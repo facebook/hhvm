@@ -32,7 +32,7 @@ public:
   TestCppExt();
 };
 
-inline void evalCodeForCppExt(CStrRef code_str) {
+inline void evalCodeForCppExt(const String& code_str) {
   String prefixedCode = concat("<?php ", code_str);
   Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
   TypedValue retVal;

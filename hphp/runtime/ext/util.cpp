@@ -20,7 +20,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Class* lookup_class(CStrRef className) {
+Class* lookup_class(const String& className) {
   auto cls = Unit::lookupClass(className.get());
   if (!cls) {
     auto normName = normalizeNS(className.get());

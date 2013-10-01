@@ -52,7 +52,7 @@ bool same(CVarRef v1, const StringData* v2) {
   return sdata == v2 || v2->same(sdata);
 }
 
-bool same(CVarRef v1, CStrRef v2) {
+bool same(CVarRef v1, const String& v2) {
   const StringData* sd = v2.get();
   return same(v1, sd);
 }

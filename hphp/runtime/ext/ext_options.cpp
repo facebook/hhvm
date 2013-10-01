@@ -93,7 +93,7 @@ Variant f_assert_options(int what, CVarRef value /* = null_variant */) {
   return false;
 }
 
-static Variant eval_for_assert(ActRec* const curFP, CStrRef codeStr) {
+static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
   String prefixedCode = concat3("<?php return ", codeStr, ";");
 
   auto const oldErrorLevel =
@@ -172,11 +172,11 @@ Variant f_assert(CVarRef assertion) {
   return uninit_null();
 }
 
-int64_t f_dl(CStrRef library) {
+int64_t f_dl(const String& library) {
   return 0;
 }
 
-bool f_extension_loaded(CStrRef name) {
+bool f_extension_loaded(const String& name) {
   return Extension::IsLoaded(name);
 }
 
@@ -184,11 +184,11 @@ Array f_get_loaded_extensions(bool zend_extensions /* = false */) {
   return Extension::GetLoadedExtensions();
 }
 
-Array f_get_extension_funcs(CStrRef module_name) {
+Array f_get_extension_funcs(const String& module_name) {
   throw NotSupportedException(__func__, "extensions are built differently");
 }
 
-Variant f_get_cfg_var(CStrRef option) {
+Variant f_get_cfg_var(const String& option) {
   return false;
 }
 
@@ -220,7 +220,7 @@ String f_get_include_path() {
 void f_restore_include_path() {
 }
 
-String f_set_include_path(CStrRef new_include_path) {
+String f_set_include_path(const String& new_include_path) {
   String s = g_context->getIncludePath();
   g_context->setIncludePath(new_include_path);
   return s;
@@ -252,7 +252,7 @@ Array f_get_required_files() {
   throw NotSupportedException(__func__, "requires PHP source code");
 }
 
-Variant f_getenv(CStrRef varname) {
+Variant f_getenv(const String& varname) {
   String ret = g_context->getenv(varname);
   if (!ret.isNull()) {
     return ret;
@@ -495,7 +495,7 @@ static int parse_opts(const char * opts, int opts_len, opt_struct **result) {
   return count;
 }
 
-Array f_getopt(CStrRef options, CVarRef longopts /* = null_variant */) {
+Array f_getopt(const String& options, CVarRef longopts /* = null_variant */) {
   opt_struct *opts, *orig_opts;
   int len = parse_opts(options.data(), options.size(), &opts);
 
@@ -722,24 +722,24 @@ bool f_clock_settime(int clk_id, int64_t sec, int64_t nsec) {
 int64_t f_cpu_get_count() { return Process::GetCPUCount();}
 String f_cpu_get_model() { return Process::GetCPUModel();}
 
-String f_ini_alter(CStrRef varname, CStrRef newvalue) {
+String f_ini_alter(const String& varname, const String& newvalue) {
   throw NotSupportedException(__func__, "not using ini");
 }
 
-Array f_ini_get_all(CStrRef extension /* = null_string */) {
+Array f_ini_get_all(const String& extension /* = null_string */) {
   throw NotSupportedException(__func__, "not using ini");
 }
 
-String f_ini_get(CStrRef varname) {
+String f_ini_get(const String& varname) {
   String value = empty_string;
   IniSetting::Get(varname, value);
   return value;
 }
 
-void f_ini_restore(CStrRef varname) {
+void f_ini_restore(const String& varname) {
 }
 
-String f_ini_set(CStrRef varname, CStrRef newvalue) {
+String f_ini_set(const String& varname, const String& newvalue) {
   String oldvalue = f_ini_get(varname);
   IniSetting::Set(varname, newvalue);
   return oldvalue;
@@ -788,7 +788,7 @@ const StaticString s_n("n");
 const StaticString s_v("v");
 const StaticString s_m("m");
 
-String f_php_uname(CStrRef mode /* = null_string */) {
+String f_php_uname(const String& mode /* = null_string */) {
   String ret;
   struct utsname buf;
   if (uname((struct utsname *)&buf) != -1) {
@@ -822,11 +822,11 @@ bool f_phpinfo(int what /* = 0 */) {
   return false;
 }
 
-String f_phpversion(CStrRef extension /* = null_string */) {
+String f_phpversion(const String& extension /* = null_string */) {
   return k_PHP_VERSION;
 }
 
-bool f_putenv(CStrRef setting) {
+bool f_putenv(const String& setting) {
   int pos = setting.find('=');
   if (pos >= 0) {
     String name = setting.substr(0, pos);
@@ -1035,8 +1035,8 @@ static int php_version_compare(const char *orig_ver1, const char *orig_ver2) {
   return compare;
 }
 
-Variant f_version_compare(CStrRef version1, CStrRef version2,
-                          CStrRef sop /* = null_string */) {
+Variant f_version_compare(const String& version1, const String& version2,
+                          const String& sop /* = null_string */) {
   const char *op = sop.data();
   int op_len = sop.size();
   int compare = php_version_compare(version1.data(), version2.data());

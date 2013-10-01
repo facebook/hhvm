@@ -26,9 +26,9 @@ DECLARE_BOOST_TYPES(CmdVariable);
 class CmdVariable : public DebuggerCommand {
 public:
   static Array GetGlobalVariables();
-  static void PrintVariable(DebuggerClient &client, CStrRef varName);
+  static void PrintVariable(DebuggerClient &client, const String& varName);
   static void PrintVariables(DebuggerClient &client, CArrRef variables,
-                             bool global, CStrRef text);
+                             bool global, const String& text);
 
 public:
   CmdVariable() : DebuggerCommand(KindOfVariable) {}

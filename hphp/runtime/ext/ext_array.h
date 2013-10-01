@@ -168,7 +168,7 @@ Variant f_natcasesort(VRefParam array);
 bool f_array_multisort(int _argc, VRefParam ar1, CArrRef _argv = null_array);
 
 String f_i18n_loc_get_default();
-bool f_i18n_loc_set_default(CStrRef locale);
+bool f_i18n_loc_set_default(const String& locale);
 bool f_i18n_loc_set_attribute(int64_t attr, int64_t val);
 bool f_i18n_loc_set_strength(int64_t strength);
 Variant f_i18n_loc_get_error_code();

@@ -215,12 +215,12 @@ void MimePart::MimeHeader::clear() {
   m_attributes = null_array;
 }
 
-Variant MimePart::MimeHeader::get(CStrRef attrname) {
+Variant MimePart::MimeHeader::get(const String& attrname) {
   return m_attributes[attrname];
 }
 
-void MimePart::MimeHeader::getAll(Array &ret, CStrRef valuelabel,
-                                  CStrRef attrprefix) {
+void MimePart::MimeHeader::getAll(Array &ret, const String& valuelabel,
+                                  const String& attrprefix) {
   for (ArrayIter iter(m_attributes); iter; ++iter) {
     ret.set(attrprefix + iter.first().toString(), iter.second());
   }
@@ -466,7 +466,7 @@ void MimePart::decoderFinish() {
   }
 }
 
-void MimePart::decoderFeed(CStrRef str) {
+void MimePart::decoderFeed(const String& str) {
   if (!str.empty()) {
     if (m_extract_filter) {
       for (int i = 0; i < str.size(); i++) {
@@ -730,7 +730,7 @@ bool MimePart::processHeader() {
   return true;
 }
 
-bool MimePart::ProcessLine(MimePart *workpart, CStrRef line) {
+bool MimePart::ProcessLine(MimePart *workpart, const String& line) {
   /* sanity check */
   if (workpart->m_children.size() > MAXPARTS) {
     raise_warning("MIME message too complex");
@@ -981,19 +981,19 @@ int MimePart::extractImpl(int decode, File *src) {
   return true;
 }
 
-void MimePart::callUserFunc(CStrRef s) {
+void MimePart::callUserFunc(const String& s) {
   vm_call_user_func(m_extract_context, make_packed_array(s));
 }
 
-void MimePart::outputToStdout(CStrRef s) {
+void MimePart::outputToStdout(const String& s) {
   echo(s);
 }
 
-void MimePart::outputToFile(CStrRef s) {
+void MimePart::outputToFile(const String& s) {
   m_extract_context.toResource().getTyped<File>()->write(s);
 }
 
-void MimePart::outputToString(CStrRef s) {
+void MimePart::outputToString(const String& s) {
   m_extract_context = m_extract_context.toString() + s;
 }
 

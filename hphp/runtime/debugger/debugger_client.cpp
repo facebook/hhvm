@@ -1189,7 +1189,8 @@ void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
   }
 }
 
-bool DebuggerClient::code(CStrRef source, int line1 /*= 0*/, int line2 /*= 0*/,
+bool DebuggerClient::code(const String& source, int line1 /*= 0*/,
+                          int line2 /*= 0*/,
                           int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                           int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   TRACE(2, "DebuggerClient::code\n");
@@ -1270,7 +1271,7 @@ void DebuggerClient::print(const std::string &s) {
   fflush(stdout);
 }
 
-void DebuggerClient::print(CStrRef msg) {
+void DebuggerClient::print(const String& msg) {
   TRACE(2, "DebuggerClient::print(CStrRef msg)\n");
   DWRITE(msg.data(), 1, msg.length(), stdout);
   DWRITE("\n", 1, 1, stdout);
@@ -1278,7 +1279,7 @@ void DebuggerClient::print(CStrRef msg) {
 }
 
 #define IMPLEMENT_COLOR_OUTPUT(name, where, color)                      \
-  void DebuggerClient::name(CStrRef msg) {                              \
+  void DebuggerClient::name(const String& msg) {                              \
     if (UseColor && color && RuntimeOption::EnableDebuggerColor) {      \
       DWRITE(color, 1, strlen(color), where);                           \
     }                                                                   \

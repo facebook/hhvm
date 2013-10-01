@@ -178,7 +178,7 @@ inline Type stringToType(const std::string& s) {
  * cleaner.
  */
 typedef const char * litstr; /* literal string */
-typedef const String & CStrRef;
+//typedef const String & CStrRef;
 typedef const Array & CArrRef;
 typedef const Object & CObjRef;
 typedef const Resource & CResRef;

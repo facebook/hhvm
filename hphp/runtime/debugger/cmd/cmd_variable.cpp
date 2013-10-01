@@ -67,7 +67,7 @@ void CmdVariable::help(DebuggerClient &client) {
   );
 }
 
-void CmdVariable::PrintVariable(DebuggerClient &client, CStrRef varName) {
+void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
   CmdVariable cmd;
   auto charCount = client.getDebuggerClientShortPrintCharCount();
   cmd.m_frame = client.getFrame();
@@ -96,7 +96,7 @@ void CmdVariable::PrintVariable(DebuggerClient &client, CStrRef varName) {
 const StaticString s_http_response_header("http_response_header");
 
 void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
-                                 bool global, CStrRef text) {
+                                 bool global, const String& text) {
   bool system = true;
   int i = 0;
   bool found = false;

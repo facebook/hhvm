@@ -26,26 +26,26 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void f_thrift_protocol_write_binary(CObjRef transportobj,
-  CStrRef method_name,
+  const String& method_name,
   int64_t msgtype,
   CObjRef request_struct,
   int seqid,
   bool strict_write);
 
 Variant f_thrift_protocol_read_binary(CObjRef transportobj,
-  CStrRef obj_typename,
+  const String& obj_typename,
   bool strict_read);
 
 int f_thrift_protocol_set_compact_version(int version);
 
 void f_thrift_protocol_write_compact(CObjRef transportobj,
-  CStrRef method_name,
+  const String& method_name,
   int64_t msgtype,
   CObjRef request_struct,
   int seqid);
 
 Variant f_thrift_protocol_read_compact(CObjRef transportobj,
-  CStrRef obj_typename);
+  const String& obj_typename);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

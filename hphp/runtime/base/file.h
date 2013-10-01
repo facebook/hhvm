@@ -49,17 +49,17 @@ DECLARE_EXTERN_REQUEST_LOCAL(FileData, s_file_data);
  */
 class File : public SweepableResourceData {
 public:
-  static String TranslatePath(CStrRef filename);
+  static String TranslatePath(const String& filename);
   // Same as TranslatePath except doesn't make paths absolute
-  static String TranslatePathKeepRelative(CStrRef filename);
+  static String TranslatePathKeepRelative(const String& filename);
   // Same as TranslatePath except checks the file cache on miss
-  static String TranslatePathWithFileCache(CStrRef filename);
-  static String TranslateCommand(CStrRef cmd);
-  static Variant Open(CStrRef filename, CStrRef mode,
+  static String TranslatePathWithFileCache(const String& filename);
+  static String TranslateCommand(const String& cmd);
+  static Variant Open(const String& filename, const String& mode,
                       int options = 0, CVarRef context = uninit_null());
 
-  static bool IsVirtualDirectory(CStrRef filename);
-  static bool IsPlainFilePath(CStrRef filename);
+  static bool IsVirtualDirectory(const String& filename);
+  static bool IsPlainFilePath(const String& filename);
 
 public:
   static const int USE_INCLUDE_PATH;
@@ -74,8 +74,8 @@ public:
   static StaticString s_resource_name;
 
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return classnameof(); }
-  CStrRef o_getResourceName() const { return s_resource_name; }
+  const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getResourceName() const { return s_resource_name; }
   virtual bool isInvalid() const { return m_closed; }
 
   int fd() const { return m_fd;}
@@ -85,7 +85,7 @@ public:
   /**
    * How to open this type of file.
    */
-  virtual bool open(CStrRef filename, CStrRef mode) = 0;
+  virtual bool open(const String& filename, const String& mode) = 0;
 
   /**
    * How to close this type of file.
@@ -104,7 +104,7 @@ public:
    * Write one chunk of output. Returns bytes written.
    */
   virtual int64_t writeImpl(const char *buffer, int64_t length) = 0;
-  virtual int64_t write(CStrRef str, int64_t length = 0);
+  virtual int64_t write(const String& str, int64_t length = 0);
   int putc(char c);
 
   /**
@@ -137,7 +137,7 @@ public:
   /**
    * Read one record a time. Returns a null string on failure or eof.
    */
-  String readRecord(CStrRef delimiter, int64_t maxlen = 0);
+  String readRecord(const String& delimiter, int64_t maxlen = 0);
 
   /**
    * Read entire file and print it out.
@@ -147,7 +147,7 @@ public:
   /**
    * Write to file with specified format and arguments.
    */
-  int64_t printf(CStrRef format, CArrRef args);
+  int64_t printf(const String& format, CArrRef args);
 
   /**
    * Write one line of csv record.

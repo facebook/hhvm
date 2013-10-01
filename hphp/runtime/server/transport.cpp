@@ -296,7 +296,7 @@ void Transport::getSplitParam(const char *name,
 ///////////////////////////////////////////////////////////////////////////////
 // headers
 
-bool Transport::splitHeader(CStrRef header, String &name, const char *&value) {
+bool Transport::splitHeader(const String& header, String &name, const char *&value) {
   int pos = header.find(':');
 
   if (pos != String::npos) {
@@ -365,7 +365,7 @@ void Transport::addHeader(const char *name, const char *value) {
   addHeaderNoLock(name, value);
 }
 
-void Transport::addHeader(CStrRef header) {
+void Transport::addHeader(const String& header) {
   String name;
   const char *value;
   if (splitHeader(header, name, value)) {
@@ -380,7 +380,7 @@ void Transport::replaceHeader(const char *name, const char *value) {
   addHeaderNoLock(name, value);
 }
 
-void Transport::replaceHeader(CStrRef header) {
+void Transport::replaceHeader(const String& header) {
   String name;
   const char *value;
   if (splitHeader(header, name, value)) {
@@ -487,7 +487,7 @@ int Transport::getRequestSize() const {
   return 0;
 }
 
-void Transport::setMimeType(CStrRef mimeType) {
+void Transport::setMimeType(const String& mimeType) {
   m_mimeType = mimeType.data();
 }
 
@@ -498,8 +498,8 @@ String Transport::getMimeType() {
 ///////////////////////////////////////////////////////////////////////////////
 // cookies
 
-bool Transport::setCookie(CStrRef name, CStrRef value, int64_t expire /* = 0 */,
-                          CStrRef path /* = "" */, CStrRef domain /* = "" */,
+bool Transport::setCookie(const String& name, const String& value, int64_t expire /* = 0 */,
+                          const String& path /* = "" */, const String& domain /* = "" */,
                           bool secure /* = false */,
                           bool httponly /* = false */,
                           bool encode_url /* = true */) {
@@ -827,12 +827,12 @@ int Transport::getLastChunkSentSize() {
 ///////////////////////////////////////////////////////////////////////////////
 // support rfc1867
 
-bool Transport::isUploadedFile(CStrRef filename) {
+bool Transport::isUploadedFile(const String& filename) {
   return is_uploaded_file(filename.c_str());
 }
 
 // Move a file if and only if it was created by an upload
-bool Transport::moveUploadedFileHelper(CStrRef filename, CStrRef destination) {
+bool Transport::moveUploadedFileHelper(const String& filename, const String& destination) {
   // Do access check.
   String dest = File::TranslatePath(destination);
   if (Util::rename(filename.c_str(), dest.c_str()) < 0) {
@@ -846,7 +846,7 @@ bool Transport::moveUploadedFileHelper(CStrRef filename, CStrRef destination) {
   return true;
 }
 
-bool Transport::moveUploadedFile(CStrRef filename, CStrRef destination) {
+bool Transport::moveUploadedFile(const String& filename, const String& destination) {
   if (!is_uploaded_file(filename.c_str())) {
     Logger::Error("%s is not an uploaded file.", filename.c_str());
     return false;

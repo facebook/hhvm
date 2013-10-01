@@ -31,13 +31,13 @@ public:
   DECLARE_RESOURCE_ALLOCATION(BZ2File);
 
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const { return classnameof(); }
 
   BZ2File();
   explicit BZ2File(PlainFile* innerFile);
   virtual ~BZ2File();
 
-  bool open(CStrRef filename, CStrRef mode);
+  bool open(const String& filename, const String& mode);
   bool close();
   int64_t errnu();
   String errstr();

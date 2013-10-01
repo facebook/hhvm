@@ -1586,7 +1586,8 @@ const StaticString
   s_mime("mime"),
   s_linespacing("linespacing");
 
-Variant f_getimagesize(CStrRef filename, VRefParam imageinfo /* = null */) {
+Variant f_getimagesize(const String& filename,
+                       VRefParam imageinfo /* = null */) {
   int itype = 0;
   struct gfxinfo *result = NULL;
   if (imageinfo.isReferenced()) {
@@ -1722,7 +1723,7 @@ Variant f_getimagesize(CStrRef filename, VRefParam imageinfo /* = null */) {
 #define M_PI 3.14159265358979323846
 #endif
 
-static Variant php_open_plain_file(CStrRef filename, const char *mode,
+static Variant php_open_plain_file(const String& filename, const char *mode,
                                    FILE **fpp) {
   Variant stream = f_fopen(filename, mode);
   if (same(stream, false)) {
@@ -1762,7 +1763,7 @@ static void _php_image_output_ctxfree(struct gdIOCtx *ctx) {
     IM_FREE(ctx);
   }
 }
-static bool _php_image_output_ctx(CResRef image, CStrRef filename,
+static bool _php_image_output_ctx(CResRef image, const String& filename,
                                   int quality, int basefilter,
                                   int image_type, char *tn,
                                   void (*func_p)()) {
@@ -1917,7 +1918,7 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out,
 /*
  * converts jpeg/png images to wbmp and resizes them as needed
  */
-static bool _php_image_convert(CStrRef f_org, CStrRef f_dest,
+static bool _php_image_convert(const String& f_org, const String& f_dest,
                                int dest_height, int dest_width,
                                int threshold, int image_type) {
   gdImagePtr im_org, im_dest, im_tmp;
@@ -2083,8 +2084,8 @@ static bool _php_image_convert(CStrRef f_org, CStrRef f_dest,
 #endif /* HAVE_GD_WBMP */
 
 // For quality and type, -1 means that the argument does not exist
-static bool _php_image_output(CResRef image, CStrRef filename, int quality,
-                              int type, int image_type, char *tn,
+static bool _php_image_output(CResRef image, const String& filename,
+                              int quality, int type, int image_type, char *tn,
                               void (*func_p)()) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
@@ -2230,7 +2231,7 @@ static bool _php_image_output(CResRef image, CStrRef filename, int quality,
   return true;
 }
 
-static gdImagePtr _php_image_create_from(CStrRef filename,
+static gdImagePtr _php_image_create_from(const String& filename,
                                          int srcX, int srcY,
                                          int width, int height,
                                          int image_type, char *tn,
@@ -2429,7 +2430,7 @@ static int _php_image_type (char data[8]) {
 }
 
 #ifdef HAVE_LIBGD15
-gdImagePtr _php_image_create_from_string(CStrRef image, char *tn,
+gdImagePtr _php_image_create_from_string(const String& image, char *tn,
                                          gdImagePtr (*ioctx_func_p)()) {
   gdImagePtr im;
   gdIOCtx *io_ctx;
@@ -2525,7 +2526,7 @@ static void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y,
  * arg = 3  ImageStringUp
  */
 static bool php_imagechar(CResRef image, int size, int x, int y,
-                          CStrRef c, int color, int mode) {
+                          const String& c, int color, int mode) {
   gdImagePtr im = image.getTyped<Image>()->get();
   if (!im) return false;
   int ch = 0;
@@ -3024,7 +3025,7 @@ Array f_gd_info() {
                      ((a & 0x0000ff00) << 8) | \
                      ((a & 0x000000ff) << 24))
 
-Variant f_imageloadfont(CStrRef file) {
+Variant f_imageloadfont(const String& file) {
   // TODO: ind = 5 + zend_list_insert(font, le_gd_font);
   throw NotSupportedException(__func__, "NYI");
 #ifdef NEVER
@@ -3384,7 +3385,7 @@ int64_t f_imagetypes() {
   return ret;
 }
 
-Variant f_imagecreatefromstring(CStrRef data) {
+Variant f_imagecreatefromstring(const String& data) {
 #ifdef HAVE_LIBGD15
   gdImagePtr im;
   int imtype;
@@ -3462,7 +3463,7 @@ Variant f_imagecreatefromstring(CStrRef data) {
 #endif
 }
 
-Variant f_imagecreatefromgif(CStrRef filename) {
+Variant f_imagecreatefromgif(const String& filename) {
 #ifdef HAVE_GD_GIF_READ
   gdImagePtr im =
     _php_image_create_from(filename, -1, -1, -1, -1,
@@ -3475,7 +3476,7 @@ Variant f_imagecreatefromgif(CStrRef filename) {
 #endif
 }
 
-Variant f_imagecreatefromjpeg(CStrRef filename) {
+Variant f_imagecreatefromjpeg(const String& filename) {
 #ifdef HAVE_GD_JPG
   gdImagePtr im =
     _php_image_create_from(filename, -1, -1, -1, -1,
@@ -3488,7 +3489,7 @@ Variant f_imagecreatefromjpeg(CStrRef filename) {
 #endif
 }
 
-Variant f_imagecreatefrompng(CStrRef filename) {
+Variant f_imagecreatefrompng(const String& filename) {
 #ifdef HAVE_GD_PNG
   gdImagePtr im =
     _php_image_create_from(filename, -1, -1, -1, -1,
@@ -3501,7 +3502,7 @@ Variant f_imagecreatefrompng(CStrRef filename) {
 #endif
 }
 
-Variant f_imagecreatefromxbm(CStrRef filename) {
+Variant f_imagecreatefromxbm(const String& filename) {
 #ifdef HAVE_GD_XBM
   gdImagePtr im =
     _php_image_create_from(filename, -1, -1, -1, -1,
@@ -3514,7 +3515,7 @@ Variant f_imagecreatefromxbm(CStrRef filename) {
 #endif
 }
 
-Variant f_imagecreatefromxpm(CStrRef filename) {
+Variant f_imagecreatefromxpm(const String& filename) {
 #if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
   gdImagePtr im =
     _php_image_create_from(filename, -1, -1, -1, -1,
@@ -3528,7 +3529,7 @@ Variant f_imagecreatefromxpm(CStrRef filename) {
 #endif
 }
 
-Variant f_imagecreatefromwbmp(CStrRef filename) {
+Variant f_imagecreatefromwbmp(const String& filename) {
 #ifdef HAVE_GD_WBMP
   gdImagePtr im =
     _php_image_create_from(filename, -1, -1, -1, -1,
@@ -3541,7 +3542,7 @@ Variant f_imagecreatefromwbmp(CStrRef filename) {
 #endif
 }
 
-Variant f_imagecreatefromgd(CStrRef filename) {
+Variant f_imagecreatefromgd(const String& filename) {
   gdImagePtr im =
     _php_image_create_from(filename, -1, -1, -1, -1,
                            PHP_GDIMG_TYPE_GD, "GD",
@@ -3550,7 +3551,7 @@ Variant f_imagecreatefromgd(CStrRef filename) {
   return Resource(new Image(im));
 }
 
-Variant f_imagecreatefromgd2(CStrRef filename) {
+Variant f_imagecreatefromgd2(const String& filename) {
   gdImagePtr im =
     _php_image_create_from(filename, -1, -1, -1, -1,
                            PHP_GDIMG_TYPE_GD2, "GD2",
@@ -3559,7 +3560,7 @@ Variant f_imagecreatefromgd2(CStrRef filename) {
   return Resource(new Image(im));
 }
 
-Variant f_imagecreatefromgd2part(CStrRef filename,
+Variant f_imagecreatefromgd2part(const String& filename,
                                 int srcx, int srcy, int width, int height) {
   gdImagePtr im =
     _php_image_create_from(filename, srcx, srcy, width, height,
@@ -3569,12 +3570,12 @@ Variant f_imagecreatefromgd2part(CStrRef filename,
   return Resource(new Image(im));
 }
 
-bool f_imagexbm(CResRef image, CStrRef filename /* = null_string */,
+bool f_imagexbm(CResRef image, const String& filename /* = null_string */,
                 int foreground /* = -1 */) {
   throw NotSupportedException(__func__, "gdImageXbmCtx does not exist");
 }
 
-bool f_imagegif(CResRef image, CStrRef filename /* = null_string */) {
+bool f_imagegif(CResRef image, const String& filename /* = null_string */) {
 #ifdef HAVE_GD_GIF_CTX
   return _php_image_output_ctx(image, filename, -1, -1,
                                PHP_GDIMG_TYPE_GIF, "GIF",
@@ -3586,7 +3587,7 @@ bool f_imagegif(CResRef image, CStrRef filename /* = null_string */) {
 #endif
 }
 
-bool f_imagepng(CResRef image, CStrRef filename /* = null_string */,
+bool f_imagepng(CResRef image, const String& filename /* = null_string */,
                 int quality /* = -1 */, int filters /* = -1 */) {
 #ifdef HAVE_GD_PNG
 #ifdef USE_GD_IOCTX
@@ -3603,7 +3604,7 @@ bool f_imagepng(CResRef image, CStrRef filename /* = null_string */,
 #endif
 }
 
-bool f_imagejpeg(CResRef image, CStrRef filename /* = null_string */,
+bool f_imagejpeg(CResRef image, const String& filename /* = null_string */,
                  int quality /* = -1 */) {
 #ifdef HAVE_GD_JPG
 #ifdef USE_GD_IOCTX
@@ -3620,7 +3621,7 @@ bool f_imagejpeg(CResRef image, CStrRef filename /* = null_string */,
 #endif
 }
 
-bool f_imagewbmp(CResRef image, CStrRef filename /* = null_string */,
+bool f_imagewbmp(CResRef image, const String& filename /* = null_string */,
                  int foreground /* = -1 */) {
 #ifdef USE_GD_IOCTX
   return _php_image_output_ctx(image, filename, foreground, -1,
@@ -3633,12 +3634,12 @@ bool f_imagewbmp(CResRef image, CStrRef filename /* = null_string */,
 #endif
 }
 
-bool f_imagegd(CResRef image, CStrRef filename /* = null_string */) {
+bool f_imagegd(CResRef image, const String& filename /* = null_string */) {
   return _php_image_output(image, filename, -1, -1, PHP_GDIMG_TYPE_GD, "GD",
                            (void (*)())gdImageGd);
 }
 
-bool f_imagegd2(CResRef image, CStrRef filename /* = null_string */,
+bool f_imagegd2(CResRef image, const String& filename /* = null_string */,
                 int chunk_size /* = 0 */, int type /* = 0 */) {
   return _php_image_output(image, filename, chunk_size, type,
                            PHP_GDIMG_TYPE_GD2, "GD2",
@@ -3945,22 +3946,22 @@ int64_t f_imagefontheight(int font) {
 }
 
 bool f_imagechar(CResRef image, int font, int x, int y,
-                 CStrRef c, int color) {
+                 const String& c, int color) {
   return php_imagechar(image, font, x, y, c, color, 0);
 }
 
 bool f_imagecharup(CResRef image, int font, int x, int y,
-                   CStrRef c, int color) {
+                   const String& c, int color) {
   return php_imagechar(image, font, x, y, c, color, 1);
 }
 
 bool f_imagestring(CResRef image, int font, int x, int y,
-                   CStrRef str, int color) {
+                   const String& str, int color) {
   return php_imagechar(image, font, x, y, str, color, 2);
 }
 
 bool f_imagestringup(CResRef image, int font, int x, int y,
-                     CStrRef str, int color) {
+                     const String& str, int color) {
   return php_imagechar(image, font, x, y, str, color, 3);
 }
 
@@ -4032,8 +4033,8 @@ Variant f_imagesy(CResRef image) {
   return gdImageSY(im);
 }
 
-Variant f_imageftbbox(double size, double angle, CStrRef font_file,
-                    CStrRef text, CArrRef extrainfo /* = null */) {
+Variant f_imageftbbox(double size, double angle, const String& font_file,
+                    const String& text, CArrRef extrainfo /* = null */) {
 #if defined(ENABLE_GD_TTF) && HAVE_LIBGD20 && \
     HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
   return php_imagettftext_common(TTFTEXT_BBOX, 1,
@@ -4046,8 +4047,8 @@ Variant f_imageftbbox(double size, double angle, CStrRef font_file,
 }
 
 Variant f_imagefttext(CResRef image, double size, double angle,
-                    int x, int y, int col, CStrRef font_file,
-                    CStrRef text, CArrRef extrainfo /* = null */) {
+                    int x, int y, int col, const String& font_file,
+                    const String& text, CArrRef extrainfo /* = null */) {
 #if defined(ENABLE_GD_TTF) && HAVE_LIBGD20 && \
   HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
   return php_imagettftext_common(TTFTEXT_DRAW, 1,
@@ -4061,7 +4062,7 @@ Variant f_imagefttext(CResRef image, double size, double angle,
 }
 
 Variant f_imagettfbbox(double size, double angle,
-                     CStrRef fontfile, CStrRef text) {
+                     const String& fontfile, const String& text) {
 #ifdef ENABLE_GD_TTF
   return php_imagettftext_common(TTFTEXT_BBOX, 0,
                                  size, angle, fontfile, text);
@@ -4072,7 +4073,7 @@ Variant f_imagettfbbox(double size, double angle,
 
 Variant f_imagettftext(CResRef image, double size, double angle,
                      int x, int y, int color,
-                     CStrRef fontfile, CStrRef text) {
+                     const String& fontfile, const String& text) {
 #ifdef ENABLE_GD_TTF
   return php_imagettftext_common(TTFTEXT_DRAW, 0,
                                  image, size, angle, x, y, color,
@@ -4082,7 +4083,7 @@ Variant f_imagettftext(CResRef image, double size, double angle,
 #endif
 }
 
-Resource f_imagepsloadfont(CStrRef filename) {
+Resource f_imagepsloadfont(const String& filename) {
 #ifdef HAVE_LIBT1
   #error config error: HAVE_LIBT1 defined!
 #else
@@ -4098,7 +4099,7 @@ bool f_imagepsfreefont(CResRef fontindex) {
 #endif
 }
 
-bool f_imagepsencodefont(CResRef font_index, CStrRef encodingfile) {
+bool f_imagepsencodefont(CResRef font_index, const String& encodingfile) {
 #ifdef HAVE_LIBT1
   #error config error: HAVE_LIBT1 defined!
 #else
@@ -4122,7 +4123,7 @@ bool f_imagepsslantfont(CResRef font_index, double slant) {
 #endif
 }
 
-Array f_imagepstext(CResRef image, CStrRef text, CResRef font, int size,
+Array f_imagepstext(CResRef image, const String& text, CResRef font, int size,
                     int foreground, int background, int x, int y,
                     int space /* = 0 */, int tightness /* = 0 */,
                     double angle /* = 0.0 */,
@@ -4134,7 +4135,7 @@ Array f_imagepstext(CResRef image, CStrRef text, CResRef font, int size,
 #endif
 }
 
-Array f_imagepsbbox(CStrRef text, int font, int size, int space /* = 0 */,
+Array f_imagepsbbox(const String& text, int font, int size, int space /* = 0 */,
                     int tightness /* = 0 */, double angle /* = 0.0 */) {
 #ifdef HAVE_LIBT1
   #error config error: HAVE_LIBT1 defined!
@@ -4143,7 +4144,7 @@ Array f_imagepsbbox(CStrRef text, int font, int size, int space /* = 0 */,
 #endif
 }
 
-bool f_image2wbmp(CResRef image, CStrRef filename /* = null_string */,
+bool f_image2wbmp(CResRef image, const String& filename /* = null_string */,
                   int threshold /* = -1 */) {
 #ifdef HAVE_GD_WBMP
   return _php_image_output(image, filename, threshold, -1,
@@ -4154,13 +4155,13 @@ bool f_image2wbmp(CResRef image, CStrRef filename /* = null_string */,
 #endif
 }
 
-bool f_jpeg2wbmp(CStrRef jpegname, CStrRef wbmpname, int dest_height,
-                 int dest_width, int threshold) {
+bool f_jpeg2wbmp(const String& jpegname, const String& wbmpname,
+                 int dest_height, int dest_width, int threshold) {
   return _php_image_convert(jpegname, wbmpname, dest_height, dest_width,
                             threshold, PHP_GDIMG_TYPE_JPG);
 }
 
-bool f_png2wbmp(CStrRef pngname, CStrRef wbmpname, int dest_height,
+bool f_png2wbmp(const String& pngname, const String& wbmpname, int dest_height,
                 int dest_width, int threshold) {
   return _php_image_convert(pngname, wbmpname, dest_height, dest_width,
                             threshold, PHP_GDIMG_TYPE_PNG);
@@ -4392,7 +4393,7 @@ static int php_iptc_next_marker(File *file, int spool,
 
 const StaticString s_size("size");
 
-Variant f_iptcembed(CStrRef iptcdata, CStrRef jpeg_file_name,
+Variant f_iptcembed(const String& iptcdata, const String& jpeg_file_name,
                     int spool /* = 0 */) {
   char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
   unsigned int iptcdata_len = iptcdata.length();
@@ -4500,7 +4501,7 @@ Variant f_iptcembed(CStrRef iptcdata, CStrRef jpeg_file_name,
   return true;
 }
 
-Variant f_iptcparse(CStrRef iptcblock) {
+Variant f_iptcparse(const String& iptcblock) {
   unsigned int inx = 0, len, tagsfound = 0;
   unsigned char *buffer, recnum, dataset, key[16];
   unsigned int str_len = iptcblock.length();
@@ -7804,8 +7805,8 @@ Variant f_exif_tagname(int index) {
   }
 }
 
-Variant f_exif_read_data(CStrRef filename,
-                         CStrRef sections /* = null_string */,
+Variant f_exif_read_data(const String& filename,
+                         const String& sections /* = null_string */,
                          bool arrays /* = false */,
                          bool thumbnail /* = false */) {
   int i, ret, sections_needed=0;
@@ -7985,14 +7986,14 @@ Variant f_exif_read_data(CStrRef filename,
   return retarr;
 }
 
-Variant f_read_exif_data(CStrRef filename,
-                         CStrRef sections /* = null_string */,
+Variant f_read_exif_data(const String& filename,
+                         const String& sections /* = null_string */,
                          bool arrays /* = false */,
                          bool thumbnail /* = false */) {
   return f_exif_read_data(filename, sections, arrays, thumbnail);
 }
 
-Variant f_exif_thumbnail(CStrRef filename, VRefParam width /* = null */,
+Variant f_exif_thumbnail(const String& filename, VRefParam width /* = null */,
                          VRefParam height /* = null */,
                          VRefParam imagetype /* = null */) {
   image_info_type ImageInfo;
@@ -8021,7 +8022,7 @@ Variant f_exif_thumbnail(CStrRef filename, VRefParam width /* = null */,
   return str;
 }
 
-Variant f_exif_imagetype(CStrRef filename) {
+Variant f_exif_imagetype(const String& filename) {
   Variant stream = f_fopen(filename, "rb");
   if (same(stream, false)) {
     raise_warning("failed to open file: %s", filename.c_str());

@@ -145,7 +145,7 @@ extern int ini_parse();
 extern void ini_error(char *msg);
 extern int ini_lex(String *ini_lval);
 
-extern void zend_ini_scan(CStrRef str, int scanner_mode, CStrRef filename,
+extern void zend_ini_scan(const String& str, int scanner_mode, const String& filename,
                           IniSetting::PFN_PARSER_CALLBACK callback, void *arg);
 extern void zend_ini_callback(String *arg1, String *arg2, String *arg3,
                               int callback_type);
@@ -154,7 +154,7 @@ extern void zend_ini_callback(String *arg1, String *arg2, String *arg3,
 // helpers
 
 static void zend_ini_do_op(char type, String &result,
-                           CStrRef op1, CStrRef op2 = String()) {
+                           const String& op1, const String& op2 = String()) {
   int i_op1 = op1.toInt32();
   int i_op2 = op2.toInt32();
 
@@ -169,7 +169,7 @@ static void zend_ini_do_op(char type, String &result,
   result = String((int64_t)i_result);
 }
 
-static void zend_ini_get_constant(String &result, CStrRef name) {
+static void zend_ini_get_constant(String &result, const String& name) {
   if (f_defined(name)) {
     result = f_constant(name);
   } else {
@@ -177,7 +177,7 @@ static void zend_ini_get_constant(String &result, CStrRef name) {
   }
 }
 
-static void zend_ini_get_var(String &result, CStrRef name) {
+static void zend_ini_get_var(String &result, const String& name) {
   String curval;
   if (IniSetting::Get(name, curval)) {
     result = curval;
@@ -1865,7 +1865,7 @@ yyreturn:
 ///////////////////////////////////////////////////////////////////////////////
 // exposed to runtime/base/ini-setting.cpp
 
-bool zend_parse_ini_string(CStrRef str, CStrRef filename, int scanner_mode,
+bool zend_parse_ini_string(const String& str, const String& filename, int scanner_mode,
                            IniSetting::PFN_PARSER_CALLBACK callback,
                            void *arg) {
   zend_ini_scan(str, scanner_mode, filename, callback, arg);

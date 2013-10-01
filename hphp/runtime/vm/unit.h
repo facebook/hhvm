@@ -440,7 +440,7 @@ struct Unit {
     assert(m_filepath);
     return m_filepath;
   }
-  CStrRef filepathRef() const {
+  const String& filepathRef() const {
     assert(m_filepath);
     return *(String*)(&m_filepath);
   }

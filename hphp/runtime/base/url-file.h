@@ -31,13 +31,13 @@ public:
   DECLARE_RESOURCE_ALLOCATION(UrlFile);
 
   explicit UrlFile(const char *method = "GET", CArrRef headers = null_array,
-                   CStrRef postData = null_string, int maxRedirect = 20,
+                   const String& postData = null_string, int maxRedirect = 20,
                    int timeout = -1);
 
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const { return classnameof(); }
 
-  virtual bool open(CStrRef filename, CStrRef mode);
+  virtual bool open(const String& filename, const String& mode);
   virtual int64_t writeImpl(const char *buffer, int64_t length);
   virtual bool flush();
   virtual Array getWrapperMetaData() { return m_responseHeaders; }

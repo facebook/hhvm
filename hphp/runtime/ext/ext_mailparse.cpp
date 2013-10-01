@@ -31,7 +31,7 @@ namespace HPHP {
  * Removes whitespaces from the end, and replaces control characters with ' '
  * from the beginning.
  */
-static String php_trim(CStrRef str) {
+static String php_trim(const String& str) {
   string s(str.c_str());
   unsigned int l = s.length();
   while (l > 0 && isspace((unsigned char)s[l - 1])) {
@@ -55,8 +55,8 @@ static String php_trim(CStrRef str) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool php_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef headers,
-              CStrRef extra_cmd) {
+bool php_mail(const String& to, const String& subject, const String& message,
+              const String& headers, const String& extra_cmd) {
   // assumes we always have sendmail installed
   always_assert(!RuntimeOption::SendmailPath.empty());
 
@@ -87,7 +87,9 @@ bool php_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef headers,
 
 const StaticString zero(LITSTR_INIT("\0"));
 
-bool f_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef additional_headers /* = null_string */, CStrRef additional_parameters /* = null_string */) {
+bool f_mail(const String& to, const String& subject, const String& message,
+            const String& additional_headers /* = null_string */,
+            const String& additional_parameters /* = null_string */) {
   // replace \0 with spaces
   String to2 = to.replace(zero, " ");
   String subject2 = subject.replace(zero, " ");
@@ -113,7 +115,7 @@ bool f_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef additional_hea
   return php_mail(to2, subject2, message2, headers2, params2);
 }
 
-int64_t f_ezmlm_hash(CStrRef addr) {
+int64_t f_ezmlm_hash(const String& addr) {
   unsigned long h = 5381L;
   int str_len = addr.length();
   for (int i = 0; i < str_len; i++) {
@@ -135,7 +137,7 @@ bool f_mailparse_msg_free(CResRef mimemail) {
   return true;
 }
 
-Variant f_mailparse_msg_parse_file(CStrRef filename) {
+Variant f_mailparse_msg_parse_file(const String& filename) {
   Variant stream = File::Open(filename, "rb");
   if (same(stream, false)) return false;
   File *f = stream.toResource().getTyped<File>();
@@ -153,7 +155,7 @@ Variant f_mailparse_msg_parse_file(CStrRef filename) {
   return ret;
 }
 
-bool f_mailparse_msg_parse(CResRef mimemail, CStrRef data) {
+bool f_mailparse_msg_parse(CResRef mimemail, const String& data) {
   return mimemail.getTyped<MimePart>()->parse(data.data(), data.size());
 }
 
@@ -182,7 +184,7 @@ Array f_mailparse_msg_get_part_data(CResRef mimemail) {
   return mimemail.getTyped<MimePart>()->getPartData().toArray();
 }
 
-Variant f_mailparse_msg_get_part(CResRef mimemail, CStrRef mimesection) {
+Variant f_mailparse_msg_get_part(CResRef mimemail, const String& mimesection) {
   Resource part =
     mimemail.getTyped<MimePart>()->findByName(mimesection.c_str());
   if (part.isNull()) {
@@ -201,7 +203,7 @@ const StaticString
   s_address("address"),
   s_is_group("is_group");
 
-Array f_mailparse_rfc822_parse_addresses(CStrRef addresses) {
+Array f_mailparse_rfc822_parse_addresses(const String& addresses) {
   php_rfc822_tokenized_t *toks =
     php_mailparse_rfc822_tokenize(addresses.data(), 1);
   php_rfc822_addresses_t *addrs = php_rfc822_parse_address_tokens(toks);
@@ -235,7 +237,7 @@ static int mailparse_stream_flush(void *stream) {
 }
 
 bool f_mailparse_stream_encode(CResRef sourcefp, CResRef destfp,
-                               CStrRef encoding) {
+                               const String& encoding) {
   File *srcstream = sourcefp.getTyped<File>(true, true);
   File *deststream = destfp.getTyped<File>(true, true);
   if (srcstream == NULL || deststream == NULL) {

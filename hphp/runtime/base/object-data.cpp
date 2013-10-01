@@ -99,12 +99,12 @@ void ObjectData::destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 // class info
 
-CStrRef ObjectData::o_getClassName() const {
+const String& ObjectData::o_getClassName() const {
   return *(const String*)(&m_cls->preClass()->nameRef());
 }
 
 HOT_FUNC
-bool ObjectData::o_instanceof(CStrRef s) const {
+bool ObjectData::o_instanceof(const String& s) const {
   Class* cls = Unit::lookupClass(s.get());
   if (!cls) return false;
   return m_cls->classof(cls);
@@ -173,7 +173,7 @@ Object ObjectData::iterableObject(bool& isIterable,
   return obj;
 }
 
-ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
+ArrayIter ObjectData::begin(const String& context /* = null_string */) {
   bool isIterable;
   if (isCollection()) {
     return ArrayIter(this);
@@ -187,7 +187,7 @@ ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
 }
 
 MutableArrayIter ObjectData::begin(Variant* key, Variant& val,
-                                   CStrRef context /* = null_string */) {
+                                   const String& context /* = null_string */) {
   bool isIterable;
   if (isCollection()) {
     raise_error("Collection elements cannot be taken by reference");
@@ -207,8 +207,8 @@ void ObjectData::reserveProperties(int numDynamic /* = 0 */) {
   o_properties = Array::attach(HphpArray::MakeReserve(numDynamic));
 }
 
-Variant* ObjectData::o_realProp(CStrRef propName, int flags,
-                                CStrRef context /* = null_string */) {
+Variant* ObjectData::o_realProp(const String& propName, int flags,
+                                const String& context /* = null_string */) {
   /*
    * Returns a pointer to a place for a property value. This should never
    * call the magic methods __get or __set. The flags argument describes the
@@ -240,9 +240,9 @@ Variant* ObjectData::o_realProp(CStrRef propName, int flags,
   }
 }
 
-inline Variant ObjectData::o_getImpl(CStrRef propName, int flags,
+inline Variant ObjectData::o_getImpl(const String& propName, int flags,
                                      bool error /* = true */,
-                                     CStrRef context /* = null_string */) {
+                                     const String& context /*= null_string*/) {
   if (UNLIKELY(!*propName.data())) {
     throw_invalid_property_name(propName);
   }
@@ -267,14 +267,14 @@ inline Variant ObjectData::o_getImpl(CStrRef propName, int flags,
   return uninit_null();
 }
 
-Variant ObjectData::o_get(CStrRef propName, bool error /* = true */,
-                          CStrRef context /* = null_string */) {
+Variant ObjectData::o_get(const String& propName, bool error /* = true */,
+                          const String& context /* = null_string */) {
   return o_getImpl(propName, 0, error, context);
 }
 
 template <class T>
-ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
-                                                   CStrRef context) {
+ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName, T v,
+                                                   const String& context) {
   if (UNLIKELY(!*propName.data())) {
     throw_invalid_property_name(propName);
   }
@@ -299,27 +299,30 @@ ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
   return variant(v);
 }
 
-Variant ObjectData::o_set(CStrRef propName, CVarRef v) {
+Variant ObjectData::o_set(const String& propName, CVarRef v) {
   return o_setImpl<CVarRef>(propName, v, null_string);
 }
 
-Variant ObjectData::o_set(CStrRef propName, RefResult v) {
+Variant ObjectData::o_set(const String& propName, RefResult v) {
   return o_setRef(propName, variant(v), null_string);
 }
 
-Variant ObjectData::o_setRef(CStrRef propName, CVarRef v) {
+Variant ObjectData::o_setRef(const String& propName, CVarRef v) {
   return o_setImpl<RefResult>(propName, ref(v), null_string);
 }
 
-Variant ObjectData::o_set(CStrRef propName, CVarRef v, CStrRef context) {
+Variant ObjectData::o_set(const String& propName, CVarRef v,
+                          const String& context) {
   return o_setImpl<CVarRef>(propName, v, context);
 }
 
-Variant ObjectData::o_set(CStrRef propName, RefResult v, CStrRef context) {
+Variant ObjectData::o_set(const String& propName, RefResult v,
+                          const String& context) {
   return o_setRef(propName, variant(v), context);
 }
 
-Variant ObjectData::o_setRef(CStrRef propName, CVarRef v, CStrRef context) {
+Variant ObjectData::o_setRef(const String& propName, CVarRef v,
+                             const String& context) {
   return o_setImpl<RefResult>(propName, ref(v), context);
 }
 
@@ -409,7 +412,7 @@ Array ObjectData::o_toArray() const {
   }
 }
 
-Array ObjectData::o_toIterArray(CStrRef context,
+Array ObjectData::o_toIterArray(const String& context,
                                 bool getRef /* = false */) {
   size_t size = m_cls->declPropNumAccessible() + o_properties.size();
   Array retArray { Array::attach(HphpArray::MakeReserve(size)) };
@@ -486,7 +489,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
   return retArray;
 }
 
-static bool decode_invoke(CStrRef s, ObjectData* obj, bool fatal,
+static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
                           CallCtx& ctx) {
   ctx.this_ = obj;
   ctx.cls = obj->getVMClass();
@@ -516,7 +519,7 @@ static bool decode_invoke(CStrRef s, ObjectData* obj, bool fatal,
   return true;
 }
 
-Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
+Variant ObjectData::o_invoke(const String& s, CArrRef params,
                              bool fatal /* = true */) {
   CallCtx ctx;
   if (!decode_invoke(s, this, fatal, ctx)) {
@@ -527,7 +530,7 @@ Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
   return ret;
 }
 
-Variant ObjectData::o_invoke_few_args(CStrRef s, int count,
+Variant ObjectData::o_invoke_few_args(const String& s, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
 
   CallCtx ctx;
@@ -690,7 +693,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     if (isCollection()) {
       collectionSerialize(const_cast<ObjectData*>(this), serializer);
     } else {
-      CStrRef className = o_getClassName();
+      const String& className = o_getClassName();
       Array properties = o_toArray();
       if (serializer->getType() ==
         VariableSerializer::Type::DebuggerSerialize) {
@@ -1315,7 +1318,8 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
     } else {
       // Dynamic property.
       assert(o_properties.get() != nullptr);
-      o_properties.remove(CStrRef(key), true /* isString */);
+      o_properties.remove(StrNR(key).asString(),
+                          true /* isString */);
     }
   } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
@@ -1364,7 +1368,8 @@ void ObjectData::getProp(const Class* klass, bool pubOnly,
       propVal->m_type != KindOfUninit &&
       !inserted[propInd]) {
     inserted[propInd] = true;
-    props.lvalAt(CStrRef(klass->declProperties()[propInd].m_mangledName))
+    props.lvalAt(
+      StrNR(klass->declProperties()[propInd].m_mangledName).asString())
       .setWithRef(tvAsCVarRef(propVal));
   }
 }

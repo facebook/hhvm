@@ -46,8 +46,8 @@ const VarNR NEGINF_varNR(std::numeric_limits<double>::infinity());
 const VarNR NAN_varNR(std::numeric_limits<double>::quiet_NaN());
 
 static void unserializeProp(VariableUnserializer *uns,
-                            ObjectData *obj, CStrRef key,
-                            CStrRef context, CStrRef realKey,
+                            ObjectData *obj, const String& key,
+                            const String& context, const String& realKey,
                             int nProp) NEVER_INLINE;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ static int64_t ToKey(int64_t i) { return i; }
 static int64_t ToKey(double d) {
   return d > std::numeric_limits<uint64_t>::max() ? 0u : uint64_t(d);
 }
-static VarNR ToKey(CStrRef s) { return s.toKey(); }
+static VarNR ToKey(const String& s) { return s.toKey(); }
 static VarNR ToKey(CVarRef v) { return v.toKey(); }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@ Variant::Variant(litstr  v) {
 }
 
 HOT_FUNC
-Variant::Variant(CStrRef v) {
+Variant::Variant(const String& v) {
   m_type = KindOfString;
   StringData *s = v.get();
   if (s) {
@@ -460,7 +460,7 @@ bool Variant::isResource() const {
 }
 
 HOT_FUNC
-bool Variant::instanceof(CStrRef s) const {
+bool Variant::instanceof(const String& s) const {
   if (m_type == KindOfObject) {
     assert(m_data.pobj);
     return m_data.pobj->o_instanceof(s);
@@ -543,7 +543,7 @@ inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
 // iterator functions
 
 HOT_FUNC
-ArrayIter Variant::begin(CStrRef context /* = null_string */) const {
+ArrayIter Variant::begin(const String& context /* = null_string */) const {
   if (is(KindOfArray)) {
     return ArrayIter(getArrayData());
   }
@@ -556,7 +556,7 @@ ArrayIter Variant::begin(CStrRef context /* = null_string */) const {
 
 HOT_FUNC
 MutableArrayIter Variant::begin(Variant *key, Variant &val,
-                                CStrRef context /* = null_string */) {
+                                const String& context /* = null_string */) {
   if (is(KindOfObject)) {
     return getObjectData()->begin(key, val, context);
   }
@@ -834,7 +834,7 @@ Variant Variant::rvalAtHelper(int64_t offset, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-Variant Variant::rvalAt(CStrRef offset, ACCESSPARAMS_IMPL) const {
+Variant Variant::rvalAt(const String& offset, ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
     bool error = flags & AccessFlags::Error;
     if (flags & AccessFlags::Key) {
@@ -975,7 +975,8 @@ CVarRef Variant::rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
 template CVarRef
 Variant::rvalRefHelper(int64_t offset, CVarRef tmp, ACCESSPARAMS_IMPL) const;
 
-CVarRef Variant::rvalRef(CStrRef offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
+CVarRef Variant::rvalRef(const String& offset, CVarRef tmp,
+                         ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
     bool error = flags & AccessFlags::Error;
     if (flags & AccessFlags::Key) return m_data.parr->get(offset, error);
@@ -1045,7 +1046,7 @@ CVarRef Variant::rvalAtRefHelper(T offset, ACCESSPARAMS_IMPL) const {
 template
 CVarRef Variant::rvalAtRefHelper<int64_t>(int64_t offset, ACCESSPARAMS_IMPL) const;
 template
-CVarRef Variant::rvalAtRefHelper<CStrRef>(CStrRef offset,
+CVarRef Variant::rvalAtRefHelper<const String&>(const String& offset,
                                           ACCESSPARAMS_IMPL) const;
 template
 CVarRef Variant::rvalAtRefHelper<CVarRef>(CVarRef offset,
@@ -1069,7 +1070,7 @@ template<>
 class LvalHelper<double> : public LvalHelper<int64_t> {};
 
 template<>
-class LvalHelper<CStrRef> {
+class LvalHelper<const String&> {
 public:
   typedef VarNR KeyType;
   static bool CheckKey(const KeyType &k) { return true; };
@@ -1145,8 +1146,8 @@ Variant &Variant::lvalAt(int     key, ACCESSPARAMS_IMPL) {
 Variant &Variant::lvalAt(int64_t   key, ACCESSPARAMS_IMPL) {
   return lvalAtImpl(key, flags);
 }
-Variant &Variant::lvalAt(CStrRef key, ACCESSPARAMS_IMPL) {
-  return lvalAtImpl<CStrRef>(key, flags);
+Variant &Variant::lvalAt(const String& key, ACCESSPARAMS_IMPL) {
+  return lvalAtImpl<const String&>(key, flags);
 }
 Variant &Variant::lvalAt(CVarRef k, ACCESSPARAMS_IMPL) {
   return lvalAtImpl<CVarRef>(k, flags);
@@ -1158,8 +1159,8 @@ Variant &Variant::lvalRef(int     key, Variant& tmp, ACCESSPARAMS_IMPL) {
 Variant &Variant::lvalRef(int64_t   key, Variant& tmp, ACCESSPARAMS_IMPL) {
   return LvalAtImpl0(this, key, &tmp, false, flags);
 }
-Variant &Variant::lvalRef(CStrRef key, Variant& tmp, ACCESSPARAMS_IMPL) {
-  return Variant::LvalAtImpl0<CStrRef>(this, key, &tmp, false, flags);
+Variant &Variant::lvalRef(const String& key, Variant& tmp, ACCESSPARAMS_IMPL) {
+  return Variant::LvalAtImpl0<const String&>(this, key, &tmp, false, flags);
 }
 Variant &Variant::lvalRef(CVarRef k, Variant& tmp, ACCESSPARAMS_IMPL) {
   return Variant::LvalAtImpl0<CVarRef>(this, k, &tmp, false, flags);
@@ -1319,8 +1320,9 @@ CVarRef Variant::set(int64_t key, CVarRef v) {
   return SetImpl(this, key, v, false);
 }
 
-CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
-  return SetImpl<CStrRef>(this, key, v, isString);
+CVarRef Variant::set(const String& key, CVarRef v,
+                     bool isString /* = false */) {
+  return SetImpl<const String&>(this, key, v, isString);
 }
 
 CVarRef Variant::set(CVarRef key, CVarRef v) {
@@ -1439,8 +1441,9 @@ CVarRef Variant::setRef(int64_t key, CVarRef v) {
   return SetRefImpl(this, key, v, false);
 }
 
-CVarRef Variant::setRef(CStrRef key, CVarRef v, bool isString /* = false */) {
-  return SetRefImpl<CStrRef>(this, key, v, isString);
+CVarRef Variant::setRef(const String& key, CVarRef v,
+                        bool isString /* = false */) {
+  return SetRefImpl<const String&>(this, key, v, isString);
 }
 
 CVarRef Variant::setRef(CVarRef key, CVarRef v) {
@@ -1550,7 +1553,7 @@ void Variant::removeImpl(CVarRef key, bool isString /* false */) {
   }
 }
 
-void Variant::removeImpl(CStrRef key, bool isString /* false */) {
+void Variant::removeImpl(const String& key, bool isString /* false */) {
   switch (getType()) {
   case KindOfUninit:
   case KindOfNull:
@@ -1694,8 +1697,8 @@ void Variant::serialize(VariableSerializer *serializer,
 }
 
 static void unserializeProp(VariableUnserializer *uns,
-                            ObjectData *obj, CStrRef key,
-                            CStrRef context, CStrRef realKey,
+                            ObjectData *obj, const String& key,
+                            const String& context, const String& realKey,
                             int nProp) {
   // Do a two-step look up
   int flags = 0;
@@ -2023,7 +2026,7 @@ void Variant::dump() const {
   printf("Variant: %s", ret.c_str());
 }
 
-VarNR::VarNR(CStrRef v) {
+VarNR::VarNR(const String& v) {
   init(KindOfString);
   StringData *s = v.get();
   if (s) {

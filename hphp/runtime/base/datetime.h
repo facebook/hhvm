@@ -218,8 +218,8 @@ public:
    * Returns are really in special PHP formats, and please read datetime.cpp
    * for details.
    */
-  static Array Parse(CStrRef datetime);
-  static Array Parse(CStrRef ts, CStrRef format);
+  static Array Parse(const String& datetime);
+  static Array Parse(const String& ts, const String& format);
 
 public:
   // constructor
@@ -228,7 +228,7 @@ public:
 
   CLASSNAME_IS("DateTime");
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const { return classnameof(); }
 
   // informational
   bool local() const { return m_time->is_localtime;}
@@ -261,7 +261,7 @@ public:
   void setISODate(int year, int week, int day = 1);
   void setTime(int hour, int minute, int second = 0);
   void setTimezone(SmartResource<TimeZone> tz);
-  void modify(CStrRef diff); // PHP's date_modify() function, very powerful
+  void modify(const String& diff); // PHP's date_modify() function, muy powerful
   void add(const SmartResource<DateInterval> &interval);
   void sub(const SmartResource<DateInterval> &interval);
   void internalModify(timelib_rel_time *rel, bool have_relative, char bias);
@@ -270,11 +270,11 @@ public:
   void toTm(struct tm &ta) const;
   int64_t toTimeStamp(bool &err) const;
   int64_t toInteger(char format) const;
-  String toString(CStrRef format, bool stdc = false) const;
+  String toString(const String& format, bool stdc = false) const;
   String toString(DateFormat format) const;
   Array toArray(ArrayFormat format) const;
   void fromTimeStamp(int64_t timestamp, bool utc = false);
-  bool fromString(CStrRef input, SmartResource<TimeZone> tz,
+  bool fromString(const String& input, SmartResource<TimeZone> tz,
                   const char* format=nullptr);
 
   // comparison
@@ -352,8 +352,8 @@ private:
 
   // helpers
   void update();
-  String rfcFormat(CStrRef format) const;
-  String stdcFormat(CStrRef format) const;
+  String rfcFormat(const String& format) const;
+  String stdcFormat(const String& format) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

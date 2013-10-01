@@ -116,10 +116,10 @@ enum CodeColor {
  * "lineFocus", the line to highlight, with gray background.
  * highlight_code() doesn't need <?php and will treat source entirely PHP.
  */
-String highlight_php(CStrRef source, int line = 0, int lineFocus0 = 0,
+String highlight_php(const String& source, int line = 0, int lineFocus0 = 0,
                      int charFocus0 = 0, int lineFocus1 = 0,
                      int charFocus1 = 0);
-String highlight_code(CStrRef source, int line = 0, int lineFocus0 = 0,
+String highlight_code(const String& source, int line = 0, int lineFocus0 = 0,
                       int charFocus0 = 0, int lineFocus1 = 0,
                       int charFocus1 = 0);
 

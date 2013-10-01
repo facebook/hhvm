@@ -135,9 +135,9 @@ public:
    */
   void addHeaderNoLock(const char *name, const char *value);
   void addHeader(const char *name, const char *value);
-  void addHeader(CStrRef header);
+  void addHeader(const String& header);
   void replaceHeader(const char *name, const char *value);
-  void replaceHeader(CStrRef header);
+  void replaceHeader(const String& header);
   void removeHeader(const char *name);
   void removeAllHeaders();
   void getResponseHeaders(HeaderMap &headers);
@@ -147,7 +147,7 @@ public:
   /**
    * Content/MIME type related functions.
    */
-  void setMimeType(CStrRef mimeType);
+  void setMimeType(const String& mimeType);
   String getMimeType();
   const char *getDefaultContentType() { return "text/html";}
   bool sendDefaultContentType() { return m_sendContentType;}
@@ -165,8 +165,8 @@ public:
   /**
    * Set cookie response header.
    */
-  bool setCookie(CStrRef name, CStrRef value, int64_t expire = 0,
-                 CStrRef path = "", CStrRef domain = "", bool secure = false,
+  bool setCookie(const String& name, const String& value, int64_t expire = 0,
+                 const String& path = "", const String& domain = "", bool secure = false,
                  bool httponly = false, bool encode_url = true);
 
   /**
@@ -324,8 +324,8 @@ public:
   void redirect(const char *location, int code, const char *info );
 
   // TODO: support rfc1867
-  virtual bool isUploadedFile(CStrRef filename);
-  virtual bool moveUploadedFile(CStrRef filename, CStrRef destination);
+  virtual bool isUploadedFile(const String& filename);
+  virtual bool moveUploadedFile(const String& filename, const String& destination);
 
   int getResponseSize() const { return m_responseSize; }
   int getResponseCode() const { return m_responseCode; }
@@ -415,11 +415,11 @@ protected:
   void parsePostParams();
   static void parseQuery(char *query, ParamMap &params);
   static void urlUnescape(char *value);
-  bool splitHeader(CStrRef header, String &name, const char *&value);
+  bool splitHeader(const String& header, String &name, const char *&value);
 
   String prepareResponse(const void *data, int size, bool &compressed,
                          bool last);
-  bool moveUploadedFileHelper(CStrRef filename, CStrRef destination);
+  bool moveUploadedFileHelper(const String& filename, const String& destination);
 
 private:
   void prepareHeaders(bool compressed, bool chunked, const String &response,

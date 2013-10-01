@@ -186,7 +186,7 @@ int String::find(const char *s, int pos /* = 0 */,
 }
 
 HOT_FUNC
-int String::find(CStrRef s, int pos /* = 0 */,
+int String::find(const String& s, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   if (s.size() == 1) {
@@ -214,7 +214,7 @@ int String::rfind(const char *s, int pos /* = 0 */,
                       pos, caseSensitive);
 }
 
-int String::rfind(CStrRef s, int pos /* = 0 */,
+int String::rfind(const String& s, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
   if (empty()) return -1;
   if (s.size() == 1) {
@@ -224,20 +224,20 @@ int String::rfind(CStrRef s, int pos /* = 0 */,
                       s.data(), s.size(), pos, caseSensitive);
 }
 
-String String::replace(int start, int length, CStrRef replacement) const {
+String String::replace(int start, int length, const String& replacement) const {
   int len = size();
   char *ret = string_replace(data(), len, start, length, replacement.data(),
                              replacement.size());
   return String(ret, len, AttachString);
 }
 
-String String::replace(CStrRef search, CStrRef replacement) const {
+String String::replace(const String& search, const String& replacement) const {
   int count;
   return replace(search, replacement, count, true);
 }
 
-String String::replace(CStrRef search, CStrRef replacement, int &count,
-                       bool caseSensitive) const {
+String String::replace(const String& search, const String& replacement,
+                       int &count, bool caseSensitive) const {
   count = 0;
   if (!search.empty() && !empty()) {
     int len = m_px->size();
@@ -299,7 +299,7 @@ String &String::operator=(const std::string & s) {
 }
 
 HOT_FUNC
-String &String::operator=(CStrRef str) {
+String &String::operator=(const String& str) {
   StringBase::operator=(str.m_px);
   return *this;
 }
@@ -329,7 +329,7 @@ String &String::operator+=(litstr s) {
   return *this;
 }
 
-String &String::operator+=(CStrRef str) {
+String &String::operator+=(const String& str) {
   if (!str.empty()) {
     if (empty()) {
       StringBase::operator=(str.m_px);
@@ -426,7 +426,7 @@ bool String::same(const StringData *v2) const {
   return HPHP::same(m_px, v2);
 }
 
-bool String::same(CStrRef v2) const {
+bool String::same(const String& v2) const {
   return HPHP::same(m_px, v2);
 }
 
@@ -446,7 +446,7 @@ bool String::equal(const StringData *v2) const {
   return HPHP::equal(m_px, v2);
 }
 
-bool String::equal(CStrRef v2) const {
+bool String::equal(const String& v2) const {
   return HPHP::equal(m_px, v2);
 }
 
@@ -466,7 +466,7 @@ bool String::less(const StringData *v2) const {
   return HPHP::less(m_px, v2);
 }
 
-bool String::less(CStrRef v2) const {
+bool String::less(const String& v2) const {
   return HPHP::less(m_px, v2);
 }
 
@@ -486,7 +486,7 @@ bool String::more(const StringData *v2) const {
   return HPHP::more(m_px, v2);
 }
 
-bool String::more(CStrRef v2) const {
+bool String::more(const String& v2) const {
   return HPHP::more(m_px, v2);
 }
 
@@ -505,19 +505,19 @@ bool String::more(CResRef v2) const {
 ///////////////////////////////////////////////////////////////////////////////
 // comparison operators
 
-bool String::operator==(CStrRef v) const {
+bool String::operator==(const String& v) const {
   return HPHP::equal(m_px, v);
 }
 
-bool String::operator!=(CStrRef v) const {
+bool String::operator!=(const String& v) const {
   return !HPHP::equal(m_px, v);
 }
 
-bool String::operator>(CStrRef v) const {
+bool String::operator>(const String& v) const {
   return HPHP::more(m_px, v);
 }
 
-bool String::operator<(CStrRef v) const {
+bool String::operator<(const String& v) const {
   return HPHP::less(m_px, v);
 }
 

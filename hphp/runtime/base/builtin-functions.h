@@ -44,12 +44,13 @@
 #endif
 
 /**
- * This file contains a list of functions that HPHP generates to wrap around
- * different expressions to maintain semantics. If we read through all types of
- * expressions in compiler/expression/expression.h, we can find most of them can be
- * directly transformed into C/C++ counterpart without too much syntactical
- * changes. The functions in this file happen to be the ones that are somewhat
- * special.
+ * This file contains a list of functions that HPHP generates to wrap
+ * around different expressions to maintain semantics. If we read
+ * through all types of expressions in
+ * compiler/expression/expression.h, we can find most of them can be
+ * directly transformed into C/C++ counterpart without too much
+ * syntactical changes. The functions in this file happen to be the
+ * ones that are somewhat special.
  *
  * Another way to think about this file is that this file has a list of C-style
  * functions, and the rest of run-time has object/classes for other tasks,
@@ -66,12 +67,13 @@ extern const StaticString s_static;
 ///////////////////////////////////////////////////////////////////////////////
 // operators
 
-inline String concat(CStrRef s1, CStrRef s2) {
+inline String concat(const String& s1, const String& s2) {
   return s1 + s2;
 }
 
-String concat3(CStrRef s1, CStrRef s2, CStrRef s3);
-String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4);
+String concat3(const String& s1, const String& s2, const String& s3);
+String concat4(const String& s1, const String& s2, const String& s3,
+               const String& s4);
 
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
@@ -79,11 +81,12 @@ String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4);
 inline void echo(const char *s) {
   g_context->write(s);
 }
-inline void echo(CStrRef s) {
+inline void echo(const String& s) {
   g_context->write(s);
 }
 
-void NEVER_INLINE throw_invalid_property_name(CStrRef name) ATTRIBUTE_NORETURN;
+void NEVER_INLINE throw_invalid_property_name(const String& name)
+  ATTRIBUTE_NORETURN;
 void NEVER_INLINE throw_null_object_prop();
 void NEVER_INLINE throw_null_get_object_prop();
 void NEVER_INLINE raise_null_object_prop();
@@ -147,7 +150,7 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
 /**
  * Invoking an arbitrary static method.
  */
-Variant invoke_static_method(CStrRef s, CStrRef method,
+Variant invoke_static_method(const String& s, const String& method,
                              CArrRef params, bool fatal = true);
 
 /**
@@ -187,8 +190,8 @@ void check_collection_compare(ObjectData* obj);
 void check_collection_compare(ObjectData* obj1, ObjectData* obj2);
 void check_collection_cast_to_array();
 
-Object create_object_only(CStrRef s);
-Object create_object(CStrRef s, const Array &params, bool init = true);
+Object create_object_only(const String& s);
+Object create_object(const String& s, const Array &params, bool init = true);
 
 inline bool isContainer(const Cell& c) {
   assert(cellIsPlausible(c));
@@ -282,7 +285,7 @@ char const kUnserializableString[] = "\x01";
  * runtime/base that depend on these two functions.
  */
 String f_serialize(CVarRef value);
-Variant unserialize_ex(CStrRef str,
+Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,
                        CArrRef class_whitelist = null_array);
 Variant unserialize_ex(const char* str, int len,
@@ -296,27 +299,28 @@ inline Variant unserialize_from_buffer(const char* str, int len,
                         class_whitelist);
 }
 
-inline Variant unserialize_from_string(CStrRef str,
+inline Variant unserialize_from_string(const String& str,
                                        CArrRef class_whitelist = null_array) {
   return unserialize_from_buffer(str.data(), str.size(), class_whitelist);
 }
 
-String resolve_include(CStrRef file, const char* currentDir,
-                       bool (*tryFile)(CStrRef file, void* ctx), void* ctx);
-Variant include(CStrRef file, bool once = false,
+String resolve_include(const String& file, const char* currentDir,
+                       bool (*tryFile)(const String& file, void* ctx),
+                       void* ctx);
+Variant include(const String& file, bool once = false,
                 const char *currentDir = "",
                 bool raiseNotice = true);
-Variant require(CStrRef file, bool once = false,
+Variant require(const String& file, bool once = false,
                 const char *currentDir = "",
                 bool raiseNotice = true);
-Variant include_impl_invoke(CStrRef file, bool once = false,
+Variant include_impl_invoke(const String& file, bool once = false,
                             const char *currentDir = "");
-Variant invoke_file(CStrRef file, bool once = false,
+Variant invoke_file(const String& file, bool once = false,
                     const char *currentDir = nullptr);
-bool invoke_file_impl(Variant &res, CStrRef path, bool once,
+bool invoke_file_impl(Variant &res, const String& path, bool once,
                       const char *currentDir);
 
-bool function_exists(CStrRef function_name);
+bool function_exists(const String& function_name);
 
 /**
  * For autoload support
@@ -369,16 +373,16 @@ public:
   void removeAllHandlers();
   bool isRunning();
 
-  bool invokeHandler(CStrRef className, bool forceSplStack = false);
+  bool invokeHandler(const String& className, bool forceSplStack = false);
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);
-  bool autoloadType(CStrRef name);
-  bool setMap(CArrRef map, CStrRef root);
+  bool autoloadType(const String& name);
+  bool setMap(CArrRef map, const String& root);
   DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
 
 private:
   template <class T>
-  Result loadFromMap(CStrRef name, CStrRef kind, bool toLower,
+  Result loadFromMap(const String& name, const String& kind, bool toLower,
                      const T &checkExists);
   static String getSignature(CVarRef handler);
 

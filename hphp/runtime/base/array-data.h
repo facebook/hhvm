@@ -305,23 +305,23 @@ public:
    * the virtual method.  Helpers that take a CVarRef key dispatch to either
    * the StringData* or int64_t key-type helpers.
    */
-  bool exists(CStrRef k) const;
+  bool exists(const String& k) const;
   bool exists(CVarRef k) const;
   CVarRef get(int64_t k, bool error = false) const;
   CVarRef get(const StringData* k, bool error = false) const;
-  CVarRef get(CStrRef k, bool error = false) const;
+  CVarRef get(const String& k, bool error = false) const;
   CVarRef get(CVarRef k, bool error = false) const;
-  ArrayData *lval(CStrRef k, Variant *&ret, bool copy);
+  ArrayData *lval(const String& k, Variant *&ret, bool copy);
   ArrayData *lval(CVarRef k, Variant *&ret, bool copy);
-  ArrayData *set(CStrRef k, CVarRef v, bool copy);
+  ArrayData *set(const String& k, CVarRef v, bool copy);
   ArrayData *set(CVarRef k, CVarRef v, bool copy);
   ArrayData *set(const StringData*, CVarRef, bool) = delete;
-  ArrayData *setRef(CStrRef k, CVarRef v, bool copy);
+  ArrayData *setRef(const String& k, CVarRef v, bool copy);
   ArrayData *setRef(CVarRef k, CVarRef v, bool copy);
   ArrayData *setRef(const StringData*, CVarRef, bool) = delete;
-  ArrayData *add(CStrRef k, CVarRef v, bool copy);
+  ArrayData *add(const String& k, CVarRef v, bool copy);
   ArrayData *add(CVarRef k, CVarRef v, bool copy);
-  ArrayData *remove(CStrRef k, bool copy);
+  ArrayData *remove(const String& k, bool copy);
   ArrayData *remove(CVarRef k, bool copy);
 
   ssize_t iter_begin() const;
@@ -516,10 +516,10 @@ public:
   static CVarRef getNotFound(const StringData* k);
   CVarRef getNotFound(int64_t k, bool error) const;
   CVarRef getNotFound(const StringData* k, bool error) const;
-  static CVarRef getNotFound(CStrRef k);
+  static CVarRef getNotFound(const String& k);
   static CVarRef getNotFound(CVarRef k);
 
-  static bool IsValidKey(CStrRef k);
+  static bool IsValidKey(const String& k);
   static bool IsValidKey(CVarRef k);
   static bool IsValidKey(const StringData* k) { return k; }
 

@@ -128,7 +128,7 @@ std::vector<std::string> apcExtension::NoTTLPrefix;
 static apcExtension s_apc_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
-bool f_apc_store(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
+bool f_apc_store(const String& key, CVarRef var, int64_t ttl /* = 0 */,
                  int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
@@ -140,7 +140,7 @@ bool f_apc_store(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
   return s_apc_store[cache_id].store(key, var, ttl);
 }
 
-bool f_apc_add(CStrRef key, CVarRef var, int64_t ttl /* = 0 */,
+bool f_apc_add(const String& key, CVarRef var, int64_t ttl /* = 0 */,
                int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
@@ -228,7 +228,7 @@ bool f_apc_clear_cache(int64_t cache_id /* = 0 */) {
   return s_apc_store[cache_id].clear();
 }
 
-Variant f_apc_inc(CStrRef key, int64_t step /* = 1 */,
+Variant f_apc_inc(const String& key, int64_t step /* = 1 */,
                   VRefParam success /* = null */, int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
@@ -242,7 +242,7 @@ Variant f_apc_inc(CStrRef key, int64_t step /* = 1 */,
   return newValue;
 }
 
-Variant f_apc_dec(CStrRef key, int64_t step /* = 1 */,
+Variant f_apc_dec(const String& key, int64_t step /* = 1 */,
                   VRefParam success /* = null */, int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
@@ -256,7 +256,7 @@ Variant f_apc_dec(CStrRef key, int64_t step /* = 1 */,
   return newValue;
 }
 
-bool f_apc_cas(CStrRef key, int64_t old_cas, int64_t new_cas,
+bool f_apc_cas(const String& key, int64_t old_cas, int64_t new_cas,
                int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
@@ -297,23 +297,24 @@ Variant f_apc_exists(CVarRef key, int64_t cache_id /* = 0 */) {
 
 const StaticString s_start_time("start_time");
 
-Variant f_apc_cache_info(int64_t cache_id /* = 0 */, bool limited /* = false */) {
+Variant f_apc_cache_info(int64_t cache_id /* = 0 */,
+                         bool limited /* = false */) {
   return make_map_array(s_start_time, start_time());
 }
 
 Array f_apc_sma_info(bool limited /* = false */) {
   return Array::Create();
 }
-bool f_apc_define_constants(CStrRef key, CStrRef constants,
+bool f_apc_define_constants(const String& key, const String& constants,
                             bool case_sensitive /* = true */,
                             int64_t cache_id /* = 0 */) {
   throw NotSupportedException(__func__, "dynamic coding");
 }
-bool f_apc_load_constants(CStrRef key, bool case_sensitive /* = true */,
+bool f_apc_load_constants(const String& key, bool case_sensitive /* = true */,
                           int64_t cache_id /* = 0 */) {
   throw NotSupportedException(__func__, "dynamic coding");
 }
-bool f_apc_compile_file(CStrRef filename, bool atomic /* = true */,
+bool f_apc_compile_file(const String& filename, bool atomic /* = true */,
                         int64_t cache_id /* = 0 */) {
   throw NotSupportedException(__func__, "dynamic coding");
 }
@@ -323,18 +324,21 @@ Array f_apc_filehits() {
 Variant f_apc_delete_file(CVarRef keys, int64_t cache_id /* = 0 */) {
   throw NotSupportedException(__func__, "feature not supported");
 }
-Variant f_apc_bin_dump(int64_t cache_id /* = 0 */, CVarRef filter /* = null_variant */) {
+Variant f_apc_bin_dump(int64_t cache_id /* = 0 */,
+                       CVarRef filter /* = null_variant */) {
   throw NotSupportedException(__func__, "feature not supported");
 }
-bool f_apc_bin_load(CStrRef data, int64_t flags /* = 0 */, int64_t cache_id /* = 0 */) {
+bool f_apc_bin_load(const String& data, int64_t flags /* = 0 */,
+                    int64_t cache_id /* = 0 */) {
   throw NotSupportedException(__func__, "feature not supported");
 }
 Variant f_apc_bin_dumpfile(int64_t cache_id, CVarRef filter,
-                           CStrRef filename, int64_t flags /* = 0 */,
+                           const String& filename, int64_t flags /* = 0 */,
                            CResRef context /* =  uninit_null() */) {
   throw NotSupportedException(__func__, "feature not supported");
 }
-bool f_apc_bin_loadfile(CStrRef filename, CResRef context /* = uninit_null() */,
+bool f_apc_bin_loadfile(const String& filename,
+                        CResRef context /* = uninit_null() */,
                         int64_t flags /* = 0 */, int64_t cache_id /* = 0 */) {
   throw NotSupportedException(__func__, "feature not supported");
 }
@@ -479,7 +483,7 @@ size_t get_const_map_size() {
 }
 
 //define in ext_fb.cpp
-extern void const_load_set(CStrRef key, CVarRef value);
+extern void const_load_set(const String& key, CVarRef value);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constant and APC priming with uncompressed data
@@ -1355,7 +1359,7 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
   buf.append(sep);
 }
 
-String apc_reserialize(CStrRef str) {
+String apc_reserialize(const String& str) {
   if (str.empty() ||
       !apcExtension::EnableApcSerialize) return str;
 

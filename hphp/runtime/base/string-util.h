@@ -51,37 +51,40 @@ public:
    * Manipulations. Note, all these functions will create a new string than
    * modifying input, although names of these functions sound like mutating.
    */
-  static String Pad(CStrRef input, int final_length,
-                    CStrRef pad_string = " ", PadType type = PadType::Right);
-  static String StripHTMLTags(CStrRef input, CStrRef allowable_tags = "");
+  static String Pad(const String& input, int final_length,
+                    const String& pad_string = " ",
+                    PadType type = PadType::Right);
+  static String StripHTMLTags(const String& input,
+                              const String& allowable_tags = "");
 
   /**
    * Split/joins.
    */
-  static Variant Explode(CStrRef input, CStrRef delimiter,
+  static Variant Explode(const String& input, const String& delimiter,
                          int limit = 0x7FFFFFFF);
-  static String  Implode(CArrRef items, CStrRef delim); // == Join()
-  static Variant Split(CStrRef str, int split_length = 1);
-  static Variant ChunkSplit(CStrRef body, int chunklen = 76,
-                            CStrRef end = "\r\n"); // for email (rfc822/2822)
+  static String  Implode(CArrRef items, const String& delim); // == Join()
+  static Variant Split(const String& str, int split_length = 1);
+  static Variant ChunkSplit(
+    const String& body, int chunklen = 76,
+    const String& end = "\r\n"); // for email (rfc822/2822)
 
   /**
    * Encoding/decoding.
    */
-  static String HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
+  static String HtmlEncode(const String& input, QuoteStyle quoteStyle,
                            const char *charset, bool nbsp);
-  static String HtmlEncodeExtra(CStrRef input, QuoteStyle quoteStyle,
+  static String HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
                                 const char *charset, bool nbsp, Array extra);
-  static String HtmlDecode(CStrRef input, QuoteStyle quoteStyle,
+  static String HtmlDecode(const String& input, QuoteStyle quoteStyle,
                            const char *charset, bool all);
-  static String QuotedPrintableEncode(CStrRef input);
-  static String QuotedPrintableDecode(CStrRef input);
-  static String UUEncode(CStrRef input);
-  static String UUDecode(CStrRef input);
-  static String Base64Encode(CStrRef input);
-  static String Base64Decode(CStrRef input, bool strict = false);
-  static String UrlEncode(CStrRef input, bool encodePlus = true);
-  static String UrlDecode(CStrRef input, bool decodePlus = true);
+  static String QuotedPrintableEncode(const String& input);
+  static String QuotedPrintableDecode(const String& input);
+  static String UUEncode(const String& input);
+  static String UUDecode(const String& input);
+  static String Base64Encode(const String& input);
+  static String Base64Decode(const String& input, bool strict = false);
+  static String UrlEncode(const String& input, bool encodePlus = true);
+  static String UrlDecode(const String& input, bool decodePlus = true);
 
   /**
    * Formatting.
@@ -91,12 +94,13 @@ public:
   /**
    * Hashing
    */
-  static String Translate(CStrRef input, CStrRef from, CStrRef to);
-  static String ROT13(CStrRef input);
-  static int64_t CRC32(CStrRef input);
-  static String Crypt(CStrRef input, const char *salt = "");
-  static String MD5(CStrRef input, bool raw = false);
-  static String SHA1(CStrRef input, bool raw = false);
+  static String Translate(const String& input, const String& from,
+                          const String& to);
+  static String ROT13(const String& input);
+  static int64_t CRC32(const String& input);
+  static String Crypt(const String& input, const char *salt = "");
+  static String MD5(const String& input, bool raw = false);
+  static String SHA1(const String& input, bool raw = false);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

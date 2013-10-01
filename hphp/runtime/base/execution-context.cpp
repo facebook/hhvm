@@ -167,7 +167,8 @@ std::string BaseExecutionContext::getRequestUrl(size_t szLimit) {
   return ret;
 }
 
-void BaseExecutionContext::setContentType(CStrRef mimetype, CStrRef charset) {
+void BaseExecutionContext::setContentType(const String& mimetype,
+                                          const String& charset) {
   if (m_transport) {
     String contentType = mimetype;
     contentType += "; ";
@@ -189,7 +190,7 @@ void BaseExecutionContext::setRequestMemoryMaxBytes(int64_t max) {
 ///////////////////////////////////////////////////////////////////////////////
 // write()
 
-void BaseExecutionContext::write(CStrRef s) {
+void BaseExecutionContext::write(const String& s) {
   write(s.data(), s.size());
 }
 
@@ -762,7 +763,7 @@ void BaseExecutionContext::setLogErrors(bool on) {
   }
 }
 
-void BaseExecutionContext::setErrorLog(CStrRef filename) {
+void BaseExecutionContext::setErrorLog(const String& filename) {
   m_errorLog = filename;
   if (m_logErrors && !m_errorLog.empty()) {
     FILE *output = fopen(m_errorLog.data(), "a");
@@ -787,11 +788,11 @@ void BaseExecutionContext::debuggerInfo(InfoVec &info) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void BaseExecutionContext::setenv(CStrRef name, CStrRef value) {
+void BaseExecutionContext::setenv(const String& name, const String& value) {
   m_envs.set(name, value);
 }
 
-String BaseExecutionContext::getenv(CStrRef name) const {
+String BaseExecutionContext::getenv(const String& name) const {
   if (m_envs.exists(name)) {
     return m_envs[name].toString();
   }
@@ -807,7 +808,7 @@ String BaseExecutionContext::getenv(CStrRef name) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void BaseExecutionContext::setIncludePath(CStrRef path) {
+void BaseExecutionContext::setIncludePath(const String& path) {
   m_include_paths = f_explode(":", path);
 }
 

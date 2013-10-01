@@ -42,12 +42,12 @@ public:
    */
   static String CurrentName();            // current timezone's name
   static SmartResource<TimeZone> Current(); // current timezone
-  static bool SetCurrent(CStrRef name);   // returns false if invalid
+  static bool SetCurrent(const String& name);   // returns false if invalid
 
   /**
    * TimeZone database queries.
    */
-  static bool IsValid(CStrRef name);
+  static bool IsValid(const String& name);
   static Array GetNames();
   static Array GetAbbreviations();
   static String AbbreviationToName(String abbr, int utcoffset = -1,
@@ -58,7 +58,7 @@ public:
    * Constructing a timezone object by name or a raw pointer (internal).
    */
   TimeZone();
-  explicit TimeZone(CStrRef name);
+  explicit TimeZone(const String& name);
   explicit TimeZone(timelib_tzinfo *tzi);
 
   static StaticString& classnameof() {
@@ -66,7 +66,7 @@ public:
     return result;
   }
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const { return classnameof(); }
 
   /**
    * Whether this represents a valid timezone.

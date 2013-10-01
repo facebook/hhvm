@@ -283,7 +283,7 @@ static DataType collator_is_numeric(UChar *str, int length, int64_t *lval,
   return KindOfNull;
 }
 
-static String intl_convert_str_utf8_to_utf16(CStrRef utf8_str,
+static String intl_convert_str_utf8_to_utf16(const String& utf8_str,
                                              UErrorCode * status) {
   UChar* ustr = nullptr;
   int ustr_len = 0;
@@ -296,7 +296,7 @@ static String intl_convert_str_utf8_to_utf16(CStrRef utf8_str,
   return String((char*)ustr, UBYTES(ustr_len), AttachString);
 }
 
-static String intl_convert_str_utf16_to_utf8(CStrRef utf16_str,
+static String intl_convert_str_utf16_to_utf8(const String& utf16_str,
                                              UErrorCode * status) {
   char* str = nullptr;
   int str_len = 0;

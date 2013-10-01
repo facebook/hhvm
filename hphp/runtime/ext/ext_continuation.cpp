@@ -32,9 +32,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Object f_hphp_create_continuation(CStrRef clsname,
-                                          CStrRef funcname,
-                                          CStrRef origFuncName,
+Object f_hphp_create_continuation(const String& clsname,
+                                          const String& funcname,
+                                          const String& origFuncName,
                                           CArrRef args /* = null_array */) {
   throw_fatal("Invalid call hphp_create_continuation");
   return NULL;

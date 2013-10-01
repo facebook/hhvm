@@ -52,9 +52,11 @@ class c_SpoofChecker : public ExtObjectData {
   public: c_SpoofChecker(Class* cls = c_SpoofChecker::classof());
   public: ~c_SpoofChecker();
   public: void t___construct();
-  public: bool t_issuspicious(CStrRef text, VRefParam issuesFound = uninit_null());
-  public: bool t_areconfusable(CStrRef s1, CStrRef s2, VRefParam issuesFound = uninit_null());
-  public: void t_setallowedlocales(CStrRef localesList);
+  public: bool t_issuspicious(
+    const String& text, VRefParam issuesFound = uninit_null());
+  public: bool t_areconfusable(
+    const String& s1, const String& s2, VRefParam issuesFound = uninit_null());
+  public: void t_setallowedlocales(const String& localesList);
   public: void t_setchecks(int checks);
 
   private: USpoofChecker *m_spoof_checker;

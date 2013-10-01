@@ -81,7 +81,7 @@ struct ConcurrentTableSharedStore {
     }
   };
 
-  static std::string GetSkeleton(CStrRef key);
+  static std::string GetSkeleton(const String& key);
 
   explicit ConcurrentTableSharedStore(int id)
     : m_id(id)
@@ -94,17 +94,17 @@ struct ConcurrentTableSharedStore {
     operator=(const ConcurrentTableSharedStore&) = delete;
 
   int size() const { return m_vars.size(); }
-  bool get(CStrRef key, Variant &value);
-  bool store(CStrRef key, CVarRef val, int64_t ttl,
+  bool get(const String& key, Variant &value);
+  bool store(const String& key, CVarRef val, int64_t ttl,
                      bool overwrite = true);
-  int64_t inc(CStrRef key, int64_t step, bool &found);
-  bool cas(CStrRef key, int64_t old, int64_t val);
-  bool exists(CStrRef key);
-  bool erase(CStrRef key, bool expired = false);
+  int64_t inc(const String& key, int64_t step, bool &found);
+  bool cas(const String& key, int64_t old, int64_t val);
+  bool exists(const String& key);
+  bool erase(const String& key, bool expired = false);
   bool clear();
 
   void prime(const std::vector<KeyValuePair> &vars);
-  bool constructPrime(CStrRef v, KeyValuePair& item, bool serialized);
+  bool constructPrime(const String& v, KeyValuePair& item, bool serialized);
   bool constructPrime(CVarRef v, KeyValuePair& item);
   void primeDone();
 
@@ -166,7 +166,7 @@ private:
     return SharedVariant::Create(v, false);
   }
 
-  bool eraseImpl(CStrRef key, bool expired);
+  bool eraseImpl(const String& key, bool expired);
 
   void eraseAcc(Map::accessor &acc) {
     const char *pkey = acc->first;
@@ -179,9 +179,9 @@ private:
 
   void addToExpirationQueue(const char* key, int64_t etime);
 
-  bool handleUpdate(CStrRef key, SharedVariant* svar);
-  bool handlePromoteObj(CStrRef key, SharedVariant* svar, CVarRef valye);
-  SharedVariant* unserialize(CStrRef key, const StoreValue* sval);
+  bool handleUpdate(const String& key, SharedVariant* svar);
+  bool handlePromoteObj(const String& key, SharedVariant* svar, CVarRef valye);
+  SharedVariant* unserialize(const String& key, const StoreValue* sval);
 
 private:
   int m_id;

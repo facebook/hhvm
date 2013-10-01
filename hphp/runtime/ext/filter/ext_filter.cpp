@@ -260,7 +260,7 @@ Variant f_filter_list() {
   return ret;
 }
 
-Variant f_filter_id(CStrRef filtername) {
+Variant f_filter_id(const String& filtername) {
   size_t size = sizeof(filter_list) / sizeof(filter_list_entry);
   for (size_t i = 0; i < size; ++i) {
     if (filter_list[i].name == filtername) {

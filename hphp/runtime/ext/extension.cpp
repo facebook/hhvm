@@ -80,7 +80,7 @@ void Extension::ShutdownModules() {
 
 const StaticString s_apc("apc");
 
-bool Extension::IsLoaded(CStrRef name) {
+bool Extension::IsLoaded(const String& name) {
   if (name == s_apc) {
     return apcExtension::Enable;
   }
@@ -89,7 +89,7 @@ bool Extension::IsLoaded(CStrRef name) {
     s_registered_extensions->end();
 }
 
-Extension *Extension::GetExtension(CStrRef name) {
+Extension *Extension::GetExtension(const String& name) {
   assert(s_registered_extensions);
   ExtensionMap::iterator iter = s_registered_extensions->find(name.data());
   if (iter != s_registered_extensions->end()) {

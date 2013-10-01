@@ -25,12 +25,12 @@ void get_server_note() {
   s_note.getCheck();
 }
 
-void ServerNote::Add(CStrRef name, CStrRef value) {
+void ServerNote::Add(const String& name, const String& value) {
   Array &arr = s_note->m_notes;
   arr.set(name, value);
 }
 
-String ServerNote::Get(CStrRef name) {
+String ServerNote::Get(const String& name) {
   Array &arr = s_note->m_notes;
   String ret;
   if (arr.exists(name)) {

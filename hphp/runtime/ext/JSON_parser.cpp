@@ -474,7 +474,7 @@ void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
 
 StaticString s__empty_("_empty_");
 
-static void object_set(Variant &var, CStrRef key, CVarRef value,
+static void object_set(Variant &var, const String& key, CVarRef value,
                        int assoc) {
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).
@@ -488,7 +488,7 @@ static void object_set(Variant &var, CStrRef key, CVarRef value,
   }
 }
 
-static void attach_zval(json_parser *json, CStrRef key,
+static void attach_zval(json_parser *json, const String& key,
                         int assoc) {
   Variant &root = json->the_zstack[json->the_top - 1];
   Variant &child =  json->the_zstack[json->the_top];

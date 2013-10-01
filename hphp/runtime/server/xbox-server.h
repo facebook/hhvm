@@ -42,14 +42,14 @@ public:
   /**
    * Send/PostMessage paradigm for local and remote RPC.
    */
-  static bool SendMessage(CStrRef message, Variant &ret, int timeout_ms,
-                          CStrRef host = "localhost");
-  static bool PostMessage(CStrRef message, CStrRef host = "localhost");
+  static bool SendMessage(const String& message, Variant &ret, int timeout_ms,
+                          const String& host = "localhost");
+  static bool PostMessage(const String& message, const String& host = "localhost");
 
   /**
    * Local tasklet for parallel processing.
    */
-  static Resource TaskStart(CStrRef msg, CStrRef reqInitDoc = "",
+  static Resource TaskStart(const String& msg, const String& reqInitDoc = "",
       ServerTaskEvent<XboxServer, XboxTransport> *event = nullptr);
   static bool TaskStatus(CResRef task);
   static int TaskResult(CResRef task, int timeout_ms, Variant &ret);
@@ -90,7 +90,7 @@ public:
 
 class XboxTransport : public Transport, public Synchronizable {
 public:
-  explicit XboxTransport(CStrRef message, CStrRef reqInitDoc = "");
+  explicit XboxTransport(const String& message, const String& reqInitDoc = "");
 
   timespec getStartTimer() const { return m_queueTime; }
 

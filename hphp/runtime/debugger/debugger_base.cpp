@@ -452,7 +452,7 @@ static void append_line_no(StringBuffer &sb, const char *text,
   if (end) sb.append(end);
 }
 
-String highlight_code(CStrRef source, int line /* = 0 */,
+String highlight_code(const String& source, int line /* = 0 */,
                       int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                       int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   TRACE(7, "debugger_base:highlight_code\n");
@@ -478,7 +478,7 @@ string check_char_highlight(int lineFocus0, int charFocus0,
   return "";
 }
 
-String highlight_php(CStrRef source, int line /* = 0 */,
+String highlight_php(const String& source, int line /* = 0 */,
                      int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                      int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   TRACE(7, "debugger_base:highlight_php\n");

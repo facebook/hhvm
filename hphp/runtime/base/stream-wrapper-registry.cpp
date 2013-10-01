@@ -59,7 +59,7 @@ const StaticString
   s_file("file"),
   s_compress_zlib("compress.zlib");
 
-bool disableWrapper(CStrRef scheme) {
+bool disableWrapper(const String& scheme) {
   String lscheme = f_strtolower(scheme);
 
   if (lscheme.same(s_file)) {
@@ -93,7 +93,7 @@ bool disableWrapper(CStrRef scheme) {
   return true;
 }
 
-bool restoreWrapper(CStrRef scheme) {
+bool restoreWrapper(const String& scheme) {
   String lscheme = f_strtolower(scheme);
   bool ret = false;
 
@@ -116,7 +116,8 @@ bool restoreWrapper(CStrRef scheme) {
   return true;
 }
 
-bool registerRequestWrapper(CStrRef scheme, std::unique_ptr<Wrapper> wrapper) {
+bool registerRequestWrapper(const String& scheme,
+                            std::unique_ptr<Wrapper> wrapper) {
   String lscheme = f_strtolower(scheme);
 
   // Global, non-disabled wrapper
@@ -155,7 +156,7 @@ Array enumWrappers() {
   return ret;
 }
 
-Wrapper* getWrapper(CStrRef scheme) {
+Wrapper* getWrapper(const String& scheme) {
   String lscheme = f_strtolower(scheme);
 
   // Request local wrapper?
@@ -179,7 +180,7 @@ Wrapper* getWrapper(CStrRef scheme) {
   return nullptr;
 }
 
-Wrapper* getWrapperFromURI(CStrRef uri) {
+Wrapper* getWrapperFromURI(const String& uri) {
   const char *uri_string = uri.data();
 
   /* Special case for PHP4 Backward Compatability */

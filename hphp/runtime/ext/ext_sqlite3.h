@@ -48,24 +48,24 @@ class c_SQLite3 : public ExtObjectData {
   // need to implement
   public: c_SQLite3(Class* cls = c_SQLite3::classof());
   public: ~c_SQLite3();
-  public: void t___construct(CStrRef filename, int64_t flags = k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE, CStrRef encryption_key = null_string);
-  public: void t_open(CStrRef filename, int64_t flags = k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE, CStrRef encryption_key = null_string);
+  public: void t___construct(const String& filename, int64_t flags = k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE, const String& encryption_key = null_string);
+  public: void t_open(const String& filename, int64_t flags = k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE, const String& encryption_key = null_string);
   public: bool t_busytimeout(int64_t msecs);
   public: bool t_close();
-  public: bool t_exec(CStrRef sql);
+  public: bool t_exec(const String& sql);
   public: Array t_version();
   public: int64_t t_lastinsertrowid();
   public: int64_t t_lasterrorcode();
   public: String t_lasterrormsg();
-  public: bool t_loadextension(CStrRef extension);
+  public: bool t_loadextension(const String& extension);
   public: int64_t t_changes();
-  public: String t_escapestring(CStrRef sql);
-  public: Variant t_prepare(CStrRef sql);
-  public: Variant t_query(CStrRef sql);
-  public: Variant t_querysingle(CStrRef sql, bool entire_row = false);
-  public: bool t_createfunction(CStrRef name, CVarRef callback, int64_t argcount = -1);
-  public: bool t_createaggregate(CStrRef name, CVarRef step, CVarRef final, int64_t argcount = -1);
-  public: bool t_openblob(CStrRef table, CStrRef column, int64_t rowid, CStrRef dbname = null_string);
+  public: String t_escapestring(const String& sql);
+  public: Variant t_prepare(const String& sql);
+  public: Variant t_query(const String& sql);
+  public: Variant t_querysingle(const String& sql, bool entire_row = false);
+  public: bool t_createfunction(const String& name, CVarRef callback, int64_t argcount = -1);
+  public: bool t_createaggregate(const String& name, CVarRef step, CVarRef final, int64_t argcount = -1);
+  public: bool t_openblob(const String& table, const String& column, int64_t rowid, const String& dbname = null_string);
 
 
   public: void validate() const;
@@ -91,7 +91,7 @@ class c_SQLite3Stmt : public ExtObjectData {
   // need to implement
   public: c_SQLite3Stmt(Class* cls = c_SQLite3Stmt::classof());
   public: ~c_SQLite3Stmt();
-  public: void t___construct(CObjRef dbobject, CStrRef statement);
+  public: void t___construct(CObjRef dbobject, const String& statement);
   public: int64_t t_paramcount();
   public: bool t_close();
   public: bool t_reset();

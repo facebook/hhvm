@@ -95,9 +95,9 @@ private:
 public:
   CLASSNAME_IS("cURL handle")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
-  explicit CurlResource(CStrRef url)
+  explicit CurlResource(const String& url)
     : m_exception(nullptr), m_phpException(false), m_emptyPost(true) {
     m_cp = curl_easy_init();
     m_url = url;
@@ -853,7 +853,7 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
     return false;                                                       \
   }                                                                     \
 
-Variant f_curl_init(CStrRef url /* = null_string */) {
+Variant f_curl_init(const String& url /* = null_string */) {
   return NEWOBJ(CurlResource)(url);
 }
 
@@ -1120,7 +1120,7 @@ public:
 
   CLASSNAME_IS("cURL Multi Handle")
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const { return classnameof(); }
 
   CurlMultiResource() {
     m_multi = curl_multi_init();
@@ -1383,7 +1383,7 @@ public:
 
   CLASSNAME_IS("LibEventHttp");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   explicit LibEventHttpHandle(LibEventHttpClientPtr client) : m_client(client) {
   }
@@ -1399,7 +1399,7 @@ public:
 IMPLEMENT_OBJECT_ALLOCATION(LibEventHttpHandle)
 
 static LibEventHttpClientPtr prepare_client
-(CStrRef url, CStrRef data, CArrRef headers, int timeout,
+(const String& url, const String& data, CArrRef headers, int timeout,
  bool async, bool post) {
   string sUrl = url.data();
   if (sUrl.size() < 7 || sUrl.substr(0, 7) != "http://") {
@@ -1473,14 +1473,15 @@ static Array prepare_response(LibEventHttpClientPtr client) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_evhttp_set_cache(CStrRef address, int max_conn, int port /* = 80 */) {
+void f_evhttp_set_cache(const String& address, int max_conn,
+                        int port /* = 80 */) {
   if (RuntimeOption::ServerHttpSafeMode) {
     throw_fatal("evhttp_set_cache is disabled");
   }
   LibEventHttpClient::SetCache(address.data(), port, max_conn);
 }
 
-Variant f_evhttp_get(CStrRef url, CArrRef headers /* = null_array */,
+Variant f_evhttp_get(const String& url, CArrRef headers /* = null_array */,
                      int timeout /* = 5 */) {
   if (RuntimeOption::ServerHttpSafeMode) {
     throw_fatal("evhttp_set_cache is disabled");
@@ -1495,7 +1496,7 @@ Variant f_evhttp_get(CStrRef url, CArrRef headers /* = null_array */,
   return false;
 }
 
-Variant f_evhttp_post(CStrRef url, CStrRef data,
+Variant f_evhttp_post(const String& url, const String& data,
                       CArrRef headers /* = null_array */,
                       int timeout /* = 5 */) {
   if (RuntimeOption::ServerHttpSafeMode) {
@@ -1511,7 +1512,8 @@ Variant f_evhttp_post(CStrRef url, CStrRef data,
   return false;
 }
 
-Variant f_evhttp_async_get(CStrRef url, CArrRef headers /* = null_array */,
+Variant f_evhttp_async_get(const String& url,
+                           CArrRef headers /* = null_array */,
                            int timeout /* = 5 */) {
   if (RuntimeOption::ServerHttpSafeMode) {
     throw_fatal("evhttp_async_get is disabled");
@@ -1524,7 +1526,7 @@ Variant f_evhttp_async_get(CStrRef url, CArrRef headers /* = null_array */,
   return false;
 }
 
-Variant f_evhttp_async_post(CStrRef url, CStrRef data,
+Variant f_evhttp_async_post(const String& url, const String& data,
                             CArrRef headers /* = null_array */,
                             int timeout /* = 5 */) {
   if (RuntimeOption::ServerHttpSafeMode) {

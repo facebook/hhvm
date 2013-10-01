@@ -72,7 +72,7 @@ public: // ArrayData implementation
   using ArrayData::remove;
   using ArrayData::nvGet;
 
-  Variant& getRef(CStrRef k) {
+  Variant& getRef(const String& k) {
     return tvAsVariant(nvGet(k.get()));
   }
 

@@ -32,9 +32,9 @@ public:
    * Create a task. This returns a task handle, or null object
    * if there are no worker threads.
    */
-  static Resource TaskStart(CStrRef url, CArrRef headers,
-                            CStrRef remote_host,
-                            CStrRef post_data = null_string,
+  static Resource TaskStart(const String& url, CArrRef headers,
+                            const String& remote_host,
+                            const String& post_data = null_string,
                             CArrRef files = null_array,
                             int timeoutSeconds = -1);
 

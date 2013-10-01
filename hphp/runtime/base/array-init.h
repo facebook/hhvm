@@ -78,7 +78,7 @@ struct ArrayInit {
   // if you have a literal, or String otherwise.
   ArrayInit& set(const char*, CVarRef v, bool keyConverted = false) = delete;
 
-  ArrayInit& set(CStrRef name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& set(const String& name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->set(name, v, false); });
     } else if (!name.isNull()) {
@@ -112,7 +112,7 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& set(CStrRef name, RefResult v, bool keyConverted = false) {
+  ArrayInit& set(const String& name, RefResult v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, variant(v), false); });
     } else if (!name.isNull()) {
@@ -153,7 +153,7 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& add(CStrRef name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& add(const String& name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->add(name, v, false); });
     } else if (!name.isNull()) {
@@ -192,7 +192,7 @@ struct ArrayInit {
     return *this;
   }
 
-  ArrayInit& setRef(CStrRef name, CVarRef v, bool keyConverted = false) {
+  ArrayInit& setRef(const String& name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
       performOp([&]{ return m_data->setRef(name, v, false); });
     } else {
@@ -391,7 +391,7 @@ namespace make_array_detail {
   inline String init_key(const char* s) { return String(s); }
   inline int64_t init_key(int k) { return k; }
   inline int64_t init_key(int64_t k) { return k; }
-  inline CStrRef init_key(CStrRef k) { return k; }
+  inline const String& init_key(const String& k) { return k; }
 
   inline void map_impl(ArrayInit&) {}
 

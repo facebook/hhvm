@@ -30,7 +30,7 @@ const StaticString s_http_response_header("http_response_header");
 
 UrlFile::UrlFile(const char *method /* = "GET" */,
                  CArrRef headers /* = null_array */,
-                 CStrRef postData /* = null_string */,
+                 const String& postData /* = null_string */,
                  int maxRedirect /* = 20 */,
                  int timeout /* = -1 */) {
   m_get = (method == nullptr || strcasecmp(method, "GET") == 0);
@@ -41,7 +41,7 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
   m_isLocal = false;
 }
 
-bool UrlFile::open(CStrRef url, CStrRef mode) {
+bool UrlFile::open(const String& url, const String& mode) {
   const char* modestr = mode.c_str();
   if (strchr(modestr, '+') || strchr(modestr, 'a') || strchr(modestr, 'w')) {
     std::string msg = "cannot open a url stream for write/append operation: ";

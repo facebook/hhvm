@@ -37,7 +37,7 @@ static const StaticString
 
 static class PharStreamWrapper : public Stream::Wrapper {
  public:
-  virtual File* open(CStrRef filename, CStrRef mode,
+  virtual File* open(const String& filename, const String& mode,
                      int options, CVarRef context) {
     static const char cz[] = "phar://";
     if (strncmp(filename.data(), cz, sizeof(cz) - 1)) {
@@ -60,7 +60,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
     return file;
   }
 
-  virtual int access(CStrRef path, int mode) {
+  virtual int access(const String& path, int mode) {
     Variant ret = callStat(path);
     if (ret.isBoolean()) {
       assert(!ret.toBoolean());
@@ -69,7 +69,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
     return 0;
   }
 
-  virtual int stat(CStrRef path, struct stat* buf) {
+  virtual int stat(const String& path, struct stat* buf) {
     Variant ret = callStat(path);
     if (ret.isBoolean()) {
       assert(!ret.toBoolean());
@@ -84,11 +84,11 @@ static class PharStreamWrapper : public Stream::Wrapper {
     return 0;
   }
 
-  virtual int lstat(CStrRef path, struct stat* buf) {
+  virtual int lstat(const String& path, struct stat* buf) {
     return stat(path, buf);
   }
 
-  virtual Directory* opendir(CStrRef path) {
+  virtual Directory* opendir(const String& path) {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_opendir.get());
     Variant ret;
     g_vmContext->invokeFunc(
@@ -107,7 +107,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
   }
 
  private:
-  Variant callStat(CStrRef path) {
+  Variant callStat(const String& path) {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_stat.get());
     Variant ret;
     g_vmContext->invokeFunc(

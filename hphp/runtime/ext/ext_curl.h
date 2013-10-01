@@ -28,7 +28,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_curl_init(CStrRef url = null_string);
+Variant f_curl_init(const String& url = null_string);
 Variant f_curl_copy_handle(CResRef ch);
 Variant f_curl_version(int uversion = k_CURLVERSION_NOW);
 bool f_curl_setopt(CResRef ch, int option, CVarRef value);
@@ -44,15 +44,24 @@ Variant f_curl_multi_add_handle(CResRef mh, CResRef ch);
 Variant f_curl_multi_remove_handle(CResRef mh, CResRef ch);
 Variant f_curl_multi_exec(CResRef mh, VRefParam still_running);
 Variant f_curl_multi_select(CResRef mh, double timeout = 1.0);
-Variant f_fb_curl_multi_fdset(CResRef mh, VRefParam read_fd_set, VRefParam write_fd_set, VRefParam exc_fd_set, VRefParam max_fd = null_object);
+Variant f_fb_curl_multi_fdset(
+  CResRef mh, VRefParam read_fd_set,
+  VRefParam write_fd_set, VRefParam exc_fd_set, VRefParam max_fd = null_object);
 Variant f_curl_multi_getcontent(CResRef ch);
-Variant f_curl_multi_info_read(CResRef mh, VRefParam msgs_in_queue = uninit_null());
+Variant f_curl_multi_info_read(CResRef mh,
+                               VRefParam msgs_in_queue = uninit_null());
 Variant f_curl_multi_close(CResRef mh);
-void f_evhttp_set_cache(CStrRef address, int max_conn, int port = 80);
-Variant f_evhttp_get(CStrRef url, CArrRef headers = null_array, int timeout = 5);
-Variant f_evhttp_post(CStrRef url, CStrRef data, CArrRef headers = null_array, int timeout = 5);
-Variant f_evhttp_async_get(CStrRef url, CArrRef headers = null_array, int timeout = 5);
-Variant f_evhttp_async_post(CStrRef url, CStrRef data, CArrRef headers = null_array, int timeout = 5);
+void f_evhttp_set_cache(const String& address, int max_conn, int port = 80);
+Variant f_evhttp_get(
+  const String& url, CArrRef headers = null_array, int timeout = 5);
+Variant f_evhttp_post(
+  const String& url, const String& data, CArrRef headers = null_array,
+  int timeout = 5);
+Variant f_evhttp_async_get(
+  const String& url, CArrRef headers = null_array, int timeout = 5);
+Variant f_evhttp_async_post(
+  const String& url, const String& data, CArrRef headers = null_array,
+  int timeout = 5);
 Variant f_evhttp_recv(CResRef handle);
 
 extern const int64_t k_CURLINFO_LOCAL_PORT;

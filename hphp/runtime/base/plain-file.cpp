@@ -49,7 +49,7 @@ void PlainFile::sweep() {
   File::sweep();
 }
 
-bool PlainFile::open(CStrRef filename, CStrRef mode) {
+bool PlainFile::open(const String& filename, const String& mode) {
   int fd;
   FILE *f;
   assert(m_stream == nullptr);

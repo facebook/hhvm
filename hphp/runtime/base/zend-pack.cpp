@@ -105,7 +105,7 @@ void ZendPack::pack(CVarRef val, int size, int *map, char *output) {
   }
 }
 
-Variant ZendPack::pack(CStrRef fmt, CArrRef argv) {
+Variant ZendPack::pack(const String& fmt, CArrRef argv) {
   /* Preprocess format into formatcodes and formatargs */
   vector<char> formatcodes;
   vector<int> formatargs;
@@ -453,7 +453,7 @@ int32_t ZendPack::unpack(const char *data, int size, int issigned, int *map) {
   return result;
 }
 
-Variant ZendPack::unpack(CStrRef fmt, CStrRef data) {
+Variant ZendPack::unpack(const String& fmt, const String& data) {
   const char *format = fmt.c_str();
   int formatlen = fmt.size();
   const char *input = data.c_str();

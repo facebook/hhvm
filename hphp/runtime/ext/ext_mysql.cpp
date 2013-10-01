@@ -185,8 +185,8 @@ String MySQL::GetDefaultSocket() {
   return MYSQL_UNIX_ADDR;
 }
 
-String MySQL::GetHash(CStrRef host, int port, CStrRef socket, CStrRef username,
-                      CStrRef password, int client_flags) {
+String MySQL::GetHash(const String& host, int port, const String& socket, const String& username,
+                      const String& password, int client_flags) {
   char buf[1024];
   snprintf(buf, sizeof(buf), "%s:%d:%s:%s:%s:%d",
            host.data(), port, socket.data(),
@@ -194,15 +194,15 @@ String MySQL::GetHash(CStrRef host, int port, CStrRef socket, CStrRef username,
   return String(buf, CopyString);
 }
 
-MySQL *MySQL::GetCachedImpl(const char *name, CStrRef host, int port,
-                            CStrRef socket, CStrRef username, CStrRef password,
+MySQL *MySQL::GetCachedImpl(const char *name, const String& host, int port,
+                            const String& socket, const String& username, const String& password,
                             int client_flags) {
   String key = GetHash(host, port, socket, username, password, client_flags);
   return dynamic_cast<MySQL*>(g_persistentObjects->get(name, key.data()));
 }
 
-void MySQL::SetCachedImpl(const char *name, CStrRef host, int port,
-                          CStrRef socket, CStrRef username, CStrRef password,
+void MySQL::SetCachedImpl(const char *name, const String& host, int port,
+                          const String& socket, const String& username, const String& password,
                           int client_flags, MySQL *conn) {
   String key = GetHash(host, port, socket, username, password, client_flags);
   g_persistentObjects->set(name, key.data(), conn);
@@ -283,8 +283,8 @@ void MySQL::close() {
   m_conn = nullptr;
 }
 
-bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
-                    CStrRef password, CStrRef database,
+bool MySQL::connect(const String& host, int port, const String& socket, const String& username,
+                    const String& password, const String& database,
                     int client_flags, int connect_timeout) {
   if (m_conn == NULL) {
     m_conn = create_new_conn();
@@ -315,8 +315,8 @@ bool MySQL::connect(CStrRef host, int port, CStrRef socket, CStrRef username,
   return ret;
 }
 
-bool MySQL::reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
-                      CStrRef password, CStrRef database,
+bool MySQL::reconnect(const String& host, int port, const String& socket, const String& username,
+                      const String& password, const String& database,
                       int client_flags, int connect_timeout) {
   if (m_conn == NULL) {
     m_conn = create_new_conn();
@@ -614,9 +614,9 @@ static Variant php_mysql_do_connect(String server, String username,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_mysql_connect(CStrRef server /* = null_string */,
-                        CStrRef username /* = null_string */,
-                        CStrRef password /* = null_string */,
+Variant f_mysql_connect(const String& server /* = null_string */,
+                        const String& username /* = null_string */,
+                        const String& password /* = null_string */,
                         bool new_link /* = false */,
                         int client_flags /* = 0 */,
                         int connect_timeout_ms /* = -1 */,
@@ -626,10 +626,10 @@ Variant f_mysql_connect(CStrRef server /* = null_string */,
                               connect_timeout_ms, query_timeout_ms);
 }
 
-Variant f_mysql_connect_with_db(CStrRef server /* = null_string */,
-                        CStrRef username /* = null_string */,
-                        CStrRef password /* = null_string */,
-                        CStrRef database /* = null_string */,
+Variant f_mysql_connect_with_db(const String& server /* = null_string */,
+                        const String& username /* = null_string */,
+                        const String& password /* = null_string */,
+                        const String& database /* = null_string */,
                         bool new_link /* = false */,
                         int client_flags /* = 0 */,
                         int connect_timeout_ms /* = -1 */,
@@ -639,9 +639,9 @@ Variant f_mysql_connect_with_db(CStrRef server /* = null_string */,
                               connect_timeout_ms, query_timeout_ms);
 }
 
-Variant f_mysql_pconnect(CStrRef server /* = null_string */,
-                         CStrRef username /* = null_string */,
-                         CStrRef password /* = null_string */,
+Variant f_mysql_pconnect(const String& server /* = null_string */,
+                         const String& username /* = null_string */,
+                         const String& password /* = null_string */,
                          int client_flags /* = 0 */,
                          int connect_timeout_ms /* = -1 */,
                          int query_timeout_ms /* = -1 */) {
@@ -650,10 +650,10 @@ Variant f_mysql_pconnect(CStrRef server /* = null_string */,
                               connect_timeout_ms, query_timeout_ms);
 }
 
-Variant f_mysql_pconnect_with_db(CStrRef server /* = null_string */,
-                         CStrRef username /* = null_string */,
-                         CStrRef password /* = null_string */,
-                         CStrRef database /* = null_string */,
+Variant f_mysql_pconnect_with_db(const String& server /* = null_string */,
+                         const String& username /* = null_string */,
+                         const String& password /* = null_string */,
+                         const String& database /* = null_string */,
                          int client_flags /* = 0 */,
                          int connect_timeout_ms /* = -1 */,
                          int query_timeout_ms /* = -1 */) {
@@ -671,14 +671,14 @@ bool f_mysql_set_timeout(int query_timeout_ms /* = -1 */,
   return true;
 }
 
-String f_mysql_escape_string(CStrRef unescaped_string) {
+String f_mysql_escape_string(const String& unescaped_string) {
   char *new_str = (char *)malloc(unescaped_string.size() * 2 + 1);
   int new_len = mysql_escape_string(new_str, unescaped_string.data(),
                                     unescaped_string.size());
   return String(new_str, new_len, AttachString);
 }
 
-Variant f_mysql_real_escape_string(CStrRef unescaped_string,
+Variant f_mysql_real_escape_string(const String& unescaped_string,
                                    CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (conn) {
@@ -694,7 +694,7 @@ Variant f_mysql_real_escape_string(CStrRef unescaped_string,
 String f_mysql_get_client_info() {
   return String(mysql_get_client_info(), CopyString);
 }
-Variant f_mysql_set_charset(CStrRef charset,
+Variant f_mysql_set_charset(const String& charset,
                                    CVarRef link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return uninit_null();
@@ -794,18 +794,18 @@ Variant f_mysql_thread_id(CVarRef link_identifier /* = uninit_null() */) {
   if (!conn) return false;
   return (int64_t)mysql_thread_id(conn);
 }
-Variant f_mysql_create_db(CStrRef db,
+Variant f_mysql_create_db(const String& db,
                                  CVarRef link_identifier /* = uninit_null() */) {
   throw NotSupportedException
     (__func__, "Deprecated. Use mysql_query(CREATE DATABASE) instead.");
 }
-Variant f_mysql_select_db(CStrRef db,
+Variant f_mysql_select_db(const String& db,
                                  CVarRef link_identifier /* = uninit_null() */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
   return mysql_select_db(conn, db.data()) == 0;
 }
-Variant f_mysql_drop_db(CStrRef db,
+Variant f_mysql_drop_db(const String& db,
                                CVarRef link_identifier /* = uninit_null() */) {
   throw NotSupportedException
     (__func__, "Deprecated. Use mysql_query(DROP DATABASE) instead.");
@@ -822,11 +822,11 @@ Variant f_mysql_affected_rows(CVarRef link_identifier /* = uninit_null() */) {
 // Zend returns strings and NULL only, not integers or floats.  We
 // return ints (and, sometimes, actual doubles). TODO: make this
 // consistent or a runtime parameter or something.
-Variant mysql_makevalue(CStrRef data, MYSQL_FIELD *mysql_field) {
+Variant mysql_makevalue(const String& data, MYSQL_FIELD *mysql_field) {
   return mysql_makevalue(data, mysql_field->type);
 }
 
-Variant mysql_makevalue(CStrRef data, enum_field_types field_type) {
+Variant mysql_makevalue(const String& data, enum_field_types field_type) {
   switch (field_type) {
   case MYSQL_TYPE_DECIMAL:
   case MYSQL_TYPE_TINY:
@@ -925,7 +925,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
 }
 #endif // FACEBOOK
 
-static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
+static Variant php_mysql_do_query_general(const String& query, CVarRef link_id,
                                           bool use_store, bool async_mode) {
   if (mysqlExtension::ReadOnly &&
       same(f_preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query), 0)) {
@@ -1097,11 +1097,11 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
   return ret;
 }
 
-Variant f_mysql_query(CStrRef query, CVarRef link_identifier /* = null */) {
+Variant f_mysql_query(const String& query, CVarRef link_identifier /* = null */) {
   return php_mysql_do_query_general(query, link_identifier, true, false);
 }
 
-Variant f_mysql_multi_query(CStrRef query, CVarRef link_identifier /* = null */) {
+Variant f_mysql_multi_query(const String& query, CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   MySQL *mySQL = MySQL::Get(link_identifier);
   if (!mySQL->m_multi_query && !mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_ON)) {
@@ -1152,12 +1152,12 @@ Variant f_mysql_fetch_result(CVarRef link_identifier /* = null */) {
     return Resource(NEWOBJ(MySQLResult)(mysql_result));
 }
 
-Variant f_mysql_unbuffered_query(CStrRef query,
+Variant f_mysql_unbuffered_query(const String& query,
                                  CVarRef link_identifier /* = null */) {
   return php_mysql_do_query_general(query, link_identifier, false, false);
 }
 
-Variant f_mysql_db_query(CStrRef database, CStrRef query,
+Variant f_mysql_db_query(const String& database, const String& query,
                          CVarRef link_identifier /* = uninit_null() */) {
   throw NotSupportedException
     (__func__, "Deprecated. Use mysql_query() instead.");
@@ -1174,7 +1174,7 @@ Variant f_mysql_list_dbs(CVarRef link_identifier /* = null */) {
   return Resource(NEWOBJ(MySQLResult)(res));
 }
 
-Variant f_mysql_list_tables(CStrRef database,
+Variant f_mysql_list_tables(const String& database,
                             CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (!conn) return false;
@@ -1189,7 +1189,7 @@ Variant f_mysql_list_tables(CStrRef database,
   return Resource(NEWOBJ(MySQLResult)(res));
 }
 
-Variant f_mysql_list_fields(CStrRef database_name, CStrRef table_name,
+Variant f_mysql_list_fields(const String& database_name, const String& table_name,
                             CVarRef link_identifier /* = uninit_null() */) {
   throw NotSupportedException
     (__func__, "Deprecated. Use mysql_query(SHOW COLUMNS FROM table "
@@ -1288,9 +1288,9 @@ const int64_t k_ASYNC_OP_CONNECT = ASYNC_OP_CONNECT;
 const int64_t k_ASYNC_OP_QUERY = ASYNC_OP_QUERY;
 const int64_t k_ASYNC_OP_FETCH_ROW = ASYNC_OP_FETCH_ROW;
 
-bool MySQL::async_connect(CStrRef host, int port, CStrRef socket,
-                          CStrRef username, CStrRef password,
-                          CStrRef database) {
+bool MySQL::async_connect(const String& host, int port, const String& socket,
+                          const String& username, const String& password,
+                          const String& database) {
   if (m_conn == NULL) {
     m_conn = create_new_conn();
   }
@@ -1308,10 +1308,10 @@ bool MySQL::async_connect(CStrRef host, int port, CStrRef socket,
   return true;
 }
 
-Variant f_mysql_async_connect_start(CStrRef server /* = null_string */,
-                                    CStrRef username /* = null_string */,
-                                    CStrRef password /* = null_string */,
-                                    CStrRef database /* = null_string */) {
+Variant f_mysql_async_connect_start(const String& server /* = null_string */,
+                                    const String& username /* = null_string */,
+                                    const String& password /* = null_string */,
+                                    const String& database /* = null_string */) {
   return php_mysql_do_connect(server, username, password, database,
                               0, false, true, 0, 0);
 }
@@ -1340,7 +1340,7 @@ bool f_mysql_async_connect_completed(CVarRef link_identifier) {
   return status == ASYNC_CLIENT_COMPLETE;
 }
 
-bool f_mysql_async_query_start(CStrRef query, CVarRef link_identifier) {
+bool f_mysql_async_query_start(const String& query, CVarRef link_identifier) {
   MYSQL* conn = MySQL::GetConn(link_identifier);
   if (!conn) {
     return false;
@@ -1562,10 +1562,10 @@ const int64_t k_ASYNC_OP_CONNECT = -2;
 const int64_t k_ASYNC_OP_QUERY = -3;
 const int64_t k_ASYNC_OP_FETCH_ROW = -4;
 
-Variant f_mysql_async_connect_start(CStrRef server,
-                                    CStrRef username,
-                                    CStrRef password,
-                                    CStrRef database) {
+Variant f_mysql_async_connect_start(const String& server,
+                                    const String& username,
+                                    const String& password,
+                                    const String& database) {
   throw NotImplementedException(__func__);
 }
 
@@ -1573,7 +1573,7 @@ bool f_mysql_async_connect_completed(CVarRef link_identifier) {
   throw NotImplementedException(__func__);
 }
 
-bool f_mysql_async_query_start(CStrRef query, CVarRef link_identifier) {
+bool f_mysql_async_query_start(const String& query, CVarRef link_identifier) {
   throw NotImplementedException(__func__);
 }
 
@@ -1612,7 +1612,7 @@ Variant f_mysql_fetch_array(CVarRef result, int result_type /* = 3 */) {
 }
 
 Variant f_mysql_fetch_object(CVarRef result,
-                             CStrRef class_name /* = "stdClass" */,
+                             const String& class_name /* = "stdClass" */,
                              CArrRef params /* = null */) {
   Variant properties = php_mysql_fetch_hash(result, MYSQL_ASSOC);
   if (!same(properties, false)) {

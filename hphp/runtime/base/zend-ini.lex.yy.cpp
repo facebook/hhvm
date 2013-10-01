@@ -720,7 +720,7 @@ static ZendINIGlobals s_zend_ini;
   return type;                                    \
 }
 
-void zend_ini_scan(CStrRef str, int scanner_mode, CStrRef filename,
+void zend_ini_scan(const String& str, int scanner_mode, const String& filename,
                    IniSetting::PFN_PARSER_CALLBACK callback, void *arg) {
   SCNG(scanner_mode) = scanner_mode;
   SCNG(filename) = filename.data();

@@ -55,9 +55,9 @@ namespace HPHP {
 
 class Extension : public IDebuggable {
 public:
-  static bool IsLoaded(CStrRef name);
+  static bool IsLoaded(const String& name);
   static Array GetLoadedExtensions();
-  static Extension *GetExtension(CStrRef name);
+  static Extension *GetExtension(const String& name);
 
   // called by RuntimeOption to initialize all configurations of extension
   static void LoadModules(Hdf hdf);

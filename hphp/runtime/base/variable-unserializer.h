@@ -54,7 +54,7 @@ public:
 
   Type getType() const { return m_type;}
   bool allowUnknownSerializableClass() const { return m_unknownSerializable;}
-  bool isWhitelistedClass(CStrRef cls_name) const;
+  bool isWhitelistedClass(const String& cls_name) const;
 
   Variant unserialize();
   Variant unserializeKey();

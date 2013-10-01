@@ -40,9 +40,9 @@ public:
 
   CLASSNAME_IS("xmlDoc");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
-  XmlDocWrapper(xmlDocPtr doc, CStrRef cls, Object domNode = nullptr)
+  XmlDocWrapper(xmlDocPtr doc, const String& cls, Object domNode = nullptr)
     : m_doc(doc), m_cls(cls), m_domNode(domNode) {
     if (!domNode.isNull()) {
       DEBUG_ONLY c_DOMNode *domnode = domNode.getTyped<c_DOMNode>();
@@ -50,7 +50,7 @@ public:
     }
   }
 
-  CStrRef getClass() { return m_cls; }
+  const String& getClass() { return m_cls; }
 
   void sweep() FOLLY_OVERRIDE {
     // if m_domNode isn't null, then he owns the m_doc. Otherwise, I own it
@@ -85,7 +85,7 @@ static Object find_node(CVarRef children, xmlNodePtr node) {
   return nullptr;
 }
 
-static inline bool match_ns(xmlNodePtr node, CStrRef ns, bool is_prefix) {
+static inline bool match_ns(xmlNodePtr node, const String& ns, bool is_prefix) {
   if (ns.empty()) {
     return true;
   }
@@ -106,7 +106,7 @@ static String node_list_to_string(xmlDocPtr doc, xmlNodePtr list) {
   return res;
 }
 
-static Array collect_attributes(xmlNodePtr node, CStrRef ns, bool is_prefix) {
+static Array collect_attributes(xmlNodePtr node, const String& ns, bool is_prefix) {
   assert(node);
   Array attributes = Array::Create();
   if (node->type != XML_ENTITY_DECL) {
@@ -144,7 +144,7 @@ static void add_property(Array &properties, xmlNodePtr node, Object value) {
 
 static Object create_text(c_SimpleXMLElement *root,
                           CResRef doc, xmlNodePtr node,
-                          CStrRef value, CStrRef ns,
+                          const String& value, const String& ns,
                           bool is_prefix, bool free_text) {
   Object obj = create_object(doc.getTyped<XmlDocWrapper>()->
                              getClass(), Array(), false);
@@ -161,11 +161,11 @@ static Object create_text(c_SimpleXMLElement *root,
 
 static Array create_children(c_SimpleXMLElement *root,
                              CResRef doc, xmlNodePtr parent,
-                             CStrRef ns, bool is_prefix);
+                             const String& ns, bool is_prefix);
 
 static Object create_element(c_SimpleXMLElement *root,
                              CResRef doc, xmlNodePtr node,
-                             CStrRef ns, bool is_prefix) {
+                             const String& ns, bool is_prefix) {
   Object obj = create_object(doc.getTyped<XmlDocWrapper>()->
                              getClass(), Array(), false);
   c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
@@ -181,7 +181,7 @@ static Object create_element(c_SimpleXMLElement *root,
 
 static Array create_children(c_SimpleXMLElement *root,
                              CResRef doc, xmlNodePtr parent,
-                             CStrRef ns, bool is_prefix) {
+                             const String& ns, bool is_prefix) {
   Array properties = Array::Create();
   for (xmlNodePtr node = parent->children; node; node = node->next) {
     if (parent->parent && parent->parent->type == XML_DOCUMENT_NODE &&
@@ -268,7 +268,7 @@ static void add_registered_namespaces(Array &out, xmlNodePtr node,
 // simplexml
 
 Variant f_simplexml_import_dom(CObjRef node,
-                               CStrRef class_name /* = "SimpleXMLElement" */) {
+                               const String& class_name /* = "SimpleXMLElement" */) {
 
   c_DOMNode *domnode = node.getTyped<c_DOMNode>();
   xmlNodePtr nodep = domnode->m_node;
@@ -294,10 +294,10 @@ Variant f_simplexml_import_dom(CObjRef node,
   }
 }
 
-Variant f_simplexml_load_string(CStrRef data,
-                                CStrRef class_name /* = "SimpleXMLElement" */,
+Variant f_simplexml_load_string(const String& data,
+                                const String& class_name /* = "SimpleXMLElement" */,
                                 int64_t options /* = 0 */,
-                                CStrRef ns /* = "" */,
+                                const String& ns /* = "" */,
                                 bool is_prefix /* = false */) {
   Class* cls;
   if (!class_name.empty()) {
@@ -329,9 +329,9 @@ Variant f_simplexml_load_string(CStrRef data,
                         root, ns, is_prefix);
 }
 
-Variant f_simplexml_load_file(CStrRef filename,
-                              CStrRef class_name /* = "SimpleXMLElement" */,
-                              int64_t options /* = 0 */, CStrRef ns /* = "" */,
+Variant f_simplexml_load_file(const String& filename,
+                              const String& class_name /* = "SimpleXMLElement" */,
+                              int64_t options /* = 0 */, const String& ns /* = "" */,
                               bool is_prefix /* = false */) {
   String str = f_file_get_contents(filename);
   return f_simplexml_load_string(str, class_name, options, ns, is_prefix);
@@ -382,9 +382,9 @@ c_SimpleXMLElement* c_SimpleXMLElement::Clone(ObjectData* obj) {
   return node;
 }
 
-void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
+void c_SimpleXMLElement::t___construct(const String& data, int64_t options /* = 0 */,
                                        bool data_is_url /* = false */,
-                                       CStrRef ns /* = "" */,
+                                       const String& ns /* = "" */,
                                        bool is_prefix /* = false */) {
   String xml = data;
   if (data_is_url) {
@@ -413,7 +413,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64_t options /* = 0 */,
   }
 }
 
-Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
+Variant c_SimpleXMLElement::t_xpath(const String& path) {
   if (m_is_attribute || !m_node) {
     return uninit_null();
   }
@@ -478,7 +478,7 @@ Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
   return ret;
 }
 
-bool c_SimpleXMLElement::t_registerxpathnamespace(CStrRef prefix, CStrRef ns) {
+bool c_SimpleXMLElement::t_registerxpathnamespace(const String& prefix, const String& ns) {
   if (m_node) {
     if (!m_xpath) {
       m_xpath = xmlXPathNewContext(m_node->doc);
@@ -489,7 +489,7 @@ bool c_SimpleXMLElement::t_registerxpathnamespace(CStrRef prefix, CStrRef ns) {
   return false;
 }
 
-Variant c_SimpleXMLElement::t_asxml(CStrRef filename /* = "" */) {
+Variant c_SimpleXMLElement::t_asxml(const String& filename /* = "" */) {
   if (!m_node) return false;
 
   if (!filename.empty()) {
@@ -554,7 +554,7 @@ Array c_SimpleXMLElement::t_getdocnamespaces(bool recursive /* = false */) {
   return ret;
 }
 
-Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
+Object c_SimpleXMLElement::t_children(const String& ns /* = "" */,
                                       bool is_prefix /* = false */) {
   if (m_is_attribute) {
     return Object();
@@ -621,7 +621,7 @@ String c_SimpleXMLElement::t_getname() {
 
 const StaticString s_attributes("@attributes");
 
-Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
+Object c_SimpleXMLElement::t_attributes(const String& ns /* = "" */,
                                         bool is_prefix /* = false */) {
   if (m_is_attribute) {
     return Object();
@@ -645,9 +645,9 @@ Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
   return obj;
 }
 
-Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
-                                       CStrRef value /* = null_string */,
-                                       CStrRef ns /* = null_string */) {
+Variant c_SimpleXMLElement::t_addchild(const String& qname,
+                                       const String& value /* = null_string */,
+                                       const String& ns /* = null_string */) {
   if (qname.empty()) {
     raise_warning("Element name is required");
     return uninit_null();
@@ -707,9 +707,9 @@ Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
   return child;
 }
 
-void c_SimpleXMLElement::t_addattribute(CStrRef qname,
-                                        CStrRef value /* = null_string */,
-                                        CStrRef ns /* = null_string */) {
+void c_SimpleXMLElement::t_addattribute(const String& qname,
+                                        const String& value /* = null_string */,
+                                        const String& ns /* = null_string */) {
   if (qname.empty()) {
     raise_warning("Attribute name is required");
     return;
@@ -850,7 +850,7 @@ bool c_SimpleXMLElement::t___isset(Variant name) {
   return false;
 }
 
-static void change_node_zval(xmlNodePtr node, CStrRef value) {
+static void change_node_zval(xmlNodePtr node, const String& value) {
   if (value.empty()) {
     xmlNodeSetContentLen(node, (xmlChar *)"", 0);
   } else {

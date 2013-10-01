@@ -175,7 +175,7 @@ public:
   /**
    * Iterator functions. See array-iterator.h for end() and next().
    */
-  ArrayIter begin(CStrRef context = null_string) const;
+  ArrayIter begin(const String& context = null_string) const;
 
   void escalate();
 
@@ -266,7 +266,7 @@ public:
   Variant rvalAt(int     key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(int64_t   key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(double  key, ACCESSPARAMS_DECL) const = delete;
-  Variant rvalAt(CStrRef key, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(const String& key, ACCESSPARAMS_DECL) const;
   Variant rvalAt(CVarRef key, ACCESSPARAMS_DECL) const;
 
   /**
@@ -276,12 +276,12 @@ public:
   CVarRef rvalAtRef(int64_t   key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(double  key, ACCESSPARAMS_DECL) const = delete;
   CVarRef rvalAtRef(CVarRef key, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(CStrRef key, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(const String& key, ACCESSPARAMS_DECL) const;
 
   const Variant operator[](int     key) const;
   const Variant operator[](int64_t   key) const;
   const Variant operator[](double  key) const = delete;
-  const Variant operator[](CStrRef key) const;
+  const Variant operator[](const String& key) const;
   const Variant operator[](CVarRef key) const;
   const Variant operator[](const char*) const = delete; // use CStrRef
 
@@ -294,7 +294,7 @@ public:
     return *ret;
   }
 
-  Variant &lval(CStrRef key) {
+  Variant &lval(const String& key) {
     if (!m_px) ArrayBase::operator=(ArrayData::Create());
     Variant *ret = nullptr;
     ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
@@ -312,7 +312,7 @@ public:
     return lvalAtImpl(key, flags);
   }
   Variant &lvalAt(double  key, ACCESSPARAMS_DECL) = delete;
-  Variant &lvalAt(CStrRef key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(const String& key, ACCESSPARAMS_DECL);
   Variant &lvalAt(CVarRef key, ACCESSPARAMS_DECL);
 
   // defined in type_variant.h
@@ -325,7 +325,7 @@ public:
   void set(int64_t key, CVarRef v);
   void set(double  key, CVarRef v) = delete;
 
-  void set(CStrRef key, CVarRef v, bool isKey = false);
+  void set(const String& key, CVarRef v, bool isKey = false);
   void set(CVarRef key, CVarRef v, bool isKey = false);
 
   void set(char    key, RefResult v) { setRef(key,variant(v)); }
@@ -334,7 +334,7 @@ public:
   void set(int64_t key, RefResult v) { setRef(key,variant(v)); }
   void set(double  key, RefResult v) = delete;
 
-  void set(CStrRef key, RefResult v, bool isKey = false) {
+  void set(const String& key, RefResult v, bool isKey = false) {
     return setRef(key,variant(v), isKey);
   }
   void set(CVarRef key, RefResult v, bool isKey = false) {
@@ -344,7 +344,7 @@ public:
   void setRef(int     key, CVarRef v) { setRef(int64_t(key), v); }
   void setRef(int64_t key, CVarRef v);
   void setRef(double  key, CVarRef v) = delete;
-  void setRef(CStrRef key, CVarRef v, bool isKey = false);
+  void setRef(const String& key, CVarRef v, bool isKey = false);
   void setRef(CVarRef key, CVarRef v, bool isKey = false);
 
   // defined in type_variant.h
@@ -354,7 +354,7 @@ public:
   void add(int     key, CVarRef v) { add(int64_t(key), v); }
   void add(int64_t key, CVarRef v);
   void add(double  key, CVarRef v) = delete;
-  void add(CStrRef key, CVarRef v, bool isKey = false);
+  void add(const String& key, CVarRef v, bool isKey = false);
   void add(CVarRef key, CVarRef v, bool isKey = false);
 
   /**
@@ -378,7 +378,7 @@ public:
     return existsImpl(key);
   }
   bool exists(double  key) const = delete;
-  bool exists(CStrRef key, bool isKey = false) const;
+  bool exists(const String& key, bool isKey = false) const;
   bool exists(CVarRef key, bool isKey = false) const;
 
   template<typename T>
@@ -401,7 +401,7 @@ public:
     removeImpl(key);
   }
   void remove(double  key) = delete;
-  void remove(CStrRef key, bool isString = false);
+  void remove(const String& key, bool isString = false);
   void remove(CVarRef key);
 
   void removeAll();

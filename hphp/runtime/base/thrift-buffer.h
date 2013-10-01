@@ -137,7 +137,7 @@ public:
     a.d = data;
     write(a.c);
   }
-  void write(CStrRef data);
+  void write(const String& data);
 
   // reads
   void read(bool &data) {
@@ -281,7 +281,7 @@ public:
 
 protected:
   virtual String readImpl() = 0;
-  virtual void flushImpl(CStrRef data) = 0;
+  virtual void flushImpl(const String& data) = 0;
   virtual void throwError(const char *msg, int code) = 0;
 
   int   m_size;
@@ -303,7 +303,7 @@ private:
 
   VariableSerializer::Type m_serializerType;
 
-  void flush(CStrRef data);
+  void flush(const String& data);
   void read(char *data, int len);
 
   void throwOutOfMemory();

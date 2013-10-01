@@ -67,7 +67,7 @@ bool f_dangling_server_proxy_old_request() {
   return true;
 }
 
-bool f_dangling_server_proxy_new_request(CStrRef host) {
+bool f_dangling_server_proxy_new_request(const String& host) {
   if (host.empty()) {
     raise_warning("proxy new request needs host name");
     return false;
@@ -113,9 +113,9 @@ bool f_pagelet_server_is_enabled() {
 
 const StaticString s_Host("Host");
 
-Resource f_pagelet_server_task_start(CStrRef url,
+Resource f_pagelet_server_task_start(const String& url,
                                      CArrRef headers /* = null_array */,
-                                     CStrRef post_data /* = null_string */,
+                                     const String& post_data /* = null_string */,
                                      CArrRef files /* = null_array */) {
   String remote_host;
   Transport *transport = g_context->getTransport();
@@ -167,16 +167,16 @@ void f_pagelet_server_flush() {
 ///////////////////////////////////////////////////////////////////////////////
 // xbox
 
-bool f_xbox_send_message(CStrRef msg, VRefParam ret, int64_t timeout_ms,
-                         CStrRef host /* = "localhost" */) {
+bool f_xbox_send_message(const String& msg, VRefParam ret, int64_t timeout_ms,
+                         const String& host /* = "localhost" */) {
   return XboxServer::SendMessage(msg, ret, timeout_ms, host);
 }
 
-bool f_xbox_post_message(CStrRef msg, CStrRef host /* = "localhost" */) {
+bool f_xbox_post_message(const String& msg, const String& host /* = "localhost" */) {
   return XboxServer::PostMessage(msg, host);
 }
 
-Resource f_xbox_task_start(CStrRef message) {
+Resource f_xbox_task_start(const String& message) {
   return XboxServer::TaskStart(message);
 }
 
@@ -188,7 +188,7 @@ int64_t f_xbox_task_result(CResRef task, int64_t timeout_ms, VRefParam ret) {
   return XboxServer::TaskResult(task, timeout_ms, ret);
 }
 
-Variant f_xbox_process_call_message(CStrRef msg) {
+Variant f_xbox_process_call_message(const String& msg) {
   Variant v = unserialize_from_string(msg);
   if (!v.isArray()) {
     raise_error("Error decoding xbox call message");

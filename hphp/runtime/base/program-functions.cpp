@@ -1297,7 +1297,7 @@ static int execute_program_impl(int argc, char** argv) {
   return -1;
 }
 
-String canonicalize_path(CStrRef p, const char* root, int rootLen) {
+String canonicalize_path(const String& p, const char* root, int rootLen) {
   String path(Util::canonicalize(p.c_str(), p.size()), AttachString);
   if (path.charAt(0) == '/') {
     const string &sourceRoot = RuntimeOption::SourceRoot;

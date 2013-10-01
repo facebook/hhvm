@@ -1122,7 +1122,7 @@ public:
   intl_error &getErrorCodeRef() {
     return m_errcode;
   }
-  bool setLocale(CStrRef locale) {
+  bool setLocale(const String& locale) {
     if (m_locale.same(locale)) {
       return true;
     }
@@ -1485,7 +1485,7 @@ String f_i18n_loc_get_default() {
   return s_collator->getLocale();
 }
 
-bool f_i18n_loc_set_default(CStrRef locale) {
+bool f_i18n_loc_set_default(const String& locale) {
   return s_collator->setLocale(locale);
 }
 

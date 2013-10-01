@@ -48,7 +48,7 @@ public:
 
   // Add a new sandbox a debugger can connect to.
   static void RegisterSandbox(const DSandboxInfo &sandbox);
-  static void UnregisterSandbox(CStrRef id);
+  static void UnregisterSandbox(const String& id);
 
   //  Add/remove/change DebuggerProxy.
   static DebuggerProxyPtr CreateProxy(SmartPtr<Socket> socket, bool local);
@@ -85,8 +85,8 @@ public:
 
   // Surround text with color, if set.
   static void SetTextColors();
-  static String ColorStdout(CStrRef s);
-  static String ColorStderr(CStrRef s);
+  static String ColorStdout(const String& s);
+  static String ColorStderr(const String& s);
 
   // Log debugging state when we're shutting the server down.
   enum ShutdownKind {

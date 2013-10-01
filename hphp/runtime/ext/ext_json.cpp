@@ -71,7 +71,7 @@ String f_json_encode(CVarRef value, CVarRef options /* = 0 */) {
   return vs.serializeValue(value, !(json_options & k_JSON_FB_UNLIMITED));
 }
 
-Variant f_json_decode(CStrRef json, bool assoc /* = false */,
+Variant f_json_decode(const String& json, bool assoc /* = false */,
                       CVarRef options /* = 0 */) {
 
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);

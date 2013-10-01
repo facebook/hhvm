@@ -361,7 +361,7 @@ bool HardwareCounter::eventExists(char *event) {
   return false;
 }
 
-bool HardwareCounter::setPerfEvents(CStrRef events) {
+bool HardwareCounter::setPerfEvents(const String& events) {
   // Make a copy of the string for use with strtok.
   auto const sevents = events.get()->slice();
   auto const sevents_buf = static_cast<char*>(smart_malloc(sevents.len + 1));
@@ -385,7 +385,7 @@ bool HardwareCounter::setPerfEvents(CStrRef events) {
   return true;
 }
 
-bool HardwareCounter::SetPerfEvents(CStrRef events) {
+bool HardwareCounter::SetPerfEvents(const String& events) {
   return s_counter->setPerfEvents(events);
 }
 

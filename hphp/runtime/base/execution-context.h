@@ -95,7 +95,7 @@ class ClassInfoVM : public ClassInfo,
  public:
   ~ClassInfoVM();
   void atomicRelease() { delete this; }
-  virtual CStrRef getParentClass() const { return m_parentClass; }
+  virtual const String& getParentClass() const { return m_parentClass; }
 
   const InterfaceSet  &getInterfaces()      const { return m_interfaces;}
   const InterfaceVec  &getInterfacesVec()   const { return m_interfacesVec;}
@@ -223,16 +223,16 @@ public:
   void setTransport(Transport *transport) { m_transport = transport;}
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
-  void setContentType(CStrRef mimetype, CStrRef charset);
+  void setContentType(const String& mimetype, const String& charset);
   int64_t getRequestMemoryMaxBytes() const { return m_maxMemory; }
   void setRequestMemoryMaxBytes(int64_t max);
   String getCwd() const { return m_cwd;}
-  void setCwd(CStrRef cwd) { m_cwd = cwd;}
+  void setCwd(const String& cwd) { m_cwd = cwd;}
 
   /**
    * Write to output.
    */
-  void write(CStrRef s);
+  void write(const String& s);
   void write(const char *s, int len);
   void write(const char *s) { write(s, strlen(s));}
   void writeStdout(const char *s, int len);
@@ -302,40 +302,40 @@ public:
   int getErrorReportingLevel() const { return m_errorReportingLevel;}
   void setErrorReportingLevel(int level) { m_errorReportingLevel = level;}
   String getErrorPage() const { return m_errorPage;}
-  void setErrorPage(CStrRef page) { m_errorPage = (std::string) page; }
+  void setErrorPage(const String& page) { m_errorPage = (std::string) page; }
   bool getLogErrors() const { return m_logErrors;}
   void setLogErrors(bool on);
   String getErrorLog() const { return m_errorLog;}
-  void setErrorLog(CStrRef filename);
+  void setErrorLog(const String& filename);
 
   /**
    * Misc. settings
    */
-  String getenv(CStrRef name) const;
-  void setenv(CStrRef name, CStrRef value);
+  String getenv(const String& name) const;
+  void setenv(const String& name, const String& value);
   Array getEnvs() const { return m_envs; }
 
   String getTimeZone() const { return m_timezone;}
-  void setTimeZone(CStrRef timezone) { m_timezone = timezone;}
+  void setTimeZone(const String& timezone) { m_timezone = timezone;}
   String getDefaultTimeZone() const { return m_timezoneDefault;}
   String getArgSeparatorOutput() const {
     if (m_argSeparatorOutput.isNull()) return s_amp;
     return m_argSeparatorOutput;
   }
-  void setArgSeparatorOutput(CStrRef s) { m_argSeparatorOutput = s;}
+  void setArgSeparatorOutput(const String& s) { m_argSeparatorOutput = s;}
   void setThrowAllErrors(bool f) { m_throwAllErrors = f; }
   bool getThrowAllErrors() const { return m_throwAllErrors; }
   void setExitCallback(Variant f) { m_exitCallback = f; }
   Variant getExitCallback() { return m_exitCallback; }
 
-  void setIncludePath(CStrRef path);
+  void setIncludePath(const String& path);
   String getIncludePath() const;
   Array getIncludePathArray() const { return m_include_paths; }
   const VirtualHost *getVirtualHost() const { return m_vhost; }
   void setVirtualHost(const VirtualHost *vhost) { m_vhost = vhost; }
 
-  CStrRef getSandboxId() const { return m_sandboxId; }
-  void setSandboxId(CStrRef sandboxId) { m_sandboxId = sandboxId; }
+  const String& getSandboxId() const { return m_sandboxId; }
+  void setSandboxId(const String& sandboxId) { m_sandboxId = sandboxId; }
 
   DECLARE_DBG_SETTING_ACCESSORS
 
@@ -583,7 +583,7 @@ public:
   ObjectData* getThis();
   Class* getContextClass();
   Class* getParentContextClass();
-  CStrRef getContainingFileName();
+  const String& getContainingFileName();
   int getLine();
   Array getCallerInfo();
   bool renameFunction(const StringData* oldName, const StringData* newName);
@@ -601,7 +601,7 @@ public:
   bool evalUnit(HPHP::Unit* unit, PC& pc, int funcType);
   void invokeUnit(TypedValue* retval, HPHP::Unit* unit);
   HPHP::Unit* compileEvalString(StringData* code);
-  CStrRef createFunction(CStrRef args, CStrRef code);
+  const String& createFunction(const String& args, const String& code);
   bool evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
@@ -642,7 +642,7 @@ public:
   bool doFCall(HPHP::ActRec* ar, PC& pc);
   bool doFCallArray(PC& pc);
   bool doFCallArrayTC(PC pc);
-  CVarRef getEvaledArg(const StringData* val, CStrRef namespacedName);
+  CVarRef getEvaledArg(const StringData* val, const String& namespacedName);
 
 private:
   void enterVMWork(ActRec* enterFnAr);
@@ -719,11 +719,11 @@ public:
   StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_traitInfos;
   Array getUserFunctionsInfo();
   Array getConstantsInfo();
-  const ClassInfo::MethodInfo* findFunctionInfo(CStrRef name);
-  const ClassInfo* findClassInfo(CStrRef name);
-  const ClassInfo* findInterfaceInfo(CStrRef name);
-  const ClassInfo* findTraitInfo(CStrRef name);
-  const ClassInfo::ConstantInfo* findConstantInfo(CStrRef name);
+  const ClassInfo::MethodInfo* findFunctionInfo(const String& name);
+  const ClassInfo* findClassInfo(const String& name);
+  const ClassInfo* findInterfaceInfo(const String& name);
+  const ClassInfo* findTraitInfo(const String& name);
+  const ClassInfo::ConstantInfo* findConstantInfo(const String& name);
 
   // The op*() methods implement individual opcode handlers.
 #define O(name, imm, pusph, pop, flags)                                       \

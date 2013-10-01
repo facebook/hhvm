@@ -99,7 +99,7 @@ c_Collator::~c_Collator() {
   }
 }
 
-void c_Collator::t___construct(CStrRef locale) {
+void c_Collator::t___construct(const String& locale) {
   if (m_ucoll) {
     ucol_close(m_ucoll);
     m_ucoll = NULL;
@@ -162,7 +162,7 @@ bool c_Collator::t_asort(VRefParam arr,
   return ret;
 }
 
-Variant c_Collator::t_compare(CStrRef str1, CStrRef str2) {
+Variant c_Collator::t_compare(const String& str1, const String& str2) {
   if (!m_ucoll) {
     raise_warning("compare called on uninitialized Collator object");
     return 0;
@@ -193,7 +193,7 @@ Variant c_Collator::t_compare(CStrRef str1, CStrRef str2) {
   return ret;
 }
 
-Variant c_Collator::ti_create(CStrRef locale) {
+Variant c_Collator::ti_create(const String& locale) {
   p_Collator c(NEWOBJ(c_Collator)());
   c.get()->t___construct(locale);
   return c;
@@ -478,12 +478,13 @@ Variant f_collator_asort(CVarRef obj, VRefParam arr,
   return coll->t_asort(ref(arr), sort_flag);
 }
 
-Variant f_collator_compare(CVarRef obj, CStrRef str1, CStrRef str2) {
+Variant f_collator_compare(CVarRef obj, const String& str1,
+                           const String& str2) {
   CHECK_COLL(obj);
   return coll->t_compare(str1, str2);
 }
 
-Variant f_collator_create(CStrRef locale) {
+Variant f_collator_create(const String& locale) {
   return c_Collator::ti_create(locale);
 }
 
@@ -558,7 +559,7 @@ void c_Normalizer::t___construct() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant c_Normalizer::ti_isnormalized(CStrRef input,
+Variant c_Normalizer::ti_isnormalized(const String& input,
                                       int64_t form /* = q_Normalizer$$FORM_C */) {
   s_intl_error->m_error.clear();
 
@@ -605,7 +606,7 @@ Variant c_Normalizer::ti_isnormalized(CStrRef input,
   return uret;
 }
 
-Variant c_Normalizer::ti_normalize(CStrRef input,
+Variant c_Normalizer::ti_normalize(const String& input,
                                    int64_t form /* = q_Normalizer$$FORM_C */) {
   s_intl_error->m_error.clear();
 
@@ -725,7 +726,9 @@ const StaticString
   s_isTransitionalDifferent("isTransitionalDifferent"),
   s_errors("errors");
 
-static Variant php_intl_idn_to_46(CStrRef domain, int64_t options, IdnVariant idn_variant, VRefParam idna_info, int mode) {
+static Variant php_intl_idn_to_46(const String& domain, int64_t options,
+                                  IdnVariant idn_variant, VRefParam idna_info,
+                                  int mode) {
   int32_t     converted_capacity;
   char        *converted = NULL;
   int32_t     converted_len;
@@ -772,7 +775,9 @@ static Variant php_intl_idn_to_46(CStrRef domain, int64_t options, IdnVariant id
 
 #endif
 
-static Variant php_intl_idn_to(CStrRef domain, int64_t options, IdnVariant idn_variant, VRefParam idna_info, int mode) {
+static Variant php_intl_idn_to(const String& domain, int64_t options,
+                               IdnVariant idn_variant, VRefParam idna_info,
+                               int mode) {
   UChar* ustring = NULL;
   int ustring_len = 0;
   UErrorCode status;
@@ -846,16 +851,25 @@ static Variant php_intl_idn_to(CStrRef domain, int64_t options, IdnVariant idn_v
   return String(converted_utf8, converted_utf8_len, AttachString);
 }
 
-Variant f_idn_to_ascii(CStrRef domain, int64_t options /* = 0 */, int64_t variant /* = 0 */, VRefParam idna_info /* = null */) {
-  return php_intl_idn_to(domain, options, (IdnVariant)variant, idna_info, INTL_IDN_TO_ASCII);
+Variant f_idn_to_ascii(const String& domain, int64_t options /* = 0 */,
+                       int64_t variant /* = 0 */,
+                       VRefParam idna_info /* = null */) {
+  return php_intl_idn_to(domain, options, (IdnVariant)variant, idna_info,
+                         INTL_IDN_TO_ASCII);
 }
 
-Variant f_idn_to_unicode(CStrRef domain, int64_t options /* = 0 */, int64_t variant /* = 0 */, VRefParam idna_info /* = null */) {
-  return php_intl_idn_to(domain, options, (IdnVariant)variant, idna_info, INTL_IDN_TO_UTF8);
+Variant f_idn_to_unicode(const String& domain, int64_t options /* = 0 */,
+                         int64_t variant /* = 0 */,
+                         VRefParam idna_info /* = null */) {
+  return php_intl_idn_to(domain, options, (IdnVariant)variant, idna_info,
+                         INTL_IDN_TO_UTF8);
 }
 
-Variant f_idn_to_utf8(CStrRef domain, int64_t options /* = 0 */, int64_t variant /* = 0 */, VRefParam idna_info /* = null */) {
-  return php_intl_idn_to(domain, options, (IdnVariant)variant, idna_info, INTL_IDN_TO_UTF8);
+Variant f_idn_to_utf8(const String& domain, int64_t options /* = 0 */,
+                      int64_t variant /* = 0 */,
+                      VRefParam idna_info /* = null */) {
+  return php_intl_idn_to(domain, options, (IdnVariant)variant, idna_info,
+                         INTL_IDN_TO_UTF8);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

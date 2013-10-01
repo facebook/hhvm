@@ -39,7 +39,7 @@ public:
     DecodeNoBody    = 4,  /* don't include the body */
   };
 
-  static bool ProcessLine(MimePart *workpart, CStrRef line);
+  static bool ProcessLine(MimePart *workpart, const String& line);
 
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MimePart);
@@ -48,7 +48,7 @@ public:
 
   CLASSNAME_IS("mailparse_mail_structure")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   bool parse(const char *buf, int bufsize);
   Variant extract(CVarRef filename, CVarRef callbackfunc, int decode,
@@ -70,8 +70,8 @@ private:
     bool empty() const { return m_empty;}
     void clear();
 
-    Variant get(CStrRef attrname);
-    void getAll(Array &ret, CStrRef valuelabel, CStrRef attrprefix);
+    Variant get(const String& attrname);
+    void getAll(Array &ret, const String& valuelabel, const String& attrprefix);
 
     bool m_empty;
     String m_value;
@@ -106,7 +106,7 @@ private:
   Array m_headers; /* a record of all the headers */
 
   /* these are used during part extraction */
-  typedef void (MimePart::*PFN_CALLBACK)(CStrRef);
+  typedef void (MimePart::*PFN_CALLBACK)(const String&);
   PFN_CALLBACK m_extract_func;
   mbfl_convert_filter *m_extract_filter;
   Variant m_extract_context;
@@ -128,14 +128,14 @@ private:
   MimePart *getParent();
 
   void decoderPrepare(bool do_decode);
-  void decoderFeed(CStrRef str);
+  void decoderFeed(const String& str);
   void decoderFinish();
 
   // extract callbacks
-  void callUserFunc(CStrRef s);
-  void outputToStdout(CStrRef s);
-  void outputToFile(CStrRef s);
-  void outputToString(CStrRef s);
+  void callUserFunc(const String& s);
+  void outputToStdout(const String& s);
+  void outputToFile(const String& s);
+  void outputToString(const String& s);
 
   // enumeration
   struct Enumerator {

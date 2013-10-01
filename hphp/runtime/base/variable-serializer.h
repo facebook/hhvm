@@ -78,7 +78,7 @@ public:
   void write(int64_t   v);
   void write(double  v);
   void write(const char *v, int len = -1, bool isArrayKey = false);
-  void write(CStrRef v);
+  void write(const String& v);
   void write(CObjRef v);
   void write(CVarRef v, bool isArrayKey = false);
 
@@ -93,7 +93,7 @@ public:
   void writeCollectionKey(CVarRef key);
   void writeCollectionKeylessPrefix();
   void writeArrayFooter();
-  void writeSerializableObject(CStrRef clsname, CStrRef serialized);
+  void writeSerializableObject(const String& clsname, const String& serialized);
 
   /**
    * Helpers.
@@ -104,8 +104,8 @@ public:
   void incMaxCount() { m_maxCount++; }
   bool incNestedLevel(void *ptr, bool isObject = false);
   void decNestedLevel(void *ptr);
-  void setObjectInfo(CStrRef objClass, int objId, char objCode);
-  void setResourceInfo(CStrRef rsrcName, int rsrcId);
+  void setObjectInfo(const String& objClass, int objId, char objCode);
+  void setResourceInfo(const String& rsrcName, int rsrcId);
   void getResourceInfo(String &rsrcName, int &rsrcId);
   Type getType() const { return m_type; }
 
@@ -137,7 +137,7 @@ private:
   };
   smart::vector<ArrayInfo> m_arrayInfos;
 
-  void writePropertyKey(CStrRef prop);
+  void writePropertyKey(const String& prop);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -72,7 +72,7 @@ int64_t f_ob_get_level() {
 Array f_ob_get_status(bool full_status /* = false */) {
   return g_context->obGetStatus(full_status);
 }
-String f_ob_gzhandler(CStrRef buffer, int mode) {
+String f_ob_gzhandler(const String& buffer, int mode) {
   throw NotSupportedException(__func__, "something that's in transport layer");
 }
 void f_ob_implicit_flush(bool flag /* = true */) {
@@ -81,21 +81,21 @@ void f_ob_implicit_flush(bool flag /* = true */) {
 Array f_ob_list_handlers() {
   return g_context->obGetHandlers();
 }
-bool f_output_add_rewrite_var(CStrRef name, CStrRef value) {
+bool f_output_add_rewrite_var(const String& name, const String& value) {
   throw NotSupportedException(__func__, "bad coding style");
 }
 bool f_output_reset_rewrite_vars() {
   throw NotSupportedException(__func__, "bad coding style");
 }
 
-void f_hphp_crash_log(CStrRef name, CStrRef value) {
+void f_hphp_crash_log(const String& name, const String& value) {
   StackTraceNoHeap::AddExtraLogging(name.data(), value.data());
 }
 
-void f_hphp_stats(CStrRef name, int64_t value) {
+void f_hphp_stats(const String& name, int64_t value) {
   ServerStats::Log(name.data(), value);
 }
-int64_t f_hphp_get_stats(CStrRef name) {
+int64_t f_hphp_get_stats(const String& name) {
   return ServerStats::Get(name.data());
 }
 Array f_hphp_get_status() {
@@ -106,7 +106,7 @@ Array f_hphp_get_status() {
 Array f_hphp_get_iostatus() {
   return ServerStats::GetThreadIOStatuses();
 }
-void f_hphp_set_iostatus_address(CStrRef name) {
+void f_hphp_set_iostatus_address(const String& name) {
   return ServerStats::SetThreadIOStatusAddress(name.c_str());
 }
 
@@ -174,7 +174,7 @@ Variant f_hphp_get_hardware_counters(void) {
   return ret;
 }
 
-bool f_hphp_set_hardware_events(CStrRef events /* = null */) {
+bool f_hphp_set_hardware_events(const String& events /* = null */) {
   return HardwareCounter::SetPerfEvents(events);
 }
 

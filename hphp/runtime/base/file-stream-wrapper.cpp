@@ -25,7 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-MemFile* FileStreamWrapper::openFromCache(CStrRef filename, CStrRef mode) {
+MemFile* FileStreamWrapper::openFromCache(const String& filename,
+                                          const String& mode) {
   if (!StaticContentCache::TheFileCache) {
     return nullptr;
   }
@@ -40,7 +41,7 @@ MemFile* FileStreamWrapper::openFromCache(CStrRef filename, CStrRef mode) {
   return nullptr;
 }
 
-File* FileStreamWrapper::open(CStrRef filename, CStrRef mode,
+File* FileStreamWrapper::open(const String& filename, const String& mode,
                               int options, CVarRef context) {
   String fname =
     !strncmp(filename.data(), "file://", sizeof("file://") - 1)
@@ -67,7 +68,7 @@ File* FileStreamWrapper::open(CStrRef filename, CStrRef mode,
   return file.release();
 }
 
-Directory* FileStreamWrapper::opendir(CStrRef path) {
+Directory* FileStreamWrapper::opendir(const String& path) {
   std::unique_ptr<PlainDirectory> dir(
     NEWOBJ(PlainDirectory)(File::TranslatePath(path))
   );

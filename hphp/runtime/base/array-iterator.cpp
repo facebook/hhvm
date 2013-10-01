@@ -746,7 +746,7 @@ bool Iter::init(TypedValue* c1) {
         (void) new (&arr()) ArrayIter(obj.detach(), ArrayIter::noInc);
       } else {
         Class* ctx = arGetContextClass(g_vmContext->getFP());
-        CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
+        const String& ctxStr = ctx ? ctx->nameRef() : null_string;
         Array iterArray(obj->o_toIterArray(ctxStr));
         ArrayData* ad = iterArray.get();
         (void) new (&arr()) ArrayIter(ad);
@@ -1108,7 +1108,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
       } else {
         TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
               __func__, dest, obj, ctx);
-        CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
+        const String& ctxStr = ctx ? ctx->nameRef() : null_string;
         Array iterArray(itObj->o_toIterArray(ctxStr));
         ArrayData* ad = iterArray.get();
         (void) new (&dest->arr()) ArrayIter(ad);
@@ -1395,7 +1395,7 @@ int64_t new_miter_object(Iter* dest, RefData* ref, Class* ctx,
 
   TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
         __func__, dest, obj, ctx);
-  CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
+  const String& ctxStr = ctx ? ctx->nameRef() : null_string;
   Array iterArray(itObj->o_toIterArray(ctxStr, true));
   ArrayData* ad = iterArray.detach();
   (void) new (&dest->marr()) MArrayIter(ad);

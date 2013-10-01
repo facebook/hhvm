@@ -28,7 +28,7 @@ namespace HPHP {
  * Unit::lookupExists and then falling back to the denormalized name to
  * properly handle dynamic input (ex. $var = $a instanceof '\foo';)
  */
-Class* lookup_class(CStrRef className);
+Class* lookup_class(const String& className);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

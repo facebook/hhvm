@@ -84,7 +84,7 @@ public:
   void setParamName(int index, const std::string &name);
   void setParamDefault(int index, const char* value, int64_t len,
                        const std::string &text);
-  CStrRef getParamDefault(int index);
+  const String& getParamDefault(int index);
   void setRefParam(int index);
   bool hasRefParam(int max) const;
 

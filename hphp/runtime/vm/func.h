@@ -282,7 +282,7 @@ struct Func {
     assert(m_name != nullptr);
     return m_name;
   }
-  CStrRef nameRef() const {
+  const String& nameRef() const {
     assert(m_name != nullptr);
     return *(String*)(&m_name);
   }
@@ -290,7 +290,7 @@ struct Func {
     if (m_fullName == nullptr) return m_name;
     return m_fullName;
   }
-  CStrRef fullNameRef() const {
+  const String& fullNameRef() const {
     assert(m_fullName != nullptr);
     return *(String*)(&m_fullName);
   }

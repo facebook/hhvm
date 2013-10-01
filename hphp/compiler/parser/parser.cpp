@@ -128,7 +128,7 @@ namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-StatementListPtr Parser::ParseString(CStrRef input, AnalysisResultPtr ar,
+StatementListPtr Parser::ParseString(const String& input, AnalysisResultPtr ar,
                                      const char *fileName /* = NULL */,
                                      bool lambdaMode /* = false */) {
   assert(!input.empty());

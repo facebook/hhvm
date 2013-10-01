@@ -51,10 +51,10 @@ public:
   virtual ~Socket();
 
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const { return classnameof(); }
 
   // implementing File
-  virtual bool open(CStrRef filename, CStrRef mode);
+  virtual bool open(const String& filename, const String& mode);
   virtual bool close();
   virtual int64_t readImpl(char *buffer, int64_t length);
   virtual int64_t writeImpl(const char *buffer, int64_t length);

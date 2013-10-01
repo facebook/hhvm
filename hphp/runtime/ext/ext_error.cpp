@@ -125,9 +125,9 @@ Array f_error_get_last() {
                      s_type, g_context->getLastErrorNumber());
 }
 
-bool f_error_log(CStrRef message, int message_type /* = 0 */,
-                 CStrRef destination /* = null_string */,
-                 CStrRef extra_headers /* = null_string */) {
+bool f_error_log(const String& message, int message_type /* = 0 */,
+                 const String& destination /* = null_string */,
+                 const String& extra_headers /* = null_string */) {
   // error_log() should not invoke the user error handler,
   // so we use Logger::Error() instead of raise_warning() or raise_error()
   switch (message_type) {
@@ -192,11 +192,11 @@ Variant f_set_exception_handler(CVarRef exception_handler) {
   return g_context->pushUserExceptionHandler(exception_handler);
 }
 
-void f_hphp_set_error_page(CStrRef page) {
+void f_hphp_set_error_page(const String& page) {
   g_context->setErrorPage(page);
 }
 
-void f_hphp_throw_fatal_error(CStrRef error_msg) {
+void f_hphp_throw_fatal_error(const String& error_msg) {
   std::string msg = error_msg.data();
   raise_error(msg);
 }
@@ -207,7 +207,7 @@ void f_hphp_clear_unflushed() {
   g_context->obProtect(true);
 }
 
-bool f_trigger_error(CStrRef error_msg,
+bool f_trigger_error(const String& error_msg,
                      int error_type /* = k_E_USER_NOTICE */) {
   std::string msg = error_msg.data();
   if (g_context->getThrowAllErrors()) throw error_type;
@@ -233,7 +233,8 @@ bool f_trigger_error(CStrRef error_msg,
   return true;
 }
 
-bool f_user_error(CStrRef error_msg, int error_type /* = k_E_USER_NOTICE */) {
+bool f_user_error(const String& error_msg,
+                  int error_type /* = k_E_USER_NOTICE */) {
   return f_trigger_error(error_msg, error_type);
 }
 

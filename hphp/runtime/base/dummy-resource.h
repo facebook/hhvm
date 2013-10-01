@@ -36,7 +36,7 @@ public:
   CLASSNAME_IS("Unknown");
   DummyResource();
   String m_class_name;
-  virtual CStrRef o_getClassNameHook() const;
+  virtual const String& o_getClassNameHook() const;
   virtual bool isInvalid() const { return m_class_name.empty(); }
   void o_setResourceId(int64_t id) { o_id = id; }
 };

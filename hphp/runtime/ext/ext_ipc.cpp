@@ -51,7 +51,7 @@ IMPLEMENT_DEFAULT_EXTENSION(sysvsem);
 IMPLEMENT_DEFAULT_EXTENSION(sysvshm);
 ///////////////////////////////////////////////////////////////////////////////
 
-int64_t f_ftok(CStrRef pathname, CStrRef proj) {
+int64_t f_ftok(const String& pathname, const String& proj) {
   if (pathname.empty()) {
     raise_warning("Pathname is empty");
     return -1;
@@ -76,7 +76,7 @@ public:
 
   CLASSNAME_IS("MessageQueue");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 };
 
 Variant f_msg_get_queue(int64_t key, int64_t perms /* = 0666 */) {
@@ -303,7 +303,7 @@ public:
 
   CLASSNAME_IS("Semaphore");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   bool op(bool acquire) {
     struct sembuf sop;

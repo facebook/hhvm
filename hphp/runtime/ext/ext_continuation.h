@@ -27,7 +27,9 @@ namespace HPHP {
 
 FORWARD_DECLARE_CLASS(Continuation);
 FORWARD_DECLARE_CLASS(ContinuationWaitHandle);
-Object f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array);
+Object f_hphp_create_continuation(const String& clsname, const String& funcname,
+                                  const String& origFuncName,
+                                  CArrRef args = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation

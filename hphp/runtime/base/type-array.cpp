@@ -393,7 +393,7 @@ bool Array::more(CVarRef v2) const {
 // iterator
 
 HOT_FUNC
-ArrayIter Array::begin(CStrRef context /* = null_string */) const {
+ArrayIter Array::begin(const String& context /* = null_string */) const {
   return ArrayIter(m_px);
 }
 
@@ -424,7 +424,7 @@ CVarRef Array::rvalAtRef(int64_t key, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-CVarRef Array::rvalAtRef(CStrRef key, ACCESSPARAMS_IMPL) const {
+CVarRef Array::rvalAtRef(const String& key, ACCESSPARAMS_IMPL) const {
   if (m_px) {
     bool error = flags & AccessFlags::Error;
     if (flags & AccessFlags::Key) return m_px->get(key, error);
@@ -439,7 +439,7 @@ CVarRef Array::rvalAtRef(CStrRef key, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-Variant Array::rvalAt(CStrRef key, ACCESSPARAMS_IMPL) const {
+Variant Array::rvalAt(const String& key, ACCESSPARAMS_IMPL) const {
   return Array::rvalAtRef(key, flags);
 }
 
@@ -495,7 +495,7 @@ Variant &Array::lvalAt() {
   return *ret;
 }
 
-Variant &Array::lvalAt(CStrRef key, ACCESSPARAMS_IMPL) {
+Variant &Array::lvalAt(const String& key, ACCESSPARAMS_IMPL) {
   if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
   return lvalAtImpl(key.toKey(), flags);
 }
@@ -550,7 +550,7 @@ void Array::set(int64_t key, CVarRef v) {
   setImpl(key, v);
 }
 
-void Array::set(CStrRef key, CVarRef v, bool isKey /* = false */) {
+void Array::set(const String& key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setImpl(key, v);
   setImpl(key.toKey(), v);
 }
@@ -566,7 +566,7 @@ void Array::setRef(int64_t key, CVarRef v) {
   setRefImpl(key, v);
 }
 
-void Array::setRef(CStrRef key, CVarRef v, bool isKey /* = false */) {
+void Array::setRef(const String& key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setRefImpl(key, v);
   setRefImpl(key.toKey(), v);
 }
@@ -582,7 +582,7 @@ void Array::add(int64_t key, CVarRef v) {
   addImpl(key, v);
 }
 
-void Array::add(CStrRef key, CVarRef v, bool isKey /* = false */) {
+void Array::add(const String& key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return addImpl(key, v);
   addImpl(key.toKey(), v);
 }
@@ -626,7 +626,7 @@ Array Array::values() const {
   return ai.toArray();
 }
 
-bool Array::exists(CStrRef key, bool isKey /* = false */) const {
+bool Array::exists(const String& key, bool isKey /* = false */) const {
   if (isKey) return existsImpl(key);
   return existsImpl(key.toKey());
 }
@@ -647,7 +647,7 @@ bool Array::exists(CVarRef key, bool isKey /* = false */) const {
   return false;
 }
 
-void Array::remove(CStrRef key, bool isString /* = false */) {
+void Array::remove(const String& key, bool isString /* = false */) {
   if (isString) {
     removeImpl(key);
   } else {

@@ -46,7 +46,7 @@ IMPLEMENT_REQUEST_LOCAL(FileData, s_file_data);
 
 const int File::USE_INCLUDE_PATH = 1;
 
-String File::TranslatePathKeepRelative(CStrRef filename) {
+String File::TranslatePathKeepRelative(const String& filename) {
   String canonicalized(Util::canonicalize(filename.data(),
                                           filename.size()), AttachString);
 
@@ -55,7 +55,7 @@ String File::TranslatePathKeepRelative(CStrRef filename) {
       VirtualHost::GetAllowedDirectories();
     auto it = std::upper_bound(allowedDirectories.begin(),
                                allowedDirectories.end(), canonicalized,
-                               [](CStrRef val, const string& dir) {
+                               [](const String& val, const string& dir) {
                                  return strcmp(val.c_str(), dir.c_str()) < 0;
                                });
     if (it != allowedDirectories.begin()) {
@@ -81,7 +81,7 @@ String File::TranslatePathKeepRelative(CStrRef filename) {
   return canonicalized;
 }
 
-String File::TranslatePath(CStrRef filename) {
+String File::TranslatePath(const String& filename) {
   String canonicalized = TranslatePathKeepRelative(filename);
 
   if (canonicalized.charAt(0) == '/') {
@@ -95,7 +95,7 @@ String File::TranslatePath(CStrRef filename) {
   return cwd + "/" + canonicalized;
 }
 
-String File::TranslatePathWithFileCache(CStrRef filename) {
+String File::TranslatePathWithFileCache(const String& filename) {
   String canonicalized(Util::canonicalize(filename.data(),
                                           filename.size()), AttachString);
   String translated = TranslatePath(canonicalized);
@@ -110,12 +110,12 @@ String File::TranslatePathWithFileCache(CStrRef filename) {
   return translated;
 }
 
-String File::TranslateCommand(CStrRef cmd) {
+String File::TranslateCommand(const String& cmd) {
   //TODO: security checking
   return cmd;
 }
 
-bool File::IsVirtualDirectory(CStrRef filename) {
+bool File::IsVirtualDirectory(const String& filename) {
   if (StaticContentCache::TheFileCache &&
       StaticContentCache::TheFileCache->dirExists(filename.data(), false)) {
     return true;
@@ -123,11 +123,11 @@ bool File::IsVirtualDirectory(CStrRef filename) {
   return false;
 }
 
-bool File::IsPlainFilePath(CStrRef filename) {
+bool File::IsPlainFilePath(const String& filename) {
   return filename.find("://") == String::npos;
 }
 
-Variant File::Open(CStrRef filename, CStrRef mode,
+Variant File::Open(const String& filename, const String& mode,
                    int options /* = 0 */,
                    CVarRef context /* = null */) {
   Stream::Wrapper *wrapper = Stream::getWrapperFromURI(filename);
@@ -230,7 +230,7 @@ String File::read(int64_t length) {
   return s.setSize(copied);
 }
 
-int64_t File::write(CStrRef data, int64_t length /* = 0 */) {
+int64_t File::write(const String& data, int64_t length /* = 0 */) {
   if (seekable()) {
     int64_t offset = m_readpos - m_writepos;
     m_readpos = m_writepos = 0; // invalidating read buffer
@@ -431,7 +431,7 @@ String File::readLine(int64_t maxlen /* = 0 */) {
   return String(ret, total_copied, AttachString);
 }
 
-String File::readRecord(CStrRef delimiter, int64_t maxlen /* = 0 */) {
+String File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
   if (eof() && m_writepos == m_readpos) {
     return empty_string;
   }
@@ -516,7 +516,7 @@ int64_t File::print() {
   return total;
 }
 
-int64_t File::printf(CStrRef format, CArrRef args) {
+int64_t File::printf(const String& format, CArrRef args) {
   int len = 0;
   char *output = string_printf(format.data(), format.size(), args, &len);
   return write(String(output, len, AttachString));

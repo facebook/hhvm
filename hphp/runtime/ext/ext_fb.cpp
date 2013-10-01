@@ -65,8 +65,12 @@ const int64_t k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE =
 #define ntohll(n) (n)
 #define htonll(n) (n)
 #else
-#define ntohll(n) ( (((uint64_t)ntohl(n)) << 32) | ((uint64_t)ntohl((n) >> 32) & 0x00000000ffffffff) )
-#define htonll(n) ( (((uint64_t)htonl(n)) << 32) | ((uint64_t)htonl((n) >> 32) & 0x00000000ffffffff) )
+#define ntohll(n)                                                       \
+  ( (((uint64_t)ntohl(n)) << 32)                                        \
+    | ((uint64_t)ntohl((n) >> 32) & 0x00000000ffffffff) )
+#define htonll(n)                                                       \
+  ( (((uint64_t)htonl(n)) << 32)                                        \
+    | ((uint64_t)htonl((n) >> 32) & 0x00000000ffffffff) )
 #endif
 
 /* enum of thrift types */
@@ -127,7 +131,7 @@ struct HphpVariant {
   static int64_t asInt64(const VariantType& obj) { return obj.toInt64(); }
   static bool asBool(const VariantType& obj) { return obj.toInt64() != 0; }
   static double asDouble(const VariantType& obj) { return obj.toDouble(); }
-  static CStrRef asString(const VariantType& obj) {
+  static const String& asString(const VariantType& obj) {
     return obj.toCStrRef();
   }
   static CArrRef asMap(const VariantType& obj) { return obj.toCArrRef(); }
@@ -148,7 +152,7 @@ struct HphpVariant {
     return type(k);
   }
   static int64_t mapKeyAsInt64(CVarRef k) { return k.toInt64(); }
-  static CStrRef mapKeyAsString(CVarRef k) {
+  static const String& mapKeyAsString(CVarRef k) {
     return k.toCStrRef();
   }
   template <typename Key>
@@ -387,7 +391,7 @@ static void fb_compact_serialize_int64(StringBuffer& sb, int64_t val) {
   }
 }
 
-static void fb_compact_serialize_string(StringBuffer& sb, CStrRef str) {
+static void fb_compact_serialize_string(StringBuffer& sb, const String& str) {
   int len = str.size();
   if (len == 0) {
     fb_compact_serialize_code(sb, FB_CS_STRING_0);
@@ -981,7 +985,7 @@ bool f_fb_utf8ize(VRefParam input) {
  *
  * deprecated=true: instead return byte count on invalid UTF-8 sequence.
  */
-static int fb_utf8_strlen_impl(CStrRef input, bool deprecated) {
+static int fb_utf8_strlen_impl(const String& input, bool deprecated) {
   // Count, don't modify.
   int32_t sourceLength = input.size();
   const char* const sourceBuffer = input.data();
@@ -1000,18 +1004,18 @@ static int fb_utf8_strlen_impl(CStrRef input, bool deprecated) {
   return num_code_points;
 }
 
-int64_t f_fb_utf8_strlen(CStrRef input) {
+int64_t f_fb_utf8_strlen(const String& input) {
   return fb_utf8_strlen_impl(input, /* deprecated */ false);
 }
 
-int64_t f_fb_utf8_strlen_deprecated(CStrRef input) {
+int64_t f_fb_utf8_strlen_deprecated(const String& input) {
   return fb_utf8_strlen_impl(input, /* deprecated */ true);
 }
 
 /**
  * Private helper; requires non-negative firstCodePoint and desiredCodePoints.
  */
-static Variant fb_utf8_substr_simple(CStrRef str, int32_t firstCodePoint,
+static Variant fb_utf8_substr_simple(const String& str, int32_t firstCodePoint,
                                      int32_t numDesiredCodePoints) {
   const char* const srcBuf = str.data();
   int32_t srcLenBytes = str.size(); // May truncate; checked before use below.
@@ -1075,7 +1079,7 @@ static Variant fb_utf8_substr_simple(CStrRef str, int32_t firstCodePoint,
   return false;
 }
 
-Variant f_fb_utf8_substr(CStrRef str, int start, int length /* = INT_MAX */) {
+Variant f_fb_utf8_substr(const String& str, int start, int length /* = INT_MAX */) {
   // For negative start or length, calculate start and length values
   // based on total code points.
   if (start < 0 || length < 0) {
@@ -1103,17 +1107,17 @@ Variant f_fb_utf8_substr(CStrRef str, int start, int length /* = INT_MAX */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_fb_could_include(CStrRef file) {
+bool f_fb_could_include(const String& file) {
   struct stat s;
   return !Eval::resolveVmInclude(file.get(), "", &s).isNull();
 }
 
-bool f_fb_intercept(CStrRef name, CVarRef handler,
+bool f_fb_intercept(const String& name, CVarRef handler,
                     CVarRef data /* = null_variant */) {
   return register_intercept(name, handler, data);
 }
 
-bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
+bool f_fb_rename_function(const String& orig_func_name, const String& new_func_name) {
   if (orig_func_name.empty() || new_func_name.empty() ||
       orig_func_name->isame(new_func_name.get())) {
     throw_invalid_argument("unable to rename %s", orig_func_name.data());
@@ -1170,7 +1174,7 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
   (so will typically need to end with '/').
 */
 
-bool f_fb_autoload_map(CVarRef map, CStrRef root) {
+bool f_fb_autoload_map(CVarRef map, const String& root) {
   if (map.isArray()) {
     return AutoloadHandler::s_instance->setMap(map.toCArrRef(), root);
   }
@@ -1269,7 +1273,7 @@ int64_t f_fb_get_last_flush_size() {
 extern Array stat_impl(struct stat*); // ext_file.cpp
 
 template<class Function>
-static Variant do_lazy_stat(Function dostat, CStrRef filename) {
+static Variant do_lazy_stat(Function dostat, const String& filename) {
   struct stat sb;
   if (dostat(File::TranslatePathWithFileCache(filename).c_str(), &sb)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
@@ -1279,11 +1283,11 @@ static Variant do_lazy_stat(Function dostat, CStrRef filename) {
   return stat_impl(&sb);
 }
 
-Variant f_fb_lazy_lstat(CStrRef filename) {
+Variant f_fb_lazy_lstat(const String& filename) {
   return do_lazy_stat(StatCache::lstat, filename);
 }
 
-String f_fb_lazy_realpath(CStrRef filename) {
+String f_fb_lazy_realpath(const String& filename) {
   return StatCache::realpath(filename.c_str());
 }
 
@@ -1303,7 +1307,7 @@ Variant f_fb_const_fetch(CVarRef key) {
   return Variant(false);
 }
 
-void const_load_set(CStrRef key, CVarRef value) {
+void const_load_set(const String& key, CVarRef value) {
   const_data.set(key, value, true);
 }
 

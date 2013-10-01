@@ -63,7 +63,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport, CVarR
 void skip_element(long thrift_typeID, PHPInputTransport& transport);
 
 // Create a PHP object given a typename and call the ctor, optionally passing up to 2 arguments
-Object createObject(CStrRef obj_typename, int nargs = 0,
+Object createObject(const String& obj_typename, int nargs = 0,
                     CVarRef arg1 = null_variant, CVarRef arg2 = null_variant) {
   if (!f_class_exists(obj_typename)) {
     raise_warning("runtime/ext_thrift: Class %s does not exist",
@@ -79,7 +79,7 @@ Object createObject(CStrRef obj_typename, int nargs = 0,
   return create_object(obj_typename, args);
 }
 
-void throw_tprotocolexception(CStrRef what, long errorcode) {
+void throw_tprotocolexception(const String& what, long errorcode) {
   Object ex = createObject("TProtocolException", 2, what, errorcode);
   throw ex;
 }
@@ -491,7 +491,7 @@ void binary_serialize_spec(CObjRef zthis, PHPOutputTransport& transport,
   transport.writeI8(T_STOP); // struct end
 }
 
-void f_thrift_protocol_write_binary(CObjRef transportobj, CStrRef method_name,
+void f_thrift_protocol_write_binary(CObjRef transportobj, const String& method_name,
                                     int64_t msgtype, CObjRef request_struct,
                                     int seqid, bool strict_write) {
 
@@ -517,7 +517,7 @@ void f_thrift_protocol_write_binary(CObjRef transportobj, CStrRef method_name,
 }
 
 Variant f_thrift_protocol_read_binary(CObjRef transportobj,
-                                      CStrRef obj_typename,
+                                      const String& obj_typename,
                                       bool strict_read) {
   PHPInputTransport transport(transportobj);
   int8_t messageType = 0;

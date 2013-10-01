@@ -37,7 +37,7 @@ public:
    * to the format argument. pack() idea stolen from Perl (implemented formats
    * behave the same as there).
    */
-  Variant pack(CStrRef fmt, CArrRef argv);
+  Variant pack(const String& fmt, CArrRef argv);
 
   /**
    * Unpack binary string into named array elements according to format
@@ -54,7 +54,7 @@ public:
    * Numeric pack types will return numbers, a and A will return strings,
    * f and d will return doubles.
    */
-  Variant unpack(CStrRef fmt, CStrRef data);
+  Variant unpack(const String& fmt, const String& data);
 
 private:
   // Whether machine is little endian

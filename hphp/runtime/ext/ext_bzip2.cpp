@@ -31,13 +31,13 @@ Variant f_bzread(CResRef bz, int length /* = 1024 */) {
   return f_fread(bz, length);
 }
 
-Variant f_bzwrite(CResRef bz, CStrRef data, int length /* = 0 */) {
+Variant f_bzwrite(CResRef bz, const String& data, int length /* = 0 */) {
   return f_fwrite(bz, data, length);
 }
 
 const StaticString s_r("r"), s_w("w");
 
-Variant f_bzopen(CVarRef filename, CStrRef mode) {
+Variant f_bzopen(CVarRef filename, const String& mode) {
   if (mode != s_r && mode != s_w) {
     raise_warning(
       "'%s' is not a valid mode for bzopen(). "
@@ -119,7 +119,7 @@ int64_t f_bzerrno(CResRef bz) {
   return f->errnu();
 }
 
-Variant f_bzcompress(CStrRef source, int blocksize /* = 4 */,
+Variant f_bzcompress(const String& source, int blocksize /* = 4 */,
                      int workfactor /* = 0 */) {
   char *dest = NULL;
   int error;
@@ -146,7 +146,7 @@ Variant f_bzcompress(CStrRef source, int blocksize /* = 4 */,
   }
 }
 
-Variant f_bzdecompress(CStrRef source, int small /* = 0 */) {
+Variant f_bzdecompress(const String& source, int small /* = 0 */) {
   char *dest;
   int source_len = source.length();
   int error;

@@ -65,14 +65,14 @@ Array ClassInfo::GetUserFunctions() {
   return ret;
 }
 
-const ClassInfo::MethodInfo *ClassInfo::FindSystemFunction(CStrRef name) {
+const ClassInfo::MethodInfo *ClassInfo::FindSystemFunction(const String& name) {
   assert(!name.isNull());
   assert(s_loaded);
 
   return s_systemFuncs->getMethodInfo(name);
 }
 
-const ClassInfo::MethodInfo *ClassInfo::FindFunction(CStrRef name) {
+const ClassInfo::MethodInfo *ClassInfo::FindFunction(const String& name) {
   assert(!name.isNull());
   assert(s_loaded);
 
@@ -83,7 +83,7 @@ const ClassInfo::MethodInfo *ClassInfo::FindFunction(CStrRef name) {
   return ret;
 }
 
-const ClassInfo *ClassInfo::FindClassInterfaceOrTrait(CStrRef name) {
+const ClassInfo *ClassInfo::FindClassInterfaceOrTrait(const String& name) {
   assert(!name.isNull());
   assert(s_loaded);
 
@@ -100,28 +100,29 @@ const ClassInfo *ClassInfo::FindClassInterfaceOrTrait(CStrRef name) {
   return 0;
 }
 
-const ClassInfo *ClassInfo::FindClass(CStrRef name) {
+const ClassInfo *ClassInfo::FindClass(const String& name) {
   if (const ClassInfo *r = FindClassInterfaceOrTrait(name)) {
     return r->getAttribute() & (IsTrait|IsInterface) ? 0 : r;
   }
   return 0;
 }
 
-const ClassInfo *ClassInfo::FindInterface(CStrRef name) {
+const ClassInfo *ClassInfo::FindInterface(const String& name) {
   if (const ClassInfo *r = FindClassInterfaceOrTrait(name)) {
     return r->getAttribute() & IsInterface ? r : 0;
   }
   return 0;
 }
 
-const ClassInfo *ClassInfo::FindTrait(CStrRef name) {
+const ClassInfo *ClassInfo::FindTrait(const String& name) {
   if (const ClassInfo *r = FindClassInterfaceOrTrait(name)) {
     return r->getAttribute() & IsTrait ? r : 0;
   }
   return 0;
 }
 
-const ClassInfo *ClassInfo::FindSystemClassInterfaceOrTrait(CStrRef name) {
+const ClassInfo *
+ClassInfo::FindSystemClassInterfaceOrTrait(const String& name) {
   assert(!name.isNull());
   assert(s_loaded);
 
@@ -134,21 +135,21 @@ const ClassInfo *ClassInfo::FindSystemClassInterfaceOrTrait(CStrRef name) {
   return 0;
 }
 
-const ClassInfo *ClassInfo::FindSystemClass(CStrRef name) {
+const ClassInfo *ClassInfo::FindSystemClass(const String& name) {
   if (const ClassInfo *r = FindSystemClassInterfaceOrTrait(name)) {
     return r->getAttribute() & (IsTrait|IsInterface) ? 0 : r;
   }
   return 0;
 }
 
-const ClassInfo *ClassInfo::FindSystemInterface(CStrRef name) {
+const ClassInfo *ClassInfo::FindSystemInterface(const String& name) {
   if (const ClassInfo *r = FindSystemClassInterfaceOrTrait(name)) {
     return r->getAttribute() & IsInterface ? r : 0;
   }
   return 0;
 }
 
-const ClassInfo *ClassInfo::FindSystemTrait(CStrRef name) {
+const ClassInfo *ClassInfo::FindSystemTrait(const String& name) {
   if (const ClassInfo *r = FindSystemClassInterfaceOrTrait(name)) {
     return r->getAttribute() & IsTrait ? r : 0;
   }
@@ -284,7 +285,7 @@ void ClassInfo::UserAttributeInfo::setStaticValue(CVarRef v) {
   value.setEvalScalar();
 }
 
-bool ClassInfo::GetClassMethods(MethodVec &ret, CStrRef classname,
+bool ClassInfo::GetClassMethods(MethodVec &ret, const String& classname,
                                 int type /* = 0 */) {
   if (classname.empty()) return false;
 
@@ -315,7 +316,7 @@ bool ClassInfo::GetClassMethods(MethodVec &ret, const ClassInfo *classInfo) {
   ret.insert(ret.end(), methods.begin(), methods.end());
 
   if (!(classInfo->getAttribute() & (IsInterface|IsTrait))) {
-    CStrRef parentClass = classInfo->getParentClass();
+    const String& parentClass = classInfo->getParentClass();
     if (!parentClass.empty()) {
       if (!GetClassMethods(ret, parentClass, 1)) return false;
     }
@@ -450,12 +451,12 @@ const ClassInfo *ClassInfo::getDeclared() const {
 }
 
 const ClassInfo *ClassInfo::getParentClassInfo() const {
-  CStrRef parentName = getParentClass();
+  const String& parentName = getParentClass();
   if (parentName.empty()) return nullptr;
   return FindClass(parentName);
 }
 
-ClassInfo::MethodInfo *ClassInfo::getMethodInfo(CStrRef name) const {
+ClassInfo::MethodInfo *ClassInfo::getMethodInfo(const String& name) const {
   assert(!name.isNull());
 
   const MethodMap &methods = getMethods();
@@ -470,7 +471,7 @@ ClassInfo::MethodInfo *ClassInfo::getMethodInfo(CStrRef name) const {
   return nullptr;
 }
 
-ClassInfo::MethodInfo *ClassInfo::hasMethod(CStrRef name,
+ClassInfo::MethodInfo *ClassInfo::hasMethod(const String& name,
                                             ClassInfo* &classInfo,
                                             bool interfaces /* = false */)
 const {

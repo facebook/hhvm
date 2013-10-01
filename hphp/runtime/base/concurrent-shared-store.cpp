@@ -99,7 +99,7 @@ static void stats_on_add(const StringData* key, const StoreValue* sval,
   }
 }
 
-std::string ConcurrentTableSharedStore::GetSkeleton(CStrRef key) {
+std::string ConcurrentTableSharedStore::GetSkeleton(const String& key) {
   std::string ret;
   const char *p = key.data();
   ret.reserve(key.size());
@@ -135,7 +135,7 @@ bool ConcurrentTableSharedStore::clear() {
   return true;
 }
 
-bool ConcurrentTableSharedStore::erase(CStrRef key,
+bool ConcurrentTableSharedStore::erase(const String& key,
                                        bool expired /* = false */) {
   bool success = eraseImpl(key, expired);
 
@@ -152,7 +152,7 @@ bool ConcurrentTableSharedStore::erase(CStrRef key,
  * The ReadLock here is to sync with clear(), which only has a WriteLock,
  * not a specific accessor.
  */
-bool ConcurrentTableSharedStore::eraseImpl(CStrRef key, bool expired) {
+bool ConcurrentTableSharedStore::eraseImpl(const String& key, bool expired) {
   if (key.isNull()) return false;
   ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
@@ -220,7 +220,8 @@ void ConcurrentTableSharedStore::purgeExpired() {
   SharedStoreStats::setExpireQueueSize(m_expQueue.size());
 }
 
-void ConcurrentTableSharedStore::addToExpirationQueue(const char* key, int64_t etime) {
+void ConcurrentTableSharedStore::addToExpirationQueue(const char* key,
+                                                      int64_t etime) {
   ExpMap::accessor acc;
   if (m_expMap.find(acc, key)) {
     acc->second++;
@@ -237,7 +238,7 @@ void ConcurrentTableSharedStore::addToExpirationQueue(const char* key, int64_t e
   m_expQueue.push(p);
 }
 
-bool ConcurrentTableSharedStore::handlePromoteObj(CStrRef key,
+bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
                                                   SharedVariant* svar,
                                                   CVarRef value) {
   SharedVariant *converted = svar->convertObj(value);
@@ -272,7 +273,7 @@ static string std_apc_cas = "apc.cas";
 static string std_apc_update = "apc.update";
 static string std_apc_new = "apc.new";
 
-SharedVariant* ConcurrentTableSharedStore::unserialize(CStrRef key,
+SharedVariant* ConcurrentTableSharedStore::unserialize(const String& key,
                                                        const StoreValue* sval) {
   try {
     VariableUnserializer::Type sType =
@@ -293,7 +294,7 @@ SharedVariant* ConcurrentTableSharedStore::unserialize(CStrRef key,
   }
 }
 
-bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
+bool ConcurrentTableSharedStore::get(const String& key, Variant &value) {
   const StoreValue *sval;
   SharedVariant *svar = nullptr;
   ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
@@ -361,7 +362,8 @@ static int64_t get_int64_value(StoreValue* sval) {
   return v.toInt64();
 }
 
-int64_t ConcurrentTableSharedStore::inc(CStrRef key, int64_t step, bool &found) {
+int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
+                                        bool &found) {
   found = false;
   int64_t ret = 0;
   ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
@@ -384,7 +386,8 @@ int64_t ConcurrentTableSharedStore::inc(CStrRef key, int64_t step, bool &found) 
   return ret;
 }
 
-bool ConcurrentTableSharedStore::cas(CStrRef key, int64_t old, int64_t val) {
+bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
+                                     int64_t val) {
   bool success = false;
   ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
@@ -405,7 +408,7 @@ bool ConcurrentTableSharedStore::cas(CStrRef key, int64_t old, int64_t val) {
   return success;
 }
 
-bool ConcurrentTableSharedStore::exists(CStrRef key) {
+bool ConcurrentTableSharedStore::exists(const String& key) {
   const StoreValue *sval;
   ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
@@ -447,7 +450,8 @@ static int64_t adjust_ttl(int64_t ttl, bool overwritePrime) {
   return ttl;
 }
 
-bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef value, int64_t ttl,
+bool ConcurrentTableSharedStore::store(const String& key, CVarRef value,
+                                       int64_t ttl,
                                        bool overwrite /* = true */) {
   StoreValue *sval;
   SharedVariant* svar = construct(value);
@@ -533,7 +537,8 @@ void ConcurrentTableSharedStore::prime(const std::vector<KeyValuePair> &vars) {
   }
 }
 
-bool ConcurrentTableSharedStore::constructPrime(CStrRef v, KeyValuePair& item,
+bool ConcurrentTableSharedStore::constructPrime(const String& v,
+                                                KeyValuePair& item,
                                                 bool serialized) {
   if (s_apc_file_storage.getState() !=
       SharedStoreFileStorage::StorageState::Invalid &&

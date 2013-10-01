@@ -50,7 +50,7 @@ void MemFile::sweep() {
   File::sweep();
 }
 
-bool MemFile::open(CStrRef filename, CStrRef mode) {
+bool MemFile::open(const String& filename, const String& mode) {
   assert(m_len == -1);
   // mem files are read-only
   const char* mode_str = mode.c_str();

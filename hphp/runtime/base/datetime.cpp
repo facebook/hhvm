@@ -148,7 +148,7 @@ const StaticString
     ret.set(name, (int)parsed_time->elem);              \
   }
 
-Array DateTime::Parse(CStrRef datetime) {
+Array DateTime::Parse(const String& datetime) {
   struct timelib_error_container *error;
   timelib_time *parsed_time =
     timelib_strtotime((char*)datetime.data(), datetime.size(), &error,
@@ -228,7 +228,7 @@ Array DateTime::Parse(CStrRef datetime) {
   return ret;
 }
 
-Array DateTime::Parse(CStrRef ts, CStrRef format) {
+Array DateTime::Parse(const String& ts, const String& format) {
   struct tm parsed_time;
   memset(&parsed_time, 0, sizeof(parsed_time));
   char *unparsed_part = strptime(ts.data(), format.data(), &parsed_time);
@@ -419,7 +419,7 @@ void DateTime::setTimezone(SmartResource<TimeZone> timezone) {
   }
 }
 
-void DateTime::modify(CStrRef diff) {
+void DateTime::modify(const String& diff) {
   timelib_time *tmp_time = timelib_strtotime((char*)diff.data(), diff.size(),
                                              nullptr, TimeZone::GetDatabase(),
                                              TimeZone::GetTimeZoneInfoRaw);
@@ -524,7 +524,7 @@ int64_t DateTime::toInteger(char format) const {
   return -1;
 }
 
-String DateTime::toString(CStrRef format, bool stdc /* = false */) const {
+String DateTime::toString(const String& format, bool stdc /* = false */) const {
   if (format.empty()) return String();
   return stdc ? stdcFormat(format) : rfcFormat(format);
 }
@@ -547,7 +547,7 @@ String DateTime::toString(DateFormat format) const {
   return String();
 }
 
-String DateTime::rfcFormat(CStrRef format) const {
+String DateTime::rfcFormat(const String& format) const {
   StringBuffer s;
   bool rfc_colon = false;
   bool error;
@@ -636,7 +636,7 @@ String DateTime::rfcFormat(CStrRef format) const {
   return s.detach();
 }
 
-String DateTime::stdcFormat(CStrRef format) const {
+String DateTime::stdcFormat(const String& format) const {
   struct tm ta;
   timelib_time_offset *offset = nullptr;
   ta.tm_sec  = second();
@@ -732,7 +732,7 @@ Array DateTime::toArray(ArrayFormat format) const {
   return ret;
 }
 
-bool DateTime::fromString(CStrRef input, SmartResource<TimeZone> tz,
+bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
                           const char* format /*=NUL*/) {
   struct timelib_error_container *error;
   timelib_time *t;

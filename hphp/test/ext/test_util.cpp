@@ -46,13 +46,13 @@ bool TestUtil::RunTests(const std::string &which) {
 // data types
 
 struct testhash {
-  size_t operator()(CStrRef s) const {
+  size_t operator()(const String& s) const {
     return hash_string(s.data(), s.size());
   }
 };
 
 struct testeqstr {
-  bool operator()(CStrRef s1, CStrRef s2) const {
+  bool operator()(const String& s1, const String& s2) const {
     return string_strcmp(s1.data(), s1.size(), s2.data(), s2.size()) == 0;
   }
 };

@@ -1390,7 +1390,7 @@ public:
    * The whole purpose to make sure "const char *" is safe to take on these
    * strings.
    */
-  void cacheString(CStrRef name) {
+  void cacheString(const String& name) {
     m_artificialFrameNames.append(name);
   }
 
@@ -1458,7 +1458,7 @@ void f_fb_setprofile(CVarRef callback) {
   }
 }
 
-void f_xhprof_frame_begin(CStrRef name) {
+void f_xhprof_frame_begin(const String& name) {
 #ifdef HOTPROFILER
   Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
   if (prof) {

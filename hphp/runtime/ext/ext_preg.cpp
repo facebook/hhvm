@@ -25,13 +25,13 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(pcre);
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
+Variant f_preg_grep(const String& pattern, CArrRef input, int flags /* = 0 */) {
   return preg_grep(pattern, input, flags);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_preg_match(CStrRef pattern, CStrRef subject,
+Variant f_preg_match(const String& pattern, const String& subject,
                      VRefParam matches /* = null */, int flags /* = 0 */,
                      int offset /* = 0 */) {
   if (matches.isReferenced()) {
@@ -41,7 +41,7 @@ Variant f_preg_match(CStrRef pattern, CStrRef subject,
   }
 }
 
-Variant f_preg_match_all(CStrRef pattern, CStrRef subject, VRefParam matches,
+Variant f_preg_match_all(const String& pattern, const String& subject, VRefParam matches,
                          int flags /* = 0 */, int offset /* = 0 */) {
   if (matches.isReferenced()) {
     return preg_match_all(pattern, subject, matches, flags, offset);
@@ -73,7 +73,7 @@ Variant f_preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String f_preg_quote(CStrRef str, CStrRef delimiter /* = null_string */) {
+String f_preg_quote(const String& str, const String& delimiter /* = null_string */) {
   return preg_quote(str, delimiter);
 }
 
@@ -84,34 +84,34 @@ int64_t f_preg_last_error() {
 ///////////////////////////////////////////////////////////////////////////////
 // ereg
 
-String f_ereg_replace(CStrRef pattern, CStrRef replacement, CStrRef str) {
+String f_ereg_replace(const String& pattern, const String& replacement, const String& str) {
   return f_mb_ereg_replace(pattern, replacement, str);
 }
 
-String f_eregi_replace(CStrRef pattern, CStrRef replacement, CStrRef str) {
+String f_eregi_replace(const String& pattern, const String& replacement, const String& str) {
   return f_mb_eregi_replace(pattern, replacement, str);
 }
 
-Variant f_ereg(CStrRef pattern, CStrRef str, VRefParam regs /* = null */) {
+Variant f_ereg(const String& pattern, const String& str, VRefParam regs /* = null */) {
   return f_mb_ereg(pattern, str, ref(regs));
 }
 
-Variant f_eregi(CStrRef pattern, CStrRef str, VRefParam regs /* = null */) {
+Variant f_eregi(const String& pattern, const String& str, VRefParam regs /* = null */) {
   return f_mb_eregi(pattern, str, ref(regs));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // regexec
 
-Variant f_split(CStrRef pattern, CStrRef str, int limit /* = -1 */) {
+Variant f_split(const String& pattern, const String& str, int limit /* = -1 */) {
   return php_split(pattern, str, limit, false);
 }
 
-Variant f_spliti(CStrRef pattern, CStrRef str, int limit /* = -1 */) {
+Variant f_spliti(const String& pattern, const String& str, int limit /* = -1 */) {
   return php_split(pattern, str, limit, true);
 }
 
-String f_sql_regcase(CStrRef str) {
+String f_sql_regcase(const String& str) {
   unsigned char c;
   register int i, j;
 

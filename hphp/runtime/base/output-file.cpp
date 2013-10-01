@@ -26,7 +26,7 @@ namespace HPHP {
 
 const StaticString s_php_output("php://output");
 
-OutputFile::OutputFile(CStrRef filename) {
+OutputFile::OutputFile(const String& filename) {
   if (filename != s_php_output) {
     throw FatalErrorException("not a php://output file ");
   }
@@ -42,7 +42,7 @@ void OutputFile::sweep() {
   File::sweep();
 }
 
-bool OutputFile::open(CStrRef filename, CStrRef mode) {
+bool OutputFile::open(const String& filename, const String& mode) {
   throw FatalErrorException("cannot open a php://output file ");
 }
 

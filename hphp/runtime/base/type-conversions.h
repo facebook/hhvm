@@ -34,7 +34,7 @@ inline bool toBoolean(litstr  v) = delete;
 inline bool toBoolean(const StringData *v) {
   return v ? v->toBoolean() : false;
 }
-inline bool toBoolean(CStrRef v) { return toBoolean(v.get());}
+inline bool toBoolean(const String& v) { return toBoolean(v.get());}
 inline bool toBoolean(const ArrayData *v) {
   return v && !v->empty();
 }
@@ -53,7 +53,7 @@ inline int toInt32(int64_t   v) { return v;}
 inline int toInt32(double  v) { return (int)v;}
 inline int toInt32(litstr  v) = delete;
 inline int toInt32(const StringData *v) { return v ? v->toInt32() : 0;}
-inline int toInt32(CStrRef v) { return toInt32(v.get());}
+inline int toInt32(const String& v) { return toInt32(v.get());}
 inline int toInt32(const ArrayData *v) { return (v && !v->empty()) ? 1 : 0;}
 inline int toInt32(CArrRef v) { return toInt32(v.get());}
 inline int toInt32(const ObjectData *v) { return v ? v->o_toInt64() : 0;}
@@ -75,7 +75,7 @@ inline int64_t toInt64(double  v) {
 }
 inline int64_t toInt64(litstr  v) = delete;
 inline int64_t toInt64(const StringData *v) { return v ? v->toInt64() : 0;}
-inline int64_t toInt64(CStrRef v) { return toInt64(v.get());}
+inline int64_t toInt64(const String& v) { return toInt64(v.get());}
 inline int64_t toInt64(const ArrayData *v) { return (v && !v->empty()) ? 1 : 0;}
 inline int64_t toInt64(CArrRef v) { return toInt64(v.get());}
 inline int64_t toInt64(const ObjectData *v) { return v ? v->o_toInt64() : 0;}
@@ -90,7 +90,7 @@ inline double toDouble(int64_t   v) { return v;}
 inline double toDouble(double  v) { return v;}
 inline double toDouble(litstr  v) = delete;
 inline double toDouble(const StringData *v) { return v? v->toDouble() : 0;}
-inline double toDouble(CStrRef v) { return toDouble(v.get());}
+inline double toDouble(const String& v) { return toDouble(v.get());}
 inline double toDouble(const ArrayData *v) {
   return (v && !v->empty()) ? 1.0 : 0.0;
 }
@@ -107,7 +107,7 @@ inline String toString(int64_t   v) { return v;}
 inline String toString(double  v) { return v;}
 inline String toString(litstr  v) = delete;
 inline String toString(StringData *v) { return v ? String(v) : String("");}
-inline String toString(CStrRef v) { return toString(v.get());}
+inline String toString(const String& v) { return toString(v.get());}
 inline String toString(const ArrayData *v) { return v ? "Array" : "";}
 inline String toString(CArrRef v) { return toString(v.get());}
 inline String toString(ObjectData *v) {
@@ -126,7 +126,7 @@ inline Array toArray(litstr  v) = delete;
 inline Array toArray(StringData *v) {
   return v ? Array::Create(v) : Array::Create();
 }
-inline Array toArray(CStrRef v) { return toArray(v.get());}
+inline Array toArray(const String& v) { return toArray(v.get());}
 inline Array toArray(ArrayData *v) { return v ? Array(v) : Array::Create();}
 inline Array toArray(CArrRef v) { return toArray(v.get());}
 inline Array toArray(const ObjectData *v) {

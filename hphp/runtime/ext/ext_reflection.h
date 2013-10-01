@@ -25,22 +25,22 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Array f_hphp_get_extension_info(CStrRef name);
+Array f_hphp_get_extension_info(const String& name);
 Array f_hphp_get_method_info(CVarRef cls, CVarRef name);
 Array f_hphp_get_closure_info(CVarRef closure);
 Variant f_hphp_get_class_constant(CVarRef cls, CVarRef name);
 Array f_hphp_get_class_info(CVarRef name);
-Array f_hphp_get_function_info(CStrRef name);
-Variant f_hphp_invoke(CStrRef name, CArrRef params);
-Variant f_hphp_invoke_method(CVarRef obj, CStrRef cls, CStrRef name, CArrRef params);
-bool f_hphp_instanceof(CObjRef obj, CStrRef name);
-Object f_hphp_create_object(CStrRef name, CArrRef params);
-Object f_hphp_create_object_without_constructor(CStrRef name);
-Variant f_hphp_get_property(CObjRef obj, CStrRef cls, CStrRef prop);
-void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop, CVarRef value);
-Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop, bool force);
-void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value, bool force);
-String f_hphp_get_original_class_name(CStrRef name);
+Array f_hphp_get_function_info(const String& name);
+Variant f_hphp_invoke(const String& name, CArrRef params);
+Variant f_hphp_invoke_method(CVarRef obj, const String& cls, const String& name, CArrRef params);
+bool f_hphp_instanceof(CObjRef obj, const String& name);
+Object f_hphp_create_object(const String& name, CArrRef params);
+Object f_hphp_create_object_without_constructor(const String& name);
+Variant f_hphp_get_property(CObjRef obj, const String& cls, const String& prop);
+void f_hphp_set_property(CObjRef obj, const String& cls, const String& prop, CVarRef value);
+Variant f_hphp_get_static_property(const String& cls, const String& prop, bool force);
+void f_hphp_set_static_property(const String& cls, const String& prop, CVarRef value, bool force);
+String f_hphp_get_original_class_name(const String& name);
 bool f_hphp_scalar_typehints_enabled();
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -791,7 +791,7 @@ void FunctionScope::setParamDefault(int index, const char* value, int64_t len,
   m_paramDefaultTexts[index] = text;
 }
 
-CStrRef FunctionScope::getParamDefault(int index) {
+const String& FunctionScope::getParamDefault(int index) {
   return m_paramDefaults[index];
 }
 

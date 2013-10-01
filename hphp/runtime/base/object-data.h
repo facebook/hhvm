@@ -219,17 +219,17 @@ class ObjectData {
   ObjectData* clearNoDestruct() { clearAttribute(NoDestructor); return this; }
 
   Object iterableObject(bool& isIterable, bool mayImplementIterator = true);
-  ArrayIter begin(CStrRef context = null_string);
+  ArrayIter begin(const String& context = null_string);
   MutableArrayIter begin(Variant* key, Variant& val,
-                         CStrRef context = null_string);
+                         const String& context = null_string);
 
   /**
    * o_instanceof() can be used for both classes and interfaces.
    */
-  bool o_instanceof(CStrRef s) const;
+  bool o_instanceof(const String& s) const;
 
   // class info
-  CStrRef o_getClassName() const;
+  const String& o_getClassName() const;
   int o_getId() const { return o_id;}
 
   bool o_toBoolean() const {
@@ -262,21 +262,21 @@ class ObjectData {
 
   void destruct();
 
-  Array o_toIterArray(CStrRef context, bool getRef = false);
+  Array o_toIterArray(const String& context, bool getRef = false);
 
-  Variant* o_realProp(CStrRef s, int flags,
-                      CStrRef context = null_string);
+  Variant* o_realProp(const String& s, int flags,
+                      const String& context = null_string);
 
-  Variant o_get(CStrRef s, bool error = true,
-                CStrRef context = null_string);
+  Variant o_get(const String& s, bool error = true,
+                const String& context = null_string);
 
-  Variant o_set(CStrRef s, CVarRef v);
-  Variant o_set(CStrRef s, RefResult v);
-  Variant o_setRef(CStrRef s, CVarRef v);
+  Variant o_set(const String& s, CVarRef v);
+  Variant o_set(const String& s, RefResult v);
+  Variant o_setRef(const String& s, CVarRef v);
 
-  Variant o_set(CStrRef s, CVarRef v, CStrRef context);
-  Variant o_set(CStrRef s, RefResult v, CStrRef context);
-  Variant o_setRef(CStrRef s, CVarRef v, CStrRef context);
+  Variant o_set(const String& s, CVarRef v, const String& context);
+  Variant o_set(const String& s, RefResult v, const String& context);
+  Variant o_setRef(const String& s, CVarRef v, const String& context);
 
   void o_setArray(CArrRef properties);
   void o_getArray(Array& props, bool pubOnly = false) const;
@@ -289,8 +289,8 @@ class ObjectData {
   // invokeFuncFew(), and vm_decode_function(). We should remove these APIs
   // and migrate all callers to use invokeFunc(), invokeFuncFew(), and
   // vm_decode_function() instead.
-  Variant o_invoke(CStrRef s, CArrRef params, bool fatal = true);
-  Variant o_invoke_few_args(CStrRef s, int count,
+  Variant o_invoke(const String& s, CArrRef params, bool fatal = true);
+  Variant o_invoke_few_args(const String& s, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
 
   void serialize(VariableSerializer* serializer) const;
@@ -359,10 +359,10 @@ class ObjectData {
   void initDynProps(int numDynamic = 0);
   Slot declPropInd(TypedValue* prop) const;
 
-  inline Variant o_getImpl(CStrRef propName, int flags,
-                           bool error = true, CStrRef context = null_string);
+  inline Variant o_getImpl(const String& propName, int flags, bool error = true,
+                           const String& context = null_string);
   template <typename T>
-  inline Variant o_setImpl(CStrRef propName, T v, CStrRef context);
+  inline Variant o_setImpl(const String& propName, T v, const String& context);
  public:
   TypedValue* getProp(Class* ctx, const StringData* key, bool& visible,
                       bool& accessible, bool& unset);

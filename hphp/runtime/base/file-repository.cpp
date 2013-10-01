@@ -480,7 +480,7 @@ struct ResolveIncludeContext {
 
 const StaticString s_file_url("file://");
 
-static bool findFileWrapper(CStrRef file, void* ctx) {
+static bool findFileWrapper(const String& file, void* ctx) {
   ResolveIncludeContext* context = (ResolveIncludeContext*)ctx;
   assert(context->path.isNull());
 

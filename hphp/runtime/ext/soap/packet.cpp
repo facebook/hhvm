@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static void add_soap_fault(c_SoapClient *client, CStrRef code, CStrRef fault) {
+static void add_soap_fault(c_SoapClient *client, const String& code, const String& fault) {
   client->m_soap_fault =
     Object(SystemLib::AllocSoapFaultObject(String(code, CopyString), fault));
 }

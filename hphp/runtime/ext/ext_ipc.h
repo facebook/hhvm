@@ -24,7 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // message queue
 
-int64_t f_ftok(CStrRef pathname, CStrRef proj);
+int64_t f_ftok(const String& pathname, const String& proj);
 
 Variant f_msg_get_queue(int64_t key, int64_t perms = 0666);
 bool f_msg_queue_exists(int64_t key);

@@ -26,7 +26,7 @@ IMPLEMENT_OBJECT_ALLOCATION(PlainDirectory)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PlainDirectory::PlainDirectory(CStrRef path) {
+PlainDirectory::PlainDirectory(const String& path) {
   m_dir = ::opendir(path.data());
 }
 

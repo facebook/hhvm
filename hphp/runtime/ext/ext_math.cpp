@@ -187,17 +187,17 @@ String f_dechex(int64_t number) {
 String f_decoct(int64_t number) {
   return String(string_long_to_base(number, 8), AttachString);
 }
-Variant f_bindec(CStrRef binary_string) {
+Variant f_bindec(const String& binary_string) {
   return string_base_to_numeric(binary_string.data(), binary_string.size(), 2);
 }
-Variant f_hexdec(CStrRef hex_string) {
+Variant f_hexdec(const String& hex_string) {
   return string_base_to_numeric(hex_string.data(), hex_string.size(), 16);
 }
-Variant f_octdec(CStrRef octal_string) {
+Variant f_octdec(const String& octal_string) {
   return string_base_to_numeric(octal_string.data(), octal_string.size(), 8);
 }
 
-Variant f_base_convert(CStrRef number, int64_t frombase, int64_t tobase) {
+Variant f_base_convert(const String& number, int64_t frombase, int64_t tobase) {
   if (!string_validate_base(frombase)) {
     throw_invalid_argument("Invalid frombase: %" PRId64, frombase);
     return false;

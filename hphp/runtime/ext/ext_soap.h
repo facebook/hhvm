@@ -41,13 +41,13 @@ class c_SoapServer : public ExtObjectData {
   public: c_SoapServer(Class* cls = c_SoapServer::classof());
   public: ~c_SoapServer();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
-  public: void t_setclass(int _argc, CStrRef name, CArrRef _argv = null_array);
+  public: void t_setclass(int _argc, const String& name, CArrRef _argv = null_array);
   public: void t_setobject(CObjRef obj);
   public: void t_addfunction(CVarRef func);
   public: Variant t_getfunctions();
-  public: void t_handle(CStrRef request = null_string);
+  public: void t_handle(const String& request = null_string);
   public: void t_setpersistence(int64_t mode);
-  public: void t_fault(CVarRef code, CStrRef fault, CStrRef actor = null_string, CVarRef detail = uninit_null(), CStrRef name = null_string);
+  public: void t_fault(CVarRef code, const String& fault, const String& actor = null_string, CVarRef detail = uninit_null(), const String& name = null_string);
   public: void t_addsoapheader(CObjRef fault);
 
 
@@ -81,16 +81,16 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   public: ~c_SoapClient();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
   public: Variant t___call(Variant name, Variant args);
-  public: Variant t___soapcall(CStrRef name, CArrRef args, CArrRef options = null_array, CVarRef input_headers = null_variant, VRefParam output_headers = uninit_null());
+  public: Variant t___soapcall(const String& name, CArrRef args, CArrRef options = null_array, CVarRef input_headers = null_variant, VRefParam output_headers = uninit_null());
   public: Variant t___getlastrequest();
   public: Variant t___getlastresponse();
   public: Variant t___getlastrequestheaders();
   public: Variant t___getlastresponseheaders();
   public: Variant t___getfunctions();
   public: Variant t___gettypes();
-  public: Variant t___dorequest(CStrRef buf, CStrRef location, CStrRef action, int64_t version, bool oneway = false);
-  public: Variant t___setcookie(CStrRef name, CStrRef value = null_string);
-  public: Variant t___setlocation(CStrRef new_location = null_string);
+  public: Variant t___dorequest(const String& buf, const String& location, const String& action, int64_t version, bool oneway = false);
+  public: Variant t___setcookie(const String& name, const String& value = null_string);
+  public: Variant t___setlocation(const String& new_location = null_string);
   public: bool t___setsoapheaders(CVarRef headers = null_variant);
 
 
@@ -142,7 +142,7 @@ class c_SoapVar : public ExtObjectData {
   // need to implement
   public: c_SoapVar(Class* cls = c_SoapVar::classof());
   public: ~c_SoapVar();
-  public: void t___construct(CVarRef data, CVarRef type, CStrRef type_name = null_string, CStrRef type_namespace = null_string, CStrRef node_name = null_string, CStrRef node_namespace = null_string);
+  public: void t___construct(CVarRef data, CVarRef type, const String& type_name = null_string, const String& type_namespace = null_string, const String& node_name = null_string, const String& node_namespace = null_string);
 
 
 
@@ -165,7 +165,7 @@ class c_SoapParam : public ExtObjectData {
   // need to implement
   public: c_SoapParam(Class* cls = c_SoapParam::classof());
   public: ~c_SoapParam();
-  public: void t___construct(CVarRef data, CStrRef name);
+  public: void t___construct(CVarRef data, const String& name);
 
 
 
@@ -184,7 +184,7 @@ class c_SoapHeader : public ExtObjectData {
   // need to implement
   public: c_SoapHeader(Class* cls = c_SoapHeader::classof());
   public: ~c_SoapHeader();
-  public: void t___construct(CStrRef ns, CStrRef name, CVarRef data = uninit_null(), bool mustunderstand = false, CVarRef actor = uninit_null());
+  public: void t___construct(const String& ns, const String& name, CVarRef data = uninit_null(), bool mustunderstand = false, CVarRef actor = uninit_null());
 
 
 

@@ -35,18 +35,18 @@ class Wrapper : boost::noncopyable {
   Wrapper() : m_isLocal(true) { }
   void registerAs(const std::string &scheme);
 
-  virtual File* open(CStrRef filename, CStrRef mode,
+  virtual File* open(const String& filename, const String& mode,
                      int options, CVarRef context) = 0;
-  virtual int access(CStrRef path, int mode) {
+  virtual int access(const String& path, int mode) {
     return -1;
   }
-  virtual int lstat(CStrRef path, struct stat* buf) {
+  virtual int lstat(const String& path, struct stat* buf) {
     return -1;
   }
-  virtual int stat(CStrRef path, struct stat* buf) {
+  virtual int stat(const String& path, struct stat* buf) {
     return -1;
   }
-  virtual Directory* opendir(CStrRef path) {
+  virtual Directory* opendir(const String& path) {
     return nullptr;
   }
 

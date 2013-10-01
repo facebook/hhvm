@@ -121,9 +121,9 @@ class PreClass : public AtomicCountable {
 
     PreClass* preClass() const { return m_preClass; }
     const StringData* name() const { return m_name; }
-    CStrRef nameRef() const { return *(String*)&m_name; }
+    const String& nameRef() const { return *(String*)&m_name; }
     const StringData* mangledName() const { return m_mangledName; }
-    CStrRef mangledNameRef() const { return *(String*)(&m_mangledName); }
+    const String& mangledNameRef() const { return *(String*)(&m_mangledName); }
     Attr attrs() const { return m_attrs; }
     const StringData* typeConstraint() const { return m_typeConstraint; }
     DataType hphpcType() const { return m_hphpcType; }
@@ -151,7 +151,7 @@ class PreClass : public AtomicCountable {
 
     PreClass* preClass() const { return m_preClass; }
     const StringData* name() const { return m_name; }
-    CStrRef nameRef() const { return *(String*)&m_name; }
+    const String& nameRef() const { return *(String*)&m_name; }
     const StringData* typeConstraint() const { return m_typeConstraint; }
     const TypedValue& val() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
@@ -249,11 +249,11 @@ class PreClass : public AtomicCountable {
   int line2() const { return m_line2; }
   Offset getOffset() const { return m_offset; }
   const StringData* name() const { return m_name; }
-  CStrRef nameRef() const { return *(String*)(&m_name); }
+  const String& nameRef() const { return *(String*)(&m_name); }
   Attr attrs() const { return m_attrs; }
   static Offset attrsOffset() { return offsetof(PreClass, m_attrs); }
   const StringData* parent() const { return m_parent; }
-  CStrRef parentRef() const { return *(String*)(&m_parent); }
+  const String& parentRef() const { return *(String*)(&m_parent); }
   const StringData* docComment() const { return m_docComment; }
   Id id() const { return m_id; }
   const InterfaceVec& interfaces() const { return m_interfaces; }
@@ -398,7 +398,7 @@ struct Class : AtomicCountable {
     TypedValue m_val;
     const StringData* m_phpCode;
     const StringData* m_typeConstraint;
-    CStrRef nameRef() const { return *(String*)&m_name; }
+    const String& nameRef() const { return *(String*)&m_name; }
   };
 
   class PropInitVec {
@@ -518,10 +518,10 @@ struct Class : AtomicCountable {
   Class* parent() const {
     return m_parent.get();
   }
-  CStrRef nameRef() const {
+  const String& nameRef() const {
     return m_preClass->nameRef();
   }
-  CStrRef parentRef() const {
+  const String& parentRef() const {
     return m_preClass->parentRef();
   }
 

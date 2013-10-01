@@ -20,8 +20,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-UserStreamWrapper::UserStreamWrapper(CStrRef name, CStrRef clsname) :
-  m_name(name) {
+UserStreamWrapper::UserStreamWrapper(const String& name,
+                                     const String& clsname)
+    : m_name(name) {
   m_cls = Unit::loadClass(clsname.get());
   if (!m_cls) {
     throw InvalidArgumentException(0, "Undefined class '%s'", clsname.data());
@@ -31,7 +32,7 @@ UserStreamWrapper::UserStreamWrapper(CStrRef name, CStrRef clsname) :
   m_isLocal = true;
 }
 
-File* UserStreamWrapper::open(CStrRef filename, CStrRef mode,
+File* UserStreamWrapper::open(const String& filename, const String& mode,
                               int options, CVarRef context) {
   std::unique_ptr<File> file(NEWOBJ(UserFile)(m_cls, options, context));
   file->open(filename, mode);

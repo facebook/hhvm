@@ -42,10 +42,10 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool ini_on_update_save_handler(CStrRef value, void *p);
-bool ini_on_update_serializer(CStrRef value, void *p);
-bool ini_on_update_trans_sid(CStrRef value, void *p);
-bool ini_on_update_save_dir(CStrRef value, void *p);
+bool ini_on_update_save_handler(const String& value, void *p);
+bool ini_on_update_serializer(const String& value, void *p);
+bool ini_on_update_trans_sid(const String& value, void *p);
+bool ini_on_update_save_dir(const String& value, void *p);
 
 ///////////////////////////////////////////////////////////////////////////////
 // global data
@@ -223,7 +223,7 @@ static char hexconvtab[] =
   "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,-";
 
 /* returns a pointer to the byte after the last valid character in out */
-static void bin_to_readable(CStrRef in, StringBuffer &out, char nbits) {
+static void bin_to_readable(const String& in, StringBuffer &out, char nbits) {
   unsigned char *p = (unsigned char *)in.data();
   unsigned char *q = (unsigned char *)in.data() + in.size();
   unsigned short w = 0;
@@ -476,7 +476,7 @@ bool SystemlibSessionModule::read(const char *key, String &value) {
   return false;
 }
 
-bool SystemlibSessionModule::write(const char *key, CStrRef value) {
+bool SystemlibSessionModule::write(const char *key, const String& value) {
   ObjectData *obj = getObject();
 
   Variant sessionKey = String(key, CopyString);
@@ -640,7 +640,7 @@ public:
     return true;
   }
 
-  bool write(const char *key, CStrRef value) {
+  bool write(const char *key, const String& value) {
     openImpl(key);
     if (m_fd < 0) {
       return false;
@@ -890,7 +890,7 @@ public:
   virtual bool read(const char *key, String &value) {
     return s_file_session_data->read(key, value);
   }
-  virtual bool write(const char *key, CStrRef value) {
+  virtual bool write(const char *key, const String& value) {
     return s_file_session_data->write(key, value);
   }
   virtual bool destroy(const char *key) {
@@ -936,7 +936,7 @@ public:
     return false;
   }
 
-  virtual bool write(const char *key, CStrRef value) {
+  virtual bool write(const char *key, const String& value) {
     return vm_call_user_func(
        make_packed_array(Object(PS(ps_session_handler)),
                       String("write")),
@@ -970,7 +970,7 @@ public:
   virtual ~SessionSerializer() {}
 
   virtual String encode() = 0;
-  virtual bool decode(CStrRef value) = 0;
+  virtual bool decode(const String& value) = 0;
 
   static SessionSerializer *Find(const char *name) {
     for (unsigned int i = 0; i < RegisteredSerializers.size(); i++) {
@@ -1016,7 +1016,7 @@ public:
     return buf.detach();
   }
 
-  virtual bool decode(CStrRef value) {
+  virtual bool decode(const String& value) {
     const char *endptr = value.data() + value.size();
     GlobalVariables *g = get_global_variables();
     for (const char *p = value.data(); p < endptr; ) {
@@ -1070,7 +1070,7 @@ public:
     return buf.detach();
   }
 
-  virtual bool decode(CStrRef value) {
+  virtual bool decode(const String& value) {
     const char *p = value.data();
     const char *endptr = value.data() + value.size();
     GlobalVariables *g = get_global_variables();
@@ -1114,19 +1114,19 @@ static PhpSessionSerializer s_php_session_serializer;
     return false;                                                       \
   }
 
-bool ini_on_update_save_handler(CStrRef value, void *p) {
+bool ini_on_update_save_handler(const String& value, void *p) {
   SESSION_CHECK_ACTIVE_STATE;
   PS(mod) = SessionModule::Find(value.data());
   return true;
 }
 
-bool ini_on_update_serializer(CStrRef value, void *p) {
+bool ini_on_update_serializer(const String& value, void *p) {
   SESSION_CHECK_ACTIVE_STATE;
   PS(serializer) = SessionSerializer::Find(value.data());
   return true;
 }
 
-bool ini_on_update_trans_sid(CStrRef value, void *p) {
+bool ini_on_update_trans_sid(const String& value, void *p) {
   SESSION_CHECK_ACTIVE_STATE;
   if (!strncasecmp(value.data(), "on", sizeof("on"))) {
     PS(use_trans_sid) = true;
@@ -1136,7 +1136,7 @@ bool ini_on_update_trans_sid(CStrRef value, void *p) {
   return true;
 }
 
-bool ini_on_update_save_dir(CStrRef value, void *p) {
+bool ini_on_update_save_dir(const String& value, void *p) {
   if (value.find('\0') >= 0) {
     return false;
   }
@@ -1177,7 +1177,7 @@ static String php_session_encode() {
   return PS(serializer)->encode();
 }
 
-static void php_session_decode(CStrRef value) {
+static void php_session_decode(const String& value) {
   if (!PS(serializer)) {
     raise_warning("Unknown session.serialize_handler. "
                   "Failed to decode session object");
@@ -1463,8 +1463,8 @@ int64_t f_session_status() {
 }
 
 void f_session_set_cookie_params(int64_t lifetime,
-                                 CStrRef path /* = null_string */,
-                                 CStrRef domain /* = null_string */,
+                                 const String& path /* = null_string */,
+                                 const String& domain /* = null_string */,
                                  CVarRef secure /* = null */,
                                  CVarRef httponly /* = null */) {
   if (PS(use_cookies)) {
@@ -1501,7 +1501,7 @@ Array f_session_get_cookie_params() {
   return ret.create();
 }
 
-String f_session_name(CStrRef newname /* = null_string */) {
+String f_session_name(const String& newname /* = null_string */) {
   String oldname = String(PS(session_name));
   if (!newname.isNull()) {
     IniSetting::Set("session.name", newname);
@@ -1509,7 +1509,7 @@ String f_session_name(CStrRef newname /* = null_string */) {
   return oldname;
 }
 
-Variant f_session_module_name(CStrRef newname /* = null_string */) {
+Variant f_session_module_name(const String& newname /* = null_string */) {
   String oldname;
   if (PS(mod) && PS(mod)->getName()) {
     oldname = String(PS(mod)->getName(), CopyString);
@@ -1558,7 +1558,7 @@ bool f_hphp_session_set_save_handler(CObjRef sessionhandler,
   return true;
 }
 
-String f_session_save_path(CStrRef newname /* = null_string */) {
+String f_session_save_path(const String& newname /* = null_string */) {
   if (!newname.isNull()) {
     if (memchr(newname.data(), '\0', newname.size()) != NULL) {
       raise_warning("The save_path cannot contain NULL characters");
@@ -1569,7 +1569,7 @@ String f_session_save_path(CStrRef newname /* = null_string */) {
   return String(PS(save_path));
 }
 
-String f_session_id(CStrRef newid /* = null_string */) {
+String f_session_id(const String& newid /* = null_string */) {
   String ret = PS(id);
   if (!newid.isNull()) {
     PS(id) = newid;
@@ -1601,7 +1601,7 @@ bool f_session_regenerate_id(bool delete_old_session /* = false */) {
   return false;
 }
 
-String f_session_cache_limiter(CStrRef new_cache_limiter /* = null_string */) {
+String f_session_cache_limiter(const String& new_cache_limiter /* = null_string */) {
   String ret(PS(cache_limiter));
   if (!new_cache_limiter.isNull()) {
     IniSetting::Set("session.cache_limiter", new_cache_limiter);
@@ -1609,7 +1609,7 @@ String f_session_cache_limiter(CStrRef new_cache_limiter /* = null_string */) {
   return ret;
 }
 
-int64_t f_session_cache_expire(CStrRef new_cache_expire /* = null_string */) {
+int64_t f_session_cache_expire(const String& new_cache_expire /* = null_string */) {
   int64_t ret = PS(cache_expire);
   if (!new_cache_expire.isNull()) {
     IniSetting::Set("session.cache_expire", new_cache_expire.toInt64());
@@ -1625,7 +1625,7 @@ Variant f_session_encode() {
   return ret;
 }
 
-bool f_session_decode(CStrRef data) {
+bool f_session_decode(const String& data) {
   if (PS(session_status) != Session::None) {
     php_session_decode(data);
     return true;
@@ -1808,20 +1808,20 @@ bool f_session_register(int _argc, CVarRef var_names,
      "Relying on this feature is highly discouraged.");
 }
 
-bool f_session_unregister(CStrRef varname) {
+bool f_session_unregister(const String& varname) {
   throw NotSupportedException
     (__func__, "Deprecated as of PHP 5.3.0 and REMOVED as of PHP 6.0.0. "
      "Relying on this feature is highly discouraged.");
 }
 
-bool f_session_is_registered(CStrRef varname) {
+bool f_session_is_registered(const String& varname) {
   throw NotSupportedException
     (__func__, "Deprecated as of PHP 5.3.0 and REMOVED as of PHP 6.0.0. "
      "Relying on this feature is highly discouraged.");
 }
 
 static bool HHVM_METHOD(SessionHandler, hhopen,
-                        CStrRef save_path, CStrRef session_id) {
+                        const String& save_path, const String& session_id) {
   return PS(default_mod) &&
     PS(default_mod)->open(save_path->data(), session_id->data());
 }
@@ -1830,7 +1830,7 @@ static bool HHVM_METHOD(SessionHandler, hhclose) {
   return PS(default_mod) && PS(default_mod)->close();
 }
 
-static String HHVM_METHOD(SessionHandler, hhread, CStrRef session_id) {
+static String HHVM_METHOD(SessionHandler, hhread, const String& session_id) {
   String value;
   if (PS(default_mod) && PS(default_mod)->read(PS(id).data(), value)) {
     php_session_decode(value);
@@ -1840,12 +1840,12 @@ static String HHVM_METHOD(SessionHandler, hhread, CStrRef session_id) {
 }
 
 static bool HHVM_METHOD(SessionHandler, hhwrite,
-                        CStrRef session_id, CStrRef session_data) {
+                        const String& session_id, const String& session_data) {
   return PS(default_mod) &&
     PS(default_mod)->write(session_id->data(), session_data->data());
 }
 
-static bool HHVM_METHOD(SessionHandler, hhdestroy, CStrRef session_id) {
+static bool HHVM_METHOD(SessionHandler, hhdestroy, const String& session_id) {
   return PS(default_mod) && PS(default_mod)->destroy(session_id->data());
 }
 

@@ -60,7 +60,7 @@ public:
 
   CLASSNAME_IS("ldap link");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   LDAP *link;
   Variant rebindproc;
@@ -83,7 +83,7 @@ public:
 
   CLASSNAME_IS("ldap result");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof();}
+  virtual const String& o_getClassNameHook() const { return classnameof();}
 
   LDAPMessage *data;
 };
@@ -107,7 +107,7 @@ public:
 
   CLASSNAME_IS("ldap result entry");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   LDAPMessage *data;
   BerElement *ber;
@@ -126,7 +126,7 @@ static int _get_lderrno(LDAP *ldap) {
   return lderr;
 }
 
-static bool php_ldap_do_modify(CResRef link, CStrRef dn, CArrRef entry,
+static bool php_ldap_do_modify(CResRef link, const String& dn, CArrRef entry,
                                int oper) {
   bool is_full_add = false; /* flag for full add operation so ldap_mod_add
                                can be put back into oper, gerrit THomson */
@@ -523,7 +523,7 @@ static void get_attributes(Array &ret, LDAP *ldap,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_ldap_connect(CStrRef hostname /* = null_string */,
+Variant f_ldap_connect(const String& hostname /* = null_string */,
                        int port /* = 389 */) {
   if (LDAPG(max_links) != -1 && LDAPG(num_links) >= LDAPG(max_links)) {
     raise_warning("Too many open links (%ld)", LDAPG(num_links));
@@ -555,7 +555,7 @@ Variant f_ldap_connect(CStrRef hostname /* = null_string */,
   return false;
 }
 
-Variant f_ldap_explode_dn(CStrRef dn, int with_attrib) {
+Variant f_ldap_explode_dn(const String& dn, int with_attrib) {
   char **ldap_value;
   if (!(ldap_value = ldap_explode_dn((char*)dn.data(), with_attrib))) {
     /* Invalid parameters were passed to ldap_explode_dn */
@@ -576,7 +576,7 @@ Variant f_ldap_explode_dn(CStrRef dn, int with_attrib) {
   return ret;
 }
 
-Variant f_ldap_dn2ufn(CStrRef db) {
+Variant f_ldap_dn2ufn(const String& db) {
   char *ufn = ldap_dn2ufn((char*)db.data());
   if (ufn) {
     String ret(ufn, CopyString);
@@ -590,28 +590,28 @@ String f_ldap_err2str(int errnum) {
   return String(ldap_err2string(errnum), CopyString);
 }
 
-bool f_ldap_add(CResRef link, CStrRef dn, CArrRef entry) {
+bool f_ldap_add(CResRef link, const String& dn, CArrRef entry) {
   return php_ldap_do_modify(link, dn, entry, PHP_LD_FULL_ADD);
 }
 
-bool f_ldap_mod_add(CResRef link, CStrRef dn, CArrRef entry) {
+bool f_ldap_mod_add(CResRef link, const String& dn, CArrRef entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_ADD);
 }
 
-bool f_ldap_mod_del(CResRef link, CStrRef dn, CArrRef entry) {
+bool f_ldap_mod_del(CResRef link, const String& dn, CArrRef entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_DELETE);
 }
 
-bool f_ldap_mod_replace(CResRef link, CStrRef dn, CArrRef entry) {
+bool f_ldap_mod_replace(CResRef link, const String& dn, CArrRef entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_REPLACE);
 }
 
-bool f_ldap_modify(CResRef link, CStrRef dn, CArrRef entry) {
+bool f_ldap_modify(CResRef link, const String& dn, CArrRef entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_REPLACE);
 }
 
-bool f_ldap_bind(CResRef link, CStrRef bind_rdn /* = null_string */,
-                 CStrRef bind_password /* = null_string */) {
+bool f_ldap_bind(CResRef link, const String& bind_rdn /* = null_string */,
+                 const String& bind_password /* = null_string */) {
   int rc;
   LdapLink *ld = link.getTyped<LdapLink>();
   if ((rc = ldap_bind_s(ld->link, (char*)bind_rdn.data(),
@@ -652,7 +652,7 @@ bool f_ldap_set_rebind_proc(CResRef link, CVarRef callback) {
   return true;
 }
 
-bool f_ldap_sort(CResRef link, CResRef result, CStrRef sortfilter) {
+bool f_ldap_sort(CResRef link, CResRef result, const String& sortfilter) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResult *res = result.getTyped<LdapResult>();
 
@@ -944,7 +944,8 @@ Variant f_ldap_search(CVarRef link, CVarRef base_dn, CVarRef filter,
                             sizelimit, timelimit, deref, LDAP_SCOPE_SUBTREE);
 }
 
-bool f_ldap_rename(CResRef link, CStrRef dn, CStrRef newrdn, CStrRef newparent,
+bool f_ldap_rename(CResRef link, const String& dn, const String& newrdn,
+                   const String& newparent,
                    bool deleteoldrdn) {
   LdapLink *ld = link.getTyped<LdapLink>();
   int rc = ldap_rename_s(ld->link, (char*)dn.data(), (char*)newrdn.data(),
@@ -953,7 +954,7 @@ bool f_ldap_rename(CResRef link, CStrRef dn, CStrRef newrdn, CStrRef newparent,
   return rc == LDAP_SUCCESS;
 }
 
-bool f_ldap_delete(CResRef link, CStrRef dn) {
+bool f_ldap_delete(CResRef link, const String& dn) {
   LdapLink *ld = link.getTyped<LdapLink>();
   int rc;
   if ((rc = ldap_delete_s(ld->link, (char*)dn.data())) != LDAP_SUCCESS) {
@@ -963,8 +964,8 @@ bool f_ldap_delete(CResRef link, CStrRef dn) {
   return true;
 }
 
-Variant f_ldap_compare(CResRef link, CStrRef dn, CStrRef attribute,
-                       CStrRef value) {
+Variant f_ldap_compare(CResRef link, const String& dn, const String& attribute,
+                       const String& value) {
   LdapLink *ld = link.getTyped<LdapLink>();
   int rc = ldap_compare_s(ld->link, (char*)dn.data(), (char*)attribute.data(),
                           (char*)value.data());
@@ -1216,7 +1217,7 @@ bool f_ldap_free_result(CResRef result) {
 }
 
 Variant f_ldap_get_values_len(CResRef link, CResRef result_entry,
-                              CStrRef attribute) {
+                              const String& attribute) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResultEntry *entry = result_entry.getTyped<LdapResultEntry>();
 
@@ -1241,7 +1242,7 @@ Variant f_ldap_get_values_len(CResRef link, CResRef result_entry,
 }
 
 Variant f_ldap_get_values(CResRef link, CResRef result_entry,
-                          CStrRef attribute) {
+                          const String& attribute) {
   return f_ldap_get_values_len(link, result_entry, attribute);
 }
 

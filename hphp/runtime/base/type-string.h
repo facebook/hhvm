@@ -188,6 +188,12 @@ public:
     m_px->setRefCount(1);
   }
 
+  static String attach(const String& s) {
+    String result;
+    result.m_px = s.m_px;
+    return result;
+  }
+
   void clear() { reset();}
   /**
    * Informational
@@ -196,12 +202,12 @@ public:
     return m_px ? m_px->data() : "";
   }
 public:
-  CStrRef setSize(int len) {
+  const String& setSize(int len) {
     assert(m_px);
     m_px->setSize(len);
     return *this;
   }
-  CStrRef shrink(int len) {
+  const String& shrink(int len) {
     assert(m_px);
     m_px->setSize(len);
     return *this;
@@ -262,10 +268,10 @@ public:
   static const int npos = -1;
   int find(char ch, int pos = 0, bool caseSensitive = true) const;
   int find(const char *s, int pos = 0, bool caseSensitive = true) const;
-  int find(CStrRef s, int pos = 0, bool caseSensitive = true) const;
+  int find(const String& s, int pos = 0, bool caseSensitive = true) const;
   int rfind(char ch, int pos = 0, bool caseSensitive = true) const;
   int rfind(const char *s, int pos = 0, bool caseSensitive = true) const;
-  int rfind(CStrRef s, int pos = 0, bool caseSensitive = true) const;
+  int rfind(const String& s, int pos = 0, bool caseSensitive = true) const;
 
   /**
    * Replace a substr with another and return replaced one. Note, read
@@ -276,9 +282,9 @@ public:
    * it will replace at most that many occurrences, so count's input value
    * is never checked.
    */
-  String replace(int start, int length, CStrRef replacement) const;
-  String replace(CStrRef search, CStrRef replacement) const;
-  String replace(CStrRef search, CStrRef replacement, int &count,
+  String replace(int start, int length, const String& replacement) const;
+  String replace(const String& search, const String& replacement) const;
+  String replace(const String& search, const String& replacement, int &count,
                  bool caseSensitive) const;
 
   /**
@@ -298,15 +304,15 @@ public:
   friend String operator+(const String& lhs, litstr rhs);
   friend String operator+(const String & lhs, const String & rhs);
   String &operator += (litstr  v);
-  String &operator += (CStrRef v);
+  String &operator += (const String& v);
   String &operator += (const StringSlice& slice);
   String &operator += (const MutableSlice& slice);
-  String  operator |  (CStrRef v) const = delete;
-  String  operator &  (CStrRef v) const = delete;
-  String  operator ^  (CStrRef v) const = delete;
-  String &operator |= (CStrRef v) = delete;
-  String &operator &= (CStrRef v) = delete;
-  String &operator ^= (CStrRef v) = delete;
+  String  operator |  (const String& v) const = delete;
+  String  operator &  (const String& v) const = delete;
+  String  operator ^  (const String& v) const = delete;
+  String &operator |= (const String& v) = delete;
+  String &operator &= (const String& v) = delete;
+  String &operator ^= (const String& v) = delete;
   String  operator ~  () const = delete;
   explicit operator std::string () const {
     return std::string(c_str(), size());
@@ -326,12 +332,12 @@ public:
   bool operator <= (litstr  v) const = delete;
   bool operator >  (litstr  v) const = delete;
   bool operator <  (litstr  v) const = delete;
-  bool operator == (CStrRef v) const;
-  bool operator != (CStrRef v) const;
-  bool operator >= (CStrRef v) const = delete;
-  bool operator <= (CStrRef v) const = delete;
-  bool operator >  (CStrRef v) const;
-  bool operator <  (CStrRef v) const;
+  bool operator == (const String& v) const;
+  bool operator != (const String& v) const;
+  bool operator >= (const String& v) const = delete;
+  bool operator <= (const String& v) const = delete;
+  bool operator >  (const String& v) const;
+  bool operator <  (const String& v) const;
   bool operator == (CVarRef v) const;
   bool operator != (CVarRef v) const;
   bool operator >= (CVarRef v) const = delete;
@@ -355,25 +361,25 @@ public:
    */
   bool same (litstr  v2) const = delete;
   bool same (const StringData *v2) const;
-  bool same (CStrRef v2) const;
+  bool same (const String& v2) const;
   bool same (CArrRef v2) const;
   bool same (CObjRef v2) const;
   bool same (CResRef v2) const;
   bool equal(litstr  v2) const = delete;
   bool equal(const StringData *v2) const;
-  bool equal(CStrRef v2) const;
+  bool equal(const String& v2) const;
   bool equal(CArrRef v2) const;
   bool equal(CObjRef v2) const;
   bool equal(CResRef v2) const;
   bool less (litstr  v2) const = delete;
   bool less (const StringData *v2) const;
-  bool less (CStrRef v2) const;
+  bool less (const String& v2) const;
   bool less (CArrRef v2) const;
   bool less (CObjRef v2) const;
   bool less (CResRef v2) const;
   bool more (litstr  v2) const = delete;
   bool more (const StringData *v2) const;
-  bool more (CStrRef v2) const;
+  bool more (const String& v2) const;
   bool more (CArrRef v2) const;
   bool more (CObjRef v2) const;
   bool more (CResRef v2) const;
@@ -392,7 +398,7 @@ public:
     not_reached();
     return rvalAtImpl(key ? key->toInt32() : 0);
   }
-  String rvalAt(CStrRef key) const { return rvalAtImpl(key.toInt32());}
+  String rvalAt(const String& key) const { return rvalAtImpl(key.toInt32());}
   String rvalAt(CArrRef key) const;
   String rvalAt(CObjRef key) const;
   String rvalAt(CVarRef key) const;
@@ -451,19 +457,19 @@ typedef hphp_hash_set<const StringData*, string_data_hash, string_data_same>
   ConstStringDataSet;
 
 struct hphp_string_hash {
-  size_t operator()(CStrRef s) const {
+  size_t operator()(const String& s) const {
     return s->hash();
   }
 };
 
 struct hphp_string_same {
-  bool operator()(CStrRef s1, CStrRef s2) const {
+  bool operator()(const String& s1, const String& s2) const {
     return s1->same(s2.get());
   }
 };
 
 struct hphp_string_isame {
-  bool operator()(CStrRef s1, CStrRef s2) const {
+  bool operator()(const String& s1, const String& s2) const {
     return s1->isame(s2.get());
   }
 };
@@ -506,6 +512,8 @@ class StringMap :
 // StrNR
 
 class StrNR {
+  StringData *m_px;
+
 public:
   explicit StrNR(StringData *data) {
     m_px = data;
@@ -516,8 +524,10 @@ public:
   explicit StrNR(const String &s) { // XXX
     m_px = s.get();
   }
+  ~StrNR() {
+  }
 
-  operator CStrRef() const { return asString(); }
+  /* implicit */ operator const String&() const { return asString(); }
   const char *data() const { return m_px ? m_px->data() : ""; }
 
   String& asString() {
@@ -527,9 +537,6 @@ public:
   const String& asString() const {
     return const_cast<StrNR*>(this)->asString();
   }
-
-protected:
-  StringData *m_px;
 
 private:
   static void compileTimeAssertions() {

@@ -31,13 +31,13 @@
 // defined in zend/zend-ini.tab.cpp
 
 extern bool zend_parse_ini_string
-(HPHP::CStrRef str, HPHP::CStrRef filename, int scanner_mode,
+(const HPHP::String& str, const HPHP::String& filename, int scanner_mode,
  HPHP::IniSetting::PFN_PARSER_CALLBACK callback, void *arg);
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool ini_on_update_bool(CStrRef value, void *p) {
+bool ini_on_update_bool(const String& value, void *p) {
   if (p) {
     if ((value.size() == 2 && strcasecmp("on", value.data()) == 0) ||
         (value.size() == 3 && strcasecmp("yes", value.data()) == 0) ||
@@ -50,14 +50,14 @@ bool ini_on_update_bool(CStrRef value, void *p) {
   return true;
 }
 
-bool ini_on_update_long(CStrRef value, void *p) {
+bool ini_on_update_long(const String& value, void *p) {
   if (p) {
     *((int64_t*)p) = value.toInt64();
   }
   return true;
 }
 
-bool ini_on_update_non_negative(CStrRef value, void *p) {
+bool ini_on_update_non_negative(const String& value, void *p) {
   int64_t v = value.toInt64();
   if (v < 0) {
     return false;
@@ -68,21 +68,21 @@ bool ini_on_update_non_negative(CStrRef value, void *p) {
   return true;
 }
 
-bool ini_on_update_real(CStrRef value, void *p) {
+bool ini_on_update_real(const String& value, void *p) {
   if (p) {
     *((double*)p) = value.toDouble();
   }
   return true;
 }
 
-bool ini_on_update_string(CStrRef value, void *p) {
+bool ini_on_update_string(const String& value, void *p) {
   if (p) {
     *((std::string*)p) = std::string(value.data(), value.size());
   }
   return true;
 }
 
-bool ini_on_update_string_non_empty(CStrRef value, void *p) {
+bool ini_on_update_string_non_empty(const String& value, void *p) {
   if (value.empty()) {
     return false;
   }
@@ -151,7 +151,7 @@ static void php_ini_parser_cb_with_sections
 ///////////////////////////////////////////////////////////////////////////////
 
 static Mutex s_mutex;
-Variant IniSetting::FromString(CStrRef ini, CStrRef filename,
+Variant IniSetting::FromString(const String& ini, const String& filename,
                                bool process_sections, int scanner_mode) {
   Lock lock(s_mutex); // ini parser is not thread-safe
 
@@ -227,7 +227,7 @@ const StaticString
   s_1("1"),
   s_0("0");
 
-bool IniSetting::Get(CStrRef name, String &value) {
+bool IniSetting::Get(const String& name, String &value) {
   if (name == s_error_reporting) {
     value = String((int64_t)g_context->getErrorReportingLevel());
     return true;
@@ -300,7 +300,7 @@ bool IniSetting::Get(CStrRef name, String &value) {
   return false;
 }
 
-bool IniSetting::Set(CStrRef name, CStrRef value) {
+bool IniSetting::Set(const String& name, const String& value) {
   CallbackMap::iterator iter = s_callbacks->find(name.data());
   if (iter != s_callbacks->end()) {
     return (*iter->second.callback)(value, iter->second.p);

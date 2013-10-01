@@ -24,7 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_filter_list();
-Variant f_filter_id(CStrRef filtername);
+Variant f_filter_id(const String& filtername);
 Variant f_filter_var(CVarRef variable, int64_t filter = 516,
                      CVarRef options = empty_array);
 

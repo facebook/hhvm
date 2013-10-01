@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 int64_t f_pcntl_alarm(int seconds);
-void f_pcntl_exec(CStrRef path, CArrRef args = null_array, CArrRef envs = null_array);
+void f_pcntl_exec(const String& path, CArrRef args = null_array, CArrRef envs = null_array);
 
 int64_t f_pcntl_fork();
 Variant f_pcntl_getpriority(int pid = 0, int process_identifier = 0);
@@ -52,16 +52,16 @@ int64_t f_pcntl_wtermsig(int status);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String f_shell_exec(CStrRef cmd);
-String f_exec(CStrRef command, VRefParam output = uninit_null(),
+String f_shell_exec(const String& cmd);
+String f_exec(const String& command, VRefParam output = uninit_null(),
               VRefParam return_var = uninit_null());
-void f_passthru(CStrRef command, VRefParam return_var = uninit_null());
-String f_system(CStrRef command, VRefParam return_var = uninit_null());
+void f_passthru(const String& command, VRefParam return_var = uninit_null());
+String f_system(const String& command, VRefParam return_var = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
-                    CStrRef cwd = null_string, CVarRef env = null_variant,
+Variant f_proc_open(const String& cmd, CArrRef descriptorspec, VRefParam pipes,
+                    const String& cwd = null_string, CVarRef env = null_variant,
                     CVarRef other_options = null_variant);
 bool f_proc_terminate(CResRef process, int signal = 0);
 int64_t f_proc_close(CResRef process);
@@ -70,8 +70,8 @@ bool f_proc_nice(int increment);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String f_escapeshellarg(CStrRef arg);
-String f_escapeshellcmd(CStrRef command);
+String f_escapeshellarg(const String& arg);
+String f_escapeshellcmd(const String& command);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

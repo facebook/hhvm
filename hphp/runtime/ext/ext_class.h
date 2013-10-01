@@ -26,29 +26,33 @@ namespace HPHP {
 Array f_get_declared_classes();
 Array f_get_declared_interfaces();
 Array f_get_declared_traits();
-bool f_class_alias(CStrRef original, CStrRef alias, bool autoload = true);
-bool f_class_exists(CStrRef class_name, bool autoload = true);
-bool f_interface_exists(CStrRef interface_name, bool autoload = true);
-bool f_trait_exists(CStrRef trait_name, bool autoload = true);
+bool f_class_alias(const String& original, const String& alias,
+                   bool autoload = true);
+bool f_class_exists(const String& class_name, bool autoload = true);
+bool f_interface_exists(const String& interface_name, bool autoload = true);
+bool f_trait_exists(const String& trait_name, bool autoload = true);
 Array f_get_class_methods(CVarRef class_or_object);
-Variant f_get_class_vars(CStrRef class_name);
-Array f_get_class_constants(CStrRef class_name);
+Variant f_get_class_vars(const String& class_name);
+Array f_get_class_constants(const String& class_name);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_get_class(CVarRef object = null_variant);
 Variant f_get_parent_class(CVarRef object = null_variant);
-bool f_is_a(CVarRef class_or_object, CStrRef class_name, bool allow_string = false);
-bool f_is_subclass_of(CVarRef class_or_object, CStrRef class_name, bool allow_string = true);
-bool f_method_exists(CVarRef class_or_object, CStrRef method_name);
-Variant f_property_exists(CVarRef class_or_object, CStrRef property);
+bool f_is_a(CVarRef class_or_object, const String& class_name,
+            bool allow_string = false);
+bool f_is_subclass_of(CVarRef class_or_object, const String& class_name,
+                      bool allow_string = true);
+bool f_method_exists(CVarRef class_or_object, const String& method_name);
+Variant f_property_exists(CVarRef class_or_object, const String& property);
 Variant f_get_object_vars(CObjRef object);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_call_user_method_array(CStrRef method_name, VRefParam obj,
+Variant f_call_user_method_array(const String& method_name, VRefParam obj,
                                  CArrRef paramarr);
-Variant f_call_user_method(int _argc, CStrRef method_name, VRefParam obj, CArrRef _argv = null_array);
+Variant f_call_user_method(int _argc, const String& method_name, VRefParam obj,
+                           CArrRef _argv = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

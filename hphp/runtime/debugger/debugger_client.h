@@ -140,13 +140,14 @@ public:
   void output (const std::string &s);
   void error  (const std::string &s);
 
-  void print  (CStrRef s);
-  void help   (CStrRef s);
-  void info   (CStrRef s);
-  void output (CStrRef s);
-  void error  (CStrRef s);
+  void print  (const String& s);
+  void help   (const String& s);
+  void info   (const String& s);
+  void output (const String& s);
+  void error  (const String& s);
 
-  bool code(CStrRef source, int lineFocus = 0, int line1 = 0, int line2 = 0,
+  bool code(const String& source, int lineFocus = 0, int line1 = 0,
+            int line2 = 0,
             int charFocus0 = 0, int lineFocus1 = 0, int charFocus1 = 0);
   void shortCode(BreakPointInfoPtr bp);
   char ask(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);

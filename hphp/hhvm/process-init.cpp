@@ -65,10 +65,10 @@ public:
   virtual Array getTraits() const {
     return Unit::getTraitsInfo();
   }
-  virtual const ClassInfo::MethodInfo *findFunction(CStrRef name) const {
+  virtual const ClassInfo::MethodInfo *findFunction(const String& name) const {
     return g_vmContext->findFunctionInfo(name);
   }
-  virtual const ClassInfo *findClassLike(CStrRef name) const {
+  virtual const ClassInfo *findClassLike(const String& name) const {
     const ClassInfo* ci;
     if ((ci = g_vmContext->findClassInfo(name)) != nullptr
         || (ci = g_vmContext->findInterfaceInfo(name)) != nullptr
@@ -77,13 +77,14 @@ public:
     }
     return nullptr;
   }
-  virtual const ClassInfo *findInterface(CStrRef name) const {
+  virtual const ClassInfo *findInterface(const String& name) const {
     return g_vmContext->findInterfaceInfo(name);
   }
-  virtual const ClassInfo* findTrait(CStrRef name) const {
+  virtual const ClassInfo* findTrait(const String& name) const {
     return g_vmContext->findTraitInfo(name);
   }
-  virtual const ClassInfo::ConstantInfo *findConstant(CStrRef name) const {
+  virtual const ClassInfo::ConstantInfo *
+  findConstant(const String& name) const {
     return g_vmContext->findConstantInfo(name);
   }
 };

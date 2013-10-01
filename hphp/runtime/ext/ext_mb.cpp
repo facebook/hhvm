@@ -1023,7 +1023,7 @@ Array f_mb_list_encodings() {
   return ret;
 }
 
-Variant f_mb_list_encodings_alias_names(CStrRef name /* = null_string */) {
+Variant f_mb_list_encodings_alias_names(const String& name /*= null_string*/) {
   const mbfl_encoding **encodings;
   const mbfl_encoding *encoding;
   mbfl_no_encoding no_encoding;
@@ -1075,7 +1075,7 @@ Variant f_mb_list_encodings_alias_names(CStrRef name /* = null_string */) {
   return ret;
 }
 
-Variant f_mb_list_mime_names(CStrRef name /* = null_string */) {
+Variant f_mb_list_mime_names(const String& name /* = null_string */) {
   const mbfl_encoding **encodings;
   const mbfl_encoding *encoding;
   mbfl_no_encoding no_encoding;
@@ -1119,8 +1119,8 @@ Variant f_mb_list_mime_names(CStrRef name /* = null_string */) {
   return ret;
 }
 
-bool f_mb_check_encoding(CStrRef var /* = null_string */,
-                         CStrRef encoding /* = null_string */) {
+bool f_mb_check_encoding(const String& var /* = null_string */,
+                         const String& encoding /* = null_string */) {
   mbfl_buffer_converter *convd;
   mbfl_no_encoding no_encoding = MBSTRG(current_internal_encoding);
   mbfl_string string, result, *ret = NULL;
@@ -1175,8 +1175,8 @@ bool f_mb_check_encoding(CStrRef var /* = null_string */,
   }
 }
 
-Variant f_mb_convert_case(CStrRef str, int mode,
-                         CStrRef encoding /* = null_string */) {
+Variant f_mb_convert_case(const String& str, int mode,
+                         const String& encoding /* = null_string */) {
   const char *enc = NULL;
   if (encoding.empty()) {
     enc = mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
@@ -1191,7 +1191,7 @@ Variant f_mb_convert_case(CStrRef str, int mode,
   return false;
 }
 
-Variant f_mb_convert_encoding(CStrRef str, CStrRef to_encoding,
+Variant f_mb_convert_encoding(const String& str, const String& to_encoding,
                               CVarRef from_encoding /* = null_variant */) {
   String encoding = from_encoding.toString();
   if (from_encoding.is(KindOfArray)) {
@@ -1218,8 +1218,9 @@ Variant f_mb_convert_encoding(CStrRef str, CStrRef to_encoding,
   return false;
 }
 
-Variant f_mb_convert_kana(CStrRef str, CStrRef option /* = null_string */,
-                          CStrRef encoding /* = null_string */) {
+Variant f_mb_convert_kana(const String& str,
+                          const String& option /* = null_string */,
+                          const String& encoding /* = null_string */) {
   mbfl_string string, result, *ret;
   mbfl_string_init(&string);
   string.no_language = MBSTRG(current_language);
@@ -1331,7 +1332,7 @@ static Variant php_mbfl_convert(CVarRef var,
   return var;
 }
 
-Variant f_mb_convert_variables(int _argc, CStrRef to_encoding,
+Variant f_mb_convert_variables(int _argc, const String& to_encoding,
                                CVarRef from_encoding, VRefParam vars,
                                CArrRef _argv /* = null_array */) {
   mbfl_string string, result;
@@ -1421,7 +1422,7 @@ Variant f_mb_convert_variables(int _argc, CStrRef to_encoding,
   return false;
 }
 
-Variant f_mb_decode_mimeheader(CStrRef str) {
+Variant f_mb_decode_mimeheader(const String& str) {
   mbfl_string string, result, *ret;
 
   mbfl_string_init(&string);
@@ -1439,8 +1440,8 @@ Variant f_mb_decode_mimeheader(CStrRef str) {
   return false;
 }
 
-static Variant php_mb_numericentity_exec(CStrRef str, CVarRef convmap,
-                                         CStrRef encoding, int type) {
+static Variant php_mb_numericentity_exec(const String& str, CVarRef convmap,
+                                         const String& encoding, int type) {
   int mapsize=0;
   mbfl_string string, result, *ret;
   mbfl_no_encoding no_encoding;
@@ -1488,12 +1489,13 @@ static Variant php_mb_numericentity_exec(CStrRef str, CVarRef convmap,
   return false;
 }
 
-Variant f_mb_decode_numericentity(CStrRef str, CVarRef convmap,
-                                 CStrRef encoding /* = null_string */) {
+Variant f_mb_decode_numericentity(const String& str, CVarRef convmap,
+                                 const String& encoding /* = null_string */) {
   return php_mb_numericentity_exec(str, convmap, encoding, 1);
 }
 
-Variant f_mb_detect_encoding(CStrRef str, CVarRef encoding_list /* = null_variant */,
+Variant f_mb_detect_encoding(const String& str,
+                             CVarRef encoding_list /* = null_variant */,
                              CVarRef strict /* = null_variant */) {
   mbfl_string string;
   const char *ret;
@@ -1566,10 +1568,11 @@ Variant f_mb_detect_order(CVarRef encoding_list /* = null_variant */) {
   return true;
 }
 
-Variant f_mb_encode_mimeheader(CStrRef str, CStrRef charset /* = null_string */,
-                              CStrRef transfer_encoding /* = null_string */,
-                              CStrRef linefeed /* = "\r\n" */,
-                              int indent /* = 0 */) {
+Variant f_mb_encode_mimeheader(const String& str,
+                               const String& charset /* = null_string */,
+                               const String& transfer_encoding/*= null_string*/,
+                               const String& linefeed /* = "\r\n" */,
+                               int indent /* = 0 */) {
   mbfl_no_encoding charsetenc, transenc;
   mbfl_string  string, result, *ret;
 
@@ -1614,8 +1617,8 @@ Variant f_mb_encode_mimeheader(CStrRef str, CStrRef charset /* = null_string */,
   return false;
 }
 
-Variant f_mb_encode_numericentity(CStrRef str, CVarRef convmap,
-                                 CStrRef encoding /* = null_string */) {
+Variant f_mb_encode_numericentity(const String& str, CVarRef convmap,
+                                 const String& encoding /* = null_string */) {
   return php_mb_numericentity_exec(str, convmap, encoding, 0);
 }
 
@@ -1638,7 +1641,7 @@ const StaticString
   s_long("long"),
   s_entity("entity");
 
-Variant f_mb_get_info(CStrRef type /* = null_string */) {
+Variant f_mb_get_info(const String& type /* = null_string */) {
   const mbfl_language *lang = mbfl_no2language(MBSTRG(current_language));
   mbfl_no_encoding *entry;
   int n;
@@ -1783,7 +1786,7 @@ Variant f_mb_get_info(CStrRef type /* = null_string */) {
   return false;
 }
 
-Variant f_mb_http_input(CStrRef type /* = null_string */) {
+Variant f_mb_http_input(const String& type /* = null_string */) {
   int n;
   char *name;
   mbfl_no_encoding *entry;
@@ -1848,7 +1851,7 @@ Variant f_mb_http_input(CStrRef type /* = null_string */) {
   return false;
 }
 
-Variant f_mb_http_output(CStrRef encoding /* = null_string */) {
+Variant f_mb_http_output(const String& encoding /* = null_string */) {
   if (encoding.empty()) {
     char *name = (char *)mbfl_no_encoding2name
       (MBSTRG(current_http_output_encoding));
@@ -1867,7 +1870,7 @@ Variant f_mb_http_output(CStrRef encoding /* = null_string */) {
   return true;
 }
 
-Variant f_mb_internal_encoding(CStrRef encoding /* = null_string */) {
+Variant f_mb_internal_encoding(const String& encoding /* = null_string */) {
   if (encoding.empty()) {
     char *name = (char *)mbfl_no_encoding2name
       (MBSTRG(current_internal_encoding));
@@ -1887,7 +1890,7 @@ Variant f_mb_internal_encoding(CStrRef encoding /* = null_string */) {
   return true;
 }
 
-Variant f_mb_language(CStrRef language /* = null_string */) {
+Variant f_mb_language(const String& language /* = null_string */) {
   if (language.empty()) {
     return String(mbfl_no_language2name(MBSTRG(current_language)), CopyString);
   }
@@ -1905,7 +1908,7 @@ Variant f_mb_language(CStrRef language /* = null_string */) {
   return true;
 }
 
-String f_mb_output_handler(CStrRef contents, int status) {
+String f_mb_output_handler(const String& contents, int status) {
   mbfl_string string, result;
   int last_feed;
 
@@ -2144,7 +2147,8 @@ out:
   return from_encoding;
 }
 
-bool f_mb_parse_str(CStrRef encoded_string, VRefParam result /* = null */) {
+bool f_mb_parse_str(const String& encoded_string,
+                    VRefParam result /* = null */) {
   php_mb_encoding_handler_info_t info;
   info.data_type              = PARSE_STRING;
   info.separator              = ";&";
@@ -2165,7 +2169,7 @@ bool f_mb_parse_str(CStrRef encoded_string, VRefParam result /* = null */) {
   return detected != mbfl_no_encoding_invalid;
 }
 
-Variant f_mb_preferred_mime_name(CStrRef encoding) {
+Variant f_mb_preferred_mime_name(const String& encoding) {
   mbfl_no_encoding no_encoding = mbfl_name2no_encoding(encoding.data());
   if (no_encoding == mbfl_no_encoding_invalid) {
     raise_warning("Unknown encoding \"%s\"", encoding.data());
@@ -2182,8 +2186,8 @@ Variant f_mb_preferred_mime_name(CStrRef encoding) {
   return String(preferred_name, CopyString);
 }
 
-static Variant php_mb_substr(CStrRef str, int from, int len,
-                             CStrRef encoding, bool substr) {
+static Variant php_mb_substr(const String& str, int from, int len,
+                             const String& encoding, bool substr) {
   mbfl_string string;
   mbfl_string_init(&string);
   string.no_language = MBSTRG(current_language);
@@ -2249,19 +2253,19 @@ static Variant php_mb_substr(CStrRef str, int from, int len,
   return false;
 }
 
-Variant f_mb_substr(CStrRef str, int start, int length /* = 0x7FFFFFFF */,
-                    CStrRef encoding /* = null_string */) {
+Variant f_mb_substr(const String& str, int start, int length /* = 0x7FFFFFFF */,
+                    const String& encoding /* = null_string */) {
   return php_mb_substr(str, start, length, encoding, true);
 }
 
-Variant f_mb_strcut(CStrRef str, int start, int length /* = 0x7FFFFFFF */,
-                    CStrRef encoding /* = null_string */) {
+Variant f_mb_strcut(const String& str, int start, int length /* = 0x7FFFFFFF */,
+                    const String& encoding /* = null_string */) {
   return php_mb_substr(str, start, length, encoding, false);
 }
 
-Variant f_mb_strimwidth(CStrRef str, int start, int width,
-                        CStrRef trimmarker /* = null_string */,
-                        CStrRef encoding /* = null_string */) {
+Variant f_mb_strimwidth(const String& str, int start, int width,
+                        const String& trimmarker /* = null_string */,
+                        const String& encoding /* = null_string */) {
   mbfl_string string, result, marker, *ret;
 
   mbfl_string_init(&string);
@@ -2305,8 +2309,9 @@ Variant f_mb_strimwidth(CStrRef str, int start, int width,
   return false;
 }
 
-Variant f_mb_stripos(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
-                     CStrRef encoding /* = null_string */) {
+Variant f_mb_stripos(const String& haystack, const String& needle,
+                     int offset /* = 0 */,
+                     const String& encoding /* = null_string */) {
   const char *from_encoding;
   if (encoding.empty()) {
     from_encoding =
@@ -2328,8 +2333,9 @@ Variant f_mb_stripos(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
   return false;
 }
 
-Variant f_mb_strripos(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
-                      CStrRef encoding /* = null_string */) {
+Variant f_mb_strripos(const String& haystack, const String& needle,
+                      int offset /* = 0 */,
+                      const String& encoding /* = null_string */) {
   const char *from_encoding;
   if (encoding.empty()) {
     from_encoding =
@@ -2346,8 +2352,9 @@ Variant f_mb_strripos(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
   return false;
 }
 
-Variant f_mb_stristr(CStrRef haystack, CStrRef needle, bool part /* = false */,
-                     CStrRef encoding /* = null_string */) {
+Variant f_mb_stristr(const String& haystack, const String& needle,
+                     bool part /* = false */,
+                     const String& encoding /* = null_string */) {
   mbfl_string mbs_haystack;
   mbfl_string_init(&mbs_haystack);
   mbs_haystack.no_language = MBSTRG(current_language);
@@ -2402,7 +2409,8 @@ Variant f_mb_stristr(CStrRef haystack, CStrRef needle, bool part /* = false */,
   return false;
 }
 
-Variant f_mb_strlen(CStrRef str, CStrRef encoding /* = null_string */) {
+Variant f_mb_strlen(const String& str,
+                    const String& encoding /* = null_string */) {
   mbfl_string string;
   mbfl_string_init(&string);
   string.val = (unsigned char *)str.data();
@@ -2426,8 +2434,9 @@ Variant f_mb_strlen(CStrRef str, CStrRef encoding /* = null_string */) {
   return false;
 }
 
-Variant f_mb_strpos(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
-                    CStrRef encoding /* = null_string */) {
+Variant f_mb_strpos(const String& haystack, const String& needle,
+                    int offset /* = 0 */,
+                    const String& encoding /* = null_string */) {
   mbfl_string mbs_haystack;
   mbfl_string_init(&mbs_haystack);
   mbs_haystack.no_language = MBSTRG(current_language);
@@ -2485,9 +2494,9 @@ Variant f_mb_strpos(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
   return false;
 }
 
-Variant f_mb_strrpos(CStrRef haystack, CStrRef needle,
+Variant f_mb_strrpos(const String& haystack, const String& needle,
                      CVarRef offset /* = 0LL */,
-                     CStrRef encoding /* = null_string */) {
+                     const String& encoding /* = null_string */) {
   mbfl_string mbs_haystack;
   mbfl_string_init(&mbs_haystack);
   mbs_haystack.no_language = MBSTRG(current_language);
@@ -2557,8 +2566,9 @@ Variant f_mb_strrpos(CStrRef haystack, CStrRef needle,
   return false;
 }
 
-Variant f_mb_strrchr(CStrRef haystack, CStrRef needle, bool part /* = false */,
-                    CStrRef encoding /* = null_string */) {
+Variant f_mb_strrchr(const String& haystack, const String& needle,
+                     bool part /* = false */,
+                    const String& encoding /* = null_string */) {
   mbfl_string mbs_haystack;
   mbfl_string_init(&mbs_haystack);
   mbs_haystack.no_language = MBSTRG(current_language);
@@ -2607,8 +2617,9 @@ Variant f_mb_strrchr(CStrRef haystack, CStrRef needle, bool part /* = false */,
   return false;
 }
 
-Variant f_mb_strrichr(CStrRef haystack, CStrRef needle, bool part /* = false */,
-                     CStrRef encoding /* = null_string */) {
+Variant f_mb_strrichr(const String& haystack, const String& needle,
+                      bool part /* = false */,
+                      const String& encoding /* = null_string */) {
   mbfl_string mbs_haystack;
   mbfl_string_init(&mbs_haystack);
   mbs_haystack.no_language = MBSTRG(current_language);
@@ -2659,8 +2670,9 @@ Variant f_mb_strrichr(CStrRef haystack, CStrRef needle, bool part /* = false */,
   return false;
 }
 
-Variant f_mb_strstr(CStrRef haystack, CStrRef needle, bool part /* = false */,
-                   CStrRef encoding /* = null_string */) {
+Variant f_mb_strstr(const String& haystack, const String& needle,
+                    bool part /* = false */,
+                    const String& encoding /* = null_string */) {
   mbfl_string mbs_haystack;
   mbfl_string_init(&mbs_haystack);
   mbs_haystack.no_language = MBSTRG(current_language);
@@ -2707,7 +2719,8 @@ Variant f_mb_strstr(CStrRef haystack, CStrRef needle, bool part /* = false */,
   return false;
 }
 
-Variant f_mb_strtolower(CStrRef str, CStrRef encoding /* = null_string */) {
+Variant f_mb_strtolower(const String& str,
+                        const String& encoding /* = null_string */) {
   const char *from_encoding;
   if (encoding.empty()) {
     from_encoding =
@@ -2726,7 +2739,8 @@ Variant f_mb_strtolower(CStrRef str, CStrRef encoding /* = null_string */) {
   return false;
 }
 
-Variant f_mb_strtoupper(CStrRef str, CStrRef encoding /* = null_string */) {
+Variant f_mb_strtoupper(const String& str,
+                        const String& encoding /* = null_string */) {
   const char *from_encoding;
   if (encoding.empty()) {
     from_encoding =
@@ -2745,7 +2759,8 @@ Variant f_mb_strtoupper(CStrRef str, CStrRef encoding /* = null_string */) {
   return false;
 }
 
-Variant f_mb_strwidth(CStrRef str, CStrRef encoding /* = null_string */) {
+Variant f_mb_strwidth(const String& str,
+                      const String& encoding /* = null_string */) {
   mbfl_string string;
   mbfl_string_init(&string);
   string.no_language = MBSTRG(current_language);
@@ -2813,8 +2828,8 @@ Variant f_mb_substitute_character(CVarRef substrchar /* = null_variant */) {
   return true;
 }
 
-Variant f_mb_substr_count(CStrRef haystack, CStrRef needle,
-                      CStrRef encoding /* = null_string */) {
+Variant f_mb_substr_count(const String& haystack, const String& needle,
+                      const String& encoding /* = null_string */) {
   mbfl_string mbs_haystack;
   mbfl_string_init(&mbs_haystack);
   mbs_haystack.no_language = MBSTRG(current_language);
@@ -2872,7 +2887,7 @@ static php_mb_regex_enc_name_map_t enc_name_map[] ={
     ONIG_ENCODING_UTF16_BE
   },
   {
-    "UTF-16LE\0",
+   "UTF-16LE\0",
     ONIG_ENCODING_UTF16_LE
   },
   {
@@ -3008,7 +3023,7 @@ static const char *php_mb_regex_mbctype2name(OnigEncoding mbctype) {
 /*
  * regex cache
  */
-static php_mb_regex_t *php_mbregex_compile_pattern(CStrRef pattern,
+static php_mb_regex_t *php_mbregex_compile_pattern(const String& pattern,
                                                    OnigOptionType options,
                                                    OnigEncoding enc,
                                                    OnigSyntaxType *syntax) {
@@ -3188,8 +3203,8 @@ static void _php_mb_regex_init_options(const char *parg, int narg,
 ///////////////////////////////////////////////////////////////////////////////
 // regex functions
 
-bool f_mb_ereg_match(CStrRef pattern, CStrRef str,
-                     CStrRef option /* = null_string */) {
+bool f_mb_ereg_match(const String& pattern, const String& str,
+                     const String& option /* = null_string */) {
   OnigSyntaxType *syntax;
   OnigOptionType noption = 0;
   if (!option.empty()) {
@@ -3214,9 +3229,9 @@ bool f_mb_ereg_match(CStrRef pattern, CStrRef str,
 }
 
 static Variant _php_mb_regex_ereg_replace_exec(CVarRef pattern,
-                                               CStrRef replacement,
-                                               CStrRef str,
-                                               CStrRef option,
+                                               const String& replacement,
+                                               const String& str,
+                                               const String& option,
                                                OnigOptionType options) {
   const char *p;
   php_mb_regex_t *re;
@@ -3346,14 +3361,16 @@ static Variant _php_mb_regex_ereg_replace_exec(CVarRef pattern,
   return out_buf.detach();
 }
 
-Variant f_mb_ereg_replace(CVarRef pattern, CStrRef replacement, CStrRef str,
-                         CStrRef option /* = null_string */) {
+Variant f_mb_ereg_replace(CVarRef pattern, const String& replacement,
+                          const String& str,
+                         const String& option /* = null_string */) {
   return _php_mb_regex_ereg_replace_exec(pattern, replacement,
                                          str, option, 0);
 }
 
-Variant f_mb_eregi_replace(CVarRef pattern, CStrRef replacement, CStrRef str,
-                          CStrRef option /* = null_string */) {
+Variant f_mb_eregi_replace(CVarRef pattern, const String& replacement,
+                           const String& str,
+                           const String& option /* = null_string */) {
   return _php_mb_regex_ereg_replace_exec(pattern, replacement,
                                          str, option, ONIG_OPTION_IGNORECASE);
 }
@@ -3393,8 +3410,9 @@ Variant f_mb_ereg_search_getregs() {
   return false;
 }
 
-bool f_mb_ereg_search_init(CStrRef str, CStrRef pattern /* = null_string */,
-                           CStrRef option /* = null_string */) {
+bool f_mb_ereg_search_init(const String& str,
+                           const String& pattern /* = null_string */,
+                           const String& option /* = null_string */) {
   OnigOptionType noption = MBSTRG(regex_default_options);
   OnigSyntaxType *syntax = MBSTRG(regex_default_syntax);
   if (!option.empty()) {
@@ -3420,7 +3438,8 @@ bool f_mb_ereg_search_init(CStrRef str, CStrRef pattern /* = null_string */,
 }
 
 /* regex search */
-static Variant _php_mb_regex_ereg_search_exec(CStrRef pattern, CStrRef option,
+static Variant _php_mb_regex_ereg_search_exec(const String& pattern,
+                                              const String& option,
                                               int mode) {
   int n, i, err, pos, len, beg, end;
   OnigUChar *str;
@@ -3518,22 +3537,22 @@ static Variant _php_mb_regex_ereg_search_exec(CStrRef pattern, CStrRef option,
   return ret;
 }
 
-Variant f_mb_ereg_search(CStrRef pattern /* = null_string */,
-                      CStrRef option /* = null_string */) {
+Variant f_mb_ereg_search(const String& pattern /* = null_string */,
+                      const String& option /* = null_string */) {
   return _php_mb_regex_ereg_search_exec(pattern, option, 0);
 }
 
-Variant f_mb_ereg_search_pos(CStrRef pattern /* = null_string */,
-                           CStrRef option /* = null_string */) {
+Variant f_mb_ereg_search_pos(const String& pattern /* = null_string */,
+                           const String& option /* = null_string */) {
   return _php_mb_regex_ereg_search_exec(pattern, option, 1);
 }
 
-Variant f_mb_ereg_search_regs(CStrRef pattern /* = null_string */,
-                            CStrRef option /* = null_string */) {
+Variant f_mb_ereg_search_regs(const String& pattern /* = null_string */,
+                            const String& option /* = null_string */) {
   return _php_mb_regex_ereg_search_exec(pattern, option, 2);
 }
 
-static Variant _php_mb_regex_ereg_exec(CVarRef pattern, CStrRef str,
+static Variant _php_mb_regex_ereg_exec(CVarRef pattern, const String& str,
                                        Variant &regs, int icase) {
   php_mb_regex_t *re;
   OnigRegion *regions = NULL;
@@ -3598,15 +3617,17 @@ static Variant _php_mb_regex_ereg_exec(CVarRef pattern, CStrRef str,
   return match_len;
 }
 
-Variant f_mb_ereg(CVarRef pattern, CStrRef str, VRefParam regs /* = null */) {
+Variant f_mb_ereg(CVarRef pattern, const String& str,
+                  VRefParam regs /* = null */) {
   return _php_mb_regex_ereg_exec(pattern, str, regs, 0);
 }
 
-Variant f_mb_eregi(CVarRef pattern, CStrRef str, VRefParam regs /* = null */) {
+Variant f_mb_eregi(CVarRef pattern, const String& str,
+                   VRefParam regs /* = null */) {
   return _php_mb_regex_ereg_exec(pattern, str, regs, 1);
 }
 
-Variant f_mb_regex_encoding(CStrRef encoding /* = null_string */) {
+Variant f_mb_regex_encoding(const String& encoding /* = null_string */) {
   if (encoding.empty()) {
     const char *retval = php_mb_regex_mbctype2name(MBSTRG(current_mbctype));
     if (retval != NULL) {
@@ -3639,7 +3660,7 @@ static void php_mb_regex_set_options(OnigOptionType options,
   MBSTRG(regex_default_syntax) = syntax;
 }
 
-String f_mb_regex_set_options(CStrRef options /* = null_string */) {
+String f_mb_regex_set_options(const String& options /* = null_string */) {
   OnigOptionType opt;
   OnigSyntaxType *syntax;
   char buf[16];
@@ -3658,7 +3679,8 @@ String f_mb_regex_set_options(CStrRef options /* = null_string */) {
   return String(buf, CopyString);
 }
 
-Variant f_mb_split(CStrRef pattern, CStrRef str, int count /* = -1 */) {
+Variant f_mb_split(const String& pattern, const String& str,
+                   int count /* = -1 */) {
   php_mb_regex_t *re;
   OnigRegion *regs = NULL;
 
@@ -3923,9 +3945,9 @@ static int php_mail(const char *to, const char *subject, const char *message,
   return 1;
 }
 
-bool f_mb_send_mail(CStrRef to, CStrRef subject, CStrRef message,
-                    CStrRef headers /* = null_string */,
-                    CStrRef extra_cmd /* = null_string */) {
+bool f_mb_send_mail(const String& to, const String& subject, const String& message,
+                    const String& headers /* = null_string */,
+                    const String& extra_cmd /* = null_string */) {
   /* initialize */
   /* automatic allocateable buffer for additional header */
   mbfl_memory_device device;

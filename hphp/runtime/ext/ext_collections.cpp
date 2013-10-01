@@ -4972,7 +4972,7 @@ Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
   }
 }
 
-Variant& collectionOffsetGet(ObjectData* obj, CStrRef offset) {
+Variant& collectionOffsetGet(ObjectData* obj, const String& offset) {
   StringData* key = offset.get();
   switch (obj->getCollectionType()) {
     case Collection::VectorType: {
@@ -5043,7 +5043,7 @@ void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
   }
 }
 
-void collectionOffsetSet(ObjectData* obj, CStrRef offset, CVarRef val) {
+void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
   StringData* key = offset.get();
   TypedValue* tv = cvarToCell(&val);
   if (UNLIKELY(tv->m_type == KindOfUninit)) {

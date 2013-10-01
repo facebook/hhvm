@@ -282,7 +282,7 @@ static int get_backref(const char **s) {
   return val;
 }
 
-bool VirtualHost::rewriteURL(CStrRef host, String &url, bool &qsa,
+bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
                              int &redirect) const {
   String normalized = url;
   if (normalized.empty() || normalized.charAt(0) != '/') {

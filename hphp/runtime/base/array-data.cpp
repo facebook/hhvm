@@ -339,7 +339,7 @@ extern const ArrayFunctions g_array_funcs = {
 // plain array access converts them to integers.  non-int-string
 // assersions should go upstream of the ArrayData api.
 
-bool ArrayData::IsValidKey(CStrRef k) {
+bool ArrayData::IsValidKey(const String& k) {
   return IsValidKey(k.get());
 }
 
@@ -726,7 +726,7 @@ CVarRef ArrayData::getNotFound(const StringData* k, bool error) const {
          null_variant;
 }
 
-CVarRef ArrayData::getNotFound(CStrRef k) {
+CVarRef ArrayData::getNotFound(const String& k) {
   raise_notice("Undefined index: %s", k.data());
   return null_variant;
 }

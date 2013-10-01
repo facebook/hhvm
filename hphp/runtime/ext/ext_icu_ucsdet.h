@@ -45,8 +45,8 @@ class c_EncodingDetector : public ExtObjectData {
   public: c_EncodingDetector(Class* cls = c_EncodingDetector::classof());
   public: ~c_EncodingDetector();
   public: void t___construct();
-  public: void t_settext(CStrRef text);
-  public: void t_setdeclaredencoding(CStrRef text);
+  public: void t_settext(const String& text);
+  public: void t_setdeclaredencoding(const String& text);
   public: Object t_detect();
   public: Array t_detectall();
 

@@ -161,7 +161,7 @@ public:
 
   CLASSNAME_IS("soapHeader")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   sdlFunction                      *function;
   String                            function_name;

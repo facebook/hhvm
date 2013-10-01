@@ -106,7 +106,7 @@ static bool check_error(const char *function, int line, bool ret) {
 }
 
 static int accessSyscall(
-    CStrRef path,
+    const String& path,
     int mode,
     bool useFileCache = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
@@ -117,7 +117,7 @@ static int accessSyscall(
 }
 
 static int statSyscall(
-    CStrRef path,
+    const String& path,
     struct stat* buf,
     bool useFileCache = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
@@ -128,7 +128,7 @@ static int statSyscall(
 }
 
 static int lstatSyscall(
-    CStrRef path,
+    const String& path,
     struct stat* buf,
     bool useFileCache = false) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
@@ -186,7 +186,7 @@ Array stat_impl(struct stat *stat_sb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_fopen(CStrRef filename, CStrRef mode,
+Variant f_fopen(const String& filename, const String& mode,
                 bool use_include_path /* = false */,
                 CVarRef context /* = null */) {
   if (!context.isNull() &&
@@ -201,7 +201,7 @@ Variant f_fopen(CStrRef filename, CStrRef mode,
                     context);
 }
 
-Variant f_popen(CStrRef command, CStrRef mode) {
+Variant f_popen(const String& command, const String& mode) {
   File *file = NEWOBJ(Pipe)();
   Resource handle(file);
   bool ret = CHECK_ERROR(file->open(File::TranslateCommand(command), mode));
@@ -286,7 +286,7 @@ Variant f_fgets(CResRef handle, int64_t length /* = 0 */) {
 }
 
 Variant f_fgetss(CResRef handle, int64_t length /* = 0 */,
-                 CStrRef allowable_tags /* = null_string */) {
+                 const String& allowable_tags /* = null_string */) {
   Variant ret = f_fgets(handle, length);
   if (!same(ret, false)) {
     return StringUtil::StripHTMLTags(ret.toString(), allowable_tags);
@@ -294,7 +294,7 @@ Variant f_fgetss(CResRef handle, int64_t length /* = 0 */,
   return ret;
 }
 
-Variant f_fscanf(int _argc, CResRef handle, CStrRef format,
+Variant f_fscanf(int _argc, CResRef handle, const String& format,
                  CArrRef _argv /* = null_array */) {
   CHECK_HANDLE(handle, f);
   return f_sscanf(_argc, f->readLine(), format, _argv);
@@ -305,27 +305,27 @@ Variant f_fpassthru(CResRef handle) {
   return f->print();
 }
 
-Variant f_fwrite(CResRef handle, CStrRef data, int64_t length /* = 0 */) {
+Variant f_fwrite(CResRef handle, const String& data, int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->write(data, length);
   if (ret < 0) ret = 0;
   return ret;
 }
 
-Variant f_fputs(CResRef handle, CStrRef data, int64_t length /* = 0 */) {
+Variant f_fputs(CResRef handle, const String& data, int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->write(data, length);
   if (ret < 0) ret = 0;
   return ret;
 }
 
-Variant f_fprintf(int _argc, CResRef handle, CStrRef format,
+Variant f_fprintf(int _argc, CResRef handle, const String& format,
                   CArrRef _argv /* = null_array */) {
   CHECK_HANDLE(handle, f);
   return f->printf(format, _argv);
 }
 
-Variant f_vfprintf(CResRef handle, CStrRef format, CArrRef args) {
+Variant f_vfprintf(CResRef handle, const String& format, CArrRef args) {
   CHECK_HANDLE(handle, f);
   return f->printf(format, args);
 }
@@ -358,8 +358,9 @@ bool f_flock(CResRef handle, int operation, VRefParam wouldblock /* = null */) {
   return ret;
 }
 
-Variant f_fputcsv(CResRef handle, CArrRef fields, CStrRef delimiter /* = "," */,
-                  CStrRef enclosure /* = "\"" */) {
+Variant f_fputcsv(CResRef handle, CArrRef fields,
+                  const String& delimiter /* = "," */,
+                  const String& enclosure /* = "\"" */) {
   if (delimiter.size() != 1) {
     throw_invalid_argument("delimiter: %s", delimiter.data());
     return false;
@@ -373,9 +374,9 @@ Variant f_fputcsv(CResRef handle, CArrRef fields, CStrRef delimiter /* = "," */,
 }
 
 Variant f_fgetcsv(CResRef handle, int64_t length /* = 0 */,
-                  CStrRef delimiter /* = "," */,
-                  CStrRef enclosure /* = "\"" */,
-                  CStrRef escape /* = "\\" */) {
+                  const String& delimiter /* = "," */,
+                  const String& enclosure /* = "\"" */,
+                  const String& escape /* = "\\" */) {
   char delimiter_char = ',', enclosure_char = '"', escape_char = '\\';
 
   // match the behavior of Zend PHP
@@ -402,7 +403,7 @@ Variant f_fgetcsv(CResRef handle, int64_t length /* = 0 */,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_file_get_contents(CStrRef filename,
+Variant f_file_get_contents(const String& filename,
                             bool use_include_path /* = false */,
                             CVarRef context /* = null */,
                             int64_t offset /* = -1 */,
@@ -412,7 +413,7 @@ Variant f_file_get_contents(CStrRef filename,
   return f_stream_get_contents(stream.toResource(), maxlen, offset);
 }
 
-Variant f_file_put_contents(CStrRef filename, CVarRef data,
+Variant f_file_put_contents(const String& filename, CVarRef data,
                             int flags /* = 0 */,
                             CVarRef context /* = null */) {
   Variant fvar = File::Open(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb");
@@ -489,7 +490,7 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
   return numbytes;
 }
 
-Variant f_file(CStrRef filename, int flags /* = 0 */,
+Variant f_file(const String& filename, int flags /* = 0 */,
                CVarRef context /* = null */) {
   Variant contents = f_file_get_contents(filename,
                                          flags & PHP_FILE_USE_INCLUDE_PATH,
@@ -547,7 +548,7 @@ Variant f_file(CStrRef filename, int flags /* = 0 */,
   return ret;
 }
 
-Variant f_readfile(CStrRef filename, bool use_include_path /* = false */,
+Variant f_readfile(const String& filename, bool use_include_path /* = false */,
                    CVarRef context /* = null */) {
   Variant f = f_fopen(filename, "rb", use_include_path, context);
   if (same(f, false)) {
@@ -559,7 +560,7 @@ Variant f_readfile(CStrRef filename, bool use_include_path /* = false */,
   return ret;
 }
 
-bool f_move_uploaded_file(CStrRef filename, CStrRef destination) {
+bool f_move_uploaded_file(const String& filename, const String& destination) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     return transport->moveUploadedFile(filename, destination);
@@ -567,7 +568,8 @@ bool f_move_uploaded_file(CStrRef filename, CStrRef destination) {
   return false;
 }
 
-Variant f_parse_ini_file(CStrRef filename, bool process_sections /* = false */,
+Variant f_parse_ini_file(const String& filename,
+                         bool process_sections /* = false */,
                          int scanner_mode /* = k_INI_SCANNER_NORMAL */) {
   String translated = File::TranslatePath(filename);
   if (translated.empty() || !f_file_exists(translated)) {
@@ -587,24 +589,25 @@ Variant f_parse_ini_file(CStrRef filename, bool process_sections /* = false */,
                                 scanner_mode);
 }
 
-Variant f_parse_ini_string(CStrRef ini, bool process_sections /* = false */,
+Variant f_parse_ini_string(const String& ini,
+                           bool process_sections /* = false */,
                            int scanner_mode /* = k_INI_SCANNER_NORMAL */) {
   return IniSetting::FromString(ini, "", process_sections, scanner_mode);
 }
 
-Variant f_parse_hdf_file(CStrRef filename) {
+Variant f_parse_hdf_file(const String& filename) {
   Variant content = f_file_get_contents(filename);
   if (same(content, false)) return false;
   return f_parse_hdf_string(content.toString());
 }
 
-Variant f_parse_hdf_string(CStrRef input) {
+Variant f_parse_hdf_string(const String& input) {
   Hdf hdf;
   hdf.fromString(input.data());
   return ArrayUtil::FromHdf(hdf);
 }
 
-bool f_write_hdf_file(CArrRef data, CStrRef filename) {
+bool f_write_hdf_file(CArrRef data, const String& filename) {
   Hdf hdf;
   ArrayUtil::ToHdf(data, hdf);
   const char *str = hdf.toString();
@@ -619,30 +622,30 @@ String f_write_hdf_string(CArrRef data) {
   return String(str, CopyString);
 }
 
-Variant f_md5_file(CStrRef filename, bool raw_output /* = false */) {
+Variant f_md5_file(const String& filename, bool raw_output /* = false */) {
   return HHVM_FN(hash_file)("md5", filename, raw_output);
 }
 
-Variant f_sha1_file(CStrRef filename, bool raw_output /* = false */) {
+Variant f_sha1_file(const String& filename, bool raw_output /* = false */) {
   return HHVM_FN(hash_file)("sha1", filename, raw_output);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // stats functions
 
-Variant f_fileperms(CStrRef filename) {
+Variant f_fileperms(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_mode;
 }
 
-Variant f_fileinode(CStrRef filename) {
+Variant f_fileinode(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb));
   return (int64_t)sb.st_ino;
 }
 
-Variant f_filesize(CStrRef filename) {
+Variant f_filesize(const String& filename) {
   if (StaticContentCache::TheFileCache) {
     int64_t size =
       StaticContentCache::TheFileCache->fileSize(filename.data(),
@@ -654,37 +657,37 @@ Variant f_filesize(CStrRef filename) {
   return (int64_t)sb.st_size;
 }
 
-Variant f_fileowner(CStrRef filename) {
+Variant f_fileowner(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_uid;
 }
 
-Variant f_filegroup(CStrRef filename) {
+Variant f_filegroup(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_gid;
 }
 
-Variant f_fileatime(CStrRef filename) {
+Variant f_fileatime(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_atime;
 }
 
-Variant f_filemtime(CStrRef filename) {
+Variant f_filemtime(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_mtime;
 }
 
-Variant f_filectime(CStrRef filename) {
+Variant f_filectime(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (int64_t)sb.st_ctime;
 }
 
-Variant f_filetype(CStrRef filename) {
+Variant f_filetype(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(lstatSyscall(filename, &sb));
 
@@ -700,13 +703,13 @@ Variant f_filetype(CStrRef filename) {
   return "unknown";
 }
 
-Variant f_linkinfo(CStrRef filename) {
+Variant f_linkinfo(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb));
   return (int64_t)sb.st_dev;
 }
 
-bool f_is_writable(CStrRef filename) {
+bool f_is_writable(const String& filename) {
   struct stat sb;
   if (statSyscall(filename, &sb)) {
     return false;
@@ -737,11 +740,11 @@ bool f_is_writable(CStrRef filename) {
   */
 }
 
-bool f_is_writeable(CStrRef filename) {
+bool f_is_writeable(const String& filename) {
   return f_is_writable(filename);
 }
 
-bool f_is_readable(CStrRef filename) {
+bool f_is_readable(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
   CHECK_SYSTEM(accessSyscall(filename, R_OK, true));
@@ -770,7 +773,7 @@ bool f_is_readable(CStrRef filename) {
   */
 }
 
-bool f_is_executable(CStrRef filename) {
+bool f_is_executable(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb));
   CHECK_SYSTEM(accessSyscall(filename, X_OK));
@@ -799,13 +802,13 @@ bool f_is_executable(CStrRef filename) {
   */
 }
 
-bool f_is_file(CStrRef filename) {
+bool f_is_file(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return (sb.st_mode & S_IFMT) == S_IFREG;
 }
 
-bool f_is_dir(CStrRef filename) {
+bool f_is_dir(const String& filename) {
   String cwd;
   if (filename.empty()) {
     return false;
@@ -823,13 +826,13 @@ bool f_is_dir(CStrRef filename) {
   return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
 
-bool f_is_link(CStrRef filename) {
+bool f_is_link(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(lstatSyscall(filename, &sb));
   return (sb.st_mode & S_IFMT) == S_IFLNK;
 }
 
-bool f_is_uploaded_file(CStrRef filename) {
+bool f_is_uploaded_file(const String& filename) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     return transport->isUploadedFile(filename);
@@ -837,7 +840,7 @@ bool f_is_uploaded_file(CStrRef filename) {
   return false;
 }
 
-bool f_file_exists(CStrRef filename) {
+bool f_file_exists(const String& filename) {
   if (filename.empty() ||
       (accessSyscall(filename, F_OK, true)) < 0) {
     return false;
@@ -845,24 +848,24 @@ bool f_file_exists(CStrRef filename) {
   return true;
 }
 
-Variant f_stat(CStrRef filename) {
+Variant f_stat(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
   return stat_impl(&sb);
 }
 
-Variant f_lstat(CStrRef filename) {
+Variant f_lstat(const String& filename) {
   struct stat sb;
   CHECK_SYSTEM(lstatSyscall(filename, &sb, true));
   return stat_impl(&sb);
 }
 
 void f_clearstatcache(bool clear_realpath_cache /* = false */,
-                      CStrRef filename /* = null_string */) {
+                      const String& filename /* = null_string */) {
   // we are not having a cache for file stats, so do nothing here
 }
 
-Variant f_readlink_internal(CStrRef path, bool warning_compliance) {
+Variant f_readlink_internal(const String& path, bool warning_compliance) {
   char buff[PATH_MAX];
   int ret = readlink(File::TranslatePath(path).data(), buff, PATH_MAX-1);
   if (ret < 0) {
@@ -877,11 +880,11 @@ Variant f_readlink_internal(CStrRef path, bool warning_compliance) {
   return String(buff, ret, CopyString);
 }
 
-Variant f_readlink(CStrRef path) {
+Variant f_readlink(const String& path) {
   return f_readlink_internal(path, true);
 }
 
-Variant f_realpath(CStrRef path) {
+Variant f_realpath(const String& path) {
   String translated = File::TranslatePath(path);
   if (translated.empty()) {
     return false;
@@ -911,7 +914,7 @@ const StaticString
   s_extension("extension"),
   s_filename("filename");
 
-Variant f_pathinfo(CStrRef path, int opt /* = 15 */) {
+Variant f_pathinfo(const String& path, int opt /* = 15 */) {
   ArrayInit ret(4);
 
   if (opt == 0) {
@@ -965,18 +968,18 @@ Variant f_pathinfo(CStrRef path, int opt /* = 15 */) {
   return ret.create();
 }
 
-Variant f_disk_free_space(CStrRef directory) {
+Variant f_disk_free_space(const String& directory) {
   struct statfs buf;
   String translated = File::TranslatePath(directory);
   CHECK_SYSTEM(statfs(translated.c_str(), &buf));
   return (double)buf.f_bsize * (double)buf.f_bavail;
 }
 
-Variant f_diskfreespace(CStrRef directory) {
+Variant f_diskfreespace(const String& directory) {
   return f_disk_free_space(directory);
 }
 
-Variant f_disk_total_space(CStrRef directory) {
+Variant f_disk_total_space(const String& directory) {
   struct statfs buf;
   String translated = File::TranslatePath(directory);
   CHECK_SYSTEM(statfs(translated.c_str(), &buf));
@@ -986,7 +989,7 @@ Variant f_disk_total_space(CStrRef directory) {
 ///////////////////////////////////////////////////////////////////////////////
 // system wrappers
 
-bool f_chmod(CStrRef filename, int64_t mode) {
+bool f_chmod(const String& filename, int64_t mode) {
   String translated = File::TranslatePath(filename);
   CHECK_SYSTEM(chmod(translated.c_str(), mode));
   return true;
@@ -1009,14 +1012,14 @@ static int get_uid(CVarRef user) {
   return uid;
 }
 
-bool f_chown(CStrRef filename, CVarRef user) {
+bool f_chown(const String& filename, CVarRef user) {
   int uid = get_uid(user);
   if (uid == 0) return false;
   CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), uid, (gid_t)-1));
   return true;
 }
 
-bool f_lchown(CStrRef filename, CVarRef user) {
+bool f_lchown(const String& filename, CVarRef user) {
   int uid = get_uid(user);
   if (uid == 0) return false;
   CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), uid, (gid_t)-1));
@@ -1040,21 +1043,22 @@ static int get_gid(CVarRef group) {
   return gid;
 }
 
-bool f_chgrp(CStrRef filename, CVarRef group) {
+bool f_chgrp(const String& filename, CVarRef group) {
   int gid = get_gid(group);
   if (gid == 0) return false;
   CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
   return true;
 }
 
-bool f_lchgrp(CStrRef filename, CVarRef group) {
+bool f_lchgrp(const String& filename, CVarRef group) {
   int gid = get_gid(group);
   if (gid == 0) return false;
   CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
   return true;
 }
 
-bool f_touch(CStrRef filename, int64_t mtime /* = 0 */, int64_t atime /* = 0 */) {
+bool f_touch(const String& filename, int64_t mtime /* = 0 */,
+             int64_t atime /* = 0 */) {
   String translated = File::TranslatePath(filename);
 
   /* create the file if it doesn't exist already */
@@ -1081,7 +1085,7 @@ bool f_touch(CStrRef filename, int64_t mtime /* = 0 */, int64_t atime /* = 0 */)
   return true;
 }
 
-bool f_copy(CStrRef source, CStrRef dest,
+bool f_copy(const String& source, const String& dest,
             CVarRef context /* = null */) {
   if (!context.isNull() || !File::IsPlainFilePath(source) ||
       !File::IsPlainFilePath(dest)) {
@@ -1108,7 +1112,7 @@ bool f_copy(CStrRef source, CStrRef dest,
   }
 }
 
-bool f_rename(CStrRef oldname, CStrRef newname,
+bool f_rename(const String& oldname, const String& newname,
               CVarRef context /* = null */) {
   int ret =
     RuntimeOption::UseDirectCopy ?
@@ -1130,24 +1134,25 @@ int64_t f_umask(CVarRef mask /* = null_variant */) {
   return oldumask;
 }
 
-bool f_unlink(CStrRef filename, CVarRef context /* = null */) {
+bool f_unlink(const String& filename, CVarRef context /* = null */) {
   CHECK_SYSTEM(unlink(File::TranslatePath(filename).data()));
   return true;
 }
 
-bool f_link(CStrRef target, CStrRef link) {
+bool f_link(const String& target, const String& link) {
   CHECK_SYSTEM(::link(File::TranslatePath(target).data(),
                       File::TranslatePath(link).data()));
   return true;
 }
 
-bool f_symlink(CStrRef target, CStrRef link) {
+bool f_symlink(const String& target, const String& link) {
   CHECK_SYSTEM(symlink(File::TranslatePath(target).data(),
                        File::TranslatePath(link).data()));
   return true;
 }
 
-String f_basename(CStrRef path, CStrRef suffix /* = null_string */) {
+String f_basename(const String& path,
+                  const String& suffix /* = null_string */) {
   int state = 0;
   const char *c = path.data();
   const char *comp, *cend;
@@ -1175,10 +1180,12 @@ String f_basename(CStrRef path, CStrRef suffix /* = null_string */) {
   return String(comp, cend - comp, CopyString);
 }
 
-bool f_fnmatch(CStrRef pattern, CStrRef filename, int flags /* = 0 */) {
+bool f_fnmatch(const String& pattern,
+               const String& filename, int flags /* = 0 */) {
   if (filename.size() >= PATH_MAX) {
-    raise_warning("Filename exceeds the maximum allowed length of %d characters",
-                  PATH_MAX);
+    raise_warning(
+      "Filename exceeds the maximum allowed length of %d characters",
+      PATH_MAX);
     return false;
   }
   if (pattern.size() >= PATH_MAX) {
@@ -1190,7 +1197,7 @@ bool f_fnmatch(CStrRef pattern, CStrRef filename, int flags /* = 0 */) {
   return fnmatch(pattern.data(), filename.data(), flags) == 0;
 }
 
-Variant f_glob(CStrRef pattern, int flags /* = 0 */) {
+Variant f_glob(const String& pattern, int flags /* = 0 */) {
   glob_t globbuf;
   int cwd_skip = 0;
   memset(&globbuf, 0, sizeof(glob_t));
@@ -1263,7 +1270,7 @@ Variant f_glob(CStrRef pattern, int flags /* = 0 */) {
   return ret;
 }
 
-Variant f_tempnam(CStrRef dir, CStrRef prefix) {
+Variant f_tempnam(const String& dir, const String& prefix) {
   String tmpdir = dir;
   if (tmpdir.empty() || !f_is_dir(tmpdir) || !f_is_writable(tmpdir)) {
     tmpdir = f_sys_get_temp_dir();
@@ -1296,7 +1303,7 @@ Variant f_tmpfile() {
 ///////////////////////////////////////////////////////////////////////////////
 // directory functions
 
-bool f_mkdir(CStrRef pathname, int64_t mode /* = 0777 */,
+bool f_mkdir(const String& pathname, int64_t mode /* = 0777 */,
              bool recursive /* = false */, CVarRef context /* = null */) {
   if (recursive) {
     String path = File::TranslatePath(pathname);
@@ -1310,12 +1317,12 @@ bool f_mkdir(CStrRef pathname, int64_t mode /* = 0777 */,
   return true;
 }
 
-bool f_rmdir(CStrRef dirname, CVarRef context /* = null */) {
+bool f_rmdir(const String& dirname, CVarRef context /* = null */) {
   CHECK_SYSTEM(rmdir(File::TranslatePath(dirname).data()));
   return true;
 }
 
-String f_dirname(CStrRef path) {
+String f_dirname(const String& path) {
   char *buf = strndup(path.data(), path.size());
   int len = Util::dirname_helper(buf, path.size());
   return String(buf, len, AttachString);
@@ -1325,7 +1332,7 @@ Variant f_getcwd() {
   return g_context->getCwd();
 }
 
-bool f_chdir(CStrRef directory) {
+bool f_chdir(const String& directory) {
   if (f_is_dir(directory)) {
     g_context->setCwd(File::TranslatePath(directory));
     return true;
@@ -1334,7 +1341,7 @@ bool f_chdir(CStrRef directory) {
   return false;
 }
 
-bool f_chroot(CStrRef directory) {
+bool f_chroot(const String& directory) {
   CHECK_SYSTEM(chroot(File::TranslatePath(directory).data()));
   CHECK_SYSTEM(chdir("/"));
   return true;
@@ -1375,7 +1382,7 @@ static Directory *get_dir(CResRef dir_handle) {
   return d;
 }
 
-Variant f_dir(CStrRef directory) {
+Variant f_dir(const String& directory) {
   Variant dir = f_opendir(directory);
   if (same(dir, false)) {
     return false;
@@ -1386,7 +1393,7 @@ Variant f_dir(CStrRef directory) {
   return d;
 }
 
-Variant f_opendir(CStrRef path, CVarRef context /* = null */) {
+Variant f_opendir(const String& path, CVarRef context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
   Directory *p = w->opendir(path);
   if (!p) {
@@ -1416,15 +1423,15 @@ void f_rewinddir(CResRef dir_handle /* = null */) {
   dir->rewind();
 }
 
-static bool StringDescending(CStrRef s1, CStrRef s2) {
+static bool StringDescending(const String& s1, const String& s2) {
   return s1.more(s2);
 }
 
-static bool StringAscending(CStrRef s1, CStrRef s2) {
+static bool StringAscending(const String& s1, const String& s2) {
   return s1.less(s2);
 }
 
-Variant f_scandir(CStrRef directory, bool descending /* = false */,
+Variant f_scandir(const String& directory, bool descending /* = false */,
                   CVarRef context /* = null */) {
   Stream::Wrapper* w = Stream::getWrapperFromURI(directory);
   Directory *dir = w->opendir(directory);

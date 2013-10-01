@@ -26,16 +26,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool f_bcscale(int64_t scale);
-String f_bcadd(CStrRef left, CStrRef right, int64_t scale = -1);
-String f_bcsub(CStrRef left, CStrRef right, int64_t scale = -1);
-int64_t f_bccomp(CStrRef left, CStrRef right, int64_t scale = -1);
-String f_bcmul(CStrRef left, CStrRef right, int64_t scale = -1);
-String f_bcdiv(CStrRef left, CStrRef right, int64_t scale = -1);
-String f_bcmod(CStrRef left, CStrRef right);
-String f_bcpow(CStrRef left, CStrRef right, int64_t scale = -1);
-Variant f_bcpowmod(CStrRef left, CStrRef right, CStrRef modulus,
-                  int64_t scale = -1);
-Variant f_bcsqrt(CStrRef operand, int64_t scale = -1);
+String f_bcadd(const String& left, const String& right, int64_t scale = -1);
+String f_bcsub(const String& left, const String& right, int64_t scale = -1);
+int64_t f_bccomp(const String& left, const String& right, int64_t scale = -1);
+String f_bcmul(const String& left, const String& right, int64_t scale = -1);
+String f_bcdiv(const String& left, const String& right, int64_t scale = -1);
+String f_bcmod(const String& left, const String& right);
+String f_bcpow(const String& left, const String& right, int64_t scale = -1);
+Variant f_bcpowmod(const String& left, const String& right,
+                   const String& modulus, int64_t scale = -1);
+Variant f_bcsqrt(const String& operand, int64_t scale = -1);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

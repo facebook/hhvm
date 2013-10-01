@@ -32,7 +32,7 @@ DateInterval::DateInterval() {
   m_di = DateIntervalPtr();
 }
 
-DateInterval::DateInterval(CStrRef date_interval,
+DateInterval::DateInterval(const String& date_interval,
                            bool date_string /*= false */) {
   if (date_string) {
     setDateString(date_interval);
@@ -45,7 +45,7 @@ DateInterval::DateInterval(timelib_rel_time *di) {
   m_di = DateIntervalPtr(di, dateinterval_deleter());
 }
 
-bool DateInterval::setDateString(CStrRef date_string) {
+bool DateInterval::setDateString(const String& date_string) {
   timelib_time *time;
   timelib_rel_time *di;
   timelib_error_container *errors = nullptr;
@@ -67,7 +67,7 @@ bool DateInterval::setDateString(CStrRef date_string) {
   }
 }
 
-bool DateInterval::setInterval(CStrRef date_interval) {
+bool DateInterval::setInterval(const String& date_interval) {
   timelib_rel_time *di = nullptr;
   timelib_error_container *errors = nullptr;
 
@@ -92,7 +92,7 @@ bool DateInterval::setInterval(CStrRef date_interval) {
   }
 }
 
-String DateInterval::format(CStrRef format_spec) {
+String DateInterval::format(const String& format_spec) {
   StringBuffer s;
   for(int i = 0; i < format_spec.length(); i++) {
     const int MAXLEN = 22; // 64bit signed int string length, plus terminating \0

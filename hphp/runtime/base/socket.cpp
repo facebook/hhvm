@@ -92,7 +92,7 @@ int Socket::getLastError() {
   return s_socket_data->m_lastErrno;
 }
 
-bool Socket::open(CStrRef filename, CStrRef mode) {
+bool Socket::open(const String& filename, const String& mode) {
   throw NotSupportedException(__func__, "cannot open socket this way");
 }
 

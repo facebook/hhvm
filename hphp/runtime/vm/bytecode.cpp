@@ -1199,7 +1199,7 @@ Class* VMExecutionContext::getParentContextClass() {
   return nullptr;
 }
 
-CStrRef VMExecutionContext::getContainingFileName() {
+const String& VMExecutionContext::getContainingFileName() {
   VMRegAnchor _;
   ActRec* ar = getFP();
   if (ar == nullptr) return empty_string;
@@ -2175,7 +2175,7 @@ Array VMExecutionContext::getUserFunctionsInfo() {
 }
 
 const ClassInfo::MethodInfo* VMExecutionContext::findFunctionInfo(
-  CStrRef name) {
+  const String& name) {
   StringIMap<AtomicSmartPtr<MethodInfoVM> >::iterator it =
     m_functionInfos.find(name);
   if (it == m_functionInfos.end()) {
@@ -2192,7 +2192,7 @@ const ClassInfo::MethodInfo* VMExecutionContext::findFunctionInfo(
   }
 }
 
-const ClassInfo* VMExecutionContext::findClassInfo(CStrRef name) {
+const ClassInfo* VMExecutionContext::findClassInfo(const String& name) {
   if (name->empty()) return nullptr;
   StringIMap<AtomicSmartPtr<ClassInfoVM> >::iterator it =
     m_classInfos.find(name);
@@ -2214,7 +2214,7 @@ const ClassInfo* VMExecutionContext::findClassInfo(CStrRef name) {
   }
 }
 
-const ClassInfo* VMExecutionContext::findInterfaceInfo(CStrRef name) {
+const ClassInfo* VMExecutionContext::findInterfaceInfo(const String& name) {
   StringIMap<AtomicSmartPtr<ClassInfoVM> >::iterator it =
     m_interfaceInfos.find(name);
   if (it == m_interfaceInfos.end()) {
@@ -2235,7 +2235,7 @@ const ClassInfo* VMExecutionContext::findInterfaceInfo(CStrRef name) {
   }
 }
 
-const ClassInfo* VMExecutionContext::findTraitInfo(CStrRef name) {
+const ClassInfo* VMExecutionContext::findTraitInfo(const String& name) {
   StringIMap<AtomicSmartPtr<ClassInfoVM> >::iterator it =
     m_traitInfos.find(name);
   if (it != m_traitInfos.end()) {
@@ -2254,7 +2254,7 @@ const ClassInfo* VMExecutionContext::findTraitInfo(CStrRef name) {
 }
 
 const ClassInfo::ConstantInfo* VMExecutionContext::findConstantInfo(
-    CStrRef name) {
+    const String& name) {
   TypedValue* tv = Unit::lookupCns(name.get());
   if (tv == nullptr) {
     return nullptr;
@@ -2461,8 +2461,8 @@ StaticString
   s_php_return("<?php return "),
   s_semicolon(";");
 CVarRef VMExecutionContext::getEvaledArg(const StringData* val,
-                                         CStrRef namespacedName) {
-  CStrRef key = *(String*)&val;
+                                         const String& namespacedName) {
+  const String& key = *(String*)&val;
 
   if (m_evaledArgs.get()) {
     CVarRef arg = m_evaledArgs.get()->get(key);
@@ -2535,7 +2535,7 @@ Unit* VMExecutionContext::compileEvalString(StringData* code) {
   return acc->second;
 }
 
-CStrRef VMExecutionContext::createFunction(CStrRef args, CStrRef code) {
+const String& VMExecutionContext::createFunction(const String& args, const String& code) {
   VMRegAnchor _;
   // It doesn't matter if there's a user function named __lambda_func; we only
   // use this name during parsing, and then change it to an impossible name

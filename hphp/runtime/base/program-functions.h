@@ -48,7 +48,7 @@ void process_env_variables(Variant &variables);
 void register_variable(Variant &variables, char *name, CVarRef value,
                        bool overwrite = true);
 
-String canonicalize_path(CStrRef path, const char* root, int rootLen);
+String canonicalize_path(const String& path, const char* root, int rootLen);
 
 /**
  * Translate hex encode stack into both C++ and PHP frames.

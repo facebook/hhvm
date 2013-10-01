@@ -50,7 +50,7 @@ File *PhpStreamWrapper::openFD(const char *sFD) {
 }
 
 
-File* PhpStreamWrapper::open(CStrRef filename, CStrRef mode,
+File* PhpStreamWrapper::open(const String& filename, const String& mode,
                              int options, CVarRef context) {
   if (strncasecmp(filename.c_str(), "php://", 6)) {
     return nullptr;

@@ -42,7 +42,7 @@ c_EncodingDetector::~c_EncodingDetector() {
 void c_EncodingDetector::t___construct() {
 }
 
-void c_EncodingDetector::t_settext(CStrRef text) {
+void c_EncodingDetector::t_settext(const String& text) {
   UErrorCode status = U_ZERO_ERROR;
   m_text = text;
   ucsdet_setText(
@@ -57,7 +57,7 @@ void c_EncodingDetector::t_settext(CStrRef text) {
   }
 }
 
-void c_EncodingDetector::t_setdeclaredencoding(CStrRef text) {
+void c_EncodingDetector::t_setdeclaredencoding(const String& text) {
   UErrorCode status = U_ZERO_ERROR;
   m_declaredencoding = text;
   ucsdet_setDeclaredEncoding(

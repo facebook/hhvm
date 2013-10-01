@@ -56,7 +56,7 @@ public:
   bool disabled() const { return m_disabled; }
 
   // url rewrite rules
-  bool rewriteURL(CStrRef host, String &url, bool &qsa, int &redirect) const;
+  bool rewriteURL(const String& host, String &url, bool &qsa, int &redirect) const;
 
   // ip blocking rules
   bool isBlocking(const std::string &command, const std::string &ip) const;

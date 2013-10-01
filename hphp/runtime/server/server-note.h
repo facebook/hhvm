@@ -23,8 +23,8 @@ namespace HPHP {
 
 class ServerNote  {
 public:
-  static void Add(CStrRef name, CStrRef value);
-  static String Get(CStrRef name);
+  static void Add(const String& name, const String& value);
+  static String Get(const String& name);
 
   static void Reset();
 private:

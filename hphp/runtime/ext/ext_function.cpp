@@ -43,7 +43,8 @@ Array f_get_defined_functions() {
                      s_user, ClassInfo::GetUserFunctions());
 }
 
-bool f_function_exists(CStrRef function_name, bool autoload /* = true */) {
+bool f_function_exists(const String& function_name,
+                       bool autoload /* = true */) {
   return
     function_exists(function_name) ||
     (autoload &&
@@ -144,7 +145,7 @@ Variant f_check_user_func_async(CVarRef handles, int timeout /* = -1 */) {
 }
 
 Variant f_end_user_func_async(CObjRef handle,
-                              int default_strategy /* = k_GLOBAL_STATE_IGNORE */,
+                              int default_strategy /*= k_GLOBAL_STATE_IGNORE*/,
                               CVarRef additional_strategies /* = null */) {
   raise_error("%s is no longer supported", __func__);
   return uninit_null();
@@ -156,7 +157,7 @@ const StaticString
   s_exception("exception"),
   s_ret("ret");
 
-String f_call_user_func_serialized(CStrRef input) {
+String f_call_user_func_serialized(const String& input) {
   Variant out;
   try {
     Variant in = unserialize_from_string(input);
@@ -167,13 +168,15 @@ String f_call_user_func_serialized(CStrRef input) {
   return f_serialize(out);
 }
 
-Variant f_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth,
+Variant f_call_user_func_array_rpc(const String& host, int port,
+                                   const String& auth,
                                    int timeout, CVarRef function,
                                    CArrRef params) {
   return f_call_user_func_rpc(0, host, port, auth, timeout, function, params);
 }
 
-Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
+Variant f_call_user_func_rpc(int _argc, const String& host, int port,
+                             const String& auth,
                              int timeout, CVarRef function,
                              CArrRef _argv /* = null_array */) {
   string shost = host.data();
@@ -253,7 +256,7 @@ Variant f_get_called_class() {
   return Variant(false);
 }
 
-String f_create_function(CStrRef args, CStrRef code) {
+String f_create_function(const String& args, const String& code) {
   return g_vmContext->createFunction(args, code);
 }
 

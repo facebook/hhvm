@@ -26,12 +26,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // pcre
 
-Variant f_preg_grep(CStrRef pattern, CArrRef input, int flags = 0);
+Variant f_preg_grep(const String& pattern, CArrRef input, int flags = 0);
 
-Variant f_preg_match(CStrRef pattern, CStrRef subject, VRefParam matches = uninit_null(),
+Variant f_preg_match(const String& pattern, const String& subject, VRefParam matches = uninit_null(),
                      int flags = 0, int offset = 0);
 
-Variant f_preg_match_all(CStrRef pattern, CStrRef subject, VRefParam matches,
+Variant f_preg_match_all(const String& pattern, const String& subject, VRefParam matches,
                          int flags = 0, int offset = 0);
 
 Variant f_preg_replace(CVarRef pattern, CVarRef replacement, CVarRef subject,
@@ -44,20 +44,20 @@ Variant f_preg_replace_callback(CVarRef pattern, CVarRef callback,
 Variant f_preg_split(CVarRef pattern, CVarRef subject, int limit = -1,
                      int flags = 0);
 
-String f_preg_quote(CStrRef str, CStrRef delimiter = null_string);
+String f_preg_quote(const String& str, const String& delimiter = null_string);
 
 int64_t f_preg_last_error();
 
 ///////////////////////////////////////////////////////////////////////////////
 // deprecating these
 
-String f_ereg_replace(CStrRef pattern, CStrRef replacement, CStrRef str);
-String f_eregi_replace(CStrRef pattern, CStrRef replacement, CStrRef str);
-Variant f_ereg(CStrRef pattern, CStrRef str, VRefParam regs = uninit_null());
-Variant f_eregi(CStrRef pattern, CStrRef str, VRefParam regs = uninit_null());
-Variant f_split(CStrRef pattern, CStrRef str, int limit = -1);
-Variant f_spliti(CStrRef pattern, CStrRef str, int limit = -1);
-String f_sql_regcase(CStrRef str);
+String f_ereg_replace(const String& pattern, const String& replacement, const String& str);
+String f_eregi_replace(const String& pattern, const String& replacement, const String& str);
+Variant f_ereg(const String& pattern, const String& str, VRefParam regs = uninit_null());
+Variant f_eregi(const String& pattern, const String& str, VRefParam regs = uninit_null());
+Variant f_split(const String& pattern, const String& str, int limit = -1);
+Variant f_spliti(const String& pattern, const String& str, int limit = -1);
+String f_sql_regcase(const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

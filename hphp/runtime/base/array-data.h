@@ -47,7 +47,6 @@ class ArrayData {
     kMixedKind,   // HphpArray arbitrary int or string keys, maybe holes
     kSharedKind,  // SharedArray
     kNvtwKind,    // NameValueTableWrapper
-    kPolicyKind,  // PolicyArray
     kNumKinds // insert new values before kNumKinds.
   };
 
@@ -186,7 +185,6 @@ public:
   /*
    * Specific derived class type querying operators.
    */
-  bool isPolicyArray() const { return m_kind == kPolicyKind; }
   bool isPacked() const { return m_kind == kPackedKind; }
   bool isHphpArray() const {
     return m_kind <= kMixedKind;

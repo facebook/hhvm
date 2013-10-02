@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/shared-array.h"
-#include "hphp/runtime/base/policy-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
 
@@ -68,267 +67,215 @@ static size_t VsizeNop(const ArrayData* ad) {
   return ad->getSize();
 }
 
-// order: kPackedKind, kMixedKind, kSharedKind, kNvtwKind, kPolicyKind
+// order: kPackedKind, kMixedKind, kSharedKind, kNvtwKind
 extern const ArrayFunctions g_array_funcs = {
   // release
   { &HphpArray::ReleasePacked, &HphpArray::Release,
     &SharedArray::Release,
-    &NameValueTableWrapper::Release,
-    &PolicyArray::Release },
+    &NameValueTableWrapper::Release },
   // nvGetInt
   { &HphpArray::NvGetIntPacked, &HphpArray::NvGetInt,
     &SharedArray::NvGetInt,
-    &NameValueTableWrapper::NvGetInt,
-    &PolicyArray::NvGetInt },
+    &NameValueTableWrapper::NvGetInt },
   // nvGetStr
   { &HphpArray::NvGetStrPacked, &HphpArray::NvGetStr,
     &SharedArray::NvGetStr,
-    &NameValueTableWrapper::NvGetStr,
-    &PolicyArray::NvGetStr },
+    &NameValueTableWrapper::NvGetStr },
   // nvGetKey
   { &HphpArray::NvGetKeyPacked, &HphpArray::NvGetKey,
     &SharedArray::NvGetKey,
-    &NameValueTableWrapper::NvGetKey,
-    &PolicyArray::NvGetKey },
+    &NameValueTableWrapper::NvGetKey },
   // setInt
   { &HphpArray::SetIntPacked, &HphpArray::SetInt,
     &SharedArray::SetInt,
-    &NameValueTableWrapper::SetInt,
-    &PolicyArray::SetInt },
+    &NameValueTableWrapper::SetInt },
   // setStr
   { &HphpArray::SetStrPacked, &HphpArray::SetStr,
     &SharedArray::SetStr,
-    &NameValueTableWrapper::SetStr,
-    &PolicyArray::SetStr },
+    &NameValueTableWrapper::SetStr },
   // vsize
   { &VsizeNop, &VsizeNop,
     &VsizeNop,
-    &NameValueTableWrapper::Vsize,
-    &VsizeNop },
+    &NameValueTableWrapper::Vsize },
   // getValueRef
   { &HphpArray::GetValueRef, &HphpArray::GetValueRef,
     &SharedArray::GetValueRef,
-    &NameValueTableWrapper::GetValueRef,
-    &PolicyArray::GetValueRef },
+    &NameValueTableWrapper::GetValueRef },
   // noCopyOnWrite
   { false, false,
     false,
-    true, // NameValueTableWrapper doesn't support COW.
-    false },
+    true }, // NameValueTableWrapper doesn't support COW.
   // isVectorData
   { &HphpArray::IsVectorDataPacked, &HphpArray::IsVectorData,
     &SharedArray::IsVectorData,
-    &NameValueTableWrapper::IsVectorData,
-    &PolicyArray::IsVectorData },
+    &NameValueTableWrapper::IsVectorData },
   // existsInt
   { &HphpArray::ExistsIntPacked, &HphpArray::ExistsInt,
     &SharedArray::ExistsInt,
-    &NameValueTableWrapper::ExistsInt,
-    &PolicyArray::ExistsInt },
+    &NameValueTableWrapper::ExistsInt },
   // existsStr
   { &HphpArray::ExistsStrPacked, &HphpArray::ExistsStr,
     &SharedArray::ExistsStr,
-    &NameValueTableWrapper::ExistsStr,
-    &PolicyArray::ExistsStr },
+    &NameValueTableWrapper::ExistsStr },
   // lvalInt
   { &HphpArray::LvalIntPacked, &HphpArray::LvalInt,
     &SharedArray::LvalInt,
-    &NameValueTableWrapper::LvalInt,
-    &PolicyArray::LvalInt },
+    &NameValueTableWrapper::LvalInt },
   // lvalStr
   { &HphpArray::LvalStrPacked, &HphpArray::LvalStr,
     &SharedArray::LvalStr,
-    &NameValueTableWrapper::LvalStr,
-    &PolicyArray::LvalStr },
+    &NameValueTableWrapper::LvalStr },
   // lvalNew
   { &HphpArray::LvalNewPacked, &HphpArray::LvalNew,
     &SharedArray::LvalNew,
-    &NameValueTableWrapper::LvalNew,
-    &PolicyArray::LvalNew },
+    &NameValueTableWrapper::LvalNew },
   // setRefInt
   { &HphpArray::SetRefIntPacked, &HphpArray::SetRefInt,
     &SharedArray::SetRefInt,
-    &NameValueTableWrapper::SetRefInt,
-    &PolicyArray::SetRefInt },
+    &NameValueTableWrapper::SetRefInt },
   // setRefStr
   { &HphpArray::SetRefStrPacked, &HphpArray::SetRefStr,
     &SharedArray::SetRefStr,
-    &NameValueTableWrapper::SetRefStr,
-    &PolicyArray::SetRefStr },
+    &NameValueTableWrapper::SetRefStr },
   // addInt
   { &HphpArray::AddIntPacked, &HphpArray::AddInt,
     &SharedArray::SetInt, // reuse set
-    &NameValueTableWrapper::SetInt, // reuse set
-    &PolicyArray::AddInt },
+    &NameValueTableWrapper::SetInt }, // reuse set
   // addStr
   { &HphpArray::SetStrPacked, // reuse set
     &HphpArray::AddStr,
     &SharedArray::SetStr, // reuse set
-    &NameValueTableWrapper::SetStr, // reuse set
-    &PolicyArray::AddStr },
+    &NameValueTableWrapper::SetStr }, // reuse set
   // removeInt
   { &HphpArray::RemoveIntPacked, &HphpArray::RemoveInt,
     &SharedArray::RemoveInt,
-    &NameValueTableWrapper::RemoveInt,
-    &PolicyArray::RemoveInt },
+    &NameValueTableWrapper::RemoveInt },
   // removeStr
   { &HphpArray::RemoveStrPacked, &HphpArray::RemoveStr,
     &SharedArray::RemoveStr,
-    &NameValueTableWrapper::RemoveStr,
-    &PolicyArray::RemoveStr },
+    &NameValueTableWrapper::RemoveStr },
   // iterBegin
   { &HphpArray::IterBegin, &HphpArray::IterBegin,
     &SharedArray::IterBegin,
-    &NameValueTableWrapper::IterBegin,
-    &PolicyArray::IterBegin },
+    &NameValueTableWrapper::IterBegin },
   // iterEnd
   { &HphpArray::IterEnd, &HphpArray::IterEnd,
     &SharedArray::IterEnd,
-    &NameValueTableWrapper::IterEnd,
-    &PolicyArray::IterEnd },
+    &NameValueTableWrapper::IterEnd },
   // iterAdvance
   { &HphpArray::IterAdvance, &HphpArray::IterAdvance,
     &SharedArray::IterAdvance,
-    &NameValueTableWrapper::IterAdvance,
-    &PolicyArray::IterAdvance },
+    &NameValueTableWrapper::IterAdvance },
   // iterRewind
   { &HphpArray::IterRewind, &HphpArray::IterRewind,
     &SharedArray::IterRewind,
-    &NameValueTableWrapper::IterRewind,
-    &PolicyArray::IterRewind },
+    &NameValueTableWrapper::IterRewind },
   // validFullPos
   { &HphpArray::ValidFullPos, &HphpArray::ValidFullPos,
     &SharedArray::ValidFullPos,
-    &NameValueTableWrapper::ValidFullPos,
-    &PolicyArray::ValidFullPos },
+    &NameValueTableWrapper::ValidFullPos },
   // advanceFullPos
   { &HphpArray::AdvanceFullPos, &HphpArray::AdvanceFullPos,
     &SharedArray::AdvanceFullPos,
-    &NameValueTableWrapper::AdvanceFullPos,
-    &PolicyArray::AdvanceFullPos },
+    &NameValueTableWrapper::AdvanceFullPos },
   // escalateForSort
   { &HphpArray::EscalateForSort, &HphpArray::EscalateForSort,
     &SharedArray::EscalateForSort,
-    &NameValueTableWrapper::EscalateForSort,
-    &PolicyArray::EscalateForSort },
+    &NameValueTableWrapper::EscalateForSort },
   // ksort
   { &HphpArray::Ksort, &HphpArray::Ksort,
     &ArrayData::Ksort,
-    &NameValueTableWrapper::Ksort,
-    &ArrayData::Ksort },
+    &NameValueTableWrapper::Ksort },
   // sort
   { &HphpArray::Sort, &HphpArray::Sort,
     &ArrayData::Sort,
-    &NameValueTableWrapper::Sort,
-    &ArrayData::Sort },
+    &NameValueTableWrapper::Sort },
   // asort
   { &HphpArray::Asort, &HphpArray::Asort,
     &ArrayData::Asort,
-    &NameValueTableWrapper::Asort,
-    &ArrayData::Asort },
+    &NameValueTableWrapper::Asort },
   // uksort
   { &HphpArray::Uksort, &HphpArray::Uksort,
     &ArrayData::Uksort,
-    &NameValueTableWrapper::Uksort,
-    &ArrayData::Uksort },
+    &NameValueTableWrapper::Uksort },
   // usort
   { &HphpArray::Usort, &HphpArray::Usort,
     &ArrayData::Usort,
-    &NameValueTableWrapper::Usort,
-    &ArrayData::Usort },
+    &NameValueTableWrapper::Usort },
   // uasort
   { &HphpArray::Uasort, &HphpArray::Uasort,
     &ArrayData::Uasort,
-    &NameValueTableWrapper::Uasort,
-    &ArrayData::Uasort },
+    &NameValueTableWrapper::Uasort },
   // copy
   { &HphpArray::CopyPacked, &HphpArray::Copy,
     &SharedArray::Copy,
-    &NameValueTableWrapper::Copy,
-    &PolicyArray::Copy },
+    &NameValueTableWrapper::Copy },
   // copyWithStrongIterators
   { &HphpArray::CopyWithStrongIterators, &HphpArray::CopyWithStrongIterators,
     &SharedArray::CopyWithStrongIterators,
-    &NameValueTableWrapper::CopyWithStrongIterators,
-    &PolicyArray::CopyWithStrongIterators },
+    &NameValueTableWrapper::CopyWithStrongIterators },
   // nonSmartCopy
   { &HphpArray::NonSmartCopy, &HphpArray::NonSmartCopy,
     &ArrayData::NonSmartCopy,
-    &ArrayData::NonSmartCopy,
-    &PolicyArray::NonSmartCopy },
+    &ArrayData::NonSmartCopy },
   // append
   { &HphpArray::AppendPacked, &HphpArray::Append,
     &SharedArray::Append,
-    &NameValueTableWrapper::Append,
-    &PolicyArray::Append },
+    &NameValueTableWrapper::Append },
   // appendRef
   { &HphpArray::AppendRefPacked, &HphpArray::AppendRef,
     &SharedArray::AppendRef,
-    &NameValueTableWrapper::AppendRef,
-    &PolicyArray::AppendRef },
+    &NameValueTableWrapper::AppendRef },
   // appendWithRef
   { &HphpArray::AppendWithRefPacked, &HphpArray::AppendWithRef,
     &SharedArray::AppendRef,
-    &NameValueTableWrapper::AppendRef,
-    &PolicyArray::AppendRef },
+    &NameValueTableWrapper::AppendRef },
   // plus
   { &HphpArray::Plus, &HphpArray::Plus,
     &SharedArray::Plus,
-    &NameValueTableWrapper::Plus,
-    &PolicyArray::Plus },
+    &NameValueTableWrapper::Plus },
   // merge
   { &HphpArray::Merge, &HphpArray::Merge,
     &SharedArray::Merge,
-    &NameValueTableWrapper::Merge,
-    &PolicyArray::Merge },
+    &NameValueTableWrapper::Merge },
   // pop
   { &HphpArray::PopPacked, &HphpArray::Pop,
     &SharedArray::Pop,
-    &NameValueTableWrapper::Pop,
-    &PolicyArray::Pop },
+    &NameValueTableWrapper::Pop },
   // dequeue
   { &HphpArray::DequeuePacked, &HphpArray::Dequeue,
     &SharedArray::Dequeue,
-    &NameValueTableWrapper::Dequeue,
-    &PolicyArray::Dequeue },
+    &NameValueTableWrapper::Dequeue },
   // prepend
   { &HphpArray::PrependPacked, &HphpArray::Prepend,
     &SharedArray::Prepend,
-    &NameValueTableWrapper::Prepend,
-    &PolicyArray::Prepend },
+    &NameValueTableWrapper::Prepend },
   // renumber
   { &HphpArray::RenumberPacked, &HphpArray::Renumber,
     &SharedArray::Renumber,
-    &NameValueTableWrapper::Renumber,
-    &PolicyArray::Renumber },
+    &NameValueTableWrapper::Renumber },
   // onSetEvalScalar
   { &HphpArray::OnSetEvalScalarPacked, &HphpArray::OnSetEvalScalar,
     &SharedArray::OnSetEvalScalar,
-    &NameValueTableWrapper::OnSetEvalScalar,
-    &PolicyArray::OnSetEvalScalar },
+    &NameValueTableWrapper::OnSetEvalScalar },
   // escalate
   { &ArrayData::Escalate, &ArrayData::Escalate,
     &SharedArray::Escalate,
-    &ArrayData::Escalate,
-    &PolicyArray::Escalate },
+    &ArrayData::Escalate },
   // getSharedVariant
   { &ArrayData::GetSharedVariant, &ArrayData::GetSharedVariant,
     &SharedArray::GetSharedVariant,
-    &ArrayData::GetSharedVariant,
     &ArrayData::GetSharedVariant },
   // zSetInt
   { &HphpArray::ZSetInt, &HphpArray::ZSetInt,
-    &ArrayData::ZSetInt,
     &ArrayData::ZSetInt,
     &ArrayData::ZSetInt },
   // zSetStr
   { &HphpArray::ZSetStr, &HphpArray::ZSetStr,
     &ArrayData::ZSetStr,
-    &ArrayData::ZSetStr,
     &ArrayData::ZSetStr },
   // zAppend
   { &HphpArray::ZAppend, &HphpArray::ZAppend,
-    &ArrayData::ZAppend,
     &ArrayData::ZAppend,
     &ArrayData::ZAppend },
 };

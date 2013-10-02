@@ -231,12 +231,21 @@ BuiltinFile::~BuiltinFile() {
 }
 
 bool BuiltinFile::close() {
-  ::fclose(m_stream);
+  auto status = ::fclose(m_stream);
   m_closed = true;
   m_stream = nullptr;
   m_fd = -1;
   File::closeImpl();
-  return true;
+  return status == 0;
+}
+
+void BuiltinFile::sweep() {
+  // This object was just a wrapper around a FILE* or fd owned by someone else,
+  // so don't close it except in explicit calls to close().
+  m_stream = nullptr;
+  m_fd = -1;
+  m_closed = true;
+  File::sweep();
 }
 
 IMPLEMENT_REQUEST_LOCAL(BuiltinFiles, g_builtin_files);

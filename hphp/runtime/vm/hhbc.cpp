@@ -361,10 +361,10 @@ int instrNumPops(const Op* opcode) {
 #define TWO(...) 2
 #define THREE(...) 3
 #define FOUR(...) 4
-#define LMANY(...) -1
-#define C_LMANY(...) -2
-#define V_LMANY(...) -2
-#define R_LMANY(...) -2
+#define LMANY -1
+#define C_LMANY -2
+#define V_LMANY -2
+#define R_LMANY -2
 #define FMANY -3
 #define CVMANY -3
 #define CMANY -3

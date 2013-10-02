@@ -421,12 +421,12 @@ enum SetOpOp {
   O(CGetN,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetG,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetS,           NA,               TWO(AV,CV),      ONE(CV),    NF) \
-  O(CGetM,           ONE(MA),          LMANY(),         ONE(CV),    NF) \
+  O(CGetM,           ONE(MA),          LMANY,           ONE(CV),    NF) \
   O(VGetL,           ONE(LA),          NOV,             ONE(VV),    NF) \
   O(VGetN,           NA,               ONE(CV),         ONE(VV),    NF) \
   O(VGetG,           NA,               ONE(CV),         ONE(VV),    NF) \
   O(VGetS,           NA,               TWO(AV,CV),      ONE(VV),    NF) \
-  O(VGetM,           ONE(MA),          LMANY(),         ONE(VV),    NF) \
+  O(VGetM,           ONE(MA),          LMANY,           ONE(VV),    NF) \
   O(AGetC,           NA,               ONE(CV),         ONE(AV),    NF) \
   O(AGetL,           ONE(LA),          NOV,             ONE(AV),    NF) \
   O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -434,12 +434,12 @@ enum SetOpOp {
   O(IssetN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetS,          NA,               TWO(AV,CV),      ONE(CV),    NF) \
-  O(IssetM,          ONE(MA),          LMANY(),         ONE(CV),    NF) \
+  O(IssetM,          ONE(MA),          LMANY,           ONE(CV),    NF) \
   O(EmptyL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(EmptyN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(EmptyG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(EmptyS,          NA,               TWO(AV,CV),      ONE(CV),    NF) \
-  O(EmptyM,          ONE(MA),          LMANY(),         ONE(CV),    NF) \
+  O(EmptyM,          ONE(MA),          LMANY,           ONE(CV),    NF) \
   /* NB: isTypePred depends on this ordering. */ \
   O(IsNullC,         NA,               ONE(CV),         ONE(CV),    NF) \
   O(IsBoolC,         NA,               ONE(CV),         ONE(CV),    NF) \
@@ -459,28 +459,28 @@ enum SetOpOp {
   O(SetN,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetS,            NA,               THREE(CV,AV,CV), ONE(CV),    NF) \
-  O(SetM,            ONE(MA),          C_LMANY(),       ONE(CV),    NF) \
-  O(SetWithRefLM,    TWO(MA,LA),       LMANY(),         NOV,        NF) \
-  O(SetWithRefRM,    ONE(MA),          R_LMANY(),       NOV,        NF) \
+  O(SetM,            ONE(MA),          C_LMANY,         ONE(CV),    NF) \
+  O(SetWithRefLM,    TWO(MA,LA),       LMANY,           NOV,        NF) \
+  O(SetWithRefRM,    ONE(MA),          R_LMANY,         NOV,        NF) \
   O(SetOpL,          TWO(LA,OA),       ONE(CV),         ONE(CV),    NF) \
   O(SetOpN,          ONE(OA),          TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpG,          ONE(OA),          TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpS,          ONE(OA),          THREE(CV,AV,CV), ONE(CV),    NF) \
-  O(SetOpM,          TWO(OA,MA),       C_LMANY(),       ONE(CV),    NF) \
+  O(SetOpM,          TWO(OA,MA),       C_LMANY,         ONE(CV),    NF) \
   O(IncDecL,         TWO(LA,OA),       NOV,             ONE(CV),    NF) \
   O(IncDecN,         ONE(OA),          ONE(CV),         ONE(CV),    NF) \
   O(IncDecG,         ONE(OA),          ONE(CV),         ONE(CV),    NF) \
   O(IncDecS,         ONE(OA),          TWO(AV,CV),      ONE(CV),    NF) \
-  O(IncDecM,         TWO(OA,MA),       LMANY(),         ONE(CV),    NF) \
+  O(IncDecM,         TWO(OA,MA),       LMANY,           ONE(CV),    NF) \
   O(BindL,           ONE(LA),          ONE(VV),         ONE(VV),    NF) \
   O(BindN,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
   O(BindG,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
   O(BindS,           NA,               THREE(VV,AV,CV), ONE(VV),    NF) \
-  O(BindM,           ONE(MA),          V_LMANY(),       ONE(VV),    NF) \
+  O(BindM,           ONE(MA),          V_LMANY,         ONE(VV),    NF) \
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
   O(UnsetN,          NA,               ONE(CV),         NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
-  O(UnsetM,          ONE(MA),          LMANY(),         NOV,        NF) \
+  O(UnsetM,          ONE(MA),          LMANY,           NOV,        NF) \
   /* NOTE: isFPush below relies on the grouping of FPush* here */       \
   O(FPushFunc,       ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushFuncD,      TWO(IVA,SA),      NOV,             NOV,        NF) \
@@ -505,7 +505,7 @@ enum SetOpOp {
   O(FPassN,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassG,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassS,          ONE(IVA),         TWO(AV,CV),      ONE(FV),    FF) \
-  O(FPassM,          TWO(IVA,MA),      LMANY(),         ONE(FV),    FF) \
+  O(FPassM,          TWO(IVA,MA),      LMANY,           ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVMANY,          ONE(RV),    CF) \

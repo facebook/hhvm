@@ -816,7 +816,7 @@ class TraceWalker {
 
   ~TraceWalker() {
     free(m_arcBuff);
-    for (auto& r : m_recursion) delete r.first;
+    for (auto& r : m_recursion) delete[] r.first;
   }
 
   void walk(TraceIterator begin, TraceIterator end, Stats& stats) {

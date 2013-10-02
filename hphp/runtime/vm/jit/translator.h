@@ -575,9 +575,6 @@ public:
     return m_analysisDepth;
   }
 
-  // Async hook for file modifications.
-  void invalidateFile(Eval::PhpFile* f);
-
   // Start a new translation space. Returns true IFF this thread created
   // a new space.
   bool replace();

@@ -90,7 +90,6 @@ void PhpFile::decRefAndDelete() {
   };
 
   if (decRef() == 0) {
-    if (RuntimeOption::EvalJit) Transl::Translator::Get()->invalidateFile(this);
     Treadmill::WorkItem::enqueue(new FileInvalidationTrigger(this));
   }
 }

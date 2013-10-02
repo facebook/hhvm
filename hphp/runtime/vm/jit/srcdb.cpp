@@ -209,34 +209,4 @@ void SrcRec::patch(IncomingBranch branch, TCA dest) {
   }
 }
 
-/*
- * Returns number of destroyed references to file.
- */
-size_t SrcDB::invalidateCode(const Eval::PhpFile* file) {
-  assert(currentRank() == RankBase);
-  /*
-   * Hold the write lease; otherwise some other thread may have started
-   * translating this very file.
-   */
-  BlockingLeaseHolder writer(Translator::WriteLease());
-
-  assert(!RuntimeOption::RepoAuthoritative);
-  unsigned i = 0;
-  {
-    TRACE(1, "SrcDB::invalidateCode: file %p\n", file);
-    FileDepMap::iterator entry = m_deps.find(file);
-    if (entry != m_deps.end()) {
-      GrowableVector<SrcKey>* deferredSrcKeys = entry->second;
-      for (/* already inited*/; i < deferredSrcKeys->size(); i++) {
-        tx64->invalidateSrcKey((*deferredSrcKeys)[i]);
-      }
-      TRACE(1, "SrcDB::invalidateCode: file %p has %zd srcKeys\n", file,
-            entry->second->size());
-      m_deps.erase(entry);
-      free(deferredSrcKeys);
-    }
-  }
-  return i;
-}
-
 } } // HPHP::Transl

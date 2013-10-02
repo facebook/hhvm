@@ -3974,8 +3974,7 @@ struct DeferredPathInvalidate : public DeferredWorkItem {
     String spath(m_path);
     /*
      * inotify saw this path change. Now poke the file repository;
-     * it will notice the underlying PhpFile* has changed, and notify
-     * us via ::invalidateFile.
+     * it will notice the underlying PhpFile* has changed.
      *
      * We don't actually need to *do* anything with the PhpFile* from
      * this lookup; since the path has changed, the file we'll get out is
@@ -3985,10 +3984,6 @@ struct DeferredPathInvalidate : public DeferredWorkItem {
   }
 };
 
-}
-
-void Translator::invalidateFile(Eval::PhpFile* f) {
-  m_srcDB.invalidateCode(f);
 }
 
 static const char *transKindStr[] = {

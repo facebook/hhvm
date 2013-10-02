@@ -66,10 +66,7 @@ BaseExecutionContext::BaseExecutionContext() :
     m_vhost(nullptr) {
 
   setRequestMemoryMaxBytes(RuntimeOption::RequestMemoryMaxBytes);
-  m_include_paths = Array::Create();
-  for (unsigned int i = 0; i < RuntimeOption::IncludeSearchPaths.size(); ++i) {
-    m_include_paths.append(String(RuntimeOption::IncludeSearchPaths[i]));
-  }
+  restoreIncludePath();
 }
 
 VMExecutionContext::VMExecutionContext() :
@@ -807,6 +804,13 @@ String BaseExecutionContext::getenv(const String& name) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void BaseExecutionContext::restoreIncludePath() {
+  m_include_paths = Array::Create();
+  for (unsigned int i = 0; i < RuntimeOption::IncludeSearchPaths.size(); ++i) {
+    m_include_paths.append(String(RuntimeOption::IncludeSearchPaths[i]));
+  }
+}
 
 void BaseExecutionContext::setIncludePath(const String& path) {
   m_include_paths = f_explode(":", path);

@@ -328,6 +328,7 @@ public:
   void setExitCallback(Variant f) { m_exitCallback = f; }
   Variant getExitCallback() { return m_exitCallback; }
 
+  void restoreIncludePath();
   void setIncludePath(const String& path);
   String getIncludePath() const;
   Array getIncludePathArray() const { return m_include_paths; }

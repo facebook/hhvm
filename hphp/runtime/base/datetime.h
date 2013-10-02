@@ -219,7 +219,8 @@ public:
    * for details.
    */
   static Array Parse(const String& datetime);
-  static Array Parse(const String& ts, const String& format);
+  static Array Parse(const String& format, const String& date);
+  static Array ParseAsStrptime(const String& format, const String& date);
 
 public:
   // constructor
@@ -351,6 +352,8 @@ private:
   mutable bool m_timestampSet;
 
   // helpers
+  static Array ParseTime(timelib_time* time,
+                         struct timelib_error_container* error);
   void update();
   String rfcFormat(const String& format) const;
   String stdcFormat(const String& format) const;

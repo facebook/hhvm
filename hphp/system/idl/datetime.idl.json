@@ -72,6 +72,24 @@
             ]
         },
         {
+            "name": "date_parse_from_format",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant"
+            },
+            "args": [
+                {
+                    "name": "format",
+                    "type": "String"
+                },
+                {
+                    "name": "date",
+                    "type": "String"
+                }
+            ]
+        },
+        {
             "name": "date_create",
             "flags": [
             ],

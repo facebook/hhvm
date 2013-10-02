@@ -149,11 +149,45 @@ const StaticString
   }
 
 Array DateTime::Parse(const String& datetime) {
-  struct timelib_error_container *error;
-  timelib_time *parsed_time =
-    timelib_strtotime((char*)datetime.data(), datetime.size(), &error,
+  struct timelib_error_container* error;
+  timelib_time* parsed_time =
+    timelib_strtotime((char *)datetime.data(), datetime.size(), &error,
                       TimeZone::GetDatabase(), TimeZone::GetTimeZoneInfoRaw);
+  return DateTime::ParseTime(parsed_time, error);
+}
 
+Array DateTime::Parse(const String& format, const String& date) {
+  struct timelib_error_container* error;
+  timelib_time* parsed_time =
+    timelib_parse_from_format((char *)format.data(), (char *)date.data(),
+                              date.size(), &error, TimeZone::GetDatabase(),
+                              TimeZone::GetTimeZoneInfoRaw);
+  return DateTime::ParseTime(parsed_time, error);
+}
+
+Array DateTime::ParseAsStrptime(const String& format, const String& date) {
+  struct tm parsed_time;
+  memset(&parsed_time, 0, sizeof(parsed_time));
+  char* unparsed_part = strptime(date.data(), format.data(), &parsed_time);
+  if (unparsed_part == nullptr) {
+    return Array();
+  }
+
+  ArrayInit ret(9);
+  ret.set(s_tm_sec,  parsed_time.tm_sec);
+  ret.set(s_tm_min,  parsed_time.tm_min);
+  ret.set(s_tm_hour, parsed_time.tm_hour);
+  ret.set(s_tm_mday, parsed_time.tm_mday);
+  ret.set(s_tm_mon,  parsed_time.tm_mon);
+  ret.set(s_tm_year, parsed_time.tm_year);
+  ret.set(s_tm_wday, parsed_time.tm_wday);
+  ret.set(s_tm_yday, parsed_time.tm_yday);
+  ret.set(s_unparsed, String(unparsed_part, CopyString));
+  return ret.create();
+}
+
+Array DateTime::ParseTime(timelib_time* parsed_time,
+                          struct timelib_error_container* error) {
   Array ret;
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_year,      y);
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_month,     m);
@@ -226,27 +260,6 @@ Array DateTime::Parse(const String& datetime) {
 
   timelib_time_dtor(parsed_time);
   return ret;
-}
-
-Array DateTime::Parse(const String& ts, const String& format) {
-  struct tm parsed_time;
-  memset(&parsed_time, 0, sizeof(parsed_time));
-  char *unparsed_part = strptime(ts.data(), format.data(), &parsed_time);
-  if (unparsed_part == nullptr) {
-    return Array();
-  }
-
-  ArrayInit ret(9);
-  ret.set(s_tm_sec,  parsed_time.tm_sec);
-  ret.set(s_tm_min,  parsed_time.tm_min);
-  ret.set(s_tm_hour, parsed_time.tm_hour);
-  ret.set(s_tm_mday, parsed_time.tm_mday);
-  ret.set(s_tm_mon,  parsed_time.tm_mon);
-  ret.set(s_tm_year, parsed_time.tm_year);
-  ret.set(s_tm_wday, parsed_time.tm_wday);
-  ret.set(s_tm_yday, parsed_time.tm_yday);
-  ret.set(s_unparsed, String(unparsed_part, CopyString));
-  return ret.create();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

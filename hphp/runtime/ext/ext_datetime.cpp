@@ -424,7 +424,7 @@ Array f_localtime(int64_t timestamp /* = TimeStamp::Current() */,
 }
 
 Variant f_strptime(const String& date, const String& format) {
-  Array ret = DateTime::Parse(date, format);
+  Array ret = DateTime::ParseAsStrptime(format, date);
   if (ret.empty()) {
     return false;
   }
@@ -518,6 +518,14 @@ Object f_date_create_from_format(const String& format,
   return c_DateTime::ti_createfromformat(format, time, timezone);
 }
 
+Variant f_date_parse_from_format(const String& format, const String& date) {
+  Array ret = DateTime::Parse(format, date);
+  if (ret.empty()) {
+    return false;
+  }
+  return ret;
+}
+
 Object f_date_create(const String& time /* = null_string */,
                      CObjRef timezone /* = null_object */) {
   c_DateTime *cdt = NEWOBJ(c_DateTime)();
@@ -567,7 +575,11 @@ int64_t f_date_offset_get(CObjRef object) {
 }
 
 Variant f_date_parse(const String& date) {
-  return DateTime::Parse(date);
+  Array ret = DateTime::Parse(date);
+  if (ret.empty()) {
+    return false;
+  }
+  return ret;
 }
 
 void f_date_time_set(CObjRef object, int hour, int minute,

@@ -1583,6 +1583,10 @@ void Parser::onExpStatement(Token &out, Token &expr) {
 
 void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                        Token &stmt) {
+  if (dynamic_pointer_cast<FunctionCall>(name->exp) ||
+      dynamic_pointer_cast<FunctionCall>(value->exp)) {
+    PARSE_ERROR("Can't use return value in write context");
+  }
   if (value->exp && name->num()) {
     PARSE_ERROR("Key element cannot be a reference");
     return;

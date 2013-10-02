@@ -34,8 +34,14 @@
 
 #define USE_VARARGS
 #define PREFER_STDARG
+
+#ifdef USE_EDITLINE
+#include <editline/readline.h>
+#include <histedit.h>
+#else
 #include <readline/readline.h>
 #include <readline/history.h>
+#endif
 
 using namespace HPHP::Util::TextArt;
 
@@ -111,7 +117,9 @@ void DebuggerClient::onSignal(int sig) {
     m_sigCount++;
     m_sigNum = CmdSignal::SignalBreak;
   } else {
-    rl_replace_line("", 0);
+    rl_line_buffer[0] = '\0';
+    rl_free_line_state();
+    rl_cleanup_after_signal();
     rl_redisplay();
   }
 }
@@ -174,11 +182,12 @@ public:
   }
 
   void animate() {
-    TRACE(2, "ReadlineWaitCursor::animate\n");
-    m_line = rl_line_buffer;
+    if (rl_point <= 0) return;
+    auto p = rl_point - 1;
+    auto orig = rl_line_buffer[p];
     while (m_waiting) {
-      frame('|'); frame('/'); frame('-'); frame('\\');
-      rl_replace_line(m_line.c_str(), 1);
+      frame('|', p); frame('/', p); frame('-', p); frame('\\', p);
+      rl_line_buffer[p] = orig;
       rl_redisplay();
     }
   }
@@ -186,12 +195,9 @@ public:
 private:
   AsyncFunc<ReadlineWaitCursor> m_thread;
   bool m_waiting;
-  string m_line;
 
-  void frame(char ch) {
-  TRACE(2, "ReadlineWaitCursor::getStaticDebuggerClient\n");
-    string line = m_line + ch;
-    rl_replace_line(line.c_str(), 1);
+  void frame(char ch, int point) {
+    rl_line_buffer[point] = ch;
     rl_redisplay();
     usleep(100000);
   }
@@ -786,7 +792,6 @@ void DebuggerClient::addCompletion(AutoComplete type) {
   }
 
   if (type == AutoCompleteFunctions || type == AutoCompleteClassMethods) {
-    rl_completion_suppress_append = 1;
     promptFunctionPrototype();
   }
 }
@@ -1090,6 +1095,10 @@ void DebuggerClient::console() {
         // treat ^D as quit
         print("quit");
         line = "quit";
+      } else {
+#ifdef USE_EDITLINE
+        print("%s", line); // Stay consistent with the readline library
+#endif
       }
     } else if (!NoPrompt && RuntimeOption::EnableDebuggerPrompt) {
       print("%s%s", getPrompt().c_str(), line);
@@ -1240,6 +1249,9 @@ char DebuggerClient::ask(const char *fmt, ...) {
   fflush(stdout);
   auto input = readline("");
   if (input == nullptr) return ' ';
+#ifdef USE_EDITLINE
+  print("%s", input); // Stay consistent with the readline library
+#endif
   if (strlen(input) > 0) return tolower(input[0]);
   return ' ';
 }

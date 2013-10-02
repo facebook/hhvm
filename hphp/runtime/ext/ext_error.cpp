@@ -96,7 +96,11 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
           } else {
             first = false;
           }
-          buf.append(it.second().toString());
+          try {
+            buf.append(it.second().toString());
+          } catch (FatalErrorException& fe) {
+            buf.append(fe.getMessage());
+          }
         }
       }
       buf.append(")");

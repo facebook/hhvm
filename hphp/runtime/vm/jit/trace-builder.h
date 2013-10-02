@@ -342,7 +342,6 @@ private:
     smart::vector<LocalState> locals;
     bool frameSpansCall;
     bool needsFPAnchor;
-    SSATmp* refCountedMemValue;
     std::vector<SSATmp*> callerAvailableValues; // unordered list
     BCMarker curMarker;
   };
@@ -468,9 +467,6 @@ private:
   bool       m_thisIsAvailable; // true only if current ActRec has non-null this
   bool       m_frameSpansCall;  // does the inlined frame span a function call
   bool       m_needsFPAnchor;
-
-  // state of values in memory
-  SSATmp*    m_refCountedMemValue;
 
   smart::vector<LocalState> m_locals;
 

@@ -45,7 +45,6 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_thisIsAvailable(false)
   , m_frameSpansCall(false)
   , m_needsFPAnchor(false)
-  , m_refCountedMemValue(nullptr)
   , m_locals(func->numLocals())
 {
   m_curFunc = m_unit.cns(func);
@@ -65,7 +64,6 @@ TraceBuilder::~TraceBuilder() {
  */
 bool TraceBuilder::isValueAvailable(SSATmp* tmp) const {
   while (true) {
-    if (m_refCountedMemValue == tmp) return true;
     if (anyLocalHasValue(tmp)) return true;
     if (callerHasValueAvailable(tmp)) return true;
 
@@ -169,11 +167,6 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
   Opcode opc = inst->op();
   // Update tracked state of local values/types, stack/frame pointer, CSE, etc.
 
-  // kill tracked memory values
-  if (inst->mayModifyRefs()) {
-    m_refCountedMemValue = nullptr;
-  }
-
   switch (opc) {
   case DefInlineFP:    trackDefInlineFP(inst);  break;
   case InlineReturn:   trackInlineReturn(inst); break;
@@ -261,30 +254,8 @@ void TraceBuilder::updateTrackedState(IRInstruction* inst) {
     break;
   }
 
-  case StElem:
-  case StProp:
-  case StPropNT:
-    // fall through to StMem; stored value is the same arg number (2)
-  case StMem:
-  case StMemNT:
-    m_refCountedMemValue = inst->src(2);
-    break;
-
-  case LdMem:
-  case LdProp:
-  case LdElem:
-  case LdRef:
-  case ArrayGet:
-  case VectorGet:
-  case PairGet:
-  case MapGet:
-  case StableMapGet:
-    m_refCountedMemValue = inst->dst();
-    break;
-
   case StRefNT:
   case StRef: {
-    m_refCountedMemValue = inst->src(1);
     SSATmp* newRef = inst->dst();
     SSATmp* prevRef = inst->src(0);
     // update other tracked locals that also contain prevRef
@@ -406,7 +377,6 @@ std::unique_ptr<TraceBuilder::State> TraceBuilder::createState() const {
   state->thisAvailable = m_thisIsAvailable;
   state->locals = m_locals;
   state->callerAvailableValues = m_callerAvailableValues;
-  state->refCountedMemValue = m_refCountedMemValue;
   state->curMarker = m_curMarker;
   state->frameSpansCall = m_frameSpansCall;
   state->needsFPAnchor = m_needsFPAnchor;
@@ -473,11 +443,6 @@ void TraceBuilder::mergeState(State* state) {
     local.unsafe = local.unsafe || m_locals[i].unsafe;
     local.written = local.written || m_locals[i].written;
   }
-  // Reference counted memory value is available only if it is available on both
-  // paths
-  if (state->refCountedMemValue != m_refCountedMemValue) {
-    state->refCountedMemValue = nullptr;
-  }
 
   // Don't attempt to continue tracking caller's available values.
   state->callerAvailableValues.clear();
@@ -493,7 +458,6 @@ void TraceBuilder::useState(std::unique_ptr<State> state) {
   m_spOffset = state->spOffset;
   m_curFunc = state->curFunc;
   m_thisIsAvailable = state->thisAvailable;
-  m_refCountedMemValue = state->refCountedMemValue;
   m_locals = std::move(state->locals);
   m_callerAvailableValues = std::move(state->callerAvailableValues);
   m_curMarker = state->curMarker;
@@ -522,7 +486,6 @@ void TraceBuilder::clearTrackedState() {
   m_spValue = m_fpValue = nullptr;
   m_spOffset = 0;
   m_thisIsAvailable = false;
-  m_refCountedMemValue = nullptr;
   for (auto i = m_snapshots.begin(), end = m_snapshots.end(); i != end; ++i) {
     delete *i;
     *i = nullptr;

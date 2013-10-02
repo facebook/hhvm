@@ -700,7 +700,6 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "MixedKind",
     "SharedKind",
     "NvtwKind",
-    "PolicyKind"
   };
   return names[kind];
 }

@@ -5850,7 +5850,7 @@ void CodeGenerator::cgIterFree(IRInstruction* inst) {
   PhysReg fpReg = m_regs[inst->src(0)].reg();
   int64_t offset = iterOffset(inst->extra<IterFree>()->iterId);
   cgCallHelper(m_as,
-               CppCall(iterFreeHelper),
+               CppCall(getMethodPtr(&Iter::free)),
                kVoidDest,
                SyncOptions::kSyncPoint,
                ArgGroup(m_regs).addr(fpReg, offset));
@@ -5860,7 +5860,7 @@ void CodeGenerator::cgMIterFree(IRInstruction* inst) {
   PhysReg fpReg = m_regs[inst->src(0)].reg();
   int64_t offset = iterOffset(inst->extra<MIterFree>()->iterId);
   cgCallHelper(m_as,
-               CppCall(miterFreeHelper),
+               CppCall(getMethodPtr(&Iter::mfree)),
                kVoidDest,
                SyncOptions::kSyncPoint,
                ArgGroup(m_regs).addr(fpReg, offset));
@@ -5878,7 +5878,7 @@ void CodeGenerator::cgCIterFree(IRInstruction* inst) {
   PhysReg fpReg = m_regs[inst->src(0)].reg();
   int64_t  offset = iterOffset(inst->extra<CIterFree>()->iterId);
   cgCallHelper(m_as,
-               CppCall(citerFreeHelper),
+               CppCall(getMethodPtr(&Iter::cfree)),
                kVoidDest,
                SyncOptions::kSyncPoint,
                ArgGroup(m_regs).addr(fpReg, offset));

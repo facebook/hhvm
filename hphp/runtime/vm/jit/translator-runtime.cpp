@@ -529,18 +529,6 @@ Cell lookupCnsUHelper(const TypedValue* tv,
   return c1;
 }
 
-void iterFreeHelper(Iter* iter) {
-  iter->free();
-}
-
-void miterFreeHelper(Iter* iter) {
-  iter->mfree();
-}
-
-void citerFreeHelper(Iter* iter) {
-  iter->cfree();
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {

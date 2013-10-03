@@ -3049,7 +3049,6 @@ OPTBLD_INLINE bool VMExecutionContext::memberHelperPre(
   const LocationCode lcode = LocationCode(*vec++);
 
   TypedValue* loc = nullptr;
-  TypedValue dummy;
   Class* const ctx = arGetContextClass(getFP());
 
   StringData* name;
@@ -3076,8 +3075,8 @@ OPTBLD_INLINE bool VMExecutionContext::memberHelperPre(
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
-      tvWriteNull(&dummy);
-      loc = &dummy;
+      tvWriteNull(&tvScratch);
+      loc = &tvScratch;
     } else {
       loc = fr;
     }
@@ -3101,8 +3100,8 @@ OPTBLD_INLINE bool VMExecutionContext::memberHelperPre(
       if (warn) {
         raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
       }
-      tvWriteNull(&dummy);
-      loc = &dummy;
+      tvWriteNull(&tvScratch);
+      loc = &tvScratch;
     } else {
       loc = fr;
     }

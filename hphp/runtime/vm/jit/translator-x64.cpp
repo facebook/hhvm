@@ -1498,18 +1498,6 @@ void TranslatorX64::emitResolvedDeps(const ChangeMap& resolvedDeps) {
 }
 
 void
-TranslatorX64::emitFallbackUncondJmp(Asm& as, SrcRec& dest) {
-  prepareForSmash(as, kJmpLen);
-  dest.emitFallbackJump(as.frontier());
-}
-
-void
-TranslatorX64::emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc) {
-  prepareForSmash(as, kJmpccLen);
-  dest.emitFallbackJump(as.frontier(), cc);
-}
-
-void
 TranslatorX64::checkRefs(SrcKey sk,
                          const RefDeps& refDeps,
                          SrcRec& fail) {

@@ -240,9 +240,6 @@ private:
   void emitResolvedDeps(const ChangeMap& resolvedDeps);
   void checkRefs(SrcKey, const RefDeps&, SrcRec&);
 
-  void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
-  void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc);
-
   static void smash(CodeBlock &cb, TCA src, TCA dest, bool isCall);
   static void smashJmp(CodeBlock& cb, TCA src, TCA dest) {
     smash(cb, src, dest, false);

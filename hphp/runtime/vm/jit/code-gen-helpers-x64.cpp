@@ -330,6 +330,16 @@ void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
   }
 }
 
+void emitFallbackUncondJmp(Asm& as, SrcRec& dest) {
+  prepareForSmash(as, kJmpLen);
+  dest.emitFallbackJump(as.frontier());
+}
+
+void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc) {
+  prepareForSmash(as, kJmpccLen);
+  dest.emitFallbackJump(as.frontier(), cc);
+}
+
 void emitRB(X64Assembler& a,
             Trace::RingBufferType t,
             const char* msg,

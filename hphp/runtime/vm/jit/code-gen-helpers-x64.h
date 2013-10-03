@@ -76,6 +76,9 @@ void emitCall(Asm& as, CppCall call);
 
 void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
 
+void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
+void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc);
+
 void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
             RegSet toSave = RegSet());
 

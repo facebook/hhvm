@@ -1887,7 +1887,7 @@ void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc) {
     [&](ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
       auto const destSR = m_tx64->getSrcRec(destSK);
-      m_tx64->emitFallbackCondJmp(this->m_as, *destSR, ccNegate(cc));
+      emitFallbackCondJmp(this->m_as, *destSR, ccNegate(cc));
     });
 }
 
@@ -2887,7 +2887,7 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
   auto const destSR = m_tx64->getSrcRec(destSK);
-  m_tx64->emitFallbackUncondJmp(m_as, *destSR);
+  emitFallbackUncondJmp(m_as, *destSR);
 }
 
 void CodeGenerator::cgIncRefWork(Type type, SSATmp* src) {
@@ -4728,7 +4728,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
         m_as.  cmpl   ((int32_t)vals64, r32(bitsValReg));
       }
     }
-    m_tx64->emitFallbackCondJmp(m_as, *destSR, cond);
+    emitFallbackCondJmp(m_as, *destSR, cond);
   };
 
   if (firstBitNum == 0) {
@@ -4746,13 +4746,13 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
       // are refs, or all params are non-refs, so if vals64
       // isn't 0 and isnt mask64, there's no possibility of
       // a match
-      m_tx64->emitFallbackCondJmp(m_as, *destSR, CC_LE);
+      emitFallbackCondJmp(m_as, *destSR, CC_LE);
       thenBody();
     } else {
       ifThenElse(CC_NLE, thenBody, /* else */ [&] {
           //   If not special builtin...
           m_as.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
-          m_tx64->emitFallbackCondJmp(m_as, *destSR, vals64 ? CC_Z : CC_NZ);
+          emitFallbackCondJmp(m_as, *destSR, vals64 ? CC_Z : CC_NZ);
         });
     }
   }

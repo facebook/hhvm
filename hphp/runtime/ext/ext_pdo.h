@@ -123,7 +123,8 @@ class c_PDO : public ExtObjectData, public Sweepable {
                              const String& username = null_string,
                              const String& password = null_string,
                              CArrRef options = null_array);
-  public: Variant t_prepare(const String& statement, CArrRef options = null_array);
+  public: Variant t_prepare(const String& statement,
+                            CArrRef options = null_array);
   public: bool t_begintransaction();
   public: bool t_commit();
   public: bool t_rollback();

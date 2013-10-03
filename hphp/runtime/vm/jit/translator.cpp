@@ -1856,7 +1856,12 @@ void getInputsImpl(SrcKey startSk,
       if (ni->nonRefCountedLocals[i]) {
         assert(curType.notCounted() && "Static analysis was wrong");
       }
-      numRefCounted += curType.maybeCounted();
+      if (curType.maybeCounted() || curType == Type::None) {
+        // TODO(#2135185): Finding Type::None means that the region
+        // compiler had no information about the type of the local.
+        // This logic would prefer that to be Type::Any.
+        numRefCounted++;
+      }
     }
     return numRefCounted <= RuntimeOption::EvalHHIRInliningMaxReturnDecRefs;
   };

@@ -210,6 +210,12 @@ bad_tests = (
     '/tests/lang/045.php',
     '/Zend/tests/lsb_021.php',
     '/Zend/tests/lsb_022.php',
+
+
+    # flaky for various reasons
+    '/ext/standard/tests/network/gethostbyname_error004.php',
+    '/ext/standard/tests/network/getmxrr.php',
+    '/ext/sockets/tests/socket_getpeername_ipv6loop.php',
 )
 
 # Tests that work but not in repo mode

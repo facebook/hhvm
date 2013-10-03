@@ -274,6 +274,11 @@ norepo_tests = (
     '/ext/standard/tests/class_object/get_declared_traits_variation1.php',
     '/ext/standard/tests/class_object/interface_exists_variation3.php',
     '/ext/standard/tests/class_object/interface_exists_variation4.php',
+    '/ext/standard/tests/file/file_get_contents_basic.php',
+    '/ext/standard/tests/file/file_get_contents_file_put_contents_basic.php',
+    '/ext/standard/tests/file/file_get_contents_file_put_contents_variation1.php',
+    '/ext/standard/tests/file/file_get_contents_file_put_contents_variation2.php',
+    '/ext/standard/tests/file/file_get_contents_variation1.php',
     '/ext/standard/tests/general_functions/is_numeric.php',
     '/ext/standard/tests/math/abs.php',
     '/ext/standard/tests/math/pow.php',
@@ -468,7 +473,7 @@ parser.add_argument(
     "--zend_path",
     type=str,
     required=True,
-    help="zend path to import tests from. git checkout https://github.com/php/php-src"
+    help="zend path to import tests from. git clone https://github.com/php/php-src"
 )
 parser.add_argument(
     "-o",

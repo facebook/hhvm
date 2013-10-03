@@ -119,7 +119,10 @@ class c_PDO : public ExtObjectData, public Sweepable {
   // need to implement
   public: c_PDO(Class* cls = c_PDO::classof());
   public: ~c_PDO();
-  public: void t___construct(const String& dsn, const String& username = null_string, const String& password = null_string, CArrRef options = null_array);
+  public: void t___construct(const String& dsn,
+                             const String& username = null_string,
+                             const String& password = null_string,
+                             CArrRef options = null_array);
   public: Variant t_prepare(const String& statement, CArrRef options = null_array);
   public: bool t_begintransaction();
   public: bool t_commit();

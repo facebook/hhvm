@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
@@ -40,11 +41,12 @@ constexpr uint64_t kUninitializedRIP = 0xba5eba11acc01ade;
 
 namespace {
 
-void emitBindJ(Asm& a, Asm& astubs,
+void emitBindJ(CodeBlock& cb, CodeBlock& stubs,
                ConditionCode cc, SrcKey dest, ServiceRequest req) {
-  prepareForSmash(a, cc == Transl::CC_None ? kJmpLen : kJmpccLen);
-  TCA toSmash = a.frontier();
-  if (a.base() == astubs.base()) {
+  prepareForSmash(cb, cc == Transl::CC_None ? kJmpLen : kJmpccLen);
+  TCA toSmash = cb.frontier();
+  if (cb.base() == stubs.base()) {
+    Asm a { cb };
     emitJmpOrJcc(a, cc, toSmash);
   }
 
@@ -55,7 +57,8 @@ void emitBindJ(Asm& a, Asm& astubs,
                                       toSmash, dest.offset())
             : emitServiceReq(tx64->stubsCode, req, toSmash, dest.offset()));
 
-  if (a.base() == astubs.base()) {
+  Asm a { cb };
+  if (cb.base() == stubs.base()) {
     CodeCursor cursor(a, toSmash);
     emitJmpOrJcc(a, cc, sr);
   } else {
@@ -153,7 +156,7 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& stubsCode,
   ReqBindCall* req = tx64->globalData().alloc<ReqBindCall>();
 
   Asm a { mainCode };
-  prepareForSmash(a, kCallLen);
+  prepareForSmash(mainCode, kCallLen);
   TCA toSmash = mainCode.frontier();
   a.    call(stubsCode.frontier());
 
@@ -267,14 +270,14 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   return retval;
 }
 
-void emitBindJcc(Asm& a, Asm& astubs, Transl::ConditionCode cc,
+void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
                  SrcKey dest, ServiceRequest req /* = REQ_BIND_JCC */) {
-  emitBindJ(a, astubs, cc, dest, req);
+  emitBindJ(cb, stubs, cc, dest, req);
 }
 
-void emitBindJmp(Asm& a, Asm& astubs,
+void emitBindJmp(CodeBlock& cb, CodeBlock& stubs,
                  SrcKey dest, ServiceRequest req /* = REQ_BIND_JMP */) {
-  emitBindJ(a, astubs, Transl::CC_None, dest, req);
+  emitBindJ(cb, stubs, Transl::CC_None, dest, req);
 }
 
 int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,

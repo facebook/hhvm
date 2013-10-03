@@ -44,15 +44,6 @@ constexpr size_t kJmpTargetAlign = 16;
 
 void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
-enum class TestAndSmashFlags {
-  kAlignJccImmediate,
-  kAlignJcc,
-  kAlignJccAndJmp
-};
-void prepareForTestAndSmash(Asm&, int testBytes, TestAndSmashFlags flags);
-void prepareForSmash(Asm&, int nBytes, int offset = 0);
-bool isSmashable(Address frontier, int nBytes, int offset = 0);
-
 void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc,
                                  const Offset spDiff);
 void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
@@ -75,9 +66,6 @@ void emitCall(Asm& as, TCA dest);
 void emitCall(Asm& as, CppCall call);
 
 void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
-
-void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
-void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc);
 
 void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
             RegSet toSave = RegSet());

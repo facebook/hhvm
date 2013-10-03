@@ -165,7 +165,7 @@ struct SrcRec {
    */
   void setFuncInfo(const Func* f);
   void chainFrom(IncomingBranch br);
-  void emitFallbackJump(TCA from, int cc = -1);
+  void emitFallbackJump(CodeBlock& cb, ConditionCode cc = CC_None);
   void newTranslation(TCA newStart);
   void replaceOldTranslations();
   void addDebuggerGuard(TCA dbgGuard, TCA m_dbgBranchGuardSrc);

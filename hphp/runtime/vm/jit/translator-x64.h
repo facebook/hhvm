@@ -82,11 +82,6 @@ typedef X64Assembler Asm;
 typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
 
 constexpr size_t kNonFallthroughAlign = 64;
-constexpr int kJmpLen = 5;
-constexpr int kCallLen = 5;
-constexpr int kJmpccLen = 6;
-constexpr int kJmpImmBytes = 4;
-constexpr int kJcc8Len = 3;
 constexpr int kLeaRipLen = 7;
 constexpr int kTestRegRegLen = 3;
 constexpr int kTestImmRegLen = 5;  // only for rax -- special encoding
@@ -238,14 +233,6 @@ private:
   void emitGuardChecks(SrcKey, const ChangeMap&, const RefDeps&, SrcRec&);
   void emitResolvedDeps(const ChangeMap& resolvedDeps);
   void checkRefs(SrcKey, const RefDeps&, SrcRec&);
-
-  static void smash(CodeBlock &cb, TCA src, TCA dest, bool isCall);
-  static void smashJmp(CodeBlock& cb, TCA src, TCA dest) {
-    smash(cb, src, dest, false);
-  }
-  static void smashCall(CodeBlock& cb, TCA src, TCA dest) {
-    smash(cb, src, dest, true);
-  }
 
 private:
   void drawCFG(std::ofstream& out) const;

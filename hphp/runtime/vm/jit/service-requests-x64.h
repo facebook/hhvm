@@ -43,9 +43,12 @@ using Transl::TCA;
 TCA emitServiceReqWork(Asm& as, TCA start, bool persist, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argInfo);
 
-void emitBindJcc(Asm& a, Asm& astubs, Transl::ConditionCode cc,
+/*
+ * "cb" may be either the main section or stubs section.
+ */
+void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
                  SrcKey dest, ServiceRequest req = REQ_BIND_JCC);
-void emitBindJmp(Asm& a, Asm& astubs,
+void emitBindJmp(CodeBlock& cb, CodeBlock& stubs,
                  SrcKey dest, ServiceRequest req = REQ_BIND_JMP);
 
 /*

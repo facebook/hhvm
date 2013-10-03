@@ -112,6 +112,7 @@
 #include "hphp/runtime/vm/jit/x64-util.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
+#include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
@@ -498,39 +499,6 @@ TranslatorX64::translate(const TranslArgs& args) {
   return start;
 }
 
-void
-TranslatorX64::smash(CodeBlock &cb, TCA src, TCA dest, bool isCall) {
-  assert(canWrite());
-  TRACE(2, "smash: %p -> %p\n", src, dest);
-  /*
-   * !
-   *
-   * We are about to smash reachable code in the translation cache. A
-   * hardware thread might be executing the very instruction we're
-   * modifying. This is safe because:
-   *
-   *    1. We align smashable instructions so that they reside on a single
-   *       cache line;
-   *
-   *    2. We modify the instruction with a single processor store; and
-   *
-   *    3. The smashed region contains only a single instruction in the
-   *       orignal instruction stream (see jmp() -> emitJ32() -> bytes() in
-   *       the assembler.
-   */
-  CodeCursor cg(cb, src);
-  Asm a { cb };
-  assert(isSmashable(cb.frontier(), kJmpLen));
-  if (dest > src && dest - src <= kJmpLen) {
-    assert(!isCall);
-    a.    emitNop(dest - src);
-  } else if (!isCall) {
-    a.    jmp(dest);
-  } else {
-    a.    call(dest);
-  }
-}
-
 void TranslatorX64::protectCode() {
   mprotect(tx64->hotCode.base(),
            tx64->stubsCode.base() - tx64->hotCode.base() +
@@ -678,15 +646,15 @@ TranslatorX64::emitCallArrayPrologue(const Func* func,
   if (dvs.size() == 1) {
     a.   cmp_imm32_disp_reg32(dvs[0].first,
                               AROFF(m_numArgsAndCtorFlag), rVmFp);
-    emitBindJcc(a, astubs, CC_LE, SrcKey(func, dvs[0].second));
-    emitBindJmp(a, astubs, SrcKey(func, func->base()));
+    emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[0].second));
+    emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
   } else {
     a.   load_reg64_disp_reg32(rVmFp, AROFF(m_numArgsAndCtorFlag), rax);
     for (unsigned i = 0; i < dvs.size(); i++) {
       a.   cmp_imm32_reg32(dvs[i].first, rax);
-      emitBindJcc(a, astubs, CC_LE, SrcKey(func, dvs[i].second));
+      emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second));
     }
-    emitBindJmp(a, astubs, SrcKey(func, func->base()));
+    emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
   }
   return start;
 }
@@ -1088,13 +1056,13 @@ void TranslatorX64::regeneratePrologue(TransID prologueTransId) {
   // Smash callers of the old prologue with the address of the new one.
   JIT::PrologueCallersRec* pcr = m_profData->prologueCallers(prologueTransId);
   for (TCA toSmash : pcr->mainCallers()) {
-    smashCall(codeBlockFor(toSmash), toSmash, start);
+    JIT::smashCall(toSmash, start);
   }
   // If the prologue has a guard, then smash its guard-callers as well.
   if (funcPrologueHasGuard(start, func)) {
     TCA guard = funcPrologueToGuard(start, func);
     for (TCA toSmash : pcr->guardCallers()) {
-      smashCall(codeBlockFor(toSmash), toSmash, guard);
+      JIT::smashCall(toSmash, guard);
     }
   }
   pcr->clearAllCallers();
@@ -1358,8 +1326,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
     a.    loadq   (rax[Func::prologueTableOff() + sizeof(TCA)*entry], rax);
     a.    jmp     (rax);
   } else {
-    Asm astubs { stubsCode };
-    emitBindJmp(a, astubs, funcBody);
+    emitBindJmp(mainCode, stubsCode, funcBody);
   }
   return funcBody;
 }
@@ -1807,7 +1774,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
       LeaseHolder writer(s_writeLease);
       if (writer && Asm::callTarget(toSmash) != dest) {
         TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
-        smashCall(tx64->codeBlockFor(toSmash), toSmash, dest);
+        JIT::smashCall(toSmash, dest);
         smashed = true;
         // For functions to be PGO'ed, if their prologues haven't been
         // regenerated yet, then save toSmash as a caller to the
@@ -3089,7 +3056,7 @@ void TranslatorX64::addDbgGuardImpl(SrcKey sk, SrcRec& srcRec) {
 
   // Emit a jump to the actual code
   TCA realCode = srcRec.getTopTranslation();
-  prepareForSmash(a, kJmpLen);
+  JIT::prepareForSmash(mainCode, kJmpLen);
   TCA dbgBranchGuardSrc = mainCode.frontier();
   a.   jmp(realCode);
 

@@ -57,6 +57,7 @@
 #include "hphp/runtime/vm/jit/ir-trace.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
+#include "hphp/runtime/vm/jit/jump-smash.h"
 
 using HPHP::Transl::TCA;
 
@@ -544,7 +545,7 @@ void CodeGenerator::emitReqBindJcc(ConditionCode cc,
   assert(m_as.base() != m_astubs.base() &&
          "ReqBindJcc only makes sense outside of astubs");
 
-  prepareForTestAndSmash(a, 0, TestAndSmashFlags::kAlignJccAndJmp);
+  prepareForTestAndSmash(m_mainCode, 0, TestAndSmashFlags::kAlignJccAndJmp);
   auto const patchAddr = a.frontier();
   auto const jccStub =
     emitEphemeralServiceReq(tx64->stubsCode,
@@ -1888,7 +1889,7 @@ void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc) {
     [&](ConditionCode cc) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
       auto const destSR = m_tx64->getSrcRec(destSK);
-      emitFallbackCondJmp(this->m_as, *destSR, ccNegate(cc));
+      destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
 }
 
@@ -2549,7 +2550,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
         m_as.  subq(data->base, indexReg);
       }
       m_as.    cmpq(data->cases - 2, indexReg);
-      prepareForSmash(m_as, kJmpccLen);
+      prepareForSmash(m_mainCode, kJmpccLen);
       TCA def = emitEphemeralServiceReq(
         tx64->stubsCode,
         tx64->getFreeStub(),
@@ -2579,11 +2580,13 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
     if (data->bounded) {
       indexVal -= data->base;
       if (indexVal >= data->cases - 2 || indexVal < 0) {
-        emitBindJmp(m_as, m_astubs, SrcKey(data->func, data->defaultOff));
+        emitBindJmp(m_mainCode, m_stubsCode,
+                    SrcKey(data->func, data->defaultOff));
         return;
       }
     }
-    emitBindJmp(m_as, m_astubs, SrcKey(data->func, data->targets[indexVal]));
+    emitBindJmp(m_mainCode, m_stubsCode,
+                SrcKey(data->func, data->targets[indexVal]));
   }
 }
 
@@ -2848,8 +2851,8 @@ void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   emitBindJmp(
-    m_as,
-    m_astubs,
+    m_mainCode,
+    m_stubsCode,
     SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset)
   );
 }
@@ -2881,7 +2884,7 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
   auto const destSR = m_tx64->getSrcRec(destSK);
-  emitFallbackUncondJmp(m_as, *destSR);
+  destSR->emitFallbackJump(m_mainCode);
 }
 
 void CodeGenerator::cgIncRefWork(Type type, SSATmp* src) {
@@ -4541,7 +4544,7 @@ void CodeGenerator::emitSideExitGuard(Type type,
   emitTypeTest(type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       auto const sk = SrcKey(curFunc(), taken);
-      emitBindJcc(this->m_as, this->m_astubs, ccNegate(cc), sk,
+      emitBindJcc(this->m_mainCode, this->m_stubsCode, ccNegate(cc), sk,
                   REQ_BIND_SIDE_EXIT);
   });
 }
@@ -4713,7 +4716,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
         m_as.  cmpl   ((int32_t)vals64, r32(bitsValReg));
       }
     }
-    emitFallbackCondJmp(m_as, *destSR, cond);
+    destSR->emitFallbackJump(m_mainCode, cond);
   };
 
   if (firstBitNum == 0) {
@@ -4731,13 +4734,13 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
       // are refs, or all params are non-refs, so if vals64
       // isn't 0 and isnt mask64, there's no possibility of
       // a match
-      emitFallbackCondJmp(m_as, *destSR, CC_LE);
+      destSR->emitFallbackJump(m_mainCode, CC_LE);
       thenBody();
     } else {
       ifThenElse(CC_NLE, thenBody, /* else */ [&] {
           //   If not special builtin...
           m_as.testl(AttrVariadicByRef, funcPtrReg[Func::attrsOff()]);
-          emitFallbackCondJmp(m_as, *destSR, vals64 ? CC_Z : CC_NZ);
+          destSR->emitFallbackJump(m_mainCode, vals64 ? CC_Z : CC_NZ);
         });
     }
   }

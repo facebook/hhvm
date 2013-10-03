@@ -13,13 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <memory>
+
+#include "folly/ScopeGuard.h"
+
 #include "hphp/runtime/base/data-stream-wrapper.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/zend-url.h"
-#include <memory.h>
-
-#include <folly/ScopeGuard.h>
+#include "hphp/runtime/base/zend-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

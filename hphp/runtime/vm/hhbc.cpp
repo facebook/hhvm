@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/stats.h"
 #include <sstream>
 

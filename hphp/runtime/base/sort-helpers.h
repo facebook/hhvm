@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/util/safesort.h"
 

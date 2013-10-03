@@ -17,23 +17,27 @@
 #ifndef incl_HPHP_BASE_MD5_H_
 #define incl_HPHP_BASE_MD5_H_
 
-#include "hphp/runtime/base/zend-string.h"
+#include <cstring>
+#include <memory>
+
+#include <boost/operators.hpp>
+
+#include "folly/String.h"
+#include "folly/Range.h"
+
 #include "hphp/util/util.h"
 
 namespace HPHP {
-/*
- * Most of php's infrastructure for md5sums treats them as strings. They
- * are 128-bits, though, and fit economically in a fixed-size struct.
- */
 
-struct MD5 {
+//////////////////////////////////////////////////////////////////////
+
+struct MD5 : private boost::totally_ordered<MD5> {
   uint64_t q[2];
-  MD5() {
-    q[0] = q[1] = 0;
-  }
 
+  MD5() : q{} {}
+
+  // Input should be null-terminated output from PHP::md5().
   explicit MD5(const char* str) {
-    // We expect our input to be null-terminated output from PHP::md5().
     assert(strlen(str) == 32);
     const int kQWordAsciiLen = 16;
     char buf[kQWordAsciiLen + 1];
@@ -47,14 +51,7 @@ struct MD5 {
     q[1] = strtoull(buf, nullptr, 16);
   }
 
-  std::string toString() const {
-    int len = 16;
-    char md5nbo[16];
-    nbo((void *)md5nbo);
-    return std::string(string_bin2hex(md5nbo, len));
-  }
-
-  // blob is assumed to be in network byte order.
+  // Blob is assumed to be in network byte order.
   explicit MD5(const void* blob) {
     q[0] = ntohq(((const uint64_t*)blob)[0]);
     q[1] = ntohq(((const uint64_t*)blob)[1]);
@@ -66,26 +63,21 @@ struct MD5 {
     ((uint64_t*)blob)[1] = htonq(q[1]);
   }
 
-  bool isValid() const {
-    /*
-     * We arbitrarily choose kDefaultMD5 to be an "impossible" md5 value.
-     * If someone manages to construct a PHP compilation unit that
-     * collides, well, we owe them a pizza dinner or something.
-     */
-    return q[0] || q[1];
+  // Convert to a std::string with hex representation of the md5.
+  std::string toString() const {
+    std::string ret;
+    char md5nbo[16];
+    nbo(md5nbo);
+    folly::hexlify(folly::StringPiece(md5nbo, sizeof md5nbo), ret);
+    return ret;
   }
 
   bool operator==(const MD5& r) const {
     return q[0] == r.q[0] && q[1] == r.q[1];
   }
+
   bool operator<(const MD5& r) const {
     return q[0] < r.q[0] || (q[0] == r.q[0] && q[1] < r.q[1]);
-  }
-  bool operator>(const MD5& r) const {
-    return q[0] > r.q[0] || (q[0] == r.q[0] && q[1] > r.q[1]);
-  }
-  bool operator!=(const MD5& r) const {
-    return !operator==(r);
   }
 
   uint64_t hash() const {
@@ -95,6 +87,9 @@ struct MD5 {
   }
 };
 
-} // HPHP
+//////////////////////////////////////////////////////////////////////
+
+}
+
 #endif
 

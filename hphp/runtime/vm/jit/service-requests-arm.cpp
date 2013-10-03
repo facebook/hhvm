@@ -10,12 +10,26 @@ namespace HPHP { namespace JIT { namespace ARM {
 using namespace vixl;
 
 TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
-                       ServiceRequest req, const ServiceReqArgVec& argInfo) {
+                       ServiceRequest req, const ServiceReqArgVec& argv) {
   MacroAssembler a { cb };
 
-  // XXX lots of cases not handled here. E.g. args, at all.
+  assert(start == cb.frontier());
 
-  // eager vm reg save
+  for (auto i = 0; i < argv.size(); ++i) {
+    auto reg = serviceReqArgReg(i);
+    auto const& arg = argv[i];
+    switch (arg.m_kind) {
+      case ServiceReqArgInfo::Immediate:
+        a.   Mov  (reg, arg.m_imm);
+        break;
+      case ServiceReqArgInfo::CondCode:
+        not_implemented();
+        break;
+      default: not_reached();
+    }
+  }
+
+  // Save VM regs
   a.     Str   (rVmFp, rGContextReg[offsetof(VMExecutionContext, m_fp)]);
   a.     Str   (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
                                     Stack::topOfStackOffset()]);
@@ -36,7 +50,7 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   }
   a.     Brk   (0);
 
-  return nullptr;
+  return start;
 }
 
 }}}

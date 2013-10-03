@@ -94,6 +94,11 @@ inline ptrdiff_t cellsToBytes(int nCells) {
   return nCells * sizeof(Cell);
 }
 
+inline int64_t localOffset(int64_t locId) {
+  return -cellsToBytes(locId + 1);
+}
+
+
 struct VMRegAnchor : private boost::noncopyable {
   VMRegState m_old;
   VMRegAnchor() {

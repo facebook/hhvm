@@ -52,6 +52,7 @@ NOOP_OPCODE(DbgAssertPtr);
 
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
             const Func* vmFunc) {
+  FTRACE(1, "punting: {} {}\n", file, line);
   throw FailedCodeGen(file, line, func, bcOff, vmFunc);
 }
 
@@ -64,8 +65,6 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
 PUNT_OPCODE(CheckType)
 PUNT_OPCODE(AssertType)
 PUNT_OPCODE(CheckTypeMem)
-PUNT_OPCODE(GuardLoc)
-PUNT_OPCODE(GuardStk)
 PUNT_OPCODE(CheckStk)
 PUNT_OPCODE(CheckLoc)
 PUNT_OPCODE(CastStk)
@@ -232,7 +231,6 @@ PUNT_OPCODE(LdFunc)
 PUNT_OPCODE(LdFuncCached)
 PUNT_OPCODE(LdFuncCachedU)
 PUNT_OPCODE(LdFuncCachedSafe)
-PUNT_OPCODE(LdARFuncPtr)
 PUNT_OPCODE(LdSSwitchDestFast)
 PUNT_OPCODE(LdSSwitchDestSlow)
 PUNT_OPCODE(LdSwitchDblIndex)
@@ -277,7 +275,6 @@ PUNT_OPCODE(ReqBindJmp)
 PUNT_OPCODE(ReqInterpret)
 PUNT_OPCODE(ReqRetranslateOpt)
 PUNT_OPCODE(ReqRetranslate)
-PUNT_OPCODE(SyncABIRegs)
 PUNT_OPCODE(Mov)
 PUNT_OPCODE(LdAddr)
 PUNT_OPCODE(IncRef)
@@ -442,6 +439,101 @@ void CodeGenerator::emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
 }
 
 //////////////////////////////////////////////////////////////////////
+
+template<class Loc, class JmpFn>
+void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc,
+                                  JmpFn doJcc) {
+  assert(!type.subtypeOf(Type::Cls));
+
+  if (type.equals(Type::Gen)) {
+    return;
+  }
+
+  // You can't compare against memory. Load the type into scratch.
+  m_as.     Ldrb  (rAsm.W(), typeSrc);
+
+  ConditionCode cc;
+  if (type.isString()) {
+    // Note: ARM can actually do better here; it has a fused test-and-branch
+    // instruction. The way this code is factored makes it difficult to use,
+    // though; the jump instruction will be written by some other code.
+    m_as.   Cmp   (rAsm.W(), KindOfStringBit);
+    cc = CC_NE;
+  } else if (type.equals(Type::UncountedInit)) {
+    m_as.   Cmp   (rAsm.W(), KindOfUncountedInitBit);
+    cc = CC_NE;
+  } else if (type.equals(Type::Uncounted)) {
+    m_as.   Cmp   (rAsm.W(), KindOfRefCountThreshold);
+    cc = CC_LE;
+  } else if (type.equals(Type::Cell)) {
+    m_as.   Cmp   (rAsm.W(), KindOfRef);
+    cc = CC_L;
+  } else {
+    assert(type.isKnownDataType());
+    DataType dataType = type.toDataType();
+    assert(dataType == KindOfRef ||
+           (dataType >= KindOfUninit && dataType <= KindOfResource));
+    m_as.   Cmp   (rAsm.W(), dataType);
+    cc = CC_E;
+  }
+  doJcc(cc);
+  if (type.strictSubtypeOf(Type::Obj) || type.strictSubtypeOf(Type::Res)) {
+    assert(type.getClass()->attrs() & AttrFinal);
+    m_as.   Ldr   (rAsm, dataSrc);
+    m_as.   Ldr   (rAsm, rAsm[ObjectData::getVMClassOffset()]);
+    m_as.   Cmp   (rAsm, reinterpret_cast<int64_t>(type.getClass()));
+    doJcc(CC_E);
+  } else if (type.subtypeOf(Type::Arr) && type.hasArrayKind()) {
+    m_as.   Ldr   (rAsm, dataSrc);
+    m_as.   Ldr   (rAsm, rAsm[ArrayData::offsetofKind()]);
+    m_as.   Cmp   (rAsm, type.getArrayKind());
+    doJcc(CC_E);
+  }
+}
+
+void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
+  auto const rFP = x2a(m_state.regs[inst->src(0)].reg());
+  auto const baseOff = localOffset(inst->extra<GuardLoc>()->locId);
+  emitTypeGuard(
+    inst->typeParam(),
+    rFP[baseOff + TVOFF(m_type)],
+    rFP[baseOff + TVOFF(m_data)],
+    [&] (ConditionCode cc) {
+      auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
+      auto const destSR = m_tx64->getSrcRec(destSK);
+      destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
+    });
+}
+
+void CodeGenerator::cgGuardStk(IRInstruction* inst) {
+  auto const rSP = x2a(m_state.regs[inst->src(0)].reg());
+  auto const baseOff = cellsToBytes(inst->extra<GuardStk>()->offset);
+  emitTypeGuard(
+    inst->typeParam(),
+    rSP[baseOff + TVOFF(m_type)],
+    rSP[baseOff + TVOFF(m_data)],
+    [&] (ConditionCode cc) {
+      auto const destSK = SrcKey(curFunc(), m_unit.bcOff());
+      auto const destSR = m_tx64->getSrcRec(destSK);
+      destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
+    });
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
+  emitRegGetsRegPlusImm(m_as, rVmFp, x2a(m_state.regs[inst->src(0)].reg()), 0);
+  emitRegGetsRegPlusImm(m_as, rVmSp, x2a(m_state.regs[inst->src(1)].reg()), 0);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
+  auto dstReg  = x2a(m_state.regs[inst->dst()].reg());
+  auto baseReg = x2a(m_state.regs[inst->src(0)].reg());
+  auto offset  = inst->src(1)->getValInt();
+  m_as.  Ldr  (dstReg, baseReg[offset + AROFF(m_func)]);
+}
 
 void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
   auto const dstReg  = x2a(m_state.regs[inst->dst()].reg());

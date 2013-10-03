@@ -113,6 +113,10 @@ struct DataBlock {
     return tca >= m_base && tca < (m_base + m_size);
   }
 
+  bool isFrontierAligned(const size_t alignment) const {
+    return ((uintptr_t)m_frontier & (alignment - 1)) == 0;
+  }
+
   void byte(const uint8_t byte) {
     always_assert(canEmit(sz::byte));
     *m_frontier = byte;

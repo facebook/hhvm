@@ -1834,11 +1834,11 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
     assert(type.getClass()->attrs() & AttrFinal);
     auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
     m_as.cmpq(type.getClass(), reg[ObjectData::getVMClassOffset()]);
-    doJcc(cc);
+    doJcc(CC_E);
   } else if (type.subtypeOf(Type::Arr) && type.hasArrayKind()) {
     auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
     m_as.cmpb(type.getArrayKind(), reg[ArrayData::offsetofKind()]);
-    doJcc(cc);
+    doJcc(CC_E);
   }
 }
 
@@ -2809,14 +2809,6 @@ void CodeGenerator::cgStRef(IRInstruction* inst) {
 }
 void CodeGenerator::cgStRefNT(IRInstruction* inst) {
   cgStRefWork(inst, false);
-}
-
-static int64_t localOffset(int64_t index) {
-  return -cellsToBytes(index + 1);
-}
-
-static int64_t localOffset(SSATmp* index) {
-  return localOffset(index->getValInt());
 }
 
 int CodeGenerator::iterOffset(SSATmp* tmp) {
@@ -5683,14 +5675,14 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
 
   PhysReg        fpReg = m_regs[inst->src(1)].reg();
   int64_t     iterOffset = this->iterOffset(inst->src(2));
-  int64_t valLocalOffset = localOffset(inst->src(3));
+  int64_t valLocalOffset = localOffset(inst->src(3)->getValInt());
   SSATmp*          src = inst->src(0);
   ArgGroup args(m_regs);
   args.addr(fpReg, iterOffset).ssa(src);
   if (src->isArray()) {
     args.addr(fpReg, valLocalOffset);
     if (isInitK) {
-      args.addr(fpReg, localOffset(inst->src(4)));
+      args.addr(fpReg, localOffset(inst->src(4)->getValInt()));
     } else if (isWInit) {
       args.imm(0);
     }
@@ -5702,7 +5694,7 @@ void CodeGenerator::cgIterInitCommon(IRInstruction* inst) {
     assert(src->type() == Type::Obj);
     args.imm(uintptr_t(curClass())).addr(fpReg, valLocalOffset);
     if (isInitK) {
-      args.addr(fpReg, localOffset(inst->src(4)));
+      args.addr(fpReg, localOffset(inst->src(4)->getValInt()));
     } else {
       args.imm(0);
     }
@@ -5726,7 +5718,7 @@ void CodeGenerator::cgMIterInitK(IRInstruction* inst) {
 void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
   PhysReg          fpReg = m_regs[inst->src(1)].reg();
   int64_t     iterOffset = this->iterOffset(inst->src(2));
-  int64_t valLocalOffset = localOffset(inst->src(3));
+  int64_t valLocalOffset = localOffset(inst->src(3)->getValInt());
   SSATmp*            src = inst->src(0);
 
   ArgGroup args(m_regs);
@@ -5739,7 +5731,7 @@ void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
   if (innerType.isArray()) {
     args.addr(fpReg, valLocalOffset);
     if (inst->op() == MIterInitK) {
-      args.addr(fpReg, localOffset(inst->src(4)));
+      args.addr(fpReg, localOffset(inst->src(4)->getValInt()));
     } else {
       args.imm(0);
     }
@@ -5748,7 +5740,7 @@ void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
   } else if (innerType.isObj()) {
     args.immPtr(curClass()).addr(fpReg, valLocalOffset);
     if (inst->op() == MIterInitK) {
-      args.addr(fpReg, localOffset(inst->src(4)));
+      args.addr(fpReg, localOffset(inst->src(4)->getValInt()));
     } else {
       args.imm(0);
     }
@@ -5786,9 +5778,9 @@ void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
   PhysReg fpReg = m_regs[inst->src(0)].reg();
   ArgGroup args(m_regs);
   args.addr(fpReg, iterOffset(inst->src(1)))
-      .addr(fpReg, localOffset(inst->src(2)));
+      .addr(fpReg, localOffset(inst->src(2)->getValInt()));
   if (isNextK) {
-    args.addr(fpReg, localOffset(inst->src(3)));
+    args.addr(fpReg, localOffset(inst->src(3)->getValInt()));
   } else if (isWNext) {
     args.imm(0);
   }
@@ -5810,9 +5802,9 @@ void CodeGenerator::cgMIterNextCommon(IRInstruction* inst) {
   PhysReg fpReg = m_regs[inst->src(0)].reg();
   ArgGroup args(m_regs);
   args.addr(fpReg, iterOffset(inst->src(1)))
-      .addr(fpReg, localOffset(inst->src(2)));
+      .addr(fpReg, localOffset(inst->src(2)->getValInt()));
   if (inst->op() == MIterNextK) {
-    args.addr(fpReg, localOffset(inst->src(3)));
+    args.addr(fpReg, localOffset(inst->src(3)->getValInt()));
   } else {
     args.imm(0);
   }

@@ -77,6 +77,43 @@ inline vixl::Register argReg(unsigned index) {
   return vixl::Register::XRegFromCode(index);
 }
 
+inline vixl::Register serviceReqArgReg(unsigned index) {
+  // First arg holds the request number
+  return argReg(index + 1);
+}
+
+inline vixl::Condition convertCC(Transl::ConditionCode cc) {
+  if (cc == Transl::CC_P || cc == Transl::CC_NP) {
+    // ARM has no parity flag
+    always_assert(false);
+  }
+  assert(cc >= 0 && cc <= 0xF);
+
+  using namespace vixl;
+
+  // We'll index into this array by the x64 condition code. The order matches
+  // the enum above.
+  constexpr vixl::Condition mapping[] = {
+    vs,  // overflow set
+    vc,  // overflow clear
+    lo,  // unsigned lower
+    hs,  // unsigned higher or same
+    eq,  // equal
+    ne,  // not equal
+    ls,  // unsigned lower or same
+    hi,  // unsigned higher
+    pl,  // plus (sign set)
+    mi,  // minus (sign clear)
+    nv, nv,  // invalid. These are the parity flags.
+    lt,  // signed less than
+    ge,  // signed greater or equal
+    le,  // signed less or equal
+    gt,  // signed greater than
+  };
+
+  return mapping[cc];
+}
+
 const vixl::Register rVmFp(vixl::x29);
 const vixl::Register rVmSp(vixl::x19);
 const vixl::Register rVmTl(vixl::x20);

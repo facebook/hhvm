@@ -15,13 +15,16 @@
 */
 #include "hphp/runtime/vm/jit/jump-smash.h"
 
+#include "hphp/vixl/a64/macro-assembler-a64.h"
+
+#include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
 namespace HPHP { namespace JIT {
 
-TRACE_SET_MOD(tx64);
+TRACE_SET_MOD(hhir);
 
 bool isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
   if (arch() == Arch::X64) {
@@ -29,6 +32,9 @@ bool isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
     uintptr_t iFrontier = uintptr_t(frontier) + offset;
     uintptr_t lastByte = uintptr_t(frontier) + nBytes - 1;
     return (iFrontier & ~kX64CacheLineMask) == (lastByte & ~kX64CacheLineMask);
+  } else if (arch() == Arch::ARM) {
+    // See prepareForSmash().
+    return true;
   } else {
     not_implemented();
   }
@@ -43,6 +49,12 @@ void prepareForSmash(CodeBlock& cb, int nBytes, int offset /* = 0 */) {
       a.emitNop(gapSize);
       assert(isSmashable(a.frontier(), nBytes, offset));
     }
+  } else if (arch() == Arch::ARM) {
+    // Don't do anything. We don't smash code on ARM; we smash non-executable
+    // data -- an 8-byte pointer -- that's embedded in the instruction stream.
+    // As long as that data is 8-byte aligned, it's safe to smash. All
+    // instructions are 4 bytes wide, so we'll just emit a single nop if needed
+    // to align the data. This is done in emitSmashableJump.
   } else {
     not_implemented();
   }
@@ -74,6 +86,8 @@ void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
       assert(isSmashable(cb.frontier() + testBytes + kJmpccLen, kJmpLen));
       break;
     }
+  } else if (arch() == Arch::ARM) {
+    // Nothing. See prepareForSmash().
   } else {
     not_implemented();
   }
@@ -139,7 +153,14 @@ void smashJcc(TCA jccAddr, TCA newDest) {
                                                 - X64::kJmpImmBytes);
     *deltaAddr = newDelta;
   } else {
-    not_implemented();
+    // This offset is asserted in emitSmashableJump. We wrote four instructions.
+    // Then the jump destination was written at the next 8-byte boundary.
+    auto dataPtr = jccAddr + 16;
+    if ((uintptr_t(dataPtr) & 7) != 0) {
+      dataPtr += 4;
+      assert((uintptr_t(dataPtr) & 7) == 0);
+    }
+    *reinterpret_cast<TCA*>(dataPtr) = newDest;
   }
 }
 
@@ -157,7 +178,47 @@ void emitSmashableJump(CodeBlock& cb, Transl::TCA dest,
       a.  jcc(cc, dest);
     }
   } else {
-    not_implemented();
+    vixl::MacroAssembler a { cb };
+    vixl::Label targetData;
+    vixl::Label afterData;
+    DEBUG_ONLY auto start = cb.frontier();
+
+    // We emit the target address straight into the instruction stream, and then
+    // do a pc-relative load to read it. This neatly sidesteps the problem of
+    // concurrent modification and execution, as well as the problem of 19- and
+    // 26-bit jump offsets (not big enough). It does, however, entail an
+    // indirect jump.
+    if (cc == CC_None) {
+      a.    Adr  (ARM::rAsm, &targetData);
+      a.    Ldr  (ARM::rAsm, ARM::rAsm[0]);
+      a.    Br   (ARM::rAsm);
+      if (!cb.isFrontierAligned(8)) {
+        a.  Nop  ();
+        assert(cb.isFrontierAligned(8));
+      }
+      a.    bind (&targetData);
+      a.    dc64 (reinterpret_cast<int64_t>(dest));
+
+      // If this assert breaks, you need to change smashJmp
+      assert(targetData.target() == start + 12 ||
+             targetData.target() == start + 16);
+    } else {
+      a.    B    (&afterData, InvertCondition(ARM::convertCC(cc)));
+      a.    Adr  (ARM::rAsm, &targetData);
+      a.    Ldr  (ARM::rAsm, ARM::rAsm[0]);
+      a.    Br   (ARM::rAsm);
+      if (!cb.isFrontierAligned(8)) {
+        a.  Nop  ();
+        assert(cb.isFrontierAligned(8));
+      }
+      a.    bind (&targetData);
+      a.    dc64 (reinterpret_cast<int64_t>(dest));
+      a.    bind (&afterData);
+
+      // If this assert breaks, you need to change smashJcc
+      assert(targetData.target() == start + 16 ||
+             targetData.target() == start + 20);
+    }
   }
 }
 

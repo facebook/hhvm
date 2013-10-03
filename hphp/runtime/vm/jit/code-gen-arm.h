@@ -30,6 +30,8 @@ struct CodeGenerator {
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
                 Transl::TranslatorX64* tx64, CodegenState& state)
       : m_unit(unit)
+      , m_mainCode(mainCode)
+      , m_stubsCode(stubsCode)
       , m_as(mainCode)
       , m_astubs(stubsCode)
       , m_tx64(tx64)
@@ -47,6 +49,8 @@ struct CodeGenerator {
                              vixl::Register dstReg,
                              vixl::Register srcReg,
                              int64_t imm);
+  template<class Loc, class JmpFn>
+  void emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc, JmpFn doJcc);
 
   Address cgInst(IRInstruction* inst);
 
@@ -57,6 +61,8 @@ struct CodeGenerator {
 #undef O
 
   const IRUnit&               m_unit;
+  CodeBlock&                  m_mainCode;
+  CodeBlock&                  m_stubsCode;
   vixl::MacroAssembler        m_as;
   vixl::MacroAssembler        m_astubs;
   TranslatorX64*              m_tx64;

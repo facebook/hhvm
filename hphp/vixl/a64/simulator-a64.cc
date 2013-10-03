@@ -329,7 +329,7 @@ void Simulator::FPCompare(double val0, double val1) {
 
   // TODO: This assumes that the C++ implementation handles comparisons in the
   // way that we expect (as per AssertSupportedFPCR()).
-  if ((isnan(val0) != 0) || (isnan(val1) != 0)) {
+  if ((std::isnan(val0) != 0) || (std::isnan(val1) != 0)) {
     nzcv().SetRawValue(FPUnorderedFlag);
   } else if (val0 < val1) {
     nzcv().SetRawValue(FPLessThanFlag);
@@ -1416,7 +1416,7 @@ int32_t Simulator::FPToInt32(double value, FPRounding rmode) {
   } else if (value < kWMinInt) {
     return kWMinInt;
   }
-  return isnan(value) ? 0 : static_cast<int32_t>(value);
+  return std::isnan(value) ? 0 : static_cast<int32_t>(value);
 }
 
 
@@ -1427,7 +1427,7 @@ int64_t Simulator::FPToInt64(double value, FPRounding rmode) {
   } else if (value < kXMinInt) {
     return kXMinInt;
   }
-  return isnan(value) ? 0 : static_cast<int64_t>(value);
+  return std::isnan(value) ? 0 : static_cast<int64_t>(value);
 }
 
 
@@ -1438,7 +1438,7 @@ uint32_t Simulator::FPToUInt32(double value, FPRounding rmode) {
   } else if (value < 0.0) {
     return 0;
   }
-  return isnan(value) ? 0 : static_cast<uint32_t>(value);
+  return std::isnan(value) ? 0 : static_cast<uint32_t>(value);
 }
 
 
@@ -1449,7 +1449,7 @@ uint64_t Simulator::FPToUInt64(double value, FPRounding rmode) {
   } else if (value < 0.0) {
     return 0;
   }
-  return isnan(value) ? 0 : static_cast<uint64_t>(value);
+  return std::isnan(value) ? 0 : static_cast<uint64_t>(value);
 }
 
 
@@ -1782,7 +1782,7 @@ float Simulator::UFixedToFloat(uint64_t src, int fbits, FPRounding round) {
 
 double Simulator::FPRoundInt(double value, FPRounding round_mode) {
   if ((value == 0.0) || (value == kFP64PositiveInfinity) ||
-      (value == kFP64NegativeInfinity) || isnan(value)) {
+      (value == kFP64NegativeInfinity) || std::isnan(value)) {
     return value;
   }
 
@@ -1953,9 +1953,9 @@ void Simulator::VisitFPDataProcessing3Source(Instruction* instr) {
 
 
 double Simulator::FPMax(double a, double b) {
-  if (isnan(a)) {
+  if (std::isnan(a)) {
     return a;
-  } else if (isnan(b)) {
+  } else if (std::isnan(b)) {
     return b;
   }
 
@@ -1970,9 +1970,9 @@ double Simulator::FPMax(double a, double b) {
 
 
 double Simulator::FPMin(double a, double b) {
-  if (isnan(a)) {
+  if (std::isnan(a)) {
     return a;
-  } else if (isnan(b)) {
+  } else if (std::isnan(b)) {
     return b;
   }
 

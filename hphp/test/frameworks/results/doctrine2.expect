@@ -1,0 +1,10 @@
+HipHop Fatal error: Uncaught exception 'Exception' with message 'Can't find autoload.php. Did you install dependencies via composer?' in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/TestInit.php:16
+Stack trace:
+#0 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Fileloader.php(92): include()
+#1 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Fileloader.php(76): PHPUnit_Util_Fileloader::load()
+#2 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(778): PHPUnit_Util_Fileloader::checkAndLoad()
+#3 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(606): PHPUnit_TextUI_Command->handleBootstrap()
+#4 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(138): PHPUnit_TextUI_Command->handleArguments()
+#5 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(129): PHPUnit_TextUI_Command->run()
+#6 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit(63): PHPUnit_TextUI_Command::main()
+#7 {main}

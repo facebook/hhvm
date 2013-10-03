@@ -1,0 +1,1 @@
+HipHop Fatal error: You have not set up composer dependencies. See http://getcomposer.org/. in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpbb3/phpBB/includes/startup.php on line 176

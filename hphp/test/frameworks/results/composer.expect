@@ -1,0 +1,2458 @@
+PHPUnit 3.7.27 by Sebastian Bergmann.
+
+Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/phpunit.xml.dist
+
+
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageAutoloading'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testVendorDirSameAsWorkingDir'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageAutoloadingAlternativeVendorDir'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testMainPackageAutoloadingWithTargetDir'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testVendorsAutoloading'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testPSR0ToClassMapIgnoresNonExistingDir'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testVendorsClassMapAutoloading'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testVendorsClassMapAutoloadingWithTargetDir'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testClassMapAutoloadingEmptyDirAndExactFile'.
+F
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testFilesAutoloadGeneration'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testFilesAutoloadOrderByDependencies'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testOverrideVendorsAutoloading'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testIncludePathFileGeneration'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testIncludePathsArePrependedInAutoloadFile'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testIncludePathsInMainPackage'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testIncludePathFileWithoutPathsIsSkipped'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testPreAndPostEventsAreDispatchedDuringAutoloadDump'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testUseGlobalIncludePath'.
+.
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testVendorDirExcludedFromWorkingDir'.
+F
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testUpLevelRelativePaths'.
+F
+Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testEmptyPaths'.
+F
+Starting test 'Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #0 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/Namespaced', array('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/Namespaced/Bar.inc', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/Namespaced/Foo.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/Namespaced/Baz.php'))'.
+.
+Starting test 'Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #1 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/beta/NamespaceCollision', array('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/beta/NamespaceCollision/A/B/Bar.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/beta/NamespaceCollision/A/B/Foo.php'))'.
+.
+Starting test 'Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #2 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/Pearlike', array('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/Pearlike/Foo.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/Pearlike/Bar.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/Pearlike/Baz.php'))'.
+.
+Starting test 'Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #3 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap', array('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/sameNsMultipleClasses.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/sameNsMultipleClasses.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/multipleNs.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/multipleNs.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/multipleNs.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/multipleNs.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/multipleNs.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/SomeInterface.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/SomeParent.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/SomeClass.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/LargeClass.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/LargeGap.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/MissingSpace.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/StripNoise.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/BackslashLineEndingString.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/BackslashLineEndingString.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/classmap/Unicode.php'))'.
+.
+Starting test 'Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #4 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/template', array())'.
+.
+Starting test 'Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #5 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/php5.4', array('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/php5.4/traits.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/php5.4/traits.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/php5.4/traits.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/php5.4/traits.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/php5.4/traits.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/php5.4/traits.php'))'.
+.
+Starting test 'Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMapFinderSupport'.
+.
+Starting test 'Composer\Test\Autoload\ClassMapGeneratorTest::testFindClassesThrowsWhenFileDoesNotExist'.
+.
+Starting test 'Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMapThrowsWhenDirectoryDoesNotExist'.
+.
+Starting test 'Composer\Test\CacheTest::testRemoveOutdatedFiles'.
+.
+Starting test 'Composer\Test\CacheTest::testRemoveFilesWhenCacheIsTooLarge'.
+.
+Starting test 'Composer\Test\Command\InitCommandTest::testParseValidAuthorString'.
+.
+Starting test 'Composer\Test\Command\InitCommandTest::testParseValidUtf8AuthorString'.
+.
+Starting test 'Composer\Test\Command\InitCommandTest::testParseEmptyAuthorString'.
+.
+Starting test 'Composer\Test\Command\InitCommandTest::testParseAuthorStringWithInvalidEmail'.
+.
+Starting test 'Composer\Test\ComposerTest::testSetGetPackage'.
+.
+Starting test 'Composer\Test\ComposerTest::testSetGetLocker'.
+.
+Starting test 'Composer\Test\ComposerTest::testSetGetRepositoryManager'.
+.
+Starting test 'Composer\Test\ComposerTest::testSetGetDownloadManager'.
+.
+Starting test 'Composer\Test\ComposerTest::testSetGetInstallationManager'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #0 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-empty.json', 'require', 'my-vend/my-lib', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/require-from-empty.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #1 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-one-of-everything.json', 'require', 'my-vend/my-lib', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/require-from-oneOfEverything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #2 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-two-of-everything.json', 'require', 'my-vend/my-lib', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/require-from-twoOfEverything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #3 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-empty.json', 'require-dev', 'my-vend/my-lib-tests', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/require-dev-from-empty.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #4 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-one-of-everything.json', 'require-dev', 'my-vend/my-lib-tests', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/require-dev-from-oneOfEverything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #5 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-two-of-everything.json', 'require-dev', 'my-vend/my-lib-tests', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/require-dev-from-twoOfEverything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #6 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-empty.json', 'provide', 'my-vend/my-lib-interface', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/provide-from-empty.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #7 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-one-of-everything.json', 'provide', 'my-vend/my-lib-interface', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/provide-from-oneOfEverything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #8 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-two-of-everything.json', 'provide', 'my-vend/my-lib-interface', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/provide-from-twoOfEverything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #9 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-empty.json', 'suggest', 'my-vend/my-optional-extension', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/suggest-from-empty.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #10 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-one-of-everything.json', 'suggest', 'my-vend/my-optional-extension', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/suggest-from-oneOfEverything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #11 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-two-of-everything.json', 'suggest', 'my-vend/my-optional-extension', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/suggest-from-twoOfEverything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #12 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-empty.json', 'replace', 'my-vend/other-app', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/replace-from-empty.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #13 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-one-of-everything.json', 'replace', 'my-vend/other-app', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/replace-from-oneOfEverything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #14 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-two-of-everything.json', 'replace', 'my-vend/other-app', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/replace-from-twoOfEverything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #15 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-empty.json', 'conflict', 'my-vend/my-old-app', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/conflict-from-empty.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #16 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-one-of-everything.json', 'conflict', 'my-vend/my-old-app', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/conflict-from-oneOfEverything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #17 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-two-of-everything.json', 'conflict', 'my-vend/my-old-app', '1.*', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/addLink/conflict-from-twoOfEverything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #0 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/require-to-empty.json', 'require', 'my-vend/my-lib', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/require-to-empty-after.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #1 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/require-to-oneOfEverything.json', 'require', 'my-vend/my-lib', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-one-of-everything.json')'.
+.   61 / 1002 (  6%)
+
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #2 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/require-to-twoOfEverything.json', 'require', 'my-vend/my-lib', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-two-of-everything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #3 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/require-dev-to-empty.json', 'require-dev', 'my-vend/my-lib-tests', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/require-dev-to-empty-after.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #4 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/require-dev-to-oneOfEverything.json', 'require-dev', 'my-vend/my-lib-tests', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-one-of-everything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #5 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/require-dev-to-twoOfEverything.json', 'require-dev', 'my-vend/my-lib-tests', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-two-of-everything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #6 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/provide-to-empty.json', 'provide', 'my-vend/my-lib-interface', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/provide-to-empty-after.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #7 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/provide-to-oneOfEverything.json', 'provide', 'my-vend/my-lib-interface', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-one-of-everything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #8 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/provide-to-twoOfEverything.json', 'provide', 'my-vend/my-lib-interface', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-two-of-everything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #9 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/suggest-to-empty.json', 'suggest', 'my-vend/my-optional-extension', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/suggest-to-empty-after.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #10 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/suggest-to-oneOfEverything.json', 'suggest', 'my-vend/my-optional-extension', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-one-of-everything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #11 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/suggest-to-twoOfEverything.json', 'suggest', 'my-vend/my-optional-extension', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-two-of-everything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #12 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/replace-to-empty.json', 'replace', 'my-vend/other-app', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/replace-to-empty-after.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #13 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/replace-to-oneOfEverything.json', 'replace', 'my-vend/other-app', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-one-of-everything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #14 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/replace-to-twoOfEverything.json', 'replace', 'my-vend/other-app', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-two-of-everything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #15 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/conflict-to-empty.json', 'conflict', 'my-vend/my-old-app', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/conflict-to-empty-after.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #16 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/conflict-to-oneOfEverything.json', 'conflict', 'my-vend/my-old-app', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-one-of-everything.json')'.
+.
+Starting test 'Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #17 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/removeLink/conflict-to-twoOfEverything.json', 'conflict', 'my-vend/my-old-app', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Config/Fixtures/composer-two-of-everything.json')'.
+.
+Starting test 'Composer\Test\ConfigTest::testAddPackagistRepository with data set "local config inherits system defaults" (array(array('composer', 'https?://packagist.org', true)), array())'.
+.
+Starting test 'Composer\Test\ConfigTest::testAddPackagistRepository with data set "local config can disable system config by name" (array(), array(array(false)))'.
+.
+Starting test 'Composer\Test\ConfigTest::testAddPackagistRepository with data set "local config adds above defaults" (array(array('vcs', 'git://github.com/composer/composer.git'), array('pear', 'http://pear.composer.org'), array('composer', 'https?://packagist.org', true)), array(array('vcs', 'git://github.com/composer/composer.git'), array('pear', 'http://pear.composer.org')))'.
+.
+Starting test 'Composer\Test\ConfigTest::testAddPackagistRepository with data set "system config adds above core defaults" (array(array('composer', 'http://example.com'), array('composer', 'https?://packagist.org', true)), array(), array(array('composer', 'http://example.com')))'.
+.
+Starting test 'Composer\Test\ConfigTest::testAddPackagistRepository with data set "local config can disable repos by name and re-add them anonymously to bring them above system config" (array(array('composer', 'http://packagist.org'), array('composer', 'http://example.com')), array(array(false), array('composer', 'http://packagist.org')), array(array('composer', 'http://example.com')))'.
+.
+Starting test 'Composer\Test\ConfigTest::testAddPackagistRepository with data set "local config can override by name to bring a repo above system config" (array(array('composer', 'http://packagistnew.org'), array('composer', 'http://example.com')), array(array('composer', 'http://packagistnew.org')), array(array('composer', 'http://example.com')))'.
+.
+Starting test 'Composer\Test\ConfigTest::testMergeGithubOauth'.
+.
+Starting test 'Composer\Test\ConfigTest::testOverrideGithubProtocols'.
+.
+Starting test 'Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectSingle'.
+.
+Starting test 'Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectNewest'.
+.
+Starting test 'Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectNewestPicksLatest'.
+.
+Starting test 'Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectNewestPicksLatestStableWithPreferStable'.
+.
+Starting test 'Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectNewestWithDevPicksNonDev'.
+.
+Starting test 'Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectNewestOverInstalled'.
+.
+Starting test 'Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectFirstRepo'.
+.
+Starting test 'Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectLocalReposFirst'.
+.
+Starting test 'Composer\Test\DependencyResolver\DefaultPolicyTest::testSelectAllProviders'.
+.
+Starting test 'Composer\Test\DependencyResolver\DefaultPolicyTest::testPreferNonReplacingFromSameRepo'.
+.
+Starting test 'Composer\Test\DependencyResolver\DefaultPolicyTest::testPreferReplacingPackageFromSameVendor'.
+.
+Starting test 'Composer\Test\DependencyResolver\PoolTest::testPool'.
+.
+Starting test 'Composer\Test\DependencyResolver\PoolTest::testPoolIgnoresIrrelevantPackages'.
+.
+Starting test 'Composer\Test\DependencyResolver\PoolTest::testGetPriorityForNotRegisteredRepository'.
+.
+Starting test 'Composer\Test\DependencyResolver\PoolTest::testGetPriorityWhenRepositoryIsRegistered'.
+.
+Starting test 'Composer\Test\DependencyResolver\PoolTest::testWhatProvidesSamePackageForDifferentRepositories'.
+.
+Starting test 'Composer\Test\DependencyResolver\PoolTest::testWhatProvidesPackageWithConstraint'.
+.
+Starting test 'Composer\Test\DependencyResolver\PoolTest::testPackageById'.
+.
+Starting test 'Composer\Test\DependencyResolver\PoolTest::testWhatProvidesWhenPackageCannotBeFound'.
+.
+Starting test 'Composer\Test\DependencyResolver\RequestTest::testRequestInstallAndRemove'.
+.
+Starting test 'Composer\Test\DependencyResolver\RequestTest::testRequestInstallSamePackageFromDifferentRepositories'.
+.
+Starting test 'Composer\Test\DependencyResolver\RequestTest::testUpdateAll'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleSetIteratorTest::testForeach'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleSetIteratorTest::testKeys'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleSetTest::testAdd'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleSetTest::testAddWhenTypeIsNotRecognized'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleSetTest::testCount'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleSetTest::testRuleById'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleSetTest::testGetIterator'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleSetTest::testGetIteratorFor'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleSetTest::testGetIteratorWithout'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleSetTest::testContainsEqual'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleSetTest::testToString'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleTest::testGetHash'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleTest::testSetAndGetId'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleTest::testEqualsForRulesWithDifferentHashes'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleTest::testEqualsForRulesWithDifferLiteralsQuantity'.
+.  122 / 1002 ( 12%)
+
+Starting test 'Composer\Test\DependencyResolver\RuleTest::testEqualsForRulesWithSameLiterals'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleTest::testSetAndGetType'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleTest::testEnable'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleTest::testDisable'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleTest::testIsAssertions'.
+.
+Starting test 'Composer\Test\DependencyResolver\RuleTest::testToString'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverInstallSingle'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverRemoveIfNotInstalled'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testInstallNonExistingPackageFails'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverInstallSamePackageFromDifferentRepositories'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverInstallWithDeps'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverInstallHonoursNotEqualOperator'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverInstallWithDepsInOrder'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverInstallInstalled'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverInstallInstalledWithAlternative'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverRemoveSingle'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverRemoveUninstalled'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverUpdateDoesOnlyUpdate'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverUpdateSingle'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverUpdateAll'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverUpdateCurrent'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverUpdateOnlyUpdatesSelectedPackage'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverUpdateConstrained'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverUpdateFullyConstrained'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverUpdateFullyConstrainedPrunesInstalledPackages'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverAllJobs'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverThreeAlternativeRequireAndConflict'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSolverObsolete'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testInstallOneOfTwoAlternatives'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testInstallProvider'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSkipReplacerOfExistingPackage'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testInstallReplacerOfMissingPackage'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testSkipReplacedPackageIfReplacerIsSelected'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testPickOlderIfNewerConflicts'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testInstallCircularRequire'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testInstallAlternativeWithCircularRequire'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testUseReplacerIfNecessary'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testIssue265'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testConflictResultEmpty'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testUnsatisfiableRequires'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testRequireMismatchException'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testLearnLiteralsWithSortedRuleLiterals'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testInstallRecursiveAliasDependencies'.
+.
+Starting test 'Composer\Test\DependencyResolver\SolverTest::testInstallDevAlias'.
+.
+Starting test 'Composer\Test\Downloader\ArchiveDownloaderTest::testGetFileName'.
+.
+Starting test 'Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrl'.
+.
+Starting test 'Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrl2'.
+.
+Starting test 'Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrl3'.
+.
+Starting test 'Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrlRewriteDist with data set #0 ('https://api.github.com/repos/composer/composer/zipball/master')'.
+.
+Starting test 'Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrlRewriteDist with data set #1 ('https://api.github.com/repos/composer/composer/tarball/master')'.
+.
+Starting test 'Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrlRewriteDist with data set #2 ('https://github.com/composer/composer/zipball/master')'.
+.
+Starting test 'Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrlRewriteDist with data set #3 ('https://www.github.com/composer/composer/tarball/master')'.
+.
+Starting test 'Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrlRewriteDist with data set #4 ('https://github.com/composer/composer/archive/master.zip')'.
+.
+Starting test 'Composer\Test\Downloader\ArchiveDownloaderTest::testProcessUrlRewriteDist with data set #5 ('https://github.com/composer/composer/archive/master.tar.gz')'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testSetGetDownloader'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testGetDownloaderForIncorrectlyInstalledPackage'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testGetDownloaderForCorrectlyInstalledDistPackage'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testGetDownloaderForIncorrectlyInstalledDistPackage'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testGetDownloaderForCorrectlyInstalledSourcePackage'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testGetDownloaderForIncorrectlyInstalledSourcePackage'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testFullPackageDownload'.
+.  183 / 1002 ( 18%)
+
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testBadPackageDownload'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testDistOnlyPackageDownload'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testSourceOnlyPackageDownload'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testFullPackageDownloadWithSourcePreferred'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testDistOnlyPackageDownloadWithSourcePreferred'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testSourceOnlyPackageDownloadWithSourcePreferred'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testBadPackageDownloadWithSourcePreferred'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testUpdateDistWithEqualTypes'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testUpdateDistWithNotEqualTypes'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testUpdateSourceWithEqualTypes'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testUpdateSourceWithNotEqualTypes'.
+.
+Starting test 'Composer\Test\Downloader\DownloadManagerTest::testRemove'.
+.
+Starting test 'Composer\Test\Downloader\FileDownloaderTest::testDownloadForPackageWithoutDistReference'.
+.
+Starting test 'Composer\Test\Downloader\FileDownloaderTest::testDownloadToExistingFile'.
+.
+Starting test 'Composer\Test\Downloader\FileDownloaderTest::testGetFileName'.
+.
+Starting test 'Composer\Test\Downloader\FileDownloaderTest::testDownloadButFileIsUnsaved'.
+.
+Starting test 'Composer\Test\Downloader\FileDownloaderTest::testDownloadFileWithInvalidChecksum'.
+.
+Starting test 'Composer\Test\Downloader\GitDownloaderTest::testDownloadForPackageWithoutSourceReference'.
+.
+Starting test 'Composer\Test\Downloader\GitDownloaderTest::testDownload'.
+.
+Starting test 'Composer\Test\Downloader\GitDownloaderTest::testDownloadUsesVariousProtocolsAndSetsPushUrlForGithub'.
+.
+Starting test 'Composer\Test\Downloader\GitDownloaderTest::testDownloadAndSetPushUrlUseCustomVariousProtocolsForGithub with data set #0 ('git', 'git@github.com:composer/composer.git')'.
+.
+Starting test 'Composer\Test\Downloader\GitDownloaderTest::testDownloadAndSetPushUrlUseCustomVariousProtocolsForGithub with data set #1 ('https', 'https://github.com/composer/composer.git')'.
+.
+Starting test 'Composer\Test\Downloader\GitDownloaderTest::testDownloadThrowsRuntimeExceptionIfGitCommandFails'.
+.
+Starting test 'Composer\Test\Downloader\GitDownloaderTest::testUpdateforPackageWithoutSourceReference'.
+.
+Starting test 'Composer\Test\Downloader\GitDownloaderTest::testUpdate'.
+.
+Starting test 'Composer\Test\Downloader\GitDownloaderTest::testUpdateThrowsRuntimeExceptionIfGitCommandFails'.
+.
+Starting test 'Composer\Test\Downloader\GitDownloaderTest::testRemove'.
+.
+Starting test 'Composer\Test\Downloader\GitDownloaderTest::testGetInstallationSource'.
+.
+Starting test 'Composer\Test\Downloader\HgDownloaderTest::testDownloadForPackageWithoutSourceReference'.
+.
+Starting test 'Composer\Test\Downloader\HgDownloaderTest::testDownload'.
+.
+Starting test 'Composer\Test\Downloader\HgDownloaderTest::testUpdateforPackageWithoutSourceReference'.
+.
+Starting test 'Composer\Test\Downloader\HgDownloaderTest::testUpdate'.
+.
+Starting test 'Composer\Test\Downloader\HgDownloaderTest::testRemove'.
+.
+Starting test 'Composer\Test\Downloader\HgDownloaderTest::testGetInstallationSource'.
+.
+Starting test 'Composer\Test\Downloader\PearPackageExtractorTest::testShouldExtractPackage_1_0'.
+.
+Starting test 'Composer\Test\Downloader\PearPackageExtractorTest::testShouldExtractPackage_2_0'.
+.
+Starting test 'Composer\Test\Downloader\PearPackageExtractorTest::testShouldExtractPackage_2_1'.
+.
+Starting test 'Composer\Test\Downloader\PearPackageExtractorTest::testShouldPerformReplacements'.
+.
+Starting test 'Composer\Test\Downloader\ZipDownloaderTest::testErrorMessages'.
+S
+Starting test 'Composer\Test\EventDispatcher\EventDispatcherTest::testListenerExceptionsAreCaught'.
+.
+Starting test 'Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherCanExecuteSingleCommandLineScript with data set #0 ('phpunit')'.
+.
+Starting test 'Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherCanExecuteSingleCommandLineScript with data set #1 ('echo foo')'.
+.
+Starting test 'Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherCanExecuteSingleCommandLineScript with data set #2 ('echo -n foo')'.
+.
+Starting test 'Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherCanExecuteCliAndPhpInSameEventScriptStack'.
+.
+Starting test 'Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherOutputsCommands'.
+.
+Starting test 'Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherOutputsErrorOnFailedCommand'.
+.
+Starting test 'Composer\Test\IO\ConsoleIOTest::testIsInteractive'.
+.
+Starting test 'Composer\Test\IO\ConsoleIOTest::testWrite'.
+.
+Starting test 'Composer\Test\IO\ConsoleIOTest::testOverwrite'.
+.
+Starting test 'Composer\Test\IO\ConsoleIOTest::testAsk'.
+.
+Starting test 'Composer\Test\IO\ConsoleIOTest::testAskConfirmation'.
+.
+Starting test 'Composer\Test\IO\ConsoleIOTest::testAskAndValidate'.
+.
+Starting test 'Composer\Test\IO\ConsoleIOTest::testSetAndgetAuthentication'.
+.
+Starting test 'Composer\Test\IO\ConsoleIOTest::testgetAuthenticationWhenDidNotSet'.
+.
+Starting test 'Composer\Test\IO\ConsoleIOTest::testhasAuthentication'.
+.
+Starting test 'Composer\Test\IO\NullIOTest::testIsInteractive'.
+.
+Starting test 'Composer\Test\IO\NullIOTest::testhasAuthentication'.
+.
+Starting test 'Composer\Test\IO\NullIOTest::testAskAndHideAnswer'.
+.
+Starting test 'Composer\Test\IO\NullIOTest::testgetAuthentications'.
+.
+Starting test 'Composer\Test\IO\NullIOTest::testAsk'.
+.
+Starting test 'Composer\Test\IO\NullIOTest::testAskConfirmation'.
+.  244 / 1002 ( 24%)
+
+Starting test 'Composer\Test\IO\NullIOTest::testAskAndValidate'.
+.
+Starting test 'Composer\Test\Installer\InstallationManagerTest::testAddGetInstaller'.
+.
+Starting test 'Composer\Test\Installer\InstallationManagerTest::testAddRemoveInstaller'.
+.
+Starting test 'Composer\Test\Installer\InstallationManagerTest::testExecute'.
+.
+Starting test 'Composer\Test\Installer\InstallationManagerTest::testInstall'.
+.
+Starting test 'Composer\Test\Installer\InstallationManagerTest::testUpdateWithEqualTypes'.
+.
+Starting test 'Composer\Test\Installer\InstallationManagerTest::testUpdateWithNotEqualTypes'.
+.
+Starting test 'Composer\Test\Installer\InstallationManagerTest::testUninstall'.
+.
+Starting test 'Composer\Test\Installer\LibraryInstallerTest::testInstallerCreationShouldNotCreateVendorDirectory'.
+.
+Starting test 'Composer\Test\Installer\LibraryInstallerTest::testInstallerCreationShouldNotCreateBinDirectory'.
+.
+Starting test 'Composer\Test\Installer\LibraryInstallerTest::testIsInstalled'.
+.
+Starting test 'Composer\Test\Installer\LibraryInstallerTest::testInstall'.
+.
+Starting test 'Composer\Test\Installer\LibraryInstallerTest::testUpdate'.
+.
+Starting test 'Composer\Test\Installer\LibraryInstallerTest::testUninstall'.
+.
+Starting test 'Composer\Test\Installer\LibraryInstallerTest::testGetInstallPath'.
+.
+Starting test 'Composer\Test\Installer\LibraryInstallerTest::testGetInstallPathWithTargetDir'.
+.
+Starting test 'Composer\Test\Installer\MetapackageInstallerTest::testInstall'.
+.
+Starting test 'Composer\Test\Installer\MetapackageInstallerTest::testUpdate'.
+.
+Starting test 'Composer\Test\Installer\MetapackageInstallerTest::testUninstall'.
+.
+Starting test 'Composer\Test\InstallerTest::testInstaller with data set #0 (a-1.0.0.0, Composer\Repository\ArrayRepository, array(array(b-1.0.0.0)))'.
+.
+Starting test 'Composer\Test\InstallerTest::testInstaller with data set #1 (a-1.0.0.0, Composer\Repository\ArrayRepository, array(array(b-1.0.0.0)))'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #0 ('updating-dev-from-lock-removes-old-deps.test', 'Installing locked dev packages should remove old dependencies', NULL, array(array('dev-master'), 'dev'), array(array(array('a/devpackage', 'dev-master', array('newref', '', 'git'), array())), NULL, array(), 'dev', array(), '3623df5f6efb923f1d6fe3f729771f73'), array(array('a/devpackage', 'dev-master', array('oldref', '', 'git'), array('*')), array('a/dependency', 'dev-master', array('ref', '', 'git'), array())), 'install', array(), '', 'Uninstalling a/dependency (dev-master ref)
+Updating a/devpackage (dev-master oldref) to a/devpackage (dev-master newref)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #1 ('update-whitelist-locked-require.test', 'Update with a package whitelist only updates those packages and their dependencies if they are not present in composer.json', NULL, array(array(array('package', array(array('whitelisted', '1.1.0', array('1.1.0', '1.*')), array('whitelisted', '1.0.0', array('1.0.0', '1.*')), array('dependency', '1.1.0'), array('dependency', '1.0.0'), array('fixed-dependency', '1.1.0', array('1.*')), array('fixed-dependency', '1.0.0', array('1.*')), array('fixed-sub-dependency', '1.1.0'), array('fixed-sub-dependency', '1.0.0')))), array('1.*', '1.*')), array(), array(array('whitelisted', '1.0.0', array('1.0.0', '1.*')), array('dependency', '1.0.0'), array('fixed-dependency', '1.0.0', array('1.*')), array('fixed-sub-dependency', '1.0.0')), 'update whitelisted', array(), '', 'Updating dependency (1.0.0) to dependency (1.1.0)
+Updating whitelisted (1.0.0) to whitelisted (1.1.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #2 ('provide-priorities.test', 'Provide only applies when no existing package has the given name', NULL, array(array(array('package', array(array('higher-prio-hijacker', '1.1.0', array('1.0.0')), array('provider2', '1.1.0', array('1.0.0')))), array('package', array(array('package', '0.9.0'), array('package', '1.0.0'), array('hijacker', '1.1.0', array('1.0.0')), array('provider3', '1.1.0', array('1.0.0'))))), array('1.*', '1.*', '1.1.0')), array(), array(), 'install', array(), '', 'Installing package (1.0.0)
+Installing provider2 (1.1.0)
+Installing provider3 (1.1.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #3 ('install-missing-alias-from-lock.test', 'Installing an old alias that doesn\'t exist anymore from a lock is possible', NULL, array(array(array('package', array(array('a/a', 'dev-master', array(array('2.2.x-dev')), array('master', 'git', ''))))), array('2.1.*'), 'dev'), array(array(array('a/a', 'dev-master', '9999999-dev', array(array('2.1.x-dev')), array('oldmaster', 'git', ''), 'library')), NULL, array(), 'dev', array(), '9cbb2de69f0ebc350cc1c4ab8694fcf0'), array(), 'install', array(), '', 'Installing a/a (dev-master oldmaster)
+Marking a/a (2.1.x-dev oldmaster) as installed, alias of a/a (dev-master oldmaster)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #4 ('partial-update-without-lock.test', 'Partial update without lock file should update everything whitelisted, remove overly unstable packages', NULL, array(array(array('package', array(array('a/old', '1.0.0'), array('a/old', '2.0.0'), array('b/unstable', '1.0.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '1.0.0'), array('d/removed', '1.0.0')))), array('*', '*', '*')), array(), array(array('a/old', '1.0.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '1.0.0'), array('d/removed', '1.0.0')), 'update b/unstable', array(array(array('a/old', '1.0.0', 'library'), array('b/unstable', '1.0.0', 'library'), array('c/uptodate', '1.0.0', 'library'), array('d/removed', '1.0.0', 'library')), array(), array(), 'stable', array(), array(), array()), '', 'Updating b/unstable (1.1.0-alpha) to b/unstable (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #5 ('update-dev-ignores-providers.test', 'Updating a dev package selects its newest version but no providers', NULL, array(array(array('package', array(array('a/replacer', 'dev-master', array('wrong', '', 'git'), array('dev-master')), array('a/installed', 'dev-master', array('newref', '', 'git'))))), array('dev-master'), 'dev'), array(), array(array('a/installed', 'dev-master', array('oldref', '', 'git'))), 'update', array(), '', 'Updating a/installed (dev-master oldref) to a/installed (dev-master newref)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #6 ('install-dev-using-dist.test', 'Installs a dev package from lock using dist', NULL, array(array(array('package', array(array('a/a', 'dev-master', '9999999-dev', array('zip', 'http://www.example.com/dist.zip', '459720ff3b74ee0c0d159277c6f2f5df89d8a4f6'))))), array('dev-master'), 'dev'), array(), array(), 'install --prefer-dist', array(array(array('a/a', 'dev-master', array('zip', 'http://www.example.com/dist.zip', '459720ff3b74ee0c0d159277c6f2f5df89d8a4f6', NULL), 'library')), array(), array(), 'dev', array(20), array(), array()), '', 'Installing a/a (dev-master)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #7 ('suggest-uninstalled.test', 'Suggestions are displayed', NULL, array(array(array('package', array(array('a/a', '1.0.0', array('an obscure reason'))))), array('1.0.0')), array(), array(), 'install', array(), '<info>Loading composer repositories with package information</info>
+<info>Installing dependencies</info>
+a/a suggests installing b/b (an obscure reason)
+<info>Writing lock file</info>
+<info>Generating autoload files</info>
+', 'Installing a/a (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #8 ('update-whitelist-reads-lock.test', 'Limited update takes rules from lock if available, and not from the installed repo + composer.json', NULL, array(array(array('package', array(array('toupdate/installed', '1.1.0'), array('toupdate/installed', '1.0.0'), array('toupdate/notinstalled', '1.1.0'), array('toupdate/notinstalled', '1.0.0'), array('old/installed', '0.9.0'), array('old/installed', '1.0.0')))), array('1.*', '1.*', '*')), array(array(array('old/installed', '1.0.0'), array('toupdate/installed', '1.0.0'), array('toupdate/notinstalled', '1.0.0')), NULL, array(), 'stable', array(), 'ff6b3054b62c0519c28f9a4d70dbcbca'), array(array('toupdate/installed', '1.0.0'), array('old/installed', '0.9.0')), 'update toupdate/installed', array(), '', 'Updating old/installed (0.9.0) to old/installed (1.0.0)
+Updating toupdate/installed (1.0.0) to toupdate/installed (1.1.0)
+Installing toupdate/notinstalled (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #9 ('update-dev-to-new-ref-picks-up-changes.test', 'Updating a dev package to its latest ref should pick up new dependencies', NULL, array(array(array('package', array(array('a/devpackage', 'dev-master', array('newref', '', 'git'), array('*')), array('a/dependency', 'dev-master', array('ref', '', 'git'), array())))), array('dev-master'), 'dev'), array(), array(array('a/devpackage', 'dev-master', array('oldref', '', 'git'), array())), 'update', array(), '', 'Installing a/dependency (dev-master ref)
+Updating a/devpackage (dev-master oldref) to a/devpackage (dev-master newref)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #10 ('suggest-replaced.test', 'Suggestions are not displayed for packages if they are replaced', NULL, array(array(array('package', array(array('a/a', '1.0.0', array('an obscure reason')), array('c/c', '1.0.0', array('1.0.0'))))), array('1.0.0', '1.0.0')), array(), array(), 'install', array(), '<info>Loading composer repositories with package information</info>
+<info>Installing dependencies</info>
+<info>Writing lock file</info>
+<info>Generating autoload files</info>
+', 'Installing a/a (1.0.0)
+Installing c/c (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #11 ('disjunctive-multi-constraints.test', 'Disjunctive multi constraints work', NULL, array(array(array('package', array(array('foo', '1.1.0'), array('foo', '1.0.0'), array('bar', '1.1.0', array('1.0.*'))))), array('1.*', '1.0.*|1.1.*')), array(), array(), 'install', array(), '', 'Installing foo (1.0.0)
+Installing bar (1.1.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #12 ('updating-dev-updates-url-and-reference.test', 'Updating a dev package for new reference updates the url and reference', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('newref', 'newurl', 'git'), array('newref', 'newurl', 'zip', ''))))), 'dev', array('dev-master')), array(array(array('a/a', 'dev-master', array('oldref', 'oldurl', 'git'), array('oldref', 'oldurl', 'zip', ''))), NULL, array(), 'dev', array(20), '55028825b2f4578970255da741113646'), array(array('a/a', 'dev-master', array('oldref', 'oldurl', 'git'), array('oldref', 'oldurl', 'zip', ''))), 'update', array(array(array('a/a', 'dev-master', 'library', array('newref', 'newurl', 'git'), array('newref', 'newurl', 'zip', ''))), array(), array(), 'dev', array(20), array(), array()), '', 'Updating a/a (dev-master oldref) to a/a (dev-master newref)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #13 ('update-all-dry-run.test', 'Updates updateable packages in dry-run mode', NULL, array(array(array('package', array(array('a/a', '1.0.0'), array('a/a', '1.0.1'), array('a/a', '1.1.0'), array('a/b', '1.0.0'), array('a/b', '1.0.1'), array('a/b', '2.0.0'), array('a/c', '1.0.0'), array('a/c', '2.0.0')))), array('1.0.*', '1.*'), array('*')), array(), array(array('a/a', '1.0.0'), array('a/c', '1.0.0'), array('a/b', '1.0.0')), 'update --dev --dry-run', array(), '', 'Updating a/a (1.0.0) to a/a (1.0.1)
+Updating a/b (1.0.0) to a/b (2.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #14 ('replace-priorities.test', 'Replace takes precedence only in higher priority repositories', NULL, array(array(array('package', array(array('forked', '1.1.0', array('1.1.0')))), array('package', array(array('package', '1.0.0'), array('package2', '1.0.0'), array('hijacker', '1.1.0', array('1.1.0'))))), array('1.*', '1.*')), array(), array(), 'install', array(), '', 'Installing package (1.0.0)
+Installing forked (1.1.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #15 ('install-simple.test', 'Installs a simple package with exact match requirement', NULL, array(array(array('package', array(array('a/a', '1.0.0')))), array('1.0.0')), array(), array(), 'install', array(), '', 'Installing a/a (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #16 ('update-alias-lock.test', 'Update aliased package does not mess up the lock file', NULL, array(array(array('package', array(array('a/a', 'dev-master', array(array('1.0.x-dev')), array('master', 'git', '')))), array('package', array(array('a/a', 'dev-master', array(array('1.0.x-dev')), array('lowpriomaster', 'git', ''))))), array('1.*'), 'dev'), array(array(array('a/a', 'dev-master', '1234'), array('a/a', 'dev-master', '1.0.x-dev', '1.0.9999999.9999999-dev')), NULL, array(), 'dev', array(), '101266320ba23f203d83903edd99c168'), array(array('a/a', 'dev-master', array(array('1.0.x-dev')), array('1234', 'git', ''))), 'update', array(array(array('a/a', 'dev-master', array(array('1.0.x-dev')), array('master', 'git', ''), 'library')), array(), array(), 'dev', array(), array(), array()), '', 'Updating a/a (dev-master 1234) to a/a (dev-master master)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #17 ('update-downgrades-unstable-packages.test', 'Downgrading from unstable to more stable package should work even if already installed', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('abcd', '', 'git')), array('a/a', '1.0.0', array('1.0.0', '', 'git'), array('1.0.0', '', 'zip', '')), array('b/b', 'dev-master', array('abcd', '', 'git')), array('b/b', '1.0.0', array('1.0.0', '', 'git'), array('1.0.0', '', 'zip', ''))))), array('*', '*@dev')), array(), array(array('a/a', 'dev-master', array('abcd', '', 'git')), array('b/b', 'dev-master', array('abcd', '', 'git'))), 'update', array(), '', 'Updating a/a (dev-master abcd) to a/a (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #18 ('install-dev.test', 'Installs a package in dev env', NULL, array(array(array('package', array(array('a/a', '1.0.0'), array('a/b', '1.0.0')))), array('1.0.0'), array('1.0.0')), array(), array(), 'install --dev', array(), '', 'Installing a/a (1.0.0)
+Installing a/b (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #19 ('partial-update-from-lock.test', 'Partial update from lock file should update everything to the state of the lock, remove overly unstable packages', NULL, array(array(array('package', array(array('a/old', '1.0.0'), array('a/old', '2.0.0'), array('b/unstable', '1.0.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '1.0.0'), array('d/removed', '1.0.0')))), array('*', '*', '*')), array(array(array('a/old', '1.0.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '1.0.0'), array('d/removed', '1.0.0')), array(), array(), 'stable', array(15), array(), array(), 'a1ef5a86d0a6f1851c03dc25941dd620'), array(array('a/old', '0.9.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '2.0.0')), 'update b/unstable', array(array(array('a/old', '1.0.0', 'library'), array('b/unstable', '1.0.0', 'library'), array('c/uptodate', '1.0.0', 'library')), array(), array(), 'stable', array(), array(), array()), '', 'Updating a/old (0.9.0) to a/old (1.0.0)
+Updating c/uptodate (2.0.0) to c/uptodate (1.0.0)
+Updating b/unstable (1.1.0-alpha) to b/unstable (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #20 ('plugins-are-installed-first.test', 'Composer installers are installed first if they have no requirements', NULL, array(array(array('package', array(array('pkg', '1.0.0'), array('pkg2', '1.0.0'), array('inst', '1.0.0', 'composer-plugin'), array('inst2', '1.0.0', 'composer-plugin', array('*'))))), array('1.0.0', '1.0.0', '1.0.0')), array(), array(), 'install', array(), '', 'Installing inst (1.0.0)
+Installing pkg (1.0.0)
+Installing pkg2 (1.0.0)
+Installing inst2 (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #21 ('partial-update-downgrades-non-whitelisted-unstable.test', 'Partial update from lock file should apply lock file and downgrade unstable packages even if not whitelisted', NULL, array(array(array('package', array(array('a/old', '1.0.0'), array('a/old', '2.0.0'), array('b/unstable', '1.0.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '1.0.0'), array('d/removed', '1.0.0')))), array('*', '*', '*')), array(array(array('a/old', '1.0.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '1.0.0'), array('d/removed', '1.0.0')), array(), array(), 'stable', array(15), array(), array(), 'a1ef5a86d0a6f1851c03dc25941dd620'), array(array('a/old', '0.9.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '2.0.0')), 'update c/uptodate', array(array(array('a/old', '1.0.0', 'library'), array('b/unstable', '1.0.0', 'library'), array('c/uptodate', '2.0.0', 'library')), array(), array(), 'stable', array(), array(), array()), '', 'Updating a/old (0.9.0) to a/old (1.0.0)
+Updating b/unstable (1.1.0-alpha) to b/unstable (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #22 ('update-whitelist-patterns.test', 'Update with a package whitelist only updates those corresponding to the pattern', NULL, array(array(array('package', array(array('vendor/Test-Package', '2.0'), array('vendor/NotMe', '2.0'), array('exact/Test-Package', '2.0'), array('notexact/TestPackage', '2.0'), array('all/Package1', '2.0'), array('all/Package2', '2.0'), array('another/another', '2.0'), array('no/regexp', '2.0')))), array('*.*', '*.*', '*.*', '*.*', '*.*', '*.*', '*.*', '*.*')), array(), array(array('vendor/Test-Package', '1.0'), array('vendor/NotMe', '1.0'), array('exact/Test-Package', '1.0'), array('notexact/TestPackage', '1.0'), array('all/Package1', '1.0'), array('all/Package2', '1.0'), array('another/another', '1.0'), array('no/regexp', '1.0')), 'update vendor/Test* exact/Test-Package notexact/Test all/* no/reg?xp', array(), '', 'Updating vendor/Test-Package (1.0) to vendor/Test-Package (2.0)
+Updating exact/Test-Package (1.0) to exact/Test-Package (2.0)
+Updating all/Package1 (1.0) to all/Package1 (2.0)
+Updating all/Package2 (1.0) to all/Package2 (2.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #23 ('aliased-priority.test', 'Aliases take precedence over default package', NULL, array(array(array('package', array(array('a/c', 'dev-feature-foo', array('feat.f', 'git', '')), array('a/b', 'dev-master', array(array('1.0.x-dev')), array('forked', 'git', '')))), array('package', array(array('a/a', 'dev-master', array(array('1.0.x-dev')), array('master', 'git', ''), array('dev-master', 'dev-master')), array('a/b', 'dev-master', array(array('1.0.x-dev')), array('master', 'git', '')), array('a/c', 'dev-master')))), array('1.*', '1.*', 'dev-feature-foo as dev-master'), 'dev'), array(), array(), 'install', array(), '', 'Installing a/c (dev-feature-foo feat.f)
+Marking a/c (dev-master feat.f) as installed, alias of a/c (dev-feature-foo feat.f)
+Installing a/b (dev-master forked)
+Installing a/a (dev-master master)
+Marking a/a (1.0.x-dev master) as installed, alias of a/a (dev-master master)
+Marking a/b (1.0.x-dev forked) as installed, alias of a/b (dev-master forked)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #24 ('install-from-empty-lock.test', 'Requirements from the composer file are not installed if the lock file is present', NULL, array(array(array('package', array(array('required', '1.0.0'), array('newly-required', '1.0.0')))), array('1.0.0', '1.0.0')), array(array(array('required', '1.0.0')), NULL, array(), 'stable', array(), 'aec448c7ab28f70b2b294451d7419cd5'), array(), 'install', array(), '', 'Installing required (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #25 ('update-reference.test', 'Updates a dev package forcing it\'s reference', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('abc123', '', 'git'))))), array('dev-master#def000')), array(), array(array('a/a', 'dev-master', array('abc123', '', 'git'))), 'install', array(), '', 'Updating a/a (dev-master abc123) to a/a (dev-master def000)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #26 ('replace-vendor-priorities.test', 'Replacer of the same vendor takes precedence if same prio repo', NULL, array(array(array('package', array(array('b/replacer', '1.1.0', array('1.1.0')), array('a/replacer', '1.1.0', array('1.1.0'))))), array('1.*')), array(), array(), 'install', array(), '', 'Installing a/replacer (1.1.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #27 ('circular-dependency.test', 'Circular dependencies are possible between packages', NULL, array('root/package', 'library', 'dev', 'dev-master', array('1.0'), array('self.version'), array(array('2.0-dev')), array(array('package', array(array('required/package', '1.0', 'library', array('some.branch', 'git', ''), array('2.*')))), array('package', array(array('root/package', '2.0-dev', 'library', array('other.branch', 'git', ''), array('self.version')))))), array(), array(), 'update', array(), '', 'Installing required/package (1.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #28 ('update-all.test', 'Updates updateable packages', NULL, array(array(array('package', array(array('a/a', '1.0.0'), array('a/a', '1.0.1'), array('a/a', '1.1.0'), array('a/b', '1.0.0'), array('a/b', '1.0.1'), array('a/b', '2.0.0'), array('a/c', '1.0.0'), array('a/c', '2.0.0')))), array('1.0.*', '1.*'), array('*')), array(), array(array('a/a', '1.0.0'), array('a/c', '1.0.0'), array('a/b', '1.0.0')), 'update --dev', array(), '', 'Updating a/a (1.0.0) to a/a (1.0.1)
+Updating a/b (1.0.0) to a/b (2.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #29 ('suggest-installed.test', 'Suggestions are not displayed for installed packages', NULL, array(array(array('package', array(array('a/a', '1.0.0', array('an obscure reason')), array('b/b', '1.0.0')))), array('1.0.0', '1.0.0')), array(), array(), 'install', array(), '<info>Loading composer repositories with package information</info>
+<info>Installing dependencies</info>
+<info>Writing lock file</info>
+<info>Generating autoload files</info>
+', 'Installing a/a (1.0.0)
+Installing b/b (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #30 ('aliased-priority-conflicting.test', 'Aliases take precedence over default package even if default is selected', NULL, array(array(array('package', array(array('a/req', 'dev-feature-foo', array('feat.f', 'git', '')), array('a/req', 'dev-master', array(array('1.0.x-dev')), array('forked', 'git', '')))), array('package', array(array('a/a', 'dev-master', array('dev-master')), array('a/b', 'dev-master', array('dev-master')), array('a/req', 'dev-master', array(array('1.0.x-dev')), array('master', 'git', ''))))), array('dev-master', 'dev-master', 'dev-feature-foo as dev-master'), 'dev'), array(), array(), 'install', array(), '', 'Installing a/req (dev-feature-foo feat.f)
+Marking a/req (dev-master feat.f) as installed, alias of a/req (dev-feature-foo feat.f)
+Installing a/a (dev-master)
+Installing a/b (dev-master)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #31 ('update-installed-alias-dry-run.test', 'Updates installed alias packages in dry-run mode', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('2.0.*'), array('abcdef', '', 'git'), array(array('1.0.x-dev'))), array('b/b', 'dev-master', array('123456', '', 'git'), array(array('2.0.x-dev')))))), array('~1.0@dev', '@dev')), array(), array(array('a/a', 'dev-master', array('2.0.*'), array('abcdef', '', 'git'), array(array('1.0.x-dev'))), array('b/b', 'dev-master', array('123456', '', 'git'), array(array('2.0.x-dev')))), 'update --dry-run', array(), '', '')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #32 ('update-alias.test', 'Update aliased package to non-aliased version', NULL, array(array(array('package', array(array('a/a', 'dev-master', array(array('1.0.x-dev')), array('master', 'git', '')), array('a/a', 'dev-foo', array('foo', 'git', ''))))), array('dev-foo')), array(), array(array('a/a', 'dev-master', array(array('1.0.x-dev')), array('master', 'git', ''))), 'update', array(), '', 'Updating a/a (dev-master master) to a/a (dev-foo foo)
+Marking a/a (1.0.x-dev master) as uninstalled, alias of a/a (dev-master master)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #33 ('update-installed-alias.test', 'Updates installed alias packages', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('2.0.*'), array('abcdef', '', 'git'), array(array('1.0.x-dev'))), array('b/b', 'dev-master', array('123456', '', 'git'), array(array('2.0.x-dev')))))), array('~1.0@dev', '@dev')), array(), array(array('a/a', 'dev-master', array('2.0.*'), array('abcdef', '', 'git'), array(array('1.0.x-dev'))), array('b/b', 'dev-master', array('123456', '', 'git'), array(array('2.0.x-dev')))), 'update', array(), '', '')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #34 ('alias-with-reference.test', 'Aliases of referenced packages work', NULL, array(array(array('package', array(array('a/aliased', 'dev-master', array('orig', 'git', '')), array('b/requirer', '1.0.0', array('1.0.0'), array('1.0.0', 'git', ''))))), array('dev-master#abcd as 1.0.0', '*')), array(), array(), 'install', array(), '', 'Installing a/aliased (dev-master abcd)
+Marking a/aliased (1.0.0) as installed, alias of a/aliased (dev-master abcd)
+Installing b/requirer (1.0.0)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #35 ('install-reference.test', 'Installs a dev package forcing it\'s reference', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('abc123', '', 'git'))))), array('dev-master#def000')), array(), array(), 'install', array(), '', 'Installing a/a (dev-master def000)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #36 ('install-aliased-alias.test', 'Installing double aliased package', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('file', ''), array('dev-master')), array('b/b', 'dev-foo', array(array('1.0.x-dev')), array('file', ''))))), array('dev-master', '1.0.x-dev as dev-master'), 'dev'), array(), array(), 'install', array(), '', 'Installing b/b (dev-foo)
+Marking b/b (dev-master) as installed, alias of b/b (dev-foo)
+Installing a/a (dev-master)
+Marking b/b (1.0.x-dev) as installed, alias of b/b (dev-foo)')'.
+.
+Starting test 'Composer\Test\InstallerTest::testIntegration with data set #37 ('update-whitelist.test', 'Update with a package whitelist only updates those packages and their dependencies listed as command arguments', NULL, array(array(array('package', array(array('fixed', '1.1.0'), array('fixed', '1.0.0'), array('whitelisted', '1.1.0', array('1.1.0')), array('whitelisted', '1.0.0', array('1.0.0')), array('dependency', '1.1.0'), array('dependency', '1.0.0'), array('unrelated', '1.1.0', array('1.*')), array('unrelated', '1.0.0', array('1.*')), array('unrelated-dependency', '1.1.0'), array('unrelated-dependency', '1.0.0')))), array('1.*', '1.*', '1.*')), array(), array(array('fixed', '1.0.0'), array('whitelisted', '1.0.0', array('1.0.0')), array('dependency', '1.0.0'), array('unrelated', '1.0.0', array('1.*')), array('unrelated-dependency', '1.0.0')), 'update whitelisted', array(), '', 'Updating dependency (1.0.0) to dependency (1.1.0)
+Updating whitelisted (1.0.0) to whitelisted (1.1.0)')'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testParseErrorDetectExtraComma'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testParseErrorDetectExtraCommaInArray'.
+.  305 / 1002 ( 30%)
+
+Starting test 'Composer\Test\Json\JsonFileTest::testParseErrorDetectUnescapedBackslash'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testParseErrorSkipsEscapedBackslash'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testParseErrorDetectSingleQuotes'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testParseErrorDetectMissingQuotes'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testParseErrorDetectArrayAsHash'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testParseErrorDetectMissingComma'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testSchemaValidation'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testParseErrorDetectMissingCommaMultiline'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testParseErrorDetectMissingColon'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testSimpleJsonString'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testTrailingBackslash'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testFormatEmptyArray'.
+F
+Starting test 'Composer\Test\Json\JsonFileTest::testEscape'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testUnicode'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testOnlyUnicode'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testEscapedSlashes'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testEscapedBackslashes'.
+.
+Starting test 'Composer\Test\Json\JsonFileTest::testEscapedUnicode'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #0 ('{}', 'require', 'vendor/baz', 'qux', '{
+    "require": {
+        "vendor/baz": "qux"
+    }
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #1 ('{
+    "foo": "bar"
+}', 'require', 'vendor/baz', 'qux', '{
+    "foo": "bar",
+    "require": {
+        "vendor/baz": "qux"
+    }
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #2 ('{
+    "require": {
+    }
+}', 'require', 'vendor/baz', 'qux', '{
+    "require": {
+        "vendor/baz": "qux"
+    }
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #3 ('{
+    "require": {
+        "foo": "bar"
+    }
+}', 'require', 'vendor/baz', 'qux', '{
+    "require": {
+        "foo": "bar",
+        "vendor/baz": "qux"
+    }
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #4 ('{
+    "require":
+    {
+        "foo": "bar",
+        "vendor/baz": "baz"
+    }
+}', 'require', 'vendor/baz', 'qux', '{
+    "require":
+    {
+        "foo": "bar",
+        "vendor/baz": "qux"
+    }
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #5 ('{
+    "require":
+    {
+        "foo": "bar",
+        "vendor\\/baz": "baz"
+    }
+}', 'require', 'vendor/baz', 'qux', '{
+    "require":
+    {
+        "foo": "bar",
+        "vendor/baz": "qux"
+    }
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #6 ('{
+    "require": {
+        "foo": "bar"
+    },
+    "repositories": [{
+        "type": "package",
+        "package": {
+            "require": {
+                "foo": "bar"
+            }
+        }
+    }]
+}', 'require', 'foo', 'qux', '{
+    "require": {
+        "foo": "qux"
+    },
+    "repositories": [{
+        "type": "package",
+        "package": {
+            "require": {
+                "foo": "bar"
+            }
+        }
+    }]
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #7 ('{
+    "repositories": [{
+        "type": "package",
+        "package": {
+            "require": {
+                "foo": "bar"
+            }
+        }
+    }]
+}', 'require', 'foo', 'qux', '{
+    "repositories": [{
+        "type": "package",
+        "package": {
+            "require": {
+                "foo": "bar"
+            }
+        }
+    }],
+    "require": {
+        "foo": "qux"
+    }
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones first" ('{
+    "repositories": {
+        "foo": {
+            "foo": "bar",
+            "bar": "baz"
+        },
+        "bar": {
+            "foo": "bar",
+            "bar": "baz"
+        }
+    }
+}', 'foo', true, '{
+    "repositories": {
+        "bar": {
+            "foo": "bar",
+            "bar": "baz"
+        }
+    }
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones last" ('{
+    "repositories": {
+        "foo": {
+            "foo": "bar",
+            "bar": "baz"
+        },
+        "bar": {
+            "foo": "bar",
+            "bar": "baz"
+        }
+    }
+}', 'bar', true, '{
+    "repositories": {
+        "foo": {
+            "foo": "bar",
+            "bar": "baz"
+        }
+    }
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones unique" ('{
+    "repositories": {
+        "foo": {
+            "foo": "bar",
+            "bar": "baz"
+        }
+    }
+}', 'foo', true, '{
+    "repositories": {
+    }
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones middle" ('{
+    "repositories": {
+        "foo": {
+            "foo": "bar",
+            "bar": "baz"
+        },
+        "bar": {
+            "foo": "bar",
+            "bar": "baz"
+        },
+        "baz": {
+            "foo": "bar",
+            "bar": "baz"
+        }
+    }
+}', 'bar', true, '{
+    "repositories": {
+        "foo": {
+            "foo": "bar",
+            "bar": "baz"
+        },
+        "baz": {
+            "foo": "bar",
+            "bar": "baz"
+        }
+    }
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on empty repos" ('{
+    "repositories": {
+    }
+}', 'bar', true)'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on empty repos2" ('{
+    "repositories": {}
+}', 'bar', true)'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on missing repos" ('{
+}', 'bar', true)'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on deep repos" ('{
+    "repositories": {
+        "foo": {
+            "package": { "bar": "baz" }
+        }
+    }
+}', 'foo', true, '{
+    "repositories": {
+    }
+}
+')'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "fails on deep repos with borked texts" ('{
+    "repositories": {
+        "foo": {
+            "package": { "bar": "ba{z" }
+        }
+    }
+}', 'bar', false)'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "fails on deep repos with borked texts2" ('{
+    "repositories": {
+        "foo": {
+            "package": { "bar": "ba}z" }
+        }
+    }
+}', 'bar', false)'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddRepositoryCanInitializeEmptyRepositories'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddRepositoryCanInitializeFromScratch'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddRepositoryCanAdd'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddRepositoryCanOverrideDeepRepos'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingEscapes'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanAdd'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanOverwrite'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanOverwriteNumbers'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanOverwriteArrays'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanAddSubKeyInEmptyConfig'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanAddSubKeyInEmptyVal'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddConfigSettingCanAddSubKeyInHash'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveConfigSettingCanRemoveSubKeyInHash'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveConfigSettingCanRemoveSubKeyInHashWithSiblings'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddMainKey'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testUpdateMainKey'.
+.
+Starting test 'Composer\Test\Json\JsonManipulatorTest::testUpdateMainKey2'.
+.
+Starting test 'Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testManualExcludes'.
+.
+Starting test 'Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testGitExcludes'.
+E
+Starting test 'Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testHgExcludes'.
+E
+Starting test 'Composer\Test\Package\Archiver\ArchiveManagerTest::testUnknownFormat'.
+.
+Starting test 'Composer\Test\Package\Archiver\ArchiveManagerTest::testArchiveTar'.
+E
+Starting test 'Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #0 ('.#', array('#.\\##', false, true))'.
+.
+Starting test 'Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #1 ('.\\#', array('#.\\\\\\##', false, true))'.
+.
+Starting test 'Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #2 ('\\.#', array('#\\.\\##', false, true))'.
+.  366 / 1002 ( 36%)
+
+Starting test 'Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #3 ('\\\\.\\\\\\\\#', array('#\\\\.\\\\\\\\\\##', false, true))'.
+.
+Starting test 'Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #4 ('.\\\\\\\\\\#', array('#.\\\\\\\\\\\\\\##', false, true))'.
+.
+Starting test 'Composer\Test\Package\Archiver\PharArchiverTest::testTarArchive'.
+E
+Starting test 'Composer\Test\Package\Archiver\PharArchiverTest::testZipArchive'.
+E
+Starting test 'Composer\Test\Package\BasePackageTest::testSetSameRepository'.
+.
+Starting test 'Composer\Test\Package\BasePackageTest::testSetAnotherRepository'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedNamingSemantics with data set #0 ('foo', '1-beta')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedNamingSemantics with data set #1 ('node', '0.5.6')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedNamingSemantics with data set #2 ('li3', '0.10')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedNamingSemantics with data set #3 ('mongodb_odm', '1.0.0BETA3')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedNamingSemantics with data set #4 ('DoctrineCommon', '2.2.0-DEV')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedVersioningSemantics with data set #0 ('foo', '1-beta')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedVersioningSemantics with data set #1 ('node', '0.5.6')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedVersioningSemantics with data set #2 ('li3', '0.10')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedVersioningSemantics with data set #3 ('mongodb_odm', '1.0.0BETA3')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedVersioningSemantics with data set #4 ('DoctrineCommon', '2.2.0-DEV')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedMarshallingSemantics with data set #0 ('foo', '1-beta')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedMarshallingSemantics with data set #1 ('node', '0.5.6')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedMarshallingSemantics with data set #2 ('li3', '0.10')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedMarshallingSemantics with data set #3 ('mongodb_odm', '1.0.0BETA3')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testPackageHasExpectedMarshallingSemantics with data set #4 ('DoctrineCommon', '2.2.0-DEV')'.
+.
+Starting test 'Composer\Test\Package\CompletePackageTest::testGetTargetDir'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testRequiredInformation'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testRootPackage'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #0 ('type', 'library')'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #1 ('time', DateTime, 'ReleaseDate', '2012-02-01 00:00:00')'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #2 ('authors', array('Nils Adermann <naderman@naderman.de>', 'Jordi Boggiano <j.boggiano@seld.be>'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #3 ('homepage', 'http://getcomposer.org')'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #4 ('description', 'Dependency Manager')'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #5 ('keywords', array('package', 'dependency', 'autoload'), NULL, array('autoload', 'dependency', 'package'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #6 ('bin', array('bin/composer'), 'binaries')'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #7 ('license', array('MIT'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #8 ('autoload', array(array('src/')))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #9 ('repositories', array(false))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #10 ('scripts', array('MyVendor\\MyClass::postUpdate'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #11 ('extra', array('MyVendor\\Installer'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #12 ('archive', array('/foo/bar', 'baz', '!/foo/bar/baz'), 'archiveExcludes', array(array('/foo/bar', 'baz', '!/foo/bar/baz')))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #13 ('require', array(foo requires foo/bar (== 1.0.0.0)), 'requires', array('1.0.0'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #14 ('require-dev', array(foo requires (for development) foo/bar (== 1.0.0.0)), 'devRequires', array('1.0.0'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #15 ('suggest', array('very useful package'), 'suggests')'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #16 ('support', array('bar'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #17 ('require', array(foo requires foo/bar (== 1.0.0.0), bar requires bar/baz (== 1.0.0.0)), 'requires', array('1.0.0', '1.0.0'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #18 ('require-dev', array(foo requires foo/bar (== 1.0.0.0), bar requires bar/baz (== 1.0.0.0)), 'devRequires', array('1.0.0', '1.0.0'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #19 ('suggest', array('very useful package', 'another useful package'), 'suggests', array('another useful package', 'very useful package'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #20 ('provide', array(foo requires foo/bar (== 1.0.0.0), bar requires bar/baz (== 1.0.0.0)), 'provides', array('1.0.0', '1.0.0'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #21 ('replace', array(foo requires foo/bar (== 1.0.0.0), bar requires bar/baz (== 1.0.0.0)), 'replaces', array('1.0.0', '1.0.0'))'.
+.
+Starting test 'Composer\Test\Package\Dumper\ArrayDumperTest::testKeys with data set #22 ('conflict', array(foo requires foo/bar (== 1.0.0.0), bar requires bar/baz (== 1.0.0.0)), 'conflicts', array('1.0.0', '1.0.0'))'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\MultiConstraintTest::testMultiVersionMatchSucceeds'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\MultiConstraintTest::testMultiVersionProvidedMatchSucceeds'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\MultiConstraintTest::testMultiVersionMatchFails'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #0 ('==', '1', '==', '1')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #1 ('>=', '1', '>=', '2')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #2 ('>=', '2', '>=', '1')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #3 ('>=', '2', '>', '1')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #4 ('<=', '2', '>=', '1')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #5 ('>=', '1', '<=', '2')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #6 ('==', '2', '>=', '2')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #7 ('!=', '1', '!=', '1')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #8 ('!=', '1', '==', '2')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #9 ('!=', '1', '<', '1')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #10 ('!=', '1', '<=', '1')'.
+.  427 / 1002 ( 42%)
+
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #11 ('!=', '1', '>', '1')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #12 ('!=', '1', '>=', '1')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #13 ('==', 'dev-foo-bar', '==', 'dev-foo-bar')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #14 ('==', 'dev-foo-xyz', '==', 'dev-foo-xyz')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #15 ('>=', 'dev-foo-bar', '>=', 'dev-foo-xyz')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #16 ('<=', 'dev-foo-bar', '<', 'dev-foo-xyz')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #17 ('!=', 'dev-foo-bar', '<', 'dev-foo-xyz')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #18 ('>=', 'dev-foo-bar', '!=', 'dev-foo-bar')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #19 ('!=', 'dev-foo-bar', '!=', 'dev-foo-xyz')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #0 ('==', '1', '==', '2')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #1 ('>=', '2', '<=', '1')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #2 ('>=', '2', '<', '2')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #3 ('<=', '2', '>', '2')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #4 ('>', '2', '<=', '2')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #5 ('<=', '1', '>=', '2')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #6 ('>=', '2', '<=', '1')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #7 ('==', '2', '<', '2')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #8 ('!=', '1', '==', '1')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #9 ('==', '1', '!=', '1')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #10 ('==', 'dev-foo-dist', '==', 'dev-foo-zist')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #11 ('==', 'dev-foo-bist', '==', 'dev-foo-aist')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #12 ('<=', 'dev-foo-bist', '>=', 'dev-foo-aist')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #13 ('>=', 'dev-foo-bist', '<', 'dev-foo-aist')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #14 ('<', '0.12', '==', 'dev-foo')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchFails with data set #15 ('>', '0.12', '==', 'dev-foo')'.
+.
+Starting test 'Composer\Test\Package\LinkConstraint\VersionConstraintTest::testComparableBranches'.
+.
+Starting test 'Composer\Test\Package\Loader\ArrayLoaderTest::testSelfVersion'.
+.
+Starting test 'Composer\Test\Package\Loader\ArrayLoaderTest::testTypeDefault'.
+.
+Starting test 'Composer\Test\Package\Loader\ArrayLoaderTest::testNormalizedVersionOptimization'.
+.
+Starting test 'Composer\Test\Package\Loader\ArrayLoaderTest::testParseDump'.
+.
+Starting test 'Composer\Test\Package\Loader\ArrayLoaderTest::testPackageWithBranchAlias'.
+.
+Starting test 'Composer\Test\Package\Loader\RootPackageLoaderTest::testDetachedHeadBecomesDevHash'.
+.
+Starting test 'Composer\Test\Package\Loader\RootPackageLoaderTest::testTagBecomesVersion'.
+.
+Starting test 'Composer\Test\Package\Loader\RootPackageLoaderTest::testInvalidTagBecomesVersion'.
+.
+Starting test 'Composer\Test\Package\Loader\RootPackageLoaderTest::testStabilityFlagsParsing'.
+.
+Starting test 'Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSuccess with data set #0 (array('foo/bar'))'.
+.
+Starting test 'Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSuccess with data set #1 (array('foo/bar', 'Foo bar', '1.0.0', 'library', array('a', 'b_c', 'D E'), 'https://foo.com', '2010-10-10T10:10:10+00:00', 'MIT', array(array('Alice', 'alice@example.org', 'Lead', 'http://example.org'), array('Bob', '')), array('mail@example.org', 'http://example.org/', 'http://example.org/', 'http://example.org/', 'http://example.org/', 'irc://example.org/example'), array('1.*', '>2.0-dev,<2.4-dev'), array('1.*', '>2.0-dev,<2.4-dev'), array('1.*', '>2.0-dev,<2.4-dev'), array('1.*', '>2.0-dev,<2.4-dev'), array('1.*', '>2.0-dev,<2.4-dev'), array('Foo bar is very useful'), array(array('src/', 'fallback/libs/'), array('dir/', 'dir2/file.php'), array('functions.php')), array('lib/'), 'Foo/Bar', 'dev', array(array('composer', 'http://packagist.org/')), array('bin', 'vendor', 10000), array(array('/foo/bar', 'baz', '!/foo/bar/baz')), array('Foo\\Bar\\Baz::doSomething', array('Foo\\Bar\\Baz::doSomething')), array(array(array('nested')), array('2.0-dev', '1.0.x-dev')), array('bin/foo', 'bin/bar')))'.
+.
+Starting test 'Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSuccess with data set #2 (array('foo/bar', array('MIT', 'WTFPL')))'.
+.
+Starting test 'Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsException with data set #0 (array('foo'), array('name : invalid value (foo), must match [A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*'))'.
+.
+Starting test 'Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsException with data set #1 (array('foo/bar', 43), array('homepage : should be a string, integer given'))'.
+.
+Starting test 'Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsException with data set #2 (array('foo/bar', array(array())), array('support.source : invalid value, must be a string'))'.
+.
+Starting test 'Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsException with data set #3 (array('foo/bar', 'strings'), array('autoload : should be an array, string given'))'.
+.
+Starting test 'Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadFailureThrowsException with data set #4 (array('foo/bar', array(array('src'))), array('autoload : invalid value (psr0), must be one of psr-0, classmap, files'))'.
+.
+Starting test 'Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadWarnings with data set #0 (array('foo/bar', 'foo:bar'), array('homepage : invalid value (foo:bar), must be an http/https URL'))'.
+.
+Starting test 'Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadWarnings with data set #1 (array('foo/bar', array('foo:bar', 'foo:bar', 'foo:bar', 'foo:bar')), array('support.source : invalid value (foo:bar), must be an http/https URL', 'support.forum : invalid value (foo:bar), must be an http/https URL', 'support.issues : invalid value (foo:bar), must be an http/https URL', 'support.wiki : invalid value (foo:bar), must be an http/https URL'))'.
+.
+Starting test 'Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSkipsWarningDataWhenIgnoringErrors with data set #0 (array('foo/bar', 'foo:bar'), array('homepage : invalid value (foo:bar), must be an http/https URL'))'.
+.
+Starting test 'Composer\Test\Package\Loader\ValidatingArrayLoaderTest::testLoadSkipsWarningDataWhenIgnoringErrors with data set #1 (array('foo/bar', array('foo:bar', 'foo:bar', 'foo:bar', 'foo:bar')), array('support.source : invalid value (foo:bar), must be an http/https URL', 'support.forum : invalid value (foo:bar), must be an http/https URL', 'support.issues : invalid value (foo:bar), must be an http/https URL', 'support.wiki : invalid value (foo:bar), must be an http/https URL'))'.
+.
+Starting test 'Composer\Test\Package\LockerTest::testIsLocked'.
+.
+Starting test 'Composer\Test\Package\LockerTest::testGetNotLockedPackages'.
+.
+Starting test 'Composer\Test\Package\LockerTest::testGetLockedPackages'.
+.
+Starting test 'Composer\Test\Package\LockerTest::testSetLockData'.
+.
+Starting test 'Composer\Test\Package\LockerTest::testLockBadPackages'.
+.
+Starting test 'Composer\Test\Package\LockerTest::testIsFresh'.
+.
+Starting test 'Composer\Test\Package\LockerTest::testIsFreshFalse'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testFormatVersionForDevPackage with data set #0 (, true, 'PrettyVersion v2.1.0-RC2')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testFormatVersionForDevPackage with data set #1 (, true, 'PrettyVersion bbf527a')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testFormatVersionForDevPackage with data set #2 (, false, 'PrettyVersion v1.0.0')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testFormatVersionForDevPackage with data set #3 (, false, 'PrettyVersion bbf527a27356414bfa9bf520f018c5cb7af67c77')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "none" ('1.0.0', '1.0.0.0')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "none/2" ('1.2.3.4', '1.2.3.4')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses state" ('1.0.0RC1dev', '1.0.0.0-RC1-dev')'.
+.  488 / 1002 ( 48%)
+
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "CI parsing" ('1.0.0-rC15-dev', '1.0.0.0-RC15-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "delimiters" ('1.0.0.RC.15-dev', '1.0.0.0-RC15-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "RC uppercase" ('1.0.0-rc1', '1.0.0.0-RC1')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "patch replace" ('1.0.0.pl3-dev', '1.0.0.0-patch3-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "forces w.x.y.z" ('1.0-dev', '1.0.0.0-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "forces w.x.y.z/2" ('0', '0.0.0.0')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses long" ('10.4.13-beta', '10.4.13.0-beta')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "expand shorthand" ('10.4.13-b', '10.4.13.0-beta')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "expand shorthand2" ('10.4.13-b5', '10.4.13.0-beta5')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "strips leading v" ('v1.0.0', '1.0.0.0')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "strips v/datetime" ('v20100102', '20100102')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses dates y-m" ('2010.01', '2010-01')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses dates w/ ." ('2010.01.02', '2010-01-02')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses dates w/ -" ('2010-01-02', '2010-01-02')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses numbers" ('2010-01-02.5', '2010-01-02-5')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses datetime" ('20100102-203040', '20100102-203040')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses dt+number" ('20100102203040-10', '20100102203040-10')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses dt+patch" ('20100102-203040-p1', '20100102-203040-patch1')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses master" ('dev-master', '9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses trunk" ('dev-trunk', '9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses branches" ('1.x-dev', '1.9999999.9999999.9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses arbitrary" ('dev-feature-foo', 'dev-feature-foo')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses arbitrary2" ('DEV-FOOBAR', 'dev-FOOBAR')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses arbitrary3" ('dev-feature/foo', 'dev-feature/foo')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "ignores aliases" ('dev-master as 1.0.0', '9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeFails with data set "empty " ('')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeFails with data set "invalid chars" ('a')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeFails with data set "invalid type" ('1.0.0-meh')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeFails with data set "too many bits" ('1.0.0.0.0')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeFails with data set "non-dev arbitrary" ('feature-foo')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses x" ('v1.x', '1.9999999.9999999.9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses *" ('v1.*', '1.9999999.9999999.9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses digits" ('v1.0', '1.0.9999999.9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses digits/2" ('2.0', '2.0.9999999.9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses long x" ('v1.0.x', '1.0.9999999.9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses long *" ('v1.0.3.*', '1.0.3.9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses long digits" ('v2.4.0', '2.4.0.9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses long digits/2" ('2.4.4', '2.4.4.9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses master" ('master', '9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses trunk" ('trunk', '9999999-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses arbitrary" ('feature-a', 'dev-feature-a')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testNormalizeBranch with data set "parses arbitrary/2" ('FOOBAR', 'dev-FOOBAR')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsIgnoresStabilityFlag'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsIgnoresReferenceOnDevVersion'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsFailsOnBadReference'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "match any" ('*', [])'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "match any/2" ('*.*', [])'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "match any/3" ('*.x.*', [])'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "match any/4" ('x.x.x.*', [])'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "not equal" ('<>1.0.0', != 1.0.0.0)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "not equal/2" ('!=1.0.0', != 1.0.0.0)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "greater than" ('>1.0.0', > 1.0.0.0)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "lesser than" ('<1.2.3.4', < 1.2.3.4-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "less/eq than" ('<=1.2.3', <= 1.2.3.0)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "great/eq than" ('>=1.2.3', >= 1.2.3.0)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "equals" ('=1.2.3', == 1.2.3.0)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "double equals" ('==1.2.3', == 1.2.3.0)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "no op means eq" ('1.2.3', == 1.2.3.0)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "completes version" ('=1.0', == 1.0.0.0)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "shorthand beta" ('1.2.3b5', == 1.2.3.0-beta5)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "accepts spaces" ('>= 1.2.3', >= 1.2.3.0)'.
+.  549 / 1002 ( 54%)
+
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "accepts master" ('>=dev-master', >= 9999999-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "accepts master/2" ('dev-master', == 9999999-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "accepts arbitrary" ('dev-feature-a', == dev-feature-a)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "regression #550" ('dev-some-fix', == dev-some-fix)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "regression #935" ('dev-CAPS', == dev-CAPS)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "ignores aliases" ('dev-master as 1.0.0', == 9999999-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "lesser than override" ('<1.2.3.4-stable', < 1.2.3.4)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #0 ('2.*', >= 2.0.0.0-dev, < 3.0.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #1 ('20.*', >= 20.0.0.0-dev, < 21.0.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #2 ('2.0.*', >= 2.0.0.0-dev, < 2.1.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #3 ('2.2.x', >= 2.2.0.0-dev, < 2.3.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #4 ('2.10.x', >= 2.10.0.0-dev, < 2.11.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #5 ('2.1.3.*', >= 2.1.3.0-dev, < 2.1.4.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsWildcard with data set #6 ('0.*', NULL, < 1.0.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #0 ('~1', >= 1.0.0.0-dev, < 2.0.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #1 ('~1.0', >= 1.0.0.0-dev, < 2.0.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #2 ('~1.0.0', >= 1.0.0.0-dev, < 1.1.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #3 ('~1.2', >= 1.2.0.0-dev, < 2.0.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #4 ('~1.2.3', >= 1.2.3.0-dev, < 1.3.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #5 ('~1.2.3.4', >= 1.2.3.4-dev, < 1.2.4.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #6 ('~1.2-beta', >= 1.2.0.0-beta, < 2.0.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #7 ('~1.2-b2', >= 1.2.0.0-beta2, < 2.0.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #8 ('~1.2-BETA2', >= 1.2.0.0-beta2, < 2.0.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #9 ('~1.2.2-dev', >= 1.2.2.0-dev, < 1.3.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseTildeWildcard with data set #10 ('~1.2.2-stable', >= 1.2.2.0-stable, < 1.3.0.0-dev)'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsMulti'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsMultiDisjunctiveHasPrioOverConjuctive'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsMultiWithStabilities'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsFails with data set "empty " ('')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseConstraintsFails with data set "invalid version" ('1.0.0-meh')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #0 ('stable', '1')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #1 ('stable', '1.0')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #2 ('stable', '3.2.1')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #3 ('stable', 'v3.2.1')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #4 ('dev', 'v2.0.x-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #5 ('dev', 'v2.0.x-dev#abc123')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #6 ('dev', 'v2.0.x-dev#trunk/@123')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #7 ('RC', '3.0-RC2')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #8 ('dev', 'dev-master')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #9 ('dev', '3.1.2-dev')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #10 ('stable', '3.1.2-pl2')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #11 ('stable', '3.1.2-patch')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #12 ('alpha', '3.1.2-alpha5')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #13 ('beta', '3.1.2-beta')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #14 ('beta', '2.0B1')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #15 ('alpha', '1.2.0a1')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #16 ('alpha', '1.2_a1')'.
+.
+Starting test 'Composer\Test\Package\Version\VersionParserTest::testParseStability with data set #17 ('RC', '2.0.0rc1')'.
+.
+Starting test 'Composer\Test\Installer\PluginInstallerTest::testInstallNewPlugin'.
+.
+Starting test 'Composer\Test\Installer\PluginInstallerTest::testInstallMultiplePlugins'.
+.
+Starting test 'Composer\Test\Installer\PluginInstallerTest::testUpgradeWithNewClassName'.
+.
+Starting test 'Composer\Test\Installer\PluginInstallerTest::testUpgradeWithSameClassName'.
+.
+Starting test 'Composer\Test\Repository\ArrayRepositoryTest::testAddPackage'.
+.
+Starting test 'Composer\Test\Repository\ArrayRepositoryTest::testRemovePackage'.
+.
+Starting test 'Composer\Test\Repository\ArrayRepositoryTest::testHasPackage'.
+.
+Starting test 'Composer\Test\Repository\ArrayRepositoryTest::testFindPackages'.
+.
+Starting test 'Composer\Test\Repository\ArrayRepositoryTest::testAutomaticallyAddAliasedPackage'.
+.
+Starting test 'Composer\Repository\ArtifactRepositoryTest::testExtractsConfigsFromZipArchives'.
+E
+Starting test 'Composer\Test\Repository\ComposerRepositoryTest::testLoadData with data set #0 (array(array('foo/bar', '1.0.0')), array(array('foo/bar', array(array('foo/bar', '1.0.0')))))'.
+.
+Starting test 'Composer\Test\Repository\ComposerRepositoryTest::testLoadData with data set #1 (array(array('bar/foo', '3.14'), array('bar/foo', '3.145')), array(array(array(array('bar/foo', '3.14'), array('bar/foo', '3.145')))))'.
+.
+Starting test 'Composer\Test\Repository\ComposerRepositoryTest::testWhatProvides'.
+.  610 / 1002 ( 60%)
+
+Starting test 'Composer\Test\Repository\CompositeRepositoryTest::testHasPackage'.
+.
+Starting test 'Composer\Test\Repository\CompositeRepositoryTest::testFindPackage'.
+.
+Starting test 'Composer\Test\Repository\CompositeRepositoryTest::testFindPackages'.
+.
+Starting test 'Composer\Test\Repository\CompositeRepositoryTest::testGetPackages'.
+.
+Starting test 'Composer\Test\Repository\CompositeRepositoryTest::testAddRepository'.
+.
+Starting test 'Composer\Test\Repository\CompositeRepositoryTest::testCount'.
+.
+Starting test 'Composer\Test\Repository\CompositeRepositoryTest::testNoRepositories with data set #0 ('findPackages', array('foo'))'.
+.
+Starting test 'Composer\Test\Repository\CompositeRepositoryTest::testNoRepositories with data set #1 ('search', array('foo'))'.
+.
+Starting test 'Composer\Test\Repository\CompositeRepositoryTest::testNoRepositories with data set #2 ('getPackages', array())'.
+.
+Starting test 'Composer\Repository\FilesystemRepositoryTest::testRepositoryRead'.
+.
+Starting test 'Composer\Repository\FilesystemRepositoryTest::testCorruptedRepositoryFile'.
+.
+Starting test 'Composer\Repository\FilesystemRepositoryTest::testUnexistentRepositoryFile'.
+.
+Starting test 'Composer\Repository\FilesystemRepositoryTest::testRepositoryWrite'.
+.
+Starting test 'Composer\Repository\Pear\ChannelReaderTest::testShouldBuildPackagesFromPearSchema'.
+.
+Starting test 'Composer\Repository\Pear\ChannelReaderTest::testShouldSelectCorrectReader'.
+.
+Starting test 'Composer\Repository\Pear\ChannelReaderTest::testShouldCreatePackages'.
+.
+Starting test 'Composer\Repository\Pear\ChannelRest10ReaderTest::testShouldBuildPackagesFromPearSchema'.
+.
+Starting test 'Composer\Repository\Pear\ChannelRest11ReaderTest::testShouldBuildPackagesFromPearSchema'.
+.
+Starting test 'Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #0 (array(array('required', '*', 'pear.php.net', 'Foo')), array(array('pkg', 'has', 'Foo')), array(array(array('Foo', 'pear.php.net'))))'.
+.
+Starting test 'Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #1 (array(array('required', '>1.0.0.0', 'pear.php.net', 'Foo')), array(array('pkg', 'gt', '1.0.0', 'Foo')), array(array(array('Foo', 'pear.php.net', '1.0.0', '1.0.0'))))'.
+.
+Starting test 'Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #2 (array(array('conflicts', '*', 'pear.php.net', 'Foo')), array(array('pkg', 'not', 'Foo')), array(array(array('Foo', 'pear.php.net', true))))'.
+.
+Starting test 'Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #3 (array(array('required', '>=1.0.0.0', 'pear.php.net', 'Foo'), array('required', '<2.0.0.0', 'pear.php.net', 'Foo')), array(array('pkg', 'ge', '1.0.0', 'Foo'), array('pkg', 'lt', '2.0.0', 'Foo')), array(array(array(array('Foo', 'pear.php.net', '1.0.0'), array('Foo', 'pear.php.net', '2.0.0', '2.0.0')))))'.
+.
+Starting test 'Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #4 (array(array('required', '>=5.3.0.0', 'php', '')), array(array('php', 'ge', '5.3')), array(array(array('5.3'))))'.
+.
+Starting test 'Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #5 (array(array('required', '*', 'ext', 'xmllib')), array(array('ext', 'has', 'xmllib')), array(array(array(array('xmllib')))))'.
+.
+Starting test 'Composer\Repository\Pear\PackageDependencyParserTest::testShouldParseDependencies with data set #6 (array(array('optional', '*', 'ext', 'xmllib')), false, array(array(array(array('xmllib')))))'.
+.
+Starting test 'Composer\Test\Repository\Vcs\GitHubDriverTest::testPrivateRepository'.
+.
+Starting test 'Composer\Test\Repository\Vcs\GitHubDriverTest::testPublicRepository'.
+.
+Starting test 'Composer\Test\Repository\Vcs\GitHubDriverTest::testPublicRepository2'.
+.
+Starting test 'Composer\Test\Repository\Vcs\GitHubDriverTest::testPrivateRepositoryNoInteraction'.
+.
+Starting test 'Composer\Test\Repository\Vcs\SvnDriverTest::testWrongCredentialsInUrl'.
+.
+Starting test 'Composer\Test\Repository\Vcs\SvnDriverTest::testSupport with data set #0 ('http://svn.apache.org', true)'.
+.
+Starting test 'Composer\Test\Repository\Vcs\SvnDriverTest::testSupport with data set #1 ('https://svn.sf.net', true)'.
+.
+Starting test 'Composer\Test\Repository\Vcs\SvnDriverTest::testSupport with data set #2 ('svn://example.org', true)'.
+.
+Starting test 'Composer\Test\Repository\Vcs\SvnDriverTest::testSupport with data set #3 ('svn+ssh://example.org', true)'.
+.
+Starting test 'Composer\Test\Util\ErrorHandlerTest::testErrorHandlerCaptureNotice'.
+.
+Starting test 'Composer\Test\Util\ErrorHandlerTest::testErrorHandlerCaptureWarning'.
+F
+Starting test 'Composer\Test\Util\ErrorHandlerTest::testErrorHandlerRespectsAtOperator'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #0 ('/foo/bar', '/foo/bar', false, '__FILE__')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #1 ('/foo/bar', '/foo/baz', false, '__DIR__.\'/baz\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #2 ('/foo/bin/run', '/foo/vendor/acme/bin/run', false, 'dirname(__DIR__).\'/vendor/acme/bin/run\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #3 ('/foo/bin/run', '/bar/bin/run', false, '\'/bar/bin/run\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #4 ('c:/bin/run', 'c:/vendor/acme/bin/run', false, 'dirname(__DIR__).\'/vendor/acme/bin/run\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #5 ('c:\\bin\\run', 'c:/vendor/acme/bin/run', false, 'dirname(__DIR__).\'/vendor/acme/bin/run\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #6 ('c:/bin/run', 'd:/vendor/acme/bin/run', false, '\'d:/vendor/acme/bin/run\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #7 ('c:\\bin\\run', 'd:/vendor/acme/bin/run', false, '\'d:/vendor/acme/bin/run\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #8 ('/foo/bar', '/foo/bar', true, '__DIR__')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #9 ('/foo/bar/', '/foo/bar', true, '__DIR__')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #10 ('/foo/bar', '/foo/baz', true, 'dirname(__DIR__).\'/baz\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #11 ('/foo/bin/run', '/foo/vendor/acme/bin/run', true, 'dirname(dirname(__DIR__)).\'/vendor/acme/bin/run\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #12 ('/foo/bin/run', '/bar/bin/run', true, '\'/bar/bin/run\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #13 ('/bin/run', '/bin/run', true, '__DIR__')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #14 ('c:/bin/run', 'c:\\bin/run', true, '__DIR__')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #15 ('c:/bin/run', 'c:/vendor/acme/bin/run', true, 'dirname(dirname(__DIR__)).\'/vendor/acme/bin/run\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #16 ('c:\\bin\\run', 'c:/vendor/acme/bin/run', true, 'dirname(dirname(__DIR__)).\'/vendor/acme/bin/run\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #17 ('c:/bin/run', 'd:/vendor/acme/bin/run', true, '\'d:/vendor/acme/bin/run\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #18 ('c:\\bin\\run', 'd:/vendor/acme/bin/run', true, '\'d:/vendor/acme/bin/run\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #19 ('C:/Temp/test', 'C:\\Temp', true, 'dirname(__DIR__)')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #20 ('C:/Temp', 'C:\\Temp\\test', true, '__DIR__ . \'/test\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #21 ('/tmp/test', '/tmp', true, 'dirname(__DIR__)')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #22 ('/tmp', '/tmp/test', true, '__DIR__ . \'/test\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #23 ('C:/Temp', 'c:\\Temp\\test', true, '__DIR__ . \'/test\'')'.
+.  671 / 1002 ( 66%)
+
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #24 ('/tmp/test/./', '/tmp/test/', true, '__DIR__')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #25 ('/tmp/test/../vendor', '/tmp/test', true, 'dirname(__DIR__).\'/test\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #26 ('/tmp/test/.././vendor', '/tmp/test', true, 'dirname(__DIR__).\'/test\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #27 ('C:/Temp', 'c:\\Temp\\..\\..\\test', true, 'dirname(__DIR__).\'/test\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #28 ('C:/Temp/../..', 'd:\\Temp\\..\\..\\test', true, '\'d:/test\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #29 ('/foo/bar', '/foo/bar_vendor', true, 'dirname(__DIR__).\'/bar_vendor\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #30 ('/foo/bar_vendor', '/foo/bar', true, 'dirname(__DIR__).\'/bar\'')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #0 ('/foo/bar', '/foo/bar', './bar')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #1 ('/foo/bar', '/foo/baz', './baz')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #2 ('/foo/bar/', '/foo/baz', './baz')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #3 ('/foo/bar', '/foo/bar', './', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #4 ('/foo/bar', '/foo/baz', '../baz', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #5 ('/foo/bar/', '/foo/baz', '../baz', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #6 ('C:/foo/bar/', 'c:/foo/baz', '../baz', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #7 ('/foo/bin/run', '/foo/vendor/acme/bin/run', '../vendor/acme/bin/run')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #8 ('/foo/bin/run', '/bar/bin/run', '/bar/bin/run')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #9 ('/foo/bin/run', '/bar/bin/run', '/bar/bin/run', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #10 ('c:/foo/bin/run', 'd:/bar/bin/run', 'd:/bar/bin/run', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #11 ('c:/bin/run', 'c:/vendor/acme/bin/run', '../vendor/acme/bin/run')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #12 ('c:\\bin\\run', 'c:/vendor/acme/bin/run', '../vendor/acme/bin/run')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #13 ('c:/bin/run', 'd:/vendor/acme/bin/run', 'd:/vendor/acme/bin/run')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #14 ('c:\\bin\\run', 'd:/vendor/acme/bin/run', 'd:/vendor/acme/bin/run')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #15 ('C:/Temp/test', 'C:\\Temp', './')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #16 ('/tmp/test', '/tmp', './')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #17 ('C:/Temp/test/sub', 'C:\\Temp', '../')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #18 ('/tmp/test/sub', '/tmp', '../')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #19 ('/tmp/test/sub', '/tmp', '../../', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #20 ('c:/tmp/test/sub', 'c:/tmp', '../../', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #21 ('/tmp', '/tmp/test', 'test')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #22 ('C:/Temp', 'C:\\Temp\\test', 'test')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #23 ('C:/Temp', 'c:\\Temp\\test', 'test')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #24 ('/tmp/test/./', '/tmp/test', './', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #25 ('/tmp/test/../vendor', '/tmp/test', '../test', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #26 ('/tmp/test/.././vendor', '/tmp/test', '../test', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #27 ('C:/Temp', 'c:\\Temp\\..\\..\\test', '../test', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #28 ('C:/Temp/../..', 'c:\\Temp\\..\\..\\test', './test', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #29 ('/tmp', '/tmp/../../test', '/test', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #30 ('/foo/bar', '/foo/bar_vendor', '../bar_vendor', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFindShortestPath with data set #31 ('/foo/bar_vendor', '/foo/bar', '../bar', true)'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testRemoveDirectoryPhp'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testFileSize'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testDirectorySize'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #0 ('../foo', '../foo')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #1 ('c:/foo/bar', 'c:/foo//bar')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #2 ('C:/foo/bar', 'C:/foo/./bar')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #3 ('C:/bar', 'C:/foo/../bar')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #4 ('/bar', '/foo/../bar/')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #5 ('phar://c:/Foo', 'phar://c:/Foo/Bar/..')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #6 ('phar://c:/', 'phar://c:/Foo/Bar/../../../..')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #7 ('/', '/Foo/Bar/../../../..')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #8 ('/', '/')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #9 ('c:/', 'c:\\')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #10 ('../src', 'Foo/Bar/../../../src')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #11 ('c:../b', 'c:.\\..\\a\\..\\b')'.
+.
+Starting test 'Composer\Test\Util\FilesystemTest::testNormalizePath with data set #12 ('phar://c:../Foo', 'phar://c:../Foo')'.
+.
+Starting test 'Composer\Test\Util\ProcessExecutorTest::testExecuteCapturesOutput'.
+.
+Starting test 'Composer\Test\Util\ProcessExecutorTest::testExecuteOutputsIfNotCaptured'.
+.
+Starting test 'Composer\Test\Util\ProcessExecutorTest::testExecuteCapturesStderr'.
+.
+Starting test 'Composer\Test\Util\ProcessExecutorTest::testTimeout'.
+.
+Starting test 'Composer\Test\Util\ProcessExecutorTest::testSplitLines'.
+.
+Starting test 'Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrl'.
+.  732 / 1002 ( 73%)
+
+Starting test 'Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrlWithAuthorization'.
+.
+Starting test 'Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrlWithStreamOptions'.
+.
+Starting test 'Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrlWithCallOptionsKeepsHeader'.
+.
+Starting test 'Composer\Test\Util\RemoteFilesystemTest::testCallbackGetFileSize'.
+.
+Starting test 'Composer\Test\Util\RemoteFilesystemTest::testCallbackGetNotifyProgress'.
+.
+Starting test 'Composer\Test\Util\RemoteFilesystemTest::testCallbackGetNotifyFailure404'.
+.
+Starting test 'Composer\Test\Util\RemoteFilesystemTest::testCaptureAuthenticationParamsFromUrl'.
+SlowTimer [5001ms] at curl: http://user:pass@www.example.com/something
+F
+Starting test 'Composer\Test\Util\RemoteFilesystemTest::testGetContents'.
+.
+Starting test 'Composer\Test\Util\RemoteFilesystemTest::testCopy'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #0 ('MIT')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #1 ('NONE')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #2 ('NOASSERTION')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #3 ('LicenseRef-3')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #4 (array('LGPL-2.0', 'GPL-3.0+'))'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #5 ('(LGPL-2.0 or GPL-3.0+)')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #6 ('(EUDatagrid and GPL-3.0+)')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #7 ('AFL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #8 ('AFL-1.2')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #9 ('AFL-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #10 ('AFL-2.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #11 ('AFL-3.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #12 ('APL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #13 ('Aladdin')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #14 ('ANTLR-PD')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #15 ('Apache-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #16 ('Apache-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #17 ('Apache-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #18 ('APSL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #19 ('APSL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #20 ('APSL-1.2')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #21 ('APSL-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #22 ('Artistic-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #23 ('Artistic-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #24 ('AAL')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #25 ('BitTorrent-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #26 ('BitTorrent-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #27 ('BSL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #28 ('BSD-3-Clause-Clear')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #29 ('BSD-2-Clause')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #30 ('BSD-2-Clause-FreeBSD')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #31 ('BSD-2-Clause-NetBSD')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #32 ('BSD-3-Clause')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #33 ('BSD-4-Clause')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #34 ('BSD-4-Clause-UC')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #35 ('CECILL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #36 ('CECILL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #37 ('CECILL-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #38 ('CECILL-B')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #39 ('CECILL-C')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #40 ('ClArtistic')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #41 ('CNRI-Python')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #42 ('CNRI-Python-GPL-Compatible')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #43 ('CDDL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #44 ('CDDL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #45 ('CPAL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #46 ('CPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #47 ('CATOSL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #48 ('Condor-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #49 ('CC-BY-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #50 ('CC-BY-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #51 ('CC-BY-2.5')'.
+.  793 / 1002 ( 79%)
+
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #52 ('CC-BY-3.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #53 ('CC-BY-ND-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #54 ('CC-BY-ND-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #55 ('CC-BY-ND-2.5')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #56 ('CC-BY-ND-3.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #57 ('CC-BY-NC-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #58 ('CC-BY-NC-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #59 ('CC-BY-NC-2.5')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #60 ('CC-BY-NC-3.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #61 ('CC-BY-NC-ND-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #62 ('CC-BY-NC-ND-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #63 ('CC-BY-NC-ND-2.5')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #64 ('CC-BY-NC-ND-3.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #65 ('CC-BY-NC-SA-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #66 ('CC-BY-NC-SA-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #67 ('CC-BY-NC-SA-2.5')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #68 ('CC-BY-NC-SA-3.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #69 ('CC-BY-SA-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #70 ('CC-BY-SA-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #71 ('CC-BY-SA-2.5')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #72 ('CC-BY-SA-3.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #73 ('CC0-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #74 ('CUA-OPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #75 ('WTFPL')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #76 ('EPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #77 ('eCos-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #78 ('ECL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #79 ('ECL-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #80 ('EFL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #81 ('EFL-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #82 ('Entessa')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #83 ('ErlPL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #84 ('EUDatagrid')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #85 ('EUPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #86 ('EUPL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #87 ('Fair')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #88 ('Frameworx-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #89 ('FTL')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #90 ('AGPL-3.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #91 ('GFDL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #92 ('GFDL-1.2')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #93 ('GFDL-1.3')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #94 ('GPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #95 ('GPL-1.0+')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #96 ('GPL-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #97 ('GPL-2.0+')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #98 ('GPL-2.0-with-autoconf-exception')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #99 ('GPL-2.0-with-bison-exception')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #100 ('GPL-2.0-with-classpath-exception')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #101 ('GPL-2.0-with-font-exception')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #102 ('GPL-2.0-with-GCC-exception')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #103 ('GPL-3.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #104 ('GPL-3.0+')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #105 ('GPL-3.0-with-autoconf-exception')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #106 ('GPL-3.0-with-GCC-exception')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #107 ('LGPL-2.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #108 ('LGPL-2.1+')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #109 ('LGPL-3.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #110 ('LGPL-3.0+')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #111 ('LGPL-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #112 ('LGPL-2.0+')'.
+.  854 / 1002 ( 85%)
+
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #113 ('gSOAP-1.3b')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #114 ('HPND')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #115 ('IPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #116 ('Imlib2')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #117 ('IJG')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #118 ('Intel')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #119 ('IPA')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #120 ('ISC')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #121 ('JSON')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #122 ('LPPL-1.3a')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #123 ('LPPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #124 ('LPPL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #125 ('LPPL-1.2')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #126 ('LPPL-1.3c')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #127 ('Libpng')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #128 ('LPL-1.02')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #129 ('LPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #130 ('MS-PL')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #131 ('MS-RL')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #132 ('MirOS')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #133 ('MIT')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #134 ('Motosoto')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #135 ('MPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #136 ('MPL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #137 ('MPL-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #138 ('MPL-2.0-no-copyleft-exception')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #139 ('Multics')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #140 ('NASA-1.3')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #141 ('Naumen')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #142 ('NBPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #143 ('NGPL')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #144 ('NOSL')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #145 ('NPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #146 ('NPL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #147 ('Nokia')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #148 ('NPOSL-3.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #149 ('NTP')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #150 ('OCLC-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #151 ('ODbL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #152 ('PDDL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #153 ('OGTSL')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #154 ('OLDAP-2.2.2')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #155 ('OLDAP-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #156 ('OLDAP-1.2')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #157 ('OLDAP-1.3')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #158 ('OLDAP-1.4')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #159 ('OLDAP-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #160 ('OLDAP-2.0.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #161 ('OLDAP-2.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #162 ('OLDAP-2.2')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #163 ('OLDAP-2.2.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #164 ('OLDAP-2.3')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #165 ('OLDAP-2.4')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #166 ('OLDAP-2.5')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #167 ('OLDAP-2.6')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #168 ('OLDAP-2.7')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #169 ('OPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #170 ('OSL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #171 ('OSL-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #172 ('OSL-2.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #173 ('OSL-3.0')'.
+.  915 / 1002 ( 91%)
+
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #174 ('OLDAP-2.8')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #175 ('OpenSSL')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #176 ('PHP-3.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #177 ('PHP-3.01')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #178 ('PostgreSQL')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #179 ('Python-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #180 ('QPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #181 ('RPSL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #182 ('RPL-1.5')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #183 ('RHeCos-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #184 ('RSCPL')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #185 ('Ruby')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #186 ('SAX-PD')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #187 ('SGI-B-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #188 ('SGI-B-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #189 ('SGI-B-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #190 ('OFL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #191 ('OFL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #192 ('SimPL-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #193 ('Sleepycat')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #194 ('SMLNJ')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #195 ('SugarCRM-1.1.3')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #196 ('SISSL')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #197 ('SPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #198 ('Watcom-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #199 ('NCSA')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #200 ('VSL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #201 ('W3C')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #202 ('WXwindows')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #203 ('Xnet')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #204 ('X11')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #205 ('XFree86-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #206 ('YPL-1.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #207 ('YPL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #208 ('Zimbra-1.3')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #209 ('Zlib')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #210 ('ZPL-1.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #211 ('ZPL-2.0')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #212 ('ZPL-2.1')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #0 ('')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #1 (array())'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #2 ('The system pwns you')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #3 ('()')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #4 ('(MIT)')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #5 ('MIT NONE')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #6 ('MIT (MIT and MIT)')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #7 ('(MIT and MIT) MIT')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #8 (array('LGPL-2.0', 'The system pwns you'))'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #9 ('and GPL-3.0+')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #10 ('EUDatagrid and GPL-3.0+')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #11 ('(GPL-3.0 and GPL-2.0 or GPL-3.0+)')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #12 ('(EUDatagrid and GPL-3.0+ and  )')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #13 ('(EUDatagrid xor GPL-3.0+)')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #14 ('(MIT Or MIT)')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #15 ('(NONE or MIT)')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidLicenses with data set #16 ('(NOASSERTION or MIT)')'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #0 (NULL)'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #1 (stdClass)'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #2 (array(stdClass))'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #3 (array('mixed', stdClass))'.
+.
+Starting test 'Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #4 (array(stdClass, stdClass))'.
+.  976 / 1002 ( 97%)
+
+Starting test 'Composer\Test\Util\StreamContextFactoryTest::testGetContext with data set #0 (array(array(1, 20)), array(), array(array(array(1, 20))), array())'.
+.
+Starting test 'Composer\Test\Util\StreamContextFactoryTest::testGetContext with data set #1 (array(array('GET', 20, 1)), array(array('GET')), array(array(array('GET', 20, 1)), Closure$Composer\Test\Util\StreamContextFactoryTest::dataGetContext), array(Closure$Composer\Test\Util\StreamContextFactoryTest::dataGetContext))'.
+.
+Starting test 'Composer\Test\Util\StreamContextFactoryTest::testHttpProxy'.
+.
+Starting test 'Composer\Test\Util\StreamContextFactoryTest::testHttpProxyWithNoProxy'.
+.
+Starting test 'Composer\Test\Util\StreamContextFactoryTest::testHttpProxyWithNoProxyWildcard'.
+.
+Starting test 'Composer\Test\Util\StreamContextFactoryTest::testOptionsArePreserved'.
+.
+Starting test 'Composer\Test\Util\StreamContextFactoryTest::testHttpProxyWithoutPort'.
+.
+Starting test 'Composer\Test\Util\StreamContextFactoryTest::testSSLProxy with data set #0 ('ssl://proxyserver:443', 'https://proxyserver/')'.
+.
+Starting test 'Composer\Test\Util\StreamContextFactoryTest::testSSLProxy with data set #1 ('ssl://proxyserver:8443', 'https://proxyserver:8443')'.
+.
+Starting test 'Composer\Test\Util\StreamContextFactoryTest::testEnsureThatfixHttpHeaderFieldMovesContentTypeToEndOfOptions'.
+F
+Starting test 'Composer\Test\Util\SvnTest::testCredentials with data set #0 ('http://till:test@svn.example.org/', ' --username \'till\' --password \'test\' ')'.
+.
+Starting test 'Composer\Test\Util\SvnTest::testCredentials with data set #1 ('http://svn.apache.org/', '')'.
+.
+Starting test 'Composer\Test\Util\SvnTest::testCredentials with data set #2 ('svn://johndoe@example.org', ' --username \'johndoe\' --password \'\' ')'.
+F
+Starting test 'Composer\Test\Util\SvnTest::testInteractiveString'.
+.
+
+Time: 1.59 minutes, Memory: 30.92Mb
+
+There were 6 errors:
+
+1) Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testGitExcludes
+ErrorException: __construct() expects exactly 4 parameters, 1 given
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/ArchivableFilesFinderTest.php:200
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/ArchivableFilesFinderTest.php:144
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+2) Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testHgExcludes
+ErrorException: __construct() expects exactly 4 parameters, 1 given
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/ArchivableFilesFinderTest.php:200
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/ArchivableFilesFinderTest.php:174
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+3) Composer\Test\Package\Archiver\ArchiveManagerTest::testArchiveTar
+ErrorException: Argument 2 passed to PharData::__construct() must be an instance of int, null given
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/src/Composer/Package/Archiver/PharArchiver.php:40
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/src/Composer/Package/Archiver/ArchiveManager.php:145
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/ArchiveManagerTest.php:48
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+4) Composer\Test\Package\Archiver\PharArchiverTest::testTarArchive
+ErrorException: Argument 2 passed to PharData::__construct() must be an instance of int, null given
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/src/Composer/Package/Archiver/PharArchiver.php:40
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/PharArchiverTest.php:28
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+5) Composer\Test\Package\Archiver\PharArchiverTest::testZipArchive
+ErrorException: Argument 2 passed to PharData::__construct() must be an instance of int, null given
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/src/Composer/Package/Archiver/PharArchiver.php:40
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/PharArchiverTest.php:43
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+6) Composer\Repository\ArtifactRepositoryTest::testExtractsConfigsFromZipArchives
+RuntimeException: The artifact repository requires PHP's zip extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/src/Composer/Repository/ArtifactRepository.php:32
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Repository/ArtifactRepositoryTest.php:32
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+--
+
+
+There were 9 failures:
+
+1) Composer\Test\Autoload\AutoloadGeneratorTest::testClassMapAutoloadingEmptyDirAndExactFile
+Failed asserting that two arrays are equal.
+--- Expected
++++ Actual
+@@ @@
+ Array (
+     'ClassMapBar' => '/tmp/cmptest-dae7cc992e28d0d4...st.php'
+-    'ClassMapBaz' => '/tmp/cmptest-dae7cc992e28d0d4...st.php'
+     'ClassMapFoo' => '/tmp/cmptest-dae7cc992e28d0d4.../a.php'
+ )
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/AutoloadGeneratorTest.php:344
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+2) Composer\Test\Autoload\AutoloadGeneratorTest::testVendorDirExcludedFromWorkingDir
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+ return array(
+-    'Bar\\Bar' => $vendorDir . '/b/b/classmaps/classes.php',
+     'Bar\\Foo' => $vendorDir . '/b/b/lib/Bar/Foo.php',
+     'Foo\\Bar' => $baseDir . '/src/Foo/Bar.php',
+     'Foo\\Foo' => $baseDir . '/classmap/classes.php',
+ );
+ '
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/AutoloadGeneratorTest.php:757
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+3) Composer\Test\Autoload\AutoloadGeneratorTest::testUpLevelRelativePaths
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+     'Foo\\Bar' => $baseDir . '/../src/Foo/Bar.php',
+-    'Foo\\Foo' => $baseDir . '/../classmap/classes.php',
+ );
+ '
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/AutoloadGeneratorTest.php:817
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+4) Composer\Test\Autoload\AutoloadGeneratorTest::testEmptyPaths
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+ return array(
+-    'Classmap\\Foo' => $baseDir . '/class.php',
+     'Foo\\Bar' => $baseDir . '/Foo/Bar.php',
+ );
+ '
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/AutoloadGeneratorTest.php:869
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+5) Composer\Test\Json\JsonFileTest::testFormatEmptyArray
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+ '{
+     "test": [
+-
+     ],
+     "test2": {
+-
+     }
+ }'
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Json/JsonFileTest.php:216
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Json/JsonFileTest.php:142
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+6) Composer\Test\Util\ErrorHandlerTest::testErrorHandlerCaptureWarning
+Failed asserting that exception message 'Invalid operand type was used: array_merge expects array(s)' contains 'array_merge(): Argument #2 is not an array'.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+7) Composer\Test\Util\RemoteFilesystemTest::testCaptureAuthenticationParamsFromUrl
+Failed asserting that 0 matches expected 404.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Util/RemoteFilesystemTest.php:160
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+8) Composer\Test\Util\StreamContextFactoryTest::testEnsureThatfixHttpHeaderFieldMovesContentTypeToEndOfOptions
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+-'Authorization: Basic aW52YWxpZA==
+-X-Foo: bar
++'X-Foo: bar
++Authorization: Basic aW52YWxpZA==
+ Content-Type: application/json'
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Util/StreamContextFactoryTest.php:195
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+9) Composer\Test\Util\SvnTest::testCredentials with data set #2 ('svn://johndoe@example.org', ' --username \'johndoe\' --password \'\' ')
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+-' --username 'johndoe' --password '' '
++' --username 'johndoe' --password  '
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Util/SvnTest.php:23
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+FAILURES!
+Tests: 990, Assertions: 1734, Failures: 9, Errors: 6, Skipped: 1.

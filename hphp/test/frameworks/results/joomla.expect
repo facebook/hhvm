@@ -1,0 +1,2 @@
+HipHop Warning: HipHop currently does not support circular reference collection in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/tests/bootstrap.php on line 57
+HipHop Fatal error: Undefined interface: Psr\Log\LoggerAwareInterface in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Application/AbstractApplication.php on line 21

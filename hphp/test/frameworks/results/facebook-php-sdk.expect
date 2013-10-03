@@ -1,0 +1,237 @@
+PHPUnit 3.7.27 by Sebastian Bergmann.
+
+
+Starting test 'PHPSDKTestCase::testConstructor'.
+.
+Starting test 'PHPSDKTestCase::testConstructorWithFileUpload'.
+.
+Starting test 'PHPSDKTestCase::testSetAppId'.
+.
+Starting test 'PHPSDKTestCase::testSetAPISecret'.
+.
+Starting test 'PHPSDKTestCase::testSetAPPSecret'.
+.
+Starting test 'PHPSDKTestCase::testSetAccessToken'.
+.
+Starting test 'PHPSDKTestCase::testSetFileUploadSupport'.
+.
+Starting test 'PHPSDKTestCase::testGetCurrentURL'.
+.
+Starting test 'PHPSDKTestCase::testGetLoginURL'.
+.
+Starting test 'PHPSDKTestCase::testGetLoginURLWithExtraParams'.
+.
+Starting test 'PHPSDKTestCase::testGetLoginURLWithScopeParamsAsArray'.
+.
+Starting test 'PHPSDKTestCase::testGetCodeWithValidCSRFState'.
+.
+Starting test 'PHPSDKTestCase::testGetCodeWithInvalidCSRFState'.
+.
+Starting test 'PHPSDKTestCase::testGetCodeWithMissingCSRFState'.
+.
+Starting test 'PHPSDKTestCase::testGetUserFromSignedRequest'.
+.
+Starting test 'PHPSDKTestCase::testSignedRequestRewrite'.
+.
+Starting test 'PHPSDKTestCase::testGetSignedRequestFromCookie'.
+.
+Starting test 'PHPSDKTestCase::testGetSignedRequestWithIncorrectSignature'.
+.
+Starting test 'PHPSDKTestCase::testNonUserAccessToken'.
+.
+Starting test 'PHPSDKTestCase::testMissingMetadataCookie'.
+.
+Starting test 'PHPSDKTestCase::testEmptyMetadataCookie'.
+.
+Starting test 'PHPSDKTestCase::testMetadataCookie'.
+.
+Starting test 'PHPSDKTestCase::testQuotedMetadataCookie'.
+.
+Starting test 'PHPSDKTestCase::testAPIForLoggedOutUsers'.
+.
+Starting test 'PHPSDKTestCase::testAPIWithBogusAccessToken'.
+.
+Starting test 'PHPSDKTestCase::testAPIGraphPublicData'.
+.
+Starting test 'PHPSDKTestCase::testGraphAPIWithBogusAccessToken'.
+.
+Starting test 'PHPSDKTestCase::testGraphAPIWithExpiredAccessToken'.
+.
+Starting test 'PHPSDKTestCase::testGraphAPIOAuthSpecError'.
+.
+Starting test 'PHPSDKTestCase::testGraphAPIMethodOAuthSpecError'.
+.
+Starting test 'PHPSDKTestCase::testCurlFailure'.
+.
+Starting test 'PHPSDKTestCase::testGraphAPIWithOnlyParams'.
+.
+Starting test 'PHPSDKTestCase::testLoginURLDefaults'.
+.
+Starting test 'PHPSDKTestCase::testLoginURLDefaultsDropStateQueryParam'.
+.
+Starting test 'PHPSDKTestCase::testLoginURLDefaultsDropCodeQueryParam'.
+.
+Starting test 'PHPSDKTestCase::testLoginURLDefaultsDropSignedRequestParamButNotOthers'.
+.
+Starting test 'PHPSDKTestCase::testLoginURLCustomNext'.
+.
+Starting test 'PHPSDKTestCase::testLogoutURLDefaults'.
+.
+Starting test 'PHPSDKTestCase::testLoginStatusURLDefaults'.
+.
+Starting test 'PHPSDKTestCase::testLoginStatusURLCustom'.
+.
+Starting test 'PHPSDKTestCase::testNonDefaultPort'.
+.
+Starting test 'PHPSDKTestCase::testSecureCurrentUrl'.
+.
+Starting test 'PHPSDKTestCase::testSecureCurrentUrlWithNonDefaultPort'.
+.
+Starting test 'PHPSDKTestCase::testBase64UrlEncode'.
+.
+Starting test 'PHPSDKTestCase::testSignedToken'.
+.
+Starting test 'PHPSDKTestCase::testNonTossedSignedtoken'.
+.
+Starting test 'PHPSDKTestCase::testSignedRequestWithEmptyValue'.
+.
+Starting test 'PHPSDKTestCase::testSignedRequestWithWrongAlgo'.
+.
+Starting test 'PHPSDKTestCase::testMakeAndParse'.
+.
+Starting test 'PHPSDKTestCase::testMakeSignedRequestExpectsArray'.
+.
+Starting test 'PHPSDKTestCase::testBundledCACert'.
+.
+Starting test 'PHPSDKTestCase::testVideoUpload'.
+.
+Starting test 'PHPSDKTestCase::testVideoUploadGraph'.
+.
+Starting test 'PHPSDKTestCase::testGetUserAndAccessTokenFromSession'.
+.
+Starting test 'PHPSDKTestCase::testGetUserAndAccessTokenFromSignedRequestNotSession'.
+.
+Starting test 'PHPSDKTestCase::testGetUserWithoutCodeOrSignedRequestOrSession'.
+.
+Starting test 'PHPSDKTestCase::testGetAccessTokenUsingCodeInJsSdkCookie'.
+.
+Starting test 'PHPSDKTestCase::testSignedRequestWithoutAuthClearsData'.
+.
+Starting test 'PHPSDKTestCase::testInvalidCodeInSignedRequestWillClearData'.
+.
+Starting test 'PHPSDKTestCase::testInvalidCodeWillClearData'.
+.
+Starting test 'PHPSDKTestCase::testValidCodeToToken'.
+.
+Starting test 'PHPSDKTestCase::testSignedRequestWithoutAuthClearsDataInAvailData'.
+.
+Starting test 'PHPSDKTestCase::testFailedToGetUserFromAccessTokenClearsData'.
+.  63 / 115 ( 54%)
+
+Starting test 'PHPSDKTestCase::testUserFromAccessTokenIsStored'.
+.
+Starting test 'PHPSDKTestCase::testUserFromAccessTokenPullsID'.
+.
+Starting test 'PHPSDKTestCase::testUserFromAccessTokenResetsOnApiException'.
+.
+Starting test 'PHPSDKTestCase::testEmptyCodeReturnsFalse'.
+.
+Starting test 'PHPSDKTestCase::testNullRedirectURIUsesCurrentURL'.
+.
+Starting test 'PHPSDKTestCase::testNullRedirectURIAllowsEmptyStringForCookie'.
+.
+Starting test 'PHPSDKTestCase::testAPIExceptionDuringCodeExchangeIsIgnored'.
+.
+Starting test 'PHPSDKTestCase::testEmptyResponseInCodeExchangeIsIgnored'.
+.
+Starting test 'PHPSDKTestCase::testExistingStateRestoredInConstructor'.
+.
+Starting test 'PHPSDKTestCase::testMissingAccessTokenInCodeExchangeIsIgnored'.
+.
+Starting test 'PHPSDKTestCase::testExceptionConstructorWithErrorCode'.
+.
+Starting test 'PHPSDKTestCase::testExceptionTypeFalse'.
+.
+Starting test 'PHPSDKTestCase::testExceptionTypeMixedDraft00'.
+.
+Starting test 'PHPSDKTestCase::testExceptionTypeDraft00'.
+.
+Starting test 'PHPSDKTestCase::testExceptionTypeDraft10'.
+.
+Starting test 'PHPSDKTestCase::testExceptionTypeDefault'.
+.
+Starting test 'PHPSDKTestCase::testExceptionToString'.
+.
+Starting test 'PHPSDKTestCase::testDestroyClearsCookie'.
+.
+Starting test 'PHPSDKTestCase::testAuthExpireSessionDestroysSession'.
+.
+Starting test 'PHPSDKTestCase::testLowercaseAuthRevokeAuthDestroysSession'.
+.
+Starting test 'PHPSDKTestCase::testErrorCodeFromRestAPIThrowsException'.
+.
+Starting test 'PHPSDKTestCase::testJsonEncodeOfNonStringParams'.
+.
+Starting test 'PHPSDKTestCase::testSessionBackedFacebook'.
+.
+Starting test 'PHPSDKTestCase::testSessionBackedFacebookIgnoresUnsupportedKey'.
+.
+Starting test 'PHPSDKTestCase::testClearSessionBackedFacebook'.
+.
+Starting test 'PHPSDKTestCase::testSessionBackedFacebookIgnoresUnsupportedKeyInClear'.
+.
+Starting test 'PHPSDKTestCase::testClearAllSessionBackedFacebook'.
+.
+Starting test 'PHPSDKTestCase::testSharedSessionBackedFacebook'.
+.
+Starting test 'PHPSDKTestCase::testSharedSessionBackedFacebookIgnoresUnsupportedKey'.
+.
+Starting test 'PHPSDKTestCase::testSharedClearSessionBackedFacebook'.
+.
+Starting test 'PHPSDKTestCase::testSharedSessionBackedFacebookIgnoresUnsupportedKeyInClear'.
+.
+Starting test 'PHPSDKTestCase::testSharedClearAllSessionBackedFacebook'.
+.
+Starting test 'PHPSDKTestCase::testSharedSessionBackedFacebookIsRestored'.
+.
+Starting test 'PHPSDKTestCase::testSharedSessionBackedFacebookIsNotRestoredWhenCorrupt'.
+.
+Starting test 'PHPSDKTestCase::testHttpHost'.
+.
+Starting test 'PHPSDKTestCase::testHttpProtocol'.
+.
+Starting test 'PHPSDKTestCase::testHttpHostForwarded'.
+.
+Starting test 'PHPSDKTestCase::testHttpProtocolForwarded'.
+.
+Starting test 'PHPSDKTestCase::testHttpProtocolForwardedSecure'.
+.
+Starting test 'PHPSDKTestCase::testEndsWith with data set #0 ('', '', true)'.
+.
+Starting test 'PHPSDKTestCase::testEndsWith with data set #1 ('', 'a', false)'.
+.
+Starting test 'PHPSDKTestCase::testEndsWith with data set #2 ('a', '', true)'.
+.
+Starting test 'PHPSDKTestCase::testEndsWith with data set #3 ('a', 'b', false)'.
+.
+Starting test 'PHPSDKTestCase::testEndsWith with data set #4 ('a', 'a', true)'.
+.
+Starting test 'PHPSDKTestCase::testEndsWith with data set #5 ('aa', 'a', true)'.
+.
+Starting test 'PHPSDKTestCase::testEndsWith with data set #6 ('ab', 'a', false)'.
+.
+Starting test 'PHPSDKTestCase::testEndsWith with data set #7 ('ba', 'a', true)'.
+.
+Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #0 ('fbrell.com', 'fbrell.com', true)'.
+.
+Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #1 ('foo.fbrell.com', 'fbrell.com', true)'.
+.
+Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #2 ('foofbrell.com', 'fbrell.com', false)'.
+.
+Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #3 ('evil.com', 'fbrell.com', false)'.
+.
+Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #4 ('foo.fbrell.com', 'bar.fbrell.com', false)'.
+.
+
+Time: 15.58 seconds, Memory: 3.81Mb
+OK (115 tests, 217 assertions)

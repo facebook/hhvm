@@ -2,3 +2,8 @@
 *.diff
 *.repo
 *.tmp
+*.errors
+/frameworks/composer.phar
+/frameworks/composer.lock
+/frameworks/vendor
+/frameworks/frameworks

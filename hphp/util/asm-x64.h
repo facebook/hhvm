@@ -1164,34 +1164,49 @@ public:
     movq (imm.q(), dest);
   }
 
-  void patchJcc(CodeAddress jmp, CodeAddress dest) {
+  static void patchJcc(CodeAddress jmp, CodeAddress dest) {
     assert(jmp[0] == 0x0F && (jmp[1] & 0xF0) == 0x80);
     ssize_t diff = dest - (jmp + 6);
     *(int32_t*)(jmp + 2) = safe_cast<int32_t>(diff);
   }
 
-  void patchJcc8(CodeAddress jmp, CodeAddress dest) {
+  static CodeAddress jccTarget(CodeAddress jmp) {
+    if (jmp[0] != 0x0F || (jmp[1] & 0xF0) != 0x80) return nullptr;
+    return jmp + 6 + ((int32_t*)(jmp + 6))[-1];
+  }
+
+  static void patchJcc8(CodeAddress jmp, CodeAddress dest) {
     assert((jmp[0] & 0xF0) == 0x70);
     ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
     *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
-  void patchJmp(CodeAddress jmp, CodeAddress dest) {
+  static void patchJmp(CodeAddress jmp, CodeAddress dest) {
     assert(jmp[0] == 0xE9);
     ssize_t diff = dest - (jmp + 5);
     *(int32_t*)(jmp + 1) = safe_cast<int32_t>(diff);
   }
 
-  void patchJmp8(CodeAddress jmp, CodeAddress dest) {
+  static CodeAddress jmpTarget(CodeAddress jmp) {
+    if (jmp[0] != 0xe9) return nullptr;
+    return jmp + 5 + ((int32_t*)(jmp + 5))[-1];
+  }
+
+  static void patchJmp8(CodeAddress jmp, CodeAddress dest) {
     assert(jmp[0] == 0xEB);
     ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
     *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
-  void patchCall(CodeAddress call, CodeAddress dest) {
+  static void patchCall(CodeAddress call, CodeAddress dest) {
     assert(call[0] == 0xE8);
     ssize_t diff = dest - (call + 5);
     *(int32_t*)(call + 1) = safe_cast<int32_t>(diff);
+  }
+
+  static CodeAddress callTarget(CodeAddress call) {
+    if (call[0] != 0xE8) return nullptr;
+    return call + 5 + ((int32_t*)(call + 5))[-1];
   }
 
   void emitInt3s(int n) {

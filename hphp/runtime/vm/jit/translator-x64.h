@@ -188,7 +188,6 @@ public:
   TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
   bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
   SrcKey emitPrologue(Func* func, int nArgs);
-
 private:
   TCA emitCallArrayPrologue(const Func* func, const DVFuncletsVec& dvs);
   TCA emitFuncGuard(Asm& a, const Func *f);

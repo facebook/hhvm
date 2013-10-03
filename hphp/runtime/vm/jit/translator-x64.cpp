@@ -1377,15 +1377,31 @@ TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk,
   if (!tDest) return nullptr;
   LeaseHolder writer(s_writeLease);
   if (!writer) return tDest;
-  smashed = true;
   SrcRec* sr = getSrcRec(destSk);
   if (req == JIT::REQ_BIND_ADDR) {
-    sr->chainFrom(IncomingBranch::addr(reinterpret_cast<TCA*>(toSmash)));
+    auto addr = reinterpret_cast<TCA*>(toSmash);
+    if (*addr == tDest) {
+      // Already smashed
+      return tDest;
+    }
+    sr->chainFrom(IncomingBranch::addr(addr));
   } else if (req == JIT::REQ_BIND_JCC || req == JIT::REQ_BIND_SIDE_EXIT) {
+    auto jt = Asm::jccTarget(toSmash);
+    assert(jt);
+    if (jt == tDest) {
+      // Already smashed
+      return tDest;
+    }
     sr->chainFrom(IncomingBranch::jccFrom(toSmash));
   } else {
+    assert(!Asm::jccTarget(toSmash));
+    if (!Asm::jmpTarget(toSmash) || Asm::jmpTarget(toSmash) == tDest) {
+      // Already smashed
+      return tDest;
+    }
     sr->chainFrom(IncomingBranch::jmpFrom(toSmash));
   }
+  smashed = true;
   return tDest;
 }
 
@@ -1434,10 +1450,6 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
     cc = ccNegate(cc);
   }
 
-  TCA stub = emitEphemeralServiceReq(stubsCode, getFreeStub(),
-                                     JIT::REQ_BIND_JMPCC_SECOND, toSmash,
-                                     offWillDefer, cc);
-
   auto& cb = codeBlockFor(toSmash);
   Asm as { cb };
   // Its not clear where chainFrom should go to if as is astubs
@@ -1453,6 +1465,18 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
   if (!tDest) {
     return 0;
   }
+
+  if (Asm::jmpTarget(toSmash + kJmpccLen) != Asm::jccTarget(toSmash)) {
+    // someone else already smashed this one. Ideally we would
+    // just re-execute from toSmash - except the flags will have
+    // been trashed.
+    return tDest;
+  }
+
+  TCA stub = emitEphemeralServiceReq(stubsCode, getFreeStub(),
+                                     JIT::REQ_BIND_JMPCC_SECOND, toSmash,
+                                     offWillDefer, cc);
+
   smashed = true;
   assert(s_writeLease.amOwner());
   /*
@@ -1482,11 +1506,18 @@ TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
   const Func* f = liveFunc();
   SrcKey dest(f, off);
   TCA branch = getTranslation(TranslArgs(dest, true));
-  LeaseHolder writer(s_writeLease, LeaseAcquire::NO_ACQUIRE);
-  if (branch && writer.acquire()) {
-    smashed = true;
-    SrcRec* destRec = getSrcRec(dest);
-    destRec->chainFrom(IncomingBranch::jccFrom(toSmash));
+  if (branch) {
+    LeaseHolder writer(s_writeLease);
+    if (writer) {
+      if (branch == Asm::jccTarget(toSmash)) {
+        // already smashed
+        return branch;
+      } else {
+        smashed = true;
+        SrcRec* destRec = getSrcRec(dest);
+        destRec->chainFrom(IncomingBranch::jccFrom(toSmash));
+      }
+    }
   }
   return branch;
 }
@@ -1772,24 +1803,27 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
       TRACE(2, "enterTC: bindCall immutably %s -> %p\n",
             func->fullName()->data(), dest);
     }
-    LeaseHolder writer(s_writeLease, LeaseAcquire::NO_ACQUIRE);
-    if (dest && writer.acquire()) {
-      TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
-      smashCall(tx64->codeBlockFor(toSmash), toSmash, dest);
-      smashed = true;
-      // For functions to be PGO'ed, if their prologues haven't been
-      // regenerated yet, then save toSmash as a caller to the
-      // prologue, so that it can later be smashed to call a new
-      // prologue when it's generated.
-      if (shouldPGOFunc(func) && !prologuesWereRegenerated(func)) {
-        int calleeNumParams = func->numParams();
-        int calledPrologNumArgs = nArgs <= calleeNumParams ?
-                                  nArgs :  calleeNumParams + 1;
-        if (isImmutable) {
-          m_profData->addPrologueMainCaller(func, calledPrologNumArgs, toSmash);
-        } else {
-          m_profData->addPrologueGuardCaller(func, calledPrologNumArgs,
-                                             toSmash);
+    if (dest) {
+      LeaseHolder writer(s_writeLease);
+      if (writer && Asm::callTarget(toSmash) != dest) {
+        TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
+        smashCall(tx64->codeBlockFor(toSmash), toSmash, dest);
+        smashed = true;
+        // For functions to be PGO'ed, if their prologues haven't been
+        // regenerated yet, then save toSmash as a caller to the
+        // prologue, so that it can later be smashed to call a new
+        // prologue when it's generated.
+        if (shouldPGOFunc(func) && !prologuesWereRegenerated(func)) {
+          int calleeNumParams = func->numParams();
+          int calledPrologNumArgs = nArgs <= calleeNumParams ?
+            nArgs :  calleeNumParams + 1;
+          if (isImmutable) {
+            m_profData->addPrologueMainCaller(func, calledPrologNumArgs,
+                                              toSmash);
+          } else {
+            m_profData->addPrologueGuardCaller(func, calledPrologNumArgs,
+                                               toSmash);
+          }
         }
       }
       // sk: stale, but doesn't matter since we have a valid dest TCA.
@@ -1800,9 +1834,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
       TRACE(2, "enterTC: bindCall rollback smash %p -> %p\n",
             toSmash, dest);
       sk = req->m_sourceInstr;
-    }
-    start = dest;
-    if (!start) {
+
       // EnterTCHelper pushes the return ip onto the stack when the
       // requestNum is REQ_BIND_CALL, but if start is NULL, it will
       // interpret in doFCall, so we clear out the requestNum in this
@@ -1810,6 +1842,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
       // onto the stack.
       info.requestNum = ~JIT::REQ_BIND_CALL;
     }
+    start = dest;
   } break;
 
   case JIT::REQ_BIND_SIDE_EXIT:

@@ -310,7 +310,6 @@ struct TransRec {
 struct TranslArgs {
   TranslArgs(const SrcKey& sk, bool align)
       : m_sk(sk)
-      , m_src(nullptr)
       , m_align(align)
       , m_interp(false)
       , m_setFuncBody(false)
@@ -319,10 +318,6 @@ struct TranslArgs {
 
   TranslArgs& sk(const SrcKey& sk) {
     m_sk = sk;
-    return *this;
-  }
-  TranslArgs& src(TCA src) {
-    m_src = src;
     return *this;
   }
   TranslArgs& align(bool align) {
@@ -343,7 +338,6 @@ struct TranslArgs {
   }
 
   SrcKey m_sk;
-  TCA m_src;
   bool m_align;
   bool m_interp;
   bool m_setFuncBody;

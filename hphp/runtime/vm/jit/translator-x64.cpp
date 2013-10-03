@@ -1373,7 +1373,7 @@ TranslatorX64::emitPrologue(Func* func, int nPassed) {
 TCA
 TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk,
                        JIT::ServiceRequest req, bool& smashed) {
-  TCA tDest = getTranslation(TranslArgs(destSk, false).src(toSmash));
+  TCA tDest = getTranslation(TranslArgs(destSk, false));
   if (!tDest) return nullptr;
   LeaseHolder writer(s_writeLease);
   if (!writer) return tDest;
@@ -1449,7 +1449,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
     !m_srcDB.find(dest);
 
   TCA tDest;
-  tDest = getTranslation(TranslArgs(dest, !fallThru).src(toSmash));
+  tDest = getTranslation(TranslArgs(dest, !fallThru));
   if (!tDest) {
     return 0;
   }
@@ -1481,7 +1481,7 @@ TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
                                ConditionCode cc, bool& smashed) {
   const Func* f = liveFunc();
   SrcKey dest(f, off);
-  TCA branch = getTranslation(TranslArgs(dest, true).src(toSmash));
+  TCA branch = getTranslation(TranslArgs(dest, true));
   LeaseHolder writer(s_writeLease, LeaseAcquire::NO_ACQUIRE);
   if (branch && writer.acquire()) {
     smashed = true;

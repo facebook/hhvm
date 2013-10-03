@@ -17,6 +17,7 @@
 #define incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/asm-x64.h"
@@ -226,7 +227,7 @@ TCA emitServiceReq(CodeBlock& cb, SRFlags flags, ServiceRequest sr, Arg... a) {
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);
-  if (RuntimeOption::EvalSimulateARM) {
+  if (arch() == Arch::ARM) {
     return ARM::emitServiceReqWork(cb, cb.frontier(), true, flags, sr, argv);
   } else {
     return X64::emitServiceReqWork(cb, cb.frontier(), true, flags, sr, argv);
@@ -248,7 +249,7 @@ TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);
-  if (RuntimeOption::EvalSimulateARM) {
+  if (arch() == Arch::ARM) {
     return ARM::emitServiceReqWork(cb, start, false, SRFlags::None, sr, argv);
   } else {
     return X64::emitServiceReqWork(cb, start, false, SRFlags::None, sr, argv);

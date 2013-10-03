@@ -2766,7 +2766,7 @@ TranslatorX64::TranslatorX64()
 void TranslatorX64::initUniqueStubs() {
   // Put the following stubs into ahot, rather than a.
   CodeBlockSelector asmSel(CodeBlockSelector::Args(this).hot(true));
-  if (RuntimeOption::EvalSimulateARM) {
+  if (JIT::arch() == JIT::Arch::ARM) {
     uniqueStubs = JIT::ARM::emitUniqueStubs();
   } else {
     uniqueStubs = JIT::X64::emitUniqueStubs();

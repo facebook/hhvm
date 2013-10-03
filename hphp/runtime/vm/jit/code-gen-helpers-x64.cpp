@@ -58,7 +58,7 @@ using Transl::rVmSp;
 void moveToAlign(CodeBlock& cb,
                  const size_t align /* =kJmpTargetAlign */) {
   // TODO(2967396) implement properly, move function
-  if (RuntimeOption::EvalSimulateARM) return;
+  if (arch() == Arch::ARM) return;
 
   using namespace HPHP::Util;
   X64Assembler a { cb };
@@ -357,7 +357,7 @@ void emitRB(X64Assembler& a,
 
 void emitTraceCall(CodeBlock& cb, int64_t pcOff) {
   // TODO(2967396) implement properly, move function
-  if (RuntimeOption::EvalSimulateARM) return;
+  if (arch() == Arch::ARM) return;
 
   Asm as { cb };
   // call to a trace function

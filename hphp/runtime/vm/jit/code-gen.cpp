@@ -6064,7 +6064,7 @@ void genCode(CodeBlock& mainCode,
       state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
     }
 
-    if (RuntimeOption::EvalSimulateARM) {
+    if (arch() == Arch::ARM) {
       ARM::CodeGenerator cg(unit, cb, stubsCode, tx64, state);
       cg.cgBlock(block, bcMap);
     } else {

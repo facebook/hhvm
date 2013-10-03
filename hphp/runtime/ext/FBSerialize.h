@@ -123,20 +123,22 @@ class FBSerializer : private FBSerializeBase {
 template <class V>
 class FBUnserializer : private FBSerializeBase {
  public:
-  static typename V::VariantType unserialize(
-    const folly::StringPiece& serialized);
- private:
-  FBUnserializer();
+  static typename V::VariantType unserialize(folly::StringPiece serialized);
 
-  typename V::VariantType doUnserialize(const folly::StringPiece& serialized);
+  explicit FBUnserializer(folly::StringPiece serialized);
 
-  void need(size_t n);
   bool unserializeBoolean();
   int64_t unserializeInt64();
   double unserializeDouble();
   typename V::StringType unserializeString();
+  folly::StringPiece unserializeStringPiece();
   typename V::MapType unserializeMap();
   typename V::VariantType unserializeThing();
+
+  void advance(size_t delta);
+  Code nextCode() const;
+ private:
+  void need(size_t n) const;
 
   const char* p_;
   const char* end_;

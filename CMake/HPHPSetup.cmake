@@ -6,6 +6,7 @@ if (APPLE)
 	    hphp_runtime_static
 	    ext_hhvm_static
 	    hphp_system
+	    vixl
 	    -Wl,-u,_register_libevent_server)
 else ()
 	set(HHVM_LINK_LIBRARIES
@@ -13,6 +14,7 @@ else ()
             hphp_runtime_static
             ext_hhvm_static
             hphp_system
+	    vixl
             -Wl,-uregister_libevent_server)
 endif ()
 

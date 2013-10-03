@@ -20,7 +20,7 @@
 #include <boost/noncopyable.hpp>
 #include <sqlite3.h>
 
-#include "hphp/runtime/base/md5.h"
+#include "hphp/util/md5.h"
 #include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {

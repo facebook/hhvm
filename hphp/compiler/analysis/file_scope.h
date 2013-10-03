@@ -25,7 +25,7 @@
 #include "hphp/compiler/code_generator.h"
 #include <boost/graph/adjacency_list.hpp>
 #include "hphp/util/json.h"
-#include "hphp/runtime/base/md5.h"
+#include "hphp/util/md5.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,7 +25,7 @@
 #include "folly/String.h"
 #include "folly/Range.h"
 
-#include "hphp/util/util.h"
+#include "hphp/util/byte-order.h"
 
 namespace HPHP {
 

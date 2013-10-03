@@ -335,23 +335,6 @@ inline void assert_native_stack_aligned() {
 }
 
 /**
- * 64-bit equivalents of 32-bit htonl() and ntohq().
- */
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-#define htonq(a) a
-#define ntohq(a) a
-#else
-#define ntohq(a)                                                              \
-  (uint64_t)(((uint64_t) (ntohl((uint32_t) ((a) >> 32))))                     \
-             | (((uint64_t) (ntohl((uint32_t)                                 \
-                ((a) & 0x00000000ffffffff)))) << 32))
-#define htonq(a)                                                              \
-  (uint64_t) (((uint64_t) (htonl((uint32_t) ((a) >> 32))))                    \
-              | (((uint64_t) (htonl((uint32_t)                                \
-                 ((a) & 0x00000000ffffffff)))) << 32))
-#endif
-
-/**
  * Read typed data from an offset relative to a base address
  */
 template <class T>

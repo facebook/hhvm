@@ -13,28 +13,39 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef incl_HPHP_UTIL_BYTE_ORDER_H_
+#define incl_HPHP_UTIL_BYTE_ORDER_H_
 
-#ifndef incl_HPHP_HHVM_AS_H_
-#define incl_HPHP_HHVM_AS_H_
+#include <cstdint>
 
-#include "hphp/util/md5.h"
+#include <arpa/inet.h>
 
 namespace HPHP {
-
-class UnitEmitter;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Assemble the contents of `filename' and return a UnitEmitter.
- *
- * Minimal documentation is available in as.cpp.
+ * Utilities for dealing with network/host byte order conversions.
  */
-UnitEmitter* assemble_string(const char* code, int codeLen,
-                             const char* filename, const MD5&);
+
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+# define htonq(a) (a)
+# define ntohq(a) (a)
+#else
+# define ntohq(a)                                         \
+  (uint64_t)(((uint64_t) (ntohl((uint32_t) ((a) >> 32)))) \
+             | (((uint64_t) (ntohl((uint32_t)             \
+                ((a) & 0x00000000ffffffff)))) << 32))
+# define htonq(a)                                           \
+  (uint64_t) (((uint64_t) (htonl((uint32_t) ((a) >> 32))))  \
+              | (((uint64_t) (htonl((uint32_t)              \
+                 ((a) & 0x00000000ffffffff)))) << 32))
+#endif
+
 
 //////////////////////////////////////////////////////////////////////
 
 }
+
 
 #endif

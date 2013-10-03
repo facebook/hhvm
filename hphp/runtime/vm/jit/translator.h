@@ -27,6 +27,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "hphp/util/md5.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/timer.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -41,7 +42,6 @@
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/base/md5.h"
 
 /* Translator front-end. */
 namespace HPHP {

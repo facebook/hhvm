@@ -22,7 +22,7 @@
 #include "hphp/util/lock.h"
 
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/md5.h"
+#include "hphp/util/md5.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/string-util.h"
 

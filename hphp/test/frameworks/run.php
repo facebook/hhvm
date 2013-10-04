@@ -297,7 +297,7 @@ class Frameworks {
           Map {
             'install_root' => __DIR__."/frameworks/phpbb3",
             'git_path' => "git@github.com:phpbb/phpbb3.git",
-            'git_commit' => "468133c07f1dd27bedb2f31c904708c6374a7989",
+            'git_commit' => "80b21e8049a138d07553288029abf66700da9a5c",
           },
         /*'pear' =>
           Map {
@@ -431,6 +431,12 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
     $frameworks->removeKey(0);
   }
 
+  $generate_new_expect_file = false;
+  if ($options->containsKey('record')) {
+    $generate_new_expect_file = true;
+    $frameworks->removeKey(0);
+  }
+
   get_unit_testing_infra_dependencies();
 
   if ($options->containsKey('all')) {
@@ -441,12 +447,12 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
     }
     // Running all tests
     run_test_suites(Frameworks::$framework_info->keys(), $timeout, $verbose,
-              $force_redownload, $zend_path);
+              $force_redownload, $generate_new_expect_file, $zend_path);
   } else if (count($frameworks) > 0) {
     // Tests specified at the command line. At this point, $tests should only
     // have tests to be run
     run_test_suites($frameworks, $timeout, $verbose, $force_redownload,
-                    $zend_path);
+                    $generate_new_expect_file, $zend_path);
   } else {
     error("Specify tests to run or use --all");
   }
@@ -526,7 +532,7 @@ function install_framework(string $name, bool $verbose,
   if ($composer_json_path !== null) {
     verbose("Retrieving dependencies for framework $name......\n", $verbose);
     $dependencies_install_cmd = get_hhvm_build()." ".__DIR__.
-                                      "/composer.phar install --dev";
+                                "/composer.phar install --dev";
     $install_ret = run_install($dependencies_install_cmd, $composer_json_path,
                                ProxyInformation::$proxies);
     // If provided the option at the command line, try Zend if we are not
@@ -601,7 +607,8 @@ function run_install(string $proc, string $path, ?Map $env): ?int
 }
 
 function run_test_suites(Vector $frameworks, int $timeout, bool $verbose,
-                         bool $force_redownload, ?string $zend_path): void {
+                         bool $force_redownload, bool $generate_new_expect_file,
+                         ?string $zend_path): void {
   $results_root = __DIR__."/results";
   $summary_file = $results_root."/frameworks.summary";
   $frameworks_to_run = Vector {};
@@ -626,7 +633,7 @@ function run_test_suites(Vector $frameworks, int $timeout, bool $verbose,
       } else {
         exit(run_single_test_suite($frameworks_to_run[$i], $summary_file,
                                    $timeout, $verbose, $force_redownload,
-                                   $zend_path));
+                                   $generate_new_expect_file, $zend_path));
       }
     }
 
@@ -663,6 +670,7 @@ THUMBSUP
 function run_single_test_suite(string $fw_name, string $summary_file,
                                int $timeout, bool $verbose,
                                bool $force_redownload,
+                               bool $generate_new_expect_file,
                                ?string $zend_path): ?int {
 
   /***********************************
@@ -670,9 +678,18 @@ function run_single_test_suite(string $fw_name, string $summary_file,
    *  installed.
    **********************************/
   $install_root = Frameworks::$framework_info[$fw_name]['install_root'];
+  $git_head_file = Frameworks::$framework_info[$fw_name]['install_root'].
+                   "/.git/HEAD";
   if (!(file_exists($install_root))) {
     install_framework($fw_name, $verbose, $zend_path);
   } else if ($force_redownload) {
+    echo "Forced redownloading of $fw_name...";
+    remove_dir_recursive($install_root);
+    install_framework($fw_name, $verbose, $zend_path);
+  // The commit hash has changed and we need to redownload
+  } else if (trim(file_get_contents($git_head_file)) !==
+             Frameworks::$framework_info[$fw_name]['git_commit']) {
+    echo "Redownloading $fw_name because git commit has changed...";
     remove_dir_recursive($install_root);
     install_framework($fw_name, $verbose, $zend_path);
   }
@@ -713,20 +730,28 @@ function run_single_test_suite(string $fw_name, string $summary_file,
 
   /***********************************
    * Have we run the tests before?
+   * Are we generating a new expect
+   * file?
    **********************************/
   $compare_tests = null;
   if(file_exists($expect_file)) {
-    // Color codes would have already been stripped out. Don't need those.
-    $compare_tests = get_fw_tests_to_run($expect_file,
+    if ($generate_new_expect_file) {
+      unlink($expect_file);
+      echo "Resetting the expect file. ".
+           "Establishing new baseline with gray dots...\n";
+    } else {
+      // Color codes would have already been stripped out. Don't need those.
+      $compare_tests = get_fw_tests_to_run($expect_file,
                                         PHPUnitPatterns::$test_name_pattern,
                                         PHPUnitPatterns::$status_code_pattern,
                                         PHPUnitPatterns::$stop_parsing_pattern);
-    echo "Comparing test suite for $fw_name with previous run. ".
-         "Green dot means test result same as previous. An \"F\" ".
-         "means the test result was different.\n";
+      echo "Comparing test suite for $fw_name with previous run. ".
+           "Green dot means test result same as previous. An \"F\" ".
+           "means the test result was different...\n";
+    }
   } else {
     echo "First time running test suite for $fw_name. ".
-         "Establishing baseline with gray dots.\n";
+         "Establishing baseline with gray dots...\n";
   }
 
   /*************************************
@@ -1059,8 +1084,9 @@ INTRO;
     # Run all framework tests using zend for alternative options for downloads.
     % hhvm run.php --all --zend ~/zend55/bin/php
 
-    # Run all framework tests forcing the download of all the tests again.
-    % hhvm run.php --all --redownload
+    # Run all framework tests forcing the download of all the frameworks and
+    # creating new expected output files for all of the frameworks
+    % hhvm run.php --all --redownload --record
 
     # Run all framework tests with a timeout per test (in secs).
     % hhvm run.php --all --timeout 600
@@ -1106,7 +1132,10 @@ function oss_test_option_map(): OptionInfoMap {
                                         "installed and the path to the zend ".
                                         "binary specified."},
     'redownload'          => Pair {'r', "Forces a redownload of the framework ".
-                                        "code and dependencies."}
+                                        "code and dependencies."},
+    'record'              => Pair {'e', "Forces a new expect file for the ".
+                                        "framework test suite"},
+
   };
 }
 
@@ -1136,10 +1165,32 @@ function remove_dir_recursive(string $root_dir) {
                RecursiveDirectoryIterator::SKIP_DOTS),
              RecursiveIteratorIterator::CHILD_FIRST);
 
+  // This can be better, but good enough for now.
+  // Maybe just use rm -rf, but that always seems
+  // a bit dangerous. The below is probably only
+  // O(2n) or so. No order depth order guaranteed
+  // with the iterator, so actual files can be
+  // deleted before symlinks
+
+  // Get rid of the symlinks first to avoid orphan
+  // symlinks that cannot be deleted.
   foreach ($files as $fileinfo) {
-    $todo = $fileinfo->isDir() ? fun('rmdir') : fun('unlink');
-    $todo($fileinfo->getRealPath());
+    if (is_link($fileinfo)) {
+      $target = readlink($fileinfo);
+      unlink($fileinfo);
+      unlink($target);
+    }
   }
+
+  // Get rid of the rest
+  foreach ($files as $fileinfo) {
+    if ($fileinfo->isDir()) {
+      rmdir($fileinfo->getRealPath());
+    } else {
+      unlink($fileinfo->getRealPath());
+    }
+  }
+
   rmdir($root_dir);
 }
 
@@ -1196,10 +1247,6 @@ function verbose(string $msg, bool $verbose): void {
   if ($verbose) {
     echo $msg;
   }
-}
-
-function fun(string $s): string {
-  return $s;
 }
 
 function main(array $argv): void {

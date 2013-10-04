@@ -5092,11 +5092,10 @@ RDS::Handle CodeGenerator::cgLdClsCachedCommon(
 void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
   auto ch = cgLdClsCachedCommon(inst);
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
-    // Passing only two arguments to lookupKnownClass, since the
-    // third is ignored in the checkOnly==false case.
-    // TODO: lookupKnownClass<true> is dead code?
+    Class* (*const func)(Class**, const StringData*) =
+      Transl::lookupKnownClass;
     cgCallHelper(a,
-                 CppCall(Transl::lookupKnownClass<false>),
+                 CppCall(func),
                  callDest(inst->dst()),
                  SyncOptions::kSyncPoint,
                  ArgGroup(m_regs).addr(rVmTl, intptr_t(ch)).ssas(inst, 0));

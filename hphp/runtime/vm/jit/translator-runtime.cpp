@@ -570,14 +570,7 @@ const Func* lookupUnknownFunc(const StringData* name) {
   return func;
 }
 
-template<bool checkOnly>
-Class*
-lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
-  if (!checkOnly) {
-    Stats::inc(Stats::TgtCache_KnownClsHit, -1);
-    Stats::inc(Stats::TgtCache_KnownClsMiss, 1);
-  }
-
+Class* lookupKnownClass(Class** cache, const StringData* clsName) {
   Class* cls = *cache;
   assert(!cls); // the caller should already have checked
   assert(clsName->data()[0] != '\\'); // namespace names should be done earlier
@@ -586,19 +579,9 @@ lookupKnownClass(Class** cache, const StringData* clsName, bool isClass) {
     StrNR(const_cast<StringData*>(clsName)));
   cls = *cache;
 
-  if (checkOnly) {
-    // If the class still doesn't exist, return flags causing the
-    // attribute check in the translated code that called us to fail.
-    return (Class*)(uintptr_t)(cls ? cls->attrs() :
-      (isClass ? (AttrTrait | AttrInterface) : AttrNone));
-  } else if (UNLIKELY(!cls)) {
-    raise_error(Strings::UNKNOWN_CLASS, clsName->data());
-  }
+  if (UNLIKELY(!cls)) raise_error(Strings::UNKNOWN_CLASS, clsName->data());
   return cls;
 }
-
-template Class* lookupKnownClass<true>(Class**, const StringData*, bool);
-template Class* lookupKnownClass<false>(Class**, const StringData*, bool);
 
 Cell lookupClassConstantTv(TypedValue* cache,
                            const NamedEntity* ne,

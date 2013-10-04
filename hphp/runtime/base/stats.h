@@ -36,8 +36,6 @@ namespace Stats {
   STAT(TgtCache_StaticMiss) \
   STAT(TgtCache_ClsCnsHit) \
   STAT(TgtCache_ClsCnsMiss) \
-  STAT(TgtCache_KnownClsHit) \
-  STAT(TgtCache_KnownClsMiss) \
   STAT(TgtCache_FuncDHit) \
   STAT(TgtCache_FuncDMiss) \
   STAT(TgtCache_CtorDHit) \

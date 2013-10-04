@@ -129,10 +129,7 @@ void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip);
 
 const Func* lookupUnknownFunc(const StringData*);
 
-template<bool checkOnly>
-Class* lookupKnownClass(Class** cache,
-                        const StringData* clsName,
-                        bool isClass);
+Class* lookupKnownClass(Class** cache, const StringData* clsName);
 
 TypedValue lookupClassConstantTv(TypedValue* cache,
                                  const NamedEntity* ne,

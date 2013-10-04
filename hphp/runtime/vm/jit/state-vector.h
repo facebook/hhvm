@@ -50,7 +50,7 @@ struct StateVector {
 
   StateVector(const IRUnit& unit, Info init)
     : m_unit(unit)
-    , m_info(numIds(unit, static_cast<Key*>(nullptr)), init)
+    , m_info(unit.numIds(nullKey))
     , m_init(init) {
   }
 
@@ -72,20 +72,21 @@ struct StateVector {
     grow();
   }
 
-  reference operator[](const Key& k) { return (*this)[&k]; }
-  reference operator[](const Key* k) {
-    auto id = k->id();
+  reference operator[](uint32_t id) {
     if (id >= m_info.size()) grow();
-    assert(id < m_info.size());
     return m_info[id];
   }
 
-  const_reference operator[](const Key& k) const { return (*this)[&k]; }
-  const_reference operator[](const Key* k) const {
-    assert(k->id() < numIds(m_unit, (Key*)nullptr));
-    auto id = k->id();
+  const_reference operator[](uint32_t id) const {
+    assert(id < m_unit.numIds(nullKey));
     return id < m_info.size() ? m_info[id] : m_init;
   }
+
+  reference operator[](const Key& k) { return (*this)[k.id()]; }
+  reference operator[](const Key* k) { return (*this)[k->id()]; }
+
+  const_reference operator[](const Key& k) const { return (*this)[k.id()]; }
+  const_reference operator[](const Key* k) const { return (*this)[k->id()]; }
 
   iterator begin()              { return m_info.begin(); }
   iterator end()                { return m_info.end(); }
@@ -95,23 +96,12 @@ struct StateVector {
   const_iterator cend()   const { return m_info.cend(); }
 
 private:
-  static unsigned numIds(const IRUnit& unit, IRInstruction*) {
-    return unit.numInsts();
-  }
-  static unsigned numIds(const IRUnit& unit, SSATmp*) {
-    return unit.numTmps();
-  }
-  static unsigned numIds(const IRUnit& unit, Block*) {
-    return unit.numBlocks();
-  }
-
-private:
   void grow() {
-    m_info.resize(numIds(m_unit, static_cast<Key*>(nullptr)),
-                  m_init);
+    m_info.resize(m_unit.numIds(nullKey), m_init);
   }
 
 private:
+  static constexpr Key* nullKey { nullptr };
   const IRUnit& m_unit;
   InfoVector m_info;
   Info m_init;

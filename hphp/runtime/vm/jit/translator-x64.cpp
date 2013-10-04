@@ -2105,7 +2105,8 @@ void TranslatorX64::traceCodeGen() {
   optimize(unit, ht.traceBuilder());
   finishPass(" after optimizing ", kOptLevel);
 
-  RegAllocInfo regs = allocRegsForUnit(unit);
+  auto regs = RuntimeOption::EvalHHIRXls ? allocateRegs(unit) :
+              allocRegsForUnit(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
 
   recordBCInstr(OpTraceletGuard, mainCode, mainCode.frontier());

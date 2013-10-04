@@ -169,7 +169,7 @@ class FailedCodeGen : public std::runtime_error {
  *
  * flags:
  *
- *   See doc/ir.specification for the meaning of these flag various.
+ *   See doc/ir.specification for the meaning of these flags.
  *
  *   The flags in this opcode table supply default values for the
  *   querying functions in IRInstruction---those functions involve

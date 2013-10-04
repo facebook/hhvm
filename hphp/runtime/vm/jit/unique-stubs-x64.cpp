@@ -270,7 +270,10 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
 
   /*
    * Note: the IR currently requires that we preserve r13/r14 across
-   * calls to these free locals helpers.
+   * calls to these free locals helpers.  These helpers assume the
+   * stack is balanced (rsp%16 == 0) on entry, unlike normal ABI calls
+   * where the stack was balanced before the call, and now has the
+   * return address on the stack (rsp%16 == 8).
    */
   static_assert(rVmSp == rbx, "");
   auto const rIter     = rbx;

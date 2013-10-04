@@ -369,6 +369,29 @@ void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
   setTaken(other->taken());
 }
 
+void IRInstruction::addCopy(IRUnit& unit, SSATmp* src, const PhysLoc& dest) {
+  assert(op() == Shuffle);
+  auto data = extra<Shuffle>();
+  auto n = numSrcs();
+  assert(n == data->size && n <= data->cap);
+  if (n == data->cap) {
+    auto cap = data->cap * 2;
+    auto srcs = new (unit.arena()) SSATmp*[cap];
+    auto dests = new (unit.arena()) PhysLoc[cap];
+    for (unsigned i = 0; i < n; i++) {
+      srcs[i] = m_srcs[i];
+      dests[i] = data->dests[i];
+    }
+    m_srcs = srcs;
+    data->dests = dests;
+    data->cap = cap;
+  }
+  m_numSrcs = n + 1;
+  m_srcs[n] = src;
+  data->size = n + 1;
+  data->dests[n] = dest;
+}
+
 SSATmp* IRInstruction::src(uint32_t i) const {
   always_assert(i < numSrcs());
   return m_srcs[i];

@@ -370,6 +370,57 @@ PhysReg::Type LinearScan::getRegType(const SSATmp* tmp, int locIdx) const {
   return PhysReg::GP;
 }
 
+PhysReg forceAlloc(SSATmp& dst) {
+  auto inst = dst.inst();
+  auto opc = inst->op();
+
+  // Note that the point of StashGeneratorSP is to save a StkPtr
+  // somewhere other than rVmSp.  (TODO(#2288359): make rbx not
+  // special.)
+  bool abnormalStkPtr = opc == StashGeneratorSP;
+
+  if (!abnormalStkPtr && dst.isA(Type::StkPtr)) {
+    assert(opc == DefSP ||
+           opc == ReDefSP ||
+           opc == ReDefGeneratorSP ||
+           opc == PassSP ||
+           opc == DefInlineSP ||
+           opc == Call ||
+           opc == CallArray ||
+           opc == SpillStack ||
+           opc == SpillFrame ||
+           opc == CufIterSpillFrame ||
+           opc == ExceptionBarrier ||
+           opc == RetAdjustStack ||
+           opc == InterpOne ||
+           opc == InterpOneCF ||
+           opc == GenericRetDecRefs ||
+           opc == CheckStk ||
+           opc == GuardStk ||
+           opc == AssertStk ||
+           opc == CastStk ||
+           opc == CoerceStk ||
+           opc == SideExitGuardStk  ||
+           MInstrEffects::supported(opc));
+    return rVmSp;
+  }
+
+  // LdRaw, loading a generator's embedded AR, is the only time we have a
+  // pointer to an AR that is not in rVmFp.
+  bool abnormalFramePtr = opc == LdRaw &&
+                          inst->src(1)->getValInt() == RawMemSlot::ContARPtr;
+
+  if (!abnormalFramePtr && dst.isA(Type::FramePtr)) {
+    return rVmFp;
+  }
+
+  if (opc == DefMIStateBase) {
+    assert(dst.isA(Type::PtrToCell));
+    return reg::rsp;
+  }
+  return InvalidReg;
+}
+
 void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
   IRInstruction* inst = &*it;
   dumpIR(inst, "allocating to instruction");
@@ -438,64 +489,14 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
   Range<SSATmp*> dsts = inst->dsts();
   if (dsts.empty()) return;
 
-  Opcode opc = inst->op();
-  if (opc == DefMIStateBase) {
-    assert(dsts[0].isA(Type::PtrToCell));
-    assignRegToTmp(&m_regs[int(rsp)], &dsts[0], 0);
-    return;
-  }
-
   for (SSATmp& dst : dsts) {
     for (int numAllocated = 0, n = dst.numNeededRegs(); numAllocated < n; ) {
-      // LdRaw, loading a generator's embedded AR, is the only time we have a
-      // pointer to an AR that is not in rVmFp.
-      const bool abnormalFramePtr =
-        (opc == LdRaw &&
-          inst->src(1)->getValInt() == RawMemSlot::ContARPtr);
-
-      // Note that the point of StashGeneratorSP is to save a StkPtr
-      // somewhere other than rVmSp.  (TODO(#2288359): make rbx not
-      // special.)
-      const bool abnormalStkPtr = opc == StashGeneratorSP;
-
-      if (!abnormalStkPtr && dst.isA(Type::StkPtr)) {
-        assert(opc == DefSP ||
-               opc == ReDefSP ||
-               opc == ReDefGeneratorSP ||
-               opc == PassSP ||
-               opc == DefInlineSP ||
-               opc == Call ||
-               opc == CallArray ||
-               opc == SpillStack ||
-               opc == SpillFrame ||
-               opc == CufIterSpillFrame ||
-               opc == ExceptionBarrier ||
-               opc == RetAdjustStack ||
-               opc == InterpOne ||
-               opc == InterpOneCF ||
-               opc == GenericRetDecRefs ||
-               opc == CheckStk ||
-               opc == GuardStk ||
-               opc == AssertStk ||
-               opc == CastStk ||
-               opc == CoerceStk ||
-               opc == SideExitGuardStk  ||
-               MInstrEffects::supported(opc));
-        assignRegToTmp(&m_regs[int(rVmSp)], &dst, 0);
+      auto reg = forceAlloc(dst);
+      if (reg != InvalidReg) {
+        assignRegToTmp(&m_regs[(int)reg], &dst, 0);
         numAllocated++;
         continue;
       }
-      if (!abnormalFramePtr && dst.isA(Type::FramePtr)) {
-        assignRegToTmp(&m_regs[int(rVmFp)], &dst, 0);
-        numAllocated++;
-        continue;
-      }
-
-      // Generally speaking, StkPtrs are pretty special due to
-      // tracelet ABI registers. Keep track here of the allowed uses
-      // that don't use the above allocation.
-      assert(!dst.isA(Type::FramePtr) || abnormalFramePtr);
-      assert(!dst.isA(Type::StkPtr) || abnormalStkPtr);
 
       if (!RuntimeOption::EvalHHIRDeadCodeElim || m_uses[dst].lastUse != 0) {
         numAllocated += allocRegToTmp(&dst, numAllocated);
@@ -504,6 +505,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
       }
     }
   }
+
   if (!RuntimeOption::EvalHHIRDeadCodeElim) {
     // if any outputs were unused, free regs now.
     freeRegsAtId(m_linear[inst]);

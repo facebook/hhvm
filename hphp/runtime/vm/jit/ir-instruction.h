@@ -211,6 +211,11 @@ struct IRInstruction {
    */
   void become(IRUnit&, IRInstruction* other);
 
+  /*
+   * Add an additional src SSATmp and dst Operand to this Shuffle.
+   */
+  void addCopy(IRUnit&, SSATmp* src, const PhysLoc& dest);
+
   bool       is() const { return false; }
   template<typename... Args>
   bool       is(Opcode op, Args&&... args) const {

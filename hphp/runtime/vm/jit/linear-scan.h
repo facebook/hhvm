@@ -82,11 +82,20 @@ private:
   StateVector<IRInstruction,RegMap> m_regs;
 };
 
+// Return a valid register if this tmp should be forced into a particular
+// register, otherwise return InvalidReg.
+PhysReg forceAlloc(SSATmp& t);
+
 /*
  * The main entry point for register allocation.  Called prior to code
  * generation.
  */
 RegAllocInfo allocRegsForUnit(IRUnit&);
+
+/*
+ * New register allocator doing extended linear scan
+ */
+RegAllocInfo allocateRegs(IRUnit&);
 
 }}
 

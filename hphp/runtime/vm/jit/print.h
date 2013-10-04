@@ -38,6 +38,18 @@ void print(std::ostream& ostream, const IRInstruction*,
            const LifetimeInfo* lifetime = nullptr,
            const GuardConstraints* guards = nullptr);
 void print(const IRInstruction*);
+void printInstr(std::ostream& ostream, const IRInstruction*,
+                const RegAllocInfo* regs = nullptr,
+                const LifetimeInfo* lifetime = nullptr,
+                const GuardConstraints* guards = nullptr);
+void printDsts(std::ostream& os, const IRInstruction* inst,
+               const RegAllocInfo* regs,
+               const LifetimeInfo* lifetime);
+void printSrcs(std::ostream& os, const IRInstruction* inst,
+               const RegAllocInfo* regs,
+               const LifetimeInfo* lifetime);
+void printOpcode(std::ostream& os, const IRInstruction* inst,
+                 const GuardConstraints* guards);
 
 // SSATmp
 void print(std::ostream& ostream, const SSATmp*,

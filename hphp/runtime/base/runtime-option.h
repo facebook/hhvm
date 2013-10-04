@@ -401,17 +401,19 @@ public:
   F(uint32_t, HHIRInliningMaxCost,     7)                               \
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 3)                          \
-  F(bool, HHIREnableCalleeSavedOpt,    true)                            \
-  F(bool, HHIREnablePreColoring,       true)                            \
-  F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIREnableRefCountOpt,       true)                            \
   F(bool, HHIREnableSinking,           true)                            \
-  F(bool, HHIRAllocXMMRegs,            true)                            \
   F(bool, HHIRGenerateAsserts,         debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
+  /* Register allocation flags */                                       \
+  F(bool, HHIRXls,                     false)                           \
+  F(bool, HHIREnableCalleeSavedOpt,    true)                            \
+  F(bool, HHIREnablePreColoring,       true)                            \
+  F(bool, HHIREnableCoalescing,        true)                            \
+  F(bool, HHIRAllocXMMRegs,            true)                            \
   /* Region compiler flags */                                           \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
   F(bool,     JitPGO,                  false)                           \

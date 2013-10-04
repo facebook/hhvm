@@ -1381,7 +1381,7 @@ TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk,
   SrcRec* sr = getSrcRec(destSk);
   if (req == JIT::REQ_BIND_ADDR) {
     sr->chainFrom(IncomingBranch::addr(reinterpret_cast<TCA*>(toSmash)));
-  } else if (req == JIT::REQ_BIND_JCC) {
+  } else if (req == JIT::REQ_BIND_JCC || req == JIT::REQ_BIND_SIDE_EXIT) {
     sr->chainFrom(IncomingBranch::jccFrom(toSmash));
   } else {
     sr->chainFrom(IncomingBranch::jmpFrom(toSmash));

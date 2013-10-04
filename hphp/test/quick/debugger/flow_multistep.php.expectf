@@ -16,13 +16,13 @@ object(C1)#1 (1) {
 }
 Breakpoint 1 reached at main() on line 58 of %s/flow_multistep.php
   57   var_dump($d);
-  58   var_dump(a(42));
+  58*  var_dump(a(42));
   59 }
 
 step 8
 Break at main() on line 58 of %s/flow_multistep.php
   57   var_dump($d);
-  58   var_dump(a(42));
+  58*  var_dump(a(42));
   59 }
 
 continue
@@ -47,19 +47,19 @@ object(C1)#3 (1) {
 }
 Breakpoint 1 reached at main() on line 58 of %s/flow_multistep.php
   57   var_dump($d);
-  58   var_dump(a(42));
+  58*  var_dump(a(42));
   59 }
 
 step 4
 Break at d() on line 17 of %s/flow_multistep.php
   16 function d($a) {
-  17   return $a + 1;
+  17*  return $a + 1;
   18 }
 
 step 4
 Break at main() on line 58 of %s/flow_multistep.php
   57   var_dump($d);
-  58   var_dump(a(42));
+  58*  var_dump(a(42));
   59 }
 
 continue
@@ -84,19 +84,19 @@ object(C1)#5 (1) {
 }
 Breakpoint 1 reached at main() on line 58 of %s/flow_multistep.php
   57   var_dump($d);
-  58   var_dump(a(42));
+  58*  var_dump(a(42));
   59 }
 
 step 4
 Break at d() on line 17 of %s/flow_multistep.php
   16 function d($a) {
-  17   return $a + 1;
+  17*  return $a + 1;
   18 }
 
 next 4
 Break at main() on line 58 of %s/flow_multistep.php
   57   var_dump($d);
-  58   var_dump(a(42));
+  58*  var_dump(a(42));
   59 }
 
 continue
@@ -121,19 +121,19 @@ object(C1)#7 (1) {
 }
 Breakpoint 1 reached at main() on line 58 of %s/flow_multistep.php
   57   var_dump($d);
-  58   var_dump(a(42));
+  58*  var_dump(a(42));
   59 }
 
 step 4
 Break at d() on line 17 of %s/flow_multistep.php
   16 function d($a) {
-  17   return $a + 1;
+  17*  return $a + 1;
   18 }
 
 out 4
 Break at main() on line 58 of %s/flow_multistep.php
   57   var_dump($d);
-  58   var_dump(a(42));
+  58*  var_dump(a(42));
   59 }
 
 continue
@@ -153,7 +153,7 @@ C1 oh hai
 C2 oh hai
 Breakpoint 1 reached at main() on line 54 of %s/flow_multistep.php
   53   $c2 = new C2(5);
-  54   $c2 = new C2(6);
+  54*  $c2 = new C2(6);
   55   $d = $c1;
 
 break clear all
@@ -164,7 +164,7 @@ C2 destructor
 C1 oh hai
 Break at C1::__destruct() on line 30 of %s/flow_multistep.php
   29   public function __destruct() {
-  30     echo "C1 destructor!\n";
+  30*    echo "C1 destructor!\n";
   31   }
 
 out 2
@@ -172,7 +172,7 @@ C1 destructor!
 C2 destructor done
 Break at main() on line 54 of %s/flow_multistep.php
   53   $c2 = new C2(5);
-  54   $c2 = new C2(6);
+  54*  $c2 = new C2(6);
   55   $d = $c1;
 
 out
@@ -188,7 +188,7 @@ C1 destructor!
 C2 destructor done
 Break on line 61 of %s/flow_multistep.php
   60 
-  61 main();
+  61*main();
   62 
 
 continue
@@ -200,7 +200,7 @@ C1 oh hai
 C2 oh hai
 Breakpoint 1 reached at main() on line 54 of %s/flow_multistep.php
   53   $c2 = new C2(5);
-  54   $c2 = new C2(6);
+  54*  $c2 = new C2(6);
   55   $d = $c1;
 
 break clear all
@@ -211,7 +211,7 @@ C2 destructor
 C1 oh hai
 Break at C1::__destruct() on line 30 of %s/flow_multistep.php
   29   public function __destruct() {
-  30     echo "C1 destructor!\n";
+  30*    echo "C1 destructor!\n";
   31   }
 
 next 5
@@ -219,13 +219,13 @@ C1 destructor!
 C2 destructor done
 Break at main() on line 54 of %s/flow_multistep.php
   53   $c2 = new C2(5);
-  54   $c2 = new C2(6);
+  54*  $c2 = new C2(6);
   55   $d = $c1;
 
 next
 Break at main() on line 55 of %s/flow_multistep.php
   54   $c2 = new C2(6);
-  55   $d = $c1;
+  55*  $d = $c1;
   56   $c1 = null;
 
 continue

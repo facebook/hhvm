@@ -42,6 +42,7 @@ public:
   static int CodeBlockSize;
   static int ScrollBlockSize;
   static const char *LineNoFormat;
+  static const char *LineNoFormatWithStar;
   static const char *LocalPrompt;
   static const char *ConfigFileName;
   static const char *HistoryFileName;

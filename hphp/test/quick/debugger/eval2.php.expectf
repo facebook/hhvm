@@ -7,7 +7,7 @@ Program %s/eval2.php exited normally.
 @ foo(1)
 Breakpoint 1 reached at foo() on line 3 of %s/eval2.php
    2   function foo($x) {
-   3     return $x + 1;
+   3*    return $x + 1;
    4   }
 
 = $x

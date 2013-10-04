@@ -5,7 +5,7 @@ But wont break until file %s/flow_pseudomain.php has been loaded.
 continue
 Breakpoint 1 reached on line 5 of %s/flow_pseudomain.php
    4 $x = 1;
-   5 echo $x;
+   5*echo $x;
    6 (END)
 
 step

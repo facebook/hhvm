@@ -11,7 +11,7 @@ in pri:1 0
 foo:1 0
 Breakpoint 1 reached at bar() on line 6 of %s/stack1.php
    5 function bar($x, $y) {
-   6   $obj = new cls();
+   6*  $obj = new cls();
    7   error_log("bar:".$x." ".$y);
 
 break clear all
@@ -38,7 +38,7 @@ out
 bar:1 0
 Break at foo() on line 16 of %s/stack1.php
   15   error_log("foo:".$x." ".$y);
-  16   return bar($x, $y);
+  16*  return bar($x, $y);
   17 }
 
 where
@@ -57,7 +57,7 @@ where
 out
 Break at cls::pri() on line 28 of %s/stack1.php
   27     error_log("in pri:".$x." ".$y);
-  28     foo($x, $y);
+  28*    foo($x, $y);
   29     if ($x == 3) {
 
 where
@@ -77,7 +77,7 @@ out
 out pri:1 0
 Break at cls::pub() on line 22 of %s/stack1.php
   21     error_log("in pub:".$x." ".$y);
-  22     $v = $this->pri($x, $y);
+  22*    $v = $this->pri($x, $y);
   23     error_log("out pub:".$x." ".$y);
 
 where
@@ -113,7 +113,7 @@ foo:2 0
 bar:2 0
 Breakpoint 1 reached at bar() on line 9 of %s/stack1.php
    8   if ($y <= 0) {
-   9     return $x;
+   9*    return $x;
   10   }
 
 where
@@ -165,7 +165,7 @@ out pri:2 0
 out pub:2 0
 Break at cls::pri() on line 30 of %s/stack1.php
   29     if ($x == 3) {
-  30       hphpd_break();
+  30*      hphpd_break();
   31     }
 
 where

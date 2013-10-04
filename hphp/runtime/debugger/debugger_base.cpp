@@ -438,7 +438,12 @@ static void append_line_no(StringBuffer &sb, const char *text,
         sb.append('\n');
         if (colorLineNo) color_line_no(sb, line, lineFocus0, lineFocus1,
                                        colorLineNo);
-        sb.printf(DebuggerClient::LineNoFormat, line);
+        if ((line == lineFocus0 && lineFocus1 == 0) ||
+            (line >= lineFocus0 && line <= lineFocus1)) {
+          sb.printf(DebuggerClient::LineNoFormatWithStar, line);
+        } else {
+          sb.printf(DebuggerClient::LineNoFormat, line);
+        }
         if (endLineNo) sb.append(endLineNo);
         if (color) sb.append(color);
         begin = p + 1;

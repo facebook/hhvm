@@ -203,6 +203,7 @@ int DebuggerClient::LineWidth = 76;
 int DebuggerClient::CodeBlockSize = 20;
 int DebuggerClient::ScrollBlockSize = 20;
 const char *DebuggerClient::LineNoFormat = "%4d ";
+const char *DebuggerClient::LineNoFormatWithStar = "%4d*";
 const char *DebuggerClient::LocalPrompt = "hphpd";
 const char *DebuggerClient::ConfigFileName = ".hphpd.hdf";
 const char *DebuggerClient::HistoryFileName = ".hphpd.history";

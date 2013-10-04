@@ -243,7 +243,6 @@ Type HhbcTranslator::topType(uint32_t idx, DataTypeCategory constraint) const {
     auto absIdx = idx - m_evalStack.size() + m_stackDeficit;
     auto stkVal = getStackValue(m_tb->sp(), absIdx);
     m_tb->constrainStack(absIdx, constraint);
-    if (stkVal.knownType.equals(Type::None)) return Type::Gen;
     return stkVal.knownType;
   }
 }
@@ -3082,6 +3081,7 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
                                       i - m_evalStack.size() + m_stackDeficit);
         val = stackVal.value;
         t = stackVal.knownType;
+        if (!val && t == Type::StackElem) return RuntimeType(KindOfAny);
       }
     } break;
     case Location::Local: {
@@ -3108,7 +3108,9 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
     if (val->type().isString())  return RuntimeType(val->getValStr());
     if (val->type().isCls())     return RuntimeType(val->getValClass());
   }
-  return t.equals(Type::None) ? RuntimeType(KindOfAny) : t.toRuntimeType();
+
+  assert(t != Type::None);
+  return t.toRuntimeType();
 }
 
 static uint64_t packBitVec(const vector<bool>& bits, unsigned i) {
@@ -4001,8 +4003,7 @@ Type HhbcTranslator::interpOutputType(
   auto localType = [&]{
     auto locId = localInputId(inst);
     assert(locId >= 0 && locId < curFunc()->numLocals());
-    auto t = m_tb->localType(locId, DataTypeSpecific);
-    return t.equals(Type::None) ? Type::Gen : t;
+    return m_tb->localType(locId, DataTypeSpecific);
   };
   auto boxed = [](Type t) {
     if (t.equals(Type::Gen)) return t;
@@ -4106,7 +4107,7 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
     case OpSetOpL:
     case OpIncDecL: {
       auto locType = m_tb->localType(localInputId(inst), DataTypeSpecific);
-      assert(!locType.equals(Type::None));
+      assert(locType < Type::Gen);
       auto stackType = inst.outputPredicted ? inst.outPred : topType(0);
       setImmLocType(0, locType.isBoxed() ? stackType.box() : stackType);
       break;
@@ -4309,7 +4310,7 @@ std::string HhbcTranslator::showStack() const {
 
     auto stkVal = getStackValue(m_tb->sp(), i);
     std::ostringstream elemStr;
-    if (stkVal.knownType.equals(Type::None)) elem("unknown");
+    if (stkVal.knownType == Type::StackElem) elem("unknown");
     else if (stkVal.value) elem(stkVal.value->inst()->toString());
     else elem(stkVal.knownType.toString());
 

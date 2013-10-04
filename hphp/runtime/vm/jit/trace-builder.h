@@ -319,13 +319,13 @@ private:
   struct LocalState {
     LocalState()
       : value(nullptr)
-      , type(Type::None)
+      , type(Type::Gen)
       , unsafe(false)
       , written(false)
     {}
 
     SSATmp* value; // The current value of the local. nullptr if unknown
-    Type type;     // The current type of the local, or Type::None if unknown
+    Type type;     // The current type of the local.
     bool unsafe;   // true iff value is not safe to use at runtime. Currently
                    // this only happens across a Call or CallArray instruction.
     bool written;  // true iff the local has been written in this trace

@@ -41,7 +41,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   switch (inst->op()) {
   case DefInlineSP:
   case DefSP:
-    return StackValueInfo { inst, Type::None };
+    return StackValueInfo { inst, Type::StackElem };
 
   case ReDefGeneratorSP: {
     auto const extra = inst->extra<ReDefGeneratorSP>();
@@ -189,7 +189,9 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case SpillFrame:
   case CufIterSpillFrame:
     // pushes an ActRec
-    if (index < kNumActRecCells) return StackValueInfo { inst, Type::None };
+    if (index < kNumActRecCells) {
+      return StackValueInfo { inst, Type::StackElem };
+    }
     return getStackValue(inst->src(0), index - kNumActRecCells);
 
   default:
@@ -599,9 +601,7 @@ SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
   auto sp = inst->src(0);
   auto offset = inst->extra<CheckStk>()->offset;
 
-  auto stkVal = getStackValue(sp, offset);
-  if (stkVal.knownType.equals(Type::None)) return nullptr;
-
+  auto const stkVal = getStackValue(sp, offset);
   if (stkVal.knownType.subtypeOf(type)) {
     m_tb.constrainStack(sp, offset, categoryForType(type));
     return sp;
@@ -1934,11 +1934,9 @@ SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
                       info.value->inst()->op() == DefConst)) {
     return info.value;
   }
-  if (!info.knownType.equals(Type::None)) {
-    inst->setTypeParam(
-      Type::mostRefined(inst->typeParam(), info.knownType)
-    );
-  }
+  inst->setTypeParam(
+    Type::mostRefined(inst->typeParam(), info.knownType)
+  );
   return nullptr;
 }
 
@@ -1971,11 +1969,9 @@ SSATmp* Simplifier::simplifyStRef(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyLdStackAddr(IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<StackOffset>()->offset);
-  if (!info.knownType.equals(Type::None)) {
-    inst->setTypeParam(
-      Type::mostRefined(inst->typeParam(), info.knownType.ptr())
-    );
-  }
+  inst->setTypeParam(
+    Type::mostRefined(inst->typeParam(), info.knownType.ptr())
+  );
   return nullptr;
 }
 
@@ -1986,11 +1982,9 @@ SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
     inst->convertToNop();
     return gen(DecRef, info.value);
   }
-  if (!info.knownType.equals(Type::None)) {
-    inst->setTypeParam(
-      Type::mostRefined(inst->typeParam(), info.knownType)
-    );
-  }
+  inst->setTypeParam(
+    Type::mostRefined(inst->typeParam(), info.knownType)
+  );
   if (inst->typeParam().notCounted()) {
     inst->convertToNop();
     return nullptr;

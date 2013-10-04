@@ -96,13 +96,13 @@ bool isInferredType(const NormalizedInstruction& i) {
           NormalizedInstruction::OutputUse::Inferred);
 }
 
-JIT::Type getInferredOrPredictedType(const NormalizedInstruction& i) {
+Type getInferredOrPredictedType(const NormalizedInstruction& i) {
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
   if (u == NormalizedInstruction::OutputUse::Inferred ||
      (u == NormalizedInstruction::OutputUse::Used && i.outputPredicted)) {
-    return JIT::Type(i.outStack->rtt);
+    return Type(i.outStack->rtt);
   }
-  return JIT::Type::None;
+  return Type::None;
 }
 }
 

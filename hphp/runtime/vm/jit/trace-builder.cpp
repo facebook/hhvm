@@ -433,13 +433,7 @@ void TraceBuilder::mergeState(State* state) {
     // to avoid clearing state, which triggers a downstream reload.
     if (local.value != m_locals[i].value) local.value = nullptr;
 
-    // combine types using Type::unionOf(), but handle Type::None here: t2135185
-    Type t1 = local.type;
-    Type t2 = m_locals[i].type;
-    local.type =
-      (t1 == Type::None || t2 == Type::None) ? Type::None
-                                             : Type::unionOf(t1, t2);
-
+    local.type = Type::unionOf(local.type, m_locals[i].type);
     local.unsafe = local.unsafe || m_locals[i].unsafe;
     local.written = local.written || m_locals[i].written;
   }
@@ -573,7 +567,7 @@ std::vector<RegionDesc::TypePred> TraceBuilder::getKnownTypes() const {
 
   for (unsigned i = 0; i < curFunc->maxStackCells(); ++i) {
     auto t = getStackValue(m_spValue, i).knownType;
-    if (!t.equals(Type::None)) {
+    if (!t.equals(Type::StackElem)) {
       result.push_back({ RegionDesc::Location::Stack{i, m_spOffset - i}, t });
     }
   }
@@ -582,7 +576,7 @@ std::vector<RegionDesc::TypePred> TraceBuilder::getKnownTypes() const {
   // trace with relaxed guards.
   for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
     auto t = m_locals[i].type;
-    if (!t.equals(Type::None)) {
+    if (!t.equals(Type::Gen)) {
       result.push_back({ RegionDesc::Location::Local{i}, t });
     }
   }
@@ -600,10 +594,6 @@ SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   }
 
   auto const prevType = localType(locId, DataTypeSpecific);
-
-  if (prevType.equals(Type::None)) {
-    return nullptr;
-  }
 
   if (prevType.subtypeOf(typeParam)) {
     inst->convertToNop();
@@ -636,7 +626,13 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   auto const prevType = localType(locId, DataTypeGeneric);
   auto const typeParam = inst->typeParam();
 
-  if (!prevType.equals(Type::None) && !typeParam.strictSubtypeOf(prevType)) {
+  if (prevType == typeParam) {
+    // Asserting an already-known type can be useful for guard relaxation, so
+    // don't drop it.
+    return nullptr;
+  }
+
+  if (!typeParam.strictSubtypeOf(prevType)) {
     if (!prevType.subtypeOf(typeParam)) {
       /* Task #2553746
        * This is triggering for a case where the tracked state says the local is
@@ -660,7 +656,7 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
           });
       }
     } else {
-      inst->convertToNop();
+      return inst->src(0);
     }
   }
   return nullptr;
@@ -758,11 +754,10 @@ SSATmp* TraceBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
   if (knownType.isBoxed()) {
     knownType = Type::BoxedCell;
   }
-  if (knownType != Type::None) { // TODO(#2135185)
-    inst->setTypeParam(
-      Type::mostRefined(knownType, inst->typeParam())
-    );
-  }
+
+  inst->setTypeParam(
+    Type::mostRefined(knownType, inst->typeParam())
+  );
 
   /*
    * If we have the local value in flight, use a DecRef on it instead
@@ -783,18 +778,14 @@ SSATmp* TraceBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   }
 
   auto const type = localType(locId, DataTypeGeneric);
-  if (!type.equals(Type::None)) { // TODO(#2135185)
-    inst->setTypeParam(Type::mostRefined(type, inst->typeParam()));
-  }
+  inst->setTypeParam(Type::mostRefined(type, inst->typeParam()));
   return nullptr;
 }
 
 SSATmp* TraceBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
   auto const locId = inst->extra<LdLocAddr>()->locId;
   auto const type = localType(locId, DataTypeGeneric);
-  if (!type.equals(Type::None)) { // TODO(#2135185)
-    inst->setTypeParam(Type::mostRefined(type.ptr(), inst->typeParam()));
-  }
+  inst->setTypeParam(Type::mostRefined(type.ptr(), inst->typeParam()));
   return nullptr;
 }
 
@@ -803,15 +794,14 @@ SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
   auto const curType = localType(locId, DataTypeGeneric);
   auto const newType = inst->src(1)->type();
 
-  assert(inst->typeParam().equals(Type::None));
+  assert(inst->typeParam() == Type::None);
 
   // There's no need to store the type if it's going to be the same
   // KindOfFoo. We still have to store string types because we don't
   // guard on KindOfStaticString vs. KindOfString.
   auto const bothBoxed = curType.isBoxed() && newType.isBoxed();
-  auto const sameUnboxed = curType != Type::None && // TODO(#2135185)
-    curType.isSameKindOf(newType) &&
-    !curType.isString();
+  auto const sameUnboxed =
+    curType.isSameKindOf(newType) && !curType.isString();
   if (bothBoxed || sameUnboxed) {
     // TODO(t2598894) once relaxGuards supports proper type reflowing, we
     // should be able to relax the constraint here and degrade StLocNT to
@@ -1060,13 +1050,15 @@ SSATmp* TraceBuilder::localValueSource(unsigned id) const {
 Type TraceBuilder::localType(unsigned id, DataTypeCategory cat) {
   always_assert(id < m_locals.size());
   constrainLocal(id, cat, "localType");
+
+  assert(m_locals[id].type != Type::None);
   return m_locals[id].type;
 }
 
 void TraceBuilder::setLocalValue(unsigned id, SSATmp* value) {
   always_assert(id < m_locals.size());
   m_locals[id].value = value;
-  m_locals[id].type = value ? value->type() : Type::None;
+  m_locals[id].type = value ? value->type() : Type::Gen;
   m_locals[id].written = true;
   m_locals[id].unsafe = false;
 }
@@ -1081,9 +1073,7 @@ void TraceBuilder::setLocalType(uint32_t id, Type type) {
 
 void TraceBuilder::refineLocalType(uint32_t id, Type type) {
   always_assert(id < m_locals.size());
-  auto UNUSED oldType = m_locals[id].type;
-  oldType = oldType.equals(Type::None) ? Type::Gen : oldType;
-  assert(type.subtypeOf(oldType));
+  assert(type.subtypeOf(m_locals[id].type));
   m_locals[id].type = type;
 }
 

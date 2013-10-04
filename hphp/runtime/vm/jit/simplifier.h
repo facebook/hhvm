@@ -200,8 +200,8 @@ struct StackValueInfo {
     return out;
   }
 
-  SSATmp* value;   // may be null
-  Type knownType;  // currently Type::None if we don't know (TODO(#2135185)
+  SSATmp* value;   // may be nullptr
+  Type knownType;  // the type of the value, for when value is nullptr
   bool spansCall;  // whether the tmp's definition was above a call
   IRInstruction* typeSrc; // the instruction that gave us knownType
 

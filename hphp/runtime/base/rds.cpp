@@ -20,6 +20,7 @@
 
 #include <sys/mman.h>
 
+#include "folly/String.h"
 #include "folly/Hash.h"
 
 #include "hphp/util/base.h"
@@ -134,52 +135,55 @@ LinkTable s_linkTable;
 
 namespace detail {
 
-  Handle alloc(Mode mode, size_t numBytes, size_t align) {
-    s_allocMutex.assertOwnedBySelf();
-    align = Util::roundUpToPowerOfTwo(align);
-    auto& frontier = mode == Mode::Persistent ? s_persistent_frontier
-                                              : s_frontier;
+Handle alloc(Mode mode, size_t numBytes, size_t align) {
+  s_allocMutex.assertOwnedBySelf();
+  align = Util::roundUpToPowerOfTwo(align);
+  auto& frontier = mode == Mode::Persistent ? s_persistent_frontier
+                                            : s_frontier;
 
-    frontier += align - 1;
-    frontier &= ~(align - 1);
-    frontier += numBytes;
+  // Note: it's ok not to zero new allocations, because we've never
+  // done anything with this part of the page yet, so it must still be
+  // zero.
+  frontier += align - 1;
+  frontier &= ~(align - 1);
+  frontier += numBytes;
 
-    auto const limit = mode == Mode::Persistent
-      ? RuntimeOption::EvalJitTargetCacheSize
-      : s_persistent_base;
-    always_assert(frontier < limit);
+  auto const limit = mode == Mode::Persistent
+    ? RuntimeOption::EvalJitTargetCacheSize
+    : s_persistent_base;
+  always_assert(frontier < limit);
 
-    return frontier - numBytes;
+  return frontier - numBytes;
+}
+
+Handle allocUnlocked(Mode mode, size_t numBytes, size_t align) {
+  SimpleLock l(s_allocMutex);
+  return alloc(mode, numBytes, align);
+}
+
+Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes, size_t align) {
+  LinkTable::const_accessor acc;
+  if (s_linkTable.find(acc, key)) return acc->second;
+
+  SimpleLock l(s_allocMutex);
+  if (s_linkTable.find(acc, key)) return acc->second;
+
+  auto const retval = alloc(mode, sizeBytes, align);
+  if (!s_linkTable.insert(LinkTable::value_type(key, retval))) {
+    always_assert(0);
   }
+  return retval;
+}
 
-  Handle allocUnlocked(Mode mode, size_t numBytes, size_t align) {
-    SimpleLock l(s_allocMutex);
-    return alloc(mode, numBytes, align);
+void bindOnLinkImpl(std::atomic<Handle>& handle,
+                    Mode mode,
+                    size_t sizeBytes,
+                    size_t align) {
+  SimpleLock l(s_allocMutex);
+  if (handle.load(std::memory_order_relaxed) == kInvalidHandle) {
+    handle.store(alloc(mode, sizeBytes, align), std::memory_order_relaxed);
   }
-
-  Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes, size_t align) {
-    LinkTable::const_accessor acc;
-    if (s_linkTable.find(acc, key)) return acc->second;
-
-    SimpleLock l(s_allocMutex);
-    if (s_linkTable.find(acc, key)) return acc->second;
-
-    auto const retval = alloc(mode, sizeBytes, align);
-    if (!s_linkTable.insert(LinkTable::value_type(key, retval))) {
-      always_assert(0);
-    }
-    return retval;
-  }
-
-  void bindOnLinkImpl(std::atomic<Handle>& handle,
-                      Mode mode,
-                      size_t sizeBytes,
-                      size_t align) {
-    SimpleLock l(s_allocMutex);
-    if (handle.load(std::memory_order_relaxed) == kInvalidHandle) {
-      handle.store(alloc(mode, sizeBytes, align), std::memory_order_relaxed);
-    }
-  }
+}
 
 }
 
@@ -222,8 +226,9 @@ void requestExit() {
 }
 
 void flush() {
-  if (madvise(tl_base, s_frontier, MADV_DONTNEED) < 0) {
-    not_reached();
+  if (madvise(tl_base, s_frontier, MADV_DONTNEED) == -1) {
+    fprintf(stderr, "RDS madvise failure: %s\n",
+      folly::errnoStr(errno).c_str());
   }
 }
 

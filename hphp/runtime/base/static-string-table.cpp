@@ -237,8 +237,8 @@ RDS::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
   }
   auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   assert(it != s_stringDataMap->end());
-  it->second.bind<0x10>(persistent ? RDS::Mode::Persistent
-                                   : RDS::Mode::Normal);
+  it->second.bind<kTVXmmAlign>(persistent ? RDS::Mode::Persistent
+                                          : RDS::Mode::Normal);
   return it->second.handle();
 }
 

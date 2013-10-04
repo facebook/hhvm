@@ -22,11 +22,12 @@ namespace HPHP { namespace RDS {
 
 namespace detail {
 
-  Handle alloc(Mode mode, size_t numBytes, size_t align);
-  Handle allocUnlocked(Mode mode, size_t numBytes, size_t align);
-  Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes, size_t align);
-  void bindOnLinkImpl(std::atomic<Handle>& handle, Mode mode,
-    size_t sizeBytes, size_t align);
+Handle alloc(Mode mode, size_t numBytes, size_t align);
+Handle allocUnlocked(Mode mode, size_t numBytes, size_t align);
+Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes, size_t align);
+void bindOnLinkImpl(std::atomic<Handle>& handle, Mode mode,
+  size_t sizeBytes, size_t align);
+
 }
 
 //////////////////////////////////////////////////////////////////////

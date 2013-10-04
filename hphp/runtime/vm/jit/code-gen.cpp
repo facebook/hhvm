@@ -2439,7 +2439,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   auto name      = inst->src(1);
   auto actRec    = inst->src(2);
   auto actRecReg = m_regs[actRec].reg();
-  auto const handle = RDS::alloc<MethodCache>().handle();
+  auto const handle = RDS::alloc<MethodCache,sizeof(MethodCache)>().handle();
 
   // preload handle->m_value
   m_as.loadq(rVmTl[handle + offsetof(MethodCache, m_value)],

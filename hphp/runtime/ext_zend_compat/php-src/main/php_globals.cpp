@@ -14,7 +14,6 @@ const zval** PG_http_globals() {
   tl_globals[TRACK_VARS_SERVER] = globals->get(s__SERVER).asRef()->m_data.pref;
   tl_globals[TRACK_VARS_ENV] = globals->get(s__ENV).asRef()->m_data.pref;
   tl_globals[TRACK_VARS_FILES] = globals->get(s__FILES).asRef()->m_data.pref;
-  tl_globals[TRACK_VARS_REQUEST] = globals->get(s__REQUEST).asRef()->m_data.pref;
 
   tl_globals[TRACK_VARS_POST]->incRefCount();
   tl_globals[TRACK_VARS_GET]->incRefCount();
@@ -22,7 +21,6 @@ const zval** PG_http_globals() {
   tl_globals[TRACK_VARS_SERVER]->incRefCount();
   tl_globals[TRACK_VARS_ENV]->incRefCount();
   tl_globals[TRACK_VARS_FILES]->incRefCount();
-  tl_globals[TRACK_VARS_REQUEST]->incRefCount();
   return tl_globals;
 }
 

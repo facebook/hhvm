@@ -978,7 +978,7 @@ Concat    [C C]  ->  [C:Str]
 
   Concatenation (.). Pushes ((string)$2 . (string)$1) on the stack.
 
-Abs    [C] -> [C]
+Abs    [C] -> [C:Int|Dbl|Bool]
 
   Absolute value.  Computes the absolute value of $1 and pushes the result onto
   the stack.
@@ -1234,7 +1234,7 @@ SSwitch <litstr id/offset vector>    [C]  ->  []
   to $1. If one is found, control will be transferred to the location specified
   by the offset corresponding to that string. If a matching string is not
   found, control is transferred to the location specified by the final element
-  in the vector.
+  in the vector, which must have a litstr id of -1.
 
 RetC    [C]  ->  []
 RetV    [V]  ->  []
@@ -1787,7 +1787,7 @@ FPushCufF <num params>    [C]   ->  []
   warning, and push an entry representing a function which does nothing, takes
   no argument, and returns null.
 
-FPushCufSafe <num params> [C C] ->  [C C]
+FPushCufSafe <num params> [C C] ->  [C C:Bool]
 
   FPI push call user function. This instruction pops $1 and $2, then pushes
   $1 back onto the stack. It then looks up $2 as a callable, and pushes a

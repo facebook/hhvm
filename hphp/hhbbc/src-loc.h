@@ -13,33 +13,60 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
-#define incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
+#ifndef incl_HHBBC_SRC_LOC_H_
+#define incl_HHBBC_SRC_LOC_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include <cstdint>
 
-namespace HPHP {
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Convert a cell to various types, without changing the Cell.
- */
-bool cellToBool(Cell);
-int64_t cellToInt(Cell);
-double cellToDouble(double);
-
-/*
- * Convert a string to a TypedNum following php semantics, allowing
- * strings that have only a partial number in them.  (I.e. the string
- * may have junk after the number.)
- */
-TypedNum stringToNumeric(const StringData*);
+namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
+
+namespace php {
+
+using LineNumber = uint32_t;
+using ColNumber  = uint32_t;
+using LineRange  = std::tuple<LineNumber,LineNumber>;
+
+struct SrcPos {
+  bool operator==(SrcPos o) const {
+    return line == o.line && col == o.col;
+  }
+  bool operator!=(SrcPos o) const { return !(*this == o); }
+
+  LineNumber line;
+  ColNumber col;
+};
+
+struct SrcLoc {
+  SrcLoc()
+    : start{0,0}
+    , past{0,0}
+  {}
+
+  SrcLoc(SrcPos start, SrcPos past)
+    : start(start)
+    , past(past)
+  {}
+
+  bool isValid() const { return past != SrcPos{0,0}; }
+
+  bool operator==(SrcLoc o) const {
+    return start == o.start && past == o.past;
+  }
+
+  bool operator!=(SrcLoc o) const { return !(*this == o); }
+
+  SrcPos start;
+  SrcPos past;
+};
+
+std::string show(SrcLoc);
 
 }
 
-#include "hphp/runtime/base/tv-conversions-inl.h"
+//////////////////////////////////////////////////////////////////////
+
+}}
 
 #endif

@@ -13,33 +13,40 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
-#define incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
+#ifndef incl_HHBBC_DEBUG_H_
+#define incl_HHBBC_DEBUG_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/util/trace.h"
+#include "hphp/hhbbc/representation.h"
 
-namespace HPHP {
+namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Convert a cell to various types, without changing the Cell.
+ * Dump the entire program to a temporary directory as readable text.
  */
-bool cellToBool(Cell);
-int64_t cellToInt(Cell);
-double cellToDouble(double);
+void debug_dump_program(const php::Program&);
 
 /*
- * Convert a string to a TypedNum following php semantics, allowing
- * strings that have only a partial number in them.  (I.e. the string
- * may have junk after the number.)
+ * Utilities for printing the state of the program after various
+ * transformations.
  */
-TypedNum stringToNumeric(const StringData*);
 
-//////////////////////////////////////////////////////////////////////
-
+inline void banner(const char* what) {
+  TRACE_SET_MOD(hhbbc);
+  FTRACE(2, "{:-^70}\n", what);
 }
 
-#include "hphp/runtime/base/tv-conversions-inl.h"
+inline void state_after(const char* when, const php::Program& program) {
+  TRACE_SET_MOD(hhbbc);
+  banner(when);
+  FTRACE(4, "{}", show(program));
+  banner("");
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}}
 
 #endif

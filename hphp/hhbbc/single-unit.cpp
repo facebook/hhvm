@@ -13,33 +13,50 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
-#define incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
+#include "hphp/hhbbc/hhbbc.h"
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/vm/unit.h"
 
-namespace HPHP {
+#include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/parse.h"
+#include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/emit.h"
+#include "hphp/hhbbc/abstract-interp.h"
 
-//////////////////////////////////////////////////////////////////////
+namespace HPHP { namespace HHBBC {
 
-/*
- * Convert a cell to various types, without changing the Cell.
- */
-bool cellToBool(Cell);
-int64_t cellToInt(Cell);
-double cellToDouble(double);
-
-/*
- * Convert a string to a TypedNum following php semantics, allowing
- * strings that have only a partial number in them.  (I.e. the string
- * may have junk after the number.)
- */
-TypedNum stringToNumeric(const StringData*);
+TRACE_SET_MOD(hhbbc);
 
 //////////////////////////////////////////////////////////////////////
 
+std::unique_ptr<UnitEmitter> single_unit(std::unique_ptr<UnitEmitter> input) {
+  trace_time timer("single unit");
+
+  php::Program program;
+  program.units.push_back(parse_unit(*input));
+  auto const u = borrow(program.units[0]);
+
+  // Single-unit index.
+  Index index{u};
+
+  // Visit each method in the unit, except the pseudomain, which isn't
+  // supported for anything yet.
+  for (auto& c : u->classes) {
+    for (auto& m : c->methods) {
+      analyze_and_optimize_func(index, Context { u, borrow(m), borrow(c) });
+    }
+    assert(check(*c));
+  }
+  for (auto& f : u->funcs) {
+    analyze_and_optimize_func(index, Context { u, borrow(f) });
+    assert(check(*f));
+  }
+
+  assert(check(*u));
+  return emit_unit(*u);
 }
 
-#include "hphp/runtime/base/tv-conversions-inl.h"
+//////////////////////////////////////////////////////////////////////
 
-#endif
+}}
+

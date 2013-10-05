@@ -13,33 +13,25 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
-#define incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
+#include <gtest/gtest.h>
+#include "hphp/hhvm/process-init.h"
+#include "hphp/util/current-executable.h"
 
-#include "hphp/runtime/base/complex-types.h"
+#include <string>
 
-namespace HPHP {
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Convert a cell to various types, without changing the Cell.
- */
-bool cellToBool(Cell);
-int64_t cellToInt(Cell);
-double cellToDouble(double);
-
-/*
- * Convert a string to a TypedNum following php semantics, allowing
- * strings that have only a partial number in them.  (I.e. the string
- * may have junk after the number.)
- */
-TypedNum stringToNumeric(const StringData*);
-
-//////////////////////////////////////////////////////////////////////
-
+int main(int argc, char** argv) {
+  std::string buf = HPHP::current_executable_path();
+  if (!buf.empty()) {
+    size_t idx = buf.length();
+    for (int i = 0; i < 3; i++) {
+      idx = buf.find_last_of('/', idx - 1);
+      assert(idx != std::string::npos);
+    }
+    std::string slib = buf.substr(0, idx);
+    slib += "/runtime/ext_hhvm/systemlib.php";
+    setenv("HHVM_SYSTEMLIB", slib.c_str(), true);
+  }
+  testing::InitGoogleTest(&argc, argv);
+  HPHP::init_for_unit_test();
+  return RUN_ALL_TESTS();
 }
-
-#include "hphp/runtime/base/tv-conversions-inl.h"
-
-#endif

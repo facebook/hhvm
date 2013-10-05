@@ -74,6 +74,7 @@
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
 #include "hphp/compiler/parser/parser.h"
+#include "hphp/hhbbc/hhbbc.h"
 
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
@@ -103,6 +104,7 @@
 #include <iomanip>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 namespace HPHP {
 namespace Compiler {
@@ -1684,6 +1686,9 @@ void EmitterVisitor::visit(FileScopePtr file) {
     TypedValue mainReturn;
     mainReturn.m_type = KindOfInvalid;
     bool notMergeOnly = false;
+
+    if (Option::UseHHBBC && SystemLib::s_inited) notMergeOnly = true;
+
     for (i = 0; i < nk; i++) {
       StatementPtr s = (*stmts)[i];
       switch (s->getKindOf()) {
@@ -7897,7 +7902,7 @@ static void addEmitterWorker(AnalysisResultPtr ar, StatementPtr sp,
   ((JobQueueDispatcher<EmitterWorker>*)data)->enqueue(sp->getFileScope());
 }
 
-static void batchCommit(std::vector<UnitEmitter*>& ues) {
+static void batchCommit(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   assert(Option::GenerateBinaryHHBC);
   Repo& repo = Repo::get();
 
@@ -7907,10 +7912,8 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
   {
     RepoTxn txn(repo);
 
-    for (std::vector<UnitEmitter*>::const_iterator it = ues.begin();
-         it != ues.end(); ++it) {
-      UnitEmitter* ue = *it;
-      if (repo.insertUnit(ue, UnitOrigin::File, txn)) {
+    for (auto& ue : ues) {
+      if (repo.insertUnit(ue.get(), UnitOrigin::File, txn)) {
         err = true;
         break;
       }
@@ -7920,15 +7923,12 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
     }
   }
 
-  // Clean up.
-  for (auto ue : ues) {
-    // Commit units individually if an error occurred during batch commit.
-    if (err) {
-      repo.commitUnit(ue, UnitOrigin::File);
+  // Commit units individually if an error occurred during batch commit.
+  if (err) {
+    for (auto& ue : ues) {
+      repo.commitUnit(ue.get(), UnitOrigin::File);
     }
-    delete ue;
   }
-  ues.clear();
 }
 
 static void commitLitstrs() {
@@ -7938,7 +7938,7 @@ static void commitLitstrs() {
   txn.commit();
 }
 
-/**
+/*
  * This is the entry point for offline bytecode generation.
  */
 void emitAllHHBC(AnalysisResultPtr ar) {
@@ -7965,6 +7965,8 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   dispatcher.start();
   ar->visitFiles(addEmitterWorker, &dispatcher);
 
+  std::vector<std::unique_ptr<UnitEmitter>> ues;
+
   if (Option::GenerateBinaryHHBC) {
     // kBatchSize needs to strike a balance between reducing transaction commit
     // overhead (bigger batches are better), and limiting the cost incurred by
@@ -7972,7 +7974,6 @@ void emitAllHHBC(AnalysisResultPtr ar) {
     // (smaller batches have less to lose).  Empirical results indicate that a
     // value in the 2-10 range is reasonable.
     static const unsigned kBatchSize = 8;
-    std::vector<UnitEmitter*> ues;
 
     // Gather up units created by the worker threads and commit them in
     // batches.
@@ -7983,22 +7984,36 @@ void emitAllHHBC(AnalysisResultPtr ar) {
       // if it gets ahead of the workers.
       UnitEmitter* ue = s_ueq.tryPop(0, 100 * 1000 * 1000);
       if ((didPop = (ue != nullptr))) {
-        ues.push_back(ue);
+        ues.push_back(std::unique_ptr<UnitEmitter>{ue});
       }
-      if (ues.size() == kBatchSize
-          || (!didPop && inShutdown && ues.size() > 0)) {
-        batchCommit(ues);
+      if (!Option::UseHHBBC &&
+          (ues.size() == kBatchSize ||
+           (!didPop && inShutdown && ues.size() > 0))) {
+        batchCommit(std::move(ues));
       }
       if (!inShutdown) {
         inShutdown = dispatcher.pollEmpty();
       } else if (!didPop) {
-        assert(ues.size() == 0);
+        assert(Option::UseHHBBC || ues.size() == 0);
         break;
       }
     }
-    commitLitstrs();
+
+    if (!Option::UseHHBBC) commitLitstrs();
   } else {
     dispatcher.waitEmpty();
+  }
+
+  assert(Option::UseHHBBC || ues.empty());
+  if (Option::UseHHBBC) {
+    // TODO: drop all the AST structures to free up their memory?
+    // RuntimeOption::EvalJitEnableRenameFunction =
+    //   Option::JitEnableRenameFunction;
+    HHBBC::Options opts;
+    opts.InterceptableFunctions = Option::DynamicInvokeFunctions;
+    ues = HHBBC::whole_program(std::move(ues), opts);
+    batchCommit(std::move(ues));
+    commitLitstrs();
   }
 }
 
@@ -8041,7 +8056,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     }
     SCOPE_EXIT { SymbolTable::Purge(); };
 
-    UnitEmitter* ue = nullptr;
+    std::unique_ptr<UnitEmitter> ue;
     // Check if this file contains raw hip hop bytecode instead of php.
     // For now this is just dictated by file extension, and doesn't ever
     // commit to the repo.
@@ -8049,7 +8064,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       if (const char* dot = strrchr(filename, '.')) {
         const char hhbc_ext[] = "hhas";
         if (!strcmp(dot + 1, hhbc_ext)) {
-          ue = assemble_string(code, codeLen, filename, md5);
+          ue.reset(assemble_string(code, codeLen, filename, md5));
         }
       }
     }
@@ -8065,11 +8080,16 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       ar->setPhase(AnalysisResult::AnalyzeAll);
       fsp->analyzeProgram(ar);
 
-      ue = emitHHBCUnitEmitter(ar, fsp, md5);
+      ue.reset(emitHHBCUnitEmitter(ar, fsp, md5));
+      if (Option::UseHHBBC && SystemLib::s_inited) {
+        ue = HHBBC::single_unit(std::move(ue));
+      }
     }
-    Repo::get().commitUnit(ue, unitOrigin);
-    Unit* unit = ue->create();
-    delete ue;
+    Repo::get().commitUnit(ue.get(), unitOrigin);
+
+    auto const unit = ue->create();
+    ue.reset();
+
     if (unit->sn() == -1) {
       // the unit was not committed to the Repo, probably because
       // another thread did it first. Try to use the winner.

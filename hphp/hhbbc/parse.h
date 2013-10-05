@@ -13,33 +13,23 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
-#define incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
+#ifndef incl_HHBBC_PARSE_H_
+#define incl_HHBBC_PARSE_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include <vector>
+#include <memory>
 
-namespace HPHP {
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Convert a cell to various types, without changing the Cell.
- */
-bool cellToBool(Cell);
-int64_t cellToInt(Cell);
-double cellToDouble(double);
-
-/*
- * Convert a string to a TypedNum following php semantics, allowing
- * strings that have only a partial number in them.  (I.e. the string
- * may have junk after the number.)
- */
-TypedNum stringToNumeric(const StringData*);
+namespace HPHP { struct UnitEmitter; }
+namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-}
+namespace php { struct Unit; }
 
-#include "hphp/runtime/base/tv-conversions-inl.h"
+std::unique_ptr<php::Unit> parse_unit(const UnitEmitter&);
+
+//////////////////////////////////////////////////////////////////////
+
+}}
 
 #endif

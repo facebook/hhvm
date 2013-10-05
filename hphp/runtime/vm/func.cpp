@@ -652,8 +652,8 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
       }
       pi->type = fpi.typeConstraint().hasConstraint() ?
         fpi.typeConstraint().typeName()->data() : "";
-      for (UserAttributeMap::const_iterator it = fpi.userAttributes().begin();
-           it != fpi.userAttributes().end(); ++it) {
+      for (auto it = fpi.userAttributes().begin();
+          it != fpi.userAttributes().end(); ++it) {
         // convert the typedvalue to a cvarref and push into pi.
         auto userAttr = new ClassInfo::UserAttributeInfo;
         assert(it->first->isStatic());

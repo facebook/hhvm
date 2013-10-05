@@ -5631,8 +5631,7 @@ void EmitterVisitor::emitPostponedMeths() {
 void EmitterVisitor::bindUserAttributes(MethodStatementPtr meth,
                                         FuncEmitter *fe,
                                         bool &allowOverride) {
-  const FunctionScope::UserAttributeMap& userAttrs =
-    meth->getFunctionScope()->userAttributes();
+  auto const& userAttrs = meth->getFunctionScope()->userAttributes();
   for (auto& attr : userAttrs) {
     if (attr.first == "__Overridable") {
       allowOverride = true;
@@ -6724,9 +6723,8 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
   for (size_t i = 0; i < usedTraits.size(); i++) {
     pce->addUsedTrait(makeStaticString(usedTraits[i]));
   }
-  const ClassScope::UserAttributeMap& userAttrs = cNode->userAttributes();
-  for (ClassScope::UserAttributeMap::const_iterator it = userAttrs.begin();
-       it != userAttrs.end(); ++it) {
+  auto const& userAttrs = cNode->userAttributes();
+  for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
     const StringData* uaName = makeStaticString(it->first);
     ExpressionPtr uaValue = it->second;
     assert(uaValue);

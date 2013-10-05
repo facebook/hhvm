@@ -45,6 +45,17 @@ typedef hphp_hash_set<const StringData*, string_data_hash,
                       string_data_isame> TraitNameSet;
 typedef hphp_hash_set<const Class*, pointer_hash<Class> > ClassSet;
 
+/*
+ * User attributes on various runtime structures are stored in this
+ * map, currently.
+ */
+typedef hphp_hash_map<
+  const StringData*,
+  TypedValue,
+  string_data_hash,
+  string_data_isame
+> UserAttributeMap;
+
 typedef ObjectData*(*BuiltinCtorFunction)(Class*);
 
 /*
@@ -231,8 +242,6 @@ class PreClass : public AtomicCountable {
   typedef FixedVector<const StringData*> UsedTraitVec;
   typedef FixedVector<TraitPrecRule> TraitPrecRuleVec;
   typedef FixedVector<TraitAliasRule> TraitAliasRuleVec;
-  typedef hphp_hash_map<const StringData*, TypedValue, string_data_hash,
-                        string_data_isame> UserAttributeMap;
 
   PreClass(Unit* unit, int line1, int line2, Offset o, const StringData* n,
            Attr attrs, const StringData* parent, const StringData* docComment,

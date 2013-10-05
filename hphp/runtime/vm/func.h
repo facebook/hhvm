@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_VM_FUNC_H_
 #define incl_HPHP_VM_FUNC_H_
 
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
@@ -47,9 +49,6 @@ typedef std::vector<std::pair<int,Offset> > DVFuncletsVec;
  */
 struct Func {
   friend class FuncEmitter;
-
-  typedef hphp_hash_map<const StringData*, TypedValue, string_data_hash,
-                        string_data_isame> UserAttributeMap;
 
   struct ParamInfo { // Parameter default value info.
     // construct a dummy ParamInfo
@@ -106,10 +105,10 @@ struct Func {
     void addUserAttribute(const StringData* name, TypedValue tv) {
       m_userAttributes[name] = tv;
     }
-    void setUserAttributes(const Func::UserAttributeMap& uaMap) {
+    void setUserAttributes(const UserAttributeMap& uaMap) {
       m_userAttributes = uaMap;
     }
-    const Func::UserAttributeMap& userAttributes() const {
+    const UserAttributeMap& userAttributes() const {
       return m_userAttributes;
     }
     void setUserType(const StringData* userType) {
@@ -127,7 +126,7 @@ struct Func {
     const StringData* m_phpCode; // eval'able PHP code.
     TypeConstraint m_typeConstraint;
 
-    Func::UserAttributeMap m_userAttributes;
+    UserAttributeMap m_userAttributes;
     // the type the user typed in source code, contains type parameters and all
     const StringData* m_userType;
   };
@@ -731,7 +730,7 @@ private:
   bool m_containsCalls;
   bool m_isAsync;
 
-  Func::UserAttributeMap m_userAttributes;
+  UserAttributeMap m_userAttributes;
 
   const ClassInfo::MethodInfo* m_info;
   BuiltinFunction m_builtinFuncPtr;

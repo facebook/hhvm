@@ -499,8 +499,7 @@ static void set_function_info(Array &ret, const Func* func) {
   // user attributes
   {
     Array arr = Array::Create();
-    Func::UserAttributeMap::const_iterator it;
-    for (it = func->userAttributes().begin();
+    for (auto it = func->userAttributes().begin();
          it != func->userAttributes().end(); ++it) {
       arr.set(String(const_cast<StringData*>(it->first)),
               tvAsCVarRef(&it->second));
@@ -920,8 +919,7 @@ Array f_hphp_get_class_info(CVarRef name) {
   {
     Array arr = Array::Create();
     const PreClass* pcls = cls->preClass();
-    PreClass::UserAttributeMap::const_iterator it;
-    for (it = pcls->userAttributes().begin();
+    for (auto it = pcls->userAttributes().begin();
          it != pcls->userAttributes().end(); ++it) {
       arr.set(String(const_cast<StringData*>(it->first)),
               tvAsCVarRef(&it->second));

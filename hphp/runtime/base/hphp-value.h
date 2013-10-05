@@ -16,11 +16,6 @@
 #ifndef incl_HPHP_HPHPVALUE_H_
 #define incl_HPHP_HPHPVALUE_H_
 
-#ifndef incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
-#error Directly including 'hphp_value.h' is prohibited. \
-       Include 'complex-types.h' instead.
-#endif
-
 #include <type_traits>
 
 #include "hphp/runtime/base/types.h"

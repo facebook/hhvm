@@ -91,6 +91,9 @@ trait StrictIterable {
     }
     return $arr;
   }
+  public function toValuesArray() {
+    return $this->toArray();
+  }
   public function toVector() {
     return new Vector($this);
   }
@@ -134,6 +137,20 @@ trait StrictKeyedIterable {
     $arr = array();
     foreach ($this as $k => $v) {
       $arr[$k] = $v;
+    }
+    return $arr;
+  }
+  public function toValuesArray() {
+    $arr = array();
+    foreach ($this as $v) {
+      $arr[] = $v;
+    }
+    return $arr;
+  }
+  public function toKeysArray() {
+    $arr = array();
+    foreach ($this as $k => $_) {
+      $arr[] = $k;
     }
     return $arr;
   }
@@ -214,6 +231,9 @@ trait LazyIterable {
     }
     return $arr;
   }
+  public function toValuesArray() {
+    return $this->toArray();
+  }
   public function toVector() {
     return new Vector($this);
   }
@@ -242,6 +262,20 @@ trait LazyKeyedIterable {
     $arr = array();
     foreach ($this as $k => $v) {
       $arr[$k] = $v;
+    }
+    return $arr;
+  }
+  public function toValuesArray() {
+    $arr = array();
+    foreach ($this as $v) {
+      $arr[] = $v;
+    }
+    return $arr;
+  }
+  public function toKeysArray() {
+    $arr = array();
+    foreach ($this as $k => $_) {
+      $arr[] = $k;
     }
     return $arr;
   }
@@ -800,6 +834,9 @@ class LazyIterableView implements Iterable {
     }
     return $arr;
   }
+  public function toValuesArray() {
+    return $this->toArray();
+  }
   public function toVector() {
     return $this->iterable->toVector();
   }
@@ -832,6 +869,20 @@ class LazyKeyedIterableView implements KeyedIterable {
     $arr = array();
     foreach ($this->iterable as $k => $v) {
       $arr[$k] = $v;
+    }
+    return $arr;
+  }
+  public function toValuesArray() {
+    $arr = array();
+    foreach ($this->iterable as $v) {
+      $arr[] = $v;
+    }
+    return $arr;
+  }
+  public function toKeysArray() {
+    $arr = array();
+    foreach ($this->iterable as $k => $_) {
+      $arr[] = $k;
     }
     return $arr;
   }

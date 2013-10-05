@@ -2412,7 +2412,7 @@ SSATmp* HhbcTranslator::genClsMethodCtx(const Func* callee, const Class* cls) {
     // DefConst or LdClsCached.
     return gen(LdCls, cns(cls->name()), cns(curClass()));
   }
-  if (m_tb->isThisAvailable()) {
+  if (m_tb->thisAvailable()) {
     // might not be a static call and $this is available, so we know it's
     // definitely not static
     assert(curClass());

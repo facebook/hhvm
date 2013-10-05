@@ -1977,7 +1977,7 @@ void parse(AsmState& as) {
 
 //////////////////////////////////////////////////////////////////////
 
-UnitEmitter* assemble_string(const char*code, int codeLen,
+UnitEmitter* assemble_string(const char* code, int codeLen,
                              const char* filename, const MD5& md5) {
   std::unique_ptr<UnitEmitter> ue(new UnitEmitter(md5));
   StringData* sd = makeStaticString(filename);

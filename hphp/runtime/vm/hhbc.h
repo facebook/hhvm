@@ -287,6 +287,20 @@ inline bool memberCodeImmIsInt(MemberCode mc) {
   return mc == MEI;
 }
 
+enum class MCodeImm { None, Int, String, Local };
+inline MCodeImm memberCodeImmType(MemberCode mc) {
+  if (!memberCodeHasImm(mc))     return MCodeImm::None;
+  if (memberCodeImmIsLoc(mc))    return MCodeImm::Local;
+  if (memberCodeImmIsString(mc)) return MCodeImm::String;
+  if (memberCodeImmIsInt(mc))    return MCodeImm::Int;
+  not_reached();
+}
+
+
+inline int mcodeStackVals(MemberCode mc) {
+  return !memberCodeHasImm(mc) && mc != MW ? 1 : 0;
+}
+
 // Returns string representation of `mc'.  (Pointer to internal static
 // data, does not need to be freed.)
 const char* memberCodeString(MemberCode mc);
@@ -307,6 +321,8 @@ enum IncDecOp {
   IncDec_invalid
 };
 
+// NB: right now hphp/hhbbc/abstract-interp.cpp depends on this enum
+// being in order from smaller types to larger ones.
 #define ASSERTT_OPS                             \
   ASSERTT_OP(Uninit)                            \
   ASSERTT_OP(InitNull)                          \
@@ -831,6 +847,7 @@ void encodeToVector(std::vector<uchar>& vec, T val) {
 void staticStreamer(const TypedValue* tv, std::stringstream& out);
 
 std::string instrToString(const Op* it, const Unit* u = nullptr);
+void staticArrayStreamer(ArrayData*, std::ostream&);
 const char* opcodeToName(Op op);
 
 // returns a pointer to the location within the bytecode containing the jump
@@ -961,7 +978,7 @@ inline bool isSwitch(Opcode op) {
 }
 
 template<typename L>
-void foreachSwitchTarget(Op* op, L func) {
+void foreachSwitchTarget(const Op* op, L func) {
   assert(isSwitch(*op));
   bool isStr = readData<Op>(op) == OpSSwitch;
   int32_t size = readData<int32_t>(op);

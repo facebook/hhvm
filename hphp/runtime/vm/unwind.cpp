@@ -120,14 +120,14 @@ UnwindAction checkHandlers(const EHEnt* eh,
             ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
           auto const obj = fault.m_userException;
           for (auto& idOff : eh->m_catches) {
+            FTRACE(1, "checkHandlers: catch candidate {}\n", idOff.second);
             auto handler = func->unit()->at(idOff.second);
-            FTRACE(1, "checkHandlers: catch candidate {}\n", handler);
             auto const cls = Unit::lookupClass(
               func->unit()->lookupNamedEntityId(idOff.first)
             );
             if (!cls || !obj->instanceof(cls)) continue;
 
-            FTRACE(1, "checkHandlers: entering catch at {}\n", pc);
+            FTRACE(1, "checkHandlers: entering catch at {}\n", idOff.second);
             pc = handler;
             DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
             return UnwindAction::ResumeVM;

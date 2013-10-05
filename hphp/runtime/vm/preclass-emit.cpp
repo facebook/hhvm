@@ -31,7 +31,7 @@ PreClassEmitter::Prop::Prop(const PreClassEmitter* pce,
                             Attr attrs,
                             const StringData* typeConstraint,
                             const StringData* docComment,
-                            TypedValue* val,
+                            const TypedValue* val,
                             DataType hphpcType)
   : m_name(n)
   , m_attrs(attrs)
@@ -96,7 +96,7 @@ bool PreClassEmitter::addMethod(FuncEmitter* method) {
 bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
                                   const StringData* typeConstraint,
                                   const StringData* docComment,
-                                  TypedValue* val,
+                                  const TypedValue* val,
                                   DataType hphpcType) {
   PropMap::Builder::const_iterator it = m_propMap.find(n);
   if (it != m_propMap.end()) {
@@ -118,7 +118,7 @@ PreClassEmitter::lookupProp(const StringData* propName) const {
 
 bool PreClassEmitter::addConstant(const StringData* n,
                                   const StringData* typeConstraint,
-                                  TypedValue* val,
+                                  const TypedValue* val,
                                   const StringData* phpCode) {
   ConstMap::Builder::const_iterator it = m_constMap.find(n);
   if (it != m_constMap.end()) {

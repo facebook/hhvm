@@ -43,7 +43,7 @@ class PreClassEmitter {
          Attr attrs,
          const StringData* typeConstraint,
          const StringData* docComment,
-         TypedValue* val,
+         const TypedValue* val,
          DataType hphpcType);
     ~Prop();
 
@@ -84,7 +84,7 @@ class PreClassEmitter {
       , m_phpCode(0)
     {}
     Const(const StringData* n, const StringData* typeConstraint,
-          TypedValue* val, const StringData* phpCode)
+          const TypedValue* val, const StringData* phpCode)
       : m_name(n), m_typeConstraint(typeConstraint), m_phpCode(phpCode) {
       memcpy(&m_val, val, sizeof(TypedValue));
     }
@@ -106,6 +106,9 @@ class PreClassEmitter {
     const StringData* m_phpCode;
   };
 
+  typedef IndexedStringMap<Prop,true,Slot> PropMap;
+  typedef IndexedStringMap<Const,true,Slot> ConstMap;
+
   PreClassEmitter(UnitEmitter& ue, Id id, const StringData* n,
                   PreClass::Hoistable hoistable);
   ~PreClassEmitter();
@@ -116,25 +119,50 @@ class PreClassEmitter {
   UnitEmitter& ue() const { return m_ue; }
   const StringData* name() const { return m_name; }
   Attr attrs() const { return m_attrs; }
+  void setAttrs(Attr attrs) { m_attrs = attrs; }
   void setHoistable(PreClass::Hoistable h) { m_hoistable = h; }
+  PreClass::Hoistable hositability() const { return m_hoistable; }
+  void setOffset(Offset off) { m_offset = off; }
   Id id() const { return m_id; }
   const MethodVec& methods() const { return m_methods; }
+  const PropMap::Builder& propMap() const { return m_propMap; }
+  const ConstMap::Builder& constMap() const { return m_constMap; }
+  const StringData* docComment() const { return m_docComment; }
+  const StringData* parentName() const { return m_parent; }
 
   void addInterface(const StringData* n);
+  const std::vector<const StringData*>& interfaces() const {
+    return m_interfaces;
+  }
   bool addMethod(FuncEmitter* method);
   bool addProperty(const StringData* n,
                    Attr attrs,
                    const StringData* typeConstraint,
                    const StringData* docComment,
-                   TypedValue* val,
+                   const TypedValue* val,
                    DataType hphpcType);
   const Prop& lookupProp(const StringData* propName) const;
   bool addConstant(const StringData* n, const StringData* typeConstraint,
-                   TypedValue* val, const StringData* phpCode);
+                   const TypedValue* val, const StringData* phpCode);
   void addUsedTrait(const StringData* traitName);
   void addTraitPrecRule(const PreClass::TraitPrecRule &rule);
   void addTraitAliasRule(const PreClass::TraitAliasRule &rule);
+  const std::vector<const StringData*>& usedTraits() const {
+    return m_usedTraits;
+  }
+  const std::vector<PreClass::TraitAliasRule>& traitAliasRules() const {
+    return m_traitAliasRules;
+  }
+  const std::vector<PreClass::TraitPrecRule>& traitPrecRules() const {
+    return m_traitPrecRules;
+  }
+
   void addUserAttribute(const StringData* name, TypedValue tv);
+  void setUserAttributes(UserAttributeMap map) {
+    m_userAttributes = std::move(map);
+  }
+  UserAttributeMap userAttributes() const { return m_userAttributes; }
+
   void commit(RepoTxn& txn) const;
 
   void setBuiltinClassInfo(const ClassInfo* info,
@@ -145,16 +173,18 @@ class PreClassEmitter {
 
   template<class SerDe> void serdeMetaData(SerDe&);
 
+  std::pair<int,int> getLocation() const {
+    return std::make_pair(m_line1, m_line2);
+  }
+
  private:
-  typedef IndexedStringMap<Prop,true,Slot> PropMap;
-  typedef IndexedStringMap<Const,true,Slot> ConstMap;
   typedef hphp_hash_map<const StringData*, FuncEmitter*, string_data_hash,
                         string_data_isame> MethodMap;
 
   UnitEmitter& m_ue;
   int m_line1;
   int m_line2;
-  Offset m_offset;
+  Offset m_offset;  // offset of the DefCls for this class
   const StringData* m_name;
   Attr m_attrs;
   const StringData* m_parent;

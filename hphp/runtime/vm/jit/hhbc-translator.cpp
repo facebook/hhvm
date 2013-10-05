@@ -3775,7 +3775,7 @@ static folly::Optional<Type> assertOpToType(AssertTOp op) {
   // type assertions in some cases:
   case AssertTOp::InitUnc:    return folly::none;
   case AssertTOp::Unc:        return folly::none;
-  case AssertTOp::InitCell:   return Type::Cell;
+  case AssertTOp::InitCell:   return Type::Cell; // - Type::Uninit
   }
   not_reached();
 }

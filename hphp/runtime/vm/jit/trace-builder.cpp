@@ -90,11 +90,11 @@ SSATmp* TraceBuilder::genDefNull() {
 }
 
 SSATmp* TraceBuilder::genPtrToInitNull() {
-  return gen(DefConst, Type::PtrToUninit, ConstData(&null_variant));
+  return gen(DefConst, Type::PtrToInitNull, ConstData(&init_null_variant));
 }
 
 SSATmp* TraceBuilder::genPtrToUninit() {
-  return gen(DefConst, Type::PtrToInitNull, ConstData(&init_null_variant));
+  return gen(DefConst, Type::PtrToUninit, ConstData(&null_variant));
 }
 
 SSATmp* TraceBuilder::genDefNone() {

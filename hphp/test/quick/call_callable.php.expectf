@@ -37,4 +37,4 @@ intval called statically
 int(10)
 inst_intval called on instance
 int(10)
-HipHop Fatal error: Undefined function: C::intval in %s on line %d
+HipHop Fatal error: Invalid callable (array) in %s on line %d

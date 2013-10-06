@@ -281,6 +281,7 @@ struct HhbcTranslator {
                       int32_t fallbackFuncId);
   void emitFPushFunc(int32_t numParams);
   void emitFPushFuncObj(int32_t numParams);
+  void emitFPushFuncArr(int32_t numParams);
   SSATmp* genClsMethodCtx(const Func* callee, const Class* cls);
   void emitFPushClsMethodD(int32_t numParams,
                            int32_t methodNameStrId,

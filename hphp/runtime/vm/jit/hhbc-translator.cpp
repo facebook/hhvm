@@ -2303,6 +2303,11 @@ void HhbcTranslator::emitFPushFunc(int32_t numParams) {
   if (topC()->isA(Type::Obj)) {
     return emitFPushFuncObj(numParams);
   }
+
+  if (topC()->isA(Type::Arr)) {
+    return emitFPushFuncArr(numParams);
+  }
+
   if (!topC()->isA(Type::Str)) {
     PUNT(FPushFunc_not_Str);
   }
@@ -2321,6 +2326,27 @@ void HhbcTranslator::emitFPushFuncObj(int32_t numParams) {
   auto const cls      = gen(LdObjClass, obj);
   auto const func     = gen(LdObjInvoke, slowExit, cls);
   emitFPushActRec(func, obj, numParams, nullptr);
+}
+
+void HhbcTranslator::emitFPushFuncArr(int32_t numParams) {
+  auto const thisAR = m_tb->fp();
+
+  auto const catchBlock = makeCatch();
+  auto const arr      = popC();
+  emitFPushActRec(
+    m_tb->genDefNull(),
+    m_tb->genDefInitNull(),
+    numParams,
+    nullptr);
+  auto const actRec = spillStack();
+
+  // This is special. We need to move the stackpointer incase LdArrFuncCtx
+  // calls a destructor. Otherwise it would clobber the ActRec we just
+  // pushed.
+  updateMarker();
+
+  gen(LdArrFuncCtx, catchBlock, arr, actRec, thisAR);
+  gen(DecRef, arr);
 }
 
 void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,

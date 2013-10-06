@@ -296,7 +296,8 @@ CALL_OPCODE(NewArray)
 CALL_OPCODE(NewPackedArray)
 CALL_OPCODE(NewCol)
 CALL_OPCODE(AllocObj)
-CALL_OPCODE(LdClsCtor);
+CALL_OPCODE(LdClsCtor)
+CALL_OPCODE(LdArrFuncCtx)
 CALL_OPCODE(PrintStr)
 CALL_OPCODE(PrintInt)
 CALL_OPCODE(PrintBool)
@@ -870,9 +871,10 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
 
   auto const dest = [&]() -> CallDest {
     switch (info.dest) {
-    case DestType::None:  return kVoidDest;
-    case DestType::TV:    return callDestTV(inst->dst(0));
-    case DestType::SSA:   return callDest(inst->dst(0));
+      case DestType::None:  return kVoidDest;
+      case DestType::TV:    return callDestTV(inst->dst(0));
+      case DestType::SSA:   return callDest(inst->dst(0));
+      case DestType::SSA2:  return callDest2(inst->dst(0));
     }
     not_reached();
   }();
@@ -893,6 +895,11 @@ CallDest CodeGenerator::callDest(SSATmp* ssa) const {
 CallDest CodeGenerator::callDestTV(SSATmp* ssa) const {
   if (!ssa) return kVoidDest;
   return { DestType::TV, m_regs[ssa].reg(0), m_regs[ssa].reg(1) };
+}
+
+CallDest CodeGenerator::callDest2(SSATmp* ssa) const {
+  if (!ssa) return kVoidDest;
+  return { DestType::SSA2, m_regs[ssa].reg(0), m_regs[ssa].reg(1) };
 }
 
 void CodeGenerator::cgCallHelper(Asm& a,
@@ -964,6 +971,11 @@ void CodeGenerator::cgCallHelper(Asm& a,
     // copy the single-register result to dstReg0
     assert(dstReg1 == InvalidReg);
     if (dstReg0 != InvalidReg) emitMovRegReg(a, reg::rax, dstReg0);
+    return;
+  case DestType::SSA2:
+    // copy both values into dest registers
+    assert(dstReg0 != InvalidReg && dstReg1 != InvalidReg);
+    shuffle2(a, reg::rax, reg::rdx, dstReg0, dstReg1);
     return;
   case DestType::None:
     // void return type, no registers have values

@@ -36,8 +36,9 @@ constexpr SyncOptions SNone = SyncOptions::kNoSyncPoint;
 constexpr SyncOptions SSync = SyncOptions::kSyncPoint;
 constexpr SyncOptions SSyncAdj1 = SyncOptions::kSyncPointAdjustOne;
 
-constexpr DestType DSSA = DestType::SSA;
-constexpr DestType DTV = DestType::TV;
+constexpr DestType DSSA  = DestType::SSA;
+constexpr DestType DSSA2 = DestType::SSA2;
+constexpr DestType DTV   = DestType::TV;
 constexpr DestType DNone = DestType::None;
 
 template<class EDType, class MemberType>
@@ -87,8 +88,9 @@ auto constexpr MemberKeyIS = ArgType::MemberKeyIS;
  *     fssa(idx)                   - Use a const TCA from inst->src(idx)
  *
  * Dest
- *   DSSA - The helper returns a single-register value
- *   DTV  - The helper returns a TypedValue in two registers
+ *   DSSA  - The helper returns a single-register value
+ *   DSSA2 - The helper returns a two-register value
+ *   DTV   - The helper returns a TypedValue in two registers
  *   DNone - The helper does not return a value
  *
  * SyncPoint
@@ -188,6 +190,8 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
                            {{SSA, 0}}},
+    {LdArrFuncCtx,       loadArrayFunctionContext, DNone, SSync,
+                         {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {PrintStr,           print_string, DNone, SNone, {{SSA, 0}}},
     {PrintInt,           print_int, DNone, SNone, {{SSA, 0}}},
     {PrintBool,          print_boolean, DNone, SNone, {{SSA, 0}}},

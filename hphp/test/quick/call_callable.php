@@ -86,6 +86,7 @@ function test_invocation_syntaxes() {
   $call_magic_static_string = 'CMagic::intval';
   $call_magic_instance = array($inst_magic, 'inst_intval');
   $call_magic_closure = function($x) {return CMagic::intval($x);};
+  $call_invalid = array('C', 'noSuchMethod');
 
   echo "* call_user_func ********************\n";
   var_dump(call_user_func($call_func_string, $test));
@@ -111,6 +112,7 @@ function test_invocation_syntaxes() {
   var_dump($call_magic_static_arr($test));
   var_dump($call_magic_instance($test));
 
+  var_dump($call_invalid($test)); // fatals
   var_dump($call_static_string($test)); // fatals
 }
 

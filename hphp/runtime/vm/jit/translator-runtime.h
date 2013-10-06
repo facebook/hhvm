@@ -125,6 +125,8 @@ Cell lookupCnsUHelper(const TypedValue* tv,
 void checkFrame(ActRec* fp, Cell* sp, bool checkLocals);
 void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip);
 
+void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp);
+
 const Func* lookupUnknownFunc(const StringData*);
 
 Class* lookupKnownClass(Class** cache, const StringData* clsName);

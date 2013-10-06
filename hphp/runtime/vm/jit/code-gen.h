@@ -33,6 +33,7 @@ struct ArgGroup;
 enum class DestType : unsigned {
   None,  // return void (no valid registers)
   SSA,   // return a single-register value
+  SSA2,  // return a two-register value (pair)
   TV     // return a TypedValue packed in two registers
 };
 
@@ -159,6 +160,7 @@ private:
   CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
   CallDest callDest(SSATmp* dst) const;
   CallDest callDestTV(SSATmp* dst) const;
+  CallDest callDest2(SSATmp* dst) const;
 
   // Main call helper:
   void cgCallHelper(Asm& a,

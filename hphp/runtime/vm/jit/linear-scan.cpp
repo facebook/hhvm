@@ -279,6 +279,7 @@ void LinearScan::StateSave::restore(LinearScan* ls) {
 
 LinearScan::LinearScan(IRUnit& unit)
   : m_unit(unit)
+  , m_idoms(unit, nullptr)
   , m_spillSlots(unit, -1)
   , m_lifetime(unit)
   , m_linear(m_lifetime.linear)
@@ -1080,7 +1081,7 @@ RegAllocInfo LinearScan::allocRegs(LifetimeInfo* lifetime) {
   }
 
   m_blocks = rpoSortCfg(m_unit);
-  m_idoms = findDominators(m_blocks);
+  m_idoms = findDominators(m_unit, m_blocks);
 
   if (!packed_tv) {
     findFullXMMCandidates();

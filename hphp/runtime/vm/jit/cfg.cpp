@@ -49,70 +49,66 @@ bool isRPOSorted(const BlockList& blocks) {
 /*
  * Find the immediate dominator of each block using Cooper, Harvey, and
  * Kennedy's "A Simple, Fast Dominance Algorithm", returned as a vector
- * of postorder ids, indexed by postorder id.
+ * of Block*, indexed by block.  IdomVector[b] == nullptr if b has no
+ * dominator.  This is the case for the entry block and any blocks not
+ * reachable from the entry block.
  */
-IdomVector findDominators(const BlockList& blocks) {
+IdomVector findDominators(const IRUnit& unit, const BlockList& blocks) {
   assert(isRPOSorted(blocks));
 
   // Calculate immediate dominators with the iterative two-finger algorithm.
   // When it terminates, idom[post-id] will contain the post-id of the
   // immediate dominator of each block.  idom[start] will be -1.  This is
   // the general algorithm but it will only loop twice for loop-free graphs.
-  auto const num_blocks = blocks.size();
-  IdomVector idom(num_blocks, -1);
+  IdomVector idom(unit, nullptr);
   auto start = blocks.begin();
-  int start_id = (*start)->postId();
-  idom[start_id] = start_id;
+  auto entry = *start;
+  idom[entry] = entry;
   start++;
   for (bool changed = true; changed; ) {
     changed = false;
     // for each block after start, in reverse postorder
     for (auto it = start; it != blocks.end(); it++) {
       Block* block = *it;
-      int b = block->postId();
-      // new_idom = any already-processed predecessor
-      auto edge_it = block->preds().begin();
-      int new_idom = edge_it->from()->postId();
-      while (idom[new_idom] == -1) new_idom = (++edge_it)->from()->postId();
-      // for all other already-processed predecessors p of b
-      for (auto& edge : block->preds()) {
-        auto p = edge.from()->postId();
-        if (p != new_idom && idom[p] != -1) {
-          // find earliest common predecessor of p and new_idom
-          // (higher postIds are earlier in flow and in dom-tree).
-          int b1 = p, b2 = new_idom;
-          do {
-            while (b1 < b2) b1 = idom[b1];
-            while (b2 < b1) b2 = idom[b2];
-          } while (b1 != b2);
-          new_idom = b1;
-        }
+      // p1 = any already-processed predecessor
+      auto predIter = block->preds().begin();
+      auto predEnd = block->preds().end();
+      auto p1 = predIter->from();
+      while (!idom[p1]) p1 = (++predIter)->from();
+      // for all other already-processed predecessors p2 of block
+      for (++predIter; predIter != predEnd; ++predIter) {
+        auto p2 = predIter->from();
+        if (p2 == p1 || !idom[p2]) continue;
+        // find earliest common predecessor of p1 and p2
+        // (higher postIds are earlier in flow and in dom-tree).
+        do {
+          while (p1->postId() < p2->postId()) p1 = idom[p1];
+          while (p2->postId() < p1->postId()) p2 = idom[p2];
+        } while (p1 != p2);
       }
-      if (idom[b] != new_idom) {
-        idom[b] = new_idom;
+      if (idom[block] != p1) {
+        idom[block] = p1;
         changed = true;
       }
     }
   }
-  idom[start_id] = -1; // start has no idom.
+  idom[entry] = nullptr; // entry has no dominator.
   return idom;
 }
 
-DomChildren findDomChildren(const BlockList& blocks) {
-  IdomVector idom = findDominators(blocks);
-  DomChildren children(blocks.size(), BlockList());
+DomChildren findDomChildren(const IRUnit& unit, const BlockList& blocks) {
+  IdomVector idom = findDominators(unit, blocks);
+  DomChildren children(unit, BlockList());
   for (Block* block : blocks) {
-    int idom_id = idom[block->postId()];
-    if (idom_id != -1) children[idom_id].push_back(block);
+    auto idomBlock = idom[block];
+    if (idomBlock) children[idomBlock].push_back(block);
   }
   return children;
 }
 
 bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
-  int p1 = b1->postId();
-  int p2 = b2->postId();
-  for (int i = p2; i != -1; i = idoms[i]) {
-    if (i == p1) return true;
+  for (auto b = b2; b != nullptr; b = idoms[b]) {
+    if (b == b1) return true;
   }
   return false;
 }

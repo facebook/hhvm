@@ -963,7 +963,7 @@ void TraceBuilder::reoptimize() {
   if (!m_enableCse && !m_enableSimplification) return;
 
   BlockList sortedBlocks = rpoSortCfg(m_unit);
-  auto const idoms = findDominators(sortedBlocks);
+  auto const idoms = findDominators(m_unit, sortedBlocks);
   clearTrackedState();
 
   auto blocks = std::move(m_curTrace->blocks());

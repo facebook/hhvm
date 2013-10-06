@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/ir-trace.h"
+#include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP { namespace JIT {
 
@@ -60,20 +61,19 @@ bool isRPOSorted(const BlockList&);
  *
  * Pre: isRPOSorted(blocks)
  */
-typedef smart::vector<int> IdomVector;
-IdomVector findDominators(const BlockList& blocks);
+typedef StateVector<Block,Block*> IdomVector;
+IdomVector findDominators(const IRUnit&, const BlockList& blocks);
 
 /*
- * A vector of children lists, indexed by block->postId()
+ * A vector of children lists, indexed by block
  */
-typedef smart::vector<BlockList> DomChildren;
+typedef StateVector<Block,BlockList> DomChildren;
 
 /*
  * Compute the dominator tree, then populate a list of dominator children
- * for each block.  Note that DomChildren is indexed by block->postId(),
- * not block->id(); that's why we don't use StateVector here.
+ * for each block.
  */
-DomChildren findDomChildren(const BlockList& blocks);
+DomChildren findDomChildren(const IRUnit&, const BlockList& blocks);
 
 /*
  * return true if b1 == b2 or if b1 dominates b2.
@@ -158,7 +158,7 @@ template <class State, class Body>
 void forPreorderDoms(Block* block, const DomChildren& children,
                      State state, Body body) {
   body(block, state);
-  for (Block* child : children[block->postId()]) {
+  for (Block* child : children[block]) {
     forPreorderDoms(child, children, state, body);
   }
 }

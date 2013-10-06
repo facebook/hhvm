@@ -101,11 +101,12 @@ namespace vixl {
   byte* buf = new byte[buf_size];                                              \
   HPHP::CodeBlock cb;                                                          \
   cb.init(buf, buf_size);                                                      \
-  MacroAssembler masm(cb);                                                     \
   Decoder decoder;                                                             \
   Simulator* simulator = nullptr;                                              \
   simulator = new Simulator(&decoder);                                         \
-  RegisterDump core
+  RegisterDump core;                                                           \
+  { /* masm needs to be destroyed before buf is deleted */                     \
+    MacroAssembler masm(cb)                                                    \
 
 #define START()                                                                \
   masm.Reset();                                                                \
@@ -122,6 +123,7 @@ namespace vixl {
   simulator->RunFrom(reinterpret_cast<Instruction*>(buf))
 
 #define TEARDOWN()                                                             \
+  } /* closing scope for masm in SETUP / SETUP_SIZE */                         \
   delete simulator;                                                            \
   delete[] buf;
 

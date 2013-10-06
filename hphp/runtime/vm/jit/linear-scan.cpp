@@ -60,7 +60,7 @@ struct LinearScan : private boost::noncopyable {
   static const int NumRegs = kNumRegs;
 
   explicit LinearScan(IRUnit&);
-  RegAllocInfo allocRegs(LifetimeInfo*);
+  RegAllocInfo allocRegs();
 
 private:
   class RegState {
@@ -1075,7 +1075,7 @@ void LinearScan::findFullXMMCandidates() {
   m_fullXMMCandidates -= notCandidates;
 }
 
-RegAllocInfo LinearScan::allocRegs(LifetimeInfo* lifetime) {
+RegAllocInfo LinearScan::allocRegs() {
   if (RuntimeOption::EvalHHIREnableCoalescing) {
     // <coalesce> doesn't need instruction numbering.
     coalesce();
@@ -1104,9 +1104,9 @@ RegAllocInfo LinearScan::allocRegs(LifetimeInfo* lifetime) {
 
   if (m_slots.size()) genSpillStats(numSpillLocs);
 
-  if (lifetime) {
-    lifetime->linear = std::move(m_linear);
-    lifetime->uses = std::move(m_uses);
+  if (dumpIREnabled()) {
+    dumpTrace(kRegAllocLevel, m_unit, " after reg alloc ", &m_allocInfo,
+              &m_lifetime, nullptr, nullptr);
   }
   return m_allocInfo;
 }
@@ -1451,8 +1451,8 @@ void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32_t index, int argNum) {
 
 //////////////////////////////////////////////////////////////////////
 
-RegAllocInfo allocRegsForUnit(IRUnit& unit, LifetimeInfo* lifetime) {
-  return LinearScan(unit).allocRegs(lifetime);
+RegAllocInfo allocRegsForUnit(IRUnit& unit) {
+  return LinearScan(unit).allocRegs();
 }
 
 }} // HPHP::JIT

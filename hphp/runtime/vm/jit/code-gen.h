@@ -82,13 +82,11 @@ typedef StateVector<IRInstruction, RegSet> LiveRegs;
 // and address information produced during codegen.
 struct CodegenState {
   CodegenState(const IRUnit& unit, const RegAllocInfo& regs,
-               const LiveRegs& liveRegs, const LifetimeInfo* lifetime,
-               AsmInfo* asmInfo)
+               const LiveRegs& liveRegs, AsmInfo* asmInfo)
     : patches(unit, nullptr)
     , addresses(unit, nullptr)
     , regs(regs)
     , liveRegs(liveRegs)
-    , lifetime(lifetime)
     , asmInfo(asmInfo)
     , catches(unit, CatchInfo())
   {}
@@ -109,10 +107,6 @@ struct CodegenState {
   // preserved across that instruction.  This is for push/pop of caller-saved
   // registers.
   const LiveRegs& liveRegs;
-
-  // Optional information used when pretty-printing code after codegen.
-  // when not available, these are nullptrs.
-  const LifetimeInfo* lifetime;
 
   // Output: start/end ranges of machine code addresses of each instruction.
   AsmInfo* asmInfo;
@@ -601,9 +595,7 @@ void genCode(CodeBlock&              mainCode,
              IRUnit&                 unit,
              vector<TransBCMapping>* bcMap,
              TranslatorX64*          tx64,
-             const RegAllocInfo&     regs,
-             const LifetimeInfo*     lifetime = nullptr,
-             AsmInfo*                asmInfo = nullptr);
+             const RegAllocInfo&     regs);
 
 }}
 

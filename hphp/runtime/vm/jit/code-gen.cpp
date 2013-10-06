@@ -5933,8 +5933,7 @@ void CodeGenerator::cgRBTrace(IRInstruction* inst) {
 }
 
 void CodeGenerator::print() const {
-  JIT::print(std::cout, m_unit,
-             &m_state.regs, m_state.lifetime, m_state.asmInfo);
+  JIT::print(std::cout, m_unit, &m_state.regs, nullptr, m_state.asmInfo);
 }
 
 static void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
@@ -6004,16 +6003,15 @@ LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs,
   return live_regs;
 }
 
-void genCode(CodeBlock& mainCode,
-             CodeBlock& stubsCode,
-             IRUnit& unit,
-             vector<TransBCMapping>* bcMap,
-             Transl::TranslatorX64* tx64,
-             const RegAllocInfo& regs,
-             const LifetimeInfo* lifetime,
-             AsmInfo* asmInfo) {
+void genCodeImpl(CodeBlock& mainCode,
+                 CodeBlock& stubsCode,
+                 IRUnit& unit,
+                 vector<TransBCMapping>* bcMap,
+                 Transl::TranslatorX64* tx64,
+                 const RegAllocInfo& regs,
+                 AsmInfo* asmInfo) {
   LiveRegs live_regs = computeLiveRegs(unit, regs, unit.entry());
-  CodegenState state(unit, regs, live_regs, lifetime, asmInfo);
+  CodegenState state(unit, regs, live_regs, asmInfo);
 
   // Returns: whether a block has already been emitted.
   DEBUG_ONLY auto isEmitted = [&](Block* block) {
@@ -6093,6 +6091,19 @@ void genCode(CodeBlock& mainCode,
     for (Block* UNUSED block : linfo.blocks) {
       assert(isEmitted(block));
     }
+  }
+}
+
+void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
+             vector<TransBCMapping>* bcMap,
+             Transl::TranslatorX64* tx64,
+             const RegAllocInfo& regs) {
+  if (dumpIREnabled()) {
+    AsmInfo ai(unit);
+    genCodeImpl(main, stubs, unit, bcMap, tx64, regs, &ai);
+    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs, nullptr, &ai);
+  } else {
+    genCodeImpl(main, stubs, unit, bcMap, tx64, regs, nullptr);
   }
 }
 

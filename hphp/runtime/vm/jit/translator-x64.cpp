@@ -2551,35 +2551,23 @@ void TranslatorX64::traceCodeGen() {
 
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   auto& unit = ht.unit();
-  auto finishPass = [&](const char* msg, int level,
-                        const RegAllocInfo* regs,
-                        const LifetimeInfo* lifetime) {
-    dumpTrace(level, unit, msg, regs, lifetime, nullptr,
+
+  auto finishPass = [&](const char* msg, int level) {
+    dumpTrace(level, unit, msg, nullptr, nullptr, nullptr,
               ht.traceBuilder().guards());
-    assert(checkCfg(ht.unit()));
+    assert(checkCfg(unit));
   };
 
-  finishPass(" after initial translation ", kIRLevel, nullptr, nullptr);
+  finishPass(" after initial translation ", kIRLevel);
+
   optimize(unit, ht.traceBuilder());
-  finishPass(" after optimizing ", kOptLevel, nullptr, nullptr);
+  finishPass(" after optimizing ", kOptLevel);
+
+  RegAllocInfo regs = allocRegsForUnit(unit);
+  assert(checkRegisters(unit, regs)); // calls checkCfg internally.
 
   recordBCInstr(OpTraceletGuard, mainCode, mainCode.frontier());
-
-  if (dumpIREnabled()) {
-    LifetimeInfo lifetime(unit);
-    RegAllocInfo regs = allocRegsForUnit(unit, &lifetime);
-    finishPass(" after reg alloc ", kRegAllocLevel, &regs, &lifetime);
-    assert(checkRegisters(unit, regs));
-    AsmInfo ai(unit);
-    genCode(mainCode, stubsCode, unit, &m_bcMap, this, regs, &lifetime, &ai);
-    dumpTrace(kCodeGenLevel, unit, " after code gen ", &regs,
-              &lifetime, &ai);
-  } else {
-    RegAllocInfo regs = allocRegsForUnit(unit);
-    finishPass(" after reg alloc ", kRegAllocLevel, nullptr, nullptr);
-    assert(checkRegisters(unit, regs));
-    genCode(mainCode, stubsCode, unit, &m_bcMap, this, regs);
-  }
+  genCode(mainCode, stubsCode, unit, &m_bcMap, this, regs);
 
   m_numHHIRTrans++;
 }

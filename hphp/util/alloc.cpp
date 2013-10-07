@@ -225,6 +225,7 @@ void enable_numa(bool local) {
 }
 
 int next_numa_node() {
+  if (!use_numa) return 0;
   int node;
   do {
     node = numa_cur_node.fetch_add(1, std::memory_order_relaxed);

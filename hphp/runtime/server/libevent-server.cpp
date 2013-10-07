@@ -78,12 +78,11 @@ LibEventTransportTraits::LibEventTransportTraits(LibEventJobPtr job,
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-LibEventServer::LibEventServer(const std::string &address, int port,
-                               int thread)
-  : Server(address, port, thread),
-    m_accept_sock(-1),
-    m_accept_sock_ssl(-1),
-    m_dispatcher(thread, RuntimeOption::ServerThreadRoundRobin,
+LibEventServer::LibEventServer(const ServerOptions &options)
+  : Server(options.m_address, options.m_port, options.m_numThreads),
+    m_accept_sock(options.m_serverFD),
+    m_accept_sock_ssl(options.m_sslFD),
+    m_dispatcher(options.m_numThreads, RuntimeOption::ServerThreadRoundRobin,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
                  RuntimeOption::ServerThreadDropStack,
                  this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
@@ -116,11 +115,40 @@ LibEventServer::~LibEventServer() {
 ///////////////////////////////////////////////////////////////////////////////
 // implementing HttpServer
 
+int LibEventServer::useExistingFd(evhttp *server, int fd) {
+  Logger::Info("inheritfd: using inherited fd %d for server", fd);
+
+  int ret = listen(fd, RuntimeOption::ServerBacklog);
+  if (ret != 0) {
+    Logger::Error("inheritfd: listen() failed: %s",
+                  folly::errnoStr(errno).c_str());
+    return -1;
+  }
+
+  ret = evhttp_accept_socket(server, fd);
+  if (ret < 0) {
+    Logger::Error("evhttp_accept_socket: %s",
+                  folly::errnoStr(errno).c_str());
+    int errno_save = errno;
+    close(fd);
+    errno = errno_save;
+    return -1;
+  }
+  return 0;
+}
+
 int LibEventServer::getAcceptSocket() {
-  int ret;
+  if (m_accept_sock >= 0) {
+    if (useExistingFd(m_server, m_accept_sock) != 0) {
+      m_accept_sock = -1;
+      return -1;
+    }
+    return 0;
+  }
+
   const char *address = m_address.empty() ? nullptr : m_address.c_str();
-  ret = evhttp_bind_socket_backlog_fd(m_server, address,
-                                      m_port, RuntimeOption::ServerBacklog);
+  int ret = evhttp_bind_socket_backlog_fd(m_server, address,
+                                          m_port, RuntimeOption::ServerBacklog);
   if (ret < 0) {
     Logger::Error("Fail to bind port %d", m_port);
     return -1;
@@ -315,6 +343,14 @@ bool LibEventServer::enableSSL(int port) {
 }
 
 int LibEventServer::getAcceptSocketSSL() {
+  if (m_accept_sock_ssl >= 0) {
+    if (useExistingFd(m_server_ssl, m_accept_sock_ssl) != 0) {
+      m_accept_sock_ssl = -1;
+      return -1;
+    }
+    return 0;
+  }
+
   const char *address = m_address.empty() ? nullptr : m_address.c_str();
   int ret = evhttp_bind_socket_backlog_fd(m_server_ssl, address,
       m_port_ssl, RuntimeOption::ServerBacklog);

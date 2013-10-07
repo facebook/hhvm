@@ -101,7 +101,9 @@ public:
   /**
    * Constructor and destructor.
    */
-  LibEventServer(const std::string &address, int port, int thread);
+  LibEventServer(const std::string &address, int port, int thread)
+      : LibEventServer(ServerOptions(address, port, thread)) {}
+  explicit LibEventServer(const ServerOptions &options);
   ~LibEventServer();
 
   // implementing Server
@@ -165,6 +167,8 @@ private:
     kNumPriorities
   };
   RequestPriority getRequestPriority(struct evhttp_request* request);
+
+  int useExistingFd(evhttp *server, int fd);
 
   static bool certHandler(const std::string &server_name,
                           const std::string& key_file,

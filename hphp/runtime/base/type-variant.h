@@ -1310,7 +1310,7 @@ public:
 
   explicit VarNR() { asVariant()->setUninitNull(); }
 
-  ~VarNR() { assert(checkRefCount()); }
+  ~VarNR() { if (debug) checkRefCount(); }
 
   operator CVarRef() const { return *asVariant(); }
 
@@ -1331,23 +1331,27 @@ private:
   Variant *asVariant() {
     return (Variant*)this;
   }
-  bool checkRefCount() {
-    if (m_type == KindOfRef) return false;
-    if (!IS_REFCOUNTED_TYPE(m_type)) return true;
-    if (varNrFlag() != NR_FLAG) return false;
+  void checkRefCount() {
+    assert(m_type != KindOfRef);
+    if (!IS_REFCOUNTED_TYPE(m_type)) return;
+    assert(varNrFlag() == NR_FLAG);
     switch (m_type) {
     case KindOfArray:
-      return m_data.parr->getCount() > 0;
+      assert_refcount_realistic(m_data.parr->getCount());
+      return;
     case KindOfString:
-      return m_data.pstr->getCount() > 0;
+      assert_refcount_realistic(m_data.pstr->getCount());
+      return;
     case KindOfObject:
-      return m_data.pobj->getCount() > 0;
+      assert_refcount_realistic(m_data.pobj->getCount());
+      return;
     case KindOfResource:
-      return m_data.pres->getCount() > 0;
+      assert_refcount_realistic(m_data.pres->getCount());
+      return;
     default:
       break;
     }
-    return false;
+    assert(false);
   }
 };
 

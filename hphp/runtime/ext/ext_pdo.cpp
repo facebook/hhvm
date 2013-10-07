@@ -928,7 +928,7 @@ void c_PDO::sweep() {
   // PDOConnection is not sweepable, so clean it up manually.
   static_assert(!std::is_base_of<Sweepable, PDOConnection>::value,
                 "Remove the call to reset() below.");
-  m_dbh.reset();
+  m_dbh.detach();
 }
 
 void c_PDO::t___construct(const String& dsn, const String& username /* = null_string */,

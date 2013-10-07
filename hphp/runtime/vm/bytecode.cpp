@@ -685,13 +685,13 @@ static std::string toStringElm(const TypedValue* tv) {
     }
     break;
   case KindOfArray:
-    assert(tv->m_data.parr->getCount() > 0);
+    assert_refcount_realistic_nz(tv->m_data.parr->getCount());
     os << tv->m_data.parr
        << "c(" << tv->m_data.parr->getCount() << ")"
        << ":Array";
      break;
   case KindOfObject:
-    assert(tv->m_data.pobj->getCount() > 0);
+    assert_refcount_realistic_nz(tv->m_data.pobj->getCount());
     os << tv->m_data.pobj
        << "c(" << tv->m_data.pobj->getCount() << ")"
        << ":Object("
@@ -699,7 +699,7 @@ static std::string toStringElm(const TypedValue* tv) {
        << ")";
     break;
   case KindOfResource:
-    assert(tv->m_data.pres->getCount() > 0);
+    assert_refcount_realistic_nz(tv->m_data.pres->getCount());
     os << tv->m_data.pres
        << "c(" << tv->m_data.pres->getCount() << ")"
        << ":Resource("
@@ -3647,7 +3647,7 @@ OPTBLD_INLINE void VMExecutionContext::iopConcat(PC& pc) {
     cellAsVariant(*c2) = concat(cellAsVariant(*c2).toString(),
                                 cellAsCVarRef(*c1).toString());
   }
-  assert(c2->m_data.pstr->getCount() > 0);
+  assert_refcount_realistic_nz(c2->m_data.pstr->getCount());
   m_stack.popC();
 }
 

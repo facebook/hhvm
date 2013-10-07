@@ -88,6 +88,7 @@ struct RefData {
    * Deallocate a RefData.
    */
   void release() {
+    assert(!hasMultipleRefs());
     if (UNLIKELY(m_cow)) {
       m_count = 1;
       m_cowAndZ = 0;
@@ -312,9 +313,7 @@ public:
 };
 
 ALWAYS_INLINE void decRefRef(RefData* ref) {
-  if (ref->decRefCount() == 0) {
-    ref->release();
-  }
+  ref->decRefAndRelease();
 }
 
 } // namespace HPHP

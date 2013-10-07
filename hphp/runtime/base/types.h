@@ -80,6 +80,7 @@ extern const Array empty_array;
  * have small fields that are packed into the same space.
  */
 const size_t FAST_REFCOUNT_OFFSET = 12;
+const size_t FAST_REFCOUNT_STATIC_BYTE_OFFSET = FAST_REFCOUNT_OFFSET + 3;
 
 /*
  * All native collection class have their m_size field at the same

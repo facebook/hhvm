@@ -493,7 +493,7 @@ private:
 };
 
 ALWAYS_INLINE void decRefObj(ObjectData* obj) {
-  if (obj->decRefCount() == 0) obj->release();
+  obj->decRefAndRelease();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

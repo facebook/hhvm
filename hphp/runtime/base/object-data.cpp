@@ -65,7 +65,6 @@ ObjectData::~ObjectData() {
 HOT_FUNC
 void ObjectData::destruct() {
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
-    assert(RuntimeOption::EnableObjDestructCall);
     g_vmContext->m_liveBCObjs.erase(this);
   }
   if (!noDestruct()) {

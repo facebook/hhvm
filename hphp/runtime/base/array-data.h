@@ -638,8 +638,7 @@ extern const ArrayFunctions g_array_funcs;
 
 ALWAYS_INLINE
 void decRefArr(ArrayData* arr) {
-  assert(!MemoryManager::sweeping());
-  if (arr->decRefCount() == 0) arr->release();
+  arr->decRefAndRelease();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

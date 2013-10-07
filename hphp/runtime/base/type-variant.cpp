@@ -266,6 +266,7 @@ ALWAYS_INLINE
 void Variant::destructDataImpl(RefData* data, DataType t) {
   assert(IS_REFCOUNTED_TYPE(t));
   assert(IS_REAL_TYPE(t));
+  assert_refcount_realistic_nz(data->getCount());
   if (data->decRefCount() == 0) {
     assert(t == KindOfString || t == KindOfArray ||
            t == KindOfObject || t == KindOfResource ||

@@ -207,14 +207,6 @@ inline void jumpDestructor(Asm& a, PhysReg typeReg, PhysReg scratch) {
   a.    jmp    (lookupDestructor(a, typeReg, scratch));
 }
 
-void emitIncRef(Asm& a, PhysReg base);
-void emitIncRefCheckNonStatic(Asm& a, PhysReg base, DataType dtype);
-void emitIncRefGenericRegSafe(Asm& a, PhysReg base,
-                              int disp, PhysReg tmpReg);
-
-void emitAssertFlagsNonNegative(Asm& as);
-void emitAssertRefCount(Asm& as, PhysReg base);
-
 //////////////////////////////////////////////////////////////////////
 
 }}}

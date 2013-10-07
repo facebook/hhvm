@@ -67,9 +67,7 @@ public:
   }
 
   ~SmartPtr() {
-    if (m_px && m_px->decRefCount() == 0) {
-      m_px->release();
-    }
+    decRefPtr(m_px);
   }
 
   /**
@@ -97,16 +95,16 @@ public:
     auto goner = m_px;
     m_px = src.m_px;
     src.m_px = nullptr;
-    if (goner && !goner->decRefCount()) goner->release();
+    decRefPtr(goner);
     return *this;
   }
   SmartPtr& operator=(T* px) {
-    // Incidentally works with self-assignment because incRefCount is
+    // Works with self-assignment because incRefCount is
     // called before decRefCount.
     if (px) px->incRefCount();
     auto goner = m_px;
     m_px = px;
-    if (goner && !goner->decRefCount()) goner->release();
+    decRefPtr(goner);
     return *this;
   }
 
@@ -143,6 +141,9 @@ protected:
   T* m_px;  // raw pointer
 
 private:
+  static ALWAYS_INLINE void decRefPtr(T* ptr) {
+    if (ptr) ptr->decRefAndRelease();
+  }
   static void compileTimeAssertions() {
     static_assert(offsetof(SmartPtr, m_px) == kExpectedMPxOffset, "");
   }

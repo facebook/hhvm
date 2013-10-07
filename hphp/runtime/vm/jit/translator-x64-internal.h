@@ -97,7 +97,7 @@ private:
 // a ref-counted cell.
 //
 // It's ok to do reconcilable register operations in the body.
-template<unsigned FieldOffset, unsigned FieldValue, ConditionCode Jcc,
+template<unsigned FieldOffset, int32_t FieldValue, ConditionCode Jcc,
          typename FieldType>
 struct CondBlock {
   X64Assembler& m_a;

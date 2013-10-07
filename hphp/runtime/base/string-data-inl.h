@@ -205,7 +205,7 @@ inline bool StringData::isImmutable() const {
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE void decRefStr(StringData* s) {
-  if (s->decRefCount() == 0) s->release();
+  s->decRefAndRelease();
 }
 
 struct string_data_hash {

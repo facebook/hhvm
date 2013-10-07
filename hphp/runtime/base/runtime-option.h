@@ -440,6 +440,9 @@ public:
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
   F(bool, SimulateARM,                 false)                           \
+  F(bool, DecRefUsePlainDecl,          true)                            \
+  F(bool, DecRefUsePlainDeclWithDestroy,false)                          \
+  F(bool, DecRefUseScratch,            true)                            \
   /* */                                                                 \
 
 #define F(type, name, unused) \

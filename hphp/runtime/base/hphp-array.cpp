@@ -1167,7 +1167,7 @@ HphpArray* HphpArray::GrowPacked(HphpArray* old) {
   return ad;
 }
 
-void HphpArray::compact(bool renumber /* = false */) {
+namespace {
   struct ElmKey {
     ElmKey() {}
     ElmKey(int32_t hash, StringData* key) {
@@ -1180,7 +1180,9 @@ void HphpArray::compact(bool renumber /* = false */) {
       int64_t ikey;
     };
   };
+}
 
+void HphpArray::compact(bool renumber /* = false */) {
   assert(!isPacked());
   ElmKey mPos;
   if (m_pos != invalid_index) {
@@ -1869,7 +1871,24 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
       *ad->findForNewInsert(i) = i;
       ++dstElm;
     }
+    assert(ad->m_pos == oldPosUnsigned);
   } else {
+    // We're not copying the tombstones over to the new array, so the
+    // positions of the elements in the new array may be shifted. Cache
+    // the key for element associated with src->m_pos so that we can
+    // properly initialize ad->m_pos below.
+    ElmKey mPos;
+    if (src->m_pos != invalid_index) {
+      assert(size_t(src->m_pos) < src->m_used);
+      auto& e = srcElm[src->m_pos];
+      mPos.hash = e.hasIntKey() ? 0 : e.hash();
+      mPos.key = e.key;
+    } else {
+      // Silence compiler warnings.
+      mPos.hash = 0;
+      mPos.key = nullptr;
+    }
+    // Copy the elements
     for (; srcElm != srcStop; ++srcElm) {
       if (isTombstone(srcElm->data.m_type)) continue;
       tvDupFlattenVars(&srcElm->data, &dstElm->data, src);
@@ -1885,6 +1904,12 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
       ++dstElm;
       ++i;
     }
+    // Now that we have finished copying the elements, update ad->m_pos
+    if (src->m_pos != invalid_index) {
+      ad->m_pos = mPos.hash
+        ? ssize_t(ad->find(mPos.key, mPos.hash))
+        : ssize_t(ad->find(mPos.ikey));
+    }
   }
 
   // Set new used value (we've removed any tombstones).
@@ -1895,7 +1920,6 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
   assert(ad->m_allocMode == AllocationMode::smart);
   assert(ad->m_size == oldSize);
   assert(ad->m_count == 1);
-  assert(ad->m_pos == oldPosUnsigned);
   assert(ad->m_cap == cap);
   assert(ad->m_used <= oldUsed);
   assert(ad->m_used == dstElm - data);

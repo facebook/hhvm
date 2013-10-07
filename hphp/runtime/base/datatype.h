@@ -239,8 +239,13 @@ ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
   return TYPE_TO_DESTR_IDX(t);
 }
 
+#define IS_REAL_TYPE(t)                                                 \
+  (((t) >= ::HPHP::KindOfUninit && (t) < ::HPHP::MaxNumDataTypes) ||    \
+   (t) == ::HPHP::KindOfClass)
+
 // Helper macro for checking if a given type is refcounted
-#define IS_REFCOUNTED_TYPE(t) ((t) > KindOfRefCountThreshold)
+#define IS_REFCOUNTED_TYPE(t)                                   \
+  (assert(IS_REAL_TYPE(t)), (t) > KindOfRefCountThreshold)
 
 // Helper function for checking if a type is KindOfString or KindOfStaticString.
 static_assert(KindOfStaticString == 0x0C, "");
@@ -256,9 +261,6 @@ inline bool IS_STRING_TYPE(DataType t) {
 #define IS_ARRAY_TYPE(t) ((t) == KindOfArray)
 #define IS_BOOL_TYPE(t) ((t) == KindOfBoolean)
 #define IS_DOUBLE_TYPE(t) ((t) == KindOfDouble)
-
-#define IS_REAL_TYPE(t) \
-  (((t) >= KindOfUninit && (t) < MaxNumDataTypes) || (t) == KindOfClass)
 
 inline bool IS_INT_KEY_TYPE(DataType t) {
   return t <= KindOfInt64;

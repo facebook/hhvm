@@ -260,6 +260,7 @@ public:
 
   // Elm's data.m_type == KindOfInvalid for deleted slots.
   static bool isTombstone(DataType t) {
+    assert(IS_REAL_TYPE(t) || t == KindOfInvalid);
     return t < KindOfUninit;
     static_assert(KindOfUninit == 0 && KindOfInvalid < 0, "");
   }

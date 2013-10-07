@@ -28,7 +28,7 @@ If you want to help but don't know where to start, try fixing some of the [Zend 
 
 All the open issues tagged [Zend incompatibility](https://github.com/facebook/hiphop-php/issues?labels=zend+incompatibility&page=1&state=open) are real issues reported by the community in existing PHP code and [frameworks](https://github.com/facebook/hiphop-php/wiki/OSS-PHP-Frameworks-Unit-Testing:-General) that could use some attention. Please add appropriate test cases as you make changes; see [here](hphp/test) for more information. Travis-CI is integrated with this GitHub project and will provide test results automatically on all pulls.
 
-Before changes can be accepted a [Contributors Licensing Agreement](http://developers.facebook.com/opensource/cla) ([pdf](https://github.com/facebook/hiphop-php/raw/master/hphp/doc/FB_Individual_CLA.pdf) - print, sign, scan, link) must be signed.
+Before changes can be accepted a [Contributor License Agreement](http://developers.facebook.com/opensource/cla) ([pdf](https://github.com/facebook/hiphop-php/raw/master/hphp/doc/FB_Individual_CLA.pdf) - print, sign, scan, link) must be signed.
 
 ## License
 

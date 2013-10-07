@@ -31,7 +31,9 @@
 #define pcre_compile      php_pcre_compile
 #define pcre_compile2      php_pcre_compile2
 #define pcre_copy_substring    php_pcre_copy_substring
+#ifndef HHVM
 #define pcre_exec      php_pcre_exec
+#endif
 #define pcre_get_substring    php_pcre_get_substring
 #define pcre_get_substring_list    php_pcre_get_substring_list
 #define pcre_maketables      php_pcre_maketables

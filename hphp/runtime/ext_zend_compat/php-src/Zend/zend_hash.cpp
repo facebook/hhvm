@@ -33,6 +33,7 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
   if (nKeyLength <= 0) {
     return FAILURE;
   }
+  assert(nDataSize == sizeof(void*));
   assert(arKey[nKeyLength - 1] == '\0');
 
   if ((flag & HASH_ADD) && zend_hash_exists(ht, arKey, nKeyLength)) {
@@ -40,6 +41,10 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
   }
   HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
   ht->zSet(key.get(), (*(zval**)pData));
+
+  if (pDest) {
+    *pDest = pData;
+  }
   return SUCCESS;
 }
 
@@ -48,6 +53,7 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, ui
 }
 
 ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
+  assert(nDataSize == sizeof(void*));
   if (flag & HASH_NEXT_INSERT) {
     ht->zAppend(*(zval**)pData);
     return SUCCESS;
@@ -59,6 +65,20 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 
   ht->zSet(h, (*(zval**)pData));
   return SUCCESS;
+}
+
+ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void * arg TSRMLS_DC) {
+  for (HPHP::ArrayIter it(ht); it; ++it) {
+    zval* data = it.zSecond();
+		int result = apply_func(&data, arg);
+
+		if (result & ZEND_HASH_APPLY_REMOVE) {
+      not_implemented();
+		}
+		if (result & ZEND_HASH_APPLY_STOP) {
+			break;
+		}
+	}
 }
 
 ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func_args_t apply_func, int num_args, ...) {

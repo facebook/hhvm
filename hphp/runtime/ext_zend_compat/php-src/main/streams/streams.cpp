@@ -28,6 +28,7 @@
 #include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
 #include <stddef.h>
 #include <fcntl.h>
+#include "hphp/runtime/base/stream-wrapper-registry.h"
 
 /* {{{ resource and registration code */
 static int le_stream = FAILURE; /* true global */
@@ -143,3 +144,76 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 }
 /* }}} */
 
+/* {{{ php_stream_locate_url_wrapper */
+PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char **path_for_open, int options TSRMLS_DC) {
+  assert(options == 0);
+  // TODO this leaks
+  auto w = HPHP::Stream::getWrapperFromURI(path);
+  if (!w) {
+    return nullptr;
+  }
+  // fill this out if people need it
+  php_stream_wrapper *stream = new (HPHP::request_arena()) php_stream_wrapper();
+  return stream;
+}
+
+PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) {
+  // kinda weird this is on the wrapper not the file
+  auto path = stream->hphp_file->getName();
+  auto w = HPHP::Stream::getWrapperFromURI(path);
+  return w->stat(path, &ssb->sb);
+}
+
+/* If buf == NULL, the buffer will be allocated automatically and will be of an
+ * appropriate length to hold the line, regardless of the line length, memory
+ * permitting */
+PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
+		size_t *returned_len TSRMLS_DC)
+{
+  auto s = stream->hphp_file->readLine(maxlen);
+  if (s.empty()) {
+    return nullptr;
+  }
+  if (!buf) {
+    buf = (char*) emalloc(s.length() + 1);
+  }
+  memcpy(buf, s.data(), s.length());
+  buf[s.length()] = '\0';
+  *returned_len = s.length();
+  return buf;
+}
+
+PHPAPI php_stream *_php_stream_opendir(char *path, int options, php_stream_context *context STREAMS_DC TSRMLS_DC)
+{
+  auto wrapper = HPHP::Stream::getWrapperFromURI(path);
+  if (!wrapper) {
+    return nullptr;
+  }
+  auto dir = wrapper->opendir(path);
+  if (!dir) {
+    return nullptr;
+  }
+
+  // TODO this leaks
+  php_stream *stream = new (HPHP::request_arena()) php_stream(dir);
+  stream->hphp_dir->incRefCount();
+  return stream;
+}
+
+PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent TSRMLS_DC)
+{
+  auto *dir = dirstream->hphp_dir;
+  if (!dir) {
+    return nullptr;
+  }
+  auto v = dir->read();
+  if (!v.isString()) {
+    return nullptr;
+  }
+  auto s = v.toString();
+  if (!s) {
+    return nullptr;
+  }
+  memcpy(ent, s->data(), s->size());
+  return ent;
+}

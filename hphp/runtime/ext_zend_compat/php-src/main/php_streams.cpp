@@ -34,6 +34,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int
   if (!file) {
     return nullptr;
   }
+  // TODO this leaks
   php_stream *stream = new (HPHP::request_arena()) php_stream(file);
   stream->hphp_file->incRefCount();
 

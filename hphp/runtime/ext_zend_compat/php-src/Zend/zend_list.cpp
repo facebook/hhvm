@@ -33,6 +33,17 @@ ZEND_API int le_index_ptr;
 
 namespace HPHP {
   IMPLEMENT_OBJECT_ALLOCATION(ZendResourceData);
+
+  ZEND_REQUEST_LOCAL_MAP(int, zend_rsrc_list_dtors_entry, s_resource_dtors);
+  const String& ZendResourceData::o_getClassNameHook() const {
+    auto& dtor = s_resource_dtors.get()->get()[type];
+
+    if (dtor.type_name_str.empty()) {
+      dtor.type_name_str = dtor.type_name;
+    }
+
+    return dtor.type_name_str;
+  }
 }
 
 ZEND_REQUEST_LOCAL_LIST(zend_rsrc_list_entry*, s_regular_list);
@@ -54,6 +65,8 @@ static zend_rsrc_list_entry *zend_list_id_to_entry(int id TSRMLS_DC) {
 
 ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC) {
   zend_rsrc_list_entry* le = NEWOBJ(zend_rsrc_list_entry)(ptr, type);
+  // TODO is this right?
+  le->incRefCount();
   le->incRefCount();
   RL().push_back(le);
   int id = RL().size() - 1;
@@ -180,8 +193,25 @@ int zend_init_rsrc_list(TSRMLS_D) {
   return SUCCESS;
 }
 
-ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, const char *type_name, int module_number) {
-  return 0;
+ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, const char *type_name, int module_number)
+{
+  zend_rsrc_list_dtors_entry lde;
+
+#if 0
+  printf("Registering destructors %d for module %d\n", list_destructors.nNextFreeElement, module_number);
+#endif
+
+  lde.list_dtor = NULL;
+  lde.plist_dtor = NULL;
+  lde.list_dtor_ex = ld;
+  lde.plist_dtor_ex = pld;
+  lde.module_number = module_number;
+  lde.resource_id = HPHP::s_resource_dtors.get()->get().size();
+  lde.type = ZEND_RESOURCE_LIST_TYPE_EX;
+  lde.type_name = type_name;
+
+  HPHP::s_resource_dtors.get()->get()[lde.resource_id] = lde;
+  return lde.resource_id;
 }
 
 int zval_get_resource_id(const zval &z) {

@@ -6,6 +6,7 @@ if (APPLE)
 	    hphp_runtime_static
 	    ext_hhvm_static
 	    hphp_system
+	    hphp_parser
 	    vixl neo
 	    -Wl,-u,_register_libevent_server)
 else ()
@@ -14,6 +15,7 @@ else ()
             hphp_runtime_static
             ext_hhvm_static
             hphp_system
+	    hphp_parser
 	    vixl neo
             -Wl,-uregister_libevent_server)
 endif ()

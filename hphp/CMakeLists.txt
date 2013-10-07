@@ -22,7 +22,7 @@ SET(USE_HHVM TRUE)
 SET(ENV{HHVM} 1)
 ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/hphp/hhvm/hhvm\\\"")
 
-set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/debugger runtime/eval runtime/ext runtime/server runtime/vm util zend parser)
+set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/debugger runtime/eval runtime/ext runtime/server runtime/vm util zend)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 	auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
 	list(APPEND CXX_SOURCES ${files})
@@ -94,11 +94,13 @@ SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 SET(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
 
 hphp_link(hphp_runtime_static)
+add_dependencies(hphp_runtime_static hphp_parser)
 
 add_subdirectory("tools/bootstrap")
 
 add_subdirectory(vixl)
 add_subdirectory(neo)
+add_subdirectory(parser)
 
 add_subdirectory(compiler)
 add_subdirectory(runtime/ext_hhvm)

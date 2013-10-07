@@ -49,3 +49,4 @@ add_definitions(-DALWAYS_ASSERT=1)
 
 ADD_LIBRARY(hphp_analysis STATIC ${CXX_SOURCES} ${C_SOURCES})
 target_link_libraries(hphp_analysis ${Boost_LIBRARIES})
+add_dependencies(hphp_analysis hphp_parser)

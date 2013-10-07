@@ -164,10 +164,6 @@ int64_t convArrToBoolHelper(const ArrayData* a) {
   return a->size() != 0;
 }
 
-int64_t convObjToBoolHelper(const ObjectData* o) {
-  return o->o_toBoolean();
-}
-
 int64_t convArrToDblHelper(ArrayData* a) {
   return reinterpretDblAsInt(a->empty() ? 0 : 1);
 }

@@ -65,7 +65,6 @@ ArrayData* array_add(ArrayData* a1, ArrayData* a2);
  */
 ArrayData* convCellToArrHelper(TypedValue tv);
 int64_t convArrToBoolHelper(const ArrayData* a);
-int64_t convObjToBoolHelper(const ObjectData* o);
 int64_t convArrToDblHelper(ArrayData* a);
 int64_t convStrToDblHelper(const StringData* s);
 int64_t convCellToDblHelper(TypedValue tv);

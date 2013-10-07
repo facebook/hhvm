@@ -2188,7 +2188,7 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
       // default: object not collection
       cgCallHelper(
         a,
-        CppCall(convObjToBoolHelper),
+        CppCall(getMethodPtr(&ObjectData::o_toBoolean)),
         callDest(dst),
         SyncOptions::kSyncPoint,
         ArgGroup(m_regs)

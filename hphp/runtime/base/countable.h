@@ -36,9 +36,13 @@ typedef int32_t RefCount;
  * object lives across requests and may be accessed by multiple
  * threads.
  */
-constexpr size_t RefCountStaticBitPos = 30;
-constexpr RefCount RefCountStaticValue = (1 << RefCountStaticBitPos);
+constexpr size_t RefCountStaticBitPos = 31;
+const int32_t RefCountStaticValue = INT_MIN;
+const int8_t RefCountStaticValueHighByte = RefCountStaticValue / (1 << 24);
 const int32_t RefCountMaxRealistic = (1 << 30) - 1;
+
+static_assert((uint32_t)RefCountStaticValue == (1uL << RefCountStaticBitPos),
+              "Check RefCountStaticValue and RefCountStaticBitPos");
 
 /*
  * Real count values should always be less than or equal to
@@ -76,9 +80,10 @@ inline void assert_refcount_realistic_ns_nz(int32_t count) {
 #define DECREF_AND_RELEASE_MAYBE_STATIC(thiz, action) do {              \
     assert(!MemoryManager::sweeping());                                 \
     assert_refcount_realistic_nz(thiz->m_count);                        \
-    if (!((uint32_t)thiz->m_count & (uint32_t)RefCountStaticValue) &&   \
-        !--thiz->m_count) {                                             \
+    if (thiz->m_count == 1) {                                           \
       action;                                                           \
+    } else if (thiz->m_count > 1) {                                     \
+      --thiz->m_count;                                                  \
     }                                                                   \
   } while (false)
 

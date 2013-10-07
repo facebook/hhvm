@@ -441,9 +441,9 @@ public:
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
   F(bool, SimulateARM,                 false)                           \
   F(bool, DecRefUsePlainDecl,          true)                            \
-  F(bool, DecRefUsePlainDeclWithDestroy,false)                          \
-  F(bool, DecRefUseScratch,            true)                            \
-  /* */                                                                 \
+  F(bool, DecRefUsePlainDeclWithDestroy,true)                           \
+  F(bool, DecRefUseScratch,            false)                           \
+  /* */
 
 #define F(type, name, unused) \
   static type Eval ## name;

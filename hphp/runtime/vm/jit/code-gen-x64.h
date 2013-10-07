@@ -303,9 +303,12 @@ private:
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
   void emitInstanceBitmaskCheck(IRInstruction*);
   void emitTraceRet(Asm& as);
-  Address cgCheckStaticBit(Type type,
-                           PhysReg reg,
-                           bool regIsCount);
+
+  template <typename F>
+  Address cgCheckStaticBitAndDecRef(Type type,
+                                    PhysReg dataReg,
+                                    Block* exit,
+                                    F destroy);
   Address cgCheckStaticBitAndDecRef(Type type,
                                     PhysReg dataReg,
                                     Block* exit);

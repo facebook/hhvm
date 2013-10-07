@@ -242,10 +242,10 @@ void emitGenericDecRefHelpers(UniqueStubs& uniqueStubs) {
    * possible to share the code for both decref helpers.
    */
   uniqueStubs.dtorGenericStubRegs = a.frontier();
-  a.    cmpl   (RefCountStaticValue, rdi[FAST_REFCOUNT_OFFSET]);
-  jccBlock<CC_Z>(a, [&] {
-    a.  decl   (rdi[FAST_REFCOUNT_OFFSET]);
+  a.    cmpl   (1, rdi[FAST_REFCOUNT_OFFSET]);
+  jccBlock<CC_L>(a, [&] {
     release.jcc8(a, CC_Z);
+    a.  decl   (rdi[FAST_REFCOUNT_OFFSET]);
   });
   a.    ret    ();
 
@@ -286,10 +286,10 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
 
 asm_label(a, release);
   a.    loadq  (rIter[TVOFF(m_data)], rData);
-  a.    cmpl   (RefCountStaticValue, rData[FAST_REFCOUNT_OFFSET]);
-  jccBlock<CC_Z>(a, [&] {
-    a.  decl   (rData[FAST_REFCOUNT_OFFSET]);
+  a.    cmpl   (1, rData[FAST_REFCOUNT_OFFSET]);
+  jccBlock<CC_L>(a, [&] {
     a.  jz8    (doRelease);
+    a.  decl   (rData[FAST_REFCOUNT_OFFSET]);
   });
   a.    ret    ();
 asm_label(a, doRelease);

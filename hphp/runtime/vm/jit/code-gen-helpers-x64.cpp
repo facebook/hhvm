@@ -143,14 +143,18 @@ void emitGetGContext(Asm& as, PhysReg dest) {
 }
 
 // IfCountNotStatic --
-//   Emits if (%reg->_count != RefCountStaticValue) { ... }.
+//   Emits if (%reg->_count < 0) { ... }.
+//   This depends on RefCountStaticValue being the only valid
+//   negative refCount.
 //   May short-circuit this check if the type is known to be
 //   static already.
 struct IfCountNotStatic {
   typedef CondBlock<FAST_REFCOUNT_OFFSET,
-                    RefCountStaticValue,
-                    CC_Z,
-                    hphp_field_type(RefData, m_count)> NonStaticCondBlock;
+                    0,
+                    CC_S,
+                    int32_t> NonStaticCondBlock;
+  static_assert(RefCountStaticValue < 0,
+                "RefCountStaticValue must be negative");
   NonStaticCondBlock *m_cb; // might be null
   IfCountNotStatic(Asm& as,
                    PhysReg reg,
@@ -215,7 +219,10 @@ void emitAssertFlagsNonNegative(Asm& as) {
 
 void emitAssertRefCount(Asm& as, PhysReg base) {
   as.cmpl(HPHP::RefCountStaticValue, base[FAST_REFCOUNT_OFFSET]);
-  ifThen(as, CC_NBE, [&] { as.ud2(); });
+  ifThen(as, CC_NE, [&] {
+      as.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
+      ifThen(as, CC_NBE, [&] { as.ud2(); });
+    });
 }
 
 // Logical register move: ensures the value in src will be in dest

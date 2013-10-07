@@ -81,3 +81,4 @@ install_manifest.txt
 .project
 .cproject
 .settings
+.*.s??

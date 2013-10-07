@@ -443,7 +443,7 @@ public:
 
 //////////////////// Connection functions /////////////////////////
 
-Variant HHVM_FUNCTION(pg_connect, CStrRef connection_string, int connect_type /* = 0 */) {
+Variant HHVM_FUNCTION(pg_connect, const String& connection_string, int connect_type /* = 0 */) {
     PGSQL * pgsql = NULL;
 
     pgsql = new PGSQL(connection_string, false);
@@ -455,7 +455,7 @@ Variant HHVM_FUNCTION(pg_connect, CStrRef connection_string, int connect_type /*
     return Resource(pgsql);
 }
 
-Variant HHVM_FUNCTION(pg_async_connect, CStrRef connection_string, int connect_type /* = 0 */) {
+Variant HHVM_FUNCTION(pg_async_connect, const String& connection_string, int connect_type /* = 0 */) {
     PGSQL * pgsql = NULL;
 
     pgsql = new PGSQL(connection_string, true);
@@ -614,7 +614,7 @@ Variant HHVM_FUNCTION(pg_options, CResRef connection) {
     return pgsql->m_options;
 }
 
-Variant HHVM_FUNCTION(pg_parameter_status, CResRef connection, CStrRef param_name) {
+Variant HHVM_FUNCTION(pg_parameter_status, CResRef connection, const String& param_name) {
     PGSQL * pgsql = PGSQL::Get(connection);
 
     if (pgsql == NULL) {
@@ -719,7 +719,7 @@ int64_t HHVM_FUNCTION(pg_get_pid, CResRef connection) {
 
 //////////////// Escaping Functions ///////////////////////////
 
-String HHVM_FUNCTION(pg_escape_bytea, CResRef connection, CStrRef data) {
+String HHVM_FUNCTION(pg_escape_bytea, CResRef connection, const String& data) {
     PGSQL * pgsql = PGSQL::Get(connection);
     if (pgsql == NULL) {
         return null_string;
@@ -741,7 +741,7 @@ String HHVM_FUNCTION(pg_escape_bytea, CResRef connection, CStrRef data) {
     return ret;
 }
 
-String HHVM_FUNCTION(pg_escape_identifier, CResRef connection, CStrRef data) {
+String HHVM_FUNCTION(pg_escape_identifier, CResRef connection, const String& data) {
     PGSQL * pgsql = PGSQL::Get(connection);
     if (pgsql == NULL) {
         return null_string;
@@ -761,7 +761,7 @@ String HHVM_FUNCTION(pg_escape_identifier, CResRef connection, CStrRef data) {
     return ret;
 }
 
-String HHVM_FUNCTION(pg_escape_literal, CResRef connection, CStrRef data) {
+String HHVM_FUNCTION(pg_escape_literal, CResRef connection, const String& data) {
     PGSQL * pgsql = PGSQL::Get(connection);
     if (pgsql == NULL) {
         return null_string;
@@ -781,7 +781,7 @@ String HHVM_FUNCTION(pg_escape_literal, CResRef connection, CStrRef data) {
     return ret;
 }
 
-String HHVM_FUNCTION(pg_escape_string, CResRef connection, CStrRef data) {
+String HHVM_FUNCTION(pg_escape_string, CResRef connection, const String& data) {
     PGSQL * pgsql = PGSQL::Get(connection);
     if (pgsql == NULL) {
         return null_string;
@@ -803,7 +803,7 @@ String HHVM_FUNCTION(pg_escape_string, CResRef connection, CStrRef data) {
     return ret;
 }
 
-String HHVM_FUNCTION(pg_unescape_bytea, CStrRef data) {
+String HHVM_FUNCTION(pg_unescape_bytea, const String& data) {
     size_t to_len = 0;
     char * unesc = (char *)PQunescapeBytea((unsigned char *)data.data(), &to_len);
     String ret = String(unesc, to_len, CopyString);
@@ -839,7 +839,7 @@ bool HHVM_FUNCTION(pg_free_result, CResRef result) {
     }
 }
 
-Variant HHVM_FUNCTION(pg_query, CResRef connection, CStrRef query) {
+Variant HHVM_FUNCTION(pg_query, CResRef connection, const String& query) {
     PGSQL *conn = PGSQL::Get(connection);
     if (conn == NULL) {
         return false;
@@ -873,7 +873,7 @@ Variant HHVM_FUNCTION(pg_query, CResRef connection, CStrRef query) {
     return Resource(pgresult);
 }
 
-Variant HHVM_FUNCTION(pg_query_params, CResRef connection, CStrRef query, CArrRef params) {
+Variant HHVM_FUNCTION(pg_query_params, CResRef connection, const String& query, CArrRef params) {
     PGSQL *conn = PGSQL::Get(connection);
     if (conn == NULL) {
         return false;
@@ -910,7 +910,7 @@ Variant HHVM_FUNCTION(pg_query_params, CResRef connection, CStrRef query, CArrRe
     return Resource(pgresult);
 }
 
-Variant HHVM_FUNCTION(pg_prepare, CResRef connection, CStrRef stmtname, CStrRef query) {
+Variant HHVM_FUNCTION(pg_prepare, CResRef connection, const String& stmtname, const String& query) {
     PGSQL *conn = PGSQL::Get(connection);
     if (conn == NULL) {
         return false;
@@ -944,7 +944,7 @@ Variant HHVM_FUNCTION(pg_prepare, CResRef connection, CStrRef stmtname, CStrRef 
     return Resource(pgres);
 }
 
-Variant HHVM_FUNCTION(pg_execute, CResRef connection, CStrRef stmtname, CArrRef params) {
+Variant HHVM_FUNCTION(pg_execute, CResRef connection, const String& stmtname, CArrRef params) {
     PGSQL *conn = PGSQL::Get(connection);
     if (conn == NULL) {
         return false;
@@ -960,7 +960,7 @@ Variant HHVM_FUNCTION(pg_execute, CResRef connection, CStrRef stmtname, CArrRef 
     return Resource(pgres);
 }
 
-bool HHVM_FUNCTION(pg_send_query, CResRef connection, CStrRef query) {
+bool HHVM_FUNCTION(pg_send_query, CResRef connection, const String& query) {
     PGSQL *conn = PGSQL::Get(connection);
     if (conn == NULL) {
         return false;
@@ -1016,7 +1016,7 @@ Variant HHVM_FUNCTION(pg_get_result, CResRef connection) {
     return Resource(pgresult);
 }
 
-bool HHVM_FUNCTION(pg_send_query_params, CResRef connection, CStrRef query, CArrRef params) {
+bool HHVM_FUNCTION(pg_send_query_params, CResRef connection, const String& query, CArrRef params) {
     PGSQL *conn = PGSQL::Get(connection);
     if (conn == NULL) {
         return false;
@@ -1057,7 +1057,7 @@ bool HHVM_FUNCTION(pg_send_query_params, CResRef connection, CStrRef query, CArr
     return true;
 }
 
-bool HHVM_FUNCTION(pg_send_prepare, CResRef connection, CStrRef stmtname, CStrRef query) {
+bool HHVM_FUNCTION(pg_send_prepare, CResRef connection, const String& stmtname, const String& query) {
     PGSQL *conn = PGSQL::Get(connection);
     if (conn == NULL) {
         return false;
@@ -1066,7 +1066,7 @@ bool HHVM_FUNCTION(pg_send_prepare, CResRef connection, CStrRef stmtname, CStrRe
     return (bool)PQsendPrepare(conn->get(), stmtname.data(), query.data(), 0, NULL);
 }
 
-bool HHVM_FUNCTION(pg_send_execute, CResRef connection, CStrRef stmtname, CArrRef params) {
+bool HHVM_FUNCTION(pg_send_execute, CResRef connection, const String& stmtname, CArrRef params) {
     PGSQL *conn = PGSQL::Get(connection);
     if (conn == NULL) {
         return false;
@@ -1228,7 +1228,7 @@ Variant HHVM_FUNCTION(pg_field_name, CResRef result, int64_t field_number) {
     }
 }
 
-int64_t HHVM_FUNCTION(pg_field_num, CResRef result, CStrRef field_name) {
+int64_t HHVM_FUNCTION(pg_field_num, CResRef result, const String& field_name) {
     PGresult *res = PGSQLResult::GetResult(result);
     if (res == NULL) {
         return -1;
@@ -1406,15 +1406,15 @@ Variant HHVM_FUNCTION(pg_last_oid, CResRef result) {
   throw NotImplementedException("pg_last_oid");
 }
 
-Variant HHVM_FUNCTION(pg_meta_data, CResRef connection, CStrRef table_name) {
+Variant HHVM_FUNCTION(pg_meta_data, CResRef connection, const String& table_name) {
   throw NotImplementedException("pg_meta_data");
 }
 
-int64_t HHVM_FUNCTION(pg_set_client_encoding, CResRef connection, CStrRef encoding) {
+int64_t HHVM_FUNCTION(pg_set_client_encoding, CResRef connection, const String& encoding) {
   throw NotImplementedException("pg_set_client_encoding");
 }
 
-bool HHVM_FUNCTION(pg_trace, CStrRef pathname, CStrRef mode /* = "w" */, CResRef connection) {
+bool HHVM_FUNCTION(pg_trace, const String& pathname, const String& mode /* = "w" */, CResRef connection) {
   throw NotImplementedException("pg_trace");
 }
 
@@ -1422,23 +1422,23 @@ bool HHVM_FUNCTION(pg_untrace, CResRef connection) {
   throw NotImplementedException("pg_untrace");
 }
 
-Variant HHVM_FUNCTION(pg_pconnect, CStrRef connection_string, int64_t connect_type /* = 0 */) {
+Variant HHVM_FUNCTION(pg_pconnect, const String& connection_string, int64_t connect_type /* = 0 */) {
   throw NotImplementedException("pg_pconnect");
 }
 
-Variant HHVM_FUNCTION(pg_convert, CResRef connection, CStrRef table_name, CArrRef assoc_array, int options /* = 0 */) {
+Variant HHVM_FUNCTION(pg_convert, CResRef connection, const String& table_name, CArrRef assoc_array, int options /* = 0 */) {
   throw NotImplementedException("pg_convert");
 }
 
-bool HHVM_FUNCTION(pg_copy_from, CResRef connection, CStrRef table_name, CArrRef rows, CStrRef delimiter /* = "\t" */, CStrRef null_as /* = "\n" */) {
+bool HHVM_FUNCTION(pg_copy_from, CResRef connection, const String& table_name, CArrRef rows, const String& delimiter /* = "\t" */, const String& null_as /* = "\n" */) {
   throw NotImplementedException("pg_copy_from");
 }
 
-Variant HHVM_FUNCTION(pg_copy_to, CResRef connection, CStrRef table_name, CStrRef delimiter /* = "\t" */, CStrRef null_as /* = "\n" */) {
+Variant HHVM_FUNCTION(pg_copy_to, CResRef connection, const String& table_name, const String& delimiter /* = "\t" */, const String& null_as /* = "\n" */) {
   throw NotImplementedException("pg_copy_to");
 }
 
-bool HHVM_FUNCTION(pg_put_line, CResRef connection, CStrRef data) {
+bool HHVM_FUNCTION(pg_put_line, CResRef connection, const String& data) {
   throw NotImplementedException("pg_put_line");
 }
 

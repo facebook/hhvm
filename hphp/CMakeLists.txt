@@ -66,16 +66,6 @@ add_subdirectory(third_party/lz4)
 add_subdirectory(third_party/double-conversion)
 add_subdirectory(third_party/folly)
 
-foreach (CXX_FILE ${CXX_SOURCES})
-	if(${CXX_FILE} MATCHES ".no.cpp$")
-		SET_SOURCE_FILES_PROPERTIES(
-			${CXX_FILE}
-			PROPERTIES
-			COMPILE_FLAGS -O0
-		)
-	endif()
-endforeach()
-
 ADD_LIBRARY(hphp_runtime_static STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES OUTPUT_NAME "hphp_runtime")

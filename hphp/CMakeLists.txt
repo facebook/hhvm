@@ -22,7 +22,7 @@ SET(USE_HHVM TRUE)
 SET(ENV{HHVM} 1)
 ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/hphp/hhvm/hhvm\\\"")
 
-set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/debugger runtime/eval runtime/ext runtime/server runtime/vm util)
+set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/debugger runtime/eval runtime/ext runtime/server runtime/vm)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 	auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
 	list(APPEND CXX_SOURCES ${files})
@@ -76,16 +76,7 @@ foreach (CXX_FILE ${CXX_SOURCES})
 	endif()
 endforeach()
 
-add_custom_command(
-  OUTPUT "hphp-repo-schema.h" "hphp-build-info.cpp"
-  COMMAND "hphp/util/generate-buildinfo.sh"
-  DEPENDS ${CXX_SOURCES} ${C_SOURCES}
-  WORKING_DIRECTORY ${HPHP_HOME}
-  COMMENT "Generating Repo Schema ID and Compiler ID"
-  VERBATIM)
-
 ADD_LIBRARY(hphp_runtime_static STATIC
-            "hphp-repo-schema.h" "hphp-build-info.cpp"
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES OUTPUT_NAME "hphp_runtime")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES PREFIX "lib")
@@ -102,6 +93,7 @@ add_subdirectory(vixl)
 add_subdirectory(neo)
 add_subdirectory(parser)
 add_subdirectory(zend)
+add_subdirectory(util)
 
 add_subdirectory(compiler)
 add_subdirectory(runtime/ext_hhvm)

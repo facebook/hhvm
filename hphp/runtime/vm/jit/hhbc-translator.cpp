@@ -3806,11 +3806,12 @@ void HhbcTranslator::emitDiv() {
 }
 
 void HhbcTranslator::emitMod() {
-  auto catchBlock = makeCatch();
+  auto catchBlock1 = makeCatch();
+  auto catchBlock2 = makeCatch();
   SSATmp* btr = popC();
   SSATmp* btl = popC();
-  SSATmp* tr = gen(ConvCellToInt, catchBlock, btr);
-  SSATmp* tl = gen(ConvCellToInt, catchBlock, btl);
+  SSATmp* tr = gen(ConvCellToInt, catchBlock1, btr);
+  SSATmp* tl = gen(ConvCellToInt, catchBlock2, btl);
   gen(DecRef, btr);
   gen(DecRef, btl);
   // Exit path spills an additional false

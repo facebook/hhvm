@@ -148,6 +148,7 @@ bool checkBlock(Block* b) {
 
   // Invariant #9
   if (b->isCatch()) {
+    // keyed off a tca, so there needs to be exactly one
     assert(b->trace()->blocks().size() == 1);
     assert(b->preds().size() <= 1);
   }

@@ -216,6 +216,10 @@ bad_tests = (
     '/ext/standard/tests/network/gethostbyname_error004.php',
     '/ext/standard/tests/network/getmxrr.php',
     '/ext/sockets/tests/socket_getpeername_ipv6loop.php',
+
+    # broken: t2991109
+    '/ext/zlib/tests/gzfile_variation5.php',
+    '/ext/zlib/tests/readgzfile_variation5.php',
 )
 
 # Tests that work but not in repo mode

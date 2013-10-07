@@ -2987,29 +2987,20 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
 
   if (numLocals == 0) return;
 
-  // The helpers called below use a special ABI, in which r15 is not saved.
-  // So save r15 on the stack if it's live.
-  bool saveR15 = m_state.liveRegs[inst].contains(r15);
-
-  int stackAdjust = 8;
-  if (saveR15)  {
-    a.push(r15);
-    stackAdjust = 16;
-  }
+  // The helpers called below use a special ABI, in which r15 is not saved,
+  // and the stub expects the stack to be imbalanced (RSP%16==0) on entry.
+  // So save r15 in addition to the caller-save registers, and use
+  // PhysRegSaverStub which assumes the odd stack parity.
+  auto toSave = m_state.liveRegs[inst] & (kCallerSaved | RegSet(r15));
+  PhysRegSaverStub saver(a, toSave);
 
   auto const target = numLocals > kNumFreeLocalsHelpers
     ? m_tx64->uniqueStubs.freeManyLocalsHelper
     : m_tx64->uniqueStubs.freeLocalsHelpers[numLocals - 1];
 
-  a.subq(stackAdjust, rsp);  // For parity; callee does retq $0x8.
   a.lea(rFp[-numLocals * sizeof(TypedValue)], rDest);
   a.call(target);
   recordSyncPoint(a);
-
-  if (saveR15) {
-    a.addq(8, rsp);
-    a.pop(r15);
-  }
 }
 
 //

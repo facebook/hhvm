@@ -325,7 +325,7 @@ asm_label(a, loopHead);
   }
 
   a.    addq   (AROFF(m_r) + sizeof(TypedValue), rVmSp);
-  a.    ret    (8);
+  a.    ret    ();
 
   uniqueStubs.add("freeLocalsHelpers", uniqueStubs.freeManyLocalsHelper);
 }

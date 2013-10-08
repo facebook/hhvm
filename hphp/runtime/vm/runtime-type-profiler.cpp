@@ -27,12 +27,33 @@
 #include "folly/dynamic.h"
 #include "folly/json.h"
 
-#include <external/google_base/atomicops.h>
-
+#include "hphp/util/atomic-vector.h"
 
 namespace HPHP {
 
+/*
+ * Holds an atomic count of profiled types.
+ */
+namespace {
+struct ProfileCounter {
+  std::atomic<int64_t> m_count;
+
+  ProfileCounter() : m_count(0) {}
+  ~ProfileCounter() = default;
+  ProfileCounter& operator=(const ProfileCounter& pc) = delete;
+
+  ProfileCounter(const ProfileCounter& pc) : m_count(pc.m_count.load()) {}
+  void inc() { m_count.fetch_add(1); }
+  int64_t load() { return m_count.load(); }
+};
+}
+
+typedef folly::AtomicHashMap<const char*, ProfileCounter> TypeCounter;
+typedef AtomicVector<TypeCounter*> FuncTypeCounter;
+typedef AtomicVector<FuncTypeCounter*> RuntimeProfileInfo;
+
 static FuncTypeCounter emptyFuncCounter(1,0);
+
 static RuntimeProfileInfo allProfileInfo
       (RuntimeOption::EvalRuntimeTypeProfile
        ? 1: 750000, &emptyFuncCounter);
@@ -53,7 +74,7 @@ std::string dumpRawParamInfo(const Func* function){
     auto typeCount = funcParamMap->get(i);
     for (auto j = typeCount->begin(); j != typeCount->end(); j++) {
       folly::dynamic key = std::string(j->first);
-      folly::dynamic value = j->second;
+      folly::dynamic value = j->second.load();
       info[i][key] = value;
     }
   }
@@ -77,7 +98,7 @@ void writeProfileInformationToDisk() {
       info.push_back(folly::dynamic::object);
       for (auto k = typeCount->begin(); k != typeCount->end(); k++) {
         folly::dynamic key = std::string(k->first);
-        folly::dynamic value = k->second;
+        folly::dynamic value = k->second.load();
         info[j][key] = value;
       }
     }
@@ -97,9 +118,9 @@ void logType(const Func* func, const char* typeString, int64_t param) {
     auto it = allProfileInfo.get(func->getFuncId());
     TypeCounter* hashmap = it->get(param);
     try {
-      auto success = hashmap->insert(std::make_pair(typeString, 1));
+      auto success = hashmap->insert(typeString, ProfileCounter());
       if (!success.second) {
-        base::subtle::NoBarrier_AtomicIncrement(&success.first->second, 1);
+        success.first->second.inc();
       }
     } catch (folly::AtomicHashMapFullError& e) {
       //fail silently if hashmap is full

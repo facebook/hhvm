@@ -3911,23 +3911,18 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           clsName = oss.str();
         }
 
-        StringData* className = makeStaticString(clsName);
-
         if (Option::WholeProgram) {
           int my_id;
           {
             EmittedClosures::accessor acc;
-            s_emittedClosures.insert(acc, className);
+            s_emittedClosures.insert(acc, makeStaticString(clsName));
             my_id = ++acc->second;
           }
           if (my_id > 1) {
             // The closure was from a trait, so we need a unique name in the
-            // implementing class
-            className = makeStaticString(
-              // _ is different from the #, which is used for many closures in
-              // the same func in ParserBase::newClosureName
-              className->toCPPString() + '_' + std::to_string(my_id)
-            );
+            // implementing class. _ is different from the #, which is used for
+            // many closures in the same func in ParserBase::newClosureName
+            folly::toAppend('_', my_id, &clsName);
           }
         }
 

@@ -1,0 +1,12 @@
+bool(true)
+bool(false)
+bool(false)
+---
+int(1)
+int(3)
+NULL
+NULL
+---
+int(1)
+int(3)
+HipHop Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Integer key 3 is out of bounds' in :%a

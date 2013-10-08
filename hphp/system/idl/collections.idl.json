@@ -693,11 +693,226 @@
             ]
         },
         {
+          "name": "FrozenVector",
+          "ifaces": [
+            "ConstVector"
+          ],
+          "flags": [
+            "IsFinal",
+            "IsCppSerializable",
+            "NoDefaultSweep"
+          ],
+          "funcs": [
+            {
+                "name": "__construct",
+                "flags": [
+                ],
+                "desc": "Returns a FrozenVector built from the values produced by the specified Iterable.",
+                "return": {
+                    "type": null
+                },
+                "args": [
+                    {
+                        "name": "iterable",
+                        "type": "Variant",
+                        "value": "null"
+                    }
+                ]
+            },
+            {
+                  "name": "isEmpty",
+                  "flags": [
+                  ],
+                  "desc": "Returns true if the FrozenVector is empty, false otherwise.",
+                  "return": {
+                      "type": "Boolean"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "count",
+                  "flags": [
+                  ],
+                  "desc": "Returns the number of values in the FrozenVector.",
+                  "return": {
+                      "type": "Int64"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "items",
+                  "flags": [
+                  ],
+                  "desc": "Returns an Iterable that produces the values from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "containsKey",
+                  "flags": [
+                  ],
+                  "desc": "Returns true if the specified key is present in the FrozenVector, returns false otherwise.",
+                  "return": {
+                      "type": "Boolean"
+                  },
+                  "args": [
+                      {
+                          "name": "key",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "at",
+                  "flags": [
+                  ],
+                  "desc": "Returns the value at the specified key. If the key is not present, an exception is thrown.",
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "key",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "get",
+                  "flags": [
+                  ],
+                  "desc": "Returns the value at the specified key. If the key is not present, null is returned.",
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "key",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "getIterator",
+                  "flags": [
+                  ],
+                  "desc": "Returns an iterator that points to beginning of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "map",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Vector of the values produced by applying the specified callback on each value from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "callback",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                 "name": "mapWithKey",
+                 "flags": [
+                  ],
+                  "desc": "Returns a Vector of the values produced by applying the specified callback on each key and value from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "callback",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "filter",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Vector of all the values from this FrozenVector for which the specified callback returns true.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                    {
+                        "name": "callback",
+                        "type": "Variant"
+                    }
+                  ]
+              },
+              {
+                  "name": "filterWithKey",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Vector of all the values from this FrozenVector for which the specified callback returns true.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "callback",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "zip",
+                  "flags": [
+                  ],
+                  "desc": "Returns a KeyedIterable produced by combined the specified Iterables pair-wise.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "iterable",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "kvzip",
+                  "flags": [
+                  ],
+                  "desc": "Returns an Iterable that produces the key\/value pairs from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "keys",
+                  "flags": [
+                  ],
+                  "desc": "Returns an Iterable that produces the keys from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              }
+            ]
+        },
+        {
             "name": "VectorIterator",
             "ifaces": [
                 "KeyedIterator"
             ],
-            "desc": "An iterator implementation for iterating over a Vector.",
+            "desc": "An iterator implementation for iterating over a Vector\/FrozenVector.",
             "flags": [
                 "IsFinal",
                 "NoDefaultSweep"

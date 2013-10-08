@@ -18,6 +18,7 @@
 #ifndef incl_HPHP_EXT_COLLECTION_H_
 #define incl_HPHP_EXT_COLLECTION_H_
 
+#include "hphp/runtime/ext/base_vector.h"
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/system/systemlib.h"
 
@@ -28,20 +29,12 @@ namespace HPHP {
 // class Vector
 
 FORWARD_DECLARE_CLASS(Vector);
-class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
-                                           ObjectData::UseGet|
-                                           ObjectData::UseSet|
-                                           ObjectData::UseIsset|
-                                           ObjectData::UseUnset|
-                                           ObjectData::CallToImpl|
-                                           ObjectData::HasClone> {
+class c_Vector : public BaseVector {
  public:
   DECLARE_CLASS_NO_SWEEP(Vector)
 
  public:
   explicit c_Vector(Class* cls = c_Vector::classof());
-  ~c_Vector();
-  void freeData();
   void t___construct(CVarRef iterable = null_variant);
   Object t_add(CVarRef val);
   Object t_addall(CVarRef val);
@@ -99,21 +92,6 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
 
   static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
-  void init(CVarRef t);
-
-  TypedValue* at(int64_t key) {
-    if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
-      throwOOB(key);
-      return NULL;
-    }
-    return &m_data[key];
-  }
-  TypedValue* get(int64_t key) {
-    if ((uint64_t)key >= (uint64_t)m_size) {
-      return NULL;
-    }
-    return &m_data[key];
-  }
   void set(int64_t key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
@@ -125,31 +103,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
     tvRefcountedDecRef(tv);
     tvCopy(*val, *tv);
   }
-  void add(TypedValue* val) {
-    assert(val->m_type != KindOfRef);
-    ++m_version;
-    if (m_capacity <= m_size) {
-      grow();
-    }
-    cellDup(*val, m_data[m_size]);
-    ++m_size;
-  }
-  void resize(int64_t sz, TypedValue* val);
-  bool contains(int64_t key) {
-    return ((uint64_t)key < (uint64_t)m_size);
-  }
-  void reserve(int64_t sz);
-  int getVersion() const {
-    return m_version;
-  }
-  int64_t size() const {
-    return m_size;
-  }
 
-  Array toArrayImpl() const;
-  bool toBoolImpl() const {
-    return (m_size != 0);
-  }
+  void resize(int64_t sz, TypedValue* val);
 
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
@@ -162,13 +117,8 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   void usort(CVarRef cmp_function);
 
   static c_Vector* Clone(ObjectData* obj);
-  static Array ToArray(const ObjectData* obj);
-  static bool ToBool(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
-  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
-  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
-  static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
@@ -178,27 +128,12 @@ class c_Vector : public ExtObjectDataFlags<ObjectData::VectorAttrInit|
   static uint dataOffset() { return offsetof(c_Vector, m_data); }
 
  private:
-  void grow();
-  static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-
-  uint m_size;
-  TypedValue* m_data;
-  uint m_capacity;
-  int32_t m_version;
 
   friend ObjectData* collectionDeepCopyVector(c_Vector* vec);
-  friend class c_VectorIterator;
   friend class c_Map;
   friend class c_StableMap;
   friend class c_Pair;
   friend class ArrayIter;
-
-  static void compileTimeAssertions() {
-    // For performance, all native collection classes have their m_size field
-    // at the same offset.
-    static_assert(
-      offsetof(c_Vector, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
-  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -220,11 +155,53 @@ class c_VectorIterator : public ExtObjectData {
   void t_rewind();
 
  private:
-  SmartPtr<c_Vector> m_obj;
+  SmartPtr<BaseVector> m_obj;
   ssize_t m_pos;
   int32_t m_version;
 
-  friend class c_Vector;
+  friend class BaseVector;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class FrozenVector
+
+FORWARD_DECLARE_CLASS(FrozenVector);
+class c_FrozenVector : public BaseVector {
+public:
+  DECLARE_CLASS_NO_SWEEP(FrozenVector)
+
+public:
+  // The methods that implement the ConstVector interface simply forward
+  // invocations to the implementations in BaseVector. Unfortunately, we need
+  // to explicitly declare them so that the code automatically generated from
+  // the IDL can link against them.
+
+  // ConstCollection
+  bool t_isempty();
+  int64_t t_count();
+  Object t_items();
+
+  // ConstIndexAccess
+  bool t_containskey(CVarRef key);
+  Variant t_at(CVarRef key);
+  Variant t_get(CVarRef key);
+
+  // KeyedIterable
+  Object t_getiterator();
+  Object t_map(CVarRef callback);
+  Object t_mapwithkey(CVarRef callback);
+  Object t_filter(CVarRef callback);
+  Object t_filterwithkey(CVarRef callback);
+  Object t_zip(CVarRef iterable);
+  Object t_kvzip();
+  Object t_keys();
+
+  // Others
+  void t___construct(CVarRef iterable = null_variant);
+
+public:
+
+  explicit c_FrozenVector(Class* cls = c_FrozenVector::classof());
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1217,6 +1194,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   friend ObjectData* collectionDeepCopyPair(c_Pair* pair);
   friend class c_PairIterator;
   friend class c_Vector;
+  friend class BaseVector;
   friend class c_Map;
   friend class c_StableMap;
   friend class ArrayIter;
@@ -1317,6 +1295,8 @@ inline bool isOptimizableCollectionClass(const Class* klass) {
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
 
 void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+
+ArrayIter getArrayIterHelper(CVarRef v, size_t& sz);
 
 ///////////////////////////////////////////////////////////////////////////////
 

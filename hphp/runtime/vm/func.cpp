@@ -533,6 +533,7 @@ void Func::prettyPrint(std::ostream& out) const {
       out << std::endl;
     }
   }
+
   const EHEntVec& ehtab = shared()->m_ehtab;
   for (EHEntVec::const_iterator it = ehtab.begin(); it != ehtab.end(); ++it) {
     bool catcher = it->m_type == EHEnt::Type::Catch;
@@ -559,6 +560,16 @@ void Func::prettyPrint(std::ostream& out) const {
       out << " parentIndex " << it->m_parentIndex;
     }
     out << std::endl;
+  }
+
+  for (auto& fpi : fpitab()) {
+    out << " FPI " << fpi.m_fpushOff << "-" << fpi.m_fcallOff
+        << "; fpOff = " << fpi.m_fpOff;
+    if (fpi.m_parentIndex != -1) {
+      out << " parentIndex = " << fpi.m_parentIndex
+          << " (depth " << fpi.m_fpiDepth << ")";
+    }
+    out << '\n';
   }
 }
 

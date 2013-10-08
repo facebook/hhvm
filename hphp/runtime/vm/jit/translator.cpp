@@ -526,6 +526,16 @@ predictOutputs(SrcKey startSk,
     return DataType(dt);
   }
 
+  if (ni->op() == OpCns ||
+      ni->op() == OpCnsE ||
+      ni->op() == OpCnsU) {
+    StringData* sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
+    TypedValue* tv = Unit::lookupCns(sd);
+    if (tv) {
+      return tv->m_type;
+    }
+  }
+
   if (ni->op() == OpMod) {
     // x % 0 returns boolean false, so we don't know for certain, but it's
     // probably an int.
@@ -714,6 +724,18 @@ getDynLocType(const SrcKey startSk,
     CS(OutObject,      KindOfObject);
     CS(OutResource,    KindOfResource);
 #undef CS
+
+    case OutCns: {
+      // If it's a system constant, burn in its type. Otherwise we have
+      // to accept prediction; use the translation-time value, or fall back
+      // to the targetcache if none exists.
+      StringData* sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
+      assert(sd);
+      const TypedValue* tv = Unit::lookupPersistentCns(sd);
+      if (tv) {
+        return RuntimeType(tv->m_type);
+      }
+    } // Fall through
     case OutPred: {
       auto dt = predictOutputs(startSk, ni);
       if (dt != KindOfAny) ni->outputPredicted = true;
@@ -723,7 +745,7 @@ getDynLocType(const SrcKey startSk,
     case OutClassRef: {
       Op op = Op(ni->op());
       if ((op == OpAGetC && inputs[0]->isString())) {
-        const StringData *sd = inputs[0]->rtt.valueString();
+        const StringData* sd = inputs[0]->rtt.valueString();
         if (sd) {
           Class *klass = Unit::lookupUniqueClass(sd);
           TRACE(3, "KindOfClass: derived class \"%s\" from string literal\n",
@@ -740,26 +762,6 @@ getDynLocType(const SrcKey startSk,
       return RuntimeType(KindOfClass);
     }
 
-    case OutCns: {
-      // If it's a system constant, burn in its type. Otherwise we have
-      // to accept prediction; use the translation-time value, or fall back
-      // to the targetcache if none exists.
-      StringData *sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
-      assert(sd);
-      const TypedValue* tv = Unit::lookupPersistentCns(sd);
-      if (tv) {
-        return RuntimeType(tv->m_type);
-      }
-      tv = Unit::lookupCns(sd);
-      // In JitPGO mode, we disable type predictions to avoid side exits
-      if (tv && !RuntimeOption::EvalJitPGO) {
-        ni->outputPredicted = true;
-        TRACE(1, "CNS %s: guessing runtime type %d\n", sd->data(), tv->m_type);
-        return RuntimeType(tv->m_type);
-      }
-      return RuntimeType(KindOfAny);
-    }
-
     case OutNullUninit: {
       assert(ni->op() == OpNullUninit);
       return RuntimeType(KindOfUninit);
@@ -767,7 +769,7 @@ getDynLocType(const SrcKey startSk,
 
     case OutStringImm: {
       assert(ni->op() == OpString);
-      StringData *sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
+      StringData* sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
       assert(sd);
       return RuntimeType(sd);
     }
@@ -1366,7 +1368,8 @@ static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
 bool outputIsPredicted(SrcKey startSk,
                        NormalizedInstruction& inst) {
   auto const& iInfo = getInstrInfo(inst.op());
-  auto doPrediction = iInfo.type == OutPred && !inst.breaksTracelet;
+  auto doPrediction =
+    (iInfo.type == OutPred || iInfo.type == OutCns) && !inst.breaksTracelet;
   if (doPrediction) {
     // All OutPred ops except for SetM have a single stack output for now.
     assert(iInfo.out == Stack1 || inst.op() == OpSetM);

@@ -14,36 +14,73 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_SERVER_LIB_EVENT_SERVER_WITH_TAKEOVER_H_
-#define incl_HPHP_HTTP_SERVER_LIB_EVENT_SERVER_WITH_TAKEOVER_H_
+#ifndef incl_HPHP_HTTP_SERVER_TAKEOVER_AGENT_H_
+#define incl_HPHP_HTTP_SERVER_TAKEOVER_AGENT_H_
 
-#include "hphp/runtime/server/libevent-server.h"
+#include "hphp/runtime/base/complex-types.h"
+
+#include <event.h>
+
+#include <chrono>
+#include <set>
+#include <string>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * LibEventServer that adds the ability to take over an accept socket
+ * A callback to be informed when a server is shutting down because its socket
+ * has been taken over by a new process.
+ */
+class TakeoverListener {
+public:
+  virtual ~TakeoverListener();
+  virtual void takeoverShutdown() = 0;
+};
+
+
+/**
+ * Agent with the ability to take over an accept socket
  * from another process, and give its accept socket up.
  */
-class LibEventServerWithTakeover : public LibEventServer {
+class TakeoverAgent {
 public:
-  LibEventServerWithTakeover(const std::string &address, int port, int thread);
+  enum class RequestType {
+    LISTEN_SOCKET,
+    TERMINATE,
+   };
 
-  virtual void stop();
+  class Callback {
+   public:
+    virtual ~Callback() {}
+    // Called by the TakeoverAgent when it receives a request for takeover
+    // Returns non zero on error, which terminates the takeover action
+    virtual int onTakeoverRequest(RequestType type) = 0;
 
-  // Set the name of the file to be used for a Unix domain socket
-  // over which to transfer the accept socket.
-  void setTransferFilename(const std::string &fname) {
-    assert(m_transfer_fname.empty());
-    m_transfer_fname = fname;
+    // Called by the TakeoverAgent when it is shutdown mid-way through a
+    // takeover.
+    virtual void takeoverAborted() = 0;
+  };
+
+  explicit TakeoverAgent(const std::string &fname);
+
+  // execute a takeover and return the fd.  -1 if an fd could not be acquired
+  int takeover(std::chrono::seconds timeout = std::chrono::seconds(2));
+
+  // instruct the old server to shutdown
+  void requestShutdown();
+
+  // setup a server to listen for takeover requests
+  int setupFdServer(event_base *eventBase, int sock, Callback *callback);
+
+  // stop the takeover agent, including in-progress takeovers
+  void stop();
+
+  void addTakeoverListener(TakeoverListener* listener) {
+    m_takeover_listeners.insert(listener);
   }
-
-  virtual void addTakeoverListener(TakeoverListener* lisener) {
-    m_takeover_listeners.insert(lisener);
-  }
-  virtual void removeTakeoverListener(TakeoverListener* lisener) {
-    m_takeover_listeners.erase(lisener);
+  void removeTakeoverListener(TakeoverListener* listener) {
+    m_takeover_listeners.erase(listener);
   }
 
   // These are public so they can be called from a C-style callback.
@@ -59,10 +96,6 @@ protected:
     Complete,
    };
 
-  virtual void start();
-  virtual int getAcceptSocket();
-
-  void setupFdServer();
   void notifyTakeoverComplete();
 
   void* m_delete_handle;
@@ -74,9 +107,15 @@ protected:
 
   // The state of taking over this server's socket
   TakeoverState m_takeover_state;
+
+  // Target socket
+  int m_sock;
+
+  // User callback for events
+  Callback *m_callback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_SERVER_LIB_EVENT_SERVER_H_
+#endif // incl_HPHP_HTTP_SERVER_TAKEOVER_AGENT_H_

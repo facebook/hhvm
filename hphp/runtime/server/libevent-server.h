@@ -22,6 +22,7 @@
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 //#include "hphp/util/job-queue.h"
 //#include "hphp/util/service-data.h"
+#include "hphp/runtime/server/takeover-agent.h"
 #include "hphp/runtime/server/server-worker.h"
 #include "hphp/util/process.h"
 
@@ -96,13 +97,11 @@ private:
  * Implementing an evhttp based HTTP server with JobQueueDispatcher. This
  * server will have one dispather thread and multiple worker threads.
  */
-class LibEventServer : public Server {
+class LibEventServer : public Server, public TakeoverAgent::Callback {
 public:
   /**
    * Constructor and destructor.
    */
-  LibEventServer(const std::string &address, int port, int thread)
-      : LibEventServer(ServerOptions(address, port, thread)) {}
   explicit LibEventServer(const ServerOptions &options);
   ~LibEventServer();
 
@@ -120,6 +119,9 @@ public:
     return m_dispatcher.getQueuedJobs();
   }
   int getLibEventConnectionCount();
+
+  void addTakeoverListener(TakeoverListener* listener);
+  void removeTakeoverListener(TakeoverListener* listener);
 
   /**
    * Request handler called by evhttp library.
@@ -143,6 +145,13 @@ public:
    */
   virtual bool enableSSL(int port);
 
+  /**
+   * TakeoverAgent::Callback
+   */
+  int onTakeoverRequest(TakeoverAgent::RequestType type);
+
+  void takeoverAborted();
+
 protected:
   virtual int getAcceptSocket();
   virtual int getAcceptSocketSSL();
@@ -156,6 +165,8 @@ protected:
   evhttp *m_server_ssl;
   int m_port_ssl;
 
+  std::unique_ptr<TakeoverAgent> m_takeover_agent;
+
   // signal to stop the thread
   event m_eventStop;
   CPipe m_pipeStop;
@@ -168,7 +179,7 @@ private:
   };
   RequestPriority getRequestPriority(struct evhttp_request* request);
 
-  int useExistingFd(evhttp *server, int fd);
+  int useExistingFd(evhttp *server, int fd, bool listen);
 
   static bool certHandler(const std::string &server_name,
                           const std::string& key_file,

@@ -98,6 +98,10 @@ LibEventServer::LibEventServer(const ServerOptions &options)
   evhttp_set_read_limit(m_server, RuntimeOption::RequestBodyReadLimit);
 #endif
   m_responseQueue.create(m_eventBase);
+
+  if (!options.m_takeoverFilename.empty()) {
+    m_takeover_agent.reset(new TakeoverAgent(options.m_takeoverFilename));
+  }
 }
 
 LibEventServer::~LibEventServer() {
@@ -115,14 +119,29 @@ LibEventServer::~LibEventServer() {
 ///////////////////////////////////////////////////////////////////////////////
 // implementing HttpServer
 
-int LibEventServer::useExistingFd(evhttp *server, int fd) {
+void LibEventServer::addTakeoverListener(TakeoverListener* listener) {
+  if (m_takeover_agent) {
+    m_takeover_agent->addTakeoverListener(listener);
+  }
+}
+
+void LibEventServer::removeTakeoverListener(TakeoverListener* listener) {
+  if (m_takeover_agent) {
+    m_takeover_agent->removeTakeoverListener(listener);
+  }
+}
+
+int LibEventServer::useExistingFd(evhttp *server, int fd, bool needListen) {
   Logger::Info("inheritfd: using inherited fd %d for server", fd);
 
-  int ret = listen(fd, RuntimeOption::ServerBacklog);
-  if (ret != 0) {
-    Logger::Error("inheritfd: listen() failed: %s",
-                  folly::errnoStr(errno).c_str());
-    return -1;
+  int ret = -1;
+  if (needListen) {
+    ret = listen(fd, RuntimeOption::ServerBacklog);
+    if (ret != 0) {
+      Logger::Error("inheritfd: listen() failed: %s",
+                    folly::errnoStr(errno).c_str());
+      return -1;
+    }
   }
 
   ret = evhttp_accept_socket(server, fd);
@@ -139,7 +158,7 @@ int LibEventServer::useExistingFd(evhttp *server, int fd) {
 
 int LibEventServer::getAcceptSocket() {
   if (m_accept_sock >= 0) {
-    if (useExistingFd(m_server, m_accept_sock) != 0) {
+    if (useExistingFd(m_server, m_accept_sock, true /* listen */) != 0) {
       m_accept_sock = -1;
       return -1;
     }
@@ -150,11 +169,77 @@ int LibEventServer::getAcceptSocket() {
   int ret = evhttp_bind_socket_backlog_fd(m_server, address,
                                           m_port, RuntimeOption::ServerBacklog);
   if (ret < 0) {
-    Logger::Error("Fail to bind port %d", m_port);
-    return -1;
+    if (errno == EADDRINUSE && m_takeover_agent) {
+      m_accept_sock = m_takeover_agent->takeover();
+      if (m_accept_sock < 0) {
+        return -1;
+      }
+      if (useExistingFd(m_server, m_accept_sock, false /* no listen */) != 0) {
+        m_accept_sock = -1;
+        return -1;
+      }
+    } else {
+      Logger::Error("Fail to bind port %d", m_port);
+      return -1;
+    }
   }
   m_accept_sock = ret;
+  if (m_takeover_agent) {
+    m_takeover_agent->requestShutdown();
+    m_takeover_agent->setupFdServer(m_eventBase, m_accept_sock, this);
+  }
   return 0;
+}
+
+int LibEventServer::onTakeoverRequest(TakeoverAgent::RequestType type) {
+  int ret = -1;
+  if (type == TakeoverAgent::RequestType::LISTEN_SOCKET) {
+    // TODO: This is broken-sauce.  We should continue serving
+    // requests from this process until shutdown.
+
+    // Make evhttp forget our copy of the accept socket so we don't accept any
+    // more connections and drop them.  Keep the socket open until we get the
+    // shutdown request so that we can still serve AFDT requests (if the new
+    // server crashes or something).  The downside is that it will take the LB
+    // longer to figure out that we are broken.
+    ret = evhttp_del_accept_socket(m_server, m_accept_sock);
+    if (ret < 0) {
+      // This will fail if we get a second AFDT request, but the spurious
+      // log message is not too harmful.
+      Logger::Error("Unable to delete accept socket");
+    }
+  } else if (type == TakeoverAgent::RequestType::TERMINATE) {
+    ret = close(m_accept_sock);
+    if (ret < 0) {
+      Logger::Error("Unable to close accept socket");
+      return -1;
+    }
+    m_accept_sock = -1;
+
+    // Close SSL server
+    if (m_server_ssl) {
+      assert(m_accept_sock_ssl > 0);
+      ret = evhttp_del_accept_socket(m_server_ssl, m_accept_sock_ssl);
+      if (ret < 0) {
+        Logger::Error("Unable to delete accept socket for SSL in evhttp");
+        return -1;
+      }
+      ret = close(m_accept_sock_ssl);
+      if (ret < 0) {
+        Logger::Error("Unable to close accept socket for SSL");
+        return -1;
+      }
+    }
+
+  }
+  return 0;
+}
+
+void LibEventServer::takeoverAborted() {
+  if (m_accept_sock >= 0) {
+    close(m_accept_sock);
+    m_accept_sock = -1;
+  }
 }
 
 int LibEventServer::getLibEventConnectionCount() {
@@ -168,10 +253,7 @@ void LibEventServer::start() {
     throw FailedToListenException(m_address, m_port);
   }
 
-  if (m_server_ssl != nullptr && m_accept_sock_ssl != -2) {
-    // m_accept_sock_ssl here serves as a flag to indicate whether it is
-    // called from subclass (LibEventServerWithTakeover). If it is (==-2)
-    // we delay the getAcceptSocketSSL();
+  if (m_server_ssl != nullptr) {
     if (getAcceptSocketSSL() != 0) {
       Logger::Error("Fail to listen on ssl port %d", m_port_ssl);
       throw FailedToListenException(m_address, m_port_ssl);
@@ -221,6 +303,10 @@ void LibEventServer::dispatch() {
     m_responseQueue.process();
   }
   m_responseQueue.close();
+
+  if (m_takeover_agent) {
+    m_takeover_agent->stop();
+  }
 
   // flushing all remaining events
   if (RuntimeOption::ServerGracefulShutdownWait) {
@@ -344,7 +430,7 @@ bool LibEventServer::enableSSL(int port) {
 
 int LibEventServer::getAcceptSocketSSL() {
   if (m_accept_sock_ssl >= 0) {
-    if (useExistingFd(m_server_ssl, m_accept_sock_ssl) != 0) {
+    if (useExistingFd(m_server_ssl, m_accept_sock_ssl, true /*listen*/) != 0) {
       m_accept_sock_ssl = -1;
       return -1;
     }

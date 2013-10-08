@@ -45,6 +45,8 @@ static int s_server_port = 0;
 static int s_admin_port = 0;
 static int s_rpc_port = 0;
 static int inherit_fd = -1;
+static std::unique_ptr<AsyncFunc<TestServer>> s_func;
+static char s_filename[MAXPATHLEN];
 
 bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
                                       const char **urls, int nUrls,
@@ -72,6 +74,10 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
   AsyncFunc<TestServer> func(this, &TestServer::RunServer);
   func.start();
 
+  if (s_func) {
+    s_func->waitForEnd();
+    s_func.reset();
+  }
   bool passed = true;
 
   string actual;
@@ -143,11 +149,13 @@ void TestServer::RunServer() {
   string rpcConfig = "-vSatellites.rpc.Port=" +
     lexical_cast<string>(s_rpc_port);
   string fd = lexical_cast<string>(inherit_fd);
+  string option = (inherit_fd >= 0) ? (string("--port-fd=") + fd) :
+    (string("-vServer.TakeoverFilename=") + string(s_filename));
 
   const char *argv[] = {
     "", "--mode=server", "--config=test/ext/config-server.hdf",
     portConfig.c_str(), adminConfig.c_str(), rpcConfig.c_str(),
-    "--port-fd", fd.c_str(),
+    option.c_str(),
     NULL
   };
 
@@ -217,6 +225,7 @@ bool TestServer::RunTests(const std::string &which) {
   s_rpc_port = find_server_port(s_admin_port + 1, PORT_MAX);
 
   RUN_TEST(TestInheritFdServer);
+  RUN_TEST(TestTakeoverServer);
   RUN_TEST(TestSanity);
   RUN_TEST(TestServerVariables);
   RUN_TEST(TestInteraction);
@@ -525,6 +534,38 @@ void TestServer::CleanupPreBoundSocket() {
 bool TestServer::TestInheritFdServer() {
   WITH_PREBOUND_SOCKET(VSR("<?php print 'Hello, World!';",
       "Hello, World!"));
+  return true;
+}
+
+bool TestServer::TestTakeoverServer() {
+  // start a server
+  snprintf(s_filename, MAXPATHLEN, "/tmp/hphp_takeover_XXXXXX");
+  int tmpfd = mkstemp(s_filename);
+  close(tmpfd);
+
+  s_func.reset(new AsyncFunc<TestServer>(this, &TestServer::RunServer));
+  s_func->start();
+
+  // Wait for the server to actually start
+  HttpClient http;
+  StringBuffer response;
+  vector<String> responseHeaders;
+  string url = "http://127.0.0.1:" + lexical_cast<string>(s_server_port) +
+    "/status.php";
+  HeaderMap headers;
+  for (int i = 0; i < 10; i++) {
+    int code = http.get(url.c_str(), response, &headers, &responseHeaders);
+    if (code > 0) {
+      break;
+    }
+    sleep(1);
+  }
+
+  // will start a second server, which should takeover
+  VSR("<?php print 'Hello, World!';",
+      "Hello, World!");
+  unlink(s_filename);
+  s_filename[0] = 0;
   return true;
 }
 

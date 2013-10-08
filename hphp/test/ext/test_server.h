@@ -53,6 +53,9 @@ public:
   // test inheriting server fd
   bool TestInheritFdServer();
 
+  // test takeover
+  bool TestTakeoverServer();
+
   // test HttpClient class that proxy server uses
   bool TestHttpClient();
 

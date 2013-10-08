@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/server/libevent-server-with-takeover.h"
+#include "hphp/runtime/server/takeover-agent.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/ext_string.h"
@@ -22,12 +22,12 @@
 #include <afdt.h>
 
 /*
-LibEventServerWithTakeover extends LibEventServer with the ability
+TakeoverAgent provides the ability
 to transfer the accept socket (the file descriptor used to accept
 new connections) from an older instance of the server to a new one
 that has just been brought up.
 
-In getAcceptSocket, if binding fails, the server will attempt to
+In takeover, the agent will attempt to
 use libafdt to transfer a file descriptor from an existing process
 (which should exist, since we couldn't bind to the socket).
 The transfer is performed in a separate event loop that we wait on,
@@ -74,22 +74,23 @@ static int fd_transfer_request_handler(
     uint8_t* response,
     uint32_t* response_length,
     void* userdata) {
-  LibEventServerWithTakeover* server = (LibEventServerWithTakeover*)userdata;
+  TakeoverAgent* agent = (TakeoverAgent*)userdata;
   String req((const char*)request, request_length, CopyString);
   String resp;
-  int fd = server->afdtRequest(req, &resp);
+  int fd = agent->afdtRequest(req, &resp);
   assert(resp.size() <= (int)*response_length);
   memcpy(response, resp.data(), resp.size());
   *response_length = resp.size();
   return fd;
 }
 
-LibEventServerWithTakeover::LibEventServerWithTakeover
-(const std::string &address, int port, int thread)
-  : LibEventServer(address, port, thread),
-    m_delete_handle(nullptr),
+TakeoverAgent::TakeoverAgent(const std::string &fname)
+  : m_delete_handle(nullptr),
+    m_transfer_fname(fname),
     m_took_over(false),
-    m_takeover_state(TakeoverState::NotStarted)
+    m_takeover_state(TakeoverState::NotStarted),
+    m_sock(-1),
+    m_callback(nullptr)
 {
 }
 
@@ -98,25 +99,14 @@ const StaticString
   s_ver_C_TERM_REQ(P_VERSION C_TERM_REQ),
   s_ver_C_TERM_OK(P_VERSION C_TERM_OK);
 
-int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
+int TakeoverAgent::afdtRequest(String request, String* response) {
   Logger::Info("takeover: received request");
   if (request == s_ver_C_FD_REQ) {
     Logger::Info("takeover: request is a listen socket request");
-    int ret;
     *response = P_VERSION C_FD_RESP;
-    // Make evhttp forget our copy of the accept socket so we don't accept any
-    // more connections and drop them.  Keep the socket open until we get the
-    // shutdown request so that we can still serve AFDT requests (if the new
-    // server crashes or something).  The downside is that it will take the LB
-    // longer to figure out that we are broken.
-    ret = evhttp_del_accept_socket(m_server, m_accept_sock);
-    if (ret < 0) {
-      // This will fail if we get a second AFDT request, but the spurious
-      // log message is not too harmful.
-      Logger::Error("Unable to delete accept socket");
-    }
     m_takeover_state = TakeoverState::Started;
-    return m_accept_sock;
+    (void)m_callback->onTakeoverRequest(RequestType::LISTEN_SOCKET);
+    return m_sock;
   } else if (request == s_ver_C_TERM_REQ) {
     Logger::Info("takeover: request is a terminate request");
     // It is a little bit of a hack to use an AFDT request/response
@@ -124,28 +114,9 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
     // within the main libevent thread.
     int ret;
     *response = P_VERSION C_TERM_BAD;
-    ret = close(m_accept_sock);
-    if (ret < 0) {
-      Logger::Error("Unable to close accept socket");
+    if (m_callback->onTakeoverRequest(RequestType::TERMINATE) != 0) {
       return -1;
     }
-    m_accept_sock = -1;
-
-    // Close SSL server
-    if (m_server_ssl) {
-      assert(m_accept_sock_ssl > 0);
-      ret = evhttp_del_accept_socket(m_server_ssl, m_accept_sock_ssl);
-      if (ret < 0) {
-        Logger::Error("Unable to delete accept socket for SSL in evhttp");
-        return -1;
-      }
-      ret = close(m_accept_sock_ssl);
-      if (ret < 0) {
-        Logger::Error("Unable to close accept socket for SSL");
-        return -1;
-      }
-    }
-
     ret = afdt_close_server(m_delete_handle);
     if (ret < 0) {
       Logger::Error("Unable to close afdt server");
@@ -159,7 +130,7 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
     for (std::set<TakeoverListener*>::iterator it =
            m_takeover_listeners.begin();
          it != m_takeover_listeners.end(); ++it) {
-      (*it)->takeoverShutdown(this);
+      (*it)->takeoverShutdown();
     }
     Logger::Info("takeover: notification complete");
     return -1;
@@ -170,18 +141,21 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
   }
 }
 
-void LibEventServerWithTakeover::setupFdServer() {
+int TakeoverAgent::setupFdServer(event_base *eventBase, int sock,
+                                 Callback *callback) {
   int ret;
+  m_sock = sock;
+  m_callback = callback;
   ret = unlink(m_transfer_fname.c_str());
   if (ret < 0 && errno != ENOENT) {
     Logger::Error("Unalbe to unlink '%s': %s",
                   m_transfer_fname.c_str(), folly::errnoStr(errno).c_str());
-    return;
+    return -1;
   }
 
   ret = afdt_create_server(
       m_transfer_fname.c_str(),
-      m_eventBase,
+      eventBase,
       fd_transfer_request_handler,
       afdt_no_post,
       fd_transfer_error_hander,
@@ -193,31 +167,11 @@ void LibEventServerWithTakeover::setupFdServer() {
   if (ret >= 0) {
     Logger::Info("takeover: fd server set up successfully");
   }
+  return ret;
 }
 
-int LibEventServerWithTakeover::getAcceptSocket() {
+int TakeoverAgent::takeover(std::chrono::seconds timeoutSec) {
   int ret;
-  const char *address = m_address.empty() ? nullptr : m_address.c_str();
-
-  if (m_accept_sock != -1) {
-    Logger::Warning("LibEventServerWithTakeover trying to get a socket, "
-        "but m_accept_sock is not -1.  Possibly leaking file descriptors.");
-    m_accept_sock = -1;
-  }
-
-  ret = evhttp_bind_socket_backlog_fd(m_server, address,
-                                   m_port, RuntimeOption::ServerBacklog);
-  if (ret >= 0) {
-    Logger::Info("takeover: bound directly to port %d", m_port);
-    m_accept_sock = ret;
-    return 0;
-  } else if (errno != EADDRINUSE) {
-    return -1;
-  }
-
-  if (m_transfer_fname.empty()) {
-    return -1;
-  }
 
   Logger::Info("takeover: beginning listen socket acquisition");
   uint8_t fd_request[3] = P_VERSION C_FD_REQ;
@@ -225,21 +179,21 @@ int LibEventServerWithTakeover::getAcceptSocket() {
   uint32_t response_len = sizeof(fd_response);
   afdt_error_t err = AFDT_ERROR_T_INIT;
   // TODO(dreiss): Make this timeout configurable.
-  struct timeval timeout = { 2 , 0 };
+  struct timeval timeout = { timeoutSec.count() , 0 };
   ret = afdt_sync_client(
       m_transfer_fname.c_str(),
       fd_request,
       sizeof(fd_request) - 1,
       fd_response,
       &response_len,
-      &m_accept_sock,
+      &m_sock,
       &timeout,
       &err);
   if (ret < 0) {
     fd_transfer_error_hander(&err, nullptr);
     errno = EADDRINUSE;
     return -1;
-  } else if (m_accept_sock < 0) {
+  } else if (m_sock < 0) {
     String resp((const char*)fd_response, response_len, CopyString);
     Logger::Error(
         "AFDT did not receive a file descriptor: "
@@ -252,30 +206,10 @@ int LibEventServerWithTakeover::getAcceptSocket() {
   Logger::Info("takeover: acquired listen socket");
   m_took_over = true;
 
-  ret = evhttp_accept_socket(m_server, m_accept_sock);
-  if (ret < 0) {
-    Logger::Error("evhttp_accept_socket: %s",
-        folly::errnoStr(errno).c_str());
-    int errno_save = errno;
-    close(m_accept_sock);
-    m_accept_sock = -1;
-    errno = errno_save;
-    return -1;
-  }
-
-  return 0;
+  return m_sock;
 }
 
-void LibEventServerWithTakeover::start() {
-
-  if (m_server_ssl) {
-    // Set a flag to prevent parent class from trying to listen to ssl
-    // before the old server releases the port
-    m_accept_sock_ssl = -2;
-  }
-
-  LibEventServer::start();
-
+void TakeoverAgent::requestShutdown() {
   if (m_took_over) {
     Logger::Info("takeover: requesting shutdown of satellites");
     // Use AFDT to synchronously shut down the old server's satellites
@@ -315,19 +249,9 @@ void LibEventServerWithTakeover::start() {
       Logger::Info("takeover: old satellites have shut down");
     }
   }
-
-  if (m_server_ssl) {
-    if (getAcceptSocketSSL() != 0) {
-      Logger::Error("Fail to listen on ssl port %d", m_port_ssl);
-      throw FailedToListenException(m_address, m_port_ssl);
-    }
-    Logger::Info("Listen on ssl port %d",m_port_ssl);
-  }
-
-  setupFdServer();
 }
 
-void LibEventServerWithTakeover::stop() {
+void TakeoverAgent::stop() {
   if (m_delete_handle != nullptr) {
     afdt_close_server(m_delete_handle);
   }
@@ -340,13 +264,9 @@ void LibEventServerWithTakeover::stop() {
   // be safe we close the socket so that if nobody else is listening
   // the OS starts rejecting requests but if somebody is listening we
   // let them receive the requests.
-  if (m_takeover_state != TakeoverState::NotStarted &&
-      m_accept_sock != -1) {
-    close(m_accept_sock);
-    m_accept_sock = -1;
+  if (m_takeover_state != TakeoverState::NotStarted) {
+    m_callback->takeoverAborted();
   }
-
-  LibEventServer::stop();
 }
 
 TakeoverListener::~TakeoverListener() {

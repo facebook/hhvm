@@ -28,7 +28,7 @@
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/server/libevent-server.h"
+#include "hphp/runtime/server/server.h"
 
 #include <memory>
 
@@ -39,7 +39,8 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TestServer::TestServer() { }
+TestServer::TestServer(const std::string serverType)
+    : m_serverType(serverType) { }
 
 static int s_server_port = 0;
 static int s_admin_port = 0;
@@ -151,11 +152,13 @@ void TestServer::RunServer() {
   string fd = lexical_cast<string>(inherit_fd);
   string option = (inherit_fd >= 0) ? (string("--port-fd=") + fd) :
     (string("-vServer.TakeoverFilename=") + string(s_filename));
+  string serverType = string("-vServer.Type=") + m_serverType;
 
   const char *argv[] = {
     "", "--mode=server", "--config=test/ext/config-server.hdf",
     portConfig.c_str(), adminConfig.c_str(), rpcConfig.c_str(),
     option.c_str(),
+    serverType.c_str(),
     NULL
   };
 
@@ -196,11 +199,12 @@ public:
   }
 };
 
-static int find_server_port(int port_min, int port_max) {
+static int find_server_port(const std::string &serverType,
+                            int port_min, int port_max) {
   for (int port = port_min; ; port++) {
     try {
-      ServerPtr server = std::make_shared<LibEventServer>(
-          "127.0.0.1", port, 50);
+      ServerPtr server = ServerFactoryRegistry::createServer(
+        serverType, "127.0.0.1", port, 50);
       server->setRequestHandlerFactory<TestServerRequestHandler>(30);
       server->start();
       server->stop();
@@ -216,13 +220,13 @@ bool TestServer::RunTests(const std::string &which) {
   bool ret = true;
 
   {
-    // TestLibeventServer finds a good port to listen on, so it must
+    // TestSimpleServer finds a good port to listen on, so it must
     // always run.
-    std::string which = "TestLibeventServer";
-    RUN_TEST(TestLibeventServer);
+    std::string which = "TestSimpleServer";
+    RUN_TEST(TestSimpleServer);
   }
-  s_admin_port = find_server_port(s_server_port + 1, PORT_MAX);
-  s_rpc_port = find_server_port(s_admin_port + 1, PORT_MAX);
+  s_admin_port = find_server_port(m_serverType, s_server_port + 1, PORT_MAX);
+  s_rpc_port = find_server_port(m_serverType, s_admin_port + 1, PORT_MAX);
 
   RUN_TEST(TestInheritFdServer);
   RUN_TEST(TestTakeoverServer);
@@ -474,8 +478,8 @@ bool TestServer::TestRequestHandling() {
   return Count(true);
 }
 
-bool TestServer::TestLibeventServer() {
-  s_server_port = find_server_port(PORT_MIN, PORT_MAX);
+bool TestServer::TestSimpleServer() {
+  s_server_port = find_server_port(m_serverType, PORT_MIN, PORT_MAX);
   return Count(true);
 }
 
@@ -611,8 +615,8 @@ bool TestServer::TestHttpClient() {
   ServerPtr server;
   for (s_server_port = PORT_MIN; s_server_port <= PORT_MAX; s_server_port++) {
     try {
-      server = std::make_shared<LibEventServer>(
-          "127.0.0.1", s_server_port, 50);
+      server = ServerFactoryRegistry::createServer(
+        m_serverType, "127.0.0.1", s_server_port, 50);
       server->setRequestHandlerFactory<EchoHandler>(0);
       server->start();
       break;

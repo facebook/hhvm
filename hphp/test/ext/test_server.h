@@ -27,7 +27,8 @@
  */
 class TestServer : public TestCodeRun {
 public:
-  TestServer();
+  TestServer() = delete;
+  explicit TestServer(const std::string serverType);
 
   virtual bool RunTests(const std::string &which);
 
@@ -48,13 +49,13 @@ public:
 
   // test multithreaded request processing
   bool TestRequestHandling();
-  bool TestLibeventServer();
+  bool TestSimpleServer();
 
   // test inheriting server fd
-  bool TestInheritFdServer();
+  virtual bool TestInheritFdServer();
 
   // test takeover
-  bool TestTakeoverServer();
+  virtual bool TestTakeoverServer();
 
   // test HttpClient class that proxy server uses
   bool TestHttpClient();
@@ -90,6 +91,13 @@ protected:
                             int port = 0);
   bool PreBindSocket();
   void CleanupPreBoundSocket();
+
+  const std::string m_serverType;
+};
+
+class TestLibEventServer : public TestServer {
+  public:
+  TestLibEventServer() : TestServer("libevent") {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

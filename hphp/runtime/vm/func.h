@@ -581,6 +581,7 @@ public:
 
   EHEnt& addEHEnt();
   FPIEnt& addFPIEnt();
+  void setEhTabIsSorted();
 
   Id newLocal();
   void appendParam(const StringData* name, const ParamInfo& info);
@@ -712,6 +713,7 @@ private:
   const StringData* m_retTypeConstraint;
 
   EHEntVec m_ehtab;
+  bool m_ehTabSorted;
   FPIEntVec m_fpitab;
 
   Attr m_attrs;

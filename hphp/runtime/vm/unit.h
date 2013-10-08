@@ -137,7 +137,7 @@ class EHEnt {
       (m_iterId)
       (m_fault)
       (m_itRef)
-      // eh.m_parentIndex is re-computed in sortEHTab, not serialized.
+      (m_parentIndex)
       ;
     if (m_type == Type::Catch) {
       sd(m_catches);
@@ -159,13 +159,6 @@ class FPIEnt {
     // These fields are recomputed by sortFPITab:
     // m_parentIndex;
     // m_fpiDepth;
-  }
-};
-
-class FPIEntComp {
- public:
-  bool operator() (const FPIEnt &fpi1, const FPIEnt &fpi2) {
-    return fpi1.m_fpushOff < fpi2.m_fpushOff;
   }
 };
 

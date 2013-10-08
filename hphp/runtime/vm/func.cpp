@@ -767,6 +767,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
   , m_retTypeConstraint(nullptr)
+  , m_ehTabSorted(false)
   , m_returnType(KindOfInvalid)
   , m_top(false)
   , m_isClosureBody(false)
@@ -793,6 +794,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_numIterators(0)
   , m_nextFreeIterator(0)
   , m_retTypeConstraint(nullptr)
+  , m_ehTabSorted(false)
   , m_returnType(KindOfInvalid)
   , m_top(false)
   , m_isClosureBody(false)
@@ -831,8 +833,33 @@ void FuncEmitter::finish(Offset past, bool load) {
 }
 
 EHEnt& FuncEmitter::addEHEnt() {
+  assert(!m_ehTabSorted
+    || "should only mark the ehtab as sorted after adding all of them");
   m_ehtab.push_back(EHEnt());
+  m_ehtab.back().m_parentIndex = 7777;
   return m_ehtab.back();
+}
+
+void FuncEmitter::setEhTabIsSorted() {
+  m_ehTabSorted = true;
+  if (!debug) return;
+
+  Offset curBase = 0;
+  for (size_t i = 0; i < m_ehtab.size(); ++i) {
+    auto& eh = m_ehtab[i];
+
+    // Base offsets must be monotonically increasing.
+    always_assert(curBase <= eh.m_base);
+    curBase = eh.m_base;
+
+    // Parent should come before, and must enclose this guy.
+    always_assert(eh.m_parentIndex == -1 || eh.m_parentIndex < i);
+    if (eh.m_parentIndex != -1) {
+      auto& parent = m_ehtab[eh.m_parentIndex];
+      always_assert(parent.m_base <= eh.m_base &&
+                    parent.m_past >= eh.m_past);
+    }
+  }
 }
 
 FPIEnt& FuncEmitter::addFPIEnt() {
@@ -938,6 +965,8 @@ struct EHEntComp {
 }
 
 void FuncEmitter::sortEHTab() {
+  if (m_ehTabSorted) return;
+
   std::sort(m_ehtab.begin(), m_ehtab.end(), EHEntComp());
 
   for (unsigned int i = 0; i < m_ehtab.size(); i++) {
@@ -951,11 +980,18 @@ void FuncEmitter::sortEHTab() {
       }
     }
   }
+
+  setEhTabIsSorted();
 }
 
 void FuncEmitter::sortFPITab(bool load) {
   // Sort it and fill in parent info
-  std::sort(m_fpitab.begin(), m_fpitab.end(), FPIEntComp());
+  std::sort(
+    begin(m_fpitab), end(m_fpitab),
+    [&] (const FPIEnt& a, const FPIEnt& b) {
+      return a.m_fpushOff < b.m_fpushOff;
+    }
+  );
   for (unsigned int i = 0; i < m_fpitab.size(); i++) {
     m_fpitab[i].m_parentIndex = -1;
     m_fpitab[i].m_fpiDepth = 1;
@@ -1304,6 +1340,7 @@ void FuncRepoProxy::GetFuncsStmt
       assert(fe->sn() == funcSn);
       fe->setTop(top);
       fe->serdeMetaData(extraBlob);
+      fe->setEhTabIsSorted();
       fe->finish(fe->past(), true);
       ue.recordFunction(fe);
     }

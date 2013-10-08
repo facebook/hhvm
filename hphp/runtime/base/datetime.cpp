@@ -587,7 +587,7 @@ String DateTime::rfcFormat(const String& format) const {
     case 'P': rfc_colon = true; /* break intentionally missing */
     case 'O':
       if (utc()) {
-        s.printf("+0%s0", rfc_colon ? ":" : "");
+        s.printf("+00%s00", rfc_colon ? ":" : "");
       } else {
         int offset = m_tz->offset(toTimeStamp(error));
         s.printf("%c%02d%s%02d",
@@ -601,7 +601,7 @@ String DateTime::rfcFormat(const String& format) const {
       break;
     case 'c':
       if (utc()) {
-        s.printf("%04d-%02d-%02dT%02d:%02d:%02d+0:0",
+        s.printf("%04d-%02d-%02dT%02d:%02d:%02d+00:00",
                  year(), month(), day(), hour(), minute(), second());
       } else {
         int offset = m_tz->offset(toTimeStamp(error));
@@ -613,7 +613,7 @@ String DateTime::rfcFormat(const String& format) const {
       break;
     case 'r':
       if (utc()) {
-        s.printf("%3s, %02d %3s %04d %02d:%02d:%02d +00",
+        s.printf("%3s, %02d %3s %04d %02d:%02d:%02d +0000",
                  shortWeekdayName(), day(), shortMonthName(), year(),
                  hour(), minute(), second());
       } else {

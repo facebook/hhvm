@@ -233,7 +233,9 @@ one of the following must hold: (1) the regions are disjoint and do not
 overlap, or (2) one of the regions must be nested inside the other region.
 
 The offset for each catch target in a "catch" EH row must be within the
-primary function body, and no two "fault" rows may target the same offset.
+primary function body.  The handler offsets listed in either type of EH
+row do not need to be unique; i.e. they may appear as a target in multiple
+rows.
 
 When an exception is thrown, control is transferred to the unwinder. The
 unwinder starts with the current frame and consults the EH table of the

@@ -1021,9 +1021,6 @@ static Variant php_mysql_do_query_general(const String& query, CVarRef link_id,
   }
 
   if (mysql_real_query(conn, query.data(), query.size())) {
-    raise_notice("runtime/ext_mysql: failed executing [%s] [%s]", query.data(),
-                 mysql_error(conn));
-
     // When we are timed out, and we're SELECT-ing, we're potentially
     // running a long query on the server without waiting for any results
     // back, wasting server resource. So we're sending a KILL command
@@ -1109,8 +1106,6 @@ Variant f_mysql_multi_query(const String& query, CVarRef link_identifier /* = nu
   }
 
   if (mysql_real_query(conn, query.data(), query.size())) {
-    raise_notice("runtime/ext_mysql: failed executing [%s] [%s]", query.data(),
-                  mysql_error(conn));
       // turning this off clears the errors
       if (!mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_OFF)) {
         mySQL->m_multi_query = false;

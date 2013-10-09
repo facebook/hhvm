@@ -28,7 +28,8 @@ class IRUnit;
 // This value must be consistent with the number of pre-allocated
 // bytes for spill locations in __enterTCHelper in translator-x64.cpp.
 // Be careful when changing this value.
-const int NumPreAllocatedSpillLocs = 64;
+const int NumPreAllocatedSpillLocs = Transl::kReservedRSPSpillSpace /
+                                     sizeof(uint64_t);
 
 struct UseInfo {
   UseInfo() : lastUse(0), count(0) {}
@@ -210,9 +211,14 @@ RegAllocInfo allocRegsForUnit(IRUnit&, LifetimeInfo* = nullptr);
 // Native stack layout:
 // |               |
 // +---------------+
-// |               |  <-- spill[5..]
-// | pre allocated |  <-- spill[4]
-// |  (16 slots)   |  <-- spill[3]
+// |               |
+// | MInstr state  |
+// |               |
+// +---------------+
+// |               |  <-- spill[kReservedRSPSpillSpace - 1]
+// |  spill slots  |  <-- spill[..]
+// |               |  <-- spill[1]
+// |               |  <-- spill[0]
 // +---------------+
 // |  return addr  |
 // +---------------+

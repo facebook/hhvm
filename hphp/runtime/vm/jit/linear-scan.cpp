@@ -219,7 +219,8 @@ private:
   smart::flat_map<IRTrace*, uint32_t> m_exitIds;
 };
 
-static_assert(kReservedRSPSpillSpace == NumPreAllocatedSpillLocs * sizeof(void*),
+static_assert(kReservedRSPSpillSpace ==
+              NumPreAllocatedSpillLocs * sizeof(void*),
               "kReservedRSPSpillSpace changes require updates in "
               "LinearScan");
 

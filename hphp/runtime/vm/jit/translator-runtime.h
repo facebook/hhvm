@@ -47,7 +47,7 @@ struct MInstrState {
 static_assert(offsetof(MInstrState, tvScratch) % 16 == 0,
               "MInstrState members require 16-byte alignment for SSE");
 static_assert(sizeof(MInstrState) - sizeof(uintptr_t) // return address
-              < kReservedRSPScratchSpace,
+              < kReservedRSPTotalSpace,
               "MInstrState is too large for the rsp scratch space "
               "in enterTCHelper");
 

@@ -30,7 +30,7 @@ We'd love to have your help in making HipHop better.
 
 Before changes can be accepted a [Contributor License Agreement](http://developers.facebook.com/opensource/cla) ([pdf](https://github.com/facebook/hiphop-php/raw/master/hphp/doc/FB_Individual_CLA.pdf) - print, sign, scan, link) must be signed.
 
-If you run into problems, please open an [issue](http://github.com/facebook/hiphop-php/issues), or better yet, fork us and send a pull request. Join us on [#hhvm on freenode](http://webchat.freenode.net/?channels=hhvm).
+If you run into problems, please open an [issue](http://github.com/facebook/hiphop-php/issues), or better yet, [fork us and send a pull request](https://github.com/facebook/hiphop-php/pulls). Join us on [#hhvm on freenode](http://webchat.freenode.net/?channels=hhvm).
 
 If you want to help but don't know where to start, try fixing some of the [Zend tests that don't pass](hphp/test/zend/bad). You can run them with [hphp/test/run](hphp/test/run). When they work, move them to [zend/good](hphp/test/zend/good) and send a pull request.
 

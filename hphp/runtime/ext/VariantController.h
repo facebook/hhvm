@@ -51,6 +51,9 @@ struct VariantController {
 
   // map methods
   static MapType createMap() { return Array::Create(); }
+  static MapType getStaticEmptyMap() {
+    return HphpArray::GetStaticEmptyArray();
+  }
   static HPHP::serialize::Type mapKeyType(CVarRef k) {
     return type(k);
   }
@@ -94,6 +97,13 @@ struct VariantController {
     String ret(n, ReserveString);
     ret.setSize(n);
     return ret;
+  }
+  static StringType createStaticString(const char* str, size_t len) {
+    String ret = String(makeStaticString(str, len));
+     return ret;
+  }
+  static StringType getStaticEmptyString() {
+    return empty_string;
   }
   static char* getMutablePtr(StringType& s) {
     return s.bufferSlice().ptr;

@@ -496,9 +496,6 @@ predictOutputs(SrcKey startSk,
                const NormalizedInstruction* ni) {
   if (!RuntimeOption::EvalJitTypePrediction) return KindOfAny;
 
-  // In JitPGO mode, disable type prediction to avoid side exits
-  if (RuntimeOption::EvalJitPGO) return KindOfAny;
-
   if (RuntimeOption::EvalJitStressTypePredPercent &&
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
     int dt;
@@ -704,7 +701,8 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
 static RuntimeType
 getDynLocType(const SrcKey startSk,
               NormalizedInstruction* ni,
-              InstrFlags::OutTypeConstraints constraint) {
+              InstrFlags::OutTypeConstraints constraint,
+              TransKind mode) {
   using namespace InstrFlags;
   auto const& inputs = ni->inputs;
   assert(constraint != OutFInputL);
@@ -737,7 +735,8 @@ getDynLocType(const SrcKey startSk,
       }
     } // Fall through
     case OutPred: {
-      auto dt = predictOutputs(startSk, ni);
+      // In TransProfile mode, disable type prediction to avoid side exits.
+      auto dt = mode == TransProfile ? KindOfAny : predictOutputs(startSk, ni);
       if (dt != KindOfAny) ni->outputPredicted = true;
       return RuntimeType(dt);
     }
@@ -1467,8 +1466,8 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         ni->imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
-        // In JitPGO, disable type predictions to avoid side exits
-        if (RuntimeOption::EvalJitPGO) break;
+        // In TransProfile mode, disable type predictions to avoid side exits.
+        if (m_mode == TransProfile) break;
 
         // If the original type was invalid or predicted, then use the
         // prediction in the meta-data.
@@ -2295,7 +2294,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
     }
     DynLocation* dl = t.newDynLocation();
     dl->location = loc;
-    dl->rtt = getDynLocType(t.m_sk, ni, typeInfo);
+    dl->rtt = getDynLocType(t.m_sk, ni, typeInfo, m_mode);
     SKTRACE(2, ni->source, "recording output t(%d->%d) #(%s, %" PRId64 ")\n",
             dl->rtt.outerType(), dl->rtt.innerType(),
             dl->location.spaceName(), dl->location.offset);

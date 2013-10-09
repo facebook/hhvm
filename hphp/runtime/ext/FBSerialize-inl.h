@@ -36,7 +36,8 @@ struct UnserializeError : std::runtime_error {
 };
 
 template <class V>
-void FBSerializer<V>::serialize(const typename V::VariantType& thing,
+template <typename Variant>
+void FBSerializer<V>::serialize(const Variant& thing,
                                 char* out) {
   FBSerializer<V> serializer(out);
   serializer.doSerialize(thing);
@@ -47,7 +48,8 @@ FBSerializer<V>::FBSerializer(char* out) : out_(out) {
 }
 
 template <class V>
-void FBSerializer<V>::doSerialize(const typename V::VariantType& thing) {
+template <typename Variant>
+void FBSerializer<V>::doSerialize(const Variant& thing) {
   serializeThing(thing, 0);
 }
 
@@ -98,7 +100,8 @@ void FBSerializer<V>::serializeDouble(double val) {
 }
 
 template <class V>
-void FBSerializer<V>::serializeString(const typename V::StringType& str) {
+template <typename String>
+void FBSerializer<V>::serializeString(const String& str) {
   size_t len = V::stringLen(str);
 
   if (len == (size_t)(uint8_t)len) {
@@ -114,8 +117,8 @@ void FBSerializer<V>::serializeString(const typename V::StringType& str) {
 }
 
 template <class V>
-void FBSerializer<V>::serializeMap(const typename V::MapType& map,
-                                   size_t depth) {
+template <typename Map>
+void FBSerializer<V>::serializeMap(const Map& map, size_t depth) {
   writeCode(FB_SERIALIZE_STRUCT);
   for (auto it = V::mapIterator(map); V::mapNotEnd(map, it); V::mapNext(it)) {
     auto key = V::mapKey(it);
@@ -135,8 +138,8 @@ void FBSerializer<V>::serializeMap(const typename V::MapType& map,
 }
 
 template <class V>
-void FBSerializer<V>::serializeVector(const typename V::VectorType& vec,
-                                      size_t depth) {
+template <typename Vector>
+void FBSerializer<V>::serializeVector(const Vector& vec, size_t depth) {
   writeCode(FB_SERIALIZE_STRUCT);
 
   size_t index = 0;
@@ -150,8 +153,8 @@ void FBSerializer<V>::serializeVector(const typename V::VectorType& vec,
 }
 
 template <class V>
-void FBSerializer<V>::serializeThing(const typename V::VariantType& thing,
-                                     size_t depth) {
+template <typename Variant>
+void FBSerializer<V>::serializeThing(const Variant& thing, size_t depth) {
   if (depth > 256) {
     throw SerializeError("link depth > 256");
   }
@@ -191,7 +194,8 @@ void FBSerializer<V>::serializeThing(const typename V::VariantType& thing,
 }
 
 template <class V>
-size_t FBSerializer<V>::serializedSize(const typename V::VariantType& thing) {
+template <typename Variant>
+size_t FBSerializer<V>::serializedSize(const Variant& thing) {
   return serializedSizeThing(thing, 0);
 }
 

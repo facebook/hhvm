@@ -92,22 +92,29 @@ struct FBSerializeBase {
 template <class V>
 class FBSerializer : private FBSerializeBase {
  public:
-  static size_t serializedSize(const typename V::VariantType& thing);
-  static void serialize(const typename V::VariantType& thing, char* out);
+  template <typename Variant>
+  static size_t serializedSize(const Variant& thing);
+  template <typename Variant>
+  static void serialize(const Variant& thing, char* out);
  private:
   char* out_;
   explicit FBSerializer(char* out);
 
   void write(const char* src, size_t size);
-  void doSerialize(const typename V::VariantType& thing);
+  template <typename Variant>
+  void doSerialize(const Variant& thing);
   void writeCode(Code code);
   void serializeBoolean(bool val);
   void serializeInt64(int64_t val);
   void serializeDouble(double val);
-  void serializeString(const typename V::StringType& str);
-  void serializeMap(const typename V::MapType& map, size_t depth);
-  void serializeVector(const typename V::VectorType& vec, size_t depth);
-  void serializeThing(const typename V::VariantType& thing, size_t depth);
+  template <typename String>
+  void serializeString(const String& str);
+  template <typename Map>
+  void serializeMap(const Map& map, size_t depth);
+  template <typename Vector>
+  void serializeVector(const Vector& vec, size_t depth);
+  template <typename Variant>
+  void serializeThing(const Variant& thing, size_t depth);
 
   static size_t serializedSizeInt64(int64_t v);
   template <typename String>

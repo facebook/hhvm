@@ -6,7 +6,7 @@ HipHop is most commonly run as a standalone server, replacing both Apache and mo
 
 ## FAQ
 
-Our [FAQ](https://github.com/facebook/hiphop-php/wiki/FAQ) has answers to many common questions about HHVM, from [general questions](https://github.com/facebook/hiphop-php/wiki/FAQ#general) to questions geared towards those that want to [use](https://github.com/facebook/hiphop-php/wiki/FAQ#users) or [contribute]((https://github.com/facebook/hiphop-php/wiki/FAQ#contributors) to HHVM.
+Our [FAQ](https://github.com/facebook/hiphop-php/wiki/FAQ) has answers to many common questions about HHVM, from [general questions](https://github.com/facebook/hiphop-php/wiki/FAQ#general) to questions geared towards those that want to [use](https://github.com/facebook/hiphop-php/wiki/FAQ#users) or [contribute](https://github.com/facebook/hiphop-php/wiki/FAQ#contributors) to HHVM.
 
 ## Installing
 

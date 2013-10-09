@@ -48,7 +48,7 @@ inline const Unit* liveUnit() { return liveFunc()->unit(); }
 inline Class* liveClass() {
   const auto* func = liveFunc();
   auto* cls = func->cls();
-  if (func->isPseudoMain() || func->isTraitMethod() || cls == nullptr) {
+  if (func->isTraitMethod() || cls == nullptr) {
     return nullptr;
   }
   return cls;

@@ -47,6 +47,7 @@ const bool k_PHP_DEBUG =
         false;
 #endif
 
+const int64_t k_PHP_MAXPATHLEN = MAXPATHLEN;
 
 ///////////////////////////////////////////////////////////////////////////////
 

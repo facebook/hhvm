@@ -52,6 +52,7 @@ String f_hphp_to_string(CVarRef v);
 extern const double k_INF;
 extern const double k_NAN;
 extern const bool k_PHP_DEBUG;
+extern const int64_t k_PHP_MAXPATHLEN;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

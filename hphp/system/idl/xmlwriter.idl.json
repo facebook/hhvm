@@ -21,7 +21,7 @@
             "flags": [
             ],
             "return": {
-                "type": "Object",
+                "type": "Variant",
                 "desc": "Object oriented style: Returns TRUE on success or FALSE on failure.\n\nProcedural style: Returns a new xmlwriter resource for later use with the xmlwriter functions on success, FALSE on error."
             },
             "args": [

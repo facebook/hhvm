@@ -33,13 +33,13 @@ Variant f_xmlwriter_open_memory() {
   return false;
 }
 
-Object f_xmlwriter_open_uri(const String& uri) {
+Variant f_xmlwriter_open_uri(const String& uri) {
   c_XMLWriter *x = NEWOBJ(c_XMLWriter)();
   Object ret(x);
   if (x->t_openuri(uri)) {
     return ret;
   }
-  return NULL;
+  return false;
 }
 
 bool f_xmlwriter_set_indent_string(CObjRef xmlwriter, const String& indentstring) {

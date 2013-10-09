@@ -29,7 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_xmlwriter_open_memory();
-Object f_xmlwriter_open_uri(const String& uri);
+Variant f_xmlwriter_open_uri(const String& uri);
 bool f_xmlwriter_set_indent_string(CObjRef xmlwriter, const String& indentstring);
 bool f_xmlwriter_set_indent(CObjRef xmlwriter, bool indent);
 bool f_xmlwriter_start_document(CObjRef xmlwriter, const String& version = "1.0", const String& encoding = null_string, const String& standalone = null_string);

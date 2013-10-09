@@ -46,10 +46,11 @@ TCA emitServiceReqWork(Asm& as, TCA start, bool persist, SRFlags flags,
 /*
  * "cb" may be either the main section or stubs section.
  */
+void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
+                      SrcKey dest);
 void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
-                 SrcKey dest, ServiceRequest req = REQ_BIND_JCC);
-void emitBindJmp(CodeBlock& cb, CodeBlock& stubs,
-                 SrcKey dest, ServiceRequest req = REQ_BIND_JMP);
+                 SrcKey dest);
+void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest);
 
 /*
  * Returns the amount by which rVmSp should be adjusted.

@@ -3,11 +3,47 @@
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
 
 using namespace vixl;
+
+namespace {
+
+void emitBindJ(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
+               Transl::ConditionCode cc, ServiceRequest req) {
+  using namespace Transl;
+
+  TCA toSmash = cb.frontier();
+  if (cb.base() == stubs.base()) {
+    // This is just to reserve space. We'll overwrite with the real dest later.
+    emitSmashableJump(cb, toSmash, cc);
+  }
+
+  tx64->setJmpTransID(toSmash);
+
+  TCA sr = (req == JIT::REQ_BIND_JMP
+            ? emitEphemeralServiceReq(tx64->stubsCode, tx64->getFreeStub(), req,
+                                      toSmash, dest.offset())
+            : emitServiceReq(tx64->stubsCode, req, toSmash, dest.offset()));
+
+  MacroAssembler a { cb };
+  if (cb.base() == stubs.base()) {
+    UndoMarker um {cb};
+    cb.setFrontier(toSmash);
+    emitSmashableJump(cb, sr, cc);
+    um.undo();
+  } else {
+    emitSmashableJump(cb, sr, cc);
+  }
+}
+
+} // anonymous namespace
+
+//////////////////////////////////////////////////////////////////////
 
 TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argv) {
@@ -51,6 +87,10 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   a.     Brk   (0);
 
   return start;
+}
+
+void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest) {
+  emitBindJ(cb, stubs, dest, Transl::CC_None, REQ_BIND_JMP);
 }
 
 }}}

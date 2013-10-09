@@ -71,6 +71,15 @@ void smashJcc(Transl::TCA jccAddr, Transl::TCA newDest);
  */
 void emitSmashableJump(CodeBlock&, Transl::TCA dest, Transl::ConditionCode cc);
 
+/*
+ * Decodes jump instructions and returns their target. This includes handling
+ * for ARM's multi-instruction "smashable jump" sequences. If the code does not
+ * encode the right kind of jump, these functions return nullptr.
+ */
+Transl::TCA jmpTarget(Transl::TCA addr);
+Transl::TCA jccTarget(Transl::TCA addr);
+Transl::TCA callTarget(Transl::TCA addr);
+
 }}
 
 #endif

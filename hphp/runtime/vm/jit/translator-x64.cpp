@@ -1353,7 +1353,7 @@ TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk,
     }
     sr->chainFrom(IncomingBranch::addr(addr));
   } else if (req == JIT::REQ_BIND_JCC || req == JIT::REQ_BIND_SIDE_EXIT) {
-    auto jt = Asm::jccTarget(toSmash);
+    auto jt = JIT::jccTarget(toSmash);
     assert(jt);
     if (jt == tDest) {
       // Already smashed
@@ -1361,8 +1361,8 @@ TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk,
     }
     sr->chainFrom(IncomingBranch::jccFrom(toSmash));
   } else {
-    assert(!Asm::jccTarget(toSmash));
-    if (!Asm::jmpTarget(toSmash) || Asm::jmpTarget(toSmash) == tDest) {
+    assert(!JIT::jccTarget(toSmash));
+    if (!JIT::jmpTarget(toSmash) || JIT::jmpTarget(toSmash) == tDest) {
       // Already smashed
       return tDest;
     }
@@ -1433,7 +1433,7 @@ TranslatorX64::bindJmpccFirst(TCA toSmash,
     return 0;
   }
 
-  if (Asm::jmpTarget(toSmash + kJmpccLen) != Asm::jccTarget(toSmash)) {
+  if (JIT::jmpTarget(toSmash + kJmpccLen) != JIT::jccTarget(toSmash)) {
     // someone else already smashed this one. Ideally we would
     // just re-execute from toSmash - except the flags will have
     // been trashed.
@@ -1476,7 +1476,7 @@ TranslatorX64::bindJmpccSecond(TCA toSmash, const Offset off,
   if (branch) {
     LeaseHolder writer(s_writeLease);
     if (writer) {
-      if (branch == Asm::jccTarget(toSmash)) {
+      if (branch == JIT::jccTarget(toSmash)) {
         // already smashed
         return branch;
       } else {
@@ -1769,7 +1769,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     }
     if (dest) {
       LeaseHolder writer(s_writeLease);
-      if (writer && Asm::callTarget(toSmash) != dest) {
+      if (writer && JIT::callTarget(toSmash) != dest) {
         TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
         JIT::smashCall(toSmash, dest);
         smashed = true;

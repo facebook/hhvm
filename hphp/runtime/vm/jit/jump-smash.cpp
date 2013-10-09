@@ -222,4 +222,63 @@ void emitSmashableJump(CodeBlock& cb, Transl::TCA dest,
   }
 }
 
+//////////////////////////////////////////////////////////////////////
+
+Transl::TCA jmpTarget(Transl::TCA jmp) {
+  if (arch() == Arch::X64) {
+    if (jmp[0] != 0xe9) return nullptr;
+    return jmp + 5 + ((int32_t*)(jmp + 5))[-1];
+  } else if (arch() == Arch::ARM) {
+    // This doesn't verify that each of the three or four instructions that make
+    // up this sequence matches; just the first one and the indirect jump.
+    using namespace vixl;
+    Instruction* adr = Instruction::Cast(jmp);
+    if (adr->Bit(31) != 0 || adr->Bits(28, 24) != 0x10) return nullptr;
+
+    Instruction* br = Instruction::Cast(jmp + 8);
+    if (br->Bits(31, 10) != 0x3587C0 || br->Bits(5, 0) != 0) return nullptr;
+
+    uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 8);
+    if ((dest & 7) != 0) {
+      dest += 4;
+      assert((dest & 7) == 0);
+    }
+    return *reinterpret_cast<TCA*>(dest);
+  } else {
+    not_implemented();
+  }
+}
+
+Transl::TCA jccTarget(Transl::TCA jmp) {
+  if (arch() == Arch::X64) {
+    if (jmp[0] != 0x0F || (jmp[1] & 0xF0) != 0x80) return nullptr;
+    return jmp + 6 + ((int32_t*)(jmp + 6))[-1];
+  } else if (arch() == Arch::ARM) {
+    using namespace vixl;
+    Instruction* b = Instruction::Cast(jmp);
+    if (b->Bits(31, 24) != 0x54 || b->Bit(4) != 0) return nullptr;
+
+    Instruction* br = Instruction::Cast(jmp + 12);
+    if (br->Bits(31, 10) != 0x3587C0 || br->Bits(5, 0) != 0) return nullptr;
+
+    uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 12);
+    if ((dest & 7) != 0) {
+      dest += 4;
+      assert((dest & 7) == 0);
+    }
+    return *reinterpret_cast<TCA*>(dest);
+  } else {
+    not_implemented();
+  }
+}
+
+Transl::TCA callTarget(Transl::TCA call) {
+  if (arch() == Arch::X64) {
+    if (call[0] != 0xE8) return nullptr;
+    return call + 5 + ((int32_t*)(call + 5))[-1];
+  } else {
+    not_implemented();
+  }
+}
+
 }}

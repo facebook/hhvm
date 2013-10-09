@@ -67,6 +67,10 @@ inline vixl::Register x2a(const Transl::Reg64& x64reg) {
     { Transl::reg::rsp, vixl::sp },
   };
 
+  if (Transl::reg::noreg == x64reg) {
+    return vixl::Register();
+  }
+
   auto it = s_x2aRegMap.find(x64reg);
   assert(it != s_x2aRegMap.end());
   return it->second;
@@ -118,6 +122,7 @@ const vixl::Register rVmFp(vixl::x29);
 const vixl::Register rVmSp(vixl::x19);
 const vixl::Register rVmTl(vixl::x20);
 const vixl::Register rAsm(vixl::x9);
+const vixl::Register rAsm2(vixl::x10);
 const vixl::Register rStashedAR(vixl::x21);
 const vixl::Register rGContextReg(vixl::x24);
 const vixl::Register rLinkReg(vixl::x30);

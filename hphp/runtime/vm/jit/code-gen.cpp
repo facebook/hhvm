@@ -4526,8 +4526,7 @@ void CodeGenerator::emitSideExitGuard(Type type,
   emitTypeTest(type, typeSrc, dataSrc,
     [&](ConditionCode cc) {
       auto const sk = SrcKey(curFunc(), taken);
-      emitBindJcc(this->m_mainCode, this->m_stubsCode, ccNegate(cc), sk,
-                  REQ_BIND_SIDE_EXIT);
+      emitBindSideExit(this->m_mainCode, this->m_stubsCode, ccNegate(cc), sk);
   });
 }
 

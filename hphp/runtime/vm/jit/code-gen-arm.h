@@ -36,6 +36,7 @@ struct CodeGenerator {
       , m_astubs(stubsCode)
       , m_tx64(tx64)
       , m_state(state)
+      , m_regs(state.regs)
       , m_curInst(nullptr)
     {
     }
@@ -43,6 +44,18 @@ struct CodeGenerator {
   void cgBlock(Block* block, vector<TransBCMapping>* bcMap);
 
  private:
+  template<class Then, class Else>
+  void ifThenElse(vixl::MacroAssembler& a, vixl::Condition cc, Then thenBlock,
+                  Else elseBlock) {
+    vixl::Label elseLabel, done;
+    a.  B   (&elseLabel, InvertCondition(cc));
+    thenBlock();
+    a.  B   (&done);
+    a.  bind(&elseLabel);
+    elseBlock();
+    a.  bind(&done);
+  }
+
   const Func* curFunc() { return m_curInst->marker().func; }
 
   void emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
@@ -67,6 +80,7 @@ struct CodeGenerator {
   vixl::MacroAssembler        m_astubs;
   TranslatorX64*              m_tx64;
   CodegenState&               m_state;
+  const RegAllocInfo&         m_regs;
   IRInstruction*              m_curInst;
 };
 

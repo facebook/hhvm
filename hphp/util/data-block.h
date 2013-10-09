@@ -212,6 +212,22 @@ struct DataBlock {
 
 typedef DataBlock CodeBlock;
 
+//////////////////////////////////////////////////////////////////////
+
+class UndoMarker {
+  CodeBlock& m_cb;
+  CodeAddress m_oldFrontier;
+  public:
+  explicit UndoMarker(CodeBlock& cb)
+    : m_cb(cb)
+    , m_oldFrontier(cb.frontier()) {
+  }
+
+  void undo() {
+    m_cb.setFrontier(m_oldFrontier);
+  }
+};
+
 }
 
 #endif

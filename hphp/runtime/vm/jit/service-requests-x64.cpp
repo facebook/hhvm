@@ -270,14 +270,18 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   return retval;
 }
 
-void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
-                 SrcKey dest, ServiceRequest req /* = REQ_BIND_JCC */) {
-  emitBindJ(cb, stubs, cc, dest, req);
+void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
+                      SrcKey dest) {
+  emitBindJ(cb, stubs, cc, dest, REQ_BIND_SIDE_EXIT);
 }
 
-void emitBindJmp(CodeBlock& cb, CodeBlock& stubs,
-                 SrcKey dest, ServiceRequest req /* = REQ_BIND_JMP */) {
-  emitBindJ(cb, stubs, Transl::CC_None, dest, req);
+void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
+                 SrcKey dest) {
+  emitBindJ(cb, stubs, cc, dest, REQ_BIND_JCC);
+}
+
+void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest) {
+  emitBindJ(cb, stubs, Transl::CC_None, dest, REQ_BIND_JMP);
 }
 
 int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,

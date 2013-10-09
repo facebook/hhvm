@@ -1591,6 +1591,11 @@ class Assembler {
   void EmitLiteralPool(LiteralPoolEmitOption option = NoJumpRequired);
   size_t LiteralPoolSize();
 
+  static bool IsImmLogical(uint64_t value, unsigned width) {
+    unsigned ignored;
+    return IsImmLogical(value, width, &ignored, &ignored, &ignored);
+  }
+
  protected:
   inline const Register& AppropriateZeroRegFor(const CPURegister& reg) const {
     return reg.Is64Bits() ? xzr : wzr;

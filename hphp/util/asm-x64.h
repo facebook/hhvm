@@ -1170,11 +1170,6 @@ public:
     *(int32_t*)(jmp + 2) = safe_cast<int32_t>(diff);
   }
 
-  static CodeAddress jccTarget(CodeAddress jmp) {
-    if (jmp[0] != 0x0F || (jmp[1] & 0xF0) != 0x80) return nullptr;
-    return jmp + 6 + ((int32_t*)(jmp + 6))[-1];
-  }
-
   static void patchJcc8(CodeAddress jmp, CodeAddress dest) {
     assert((jmp[0] & 0xF0) == 0x70);
     ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
@@ -1187,11 +1182,6 @@ public:
     *(int32_t*)(jmp + 1) = safe_cast<int32_t>(diff);
   }
 
-  static CodeAddress jmpTarget(CodeAddress jmp) {
-    if (jmp[0] != 0xe9) return nullptr;
-    return jmp + 5 + ((int32_t*)(jmp + 5))[-1];
-  }
-
   static void patchJmp8(CodeAddress jmp, CodeAddress dest) {
     assert(jmp[0] == 0xEB);
     ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
@@ -1202,11 +1192,6 @@ public:
     assert(call[0] == 0xE8);
     ssize_t diff = dest - (call + 5);
     *(int32_t*)(call + 1) = safe_cast<int32_t>(diff);
-  }
-
-  static CodeAddress callTarget(CodeAddress call) {
-    if (call[0] != 0xE8) return nullptr;
-    return call + 5 + ((int32_t*)(call + 5))[-1];
   }
 
   void emitInt3s(int n) {
@@ -2583,23 +2568,6 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
-
-class UndoMarker {
-  CodeBlock& m_cb;
-  CodeAddress m_oldFrontier;
-  public:
-  explicit UndoMarker(CodeBlock& cb)
-    : m_cb(cb)
-    , m_oldFrontier(cb.frontier()) {
-    TRACE_MOD(Trace::trans, 1, "RewindTo: %p\n",
-              m_oldFrontier);
-  }
-
-  void undo() {
-    m_cb.setFrontier(m_oldFrontier);
-    TRACE_MOD(Trace::trans, 1, "Restore: %p\n", m_cb.frontier());
-  }
-};
 
 /*
  * RAII bookmark for scoped rewinding of frontier.

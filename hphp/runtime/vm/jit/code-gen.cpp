@@ -3892,28 +3892,13 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
   int64_t adjustment = (spDeficit - spillCells) * sizeof(Cell);
   for (uint32_t i = 0; i < numSpillSrcs; ++i) {
     const int64_t offset = i * sizeof(Cell) + adjustment;
-    if (spillVals[i]->type() == Type::None) {
-      // The simplifier detected that we're storing the same value
-      // already in there.
+    auto* val = spillVals[i];
+    if (val->type() == Type::None) {
+      // The simplifier detected that this store was redundnant.
       continue;
     }
-
-    auto* val = spillVals[i];
-    auto* inst = val->inst();
-    while (inst->isPassthrough()) {
-      inst = inst->getPassthroughValue()->inst();
-    }
-    // If our value came from a LdStack on the same sp and offset,
-    // we don't need to spill it.
-    if (inst->op() == LdStack && inst->src(0) == sp &&
-        inst->extra<LdStack>()->offset * sizeof(Cell) == offset) {
-      FTRACE(6, "{}: Not spilling spill value {} from {}\n",
-             __func__, i, inst->toString());
-    } else {
-      cgStore(spReg[offset], val);
-    }
+    cgStore(spReg[offset], val);
   }
-
   emitAdjustSp(spReg, dstReg, adjustment);
 }
 

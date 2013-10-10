@@ -558,37 +558,22 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
   int64_t adjustment = (spDeficit - spillCells) * sizeof(Cell);
   for (uint32_t i = 0; i < numSpillSrcs; ++i) {
     const int64_t offset = i * sizeof(Cell) + adjustment;
-    if (spillVals[i]->type() == Type::None) {
-      // The simplifier detected that we're storing the same value
-      // already in there.
+    auto* val = spillVals[i];
+    if (val->type() == Type::None) {
+      // The simplifier detected that this store was redundnant.
       continue;
     }
-
-    auto* val = spillVals[i];
-    auto* inst = val->inst();
-    while (inst->isPassthrough()) {
-      inst = inst->getPassthroughValue()->inst();
-    }
-    // If our value came from a LdStack on the same sp and offset,
-    // we don't need to spill it.
-    if (inst->op() == LdStack && inst->src(0) == sp &&
-        inst->extra<LdStack>()->offset * sizeof(Cell) == offset) {
-      FTRACE(6, "{}: Not spilling spill value {} from {}\n",
-             __func__, i, inst->toString());
+    // XXX this is a cut-down version of cgStore.
+    if (val->isConst()) {
+      m_as. Mov (rAsm, val->getValBits());
+      m_as. Str (rAsm, spReg[offset]);
     } else {
-      // XXX this is a cut-down version of cgStore.
-      if (val->isConst()) {
-        m_as. Mov (rAsm, val->getValBits());
-        m_as. Str (rAsm, spReg[offset]);
-      } else {
-        auto reg = x2a(m_state.regs[val].reg());
-        m_as. Str   (reg, spReg[offset]);
-      }
-      m_as. Mov   (rAsm, val->type().toDataType());
-      m_as. Str   (rAsm.W(), spReg[offset + TVOFF(m_type)]);
+      auto reg = x2a(m_state.regs[val].reg());
+      m_as. Str   (reg, spReg[offset]);
     }
+    m_as. Mov   (rAsm, val->type().toDataType());
+    m_as. Strb  (rAsm.W(), spReg[offset + TVOFF(m_type)]);
   }
-
   emitRegGetsRegPlusImm(m_as, dstReg, spReg, adjustment);
 }
 

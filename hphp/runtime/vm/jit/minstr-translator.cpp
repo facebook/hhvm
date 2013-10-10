@@ -2394,9 +2394,8 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
     // Emit the appropriate helper call.
     typedef StringData* (*OpFunc)(TypedValue*, TypedValue, Cell);
     BUILD_OPTAB_HOT(getKeyType(key));
-    m_failedSetBlock = makeCatchSet();
-    SSATmp* result = genStk(SetElem, m_failedSetBlock,
-                            cns((TCA)opFunc), m_base, key, value);
+    SSATmp* result = genStk(SetElem, makeCatchSet(), cns((TCA)opFunc),
+                            m_base, key, value);
     auto t = result->type();
     if (t.equals(Type::Nullptr)) {
       // Base is not a string. Result is always value.
@@ -2665,13 +2664,12 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
 
   if (m_failedSetBlock) {
     assert(bool(m_result) ^ isSetWithRef);
-    // This catch trace currently ends with an EndCatch that will fall through
-    // if an InvalidSetMException was thrown. We need to emit code to clean up
-    // if that happens. If we're translating a SetWithRef* bytecode we don't
-    // have to do anything special to the stack since they have no stack
-    // output. Otherwise we need to pop our input value and push the value from
-    // the exception to the stack (done with a DecRefStack followed by a
-    // SpillStack).
+    // We need to emit code to clean up and side exit if the TryEndCatch falls
+    // through because of an InvalidSetMException. If we're translating a
+    // SetWithRef* bytecode we don't have to do anything special to the stack
+    // since they have no stack output. Otherwise we need to pop our input
+    // value and push the value from the exception to the stack (done with a
+    // DecRefStack followed by a SpillStack).
 
     std::vector<SSATmp*> args{
         catchSp,     // sp from the previous SpillStack

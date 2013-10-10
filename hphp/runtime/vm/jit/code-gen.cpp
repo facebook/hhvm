@@ -627,14 +627,19 @@ static void unwindResumeHelper(_Unwind_Exception* data) {
   _Unwind_Resume(data);
 }
 
+static void callUnwindResumeHelper(Asm& as) {
+  as.loadq(rVmTl[unwinderScratchOff()], rdi);
+  as.call ((TCA)unwindResumeHelper); // pass control back to the unwinder
+  as.ud2();
+}
+
 void CodeGenerator::cgEndCatch(IRInstruction* inst) {
+  callUnwindResumeHelper(m_as);
+}
+
+void CodeGenerator::cgTryEndCatch(IRInstruction* inst) {
   m_as.cmpb (0, rVmTl[unwinderSideExitOff()]);
-  unlikelyIfBlock(CC_E,
-    [&](Asm& as) { // doSideExit == false, so call _Unwind_Resume
-      as.loadq(rVmTl[unwinderScratchOff()], rdi);
-      as.call ((TCA)unwindResumeHelper); // pass control back to the unwinder
-      as.ud2();
-    });
+  unlikelyIfBlock(CC_E, callUnwindResumeHelper);
 
   // doSideExit == true, so fall through to the side exit code
   Stats::emitInc(m_mainCode, Stats::TC_CatchSideExit);

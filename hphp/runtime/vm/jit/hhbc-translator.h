@@ -542,7 +542,13 @@ private:
     // a side-exit from a failed set operation, return the first block.
     Block* makeCatchSet() {
       assert(!m_failedSetBlock);
-      return m_failedSetBlock = makeCatch();
+      m_failedSetBlock = makeCatch();
+
+      // This catch trace will be modified in emitMPost to end with a side
+      // exit, and TryEndCatch will fall through to that side exit if an
+      // InvalidSetMException is thrown.
+      m_failedSetBlock->back()->setOpcode(TryEndCatch);
+      return m_failedSetBlock;
     }
 
     void prependToTraces(IRInstruction* inst) {

@@ -2164,8 +2164,13 @@ BeginCatch
 
 EndCatch S0:StkPtr
 
-  Marks the end of a catch region and returns control to the unwinder if
-  appropriate. Exact behavior is implementation and architecture specific.
+  Marks the end of a catch region and returns control to the unwinder. Exact
+  behavior is implementation and architecture specific.
+
+TryEndCatch S0:StkPtr
+
+  Marks a potential end of a catch region and might return control to the
+  unwinder. Exact behavior is implementation and architecture specific.
 
 D:Cell = LdUnwinderValue
 

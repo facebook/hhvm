@@ -206,7 +206,8 @@ O(OverrideLoc,                      ND, S(FramePtr),                       E) \
 O(OverrideLocVal,                   ND, S(FramePtr) S(Gen),                E) \
 O(SmashLocals,                      ND, S(FramePtr),                       E) \
 O(BeginCatch,                       ND, NA,                            E|Mem) \
-O(EndCatch,                         ND, S(StkPtr),                     E|Mem) \
+O(EndCatch,                         ND, S(StkPtr),                   E|Mem|T) \
+O(TryEndCatch,                      ND, S(StkPtr),                     E|Mem) \
 O(LdUnwinderValue,              DParam, NA,                              PRc) \
 O(DeleteUnwinderException,          ND, NA,                          N|E|Mem) \
 O(Add,                          DArith, S(Int,Dbl) S(Int,Dbl),             C) \

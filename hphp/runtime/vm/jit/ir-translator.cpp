@@ -1616,42 +1616,60 @@ void IRTranslator::interpretInstr(const NormalizedInstruction& i) {
   m_hhbcTrans.emitInterpOne(i);
 }
 
-void IRTranslator::translateInstr(const NormalizedInstruction& i) {
-  m_hhbcTrans.setBcOff(i.source.offset(),
-                       i.breaksTracelet && !m_hhbcTrans.isInlining());
+static Type flavorToType(FlavorDesc f) {
+  switch (f) {
+    case NOV: not_reached();
+
+    case CV: return Type::Cell;
+    case VV: return Type::BoxedCell;
+    case AV: return Type::Cls;
+    case RV: case FV: case CVV: return Type::Gen;
+  }
+  not_reached();
+}
+
+void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
+  m_hhbcTrans.setBcOff(ni.source.offset(),
+                       ni.breaksTracelet && !m_hhbcTrans.isInlining());
   FTRACE(1, "\n{:-^60}\n", folly::format("translating {} with stack:\n{}",
-                                         i.toString(),
+                                         ni.toString(),
                                          m_hhbcTrans.showStack()));
   // When profiling, we disable type predictions to avoid side exits
-  assert(Transl::tx64->mode() != TransProfile || !i.outputPredicted);
+  assert(Transl::tx64->mode() != TransProfile || !ni.outputPredicted);
 
-  if (i.guardedThis) {
+  if (ni.guardedThis) {
     // Task #2067635: This should really generate an AssertThis
     m_hhbcTrans.setThisAvailable();
   }
 
   if (moduleEnabled(HPHP::Trace::stats, 2)) {
-    m_hhbcTrans.emitIncStat(Stats::opcodeToIRPreStatCounter(i.op()), 1);
+    m_hhbcTrans.emitIncStat(Stats::opcodeToIRPreStatCounter(ni.op()), 1);
   }
   if (RuntimeOption::EnableInstructionCounts ||
       moduleEnabled(HPHP::Trace::stats, 3)) {
     // If the instruction takes a slow exit, the exit trace will
     // decrement the post counter for that opcode.
-    m_hhbcTrans.emitIncStat(Stats::opcodeToIRPostStatCounter(i.op()),
+    m_hhbcTrans.emitIncStat(Stats::opcodeToIRPostStatCounter(ni.op()),
                             1, true);
   }
 
-  if (instrMustInterp(i) || i.interp) {
-    interpretInstr(i);
-  } else {
-    translateInstrWork(i);
+  auto pc = reinterpret_cast<const Op*>(ni.pc());
+  for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
+    auto const type = flavorToType(instrInputFlavor(pc, i));
+    if (type != Type::Gen) m_hhbcTrans.assertTypeStack(i, type);
   }
 
-  if (Transl::callDestroysLocals(i, m_hhbcTrans.curFunc())) {
+  if (instrMustInterp(ni) || ni.interp) {
+    interpretInstr(ni);
+  } else {
+    translateInstrWork(ni);
+  }
+
+  if (Transl::callDestroysLocals(ni, m_hhbcTrans.curFunc())) {
     m_hhbcTrans.emitSmashLocals();
   }
 
-  passPredictedAndInferredTypes(i);
+  passPredictedAndInferredTypes(ni);
 }
 
 }}

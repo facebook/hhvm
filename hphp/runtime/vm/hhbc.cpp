@@ -433,6 +433,100 @@ int instrNumPushes(const Op* opcode) {
   return numberOfPushes[uint8_t(*opcode)];
 }
 
+namespace {
+FlavorDesc doFlavor(uint32_t i) {
+  always_assert(0 && "Invalid stack index");
+}
+template<typename... Args>
+FlavorDesc doFlavor(uint32_t i, FlavorDesc f, Args&&... args) {
+  return i == 0 ? f : doFlavor(i - 1, std::forward<Args>(args)...);
+}
+
+FlavorDesc minstrFlavor(const Op* op, uint32_t i, FlavorDesc top) {
+  if (top != NOV) {
+    if (i == 0) return top;
+    --i;
+  }
+  auto const location = getMLocation(op);
+  switch (location.lcode) {
+    // No stack input for the location
+    case LL: case LH: case LGL: case LNL: break;
+
+    // CV on top
+    case LC: case LGC: case LNC:
+      if (i == 0) return CV;
+      --i;
+      break;
+
+    // AV on top
+    case LSL:
+      if (i == 0) return AV;
+      --i;
+      break;
+
+    // RV on top
+    case LR:
+      if (i == 0) return RV;
+      --i;
+      break;
+
+    // AV on top, CV below
+    case LSC:
+      if (i == 0) return AV;
+      if (i == 1) return CV;
+      i -= 2;
+      break;
+
+    case NumLocationCodes: not_reached();
+  }
+
+  if (i < getImmVector(op).numStackValues()) return CV;
+  always_assert(0 && "Invalid stack index");
+}
+
+FlavorDesc manyFlavor(const Op* op, uint32_t i, FlavorDesc flavor) {
+  if (i < getImm(op, 0).u_IVA) return flavor;
+  always_assert(0 && "Invalid stack index");
+}
+}
+
+/**
+ * Returns the expected input flavor of stack slot idx.
+ */
+FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
+  auto constexpr nov = NOV;
+#define NOV always_assert(0 && "Opcode has no stack inputs");
+#define ONE(f1) return doFlavor(idx, f1);
+#define TWO(f1, f2) return doFlavor(idx, f1, f2);
+#define THREE(f1, f2, f3) return doFlavor(idx, f1, f2, f3);
+#define FOUR(f1, f2, f3, f4) return doFlavor(idx, f1, f2, f3, f4);
+#define LMANY return minstrFlavor(op, idx, nov);
+#define C_LMANY return minstrFlavor(op, idx, CV);
+#define V_LMANY return minstrFlavor(op, idx, VV);
+#define R_LMANY return minstrFlavor(op, idx, RV);
+#define FMANY return manyFlavor(op, idx, FV);
+#define CVMANY return manyFlavor(op, idx, CVV);
+#define CMANY return manyFlavor(op, idx, CV);
+#define O(name, imm, pop, push, flags) case Op::name: pop
+  switch (*op) {
+    OPCODES
+  }
+  not_reached();
+#undef NOV
+#undef ONE
+#undef TWO
+#undef THREE
+#undef FOUR
+#undef LMANY
+#undef C_LMANY
+#undef V_LMANY
+#undef R_LMANY
+#undef FMANY
+#undef CVMANY
+#undef CMANY
+#undef O
+}
+
 StackTransInfo instrStackTransInfo(const Op* opcode) {
   static const StackTransInfo::Kind transKind[] = {
 #define NOV StackTransInfo::Kind::PushPop
@@ -486,7 +580,7 @@ StackTransInfo instrStackTransInfo(const Op* opcode) {
     ret.pos = peekPokeType[uint8_t(*opcode)];
     return ret;
   default:
-    NOT_REACHED();
+    not_reached();
   }
 }
 

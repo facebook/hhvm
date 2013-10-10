@@ -68,13 +68,13 @@ union ArgUnion {
 const Offset InvalidAbsoluteOffset = -1;
 
 enum FlavorDesc {
-  NOV = 0, // None
-  CV = 1,  // Cell
-  VV = 2,  // Var
-  AV = 3,  // Classref
-  RV = 4,  // Return value (cell or var)
-  FV = 5,  // Function parameter (cell or var)
-  CVV =  6, // Cell or Var argument
+  NOV, // None
+  CV,  // Cell
+  VV,  // Var
+  AV,  // Classref
+  RV,  // Return value (cell or var)
+  FV,  // Function parameter (cell or var)
+  CVV, // Cell or Var argument
 };
 
 enum InstrFlags {
@@ -943,6 +943,7 @@ void foreachSwitchString(Opcode* op, L func) {
 
 int instrNumPops(const Op* opcode);
 int instrNumPushes(const Op* opcode);
+FlavorDesc instrInputFlavor(const Op* op, uint32_t idx);
 StackTransInfo instrStackTransInfo(const Op* opcode);
 int instrSpToArDelta(const Op* opcode);
 

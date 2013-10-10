@@ -4621,10 +4621,13 @@ SSATmp* HhbcTranslator::stLocNRC(uint32_t id, Block* exit, SSATmp* newVal) {
 }
 
 void HhbcTranslator::end() {
+  auto const nextSk = curSrcKey().advanced(curUnit());
+  end(nextSk.offset());
+}
+
+void HhbcTranslator::end(Offset nextPc) {
   if (m_hasExit) return;
 
-  auto const nextSk = curSrcKey().advanced(curUnit());
-  auto const nextPc = nextSk.offset();
   if (nextPc >= curFunc()->past()) {
     // We have fallen off the end of the func's bytecodes. This happens
     // when the function's bytecodes end with an unconditional

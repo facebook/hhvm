@@ -127,6 +127,7 @@ struct HhbcTranslator {
   // bytecode offset (or whether we're finished) using this API.
   void setBcOff(Offset newOff, bool lastBcOff);
   void end();
+  void end(Offset nextPc);
 
   // Tracelet guards.
   void guardTypeStack(uint32_t stackIndex, Type type, bool outerOnly);

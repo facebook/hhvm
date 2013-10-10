@@ -201,7 +201,8 @@ RegionDescPtr RegionFormer::go() {
       break;
     }
 
-    if (m_inst.breaksTracelet) break;
+    // We successfully translated the instruction, so update m_sk.
+    m_sk.advance(m_curBlock->unit());
 
     if (inlineReturn) {
       // If we just translated an inlined RetC, grab the updated SrcKey from
@@ -211,22 +212,26 @@ RegionDescPtr RegionFormer::go() {
       m_arStates.pop_back();
       m_blockFinished = true;
       continue;
+    } else if (m_inst.breaksTracelet) {
+      FTRACE(1, "selectTracelet: tracelet broken after {}\n", m_inst);
+      // We don't currently support partial inlining.
+      assert(!m_ht.isInlining());
+      break;
     } else {
       assert(m_sk.func() == m_ht.curFunc());
     }
 
     if (isFCallStar(m_inst.op())) m_arStates.back().pop();
 
-    // Advance sk and check the prediction, if any. Since the current
-    // instruction is over, advance HhbcTranslator's sk before
-    // emitting the prediction.
-    m_sk.advance(m_curBlock->unit());
+    // Since the current instruction is over, advance HhbcTranslator's sk
+    // before emitting the prediction (if any).
     if (doPrediction) {
       m_ht.setBcOff(m_sk.offset(), false);
       m_ht.checkTypeStack(0, m_inst.outPred, m_sk.offset());
     }
   }
 
+  m_ht.end(m_sk.offset());
   dumpTrace(2, m_ht.unit(), " after tracelet formation ",
             nullptr, nullptr, nullptr, m_ht.traceBuilder().guards());
 

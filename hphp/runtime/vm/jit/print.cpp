@@ -188,7 +188,7 @@ void printSrcs(std::ostream& os, const IRInstruction* inst,
 
 void printLabel(std::ostream& os, const Block* block) {
   os << color(ANSI_COLOR_MAGENTA);
-  os << "L" << block->id();
+  os << "B" << block->id();
   switch (block->hint()) {
   case Block::Hint::Unlikely:    os << "<Unlikely>"; break;
   case Block::Hint::Likely:      os << "<Likely>"; break;

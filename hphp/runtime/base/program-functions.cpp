@@ -1490,7 +1490,7 @@ void hphp_session_init() {
 }
 
 ExecutionContext *hphp_context_init() {
-  ExecutionContext *context = g_context.getNoCheck();
+  ExecutionContext *context = g_vmContext;
   context->obStart();
   context->obProtect(true);
   return context;

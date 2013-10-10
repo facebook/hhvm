@@ -1656,12 +1656,12 @@ TranslatorX64::enterTC(TCA start, void* data) {
     }
 
     if (RuntimeOption::EvalSimulateARM) {
-      vixl::PrintDisassembler disasm(stdout);
+      vixl::PrintDisassembler disasm(std::cout);
       vixl::Decoder decoder;
       if (getenv("ARM_DISASM")) {
         decoder.AppendVisitor(&disasm);
       }
-      vixl::Simulator sim(&decoder, stdout);
+      vixl::Simulator sim(&decoder, std::cout);
 
       g_vmContext->m_activeSims.push_back(&sim);
       SCOPE_EXIT { g_vmContext->m_activeSims.pop_back(); };

@@ -18,6 +18,7 @@
 #include "hphp/util/disasm.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/abi-cxx.h"
+#include "hphp/vixl/a64/disasm-a64.h"
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/ir.h"
@@ -332,14 +333,31 @@ static smart::vector<Block*> blocks(const IRUnit& unit,
   return blocks;
 }
 
+static constexpr auto kIndent = 4;
+
+static void disasmRange(std::ostream& os, TCA begin, TCA end) {
+  if (arch() == Arch::X64) {
+    Disasm disasm(Disasm::Options().indent(kIndent + 4)
+                  .printEncoding(dumpIREnabled(kExtraLevel))
+                  .color(color(ANSI_COLOR_BROWN)));
+    disasm.disasm(os, begin, end);
+  } else if (arch() == Arch::ARM) {
+    using namespace vixl;
+    Decoder dec;
+    PrintDisassembler disasm(os, kIndent + 4, dumpIREnabled(kExtraLevel),
+                             color(ANSI_COLOR_BROWN));
+    dec.AppendVisitor(&disasm);
+    assert(begin <= end);
+    for (; begin < end; begin += kInstructionSize) {
+      dec.Decode(Instruction::Cast(begin));
+    }
+  }
+
+}
+
 void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
            const RegAllocInfo* regs, const LifetimeInfo* lifetime,
            const AsmInfo* asmInfo, const GuardConstraints* guards) {
-  static const int kIndent = 4;
-  Disasm disasm(Disasm::Options().indent(kIndent + 4)
-                                 .printEncoding(dumpIREnabled(kExtraLevel))
-                                 .color(color(ANSI_COLOR_BROWN)));
-
   BCMarker curMarker;
   for (Block* block : blocks(unit, trace, asmInfo)) {
     if (!block->isMain()) {
@@ -426,7 +444,7 @@ void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
       if (asmInfo) {
         TcaRange instRange = asmInfo->instRanges[inst];
         if (!instRange.empty()) {
-          disasm.disasm(os, instRange.begin(), instRange.end());
+          disasmRange(os, instRange.begin(), instRange.end());
           os << '\n';
           assert(instRange.end() >= blockRange.start() &&
                  instRange.end() <= blockRange.end());
@@ -441,12 +459,12 @@ void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
       // jmp to next block), and AStubs code.
       if (!blockRange.empty()) {
         os << std::string(kIndent, ' ') << punc("A:") << "\n";
-        disasm.disasm(os, blockRange.start(), blockRange.end());
+        disasmRange(os, blockRange.start(), blockRange.end());
       }
       auto astubRange = asmInfo->astubRanges[block];
       if (!astubRange.empty()) {
         os << std::string(kIndent, ' ') << punc("AStubs:") << "\n";
-        disasm.disasm(os, astubRange.start(), astubRange.end());
+        disasmRange(os, astubRange.start(), astubRange.end());
       }
       if (!blockRange.empty() || !astubRange.empty()) {
         os << '\n';

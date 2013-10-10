@@ -249,18 +249,122 @@ void FrameState::update(IRInstruction* inst) {
   if (Block* target = inst->taken()) save(target);
 }
 
-void FrameState::appendBlock(Block* block) {
-  if (!m_unit.main()->back()->back()->isTerminal()) {
-    // previous instruction falls through; merge current state with block.
-    save(block);
+void FrameState::startBlock(Block* block) {
+  if (m_snapshots[block]) {
+    load(block);
   }
-  use(block);
+}
+
+void FrameState::finishBlock(Block* block) {
+  assert(block->back()->isTerminal() == !block->next());
+
+  if (!block->back()->isTerminal()) {
+    save(block->next());
+  }
+}
+
+std::unique_ptr<FrameState::Snapshot> FrameState::createSnapshot() const {
+  std::unique_ptr<Snapshot> state(new Snapshot);
+  state->spValue = m_spValue;
+  state->fpValue = m_fpValue;
+  state->curFunc = m_curFunc;
+  state->spOffset = m_spOffset;
+  state->thisAvailable = m_thisAvailable;
+  state->locals = m_locals;
+  state->callerAvailableValues = m_callerAvailableValues;
+  state->curMarker = m_marker;
+  state->frameSpansCall = m_frameSpansCall;
+  state->needsFPAnchor = m_hasFPAnchor;
+  assert(state->curMarker.valid());
+  return state;
+}
+
+/*
+ * Save current state for block.  If this is the first time saving state for
+ * block, create a new snapshot.  Otherwise merge the current state into the
+ * existing snapshot.
+ */
+void FrameState::save(Block* block) {
+  if (auto* state = m_snapshots[block]) {
+    merge(state);
+
+    // reset caller's available values for all inlined frames
+    for (auto& state : m_inlineSavedStates) {
+      state->callerAvailableValues.clear();
+    }
+  } else {
+    m_snapshots[block] = createSnapshot().release();
+  }
+}
+
+void FrameState::load(std::unique_ptr<Snapshot> state) {
+  m_spValue = state->spValue;
+  m_fpValue = state->fpValue;
+  m_spOffset = state->spOffset;
+  m_curFunc = state->curFunc;
+  m_thisAvailable = state->thisAvailable;
+  m_locals = std::move(state->locals);
+  m_callerAvailableValues = std::move(state->callerAvailableValues);
+  m_marker = state->curMarker;
+  m_hasFPAnchor = state->needsFPAnchor;
+  m_frameSpansCall = m_frameSpansCall || state->frameSpansCall;
+
+  // If spValue is null, we merged two different but equivalent values. We
+  // could define a new sp but that would drop a lot of useful information on
+  // the floor. Let's cross this bridge when we reach it.
+  always_assert(m_spValue &&
+                "Attempted to merge two states with different stack pointers");
 }
 
 void FrameState::load(Block* block) {
-  if (m_snapshots[block]) {
-    use(block);
+  assert(m_snapshots[block]);
+  std::unique_ptr<Snapshot> state(m_snapshots[block]);
+  m_snapshots[block] = nullptr;
+  load(std::move(state));
+}
+
+/*
+ * Merge current state into state.  Frame pointers and stack depth must match.
+ * If the stack pointer tmps are different, clear the tracked value (we can
+ * make a new one, given fp and spOffset).
+ *
+ * thisIsAvailable remains true if it's true in both states.
+ * local variable values are preserved if the match in both states.
+ * types are combined using Type::unionOf.
+ */
+void FrameState::merge(Snapshot* state) {
+  // cannot merge fp or spOffset state, so assert they match
+  assert(state->fpValue == m_fpValue);
+  assert(state->spOffset == m_spOffset);
+  assert(state->curFunc == m_curFunc);
+  if (state->spValue != m_spValue) {
+    // we have two different sp definitions but we know they're equal
+    // because spOffset matched.
+    state->spValue = nullptr;
   }
+  // this is available iff it's available in both states
+  state->thisAvailable &= m_thisAvailable;
+
+  assert(m_locals.size() == state->locals.size());
+  for (unsigned i = 0; i < m_locals.size(); ++i) {
+    auto& local = state->locals[i];
+
+    // preserve local values if they're the same in both states,
+    // This would be the place to insert phi nodes (jmps+deflabels) if we want
+    // to avoid clearing state, which triggers a downstream reload.
+    if (local.value != m_locals[i].value) local.value = nullptr;
+
+    local.type = Type::unionOf(local.type, m_locals[i].type);
+    local.unsafe = local.unsafe || m_locals[i].unsafe;
+    local.written = local.written || m_locals[i].written;
+  }
+
+  // Don't attempt to continue tracking caller's available values.
+  state->callerAvailableValues.clear();
+
+  // We should not be merging states that have different hhbc bytecode
+  // boundaries.
+  assert(m_marker.valid() && state->curMarker == m_marker);
 }
 
 void FrameState::trackDefInlineFP(IRInstruction* inst) {
@@ -314,7 +418,7 @@ void FrameState::trackDefInlineFP(IRInstruction* inst) {
 }
 
 void FrameState::trackInlineReturn(IRInstruction* inst) {
-  use(std::move(m_inlineSavedStates.back()));
+  load(std::move(m_inlineSavedStates.back()));
   m_inlineSavedStates.pop_back();
 }
 
@@ -557,110 +661,6 @@ bool FrameState::anyLocalHasValue(SSATmp* tmp) const {
                      [tmp](const LocalState& s) {
                        return !s.unsafe && s.value == tmp;
                      });
-}
-
-std::unique_ptr<FrameState::Snapshot> FrameState::createSnapshot() const {
-  std::unique_ptr<Snapshot> state(new Snapshot);
-  state->spValue = m_spValue;
-  state->fpValue = m_fpValue;
-  state->curFunc = m_curFunc;
-  state->spOffset = m_spOffset;
-  state->thisAvailable = m_thisAvailable;
-  state->locals = m_locals;
-  state->callerAvailableValues = m_callerAvailableValues;
-  state->curMarker = m_marker;
-  state->frameSpansCall = m_frameSpansCall;
-  state->needsFPAnchor = m_hasFPAnchor;
-  assert(state->curMarker.valid());
-  return state;
-}
-
-/*
- * Save current state for block.  If this is the first time saving state for
- * block, create a new snapshot.  Otherwise merge the current state into the
- * existing snapshot.
- */
-void FrameState::save(Block* block) {
-  if (auto* state = m_snapshots[block]) {
-    merge(state);
-
-    // reset caller's available values for all inlined frames
-    for (auto& state : m_inlineSavedStates) {
-      state->callerAvailableValues.clear();
-    }
-  } else {
-    m_snapshots[block] = createSnapshot().release();
-  }
-}
-
-/*
- * Merge current state into state.  Frame pointers and stack depth must match.
- * If the stack pointer tmps are different, clear the tracked value (we can
- * make a new one, given fp and spOffset).
- *
- * thisIsAvailable remains true if it's true in both states.
- * local variable values are preserved if the match in both states.
- * types are combined using Type::unionOf.
- */
-void FrameState::merge(Snapshot* state) {
-  // cannot merge fp or spOffset state, so assert they match
-  assert(state->fpValue == m_fpValue);
-  assert(state->spOffset == m_spOffset);
-  assert(state->curFunc == m_curFunc);
-  if (state->spValue != m_spValue) {
-    // we have two different sp definitions but we know they're equal
-    // because spOffset matched.
-    state->spValue = nullptr;
-  }
-  // this is available iff it's available in both states
-  state->thisAvailable &= m_thisAvailable;
-
-  assert(m_locals.size() == state->locals.size());
-  for (unsigned i = 0; i < m_locals.size(); ++i) {
-    auto& local = state->locals[i];
-
-    // preserve local values if they're the same in both states,
-    // This would be the place to insert phi nodes (jmps+deflabels) if we want
-    // to avoid clearing state, which triggers a downstream reload.
-    if (local.value != m_locals[i].value) local.value = nullptr;
-
-    local.type = Type::unionOf(local.type, m_locals[i].type);
-    local.unsafe = local.unsafe || m_locals[i].unsafe;
-    local.written = local.written || m_locals[i].written;
-  }
-
-  // Don't attempt to continue tracking caller's available values.
-  state->callerAvailableValues.clear();
-
-  // We should not be merging states that have different hhbc bytecode
-  // boundaries.
-  assert(m_marker.valid() && state->curMarker == m_marker);
-}
-
-void FrameState::use(std::unique_ptr<Snapshot> state) {
-  m_spValue = state->spValue;
-  m_fpValue = state->fpValue;
-  m_spOffset = state->spOffset;
-  m_curFunc = state->curFunc;
-  m_thisAvailable = state->thisAvailable;
-  m_locals = std::move(state->locals);
-  m_callerAvailableValues = std::move(state->callerAvailableValues);
-  m_marker = state->curMarker;
-  m_hasFPAnchor = state->needsFPAnchor;
-  m_frameSpansCall = m_frameSpansCall || state->frameSpansCall;
-  // If spValue is null, we merged two different but equivalent values.
-  // Define a new sp using the known-good spOffset.
-  if (!m_spValue) {
-    always_assert(false && "aw crap");
-    //gen(DefSP, StackOffset(m_spOffset), m_fpValue);
-  }
-}
-
-void FrameState::use(Block* block) {
-  assert(m_snapshots[block]);
-  std::unique_ptr<Snapshot> state(m_snapshots[block]);
-  m_snapshots[block] = nullptr;
-  use(std::move(state));
 }
 
 } }

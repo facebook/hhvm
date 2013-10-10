@@ -49,7 +49,11 @@ struct IRTrace : private boost::noncopyable {
         iterator begin()        { return blocks().begin(); }
         iterator end()          { return blocks().end(); }
 
-  // Unlink a block from a trace. Updates any successor blocks that
+  // Unlink a block from a trace by forwarding any incoming edges to the
+  // block's successor, then erasing it.
+  iterator unlink(iterator it);
+
+  // Erase a block from a trace. Updates any successor blocks that
   // have a DefLabel with a dest depending on this block.
   iterator erase(iterator it);
 
@@ -69,6 +73,20 @@ private:
 inline IRTrace::IRTrace(IRUnit& unit, Block* first)
   : m_unit(unit) {
   push_back(first);
+}
+
+inline IRTrace::iterator IRTrace::unlink(iterator blockIt) {
+  // Update any predecessors to point to the empty block's next block.
+  auto block = *blockIt;
+  assert(block->empty());
+  auto next = block->next();
+  for (auto it = block->preds().begin(); it != block->preds().end(); ) {
+    auto cur = it;
+    ++it;
+    cur->setTo(next);
+  }
+
+  return erase(blockIt);
 }
 
 inline IRTrace::iterator IRTrace::erase(iterator it) {

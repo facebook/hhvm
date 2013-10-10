@@ -126,16 +126,7 @@ void removeDeadInstructions(IRTrace* trace, const DceState& state) {
               });
       return state[inst].isDead();
     });
-    if (block->empty()) {
-      // Update any predecessors to point to the empty block's next block.
-      auto next = block->next();
-      for (auto it = block->preds().begin(); it != block->preds().end(); ) {
-        auto cur = it;
-        ++it;
-        cur->setTo(next);
-      }
-      trace->erase(cur);
-    }
+    if (block->empty()) trace->unlink(cur);
   }
 }
 

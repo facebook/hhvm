@@ -59,9 +59,9 @@ struct FrameState {
   ~FrameState();
 
   void update(IRInstruction* inst);
-  void appendBlock(Block* block);
-  void load(Block* dest);
-  void save(Block* dest);
+
+  void startBlock(Block*);
+  void finishBlock(Block*);
   void clear();
 
   const Func* func() const { return m_curFunc; }
@@ -143,9 +143,10 @@ struct FrameState {
   void clearCse();
 
   std::unique_ptr<Snapshot> createSnapshot() const;
+  void save(Block*);
+  void load(Block*);
+  void load(std::unique_ptr<Snapshot> state);
   void merge(Snapshot* s1);
-  void use(std::unique_ptr<Snapshot> state);
-  void use(Block*);
 
  private:
   IRUnit& m_unit;

@@ -112,7 +112,12 @@ void TraceBuilder::appendInstruction(IRInstruction* inst) {
 }
 
 void TraceBuilder::appendBlock(Block* block) {
-  m_state.appendBlock(block);
+  assert(m_savedTraces.empty()); // TODO(t2982555): Don't require this
+
+  m_state.finishBlock(m_curTrace->back());
+
+  // Load up the state for the new block.
+  m_state.startBlock(block);
   m_curTrace->push_back(block);
 }
 
@@ -153,7 +158,7 @@ SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
   auto const prevType = localType(locId, DataTypeSpecific);
 
   if (prevType.subtypeOf(typeParam)) {
-    inst->convertToNop();
+    return inst->src(0);
   } else {
     //
     // Normally, it doesn't make sense to be checking something that's
@@ -519,14 +524,15 @@ void TraceBuilder::reoptimize() {
     FTRACE(5, "Block: {}\n", block->id());
 
     assert(m_curTrace->isMain());
+    m_state.startBlock(block);
     m_curTrace->push_back(block);
-    m_state.load(block);
 
     auto instructions = std::move(block->instrs());
     assert(block->empty());
     while (!instructions.empty()) {
       auto *inst = &instructions.front();
       instructions.pop_front();
+      m_state.setMarker(inst->marker());
 
       // last attempt to elide ActRecs, if we still need the InlineFPAnchor
       // it will be added back to the trace when we re-add instructions that
@@ -562,14 +568,20 @@ void TraceBuilder::reoptimize() {
       // Not re-adding inst; remove the inst->taken edge
       if (inst->taken()) inst->setTaken(nullptr);
     }
-    if (block->back()->isTerminal()) {
-      // Could have converted a conditional branch to Jmp; clear next.
-      block->setNext(nullptr);
+
+    if (block->empty()) {
+      // If all the instructions in the block were optimized away, remove it
+      // from the trace.
+      auto it = m_curTrace->blocks().end();
+      --it;
+      assert(*it == block);
+      m_curTrace->unlink(it);
     } else {
-      // if the last instruction was a branch, we already saved state
-      // for the target in updateTrackedState().  Now save state for
-      // the fall-through path.
-      m_state.save(block->next());
+      if (block->back()->isTerminal()) {
+        // Could have converted a conditional branch to Jmp; clear next.
+        block->setNext(nullptr);
+      }
+      m_state.finishBlock(block);
     }
   }
 }

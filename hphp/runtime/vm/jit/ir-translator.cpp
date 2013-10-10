@@ -376,6 +376,17 @@ IRTranslator::translateUnboxR(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translateBoxR(const NormalizedInstruction& i) {
+  if (i.noOp) {
+    // statically proved to be unboxed -- just pass that info to the IR
+    TRACE(1, "HHIR: translateBoxR: output inferred to be Box\n");
+    m_hhbcTrans.assertTypeStack(0, JIT::Type::BoxedCell);
+  } else {
+    HHIR_UNIMPLEMENTED(BoxR);
+  }
+}
+
+void
 IRTranslator::translateNull(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 0);
 
@@ -1019,6 +1030,7 @@ IRTranslator::translateFPushFuncU(const NormalizedInstruction& i) {
 void
 IRTranslator::translateFPassCOp(const NormalizedInstruction& i) {
   auto const op = i.op();
+  if (i.noOp) return;
   if (i.preppedByRef && (op == OpFPassCW || op == OpFPassCE)) {
     // These cases might have to raise a warning or an error
     HHIR_UNIMPLEMENTED(FPassCW_FPassCE_byref);

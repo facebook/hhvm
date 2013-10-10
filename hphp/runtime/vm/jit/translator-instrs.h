@@ -25,6 +25,7 @@
   CASE(PopV) \
   CASE(PopR) \
   CASE(UnboxR) \
+  CASE(BoxR) \
   CASE(Null) \
   CASE(NullUninit) \
   CASE(True) \

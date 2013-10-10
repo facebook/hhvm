@@ -646,7 +646,7 @@ predictOutputs(SrcKey startSk,
   } else if (hasImmVector(ni->op())) {
     pred = predictMVec(ni);
   }
-  if (debug && pred.second < kAccept) {
+  if (pred.second < kAccept) {
     if (const StringData* invName = fcallToFuncName(ni)) {
       pred = predictType(TypeProfileKey(TypeProfileKey::MethodName, invName));
       TRACE(1, "prediction for methods named %s: %d, %f\n",
@@ -738,7 +738,7 @@ getDynLocType(const SrcKey startSk,
       // In TransProfile mode, disable type prediction to avoid side exits.
       auto dt = mode == TransProfile ? KindOfAny : predictOutputs(startSk, ni);
       if (dt != KindOfAny) ni->outputPredicted = true;
-      return RuntimeType(dt);
+      return RuntimeType(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
     }
 
     case OutClassRef: {

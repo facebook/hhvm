@@ -67,38 +67,6 @@ void MInstrEffects::get(const IRInstruction* inst,
   }
 }
 
-namespace {
-// Reduce baseType to a canonical unboxed, non-pointer form, returning (in
-// basePtr and baseBoxed) whether the original type was a pointer or boxed,
-// respectively. Whether or not the type is a pointer and/or boxed must be
-// statically known, unless it's exactly equal to Gen.
-void stripBase(Type& baseType, bool& basePtr, bool& baseBoxed) {
-  assert_not_implemented(baseType.isPtr() || baseType.notPtr());
-  basePtr = baseType.isPtr();
-  baseType = basePtr ? baseType.deref() : baseType;
-  assert_not_implemented(
-    baseType.equals(Type::Gen) || baseType.isBoxed() || baseType.notBoxed());
-  baseBoxed = baseType.isBoxed();
-  baseType = baseBoxed ? baseType.innerType() : baseType;
-}
-
-Opcode canonicalOp(Opcode op) {
-  if (op == ElemUX || op == ElemUXStk ||
-      op == UnsetElem || op == UnsetElemStk) {
-    return UnsetElem;
-  }
-  if (op == SetWithRefElem ||
-      op == SetWithRefElemStk ||
-      op == SetWithRefNewElem ||
-      op == SetWithRefNewElemStk) {
-    return SetWithRefElem;
-  }
-  return opcodeHasFlags(op, MInstrProp) ? SetProp
-       : opcodeHasFlags(op, MInstrElem) || op == ArraySet ? SetElem
-       : bad_value<Opcode>();
-}
-}
-
 MInstrEffects::MInstrEffects(const IRInstruction* inst) {
   init(inst->op(), inst->src(minstrBaseIdx(inst))->type());
 }
@@ -117,17 +85,26 @@ MInstrEffects::MInstrEffects(Opcode opc, const std::vector<SSATmp*>& srcs) {
   init(opc, srcs[minstrBaseIdx(opc)]->type());
 }
 
-void MInstrEffects::init(const Opcode rawOp, const Type origBase) {
-  baseType = origBase;
-  bool basePtr, baseBoxed;
-  stripBase(baseType, basePtr, baseBoxed);
-  // Only certain types of bases are supported now but this list may expand in
-  // the future.
-  assert_not_implemented(basePtr ||
-                         baseType.subtypeOfAny(Type::Obj, Type::Arr));
-  baseTypeChanged = baseValChanged = false;
+namespace {
+Opcode canonicalOp(Opcode op) {
+  if (op == ElemUX || op == ElemUXStk ||
+      op == UnsetElem || op == UnsetElemStk) {
+    return UnsetElem;
+  }
+  if (op == SetWithRefElem ||
+      op == SetWithRefElemStk ||
+      op == SetWithRefNewElem ||
+      op == SetWithRefNewElemStk) {
+    return SetWithRefElem;
+  }
+  return opcodeHasFlags(op, MInstrProp) ? SetProp
+       : opcodeHasFlags(op, MInstrElem) || op == ArraySet ? SetElem
+       : bad_value<Opcode>();
+}
 
-  // Canonicalize the op to SetProp/SetElem/UnsetElem/SetWithRefElem
+void getBaseType(Opcode rawOp, bool predict,
+                 Type& baseType, bool& baseValChanged) {
+  always_assert(baseType.notBoxed());
   auto const op = canonicalOp(rawOp);
 
   // Deal with possible promotion to stdClass or array
@@ -135,12 +112,9 @@ void MInstrEffects::init(const Opcode rawOp, const Type origBase) {
       baseType.maybe(Type::Null | Type::Bool | Type::Str)) {
     auto newBase = op == SetProp ? Type::Obj : Type::Arr;
 
-    if (baseBoxed) {
-      /* We always guard when loading from a Boxed type, so we don't *have* to
-       * fix the type when the base is boxed. But it's still a good idea to do
-       * something with it, since the inner type is used as a hint by
-       * LdRef. And since the next load of the base will be guarded anyway we
-       * can be optimistic and assume no promotion for string bases and
+    if (predict) {
+      /* If the output type will be used as a prediction and not as fact, we
+       * can be optimistic here. Assume no promotion for string bases and
        * promotion in other cases. */
       baseType = baseType.isString() ? Type::Str : newBase;
     } else if (baseType.isString() &&
@@ -169,16 +143,39 @@ void MInstrEffects::init(const Opcode rawOp, const Type origBase) {
     if (baseType.maybe(Type::StaticArr)) baseType |= Type::CountedArr;
     if (baseType.maybe(Type::StaticStr)) baseType |= Type::CountedStr;
   }
+}
+}
 
-  // The final baseType should be a pointer/box iff the input was
-  baseType = baseBoxed ? baseType.box() : baseType;
-  baseType = basePtr   ? baseType.ptr() : baseType;
+void MInstrEffects::init(const Opcode rawOp, const Type origBase) {
+  baseType = origBase;
+  always_assert(baseType.isPtr() ^ baseType.notPtr());
+  auto const basePtr = baseType.isPtr();
+  baseType = baseType.derefIfPtr();
 
-  baseTypeChanged = baseTypeChanged || baseType != origBase;
+  // Only certain types of bases are supported now but this list may expand in
+  // the future.
+  assert_not_implemented(basePtr ||
+                         baseType.subtypeOfAny(Type::Obj, Type::Arr));
+
+  baseTypeChanged = baseValChanged = false;
+
+  // Process the inner and outer types separately and then recombine them,
+  // since the minstr operations all operate on the inner cell of boxed
+  // bases. We treat the new inner type as a prediction because it will be
+  // verified the next time we load from the box.
+  auto inner = (baseType & Type::BoxedCell).innerType();
+  auto outer = baseType & Type::Cell;
+  getBaseType(rawOp, false, outer, baseValChanged);
+  getBaseType(rawOp, true, inner, baseValChanged);
+
+  baseType = inner.box() | outer;
+  baseType = basePtr ? baseType.ptr() : baseType;
+
+  baseTypeChanged = baseType != origBase;
 
   /* Boxed bases may have their inner value changed but the value of the box
    * will never change. */
-  baseValChanged = !baseBoxed && (baseValChanged || baseTypeChanged);
+  baseValChanged = !origBase.isBoxed() && (baseValChanged || baseTypeChanged);
 }
 
 // minstrBaseIdx returns the src index for inst's base operand.

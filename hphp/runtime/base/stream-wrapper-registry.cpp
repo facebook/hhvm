@@ -58,6 +58,7 @@ bool registerWrapper(const std::string &scheme, Wrapper *wrapper) {
 
 const StaticString
   s_file("file"),
+  s_compress_bzip2("compress.bzip2"),
   s_compress_zlib("compress.zlib"),
   s_data("data");
 
@@ -188,6 +189,11 @@ Wrapper* getWrapperFromURI(const String& uri) {
   /* Special case for PHP4 Backward Compatability */
   if (!strncasecmp(uri_string, "zlib:", sizeof("zlib:") - 1)) {
     return getWrapper(s_compress_zlib);
+  }
+
+  /* Special case for PHP4 Backward Compatability */
+  if (!strncasecmp(uri_string, "bzip2:", sizeof("bzip2:") - 1)) {
+    return getWrapper(s_compress_bzip2);
   }
 
   // data wrapper can come with or without a double forward slash

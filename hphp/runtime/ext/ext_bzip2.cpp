@@ -16,11 +16,67 @@
 */
 
 #include "hphp/runtime/ext/ext_bzip2.h"
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/bzip2-file.h"
+#include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/util/alloc.h"
 #include "folly/String.h"
 
+using namespace HPHP;
+
+namespace {
+
+///////////////////////////////////////////////////////////////////////////////
+// compress.bzip2:// stream wrapper
+
+static class Bzip2StreamWrapper : public Stream::Wrapper {
+ public:
+  virtual File* open(const String& filename, const String& mode,
+                     int options, CVarRef context) {
+    String fname;
+    static const char cz[] = "compress.bzip2://";
+
+    if (!strncmp(filename.data(), "bzip2:", sizeof("bzip2:") - 1)) {
+      fname = filename.substr(sizeof("bzip2:") - 1);
+    } else if (!strncmp(filename.data(), cz, sizeof(cz) - 1)) {
+      fname = filename.substr(sizeof(cz) - 1);
+    } else {
+      return NULL;
+    }
+
+    if (MemFile* file = FileStreamWrapper::openFromCache(fname, mode)) {
+      file->unzip();
+      return file;
+    }
+
+    std::unique_ptr<BZ2File> file(NEWOBJ(BZ2File)());
+    bool ret = file->open(File::TranslatePath(fname), mode);
+    if (!ret) {
+      raise_warning("%s", file->getLastError().c_str());
+      return NULL;
+    }
+    return file.release();
+  }
+} s_bzip2_stream_wrapper;
+
+///////////////////////////////////////////////////////////////////////////////
+// Extension entry point
+
+static class Bzip2Extension : Extension {
+ public:
+  Bzip2Extension() : Extension("bzip2") {}
+  virtual void moduleLoad(Hdf hdf) {
+    s_bzip2_stream_wrapper.registerAs("compress.bzip2");
+  }
+} s_bzip2_extension;
+
+} // nil namespace
+
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_bzclose(CResRef bz) {

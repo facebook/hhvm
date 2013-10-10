@@ -1228,9 +1228,14 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     if (op == OpFCallArray) return refuse("FCallArray");
 
     cost += 1;
-    if (hasImmVector(op)) {
-      cost += getMVector(reinterpret_cast<const Op*>(iter.sk().pc())).size();
-      // static cost + scale factor for vector ops
+
+    // Check for an immediate vector, and if it's present add its size to the
+    // cost.
+    auto const pc = reinterpret_cast<const Op*>(iter.sk().pc());
+    if (hasMVector(op)) {
+      cost += getMVector(pc).size();
+    } else if (hasImmVector(op)) {
+      cost += getImmVector(pc).size();
     }
 
     if (cost > RuntimeOption::EvalHHIRInliningMaxCost) {

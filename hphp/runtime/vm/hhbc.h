@@ -736,6 +736,7 @@ struct MVectorItem {
     return memberCodeHasImm(mcode);
   }
 };
+bool hasMVector(Op op);
 std::vector<MVectorItem> getMVector(const Op* opcode);
 
 /* Some decoding helper functions. */

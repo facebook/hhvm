@@ -2280,6 +2280,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     undoA.undo();
     undoAstubs.undo();
     m_fixupMap.clearPendingFixups();
+    m_pendingCatchTraces.clear();
     m_bcMap.clear();
     srcRec.clearInProgressTailJumps();
   };
@@ -2288,12 +2289,12 @@ TranslatorX64::translateWork(const TranslArgs& args) {
     assert(mainCode.frontier() == start);
     assert(stubsCode.frontier() == stubStart);
     assert(m_fixupMap.pendingFixupsEmpty());
+    assert(m_pendingCatchTraces.empty());
     assert(m_bcMap.empty());
     assert(srcRec.inProgressTailJumps().empty());
   };
 
   JIT::PostConditions pconds;
-
   if (!args.m_interp && !reachedTranslationLimit(sk, srcRec)) {
     // Attempt to create a region at this SrcKey
     JIT::RegionDescPtr region;
@@ -2388,6 +2389,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   }
 
   m_fixupMap.processPendingFixups();
+  processPendingCatchTraces();
 
   addTranslation(TransRec(sk, sk.unit()->md5(), transKind, t, start,
                           mainCode.frontier() - start, stubStart,
@@ -2735,7 +2737,14 @@ TranslatorX64::Get() {
 
 void TranslatorX64::registerCatchTrace(CTCA ip, TCA trace) {
   FTRACE(1, "registerCatchTrace: afterCall: {} trace: {}\n", ip, trace);
-  m_catchTraceMap.insert(ip, trace);
+  m_pendingCatchTraces.emplace_back(ip, trace);
+}
+
+void TranslatorX64::processPendingCatchTraces() {
+  for (auto const& pair : m_pendingCatchTraces) {
+    m_catchTraceMap.insert(pair.first, pair.second);
+  }
+  m_pendingCatchTraces.clear();
 }
 
 TCA TranslatorX64::getCatchTrace(CTCA ip) const {

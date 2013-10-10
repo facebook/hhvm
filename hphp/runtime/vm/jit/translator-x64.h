@@ -161,6 +161,7 @@ private:
 
   FixupMap                   m_fixupMap;
   UnwindInfoHandle           m_unwindRegistrar;
+  std::vector<std::pair<CTCA, TCA>> m_pendingCatchTraces;
   CatchTraceMap              m_catchTraceMap;
   std::vector<TransBCMapping> m_bcMap;
 
@@ -261,6 +262,7 @@ public:
   TCA getFreeStub();
 
   void registerCatchTrace(CTCA ip, TCA trace);
+  void processPendingCatchTraces();
   TCA getCatchTrace(CTCA ip) const;
 
   TCA getTranslatedCaller() const;

@@ -1057,6 +1057,14 @@ MInstrLocation getMLocation(const Op* opcode) {
   return {lcode, imm};
 }
 
+bool hasMVector(Op op) {
+  auto const num = numImmediates(op);
+  for (int i = 0; i < num; ++i) {
+    if (immType(op, i) == MA) return true;
+  }
+  return false;
+}
+
 std::vector<MVectorItem> getMVector(const Op* opcode) {
   auto immVec = getImmVector(opcode);
   std::vector<MVectorItem> result;

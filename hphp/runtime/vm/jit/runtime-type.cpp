@@ -387,6 +387,10 @@ string RuntimeType::pretty() const {
     retval += folly::format("(Class {})",
               valueClass()->name()->data()).str();
   }
+  if (valueType() == KindOfArray && hasArrayKind()) {
+    retval += folly::format("(Kind {})",
+                            ArrayData::kindToString(arrayKind())).str();
+  }
   return retval;
 }
 

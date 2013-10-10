@@ -1703,6 +1703,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
 
     if (mcode == MW) {
       // No stack and no locals.
+      continue;
     } else if (member.hasImm()) {
       int64_t imm = member.imm;
       if (memberCodeImmIsLoc(mcode)) {

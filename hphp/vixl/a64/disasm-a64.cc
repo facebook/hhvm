@@ -25,6 +25,9 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "hphp/vixl/a64/disasm-a64.h"
+#include "hphp/util/text-color.h"
+
+#include "folly/Format.h"
 
 namespace vixl {
 
@@ -1670,9 +1673,30 @@ void Disassembler::AppendToOutput(const char* format, ...) {
 
 
 void PrintDisassembler::ProcessOutput(Instruction* instr) {
-  fprintf(stream_, "0x%016" PRIx64 "  %08" PRIx32 "\t\t%s\n",
-          reinterpret_cast<uint64_t>(instr),
-          instr->InstructionBits(),
-          GetOutput());
+  for (int i; i < indent_; i++) {
+    stream_ << ' ';
+  }
+  if (*color_) {
+    stream_ << color_;
+  }
+
+  if (showEncoding_) {
+    stream_ << folly::format(
+      "{:#16x}  {:08x}\t\t{}\n",
+      reinterpret_cast<uint64_t>(instr),
+      instr->InstructionBits(),
+      GetOutput()
+    );
+  } else {
+    stream_ << folly::format(
+      "{:#16x}  \t\t{}\n",
+      reinterpret_cast<uint64_t>(instr),
+      GetOutput()
+    );
+  }
+
+  if (*color_) {
+    stream_ << HPHP::ANSI_COLOR_END;
+  }
 }
 }  // namespace vixl

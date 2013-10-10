@@ -26,6 +26,8 @@
 
 #include "hphp/vixl/a64/debugger-a64.h"
 
+#include "folly/Format.h"
+
 namespace vixl {
 
 // List of commands supported by the debugger.
@@ -525,14 +527,14 @@ const char* RegisterToken::kWAliases[kNumberOfRegisters][kMaxAliasNumber] = {
 };
 
 
-Debugger::Debugger(Decoder* decoder, FILE* stream)
+Debugger::Debugger(Decoder* decoder, std::ostream& stream)
     : Simulator(decoder, stream),
       log_parameters_(0),
       debug_parameters_(0),
       pending_request_(false),
       steps_(0),
       last_command_(nullptr) {
-  disasm_ = new PrintDisassembler(stdout);
+  disasm_ = new PrintDisassembler(std::cout);
   printer_ = new Decoder();
   printer_->AppendVisitor(disasm_);
 }
@@ -729,8 +731,8 @@ void Debugger::DoUnreachable(Instruction* instr) {
   assert((instr->Mask(ExceptionMask) == HLT) &&
          (instr->ImmException() == kUnreachableOpcode));
 
-  fprintf(stream_, "Hit not_reached marker at pc=%p.\n",
-          reinterpret_cast<void*>(instr));
+  stream_ << folly::format("Hit not_reached marker at pc={:#x}.\n",
+                           reinterpret_cast<void*>(instr));
   abort();
 }
 

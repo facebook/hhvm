@@ -63,7 +63,7 @@ struct CodeGenerator {
                              vixl::Register srcReg,
                              int64_t imm);
   template<class Loc, class JmpFn>
-  void emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc, JmpFn doJcc);
+  void emitTypeTest(Type type, Loc typeSrc, Loc dataSrc, JmpFn doJcc);
 
   Address cgInst(IRInstruction* inst);
 

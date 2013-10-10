@@ -93,4 +93,9 @@ void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest) {
   emitBindJ(cb, stubs, dest, Transl::CC_None, REQ_BIND_JMP);
 }
 
+void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
+                      Transl::ConditionCode cc) {
+  emitBindJ(cb, stubs, dest, cc, REQ_BIND_SIDE_EXIT);
+}
+
 }}}

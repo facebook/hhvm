@@ -4007,12 +4007,6 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
                            dstReg);
 }
 
-static int getNativeTypeSize(Type type) {
-  if (type.subtypeOf(Type::Int | Type::Func)) return sz::qword;
-  if (type.subtypeOf(Type::Bool))             return sz::byte;
-  not_implemented();
-}
-
 void CodeGenerator::cgLdRaw(IRInstruction* inst) {
   SSATmp* dest   = inst->dst();
   SSATmp* addr   = inst->src(0);
@@ -4043,7 +4037,7 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
       m_as.loadzbl (addrReg[off], r32(destReg));
     }
   } else {
-    int ldSize = getNativeTypeSize(dest->type());
+    int ldSize = dest->type().nativeSize();
     Reg64 offsetReg = r64(m_regs[offset].reg());
     if (ldSize == sz::qword) {
       m_as.loadq (addrReg[offsetReg], destReg);

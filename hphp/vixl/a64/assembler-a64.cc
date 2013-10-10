@@ -151,6 +151,11 @@ MemOperand Register::operator[](const ptrdiff_t offset) const {
   return MemOperand { *this, offset };
 }
 
+MemOperand Register::operator[](const Register& offset) const {
+  return MemOperand { *this, offset };
+}
+
+
 const Register& Register::WRegFromCode(unsigned code) {
   // This function returns the zero register when code = 31. The stack pointer
   // can not be returned.

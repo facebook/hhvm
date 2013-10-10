@@ -19,6 +19,8 @@
 namespace HPHP { namespace JIT { namespace ARM {
 
 void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest);
+void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
+                      Transl::ConditionCode cc);
 
 }}}
 

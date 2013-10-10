@@ -21,6 +21,8 @@
 #include <cstring>
 #include <boost/optional/optional.hpp>
 
+#include "hphp/util/data-block.h"
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/class.h"
 
@@ -610,6 +612,12 @@ public:
            || subtypeOf(Type::Arr)
            || subtypeOf(Type::Obj)
            || subtypeOf(Type::Res);
+  }
+
+  int nativeSize() const {
+    if (subtypeOf(Type::Int | Type::Func)) return sz::qword;
+    if (subtypeOf(Type::Bool))             return sz::byte;
+    not_implemented();
   }
 };
 

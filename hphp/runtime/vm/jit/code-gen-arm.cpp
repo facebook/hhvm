@@ -170,7 +170,6 @@ PUNT_OPCODE(ReqBindJmpNInstanceOfBitmask)
 PUNT_OPCODE(ReqBindJmpZero)
 PUNT_OPCODE(ReqBindJmpNZero)
 PUNT_OPCODE(SideExitGuardLoc)
-PUNT_OPCODE(SideExitGuardStk)
 PUNT_OPCODE(JmpIndirect)
 PUNT_OPCODE(CheckSurpriseFlags)
 PUNT_OPCODE(SurpriseHook)
@@ -201,7 +200,6 @@ PUNT_OPCODE(LdElem)
 PUNT_OPCODE(LdRef)
 PUNT_OPCODE(LdThis)
 PUNT_OPCODE(LdRetAddr)
-PUNT_OPCODE(LdConst)
 PUNT_OPCODE(ConvClsToCctx)
 PUNT_OPCODE(LdCtx)
 PUNT_OPCODE(LdCctx)
@@ -246,7 +244,6 @@ PUNT_OPCODE(StClosureArg)
 PUNT_OPCODE(StClosureCtx)
 PUNT_OPCODE(NewArray)
 PUNT_OPCODE(NewPackedArray)
-PUNT_OPCODE(LdRaw)
 PUNT_OPCODE(FreeActRec)
 PUNT_OPCODE(Call)
 PUNT_OPCODE(CallArray)
@@ -441,8 +438,8 @@ void CodeGenerator::emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
 //////////////////////////////////////////////////////////////////////
 
 template<class Loc, class JmpFn>
-void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc,
-                                  JmpFn doJcc) {
+void CodeGenerator::emitTypeTest(Type type, Loc typeSrc, Loc dataSrc,
+                                 JmpFn doJcc) {
   assert(!type.subtypeOf(Type::Cls));
 
   if (type.equals(Type::Gen)) {
@@ -494,7 +491,7 @@ void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc,
 void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
   auto const rFP = x2a(m_regs[inst->src(0)].reg());
   auto const baseOff = localOffset(inst->extra<GuardLoc>()->locId);
-  emitTypeGuard(
+  emitTypeTest(
     inst->typeParam(),
     rFP[baseOff + TVOFF(m_type)],
     rFP[baseOff + TVOFF(m_data)],
@@ -508,7 +505,7 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
 void CodeGenerator::cgGuardStk(IRInstruction* inst) {
   auto const rSP = x2a(m_regs[inst->src(0)].reg());
   auto const baseOff = cellsToBytes(inst->extra<GuardStk>()->offset);
-  emitTypeGuard(
+  emitTypeTest(
     inst->typeParam(),
     rSP[baseOff + TVOFF(m_type)],
     rSP[baseOff + TVOFF(m_data)],
@@ -517,6 +514,21 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
       auto const destSR = m_tx64->getSrcRec(destSK);
       destSR->emitFallbackJump(this->m_mainCode, ccNegate(cc));
     });
+}
+
+void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
+  auto const sp = x2a(m_regs[inst->src(0)].reg());
+  auto const extra = inst->extra<SideExitGuardStk>();
+
+  emitTypeTest(
+    inst->typeParam(),
+    sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_type)],
+    sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_data)],
+    [&] (ConditionCode cc) {
+      auto const sk = SrcKey(curFunc(), extra->taken);
+      emitBindSideExit(this->m_mainCode, this->m_stubsCode, sk, ccNegate(cc));
+    }
+  );
 }
 
 void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
@@ -657,6 +669,51 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgLdConst(IRInstruction* inst) {
+  auto const dstReg = x2a(m_regs[inst->dst()].reg());
+  auto const val    = inst->extra<LdConst>()->as<uintptr_t>();
+  if (dstReg.IsValid()) {
+    m_as.  Mov  (dstReg, val);
+  }
+}
+
+void CodeGenerator::cgLdRaw(IRInstruction* inst) {
+  auto* addr   = inst->src(0);
+  auto* offset = inst->src(1);
+
+  auto destReg = x2a(m_regs[inst->dst()].reg());
+  auto addrReg = x2a(m_regs[addr].reg());
+
+  if (addr->isConst()) {
+    not_implemented();
+  }
+
+  if (offset->isConst()) {
+    auto kind   = offset->getValInt();
+    auto& slot  = RawMemSlot::Get(RawMemSlot::Kind(kind));
+    auto ldSize = slot.size();
+    auto offs   = slot.offset();
+
+    switch (ldSize) {
+      case sz::qword:
+        m_as.  Ldr  (destReg, addrReg[offs]);
+        break;
+      case sz::dword:
+        m_as.  Ldr  (destReg.W(), addrReg[offs]);
+        break;
+      case sz::byte:
+        // Ldrb zero-extends
+        m_as.  Ldrb (destReg.W(), addrReg[offs]);
+        break;
+      default: not_reached();
+    }
+  } else {
+    auto offsetReg = x2a(m_regs[offset].reg());
+    assert(inst->dst()->type().nativeSize() == sz::qword);
+    m_as.  Ldr  (destReg, addrReg[offsetReg]);
+  }
+}
 
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   auto dstReg  = x2a(m_regs[inst->dst()].reg());

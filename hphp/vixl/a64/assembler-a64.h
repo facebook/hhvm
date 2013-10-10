@@ -203,6 +203,7 @@ class Register : public CPURegister {
   }
 
   MemOperand operator[](const ptrdiff_t offset) const;
+  MemOperand operator[](const Register& offset) const;
 
   static const Register& WRegFromCode(unsigned code);
   static const Register& XRegFromCode(unsigned code);

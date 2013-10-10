@@ -25,7 +25,7 @@ namespace HPHP {
 
 class UserStreamWrapper : public Stream::Wrapper {
  public:
-  UserStreamWrapper(const String& name, const String& clsname);
+  UserStreamWrapper(const String& name, const String& clsname, const int flags);
   virtual File* open(const String& filename, const String& mode,
                      int options, CVarRef context);
  private:

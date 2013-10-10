@@ -823,6 +823,11 @@ void c_FrozenVector::t___construct(CVarRef iterable /* = null_variant */) {
 }
 
 c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
+
+  int flags = ObjectData::FrozenVectorAttrInit |
+              ObjectData::CallToImpl;
+
+  ObjectData::setAttributes(flags);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4679,6 +4684,8 @@ bool collectionIsset(ObjectData* obj, TypedValue* key) {
       return c_Set::OffsetIsset(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetIsset(obj, key);
+    case Collection::FrozenVectorType:
+      return c_FrozenVector::OffsetIsset(obj, key);
     default:
       assert(false);
       return false;
@@ -4698,6 +4705,8 @@ bool collectionEmpty(ObjectData* obj, TypedValue* key) {
       return c_Set::OffsetEmpty(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetEmpty(obj, key);
+    case Collection::FrozenVectorType:
+      return c_FrozenVector::OffsetEmpty(obj, key);
     default:
       assert(false);
       return false;
@@ -4773,6 +4782,9 @@ void collectionInitAppend(ObjectData* obj, TypedValue* val) {
       break;
     case Collection::PairType:
       static_cast<c_Pair*>(obj)->initAdd(val);
+      break;
+    case Collection::FrozenVectorType:
+      static_cast<c_FrozenVector*>(obj)->add(val);
       break;
     default:
       assert(false);
@@ -4938,6 +4950,8 @@ bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
       return c_Set::OffsetContains(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetContains(obj, key);
+    case Collection::FrozenVectorType:
+      return c_FrozenVector::OffsetContains(obj, key);
     default:
       assert(false);
       return false;
@@ -4960,6 +4974,9 @@ void collectionReserve(ObjectData* obj, int64_t sz) {
       break;
     case Collection::PairType:
       // do nothing
+      break;
+    case Collection::FrozenVectorType:
+      static_cast<c_FrozenVector*>(obj)->reserve(sz);
       break;
     default:
       assert(false);

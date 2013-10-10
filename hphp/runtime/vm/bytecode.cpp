@@ -3499,6 +3499,7 @@ OPTBLD_INLINE void VMExecutionContext::iopNewCol(PC& pc) {
     case Collection::StableMapType: obj = NEWOBJ(c_StableMap)(); break;
     case Collection::SetType: obj = NEWOBJ(c_Set)(); break;
     case Collection::PairType: obj = NEWOBJ(c_Pair)(); break;
+    case Collection::FrozenVectorType: obj = NEWOBJ(c_FrozenVector)(); break;
     default:
       obj = nullptr;
       raise_error("NewCol: Invalid collection type");

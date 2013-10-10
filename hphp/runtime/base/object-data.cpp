@@ -120,6 +120,8 @@ bool ObjectData::o_toBooleanImpl() const noexcept {
       return c_StableMap::ToBool(this);
     } else if (m_cls == c_Set::classof()) {
       return c_Set::ToBool(this);
+    } else if (m_cls == c_FrozenVector::classof()) {
+      return c_FrozenVector::ToBool(this);
     } else {
       always_assert(false);
     }
@@ -396,6 +398,8 @@ Array ObjectData::o_toArray() const {
       return c_Set::ToArray(this);
     } else if (m_cls == c_Pair::classof()) {
       return c_Pair::ToArray(this);
+    } else if (m_cls == c_FrozenVector::classof()) {
+      return c_FrozenVector::ToArray(this);
     }
     // It's undefined what happens if you reach not_reached. We want to be sure
     // to hard fail if we get here.

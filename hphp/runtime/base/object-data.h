@@ -65,6 +65,7 @@ class ObjectData {
     StableMapAttrInit = (Collection::StableMapType << 13),
     SetAttrInit = (Collection::SetType << 13),
     PairAttrInit = (Collection::PairType << 13),
+    FrozenVectorAttrInit = (Collection::FrozenVectorType << 13),
   };
 
   enum {

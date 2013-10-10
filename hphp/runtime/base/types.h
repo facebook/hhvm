@@ -143,7 +143,8 @@ enum Type {
   StableMapType = 3,
   SetType = 4,
   PairType = 5,
-  MaxNumTypes = 6
+  FrozenVectorType = 6,
+  MaxNumTypes = 7
 };
 inline Type stringToType(const char* str, size_t len) {
   switch (len) {
@@ -159,6 +160,9 @@ inline Type stringToType(const char* str, size_t len) {
       break;
     case 9:
       if (!strcasecmp(str, "stablemap")) return StableMapType;
+      break;
+    case 12:
+      if (!strcasecmp(str, "frozenvector")) return FrozenVectorType;
       break;
     default:
       break;

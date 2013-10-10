@@ -111,7 +111,7 @@
 #define HHVM_NAMED_STATIC_ME(cn,fn,mimpl) Native::registerBuiltinFunction(\
                           makeStaticString(#cn "::" #fn), \
                           mimpl)
-#define HHVE_STATIC_ME(cn,fn) HHVM_NAMED_STATIC_FE(cn,fn,HHVM_STATIC_MN(cn,fn))
+#define HHVM_STATIC_ME(cn,fn) HHVM_NAMED_STATIC_FE(cn,fn,HHVM_STATIC_MN(cn,fn))
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////

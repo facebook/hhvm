@@ -68,6 +68,7 @@
 #include "hphp/runtime/base/file-repository.h"
 
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/compiler/builtin_symbols.h"
@@ -1070,7 +1071,9 @@ static int execute_program_impl(int argc, char** argv) {
   for (unsigned int i = 0; i < badnodes.size(); i++) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
-
+  if (RuntimeOption::EvalRuntimeTypeProfile) {
+    HPHP::initTypeProfileStructure();
+  }
   vector<int> inherited_fds;
   RuntimeOption::BuildId = po.buildId;
   RuntimeOption::InstanceId = po.instanceId;

@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-
 #ifndef incl_HPHP_VM_PROFILER_H_
 #define incl_HPHP_VM_PROFILER_H_
 
@@ -24,12 +23,28 @@
 
 namespace HPHP {
 
-void profileOneArgument(TypedValue value, int param, const Func* func);
-void logType(const Func* func, const char* typeString, int64_t param);
+/*
+ * Create a data structure to hold type profile information.  This
+ * structure is logically a map with the structure:
+ *
+ *   (function, parameter index, type) -> observed count
+ *
+ * In this map "type" is a tuple containing both the PHP DataType and,
+ * if the type is KindOfObject, the Class of the object.
+ */
+void initTypeProfileStructure();
+
+/*
+ * Record an observation of (func, paramIndex, type of value)
+ */
+void profileOneArgument(TypedValue value, int paramIndex, const Func* func);
+
+/*
+ * Format the type profile as JSON and write it to disk at
+ * /tmp/type-profile.txt
+ */
 void writeProfileInformationToDisk();
-const char* giveTypeString(const TypedValue* value);
-std::string dumpRawParamInfo(const Func* function);
-void initFuncTypeProfileData(const Func* func);
+
 }
 
 #endif

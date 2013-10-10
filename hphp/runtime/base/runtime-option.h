@@ -356,7 +356,6 @@ public:
     kEvalVMInitialGlobalTableSizeDefault)                               \
   F(bool, Jit,                         evalJitDefault())                \
   F(bool, JitRequireWriteLease,        false)                           \
-  F(bool, RuntimeTypeProfile,          false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(bool, CheckExtendedTypeHints,      false)                           \
   F(bool, JitNoGdb,                    true)                            \
@@ -364,7 +363,8 @@ public:
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
   F(bool, PerfPidMap,                  true)                            \
   F(bool, KeepPerfPidMap,              false)                           \
-  F(uint32_t, RuntimeTypeProfileFreq,  1000)                            \
+  F(bool, RuntimeTypeProfile,          false)                           \
+  F(int32_t, RuntimeTypeProfileLoggingFreq,  -1)                        \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      64 << 20)                        \
   F(bool, ProfileBC,                   false)                           \

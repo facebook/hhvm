@@ -260,7 +260,7 @@ struct TypeProfileData : IRExtraData {
   int32_t param;
   const Func* func;
   std::string show() const {
-    return folly::to<std::string>(func->fullName()->data(), ":", param);
+    return folly::to<std::string>(func->fullName()->data(), ",", param);
   }
 };
 

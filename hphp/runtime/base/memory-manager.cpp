@@ -167,6 +167,7 @@ void MemoryManager::OnThreadExit(MemoryManager* mm) {
 MemoryManager::MemoryManager()
     : m_front(nullptr)
     , m_limit(nullptr)
+    , m_usage(0)
     , m_sweeping(false) {
 #ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
@@ -196,6 +197,7 @@ void MemoryManager::resetStats() {
 NEVER_INLINE
 void MemoryManager::refreshStatsHelper() {
   refreshStats();
+  m_usage = m_stats.usage;
 }
 
 void MemoryManager::refreshStatsHelperExceeded() const {
@@ -293,11 +295,11 @@ void MemoryManager::resetAllocator() {
 inline void* MemoryManager::smartMalloc(size_t nbytes) {
   nbytes += sizeof(SmallNode);
   if (UNLIKELY(nbytes > kMaxSmartSize)) {
-    return smartMallocBig(nbytes);
+    return smartMallocBig(nbytes - sizeof(SmallNode));
   }
 
   nbytes = smartSizeClass(nbytes);
-  m_stats.usage += nbytes;
+  m_usage += nbytes;
 
   auto const idx = (nbytes - 1) >> kLgSizeQuantum;
   assert(idx < kNumSizes && idx >= 0);
@@ -314,13 +316,13 @@ inline void MemoryManager::smartFree(void* ptr) {
   assert(ptr != 0);
   auto const n = static_cast<SweepNode*>(ptr) - 1;
   auto const padbytes = n->padbytes;
+  m_usage -= padbytes;
   if (LIKELY(padbytes <= kMaxSmartSize)) {
     assert(memset(ptr, kSmartFreeFill, padbytes - sizeof(SmallNode)));
     auto const idx = (padbytes - 1) >> kLgSizeQuantum;
     assert(idx < kNumSizes && idx >= 0);
     FTRACE(1, "smartFree: {}\n", ptr);
     m_sizeTrackedFree[idx].push(ptr);
-    m_stats.usage -= padbytes;
     return;
   }
   smartFreeBig(n);
@@ -351,7 +353,7 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
   auto const oldPrev = n->prev;
 
   auto const newNode = static_cast<SweepNode*>(
-    realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
+    Util::safe_realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
   );
 
   refreshStatsHelper();
@@ -366,7 +368,7 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
  * slab list.  Return the newly allocated nbytes-sized block.
  */
 NEVER_INLINE char* MemoryManager::newSlab(size_t nbytes) {
-  if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
+  if (UNLIKELY(m_usage > m_stats.maxBytes)) {
     refreshStatsHelper();
   }
   char* slab = (char*) Util::safe_malloc(SLAB_SIZE);
@@ -407,7 +409,7 @@ void* MemoryManager::smartMallocSlab(size_t padbytes) {
 }
 
 inline void* MemoryManager::smartEnlist(SweepNode* n) {
-  if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
+  if (UNLIKELY(m_usage > m_stats.maxBytes)) {
     refreshStatsHelper();
   }
   // link after m_sweep
@@ -422,9 +424,9 @@ inline void* MemoryManager::smartEnlist(SweepNode* n) {
 NEVER_INLINE
 void* MemoryManager::smartMallocBig(size_t nbytes) {
   assert(nbytes > 0);
-  auto const n = static_cast<SweepNode*>(
-    Util::safe_malloc(nbytes + sizeof(SweepNode) - sizeof(SmallNode))
-  );
+  auto size = nbytes + sizeof(SweepNode);
+  m_usage += size;
+  auto const n = static_cast<SweepNode*>(Util::safe_malloc(size));
   return smartEnlist(n);
 }
 
@@ -433,8 +435,8 @@ NEVER_INLINE
 void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
                                               size_t& szOut,
                                               size_t bytes) {
-  m_stats.usage += bytes;
   allocm(&ptr, &szOut, debugAddExtra(bytes + sizeof(SweepNode)), 0);
+  m_usage += szOut;
   szOut = debugRemoveExtra(szOut - sizeof(SweepNode));
   return debugPostAllocate(
     smartEnlist(static_cast<SweepNode*>(ptr)),

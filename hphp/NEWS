@@ -1,3 +1,6 @@
+Next release
+  - Fixed issue that caused memory_get_usage to report double the actual usage. 
+
 "Tabasco" 30-Sep-2013
   - Fix issues with __toString() functions that return non-string values
   - Don't allow mock classes to extend collection classes

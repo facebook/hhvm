@@ -32,11 +32,11 @@ namespace HPHP {
 class SharedStringData {
 public:
   explicit SharedStringData(const std::string &data);
-  void incRefCount() const {
+  void incAtomicCount() const {
     m_count.fetch_and_increment();
   }
-  int decRefCount() const;
-  void release();
+  int decAtomicCount() const;
+  void atomicRelease();
   const std::string &getString() const;
 
   typedef tbb::concurrent_hash_map<std::string, SharedStringData*> InternMap;
@@ -47,13 +47,13 @@ protected:
   static InternMap s_intern;
 };
 
-class SharedString : public SmartPtr<SharedStringData> {
+class SharedString : public AtomicSmartPtr<SharedStringData> {
 public:
   SharedString() {}
   /* implicit */ SharedString(SharedStringData *px)
-    : SmartPtr<SharedStringData>(px) {}
+    : AtomicSmartPtr<SharedStringData>(px) {}
   /* implicit */ SharedString(const SharedString &src)
-    : SmartPtr<SharedStringData>(src) {}
+    : AtomicSmartPtr<SharedStringData>(src) {}
   /* implicit */ SharedString(const std::string &data) {
     operator=(data);
   }

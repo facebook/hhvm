@@ -246,7 +246,8 @@ void optimizeRefCount(IRTrace* trace, IRTrace* main, DceState& state,
       // This assert is often hit when an instruction should have a
       // consumesReferences flag but doesn't.
       auto& s = state[inst];
-      always_assert_log(s.decRefNZed(), [&]{
+      always_assert_log(inst->src(0)->type().notCounted() || s.decRefNZed(),
+      [&]{
         return folly::format("\n{} has state {} in trace:\n{}{}\n",
                inst->toString(), s.toString(), main->toString(),
                trace == main ? "" : trace->toString()).str();

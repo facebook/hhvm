@@ -730,6 +730,19 @@ void assertOperandTypes(const IRInstruction* inst) {
 
 }
 
+std::string TypeConstraint::toString() const {
+  std::string catStr;
+  if (innerCat) {
+    catStr = folly::to<std::string>("inner:",
+                                    typeCategoryName(innerCat.get()));
+  } else {
+    catStr = typeCategoryName(category);
+  }
+
+  return folly::format("<{},{}>",
+                       catStr, knownType).str();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

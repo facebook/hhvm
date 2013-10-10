@@ -79,6 +79,9 @@ struct TraceBuilder {
   ~TraceBuilder();
 
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
+  bool inReoptimize() const              { return m_inReoptimize; }
+  bool typeMightRelax(SSATmp* val = nullptr) const;
+  bool shouldElideAssertType(Type oldType, Type newType, SSATmp* oldVal) const;
 
   IRTrace* trace() const { return m_curTrace; }
   IRUnit& unit() { return m_unit; }
@@ -92,14 +95,15 @@ struct TraceBuilder {
   bool thisAvailable() const { return m_state.thisAvailable(); }
   void setThisAvailable() { m_state.setThisAvailable(); }
 
-  void constrainGuard(IRInstruction* inst, TypeConstraint cat);
-  SSATmp* constrainValue(SSATmp* const val, TypeConstraint cat);
-  void constrainLocal(uint32_t id, TypeConstraint cat,
+  bool shouldConstrainGuards() const;
+  void constrainGuard(IRInstruction* inst, TypeConstraint tc);
+  SSATmp* constrainValue(SSATmp* const val, TypeConstraint tc);
+  void constrainLocal(uint32_t id, TypeConstraint tc,
                       const std::string& why);
-  void constrainLocal(uint32_t id, SSATmp* valSrc, TypeConstraint cat,
+  void constrainLocal(uint32_t id, SSATmp* valSrc, TypeConstraint tc,
                       const std::string& why);
-  void constrainStack(int32_t offset, TypeConstraint cat);
-  void constrainStack(SSATmp* sp, int32_t offset, TypeConstraint cat);
+  void constrainStack(int32_t offset, TypeConstraint tc);
+  void constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
 
   Type localType(uint32_t id, TypeConstraint tc);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
@@ -339,6 +343,7 @@ private:
   boost::optional<Block::iterator> m_curWhere;
 
   bool       m_enableSimplification;
+  bool       m_inReoptimize;
 
   GuardConstraints m_guardConstraints;
 

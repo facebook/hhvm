@@ -38,6 +38,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   , m_curTrace(m_unit.makeMain(func, initialBcOffset)->trace())
   , m_curBlock(nullptr)
   , m_enableSimplification(false)
+  , m_inReoptimize(false)
 {
   if (RuntimeOption::EvalHHIRGenOpts) {
     m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
@@ -46,6 +47,34 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
 }
 
 TraceBuilder::~TraceBuilder() {
+}
+
+/*
+ * Returns whether or not the given value might have its type relaxed by guard
+ * relaxation. If tmp is null, only conditions that apply to all values are
+ * checked.
+ */
+bool TraceBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
+  if (!RuntimeOption::EvalHHIRRelaxGuards) return false;
+  if (inReoptimize()) return false;
+  if (tmp && tmp->isConst()) return false;
+
+  return true;
+}
+
+/*
+ * To help guard relaxation, there are some situations where we want to keep
+ * around an Assert(Type|Stk|Loc) instruction that doesn't provide a more
+ * specific type than its source.
+ */
+bool TraceBuilder::shouldElideAssertType(Type oldType, Type newType,
+                                         SSATmp* oldVal) const {
+  assert(oldType.maybe(newType));
+
+  if (!typeMightRelax(oldVal)) return newType >= oldType;
+  if (oldType == Type::Cls || newType == Type::Gen) return true;
+
+  return newType > oldType;
 }
 
 SSATmp* TraceBuilder::genDefUninit() {
@@ -134,8 +163,6 @@ std::vector<RegionDesc::TypePred> TraceBuilder::getKnownTypes() const {
     }
   }
 
-  // XXX(t2598894) This is only safe right now because it's not called on a
-  // trace with relaxed guards.
   for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
     auto t = m_state.localType(i);
     if (!t.equals(Type::Gen)) {
@@ -185,41 +212,35 @@ SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
 
 SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   auto const locId = inst->extra<AssertLoc>()->locId;
+
   auto const prevType = localType(locId, DataTypeGeneric);
   auto const typeParam = inst->typeParam();
 
-  if (prevType == typeParam) {
-    // Asserting an already-known type can be useful for guard relaxation, so
-    // don't drop it.
-    return nullptr;
-  }
+  if (prevType.not(typeParam)) {
+    /* Task #2553746
+     * This is triggering for a case where the tracked state says the local is
+     * InitNull but the AssertLoc says it's Str. */
+    static auto const error =
+      makeStaticString("Internal error: static analysis was "
+                       "wrong about a local variable's type.");
+    auto* errorInst = m_unit.gen(RaiseError, inst->marker(), cns(error));
+    inst->become(m_unit, errorInst);
 
-  if (!typeParam.strictSubtypeOf(prevType)) {
-    if (!prevType.subtypeOf(typeParam)) {
-      /* Task #2553746
-       * This is triggering for a case where the tracked state says the local is
-       * InitNull but the AssertLoc says it's Str. */
-      static auto const error =
-        makeStaticString("Internal error: static analysis was "
-                                    "wrong about a local variable's type.");
-      auto* errorInst = m_unit.gen(RaiseError, inst->marker(), cns(error));
-      inst->become(m_unit, errorInst);
-
-      // It's not a disaster to generate this in unreachable code for
-      // now. t2590033.
-      if (false) {
-        assert_log(false,  [&]{
-            return folly::format("\npreOptimizeAssertLoc: prevType: {} "
-                                 "typeParam: {}\nin instr: {}\nin trace: {}\n",
-                                 prevType.toString(),
-                                 typeParam.toString(),
-                                 inst->toString(),
-                                 m_unit.main()->toString()).str();
-          });
-      }
-    } else {
-      return inst->src(0);
+    // It's not a disaster to generate this in unreachable code for
+    // now. t2590033.
+    if (false) {
+      assert_log(false,  [&]{
+          return folly::format("\npreOptimizeAssertLoc: prevType: {} "
+                               "typeParam: {}\nin instr: {}\nin trace: {}\n",
+                               prevType.toString(),
+                               typeParam.toString(),
+                               inst->toString(),
+                               m_unit.main()->toString()).str();
+        });
     }
+  } else if (shouldElideAssertType(prevType, typeParam, nullptr)) {
+    // The type we're asserting is worse than the last known type.
+    return inst->src(0);
   }
   return nullptr;
 }
@@ -308,26 +329,33 @@ SSATmp* TraceBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
   /*
    * Refine the type if we can.
    *
-   * We can't really rely on the types held in the boxed values since
-   * aliasing stores may change them, and we only guard during LdRef.
-   * So we have to change any boxed type to BoxedCell.
+   * We can't really rely on the types held in the boxed values since aliasing
+   * stores may change them, and we only guard during LdRef.  So we have to
+   * change any boxed type to BoxedCell.
+   *
+   * DataTypeGeneric is used because we don't want a DecRef to be the only
+   * thing keeping a guard around. This code is designed to tolerate the
+   * incoming type being relaxed.
    */
-  auto knownType = localType(locId, DataTypeCountness);
+  auto knownType = localType(locId, DataTypeGeneric);
   if (knownType.isBoxed()) {
     knownType = Type::BoxedCell;
   }
 
-  inst->setTypeParam(
-    Type::mostRefined(knownType, inst->typeParam())
-  );
-
   /*
-   * If we have the local value in flight, use a DecRef on it instead
-   * of doing it in memory.
+   * If we have the local value in flight, use a DecRef on it instead of doing
+   * it in memory.
    */
-  if (auto tmp = localValue(locId, DataTypeCountness)) {
+  if (auto tmp = localValue(locId, DataTypeGeneric)) {
     gen(DecRef, tmp);
     inst->convertToNop();
+    return nullptr;
+  }
+
+  if (!typeMightRelax()) {
+    inst->setTypeParam(
+      Type::mostRefined(knownType, inst->typeParam())
+    );
   }
 
   return nullptr;
@@ -340,6 +368,9 @@ SSATmp* TraceBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   }
 
   auto const type = localType(locId, DataTypeGeneric);
+  // If FrameState's type isn't as good as the type param, we're missing
+  // information in the IR.
+  assert(inst->typeParam() >= type);
   inst->setTypeParam(Type::mostRefined(type, inst->typeParam()));
   return nullptr;
 }
@@ -347,11 +378,16 @@ SSATmp* TraceBuilder::preOptimizeLdLoc(IRInstruction* inst) {
 SSATmp* TraceBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
   auto const locId = inst->extra<LdLocAddr>()->locId;
   auto const type = localType(locId, DataTypeGeneric);
+  assert(inst->typeParam().deref() >= type);
   inst->setTypeParam(Type::mostRefined(type.ptr(), inst->typeParam()));
   return nullptr;
 }
 
 SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
+  // Guard relaxation might change the current local type, so don't try to
+  // change to StLocNT until after relaxation happens.
+  if (!inReoptimize()) return nullptr;
+
   auto locId = inst->extra<StLoc>()->locId;
   auto const curType = localType(locId, DataTypeGeneric);
   auto const newType = inst->src(1)->type();
@@ -365,11 +401,6 @@ SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
   auto const sameUnboxed =
     curType.isSameKindOf(newType) && !curType.isString();
   if (bothBoxed || sameUnboxed) {
-    // TODO(t2598894) once relaxGuards supports proper type reflowing, we
-    // should be able to relax the constraint here and degrade StLocNT to
-    // StLoc if we relax its input.
-    if (sameUnboxed) constrainLocal(locId, DataTypeSpecific,
-                                    "StLoc -> StLocNT");
     inst->setOpcode(StLocNT);
   }
 
@@ -440,6 +471,13 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
       // Found a dominating instruction that can be used instead of inst
       FTRACE(1, "  {}cse found: {}\n",
              indent(), result->inst()->toString());
+
+      // CheckType and AssertType are special. They're marked as both PRc and
+      // CRc to placate our refcounting optimizations, for for the purposes of
+      // CSE they're neither.
+      if (inst->is(CheckType, AssertType)) {
+        return result;
+      }
       assert(!inst->consumesReferences());
       if (inst->producesReference()) {
         // Replace with an IncRef
@@ -510,6 +548,8 @@ void TraceBuilder::reoptimize() {
   m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_state.enableCse() && !m_enableSimplification) return;
+  always_assert(!m_inReoptimize);
+  m_inReoptimize = true;
 
   BlockList sortedBlocks = rpoSortCfg(m_unit);
   auto const idoms = findDominators(m_unit, sortedBlocks);
@@ -586,9 +626,14 @@ void TraceBuilder::reoptimize() {
   }
 }
 
+bool TraceBuilder::shouldConstrainGuards() const {
+  return RuntimeOption::EvalHHIRRelaxGuards &&
+    !inReoptimize();
+}
+
 void TraceBuilder::constrainGuard(IRInstruction* inst,
                                   TypeConstraint tc) {
-  if (!RuntimeOption::EvalHHIRRelaxGuards) return;
+  if (!shouldConstrainGuards()) return;
 
   auto& guard = m_guardConstraints[inst];
 
@@ -621,15 +666,15 @@ void TraceBuilder::constrainGuard(IRInstruction* inst,
  * DataTypeCategory. Always returns val, for convenience.
  */
 SSATmp* TraceBuilder::constrainValue(SSATmp* const val,
-                                     TypeConstraint cat) {
-  if (!RuntimeOption::EvalHHIRRelaxGuards) return val;
+                                     TypeConstraint tc) {
+  if (!shouldConstrainGuards()) return val;
 
   if (!val) {
-    FTRACE(1, "constrainValue(nullptr, {}), bailing\n", cat);
+    FTRACE(1, "constrainValue(nullptr, {}), bailing\n", tc);
     return nullptr;
   }
 
-  FTRACE(1, "constrainValue({}, {})\n", *val->inst(), cat);
+  FTRACE(1, "constrainValue({}, {})\n", *val->inst(), tc);
 
   auto inst = val->inst();
   if (inst->is(LdLoc, LdLocAddr)) {
@@ -637,7 +682,7 @@ SSATmp* TraceBuilder::constrainValue(SSATmp* const val,
     // a FramePtr, it's a real value that was killed by a Call. The value won't
     // be live but it's ok to use it to track down the guard.
 
-    auto source = inst->extra<LdLocData>()->valSrc;
+    auto source = inst->extra<LocalData>()->valSrc;
     if (!source) {
       // val was newly created in this trace. Nothing to constrain.
       FTRACE(2, "  - valSrc is null, bailing\n");
@@ -647,41 +692,41 @@ SSATmp* TraceBuilder::constrainValue(SSATmp* const val,
     // If valSrc is a FramePtr, it represents the frame the value was
     // originally loaded from. Look for the guard for this local.
     if (source->isA(Type::FramePtr)) {
-      constrainLocal(inst->extra<LocalId>()->locId, source, cat,
+      constrainLocal(inst->extra<LocalId>()->locId, source, tc,
                      "constrainValue");
       return val;
     }
 
     // Otherwise, keep chasing down the source of val.
-    constrainValue(source, cat);
+    constrainValue(source, tc);
   } else if (inst->is(LdStack, LdStackAddr)) {
-    constrainStack(inst->src(0), inst->extra<StackOffset>()->offset, cat);
+    constrainStack(inst->src(0), inst->extra<StackOffset>()->offset, tc);
   } else if (inst->is(CheckType, AssertType)) {
     // If the dest type of the instruction fits the constraint we want, we can
     // stop here without constraining any further. Otherwise, continue through
     // to the source.
-    if (inst->is(CheckType)) constrainGuard(inst, cat);
+    if (inst->is(CheckType)) constrainGuard(inst, tc);
 
     auto dstType = inst->typeParam();
-    if (!typeFitsConstraint(dstType, cat.category)) {
-      constrainValue(inst->src(0), cat);
+    if (!typeFitsConstraint(dstType, tc.category)) {
+      constrainValue(inst->src(0), tc);
     }
   } else if (inst->is(StRef, StRefNT, Box, BoxPtr)) {
     // If our caller cares about the inner type, propagate that through.
     // Otherwise we're done.
-    if (cat.innerCat) {
+    if (tc.innerCat) {
       auto src = inst->src(inst->is(StRef, StRefNT) ? 1 : 0);
-      cat.innerCat.reset();
-      constrainValue(src, cat);
+      tc.innerCat.reset();
+      constrainValue(src, tc);
     }
   } else if (inst->is(LdRef, Unbox, UnboxPtr)) {
     // Pass through to the source of the box, remembering that we care about
     // the inner type of the box.
-    assert(!cat.innerCat);
-    cat.innerCat = cat.category;
-    constrainValue(inst->src(0), cat);
+    assert(!tc.innerCat);
+    tc.innerCat = tc.category;
+    constrainValue(inst->src(0), tc);
   } else if (inst->isPassthrough()) {
-    constrainValue(inst->getPassthroughValue(), cat);
+    constrainValue(inst->getPassthroughValue(), tc);
   } else {
     // Any instructions not special cased above produce a new value, so
     // there's no guard for us to constrain.
@@ -692,22 +737,22 @@ SSATmp* TraceBuilder::constrainValue(SSATmp* const val,
   return val;
 }
 
-void TraceBuilder::constrainLocal(uint32_t locId, TypeConstraint cat,
+void TraceBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
                                   const std::string& why) {
-  constrainLocal(locId, localValueSource(locId), cat, why);
+  constrainLocal(locId, localValueSource(locId), tc, why);
 }
 
 void TraceBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
-                                  TypeConstraint cat,
+                                  TypeConstraint tc,
                                   const std::string& why) {
-  if (!RuntimeOption::EvalHHIRRelaxGuards) return;
+  if (!shouldConstrainGuards()) return;
 
   FTRACE(1, "constrainLocal({}, {}, {}, {})\n",
-         locId, valSrc ? valSrc->inst()->toString() : "null", cat, why);
+         locId, valSrc ? valSrc->inst()->toString() : "null", tc, why);
 
   if (!valSrc) return;
   if (!valSrc->isA(Type::FramePtr)) {
-    constrainValue(valSrc, cat);
+    constrainValue(valSrc, tc);
     return;
   }
 
@@ -723,12 +768,12 @@ void TraceBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
       // trying to apply, we can stop here. This can happen if we assert a
       // more general type than what we already know. Otherwise we need to
       // keep tracing back to the guard.
-      if (typeFitsConstraint(guard->typeParam(), cat.category)) return;
+      if (typeFitsConstraint(guard->typeParam(), tc.category)) return;
       guard = guardForLocal(locId, guard->src(0));
     } else {
       assert(guard->is(GuardLoc, AssertLoc));
       FTRACE(2, "    - found guard to constrain\n");
-      constrainGuard(guard, cat);
+      constrainGuard(guard, tc);
       return;
     }
   }
@@ -736,15 +781,15 @@ void TraceBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
   FTRACE(2, "    - no guard to constrain\n");
 }
 
-void TraceBuilder::constrainStack(int32_t idx, TypeConstraint cat) {
-  constrainStack(sp(), idx, cat);
+void TraceBuilder::constrainStack(int32_t idx, TypeConstraint tc) {
+  constrainStack(sp(), idx, tc);
 }
 
 void TraceBuilder::constrainStack(SSATmp* sp, int32_t idx,
-                                  TypeConstraint cat) {
-  if (!RuntimeOption::EvalHHIRRelaxGuards) return;
+                                  TypeConstraint tc) {
+  if (!shouldConstrainGuards()) return;
 
-  FTRACE(1, "constrainStack({}, {}, {})\n", *sp->inst(), idx, cat);
+  FTRACE(1, "constrainStack({}, {}, {})\n", *sp->inst(), idx, tc);
   assert(sp->isA(Type::StkPtr));
 
   // We've hit a LdStack. If getStackValue gives us a value, recurse on
@@ -754,11 +799,11 @@ void TraceBuilder::constrainStack(SSATmp* sp, int32_t idx,
   auto stackInfo = getStackValue(sp, idx);
   if (stackInfo.value) {
     FTRACE(1, "  - value = {}\n", *stackInfo.value->inst());
-    constrainValue(stackInfo.value, cat);
+    constrainValue(stackInfo.value, tc);
   } else {
     auto typeSrc = stackInfo.typeSrc;
     FTRACE(1, "  - typeSrc = {}\n", *typeSrc);
-    if (typeSrc->is(GuardStk, CheckStk)) constrainGuard(typeSrc, cat);
+    if (typeSrc->is(GuardStk, CheckStk)) constrainGuard(typeSrc, tc);
   }
 }
 

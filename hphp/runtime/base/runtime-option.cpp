@@ -382,7 +382,7 @@ static inline bool hhirRelaxGuardsDefault() {
 }
 
 static inline bool hhbcRelaxGuardsDefault() {
-  return true;
+  return !RuntimeOption::EvalHHIRRelaxGuards;
 }
 
 static inline bool hugePagesSoundNice() {

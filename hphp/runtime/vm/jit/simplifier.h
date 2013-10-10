@@ -121,6 +121,7 @@ private:
   SSATmp* simplifyIncRef(IRInstruction* inst);
   SSATmp* simplifyIncRefCtx(IRInstruction* inst);
   SSATmp* simplifyCheckType(IRInstruction* inst);
+  SSATmp* simplifyAssertType(IRInstruction* inst);
   SSATmp* simplifyCheckStk(IRInstruction* inst);
   SSATmp* simplifyLdCls(IRInstruction* inst);
   SSATmp* simplifyLdClsPropAddr(IRInstruction*);
@@ -244,6 +245,11 @@ void copyProp(IRInstruction*);
 bool canUseSPropCache(SSATmp* clsTmp,
                       const StringData* propName,
                       const Class* ctx);
+
+/*
+ * Traces through any IncRefs to get the true value of tmp.
+ */
+SSATmp* chaseIncRefs(SSATmp* tmp);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -1599,9 +1599,24 @@ static bool isPop(Op opc) {
 void
 IRTranslator::passPredictedAndInferredTypes(const NormalizedInstruction& i) {
   if (!i.outStack || i.breaksTracelet) return;
+  auto const jitType = Type(i.outStack->rtt);
+
+  if (RuntimeOption::EvalHHIRRelaxGuards) {
+    if (i.outputPredicted) {
+      if (i.outputPredictionStatic && jitType.notCounted()) {
+        // If the prediction is from static analysis it really means jitType |
+        // InitNull. When jitType is an uncounted type, we know that the value
+        // will always be an uncounted type, so we assert that fact before
+        // doing the real check. This allows us to relax the CheckType away
+        // while still eliminating some refcounting operations.
+        m_hhbcTrans.assertTypeStack(0, Type::Uncounted);
+      }
+      m_hhbcTrans.checkTypeTopOfStack(jitType, i.next->offset());
+    }
+    return;
+  }
 
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
-  JIT::Type jitType = JIT::Type(i.outStack->rtt);
 
   if (u == NormalizedInstruction::OutputUse::Inferred) {
     TRACE(1, "irPassPredictedAndInferredTypes: output inferred as %s\n",

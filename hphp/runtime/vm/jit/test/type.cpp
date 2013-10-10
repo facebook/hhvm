@@ -190,7 +190,9 @@ TEST(Type, CanRunDtor) {
   expectTrue(Type::BoxedCountedArr);
   expectTrue(Type::BoxedObj);
   expectTrue(Type::BoxedRes);
+  expectTrue(Type::BoxedInitCell);
   expectTrue(Type::BoxedCell);
+  expectTrue(Type::InitCell);
   expectTrue(Type::Cell);
   expectTrue(Type::Gen);
   expectTrue(Type::Ctx);
@@ -202,6 +204,7 @@ TEST(Type, CanRunDtor) {
   expectTrue(Type::AnyRes);
   expectTrue(Type::AnyArr);
   expectTrue(Type::AnyCountedArr);
+  expectTrue(Type::AnyInitCell);
   expectTrue(Type::AnyCell);
 
   for (Type t : types) {

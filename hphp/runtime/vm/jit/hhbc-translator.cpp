@@ -123,6 +123,7 @@ const NamedEntity* HhbcTranslator::lookupNamedEntityId(int id) {
 
 SSATmp* HhbcTranslator::push(SSATmp* tmp) {
   assert(tmp);
+  FTRACE(2, "HhbcTranslator pushing {}\n", *tmp->inst());
   m_evalStack.push(tmp);
   return tmp;
 }
@@ -166,13 +167,16 @@ SSATmp* HhbcTranslator::pop(Type type, TypeConstraint tc) {
     uint32_t stackOff = m_stackDeficit;
     m_stackDeficit++;
     m_tb->constrainStack(stackOff, tc);
-    return gen(LdStack, type, StackOffset(stackOff), m_tb->sp());
+    auto value = gen(LdStack, type, StackOffset(stackOff), m_tb->sp());
+    FTRACE(2, "HhbcTranslator popping {}\n", *value->inst());
+    return value;
   }
 
   // Refine the type of the temp given the information we have from
   // `type'.  This case can occur if we did an extendStack() and
   // didn't know the type of the intermediate values yet (see below).
   refineType(opnd, type);
+  FTRACE(2, "HhbcTranslator popping {}\n", *opnd->inst());
   return opnd;
 }
 
@@ -214,7 +218,7 @@ void HhbcTranslator::extendStack(uint32_t index, Type type) {
 }
 
 SSATmp* HhbcTranslator::top(Type type, uint32_t index,
-                            DataTypeCategory constraint) {
+                            TypeConstraint constraint) {
   SSATmp* tmp = m_evalStack.top(constraint, index);
   if (!tmp) {
     extendStack(index, type);
@@ -229,7 +233,7 @@ void HhbcTranslator::replace(uint32_t index, SSATmp* tmp) {
   m_evalStack.replace(index, tmp);
 }
 
-Type HhbcTranslator::topType(uint32_t idx, DataTypeCategory constraint) const {
+Type HhbcTranslator::topType(uint32_t idx, TypeConstraint constraint) const {
   FTRACE(5, "Asking for type of stack elem {}\n", idx);
   if (idx < m_evalStack.size()) {
     return m_evalStack.top(constraint, idx)->type();
@@ -758,9 +762,7 @@ void HhbcTranslator::emitInitThisLoc(int32_t id) {
 
 void HhbcTranslator::emitCGetL(int32_t id) {
   auto exit = makeExit();
-  auto cat = curSrcKey().op() == OpFPassL ? DataTypeSpecific // XXX t2802368
-                                          : DataTypeCountnessInit;
-  pushIncRef(ldLocInnerWarn(id, exit, cat));
+  pushIncRef(ldLocInnerWarn(id, exit, DataTypeCountnessInit));
 }
 
 void HhbcTranslator::emitCGetL2(int32_t id) {
@@ -805,7 +807,7 @@ void HhbcTranslator::emitBindL(int32_t id) {
   // pseudo-main: the destructor could decref the value again after
   // we've stored it into the local.
   pushIncRef(newValue);
-  auto const oldValue = ldLoc(id, DataTypeSpecific); // XXX t2802368
+  auto const oldValue = ldLoc(id, DataTypeGeneric);
   gen(StLoc, LocalId(id), m_tb->fp(), newValue);
   gen(DecRef, oldValue);
 }
@@ -1336,9 +1338,6 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
     LdRaw, Type::PtrToGen, cont, cns(RawMemSlot::ContARPtr));
   for (int i = 0; i < origFunc->numNamedLocals(); ++i) {
     assert(i == genFunc->lookupVarId(origFunc->localVarName(i)));
-    // We must generate an AssertLoc because we don't have tracelet
-    // guards on the object type in these outer generator functions.
-    gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
     // Copy the value of the local to the cont object and set the local to
     // uninit so that we don't need to change refcounts. We pass
     // DataTypeGeneric to ldLoc because we're just teleporting the value.
@@ -1841,18 +1840,15 @@ void HhbcTranslator::emitIsBoolC()   { emitIsTypeC(Type::Bool);}
 void HhbcTranslator::emitIsDoubleC() { emitIsTypeC(Type::Dbl); }
 
 void HhbcTranslator::emitPopC() {
-  // PopC and friends decref their source. We should be able to use a generic
-  // decref if nobody else cares about the type but don't currently have the
-  // ability to get this correct. t2598894.
-  popDecRef(Type::Cell, {DataTypeCountness, Type::Cell});
+  popDecRef(Type::Cell, {DataTypeGeneric, Type::Cell});
 }
 
 void HhbcTranslator::emitPopV() {
-  popDecRef(Type::BoxedCell, {DataTypeCountness, Type::BoxedCell});
+  popDecRef(Type::BoxedCell, {DataTypeGeneric, Type::BoxedCell});
 }
 
 void HhbcTranslator::emitPopR() {
-  popDecRef(Type::Gen, DataTypeCountness);
+  popDecRef(Type::Gen, DataTypeGeneric);
 }
 
 void HhbcTranslator::emitDup() {
@@ -2726,7 +2722,9 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(ReleaseVVOrExit, makeExitSlow(), m_tb->fp());
   }
 
-  SSATmp* retVal = pop(type, DataTypeCountness);
+  // The return value is teleported to its place in memory so we don't care
+  // about the type.
+  SSATmp* retVal = pop(type, DataTypeGeneric);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     gen(TypeProfileFunc, TypeProfileData(-1, curFunc), retVal);
   }
@@ -3162,7 +3160,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   auto const& tc = func->params()[paramId].typeConstraint();
   auto locVal = ldLoc(paramId, DataTypeSpecific);
   Type locType = locVal->type().unbox();
-  assert(locType.isKnownDataType());
+  always_assert(locType.isKnownDataType());
 
   if (!RuntimeOption::EvalCheckExtendedTypeHints && tc.isExtended()) {
     return;
@@ -3813,8 +3811,11 @@ void HhbcTranslator::emitMod() {
   SSATmp* btl = popC();
   SSATmp* tr = gen(ConvCellToInt, catchBlock1, btr);
   SSATmp* tl = gen(ConvCellToInt, catchBlock2, btl);
-  gen(DecRef, btr);
-  gen(DecRef, btl);
+
+  // We only want to decref btr and btl if the ConvCellToInt operation gave us
+  // a new value back.
+  if (tr != btr) gen(DecRef, btr);
+  if (tl != btl) gen(DecRef, btl);
   // Exit path spills an additional false
   auto exitSpillValues = peekSpillValues();
   exitSpillValues.push_back(cns(false));
@@ -3829,8 +3830,9 @@ void HhbcTranslator::emitMod() {
   // We unfortunately need to special-case r = -1 here. In two's
   // complement, trying to divide INT_MIN by -1 will cause an integer
   // overflow.
+  tr = chaseIncRefs(tr);
   if (tr->isConst()) {
-    // This crap only exists so m_tb->cond doesn't get mad when one
+    // This whole block only exists so m_tb->cond doesn't get mad when one
     // of the branches gets optimized out due to constant folding.
     if (tr->getValInt() == -1LL) {
       push(cns(0));
@@ -4498,10 +4500,10 @@ void HhbcTranslator::exceptionBarrier() {
   gen(ExceptionBarrier, sp);
 }
 
-SSATmp* HhbcTranslator::ldStackAddr(int32_t offset, DataTypeCategory cat) {
+SSATmp* HhbcTranslator::ldStackAddr(int32_t offset, TypeConstraint tc) {
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in m_evalStack.
-  m_tb->constrainStack(offset, cat);
+  m_tb->constrainStack(offset, tc);
   assert(offset >= (int32_t)m_evalStack.numCells());
   return gen(
     LdStackAddr,
@@ -4511,17 +4513,17 @@ SSATmp* HhbcTranslator::ldStackAddr(int32_t offset, DataTypeCategory cat) {
   );
 }
 
-SSATmp* HhbcTranslator::ldLoc(uint32_t locId, DataTypeCategory cat) {
-  m_tb->constrainLocal(locId, cat, "LdLoc");
+SSATmp* HhbcTranslator::ldLoc(uint32_t locId, TypeConstraint tc) {
+  m_tb->constrainLocal(locId, tc, "LdLoc");
   return gen(LdLoc, Type::Gen,
-             LdLocData(locId, m_tb->localValueSource(locId)),
+             LocalData(locId, m_tb->localValueSource(locId)),
              m_tb->fp());
 }
 
-SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId, DataTypeCategory cat) {
-  m_tb->constrainLocal(locId, cat, "LdLocAddr");
+SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId, TypeConstraint tc) {
+  m_tb->constrainLocal(locId, tc, "LdLocAddr");
   return gen(LdLocAddr, Type::PtrToGen,
-             LdLocData(locId, m_tb->localValueSource(locId)),
+             LocalData(locId, m_tb->localValueSource(locId)),
              m_tb->fp());
 }
 
@@ -4534,13 +4536,17 @@ SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId, DataTypeCategory cat) {
  *       if we can determine that the inner type must match the tracked type.
  */
 SSATmp* HhbcTranslator::ldLocInner(uint32_t locId, Block* exit,
-                                   DataTypeCategory constraint) {
-  auto loc = ldLoc(locId, constraint);
+                                   TypeConstraint constraint) {
+  // We only care if the local is KindOfRef or not. DataTypeCountness
+  // gets us that.
+  auto loc = ldLoc(locId, DataTypeCountness);
   assert((loc->type().isBoxed() || loc->type().notBoxed()) &&
          "Currently we don't handle traces where locals are maybeBoxed");
-  return loc->type().isBoxed()
+  auto value = loc->type().isBoxed()
     ? gen(LdRef, loc->type().innerType(), exit, loc)
     : loc;
+  m_tb->constrainValue(value, constraint);
+  return value;
 }
 
 /*
@@ -4550,8 +4556,8 @@ SSATmp* HhbcTranslator::ldLocInner(uint32_t locId, Block* exit,
  * it calls this function.
  */
 SSATmp* HhbcTranslator::ldLocInnerWarn(uint32_t id, Block* target,
-                                       DataTypeCategory constraint,
-                                       Block* catchBlock /*   = nullptr */) {
+                                       TypeConstraint constraint,
+                                       Block* catchBlock /* = nullptr */) {
   if (!catchBlock) catchBlock = makeCatch();
   auto const locVal = ldLocInner(id, target, constraint);
 
@@ -4579,13 +4585,9 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
                                   bool doRefCount) {
   assert(!newVal->type().maybeBoxed());
 
-  // We might be refcounting both the old and new values.
-  if (doRefCount) m_tb->constrainValue(newVal, DataTypeCountness);
   auto const oldLoc = ldLoc(id, doRefCount ? DataTypeCountness
                                            : DataTypeGeneric);
-  if (!(oldLoc->type().isBoxed() || oldLoc->type().notBoxed())) {
-    PUNT(stLocImpl-maybeBoxedValue);
-  }
+  assert(oldLoc->type().isBoxed() || oldLoc->type().notBoxed());
 
   if (oldLoc->type().notBoxed()) {
     gen(StLoc, LocalId(id), m_tb->fp(), newVal);
@@ -4605,6 +4607,7 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
   auto const ret = doRefCount ? gen(IncRef, newVal) : newVal;
   gen(StRef, oldLoc, newVal);
   if (doRefCount) {
+    m_tb->constrainValue(newVal, DataTypeCountness);
     gen(DecRef, innerCell);
   }
 

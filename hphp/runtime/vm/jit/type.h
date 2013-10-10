@@ -71,7 +71,8 @@ using Transl::DynLocation;
   c(Arr,           kStaticArr|kCountedArr)                              \
   c(UncountedInit, kInitNull|kBool|kInt|kDbl|kStaticStr|kStaticArr)     \
   c(Uncounted,     kUncountedInit|kUninit)                              \
-  c(Cell,          kUncounted|kStr|kArr|kObj|kRes)
+  c(InitCell,      kUncountedInit|kStr|kArr|kObj|kRes)                  \
+  c(Cell,          kInitCell|kUninit)
 
 #define IRT_RUNTIME                                                     \
   IRT(Cls,         1ULL << 44)                                          \
@@ -651,17 +652,7 @@ struct TypeConstraint {
     , knownType(type)
   {}
 
-  std::string toString() const {
-    std::string catStr;
-    if (innerCat) {
-      catStr = folly::to<std::string>("inner:",
-                                      typeCategoryName(innerCat.get()));
-    } else {
-      catStr = typeCategoryName(category);
-    }
-
-    return folly::format("<{},{}>", catStr, knownType).str();
-  }
+  std::string toString() const;
 
   // category starts as DataTypeGeneric and is refined to more specific values
   // by consumers of the type.

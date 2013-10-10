@@ -208,7 +208,7 @@ struct IRInstruction {
 
   bool       is() const { return false; }
   template<typename... Args>
-  bool       is(Opcode op, Args&&... args) {
+  bool       is(Opcode op, Args&&... args) const {
     return m_op == op || is(std::forward<Args>(args)...);
   }
 

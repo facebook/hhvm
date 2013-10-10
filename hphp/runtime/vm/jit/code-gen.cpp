@@ -1820,10 +1820,15 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
     emitCmpTVType(m_as, KindOfRefCountThreshold, typeSrc);
     cc = CC_LE;
   } else if (type.equals(Type::Cell)) {
+    assert(!m_curInst->is(LdRef));
     emitCmpTVType(m_as, KindOfRef, typeSrc);
     cc = CC_L;
   } else if (type.equals(Type::Gen)) {
     // nothing to check
+    return;
+  } else if (type.equals(Type::InitCell)) {
+    assert(m_curInst->is(LdRef));
+    // nothing to check: Refs cannot contain Uninit or another Ref.
     return;
   } else {
     assert(type.isKnownDataType());
@@ -2909,6 +2914,8 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
   SSATmp* dst = inst->dst();
   SSATmp* src = inst->src(0);
   Type type   = src->type();
+
+  if (type.notCounted()) return;
 
   cgIncRefWork(type, src);
   shuffle2(m_as, m_regs[src].reg(0), m_regs[src].reg(1),

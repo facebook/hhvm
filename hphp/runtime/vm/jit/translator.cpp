@@ -3610,7 +3610,16 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         inst.imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
-        if (metaMode == MetaMode::Legacy) break;
+        // When we're translating a Tracelet from Translator::analyze(), the
+        // information from these predictions has been added to the
+        // NormalizedInstructions in the instruction stream, so they aren't
+        // necessary (and they caused a perf regression). HHIR guard relaxation
+        // is capable of eliminating unnecessary predictions and the
+        // information added here is valuable to it.
+        if (metaMode == MetaMode::Legacy &&
+            !RuntimeOption::EvalHHIRRelaxGuards) {
+          break;
+        }
         auto const loc = stackFilter(inst.inputs[arg]->location).
                          toLocation(inst.stackOffset);
         auto const t = Type(DataType(info.m_data));

@@ -230,20 +230,8 @@ static void copyPropSrc(IRInstruction* inst, int index) {
   auto tmp     = inst->src(index);
   auto srcInst = tmp->inst();
 
-  switch (srcInst->op()) {
-  case Mov:
+  if (srcInst->is(Mov)) {
     inst->setSrc(index, srcInst->src(0));
-    break;
-
-  case IncRef:
-    if (!isRefCounted(srcInst->src(0))) {
-      srcInst->setOpcode(Mov);
-      inst->setSrc(index, srcInst->src(0));
-    }
-    break;
-
-  default:
-    return;
   }
 }
 
@@ -406,8 +394,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case DecRefNZ:     return simplifyDecRef(inst);
   case IncRef:       return simplifyIncRef(inst);
   case IncRefCtx:    return simplifyIncRefCtx(inst);
-  case CheckType:
-  case AssertType:   return simplifyCheckType(inst);
+  case CheckType:    return simplifyCheckType(inst);
+  case AssertType:   return simplifyAssertType(inst);
   case CheckStk:     return simplifyCheckStk(inst);
   case AssertNonNull:return simplifyAssertNonNull(inst);
 
@@ -556,54 +544,60 @@ SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
-  Type type    = inst->typeParam();
   SSATmp* src  = inst->src(0);
-  Type srcType = src->type();
+  auto const oldType = src->type();
+  auto const newType = inst->typeParam();
 
-  if (srcType.subtypeOf(type)) {
+  if (inst->is(CheckType) && newType >= oldType) {
     /*
      * The type of the src is the same or more refined than type, so the guard
-     * is unnecessary. Constrain the guard so the resulting type isn't less
-     * specific that the CheckType would've produced.
-     *
-     * TODO(t2598894): This might not be optimal: if the CheckType is guarding
-     * to a less specific type but nobody cares about the more specific type
-     * coming in, we might be able to have fewer translations by eliminating
-     * the earlier guard and leaving the less specific CheckType.
+     * is unnecessary.
      */
-    m_tb.constrainValue(src, categoryForType(type));
     return src;
   }
-  if (type.strictSubtypeOf(srcType)) {
+  if (newType < oldType) {
     return nullptr;
   }
 
-  if (type.equals(Type::Str) && srcType.maybe(Type::Str)) {
+  if (newType.equals(Type::Str) && oldType.maybe(Type::Str)) {
     /*
-     * If we're guarding against Str and srcType has StaticStr or CountedStr
+     * If we're guarding against Str and oldType has StaticStr or CountedStr
      * in it, refine the output type. This can happen when we have a
      * KindOfString guard from Translator but internally we know a more
      * specific subtype of Str.
      */
-    FTRACE(1, "CheckType: refining {} to {}\n", srcType.toString(),
-           type.toString());
-    inst->setTypeParam(type & srcType);
+    FTRACE(1, "CheckType: refining {} to {}\n", oldType.toString(),
+           Type::Str.toString());
+    inst->setTypeParam(Type::Str & oldType);
     return nullptr;
   }
 
   FTRACE(1, "WARNING: CheckType that will always fail: prediction that "
-         "{} is {}\n", srcType, type);
+         "{} is {}\n", oldType, newType);
   return nullptr;
 }
 
+SSATmp* Simplifier::simplifyAssertType(IRInstruction* inst) {
+  auto const src = inst->src(0);
+  auto const oldType = src->type();
+  auto const newType = inst->typeParam();
+
+  if (m_tb.shouldElideAssertType(oldType, newType, src)) {
+    return src;
+  }
+  return simplifyCheckType(inst);
+}
+
 SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
-  auto type = inst->typeParam();
+  auto const newType = inst->typeParam();
   auto sp = inst->src(0);
   auto offset = inst->extra<CheckStk>()->offset;
 
-  auto const stkVal = getStackValue(sp, offset);
-  if (stkVal.knownType.subtypeOf(type)) {
-    m_tb.constrainStack(sp, offset, categoryForType(type));
+  auto stkVal = getStackValue(sp, offset);
+  auto const oldType = stkVal.knownType;
+
+  if (newType >= oldType) {
+    // The new type isn't better than the old type.
     return sp;
   }
   return nullptr;
@@ -1065,13 +1059,17 @@ SSATmp* Simplifier::simplifyBitXor(SSATmp* src1, SSATmp* src2) {
 }
 
 SSATmp* Simplifier::simplifyLogicXor(SSATmp* src1, SSATmp* src2) {
-  SIMPLIFY_COMMUTATIVE(^, LogicXor);
-  if (src1 == src2) {
-    return cns(false);
+  // Canonicalize constants to the right.
+  if (src1->isConst() && !src2->isConst()) {
+    return gen(LogicXor, src2, src1);
   }
 
-  // SIMPLIFY_COMMUTATIVE takes care of the both-sides-const case, and
-  // canonicalizes a single const to the right
+  // Both constants.
+  if (src1->isConst() && src2->isConst()) {
+    return cns(bool(src1->getValBool() ^ src2->getValBool()));
+  }
+
+  // One constant: either a Not or constant result.
   if (src2->isConst()) {
     if (src2->getValBool()) {
       return gen(Not, src1);
@@ -1117,7 +1115,7 @@ SSATmp* Simplifier::simplifyShr(IRInstruction* inst) {
                        return a >> b; });
 }
 
-static SSATmp* chaseIncRefs(SSATmp* tmp) {
+SSATmp* chaseIncRefs(SSATmp* tmp) {
   while (tmp->inst()->op() == IncRef) {
     tmp = tmp->inst()->src(0);
   }
@@ -1803,7 +1801,8 @@ SSATmp* Simplifier::simplifyPrint(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyDecRef(IRInstruction* inst) {
-  if (!isRefCounted(inst->src(0))) {
+  auto src = inst->src(0);
+  if (!m_tb.typeMightRelax(src) && !isRefCounted(src)) {
     inst->convertToNop();
   }
   return nullptr;
@@ -1811,7 +1810,7 @@ SSATmp* Simplifier::simplifyDecRef(IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyIncRef(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
-  if (!isRefCounted(src)) {
+  if (!m_tb.typeMightRelax(src) && !isRefCounted(src)) {
     return src;
   }
   return nullptr;
@@ -1910,15 +1909,14 @@ SSATmp* Simplifier::simplifyCoerceStk(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyAssertStk(IRInstruction* inst) {
-  auto const info = getStackValue(inst->src(0),
-                                  inst->extra<AssertStk>()->offset);
+  auto const idx = inst->extra<AssertStk>()->offset;
+  auto const newType = inst->typeParam();
+  auto const info = getStackValue(inst->src(0), idx);
+  auto const oldType = info.knownType;
+  if (oldType == Type::None) return nullptr;
 
-  // AssertStk indicated that we knew the type from static analysis,
-  // so this assert just double checks.
-  if (info.value) assert(info.value->isA(inst->typeParam()));
-
-  if (info.knownType.subtypeOf(inst->typeParam())) {
-    inst->convertToMov();
+  if (m_tb.shouldElideAssertType(oldType, newType, info.value)) {
+    return inst->src(0);
   }
   return nullptr;
 }
@@ -1941,7 +1939,9 @@ SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyDecRefLoc(IRInstruction* inst) {
-  if (inst->typeParam().notCounted()) {
+  auto const localValue = m_tb.localValue(inst->extra<DecRefLoc>()->locId,
+                                          DataTypeGeneric);
+  if (!m_tb.typeMightRelax(localValue) && inst->typeParam().notCounted()) {
     inst->convertToNop();
   }
   return nullptr;
@@ -1982,12 +1982,15 @@ SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
     inst->convertToNop();
     return gen(DecRef, info.value);
   }
+  if (m_tb.typeMightRelax(info.value)) {
+    return nullptr;
+  }
+
   inst->setTypeParam(
     Type::mostRefined(inst->typeParam(), info.knownType)
   );
   if (inst->typeParam().notCounted()) {
     inst->convertToNop();
-    return nullptr;
   }
   return nullptr;
 }

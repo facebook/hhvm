@@ -385,7 +385,9 @@ void Assembler::Reset() {
 
 
 void Assembler::FinalizeCode() {
-  EmitLiteralPool();
+  if (!literals_.empty()) {
+    EmitLiteralPool();
+  }
 #ifdef DEBUG
   finalized_ = true;
 #endif

@@ -458,10 +458,10 @@ void CodeGenerator::emitTypeTest(Type type, Loc typeSrc, Loc dataSrc,
     // Note: ARM can actually do better here; it has a fused test-and-branch
     // instruction. The way this code is factored makes it difficult to use,
     // though; the jump instruction will be written by some other code.
-    m_as.   Cmp   (rAsm.W(), KindOfStringBit);
+    m_as.   Tst   (rAsm.W(), KindOfStringBit);
     cc = CC_NE;
   } else if (type.equals(Type::UncountedInit)) {
-    m_as.   Cmp   (rAsm.W(), KindOfUncountedInitBit);
+    m_as.   Tst   (rAsm.W(), KindOfUncountedInitBit);
     cc = CC_NE;
   } else if (type.equals(Type::Uncounted)) {
     m_as.   Cmp   (rAsm.W(), KindOfRefCountThreshold);
@@ -486,8 +486,8 @@ void CodeGenerator::emitTypeTest(Type type, Loc typeSrc, Loc dataSrc,
     doJcc(CC_E);
   } else if (type.subtypeOf(Type::Arr) && type.hasArrayKind()) {
     m_as.   Ldr   (rAsm, dataSrc);
-    m_as.   Ldr   (rAsm, rAsm[ArrayData::offsetofKind()]);
-    m_as.   Cmp   (rAsm, type.getArrayKind());
+    m_as.   Ldrb  (rAsm.W(), rAsm[ArrayData::offsetofKind()]);
+    m_as.   Cmp   (rAsm.W(), type.getArrayKind());
     doJcc(CC_E);
   }
 }

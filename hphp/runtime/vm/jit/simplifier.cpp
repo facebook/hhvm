@@ -170,6 +170,11 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
       if (index == kNumActRecCells) return StackValueInfo { inst, Type::Bool };
       if (index == kNumActRecCells + 1) return getStackValue(prevSp, 0);
       break;
+    case Op::FPushCtor:
+    case Op::FPushCtorD:
+      if (index == kNumActRecCells) return StackValueInfo { inst, Type::Obj };
+      if (index == kNumActRecCells + 1) return getStackValue(prevSp, 0);
+      break;
 
     default:
       if (index == 0 && !resultType.equals(Type::None)) {

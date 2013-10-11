@@ -213,10 +213,11 @@ END_EXTERN_C()
 
 /* fast cache for HashTables */
 #ifdef HHVM
-#define ALLOC_HASHTABLE(ht)  \
-  (ht) = [&]{ auto ret = HPHP::HphpArray::MakeReserve(0); \
-              ret->setRefCount(0);                        \
-              return ret; }()
+#define ALLOC_HASHTABLE(ht)                               \
+  (ht) = [&]{ auto ret = HPHP::ProxyArray::Make(          \
+      HPHP::HphpArray::MakeReserve(0));                   \
+      ret->setRefCount(0);                                \
+      return ret; }()
 #else
 #define ALLOC_HASHTABLE(ht)  \
   (ht) = (HashTable *) emalloc(sizeof(HashTable))

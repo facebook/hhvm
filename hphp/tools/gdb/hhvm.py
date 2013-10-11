@@ -94,16 +94,14 @@ class ArrayDataPrinter:
         self.kind = val['m_kind']
         if self.kind == 0 or self.kind == 1:
             self.val = val.cast(gdb.lookup_type('HPHP::HphpArray'))
+        elif self.kind == self.proxyKind():
+            self.val = val.cast(gdb.lookup_type('HPHP::ProxyArray'))
         else:
             self.val = val
 
     def children(self):
-        packed = gdb.lookup_global_symbol('HPHP::ArrayData::kPackedKind') \
-            .value()
-        mixed = gdb.lookup_global_symbol('HPHP::ArrayData::kMixedKind') \
-            .value()
         # Only support kPackedKind or kMixedKind
-        if self.kind == packed or self.kind == mixed:
+        if self.kind == self.packedKind() or self.kind == self.mixedKind():
             data = self.val.address.cast(gdb.lookup_type('char').pointer()) + \
                 self.val.type.sizeof
             pelm = data.cast(gdb.lookup_type('HPHP::HphpArray::Elm').pointer())
@@ -111,7 +109,18 @@ class ArrayDataPrinter:
         return self._iterator(0, 0, 0)
 
     def to_string(self):
+        if self.kind == self.proxyKind():
+            return "ProxyArr: %s" % (self.val['m_ad'].dereference())
         return "%d elements (kind==%d)" % (self.val['m_size'], self.kind)
+
+    def proxyKind(self):
+        return gdb.lookup_global_symbol('HPHP::ArrayData::kProxyKind').value()
+
+    def packedKind(self):
+        return gdb.lookup_global_symbol('HPHP::ArrayData::kPackedKind').value()
+
+    def mixedKind(self):
+        return gdb.lookup_global_symbol('HPHP::ArrayData::kMixedKind').value()
 
 objectDataCount = 100
 

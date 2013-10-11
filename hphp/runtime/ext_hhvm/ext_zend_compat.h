@@ -52,6 +52,9 @@ typedef void (*zend_ext_func)(
   int return_value_used
 );
 
+void zBoxAndProxy(TypedValue* arg);
+void zBoxAndProxy(const TypedValue* arg);
+
 inline TypedValue* zend_wrap_func(
     ActRec* ar,
     zend_ext_func builtin_func,

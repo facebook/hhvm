@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/ext_hhvm/ext_zend_compat.h"
+#include "hphp/runtime/base/proxy-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,9 +30,17 @@ void zPrepArgs(ActRec* ar) {
   TypedValue* args = (TypedValue*)ar - 1;
   for (int32_t i = 0; i < numArgs; ++i) {
     TypedValue* arg = args-i;
-    if (arg->m_type != KindOfRef) {
-      tvBox(arg);
-    }
+    zBoxAndProxy(arg);
+  }
+}
+
+void zBoxAndProxy(TypedValue* arg) {
+  if (arg->m_type != KindOfRef) {
+    tvBox(arg);
+  }
+  auto inner = arg->m_data.pref->tv();
+  if (inner->m_type == KindOfArray) {
+    inner->m_data.parr = ProxyArray::Make(inner->m_data.parr);
   }
 }
 

@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/vm/name-value-table-wrapper.h"
+#include "hphp/runtime/base/proxy-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,212 +73,264 @@ extern const ArrayFunctions g_array_funcs = {
   // release
   { &HphpArray::ReleasePacked, &HphpArray::Release,
     &APCLocalArray::Release,
-    &NameValueTableWrapper::Release },
+    &NameValueTableWrapper::Release,
+    &ProxyArray::Release },
   // nvGetInt
   { &HphpArray::NvGetIntPacked, &HphpArray::NvGetInt,
     &APCLocalArray::NvGetInt,
-    &NameValueTableWrapper::NvGetInt },
+    &NameValueTableWrapper::NvGetInt,
+    &ProxyArray::NvGetInt },
   // nvGetStr
   { &HphpArray::NvGetStrPacked, &HphpArray::NvGetStr,
     &APCLocalArray::NvGetStr,
-    &NameValueTableWrapper::NvGetStr },
+    &NameValueTableWrapper::NvGetStr,
+    &ProxyArray::NvGetStr },
   // nvGetKey
   { &HphpArray::NvGetKeyPacked, &HphpArray::NvGetKey,
     &APCLocalArray::NvGetKey,
-    &NameValueTableWrapper::NvGetKey },
+    &NameValueTableWrapper::NvGetKey,
+    &ProxyArray::NvGetKey },
   // setInt
   { &HphpArray::SetIntPacked, &HphpArray::SetInt,
     &APCLocalArray::SetInt,
-    &NameValueTableWrapper::SetInt },
+    &NameValueTableWrapper::SetInt,
+    &ProxyArray::SetInt },
   // setStr
   { &HphpArray::SetStrPacked, &HphpArray::SetStr,
     &APCLocalArray::SetStr,
-    &NameValueTableWrapper::SetStr },
+    &NameValueTableWrapper::SetStr,
+    &ProxyArray::SetStr },
   // vsize
   { &VsizeNop, &VsizeNop,
     &VsizeNop,
-    &NameValueTableWrapper::Vsize },
+    &NameValueTableWrapper::Vsize,
+    &ProxyArray::Vsize },
   // getValueRef
   { &HphpArray::GetValueRef, &HphpArray::GetValueRef,
     &APCLocalArray::GetValueRef,
-    &NameValueTableWrapper::GetValueRef },
+    &NameValueTableWrapper::GetValueRef,
+    &ProxyArray::GetValueRef },
   // noCopyOnWrite
   { false, false,
     false,
-    true }, // NameValueTableWrapper doesn't support COW.
+    true, // NameValueTableWrapper doesn't support COW.
+    false },
   // isVectorData
   { &HphpArray::IsVectorDataPacked, &HphpArray::IsVectorData,
     &APCLocalArray::IsVectorData,
-    &NameValueTableWrapper::IsVectorData },
+    &NameValueTableWrapper::IsVectorData,
+    &ProxyArray::IsVectorData },
   // existsInt
   { &HphpArray::ExistsIntPacked, &HphpArray::ExistsInt,
     &APCLocalArray::ExistsInt,
-    &NameValueTableWrapper::ExistsInt },
+    &NameValueTableWrapper::ExistsInt,
+    &ProxyArray::ExistsInt },
   // existsStr
   { &HphpArray::ExistsStrPacked, &HphpArray::ExistsStr,
     &APCLocalArray::ExistsStr,
-    &NameValueTableWrapper::ExistsStr },
+    &NameValueTableWrapper::ExistsStr,
+    &ProxyArray::ExistsStr },
   // lvalInt
   { &HphpArray::LvalIntPacked, &HphpArray::LvalInt,
     &APCLocalArray::LvalInt,
-    &NameValueTableWrapper::LvalInt },
+    &NameValueTableWrapper::LvalInt,
+    &ProxyArray::LvalInt },
   // lvalStr
   { &HphpArray::LvalStrPacked, &HphpArray::LvalStr,
     &APCLocalArray::LvalStr,
-    &NameValueTableWrapper::LvalStr },
+    &NameValueTableWrapper::LvalStr,
+    &ProxyArray::LvalStr },
   // lvalNew
   { &HphpArray::LvalNewPacked, &HphpArray::LvalNew,
     &APCLocalArray::LvalNew,
-    &NameValueTableWrapper::LvalNew },
+    &NameValueTableWrapper::LvalNew,
+    &ProxyArray::LvalNew },
   // setRefInt
   { &HphpArray::SetRefIntPacked, &HphpArray::SetRefInt,
     &APCLocalArray::SetRefInt,
-    &NameValueTableWrapper::SetRefInt },
+    &NameValueTableWrapper::SetRefInt,
+    &ProxyArray::SetRefInt },
   // setRefStr
   { &HphpArray::SetRefStrPacked, &HphpArray::SetRefStr,
     &APCLocalArray::SetRefStr,
-    &NameValueTableWrapper::SetRefStr },
+    &NameValueTableWrapper::SetRefStr,
+    &ProxyArray::SetRefStr },
   // addInt
   { &HphpArray::AddIntPacked, &HphpArray::AddInt,
     &APCLocalArray::SetInt, // reuse set
-    &NameValueTableWrapper::SetInt }, // reuse set
+    &NameValueTableWrapper::SetInt, // reuse set
+    &ProxyArray::SetInt }, // reuse set
   // addStr
   { &HphpArray::SetStrPacked, // reuse set
     &HphpArray::AddStr,
     &APCLocalArray::SetStr, // reuse set
-    &NameValueTableWrapper::SetStr }, // reuse set
+    &NameValueTableWrapper::SetStr, // reuse set
+    &ProxyArray::SetStr }, // reuse set
   // removeInt
   { &HphpArray::RemoveIntPacked, &HphpArray::RemoveInt,
     &APCLocalArray::RemoveInt,
-    &NameValueTableWrapper::RemoveInt },
+    &NameValueTableWrapper::RemoveInt,
+    &ProxyArray::RemoveInt },
   // removeStr
   { &HphpArray::RemoveStrPacked, &HphpArray::RemoveStr,
     &APCLocalArray::RemoveStr,
-    &NameValueTableWrapper::RemoveStr },
+    &NameValueTableWrapper::RemoveStr,
+    &ProxyArray::RemoveStr },
   // iterBegin
   { &HphpArray::IterBegin, &HphpArray::IterBegin,
     &APCLocalArray::IterBegin,
-    &NameValueTableWrapper::IterBegin },
+    &NameValueTableWrapper::IterBegin,
+    &ProxyArray::IterBegin },
   // iterEnd
   { &HphpArray::IterEnd, &HphpArray::IterEnd,
     &APCLocalArray::IterEnd,
-    &NameValueTableWrapper::IterEnd },
+    &NameValueTableWrapper::IterEnd,
+    &ProxyArray::IterEnd },
   // iterAdvance
   { &HphpArray::IterAdvance, &HphpArray::IterAdvance,
     &APCLocalArray::IterAdvance,
-    &NameValueTableWrapper::IterAdvance },
+    &NameValueTableWrapper::IterAdvance,
+    &ProxyArray::IterAdvance },
   // iterRewind
   { &HphpArray::IterRewind, &HphpArray::IterRewind,
     &APCLocalArray::IterRewind,
-    &NameValueTableWrapper::IterRewind },
+    &NameValueTableWrapper::IterRewind,
+    &ProxyArray::IterRewind },
   // validFullPos
   { &HphpArray::ValidFullPos, &HphpArray::ValidFullPos,
     &APCLocalArray::ValidFullPos,
-    &NameValueTableWrapper::ValidFullPos },
+    &NameValueTableWrapper::ValidFullPos,
+    &ProxyArray::ValidFullPos },
   // advanceFullPos
   { &HphpArray::AdvanceFullPos, &HphpArray::AdvanceFullPos,
     &APCLocalArray::AdvanceFullPos,
-    &NameValueTableWrapper::AdvanceFullPos },
+    &NameValueTableWrapper::AdvanceFullPos,
+    &ProxyArray::AdvanceFullPos },
   // escalateForSort
   { &HphpArray::EscalateForSort, &HphpArray::EscalateForSort,
     &APCLocalArray::EscalateForSort,
-    &NameValueTableWrapper::EscalateForSort },
+    &NameValueTableWrapper::EscalateForSort,
+    &ProxyArray::EscalateForSort },
   // ksort
   { &HphpArray::Ksort, &HphpArray::Ksort,
     &ArrayData::Ksort,
-    &NameValueTableWrapper::Ksort },
+    &NameValueTableWrapper::Ksort,
+    &ProxyArray::Ksort },
   // sort
   { &HphpArray::Sort, &HphpArray::Sort,
     &ArrayData::Sort,
-    &NameValueTableWrapper::Sort },
+    &NameValueTableWrapper::Sort,
+    &ProxyArray::Sort },
   // asort
   { &HphpArray::Asort, &HphpArray::Asort,
     &ArrayData::Asort,
-    &NameValueTableWrapper::Asort },
+    &NameValueTableWrapper::Asort,
+    &ProxyArray::Asort },
   // uksort
   { &HphpArray::Uksort, &HphpArray::Uksort,
     &ArrayData::Uksort,
-    &NameValueTableWrapper::Uksort },
+    &NameValueTableWrapper::Uksort,
+    &ProxyArray::Uksort },
   // usort
   { &HphpArray::Usort, &HphpArray::Usort,
     &ArrayData::Usort,
-    &NameValueTableWrapper::Usort },
+    &NameValueTableWrapper::Usort,
+    &ProxyArray::Usort },
   // uasort
   { &HphpArray::Uasort, &HphpArray::Uasort,
     &ArrayData::Uasort,
-    &NameValueTableWrapper::Uasort },
+    &NameValueTableWrapper::Uasort,
+    &ProxyArray::Uasort },
   // copy
   { &HphpArray::CopyPacked, &HphpArray::Copy,
     &APCLocalArray::Copy,
-    &NameValueTableWrapper::Copy },
+    &NameValueTableWrapper::Copy,
+    &ProxyArray::Copy },
   // copyWithStrongIterators
   { &HphpArray::CopyWithStrongIterators, &HphpArray::CopyWithStrongIterators,
     &APCLocalArray::CopyWithStrongIterators,
-    &NameValueTableWrapper::CopyWithStrongIterators },
+    &NameValueTableWrapper::CopyWithStrongIterators,
+    &ProxyArray::CopyWithStrongIterators },
   // nonSmartCopy
   { &HphpArray::NonSmartCopy, &HphpArray::NonSmartCopy,
     &ArrayData::NonSmartCopy,
-    &ArrayData::NonSmartCopy },
+    &ArrayData::NonSmartCopy,
+    &ProxyArray::NonSmartCopy },
   // append
   { &HphpArray::AppendPacked, &HphpArray::Append,
     &APCLocalArray::Append,
-    &NameValueTableWrapper::Append },
+    &NameValueTableWrapper::Append,
+    &ProxyArray::Append },
   // appendRef
   { &HphpArray::AppendRefPacked, &HphpArray::AppendRef,
     &APCLocalArray::AppendRef,
-    &NameValueTableWrapper::AppendRef },
+    &NameValueTableWrapper::AppendRef,
+    &ProxyArray::AppendRef },
   // appendWithRef
   { &HphpArray::AppendWithRefPacked, &HphpArray::AppendWithRef,
     &APCLocalArray::AppendRef,
-    &NameValueTableWrapper::AppendRef },
+    &NameValueTableWrapper::AppendRef,
+    &ProxyArray::AppendRef },
   // plus
   { &HphpArray::Plus, &HphpArray::Plus,
     &APCLocalArray::Plus,
-    &NameValueTableWrapper::Plus },
+    &NameValueTableWrapper::Plus,
+    &ProxyArray::Plus },
   // merge
   { &HphpArray::Merge, &HphpArray::Merge,
     &APCLocalArray::Merge,
-    &NameValueTableWrapper::Merge },
+    &NameValueTableWrapper::Merge,
+    &ProxyArray::Merge },
   // pop
   { &HphpArray::PopPacked, &HphpArray::Pop,
     &APCLocalArray::Pop,
-    &NameValueTableWrapper::Pop },
+    &NameValueTableWrapper::Pop,
+    &ProxyArray::Pop },
   // dequeue
   { &HphpArray::DequeuePacked, &HphpArray::Dequeue,
     &APCLocalArray::Dequeue,
-    &NameValueTableWrapper::Dequeue },
+    &NameValueTableWrapper::Dequeue,
+    &ProxyArray::Dequeue },
   // prepend
   { &HphpArray::PrependPacked, &HphpArray::Prepend,
     &APCLocalArray::Prepend,
-    &NameValueTableWrapper::Prepend },
+    &NameValueTableWrapper::Prepend,
+    &ProxyArray::Prepend },
   // renumber
   { &HphpArray::RenumberPacked, &HphpArray::Renumber,
     &APCLocalArray::Renumber,
-    &NameValueTableWrapper::Renumber },
+    &NameValueTableWrapper::Renumber,
+    &ProxyArray::Renumber },
   // onSetEvalScalar
   { &HphpArray::OnSetEvalScalarPacked, &HphpArray::OnSetEvalScalar,
     &APCLocalArray::OnSetEvalScalar,
-    &NameValueTableWrapper::OnSetEvalScalar },
+    &NameValueTableWrapper::OnSetEvalScalar,
+    &ProxyArray::OnSetEvalScalar },
   // escalate
   { &ArrayData::Escalate, &ArrayData::Escalate,
     &APCLocalArray::Escalate,
-    &ArrayData::Escalate },
+    &ArrayData::Escalate,
+    &ProxyArray::Escalate },
   // getSharedVariant
   { &ArrayData::GetSharedVariant, &ArrayData::GetSharedVariant,
     &APCLocalArray::GetSharedVariant,
-    &ArrayData::GetSharedVariant },
+    &ArrayData::GetSharedVariant,
+    &ProxyArray::GetSharedVariant },
   // zSetInt
-  { &ArrayData::ZSetInt, &ArrayData::ZSetInt,
+  { &HphpArray::ZSetInt, &HphpArray::ZSetInt,
     &ArrayData::ZSetInt,
-    &ArrayData::ZSetInt },
+    &ArrayData::ZSetInt,
+    &ProxyArray::ZSetInt },
   // zSetStr
-  { &ArrayData::ZSetStr, &ArrayData::ZSetStr,
+  { &HphpArray::ZSetStr, &HphpArray::ZSetStr,
     &ArrayData::ZSetStr,
-    &ArrayData::ZSetStr },
+    &ArrayData::ZSetStr,
+    &ProxyArray::ZSetStr },
   // zAppend
-  { &ArrayData::ZAppend, &ArrayData::ZAppend,
+  { &HphpArray::ZAppend, &HphpArray::ZAppend,
     &ArrayData::ZAppend,
-    &ArrayData::ZAppend },
+    &ArrayData::ZAppend,
+    &ProxyArray::ZAppend },
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -496,15 +549,15 @@ ArrayData* ArrayData::CopyWithStrongIterators(const ArrayData* ad) {
   throw FatalErrorException("Unimplemented ArrayData::copyWithStrongIterators");
 }
 
-void ArrayData::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
+ArrayData* ArrayData::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
   throw FatalErrorException("Unimplemented ArrayData::ZSetInt");
 }
 
-void ArrayData::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
+ArrayData* ArrayData::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
   throw FatalErrorException("Unimplemented ArrayData::ZSetStr");
 }
 
-void ArrayData::ZAppend(ArrayData* ad, RefData* v) {
+ArrayData* ArrayData::ZAppend(ArrayData* ad, RefData* v) {
   throw FatalErrorException("Unimplemented ArrayData::ZAppend");
 }
 

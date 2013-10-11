@@ -525,7 +525,15 @@ class SplFileObject extends SplFileInfo
    */
   public function current() {
     if ($this->currentLine === false) {
-      $this->currentLine = $this->fgets();
+      if (($this->flags & SplFileObject::READ_CSV) == SplFileObject::READ_CSV) {
+        $this->currentLine = $this->fgetcsv(
+          $this->delimiter,
+          $this->enclosure,
+          $this->escape
+        );
+      } else {
+        $this->currentLine = $this->fgets();
+      }
     }
     return $this->currentLine;
   }

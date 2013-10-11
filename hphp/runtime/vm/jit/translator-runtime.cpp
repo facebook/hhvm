@@ -377,10 +377,12 @@ int64_t ak_exist_int_obj(ObjectData* obj, int64_t key) {
 ALWAYS_INLINE
 TypedValue& getDefaultIfNullCell(TypedValue* tv, TypedValue& def) {
   if (UNLIKELY(nullptr == tv)) {
-    // refcount is already correct since def was never decrefed
+    // DecRef of def is done unconditionally by the IR, since there's
+    // a good chance it will be paired with an IncRef and optimized
+    // away.  So we need to IncRef here if it is being returned.
+    tvRefcountedIncRef(&def);
     return def;
   }
-  tvRefcountedDecRef(&def);
   TypedValue* ret = tvToCell(tv);
   tvRefcountedIncRef(ret);
   return *ret;

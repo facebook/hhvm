@@ -1665,6 +1665,7 @@ void HhbcTranslator::emitArrayIdx() {
   push(gen(ArrayIdx, cns(opFunc), arr, key, def));
   gen(DecRef, arr);
   gen(DecRef, key);
+  gen(DecRef, def);
 }
 
 void HhbcTranslator::emitIncTransCounter() {

@@ -755,7 +755,7 @@ O(IncTransCounter,                  ND, NA,                                E) \
 O(ArrayIdx,                    D(Cell), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \
-                                          S(Cell),      E|N|CRc|PRc|Refs|Mem) \
+                                          S(Cell),          E|N|PRc|Refs|Mem) \
 O(DbgAssertRefCount,                ND, S(Counted,StaticStr,StaticArr),  N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(DbgAssertType,                    ND, S(Cell),                           E) \

@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/shared-array.h"
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"

@@ -18,7 +18,7 @@
 
 #include <cmath>
 
-#include "hphp/runtime/base/shared-variant.h"
+#include "hphp/runtime/base/apc-variant.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/util/alloc.h"

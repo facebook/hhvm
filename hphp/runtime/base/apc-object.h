@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_IMMUTABLE_OBJ_H_
-#define incl_HPHP_IMMUTABLE_OBJ_H_
+#ifndef incl_HPHP_APC_OBJECT_H_
+#define incl_HPHP_APC_OBJECT_H_
 
 #include <cinttypes>
 
@@ -23,8 +23,8 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct SharedVariant;
-struct SharedVariantStats;
+struct APCVariant;
+struct APCVariantStats;
 struct ObjectData;
 struct StringData;
 struct Object;
@@ -34,21 +34,21 @@ struct Object;
 /*
  * Representation of an object stored in APC.
  */
-struct ImmutableObj {
-  explicit ImmutableObj(ObjectData* obj);
-  ~ImmutableObj();
+struct APCObject {
+  explicit APCObject(ObjectData* obj);
+  ~APCObject();
 
-  ImmutableObj(const ImmutableObj&) = delete;
-  ImmutableObj& operator=(const ImmutableObj&) = delete;
+  APCObject(const APCObject&) = delete;
+  APCObject& operator=(const APCObject&) = delete;
 
   Object getObject() const;
-  void getSizeStats(SharedVariantStats* stats) const;
+  void getSizeStats(APCVariantStats* stats) const;
   int32_t getSpaceUsage() const;
 
 private:
   struct Prop {
     StringData* name;
-    SharedVariant* val;
+    APCVariant* val;
   };
 
 private:

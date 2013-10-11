@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/immutable-array.h"
-#include "hphp/runtime/base/shared-variant.h"
+#include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/apc-variant.h"
 #include "hphp/runtime/base/array-iterator.h"
 
 namespace HPHP {
@@ -23,13 +23,13 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 HOT_FUNC
-ImmutableArray* ImmutableArray::Create(ArrayData* arr,
+APCArray* APCArray::Create(ArrayData* arr,
                                        bool unserializeObj,
                                        bool &shouldCache) {
   int num = arr->size();
   int cap = num > 2 ? Util::roundUpToPowerOfTwo(num) : 2;
 
-  ImmutableArray* ret = (ImmutableArray*)malloc(sizeof(ImmutableArray) +
+  APCArray* ret = (APCArray*)malloc(sizeof(APCArray) +
                                                 sizeof(int) * cap +
                                                 sizeof(Bucket) * num);
 
@@ -39,9 +39,9 @@ ImmutableArray* ImmutableArray::Create(ArrayData* arr,
 
   try {
     for (ArrayIter it(arr); !it.end(); it.next()) {
-      SharedVariant* key = SharedVariant::Create(it.first(), false, true,
+      APCVariant* key = APCVariant::Create(it.first(), false, true,
                                                  unserializeObj);
-      SharedVariant* val = SharedVariant::Create(it.secondRef(), false, true,
+      APCVariant* val = APCVariant::Create(it.secondRef(), false, true,
                                                  unserializeObj);
       if (val->shouldCache()) shouldCache = true;
       ret->add(ret->m.m_num, key, val);
@@ -56,7 +56,7 @@ ImmutableArray* ImmutableArray::Create(ArrayData* arr,
 }
 
 HOT_FUNC
-void ImmutableArray::Destroy(ImmutableArray* map) {
+void APCArray::Destroy(APCArray* map) {
   Bucket* buckets = map->buckets();
   for (int i = 0; i < map->m.m_num; i++) {
     buckets[i].key->decRef();
@@ -66,7 +66,7 @@ void ImmutableArray::Destroy(ImmutableArray* map) {
 }
 
 HOT_FUNC
-void ImmutableArray::add(int pos, SharedVariant *key, SharedVariant *val) {
+void APCArray::add(int pos, APCVariant *key, APCVariant *val) {
   // NOTE: no check on duplication because we assume the original array has no
   // duplication
   Bucket* bucket = buckets() + pos;
@@ -82,7 +82,7 @@ void ImmutableArray::add(int pos, SharedVariant *key, SharedVariant *val) {
 }
 
 HOT_FUNC
-int ImmutableArray::indexOf(const StringData* key) {
+int APCArray::indexOf(const StringData* key) {
   strhash_t h = key->hash();
   int bucket = hash()[h & m.m_capacity_mask];
   Bucket* b = buckets();
@@ -97,7 +97,7 @@ int ImmutableArray::indexOf(const StringData* key) {
 }
 
 HOT_FUNC
-int ImmutableArray::indexOf(int64_t key) {
+int APCArray::indexOf(int64_t key) {
   int bucket = hash()[key & m.m_capacity_mask];
   Bucket* b = buckets();
   while (bucket != -1) {

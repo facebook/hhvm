@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SHARED_MAP_H_
-#define incl_HPHP_SHARED_MAP_H_
+#ifndef incl_HPHP_APC_LOCAL_ARRAY_H_
+#define incl_HPHP_APC_LOCAL_ARRAY_H_
 
 #include "hphp/util/shared-memory-allocator.h"
-#include "hphp/runtime/base/shared-variant.h"
+#include "hphp/runtime/base/apc-variant.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -27,10 +27,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Wrapper for a shared memory map.
+ * Wrapper for APCArray. It is what gets returned when an array is fetched
+ * via APC. It has a pointer to the APCArray that it represents and it may
+ * cache values locally depending on the type accessed and/or the operation.
  */
-class SharedArray : public ArrayData, Sweepable {
-  explicit SharedArray(SharedVariant* source)
+class APCLocalArray : public ArrayData, Sweepable {
+  explicit APCLocalArray(APCVariant* source)
     : ArrayData(kSharedKind)
     , m_arr(source)
     , m_localCache(nullptr) {
@@ -38,16 +40,16 @@ class SharedArray : public ArrayData, Sweepable {
     source->incRef();
   }
 
-  ~SharedArray();
+  ~APCLocalArray();
 
 public:
   template<class... Args>
-  static SharedArray* Make(Args&&... args) {
-    return new (MM().smartMallocSize(sizeof(SharedArray)))
-      SharedArray(std::forward<Args>(args)...);
+  static APCLocalArray* Make(Args&&... args) {
+    return new (MM().smartMallocSize(sizeof(APCLocalArray)))
+      APCLocalArray(std::forward<Args>(args)...);
   }
 
-  static SharedVariant *GetSharedVariant(const ArrayData* ad);
+  static APCVariant *GetSharedVariant(const ArrayData* ad);
 
   // these using directives ensure the full set of overloaded functions
   // are visible in this class, to avoid triggering implicit conversions
@@ -123,16 +125,16 @@ public:
 private:
   ssize_t getIndex(int64_t k) const;
   ssize_t getIndex(const StringData* k) const;
-  static SharedArray* asSharedArray(ArrayData* ad);
-  static const SharedArray* asSharedArray(const ArrayData* ad);
+  static APCLocalArray* asSharedArray(ArrayData* ad);
+  static const APCLocalArray* asSharedArray(const ArrayData* ad);
 
 public:
   void getChildren(std::vector<TypedValue *> &out);
-  SharedVariant *m_arr;
+  APCVariant *m_arr;
   mutable TypedValue* m_localCache;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SHARED_MAP_H_
+#endif // incl_HPHP_APC_LOCAL_ARRAY_H_

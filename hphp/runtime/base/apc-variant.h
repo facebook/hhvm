@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SHARED_VARIANT_H_
-#define incl_HPHP_SHARED_VARIANT_H_
+#ifndef incl_HPHP_APC_VARIANT_H_
+#define incl_HPHP_APC_VARIANT_H_
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/atomic.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/immutable-array.h"
+#include "hphp/runtime/base/apc-array.h"
 
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
 # if defined(__LITTLE_ENDIAN__)
@@ -37,22 +37,22 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SharedArray;
-class SharedVariantStats;
-class ImmutablePackedArray;
-class ImmutableArray;
-struct ImmutableObj;
+class APCLocalArray;
+class APCVariantStats;
+class APCPackedArray;
+class APCArray;
+struct APCObject;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SharedVariant {
+class APCVariant {
 public:
-  SharedVariant(CVarRef source, bool serialized, bool inner = false,
+  APCVariant(CVarRef source, bool serialized, bool inner = false,
                 bool unserializeObj = false);
-  ~SharedVariant();
+  ~APCVariant();
 
-  // Create will do the wrapped check before creating a SharedVariant
-  static SharedVariant* Create(CVarRef source, bool serialized,
+  // Create will do the wrapped check before creating a APCVariant
+  static APCVariant* Create(CVarRef source, bool serialized,
                                bool inner = false,
                                bool unserializeObj = false);
 
@@ -120,15 +120,15 @@ public:
   int getIndex(int64_t key);
   int getIndex(const StringData* key);
 
-  ArrayData* loadElems(const SharedArray&);
+  ArrayData* loadElems(const APCLocalArray&);
 
   Variant getKey(ssize_t pos) const;
 
-  SharedVariant* getValue(ssize_t pos) const;
+  APCVariant* getValue(ssize_t pos) const;
 
   void dump(std::string &out);
 
-  void getStats(SharedVariantStats *stats) const;
+  void getStats(APCVariantStats *stats) const;
   int32_t getSpaceUsage() const;
 
   StringData *getStringData() const {
@@ -136,7 +136,7 @@ public:
     return m_data.str;
   }
 
-  SharedVariant *convertObj(CVarRef var);
+  APCVariant *convertObj(CVarRef var);
   bool isUnserializedObj() { return getIsObj(); }
   bool shouldCache() const { return m_shouldCache; }
 
@@ -157,9 +157,9 @@ private:
     int64_t num;
     double dbl;
     StringData *str;
-    ImmutableArray* array;
-    ImmutablePackedArray* packed;
-    ImmutableObj* obj;
+    APCArray* array;
+    APCPackedArray* packed;
+    APCObject* obj;
   };
 
 #if PACKED_TV
@@ -177,13 +177,13 @@ private:
 #endif
 
   static void compileTimeAssertions() {
-    static_assert(offsetof(SharedVariant, m_data) == offsetof(TypedValue, m_data),
-                  "Offset of m_data must be equal in SharedVar and TypedValue");
-    static_assert(offsetof(SharedVariant, m_count) == TypedValueAux::auxOffset,
-                  "Offset of m_count must equal offset of TV.m_aux");
-    static_assert(offsetof(SharedVariant, m_type) == offsetof(TypedValue, m_type),
-                  "Offset of m_type must be equal in SharedVar and TypedValue");
-    static_assert(sizeof(SharedVariant) == sizeof(TypedValue),
+    static_assert(offsetof(APCVariant, m_data) == offsetof(TypedValue, m_data),
+                 "Offset of m_data must be equal in APCVariant and TypedValue");
+    static_assert(offsetof(APCVariant, m_count) == TypedValueAux::auxOffset,
+                 "Offset of m_count must equal offset of TV.m_aux");
+    static_assert(offsetof(APCVariant, m_type) == offsetof(TypedValue, m_type),
+                 "Offset of m_type must be equal in APCVariant and TypedValue");
+    static_assert(sizeof(APCVariant) == sizeof(TypedValue),
                   "Be careful with field layout");
   }
 
@@ -205,7 +205,7 @@ private:
   void setObjAttempted() { m_flags |= ObjAttempted; }
 };
 
-class SharedVariantStats {
+class APCVariantStats {
  public:
   int32_t dataSize;
   int32_t dataTotalSize;
@@ -217,25 +217,25 @@ class SharedVariantStats {
     dataTotalSize = 0;
   }
 
-  SharedVariantStats() {
+  APCVariantStats() {
     initStats();
   }
 
-  void addChildStats(const SharedVariantStats *childStats) {
+  void addChildStats(const APCVariantStats *childStats) {
     dataSize += childStats->dataSize;
     dataTotalSize += childStats->dataTotalSize;
     variantCount += childStats->variantCount;
   }
 
-  void removeChildStats(const SharedVariantStats *childStats) {
+  void removeChildStats(const APCVariantStats *childStats) {
     dataSize -= childStats->dataSize;
     dataTotalSize -= childStats->dataTotalSize;
     variantCount -= childStats->variantCount;
   }
 };
 
-inline ImmutablePackedArray::~ImmutablePackedArray() {
-  SharedVariant** v = vals();
+inline APCPackedArray::~APCPackedArray() {
+  APCVariant** v = vals();
   for (size_t i = 0, n = m_size; i < n; i++) {
     v[i]->decRef();
   }
@@ -244,4 +244,4 @@ inline ImmutablePackedArray::~ImmutablePackedArray() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* incl_HPHP_SHARED_VARIANT_H_ */
+#endif /* incl_HPHP_APC_VARIANT_H_ */

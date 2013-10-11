@@ -34,7 +34,7 @@ static void log_apc(const string& name) {
   }
 }
 
-static void stats_on_get(StringData* key, const SharedVariant* svar) {
+static void stats_on_get(StringData* key, const APCVariant* svar) {
   if (RuntimeOption::EnableAPCSizeStats &&
       RuntimeOption::EnableAPCFetchStats) {
     SharedStoreStats::onGet(key, svar);
@@ -69,7 +69,7 @@ static bool check_noTTL(const char *key, size_t keyLen) {
 
 // stats_on_update should be called before updating sval with new value
 static void stats_on_update(const StringData* key, const StoreValue* sval,
-                            const SharedVariant* svar, int64_t ttl) {
+                            const APCVariant* svar, int64_t ttl) {
   if (RuntimeOption::EnableAPCSizeStats &&
       !check_skip(key->data(), key->size())) {
     int32_t newSize = svar->getSpaceUsage();
@@ -239,9 +239,9 @@ void ConcurrentTableSharedStore::addToExpirationQueue(const char* key,
 }
 
 bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
-                                                  SharedVariant* svar,
+                                                  APCVariant* svar,
                                                   CVarRef value) {
-  SharedVariant *converted = svar->convertObj(value);
+  APCVariant *converted = svar->convertObj(value);
   if (converted) {
     Map::accessor acc;
     if (!m_vars.find(acc, tagStringData(key.get()))) {
@@ -252,7 +252,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
     }
     // A write lock was acquired during find
     StoreValue *sval = &acc->second;
-    SharedVariant *sv = sval->var;
+    APCVariant *sv = sval->var;
     // sv may not be same as svar here because some other thread may have
     // updated it already, check before updating
     if (sv == svar && !sv->isUnserializedObj()) {
@@ -273,7 +273,7 @@ static string std_apc_cas = "apc.cas";
 static string std_apc_update = "apc.update";
 static string std_apc_new = "apc.new";
 
-SharedVariant* ConcurrentTableSharedStore::unserialize(const String& key,
+APCVariant* ConcurrentTableSharedStore::unserialize(const String& key,
                                                        const StoreValue* sval) {
   try {
     VariableUnserializer::Type sType =
@@ -284,7 +284,7 @@ SharedVariant* ConcurrentTableSharedStore::unserialize(const String& key,
     VariableUnserializer vu(sval->sAddr, sval->getSerializedSize(), sType);
     Variant v;
     v.unserialize(&vu);
-    sval->var = SharedVariant::Create(v, sval->isSerializedObj());
+    sval->var = APCVariant::Create(v, sval->isSerializedObj());
     stats_on_add(key.get(), sval, 0, true, true); // delayed prime
     return sval->var;
   } catch (Exception &e) {
@@ -296,7 +296,7 @@ SharedVariant* ConcurrentTableSharedStore::unserialize(const String& key,
 
 bool ConcurrentTableSharedStore::get(const String& key, Variant &value) {
   const StoreValue *sval;
-  SharedVariant *svar = nullptr;
+  APCVariant *svar = nullptr;
   ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
   bool expired = false;
@@ -375,7 +375,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
       sval = &acc->second;
       if (!sval->expired()) {
         ret = get_int64_value(sval) + step;
-        SharedVariant *svar = construct(Variant(ret));
+        APCVariant *svar = construct(Variant(ret));
         sval->var->decRef();
         sval->var = svar;
         found = true;
@@ -397,7 +397,7 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
     if (m_vars.find(acc, tagStringData(key.get()))) {
       sval = &acc->second;
       if (!sval->expired() && get_int64_value(sval) == old) {
-        SharedVariant *var = construct(Variant(val));
+        APCVariant *var = construct(Variant(val));
         sval->var->decRef();
         sval->var = var;
         success = true;
@@ -454,7 +454,7 @@ bool ConcurrentTableSharedStore::store(const String& key, CVarRef value,
                                        int64_t ttl,
                                        bool overwrite /* = true */) {
   StoreValue *sval;
-  SharedVariant* svar = construct(value);
+  APCVariant* svar = construct(value);
   ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
                                 m_lockingFlag);
   const char *kcp = strdup(key.data());
@@ -557,7 +557,7 @@ bool ConcurrentTableSharedStore::constructPrime(const String& v,
       return false;
     }
   }
-  item.value = SharedVariant::Create(v, serialized);
+  item.value = APCVariant::Create(v, serialized);
   return true;
 }
 
@@ -575,7 +575,7 @@ bool ConcurrentTableSharedStore::constructPrime(CVarRef v,
       return false;
     }
   }
-  item.value = SharedVariant::Create(v, false);
+  item.value = APCVariant::Create(v, false);
   return true;
 }
 

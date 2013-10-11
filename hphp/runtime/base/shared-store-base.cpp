@@ -36,7 +36,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-void StoreValue::set(SharedVariant *v, int64_t ttl) {
+void StoreValue::set(APCVariant *v, int64_t ttl) {
   var = v;
   expiry = ttl ? time(nullptr) + ttl : 0;
 }

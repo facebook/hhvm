@@ -21,7 +21,7 @@
 
 #include "hphp/util/smalllocks.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/shared-variant.h"
+#include "hphp/runtime/base/apc-variant.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -39,13 +39,13 @@ struct StoreValue {
   StoreValue(const StoreValue& v) : var(v.var), sAddr(v.sAddr),
                                     expiry(v.expiry), size(v.size),
                                     sSize(v.sSize) {}
-  void set(SharedVariant *v, int64_t ttl);
+  void set(APCVariant *v, int64_t ttl);
   bool expired() const;
 
   // Mutable fields here are so that we can deserialize the object from disk
   // while holding a const pointer to the StoreValue. Mostly a hacky workaround
   // for how we use TBB
-  mutable SharedVariant *var;
+  mutable APCVariant *var;
   char *sAddr; // For file storage
   int64_t expiry;
   mutable int32_t size;
@@ -72,7 +72,7 @@ struct ConcurrentTableSharedStore {
     KeyValuePair() : value(nullptr), sAddr(nullptr) {}
     litstr key;
     int len;
-    SharedVariant *value;
+    APCVariant *value;
     char *sAddr;
     int32_t sSize;
 
@@ -162,8 +162,8 @@ private:
   };
 
 private:
-  SharedVariant* construct(CVarRef v) {
-    return SharedVariant::Create(v, false);
+  APCVariant* construct(CVarRef v) {
+    return APCVariant::Create(v, false);
   }
 
   bool eraseImpl(const String& key, bool expired);
@@ -179,9 +179,9 @@ private:
 
   void addToExpirationQueue(const char* key, int64_t etime);
 
-  bool handleUpdate(const String& key, SharedVariant* svar);
-  bool handlePromoteObj(const String& key, SharedVariant* svar, CVarRef valye);
-  SharedVariant* unserialize(const String& key, const StoreValue* sval);
+  bool handleUpdate(const String& key, APCVariant* svar);
+  bool handlePromoteObj(const String& key, APCVariant* svar, CVarRef valye);
+  APCVariant* unserialize(const String& key, const StoreValue* sval);
 
 private:
   int m_id;

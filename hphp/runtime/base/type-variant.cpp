@@ -2007,7 +2007,7 @@ void Variant::unserialize(VariableUnserializer *uns,
   }
 }
 
-SharedVariant *Variant::getSharedVariant() const {
+APCVariant *Variant::getSharedVariant() const {
   if (m_type == KindOfRef) {
     return m_data.pref->var()->getSharedVariant();
   }

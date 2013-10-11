@@ -97,7 +97,7 @@ inline bool StringData::isStatic() const {
   return m_count == RefCountStaticValue;
 }
 
-inline SharedVariant* StringData::getSharedVariant() const {
+inline APCVariant* StringData::getSharedVariant() const {
   if (isShared()) return sharedPayload()->shared;
   return nullptr;
 }

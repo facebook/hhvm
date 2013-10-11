@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_IMMUTABLE_ARRAY_H_
-#define incl_HPHP_IMMUTABLE_ARRAY_H_
+#ifndef incl_HPHP_APC_ARRAY_H_
+#define incl_HPHP_APC_ARRAY_H_
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/util/lock.h"
@@ -25,24 +25,24 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SharedVariant;
+class APCVariant;
 
 /**
- * ImmutableArray is a php-style array that can take strings and
+ * APCArray is a php-style array that can take strings and
  * ints as keys. We also store the order in which the elements
  * are inserted. Once an element is added, it can not be
  * removed.
  */
-struct ImmutableArray {
+struct APCArray {
   int indexOf(const StringData* key);
   int indexOf(int64_t key);
 
-  SharedVariant* getKeyIndex(int index) {
+  APCVariant* getKeyIndex(int index) {
     assert(index < size());
     return buckets()[index].key;
   }
 
-  SharedVariant* getValIndex(int index) {
+  APCVariant* getValIndex(int index) {
     assert(index < size());
     return buckets()[index].val;
   }
@@ -56,29 +56,29 @@ struct ImmutableArray {
   }
 
   size_t getStructSize() {
-    size_t size = sizeof(ImmutableArray) +
+    size_t size = sizeof(APCArray) +
                   sizeof(Bucket) * m.m_num +
                   sizeof(int) * (m.m_capacity_mask + 1);
     return size;
   }
 
-  static ImmutableArray* Create(ArrayData* arr, bool unserializeObj,
+  static APCArray* Create(ArrayData* arr, bool unserializeObj,
                                 bool& shouldCache);
-  static void Destroy(ImmutableArray* im);
+  static void Destroy(APCArray* im);
 
 private:
   struct Bucket {
     /** index of the next bucket, or -1 if the end of a chain */
     int next;
     /** the value of this bucket */
-    SharedVariant *key;
-    SharedVariant *val;
+    APCVariant *key;
+    APCVariant *val;
   };
 
 private:
-  ImmutableArray() {}
-  ~ImmutableArray() {}
-  void add(int pos, SharedVariant *key, SharedVariant *val);
+  APCArray() {}
+  ~APCArray() {}
+  void add(int pos, APCVariant *key, APCVariant *val);
 
   /** index of the beginning of each hash chain */
   int *hash() const { return (int*)(this + 1); }
@@ -91,22 +91,22 @@ private:
       unsigned int m_capacity_mask;
       unsigned int m_num;
     } m;
-    SharedVariant* align_dummy;
+    APCVariant* align_dummy;
   };
 };
 
 /*
- * ImmutablePackedArray is the immutable version of a PackedArray,
+ * APCPackedArray is the APC version of a PackedArray,
  * i.e. an array with int keys in order 0..size-1.  We only store
  * the values.
  */
-struct ImmutablePackedArray {
-  explicit ImmutablePackedArray(size_t size) : m_size(size) {}
-  ~ImmutablePackedArray();
-  SharedVariant** vals() { return (SharedVariant**)(this + 1); }
+struct APCPackedArray {
+  explicit APCPackedArray(size_t size) : m_size(size) {}
+  ~APCPackedArray();
+  APCVariant** vals() { return (APCVariant**)(this + 1); }
   void *operator new(size_t sz, int num) {
-    assert(sz == sizeof(ImmutablePackedArray));
-    return malloc(sizeof(ImmutablePackedArray) + num * sizeof(SharedVariant*));
+    assert(sz == sizeof(APCPackedArray));
+    return malloc(sizeof(APCPackedArray) + num * sizeof(APCVariant*));
   }
   void operator delete(void* ptr) { free(ptr); }
   // just to keep the compiler happy; used if the constructor throws
@@ -120,4 +120,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif /* incl_HPHP_IMMUTABLE_ARRAY_H_ */
+#endif /* incl_HPHP_APC_ARRAY_H_ */

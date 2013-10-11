@@ -13,21 +13,21 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/shared-variant.h"
+#include "hphp/runtime/base/apc-variant.h"
 
 #include "folly/ScopeGuard.h"
 
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/base/shared-array.h"
-#include "hphp/runtime/base/immutable-obj.h"
+#include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-SharedVariant::SharedVariant(CVarRef source, bool serialized,
+APCVariant::APCVariant(CVarRef source, bool serialized,
                              bool inner /* = false */,
                              bool unserializeObj /* = false */)
   : m_shouldCache(false), m_flags(0) {
@@ -100,17 +100,17 @@ StringCase:
       if (arr->isVectorData()) {
         setPacked();
         size_t num_elems = arr->size();
-        m_data.packed = new (num_elems) ImmutablePackedArray(num_elems);
+        m_data.packed = new (num_elems) APCPackedArray(num_elems);
         size_t i = 0;
         for (ArrayIter it(arr); !it.end(); it.next()) {
-          SharedVariant* val = Create(it.secondRef(), false, true,
+          APCVariant* val = Create(it.secondRef(), false, true,
                                       unserializeObj);
           if (val->m_shouldCache) m_shouldCache = true;
           m_data.packed->vals()[i++] = val;
         }
         assert(i == num_elems);
       } else {
-        m_data.array = ImmutableArray::Create(arr, unserializeObj,
+        m_data.array = APCArray::Create(arr, unserializeObj,
                                               m_shouldCache);
       }
       break;
@@ -128,7 +128,7 @@ StringCase:
       m_type = KindOfArray;
       setPacked();
       auto const num_elems = 0;
-      m_data.packed = new (num_elems) ImmutablePackedArray(num_elems);
+      m_data.packed = new (num_elems) APCPackedArray(num_elems);
       break;
     }
   default:
@@ -137,7 +137,7 @@ StringCase:
       m_shouldCache = true;
       if (unserializeObj) {
         // This assumes hasInternalReference(seen, true) is false
-        ImmutableObj* obj = new ImmutableObj(source.getObjectData());
+        APCObject* obj = new APCObject(source.getObjectData());
         m_data.obj = obj;
         setIsObj();
       } else {
@@ -164,7 +164,7 @@ ALWAYS_INLINE void StringData::enlist() {
 }
 
 HOT_FUNC NEVER_INLINE
-StringData* StringData::MakeSVSlowPath(SharedVariant* shared, uint32_t len) {
+StringData* StringData::MakeSVSlowPath(APCVariant* shared, uint32_t len) {
   auto const data       = shared->stringData();
   auto const hash       = shared->rawStringData()->m_hash & STRHASH_MASK;
   auto const capAndHash = static_cast<uint64_t>(hash) << 32;
@@ -189,9 +189,9 @@ StringData* StringData::MakeSVSlowPath(SharedVariant* shared, uint32_t len) {
   return sd;
 }
 
-StringData* StringData::Make(SharedVariant* shared) {
+StringData* StringData::Make(APCVariant* shared) {
   // No need to check if len > MaxSize, because if it were we'd never
-  // have made the StringData in the SharedVariant without throwing.
+  // have made the StringData in the APCVariant without throwing.
   assert(size_t(shared->stringLength()) <= size_t(MaxSize));
 
   auto const len        = shared->stringLength();
@@ -234,7 +234,7 @@ StringData* StringData::Make(SharedVariant* shared) {
 }
 
 HOT_FUNC
-Variant SharedVariant::toLocal() {
+Variant APCVariant::toLocal() {
   switch (m_type) {
   case KindOfBoolean:
     {
@@ -261,7 +261,7 @@ Variant SharedVariant::toLocal() {
       if (getSerializedArray()) {
         return apc_unserialize(m_data.str->data(), m_data.str->size());
       }
-      return SharedArray::Make(this);
+      return APCLocalArray::Make(this);
     }
   case KindOfUninit:
   case KindOfNull:
@@ -279,7 +279,7 @@ Variant SharedVariant::toLocal() {
   }
 }
 
-void SharedVariant::dump(std::string &out) {
+void APCVariant::dump(std::string &out) {
   out += "ref(";
   out += boost::lexical_cast<string>(m_count);
   out += ") ";
@@ -308,7 +308,7 @@ void SharedVariant::dump(std::string &out) {
       out += "array: ";
       out += m_data.str->data();
     } else {
-      auto sm = SharedArray::Make(this);
+      auto sm = APCLocalArray::Make(this);
       SCOPE_EXIT { sm->release(); };
       sm->dump(out);
     }
@@ -325,7 +325,7 @@ void SharedVariant::dump(std::string &out) {
   out += "\n";
 }
 
-SharedVariant::~SharedVariant() {
+APCVariant::~APCVariant() {
   switch (m_type) {
   case KindOfObject:
     if (getIsObj()) {
@@ -346,7 +346,7 @@ SharedVariant::~SharedVariant() {
       if (isPacked()) {
         delete m_data.packed;
       } else {
-        ImmutableArray::Destroy(m_data.array);
+        APCArray::Destroy(m_data.array);
       }
     }
     break;
@@ -358,13 +358,13 @@ SharedVariant::~SharedVariant() {
 ///////////////////////////////////////////////////////////////////////////////
 
 HOT_FUNC
-int SharedVariant::getIndex(const StringData* key) {
+int APCVariant::getIndex(const StringData* key) {
   assert(is(KindOfArray));
   if (isPacked()) return -1;
   return m_data.array->indexOf(key);
 }
 
-int SharedVariant::getIndex(int64_t key) {
+int APCVariant::getIndex(int64_t key) {
   assert(is(KindOfArray));
   if (isPacked()) {
     if (key < 0 || (size_t) key >= m_data.packed->size()) return -1;
@@ -373,7 +373,7 @@ int SharedVariant::getIndex(int64_t key) {
   return m_data.array->indexOf(key);
 }
 
-Variant SharedVariant::getKey(ssize_t pos) const {
+Variant APCVariant::getKey(ssize_t pos) const {
   assert(is(KindOfArray));
   if (isPacked()) {
     assert(pos < (ssize_t) m_data.packed->size());
@@ -383,7 +383,7 @@ Variant SharedVariant::getKey(ssize_t pos) const {
 }
 
 HOT_FUNC
-SharedVariant* SharedVariant::getValue(ssize_t pos) const {
+APCVariant* APCVariant::getValue(ssize_t pos) const {
   assert(is(KindOfArray));
   if (isPacked()) {
     assert(pos < (ssize_t) m_data.packed->size());
@@ -392,7 +392,7 @@ SharedVariant* SharedVariant::getValue(ssize_t pos) const {
   return m_data.array->getValIndex(pos);
 }
 
-ArrayData* SharedVariant::loadElems(const SharedArray &array) {
+ArrayData* APCVariant::loadElems(const APCLocalArray &array) {
   assert(is(KindOfArray));
   auto count = arrSize();
   ArrayData* elems;
@@ -414,7 +414,7 @@ ArrayData* SharedVariant::loadElems(const SharedArray &array) {
   return elems;
 }
 
-int SharedVariant::countReachable() const {
+int APCVariant::countReachable() const {
   int count = 1;
   if (getType() == KindOfArray) {
     int size = arrSize();
@@ -422,26 +422,26 @@ int SharedVariant::countReachable() const {
       count += size; // for keys
     }
     for (int i = 0; i < size; i++) {
-      SharedVariant* p = getValue(i);
+      APCVariant* p = getValue(i);
       count += p->countReachable(); // for values
     }
   }
   return count;
 }
 
-SharedVariant *SharedVariant::Create
+APCVariant *APCVariant::Create
 (CVarRef source, bool serialized, bool inner /* = false */,
  bool unserializeObj /* = false*/) {
-  SharedVariant *wrapped = source.getSharedVariant();
+  APCVariant *wrapped = source.getSharedVariant();
   if (wrapped && !unserializeObj) {
     wrapped->incRef();
     // static cast should be enough
-    return (SharedVariant *)wrapped;
+    return (APCVariant *)wrapped;
   }
-  return new SharedVariant(source, serialized, inner, unserializeObj);
+  return new APCVariant(source, serialized, inner, unserializeObj);
 }
 
-SharedVariant* SharedVariant::convertObj(CVarRef var) {
+APCVariant* APCVariant::convertObj(CVarRef var) {
   if (!var.is(KindOfObject) || getObjAttempted()) {
     return nullptr;
   }
@@ -455,13 +455,13 @@ SharedVariant* SharedVariant::convertObj(CVarRef var) {
   if (obj->hasInternalReference(seen, true)) {
     return nullptr;
   }
-  SharedVariant *tmp = new SharedVariant(var, false, true, true);
+  APCVariant *tmp = new APCVariant(var, false, true, true);
   tmp->setObjAttempted();
   return tmp;
 }
 
-int32_t SharedVariant::getSpaceUsage() const {
-  int32_t size = sizeof(SharedVariant);
+int32_t APCVariant::getSpaceUsage() const {
+  int32_t size = sizeof(APCVariant);
   if (!IS_REFCOUNTED_TYPE(m_type)) return size;
   switch (m_type) {
   case KindOfObject:
@@ -478,7 +478,7 @@ int32_t SharedVariant::getSpaceUsage() const {
       size += sizeof(StringData) + m_data.str->size();
     } else if (isPacked()) {
       auto size = m_data.packed->size();
-      size += sizeof(ImmutablePackedArray) + size * sizeof(SharedVariant*);
+      size += sizeof(APCPackedArray) + size * sizeof(APCVariant*);
       for (size_t i = 0, n = m_data.packed->size(); i < n; i++) {
         size += m_data.packed->vals()[i]->getSpaceUsage();
       }
@@ -496,7 +496,7 @@ int32_t SharedVariant::getSpaceUsage() const {
 }
 
 
-void SharedVariant::getStats(SharedVariantStats *stats) const {
+void APCVariant::getStats(APCVariantStats *stats) const {
   stats->initStats();
   stats->variantCount = 1;
   switch (m_type) {
@@ -507,11 +507,11 @@ void SharedVariant::getStats(SharedVariantStats *stats) const {
   case KindOfDouble:
   case KindOfStaticString:
     stats->dataSize = sizeof(m_data.dbl);
-    stats->dataTotalSize = sizeof(SharedVariant);
+    stats->dataTotalSize = sizeof(APCVariant);
     break;
   case KindOfObject:
     if (getIsObj()) {
-      SharedVariantStats childStats;
+      APCVariantStats childStats;
       m_data.obj->getSizeStats(&childStats);
       stats->addChildStats(&childStats);
       break;
@@ -519,33 +519,33 @@ void SharedVariant::getStats(SharedVariantStats *stats) const {
     // fall through
   case KindOfString:
     stats->dataSize = m_data.str->size();
-    stats->dataTotalSize = sizeof(SharedVariant) + sizeof(StringData) +
+    stats->dataTotalSize = sizeof(APCVariant) + sizeof(StringData) +
                            stats->dataSize;
     break;
   default:
     assert(is(KindOfArray));
     if (getSerializedArray()) {
       stats->dataSize = m_data.str->size();
-      stats->dataTotalSize = sizeof(SharedVariant) + sizeof(StringData) +
+      stats->dataTotalSize = sizeof(APCVariant) + sizeof(StringData) +
                              stats->dataSize;
       break;
     }
     if (isPacked()) {
-      stats->dataTotalSize = sizeof(SharedVariant) +
-                             sizeof(ImmutablePackedArray);
+      stats->dataTotalSize = sizeof(APCVariant) +
+                             sizeof(APCPackedArray);
       auto size = m_data.packed->size();
-      stats->dataTotalSize += sizeof(SharedVariant*) * size;
+      stats->dataTotalSize += sizeof(APCVariant*) * size;
       for (size_t i = 0; i < size; i++) {
-        SharedVariant *v = m_data.packed->vals()[i];
-        SharedVariantStats childStats;
+        APCVariant *v = m_data.packed->vals()[i];
+        APCVariantStats childStats;
         v->getStats(&childStats);
         stats->addChildStats(&childStats);
       }
     } else {
       auto array = m_data.array;
-      stats->dataTotalSize = sizeof(SharedVariant) + array->getStructSize();
+      stats->dataTotalSize = sizeof(APCVariant) + array->getStructSize();
       for (size_t i = 0, n = array->size(); i < n; i++) {
-        SharedVariantStats childStats;
+        APCVariantStats childStats;
         array->getKeyIndex(i)->getStats(&childStats);
         stats->addChildStats(&childStats);
         array->getValIndex(i)->getStats(&childStats);

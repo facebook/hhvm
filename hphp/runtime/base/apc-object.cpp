@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/immutable-obj.h"
+#include "hphp/runtime/base/apc-object.h"
 
 #include <cstdlib>
 
 #include "hphp/util/logger.h"
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/shared-variant.h"
+#include "hphp/runtime/base/apc-variant.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -32,7 +32,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-ImmutableObj::ImmutableObj(ObjectData* obj)
+APCObject::APCObject(ObjectData* obj)
   : m_cls(obj->o_getClassName().get())
 {
   assert(m_cls->isStatic());
@@ -56,9 +56,9 @@ ImmutableObj::ImmutableObj(ObjectData* obj)
     Variant key(it.first());
     assert(key.isString());
     CVarRef value = it.secondRef();
-    SharedVariant *val = nullptr;
+    APCVariant *val = nullptr;
     if (!value.isNull()) {
-      val = new SharedVariant(value, false, true, true);
+      val = new APCVariant(value, false, true, true);
     }
 
     auto const keySD = key.getStringData();
@@ -71,7 +71,7 @@ ImmutableObj::ImmutableObj(ObjectData* obj)
   }
 }
 
-ImmutableObj::~ImmutableObj() {
+APCObject::~APCObject() {
   assert(m_cls->isStatic());
 
   if (m_props) {
@@ -85,12 +85,12 @@ ImmutableObj::~ImmutableObj() {
   }
 }
 
-Object ImmutableObj::getObject() const {
+Object APCObject::getObject() const {
   Object obj;
   try {
     obj = create_object_only(m_cls);
   } catch (ClassNotFoundException& e) {
-    Logger::Error("ImmutableObj::getObject(): Cannot find class %s",
+    Logger::Error("APCObject::getObject(): Cannot find class %s",
                   m_cls->data());
     return obj;
   }
@@ -113,9 +113,9 @@ Object ImmutableObj::getObject() const {
   return obj;
 }
 
-void ImmutableObj::getSizeStats(SharedVariantStats* stats) const {
+void APCObject::getSizeStats(APCVariantStats* stats) const {
   stats->initStats();
-  stats->dataTotalSize += sizeof(ImmutableObj) + sizeof(Prop) * m_propCount;
+  stats->dataTotalSize += sizeof(APCObject) + sizeof(Prop) * m_propCount;
 
   for (int i = 0; i < m_propCount; i++) {
     auto const sd = m_props[i].name;
@@ -124,15 +124,15 @@ void ImmutableObj::getSizeStats(SharedVariantStats* stats) const {
       stats->dataTotalSize += sizeof(StringData) + sd->size();
     }
     if (m_props[i].val) {
-      SharedVariantStats childStats;
+      APCVariantStats childStats;
       m_props[i].val->getStats(&childStats);
       stats->addChildStats(&childStats);
     }
   }
 }
 
-int32_t ImmutableObj::getSpaceUsage() const {
-  int32_t size = sizeof(ImmutableObj) + sizeof(Prop) * m_propCount;
+int32_t APCObject::getSpaceUsage() const {
+  int32_t size = sizeof(APCObject) + sizeof(Prop) * m_propCount;
 
   for (int i = 0; i < m_propCount; i++) {
     auto const sd = m_props[i].name;

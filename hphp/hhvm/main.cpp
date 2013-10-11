@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/emulate-zend.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/compiler/compiler.h"
 
@@ -24,11 +25,24 @@
 
 int main(int argc, char** argv) {
   if (!argc) return 0;
+  int len = strlen(argv[0]);
+  if (len >= 4 && !strcmp(argv[0] + len - 4, "hphp")) {
+    return HPHP::compiler_main(argc, argv);
+  }
   if (argc > 1 && !strcmp(argv[1], "--hphp")) {
     argv[1] = argv[0];
     return HPHP::compiler_main(argc - 1, argv + 1);
   }
+
   HPHP::register_process_init();
+  if (len >= 3 && !strcmp(argv[0] + len - 3, "php")) {
+    return HPHP::emulate_zend(argc, argv);
+  }
+  if (argc > 1 && !strcmp(argv[1], "--php")) {
+    argv[1] = argv[0];
+    return HPHP::emulate_zend(argc - 1, argv + 1);
+  }
+
   HPHP::Util::embedded_data data;
   if (!HPHP::Util::get_embedded_data("repo", &data)) {
     return HPHP::execute_program(argc, argv);

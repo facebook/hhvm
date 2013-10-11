@@ -1092,7 +1092,7 @@ class Phar extends RecursiveDirectoryIterator
    *   array([Phar object for alias], 'rest/of/path.php')
    */
   private static function getPharAndFile($filename_or_alias) {
-    if (!strpos($filename_or_alias, 'phar://') === 0) {
+    if (strncmp($filename_or_alias, 'phar://', 7)) {
       throw new PharException("Not a phar: $filename_or_alias");
     }
 

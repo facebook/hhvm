@@ -1321,22 +1321,26 @@ static string systemlib_split(string slib, string* hhas) {
   return slib;
 }
 
-// Search for systemlib.php in the following places:
-// 1) ${HHVM_SYSTEMLIB}
-// 2) section "systemlib" in the current executable
-// and return its contents
-string get_systemlib(string* hhas) {
-  if (char *file = getenv("HHVM_SYSTEMLIB")) {
-    std::ifstream ifs(file);
-    if (ifs.good()) {
-      return systemlib_split(std::string(
-                               std::istreambuf_iterator<char>(ifs),
-                               std::istreambuf_iterator<char>()), hhas);
+// Retrieve a systemlib (or mini systemlib) from the
+// current executable.
+//
+// Additionally, when retrieving the main systemlib,
+// honor the HHVM_SYSTEMLIB environment variable as
+// an override.
+string get_systemlib(string* hhas, const string &section /*= "systemlib" */) {
+  if (section == "systemlib") {
+    if (char *file = getenv("HHVM_SYSTEMLIB")) {
+      std::ifstream ifs(file);
+      if (ifs.good()) {
+        return systemlib_split(std::string(
+                                 std::istreambuf_iterator<char>(ifs),
+                                 std::istreambuf_iterator<char>()), hhas);
+      }
     }
   }
 
   Util::embedded_data desc;
-  if (!Util::get_embedded_data("systemlib", &desc)) return "";
+  if (!Util::get_embedded_data(section.c_str(), &desc)) return "";
 
   std::ifstream ifs(desc.m_filename);
   if (!ifs.good()) return "";

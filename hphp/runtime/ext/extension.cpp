@@ -18,6 +18,10 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unit.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,6 +29,7 @@ namespace HPHP {
 typedef std::map<std::string, Extension*, stdltistr> ExtensionMap;
 static ExtensionMap *s_registered_extensions = NULL;
 static bool s_modules_initialised = false;
+static std::vector<Unit*> s_systemlib_units;
 
 // just to make valgrind cleaner
 class ExtensionUninitializer {
@@ -58,6 +63,13 @@ void Extension::LoadModules(Hdf hdf) {
 
 void Extension::InitModules() {
   assert(s_registered_extensions);
+  bool wasInited = SystemLib::s_inited;
+  LitstrTable::get().setWriting();
+  SCOPE_EXIT {
+    SystemLib::s_inited = wasInited;
+    LitstrTable::get().setReading();
+  };
+  SystemLib::s_inited = false;
   for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
        iter != s_registered_extensions->end(); ++iter) {
     iter->second->moduleInit();
@@ -106,6 +118,36 @@ Array Extension::GetLoadedExtensions() {
     ret.append(iter->second->m_name);
   }
   return ret;
+}
+
+void Extension::MergeSystemlib() {
+  for (auto &unit : s_systemlib_units) {
+    unit->merge();
+  }
+}
+
+void Extension::CompileSystemlib(const std::string &slib,
+                                 const std::string &name) {
+  Unit *unit = compile_string(slib.c_str(), slib.size(), name.c_str());
+  assert(unit);
+  unit->merge();
+  s_systemlib_units.push_back(unit);
+}
+
+void Extension::loadSystemlib() {
+  std::string section("systemlib.ext.");
+  section += m_name.data();
+  std::string hhas, slib = get_systemlib(&hhas, section);
+  if (!slib.empty()) {
+    std::string phpname("systemlib.php.");
+    phpname += m_name.data();
+    CompileSystemlib(slib, phpname);
+  }
+  if (!hhas.empty()) {
+    std::string hhasname("systemlib.hhas.");
+    hhasname += m_name.data();
+    CompileSystemlib(hhas, hhasname);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

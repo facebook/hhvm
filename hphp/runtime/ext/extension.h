@@ -64,8 +64,16 @@ public:
 
   // called by hphp_process_init/exit
   static void InitModules();
+  static void MergeSystemlib();
   static void ShutdownModules();
   static bool ModulesInitialised();
+
+  // Look for "systemlib.ext.{m_name}" in the binary and compile/merge it
+  void loadSystemlib();
+
+  // Compile and merge an systemlib fragment
+  static void CompileSystemlib(const std::string &slib,
+                               const std::string &name);
 public:
   explicit Extension(litstr name, const char *version = "");
   virtual ~Extension() {}

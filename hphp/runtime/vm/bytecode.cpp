@@ -7246,6 +7246,7 @@ void VMExecutionContext::requestInit() {
 
   if (UNLIKELY(RuntimeOption::EvalJitEnableRenameFunction)) {
     SystemLib::s_unit->merge();
+    Extension::MergeSystemlib();
     if (SystemLib::s_hhas_unit) SystemLib::s_hhas_unit->merge();
     SystemLib::s_nativeFuncUnit->merge();
     SystemLib::s_nativeClassUnit->merge();

@@ -21,21 +21,21 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * This is the runtime representation of a typedef.  Typedefs are only
- * allowed when HipHop extensions are enabled.
+ * This is the runtime representation of a type alias.  Type aliases
+ * are only allowed when HipHop extensions are enabled.
  *
- * The m_kind field is KindOfObject whenever the typedef is basically
- * just a name.  At runtime we still might resolve this name to
- * another typedef, becoming a typedef for KindOfArray or something in
- * that request.
+ * The m_kind field is KindOfObject whenever the type alias is
+ * basically just a name.  At runtime we still might resolve this name
+ * to another type alias, becoming a type alias for KindOfArray or
+ * something in that request.
  *
- * For the per-request struct, see TypedefReq below.
+ * For the per-request struct, see TypeAliasReq below.
  */
-struct Typedef {
+struct TypeAlias {
   const StringData* name;
   const StringData* value;
   DataType          kind;
-  bool              nullable; // Null is allowed; for ?Foo typedefs
+  bool              nullable; // Null is allowed; for ?Foo aliases
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(name)
@@ -47,11 +47,11 @@ struct Typedef {
 };
 
 /*
- * In a given request, a defined typedef is turned into a TypedefReq
- * struct.  This contains the information needed to validate parameter
- * type hints for a typedef at runtime.
+ * In a given request, a defined type alias is turned into a
+ * TypeAliasReq struct.  This contains the information needed to
+ * validate parameter type hints for a type alias at runtime.
  */
-struct TypedefReq {
+struct TypeAliasReq {
   DataType kind;          // may be KindOfAny for "mixed"
   bool nullable;          // for option types, like ?Foo
   Class* klass;           // nullptr if kind != KindOfObject

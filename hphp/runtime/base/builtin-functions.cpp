@@ -1185,7 +1185,8 @@ bool AutoloadHandler::autoloadType(const String& name) {
   return !m_map.isNull() &&
     loadFromMap(name, s_type, true,
       [] (const String& name) {
-        return Unit::GetNamedEntity(name.get())->getCachedTypedef() != nullptr;
+        return Unit::GetNamedEntity(name.get())->
+          getCachedTypeAlias() != nullptr;
       }
     ) != Failure;
 }

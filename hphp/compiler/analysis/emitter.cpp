@@ -6635,13 +6635,13 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   m_ue.mergeLitstr(name);
   m_ue.mergeLitstr(value);
 
-  Typedef record;
+  TypeAlias record;
   record.name     = name;
   record.value    = value;
   record.kind     = kind;
   record.nullable = nullable;
-  Id id = m_ue.addTypedef(record);
-  e.DefTypedef(id);
+  Id id = m_ue.addTypeAlias(record);
+  e.DefTypeAlias(id);
 }
 
 PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,

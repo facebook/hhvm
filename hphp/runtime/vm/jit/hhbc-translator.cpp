@@ -3178,7 +3178,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
 
   // For non-object guards, we rely on what we know from the tracelet
   // guards and never have to do runtime checks.
-  if (!tc.isObjectOrTypedef()) {
+  if (!tc.isObjectOrTypeAlias()) {
     if (locVal->type().isBoxed()) {
       locVal = gen(LdRef, locVal->type().innerType(), makeExit(), locVal);
     }

@@ -6338,10 +6338,10 @@ OPTBLD_INLINE void VMExecutionContext::iopDefCls(PC& pc) {
   Unit::defClass(c);
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopDefTypedef(PC& pc) {
+OPTBLD_INLINE void VMExecutionContext::iopDefTypeAlias(PC& pc) {
   NEXT();
   DECODE_IVA(tid);
-  m_fp->m_func->unit()->defTypedef(tid);
+  m_fp->m_func->unit()->defTypeAlias(tid);
 }
 
 static inline void checkThis(ActRec* fp) {

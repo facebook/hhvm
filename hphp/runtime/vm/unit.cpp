@@ -140,14 +140,14 @@ Class* NamedEntity::getCachedClass() const {
   return LIKELY(m_cachedClass.bound()) ? *m_cachedClass : nullptr;
 }
 
-void NamedEntity::setCachedTypedef(const TypedefReq& td) {
-  *m_cachedTypedef = td;
+void NamedEntity::setCachedTypeAlias(const TypeAliasReq& td) {
+  *m_cachedTypeAlias = td;
 }
 
-const TypedefReq* NamedEntity::getCachedTypedef() const {
-  // TODO(#2103214): support persistent typedefs
-  m_cachedTypedef.bind();
-  return m_cachedTypedef->name ? m_cachedTypedef.get() : nullptr;
+const TypeAliasReq* NamedEntity::getCachedTypeAlias() const {
+  // TODO(#2103214): support persistent typeAliases
+  m_cachedTypeAlias.bind();
+  return m_cachedTypeAlias->name ? m_cachedTypeAlias.get() : nullptr;
 }
 
 void NamedEntity::pushClass(Class* cls) {
@@ -558,7 +558,7 @@ Class* Unit::defClass(const PreClass* preClass,
    * Raise a fatal unless the existing class definition is identical to the
    * one this invocation would create.
    */
-  if (auto current = nameList->getCachedTypedef()) {
+  if (auto current = nameList->getCachedTypeAlias()) {
     FrameRestore fr(preClass);
     raise_error("Cannot declare class with the same name (%s) as an "
                 "existing type", current->name->data());
@@ -679,9 +679,9 @@ bool Unit::aliasClass(Class* original, const StringData* alias) {
   return true;
 }
 
-void Unit::defTypedef(Id id) {
-  assert(id < m_typedefs.size());
-  auto thisType = &m_typedefs[id];
+void Unit::defTypeAlias(Id id) {
+  assert(id < m_typeAliases.size());
+  auto thisType = &m_typeAliases[id];
   auto nameList = GetNamedEntity(thisType->name);
   const StringData* typeName = thisType->value;
 
@@ -689,7 +689,7 @@ void Unit::defTypedef(Id id) {
    * Check if this name already was defined as a type alias, and if so
    * make sure it is compatible.
    */
-  if (auto current = nameList->getCachedTypedef()) {
+  if (auto current = nameList->getCachedTypeAlias()) {
     if (thisType->kind != current->kind ||
         thisType->nullable != current->nullable ||
         Unit::lookupClass(typeName) != current->klass) {
@@ -706,13 +706,13 @@ void Unit::defTypedef(Id id) {
     return;
   }
 
-  // TODO(#2103214): persistent typedef support
-  nameList->m_cachedTypedef.bind();
+  // TODO(#2103214): persistent type alias support
+  nameList->m_cachedTypeAlias.bind();
 
   /*
-   * If this typedef is a KindOfObject and the name on the right hand
-   * side was another typedef, we will bind the name to the other side
-   * for this request (i.e. resolve that typedef now).
+   * If this type alias is a KindOfObject and the name on the right
+   * hand side was another type alias, we will bind the name to the
+   * other side for this request (i.e. resolve that type alias now).
    *
    * We need to inspect the right hand side and figure out what it was
    * first.
@@ -722,31 +722,31 @@ void Unit::defTypedef(Id id) {
    */
 
   if (thisType->kind != KindOfObject) {
-    nameList->setCachedTypedef(
-      TypedefReq { thisType->kind,
-                   thisType->nullable,
-                   nullptr,
-                   thisType->name }
+    nameList->setCachedTypeAlias(
+      TypeAliasReq { thisType->kind,
+                     thisType->nullable,
+                     nullptr,
+                     thisType->name }
     );
     return;
   }
 
   auto targetNameList = GetNamedEntity(typeName);
-  if (auto targetTd = getTypedefWithAutoload(targetNameList, typeName)) {
-    nameList->setCachedTypedef(
-      TypedefReq { targetTd->kind,
-                   thisType->nullable || targetTd->nullable,
-                   targetTd->klass,
-                   thisType->name }
+  if (auto targetTd = getTypeAliasWithAutoload(targetNameList, typeName)) {
+    nameList->setCachedTypeAlias(
+      TypeAliasReq { targetTd->kind,
+                     thisType->nullable || targetTd->nullable,
+                     targetTd->klass,
+                     thisType->name }
     );
     return;
   }
   if (auto klass = Unit::loadClass(typeName)) {
-    nameList->setCachedTypedef(
-      TypedefReq { KindOfObject,
-                   thisType->nullable,
-                   klass,
-                   thisType->name }
+    nameList->setCachedTypeAlias(
+      TypeAliasReq { KindOfObject,
+                     thisType->nullable,
+                     klass,
+                     thisType->name }
     );
     return;
   }
@@ -1780,7 +1780,7 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
     ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Unit")
              << "(unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB,"
                 " bc_meta BLOB, mainReturn BLOB, mergeable INTEGER,"
-                "lines BLOB, typedefs BLOB, UNIQUE (md5));";
+                "lines BLOB, typeAliases BLOB, UNIQUE (md5));";
     txn.exec(ssCreate.str());
   }
   {
@@ -1856,15 +1856,15 @@ void UnitRepoProxy::InsertUnitStmt
                            const uchar* bc_meta, size_t bc_meta_len,
                            const TypedValue* mainReturn, bool mergeOnly,
                            const LineTable& lines,
-                           const std::vector<Typedef>& typedefs) {
+                           const std::vector<TypeAlias>& typeAliases) {
   BlobEncoder linesBlob;
-  BlobEncoder typedefsBlob;
+  BlobEncoder typeAliasesBlob;
 
   if (!prepared()) {
     std::stringstream ssInsert;
     ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Unit")
              << " VALUES(NULL, @md5, @bc, @bc_meta,"
-                " @mainReturn, @mergeable, @lines, @typedefs);";
+                " @mainReturn, @mergeable, @lines, @typeAliases);";
     txn.prepare(*this, ssInsert.str());
   }
   RepoTxnQuery query(txn, *this);
@@ -1876,7 +1876,8 @@ void UnitRepoProxy::InsertUnitStmt
   query.bindTypedValue("@mainReturn", *mainReturn);
   query.bindBool("@mergeable", mergeOnly);
   query.bindBlob("@lines", linesBlob(lines), /* static */ true);
-  query.bindBlob("@typedefs", typedefsBlob(typedefs), /* static */ true);
+  query.bindBlob("@typeAliases",
+                 typeAliasesBlob(typeAliases), /* static */ true);
   query.exec();
   unitSn = query.getInsertedRowid();
 }
@@ -1888,7 +1889,7 @@ bool UnitRepoProxy::GetUnitStmt
     if (!prepared()) {
       std::stringstream ssSelect;
       ssSelect << "SELECT unitSn,bc,bc_meta,mainReturn,mergeable,"
-                  "lines,typedefs FROM "
+                  "lines,typeAliases FROM "
                << m_repo.table(m_repoId, "Unit")
                << " WHERE md5 == @md5;";
       txn.prepare(*this, ssSelect.str());
@@ -1906,7 +1907,7 @@ bool UnitRepoProxy::GetUnitStmt
     TypedValue value;                        /**/ query.getTypedValue(3, value);
     bool mergeable;                          /**/ query.getBool(4, mergeable);
     BlobDecoder linesBlob =                  /**/ query.getBlob(5);
-    BlobDecoder typedefsBlob =               /**/ query.getBlob(6);
+    BlobDecoder typeAliasesBlob =            /**/ query.getBlob(6);
     ue.setRepoId(m_repoId);
     ue.setSn(unitSn);
     ue.setBc((const uchar*)bc, bclen);
@@ -1918,7 +1919,7 @@ bool UnitRepoProxy::GetUnitStmt
     linesBlob(lines);
     ue.setLines(lines);
 
-    typedefsBlob(ue.m_typedefs);
+    typeAliasesBlob(ue.m_typeAliases);
 
     txn.commit();
   } catch (RepoExc& re) {
@@ -2348,9 +2349,9 @@ PreClassEmitter* UnitEmitter::newPreClassEmitter(const StringData* n,
   return pce;
 }
 
-Id UnitEmitter::addTypedef(const Typedef& td) {
-  Id id = m_typedefs.size();
-  m_typedefs.push_back(td);
+Id UnitEmitter::addTypeAlias(const TypeAlias& td) {
+  Id id = m_typeAliases.size();
+  m_typeAliases.push_back(td);
   return id;
 }
 
@@ -2457,7 +2458,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       urp.insertUnit(repoId).insert(txn, m_sn, m_md5, m_bc, m_bclen,
                                     m_bc_meta, m_bc_meta_len,
                                     &m_mainReturn, m_mergeOnly, lines,
-                                    m_typedefs);
+                                    m_typeAliases);
     }
     int64_t usn = m_sn;
     for (unsigned i = 0; i < m_litstrs.size(); ++i) {
@@ -2568,7 +2569,7 @@ Unit* UnitEmitter::create() {
        ++it) {
     u->m_preClasses.push_back(PreClassPtr((*it)->create(*u)));
   }
-  u->m_typedefs = m_typedefs;
+  u->m_typeAliases = m_typeAliases;
 
   size_t ix = m_fes.size() + m_hoistablePceIdVec.size();
   if (m_mergeOnly && !m_allClassesHoistable) {

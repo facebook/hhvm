@@ -139,34 +139,34 @@ void TypeConstraint::init() {
  * autoload typedefs because they can affect whether the
  * VerifyParamType would succeed.
  */
-const TypedefReq* getTypedefWithAutoload(const NamedEntity* ne,
-                                         const StringData* name) {
-  auto def = ne->getCachedTypedef();
+const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
+                                             const StringData* name) {
+  auto def = ne->getCachedTypeAlias();
   if (!def) {
     String nameStr(const_cast<StringData*>(name));
     if (!AutoloadHandler::s_instance->autoloadType(nameStr)) {
       return nullptr;
     }
-    def = ne->getCachedTypedef();
+    def = ne->getCachedTypeAlias();
   }
   return def;
 }
 
-bool TypeConstraint::checkTypedefNonObj(const TypedValue* tv) const {
+bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
   assert(tv->m_type != KindOfObject); // this checks when tv is not an object
   assert(!isSelf() && !isParent());
 
-  auto const td = getTypedefWithAutoload(m_namedEntity, m_typeName);
+  auto const td = getTypeAliasWithAutoload(m_namedEntity, m_typeName);
   if (!td) return false;
   if (td->nullable && IS_NULL_TYPE(tv->m_type)) return true;
   return td->kind == KindOfAny || equivDataTypes(td->kind, tv->m_type);
 }
 
-bool TypeConstraint::checkTypedefObj(const TypedValue* tv) const {
+bool TypeConstraint::checkTypeAliasObj(const TypedValue* tv) const {
   assert(tv->m_type == KindOfObject); // this checks when tv is an object
   assert(!isSelf() && !isParent() && !isCallable());
 
-  auto const td = getTypedefWithAutoload(m_namedEntity, m_typeName);
+  auto const td = getTypeAliasWithAutoload(m_namedEntity, m_typeName);
   if (!td) return false;
   if (td->nullable && IS_NULL_TYPE(tv->m_type)) return true;
   if (td->kind != KindOfObject) return td->kind == KindOfAny;
@@ -184,7 +184,7 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
   if (nullable() && IS_NULL_TYPE(tv->m_type)) return true;
 
   if (tv->m_type == KindOfObject) {
-    if (!isObjectOrTypedef()) return false;
+    if (!isObjectOrTypeAlias()) return false;
     // Perfect match seems common enough to be worth skipping the hash
     // table lookup.
     if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) {
@@ -214,10 +214,10 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     if (c && tv->m_data.pobj->instanceof(c)) {
       return true;
     }
-    return !selfOrParentOrCallable && checkTypedefObj(tv);
+    return !selfOrParentOrCallable && checkTypeAliasObj(tv);
   }
 
-  if (isObjectOrTypedef()) {
+  if (isObjectOrTypeAlias()) {
     switch (tv->m_type) {
       case KindOfArray:
         if (interface_supports_array(m_typeName)) {
@@ -247,7 +247,7 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     if (isCallable()) {
       return f_is_callable(tvAsCVarRef(tv));
     }
-    return isPrecise() && checkTypedefNonObj(tv);
+    return isPrecise() && checkTypeAliasNonObj(tv);
   }
 
   return equivDataTypes(m_type.m_dt, tv->m_type);

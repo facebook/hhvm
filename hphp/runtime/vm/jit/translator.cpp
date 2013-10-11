@@ -1190,7 +1190,7 @@ static const struct {
   { OpReqDoc,      {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpEval,        {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpDefFunc,     {None,             None,         OutNone,           0 }},
-  { OpDefTypedef,  {None,             None,         OutNone,           0 }},
+  { OpDefTypeAlias,{None,             None,         OutNone,           0 }},
   { OpDefCls,      {None,             None,         OutNone,           0 }},
   { OpDefCns,      {Stack1,           Stack1,       OutBoolean,        0 }},
 

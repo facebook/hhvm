@@ -285,12 +285,12 @@ void VerifyParamTypeSlow(const Class* cls,
   // object, so if it's a typedef for something non-objecty we're
   // failing anyway.
   if (auto namedEntity = expected->namedEntity()) {
-    auto def = namedEntity->getCachedTypedef();
+    auto def = namedEntity->getCachedTypeAlias();
     if (UNLIKELY(!def)) {
       VMRegAnchor _;
       String nameStr(const_cast<StringData*>(expected->typeName()));
       if (AutoloadHandler::s_instance->autoloadType(nameStr)) {
-        def = namedEntity->getCachedTypedef();
+        def = namedEntity->getCachedTypeAlias();
       }
     }
     if (def) {

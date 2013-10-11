@@ -49,13 +49,13 @@ struct NamedEntity {
   explicit NamedEntity()
     : m_cachedClass(RDS::kInvalidHandle)
     , m_cachedFunc(RDS::kInvalidHandle)
-    , m_cachedTypedef(RDS::kInvalidHandle)
+    , m_cachedTypeAlias(RDS::kInvalidHandle)
     , m_clsList(nullptr)
   {}
 
   mutable RDS::Link<Class*> m_cachedClass;
   mutable RDS::Link<Func*> m_cachedFunc;
-  mutable RDS::Link<TypedefReq> m_cachedTypedef;
+  mutable RDS::Link<TypeAliasReq> m_cachedTypeAlias;
 
   /*
    * Get the RDS::Handle that caches this Class*, creating a
@@ -81,8 +81,8 @@ struct NamedEntity {
   void setCachedClass(Class* c);
   Class* getCachedClass() const;
 
-  const TypedefReq* getCachedTypedef() const;
-  void setCachedTypedef(const TypedefReq&);
+  const TypeAliasReq* getCachedTypeAlias() const;
+  void setCachedTypeAlias(const TypeAliasReq&);
 
   Class* clsList() const {
     return m_clsList;
@@ -100,12 +100,12 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Lookup a Typedef* for the supplied NamedEntity (which must be the
- * NamedEntity for `name'), if necessary invoking autoload for types
- * but not classes.
+ * Lookup a TypeAliasReq for the supplied NamedEntity (which must be
+ * the NamedEntity for `name'), if necessary invoking autoload for
+ * types but not classes.
  */
-const TypedefReq* getTypedefWithAutoload(const NamedEntity* ne,
-                                         const StringData* name);
+const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
+                                             const StringData* name);
 
 //////////////////////////////////////////////////////////////////////
 

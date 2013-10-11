@@ -516,7 +516,7 @@ struct Unit {
   static Class* defClass(const HPHP::PreClass* preClass,
                          bool failIsFatal = true);
   static bool aliasClass(Class* original, const StringData* alias);
-  void defTypedef(Id id);
+  void defTypeAlias(Id id);
 
   static Cell* lookupCns(const StringData* cnsName);
   static Cell* lookupPersistentCns(const StringData* cnsName);
@@ -743,7 +743,7 @@ private:
   std::vector<NamedEntityPair> m_namedInfo;
   std::vector<const ArrayData*> m_arrays;
   PreClassPtrVec m_preClasses;
-  FixedVector<Typedef> m_typedefs;
+  FixedVector<TypeAlias> m_typeAliases;
   UnitMergeInfo* m_mergeInfo;
   unsigned m_cacheOffset;
   int8_t m_repoId;
@@ -781,7 +781,7 @@ class UnitEmitter {
   void setMainReturn(const TypedValue* v) { m_mainReturn = *v; }
   void setMergeOnly(bool b) { m_mergeOnly = b; }
   const MD5& md5() const { return m_md5; }
-  Id addTypedef(const Typedef& td);
+  Id addTypeAlias(const TypeAlias& td);
   Id mergeLitstr(const StringData* litstr);
   Id mergeUnitLitstr(const StringData* litstr);
   Id mergeArray(ArrayData* a, const StringData* key=nullptr);
@@ -922,7 +922,7 @@ class UnitEmitter {
   std::vector<std::pair<Offset,SourceLoc> > m_sourceLocTab;
   std::vector<std::pair<Offset,const FuncEmitter*> > m_feTab;
   LineTable m_lineTable;
-  std::vector<Typedef> m_typedefs;
+  std::vector<TypeAlias> m_typeAliases;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -994,7 +994,7 @@ class UnitRepoProxy : public RepoProxy {
                 size_t bclen, const uchar* bc_meta, size_t bc_meta_len,
                 const TypedValue* mainReturn, bool mergeOnly,
                 const LineTable& lines,
-                const std::vector<Typedef>&);
+                const std::vector<TypeAlias>&);
   };
   class GetUnitStmt : public RepoProxy::Stmt {
    public:

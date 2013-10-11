@@ -418,7 +418,8 @@ DebuggerClient::DebuggerClient()
       m_sigNum(CmdSignal::SignalNone), m_sigCount(0),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_listLineFocus(0),
-      m_stacktraceAsync(false), m_frame(0) {
+      m_stacktraceAsync(false), m_frame(0),
+      m_unknownCmd(false) {
   TRACE(2, "DebuggerClient::DebuggerClient\n");
   Debugger::InitUsageLogging();
 }
@@ -1573,6 +1574,9 @@ do {                                         \
 bool DebuggerClient::process() {
   TRACE(2, "DebuggerClient::process\n");
   clearCachedLocal();
+
+  // assume it is a known command.
+  m_unknownCmd = false;
   switch (tolower(m_command[0])) {
     case '@':
     case '=':
@@ -1606,6 +1610,7 @@ bool DebuggerClient::process() {
         DebuggerCommandPtr deleter(cmd);
         cmd->onClient(*this);
       } else {
+        m_unknownCmd = true;
         processTakeCode();
       }
       return true;

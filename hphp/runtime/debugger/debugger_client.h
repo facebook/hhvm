@@ -311,6 +311,7 @@ public:
   // Internal testing helpers. Only used by internal tests!!!
   bool internalTestingIsClientStopped() const { return m_stopped; }
 
+  bool unknownCmdReceived() const { return m_unknownCmd; }
 private:
   enum InputState {
     TakingCommand,
@@ -440,6 +441,8 @@ private:
 
   // Zend executable for CmdZend, overridable via config.
   std::string m_zendExe;
+
+  bool m_unknownCmd;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -282,6 +282,26 @@ bool BaseVector::OffsetContains(ObjectData* obj, TypedValue* key) {
   }
 }
 
+bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto bv1 = static_cast<const BaseVector*>(obj1);
+  auto bv2 = static_cast<const BaseVector*>(obj2);
+
+  uint sz = bv1->m_size;
+  if (sz != bv2->m_size) {
+    return false;
+  }
+
+  for (uint i = 0; i < sz; ++i) {
+    if (!equal(tvAsCVarRef(&bv1->m_data[i]),
+               tvAsCVarRef(&bv2->m_data[i]))) {
+
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // Helpers
 
 Array BaseVector::toArrayImpl() const {

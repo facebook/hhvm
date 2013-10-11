@@ -674,22 +674,6 @@ void c_Vector::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throw e;
 }
 
-bool c_Vector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
-  auto vec1 = static_cast<const c_Vector*>(obj1);
-  auto vec2 = static_cast<const c_Vector*>(obj2);
-  uint sz = vec1->m_size;
-  if (sz != vec2->m_size) {
-    return false;
-  }
-  for (uint i = 0; i < sz; ++i) {
-    if (!equal(tvAsCVarRef(&vec1->m_data[i]),
-               tvAsCVarRef(&vec2->m_data[i]))) {
-      return false;
-    }
-  }
-  return true;
-}
-
 void c_Vector::Unserialize(ObjectData* obj,
                            VariableUnserializer* uns,
                            int64_t sz,
@@ -5021,6 +5005,8 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
       return c_Set::Equals(obj1, obj2);
     case Collection::PairType:
       return c_Pair::Equals(obj1, obj2);
+    case Collection::FrozenVectorType:
+      return c_FrozenVector::Equals(obj1, obj2);
     default:
       assert(false);
       return false;

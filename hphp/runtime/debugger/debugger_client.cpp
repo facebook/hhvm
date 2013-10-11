@@ -118,8 +118,10 @@ void DebuggerClient::onSignal(int sig) {
     m_sigNum = CmdSignal::SignalBreak;
   } else {
     rl_line_buffer[0] = '\0';
+#ifndef USE_EDITLINE
     rl_free_line_state();
     rl_cleanup_after_signal();
+#endif
     rl_redisplay();
   }
 }
@@ -148,7 +150,9 @@ public:
     rl_attempted_completion_function = debugger_completion;
     rl_basic_word_break_characters = PHP_WORD_BREAK_CHARACTERS;
 
+#ifndef USE_EDITLINE
     rl_catch_signals = 0;
+#endif
     signal(SIGINT, debugger_signal_handler);
 
     TRACE(3, "ReadlineApp::ReadlineApp, about to call read_history\n");

@@ -702,6 +702,14 @@ static int start_server(const std::string &username) {
     }
   }
 
+  if (RuntimeOption::EvalEnableNuma) {
+#ifdef USE_JEMALLOC
+    mallctl("arenas.purge", nullptr, nullptr, nullptr, 0);
+#endif
+    Util::enable_numa(RuntimeOption::EvalEnableNumaLocal);
+
+  }
+
   HttpServer::Server->run();
   return 0;
 }

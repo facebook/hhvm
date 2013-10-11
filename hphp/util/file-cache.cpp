@@ -366,8 +366,8 @@ void FileCache::adviseOutMemory() {
     return;
   }
 
-  if (posix_madvise(m_addr, m_size, POSIX_MADV_DONTNEED)) {
-    Logger::Error("posix_madvise failed: %s",
+  if (madvise(m_addr, m_size, MADV_DONTNEED)) {
+    Logger::Error("madvise failed: %s",
                   folly::errnoStr(errno).c_str());
   }
 }

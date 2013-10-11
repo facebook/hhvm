@@ -89,10 +89,6 @@ void VerifyParamTypeSlow(const Class* cls,
 
 void raise_error_sd(const StringData* sd);
 
-int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
-int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
-int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
-
 RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val);
 
 bool instanceOfHelper(const Class* objClass, const Class* testClass);
@@ -109,10 +105,12 @@ TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 TypedValue* ldGblAddrHelper(StringData* name);
 TypedValue* ldGblAddrDefHelper(StringData* name);
 
+int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
+int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
+int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
+
 typedef FixedStringMap<TCA,true> SSwitchMap;
-TCA sswitchHelperFast(const StringData* val,
-                      const SSwitchMap* table,
-                      TCA* def);
+TCA sswitchHelperFast(const StringData* val, const SSwitchMap* table, TCA* def);
 
 void tv_release_generic(TypedValue* tv);
 void tv_release_typed(RefData* pv, DataType dt);

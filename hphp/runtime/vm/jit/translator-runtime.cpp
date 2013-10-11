@@ -416,6 +416,57 @@ TypedValue* ldGblAddrDefHelper(StringData* name) {
   return r;
 }
 
+template <typename T>
+static int64_t switchBoundsCheck(T v, int64_t base, int64_t nTargets) {
+  // I'm relying on gcc to be smart enough to optimize away the next
+  // two lines when T is int64.
+  if (int64_t(v) == v) {
+    int64_t ival = v;
+    if (ival >= base && ival < (base + nTargets)) {
+      return ival - base;
+    }
+  }
+  return nTargets + 1;
+}
+
+int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets) {
+  union {
+    int64_t intbits;
+    double dblval;
+  } u;
+  u.intbits = val;
+  return switchBoundsCheck(u.dblval, base, nTargets);
+}
+
+int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
+  int64_t ival;
+  double dval;
+  switch (s->isNumericWithVal(ival, dval, 1)) {
+    case KindOfNull:
+      ival = switchBoundsCheck(0, base, nTargets);
+      break;
+
+    case KindOfDouble:
+      ival = switchBoundsCheck(dval, base, nTargets);
+      break;
+
+    case KindOfInt64:
+      ival = switchBoundsCheck(ival, base, nTargets);
+      break;
+
+    default:
+      not_reached();
+  }
+  decRefStr(s);
+  return ival;
+}
+
+int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
+  int64_t ival = o->o_toInt64();
+  decRefObj(o);
+  return switchBoundsCheck(ival, base, nTargets);
+}
+
 TCA sswitchHelperFast(const StringData* val,
                       const SSwitchMap* table,
                       TCA* def) {

@@ -22,6 +22,24 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/exception.h"
+
+#ifdef HAVE_LIBDL
+# include <dlfcn.h>
+# ifndef RTLD_LAZY
+#  define RTLD_LAZY 1
+# endif
+# ifndef RTLD_GLOBAL
+#  define RTLD_GLOBAL 0
+# endif
+# if defined(RTLD_GROUP) && defined(RTLD_WORLD) && defined(RTLD_PARENT)
+#  define DLOPEN_FLAGS (RTLD_LAZY|RTLD_GLOBAL|RTLD_GROUP|RTLD_WORLD|RTLD_PARENT)
+# elif defined(RTLD_DEEPBIND)
+#  define DLOPEN_FLAGS (RTLD_LAZY|RTLD_GLOBAL|RTLD_DEEPBIND)
+# else
+#  define DLOPEN_FLAGS (RTLD_LAZY|RTLD_GLOBAL)
+# endif
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,9 +59,42 @@ public:
 static ExtensionUninitializer s_extension_uninitializer;
 
 ///////////////////////////////////////////////////////////////////////////////
+// dlfcn wrappers
+
+static void* dlopen(const char *dso) {
+#ifdef HAVE_LIBDL
+  return ::dlopen(dso, DLOPEN_FLAGS);
+#else
+  return nullptr;
+#endif
+}
+
+static void* dlsym(void *mod, const char *sym) {
+#ifdef HAVE_LIBDL
+# ifdef LIBDL_NEEDS_UNDERSCORE
+  std::string tmp("_");
+  tmp += sym;
+  sym = tmp.c_str();
+# endif
+  return ::dlsym(mod, sym);
+#else
+  return nullptr;
+#endif
+}
+
+static const char* dlerror() {
+#ifdef HAVE_LIBDL
+  return ::dlerror();
+#else
+  return "Your system does not support dlopen()";
+#endif
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 Extension::Extension(litstr name, const char *version /* = "" */)
-    : m_name(makeStaticString(name))
+    : m_hhvmAPIVersion(HHVM_API_VERSION)
+    , m_name(makeStaticString(name))
     , m_version(version ? version : "") {
   if (s_registered_extensions == NULL) {
     s_registered_extensions = new ExtensionMap();
@@ -54,6 +105,46 @@ Extension::Extension(litstr name, const char *version /* = "" */)
 }
 
 void Extension::LoadModules(Hdf hdf) {
+  // Load up any dynamic extensions
+  std::string path = hdf["DynamicExtensionPath"].getString(".");
+  for (Hdf ext = hdf["DynamicExtensions"].firstChild();
+       ext.exists(); ext = ext.next()) {
+    std::string extLoc = ext.getString();
+    if (extLoc.empty()) {
+      continue;
+    }
+    if (extLoc[0] != '/') {
+      extLoc = path + "/" + extLoc;
+    }
+
+    // Extensions are self-registering,
+    // so we bring in the SO then
+    // throw away its handle.
+    void *ptr = dlopen(extLoc.c_str());
+    if (!ptr) {
+      throw Exception("Could not open extension %s: %s",
+                      extLoc.c_str(), dlerror());
+    }
+    auto getModule = (Extension *(*)())dlsym(ptr, "getModule");
+    if (!getModule) {
+      throw Exception("Could not load extension %s: %s (%s)",
+                      extLoc.c_str(),
+                      "getModule() symbol not defined.",
+                      dlerror());
+    }
+    Extension *mod = getModule();
+    if (mod->m_hhvmAPIVersion != HHVM_API_VERSION) {
+      throw Exception("Could not use extension %s: "
+                      "Compiled with HHVM API Version %ld, "
+                      "this version of HHVM expects %ld",
+                      extLoc.c_str(),
+                      mod->m_hhvmAPIVersion,
+                      HHVM_API_VERSION);
+    }
+    mod->setDSOName(extLoc);
+  }
+
+  // Invoke Extension::moduleLoad() callbacks
   assert(s_registered_extensions);
   for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
        iter != s_registered_extensions->end(); ++iter) {
@@ -135,9 +226,14 @@ void Extension::CompileSystemlib(const std::string &slib,
 }
 
 void Extension::loadSystemlib() {
-  std::string section("systemlib.ext.");
-  section += m_name.data();
-  std::string hhas, slib = get_systemlib(&hhas, section);
+  std::string hhas, slib;
+  if (m_dsoName.empty()) {
+    std::string section("systemlib.ext.");
+    section += m_name.data();
+    slib = get_systemlib(&hhas, section);
+  } else {
+    slib = get_systemlib(&hhas, "systemlib", m_dsoName);
+  }
   if (!slib.empty()) {
     std::string phpname("systemlib.php.");
     phpname += m_name.data();

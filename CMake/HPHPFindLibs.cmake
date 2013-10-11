@@ -17,6 +17,16 @@
 
 include(CheckFunctionExists)
 
+# libdl
+find_package(LibDL)
+if (LIBDL_INCLUDE_DIRS)
+	add_definitions("-DHAVE_LIBDL")
+	include_directories(${LIBDL_INCLUDE_DIRS})
+	if (LIBDL_NEEDS_UNDERSCORE)
+		add_definitions("-DLIBDL_NEEDS_UNDERSCORE")
+	endif()
+endif()
+
 # boost checks
 find_package(Boost 1.48.0 COMPONENTS system program_options filesystem regex REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -347,6 +357,10 @@ include_directories(${HPHP_HOME}/hphp)
 include_directories(${HPHP_HOME}/hphp/system/gen)
 
 macro(hphp_link target)
+	if (LIBDL_LIBRARIES)
+		target_link_libraries(${target} ${LIBDL_LIBRARIES})
+	endif ()
+
 	if (GOOGLE_HEAP_PROFILER_ENABLED OR GOOGLE_CPU_PROFILER_ENABLED)
 		target_link_libraries(${target} ${GOOGLE_PROFILER_LIB})
 	endif()

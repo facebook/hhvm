@@ -1322,13 +1322,14 @@ static string systemlib_split(string slib, string* hhas) {
 }
 
 // Retrieve a systemlib (or mini systemlib) from the
-// current executable.
+// current executable or another ELF object file.
 //
-// Additionally, when retrieving the main systemlib,
-// honor the HHVM_SYSTEMLIB environment variable as
-// an override.
-string get_systemlib(string* hhas, const string &section /*= "systemlib" */) {
-  if (section == "systemlib") {
+// Additionally, when retrieving the main systemlib
+// from the current executable, honor the
+// HHVM_SYSTEMLIB environment variable as an override.
+string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
+                                   const string &filename /*= "" */) {
+  if (filename.empty() && section == "systemlib") {
     if (char *file = getenv("HHVM_SYSTEMLIB")) {
       std::ifstream ifs(file);
       if (ifs.good()) {
@@ -1340,7 +1341,7 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */) {
   }
 
   Util::embedded_data desc;
-  if (!Util::get_embedded_data(section.c_str(), &desc)) return "";
+  if (!Util::get_embedded_data(section.c_str(), &desc, filename)) return "";
 
   std::ifstream ifs(desc.m_filename);
   if (!ifs.good()) return "";

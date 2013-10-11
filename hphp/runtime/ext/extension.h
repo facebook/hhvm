@@ -87,10 +87,26 @@ public:
   virtual void moduleInit() {}
   virtual void moduleShutdown() {}
 
+  void setDSOName(const std::string &name) {
+    m_dsoName = name;
+  }
+
 private:
+  // Indicates which version of the HHVM Extension API
+  // this module was built against.
+  int64_t m_hhvmAPIVersion;
+
   const String m_name;
   std::string m_version;
+  std::string m_dsoName;
 };
+
+#define HHVM_API_VERSION 20131007L
+
+#define HHVM_GET_MODULE(name) \
+extern "C" Extension *getModule() { \
+  return &s_##name##_extension; \
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -34,7 +34,10 @@
 
 namespace HPHP { namespace Util {
 
-bool get_embedded_data(const char *section, embedded_data* desc) {
+bool get_embedded_data(const char *section, embedded_data* desc,
+                       const std::string &filename /*= "" */) {
+  std::string fname(filename.empty() ? current_executable_path() : filename);
+
 #ifndef __APPLE__
   GElf_Shdr shdr;
   size_t shstrndx;
@@ -43,7 +46,7 @@ bool get_embedded_data(const char *section, embedded_data* desc) {
 
   if (elf_version(EV_CURRENT) == EV_NONE) return false;
 
-  int fd = open(current_executable_path().c_str(), O_RDONLY, 0);
+  int fd = open(fname.c_str(), O_RDONLY, 0);
   if (fd < 0) return false;
   SCOPE_EXIT { close(fd); };
 
@@ -68,7 +71,7 @@ bool get_embedded_data(const char *section, embedded_data* desc) {
     if (!strcmp(section, name)) {
       GElf_Shdr ghdr;
       if (gelf_getshdr(scn, &ghdr) != &ghdr) return false;
-      desc->m_filename = current_executable_path();
+      desc->m_filename = fname;
       desc->m_start = ghdr.sh_offset;
       desc->m_len = ghdr.sh_size;
       return true;
@@ -77,15 +80,10 @@ bool get_embedded_data(const char *section, embedded_data* desc) {
 #else // __APPLE__
   const struct section_64 *sect = getsectbyname("__text", section);
   if (sect) {
-    std::string path = current_executable_path();
-    if (!path.empty()) {
-      desc->m_filename = path;
-    } else {
-      return false;
-    }
+    desc->m_filename = fname;
     desc->m_start = sect->offset;
     desc->m_len = sect->size;
-    return true;
+    return !desc->m_filename.empty();
   }
 #endif // __APPLE__
   return false;

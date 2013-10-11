@@ -90,3 +90,6 @@ add_subdirectory(system)
 if (NOT "$ENV{HPHP_NOTEST}" STREQUAL "1")
 	add_subdirectory(test)
 endif ()
+
+# Keep this last
+add_subdirectory(tools/hphpize)

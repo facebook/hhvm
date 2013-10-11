@@ -1,2 +1,917 @@
 HipHop Warning: HipHop currently does not support circular reference collection in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/tests/bootstrap.php on line 57
-HipHop Fatal error: Undefined interface: Psr\Log\LoggerAwareInterface in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Application/AbstractApplication.php on line 21
+PHPUnit 3.7.27 by Sebastian Bergmann.
+
+Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/phpunit.xml.dist
+
+
+Starting test 'Joomla\Application\Tests\AbstractApplicationTest::test__construct'.
+.
+Starting test 'Joomla\Application\Tests\AbstractApplicationTest::testClose'.
+.
+Starting test 'Joomla\Application\Tests\AbstractApplicationTest::testExecute'.
+.
+Starting test 'Joomla\Application\Tests\AbstractApplicationTest::testGet'.
+.
+Starting test 'Joomla\Application\Tests\AbstractApplicationTest::testGetLogger_exception'.
+.
+Starting test 'Joomla\Application\Tests\AbstractApplicationTest::testHasLogger'.
+.
+Starting test 'Joomla\Application\Tests\AbstractApplicationTest::testSet'.
+.
+Starting test 'Joomla\Application\Tests\AbstractApplicationTest::testSetConfiguration'.
+.
+Starting test 'Joomla\Application\Tests\AbstractApplicationTest::testSetLogger'.
+.
+Starting test 'Joomla\Application\Tests\AbstractCliApplicationTest::test__construct'.
+.
+Starting test 'Joomla\Application\Tests\AbstractCliApplicationTest::testClose'.
+.
+Starting test 'Joomla\Application\Tests\AbstractCliApplicationTest::testGetOutput'.
+.
+Starting test 'Joomla\Application\Tests\AbstractDaemonApplicationTest::testChangeIdentity'.
+I
+Starting test 'Joomla\Application\Tests\AbstractDaemonApplicationTest::testDaemonize'.
+I
+Starting test 'Joomla\Application\Tests\AbstractDaemonApplicationTest::testFork'.
+I
+Starting test 'Joomla\Application\Tests\AbstractDaemonApplicationTest::testGc'.
+I
+Starting test 'Joomla\Application\Tests\AbstractDaemonApplicationTest::testIsActive'.
+I
+Starting test 'Joomla\Application\Tests\AbstractDaemonApplicationTest::testLoadConfiguration'.
+I
+Starting test 'Joomla\Application\Tests\AbstractDaemonApplicationTest::testSetupSignalHandlers'.
+.
+Starting test 'Joomla\Application\Tests\AbstractDaemonApplicationTest::testSetupSignalHandlersFailure'.
+.
+Starting test 'Joomla\Application\Tests\AbstractDaemonApplicationTest::testShutdown'.
+I
+Starting test 'Joomla\Application\Tests\AbstractDaemonApplicationTest::testSignal'.
+I
+Starting test 'Joomla\Application\Tests\AbstractDaemonApplicationTest::testExecute'.
+I
+Starting test 'Joomla\Application\Tests\AbstractDaemonApplicationTest::testWriteProcessIdFile'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::test__construct'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::test__constructDependancyInjection'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testAllowCache'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testAppendBody'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testClearHeaders'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testClose'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testCompressWithGzipEncoding'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testCompressWithDeflateEncoding'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testCompressWithNoAcceptEncodings'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testCompressWithHeadersSent'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testCompressWithUnsupportedEncodings'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #0 (NULL, '/j/index.php', '/j/index.php?foo=bar', 'joom.la:3', '/j/index.php', '', 'http://joom.la:3/j/index.php?foo=bar')'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #1 ('on', '/j/index.php', '/j/index.php?foo=bar', 'joom.la:3', '/j/index.php', '', 'https://joom.la:3/j/index.php?foo=bar')'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #2 (NULL, '', '', 'joom.la:3', '/j/index.php', '', 'http://joom.la:3/j/index.php')'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #3 (NULL, '', '', 'joom.la:3', '/j/index.php', 'foo=bar', 'http://joom.la:3/j/index.php?foo=bar')'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testExecute'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testGetBody'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testGetHeaders'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testLoadSystemUrisWithSiteUriSet'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testLoadSystemUrisWithoutSiteUriSet'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testLoadSystemUrisWithoutSiteUriWithMediaUriSet'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testLoadSystemUrisWithoutSiteUriWithRelativeMediaUriSet'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testPrependBody'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testRedirect'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithHeadersSent'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithJavascriptRedirect'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithMoved'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithUrl with data set #0 ('/foo', 'http://j.org/', 'http://j.org/index.php?v=1.0', 'http://j.org/foo')'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithUrl with data set #1 ('foo', 'http://j.org/', 'http://j.org/index.php?v=1.0', 'http://j.org/foo')'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testRespond'.
+I
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testSendHeaders'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testSetBody'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testSetHeader'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testSetSession'.
+.
+Starting test 'Joomla\Application\Tests\AbstractWebApplicationTest::testIsSSLConnection'.
+.
+Starting test 'Joomla\Application\Tests\ColorProcessorTest::testAddStyle'.
+.
+Starting test 'Joomla\Application\Tests\ColorProcessorTest::testStripColors'.
+.   61 / 4133 (  1%)
+
+Starting test 'Joomla\Application\Tests\ColorProcessorTest::testProcess'.
+.
+Starting test 'Joomla\Application\Tests\ColorProcessorTest::testProcessNamed'.
+.
+Starting test 'Joomla\Application\Tests\ColorProcessorTest::testProcessReplace'.
+.
+Starting test 'Joomla\Application\Cli\Tests\ColorStyleTest::testGetStyle'.
+.
+Starting test 'Joomla\Application\Cli\Tests\ColorStyleTest::testToString'.
+.
+Starting test 'Joomla\Application\Cli\Tests\ColorStyleTest::testFromStringInvalid'.
+.
+Starting test 'Joomla\Application\Cli\Tests\ColorStyleTest::testConstructInvalid1'.
+.
+Starting test 'Joomla\Application\Cli\Tests\ColorStyleTest::testConstructInvalid2'.
+.
+Starting test 'Joomla\Application\Cli\Tests\ColorStyleTest::testConstructInvalid3'.
+.
+Starting test 'JApplicationWebClientTest::test__construct'.
+I
+Starting test 'JApplicationWebClientTest::test__get'.
+I
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #0 (1, false, 11, 17, '10', 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #1 (1, false, 11, 17, '9', 'Mozilla/5.0 (Windows; U; MSIE 9.0; WIndows NT 9.0; en-US))')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #2 (1, false, 11, 17, '8', 'Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET CLR 1.0.3705; .NET CLR 1.1.4322)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #3 (1, false, 11, 17, '7.0b', 'Mozilla/4.0(compatible; MSIE 7.0b; Windows NT 6.0)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #4 (1, false, 11, 17, '7.0b', 'Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 5.1; Media Center PC 3.0; .NET CLR 1.0.3705; .NET CLR 1.1.4322; .NET CLR 2.0.50727; InfoPath.1)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #5 (1, false, 11, 17, '7', 'Mozilla/5.0 (Windows; U; MSIE 7.0; Windows NT 5.2)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #6 (1, false, 11, 17, '6.1', 'Mozilla/4.0 (compatible; MSIE 6.1; Windows XP)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #7 (1, false, 11, 17, '6', 'Mozilla/4.0 (compatible;MSIE 6.0;Windows 98;Q312461)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #8 (1, false, 11, 17, '7', 'Mozilla/4.0 (compatible; MSIE 7.0; AOL 9.6; AOLBuild 4340.128; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #9 (1, false, 11, 17, '8', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; Maxthon 2.0)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #10 (1, false, 11, 17, '7', 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; SlimBrowser)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #11 (7, false, 12, 19, '13.0.782.32', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_3) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.782.32 Safari/535.1')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #12 (1, false, 12, 19, '12.0.742.113', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.113 Safari/534.30')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #13 (10, false, 12, 19, '12.0.742.112', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.30 (KHTML, like Gecko) Ubuntu/10.04 Chromium/12.0.742.112 Chrome/12.0.742.112 Safari/534.30')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #14 (1, false, 12, 19, '15.0.864.0', 'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.864.0 Safari/535.2')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #15 (8, true, 12, 20, '6.0.0.546', 'Mozilla/5.0 (BlackBerry; U; BlackBerry 9700; pt) AppleWebKit/534.8+ (KHTML, like Gecko) Version/6.0.0.546 Mobile Safari/534.8+')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #16 (8, true, 12, '', '', 'BlackBerry9700/5.0.0.862 Profile/MIDP-2.1 Configuration/CLDC-1.1 VendorID/120')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #17 (22, true, 12, 20, '999.9', 'Mozilla/5.0 (Linux; U; Android 2.3; en-us) AppleWebKit/999+ (KHTML, like Gecko) Safari/999.9')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #18 (9, true, 12, 20, '4', 'Mozilla/5.0 (Linux; U; Android 2.2.1; en-ca; LG-P505R Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #19 (22, true, 12, 20, '4', 'Mozilla/5.0 (Linux; U; Android 3.0; en-us; Xoom Build/HRI39) AppleWebKit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #20 (22, true, 12, 20, '4', 'Mozilla/5.0 (Linux; U; Android 2.3.4; en-us; Silk/1.1.0-84) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1 Silk-Accelerated=false')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #21 (22, true, 13, 18, '12', ' Mozilla/5.0 (Android; Tablet; rv:12.0) Gecko/12.0 Firefox/12.0')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #22 (22, true, 14, 21, '11.5', 'Opera/9.80 (Android 3.2.1; Linux; Opera Tablet/ADR-1111101157; U; en) Presto/2.9.201 Version/11.50')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #23 (5, true, 12, 20, '4.0.4', 'Mozilla/5.0(iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10gin_lib.cc')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #24 (4, true, 12, 20, '4.0.5', 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8B5097d Safari/6531.22.7')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #25 (5, true, 12, 20, '4.0.4', 'Mozilla/5.0(iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10gin_lib.cc')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #26 (6, true, 12, 20, '4.0.4', 'Mozilla/5.0(iPod; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10gin_lib.cc')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #27 (1, false, 12, 20, '5.0.4', 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #28 (7, false, 12, 20, '5.0.3', 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_5; ar) AppleWebKit/533.19.4 (KHTML, like Gecko) Version/5.0.3 Safari/533.19.4')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #29 (1, false, 13, 18, '3.6.9', 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-GB; rv:1.9.2.9) Gecko/20100824 Firefox/3.6.9 ( .NET CLR 3.5.30729; .NET CLR 4.0.20506)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #30 (1, false, 13, 18, '4.0b8pre', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:2.0b8pre) Gecko/20101213 Firefox/4.0b8pre')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #31 (1, false, 13, 18, '5', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:5.0) Gecko/20100101 Firefox/5.0')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #32 (1, false, 13, 18, '6', 'Mozilla/5.0 (Windows NT 5.0; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #33 (7, false, 13, '', '', 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en; rv:1.9.2.14pre) Gecko/20101212 Camino/2.1a1pre (like Firefox/3.6.14pre)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #34 (10, false, 15, '', '', 'Mozilla/5.0 (compatible; Konqueror/4.4; Linux 2.6.32-22-generic; X11; en_US) KHTML/4.4.3 (like Gecko) Kubuntu')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectBrowser with data set #35 ('', false, 16, '', '', 'amaya/11.3.1 libwww/5.4.1')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEncoding with data set #0 ('gzip, deflate', array('gzip', 'deflate'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEncoding with data set #1 ('x-gzip, deflate', array('x-gzip', 'deflate'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEncoding with data set #2 ('gzip, x-gzip, deflate', array('gzip', 'x-gzip', 'deflate'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEncoding with data set #3 (' gzip, deflate ', array('gzip', 'deflate'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEncoding with data set #4 ('deflate, x-gzip', array('deflate', 'x-gzip'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEncoding with data set #5 ('goober , flasm', array('goober', 'flasm'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEncoding with data set #6 ('b2z, base64', array('b2z', 'base64'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #0 (1, false, 11, 17, '10', 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #1 (1, false, 11, 17, '9', 'Mozilla/5.0 (Windows; U; MSIE 9.0; WIndows NT 9.0; en-US))')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #2 (1, false, 11, 17, '8', 'Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET CLR 1.0.3705; .NET CLR 1.1.4322)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #3 (1, false, 11, 17, '7.0b', 'Mozilla/4.0(compatible; MSIE 7.0b; Windows NT 6.0)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #4 (1, false, 11, 17, '7.0b', 'Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 5.1; Media Center PC 3.0; .NET CLR 1.0.3705; .NET CLR 1.1.4322; .NET CLR 2.0.50727; InfoPath.1)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #5 (1, false, 11, 17, '7', 'Mozilla/5.0 (Windows; U; MSIE 7.0; Windows NT 5.2)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #6 (1, false, 11, 17, '6.1', 'Mozilla/4.0 (compatible; MSIE 6.1; Windows XP)')'.
+.  122 / 4133 (  2%)
+
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #7 (1, false, 11, 17, '6', 'Mozilla/4.0 (compatible;MSIE 6.0;Windows 98;Q312461)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #8 (1, false, 11, 17, '7', 'Mozilla/4.0 (compatible; MSIE 7.0; AOL 9.6; AOLBuild 4340.128; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #9 (1, false, 11, 17, '8', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; Maxthon 2.0)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #10 (1, false, 11, 17, '7', 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; SlimBrowser)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #11 (7, false, 12, 19, '13.0.782.32', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_3) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.782.32 Safari/535.1')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #12 (1, false, 12, 19, '12.0.742.113', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.113 Safari/534.30')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #13 (10, false, 12, 19, '12.0.742.112', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.30 (KHTML, like Gecko) Ubuntu/10.04 Chromium/12.0.742.112 Chrome/12.0.742.112 Safari/534.30')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #14 (1, false, 12, 19, '15.0.864.0', 'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.864.0 Safari/535.2')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #15 (8, true, 12, 20, '6.0.0.546', 'Mozilla/5.0 (BlackBerry; U; BlackBerry 9700; pt) AppleWebKit/534.8+ (KHTML, like Gecko) Version/6.0.0.546 Mobile Safari/534.8+')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #16 (8, true, 12, '', '', 'BlackBerry9700/5.0.0.862 Profile/MIDP-2.1 Configuration/CLDC-1.1 VendorID/120')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #17 (22, true, 12, 20, '999.9', 'Mozilla/5.0 (Linux; U; Android 2.3; en-us) AppleWebKit/999+ (KHTML, like Gecko) Safari/999.9')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #18 (9, true, 12, 20, '4', 'Mozilla/5.0 (Linux; U; Android 2.2.1; en-ca; LG-P505R Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #19 (22, true, 12, 20, '4', 'Mozilla/5.0 (Linux; U; Android 3.0; en-us; Xoom Build/HRI39) AppleWebKit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #20 (22, true, 12, 20, '4', 'Mozilla/5.0 (Linux; U; Android 2.3.4; en-us; Silk/1.1.0-84) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1 Silk-Accelerated=false')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #21 (22, true, 13, 18, '12', ' Mozilla/5.0 (Android; Tablet; rv:12.0) Gecko/12.0 Firefox/12.0')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #22 (22, true, 14, 21, '11.5', 'Opera/9.80 (Android 3.2.1; Linux; Opera Tablet/ADR-1111101157; U; en) Presto/2.9.201 Version/11.50')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #23 (5, true, 12, 20, '4.0.4', 'Mozilla/5.0(iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10gin_lib.cc')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #24 (4, true, 12, 20, '4.0.5', 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8B5097d Safari/6531.22.7')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #25 (5, true, 12, 20, '4.0.4', 'Mozilla/5.0(iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10gin_lib.cc')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #26 (6, true, 12, 20, '4.0.4', 'Mozilla/5.0(iPod; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10gin_lib.cc')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #27 (1, false, 12, 20, '5.0.4', 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #28 (7, false, 12, 20, '5.0.3', 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_5; ar) AppleWebKit/533.19.4 (KHTML, like Gecko) Version/5.0.3 Safari/533.19.4')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #29 (1, false, 13, 18, '3.6.9', 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-GB; rv:1.9.2.9) Gecko/20100824 Firefox/3.6.9 ( .NET CLR 3.5.30729; .NET CLR 4.0.20506)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #30 (1, false, 13, 18, '4.0b8pre', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:2.0b8pre) Gecko/20101213 Firefox/4.0b8pre')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #31 (1, false, 13, 18, '5', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:5.0) Gecko/20100101 Firefox/5.0')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #32 (1, false, 13, 18, '6', 'Mozilla/5.0 (Windows NT 5.0; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #33 (7, false, 13, '', '', 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en; rv:1.9.2.14pre) Gecko/20101212 Camino/2.1a1pre (like Firefox/3.6.14pre)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #34 (10, false, 15, '', '', 'Mozilla/5.0 (compatible; Konqueror/4.4; Linux 2.6.32-22-generic; X11; en_US) KHTML/4.4.3 (like Gecko) Kubuntu')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectEngine with data set #35 ('', false, 16, '', '', 'amaya/11.3.1 libwww/5.4.1')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectLanguage with data set #0 ('en-US, en-GB', array('en-US', 'en-GB'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectLanguage with data set #1 ('fr-FR, de-DE', array('fr-FR', 'de-DE'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectLanguage with data set #2 ('en-AU, en-CA, en-GB', array('en-AU', 'en-CA', 'en-GB'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectLanguage with data set #3 (' nl-NL, de-DE ', array('nl-NL', 'de-DE'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectLanguage with data set #4 ('en, nl-NL', array('en', 'nl-NL'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectLanguage with data set #5 ('nerd , geek', array('nerd', 'geek'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectLanguage with data set #6 ('xx-XX, xx', array('xx-XX', 'xx'))'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #0 (1, false, 11, 17, '10', 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #1 (1, false, 11, 17, '9', 'Mozilla/5.0 (Windows; U; MSIE 9.0; WIndows NT 9.0; en-US))')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #2 (1, false, 11, 17, '8', 'Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET CLR 1.0.3705; .NET CLR 1.1.4322)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #3 (1, false, 11, 17, '7.0b', 'Mozilla/4.0(compatible; MSIE 7.0b; Windows NT 6.0)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #4 (1, false, 11, 17, '7.0b', 'Mozilla/4.0 (compatible; MSIE 7.0b; Windows NT 5.1; Media Center PC 3.0; .NET CLR 1.0.3705; .NET CLR 1.1.4322; .NET CLR 2.0.50727; InfoPath.1)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #5 (1, false, 11, 17, '7', 'Mozilla/5.0 (Windows; U; MSIE 7.0; Windows NT 5.2)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #6 (1, false, 11, 17, '6.1', 'Mozilla/4.0 (compatible; MSIE 6.1; Windows XP)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #7 (1, false, 11, 17, '6', 'Mozilla/4.0 (compatible;MSIE 6.0;Windows 98;Q312461)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #8 (1, false, 11, 17, '7', 'Mozilla/4.0 (compatible; MSIE 7.0; AOL 9.6; AOLBuild 4340.128; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #9 (1, false, 11, 17, '8', 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET4.0C; Maxthon 2.0)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #10 (1, false, 11, 17, '7', 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; SlimBrowser)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #11 (7, false, 12, 19, '13.0.782.32', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_3) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.782.32 Safari/535.1')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #12 (1, false, 12, 19, '12.0.742.113', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.113 Safari/534.30')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #13 (10, false, 12, 19, '12.0.742.112', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.30 (KHTML, like Gecko) Ubuntu/10.04 Chromium/12.0.742.112 Chrome/12.0.742.112 Safari/534.30')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #14 (1, false, 12, 19, '15.0.864.0', 'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.864.0 Safari/535.2')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #15 (8, true, 12, 20, '6.0.0.546', 'Mozilla/5.0 (BlackBerry; U; BlackBerry 9700; pt) AppleWebKit/534.8+ (KHTML, like Gecko) Version/6.0.0.546 Mobile Safari/534.8+')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #16 (8, true, 12, '', '', 'BlackBerry9700/5.0.0.862 Profile/MIDP-2.1 Configuration/CLDC-1.1 VendorID/120')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #17 (22, true, 12, 20, '999.9', 'Mozilla/5.0 (Linux; U; Android 2.3; en-us) AppleWebKit/999+ (KHTML, like Gecko) Safari/999.9')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #18 (9, true, 12, 20, '4', 'Mozilla/5.0 (Linux; U; Android 2.2.1; en-ca; LG-P505R Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #19 (22, true, 12, 20, '4', 'Mozilla/5.0 (Linux; U; Android 3.0; en-us; Xoom Build/HRI39) AppleWebKit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #20 (22, true, 12, 20, '4', 'Mozilla/5.0 (Linux; U; Android 2.3.4; en-us; Silk/1.1.0-84) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1 Silk-Accelerated=false')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #21 (22, true, 13, 18, '12', ' Mozilla/5.0 (Android; Tablet; rv:12.0) Gecko/12.0 Firefox/12.0')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #22 (22, true, 14, 21, '11.5', 'Opera/9.80 (Android 3.2.1; Linux; Opera Tablet/ADR-1111101157; U; en) Presto/2.9.201 Version/11.50')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #23 (5, true, 12, 20, '4.0.4', 'Mozilla/5.0(iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10gin_lib.cc')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #24 (4, true, 12, 20, '4.0.5', 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8B5097d Safari/6531.22.7')'.
+.  183 / 4133 (  4%)
+
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #25 (5, true, 12, 20, '4.0.4', 'Mozilla/5.0(iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10gin_lib.cc')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #26 (6, true, 12, 20, '4.0.4', 'Mozilla/5.0(iPod; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10gin_lib.cc')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #27 (1, false, 12, 20, '5.0.4', 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #28 (7, false, 12, 20, '5.0.3', 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_5; ar) AppleWebKit/533.19.4 (KHTML, like Gecko) Version/5.0.3 Safari/533.19.4')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #29 (1, false, 13, 18, '3.6.9', 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-GB; rv:1.9.2.9) Gecko/20100824 Firefox/3.6.9 ( .NET CLR 3.5.30729; .NET CLR 4.0.20506)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #30 (1, false, 13, 18, '4.0b8pre', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:2.0b8pre) Gecko/20101213 Firefox/4.0b8pre')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #31 (1, false, 13, 18, '5', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:5.0) Gecko/20100101 Firefox/5.0')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #32 (1, false, 13, 18, '6', 'Mozilla/5.0 (Windows NT 5.0; WOW64; rv:6.0) Gecko/20100101 Firefox/6.0')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #33 (7, false, 13, '', '', 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en; rv:1.9.2.14pre) Gecko/20101212 Camino/2.1a1pre (like Firefox/3.6.14pre)')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #34 (10, false, 15, '', '', 'Mozilla/5.0 (compatible; Konqueror/4.4; Linux 2.6.32-22-generic; X11; en_US) KHTML/4.4.3 (like Gecko) Kubuntu')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectPlatform with data set #35 ('', false, 16, '', '', 'amaya/11.3.1 libwww/5.4.1')'.
+.
+Starting test 'JApplicationWebClientTest::testDetectRobot with data set #0 ('Googlebot/2.1 (+http://www.google.com/bot.html)', true)'.
+.
+Starting test 'JApplicationWebClientTest::testDetectRobot with data set #1 ('msnbot/1.0 (+http://search.msn.com/msnbot.htm)', true)'.
+.
+Starting test 'JApplicationWebClientTest::testDetectRobot with data set #2 ('Mozilla/4.0 compatible ZyBorg/1.0 (wn-14.zyborg@looksmart.net; http://www.WISEnutbot.com)', true)'.
+.
+Starting test 'JApplicationWebClientTest::testDetectRobot with data set #3 ('Mozilla/2.0 (compatible; Ask Jeeves/Teoma; +http://sp.ask.com/docs/about/tech_crawling.html)', true)'.
+.
+Starting test 'JApplicationWebClientTest::testDetectRobot with data set #4 ('Mozilla/5.0 (iPad; U; CPU OS 3_2_1 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Mobile/7B405', false)'.
+.
+Starting test 'JApplicationWebClientTest::testDetectRobot with data set #5 ('Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19', false)'.
+.
+Starting test 'JApplicationWebClientTest::testDetectRobot with data set #6 ('BlackBerry8300/4.2.2 Profile/MIDP-2.0 Configuration/CLDC-1.1 VendorID/107 UP.Link/6.2.3.15.02011-10-16 20:20:17', false)'.
+.
+Starting test 'JApplicationWebClientTest::testDetectRobot with data set #7 ('IE 7 ? Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30)2011-10-16 20:20:09', false)'.
+.
+Starting test 'Joomla\Archive\Tests\ArchiveTest::testExtractZip'.
+.
+Starting test 'Joomla\Archive\Tests\ArchiveTest::testExtractTar'.
+.
+Starting test 'Joomla\Archive\Tests\ArchiveTest::testExtractGzip'.
+.
+Starting test 'Joomla\Archive\Tests\ArchiveTest::testExtractBzip2'.
+S
+Starting test 'Joomla\Archive\Tests\ArchiveTest::testGetAdapter'.
+E
+Starting test 'Joomla\Archive\Tests\ArchiveTest::testGetAdapterException'.
+.
+Starting test 'Joomla\Archive\Tests\Bzip2Test::testExtract'.
+S
+Starting test 'Joomla\Archive\Tests\Bzip2Test::testExtractWithStreams'.
+S
+Starting test 'Joomla\Archive\Tests\Bzip2Test::testIsSupported'.
+.
+Starting test 'Joomla\Archive\Tests\GzipTest::testExtract'.
+.
+Starting test 'Joomla\Archive\Tests\GzipTest::testExtractWithStreams'.
+.
+Starting test 'Joomla\Archive\Tests\GzipTest::testIsSupported'.
+.
+Starting test 'Joomla\Archive\Tests\GzipTest::test_getFilePosition'.
+I
+Starting test 'Joomla\Archive\Tests\TarTest::testExtract'.
+.
+Starting test 'Joomla\Archive\Tests\TarTest::testIsSupported'.
+.
+Starting test 'Joomla\Archive\Tests\ZipTest::testCreate'.
+I
+Starting test 'Joomla\Archive\Tests\ZipTest::testExtractNative'.
+S
+Starting test 'Joomla\Archive\Tests\ZipTest::testExtractCustom'.
+.
+Starting test 'Joomla\Archive\Tests\ZipTest::testExtract'.
+.
+Starting test 'Joomla\Archive\Tests\ZipTest::testHasNativeSupport'.
+.
+Starting test 'Joomla\Archive\Tests\ZipTest::testIsSupported'.
+.
+Starting test 'Joomla\Archive\Tests\ZipTest::testCheckZipData'.
+.
+Starting test 'Joomla\Cache\Tests\ApcTest::testPsrCache'.
+S
+Starting test 'Joomla\Cache\Tests\ApcTest::testClear'.
+S
+Starting test 'Joomla\Cache\Tests\ApcTest::testExists'.
+S
+Starting test 'Joomla\Cache\Tests\ApcTest::testGet'.
+S
+Starting test 'Joomla\Cache\Tests\ApcTest::testRemove'.
+S
+Starting test 'Joomla\Cache\Tests\ApcTest::testSet'.
+S
+Starting test 'Joomla\Cache\Tests\CacheTest::test__construct'.
+.
+Starting test 'Joomla\Cache\Tests\CacheTest::testGetMultiple'.
+.
+Starting test 'Joomla\Cache\Tests\CacheTest::testRemoveMultiple'.
+.
+Starting test 'Joomla\Cache\Tests\CacheTest::testSetOption'.
+.
+Starting test 'Joomla\Cache\Tests\CacheTest::testSetMultiple'.
+.
+Starting test 'Joomla\Cache\Tests\FileTest::testPsrCache'.
+.
+Starting test 'Joomla\Cache\Tests\FileTest::testClear'.
+.
+Starting test 'Joomla\Cache\Tests\FileTest::testGet'.
+.
+Starting test 'Joomla\Cache\Tests\FileTest::testExists'.
+.
+Starting test 'Joomla\Cache\Tests\FileTest::testRemove'.
+I
+Starting test 'Joomla\Cache\Tests\FileTest::testSet'.
+.
+Starting test 'Joomla\Cache\Tests\FileTest::testCheckFilePath'.
+.
+Starting test 'Joomla\Cache\Tests\FileTest::testCheckFilePath_exception1'.
+.
+Starting test 'Joomla\Cache\Tests\FileTest::testCheckFilePath_exception2'.
+I  244 / 4133 (  5%)
+
+Starting test 'Joomla\Cache\Tests\FileTest::testFetchStreamUri'.
+.
+Starting test 'Joomla\Cache\Tests\FileTest::testIsExpired'.
+.
+Starting test 'Joomla\Cache\Tests\ItemTest::testItem'.
+.
+Starting test 'Joomla\Cache\Tests\MemcachedTest::testPsrCache'.
+S
+Starting test 'Joomla\Cache\Tests\MemcachedTest::testClear'.
+S
+Starting test 'Joomla\Cache\Tests\MemcachedTest::testExists'.
+S
+Starting test 'Joomla\Cache\Tests\MemcachedTest::testGet'.
+S
+Starting test 'Joomla\Cache\Tests\MemcachedTest::testRemove'.
+S
+Starting test 'Joomla\Cache\Tests\MemcachedTest::testSet'.
+S
+Starting test 'Joomla\Cache\Tests\NoneTest::testPsrCache'.
+.
+Starting test 'Joomla\Cache\Tests\NoneTest::testClear'.
+.
+Starting test 'Joomla\Cache\Tests\NoneTest::testGet'.
+.
+Starting test 'Joomla\Cache\Tests\NoneTest::testRemove'.
+.
+Starting test 'Joomla\Cache\Tests\NoneTest::testSet'.
+.
+Starting test 'Joomla\Cache\Tests\NoneTest::testExists'.
+.
+Starting test 'Joomla\Cache\Tests\RuntimeTest::testPsrCache'.
+.
+Starting test 'Joomla\Cache\Tests\RuntimeTest::testClear'.
+.
+Starting test 'Joomla\Cache\Tests\RuntimeTest::testExists'.
+.
+Starting test 'Joomla\Cache\Tests\RuntimeTest::testGet'.
+.
+Starting test 'Joomla\Cache\Tests\RuntimeTest::testRemove'.
+.
+Starting test 'Joomla\Cache\Tests\RuntimeTest::testSet'.
+.
+Starting test 'Joomla\Cache\Tests\WincacheTest::testPsrCache'.
+S
+Starting test 'Joomla\Cache\Tests\WincacheTest::testClear'.
+S
+Starting test 'Joomla\Cache\Tests\WincacheTest::testExists'.
+S
+Starting test 'Joomla\Cache\Tests\WincacheTest::testGet'.
+S
+Starting test 'Joomla\Cache\Tests\WincacheTest::testRemove'.
+S
+Starting test 'Joomla\Cache\Tests\WincacheTest::testSet'.
+S
+Starting test 'Joomla\Cache\Tests\XCacheTest::testPsrCache'.
+S
+Starting test 'Joomla\Cache\Tests\XCacheTest::testClear'.
+S
+Starting test 'Joomla\Cache\Tests\XCacheTest::testExists'.
+S
+Starting test 'Joomla\Cache\Tests\XCacheTest::testGet'.
+S
+Starting test 'Joomla\Cache\Tests\XCacheTest::testRemove'.
+S
+Starting test 'Joomla\Cache\Tests\XCacheTest::testSet'.
+S
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamOpen with data set "basic" ('http://www.example.com/fred', NULL, NULL, NULL, 'www.example.com')'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamRead with data set "basic" ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 'www.example.com', 30, 10, 'EFGHIJKLMN')'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamWrite with data set "basic" ('abcdefghijklmnop', 'www.example.com', 5, 'ABCDE', 'abcdeABCDEklmnop')'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamTell'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamEOF with data set "~EOF" ('abcdefghijklmnop', 'www.example.com', 5, false)'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamEOF with data set "EOF" ('abcdefghijklmnop', 'www.example.com', 17, true)'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamSeek with data set "basic" ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 'www.example.com', 5, 10, 0, true, 10)'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamSeek with data set "too_early" ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 'www.example.com', 5, -10, 0, false, 5)'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamSeek with data set "off_end" ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 'www.example.com', 5, 100, 0, false, 5)'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamSeek with data set "is_pos" ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 'www.example.com', 5, 10, 1, true, 15)'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamSeek with data set "is_neg" ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 'www.example.com', 5, -100, 1, false, 5)'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamSeek with data set "from_end" ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 'www.example.com', 5, -10, 2, true, 42)'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamSeek with data set "before_beg" ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 'www.example.com', 5, -100, 2, false, 5)'.
+.
+Starting test 'Joomla\Client\Tests\BufferTest::testStreamSeek with data set "bad_seek_code" ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 'www.example.com', 5, -100, 100, false, 5)'.
+.
+Starting test 'Joomla\Client\Tests\ClientHelperTest::testGetCredentials'.
+I
+Starting test 'Joomla\Client\Tests\ClientHelperTest::testSetCredentials'.
+I
+Starting test 'Joomla\Client\Tests\ClientHelperTest::testHasCredentials'.
+I
+Starting test 'Joomla\Client\Tests\ClientHelperTest::testSetCredentialsFromRequest'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::test__destruct'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testGetInstance'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testSetOptions'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testConnect'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testIsConnected'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testLogin'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testQuit'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testPwd'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testSyst'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testChdir'.
+I  305 / 4133 (  7%)
+
+Starting test 'Joomla\Client\Tests\FtpClientTest::testReinit'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testRename'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testChmod'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testDelete'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testMkdir'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testRestart'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testCreate'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testRead'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testGet'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testStore'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testWrite'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testListNames'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::testListDetails'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::test_putCmd'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::test_verifyResponse'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::test_passive'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::test_findMode'.
+I
+Starting test 'Joomla\Client\Tests\FtpClientTest::test_mode'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testConnect'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testClose'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testSetDN'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testGetDN'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testAnonymous_bind'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testBind'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testSimple_search'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testSearch'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testReplace'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testModify'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testRemove'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testCompare'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testRead'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testDelete'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testCreate'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testAdd'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testRename'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testGetErrorMsg'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testIpToNetAddress'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testLDAPNetAddr'.
+I
+Starting test 'Joomla\Client\Tests\LdapClientTest::testGeneratePassword'.
+I
+Starting test 'Joomla\Controller\Tests\BaseTest::test__construct'.
+.
+Starting test 'Joomla\Controller\Tests\BaseTest::testGetApplication_exception'.
+.
+Starting test 'Joomla\Controller\Tests\BaseTest::testGetInput_exception'.
+.
+Starting test 'Joomla\Controller\Tests\BaseTest::testSerialise'.
+.
+Starting test 'Joomla\Controller\Tests\BaseTest::testUnserialise'.
+.
+Starting test 'Joomla\Controller\Tests\BaseTest::testUnserialise_exception'.
+.
+Starting test 'Joomla\Controller\Tests\BaseTest::testSetApplication'.
+.
+Starting test 'Joomla\Controller\Tests\BaseTest::testSetInput'.
+.
+Starting test 'Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #0 ('1.txt', 'c-;3-(Is>{DJzOHMCv_<#yKuN/G`/Us{GkgicWG$M|HW;kI0BVZ^|FY/"Obt53?PNaWwhmRtH;lWkWE4vlG5CIFA!abu&F=Xo#Qw}gAp3;GL\'k])%D}C+W&ne6_F$3P5')'.
+.
+Starting test 'Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #1 ('2.txt', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')'.
+.
+Starting test 'Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #2 ('3.txt', 'لا أحد يحب الألم بذاته، يسعى ورائه أو يبتغيه، ببساطة لأنه الألم...')'.
+.
+Starting test 'Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #3 ('4.txt', 'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства')'.
+.
+Starting test 'Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #4 ('5.txt', 'The quick brown fox jumps over the lazy dog.')'.
+.
+Starting test 'Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #0 ('1.txt', 'c-;3-(Is>{DJzOHMCv_<#yKuN/G`/Us{GkgicWG$M|HW;kI0BVZ^|FY/"Obt53?PNaWwhmRtH;lWkWE4vlG5CIFA!abu&F=Xo#Qw}gAp3;GL\'k])%D}C+W&ne6_F$3P5')'.
+.
+Starting test 'Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #1 ('2.txt', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')'.
+.
+Starting test 'Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #2 ('3.txt', 'لا أحد يحب الألم بذاته، يسعى ورائه أو يبتغيه، ببساطة لأنه الألم...')'.
+.
+Starting test 'Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #3 ('4.txt', 'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства')'.
+.
+Starting test 'Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #4 ('5.txt', 'The quick brown fox jumps over the lazy dog.')'.
+.
+Starting test 'Joomla\Crypt\Tests\Cipher3DESTest::testGenerateKey'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #0 ('1.txt', 'c-;3-(Is>{DJzOHMCv_<#yKuN/G`/Us{GkgicWG$M|HW;kI0BVZ^|FY/"Obt53?PNaWwhmRtH;lWkWE4vlG5CIFA!abu&F=Xo#Qw}gAp3;GL\'k])%D}C+W&ne6_F$3P5')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #1 ('2.txt', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #2 ('3.txt', 'لا أحد يحب الألم بذاته، يسعى ورائه أو يبتغيه، ببساطة لأنه الألم...')'.
+.  366 / 4133 (  8%)
+
+Starting test 'Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #3 ('4.txt', 'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #4 ('5.txt', 'The quick brown fox jumps over the lazy dog.')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #0 ('1.txt', 'c-;3-(Is>{DJzOHMCv_<#yKuN/G`/Us{GkgicWG$M|HW;kI0BVZ^|FY/"Obt53?PNaWwhmRtH;lWkWE4vlG5CIFA!abu&F=Xo#Qw}gAp3;GL\'k])%D}C+W&ne6_F$3P5')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #1 ('2.txt', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #2 ('3.txt', 'لا أحد يحب الألم بذاته، يسعى ورائه أو يبتغيه، ببساطة لأنه الألم...')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #3 ('4.txt', 'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #4 ('5.txt', 'The quick brown fox jumps over the lazy dog.')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherBlowfishTest::testGenerateKey'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #0 ('1.txt', 'c-;3-(Is>{DJzOHMCv_<#yKuN/G`/Us{GkgicWG$M|HW;kI0BVZ^|FY/"Obt53?PNaWwhmRtH;lWkWE4vlG5CIFA!abu&F=Xo#Qw}gAp3;GL\'k])%D}C+W&ne6_F$3P5')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #1 ('2.txt', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #2 ('3.txt', 'لا أحد يحب الألم بذاته، يسعى ورائه أو يبتغيه، ببساطة لأنه الألم...')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #3 ('4.txt', 'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #4 ('5.txt', 'The quick brown fox jumps over the lazy dog.')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #0 ('1.txt', 'c-;3-(Is>{DJzOHMCv_<#yKuN/G`/Us{GkgicWG$M|HW;kI0BVZ^|FY/"Obt53?PNaWwhmRtH;lWkWE4vlG5CIFA!abu&F=Xo#Qw}gAp3;GL\'k])%D}C+W&ne6_F$3P5')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #1 ('2.txt', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #2 ('3.txt', 'لا أحد يحب الألم بذاته، يسعى ورائه أو يبتغيه، ببساطة لأنه الألم...')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #3 ('4.txt', 'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #4 ('5.txt', 'The quick brown fox jumps over the lazy dog.')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherRijndael256Test::testGenerateKey'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #0 ('1.txt', 'c-;3-(Is>{DJzOHMCv_<#yKuN/G`/Us{GkgicWG$M|HW;kI0BVZ^|FY/"Obt53?PNaWwhmRtH;lWkWE4vlG5CIFA!abu&F=Xo#Qw}gAp3;GL\'k])%D}C+W&ne6_F$3P5')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #1 ('2.txt', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #2 ('3.txt', 'لا أحد يحب الألم بذاته، يسعى ورائه أو يبتغيه، ببساطة لأنه الألم...')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #3 ('4.txt', 'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #4 ('5.txt', 'The quick brown fox jumps over the lazy dog.')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #0 ('1.txt', 'c-;3-(Is>{DJzOHMCv_<#yKuN/G`/Us{GkgicWG$M|HW;kI0BVZ^|FY/"Obt53?PNaWwhmRtH;lWkWE4vlG5CIFA!abu&F=Xo#Qw}gAp3;GL\'k])%D}C+W&ne6_F$3P5')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #1 ('2.txt', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #2 ('3.txt', 'لا أحد يحب الألم بذاته، يسعى ورائه أو يبتغيه، ببساطة لأنه الألم...')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #3 ('4.txt', 'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #4 ('5.txt', 'The quick brown fox jumps over the lazy dog.')'.
+.
+Starting test 'Joomla\Crypt\Tests\CipherSimpleTest::testGenerateKey'.
+.
+Starting test 'Joomla\Crypt\Tests\CryptTest::test__construct'.
+.
+Starting test 'Joomla\Crypt\Tests\CryptTest::testDecrypt'.
+I
+Starting test 'Joomla\Crypt\Tests\CryptTest::testEncrypt'.
+I
+Starting test 'Joomla\Crypt\Tests\CryptTest::testGenerateKey'.
+.
+Starting test 'Joomla\Crypt\Tests\CryptTest::testSetKey'.
+.
+Starting test 'Joomla\Crypt\Tests\CryptTest::testGenRandomBytes'.
+.
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testCreateException with data set "Bogus" ('password', 'abc', 'ABCDEFGHIJKLMNOPQRSTUV', '$2y$10$ABCDEFGHIJKLMNOPQRSTUOiAi7OcdE4zRCh6NcGWusEcNPtq6/w8.', 10)'.
+.
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "Blowfish" ('password', '$2y$', 'ABCDEFGHIJKLMNOPQRSTUV', '$2y$10$ABCDEFGHIJKLMNOPQRSTUOiAi7OcdE4zRCh6NcGWusEcNPtq6/w8.')'.
+F
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "Blowfish2" ('password', '$2a$', 'ABCDEFGHIJKLMNOPQRSTUV', '$2y$10$ABCDEFGHIJKLMNOPQRSTUOiAi7OcdE4zRCh6NcGWusEcNPtq6/w8.')'.
+F
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "MD5" ('password', '$1$', 'ABCDEFGHIJKL', '$1$ABCDEFGH$hGGndps75hhROKqu/zh9q1')'.
+.
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "Joomla" ('password', 'Joomla', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456', '883a96d8da5440781fe7b60f1d4ae2b3:ABCDEFGHIJKLMNOPQRSTUVWXYZ123456')'.
+.
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "Blowfish_5" ('password', '$2y$', 'ABCDEFGHIJKLMNOPQRSTUV', '$2y$05$ABCDEFGHIJKLMNOPQRSTUOvv7EU5o68GAoLxyfugvULZR70IIMZqW', 5)'.
+F
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "default" ('password', NULL, 'ABCDEFGHIJKLMNOPQRSTUV', '$2y$05$ABCDEFGHIJKLMNOPQRSTUOvv7EU5o68GAoLxyfugvULZR70IIMZqW', 5)'.
+F
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Blowfish Valid:" ('password', '$2y$10$ABCDEFGHIJKLMNOPQRSTUOiAi7OcdE4zRCh6NcGWusEcNPtq6/w8.', true)'.
+F
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Blowfish Invalid:" ('wrong password', '$2y$10$ABCDEFGHIJKLMNOPQRSTUOiAi7OcdE4zRCh6NcGWusEcNPtq6/w8.', false)'.
+.
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "MD5 Valid" ('password', '$1$ABCDEFGH$hGGndps75hhROKqu/zh9q1', true)'.
+.
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "MD5 Invalid" ('passw0rd', '$1$ABCDEFGH$hGGndps75hhROKqu/zh9q1', false)'.
+.
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Joomla Valid" ('password', '883a96d8da5440781fe7b60f1d4ae2b3:ABCDEFGHIJKLMNOPQRSTUVWXYZ123456', true)'.
+.
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Joomla Invalid" ('passw0rd', '883a96d8da5440781fe7b60f1d4ae2b3:ABCDEFGHIJKLMNOPQRSTUVWXYZ123456', false)'.
+.
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testSetDefaultType with data set "Joomla" ('Joomla', 'Joomla')'.
+.
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testSetDefaultType with data set "Null" ('', '$2y$')'.
+.
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testGetDefaultType with data set "Joomla" ('Joomla', 'Joomla')'.
+.
+Starting test 'Joomla\Crypt\Tests\PasswordSimpleTest::testGetDefaultType with data set "Null" ('', '$2y$')'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testConstructor'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testConstructorWithParent'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testBuildObjectNoDependencies'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testBuildObjectGetDependencyFromContainer'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testBuildObjectNonClass'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testBuildSharedObject'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testCreateChild'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testExtend'.
+.  427 / 4133 ( 10%)
+
+Starting test 'Joomla\DI\Tests\ContainerTest::testExtendValidatesKeyIsPresent'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetMethodArgsFromContainer'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetMethodArgsConcreteClass'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetMethodArgsDefaultValues'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetMethodArgsCantResolve'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetMethodArgsResolvedIsNotInstanceOfHintedDependency'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testSetNotClosure'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testSetAlreadySetProtected'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testSetAlreadySetNotProtected'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testSetShared'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testSetNotShared'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testProtect'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testProtectShared'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testShare'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testShareProtected'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetShared'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetNotShared'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetNotExists'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetPassesContainerInstanceShared'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetPassesContainerInstanceNotShared'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetRaw'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetRawFromParent'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testGetNewInstance'.
+.
+Starting test 'Joomla\DI\Tests\ContainerTest::testRegisterServiceProvider'.
+.
+Starting test 'Joomla\Data\Tests\DataObjectTest::test__construct'.
+HipHop Fatal error: Argument must implement interface Traversable in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Data/DataObject.php on line 139

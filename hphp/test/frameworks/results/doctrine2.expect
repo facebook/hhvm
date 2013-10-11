@@ -1,10 +1,210 @@
-HipHop Fatal error: Uncaught exception 'Exception' with message 'Can't find autoload.php. Did you install dependencies via composer?' in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/TestInit.php:16
-Stack trace:
-#0 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Fileloader.php(92): include()
-#1 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Fileloader.php(76): PHPUnit_Util_Fileloader::load()
-#2 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(778): PHPUnit_Util_Fileloader::checkAndLoad()
-#3 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(606): PHPUnit_TextUI_Command->handleBootstrap()
-#4 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(138): PHPUnit_TextUI_Command->handleArguments()
-#5 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(129): PHPUnit_TextUI_Command->run()
-#6 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit(63): PHPUnit_TextUI_Command::main()
-#7 {main}
+HipHop Strict Warning: It is not safe to rely on the system's timezone settings. Please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. In case you used any of those methods and you are still getting this warning, you most likely misspelled the timezone identifier. We selected 'America/Los_Angeles' for 'PDT/-7.0/DST' instead in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/ORM/Query/ParameterTypeInfererTest.php on line 37
+HipHop Strict Warning: It is not safe to rely on the system's timezone settings. Please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. In case you used any of those methods and you are still getting this warning, you most likely misspelled the timezone identifier. We selected 'America/Los_Angeles' for 'PDT/-7.0/DST' instead in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/ORM/Query/ParameterTypeInfererTest.php on line 37
+HipHop Strict Warning: It is not safe to rely on the system's timezone settings. Please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. In case you used any of those methods and you are still getting this warning, you most likely misspelled the timezone identifier. We selected 'America/Los_Angeles' for 'PDT/-7.0/DST' instead in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/ORM/Tools/EntityGeneratorTest.php on line 530
+HipHop Strict Warning: It is not safe to rely on the system's timezone settings. Please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. In case you used any of those methods and you are still getting this warning, you most likely misspelled the timezone identifier. We selected 'America/Los_Angeles' for 'PDT/-7.0/DST' instead in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/ORM/Tools/EntityGeneratorTest.php on line 530
+HipHop Strict Warning: It is not safe to rely on the system's timezone settings. Please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. In case you used any of those methods and you are still getting this warning, you most likely misspelled the timezone identifier. We selected 'America/Los_Angeles' for 'PDT/-7.0/DST' instead in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/ORM/Tools/EntityGeneratorTest.php on line 536
+HipHop Strict Warning: It is not safe to rely on the system's timezone settings. Please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. In case you used any of those methods and you are still getting this warning, you most likely misspelled the timezone identifier. We selected 'America/Los_Angeles' for 'PDT/-7.0/DST' instead in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/ORM/Tools/EntityGeneratorTest.php on line 536
+HipHop Strict Warning: It is not safe to rely on the system's timezone settings. Please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. In case you used any of those methods and you are still getting this warning, you most likely misspelled the timezone identifier. We selected 'America/Los_Angeles' for 'PDT/-7.0/DST' instead in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/ORM/Tools/EntityGeneratorTest.php on line 542
+HipHop Strict Warning: It is not safe to rely on the system's timezone settings. Please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. In case you used any of those methods and you are still getting this warning, you most likely misspelled the timezone identifier. We selected 'America/Los_Angeles' for 'PDT/-7.0/DST' instead in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/ORM/Tools/EntityGeneratorTest.php on line 542
+HipHop Strict Warning: It is not safe to rely on the system's timezone settings. Please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. In case you used any of those methods and you are still getting this warning, you most likely misspelled the timezone identifier. We selected 'America/Los_Angeles' for 'PDT/-7.0/DST' instead in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/ORM/Tools/EntityGeneratorTest.php on line 548
+HipHop Strict Warning: It is not safe to rely on the system's timezone settings. Please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. In case you used any of those methods and you are still getting this warning, you most likely misspelled the timezone identifier. We selected 'America/Los_Angeles' for 'PDT/-7.0/DST' instead in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/ORM/Tools/EntityGeneratorTest.php on line 548
+PHPUnit 3.7.27 by Sebastian Bergmann.
+
+Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/phpunit.xml.dist
+
+
+Starting test 'Doctrine\Tests\ORM\CommitOrderCalculatorTest::testCommitOrdering1'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetGetProxyDir'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetGetAutoGenerateProxyClasses'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetGetProxyNamespace'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetGetMetadataDriverImpl'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testNewDefaultAnnotationDriver'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetGetEntityNamespace'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetGetQueryCacheImpl'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetGetHydrationCacheImpl'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetGetMetadataCacheImpl'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testAddGetNamedQuery'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testAddGetNamedNativeQuery'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testAddGetCustomStringFunction'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testAddGetCustomNumericFunction'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testAddGetCustomDatetimeFunction'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testAddGetCustomHydrationMode'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetCustomHydrationModes'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetGetClassMetadataFactoryName'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testAddGetFilters'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetGetNamingStrategy'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetGetQuoteStrategy'.
+.
+Starting test 'Doctrine\Tests\ORM\ConfigurationTest::testSetGetEntityListenerResolver'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #0 ('getConnection', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #1 ('getMetadataFactory', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #2 ('getExpressionBuilder', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #3 ('beginTransaction', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #4 ('transactional', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #5 ('commit', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #6 ('rollback', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #7 ('getClassMetadata', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #8 ('createQuery', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #9 ('createQuery', array('all'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #10 ('createNamedQuery', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #11 ('createNativeQuery', array('name', Doctrine\ORM\Query\ResultSetMapping))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #12 ('createNamedNativeQuery', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #13 ('createQueryBuilder', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #14 ('flush', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #15 ('flush', array('all'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #16 ('find', array('req', 'req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #17 ('find', array('all', 'all', 'all', 'all'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #18 ('getReference', array('req', 'req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #19 ('getPartialReference', array('req', 'req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #20 ('clear', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #21 ('clear', array('all'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #22 ('close', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #23 ('persist', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #24 ('remove', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #25 ('refresh', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #26 ('detach', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #27 ('merge', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #28 ('copy', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #29 ('copy', array('all', 'all'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #30 ('lock', array('req', 'req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #31 ('lock', array('all', 'all', 'all'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #32 ('getRepository', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #33 ('contains', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #34 ('getEventManager', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #35 ('getConfiguration', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #36 ('isOpen', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #37 ('getUnitOfWork', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #38 ('getHydrator', array('req'))'.
+.   61 / 2068 (  2%)
+
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #39 ('newHydrator', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #40 ('getProxyFactory', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #41 ('initializeObject', array('req'))'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #42 ('getFilters', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #43 ('isFiltersStateClean', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #44 ('hasFilters', array())'.
+.
+Starting test 'Doctrine\Tests\ORM\Entity\ConstructorTest::testFieldInitializationInConstructor'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testIsOpen'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testGetConnection'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testGetMetadataFactory'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testGetConfiguration'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testGetUnitOfWork'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testGetProxyFactory'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testGetEventManager'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testCreateNativeQuery'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testCreateQueryBuilder'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testCreateQueryBuilderAliasValid'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testCreateQuery_DqlIsOptional'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testGetPartialReference'.
+E
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testCreateQuery'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #0 ('persist')'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #1 ('remove')'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #2 ('merge')'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #3 ('refresh')'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #4 ('detach')'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #0 ('flush')'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #1 ('persist')'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #2 ('remove')'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #3 ('merge')'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #4 ('refresh')'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testTransactionalAcceptsReturn'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testTransactionalAcceptsVariousCallables'.
+.
+Starting test 'Doctrine\Tests\ORM\EntityManagerTest::testTransactionalThrowsInvalidArgumentExceptionIfNonCallablePassed'.
+.
+Starting test 'Doctrine\Tests\ORM\Functional\AdvancedAssociationTest::testIssue'.
+E
+Starting test 'Doctrine\Tests\ORM\Functional\AdvancedAssociationTest::testManyToMany'.
+E
+Starting test 'Doctrine\Tests\ORM\Functional\AdvancedDqlQueryTest::testAggregateWithHavingClause'.
+HipHop Fatal error: Declaration of Doctrine\DBAL\Driver\PDOConnection::prepare() must be compatible with that of Doctrine\DBAL\Driver\Connection::prepare() in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/doctrine2/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php on line 30

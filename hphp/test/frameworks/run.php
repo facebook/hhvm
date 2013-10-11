@@ -365,15 +365,15 @@ class Frameworks {
                                   "--bootstrap tests/bootstrap.php ".
                                   "tests/tests.php",
           },
-        /*'phpunit' =>
+        'phpunit' =>
           Map {
             'install_root' => __DIR__."/frameworks/phpunit",
             'git_path' => "git@github.com:sebastianbergmann/phpunit.git",
-            'git_commit' => "4b024e753e3421837afbcca962c8724c58b39376",
+            'git_commit' => "0ce13a8c9ff41d9c0d69ebd216bcc66b5f047246",
             'test_path' => __DIR__."/frameworks/phpunit",
             'test_run_command' => get_hhvm_build()." ".__DIR__.
                                   "/frameworks/phpunit/phpunit.php --debug",
-          },*/
+          },
       };
   }
 }
@@ -563,12 +563,12 @@ function install_framework(string $name, bool $verbose,
         if (any_dir_empty_one_level($fw_vendor_dir)) {
           remove_dir_recursive($install_root);
           error("Couldn't download dependencies for $name!".
-                " Removing framework\n");
+                " Removing framework. You can try the --zend option.\n");
         }
       } else { // No vendor directory. Dependencies could not have been gotten.
         remove_dir_recursive($install_root);
         error("Couldn't download dependencies for $name!".
-              " Removing framework\n");
+              " Removing framework. You can try the --zend option.\n");
       }
     }
   }
@@ -655,7 +655,7 @@ function run_test_suites(Vector $frameworks, int $timeout, bool $verbose,
            /(|
           (  :
          __\  \  _____
-       (____)  `|
+       (____)  -|
       (____)|   |
        (____).__|
         (___)__.|_____
@@ -747,7 +747,9 @@ function run_single_test_suite(string $fw_name, string $summary_file,
                                         PHPUnitPatterns::$stop_parsing_pattern);
       echo "Comparing test suite for $fw_name with previous run. ".
            "Green dot means test result same as previous. An \"F\" ".
-           "means the test result was different...\n";
+           "means the test result was different. If you see gray dots, that ".
+           "means previous runs went bad and we are acting like a first ".
+           "run...\n";
     }
   } else {
     echo "First time running test suite for $fw_name. ".
@@ -796,9 +798,10 @@ function run_single_test_suite(string $fw_name, string $summary_file,
           $status = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
                                  "", $status);
           $raw_results .= $status;
-          if (strpos($status, 'HipHop Fatal') !== false) {
-            // We have hit a fatal. Escape now and try to get
-            // the results written.
+          if (strpos($status, 'HipHop Fatal') !== false ||
+              strpos($status, "hhvm:") !== false) {
+            // We have hit a fatal or some nasty assert. Escape now and try to
+            // get the results written.
             $error_information .= $status;
             break 2;
           }
@@ -1235,12 +1238,15 @@ function find_any_file_recursive(Set $filenames, string $root_dir,
   return null;
 }
 
-function get_hhvm_build(): string {
+function get_hhvm_build(bool $with_jit = true): string {
   $fbcode_root_dir = __DIR__.'/../../..';
   if (!(file_exists($fbcode_root_dir."/_bin"))) {
     error("HHVM build doesn't exist. Did you build yet?");
   }
-  return $fbcode_root_dir."/_bin/hphp/hhvm/hhvm";
+  $build = $with_jit ?
+           $fbcode_root_dir."/_bin/hphp/hhvm/hhvm -v Eval.Jit=true" :
+           $fbcode_root_dir."/_bin/hphp/hhvm/hhvm";
+  return $build;
 }
 
 function verbose(string $msg, bool $verbose): void {

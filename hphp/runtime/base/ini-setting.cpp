@@ -217,6 +217,8 @@ const StaticString
   s_hphp_compiler_version("hphp.compiler_version"),
   s_hphp_compiler_id("hphp.compiler_id"),
   s_arg_separator_output("arg_separator.output"),
+  s_file_uploads("file_uploads"),
+  s_upload_tmp_dir("upload_tmp_dir"),
   s_upload_max_filesize("upload_max_filesize"),
   s_post_max_size("post_max_size"),
   s_log_errors("log_errors"),
@@ -258,6 +260,14 @@ bool IniSetting::Get(const String& name, String &value) {
   }
   if (name == s_arg_separator_output) {
     value = g_context->getArgSeparatorOutput();
+    return true;
+  }
+  if (name == s_file_uploads) {
+    value = RuntimeOption::EnableFileUploads ? s_1 : s_0;
+    return true;
+  }
+  if (name == s_upload_tmp_dir) {
+    value = String(RuntimeOption::UploadTmpDir);
     return true;
   }
   if (name == s_upload_max_filesize) {

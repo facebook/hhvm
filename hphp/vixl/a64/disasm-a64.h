@@ -95,25 +95,14 @@ class Disassembler: public DecoderVisitor {
 
 class PrintDisassembler: public Disassembler {
  public:
-  explicit PrintDisassembler(std::ostream& stream,
-                             int indent = 0,
-                             bool showEncoding = true,
-                             const char* color = "")
-      : stream_(stream)
-      , indent_(indent)
-      , showEncoding_(showEncoding)
-      , color_(color) {
-  }
+  explicit PrintDisassembler(FILE* stream) : stream_(stream) { }
   ~PrintDisassembler() { }
 
  protected:
   virtual void ProcessOutput(Instruction* instr);
 
  private:
-  std::ostream& stream_;
-  int indent_;
-  bool showEncoding_;
-  const char* color_;
+  FILE *stream_;
 };
 }  // namespace vixl
 

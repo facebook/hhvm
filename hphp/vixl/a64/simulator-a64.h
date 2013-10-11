@@ -118,7 +118,7 @@ class SimSystemRegister {
 
 class Simulator : public DecoderVisitor {
  public:
-  explicit Simulator(Decoder* decoder, std::ostream& stream = std::cout);
+  explicit Simulator(Decoder* decoder, FILE* stream = stdout);
   ~Simulator();
 
   void ResetState();
@@ -504,7 +504,7 @@ class Simulator : public DecoderVisitor {
   // Processor state ---------------------------------------
 
   // Output stream.
-  std::ostream& stream_;
+  FILE* stream_;
   PrintDisassembler* print_disasm_;
 
   // Instruction statistics instrumentation.

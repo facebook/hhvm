@@ -25,7 +25,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "hphp/vixl/a64/simulator-a64.h"
-#include "folly/Format.h"
 #include <math.h>
 
 namespace vixl {
@@ -57,9 +56,7 @@ SimSystemRegister SimSystemRegister::DefaultValueFor(SystemRegister id) {
 }
 
 
-Simulator::Simulator(Decoder* decoder, std::ostream& stream)
-    : stream_(stream)
-{
+Simulator::Simulator(Decoder* decoder, FILE* stream) {
   // Ensure shift operations act as the simulator expects.
   assert((static_cast<int32_t>(-1) >> 1) == -1);
   assert((static_cast<uint32_t>(-1) >> 1) == 0x7FFFFFFF);
@@ -77,6 +74,7 @@ Simulator::Simulator(Decoder* decoder, std::ostream& stream)
   // The stack pointer must be 16 bytes aligned.
   set_sp(reinterpret_cast<int64_t>(tos) & ~0xfUL);
 
+  stream_ = stream;
   print_disasm_ = new PrintDisassembler(stream_);
   coloured_trace_ = false;
   disasm_trace_ = false;
@@ -356,11 +354,11 @@ void Simulator::PrintSystemRegisters(bool print_all) {
 
   static SimSystemRegister last_nzcv;
   if (print_all || first_run || (last_nzcv.RawValue() != nzcv().RawValue())) {
-    stream_ << folly::format("# {}FLAGS: {}N:{} Z:{} C:{} V:{}{}\n",
-                             clr_flag_name,
-                             clr_flag_value,
-                             N(), Z(), C(), V(),
-                             clr_normal);
+    fprintf(stream_, "# %sFLAGS: %sN:%d Z:%d C:%d V:%d%s\n",
+            clr_flag_name,
+            clr_flag_value,
+            N(), Z(), C(), V(),
+            clr_normal);
   }
   last_nzcv = nzcv();
 
@@ -373,13 +371,11 @@ void Simulator::PrintSystemRegisters(bool print_all) {
       "0b11 (Round towards Zero)"
     };
     assert(fpcr().RMode() <= (sizeof(rmode) / sizeof(rmode[0])));
-    stream_ << folly::format(
-      "# {}FPCR: {}AHP:{} DN:{} FZ:{} RMode:{}{}\n",
-      clr_flag_name,
-      clr_flag_value,
-      fpcr().AHP(), fpcr().DN(), fpcr().FZ(), rmode[fpcr().RMode()],
-      clr_normal
-    );
+    fprintf(stream_, "# %sFPCR: %sAHP:%d DN:%d FZ:%d RMode:%s%s\n",
+            clr_flag_name,
+            clr_flag_value,
+            fpcr().AHP(), fpcr().DN(), fpcr().FZ(), rmode[fpcr().RMode()],
+            clr_normal);
   }
   last_fpcr = fpcr();
 
@@ -399,14 +395,13 @@ void Simulator::PrintRegisters(bool print_all_regs) {
 
   for (unsigned i = 0; i < kNumberOfRegisters; i++) {
     if (print_all_regs || first_run || (last_regs[i] != registers_[i].x)) {
-      stream_ << folly::format(
-        "# {}{:4}:{} {:#016x}{}\n",
-        clr_reg_name,
-        XRegNameForCode(i, Reg31IsStackPointer),
-        clr_reg_value,
-        registers_[i].x,
-        clr_normal
-      );
+      fprintf(stream_,
+              "# %s%4s:%s 0x%016" PRIx64 "%s\n",
+              clr_reg_name,
+              XRegNameForCode(i, Reg31IsStackPointer),
+              clr_reg_value,
+              registers_[i].x,
+              clr_normal);
     }
     // Cache the new register value so the next run can detect any changes.
     last_regs[i] = registers_[i].x;
@@ -431,23 +426,22 @@ void Simulator::PrintFPRegisters(bool print_all_regs) {
   for (unsigned i = 0; i < kNumberOfFPRegisters; i++) {
     if (print_all_regs || first_run ||
         (last_regs[i] != double_to_rawbits(fpregisters_[i].d))) {
-      stream_ << folly::format(
-        "# {} {:4}:{} {:#016x}{} ({}{}:{} {}{} {}:{} {}{})\n",
-        clr_reg_name,
-        VRegNameForCode(i),
-        clr_reg_value,
-        double_to_rawbits(fpregisters_[i].d),
-        clr_normal,
-        clr_reg_name,
-        DRegNameForCode(i),
-        clr_reg_value,
-        fpregisters_[i].d,
-        clr_reg_name,
-        SRegNameForCode(i),
-        clr_reg_value,
-        fpregisters_[i].s,
-        clr_normal
-      );
+      fprintf(stream_,
+              "# %s %4s:%s 0x%016" PRIx64 "%s (%s%s:%s %g%s %s:%s %g%s)\n",
+              clr_reg_name,
+              VRegNameForCode(i),
+              clr_reg_value,
+              double_to_rawbits(fpregisters_[i].d),
+              clr_normal,
+              clr_reg_name,
+              DRegNameForCode(i),
+              clr_reg_value,
+              fpregisters_[i].d,
+              clr_reg_name,
+              SRegNameForCode(i),
+              clr_reg_value,
+              fpregisters_[i].s,
+              clr_normal);
     }
     // Cache the new register value so the next run can detect any changes.
     last_regs[i] = double_to_rawbits(fpregisters_[i].d);

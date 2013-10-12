@@ -51,6 +51,13 @@ struct VariantController {
 
   // map methods
   static MapType createMap() { return Array::Create(); }
+  static MapType createMap(ArrayInit&& map) {
+    return map.toArray();
+  }
+  static ArrayInit reserveMap(size_t n) {
+    ArrayInit res(n, ArrayInit::mapInit);
+    return res;
+  }
   static MapType getStaticEmptyMap() {
     return HphpArray::GetStaticEmptyArray();
   }
@@ -64,6 +71,10 @@ struct VariantController {
   template <typename Key>
   static void mapSet(MapType& map, Key&& k, VariantType&& v) {
     map.set(std::move(k), std::move(v));
+  }
+  template <typename Key>
+  static void mapSet(ArrayInit& map, Key&& k, VariantType&& v) {
+    map.set(std::move(k), std::move(v), /* key converted */ true);
   }
   static int64_t mapSize(const MapType& map) { return map.size(); }
   static ArrayIter mapIterator(const MapType& map) {
@@ -100,7 +111,7 @@ struct VariantController {
   }
   static StringType createStaticString(const char* str, size_t len) {
     String ret = String(makeStaticString(str, len));
-     return ret;
+    return ret;
   }
   static StringType getStaticEmptyString() {
     return empty_string;

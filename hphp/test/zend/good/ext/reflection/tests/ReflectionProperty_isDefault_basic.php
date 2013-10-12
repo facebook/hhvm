@@ -25,4 +25,4 @@ echo "Wrong number of params:\n";
 $propInfo = new ReflectionProperty('TestClass', 'pub');
 $propInfo->isDefault(1);
 
-?> 
+?>

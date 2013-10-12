@@ -15,4 +15,4 @@ $r3 = new ReflectionClass("TrickClass");
 
 var_dump($r1->getName(), $r2->getName(), $r3->getName());
 
-?> 
+?>

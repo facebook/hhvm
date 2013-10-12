@@ -2362,6 +2362,11 @@ class ReflectionProperty implements Reflector {
    * @return     mixed   The doc comment.
    */
   public function getDocComment() {
+    if(func_num_args()) {
+      user_error(sprintf('%s expects exactly 0 parameters, %d given',
+                        __FUNCTION__, func_num_args()), E_USER_WARNING);
+      return null;
+    }
     return $this->info['doc'];
   }
 

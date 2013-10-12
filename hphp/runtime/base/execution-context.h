@@ -635,7 +635,7 @@ public:
                        VMParserFrame* parserFrame = nullptr,
                        bool ignoreArgs = false,
                        int limit = 0);
-  VarEnv* getVarEnv();
+  VarEnv* getVarEnv(int frame = 0);
   void setVar(StringData* name, TypedValue* v, bool ref);
   Array getLocalDefinedVariables(int frame);
   HPHP::PCFilter* m_breakPointFilter;

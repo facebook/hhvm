@@ -283,11 +283,8 @@ object(ReflectionClass)#%d (2) {
 
 --- getStaticProperties() ---
 
---- setStaticPropertyValue() ---
-NULL
-
 --- getStaticPropertyValue() ---
-string(16) "new value for s0"
+int(42)
 NULL
 
 --- hasConstant() ---

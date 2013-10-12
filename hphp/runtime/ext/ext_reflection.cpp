@@ -975,6 +975,14 @@ Array f_hphp_get_function_info(const String& name) {
   return ret;
 }
 
+void f_hphp_authoritative_check() {
+  if (RuntimeOption::RepoAuthoritative) {
+    raise_error(
+      "Unable to use mutating Reflection methods in Whole Program mode"
+    );
+  }
+}
+
 Variant f_hphp_invoke(const String& name, CArrRef params) {
   return invoke(name.data(), params);
 }

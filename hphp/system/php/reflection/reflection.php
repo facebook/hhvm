@@ -1753,8 +1753,11 @@ class ReflectionClass implements Reflector {
     $ret = array();
     foreach ($this->getProperties() as $prop) {
       if ($prop->isStatic()) {
-        $prop->setAccessible(true);
-        $ret[$prop->name] = $prop->getValue();
+        $ret[$prop->name] = hphp_get_static_property(
+          $prop->class,
+          $prop->name,
+          true
+        );
       }
     }
     return $ret;
@@ -1795,6 +1798,7 @@ class ReflectionClass implements Reflector {
    * @return     mixed   No value is returned.
    */
   public function setStaticPropertyValue($name, $value) {
+    hphp_authoritative_check();
     hphp_set_static_property($this->name, $name, $value, false);
   }
 
@@ -2196,6 +2200,7 @@ class ReflectionProperty implements Reflector {
    * @return     mixed   No value is returned.
    */
   public function setAccessible($accessible) {
+    hphp_authoritative_check();
     $this->forceAccessible = $accessible;
   }
 
@@ -2282,6 +2287,7 @@ class ReflectionProperty implements Reflector {
    * @return     mixed   No value is returned.
    */
   public function setValue($obj, $value = null) {
+    hphp_authoritative_check();
     $num = func_num_args();
     if (($this->isStatic() && $num < 1) ||
         (!$this->isStatic() && $num < 2) ||
@@ -2811,6 +2817,7 @@ implements Reflector {
    * @return     mixed   No value is returned.
    */
   public function setAccessible(bool $accessible) {
+    hphp_authoritative_check();
     // Public methods are always accessible. Cannot manually
     // set to not be accessible.
     if ($this->info['access'] !== 'public') {

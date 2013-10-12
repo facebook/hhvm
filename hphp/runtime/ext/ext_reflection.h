@@ -25,6 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+void f_hphp_authoritative_check();
 Array f_hphp_get_extension_info(const String& name);
 Array f_hphp_get_method_info(CVarRef cls, CVarRef name);
 Array f_hphp_get_closure_info(CVarRef closure);

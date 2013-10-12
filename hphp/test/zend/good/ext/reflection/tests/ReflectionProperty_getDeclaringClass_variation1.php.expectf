@@ -1,0 +1,7 @@
+object(ReflectionClass)#%d (%d) {
+  ["name"]=>
+  string(1) "A"
+  %a
+}
+Wrong number of params:
+HipHop Warning: %s

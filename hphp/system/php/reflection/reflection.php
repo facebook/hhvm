@@ -2345,6 +2345,11 @@ class ReflectionProperty implements Reflector {
    * @return     mixed   A ReflectionClass object.
    */
   public function getDeclaringClass() {
+    if (func_num_args()) {
+      user_error(sprintf('%s expects exactly 0 parameters, %d given',
+                        __FUNCTION__, func_num_args()), E_USER_WARNING);
+      return null;
+    }
     if (empty($this->info['class'])) {
       return null;
     }

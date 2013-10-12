@@ -1261,10 +1261,14 @@ Array VMExecutionContext::getCallerInfo() {
   return result;
 }
 
-VarEnv* VMExecutionContext::getVarEnv() {
+VarEnv* VMExecutionContext::getVarEnv(int frame) {
   VMRegAnchor _;
 
   ActRec* fp = getFP();
+  for (; frame > 0; --frame) {
+    if (!fp) break;
+    fp = getPrevVMState(fp);
+  }
   if (UNLIKELY(!fp)) return NULL;
   if (fp->skipFrame()) {
     fp = getPrevVMState(fp);

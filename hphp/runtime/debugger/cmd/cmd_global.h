@@ -25,7 +25,9 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdGlobal);
 class CmdGlobal : public DebuggerCommand {
 public:
-  CmdGlobal() : DebuggerCommand(KindOfGlobal) {}
+  CmdGlobal() : DebuggerCommand(KindOfGlobal) {
+    m_version = 1;
+  }
 
   virtual void help(DebuggerClient &client);
 

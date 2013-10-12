@@ -355,6 +355,10 @@ macro(hphp_link target)
 		target_link_libraries(${target} ${JEMALLOC_LIB})
 	endif()
 
+    if (LibNuma_FOUND)
+        target_link_libraries(${target} ${LIBNUMA_LIBRARIES})
+    endif()
+
 	if (GOOGLE_HEAP_PROFILER_ENABLED)
 		target_link_libraries(${target} ${GOOGLE_TCMALLOC_FULL_LIB})
 	elseif (GOOGLE_TCMALLOC_ENABLED)

@@ -74,6 +74,7 @@ class Colors {
   const Color BLUE = "\033[0;34m";
   const Color GRAY = "\033[1;30m";
   const Color LIGHTBLUE = "\033[1;34m";
+  const Color YELLOW = "\033[0;33m";
   const Color NONE = "\033[0m";
 }
 
@@ -474,7 +475,7 @@ function get_unit_testing_infra_dependencies(): void {
   // Install phpunit from composer.json located in __DIR__
   $phpunit_binary = __DIR__."/vendor/bin/phpunit";
   if (!(file_exists($phpunit_binary))) {
-    echo "Downloading PHPUnit in order to run tests. There may be an output ".
+    echo "\nDownloading PHPUnit in order to run tests. There may be an output ".
          "delay while the download begins.\n";
     $phpunit_install_command = get_hhvm_build()." ".__DIR__.
                                "/composer.phar install --dev --verbose 2>&1";
@@ -734,22 +735,28 @@ function run_single_test_suite(string $fw_name, string $summary_file,
    * file?
    **********************************/
   $compare_tests = null;
-  if(file_exists($expect_file)) {
+  if (file_exists($expect_file)) {
     if ($generate_new_expect_file) {
       unlink($expect_file);
       echo "Resetting the expect file. ".
            "Establishing new baseline with gray dots...\n";
     } else {
       // Color codes would have already been stripped out. Don't need those.
-      $compare_tests = get_fw_tests_to_run($expect_file,
-                                        PHPUnitPatterns::$test_name_pattern,
-                                        PHPUnitPatterns::$status_code_pattern,
-                                        PHPUnitPatterns::$stop_parsing_pattern);
-      echo "Comparing test suite for $fw_name with previous run. ".
-           "Green dot means test result same as previous. An \"F\" ".
-           "means the test result was different. If you see gray dots, that ".
-           "means previous runs went bad and we are acting like a first ".
-           "run...\n";
+      $compare_tests = get_fw_tests_to_run(
+        $expect_file,
+        PHPUnitPatterns::$test_name_pattern,
+        PHPUnitPatterns::$status_code_pattern,
+        PHPUnitPatterns::$stop_parsing_pattern
+      );
+      echo Colors::YELLOW . $fw_name . Colors::NONE . ": running\n";
+      verbose(
+        "Comparing test suite with previous run. ".
+        "Green dot means test result same as previous. An \"F\" ".
+        "means the test result was different. If you see gray dots, that ".
+        "means previous runs went bad and we are acting like a first ".
+        "run...\n",
+        $verbose
+      );
     }
   } else {
     echo "First time running test suite for $fw_name. ".
@@ -809,7 +816,9 @@ function run_single_test_suite(string $fw_name, string $summary_file,
                  preg_match(PHPUnitPatterns::$status_code_pattern,
                             $status) === 0);
         if ($compare_tests !== null && $compare_tests->containsKey($match)) {
-          $status = $status[0]; // In case we had "F 252 / 364 (69 %)"
+          if (strlen($status) > 0) {
+            $status = $status[0]; // In case we had "F 252 / 364 (69 %)"
+          }
           if ($status === $compare_tests[$match]) {
             // FIX: posix_isatty(STDOUT) was always returning false, even though
             // can print in color. Check this out later.
@@ -867,7 +876,7 @@ function run_single_test_suite(string $fw_name, string $summary_file,
     file_put_contents($errors_file, $error_information);
     file_put_contents($diff_file, $diff_information);
     // If the first baseline run, make both the same.
-    if ($compare_tests === null) {
+    if (!file_exists($expect_file)) {
       copy($results_file, $expect_file);
     }
 
@@ -876,7 +885,8 @@ function run_single_test_suite(string $fw_name, string $summary_file,
     * the run framework.
     ****************************************/
     $pct_str = create_summary_for_framework($fw_name, $results_file,
-                                            $summary_file);
+                                            $summary_file,
+                                            $generate_new_expect_file);
     verbose(strtoupper($fw_name).
        " TEST COMPLETE with pass percentage of: $pct_str\n\n", $verbose);
     verbose("Results File: $results_file\n", $verbose);
@@ -964,7 +974,8 @@ function get_fw_tests_to_run(string $expect_file, string $test_name_pattern,
 // phpunit for their testing (e.g. ThinkUp)
 function create_summary_for_framework(string $name,
                                       string $results_file,
-                                      string $summary_file): string {
+                                      string $summary_file,
+                                      bool $generate_new_expect_file): string {
   // Get the last 4 lines of the results file which will give us the surface
   // area necessary to get the final stats.
   $file = escapeshellarg($results_file);
@@ -1037,7 +1048,7 @@ function create_summary_for_framework(string $name,
                   PHP_EOL;
   if (!(file_exists($summary_file))) {
     file_put_contents($summary_file, $summary_line);
-  } else {
+  } else if ($generate_new_expect_file) {
     $file_data = file_get_contents($summary_file);
     if (preg_match("/$name\=([A-Za-z0-9]+(\.[0-9]+)?)/", $file_data,
         $data_matches) === 1) {

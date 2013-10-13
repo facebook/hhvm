@@ -3346,28 +3346,40 @@ WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
   If $1 is not an array or an object, these instructions raise a warning and
   transfer control to the location specified by %2.
 
-  If the iterator specified by %1 is a non-mutable array iterator or an
-  extension class iterator, IterInit and IterInitK store a copy of the current
-  value in %3 as a cell; WIterInit and WIterInitK will store a reference
-  if the current element is a reference, or a value otherwise in %3
+  The local ids in %3 (and %4, for the *K variants) represent the locals that
+  should receive the value (in %3) and key (in %4) for the iteration, in
+  accordance with the type of iterator initialized in %1.
 
-  If the iterator specified by %1 is a user class iterator for object $x, these
-  instructions store the return value of $x->current() in %3 as a cell.
+  For the non-W* flavors of these instructions, the locals are stored to
+  with the same semantics as SetL (non-binding assignment).  The W* flavors
+  of these instructions do a binding assignment if the rhs (key or value)
+  was a reference, or if not they unset the old value of the local and then
+  do a non-binding assignment.
 
-  If the iterator specified by %1 is a non-mutable default class iterator, these
-  instructions store a copy of the current property in %3 as a cell.
+  The logical value is computed differently depending on the iterator type
+  that is initialized in %1:
 
-  For the IterInitK version, the following also happens:
+    If the iterator specified by %1 is a non-mutable array iterator or an
+    extension class iterator, these instructions of the current value in %3.
 
-  If the iterator specified by %1 is an array iterator or an extension class
-  iterator, this instruction stores a copy of the current key in %4 as a cell.
+    If the iterator specified by %1 is a user class iterator for object $x,
+    these instructions store the return value of $x->current() in %3.
 
-  If the iterator specified by %1 is a user class iterator for object $x, this
-  instruction stores the return value of $x->key() in %4 as a cell.
+    If the iterator specified by %1 is a non-mutable default class iterator,
+    these instructions store a copy of the current property in %3.
 
-  If the iterator specified by %1 is a non-mutable default class iterator,
-  this instruction stores a copy of the name of the current property in %4 as a
-  cell.
+  For the *K variants, the logical key to be stored in %4 is computed
+  differently depending on the iterator type initialized in %1:
+
+    If the iterator specified by %1 is an array iterator or an extension class
+    iterator, this instruction stores a copy of the current key in %4.
+
+    If the iterator specified by %1 is a user class iterator for object $x, this
+    instruction stores the return value of $x->key() in %4.
+
+    If the iterator specified by %1 is a non-mutable default class
+    iterator, this instruction stores a copy of the name of the current
+    property in %4.
 
 MIterInit  <iterator id> <rel offset> <local id>               [V]  ->  []
 MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
@@ -3436,32 +3448,18 @@ WIterNextK <iterator id> <rel offset> <local id> <local id>   []  ->  []
   If the specified iterator is at the end, free the iterator variable with
   an implicit IterFree, then fall through to the next instruction.
 
-  If the specified iterator is not at the end, retrieve the key and value:
+  If the specified iterator is not at the end, the local ids in %3 (and %4,
+  for the *K variants) represent the locals that should receive the value (in
+  %3) and key (in %4) for the iteration, in accordance with the type of
+  iterator initialized in %1.
 
-  If the iterator specified by %1 is a non-mutable array iterator or an
-  extension class iterator, IterNext and IterNextK store a copy of the new current
-  value in %3 as a cell; WIterNext and WIterNextK store a reference to the
-  new current value in %3 if the current value is a reference, otherwise
-  they store the new current value in %3 as a cell.
+  These locals are stored to with the same semantics as SetL (non-binding
+  assignment), except the W* flavors of these instructions do a "with
+  reference" assignment (i.e. the local gets a binding assignment if and only
+  if the value to be assigned is already a reference).
 
-  If the iterator specified by %1 is a user class iterator for object $x, these
-  instructions store the return value of $x->current() in %3 as a cell.
-
-  If the iterator specified by %1 is a non-mutable default class iterator, these
-  instructions store a copy of the new current property in %3 as a cell.
-
-  For the IterNextK version, the following also happens:
-
-  If the iterator specified by %1 is an array iterator or an extension class
-  iterator, this instruction stores a copy of the new current key in %4 as a
-  cell.
-
-  If the iterator specified by %1 is a user class iterator for object $x, this
-  instruction stores the return value of $x->key() in %4 as a cell.
-
-  If the iterator specified by %1 is a non-mutable default class iterator,
-  this instruction stores a copy of the name of the new current property in %4
-  as a cell.
+  The semantics of how to determine what the key and value are depend on %1 in
+  an analagous way to {W,}IterInit{K,}.
 
 MIterNext  <iterator id> <rel offset> <local id>               []  ->  []
 MIterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []

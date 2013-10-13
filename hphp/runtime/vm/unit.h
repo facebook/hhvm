@@ -600,8 +600,10 @@ struct Unit {
 
   bool compileTimeFatal(const StringData*& msg, int& line) const;
   const TypedValue *getMainReturn() const {
+    assert(isMergeOnly());
     return &m_mainReturn;
   }
+
 private:
   template <bool debugger>
   void mergeImpl(void* tcbase, UnitMergeInfo* mi);
@@ -670,9 +672,9 @@ public:
   bool isInterpretOnly() const { return m_interpretOnly; }
   void setInterpretOnly() { m_interpretOnly = true; }
   bool isMergeOnly() const { return m_mergeOnly; }
-  void clearMergeOnly() { m_mergeOnly = false; }
   bool isEmpty() const { return m_mergeState & UnitMergeStateEmpty; }
   void* replaceUnit() const;
+
 public:
   static Mutex s_classesMutex;
 

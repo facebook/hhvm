@@ -681,8 +681,7 @@ public:
   void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                          bool byRef);
   void emitBuiltinDefaultArg(Emitter& e, Variant& v, DataType t, int paramId);
-  PreClass::Hoistable emitClass(Emitter& e, ClassScopePtr cNode,
-                                bool topLevel);
+  void emitClass(Emitter& e, ClassScopePtr cNode, bool topLevel);
   void emitTypedef(Emitter& e, TypedefStatementPtr);
   void emitForeachListAssignment(Emitter& e, ListAssignmentPtr la,
                                  int vLocalId);

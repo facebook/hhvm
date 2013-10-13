@@ -1677,7 +1677,6 @@ void EmitterVisitor::visit(FileScopePtr file) {
     TypedValue mainReturn;
     mainReturn.m_type = KindOfInvalid;
     bool notMergeOnly = false;
-    PreClass::Hoistable allHoistable = PreClass::AlwaysHoistable;
     for (i = 0; i < nk; i++) {
       StatementPtr s = (*stmts)[i];
       switch (s->getKindOf()) {
@@ -1689,8 +1688,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
           // Handle classes directly here, since only top-level classes are
           // hoistable.
           ClassScopePtr cNode = s->getClassScope();
-          PreClass::Hoistable h = emitClass(e, cNode, true);
-          if (h < allHoistable) allHoistable = h;
+          emitClass(e, cNode, true);
           break;
         }
         case Statement::KindOfTypedefStatement:
@@ -1788,12 +1786,15 @@ void EmitterVisitor::visit(FileScopePtr file) {
           visit(s);
       }
     }
-    if (mainReturn.m_type == KindOfInvalid) {
-      tvWriteUninit(&mainReturn);
-      tvAsVariant(&mainReturn) = 1;
+
+    if (!notMergeOnly) {
+      m_ue.setMergeOnly(true);
+      if (mainReturn.m_type == KindOfInvalid) {
+        tvWriteUninit(&mainReturn);
+        tvAsVariant(&mainReturn) = 1;
+      }
+      m_ue.setMainReturn(&mainReturn);
     }
-    m_ue.setMainReturn(&mainReturn);
-    m_ue.setMergeOnly(!notMergeOnly);
 
     // Pseudo-main returns the integer value 1 by default. If the
     // current position in the bytecode is reachable, emit code to
@@ -6649,8 +6650,9 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   e.DefTypeAlias(id);
 }
 
-PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
-                                              bool toplevel) {
+void EmitterVisitor::emitClass(Emitter& e,
+                               ClassScopePtr cNode,
+                               bool toplevel) {
   InterfaceStatementPtr is(
     static_pointer_cast<InterfaceStatement>(cNode->getStmt()));
   StringData* className = makeStaticString(cNode->getOriginalName());
@@ -6899,8 +6901,6 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
     assert(added);
     postponeCinit(is, fe, nonScalarConstVec);
   }
-
-  return hoistable;
 }
 
 namespace {

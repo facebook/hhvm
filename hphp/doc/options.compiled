@@ -353,6 +353,8 @@ These are experimental LFU settings.
       Rfc1867Prefix = vupload_
       Rfc1867Name = video_ptoken
     }
+ 
+    IniFile = "/etc/hhvm/php.ini"
   }
 
 = Virtual Hosts

@@ -731,7 +731,7 @@ void zend_ini_scan(const String& str, int scanner_mode, const String& filename,
   BEGIN(INITIAL);
 
   /* Eat any UTF-8 BOM we find in the first 3 bytes */
-  if (memcmp(str.data(), "\xef\xbb\xbf", 3) == 0) {
+  if (str.size() > 3 && memcmp(str.data(), "\xef\xbb\xbf", 3) == 0) {
     yy_scan_string(str.data() + 3);
   } else {
     yy_scan_string(str.data());

@@ -253,6 +253,7 @@ int RuntimeOption::ProxyPercentage = 0;
 std::set<std::string> RuntimeOption::ProxyURLs;
 std::vector<std::string> RuntimeOption::ProxyPatterns;
 bool RuntimeOption::AlwaysUseRelativePath = false;
+std::string RuntimeOption::IniFile;
 
 int RuntimeOption::HttpDefaultTimeout = 30;
 int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
@@ -847,6 +848,11 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     WarnOnCollectionToArray = server["WarnOnCollectionToArray"].getBool(false);
     UseDirectCopy = server["UseDirectCopy"].getBool(false);
     AlwaysUseRelativePath = server["AlwaysUseRelativePath"].getBool(false);
+
+    IniFile = server["IniFile"].getString("/etc/hhvm/php.ini");
+    if (access(IniFile.c_str(), R_OK) == -1) {
+      IniFile.clear();
+    }
 
     Hdf dns = server["DnsCache"];
     EnableDnsCache = dns["Enable"].getBool();

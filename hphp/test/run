@@ -93,7 +93,9 @@ function verify_hhbc() {
 
 function read_file($file) {
   return file_exists($file) ?
-         preg_replace('/\s+/', ' ', (file_get_contents($file))) : "";
+         str_replace('__DIR__', dirname($file),
+           preg_replace('/\s+/', ' ', (file_get_contents($file))))
+         : "";
 }
 
 // http://stackoverflow.com/questions/2637945/

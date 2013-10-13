@@ -245,6 +245,7 @@ public:
   static std::set<std::string> ProxyURLs;
   static std::vector<std::string> ProxyPatterns;
   static bool AlwaysUseRelativePath;
+  static std::string IniFile;
 
   static int  HttpDefaultTimeout;
   static int  HttpSlowQueryThreshold;

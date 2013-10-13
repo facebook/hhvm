@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/pprof-server.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/util/shared-memory-allocator.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-server.h"
@@ -50,6 +51,7 @@
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/base/simple-counter.h"
@@ -177,6 +179,13 @@ void process_env_variables(Variant &variables) {
       register_variable(variables, (char*)name.data(),
                         String(p + 1, CopyString));
     }
+  }
+}
+
+void process_ini_settings() {
+  auto settings = f_parse_ini_file(String(RuntimeOption::IniFile));
+  for (ArrayIter iter(settings); iter; ++iter) {
+    IniSetting::Set(iter.first(), iter.second());
   }
 }
 
@@ -1503,6 +1512,8 @@ void hphp_session_init() {
   StatCache::requestInit();
 
   g_vmContext->requestInit();
+
+  process_ini_settings();
 }
 
 ExecutionContext *hphp_context_init() {

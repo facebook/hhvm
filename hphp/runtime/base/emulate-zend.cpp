@@ -44,9 +44,13 @@ bool check_option(const char *option) {
 int emulate_zend(int argc, char** argv){
   vector<string> newargv;
 
+  newargv.push_back(argv[0]);
+
   bool lint = false;
   bool show = false;
   bool need_file = true;
+  int ini_fd = -1;
+  char ini_path[] = "/tmp/php-ini-XXXXXX";
   const char* program = nullptr;
 
   int cnt = 1;
@@ -92,7 +96,17 @@ int emulate_zend(int argc, char** argv){
       break;
     }
     if (strcmp(argv[cnt], "-d")  == 0) {
-      // skip -d since we don't use the INI file
+      if (ini_fd == -1) {
+        ini_fd = mkstemp(ini_path);
+        if (ini_fd == -1) {
+          fprintf(stderr, "Error: unable to open temporary file");
+          exit(EXIT_FAILURE);
+        }
+        write(ini_fd, "[php]\n", 6);
+      }
+      auto &line = argv[cnt+1];
+      write(ini_fd, line, strlen(line));
+      write(ini_fd, "\n", 1);
       cnt += 2;
       continue;
     }
@@ -141,6 +155,12 @@ int emulate_zend(int argc, char** argv){
     }
     newargv.push_back(tmp);
     newargv.push_back("--temp-file");
+  }
+
+  if (ini_fd != -1) {
+    char arg[37];
+    sprintf(arg, "-vServer.IniFile=%s", ini_path);
+    newargv.push_back(arg);
   }
 
   if (cnt < argc && strcmp(argv[cnt], "--") == 0) cnt++;

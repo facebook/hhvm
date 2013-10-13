@@ -98,8 +98,8 @@ void TypeConstraint::init() {
     return;
   }
   if (m_typeName && isExtended()) {
-    assert(nullable() &&
-           "Only nullable extended type hints are implemented");
+    assert((nullable() || soft()) &&
+           "Only nullable and soft extended type hints are implemented");
   }
 
   if (isExtended() && blacklistedName(m_typeName)) {
@@ -300,11 +300,12 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
     // Extended type hints raise warnings instead of recoverable
     // errors for now, to ease migration (we used to not check these
     // at all at runtime).
-    assert(nullable() &&
-           "only nullable extended type hints are currently supported");
+    assert(
+      (soft() || nullable()) &&
+      "Only nullable and soft extended type hints are currently implemented");
     raise_warning(
-      "Argument %d to %s must be of type ?%s, %s given",
-      paramNum + 1, fname.str().c_str(), tn->data(), givenType);
+      "Argument %d to %s must be of type %s, %s given",
+      paramNum + 1, fname.str().c_str(), fullName().c_str(), givenType);
   } else {
     raise_recoverable_error(
       "Argument %d passed to %s must be an instance of %s, %s given",

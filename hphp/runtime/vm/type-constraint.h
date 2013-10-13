@@ -59,6 +59,12 @@ public:
      * }
      */
     TypeVar = 0x8,
+
+    /*
+     * Soft type hints: triggers warning, but never fatals
+     * E.g. "@int"
+     */
+    Soft = 0x16,
   };
 
 private:
@@ -125,9 +131,23 @@ public:
   bool hasConstraint() const { return m_typeName; }
 
   const StringData* typeName() const { return m_typeName; }
+
+  const std::string fullName() const {
+    std::string name;
+    if (soft()) {
+      name += '@';
+    }
+    if (nullable()) {
+      name += '?';
+    }
+    name += m_typeName->data();
+    return name;
+  }
+
   const NamedEntity* namedEntity() const { return m_namedEntity; }
 
   bool nullable() const { return m_flags & Nullable; }
+  bool soft() const { return m_flags & Soft; }
   bool hhType() const { return m_flags & HHType; }
   Flags flags() const { return m_flags; }
 

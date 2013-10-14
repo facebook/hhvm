@@ -16,6 +16,12 @@ int main() { return 0; }" HAVE_GCC_46)
 #endif
 int main() { return 0; }" HAVE_GCC_47)
 
+	CHECK_C_SOURCE_COMPILES("#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#if GCC_VERSION < 40800
+#error Not GCC 4.8.0+
+#endif
+int main() { return 0; }" HAVE_GCC_48)
+
 endif()
 
 set(FREEBSD FALSE)
@@ -37,8 +43,12 @@ else()
 	if(HAVE_GCC_47)
 		set(GNUCC_UNINIT_OPT "-Wno-maybe-uninitialized")
 	endif()
+	set(GNUCC_LOCAL_TYPEDEF_OPT "")
+	if(HAVE_GCC_48)
+		set(GNUCC_LOCAL_TYPEDEF_OPT "-Wno-unused-local-typedefs")
+	endif()
 	set(CMAKE_C_FLAGS "-w")
-	set(CMAKE_CXX_FLAGS "-fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -std=gnu++0x -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes ${GNUCC_UNINIT_OPT}")
+	set(CMAKE_CXX_FLAGS "-fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -std=gnu++0x -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes ${GNUCC_UNINIT_OPT} ${GNUCC_LOCAL_TYPEDEF_OPT}")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC)

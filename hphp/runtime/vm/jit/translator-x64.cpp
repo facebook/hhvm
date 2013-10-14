@@ -194,7 +194,7 @@ JIT::CppCall TranslatorX64::getDtorCall(DataType type) {
   case KindOfResource:
     return JIT::CppCall(getMethodPtr(&ResourceData::release));
   case KindOfRef:
-    return JIT::CppCall(&refdata_after_decref_helper);
+    return JIT::CppCall(getMethodPtr(&RefData::release));
   default:
     assert(false);
     NOT_REACHED();

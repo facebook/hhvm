@@ -207,7 +207,7 @@ void emitDtorStubs(UniqueStubs& uniqueStubs) {
     tx64->stubsCode, CppCall(getMethodPtr(&ResourceData::release))
   ));
   auto const refDtor = uniqueStubs.add("dtorRef", emitUnaryStub(
-    tx64->stubsCode, CppCall((void*)(&refdata_after_decref_helper))
+    tx64->stubsCode, CppCall(getMethodPtr(&RefData::release))
   ));
 
   uniqueStubs.dtorStubs[0] = nullptr;

@@ -37,9 +37,7 @@
  * overload of _efree() to handle freeing these correctly.
  */
 inline void _efree(const HPHP::RefData* ptr) {
-  auto p = const_cast<HPHP::RefData*>(ptr);
-  p->tv()->m_type = HPHP::KindOfNull;
-  p->release();
+  ptr->releaseMem();
 }
 
 BEGIN_EXTERN_C()
@@ -136,8 +134,7 @@ END_EXTERN_C()
 
 #define FREE_ZVAL(z)  \
   do { \
-    (z)->tv()->m_type = HPHP::KindOfNull; \
-    (z)->release(); \
+    (z)->releaseMem(); \
   } while (0)
 
 #define ALLOC_ZVAL_REL(z)  \
@@ -145,8 +142,7 @@ END_EXTERN_C()
 
 #define FREE_ZVAL_REL(z)  \
   do { \
-    (z)->tv()->m_type = HPHP::KindOfNull; \
-    (z)->release(); \
+    (z)->releaseMem(); \
   } while (0)
 
 /* fast cache for HashTables */

@@ -42,10 +42,9 @@ namespace HPHP {
  * refcount of a RefData - instead the real refcount can be computed
  * by calling getRealCount() (which simply adds the m_count and m_cow
  * fields together). When the m_count field is decremented to 0, the
- * refdata_after_decref_helper() helper function gets called. This
- * help will either free the RefData (if the "real" refcount has
- * reached 0) or it will update the m_count and m_cow fields
- * appropriately.
+ * release() method gets called. This will either free the RefData
+ * (if the "real" refcount has reached 0) or it will update the
+ * m_count and m_cow fields appropriately.
  *
  * For more info on the PHP extension compatibility layer, check out
  * the documentation at "doc/php.extension.compat.layer".
@@ -89,8 +88,17 @@ struct RefData {
    * Deallocate a RefData.
    */
   void release() {
+    if (UNLIKELY(m_cow)) {
+      m_count = 1;
+      m_cowAndZ = 0;
+      return;
+    }
     this->~RefData();
     MM().smartFreeSize(this, sizeof(RefData));
+  }
+
+  void releaseMem() const {
+    MM().smartFreeSize(const_cast<RefData*>(this), sizeof(RefData));
   }
 
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
@@ -305,22 +313,9 @@ public:
 
 ALWAYS_INLINE void decRefRef(RefData* ref) {
   if (ref->decRefCount() == 0) {
-    if (ref->m_cow) {
-      ref->m_count = 1;
-      ref->m_cowAndZ = 0;
-      return;
-    }
     ref->release();
   }
 }
-
-/**
- * When m_count is decremented and reaches 0, this helper function is called.
- * If the "real" refcount (as given by getRealCount()) is 0 the RefData will
- * be freed, otherwise the RefData's m_count, m_cow, and m_z fields will be
- * updated appropriately.
- */
-void refdata_after_decref_helper(RefData* ref);
 
 } // namespace HPHP
 

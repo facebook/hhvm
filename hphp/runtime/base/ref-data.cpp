@@ -24,13 +24,4 @@ void RefData::dump() const {
   printf("RefData: %s", ret.c_str());
 }
 
-void refdata_after_decref_helper(RefData* ref) {
-  if (LIKELY(!ref->m_cow)) {
-    ref->release();
-    return;
-  }
-  ref->m_count = 1;
-  ref->m_cowAndZ = 0;
-}
-
 }

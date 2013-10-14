@@ -231,6 +231,10 @@ void raiseWarning(const StringData* sd) {
   raise_warning("%s", sd->data());
 }
 
+void raiseNotice(const StringData* sd) {
+  raise_notice("%s", sd->data());
+}
+
 void raiseArrayIndexNotice(const int64_t index) {
   raise_notice("Undefined index: %" PRId64, index);
 }

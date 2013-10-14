@@ -196,6 +196,11 @@ public:
 
   // Others
   void t___construct(CVarRef iterable = null_variant);
+  String t___tostring();
+  Variant t___get(Variant name);
+  Variant t___set(Variant name, Variant value);
+  bool t___isset(Variant name);
+  Variant t___unset(Variant name);
 
 public:
 

@@ -799,6 +799,10 @@ void c_FrozenVector::t___construct(CVarRef iterable /* = null_variant */) {
 c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
 
   int flags = ObjectData::FrozenVectorAttrInit |
+              ObjectData::UseGet |
+              ObjectData::UseSet |
+              ObjectData::UseIsset |
+              ObjectData::UseUnset |
               ObjectData::CallToImpl;
 
   ObjectData::setAttributes(flags);
@@ -4420,6 +4424,7 @@ COLLECTION_MAGIC_METHODS(Map)
 COLLECTION_MAGIC_METHODS(StableMap)
 COLLECTION_MAGIC_METHODS(Set)
 COLLECTION_MAGIC_METHODS(Pair)
+COLLECTION_MAGIC_METHODS(FrozenVector)
 
 #undef COLLECTION_MAGIC_METHODS
 

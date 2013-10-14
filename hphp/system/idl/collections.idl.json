@@ -904,6 +904,76 @@
                   },
                   "args": [
                   ]
+              },
+              {
+                  "name": "__toString",
+                  "return": {
+                      "type": "String"
+                  },
+                  "flags": [
+                  ],
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "__get",
+                  "flags": [
+                  ],
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "name",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "__set",
+                  "flags": [
+                  ],
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "name",
+                          "type": "Variant"
+                      },
+                      {
+                          "name": "value",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "__isset",
+                  "flags": [
+                  ],
+                  "return": {
+                      "type": "Boolean"
+                  },
+                  "args": [
+                      {
+                          "name": "name",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "__unset",
+                  "flags": [
+                  ],
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "name",
+                          "type": "Variant"
+                      }
+                  ]
               }
             ]
         },

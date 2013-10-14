@@ -1003,6 +1003,14 @@ Sqrt   [C]    ->  [C:Null|Dbl]
   If $1 is a negative number, this instruction pushes a floating-point
   value representing NAN onto the stack.
 
+Strlen  [C] -> [C:Null|Int]
+
+  String length.  If $1 is a string push the length of the string on the
+  stack.  If $1 is an object with a __toString method, call this method and
+  push the length of the resulting string on the stack.  If $1 is an array
+  or resource, raise a warning and push null on the stack.  Otherwise
+  convert $1 to a string and push the length of that string on the stack.
+
 Xor    [C C]  ->  [C:Bool]
 
   Logical xor (xor). Pushes ((bool)$2 xor (bool)$1) onto the stack.

@@ -135,7 +135,7 @@ void Extension::LoadModules(Hdf hdf) {
     Extension *mod = getModule();
     if (mod->m_hhvmAPIVersion != HHVM_API_VERSION) {
       throw Exception("Could not use extension %s: "
-                      "Compiled with HHVM API Version %ld, "
+                      "Compiled with HHVM API Version %" PRId64 ", "
                       "this version of HHVM expects %ld",
                       extLoc.c_str(),
                       mod->m_hhvmAPIVersion,

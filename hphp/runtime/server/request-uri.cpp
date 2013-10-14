@@ -25,8 +25,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
-                       const std::string &sourceRoot,
-                       const std::string &pathTranslation)
+                       const std::string &pathTranslation,
+                       const std::string &sourceRoot)
   :  m_rewritten(false), m_defaultDoc(false), m_done(false),
      m_forbidden(false), m_ext(nullptr) {
   if (!process(vhost, transport, sourceRoot, pathTranslation,

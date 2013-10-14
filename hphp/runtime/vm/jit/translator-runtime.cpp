@@ -237,7 +237,8 @@ StringData* convCellToStrHelper(TypedValue tv) {
                        /* fallthrough */
   case KindOfStaticString:
                        return tv.m_data.pstr;
-  case KindOfArray:    return s_Array.get();
+  case KindOfArray:    raise_notice("Array to string conversion");
+                       return s_Array.get();
   case KindOfObject:   return convObjToStrHelper(tv.m_data.pobj);
   case KindOfResource: return convResToStrHelper(tv.m_data.pres);
   default:             not_reached();

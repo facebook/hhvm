@@ -1550,6 +1550,10 @@ RaiseWarning S0:Str
 
   Raises a warning with the text in S0 as its message.
 
+RaiseNotice S0:Str
+
+  Raises a notice with the text in S0 as its message.
+
 D:BoxedCell = ClosureStaticLocInit S0:ConstStr S1:FramePtr S2:Cell
 
   Get boxed value to initialize static local named S0 in frame S1,

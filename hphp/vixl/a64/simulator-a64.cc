@@ -356,11 +356,12 @@ void Simulator::PrintSystemRegisters(bool print_all) {
 
   static SimSystemRegister last_nzcv;
   if (print_all || first_run || (last_nzcv.RawValue() != nzcv().RawValue())) {
-    stream_ << folly::format("# {}FLAGS: {}N:{} Z:{} C:{} V:{}{}\n",
+    // Split up the call, to prevent template explosion
+    stream_ << folly::format("# {}FLAGS: {}N:{} Z:{} ",
                              clr_flag_name,
                              clr_flag_value,
-                             N(), Z(), C(), V(),
-                             clr_normal);
+                             N(), Z());
+    stream_ << folly::format("C:{} V:{}{}\n", C(), V(), clr_normal);
   }
   last_nzcv = nzcv();
 
@@ -374,10 +375,14 @@ void Simulator::PrintSystemRegisters(bool print_all) {
     };
     assert(fpcr().RMode() <= (sizeof(rmode) / sizeof(rmode[0])));
     stream_ << folly::format(
-      "# {}FPCR: {}AHP:{} DN:{} FZ:{} RMode:{}{}\n",
+      "# {}FPCR: {}AHP:{} DN:{} ",
       clr_flag_name,
       clr_flag_value,
-      fpcr().AHP(), fpcr().DN(), fpcr().FZ(), rmode[fpcr().RMode()],
+      fpcr().AHP(), fpcr().DN()
+    );
+    stream_ << folly::format(
+      "FZ:{} RMode:{}{}\n",
+      fpcr().FZ(), rmode[fpcr().RMode()],
       clr_normal
     );
   }
@@ -431,18 +436,25 @@ void Simulator::PrintFPRegisters(bool print_all_regs) {
   for (unsigned i = 0; i < kNumberOfFPRegisters; i++) {
     if (print_all_regs || first_run ||
         (last_regs[i] != double_to_rawbits(fpregisters_[i].d))) {
+      // Split up the call to prevent template explosion
       stream_ << folly::format(
-        "# {} {:4}:{} {:#016x}{} ({}{}:{} {}{} {}:{} {}{})\n",
+        "# {} {:4}:{} {:#016x}{} ",
         clr_reg_name,
         VRegNameForCode(i),
         clr_reg_value,
         double_to_rawbits(fpregisters_[i].d),
-        clr_normal,
+        clr_normal
+      );
+      stream_ << folly::format(
+        "({}{}:{} {}{} ",
         clr_reg_name,
         DRegNameForCode(i),
         clr_reg_value,
         fpregisters_[i].d,
-        clr_reg_name,
+        clr_reg_name
+      );
+      stream_ << folly::format(
+        "{}:{} {}{})\n",
         SRegNameForCode(i),
         clr_reg_value,
         fpregisters_[i].s,

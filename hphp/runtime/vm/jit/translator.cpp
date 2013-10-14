@@ -1376,7 +1376,7 @@ bool outputIsPredicted(SrcKey startSk,
     assert(iInfo.out == Stack1 || inst.op() == OpSetM);
     auto dt = predictOutputs(startSk, &inst);
     if (dt != KindOfAny) {
-      inst.outPred = Type(dt);
+      inst.outPred = Type(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
     } else {
       doPrediction = false;
     }

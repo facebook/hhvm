@@ -839,7 +839,7 @@ class TraceWalker {
         Frame fr;
         fr.trace = current;
         fr.level = level - 1;
-        fr.len = strlen(current->symbol);
+        fr.len = symbolLength(current->symbol);
         checkArcBuff(fr.len);
         m_stack.push_back(fr);
       } else if (m_stack.size() > 1) {
@@ -953,6 +953,17 @@ class TraceWalker {
     }
     *cp = 0;
     incStats(m_arcBuff, tIt, callee, stats);
+  }
+
+  // Computes the length of the symbol without $continuation on the
+  // end, to ensure that work done in continuations and the original
+  // function are counted together.
+  int symbolLength(const char* symbol) {
+    auto len = strlen(symbol);
+    if ((len > 13) && (strcmp(&symbol[len - 13], "$continuation") == 0)) {
+      return len - 13;
+    }
+    return len;
   }
 
   vector<std::pair<char*, int>> m_recursion;

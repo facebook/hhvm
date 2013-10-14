@@ -790,7 +790,7 @@ static Variant iter_op_impl(VRefParam refParam, Op op, NonArrayRet nonArray) {
 
   auto ad = cell.m_data.parr;
   if (Cow == CowTag::Yes) {
-    if (ad->getCount() > 1 && !ad->isInvalid() && !ad->noCopyOnWrite()) {
+    if (ad->hasMultipleRefs() && !ad->isInvalid() && !ad->noCopyOnWrite()) {
       ad = ad->copy();
       cellSet(make_tv<KindOfArray>(ad), cell);
     }

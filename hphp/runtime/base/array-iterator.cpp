@@ -611,13 +611,13 @@ ArrayData* FullPos::cowCheck() {
   if (hasVar()) {
     data = getData();
     if (!data) return nullptr;
-    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
+    if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
       *const_cast<Variant*>(getVar()) = data = data->copyWithStrongIterators();
     }
   } else {
     assert(hasAd());
     data = getAd();
-    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
+    if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
       ArrayData* copied = data->copyWithStrongIterators();
       copied->incRefCount();
       decRefArr(data);

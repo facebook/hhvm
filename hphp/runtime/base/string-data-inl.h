@@ -113,14 +113,14 @@ inline MutableSlice StringData::bufferSlice() {
 
 inline void StringData::invalidateHash() {
   assert(!isImmutable());
-  assert(getCount() <= 1);
+  assert(!hasMultipleRefs());
   m_hash = 0;
   assert(checkSane());
 }
 
 inline void StringData::setSize(int len) {
   assert(len >= 0 && len < capacity() && !isImmutable());
-  assert(getCount() <= 1);
+  assert(!hasMultipleRefs());
   m_data[len] = 0;
   m_len = len;
   m_hash = 0;
@@ -153,8 +153,8 @@ inline bool StringData::isZero() const  {
 }
 
 inline StringData* StringData::modifyChar(int offset, char c) {
-  assert(offset >= 0 && offset < size() && !isStatic());
-  assert(getCount() <= 1);
+  assert(offset >= 0 && offset < size());
+  assert(!hasMultipleRefs());
 
   auto const sd = isShared() ? escalate(size()) : this;
   sd->m_data[offset] = c;

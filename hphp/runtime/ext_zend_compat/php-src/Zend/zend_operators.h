@@ -200,7 +200,7 @@ private:
 public:
   explicit ZArrVal(HPHP::TypedValue* tv) : m_tv(tv) {}
   void cowCheck() {
-    if (m_tv->m_data.parr->getCount() > 1) {
+    if (m_tv->m_data.parr->hasMultipleRefs()) {
       HPHP::ArrayData* a = m_tv->m_data.parr->copy();
       a->incRefCount();
       m_tv->m_data.parr->decRefCount();

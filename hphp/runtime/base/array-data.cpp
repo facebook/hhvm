@@ -402,7 +402,7 @@ ArrayData *ArrayData::Pop(ArrayData* a, Variant &value) {
   if (!a->empty()) {
     ssize_t pos = a->iter_end();
     value = a->getValue(pos);
-    return a->remove(a->getKey(pos), a->getCount() > 1);
+    return a->remove(a->getKey(pos), a->hasMultipleRefs());
   }
   value = uninit_null();
   return a;
@@ -412,7 +412,7 @@ ArrayData *ArrayData::Dequeue(ArrayData* a, Variant &value) {
   if (!a->empty()) {
     auto const pos = a->iter_begin();
     value = a->getValue(pos);
-    ArrayData *ret = a->remove(a->getKey(pos), a->getCount() > 1);
+    ArrayData *ret = a->remove(a->getKey(pos), a->hasMultipleRefs());
 
     // In PHP, array_shift() will cause all numerically key-ed values re-keyed
     ret->renumber();

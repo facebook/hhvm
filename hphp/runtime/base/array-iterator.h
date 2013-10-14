@@ -523,7 +523,7 @@ class MArrayIter : public FullPos {
   CVarRef val() {
     ArrayData* data = getArray();
     assert(data && data == getContainer());
-    assert(data->getCount() <= 1 || data->noCopyOnWrite());
+    assert(!data->hasMultipleRefs() || data->noCopyOnWrite());
     assert(!getResetFlag());
     assert(data->validFullPos(*this));
     return data->getValueRef(m_pos);

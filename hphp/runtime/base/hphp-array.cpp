@@ -1778,7 +1778,7 @@ ArrayData* HphpArray::AddNewElemC(ArrayData* ad, TypedValue value) {
   int64_t k;
   if (LIKELY(ad->isPacked()) &&
       ((a = asPacked(ad)), LIKELY(a->m_pos >= 0)) &&
-      LIKELY(a->getCount() <= 1) &&
+      LIKELY(!a->hasMultipleRefs()) &&
       ((k = a->m_size), LIKELY(size_t(k) < a->m_cap))) {
     assert(a->checkInvariants());
     auto& tv = a->allocNextElm(k);
@@ -1973,7 +1973,7 @@ ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems) {
 
 ArrayData* HphpArray::PopPacked(ArrayData* ad, Variant& value) {
   auto a = asPacked(ad);
-  if (a->getCount() > 1) a = a->copyPacked();
+  if (a->hasMultipleRefs()) a = a->copyPacked();
   if (a->m_size > 0) {
     auto i = a->m_size - 1;
     auto& tv = a->data()[i].data;
@@ -1993,7 +1993,7 @@ ArrayData* HphpArray::PopPacked(ArrayData* ad, Variant& value) {
 
 ArrayData* HphpArray::Pop(ArrayData* ad, Variant& value) {
   auto a = asMixed(ad);
-  if (a->getCount() > 1) a = a->copyMixed();
+  if (a->hasMultipleRefs()) a = a->copyMixed();
   auto elms = a->data();
   ssize_t pos = IterEnd(a);
   if (validPos(pos)) {
@@ -2015,7 +2015,7 @@ ArrayData* HphpArray::Pop(ArrayData* ad, Variant& value) {
 
 ArrayData* HphpArray::DequeuePacked(ArrayData* ad, Variant& value) {
   auto a = asPacked(ad);
-  if (a->getCount() > 1) a = a->copyPacked();
+  if (a->hasMultipleRefs()) a = a->copyPacked();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
   a->freeStrongIterators();
@@ -2036,7 +2036,7 @@ ArrayData* HphpArray::DequeuePacked(ArrayData* ad, Variant& value) {
 
 ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
   auto a = asMixed(ad);
-  if (a->getCount() > 1) a = a->copyMixed();
+  if (a->hasMultipleRefs()) a = a->copyMixed();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
   a->freeStrongIterators();
@@ -2061,7 +2061,7 @@ ArrayData* HphpArray::Dequeue(ArrayData* ad, Variant& value) {
 
 ArrayData* HphpArray::PrependPacked(ArrayData* ad, CVarRef v, bool copy) {
   auto a = asPacked(ad);
-  if (a->getCount() > 1) a = a->copyPackedAndResizeIfNeeded();
+  if (a->hasMultipleRefs()) a = a->copyPackedAndResizeIfNeeded();
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is added to the beginning of the array.
   a->freeStrongIterators();
@@ -2079,7 +2079,7 @@ ArrayData* HphpArray::PrependPacked(ArrayData* ad, CVarRef v, bool copy) {
 
 ArrayData* HphpArray::Prepend(ArrayData* ad, CVarRef v, bool copy) {
   auto a = asMixed(ad);
-  if (a->getCount() > 1) a = a->copyMixedAndResizeIfNeeded();
+  if (a->hasMultipleRefs()) a = a->copyMixedAndResizeIfNeeded();
 
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is added to the beginning of the array.

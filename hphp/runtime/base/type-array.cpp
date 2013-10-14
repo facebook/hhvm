@@ -487,7 +487,7 @@ Variant &Array::lvalAt() {
   if (!m_px) ArrayBase::operator=(ArrayData::Create());
   Variant *ret = nullptr;
   ArrayData *arr = m_px;
-  ArrayData *escalated = arr->lvalNew(ret, arr->getCount() > 1);
+  ArrayData *escalated = arr->lvalNew(ret, arr->hasMultipleRefs());
   if (escalated != arr) ArrayBase::operator=(escalated);
   assert(ret);
   return *ret;
@@ -514,7 +514,7 @@ void Array::setImpl(const T &key, CVarRef v) {
     ArrayData *data = ArrayData::Create(key, v);
     ArrayBase::operator=(data);
   } else {
-    ArrayData *escalated = m_px->set(key, v, (m_px->getCount() > 1));
+    ArrayData *escalated = m_px->set(key, v, (m_px->hasMultipleRefs()));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
 }
@@ -527,7 +527,7 @@ void Array::setRefImpl(const T &key, CVarRef v) {
     ArrayBase::operator=(data);
   } else {
     escalate();
-    ArrayData *escalated = m_px->setRef(key, v, (m_px->getCount() > 1));
+    ArrayData *escalated = m_px->setRef(key, v, (m_px->hasMultipleRefs()));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
 }
@@ -539,7 +539,7 @@ void Array::addImpl(const T &key, CVarRef v) {
     ArrayData *data = ArrayData::Create(key, v);
     ArrayBase::operator=(data);
   } else {
-    ArrayData *escalated = m_px->add(key, v, (m_px->getCount() > 1));
+    ArrayData *escalated = m_px->add(key, v, (m_px->hasMultipleRefs()));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
 }
@@ -676,7 +676,7 @@ CVarRef Array::append(CVarRef v) {
   if (!m_px) {
     ArrayBase::operator=(ArrayData::Create(v));
   } else {
-    ArrayData *escalated = m_px->append(v, (m_px->getCount() > 1));
+    ArrayData *escalated = m_px->append(v, (m_px->hasMultipleRefs()));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
   return v;
@@ -686,7 +686,7 @@ CVarRef Array::appendRef(CVarRef v) {
   if (!m_px) {
     ArrayBase::operator=(ArrayData::CreateRef(v));
   } else {
-    ArrayData *escalated = m_px->appendRef(v, (m_px->getCount() > 1));
+    ArrayData *escalated = m_px->appendRef(v, (m_px->hasMultipleRefs()));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
   return v;
@@ -694,7 +694,7 @@ CVarRef Array::appendRef(CVarRef v) {
 
 CVarRef Array::appendWithRef(CVarRef v) {
   if (!m_px) ArrayBase::operator=(ArrayData::Create());
-  ArrayData *escalated = m_px->appendWithRef(v, (m_px->getCount() > 1));
+  ArrayData *escalated = m_px->appendWithRef(v, (m_px->hasMultipleRefs()));
   if (escalated != m_px) ArrayBase::operator=(escalated);
   return v;
 }
@@ -722,7 +722,7 @@ Variant Array::dequeue() {
 void Array::prepend(CVarRef v) {
   if (!m_px) operator=(Create());
   assert(m_px);
-  ArrayData *newarr = m_px->prepend(v, (m_px->getCount() > 1));
+  ArrayData *newarr = m_px->prepend(v, (m_px->hasMultipleRefs()));
   if (newarr != m_px) ArrayBase::operator=(newarr);
 }
 

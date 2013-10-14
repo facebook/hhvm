@@ -288,7 +288,7 @@ public:
   Variant &lval(int64_t key) {
     if (!m_px) ArrayBase::operator=(ArrayData::Create());
     Variant *ret = nullptr;
-    ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
+    ArrayData *escalated = m_px->lval(key, ret, m_px->hasMultipleRefs());
     if (escalated != m_px) ArrayBase::operator=(escalated);
     assert(ret);
     return *ret;
@@ -297,7 +297,7 @@ public:
   Variant &lval(const String& key) {
     if (!m_px) ArrayBase::operator=(ArrayData::Create());
     Variant *ret = nullptr;
-    ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
+    ArrayData *escalated = m_px->lval(key, ret, m_px->hasMultipleRefs());
     if (escalated != m_px) ArrayBase::operator=(escalated);
     assert(ret);
     return *ret;
@@ -384,7 +384,7 @@ public:
   template<typename T>
   void removeImpl(const T &key) {
     if (m_px) {
-      ArrayData *escalated = m_px->remove(key, (m_px->getCount() > 1));
+      ArrayData *escalated = m_px->remove(key, (m_px->hasMultipleRefs()));
       if (escalated != m_px) ArrayBase::operator=(escalated);
     }
   }
@@ -450,7 +450,7 @@ public:
     assert(!(flags & AccessFlags::CheckExist));
     if (!m_px) ArrayBase::operator=(ArrayData::Create());
     Variant *ret = nullptr;
-    ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
+    ArrayData *escalated = m_px->lval(key, ret, m_px->hasMultipleRefs());
     if (escalated != m_px) ArrayBase::operator=(escalated);
     assert(ret);
     return *ret;

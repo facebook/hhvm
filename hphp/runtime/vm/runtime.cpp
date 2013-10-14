@@ -116,7 +116,7 @@ tvPairToCString(DataType t, uint64_t v,
  */
 StringData*
 concat_ss(StringData* v1, StringData* v2) {
-  if (v1->getCount() > 1) {
+  if (v1->hasMultipleRefs()) {
     StringData* ret = StringData::Make(v1, v2);
     ret->setRefCount(1);
     // Because v1->getCount() is greater than 1, we know we will never

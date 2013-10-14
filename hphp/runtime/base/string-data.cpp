@@ -272,7 +272,7 @@ StringData* StringData::Make(int reserveLen) {
 }
 
 StringData* StringData::append(StringSlice range) {
-  assert(!isStatic() && getCount() <= 1);
+  assert(!hasMultipleRefs());
 
   auto s = range.ptr;
   auto const len = range.len;
@@ -314,7 +314,7 @@ StringData* StringData::append(StringSlice range) {
 }
 
 StringData* StringData::reserve(int cap) {
-  assert(!isImmutable() && m_count <= 1 && cap >= 0);
+  assert(!isImmutable() && !hasMultipleRefs() && cap >= 0);
   assert(isFlat());
 
   if (cap + 1 <= capacity()) return this;

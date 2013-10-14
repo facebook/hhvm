@@ -735,7 +735,7 @@ inline StringData* SetElemString(TypedValue* base, TypedValue* key,
   }
 
   // Create and save the result.
-  if (x >= 0 && x < baseLen && base->m_data.pstr->getCount() <= 1) {
+  if (x >= 0 && x < baseLen && !base->m_data.pstr->hasMultipleRefs()) {
     // Modify base in place.  This is safe because the LHS owns the
     // only reference.
     auto const oldp = base->m_data.pstr;
@@ -855,7 +855,7 @@ inline void SetElemArray(TypedValue* base, TypedValue* key,
                          Cell* value) {
   ArrayData* a = base->m_data.parr;
   ArrayData* newData = a;
-  bool copy = (a->getCount() > 1)
+  bool copy = (a->hasMultipleRefs())
     || (value->m_type == KindOfArray && value->m_data.parr == a);
 
   if (keyType != KeyType::Any) {
@@ -982,7 +982,7 @@ inline void SetNewElemString(TypedValue* base, Cell* value) {
  */
 inline void SetNewElemArray(TypedValue* base, Cell* value) {
   ArrayData* a = base->m_data.parr;
-  bool copy = (a->getCount() > 1)
+  bool copy = (a->hasMultipleRefs())
     || (value->m_type == KindOfArray && value->m_data.parr == a);
   ArrayData* a2 = a->append(cellAsCVarRef(*value), copy);
   if (a2 != a) {
@@ -1456,7 +1456,7 @@ template <KeyType keyType>
 inline void UnsetElemArray(TypedValue* base, TypedValue* key) {
   ArrayData* a = base->m_data.parr;
   ArrayData* a2;
-  bool copy = a->getCount() > 1;
+  bool copy = a->hasMultipleRefs();
   if (keyType == KeyType::Any) {
     if (IS_STRING_TYPE(key->m_type)) {
       a2 = UnsetElemArrayRawKey(a, key->m_data.pstr, copy);

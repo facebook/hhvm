@@ -798,7 +798,7 @@ class Variant : private TypedValue {
     assert(m_type == KindOfArray);
     Variant *ret = nullptr;
     ArrayData *arr = m_data.parr;
-    ArrayData *escalated = arr->lval(key, ret, arr->getCount() > 1);
+    ArrayData *escalated = arr->lval(key, ret, arr->hasMultipleRefs());
     if (escalated != arr) set(escalated);
     assert(ret);
     return *ret;
@@ -1163,7 +1163,7 @@ private:
    */
   bool needCopyForSet(CVarRef v) {
     assert(m_type == KindOfArray);
-    if (m_data.parr->getCount() > 1) return true;
+    if (m_data.parr->hasMultipleRefs()) return true;
     if (v.m_type == KindOfArray) return m_data.parr == v.m_data.parr;
     if (v.m_type == KindOfRef) {
       return m_data.parr == v.m_data.pref->var()->m_data.parr;
@@ -1173,7 +1173,7 @@ private:
 
   bool needCopyForSetRef(CVarRef v) {
     assert(m_type == KindOfArray);
-    return m_data.parr->getCount() > 1;
+    return m_data.parr->hasMultipleRefs();
   }
 
   bool   toBooleanHelper() const;

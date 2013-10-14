@@ -82,7 +82,7 @@ bool tvDecRefWillRelease(TypedValue* tv);
  */
 inline bool tvDecRefWillCallHelper(TypedValue* tv) {
   return IS_REFCOUNTED_TYPE(tv->m_type) &&
-         tv->m_data.pstr->getCount() <= 1;
+    !tv->m_data.pstr->hasMultipleRefs();
 }
 
 // Assumes 'tv' is live

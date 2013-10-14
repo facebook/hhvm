@@ -526,7 +526,7 @@ void Variant::prepend(CVarRef v) {
   if (isNull()) set(Array::Create());
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    ArrayData *newarr = arr->prepend(v, (arr->getCount() > 1));
+    ArrayData *newarr = arr->prepend(v, (arr->hasMultipleRefs()));
     if (newarr != arr) set(newarr);
   } else {
     throw_bad_type_exception("expecting an array");
@@ -1095,11 +1095,11 @@ head:
     ArrayData *escalated;
     Variant *ret = nullptr;
     if (LvalHelper<T>::CheckParams && flags & AccessFlags::Key) {
-      escalated = arr->lval(key, ret, arr->getCount() > 1);
+      escalated = arr->lval(key, ret, arr->hasMultipleRefs());
     } else {
       typename LvalHelper<T>::KeyType k(ToKey(key));
       if (LvalHelper<T>::CheckKey(k)) {
-        escalated = arr->lval(k, ret, arr->getCount() > 1);
+        escalated = arr->lval(k, ret, arr->hasMultipleRefs());
       } else {
         if (blackHole) ret = &lvalBlackHole();
         else           ret = tmp;
@@ -1211,7 +1211,7 @@ Variant &Variant::lvalAt() {
   assert(m_type == KindOfArray);
   Variant *ret = nullptr;
   ArrayData *arr = m_data.parr;
-  ArrayData *escalated = arr->lvalNew(ret, arr->getCount() > 1);
+  ArrayData *escalated = arr->lvalNew(ret, arr->hasMultipleRefs());
   if (escalated != arr) {
     set(escalated);
   }
@@ -1282,7 +1282,7 @@ CVarRef Variant::SetImpl(Variant *self, T key, CVarRef v, bool isKey) {
 
       String str = v.toString();
       auto const ch = str.empty() ? 0 : str.data()[0];
-      if (offset < r.len && s->getCount() <= 1) {
+      if (offset < r.len && !s->hasMultipleRefs()) {
         return s->modifyChar(offset, ch);
       }
       if (offset > RuntimeOption::StringOffsetLimit) {
@@ -1505,7 +1505,7 @@ void Variant::removeImpl(int64_t key) {
     {
       ArrayData *arr = getArrayData();
       if (arr) {
-        ArrayData *escalated = arr->remove(key, (arr->getCount() > 1));
+        ArrayData *escalated = arr->remove(key, (arr->hasMultipleRefs()));
         if (escalated != arr) {
           set(escalated);
         }
@@ -1532,11 +1532,11 @@ void Variant::removeImpl(CVarRef key, bool isString /* false */) {
       if (arr) {
         ArrayData *escalated;
         if (isString) {
-          escalated = arr->remove(key, (arr->getCount() > 1));
+          escalated = arr->remove(key, (arr->hasMultipleRefs()));
         } else {
           const VarNR &k = key.toKey();
           if (k.isNull()) return;
-          escalated = arr->remove(k, (arr->getCount() > 1));
+          escalated = arr->remove(k, (arr->hasMultipleRefs()));
         }
         if (escalated != arr) {
           set(escalated);
@@ -1564,9 +1564,9 @@ void Variant::removeImpl(const String& key, bool isString /* false */) {
       if (arr) {
         ArrayData *escalated;
         if (isString) {
-          escalated = arr->remove(key, (arr->getCount() > 1));
+          escalated = arr->remove(key, (arr->hasMultipleRefs()));
         } else {
-          escalated = arr->remove(key.toKey(), (arr->getCount() > 1));
+          escalated = arr->remove(key.toKey(), (arr->hasMultipleRefs()));
         }
         if (escalated != arr) {
           set(escalated);

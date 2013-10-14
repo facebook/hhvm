@@ -511,7 +511,7 @@ void cellBitNot(Cell& cell) {
     break;
 
   case KindOfString:
-    if (cell.m_data.pstr->getCount() > 1) {
+    if (cell.m_data.pstr->hasMultipleRefs()) {
     case KindOfStaticString:
       auto const newSd = StringData::Make(
         cell.m_data.pstr->slice(),

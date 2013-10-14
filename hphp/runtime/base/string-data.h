@@ -204,7 +204,7 @@ struct StringData {
    * sufficient capacity in this string to contain the range, a new
    * string may be returned.
    *
-   * Pre: !isStatic() && getCount() <= 1
+   * Pre: !hasMultipleRefs()
    * Pre: the string is request-local
    */
   StringData* append(StringSlice r);
@@ -247,7 +247,7 @@ struct StringData {
    * calling setSize() if the mutation changed the size of the string,
    * or invalidateHash() if not.
    *
-   * Pre: !isStatic && getCount() <= 1
+   * Pre: !hasMultipleRefs()
    */
   void invalidateHash();
   void setSize(int len);
@@ -341,8 +341,7 @@ struct StringData {
    * string.
    *
    * Pre: offset >= 0 && offset < size()
-   *      getCount() <= 1
-   *      !isStatic()
+   *      !hasMultipleRefs()
    *      string must be request local
    */
   StringData* modifyChar(int offset, char c);

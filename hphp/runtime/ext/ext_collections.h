@@ -60,6 +60,7 @@ class c_Vector : public BaseVector {
   Object t_removekey(CVarRef key);
   Array t_toarray();
   Object t_tovector();
+  Object t_tofrozenvector();
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
@@ -202,6 +203,12 @@ public:
   bool t___isset(Variant name);
   Variant t___unset(Variant name);
 
+  Object t_tovector();
+  Object t_tofrozenvector();
+  Object t_tomap();
+  Object t_tostablemap();
+  Object t_toset();
+
 public:
 
   explicit c_FrozenVector(Class* cls = c_FrozenVector::classof());
@@ -246,6 +253,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   Object t_removekey(CVarRef key);
   Array t_toarray();
   Object t_tovector();
+  Object t_tofrozenvector();
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
@@ -575,6 +583,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   Object t_removekey(CVarRef key);
   Array t_toarray();
   Object t_tovector();
+  Object t_tofrozenvector();
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
@@ -858,6 +867,7 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   Object t_remove(CVarRef key);
   Array t_toarray();
   Object t_tovector();
+  Object t_tofrozenvector();
   Object t_toset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
@@ -1105,6 +1115,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   bool t_containskey(CVarRef key);
   Array t_toarray();
   Object t_tovector();
+  Object t_tofrozenvector();
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();

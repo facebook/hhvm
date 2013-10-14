@@ -4440,6 +4440,12 @@ COLLECTION_MAGIC_METHODS(FrozenVector)
     Object o = st = NEWOBJ(c_Set)(); \
     st->init(VarNR(this)); \
     return o; \
+  } \
+  Object c_##cls::t_tofrozenvector() { \
+    c_FrozenVector* fv; \
+    Object o = fv = NEWOBJ(c_FrozenVector)(); \
+    fv->init(VarNR(this)); \
+    return o; \
   }
 
 #define KEYEDITERABLE_MATERIALIZE_METHODS(cls) \
@@ -4462,6 +4468,7 @@ KEYEDITERABLE_MATERIALIZE_METHODS(Map)
 KEYEDITERABLE_MATERIALIZE_METHODS(StableMap)
 ITERABLE_MATERIALIZE_METHODS(Set)
 KEYEDITERABLE_MATERIALIZE_METHODS(Pair)
+KEYEDITERABLE_MATERIALIZE_METHODS(FrozenVector)
 
 #undef ITERABLE_MATERIALIZE_METHODS
 #undef KEYEDITERABLE_MATERIALIZE_METHODS

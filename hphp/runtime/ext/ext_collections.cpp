@@ -5023,5 +5023,26 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
   }
 }
 
+ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
+  ObjectData* obj;
+  switch (type) {
+    case Collection::VectorType: obj = NEWOBJ(c_Vector)(); break;
+    case Collection::MapType: obj = NEWOBJ(c_Map)(); break;
+    case Collection::StableMapType: obj = NEWOBJ(c_StableMap)(); break;
+    case Collection::SetType: obj = NEWOBJ(c_Set)(); break;
+    case Collection::PairType: obj = NEWOBJ(c_Pair)(); break;
+    case Collection::FrozenVectorType: obj = NEWOBJ(c_FrozenVector)(); break;
+    default:
+      obj = nullptr;
+      raise_error("NewCol: Invalid collection type");
+      break;
+  }
+  // Reserve enough room for nElms elements in advance
+  if (size) {
+    collectionReserve(obj, size);
+  }
+  return obj;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

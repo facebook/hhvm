@@ -401,6 +401,7 @@ O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \
 O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
 O(NewPackedArray,               D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
+O(NewCol,                       D(Obj), C(Int) C(Int),                 N|PRc) \
 O(LdRaw,                        DParam, SUnk,                             NF) \
 O(FreeActRec,              D(FramePtr), S(FramePtr),                     Mem) \
 /*    name                      dstinfo srcinfo                      flags */ \
@@ -493,6 +494,10 @@ O(AddElemIntKey,                D(Arr), S(Arr)                                \
                                           S(Int)                              \
                                           S(Cell),        N|Mem|CRc|PRc|Refs) \
 O(AddNewElem,                   D(Arr), SUnk,                  N|Mem|CRc|PRc) \
+O(ColAddElemC,                  D(Obj), S(Obj)                                \
+                                         S(Cell)                              \
+                                         S(Cell),              N|Mem|CRc|PRc) \
+O(ColAddNewElemC,               D(Obj), SUnk,                  N|Mem|CRc|PRc) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(ConcatStrStr,                 D(Str), S(Str) S(Str),             N|CRc|PRc) \
 O(ConcatIntStr,                 D(Str), S(Int) S(Str),                 N|PRc) \

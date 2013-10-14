@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -644,6 +645,37 @@ Cell lookupClassConstantTv(TypedValue* cache,
   assert(isUncounted(clsCns));
   cellDup(clsCns, *cache);
   return clsCns;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+ObjectData* newColHelper(uint32_t type, uint32_t size) {
+  ObjectData* obj = newCollectionHelper(type, size);
+  obj->incRefCount();
+  return obj;
+}
+
+ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
+  if (coll->isCollection()) {
+    collectionInitAppend(coll, &value);
+    // decref the value as the collection helper incref'ed it
+    tvRefcountedDecRef(&value);
+  } else {
+    raise_error("ColAddNewElemC: $2 must be a collection");
+  }
+  return coll;
+}
+
+ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
+                              TypedValue value) {
+  if (coll->isCollection()) {
+    collectionSet(coll, &key, &value);
+    // decref the value as the collection helper incref'ed it
+    tvRefcountedDecRef(&value);
+  } else {
+    raise_error("ColAddNewElemC: $2 must be a collection");
+  }
+  return coll;
 }
 
 //////////////////////////////////////////////////////////////////////

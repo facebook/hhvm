@@ -253,6 +253,8 @@ CALL_OPCODE(AddElemIntKey)
 CALL_OPCODE(AddNewElem)
 CALL_OPCODE(ArrayAdd)
 CALL_OPCODE(Box)
+CALL_OPCODE(ColAddElemC)
+CALL_OPCODE(ColAddNewElemC)
 
 CALL_OPCODE(ConvBoolToArr);
 CALL_OPCODE(ConvDblToArr);
@@ -292,6 +294,7 @@ CALL_OPCODE(CreateContFunc)
 CALL_OPCODE(CreateContMeth)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewPackedArray)
+CALL_OPCODE(NewCol)
 CALL_OPCODE(AllocObj)
 CALL_OPCODE(LdClsCtor);
 CALL_OPCODE(PrintStr)

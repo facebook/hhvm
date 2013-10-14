@@ -1271,6 +1271,8 @@ ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
 ObjectData* collectionDeepCopySet(c_Set* st);
 ObjectData* collectionDeepCopyPair(c_Pair* pair);
 
+ObjectData* newCollectionHelper(uint32_t type, uint32_t size);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 inline TypedValue* cvarToCell(const Variant* v) {

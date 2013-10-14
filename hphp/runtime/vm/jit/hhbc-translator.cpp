@@ -594,16 +594,37 @@ void HhbcTranslator::emitAddNewElemC() {
   push(gen(AddNewElem, arr, val));
 }
 
-void HhbcTranslator::emitNewCol(int type, int numElems) {
-  emitInterpOne(Type::Obj, 0);
+void HhbcTranslator::emitNewCol(int type, int size) {
+  push(gen(NewCol, cns(type), cns(size)));
 }
 
 void HhbcTranslator::emitColAddElemC() {
-  emitInterpOne(Type::Obj, 3);
+  if (!topC(2)->isA(Type::Obj)) {
+    return emitInterpOne(Type::Obj, 3);
+  }
+  auto kt = topC(1, DataTypeGeneric)->type();
+  if (!kt.subtypeOf(Type::Int) && !kt.isString()) {
+    emitInterpOne(Type::Obj, 3);
+    return;
+  }
+
+  // val is teleported from the stack to the collection, so we don't
+  // have to do any refcounting.
+  auto const val = popC(DataTypeGeneric);
+  auto const key = popC();
+  auto const coll = popC();
+  push(gen(ColAddElemC, coll, key, val));
 }
 
 void HhbcTranslator::emitColAddNewElemC() {
-  emitInterpOne(Type::Obj, 2);
+  if (!topC(1)->isA(Type::Obj)) {
+    return emitInterpOne(Type::Obj, 2);
+  }
+
+  auto const val = popC();
+  auto const coll = popC();
+  // The AddNewElem helper decrefs its args, so don't decref pop'ed values.
+  push(gen(ColAddNewElemC, coll, val));
 }
 
 void HhbcTranslator::emitCnsCommon(uint32_t id,

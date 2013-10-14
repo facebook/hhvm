@@ -74,6 +74,7 @@ public:
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
+  static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
   // Helpers

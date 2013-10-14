@@ -282,6 +282,16 @@ bool BaseVector::OffsetContains(ObjectData* obj, TypedValue* key) {
   }
 }
 
+TypedValue* BaseVector::OffsetGet(ObjectData* obj, TypedValue* key) {
+  assert(key->m_type != KindOfRef);
+  auto vec = static_cast<BaseVector*>(obj);
+  if (key->m_type == KindOfInt64) {
+    return vec->at(key->m_data.num);
+  }
+  throwBadKeyType();
+  return nullptr;
+}
+
 bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto bv1 = static_cast<const BaseVector*>(obj1);
   auto bv2 = static_cast<const BaseVector*>(obj2);

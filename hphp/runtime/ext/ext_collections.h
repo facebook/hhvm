@@ -117,7 +117,6 @@ class c_Vector : public BaseVector {
   void usort(CVarRef cmp_function);
 
   static c_Vector* Clone(ObjectData* obj);
-  static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,

@@ -647,16 +647,6 @@ void c_Vector::usort(CVarRef cmp_function) {
   HPHP::Sort::sort(m_data, m_data + m_size, comp);
 }
 
-TypedValue* c_Vector::OffsetGet(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  auto vec = static_cast<c_Vector*>(obj);
-  if (key->m_type == KindOfInt64) {
-    return vec->at(key->m_data.num);
-  }
-  throwBadKeyType();
-  return nullptr;
-}
-
 void c_Vector::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   assert(key->m_type != KindOfRef);
   assert(val->m_type != KindOfRef);
@@ -4624,6 +4614,8 @@ TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
       return c_Set::OffsetGet(obj, key);
     case Collection::PairType:
       return c_Pair::OffsetGet(obj, key);
+    case Collection::FrozenVectorType:
+      return c_FrozenVector::OffsetGet(obj, key);
     default:
       assert(false);
       return nullptr;

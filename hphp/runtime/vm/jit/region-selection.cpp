@@ -313,6 +313,7 @@ RegionDescPtr selectTraceletLegacy(const RegionContext&    rCtx,
       for (auto cni = callee.m_instrStream.first; cni; cni = cni->next) {
         assert(cSk == cni->source);
         assert(cni->op() == OpRetC ||
+               cni->op() == OpRetV ||
                cni->op() == OpContRetC ||
                cni->op() == OpNativeImpl ||
                !instrIsNonCallControlFlow(cni->op()));

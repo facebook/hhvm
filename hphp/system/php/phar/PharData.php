@@ -31,7 +31,7 @@ class PharData extends Phar {
    */
   public function __construct(
     string $fname,
-    int $flags = 0,
+    int $flags = null,
     string $alias = null,
     int $format = Phar::TAR
   ) {

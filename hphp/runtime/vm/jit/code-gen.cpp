@@ -5874,7 +5874,7 @@ void CodeGenerator::cgIncStat(IRInstruction *inst) {
 }
 
 void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {
-  m_tx64->emitTransCounterInc(m_as);
+  emitTransCounterInc(m_as);
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {

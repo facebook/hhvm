@@ -87,7 +87,7 @@ static void setupAfterPrologue(ActRec* fp) {
 TCA fcallHelper(ActRec* ar) {
   try {
     TCA tca =
-      Translator::Get()->funcPrologue((Func*)ar->m_func, ar->numArgs(), ar);
+      tx64->getFuncPrologue((Func*)ar->m_func, ar->numArgs(), ar);
     if (tca) {
       return tca;
     }

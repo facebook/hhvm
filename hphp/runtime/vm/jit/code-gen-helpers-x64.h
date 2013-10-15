@@ -49,6 +49,8 @@ void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc,
 void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
 void emitGetGContext(Asm& as, PhysReg dest);
 
+void emitTransCounterInc(Asm& a);
+
 void emitIncRef(Asm& as, PhysReg base);
 void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype);
 void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg);

@@ -113,6 +113,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
+#include "hphp/runtime/vm/jit/func-prologues-x64.h"
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
@@ -165,15 +166,6 @@ __thread TranslatorX64* tx64;
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = VMRegState::CLEAN;
 
-static StaticString s___call(LITSTR_INIT("__call"));
-static StaticString s___callStatic(LITSTR_INIT("__callStatic"));
-
-// Initialize at most this many locals inline in function body prologue; more
-// than this, and emitting a loop is more compact. To be precise, the actual
-// crossover point in terms of code size is 6; 9 was determined by experiment to
-// be the optimal point in certain benchmarks. #microoptimization
-static const int kLocalsToInitializeInline = 9;
-
 // stubBlock --
 //   Used to emit a bunch of outlined code that is unconditionally jumped to.
 template <typename L>
@@ -201,23 +193,8 @@ JIT::CppCall TranslatorX64::getDtorCall(DataType type) {
   }
 }
 
-static bool shouldPGOFunc(const Func* func) {
-  if (!RuntimeOption::EvalJitPGO) return false;
-
-  // Cloned closures use the func prologue tables to hold the
-  // addresses of the DV funclets, and not real prologues.  The
-  // mechanism to retranslate prologues currently assumes that the
-  // prologue tables contain real prologues, so it doesn't properly
-  // handle cloned closures for now.  So don't profile & retranslate
-  // them for now.
-  if (func->isClonedClosure()) return false;
-
-  if (!RuntimeOption::EvalJitPGOHotOnly) return true;
-  return func->attrs() & AttrHot;
-}
-
 bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
-  if (!shouldPGOFunc(sk.func())) return false;
+  if (!sk.func()->shouldPGO()) return false;
 
   if (profData()->optimized(sk)) return false;
 
@@ -514,152 +491,6 @@ void TranslatorX64::unprotectCode() {
            PROT_READ | PROT_WRITE | PROT_EXEC);
 }
 
-void
-TranslatorX64::emitStackCheck(int funcDepth, Offset pc) {
-  Asm a { mainCode };
-  funcDepth += kStackCheckPadding * sizeof(Cell);
-
-  uint64_t stackMask = cellsToBytes(RuntimeOption::EvalVMStackElms) - 1;
-  a.    mov_reg64_reg64(rVmSp, rAsm); // copy to destroy
-  a.    and_imm64_reg64(stackMask, rAsm);
-  a.    sub_imm64_reg64(funcDepth + Stack::sSurprisePageSize, rAsm);
-  a.    jl(uniqueStubs.stackOverflowHelper); // Unlikely branch to failure.
-  // Success.
-}
-
-void
-TranslatorX64::setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
-                              DataType t) {
-  TypedValue* tv =
-    (TypedValue*)(uintptr_t(ar) - (argNum+1) * sizeof(TypedValue));
-  tv->m_data.num = datum;
-  tv->m_type = t;
-}
-
-int
-TranslatorX64::shuffleArgsForMagicCall(ActRec* ar) {
-  if (!ar->hasInvName()) {
-    return 0;
-  }
-  const Func* f UNUSED = ar->m_func;
-  f->validate();
-  assert(f->name()->isame(s___call.get())
-         || f->name()->isame(s___callStatic.get()));
-  assert(f->numParams() == 2);
-  TRACE(1, "shuffleArgsForMagicCall: ar %p\n", ar);
-  assert(ar->hasInvName());
-  StringData* invName = ar->getInvName();
-  assert(invName);
-  ar->setVarEnv(nullptr);
-  int nargs = ar->numArgs();
-
-  // We need to make an array containing all the arguments passed by the
-  // caller and put it where the second argument is
-  PackedArrayInit aInit(nargs);
-  for (int i = 0; i < nargs; ++i) {
-    auto const tv = reinterpret_cast<TypedValue*>(
-      uintptr_t(ar) - (i+1) * sizeof(TypedValue)
-    );
-    aInit.append(tvAsCVarRef(tv));
-    tvRefcountedDecRef(tv);
-  }
-
-  // Put invName in the slot for first argument
-  setArgInActRec(ar, 0, uint64_t(invName), BitwiseKindOfString);
-  // Put argArray in the slot for second argument
-  auto const argArray = aInit.toArray().detach();
-  setArgInActRec(ar, 1, uint64_t(argArray), KindOfArray);
-  // Fix up ActRec's numArgs
-  ar->initNumArgs(2);
-  return 1;
-}
-
-/*
- * The standard VMRegAnchor treatment won't work for some cases called
- * during function preludes.
- *
- * The fp sync machinery is fundamentally based on the notion that
- * instruction pointers in the TC are uniquely associated with source
- * HHBC instructions, and that source HHBC instructions are in turn
- * uniquely associated with SP->FP deltas.
- *
- * trimExtraArgs is called from the prologue of the callee.
- * The prologue is 1) still in the caller frame for now,
- * and 2) shared across multiple call sites. 1 means that we have the
- * fp from the caller's frame, and 2 means that this fp is not enough
- * to figure out sp.
- *
- * However, the prologue passes us the callee actRec, whose predecessor
- * has to be the caller. So we can sync sp and fp by ourselves here.
- * Geronimo!
- */
-static void sync_regstate_to_caller(ActRec* preLive) {
-  assert(tl_regState == VMRegState::DIRTY);
-  VMExecutionContext* ec = g_vmContext;
-  ec->m_stack.top() = (TypedValue*)preLive - preLive->numArgs();
-  ActRec* fp = preLive == ec->m_firstAR ?
-    ec->m_nestedVMs.back().m_savedState.fp : (ActRec*)preLive->m_savedRbp;
-  ec->m_fp = fp;
-  ec->m_pc = fp->m_func->unit()->at(fp->m_func->base() + preLive->m_soff);
-  tl_regState = VMRegState::CLEAN;
-}
-
-void
-TranslatorX64::trimExtraArgs(ActRec* ar) {
-  assert(!ar->hasInvName());
-
-  sync_regstate_to_caller(ar);
-  const Func* f = ar->m_func;
-  int numParams = f->numParams();
-  int numArgs = ar->numArgs();
-  assert(numArgs > numParams);
-  int numExtra = numArgs - numParams;
-
-  TRACE(1, "trimExtraArgs: %d args, function %s takes only %d, ar %p\n",
-        numArgs, f->name()->data(), numParams, ar);
-
-  if (f->attrs() & AttrMayUseVV) {
-    assert(!ar->hasExtraArgs());
-    ar->setExtraArgs(ExtraArgs::allocateCopy(
-      (TypedValue*)(uintptr_t(ar) - numArgs * sizeof(TypedValue)),
-      numArgs - numParams));
-  } else {
-    // Function is not marked as "MayUseVV", so discard the extra arguments
-    TypedValue* tv = (TypedValue*)(uintptr_t(ar) - numArgs*sizeof(TypedValue));
-    for (int i = 0; i < numExtra; ++i) {
-      tvRefcountedDecRef(tv);
-      ++tv;
-    }
-    ar->setNumArgs(numParams);
-  }
-
-  // Only go back to dirty in a non-exception case.  (Same reason as
-  // above.)
-  tl_regState = VMRegState::DIRTY;
-}
-
-TCA
-TranslatorX64::emitCallArrayPrologue(const Func* func,
-                                   const DVFuncletsVec& dvs) {
-  Asm a { mainCode };
-  Asm astubs { stubsCode };
-  TCA start = mainCode.frontier();
-  if (dvs.size() == 1) {
-    a.   cmp_imm32_disp_reg32(dvs[0].first,
-                              AROFF(m_numArgsAndCtorFlag), rVmFp);
-    emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[0].second));
-    emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
-  } else {
-    a.   load_reg64_disp_reg32(rVmFp, AROFF(m_numArgsAndCtorFlag), rax);
-    for (unsigned i = 0; i < dvs.size(); i++) {
-      a.   cmp_imm32_reg32(dvs[i].first, rax);
-      emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second));
-    }
-    emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
-  }
-  return start;
-}
-
 TCA
 TranslatorX64::getCallArrayPrologue(Func* func) {
   TCA tca = func->getFuncBody();
@@ -682,64 +513,13 @@ TranslatorX64::getCallArrayPrologue(Func* func) {
   return tca;
 }
 
-// The funcGuard gets skipped and patched by other code, so we have some
-// magic offsets.
-static const int kFuncMovImm = 6; // Offset to the immediate for 8 byte Func*
-static const int kFuncCmpImm = 4; // Offset to the immediate for 4 byte Func*
-static const int kFuncGuardLen = 23;
-static const int kFuncGuardShortLen = 14;
-
-template<typename T>
-static T*
-funcPrologueToGuardImm(TCA prologue) {
-  assert(sizeof(T) == 4 || sizeof(T) == 8);
-  T* retval = (T*)(prologue - (sizeof(T) == 8 ?
-                               kFuncGuardLen - kFuncMovImm :
-                               kFuncGuardShortLen - kFuncCmpImm));
-  // We padded these so the immediate would fit inside a cache line
-  assert(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) &
-          ~(kX64CacheLineSize - 1)) == 0);
-
-  return retval;
-}
-
-static inline bool
-funcPrologueHasGuard(TCA prologue, const Func* func) {
-  intptr_t iptr = uintptr_t(func);
-  if (deltaFits(iptr, sz::dword)) {
-    return *funcPrologueToGuardImm<int32_t>(prologue) == iptr;
-  }
-  return *funcPrologueToGuardImm<int64_t>(prologue) == iptr;
-}
-
-static TCA
-funcPrologueToGuard(TCA prologue, const Func* func) {
-  if (!prologue || prologue == Translator::Get()->uniqueStubs.fcallHelperThunk) {
-    return prologue;
-  }
-  return prologue -
-    (deltaFits(uintptr_t(func), sz::dword) ?
-     kFuncGuardShortLen :
-     kFuncGuardLen);
-}
-
-static inline void
-funcPrologueSmashGuard(TCA prologue, const Func* func) {
-  intptr_t iptr = uintptr_t(func);
-  if (deltaFits(iptr, sz::dword)) {
-    *funcPrologueToGuardImm<int32_t>(prologue) = 0;
-    return;
-  }
-  *funcPrologueToGuardImm<int64_t>(prologue) = 0;
-}
-
 void
 TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
                                    const Func* func) {
   DEBUG_ONLY std::unique_ptr<LeaseHolder> writer;
   for (int i = 0; i < numPrologues; i++) {
     if (prologues[i] != uniqueStubs.fcallHelperThunk
-        && funcPrologueHasGuard(prologues[i], func)) {
+        && JIT::X64::funcPrologueHasGuard(prologues[i], func)) {
       if (debug) {
         /*
          * Unit's are sometimes created racily, in which case all
@@ -757,60 +537,9 @@ TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
           writer.reset(new LeaseHolder(s_writeLease, LeaseAcquire::BLOCKING));
         }
       }
-      funcPrologueSmashGuard(prologues[i], func);
+      JIT::X64::funcPrologueSmashGuard(prologues[i], func);
     }
   }
-}
-
-TCA
-TranslatorX64::emitFuncGuard(X64Assembler& a, const Func* func) {
-  assert(kScratchCrossTraceRegs.contains(rax));
-  assert(kScratchCrossTraceRegs.contains(rdx));
-
-  const int kAlign = kX64CacheLineSize;
-  const int kAlignMask = kAlign - 1;
-  int loBits = uintptr_t(a.frontier()) & kAlignMask;
-  int delta, size;
-
-  // Ensure the immediate is safely smashable
-  // the immediate must not cross a qword boundary,
-  if (!deltaFits((intptr_t)func, sz::dword)) {
-    size = 8;
-    delta = loBits + kFuncMovImm;
-  } else {
-    size = 4;
-    delta = loBits + kFuncCmpImm;
-  }
-
-  delta = (delta + size - 1) & kAlignMask;
-  if (delta < size - 1) {
-    a.emitNop(size - 1 - delta);
-  }
-
-  TCA aStart DEBUG_ONLY = a.frontier();
-  if (!deltaFits((intptr_t)func, sz::dword)) {
-    a.    load_reg64_disp_reg64(rStashedAR, AROFF(m_func), rax);
-    /*
-      Although func doesnt fit in a signed 32-bit immediate, it may still
-      fit in an unsigned one. Rather than deal with yet another case
-      (which only happens when we disable jemalloc) just force it to
-      be an 8-byte immediate, and patch it up afterwards.
-    */
-    a.    mov_imm64_reg(0xdeadbeeffeedface, rdx);
-    assert(((uint64_t*)a.frontier())[-1] == 0xdeadbeeffeedface);
-    ((uint64_t*)a.frontier())[-1] = uintptr_t(func);
-    a.    cmp_reg64_reg64(rax, rdx);
-  } else {
-    a.    cmp_imm32_disp_reg32(uint64_t(func), AROFF(m_func), rStashedAR);
-  }
-
-  assert(uniqueStubs.funcPrologueRedispatch);
-
-  a.    jnz(uniqueStubs.funcPrologueRedispatch);
-
-  assert(funcPrologueToGuard(a.frontier(), func) == aStart);
-  assert(funcPrologueHasGuard(a.frontier(), func));
-  return a.frontier();
 }
 
 /*
@@ -869,7 +598,7 @@ static void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
 }
 
 TCA
-TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
+TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
   int numParams = func->numParams();
@@ -914,7 +643,7 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
   // We're comming from a BIND_CALL service request, so enable
   // profiling if we haven't optimized the function entry yet.
   assert(m_mode == TransInvalid || m_mode == TransPrologue);
-  if (m_mode == TransInvalid && shouldPGOFunc(func) &&
+  if (m_mode == TransInvalid && func->shouldPGO() &&
       !prologuesWereRegenerated(func)) {
     m_mode = TransProflogue;
   } else {
@@ -931,92 +660,22 @@ TranslatorX64::funcPrologue(Func* func, int nPassed, ActRec* ar) {
   if (((uintptr_t)mainCode.frontier() & kX64CacheLineMask) >= 32) {
     moveToAlign(mainCode, kX64CacheLineSize);
   }
+
   // Careful: this isn't necessarily the real entry point. For funcIsMagic
   // prologues, this is just a possible prologue.
   TCA aStart    = mainCode.frontier();
   TCA start     = aStart;
   TCA stubStart = stubsCode.frontier();
 
-  Asm a { mainCode };
-
-  // Guard: we're in the right callee. This happens in magicStart for
-  // magic callees.
-  if (!funcIsMagic) {
-    start = aStart = emitFuncGuard(a, func);
+  SrcKey skFuncBody;
+  if (JIT::arch() == JIT::Arch::X64) {
+    skFuncBody = JIT::X64::emitFuncPrologue(
+      mainCode, stubsCode, func, funcIsMagic, nPassed, start, aStart
+    );
+  } else {
+    not_implemented();
   }
 
-  emitRB(a, RBTypeFuncPrologueTry, func->fullName()->data());
-
-  // NB: We have most of the register file to play with, since we know
-  // we're between BB's. So, we hardcode some registers here rather
-  // than using the scratch allocator.
-  TRACE(2, "funcPrologue: user function: %s\n", func->name()->data());
-
-  // Add a counter for the translation if requested
-  if (RuntimeOption::EvalJitTransCounters) {
-    emitTransCounterInc(a);
-  }
-
-  if (!funcIsMagic) {
-    emitPopRetIntoActRec(a);
-    // entry point for magic methods comes later
-    emitRB(a, RBTypeFuncEntry, func->fullName()->data());
-
-    /*
-     * Guard: we have stack enough stack space to complete this
-     * function.  We omit overflow checks if it is a leaf function
-     * that can't use more than kStackCheckLeafPadding cells.
-     */
-    auto const needStackCheck =
-      !(func->attrs() & AttrPhpLeafFn) ||
-      func->maxStackCells() >= kStackCheckLeafPadding;
-    if (needStackCheck) {
-      emitStackCheck(cellsToBytes(func->maxStackCells()), func->base());
-    }
-  }
-
-  SrcKey skFuncBody = emitPrologue(func, nPassed);
-
-  if (funcIsMagic) {
-    // entry points for magic methods is here
-    TCA magicStart = emitFuncGuard(a, func);
-    emitPopRetIntoActRec(a);
-    emitRB(a, RBTypeFuncEntry, func->fullName()->data());
-    // Guard: we have stack enough stack space to complete this function.
-    emitStackCheck(cellsToBytes(func->maxStackCells()), func->base());
-    assert(numParams == 2);
-    // Special __call prologue
-    a.  mov_reg64_reg64(rStashedAR, argNumToRegName[0]);
-    emitCall(a, TCA(TranslatorX64::shuffleArgsForMagicCall));
-    if (memory_profiling) {
-      m_fixupMap.recordFixup(
-        a.frontier(),
-        Fixup(skFuncBody.offset() - func->base(), func->numSlotsInFrame())
-      );
-    }
-    // if shuffleArgs returns 0, that means this was not a magic call
-    // and we should proceed to a prologue specialized for nPassed;
-    // otherwise, proceed to a prologue specialized for nPassed==numParams (2).
-    if (nPassed == 2) {
-      a.jmp(start);
-    } else {
-      a.test_reg64_reg64(rax, rax);
-      // z ==> not a magic call, go to prologue for nPassed
-      if (deltaFits(start - (a.frontier() + kJcc8Len), sz::byte)) {
-        a.jcc8(CC_Z, start);
-      } else {
-        a.jcc(CC_Z, start);
-      }
-      // this was a magic call
-      // nPassed == 2
-      // Fix up hardware stack pointer
-      nPassed = 2;
-      emitLea(a, rStashedAR[-cellsToBytes(nPassed)], rVmSp);
-      // Optimization TODO: Reuse the prologue for args == 2
-      emitPrologue(func, nPassed);
-    }
-    start = magicStart;
-  }
   assert(funcPrologueHasGuard(start, func));
   TRACE(2, "funcPrologue tx64 %p %s(%d) setting prologue %p\n",
         this, func->fullName()->data(), nPassed, start);
@@ -1052,7 +711,7 @@ void TranslatorX64::regeneratePrologue(TransID prologueTransId) {
   func->resetPrologue(nArgs);
   m_mode = TransPrologue;
   SCOPE_EXIT { m_mode = TransInvalid; };
-  TCA start = funcPrologue(func, nArgs);
+  TCA start = getFuncPrologue(func, nArgs);
   func->setPrologue(nArgs, start);
 
   // Smash callers of the old prologue with the address of the new one.
@@ -1061,8 +720,8 @@ void TranslatorX64::regeneratePrologue(TransID prologueTransId) {
     JIT::smashCall(toSmash, start);
   }
   // If the prologue has a guard, then smash its guard-callers as well.
-  if (funcPrologueHasGuard(start, func)) {
-    TCA guard = funcPrologueToGuard(start, func);
+  if (JIT::X64::funcPrologueHasGuard(start, func)) {
+    TCA guard = JIT::X64::funcPrologueToGuard(start, func);
     for (TCA toSmash : pcr->guardCallers()) {
       JIT::smashCall(toSmash, guard);
     }
@@ -1118,219 +777,6 @@ void TranslatorX64::regeneratePrologues(Func* func) {
   for (TransID tid : prologTransIDs) {
     regeneratePrologue(tid);
   }
-}
-
-static void raiseMissingArgument(const char* name, int expected, int got) {
-  if (expected == 1) {
-    raise_warning(Strings::MISSING_ARGUMENT, name, got);
-  } else {
-    raise_warning(Strings::MISSING_ARGUMENTS, name, expected, got);
-  }
-}
-
-static void emitIncRefHelper(X64Assembler& a, PhysReg base, DataType dtype) {
-  if (!IS_REFCOUNTED_TYPE(dtype) && dtype != KindOfInvalid) {
-    return;
-  }
-  static_assert(sizeof(RefCount) == sizeof(int32_t), "");
-  emitIncRefCheckNonStatic(a, base, dtype);
-}
-
-SrcKey
-TranslatorX64::emitPrologue(Func* func, int nPassed) {
-  int numParams = func->numParams();
-  const Func::ParamInfoVec& paramInfo = func->params();
-
-  Offset dvInitializer = InvalidAbsoluteOffset;
-
-  assert(IMPLIES(func->isGenerator(), nPassed == numParams));
-
-  Asm a { mainCode };
-
-  if (m_mode == TransProflogue) {
-    assert(shouldPGOFunc(func));
-    TransID transId  = profData()->curTransID();
-    auto counterAddr = profData()->transCounterAddr(transId);
-    a.movq(counterAddr, rAsm);
-    a.decq(rAsm[0]);
-  }
-
-  if (nPassed > numParams) {
-    // Too many args; a weird case, so just callout. Stash ar
-    // somewhere callee-saved.
-    if (false) { // typecheck
-      TranslatorX64::trimExtraArgs((ActRec*)nullptr);
-    }
-    a.  mov_reg64_reg64(rStashedAR, argNumToRegName[0]);
-    emitCall(a, TCA(TranslatorX64::trimExtraArgs));
-    // We'll fix rVmSp below.
-  } else if (nPassed < numParams) {
-    // Figure out which, if any, default value initializer to go to
-    for (int i = nPassed; i < numParams; ++i) {
-      const Func::ParamInfo& pi = paramInfo[i];
-      if (pi.hasDefaultValue()) {
-        dvInitializer = pi.funcletOff();
-        break;
-      }
-    }
-    TRACE(1, "Only have %d of %d args; getting dvFunclet\n",
-          nPassed, numParams);
-    a.  emitImmReg(nPassed, rax);
-    // do { *(--rVmSp) = NULL; nPassed++; } while (nPassed < numParams);
-    // This should be an unusual case, so optimize for code density
-    // rather than execution speed; i.e., don't unroll the loop.
-    TCA loopTop = a.frontier();
-    a.  sub_imm32_reg64(sizeof(Cell), rVmSp);
-    a.  incl(eax);
-    emitStoreUninitNull(a, 0, rVmSp);
-    a.  cmp_imm32_reg32(numParams, rax);
-    a.  jcc8(CC_L, loopTop);
-  }
-
-  // Entry point for numParams == nPassed is here.
-  // Args are kosher. Frame linkage: set fp = ar.
-  a.    mov_reg64_reg64(rStashedAR, rVmFp);
-
-  int numLocals = numParams;
-  if (func->isClosureBody()) {
-    // Closure object properties are the use vars followed by the
-    // static locals (which are per-instance).
-    int numUseVars = func->cls()->numDeclProperties() -
-                     func->numStaticLocals();
-
-    emitLea(a, rVmFp[-cellsToBytes(numParams)], rVmSp);
-
-    PhysReg rClosure = rcx;
-    a.  loadq(rVmFp[AROFF(m_this)], rClosure);
-
-    // Swap in the $this or late bound class
-    a.  loadq(rClosure[c_Closure::ctxOffset()], rAsm);
-    a.  storeq(rAsm, rVmFp[AROFF(m_this)]);
-
-    if (!(func->attrs() & AttrStatic)) {
-      a.shrq(1, rAsm);
-      JccBlock<CC_BE> ifRealThis(a);
-      a.shlq(1, rAsm);
-      emitIncRefHelper(a, rAsm, KindOfObject);
-    }
-
-    // Put in the correct context
-    a.  loadq(rClosure[c_Closure::funcOffset()], rAsm);
-    a.  storeq(rAsm, rVmFp[AROFF(m_func)]);
-
-    // Copy in all the use vars
-    int baseUVOffset = sizeof(ObjectData) + func->cls()->builtinPropSize();
-    for (int i = 0; i < numUseVars + 1; i++) {
-      int spOffset = -cellsToBytes(i+1);
-
-      if (i == 0) {
-        // The closure is the first local.
-        // We don't incref because it used to be $this
-        // and now it is a local, so they cancel out
-        emitStoreTypedValue(a, KindOfObject, rClosure, spOffset, rVmSp);
-        continue;
-      }
-
-      int uvOffset = baseUVOffset + cellsToBytes(i-1);
-
-      emitCopyTo(a, rClosure, uvOffset, rVmSp, spOffset, rAsm);
-      emitIncRefGenericRegSafe(a, rVmSp, spOffset, rAsm);
-    }
-
-    numLocals += numUseVars + 1;
-  }
-
-  // We're in the callee frame; initialize locals. Unroll the loop all
-  // the way if there are a modest number of locals to update;
-  // otherwise, do it in a compact loop. If we're in a generator body,
-  // named locals will be initialized by UnpackCont so we can leave
-  // them alone here.
-  int numUninitLocals = func->numLocals() - numLocals;
-  assert(numUninitLocals >= 0);
-  if (numUninitLocals > 0 && !func->isGenerator()) {
-
-    // If there are too many locals, then emitting a loop to initialize locals
-    // is more compact, rather than emitting a slew of movs inline.
-    if (numUninitLocals > kLocalsToInitializeInline) {
-      PhysReg loopReg = rcx;
-
-      // rVmFp + rcx points to the count/type fields of the TypedValue we're
-      // about to write to.
-      int loopStart = -func->numLocals() * sizeof(TypedValue) + TVOFF(m_type);
-      int loopEnd = -numLocals * sizeof(TypedValue) + TVOFF(m_type);
-
-      a.  emitImmReg(loopStart, loopReg);
-      a.  emitImmReg(KindOfUninit, rdx);
-
-      TCA topOfLoop = a.frontier();
-      // do {
-      //   rVmFp[loopReg].m_type = KindOfUninit;
-      // } while(++loopReg != loopEnd);
-
-      emitStoreTVType(a, edx, rVmFp[loopReg]);
-      a.  addq   (sizeof(Cell), loopReg);
-      a.  cmpq   (loopEnd, loopReg);
-      a.  jcc8   (CC_NE, topOfLoop);
-    } else {
-      PhysReg base;
-      int disp, k;
-      static_assert(KindOfUninit == 0, "");
-      if (numParams < func->numLocals()) {
-        a.xorl (eax, eax);
-      }
-      for (k = numLocals; k < func->numLocals(); ++k) {
-        locToRegDisp(Location(Location::Local, k), &base, &disp, func);
-        emitStoreTVType(a, eax, base[disp + TVOFF(m_type)]);
-      }
-    }
-  }
-
-  const Opcode* destPC = func->unit()->entry() + func->base();
-  if (dvInitializer != InvalidAbsoluteOffset) {
-    // dispatch to funclet.
-    destPC = func->unit()->entry() + dvInitializer;
-  }
-  SrcKey funcBody(func, destPC);
-
-  // Move rVmSp to the right place: just past all locals
-  int frameCells = func->numSlotsInFrame();
-  if (func->isGenerator()) {
-    frameCells = 1;
-  } else {
-    emitLea(a, rVmFp[-cellsToBytes(frameCells)], rVmSp);
-  }
-
-  Fixup fixup(funcBody.offset() - func->base(), frameCells);
-
-  // Emit warnings for any missing arguments
-  if (!func->info() && !(func->attrs() & AttrNative)) {
-    for (int i = nPassed; i < numParams; ++i) {
-      if (paramInfo[i].funcletOff() == InvalidAbsoluteOffset) {
-        a.  emitImmReg((intptr_t)func->name()->data(), argNumToRegName[0]);
-        a.  emitImmReg(numParams, argNumToRegName[1]);
-        a.  emitImmReg(i, argNumToRegName[2]);
-        emitCall(a, (TCA)raiseMissingArgument);
-        m_fixupMap.recordFixup(a.frontier(), fixup);
-        break;
-      }
-    }
-  }
-
-  // Check surprise flags in the same place as the interpreter: after
-  // setting up the callee's frame but before executing any of its
-  // code
-  emitCheckSurpriseFlagsEnter(mainCode, stubsCode, false, m_fixupMap, fixup);
-
-  if (func->isClosureBody() && func->cls()) {
-    int entry = nPassed <= numParams ? nPassed : numParams + 1;
-    // Relying on rStashedAR == rVmFp here
-    a.    loadq   (rStashedAR[AROFF(m_func)], rax);
-    a.    loadq   (rax[Func::prologueTableOff() + sizeof(TCA)*entry], rax);
-    a.    jmp     (rax);
-  } else {
-    emitBindJmp(mainCode, stubsCode, funcBody);
-  }
-  return funcBody;
 }
 
 /*
@@ -1759,12 +1205,12 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     Func *func = const_cast<Func*>(calleeFrame->m_func);
     int nArgs = req->m_nArgs;
     bool isImmutable = req->m_isImmutable;
-    TCA dest = tx64->funcPrologue(func, nArgs);
+    TCA dest = getFuncPrologue(func, nArgs);
     TRACE(2, "enterTC: bindCall %s -> %p\n", func->name()->data(), dest);
     if (!isImmutable) {
       // We dont know we're calling the right function, so adjust
       // dest to point to the dynamic check of ar->m_func.
-      dest = funcPrologueToGuard(dest, func);
+      dest = JIT::X64::funcPrologueToGuard(dest, func);
     } else {
       TRACE(2, "enterTC: bindCall immutably %s -> %p\n",
             func->fullName()->data(), dest);
@@ -1779,7 +1225,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
         // regenerated yet, then save toSmash as a caller to the
         // prologue, so that it can later be smashed to call a new
         // prologue when it's generated.
-        if (shouldPGOFunc(func) && !prologuesWereRegenerated(func)) {
+        if (func->shouldPGO() && !prologuesWereRegenerated(func)) {
           int calleeNumParams = func->numParams();
           int calledPrologNumArgs = nArgs <= calleeNumParams ?
             nArgs :  calleeNumParams + 1;
@@ -2010,18 +1456,6 @@ TCA TranslatorX64::getFreeStub() {
     TRACE(1, "alloc new stub %p\n", ret);
   }
   return ret;
-}
-
-TCA
-TranslatorX64::emitTransCounterInc(X64Assembler& a) {
-  TCA start = a.frontier();
-  if (!isTransDBEnabled()) return start;
-
-  a.    movq (getTransCounterAddr(), rAsm);
-  a.    lock ();
-  a.    incq (*rAsm);
-
-  return start;
 }
 
 #define O(opcode, imm, pusph, pop, flags) \

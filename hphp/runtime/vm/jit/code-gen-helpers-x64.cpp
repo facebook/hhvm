@@ -170,6 +170,15 @@ struct IfCountNotStatic {
   }
 };
 
+
+void emitTransCounterInc(Asm& a) {
+  if (!tx64->isTransDBEnabled()) return;
+
+  a.    movq (tx64->getTransCounterAddr(), rAsm);
+  a.    lock ();
+  a.    incq (*rAsm);
+}
+
 void emitIncRef(Asm& as, PhysReg base) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitAssertRefCount(as, base);

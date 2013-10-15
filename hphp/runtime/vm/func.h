@@ -369,6 +369,8 @@ struct Func {
     return shared()->m_userAttributes;
   }
 
+  bool shouldPGO() const;
+
   /**
    * Closure's __invoke()s have an extra pointer used to keep cloned versions
    * of themselves with different contexts.

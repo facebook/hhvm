@@ -456,7 +456,6 @@ public:
    */
   virtual void requestInit() = 0;
   virtual void requestExit() = 0;
-  virtual TCA funcPrologue(Func* f, int nArgs, ActRec* ar = nullptr) = 0;
   virtual TCA getTranslatedCaller() const = 0;
   virtual std::string getUsage() = 0;
   virtual size_t getCodeSize() = 0;

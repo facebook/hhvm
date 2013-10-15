@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator-x64-internal.h"
 #include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
@@ -32,6 +33,8 @@ TRACE_SET_MOD(runtime);
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_staticPrefix("86static_");
+const StaticString s___call("__call");
+const StaticString s___callStatic("__callStatic");
 
 // Defined here so it can be inlined below.
 RefData* lookupStaticFromClosure(ObjectData* closure,
@@ -720,6 +723,123 @@ ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
     raise_error("ColAddNewElemC: $2 must be a collection");
   }
   return coll;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void setArgInActRec(ActRec* ar, int argNum, uint64_t datum, DataType t) {
+  TypedValue* tv =
+    (TypedValue*)(uintptr_t(ar) - (argNum+1) * sizeof(TypedValue));
+  tv->m_data.num = datum;
+  tv->m_type = t;
+}
+
+int shuffleArgsForMagicCall(ActRec* ar) {
+  if (!ar->hasInvName()) {
+    return 0;
+  }
+  const Func* f UNUSED = ar->m_func;
+  f->validate();
+  assert(f->name()->isame(s___call.get())
+         || f->name()->isame(s___callStatic.get()));
+  assert(f->numParams() == 2);
+  TRACE(1, "shuffleArgsForMagicCall: ar %p\n", ar);
+  assert(ar->hasInvName());
+  StringData* invName = ar->getInvName();
+  assert(invName);
+  ar->setVarEnv(nullptr);
+  int nargs = ar->numArgs();
+
+  // We need to make an array containing all the arguments passed by the
+  // caller and put it where the second argument is
+  PackedArrayInit aInit(nargs);
+  for (int i = 0; i < nargs; ++i) {
+    auto const tv = reinterpret_cast<TypedValue*>(
+      uintptr_t(ar) - (i+1) * sizeof(TypedValue)
+    );
+    aInit.append(tvAsCVarRef(tv));
+    tvRefcountedDecRef(tv);
+  }
+
+  // Put invName in the slot for first argument
+  setArgInActRec(ar, 0, uint64_t(invName), BitwiseKindOfString);
+  // Put argArray in the slot for second argument
+  auto const argArray = aInit.toArray().detach();
+  setArgInActRec(ar, 1, uint64_t(argArray), KindOfArray);
+  // Fix up ActRec's numArgs
+  ar->initNumArgs(2);
+  return 1;
+}
+
+/*
+ * The standard VMRegAnchor treatment won't work for some cases called
+ * during function preludes.
+ *
+ * The fp sync machinery is fundamentally based on the notion that
+ * instruction pointers in the TC are uniquely associated with source
+ * HHBC instructions, and that source HHBC instructions are in turn
+ * uniquely associated with SP->FP deltas.
+ *
+ * trimExtraArgs is called from the prologue of the callee.
+ * The prologue is 1) still in the caller frame for now,
+ * and 2) shared across multiple call sites. 1 means that we have the
+ * fp from the caller's frame, and 2 means that this fp is not enough
+ * to figure out sp.
+ *
+ * However, the prologue passes us the callee actRec, whose predecessor
+ * has to be the caller. So we can sync sp and fp by ourselves here.
+ * Geronimo!
+ */
+static void sync_regstate_to_caller(ActRec* preLive) {
+  assert(tl_regState == VMRegState::DIRTY);
+  VMExecutionContext* ec = g_vmContext;
+  ec->m_stack.top() = (TypedValue*)preLive - preLive->numArgs();
+  ActRec* fp = preLive == ec->m_firstAR ?
+    ec->m_nestedVMs.back().m_savedState.fp : (ActRec*)preLive->m_savedRbp;
+  ec->m_fp = fp;
+  ec->m_pc = fp->m_func->unit()->at(fp->m_func->base() + preLive->m_soff);
+  tl_regState = VMRegState::CLEAN;
+}
+
+void trimExtraArgs(ActRec* ar) {
+  assert(!ar->hasInvName());
+
+  sync_regstate_to_caller(ar);
+  const Func* f = ar->m_func;
+  int numParams = f->numParams();
+  int numArgs = ar->numArgs();
+  assert(numArgs > numParams);
+  int numExtra = numArgs - numParams;
+
+  TRACE(1, "trimExtraArgs: %d args, function %s takes only %d, ar %p\n",
+        numArgs, f->name()->data(), numParams, ar);
+
+  if (f->attrs() & AttrMayUseVV) {
+    assert(!ar->hasExtraArgs());
+    ar->setExtraArgs(ExtraArgs::allocateCopy(
+      (TypedValue*)(uintptr_t(ar) - numArgs * sizeof(TypedValue)),
+      numArgs - numParams));
+  } else {
+    // Function is not marked as "MayUseVV", so discard the extra arguments
+    TypedValue* tv = (TypedValue*)(uintptr_t(ar) - numArgs*sizeof(TypedValue));
+    for (int i = 0; i < numExtra; ++i) {
+      tvRefcountedDecRef(tv);
+      ++tv;
+    }
+    ar->setNumArgs(numParams);
+  }
+
+  // Only go back to dirty in a non-exception case.  (Same reason as
+  // above.)
+  tl_regState = VMRegState::DIRTY;
+}
+
+void raiseMissingArgument(const char* name, int expected, int got) {
+  if (expected == 1) {
+    raise_warning(Strings::MISSING_ARGUMENT, name, got);
+  } else {
+    raise_warning(Strings::MISSING_ARGUMENTS, name, expected, got);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

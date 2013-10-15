@@ -751,6 +751,20 @@ int Func::getDVEntryNumParams(Offset offset) const {
   return -1;
 }
 
+bool Func::shouldPGO() const {
+  if (!RuntimeOption::EvalJitPGO) return false;
+
+  // Cloned closures use the func prologue tables to hold the
+  // addresses of the DV funclets, and not real prologues.  The
+  // mechanism to retranslate prologues currently assumes that the
+  // prologue tables contain real prologues, so it doesn't properly
+  // handle cloned closures for now.  So don't profile & retranslate
+  // them for now.
+  if (isClonedClosure()) return false;
+
+  if (!RuntimeOption::EvalJitPGOHotOnly) return true;
+  return attrs() & AttrHot;
+}
 
 //=============================================================================
 // FuncEmitter.

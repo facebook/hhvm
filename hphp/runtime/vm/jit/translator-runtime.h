@@ -169,6 +169,12 @@ ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value);
 ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
                               TypedValue value);
 
+void trimExtraArgs(ActRec* ar);
+void setArgInActRec(ActRec* ar, int argNum, uint64_t datum, DataType t);
+int shuffleArgsForMagicCall(ActRec* ar);
+
+void raiseMissingArgument(const char* name, int expected, int got);
+
 }}
 
 #endif

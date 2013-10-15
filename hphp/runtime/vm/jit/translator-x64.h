@@ -174,27 +174,16 @@ private:
 
   ////////////////////////////////////////
   //
-  // Function prologue emission / smashing
+  // Function prologues
   //
   ////////////////////////////////////////
 public:
+  TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr);
   TCA getCallArrayPrologue(Func* func);
-
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
-  TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
-  bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
-  SrcKey emitPrologue(Func* func, int nArgs);
-private:
-  TCA emitCallArrayPrologue(const Func* func, const DVFuncletsVec& dvs);
-  TCA emitFuncGuard(Asm& a, const Func *f);
-  void emitStackCheck(int funcDepth, Offset pc);
-  TCA  emitTransCounterInc(Asm& a);
 
-  // Called at runtime, from prologues.
-  static void trimExtraArgs(ActRec* ar);
-  static int  shuffleArgsForMagicCall(ActRec* ar);
-  static void setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
-                             DataType t);
+private:
+  bool checkCachedPrologue(const Func*, int, TCA&) const;
 
   ////////////////////////////////////////
   //

@@ -27,7 +27,6 @@ constexpr int kJmpLen = 5;
 constexpr int kCallLen = 5;
 constexpr int kJmpccLen = 6;
 constexpr int kJmpImmBytes = 4;
-constexpr int kJcc8Len = 3;
 }
 
 /*

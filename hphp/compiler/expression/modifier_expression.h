@@ -34,7 +34,17 @@ public:
   int getCount() const { return m_modifiers.size();}
   int operator[](int index);
 
+  /**
+   * Whether the modifiers combine to mean public, including the implicit
+   * public access that occurs when none of public|private|protected are
+   * supplied.
+   */
   bool isPublic() const;
+  /**
+   * Use isPublic unless you care about the difference between no-modifiers
+   * implicit public and public-keyword-appears explicitly public.
+   */
+  bool isExplicitlyPublic() const;
   bool isProtected() const;
   bool isPrivate() const;
   bool isStatic() const;

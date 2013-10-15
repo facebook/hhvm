@@ -199,6 +199,18 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
   FunctionScopeRawPtr fs = getFunctionScope();
   const bool isNative = fs->isNative();
   if (m_modifiers) {
+    if ((m_modifiers->isExplicitlyPublic() +
+         m_modifiers->isProtected() +
+         m_modifiers->isPrivate()) > 1) {
+      m_modifiers->parseTimeFatal(
+        Compiler::InvalidAttribute,
+        "%s: method %s::%s()",
+        Strings::PICK_ACCESS_MODIFIER,
+        classScope->getOriginalName().c_str(),
+        getOriginalName().c_str()
+      );
+    }
+
     if (classScope->isInterface()) {
       if (m_modifiers->isProtected() || m_modifiers->isPrivate() ||
           m_modifiers->isAbstract()  || m_modifiers->isFinal() ||

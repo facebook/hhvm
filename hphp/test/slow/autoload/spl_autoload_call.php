@@ -18,7 +18,8 @@ class Autoloaders
   public function autoload3($class)
   {
     echo "autoload3\n";
-    exit();
+    require_once __DIR__ . '/spl_autoload_call.inc';
+    return true;
   }
 }
 

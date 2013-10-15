@@ -141,15 +141,14 @@ bool IRInstruction::mayRaiseError() const {
 
 bool IRInstruction::isEssential() const {
   Opcode opc = op();
-  if (opc == DecRefNZ) {
+  if (is(IncRef, IncRefCtx, DecRefNZ, DecRefNZOrBranch)) {
+    // If the ref count optimization is turned off, mark all refcounting
+    // operations as essential.
+    if (!RuntimeOption::EvalHHIREnableRefCountOpt) return true;
+
     // If the source of a DecRefNZ is not an IncRef, mark it as essential
     // because we won't remove its source as well as itself.
-    // If the ref count optimization is turned off, mark all DecRefNZ as
-    // essential.
-    if (!RuntimeOption::EvalHHIREnableRefCountOpt ||
-        src(0)->inst()->op() != IncRef) {
-      return true;
-    }
+    if (is(DecRefNZ) && !src(0)->inst()->is(IncRef)) return true;
   }
   return isControlFlow() ||
          opcodeHasFlags(opc, Essential) ||

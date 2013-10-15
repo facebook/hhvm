@@ -215,7 +215,7 @@ initInstructions(const BlockList& blocks, DceState& state) {
         state[inst].setLive();
         wl.push_back(&inst);
       }
-      if (inst.op() == DecRefNZ) {
+      if (RuntimeOption::EvalHHIREnableRefCountOpt && inst.op() == DecRefNZ) {
         auto* srcInst = inst.src(0)->inst();
         Opcode srcOpc = srcInst->op();
         if (srcOpc != DefConst) {
@@ -681,20 +681,22 @@ void eliminateDeadCode(IRUnit& unit) {
 
       // If inst consumes this source, find the true source instruction and
       // mark it as consumed if it's an IncRef.
-      if (inst->consumesReference(i)) {
+      if (RuntimeOption::EvalHHIREnableRefCountOpt && inst->consumesReference(i)) {
         consumeIncRef(inst, src, state);
       }
     }
   }
 
   // Optimize IncRefs and DecRefs.
-  forEachTrace(unit, [&](IRTrace* t) {
-    optimizeRefCount(t, unit.main(), state, uses);
-  });
+  if (RuntimeOption::EvalHHIREnableRefCountOpt) {
+    forEachTrace(unit, [&](IRTrace* t) {
+      optimizeRefCount(t, unit.main(), state, uses);
+    });
 
-  if (RuntimeOption::EvalHHIREnableSinking) {
-    // Sink IncRefs consumed off trace.
-    sinkIncRefs(trace, unit, state);
+    if (RuntimeOption::EvalHHIREnableSinking) {
+      // Sink IncRefs consumed off trace.
+      sinkIncRefs(trace, unit, state);
+    }
   }
 
   // Optimize unused inlined activation records.  It's not necessary

@@ -2439,6 +2439,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   SYNC();
   bool ret = EventHook::FunctionEnter(m_fp, funcType);
   pc = m_pc;
+  checkStack(m_stack, func);
   return ret;
 }
 

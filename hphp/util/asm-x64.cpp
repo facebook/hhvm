@@ -29,7 +29,6 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/maphuge.h"
-#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP { namespace Transl {
 

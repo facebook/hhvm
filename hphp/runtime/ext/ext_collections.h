@@ -698,7 +698,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
 
     template<class... Args>
     static Bucket* Make(Args&&... args) {
-      return new (MM().smartMallocSize(sizeof(Bucket)))
+      return new (MM().smartMallocSizeLogged(sizeof(Bucket)))
         Bucket(std::forward<Args>(args)...);
     }
     void release();

@@ -77,14 +77,14 @@ namespace HPHP {
   INVOKE_FEW_ARGS(PASS_ARR,INVOKE_FEW_ARGS_COUNT)
 #define INVOKE_FEW_ARGS_IMPL_ARGS INVOKE_FEW_ARGS(IMPL,INVOKE_FEW_ARGS_COUNT)
 
-#define NEWOBJ(T) new (HPHP::MM().smartMallocSize(sizeof(T))) T
+#define NEWOBJ(T) new (HPHP::MM().smartMallocSizeLogged(sizeof(T))) T
 
 #define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                         \
   public:                                                               \
   ALWAYS_INLINE void operator delete(void* p) {                         \
     static_assert(std::is_base_of<ResourceData,T>::value, "");          \
     assert(sizeof(T) <= kMaxSmartSize);                                 \
-    MM().smartFreeSize(p, sizeof(T));                                   \
+    MM().smartFreeSizeLogged(p, sizeof(T));                             \
   }
 
 #define DECLARE_RESOURCE_ALLOCATION(T)                                  \

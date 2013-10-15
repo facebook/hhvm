@@ -154,7 +154,7 @@ HphpArray* smartAllocArray(uint32_t cap, uint32_t mask) {
    * for a packed array even if we aren't going to use it yet.
    */
   auto const allocBytes = computeAllocBytes(cap, mask);
-  return static_cast<HphpArray*>(MM().objMalloc(allocBytes));
+  return static_cast<HphpArray*>(MM().objMallocLogged(allocBytes));
 }
 
 ALWAYS_INLINE
@@ -421,7 +421,7 @@ void HphpArray::ReleasePacked(ArrayData* in) {
 
   auto const cap  = ad->m_cap;
   auto const mask = ad->m_tableMask;
-  MM().objFree(ad, computeAllocBytes(cap, mask));
+  MM().objFreeLogged(ad, computeAllocBytes(cap, mask));
 }
 
 HOT_FUNC_VM NEVER_INLINE
@@ -447,7 +447,7 @@ void HphpArray::Release(ArrayData* in) {
 
   auto const cap  = ad->m_cap;
   auto const mask = ad->m_tableMask;
-  MM().objFree(ad, computeAllocBytes(cap, mask));
+  MM().objFreeLogged(ad, computeAllocBytes(cap, mask));
 }
 
 //=============================================================================

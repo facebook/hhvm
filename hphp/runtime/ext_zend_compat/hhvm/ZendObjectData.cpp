@@ -28,7 +28,7 @@ ObjectData* new_ZendObjectData_Instance(Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_ZendObjectData) - sizeof(ObjectData);
   size_t size = ObjectData::sizeForNProps(nProps) + builtinPropSize;
-  auto inst = new (MM().objMalloc(size)) c_ZendObjectData(cls);
+  auto inst = new (MM().objMallocLogged(size)) c_ZendObjectData(cls);
 
   zend_class_entry* ce = zend_hphp_class_to_class_entry(cls);
   auto create_func = ce->create_object;

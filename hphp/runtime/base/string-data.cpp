@@ -53,7 +53,7 @@ std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
   auto const needed = static_cast<uint32_t>(sizeof(StringData) + len + 1);
   if (LIKELY(needed <= kMaxSmartSize)) {
     auto const cap = MemoryManager::smartSizeClass(needed);
-    auto const sd  = static_cast<StringData*>(MM().smartMallocSize(cap));
+    auto const sd  = static_cast<StringData*>(MM().smartMallocSizeLogged(cap));
     return std::make_pair(sd, cap);
   }
 
@@ -62,7 +62,7 @@ std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
   }
 
   auto const cap = needed;
-  auto const ret = MM().smartMallocSizeBig(cap);
+  auto const ret = MM().smartMallocSizeBigLogged(cap);
   return std::make_pair(static_cast<StringData*>(ret.first),
                         static_cast<uint32_t>(ret.second));
 }
@@ -70,9 +70,9 @@ std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
 ALWAYS_INLINE
 void freeForSize(void* vp, uint32_t size) {
   if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSize(vp, size);
+    return MM().smartFreeSizeLogged(vp, size);
   }
-  return MM().smartFreeSizeBig(vp, size);
+  return MM().smartFreeSizeBigLogged(vp, size);
 }
 
 }

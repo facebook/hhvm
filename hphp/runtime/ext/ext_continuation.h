@@ -41,10 +41,10 @@ class c_Continuation : public ExtObjectDataFlags<ObjectData::HasClone> {
     c_Continuation* this_ = (c_Continuation*)p;
     auto const size = this_->getObjectSize();
     if (LIKELY(size <= kMaxSmartSize)) {
-      MM().smartFreeSize(this_, size);
+      MM().smartFreeSizeLogged(this_, size);
       return;
     }
-    MM().smartFreeSizeBig(this_, size);
+    MM().smartFreeSizeBigLogged(this_, size);
   }
 
   explicit c_Continuation(Class* cls = c_Continuation::classof());
@@ -94,7 +94,7 @@ public:
 
     size_t arOffset = getArOffset(genFunc);
     size_t objectSize = arOffset + sizeof(ActRec);
-    auto const cont = new (MM().objMalloc(objectSize)) c_Continuation();
+    auto const cont = new (MM().objMallocLogged(objectSize)) c_Continuation();
     cont->m_origFunc = const_cast<Func*>(origFunc);
     cont->m_arPtr = (ActRec*)(uintptr_t(cont) + arOffset);
     memset((void*)((uintptr_t)cont + sizeof(c_Continuation)), 0,

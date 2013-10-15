@@ -227,6 +227,20 @@ struct MemoryManager {
   void objFree(void* vp, size_t size);
 
   /*
+   * Versions of the above APIs that log the allocation/deallocation.
+   *
+   * These should be used for allocations that reflect PHP "objects" (Object,
+   * String, Array, RefData, extension objects, etc.) that make sense to log by
+   * capturing a PHP stacktrace to which to charge the allocation.
+   */
+  void* smartMallocSizeLogged(uint32_t size);
+  void smartFreeSizeLogged(void* p, uint32_t size);
+  std::pair<void*,size_t> smartMallocSizeBigLogged(size_t size);
+  void smartFreeSizeBigLogged(void* vp, size_t size);
+  void* objMallocLogged(size_t size);
+  void objFreeLogged(void* vp, size_t size);
+
+  /*
    * During session shutdown, before resetAllocator(), this phase runs
    * through the sweep lists running cleanup for anything that needs
    * to run custom tear down logic before we throw away the
@@ -330,6 +344,9 @@ private:
   template<class SizeT> static SizeT debugRemoveExtra(SizeT);
   void* debugPostAllocate(void*, size_t, size_t);
   void* debugPreFree(void*, size_t, size_t);
+
+  void logAllocation(void*, size_t);
+  void logDeallocation(void*);
 
 private:
   TRACE_SET_MOD(smartalloc);

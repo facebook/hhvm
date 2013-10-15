@@ -561,6 +561,14 @@ bool MemoryManager::checkPreFree(DebugHeader* p,
   return true;
 }
 
+void MemoryManager::logAllocation(void* p, size_t bytes) {
+  MemoryProfile::logAllocation(p, bytes);
+}
+
+void MemoryManager::logDeallocation(void* p) {
+  MemoryProfile::logDeallocation(p);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

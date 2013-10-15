@@ -2990,7 +2990,7 @@ c_StableMap::Bucket::~Bucket() {
 
 void c_StableMap::Bucket::release() {
   this->~Bucket();
-  MM().smartFreeSize(this, sizeof(Bucket));
+  MM().smartFreeSizeLogged(this, sizeof(Bucket));
 }
 
 void c_StableMap::Bucket::dump() {

@@ -860,11 +860,12 @@ ObjectData* ObjectData::callCustomInstanceInit() {
 
 HOT_FUNC_VM
 ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
-  return new (MM().smartMallocSize(size)) ObjectData(cls, NoInit::noinit);
+  return new (MM().smartMallocSizeLogged(size))
+    ObjectData(cls, NoInit::noinit);
 }
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  return new (MM().smartMallocSizeBig(size).first)
+  return new (MM().smartMallocSizeBigLogged(size).first)
     ObjectData(cls, NoInit::noinit);
 }
 
@@ -882,9 +883,9 @@ void ObjectData::operator delete(void* p) {
 
   auto const size = sizeForNProps(nProps) + builtinPropSize;
   if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSize(this_, size);
+    return MM().smartFreeSizeLogged(this_, size);
   }
-  MM().smartFreeSizeBig(this_, size);
+  MM().smartFreeSizeBigLogged(this_, size);
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {

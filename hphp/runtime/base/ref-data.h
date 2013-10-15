@@ -80,7 +80,7 @@ struct RefData {
    * Create a RefData, allocated in the request local heap.
    */
   static RefData* Make(TypedValue tv) {
-    return new (MM().smartMallocSize(sizeof(RefData)))
+    return new (MM().smartMallocSizeLogged(sizeof(RefData)))
       RefData(tv.m_type, tv.m_data.num);
   }
 
@@ -94,7 +94,7 @@ struct RefData {
       return;
     }
     this->~RefData();
-    MM().smartFreeSize(this, sizeof(RefData));
+    MM().smartFreeSizeLogged(this, sizeof(RefData));
   }
 
   void releaseMem() const {

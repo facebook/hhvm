@@ -119,7 +119,7 @@ class ObjectData {
     }
     size_t nProps = cls->numDeclProperties();
     size_t size = sizeForNProps(nProps);
-    auto const obj = new (MM().objMalloc(size)) ObjectData(cls);
+    auto const obj = new (MM().objMallocLogged(size)) ObjectData(cls);
     if (UNLIKELY(cls->callsCustomInstanceInit())) {
       /*
         This must happen after the constructor finishes,

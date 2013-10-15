@@ -1209,7 +1209,10 @@ bool AutoloadHandler::invokeHandler(const String& className,
   }
   // If we end up in a recursive autoload loop where we try to load the same
   // class twice, just fail the load to mimic PHP as many frameworks rely on it
-  if (m_loading.valueExists(className)) {
+  // unless we are forcing a restart (due to spl_autoload_call) in which case
+  // it's allowed to re-enter. This means we can still overflow the stack if
+  // there is a loop when using spl_autoload_call directly but this is parity.
+  if (!forceSplStack && m_loading.valueExists(className)) {
     return false;
   }
 

@@ -110,5 +110,5 @@ Starting test 'Psr1Test53::testHasManyThroughRelation'.
 Starting test 'Psr1Test53::testHasManyThroughRelationWithCustomIntermediateModelAndKeyNames'.
 .
 
-Time: 7.22 seconds, Memory: 4.79Mb
+Time: 9.4 seconds, Memory: 3.95Mb
 OK (53 tests, 61 assertions)

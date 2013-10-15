@@ -57,7 +57,7 @@ Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezon
 .
 Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezone with data set #2 ('2007-01-31 21:00:00', DateTimeZone, 'Australia/Canberra', 'DateTimePlus uses the specified timezone if provided.')'.
 .
-Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezone with data set #3 (2013-10-03 09:00:54 Pacific/Midway, NULL, 'Pacific/Midway', 'DateTimePlus uses the specified timezone if provided.')'.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezone with data set #3 (2013-10-15 06:29:54 Pacific/Midway, NULL, 'Pacific/Midway', 'DateTimePlus uses the specified timezone if provided.')'.
 .
 Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezoneWithDateTimeObject'.
 .
@@ -265,13 +265,13 @@ Starting test 'Drupal\Tests\Component\Utility\TimerTest::testTimer'.
 .
 Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #0 (0, 0)'.
 .
-Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #1 (96, 0, true)'.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #1 (52, 0, true)'.
 .
-Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #2 (32, 0, true)'.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #2 (46, 0, true)'.
 .
 Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #3 (1, 1)'.
 .
-Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #4 (21, 1, true)'.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #4 (86, 1, true)'.
 .
 Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #5 (-1, -1)'.
 .
@@ -1523,7 +1523,7 @@ F
 Starting test 'Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateActive'.
 .
 
-Time: 44 seconds, Memory: 24.12Mb
+Time: 01:04, Memory: 36.91Mb
 
 There were 7 failures:
 

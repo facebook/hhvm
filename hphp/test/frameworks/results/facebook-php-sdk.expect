@@ -233,5 +233,5 @@ Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #3 ('evil.com',
 Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #4 ('foo.fbrell.com', 'bar.fbrell.com', false)'.
 .
 
-Time: 15.58 seconds, Memory: 3.81Mb
+Time: 16.33 seconds, Memory: 7.13Mb
 OK (115 tests, 217 assertions)

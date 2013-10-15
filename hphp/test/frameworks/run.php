@@ -40,15 +40,15 @@
  *   - Timeout option for running tests. Thre is a default of 30 minutes to
  *     run each test, but this can be shortened or lengthened as desired.
  *
+ *   - Enhanced data output by the script to include "diff" type information
+ *     about why a passing percentage is different from a previous run,
+ *     particularly from a regression perspective. For example, what tests
+ *     caused the regression.
+ *
  * Future enhancements:
  *
  *   - Integreate the testing with our current "test/run" style infrastructure
  *     for official pass/fail statistics when we have diffs.
- *
- *   - Enhance the data output by the script to include "diff" type information
- *     about why a passing percentage is different from a previous run,
- *     particularly from a regression perspective. For example, what tests
- *     caused the regression.
  *
  *   - Special case frameworks that don't use PHPUnit (e.g. Thinkup).
  *
@@ -140,7 +140,7 @@ class PHPUnitPatterns {
   //   Starting test 'PrettyExceptionsTest::testReturnsDiagnostics'.
   //   Starting test 'Assetic\Test\::testMethods with data set #1 ('getRoot')'.
   static string $test_name_pattern =
-   "/Starting test '[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set #[0-9]+)?/";
+ "/Starting test '([_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set #[0-9]+)?)/";
 
   // Matches:
   //    E
@@ -178,6 +178,22 @@ class Frameworks {
     //
     // Some tests are commented out because they may need to be special cased as
     // they require special testing commands, mock databases, etc.
+    //
+    // IF WE HAVE A BLACKLIST FOR FLAKEY TESTS THAT PASS OR FAIL DEPENDING ON
+    // THE POSITION OF THE MOON (OR AN UKNOWN BUG IN HHVM), THESE ARE THE
+    // CANDIDATES:
+    //
+    // Joomla    - Joomla\Crypt\Tests\PasswordSimpleTest::testCreate
+    //           - Joomla\Crypt\Tests\PasswordSimpleTest::testVerify
+    // Slim      - SlimHttpUtilTest::
+    //     testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAsString
+    // Symfony   - Symfony\Component\BrowserKit\Tests\ClientTest::testClick
+    //           - Symfony\Component\BrowserKit\Tests\ClientTest::testClickForm
+    //           - Symfony\Component\BrowserKit\Tests\ClientTest::testSubmit
+    //           - Symfony\Component\BrowserKit\Tests\ClientTest::
+    //                                                 testSubmitPreserveAuth
+    //           - Symfony\Component\DomCrawler\Tests\CrawlerTest::*
+    //
     self::$framework_info =
       Map {
         'assetic' =>
@@ -392,10 +408,26 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
   // Although, there is a failsafe when checking if the test exists that would
   // weed command line opts out too.
   $verbose = false;
-  if($options->containsKey('verbose')) {
-    $verbose = true;
-    // $tests[0] may not even be "verbose", but it doesn't matter, we are
+  $csv_only = false;
+  $csv_header = false;
+
+  // Can't be both summary and verbose. Summary trumps.
+  if ($options->containsKey('csv') && $options->containsKey('verbose')) {
+    error("Cannot be --csv and --verbose together");
+  }
+  else if ($options->containsKey('csv')) {
+    $csv_only = true;
+    // $tests[0] may not even be "summary", but it doesn't matter, we are
     // just trying to make the count right for $tests
+    $frameworks->removeKey(0);
+  }
+  else if ($options->containsKey('verbose')) {
+    $verbose = true;
+    $frameworks->removeKey(0);
+  }
+
+  if ($options->contains('csvheader')) {
+    $csv_header = true;
     $frameworks->removeKey(0);
   }
 
@@ -438,7 +470,7 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
     $frameworks->removeKey(0);
   }
 
-  get_unit_testing_infra_dependencies();
+  get_unit_testing_infra_dependencies($csv_only);
 
   if ($options->containsKey('all')) {
     $frameworks->removeKey(0);
@@ -448,25 +480,26 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
     }
     // Running all tests
     run_test_suites(Frameworks::$framework_info->keys(), $timeout, $verbose,
-              $force_redownload, $generate_new_expect_file, $zend_path);
+              $csv_only, $csv_header, $force_redownload,
+              $generate_new_expect_file, $zend_path);
   } else if (count($frameworks) > 0) {
     // Tests specified at the command line. At this point, $tests should only
     // have tests to be run
-    run_test_suites($frameworks, $timeout, $verbose, $force_redownload,
-                    $generate_new_expect_file, $zend_path);
+    run_test_suites($frameworks, $timeout, $verbose, $csv_only, $csv_header,
+                    $force_redownload, $generate_new_expect_file, $zend_path);
   } else {
     error("Specify tests to run or use --all");
   }
 }
 
-function get_unit_testing_infra_dependencies(): void {
+function get_unit_testing_infra_dependencies(bool $csv_only): void {
   // Install composer.phar
   if (!(file_exists(__DIR__."/composer.phar"))) {
-    echo "Getting composer.phar....\n";
+    verbose("Getting composer.phar....\n", !$csv_only);
     $comp_url = "http://getcomposer.org/composer.phar";
     $get_composer_command = "wget ".$comp_url." -P ".__DIR__." 2>&1";
     $ret = run_install($get_composer_command, __DIR__,
-                       ProxyInformation::$proxies);
+                       ProxyInformation::$proxies, $csv_only);
     if ($ret !== 0) {
       error("Could not download composer. Script stopping\n");
     }
@@ -475,12 +508,12 @@ function get_unit_testing_infra_dependencies(): void {
   // Install phpunit from composer.json located in __DIR__
   $phpunit_binary = __DIR__."/vendor/bin/phpunit";
   if (!(file_exists($phpunit_binary))) {
-    echo "\nDownloading PHPUnit in order to run tests. There may be an output ".
-         "delay while the download begins.\n";
+    verbose("\nDownloading PHPUnit in order to run tests. There may be an ".
+            "output delay while the download begins.\n", !$csv_only);
     $phpunit_install_command = get_hhvm_build()." ".__DIR__.
                                "/composer.phar install --dev --verbose 2>&1";
     $ret = run_install($phpunit_install_command, __DIR__,
-                       ProxyInformation::$proxies);
+                       ProxyInformation::$proxies, $csv_only);
     if ($ret !== 0) {
       error("Could not install PHPUnit. Script stopping\n");
     }
@@ -492,10 +525,11 @@ function get_unit_testing_infra_dependencies(): void {
 // delete the framework from your repo). The proxy could make things a bit
 // adventurous, so we will see how this works out after some time to test it
 // out
-function install_framework(string $name, bool $verbose,
+function install_framework(string $name, bool $verbose, bool $csv_only,
                            ?string $zend_path): void {
 
-  echo "Installing $name. You will see white dots during install.....\n";
+  verbose("Installing $name. You will see white dots during install.....\n",
+          !$csv_only);
   $install_root = Frameworks::$framework_info[$name]['install_root'];
 
   /*******************************
@@ -509,17 +543,19 @@ function install_framework(string $name, bool $verbose,
   $git_command .= " ".$install_root;
   // "frameworks" directory will be created automatically on the first git clone
   // of a framework.
-  $git_ret = run_install($git_command, __DIR__, ProxyInformation::$proxies);
+  $git_ret = run_install($git_command, __DIR__, ProxyInformation::$proxies,
+                         $csv_only);
   if ($git_ret !== 0) {
-    error("Could not download framework $name!\n");
+    $csv_only ? error() : error("Could not download framework $name!\n");
   }
   // Checkout out our baseline test code via SHA
   $git_command = "git checkout";
   $git_command .= " ".Frameworks::$framework_info[$name]['git_commit'];
   $git_ret = run_install($git_command, $install_root,
-                         ProxyInformation::$proxies);
+                         ProxyInformation::$proxies, $csv_only);
   if ($git_ret !== 0) {
-    error("Could not checkout baseline test code for $name!\n");
+    $csv_only ? error()
+                  : error("Could not checkout baseline test code for $name!\n");
   }
 
   /*******************************
@@ -535,7 +571,7 @@ function install_framework(string $name, bool $verbose,
     $dependencies_install_cmd = get_hhvm_build()." ".__DIR__.
                                 "/composer.phar install --dev";
     $install_ret = run_install($dependencies_install_cmd, $composer_json_path,
-                               ProxyInformation::$proxies);
+                               ProxyInformation::$proxies, $csv_only);
     // If provided the option at the command line, try Zend if we are not
     // successful with hhvm. For example, I know hhvm had trouble
     // downloading dependencies for Symfony, but Zend worked.
@@ -544,12 +580,12 @@ function install_framework(string $name, bool $verbose,
     // relying on user to specify a path? Should we try to determine if zend
     // is already installed via a $PATH variable?
     if ($zend_path !== null && $install_ret !== 0) {
-      echo "HHVM didn't work for downloading dependencies for $name. ".
-           "Trying Zend.\n";
+       verbose("HHVM didn't work for downloading dependencies for $name. ".
+               "Trying Zend.\n", !$csv_only);
       $dependencies_install_cmd = $zend_path." ".__DIR__.
                                         "/composer.phar install --dev";
       $install_ret = run_install($dependencies_install_cmd, $composer_json_path,
-                                 ProxyInformation::$proxies);
+                                 ProxyInformation::$proxies, $csv_only);
     }
 
     if ($install_ret !== 0) {
@@ -563,13 +599,17 @@ function install_framework(string $name, bool $verbose,
         // did not get the dependencies.
         if (any_dir_empty_one_level($fw_vendor_dir)) {
           remove_dir_recursive($install_root);
-          error("Couldn't download dependencies for $name!".
-                " Removing framework. You can try the --zend option.\n");
+          $csv_only ? error()
+                        : error("Couldn't download dependencies for $name!".
+                                " Removing framework. You can try the --zend".
+                                " option.\n");
         }
       } else { // No vendor directory. Dependencies could not have been gotten.
         remove_dir_recursive($install_root);
-        error("Couldn't download dependencies for $name!".
-              " Removing framework. You can try the --zend option.\n");
+        $csv_only ? error()
+                      : error("Couldn't download dependencies for $name!".
+                              " Removing framework. You can try the --zend".
+                              " option.\n");
       }
     }
   }
@@ -577,7 +617,8 @@ function install_framework(string $name, bool $verbose,
 
 // This will run processes that will get the test infra dependencies
 // (e.g. PHPUnit), frameworks and framework dependencies.
-function run_install(string $proc, string $path, ?Map $env): ?int
+function run_install(string $proc, string $path, ?Map $env,
+                     bool $csv_only): ?int
 {
   $descriptorspec = array(
     0 => array("pipe", "r"),
@@ -596,7 +637,7 @@ function run_install(string $proc, string $path, ?Map $env): ?int
     $start_time = microtime(true);
     while (fgets($pipes[1])) {
       if ((microtime(true) - $start_time) > 1) {
-        echo ".";
+        verbose(".", !$csv_only);
         $start_time = microtime(true);
       }
     }
@@ -608,10 +649,11 @@ function run_install(string $proc, string $path, ?Map $env): ?int
 }
 
 function run_test_suites(Vector $frameworks, int $timeout, bool $verbose,
+                         bool $csv_only, bool $csv_header,
                          bool $force_redownload, bool $generate_new_expect_file,
                          ?string $zend_path): void {
   $results_root = __DIR__."/results";
-  $summary_file = $results_root."/frameworks.summary";
+  $temp_summary_file = tempnam("/tmp", "oss-fw-test-summary");
   $frameworks_to_run = Vector {};
   foreach ($frameworks as $framework) {
     $name = trim(strtolower($framework));
@@ -621,7 +663,7 @@ function run_test_suites(Vector $frameworks, int $timeout, bool $verbose,
   }
 
   if (count($frameworks_to_run) > 0) {
-    echo "Beginning the unit tests.....\n";
+    verbose("Beginning the unit tests.....\n", !$csv_only);
     $num_threads = min(count($frameworks_to_run), num_cpus() + 1);
 
     $children = Vector {};
@@ -632,9 +674,10 @@ function run_test_suites(Vector $frameworks, int $timeout, bool $verbose,
       } else if ($pid) {
         $children[] = $pid;
       } else {
-        exit(run_single_test_suite($frameworks_to_run[$i], $summary_file,
-                                   $timeout, $verbose, $force_redownload,
-                                   $generate_new_expect_file, $zend_path));
+        exit(run_single_test_suite($frameworks_to_run[$i], $temp_summary_file,
+                                   $timeout, $verbose, $csv_only,
+                                   $force_redownload, $generate_new_expect_file,
+                                   $zend_path));
       }
     }
 
@@ -642,16 +685,11 @@ function run_test_suites(Vector $frameworks, int $timeout, bool $verbose,
     $status = -1;
     foreach($children as $child) {
       pcntl_waitpid($child, $status);
-      // For now I am returning 0 from run_single_test.
-      // So this will always be 0.
       $thread_ret_val |= pcntl_wexitstatus($status);
     }
-    echo "\nALL TESTS COMPLETE!\n";
-    echo "SUMMARY:\n";
-    $summary = file_get_contents($summary_file);
-    print $summary;
+
     if ($thread_ret_val === 0) {
-      echo "\nAll tests ran as expected.\n\n".<<<THUMBSUP
+      $msg = "\nAll tests ran as expected.\n\n".<<<THUMBSUP
             _
            /(|
           (  :
@@ -662,14 +700,90 @@ function run_test_suites(Vector $frameworks, int $timeout, bool $verbose,
         (___)__.|_____
 THUMBSUP
 ."\n";
+     verbose($msg, !$csv_only);
+    } else {
+      $msg = "\nAll tests did not run as expected.\n\n".<<<THUMBSDOWN
+        ______
+       (( ____ \-
+       (( _____
+       ((_____
+       ((____   ----
+            /  /
+           (_((
+THUMBSDOWN
+."\n";
+      verbose($msg, !$csv_only);
+      // Print the diffs
+      if (!$csv_only) {
+        foreach($frameworks as $fw_name) {
+          $fn = $results_root."/".$fw_name.".diff";
+          // The file may not exist or the file may not have anything in it
+          // since there is no diff (i.e., all tests for that particular
+          // framework ran as expected). Either way, don't print anything
+          // out for those cases.
+          if (file_exists($fn) && ($contents = file_get_contents($fn)) !== "") {
+            print PHP_EOL."********* ".strtoupper($fw_name).
+                  " **********".PHP_EOL;
+            print $contents;
+            print "To run tests for ".strtoupper($fw_name).
+                  " use this command: \n";
+            $dir = Frameworks::$framework_info[$fw_name]->
+                   containsKey("test_path")
+                   ? Frameworks::$framework_info[$fw_name]["test_path"]
+                   : Frameworks::$framework_info[$fw_name]['install_root'];
+            $command = "cd ".$dir." && ";
+            $command .= prepare_framework_test_run_command($fw_name, $timeout);
+            print $command." [TEST NAME]".PHP_EOL;
+          }
+        }
+      }
+    }
+
+    if (file_exists($temp_summary_file)
+        && ($contents = file_get_contents($temp_summary_file)) !== "") {
+      $file_data = file_get_contents($temp_summary_file);
+      $decoded_results = json_decode($file_data, true);
+      ksort($decoded_results);
+
+      if ($csv_only) {
+        $not_first = false; // To avoid trailing comma
+        if ($csv_header) {
+          print "date,";
+          foreach ($decoded_results as $key => $value) {
+            if ($not_first) {
+              print ",";
+            }
+            $not_first = true;
+            print $key;
+          }
+          print PHP_EOL;
+          $not_first = false;
+        }
+        print date("Y-m-d").",";
+        foreach ($decoded_results as $key => $value) {
+          if ($not_first) {
+            print ",";
+          }
+          $not_first = true;
+          print $value;
+        }
+      } else {
+        print "\nALL TESTS COMPLETE!\n";
+        print "SUMMARY:\n";
+        foreach ($decoded_results as $key => $value) {
+          print $key."=".$value.PHP_EOL;
+        }
+      }
+    } else {
+      print "\nNO SUMMARY INFO AVAILABLE!\n";
     }
   } else {
-    error("No valid tests to run. Try different tests or the --all option");
+    error("No frameworks to tests!");
   }
 }
 
 function run_single_test_suite(string $fw_name, string $summary_file,
-                               int $timeout, bool $verbose,
+                               int $timeout, bool $verbose, bool $csv_only,
                                bool $force_redownload,
                                bool $generate_new_expect_file,
                                ?string $zend_path): ?int {
@@ -682,24 +796,24 @@ function run_single_test_suite(string $fw_name, string $summary_file,
   $git_head_file = Frameworks::$framework_info[$fw_name]['install_root'].
                    "/.git/HEAD";
   if (!(file_exists($install_root))) {
-    install_framework($fw_name, $verbose, $zend_path);
+    install_framework($fw_name, $verbose, $csv_only, $zend_path);
   } else if ($force_redownload) {
-    echo "Forced redownloading of $fw_name...";
+    verbose("Forced redownloading of $fw_name...", !$csv_only);
     remove_dir_recursive($install_root);
-    install_framework($fw_name, $verbose, $zend_path);
+    install_framework($fw_name, $verbose, $csv_only, $zend_path);
   // The commit hash has changed and we need to redownload
   } else if (trim(file_get_contents($git_head_file)) !==
              Frameworks::$framework_info[$fw_name]['git_commit']) {
-    echo "Redownloading $fw_name because git commit has changed...";
+    verbose("Redownloading $fw_name because git commit has changed...",
+            !$csv_only);
     remove_dir_recursive($install_root);
-    install_framework($fw_name, $verbose, $zend_path);
+    install_framework($fw_name, $verbose, $csv_only, $zend_path);
   }
 
   /***********************************
    *  Initial preparation
    **********************************/
-  $run_command = prepare_framework_test_run_command($fw_name, $timeout,
-                                                    $verbose);
+  $run_command = prepare_framework_test_run_command($fw_name, $timeout);
   $test_path = get_test_path($fw_name, $install_root, $verbose);
 
   verbose("Running test for $fw_name\n", $verbose);
@@ -738,8 +852,8 @@ function run_single_test_suite(string $fw_name, string $summary_file,
   if (file_exists($expect_file)) {
     if ($generate_new_expect_file) {
       unlink($expect_file);
-      echo "Resetting the expect file. ".
-           "Establishing new baseline with gray dots...\n";
+      verbose("Resetting the expect file. ".
+              "Establishing new baseline with gray dots...\n", !$csv_only);
     } else {
       // Color codes would have already been stripped out. Don't need those.
       $compare_tests = get_fw_tests_to_run(
@@ -748,19 +862,27 @@ function run_single_test_suite(string $fw_name, string $summary_file,
         PHPUnitPatterns::$status_code_pattern,
         PHPUnitPatterns::$stop_parsing_pattern
       );
-      echo Colors::YELLOW . $fw_name . Colors::NONE . ": running\n";
-      verbose(
-        "Comparing test suite with previous run. ".
-        "Green dot means test result same as previous. An \"F\" ".
-        "means the test result was different. If you see gray dots, that ".
-        "means previous runs went bad and we are acting like a first ".
-        "run...\n",
-        $verbose
-      );
+      verbose(Colors::YELLOW . $fw_name . Colors::NONE . ": running. ".
+              "Comparing against ".count($compare_tests)." tests\n",
+              !$csv_only);
+      $run_msg = "Comparing test suite with previous run. ";
+      $run_msg .= Colors::GREEN."Green . (dot) ".Colors::NONE;
+      $run_msg .= "means test result same as previous. ";
+      $run_msg .= "A ".Colors::GREEN." green F ".Colors::NONE;
+      $run_msg .= "means we have gone from fail to pass. ";
+      $run_msg .= "A ".Colors::RED." red F ".Colors::NONE;
+      $run_msg .= "means we have gone from pass to fail. ";
+      $run_msg .= "A ".Colors::BLUE." blue F ".Colors::NONE;
+      $run_msg .= "means we have gone from one type of fail to another type ";
+      $run_msg .= "of fail (e.g., F to E, or I to F). ";
+      $run_msg .= "A ".Colors::LIGHTBLUE." light blue F ".Colors::NONE;
+      $run_msg .= "means we are having trouble accessing the tests from the ";
+      $run_msg .= "expected run and can't get a proper status".PHP_EOL;
+      verbose($run_msg, $verbose);
     }
   } else {
-    echo "First time running test suite for $fw_name. ".
-         "Establishing baseline with gray dots...\n";
+    verbose("First time running test suite for $fw_name. ".
+            "Establishing baseline with gray dots...\n", !$csv_only);
   }
 
   /*************************************
@@ -799,7 +921,8 @@ function run_single_test_suite(string $fw_name, string $summary_file,
       if (!$just_raw_results_and_errors &&
           preg_match(PHPUnitPatterns::$test_name_pattern, $line,
                      $tn_matches) === 1) {
-        $match = $tn_matches[0];
+        // The subpattern of the "Starting test" line is the actual test.
+        $match = $tn_matches[1];
         do {
           $status = fgets($pipes[1]);
           $status = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
@@ -822,20 +945,23 @@ function run_single_test_suite(string $fw_name, string $summary_file,
           if ($status === $compare_tests[$match]) {
             // FIX: posix_isatty(STDOUT) was always returning false, even though
             // can print in color. Check this out later.
-            echo Colors::GREEN.".".Colors::NONE;
+            verbose(Colors::GREEN.".".Colors::NONE, !$csv_only);
           } else {
             $ret_val = -1;
             // We are different than we expected
             // Red if we go from pass to something else
             if ($compare_tests[$match] === '.') {
-              echo Colors::RED."F".Colors::NONE;
+              verbose(Colors::RED."F".Colors::NONE, !$csv_only);
             // Green if we go from something else to pass
             } else if ($status === '.') {
-              echo Colors::GREEN."F".Colors::NONE;
-            // Blue if we go from something like E to I or F
+              verbose(Colors::GREEN."F".Colors::NONE, !$csv_only);
+            // Blue if we go from something "faily" to something "faily"
+            // e.g., E to I or F
             } else {
-              echo Colors::BLUE."F".Colors::NONE;
+              verbose(Colors::BLUE."F".Colors::NONE, !$csv_only);
             }
+            verbose(PHP_EOL."Different status in ".$fw_name." for test ".
+                    $match.PHP_EOL,!$csv_only);
             $diff_information .= "----------------------".PHP_EOL;
             $diff_information .= $match.PHP_EOL.PHP_EOL;
             $diff_information .= "EXPECTED: ".$compare_tests[$match].PHP_EOL;
@@ -849,11 +975,13 @@ function run_single_test_suite(string $fw_name, string $summary_file,
           // (e.g., yii is one test suite that has behaved this way).
           if ($compare_tests !== null) {
             $ret_val = -1;
-            echo Colors::LIGHTBLUE."F".Colors::NONE;
+            verbose(Colors::LIGHTBLUE."F".Colors::NONE, !$csv_only);
+            verbose(PHP_EOL."Different status in ".$fw_name." for test ".
+                    $match.PHP_EOL,!$csv_only);
             $diff_information .= "----------------------".PHP_EOL;
             $diff_information .= "Problem loading: ".$match.PHP_EOL.PHP_EOL;
           } else {
-            echo Colors::GRAY.".".Colors::NONE;
+            verbose(Colors::GRAY.".".Colors::NONE, !$csv_only);
           }
         }
       }
@@ -881,26 +1009,30 @@ function run_single_test_suite(string $fw_name, string $summary_file,
     }
 
    /****************************************
-    * Test complete. Create a summary for
-    * the run framework.
+    * Test complete. Create results for
+    * the framework that just ran.
     ****************************************/
-    $pct_str = create_summary_for_framework($fw_name, $results_file,
-                                            $summary_file,
-                                            $generate_new_expect_file);
-    verbose(strtoupper($fw_name).
-       " TEST COMPLETE with pass percentage of: $pct_str\n\n", $verbose);
-    verbose("Results File: $results_file\n", $verbose);
-    verbose("Summary File: $summary_file\n", $verbose);
-    verbose("..........\n\n", $verbose);
+    $pct = get_framework_pass_percentage($fw_name, $results_file, $verbose);
+    $encoded_result = json_encode(array($fw_name => $pct));
+    if (!(file_exists($summary_file))) {
+      file_put_contents($summary_file, $encoded_result);
+    } else {
+      $file_data = file_get_contents($summary_file);
+      $decoded_results = json_decode($file_data, true);
+      $decoded_results[$fw_name] = $pct;
+      file_put_contents($summary_file, json_encode($decoded_results));
+    }
   } else {
-    error("Could not open process to run test for framework $fw_name");
+    $csv_only ? error()
+                  : error("Could not open process to run test for framework ".
+                          $fw_name);
   }
   chdir(__DIR__);
   return $ret_val;
 }
 
-function prepare_framework_test_run_command(string $fw_name, int $timeout,
-                                            bool $verbose): string {
+function prepare_framework_test_run_command(string $fw_name,
+                                            int $timeout): string {
   // Remember, timeouts are in minutes.
   $run_command = __DIR__."/../../tools/timeout.sh -t $timeout";
   if (Frameworks::$framework_info[$fw_name]
@@ -915,8 +1047,7 @@ function prepare_framework_test_run_command(string $fw_name, int $timeout,
   return $run_command;
 }
 
-function get_test_path(string $fw_name, string $install_root,
-                       bool $verbose) {
+function get_test_path(string $fw_name, string $install_root, bool $verbose) {
   // 2 possibilities, phpunit.xml and phpunit.xml.dist for configuration
   $phpunit_config_files = Set {'phpunit.xml', 'phpunit.xml.dist'};
 
@@ -937,9 +1068,6 @@ function get_test_path(string $fw_name, string $install_root,
   return $test_path;
 }
 
-
-
-
 function get_fw_tests_to_run(string $expect_file, string $test_name_pattern,
                              string $status_code_pattern,
                              string $stop_parsing_pattern): ?Map {
@@ -956,11 +1084,13 @@ function get_fw_tests_to_run(string $expect_file, string $test_name_pattern,
     }
     if (preg_match($test_name_pattern, $line, $matches) === 1) {
       do {
+        // Get the next line for the expected status for that test
         $status = fgets($file);
       } while (!feof($file) &&
                preg_match($status_code_pattern, $status) === 0);
-      // Get the next line for the expected status for that test
-      $tests[trim($matches[0], "\'")] = $status[0];
+      // The second match will be the test name only from the "Starting test..."
+      // match string
+      $tests[$matches[1]] = $status[0];
     }
   }
   if ($tests->isEmpty()) {
@@ -969,13 +1099,11 @@ function get_fw_tests_to_run(string $expect_file, string $test_name_pattern,
   return $tests;
 }
 
-
 // We may have to special case frameworks that don't use
 // phpunit for their testing (e.g. ThinkUp)
-function create_summary_for_framework(string $name,
-                                      string $results_file,
-                                      string $summary_file,
-                                      bool $generate_new_expect_file): string {
+function get_framework_pass_percentage(string $name,
+                                       string $results_file,
+                                       bool $verbose): mixed {
   // Get the last 4 lines of the results file which will give us the surface
   // area necessary to get the final stats.
   $file = escapeshellarg($results_file);
@@ -999,10 +1127,10 @@ function create_summary_for_framework(string $name,
     }
   }
 
-  $pct_str = "";
+  $pct = "";
   switch ($test_result) {
     case TestResult::CLEAN:
-      $pct_str = "100";
+      $pct = "100";
       break;
     // Get the total number of tests and the number of failures, errors, etc.
     case TestResult::ERRORS:
@@ -1030,41 +1158,21 @@ function create_summary_for_framework(string $name,
             / $total_tests_for_calc;
       $pct = round($pct, 4);
       $pct *= 100; // for percentage
-      $pct_str = "$pct";
       break;
     case TestResult::FATAL:
-      $pct_str = "Fatal";
+      $pct = "Fatal";
       break;
     default:
-      $pct_str = "Unknown";
+      $pct = "Unknown";
       break;
   }
 
-  // Make sure we are overwriting test results if they exit already,
-  // as opposed to having duplicate test names
-  $data_matches = array();
-  $prev_pct_str = "None";
-  $summary_line = "$name=$pct_str [previous: $prev_pct_str] ($results_file)".
-                  PHP_EOL;
-  if (!(file_exists($summary_file))) {
-    file_put_contents($summary_file, $summary_line);
-  } else if ($generate_new_expect_file) {
-    $file_data = file_get_contents($summary_file);
-    if (preg_match("/$name\=([A-Za-z0-9]+(\.[0-9]+)?)/", $file_data,
-        $data_matches) === 1) {
-      $prev_pct_str = $data_matches[1];
-      $summary_line = "$name=$pct_str [previous: $prev_pct_str] ".
-                      "($results_file)".PHP_EOL;
-      $file_data = preg_replace("/$name=.*".PHP_EOL."/",
-                   $summary_line, $file_data);
+  verbose(strtoupper($name).
+          " TEST COMPLETE with pass percentage of: $pct\n\n", $verbose);
+  verbose("Results File: $results_file\n", $verbose);
+  verbose("..........\n\n", $verbose);
 
-    } else {
-      $file_data = $file_data.$summary_line;
-    }
-    file_put_contents($summary_file, $file_data);
-  }
-
-  return $pct_str;
+  return $pct;
 }
 
 function help(): void {
@@ -1119,13 +1227,37 @@ INTRO;
     # with verbose messages. Tests must come after the -- options.
     % hhvm run.php --timeout 600 --verbose composer assetic
 
+    # Run all the tests, but only produce a machine readable csv
+    # for data extraction into entities like charts.
+    % hhvm run.php --all --csv
+
+    # Run all the tests, but only produce a machine readable csv
+    # for data extraction into entities like charts, including a header row.
+    % hhvm run.php --all --csv --csvheader
+
     # Display help.
     % hhvm run.php --help
 
+
 EXAMPLES;
 
+  $run_msg = "When comparing test suites with previous runs: ".PHP_EOL;
+  $run_msg .= Colors::GREEN."Green . (dot) ".Colors::NONE;
+  $run_msg .= "means test result same as previous. ".PHP_EOL;
+  $run_msg .= "A ".Colors::GREEN." green F ".Colors::NONE;
+  $run_msg .= "means we have gone from fail to pass. ".PHP_EOL;
+  $run_msg .= "A ".Colors::RED." red F ".Colors::NONE;
+  $run_msg .= "means we have gone from pass to fail. ".PHP_EOL;
+  $run_msg .= "A ".Colors::BLUE." blue F ".Colors::NONE;
+  $run_msg .= "means we have gone from one type of fail to another type ";
+  $run_msg .= "of fail (e.g., F to E, or I to F). ".PHP_EOL;
+  $run_msg .= "A ".Colors::LIGHTBLUE." light blue F ".Colors::NONE;
+  $run_msg .= "means we are having trouble accessing the tests from the ";
+  $run_msg .= "expected run and can't get a proper status.".PHP_EOL;
+
   display_help($intro, oss_test_option_map());
-  echo $examples;
+  print $examples;
+  print $run_msg;
 
 }
 
@@ -1149,7 +1281,12 @@ function oss_test_option_map(): OptionInfoMap {
                                         "code and dependencies."},
     'record'              => Pair {'e', "Forces a new expect file for the ".
                                         "framework test suite"},
-
+    'csv'                 => Pair {'c', "Just create the machine readable ".
+                                        "summary CSV for parsing and chart ".
+                                        "display."},
+    'csvheader'           => Pair {'',  "Add a header line for the summary ".
+                                        "CSV which includes the framework ".
+                                        "names."}
   };
 }
 
@@ -1251,18 +1388,30 @@ function find_any_file_recursive(Set $filenames, string $root_dir,
 
 function get_hhvm_build(bool $with_jit = true): string {
   $fbcode_root_dir = __DIR__.'/../../..';
-  if (!(file_exists($fbcode_root_dir."/_bin"))) {
+  $build = "";
+  // See if we are using an internal development build
+  if ((file_exists($fbcode_root_dir."/_bin"))) {
+    $build .= $fbcode_root_dir."/_bin/hphp/hhvm/hhvm";
+  } else if (command_exists("hhvm")) {
+  // Maybe we are in OSS land trying this script
+    $build .= "hhvm";
+  } else {
     error("HHVM build doesn't exist. Did you build yet?");
   }
-  $build = $with_jit ?
-           $fbcode_root_dir."/_bin/hphp/hhvm/hhvm -v Eval.Jit=true" :
-           $fbcode_root_dir."/_bin/hphp/hhvm/hhvm";
+  if ($with_jit) {
+    $build .= " -v Eval.Jit=true";
+  }
   return $build;
+}
+
+function command_exists(string $cmd): bool {
+    $returnVal = shell_exec("which $cmd");
+    return (empty($returnVal) ? false : true);
 }
 
 function verbose(string $msg, bool $verbose): void {
   if ($verbose) {
-    echo $msg;
+    print $msg;
   }
 }
 

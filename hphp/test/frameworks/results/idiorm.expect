@@ -407,5 +407,5 @@ Starting test 'QueryBuilderPsr1Test53::testIssue74EscapingQuoteMarksIn_quote_ide
 Starting test 'QueryBuilderPsr1Test53::testIssue90UsingSetExprAloneDoesTriggerQueryGeneration'.
 .
 
-Time: 8.8 seconds, Memory: 4.84Mb
+Time: 12.32 seconds, Memory: 7.89Mb
 OK (200 tests, 226 assertions)

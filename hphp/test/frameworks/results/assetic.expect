@@ -1,4 +1,4 @@
-PHPUnit 3.8-g1c26eb5 by Sebastian Bergmann.
+PHPUnit 3.8-g0a354ee by Sebastian Bergmann.
 
 Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/assetic/phpunit.xml.dist
 
@@ -146,7 +146,6 @@ Starting test 'Assetic\Test\Asset\HttpAssetTest::testGetLastModified'.
 SlowTimer [5001ms] at curl: http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js
 F
 Starting test 'Assetic\Test\Asset\HttpAssetTest::testProtocolRelativeUrl'.
-SlowTimer [5001ms] at curl: http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js
 E
 Starting test 'Assetic\Test\Asset\HttpAssetTest::testMalformedUrl'.
 .

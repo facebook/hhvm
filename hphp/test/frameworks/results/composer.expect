@@ -2261,23 +2261,23 @@ F
 Starting test 'Composer\Test\Util\SvnTest::testInteractiveString'.
 .
 
-Time: 1.59 minutes, Memory: 30.92Mb
+Time: 1.7 minutes, Memory: 44.35Mb
 
 There were 6 errors:
 
 1) Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testGitExcludes
-ErrorException: __construct() expects exactly 4 parameters, 1 given
+ErrorException: Not a valid directory resource
 
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/ArchivableFilesFinderTest.php:200
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/ArchivableFilesFinderTest.php:206
 /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/ArchivableFilesFinderTest.php:144
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
 
 2) Composer\Test\Package\Archiver\ArchivableFilesFinderTest::testHgExcludes
-ErrorException: __construct() expects exactly 4 parameters, 1 given
+ErrorException: Not a valid directory resource
 
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/ArchivableFilesFinderTest.php:200
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/ArchivableFilesFinderTest.php:206
 /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/ArchivableFilesFinderTest.php:174
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
@@ -2331,9 +2331,9 @@ Failed asserting that two arrays are equal.
 +++ Actual
 @@ @@
  Array (
-     'ClassMapBar' => '/tmp/cmptest-dae7cc992e28d0d4...st.php'
--    'ClassMapBaz' => '/tmp/cmptest-dae7cc992e28d0d4...st.php'
-     'ClassMapFoo' => '/tmp/cmptest-dae7cc992e28d0d4.../a.php'
+     'ClassMapBar' => '/tmp/cmptest-23319eedc017ffbc...st.php'
+-    'ClassMapBaz' => '/tmp/cmptest-23319eedc017ffbc...st.php'
+     'ClassMapFoo' => '/tmp/cmptest-23319eedc017ffbc.../a.php'
  )
 
 /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/AutoloadGeneratorTest.php:344

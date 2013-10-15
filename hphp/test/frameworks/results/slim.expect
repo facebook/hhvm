@@ -749,7 +749,7 @@ Starting test 'ViewTest::testDisplay'.
 Starting test 'ViewTest::testDisplayTemplateThatDoesNotExist'.
 .
 
-Time: 10.53 seconds, Memory: 7.10Mb
+Time: 19.31 seconds, Memory: 12.06Mb
 There were 3 errors:
 
 1) SessionCookieTest::testSessionCookieIsCreated

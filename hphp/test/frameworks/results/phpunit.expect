@@ -1,4 +1,3 @@
-Possible bad config node: Eval.JIT
 PHPUnit 3.7.27-2-g0ce13a8 by Sebastian Bergmann.
 
 The Xdebug extension is not loaded. No code coverage will be generated.
@@ -1471,13 +1470,13 @@ Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #1
 +++ Actual
 @@ @@
  SplObjectStorage Object (
--    \'00000000000000007cdde405ce7e94ad\' => Array (
+-    \'0000000000000000fbdd983ffc3140b1\' => Array (
 -        \'obj\' => stdClass Object (
 -            \'foo\' => \'bar\'
 -        )
 -        \'inf\' => null
 -    )
-     \'00000000000000007cdde405ce7e95ad\' => Array (
+     \'0000000000000000fbdd983ffc3141b1\' => Array (
          \'obj\' => stdClass Object ()
          \'inf\' => null
      )
@@ -2433,7 +2432,7 @@ Starting test 'Util_XMLTest::testConvertAssertRange'.
 Starting test 'Util_XMLTest::testPrepareStringEscapesChars'.
 .
 
-Time: 16.53 seconds, Memory: 16.12Mb
+Time: 33.76 seconds, Memory: 19.16Mb
 There were 3 errors:
 
 1) Framework_AssertTest::testAssertAttributeEmpty
@@ -3121,13 +3120,13 @@ Failed asserting that false is true.
 +++ Actual
 @@ @@
  SplObjectStorage Object (
--    \'00000000000000007cdde405ce7e94ad\' => Array (
+-    \'0000000000000000fbdd983ffc3140b1\' => Array (
 -        \'obj\' => stdClass Object (
 -            \'foo\' => \'bar\'
 -        )
 -        \'inf\' => null
 -    )
-     \'00000000000000007cdde405ce7e95ad\' => Array (
+     \'0000000000000000fbdd983ffc3141b1\' => Array (
          \'obj\' => stdClass Object ()
          \'inf\' => null
      )
@@ -3139,18 +3138,18 @@ Failed asserting that two strings are equal.
 @@ @@
   SplObjectStorage Object (
 +     'storage' => Array (
-+-        '00000000000000007cdde405ce7e94ad' => Array (
++-        '0000000000000000fbdd983ffc3140b1' => Array (
 +-            'obj' => stdClass Object (
 +-                'foo' => 'bar'
 +-            )
 +-            'inf' => null
 +-        )
-+         '00000000000000007cdde405ce7e95ad' => Array (
++         '0000000000000000fbdd983ffc3141b1' => Array (
 +             'obj' => stdClass Object ()
 +             'inf' => null
 +         )
 +-    )
- -    '00000000000000007cdde405ce7e94ad' => Array (
+ -    '0000000000000000fbdd983ffc3140b1' => Array (
 --        'obj' => stdClass Object (
 --            'foo' => 'bar'
 --        )
@@ -3158,7 +3157,7 @@ Failed asserting that two strings are equal.
  -        'inf' => null
 --    )
 +     )
-      '00000000000000007cdde405ce7e95ad' => Array (
+      '0000000000000000fbdd983ffc3141b1' => Array (
 -         'obj' => stdClass Object ()
 +         'obj' => stdClass Object (*RECURSION*)
           'inf' => null

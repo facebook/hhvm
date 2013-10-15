@@ -8156,7 +8156,7 @@ Starting test 'Twig_Test_EscapingTest::testHtmlAttributeEscapingEscapesOwaspReco
 Starting test 'Twig_Test_EscapingTest::testCssEscapingEscapesOwaspRecommendedRanges'.
 .
 
-Time: 1.12 minutes, Memory: 35.92Mb
+Time: 1.3 minutes, Memory: 39.46Mb
 
 There were 2 errors:
 

@@ -1,4 +1,3 @@
-
 **********************************
 * HipHop Bytecode v1 revision 17 *
 **********************************
@@ -565,7 +564,7 @@ inputs to each instruction is said to be "flavor-safe".
 
 HHBC provides a set of verification rules that can be mechanically applied to
 verify that an HHBC program is flavor-safe. All valid HHBC programs must be
-verifiably flavor-safe, and the execution execution may refuse to execute HHBC
+verifiably flavor-safe, and the execution engine may refuse to execute HHBC 
 programs that cannot be verified.
 
 At bytecode generation time, what is known about the state of the evaluation

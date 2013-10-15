@@ -293,10 +293,10 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_TWO(t1,t2) 2
 #define COUNT_THREE(t1,t2,t3) 3
 #define COUNT_FOUR(t1,t2,t3,t4) 4
-#define COUNT_LMANY 0
-#define COUNT_C_LMANY 0
-#define COUNT_R_LMANY 0
-#define COUNT_V_LMANY 0
+#define COUNT_MMANY 0
+#define COUNT_C_MMANY 0
+#define COUNT_R_MMANY 0
+#define COUNT_V_MMANY 0
 #define COUNT_FMANY 0
 #define COUNT_CVMANY 0
 #define COUNT_CVUMANY 0
@@ -340,17 +340,17 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   POP_##t2(1);                   \
   POP_##t3(2);                   \
   POP_##t4(3)
-#define POP_LMANY \
-  getEmitterVisitor().popEvalStackLMany()
-#define POP_C_LMANY \
+#define POP_MMANY \
+  getEmitterVisitor().popEvalStackMMany()
+#define POP_C_MMANY \
   getEmitterVisitor().popEvalStack(StackSym::C); \
-  getEmitterVisitor().popEvalStackLMany()
-#define POP_V_LMANY \
+  getEmitterVisitor().popEvalStackMMany()
+#define POP_V_MMANY \
   getEmitterVisitor().popEvalStack(StackSym::V); \
-  getEmitterVisitor().popEvalStackLMany()
-#define POP_R_LMANY \
+  getEmitterVisitor().popEvalStackMMany()
+#define POP_R_MMANY \
   getEmitterVisitor().popEvalStack(StackSym::R); \
-  getEmitterVisitor().popEvalStackLMany()
+  getEmitterVisitor().popEvalStackMMany()
 #define POP_FMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
 #define POP_CVMANY \
@@ -583,10 +583,10 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_TWO
 #undef POP_THREE
 #undef POP_FOUR
-#undef POP_LMANY
-#undef POP_C_LMANY
-#undef POP_V_LMANY
-#undef POP_R_LMANY
+#undef POP_MMANY
+#undef POP_C_MMANY
+#undef POP_V_MMANY
+#undef POP_R_MMANY
 #undef POP_CV
 #undef POP_VV
 #undef POP_HV
@@ -1288,7 +1288,7 @@ void EmitterVisitor::popSymbolicLocal(Op op, int arg, int pos) {
   }
 }
 
-void EmitterVisitor::popEvalStackLMany() {
+void EmitterVisitor::popEvalStackMMany() {
   while (!m_evalStack.empty()) {
     char sym = m_evalStack.top();
     char symFlavor = StackSym::GetSymFlavor(sym);

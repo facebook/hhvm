@@ -605,17 +605,17 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define TWO(a,b) { b, a },
   #define THREE(a,b,c) { c, b, a },
   #define FOUR(a,b,c,d) { d, c, b, a },
-  #define LMANY { },
-  #define C_LMANY { },
-  #define V_LMANY { },
-  #define R_LMANY { },
+  #define MMANY { },
+  #define C_MMANY { },
+  #define V_MMANY { },
+  #define R_MMANY { },
   #define O(name, imm, pop, push, flags) pop
     OPCODES
   #undef O
-  #undef C_LMANY
-  #undef V_LMANY
-  #undef R_LMANY
-  #undef LMANY
+  #undef C_MMANY
+  #undef V_MMANY
+  #undef R_MMANY
+  #undef MMANY
   #undef FMANY
   #undef CVMANY
   #undef CVUMANY
@@ -627,22 +627,22 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef NOV
   };
   switch (toOp(*pc)) {
-  case OpCGetM:     // ONE(LA),      LMANY, ONE(CV)
-  case OpVGetM:     // ONE(LA),      LMANY, ONE(VV)
-  case OpIssetM:    // ONE(LA),      LMANY, ONE(CV)
-  case OpEmptyM:    // ONE(LA),      LMANY, ONE(CV)
-  case OpUnsetM:    // ONE(LA),      LMANY, NOV
-  case OpFPassM:    // TWO(IVA,LA),  LMANY, ONE(FV)
-  case OpIncDecM:   // TWO(OA,LA),   LMANY, ONE(CV)
+  case OpCGetM:     // ONE(LA),      MMANY, ONE(CV)
+  case OpVGetM:     // ONE(LA),      MMANY, ONE(VV)
+  case OpIssetM:    // ONE(LA),      MMANY, ONE(CV)
+  case OpEmptyM:    // ONE(LA),      MMANY, ONE(CV)
+  case OpUnsetM:    // ONE(LA),      MMANY, NOV
+  case OpFPassM:    // TWO(IVA,LA),  MMANY, ONE(FV)
+  case OpIncDecM:   // TWO(OA,LA),   MMANY, ONE(CV)
     return vectorSig(pc, NOV);
-  case OpBindM:     // ONE(LA),    V_LMANY, ONE(VV)
+  case OpBindM:     // ONE(LA),    V_MMANY, ONE(VV)
     return vectorSig(pc, VV);
-  case OpSetM:      // ONE(LA),    C_LMANY, ONE(CV)
-  case OpSetOpM:    // TWO(OA,LA), C_LMANY, ONE(CV)
+  case OpSetM:      // ONE(LA),    C_MMANY, ONE(CV)
+  case OpSetOpM:    // TWO(OA,LA), C_MMANY, ONE(CV)
     return vectorSig(pc, CV);
-  case OpSetWithRefLM://TWO(MA, HA), LMANY, NOV
+  case OpSetWithRefLM://TWO(MA, HA), MMANY, NOV
     return vectorSig(pc, NOV);
-  case OpSetWithRefRM://ONE(MA),   R_LMANY, NOV
+  case OpSetWithRefRM://ONE(MA),   R_MMANY, NOV
     return vectorSig(pc, RV);
   case OpFCall:     // ONE(IVA),     FMANY,   ONE(RV)
   case OpFCallArray:// NA,           ONE(FV), ONE(RV)
@@ -785,17 +785,17 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define FOUR(a,b,c,d) { a, b, c, d },
   #define INS_1(a) { a },
   #define INS_2(a) { a },
-  #define LMANY() { },
-  #define C_LMANY() { },
-  #define V_LMANY() { },
-  #define R_LMANY() { },
+  #define MMANY() { },
+  #define C_MMANY() { },
+  #define V_MMANY() { },
+  #define R_MMANY() { },
   #define O(name, imm, pop, push, flags) push
     OPCODES
   #undef O
-  #undef C_LMANY
-  #undef V_LMANY
-  #undef R_LMANY
-  #undef LMANY
+  #undef C_MMANY
+  #undef V_MMANY
+  #undef R_MMANY
+  #undef MMANY
   #undef FMANY
   #undef CMANY
   #undef INS_1

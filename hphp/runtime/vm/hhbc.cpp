@@ -362,10 +362,10 @@ int instrNumPops(const Op* opcode) {
 #define TWO(...) 2
 #define THREE(...) 3
 #define FOUR(...) 4
-#define LMANY -1
-#define C_LMANY -2
-#define V_LMANY -2
-#define R_LMANY -2
+#define MMANY -1
+#define C_MMANY -2
+#define V_MMANY -2
+#define R_MMANY -2
 #define FMANY -3
 #define CVMANY -3
 #define CVUMANY -3
@@ -377,10 +377,10 @@ int instrNumPops(const Op* opcode) {
 #undef TWO
 #undef THREE
 #undef FOUR
-#undef LMANY
-#undef C_LMANY
-#undef V_LMANY
-#undef R_LMANY
+#undef MMANY
+#undef C_MMANY
+#undef V_MMANY
+#undef R_MMANY
 #undef FMANY
 #undef CVMANY
 #undef CVUMANY
@@ -502,10 +502,10 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
 #define TWO(f1, f2) return doFlavor(idx, f1, f2);
 #define THREE(f1, f2, f3) return doFlavor(idx, f1, f2, f3);
 #define FOUR(f1, f2, f3, f4) return doFlavor(idx, f1, f2, f3, f4);
-#define LMANY return minstrFlavor(op, idx, nov);
-#define C_LMANY return minstrFlavor(op, idx, CV);
-#define V_LMANY return minstrFlavor(op, idx, VV);
-#define R_LMANY return minstrFlavor(op, idx, RV);
+#define MMANY return minstrFlavor(op, idx, nov);
+#define C_MMANY return minstrFlavor(op, idx, CV);
+#define V_MMANY return minstrFlavor(op, idx, VV);
+#define R_MMANY return minstrFlavor(op, idx, RV);
 #define FMANY return manyFlavor(op, idx, FV);
 #define CVMANY return manyFlavor(op, idx, CVV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
@@ -520,10 +520,10 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
 #undef TWO
 #undef THREE
 #undef FOUR
-#undef LMANY
-#undef C_LMANY
-#undef V_LMANY
-#undef R_LMANY
+#undef MMANY
+#undef C_MMANY
+#undef V_MMANY
+#undef R_MMANY
 #undef FMANY
 #undef CVMANY
 #undef CVUMANY

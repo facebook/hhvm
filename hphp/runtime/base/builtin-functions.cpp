@@ -1208,7 +1208,7 @@ bool AutoloadHandler::invokeHandler(const String& className,
   }
   // If we end up in a recursive autoload loop where we try to load the same
   // class twice, just fail the load to mimic PHP as many frameworks rely on it
-  if (m_loading.valueExists(className)) {
+  if (!forceSplStack && m_loading.valueExists(className)) {
     return false;
   }
 

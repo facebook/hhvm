@@ -1,0 +1,5 @@
+autoload1
+autoload2
+autoload1
+autoload3
+bool(true)

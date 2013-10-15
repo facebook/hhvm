@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
@@ -439,19 +440,6 @@ PUNT_OPCODE(DbgAssertType)
 
 //////////////////////////////////////////////////////////////////////
 
-void CodeGenerator::emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
-                                          vixl::Register dstReg,
-                                          vixl::Register srcReg,
-                                          int64_t imm) {
-  if (imm != 0) {
-    as.  Add  (dstReg, srcReg, imm);
-  } else if (dstReg.code() != srcReg.code()) {
-    as.  Mov  (dstReg, srcReg);
-  } // else nothing
-}
-
-//////////////////////////////////////////////////////////////////////
-
 template<class Loc, class JmpFn>
 void CodeGenerator::emitTypeTest(Type type, Loc typeSrc, Loc dataSrc,
                                  JmpFn doJcc) {
@@ -801,7 +789,9 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
   auto opc = *(curFunc()->unit()->at(pcOff));
   auto* interpOneHelper = interpOneEntryPoints[opc];
 
-  m_as.   Push   (x29, x30);
+  // This means push x30 (the link register) first, then x29. This mimics the
+  // x64 stack frame: return address higher in memory than saved FP.
+  m_as.   Push   (x30, x29);
 
   // TODO(2966997): this really should be saving caller-save registers and
   // basically doing everything else that cgCallHelper does. This only works
@@ -812,7 +802,7 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
   m_as.   Mov    (argReg(2), pcOff);
   m_as.   HostCall(3);
 
-  m_as.   Pop    (x30, x29);
+  m_as.   Pop    (x29, x30);
 }
 
 void CodeGenerator::cgInterpOne(IRInstruction* inst) {

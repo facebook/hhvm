@@ -1,0 +1,101 @@
+#include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
+
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/jump-smash.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
+
+namespace HPHP { namespace JIT { namespace ARM {
+
+void emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
+                           const vixl::Register& dstReg,
+                           const vixl::Register& srcReg,
+                           int64_t imm) {
+  if (imm != 0) {
+    as.  Add  (dstReg, srcReg, imm);
+  } else if (dstReg.code() != srcReg.code()) {
+    as.  Mov  (dstReg, srcReg);
+  } // else nothing
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitStoreRetIntoActRec(vixl::MacroAssembler& a) {
+  a.  Str  (rLinkReg, rStashedAR[AROFF(m_savedRip)]);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitCall(vixl::MacroAssembler& a, CppCall call) {
+  if (call.isDirect()) {
+    a. Mov  (rHostCallReg, reinterpret_cast<intptr_t>(call.getAddress()));
+  } else {
+    a. Ldr  (rHostCallReg, argReg(0)[0]);
+    a. Ldr  (rHostCallReg, rHostCallReg[call.getOffset()]);
+  }
+
+  using namespace vixl;
+  a.   Push    (x30, x29);
+  a.   HostCall(5);
+  a.   Pop     (x29, x30);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitXorSwap(vixl::MacroAssembler& a,
+                 const vixl::Register& r1, const vixl::Register& r2) {
+  a.  Eor  (r1, r1, r2);
+  a.  Eor  (r2, r1, r2);
+  a.  Eor  (r1, r1, r2);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitTestSurpriseFlags(vixl::MacroAssembler& a) {
+  static_assert(RequestInjectionData::LastFlag < (1 << 8),
+                "Translator assumes RequestInjectionFlags fit in one byte");
+  a.  Ldrb  (rAsm, rVmTl[RDS::kConditionFlagsOff]);
+  a.  Tst   (rAsm, 0xff);
+}
+
+void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
+                                 bool inTracelet, Transl::FixupMap& fixupMap,
+                                 Transl::Fixup fixup) {
+  vixl::MacroAssembler a { mainCode };
+  vixl::MacroAssembler astubs { stubsCode };
+
+  emitTestSurpriseFlags(a);
+  emitSmashableJump(mainCode, stubsCode.frontier(), CC_NZ);
+
+  astubs.  Mov  (argReg(0), rVmFp);
+  void (*helper)(const ActRec*) = functionEnterHelper;
+
+  emitCall(astubs, CppCall(helper));
+  if (inTracelet) {
+    fixupMap.recordSyncPoint(stubsCode.frontier(),
+                             fixup.m_pcOffset, fixup.m_spOffset);
+  } else {
+    // If we're being called while generating a func prologue, we
+    // have to record the fixup directly in the fixup map instead of
+    // going through the pending fixup path like normal.
+    fixupMap.recordFixup(stubsCode.frontier(), fixup);
+  }
+  emitSmashableJump(stubsCode, mainCode.frontier(), CC_None);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitTransCounterInc(vixl::MacroAssembler& a) {
+  if (!tx64->isTransDBEnabled()) return;
+
+  // TODO(#3057328): this is not thread-safe. This should be a "load-exclusive,
+  // increment, store-exclusive, loop" sequence, but vixl doesn't yet support
+  // the exclusive-access instructions.
+  a.   Mov   (rAsm, tx64->getTransCounterAddr());
+  a.   Ldr   (rAsm2, rAsm[0]);
+  a.   Add   (rAsm2, rAsm2, 1);
+  a.   Str   (rAsm2, rAsm[0]);
+}
+
+}}}

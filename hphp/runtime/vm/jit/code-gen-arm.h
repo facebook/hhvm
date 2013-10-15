@@ -58,10 +58,6 @@ struct CodeGenerator {
 
   const Func* curFunc() { return m_curInst->marker().func; }
 
-  void emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
-                             vixl::Register dstReg,
-                             vixl::Register srcReg,
-                             int64_t imm);
   template<class Loc, class JmpFn>
   void emitTypeTest(Type type, Loc typeSrc, Loc dataSrc, JmpFn doJcc);
 

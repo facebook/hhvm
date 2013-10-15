@@ -16,6 +16,7 @@
 
 #include "hphp/util/data-block.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
@@ -127,10 +128,29 @@ void emitFCallArrayHelper(UniqueStubs& us) {
 }
 
 void emitFCallHelperThunk(UniqueStubs& us) {
+  TCA (*helper)(ActRec*) = &fcallHelper;
   MacroAssembler a { tx64->stubsCode };
 
   us.fcallHelperThunk = a.frontier();
-  a.   Brk   (0);
+  vixl::Label popAndXchg;
+
+  a.   Mov   (argReg(0), rStashedAR);
+  a.   Cmp   (rVmFp, rStashedAR);
+  a.   B     (&popAndXchg, vixl::ne);
+  emitCall(a, CppCall(helper));
+  a.   Br    (rReturnReg);
+
+  a.   bind  (&popAndXchg);
+  emitXorSwap(a, rStashedAR, rVmFp);
+  // Pop return address into ActRec.
+  a.   Ldr   (rAsm, vixl::sp[0]);
+  a.   Str   (rAsm, rVmFp[AROFF(m_savedRip)]);
+  emitCall(a, CppCall(helper));
+  // Put return address back on stack.
+  a.   Ldr   (rAsm, rVmFp[AROFF(m_savedRip)]);
+  a.   Str   (rAsm, vixl::sp[0]);
+  emitXorSwap(a, rStashedAR, rVmFp);
+  a.   Br    (rReturnReg);
 
   us.add("fcallHelperThunk", us.fcallHelperThunk);
 }
@@ -142,9 +162,9 @@ void emitFuncBodyHelperThunk(UniqueStubs& us) {
   us.funcBodyHelperThunk = a.frontier();
   a.   Mov   (argReg(0), rVmFp);
   a.   Mov   (rHostCallReg, reinterpret_cast<intptr_t>(helper));
-  a.   Push  (rVmFp, rLinkReg);
+  a.   Push  (rLinkReg, rVmFp);
   a.   HostCall(1);
-  a.   Pop   (rLinkReg, rVmFp);
+  a.   Pop   (rVmFp, rLinkReg);
   a.   Br    (rReturnReg);
 
   us.add("funcBodyHelperThunk", us.funcBodyHelperThunk);

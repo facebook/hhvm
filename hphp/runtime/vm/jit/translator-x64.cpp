@@ -113,7 +113,9 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
+#include "hphp/runtime/vm/jit/func-prologues.h"
 #include "hphp/runtime/vm/jit/func-prologues-x64.h"
+#include "hphp/runtime/vm/jit/func-prologues-arm.h"
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
@@ -519,7 +521,7 @@ TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
   DEBUG_ONLY std::unique_ptr<LeaseHolder> writer;
   for (int i = 0; i < numPrologues; i++) {
     if (prologues[i] != uniqueStubs.fcallHelperThunk
-        && JIT::X64::funcPrologueHasGuard(prologues[i], func)) {
+        && JIT::funcPrologueHasGuard(prologues[i], func)) {
       if (debug) {
         /*
          * Unit's are sometimes created racily, in which case all
@@ -537,7 +539,13 @@ TranslatorX64::smashPrologueGuards(TCA* prologues, int numPrologues,
           writer.reset(new LeaseHolder(s_writeLease, LeaseAcquire::BLOCKING));
         }
       }
-      JIT::X64::funcPrologueSmashGuard(prologues[i], func);
+      if (JIT::arch() == JIT::Arch::X64) {
+        JIT::X64::funcPrologueSmashGuard(prologues[i], func);
+      } else if (JIT::arch() == JIT::Arch::ARM) {
+        JIT::ARM::funcPrologueSmashGuard(prologues[i], func);
+      } else {
+        not_implemented();
+      }
     }
   }
 }
@@ -672,11 +680,15 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
     skFuncBody = JIT::X64::emitFuncPrologue(
       mainCode, stubsCode, func, funcIsMagic, nPassed, start, aStart
     );
+  } else if (JIT::arch() == JIT::Arch::ARM) {
+    skFuncBody = JIT::ARM::emitFuncPrologue(
+      mainCode, stubsCode, func, funcIsMagic, nPassed, start, aStart
+    );
   } else {
     not_implemented();
   }
 
-  assert(funcPrologueHasGuard(start, func));
+  assert(JIT::funcPrologueHasGuard(start, func));
   TRACE(2, "funcPrologue tx64 %p %s(%d) setting prologue %p\n",
         this, func->fullName()->data(), nPassed, start);
   assert(isValidCodeAddress(start));
@@ -720,8 +732,8 @@ void TranslatorX64::regeneratePrologue(TransID prologueTransId) {
     JIT::smashCall(toSmash, start);
   }
   // If the prologue has a guard, then smash its guard-callers as well.
-  if (JIT::X64::funcPrologueHasGuard(start, func)) {
-    TCA guard = JIT::X64::funcPrologueToGuard(start, func);
+  if (JIT::funcPrologueHasGuard(start, func)) {
+    TCA guard = JIT::funcPrologueToGuard(start, func);
     for (TCA toSmash : pcr->guardCallers()) {
       JIT::smashCall(toSmash, guard);
     }
@@ -1118,8 +1130,11 @@ TranslatorX64::enterTC(TCA start, void* data) {
       sim.   set_xreg(JIT::ARM::rVmFp.code(), vmfp());
       sim.   set_xreg(JIT::ARM::rVmSp.code(), vmsp());
       sim.   set_xreg(JIT::ARM::rVmTl.code(), RDS::tl_base);
+      sim.   set_xreg(JIT::ARM::rStashedAR.code(), info.saved_rStashedAr);
 
+      std::cout.flush();
       sim.RunFrom(vixl::Instruction::Cast(start));
+      std::cout.flush();
 
       info.requestNum = sim.xreg(0);
       info.args[0] = sim.xreg(1);
@@ -1130,8 +1145,6 @@ TranslatorX64::enterTC(TCA start, void* data) {
       info.saved_rStashedAr = sim.xreg(JIT::ARM::rStashedAR.code());
 
       info.stubAddr = reinterpret_cast<TCA>(sim.xreg(JIT::ARM::rAsm.code()));
-
-      fflush(stdout);
     } else {
       // We have to force C++ to spill anything that might be in a callee-saved
       // register (aside from rbp). enterTCHelper does not save them.
@@ -1210,7 +1223,7 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     if (!isImmutable) {
       // We dont know we're calling the right function, so adjust
       // dest to point to the dynamic check of ar->m_func.
-      dest = JIT::X64::funcPrologueToGuard(dest, func);
+      dest = JIT::funcPrologueToGuard(dest, func);
     } else {
       TRACE(2, "enterTC: bindCall immutably %s -> %p\n",
             func->fullName()->data(), dest);
@@ -2416,6 +2429,7 @@ bool TranslatorX64::addDbgGuard(const Func* func, Offset offset) {
 
 void TranslatorX64::addDbgGuardImpl(SrcKey sk, SrcRec& srcRec) {
   TCA dbgGuard = mainCode.frontier();
+  assert(JIT::arch() == JIT::Arch::X64);
   Asm a { mainCode };
 
   // Emit the checks for debugger attach

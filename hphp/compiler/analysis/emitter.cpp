@@ -118,6 +118,12 @@ namespace {
 namespace StackSym {
   static const char None = 0x00;
 
+  /*
+   * We don't actually track the U flavor (we treat it as a C),
+   * because there's nothing important to do with it for emission.
+   * The verifier will check they are only created at the appropriate
+   * times.
+   */
   static const char C = 0x01; // Cell symbolic flavor
   static const char V = 0x02; // Var symbolic flavor
   static const char A = 0x03; // Classref symbolic flavor
@@ -293,6 +299,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_V_LMANY 0
 #define COUNT_FMANY 0
 #define COUNT_CVMANY 0
+#define COUNT_CVUMANY 0
 #define COUNT_CMANY 0
 
 #define ONE(t) \
@@ -348,6 +355,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
 #define POP_CVMANY \
   getEmitterVisitor().popEvalStackCVMany(a1)
+#define POP_CVUMANY POP_CVMANY
 #define POP_CMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::C)
 
@@ -409,6 +417,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define PUSH_INS_2(t) PUSH_INS_2_##t
 
 #define PUSH_CV getEmitterVisitor().pushEvalStack(StackSym::C)
+#define PUSH_UV PUSH_CV
 #define PUSH_VV getEmitterVisitor().pushEvalStack(StackSym::V)
 #define PUSH_AV getEmitterVisitor().pushEvalStack(StackSym::A)
 #define PUSH_RV getEmitterVisitor().pushEvalStack(StackSym::R)
@@ -587,6 +596,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_LREST
 #undef POP_FMANY
 #undef POP_CVMANY
+#undef POP_CVUMANY
 #undef POP_CMANY
 #undef POP_LA_ONE
 #undef POP_LA_TWO
@@ -609,6 +619,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef PUSH_THREE
 #undef PUSH_FOUR
 #undef PUSH_CV
+#undef PUSH_UV
 #undef PUSH_VV
 #undef PUSH_HV
 #undef PUSH_AV

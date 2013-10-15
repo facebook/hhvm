@@ -552,6 +552,8 @@ Here is a description of each flavor descriptor:
   F - function argument; specifies that the value may be a cell or a ref at run
         time; this flavor descriptor is used for parameter values that are
         about to be passed into a function
+  U - uninit; specifies that the value must be an uninitialized null at run
+        time; this is only used for FCallBuiltin
 
 
 Verifiability
@@ -836,9 +838,9 @@ False    []  ->  [C:Bool]
   Push constant. Null pushes null onto the stack, True pushes true onto
   the stack, and False pushes false onto the stack.
 
-NullUninit                      []  ->  [C:Uninit]
+NullUninit                      []  ->  [U]
 
-   Push Uninit Null Cell onto stack.
+   Push an uninitialized null on the stack.
 
 Int <signed 64-bit integer value>    []  ->  [C:Int]
 Double <double value>                []  ->  [C:Dbl]
@@ -1845,7 +1847,7 @@ FCallArray    [F]  ->  [R]
   call the callee. When the callee returns, it will transfer the return value
   onto the caller's evaluation stack using the R flavor.
 
-FCallBuiltin  <total params> <passed params> <litstr id> [C|V..C|V]  -> [R]
+FCallBuiltin  <total params> <passed params> <litstr id> [C|V|U..C|V|U]  -> [R]
 
   Optimized builtin call without an ActRec. This instruction attempts to
   lookup a builtin function named %3. If no function named %3 is defined,

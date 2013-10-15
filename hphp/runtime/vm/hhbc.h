@@ -68,13 +68,15 @@ union ArgUnion {
 const Offset InvalidAbsoluteOffset = -1;
 
 enum FlavorDesc {
-  NOV, // None
-  CV,  // Cell
-  VV,  // Var
-  AV,  // Classref
-  RV,  // Return value (cell or var)
-  FV,  // Function parameter (cell or var)
-  CVV, // Cell or Var argument
+  NOV,  // None
+  CV,   // Cell
+  VV,   // Var
+  AV,   // Classref
+  RV,   // Return value (cell or var)
+  FV,   // Function parameter (cell or var)
+  UV,   // Uninit
+  CVV,  // Cell or Var argument
+  CVUV, // Cell, Var, or Uninit argument
 };
 
 enum InstrFlags {
@@ -368,7 +370,7 @@ enum SetOpOp {
   O(BoxR,            NA,               ONE(RV),         ONE(VV),    NF) \
   O(UnboxR,          NA,               ONE(RV),         ONE(CV),    NF) \
   O(Null,            NA,               NOV,             ONE(CV),    NF) \
-  O(NullUninit,      NA,               NOV,             ONE(CV),    NF) \
+  O(NullUninit,      NA,               NOV,             ONE(UV),    NF) \
   O(True,            NA,               NOV,             ONE(CV),    NF) \
   O(False,           NA,               NOV,             ONE(CV),    NF) \
   O(Int,             ONE(I64A),        NOV,             ONE(CV),    NF) \
@@ -531,7 +533,7 @@ enum SetOpOp {
   O(FPassM,          TWO(IVA,MA),      LMANY,           ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
-  O(FCallBuiltin,    THREE(IVA,IVA,SA),CVMANY,          ONE(RV),    CF) \
+  O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    CF) \
   O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
   O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \

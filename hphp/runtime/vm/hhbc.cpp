@@ -368,6 +368,7 @@ int instrNumPops(const Op* opcode) {
 #define R_LMANY -2
 #define FMANY -3
 #define CVMANY -3
+#define CVUMANY -3
 #define CMANY -3
 #define O(name, imm, pop, push, flags) pop,
     OPCODES
@@ -382,6 +383,7 @@ int instrNumPops(const Op* opcode) {
 #undef R_LMANY
 #undef FMANY
 #undef CVMANY
+#undef CVUMANY
 #undef CMANY
 #undef O
   };
@@ -506,6 +508,7 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
 #define R_LMANY return minstrFlavor(op, idx, RV);
 #define FMANY return manyFlavor(op, idx, FV);
 #define CVMANY return manyFlavor(op, idx, CVV);
+#define CVUMANY return manyFlavor(op, idx, CVUV);
 #define CMANY return manyFlavor(op, idx, CV);
 #define O(name, imm, pop, push, flags) case Op::name: pop
   switch (*op) {
@@ -523,6 +526,7 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
 #undef R_LMANY
 #undef FMANY
 #undef CVMANY
+#undef CVUMANY
 #undef CMANY
 #undef O
 }

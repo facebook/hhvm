@@ -313,6 +313,7 @@ TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
   }
 
   m_mode = TransOptimize;
+  SCOPE_EXIT { m_mode = TransInvalid; };
   auto translArgs = TranslArgs(sk, align).transId(transId);
   if (setFuncBody) translArgs.setFuncBody();
 
@@ -1050,6 +1051,7 @@ void TranslatorX64::regeneratePrologue(TransID prologueTransId) {
   // Regenerate the prologue.
   func->resetPrologue(nArgs);
   m_mode = TransPrologue;
+  SCOPE_EXIT { m_mode = TransInvalid; };
   TCA start = funcPrologue(func, nArgs);
   func->setPrologue(nArgs, start);
 

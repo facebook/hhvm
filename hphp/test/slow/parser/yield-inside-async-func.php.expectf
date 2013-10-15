@@ -1,0 +1,1 @@
+HipHop Fatal error: 'yield' is not allowed in async functions. in %s on line %d

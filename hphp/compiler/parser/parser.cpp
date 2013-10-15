@@ -808,6 +808,10 @@ void Parser::checkFunctionContext(string funcName,
     PARSE_ERROR("Asynchronous function '%s' cannot return reference.",
                 funcName.c_str());
   }
+
+  if (modifiers->isAsync() && funcContext.isGenerator) {
+    PARSE_ERROR("'yield' is not allowed in async functions.");
+  }
 }
 
 void Parser::prepareConstructorParameters(StatementListPtr stmts,

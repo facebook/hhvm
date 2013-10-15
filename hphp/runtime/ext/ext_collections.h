@@ -115,7 +115,7 @@ class c_Vector : public BaseVector {
 
  public:
   void sort(int sort_flags, bool ascending);
-  void usort(CVarRef cmp_function);
+  bool usort(CVarRef cmp_function);
 
   static c_Vector* Clone(ObjectData* obj);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
@@ -755,8 +755,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
  public:
   void asort(int sort_flags, bool ascending);
   void ksort(int sort_flags, bool ascending);
-  void uasort(CVarRef cmp_function);
-  void uksort(CVarRef cmp_function);
+  bool uasort(CVarRef cmp_function);
+  bool uksort(CVarRef cmp_function);
 
  private:
   uint m_size;

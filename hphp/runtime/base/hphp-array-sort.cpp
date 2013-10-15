@@ -25,6 +25,8 @@
 // inline methods of HphpArray
 #include "hphp/runtime/base/hphp-array-defs.h"
 
+#include <folly/ScopeGuard.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -224,36 +226,37 @@ void HphpArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
       if (resetKeys) {                                          \
         a->m_nextKI = 0;                                        \
       }                                                         \
-      return;                                                   \
+      return true;                                              \
+    }                                                           \
+    CallCtx ctx;                                                \
+    Transl::CallerFrame cf;                                     \
+    vm_decode_function(cmp_function, cf(), false, ctx);         \
+    if (!ctx.func) {                                            \
+      return false;                                             \
     }                                                           \
     a->preSort<acc_type>(acc_type(), false);                    \
     a->m_pos = ssize_t(0);                                      \
-    try {                                                       \
-      ElmUCompare<acc_type> comp;                               \
-      Transl::CallerFrame cf;                                   \
-      CallCtx ctx;                                              \
-      vm_decode_function(cmp_function, cf(), false, ctx);       \
-      comp.ctx = &ctx;                                          \
-      HPHP::Sort::sort(a->data(), a->data() + a->m_size, comp); \
-    } catch (...) {                                             \
+    SCOPE_EXIT {                                                \
       /* Make sure we leave the array in a consistent state */  \
       a->postSort(resetKeys);                                   \
-      throw;                                                    \
-    }                                                           \
-    a->postSort(resetKeys);                                     \
+    };                                                          \
+    ElmUCompare<acc_type> comp;                                 \
+    comp.ctx = &ctx;                                            \
+    HPHP::Sort::sort(a->data(), a->data() + a->m_size, comp);   \
+    return true;                                                \
   } while (0)
 
-void HphpArray::Uksort(ArrayData* ad, CVarRef cmp_function) {
+bool HphpArray::Uksort(ArrayData* ad, CVarRef cmp_function) {
   auto a = asHphpArray(ad);
   USER_SORT_BODY(KeyAccessor, false);
 }
 
-void HphpArray::Usort(ArrayData* ad, CVarRef cmp_function) {
+bool HphpArray::Usort(ArrayData* ad, CVarRef cmp_function) {
   auto a = asHphpArray(ad);
   USER_SORT_BODY(ValAccessor, true);
 }
 
-void HphpArray::Uasort(ArrayData* ad, CVarRef cmp_function) {
+bool HphpArray::Uasort(ArrayData* ad, CVarRef cmp_function) {
   auto a = asHphpArray(ad);
   USER_SORT_BODY(ValAccessor, false);
 }

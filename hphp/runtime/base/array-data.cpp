@@ -480,15 +480,15 @@ void ArrayData::Asort(ArrayData*, int sort_flags, bool ascending) {
   throw FatalErrorException("Unimplemented ArrayData::asort");
 }
 
-void ArrayData::Uksort(ArrayData*, CVarRef cmp_function) {
+bool ArrayData::Uksort(ArrayData*, CVarRef cmp_function) {
   throw FatalErrorException("Unimplemented ArrayData::uksort");
 }
 
-void ArrayData::Usort(ArrayData*, CVarRef cmp_function) {
+bool ArrayData::Usort(ArrayData*, CVarRef cmp_function) {
   throw FatalErrorException("Unimplemented ArrayData::usort");
 }
 
-void ArrayData::Uasort(ArrayData*, CVarRef cmp_function) {
+bool ArrayData::Uasort(ArrayData*, CVarRef cmp_function) {
   throw FatalErrorException("Unimplemented ArrayData::uasort");
 }
 

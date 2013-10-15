@@ -21,3 +21,6 @@ $fruits = array(
 );
 uksort($fruits, 'reverse_strcasecmp');
 var_dump($fruits);
+
+uasort($fruits, "undefined_function_");
+uksort($fruits, "undefined_function_");

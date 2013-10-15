@@ -254,9 +254,9 @@ public:
   static void Ksort(ArrayData*, int sort_flags, bool ascending);
   static void Sort(ArrayData*, int sort_flags, bool ascending);
   static void Asort(ArrayData*, int sort_flags, bool ascending);
-  static void Uksort(ArrayData*, CVarRef cmp_function);
-  static void Usort(ArrayData*, CVarRef cmp_function);
-  static void Uasort(ArrayData*, CVarRef cmp_function);
+  static bool Uksort(ArrayData*, CVarRef cmp_function);
+  static bool Usort(ArrayData*, CVarRef cmp_function);
+  static bool Uasort(ArrayData*, CVarRef cmp_function);
 
   // Elm's data.m_type == KindOfInvalid for deleted slots.
   static bool isTombstone(DataType t) {

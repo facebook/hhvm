@@ -1366,15 +1366,13 @@ bool f_usort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
     Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
-    ast->usort(cmp_function);
-    return true;
+    return ast->usort(cmp_function);
   }
   if (array.isObject()) {
     ObjectData* obj = array.getObjectData();
     if (obj->getCollectionType() == Collection::VectorType) {
       c_Vector* vec = static_cast<c_Vector*>(obj);
-      vec->usort(cmp_function);
-      return true;
+      return vec->usort(cmp_function);
     }
   }
   throw_bad_array_exception();
@@ -1385,15 +1383,13 @@ bool f_uasort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
     Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
-    ast->uasort(cmp_function);
-    return true;
+    return ast->uasort(cmp_function);
   }
   if (array.isObject()) {
     ObjectData* obj = array.getObjectData();
     if (obj->getCollectionType() == Collection::StableMapType) {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      smp->uasort(cmp_function);
-      return true;
+      return smp->uasort(cmp_function);
     }
   }
   throw_bad_array_exception();
@@ -1404,15 +1400,13 @@ bool f_uksort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
     Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
-    ast->uksort(cmp_function);
-    return true;
+    return ast->uksort(cmp_function);
   }
   if (array.isObject()) {
     ObjectData* obj = array.getObjectData();
     if (obj->getCollectionType() == Collection::StableMapType) {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      smp->uksort(cmp_function);
-      return true;
+      return smp->uksort(cmp_function);
     }
   }
   throw_bad_array_exception();

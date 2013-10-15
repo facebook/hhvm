@@ -25,6 +25,8 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
+#include <folly/ScopeGuard.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -635,16 +637,20 @@ void c_Vector::sort(int sort_flags, bool ascending) {
 #undef SORT_CASE_BLOCK
 #undef CALL_SORT
 
-void c_Vector::usort(CVarRef cmp_function) {
+bool c_Vector::usort(CVarRef cmp_function) {
   if (!m_size) {
-    return;
+    return true;
   }
   ElmUCompare<VectorValAccessor> comp;
   CallCtx ctx;
   Transl::CallerFrame cf;
   vm_decode_function(cmp_function, cf(), false, ctx);
+  if (!ctx.func) {
+    return false;
+  }
   comp.ctx = &ctx;
   HPHP::Sort::sort(m_data, m_data + m_size, comp);
+  return true;
 }
 
 void c_Vector::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
@@ -2945,31 +2951,31 @@ void c_StableMap::ksort(int sort_flags, bool ascending) {
 #define USER_SORT_BODY(acc_type)                                        \
   do {                                                                  \
     if (!m_size) {                                                      \
-      return;                                                           \
+      return true;                                                      \
+    }                                                                   \
+    CallCtx ctx;                                                        \
+    Transl::CallerFrame cf;                                             \
+    vm_decode_function(cmp_function, cf(), false, ctx);                 \
+    if (!ctx.func) {                                                    \
+      return false;                                                     \
     }                                                                   \
     Bucket** buffer = (Bucket**)smart_malloc(m_size * sizeof(Bucket*)); \
     preSort<acc_type>(buffer, acc_type(), false);                       \
-    ElmUCompare<acc_type> comp;                                         \
-    CallCtx ctx;                                                        \
-    Transl::CallerFrame cf;                                         \
-    vm_decode_function(cmp_function, cf(), false, ctx);                 \
-    comp.ctx = &ctx;                                                    \
-    try {                                                               \
-      HPHP::Sort::sort(buffer, buffer + m_size, comp);                  \
-    } catch (...) {                                                     \
+    SCOPE_EXIT {                                                        \
       postSort(buffer);                                                 \
       smart_free(buffer);                                               \
-      throw;                                                            \
-    }                                                                   \
-    postSort(buffer);                                                   \
-    smart_free(buffer);                                                 \
+    };                                                                  \
+    ElmUCompare<acc_type> comp;                                         \
+    comp.ctx = &ctx;                                                    \
+    HPHP::Sort::sort(buffer, buffer + m_size, comp);                    \
+    return true;                                                        \
   } while (0)
 
-void c_StableMap::uasort(CVarRef cmp_function) {
+bool c_StableMap::uasort(CVarRef cmp_function) {
   USER_SORT_BODY(StableMapValAccessor);
 }
 
-void c_StableMap::uksort(CVarRef cmp_function) {
+bool c_StableMap::uksort(CVarRef cmp_function) {
   USER_SORT_BODY(StableMapKeyAccessor);
 }
 

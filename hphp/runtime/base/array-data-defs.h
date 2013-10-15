@@ -290,15 +290,15 @@ inline void ArrayData::asort(int sort_flags, bool ascending) {
   return g_array_funcs.asort[m_kind](this, sort_flags, ascending);
 }
 
-inline void ArrayData::uksort(CVarRef compare) {
+inline bool ArrayData::uksort(CVarRef compare) {
   return g_array_funcs.uksort[m_kind](this, compare);
 }
 
-inline void ArrayData::usort(CVarRef compare) {
+inline bool ArrayData::usort(CVarRef compare) {
   return g_array_funcs.usort[m_kind](this, compare);
 }
 
-inline void ArrayData::uasort(CVarRef compare) {
+inline bool ArrayData::uasort(CVarRef compare) {
   return g_array_funcs.uasort[m_kind](this, compare);
 }
 

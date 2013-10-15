@@ -382,17 +382,17 @@ public:
   void ksort(int sort_flags, bool ascending);
   void sort(int sort_flags, bool ascending);
   void asort(int sort_flags, bool ascending);
-  void uksort(CVarRef cmp_function);
-  void usort(CVarRef cmp_function);
-  void uasort(CVarRef cmp_function);
+  bool uksort(CVarRef cmp_function);
+  bool usort(CVarRef cmp_function);
+  bool uasort(CVarRef cmp_function);
 
   // default sort implementations
   static void Ksort(ArrayData*, int sort_flags, bool ascending);
   static void Sort(ArrayData*, int sort_flags, bool ascending);
   static void Asort(ArrayData*, int sort_flags, bool ascending);
-  static void Uksort(ArrayData*, CVarRef cmp_function);
-  static void Usort(ArrayData*, CVarRef cmp_function);
-  static void Uasort(ArrayData*, CVarRef cmp_function);
+  static bool Uksort(ArrayData*, CVarRef cmp_function);
+  static bool Usort(ArrayData*, CVarRef cmp_function);
+  static bool Uasort(ArrayData*, CVarRef cmp_function);
 
   // TODO(#2941952)
   static void ZSetInt(ArrayData* ad, int64_t k, RefData* v);
@@ -608,9 +608,9 @@ struct ArrayFunctions {
   void (*ksort[NK])(ArrayData* ad, int sort_flags, bool ascending);
   void (*sort[NK])(ArrayData* ad, int sort_flags, bool ascending);
   void (*asort[NK])(ArrayData* ad, int sort_flags, bool ascending);
-  void (*uksort[NK])(ArrayData* ad, CVarRef cmp_function);
-  void (*usort[NK])(ArrayData* ad, CVarRef cmp_function);
-  void (*uasort[NK])(ArrayData* ad, CVarRef cmp_function);
+  bool (*uksort[NK])(ArrayData* ad, CVarRef cmp_function);
+  bool (*usort[NK])(ArrayData* ad, CVarRef cmp_function);
+  bool (*uasort[NK])(ArrayData* ad, CVarRef cmp_function);
   ArrayData* (*copy[NK])(const ArrayData*);
   ArrayData* (*copyWithStrongIterators[NK])(const ArrayData*);
   ArrayData* (*nonSmartCopy[NK])(const ArrayData*);

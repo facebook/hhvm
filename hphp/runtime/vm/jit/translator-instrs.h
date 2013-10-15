@@ -176,6 +176,9 @@
   CASE(Div) \
   CASE(Floor) \
   CASE(Ceil) \
+  CASE(AssertTL) \
+  CASE(AssertTStk) \
+  /* */
 
   // These are instruction-like functions which cover more than one
   // opcode.

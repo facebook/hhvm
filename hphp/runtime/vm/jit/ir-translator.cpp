@@ -463,6 +463,14 @@ IRTranslator::translateCeil(const NormalizedInstruction& i) {
   HHIR_EMIT(Ceil);
 }
 
+void IRTranslator::translateAssertTL(const NormalizedInstruction& i) {
+  HHIR_EMIT(AssertTL, i.imm[0].u_LA, static_cast<AssertTOp>(i.imm[1].u_OA));
+}
+
+void IRTranslator::translateAssertTStk(const NormalizedInstruction& i) {
+  HHIR_EMIT(AssertTStk, i.imm[0].u_IVA, static_cast<AssertTOp>(i.imm[1].u_OA));
+}
+
 void
 IRTranslator::translateAddNewElemC(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 2);

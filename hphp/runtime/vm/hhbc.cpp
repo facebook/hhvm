@@ -785,6 +785,16 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   static const int setopNamesCount =
     (int)(sizeof(setopNames)/sizeof(const char*));
 
+  auto assertTName = [&] (int immVal) {
+#   define ASSERTT_OP(x) case AssertTOp::x: return #x;
+    switch (static_cast<AssertTOp>(immVal)) {
+      ASSERTT_OPS
+    }
+#   undef ASSERTT_OP
+    assert(false);
+    return "<" "?" ">";
+  };
+
   std::stringstream out;
   const Op* iStart = it;
   Op op = *it;
@@ -829,6 +839,9 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   case OpSetOpM:                                                  \
     out << ((immVal >=0 && immVal < setopNamesCount) ?            \
             setopNames[immVal] : "?");                            \
+    break;                                                        \
+  case Op::AssertTL: case Op::AssertTStk:                         \
+    out << assertTName(immVal);                                   \
     break;                                                        \
   default:                                                        \
     out << immVal;                                                \

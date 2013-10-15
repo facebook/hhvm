@@ -3741,6 +3741,14 @@ ArrayIdx    [C C C] -> [C]
   if found. Otherwise, $1 is pushed onto the stack. A fatal error will be
   thrown if $3 is not an array.
 
+AssertTL   <local id>     <op>
+AssertTStk <stack offset> <op>
+
+  These opcodes are currently only supplied for debugging purposes.  They
+  instruct the runtime that the value in the specified local or stack offset
+  must have a particular type.  The type sub-opcodes are not currently
+  specified, as they are particular to the implementation.
+
 14. Continuation creation and execution
 ---------------------------------------
 

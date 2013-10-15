@@ -3732,6 +3732,33 @@ void HhbcTranslator::emitCeil() {
   push(gen(Ceil, dblVal));
 }
 
+static Type assertOpToType(AssertTOp op) {
+  switch (op) {
+  case AssertTOp::Uninit:     return Type::Uninit;
+  case AssertTOp::InitNull:   return Type::InitNull;
+  case AssertTOp::Int:        return Type::Int;
+  case AssertTOp::Dbl:        return Type::Dbl;
+  case AssertTOp::Res:        return Type::Res;
+  case AssertTOp::Null:       return Type::Null;
+  case AssertTOp::Bool:       return Type::Bool;
+  case AssertTOp::Str:        return Type::Str;
+  case AssertTOp::Arr:        return Type::Arr;
+  case AssertTOp::Obj:        return Type::Obj;
+  case AssertTOp::InitUnc:    return Type::UncountedInit;
+  case AssertTOp::Unc:        return Type::Uncounted;
+  case AssertTOp::InitCell:   return Type::Cell - Type::Uninit;
+  }
+  not_reached();
+}
+
+void HhbcTranslator::emitAssertTL(int32_t id, AssertTOp op) {
+  assertTypeLocal(id, assertOpToType(op));
+}
+
+void HhbcTranslator::emitAssertTStk(int32_t offset, AssertTOp op) {
+  assertTypeStack(offset, assertOpToType(op));
+}
+
 void HhbcTranslator::emitAbs() {
   auto value = popC();
 

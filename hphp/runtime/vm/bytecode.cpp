@@ -203,6 +203,7 @@ Transl::Translator* tx() {
 
 #define DECODE_LA(var) DECODE_IVA(var)
 #define DECODE_IA(var) DECODE_IVA(var)
+#define DECODE_OA(var) DECODE(unsigned char, var)
 
 #define DECODE_ITER_LIST(typeList, idList, vecLen) \
   DECODE(int32_t, vecLen);                         \
@@ -4615,6 +4616,44 @@ IOP_TYPE_CHECK_INSTR(true, Double, is_double)
 IOP_TYPE_CHECK_INSTR(true,   Bool, is_bool)
 #undef IOP_TYPE_CHECK_INSTR
 
+OPTBLD_INLINE static void implAssertT(TypedValue* tv, AssertTOp op) {
+  switch (op) {
+  case AssertTOp::Uninit:   assert(tv->m_type == KindOfUninit);   break;
+  case AssertTOp::InitNull: assert(tv->m_type == KindOfNull);     break;
+  case AssertTOp::Int:      assert(tv->m_type == KindOfInt64);    break;
+  case AssertTOp::Dbl:      assert(tv->m_type == KindOfDouble);   break;
+  case AssertTOp::Res:      assert(tv->m_type == KindOfResource); break;
+  case AssertTOp::Null:     assert(IS_NULL_TYPE(tv->m_type));     break;
+  case AssertTOp::Bool:     assert(tv->m_type == KindOfBoolean);  break;
+  case AssertTOp::Str:      assert(IS_STRING_TYPE(tv->m_type));   break;
+  case AssertTOp::Arr:      assert(tv->m_type == KindOfArray);    break;
+  case AssertTOp::Obj:      assert(tv->m_type == KindOfObject);   break;
+
+  case AssertTOp::InitUnc:  assert(tv->m_type != KindOfUninit);
+    /* fallthrough */
+  case AssertTOp::Unc:      assert(!IS_REFCOUNTED_TYPE(tv->m_type) ||
+      (tv->m_type == KindOfString && tv->m_data.pstr->isStatic()) ||
+      (tv->m_type == KindOfArray  && tv->m_data.parr->isStatic())); break;
+
+  case AssertTOp::InitCell: assert(tv->m_type != KindOfUninit &&
+                                   tv->m_type != KindOfRef);      break;
+  }
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopAssertTL(PC& pc) {
+  NEXT();
+  DECODE_LA(localId);
+  DECODE_OA(op);
+  implAssertT(frame_local(m_fp, localId), static_cast<AssertTOp>(op));
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopAssertTStk(PC& pc) {
+  NEXT();
+  DECODE_IVA(stkSlot);
+  DECODE_OA(op);
+  implAssertT(m_stack.indTV(stkSlot), static_cast<AssertTOp>(op));
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopEmptyL(PC& pc) {
   NEXT();
   DECODE_LA(local);
@@ -4830,7 +4869,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetWithRefRM(PC& pc) {
 OPTBLD_INLINE void VMExecutionContext::iopSetOpL(PC& pc) {
   NEXT();
   DECODE_LA(local);
-  DECODE(unsigned char, op);
+  DECODE_OA(op);
   Cell* fr = m_stack.topC();
   Cell* to = tvToCell(frame_local(m_fp, local));
   SETOP_BODY_CELL(to, op, fr);
@@ -4840,7 +4879,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpL(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpN(PC& pc) {
   NEXT();
-  DECODE(unsigned char, op);
+  DECODE_OA(op);
   StringData* name;
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
@@ -4858,7 +4897,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpN(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpG(PC& pc) {
   NEXT();
-  DECODE(unsigned char, op);
+  DECODE_OA(op);
   StringData* name;
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
@@ -4876,7 +4915,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpG(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpS(PC& pc) {
   NEXT();
-  DECODE(unsigned char, op);
+  DECODE_OA(op);
   Cell* fr = m_stack.topC();
   TypedValue* classref = m_stack.indTV(1);
   TypedValue* propn = m_stack.indTV(2);
@@ -4900,7 +4939,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpS(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpM(PC& pc) {
   NEXT();
-  DECODE(unsigned char, op);
+  DECODE_OA(op);
   DECLARE_SETHELPER_ARGS
   if (!setHelperPre<MoreWarnings, true, false, false, 1,
       VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS)) {
@@ -4941,7 +4980,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpM(PC& pc) {
 OPTBLD_INLINE void VMExecutionContext::iopIncDecL(PC& pc) {
   NEXT();
   DECODE_LA(local);
-  DECODE(unsigned char, op);
+  DECODE_OA(op);
   TypedValue* to = m_stack.allocTV();
   tvWriteUninit(to);
   TypedValue* fr = frame_local(m_fp, local);
@@ -4950,7 +4989,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecL(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecN(PC& pc) {
   NEXT();
-  DECODE(unsigned char, op);
+  DECODE_OA(op);
   StringData* name;
   TypedValue* nameCell = m_stack.topTV();
   TypedValue* local = nullptr;
@@ -4963,7 +5002,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecN(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecG(PC& pc) {
   NEXT();
-  DECODE(unsigned char, op);
+  DECODE_OA(op);
   StringData* name;
   TypedValue* nameCell = m_stack.topTV();
   TypedValue* gbl = nullptr;
@@ -4977,7 +5016,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecG(PC& pc) {
 OPTBLD_INLINE void VMExecutionContext::iopIncDecS(PC& pc) {
   StringData* name;
   SPROP_OP_PRELUDE
-  DECODE(unsigned char, op);
+  DECODE_OA(op);
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 clsref->m_data.pcls->name()->data(),
@@ -4991,7 +5030,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecS(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecM(PC& pc) {
   NEXT();
-  DECODE(unsigned char, op);
+  DECODE_OA(op);
   DECLARE_SETHELPER_ARGS
   TypedValue to;
   tvWriteUninit(&to);
@@ -6344,7 +6383,7 @@ OPTBLD_INLINE void VMExecutionContext::iopThis(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopBareThis(PC& pc) {
   NEXT();
-  DECODE(unsigned char, notice);
+  DECODE_OA(notice);
   if (m_fp->hasThis()) {
     ObjectData* this_ = m_fp->getThis();
     m_stack.pushObject(this_);

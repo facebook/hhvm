@@ -305,6 +305,27 @@ enum IncDecOp {
   IncDec_invalid
 };
 
+#define ASSERTT_OPS                             \
+  ASSERTT_OP(Uninit)                            \
+  ASSERTT_OP(InitNull)                          \
+  ASSERTT_OP(Int)                               \
+  ASSERTT_OP(Dbl)                               \
+  ASSERTT_OP(Res)                               \
+  ASSERTT_OP(Null)                              \
+  ASSERTT_OP(Bool)                              \
+  ASSERTT_OP(Str)                               \
+  ASSERTT_OP(Arr)                               \
+  ASSERTT_OP(Obj)                               \
+  ASSERTT_OP(InitUnc)                           \
+  ASSERTT_OP(Unc)                               \
+  ASSERTT_OP(InitCell)
+
+enum class AssertTOp : uint8_t {
+#define ASSERTT_OP(op) op,
+  ASSERTT_OPS
+#undef ASSERTT_OP
+};
+
 enum IterKind {
   KindOfIter  = 0,
   KindOfMIter = 1,
@@ -455,6 +476,8 @@ enum SetOpOp {
   O(IsStringL,       ONE(LA),          NOV,             ONE(CV),    NF) \
   O(IsArrayL,        ONE(LA),          NOV,             ONE(CV),    NF) \
   O(IsObjectL,       ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(AssertTL,        TWO(LA,OA),       NOV,             NOV,        NF) \
+  O(AssertTStk,      TWO(IVA,OA),      NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(SetN,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \

@@ -782,6 +782,15 @@ template<class Target> Target read_opcode_arg(AsmState& as) {
   }
 }
 
+uint8_t read_AssertT_arg(AsmState& as) {
+  auto const str = read_opcode_arg<std::string>(as);
+#define ASSERTT_OP(x) if (str == #x) return static_cast<uint8_t>(AssertTOp::x);
+  ASSERTT_OPS
+#undef ASSERTT_OP
+  as.error("unknown AssertT operand");
+  NOT_REACHED();
+}
+
 const StringData* read_litstr(AsmState& as) {
   as.in.skipSpaceTab();
   std::string strVal;
@@ -1002,8 +1011,11 @@ OpcodeParserMap opcode_parsers;
                    read_opcode_arg<std::string>(as)))
 #define IMM_IA   as.ue->emitIVA(as.getIterId( \
                    read_opcode_arg<int32_t>(as)))
-#define IMM_OA   as.ue->emitByte(               \
-                   uint8_t(read_opcode_arg<int32_t>(as))) // TODO op names
+#define IMM_OA   as.ue->emitByte(                                       \
+                    (thisOpcode == Op::AssertTL ||                      \
+                     thisOpcode == Op::AssertTStk) ? read_AssertT_arg(as) \
+                    : uint8_t(read_opcode_arg<int32_t>(as)))
+                     // TODO more subop names
 #define IMM_AA   as.ue->emitInt32(as.ue->mergeArray(read_litarray(as)))
 
 /*

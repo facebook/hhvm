@@ -758,6 +758,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     }
 
     if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
+      m_buf->append("\n");
       m_indent += (info.indent_delta = 4);
     }
 
@@ -865,7 +866,9 @@ void VariableSerializer::writeArrayKey(Variant key) {
       m_buf->append(',');
     }
     if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
-      m_buf->append("\n");
+      if (!info.first_element) {
+        m_buf->append("\n");
+      }
       indent();
     }
     if (!info.is_vector) {
@@ -925,7 +928,9 @@ void VariableSerializer::writeCollectionKeylessPrefix() {
       m_buf->append(',');
     }
     if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
-      m_buf->append("\n");
+      if (!info.first_element) {
+        m_buf->append("\n");
+      }
       indent();
     }
     break;

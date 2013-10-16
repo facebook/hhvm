@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/vm/bytecode.h"
 
 namespace HPHP { namespace Transl {
 
@@ -52,6 +53,33 @@ static_assert(sizeof(MInstrState) - sizeof(uintptr_t) // return address
               "in enterTCHelper");
 
 /* Helper functions for translated code */
+
+/**
+ * Only use in case of extreme shadiness.
+ *
+ * There are a few cases in the JIT where we allocate a pre-live ActRec on
+ * the stack, call updateMarker() and then a CPP helper
+ * (methodCacheSlowPath, loadArrayFunctionContext) to fill the ActRec with
+ * te function that it needs to call. In the case that the helper throws an
+ * exception, the unwinder sees a strange stack marker that has moved while
+ * the bytecode offset remains unchanged and believes it has decref work to
+ * do; we need the unwinder to ignore the half-built ActRec allocated on
+ * the stack when building its back-trace and certainly to avoid attempting
+ * to decref its contents. We achieve this by overwriting the ActRec cells
+ * with null TypeValues.
+ *
+ * A TypedValue* is returned here to allow the CPP helper to write whatever
+ * it needs to be decref'd into those eval cells, to ensure that the
+ * unwinder leaves state the same as it was before the call into FPush
+ * bytecode that started this whole stack trace.
+ */
+inline TypedValue* arPreliveOverwriteCells(ActRec *preLiveAR) {
+  auto actRecCell = reinterpret_cast<TypedValue*>(preLiveAR);
+  for (size_t ar_cell = 0; ar_cell < HPHP::kNumActRecCells; ++ar_cell) {
+    tvWriteNull(actRecCell + ar_cell);
+  }
+  return actRecCell;
+}
 
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
 ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,

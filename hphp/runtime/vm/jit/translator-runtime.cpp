@@ -649,32 +649,12 @@ void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
       preLiveAR->setInvName(invName);
     }
   } catch (...) {
-    /*
-     * This is some shady shit, similar to methodCacheSlowPath.
-     *
-     * Because we encountered an exception in the middle of doing work
-     * (filling up a pre-live ActRec) and already called emitMarker in
-     * emitFPushFuncArr, the bytecode offset looks like we've not made it
-     * through the instruction (correct!), but the stack pointer has moved
-     * as if we have allocated kNumActRecCells eval cells onto the
-     * stack. The unwinder will thus believe that it has to decref those
-     * kNumActRecCells.
-     *
-     * We need the unwinder to ignore the half-built ActRec on the stack
-     * when building the back-trace and certainly to avoid attempting to
-     * decref its contents. We also need to make sure that arr gets
-     * decref'd. We achieve both of these aims by overwriting one cell of
-     * the ActRec with the pointer to arr and the remainder with null
-     * TypeValues and thus ensure that the unwinder leaves state the same
-     * as it was before the call into the FPushFunc that started this whole
-     * stack trace.
-     */
-    auto firstActRecCell = reinterpret_cast<TypedValue*>(preLiveAR);
+    // This is extreme shadiness. See the comments of
+    // arPreliveOverwriteCells() for more info on how this code gets the
+    // unwinder to restore the pre-FPush state.
+    auto firstActRecCell = arPreliveOverwriteCells(preLiveAR);
     firstActRecCell->m_type = KindOfArray;
     firstActRecCell->m_data.parr = arr;
-    for (size_t ar_cell = 1; ar_cell < kNumActRecCells; ++ar_cell) {
-      tvWriteNull(firstActRecCell + ar_cell);
-    }
     throw;
   }
 }

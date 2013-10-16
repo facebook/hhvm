@@ -26,10 +26,12 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-runtime.h"
 
 namespace HPHP { namespace JIT {
 
 using namespace HPHP::MethodLookup;
+using namespace HPHP::Transl;
 
 TRACE_SET_MOD(targetcache);
 
@@ -252,30 +254,14 @@ void methodCacheSlowPath(MethodCache* mce,
       assert(name->isStatic()); // No incRef needed.
     }
   } catch (...) {
-    /*
-     * Barf.
-     *
-     * If the slow lookup fails, we're going to rewind to the state
-     * before the FPushObjMethodD that dumped us here. In this state,
-     * the object is still on the stack, but for efficiency reasons,
-     * we've smashed this TypedValue* with the ActRec we were trying
-     * to push.
-     *
-     * Reconstitute the virtual object before rethrowing.
-     */
-    TypedValue* shouldBeObj = reinterpret_cast<TypedValue*>(ar) +
-      kNumActRecCells - 1;
+    // This is extreme shadiness. See the comments of
+    // arPreliveOverwriteCells() for more info on how this code gets the
+    // unwinder to restore the pre-FPushObjMethodD state, including decref
+    // of the ar->getThis() object.
     ObjectData* arThis = ar->getThis();
-    shouldBeObj->m_type = KindOfObject;
-    shouldBeObj->m_data.pobj = arThis;
-
-    // There used to be a half-built ActRec on the stack that we need the
-    // unwinder to ignore. We overwrote 1/3 of it with the code above, but
-    // because of the emitMarker() in LdObjMethod we need the other two slots
-    // to not have any TypedValues.
-    tvWriteNull(shouldBeObj - 1);
-    tvWriteNull(shouldBeObj - 2);
-
+    auto firstActRecCell = arPreliveOverwriteCells(ar);
+    firstActRecCell->m_type = KindOfObject;
+    firstActRecCell->m_data.pobj = arThis;
     throw;
   }
 }
@@ -527,4 +513,3 @@ StaticMethodFCache::lookupIR(RDS::Handle handle, const Class* cls,
 //////////////////////////////////////////////////////////////////////
 
 }}
-

@@ -176,8 +176,11 @@ inline Variant throw_missing_class(const char *cls) {
   throw ClassNotFoundException((std::string("unknown class ") + cls).c_str());
 }
 
-inline Variant throw_missing_file(const char *cls) {
-  throw PhpFileDoesNotExistException(cls);
+inline Variant throw_missing_file(const char *file) {
+  if (file[0] == '\0') {
+    throw NoFileSpecifiedException();
+  }
+  throw PhpFileDoesNotExistException(file);
 }
 void throw_instance_method_fatal(const char *name);
 

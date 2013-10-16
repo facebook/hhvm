@@ -293,8 +293,23 @@ class PhpFileDoesNotExistException : public ExtendedException {
 public:
   explicit PhpFileDoesNotExistException(const char *file)
     : ExtendedException("File could not be loaded: %s", file) {}
+  explicit PhpFileDoesNotExistException(const char *msg, bool empty_file)
+    : ExtendedException("%s", msg) {
+      assert(empty_file);
+    }
   virtual ~PhpFileDoesNotExistException() throw() {}
   EXCEPTION_COMMON_IMPL(PhpFileDoesNotExistException);
+};
+
+class NoFileSpecifiedException : public PhpFileDoesNotExistException {
+public:
+  explicit NoFileSpecifiedException()
+    : PhpFileDoesNotExistException(
+        "Nothing to do. Either pass a .php file to run, or use -m server",
+        true
+      ) {}
+  virtual ~NoFileSpecifiedException() throw() {}
+  EXCEPTION_COMMON_IMPL(NoFileSpecifiedException);
 };
 
 class RequestTimeoutException : public FatalErrorException {

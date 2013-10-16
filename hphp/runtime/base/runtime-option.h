@@ -358,7 +358,7 @@ public:
   F(bool, Jit,                         evalJitDefault())                \
   F(bool, JitRequireWriteLease,        false)                           \
   F(bool, AllowHhas,                   false)                           \
-  F(bool, CheckExtendedTypeHints,      false)                           \
+  F(bool, CheckExtendedTypeHints,      true)                            \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \

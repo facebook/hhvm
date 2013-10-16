@@ -5503,10 +5503,11 @@ determine_type_constraint(const ParameterExpressionPtr& par) {
     // We only care about a subset of extended type constaints:
     // typevar
     // nullable
+    // soft
     //
-    // If a constraint it both, nullable and a typevar, we don't need
-    // to flag it as nullable, because it will get dropped.
-    if (annot->isFunction()) {
+    // For everything else, we return {}. We also return {} for annotations
+    // we don't know how to handle.
+    if (annot->isFunction() || annot->isMixed()) {
       return {};
     }
     if (annot->isTypeVar()) {

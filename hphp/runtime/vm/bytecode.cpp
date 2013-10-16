@@ -6485,6 +6485,9 @@ OPTBLD_INLINE void VMExecutionContext::iopVerifyParamType(PC& pc) {
                tc.isExtended())) {
     return;
   }
+  if (tc.isTypeVar()) {
+    return;
+  }
   const TypedValue *tv = frame_local(m_fp, param);
   tc.verify(tv, func, param);
 }

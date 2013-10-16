@@ -3165,7 +3165,9 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   if (!RuntimeOption::EvalCheckExtendedTypeHints && tc.isExtended()) {
     return;
   }
-
+  if (tc.isTypeVar()) {
+    return;
+  }
   if (tc.nullable() && locType.isNull()) {
     return;
   }

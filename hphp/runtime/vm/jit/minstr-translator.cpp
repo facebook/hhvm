@@ -683,27 +683,32 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
       }
     } else if (baseType.strictSubtypeOf(Type::Obj)) {
       const Class* klass = baseType.getClass();
-      if (klass == c_Vector::classof() ||
-          klass == c_Pair::classof()) {
+      auto const isVector    = klass == c_Vector::classof();
+      auto const isPair      = klass == c_Pair::classof();
+      auto const isMap       = klass == c_Map::classof();
+      auto const isStableMap = klass == c_StableMap::classof();
+
+      if (isVector || isPair) {
         if (mcodeMaybeVectorKey(m_ni.immVecM[0])) {
           SSATmp* key = getInput(m_mii.valCount() + 1, DataTypeGeneric);
           if (key->isA(Type::Int)) {
-            return (klass == c_Vector::classof()) ?
-                SimpleOp::Vector : SimpleOp::Pair;
+            // We don't specialize setting pair elements.
+            if (isPair && op == OpSetM) return SimpleOp::None;
+
+            return isVector ? SimpleOp::Vector : SimpleOp::Pair;
           }
         }
-      } else if (klass == c_Map::classof() ||
-                 klass == c_StableMap::classof()) {
+      } else if (isMap || isStableMap) {
         if (mcodeMaybeArrayOrMapKey(m_ni.immVecM[0])) {
           SSATmp* key = getInput(m_mii.valCount() + 1, DataTypeGeneric);
           if (key->isA(Type::Int) || key->isA(Type::Str)) {
-            return (klass == c_Map::classof()) ?
-                SimpleOp::Map : SimpleOp::StableMap;
+            return isMap ? SimpleOp::Map : SimpleOp::StableMap;
           }
         }
       }
     }
   }
+
   return SimpleOp::None;
 }
 
@@ -1721,7 +1726,7 @@ void HhbcTranslator::MInstrTranslator::emitVectorGet(SSATmp* key) {
     PUNT(emitVectorGet);
   }
   SSATmp* size = gen(LdVectorSize, m_base);
-  gen(CheckBounds, key, size);
+  gen(CheckBounds, makeCatch(), key, size);
   SSATmp* base = gen(LdVectorBase, m_base);
   static_assert(sizeof(TypedValue) == 16,
                 "TypedValue size expected to be 16 bytes");
@@ -1745,7 +1750,7 @@ void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
     auto index = cns(key->getValInt() << 4);
     value = gen(LdElem, base, index);
   } else {
-    gen(CheckBounds, key, cns(1));
+    gen(CheckBounds, makeCatch(), key, cns(1));
     SSATmp* base = gen(LdPairBase, m_base);
     auto idx = gen(Shl, key, cns(4));
     value = gen(LdElem, base, idx);
@@ -2310,7 +2315,7 @@ void HhbcTranslator::MInstrTranslator::emitVectorSet(
     PUNT(emitVectorSet); // will throw
   }
   SSATmp* size = gen(LdVectorSize, m_base);
-  gen(CheckBounds, key, size);
+  gen(CheckBounds, makeCatch(), key, size);
 
   SSATmp* increffed = gen(IncRef, value);
   SSATmp* vecBase = gen(LdVectorBase, m_base);

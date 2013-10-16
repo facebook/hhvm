@@ -4378,6 +4378,7 @@ void CodeGenerator::cgCheckBounds(IRInstruction* inst) {
                    kVoidDest, SyncOptions::kSyncPoint, args);
 
     };
+
   if (idx->isConst()) {
     int64_t idxVal = idx->getValInt();
     assert(idxVal >= 0); // we would have punted otherwise
@@ -4385,18 +4386,17 @@ void CodeGenerator::cgCheckBounds(IRInstruction* inst) {
     unlikelyIfBlock(CC_LE, throwHelper);
     return;
   }
+
   auto idxReg = m_regs[idx].reg();
-  m_as.cmpq(0, idxReg);
-  unlikelyIfBlock(CC_L, throwHelper);
   if (size->isConst()) {
     int64_t sizeVal = size->getValInt();
     assert(sizeVal >= 0);
-    m_as.cmpq(sizeVal, m_regs[idx].reg());
+    m_as.cmpq(sizeVal, idxReg);
   } else {
     auto sizeReg = m_regs[size].reg();
     m_as.cmpq(sizeReg, idxReg);
   }
-  unlikelyIfBlock(CC_GE, throwHelper);
+  unlikelyIfBlock(CC_AE, throwHelper);
 }
 
 void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {

@@ -1,28 +1,21 @@
 include(Options)
 
 if (APPLE)
-	set(HHVM_LINK_LIBRARIES
-	    hphp_analysis
-	    hphp_runtime_static
-	    ext_hhvm_static
-	    hphp_system
-	    hphp_parser
-	    hphp_zend
-	    hphp_util
-	    vixl neo
-	    -Wl,-u,_register_libevent_server)
-else ()
-	set(HHVM_LINK_LIBRARIES
-            hphp_analysis
-            hphp_runtime_static
-            ext_hhvm_static
-            hphp_system
-	    hphp_parser
-	    hphp_zend
-	    hphp_util
-	    vixl neo
-            -Wl,-uregister_libevent_server)
-endif ()
+	set(HHVM_ANCHOR_SYMS -Wl,-u,_register_libevent_server)
+else()
+	set(HHVM_ANCHOR_SYMS -Wl,-uregister_libevent_server)
+endif()
+
+set(HHVM_LINK_LIBRARIES
+    hphp_analysis
+    hphp_runtime_static
+    ext_hhvm_static
+    hphp_system
+    hphp_parser
+    hphp_zend
+    hphp_util
+    vixl neo
+    ${HHVM_ANCHOR_SYMS})
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")

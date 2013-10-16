@@ -116,8 +116,10 @@ VSOAP("<ns1:Add xmlns:ns1=\"http://testuri.org\">".
 
 $server->addfunction("Sum");
 
-VSOAP("<ns1:sum>".
+VSOAP("<ns1:sum xmlns:ns1=\"http://testuri.org\">".
       "<param0 SOAP-ENC:arrayType=\"xsd:int[2]\"".
+      " xmlns:SOAP-ENC=".
+      "\"http://schemas.xmlsoap.org/soap/encoding/\"".
       " xsi:type=\"SOAP-ENC:Array\">".
       "  <val xsi:type=\"xsd:int\">3</val>".
       "  <val xsi:type=\"xsd:int\">5</val>".

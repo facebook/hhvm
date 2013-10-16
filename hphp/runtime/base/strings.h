@@ -60,9 +60,6 @@ const char* const CANT_UNSET_STRING =
   "Cannot unset string offsets";
 const char* const OP_NOT_SUPPORTED_STRING =
   "Operator not supported for strings";
-const char* const ASYNC_WITHOUT_BODY =
-  "Cannot declare %s method %s::%s() async; async is only meaningful"
-  " when it modifies a method body";
 const char* const PICK_ACCESS_MODIFIER =
   "Cannot declare more than one access modifier";
 

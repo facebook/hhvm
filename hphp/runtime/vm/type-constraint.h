@@ -64,7 +64,7 @@ public:
      * Soft type hints: triggers warning, but never fatals
      * E.g. "@int"
      */
-    Soft = 0x16,
+    Soft = 0x10,
   };
 
 private:

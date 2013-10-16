@@ -5960,7 +5960,8 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
     // marker since the last instruction, update the bc mapping.
     if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
         m_tx64->isTransDBEnabled() && bcMap) {
-      bcMap->push_back(TransBCMapping{inst->marker().bcOff,
+      bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
+                                      inst->marker().bcOff,
                                       m_as.frontier(),
                                       m_astubs.frontier()});
       prevMarker = inst->marker();

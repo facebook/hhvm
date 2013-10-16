@@ -57,6 +57,11 @@ struct BCMarker {
 
   std::string show() const;
   bool valid() const;
+
+  SrcKey sk() const {
+    assert(valid());
+    return SrcKey { func, bcOff };
+  }
 };
 
 /*

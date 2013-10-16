@@ -18,7 +18,7 @@ add_custom_command(
   VERBATIM)
 
 find_package(LibNuma)
-if (LIBNUMA_INCLUDE_DIRS)
+if (LibNuma_FOUND)
 	add_definitions("-DHAVE_NUMA=1")
 	include_directories(${LIBNUMA_INCLUDE_DIRS})
 endif()
@@ -27,6 +27,6 @@ add_library(hphp_util STATIC ${CXX_SOURCES}
             "${HPHP_HOME}/hphp/hphp-repo-schema.h"
             "${HPHP_HOME}/hphp/hphp-build-info.cpp")
 
-if (LIBNUMA_LIBRARIES)
+if (LibNuma_FOUND)
 	target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})
 endif()

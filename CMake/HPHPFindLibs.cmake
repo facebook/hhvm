@@ -176,12 +176,26 @@ endif()
 if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
 	FIND_LIBRARY(JEMALLOC_LIB NAMES jemalloc)
 	FIND_PATH(JEMALLOC_INCLUDE_DIR NAMES jemalloc/jemalloc.h)
-	if (JEMALLOC_LIB)
-		message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
-		set(JEMALLOC_ENABLED 1)
-	endif()
-	if (JEMALLOC_INCLUDE_DIR)
+
+	if (JEMALLOC_INCLUDE_DIR AND JEMALLOC_LIB)
 		include_directories(${JEMALLOC_INCLUDE_DIR})
+
+		INCLUDE(CheckCXXSourceCompiles)
+		CHECK_CXX_SOURCE_COMPILES("
+#include <jemalloc/jemalloc.h>
+int main(void) {
+#if !defined(JEMALLOC_VERSION_MAJOR) || (JEMALLOC_VERSION_MAJOR < 3)
+# error \"jemalloc version >= 3.0.0 required\"
+#endif
+	return 0;
+}" JEMALLOC_VERSION_3)
+
+		if (JEMALLOC_VERSION_3)
+			message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
+			set(JEMALLOC_ENABLED 1)
+		else()
+			message(STATUS "Found jemalloc, but it was too old")
+		endif()
 	endif()
 endif()
 

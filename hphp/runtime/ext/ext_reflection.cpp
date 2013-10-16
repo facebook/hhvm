@@ -445,7 +445,7 @@ static void set_function_info(Array &ret, const Func* func) {
         param.set(s_class, VarNR(func->cls() ? func->cls()->name() :
                                  func->preClass()->name()));
       }
-      if (!nonExtendedConstraint || fpi.typeConstraint().nullable()) {
+      if (!nonExtendedConstraint || fpi.typeConstraint().isNullable()) {
         param.set(s_nullable, true_varNR);
       }
 

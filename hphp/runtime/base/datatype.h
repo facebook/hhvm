@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // definitions
 
-enum DataType: int8_t {
+enum DataType : int8_t {
   KindOfClass            = -13,
   MinDataType            = -13,
 
@@ -275,6 +275,21 @@ inline bool typeReentersOnRelease(DataType type) {
 
 inline DataType typeInitNull(DataType t) {
   return t == KindOfUninit ? KindOfNull : t;
+}
+
+/*
+ * Returns whether two DataTypes for primitive types are "equivalent"
+ * as far as user-visible php types are concerned.  (I.e. ignoring
+ * different types of strings or different types of nulls.)
+ *
+ * Pre: t1 and t2 must both be DataTypes that represent php-types.
+ * (Non-internal KindOfs.)
+ */
+inline bool equivDataTypes(DataType t1, DataType t2) {
+  return
+    (t1 == t2) ||
+    (IS_STRING_TYPE(t1) && IS_STRING_TYPE(t2)) ||
+    (IS_NULL_TYPE(t1) && IS_NULL_TYPE(t2));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

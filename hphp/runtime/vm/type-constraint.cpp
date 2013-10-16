@@ -30,6 +30,8 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
+//////////////////////////////////////////////////////////////////////
+
 namespace {
 
 // TODO(#2322864): this is a hack until we can get rid of the "Xhp"
@@ -42,7 +44,11 @@ bool blacklistedName(const StringData* sd) {
 
 }
 
+//////////////////////////////////////////////////////////////////////
+
 TypeConstraint::TypeMap TypeConstraint::s_typeNamesToTypes;
+
+//////////////////////////////////////////////////////////////////////
 
 void TypeConstraint::init() {
   if (UNLIKELY(s_typeNamesToTypes.empty())) {
@@ -94,11 +100,11 @@ void TypeConstraint::init() {
     //
     // This type constraint is never actually used, so we can just return.
     // We could also do:
-    // m_type.m_dt = KindOfAny;
+    // m_type.dt = KindOfAny;
     return;
   }
   if (m_typeName && isExtended()) {
-    assert((nullable() || soft()) &&
+    assert((isNullable() || isSoft()) &&
            "Only nullable and soft extended type hints are implemented");
   }
 
@@ -106,17 +112,18 @@ void TypeConstraint::init() {
     m_typeName = nullptr;
   }
   if (m_typeName == nullptr) {
-    m_type.m_dt = KindOfInvalid;
-    m_type.m_metatype = MetaType::Precise;
+    m_type.dt = KindOfInvalid;
+    m_type.metatype = MetaType::Precise;
     return;
   }
 
   Type dtype;
   TRACE(5, "TypeConstraint: this %p type %s, nullable %d\n",
-        this, m_typeName->data(), nullable());
+        this, m_typeName->data(), isNullable());
   if (!mapGet(s_typeNamesToTypes, m_typeName, &dtype) ||
-      !(hhType() || dtype.m_dt == KindOfArray || dtype.isParent() ||
-        dtype.isSelf())) {
+      !(isHHType() || dtype.dt == KindOfArray ||
+        dtype.metatype == MetaType::Parent ||
+        dtype.metatype == MetaType::Self)) {
     TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
           this, m_typeName->data());
     m_type = { KindOfObject, MetaType::Precise };
@@ -125,10 +132,10 @@ void TypeConstraint::init() {
     return;
   }
   m_type = dtype;
-  assert(m_type.m_dt != KindOfStaticString);
-  assert(IMPLIES(isParent(), m_type.m_dt == KindOfObject));
-  assert(IMPLIES(isSelf(), m_type.m_dt == KindOfObject));
-  assert(IMPLIES(isCallable(), m_type.m_dt == KindOfObject));
+  assert(m_type.dt != KindOfStaticString);
+  assert(IMPLIES(isParent(), m_type.dt == KindOfObject));
+  assert(IMPLIES(isSelf(), m_type.dt == KindOfObject));
+  assert(IMPLIES(isCallable(), m_type.dt == KindOfObject));
 }
 
 /*
@@ -181,7 +188,7 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
-  if (nullable() && IS_NULL_TYPE(tv->m_type)) return true;
+  if (isNullable() && IS_NULL_TYPE(tv->m_type)) return true;
 
   if (tv->m_type == KindOfObject) {
     if (!isObjectOrTypeAlias()) return false;
@@ -250,15 +257,15 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     return isPrecise() && checkTypeAliasNonObj(tv);
   }
 
-  return equivDataTypes(m_type.m_dt, tv->m_type);
+  return equivDataTypes(m_type.dt, tv->m_type);
 }
 
 bool
 TypeConstraint::checkPrimitive(DataType dt) const {
-  assert(m_type.m_dt != KindOfObject);
+  assert(m_type.dt != KindOfObject);
   assert(dt != KindOfRef);
-  if (nullable() && IS_NULL_TYPE(dt)) return true;
-  return equivDataTypes(m_type.m_dt, dt);
+  if (isNullable() && IS_NULL_TYPE(dt)) return true;
+  return equivDataTypes(m_type.dt, dt);
 }
 
 static const char* describe_actual_type(const TypedValue* tv) {
@@ -301,7 +308,7 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
     // errors for now, to ease migration (we used to not check these
     // at all at runtime).
     assert(
-      (soft() || nullable()) &&
+      (isSoft() || isNullable()) &&
       "Only nullable and soft extended type hints are currently implemented");
     raise_warning(
       "Argument %d to %s must be of type %s, %s given",
@@ -345,4 +352,6 @@ void TypeConstraint::parentToTypeName(const Func* func,
   }
 }
 
-} // HPHP::VM
+//////////////////////////////////////////////////////////////////////
+
+}

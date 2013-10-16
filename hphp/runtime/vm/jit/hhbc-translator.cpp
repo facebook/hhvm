@@ -3215,7 +3215,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   if (tc.isTypeVar()) {
     return;
   }
-  if (tc.nullable() && locType.isNull()) {
+  if (tc.isNullable() && locType.isNull()) {
     return;
   }
   if (tc.isCallable()) {

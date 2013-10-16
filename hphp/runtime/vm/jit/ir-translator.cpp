@@ -244,7 +244,7 @@ IRTranslator::translateLtGtOp(const NormalizedInstruction& i) {
 
   DataType leftType = i.inputs[0]->outerType();
   DataType rightType = i.inputs[1]->outerType();
-  bool ok = HPHP::TypeConstraint::equivDataTypes(leftType, rightType) &&
+  bool ok = equivDataTypes(leftType, rightType) &&
     (i.inputs[0]->isNull() ||
      leftType == KindOfBoolean ||
      i.inputs[0]->isInt());

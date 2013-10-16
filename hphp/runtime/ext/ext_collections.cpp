@@ -1796,7 +1796,7 @@ bool c_Map::OffsetIsset(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? !tvIsNull(tvToCell(result)) : false;
+  return result ? !tvIsNull(result) : false;
 }
 
 bool c_Map::OffsetEmpty(ObjectData* obj, TypedValue* key) {
@@ -3057,7 +3057,7 @@ bool c_StableMap::OffsetIsset(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? !tvIsNull(tvToCell(result)) : false;
+  return result ? !tvIsNull(result) : false;
 }
 
 bool c_StableMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
@@ -4304,7 +4304,7 @@ bool c_Pair::OffsetIsset(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? !tvIsNull(tvToCell(result)) : false;
+  return result ? !tvIsNull(result) : false;
 }
 
 bool c_Pair::OffsetEmpty(ObjectData* obj, TypedValue* key) {

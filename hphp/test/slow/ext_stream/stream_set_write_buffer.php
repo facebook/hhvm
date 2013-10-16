@@ -3,7 +3,7 @@
 $descriptorspec = array(
   0 => array("pipe", "r+"),
   1 => array("pipe", "w"),
-  2 => array("file", "/tmp/error-output.txt", "a"),
+  2 => array("pipe", "a"),
 );
 
 $process = proc_open('echo', $descriptorspec, $io);

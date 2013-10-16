@@ -132,6 +132,17 @@ void ProcessInit() {
 
   SystemLib::s_unit = compile_string(slib.c_str(), slib.size(),
                                      "systemlib.php");
+
+  const StringData* msg;
+  int line;
+  if (SystemLib::s_unit->compileTimeFatal(msg, line)) {
+    Logger::Error("An error has been introduced into the systemlib, "
+                  "but we cannot give you a file and line number right now.");
+    Logger::Error("Check all of your changes to hphp/system/php");
+    Logger::Error("HipHop Parse Error: %s", msg->data());
+    _exit(1);
+  }
+
   if (!hhas.empty()) {
     SystemLib::s_hhas_unit = compile_string(hhas.c_str(), hhas.size(),
                                             "systemlib.hhas");

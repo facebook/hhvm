@@ -168,12 +168,16 @@ void TransCFG::addArc(TransID srcId, TransID dstId, int64_t weight) {
   m_nodeInfo[dstIdx].addInArc(arc);
 }
 
-void TransCFG::print(std::string fileName, const ProfData* profData,
+void TransCFG::print(std::string fileName, FuncId funcId,
+                     const ProfData* profData,
                      const TransIDSet* selected) const {
   FILE* file = fopen(fileName.c_str(), "wt");
   if (!file) return;
 
   fprintf(file, "digraph CFG {\n");
+
+  fprintf(file, "# function: %s\n",
+          Func::fromFuncId(funcId)->fullName()->data());
 
   // find max node weight
   int64_t maxWeight = 1; // 1 to avoid div by 0

@@ -94,6 +94,7 @@ class TransCFG {
   bool                   hasNode(TransID id) const;
   void                   addArc(TransID srcId, TransID dstId, int64_t weight=0);
   void                   print(std::string fileName,
+                               FuncId funcId,
                                const ProfData* profData,
                                const TransIDSet* selected = nullptr) const;
 

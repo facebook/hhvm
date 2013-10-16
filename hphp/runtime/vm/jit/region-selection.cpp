@@ -461,7 +461,7 @@ RegionDescPtr selectHotRegion(TransID transId,
     std::string dotFileName = string("/tmp/trans-cfg-") +
                               lexical_cast<std::string>(transId) + ".dot";
 
-    cfg.print(dotFileName, profData, &selectedTIDs);
+    cfg.print(dotFileName, funcId, profData, &selectedTIDs);
     FTRACE(5, "selectHotRegion: New Translation {} (file: {}) {}\n",
            tx64->profData()->curTransID(), dotFileName,
            region ? show(*region) : std::string("empty region"));

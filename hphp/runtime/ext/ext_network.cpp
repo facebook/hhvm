@@ -932,14 +932,21 @@ void f_header(const String& str, bool replace /* = true */,
     // handle single line of status code
     if (header->size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) {
       int code = 200;
+      const char *reason = nullptr;
       for (const char *ptr = header_line; *ptr; ptr++) {
         if (*ptr == ' ' && *(ptr + 1) != ' ') {
           code = atoi(ptr + 1);
+          for (ptr++; *ptr; ptr++) {
+            if (*ptr == ' ' && *(ptr + 1) != ' ') {
+              reason = ptr + 1;
+              break;
+            }
+          }
           break;
         }
       }
       if (code) {
-        transport->setResponse(code, "explicit_header");
+        transport->setResponse(code, reason);
       }
       return;
     }

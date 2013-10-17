@@ -1,4 +1,4 @@
-# HipHop VM for PHP [![Build Status](https://travis-ci.org/facebook/hiphop-php.png?branch=master)](https://travis-ci.org/facebook/hiphop-php)
+# HipHop VM for PHP [![Build Status](https://travis-ci.org/facebook/hhvm.png?branch=master)](https://travis-ci.org/facebook/hhvm)
 
 HipHop VM (HHVM) is a new open-source virtual machine designed for executing programs written in PHP. HHVM uses a just-in-time compilation approach to achieve superior performance while maintaining the flexibility that PHP developers are accustomed to. HipHop VM (and before it HPHPc) has realized > 5x increase in throughput for Facebook compared with Zend PHP 5.2.
 

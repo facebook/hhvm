@@ -55,14 +55,14 @@ where
 #5  include ("")
     at :1
 out
-Break at cls::pri() on line 28 of %s/stack1.php
-  27     error_log("in pri:".$x." ".$y);
-  28*    foo($x, $y);
-  29     if ($x == 3) {
+Break at cls::pri() on line 29 of %s/stack1.php
+  28     foo($x, $y);
+  29*    if ($x == 3) {
+  30       hphpd_break();
 
 where
 #0   ()
-    at %s/stack1.php:28
+    at %s/stack1.php:29
 #1  cls::pri (1, 0)
     at %s/stack1.php:22
 #2  cls::pub (1, 0)

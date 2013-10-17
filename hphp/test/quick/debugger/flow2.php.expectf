@@ -190,10 +190,10 @@ Breakpoint 1 reached at C1::__destruct() on line 26 of %s/flow2.php
 
 out
 Destructor
-Break at test() on line 53 of %s/flow2.php
-  52 function test($a) {
-  53*  foo($a);
-  54 }
+Break at test() on line 54 of %s/flow2.php
+  53   foo($a);
+  54*}
+  55 
 
 break clear all
 All breakpoints are cleared.

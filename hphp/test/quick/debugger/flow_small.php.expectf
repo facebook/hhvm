@@ -214,12 +214,6 @@ break clear all
 All breakpoints are cleared.
 out
 foo:13
-Break at cls::pri() on line 19 of %s/flow_small.php
-  18     $y = $x + 3; $z = $x * 5;
-  19*    foo($y, $z);
-  20     if ($x == 3) {
-
-step
 Break at cls::pri() on line 20 of %s/flow_small.php
   19     foo($y, $z);
   20*    if ($x == 3) {
@@ -227,12 +221,6 @@ Break at cls::pri() on line 20 of %s/flow_small.php
 
 out
 out pri:4
-Break at cls::pub() on line 13 of %s/flow_small.php
-  12     error_log("in pub:".$x);
-  13*    $this->pri($x);
-  14     error_log("out pub:".$x);
-
-next
 Break at cls::pub() on line 14 of %s/flow_small.php
   13     $this->pri($x);
   14*    error_log("out pub:".$x);
@@ -240,10 +228,10 @@ Break at cls::pub() on line 14 of %s/flow_small.php
 
 out
 out pub:4
-Break at test() on line 62 of %s/flow_small.php
-  61   $obj = new cls();
-  62*  $obj->pub($x);
-  63   error_log("test done ".$x);
+Break at test() on line 63 of %s/flow_small.php
+  62   $obj->pub($x);
+  63*  error_log("test done ".$x);
+  64 }
 
 continue
 test done 4
@@ -278,10 +266,10 @@ Break at baz() on line 53 of %s/flow_small.php
   54   }
 
 out
-Break at cls::pri() on line 27 of %s/flow_small.php
-  26     if ($x == 5 || $x == 6) {
-  27*      baz($x);
+Break at cls::pri() on line 29 of %s/flow_small.php
   28     }
+  29*    error_log("out pri:".$x);
+  30   }
 
 continue
 out pri:5
@@ -318,10 +306,10 @@ Break at baz() on line 53 of %s/flow_small.php
   54   }
 
 out
-Break at cls::pri() on line 27 of %s/flow_small.php
-  26     if ($x == 5 || $x == 6) {
-  27*      baz($x);
+Break at cls::pri() on line 29 of %s/flow_small.php
   28     }
+  29*    error_log("out pri:".$x);
+  30   }
 
 continue
 out pri:6

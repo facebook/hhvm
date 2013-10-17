@@ -303,7 +303,7 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
     RegState state = states[block];
     for (IRInstruction& inst : *block) {
       for (SSATmp* src : inst.srcs()) {
-        auto const &info = regs[src];
+        auto const &info = regs[inst][src];
         if (!info.spilled() &&
             (info.reg(0) == Transl::rVmSp ||
              info.reg(0) == Transl::rVmFp)) {
@@ -315,7 +315,7 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
         }
       }
       for (SSATmp& dst : inst.dsts()) {
-        auto const &info = regs[dst];
+        auto const &info = regs[inst][dst];
         for (unsigned i = 0, n = info.numAllocatedRegs(); i < n; ++i) {
           state.tmp(info, i) = &dst;
         }

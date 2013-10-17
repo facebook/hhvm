@@ -41,7 +41,7 @@ void print(const IRInstruction*);
 
 // SSATmp
 void print(std::ostream& ostream, const SSATmp*,
-           const RegAllocInfo* regs = nullptr,
+           const RegisterInfo* info = nullptr,
            const LifetimeInfo* lifetime = nullptr,
            bool printLastUse = false);
 void print(const SSATmp*);

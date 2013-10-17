@@ -185,16 +185,27 @@ private:
 };
 
 struct RegAllocInfo {
-  explicit RegAllocInfo(const IRUnit& unit)
-    : m_regs(unit, RegisterInfo()) {}
+  struct RegMap {
+    RegisterInfo& operator[](const SSATmp* k) { return m_map[k->id()]; }
+    RegisterInfo& operator[](const SSATmp& k) { return m_map[k.id()]; }
+    const RegisterInfo& operator[](const SSATmp* k) const {
+      return m_map[k->id()];
+    }
+    const RegisterInfo& operator[](const SSATmp& k) const {
+      return m_map[k.id()];
+    }
+  private:
+    mutable smart::flat_map<uint32_t,RegisterInfo> m_map;
+  };
+  explicit RegAllocInfo(const IRUnit& unit) : m_regs(unit, RegMap()) {}
   RegAllocInfo(const RegAllocInfo& other) : m_regs(other.m_regs) {}
   RegAllocInfo(RegAllocInfo&& other) : m_regs(other.m_regs) {}
-  RegisterInfo& operator[](const SSATmp* k) { return m_regs[k]; }
-  RegisterInfo& operator[](const SSATmp& k) { return m_regs[k]; }
-  const RegisterInfo& operator[](const SSATmp* k) const { return m_regs[k]; }
-  const RegisterInfo& operator[](const SSATmp& k) const { return m_regs[k]; }
+  RegMap& operator[](const IRInstruction* i) { return m_regs[i]; }
+  RegMap& operator[](const IRInstruction& i) { return m_regs[i]; }
+  const RegMap& operator[](const IRInstruction* i) const { return m_regs[i]; }
+  const RegMap& operator[](const IRInstruction& i) const { return m_regs[i]; }
 private:
-  StateVector<SSATmp, RegisterInfo> m_regs;
+  StateVector<IRInstruction,RegMap> m_regs;
 };
 
 inline std::ostream& operator<<(std::ostream& os, SpillInfo si) {

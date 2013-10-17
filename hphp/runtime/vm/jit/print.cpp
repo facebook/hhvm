@@ -137,6 +137,11 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
      << color(ANSI_COLOR_END);
 }
 
+const RegisterInfo* regInfo(const RegAllocInfo* regs,
+                            const IRInstruction* inst, const SSATmp* t) {
+  return regs ? &(*regs)[inst][t] : nullptr;
+}
+
 void printDst(std::ostream& os, const IRInstruction* inst,
               const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
   if (inst->numDsts() == 0) return;
@@ -144,7 +149,7 @@ void printDst(std::ostream& os, const IRInstruction* inst,
   const char* sep = "";
   for (const SSATmp& dst : inst->dsts()) {
     os << punc(sep);
-    print(os, &dst, regs, lifetime, true);
+    print(os, &dst, regInfo(regs, inst, &dst), lifetime, true);
     sep = ", ";
   }
   os << punc(" = ");
@@ -158,7 +163,7 @@ void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
         lifetime->uses[src].lastUse == lifetime->linear[inst]) {
       ostream << "~";
     }
-    print(ostream, src, regs, lifetime);
+    print(ostream, src, regInfo(regs, inst, src), lifetime);
   } else {
     ostream << color(ANSI_COLOR_RED)
             << "!!!NULL @ " << i
@@ -230,7 +235,7 @@ void print(const IRInstruction* inst) {
   std::cerr << std::endl;
 }
 
-void print(std::ostream& os, const SSATmp* tmp, const RegAllocInfo* regs,
+void print(std::ostream& os, const SSATmp* tmp, const RegisterInfo* regInfo,
            const LifetimeInfo* lifetime, bool printLastUse) {
   if (tmp->inst()->op() == DefConst) {
     os << constToString(tmp->inst()->typeParam(),
@@ -245,24 +250,23 @@ void print(std::ostream& os, const SSATmp* tmp, const RegAllocInfo* regs,
        << "@" << lifetime->uses[tmp].lastUse << "#" << lifetime->uses[tmp].count
        << color(ANSI_COLOR_END);
   }
-  if (regs) {
-    const RegisterInfo& info = (*regs)[tmp];
-    if (info.spilled() || info.numAllocatedRegs() > 0) {
+  if (regInfo) {
+    if (regInfo->spilled() || regInfo->numAllocatedRegs() > 0) {
       os << color(ANSI_COLOR_BROWN) << '(';
-      if (!info.spilled()) {
-        for (int i = 0, sz = info.numAllocatedRegs(); i < sz; ++i) {
+      if (!regInfo->spilled()) {
+        for (int i = 0, sz = regInfo->numAllocatedRegs(); i < sz; ++i) {
           if (i != 0) os << ",";
-          PhysReg reg = info.reg(i);
-          if (reg.type() == PhysReg::GP) {
-            os << reg::regname(Reg64(reg));
+          PhysReg r = regInfo->reg(i);
+          if (r.type() == PhysReg::GP) {
+            os << reg::regname(Reg64(r));
           } else {
-            os << reg::regname(RegXMM(reg));
+            os << reg::regname(RegXMM(r));
           }
         }
       } else {
         for (int i = 0, sz = tmp->numNeededRegs(); i < sz; ++i) {
           if (i != 0) os << ",";
-          os << info.spillInfo(i);
+          os << regInfo->spillInfo(i);
         }
       }
       os << ')' << color(ANSI_COLOR_END);
@@ -434,7 +438,8 @@ void print(std::ostream& os, const Block* block,
         os << std::string(kIndent +
                           folly::format("({}) ", inst.id()).str().size(),
                           ' ');
-        JIT::print(os, inst.dst(i), regs, lifetime, false);
+        auto dst = inst.dst(i);
+        JIT::print(os, dst, regInfo(regs, &inst, dst), lifetime, false);
         os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
            << color(ANSI_COLOR_END);
         bool first = true;

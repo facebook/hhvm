@@ -132,7 +132,6 @@ struct CodeGenerator {
     , m_astubs(stubsCode)
     , m_tx64(tx64)
     , m_state(state)
-    , m_regs(state.regs)
     , m_rScratch(InvalidReg)
     , m_curInst(nullptr)
   {
@@ -142,6 +141,16 @@ struct CodeGenerator {
 
 private:
   Address cgInst(IRInstruction* inst);
+
+  const RegisterInfo curOpd(const SSATmp* t) const {
+    return m_state.regs[m_curInst][t];
+  }
+  const RegisterInfo curOpd(const SSATmp& t) const {
+    return curOpd(&t);
+  }
+  const RegAllocInfo::RegMap& curOpds() const {
+    return m_state.regs[m_curInst];
+  }
 
   // Autogenerate function declarations for each IR instruction in ir.h
 #define O(name, dsts, srcs, flags) void cg##name(IRInstruction* inst);
@@ -278,7 +287,7 @@ private:
   void emitLoadImm(Asm& as, int64_t val, PhysReg dstReg);
   PhysReg prepXMMReg(const SSATmp* tmp,
                      Asm& as,
-                     const RegAllocInfo& allocInfo,
+                     const RegisterInfo& info,
                      RegXMM rXMMScratch);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
@@ -412,7 +421,6 @@ private:
   Asm                 m_astubs; // for stubs and other cold code
   TranslatorX64*      m_tx64;
   CodegenState&       m_state;
-  const RegAllocInfo& m_regs;
   Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
 };
@@ -475,9 +483,9 @@ private:
 struct ArgGroup {
   typedef smart::vector<ArgDesc> ArgVec;
 
-  explicit ArgGroup(const RegAllocInfo& regs)
+  explicit ArgGroup(const RegAllocInfo::RegMap& regs)
       : m_regs(regs), m_override(nullptr)
-    {}
+  {}
 
   size_t numRegArgs() const { return m_regArgs.size(); }
   size_t numStackArgs() const { return m_stkArgs.size(); }
@@ -574,7 +582,7 @@ private:
     return typedValue(key);
   }
 
-  const RegAllocInfo& m_regs;
+  const RegAllocInfo::RegMap& m_regs;
   ArgVec* m_override; // used to force args to go into a specific ArgVec
   ArgVec m_regArgs;
   ArgVec m_stkArgs;

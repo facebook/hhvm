@@ -36,7 +36,6 @@ struct CodeGenerator {
       , m_astubs(stubsCode)
       , m_tx64(tx64)
       , m_state(state)
-      , m_regs(state.regs)
       , m_curInst(nullptr)
     {
     }
@@ -63,6 +62,16 @@ struct CodeGenerator {
 
   Address cgInst(IRInstruction* inst);
 
+  const RegisterInfo curOpd(const SSATmp* t) const {
+    return m_state.regs[m_curInst][t];
+  }
+  const RegisterInfo curOpd(const SSATmp& t) const {
+    return curOpd(&t);
+  }
+  const RegAllocInfo::RegMap& curOpds() const {
+    return m_state.regs[m_curInst];
+  }
+
   void cgInterpOneCommon(IRInstruction* inst);
 
 #define O(name, dsts, srcs, flags) void cg##name(IRInstruction* inst);
@@ -76,7 +85,6 @@ struct CodeGenerator {
   vixl::MacroAssembler        m_astubs;
   TranslatorX64*              m_tx64;
   CodegenState&               m_state;
-  const RegAllocInfo&         m_regs;
   IRInstruction*              m_curInst;
 };
 

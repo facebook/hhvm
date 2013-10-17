@@ -538,6 +538,9 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           *result.asCell() = cellBitXor(*v1.asCell(), *v2.asCell());
           break;
         case '.':
+          if (v1.isArray() || v2.isArray()) {
+            return ExpressionPtr();
+          }
           result = concat(v1.toString(), v2.toString());
           break;
         case T_IS_IDENTICAL:

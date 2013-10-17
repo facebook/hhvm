@@ -140,7 +140,7 @@ std::pair<uint32_t,uint32_t> computeCapAndMask(uint32_t minimumMaxElms) {
 }
 
 ALWAYS_INLINE
-uint32_t computeAllocBytes(uint32_t cap, uint32_t mask) {
+size_t computeAllocBytes(uint32_t cap, uint32_t mask) {
   auto const tabSize    = mask + 1;
   auto const tabBytes   = tabSize * sizeof(int32_t);
   auto const dataBytes  = cap * sizeof(HphpArray::Elm);

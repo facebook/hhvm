@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 
 #include "folly/CpuId.h"
+#include "folly/Optional.h"
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -3747,7 +3748,7 @@ void HhbcTranslator::emitCeil() {
   push(gen(Ceil, dblVal));
 }
 
-static Type assertOpToType(AssertTOp op) {
+static folly::Optional<Type> assertOpToType(AssertTOp op) {
   switch (op) {
   case AssertTOp::Uninit:     return Type::Uninit;
   case AssertTOp::InitNull:   return Type::InitNull;
@@ -3759,19 +3760,26 @@ static Type assertOpToType(AssertTOp op) {
   case AssertTOp::Str:        return Type::Str;
   case AssertTOp::Arr:        return Type::Arr;
   case AssertTOp::Obj:        return Type::Obj;
-  case AssertTOp::InitUnc:    return Type::UncountedInit;
-  case AssertTOp::Unc:        return Type::Uncounted;
-  case AssertTOp::InitCell:   return Type::Cell - Type::Uninit;
+
+  // The JIT can't currently handle the exact information in these
+  // type assertions in some cases:
+  case AssertTOp::InitUnc:    return folly::none;
+  case AssertTOp::Unc:        return folly::none;
+  case AssertTOp::InitCell:   return Type::Cell;
   }
   not_reached();
 }
 
 void HhbcTranslator::emitAssertTL(int32_t id, AssertTOp op) {
-  assertTypeLocal(id, assertOpToType(op));
+  if (auto const t = assertOpToType(op)) {
+    assertTypeLocal(id, *t);
+  }
 }
 
 void HhbcTranslator::emitAssertTStk(int32_t offset, AssertTOp op) {
-  assertTypeStack(offset, assertOpToType(op));
+  if (auto const t = assertOpToType(op)) {
+    assertTypeStack(offset, *t);
+  }
 }
 
 void HhbcTranslator::emitAbs() {

@@ -797,7 +797,7 @@ void Transport::onSendEnd() {
   }
   auto httpResponseStats = ServiceData::createTimeseries(
     folly::to<string>(HTTP_RESPONSE_STATS_PREFIX, getResponseCode()),
-    {ServiceData::StatsType::RATE});
+    {ServiceData::StatsType::SUM});
   httpResponseStats->addValue(1);
   onSendEndImpl();
 }

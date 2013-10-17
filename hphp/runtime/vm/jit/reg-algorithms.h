@@ -50,8 +50,8 @@ bool cycleHasXMMReg(const CycleInfo& cycle, const int (&moves)[N]) {
 }
 
 template <int N>
-void doRegMoves(int (&moves)[N], int rTmp, std::vector<MoveInfo>& howTo) {
-  assert(howTo.empty());
+smart::vector<MoveInfo> doRegMoves(int (&moves)[N], int rTmp) {
+  smart::vector<MoveInfo> howTo;
   int outDegree[N];
   CycleInfo cycles[N];
   int numCycles = 0;
@@ -149,6 +149,7 @@ pathloop:
       howTo.push_back(MoveInfo(MoveInfo::Kind::Move, rTmp, w));
     }
   }
+  return howTo;
 }
 
 }}

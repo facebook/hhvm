@@ -472,7 +472,7 @@ private:
  *   assert(args.size() == 3);
  */
 struct ArgGroup {
-  typedef std::vector<ArgDesc> ArgVec;
+  typedef smart::vector<ArgDesc> ArgVec;
 
   explicit ArgGroup(const RegAllocInfo& regs)
       : m_regs(regs), m_override(nullptr)
@@ -516,13 +516,6 @@ struct ArgGroup {
 
   ArgGroup& ssa(SSATmp* tmp) {
     push_arg(ArgDesc(tmp, m_regs[tmp]));
-    return *this;
-  }
-
-  ArgGroup& ssas(IRInstruction* inst, unsigned begin, unsigned count = 1) {
-    for (SSATmp* s : inst->srcs().subpiece(begin, count)) {
-      push_arg(ArgDesc(s, m_regs[s]));
-    }
     return *this;
   }
 

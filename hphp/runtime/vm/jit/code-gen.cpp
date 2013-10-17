@@ -709,42 +709,41 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
       argDescs[int(dstReg)] = &args[i];
     }
   }
-  std::vector<MoveInfo> howTo;
-  doRegMoves(moves, int(rCgGP), howTo);
+  auto const howTo = doRegMoves(moves, int(rCgGP));
 
   // Execute the plan
-  for (size_t i = 0; i < howTo.size(); ++i) {
-    if (howTo[i].m_kind == MoveInfo::Kind::Move) {
-      if (howTo[i].m_reg2 == rCgGP) {
-        emitMovRegReg(a, howTo[i].m_reg1, howTo[i].m_reg2);
+  for (auto& how : howTo) {
+    if (how.m_kind == MoveInfo::Kind::Move) {
+      if (how.m_reg2 == rCgGP) {
+        emitMovRegReg(a, how.m_reg1, how.m_reg2);
       } else {
-        ArgDesc* argDesc = argDescs[int(howTo[i].m_reg2)];
+        ArgDesc* argDesc = argDescs[int(how.m_reg2)];
         ArgDesc::Kind kind = argDesc->kind();
         if (kind == ArgDesc::Kind::Reg || kind == ArgDesc::Kind::TypeReg) {
           if (argDesc->isZeroExtend()) {
-            assert(howTo[i].m_reg1.isGP());
-            assert(howTo[i].m_reg2.isGP());
-            a.    movzbl (rbyte(howTo[i].m_reg1), r32(howTo[i].m_reg2));
+            assert(how.m_reg1.isGP());
+            assert(how.m_reg2.isGP());
+            a.    movzbl (rbyte(how.m_reg1), r32(how.m_reg2));
           } else {
-            emitMovRegReg(a, howTo[i].m_reg1, howTo[i].m_reg2);
+            emitMovRegReg(a, how.m_reg1, how.m_reg2);
           }
         } else {
           assert(kind == ArgDesc::Kind::Addr);
-          assert(howTo[i].m_reg1.isGP());
-          assert(howTo[i].m_reg2.isGP());
-          a.    lea    (howTo[i].m_reg1[argDesc->imm().q()],
-                        howTo[i].m_reg2);
+          assert(how.m_reg1.isGP());
+          assert(how.m_reg2.isGP());
+          a.    lea    (how.m_reg1[argDesc->imm().q()], how.m_reg2);
         }
         if (kind != ArgDesc::Kind::TypeReg) {
           argDesc->markDone();
         }
       }
     } else {
-      assert(howTo[i].m_reg1.isGP());
-      assert(howTo[i].m_reg2.isGP());
-      a.    xchgq  (howTo[i].m_reg1, howTo[i].m_reg2);
+      assert(how.m_reg1.isGP());
+      assert(how.m_reg2.isGP());
+      a.    xchgq  (how.m_reg1, how.m_reg2);
     }
   }
+
   // Handle const-to-register moves, type shifting,
   // load-effective address and zero extending for bools.
   // Ignore args that have been handled by the
@@ -5089,7 +5088,8 @@ void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
                  CppCall(func),
                  callDest(inst->dst()),
                  SyncOptions::kSyncPoint,
-                 ArgGroup(m_regs).addr(rVmTl, intptr_t(ch)).ssas(inst, 0));
+                 ArgGroup(m_regs).addr(rVmTl, intptr_t(ch))
+                                 .ssa(inst->src(0)));
   });
 }
 

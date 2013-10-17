@@ -77,6 +77,9 @@ function(embed_systemlib TARGET DEST SOURCE)
 	                   ARGS "--add-section" "systemlib=${SOURCE}" ${DEST}
 	                   COMMENT "Embedding systemlib.php in ${TARGET}")
 	endif()
+	# Add the systemlib file to the "LINK_DEPENDS" for the systemlib, this will cause it
+	# to be relinked and the systemlib re-embedded
+	set_property(TARGET ${TARGET} APPEND PROPERTY LINK_DEPENDS ${SOURCE})
 endfunction(embed_systemlib)
 
 # Custom install function that doesn't relink, instead it uses chrpath to change it, if

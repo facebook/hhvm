@@ -202,7 +202,7 @@ SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
     if (!typeParam.isBoxed() || !prevType.isBoxed()) {
       if ((typeParam & prevType) == Type::Bottom) {
         assert(RuntimeOption::EvalJitPGO);
-        return gen(Jmp_, inst->taken());
+        return gen(Jmp, inst->taken());
       }
     }
   }

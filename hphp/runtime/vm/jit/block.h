@@ -219,7 +219,7 @@ template<typename L> inline
 void Block::forEachSrc(unsigned i, L body) {
   for (Edge& e : m_preds) {
     IRInstruction* jmp = e.from()->back();
-    assert(jmp->op() == Jmp_ && jmp->taken() == this);
+    assert(jmp->op() == Jmp && jmp->taken() == this);
     body(jmp, jmp->src(i));
   }
 }

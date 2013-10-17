@@ -334,7 +334,7 @@ void IRInstruction::convertToNop() {
 void IRInstruction::convertToJmp() {
   assert(isControlFlow());
   assert(IMPLIES(block(), block()->back() == this));
-  m_op = Jmp_;
+  m_op = Jmp;
   m_typeParam = Type::None;
   m_numSrcs = 0;
   m_numDsts = 0;

@@ -208,7 +208,7 @@ void eliminateUnconditionalJump(IRUnit& unit) {
   Block* lastBlock = trace->back();
   auto lastInst = lastBlock->backIter(); // iterator to last instruction
   IRInstruction& jmp = *lastInst;
-  if (jmp.op() == Jmp_ && jmp.taken()->numPreds() == 1) {
+  if (jmp.op() == Jmp && jmp.taken()->numPreds() == 1) {
     Block* target = jmp.taken();
     lastBlock->splice(lastInst, target, target->skipHeader(), target->end(),
                       lastInst->marker());

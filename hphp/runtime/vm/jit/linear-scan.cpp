@@ -204,7 +204,7 @@ private:
   // stores pre-coloring hints
   PreColoringHint m_preColoringHint;
 
-  // a map from SSATmp* to a list of Jmp_ instructions that have it as
+  // a map from SSATmp* to a list of Jmp instructions that have it as
   // a source.
   typedef smart::vector<IRInstruction*> JmpList;
   StateVector<SSATmp, JmpList> m_jmps;
@@ -757,7 +757,7 @@ void LinearScan::collectInfo(BlockList::iterator it, IRTrace* trace) {
       }
 
       IRInstruction* jmp = block->back();
-      if (jmp->op() == Jmp_ && jmp->numSrcs() != 0) {
+      if (jmp->op() == Jmp && jmp->numSrcs() != 0) {
         for (SSATmp* src : jmp->srcs()) {
           m_jmps[src].push_back(jmp);
         }
@@ -872,7 +872,7 @@ void LinearScan::computePreColoringHint() {
 }
 
 // Given a label, dest index for that label, and register index, scan
-// the sources of all incoming Jmp_s to see if any have a register
+// the sources of all incoming Jmps to see if any have a register
 // allocated at the specified index.
 static RegNumber findLabelSrcReg(const RegAllocInfo& regs, IRInstruction* label,
                                  unsigned dstIdx, uint32_t regIndex) {
@@ -886,8 +886,8 @@ static RegNumber findLabelSrcReg(const RegAllocInfo& regs, IRInstruction* label,
 
 // This function attempts to find a pre-coloring hint from two
 // different sources: If tmp comes from a DefLabel, it will scan up to
-// the SSATmps providing values to incoming Jmp_s to look for a
-// hint. If tmp is consumed by a Jmp_, look for other incoming Jmp_s
+// the SSATmps providing values to incoming Jmps to look for a
+// hint. If tmp is consumed by a Jmp, look for other incoming Jmps
 // to its destination and see if any of them have already been given a
 // register. If all of these fail, let normal register allocation
 // proceed unhinted.
@@ -911,7 +911,7 @@ RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
         auto reg = findLabelSrcReg(m_allocInfo, srcInst, i, regIndex);
         // Until we handle loops, it's a bug to try and allocate a
         // register to a DefLabel's dest before all of its incoming
-        // Jmp_s have had their srcs allocated, unless the incoming
+        // Jmps have had their srcs allocated, unless the incoming
         // block is unreachable.
         const DEBUG_ONLY bool unreachable =
           std::find(m_blocks.begin(), m_blocks.end(),
@@ -923,19 +923,19 @@ RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
     not_reached();
   }
 
-  // If srcInst wasn't a label, check if tmp is used by any Jmp_
-  // instructions. If it is, trace to the Jmp_'s label and use the
+  // If srcInst wasn't a label, check if tmp is used by any Jmp
+  // instructions. If it is, trace to the Jmp's label and use the
   // same procedure as above.
   for (unsigned ji = 0, jn = jmps.size(); ji < jn; ++ji) {
     IRInstruction* jmp = jmps[ji];
     IRInstruction* label = jmp->taken()->front();
 
-    // Figure out which src of the Jmp_ is tmp
+    // Figure out which src of the Jmp is tmp
     for (unsigned si = 0, sn = jmp->numSrcs(); si < sn; ++si) {
       SSATmp* src = jmp->src(si);
       if (tmp == src) {
         // For now, a DefLabel should never have a register assigned
-        // to it before any of its incoming Jmp_ instructions.
+        // to it before any of its incoming Jmp instructions.
         always_assert(m_allocInfo[label->dst(si)].reg(regIndex) ==
                       reg::noreg);
         auto reg = findLabelSrcReg(m_allocInfo, label, si, regIndex);

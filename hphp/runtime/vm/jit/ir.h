@@ -300,7 +300,7 @@ O(JmpIsNType,                  D(None), SUnk,                              E) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(JmpZero,                     D(None), SNum,                              E) \
 O(JmpNZero,                    D(None), SNum,                              E) \
-O(Jmp_,                        D(None), SUnk,                            T|E) \
+O(Jmp,                         D(None), SUnk,                            T|E) \
 O(ReqBindJmpGt,                     ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpGte,                    ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpLt,                     ND, S(Gen) S(Gen),                   T|E) \

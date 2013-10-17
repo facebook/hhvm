@@ -1395,7 +1395,7 @@ SSATmp* Simplifier::simplifyJmpIsType(IRInstruction* inst) {
   assert(res->isConst());
   if (res->getValBool()) {
     // Taken jump
-    return gen(Jmp_, inst->taken());
+    return gen(Jmp, inst->taken());
   } else {
     // Not taken jump; turn jump into a nop
     inst->convertToNop();
@@ -1842,7 +1842,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
       val = !val;
     }
     if (val) {
-      return gen(Jmp_, inst->taken());
+      return gen(Jmp, inst->taken());
     }
     inst->convertToNop();
     return nullptr;

@@ -96,9 +96,9 @@ struct CodegenState {
   StateVector<Block,void*> patches;
   StateVector<Block,TCA> addresses;
 
-  // True if this block's terminal Jmp_ has a desination equal to the
+  // True if this block's terminal Jmp has a desination equal to the
   // next block in the same assmbler.
-  bool noTerminalJmp_;
+  bool noTerminalJmp;
 
   // output from register allocator
   const RegAllocInfo& regs;

@@ -5281,7 +5281,7 @@ void CodeGenerator::cgReqBindJmpNZero(IRInstruction* inst) {
   emitReqBindJcc(CC_NZ, inst->extra<ReqBindJmpNZero>());
 }
 
-void CodeGenerator::cgJmp_(IRInstruction* inst) {
+void CodeGenerator::cgJmp(IRInstruction* inst) {
   Block* target = inst->taken();
   if (unsigned n = inst->numSrcs()) {
     // Parallel-copy sources to the label's destination registers.
@@ -5294,7 +5294,7 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
       auto dst = &dsts[i];
       auto src = srcs[i];
       // Currently, full XMM registers cannot be assigned to SSATmps
-      // passed from to Jmp_ to DefLabel. If this changes, it'll require
+      // passed from to Jmp to DefLabel. If this changes, it'll require
       // teaching shuffleArgs() how to handle full XMM values.
       assert(!m_regs[src].isFullXMM() && !m_regs[dst].isFullXMM());
       if (m_regs[dst].reg(0) == InvalidReg) continue; // dst is unused.
@@ -5316,10 +5316,10 @@ void CodeGenerator::cgJmp_(IRInstruction* inst) {
       }
     }
     assert(args.numStackArgs() == 0 &&
-           "Jmp_ doesn't support passing arguments on the stack yet.");
+           "Jmp doesn't support passing arguments on the stack yet.");
     shuffleArgs(m_as, args);
   }
-  if (!m_state.noTerminalJmp_) {
+  if (!m_state.noTerminalJmp) {
     emitFwdJmp(m_as, target, m_state);
   }
 }
@@ -6035,10 +6035,10 @@ void genCodeImpl(CodeBlock& mainCode,
     patchJumps(cb, state, block);
     state.addresses[block] = aStart;
 
-    // If the block ends with a Jmp_ and the next block is going to be
+    // If the block ends with a Jmp and the next block is going to be
     // its target, we don't need to actually emit it.
     IRInstruction* last = block->back();
-    state.noTerminalJmp_ = last->op() == Jmp_ && nextBlock == last->taken();
+    state.noTerminalJmp = last->op() == Jmp && nextBlock == last->taken();
 
     if (state.asmInfo) {
       state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());

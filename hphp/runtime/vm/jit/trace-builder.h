@@ -218,10 +218,10 @@ struct TraceBuilder {
     DisableCseGuard guard(*this);
     branch(taken_block);
     SSATmp* v1 = next();
-    gen(Jmp_, done_block, v1);
+    gen(Jmp, done_block, v1);
     appendBlock(taken_block);
     SSATmp* v2 = taken();
-    gen(Jmp_, done_block, v2);
+    gen(Jmp, done_block, v2);
     appendBlock(done_block);
     SSATmp* result = label->dst(0);
     result->setType(Type::unionOf(v1->type(), v2->type()));

@@ -1327,7 +1327,7 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
   }
 
   if (!breakTracelet) return;
-  gen(Jmp_, makeExit(offset));
+  gen(Jmp, makeExit(offset));
 }
 
 void HhbcTranslator::emitCreateCont(Id funNameStrId) {
@@ -1885,7 +1885,7 @@ void HhbcTranslator::emitJmp(int32_t offset,
     emitJmpSurpriseCheck();
   }
   if (!breakTracelet) return;
-  gen(Jmp_, makeExit(offset));
+  gen(Jmp, makeExit(offset));
 }
 
 SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
@@ -2852,13 +2852,13 @@ void HhbcTranslator::emitSwitch(const ImmVector& iv,
   }
 
   if (type.subtypeOf(Type::Null)) {
-    gen(Jmp_, makeExit(zeroOff));
+    gen(Jmp, makeExit(zeroOff));
     return;
   }
   if (type.subtypeOf(Type::Bool)) {
     Offset nonZeroOff = bcOff() + iv.vec32()[iv.size() - 2];
     gen(JmpNZero, makeExit(nonZeroOff), switchVal);
-    gen(Jmp_, makeExit(zeroOff));
+    gen(Jmp, makeExit(zeroOff));
     return;
   }
 
@@ -2884,7 +2884,7 @@ void HhbcTranslator::emitSwitch(const ImmVector& iv,
     index = gen(LdSwitchObjIndex, catchBlock, switchVal, ssabase, ssatargets);
   } else if (type.subtypeOf(Type::Arr)) {
     gen(DecRef, switchVal);
-    gen(Jmp_, makeExit(defaultOff));
+    gen(Jmp, makeExit(defaultOff));
     return;
   } else {
     PUNT(Switch-UnknownType);

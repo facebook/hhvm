@@ -90,7 +90,7 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  * 6. If the DefLabel produces a value, all of its incoming edges must be from
  *    blocks listed in the block list for this block's Trace.
  * 7. Any path from this block to a Block that expects values must be
- *    from a Jmp_ instruciton.
+ *    from a Jmp instruciton.
  * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
  * 9. If this block is a catch block, it must have at most one predecessor
  *    and the trace containing it must contain exactly this block.
@@ -129,9 +129,9 @@ bool checkBlock(Block* b) {
 
   // Invariant #7
   if (b->taken()) {
-    // only Jmp_ can branch to a join block expecting values.
+    // only Jmp can branch to a join block expecting values.
     DEBUG_ONLY IRInstruction* branch = b->back();
-    DEBUG_ONLY auto numArgs = branch->op() == Jmp_ ? branch->numSrcs() : 0;
+    DEBUG_ONLY auto numArgs = branch->op() == Jmp ? branch->numSrcs() : 0;
     assert(numBlockParams(b->taken()) == numArgs);
   }
 

@@ -65,14 +65,14 @@ but may not form loops.
 No Variables are defined on entry to the main Trace.
 
 Blocks which are join points may start with a DefLabel with destination
-Variables.  In that case, each predecessor must be a Jmp_ passing a matching
-number of source Variables.  In this case the Jmp_ acts as a tail-call, passing
+Variables.  In that case, each predecessor must be a Jmp passing a matching
+number of source Variables.  In this case the Jmp acts as a tail-call, passing
 arguments the same way a plain call would.
 
-Together, the sources of the Jmp_ instructions and the destinations of the
+Together, the sources of the Jmp instructions and the destinations of the
 DefLabel instructions act as traditional SSA Phi pseudo-functions; The type
 of the label's destination is the type-union of the corresponding sources.
-Because the Jmp_ sources are at the ends of blocks, they do not violate the
+Because the Jmp sources are at the ends of blocks, they do not violate the
 SSA dominator rule (rule 2, above).
 
 Implementation note: The JIT's compilation unit ("Trace" in this spec) actually
@@ -685,12 +685,12 @@ ExitOnVarEnv S0:FramePtr -> L
   Loads the VarEnv slot off the ActRec pointed to by S0.  If it is
   non-zero, jumps to the exit-trace label L.
 
-Jmp_ [S:T ...] -> L
+Jmp [S:T ...] -> L
 
   Unconditional jump to L.  L is the name of a DefLabel instruction.
   Each the sources are copied to the corresponding destinations of the
   target L.  The number of destinations on L must match the number of
-  sources of this Jmp_.
+  sources of this Jmp.
 
 DefLabel
 D:T ... = DefLabel
@@ -701,12 +701,12 @@ D:T ... = DefLabel
   with a DefLabel instruction.
 
   DefLabel can optionally define one or more destination variables.  In that
-  case, the values are passed to it by Jmp_ instruction(s) with the same
+  case, the values are passed to it by Jmp instruction(s) with the same
   number of sources.  The type of each destination variable is the least common
-  supertype of each of the corresponding Jmp_ sources.
+  supertype of each of the corresponding Jmp sources.
 
   Note that when a label defines destination variables, it is only reachable
-  from the Jmp_ instruction.  Other branch instructions cannot pass arguments.
+  from the Jmp instruction.  Other branch instructions cannot pass arguments.
 
 
 6. Reference manipulation

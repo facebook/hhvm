@@ -189,14 +189,14 @@ BlockList removeUnreachable(IRTrace* trace, IRUnit& unit) {
         continue;
       }
       FTRACE(5, "erasing block {}\n", (*bit)->id());
-      if ((*bit)->taken() && (*bit)->back()->op() == Jmp_) {
+      if ((*bit)->taken() && (*bit)->back()->op() == Jmp) {
         needsReflow = true;
       }
       bit = t->erase(bit);
     }
   });
 
-  // 3. if we removed any whole blocks that ended in Jmp_
+  // 3. if we removed any whole blocks that ended in Jmp
   //    instructions, reflow all types in case they change the
   //    incoming types of DefLabel instructions.
   if (needsReflow) reflowTypes(blocks.front(), blocks);
@@ -314,7 +314,7 @@ void optimizeRefCount(IRTrace* trace, IRTrace* main, DceState& state,
 void sinkIncRefs(IRTrace* trace, IRUnit& unit, DceState& state) {
   assert(trace->isMain());
 
-  assert(trace->back()->back()->op() != Jmp_);
+  assert(trace->back()->back()->op() != Jmp);
 
   auto copyPropTrace = [] (IRTrace* trace) {
     forEachInst(trace->blocks(), copyProp);

@@ -50,7 +50,6 @@ void YieldExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_keyExp) {
     m_keyExp->analyzeProgram(ar);
   }
-  m_valExp->setChildOfYield();
   m_valExp->analyzeProgram(ar);
 
   m_label.setNew();

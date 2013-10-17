@@ -3271,14 +3271,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             e.Abs();
             return true;
           }
-        } else if (call->isCompilerCallToFunction("hphp_continuation_done")) {
-          assert(params && params->getCount() == 1);
-          visit((*params)[0]);
-          emitConvertToCell(e);
-          assert(m_evalStack.size() == 1);
-          e.ContRetC();
-          e.Null();
-          return true;
         } else if ((call->isCallToFunction("class_exists") ||
                     call->isCallToFunction("interface_exists") ||
                     call->isCallToFunction("trait_exists")) && params &&

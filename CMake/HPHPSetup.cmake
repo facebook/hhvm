@@ -25,6 +25,15 @@ IF(NOT DEFINED CMAKE_PREFIX_PATH)
   message(STATUS "CMAKE_PREFIX_PATH was missing, proceeding anyway")
 endif()
 
+# Look for the chrpath tool so we can warn if it's not there
+find_program(CHRPATH chrpath)
+IF (CHRPATH STREQUAL "CHRPATH-NOTFOUND")
+    SET(FOUND_CHRPATH OFF)
+    message(WARNING "chrpath not found, rpath will not be stripped from installed binaries")
+else()
+    SET(FOUND_CHRPATH ON)
+endif()
+
 LIST(APPEND CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
 
 if(APPLE)

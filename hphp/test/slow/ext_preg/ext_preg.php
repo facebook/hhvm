@@ -194,29 +194,6 @@ function test_preg_replace() {
   $count = 0;
   preg_replace(array("/\\d/", "/\\s/"), "*", "xp 4 to", -1, $count);
   VS($count, 3);
-
-  $html_body = "<html><body></body></html>";
-  $html_body2 = preg_replace("/(<\\/?\\w+[^>]*>)/e",
-                             "strtoupper(\"$1\")",
-                             $html_body);
-  VS($html_body2, "<HTML><BODY></BODY></HTML>");
-
-  $css_text = "#AAAA;";
-  $css_text2 = preg_replace("/#([A-Fa-f0-9]{3,6});/e",
-                                    "strtolower(\"#\\1;\");", $css_text);
-  VS($css_text2, "#aaaa;");
-
-  $rgb_text = "rgb(13, 14, 15)";
-  $rgb_text2 =
-    preg_replace("/rgb\\(([0-9]{1,3}), ([0-9]{1,3}), ([0-9]{1,3})\\)/e",
-                   "sprintf(\"%02x%02x%02x\", \"\\1\", \"\\2\", \"\\3\")",
-                   $rgb_text);
-  VS($rgb_text2, "0d0e0f");
-
-  $res = preg_replace("/(a*)(b*)/e",
-                              "test_preg_rep(\"\\1\",\"smu\\\"rf\",\"\\2\")",
-                              "aaabbbblahblahaabbbababab");
-  VS($res, "BBBBaaalahBlahBBBaaBaBaBa");
 }
 
 function next_year($m) {

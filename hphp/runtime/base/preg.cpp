@@ -25,6 +25,10 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include <tbb/concurrent_hash_map.h>
 
 #define PREG_PATTERN_ORDER          1
@@ -826,13 +830,24 @@ static String php_pcre_replace(const String& pattern, const String& subject,
   if (pce == nullptr) {
     return false;
   }
-  bool eval = false;
-  if (pce->preg_options & PREG_REPLACE_EVAL) {
-    if (callable)
-      throw NotSupportedException("preg_replace",
-                                  "Modifier /e cannot be used with replacement "
-                                  "callback.");
-    eval = true;
+  bool eval = pce->preg_options & PREG_REPLACE_EVAL;
+  if (eval) {
+    if (RuntimeOption::RepoAuthoritative) {
+      throw Exception(
+        "You can't use eval in RepoAuthoritative mode. It breaks all sorts of "
+        "assumptions we use for speed. Switch to using preg_replace_callback()."
+      );
+    }
+    if (callable) {
+      raise_warning(
+        "Modifier /e cannot be used with replacement callback."
+      );
+      return null_string;
+    }
+    raise_notice(
+      "Deprecated: preg_replace(): The /e modifier is deprecated, use "
+      "preg_replace_callback instead"
+    );
   }
 
   int size_offsets;
@@ -846,27 +861,9 @@ static String php_pcre_replace(const String& pattern, const String& subject,
   const char *replace_end = nullptr;
   int replace_len = 0;
   String replace_val;
-  String eval_fn;
 
   if (!callable) {
     replace_val = replace_var.toString();
-    if (eval) {
-      // Extract eval fn
-      int pidx = replace_val.find('(');
-      const char *rd = replace_val.data();
-      int rs = replace_val.size();
-
-      if (!(rs >= 5 && pidx >= 0 && rd[pidx+1] == '"' &&
-            ((rd[rs-2] == '"' && rd[rs-1] == ')') ||
-            (rd[rs-3] == '"' && rd[rs-2] == ')' && rd[rs-1] == ';')))) {
-        throw NotSupportedException("preg_replace",
-                                    "Modifier /e must be used with the form "
-                                    "f(\"<replacement string>\") or "
-                                    "f(\"<replacement string>\");");
-      }
-      eval_fn = replace_val.substr(0, pidx);
-      replace_val = replace_val.substr(pidx+1, rs - (pidx+1) - 1);
-    }
     replace = replace_val.data();
     replace_len = replace_val.size();
     replace_end = replace + replace_len;
@@ -930,7 +927,18 @@ static String php_pcre_replace(const String& pattern, const String& subject,
               }
               if (preg_get_backref(&walk, &backref)) {
                 if (backref < count) {
-                  new_len += offsets[(backref<<1)+1] - offsets[backref<<1];
+                  match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
+                  if (eval) {
+                    String esc_match = f_addslashes(
+                      String(
+                        subject.data() + offsets[backref<<1],
+                        match_len,
+                        CopyString
+                      )
+                    );
+                    match_len = esc_match.length();
+                  }
+                  new_len += match_len;
                 }
                 continue;
               }
@@ -979,8 +987,23 @@ static String php_pcre_replace(const String& pattern, const String& subject,
               if (preg_get_backref(&walk, &backref)) {
                 if (backref < count) {
                   match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
-                  memcpy(walkbuf, subject.data() + offsets[backref<<1],
-                         match_len);
+                  if (eval) {
+                    String esc_match = f_addslashes(
+                      String(
+                        subject.data() + offsets[backref<<1],
+                        match_len,
+                        CopyString
+                      )
+                    );
+                    match_len = esc_match.length();
+                    memcpy(walkbuf, esc_match.data(), match_len);
+                  } else {
+                    memcpy(
+                      walkbuf,
+                      subject.data() + offsets[backref<<1],
+                      match_len
+                    );
+                  }
                   walkbuf += match_len;
                 }
                 continue;
@@ -994,7 +1017,16 @@ static String php_pcre_replace(const String& pattern, const String& subject,
           }
           *walkbuf = '\0';
           if (eval) {
-            eval_result = vm_call_user_func(eval_fn, params);
+            String prefixedCode = concat(concat(
+                "<?php return ", result + result_len), ";");
+            Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
+            Variant v;
+            Func* func = unit->getMain();
+            g_vmContext->invokeFunc(v.asTypedValue(), func, null_array, nullptr,
+              nullptr, nullptr, nullptr, VMExecutionContext::InvokePseudoMain
+            );
+            eval_result = v;
+
             memcpy(result + result_len, eval_result.data(), eval_result.size());
             result_len += eval_result.size();
           } else {

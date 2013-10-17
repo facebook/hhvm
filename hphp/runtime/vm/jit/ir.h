@@ -889,7 +889,6 @@ typename std::enable_if<
   return std::is_same<T,bool>::value ? Type::Bool : Type::Int;
 }
 
-inline Type typeForConst(const StringData*)  { return Type::StaticStr; }
 inline Type typeForConst(const NamedEntity*) { return Type::NamedEntity; }
 inline Type typeForConst(const Func*)        { return Type::Func; }
 inline Type typeForConst(const Class*)       { return Type::Cls; }
@@ -899,10 +898,14 @@ inline Type typeForConst(double)             { return Type::Dbl; }
 inline Type typeForConst(SetOpOp)            { return Type::Int; }
 inline Type typeForConst(IncDecOp)           { return Type::Int; }
 inline Type typeForConst(std::nullptr_t)     { return Type::Nullptr; }
+
+inline Type typeForConst(const StringData* sd) {
+  assert(sd->isStatic());
+  return Type::StaticStr;
+}
 inline Type typeForConst(const ArrayData* ad) {
   assert(ad->isStatic());
-  // TODO: Task #2124292, Reintroduce StaticArr
-  return Type::Arr;
+  return Type::StaticArr;
 }
 
 /*

@@ -6,7 +6,7 @@ array(6) {
   [2]=>
   string(%d) "%s"
   [3]=>
-  int(12)
+  int(16)
   [4]=>
   string(0) ""
   [5]=>
@@ -16,14 +16,14 @@ array(6) {
       ["file"]=>
       string(%d) "%s"
       ["line"]=>
-      int(12)
+      int(16)
     }
     [1]=>
     array(4) {
       ["file"]=>
       string(%d) "%s"
       ["line"]=>
-      int(14)
+      int(18)
       ["function"]=>
       string(4) "main"
       ["args"]=>
@@ -35,4 +35,5 @@ array(6) {
   }
 }
 in main
+bool(false)
 done with main

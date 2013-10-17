@@ -156,10 +156,13 @@ struct TypeConstraint {
     if (isSoft()) {
       name += '@';
     }
-    if (isNullable()) {
+    if (isNullable() && isExtended()) {
       name += '?';
     }
     name += m_typeName->data();
+    if (isNullable() && !isExtended()) {
+      name += " (defaulted to null)";
+    }
     return name;
   }
 

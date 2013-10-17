@@ -234,10 +234,10 @@ void c_ContinuationWaitHandle::markAsSucceeded(const Cell& result) {
 
 void c_ContinuationWaitHandle::markAsFailed(CObjRef exception) {
   AsioSession* session = AsioSession::Get();
-  session->onFailed(exception);
   if (UNLIKELY(session->hasOnContinuationFailCallback())) {
     session->onContinuationFail(this, exception);
   }
+
   setException(exception.get());
 
   m_continuation = nullptr;

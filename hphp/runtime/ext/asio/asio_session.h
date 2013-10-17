@@ -87,13 +87,6 @@ class AsioSession {
 
     void initAbruptInterruptException();
 
-    // callback: on failed
-    void setOnFailedCallback(ObjectData* on_failed_callback) {
-      assert(!on_failed_callback || on_failed_callback->instanceof(c_Closure::classof()));
-      m_onFailedCallback = on_failed_callback;
-    }
-    void onFailed(CObjRef exception);
-
     // ContinuationWaitHandle callbacks:
     void setOnContinuationCreateCallback(ObjectData* on_start) {
       assert(!on_start || on_start->instanceof(c_Closure::classof()));
@@ -181,9 +174,6 @@ class AsioSession {
     Object m_onGenVectorCreateCallback;
     Object m_onSetResultToRefCreateCallback;
     Object m_onJoinCallback;
-
-    // Legacy callback for backwards compatibility.
-    Object m_onFailedCallback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,8 +27,6 @@ namespace HPHP {
 int f_asio_get_current_context_idx();
 Object f_asio_get_running_in_context(int ctx_idx);
 Object f_asio_get_running();
-void f_asio_set_on_failed_callback(CVarRef on_failed_cb);
-void f_asio_set_on_started_callback(CVarRef on_started_cb);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class WaitHandle

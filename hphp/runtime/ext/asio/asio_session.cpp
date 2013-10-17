@@ -74,16 +74,6 @@ void AsioSession::initAbruptInterruptException() {
     "The request was abruptly interrupted.");
 }
 
-void AsioSession::onFailed(CObjRef exception) {
-  if (m_onFailedCallback.get()) {
-    try {
-      vm_call_user_func(m_onFailedCallback, Array::Create(exception));
-    } catch (const Object& callback_exception) {
-      raise_warning("[asio] Ignoring exception thrown by onFailed callback");
-    }
-  }
-}
-
 void AsioSession::onContinuationCreate(c_ContinuationWaitHandle* cont) {
   assert(m_onContinuationCreateCallback.get());
   try {

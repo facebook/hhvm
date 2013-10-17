@@ -140,6 +140,22 @@ bool f_apc_store(const String& key, CVarRef var, int64_t ttl /* = 0 */,
   return s_apc_store[cache_id].store(key, var, ttl);
 }
 
+/**
+ * Stores the key in a similar fashion as "priming" would do (no TTL limit).
+ * Using this function is equivalent to adding your key to apc_prime.so.
+ */
+bool f_apc_store_as_primed_do_not_use(const String& key, CVarRef var,
+    int64_t cache_id /* = 0 */) {
+  if (!apcExtension::Enable) return false;
+
+  if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
+    throw_invalid_argument("cache_id: %" PRId64, cache_id);
+    return false;
+  }
+
+  return s_apc_store[cache_id].store(key, var, 0, true, false);
+}
+
 bool f_apc_add(const String& key, CVarRef var, int64_t ttl /* = 0 */,
                int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;

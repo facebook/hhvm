@@ -452,7 +452,8 @@ static int64_t adjust_ttl(int64_t ttl, bool overwritePrime) {
 
 bool ConcurrentTableSharedStore::store(const String& key, CVarRef value,
                                        int64_t ttl,
-                                       bool overwrite /* = true */) {
+                                       bool overwrite /* = true */,
+                                       bool limit_ttl /* = true */) {
   StoreValue *sval;
   APCVariant* svar = construct(value);
   ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
@@ -473,7 +474,7 @@ bool ConcurrentTableSharedStore::store(const String& key, CVarRef value,
         overwritePrime = (sval->expiry == 0);
         if (sval->inMem()) {
           stats_on_update(key.get(), sval, svar,
-                          adjust_ttl(ttl, overwritePrime));
+                          adjust_ttl(ttl, overwritePrime || !limit_ttl));
           sval->var->decRef();
           update = true;
         } else {
@@ -486,7 +487,7 @@ bool ConcurrentTableSharedStore::store(const String& key, CVarRef value,
         return false;
       }
     }
-    int64_t adjustedTtl = adjust_ttl(ttl, overwritePrime);
+    int64_t adjustedTtl = adjust_ttl(ttl, overwritePrime || !limit_ttl);
     if (check_noTTL(key.data(), key.size())) {
       adjustedTtl = 0;
     }

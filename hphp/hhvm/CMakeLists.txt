@@ -7,4 +7,4 @@ target_link_libraries(hhvm ${HHVM_LINK_LIBRARIES})
 embed_systemlib(hhvm "${CMAKE_CURRENT_SOURCE_DIR}/hhvm" ${HPHP_HOME}/bin/systemlib.php)
 add_dependencies(hhvm systemlib)
 
-install(TARGETS hhvm DESTINATION bin)
+HHVM_INSTALL(hhvm bin)

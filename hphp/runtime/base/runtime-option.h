@@ -420,6 +420,7 @@ public:
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
   F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
   F(bool,     JitPGOUsePostConditions, true)                            \
+  F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \
   F(bool, HHBCRelaxGuards,             hhbcRelaxGuardsDefault())        \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \

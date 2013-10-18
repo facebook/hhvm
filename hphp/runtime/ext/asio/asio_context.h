@@ -46,8 +46,17 @@ class AsioContext {
 
     void schedule(c_AsyncFunctionWaitHandle* wait_handle);
     void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority);
-    uint32_t registerExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle);
-    void unregisterExternalThreadEvent(uint32_t ete_idx);
+
+    template <class TWaitHandle>
+    uint32_t registerTo(smart::vector<TWaitHandle*>& vec, TWaitHandle* wh);
+
+    template <class TWaitHandle>
+    void unregisterFrom(smart::vector<TWaitHandle*>& vec, uint32_t ev_idx);
+
+    smart::vector<c_ExternalThreadEventWaitHandle*>& getExternalThreadEvents() {
+      return m_externalThreadEvents;
+    };
+
     void runUntil(c_WaitableWaitHandle* wait_handle);
 
     static const uint32_t QUEUE_DEFAULT       = 0;
@@ -76,5 +85,7 @@ class AsioContext {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#include "hphp/runtime/ext/asio/asio_context-inl.h"
 
 #endif // incl_HPHP_EXT_ASIO_CONTEXT_H_

@@ -824,8 +824,33 @@
             ]
         },
         {
-            "name": "ExternalThreadEventWaitHandle",
+            "name": "SessionScopedWaitHandle",
             "parent": "WaitableWaitHandle",
+            "desc": "A wait handle whose execution is session-managed",
+            "flags": [
+                "IsAbstract",
+                "IsCppAbstract",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "ExternalThreadEventWaitHandle",
+            "parent": "SessionScopedWaitHandle",
             "desc": "A wait handle that synchronizes against C++ operation in external thread",
             "bases": [
                 "Sweepable"

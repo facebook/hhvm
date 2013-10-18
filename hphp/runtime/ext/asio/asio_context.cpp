@@ -83,20 +83,6 @@ void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, 
   wait_handle->incRefCount();
 }
 
-uint32_t AsioContext::registerExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle) {
-  m_externalThreadEvents.push_back(wait_handle);
-  return m_externalThreadEvents.size() - 1;
-}
-
-void AsioContext::unregisterExternalThreadEvent(uint32_t ete_idx) {
-  assert(ete_idx < m_externalThreadEvents.size());
-  if (ete_idx != m_externalThreadEvents.size() - 1) {
-    m_externalThreadEvents[ete_idx] = m_externalThreadEvents.back();
-    m_externalThreadEvents[ete_idx]->setIndex(ete_idx);
-  }
-  m_externalThreadEvents.pop_back();
-}
-
 void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   assert(!m_current);
   assert(wait_handle);

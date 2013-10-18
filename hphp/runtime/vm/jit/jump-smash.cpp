@@ -153,9 +153,10 @@ void smashJcc(TCA jccAddr, TCA newDest) {
                                                 - X64::kJmpImmBytes);
     *deltaAddr = newDelta;
   } else {
-    // This offset is asserted in emitSmashableJump. We wrote four instructions.
-    // Then the jump destination was written at the next 8-byte boundary.
-    auto dataPtr = jccAddr + 16;
+    // This offset is asserted in emitSmashableJump. We wrote three
+    // instructions. Then the jump destination was written at the next 8-byte
+    // boundary.
+    auto dataPtr = jccAddr + 12;
     if ((uintptr_t(dataPtr) & 7) != 0) {
       dataPtr += 4;
       assert((uintptr_t(dataPtr) & 7) == 0);
@@ -189,8 +190,7 @@ void emitSmashableJump(CodeBlock& cb, Transl::TCA dest,
     // 26-bit jump offsets (not big enough). It does, however, entail an
     // indirect jump.
     if (cc == CC_None) {
-      a.    Adr  (ARM::rAsm, &targetData);
-      a.    Ldr  (ARM::rAsm, ARM::rAsm[0]);
+      a.    Ldr  (ARM::rAsm, &targetData);
       a.    Br   (ARM::rAsm);
       if (!cb.isFrontierAligned(8)) {
         a.  Nop  ();
@@ -200,12 +200,11 @@ void emitSmashableJump(CodeBlock& cb, Transl::TCA dest,
       a.    dc64 (reinterpret_cast<int64_t>(dest));
 
       // If this assert breaks, you need to change smashJmp
-      assert(targetData.target() == start + 12 ||
-             targetData.target() == start + 16);
+      assert(targetData.target() == start + 8 ||
+             targetData.target() == start + 12);
     } else {
       a.    B    (&afterData, InvertCondition(ARM::convertCC(cc)));
-      a.    Adr  (ARM::rAsm, &targetData);
-      a.    Ldr  (ARM::rAsm, ARM::rAsm[0]);
+      a.    Ldr  (ARM::rAsm, &targetData);
       a.    Br   (ARM::rAsm);
       if (!cb.isFrontierAligned(8)) {
         a.  Nop  ();
@@ -216,8 +215,8 @@ void emitSmashableJump(CodeBlock& cb, Transl::TCA dest,
       a.    bind (&afterData);
 
       // If this assert breaks, you need to change smashJcc
-      assert(targetData.target() == start + 16 ||
-             targetData.target() == start + 20);
+      assert(targetData.target() == start + 12 ||
+             targetData.target() == start + 16);
     }
   }
 }
@@ -229,13 +228,13 @@ Transl::TCA jmpTarget(Transl::TCA jmp) {
     if (jmp[0] != 0xe9) return nullptr;
     return jmp + 5 + ((int32_t*)(jmp + 5))[-1];
   } else if (arch() == Arch::ARM) {
-    // This doesn't verify that each of the three or four instructions that make
+    // This doesn't verify that each of the two or three instructions that make
     // up this sequence matches; just the first one and the indirect jump.
     using namespace vixl;
-    Instruction* adr = Instruction::Cast(jmp);
-    if (adr->Bit(31) != 0 || adr->Bits(28, 24) != 0x10) return nullptr;
+    Instruction* ldr = Instruction::Cast(jmp);
+    if (ldr->Bits(31, 24) != 0x58) return nullptr;
 
-    Instruction* br = Instruction::Cast(jmp + 8);
+    Instruction* br = Instruction::Cast(jmp + 4);
     if (br->Bits(31, 10) != 0x3587C0 || br->Bits(5, 0) != 0) return nullptr;
 
     uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 8);
@@ -258,10 +257,10 @@ Transl::TCA jccTarget(Transl::TCA jmp) {
     Instruction* b = Instruction::Cast(jmp);
     if (b->Bits(31, 24) != 0x54 || b->Bit(4) != 0) return nullptr;
 
-    Instruction* br = Instruction::Cast(jmp + 12);
+    Instruction* br = Instruction::Cast(jmp + 8);
     if (br->Bits(31, 10) != 0x3587C0 || br->Bits(5, 0) != 0) return nullptr;
 
-    uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 12);
+    uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 8);
     if ((dest & 7) != 0) {
       dest += 4;
       assert((dest & 7) == 0);

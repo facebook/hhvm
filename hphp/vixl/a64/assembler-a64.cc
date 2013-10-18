@@ -1094,6 +1094,14 @@ void Assembler::str(const CPURegister& rt, const MemOperand& src) {
 }
 
 
+void Assembler::ldr(const Register& rt, Label* label) {
+  assert(rt.Is64Bits());
+  Emit(LDR_x_lit
+       | ImmLLiteral(UpdateAndGetInstructionOffsetTo(label))
+       | Rt(rt));
+}
+
+
 void Assembler::ldrsw(const Register& rt, const MemOperand& src) {
   assert(rt.Is64Bits());
   LoadStore(rt, src, LDRSW_x);

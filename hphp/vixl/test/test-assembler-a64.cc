@@ -2103,6 +2103,38 @@ TEST(Assembler, load_store_double) {
 }
 
 
+TEST(Assembler, load_pc_relative) {
+  SETUP();
+
+  constexpr auto beforeValue = 0xdeadbeeffeedface;
+  constexpr auto afterValue  = 0xf00dcafebeadf00c;
+
+  START();
+  Label dataBefore;
+  Label dataAfter;
+  Label codeStart;
+  Label codeEnd;
+  __ B   (&codeStart);
+  __ bind(&dataBefore);
+  __ dc64(beforeValue);
+  __ bind(&codeStart);
+  __ Ldr (x0, &dataBefore);
+  __ Ldr (x1, &dataAfter);
+  __ B   (&codeEnd);
+  __ bind(&dataAfter);
+  __ dc64(afterValue);
+  __ bind(&codeEnd);
+  END();
+
+  RUN();
+
+  ASSERT_EQUAL_64(beforeValue, x0);
+  ASSERT_EQUAL_64(afterValue, x1);
+
+  TEARDOWN();
+}
+
+
 TEST(Assembler, ldp_stp_float) {
   SETUP();
 

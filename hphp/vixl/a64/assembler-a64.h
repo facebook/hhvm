@@ -1076,6 +1076,9 @@ class Assembler {
   // Store integer or FP register.
   void str(const CPURegister& rt, const MemOperand& dst);
 
+  // PC-relative load.
+  void ldr(const Register& rt, Label* label);
+
   // Load word with sign extension.
   void ldrsw(const Register& rt, const MemOperand& src);
 
@@ -1371,6 +1374,11 @@ class Assembler {
     Instr immhi = (imm >> ImmPCRelLo_width) << ImmPCRelHi_offset;
     Instr immlo = imm << ImmPCRelLo_offset;
     return (immhi & ImmPCRelHi_mask) | (immlo & ImmPCRelLo_mask);
+  }
+
+  static Instr ImmPCRelLoadStoreAddress(int imm19) {
+    assert(is_int19(imm19));
+    return truncate_to_int19(imm19) << ImmLLiteral_offset;
   }
 
   // Branch encoding.

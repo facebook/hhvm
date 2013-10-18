@@ -504,7 +504,9 @@ void LibEventServer::onResponse(int worker, evhttp_request *request,
   int totalSize = 0;
 
   if (RuntimeOption::LibEventSyncSend && !skip_sync) {
-    const char *reason = HttpProtocol::GetReasonString(code);
+    auto const& reasonStr = transport->getResponseInfo();
+    const char* reason = reasonStr.empty() ? HttpProtocol::GetReasonString(code)
+                                           : reasonStr.c_str();
     timespec begin, end;
     Timer::GetMonotonicTime(begin);
 #ifdef EVHTTP_SYNC_SEND_REPORT_TOTAL_LEN

@@ -8,4 +8,5 @@ array(1) {
     }
   }
 }
+HipHop Notice: Array to string conversion in %s on line %d
 string(7) "Arrayok"

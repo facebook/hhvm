@@ -43,6 +43,8 @@ class AsioExternalThreadEventQueue {
     bool abandonAllReceived(c_ExternalThreadEventWaitHandle* wait_handle);
 
     bool tryReceiveSome();
+    bool receiveSomeUntil(
+        std::chrono::time_point<std::chrono::steady_clock> waketime);
     void receiveSome();
     void send(c_ExternalThreadEventWaitHandle* wait_handle);
 

@@ -71,12 +71,32 @@ class AsioSession {
 
     uint16_t getCurrentWaitHandleDepth();
 
-    // external thread events
+    // External thread events.
     AsioExternalThreadEventQueue* getExternalThreadEventQueue() {
       return &m_externalThreadEventQueue;
     }
 
-    // abrupt interrupt exception
+    // Meager time abstractions.
+    typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
+
+    static TimePoint getLatestWakeTime() {
+      // Don't wait for over nine thousand hours.
+      return std::chrono::steady_clock::now() + std::chrono::hours(9000);
+    }
+
+    // Sleep event management.
+    struct sleep_wh_greater {
+      bool operator() (const c_SleepWaitHandle* x, const c_SleepWaitHandle* y);
+    };
+
+    smart::priority_queue<c_SleepWaitHandle*, sleep_wh_greater>&
+    getSleepEventQueue() {
+      return m_sleepEventQueue;
+    }
+
+    bool processSleepEvents();
+
+    // Abrupt interrupt exception.
     CObjRef getAbruptInterruptException() {
       return m_abruptInterruptException;
     }
@@ -153,14 +173,14 @@ class AsioSession {
     bool hasOnSetResultToRefCreateCallback() { return m_onSetResultToRefCreateCallback.get(); }
     void onSetResultToRefCreate(c_SetResultToRefWaitHandle* wait_handle, CObjRef child);
 
-
   private:
     static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);
 
     AsioSession();
 
     smart::vector<AsioContext*> m_contexts;
-
+    smart::priority_queue<c_SleepWaitHandle*,
+                          sleep_wh_greater> m_sleepEventQueue;
     AsioExternalThreadEventQueue m_externalThreadEventQueue;
 
     Object m_abruptInterruptException;

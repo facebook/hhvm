@@ -849,6 +849,47 @@
             ]
         },
         {
+            "name": "SleepWaitHandle",
+            "parent": "SessionScopedWaitHandle",
+            "desc": "A wait handle that succeeds with null after the desired timeout expires",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                        "IsPrivate"
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "create",
+                    "desc": "Create a wait handle that succeeds after the desired timeout expires",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "A SleepWaitHandle that succeeds after the desired timeout expires"
+                    },
+                    "args": [
+                        {
+                            "name": "usecs",
+                            "type": "Int64",
+                            "desc": "Non-negative number of microseconds to sleep for"
+                        }
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
             "name": "ExternalThreadEventWaitHandle",
             "parent": "SessionScopedWaitHandle",
             "desc": "A wait handle that synchronizes against C++ operation in external thread",

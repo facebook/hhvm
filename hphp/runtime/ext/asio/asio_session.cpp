@@ -171,5 +171,34 @@ void AsioSession::onSetResultToRefCreate(c_SetResultToRefWaitHandle* wait_handle
   }
 }
 
+bool AsioSession::sleep_wh_greater::operator() (const c_SleepWaitHandle* x,
+                                                const c_SleepWaitHandle* y) {
+  return x->getWakeTime() > y->getWakeTime();
+}
+
+bool AsioSession::processSleepEvents() {
+  if (m_sleepEventQueue.empty()) {
+    return false;
+  }
+
+  bool woken = false;
+  auto now = TimePoint::clock::now();
+
+  while (!m_sleepEventQueue.empty()) {
+    auto wh = m_sleepEventQueue.top();
+
+    if (wh->getWakeTime() > now) {
+      break;
+    }
+    woken = true;
+
+    wh->process();
+    decRefObj(wh);
+    m_sleepEventQueue.pop();
+  }
+
+  return woken;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

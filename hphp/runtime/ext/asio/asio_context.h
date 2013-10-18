@@ -29,6 +29,7 @@ namespace HPHP {
 FORWARD_DECLARE_CLASS(WaitableWaitHandle);
 FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
 FORWARD_DECLARE_CLASS(RescheduleWaitHandle);
+FORWARD_DECLARE_CLASS(SleepWaitHandle);
 FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
 
 typedef uint8_t context_idx_t;
@@ -53,6 +54,9 @@ class AsioContext {
     template <class TWaitHandle>
     void unregisterFrom(smart::vector<TWaitHandle*>& vec, uint32_t ev_idx);
 
+    smart::vector<c_SleepWaitHandle*>& getSleepEvents() {
+      return m_sleepEvents;
+    };
     smart::vector<c_ExternalThreadEventWaitHandle*>& getExternalThreadEvents() {
       return m_externalThreadEvents;
     };
@@ -79,7 +83,8 @@ class AsioContext {
     // queue of RescheduleWaitHandles scheduled to be run once there is no pending I/O
     reschedule_priority_queue_t m_priorityQueueNoPendingIO;
 
-    // list of all pending ExternalThreadEventWaitHandles
+    // pending wait handles
+    smart::vector<c_SleepWaitHandle*> m_sleepEvents;
     smart::vector<c_ExternalThreadEventWaitHandle*> m_externalThreadEvents;
 };
 

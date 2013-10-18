@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -129,9 +130,7 @@ bool AsioExternalThreadEventQueue::receiveSomeUntil(
  * Receive at least one finished event.
  */
 void AsioExternalThreadEventQueue::receiveSome() {
-  // Wait for over nine thousand hours.
-  bool received UNUSED = receiveSomeUntil(
-      std::chrono::steady_clock::now() + std::chrono::hours(9001));
+  bool received UNUSED = receiveSomeUntil(AsioSession::getLatestWakeTime());
   assert(received);
 }
 

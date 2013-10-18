@@ -9,7 +9,7 @@ Introduction
 HipHop bytecode (HHBC) v1 is intended to serve as the conceptual basis for
 encoding the semantic meaning of HipHop source code into a format that is
 appropriate for consumption by interpreters and just-in-time compilers. By
-using simpler constructs to encode more complex expressesion and statements,
+using simpler constructs to encode more complex expressions and statements,
 HHBC makes it straightforward for an interpreter or a compiler to determine
 the order of execution for a program.
 
@@ -24,7 +24,7 @@ code into HipHop bytecode in a way that preserves the semantic meaning of the
 source.
 
 3) Simplicity. The design of HHBC should avoid features that could be removed
-or simplified without comprimising PHP 5.4 compatibility, run-time efficiency,
+or simplified without compromising PHP 5.4 compatibility, run-time efficiency,
 or design cleanliness.
 
 
@@ -111,7 +111,7 @@ logic.
 A "ref" is a structure that contains a pointer to a cell container. When a
 ref is duplicated, the new ref will point to the same container as the
 original ref. When a ref is duplicated or destroyed, the execution engine is
-responsible for honoring the containers's refcount logic.  When the container
+responsible for honoring the container's refcount logic.  When the container
 is destroyed, the cell it contains is also destroyed.
 
 A "classref" is a structure that contains a reference to a class. When a
@@ -126,7 +126,7 @@ Functions
 ---------
 
 A unit's bytecode is organized into functions. Each function has its own
-metadata that provdes essential information about the function, such as the
+metadata that provides essential information about the function, such as the
 name of the function, how many local variables it has, how many iterator
 variables it has, how many formal parameters it has, the names of the local
 variables, the names of the formal parameters, how each parameter should be
@@ -153,7 +153,7 @@ in the current variable environment.
 Formally declared parameters are considered to be local variables. Given a
 function with n formally declared parameters, local ids 0 through n-1 will be
 used to reference the formally declared parameters. Formal parameters without
-default values are called "required parameters", while formal parmeters with
+default values are called "required parameters", while formal parameters with
 default values are called "optional parameters".
 
 The bytecode for each function consists of the instructions of the primary
@@ -163,7 +163,7 @@ the primary function body, along with information about each fault funclet.
 Entry points and fault funclets are discussed in more detail in the next
 section. The total size of the bytecode for the primary function body and all
 the fault funclets must not exceed 2^31 - 1 bytes. The primary function body
-and each fault funclet must be a continguous range of bytecode.
+and each fault funclet must be a contiguous range of bytecode.
 
 Each function's metadata provides a "line number table" to allow mapping
 bytecode offsets back to source line numbers. Each row in the line number table
@@ -221,7 +221,7 @@ Exceptions
 
 The metadata for each function provides an "exception handler (EH) table".
 Each row in the EH table consists of a kind ("fault" or "catch"), a range
-of bytecode that constitues the protected region, and an offset of a fault
+of bytecode that constitutes the protected region, and an offset of a fault
 funclet or list of (classname, offset) pairs describing catch entry points.
 
 Each range of bytecode is given by a starting offset and an ending
@@ -270,8 +270,13 @@ Unit metadata
 Every compilation unit has a litstr table, a scalar array table, a function
 table, and a class table.
 
-The litstr table maps litstr ids to literal strings. Litstr ids are signed
-32-bit integer values. Each litstr id must be between 0 and 2^31 - 2 inclusive.
+The litstr table maps litstr ids to literal strings. Bytecodes that refer to
+literal strings do so by litstr id.  Litstr ids are signed 32-bit integer
+values, which must be between 0 and 2^31 - 2 inclusive.  In addition to the
+per-unit litstr tables, a global table is built when generating an
+"authoritative" repo (one in which all the PHP code is known at bytecode
+generation time, and is guaranteed not to change).  Global litstr ids can be
+used in any unit, and are encoded in the range [2^30..2^31-2].
 
 The scalar array table maps scalar array ids to a description of the contents
 of a scalar array. An array is a scalar array if and only if each element of
@@ -320,7 +325,7 @@ function (the callee), transfers the parameters from the evaluation stack to
 the callee, pops the current FPI off of the FPI stack, and then invokes the
 dispatcher to call the function.
 
-Calls to builtin functions may be optimized to avoid pusing an entry on the FPI
+Calls to builtin functions may be optimized to avoid pushing an entry on the FPI
 stack if it is known that the builtin function does not need access to the call
 stack. In this case, the arguments to the builtin are pushed on stack as Cells
 and Vars, and the builtin can be invoked with the FCallBuiltin instruction.
@@ -359,7 +364,7 @@ responsible for following certain rules to honor each property's accessibility
 and visibility.
 
 The accessibility and visibility of a property in a given class is determined
-by that class's definition and the definitons of all of that class's ancestors.
+by that class's definition and the definitions of all of that class's ancestors.
 When a property is declared in a class definition (a "declared property") it
 may be specified as being "public", "protected", or "private". Accessibility
 and visibility are two related but distinct concepts. Depending on the current
@@ -387,13 +392,13 @@ the ancestor class. Note that there may exist a class D that is a descendent of
 C and declares a property as "public" with the same name as P. In such cases
 the new "public" declaration in D is considered to refer to the same property
 as the original "protected" declaration in C, and the "protected" qualifier
-from the original declaration is effectively overriden by the "public"
+from the original declaration is effectively overridden by the "public"
 qualifier from the new declaration. Class D is said to "redeclare" property P
 with the "public" qualifier. Thus, for instances of class D and descendent
 classes of D, property P will be visible and accessible in all contexts.
 Finally, if a class E that is descendent of C does not redeclare P as public
 and does not have an ancestor class that redeclares P as public, for instances
-of class E the property P will be visibile in all contexts, but only accessible
+of class E the property P will be visible in all contexts, but only accessible
 in the context of class E, an ancestor class of E, or a descendent class of E.
 
 If a property P is declared with the "private" qualifier in the definition of
@@ -454,7 +459,7 @@ engine is responsible for following certain rules to honor each static
 property's accessibility and visibility.
 
 The accessibility and visibility of a static property in a given class is
-determined by that class's definition and the definitons of all of that class's
+determined by that class's definition and the definitions of all of that class's
 ancestors. When a static property is declared in a class definition it may be
 specified as being "public", "protected", or "private". Depending on the
 current context, a static property may be visible and accessible, visible but
@@ -513,7 +518,7 @@ not declared in the class definition.
 FPI regions
 -----------
 
-An FPI region is a continguous range of bytecode that constitutes a call site.
+An FPI region is a contiguous range of bytecode that constitutes a call site.
 Each FPI region begins immediately after an FPush* instruction that pushes an
 FPI structure onto the FPI stack and must end with the corresponding FCall*
 instruction that pops that FPI structure off of the FPI stack. If two FPI
@@ -566,7 +571,7 @@ inputs to each instruction is said to be "flavor-safe".
 
 HHBC provides a set of verification rules that can be mechanically applied to
 verify that an HHBC program is flavor-safe. All valid HHBC programs must be
-verifiably flavor-safe, and the execution engine may refuse to execute HHBC 
+verifiably flavor-safe, and the execution engine may refuse to execute HHBC
 programs that cannot be verified.
 
 At bytecode generation time, what is known about the state of the evaluation
@@ -762,7 +767,7 @@ number of cells from the stack. In most cases the immediate vector arguments
 are ordered such that the loc-desc comes first (deepest in the stack), with the
 last M-vector element last (shallowest in the stack). However, classrefs that
 are part of the BaseSC and BaseSL loc-desc inputs always come last (the cell
-input to BaseSC comes first though).  Instuctions accepting an immediate vector
+input to BaseSC comes first though).  Instructions accepting an immediate vector
 containing a list of iterators and iterator types use the notation "<iter-vec>".
 
 In addition to describing each instruction, this instruction set documentation
@@ -1089,7 +1094,7 @@ Shr    [C C]  ->  [C:Int]
 
 Floor    [C]  ->  [C:Dbl]
 
-  Round $1 to nearest integer value not greater than $1.  Converts $1 to 
+  Round $1 to nearest integer value not greater than $1.  Converts $1 to
   numeric as appropriate and then takes floor of resulting numeric value.
 
 Ceil    [C]  ->  [C:Dbl]
@@ -3527,8 +3532,8 @@ CIterFree <iterator id>    []  ->  []
 
 IterBreak <iter-vec> <rel offset>   []  ->  []
 
-  Iterator break.  Frees vectors in %1 in left to right order then transfers 
-  control to the locaton specified by %2.  Surprise checks are performed 
+  Iterator break.  Frees vectors in %1 in left to right order then transfers
+  control to the locaton specified by %2.  Surprise checks are performed
   before iterators are freed so that in the event of an exception iterators
   are not double freed.  Note that as with normal jumps surprise checks will
   only be performed if %2 is negative.
@@ -3765,9 +3770,9 @@ CreateCont <function name>    []  ->  [C]
 
 CreateAsync <function name> <label id> <number of iterators>   [C]  ->  [C]
 
-  Analogy of CreateCont for async functions. Creates a Continuation object, 
-  updates its label with <label id> immediate and stores a value from the stack 
-  to its m_value field. Unlike CreateCont, it also copies the first 
+  Analogy of CreateCont for async functions. Creates a Continuation object,
+  updates its label with <label id> immediate and stores a value from the stack
+  to its m_value field. Unlike CreateCont, it also copies the first
   <number of iterators> iterators into the continuation frame.
 
 ContEnter [C]  ->  []

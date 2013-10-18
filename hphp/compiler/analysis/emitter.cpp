@@ -3805,6 +3805,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               } else {
                 not_implemented();
               }
+            } else if (key->is(Expression::KindOfUnaryOpExpression)) {
+              assert(key->isScalar());
+              tvKey = make_tv<KindOfNull>();
+              auto uoe = dynamic_pointer_cast<UnaryOpExpression>(key);
+              uoe->getScalarValue(tvAsVariant(&tvKey));
             } else {
               not_implemented();
             }

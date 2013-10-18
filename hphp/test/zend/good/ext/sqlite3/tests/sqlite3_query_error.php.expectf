@@ -1,6 +1,7 @@
 Testing SQLite3 query without parameters
 HipHop Warning: %s
 Testing SQLite3 query with one array parameter
+HipHop Notice: Array to string conversion in %s on line %d
 HipHop Warning: %s
 Testing SQLite3 qeury with empty string parameter
 bool(false)

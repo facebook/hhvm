@@ -10,5 +10,5 @@ $db->query(array());
 echo 'Testing SQLite3 qeury with empty string parameter' . PHP_EOL;
 var_dump($db->query(''));
 
-echo "Done";
+echo "Done\n";
 ?>

@@ -893,6 +893,9 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   void init(CVarRef t);
 
   void add(TypedValue* val);
+  void add(int64_t h);
+  void add(StringData* key);
+
   void remove(int64_t key) {
     ++m_version;
     erase(find(key));
@@ -1018,8 +1021,6 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   Bucket* findForInsert(const char* k, int len, strhash_t prehash) const;
   Bucket* findForNewInsert(size_t h0) const;
 
-  void update(int64_t h);
-  void update(StringData* key);
   void erase(Bucket* prev);
 
   void adjustCapacityImpl(int64_t sz);

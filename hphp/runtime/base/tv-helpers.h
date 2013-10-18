@@ -488,7 +488,7 @@ void cellCastToInt64InPlace(Cell*);
 void tvCastToDoubleInPlace(TypedValue* tv);
 double tvCastToDouble(TypedValue* tv);
 void tvCastToStringInPlace(TypedValue* tv);
-StringData* tvCastToString(TypedValue* tv);
+StringData* tvCastToString(const TypedValue* tv);
 void tvCastToArrayInPlace(TypedValue* tv);
 void tvCastToObjectInPlace(TypedValue* tv);
 void tvCastToResourceInPlace(TypedValue* tv);

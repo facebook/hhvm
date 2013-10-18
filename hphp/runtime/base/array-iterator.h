@@ -145,7 +145,22 @@ class ArrayIter {
     }
     return firstHelper();
   }
-  Variant firstHelper();
+  /**
+   * keyish() works similarly to first(), except that for Sets it will
+   * return the value (second()) instead of returning null. We use keyish()
+   * instead of first() in a number of the array builtins that have been
+   * adapted to work with collections.
+   */
+  Variant keyish() {
+    if (LIKELY(hasArrayData())) {
+      const ArrayData* ad = getArrayData();
+      assert(ad);
+      assert(m_pos != ArrayData::invalid_index);
+      return ad->getKey(m_pos);
+    }
+    return firstHelper(true);
+  }
+  Variant firstHelper(bool keyishMode = false);
   void nvFirst(TypedValue* out) {
     const ArrayData* ad = getArrayData();
     assert(ad && m_pos != ArrayData::invalid_index);

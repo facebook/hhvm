@@ -292,7 +292,7 @@ void ArrayIter::nextHelper() {
   }
 }
 
-Variant ArrayIter::firstHelper() {
+Variant ArrayIter::firstHelper(bool keyishMode /* = false */) {
   switch (getCollectionType()) {
     case Collection::VectorType: {
       return m_pos;
@@ -314,7 +314,15 @@ Variant ArrayIter::firstHelper() {
       return smp->iter_key(m_pos);
     }
     case Collection::SetType: {
-      return uninit_null();
+      if (keyishMode) {
+        c_Set* st = getSet();
+        if (UNLIKELY(m_version != st->getVersion())) {
+          throw_collection_modified();
+        }
+        return tvAsCVarRef(st->iter_value(m_pos));
+      } else {
+        return uninit_null();
+      }
     }
     case Collection::PairType: {
       return m_pos;

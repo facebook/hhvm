@@ -1368,8 +1368,9 @@ inline const Variant Array::operator[](CVarRef key) const {
   return rvalAt(key);
 }
 
-inline void Array::setWithRef(CVarRef k, CVarRef v) {
-  lvalAt(k, AccessFlags::Key).setWithRef(v);
+inline void Array::setWithRef(CVarRef k, CVarRef v,
+                              bool isKey /* = false */) {
+  lvalAt(k, isKey ? AccessFlags::Key : AccessFlags::None).setWithRef(v);
 }
 
 inline Variant uninit_null() {

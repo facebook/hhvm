@@ -379,7 +379,7 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   // Iterate over dynamic properties and insert {name --> prop} pairs.
   if (!o_properties.empty()) {
     for (ArrayIter it(o_properties.get()); !it.end(); it.next()) {
-      props.setWithRef(it.first(), it.secondRef());
+      props.setWithRef(it.first(), it.secondRef(), true);
     }
   }
 }

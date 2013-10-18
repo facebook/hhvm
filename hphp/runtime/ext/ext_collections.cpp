@@ -3321,9 +3321,9 @@ void c_Set::init(CVarRef t) {
   for (; iter; ++iter) {
     Variant v = iter.second();
     if (v.isInteger()) {
-      update(v.toInt64());
+      add(v.toInt64());
     } else if (v.isString()) {
-      update(v.getStringData());
+      add(v.getStringData());
     } else {
       throwBadValueType();
     }
@@ -3495,10 +3495,10 @@ Object c_Set::t_filter(CVarRef callback) {
     }
     if (!ret.toBoolean()) continue;
     if (p.hasInt()) {
-      st->update(p.data.m_data.num);
+      st->add(p.data.m_data.num);
     } else {
       assert(p.hasStr());
-      st->update(p.data.m_data.pstr);
+      st->add(p.data.m_data.pstr);
     }
   }
   return obj;
@@ -3526,9 +3526,9 @@ Object c_Set::ti_fromitems(CVarRef iterable) {
   for (; iter; ++iter) {
     Variant v = iter.second();
     if (v.isInteger()) {
-      target->update(v.toInt64());
+      target->add(v.toInt64());
     } else if (v.isString()) {
-      target->update(v.getStringData());
+      target->add(v.getStringData());
     } else {
       throwBadValueType();
     }
@@ -3549,9 +3549,9 @@ Object c_Set::ti_fromarray(CVarRef arr) {
        pos = ad->iter_advance(pos)) {
     CVarRef v = ad->getValueRef(pos);
     if (v.isInteger()) {
-      st->update(v.toInt64());
+      st->add(v.toInt64());
     } else if (v.isString()) {
-      st->update(v.getStringData());
+      st->add(v.getStringData());
     } else {
       throwBadValueType();
     }
@@ -3601,16 +3601,6 @@ void c_Set::throwNoIndexAccess() {
   Object e(SystemLib::AllocRuntimeExceptionObject(
     "[] operator not supported for accessing elements of Sets"));
   throw e;
-}
-
-void c_Set::add(TypedValue* val) {
-  if (val->m_type == KindOfInt64) {
-    update(val->m_data.num);
-  } else if (IS_STRING_TYPE(val->m_type)) {
-    update(val->m_data.pstr);
-  } else {
-    throwBadValueType();
-  }
 }
 
 #define STRING_HASH(x)   (int32_t(x) | 0x80000000)
@@ -3725,7 +3715,7 @@ c_Set::Bucket* c_Set::findForNewInsert(size_t h0) const {
 #undef FIND_BODY
 #undef FIND_FOR_INSERT_BODY
 
-void c_Set::update(int64_t h) {
+void c_Set::add(int64_t h) {
   Bucket* p = findForInsert(h);
   assert(p);
   if (p->validValue()) {
@@ -3743,7 +3733,7 @@ void c_Set::update(int64_t h) {
   p->setInt(h);
 }
 
-void c_Set::update(StringData *key) {
+void c_Set::add(StringData *key) {
   strhash_t h = key->hash();
   Bucket* p = findForInsert(key->data(), key->size(), h);
   assert(p);
@@ -3760,6 +3750,16 @@ void c_Set::update(StringData *key) {
     }
   }
   p->setStr(key, h);
+}
+
+void c_Set::add(TypedValue* val) {
+  if (val->m_type == KindOfInt64) {
+    add(val->m_data.num);
+  } else if (IS_STRING_TYPE(val->m_type)) {
+    add(val->m_data.pstr);
+  } else {
+    throwBadValueType();
+  }
 }
 
 void c_Set::erase(Bucket* p) {

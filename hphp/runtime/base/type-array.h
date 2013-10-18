@@ -407,7 +407,7 @@ public:
   void removeAll();
   void clear() { removeAll();}
 
-  void setWithRef(CVarRef k, CVarRef v);
+  void setWithRef(CVarRef key, CVarRef v, bool isKey = false);
 
   CVarRef append(CVarRef v);
   CVarRef append(RefResult v) { return appendRef(variant(v)); }

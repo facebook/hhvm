@@ -158,7 +158,7 @@ Variant f_array_combine(CVarRef keys, CVarRef values) {
   Array ret = ArrayData::Create();
   for (ArrayIter iter1(cell_keys), iter2(cell_values);
        iter1; ++iter1, ++iter2) {
-    ret.lvalAt(iter1.secondRefPlus()).setWithRef(iter2.secondRefPlus());
+    ret.setWithRef(iter1.secondRefPlus(), iter2.secondRefPlus());
   }
   return ret;
 }
@@ -249,27 +249,6 @@ bool f_key_exists(CVarRef key, CVarRef search) {
   return f_array_key_exists(key, search);
 }
 
-static Variant
-arrayKeysSetHelper(const Cell& cell_input, CVarRef search_value, bool strict) {
-  ArrayIter iter(cell_input);
-  if (LIKELY(!search_value.isInitialized())) {
-    PackedArrayInit ai(getContainerSize(cell_input));
-    for (; iter; ++iter) {
-      ai.append(iter.second());
-    }
-    return ai.toArray();
-  }
-
-  Array ai = HphpArray::MakeReserve(0);
-  for (; iter; ++iter) {
-    if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
-        (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
-      ai.append(iter.second());
-    }
-  }
-  return ai;
-}
-
 Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
                      bool strict /* = false */) {
   const auto& cell_input = *input.asCell();
@@ -277,19 +256,11 @@ Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
     goto warn;
   }
   {
-    // We treat Sets differently. For Sets, we pretend the values are
-    // also the keys (similar to how Set::toArray() behaves).
-    bool isSetType =
-      cell_input.m_type == KindOfObject &&
-      cell_input.m_data.pobj->getCollectionType() == Collection::SetType;
-    if (UNLIKELY(isSetType)) {
-      return arrayKeysSetHelper(cell_input, search_value, strict);
-    }
     ArrayIter iter(cell_input);
     if (LIKELY(!search_value.isInitialized())) {
       PackedArrayInit ai(getContainerSize(cell_input));
       for (; iter; ++iter) {
-        ai.append(iter.first());
+        ai.append(iter.keyish());
       }
       return ai.toArray();
     }
@@ -298,7 +269,7 @@ Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
     for (; iter; ++iter) {
       if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
           (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
-        ai.append(iter.first());
+        ai.append(iter.keyish());
       }
     }
     return ai;
@@ -374,7 +345,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       v.unset(); // avoid contamination of the value that was strongly bound
       v = subarr1;
     } else {
-      arr1.lvalAt(key, AccessFlags::Key).setWithRef(value);
+      arr1.setWithRef(key, value, true);
     }
   }
 
@@ -424,7 +395,7 @@ static void php_array_replace(Array &arr1, CArrRef arr2) {
   for (ArrayIter iter(arr2); iter; ++iter) {
     Variant key = iter.first();
     CVarRef value = iter.secondRef();
-    arr1.lvalAt(key, AccessFlags::Key).setWithRef(value);
+    arr1.setWithRef(key, value, true);
   }
 }
 
@@ -453,7 +424,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
         arr1.set(key, value, true);
       }
     } else {
-      arr1.lvalAt(key, AccessFlags::Key).setWithRef(value);
+      arr1.setWithRef(key, value, true);
     }
   }
 
@@ -629,7 +600,7 @@ int64_t f_array_unshift(int _argc, VRefParam array, CVarRef var, CArrRef _argv /
         if (key.isInteger()) {
           newArray.appendWithRef(value);
         } else {
-          newArray.lvalAt(key, AccessFlags::Key).setWithRef(value);
+          newArray.setWithRef(key, value, true);
         }
       }
       array = newArray;
@@ -946,9 +917,138 @@ static int cmp_func(CVarRef v1, CVarRef v2, const void *data) {
 ///////////////////////////////////////////////////////////////////////////////
 // diff functions
 
+static void addToSetHelper(c_Set* st, const Cell& c, TypedValue* strTv,
+                           bool convertIntLikeStrs) {
+  if (c.m_type == KindOfInt64) {
+    st->add(c.m_data.num);
+  } else {
+    StringData* s;
+    if (LIKELY(IS_STRING_TYPE(c.m_type))) {
+      s = c.m_data.pstr;
+    } else {
+      s = tvCastToString(&c);
+      decRefStr(strTv->m_data.pstr);
+      strTv->m_data.pstr = s;
+    }
+    int64_t n;
+    if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
+      st->add(n);
+    } else {
+      st->add(s);
+    }
+  }
+}
+
+static bool checkSetHelper(c_Set* st, const Cell& c, TypedValue* strTv,
+                           bool convertIntLikeStrs) {
+  if (c.m_type == KindOfInt64) {
+    return st->contains(c.m_data.num);
+  }
+  StringData* s;
+  if (LIKELY(IS_STRING_TYPE(c.m_type))) {
+    s = c.m_data.pstr;
+  } else {
+    s = tvCastToString(&c);
+    decRefStr(strTv->m_data.pstr);
+    strTv->m_data.pstr = s;
+  }
+  int64_t n;
+  if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
+    return st->contains(n);
+  }
+  return st->contains(s);
+}
+
+static void containerValuesToSetHelper(c_Set* st, CVarRef container) {
+  Variant strHolder(empty_string.get());
+  TypedValue* strTv = strHolder.asTypedValue();
+  for (ArrayIter iter(container); iter; ++iter) {
+    const auto& c = *const_cast<TypedValue*>(iter.secondRefPlus().asCell());
+    addToSetHelper(st, c, strTv, true);
+  }
+}
+
+static void containerKeysToSetHelper(c_Set* st, CVarRef container) {
+  Variant strHolder(empty_string.get());
+  TypedValue* strTv = strHolder.asTypedValue();
+  bool isKey = container.asCell()->m_type == KindOfArray;
+  for (ArrayIter iter(container); iter; ++iter) {
+    auto key = iter.keyish();
+    const auto& c = *const_cast<TypedValue*>(key.asCell());
+    addToSetHelper(st, c, strTv, !isKey);
+  }
+}
+
 Variant f_array_diff(int _argc, CVarRef array1, CVarRef array2,
-                   CArrRef _argv /* = null_array */) {
-  diff_intersect_body(diff, false COMMA true,);
+                     CArrRef _argv /* = null_array */) {
+  // Check to make sure all inputs are containers
+  const auto& c1 = *array1.asCell();
+  const auto& c2 = *array2.asCell();
+  if (!isContainer(c1) || !isContainer(c2)) {
+    raise_warning("array_diff() expects parameter %d to be an array "
+                  "or collection", isContainer(c1) ? 2 : 1);
+    return uninit_null();
+  }
+  bool moreThanTwo = (_argc > 2);
+  size_t largestSize = getContainerSize(c2);
+  if (UNLIKELY(moreThanTwo)) {
+    int pos = 3;
+    for (ArrayIter argvIter(_argv); argvIter; ++argvIter, ++pos) {
+      const auto& c = *argvIter.secondRef().asCell();
+      if (!isContainer(c)) {
+        raise_warning("array_diff() expects parameter %d to be an array "
+                      "or collection", pos);
+        return uninit_null();
+      }
+      size_t sz = getContainerSize(c);
+      if (sz > largestSize) {
+        largestSize = sz;
+      }
+    }
+  }
+  // If the first container is empty, we can stop here and return the
+  // empty array
+  if (!getContainerSize(c1)) return empty_array;
+  // If the second container is empty and we don't have more than two
+  // containers, then we can just return the first container (converting
+  // it to an array if needed)
+  if (LIKELY(!moreThanTwo)) {
+    if (!getContainerSize(c2)) {
+      if (c1.m_type == KindOfArray) {
+        return array1;
+      } else {
+        return array1.toArray();
+      }
+    }
+  }
+  // Put all of the values from all the containers (except the first
+  // container) into a Set. All types aside from integer and string will
+  // be cast to string, and we also convert int-like strings to integers.
+  c_Set* st;
+  Object setObj = st = NEWOBJ(c_Set)();
+  st->reserve(largestSize);
+  containerValuesToSetHelper(st, array2);
+  if (UNLIKELY(moreThanTwo)) {
+    for (ArrayIter argvIter(_argv); argvIter; ++argvIter) {
+      const auto& container = argvIter.secondRef();
+      containerValuesToSetHelper(st, container);
+    }
+  }
+  // Loop over the first container, only copying over key/value pairs where the
+  // value is not present in the Set. When checking if a value is present in
+  // the Set, any value that is not an integer or string is cast to a string,
+  // and we convert int-like strings to integers.
+  Array ret = Array::Create();
+  Variant strHolder(empty_string.get());
+  TypedValue* strTv = strHolder.asTypedValue();
+  bool isKey = c1.m_type == KindOfArray;
+  for (ArrayIter iter(array1); iter; ++iter) {
+    const auto& val = iter.secondRefPlus();
+    const auto& c = *val.asCell();
+    if (checkSetHelper(st, c, strTv, true)) continue;
+    ret.setWithRef(iter.keyish(), val, isKey);
+  }
+  return ret;
 }
 
 Variant f_array_udiff(int _argc, CVarRef array1, CVarRef array2,
@@ -1013,7 +1113,110 @@ Variant f_array_udiff_uassoc(int _argc, CVarRef array1, CVarRef array2,
 
 Variant f_array_diff_key(int _argc, CVarRef array1, CVarRef array2,
                          CArrRef _argv /* = null_array */) {
-  diff_intersect_body(diff, true COMMA false,);
+  // Check to make sure all inputs are containers
+  const auto& c1 = *array1.asCell();
+  const auto& c2 = *array2.asCell();
+  if (!isContainer(c1) || !isContainer(c2)) {
+    raise_warning("array_diff_key() expects parameter %d to be an array "
+                  "or collection", isContainer(c1) ? 2 : 1);
+    return uninit_null();
+  }
+  bool moreThanTwo = (_argc > 2);
+  size_t largestSize = getContainerSize(c2);
+  if (UNLIKELY(moreThanTwo)) {
+    int pos = 3;
+    for (ArrayIter argvIter(_argv); argvIter; ++argvIter, ++pos) {
+      const auto& c = *argvIter.secondRef().asCell();
+      if (!isContainer(c)) {
+        raise_warning("array_diff_key() expects parameter %d to be an array "
+                      "or collection", pos);
+        return uninit_null();
+      }
+      size_t sz = getContainerSize(c);
+      if (sz > largestSize) {
+        largestSize = sz;
+      }
+    }
+  }
+  // If the first container is empty, we can stop here and return the
+  // empty array
+  if (!getContainerSize(c1)) {
+    return empty_array;
+  }
+  // Various fast paths for cases where we have exactly 2 containers
+  if (LIKELY(!moreThanTwo)) {
+    if (!getContainerSize(c2)) {
+      // If the second container is empty (and we don't have more than
+      // two containers), we can stop here and return the first container
+      // (converting it to an array if needed)
+      if (c1.m_type == KindOfArray) {
+        return array1;
+      } else {
+        return array1.toArray();
+      }
+    }
+    // If the second container is an array (and there are not more than 2
+    // containers), we can avoid creating an intermediate Set
+    if (c2.m_type == KindOfArray) {
+      Array ret = Array::Create();
+      Variant strHolder(empty_string.get());
+      TypedValue* strTv = strHolder.asTypedValue();
+      auto ad2 = c2.m_data.parr;
+      bool isKey = c1.m_type == KindOfArray;
+      for (ArrayIter iter(array1); iter; ++iter) {
+        auto key = iter.keyish();
+        const auto& c = *key.asCell();
+        if (c.m_type == KindOfInt64) {
+          if (ad2->exists(c.m_data.num)) continue;
+        } else {
+          StringData* s;
+          if (LIKELY(IS_STRING_TYPE(c.m_type))) {
+            s = c.m_data.pstr;
+          } else {
+            s = tvCastToString(&c);
+            decRefStr(strTv->m_data.pstr);
+            strTv->m_data.pstr = s;
+          }
+          int64_t n;
+          if (!isKey && s->isStrictlyInteger(n)) {
+            if (ad2->exists(n)) continue;
+          } else {
+            if (ad2->exists(s)) continue;
+          }
+        }
+        ret.setWithRef(key, iter.secondRefPlus(), isKey);
+      }
+      return ret;
+    }
+  }
+  // Put all of the keys from all the containers (except the first container)
+  // into a Set. All types aside from integer and string will be cast to
+  // string, and we also convert int-like strings to integers.
+  c_Set* st;
+  Object setObj = st = NEWOBJ(c_Set)();
+  st->reserve(largestSize);
+  containerKeysToSetHelper(st, array2);
+  if (UNLIKELY(moreThanTwo)) {
+    for (ArrayIter argvIter(_argv); argvIter; ++argvIter) {
+      const auto& container = argvIter.secondRef();
+      containerKeysToSetHelper(st, container);
+    }
+  }
+  // Loop over the first container, only copying over key/value pairs where the
+  // key is not present in the Set. When checking if a key is present in the
+  // Set, any key that is not an integer or string is cast to a string, and we
+  // convert int-like strings to integers.
+  Array ret = Array::Create();
+  Variant strHolder(empty_string.get());
+  TypedValue* strTv = strHolder.asTypedValue();
+  bool isKey = c1.m_type == KindOfArray;
+  for (ArrayIter iter(array1); iter; ++iter) {
+    auto key = iter.keyish();
+    const auto& c = *key.asCell();
+    if (checkSetHelper(st, c, strTv, !isKey)) continue;
+    ret.setWithRef(key, iter.secondRefPlus(), isKey);
+  }
+  return ret;
 }
 
 Variant f_array_diff_ukey(int _argc, CVarRef array1, CVarRef array2,

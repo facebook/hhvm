@@ -151,6 +151,7 @@ In A::aFunc():
   C::d: B::CD
   C::e: B::CE
   C::g: B::g
+HipHop Notice: Array to string conversion in %s on line %d
   C::h: Array
 In A::aFunc():
   A::a: A::a
@@ -171,6 +172,7 @@ In A::aFunc():
   C::d: B::CD
   C::e: B::CE
   C::g: B::g
+HipHop Notice: Array to string conversion in %s on line %d
   C::h: Array
 In B::bFunc():
   A::a: A::a
@@ -190,6 +192,7 @@ In B::bFunc():
   C::d: B::CD
   C::e: B::CE
   C::g: B::g
+HipHop Notice: Array to string conversion in %s on line %d
   C::h: Array
 In A::aFunc():
   A::a: A::a
@@ -210,6 +213,7 @@ In A::aFunc():
   C::d: B::CD
   C::e: B::CE
   C::g: B::g
+HipHop Notice: Array to string conversion in %s on line %d
   C::h: Array
 In B::bFunc():
   A::a: A::a
@@ -229,6 +233,7 @@ In B::bFunc():
   C::d: B::CD
   C::e: B::CE
   C::g: B::g
+HipHop Notice: Array to string conversion in %s on line %d
   C::h: Array
 In C::cFunc():
   A::a: A::a
@@ -247,11 +252,13 @@ In C::cFunc():
   C::d: B::CD
   C::e: B::CE
   C::g: B::g
+HipHop Notice: Array to string conversion in %s on line %d
   C::h: Array
 isset(C::$h): true
 empty(C::$h): false
 isset(C::$i): false
 empty(C::$i): true
+HipHop Notice: Array to string conversion in %s on line %d
 C::$h: Array
 C::$h: 42
 C::$h: 84

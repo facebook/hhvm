@@ -1,0 +1,21 @@
+HipHop Notice: Array to string conversion in %s on line %d
+GLOBALS->Array
+HTTP_RAW_POST_DATA->
+HipHop Notice: Array to string conversion in %s on line %d
+_COOKIE->Array
+HipHop Notice: Array to string conversion in %s on line %d
+_ENV->Array
+HipHop Notice: Array to string conversion in %s on line %d
+_FILES->Array
+HipHop Notice: Array to string conversion in %s on line %d
+_GET->Array
+HipHop Notice: Array to string conversion in %s on line %d
+_POST->Array
+HipHop Notice: Array to string conversion in %s on line %d
+_REQUEST->Array
+HipHop Notice: Array to string conversion in %s on line %d
+_SERVER->Array
+argc->1
+HipHop Notice: Array to string conversion in %s on line %d
+argv->Array
+http_response_header->

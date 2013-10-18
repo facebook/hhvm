@@ -538,7 +538,7 @@ SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
         return cns(cls);
       }
     }
-    return gen(LdClsCached, clsName);
+    return gen(LdClsCached, inst->taken(), clsName);
   }
   return nullptr;
 }

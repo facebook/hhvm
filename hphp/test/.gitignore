@@ -1,5 +1,4 @@
 *.out
-*.diff
 *.repo
 *.tmp
 *.errors

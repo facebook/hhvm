@@ -57,7 +57,7 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   }
 }
 
-void AsioContext::schedule(c_ContinuationWaitHandle* wait_handle) {
+void AsioContext::schedule(c_AsyncFunctionWaitHandle* wait_handle) {
   m_runnableQueue.push(wait_handle);
   wait_handle->incRefCount();
 }

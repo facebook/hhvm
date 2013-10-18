@@ -189,7 +189,7 @@ const StaticString
 
 // Add location information for the given continuation to the given frame.
 void addContinuationLocation(Array& frameData,
-                             c_ContinuationWaitHandle& contWh) {
+                             c_AsyncFunctionWaitHandle& contWh) {
   // A running continuation is active on the normal stack, and we
   // cannot compute the location just by inspecting the continuation
   // alone.
@@ -226,7 +226,7 @@ Array createAsyncStacktrace() {
       frameData.set(s_id, wh->t_getid(), true);
       frameData.set(s_ancestors, ancestors, true);
       // Continuation wait handles may have a source location to add.
-      auto contWh = dynamic_cast<c_ContinuationWaitHandle*>(wh);
+      auto contWh = dynamic_cast<c_AsyncFunctionWaitHandle*>(wh);
       if (contWh != nullptr) addContinuationLocation(frameData, *contWh);
       trace.append(frameData);
     }

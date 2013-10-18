@@ -85,7 +85,7 @@ Object c_GenArrayWaitHandle::ti_create(CArrRef dependencies) {
 
     Cell* current = tvAssertCell(deps->nvGetValueRef(iter_pos));
     if (IS_NULL_TYPE(current->m_type)) {
-      // {uninit,null} yields null
+      // {uninit,null} gives null
       tvWriteNull(current);
       continue;
     }
@@ -141,7 +141,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
 
     Cell* current = tvAssertCell(m_deps->nvGetValueRef(m_iterPos));
     if (IS_NULL_TYPE(current->m_type)) {
-      // {uninit,null} yields null
+      // {uninit,null} gives null
       tvWriteNull(current);
       continue;
     }

@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 FORWARD_DECLARE_CLASS(Continuation);
-FORWARD_DECLARE_CLASS(ContinuationWaitHandle);
+FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
 Object f_hphp_create_continuation(const String& clsname, const String& funcname,
                                   const String& origFuncName,
                                   CArrRef args = null_array);
@@ -159,7 +159,7 @@ public:
 
   /* ActRec for continuation (does not live on stack) */
   ActRec* m_arPtr;
-  p_ContinuationWaitHandle m_waitHandle;
+  p_AsyncFunctionWaitHandle m_waitHandle;
 
   /* temporary storage used to save the SP when inlining into a continuation */
   void* m_stashedSP;

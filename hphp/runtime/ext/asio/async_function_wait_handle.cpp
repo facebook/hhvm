@@ -34,57 +34,57 @@ namespace {
   StaticString s_continuation("Continuation");
 }
 
-c_ContinuationWaitHandle::c_ContinuationWaitHandle(Class* cb)
+c_AsyncFunctionWaitHandle::c_AsyncFunctionWaitHandle(Class* cb)
     : c_BlockableWaitHandle(cb), m_continuation(), m_child(), m_privData(),
       m_depth(0) {
 }
 
-c_ContinuationWaitHandle::~c_ContinuationWaitHandle() {
+c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
 }
 
-void c_ContinuationWaitHandle::t___construct() {
+void c_AsyncFunctionWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use $continuation->getWaitHandle() instead of constructor"));
   throw e;
 }
 
-void c_ContinuationWaitHandle::ti_setoncreatecallback(CVarRef callback) {
+void c_AsyncFunctionWaitHandle::ti_setoncreatecallback(CVarRef callback) {
   if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set ContinuationWaitHandle::onStart: on_start_cb not a closure"));
+      "Unable to set AsyncFunctionWaitHandle::onStart: on_start_cb not a closure"));
     throw e;
   }
-  AsioSession::Get()->setOnContinuationCreateCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnAsyncFunctionCreateCallback(callback.getObjectDataOrNull());
 }
 
-void c_ContinuationWaitHandle::ti_setonyieldcallback(CVarRef callback) {
+void c_AsyncFunctionWaitHandle::ti_setonawaitcallback(CVarRef callback) {
   if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set ContinuationWaitHandle::onYield: on_yield_cb not a closure"));
+      "Unable to set AsyncFunctionWaitHandle::onAwait: on_await_cb not a closure"));
     throw e;
   }
-  AsioSession::Get()->setOnContinuationYieldCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnAsyncFunctionAwaitCallback(callback.getObjectDataOrNull());
 }
 
-void c_ContinuationWaitHandle::ti_setonsuccesscallback(CVarRef callback) {
+void c_AsyncFunctionWaitHandle::ti_setonsuccesscallback(CVarRef callback) {
   if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set ContinuationWaitHandle::onSuccess: on_success_cb not a closure"));
+      "Unable to set AsyncFunctionWaitHandle::onSuccess: on_success_cb not a closure"));
     throw e;
   }
-  AsioSession::Get()->setOnContinuationSuccessCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnAsyncFunctionSuccessCallback(callback.getObjectDataOrNull());
 }
 
-void c_ContinuationWaitHandle::ti_setonfailcallback(CVarRef callback) {
+void c_AsyncFunctionWaitHandle::ti_setonfailcallback(CVarRef callback) {
   if (!callback.isNull() && !callback.instanceof(c_Closure::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set ContinuationWaitHandle::onFail: on_fail_cb not a closure"));
+      "Unable to set AsyncFunctionWaitHandle::onFail: on_fail_cb not a closure"));
     throw e;
   }
-  AsioSession::Get()->setOnContinuationFailCallback(callback.getObjectDataOrNull());
+  AsioSession::Get()->setOnAsyncFunctionFailCallback(callback.getObjectDataOrNull());
 }
 
-void c_ContinuationWaitHandle::Create(c_Continuation* continuation) {
+void c_AsyncFunctionWaitHandle::Create(c_Continuation* continuation) {
   assert(continuation);
   assert(continuation->m_waitHandle.isNull());
 
@@ -104,24 +104,24 @@ void c_ContinuationWaitHandle::Create(c_Continuation* continuation) {
     throw e;
   }
 
-  continuation->m_waitHandle = NEWOBJ(c_ContinuationWaitHandle)();
+  continuation->m_waitHandle = NEWOBJ(c_AsyncFunctionWaitHandle)();
   continuation->m_waitHandle->initialize(continuation, depth + 1);
 
   // needs to be called after continuation->m_waitHandle is set
-  if (UNLIKELY(session->hasOnContinuationCreateCallback())) {
-    session->onContinuationCreate(continuation->m_waitHandle.get());
+  if (UNLIKELY(session->hasOnAsyncFunctionCreateCallback())) {
+    session->onAsyncFunctionCreate(continuation->m_waitHandle.get());
   }
 }
 
-Object c_ContinuationWaitHandle::t_getprivdata() {
+Object c_AsyncFunctionWaitHandle::t_getprivdata() {
   return m_privData;
 }
 
-void c_ContinuationWaitHandle::t_setprivdata(CObjRef data) {
+void c_AsyncFunctionWaitHandle::t_setprivdata(CObjRef data) {
   m_privData = data;
 }
 
-void c_ContinuationWaitHandle::initialize(c_Continuation* continuation, uint16_t depth) {
+void c_AsyncFunctionWaitHandle::initialize(c_Continuation* continuation, uint16_t depth) {
   m_continuation = continuation;
   m_child = nullptr;
   m_privData = nullptr;
@@ -146,7 +146,7 @@ void c_ContinuationWaitHandle::initialize(c_Continuation* continuation, uint16_t
   }
 }
 
-void c_ContinuationWaitHandle::run() {
+void c_AsyncFunctionWaitHandle::run() {
   // may happen if scheduled in multiple contexts
   if (getState() != STATE_SCHEDULED) {
     return;
@@ -186,13 +186,13 @@ void c_ContinuationWaitHandle::run() {
         c_WaitHandle* child = c_WaitHandle::fromCell(value);
         if (UNLIKELY(!child)) {
           Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-              "Expected yield argument to be an instance of WaitHandle"));
+              "Expected await argument to be an instance of Awaitable"));
           throw e;
         }
 
         AsioSession* session = AsioSession::Get();
-        if (UNLIKELY(session->hasOnContinuationYieldCallback())) {
-          session->onContinuationYield(this, child);
+        if (UNLIKELY(session->hasOnAsyncFunctionAwaitCallback())) {
+          session->onAsyncFunctionAwait(this, child);
         }
 
         m_child = child;
@@ -212,17 +212,17 @@ void c_ContinuationWaitHandle::run() {
   }
 }
 
-void c_ContinuationWaitHandle::onUnblocked() {
+void c_AsyncFunctionWaitHandle::onUnblocked() {
   setState(STATE_SCHEDULED);
   if (isInContext()) {
     getContext()->schedule(this);
   }
 }
 
-void c_ContinuationWaitHandle::markAsSucceeded(const Cell& result) {
+void c_AsyncFunctionWaitHandle::markAsSucceeded(const Cell& result) {
   AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(session->hasOnContinuationSuccessCallback())) {
-    session->onContinuationSuccess(this, cellAsCVarRef(result));
+  if (UNLIKELY(session->hasOnAsyncFunctionSuccessCallback())) {
+    session->onAsyncFunctionSuccess(this, cellAsCVarRef(result));
   }
 
   setResult(result);
@@ -232,10 +232,10 @@ void c_ContinuationWaitHandle::markAsSucceeded(const Cell& result) {
   m_child = nullptr;
 }
 
-void c_ContinuationWaitHandle::markAsFailed(CObjRef exception) {
+void c_AsyncFunctionWaitHandle::markAsFailed(CObjRef exception) {
   AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(session->hasOnContinuationFailCallback())) {
-    session->onContinuationFail(this, exception);
+  if (UNLIKELY(session->hasOnAsyncFunctionFailCallback())) {
+    session->onAsyncFunctionFail(this, exception);
   }
 
   setException(exception.get());
@@ -244,7 +244,7 @@ void c_ContinuationWaitHandle::markAsFailed(CObjRef exception) {
   m_child = nullptr;
 }
 
-String c_ContinuationWaitHandle::getName() {
+String c_AsyncFunctionWaitHandle::getName() {
   switch (getState()) {
     case STATE_SUCCEEDED:
       return s_continuationResult;
@@ -269,7 +269,7 @@ String c_ContinuationWaitHandle::getName() {
   }
 }
 
-c_WaitableWaitHandle* c_ContinuationWaitHandle::getChild() {
+c_WaitableWaitHandle* c_AsyncFunctionWaitHandle::getChild() {
   if (getState() == STATE_BLOCKED) {
     assert(dynamic_cast<c_WaitableWaitHandle*>(m_child.get()));
     return static_cast<c_WaitableWaitHandle*>(m_child.get());
@@ -279,7 +279,7 @@ c_WaitableWaitHandle* c_ContinuationWaitHandle::getChild() {
   }
 }
 
-void c_ContinuationWaitHandle::enterContext(context_idx_t ctx_idx) {
+void c_AsyncFunctionWaitHandle::enterContext(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx));
 
   // stop before corrupting unioned data
@@ -318,7 +318,7 @@ void c_ContinuationWaitHandle::enterContext(context_idx_t ctx_idx) {
   }
 }
 
-void c_ContinuationWaitHandle::exitContext(context_idx_t ctx_idx) {
+void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx));
 
   // stop before corrupting unioned data
@@ -361,7 +361,7 @@ void c_ContinuationWaitHandle::exitContext(context_idx_t ctx_idx) {
 }
 
 // Get the filename in which execution will proceed when execution resumes.
-String c_ContinuationWaitHandle::getFileName() {
+String c_AsyncFunctionWaitHandle::getFileName() {
   if (m_continuation.isNull()) return empty_string;
   auto ar = m_continuation->actRec();
   auto file = ar->m_func->unit()->filepath()->data();
@@ -372,7 +372,7 @@ String c_ContinuationWaitHandle::getFileName() {
 }
 
 // Get the line number on which execution will proceed when execution resumes.
-int c_ContinuationWaitHandle::getLineNumber() {
+int c_AsyncFunctionWaitHandle::getLineNumber() {
   if (m_continuation.isNull()) return -1;
   auto const unit = m_continuation->actRec()->m_func->unit();
   return unit->getLineNumber(m_continuation->getNextExecutionOffset());

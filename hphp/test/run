@@ -359,7 +359,7 @@ class Status {
         if (self::hasColor()) {
           print "$test \033[1;32mpassed\033[0m\n";
         } else {
-          print "$test passed";
+          print "$test passed\n";
         }
         break;
       case self::MODE_FBMAKE:
@@ -381,7 +381,7 @@ class Status {
         if (self::hasColor()) {
           print "$test \033[1;33mskipped\033[0m\n";
         } else {
-          print "$test skipped";
+          print "$test skipped\n";
         }
         break;
       case self::MODE_FBMAKE:

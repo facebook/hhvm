@@ -284,6 +284,15 @@ class Frameworks {
             'install_root' => __DIR__."/frameworks/doctrine2",
             'git_path' => "git@github.com:doctrine/doctrine2.git",
             'git_commit' => "bd7c7ebaf353f038fae2f828802ecda823190759",
+            'pull_requests' =>
+              Vector {
+                Map {
+                  'pull_dir' => __DIR__."/frameworks/doctrine2".
+                                 "/vendor/doctrine/dbal",
+                  'pull_repository' => "https://github.com/javer/dbal",
+                  'git_commit' => "hhvm-pdo-implement-interfaces",
+                 },
+              }
           },
         'twig' =>
           Map {
@@ -527,7 +536,6 @@ function get_unit_testing_infra_dependencies(bool $csv_only): void {
 // out
 function install_framework(string $name, bool $verbose, bool $csv_only,
                            ?string $zend_path): void {
-
   verbose("Installing $name. You will see white dots during install.....\n",
           !$csv_only);
   $install_root = Frameworks::$framework_info[$name]['install_root'];
@@ -555,7 +563,7 @@ function install_framework(string $name, bool $verbose, bool $csv_only,
                          ProxyInformation::$proxies, $csv_only);
   if ($git_ret !== 0) {
     $csv_only ? error()
-                  : error("Could not checkout baseline test code for $name!\n");
+              : error("Could not checkout baseline test code for $name!\n");
   }
 
   /*******************************
@@ -600,17 +608,40 @@ function install_framework(string $name, bool $verbose, bool $csv_only,
         if (any_dir_empty_one_level($fw_vendor_dir)) {
           remove_dir_recursive($install_root);
           $csv_only ? error()
-                        : error("Couldn't download dependencies for $name!".
-                                " Removing framework. You can try the --zend".
-                                " option.\n");
+                    : error("Couldn't download dependencies for $name!".
+                            " Removing framework. You can try the --zend".
+                            " option.\n");
         }
       } else { // No vendor directory. Dependencies could not have been gotten.
         remove_dir_recursive($install_root);
         $csv_only ? error()
-                      : error("Couldn't download dependencies for $name!".
-                              " Removing framework. You can try the --zend".
-                              " option.\n");
+                  : error("Couldn't download dependencies for $name!".
+                          " Removing framework. You can try the --zend".
+                          " option.\n");
       }
+    }
+  }
+
+  /*******************************
+   *  OTHER PULL REQUESTS
+   ******************************/
+  if (Frameworks::$framework_info[$name]->containsKey("pull_requests")) {
+    verbose("Merging some upstream pull requests for ".$name."\n", $verbose);
+    $pull_requests = Frameworks::$framework_info[$name]["pull_requests"];
+    foreach ($pull_requests as $pr) {
+      $dir = $pr["pull_dir"];
+      $rep = $pr["pull_repository"];
+      $gc = $pr["git_commit"];
+      chdir($dir);
+      // Checkout out our baseline test code via SHA
+      $git_command = "git pull --no-edit ".$rep." ".$gc;
+      $git_ret = run_install($git_command, $dir,
+                             ProxyInformation::$proxies, $csv_only);
+      if ($git_ret !== 0) {
+        $csv_only ? error()
+                  : error("Could not checkout baseline test code for $name!\n");
+      }
+      chdir(__DIR__);
     }
   }
 }
@@ -998,7 +1029,9 @@ function run_single_test_suite(string $fw_name, string $summary_file,
 
     fclose($pipes[1]);
     fclose($pipes[2]);
-    $ret = proc_close($process);
+    if (proc_close($process) === -1) {
+      $ret_val = -1;
+    }
 
     file_put_contents($results_file, $raw_results);
     file_put_contents($errors_file, $error_information);
@@ -1405,8 +1438,8 @@ function get_hhvm_build(bool $with_jit = true): string {
 }
 
 function command_exists(string $cmd): bool {
-    $returnVal = shell_exec("which $cmd");
-    return (empty($returnVal) ? false : true);
+    $ret = shell_exec("which $cmd");
+    return (empty($ret) ? false : true);
 }
 
 function verbose(string $msg, bool $verbose): void {

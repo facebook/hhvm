@@ -7111,6 +7111,8 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo,
           }
           if (exif_file_sections_realloc(ImageInfo, sn, ifd_size)) {
             return 0;
+          } else {
+            end = (char*)ImageInfo->file.list[sn].data + dir_size;
           }
           /* read values not stored in directory itself */
           snData = ImageInfo->infile->read(ifd_size-dir_size);
@@ -7175,8 +7177,8 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo,
             }
           } else {
             if (!exif_process_IFD_TAG(ImageInfo, (char*)dir_entry,
-                          (char*)ImageInfo->file.list[sn].data + ifd_size,
                           (char*)(ImageInfo->file.list[sn].data-dir_offset),
+                          (char*)(ImageInfo->file.list[sn].data + ifd_size),
                           ifd_size, 0, section_index, 0, tag_table)) {
               return 0;
             }

@@ -1,0 +1,4 @@
+string(23) "/** private property */"
+string(25) "/** protected property */"
+string(22) "/** public property */"
+string(29) "/** public static property */"

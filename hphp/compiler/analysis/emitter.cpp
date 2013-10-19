@@ -6785,7 +6785,7 @@ void EmitterVisitor::emitClass(Emitter& e,
             : KindOfInvalid;
 
           StringData* propName = makeStaticString(var->getName());
-          StringData* propDoc = empty_string.get();
+          StringData* propDoc = makeStaticString(var->getDocComment());
           TypedValue tvVal;
           // Some properties may need to be marked with the AttrDeepInit
           // attribute, while other properties should not be marked with

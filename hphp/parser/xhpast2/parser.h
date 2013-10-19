@@ -389,7 +389,12 @@ struct Parser : ParserBase {
 #define X(...)
 //#define X(...) traceCb(__FUNCTION__,## __VA_ARGS__)
 
-  void fatal(Location* loc, const char* msg) {
+  void fatal(const Location* loc, const char* msg) {
+    throw std::runtime_error(folly::format(
+      "{}:{}: {}", m_fileName, m_loc.line0, msg).str());
+  }
+
+  void parseFatal(const Location* loc, const char* msg) {
     throw std::runtime_error(folly::format(
       "{}:{}: {}", m_fileName, m_loc.line0, msg).str());
   }

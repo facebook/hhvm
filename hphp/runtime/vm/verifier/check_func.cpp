@@ -525,6 +525,17 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
       case OpBareThis:
         if (op > 1) ok = false;
         break;
+      case OpFatal:
+        switch (static_cast<FatalKind>(op)) {
+        default: {
+          error("invalid error kind for Fatal: %d\n", op);
+          ok = false;
+        }
+        case FatalKind::Parse:
+        case FatalKind::Runtime:
+          break;
+        }
+        break;
       }
       break;
     }}

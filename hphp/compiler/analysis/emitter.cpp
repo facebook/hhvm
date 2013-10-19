@@ -1994,12 +1994,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   return ret;
 }
 
-void EmitterVisitor::emitFatal(Emitter& e, const char* message) {
-  const StringData* msg = makeStaticString(message);
-  e.String(msg);
-  e.Fatal(0);
-}
-
 bool EmitterVisitor::visitImpl(ConstructPtr node) {
   if (!node) return false;
 
@@ -2013,8 +2007,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         return false;
 
       case Statement::KindOfTypedefStatement: {
-        emitFatal(e, "Type statements are currently only allowed at "
-                     "the top-level");
+        emitMakeUnitFatal(e, "Type statements are currently only allowed at "
+                             "the top-level");
         return false;
       }
 
@@ -2029,8 +2023,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (bs->getDepth() > 1) {
             msg << "s";
           }
-          e.String(makeStaticString(msg.str()));
-          e.Fatal(0);
+          emitMakeUnitFatal(e, msg.str().c_str());
           return false;
         }
 
@@ -3158,7 +3151,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (p->getScalarValue(v)) {
               assert(v.isString());
               StringData* msg = makeStaticString(v.toString());
-              throw IncludeTimeFatalException(call, "%s", msg->data());
+              auto exn = IncludeTimeFatalException(call, "%s", msg->data());
+              exn.setParseFatal(call->isParseFatalFunction());
+              throw exn;
             }
             not_reached();
           }
@@ -4750,15 +4745,14 @@ void EmitterVisitor::emitUnset(Emitter& e,
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
       case StackSym::CG: e.UnsetG(); break;
       case StackSym::LS: // fall through
-      case StackSym::CS:
+      case StackSym::CS: {
         assert(exp);
-        e.String(
-          makeStaticString("Attempt to unset static property " +
-                                      exp->getText())
-        );
-        e.Fatal(0);
-        break;
 
+        std::ostringstream s;
+        s << "Attempt to unset static property " << exp->getText();
+        emitMakeUnitFatal(e, s.str().c_str());
+        break;
+      }
       default: {
         unexpectedStackSym(sym, "emitUnset");
         break;
@@ -5879,10 +5873,10 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   }
 
   if (funcScope->isAbstract()) {
-    StringData* msg = makeStaticString(
-      "Cannot call abstract method " + meth->getOriginalFullName() + "()");
-    e.String(msg);
-    e.Fatal(1);
+    std::ostringstream s;
+    s << "Cannot call abstract method " << meth->getOriginalFullName() << "()";
+    emitMakeUnitFatal(e, s.str().c_str(),
+                      FatalKind::Runtime, true /* skipFrame */);
   }
 }
 
@@ -7182,10 +7176,13 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
   dontRollback.set(e);
 }
 
-void EmitterVisitor::emitMakeUnitFatal(Emitter& e, const std::string& msg) {
-  StringData* sd = makeStaticString(msg);
+void EmitterVisitor::emitMakeUnitFatal(Emitter& e,
+                                       const char* msg,
+                                       FatalKind k /* = FatalKind::Runtime */,
+                                       bool skipFrame /* = false */) {
+  const StringData* sd = makeStaticString(msg);
   e.String(sd);
-  e.Fatal(0);
+  e.Fatal(uint8_t(k), uint8_t(skipFrame));
 }
 
 void EmitterVisitor::addFunclet(Thunklet* body, Label* entry) {
@@ -7453,7 +7450,8 @@ static UnitEmitter* emitHHBCUnitEmitter(AnalysisResultPtr ar, FileScopePtr fsp,
     EmitterVisitor fev(*ue);
     Emitter emitter(ex.m_node, *ue, fev);
     FuncFinisher ff(&fev, emitter, ue->getMain());
-    fev.emitMakeUnitFatal(emitter, ex.getMessage());
+    auto kind = ex.m_parseFatal ? FatalKind::Parse : FatalKind::Runtime;
+    fev.emitMakeUnitFatal(emitter, ex.getMessage().c_str(), kind);
   }
   return ue;
 }
@@ -7906,14 +7904,12 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
   }
 
   // Clean up.
-  for (std::vector<UnitEmitter*>::const_iterator it = ues.begin();
-       it != ues.end(); ++it) {
-      UnitEmitter* ue = *it;
-      // Commit units individually if an error occurred during batch commit.
-      if (err) {
-        repo.commitUnit(ue, UnitOrigin::File);
-      }
-      delete ue;
+  for (auto ue : ues) {
+    // Commit units individually if an error occurred during batch commit.
+    if (err) {
+      repo.commitUnit(ue, UnitOrigin::File);
+    }
+    delete ue;
   }
   ues.clear();
 }

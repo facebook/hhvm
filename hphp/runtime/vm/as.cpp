@@ -1971,6 +1971,8 @@ UnitEmitter* assemble_string(const char*code, int codeLen,
     ue->emitOp(OpString);
     ue->emitInt32(ue->mergeLitstr(makeStaticString(e.what())));
     ue->emitOp(OpFatal);
+    ue->emitByte(uint8_t(FatalKind::Runtime));
+    ue->emitByte(false /* skipFrame */);
     FuncEmitter* fe = ue->getMain();
     fe->setMaxStackCells(kNumActRecCells + 1);
     // XXX line numbers are bogus

@@ -550,10 +550,10 @@ void BaseExecutionContext::onShutdownPostSend() {
 bool BaseExecutionContext::errorNeedsHandling(int errnum,
                                               bool callUserHandler,
                                               ErrorThrowMode mode) {
-  if (m_throwAllErrors) throw errnum;
-  if (mode != ErrorThrowMode::Never ||
-      (getErrorReportingLevel() & errnum) != 0 ||
-      RuntimeOption::NoSilencer) {
+  if (m_throwAllErrors) {
+    throw errnum;
+  }
+  if (mode != ErrorThrowMode::Never || errorNeedsLogging(errnum)) {
     return true;
   }
   if (callUserHandler) {
@@ -563,6 +563,10 @@ bool BaseExecutionContext::errorNeedsHandling(int errnum,
     }
   }
   return false;
+}
+
+bool BaseExecutionContext::errorNeedsLogging(int errnum) {
+  return RuntimeOption::NoSilencer || (getErrorReportingLevel() & errnum) != 0;
 }
 
 class ErrorStateHelper {
@@ -585,15 +589,15 @@ const StaticString
   s_file("file"),
   s_line("line");
 
-void BaseExecutionContext::handleError(const std::string &msg,
+void BaseExecutionContext::handleError(const std::string& msg,
                                        int errnum,
                                        bool callUserHandler,
                                        ErrorThrowMode mode,
-                                       const std::string &prefix,
+                                       const std::string& prefix,
                                        bool skipFrame /* = false */) {
   SYNC_VM_REGS_SCOPED();
 
-  ErrorState newErrorState = ErrorState::ErrorRaised;
+  auto newErrorState = ErrorState::ErrorRaised;
   switch (getErrorState()) {
   case ErrorState::ErrorRaised:
   case ErrorState::ErrorRaisedByUserHandler:
@@ -604,12 +608,11 @@ void BaseExecutionContext::handleError(const std::string &msg,
   default:
     break;
   }
+
   ErrorStateHelper esh(this, newErrorState);
-  ExtendedException ee = skipFrame ?
+  auto const ee = skipFrame ?
     ExtendedException(ExtendedException::SkipFrame::skipFrame, msg) :
     ExtendedException(msg);
-  Array bt = ee.getBackTrace();
-
   recordLastError(ee, errnum);
   bool handled = false;
   if (callUserHandler) {
@@ -618,22 +621,22 @@ void BaseExecutionContext::handleError(const std::string &msg,
   if (mode == ErrorThrowMode::Always ||
       (mode == ErrorThrowMode::IfUnhandled && !handled)) {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(msg));
-    throw FatalErrorException(msg, bt);
+    auto exn = FatalErrorException(msg, ee.getBackTrace());
+    exn.setSilent(!errorNeedsLogging(errnum));
+    throw exn;
   }
-  if (!handled &&
-      (RuntimeOption::NoSilencer ||
-       (getErrorReportingLevel() & errnum) != 0)) {
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(msg));
+  if (!handled && errorNeedsLogging(errnum)) {
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee.getMessage()));
     String file = empty_string;
     int line = 0;
     if (RuntimeOption::InjectedStackTrace) {
+      Array bt = ee.getBackTrace();
       if (!bt.empty()) {
         Array top = bt.rvalAt(0).toArray();
         if (top.exists(s_file)) file = top.rvalAt(s_file).toString();
         if (top.exists(s_line)) line = top.rvalAt(s_line).toInt64();
       }
     }
-
     Logger::Log(Logger::LogError, prefix.c_str(), ee, file.c_str(), line);
   }
 }
@@ -652,8 +655,7 @@ bool BaseExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
     int errline = 0;
     String errfile;
     Array backtrace;
-    const ExtendedException *ee = dynamic_cast<const ExtendedException*>(&e);
-    if (ee) {
+    if (auto const ee = dynamic_cast<const ExtendedException*>(&e)) {
       Array arr = ee->getBackTrace();
       if (!arr.isNull()) {
         backtrace = arr;
@@ -690,9 +692,10 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
   recordLastError(e);
   String file = empty_string;
   int line = 0;
+  bool silenced = false;
   if (RuntimeOption::InjectedStackTrace) {
-    const ExtendedException *ee = dynamic_cast<const ExtendedException *>(&e);
-    if (ee) {
+    if (auto const ee = dynamic_cast<const ExtendedException *>(&e)) {
+      silenced = ee->isSilent();
       Array bt = ee->getBackTrace();
       if (!bt.empty()) {
         Array top = bt.rvalAt(0).toArray();
@@ -701,7 +704,8 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
       }
     }
   }
-  if (RuntimeOption::AlwaysLogUnhandledExceptions) {
+  // need to silence even with the AlwaysLogUnhandledExceptions flag set
+  if (!silenced && RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Log(Logger::LogError, "HipHop Fatal error: ", e,
                 file.c_str(), line);
   }
@@ -710,7 +714,7 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
     int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
     handled = callUserErrorHandler(e, errnum, true);
   }
-  if (!handled && !RuntimeOption::AlwaysLogUnhandledExceptions) {
+  if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Log(Logger::LogError, "HipHop Fatal error: ", e,
                 file.c_str(), line);
   }

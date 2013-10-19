@@ -311,6 +311,8 @@ enum IterKind {
   KindOfCIter = 2,
 };
 
+enum class FatalKind : uint8_t { Parse = 0, Runtime };
+
 // Each of the setop ops maps to a binary bytecode op. We have reasons
 // for using distinct bitwise representations, though. This macro records
 // their correspondence for mapping either direction.
@@ -404,7 +406,7 @@ enum SetOpOp {
   O(Print,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Clone,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Exit,            NA,               ONE(CV),         ONE(CV),    NF) \
-  O(Fatal,           ONE(IVA),         ONE(CV),         NOV,        CF_TF) \
+  O(Fatal,           TWO(OA,OA),       ONE(CV),         NOV,        CF_TF) \
   O(Jmp,             ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpZ,            ONE(BA),          ONE(CV),         NOV,        CF) \
   O(JmpNZ,           ONE(BA),          ONE(CV),         NOV,        CF) \

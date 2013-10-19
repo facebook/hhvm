@@ -67,6 +67,7 @@
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/tracer.h"
 #include "hphp/runtime/base/memory-profile.h"
+#include "hphp/runtime/base/runtime-error.h"
 
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -2513,13 +2514,19 @@ typedef RankedCHM<StringData*, HPHP::Unit*,
         StringDataHashCompare,
         RankEvaledUnits> EvaledUnitsMap;
 static EvaledUnitsMap s_evaledUnits;
-Unit* VMExecutionContext::compileEvalString(StringData* code) {
+Unit* VMExecutionContext::compileEvalString(
+    StringData* code,
+    const char* evalFilename /* = nullptr */) {
   EvaledUnitsMap::accessor acc;
   // Promote this to a static string; otherwise it may get swept
   // across requests.
   code = makeStaticString(code);
   if (s_evaledUnits.insert(acc, code)) {
-    acc->second = compile_string(code->data(), code->size());
+    acc->second = compile_string(
+      code->data(),
+      code->size(),
+      evalFilename
+    );
   }
   return acc->second;
 }
@@ -3951,7 +3958,8 @@ OPTBLD_INLINE void VMExecutionContext::iopFatal(PC& pc) {
   NEXT();
   TypedValue* top = m_stack.topTV();
   std::string msg;
-  DECODE_IVA(skipFrame);
+  DECODE_OA(kind_char);
+  DECODE_OA(skipFrame);
   if (IS_STRING_TYPE(top->m_type)) {
     msg = top->m_data.pstr->data();
   } else {
@@ -6301,9 +6309,32 @@ OPTBLD_INLINE void VMExecutionContext::iopEval(PC& pc) {
   Cell* c1 = m_stack.topC();
   String code(prepareKey(c1));
   String prefixedCode = concat("<?php ", code);
-  Unit* unit = compileEvalString(prefixedCode.get());
-  if (unit == nullptr) {
-    raise_error("Syntax error in eval()");
+
+  auto evalFilename = std::string();
+  Util::string_printf(
+    evalFilename,
+    "%s(%d) : eval()'d code",
+    getContainingFileName().data(),
+    getLine()
+  );
+  Unit* unit = compileEvalString(prefixedCode.get(), evalFilename.c_str());
+
+  const StringData* msg;
+  int line = 0;
+
+  if (unit->parseFatal(msg, line)) {
+    int errnum = static_cast<int>(ErrorConstants::ErrorModes::WARNING);
+    if (errorNeedsLogging(errnum)) {
+      // manual call to Logger instead of logError as we need to use
+      // evalFileName and line as the exception doesn't track the eval()
+      Logger::Error(
+        "HipHop Fatal error: %s in %s on line %d",
+        msg->data(),
+        evalFilename.c_str(),
+        line
+      );
+    }
+    return;
   }
   m_stack.popC();
   evalUnit(unit, pc, EventHook::Eval);

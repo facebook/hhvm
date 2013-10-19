@@ -287,6 +287,7 @@ public:
   bool errorNeedsHandling(int errnum,
                           bool callUserHandler,
                           ErrorThrowMode mode);
+  bool errorNeedsLogging(int errnum);
   void handleError(const std::string &msg,
                    int errnum,
                    bool callUserHandler,
@@ -600,7 +601,8 @@ public:
                                          HPHP::Unit* unit = 0);
   bool evalUnit(HPHP::Unit* unit, PC& pc, int funcType);
   void invokeUnit(TypedValue* retval, HPHP::Unit* unit);
-  HPHP::Unit* compileEvalString(StringData* code);
+  HPHP::Unit* compileEvalString(StringData* code,
+                                const char* evalFilename = nullptr);
   const String& createFunction(const String& args, const String& code);
   bool evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
   void enterDebuggerDummyEnv();

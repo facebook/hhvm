@@ -73,8 +73,7 @@ FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,
   return createPseudoMain(ar);
 }
 
-void FileScope::cleanupForError(AnalysisResultConstPtr ar,
-                                int line, const string &msg) {
+void FileScope::cleanupForError(AnalysisResultConstPtr ar) {
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classes.begin();
        iter != m_classes.end(); ++iter) {
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {
@@ -90,8 +89,16 @@ void FileScope::cleanupForError(AnalysisResultConstPtr ar,
   StringToClassScopePtrVecMap().swap(m_classes);
   m_pseudoMain.reset();
   m_tree.reset();
+}
+
+template <class Meth>
+void makeFatalMeth(FileScope& file,
+                   AnalysisResultConstPtr ar,
+                   const std::string& msg,
+                   int line,
+                   Meth meth) {
   LocationPtr loc(new Location());
-  loc->file = m_fileName.c_str();
+  loc->file = file.getName().c_str();
   loc->first(line, 0);
   loc->last(line, 0);
   BlockScopePtr scope;
@@ -100,16 +107,30 @@ void FileScope::cleanupForError(AnalysisResultConstPtr ar,
   SimpleFunctionCallPtr e(
     new SimpleFunctionCall(scope, loc, "throw_fatal", false, args,
       ExpressionPtr()));
-  e->setThrowFatal();
+  meth(e);
   ExpStatementPtr exp(new ExpStatement(scope, loc, e));
   StatementListPtr stmts(new StatementList(scope, loc));
   stmts->addElement(exp);
 
-  FunctionScopePtr fs = setTree(ar, stmts);
-  fs->setOuterScope(shared_from_this());
+  FunctionScopePtr fs = file.setTree(ar, stmts);
+  fs->setOuterScope(file.shared_from_this());
   fs->getStmt()->resetScope(fs);
   fs->getStmt()->setLocation(loc);
-  setOuterScope(const_cast<AnalysisResult*>(ar.get())->shared_from_this());
+  file.setOuterScope(const_cast<AnalysisResult*>(ar.get())->shared_from_this());
+}
+
+void FileScope::makeFatal(AnalysisResultConstPtr ar,
+                          const std::string& msg,
+                          int line) {
+  auto meth = [](SimpleFunctionCallPtr e) { e->setThrowFatal(); };
+  makeFatalMeth(*this, ar, msg, line, meth);
+}
+
+void FileScope::makeParseFatal(AnalysisResultConstPtr ar,
+                               const std::string& msg,
+                               int line) {
+  auto meth = [](SimpleFunctionCallPtr e) { e->setThrowParseFatal(); };
+  makeFatalMeth(*this, ar, msg, line, meth);
 }
 
 bool FileScope::addFunction(AnalysisResultConstPtr ar,

@@ -599,6 +599,7 @@ struct Unit {
                           Attr typeAttrs);
 
   bool compileTimeFatal(const StringData*& msg, int& line) const;
+  bool parseFatal(const StringData*& msg, int& line) const;
   const TypedValue *getMainReturn() const {
     assert(isMergeOnly());
     return &m_mainReturn;

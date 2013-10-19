@@ -96,7 +96,7 @@
 #ifdef yyerror
 #undef yyerror
 #endif
-#define yyerror(loc,p,msg) p->fatal(loc,msg)
+#define yyerror(loc,p,msg) p->parseFatal(loc,msg)
 
 #ifdef YYLLOC_DEFAULT
 # undef YYLLOC_DEFAULT

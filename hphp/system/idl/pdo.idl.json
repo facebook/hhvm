@@ -249,6 +249,67 @@
                     ]
                 },
                 {
+                    "name": "sqliteCreateFunction",
+                    "desc": "Registers a User Defined Function for use in SQL statements.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE upon successful creation of the function, FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "Name of the SQL function to be created or redefined."
+                        },
+                        {
+                            "name": "callback",
+                            "type": "Variant",
+                            "desc": "The name of a PHP function or user-defined function to apply as a callback, defining the behavior of the SQL function."
+                        },
+                        {
+                            "name": "argcount",
+                            "type": "Int64",
+                            "value": "-1",
+                            "desc": "The number of arguments that the SQL function takes. If this parameter is negative, then the SQL function may take any number of arguments."
+                        }
+                    ]
+                },
+                {
+                    "name": "sqliteCreateAggregate",
+                    "desc": "Registers an aggregating User Defined Function for use in SQL statements",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean",
+                        "desc": "Returns TRUE upon successful creation of the aggregate, FALSE on failure."
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "String",
+                            "desc": "Name of the SQL aggregate to be created or redefined."
+                        },
+                        {
+                            "name": "step",
+                            "type": "Variant",
+                            "desc": "The name of a PHP function or user-defined function to apply as a callback for every item in the aggregate."
+                        },
+                        {
+                            "name": "final",
+                            "type": "Variant",
+                            "desc": "The name of a PHP function or user-defined function to apply as a callback at the end of the aggregate data."
+                        },
+                        {
+                            "name": "argcount",
+                            "type": "Int64",
+                            "value": "-1",
+                            "desc": "The number of arguments that the SQL aggregate takes. If this parameter is negative, then the SQL aggregate may take any number of arguments."
+                        }
+                    ]
+                },
+                {
                     "name": "__wakeup",
                     "flags": [
                     ],

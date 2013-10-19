@@ -1482,6 +1482,20 @@ Variant c_PDO::t_quote(const String& str, int64_t paramtype /* = q_PDO$$PARAM_ST
   return false;
 }
 
+bool c_PDO::t_sqlitecreatefunction(const String& name,
+                                   CVarRef callback,
+                                   int64_t argcount /* = -1 */) {
+  raise_recoverable_error("PDO::sqliteCreateFunction not implemented");
+  return false;
+}
+
+bool c_PDO::t_sqlitecreateaggregate(const String& name,
+                                    CVarRef step, CVarRef final,
+                                    int64_t argcount /* = -1 */) {
+  raise_recoverable_error("PDO::sqliteCreateAggregate not implemented");
+  return false;
+}
+
 Variant c_PDO::t___wakeup() {
   throw_pdo_exception(uninit_null(), uninit_null(),
                       "You cannot serialize or unserialize PDO instances");

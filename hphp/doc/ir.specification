@@ -1339,6 +1339,22 @@ ReqBindJmpNZero
   emit a pair of smashable jumps to a REQ_BIND_JMPCC_FIRST service
   request.
 
+SideExitJmpGt
+SideExitJmpGte
+SideExitJmpLt
+SideExitJmpLte
+SideExitJmpEq
+SideExitJmpNeq
+SideExitJmpSame
+SideExitJmpNSame
+SideExitJmpInstanceOfBitmask
+SideExitJmpNInstanceOfBitmask
+SideExitJmpZero
+SideExitJmpNZero
+
+  Test the condition based on the Jmp* op of similar name, and then
+  emit a smashable jump to a REQ_BIND_SIDE_EXIT service request.
+
 SideExitGuardLoc<T,locId,takenOff> S0:FramePtr
 
   Test the type of a local, and if it fails jump to a side exit

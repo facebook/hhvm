@@ -224,6 +224,17 @@ struct ReqBindJccData : IRExtraData {
 };
 
 /*
+ * Information for REQ_BIND_SIDE_EXIT stubs created from a conditional jump.
+ */
+struct SideExitJccData : IRExtraData {
+  Offset taken;
+
+  std::string show() const {
+    return folly::to<std::string>(taken);
+  }
+};
+
+/*
  * Information for a conditional side exit based on a type check of a
  * local or stack cell.
  */
@@ -605,6 +616,18 @@ X(ReqBindJmpInstanceOfBitmask,  ReqBindJccData);
 X(ReqBindJmpNInstanceOfBitmask, ReqBindJccData);
 X(ReqBindJmpZero,               ReqBindJccData);
 X(ReqBindJmpNZero,              ReqBindJccData);
+X(SideExitJmpGt,                SideExitJccData);
+X(SideExitJmpGte,               SideExitJccData);
+X(SideExitJmpLt,                SideExitJccData);
+X(SideExitJmpLte,               SideExitJccData);
+X(SideExitJmpEq,                SideExitJccData);
+X(SideExitJmpNeq,               SideExitJccData);
+X(SideExitJmpSame,              SideExitJccData);
+X(SideExitJmpNSame,             SideExitJccData);
+X(SideExitJmpInstanceOfBitmask, SideExitJccData);
+X(SideExitJmpNInstanceOfBitmask,SideExitJccData);
+X(SideExitJmpZero,              SideExitJccData);
+X(SideExitJmpNZero,             SideExitJccData);
 X(SideExitGuardLoc,             SideExitGuardData);
 X(SideExitGuardStk,             SideExitGuardData);
 X(CheckDefinedClsEq,            CheckDefinedClsData);

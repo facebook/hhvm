@@ -350,6 +350,24 @@ Opcode queryJmpToQueryOp(Opcode opc) {
   }
 }
 
+Opcode jmpToSideExitJmp(Opcode opc) {
+  switch (opc) {
+  case JmpGt:                 return SideExitJmpGt;
+  case JmpGte:                return SideExitJmpGte;
+  case JmpLt:                 return SideExitJmpLt;
+  case JmpLte:                return SideExitJmpLte;
+  case JmpEq:                 return SideExitJmpEq;
+  case JmpNeq:                return SideExitJmpNeq;
+  case JmpSame:               return SideExitJmpSame;
+  case JmpNSame:              return SideExitJmpNSame;
+  case JmpInstanceOfBitmask:  return SideExitJmpInstanceOfBitmask;
+  case JmpNInstanceOfBitmask: return SideExitJmpNInstanceOfBitmask;
+  case JmpZero:               return SideExitJmpZero;
+  case JmpNZero:              return SideExitJmpNZero;
+  default:                    always_assert(0);
+  }
+}
+
 Opcode jmpToReqBindJmp(Opcode opc) {
   switch (opc) {
   case JmpGt:                 return ReqBindJmpGt;

@@ -37,6 +37,29 @@ namespace HPHP { namespace Transl {
 
 typedef TreadHashMap<CTCA, TCA, ctca_identity_hash> CatchTraceMap;
 
+/*
+ * Information the unwinder needs stored in RDS, and the RDS::Link for
+ * it.  Used to pass values between unwinder code and catch traces.
+ */
+struct UnwindRDS {
+  int64_t unwinderScratch;
+  TypedValue unwinderTv;
+  bool doSideExit;
+};
+extern RDS::Link<UnwindRDS> unwindRdsInfo;
+
+inline ptrdiff_t unwinderScratchOff() {
+  return unwindRdsInfo.handle() + offsetof(UnwindRDS, unwinderScratch);
+}
+
+inline ptrdiff_t unwinderSideExitOff() {
+  return unwindRdsInfo.handle() + offsetof(UnwindRDS, doSideExit);
+}
+
+inline ptrdiff_t unwinderTvOff() {
+  return unwindRdsInfo.handle() + offsetof(UnwindRDS, unwinderTv);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 inline const std::type_info& typeInfoFromUnwindException(

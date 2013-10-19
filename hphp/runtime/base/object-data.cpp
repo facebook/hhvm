@@ -99,12 +99,12 @@ void ObjectData::destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 // class info
 
-CStrRef ObjectData::o_getClassName() const {
+const String& ObjectData::o_getClassName() const {
   return *(const String*)(&m_cls->preClass()->nameRef());
 }
 
 HOT_FUNC
-bool ObjectData::o_instanceof(CStrRef s) const {
+bool ObjectData::o_instanceof(const String& s) const {
   Class* cls = Unit::lookupClass(s.get());
   if (!cls) return false;
   return m_cls->classof(cls);
@@ -112,14 +112,16 @@ bool ObjectData::o_instanceof(CStrRef s) const {
 
 bool ObjectData::o_toBooleanImpl() const noexcept {
   if (isCollection()) {
-    if (instanceof(c_Vector::classof())) {
+    if (m_cls == c_Vector::classof()) {
       return c_Vector::ToBool(this);
-    } else if (instanceof(c_Map::classof())) {
+    } else if (m_cls == c_Map::classof()) {
       return c_Map::ToBool(this);
-    } else if (instanceof(c_StableMap::classof())) {
+    } else if (m_cls == c_StableMap::classof()) {
       return c_StableMap::ToBool(this);
-    } else if (instanceof(c_Set::classof())) {
+    } else if (m_cls == c_Set::classof()) {
       return c_Set::ToBool(this);
+    } else if (m_cls == c_FrozenVector::classof()) {
+      return c_FrozenVector::ToBool(this);
     } else {
       always_assert(false);
     }
@@ -173,7 +175,7 @@ Object ObjectData::iterableObject(bool& isIterable,
   return obj;
 }
 
-ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
+ArrayIter ObjectData::begin(const String& context /* = null_string */) {
   bool isIterable;
   if (isCollection()) {
     return ArrayIter(this);
@@ -187,7 +189,7 @@ ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
 }
 
 MutableArrayIter ObjectData::begin(Variant* key, Variant& val,
-                                   CStrRef context /* = null_string */) {
+                                   const String& context /* = null_string */) {
   bool isIterable;
   if (isCollection()) {
     raise_error("Collection elements cannot be taken by reference");
@@ -207,8 +209,8 @@ void ObjectData::reserveProperties(int numDynamic /* = 0 */) {
   o_properties = Array::attach(HphpArray::MakeReserve(numDynamic));
 }
 
-Variant* ObjectData::o_realProp(CStrRef propName, int flags,
-                                CStrRef context /* = null_string */) {
+Variant* ObjectData::o_realProp(const String& propName, int flags,
+                                const String& context /* = null_string */) {
   /*
    * Returns a pointer to a place for a property value. This should never
    * call the magic methods __get or __set. The flags argument describes the
@@ -240,9 +242,9 @@ Variant* ObjectData::o_realProp(CStrRef propName, int flags,
   }
 }
 
-inline Variant ObjectData::o_getImpl(CStrRef propName, int flags,
+inline Variant ObjectData::o_getImpl(const String& propName, int flags,
                                      bool error /* = true */,
-                                     CStrRef context /* = null_string */) {
+                                     const String& context /*= null_string*/) {
   if (UNLIKELY(!*propName.data())) {
     throw_invalid_property_name(propName);
   }
@@ -267,14 +269,14 @@ inline Variant ObjectData::o_getImpl(CStrRef propName, int flags,
   return uninit_null();
 }
 
-Variant ObjectData::o_get(CStrRef propName, bool error /* = true */,
-                          CStrRef context /* = null_string */) {
+Variant ObjectData::o_get(const String& propName, bool error /* = true */,
+                          const String& context /* = null_string */) {
   return o_getImpl(propName, 0, error, context);
 }
 
 template <class T>
-ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
-                                                   CStrRef context) {
+ALWAYS_INLINE Variant ObjectData::o_setImpl(const String& propName, T v,
+                                                   const String& context) {
   if (UNLIKELY(!*propName.data())) {
     throw_invalid_property_name(propName);
   }
@@ -299,27 +301,30 @@ ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
   return variant(v);
 }
 
-Variant ObjectData::o_set(CStrRef propName, CVarRef v) {
+Variant ObjectData::o_set(const String& propName, CVarRef v) {
   return o_setImpl<CVarRef>(propName, v, null_string);
 }
 
-Variant ObjectData::o_set(CStrRef propName, RefResult v) {
+Variant ObjectData::o_set(const String& propName, RefResult v) {
   return o_setRef(propName, variant(v), null_string);
 }
 
-Variant ObjectData::o_setRef(CStrRef propName, CVarRef v) {
+Variant ObjectData::o_setRef(const String& propName, CVarRef v) {
   return o_setImpl<RefResult>(propName, ref(v), null_string);
 }
 
-Variant ObjectData::o_set(CStrRef propName, CVarRef v, CStrRef context) {
+Variant ObjectData::o_set(const String& propName, CVarRef v,
+                          const String& context) {
   return o_setImpl<CVarRef>(propName, v, context);
 }
 
-Variant ObjectData::o_set(CStrRef propName, RefResult v, CStrRef context) {
+Variant ObjectData::o_set(const String& propName, RefResult v,
+                          const String& context) {
   return o_setRef(propName, variant(v), context);
 }
 
-Variant ObjectData::o_setRef(CStrRef propName, CVarRef v, CStrRef context) {
+Variant ObjectData::o_setRef(const String& propName, CVarRef v,
+                             const String& context) {
   return o_setImpl<RefResult>(propName, ref(v), context);
 }
 
@@ -383,16 +388,18 @@ Array ObjectData::o_toArray() const {
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
   if (isCollection()) {
-    if (instanceof(c_Vector::classof())) {
+    if (m_cls == c_Vector::classof()) {
       return c_Vector::ToArray(this);
-    } else if (instanceof(c_Map::classof())) {
+    } else if (m_cls == c_Map::classof()) {
       return c_Map::ToArray(this);
-    } else if (instanceof(c_StableMap::classof())) {
+    } else if (m_cls == c_StableMap::classof()) {
       return c_StableMap::ToArray(this);
-    } else if (instanceof(c_Set::classof())) {
+    } else if (m_cls == c_Set::classof()) {
       return c_Set::ToArray(this);
-    } else if (instanceof(c_Pair::classof())) {
+    } else if (m_cls == c_Pair::classof()) {
       return c_Pair::ToArray(this);
+    } else if (m_cls == c_FrozenVector::classof()) {
+      return c_FrozenVector::ToArray(this);
     }
     // It's undefined what happens if you reach not_reached. We want to be sure
     // to hard fail if we get here.
@@ -409,7 +416,7 @@ Array ObjectData::o_toArray() const {
   }
 }
 
-Array ObjectData::o_toIterArray(CStrRef context,
+Array ObjectData::o_toIterArray(const String& context,
                                 bool getRef /* = false */) {
   size_t size = m_cls->declPropNumAccessible() + o_properties.size();
   Array retArray { Array::attach(HphpArray::MakeReserve(size)) };
@@ -486,7 +493,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
   return retArray;
 }
 
-static bool decode_invoke(CStrRef s, ObjectData* obj, bool fatal,
+static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
                           CallCtx& ctx) {
   ctx.this_ = obj;
   ctx.cls = obj->getVMClass();
@@ -516,7 +523,7 @@ static bool decode_invoke(CStrRef s, ObjectData* obj, bool fatal,
   return true;
 }
 
-Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
+Variant ObjectData::o_invoke(const String& s, CArrRef params,
                              bool fatal /* = true */) {
   CallCtx ctx;
   if (!decode_invoke(s, this, fatal, ctx)) {
@@ -527,7 +534,7 @@ Variant ObjectData::o_invoke(CStrRef s, CArrRef params,
   return ret;
 }
 
-Variant ObjectData::o_invoke_few_args(CStrRef s, int count,
+Variant ObjectData::o_invoke_few_args(const String& s, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
 
   CallCtx ctx;
@@ -690,7 +697,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     if (isCollection()) {
       collectionSerialize(const_cast<ObjectData*>(this), serializer);
     } else {
-      CStrRef className = o_getClassName();
+      const String& className = o_getClassName();
       Array properties = o_toArray();
       if (serializer->getType() ==
         VariableSerializer::Type::DebuggerSerialize) {
@@ -744,15 +751,15 @@ void ObjectData::dump() const {
 ObjectData* ObjectData::clone() {
   if (getAttribute(HasClone)) {
     if (isCollection()) {
-      if (instanceof(c_Vector::classof())) {
+      if (m_cls == c_Vector::classof()) {
         return c_Vector::Clone(this);
-      } else if (instanceof(c_Map::classof())) {
+      } else if (m_cls == c_Map::classof()) {
         return c_Map::Clone(this);
-      } else if (instanceof(c_StableMap::classof())) {
+      } else if (m_cls == c_StableMap::classof()) {
         return c_StableMap::Clone(this);
-      } else if (instanceof(c_Set::classof())) {
+      } else if (m_cls == c_Set::classof()) {
         return c_Set::Clone(this);
-      } else if (instanceof(c_Pair::classof())) {
+      } else if (m_cls == c_Pair::classof()) {
         return c_Pair::Clone(this);
       }
     } else if (instanceof(c_Closure::classof())) {
@@ -853,11 +860,12 @@ ObjectData* ObjectData::callCustomInstanceInit() {
 
 HOT_FUNC_VM
 ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
-  return new (MM().smartMallocSize(size)) ObjectData(cls, NoInit::noinit);
+  return new (MM().smartMallocSizeLogged(size))
+    ObjectData(cls, NoInit::noinit);
 }
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  return new (MM().smartMallocSizeBig(size).first)
+  return new (MM().smartMallocSizeBigLogged(size).first)
     ObjectData(cls, NoInit::noinit);
 }
 
@@ -874,10 +882,10 @@ void ObjectData::operator delete(void* p) {
   }
 
   auto const size = sizeForNProps(nProps) + builtinPropSize;
-  if (LIKELY(size <= MemoryManager::kMaxSmartSize)) {
-    return MM().smartFreeSize(this_, size);
+  if (LIKELY(size <= kMaxSmartSize)) {
+    return MM().smartFreeSizeLogged(this_, size);
   }
-  MM().smartFreeSizeBig(this_, size);
+  MM().smartFreeSizeBigLogged(this_, size);
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {
@@ -1315,7 +1323,8 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
     } else {
       // Dynamic property.
       assert(o_properties.get() != nullptr);
-      o_properties.remove(CStrRef(key), true /* isString */);
+      o_properties.remove(StrNR(key).asString(),
+                          true /* isString */);
     }
   } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
@@ -1364,7 +1373,8 @@ void ObjectData::getProp(const Class* klass, bool pubOnly,
       propVal->m_type != KindOfUninit &&
       !inserted[propInd]) {
     inserted[propInd] = true;
-    props.lvalAt(CStrRef(klass->declProperties()[propInd].m_mangledName))
+    props.lvalAt(
+      StrNR(klass->declProperties()[propInd].m_mangledName).asString())
       .setWithRef(tvAsCVarRef(propVal));
   }
 }
@@ -1415,27 +1425,33 @@ Variant ObjectData::invokeWakeup() {
 
 String ObjectData::invokeToString() {
   const Func* method = m_cls->getToString();
-  if (method) {
-    TypedValue tv;
-    g_vmContext->invokeFuncFew(&tv, method, this);
-    if (!IS_STRING_TYPE(tv.m_type)) {
-      void (*notify_user)(const char*, ...) = &raise_error;
-      if (hphpiCompat) {
-        tvCastToStringInPlace(&tv);
-        notify_user = &raise_warning;
-      }
-      notify_user("Method %s::__toString() must return a string value",
-                  m_cls->preClass()->name()->data());
-    }
-    return tv.m_data.pstr;
+  if (!method) {
+    // If the object does not define a __toString() method, raise a
+    // recoverable error
+    raise_recoverable_error(
+      "Object of class %s could not be converted to string",
+      m_cls->preClass()->name()->data()
+    );
+    // If the user error handler decides to allow execution to continue,
+    // we return the empty string.
+    return empty_string;
   }
-  raise_recoverable_error(
-    "Object of class %s could not be converted to string",
-    m_cls->preClass()->name()->data()
-  );
-  // If the user error handler decides to allow execution to continue,
-  // we return the empty string.
-  return empty_string;
+  TypedValue tv;
+  g_vmContext->invokeFuncFew(&tv, method, this);
+  if (!IS_STRING_TYPE(tv.m_type)) {
+    // Discard the value returned by the __toString() method and raise
+    // a recoverable error
+    tvRefcountedDecRef(tv);
+    raise_recoverable_error(
+      "Method %s::__toString() must return a string value",
+      m_cls->preClass()->name()->data());
+    // If the user error handler decides to allow execution to continue,
+    // we return the empty string.
+    return empty_string;
+  }
+  String ret = tv.m_data.pstr;
+  decRefStr(tv.m_data.pstr);
+  return ret;
 }
 
 bool ObjectData::hasToString() {

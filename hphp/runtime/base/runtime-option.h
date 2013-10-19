@@ -246,6 +246,7 @@ public:
   static std::set<std::string> ProxyURLs;
   static std::vector<std::string> ProxyPatterns;
   static bool AlwaysUseRelativePath;
+  static std::string IniFile;
 
   static int  HttpDefaultTimeout;
   static int  HttpSlowQueryThreshold;
@@ -302,7 +303,6 @@ public:
   static int64_t MaxMemcacheKeyCount;
   static int  SocketDefaultTimeout;
   static bool LockCodeMemory;
-  static bool CheckMemory;
   static int MaxArrayChain;
   static bool WarnOnCollectionToArray;
   static bool UseDirectCopy;
@@ -358,14 +358,15 @@ public:
     kEvalVMInitialGlobalTableSizeDefault)                               \
   F(bool, Jit,                         evalJitDefault())                \
   F(bool, JitRequireWriteLease,        false)                           \
-  F(bool, RuntimeTypeProfile,          false)                           \
   F(bool, AllowHhas,                   false)                           \
-  F(bool, CheckExtendedTypeHints,      false)                           \
+  F(bool, CheckExtendedTypeHints,      true)                            \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
+  F(uint32_t, DumpRingBufferOnCrash,   0)                               \
   F(bool, PerfPidMap,                  true)                            \
   F(bool, KeepPerfPidMap,              false)                           \
-  F(uint32_t, RuntimeTypeProfileFreq,  1000)                            \
+  F(bool, RuntimeTypeProfile,          false)                           \
+  F(int32_t, RuntimeTypeProfileLoggingFreq,  -1)                        \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      64 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
@@ -434,6 +435,9 @@ public:
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize, 100000)                     \
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
+  F(bool, EnableNuma, ServerExecutionMode())                            \
+  F(bool, EnableNumaLocal, ServerExecutionMode())                       \
+  F(bool, SimulateARM,                 false)                           \
   /* */                                                                 \
 
 #define F(type, name, unused) \

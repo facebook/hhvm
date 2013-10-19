@@ -82,11 +82,6 @@ typedef X64Assembler Asm;
 typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
 
 constexpr size_t kNonFallthroughAlign = 64;
-constexpr int kJmpLen = 5;
-constexpr int kCallLen = 5;
-constexpr int kJmpccLen = 6;
-constexpr int kJmpImmBytes = 4;
-constexpr int kJcc8Len = 3;
 constexpr int kLeaRipLen = 7;
 constexpr int kTestRegRegLen = 3;
 constexpr int kTestImmRegLen = 5;  // only for rax -- special encoding
@@ -166,6 +161,7 @@ private:
 
   FixupMap                   m_fixupMap;
   UnwindInfoHandle           m_unwindRegistrar;
+  std::vector<std::pair<CTCA, TCA>> m_pendingCatchTraces;
   CatchTraceMap              m_catchTraceMap;
   std::vector<TransBCMapping> m_bcMap;
 
@@ -178,28 +174,16 @@ private:
 
   ////////////////////////////////////////
   //
-  // Function prologue emission / smashing
+  // Function prologues
   //
   ////////////////////////////////////////
 public:
+  TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr);
   TCA getCallArrayPrologue(Func* func);
-
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
-  TCA funcPrologue(Func* func, int nArgs, ActRec* ar = nullptr);
-  bool checkCachedPrologue(const Func* func, int param, TCA& plgOut) const;
-  SrcKey emitPrologue(Func* func, int nArgs);
 
 private:
-  TCA emitCallArrayPrologue(const Func* func, const DVFuncletsVec& dvs);
-  TCA emitFuncGuard(Asm& a, const Func *f);
-  void emitStackCheck(int funcDepth, Offset pc);
-  TCA  emitTransCounterInc(Asm& a);
-
-  // Called at runtime, from prologues.
-  static void trimExtraArgs(ActRec* ar);
-  static int  shuffleArgsForMagicCall(ActRec* ar);
-  static void setArgInActRec(ActRec* ar, int argNum, uint64_t datum,
-                             DataType t);
+  bool checkCachedPrologue(const Func*, int, TCA&) const;
 
   ////////////////////////////////////////
   //
@@ -236,21 +220,9 @@ private:
   //
   ////////////////////////////////////////
 private:
-  void emitGuardChecks(Asm& a, SrcKey, const ChangeMap&,
-    const RefDeps&, SrcRec&);
+  void emitGuardChecks(SrcKey, const ChangeMap&, const RefDeps&, SrcRec&);
   void emitResolvedDeps(const ChangeMap& resolvedDeps);
-  void checkRefs(Asm&, SrcKey, const RefDeps&, SrcRec&);
-
-  void emitFallbackUncondJmp(Asm& as, SrcRec& dest);
-  void emitFallbackCondJmp(Asm& as, SrcRec& dest, ConditionCode cc);
-
-  static void smash(CodeBlock &cb, TCA src, TCA dest, bool isCall);
-  static void smashJmp(CodeBlock& cb, TCA src, TCA dest) {
-    smash(cb, src, dest, false);
-  }
-  static void smashCall(CodeBlock& cb, TCA src, TCA dest) {
-    smash(cb, src, dest, true);
-  }
+  void checkRefs(SrcKey, const RefDeps&, SrcRec&);
 
 private:
   void drawCFG(std::ofstream& out) const;
@@ -279,6 +251,7 @@ public:
   TCA getFreeStub();
 
   void registerCatchTrace(CTCA ip, TCA trace);
+  void processPendingCatchTraces();
   TCA getCatchTrace(CTCA ip) const;
 
   TCA getTranslatedCaller() const;
@@ -381,7 +354,6 @@ public:
   virtual std::string getUsage();
   virtual size_t getCodeSize();
   virtual size_t getStubSize();
-  virtual size_t getTargetCacheSize();
 
   // true iff calling thread is sole writer.
   static bool canWrite() {

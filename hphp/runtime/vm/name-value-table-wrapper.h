@@ -56,7 +56,7 @@ struct NameValueTableWrapper : public ArrayData {
   explicit NameValueTableWrapper(NameValueTable* tab)
     : ArrayData(kNvtwKind)
     , m_tab(tab)
-  { }
+  {}
 
 public: // ArrayData implementation
   static void Release(ArrayData*) {}
@@ -72,7 +72,7 @@ public: // ArrayData implementation
   using ArrayData::remove;
   using ArrayData::nvGet;
 
-  Variant& getRef(CStrRef k) {
+  Variant& getRef(const String& k) {
     return tvAsVariant(nvGet(k.get()));
   }
 
@@ -106,8 +106,8 @@ public: // ArrayData implementation
   static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
 
-  static ArrayData* Plus(ArrayData*, const ArrayData* elems, bool copy);
-  static ArrayData* Merge(ArrayData*, const ArrayData* elems, bool copy);
+  static ArrayData* Plus(ArrayData*, const ArrayData* elems);
+  static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Prepend(ArrayData*, CVarRef v, bool copy);
 
   static ssize_t IterBegin(const ArrayData*);
@@ -123,9 +123,9 @@ public: // ArrayData implementation
   static void Ksort(ArrayData*, int sort_flags, bool ascending);
   static void Sort(ArrayData*, int sort_flags, bool ascending);
   static void Asort(ArrayData*, int sort_flags, bool ascending);
-  static void Uksort(ArrayData*, CVarRef cmp_function);
-  static void Usort(ArrayData*, CVarRef cmp_function);
-  static void Uasort(ArrayData*, CVarRef cmp_function);
+  static bool Uksort(ArrayData*, CVarRef cmp_function);
+  static bool Usort(ArrayData*, CVarRef cmp_function);
+  static bool Uasort(ArrayData*, CVarRef cmp_function);
 
 private:
   static NameValueTableWrapper* asNVTW(ArrayData* ad);

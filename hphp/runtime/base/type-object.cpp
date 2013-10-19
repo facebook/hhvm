@@ -42,13 +42,13 @@ Object::~Object() {
   }
 }
 
-ArrayIter Object::begin(CStrRef context /* = null_string */) const {
+ArrayIter Object::begin(const String& context /* = null_string */) const {
   if (!m_px) throw_null_pointer_exception();
   return m_px->begin(context);
 }
 
 MutableArrayIter Object::begin(Variant *key, Variant &val,
-                               CStrRef context /* = null_string */) const {
+                               const String& context /*= null_string*/) const {
   if (!m_px) throw_null_pointer_exception();
   return m_px->begin(key, val, context);
 }
@@ -98,30 +98,30 @@ static Variant warn_non_object() {
   return uninit_null();
 }
 
-Variant Object::o_get(CStrRef propName, bool error /* = true */,
-                      CStrRef context /* = null_string */) const {
+Variant Object::o_get(const String& propName, bool error /* = true */,
+                      const String& context /* = null_string */) const {
   if (UNLIKELY(!m_px)) return warn_non_object();
   return m_px->o_get(propName, error, context);
 }
 
-Variant Object::o_set(CStrRef propName, CVarRef val,
-                      CStrRef context /* = null_string */) {
+Variant Object::o_set(const String& propName, CVarRef val,
+                      const String& context /* = null_string */) {
   if (!m_px) {
     setToDefaultObject();
   }
   return m_px->o_set(propName, val, context);
 }
 
-Variant Object::o_setRef(CStrRef propName, CVarRef val,
-                         CStrRef context /* = null_string */) {
+Variant Object::o_setRef(const String& propName, CVarRef val,
+                         const String& context /* = null_string */) {
   if (!m_px) {
     setToDefaultObject();
   }
   return m_px->o_setRef(propName, val, context);
 }
 
-Variant Object::o_set(CStrRef propName, RefResult val,
-                      CStrRef context /* = null_string */) {
+Variant Object::o_set(const String& propName, RefResult val,
+                      const String& context /* = null_string */) {
   return o_setRef(propName, variant(val), context);
 }
 

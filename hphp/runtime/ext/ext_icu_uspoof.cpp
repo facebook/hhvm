@@ -68,7 +68,7 @@ c_SpoofChecker::~c_SpoofChecker() {
 void c_SpoofChecker::t___construct() {
 }
 
-bool c_SpoofChecker::t_issuspicious(CStrRef text, VRefParam issuesFound) {
+bool c_SpoofChecker::t_issuspicious(const String& text, VRefParam issuesFound) {
   UErrorCode status = U_ZERO_ERROR;
   int32_t ret = uspoof_checkUTF8(
     m_spoof_checker,
@@ -86,8 +86,8 @@ bool c_SpoofChecker::t_issuspicious(CStrRef text, VRefParam issuesFound) {
 }
 
 bool c_SpoofChecker::t_areconfusable(
-  CStrRef s1,
-  CStrRef s2,
+  const String& s1,
+  const String& s2,
   VRefParam issuesFound) {
   UErrorCode status = U_ZERO_ERROR;
   int32_t ret = uspoof_areConfusableUTF8(
@@ -106,7 +106,7 @@ bool c_SpoofChecker::t_areconfusable(
   return ret != 0;
 }
 
-void c_SpoofChecker::t_setallowedlocales(CStrRef localesList) {
+void c_SpoofChecker::t_setallowedlocales(const String& localesList) {
   UErrorCode status = U_ZERO_ERROR;
   uspoof_setAllowedLocales(
     m_spoof_checker,

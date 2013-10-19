@@ -45,7 +45,7 @@
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
@@ -496,9 +496,6 @@ predictOutputs(SrcKey startSk,
                const NormalizedInstruction* ni) {
   if (!RuntimeOption::EvalJitTypePrediction) return KindOfAny;
 
-  // In JitPGO mode, disable type prediction to avoid side exits
-  if (RuntimeOption::EvalJitPGO) return KindOfAny;
-
   if (RuntimeOption::EvalJitStressTypePredPercent &&
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
     int dt;
@@ -524,6 +521,16 @@ predictOutputs(SrcKey startSk,
       break;
     }
     return DataType(dt);
+  }
+
+  if (ni->op() == OpCns ||
+      ni->op() == OpCnsE ||
+      ni->op() == OpCnsU) {
+    StringData* sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
+    TypedValue* tv = Unit::lookupCns(sd);
+    if (tv) {
+      return tv->m_type;
+    }
   }
 
   if (ni->op() == OpMod) {
@@ -639,7 +646,7 @@ predictOutputs(SrcKey startSk,
   } else if (hasImmVector(ni->op())) {
     pred = predictMVec(ni);
   }
-  if (debug && pred.second < kAccept) {
+  if (pred.second < kAccept) {
     if (const StringData* invName = fcallToFuncName(ni)) {
       pred = predictType(TypeProfileKey(TypeProfileKey::MethodName, invName));
       TRACE(1, "prediction for methods named %s: %d, %f\n",
@@ -694,7 +701,8 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
 static RuntimeType
 getDynLocType(const SrcKey startSk,
               NormalizedInstruction* ni,
-              InstrFlags::OutTypeConstraints constraint) {
+              InstrFlags::OutTypeConstraints constraint,
+              TransKind mode) {
   using namespace InstrFlags;
   auto const& inputs = ni->inputs;
   assert(constraint != OutFInputL);
@@ -714,16 +722,29 @@ getDynLocType(const SrcKey startSk,
     CS(OutObject,      KindOfObject);
     CS(OutResource,    KindOfResource);
 #undef CS
+
+    case OutCns: {
+      // If it's a system constant, burn in its type. Otherwise we have
+      // to accept prediction; use the translation-time value, or fall back
+      // to the targetcache if none exists.
+      StringData* sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
+      assert(sd);
+      const TypedValue* tv = Unit::lookupPersistentCns(sd);
+      if (tv) {
+        return RuntimeType(tv->m_type);
+      }
+    } // Fall through
     case OutPred: {
-      auto dt = predictOutputs(startSk, ni);
+      // In TransProfile mode, disable type prediction to avoid side exits.
+      auto dt = mode == TransProfile ? KindOfAny : predictOutputs(startSk, ni);
       if (dt != KindOfAny) ni->outputPredicted = true;
-      return RuntimeType(dt);
+      return RuntimeType(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
     }
 
     case OutClassRef: {
       Op op = Op(ni->op());
       if ((op == OpAGetC && inputs[0]->isString())) {
-        const StringData *sd = inputs[0]->rtt.valueString();
+        const StringData* sd = inputs[0]->rtt.valueString();
         if (sd) {
           Class *klass = Unit::lookupUniqueClass(sd);
           TRACE(3, "KindOfClass: derived class \"%s\" from string literal\n",
@@ -740,26 +761,6 @@ getDynLocType(const SrcKey startSk,
       return RuntimeType(KindOfClass);
     }
 
-    case OutCns: {
-      // If it's a system constant, burn in its type. Otherwise we have
-      // to accept prediction; use the translation-time value, or fall back
-      // to the targetcache if none exists.
-      StringData *sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
-      assert(sd);
-      const TypedValue* tv = Unit::lookupPersistentCns(sd);
-      if (tv) {
-        return RuntimeType(tv->m_type);
-      }
-      tv = Unit::lookupCns(sd);
-      // In JitPGO mode, we disable type predictions to avoid side exits
-      if (tv && !RuntimeOption::EvalJitPGO) {
-        ni->outputPredicted = true;
-        TRACE(1, "CNS %s: guessing runtime type %d\n", sd->data(), tv->m_type);
-        return RuntimeType(tv->m_type);
-      }
-      return RuntimeType(KindOfAny);
-    }
-
     case OutNullUninit: {
       assert(ni->op() == OpNullUninit);
       return RuntimeType(KindOfUninit);
@@ -767,7 +768,7 @@ getDynLocType(const SrcKey startSk,
 
     case OutStringImm: {
       assert(ni->op() == OpString);
-      StringData *sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
+      StringData* sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
       assert(sd);
       return RuntimeType(sd);
     }
@@ -1189,7 +1190,7 @@ static const struct {
   { OpReqDoc,      {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpEval,        {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpDefFunc,     {None,             None,         OutNone,           0 }},
-  { OpDefTypedef,  {None,             None,         OutNone,           0 }},
+  { OpDefTypeAlias,{None,             None,         OutNone,           0 }},
   { OpDefCls,      {None,             None,         OutNone,           0 }},
   { OpDefCns,      {Stack1,           Stack1,       OutBoolean,        0 }},
 
@@ -1221,6 +1222,8 @@ static const struct {
   { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown,       -2 }},
   { OpFloor,       {Stack1,           Stack1,       OutDouble,         0 }},
   { OpCeil,        {Stack1,           Stack1,       OutDouble,         0 }},
+  { OpAssertTL,    {None,             None,         OutNone,           0 }},
+  { OpAssertTStk,  {None,             None,         OutNone,           0 }},
 
   /*** 14. Continuation instructions ***/
 
@@ -1366,13 +1369,14 @@ static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
 bool outputIsPredicted(SrcKey startSk,
                        NormalizedInstruction& inst) {
   auto const& iInfo = getInstrInfo(inst.op());
-  auto doPrediction = iInfo.type == OutPred && !inst.breaksTracelet;
+  auto doPrediction =
+    (iInfo.type == OutPred || iInfo.type == OutCns) && !inst.breaksTracelet;
   if (doPrediction) {
     // All OutPred ops except for SetM have a single stack output for now.
     assert(iInfo.out == Stack1 || inst.op() == OpSetM);
     auto dt = predictOutputs(startSk, &inst);
     if (dt != KindOfAny) {
-      inst.outPred = Type(dt);
+      inst.outPred = Type(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
     } else {
       doPrediction = false;
     }
@@ -1464,8 +1468,8 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         ni->imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
-        // In JitPGO, disable type predictions to avoid side exits
-        if (RuntimeOption::EvalJitPGO) break;
+        // In TransProfile mode, disable type predictions to avoid side exits.
+        if (m_mode == TransProfile) break;
 
         // If the original type was invalid or predicted, then use the
         // prediction in the meta-data.
@@ -1701,6 +1705,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
 
     if (mcode == MW) {
       // No stack and no locals.
+      continue;
     } else if (member.hasImm()) {
       int64_t imm = member.imm;
       if (memberCodeImmIsLoc(mcode)) {
@@ -1856,7 +1861,9 @@ void getInputsImpl(SrcKey startSk,
       if (ni->nonRefCountedLocals[i]) {
         assert(curType.notCounted() && "Static analysis was wrong");
       }
-      numRefCounted += curType.maybeCounted();
+      if (curType.maybeCounted()) {
+        numRefCounted++;
+      }
     }
     return numRefCounted <= RuntimeOption::EvalHHIRInliningMaxReturnDecRefs;
   };
@@ -2290,7 +2297,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
     }
     DynLocation* dl = t.newDynLocation();
     dl->location = loc;
-    dl->rtt = getDynLocType(t.m_sk, ni, typeInfo);
+    dl->rtt = getDynLocType(t.m_sk, ni, typeInfo, m_mode);
     SKTRACE(2, ni->source, "recording output t(%d->%d) #(%s, %" PRId64 ")\n",
             dl->rtt.outerType(), dl->rtt.innerType(),
             dl->location.spaceName(), dl->location.offset);
@@ -3134,7 +3141,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
 static bool instrBreaksProfileBB(const NormalizedInstruction* instr) {
   return (instrIsNonCallControlFlow(instr->op()) ||
           instr->outputPredicted ||
-          instr->op() == OpClsCnsD); // side exits if misses in the target cache
+          instr->op() == OpClsCnsD); // side exits if misses in the RDS
 }
 
 /*
@@ -3605,7 +3612,16 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         inst.imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
-        if (metaMode == MetaMode::Legacy) break;
+        // When we're translating a Tracelet from Translator::analyze(), the
+        // information from these predictions has been added to the
+        // NormalizedInstructions in the instruction stream, so they aren't
+        // necessary (and they caused a perf regression). HHIR guard relaxation
+        // is capable of eliminating unnecessary predictions and the
+        // information added here is valuable to it.
+        if (metaMode == MetaMode::Legacy &&
+            !RuntimeOption::EvalHHIRRelaxGuards) {
+          break;
+        }
         auto const loc = stackFilter(inst.inputs[arg]->location).
                          toLocation(inst.stackOffset);
         auto const t = Type(DataType(info.m_data));
@@ -3766,7 +3782,8 @@ Translator::translateRegion(const RegionDesc& region,
           assert(loc.tag() == JIT::RegionDesc::Location::Tag::Stack);
           ht.assertTypeLocation(loc, type);
         } else if (isFirstRegionInstr) {
-          ht.guardTypeLocation(loc, type);
+          bool checkOuterTypeOnly = m_mode != TransProfile;
+          ht.guardTypeLocation(loc, type, checkOuterTypeOnly);
         } else {
           ht.checkTypeLocation(loc, type, sk.offset());
         }
@@ -3973,8 +3990,7 @@ struct DeferredPathInvalidate : public DeferredWorkItem {
     String spath(m_path);
     /*
      * inotify saw this path change. Now poke the file repository;
-     * it will notice the underlying PhpFile* has changed, and notify
-     * us via ::invalidateFile.
+     * it will notice the underlying PhpFile* has changed.
      *
      * We don't actually need to *do* anything with the PhpFile* from
      * this lookup; since the path has changed, the file we'll get out is
@@ -3984,10 +4000,6 @@ struct DeferredPathInvalidate : public DeferredWorkItem {
   }
 };
 
-}
-
-void Translator::invalidateFile(Eval::PhpFile* f) {
-  m_srcDB.invalidateCode(f);
 }
 
 static const char *transKindStr[] = {

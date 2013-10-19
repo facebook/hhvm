@@ -32,6 +32,7 @@ class c_Map;
 class c_StableMap;
 class c_Set;
 class c_Pair;
+class c_FrozenVector;
 struct Iter;
 
 /**
@@ -263,10 +264,11 @@ class ArrayIter {
   static void StableMapInit(ArrayIter* iter, ObjectData* obj);
   static void SetInit(ArrayIter* iter, ObjectData* obj);
   static void PairInit(ArrayIter* iter, ObjectData* obj);
+  static void FrozenVectorInit(ArrayIter* iter, ObjectData* obj);
   static void IteratorObjInit(ArrayIter* iter, ObjectData* obj);
 
   typedef void(*InitFuncPtr)(ArrayIter*,ObjectData*);
-  static const InitFuncPtr initFuncTable[6];
+  static const InitFuncPtr initFuncTable[7];
 
   void destruct();
 
@@ -289,6 +291,12 @@ class ArrayIter {
   c_Pair* getPair() {
     assert(hasCollection() && getCollectionType() == Collection::PairType);
     return (c_Pair*)((intptr_t)m_obj & ~1);
+  }
+  c_FrozenVector* getFrozenVector() {
+    assert(hasCollection() &&
+           getCollectionType() == Collection::FrozenVectorType);
+
+    return (c_FrozenVector*)((intptr_t)m_obj & ~1);
   }
   Collection::Type getCollectionType() {
     ObjectData* obj = getObject();
@@ -515,7 +523,7 @@ class MArrayIter : public FullPos {
   CVarRef val() {
     ArrayData* data = getArray();
     assert(data && data == getContainer());
-    assert(data->getCount() <= 1 || data->noCopyOnWrite());
+    assert(!data->hasMultipleRefs() || data->noCopyOnWrite());
     assert(!getResetFlag());
     assert(data->validFullPos(*this));
     return data->getValueRef(m_pos);
@@ -526,7 +534,7 @@ class MArrayIter : public FullPos {
 
 class CufIter {
  public:
-  CufIter() {}
+  CufIter() : m_func(nullptr), m_ctx(nullptr), m_name(nullptr) {}
   ~CufIter();
   const Func* func() const { return m_func; }
   void* ctx() const { return m_ctx; }

@@ -38,14 +38,14 @@ public:
   typedef void (*PFN_PARSER_CALLBACK)(String *arg1, String *arg2, String *arg3,
                                       int callback_type, void *arg);
 
-  typedef bool (*PFN_UPDATE_CALLBACK)(CStrRef value, void *p);
+  typedef bool (*PFN_UPDATE_CALLBACK)(const String& value, void *p);
 
 public:
-  static Variant FromString(CStrRef ini, CStrRef filename,
+  static Variant FromString(const String& ini, const String& filename,
                             bool process_sections, int scanner_mode);
 
-  static bool Get(CStrRef name, String &value);
-  static bool Set(CStrRef name, CStrRef value);
+  static bool Get(const String& name, String &value);
+  static bool Set(const String& name, const String& value);
 
   static void Bind(const char *name, const char *value,
                    PFN_UPDATE_CALLBACK callback, void *p = nullptr);
@@ -55,12 +55,12 @@ public:
 
 };
 
-bool ini_on_update_bool(CStrRef value, void *p);
-bool ini_on_update_long(CStrRef value, void *p);
-bool ini_on_update_non_negative(CStrRef value, void *p);
-bool ini_on_update_real(CStrRef value, void *p);
-bool ini_on_update_string(CStrRef value, void *p);
-bool ini_on_update_string_non_empty(CStrRef value, void *p);
+bool ini_on_update_bool(const String& value, void *p);
+bool ini_on_update_long(const String& value, void *p);
+bool ini_on_update_non_negative(const String& value, void *p);
+bool ini_on_update_real(const String& value, void *p);
+bool ini_on_update_string(const String& value, void *p);
+bool ini_on_update_string_non_empty(const String& value, void *p);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

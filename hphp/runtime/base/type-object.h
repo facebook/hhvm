@@ -85,7 +85,7 @@ public:
   bool isNull() const {
     return m_px == nullptr;
   }
-  bool instanceof(CStrRef s) const {
+  bool instanceof(const String& s) const {
     return m_px && m_px->o_instanceof(s);
   }
   bool instanceof(const Class* cls) const {
@@ -96,10 +96,10 @@ public:
   template <class T> const T& cast() const {
     return *static_cast<const T*>(this);
   }
-  ArrayIter begin(CStrRef context = null_string) const;
+  ArrayIter begin(const String& context = null_string) const;
 
   MutableArrayIter begin(Variant *key, Variant &val,
-                         CStrRef context = null_string) const;
+                         const String& context = null_string) const;
 
   /**
    * getTyped() and is() are intended for use with C++ classes that derive
@@ -165,11 +165,14 @@ public:
   bool less (CObjRef v2) const;
   bool more (CObjRef v2) const;
 
-  Variant o_get(CStrRef propName, bool error = true,
-                CStrRef context = null_string) const;
-  Variant o_set(CStrRef s, CVarRef v, CStrRef context = null_string);
-  Variant o_set(CStrRef s, RefResult v, CStrRef context = null_string);
-  Variant o_setRef(CStrRef s, CVarRef v, CStrRef context = null_string);
+  Variant o_get(const String& propName, bool error = true,
+                const String& context = null_string) const;
+  Variant o_set(
+    const String& s, CVarRef v, const String& context = null_string);
+  Variant o_set(
+    const String& s, RefResult v, const String& context = null_string);
+  Variant o_setRef(
+    const String& s, CVarRef v, const String& context = null_string);
 
   /**
    * Input/Output

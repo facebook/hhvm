@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,13 +39,8 @@ inline TypedValue* zend_wrap_func(
   // Prepare the arguments and return value before they are
   // exposed to the PHP extension
   zPrepArgs(ar);
-  Variant return_value;
-  return_value.asTypedValue()->m_type = KindOfRef;
-  return_value.asTypedValue()->m_data.pref = RefData::Make(KindOfNull, 0);
-
-  Variant this_ptr;
-  this_ptr.asTypedValue()->m_type = HPHP::KindOfRef;
-  this_ptr.asTypedValue()->m_data.pref = RefData::Make(HPHP::KindOfNull, 0);
+  Variant return_value(RefData::Make(*init_null_variant.asTypedValue()));
+  Variant this_ptr(RefData::Make(*init_null_variant.asTypedValue()));
   if (ar->hasThis()) {
     tvWriteObject(
       ar->getThis(),

@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/ir-trace.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 
 // Include last to localize effects to this file
 #include "hphp/util/assert-throw.h"

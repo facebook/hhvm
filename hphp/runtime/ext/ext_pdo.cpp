@@ -554,14 +554,14 @@ static inline int64_t pdo_attr_lval(CArrRef options, PDOAttributeType name,
 }
 
 static inline String pdo_attr_strval(CArrRef options, PDOAttributeType name,
-                                     CStrRef defval) {
+                                     const String& defval) {
   if (options.exists(name)) {
     return options[name].toString();
   }
   return defval;
 }
 
-static Object pdo_stmt_instantiate(sp_PDOConnection dbh, CStrRef clsname,
+static Object pdo_stmt_instantiate(sp_PDOConnection dbh, const String& clsname,
                                    CVarRef ctor_args) {
   String name = clsname;
   if (name.empty()) {
@@ -580,7 +580,7 @@ static Object pdo_stmt_instantiate(sp_PDOConnection dbh, CStrRef clsname,
 }
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
-                               CStrRef clsname, CVarRef ctor_args) {
+                               const String& clsname, CVarRef ctor_args) {
   if (clsname.empty()) {
     return;
   }
@@ -931,8 +931,8 @@ void c_PDO::sweep() {
   m_dbh.reset();
 }
 
-void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
-                          CStrRef password /* = null_string */,
+void c_PDO::t___construct(const String& dsn, const String& username /* = null_string */,
+                          const String& password /* = null_string */,
                           CArrRef options /* = null_array */) {
   String data_source = dsn;
 
@@ -1067,7 +1067,7 @@ void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
 }
 
 
-Variant c_PDO::t_prepare(CStrRef statement,
+Variant c_PDO::t_prepare(const String& statement,
                          CArrRef options /* = null_array */) {
   assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
@@ -1320,7 +1320,7 @@ Variant c_PDO::t_getattribute(int64_t attribute) {
   return ret;
 }
 
-Variant c_PDO::t_exec(CStrRef query) {
+Variant c_PDO::t_exec(const String& query) {
   if (query.empty()) {
     pdo_raise_impl_error(m_dbh, nullptr, "HY000",
                          "trying to execute an empty query");
@@ -1339,7 +1339,7 @@ Variant c_PDO::t_exec(CStrRef query) {
   return ret;
 }
 
-Variant c_PDO::t_lastinsertid(CStrRef seqname /* = null_string */) {
+Variant c_PDO::t_lastinsertid(const String& seqname /* = null_string */) {
   assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
@@ -1405,7 +1405,7 @@ Array c_PDO::t_errorinfo() {
   return ret;
 }
 
-Variant c_PDO::t_query(CStrRef sql) {
+Variant c_PDO::t_query(const String& sql) {
   assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
@@ -1463,7 +1463,7 @@ Variant c_PDO::t_query(CStrRef sql) {
   return false;
 }
 
-Variant c_PDO::t_quote(CStrRef str, int64_t paramtype /* = q_PDO$$PARAM_STR */) {
+Variant c_PDO::t_quote(const String& str, int64_t paramtype /* = q_PDO$$PARAM_STR */) {
   assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
@@ -1479,6 +1479,20 @@ Variant c_PDO::t_quote(CStrRef str, int64_t paramtype /* = q_PDO$$PARAM_STR */) 
     return quoted;
   }
   PDO_HANDLE_DBH_ERR(m_dbh);
+  return false;
+}
+
+bool c_PDO::t_sqlitecreatefunction(const String& name,
+                                   CVarRef callback,
+                                   int64_t argcount /* = -1 */) {
+  raise_recoverable_error("PDO::sqliteCreateFunction not implemented");
+  return false;
+}
+
+bool c_PDO::t_sqlitecreateaggregate(const String& name,
+                                    CVarRef step, CVarRef final,
+                                    int64_t argcount /* = -1 */) {
+  raise_recoverable_error("PDO::sqliteCreateAggregate not implemented");
   return false;
 }
 
@@ -2336,7 +2350,7 @@ struct placeholder {
   struct placeholder *next;
 };
 
-int pdo_parse_params(PDOStatement *stmt, CStrRef in, String &out) {
+int pdo_parse_params(PDOStatement *stmt, const String& in, String &out) {
   Scanner s;
   const char *ptr;
   char *newbuffer;
@@ -2718,7 +2732,7 @@ Variant c_PDOStatement::t_fetch(int64_t how /* = 0 */,
   return ret;
 }
 
-Variant c_PDOStatement::t_fetchobject(CStrRef class_name /* = null_string */,
+Variant c_PDOStatement::t_fetchobject(const String& class_name /* = null_string */,
                                       CVarRef ctor_args /* = null */) {
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
   if (!pdo_stmt_verify_mode(m_stmt, PDO_FETCH_CLASS, false)) {

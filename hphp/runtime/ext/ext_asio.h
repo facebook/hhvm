@@ -27,8 +27,6 @@ namespace HPHP {
 int f_asio_get_current_context_idx();
 Object f_asio_get_running_in_context(int ctx_idx);
 Object f_asio_get_running();
-void f_asio_set_on_failed_callback(CVarRef on_failed_cb);
-void f_asio_set_on_started_callback(CVarRef on_started_cb);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class WaitHandle
@@ -44,7 +42,7 @@ void f_asio_set_on_started_callback(CVarRef on_started_cb);
  *     StaticExceptionWaitHandle  - statically failed wait handle with exception
  *   WaitableWaitHandle           - wait handle that can be waited for
  *     BlockableWaitHandle        - wait handle that can be blocked by other WH
- *       ContinuationWaitHandle   - Continuation-powered asynchronous execution
+ *       AsyncFunctionWaitHandle  - async function-based asynchronous execution
  *       GenArrayWaitHandle       - wait handle representing an array of WHs
  *       GenMapWaitHandle         - wait handle representing an Map of WHs
  *       GenVectorWaitHandle      - wait handle representing an Vector of WHs
@@ -53,7 +51,7 @@ void f_asio_set_on_started_callback(CVarRef on_started_cb);
  *
  * A wait handle can be either synchronously joined (waited for the operation
  * to finish) or passed in various contexts as a dependency and waited for
- * asynchronously (such as using yield mechanism of ContinuationWaitHandle or
+ * asynchronously (such as using await mechanism of async function or
  * passed as an array member of GenArrayWaitHandle).
  */
 FORWARD_DECLARE_CLASS(WaitHandle);
@@ -224,7 +222,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   static const int8_t STATE_NEW       = 2;
 
  private:
-  c_ContinuationWaitHandle* m_creator;
+  c_AsyncFunctionWaitHandle* m_creator;
   c_BlockableWaitHandle* m_firstParent;
 };
 
@@ -267,26 +265,26 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class ContinuationWaitHandle
+// class AsyncFunctionWaitHandle
 
 /**
  * A continuation wait handle represents a basic unit of asynchronous execution
  * powered by continuation object. An asynchronous program can be written using
- * continuations; a dependency on another wait handle is set up by yielding such
+ * continuations; a dependency on another wait handle is set up by awaiting such
  * wait handle, giving control of the execution back to the asio framework.
  */
 FORWARD_DECLARE_CLASS(Continuation);
-FORWARD_DECLARE_CLASS(ContinuationWaitHandle);
-class c_ContinuationWaitHandle : public c_BlockableWaitHandle {
+FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
+class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
  public:
-  DECLARE_CLASS_NO_SWEEP(ContinuationWaitHandle)
+  DECLARE_CLASS_NO_SWEEP(AsyncFunctionWaitHandle)
 
   // need to implement
-  public: c_ContinuationWaitHandle(Class* cls = c_ContinuationWaitHandle::classof());
-  public: ~c_ContinuationWaitHandle();
+  public: c_AsyncFunctionWaitHandle(Class* cls = c_AsyncFunctionWaitHandle::classof());
+  public: ~c_AsyncFunctionWaitHandle();
   public: void t___construct();
   public: static void ti_setoncreatecallback(CVarRef callback);
-  public: static void ti_setonyieldcallback(CVarRef callback);
+  public: static void ti_setonawaitcallback(CVarRef callback);
   public: static void ti_setonsuccesscallback(CVarRef callback);
   public: static void ti_setonfailcallback(CVarRef callback);
   public: Object t_getprivdata();

@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/util/exception.h"
-#include "hphp/runtime/base/shared-array.h"
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -278,8 +278,7 @@ Array &Array::plusImpl(ArrayData *data) {
     if (m_px->empty()) {
       ArrayBase::operator=(data);
     } else if (m_px != data) {
-      ArrayData *escalated = m_px->plus(data, m_px->getCount() > 1);
-      if (escalated != m_px) ArrayBase::operator=(escalated);
+      ArrayBase::operator=(Array::attach(m_px->plus(data)));
     }
   }
   return *this;
@@ -291,8 +290,7 @@ Array &Array::mergeImpl(ArrayData *data) {
     throw BadArrayMergeException();
   }
   if (!data->empty()) {
-    ArrayData *escalated = m_px->merge(data, m_px->getCount() > 1);
-    if (escalated != m_px) ArrayBase::operator=(escalated);
+    ArrayBase::operator=(Array::attach(m_px->merge(data)));
   } else {
     m_px->renumber();
   }
@@ -393,7 +391,7 @@ bool Array::more(CVarRef v2) const {
 // iterator
 
 HOT_FUNC
-ArrayIter Array::begin(CStrRef context /* = null_string */) const {
+ArrayIter Array::begin(const String& context /* = null_string */) const {
   return ArrayIter(m_px);
 }
 
@@ -424,7 +422,7 @@ CVarRef Array::rvalAtRef(int64_t key, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-CVarRef Array::rvalAtRef(CStrRef key, ACCESSPARAMS_IMPL) const {
+CVarRef Array::rvalAtRef(const String& key, ACCESSPARAMS_IMPL) const {
   if (m_px) {
     bool error = flags & AccessFlags::Error;
     if (flags & AccessFlags::Key) return m_px->get(key, error);
@@ -439,7 +437,7 @@ CVarRef Array::rvalAtRef(CStrRef key, ACCESSPARAMS_IMPL) const {
   return null_variant;
 }
 
-Variant Array::rvalAt(CStrRef key, ACCESSPARAMS_IMPL) const {
+Variant Array::rvalAt(const String& key, ACCESSPARAMS_IMPL) const {
   return Array::rvalAtRef(key, flags);
 }
 
@@ -489,13 +487,13 @@ Variant &Array::lvalAt() {
   if (!m_px) ArrayBase::operator=(ArrayData::Create());
   Variant *ret = nullptr;
   ArrayData *arr = m_px;
-  ArrayData *escalated = arr->lvalNew(ret, arr->getCount() > 1);
+  ArrayData *escalated = arr->lvalNew(ret, arr->hasMultipleRefs());
   if (escalated != arr) ArrayBase::operator=(escalated);
   assert(ret);
   return *ret;
 }
 
-Variant &Array::lvalAt(CStrRef key, ACCESSPARAMS_IMPL) {
+Variant &Array::lvalAt(const String& key, ACCESSPARAMS_IMPL) {
   if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
   return lvalAtImpl(key.toKey(), flags);
 }
@@ -516,7 +514,7 @@ void Array::setImpl(const T &key, CVarRef v) {
     ArrayData *data = ArrayData::Create(key, v);
     ArrayBase::operator=(data);
   } else {
-    ArrayData *escalated = m_px->set(key, v, (m_px->getCount() > 1));
+    ArrayData *escalated = m_px->set(key, v, (m_px->hasMultipleRefs()));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
 }
@@ -529,7 +527,7 @@ void Array::setRefImpl(const T &key, CVarRef v) {
     ArrayBase::operator=(data);
   } else {
     escalate();
-    ArrayData *escalated = m_px->setRef(key, v, (m_px->getCount() > 1));
+    ArrayData *escalated = m_px->setRef(key, v, (m_px->hasMultipleRefs()));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
 }
@@ -541,7 +539,7 @@ void Array::addImpl(const T &key, CVarRef v) {
     ArrayData *data = ArrayData::Create(key, v);
     ArrayBase::operator=(data);
   } else {
-    ArrayData *escalated = m_px->add(key, v, (m_px->getCount() > 1));
+    ArrayData *escalated = m_px->add(key, v, (m_px->hasMultipleRefs()));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
 }
@@ -550,7 +548,7 @@ void Array::set(int64_t key, CVarRef v) {
   setImpl(key, v);
 }
 
-void Array::set(CStrRef key, CVarRef v, bool isKey /* = false */) {
+void Array::set(const String& key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setImpl(key, v);
   setImpl(key.toKey(), v);
 }
@@ -566,7 +564,7 @@ void Array::setRef(int64_t key, CVarRef v) {
   setRefImpl(key, v);
 }
 
-void Array::setRef(CStrRef key, CVarRef v, bool isKey /* = false */) {
+void Array::setRef(const String& key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return setRefImpl(key, v);
   setRefImpl(key.toKey(), v);
 }
@@ -582,7 +580,7 @@ void Array::add(int64_t key, CVarRef v) {
   addImpl(key, v);
 }
 
-void Array::add(CStrRef key, CVarRef v, bool isKey /* = false */) {
+void Array::add(const String& key, CVarRef v, bool isKey /* = false */) {
   if (isKey) return addImpl(key, v);
   addImpl(key.toKey(), v);
 }
@@ -626,7 +624,7 @@ Array Array::values() const {
   return ai.toArray();
 }
 
-bool Array::exists(CStrRef key, bool isKey /* = false */) const {
+bool Array::exists(const String& key, bool isKey /* = false */) const {
   if (isKey) return existsImpl(key);
   return existsImpl(key.toKey());
 }
@@ -647,7 +645,7 @@ bool Array::exists(CVarRef key, bool isKey /* = false */) const {
   return false;
 }
 
-void Array::remove(CStrRef key, bool isString /* = false */) {
+void Array::remove(const String& key, bool isString /* = false */) {
   if (isString) {
     removeImpl(key);
   } else {
@@ -678,7 +676,7 @@ CVarRef Array::append(CVarRef v) {
   if (!m_px) {
     ArrayBase::operator=(ArrayData::Create(v));
   } else {
-    ArrayData *escalated = m_px->append(v, (m_px->getCount() > 1));
+    ArrayData *escalated = m_px->append(v, (m_px->hasMultipleRefs()));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
   return v;
@@ -688,7 +686,7 @@ CVarRef Array::appendRef(CVarRef v) {
   if (!m_px) {
     ArrayBase::operator=(ArrayData::CreateRef(v));
   } else {
-    ArrayData *escalated = m_px->appendRef(v, (m_px->getCount() > 1));
+    ArrayData *escalated = m_px->appendRef(v, (m_px->hasMultipleRefs()));
     if (escalated != m_px) ArrayBase::operator=(escalated);
   }
   return v;
@@ -696,7 +694,7 @@ CVarRef Array::appendRef(CVarRef v) {
 
 CVarRef Array::appendWithRef(CVarRef v) {
   if (!m_px) ArrayBase::operator=(ArrayData::Create());
-  ArrayData *escalated = m_px->appendWithRef(v, (m_px->getCount() > 1));
+  ArrayData *escalated = m_px->appendWithRef(v, (m_px->hasMultipleRefs()));
   if (escalated != m_px) ArrayBase::operator=(escalated);
   return v;
 }
@@ -724,7 +722,7 @@ Variant Array::dequeue() {
 void Array::prepend(CVarRef v) {
   if (!m_px) operator=(Create());
   assert(m_px);
-  ArrayData *newarr = m_px->prepend(v, (m_px->getCount() > 1));
+  ArrayData *newarr = m_px->prepend(v, (m_px->hasMultipleRefs()));
   if (newarr != m_px) ArrayBase::operator=(newarr);
 }
 
@@ -958,12 +956,25 @@ int Array::SortNumericDescending(CVarRef v1, CVarRef v2, const void *data) {
 int Array::SortStringAscending(CVarRef v1, CVarRef v2, const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
-  return strcmp(s1.data(), s2.data());
+  return string_strcmp(s1.data(), s1.size(), s2.data(), s2.size());
 }
+
+int Array::SortStringAscendingCase(CVarRef v1, CVarRef v2, const void *data) {
+  String s1 = v1.toString();
+  String s2 = v2.toString();
+  return bstrcasecmp(s1.data(), s1.size(), s2.data(), s2.size());
+}
+
 int Array::SortStringDescending(CVarRef v1, CVarRef v2, const void *data) {
   String s1 = v1.toString();
   String s2 = v2.toString();
-  return strcmp(s2.data(), s1.data());
+  return string_strcmp(s2.data(), s2.size(), s1.data(), s1.size());
+}
+
+int Array::SortStringDescendingCase(CVarRef v1, CVarRef v2, const void *data) {
+  String s1 = v1.toString();
+  String s2 = v2.toString();
+  return bstrcasecmp(s2.data(), s2.size(), s1.data(), s1.size());
 }
 
 int Array::SortLocaleStringAscending(CVarRef v1, CVarRef v2,

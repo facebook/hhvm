@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/ext/ext_error.h"
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/runtime/vm/ringbuffer-print.h"
 
 namespace HPHP {
 
@@ -39,6 +40,10 @@ static void bt_handler(int sig) {
   if (sig==SIGQUIT || sig==SIGILL || sig==SIGSEGV || sig==SIGBUS) {
     LightProcess::Close();
     // leave running for SIGTERM SIGFPE SIGABRT
+  }
+
+  if (RuntimeOption::EvalDumpRingBufferOnCrash) {
+    Trace::dumpRingBuffer(RuntimeOption::EvalDumpRingBufferOnCrash);
   }
 
   if (RuntimeOption::EvalSpinOnCrash) {

@@ -27,6 +27,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "hphp/util/md5.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/timer.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -41,7 +42,6 @@
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/base/md5.h"
 
 /* Translator front-end. */
 namespace HPHP {
@@ -310,7 +310,6 @@ struct TransRec {
 struct TranslArgs {
   TranslArgs(const SrcKey& sk, bool align)
       : m_sk(sk)
-      , m_src(nullptr)
       , m_align(align)
       , m_interp(false)
       , m_setFuncBody(false)
@@ -319,10 +318,6 @@ struct TranslArgs {
 
   TranslArgs& sk(const SrcKey& sk) {
     m_sk = sk;
-    return *this;
-  }
-  TranslArgs& src(TCA src) {
-    m_src = src;
     return *this;
   }
   TranslArgs& align(bool align) {
@@ -343,7 +338,6 @@ struct TranslArgs {
   }
 
   SrcKey m_sk;
-  TCA m_src;
   bool m_align;
   bool m_interp;
   bool m_setFuncBody;
@@ -462,12 +456,10 @@ public:
    */
   virtual void requestInit() = 0;
   virtual void requestExit() = 0;
-  virtual TCA funcPrologue(Func* f, int nArgs, ActRec* ar = nullptr) = 0;
   virtual TCA getTranslatedCaller() const = 0;
   virtual std::string getUsage() = 0;
   virtual size_t getCodeSize() = 0;
   virtual size_t getStubSize() = 0;
-  virtual size_t getTargetCacheSize() = 0;
   virtual bool dumpTC(bool ignoreLease = false) = 0;
   virtual bool dumpTCCode(const char *filename) = 0;
   virtual bool dumpTCData() = 0;
@@ -580,9 +572,6 @@ public:
     assert(m_analysisDepth >= 0);
     return m_analysisDepth;
   }
-
-  // Async hook for file modifications.
-  void invalidateFile(Eval::PhpFile* f);
 
   // Start a new translation space. Returns true IFF this thread created
   // a new space.

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_out.h"
+#include "hphp/runtime/vm/hhbc.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,6 +49,12 @@ void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   assert(!m_complete); // Complete cmds should not be asked to do work.
 
   m_needsVMInterrupt = false;
+
+  if (m_skippingOverPopR) {
+    m_complete = true;
+    return;
+  }
+
   int currentVMDepth = g_vmContext->m_nesting;
   int currentStackDepth = proxy.getStackDepth();
 
@@ -70,8 +77,18 @@ void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
 
   TRACE(2, "CmdOut: shallower stack depth, done.\n");
   cleanupStepOuts();
-  m_complete = (decCount() == 0);
-  if (!m_complete) {
+  int depth = decCount();
+  if (depth == 0) {
+    PC pc = g_vmContext->getPC();
+    // Step over PopR following a call
+    if (toOp(*pc) == OpPopR) {
+      m_skippingOverPopR = true;
+      m_needsVMInterrupt = true;
+    } else {
+      m_complete = true;
+    }
+    return;
+  } else {
     TRACE(2, "CmdOut: not complete, step out again.\n");
     onSetup(proxy, interrupt);
   }

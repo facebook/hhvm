@@ -104,9 +104,10 @@ class ArrayDataPrinter:
             .value()
         # Only support kPackedKind or kMixedKind
         if self.kind == packed or self.kind == mixed:
-            return self._iterator(self.kind,
-                                  self.val['m_data'],
-                                  self.val['m_data'] + self.val['m_size'])
+            data = self.val.address.cast(gdb.lookup_type('char').pointer()) + \
+                self.val.type.sizeof
+            pelm = data.cast(gdb.lookup_type('HPHP::HphpArray::Elm').pointer())
+            return self._iterator(self.kind, pelm, pelm + self.val['m_size'])
         return self._iterator(0, 0, 0)
 
     def to_string(self):
@@ -158,9 +159,9 @@ class ObjectDataPrinter:
         return self._iterator(self.val, self.cls, mv, mv + dp['m_map']['m_extra'])
 
     def to_string(self):
-        return "%s of class %s" % (
-            self.dtype.tag,
-            StringDataVal(self.cls['m_preClass']['m_px']['m_name']))
+        return "Object of class %s @ 0x%x" % (
+            StringDataVal(self.cls['m_preClass']['m_px']['m_name']),
+            self.val.address)
 
 class SmartPtrPrinter:
     class _iterator:

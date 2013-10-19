@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/shared-store-stats.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/repo-schema.h"
@@ -584,7 +585,8 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
     appendStat("tc-size", tx->getCodeSize());
     appendStat("tc-stubsize", tx->getStubSize());
-    appendStat("targetcache", tx->getTargetCacheSize());
+    appendStat("targetcache", RDS::usedBytes());
+    appendStat("rds", RDS::usedBytes()); // TODO(#2966387): temp double logging
     appendStat("units", Eval::FileRepository::getLoadedFiles());
     appendStat("Funcs", Func::nextFuncId());
     out << "}" << endl;
@@ -617,9 +619,6 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     out << "}" << endl;
     transport->sendString(out.str());
     return true;
-  }
-  if (cmd == "check-mem") {
-    return toggle_switch(transport, RuntimeOption::CheckMemory);
   }
   if (cmd == "check-sql") {
     string stats = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";

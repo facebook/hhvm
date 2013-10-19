@@ -313,6 +313,7 @@ RegionDescPtr selectTraceletLegacy(const RegionContext&    rCtx,
       for (auto cni = callee.m_instrStream.first; cni; cni = cni->next) {
         assert(cSk == cni->source);
         assert(cni->op() == OpRetC ||
+               cni->op() == OpRetV ||
                cni->op() == OpContRetC ||
                cni->op() == OpNativeImpl ||
                !instrIsNonCallControlFlow(cni->op()));
@@ -461,7 +462,7 @@ RegionDescPtr selectHotRegion(TransID transId,
     std::string dotFileName = string("/tmp/trans-cfg-") +
                               lexical_cast<std::string>(transId) + ".dot";
 
-    cfg.print(dotFileName, profData, &selectedTIDs);
+    cfg.print(dotFileName, funcId, profData, &selectedTIDs);
     FTRACE(5, "selectHotRegion: New Translation {} (file: {}) {}\n",
            tx64->profData()->curTransID(), dotFileName,
            region ? show(*region) : std::string("empty region"));

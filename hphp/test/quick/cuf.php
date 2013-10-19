@@ -2,61 +2,61 @@
 error_reporting(-1);
 
 class A {
-  public function foo() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public function meth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function bar() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public static function staticMeth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
 }
 
 class B extends A {
-  public function foo() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public function meth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function bar() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public static function staticMeth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public function doFoo() {
-    $this->foo();  // B B B
-    B::foo();      // B B B
-    C::foo();      // C C   (Zend outputs: C B B) (Rule 1)
-    D::foo();      // D D   (Zend outputs: D B B) (Rule 1)
-    F::foo();      // F F   (Zend outputs: F B B) (Rule 1)
-    G::foo();      // G G   (Zend outputs: G B B) (Rule 1)
-    H::foo();      // H H   (Zend outputs: H B B) (Rule 1)
-    parent::foo(); // A B B
-    self::foo();   // B B B
-    static::foo(); // B B B
+  public function doMeth() {
+    $this->meth();  // B B B
+    B::meth();      // B B B
+    C::meth();      // C C   (Zend outputs: C B B) (Rule 1)
+    D::meth();      // D D   (Zend outputs: D B B) (Rule 1)
+    F::meth();      // F F   (Zend outputs: F B B) (Rule 1)
+    G::meth();      // G G   (Zend outputs: G B B) (Rule 1)
+    H::meth();      // H H   (Zend outputs: H B B) (Rule 1)
+    parent::meth(); // A B B
+    self::meth();   // B B B
+    static::meth(); // B B B
     echo "****************\n";
   }
-  public function doBar() {
-    $this->bar();  // B B
-    B::bar();      // B B
-    C::bar();      // C C
-    D::bar();      // D D
-    F::bar();      // F F
-    G::bar();      // G G
-    H::bar();      // H H
-    parent::bar(); // A B
-    self::bar();   // B B
-    static::bar(); // B B
+  public function doStaticMeth() {
+    $this->staticMeth();  // B B
+    B::staticMeth();      // B B
+    C::staticMeth();      // C C
+    D::staticMeth();      // D D
+    F::staticMeth();      // F F
+    G::staticMeth();      // G G
+    H::staticMeth();      // H H
+    parent::staticMeth(); // A B
+    self::staticMeth();   // B B
+    static::staticMeth(); // B B
     echo "****************\n";
   }
 }
 
 class C extends B {
-  public function foo() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public function meth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function bar() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public static function staticMeth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   /**
    * Zend's implementation of call_user_func() and forward_static_call() has
@@ -74,410 +74,616 @@ class C extends B {
    *      class of the object instance."
    *   3) Normal style calls and call_user_func style calls should produce
    *      consistent results aside from any exceptions mentioned in Zend PHP's
-   *      documentation. Therefore, "B::foo()" and "call_user_func('B::foo')"
-   *      and "call_user_func(array('B', 'foo'))" should all produce consistent
+   *      documentation. Therefore, "B::meth()" and "call_user_func('B::meth')"
+   *      and "call_user_func(array('B', 'meth'))" should all produce consistent
    *      results.
    *   4) call_user_func() and forward_static_call() must never forward the
    *      caller's late bound class to the callee if the late bound class is
    *      not the same or a descendent of the class enclosing the method.
    *      Zend's implementation of forward_static_call contains a check for
-   *      this, implying intent to uphold this invariant. 
+   *      this, implying intent to uphold this invariant.
    */
-  public function testFoo1() {
-    echo "############# testFoo1 ##############\n";
-    B::foo(); // B D D
-    C::foo(); // C D D
-    D::foo(); // D D D
-    F::foo(); // F F    (Zend: F D D) (Rule 1)
-    G::foo(); // G G    (Zend: G D D) (Rule 1)
-    H::foo(); // H H    (Zend: H D D) (Rule 1)
-    parent::foo(); // B D D
-    self::foo();   // C D D
-    static::foo(); // D D D
+  public function testMeth1() {
+    echo "############# testMeth1 ##############\n";
+    B::meth(); // B D D
+    C::meth(); // C D D
+    D::meth(); // D D D
+    F::meth(); // F F    (Zend: F D D) (Rule 1)
+    G::meth(); // G G    (Zend: G D D) (Rule 1)
+    H::meth(); // H H    (Zend: H D D) (Rule 1)
+    parent::meth(); // B D D
+    self::meth();   // C D D
+    static::meth(); // D D D
     echo "****************\n";
-    call_user_func(array('B','foo')); // B D D
-    call_user_func(array('C','foo')); // C D D
-    call_user_func(array('D','foo')); // D D D
-    call_user_func(array('F','foo')); // F F
-    call_user_func(array('G','foo')); // G G
-    call_user_func(array('H','foo')); // H H
-    call_user_func(array('parent','foo')); // B D D
-    call_user_func(array('self','foo'));   // C D D
-    call_user_func(array('static','foo')); // D D D
+    call_user_func('B::meth'); // B D D
+    call_user_func('C::meth'); // C D D
+    call_user_func('D::meth'); // D D D
+    call_user_func('F::meth'); // F F
+    call_user_func('G::meth'); // G G
+    call_user_func('H::meth'); // H H
+    call_user_func('parent::meth'); // B D D
+    call_user_func('self::meth');   // C D D
+    call_user_func('static::meth'); // D D D
     echo "****************\n";
-    call_user_func('B::foo'); // B D D
-    call_user_func('C::foo'); // C D D
-    call_user_func('D::foo'); // D D D
-    call_user_func('F::foo'); // F F
-    call_user_func('G::foo'); // G G
-    call_user_func('H::foo'); // H H
-    call_user_func('parent::foo'); // B D D
-    call_user_func('self::foo');   // C D D
-    call_user_func('static::foo'); // D D D
+    call_user_func(array('B','meth')); // B D D
+    call_user_func(array('C','meth')); // C D D
+    call_user_func(array('D','meth')); // D D D
+    call_user_func(array('F','meth')); // F F
+    call_user_func(array('G','meth')); // G G
+    call_user_func(array('H','meth')); // H H
+    call_user_func(array('parent','meth')); // B D D
+    call_user_func(array('self','meth'));   // C D D
+    call_user_func(array('static','meth')); // D D D
     echo "****************\n";
-    call_user_func(array('B','B::foo')); // B D D
-    call_user_func(array('B','C::foo')); // warning
-    call_user_func(array('B','D::foo')); // warning
-    call_user_func(array('B','F::foo')); // warning
-    call_user_func(array('B','G::foo')); // warning
-    call_user_func(array('B','H::foo')); // warning
-    call_user_func(array('B','parent::foo')); // A D D
-    call_user_func(array('B','self::foo'));   // B D D
-    call_user_func(array('B','static::foo')); // warning
+    call_user_func(array('B','B::meth')); // B D D
+    call_user_func(array('B','C::meth')); // warning
+    call_user_func(array('B','D::meth')); // warning
+    call_user_func(array('B','F::meth')); // warning
+    call_user_func(array('B','G::meth')); // warning
+    call_user_func(array('B','H::meth')); // warning
+    call_user_func(array('B','parent::meth')); // A D D
+    call_user_func(array('B','self::meth'));   // B D D
+    call_user_func(array('B','static::meth')); // warning
     echo "****************\n";
-    call_user_func(array('G','B::foo')); // warning
-    call_user_func(array('G','C::foo')); // warning
-    call_user_func(array('G','D::foo')); // warning
-    call_user_func(array('G','F::foo')); // F F
-    call_user_func(array('G','G::foo')); // G G
-    call_user_func(array('G','H::foo')); // warning
-    call_user_func(array('G','parent::foo')); // F F  (Zend: F D D) (Rule 1)
-    call_user_func(array('G','self::foo'));   // G G  (Zend: G D D) (Rule 1)
-    call_user_func(array('G','static::foo')); // warning
+    $call = array('B','B::meth'); $call(); // B D D
+    // $call = array('B','C::meth'); $call(); // expected fatal
+    // $call = array('B','D::meth'); $call(); // expected fatal
+    // $call = array('B','F::meth'); $call(); // expected fatal
+    // $call = array('B','G::meth'); $call(); // expected fatal
+    // $call = array('B','H::meth'); $call(); // expected fatal
+    $call = array('B','parent::meth'); $call(); // A D D
+    $call = array('B','self::meth'); $call();   // B D D
+    // $call = array('B','static::meth'); $call(); // expected fatal
+    echo "****************\n";
+    call_user_func(array('G','B::meth')); // warning
+    call_user_func(array('G','C::meth')); // warning
+    call_user_func(array('G','D::meth')); // warning
+    call_user_func(array('G','F::meth')); // F F
+    call_user_func(array('G','G::meth')); // G G
+    call_user_func(array('G','H::meth')); // warning
+    call_user_func(array('G','parent::meth')); // F F  (Zend: F D D) (Rule 1)
+    call_user_func(array('G','self::meth'));   // G G  (Zend: G D D) (Rule 1)
+    call_user_func(array('G','static::meth')); // warning
+    echo "****************\n";
+    // $call = array('G','B::meth'); $call(); // expected fatal
+    // $call = array('G','C::meth'); $call(); // expected fatal
+    // $call = array('G','D::meth'); $call(); // expected fatal
+    $call = array('G','F::meth'); $call(); // F F
+    $call = array('G','G::meth'); $call(); // G G
+    // $call = array('G','H::meth'); $call(); // expected fatal
+    $call = array('G','parent::meth'); $call(); // F F  (Zend: F D D) (Rule 1)
+    $call = array('G','self::meth'); $call();   // G G  (Zend: G D D) (Rule 1)
+    // $call = array('G','static::meth'); $call(); // expected fatal
     echo "****************\n";
     $b = new B;
-    call_user_func(array($b,'foo')); // B B B
-    call_user_func(array($b,'B::foo')); // B B B
-    call_user_func(array($b,'C::foo')); // warning
-    call_user_func(array($b,'D::foo')); // warning
-    call_user_func(array($b,'F::foo')); // warning
-    call_user_func(array($b,'G::foo')); // warning
-    call_user_func(array($b,'H::foo')); // warning
-    call_user_func(array($b,'parent::foo')); // A B B
-    call_user_func(array($b,'self::foo'));   // B B B
-    call_user_func(array($b,'static::foo')); // warning
+    call_user_func(array($b,'meth')); // B B B
+    call_user_func(array($b,'B::meth')); // B B B
+    call_user_func(array($b,'C::meth')); // warning
+    call_user_func(array($b,'D::meth')); // warning
+    call_user_func(array($b,'F::meth')); // warning
+    call_user_func(array($b,'G::meth')); // warning
+    call_user_func(array($b,'H::meth')); // warning
+    call_user_func(array($b,'parent::meth')); // A B B
+    call_user_func(array($b,'self::meth'));   // B B B
+    call_user_func(array($b,'static::meth')); // warning
+    echo "****************\n";
+    $b = new B;
+    $call = array($b,'meth'); $call(); // B B B
+    $call = array($b,'B::meth'); $call(); // B B B
+    // $call = array($b,'C::meth'); $call(); // expected fatal
+    // $call = array($b,'D::meth'); $call(); // expected fatal
+    // $call = array($b,'F::meth'); $call(); // expected fatal
+    // $call = array($b,'G::meth'); $call(); // expected fatal
+    // $call = array($b,'H::meth'); $call(); // expected fatal
+    $call = array($b,'parent::meth'); $call(); // A B B
+    $call = array($b,'self::meth'); $call();   // B B B
+    // $call = array($b,'static::meth'); $call(); // expected fatal
     echo "****************\n";
     $g = new G;
-    call_user_func(array($g,'foo')); // G G G
-    call_user_func(array($g,'B::foo')); // warning
-    call_user_func(array($g,'C::foo')); // warning
-    call_user_func(array($g,'D::foo')); // warning
-    call_user_func(array($g,'F::foo')); // F G G
-    call_user_func(array($g,'G::foo')); // G G G
-    call_user_func(array($g,'H::foo')); // warning
-    call_user_func(array($g,'parent::foo')); // F G G
-    call_user_func(array($g,'self::foo'));   // G G G
-    call_user_func(array($g,'static::foo')); // warning
+    call_user_func(array($g,'meth')); // G G G
+    call_user_func(array($g,'B::meth')); // warning
+    call_user_func(array($g,'C::meth')); // warning
+    call_user_func(array($g,'D::meth')); // warning
+    call_user_func(array($g,'F::meth')); // F G G
+    call_user_func(array($g,'G::meth')); // G G G
+    call_user_func(array($g,'H::meth')); // warning
+    call_user_func(array($g,'parent::meth')); // F G G
+    call_user_func(array($g,'self::meth'));   // G G G
+    call_user_func(array($g,'static::meth')); // warning
+    echo "****************\n";
+    $g = new G;
+    $call = array($g,'meth'); $call(); // G G G
+    // $call = array($g,'B::meth'); $call(); // expected fatal
+    // $call = array($g,'C::meth'); $call(); // expected fatal
+    // $call = array($g,'D::meth'); $call(); // expected fatal
+    $call = array($g,'F::meth'); $call(); // F G G
+    $call = array($g,'G::meth'); $call(); // G G G
+    // $call = array($g,'H::meth'); $call(); // expected fatal
+    $call = array($g,'parent::meth'); $call(); // F G G
+    $call = array($g,'self::meth'); $call();   // G G G
+    // $call = array($g,'static::meth'); $call(); // expected fatal
     echo "****************\n";
   }
-  public static function testFoo2() {
-    echo "############# testFoo2 ##############\n";
-    B::foo(); // B B
-    C::foo(); // C C
-    D::foo(); // D D
-    F::foo(); // F F
-    G::foo(); // G G
-    H::foo(); // H H
-    parent::foo(); // B D
-    self::foo();   // C D
-    static::foo(); // D D
+  public static function testMeth2() {
+    echo "############# testMeth2 ##############\n";
+    B::meth(); // B B
+    C::meth(); // C C
+    D::meth(); // D D
+    F::meth(); // F F
+    G::meth(); // G G
+    H::meth(); // H H
+    parent::meth(); // B D
+    self::meth();   // C D
+    static::meth(); // D D
     echo "****************\n";
-    call_user_func(array('B','foo')); // B B
-    call_user_func(array('C','foo')); // C C
-    call_user_func(array('D','foo')); // D D
-    call_user_func(array('F','foo')); // F F
-    call_user_func(array('G','foo')); // G G
-    call_user_func(array('H','foo')); // H H
-    call_user_func(array('parent','foo')); // B D
-    call_user_func(array('self','foo'));   // C D
-    call_user_func(array('static','foo')); // D D
+    call_user_func('B::meth'); // B B
+    call_user_func('C::meth'); // C C
+    call_user_func('D::meth'); // D D
+    call_user_func('F::meth'); // F F
+    call_user_func('G::meth'); // G G
+    call_user_func('H::meth'); // H H
+    call_user_func('parent::meth'); // B D
+    call_user_func('self::meth');   // C D
+    call_user_func('static::meth'); // D D
     echo "****************\n";
-    call_user_func('B::foo'); // B B
-    call_user_func('C::foo'); // C C
-    call_user_func('D::foo'); // D D
-    call_user_func('F::foo'); // F F
-    call_user_func('G::foo'); // G G
-    call_user_func('H::foo'); // H H
-    call_user_func('parent::foo'); // B D
-    call_user_func('self::foo');   // C D
-    call_user_func('static::foo'); // D D
+    call_user_func(array('B','meth')); // B B
+    call_user_func(array('C','meth')); // C C
+    call_user_func(array('D','meth')); // D D
+    call_user_func(array('F','meth')); // F F
+    call_user_func(array('G','meth')); // G G
+    call_user_func(array('H','meth')); // H H
+    call_user_func(array('parent','meth')); // B D
+    call_user_func(array('self','meth'));   // C D
+    call_user_func(array('static','meth')); // D D
     echo "****************\n";
-    call_user_func(array('B','B::foo')); // B B
-    call_user_func(array('B','C::foo')); // warning
-    call_user_func(array('B','D::foo')); // warning
-    call_user_func(array('B','F::foo')); // warning
-    call_user_func(array('B','G::foo')); // warning
-    call_user_func(array('B','H::foo')); // warning
-    call_user_func(array('B','parent::foo')); // A D
-    call_user_func(array('B','self::foo'));   // B D
-    call_user_func(array('B','static::foo')); // warning
+    $call = array('B','meth'); $call(); // B B
+    $call = array('C','meth'); $call(); // C C
+    $call = array('D','meth'); $call(); // D D
+    $call = array('F','meth'); $call(); // F F
+    $call = array('G','meth'); $call(); // G G
+    $call = array('H','meth'); $call(); // H H
+    $call = array('parent','meth'); $call(); // B D
+    $call = array('self','meth'); $call();   // C D
+    $call = array('static','meth'); $call(); // D D
     echo "****************\n";
-    call_user_func(array('G','B::foo')); // warning
-    call_user_func(array('G','C::foo')); // warning
-    call_user_func(array('G','D::foo')); // warning
-    call_user_func(array('G','F::foo')); // F F
-    call_user_func(array('G','G::foo')); // G G
-    call_user_func(array('G','H::foo')); // warning
-    call_user_func(array('G','parent::foo')); // F F   (Zend: F D) (Rule 4)
-    call_user_func(array('G','self::foo'));   // G G   (Zend: G D) (Rule 4)
-    call_user_func(array('G','static::foo')); // warning
+    call_user_func(array('B','B::meth')); // B B
+    call_user_func(array('B','C::meth')); // warning
+    call_user_func(array('B','D::meth')); // warning
+    call_user_func(array('B','F::meth')); // warning
+    call_user_func(array('B','G::meth')); // warning
+    call_user_func(array('B','H::meth')); // warning
+    call_user_func(array('B','parent::meth')); // A D
+    call_user_func(array('B','self::meth'));   // B D
+    call_user_func(array('B','static::meth')); // warning
+    echo "****************\n";
+    $call = array('B','B::meth'); $call(); // B B
+    // $call = array('B','C::meth'); $call(); // expected fatal
+    // $call = array('B','D::meth'); $call(); // expected fatal
+    // $call = array('B','F::meth'); $call(); // expected fatal
+    // $call = array('B','G::meth'); $call(); // expected fatal
+    // $call = array('B','H::meth'); $call(); // expected fatal
+    $call = array('B','parent::meth'); $call(); // A D
+    $call = array('B','self::meth'); $call();   // B D
+    // $call = array('B','static::meth'); $call(); // expected fatal
+    echo "****************\n";
+    call_user_func(array('G','B::meth')); // warning
+    call_user_func(array('G','C::meth')); // warning
+    call_user_func(array('G','D::meth')); // warning
+    call_user_func(array('G','F::meth')); // F F
+    call_user_func(array('G','G::meth')); // G G
+    call_user_func(array('G','H::meth')); // warning
+    call_user_func(array('G','parent::meth')); // F F   (Zend: F D) (Rule 4)
+    call_user_func(array('G','self::meth'));   // G G   (Zend: G D) (Rule 4)
+    call_user_func(array('G','static::meth')); // warning
+    echo "****************\n";
+    // $call = array('G','B::meth'); $call(); // warning
+    // $call = array('G','C::meth'); $call(); // warning
+    // $call = array('G','D::meth'); $call(); // warning
+    $call = array('G','F::meth'); $call(); // F F
+    $call = array('G','G::meth'); $call(); // G G
+    // $call = array('G','H::meth'); $call(); // warning
+    $call = array('G','parent::meth'); $call(); // F F   (Zend: F D) (Rule 4)
+    $call = array('G','self::meth'); $call();   // G G   (Zend: G D) (Rule 4)
+    // $call = array('G','static::meth'); $call(); // warning
     echo "****************\n";
     $b = new B;
-    call_user_func(array($b,'foo'));    // B B B
-    call_user_func(array($b,'B::foo')); // B B B
-    call_user_func(array($b,'C::foo')); // warning
-    call_user_func(array($b,'D::foo')); // warning
-    call_user_func(array($b,'F::foo')); // warning
-    call_user_func(array($b,'G::foo')); // warning
-    call_user_func(array($b,'H::foo')); // warning
-    call_user_func(array($b,'parent::foo')); // A B B
-    call_user_func(array($b,'self::foo'));   // B B B
-    call_user_func(array($b,'static::foo')); // warning
+    call_user_func(array($b,'meth'));    // B B B
+    call_user_func(array($b,'B::meth')); // B B B
+    call_user_func(array($b,'C::meth')); // warning
+    call_user_func(array($b,'D::meth')); // warning
+    call_user_func(array($b,'F::meth')); // warning
+    call_user_func(array($b,'G::meth')); // warning
+    call_user_func(array($b,'H::meth')); // warning
+    call_user_func(array($b,'parent::meth')); // A B B
+    call_user_func(array($b,'self::meth'));   // B B B
+    call_user_func(array($b,'static::meth')); // warning
+    echo "****************\n";
+    $b = new B;
+    $call = array($b,'meth'); $call();    // B B B
+    $call = array($b,'B::meth'); $call(); // B B B
+    // $call = array($b,'C::meth'); $call(); // expected fatal
+    // $call = array($b,'D::meth'); $call(); // expected fatal
+    // $call = array($b,'F::meth'); $call(); // expected fatal
+    // $call = array($b,'G::meth'); $call(); // expected fatal
+    // $call = array($b,'H::meth'); $call(); // expected fatal
+    $call = array($b,'parent::meth'); $call(); // A B B
+    $call = array($b,'self::meth'); $call();   // B B B
+    // $call = array($b,'static::meth'); $call(); // expected fatal
     echo "****************\n";
     $g = new G;
-    call_user_func(array($g,'foo'));    // G G G
-    call_user_func(array($g,'B::foo')); // warning
-    call_user_func(array($g,'C::foo')); // warning
-    call_user_func(array($g,'D::foo')); // warning
-    call_user_func(array($g,'F::foo')); // F G G
-    call_user_func(array($g,'G::foo')); // G G G
-    call_user_func(array($g,'H::foo')); // warning
-    call_user_func(array($g,'parent::foo')); // F G G
-    call_user_func(array($g,'self::foo'));   // G G G
-    call_user_func(array($g,'static::foo')); // warning
+    call_user_func(array($g,'meth'));    // G G G
+    call_user_func(array($g,'B::meth')); // warning
+    call_user_func(array($g,'C::meth')); // warning
+    call_user_func(array($g,'D::meth')); // warning
+    call_user_func(array($g,'F::meth')); // F G G
+    call_user_func(array($g,'G::meth')); // G G G
+    call_user_func(array($g,'H::meth')); // warning
+    call_user_func(array($g,'parent::meth')); // F G G
+    call_user_func(array($g,'self::meth'));   // G G G
+    call_user_func(array($g,'static::meth')); // warning
+    echo "****************\n";
+    $g = new G;
+    $call = array($g,'meth'); $call();    // G G G
+    // $call = array($g,'B::meth'); $call(); // expected fatal
+    // $call = array($g,'C::meth'); $call(); // expected fatal
+    // $call = array($g,'D::meth'); $call(); // expected fatal
+    $call = array($g,'F::meth'); $call(); // F G G
+    $call = array($g,'G::meth'); $call(); // G G G
+    // $call = array($g,'H::meth'); $call(); // expected fatal
+    $call = array($g,'parent::meth'); $call(); // F G G
+    $call = array($g,'self::meth'); $call();   // G G G
+    // $call = array($g,'static::meth'); $call(); // expected fatal
     echo "****************\n";
   }
-  public function testBar1() {
-    echo "############# testBar1 ##############\n";
-    B::bar(); // B B
-    C::bar(); // C C
-    D::bar(); // D D
-    F::bar(); // F F
-    G::bar(); // G G
-    H::bar(); // H H
-    parent::bar(); // B D
-    self::bar();   // C D
-    static::bar(); // D D
+  public function testStaticMeth1() {
+    echo "############# testStaticMeth1 ##############\n";
+    B::staticMeth(); // B B
+    C::staticMeth(); // C C
+    D::staticMeth(); // D D
+    F::staticMeth(); // F F
+    G::staticMeth(); // G G
+    H::staticMeth(); // H H
+    parent::staticMeth(); // B D
+    self::staticMeth();   // C D
+    static::staticMeth(); // D D
     echo "****************\n";
-    call_user_func(array('B','bar')); // B B   (Zend: B D) (Rule 3)
-    call_user_func(array('C','bar')); // C C   (Zend: C D) (Rule 3)
-    call_user_func(array('D','bar')); // D D
-    call_user_func(array('F','bar')); // F F
-    call_user_func(array('G','bar')); // G G
-    call_user_func(array('H','bar')); // H H
-    call_user_func(array('parent','bar')); // B D
-    call_user_func(array('self','bar'));   // C D
-    call_user_func(array('static','bar')); // D D
+    call_user_func('B::staticMeth'); // B B   (Zend: B D) (Rule 3)
+    call_user_func('C::staticMeth'); // C C   (Zend: C D) (Rule 3)
+    call_user_func('D::staticMeth'); // D D
+    call_user_func('F::staticMeth'); // F F
+    call_user_func('G::staticMeth'); // G G
+    call_user_func('H::staticMeth'); // H H
+    call_user_func('parent::staticMeth'); // B D
+    call_user_func('self::staticMeth');   // C D
+    call_user_func('static::staticMeth'); // D D
     echo "****************\n";
-    call_user_func('B::bar'); // B B   (Zend: B D) (Rule 3)
-    call_user_func('C::bar'); // C C   (Zend: C D) (Rule 3)
-    call_user_func('D::bar'); // D D
-    call_user_func('F::bar'); // F F
-    call_user_func('G::bar'); // G G
-    call_user_func('H::bar'); // H H
-    call_user_func('parent::bar'); // B D
-    call_user_func('self::bar');   // C D
-    call_user_func('static::bar'); // D D
+    call_user_func(array('B','staticMeth')); // B B   (Zend: B D) (Rule 3)
+    call_user_func(array('C','staticMeth')); // C C   (Zend: C D) (Rule 3)
+    call_user_func(array('D','staticMeth')); // D D
+    call_user_func(array('F','staticMeth')); // F F
+    call_user_func(array('G','staticMeth')); // G G
+    call_user_func(array('H','staticMeth')); // H H
+    call_user_func(array('parent','staticMeth')); // B D
+    call_user_func(array('self','staticMeth'));   // C D
+    call_user_func(array('static','staticMeth')); // D D
     echo "****************\n";
-    call_user_func(array('B','B::bar')); // B B   (Zend: B D) (Rule 3)
-    call_user_func(array('B','C::bar')); // warning
-    call_user_func(array('B','D::bar')); // warning
-    call_user_func(array('B','F::bar')); // warning
-    call_user_func(array('B','G::bar')); // warning
-    call_user_func(array('B','H::bar')); // warning
-    call_user_func(array('B','parent::bar')); // A D
-    call_user_func(array('B','self::bar'));   // B D
-    call_user_func(array('B','static::bar')); // warning
+    $call = array('B','staticMeth'); $call(); // B B   (Zend: B D) (Rule 3)
+    $call = array('C','staticMeth'); $call(); // C C   (Zend: C D) (Rule 3)
+    $call = array('D','staticMeth'); $call(); // D D
+    $call = array('F','staticMeth'); $call(); // F F
+    $call = array('G','staticMeth'); $call(); // G G
+    $call = array('H','staticMeth'); $call(); // H H
+    $call = array('parent','staticMeth'); $call(); // B D
+    $call = array('self','staticMeth'); $call();   // C D
+    $call = array('static','staticMeth'); $call(); // D D
     echo "****************\n";
-    call_user_func(array('G','B::bar')); // warning
-    call_user_func(array('G','C::bar')); // warning
-    call_user_func(array('G','D::bar')); // warning
-    call_user_func(array('G','F::bar')); // F F
-    call_user_func(array('G','G::bar')); // G G
-    call_user_func(array('G','H::bar')); // warning
-    call_user_func(array('G','parent::bar')); // F F   (Zend: F D) (Rule 4)
-    call_user_func(array('G','self::bar'));   // G G   (Zend: G D) (Rule 4)
-    call_user_func(array('G','static::bar')); // warning
+    call_user_func(array('B','B::staticMeth')); // B B   (Zend: B D) (Rule 3)
+    call_user_func(array('B','C::staticMeth')); // warning
+    call_user_func(array('B','D::staticMeth')); // warning
+    call_user_func(array('B','F::staticMeth')); // warning
+    call_user_func(array('B','G::staticMeth')); // warning
+    call_user_func(array('B','H::staticMeth')); // warning
+    call_user_func(array('B','parent::staticMeth')); // A D
+    call_user_func(array('B','self::staticMeth'));   // B D
+    call_user_func(array('B','static::staticMeth')); // warning
+    echo "****************\n";
+    $call = array('B','B::staticMeth'); $call(); // B B   (Zend: B D) (Rule 3)
+    // $call = array('B','C::staticMeth'); $call(); // expected fatal
+    // $call = array('B','D::staticMeth'); $call(); // expected fatal
+    // $call = array('B','F::staticMeth'); $call(); // expected fatal
+    // $call = array('B','G::staticMeth'); $call(); // expected fatal
+    // $call = array('B','H::staticMeth'); $call(); // expected fatal
+    $call = array('B','parent::staticMeth'); $call(); // A D
+    $call = array('B','self::staticMeth'); $call();   // B D
+    // $call = array('B','static::staticMeth'); $call(); // expected fatal
+    echo "****************\n";
+    call_user_func(array('G','B::staticMeth')); // warning
+    call_user_func(array('G','C::staticMeth')); // warning
+    call_user_func(array('G','D::staticMeth')); // warning
+    call_user_func(array('G','F::staticMeth')); // F F
+    call_user_func(array('G','G::staticMeth')); // G G
+    call_user_func(array('G','H::staticMeth')); // warning
+    call_user_func(array('G','parent::staticMeth')); // F F   (Zend: F D) (Rule 4)
+    call_user_func(array('G','self::staticMeth'));   // G G   (Zend: G D) (Rule 4)
+    call_user_func(array('G','static::staticMeth')); // warning
+    echo "****************\n";
+    // $call = array('G','B::staticMeth'); $call(); // expected fatal
+    // $call = array('G','C::staticMeth'); $call(); // expected fatal
+    // $call = array('G','D::staticMeth'); $call(); // expected fatal
+    $call = array('G','F::staticMeth'); $call(); // F F
+    $call = array('G','G::staticMeth'); $call(); // G G
+    // $call = array('G','H::staticMeth'); $call(); // expected fatal
+    $call = array('G','parent::staticMeth'); $call(); // F F   (Zend: F D) (Rule 4)
+    $call = array('G','self::staticMeth'); $call();   // G G   (Zend: G D) (Rule 4)
+    // $call = array('G','static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
     $b = new B;
-    call_user_func(array($b,'bar'));    // B B
-    call_user_func(array($b,'B::bar')); // B B
-    call_user_func(array($b,'C::bar')); // warning
-    call_user_func(array($b,'D::bar')); // warning
-    call_user_func(array($b,'F::bar')); // warning
-    call_user_func(array($b,'G::bar')); // warning
-    call_user_func(array($b,'H::bar')); // warning
-    call_user_func(array($b,'parent::bar')); // A B
-    call_user_func(array($b,'self::bar'));   // B B
-    call_user_func(array($b,'static::bar')); // warning
+    call_user_func(array($b,'staticMeth'));    // B B
+    call_user_func(array($b,'B::staticMeth')); // B B
+    call_user_func(array($b,'C::staticMeth')); // warning
+    call_user_func(array($b,'D::staticMeth')); // warning
+    call_user_func(array($b,'F::staticMeth')); // warning
+    call_user_func(array($b,'G::staticMeth')); // warning
+    call_user_func(array($b,'H::staticMeth')); // warning
+    call_user_func(array($b,'parent::staticMeth')); // A B
+    call_user_func(array($b,'self::staticMeth'));   // B B
+    call_user_func(array($b,'static::staticMeth')); // warning
+    echo "****************\n";
+    $b = new B;
+    $call = array($b,'staticMeth'); $call();    // B B
+    $call = array($b,'B::staticMeth'); $call(); // B B
+    // $call = array($b,'C::staticMeth'); $call(); // expected fatal
+    // $call = array($b,'D::staticMeth'); $call(); // expected fatal
+    // $call = array($b,'F::staticMeth'); $call(); // expected fatal
+    // $call = array($b,'G::staticMeth'); $call(); // expected fatal
+    // $call = array($b,'H::staticMeth'); $call(); // expected fatal
+    $call = array($b,'parent::staticMeth'); $call(); // A B
+    $call = array($b,'self::staticMeth'); $call();   // B B
+    // $call = array($b,'static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
     $g = new G;
-    call_user_func(array($g,'bar'));    // G G
-    call_user_func(array($g,'B::bar')); // warning
-    call_user_func(array($g,'C::bar')); // warning
-    call_user_func(array($g,'D::bar')); // warning
-    call_user_func(array($g,'F::bar')); // F G
-    call_user_func(array($g,'G::bar')); // G G
-    call_user_func(array($g,'H::bar')); // warning
-    call_user_func(array($g,'parent::bar')); // F G
-    call_user_func(array($g,'self::bar'));   // G G
-    call_user_func(array($g,'static::bar')); // warning
+    call_user_func(array($g,'staticMeth'));    // G G
+    call_user_func(array($g,'B::staticMeth')); // warning
+    call_user_func(array($g,'C::staticMeth')); // warning
+    call_user_func(array($g,'D::staticMeth')); // warning
+    call_user_func(array($g,'F::staticMeth')); // F G
+    call_user_func(array($g,'G::staticMeth')); // G G
+    call_user_func(array($g,'H::staticMeth')); // warning
+    call_user_func(array($g,'parent::staticMeth')); // F G
+    call_user_func(array($g,'self::staticMeth'));   // G G
+    call_user_func(array($g,'static::staticMeth')); // warning
+    echo "****************\n";
+    $g = new G;
+    $call = array($g,'staticMeth'); $call();    // G G
+    // $call = array($g,'B::staticMeth'); $call(); // expected fatal
+    // $call = array($g,'C::staticMeth'); $call(); // expected fatal
+    // $call = array($g,'D::staticMeth'); $call(); // expected fatal
+    $call = array($g,'F::staticMeth'); $call(); // F G
+    $call = array($g,'G::staticMeth'); $call(); // G G
+    // $call = array($g,'H::staticMeth'); $call(); // expected fatal
+    $call = array($g,'parent::staticMeth'); $call(); // F G
+    $call = array($g,'self::staticMeth'); $call();   // G G
+    // $call = array($g,'static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
   }
-  public static function testBar2() {
-    echo "############# testBar2 ##############\n";
-    B::bar(); // B B
-    C::bar(); // C C
-    D::bar(); // D D
-    F::bar(); // F F
-    G::bar(); // G G
-    H::bar(); // H H
-    parent::bar(); // B D
-    self::bar();   // C D
-    static::bar(); // D D
+  public static function testStaticMeth2() {
+    echo "############# testStaticMeth2 ##############\n";
+    B::staticMeth(); // B B
+    C::staticMeth(); // C C
+    D::staticMeth(); // D D
+    F::staticMeth(); // F F
+    G::staticMeth(); // G G
+    H::staticMeth(); // H H
+    parent::staticMeth(); // B D
+    self::staticMeth();   // C D
+    static::staticMeth(); // D D
     echo "****************\n";
-    call_user_func(array('B','bar')); // B B
-    call_user_func(array('C','bar')); // C C
-    call_user_func(array('D','bar')); // D D
-    call_user_func(array('F','bar')); // F F
-    call_user_func(array('G','bar')); // G G
-    call_user_func(array('H','bar')); // H H
-    call_user_func(array('parent','bar')); // B D
-    call_user_func(array('self','bar'));   // C D
-    call_user_func(array('static','bar')); // D D
+    call_user_func('B::staticMeth'); // B B
+    call_user_func('C::staticMeth'); // C C
+    call_user_func('D::staticMeth'); // D D
+    call_user_func('F::staticMeth'); // F F
+    call_user_func('G::staticMeth'); // G G
+    call_user_func('H::staticMeth'); // H H
+    call_user_func('parent::staticMeth'); // B D
+    call_user_func('self::staticMeth');   // C D
+    call_user_func('static::staticMeth'); // D D
     echo "****************\n";
-    call_user_func('B::bar'); // B B
-    call_user_func('C::bar'); // C C
-    call_user_func('D::bar'); // D D
-    call_user_func('F::bar'); // F F
-    call_user_func('G::bar'); // G G
-    call_user_func('H::bar'); // H H
-    call_user_func('parent::bar'); // B D
-    call_user_func('self::bar');   // C D
-    call_user_func('static::bar'); // D D
+    call_user_func(array('B','staticMeth')); // B B
+    call_user_func(array('C','staticMeth')); // C C
+    call_user_func(array('D','staticMeth')); // D D
+    call_user_func(array('F','staticMeth')); // F F
+    call_user_func(array('G','staticMeth')); // G G
+    call_user_func(array('H','staticMeth')); // H H
+    call_user_func(array('parent','staticMeth')); // B D
+    call_user_func(array('self','staticMeth'));   // C D
+    call_user_func(array('static','staticMeth')); // D D
     echo "****************\n";
-    call_user_func(array('B','B::bar')); // B B
-    call_user_func(array('B','C::bar')); // warning
-    call_user_func(array('B','D::bar')); // warning
-    call_user_func(array('B','F::bar')); // warning
-    call_user_func(array('B','G::bar')); // warning
-    call_user_func(array('B','H::bar')); // warning
-    call_user_func(array('B','parent::bar')); // A D
-    call_user_func(array('B','self::bar'));   // B D
-    call_user_func(array('B','static::bar')); // warning
+    $call = array('B','staticMeth'); $call(); // B B
+    $call = array('C','staticMeth'); $call(); // C C
+    $call = array('D','staticMeth'); $call(); // D D
+    $call = array('F','staticMeth'); $call(); // F F
+    $call = array('G','staticMeth'); $call(); // G G
+    $call = array('H','staticMeth'); $call(); // H H
+    $call = array('parent','staticMeth'); $call(); // B D
+    $call = array('self','staticMeth'); $call();   // C D
+    $call = array('static','staticMeth'); $call(); // D D
     echo "****************\n";
-    call_user_func(array('G','B::bar')); // warning
-    call_user_func(array('G','C::bar')); // warning
-    call_user_func(array('G','D::bar')); // warning
-    call_user_func(array('G','F::bar')); // F F
-    call_user_func(array('G','G::bar')); // G G
-    call_user_func(array('G','H::bar')); // warning
-    call_user_func(array('G','parent::bar')); // F F   (Zend: F D) (Rule 4)
-    call_user_func(array('G','self::bar'));   // G G   (Zend: G D) (Rule 4)
-    call_user_func(array('G','static::bar')); // warning
+    call_user_func(array('B','B::staticMeth')); // B B
+    call_user_func(array('B','C::staticMeth')); // warning
+    call_user_func(array('B','D::staticMeth')); // warning
+    call_user_func(array('B','F::staticMeth')); // warning
+    call_user_func(array('B','G::staticMeth')); // warning
+    call_user_func(array('B','H::staticMeth')); // warning
+    call_user_func(array('B','parent::staticMeth')); // A D
+    call_user_func(array('B','self::staticMeth'));   // B D
+    call_user_func(array('B','static::staticMeth')); // warning
+    echo "****************\n";
+    $call = array('B','B::staticMeth'); $call(); // B B
+    // $call = array('B','C::staticMeth'); $call(); // expected fatal
+    // $call = array('B','D::staticMeth'); $call(); // expected fatal
+    // $call = array('B','F::staticMeth'); $call(); // expected fatal
+    // $call = array('B','G::staticMeth'); $call(); // expected fatal
+    // $call = array('B','H::staticMeth'); $call(); // expected fatal
+    $call = array('B','parent::staticMeth'); $call(); // A D
+    $call = array('B','self::staticMeth'); $call();   // B D
+    // $call = array('B','static::staticMeth'); $call(); // expected fatal
+    echo "****************\n";
+    call_user_func(array('G','B::staticMeth')); // warning
+    call_user_func(array('G','C::staticMeth')); // warning
+    call_user_func(array('G','D::staticMeth')); // warning
+    call_user_func(array('G','F::staticMeth')); // F F
+    call_user_func(array('G','G::staticMeth')); // G G
+    call_user_func(array('G','H::staticMeth')); // warning
+    call_user_func(array('G','parent::staticMeth')); // F F   (Zend: F D) (Rule 4)
+    call_user_func(array('G','self::staticMeth'));   // G G   (Zend: G D) (Rule 4)
+    call_user_func(array('G','static::staticMeth')); // warning
+    echo "****************\n";
+    // $call = array('G','B::staticMeth'); $call(); // expected fatal
+    // $call = array('G','C::staticMeth'); $call(); // expected fatal
+    // $call = array('G','D::staticMeth'); $call(); // expected fatal
+    $call = array('G','F::staticMeth'); $call(); // F F
+    $call = array('G','G::staticMeth'); $call(); // G G
+    // $call = array('G','H::staticMeth'); $call(); // expected fatal
+    $call = array('G','parent::staticMeth'); $call(); // F F   (Zend: F D) (Rule 4)
+    $call = array('G','self::staticMeth'); $call();   // G G   (Zend: G D) (Rule 4)
+    // $call = array('G','static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
     $b = new B;
-    call_user_func(array($b,'bar'));    // B B
-    call_user_func(array($b,'B::bar')); // B B
-    call_user_func(array($b,'C::bar')); // warning
-    call_user_func(array($b,'D::bar')); // warning
-    call_user_func(array($b,'F::bar')); // warning
-    call_user_func(array($b,'G::bar')); // warning
-    call_user_func(array($b,'H::bar')); // warning
-    call_user_func(array($b,'parent::bar')); // A B
-    call_user_func(array($b,'self::bar'));   // B B
-    call_user_func(array($b,'static::bar')); // warning
+    call_user_func(array($b,'staticMeth'));    // B B
+    call_user_func(array($b,'B::staticMeth')); // B B
+    call_user_func(array($b,'C::staticMeth')); // warning
+    call_user_func(array($b,'D::staticMeth')); // warning
+    call_user_func(array($b,'F::staticMeth')); // warning
+    call_user_func(array($b,'G::staticMeth')); // warning
+    call_user_func(array($b,'H::staticMeth')); // warning
+    call_user_func(array($b,'parent::staticMeth')); // A B
+    call_user_func(array($b,'self::staticMeth'));   // B B
+    call_user_func(array($b,'static::staticMeth')); // warning
+    echo "****************\n";
+    $b = new B;
+    $call = array($b,'staticMeth'); $call();    // B B
+    $call = array($b,'B::staticMeth'); $call(); // B B
+    // $call = array($b,'C::staticMeth'); $call(); // expected fatal
+    // $call = array($b,'D::staticMeth'); $call(); // expected fatal
+    // $call = array($b,'F::staticMeth'); $call(); // expected fatal
+    // $call = array($b,'G::staticMeth'); $call(); // expected fatal
+    // $call = array($b,'H::staticMeth'); $call(); // expected fatal
+    $call = array($b,'parent::staticMeth'); $call(); // A B
+    $call = array($b,'self::staticMeth'); $call();   // B B
+    // $call = array($b,'static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
     $g = new G;
-    call_user_func(array($g,'bar'));    // G G
-    call_user_func(array($g,'B::bar')); // warning
-    call_user_func(array($g,'C::bar')); // warning
-    call_user_func(array($g,'D::bar')); // warning
-    call_user_func(array($g,'F::bar')); // F G
-    call_user_func(array($g,'G::bar')); // G G
-    call_user_func(array($g,'H::bar')); // warning
-    call_user_func(array($g,'parent::bar')); // F G
-    call_user_func(array($g,'self::bar'));   // G G
-    call_user_func(array($g,'static::bar')); // warning
+    call_user_func(array($g,'staticMeth'));    // G G
+    call_user_func(array($g,'B::staticMeth')); // warning
+    call_user_func(array($g,'C::staticMeth')); // warning
+    call_user_func(array($g,'D::staticMeth')); // warning
+    call_user_func(array($g,'F::staticMeth')); // F G
+    call_user_func(array($g,'G::staticMeth')); // G G
+    call_user_func(array($g,'H::staticMeth')); // warning
+    call_user_func(array($g,'parent::staticMeth')); // F G
+    call_user_func(array($g,'self::staticMeth'));   // G G
+    call_user_func(array($g,'static::staticMeth')); // warning
+    echo "****************\n";
+    $g = new G;
+    $call = array($g,'staticMeth'); $call();    // G G
+    // $call = array($g,'B::staticMeth'); $call(); // warning
+    // $call = array($g,'C::staticMeth'); $call(); // warning
+    // $call = array($g,'D::staticMeth'); $call(); // warning
+    $call = array($g,'F::staticMeth'); $call(); // F G
+    $call = array($g,'G::staticMeth'); $call(); // G G
+    // $call = array($g,'H::staticMeth'); $call(); // warning
+    $call = array($g,'parent::staticMeth'); $call(); // F G
+    $call = array($g,'self::staticMeth'); $call();   // G G
+    // $call = array($g,'static::staticMeth'); $call(); // warning
     echo "****************\n";
   }
 }
 
 class D extends C {
-  public function foo() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public function meth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function bar() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public static function staticMeth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
 }
 
 class F {
-  public function foo() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public function meth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function bar() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public static function staticMeth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
 }
 
 class G extends F {
-  public function foo() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public function meth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function bar() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public static function staticMeth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public function doFoo() {
-    $this->foo();  // G G G
-    B::foo();      // B B    (Zend: B G G) (Rule 1)
-    C::foo();      // C C    (Zend: C G G) (Rule 1)
-    D::foo();      // D D    (Zend: D G G) (Rule 1)
-    F::foo();      // F G G
-    G::foo();      // G G G
-    H::foo();      // H H    (Zend: H G G) (Rule 1)
-    parent::foo(); // F G G
-    self::foo();   // G G G
-    static::foo(); // G G G
+  public function doMeth() {
+    $this->meth();  // G G G
+    B::meth();      // B B    (Zend: B G G) (Rule 1)
+    C::meth();      // C C    (Zend: C G G) (Rule 1)
+    D::meth();      // D D    (Zend: D G G) (Rule 1)
+    F::meth();      // F G G
+    G::meth();      // G G G
+    H::meth();      // H H    (Zend: H G G) (Rule 1)
+    parent::meth(); // F G G
+    self::meth();   // G G G
+    static::meth(); // G G G
     echo "****************\n";
   }
-  public function doBar() {
-    $this->bar();  // G G
-    B::bar();      // B B
-    C::bar();      // C C
-    D::bar();      // D D
-    F::bar();      // F F
-    G::bar();      // G G
-    H::bar();      // H H
-    parent::bar(); // F G
-    self::bar();   // G G
-    static::bar(); // G G
+  public function doStaticMeth() {
+    $this->staticMeth();  // G G
+    B::staticMeth();      // B B
+    C::staticMeth();      // C C
+    D::staticMeth();      // D D
+    F::staticMeth();      // F F
+    G::staticMeth();      // G G
+    H::staticMeth();      // H H
+    parent::staticMeth(); // F G
+    self::staticMeth();   // G G
+    static::staticMeth(); // G G
     echo "****************\n";
   }
 }
 
 class H extends G {
-  public function foo() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public function meth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function bar() {
-    echo __CLASS__ . ' ' . get_called_class() . ' ' .
-         (isset($this) ? get_class($this) : '') . "\n";
+  public static function staticMeth() {
+    echo __CLASS__ . ' ' . get_called_class() .
+         (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
 }
 
 
 function main() {
   $d = new D;
-  $d->testFoo1();
-  D::testFoo2();
-  $d->testBar1();
-  D::testBar2();
+  $d->testMeth1();
+  D::testMeth2();
+  $d->testStaticMeth1();
+  D::testStaticMeth2();
 
   $b = new B;
   $g = new G;
-  echo "############# doFoo ##############\n";
-  $b->doFoo();
-  $g->doFoo();
-  echo "############# doBar ##############\n";
-  $b->doBar();
-  $g->doBar();
+  echo "############# doMeth ##############\n";
+  $b->doMeth();
+  $g->doMeth();
+  echo "############# doStaticMeth ##############\n";
+  $b->doStaticMeth();
+  $g->doStaticMeth();
 }
 main();

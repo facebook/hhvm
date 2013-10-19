@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 
 namespace HPHP {
@@ -41,22 +42,14 @@ typedef X64Assembler Asm;
 
 constexpr size_t kJmpTargetAlign = 16;
 
-void moveToAlign(Asm &aa, const size_t alignment = kJmpTargetAlign,
-                 const bool unreachable = true);
-
-enum class TestAndSmashFlags {
-  kAlignJccImmediate,
-  kAlignJcc,
-  kAlignJccAndJmp
-};
-void prepareForTestAndSmash(Asm&, int testBytes, TestAndSmashFlags flags);
-void prepareForSmash(Asm&, int nBytes, int offset = 0);
-bool isSmashable(Address frontier, int nBytes, int offset = 0);
+void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
 void emitEagerSyncPoint(Asm& as, const HPHP::Opcode* pc,
                                  const Offset spDiff);
 void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
 void emitGetGContext(Asm& as, PhysReg dest);
+
+void emitTransCounterInc(Asm& a);
 
 void emitIncRef(Asm& as, PhysReg base);
 void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype);
@@ -71,18 +64,15 @@ void emitLea(Asm& as, MemoryRef mr, PhysReg dst);
 void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg);
 void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg);
 
-void emitExitSlowStats(Asm& as, const Func* func, SrcKey dest);
-
 void emitCall(Asm& as, TCA dest);
 void emitCall(Asm& as, CppCall call);
 
 void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
 
-void emitRB(Asm& a, Trace::RingBufferType t, SrcKey sk,
-            RegSet toSave = RegSet());
 void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm,
             RegSet toSave = RegSet());
 
+void emitTraceCall(CodeBlock& cb, int64_t pcOff);
 
 /*
  * Tests the surprise flags for the current thread. Should be used

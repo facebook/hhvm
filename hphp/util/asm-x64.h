@@ -1164,31 +1164,31 @@ public:
     movq (imm.q(), dest);
   }
 
-  void patchJcc(CodeAddress jmp, CodeAddress dest) {
+  static void patchJcc(CodeAddress jmp, CodeAddress dest) {
     assert(jmp[0] == 0x0F && (jmp[1] & 0xF0) == 0x80);
     ssize_t diff = dest - (jmp + 6);
     *(int32_t*)(jmp + 2) = safe_cast<int32_t>(diff);
   }
 
-  void patchJcc8(CodeAddress jmp, CodeAddress dest) {
+  static void patchJcc8(CodeAddress jmp, CodeAddress dest) {
     assert((jmp[0] & 0xF0) == 0x70);
     ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
     *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
-  void patchJmp(CodeAddress jmp, CodeAddress dest) {
+  static void patchJmp(CodeAddress jmp, CodeAddress dest) {
     assert(jmp[0] == 0xE9);
     ssize_t diff = dest - (jmp + 5);
     *(int32_t*)(jmp + 1) = safe_cast<int32_t>(diff);
   }
 
-  void patchJmp8(CodeAddress jmp, CodeAddress dest) {
+  static void patchJmp8(CodeAddress jmp, CodeAddress dest) {
     assert(jmp[0] == 0xEB);
     ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
     *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
-  void patchCall(CodeAddress call, CodeAddress dest) {
+  static void patchCall(CodeAddress call, CodeAddress dest) {
     assert(call[0] == 0xE8);
     ssize_t diff = dest - (call + 5);
     *(int32_t*)(call + 1) = safe_cast<int32_t>(diff);
@@ -2568,23 +2568,6 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
-
-class UndoMarker {
-  CodeBlock& m_cb;
-  CodeAddress m_oldFrontier;
-  public:
-  explicit UndoMarker(CodeBlock& cb)
-    : m_cb(cb)
-    , m_oldFrontier(cb.frontier()) {
-    TRACE_MOD(Trace::trans, 1, "RewindTo: %p\n",
-              m_oldFrontier);
-  }
-
-  void undo() {
-    m_cb.setFrontier(m_oldFrontier);
-    TRACE_MOD(Trace::trans, 1, "Restore: %p\n", m_cb.frontier());
-  }
-};
 
 /*
  * RAII bookmark for scoped rewinding of frontier.

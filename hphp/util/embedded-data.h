@@ -27,7 +27,8 @@ struct embedded_data {
   uint32_t      m_len;
 };
 
-bool get_embedded_data(const char *section, embedded_data* desc);
+bool get_embedded_data(const char *section, embedded_data* desc,
+                       const std::string &filename = "");
 
 } }
 

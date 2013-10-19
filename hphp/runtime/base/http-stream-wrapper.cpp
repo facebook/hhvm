@@ -35,7 +35,7 @@ const StaticString
   s_user_agent("user_agent"),
   s_User_Agent("User-Agent");
 
-File* HttpStreamWrapper::open(CStrRef filename, CStrRef mode,
+File* HttpStreamWrapper::open(const String& filename, const String& mode,
                               int options, CVarRef context) {
   if (RuntimeOption::ServerHttpSafeMode) {
     return nullptr;

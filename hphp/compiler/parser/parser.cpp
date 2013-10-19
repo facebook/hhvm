@@ -128,7 +128,7 @@ namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-StatementListPtr Parser::ParseString(CStrRef input, AnalysisResultPtr ar,
+StatementListPtr Parser::ParseString(const String& input, AnalysisResultPtr ar,
                                      const char *fileName /* = NULL */,
                                      bool lambdaMode /* = false */) {
   assert(!input.empty());
@@ -174,10 +174,16 @@ bool Parser::parse() {
                                     "Parse error: %s",
                                     errString().c_str());
     }
-  } catch (ParseTimeFatalException &e) {
-    m_file->cleanupForError(m_ar, e.m_line, e.getMessage());
+    return true;
+  } catch (const ParseTimeFatalException& e) {
+    m_file->cleanupForError(m_ar);
+    if (e.m_parseFatal) {
+      m_file->makeParseFatal(m_ar, e.getMessage(), e.m_line);
+    } else {
+      m_file->makeFatal(m_ar, e.getMessage(), e.m_line);
+    }
+    return false;
   }
-  return true;
 }
 
 void Parser::error(const char* fmt, ...) {
@@ -190,9 +196,16 @@ void Parser::error(const char* fmt, ...) {
   fatal(&m_loc, msg.c_str());
 }
 
-void Parser::fatal(Location *loc, const char *msg) {
-  throw ParseTimeFatalException(loc->file, loc->line0,
-                                "%s", msg);
+void Parser::parseFatal(const Location* loc, const char* msg) {
+  // we can't use loc->file, as the bison parser doesn't track that in YYLTYPE
+  auto file = m_file->getName().c_str();
+  auto exn = ParseTimeFatalException(file, loc->line0, "%s", msg);
+  exn.setParseFatal();
+  throw exn;
+}
+
+void Parser::fatal(const Location* loc, const char* msg) {
+  throw ParseTimeFatalException(loc->file, loc->line0, "%s", msg);
 }
 
 string Parser::errString() {
@@ -807,6 +820,10 @@ void Parser::checkFunctionContext(string funcName,
   if (modifiers->isAsync() && returnsRef) {
     PARSE_ERROR("Asynchronous function '%s' cannot return reference.",
                 funcName.c_str());
+  }
+
+  if (modifiers->isAsync() && funcContext.isGenerator) {
+    PARSE_ERROR("'yield' is not allowed in async functions.");
   }
 }
 
@@ -1583,6 +1600,10 @@ void Parser::onExpStatement(Token &out, Token &expr) {
 
 void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                        Token &stmt) {
+  if (dynamic_pointer_cast<FunctionCall>(name->exp) ||
+      dynamic_pointer_cast<FunctionCall>(value->exp)) {
+    PARSE_ERROR("Can't use return value in write context");
+  }
   if (value->exp && name->num()) {
     PARSE_ERROR("Key element cannot be a reference");
     return;
@@ -1653,10 +1674,22 @@ void Parser::onClosure(Token &out, Token* modifiers, Token &ret, Token &ref,
   auto stmt = onFunctionHelper(FunctionType::Closure,
                 modifiers, ret, ref, nullptr, params, stmts, nullptr, true);
 
+  ExpressionListPtr vars = dynamic_pointer_cast<ExpressionList>(cparams->exp);
+  if (vars) {
+    for (int i = vars->getCount() - 1; i >= 0; i--) {
+      ParameterExpressionPtr param(
+        dynamic_pointer_cast<ParameterExpression>((*vars)[i]));
+      if (param->getName() == "this") {
+        PARSE_ERROR("Cannot use $this as lexical variable");
+      }
+    }
+  }
+
   ClosureExpressionPtr closure = NEW_EXP(
     ClosureExpression,
     dynamic_pointer_cast<FunctionStatement>(stmt),
-    dynamic_pointer_cast<ExpressionList>(cparams->exp));
+    vars
+  );
   closure->getClosureFunction()->setContainingClosure(closure);
   out->exp = closure;
 }
@@ -1748,7 +1781,7 @@ void Parser::nns(int token) {
           getMessage().c_str());
     return;
   }
-  if (m_nsState == SeenNothing && token != T_DECLARE) {
+  if (m_nsState == SeenNothing && token != T_DECLARE && token != ';') {
     m_nsState = SeenNonNamespaceStatement;
   }
 }

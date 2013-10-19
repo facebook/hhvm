@@ -106,7 +106,7 @@ class FormatToken;
 
 class Debugger : public Simulator {
  public:
-  explicit Debugger(Decoder* decoder, FILE* stream = stdout);
+  explicit Debugger(Decoder* decoder, std::ostream& stream = std::cout);
 
   virtual void Run();
   void VisitException(Instruction* instr);

@@ -79,55 +79,54 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRUnit& unit) {
  * Insert asserts at various points in the IR.
  * TODO: t2137231 Insert DbgAssertPtr at points that use or produces a GenPtr
  */
-static void insertAsserts(IRTrace* trace, IRUnit& unit) {
-  forEachTraceBlock(trace, [&](Block* block) {
-    for (auto it = block->begin(), end = block->end(); it != end; ) {
-      IRInstruction& inst = *it;
-      ++it;
-      if (inst.op() == SpillStack) {
-        insertSpillStackAsserts(inst, unit);
-        continue;
+static void insertAsserts(IRUnit& unit) {
+  postorderWalk([&](Block* block) {
+      for (auto it = block->begin(), end = block->end(); it != end; ) {
+        IRInstruction& inst = *it;
+        ++it;
+        if (inst.op() == SpillStack) {
+          insertSpillStackAsserts(inst, unit);
+          continue;
+        }
+        if (inst.op() == Call) {
+          SSATmp* sp = inst.dst();
+          IRInstruction* addr = unit.gen(LdStackAddr,
+                                         inst.marker(),
+                                         Type::PtrToGen,
+                                         StackOffset(0),
+                                         sp);
+          insertAfter(&inst, addr);
+          insertAfter(addr, unit.gen(DbgAssertPtr, inst.marker(), addr->dst()));
+          continue;
+        }
+        if (!inst.isBlockEnd()) insertRefCountAsserts(inst, unit);
       }
-      if (inst.op() == Call) {
-        SSATmp* sp = inst.dst();
-        IRInstruction* addr = unit.gen(LdStackAddr,
-                                       inst.marker(),
-                                       Type::PtrToGen,
-                                       StackOffset(0),
-                                       sp);
-        insertAfter(&inst, addr);
-        insertAfter(addr, unit.gen(DbgAssertPtr, inst.marker(), addr->dst()));
-        continue;
-      }
-      if (!inst.isBlockEnd()) insertRefCountAsserts(inst, unit);
-    }
-  });
+    },
+    unit.numBlocks(),
+    unit.entry());
 }
 
-void optimizeTrace(IRTrace* trace, TraceBuilder& traceBuilder) {
-  auto& unit = traceBuilder.unit();
-
+void optimize(IRUnit& unit, TraceBuilder& traceBuilder) {
   auto finishPass = [&](const char* msg) {
-    dumpTrace(6, trace, folly::format("after {}", msg).str().c_str());
-    assert(checkCfg(trace, unit));
-    assert(checkTmpsSpanningCalls(trace, unit));
-    if (debug) forEachTraceInst(trace, assertOperandTypes);
+    dumpTrace(6, unit, folly::format("after {}", msg).str().c_str());
+    assert(checkCfg(unit));
+    assert(checkTmpsSpanningCalls(unit));
+    if (debug) forEachTraceInst(unit, assertOperandTypes);
   };
 
-  auto doPass = [&](void (*fn)(IRTrace*, IRUnit&),
-                    const char* msg) {
-    fn(trace, unit);
+  auto doPass = [&](void (*fn)(IRUnit&), const char* msg) {
+    fn(unit);
     finishPass(msg);
   };
 
   auto dce = [&](const char* which) {
     if (!RuntimeOption::EvalHHIRDeadCodeElim) return;
-    eliminateDeadCode(trace, unit);
+    eliminateDeadCode(unit);
     finishPass(folly::format("{} DCE", which).str().c_str());
   };
 
   if (RuntimeOption::EvalHHIRRelaxGuards) {
-    auto changed = relaxGuards(trace, unit, *traceBuilder.guards());
+    auto changed = relaxGuards(unit, *traceBuilder.guards());
     if (changed) finishPass("guard relaxation");
   }
 

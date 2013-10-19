@@ -21,6 +21,8 @@
 #include <cstring>
 #include <boost/optional/optional.hpp>
 
+#include "hphp/util/data-block.h"
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/class.h"
 
@@ -69,7 +71,8 @@ using Transl::DynLocation;
   c(Arr,           kStaticArr|kCountedArr)                              \
   c(UncountedInit, kInitNull|kBool|kInt|kDbl|kStaticStr|kStaticArr)     \
   c(Uncounted,     kUncountedInit|kUninit)                              \
-  c(Cell,          kUncounted|kStr|kArr|kObj|kRes)
+  c(InitCell,      kUncountedInit|kStr|kArr|kObj|kRes)                  \
+  c(Cell,          kInitCell|kUninit)
 
 #define IRT_RUNTIME                                                     \
   IRT(Cls,         1ULL << 44)                                          \
@@ -86,7 +89,7 @@ using Transl::DynLocation;
   IRT(TCA,         1ULL << 54)                                          \
   IRT(ActRec,      1ULL << 55)                                          \
   IRT(None,        1ULL << 56)                                          \
-  IRT(CacheHandle, 1ULL << 57) /* TargetCache::CacheHandle */           \
+  IRT(RDSHandle,   1ULL << 57) /* RDS::Handle */                        \
   IRT(Nullptr,     1ULL << 58)
 
 // The definitions for these are in ir.cpp
@@ -611,6 +614,12 @@ public:
            || subtypeOf(Type::Obj)
            || subtypeOf(Type::Res);
   }
+
+  int nativeSize() const {
+    if (subtypeOf(Type::Int | Type::Func)) return sz::qword;
+    if (subtypeOf(Type::Bool))             return sz::byte;
+    not_implemented();
+  }
 };
 
 inline bool operator<(Type a, Type b) { return a.strictSubtypeOf(b); }
@@ -643,17 +652,7 @@ struct TypeConstraint {
     , knownType(type)
   {}
 
-  std::string toString() const {
-    std::string catStr;
-    if (innerCat) {
-      catStr = folly::to<std::string>("inner:",
-                                      typeCategoryName(innerCat.get()));
-    } else {
-      catStr = typeCategoryName(category);
-    }
-
-    return folly::format("<{},{}>", catStr, knownType).str();
-  }
+  std::string toString() const;
 
   // category starts as DataTypeGeneric and is refined to more specific values
   // by consumers of the type.

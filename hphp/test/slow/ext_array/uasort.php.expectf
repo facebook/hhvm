@@ -1,0 +1,22 @@
+array(4) {
+  ["a"]=>
+  string(6) "orange"
+  ["d"]=>
+  string(5) "lemon"
+  ["b"]=>
+  string(6) "banana"
+  ["c"]=>
+  string(5) "apple"
+}
+array(4) {
+  ["d"]=>
+  string(5) "lemon"
+  ["c"]=>
+  string(5) "apple"
+  ["b"]=>
+  string(6) "banana"
+  ["a"]=>
+  string(6) "orange"
+}
+HipHop Warning: Invalid argument: function: method 'undefined_function_' not found in %s/test/slow/ext_array/uasort.php on line 25
+HipHop Warning: Invalid argument: function: method 'undefined_function_' not found in %s/test/slow/ext_array/uasort.php on line 26

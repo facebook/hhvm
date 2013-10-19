@@ -87,34 +87,35 @@ class c_UConverter : public ExtObjectData {
   // need to implement
   public: c_UConverter(Class* cls = c_UConverter::classof());
   public: ~c_UConverter();
-  public: void t___construct(CStrRef toEncoding = "utf-8",
-                             CStrRef fromEncoding = "utf-8");
+  public: void t___construct(const String& toEncoding = "utf-8",
+                             const String& fromEncoding = "utf-8");
   public: Variant t___destruct();
   public: String t_getsourceencoding();
-  public: void t_setsourceencoding(CStrRef encoding);
+  public: void t_setsourceencoding(const String& encoding);
   public: String t_getdestinationencoding();
-  public: void t_setdestinationencoding(CStrRef encoding);
+  public: void t_setdestinationencoding(const String& encoding);
   public: int64_t t_getsourcetype();
   public: int64_t t_getdestinationtype();
   public: String t_getsubstchars();
-  public: bool t_setsubstchars(CStrRef chars);
+  public: bool t_setsubstchars(const String& chars);
   public: Variant t_fromucallback(int64_t reason, CArrRef source,
                                   int64_t codepoint, VRefParam error);
-  public: Variant t_toucallback(int64_t reason, CStrRef source,
-                                CStrRef codeunits, VRefParam error);
-  public: Variant t_convert(CStrRef str, bool reverse = false);
-  public: static Variant ti_transcode(CStrRef str,
-                                      CStrRef toEncoding, CStrRef fromEncoding,
+  public: Variant t_toucallback(int64_t reason, const String& source,
+                                const String& codeunits, VRefParam error);
+  public: Variant t_convert(const String& str, bool reverse = false);
+  public: static Variant ti_transcode(const String& str,
+                                      const String& toEncoding,
+                                      const String& fromEncoding,
                                       CArrRef options = Array());
   public: int64_t t_geterrorcode();
   public: String t_geterrormessage();
   public: static String ti_reasontext(int64_t reason);
   public: static Array ti_getavailable();
-  public: static Array ti_getaliases(CStrRef encoding);
+  public: static Array ti_getaliases(const String& encoding);
   public: static Array ti_getstandards();
-  public: static String ti_getstandardname(CStrRef name,
-                                           CStrRef standard);
-  public: static String ti_getmimename(CStrRef name);
+  public: static String ti_getstandardname(const String& name,
+                                           const String& standard);
+  public: static String ti_getmimename(const String& name);
 
   private:
     static void throwFailure(UErrorCode error, const char *fname,
@@ -133,12 +134,12 @@ class c_UConverter : public ExtObjectData {
                                   UChar32 codePoint,
                                   UConverterCallbackReason reason,
                                   UErrorCode *pErrorCode);
-    static bool setEncoding(CStrRef encoding, UConverter **pcnv,
+    static bool setEncoding(const String& encoding, UConverter **pcnv,
                             intl_error &err);
     static bool setSubstChars(String chars, UConverter *cnv, intl_error &err);
     bool setCallback(UConverter *cnv);
     Variant defaultCallback(int64_t reason, VRefParam error);
-    static String doConvert(CStrRef str, UConverter *toCnv,
+    static String doConvert(const String& str, UConverter *toCnv,
                             UConverter *fromCnv, intl_error &err);
   public:
     intl_error  m_error;

@@ -59,11 +59,11 @@ namespace Trace {
 
 #define TRACE_MODULES \
       TM(tprefix)     /* Meta: prefix with string */          \
-      TM(ringbuffer)  /* Meta: trace to ram */                \
       TM(traceAsync)  /* Meta: lazy writes to disk */ \
       TM(trans)       \
       TM(tx64)        \
       TM(tx64stats)   \
+      TM(ringbuffer)  \
       TM(ustubs)      \
       TM(unwind)      \
       TM(txlease)     \
@@ -174,6 +174,11 @@ std::string prettyNode(const char* name, const P1& p1, const P2& p2) {
 
 void traceRelease(const char*, ...) ATTRIBUTE_PRINTF(1,2);
 void traceRelease(const std::string& s);
+
+template<typename... Args>
+void ftraceRelease(Args&&... args) {
+  traceRelease("%s", folly::format(std::forward<Args>(args)...).str().c_str());
+}
 
 // Trace to the global ring buffer in all builds, and also trace normally
 // via the standard TRACE(n, ...) macro.

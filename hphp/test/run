@@ -93,7 +93,9 @@ function verify_hhbc() {
 
 function read_file($file) {
   return file_exists($file) ?
-         preg_replace('/\s+/', ' ', (file_get_contents($file))) : "";
+         str_replace('__DIR__', dirname($file),
+           preg_replace('/\s+/', ' ', (file_get_contents($file))))
+         : "";
 }
 
 // http://stackoverflow.com/questions/2637945/
@@ -267,10 +269,13 @@ function mode_cmd($options) {
     case 'jit':
     case 'automain':
       return "$jit_args";
+    case 'pgo':
+      return "$jit_args -vEval.JitPGO=1 -vEval.JitRegionSelector=hottrace ".
+             "-vEval.JitPGOHotOnly=0";
     case 'interp':
       return "$repo_args -vEval.Jit=0";
     default:
-      error("-m must be one of jit | interp | automain. Got: '$mode'");
+      error("-m must be one of jit | pgo | interp | automain. Got: '$mode'");
   }
 }
 

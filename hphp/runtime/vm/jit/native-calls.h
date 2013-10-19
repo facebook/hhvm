@@ -24,7 +24,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
 
-namespace HPHP {  namespace JIT { namespace NativeCalls {
+namespace HPHP { namespace JIT { namespace NativeCalls {
 
 // Information about C++ helpers called by translated code, used by
 // CodeGenerator and LinearScan. See nativecalls.cpp for a full
@@ -105,6 +105,6 @@ private:
   CallInfoMap m_map;
 };
 
-} } }
+}}}
 
 #endif

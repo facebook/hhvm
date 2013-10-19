@@ -26,8 +26,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 FORWARD_DECLARE_CLASS(Continuation);
-FORWARD_DECLARE_CLASS(ContinuationWaitHandle);
-Object f_hphp_create_continuation(CStrRef clsname, CStrRef funcname, CStrRef origFuncName, CArrRef args = null_array);
+FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
+Object f_hphp_create_continuation(const String& clsname, const String& funcname,
+                                  const String& origFuncName,
+                                  CArrRef args = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation
@@ -38,11 +40,11 @@ class c_Continuation : public ExtObjectDataFlags<ObjectData::HasClone> {
   void operator delete(void* p) {
     c_Continuation* this_ = (c_Continuation*)p;
     auto const size = this_->getObjectSize();
-    if (LIKELY(size <= MemoryManager::kMaxSmartSize)) {
-      MM().smartFreeSize(this_, size);
+    if (LIKELY(size <= kMaxSmartSize)) {
+      MM().smartFreeSizeLogged(this_, size);
       return;
     }
-    MM().smartFreeSizeBig(this_, size);
+    MM().smartFreeSizeBigLogged(this_, size);
   }
 
   explicit c_Continuation(Class* cls = c_Continuation::classof());
@@ -92,7 +94,7 @@ public:
 
     size_t arOffset = getArOffset(genFunc);
     size_t objectSize = arOffset + sizeof(ActRec);
-    auto const cont = new (MM().objMalloc(objectSize)) c_Continuation();
+    auto const cont = new (MM().objMallocLogged(objectSize)) c_Continuation();
     cont->m_origFunc = const_cast<Func*>(origFunc);
     cont->m_arPtr = (ActRec*)(uintptr_t(cont) + arOffset);
     memset((void*)((uintptr_t)cont + sizeof(c_Continuation)), 0,
@@ -157,7 +159,7 @@ public:
 
   /* ActRec for continuation (does not live on stack) */
   ActRec* m_arPtr;
-  p_ContinuationWaitHandle m_waitHandle;
+  p_AsyncFunctionWaitHandle m_waitHandle;
 
   /* temporary storage used to save the SP when inlining into a continuation */
   void* m_stashedSP;

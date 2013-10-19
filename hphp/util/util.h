@@ -228,19 +228,33 @@ inline Int roundUpToPowerOfTwo(Int value) {
  * Return log-base-2 of the next power of 2, i.e. CLZ
  */
 inline int lgNextPower2(uint64_t value) {
-#ifdef DEBUG
-  (void) (0 / value); // fail for 0; ASSERT is a pain.
+  assert(value != 0);
+#ifdef __x86_64__
+  // __builtin_clz emits the bsr instruction, but doesn't let us pass -1
+  // through for the 0 case.  Also, it is careful to convert bsr to clz
+  // with 6-bit arithmetic, which is not necessary here
+  uint64_t result = -1;
+  --value;
+  asm ("bsr %2, %0" : "=r" (result) : "0" (result), "r" (value) : "flags");
+  return result + 1;
+#else
+  return value == 1 ? 0 : 64 - __builtin_clzll(value - 1);
 #endif
-  return 64 - __builtin_clzll(value - 1);
 }
 
 inline int lgNextPower2(uint32_t value) {
-#ifdef DEBUG
-  (void) (0 / value); // fail for 0; ASSERT is a pain.
+  assert(value != 0);
+#ifdef __x86_64__
+  uint32_t result = -1;
+  --value;
+  asm ("bsr %2, %0" : "=r" (result) : "0" (result), "r" (value) : "flags");
+  return result + 1;
+#else
+  return value == 1 ? 0 : 32 - __builtin_clz(value - 1);
 #endif
-  return 32 - __builtin_clz(value - 1);
 }
 
+// Returns the smallest power of 2 >= value, so long as value is not zero
 inline uint64_t nextPower2(uint64_t value) {
   return uint64_t(1) << lgNextPower2(value);
 }
@@ -333,23 +347,6 @@ inline void assert_native_stack_aligned() {
   assert(reinterpret_cast<uintptr_t>(sp) % 16 == 0);
 #endif
 }
-
-/**
- * 64-bit equivalents of 32-bit htonl() and ntohq().
- */
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-#define htonq(a) a
-#define ntohq(a) a
-#else
-#define ntohq(a)                                                              \
-  (uint64_t)(((uint64_t) (ntohl((uint32_t) ((a) >> 32))))                     \
-             | (((uint64_t) (ntohl((uint32_t)                                 \
-                ((a) & 0x00000000ffffffff)))) << 32))
-#define htonq(a)                                                              \
-  (uint64_t) (((uint64_t) (htonl((uint32_t) ((a) >> 32))))                    \
-              | (((uint64_t) (htonl((uint32_t)                                \
-                 ((a) & 0x00000000ffffffff)))) << 32))
-#endif
 
 /**
  * Read typed data from an offset relative to a base address

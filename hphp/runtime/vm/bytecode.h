@@ -26,6 +26,8 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
@@ -402,11 +404,13 @@ struct ActRec {
 
   // Note that reordering these is likely to require changes to the
   // translator.
-  UNION_FIELD_ACCESSORS2(This, ObjectData*, m_this, Class, Class*, m_cls)
+  UNION_FIELD_ACCESSORS2(This, ObjectData*, m_this, \
+                         Class, Class*, m_cls)
   static const int8_t kInvNameBit   = 0x1;
   static const int8_t kExtraArgsBit = 0x2;
-  UNION_FIELD_ACCESSORS3(VarEnv, VarEnv*, m_varEnv, InvName, StringData*,
-                         m_invName, ExtraArgs, ExtraArgs*, m_extraArgs)
+  UNION_FIELD_ACCESSORS3(VarEnv, VarEnv*, m_varEnv, \
+                         InvName, StringData*, m_invName, \
+                         ExtraArgs, ExtraArgs*, m_extraArgs)
 
 #undef UNION_FIELD_ACCESSORS2
 #undef UNION_FIELD_ACCESSORS3

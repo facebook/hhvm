@@ -189,6 +189,43 @@ void init_stack_limits(pthread_attr_t* attr);
 
 extern const size_t s_pageSize;
 
+/*
+ * The numa node this thread is bound to
+ */
+extern __thread int32_t s_numaNode;
+/*
+ * enable the numa support in hhvm,
+ * and determine whether threads should default to using
+ * local memory.
+ */
+void enable_numa(bool local);
+/*
+ * Determine the node that the next thread should run on.
+ */
+int next_numa_node();
+/*
+ * Set the thread affinity, and the jemalloc arena for the current
+ * thread.
+ * Also initializes s_numaNode
+ */
+void set_numa_binding(int node);
+/*
+ * The number of numa nodes in the system
+ */
+int num_numa_nodes();
+/*
+ * Enable numa interleaving for the specified address range
+ */
+void numa_interleave(void* start, size_t size);
+/*
+ * Allocate the specified address range on the local node
+ */
+void numa_local(void* start, size_t size);
+/*
+ * Allocate the specified address range on the given node
+ */
+void numa_bind_to(void* start, size_t size, int node);
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

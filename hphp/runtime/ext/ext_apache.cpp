@@ -24,8 +24,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_apache_note(CStrRef note_name,
-                      CStrRef note_value /* = null_string */) {
+Variant f_apache_note(const String& note_name,
+                      const String& note_value /* = null_string */) {
   String prev = ServerNote::Get(note_name);
   if (!note_value.isNull()) {
     ServerNote::Add(note_name, note_value);
@@ -68,7 +68,7 @@ Array f_apache_response_headers() {
   return Array();
 }
 
-bool f_apache_setenv(CStrRef variable, CStrRef value,
+bool f_apache_setenv(const String& variable, const String& value,
                      bool walk_to_top /* = false */) {
   return false;
 }
@@ -77,7 +77,7 @@ Array f_getallheaders() {
   return f_apache_request_headers();
 }
 
-bool f_virtual(CStrRef filename) {
+bool f_virtual(const String& filename) {
   throw NotSupportedException(__func__, "apache is not in use");
 }
 

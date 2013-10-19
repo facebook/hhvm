@@ -45,7 +45,7 @@ typedef tbb::concurrent_hash_map<const StringData*,const RegexPattern*,
 
 static PatternStringMap s_patternCacheMap;
 
-Variant f_icu_match(CStrRef pattern, CStrRef subject,
+Variant f_icu_match(const String& pattern, const String& subject,
                     VRefParam matches /* = null */, int64_t flags /* = 0 */) {
   UErrorCode status = U_ZERO_ERROR;
 
@@ -177,7 +177,7 @@ private:
 
 IMPLEMENT_THREAD_LOCAL(TransliteratorWrapper, s_transliterator);
 
-String f_icu_transliterate(CStrRef str, bool remove_accents) {
+String f_icu_transliterate(const String& str, bool remove_accents) {
   UnicodeString u_str = UnicodeString::fromUTF8(str.data());
   if (remove_accents) {
     s_transliterator->transliterate(u_str);
@@ -300,7 +300,7 @@ void normalizeToken(struct Token& token) {
  * Other: replaced with empty string
  *
  */
-Array f_icu_tokenize(CStrRef text) {
+Array f_icu_tokenize(const String& text) {
   // Boundary markers that indicate the beginning and end of a token stream.
   const String BEGIN_MARKER("_B_");
   const String END_MARKER("_E_");

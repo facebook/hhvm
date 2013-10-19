@@ -17,11 +17,12 @@
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/frame-state.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/mutation.h"
-#include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/ir-trace.h"
+#include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/simplifier.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/trace-builder.h"
 
 namespace HPHP { namespace JIT {
@@ -62,17 +63,76 @@ IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp) {
   return nullptr;
 }
 
+namespace {
+/*
+ * Given a load and the new type of that load's guard, update the type
+ * of the load to match the relaxed type of the guard.
+ */
+void retypeLoad(IRInstruction* load, Type newType) {
+  newType = load->is(LdLocAddr, LdStackAddr) ? newType.ptr() : newType;
+
+  if (!newType.equals(load->typeParam())) {
+    FTRACE(2, "retypeLoad changing type param of {} to {}\n",
+           *load, newType);
+    load->setTypeParam(newType);
+  }
+}
+
+/*
+ * Loads from locals and the stack are special: they get their type from a
+ * guard instruction but have no direct reference to that guard. This block
+ * only changes the load's type param; the loop afterwards will retype the dest
+ * if needed.
+ */
+void visitLoad(IRInstruction* inst, const FrameState& state) {
+  switch (inst->op()) {
+    case LdLoc:
+    case LdLocAddr: {
+      auto const id = inst->extra<LocalData>()->locId;
+      auto const newType = state.localType(id);
+
+      retypeLoad(inst, newType);
+      break;
+    }
+
+    case LdStack:
+    case LdStackAddr: {
+      auto idx = inst->extra<StackOffset>()->offset;
+      auto typeSrc = getStackValue(inst->src(0), idx).typeSrc;
+      if (typeSrc->is(GuardStk, CheckStk, AssertStk)) {
+        retypeLoad(inst, typeSrc->typeParam());
+      }
+      break;
+    }
+
+    case LdRef: {
+      auto inner = inst->src(0)->type().innerType();
+      auto param = inst->typeParam();
+      assert(inner.maybe(param));
+
+      // If the type of the src has been relaxed past the LdRef's type param,
+      // update the type param.
+      if (inner > param) {
+        inst->setTypeParam(inner);
+      }
+      break;
+    }
+
+    default: break;
+  }
+}
+}
+
 /*
  * For all guard instructions in trace, check to see if we can relax the
  * destination type to something less specific. The GuardConstraints map
  * contains information about what properties of the guarded type matter for
  * each instruction. Returns true iff any changes were made to the trace.
  */
-bool relaxGuards(IRTrace* trace, const IRUnit& unit,
-                 const GuardConstraints& guards) {
-  FTRACE(1, "relaxing guards for trace {}\n", trace);
-  auto blocks = rpoSortCfg(trace, unit);
-  Block* reflowBlock = nullptr;
+bool relaxGuards(IRUnit& unit, const GuardConstraints& guards) {
+  FTRACE(1, "relaxing guards for trace {}\n", unit.main());
+  auto blocks = rpoSortCfg(unit);
+  auto changed = false;
 
   for (auto* block : blocks) {
     for (auto& inst : *block) {
@@ -95,29 +155,45 @@ bool relaxGuards(IRTrace* trace, const IRUnit& unit,
         inst.setOpcode(newOp);
         inst.setTaken(nullptr);
 
-        if (!reflowBlock) reflowBlock = block;
+        changed = true;
       } else if (!oldType.equals(newType)) {
         FTRACE(1, "relaxGuards changing {}'s type to {}\n", inst, newType);
         inst.setTypeParam(newType);
 
-        if (!reflowBlock) reflowBlock = block;
+        changed = true;
       }
     }
   }
 
-  if (reflowBlock) reflowTypes(reflowBlock, blocks);
+  if (!changed) return false;
 
-  return (bool)reflowBlock;
+  // Make a second pass to reflow types, with some special logic for loads.
+  auto const firstMarker = unit.main()->front()->front()->marker();
+  FrameState state(unit, firstMarker.spOff, firstMarker.func);
+  for (auto* block : blocks) {
+    state.startBlock(block);
+
+    for (auto& inst : *block) {
+      state.setMarker(inst.marker());
+      visitLoad(&inst, state);
+      retypeDests(&inst);
+      state.update(&inst);
+    }
+
+    state.finishBlock(block);
+  }
+
+  return true;
 }
 
 /*
  * For every instruction in trace representing a tracelet guard, call func with
  * its location and type.
  */
-void visitGuards(IRTrace* trace, const VisitGuardFn& func) {
+void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
   typedef RegionDesc::Location L;
 
-  for (auto const& inst : *trace->front()) {
+  for (auto const& inst : *unit.entry()) {
     if (inst.typeParam().equals(Type::Gen)) continue;
 
     if (inst.op() == GuardLoc) {

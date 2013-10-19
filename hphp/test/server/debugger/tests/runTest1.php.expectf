@@ -11,7 +11,7 @@ next
 Waiting for server response
 Break on line 2 of %s/test1.php
    1 <?php
-   2 include 'break1.php';
+   2*include 'break1.php';
    3 
 
 break break1.php:7
@@ -21,7 +21,7 @@ continue
 Waiting for server response
 Breakpoint 2 reached at foo() on line 7 of %s/break1.php
    6   $y = $x.'_suffix';
-   7   error_log($y);
+   7*  error_log($y);
    8 }
 
 variable
@@ -35,7 +35,7 @@ continue
 Waiting for server response
 Breakpoint 1 reached at foo() on line 6 of %s/break1.php
    5 function foo($x) {
-   6   $y = $x.'_suffix';
+   6*  $y = $x.'_suffix';
    7   error_log($y);
 
 break clear all
@@ -46,7 +46,7 @@ continue
 Waiting for server response
 Breakpoint 1 reached at cls::pubObj() on line 12 of %s/break1.php
   11   public function pubObj($x) {
-  12     error_log("pubObj:".$x);
+  12*    error_log("pubObj:".$x);
   13   }
 
 break clear all
@@ -57,7 +57,7 @@ continue
 Waiting for server response
 Breakpoint 1 reached at cls::pubCls() on line 15 of %s/break1.php
   14   public static function pubCls($x) {
-  15     error_log("pubCls:".$x);
+  15*    error_log("pubCls:".$x);
   16   }
 
 break clear all
@@ -66,7 +66,7 @@ continue
 Waiting for server response
 Break at cls::pubHardBreak() on line 19 of %s/break1.php
   18     error_log("pubHardBreak:".$x);
-  19     hphpd_break();
+  19*    hphpd_break();
   20     error_log("pubHardBreak:done");
 
 break end test1.php

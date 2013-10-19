@@ -53,7 +53,7 @@ Breakpoint 1 set on line 12 of eval1.php
 print $eval2->callCls()
 Breakpoint 1 reached at cls::meth() on line 12 of %s/eval1.php
   11     $a = $this->pub.':'.$this->pri;
-  12     $b = $this->pub.':'.$this->pri;
+  12*    $b = $this->pub.':'.$this->pri;
   13     $c = $this->pub.':'.$this->pri;
 
 break clear all
@@ -65,7 +65,7 @@ BypassAccessCheck(bac) set to off
 next
 Break at cls::meth() on line 13 of %s/eval1.php
   12     $b = $this->pub.':'.$this->pri;
-  13     $c = $this->pub.':'.$this->pri;
+  13*    $c = $this->pub.':'.$this->pri;
   14     return $a.'-'.$b.'-'.$c;
 
 @ $this->pub = $x->seven()

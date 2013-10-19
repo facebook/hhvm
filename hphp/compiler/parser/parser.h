@@ -26,24 +26,26 @@
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/statement_list.h"
+#include "hphp/util/logger.h"
 
 #ifdef HPHP_PARSER_NS
 #undef HPHP_PARSER_NS
 #endif
 #define HPHP_PARSER_NS Compiler
 
+#define LOG_PARSE_ERROR(file, line, fmt, args...)     \
+  HPHP::Logger::Error(                                \
+    "HipHop Fatal error: " fmt " in %s on line %d",   \
+    ##args,                                           \
+    (file),                                           \
+    (line)                                            \
+  )
+
 #ifdef HPHP_PARSER_ERROR
 #undef HPHP_PARSER_ERROR
 #endif
-#define HPHP_PARSER_ERROR(fmt, p, args...)                              \
-  do {                                                                  \
-    if (HPHP::Option::WholeProgram) {                                   \
-      HPHP::Logger::Error(fmt " %s", ##args, (p)->getMessage(true).c_str()); \
-    }                                                                   \
-    throw HPHP::ParseTimeFatalException((p)->file(), (p)->line1(),      \
-                                        fmt, ##args);                   \
-  } while (0)
-
+#define HPHP_PARSER_ERROR(fmt, p, args...)  \
+  throw HPHP::ParseTimeFatalException((p)->file(), (p)->line1(), fmt, ##args)
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,7 +112,7 @@ public:
 DECLARE_BOOST_TYPES(Parser);
 class Parser : public ParserBase {
 public:
-  static StatementListPtr ParseString(CStrRef input, AnalysisResultPtr ar,
+  static StatementListPtr ParseString(const String& input, AnalysisResultPtr ar,
                                       const char *fileName = nullptr,
                                       bool lambdaMode = false);
 
@@ -125,7 +127,8 @@ public:
   virtual bool enableFinallyStatement();
   IMPLEMENT_XHP_ATTRIBUTES;
 
-  virtual void fatal(Location *loc, const char *msg);
+  virtual void fatal(const Location* loc, const char* msg);
+  virtual void parseFatal(const Location* loc, const char* msg);
   std::string errString();
 
   // result

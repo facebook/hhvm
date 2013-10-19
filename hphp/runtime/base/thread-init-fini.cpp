@@ -61,7 +61,6 @@ void init_thread_locals(void *arg /* = NULL */) {
   ThreadInfo::s_threadInfo.getCheck();
   g_context.getCheck();
   AsioSession::Init();
-  s_hasRenamedFunction.getCheck();
   HardwareCounter::s_counter.getCheck();
   for (InitFiniNode *in = extra_init; in; in = in->next) {
     in->func();

@@ -262,8 +262,8 @@ public:
   /*
    * Create a new trace
    */
-  IRTrace* makeMain(const Func* func, uint32_t bcOff);
-  IRTrace* addExit(const Func* func, uint32_t bcOff);
+  Block* makeMain(const Func* func, uint32_t bcOff);
+  Block* addExit(const Func* func);
 
   Arena&   arena()               { return m_arena; }
   uint32_t numTmps() const       { return m_nextOpndId; }
@@ -271,13 +271,14 @@ public:
   uint32_t numInsts() const      { return m_nextInstId; }
   CSEHash& constTable()          { return m_constTable; }
   IRTrace* main() const          { return m_main; }
+  uint32_t bcOff() const         { return m_bcOff; }
 
   typedef std::list<IRTrace*> ExitList;
   ExitList& exits() { return m_exits; }
   const ExitList& exits() const { return m_exits; }
+  Block* entry() const;
 
 private:
-  IRTrace* makeTrace(const Func* func, uint32_t bcOff);
   SSATmp* findConst(ConstData& cdata, Type t);
   void newSSATmp(IRInstruction* inst) {
     if (!inst->hasDst()) return;
@@ -286,16 +287,14 @@ private:
   }
 
 private:
-  CSEHash  m_constTable;
+  Arena m_arena; // contains IRTrace, Block, IRInstruction, and SSATmp objects
+  CSEHash m_constTable; // DefConst's for each unique constant in this IR
   uint32_t m_nextBlockId;
   uint32_t m_nextOpndId;
   uint32_t m_nextInstId;
-
-  // IRTrace, Block, IRInstruction, and SSATmp objects are allocated here.
-  Arena m_arena;
-
-  IRTrace* m_main;
-  std::list<IRTrace*> m_exits;
+  uint32_t m_bcOff; // bytecode offset where this unit starts
+  IRTrace* m_main; // main entry point trace
+  ExitList m_exits; // exit traces
 };
 
 //////////////////////////////////////////////////////////////////////

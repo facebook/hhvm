@@ -116,7 +116,7 @@ tvPairToCString(DataType t, uint64_t v,
  */
 StringData*
 concat_ss(StringData* v1, StringData* v2) {
-  if (v1->getCount() > 1) {
+  if (v1->hasMultipleRefs()) {
     StringData* ret = StringData::Make(v1, v2);
     ret->setRefCount(1);
     // Because v1->getCount() is greater than 1, we know we will never
@@ -264,11 +264,13 @@ Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
   return g_hphp_build_native_class_unit(builtinClasses, numBuiltinClasses);
 }
 
-Unit* compile_string(const char* s, size_t sz, const char* fname) {
+Unit* compile_string(const char* s,
+                     size_t sz,
+                     const char* fname /* = nullptr */) {
   MD5 md5;
   int out_len;
 
-  char * md5str = string_md5(s, sz, false, out_len);
+  char* md5str = string_md5(s, sz, false, out_len);
   md5 = MD5(md5str);
   free(md5str);
 
@@ -277,83 +279,6 @@ Unit* compile_string(const char* s, size_t sz, const char* fname) {
     return u;
   }
   return g_hphp_compiler_parse(s, sz, md5, fname);
-}
-
-void collection_setm_wk1_v0(ObjectData* obj, TypedValue* value) {
-  assert(obj);
-  collectionAppend(obj, value);
-  // TODO Task #1970153: It would be great if we had a version of
-  // collectionAppend() that didn't incRef the value so that we
-  // wouldn't have to decRef it here
-  tvRefcountedDecRef(value);
-}
-
-void collection_setm_ik1_v0(ObjectData* obj, int64_t key, TypedValue* value) {
-  assert(obj);
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType: {
-      c_Vector* vec = static_cast<c_Vector*>(obj);
-      vec->set(key, value);
-      break;
-    }
-    case Collection::MapType: {
-      c_Map* mp = static_cast<c_Map*>(obj);
-      mp->set(key, value);
-      break;
-    }
-    case Collection::StableMapType: {
-      c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      smp->set(key, value);
-      break;
-    }
-    case Collection::SetType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Set does not support $c[$k] syntax"));
-      throw e;
-    }
-    case Collection::PairType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot assign to an element of a Pair"));
-      throw e;
-    }
-    default:
-      assert(false);
-  }
-  tvRefcountedDecRef(value);
-}
-
-void collection_setm_sk1_v0(ObjectData* obj, StringData* key,
-                            TypedValue* value) {
-  switch (obj->getCollectionType()) {
-    case Collection::VectorType: {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Only integer keys may be used with Vectors"));
-      throw e;
-    }
-    case Collection::MapType: {
-      c_Map* mp = static_cast<c_Map*>(obj);
-      mp->set(key, value);
-      break;
-    }
-    case Collection::StableMapType: {
-      c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      smp->set(key, value);
-      break;
-    }
-    case Collection::SetType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Set does not support $c[$k] syntax"));
-      throw e;
-    }
-    case Collection::PairType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot assign to an element of a Pair"));
-      throw e;
-    }
-    default:
-      assert(false);
-  }
-  tvRefcountedDecRef(value);
 }
 
 void assertTv(const TypedValue* tv) {

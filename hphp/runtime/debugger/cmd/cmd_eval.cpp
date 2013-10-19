@@ -58,6 +58,11 @@ void CmdEval::onClient(DebuggerClient &client) {
 }
 
 void CmdEval::handleReply(DebuggerClient &client) {
+  if (this->failed() && client.unknownCmdReceived()) {
+    client.help(
+    "Notice: Attempted to interpret unknown debugger command as PHP!\n");
+  }
+
   if (!m_output.empty()) client.print(m_output);
 }
 

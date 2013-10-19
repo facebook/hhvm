@@ -16,6 +16,10 @@ class Bar {
     unset($this->bar);
   }
 }
+function main() {
 $y = new Bar();
 $x = new Foo($y);
+}
+main();
+
 ?>

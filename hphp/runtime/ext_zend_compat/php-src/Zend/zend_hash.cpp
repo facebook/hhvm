@@ -1,4 +1,7 @@
+#include "zend.h"
 #include "zend_hash.h"
+#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_qsort.h"
+#include "hphp/util/safesort.h"
 
 ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
   if (nKeyLength <= 0) {
@@ -11,18 +14,21 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
     return FAILURE;
   }
   /*
-   * TODO(#2887942): we should eventually be handling the fact that
+   * TODO(#2941952): we should eventually be handling the fact that
    * zSet() operation could return a new HashTable, but currently this
-   * is not possible.  (Eventually we probably need a m_kind for zend
-   * arrays that is just a proxy that does the write barrier for us.)
+   * is not possible.
    */
   ht->zSet(key.get(), (*(zval**)pData));
   return SUCCESS;
 }
 
+ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
+  return _zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, flag);
+}
+
 ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
   if (flag & HASH_NEXT_INSERT) {
-    // TODO(#2887942): append can return an escalated array
+    // TODO(#2941952)
     ht->zAppend(*(zval**)pData);
     return SUCCESS;
   }
@@ -32,21 +38,31 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
   }
 
   /*
-   * TODO(#2887942): See comment in _zend_hash_add_or_update above.
+   * TODO(#2941952)
    */
   ht->zSet(h, (*(zval**)pData));
   return SUCCESS;
 }
 
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag) {
+  HPHP::raise_error("zend_hash_del_key_or_index unimplemented");
+#if 0
   if (nKeyLength == 0) {
+    // TODO(#2941952)
     ht->remove(h, false);
   } else {
     assert(arKey[nKeyLength - 1] == '\0');
     HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
+    // TODO(#2941952)
     ht->remove(key.get(), false);
   }
+#endif
   return SUCCESS;
+}
+
+ZEND_API ulong zend_get_hash_value(const char *arKey, uint nKeyLength)
+{
+  return zend_inline_hash_func(arKey, nKeyLength);
 }
 
 /**
@@ -78,6 +94,10 @@ ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLen
   auto p = (zval***)pData;
   *p = &val->m_data.pref;
   return SUCCESS;
+}
+
+ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void **pData) {
+  return zend_hash_find(ht, arKey, nKeyLength, pData);
 }
 
 ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData) {
@@ -131,7 +151,8 @@ ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index,
       *str_index = const_cast<char*>(keyStr.data());
     }
     if (str_length) {
-      *str_length = keyStr.size();
+      *str_length = keyStr.size() + 1;
+      assert((*str_index)[*str_length - 1] == '\0');
     }
     return HASH_KEY_IS_STRING;
   }
@@ -191,8 +212,12 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 }
 
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC) {
-  // TODO(#2887942): unchecked plus
-  target->plus(source, false);
+  // TODO(#2941952): We can't really implement this correctly right
+  // now.
+  HPHP::raise_error("_zend_hash_merge unimplemented");
+#if 0
+  auto const newArray = target->plus(source);
+  decRefArr(newArray);
   for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
     auto tv = (HPHP::TypedValue*)it.secondRef().asTypedValue();
     if (tv->m_type != HPHP::KindOfRef) {
@@ -200,4 +225,44 @@ ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_f
     }
     pCopyConstructor((void*)(&tv->m_data.pref));
   }
+#endif
+}
+
+ZEND_API int zend_hash_num_elements(const HashTable *ht) {
+  return ht->size();
+}
+
+ZEND_API void zend_hash_clean(HashTable *ht) {
+  HPHP::raise_error("zend_hash_clean unimplemented");
+#if 0
+  for (HPHP::ArrayIter it(ht); !it.end(); it.next()) {
+    // TODO(#2941952)
+    // This can't assume that the ht pointer isn't reseated
+    ht->remove(it.secondRef(), false);
+  }
+#endif
+}
+
+ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size) {
+  HPHP::raise_error("zend_hash_copy unimplemented");
+#if 0
+  target->merge(source, false);
+  for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
+    const void *tv = it.secondRef().asTypedValue();
+    pCopyConstructor(const_cast<void*>(tv));
+  }
+#endif
+}
+
+ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength)
+{
+  return zend_inline_hash_func(arKey, nKeyLength);
+}
+
+ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
+              compare_func_t compar, int renumber TSRMLS_DC) {
+  assert(sort_func == zend_qsort);
+  // TODO figure out how to use compar
+  ht->ksort(0, true);
+  return SUCCESS;
 }

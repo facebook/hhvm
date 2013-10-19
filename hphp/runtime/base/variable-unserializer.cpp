@@ -69,7 +69,7 @@ Variant &VariableUnserializer::addVar() {
   return m_vars.back();
 }
 
-bool VariableUnserializer::isWhitelistedClass(CStrRef cls_name) const {
+bool VariableUnserializer::isWhitelistedClass(const String& cls_name) const {
   if (m_type != Type::Serialize || m_classWhiteList.isNull()) {
     return true;
   }

@@ -206,7 +206,8 @@ O(OverrideLoc,                      ND, S(FramePtr),                       E) \
 O(OverrideLocVal,                   ND, S(FramePtr) S(Gen),                E) \
 O(SmashLocals,                      ND, S(FramePtr),                       E) \
 O(BeginCatch,                       ND, NA,                            E|Mem) \
-O(EndCatch,                         ND, S(StkPtr),                     E|Mem) \
+O(EndCatch,                         ND, S(StkPtr),                   E|Mem|T) \
+O(TryEndCatch,                      ND, S(StkPtr),                     E|Mem) \
 O(LdUnwinderValue,              DParam, NA,                              PRc) \
 O(DeleteUnwinderException,          ND, NA,                          N|E|Mem) \
 O(Add,                          DArith, S(Int,Dbl) S(Int,Dbl),             C) \
@@ -299,7 +300,7 @@ O(JmpIsNType,                  D(None), SUnk,                              E) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(JmpZero,                     D(None), SNum,                              E) \
 O(JmpNZero,                    D(None), SNum,                              E) \
-O(Jmp_,                        D(None), SUnk,                            T|E) \
+O(Jmp,                         D(None), SUnk,                            T|E) \
 O(ReqBindJmpGt,                     ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpGte,                    ND, S(Gen) S(Gen),                   T|E) \
 O(ReqBindJmpLt,                     ND, S(Gen) S(Gen),                   T|E) \
@@ -381,10 +382,13 @@ O(LdObjInvoke,                 D(Func), S(Cls),                           NF) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                            N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
+O(LdArrFuncCtx,                     ND, S(Arr) \
+                                        S(StkPtr) \
+                                        S(FramePtr),               N|Refs|Er) \
 O(LdFunc,                      D(Func), S(Str),              E|N|CRc|Refs|Er) \
-O(LdFuncCached,                D(Func), CStr,                  N|C|E|Refs|Er) \
-O(LdFuncCachedU,               D(Func), CStr CStr,             N|C|E|Refs|Er) \
-O(LdFuncCachedSafe,            D(Func), CStr,                              C) \
+O(LdFuncCached,                D(Func), NA,                    N|C|E|Refs|Er) \
+O(LdFuncCachedU,               D(Func), NA,                    N|C|E|Refs|Er) \
+O(LdFuncCachedSafe,            D(Func), NA,                                C) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr,FramePtr) C(Int),         C) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \
 O(LdSSwitchDestSlow,            D(TCA), S(Gen),                  E|N|Refs|Er) \
@@ -400,6 +404,7 @@ O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \
 O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
 O(NewPackedArray,               D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
+O(NewCol,                       D(Obj), C(Int) C(Int),                 N|PRc) \
 O(LdRaw,                        DParam, SUnk,                             NF) \
 O(FreeActRec,              D(FramePtr), S(FramePtr),                     Mem) \
 /*    name                      dstinfo srcinfo                      flags */ \
@@ -492,6 +497,10 @@ O(AddElemIntKey,                D(Arr), S(Arr)                                \
                                           S(Int)                              \
                                           S(Cell),        N|Mem|CRc|PRc|Refs) \
 O(AddNewElem,                   D(Arr), SUnk,                  N|Mem|CRc|PRc) \
+O(ColAddElemC,                  D(Obj), S(Obj)                                \
+                                         S(Cell)                              \
+                                         S(Cell),              N|Mem|CRc|PRc) \
+O(ColAddNewElemC,               D(Obj), SUnk,                  N|Mem|CRc|PRc) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(ConcatStrStr,                 D(Str), S(Str) S(Str),             N|CRc|PRc) \
 O(ConcatIntStr,                 D(Str), S(Int) S(Str),                 N|PRc) \
@@ -749,11 +758,12 @@ O(EmptyElem,                   D(Bool), C(TCA)                                \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
 O(TypeProfileFunc,                  ND, S(Gen),                          E|N) \
 O(IncStatGrouped,                   ND, CStr CStr C(Int),            E|N|Mem) \
+O(RBTrace,                          ND, NA,                              E|N) \
 O(IncTransCounter,                  ND, NA,                                E) \
 O(ArrayIdx,                    D(Cell), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \
-                                          S(Cell),      E|N|CRc|PRc|Refs|Mem) \
+                                          S(Cell),          E|N|PRc|Refs|Mem) \
 O(DbgAssertRefCount,                ND, S(Counted,StaticStr,StaticArr),  N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(DbgAssertType,                    ND, S(Cell),                           E) \
@@ -879,7 +889,6 @@ typename std::enable_if<
   return std::is_same<T,bool>::value ? Type::Bool : Type::Int;
 }
 
-inline Type typeForConst(const StringData*)  { return Type::StaticStr; }
 inline Type typeForConst(const NamedEntity*) { return Type::NamedEntity; }
 inline Type typeForConst(const Func*)        { return Type::Func; }
 inline Type typeForConst(const Class*)       { return Type::Cls; }
@@ -889,10 +898,14 @@ inline Type typeForConst(double)             { return Type::Dbl; }
 inline Type typeForConst(SetOpOp)            { return Type::Int; }
 inline Type typeForConst(IncDecOp)           { return Type::Int; }
 inline Type typeForConst(std::nullptr_t)     { return Type::Nullptr; }
+
+inline Type typeForConst(const StringData* sd) {
+  assert(sd->isStatic());
+  return Type::StaticStr;
+}
 inline Type typeForConst(const ArrayData* ad) {
   assert(ad->isStatic());
-  // TODO: Task #2124292, Reintroduce StaticArr
-  return Type::Arr;
+  return Type::StaticArr;
 }
 
 /*

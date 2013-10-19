@@ -36,7 +36,7 @@ public:
 
   CLASSNAME_IS("Directory")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   String getLastError() {
     return String(folly::errnoStr(errno).toStdString());
@@ -47,7 +47,7 @@ class PlainDirectory : public Directory {
 public:
   DECLARE_RESOURCE_ALLOCATION(PlainDirectory);
 
-  explicit PlainDirectory(CStrRef path);
+  explicit PlainDirectory(const String& path);
   ~PlainDirectory();
 
   virtual void close();

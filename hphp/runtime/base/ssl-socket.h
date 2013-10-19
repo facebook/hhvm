@@ -59,7 +59,7 @@ public:
 
   CLASSNAME_IS("SSLSocket")
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const { return classnameof(); }
 
   // overriding Socket
   virtual bool close();
@@ -116,7 +116,7 @@ public:
 
   CLASSNAME_IS("OpenSSL X.509")
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const { return classnameof(); }
 
   /**
    * Given a variant, coerce it into an X509 object. It can be:

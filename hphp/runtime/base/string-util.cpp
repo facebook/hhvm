@@ -26,8 +26,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // manipulations
 
-String StringUtil::Pad(CStrRef input, int final_length,
-                       CStrRef pad_string /* = " " */,
+String StringUtil::Pad(const String& input, int final_length,
+                       const String& pad_string /* = " " */,
                        PadType type /* = PadType::Right */) {
   int len = input.size();
   char *ret = string_pad(input.data(), len, final_length, pad_string.data(),
@@ -36,8 +36,8 @@ String StringUtil::Pad(CStrRef input, int final_length,
   return String();
 }
 
-String StringUtil::StripHTMLTags(CStrRef input,
-                                 CStrRef allowable_tags /* = "" */) {
+String StringUtil::StripHTMLTags(const String& input,
+                                 const String& allowable_tags /* = "" */) {
   if (input.empty()) return input;
   int len = input.size();
   char *ret = string_strip_tags(input.data(), len, allowable_tags.data(),
@@ -48,7 +48,7 @@ String StringUtil::StripHTMLTags(CStrRef input,
 ///////////////////////////////////////////////////////////////////////////////
 // splits/joins
 
-Variant StringUtil::Explode(CStrRef input, CStrRef delimiter,
+Variant StringUtil::Explode(const String& input, const String& delimiter,
                             int limit /* = 0x7FFFFFFF */) {
   if (delimiter.empty()) {
     throw_invalid_argument("delimiter: (empty)");
@@ -113,7 +113,7 @@ Variant StringUtil::Explode(CStrRef input, CStrRef delimiter,
   return ret;
 }
 
-String StringUtil::Implode(CArrRef items, CStrRef delim) {
+String StringUtil::Implode(CArrRef items, const String& delim) {
   int size = items.size();
   if (size == 0) return "";
 
@@ -151,7 +151,7 @@ String StringUtil::Implode(CArrRef items, CStrRef delim) {
   return s.setSize(len);
 }
 
-Variant StringUtil::Split(CStrRef str, int split_length /* = 1 */) {
+Variant StringUtil::Split(const String& str, int split_length /* = 1 */) {
   if (split_length <= 0) {
     throw_invalid_argument(
       "The length of each segment must be greater than zero"
@@ -171,8 +171,8 @@ Variant StringUtil::Split(CStrRef str, int split_length /* = 1 */) {
   return ret;
 }
 
-Variant StringUtil::ChunkSplit(CStrRef body, int chunklen /* = 76 */,
-                               CStrRef end /* = "\r\n" */) {
+Variant StringUtil::ChunkSplit(const String& body, int chunklen /* = 76 */,
+                               const String& end /* = "\r\n" */) {
   if (chunklen <= 0) {
     throw_invalid_argument("chunklen: (non-positive)");
     return false;
@@ -194,7 +194,7 @@ Variant StringUtil::ChunkSplit(CStrRef body, int chunklen /* = 76 */,
 ///////////////////////////////////////////////////////////////////////////////
 // encoding/decoding
 
-String StringUtil::HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
+String StringUtil::HtmlEncode(const String& input, QuoteStyle quoteStyle,
                               const char *charset, bool nbsp) {
   if (input.empty()) return input;
 
@@ -237,7 +237,7 @@ static const AsciiMap mapBothQuotes = {
 
 static const AsciiMap mapNothing = {};
 
-String StringUtil::HtmlEncodeExtra(CStrRef input, QuoteStyle quoteStyle,
+String StringUtil::HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
                                    const char *charset, bool nbsp,
                                    Array extra) {
   if (input.empty()) return input;
@@ -302,7 +302,7 @@ String StringUtil::HtmlEncodeExtra(CStrRef input, QuoteStyle quoteStyle,
   return String(ret, len, AttachString);
 }
 
-String StringUtil::HtmlDecode(CStrRef input, QuoteStyle quoteStyle,
+String StringUtil::HtmlDecode(const String& input, QuoteStyle quoteStyle,
                               const char *charset, bool all) {
   if (input.empty()) return input;
 
@@ -322,21 +322,21 @@ String StringUtil::HtmlDecode(CStrRef input, QuoteStyle quoteStyle,
   return String(ret, len, AttachString);
 }
 
-String StringUtil::QuotedPrintableEncode(CStrRef input) {
+String StringUtil::QuotedPrintableEncode(const String& input) {
   if (input.empty()) return input;
   int len = input.size();
   char *ret = string_quoted_printable_encode(input.data(), len);
   return String(ret, len, AttachString);
 }
 
-String StringUtil::QuotedPrintableDecode(CStrRef input) {
+String StringUtil::QuotedPrintableDecode(const String& input) {
   if (input.empty()) return input;
   int len = input.size();
   char *ret = string_quoted_printable_decode(input.data(), len, false);
   return String(ret, len, AttachString);
 }
 
-String StringUtil::UUEncode(CStrRef input) {
+String StringUtil::UUEncode(const String& input) {
   if (input.empty()) return input;
 
   int len;
@@ -344,7 +344,7 @@ String StringUtil::UUEncode(CStrRef input) {
   return String(encoded, len, AttachString);
 }
 
-String StringUtil::UUDecode(CStrRef input) {
+String StringUtil::UUDecode(const String& input) {
   if (!input.empty()) {
     int len;
     char *decoded = string_uudecode(input.data(), input.size(), len);
@@ -355,19 +355,21 @@ String StringUtil::UUDecode(CStrRef input) {
   return String();
 }
 
-String StringUtil::Base64Encode(CStrRef input) {
+String StringUtil::Base64Encode(const String& input) {
   int len = input.size();
   char *ret = string_base64_encode(input.data(), len);
   return String(ret, len, AttachString);
 }
 
-String StringUtil::Base64Decode(CStrRef input, bool strict /* = false */) {
+String StringUtil::Base64Decode(const String& input,
+                                bool strict /* = false */) {
   int len = input.size();
   char *ret = string_base64_decode(input.data(), len, strict);
   return String(ret, len, AttachString);
 }
 
-String StringUtil::UrlEncode(CStrRef input, bool encodePlus /* = true */) {
+String StringUtil::UrlEncode(const String& input,
+                             bool encodePlus /* = true */) {
   int len = input.size();
   char *ret;
   if (encodePlus) {
@@ -378,7 +380,8 @@ String StringUtil::UrlEncode(CStrRef input, bool encodePlus /* = true */) {
   return String(ret, len, AttachString);
 }
 
-String StringUtil::UrlDecode(CStrRef input, bool decodePlus /* = true */) {
+String StringUtil::UrlDecode(const String& input,
+                             bool decodePlus /* = true */) {
   int len = input.size();
   char *ret;
   if (decodePlus) {
@@ -401,7 +404,8 @@ String StringUtil::MoneyFormat(const char *format, double value) {
 ///////////////////////////////////////////////////////////////////////////////
 // hashing
 
-String StringUtil::Translate(CStrRef input, CStrRef from, CStrRef to) {
+String StringUtil::Translate(const String& input, const String& from,
+                             const String& to) {
   if (input.empty()) return input;
 
   int len = input.size();
@@ -413,27 +417,27 @@ String StringUtil::Translate(CStrRef input, CStrRef from, CStrRef to) {
   return retstr.setSize(len);
 }
 
-String StringUtil::ROT13(CStrRef input) {
+String StringUtil::ROT13(const String& input) {
   if (input.empty()) return input;
   return String(string_rot13(input.data(), input.size()),
                 input.size(), AttachString);
 }
 
-int64_t StringUtil::CRC32(CStrRef input) {
+int64_t StringUtil::CRC32(const String& input) {
   return string_crc32(input.data(), input.size());
 }
 
-String StringUtil::Crypt(CStrRef input, const char *salt /* = "" */) {
+String StringUtil::Crypt(const String& input, const char *salt /* = "" */) {
   return String(string_crypt(input.c_str(), salt), AttachString);
 }
 
-String StringUtil::MD5(CStrRef input, bool raw /* = false */) {
+String StringUtil::MD5(const String& input, bool raw /* = false */) {
   int len;
   char *ret = string_md5(input.data(), input.size(), raw, len);
   return String(ret, len, AttachString);
 }
 
-String StringUtil::SHA1(CStrRef input, bool raw /* = false */) {
+String StringUtil::SHA1(const String& input, bool raw /* = false */) {
   int len;
   char *ret = string_sha1(input.data(), input.size(), raw, len);
   return String(ret, len, AttachString);

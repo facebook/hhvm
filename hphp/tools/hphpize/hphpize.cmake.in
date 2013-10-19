@@ -1,0 +1,21 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5 FATAL_ERROR)
+PROJECT(hphp C CXX ASM)
+
+set(HPHP_HOME "@HPHP_HOME@")
+set(CMAKE_MODULE_PATH
+    "${HPHP_HOME}/CMake"
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_MODULE_PATH})
+set(HHVM_INCLUDE_DIRS "@HHVM_INCLUDE_DIRS@")
+set(HHVM_DEFINITIONS "@HHVM_DEFINITIONS@")
+include(HPHPFunctions)
+include(HPHPCompiler)
+include(config)
+
+foreach (dir ${HHVM_INCLUDE_DIRS})
+	include_directories(${dir})
+endforeach()
+
+foreach (def ${HHVM_DEFINITIONS})
+	add_definitions("-D${def}")
+endforeach()

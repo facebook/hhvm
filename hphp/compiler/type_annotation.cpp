@@ -46,10 +46,11 @@ std::string TypeAnnotation::vanillaName() const {
 
 std::string TypeAnnotation::fullName() const {
   std::string name;
+  if (m_soft) {
+    name += '@';
+  }
   if (m_nullable) {
     name += '?';
-  } else if (m_soft) {
-    name += '@';
   }
 
   if (m_function) {

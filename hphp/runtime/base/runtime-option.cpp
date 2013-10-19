@@ -254,6 +254,7 @@ int RuntimeOption::ProxyPercentage = 0;
 std::set<std::string> RuntimeOption::ProxyURLs;
 std::vector<std::string> RuntimeOption::ProxyPatterns;
 bool RuntimeOption::AlwaysUseRelativePath = false;
+std::string RuntimeOption::IniFile = "/etc/hhvm/php.ini";
 
 int RuntimeOption::HttpDefaultTimeout = 30;
 int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
@@ -311,7 +312,6 @@ int64_t RuntimeOption::MaxSQLRowCount = 10000;
 int64_t RuntimeOption::MaxMemcacheKeyCount = 0;
 int RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::LockCodeMemory = false;
-bool RuntimeOption::CheckMemory = false;
 int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::WarnOnCollectionToArray = false;
 bool RuntimeOption::UseDirectCopy = false;
@@ -383,7 +383,7 @@ static inline bool hhirRelaxGuardsDefault() {
 }
 
 static inline bool hhbcRelaxGuardsDefault() {
-  return true;
+  return !RuntimeOption::EvalHHIRRelaxGuards;
 }
 
 static inline bool hugePagesSoundNice() {
@@ -784,7 +784,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
       IncludeSearchPaths[i] = Util::normalizeDir(IncludeSearchPaths[i]);
     }
-    IncludeSearchPaths.insert(IncludeSearchPaths.begin(), "./");
+    IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
     FileCache = server["FileCache"].getString();
     DefaultDocument = server["DefaultDocument"].getString();
@@ -839,7 +839,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     server["ForbiddenFileExtensions"].get(ForbiddenFileExtensions);
 
     LockCodeMemory = server["LockCodeMemory"].getBool(false);
-    CheckMemory = server["CheckMemory"].getBool();
     MaxArrayChain = server["MaxArrayChain"].getInt32(INT_MAX);
     if (MaxArrayChain != INT_MAX) {
       // HphpArray needs a higher threshold to avoid false-positives.
@@ -850,6 +849,14 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     WarnOnCollectionToArray = server["WarnOnCollectionToArray"].getBool(false);
     UseDirectCopy = server["UseDirectCopy"].getBool(false);
     AlwaysUseRelativePath = server["AlwaysUseRelativePath"].getBool(false);
+
+    IniFile = server["IniFile"].getString(IniFile);
+    if (access(IniFile.c_str(), R_OK) == -1) {
+      if (IniFile != "/etc/hhvm/php.ini") {
+        Logger::Error("INI file doens't exist: %s", IniFile.c_str());
+      }
+      IniFile.clear();
+    }
 
     Hdf dns = server["DnsCache"];
     EnableDnsCache = dns["Enable"].getBool();
@@ -1136,7 +1143,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 #undef get_uint32_t
 #undef get_uint64
     Util::low_malloc_huge_pages(EvalMaxLowMemHugePages);
-
     EvalJitEnableRenameFunction = EvalJitEnableRenameFunction || !EvalJit;
 
     EnableEmitSwitch = eval["EnableEmitSwitch"].getBool(true);

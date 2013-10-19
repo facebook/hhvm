@@ -32,7 +32,7 @@ namespace HPHP {
  */
 class SynchronizableMulti {
 public:
-  explicit SynchronizableMulti(int size);
+  explicit SynchronizableMulti(int size, int groups);
   virtual ~SynchronizableMulti();
 
   /**
@@ -43,9 +43,9 @@ public:
    * Otherwise, the thread is pushed to the back of the queue, being the last
    * to wake up, when notify() is called.
    */
-  void wait(int id, bool front);
-  bool wait(int id, bool front, long seconds); // false if timed out
-  bool wait(int id, bool front, long seconds, long long nanosecs);
+  void wait(int id, int q, bool front);
+  bool wait(int id, int q, bool front, long seconds); // false if timed out
+  bool wait(int id, int q, bool front, long seconds, long long nanosecs);
   void notify();
   void notifyAll();
 
@@ -54,14 +54,17 @@ public:
  private:
   Mutex m_mutex;
   std::vector<pthread_cond_t> m_conds;
-  std::list<pthread_cond_t*> m_cond_list;
+  typedef std::list<pthread_cond_t*> CondPtrList;
+  std::vector<CondPtrList> m_cond_list_vec;
 
+  typedef std::pair<CondPtrList*, CondPtrList::iterator> CondListElem;
   // iterators in std::list are valid even after element removal
-  typedef hphp_hash_map<pthread_cond_t*, std::list<pthread_cond_t*>::iterator,
+  typedef hphp_hash_map<pthread_cond_t*, CondListElem,
                         pointer_hash<pthread_cond_t> > CondIterMap;
   CondIterMap m_cond_map;
 
-  bool waitImpl(int id, bool front, timespec *ts);
+  bool waitImpl(int id, int q, bool front, timespec *ts);
+  int m_group;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

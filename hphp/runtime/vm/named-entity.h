@@ -20,14 +20,15 @@
 #include <tbb/concurrent_unordered_map.h>
 #include <boost/operators.hpp>
 
-#include "hphp/util/atomic.h"
 #include "folly/AtomicHashMap.h"
+
+#include "hphp/util/atomic.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/vm/type-alias.h"
 
 namespace HPHP {
 
 class Class;
-struct Typedef;
-struct TypedefReq;
 class Func;
 
 //////////////////////////////////////////////////////////////////////
@@ -41,22 +42,38 @@ class Func;
  * Classes and typedefs are in the same namespace when we're naming
  * types, but different namespaces at sites that allocate classes.  If
  * a typedef is defined for a given name, we'll cache it in each
- * request at m_cachedTypedefOffset.  Classes are always cached at
- * m_cachedClassOffset.
+ * request at m_cachedTypedef.  Classes are always cached at
+ * m_cachedClass.
  */
 struct NamedEntity {
   explicit NamedEntity()
-    : m_cachedClassOffset(0)
-    , m_cachedFuncOffset(0)
-    , m_cachedTypedefOffset(0)
+    : m_cachedClass(RDS::kInvalidHandle)
+    , m_cachedFunc(RDS::kInvalidHandle)
+    , m_cachedTypeAlias(RDS::kInvalidHandle)
     , m_clsList(nullptr)
   {}
 
-  // Assigning these fields is protected by the targetcache lock.  We
-  // read them without locks.
-  unsigned m_cachedClassOffset;
-  unsigned m_cachedFuncOffset;
-  unsigned m_cachedTypedefOffset;
+  mutable RDS::Link<Class*> m_cachedClass;
+  mutable RDS::Link<Func*> m_cachedFunc;
+  mutable RDS::Link<TypeAliasReq> m_cachedTypeAlias;
+
+  /*
+   * Get the RDS::Handle that caches this Class*, creating a
+   * (non-persistent) one if it doesn't exist yet.
+   */
+  RDS::Handle getClassHandle() const {
+    m_cachedClass.bind();
+    return m_cachedClass.handle();
+  }
+
+  /*
+   * Get the RDS::Handle that caches this Func*, creating a
+   * (non-persistent) one if it doesn't exist yet.
+   */
+  RDS::Handle getFuncHandle() const {
+    m_cachedFunc.bind();
+    return m_cachedFunc.handle();
+  }
 
   void setCachedFunc(Func *f);
   Func* getCachedFunc() const;
@@ -64,8 +81,8 @@ struct NamedEntity {
   void setCachedClass(Class* c);
   Class* getCachedClass() const;
 
-  const TypedefReq* getCachedTypedef() const;
-  void setCachedTypedef(const TypedefReq&);
+  const TypeAliasReq* getCachedTypeAlias() const;
+  void setCachedTypeAlias(const TypeAliasReq&);
 
   Class* clsList() const {
     return m_clsList;
@@ -83,12 +100,12 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Lookup a Typedef* for the supplied NamedEntity (which must be the
- * NamedEntity for `name'), if necessary invoking autoload for types
- * but not classes.
+ * Lookup a TypeAliasReq for the supplied NamedEntity (which must be
+ * the NamedEntity for `name'), if necessary invoking autoload for
+ * types but not classes.
  */
-const TypedefReq* getTypedefWithAutoload(const NamedEntity* ne,
-                                         const StringData* name);
+const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
+                                             const StringData* name);
 
 //////////////////////////////////////////////////////////////////////
 

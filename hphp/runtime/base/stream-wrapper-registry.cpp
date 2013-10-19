@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/php-stream-wrapper.h"
 #include "hphp/runtime/base/http-stream-wrapper.h"
+#include "hphp/runtime/base/data-stream-wrapper.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include <set>
@@ -57,9 +58,10 @@ bool registerWrapper(const std::string &scheme, Wrapper *wrapper) {
 
 const StaticString
   s_file("file"),
-  s_compress_zlib("compress.zlib");
+  s_compress_zlib("compress.zlib"),
+  s_data("data");
 
-bool disableWrapper(CStrRef scheme) {
+bool disableWrapper(const String& scheme) {
   String lscheme = f_strtolower(scheme);
 
   if (lscheme.same(s_file)) {
@@ -93,7 +95,7 @@ bool disableWrapper(CStrRef scheme) {
   return true;
 }
 
-bool restoreWrapper(CStrRef scheme) {
+bool restoreWrapper(const String& scheme) {
   String lscheme = f_strtolower(scheme);
   bool ret = false;
 
@@ -116,7 +118,8 @@ bool restoreWrapper(CStrRef scheme) {
   return true;
 }
 
-bool registerRequestWrapper(CStrRef scheme, std::unique_ptr<Wrapper> wrapper) {
+bool registerRequestWrapper(const String& scheme,
+                            std::unique_ptr<Wrapper> wrapper) {
   String lscheme = f_strtolower(scheme);
 
   // Global, non-disabled wrapper
@@ -155,7 +158,7 @@ Array enumWrappers() {
   return ret;
 }
 
-Wrapper* getWrapper(CStrRef scheme) {
+Wrapper* getWrapper(const String& scheme) {
   String lscheme = f_strtolower(scheme);
 
   // Request local wrapper?
@@ -179,12 +182,17 @@ Wrapper* getWrapper(CStrRef scheme) {
   return nullptr;
 }
 
-Wrapper* getWrapperFromURI(CStrRef uri) {
+Wrapper* getWrapperFromURI(const String& uri) {
   const char *uri_string = uri.data();
 
   /* Special case for PHP4 Backward Compatability */
   if (!strncasecmp(uri_string, "zlib:", sizeof("zlib:") - 1)) {
     return getWrapper(s_compress_zlib);
+  }
+
+  // data wrapper can come with or without a double forward slash
+  if (!strncasecmp(uri_string, "data:", sizeof("data:") - 1)) {
+    return getWrapper(s_data);
   }
 
   const char *colon = strstr(uri_string, "://");
@@ -202,12 +210,14 @@ Wrapper* getWrapperFromURI(CStrRef uri) {
 static FileStreamWrapper s_file_stream_wrapper;
 static PhpStreamWrapper  s_php_stream_wrapper;
 static HttpStreamWrapper s_http_stream_wrapper;
+static DataStreamWrapper s_data_stream_wrapper;
 
 void RegisterCoreWrappers() {
   s_file_stream_wrapper.registerAs("file");
   s_php_stream_wrapper.registerAs("php");
   s_http_stream_wrapper.registerAs("http");
   s_http_stream_wrapper.registerAs("https");
+  s_data_stream_wrapper.registerAs("data");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

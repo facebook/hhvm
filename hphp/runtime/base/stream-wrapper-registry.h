@@ -29,12 +29,12 @@ namespace HPHP { namespace Stream {
 class Wrapper;
 
 bool registerWrapper(const std::string &scheme, Wrapper *wrapper);
-bool disableWrapper(CStrRef scheme);
-bool restoreWrapper(CStrRef scheme);
-bool registerRequestWrapper(CStrRef scheme, std::unique_ptr<Wrapper> wrapper);
+bool disableWrapper(const String& scheme);
+bool restoreWrapper(const String& scheme);
+bool registerRequestWrapper(const String& scheme, std::unique_ptr<Wrapper> wrapper);
 Array enumWrappers();
-Wrapper* getWrapper(CStrRef scheme);
-Wrapper* getWrapperFromURI(CStrRef uri);
+Wrapper* getWrapper(const String& scheme);
+Wrapper* getWrapperFromURI(const String& uri);
 
 /* Called during process init to register core wrappers */
 void RegisterCoreWrappers();

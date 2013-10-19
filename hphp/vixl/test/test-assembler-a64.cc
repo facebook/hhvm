@@ -101,11 +101,12 @@ namespace vixl {
   byte* buf = new byte[buf_size];                                              \
   HPHP::CodeBlock cb;                                                          \
   cb.init(buf, buf_size);                                                      \
-  MacroAssembler masm(cb);                                                     \
   Decoder decoder;                                                             \
   Simulator* simulator = nullptr;                                              \
   simulator = new Simulator(&decoder);                                         \
-  RegisterDump core
+  RegisterDump core;                                                           \
+  { /* masm needs to be destroyed before buf is deleted */                     \
+    MacroAssembler masm(cb)                                                    \
 
 #define START()                                                                \
   masm.Reset();                                                                \
@@ -122,6 +123,7 @@ namespace vixl {
   simulator->RunFrom(reinterpret_cast<Instruction*>(buf))
 
 #define TEARDOWN()                                                             \
+  } /* closing scope for masm in SETUP / SETUP_SIZE */                         \
   delete simulator;                                                            \
   delete[] buf;
 
@@ -2096,6 +2098,38 @@ TEST(Assembler, load_store_double) {
   ASSERT_EQUAL_64(dst_base + 2 * sizeof(dst[0]), x20);
   ASSERT_EQUAL_64(src_base + 2 * sizeof(src[0]), x21);
   ASSERT_EQUAL_64(dst_base, x22);
+
+  TEARDOWN();
+}
+
+
+TEST(Assembler, load_pc_relative) {
+  SETUP();
+
+  constexpr auto beforeValue = 0xdeadbeeffeedface;
+  constexpr auto afterValue  = 0xf00dcafebeadf00c;
+
+  START();
+  Label dataBefore;
+  Label dataAfter;
+  Label codeStart;
+  Label codeEnd;
+  __ B   (&codeStart);
+  __ bind(&dataBefore);
+  __ dc64(beforeValue);
+  __ bind(&codeStart);
+  __ Ldr (x0, &dataBefore);
+  __ Ldr (x1, &dataAfter);
+  __ B   (&codeEnd);
+  __ bind(&dataAfter);
+  __ dc64(afterValue);
+  __ bind(&codeEnd);
+  END();
+
+  RUN();
+
+  ASSERT_EQUAL_64(beforeValue, x0);
+  ASSERT_EQUAL_64(afterValue, x1);
 
   TEARDOWN();
 }
@@ -5067,8 +5101,8 @@ TEST(Assembler, fcvt_sd) {
     float expected = test[i].expected;
 
     // We only expect positive input.
-    assert(signbit(in) == 0);
-    assert(signbit(expected) == 0);
+    assert(std::signbit(in) == 0);
+    assert(std::signbit(expected) == 0);
 
     SETUP();
     START();

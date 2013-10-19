@@ -60,13 +60,7 @@ struct Block : boost::noncopyable {
   void        addEdge(IRInstruction* jmp);
   void        removeEdge(IRInstruction* jmp);
 
-  // Returns true if this block is the main trace exit.  This block
-  // post-dominates all main trace blocks.  Currently there is only
-  // ever a single main trace exit.
-  bool isMainExit() const { return isMain() && isExit(); }
-
-  // Returns true if this block is part of the main trace.  I.e. it is
-  // post-dominated by a block with isMainExit() == true.
+  // Returns true if this block is part of the main trace.
   bool isMain() const;
 
   // Returns true if this block has no successors.
@@ -74,6 +68,9 @@ struct Block : boost::noncopyable {
 
   // Returns whether this block is the initial entry block for the tracelet.
   bool isEntry() const { return id() == 0; }
+
+  // Returns whether this block starts with BeginCatch
+  bool isCatch() const;
 
   // return the last instruction in the block
   IRInstruction* back() const;
@@ -222,7 +219,7 @@ template<typename L> inline
 void Block::forEachSrc(unsigned i, L body) {
   for (Edge& e : m_preds) {
     IRInstruction* jmp = e.from()->back();
-    assert(jmp->op() == Jmp_ && jmp->taken() == this);
+    assert(jmp->op() == Jmp && jmp->taken() == this);
     body(jmp, jmp->src(i));
   }
 }
@@ -271,6 +268,14 @@ inline void Block::push_back(IRInstruction* inst) {
 template <class Predicate> inline
 void Block::remove_if(Predicate p) {
   m_instrs.remove_if(p);
+}
+
+inline bool Block::isCatch() const {
+  // Catch blocks always start with DefLabel; BeginCatch.
+  if (empty()) return false;
+  auto it = skipHeader();
+  if (it == begin()) return false;
+  return (--it)->op() == BeginCatch;
 }
 
 // defined here to avoid circular dependencies

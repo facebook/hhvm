@@ -25,6 +25,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "hphp/vixl/a64/simulator-a64.h"
+#include "folly/Format.h"
 #include <math.h>
 
 namespace vixl {
@@ -56,7 +57,9 @@ SimSystemRegister SimSystemRegister::DefaultValueFor(SystemRegister id) {
 }
 
 
-Simulator::Simulator(Decoder* decoder, FILE* stream) {
+Simulator::Simulator(Decoder* decoder, std::ostream& stream)
+    : stream_(stream)
+{
   // Ensure shift operations act as the simulator expects.
   assert((static_cast<int32_t>(-1) >> 1) == -1);
   assert((static_cast<uint32_t>(-1) >> 1) == 0x7FFFFFFF);
@@ -74,7 +77,6 @@ Simulator::Simulator(Decoder* decoder, FILE* stream) {
   // The stack pointer must be 16 bytes aligned.
   set_sp(reinterpret_cast<int64_t>(tos) & ~0xfUL);
 
-  stream_ = stream;
   print_disasm_ = new PrintDisassembler(stream_);
   coloured_trace_ = false;
   disasm_trace_ = false;
@@ -329,7 +331,7 @@ void Simulator::FPCompare(double val0, double val1) {
 
   // TODO: This assumes that the C++ implementation handles comparisons in the
   // way that we expect (as per AssertSupportedFPCR()).
-  if ((isnan(val0) != 0) || (isnan(val1) != 0)) {
+  if ((std::isnan(val0) != 0) || (std::isnan(val1) != 0)) {
     nzcv().SetRawValue(FPUnorderedFlag);
   } else if (val0 < val1) {
     nzcv().SetRawValue(FPLessThanFlag);
@@ -354,11 +356,12 @@ void Simulator::PrintSystemRegisters(bool print_all) {
 
   static SimSystemRegister last_nzcv;
   if (print_all || first_run || (last_nzcv.RawValue() != nzcv().RawValue())) {
-    fprintf(stream_, "# %sFLAGS: %sN:%d Z:%d C:%d V:%d%s\n",
-            clr_flag_name,
-            clr_flag_value,
-            N(), Z(), C(), V(),
-            clr_normal);
+    // Split up the call, to prevent template explosion
+    stream_ << folly::format("# {}FLAGS: {}N:{} Z:{} ",
+                             clr_flag_name,
+                             clr_flag_value,
+                             N(), Z());
+    stream_ << folly::format("C:{} V:{}{}\n", C(), V(), clr_normal);
   }
   last_nzcv = nzcv();
 
@@ -371,11 +374,17 @@ void Simulator::PrintSystemRegisters(bool print_all) {
       "0b11 (Round towards Zero)"
     };
     assert(fpcr().RMode() <= (sizeof(rmode) / sizeof(rmode[0])));
-    fprintf(stream_, "# %sFPCR: %sAHP:%d DN:%d FZ:%d RMode:%s%s\n",
-            clr_flag_name,
-            clr_flag_value,
-            fpcr().AHP(), fpcr().DN(), fpcr().FZ(), rmode[fpcr().RMode()],
-            clr_normal);
+    stream_ << folly::format(
+      "# {}FPCR: {}AHP:{} DN:{} ",
+      clr_flag_name,
+      clr_flag_value,
+      fpcr().AHP(), fpcr().DN()
+    );
+    stream_ << folly::format(
+      "FZ:{} RMode:{}{}\n",
+      fpcr().FZ(), rmode[fpcr().RMode()],
+      clr_normal
+    );
   }
   last_fpcr = fpcr();
 
@@ -395,13 +404,14 @@ void Simulator::PrintRegisters(bool print_all_regs) {
 
   for (unsigned i = 0; i < kNumberOfRegisters; i++) {
     if (print_all_regs || first_run || (last_regs[i] != registers_[i].x)) {
-      fprintf(stream_,
-              "# %s%4s:%s 0x%016" PRIx64 "%s\n",
-              clr_reg_name,
-              XRegNameForCode(i, Reg31IsStackPointer),
-              clr_reg_value,
-              registers_[i].x,
-              clr_normal);
+      stream_ << folly::format(
+        "# {}{:4}:{} {:#016x}{}\n",
+        clr_reg_name,
+        XRegNameForCode(i, Reg31IsStackPointer),
+        clr_reg_value,
+        registers_[i].x,
+        clr_normal
+      );
     }
     // Cache the new register value so the next run can detect any changes.
     last_regs[i] = registers_[i].x;
@@ -426,22 +436,30 @@ void Simulator::PrintFPRegisters(bool print_all_regs) {
   for (unsigned i = 0; i < kNumberOfFPRegisters; i++) {
     if (print_all_regs || first_run ||
         (last_regs[i] != double_to_rawbits(fpregisters_[i].d))) {
-      fprintf(stream_,
-              "# %s %4s:%s 0x%016" PRIx64 "%s (%s%s:%s %g%s %s:%s %g%s)\n",
-              clr_reg_name,
-              VRegNameForCode(i),
-              clr_reg_value,
-              double_to_rawbits(fpregisters_[i].d),
-              clr_normal,
-              clr_reg_name,
-              DRegNameForCode(i),
-              clr_reg_value,
-              fpregisters_[i].d,
-              clr_reg_name,
-              SRegNameForCode(i),
-              clr_reg_value,
-              fpregisters_[i].s,
-              clr_normal);
+      // Split up the call to prevent template explosion
+      stream_ << folly::format(
+        "# {} {:4}:{} {:#016x}{} ",
+        clr_reg_name,
+        VRegNameForCode(i),
+        clr_reg_value,
+        double_to_rawbits(fpregisters_[i].d),
+        clr_normal
+      );
+      stream_ << folly::format(
+        "({}{}:{} {}{} ",
+        clr_reg_name,
+        DRegNameForCode(i),
+        clr_reg_value,
+        fpregisters_[i].d,
+        clr_reg_name
+      );
+      stream_ << folly::format(
+        "{}:{} {}{})\n",
+        SRegNameForCode(i),
+        clr_reg_value,
+        fpregisters_[i].s,
+        clr_normal
+      );
     }
     // Cache the new register value so the next run can detect any changes.
     last_regs[i] = double_to_rawbits(fpregisters_[i].d);
@@ -1416,7 +1434,7 @@ int32_t Simulator::FPToInt32(double value, FPRounding rmode) {
   } else if (value < kWMinInt) {
     return kWMinInt;
   }
-  return isnan(value) ? 0 : static_cast<int32_t>(value);
+  return std::isnan(value) ? 0 : static_cast<int32_t>(value);
 }
 
 
@@ -1427,7 +1445,7 @@ int64_t Simulator::FPToInt64(double value, FPRounding rmode) {
   } else if (value < kXMinInt) {
     return kXMinInt;
   }
-  return isnan(value) ? 0 : static_cast<int64_t>(value);
+  return std::isnan(value) ? 0 : static_cast<int64_t>(value);
 }
 
 
@@ -1438,7 +1456,7 @@ uint32_t Simulator::FPToUInt32(double value, FPRounding rmode) {
   } else if (value < 0.0) {
     return 0;
   }
-  return isnan(value) ? 0 : static_cast<uint32_t>(value);
+  return std::isnan(value) ? 0 : static_cast<uint32_t>(value);
 }
 
 
@@ -1449,7 +1467,7 @@ uint64_t Simulator::FPToUInt64(double value, FPRounding rmode) {
   } else if (value < 0.0) {
     return 0;
   }
-  return isnan(value) ? 0 : static_cast<uint64_t>(value);
+  return std::isnan(value) ? 0 : static_cast<uint64_t>(value);
 }
 
 
@@ -1782,7 +1800,7 @@ float Simulator::UFixedToFloat(uint64_t src, int fbits, FPRounding round) {
 
 double Simulator::FPRoundInt(double value, FPRounding round_mode) {
   if ((value == 0.0) || (value == kFP64PositiveInfinity) ||
-      (value == kFP64NegativeInfinity) || isnan(value)) {
+      (value == kFP64NegativeInfinity) || std::isnan(value)) {
     return value;
   }
 
@@ -1817,7 +1835,7 @@ double Simulator::FPRoundInt(double value, FPRounding round_mode) {
 
 
 double Simulator::FPToDouble(float value) {
-  switch (fpclassify(value)) {
+  switch (std::fpclassify(value)) {
     case FP_NAN: {
       // Convert NaNs as the processor would, assuming that FPCR.DN (default
       // NaN) is not set:
@@ -1857,7 +1875,7 @@ float Simulator::FPToFloat(double value, FPRounding round_mode) {
   assert(round_mode == FPTieEven);
   USE(round_mode);
 
-  switch (fpclassify(value)) {
+  switch (std::fpclassify(value)) {
     case FP_NAN: {
       // Convert NaNs as the processor would, assuming that FPCR.DN (default
       // NaN) is not set:
@@ -1892,7 +1910,7 @@ float Simulator::FPToFloat(double value, FPRounding round_mode) {
       int32_t exponent = unsigned_bitextract_64(62, 52, raw) - 1023;
       // Extract the mantissa and add the implicit '1' bit.
       uint64_t mantissa = unsigned_bitextract_64(51, 0, raw);
-      if (fpclassify(value) == FP_NORMAL) {
+      if (std::fpclassify(value) == FP_NORMAL) {
         mantissa |= (1UL << 52);
       }
       return FPRoundToFloat(sign, exponent, mantissa, round_mode);
@@ -1953,9 +1971,9 @@ void Simulator::VisitFPDataProcessing3Source(Instruction* instr) {
 
 
 double Simulator::FPMax(double a, double b) {
-  if (isnan(a)) {
+  if (std::isnan(a)) {
     return a;
-  } else if (isnan(b)) {
+  } else if (std::isnan(b)) {
     return b;
   }
 
@@ -1970,9 +1988,9 @@ double Simulator::FPMax(double a, double b) {
 
 
 double Simulator::FPMin(double a, double b) {
-  if (isnan(a)) {
+  if (std::isnan(a)) {
     return a;
-  } else if (isnan(b)) {
+  } else if (std::isnan(b)) {
     return b;
   }
 

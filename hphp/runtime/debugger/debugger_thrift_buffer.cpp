@@ -30,7 +30,7 @@ String DebuggerThriftBuffer::readImpl() {
   return String(m_buffer, nread, CopyString);
 }
 
-void DebuggerThriftBuffer::flushImpl(CStrRef data) {
+void DebuggerThriftBuffer::flushImpl(const String& data) {
   TRACE(7, "DebuggerThriftBuffer::flushImpl\n");
   m_socket->write(data);
 }
@@ -63,7 +63,7 @@ static inline int serializeImpl(T data, String& sdata) {
   return DebuggerWireHelpers::NoError;
 }
 
-static inline int unserializeImpl(CStrRef sdata, Variant& data) {
+static inline int unserializeImpl(const String& sdata, Variant& data) {
   TRACE(7, "DebuggerWireHelpers::unserializeImpl(CStrRef sdata,\n");
   if (sdata.same(s_hit_limit)) {
     return DebuggerWireHelpers::HitLimit;

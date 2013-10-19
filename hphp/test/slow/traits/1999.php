@@ -3,8 +3,6 @@
 function get_declared_user_traits() {
   $ret = array();
   $system_traits = Set {
-    'iterabletrait',
-    'keyediterabletrait',
     'strictiterable',
     'strictkeyediterable',
     'lazyiterable',

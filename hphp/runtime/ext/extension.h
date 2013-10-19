@@ -55,17 +55,25 @@ namespace HPHP {
 
 class Extension : public IDebuggable {
 public:
-  static bool IsLoaded(CStrRef name);
+  static bool IsLoaded(const String& name);
   static Array GetLoadedExtensions();
-  static Extension *GetExtension(CStrRef name);
+  static Extension *GetExtension(const String& name);
 
   // called by RuntimeOption to initialize all configurations of extension
   static void LoadModules(Hdf hdf);
 
   // called by hphp_process_init/exit
   static void InitModules();
+  static void MergeSystemlib();
   static void ShutdownModules();
   static bool ModulesInitialised();
+
+  // Look for "systemlib.ext.{m_name}" in the binary and compile/merge it
+  void loadSystemlib();
+
+  // Compile and merge an systemlib fragment
+  static void CompileSystemlib(const std::string &slib,
+                               const std::string &name);
 public:
   explicit Extension(litstr name, const char *version = "");
   virtual ~Extension() {}
@@ -79,10 +87,26 @@ public:
   virtual void moduleInit() {}
   virtual void moduleShutdown() {}
 
+  void setDSOName(const std::string &name) {
+    m_dsoName = name;
+  }
+
 private:
+  // Indicates which version of the HHVM Extension API
+  // this module was built against.
+  int64_t m_hhvmAPIVersion;
+
   const String m_name;
   std::string m_version;
+  std::string m_dsoName;
 };
+
+#define HHVM_API_VERSION 20131007L
+
+#define HHVM_GET_MODULE(name) \
+extern "C" Extension *getModule() { \
+  return &s_##name##_extension; \
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

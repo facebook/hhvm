@@ -39,7 +39,7 @@ static String get_classname(CVarRef class_or_object) {
   return class_or_object.toString();
 }
 
-static inline CStrRef ctxClassName() {
+static inline const String& ctxClassName() {
   Class* ctx = g_vmContext->getContextClass();
   return ctx ? ctx->nameRef() : empty_string;
 }
@@ -69,8 +69,8 @@ Array f_get_declared_traits() {
   return ClassInfo::GetTraits();
 }
 
-bool f_class_alias(CStrRef original,
-                   CStrRef alias,
+bool f_class_alias(const String& original,
+                   const String& alias,
                    bool autoload /* = true */) {
   auto const origClass =
     autoload ? Unit::loadClass(original.get())
@@ -82,16 +82,17 @@ bool f_class_alias(CStrRef original,
   return Unit::aliasClass(origClass, alias.get());
 }
 
-bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
+bool f_class_exists(const String& class_name, bool autoload /* = true */) {
   return Unit::classExists(class_name.get(), autoload, AttrNone);
 }
 
-bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
+bool f_interface_exists(const String& interface_name,
+                        bool autoload /* = true */) {
   return Unit::classExists(interface_name.get(), autoload,
                                AttrInterface);
 }
 
-bool f_trait_exists(CStrRef trait_name, bool autoload /* = true */) {
+bool f_trait_exists(const String& trait_name, bool autoload /* = true */) {
   return Unit::classExists(trait_name.get(), autoload, AttrTrait);
 }
 
@@ -158,7 +159,7 @@ Array f_get_class_methods(const Variant& class_or_object) {
   return f_array_keys(retVal).toArray();
 }
 
-Array f_get_class_constants(CStrRef className) {
+Array f_get_class_constants(const String& className) {
   auto const cls = Unit::loadClass(className.get());
   if (cls == NULL) {
     return Array::attach(HphpArray::MakeReserve(0));
@@ -186,7 +187,7 @@ Array f_get_class_constants(CStrRef className) {
   return arrayInit.toArray();
 }
 
-Variant f_get_class_vars(CStrRef className) {
+Variant f_get_class_vars(const String& className) {
   const Class* cls = Unit::loadClass(className.get());
   if (!cls) {
     return false;
@@ -244,7 +245,7 @@ Variant f_get_class(CVarRef object /* = null_variant */) {
     CallerFrame cf;
     Class* cls = arGetContextClassImpl<true>(cf());
     if (cls) {
-      ret = CStrRef(cls->nameRef());
+      ret = String(cls->nameRef());
     }
 
     if (ret.empty()) {
@@ -262,7 +263,7 @@ Variant f_get_parent_class(CVarRef object /* = null_variant */) {
     CallerFrame cf;
     Class* cls = arGetContextClass(cf());
     if (cls && cls->parent()) {
-      return CStrRef(cls->parentRef());
+      return String(cls->parentRef());
     }
     return false;
   }
@@ -286,7 +287,7 @@ Variant f_get_parent_class(CVarRef object /* = null_variant */) {
   return false;
 }
 
-static bool is_a_impl(CVarRef class_or_object, CStrRef class_name,
+static bool is_a_impl(CVarRef class_or_object, const String& class_name,
                       bool allow_string, bool subclass_only) {
   if (class_or_object.isString() && !allow_string) {
     return false;
@@ -302,15 +303,17 @@ static bool is_a_impl(CVarRef class_or_object, CStrRef class_name,
   return cls->classof(other);
 }
 
-bool f_is_a(CVarRef class_or_object, CStrRef class_name, bool allow_string /* = false */) {
+bool f_is_a(CVarRef class_or_object, const String& class_name,
+            bool allow_string /* = false */) {
   return is_a_impl(class_or_object, class_name, allow_string, false);
 }
 
-bool f_is_subclass_of(CVarRef class_or_object, CStrRef class_name, bool allow_string /* = true */) {
+bool f_is_subclass_of(CVarRef class_or_object, const String& class_name,
+                      bool allow_string /* = true */) {
   return is_a_impl(class_or_object, class_name, allow_string, true);
 }
 
-bool f_method_exists(CVarRef class_or_object, CStrRef method_name) {
+bool f_method_exists(CVarRef class_or_object, const String& method_name) {
   const Class* cls = get_cls(class_or_object);
   if (!cls) return false;
   if (cls->lookupMethod(method_name.get()) != NULL) return true;
@@ -323,15 +326,16 @@ bool f_method_exists(CVarRef class_or_object, CStrRef method_name) {
   return false;
 }
 
-Variant f_property_exists(CVarRef class_or_object, CStrRef property) {
+Variant f_property_exists(CVarRef class_or_object, const String& property) {
   if (class_or_object.isObject()) {
-    CStrRef context = ctxClassName();
+    const String& context = ctxClassName();
     return (bool)class_or_object.toObject()->o_realProp(
       property, ObjectData::RealPropExist, context);
   }
   if (!class_or_object.isString()) {
     raise_warning(
-      "First parameter must either be an object or the name of an existing class"
+      "First parameter must either be an object"
+      " or the name of an existing class"
     );
     return Variant(Variant::NullInit());
   }
@@ -355,12 +359,12 @@ Variant f_get_object_vars(CObjRef object) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_call_user_method_array(CStrRef method_name, VRefParam obj,
+Variant f_call_user_method_array(const String& method_name, VRefParam obj,
                                  CArrRef paramarr) {
   return obj.toObject()->o_invoke(method_name, paramarr);
 }
 
-Variant f_call_user_method(int _argc, CStrRef method_name, VRefParam obj,
+Variant f_call_user_method(int _argc, const String& method_name, VRefParam obj,
                            CArrRef _argv /* = null_array */) {
   return obj.toObject()->o_invoke(method_name, _argv);
 }

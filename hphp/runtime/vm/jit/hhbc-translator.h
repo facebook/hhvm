@@ -24,6 +24,7 @@
 #include "folly/Optional.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
@@ -52,21 +53,21 @@ struct EvalStack {
     m_vector.push_back(tmp);
   }
 
-  SSATmp* pop(TypeConstraint cat) {
+  SSATmp* pop(TypeConstraint tc) {
     if (m_vector.size() == 0) {
       return nullptr;
     }
     SSATmp* tmp = m_vector.back();
     m_vector.pop_back();
-    return m_tb.constrainValue(tmp, cat);
+    return m_tb.constrainValue(tmp, tc);
   }
 
-  SSATmp* top(DataTypeCategory cat, uint32_t offset = 0) const {
+  SSATmp* top(TypeConstraint tc, uint32_t offset = 0) const {
     if (offset >= m_vector.size()) {
       return nullptr;
     }
     uint32_t index = m_vector.size() - 1 - offset;
-    return m_tb.constrainValue(m_vector[index], cat);
+    return m_tb.constrainValue(m_vector[index], tc);
   }
 
   void replace(uint32_t offset, SSATmp* tmp) {
@@ -109,7 +110,7 @@ private:
  * HhbcTranslator is where we make optimiations that relate to overall
  * knowledge of the runtime and HHBC.  For example, decisions like
  * whether to use IR instructions that have constant Class*'s (for a
- * AttrUnique class) instead of loading a Class* from TargetCache are
+ * AttrUnique class) instead of loading a Class* from RDS are
  * made at this level.
  */
 struct HhbcTranslator {
@@ -126,11 +127,13 @@ struct HhbcTranslator {
   // bytecode offset (or whether we're finished) using this API.
   void setBcOff(Offset newOff, bool lastBcOff);
   void end();
+  void end(Offset nextPc);
 
   // Tracelet guards.
-  void guardTypeStack(uint32_t stackIndex, Type type);
-  void guardTypeLocal(uint32_t locId, Type type);
-  void guardTypeLocation(const RegionDesc::Location& loc, Type type);
+  void guardTypeStack(uint32_t stackIndex, Type type, bool outerOnly);
+  void guardTypeLocal(uint32_t locId,      Type type, bool outerOnly);
+  void guardTypeLocation(const RegionDesc::Location& loc, Type type,
+                         bool outerOnly);
   void guardRefs(int64_t entryArDelta,
                  const vector<bool>& mask,
                  const vector<bool>& vals);
@@ -183,6 +186,7 @@ struct HhbcTranslator {
   void emitArray(int arrayId);
   void emitNewArray(int capacity);
   void emitNewPackedArray(int n);
+  void emitNewCol(int capacity);
 
   void emitArrayAdd();
   void emitAddElemC();
@@ -277,6 +281,7 @@ struct HhbcTranslator {
                       int32_t fallbackFuncId);
   void emitFPushFunc(int32_t numParams);
   void emitFPushFuncObj(int32_t numParams);
+  void emitFPushFuncArr(int32_t numParams);
   SSATmp* genClsMethodCtx(const Func* callee, const Class* cls);
   void emitFPushClsMethodD(int32_t numParams,
                            int32_t methodNameStrId,
@@ -338,8 +343,11 @@ struct HhbcTranslator {
   void emitRetC(bool freeInline);
   void emitRetV(bool freeInline);
 
+  // miscelaneous ops
   void emitFloor();
   void emitCeil();
+  void emitAssertTL(int32_t id, AssertTOp op);
+  void emitAssertTStk(int32_t offset, AssertTOp op);
 
   // binary arithmetic ops
   void emitAdd();
@@ -446,6 +454,11 @@ struct HhbcTranslator {
   void emitIncStat(int32_t counter, int32_t value, bool force = false);
   void emitIncTransCounter();
   void emitCheckCold(Transl::TransID transId);
+  void emitRB(Trace::RingBufferType t, SrcKey sk);
+  void emitRB(Trace::RingBufferType t, std::string msg) {
+    emitRB(t, makeStaticString(msg));
+  }
+  void emitRB(Trace::RingBufferType t, const StringData* msg);
   void emitArrayIdx();
 
 private:
@@ -535,7 +548,13 @@ private:
     // a side-exit from a failed set operation, return the first block.
     Block* makeCatchSet() {
       assert(!m_failedSetBlock);
-      return m_failedSetBlock = makeCatch();
+      m_failedSetBlock = makeCatch();
+
+      // This catch trace will be modified in emitMPost to end with a side
+      // exit, and TryEndCatch will fall through to that side exit if an
+      // InvalidSetMException is thrown.
+      m_failedSetBlock->back()->setOpcode(TryEndCatch);
+      return m_failedSetBlock;
     }
 
     void prependToTraces(IRInstruction* inst) {
@@ -548,11 +567,12 @@ private:
     void numberStackInputs();
     void setNoMIState() { m_needMIS = false; }
     SSATmp* genMisPtr();
-    SSATmp* getInput(unsigned i, DataTypeCategory cat = DataTypeSpecific);
-    SSATmp* getBase();
+    SSATmp* getInput(unsigned i, TypeConstraint tc);
+    SSATmp* getBase(TypeConstraint tc);
     SSATmp* getKey();
     SSATmp* getValue();
     SSATmp* getValAddr();
+    void    constrainBase(TypeConstraint tc, SSATmp* value = nullptr);
     SSATmp* checkInitProp(SSATmp* baseAsObj,
                           SSATmp* propAddr,
                           Transl::PropInfo propOffset,
@@ -590,7 +610,7 @@ private:
       Pair
     };
     SimpleOp simpleCollectionOp();
-    void constrainSimpleOpBase();
+    void constrainCollectionOpBase();
 
     bool generateMVal() const;
     bool needFirstRatchet() const;
@@ -795,7 +815,7 @@ public:
   Offset      bcOff()     const { return m_bcStateStack.back().bcOff; }
   SrcKey      curSrcKey() const { return SrcKey(curFunc(), bcOff()); }
   size_t      spOffset()  const;
-  Type        topType(uint32_t i, DataTypeCategory c = DataTypeSpecific) const;
+  Type        topType(uint32_t i, TypeConstraint c = DataTypeSpecific) const;
 
 private:
   /*
@@ -845,13 +865,13 @@ private:
   SSATmp* popV() { return pop(Type::BoxedCell); }
   SSATmp* popR() { return pop(Type::Gen);       }
   SSATmp* popA() { return pop(Type::Cls);       }
-  SSATmp* popF(DataTypeCategory cat = DataTypeSpecific) {
-    return pop(Type::Gen, cat);
+  SSATmp* popF(TypeConstraint tc = DataTypeSpecific) {
+    return pop(Type::Gen, tc);
   }
   SSATmp* top(Type type, uint32_t index = 0,
-              DataTypeCategory c = DataTypeSpecific);
-  SSATmp* topC(uint32_t i = 0, DataTypeCategory cat = DataTypeSpecific) {
-    return top(Type::Cell, i, cat);
+              TypeConstraint tc = DataTypeSpecific);
+  SSATmp* topC(uint32_t i = 0, TypeConstraint tc = DataTypeSpecific) {
+    return top(Type::Cell, i, tc);
   }
   SSATmp* topV(uint32_t i = 0) { return top(Type::BoxedCell, i); }
   std::vector<SSATmp*> peekSpillValues() const;
@@ -859,7 +879,7 @@ private:
                          const std::vector<SSATmp*>& spillVals);
   SSATmp* spillStack();
   void    exceptionBarrier();
-  SSATmp* ldStackAddr(int32_t offset, DataTypeCategory cat);
+  SSATmp* ldStackAddr(int32_t offset, TypeConstraint tc);
   void    extendStack(uint32_t index, Type type);
   void    replace(uint32_t index, SSATmp* tmp);
   void    refineType(SSATmp* tmp, Type type);
@@ -867,12 +887,13 @@ private:
   /*
    * Local instruction helpers.
    */
-  SSATmp* ldLoc(uint32_t id, DataTypeCategory constraint);
-  SSATmp* ldLocAddr(uint32_t id, DataTypeCategory constraint);
+  SSATmp* ldLoc(uint32_t id, TypeConstraint constraint);
+  SSATmp* ldLocAddr(uint32_t id, TypeConstraint constraint);
 private:
-  SSATmp* ldLocInner(uint32_t id, Block* exit, DataTypeCategory constraint);
+  SSATmp* ldLocInner(uint32_t id, Block* exit,
+                     TypeConstraint constraint);
   SSATmp* ldLocInnerWarn(uint32_t id, Block* target,
-                         DataTypeCategory constraint,
+                         TypeConstraint constraint,
                          Block* catchBlock = nullptr);
 public:
   SSATmp* stLoc(uint32_t id, Block* exit, SSATmp* newVal);

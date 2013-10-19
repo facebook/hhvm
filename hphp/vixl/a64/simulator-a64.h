@@ -118,7 +118,7 @@ class SimSystemRegister {
 
 class Simulator : public DecoderVisitor {
  public:
-  explicit Simulator(Decoder* decoder, FILE* stream = stdout);
+  explicit Simulator(Decoder* decoder, std::ostream& stream = std::cout);
   ~Simulator();
 
   void ResetState();
@@ -206,6 +206,12 @@ class Simulator : public DecoderVisitor {
     }
     registers_[code].x = 0;  // First clear the register top bits.
     registers_[code].w = value;
+  }
+
+  template<typename T>
+  inline void set_xreg(unsigned code, T* value,
+                       Reg31Mode r31mode = Reg31IsZeroRegister) {
+    set_xreg(code, reinterpret_cast<int64_t>(value), r31mode);
   }
 
   inline void set_xreg(unsigned code, int64_t value,
@@ -498,7 +504,7 @@ class Simulator : public DecoderVisitor {
   // Processor state ---------------------------------------
 
   // Output stream.
-  FILE* stream_;
+  std::ostream& stream_;
   PrintDisassembler* print_disasm_;
 
   // Instruction statistics instrumentation.

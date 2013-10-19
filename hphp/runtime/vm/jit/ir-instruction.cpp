@@ -76,8 +76,7 @@ bool IRInstruction::canCSE() const {
   // count or consume reference counts. CheckType/AssertType are special
   // because they can refine a maybeCounted type to a notCounted type, so they
   // logically consume and produce a reference without doing any work.
-  assert(!canCSE || !consumesReferences() ||
-         m_op == CheckType || m_op == AssertType);
+  assert(!canCSE || !consumesReferences() || is(CheckType, AssertType));
   return canCSE && !mayReenterHelper();
 }
 
@@ -142,15 +141,14 @@ bool IRInstruction::mayRaiseError() const {
 
 bool IRInstruction::isEssential() const {
   Opcode opc = op();
-  if (opc == DecRefNZ) {
+  if (is(IncRef, IncRefCtx, DecRefNZ, DecRefNZOrBranch)) {
+    // If the ref count optimization is turned off, mark all refcounting
+    // operations as essential.
+    if (!RuntimeOption::EvalHHIREnableRefCountOpt) return true;
+
     // If the source of a DecRefNZ is not an IncRef, mark it as essential
     // because we won't remove its source as well as itself.
-    // If the ref count optimization is turned off, mark all DecRefNZ as
-    // essential.
-    if (!RuntimeOption::EvalHHIREnableRefCountOpt ||
-        src(0)->inst()->op() != IncRef) {
-      return true;
-    }
+    if (is(DecRefNZ) && !src(0)->inst()->is(IncRef)) return true;
   }
   return isControlFlow() ||
          opcodeHasFlags(opc, Essential) ||
@@ -336,7 +334,7 @@ void IRInstruction::convertToNop() {
 void IRInstruction::convertToJmp() {
   assert(isControlFlow());
   assert(IMPLIES(block(), block()->back() == this));
-  m_op = Jmp_;
+  m_op = Jmp;
   m_typeParam = Type::None;
   m_numSrcs = 0;
   m_numDsts = 0;

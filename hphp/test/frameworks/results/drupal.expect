@@ -1,0 +1,1618 @@
+PHPUnit 3.7.21 by Sebastian Bergmann.
+
+Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/phpunit.xml.dist
+
+
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDates with data set #0 ('2009-03-07 10:30', 'America/Chicago', '2009-03-07T10:30:00-06:00')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDates with data set #1 ('2009-06-07 10:30', 'America/Chicago', '2009-06-07T10:30:00-05:00')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDates with data set #2 ('2009-03-07', 'America/Chicago', '2009-03-07T00:00:00-06:00')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDates with data set #3 ('2009-06-07', 'America/Chicago', '2009-06-07T00:00:00-05:00')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDates with data set #4 ('2009-03-07 10:30', 'Australia/Canberra', '2009-03-07T10:30:00+11:00')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDates with data set #5 ('2009-06-07 10:30', 'Australia/Canberra', '2009-06-07T10:30:00+10:00')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateArrays with data set #0 (array(2010, 2, 28), 'America/Chicago', '2010-02-28T00:00:00-06:00')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateArrays with data set #1 (array(2010, 2, 28, 10), 'America/Chicago', '2010-02-28T10:00:00-06:00')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateArrays with data set #2 (array(2010, 2, 28), 'Europe/Berlin', '2010-02-28T00:00:00+01:00')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateArrays with data set #3 (array(2010, 2, 28, 10), 'Europe/Berlin', '2010-02-28T10:00:00+01:00')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testTimestamp with data set #0 (0, array('UTC', 'c', '1970-01-01T00:00:00+00:00', 'UTC', 0), array('America/Los_Angeles', 'c', '1969-12-31T16:00:00-08:00', 'America/Los_Angeles', '-28800'))'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testTimestamp with data set #1 (0, array('America/Los_Angeles', 'c', '1969-12-31T16:00:00-08:00', 'America/Los_Angeles', '-28800'), array('UTC', 'c', '1970-01-01T00:00:00+00:00', 'UTC', 0))'.
+F
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimestamp with data set #0 ('1970-01-01 00:00:00', array('UTC', 'c', '1970-01-01T00:00:00+00:00', 'UTC', 0), array('America/Los_Angeles', 'c', '1969-12-31T16:00:00-08:00', 'America/Los_Angeles', '-28800'))'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimestamp with data set #1 ('1969-12-31 16:00:00', array('America/Los_Angeles', 'c', '1969-12-31T16:00:00-08:00', 'America/Los_Angeles', '-28800'), array('UTC', 'c', '1970-01-01T00:00:00+00:00', 'UTC', 0))'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimestamp with data set #2 ('1969-12-31 16:00:00', array('Europe/Warsaw', 'c', '1969-12-31T16:00:00+01:00', 'Europe/Warsaw', '+3600'), array('UTC', 'c', '1969-12-31T15:00:00+00:00', 'UTC', 0))'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateFormat with data set #0 ('2009', NULL, 'Y', 'Y', '2009')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateFormat with data set #1 ('2009-10', NULL, 'Y-m', 'Y-m', '2009-10')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateFormat with data set #2 ('T10:30:00', NULL, '\\TH:i:s', 'H:i:s', '10:30:00')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateFormat with data set #3 ('10:30:00', NULL, 'H:i:s', 'H:i:s', '10:30:00')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testInvalidDates with data set #0 ('23 abc 2012', NULL, 'd M Y', '23 abc 2012 contains an invalid month name and did not produce errors.')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testInvalidDates with data set #1 ('0000-00-00T45:30:00', NULL, 'Y-m-d\\TH:i:s', '0000-00-00T45:30:00 contains an invalid hour and did not produce errors.')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testInvalidDates with data set #2 ('0000-00-99T05:30:00', NULL, 'Y-m-d\\TH:i:s', '0000-00-99T05:30:00 contains an invalid day and did not produce errors.')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testInvalidDates with data set #3 ('0000-75-00T15:30:00', NULL, 'Y-m-d\\TH:i:s', '0000-75-00T15:30:00 contains an invalid month and did not produce errors.')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testInvalidDates with data set #4 ('11-08-01T15:30:00', NULL, 'Y-m-d\\TH:i:s', '11-08-01T15:30:00 contains an invalid year and did not produce errors.')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezone with data set #0 ('2007-01-31 21:00:00', NULL, 'UTC', 'DateTimePlus uses the system timezone when there is no site timezone.')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezone with data set #1 ('2007-01-31 21:00:00', 'America/Yellowknife', 'America/Yellowknife', 'DateTimePlus uses the specified timezone if provided.')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezone with data set #2 ('2007-01-31 21:00:00', DateTimeZone, 'Australia/Canberra', 'DateTimePlus uses the specified timezone if provided.')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezone with data set #3 (2013-10-15 06:29:54 Pacific/Midway, NULL, 'Pacific/Midway', 'DateTimePlus uses the specified timezone if provided.')'.
+.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezoneWithDateTimeObject'.
+.
+Starting test 'Drupal\Tests\Component\Discovery\YamlDiscoveryTest::testDiscovery'.
+.
+Starting test 'Drupal\Tests\Component\Graph\GraphTest::testDepthFirstSearch'.
+.
+Starting test 'Drupal\Tests\Component\Image\ImageUtilityTest::testScaleDimensions with data set #0 (array(array(1000, 2000), 200, NULL, true), array(array(200, 400), true))'.
+.
+Starting test 'Drupal\Tests\Component\Image\ImageUtilityTest::testScaleDimensions with data set #1 (array(array(1000, 800), NULL, 140, false), array(array(175, 140), true))'.
+.
+Starting test 'Drupal\Tests\Component\Image\ImageUtilityTest::testScaleDimensions with data set #2 (array(array(8, 20), 200, 140, true), array(array(56, 140), true))'.
+.
+Starting test 'Drupal\Tests\Component\Image\ImageUtilityTest::testScaleDimensions with data set #3 (array(array(2000, 800), 200, 140, false), array(array(200, 80), true))'.
+.
+Starting test 'Drupal\Tests\Component\Image\ImageUtilityTest::testScaleDimensions with data set #4 (array(array(100, 50), 200, 140, false), array(array(100, 50), false))'.
+.
+Starting test 'Drupal\Tests\Component\PhpStorage\FileStorageTest::testCRUD'.
+.
+Starting test 'Drupal\Tests\Component\PhpStorage\FileStorageTest::testReadOnly'.
+.
+Starting test 'Drupal\Tests\Component\PhpStorage\MTimeProtectedFastFileStorageTest::testCRUD'.
+.
+Starting test 'Drupal\Tests\Component\PhpStorage\MTimeProtectedFastFileStorageTest::testSecurity'.
+F
+Starting test 'Drupal\Tests\Component\Plugin\DefaultPluginBagTest::testHas'.
+.
+Starting test 'Drupal\Tests\Component\Plugin\DefaultPluginBagTest::testGet'.
+.
+Starting test 'Drupal\Tests\Component\Plugin\DefaultPluginBagTest::testGetNotExistingPlugin'.
+.
+Starting test 'Drupal\Tests\Component\Plugin\DefaultPluginBagTest::testSortHelper with data set #0 ('apple', 'apple', 0)'.
+.
+Starting test 'Drupal\Tests\Component\Plugin\DefaultPluginBagTest::testSortHelper with data set #1 ('apple', 'cherry', -1)'.
+.
+Starting test 'Drupal\Tests\Component\Plugin\DefaultPluginBagTest::testSortHelper with data set #2 ('cherry', 'apple', 1)'.
+.
+Starting test 'Drupal\Tests\Component\Plugin\DefaultPluginBagTest::testSortHelper with data set #3 ('cherry', 'banana', 1)'.
+.
+Starting test 'Drupal\Tests\Component\Plugin\DefaultPluginBagTest::testGetConfiguration'.
+.
+Starting test 'Drupal\Tests\Component\Utility\CryptTest::testRandomBytes'.
+.
+Starting test 'Drupal\Tests\Component\Utility\JsonTest::testEncodingAscii'.
+.
+Starting test 'Drupal\Tests\Component\Utility\JsonTest::testEncodingLength'.
+.
+Starting test 'Drupal\Tests\Component\Utility\JsonTest::testEncodingStartEnd'.
+.
+Starting test 'Drupal\Tests\Component\Utility\JsonTest::testReversibility'.
+.
+Starting test 'Drupal\Tests\Component\Utility\JsonTest::testStructuredReversibility'.
+.
+Starting test 'Drupal\Tests\Component\Utility\MapArrayTest::testCopyValuesToKey with data set #0 (array(), array())'.
+.
+Starting test 'Drupal\Tests\Component\Utility\MapArrayTest::testCopyValuesToKey with data set #1 (array('foobar'), array('foobar'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\MapArrayTest::testCopyValuesToKey with data set #2 (array('bar'), array('bar'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\MapArrayTest::testCopyValuesToKey with data set #3 (array(1, 2, 3, 4, 5), array(2, 4, 6, 8, 10), 'Drupal\\Tests\\Component\\Utility\\MapArrayTest::providerCopyValuesToKeyCallback')'.
+.
+Starting test 'Drupal\Tests\Core\NestedArrayTest::testGetValue'.
+.
+Starting test 'Drupal\Tests\Core\NestedArrayTest::testSetValue'.
+.
+Starting test 'Drupal\Tests\Core\NestedArrayTest::testSetValueForce'.
+.
+Starting test 'Drupal\Tests\Core\NestedArrayTest::testUnsetValue'.
+.
+Starting test 'Drupal\Tests\Core\NestedArrayTest::testKeyExists'.
+.  63 / 686 (  9%)
+
+Starting test 'Drupal\Tests\Core\NestedArrayTest::testMergeDeepArray'.
+.
+Starting test 'Drupal\Tests\Component\Utility\RandomTest::testRandomStringUniqueness'.
+.
+Starting test 'Drupal\Tests\Component\Utility\RandomTest::testRandomNamesUniqueness'.
+.
+Starting test 'Drupal\Tests\Component\Utility\RandomTest::testRandomNameException'.
+.
+Starting test 'Drupal\Tests\Component\Utility\RandomTest::testRandomStringException'.
+.
+Starting test 'Drupal\Tests\Component\Utility\RandomTest::testRandomNameNonUnique'.
+.
+Starting test 'Drupal\Tests\Component\Utility\RandomTest::testRandomStringNonUnique'.
+.
+Starting test 'Drupal\Tests\Component\Utility\RandomTest::testRandomObject'.
+.
+Starting test 'Drupal\Tests\Component\Utility\RandomTest::testRandomStringValidator'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SettingsTest::testGet'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SettingsTest::testGetAll'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SettingsTest::testGetSingleton'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightElement with data set #0 (array(1), array(1), 0)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightElement with data set #1 (array(1), array(2), -1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightElement with data set #2 (array(2), array(1), 1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightElement with data set #3 (array(), array(), 0)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightElement with data set #4 (array(1), array(), 1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightElement with data set #5 (array(), array(1), -1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightProperty with data set #0 (array(1), array(1), 0)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightProperty with data set #1 (array(1), array(2), -1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightProperty with data set #2 (array(2), array(1), 1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightProperty with data set #3 (array(), array(), 0)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightProperty with data set #4 (array(1), array(), 1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightProperty with data set #5 (array(), array(1), -1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByTitleElement with data set #0 (array('test'), array('test'), 0)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByTitleElement with data set #1 (array(), array('test'), -4)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByTitleElement with data set #2 (array('test'), array(), 4)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByTitleElement with data set #3 (array('test'), array('testing'), -1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByTitleElement with data set #4 (array('testing'), array('test'), 1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByTitleProperty with data set #0 (array('test'), array('test'), 0)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByTitleProperty with data set #1 (array(), array('test'), -4)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByTitleProperty with data set #2 (array('test'), array(), 4)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByTitleProperty with data set #3 (array('test'), array('testing'), -1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\SortArrayTest::testSortByTitleProperty with data set #4 (array('testing'), array('test'), 1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testCheckPlain with data set #0 ('Foo�barbaz', '', 'String::checkPlain() rejects invalid sequence "Foo\\xC0barbaz"', true)'.
+F
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testCheckPlain with data set #1 ('�"', '', 'String::checkPlain() rejects invalid sequence "\\xc2\\""', true)'.
+F
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testCheckPlain with data set #2 ('Fooÿñ', 'Fooÿñ', 'String::checkPlain() accepts valid sequence "Fooÿñ"')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testCheckPlain with data set #3 ('<script>', '&lt;script&gt;', 'String::checkPlain() escapes &lt;script&gt;')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testCheckPlain with data set #4 ('<>&"\'', '&lt;&gt;&amp;&quot;&#039;', 'String::checkPlain() escapes reserved HTML characters.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testFormat with data set #0 ('Simple text', array(), 'Simple text', 'String::format leaves simple text alone.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testFormat with data set #1 ('Escaped text: @value', array('<script>'), 'Escaped text: &lt;script&gt;', 'String::format replaces and escapes string.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testFormat with data set #2 ('Placeholder text: %value', array('<script>'), 'Placeholder text: <em class="placeholder">&lt;script&gt;</em>', 'String::format replaces, escapes and themes string.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testFormat with data set #3 ('Verbatim text: !value', array('<script>'), 'Verbatim text: <script>', 'String::format replaces verbatim string as-is.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testPlaceholder'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #0 ('Drupal', 'Drupal')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #1 ('<script>', '<script>')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #2 ('&lt;script&gt;', '<script>')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #3 ('&#60;script&#62;', '<script>')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #4 ('&amp;lt;script&amp;gt;', '&lt;script&gt;')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #5 ('"', '"')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #6 ('&#34;', '"')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #7 ('&amp;#34;', '&#34;')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #8 ('&quot;', '"')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #9 ('&amp;quot;', '&quot;')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #10 ('\'', '\'')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #11 ('&#39;', '\'')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #12 ('&amp;#39;', '&#39;')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #13 ('©', '©')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #14 ('&copy;', '©')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #15 ('&#169;', '©')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #16 ('→', '→')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #17 ('&#8594;', '→')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #18 ('➼', '➼')'.
+. 126 / 686 ( 18%)
+
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #19 ('&#10172;', '➼')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #20 ('&euro;', '€')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\TimerTest::testTimer'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #0 (0, 0)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #1 (52, 0, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #2 (46, 0, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #3 (1, 1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #4 (86, 1, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #5 (-1, -1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #6 (1, 1)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testMimeHeader with data set #0 ('tést.txt', '=?UTF-8?B?dMOpc3QudHh0?=')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testMimeHeader with data set #1 ('ASCII', 'ASCII')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStrtolower with data set #0 ('tHe QUIcK bRoWn', 'the quick brown')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStrtolower with data set #1 ('FrançAIS is ÜBER-åwesome', 'français is über-åwesome')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStrtolower with data set #2 ('tHe QUIcK bRoWn', 'the quick brown', true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStrtolower with data set #3 ('FrançAIS is ÜBER-åwesome', 'français is über-åwesome', true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStrtolower with data set #4 ('ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΣὨ', 'αβγδεζηθικλμνξοσὠ', true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStrtoupper with data set #0 ('tHe QUIcK bRoWn', 'THE QUICK BROWN')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStrtoupper with data set #1 ('FrançAIS is ÜBER-åwesome', 'FRANÇAIS IS ÜBER-ÅWESOME')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStrtoupper with data set #2 ('tHe QUIcK bRoWn', 'THE QUICK BROWN', true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStrtoupper with data set #3 ('FrançAIS is ÜBER-åwesome', 'FRANÇAIS IS ÜBER-ÅWESOME', true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStrtoupper with data set #4 ('αβγδεζηθικλμνξοσὠ', 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΣὨ', true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testUcfirst with data set #0 ('tHe QUIcK bRoWn', 'THe QUIcK bRoWn')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testUcfirst with data set #1 ('françAIS', 'FrançAIS')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testUcfirst with data set #2 ('über', 'Über')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testUcfirst with data set #3 ('åwesome', 'Åwesome')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testUcfirst with data set #4 ('σion', 'Σion')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStrlen with data set #0 ('tHe QUIcK bRoWn', 15)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStrlen with data set #1 ('ÜBER-åwesome', 12)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #0 ('frànçAIS is über-åwesome', 0, 0, '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #1 ('frànçAIS is über-åwesome', 0, 1, 'f')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #2 ('frànçAIS is über-åwesome', 0, 8, 'frànçAIS')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #3 ('frànçAIS is über-åwesome', 0, 23, 'frànçAIS is über-åwesom')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #4 ('frànçAIS is über-åwesome', 0, 24, 'frànçAIS is über-åwesome')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #5 ('frànçAIS is über-åwesome', 0, 25, 'frànçAIS is über-åwesome')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #6 ('frànçAIS is über-åwesome', 0, 100, 'frànçAIS is über-åwesome')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #7 ('frànçAIS is über-åwesome', 4, 4, 'çAIS')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #8 ('frànçAIS is über-åwesome', 1, 0, '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #9 ('frànçAIS is über-åwesome', 100, 0, '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #10 ('frànçAIS is über-åwesome', -4, 2, 'so')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #11 ('frànçAIS is über-åwesome', -4, 3, 'som')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #12 ('frànçAIS is über-åwesome', -4, 4, 'some')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #13 ('frànçAIS is über-åwesome', -4, 5, 'some')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #14 ('frànçAIS is über-åwesome', -7, 10, 'åwesome')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #15 ('frànçAIS is über-åwesome', 5, -10, 'AIS is üb')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #16 ('frànçAIS is über-åwesome', 0, -10, 'frànçAIS is üb')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #17 ('frànçAIS is über-åwesome', 0, -1, 'frànçAIS is über-åwesom')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #18 ('frànçAIS is über-åwesome', -7, -2, 'åweso')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #19 ('frànçAIS is über-åwesome', -7, -6, 'å')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #20 ('frànçAIS is über-åwesome', -7, -7, '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #21 ('frànçAIS is über-åwesome', -7, -8, '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #22 ('...', 0, 2, '..')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testSubstr with data set #23 ('以呂波耳・ほへとち。リヌルヲ。', 1, 3, '呂波耳')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #0 ('frànçAIS is über-åwesome', 24, 'frànçAIS is über-åwesome')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #1 ('frànçAIS is über-åwesome', 23, 'frànçAIS is über-åwesom')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #2 ('frànçAIS is über-åwesome', 17, 'frànçAIS is über-')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #3 ('以呂波耳・ほへとち。リヌルヲ。', 6, '以呂波耳・ほ')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #4 ('frànçAIS is über-åwesome', 24, 'frànçAIS is über-åwesome', false, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #5 ('frànçAIS is über-åwesome', 23, 'frànçAIS is über-åweso…', false, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #6 ('frànçAIS is über-åwesome', 17, 'frànçAIS is über…', false, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #7 ('123', 1, '…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #8 ('123', 2, '1…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #9 ('123', 3, '123', true, true)'.
+. 189 / 686 ( 27%)
+
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #10 ('1234', 3, '12…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #11 ('1234567890', 10, '1234567890', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #12 ('12345678901', 10, '123456789…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #13 ('12345678901', 11, '12345678901', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #14 ('123456789012', 11, '1234567890…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #15 ('12345 7890', 10, '12345 7890', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #16 ('12345 7890', 9, '12345…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #17 ('123 567 90', 10, '123 567 90', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #18 ('123 567 901', 10, '123 567…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #19 ('Stop. Hammertime.', 17, 'Stop. Hammertime.', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #20 ('Stop. Hammertime.', 16, 'Stop…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #21 ('frànçAIS is über-åwesome', 24, 'frànçAIS is über-åwesome', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #22 ('frànçAIS is über-åwesome', 23, 'frànçAIS is über…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #23 ('frànçAIS is über-åwesome', 17, 'frànçAIS is über…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #24 ('¿Dónde está el niño?', 20, '¿Dónde está el niño?', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #25 ('¿Dónde está el niño?', 19, '¿Dónde está el…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #26 ('¿Dónde está el niño?', 13, '¿Dónde está…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #27 ('¿Dónde está el niño?', 10, '¿Dónde…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #28 ('Help! Help! Help!', 17, 'Help! Help! Help!', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #29 ('Help! Help! Help!', 16, 'Help! Help!…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #30 ('Help! Help! Help!', 15, 'Help! Help!…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #31 ('Help! Help! Help!', 14, 'Help! Help!…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #32 ('Help! Help! Help!', 13, 'Help! Help!…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #33 ('Help! Help! Help!', 12, 'Help! Help!…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #34 ('Help! Help! Help!', 11, 'Help! Help…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #35 ('Help! Help! Help!', 10, 'Help!…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #36 ('Help! Help! Help!', 9, 'Help!…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #37 ('Help! Help! Help!', 8, 'Help!…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #38 ('Help! Help! Help!', 7, 'Help!…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #39 ('Help! Help! Help!', 6, 'Help!…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #40 ('Help! Help! Help!', 5, 'Help…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #41 ('Help! Help! Help!', 4, 'Hel…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #42 ('Help! Help! Help!', 3, 'He…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #43 ('Help! Help! Help!', 2, 'H…', true, true)'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncateBytes with data set #0 ('Short string', 42, 'Short string')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncateBytes with data set #1 ('Longer string than previous.', 10, 'Longer str')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testTruncateBytes with data set #2 ('以呂波耳・ほへとち。リヌルヲ。', 10, '以呂波')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testValidateUtf8 with data set #0 ('', true, 'An empty string did not validate.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testValidateUtf8 with data set #1 ('Simple text.', true, 'A simple ASCII text string did not validate.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testValidateUtf8 with data set #2 ('�����', false, 'Invalid UTF-8 was validated.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testValidateUtf8 with data set #3 ('�', false, 'Invalid UTF-8 was validated.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testConvertToUtf8 with data set #0 ('�', 'Windows-1250', '—')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testConvertToUtf8 with data set #1 ('�', 'Windows-1250', '™')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testConvertToUtf8 with data set #2 ('�', 'Windows-1250', '€')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testBuildQuery with data set #0 (array(' &#//+%20@۞'), 'a=%20%26%23//%2B%2520%40%DB%9E', 'Value was properly encoded.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testBuildQuery with data set #1 (array('a'), '%20%26%23%2F%2F%2B%2520%40%DB%9E=a', 'Key was properly encoded.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testBuildQuery with data set #2 (array('1', '2', '3'), 'a=1&b=2&c=3', 'Multiple values were properly concatenated.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testBuildQuery with data set #3 (array(array('2', '3'), 'foo'), 'a[b]=2&a[c]=3&d=foo', 'Nested array was properly encoded.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #0 ('example.com', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #1 ('www.example.com', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #2 ('ex-ample.com', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #3 ('3xampl3.com', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #4 ('example.com/parenthesis', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #5 ('example.com/index.html#pagetop', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #6 ('example.com:8080', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #7 ('subdomain.example.com', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #8 ('example.com/index.php/node', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #9 ('example.com/index.php/node?param=false', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #10 ('user@www.example.com', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #11 ('user:pass@www.example.com:8080/login.php?do=login&style=%23#pagetop', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #12 ('127.0.0.1', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #13 ('example.org?', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #14 ('john%20doe:secret:foo@example.org/', 'http')'.
+. 252 / 686 ( 36%)
+
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #15 ('example.org/~,$\'*;', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #16 ('caf%C3%A9.example.org', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #17 ('[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #18 ('example.com', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #19 ('www.example.com', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #20 ('ex-ample.com', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #21 ('3xampl3.com', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #22 ('example.com/parenthesis', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #23 ('example.com/index.html#pagetop', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #24 ('example.com:8080', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #25 ('subdomain.example.com', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #26 ('example.com/index.php/node', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #27 ('example.com/index.php/node?param=false', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #28 ('user@www.example.com', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #29 ('user:pass@www.example.com:8080/login.php?do=login&style=%23#pagetop', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #30 ('127.0.0.1', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #31 ('example.org?', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #32 ('john%20doe:secret:foo@example.org/', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #33 ('example.org/~,$\'*;', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #34 ('caf%C3%A9.example.org', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #35 ('[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #36 ('example.com', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #37 ('www.example.com', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #38 ('ex-ample.com', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #39 ('3xampl3.com', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #40 ('example.com/parenthesis', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #41 ('example.com/index.html#pagetop', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #42 ('example.com:8080', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #43 ('subdomain.example.com', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #44 ('example.com/index.php/node', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #45 ('example.com/index.php/node?param=false', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #46 ('user@www.example.com', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #47 ('user:pass@www.example.com:8080/login.php?do=login&style=%23#pagetop', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #48 ('127.0.0.1', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #49 ('example.org?', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #50 ('john%20doe:secret:foo@example.org/', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #51 ('example.org/~,$\'*;', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #52 ('caf%C3%A9.example.org', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #53 ('[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidAbsolute with data set #0 ('', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidAbsolute with data set #1 ('ex!ample.com', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidAbsolute with data set #2 ('ex%ample.com', 'http')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidAbsolute with data set #3 ('', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidAbsolute with data set #4 ('ex!ample.com', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidAbsolute with data set #5 ('ex%ample.com', 'https')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidAbsolute with data set #6 ('', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidAbsolute with data set #7 ('ex!ample.com', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidAbsolute with data set #8 ('ex%ample.com', 'ftp')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidRelative with data set #0 ('paren(the)sis', '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidRelative with data set #1 ('index.html#pagetop', '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidRelative with data set #2 ('index.php/node', '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidRelative with data set #3 ('index.php/node?param=false', '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidRelative with data set #4 ('login.php?do=login&style=%23#pagetop', '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidRelative with data set #5 ('paren(the)sis', '/')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidRelative with data set #6 ('index.html#pagetop', '/')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidRelative with data set #7 ('index.php/node', '/')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidRelative with data set #8 ('index.php/node?param=false', '/')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testValidRelative with data set #9 ('login.php?do=login&style=%23#pagetop', '/')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidRelative with data set #0 ('ex^mple', '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidRelative with data set #1 ('example<>', '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidRelative with data set #2 ('ex%ample', '')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidRelative with data set #3 ('ex^mple', '/')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidRelative with data set #4 ('example<>', '/')'.
+. 315 / 686 ( 45%)
+
+Starting test 'Drupal\Tests\Component\Utility\UrlTest::testInvalidRelative with data set #5 ('ex%ample', '/')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNormalized with data set #0 ('Who&#039;s Online', 'who\'s online', 'HTML filter -- html entity number')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNormalized with data set #1 ('Who&amp;#039;s Online', 'who&#039;s online', 'HTML filter -- encoded html entity number')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNormalized with data set #2 ('Who&amp;amp;#039; Online', 'who&amp;#039; online', 'HTML filter -- double encoded html entity number')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #0 ('<script>alert(0)</script>', 'script', 'HTML tag stripping -- simple script without special characters.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #1 ('<script src="http://www.example.com" />', 'script', 'HTML tag stripping -- empty script with source.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #2 ('<ScRipt sRc=http://www.example.com/>', 'script', 'HTML tag stripping evasion -- varying case.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #3 ('<script
+src
+=
+http://www.example.com/
+>', 'script', 'HTML tag stripping evasion -- multiline tag.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #4 ('<script/a src=http://www.example.com/a.js></script>', 'script', 'HTML tag stripping evasion -- non whitespace character after tag name.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #5 ('<script/src=http://www.example.com/a.js></script>', 'script', 'HTML tag stripping evasion -- no space between tag and attribute.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #6 ('<' . "\0" . 'scr' . "\0" . 'ipt>alert(0)</script>', 'ipt', 'HTML tag stripping evasion -- breaking HTML with nulls.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #7 ('<scrscriptipt src=http://www.example.com/a.js>', 'script', 'HTML tag stripping evasion -- filter just removing "script".')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #8 ('<<script>alert(0);//<</script>', 'script', 'HTML tag stripping evasion -- double opening brackets.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #9 ('<script src=http://www.example.com/a.js?<b>', 'script', 'HTML tag stripping evasion -- no closing tag.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #10 ('<script>>', 'script', 'HTML tag stripping evasion -- double closing tag.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #11 ('<script src=//www.example.com/.a>', 'script', 'HTML tag stripping evasion -- no scheme or ending slash.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #12 ('<script src=http://www.example.com/.a', 'script', 'HTML tag stripping evasion -- no closing bracket.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #13 ('<script src=http://www.example.com/ <', 'script', 'HTML tag stripping evasion -- opening instead of closing bracket.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #14 ('<nosuchtag attribute="newScriptInjectionVector">', 'nosuchtag', 'HTML tag stripping evasion -- unknown tag.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #15 ('<t:set attributeName="innerHTML" to="&lt;script defer&gt;alert(0)&lt;/script&gt;">', 't:set', 'HTML tag stripping evasion -- colon in the tag name (namespaces\' tricks).')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #16 ('<img """><script>alert(0)</script>', 'script', 'HTML tag stripping evasion -- a malformed image tag.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #17 ('<blockquote><script>alert(0)</script></blockquote>', 'script', 'HTML tag stripping evasion -- script in a blockqoute.', array('blockquote'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #18 ('<!--[if true]><script>alert(0)</script><![endif]-->', 'script', 'HTML tag stripping evasion -- script within a comment.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #19 ('<p onmouseover="http://www.example.com/">', 'onmouseover', 'HTML filter attributes removal -- events, no evasion.', array('p'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #20 ('<li style="list-style-image: url(javascript:alert(0))">', 'style', 'HTML filter attributes removal -- style, no evasion.', array('li'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #21 ('<img onerror   =alert(0)>', 'onerror', 'HTML filter attributes removal evasion -- spaces before equals sign.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #22 ('<img onabort!#$%&()*~+-_.,:;?@[/|\\]^`=alert(0)>', 'onabort', 'HTML filter attributes removal evasion -- non alphanumeric characters before equals sign.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #23 ('<img oNmediAError=alert(0)>', 'onmediaerror', 'HTML filter attributes removal evasion -- varying case.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #24 ('<img o' . "\0" . 'nfocus' . "\0" . '=alert(0)>', 'focus', 'HTML filter attributes removal evasion -- breaking with nulls.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #25 ('<img src="javascript:alert(0)">', 'javascript', 'HTML scheme clearing -- no evasion.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #26 ('<img src=javascript:alert(0)>', 'javascript', 'HTML scheme clearing evasion -- no quotes.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #27 ('<img src="javascript:confirm(0)">', 'javascript', 'HTML scheme clearing evasion -- no alert ;)', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #28 ('<img src=`javascript:alert(0)`>', 'javascript', 'HTML scheme clearing evasion -- grave accents.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #29 ('<img dynsrc="javascript:alert(0)">', 'javascript', 'HTML scheme clearing -- rare attribute.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #30 ('<table background="javascript:alert(0)">', 'javascript', 'HTML scheme clearing -- another tag.', array('table'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #31 ('<base href="javascript:alert(0);//">', 'javascript', 'HTML scheme clearing -- one more attribute and tag.', array('base'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #32 ('<img src="jaVaSCriPt:alert(0)">', 'javascript', 'HTML scheme clearing evasion -- varying case.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #33 ('<img src=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#48;&#41;>', 'javascript', 'HTML scheme clearing evasion -- UTF-8 decimal encoding.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #34 ('<img src=&#00000106&#0000097&#00000118&#0000097&#00000115&#0000099&#00000114&#00000105&#00000112&#00000116&#0000058&#0000097&#00000108&#00000101&#00000114&#00000116&#0000040&#0000048&#0000041>', 'javascript', 'HTML scheme clearing evasion -- long UTF-8 encoding.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #35 ('<img src=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x30&#x29>', 'javascript', 'HTML scheme clearing evasion -- UTF-8 hex encoding.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #36 ('<img src="jav	ascript:alert(0)">', 'script', 'HTML scheme clearing evasion -- an embedded tab.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #37 ('<img src="jav&#x09;ascript:alert(0)">', 'script', 'HTML scheme clearing evasion -- an encoded, embedded tab.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #38 ('<img src="jav&#x000000A;ascript:alert(0)">', 'script', 'HTML scheme clearing evasion -- an encoded, embedded newline.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #39 ('<img src="jav&#x0D;ascript:alert(0)">', 'script', 'HTML scheme clearing evasion -- an encoded, embedded carriage return.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #40 ('<img src="
+
+
+j
+a
+va
+s
+cript:alert(0)">', 'cript', 'HTML scheme clearing evasion -- broken into many lines.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #41 ('<img src="jav' . "\0" . 'a' . "\0" . '' . "\0" . 'cript:alert(0)">', 'cript', 'HTML scheme clearing evasion -- embedded nulls.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #42 ('<img src="vbscript:msgbox(0)">', 'vbscript', 'HTML scheme clearing evasion -- another scheme.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #43 ('<img src="nosuchscheme:notice(0)">', 'nosuchscheme', 'HTML scheme clearing evasion -- unknown scheme.', array('img'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #44 ('<br size="&{alert(0)}">', 'alert', 'Netscape 4.x javascript entities.', array('br'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #45 ('<p arg="�">" style="background-image: url(javascript:alert(0));"�<p>', 'style', 'HTML filter -- invalid UTF-8.', array('p'))'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testInvalidMultiByte with data set #0 ('Foo�barbaz', '', 'Xss::filter() accepted invalid sequence "Foo\\xC0barbaz"')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testInvalidMultiByte with data set #1 ('Fooÿñ', 'Fooÿñ', 'Xss::filter() rejects valid sequence Fooÿñ"')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testInvalidMultiByte with data set #2 ('�aaa', '', 'HTML filter -- overlong UTF-8 sequences.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testQuestionSign'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXSSAdmin'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssAdminNotNormalized with data set #0 ('<object />', 'object', 'Admin HTML filter -- should not allow object tag.')'.
+.
+Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssAdminNotNormalized with data set #1 ('<script />', 'script', 'Admin HTML filter -- should not allow script tag.')'.
+.
+Starting test 'Drupal\Tests\Component\Uuid\UuidTest::testGenerateUuid with data set #0 (Drupal\Component\Uuid\Php)'.
+.
+Starting test 'Drupal\Tests\Component\Uuid\UuidTest::testUuidIsUnique with data set #0 (Drupal\Component\Uuid\Php)'.
+.
+Starting test 'Drupal\Tests\Component\Uuid\UuidTest::testValidation with data set #0 ('6ba7b810-9dad-11d1-80b4-00c04fd430c8', true, 'Basic FQDN UUID did not validate')'.
+.
+Starting test 'Drupal\Tests\Component\Uuid\UuidTest::testValidation with data set #1 ('00000000-0000-0000-0000-000000000000', true, 'Minimum UUID did not validate')'.
+.
+Starting test 'Drupal\Tests\Component\Uuid\UuidTest::testValidation with data set #2 ('ffffffff-ffff-ffff-ffff-ffffffffffff', true, 'Maximum UUID did not validate')'.
+.
+Starting test 'Drupal\Tests\Component\Uuid\UuidTest::testValidation with data set #3 ('0ab26e6b-f074-4e44-9da-601205fa0e976', false, 'Invalid format was validated')'.
+. 378 / 686 ( 55%)
+
+Starting test 'Drupal\Tests\Component\Uuid\UuidTest::testValidation with data set #4 ('0ab26e6b-f074-4e44-9daf-1205fa0e9761f', false, 'Invalid length was validated')'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testSetChecks'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheck'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckConjunctions with data set #0 ('ALL', 'test_route_4', true, false, false)'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckConjunctions with data set #1 ('ALL', 'test_route_5', true, NULL, false)'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckConjunctions with data set #2 ('ALL', 'test_route_6', false, NULL, false)'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckConjunctions with data set #3 ('ALL', 'test_route_7', true, true, true)'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckConjunctions with data set #4 ('ALL', 'test_route_8', false, false, false)'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckConjunctions with data set #5 ('ALL', 'test_route_9', NULL, NULL, false)'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckConjunctions with data set #6 ('ANY', 'test_route_10', true, false, false)'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckConjunctions with data set #7 ('ANY', 'test_route_11', true, NULL, true)'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckConjunctions with data set #8 ('ANY', 'test_route_12', false, NULL, false)'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckConjunctions with data set #9 ('ANY', 'test_route_13', true, true, true)'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckConjunctions with data set #10 ('ANY', 'test_route_14', false, false, false)'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckConjunctions with data set #11 ('ANY', 'test_route_15', NULL, NULL, false)'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testStaticAccessCheckInterface'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckNamedRoute'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckNamedRouteWithUpcastedValues'.
+.
+Starting test 'Drupal\Tests\Core\Access\AccessManagerTest::testCheckNamedRouteWithNonExistingRoute'.
+.
+Starting test 'Drupal\Tests\Core\Access\CsrfTokenGeneratorTest::testGet'.
+.
+Starting test 'Drupal\Tests\Core\Access\CsrfTokenGeneratorTest::testValidate'.
+.
+Starting test 'Drupal\Tests\Core\Access\DefaultAccessCheckTest::testAppliesTo'.
+.
+Starting test 'Drupal\Tests\Core\Access\DefaultAccessCheckTest::testAccess'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssCollectionGrouperUnitTest::testGrouper'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRenderProvider'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #0 (array(array(0, true, 'external', 'all', true, 'http://example.com/popular.js', array())), array(array('html_tag', 'link', array('stylesheet', 'http://example.com/popular.js', 'all'), array())))'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #1 (array(array(0, false, 'inline', 'all', false, '.girlfriend { display: none; }', array())), array(array('html_tag', 'style', '.girlfriend { display: none; }', array('all'), array(), '
+/* <![CDATA[ */
+', '
+/* ]]> */
+')))'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #2 (array(array(0, true, 'file', 'all', true, 'public://css/file-every_page-all', array())), array(array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/file-every_page-all?0', 'all'), array())))'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #3 (array(array(0, false, 'file', 'all', true, 'public://css/1.css', array()), array(0, false, 'file', 'all', true, 'public://css/2.css', array()), array(0, false, 'file', 'all', true, 'public://css/3.css', array()), array(0, false, 'file', 'all', true, 'public://css/4.css', array()), array(0, false, 'file', 'all', true, 'public://css/5.css', array()), array(0, false, 'file', 'all', true, 'public://css/6.css', array()), array(0, false, 'file', 'all', true, 'public://css/7.css', array()), array(0, false, 'file', 'all', true, 'public://css/8.css', array()), array(0, false, 'file', 'all', true, 'public://css/9.css', array()), array(0, false, 'file', 'all', true, 'public://css/10.css', array()), array(0, false, 'file', 'all', true, 'public://css/11.css', array()), array(0, false, 'file', 'all', true, 'public://css/12.css', array()), array(0, false, 'file', 'all', true, 'public://css/13.css', array()), array(0, false, 'file', 'all', true, 'public://css/14.css', array()), array(0, false, 'file', 'all', true, 'public://css/15.css', array()), array(0, false, 'file', 'all', true, 'public://css/16.css', array()), array(0, false, 'file', 'all', true, 'public://css/17.css', array()), array(0, false, 'file', 'all', true, 'public://css/18.css', array()), array(0, false, 'file', 'all', true, 'public://css/19.css', array()), array(0, false, 'file', 'all', true, 'public://css/20.css', array()), array(0, false, 'file', 'all', true, 'public://css/21.css', array()), array(0, false, 'file', 'all', true, 'public://css/22.css', array()), array(0, false, 'file', 'all', true, 'public://css/23.css', array()), array(0, false, 'file', 'all', true, 'public://css/24.css', array()), array(0, false, 'file', 'all', true, 'public://css/25.css', array()), array(0, false, 'file', 'all', true, 'public://css/26.css', array()), array(0, false, 'file', 'all', true, 'public://css/27.css', array()), array(0, false, 'file', 'all', true, 'public://css/28.css', array()), array(0, false, 'file', 'all', true, 'public://css/29.css', array()), array(0, false, 'file', 'all', true, 'public://css/30.css', array()), array(0, false, 'file', 'all', true, 'public://css/31.css', array())), array(array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/1.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/2.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/3.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/4.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/5.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/6.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/7.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/8.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/9.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/10.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/11.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/12.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/13.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/14.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/15.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/16.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/17.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/18.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/19.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/20.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/21.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/22.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/23.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/24.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/25.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/26.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/27.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/28.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/29.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/30.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/31.css?0', 'all'), array())))'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #4 (array(array(0, false, 'file', 'all', true, 'public://css/1.css', array()), array(0, false, 'file', 'all', true, 'public://css/2.css', array()), array(0, false, 'file', 'all', true, 'public://css/3.css', array()), array(0, false, 'file', 'all', true, 'public://css/4.css', array()), array(0, false, 'file', 'all', true, 'public://css/5.css', array()), array(0, false, 'file', 'all', true, 'public://css/6.css', array()), array(0, false, 'file', 'all', true, 'public://css/7.css', array()), array(0, false, 'file', 'all', true, 'public://css/8.css', array()), array(0, false, 'file', 'all', true, 'public://css/9.css', array()), array(0, false, 'file', 'all', true, 'public://css/10.css', array()), array(0, false, 'file', 'all', true, 'public://css/11.css', array()), array(0, false, 'file', 'all', true, 'public://css/12.css', array()), array(0, false, 'file', 'all', true, 'public://css/13.css', array()), array(0, false, 'file', 'all', true, 'public://css/14.css', array()), array(0, false, 'file', 'all', true, 'public://css/15.css', array()), array(0, false, 'file', 'all', true, 'public://css/16.css', array()), array(0, false, 'file', 'all', true, 'public://css/17.css', array()), array(0, false, 'file', 'all', true, 'public://css/18.css', array()), array(0, false, 'file', 'all', true, 'public://css/19.css', array()), array(0, false, 'file', 'all', true, 'public://css/20.css', array()), array(0, false, 'file', 'all', true, 'public://css/21.css', array()), array(0, false, 'file', 'all', true, 'public://css/22.css', array()), array(0, false, 'file', 'all', true, 'public://css/23.css', array()), array(0, false, 'file', 'all', true, 'public://css/24.css', array()), array(0, false, 'file', 'all', true, 'public://css/25.css', array()), array(0, false, 'file', 'all', true, 'public://css/26.css', array()), array(0, false, 'file', 'all', true, 'public://css/27.css', array()), array(0, false, 'file', 'all', true, 'public://css/28.css', array()), array(0, false, 'file', 'all', true, 'public://css/29.css', array()), array(0, false, 'file', 'all', true, 'public://css/30.css', array()), array(0, false, 'file', 'all', true, 'public://css/31.css', array()), array(0, false, 'file', 'all', true, 'public://css/32.css', array())), array(array('html_tag', 'style', '
+@import url("file_create_url:public://css/1.css?0");
+@import url("file_create_url:public://css/2.css?0");
+@import url("file_create_url:public://css/3.css?0");
+@import url("file_create_url:public://css/4.css?0");
+@import url("file_create_url:public://css/5.css?0");
+@import url("file_create_url:public://css/6.css?0");
+@import url("file_create_url:public://css/7.css?0");
+@import url("file_create_url:public://css/8.css?0");
+@import url("file_create_url:public://css/9.css?0");
+@import url("file_create_url:public://css/10.css?0");
+@import url("file_create_url:public://css/11.css?0");
+@import url("file_create_url:public://css/12.css?0");
+@import url("file_create_url:public://css/13.css?0");
+@import url("file_create_url:public://css/14.css?0");
+@import url("file_create_url:public://css/15.css?0");
+@import url("file_create_url:public://css/16.css?0");
+@import url("file_create_url:public://css/17.css?0");
+@import url("file_create_url:public://css/18.css?0");
+@import url("file_create_url:public://css/19.css?0");
+@import url("file_create_url:public://css/20.css?0");
+@import url("file_create_url:public://css/21.css?0");
+@import url("file_create_url:public://css/22.css?0");
+@import url("file_create_url:public://css/23.css?0");
+@import url("file_create_url:public://css/24.css?0");
+@import url("file_create_url:public://css/25.css?0");
+@import url("file_create_url:public://css/26.css?0");
+@import url("file_create_url:public://css/27.css?0");
+@import url("file_create_url:public://css/28.css?0");
+@import url("file_create_url:public://css/29.css?0");
+@import url("file_create_url:public://css/30.css?0");
+@import url("file_create_url:public://css/31.css?0");
+', array('all'), array()), array('html_tag', 'style', '
+@import url("file_create_url:public://css/32.css?0");
+', array('all'), array())))'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #5 (array(array(0, false, 'file', 'all', true, 'public://css/1.css', array()), array(0, false, 'file', 'all', true, 'public://css/2.css', array()), array(0, false, 'file', 'all', true, 'public://css/3.css', array()), array(0, false, 'file', 'all', true, 'public://css/4.css', array()), array(0, false, 'file', 'all', true, 'public://css/5.css', array()), array(0, false, 'file', 'all', true, 'public://css/6.css', array()), array(0, false, 'file', 'all', true, 'public://css/7.css', array()), array(0, false, 'file', 'all', true, 'public://css/8.css', array()), array(0, false, 'file', 'all', true, 'public://css/9.css', array()), array(0, false, 'file', 'screen', true, 'public://css/10.css', array()), array(0, false, 'file', 'all', true, 'public://css/11.css', array()), array(0, false, 'file', 'all', true, 'public://css/12.css', array()), array(0, false, 'file', 'all', true, 'public://css/13.css', array()), array(0, false, 'file', 'all', true, 'public://css/14.css', array()), array(0, false, 'file', 'all', true, 'public://css/15.css', array()), array(0, false, 'file', 'all', true, 'public://css/16.css', array()), array(0, false, 'file', 'all', true, 'public://css/17.css', array()), array(0, false, 'file', 'all', true, 'public://css/18.css', array()), array(0, false, 'file', 'all', true, 'public://css/19.css', array()), array(0, false, 'file', 'print', true, 'public://css/20.css', array()), array(0, false, 'file', 'all', true, 'public://css/21.css', array()), array(0, false, 'file', 'all', true, 'public://css/22.css', array()), array(0, false, 'file', 'all', true, 'public://css/23.css', array()), array(0, false, 'file', 'all', true, 'public://css/24.css', array()), array(0, false, 'file', 'all', true, 'public://css/25.css', array()), array(0, false, 'file', 'all', true, 'public://css/26.css', array()), array(0, false, 'file', 'all', true, 'public://css/27.css', array()), array(0, false, 'file', 'all', true, 'public://css/28.css', array()), array(0, false, 'file', 'all', true, 'public://css/29.css', array()), array(0, false, 'file', 'all', true, 'public://css/30.css', array()), array(0, false, 'file', 'all', true, 'public://css/31.css', array()), array(0, false, 'file', 'all', true, 'public://css/32.css', array())), array(array('html_tag', 'style', '
+@import url("file_create_url:public://css/1.css?0");
+@import url("file_create_url:public://css/2.css?0");
+@import url("file_create_url:public://css/3.css?0");
+@import url("file_create_url:public://css/4.css?0");
+@import url("file_create_url:public://css/5.css?0");
+@import url("file_create_url:public://css/6.css?0");
+@import url("file_create_url:public://css/7.css?0");
+@import url("file_create_url:public://css/8.css?0");
+@import url("file_create_url:public://css/9.css?0");
+', array('all'), array()), array('html_tag', 'style', '
+@import url("file_create_url:public://css/10.css?0");
+', array('screen'), array()), array('html_tag', 'style', '
+@import url("file_create_url:public://css/11.css?0");
+@import url("file_create_url:public://css/12.css?0");
+@import url("file_create_url:public://css/13.css?0");
+@import url("file_create_url:public://css/14.css?0");
+@import url("file_create_url:public://css/15.css?0");
+@import url("file_create_url:public://css/16.css?0");
+@import url("file_create_url:public://css/17.css?0");
+@import url("file_create_url:public://css/18.css?0");
+@import url("file_create_url:public://css/19.css?0");
+', array('all'), array()), array('html_tag', 'style', '
+@import url("file_create_url:public://css/20.css?0");
+', array('print'), array()), array('html_tag', 'style', '
+@import url("file_create_url:public://css/21.css?0");
+@import url("file_create_url:public://css/22.css?0");
+@import url("file_create_url:public://css/23.css?0");
+@import url("file_create_url:public://css/24.css?0");
+@import url("file_create_url:public://css/25.css?0");
+@import url("file_create_url:public://css/26.css?0");
+@import url("file_create_url:public://css/27.css?0");
+@import url("file_create_url:public://css/28.css?0");
+@import url("file_create_url:public://css/29.css?0");
+@import url("file_create_url:public://css/30.css?0");
+@import url("file_create_url:public://css/31.css?0");
+@import url("file_create_url:public://css/32.css?0");
+', array('all'), array())))'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #6 (array(array(0, false, 'file', 'all', true, 'public://css/1.css', array()), array(0, false, 'file', 'all', true, 'public://css/2.css', array()), array(0, false, 'file', 'all', true, 'public://css/3.css', array()), array(0, false, 'file', 'all', true, 'public://css/4.css', array()), array(0, false, 'file', 'all', true, 'public://css/5.css', array()), array(0, false, 'file', 'all', true, 'public://css/6.css', array()), array(0, false, 'file', 'all', true, 'public://css/7.css', array()), array(0, false, 'file', 'all', true, 'public://css/8.css', array()), array(0, false, 'file', 'all', true, 'public://css/9.css', array()), array(0, false, 'file', 'all', true, 'public://css/10.css', array()), array(0, false, 'file', 'all', true, 'public://css/11.css', array()), array(0, false, 'file', 'all', true, 'public://css/12.css', array()), array(0, false, 'file', 'all', true, 'public://css/13.css', array()), array(0, false, 'file', 'all', true, 'public://css/14.css', array()), array(0, false, 'file', 'all', false, 'public://css/15.css', array()), array(0, false, 'file', 'all', true, 'public://css/16.css', array()), array(0, false, 'file', 'all', true, 'public://css/17.css', array()), array(0, false, 'file', 'all', true, 'public://css/18.css', array()), array(0, false, 'file', 'all', true, 'public://css/19.css', array()), array(0, false, 'file', 'all', true, 'public://css/20.css', array()), array(0, false, 'file', 'all', true, 'public://css/21.css', array()), array(0, false, 'file', 'all', true, 'public://css/22.css', array()), array(0, false, 'file', 'all', true, 'public://css/23.css', array()), array(0, false, 'file', 'all', true, 'public://css/24.css', array()), array(0, false, 'file', 'all', true, 'public://css/25.css', array()), array(0, false, 'file', 'all', true, 'public://css/26.css', array()), array(0, false, 'file', 'all', true, 'public://css/27.css', array()), array(0, false, 'file', 'all', true, 'public://css/28.css', array()), array(0, false, 'file', 'all', true, 'public://css/29.css', array()), array(0, false, 'file', 'all', true, 'public://css/30.css', array()), array(0, false, 'file', 'all', true, 'public://css/31.css', array()), array(0, false, 'file', 'all', true, 'public://css/32.css', array())), array(array('html_tag', 'style', '
+@import url("file_create_url:public://css/1.css?0");
+@import url("file_create_url:public://css/2.css?0");
+@import url("file_create_url:public://css/3.css?0");
+@import url("file_create_url:public://css/4.css?0");
+@import url("file_create_url:public://css/5.css?0");
+@import url("file_create_url:public://css/6.css?0");
+@import url("file_create_url:public://css/7.css?0");
+@import url("file_create_url:public://css/8.css?0");
+@import url("file_create_url:public://css/9.css?0");
+@import url("file_create_url:public://css/10.css?0");
+@import url("file_create_url:public://css/11.css?0");
+@import url("file_create_url:public://css/12.css?0");
+@import url("file_create_url:public://css/13.css?0");
+@import url("file_create_url:public://css/14.css?0");
+', array('all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/15.css?0', 'all'), array()), array('html_tag', 'style', '
+@import url("file_create_url:public://css/16.css?0");
+@import url("file_create_url:public://css/17.css?0");
+@import url("file_create_url:public://css/18.css?0");
+@import url("file_create_url:public://css/19.css?0");
+@import url("file_create_url:public://css/20.css?0");
+@import url("file_create_url:public://css/21.css?0");
+@import url("file_create_url:public://css/22.css?0");
+@import url("file_create_url:public://css/23.css?0");
+@import url("file_create_url:public://css/24.css?0");
+@import url("file_create_url:public://css/25.css?0");
+@import url("file_create_url:public://css/26.css?0");
+@import url("file_create_url:public://css/27.css?0");
+@import url("file_create_url:public://css/28.css?0");
+@import url("file_create_url:public://css/29.css?0");
+@import url("file_create_url:public://css/30.css?0");
+@import url("file_create_url:public://css/31.css?0");
+@import url("file_create_url:public://css/32.css?0");
+', array('all'), array())))'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRenderInvalidType'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimizeProvider'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #0 (array(-100, true, 'file', 0.012, 'all', true, '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Asset/css_test_files/css_input_without_import.css', array(true, true), 'css_input_without_import.css'), 'body{margin:0;padding:0;background:#edf5fa;font:76%/170% Verdana,sans-serif;color:#494949;}.this .is .a .test{font:1em/100% Verdana,sans-serif;color:#494949;}.this
+.is
+.a
+.test{font:1em/100% Verdana,sans-serif;color:#494949;}some :pseudo .thing{border-radius:3px;}::-moz-selection{background:#000;color:#fff;}::selection{background:#000;color:#fff;}@media print{*{background:#000 !important;color:#fff !important;}@page{margin:0.5cm;}}@media screen and (max-device-width:480px){background:#000;color:#fff;}textarea,select{font:1em/160% Verdana,sans-serif;color:#494949;}
+')'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #1 (array(-100, true, 'file', 0.013, 'all', true, '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Asset/css_test_files/css_input_with_import.css', array(true, true), 'css_input_with_import.css'), 'ul,select{font:1em/160% Verdana,sans-serif;color:#494949;}.ui-icon{background-image:url(file_create_url:/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Asset/css_test_files/images/icon.png);}
+p,select{font:1em/160% Verdana,sans-serif;color:#494949;}
+@import url("http://example.com/style.css");@import url("//example.com/style.css");body{margin:0;padding:0;background:#edf5fa;font:76%/170% Verdana,sans-serif;color:#494949;}.this .is .a .test{font:1em/100% Verdana,sans-serif;color:#494949;}.this
+.is
+.a
+.test{font:1em/100% Verdana,sans-serif;color:#494949;}textarea,select{font:1em/160% Verdana,sans-serif;color:#494949;}
+')'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #2 (array(-100, true, 'file', 0.013, 'all', true, '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Asset/css_test_files/comment_hacks.css', array(true, true), 'comment_hacks.css'), '.test1{display:block;}html .clear-block{height:1%;}.clear-block{display:block;font:italic bold 12px/30px Georgia,serif;}.test2{display:block;}.bkslshv1{background-color:#c00;}.test3{display:block;}.test4{display:block;}.comment-in-double-quotes:before{content:"/* ";}.this_rule_must_stay{color:#f00;background-color:#fff;}.comment-in-double-quotes:after{content:" */";}.comment-in-single-quotes:before{content:\'/*\';}.this_rule_must_stay{color:#f00;background-color:#fff;}.comment-in-single-quotes:after{content:\'*/\';}.comment-in-mixed-quotes:before{content:\'"/*"\';}.this_rule_must_stay{color:#f00;background-color:#fff;}.comment-in-mixed-quotes:after{content:"\'*/\'";}.comment-in-quotes-with-escaped:before{content:\'/* \\" \\\' */\';}.this_rule_must_stay{color:#f00;background-color:#fff;}.comment-in-quotes-with-escaped:after{content:"*/ \\" \\ \'";}
+')'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #3 (array(0, false, 'inline', 0.012, 'all', true, '.girlfriend { display: none; }', array(true, true)), '.girlfriend{display:none;}
+')'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #4 (array(0, false, 'inline', 0.013, 'all', false, '#home body { position: fixed; }', array(true, true)), '#home body { position: fixed; }')'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #5 (array(-100, true, 'file', 0.013, 'all', true, '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Asset/css_test_files/css_subfolder/css_input_with_import.css', array(true, true), 'css_input_with_import.css'), 'ul,select{font:1em/160% Verdana,sans-serif;color:#494949;}.ui-icon{background-image:url(file_create_url:/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Asset/css_test_files/images/icon.png);}
+p,select{font:1em/160% Verdana,sans-serif;color:#494949;}
+body{margin:0;padding:0;background:#edf5fa;font:76%/170% Verdana,sans-serif;color:#494949;}.this .is .a .test{font:1em/100% Verdana,sans-serif;color:#494949;}.this
+.is
+.a
+.test{font:1em/100% Verdana,sans-serif;color:#494949;}textarea,select{font:1em/160% Verdana,sans-serif;color:#494949;}
+')'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimizeRemoveCharset'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testTypeFilePreprocessingDisabled'.
+.
+Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testTypeExternal'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #0 (2, 1, '50')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #1 (3, 0, '0')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #2 (3, 1, '33')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #3 (3, 2, '67')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #4 (199, 1, '1')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #5 (199, 198, '99')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #6 (200, 199, '99.5')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #7 (200, 1, '0.5')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #8 (200, 50, '25.0')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #9 (200, 200, '100')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #10 (1999, 1998, '99.9')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #11 (2000, 1999, '99.95')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #12 (20000, 19999, '99.995')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #13 (1, 0.19960079840319, '20')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #14 (1, 0.39920159680639, '40')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #15 (1, 0.59880239520958, '60')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #16 (1, 0.79840319361277, '80')'.
+.
+Starting test 'Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #17 (1, 0.99800399201597, '99.8')'.
+.
+Starting test 'Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testGet'.
+.
+Starting test 'Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testGetMultiple'.
+. 441 / 686 ( 64%)
+
+Starting test 'Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testSet'.
+.
+Starting test 'Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testDelete'.
+.
+Starting test 'Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testGetHasPropagated'.
+.
+Starting test 'Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testGetMultipleHasPropagated'.
+.
+Starting test 'Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testNotEmptyIfOneBackendHasTheKey'.
+.
+Starting test 'Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testDeleteAllPropagation'.
+.
+Starting test 'Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testDeleteTagsPropagation'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testResolveCacheMiss'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testSetAndGet'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testSetAndGetNull'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testGetFromCache'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testDelete'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testUpdateCacheNoChanges'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testUpdateCache'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testUpdateCacheLockFail'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testUpdateCacheInvalidatedConflict'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testUpdateCacheMerge'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testUpdateCacheDelete'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testUpdateCacheReset'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testUpdateCacheClear'.
+.
+Starting test 'Drupal\Tests\Core\Cache\CacheCollectorTest::testUpdateCacheClearTags'.
+.
+Starting test 'Drupal\Tests\Core\Cache\NullBackendTest::testNullBackend'.
+.
+Starting test 'Drupal\Tests\Core\Common\AttributesTest::testDrupalAttributes with data set #0 (array('&"\'<>'), ' title="&amp;&quot;&#039;&lt;&gt;"', 'HTML encode attribute values.')'.
+.
+Starting test 'Drupal\Tests\Core\Common\AttributesTest::testDrupalAttributes with data set #1 (array(array('first', 'last')), ' class="first last"', 'Concatenate multi-value attributes.')'.
+.
+Starting test 'Drupal\Tests\Core\Common\AttributesTest::testDrupalAttributes with data set #2 (array(''), ' alt=""', 'Empty attribute value #1.')'.
+.
+Starting test 'Drupal\Tests\Core\Common\AttributesTest::testDrupalAttributes with data set #3 (array(NULL), ' alt=""', 'Empty attribute value #2.')'.
+.
+Starting test 'Drupal\Tests\Core\Common\AttributesTest::testDrupalAttributes with data set #4 (array('id-test', array('first', 'last'), 'Alternate'), ' id="id-test" class="first last" alt="Alternate"', 'Multiple attributes.')'.
+.
+Starting test 'Drupal\Tests\Core\Common\AttributesTest::testDrupalAttributes with data set #5 (array(), '', 'Empty attributes array.')'.
+.
+Starting test 'Drupal\Tests\Core\Common\AttributesTest::testAttributeIteration'.
+.
+Starting test 'Drupal\Tests\Core\Common\DiffArrayTest::testDiffAssocRecursive'.
+.
+Starting test 'Drupal\Tests\Core\Common\RenderWrapperTest::testDrupalRenderWrapper with data set #0 ('ucwords', array('Amazingly few discotheques provide jukeboxes.'), 'Amazingly Few Discotheques Provide Jukeboxes.', 'Simple string manipulation callback.')'.
+.
+Starting test 'Drupal\Tests\Core\Common\RenderWrapperTest::testDrupalRenderWrapper with data set #1 ('phpversion', array(), '5.4.999-hiphop', 'Callback with no arguments.')'.
+.
+Starting test 'Drupal\Tests\Core\Common\RenderWrapperTest::testDrupalRenderWrapper with data set #2 (array('Drupal\\Component\\Utility\\String', 'checkPlain'), array('<script>'), '&lt;script&gt;', 'Namespaced callback.')'.
+.
+Starting test 'Drupal\Tests\Core\Common\RenderWrapperTest::testInvalidCallback'.
+.
+Starting test 'Drupal\Tests\Core\Common\TagsTest::testImplodeTags'.
+.
+Starting test 'Drupal\Tests\Core\Config\CachedStorageTest::testListAllStaticCache'.
+.
+Starting test 'Drupal\Tests\Core\Config\CachedStorageTest::testListAllPrimedPersistentCache'.
+.
+Starting test 'Drupal\Tests\Core\Config\CachedStorageTest::testGetMultipleOnPrimedCache'.
+.
+Starting test 'Drupal\Tests\Core\Config\CachedStorageTest::testGetMultipleOnPartiallyPrimedCache'.
+.
+Starting test 'Drupal\Tests\Core\Controller\ControllerBaseTest::testGetConfig'.
+.
+Starting test 'Drupal\Tests\Core\Controller\ControllerResolverTest::testGetArguments'.
+.
+Starting test 'Drupal\Tests\Core\Database\EmptyStatementTest::testEmpty'.
+.
+Starting test 'Drupal\Tests\Core\Database\EmptyStatementTest::testEmptyIteration'.
+.
+Starting test 'Drupal\Tests\Core\Database\EmptyStatementTest::testEmptyFetchAll'.
+.
+Starting test 'Drupal\Tests\Core\DependencyInjection\ContainerTest::testGet'.
+.
+Starting test 'Drupal\Tests\Core\DependencyInjection\DependencySerializationTest::testSerialization'.
+.
+Starting test 'Drupal\Core\Tests\Entity\Controller\EntityViewControllerTest::testView'.
+.
+Starting test 'Drupal\Tests\Core\Entity\Enhancer\EntityRouteEnhancerTest::testEnhancer'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityAccessCheckTest::testAppliesTo'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityAccessCheckTest::testAccess'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityCreateAccessCheckTest::testAppliesTo'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityCreateAccessCheckTest::testAccess with data set #0 ('', 'entity_test', false, NULL)'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityCreateAccessCheckTest::testAccess with data set #1 ('', 'entity_test', true, true)'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityCreateAccessCheckTest::testAccess with data set #2 ('test_entity', 'entity_test:test_entity', true, true)'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityCreateAccessCheckTest::testAccess with data set #3 ('test_entity', 'entity_test:test_entity', false, NULL)'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityCreateAccessCheckTest::testAccess with data set #4 ('test_entity', 'entity_test:{bundle_argument}', true, true)'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityCreateAccessCheckTest::testAccess with data set #5 ('test_entity', 'entity_test:{bundle_argument}', false, NULL)'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityCreateAccessCheckTest::testAccess with data set #6 ('', 'entity_test:{bundle_argument}', false, NULL)'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityCreateAccessCheckTest::testAccess with data set #7 ('', 'entity_test:{bundle_argument}', true, NULL)'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #0 ('Foo�barbaz', '', 'EntityTestListController::buildRow() rejects invalid sequence "Foo\\xC0barbaz"', true)'.
+F
+Starting test 'Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #1 ('�"', '', 'EntityTestListController::buildRow() rejects invalid sequence "\\xc2\\""', true)'.
+F
+Starting test 'Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #2 ('Fooÿñ', 'Fooÿñ', 'EntityTestListController::buildRow() accepts valid sequence "Fooÿñ"')'.
+.
+Starting test 'Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #3 ('<script>', '&lt;script&gt;', 'EntityTestListController::buildRow() escapes &lt;script&gt;')'.
+. 504 / 686 ( 73%)
+
+Starting test 'Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #4 ('<>&"\'', '&lt;&gt;&amp;&quot;&#039;', 'EntityTestListController::buildRow() escapes reserved HTML characters.')'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\ReverseProxySubscriberUnitTest::testNoProxy'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\ReverseProxySubscriberUnitTest::testReverseProxyEnabled'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingValidVariables with data set #0 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingValidVariables with data set #1 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingValidVariables with data set #2 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingValidVariables with data set #3 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingInvalidVariables with data set #0 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingInvalidVariables with data set #1 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingInvalidVariables with data set #2 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingInvalidVariables with data set #3 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingInvalidVariables with data set #4 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingInvalidVariables with data set #5 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingInvalidVariables with data set #6 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingInvalidVariables with data set #7 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingInvalidVariables with data set #8 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\EventSubscriber\SpecialAttributesRouteSubscriberTest::testOnRouteBuildingInvalidVariables with data set #9 (Symfony\Component\Routing\Route)'.
+.
+Starting test 'Drupal\Tests\Core\Extension\ModuleHandlerUnitTest::testloadInclude'.
+.
+Starting test 'Drupal\Tests\Core\Form\ConfirmFormHelperTest::testCancelLinkTitle'.
+.
+Starting test 'Drupal\Tests\Core\Form\ConfirmFormHelperTest::testCancelLinkRoute'.
+.
+Starting test 'Drupal\Tests\Core\Form\ConfirmFormHelperTest::testCancelLinkRouteWithParams'.
+.
+Starting test 'Drupal\Tests\Core\Form\ConfirmFormHelperTest::testCancelLinkInvalidRoute'.
+.
+Starting test 'Drupal\Tests\Core\Form\ConfirmFormHelperTest::testCancelLinkDestination'.
+.
+Starting test 'Drupal\Tests\Core\HttpKernelTest::testSetupSubrequest'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testGetExtension'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testGetHeight'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testSetHeight'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testGetWidth'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testSetWidth'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testGetFileSize'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testGetMimeType'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testSetResource'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testHasResource'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testSetSource'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testGetToolkitId'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testSave'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testSaveFails'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testChmodFails'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testProcessInfoFails'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testScaleWidth'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testScaleHeight'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testScaleSame'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testScaleAndCropWidth'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testScaleAndCropHeight'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testScaleAndCropFails'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testCropWidth'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testCropHeight'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testCrop'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testResize'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testDesaturate'.
+.
+Starting test 'Drupal\Tests\Core\Image\ImageTest::testRotate'.
+.
+Starting test 'Drupal\Tests\Core\Lock\LockBackendAbstractTest::testWaitFalse'.
+.
+Starting test 'Drupal\Tests\Core\Lock\LockBackendAbstractTest::testWaitTrue'.
+.
+Starting test 'Drupal\Tests\Core\Lock\LockBackendAbstractTest::testGetLockId'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testGetRouteParametersForStaticRoute'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testGetRouteParametersInPluginDefinitions'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testGetRouteParametersForDynamicRoute'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testGetRouteParametersForDynamicRouteWithUpcastedParameters'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testGetWeight with data set #0 (array(314), 314)'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testGetWeight with data set #1 (array('local_task_default', 'local_task_default'), -10)'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testGetWeight with data set #2 (array('local_task_example', 'local_task_default'), 0)'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testActive'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testGetTitle'.
+. 567 / 686 ( 82%)
+
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testGetOptions'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskManagerTest::testGetLocalTasksForRouteSingleLevelTitle'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskManagerTest::testGetLocalTaskForRouteWithEmptyCache'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskManagerTest::testGetLocalTaskForRouteWithFilledCache'.
+.
+Starting test 'Drupal\Tests\Core\Menu\LocalTaskManagerTest::testGetTitle'.
+.
+Starting test 'Drupal\Tests\Core\ParamConverter\ParamConverterManagerTest::testAddConverter with data set #0 (array(array('raspberry', 10), array('pear', 5), array('strawberry', 20), array('pineapple', 0), array('banana', -10), array('apple', -10), array('peach', 5)), array('strawberry', 'raspberry', 'pear', 'peach', 'pineapple', 'banana', 'apple'))'.
+.
+Starting test 'Drupal\Tests\Core\ParamConverter\ParamConverterManagerTest::testAddConverter with data set #1 (array(array('ape', 0), array('cat', -5), array('puppy', -10), array('llama', -15), array('giraffe', 10), array('zebra', 10), array('eagle', 5)), array('giraffe', 'zebra', 'eagle', 'ape', 'cat', 'puppy', 'llama'))'.
+.
+Starting test 'Drupal\Tests\Core\ParamConverter\ParamConverterManagerTest::testGetConverter with data set #0 ('ape', 0, 'ApeConverterClass')'.
+.
+Starting test 'Drupal\Tests\Core\ParamConverter\ParamConverterManagerTest::testGetConverter with data set #1 ('cat', -5, 'CatConverterClass')'.
+.
+Starting test 'Drupal\Tests\Core\ParamConverter\ParamConverterManagerTest::testGetConverter with data set #2 ('puppy', -10, 'PuppyConverterClass')'.
+.
+Starting test 'Drupal\Tests\Core\ParamConverter\ParamConverterManagerTest::testGetConverter with data set #3 ('llama', -15, 'LlamaConverterClass')'.
+.
+Starting test 'Drupal\Tests\Core\ParamConverter\ParamConverterManagerTest::testGetConverter with data set #4 ('giraffe', 10, 'GiraffeConverterClass')'.
+.
+Starting test 'Drupal\Tests\Core\ParamConverter\ParamConverterManagerTest::testGetConverter with data set #5 ('zebra', 10, 'ZebraConverterClass')'.
+.
+Starting test 'Drupal\Tests\Core\ParamConverter\ParamConverterManagerTest::testGetConverter with data set #6 ('eagle', 5, 'EagleConverterClass')'.
+.
+Starting test 'Drupal\Tests\Core\ParamConverter\ParamConverterManagerTest::testGetConverterException'.
+.
+Starting test 'Drupal\Tests\Core\PathProcessor\PathProcessorTest::testProcessInbound'.
+.
+Starting test 'Drupal\Tests\Core\Plugin\DefaultPluginManagerTest::testDefaultPluginManager'.
+.
+Starting test 'Drupal\Tests\Core\Plugin\DefaultPluginManagerTest::testDefaultPluginManagerWithAlter'.
+.
+Starting test 'Drupal\Tests\Core\Plugin\DefaultPluginManagerTest::testDefaultPluginManagerWithEmptyCache'.
+.
+Starting test 'Drupal\Tests\Core\Plugin\DefaultPluginManagerTest::testDefaultPluginManagerWithFilledCache'.
+.
+Starting test 'Drupal\Tests\Core\Plugin\DefaultPluginManagerTest::testCacheClearWithTags'.
+.
+Starting test 'Drupal\Tests\Core\Plugin\Discovery\ContainerDerivativeDiscoveryDecoratorTest::testGetDerivativeFetcher'.
+.
+Starting test 'Drupal\Tests\Core\Plugin\Discovery\YamlDiscoveryDecoratorTest::testGetDefinitions'.
+.
+Starting test 'Drupal\Tests\Core\Plugin\Discovery\YamlDiscoveryTest::testGetDefinitions'.
+.
+Starting test 'Drupal\Tests\Core\Plugin\Discovery\YamlDiscoveryTest::testGetDefinition'.
+.
+Starting test 'Drupal\Tests\Core\PrivateKeyTest::testGet'.
+.
+Starting test 'Drupal\Tests\Core\PrivateKeyTest::testGetNoState'.
+.
+Starting test 'Drupal\Tests\Core\PrivateKeyTest::testSet'.
+.
+Starting test 'Drupal\Tests\Core\Route\RoleAccessCheckTest::testRoleAccess with data set #0 ('role_test_1', array(Drupal\Core\Session\UserSession, Drupal\Core\Session\UserSession), array(Drupal\Core\Session\UserSession, Drupal\Core\Session\UserSession))'.
+.
+Starting test 'Drupal\Tests\Core\Route\RoleAccessCheckTest::testRoleAccess with data set #1 ('role_test_2', array(Drupal\Core\Session\UserSession, Drupal\Core\Session\UserSession), array(Drupal\Core\Session\UserSession, Drupal\Core\Session\UserSession))'.
+.
+Starting test 'Drupal\Tests\Core\Route\RoleAccessCheckTest::testRoleAccess with data set #2 ('role_test_3', array(Drupal\Core\Session\UserSession), array(Drupal\Core\Session\UserSession, Drupal\Core\Session\UserSession, Drupal\Core\Session\UserSession))'.
+.
+Starting test 'Drupal\Tests\Core\Route\RoleAccessCheckTest::testRoleAccess with data set #3 ('role_test_4', array(Drupal\Core\Session\UserSession), array(Drupal\Core\Session\UserSession, Drupal\Core\Session\UserSession, Drupal\Core\Session\UserSession))'.
+.
+Starting test 'Drupal\Tests\Core\Route\RoleAccessCheckTest::testRoleAccess with data set #4 ('role_test_5', array(Drupal\Core\Session\UserSession, Drupal\Core\Session\UserSession, Drupal\Core\Session\UserSession), array())'.
+.
+Starting test 'Drupal\Tests\Core\Route\RoleAccessCheckTest::testRoleAccess with data set #5 ('role_test_6', array(Drupal\Core\Session\UserSession, Drupal\Core\Session\UserSession, Drupal\Core\Session\UserSession), array())'.
+.
+Starting test 'Drupal\Tests\Core\Routing\RouteCompilerTest::testCompilation'.
+.
+Starting test 'Drupal\Tests\Core\Routing\RouteCompilerTest::testCompilationDefaultValue'.
+.
+Starting test 'Drupal\Tests\Core\Routing\UrlGeneratorTest::testAliasGeneration'.
+.
+Starting test 'Drupal\Tests\Core\Routing\UrlGeneratorTest::testGetPathFromRouteWithSubdirectory'.
+.
+Starting test 'Drupal\Tests\Core\Routing\UrlGeneratorTest::testAliasGenerationWithParameters'.
+.
+Starting test 'Drupal\Tests\Core\Routing\UrlGeneratorTest::testGetPathFromRouteTrailing'.
+.
+Starting test 'Drupal\Tests\Core\Routing\UrlGeneratorTest::testAbsoluteURLGeneration'.
+.
+Starting test 'Drupal\Tests\Core\Routing\UrlGeneratorTest::testUrlGenerationWithHttpsRequirement'.
+.
+Starting test 'Drupal\Tests\Core\Routing\UrlGeneratorTest::testPathBasedURLGeneration'.
+.
+Starting test 'Drupal\Tests\Core\Session\UserSessionTest::testHasPermission with data set #0 ('example permission', array('user_one', 'user_two'), array('user_last'))'.
+.
+Starting test 'Drupal\Tests\Core\Session\UserSessionTest::testHasPermission with data set #1 ('another example permission', array('user_two'), array('user_one', 'user_last'))'.
+.
+Starting test 'Drupal\Tests\Core\Session\UserSessionTest::testHasPermission with data set #2 ('final example permission', array(), array('user_one', 'user_two', 'user_last'))'.
+.
+Starting test 'Drupal\Tests\Core\Template\AttributeTest::testConstructor'.
+.
+Starting test 'Drupal\Tests\Core\Template\AttributeTest::testSet'.
+.
+Starting test 'Drupal\Tests\Core\Template\AttributeTest::testAdd'.
+.
+Starting test 'Drupal\Tests\Core\Template\AttributeTest::testRemove'.
+.
+Starting test 'Drupal\Tests\Core\Template\AttributeTest::testIterate'.
+.
+Starting test 'Drupal\Tests\Core\Template\AttributeTest::testPrint'.
+.
+Starting test 'Drupal\Tests\Core\Template\AttributeTest::testStorage'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #0 ('', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #1 ('-1', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #2 ('1', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #3 ('12', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #4 ('12345', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #5 ('1234567', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #6 ('123456789', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #7 ('123456789a', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #8 ('foo', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #9 ('#', '', true)'.
+. 630 / 686 ( 91%)
+
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #10 ('#-1', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #11 ('#1', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #12 ('#12', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #13 ('#12345', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #14 ('#1234567', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #15 ('#123456789', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #16 ('#123456789a', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #17 ('#foo', '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #18 (1, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #19 (12, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #20 (1234, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #21 (12345, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #22 (123456, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #23 (1234567, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #24 (12345678, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #25 (123456789, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #26 (123456789, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #27 (-1, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #28 (9223372036854775807, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #29 (-9223372036854775808, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #30 (-9223372036854775807, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #31 (0, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #32 (16, '', true)'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #33 ('#000', array(0, 0, 0))'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #34 ('#fff', array(255, 255, 255))'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #35 ('#abc', array(170, 187, 204))'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #36 ('cba', array(204, 187, 170))'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #37 ('#000000', array(0, 0, 0))'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #38 ('#ffffff', array(255, 255, 255))'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #39 ('#010203', array(1, 2, 3))'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #0 (array(0, 0, 0), '#000000')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #1 (array(255, 255, 255), '#ffffff')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #2 (array(119, 119, 119), '#777777')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #3 (array(1, 2, 3), '#010203')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #4 (array(0, 0, 0), '#000000')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #5 (array(255, 255, 255), '#ffffff')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #6 (array(119, 119, 119), '#777777')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #7 (array(1, 2, 3), '#010203')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #8 ('0, 0, 0', '#000000')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #9 ('255, 255, 255', '#ffffff')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #10 ('119, 119, 119', '#777777')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #11 ('1, 2, 3', '#010203')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #12 ('0, 0, 0', '#000000')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #13 ('255, 255, 255', '#ffffff')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #14 ('119, 119, 119', '#777777')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\ColorTest::testRgbToHex with data set #15 ('1, 2, 3', '#010203')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateHrefs with data set #0 ('test_route_1', array(), false, '/test-route-1')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateHrefs with data set #1 ('test_route_2', array('example'), false, '/test-route-2/example')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateHrefs with data set #2 ('test_route_3', array(), true, 'http://example.com/test-route-3')'.
+.
+Starting test 'Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateAttributes'.
+.
+Starting test 'Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateQuery'.
+.
+Starting test 'Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateParametersAsQuery'.
+.
+Starting test 'Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateOptions'.
+.
+Starting test 'Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateXss'.
+.
+Starting test 'Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateWithHtml'.
+F
+Starting test 'Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateActive'.
+.
+
+Time: 01:04, Memory: 36.91Mb
+
+There were 7 failures:
+
+1) Drupal\Tests\Component\Datetime\DateTimePlusTest::testTimestamp with data set #1 (0, array('America/Los_Angeles', 'c', '1969-12-31T16:00:00-08:00', 'America/Los_Angeles', '-28800'), array('UTC', 'c', '1970-01-01T00:00:00+00:00', 'UTC', 0))
+Test new DateTimePlus(0, America/Los_Angeles): should be 1969-12-31T16:00:00-08:00, found 1970-01-01T00:00:00+00:00.
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+-'1969-12-31T16:00:00-08:00'
++'1970-01-01T00:00:00+00:00'
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Component/Datetime/DateTimePlusTest.php:143
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Component/Datetime/DateTimePlusTest.php:106
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+2) Drupal\Tests\Component\PhpStorage\MTimeProtectedFastFileStorageTest::testSecurity
+Failed asserting that false is true.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFileStorageTest.php:73
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+3) Drupal\Tests\Component\Utility\StringTest::testCheckPlain with data set #0 ('Foo�barbaz', '', 'String::checkPlain() rejects invalid sequence "Foo\\xC0barbaz"', true)
+String::checkPlain() rejects invalid sequence "Foo\xC0barbaz"
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+-''
++'Foo�barbaz'
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Component/Utility/StringTest.php:44
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+4) Drupal\Tests\Component\Utility\StringTest::testCheckPlain with data set #1 ('�"', '', 'String::checkPlain() rejects invalid sequence "\\xc2\\""', true)
+String::checkPlain() rejects invalid sequence "\xc2\""
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+-''
++'�&quot;'
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Component/Utility/StringTest.php:44
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+5) Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #0 ('Foo�barbaz', '', 'EntityTestListController::buildRow() rejects invalid sequence "Foo\\xC0barbaz"', true)
+EntityTestListController::buildRow() rejects invalid sequence "Foo\xC0barbaz"
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+-'Foo�barbaz'
++''
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Entity/EntityListControllerTest.php:118
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+6) Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #1 ('�"', '', 'EntityTestListController::buildRow() rejects invalid sequence "\\xc2\\""', true)
+EntityTestListController::buildRow() rejects invalid sequence "\xc2\""
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+-'�&quot;'
++''
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Entity/EntityListControllerTest.php:118
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+7) Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateWithHtml
+Failed asserting that false is true.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Utility/LinkGeneratorTest.php:302
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+FAILURES!
+Tests: 686, Assertions: 1517, Failures: 7.

@@ -43,7 +43,7 @@ TempFile::~TempFile() {
   closeImpl();
 }
 
-bool TempFile::open(CStrRef filename, CStrRef mode) {
+bool TempFile::open(const String& filename, const String& mode) {
   throw FatalErrorException((string("cannot open a temp file ") +
                              m_name).c_str());
 }

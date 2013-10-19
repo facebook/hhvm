@@ -17,10 +17,13 @@
 #ifndef incl_HPHP_VM_FUNC_H_
 #define incl_HPHP_VM_FUNC_H_
 
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/class-info.h"
 
 namespace HPHP {
@@ -32,12 +35,6 @@ typedef TypedValue*(*BuiltinFunction)(ActRec* ar);
 class PreClassEmitter;
 
 /*
- * Unique identifier for a Func*.
- */
-typedef uint32_t FuncId;
-constexpr FuncId InvalidFuncId = FuncId(-1LL);
-
-/*
  * Vector of pairs (param number, offset of corresponding DV funclet).
  */
 typedef std::vector<std::pair<int,Offset> > DVFuncletsVec;
@@ -47,9 +44,6 @@ typedef std::vector<std::pair<int,Offset> > DVFuncletsVec;
  */
 struct Func {
   friend class FuncEmitter;
-
-  typedef hphp_hash_map<const StringData*, TypedValue, string_data_hash,
-                        string_data_isame> UserAttributeMap;
 
   struct ParamInfo { // Parameter default value info.
     // construct a dummy ParamInfo
@@ -106,10 +100,10 @@ struct Func {
     void addUserAttribute(const StringData* name, TypedValue tv) {
       m_userAttributes[name] = tv;
     }
-    void setUserAttributes(const Func::UserAttributeMap& uaMap) {
+    void setUserAttributes(const UserAttributeMap& uaMap) {
       m_userAttributes = uaMap;
     }
-    const Func::UserAttributeMap& userAttributes() const {
+    const UserAttributeMap& userAttributes() const {
       return m_userAttributes;
     }
     void setUserType(const StringData* userType) {
@@ -127,7 +121,7 @@ struct Func {
     const StringData* m_phpCode; // eval'able PHP code.
     TypeConstraint m_typeConstraint;
 
-    Func::UserAttributeMap m_userAttributes;
+    UserAttributeMap m_userAttributes;
     // the type the user typed in source code, contains type parameters and all
     const StringData* m_userType;
   };
@@ -282,7 +276,7 @@ struct Func {
     assert(m_name != nullptr);
     return m_name;
   }
-  CStrRef nameRef() const {
+  const String& nameRef() const {
     assert(m_name != nullptr);
     return *(String*)(&m_name);
   }
@@ -290,7 +284,7 @@ struct Func {
     if (m_fullName == nullptr) return m_name;
     return m_fullName;
   }
-  CStrRef fullNameRef() const {
+  const String& fullNameRef() const {
     assert(m_fullName != nullptr);
     return *(String*)(&m_fullName);
   }
@@ -375,6 +369,8 @@ struct Func {
     return shared()->m_userAttributes;
   }
 
+  bool shouldPGO() const;
+
   /**
    * Closure's __invoke()s have an extra pointer used to keep cloned versions
    * of themselves with different contexts.
@@ -432,10 +428,13 @@ struct Func {
     assert(m_cls);
     m_methodSlot = s;
   }
-  Func** getCachedAddr();
-  Func* getCached() { return *getCachedAddr(); }
-  void setCached();
-  unsigned getCachedOffset() const { return m_cachedOffset; }
+  RDS::Handle funcHandle() const { return m_cachedFunc.handle(); }
+  void setFuncHandle(RDS::Link<Func*> l) {
+    // TODO(#2950356): this assertion fails for create_function with
+    // an existing declared function named __lambda_func.
+    // assert(!m_cachedFunc.valid());
+    m_cachedFunc = l;
+  }
 
 public: // Offset accessors for the translator.
 #define X(f) static size_t f##Off() { return offsetof(Func, m_##f); }
@@ -527,9 +526,7 @@ private:
     Slot m_methodSlot;
   };
   uint64_t m_refBitVal;
-public: // used by Unit
-  unsigned m_cachedOffset;
-private:
+  mutable RDS::Link<Func*> m_cachedFunc;
 #ifdef DEBUG
   int m_magic; // For asserts only.
 #endif
@@ -586,6 +583,7 @@ public:
 
   EHEnt& addEHEnt();
   FPIEnt& addFPIEnt();
+  void setEhTabIsSorted();
 
   Id newLocal();
   void appendParam(const StringData* name, const ParamInfo& info);
@@ -717,6 +715,7 @@ private:
   const StringData* m_retTypeConstraint;
 
   EHEntVec m_ehtab;
+  bool m_ehTabSorted;
   FPIEntVec m_fpitab;
 
   Attr m_attrs;
@@ -731,7 +730,7 @@ private:
   bool m_containsCalls;
   bool m_isAsync;
 
-  Func::UserAttributeMap m_userAttributes;
+  UserAttributeMap m_userAttributes;
 
   const ClassInfo::MethodInfo* m_info;
   BuiltinFunction m_builtinFuncPtr;

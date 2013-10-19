@@ -21,11 +21,11 @@
 #include "hphp/runtime/ext/ext.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/funcdict.h"
+#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/base/file-repository.h"
@@ -65,10 +65,10 @@ public:
   virtual Array getTraits() const {
     return Unit::getTraitsInfo();
   }
-  virtual const ClassInfo::MethodInfo *findFunction(CStrRef name) const {
+  virtual const ClassInfo::MethodInfo *findFunction(const String& name) const {
     return g_vmContext->findFunctionInfo(name);
   }
-  virtual const ClassInfo *findClassLike(CStrRef name) const {
+  virtual const ClassInfo *findClassLike(const String& name) const {
     const ClassInfo* ci;
     if ((ci = g_vmContext->findClassInfo(name)) != nullptr
         || (ci = g_vmContext->findInterfaceInfo(name)) != nullptr
@@ -77,13 +77,14 @@ public:
     }
     return nullptr;
   }
-  virtual const ClassInfo *findInterface(CStrRef name) const {
+  virtual const ClassInfo *findInterface(const String& name) const {
     return g_vmContext->findInterfaceInfo(name);
   }
-  virtual const ClassInfo* findTrait(CStrRef name) const {
+  virtual const ClassInfo* findTrait(const String& name) const {
     return g_vmContext->findTraitInfo(name);
   }
-  virtual const ClassInfo::ConstantInfo *findConstant(CStrRef name) const {
+  virtual const ClassInfo::ConstantInfo *
+  findConstant(const String& name) const {
     return g_vmContext->findConstantInfo(name);
   }
 };
@@ -104,12 +105,14 @@ void ProcessInit() {
   bool rp = RuntimeOption::AlwaysUseRelativePath;
   bool sf = RuntimeOption::SafeFileAccess;
   bool ah = RuntimeOption::EvalAllowHhas;
+  bool wp = Option::WholeProgram;
   RuntimeOption::EvalDumpBytecode &= ~1;
   RuntimeOption::AlwaysUseRelativePath = false;
   RuntimeOption::SafeFileAccess = false;
   RuntimeOption::EvalAllowHhas = true;
+  Option::WholeProgram = false;
 
-  Transl::TargetCache::requestInit();
+  RDS::requestInit();
   string hhas;
   string slib = get_systemlib(&hhas);
 
@@ -118,12 +121,28 @@ void ProcessInit() {
     Logger::Error("Unable to find/load systemlib.php");
     _exit(1);
   }
+
+  LitstrTable::init();
+  LitstrTable::get().setWriting();
+  Repo::get().loadLitstrs();
+
   // Save this in case the debugger needs it. Once we know if this
   // process does not have debugger support, we'll clear it.
   SystemLib::s_source = slib;
 
   SystemLib::s_unit = compile_string(slib.c_str(), slib.size(),
                                      "systemlib.php");
+
+  const StringData* msg;
+  int line;
+  if (SystemLib::s_unit->compileTimeFatal(msg, line)) {
+    Logger::Error("An error has been introduced into the systemlib, "
+                  "but we cannot give you a file and line number right now.");
+    Logger::Error("Check all of your changes to hphp/system/php");
+    Logger::Error("HipHop Parse Error: %s", msg->data());
+    _exit(1);
+  }
+
   if (!hhas.empty()) {
     SystemLib::s_hhas_unit = compile_string(hhas.c_str(), hhas.size(),
                                             "systemlib.hhas");
@@ -148,6 +167,8 @@ void ProcessInit() {
   Unit* nativeClassUnit = build_native_class_unit(hhbc_ext_classes,
                                                   hhbc_ext_class_count);
   SystemLib::s_nativeClassUnit = nativeClassUnit;
+
+  LitstrTable::get().setReading();
 
   // Load the nativelib unit to build the Class objects
   SystemLib::s_nativeClassUnit->merge();
@@ -192,6 +213,7 @@ void ProcessInit() {
   RuntimeOption::SafeFileAccess = sf;
   RuntimeOption::EvalDumpBytecode = db;
   RuntimeOption::EvalAllowHhas = ah;
+  Option::WholeProgram = wp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -121,6 +121,7 @@ private:
   SSATmp* simplifyIncRef(IRInstruction* inst);
   SSATmp* simplifyIncRefCtx(IRInstruction* inst);
   SSATmp* simplifyCheckType(IRInstruction* inst);
+  SSATmp* simplifyAssertType(IRInstruction* inst);
   SSATmp* simplifyCheckStk(IRInstruction* inst);
   SSATmp* simplifyLdCls(IRInstruction* inst);
   SSATmp* simplifyLdClsPropAddr(IRInstruction*);
@@ -200,8 +201,8 @@ struct StackValueInfo {
     return out;
   }
 
-  SSATmp* value;   // may be null
-  Type knownType;  // currently Type::None if we don't know (TODO(#2135185)
+  SSATmp* value;   // may be nullptr
+  Type knownType;  // the type of the value, for when value is nullptr
   bool spansCall;  // whether the tmp's definition was above a call
   IRInstruction* typeSrc; // the instruction that gave us knownType
 
@@ -244,6 +245,11 @@ void copyProp(IRInstruction*);
 bool canUseSPropCache(SSATmp* clsTmp,
                       const StringData* propName,
                       const Class* ctx);
+
+/*
+ * Traces through any IncRefs to get the true value of tmp.
+ */
+SSATmp* chaseIncRefs(SSATmp* tmp);
 
 //////////////////////////////////////////////////////////////////////
 

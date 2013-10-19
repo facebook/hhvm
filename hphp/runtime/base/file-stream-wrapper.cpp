@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/directory.h"
@@ -24,7 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-MemFile* FileStreamWrapper::openFromCache(CStrRef filename, CStrRef mode) {
+MemFile* FileStreamWrapper::openFromCache(const String& filename,
+                                          const String& mode) {
   if (!StaticContentCache::TheFileCache) {
     return nullptr;
   }
@@ -39,7 +41,7 @@ MemFile* FileStreamWrapper::openFromCache(CStrRef filename, CStrRef mode) {
   return nullptr;
 }
 
-File* FileStreamWrapper::open(CStrRef filename, CStrRef mode,
+File* FileStreamWrapper::open(const String& filename, const String& mode,
                               int options, CVarRef context) {
   String fname =
     !strncmp(filename.data(), "file://", sizeof("file://") - 1)
@@ -47,6 +49,14 @@ File* FileStreamWrapper::open(CStrRef filename, CStrRef mode,
 
   if (MemFile *file = openFromCache(fname, mode)) {
     return file;
+  }
+
+  if (options & File::USE_INCLUDE_PATH) {
+    struct stat s;
+    String resolved_fname = Eval::resolveVmInclude(fname.get(), "", &s);
+    if (!resolved_fname.isNull()) {
+        fname = resolved_fname;
+    }
   }
 
   std::unique_ptr<PlainFile> file(NEWOBJ(PlainFile)());
@@ -58,7 +68,7 @@ File* FileStreamWrapper::open(CStrRef filename, CStrRef mode,
   return file.release();
 }
 
-Directory* FileStreamWrapper::opendir(CStrRef path) {
+Directory* FileStreamWrapper::opendir(const String& path) {
   std::unique_ptr<PlainDirectory> dir(
     NEWOBJ(PlainDirectory)(File::TranslatePath(path))
   );

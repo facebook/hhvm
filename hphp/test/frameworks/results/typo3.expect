@@ -1,0 +1,3 @@
+hhvm: hphp/runtime/base/tv-helpers.cpp:69: bool HPHP::cellIsPlausible(HPHP::Cell): Assertion `false' failed.
+hhvm: hphp/runtime/vm/jit/fixup.cpp:65: HPHP::Transl::FixupMap::fixupWork(HPHP::VMExecutionContext*, HPHP::ActRec*) const::__lambda14: Assertion `ar' failed.
+/data/users/joelm/fbcode/hphp/test/frameworks/../../tools/timeout.sh: line 91: 29893 Aborted                 "$@"

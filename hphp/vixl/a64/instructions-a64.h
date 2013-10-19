@@ -337,6 +337,7 @@ class Instruction {
   inline int ImmBranch() const;
 
   void SetPCRelImmTarget(Instruction* target);
+  void SetPCRelLoadStoreTarget(Instruction* target);
   void SetBranchImmTarget(Instruction* target);
 };
 }  // namespace vixl

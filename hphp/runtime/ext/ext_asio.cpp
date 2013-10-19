@@ -51,18 +51,5 @@ Object f_asio_get_running() {
   return AsioSession::Get()->getCurrentWaitHandle();
 }
 
-void f_asio_set_on_failed_callback(CVarRef on_failed_cb) {
-  if (!on_failed_cb.isNull() && !on_failed_cb.instanceof(c_Closure::classof())) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to set asio on failed callback: on_failed_cb not a closure"));
-    throw e;
-  }
-  AsioSession::Get()->setOnFailedCallback(on_failed_cb.getObjectDataOrNull());
-}
-
-void f_asio_set_on_started_callback(CVarRef on_started_cb) {
-  c_ContinuationWaitHandle::ti_setoncreatecallback(on_started_cb);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

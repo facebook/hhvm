@@ -238,7 +238,11 @@ struct AtomicSmartPtr {
   void reset() {
     operator=((T*)nullptr);
   }
-
+protected:
+  void overwrite_unsafe(T* ptr) {
+    assert(!m_px);
+    m_px = ptr;
+  }
 private:
   T* m_px;
 };

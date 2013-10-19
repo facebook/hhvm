@@ -172,10 +172,10 @@ c_SQLite3::~c_SQLite3() {
   }
 }
 
-void c_SQLite3::t___construct(CStrRef filename,
+void c_SQLite3::t___construct(const String& filename,
                        int64_t flags /* = k_SQLITE3_OPEN_READWRITE |
                                       k_SQLITE3_OPEN_CREATE */,
-                       CStrRef encryption_key /* = null_string */) {
+                       const String& encryption_key /* = null_string */) {
   t_open(filename, flags, encryption_key);
 }
 
@@ -185,10 +185,10 @@ void c_SQLite3::validate() const {
   }
 }
 
-void c_SQLite3::t_open(CStrRef filename,
+void c_SQLite3::t_open(const String& filename,
                        int64_t flags /* = k_SQLITE3_OPEN_READWRITE |
                                       k_SQLITE3_OPEN_CREATE */,
-                       CStrRef encryption_key /* = null_string */) {
+                       const String& encryption_key /* = null_string */) {
   if (m_raw_db) {
     throw Exception("Already initialized DB Object");
   }
@@ -237,7 +237,7 @@ bool c_SQLite3::t_close() {
   return true;
 }
 
-bool c_SQLite3::t_exec(CStrRef sql) {
+bool c_SQLite3::t_exec(const String& sql) {
   validate();
 
   char *errtext = NULL;
@@ -275,7 +275,7 @@ String c_SQLite3::t_lasterrormsg() {
   return String((char*)sqlite3_errmsg(m_raw_db), CopyString);
 }
 
-bool c_SQLite3::t_loadextension(CStrRef extension) {
+bool c_SQLite3::t_loadextension(const String& extension) {
   validate();
 
   String translated = File::TranslatePath(extension);
@@ -302,7 +302,7 @@ int64_t c_SQLite3::t_changes() {
   return sqlite3_changes(m_raw_db);
 }
 
-String c_SQLite3::t_escapestring(CStrRef sql) {
+String c_SQLite3::t_escapestring(const String& sql) {
   if (!sql.empty()) {
     char *ret = sqlite3_mprintf("%q", sql.data());
     if (ret) {
@@ -314,7 +314,7 @@ String c_SQLite3::t_escapestring(CStrRef sql) {
   return "";
 }
 
-Variant c_SQLite3::t_prepare(CStrRef sql) {
+Variant c_SQLite3::t_prepare(const String& sql) {
   validate();
   if (!sql.empty()) {
     c_SQLite3Stmt *stmt = NEWOBJ(c_SQLite3Stmt)();
@@ -327,7 +327,7 @@ Variant c_SQLite3::t_prepare(CStrRef sql) {
   return false;
 }
 
-Variant c_SQLite3::t_query(CStrRef sql) {
+Variant c_SQLite3::t_query(const String& sql) {
   validate();
   if (!sql.empty()) {
     Variant stmt = t_prepare(sql);
@@ -338,7 +338,7 @@ Variant c_SQLite3::t_query(CStrRef sql) {
   return false;
 }
 
-Variant c_SQLite3::t_querysingle(CStrRef sql, bool entire_row /* = false */) {
+Variant c_SQLite3::t_querysingle(const String& sql, bool entire_row /* = false */) {
   validate();
   if (!sql.empty()) {
     Variant stmt = t_prepare(sql);
@@ -371,7 +371,7 @@ Variant c_SQLite3::t_querysingle(CStrRef sql, bool entire_row /* = false */) {
   return false;
 }
 
-bool c_SQLite3::t_createfunction(CStrRef name, CVarRef callback,
+bool c_SQLite3::t_createfunction(const String& name, CVarRef callback,
                                  int64_t argcount /* = -1 */) {
   validate();
   if (name.empty()) {
@@ -395,7 +395,7 @@ bool c_SQLite3::t_createfunction(CStrRef name, CVarRef callback,
   return false;
 }
 
-bool c_SQLite3::t_createaggregate(CStrRef name, CVarRef step, CVarRef final,
+bool c_SQLite3::t_createaggregate(const String& name, CVarRef step, CVarRef final,
                                   int64_t argcount /* = -1 */) {
   validate();
   if (name.empty()) {
@@ -426,8 +426,8 @@ bool c_SQLite3::t_createaggregate(CStrRef name, CVarRef step, CVarRef final,
   return false;
 }
 
-bool c_SQLite3::t_openblob(CStrRef table, CStrRef column, int64_t rowid,
-                           CStrRef dbname /* = null_string */) {
+bool c_SQLite3::t_openblob(const String& table, const String& column, int64_t rowid,
+                           const String& dbname /* = null_string */) {
   throw NotSupportedException(__func__, "sqlite3 stream");
 }
 
@@ -443,7 +443,7 @@ c_SQLite3Stmt::~c_SQLite3Stmt() {
   }
 }
 
-void c_SQLite3Stmt::t___construct(CObjRef dbobject, CStrRef statement) {
+void c_SQLite3Stmt::t___construct(CObjRef dbobject, const String& statement) {
   if (!statement.empty()) {
     c_SQLite3 *db = dbobject.getTyped<c_SQLite3>();
     db->validate();

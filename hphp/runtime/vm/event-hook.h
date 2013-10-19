@@ -16,11 +16,20 @@
 #ifndef incl_HPHP_VM_EVENT_HOOK_H_
 #define incl_HPHP_VM_EVENT_HOOK_H_
 
+#include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 
 namespace HPHP {
+
+//////////////////////////////////////////////////////////////////////
+
+inline bool checkConditionFlags() {
+  return atomic_acquire_load(&RDS::header()->conditionFlags);
+}
+
+//////////////////////////////////////////////////////////////////////
 
 class EventHook {
  public:
@@ -42,7 +51,11 @@ class EventHook {
    */
   static bool onFunctionEnter(const ActRec* ar, int funcType);
   static inline bool FunctionEnter(const ActRec* ar, int funcType) {
-    if (UNLIKELY(Transl::TargetCache::loadConditionFlags())) {
+    if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
+      auto name = ar->m_func->fullName();
+      Trace::ringbufferMsg(name->data(), name->size(), Trace::RBTypeFuncEntry);
+    }
+    if (UNLIKELY(checkConditionFlags())) {
       return onFunctionEnter(ar, funcType);
     }
     return true;
@@ -58,7 +71,11 @@ class EventHook {
    */
   static void onFunctionExit(const ActRec* ar);
   static inline void FunctionExit(const ActRec* ar) {
-    if (UNLIKELY(Transl::TargetCache::loadConditionFlags())) {
+    if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
+      auto name = ar->m_func->fullName();
+      Trace::ringbufferMsg(name->data(), name->size(), Trace::RBTypeFuncExit);
+    }
+    if (UNLIKELY(checkConditionFlags())) {
       onFunctionExit(ar);
     }
   }
@@ -75,8 +92,8 @@ private:
                                                 int funcType);
 };
 
-#undef DECLARE_HOOK
+//////////////////////////////////////////////////////////////////////
 
-} // namespace HPHP
+}
 
 #endif

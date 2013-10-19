@@ -54,7 +54,8 @@ static size_t threadAllocatedpMib[2];
 static size_t threadDeallocatedpMib[2];
 static size_t statsCactiveMib[2];
 static pthread_once_t threadStatsOnce = PTHREAD_ONCE_INIT;
-static void threadStatsInit() {
+
+void MemoryManager::threadStatsInit() {
   if (!mallctlnametomib) return;
   size_t miblen = sizeof(threadAllocatedpMib) / sizeof(size_t);
   if (mallctlnametomib("thread.allocatedp", threadAllocatedpMib, &miblen)) {
@@ -100,8 +101,9 @@ static void threadStatsInit() {
   }
 }
 
-static inline void threadStats(uint64_t*& allocated, uint64_t*& deallocated,
-                               size_t*& cactive, size_t& cactiveLimit) {
+inline
+void MemoryManager::threadStats(uint64_t*& allocated, uint64_t*& deallocated,
+                                size_t*& cactive, size_t& cactiveLimit) {
   pthread_once(&threadStatsOnce, threadStatsInit);
   if (!MemoryManager::s_statsEnabled) return;
 
@@ -165,6 +167,7 @@ void MemoryManager::OnThreadExit(MemoryManager* mm) {
 MemoryManager::MemoryManager()
     : m_front(nullptr)
     , m_limit(nullptr)
+    , m_usage(0)
     , m_sweeping(false) {
 #ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated, m_cactive, m_cactiveLimit);
@@ -194,9 +197,10 @@ void MemoryManager::resetStats() {
 NEVER_INLINE
 void MemoryManager::refreshStatsHelper() {
   refreshStats();
+  m_usage = m_stats.usage;
 }
 
-void MemoryManager::refreshStatsHelperExceeded() {
+void MemoryManager::refreshStatsHelperExceeded() const {
   ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
   info->m_reqInjectionData.setMemExceededFlag();
 }
@@ -210,13 +214,14 @@ void MemoryManager::refreshStatsHelperStop() {
 }
 #endif
 
-void MemoryManager::sweepAll() {
+void MemoryManager::sweep() {
+  assert(!sweeping());
   m_sweeping = true;
   SCOPE_EXIT { m_sweeping = false; };
   Sweepable::SweepAll();
 }
 
-void MemoryManager::rollback() {
+void MemoryManager::resetAllocator() {
   StringData::sweepAll();
 
   // free smart-malloc slabs
@@ -233,21 +238,9 @@ void MemoryManager::rollback() {
   m_sweep.next = m_sweep.prev = &m_sweep;
 
   // zero out freelists
-  for (auto& i : m_sizeUntrackedFree) i.clear();
-  for (auto& i : m_sizeTrackedFree)   i.clear();
+  for (auto& i : m_sizeUntrackedFree) i.head = nullptr;
+  for (auto& i : m_sizeTrackedFree)   i.head = nullptr;
   m_front = m_limit = 0;
-}
-
-void MemoryManager::checkMemory() {
-  printf("----- MemoryManager for Thread %ld -----\n", (long)pthread_self());
-
-  refreshStats();
-  printf("Current Usage: %" PRId64 " bytes\t", m_stats.usage);
-  printf("Current Alloc: %" PRId64 " bytes\n", m_stats.alloc);
-  printf("Peak Usage: %" PRId64 " bytes\t", m_stats.peakUsage);
-  printf("Peak Alloc: %" PRId64 " bytes\n", m_stats.peakAlloc);
-
-  printf("Slabs: %lu KiB\n", m_slabs.size() * SLAB_SIZE / 1024);
 }
 
 /*
@@ -302,11 +295,11 @@ void MemoryManager::checkMemory() {
 inline void* MemoryManager::smartMalloc(size_t nbytes) {
   nbytes += sizeof(SmallNode);
   if (UNLIKELY(nbytes > kMaxSmartSize)) {
-    return smartMallocBig(nbytes);
+    return smartMallocBig(nbytes - sizeof(SmallNode));
   }
 
   nbytes = smartSizeClass(nbytes);
-  m_stats.usage += nbytes;
+  m_usage += nbytes;
 
   auto const idx = (nbytes - 1) >> kLgSizeQuantum;
   assert(idx < kNumSizes && idx >= 0);
@@ -323,13 +316,13 @@ inline void MemoryManager::smartFree(void* ptr) {
   assert(ptr != 0);
   auto const n = static_cast<SweepNode*>(ptr) - 1;
   auto const padbytes = n->padbytes;
+  m_usage -= padbytes;
   if (LIKELY(padbytes <= kMaxSmartSize)) {
     assert(memset(ptr, kSmartFreeFill, padbytes - sizeof(SmallNode)));
     auto const idx = (padbytes - 1) >> kLgSizeQuantum;
     assert(idx < kNumSizes && idx >= 0);
     FTRACE(1, "smartFree: {}\n", ptr);
     m_sizeTrackedFree[idx].push(ptr);
-    m_stats.usage -= padbytes;
     return;
   }
   smartFreeBig(n);
@@ -342,7 +335,7 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
   void* ptr = debug ? static_cast<DebugHeader*>(inputPtr) - 1 : inputPtr;
 
   auto const n = static_cast<SweepNode*>(ptr) - 1;
-  if (LIKELY(n->padbytes <= MemoryManager::kMaxSmartSize)) {
+  if (LIKELY(n->padbytes <= kMaxSmartSize)) {
     void* newmem = smart_malloc(nbytes);
     auto const copySize = std::min(
       n->padbytes - sizeof(SmallNode) - (debug ? sizeof(DebugHeader) : 0),
@@ -360,7 +353,7 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
   auto const oldPrev = n->prev;
 
   auto const newNode = static_cast<SweepNode*>(
-    realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
+    Util::safe_realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
   );
 
   refreshStatsHelper();
@@ -375,7 +368,7 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
  * slab list.  Return the newly allocated nbytes-sized block.
  */
 NEVER_INLINE char* MemoryManager::newSlab(size_t nbytes) {
-  if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
+  if (UNLIKELY(m_usage > m_stats.maxBytes)) {
     refreshStatsHelper();
   }
   char* slab = (char*) Util::safe_malloc(SLAB_SIZE);
@@ -416,7 +409,7 @@ void* MemoryManager::smartMallocSlab(size_t padbytes) {
 }
 
 inline void* MemoryManager::smartEnlist(SweepNode* n) {
-  if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
+  if (UNLIKELY(m_usage > m_stats.maxBytes)) {
     refreshStatsHelper();
   }
   // link after m_sweep
@@ -431,9 +424,9 @@ inline void* MemoryManager::smartEnlist(SweepNode* n) {
 NEVER_INLINE
 void* MemoryManager::smartMallocBig(size_t nbytes) {
   assert(nbytes > 0);
-  auto const n = static_cast<SweepNode*>(
-    Util::safe_malloc(nbytes + sizeof(SweepNode) - sizeof(SmallNode))
-  );
+  auto size = nbytes + sizeof(SweepNode);
+  m_usage += size;
+  auto const n = static_cast<SweepNode*>(Util::safe_malloc(size));
   return smartEnlist(n);
 }
 
@@ -442,8 +435,8 @@ NEVER_INLINE
 void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
                                               size_t& szOut,
                                               size_t bytes) {
-  m_stats.usage += bytes;
   allocm(&ptr, &szOut, debugAddExtra(bytes + sizeof(SweepNode)), 0);
+  m_usage += szOut;
   szOut = debugRemoveExtra(szOut - sizeof(SweepNode));
   return debugPostAllocate(
     smartEnlist(static_cast<SweepNode*>(ptr)),
@@ -484,7 +477,7 @@ HOT_FUNC
 void* smart_calloc(size_t count, size_t nbytes) {
   auto& mm = MM();
   auto const totalBytes = std::max<size_t>(count * nbytes, 1);
-  if (totalBytes <= MemoryManager::kMaxSmartSize) {
+  if (totalBytes <= kMaxSmartSize) {
     return memset(smart_malloc(totalBytes), 0, totalBytes);
   }
   auto const withExtra = mm.debugAddExtra(totalBytes);
@@ -553,7 +546,7 @@ bool MemoryManager::checkPreFree(DebugHeader* p,
     assert(userSpecifiedBytes == p->requestedSize ||
            userSpecifiedBytes == p->returnedCap);
   }
-  if (bytes != 0 && bytes <= MemoryManager::kMaxSmartSize) {
+  if (bytes != 0 && bytes <= kMaxSmartSize) {
     auto const ptrInt = reinterpret_cast<uintptr_t>(p);
     DEBUG_ONLY auto it = std::find_if(
       begin(m_slabs), end(m_slabs),
@@ -566,6 +559,14 @@ bool MemoryManager::checkPreFree(DebugHeader* p,
   }
 
   return true;
+}
+
+void MemoryManager::logAllocation(void* p, size_t bytes) {
+  MemoryProfile::logAllocation(p, bytes);
+}
+
+void MemoryManager::logDeallocation(void* p) {
+  MemoryProfile::logDeallocation(p);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

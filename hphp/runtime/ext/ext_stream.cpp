@@ -84,8 +84,8 @@ bool f_stream_context_set_option0(StreamContext* context,
 }
 
 bool f_stream_context_set_option1(StreamContext* context,
-                                  CStrRef wrapper,
-                                  CStrRef option,
+                                  const String& wrapper,
+                                  const String& option,
                                   CVarRef value) {
   context->setOption(wrapper, option, value);
   return true;
@@ -174,7 +174,7 @@ Variant f_stream_copy_to_stream(CResRef source, CResRef dest,
   return cbytes;
 }
 
-bool f_stream_encoding(CResRef stream, CStrRef encoding /* = null_string */) {
+bool f_stream_encoding(CResRef stream, const String& encoding /* = null_string */) {
   throw NotSupportedException(__func__, "stream filter is not supported");
 }
 
@@ -190,11 +190,11 @@ Resource f_stream_bucket_make_writeable(CResRef brigade) {
   throw NotSupportedException(__func__, "stream bucket is not supported");
 }
 
-Resource f_stream_bucket_new(CResRef stream, CStrRef buffer) {
+Resource f_stream_bucket_new(CResRef stream, const String& buffer) {
   throw NotSupportedException(__func__, "stream bucket is not supported");
 }
 
-bool f_stream_filter_register(CStrRef filtername, CStrRef classname) {
+bool f_stream_filter_register(const String& filtername, const String& classname) {
   throw NotSupportedException(__func__, "stream filter is not supported");
 }
 
@@ -202,13 +202,13 @@ bool f_stream_filter_remove(CResRef stream_filter) {
   throw NotSupportedException(__func__, "stream filter is not supported");
 }
 
-Resource f_stream_filter_append(CResRef stream, CStrRef filtername,
+Resource f_stream_filter_append(CResRef stream, const String& filtername,
                               int read_write /* = 0 */,
                               CVarRef params /* = null_variant */) {
   throw NotSupportedException(__func__, "stream filter is not supported");
 }
 
-Resource f_stream_filter_prepend(CResRef stream, CStrRef filtername,
+Resource f_stream_filter_prepend(CResRef stream, const String& filtername,
                                int read_write /* = 0 */,
                                CVarRef params /* = null_variant */) {
   throw NotSupportedException(__func__, "stream filter is not supported");
@@ -260,7 +260,7 @@ Array f_stream_get_filters() {
 }
 
 Variant f_stream_get_line(CResRef handle, int length /* = 0 */,
-                          CStrRef ending /* = null_string */) {
+                          const String& ending /* = null_string */) {
   File *file = handle.getTyped<File>();
   return file->readRecord(ending, length);
 }
@@ -275,7 +275,7 @@ Array f_stream_get_transports() {
   return make_packed_array("tcp", "udp", "unix", "udg");
 }
 
-String f_stream_resolve_include_path(CStrRef filename,
+String f_stream_resolve_include_path(const String& filename,
                                      CResRef context /* = null_object */) {
   struct stat s;
   return Eval::resolveVmInclude(filename.get(), "", &s);
@@ -362,11 +362,11 @@ bool f_stream_is_local(CVarRef stream_or_url) {
 }
 
 
-bool f_stream_register_wrapper(CStrRef protocol, CStrRef classname) {
+bool f_stream_register_wrapper(const String& protocol, const String& classname) {
   return f_stream_wrapper_register(protocol, classname);
 }
 
-bool f_stream_wrapper_register(CStrRef protocol, CStrRef classname) {
+bool f_stream_wrapper_register(const String& protocol, const String& classname) {
   std::unique_ptr<Stream::Wrapper> wrapper;
   try {
     wrapper = std::unique_ptr<Stream::Wrapper>(
@@ -382,11 +382,11 @@ bool f_stream_wrapper_register(CStrRef protocol, CStrRef classname) {
   return true;
 }
 
-bool f_stream_wrapper_restore(CStrRef protocol) {
+bool f_stream_wrapper_restore(const String& protocol) {
   return Stream::restoreWrapper(protocol);
 }
 
-bool f_stream_wrapper_unregister(CStrRef protocol) {
+bool f_stream_wrapper_unregister(const String& protocol) {
   return Stream::disableWrapper(protocol);
 }
 
@@ -488,7 +488,7 @@ Variant f_stream_socket_accept(CResRef server_socket,
   return false;
 }
 
-Variant f_stream_socket_server(CStrRef local_socket,
+Variant f_stream_socket_server(const String& local_socket,
                                VRefParam errnum /* = null */,
                                VRefParam errstr /* = null */,
                                int flags /* = 0 */,
@@ -497,7 +497,7 @@ Variant f_stream_socket_server(CStrRef local_socket,
   return socket_server_impl(hosturl, flags, errnum, errstr);
 }
 
-Variant f_stream_socket_client(CStrRef remote_socket,
+Variant f_stream_socket_client(const String& remote_socket,
                                VRefParam errnum /* = null */,
                                VRefParam errstr /* = null */,
                                double timeout /* = -1.0 */,
@@ -553,9 +553,9 @@ Variant f_stream_socket_recvfrom(CResRef socket, int length,
   return false;
 }
 
-Variant f_stream_socket_sendto(CResRef socket, CStrRef data,
+Variant f_stream_socket_sendto(CResRef socket, const String& data,
                                int flags /* = 0 */,
-                               CStrRef address /* = null_string */) {
+                               const String& address /* = null_string */) {
   String host; int port;
 
   if (address == null_string) {
@@ -628,8 +628,8 @@ void StreamContext::mergeOptions(CArrRef options) {
   }
 }
 
-void StreamContext::setOption(CStrRef wrapper,
-                               CStrRef option,
+void StreamContext::setOption(const String& wrapper,
+                               const String& option,
                                CVarRef value) {
   if (m_options.isNull()) {
     m_options = Array::Create();
@@ -654,7 +654,7 @@ bool StreamContext::validateParams(CVarRef params) {
     return false;
   }
   CArrRef arr = params.toArray();
-  CStrRef options_key = String::FromCStr("options");
+  const String& options_key = String::FromCStr("options");
   for (ArrayIter it(arr); it; ++it) {
     if (!it.first().isString()) {
       return false;
@@ -672,11 +672,11 @@ void StreamContext::mergeParams(CArrRef params) {
   if (m_params.isNull()) {
     m_params = Array::Create();
   }
-  CStrRef notification_key = String::FromCStr("notification");
+  const String& notification_key = String::FromCStr("notification");
   if (params.exists(notification_key)) {
     m_params.set(notification_key, params[notification_key]);
   }
-  CStrRef options_key = String::FromCStr("options");
+  const String& options_key = String::FromCStr("options");
   if (params.exists(options_key)) {
     assert(params[options_key].isArray());
     mergeOptions(params[options_key].toArray());
@@ -688,7 +688,7 @@ Array StreamContext::getParams() const {
   if (params.isNull()) {
     params = Array::Create();
   }
-  CStrRef options_key = String::FromCStr("options");
+  const String& options_key = String::FromCStr("options");
   params.set(options_key, getOptions());
   return params;
 }

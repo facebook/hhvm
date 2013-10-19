@@ -147,6 +147,15 @@ REGISTER_CODE_LIST(DREG)
 #undef DREG
 
 
+MemOperand Register::operator[](const ptrdiff_t offset) const {
+  return MemOperand { *this, offset };
+}
+
+MemOperand Register::operator[](const Register& offset) const {
+  return MemOperand { *this, offset };
+}
+
+
 const Register& Register::WRegFromCode(unsigned code) {
   // This function returns the zero register when code = 31. The stack pointer
   // can not be returned.
@@ -353,12 +362,11 @@ Assembler::Assembler(HPHP::CodeBlock& cb)
   assert(sizeof(void *) == sizeof(int64_t));  // NOLINT(runtime/sizeof)
   assert(sizeof(1) == sizeof(int32_t));       // NOLINT(runtime/sizeof)
   assert(sizeof(1L) == sizeof(int64_t));      // NOLINT(runtime/sizeof)
-
-  Reset();
 }
 
 
 Assembler::~Assembler() {
+  FinalizeCode();
   assert(finalized_ || (cb_.used() == 0));
   assert(literals_.empty());
 }
@@ -377,7 +385,9 @@ void Assembler::Reset() {
 
 
 void Assembler::FinalizeCode() {
-  EmitLiteralPool();
+  if (!literals_.empty()) {
+    EmitLiteralPool();
+  }
 #ifdef DEBUG
   finalized_ = true;
 #endif
@@ -1081,6 +1091,14 @@ void Assembler::ldr(const CPURegister& rt, const MemOperand& src) {
 
 void Assembler::str(const CPURegister& rt, const MemOperand& src) {
   LoadStore(rt, src, StoreOpFor(rt));
+}
+
+
+void Assembler::ldr(const Register& rt, Label* label) {
+  assert(rt.Is64Bits());
+  Emit(LDR_x_lit
+       | ImmLLiteral(UpdateAndGetInstructionOffsetTo(label))
+       | Rt(rt));
 }
 
 

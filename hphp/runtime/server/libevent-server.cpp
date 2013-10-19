@@ -78,17 +78,16 @@ LibEventTransportTraits::LibEventTransportTraits(LibEventJobPtr job,
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-LibEventServer::LibEventServer(const std::string &address, int port,
-                               int thread)
-  : Server(address, port, thread),
-    m_accept_sock(-1),
-    m_accept_sock_ssl(-1),
-    m_dispatcher(thread, RuntimeOption::ServerThreadRoundRobin,
+LibEventServer::LibEventServer(const ServerOptions &options)
+  : Server(options.m_address, options.m_port, options.m_numThreads),
+    m_accept_sock(options.m_serverFD),
+    m_accept_sock_ssl(options.m_sslFD),
+    m_dispatcher(options.m_numThreads, RuntimeOption::ServerThreadRoundRobin,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
                  RuntimeOption::ServerThreadDropStack,
                  this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
                  RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
-                 kNumPriorities),
+                 kNumPriorities, Util::num_numa_nodes()),
     m_dispatcherThread(this, &LibEventServer::dispatch) {
   m_eventBase = event_base_new();
   m_server = evhttp_new(m_eventBase);
@@ -99,6 +98,10 @@ LibEventServer::LibEventServer(const std::string &address, int port,
   evhttp_set_read_limit(m_server, RuntimeOption::RequestBodyReadLimit);
 #endif
   m_responseQueue.create(m_eventBase);
+
+  if (!options.m_takeoverFilename.empty()) {
+    m_takeover_agent.reset(new TakeoverAgent(options.m_takeoverFilename));
+  }
 }
 
 LibEventServer::~LibEventServer() {
@@ -116,17 +119,127 @@ LibEventServer::~LibEventServer() {
 ///////////////////////////////////////////////////////////////////////////////
 // implementing HttpServer
 
-int LibEventServer::getAcceptSocket() {
-  int ret;
-  const char *address = m_address.empty() ? nullptr : m_address.c_str();
-  ret = evhttp_bind_socket_backlog_fd(m_server, address,
-                                      m_port, RuntimeOption::ServerBacklog);
+void LibEventServer::addTakeoverListener(TakeoverListener* listener) {
+  if (m_takeover_agent) {
+    m_takeover_agent->addTakeoverListener(listener);
+  }
+}
+
+void LibEventServer::removeTakeoverListener(TakeoverListener* listener) {
+  if (m_takeover_agent) {
+    m_takeover_agent->removeTakeoverListener(listener);
+  }
+}
+
+int LibEventServer::useExistingFd(evhttp *server, int fd, bool needListen) {
+  Logger::Info("inheritfd: using inherited fd %d for server", fd);
+
+  int ret = -1;
+  if (needListen) {
+    ret = listen(fd, RuntimeOption::ServerBacklog);
+    if (ret != 0) {
+      Logger::Error("inheritfd: listen() failed: %s",
+                    folly::errnoStr(errno).c_str());
+      return -1;
+    }
+  }
+
+  ret = evhttp_accept_socket(server, fd);
   if (ret < 0) {
-    Logger::Error("Fail to bind port %d", m_port);
+    Logger::Error("evhttp_accept_socket: %s",
+                  folly::errnoStr(errno).c_str());
+    int errno_save = errno;
+    close(fd);
+    errno = errno_save;
     return -1;
   }
-  m_accept_sock = ret;
   return 0;
+}
+
+int LibEventServer::getAcceptSocket() {
+  if (m_accept_sock >= 0) {
+    if (useExistingFd(m_server, m_accept_sock, true /* listen */) != 0) {
+      m_accept_sock = -1;
+      return -1;
+    }
+    return 0;
+  }
+
+  const char *address = m_address.empty() ? nullptr : m_address.c_str();
+  int ret = evhttp_bind_socket_backlog_fd(m_server, address,
+                                          m_port, RuntimeOption::ServerBacklog);
+  if (ret < 0) {
+    if (errno == EADDRINUSE && m_takeover_agent) {
+      m_accept_sock = m_takeover_agent->takeover();
+      if (m_accept_sock < 0) {
+        return -1;
+      }
+      if (useExistingFd(m_server, m_accept_sock, false /* no listen */) != 0) {
+        m_accept_sock = -1;
+        return -1;
+      }
+    } else {
+      Logger::Error("Fail to bind port %d", m_port);
+      return -1;
+    }
+  }
+  m_accept_sock = ret;
+  if (m_takeover_agent) {
+    m_takeover_agent->requestShutdown();
+    m_takeover_agent->setupFdServer(m_eventBase, m_accept_sock, this);
+  }
+  return 0;
+}
+
+int LibEventServer::onTakeoverRequest(TakeoverAgent::RequestType type) {
+  int ret = -1;
+  if (type == TakeoverAgent::RequestType::LISTEN_SOCKET) {
+    // TODO: This is broken-sauce.  We should continue serving
+    // requests from this process until shutdown.
+
+    // Make evhttp forget our copy of the accept socket so we don't accept any
+    // more connections and drop them.  Keep the socket open until we get the
+    // shutdown request so that we can still serve AFDT requests (if the new
+    // server crashes or something).  The downside is that it will take the LB
+    // longer to figure out that we are broken.
+    ret = evhttp_del_accept_socket(m_server, m_accept_sock);
+    if (ret < 0) {
+      // This will fail if we get a second AFDT request, but the spurious
+      // log message is not too harmful.
+      Logger::Error("Unable to delete accept socket");
+    }
+  } else if (type == TakeoverAgent::RequestType::TERMINATE) {
+    ret = close(m_accept_sock);
+    if (ret < 0) {
+      Logger::Error("Unable to close accept socket");
+      return -1;
+    }
+    m_accept_sock = -1;
+
+    // Close SSL server
+    if (m_server_ssl) {
+      assert(m_accept_sock_ssl > 0);
+      ret = evhttp_del_accept_socket(m_server_ssl, m_accept_sock_ssl);
+      if (ret < 0) {
+        Logger::Error("Unable to delete accept socket for SSL in evhttp");
+        return -1;
+      }
+      ret = close(m_accept_sock_ssl);
+      if (ret < 0) {
+        Logger::Error("Unable to close accept socket for SSL");
+        return -1;
+      }
+    }
+
+  }
+  return 0;
+}
+
+void LibEventServer::takeoverAborted() {
+  if (m_accept_sock >= 0) {
+    close(m_accept_sock);
+    m_accept_sock = -1;
+  }
 }
 
 int LibEventServer::getLibEventConnectionCount() {
@@ -140,10 +253,7 @@ void LibEventServer::start() {
     throw FailedToListenException(m_address, m_port);
   }
 
-  if (m_server_ssl != nullptr && m_accept_sock_ssl != -2) {
-    // m_accept_sock_ssl here serves as a flag to indicate whether it is
-    // called from subclass (LibEventServerWithTakeover). If it is (==-2)
-    // we delay the getAcceptSocketSSL();
+  if (m_server_ssl != nullptr) {
     if (getAcceptSocketSSL() != 0) {
       Logger::Error("Fail to listen on ssl port %d", m_port_ssl);
       throw FailedToListenException(m_address, m_port_ssl);
@@ -193,6 +303,10 @@ void LibEventServer::dispatch() {
     m_responseQueue.process();
   }
   m_responseQueue.close();
+
+  if (m_takeover_agent) {
+    m_takeover_agent->stop();
+  }
 
   // flushing all remaining events
   if (RuntimeOption::ServerGracefulShutdownWait) {
@@ -315,6 +429,14 @@ bool LibEventServer::enableSSL(int port) {
 }
 
 int LibEventServer::getAcceptSocketSSL() {
+  if (m_accept_sock_ssl >= 0) {
+    if (useExistingFd(m_server_ssl, m_accept_sock_ssl, true /*listen*/) != 0) {
+      m_accept_sock_ssl = -1;
+      return -1;
+    }
+    return 0;
+  }
+
   const char *address = m_address.empty() ? nullptr : m_address.c_str();
   int ret = evhttp_bind_socket_backlog_fd(m_server_ssl, address,
       m_port_ssl, RuntimeOption::ServerBacklog);
@@ -382,7 +504,9 @@ void LibEventServer::onResponse(int worker, evhttp_request *request,
   int totalSize = 0;
 
   if (RuntimeOption::LibEventSyncSend && !skip_sync) {
-    const char *reason = HttpProtocol::GetReasonString(code);
+    auto const& reasonStr = transport->getResponseInfo();
+    const char* reason = reasonStr.empty() ? HttpProtocol::GetReasonString(code)
+                                           : reasonStr.c_str();
     timespec begin, end;
     Timer::GetMonotonicTime(begin);
 #ifdef EVHTTP_SYNC_SEND_REPORT_TOTAL_LEN

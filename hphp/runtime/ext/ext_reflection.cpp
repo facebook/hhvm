@@ -101,7 +101,7 @@ static const Class* get_cls(CVarRef class_or_object) {
   return cls;
 }
 
-Array f_hphp_get_extension_info(CStrRef name) {
+Array f_hphp_get_extension_info(const String& name) {
   Array ret;
 
   Extension *ext = Extension::GetExtension(name);
@@ -445,7 +445,7 @@ static void set_function_info(Array &ret, const Func* func) {
         param.set(s_class, VarNR(func->cls() ? func->cls()->name() :
                                  func->preClass()->name()));
       }
-      if (!nonExtendedConstraint || fpi.typeConstraint().nullable()) {
+      if (!nonExtendedConstraint || fpi.typeConstraint().isNullable()) {
         param.set(s_nullable, true_varNR);
       }
 
@@ -499,8 +499,7 @@ static void set_function_info(Array &ret, const Func* func) {
   // user attributes
   {
     Array arr = Array::Create();
-    Func::UserAttributeMap::const_iterator it;
-    for (it = func->userAttributes().begin();
+    for (auto it = func->userAttributes().begin();
          it != func->userAttributes().end(); ++it) {
       arr.set(String(const_cast<StringData*>(it->first)),
               tvAsCVarRef(&it->second));
@@ -577,7 +576,7 @@ Array f_hphp_get_method_info(CVarRef cls, CVarRef name) {
      */
     return get_method_info(c->clsInfo(), name);
   }
-  CStrRef method_name = name.toString();
+  const String& method_name = name.toString();
   const Func* func = c->lookupMethod(method_name.get());
   if (!func) {
     if (c->attrs() & AttrAbstract) {
@@ -622,7 +621,7 @@ Variant f_hphp_get_class_constant(CVarRef cls, CVarRef name) {
 
 static Array get_class_info(const ClassInfo *cls) {
   Array ret;
-  CStrRef className = cls->getName();
+  const String& className = cls->getName();
   ret.set(s_name,       className);
   ret.set(s_extension,  empty_string);
   ret.set(s_parent,     cls->getParentClass());
@@ -920,8 +919,7 @@ Array f_hphp_get_class_info(CVarRef name) {
   {
     Array arr = Array::Create();
     const PreClass* pcls = cls->preClass();
-    PreClass::UserAttributeMap::const_iterator it;
-    for (it = pcls->userAttributes().begin();
+    for (auto it = pcls->userAttributes().begin();
          it != pcls->userAttributes().end(); ++it) {
       arr.set(String(const_cast<StringData*>(it->first)),
               tvAsCVarRef(&it->second));
@@ -932,7 +930,7 @@ Array f_hphp_get_class_info(CVarRef name) {
   return ret;
 }
 
-Array f_hphp_get_function_info(CStrRef name) {
+Array f_hphp_get_function_info(const String& name) {
   Array ret;
   const Func* func = Unit::loadFunc(name.get());
   if (!func) return ret;
@@ -946,11 +944,11 @@ Array f_hphp_get_function_info(CStrRef name) {
   return ret;
 }
 
-Variant f_hphp_invoke(CStrRef name, CArrRef params) {
+Variant f_hphp_invoke(const String& name, CArrRef params) {
   return invoke(name.data(), params);
 }
 
-Variant f_hphp_invoke_method(CVarRef obj, CStrRef cls, CStrRef name,
+Variant f_hphp_invoke_method(CVarRef obj, const String& cls, const String& name,
                              CArrRef params) {
   if (!obj.isObject()) {
     return invoke_static_method(cls, name, params);
@@ -959,23 +957,23 @@ Variant f_hphp_invoke_method(CVarRef obj, CStrRef cls, CStrRef name,
   return o->o_invoke(name, params);
 }
 
-bool f_hphp_instanceof(CObjRef obj, CStrRef name) {
+bool f_hphp_instanceof(CObjRef obj, const String& name) {
   return obj.instanceof(name.data());
 }
 
-Object f_hphp_create_object(CStrRef name, CArrRef params) {
+Object f_hphp_create_object(const String& name, CArrRef params) {
   return g_vmContext->createObject(name.get(), params);
 }
 
-Object f_hphp_create_object_without_constructor(CStrRef name) {
+Object f_hphp_create_object_without_constructor(const String& name) {
   return g_vmContext->createObject(name.get(), nullptr, false);
 }
 
-Variant f_hphp_get_property(CObjRef obj, CStrRef cls, CStrRef prop) {
+Variant f_hphp_get_property(CObjRef obj, const String& cls, const String& prop) {
   return obj->o_get(prop, true /* error */, cls);
 }
 
-void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop,
+void f_hphp_set_property(CObjRef obj, const String& cls, const String& prop,
                          CVarRef value) {
   if (!cls.empty() && RuntimeOption::RepoAuthoritative) {
     raise_error(
@@ -986,7 +984,7 @@ void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop,
   obj->o_set(prop, value, cls);
 }
 
-Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop, bool force) {
+Variant f_hphp_get_static_property(const String& cls, const String& prop, bool force) {
   StringData* sd = cls.get();
   Class* class_ = lookup_class(sd);
   if (!class_) {
@@ -1009,7 +1007,7 @@ Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop, bool force) {
   return tvAsVariant(tv);
 }
 
-void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value,
+void f_hphp_set_static_property(const String& cls, const String& prop, CVarRef value,
                                 bool force) {
   StringData* sd = cls.get();
   Class* class_ = lookup_class(sd);
@@ -1033,7 +1031,7 @@ void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value,
   tvAsVariant(tv) = value;
 }
 
-String f_hphp_get_original_class_name(CStrRef name) {
+String f_hphp_get_original_class_name(const String& name) {
   Class* cls = Unit::loadClass(name.get());
   if (!cls) return empty_string;
   return cls->nameRef();

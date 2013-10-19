@@ -33,7 +33,7 @@ public:
   virtual ~XmlParser();
   void cleanupImpl();
   CLASSNAME_IS("xml");
-  virtual CStrRef o_getClassNameHook() const;
+  virtual const String& o_getClassNameHook() const;
 
   int case_folding;
   XML_Parser parser;
@@ -92,7 +92,7 @@ void XmlParser::sweep() {
   cleanupImpl();
 }
 
-CStrRef XmlParser::o_getClassNameHook() const {
+const String& XmlParser::o_getClassNameHook() const {
   return classnameof();
 }
 
@@ -269,8 +269,8 @@ static char *_xml_decode_tag(XmlParser *parser, const char *tag) {
   return newstr;
 }
 
-static Variant php_xml_parser_create_impl(CStrRef encoding_param,
-                                          CStrRef ns_param, int ns_support) {
+static Variant php_xml_parser_create_impl(const String& encoding_param,
+                                          const String& ns_param, int ns_support) {
   XmlParser *parser;
   int auto_detect = 0;
   XML_Char *encoding;
@@ -677,12 +677,12 @@ static void xml_set_handler(Variant * handler, CVarRef data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource f_xml_parser_create(CStrRef encoding /* = null_string */) {
+Resource f_xml_parser_create(const String& encoding /* = null_string */) {
   return php_xml_parser_create_impl(encoding, null_string, 0).toResource();
 }
 
-Resource f_xml_parser_create_ns(CStrRef encoding /* = null_string */,
-                              CStrRef separator /* = null_string */) {
+Resource f_xml_parser_create_ns(const String& encoding /* = null_string */,
+                              const String& separator /* = null_string */) {
   return php_xml_parser_create_impl(encoding, separator, 1).toResource();
 }
 
@@ -695,7 +695,7 @@ bool f_xml_parser_free(CResRef parser) {
   return true;
 }
 
-int64_t f_xml_parse(CResRef parser, CStrRef data, bool is_final /* = true */) {
+int64_t f_xml_parse(CResRef parser, const String& data, bool is_final /* = true */) {
   // XML_Parse can reenter the VM, and it will do so after we've lost
   // the frame pointer by calling through the system's copy of XML_Parse
   // in libexpat.so.
@@ -710,7 +710,7 @@ int64_t f_xml_parse(CResRef parser, CStrRef data, bool is_final /* = true */) {
   return ret;
 }
 
-int64_t f_xml_parse_into_struct(CResRef parser, CStrRef data, VRefParam values,
+int64_t f_xml_parse_into_struct(CResRef parser, const String& data, VRefParam values,
                             VRefParam index /* = null */) {
   int ret;
   XmlParser * p = parser.getTyped<XmlParser>();
@@ -877,7 +877,7 @@ String f_xml_error_string(int code) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String f_utf8_decode(CStrRef data) {
+String f_utf8_decode(const String& data) {
   String str = String(data.size(), ReserveString);
   char *newbuf = str.bufferSlice().ptr;
   int newlen = 0;
@@ -918,7 +918,7 @@ String f_utf8_decode(CStrRef data) {
   return str.setSize(newlen);
 }
 
-String f_utf8_encode(CStrRef data) {
+String f_utf8_encode(const String& data) {
   String str = String(data.size() * 4, ReserveString);
   char *newbuf = str.bufferSlice().ptr;
   int newlen = 0;

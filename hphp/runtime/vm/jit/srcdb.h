@@ -28,6 +28,68 @@
 namespace HPHP {
 namespace Transl {
 
+template<typename T>
+struct GrowableVector {
+  GrowableVector() : m_vec(nullptr) {}
+  size_t size() const {
+    return m_vec ? m_vec->m_size : 0;
+  }
+  T& operator[](const size_t idx) {
+    assert(idx < size());
+    return m_vec->m_data[idx];
+  }
+  const T& operator[](const size_t idx) const {
+    assert(idx < size());
+    return m_vec->m_data[idx];
+  }
+  void push_back(const T& datum) {
+    if (!m_vec) {
+      m_vec = Impl::make();
+    }
+    m_vec = m_vec->push_back(datum);
+  }
+  void swap(GrowableVector<T>& other) {
+    std::swap(m_vec, other.m_vec);
+  }
+  void clear() {
+    free(m_vec);
+    m_vec = nullptr;
+  }
+  bool empty() const {
+    return !m_vec;
+  }
+  T* begin() const { return m_vec ? m_vec->m_data : (T*)this; }
+  T* end() const { return m_vec ? &m_vec->m_data[m_vec->m_size] : (T*)this; }
+private:
+  struct Impl {
+    uint32_t m_size;
+    T m_data[1]; // Actually variable length
+    Impl() : m_size(0) { }
+    static Impl* make() {
+      static_assert(boost::has_trivial_destructor<T>::value,
+                    "GrowableVector can only hold trivially "
+                    "destructible types");
+      auto mem = malloc(sizeof(Impl));
+      return new (mem) Impl;
+    }
+    Impl* push_back(const T& datum) {
+      Impl* gv;
+      // m_data always has room for at least one element due to the m_data[1]
+      // declaration, so the realloc() code first has to kick in when a second
+      // element is about to be pushed.
+      if (Util::isPowerOfTwo(m_size)) {
+        gv = (Impl*)realloc(this,
+                            offsetof(Impl, m_data) + 2 * m_size * sizeof(T));
+      } else {
+        gv = this;
+      }
+      gv->m_data[gv->m_size++] = datum;
+      return gv;
+    }
+  };
+  Impl* m_vec;
+};
+
 /*
  * Incoming branches between different translations are tracked using
  * this structure.
@@ -58,17 +120,19 @@ struct IncomingBranch {
     return IncomingBranch(Tag::ADDR, TCA(from));
   }
 
-  Tag type()        const { return m_type; }
-  TCA toSmash()     const { return m_toSmash; }
+  Tag type()        const { return static_cast<Tag>(m_ptr.size()); }
+  TCA toSmash()     const { return TCA(m_ptr.ptr()); }
 
 private:
-  explicit IncomingBranch(Tag type, TCA toSmash)
-    : m_type(type)
-    , m_toSmash(toSmash)
-  {}
+  explicit IncomingBranch(Tag type, TCA toSmash) {
+    m_ptr.set((uint32_t)type, toSmash);
+  }
 
-  Tag m_type;
-  TCA m_toSmash;
+  /* needed to allow IncomingBranch to be put in a GrowableVector */
+  friend class GrowableVector<IncomingBranch>;
+  IncomingBranch() {}
+
+  CompactSizedPtr<void> m_ptr;
 };
 
 /*
@@ -79,12 +143,13 @@ struct SrcRec {
     : m_topTranslation(nullptr)
     , m_anchorTranslation(0)
     , m_dbgBranchGuardSrc(nullptr)
+    , m_guard(0)
   {}
 
   /*
    * The top translation is our first target, a translation whose type
    * checks properly chain through all other translations. Usually this will
-   * be the most recently created translation.
+   * be the first translation.
    *
    * This function can be safely called without holding the write
    * lease.
@@ -100,14 +165,14 @@ struct SrcRec {
    */
   void setFuncInfo(const Func* f);
   void chainFrom(IncomingBranch br);
-  void emitFallbackJump(TCA from, int cc = -1);
+  void emitFallbackJump(CodeBlock& cb, ConditionCode cc = CC_None);
   void newTranslation(TCA newStart);
   void replaceOldTranslations();
   void addDebuggerGuard(TCA dbgGuard, TCA m_dbgBranchGuardSrc);
   bool hasDebuggerGuard() const { return m_dbgBranchGuardSrc != nullptr; }
   const MD5& unitMd5() const { return m_unitMd5; }
 
-  const vector<TCA>& translations() const {
+  const GrowableVector<TCA>& translations() const {
     return m_translations;
   }
 
@@ -121,16 +186,34 @@ struct SrcRec {
     m_anchorTranslation = anc;
   }
 
-  const vector<IncomingBranch>& inProgressTailJumps() const {
+  const GrowableVector<IncomingBranch>& inProgressTailJumps() const {
     return m_inProgressTailJumps;
   }
 
-  const vector<IncomingBranch>& incomingBranches() const {
+  const GrowableVector<IncomingBranch>& incomingBranches() const {
     return m_incomingBranches;
   }
 
   void clearInProgressTailJumps() {
     m_inProgressTailJumps.clear();
+  }
+
+  /*
+   * There is an unlikely race in retranslate, where two threads
+   * could simultaneously generate the same translation for a
+   * tracelet. In practice its almost impossible to hit this, unless
+   * Eval.JitRequireWriteLease is set. But when it is set, we hit
+   * it a lot.
+   * m_guard doesn't quite solve it, but its as good as things were
+   * before.
+   */
+  bool tryLock() {
+    uint32_t val = 0;
+    return m_guard.compare_exchange_strong(val, 1);
+  }
+
+  void freeLock() {
+    m_guard = 0;
   }
 
 private:
@@ -153,65 +236,18 @@ private:
   // track all the fallback jumps from the "tail" translation so we
   // can rewrire them to new ones.
   TCA m_anchorTranslation;
-  vector<IncomingBranch> m_tailFallbackJumps;
-  vector<IncomingBranch> m_inProgressTailJumps;
+  GrowableVector<IncomingBranch> m_tailFallbackJumps;
+  GrowableVector<IncomingBranch> m_inProgressTailJumps;
 
-  vector<TCA> m_translations;
-  vector<IncomingBranch> m_incomingBranches;
+  GrowableVector<TCA> m_translations;
+  GrowableVector<IncomingBranch> m_incomingBranches;
   MD5 m_unitMd5;
   // The branch src for the debug guard, if this has one.
   TCA m_dbgBranchGuardSrc;
-};
-
-/*
- * GrowableVector --
- *
- * We make a large number of these, and they typically only have one entry.
- * It's a shame to use a 24-byte std::vector for this.
- *
- * Only gets larger. Non-standard interface because we may realloc
- * at push_back() time.
- */
-template<typename T>
-struct GrowableVector {
-  uint32_t m_size;
-  T m_data[1]; // Actually variable length
-  GrowableVector() : m_size(0) { }
-  size_t size() const {
-    return m_size;
-  }
-  T& operator[](const size_t idx) {
-    assert(idx < m_size);
-    return m_data[idx];
-  }
-  const T& operator[](const size_t idx) const {
-    assert(idx < m_size);
-    return m_data[idx];
-  }
-  GrowableVector* push_back(const T& datum) {
-    GrowableVector* gv;
-    // m_data always has room for at least one element due to the m_data[1]
-    // declaration, so the realloc() code first has to kick in when a second
-    // element is about to be pushed.
-    if (Util::isPowerOfTwo(m_size)) {
-      gv = (GrowableVector*)realloc(this,
-                                    offsetof(GrowableVector<T>, m_data) +
-                                    2 * m_size * sizeof(T));
-    } else {
-      gv = this;
-    }
-    gv->m_data[gv->m_size++] = datum;
-    return gv;
-  }
+  std::atomic<uint32_t> m_guard;
 };
 
 class SrcDB : boost::noncopyable {
-  // SrcKeys that depend on a particular file go here.
-  typedef hphp_hash_map<const Eval::PhpFile*,
-          GrowableVector<SrcKey>*,
-          pointer_hash<Eval::PhpFile> > FileDepMap;
-  FileDepMap m_deps;
-
   // Although it seems tempting, in an experiment, trying to stash the
   // top TCA in place in the hashtable did worse than dereferencing a
   // SrcRec* to get it.  Maybe could be possible with a better hash
@@ -240,7 +276,6 @@ public:
     return *m_map.insert(sk.toAtomicInt(), new SrcRec);
   }
 
-  size_t invalidateCode(const Eval::PhpFile* file);
 };
 
 } }

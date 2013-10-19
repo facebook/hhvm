@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_HTTP_SERVER_SERVER_H_
 #define incl_HPHP_HTTP_SERVER_SERVER_H_
 
+#include "hphp/runtime/server/takeover-agent.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/lock.h"
@@ -91,16 +92,6 @@ private:
   int m_timeout;
 };
 
-/**
- * A callback to be informed when a server is shutting down because its socket
- * has been taken over by a new process.
- */
-class TakeoverListener {
-public:
-  virtual ~TakeoverListener();
-  virtual void takeoverShutdown(Server* server) = 0;
-};
-
 typedef std::function<std::unique_ptr<RequestHandler>()> RequestHandlerFactory;
 typedef std::function<bool(const std::string&)> URLChecker;
 
@@ -167,8 +158,8 @@ public:
    *
    * This is a no-op for servers that do not support socket takeover.
    */
-  virtual void addTakeoverListener(TakeoverListener* lisener) {}
-  virtual void removeTakeoverListener(TakeoverListener* lisener) {}
+  virtual void addTakeoverListener(TakeoverListener* listener) {}
+  virtual void removeTakeoverListener(TakeoverListener* listener) {}
 
   /**
    * Add additional worker threads

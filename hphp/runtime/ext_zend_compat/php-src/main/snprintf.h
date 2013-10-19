@@ -73,7 +73,7 @@ Example:
 typedef int bool_int;
 
 typedef enum {
-	NO = 0, YES = 1
+  NO = 0, YES = 1
 } boolean_e;
 
 
@@ -87,7 +87,7 @@ PHPAPI int ap_php_asprintf(char **buf, const char *format, ...);
 PHPAPI int php_sprintf (char* s, const char* format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPAPI char * php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 PHPAPI char * php_conv_fp(register char format, register double num,
-		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, int *len);
+     boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, int *len);
 
 END_EXTERN_C()
 
@@ -125,38 +125,38 @@ END_EXTERN_C()
 #define sprintf php_sprintf
 
 typedef enum {
-	LM_STD = 0,
+  LM_STD = 0,
 #if SIZEOF_INTMAX_T
-	LM_INTMAX_T,
+  LM_INTMAX_T,
 #endif
 #if SIZEOF_PTRDIFF_T
-	LM_PTRDIFF_T,
+  LM_PTRDIFF_T,
 #endif
 #if SIZEOF_LONG_LONG
-	LM_LONG_LONG,
+  LM_LONG_LONG,
 #endif
-	LM_SIZE_T,
-	LM_LONG,
-	LM_LONG_DOUBLE
+  LM_SIZE_T,
+  LM_LONG,
+  LM_LONG_DOUBLE
 } length_modifier_e;
 
 #ifdef PHP_WIN32
-# define WIDE_INT		__int64
+# define WIDE_INT    __int64
 #elif SIZEOF_LONG_LONG_INT
-# define WIDE_INT		long long int
+# define WIDE_INT    long long int
 #elif SIZEOF_LONG_LONG
-# define WIDE_INT		long long
+# define WIDE_INT    long long
 #else
-# define WIDE_INT		long
+# define WIDE_INT    long
 #endif
 typedef WIDE_INT wide_int;
 typedef unsigned WIDE_INT u_wide_int;
 
 extern char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
-	   register bool_int * is_negative, char *buf_end, register int *len);
+     register bool_int * is_negative, char *buf_end, register int *len);
 
 extern char * ap_php_conv_p2(register u_wide_int num, register int nbits,
-		 char format, char *buf_end, register int *len);
+     char format, char *buf_end, register int *len);
 
 /* The maximum precision that's allowed for float conversion. Does not include
  * decimal separator, exponent, sign, terminator. Currently does not affect

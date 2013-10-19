@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // definitions
 
-enum DataType: int8_t {
+enum DataType : int8_t {
   KindOfClass            = -13,
   MinDataType            = -13,
 
@@ -132,7 +132,7 @@ static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
 
 // assume KindOfUninit == 0 in ClsCns
 static_assert(KindOfUninit == 0,
-              "Several things assume this tag is 0, especially target cache");
+              "Several things assume this tag is 0, especially RDS");
 
 static_assert(MaxNumDataTypes - 1 <= kDataTypeMask, "");
 
@@ -239,8 +239,13 @@ ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
   return TYPE_TO_DESTR_IDX(t);
 }
 
+#define IS_REAL_TYPE(t)                                                 \
+  (((t) >= ::HPHP::KindOfUninit && (t) < ::HPHP::MaxNumDataTypes) ||    \
+   (t) == ::HPHP::KindOfClass)
+
 // Helper macro for checking if a given type is refcounted
-#define IS_REFCOUNTED_TYPE(t) ((t) > KindOfRefCountThreshold)
+#define IS_REFCOUNTED_TYPE(t)                                   \
+  (assert(IS_REAL_TYPE(t)), (t) > KindOfRefCountThreshold)
 
 // Helper function for checking if a type is KindOfString or KindOfStaticString.
 static_assert(KindOfStaticString == 0x0C, "");
@@ -257,9 +262,6 @@ inline bool IS_STRING_TYPE(DataType t) {
 #define IS_BOOL_TYPE(t) ((t) == KindOfBoolean)
 #define IS_DOUBLE_TYPE(t) ((t) == KindOfDouble)
 
-#define IS_REAL_TYPE(t) \
-  (((t) >= KindOfUninit && (t) < MaxNumDataTypes) || (t) == KindOfClass)
-
 inline bool IS_INT_KEY_TYPE(DataType t) {
   return t <= KindOfInt64;
 }
@@ -273,6 +275,21 @@ inline bool typeReentersOnRelease(DataType type) {
 
 inline DataType typeInitNull(DataType t) {
   return t == KindOfUninit ? KindOfNull : t;
+}
+
+/*
+ * Returns whether two DataTypes for primitive types are "equivalent"
+ * as far as user-visible php types are concerned.  (I.e. ignoring
+ * different types of strings or different types of nulls.)
+ *
+ * Pre: t1 and t2 must both be DataTypes that represent php-types.
+ * (Non-internal KindOfs.)
+ */
+inline bool equivDataTypes(DataType t1, DataType t2) {
+  return
+    (t1 == t2) ||
+    (IS_STRING_TYPE(t1) && IS_STRING_TYPE(t2)) ||
+    (IS_NULL_TYPE(t1) && IS_NULL_TYPE(t2));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

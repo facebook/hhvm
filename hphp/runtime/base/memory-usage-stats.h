@@ -23,7 +23,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-/**
+/*
  * Usage stats, all in bytes.
  */
 struct MemoryUsageStats {

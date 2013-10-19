@@ -16,7 +16,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/code-coverage.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include "folly/String.h"
@@ -40,13 +40,13 @@ ThreadInfo::ThreadInfo()
   assert(!t_stackbase);
   t_stackbase = static_cast<char*>(stack_top_ptr());
 
-  m_mm = MemoryManager::TheMemoryManager();
+  m_mm = &MM();
 
   m_profiler = nullptr;
   m_pendingException = nullptr;
   m_coverage = new CodeCoverage();
 
-  Transl::TargetCache::threadInit();
+  RDS::threadInit();
   onSessionInit();
 
   Lock lock(s_thread_info_mutex);
@@ -59,7 +59,7 @@ ThreadInfo::~ThreadInfo() {
   Lock lock(s_thread_info_mutex);
   s_thread_infos.erase(this);
   delete m_coverage;
-  Transl::TargetCache::threadExit();
+  RDS::threadExit();
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {
@@ -110,7 +110,7 @@ void ThreadInfo::setPendingException(Exception* e) {
 void ThreadInfo::onSessionExit() {
   m_reqInjectionData.setTimeout(0);
   m_reqInjectionData.reset();
-  Transl::TargetCache::requestExit();
+  RDS::requestExit();
 }
 
 RequestInjectionData::~RequestInjectionData() {
@@ -122,8 +122,8 @@ RequestInjectionData::~RequestInjectionData() {
 }
 
 void RequestInjectionData::onSessionInit() {
-  Transl::TargetCache::requestInit();
-  cflagsPtr = Transl::TargetCache::conditionFlagsPtr();
+  RDS::requestInit();
+  cflagsPtr = &RDS::header()->conditionFlags;
   reset();
 }
 

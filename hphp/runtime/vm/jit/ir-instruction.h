@@ -208,7 +208,7 @@ struct IRInstruction {
 
   bool       is() const { return false; }
   template<typename... Args>
-  bool       is(Opcode op, Args&&... args) {
+  bool       is(Opcode op, Args&&... args) const {
     return m_op == op || is(std::forward<Args>(args)...);
   }
 
@@ -217,10 +217,6 @@ struct IRInstruction {
   Type       typeParam() const         { return m_typeParam; }
   void       setTypeParam(Type t)      { m_typeParam = t; }
   uint32_t   numSrcs()  const          { return m_numSrcs; }
-  void       setNumSrcs(uint32_t i)    {
-    assert(i <= m_numSrcs);
-    m_numSrcs = i;
-  }
   SSATmp*    src(uint32_t i) const;
   void       setSrc(uint32_t i, SSATmp* newSrc);
   SrcRange   srcs() const {

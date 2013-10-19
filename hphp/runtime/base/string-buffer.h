@@ -27,7 +27,7 @@ class File;
 
 class StringBufferLimitException : public FatalErrorException {
 public:
-  StringBufferLimitException(int size, CStrRef partialResult)
+  StringBufferLimitException(int size, const String& partialResult)
     : FatalErrorException(0, "StringBuffer exceeded %d bytes of memory", size),
       m_result(partialResult) {}
   virtual ~StringBufferLimitException() throw() {}
@@ -153,7 +153,7 @@ struct StringBuffer {
   }
   void append(unsigned char c) { append((char)c);}
   void append(const char* s) { assert(s); append(s, strlen(s)); }
-  void append(CStrRef s) { append(s.data(), s.size()); }
+  void append(const String& s) { append(s.data(), s.size()); }
   void append(const std::string& s) { append(s.data(), s.size()); }
   void append(const StringData* s) { append(s->data(), s->size()); }
   void append(const char* s, int len) {

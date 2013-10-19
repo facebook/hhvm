@@ -148,7 +148,7 @@ static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
 ///////////////////////////////////////////////////////////////////////////////
 // client helpers
 
-static Object create_soap_fault(CStrRef code, CStrRef fault) {
+static Object create_soap_fault(const String& code, const String& fault) {
   return Object(SystemLib::AllocSoapFaultObject(code, fault));
 }
 
@@ -1963,7 +1963,7 @@ void c_SoapServer::t___construct(CVarRef wsdl,
   }
 }
 
-void c_SoapServer::t_setclass(int _argc, CStrRef name,
+void c_SoapServer::t_setclass(int _argc, const String& name,
                               CArrRef _argv /* = null_array */) {
   SoapServerScope ss(this);
   if (f_class_exists(name, true)) {
@@ -2046,7 +2046,7 @@ Variant c_SoapServer::t_getfunctions() {
 }
 
 static bool valid_function(c_SoapServer *server, Object &soap_obj,
-                           CStrRef fn_name) {
+                           const String& fn_name) {
   HPHP::Class* cls = nullptr;
   if (server->m_type == SOAP_OBJECT || server->m_type == SOAP_CLASS) {
     cls = server->m_soap_object->getVMClass();
@@ -2065,7 +2065,7 @@ const StaticString
   s_xgzip("x-gzip"),
   s_deflate("deflate");
 
-void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
+void c_SoapServer::t_handle(const String& request /* = null_string */) {
   USE_SOAP_GLOBAL;
   SoapServerScope ss(this);
 
@@ -2289,10 +2289,10 @@ void c_SoapServer::t_setpersistence(int64_t mode) {
   }
 }
 
-void c_SoapServer::t_fault(CVarRef code, CStrRef fault,
-                           CStrRef actor /* = null_string */,
+void c_SoapServer::t_fault(CVarRef code, const String& fault,
+                           const String& actor /* = null_string */,
                            CVarRef detail /* = null */,
-                           CStrRef name /* = null_string */) {
+                           const String& name /* = null_string */) {
   SoapServerScope ss(this);
   Object obj(SystemLib::AllocSoapFaultObject(code, fault, actor, detail, name));
   send_soap_server_fault(sdlFunctionPtr(), obj, NULL);
@@ -2457,7 +2457,7 @@ Variant c_SoapClient::t___call(Variant name, Variant args) {
   return t___soapcall(name.toString(), args.toArray());
 }
 
-Variant c_SoapClient::t___soapcall(CStrRef name, CArrRef args,
+Variant c_SoapClient::t___soapcall(const String& name, CArrRef args,
                                    CArrRef options /* = null_array */,
                                    CVarRef input_headers /* = null_variant */,
                                    VRefParam output_headers /* = null */) {
@@ -2657,7 +2657,7 @@ Variant c_SoapClient::t___gettypes() {
   return uninit_null();
 }
 
-Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef action,
+Variant c_SoapClient::t___dorequest(const String& buf, const String& location, const String& action,
                                     int64_t version, bool oneway /* = false */) {
   if (location.empty()) {
     m_soap_fault =
@@ -2751,8 +2751,8 @@ Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef actio
   return response.detach();
 }
 
-Variant c_SoapClient::t___setcookie(CStrRef name,
-                                    CStrRef value /* = null_string */) {
+Variant c_SoapClient::t___setcookie(const String& name,
+                                    const String& value /* = null_string */) {
   if (!value.isNull()) {
     m_cookies.set(name, make_packed_array(value));
   } else {
@@ -2764,7 +2764,7 @@ Variant c_SoapClient::t___setcookie(CStrRef name,
   return uninit_null();
 }
 
-Variant c_SoapClient::t___setlocation(CStrRef new_location /* = null_string */){
+Variant c_SoapClient::t___setlocation(const String& new_location /* = null_string */){
   Variant ret = m_location;
   m_location = new_location;
   return ret;
@@ -2795,10 +2795,10 @@ c_SoapVar::~c_SoapVar() {
 }
 
 void c_SoapVar::t___construct(CVarRef data, CVarRef type,
-                              CStrRef type_name /* = null_string */,
-                              CStrRef type_namespace /* = null_string */,
-                              CStrRef node_name /* = null_string */,
-                              CStrRef node_namespace /* = null_string */) {
+                              const String& type_name /* = null_string */,
+                              const String& type_namespace /* = null_string */,
+                              const String& node_name /* = null_string */,
+                              const String& node_namespace /* = null_string */) {
   USE_SOAP_GLOBAL;
   if (type.isNull()) {
     m_type = UNKNOWN_TYPE;
@@ -2829,7 +2829,7 @@ c_SoapParam::c_SoapParam(Class* cb) : ExtObjectData(cb) {
 c_SoapParam::~c_SoapParam() {
 }
 
-void c_SoapParam::t___construct(CVarRef data, CStrRef name) {
+void c_SoapParam::t___construct(CVarRef data, const String& name) {
   if (name.empty()) {
     raise_warning("Invalid parameter name");
     return;
@@ -2848,7 +2848,7 @@ c_SoapHeader::c_SoapHeader(Class* cb) :
 c_SoapHeader::~c_SoapHeader() {
 }
 
-void c_SoapHeader::t___construct(CStrRef ns, CStrRef name,
+void c_SoapHeader::t___construct(const String& ns, const String& name,
                                  CVarRef data /* = null */,
                                  bool mustunderstand /* = false */,
                                  CVarRef actor /* = null */) {

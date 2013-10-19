@@ -540,7 +540,7 @@ bool f_socket_set_option(CResRef socket, int level, int optname,
   return true;
 }
 
-bool f_socket_connect(CResRef socket, CStrRef address, int port /* = 0 */) {
+bool f_socket_connect(CResRef socket, const String& address, int port /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
 
   switch (sock->getType()) {
@@ -577,7 +577,7 @@ bool f_socket_connect(CResRef socket, CStrRef address, int port /* = 0 */) {
   return true;
 }
 
-bool f_socket_bind(CResRef socket, CStrRef address, int port /* = 0 */) {
+bool f_socket_bind(CResRef socket, const String& address, int port /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
 
   const char *addr = address.data();
@@ -691,7 +691,7 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
   return count;
 }
 
-Variant f_socket_server(CStrRef hostname, int port /* = -1 */,
+Variant f_socket_server(const String& hostname, int port /* = -1 */,
                         VRefParam errnum /* = null */,
                         VRefParam errstr /* = null */) {
   Util::HostURL hosturl(static_cast<const std::string>(hostname), port);
@@ -778,7 +778,7 @@ Variant f_socket_read(CResRef socket, int length, int type /* = 0 */) {
   return String(tmpbuf, retval, AttachString);
 }
 
-Variant f_socket_write(CResRef socket, CStrRef buffer, int length /* = 0 */) {
+Variant f_socket_write(CResRef socket, const String& buffer, int length /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (length == 0 || length > buffer.size()) {
     length = buffer.size();
@@ -791,7 +791,7 @@ Variant f_socket_write(CResRef socket, CStrRef buffer, int length /* = 0 */) {
   return retval;
 }
 
-Variant f_socket_send(CResRef socket, CStrRef buf, int len, int flags) {
+Variant f_socket_send(CResRef socket, const String& buf, int len, int flags) {
   Socket *sock = socket.getTyped<Socket>();
   if (len > buf.size()) {
     len = buf.size();
@@ -804,8 +804,8 @@ Variant f_socket_send(CResRef socket, CStrRef buf, int len, int flags) {
   return retval;
 }
 
-Variant f_socket_sendto(CResRef socket, CStrRef buf, int len, int flags,
-                        CStrRef addr, int port /* = -1 */) {
+Variant f_socket_sendto(CResRef socket, const String& buf, int len, int flags,
+                        const String& addr, int port /* = -1 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (len > buf.size()) {
     len = buf.size();
@@ -1145,7 +1145,7 @@ Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
   return ret;
 }
 
-Variant f_fsockopen(CStrRef hostname, int port /* = -1 */,
+Variant f_fsockopen(const String& hostname, int port /* = -1 */,
                     VRefParam errnum /* = null */,
                     VRefParam errstr /* = null */,
                     double timeout /* = -1.0 */) {
@@ -1153,7 +1153,7 @@ Variant f_fsockopen(CStrRef hostname, int port /* = -1 */,
   return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
 
-Variant f_pfsockopen(CStrRef hostname, int port /* = -1 */,
+Variant f_pfsockopen(const String& hostname, int port /* = -1 */,
                      VRefParam errnum /* = null */,
                      VRefParam errstr /* = null */,
                      double timeout /* = -1.0 */) {
@@ -1183,7 +1183,7 @@ const StaticString
   s_scope_id("scope_id"),
   s_sockaddr("sockaddr");
 
-Variant f_getaddrinfo(CStrRef host, CStrRef port, int family /* = 0 */,
+Variant f_getaddrinfo(const String& host, const String& port, int family /* = 0 */,
                       int socktype /* = 0 */, int protocol /* = 0 */,
                       int flags /* = 0 */) {
   const char *hptr = NULL, *pptr = NULL;

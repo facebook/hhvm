@@ -92,7 +92,8 @@ void c_UConverter::throwFailure(UErrorCode error, const char *fname,
   merror.custom_error_message = String((const char*)message, CopyString);
 }
 
-void c_UConverter::t___construct(CStrRef toEncoding, CStrRef fromEncoding) {
+void c_UConverter::t___construct(const String& toEncoding,
+                                 const String& fromEncoding) {
   setEncoding(toEncoding,   &m_dest, m_error);
   setEncoding(fromEncoding, &m_src,  m_error);
   setCallback(m_dest);
@@ -269,7 +270,7 @@ bool c_UConverter::setCallback(UConverter *cnv) {
   return true;
 }
 
-bool c_UConverter::setEncoding(CStrRef encoding, UConverter **pcnv,
+bool c_UConverter::setEncoding(const String& encoding, UConverter **pcnv,
                                intl_error &err) {
   UErrorCode error = U_ZERO_ERROR;
   UConverter *cnv = ucnv_open(encoding.data(), &error);
@@ -294,11 +295,11 @@ bool c_UConverter::setEncoding(CStrRef encoding, UConverter **pcnv,
   return true;
 }
 
-void c_UConverter::t_setsourceencoding(CStrRef encoding) {
+void c_UConverter::t_setsourceencoding(const String& encoding) {
   setEncoding(encoding, &m_src, m_error);
 }
 
-void c_UConverter::t_setdestinationencoding(CStrRef encoding) {
+void c_UConverter::t_setdestinationencoding(const String& encoding) {
   setEncoding(encoding, &m_dest, m_error);
 }
 
@@ -363,7 +364,7 @@ bool c_UConverter::setSubstChars(String chars, UConverter *cnv,
   return true;
 }
 
-bool c_UConverter::t_setsubstchars(CStrRef chars) {
+bool c_UConverter::t_setsubstchars(const String& chars) {
   return setSubstChars(chars, m_dest, m_error) &&
          setSubstChars(chars, m_src,  m_error);
 }
@@ -403,20 +404,21 @@ Variant c_UConverter::t_fromucallback(int64_t reason,
 }
 
 Variant c_UConverter::t_toucallback(int64_t reason,
-                                    CStrRef source, CStrRef codeunits,
+                                    const String& source,
+                                    const String& codeunits,
                                     VRefParam error) {
   return defaultCallback(reason, error);
 }
 
 /* Main workhorse functions */
 
-Variant c_UConverter::t_convert(CStrRef str, bool reverse) {
+Variant c_UConverter::t_convert(const String& str, bool reverse) {
   SYNC_VM_REGS_SCOPED();
   return doConvert(str, reverse ? m_src : m_dest,
                         reverse ? m_dest : m_src, m_error);
 }
 
-String c_UConverter::doConvert(CStrRef str,
+String c_UConverter::doConvert(const String& str,
                                UConverter *toCnv, UConverter *fromCnv,
                                intl_error &err) {
   UErrorCode error = U_ZERO_ERROR;
@@ -473,8 +475,9 @@ const StaticString
   s_from_subst("from_subst"),
   s_to_subst("to_subst");
 
-Variant c_UConverter::ti_transcode(CStrRef str, CStrRef toEncoding,
-                                   CStrRef fromEncoding, CArrRef options) {
+Variant c_UConverter::ti_transcode(const String& str, const String& toEncoding,
+                                   const String& fromEncoding,
+                                   CArrRef options) {
   UConverter *fromCnv = NULL, *toCnv = NULL;
   if (!setEncoding(fromEncoding, &fromCnv, s_intl_error->m_error)) {
     return uninit_null();
@@ -536,7 +539,7 @@ Array c_UConverter::ti_getavailable() {
   return ret;
 }
 
-Array c_UConverter::ti_getaliases(CStrRef encoding) {
+Array c_UConverter::ti_getaliases(const String& encoding) {
   UErrorCode error = U_ZERO_ERROR;
   int16_t i, count = ucnv_countAliases(encoding.data(), &error);
 
@@ -574,7 +577,8 @@ Array c_UConverter::ti_getstandards() {
   return ret;
 }
 
-String c_UConverter::ti_getstandardname(CStrRef name, CStrRef standard) {
+String c_UConverter::ti_getstandardname(const String& name,
+                                        const String& standard) {
   UErrorCode error = U_ZERO_ERROR;
   const char *standard_name = ucnv_getStandardName(name.data(),
                                                    standard.data(),
@@ -588,7 +592,7 @@ String c_UConverter::ti_getstandardname(CStrRef name, CStrRef standard) {
   return String(standard_name, CopyString);
 }
 
-String c_UConverter::ti_getmimename(CStrRef name) {
+String c_UConverter::ti_getmimename(const String& name) {
   return ti_getstandardname(name, "MIME");
 }
 

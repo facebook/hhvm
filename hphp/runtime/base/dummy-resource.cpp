@@ -23,7 +23,7 @@ namespace HPHP {
 DummyResource::DummyResource() {
 }
 
-CStrRef DummyResource::o_getClassNameHook() const {
+const String& DummyResource::o_getClassNameHook() const {
   if (m_class_name.empty()) {
     return classnameof();
   }

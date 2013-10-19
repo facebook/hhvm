@@ -1,0 +1,46 @@
+#
+# Simple test of AssertT opcodes
+#
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.class Foo {
+  .default_ctor;
+
+  .method [public] returns_int {
+    Int 12
+    RetC
+  }
+}
+
+.function main() {
+  Jmp stuff
+out:
+  Null
+  RetC
+
+stuff:
+  FPushCtorD 0 "Foo"
+  FCall 0
+  PopR
+  SetL $obj
+  PopC
+
+  CGetL $obj
+  FPushObjMethodD 0 "returns_int"
+  FCall 0
+  AssertTStk 0 Int
+  UnboxR
+  Int 0
+  Add
+  SetL $k
+  PopC
+  Jmp out
+}
+

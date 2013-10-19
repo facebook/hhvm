@@ -110,7 +110,7 @@ class RecursiveDirectoryIterator extends FilesystemIterator
    */
   public function getSubPathname() {
     return ($this->subPath ? $this->subPath . DIRECTORY_SEPARATOR : '') .
-      $this->getPathname();
+      $this->getFilename();
   }
 
 }

@@ -1,0 +1,2 @@
+HipHop Warning: Argument 1 to foo() must be of type @int, string given in %s on line 4
+1

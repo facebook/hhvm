@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/pprof-server.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/util/shared-memory-allocator.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-server.h"
@@ -50,6 +51,7 @@
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/base/simple-counter.h"
@@ -68,6 +70,7 @@
 #include "hphp/runtime/base/file-repository.h"
 
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/compiler/builtin_symbols.h"
@@ -176,6 +179,13 @@ void process_env_variables(Variant &variables) {
       register_variable(variables, (char*)name.data(),
                         String(p + 1, CopyString));
     }
+  }
+}
+
+void process_ini_settings() {
+  auto settings = f_parse_ini_file(String(RuntimeOption::IniFile));
+  for (ArrayIter iter(settings); iter; ++iter) {
+    IniSetting::Set(iter.first(), iter.second());
   }
 }
 
@@ -701,6 +711,14 @@ static int start_server(const std::string &username) {
     }
   }
 
+  if (RuntimeOption::EvalEnableNuma) {
+#ifdef USE_JEMALLOC
+    mallctl("arenas.purge", nullptr, nullptr, nullptr, 0);
+#endif
+    Util::enable_numa(RuntimeOption::EvalEnableNumaLocal);
+
+  }
+
   HttpServer::Server->run();
   return 0;
 }
@@ -1070,7 +1088,9 @@ static int execute_program_impl(int argc, char** argv) {
   for (unsigned int i = 0; i < badnodes.size(); i++) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
-
+  if (RuntimeOption::EvalRuntimeTypeProfile) {
+    HPHP::initTypeProfileStructure();
+  }
   vector<int> inherited_fds;
   RuntimeOption::BuildId = po.buildId;
   RuntimeOption::InstanceId = po.instanceId;
@@ -1297,7 +1317,7 @@ static int execute_program_impl(int argc, char** argv) {
   return -1;
 }
 
-String canonicalize_path(CStrRef p, const char* root, int rootLen) {
+String canonicalize_path(const String& p, const char* root, int rootLen) {
   String path(Util::canonicalize(p.c_str(), p.size()), AttachString);
   if (path.charAt(0) == '/') {
     const string &sourceRoot = RuntimeOption::SourceRoot;
@@ -1321,22 +1341,27 @@ static string systemlib_split(string slib, string* hhas) {
   return slib;
 }
 
-// Search for systemlib.php in the following places:
-// 1) ${HHVM_SYSTEMLIB}
-// 2) section "systemlib" in the current executable
-// and return its contents
-string get_systemlib(string* hhas) {
-  if (char *file = getenv("HHVM_SYSTEMLIB")) {
-    std::ifstream ifs(file);
-    if (ifs.good()) {
-      return systemlib_split(std::string(
-                               std::istreambuf_iterator<char>(ifs),
-                               std::istreambuf_iterator<char>()), hhas);
+// Retrieve a systemlib (or mini systemlib) from the
+// current executable or another ELF object file.
+//
+// Additionally, when retrieving the main systemlib
+// from the current executable, honor the
+// HHVM_SYSTEMLIB environment variable as an override.
+string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
+                                   const string &filename /*= "" */) {
+  if (filename.empty() && section == "systemlib") {
+    if (char *file = getenv("HHVM_SYSTEMLIB")) {
+      std::ifstream ifs(file);
+      if (ifs.good()) {
+        return systemlib_split(std::string(
+                                 std::istreambuf_iterator<char>(ifs),
+                                 std::istreambuf_iterator<char>()), hhas);
+      }
     }
   }
 
   Util::embedded_data desc;
-  if (!Util::get_embedded_data("systemlib", &desc)) return "";
+  if (!Util::get_embedded_data(section.c_str(), &desc, filename)) return "";
 
   std::ifstream ifs(desc.m_filename);
   if (!ifs.good()) return "";
@@ -1412,7 +1437,7 @@ void hphp_process_init() {
   apc_load(apcExtension::LoadThread);
   RuntimeOption::SerializationSizeLimit = save;
 
-  Transl::TargetCache::requestExit();
+  RDS::requestExit();
   // Reset the preloaded g_context
   ExecutionContext *context = g_context.getNoCheck();
   context->~ExecutionContext();
@@ -1475,7 +1500,7 @@ static bool hphp_warmup(ExecutionContext *context,
 void hphp_session_init() {
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
-  MemoryManager::TheMemoryManager()->resetStats();
+  MM().resetStats();
 
 #ifdef ENABLE_SIMPLE_COUNTER
   SimpleCounter::Enabled = true;
@@ -1487,6 +1512,8 @@ void hphp_session_init() {
   StatCache::requestInit();
 
   g_vmContext->requestInit();
+
+  process_ini_settings();
 }
 
 ExecutionContext *hphp_context_init() {
@@ -1522,6 +1549,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
     return false;
   }
 
+  LitstrTable::get().setReading();
+
   bool ret = true;
   if (!warmupOnly) {
     try {
@@ -1530,7 +1559,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
         funcRet->assignVal(invoke(cmd.c_str(), funcParams));
       } else {
         if (isServer) hphp_chdir_file(cmd);
-         include_impl_invoke(cmd.c_str(), once);
+        include_impl_invoke(cmd.c_str(), once);
       }
     } catch (...) {
       handle_invoke_exception(ret, context, errorMsg, error, richErrorMsg);
@@ -1583,28 +1612,25 @@ void hphp_session_exit() {
 
   ThreadInfo::s_threadInfo->clearPendingException();
 
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  if (RuntimeOption::CheckMemory) {
-    mm->checkMemory();
-  }
-  mm->resetStats();
+  auto& mm = MM();
+  mm.resetStats();
 
   {
     ServerStatsHelper ssh("rollback");
-    // sweep may call g_context->, which is a noCheck, so we need to
-    // reinitialize g_context here
+    // sweep functions are allowed to call g_context->, so we need to
+    // reinitialize g_context here.
     g_context.getCheck();
-    // MemoryManager::sweepAll() will handle sweeping for PHP objects and
-    // PHP resources (ex. File, Collator, XmlReader, etc.)
-    mm->sweepAll();
-    // Destroy g_context again because ExecutionContext has SmartAllocated
-    // data members. These members cannot survive over rollback(), so we need
-    // to destroy g_context before calling rollback().
+
+    mm.sweep();
+
+    // Destroy g_context again because ExecutionContext has
+    // SmartAllocated data members. These members cannot survive over
+    // resetAllocator(), so we need to destroy g_context before
+    // calling resetAllocator().
     g_context.destroy();
-    // MemoryManager::rollback() will handle sweeping for all types that have
-    // dedicated allocators (ex. StringData, HphpArray, etc.) and it reset all
-    // of the allocators in preparation for the next request.
-    mm->rollback();
+
+    mm.resetAllocator();
+
     // Do any post-sweep cleanup necessary for global variables
     free_global_variables_after_sweep();
     g_context.getCheck();

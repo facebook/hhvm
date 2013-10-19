@@ -17,6 +17,16 @@
 
 include(CheckFunctionExists)
 
+# libdl
+find_package(LibDL)
+if (LIBDL_INCLUDE_DIRS)
+	add_definitions("-DHAVE_LIBDL")
+	include_directories(${LIBDL_INCLUDE_DIRS})
+	if (LIBDL_NEEDS_UNDERSCORE)
+		add_definitions("-DLIBDL_NEEDS_UNDERSCORE")
+	endif()
+endif()
+
 # boost checks
 find_package(Boost 1.48.0 COMPONENTS system program_options filesystem regex REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -164,13 +174,30 @@ if (USE_GOOGLE_HEAP_PROFILER AND GOOGLE_PROFILER_LIB)
 endif()
 
 if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
-	FIND_LIBRARY(JEMALLOC_LIB jemalloc)
-	if (JEMALLOC_LIB)
-		message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
-		set(JEMALLOC_ENABLED 1)
-	endif()
-	if (JEMALLOC_INCLUDE_DIR)
+	FIND_LIBRARY(JEMALLOC_LIB NAMES jemalloc)
+	FIND_PATH(JEMALLOC_INCLUDE_DIR NAMES jemalloc/jemalloc.h)
+
+	if (JEMALLOC_INCLUDE_DIR AND JEMALLOC_LIB)
 		include_directories(${JEMALLOC_INCLUDE_DIR})
+
+		set (CMAKE_REQUIRED_INCLUDES ${JEMALLOC_INCLUDE_DIR})
+		INCLUDE(CheckCXXSourceCompiles)
+		CHECK_CXX_SOURCE_COMPILES("
+#include <jemalloc/jemalloc.h>
+int main(void) {
+#if !defined(JEMALLOC_VERSION_MAJOR) || (JEMALLOC_VERSION_MAJOR < 3)
+# error \"jemalloc version >= 3.0.0 required\"
+#endif
+	return 0;
+}" JEMALLOC_VERSION_3)
+		set (CMAKE_REQUIRED_INCLUDES)
+
+		if (JEMALLOC_VERSION_3)
+			message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
+			set(JEMALLOC_ENABLED 1)
+		else()
+			message(STATUS "Found jemalloc, but it was too old")
+		endif()
 	endif()
 endif()
 
@@ -245,8 +272,17 @@ include_directories(${NCURSES_INCLUDE_PATH})
 find_package(PThread REQUIRED)
 include_directories(${LIBPTHREAD_INCLUDE_DIRS})
 
-find_package(Readline REQUIRED)
-include_directories(${READLINE_INCLUDE_DIR})
+# Either Readline or Editline (for hphpd)
+find_package(Readline)
+find_package(Editline)
+if (READLINE_INCLUDE_DIR)
+	include_directories(${READLINE_INCLUDE_DIR})
+elseif (EDITLINE_INCLUDE_DIRS)
+	add_definitions("-DUSE_EDITLINE")
+	include_directories(${EDITLINE_INCLUDE_DIRS})
+else()
+	message(FATAL_ERROR "Could not find Readline or Editline")
+endif()
 
 find_package(CClient REQUIRED)
 include_directories(${CCLIENT_INCLUDE_PATH})
@@ -338,6 +374,10 @@ include_directories(${HPHP_HOME}/hphp)
 include_directories(${HPHP_HOME}/hphp/system/gen)
 
 macro(hphp_link target)
+	if (LIBDL_LIBRARIES)
+		target_link_libraries(${target} ${LIBDL_LIBRARIES})
+	endif ()
+
 	if (GOOGLE_HEAP_PROFILER_ENABLED OR GOOGLE_CPU_PROFILER_ENABLED)
 		target_link_libraries(${target} ${GOOGLE_PROFILER_LIB})
 	endif()
@@ -426,7 +466,12 @@ endif()
 	target_link_libraries(${target} afdt)
 	target_link_libraries(${target} mbfl)
 
-	target_link_libraries(${target} ${READLINE_LIBRARY})
+	if (READLINE_LIBRARY)
+		target_link_libraries(${target} ${READLINE_LIBRARY})
+	elseif (EDITLINE_LIBRARIES)
+		target_link_libraries(${target} ${EDITLINE_LIBRARIES})
+	endif()
+
 	target_link_libraries(${target} ${NCURSES_LIBRARY})
 	target_link_libraries(${target} ${CCLIENT_LIBRARY})
 

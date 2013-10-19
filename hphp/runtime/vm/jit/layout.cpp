@@ -58,9 +58,9 @@ smart::vector<Block*> rpoForCodegen(const IRUnit& unit, Block* head) {
  * so this just selects an appropriate reverse post order on the
  * blocks, and partitions the unlikely ones to astubs.
  */
-LayoutInfo layoutBlocks(IRTrace* trace, const IRUnit& unit) {
+LayoutInfo layoutBlocks(const IRUnit& unit) {
   LayoutInfo ret;
-  ret.blocks = rpoForCodegen(unit, trace->front());
+  ret.blocks = rpoForCodegen(unit, unit.entry());
 
   // Optionally stress test by randomizing the positions.
   if (RuntimeOption::EvalHHIRStressCodegenBlocks) {
@@ -73,9 +73,7 @@ LayoutInfo layoutBlocks(IRTrace* trace, const IRUnit& unit) {
   // Partition into a and astubs, without changing relative order.
   ret.astubsIt = std::stable_partition(
     ret.blocks.begin(), ret.blocks.end(),
-    [&] (Block* b) {
-      return b->isMain() && b->hint() != Block::Hint::Unlikely;
-    }
+    [&] (Block* b) { return b->hint() != Block::Hint::Unlikely; }
   );
 
   if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhir, 5)) {
@@ -108,7 +106,7 @@ LayoutInfo layoutBlocks(IRTrace* trace, const IRUnit& unit) {
    */
   if (!RuntimeOption::EvalHHIRStressCodegenBlocks) {
     always_assert(ret.blocks.front()->isEntry());
-    always_assert((*boost::prior(ret.astubsIt))->isMainExit());
+    always_assert((*boost::prior(ret.astubsIt))->isExit());
   }
 
   return ret;

@@ -122,6 +122,11 @@ void ArrayIter::SetInit(ArrayIter* iter, ObjectData* obj) {
 void ArrayIter::PairInit(ArrayIter* iter, ObjectData* obj) {
   iter->m_pos = 0;
 }
+void ArrayIter::FrozenVectorInit(ArrayIter* iter, ObjectData* obj) {
+  auto vec = static_cast<c_FrozenVector*>(obj);
+  iter->m_version = vec->getVersion();
+  iter->m_pos = 0;
+}
 void ArrayIter::IteratorObjInit(ArrayIter* iter, ObjectData* obj) {
   assert(obj->instanceof(SystemLib::s_IteratorClass));
   try {
@@ -141,13 +146,14 @@ void ArrayIter::IteratorObjInit(ArrayIter* iter, ObjectData* obj) {
   }
 }
 
-const ArrayIter::InitFuncPtr ArrayIter::initFuncTable[6] = {
+const ArrayIter::InitFuncPtr ArrayIter::initFuncTable[7] = {
   &ArrayIter::IteratorObjInit,
   &ArrayIter::VectorInit,
   &ArrayIter::MapInit,
   &ArrayIter::StableMapInit,
   &ArrayIter::SetInit,
   &ArrayIter::PairInit,
+  &ArrayIter::FrozenVectorInit,
 };
 
 template <bool incRef>
@@ -229,6 +235,9 @@ bool ArrayIter::endHelper() {
     case Collection::PairType: {
       return m_pos >= getPair()->size();
     }
+    case Collection::FrozenVectorType: {
+      return m_pos >= getFrozenVector()->size();
+    }
     default: {
       ObjectData* obj = getIteratorObj();
       return !obj->o_invoke_few_args(s_valid, 0).toBoolean();
@@ -273,6 +282,10 @@ void ArrayIter::nextHelper() {
       m_pos++;
       return;
     }
+    case Collection::FrozenVectorType: {
+      m_pos++;
+      return;
+    }
     default:
       ObjectData* obj = getIteratorObj();
       obj->o_invoke_few_args(s_next, 0);
@@ -304,6 +317,9 @@ Variant ArrayIter::firstHelper() {
       return uninit_null();
     }
     case Collection::PairType: {
+      return m_pos;
+    }
+    case Collection::FrozenVectorType: {
       return m_pos;
     }
     default: {
@@ -352,6 +368,13 @@ Variant ArrayIter::second() {
     }
     case Collection::PairType: {
       return tvAsCVarRef(getPair()->at(m_pos));
+    }
+    case Collection::FrozenVectorType: {
+      c_FrozenVector* fvec = getFrozenVector();
+      if (UNLIKELY(m_version != fvec->getVersion())) {
+        throw_collection_modified();
+      }
+      return tvAsCVarRef(fvec->at(m_pos));
     }
     default: {
       ObjectData* obj = getIteratorObj();
@@ -411,6 +434,13 @@ CVarRef ArrayIter::secondRefPlus() {
     }
     case Collection::PairType: {
       return tvAsCVarRef(getPair()->at(m_pos));
+    }
+    case Collection::FrozenVectorType: {
+      c_FrozenVector* fvec = getFrozenVector();
+      if (UNLIKELY(m_version != fvec->getVersion())) {
+        throw_collection_modified();
+      }
+      return tvAsCVarRef(fvec->at(m_pos));
     }
     default: {
       throw_param_is_not_container();
@@ -581,13 +611,13 @@ ArrayData* FullPos::cowCheck() {
   if (hasVar()) {
     data = getData();
     if (!data) return nullptr;
-    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
+    if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
       *const_cast<Variant*>(getVar()) = data = data->copyWithStrongIterators();
     }
   } else {
     assert(hasAd());
     data = getAd();
-    if (data->getCount() > 1 && !data->noCopyOnWrite()) {
+    if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
       ArrayData* copied = data->copyWithStrongIterators();
       copied->incRefCount();
       decRefArr(data);
@@ -746,7 +776,7 @@ bool Iter::init(TypedValue* c1) {
         (void) new (&arr()) ArrayIter(obj.detach(), ArrayIter::noInc);
       } else {
         Class* ctx = arGetContextClass(g_vmContext->getFP());
-        CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
+        const String& ctxStr = ctx ? ctx->nameRef() : null_string;
         Array iterArray(obj->o_toIterArray(ctxStr));
         ArrayData* ad = iterArray.get();
         (void) new (&arr()) ArrayIter(ad);
@@ -1108,7 +1138,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
       } else {
         TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
               __func__, dest, obj, ctx);
-        CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
+        const String& ctxStr = ctx ? ctx->nameRef() : null_string;
         Array iterArray(itObj->o_toIterArray(ctxStr));
         ArrayData* ad = iterArray.get();
         (void) new (&dest->arr()) ArrayIter(ad);
@@ -1173,6 +1203,10 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
       return iterInit<c_Pair, ArrayIter::Fixed>(
                                 dest,
                                 static_cast<c_Pair*>(obj),
+                                valOut, keyOut);
+    case Collection::FrozenVectorType:
+      return iterInit<c_FrozenVector, ArrayIter::Fixed>(
+                                dest, static_cast<c_FrozenVector*>(obj),
                                 valOut, keyOut);
     default:
       return new_iter_object_any(dest, obj, ctx, valOut, keyOut);
@@ -1247,6 +1281,9 @@ static int64_t iter_next_collection(
                                 ai, valOut, keyOut);
     case Collection::PairType:
       return iterNext<c_Pair, ArrayIter::Fixed>(
+                                ai, valOut, keyOut);
+    case Collection::FrozenVectorType:
+      return iterNext<c_FrozenVector, ArrayIter::Fixed>(
                                 ai, valOut, keyOut);
     default:
       return iter_next_cold<withRef>(iter, valOut, keyOut);
@@ -1395,7 +1432,7 @@ int64_t new_miter_object(Iter* dest, RefData* ref, Class* ctx,
 
   TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
         __func__, dest, obj, ctx);
-  CStrRef ctxStr = ctx ? ctx->nameRef() : null_string;
+  const String& ctxStr = ctx ? ctx->nameRef() : null_string;
   Array iterArray(itObj->o_toIterArray(ctxStr, true));
   ArrayData* ad = iterArray.detach();
   (void) new (&dest->marr()) MArrayIter(ad);

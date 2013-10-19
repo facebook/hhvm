@@ -8,3 +8,5 @@ function reverse_comp_func($n1,$n2) {
 $a = array(3, 2, 5, 6, 10);
 usort($a, "reverse_comp_func");
 var_dump($a);
+
+usort($a, "undefined_function_");

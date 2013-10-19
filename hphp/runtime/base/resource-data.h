@@ -71,9 +71,9 @@ class ResourceData {
   void o_setId(int id); // only for BuiltinFiles
   static int GetMaxResourceId() ATTRIBUTE_COLD;
 
-  CStrRef o_getClassName() const;
-  virtual CStrRef o_getClassNameHook() const;
-  virtual CStrRef o_getResourceName() const;
+  const String& o_getClassName() const;
+  virtual const String& o_getClassNameHook() const;
+  virtual const String& o_getResourceName() const;
   virtual bool isInvalid() const { return false; }
 
   bool o_toBoolean() const { return 1; }

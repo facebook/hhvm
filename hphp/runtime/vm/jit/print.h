@@ -47,11 +47,21 @@ void print(std::ostream& ostream, const SSATmp*,
 void print(const SSATmp*);
 
 // Trace
-void print(std::ostream& ostream, const IRTrace*,
+void print(std::ostream& ostream, const IRUnit&, const IRTrace*,
            const RegAllocInfo* regs = nullptr,
            const LifetimeInfo* lifetime = nullptr,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr);
+
+// Print the whole unit
+inline void print(std::ostream& ostream, const IRUnit& unit,
+                  const RegAllocInfo* regs = nullptr,
+                  const LifetimeInfo* lifetime = nullptr,
+                  const AsmInfo* asmInfo = nullptr,
+                  const GuardConstraints* guards = nullptr) {
+  print(ostream, unit, unit.main(), regs, lifetime, asmInfo, guards);
+}
+
 void print(const IRTrace*);
 
 /*
@@ -68,9 +78,7 @@ static const int kRegAllocLevel = 3;
 static const int kOptLevel = 4;
 static const int kExtraLevel = 6;
 
-void dumpTraceImpl(const IRTrace* trace, std::ostream& out,
-                   const RegAllocInfo*, const LifetimeInfo*, const AsmInfo*);
-void dumpTrace(int level, const IRTrace* trace, const char* caption,
+void dumpTrace(int level, const IRUnit&, const char* caption,
                const RegAllocInfo* regs = nullptr,
                const LifetimeInfo* lifetime = nullptr,
                AsmInfo* ai = nullptr, const GuardConstraints* guards = nullptr);

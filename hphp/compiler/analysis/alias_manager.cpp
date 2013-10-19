@@ -3583,8 +3583,8 @@ public:
         } else {
           auto sym = vars->getSymbol(l);
           auto dt = vars->getFinalType(l)->getDataType();
-          if (!sym->isStatic()
-              && !IS_REFCOUNTED_TYPE(dt) && dt != KindOfUnknown) {
+          if (!sym->isStatic() && dt != KindOfUnknown &&
+              !IS_REFCOUNTED_TYPE(dt)) {
             rs->addNonRefcounted(l);
           }
         }

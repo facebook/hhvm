@@ -1805,7 +1805,7 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "2.1.0"
+            "value": "2.3.0-dev"
         },
         {
             "name": "HTML_ENTITIES",
@@ -4240,6 +4240,10 @@
             "value": 512
         },
         {
+            "name": "MYSQLI_BINARY_FLAG",
+            "value": 128
+        },
+        {
             "name": "MYSQLI_BLOB_FLAG",
             "value": 16
         },
@@ -4290,6 +4294,14 @@
         {
             "name": "MYSQLI_DATA_TRUNCATED",
             "value": 101
+        },
+        {
+            "name": "MYSQLI_DEBUG_TRACE_ENABLED",
+            "value": 0
+        },
+        {
+            "name": "MYSQLI_ENUM_FLAG",
+            "value": 256
         },
         {
             "name": "MYSQLI_GROUP_FLAG",
@@ -4344,6 +4356,38 @@
             "value": 5
         },
         {
+            "name": "MYSQLI_REFRESH_GRANT",
+            "value": 1
+        },
+        {
+            "name": "MYSQLI_REFRESH_LOG",
+            "value": 2
+        },
+        {
+            "name": "MYSQLI_REFRESH_TABLES",
+            "value": 4
+        },
+        {
+            "name": "MYSQLI_REFRESH_HOSTS",
+            "value": 8
+        },
+        {
+            "name": "MYSQLI_REFRESH_STATUS",
+            "value": 16
+        },
+        {
+            "name": "MYSQLI_REFRESH_THREADS",
+            "value": 32
+        },
+        {
+            "name": "MYSQLI_REFRESH_SLAVE",
+            "value": 64
+        },
+        {
+            "name": "MYSQLI_REFRESH_MASTER",
+            "value": 128
+        },
+        {
             "name": "MYSQLI_REPORT_ALL",
             "value": 255
         },
@@ -4376,6 +4420,14 @@
             "value": 1
         },
         {
+            "name": "MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED",
+            "value": 16
+        },
+        {
+            "name": "MYSQLI_SERVER_QUERY_NO_INDEX_USED",
+            "value": 32
+        },
+        {
             "name": "MYSQLI_SET_CHARSET_NAME",
             "value": 7
         },
@@ -4402,6 +4454,22 @@
         {
             "name": "MYSQLI_TIMESTAMP_FLAG",
             "value": 1024
+        },
+        {
+            "name": "MYSQLI_TRANS_COR_AND_CHAIN",
+            "value": 1
+        },
+        {
+            "name": "MYSQLI_TRANS_COR_AND_NO_CHAIN",
+            "value": 2
+        },
+        {
+            "name": "MYSQLI_TRANS_COR_RELEASE",
+            "value": 4
+        },
+        {
+            "name": "MYSQLI_TRANS_COR_NO_RELEASE",
+            "value": 8
         },
         {
             "name": "MYSQLI_TYPE_BIT",
@@ -6010,8 +6078,16 @@
             "value": 3
         },
         {
+            "name": "SORT_FLAG_CASE",
+            "value": 8
+        },
+        {
             "name": "SORT_LOCALE_STRING",
             "value": 5
+        },
+        {
+            "name": "SORT_NATURAL",
+            "value": 6
         },
         {
             "name": "SORT_NUMERIC",

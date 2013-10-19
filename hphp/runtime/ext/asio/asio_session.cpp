@@ -74,57 +74,47 @@ void AsioSession::initAbruptInterruptException() {
     "The request was abruptly interrupted.");
 }
 
-void AsioSession::onFailed(CObjRef exception) {
-  if (m_onFailedCallback.get()) {
-    try {
-      vm_call_user_func(m_onFailedCallback, Array::Create(exception));
-    } catch (const Object& callback_exception) {
-      raise_warning("[asio] Ignoring exception thrown by onFailed callback");
-    }
-  }
-}
-
-void AsioSession::onContinuationCreate(c_ContinuationWaitHandle* cont) {
-  assert(m_onContinuationCreateCallback.get());
+void AsioSession::onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont) {
+  assert(m_onAsyncFunctionCreateCallback.get());
   try {
     vm_call_user_func(
-      m_onContinuationCreateCallback,
+      m_onAsyncFunctionCreateCallback,
       Array::Create(cont));
   } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by ContinuationWaitHandle::onCreate callback");
+    raise_warning("[asio] Ignoring exception thrown by AsyncFunctionWaitHandle::onCreate callback");
   }
 }
 
-void AsioSession::onContinuationYield(c_ContinuationWaitHandle* cont, c_WaitHandle* child) {
-  assert(m_onContinuationYieldCallback.get());
+void AsioSession::onAsyncFunctionAwait(c_AsyncFunctionWaitHandle* cont, c_WaitHandle* child) {
+  assert(m_onAsyncFunctionAwaitCallback.get());
   try {
     vm_call_user_func(
-      m_onContinuationYieldCallback,
+      m_onAsyncFunctionAwaitCallback,
       make_packed_array(cont, child));
   } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by ContinuationWaitHandle::onYield callback");
+    raise_warning("[asio] Ignoring exception thrown by AsyncFunctionWaitHandle::onAwait callback");
   }
 }
 
-void AsioSession::onContinuationSuccess(c_ContinuationWaitHandle* cont, CVarRef result) {
-  assert(m_onContinuationSuccessCallback.get());
+void AsioSession::onAsyncFunctionSuccess(c_AsyncFunctionWaitHandle* cont, CVarRef result) {
+  assert(m_onAsyncFunctionSuccessCallback.get());
   try {
     vm_call_user_func(
-      m_onContinuationSuccessCallback,
+      m_onAsyncFunctionSuccessCallback,
       make_packed_array(cont, result));
   } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by ContinuationWaitHandle::onSuccess callback");
+    raise_warning("[asio] Ignoring exception thrown by AsyncFunctionWaitHandle::onSuccess callback");
   }
 }
 
-void AsioSession::onContinuationFail(c_ContinuationWaitHandle* cont, CObjRef exception) {
-  assert(m_onContinuationFailCallback.get());
+void AsioSession::onAsyncFunctionFail(c_AsyncFunctionWaitHandle* cont, CObjRef exception) {
+  assert(m_onAsyncFunctionFailCallback.get());
   try {
     vm_call_user_func(
-      m_onContinuationFailCallback,
+      m_onAsyncFunctionFailCallback,
       make_packed_array(cont, exception));
   } catch (const Object& callback_exception) {
-    raise_warning("[asio] Ignoring exception thrown by ContinuationWaitHandle::onFail callback");
+    raise_warning("[asio] Ignoring exception thrown by AsyncFunctionWaitHandle::onFail callback");
   }
 }
 

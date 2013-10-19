@@ -30,6 +30,7 @@
 #include <list>
 
 #include "hphp/util/data-block.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/utils.h"
@@ -46,6 +47,7 @@ constexpr int kRegListSizeInBits = sizeof(RegList) * 8;
 // need to declare them in advance.
 class Register;
 class FPRegister;
+class MemOperand;
 
 
 class CPURegister {
@@ -199,6 +201,9 @@ class Register : public CPURegister {
     assert(IsRegister() || IsNone());
     return IsValidRegister();
   }
+
+  MemOperand operator[](const ptrdiff_t offset) const;
+  MemOperand operator[](const Register& offset) const;
 
   static const Register& WRegFromCode(unsigned code);
   static const Register& XRegFromCode(unsigned code);
@@ -649,6 +654,9 @@ class Assembler {
     return UpdateAndGetByteOffsetTo(label) >> kInstructionSizeLog2;
   }
 
+  HPHP::Transl::TCA frontier() const {
+    return cb_.frontier();
+  }
 
   // Instruction set functions.
 
@@ -1068,6 +1076,9 @@ class Assembler {
   // Store integer or FP register.
   void str(const CPURegister& rt, const MemOperand& dst);
 
+  // PC-relative load.
+  void ldr(const Register& rt, Label* label);
+
   // Load word with sign extension.
   void ldrsw(const Register& rt, const MemOperand& src);
 
@@ -1365,6 +1376,11 @@ class Assembler {
     return (immhi & ImmPCRelHi_mask) | (immlo & ImmPCRelLo_mask);
   }
 
+  static Instr ImmPCRelLoadStoreAddress(int imm19) {
+    assert(is_int19(imm19));
+    return truncate_to_int19(imm19) << ImmLLiteral_offset;
+  }
+
   // Branch encoding.
   static Instr ImmUncondBranch(int imm26) {
     assert(is_int26(imm26));
@@ -1583,6 +1599,11 @@ class Assembler {
   void CheckLiteralPool(LiteralPoolEmitOption option = JumpRequired);
   void EmitLiteralPool(LiteralPoolEmitOption option = NoJumpRequired);
   size_t LiteralPoolSize();
+
+  static bool IsImmLogical(uint64_t value, unsigned width) {
+    unsigned ignored;
+    return IsImmLogical(value, width, &ignored, &ignored, &ignored);
+  }
 
  protected:
   inline const Register& AppropriateZeroRegFor(const CPURegister& reg) const {

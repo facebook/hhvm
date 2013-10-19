@@ -31,7 +31,7 @@ FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
 FORWARD_DECLARE_CLASS(GenMapWaitHandle);
 FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
 FORWARD_DECLARE_CLASS(SetResultToRefWaitHandle);
-FORWARD_DECLARE_CLASS(ContinuationWaitHandle);
+FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
 
 class AsioSession {
   public:
@@ -64,7 +64,7 @@ class AsioSession {
       return static_cast<context_idx_t>(m_contexts.size());
     }
 
-    c_ContinuationWaitHandle* getCurrentWaitHandle() {
+    c_AsyncFunctionWaitHandle* getCurrentWaitHandle() {
       assert(!isInContext() || getCurrentContext()->isRunning());
       return isInContext() ? getCurrentContext()->getCurrent() : nullptr;
     }
@@ -87,38 +87,31 @@ class AsioSession {
 
     void initAbruptInterruptException();
 
-    // callback: on failed
-    void setOnFailedCallback(ObjectData* on_failed_callback) {
-      assert(!on_failed_callback || on_failed_callback->instanceof(c_Closure::classof()));
-      m_onFailedCallback = on_failed_callback;
-    }
-    void onFailed(CObjRef exception);
-
-    // ContinuationWaitHandle callbacks:
-    void setOnContinuationCreateCallback(ObjectData* on_start) {
+    // AsyncFunctionWaitHandle callbacks:
+    void setOnAsyncFunctionCreateCallback(ObjectData* on_start) {
       assert(!on_start || on_start->instanceof(c_Closure::classof()));
-      m_onContinuationCreateCallback = on_start;
+      m_onAsyncFunctionCreateCallback = on_start;
     }
-    void setOnContinuationYieldCallback(ObjectData* on_yield) {
-      assert(!on_yield || on_yield->instanceof(c_Closure::classof()));
-      m_onContinuationYieldCallback = on_yield;
+    void setOnAsyncFunctionAwaitCallback(ObjectData* on_await) {
+      assert(!on_await || on_await->instanceof(c_Closure::classof()));
+      m_onAsyncFunctionAwaitCallback = on_await;
     }
-    void setOnContinuationSuccessCallback(ObjectData* on_success) {
+    void setOnAsyncFunctionSuccessCallback(ObjectData* on_success) {
       assert(!on_success || on_success->instanceof(c_Closure::classof()));
-      m_onContinuationSuccessCallback = on_success;
+      m_onAsyncFunctionSuccessCallback = on_success;
     }
-    void setOnContinuationFailCallback(ObjectData* on_fail) {
+    void setOnAsyncFunctionFailCallback(ObjectData* on_fail) {
       assert(!on_fail || on_fail->instanceof(c_Closure::classof()));
-      m_onContinuationFailCallback = on_fail;
+      m_onAsyncFunctionFailCallback = on_fail;
     }
-    bool hasOnContinuationCreateCallback() { return m_onContinuationCreateCallback.get(); }
-    bool hasOnContinuationYieldCallback() { return m_onContinuationYieldCallback.get(); }
-    bool hasOnContinuationSuccessCallback() { return m_onContinuationSuccessCallback.get(); }
-    bool hasOnContinuationFailCallback() { return m_onContinuationFailCallback.get(); }
-    void onContinuationCreate(c_ContinuationWaitHandle* cont);
-    void onContinuationYield(c_ContinuationWaitHandle* cont, c_WaitHandle* child);
-    void onContinuationSuccess(c_ContinuationWaitHandle* cont, CVarRef result);
-    void onContinuationFail(c_ContinuationWaitHandle* cont, CObjRef exception);
+    bool hasOnAsyncFunctionCreateCallback() { return m_onAsyncFunctionCreateCallback.get(); }
+    bool hasOnAsyncFunctionAwaitCallback() { return m_onAsyncFunctionAwaitCallback.get(); }
+    bool hasOnAsyncFunctionSuccessCallback() { return m_onAsyncFunctionSuccessCallback.get(); }
+    bool hasOnAsyncFunctionFailCallback() { return m_onAsyncFunctionFailCallback.get(); }
+    void onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont);
+    void onAsyncFunctionAwait(c_AsyncFunctionWaitHandle* cont, c_WaitHandle* child);
+    void onAsyncFunctionSuccess(c_AsyncFunctionWaitHandle* cont, CVarRef result);
+    void onAsyncFunctionFail(c_AsyncFunctionWaitHandle* cont, CObjRef exception);
 
     // WaitHandle callbacks:
     void setOnJoinCallback(ObjectData* on_join) {
@@ -172,18 +165,15 @@ class AsioSession {
 
     Object m_abruptInterruptException;
 
-    Object m_onContinuationCreateCallback;
-    Object m_onContinuationYieldCallback;
-    Object m_onContinuationSuccessCallback;
-    Object m_onContinuationFailCallback;
+    Object m_onAsyncFunctionCreateCallback;
+    Object m_onAsyncFunctionAwaitCallback;
+    Object m_onAsyncFunctionSuccessCallback;
+    Object m_onAsyncFunctionFailCallback;
     Object m_onGenArrayCreateCallback;
     Object m_onGenMapCreateCallback;
     Object m_onGenVectorCreateCallback;
     Object m_onSetResultToRefCreateCallback;
     Object m_onJoinCallback;
-
-    // Legacy callback for backwards compatibility.
-    Object m_onFailedCallback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

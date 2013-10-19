@@ -119,19 +119,28 @@ class c_PDO : public ExtObjectData, public Sweepable {
   // need to implement
   public: c_PDO(Class* cls = c_PDO::classof());
   public: ~c_PDO();
-  public: void t___construct(CStrRef dsn, CStrRef username = null_string, CStrRef password = null_string, CArrRef options = null_array);
-  public: Variant t_prepare(CStrRef statement, CArrRef options = null_array);
+  public: void t___construct(const String& dsn,
+                             const String& username = null_string,
+                             const String& password = null_string,
+                             CArrRef options = null_array);
+  public: Variant t_prepare(const String& statement,
+                            CArrRef options = null_array);
   public: bool t_begintransaction();
   public: bool t_commit();
   public: bool t_rollback();
   public: bool t_setattribute(int64_t attribute, CVarRef value);
   public: Variant t_getattribute(int64_t attribute);
-  public: Variant t_exec(CStrRef query);
-  public: Variant t_lastinsertid(CStrRef seqname = null_string);
+  public: Variant t_exec(const String& query);
+  public: Variant t_lastinsertid(const String& seqname = null_string);
   public: Variant t_errorcode();
   public: Array t_errorinfo();
-  public: Variant t_query(CStrRef sql);
-  public: Variant t_quote(CStrRef str, int64_t paramtype = q_PDO$$PARAM_STR);
+  public: Variant t_query(const String& sql);
+  public: Variant t_quote(const String& str,
+                          int64_t paramtype = q_PDO$$PARAM_STR);
+  public: bool t_sqlitecreatefunction(const String& name, CVarRef callback,
+                                      int64_t argcount = -1);
+  public: bool t_sqlitecreateaggregate(const String& name, CVarRef step,
+                                       CVarRef final, int64_t argcount = -1);
   public: Variant t___wakeup();
   public: Variant t___sleep();
   public: static Array ti_getavailabledrivers();
@@ -152,13 +161,25 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
   public: ~c_PDOStatement();
   public: void t___construct();
   public: Variant t_execute(CArrRef params = null_array);
-  public: Variant t_fetch(int64_t how = 0, int64_t orientation = q_PDO$$FETCH_ORI_NEXT, int64_t offset = 0);
-  public: Variant t_fetchobject(CStrRef class_name = null_string, CVarRef ctor_args = uninit_null());
+  public: Variant t_fetch(int64_t how = 0,
+                          int64_t orientation = q_PDO$$FETCH_ORI_NEXT,
+                          int64_t offset = 0);
+  public: Variant t_fetchobject(const String& class_name = null_string,
+                                CVarRef ctor_args = uninit_null());
   public: Variant t_fetchcolumn(int64_t column_numner = 0);
-  public: Variant t_fetchall(int64_t how = 0, CVarRef class_name = uninit_null(), CVarRef ctor_args = uninit_null());
-  public: bool t_bindvalue(CVarRef paramno, CVarRef param, int64_t type = q_PDO$$PARAM_STR);
-  public: bool t_bindparam(CVarRef paramno, VRefParam param, int64_t type = q_PDO$$PARAM_STR, int64_t max_value_len = 0, CVarRef driver_params = uninit_null());
-  public: bool t_bindcolumn(CVarRef paramno, VRefParam param, int64_t type = q_PDO$$PARAM_STR, int64_t max_value_len = 0, CVarRef driver_params = uninit_null());
+  public: Variant t_fetchall(int64_t how = 0,
+                             CVarRef class_name = uninit_null(),
+                             CVarRef ctor_args = uninit_null());
+  public: bool t_bindvalue(CVarRef paramno, CVarRef param,
+                           int64_t type = q_PDO$$PARAM_STR);
+  public: bool t_bindparam(CVarRef paramno, VRefParam param,
+                           int64_t type = q_PDO$$PARAM_STR,
+                           int64_t max_value_len = 0,
+                           CVarRef driver_params = uninit_null());
+  public: bool t_bindcolumn(CVarRef paramno, VRefParam param,
+                            int64_t type = q_PDO$$PARAM_STR,
+                            int64_t max_value_len = 0,
+                            CVarRef driver_params = uninit_null());
   public: int64_t t_rowcount();
   public: Variant t_errorcode();
   public: Array t_errorinfo();
@@ -166,7 +187,8 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
   public: Variant t_getattribute(int64_t attribute);
   public: int64_t t_columncount();
   public: Variant t_getcolumnmeta(int64_t column);
-  public: bool t_setfetchmode(int _argc, int64_t mode, CArrRef _argv = null_array);
+  public: bool t_setfetchmode(int _argc, int64_t mode,
+                              CArrRef _argv = null_array);
   public: bool t_nextrowset();
   public: bool t_closecursor();
   public: Variant t_debugdumpparams();

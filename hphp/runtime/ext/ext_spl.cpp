@@ -308,7 +308,7 @@ Variant f_spl_autoload_functions() {
     return handlers.values();
 }
 
-void f_spl_autoload_call(CStrRef class_name) {
+void f_spl_autoload_call(const String& class_name) {
   AutoloadHandler::s_instance->invokeHandler(class_name, true);
 }
 
@@ -328,7 +328,7 @@ public:
 IMPLEMENT_STATIC_REQUEST_LOCAL(ExtensionList, s_extension_list);
 }
 
-String f_spl_autoload_extensions(CStrRef file_extensions /* = null_string */) {
+String f_spl_autoload_extensions(const String& file_extensions /* = null_string */) {
   if (!file_extensions.isNull()) {
     s_extension_list->extensions = StringUtil::Explode(file_extensions, ",")
                                    .toArray();
@@ -337,8 +337,8 @@ String f_spl_autoload_extensions(CStrRef file_extensions /* = null_string */) {
   return StringUtil::Implode(s_extension_list->extensions, ",");
 }
 
-void f_spl_autoload(CStrRef class_name,
-                    CStrRef file_extensions /* = null_string */) {
+void f_spl_autoload(const String& class_name,
+                    const String& file_extensions /* = null_string */) {
   Array ext = file_extensions.isNull()
               ? s_extension_list->extensions
               : StringUtil::Explode(file_extensions, ",").toArray();

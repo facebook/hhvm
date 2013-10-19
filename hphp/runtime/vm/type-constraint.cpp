@@ -30,6 +30,8 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
+//////////////////////////////////////////////////////////////////////
+
 namespace {
 
 // TODO(#2322864): this is a hack until we can get rid of the "Xhp"
@@ -42,7 +44,11 @@ bool blacklistedName(const StringData* sd) {
 
 }
 
+//////////////////////////////////////////////////////////////////////
+
 TypeConstraint::TypeMap TypeConstraint::s_typeNamesToTypes;
+
+//////////////////////////////////////////////////////////////////////
 
 void TypeConstraint::init() {
   if (UNLIKELY(s_typeNamesToTypes.empty())) {
@@ -91,32 +97,31 @@ void TypeConstraint::init() {
   if (isTypeVar()) {
     // We kept the type variable type constraint to correctly check child
     // classes implementing abstract methods or interfaces.
-    //
-    // This type constraint is never actually used, so we can just return.
-    // We could also do:
-    // m_type.m_dt = KindOfAny;
+    m_type.dt = KindOfInvalid;
+    m_type.metatype = MetaType::Precise;
     return;
   }
   if (m_typeName && isExtended()) {
-    assert(nullable() &&
-           "Only nullable extended type hints are implemented");
+    assert((isNullable() || isSoft()) &&
+           "Only nullable and soft extended type hints are implemented");
   }
 
   if (isExtended() && blacklistedName(m_typeName)) {
     m_typeName = nullptr;
   }
   if (m_typeName == nullptr) {
-    m_type.m_dt = KindOfInvalid;
-    m_type.m_metatype = MetaType::Precise;
+    m_type.dt = KindOfInvalid;
+    m_type.metatype = MetaType::Precise;
     return;
   }
 
   Type dtype;
   TRACE(5, "TypeConstraint: this %p type %s, nullable %d\n",
-        this, m_typeName->data(), nullable());
+        this, m_typeName->data(), isNullable());
   if (!mapGet(s_typeNamesToTypes, m_typeName, &dtype) ||
-      !(hhType() || dtype.m_dt == KindOfArray || dtype.isParent() ||
-        dtype.isSelf())) {
+      !(isHHType() || dtype.dt == KindOfArray ||
+        dtype.metatype == MetaType::Parent ||
+        dtype.metatype == MetaType::Self)) {
     TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
           this, m_typeName->data());
     m_type = { KindOfObject, MetaType::Precise };
@@ -125,10 +130,10 @@ void TypeConstraint::init() {
     return;
   }
   m_type = dtype;
-  assert(m_type.m_dt != KindOfStaticString);
-  assert(IMPLIES(isParent(), m_type.m_dt == KindOfObject));
-  assert(IMPLIES(isSelf(), m_type.m_dt == KindOfObject));
-  assert(IMPLIES(isCallable(), m_type.m_dt == KindOfObject));
+  assert(m_type.dt != KindOfStaticString);
+  assert(IMPLIES(isParent(), m_type.dt == KindOfObject));
+  assert(IMPLIES(isSelf(), m_type.dt == KindOfObject));
+  assert(IMPLIES(isCallable(), m_type.dt == KindOfObject));
 }
 
 /*
@@ -139,34 +144,34 @@ void TypeConstraint::init() {
  * autoload typedefs because they can affect whether the
  * VerifyParamType would succeed.
  */
-const TypedefReq* getTypedefWithAutoload(const NamedEntity* ne,
-                                         const StringData* name) {
-  auto def = ne->getCachedTypedef();
+const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
+                                             const StringData* name) {
+  auto def = ne->getCachedTypeAlias();
   if (!def) {
     String nameStr(const_cast<StringData*>(name));
     if (!AutoloadHandler::s_instance->autoloadType(nameStr)) {
       return nullptr;
     }
-    def = ne->getCachedTypedef();
+    def = ne->getCachedTypeAlias();
   }
   return def;
 }
 
-bool TypeConstraint::checkTypedefNonObj(const TypedValue* tv) const {
+bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
   assert(tv->m_type != KindOfObject); // this checks when tv is not an object
   assert(!isSelf() && !isParent());
 
-  auto const td = getTypedefWithAutoload(m_namedEntity, m_typeName);
+  auto const td = getTypeAliasWithAutoload(m_namedEntity, m_typeName);
   if (!td) return false;
   if (td->nullable && IS_NULL_TYPE(tv->m_type)) return true;
   return td->kind == KindOfAny || equivDataTypes(td->kind, tv->m_type);
 }
 
-bool TypeConstraint::checkTypedefObj(const TypedValue* tv) const {
+bool TypeConstraint::checkTypeAliasObj(const TypedValue* tv) const {
   assert(tv->m_type == KindOfObject); // this checks when tv is an object
   assert(!isSelf() && !isParent() && !isCallable());
 
-  auto const td = getTypedefWithAutoload(m_namedEntity, m_typeName);
+  auto const td = getTypeAliasWithAutoload(m_namedEntity, m_typeName);
   if (!td) return false;
   if (td->nullable && IS_NULL_TYPE(tv->m_type)) return true;
   if (td->kind != KindOfObject) return td->kind == KindOfAny;
@@ -181,10 +186,10 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
   }
-  if (nullable() && IS_NULL_TYPE(tv->m_type)) return true;
+  if (isNullable() && IS_NULL_TYPE(tv->m_type)) return true;
 
   if (tv->m_type == KindOfObject) {
-    if (!isObjectOrTypedef()) return false;
+    if (!isObjectOrTypeAlias()) return false;
     // Perfect match seems common enough to be worth skipping the hash
     // table lookup.
     if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) {
@@ -214,10 +219,10 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     if (c && tv->m_data.pobj->instanceof(c)) {
       return true;
     }
-    return !selfOrParentOrCallable && checkTypedefObj(tv);
+    return !selfOrParentOrCallable && checkTypeAliasObj(tv);
   }
 
-  if (isObjectOrTypedef()) {
+  if (isObjectOrTypeAlias()) {
     switch (tv->m_type) {
       case KindOfArray:
         if (interface_supports_array(m_typeName)) {
@@ -247,18 +252,18 @@ TypeConstraint::check(const TypedValue* tv, const Func* func) const {
     if (isCallable()) {
       return f_is_callable(tvAsCVarRef(tv));
     }
-    return isPrecise() && checkTypedefNonObj(tv);
+    return isPrecise() && checkTypeAliasNonObj(tv);
   }
 
-  return equivDataTypes(m_type.m_dt, tv->m_type);
+  return equivDataTypes(m_type.dt, tv->m_type);
 }
 
 bool
 TypeConstraint::checkPrimitive(DataType dt) const {
-  assert(m_type.m_dt != KindOfObject);
+  assert(m_type.dt != KindOfObject);
   assert(dt != KindOfRef);
-  if (nullable() && IS_NULL_TYPE(dt)) return true;
-  return equivDataTypes(m_type.m_dt, dt);
+  if (isNullable() && IS_NULL_TYPE(dt)) return true;
+  return equivDataTypes(m_type.dt, dt);
 }
 
 static const char* describe_actual_type(const TypedValue* tv) {
@@ -300,11 +305,12 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
     // Extended type hints raise warnings instead of recoverable
     // errors for now, to ease migration (we used to not check these
     // at all at runtime).
-    assert(nullable() &&
-           "only nullable extended type hints are currently supported");
+    assert(
+      (isSoft() || isNullable()) &&
+      "Only nullable and soft extended type hints are currently implemented");
     raise_warning(
-      "Argument %d to %s must be of type ?%s, %s given",
-      paramNum + 1, fname.str().c_str(), tn->data(), givenType);
+      "Argument %d to %s must be of type %s, %s given",
+      paramNum + 1, fname.str().c_str(), fullName().c_str(), givenType);
   } else {
     raise_recoverable_error(
       "Argument %d passed to %s must be an instance of %s, %s given",
@@ -344,4 +350,6 @@ void TypeConstraint::parentToTypeName(const Func* func,
   }
 }
 
-} // HPHP::VM
+//////////////////////////////////////////////////////////////////////
+
+}

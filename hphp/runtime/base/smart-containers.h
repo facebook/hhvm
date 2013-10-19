@@ -16,6 +16,15 @@
 #ifndef incl_HPHP_RUNTIME_BASE_MEMORY_SMART_CONTAINERS_H_
 #define incl_HPHP_RUNTIME_BASE_MEMORY_SMART_CONTAINERS_H_
 
+#include <deque>
+#include <queue>
+#include <map>
+#include <stack>
+#include <vector>
+#include <tr1/unordered_map>
+#include <cstdlib>
+#include <memory>
+
 #include <boost/container/flat_map.hpp>
 
 #include "hphp/runtime/base/memory-manager.h"

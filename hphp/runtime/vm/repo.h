@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/preclass-emit.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/litstr-repo-proxy.h"
 
 #include <sqlite3.h>
 
@@ -72,9 +73,11 @@ class Repo : public RepoProxy {
   UnitRepoProxy& urp() { return m_urp; }
   PreClassRepoProxy& pcrp() { return m_pcrp; }
   FuncRepoProxy& frp() { return m_frp; }
+  LitstrRepoProxy& lsrp() { return m_lsrp; }
 
   static void setCliFile(const std::string& cliFile);
 
+  void loadLitstrs();
   Unit* loadUnit(const std::string& name, const MD5& md5);
   bool findFile(const char* path, const std::string& root, MD5& md5);
   bool insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
@@ -118,6 +121,7 @@ class Repo : public RepoProxy {
   bool insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
                   RepoTxn& txn); // nothrow
   void commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin); // nothrow
+  void insertLitstrs(RepoTxn& txn, UnitOrigin unitOrigin);
 
   // All database table names use the schema ID (md5 checksum based on the
   // source code) as a suffix.  For example, if the schema ID is
@@ -170,6 +174,7 @@ class Repo : public RepoProxy {
   UnitRepoProxy m_urp;
   PreClassRepoProxy m_pcrp;
   FuncRepoProxy m_frp;
+  LitstrRepoProxy m_lsrp;
 };
 
 }

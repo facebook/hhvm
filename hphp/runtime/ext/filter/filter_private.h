@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 
-#define PHP_INPUT_FILTER_PARAM_DECL CStrRef value, long flags, \
+#define PHP_INPUT_FILTER_PARAM_DECL const String& value, long flags, \
                                     CVarRef option_array
 
 #define RETURN_VALIDATION_FAILED    \

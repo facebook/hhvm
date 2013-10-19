@@ -25,7 +25,7 @@
 #include "hphp/compiler/code_generator.h"
 #include <boost/graph/adjacency_list.hpp>
 #include "hphp/util/json.h"
-#include "hphp/runtime/base/md5.h"
+#include "hphp/util/md5.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,8 +107,11 @@ public:
    * are the only functions a parser calls upon analysis results.
    */
   FunctionScopePtr setTree(AnalysisResultConstPtr ar, StatementListPtr tree);
-  void cleanupForError(AnalysisResultConstPtr ar,
-                       int line, const std::string &msg);
+  void cleanupForError(AnalysisResultConstPtr ar);
+  void makeFatal(AnalysisResultConstPtr ar,
+                 const std::string& msg, int line);
+  void makeParseFatal(AnalysisResultConstPtr ar,
+                      const std::string& msg, int line);
 
   bool addFunction(AnalysisResultConstPtr ar, FunctionScopePtr funcScope);
   bool addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope);

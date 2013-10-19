@@ -77,4 +77,36 @@ function(embed_systemlib TARGET DEST SOURCE)
 	                   ARGS "--add-section" "systemlib=${SOURCE}" ${DEST}
 	                   COMMENT "Embedding systemlib.php in ${TARGET}")
 	endif()
+	# Add the systemlib file to the "LINK_DEPENDS" for the systemlib, this will cause it
+	# to be relinked and the systemlib re-embedded
+	set_property(TARGET ${TARGET} APPEND PROPERTY LINK_DEPENDS ${SOURCE})
 endfunction(embed_systemlib)
+
+# Custom install function that doesn't relink, instead it uses chrpath to change it, if
+# it's available, otherwise, it leaves the chrpath alone
+function(HHVM_INSTALL TARGET DEST)
+	get_target_property(LOC ${TARGET} LOCATION)
+	get_target_property(TY ${TARGET} TYPE)
+	if (FOUND_CHRPATH)
+		get_target_property(RPATH ${TARGET} INSTALL_RPATH)
+		if (NOT RPATH STREQUAL "RPATH-NOTFOUND")
+			if (RPATH STREQUAL "")
+				install(CODE "execute_process(COMMAND \"${CHRPATH}\" \"-d\" \"${LOC}\" ERROR_QUIET)")
+			else()
+				install(CODE "execute_process(COMMAND \"${CHRPATH}\" \"-r\" \"${RPATH}\" \"${LOC}\" ERROR_QUIET)")
+			endif()
+		endif()
+	endif()
+	install(CODE "FILE(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${DEST}\" TYPE ${TY} FILES \"${LOC}\")")
+endfunction(HHVM_INSTALL)
+
+function(HHVM_EXTENSION EXTNAME)
+	list(REMOVE_AT ARGV 0)
+	add_library(${EXTNAME} SHARED ${ARGV})
+	set_target_properties(${EXTNAME} PROPERTIES PREFIX "")
+	set_target_properties(${EXTNAME} PROPERTIES SUFFIX ".so")
+endfunction()
+
+function(HHVM_SYSTEMLIB EXTNAME SOURCE_FILE)
+	embed_systemlib(${EXTNAME} "${EXTNAME}.so" ${SOURCE_FILE})
+endfunction()

@@ -620,6 +620,9 @@ class MacroAssembler : public Assembler {
     assert(!rt.IsZero());
     ldr(rt, imm);
   }
+  void Ldr(const Register& rt, Label* label) {
+    ldr(rt, label);
+  }
   void Lsl(const Register& rd, const Register& rn, unsigned shift) {
     assert(allow_macro_instructions_);
     assert(!rd.IsZero());

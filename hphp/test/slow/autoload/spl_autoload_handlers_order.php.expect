@@ -1,0 +1,75 @@
+bool(false)
+array(1) {
+  [0]=>
+  string(1) "a"
+}
+array(1) {
+  [0]=>
+  string(1) "a"
+}
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  string(1) "a"
+}
+array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "a"
+}
+array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "a"
+}
+array(3) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "c"
+}
+array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+}

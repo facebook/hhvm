@@ -1638,6 +1638,18 @@
                 "desc": "No value is returned."
             },
             "args": [
+                {
+                    "name": "clear_realpath_cache",
+                    "type": "Boolean",
+                    "desc": "Whether to clear the realpath cache or not.",
+                    "value": "false"
+                },
+                {
+                    "name": "filename",
+                    "type": "String",
+                    "desc": "Clear the realpath and the stat cache for a specific filename only; only used if clear_realpath_cache is TRUE.",
+                    "value": "null"
+                }
             ]
         },
         {

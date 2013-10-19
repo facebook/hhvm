@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
@@ -53,74 +54,24 @@ using Transl::rVmFp;
 using Transl::rVmSp;
 
 /*
- * Satisfy an alignment constraint. If we're in a reachable section
- * of code, bridge the gap with nops. Otherwise, int3's.
+ * Satisfy an alignment constraint. Bridge the gap with int3's.
  */
-void moveToAlign(Asm& aa,
-                 const size_t align /* =kJmpTargetAlign */,
-                 const bool unreachable /* =true */) {
+void moveToAlign(CodeBlock& cb,
+                 const size_t align /* =kJmpTargetAlign */) {
+  // TODO(2967396) implement properly, move function
+  if (arch() == Arch::ARM) return;
+
   using namespace HPHP::Util;
+  X64Assembler a { cb };
   assert(isPowerOfTwo(align));
-  size_t leftInBlock = align - ((align - 1) & uintptr_t(aa.frontier()));
+  size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
   if (leftInBlock == align) return;
-  if (unreachable) {
-    if (leftInBlock > 2) {
-      aa.ud2();
-      leftInBlock -= 2;
-    }
-    if (leftInBlock > 0) {
-      aa.emitInt3s(leftInBlock);
-    }
-    return;
+  if (leftInBlock > 2) {
+    a.ud2();
+    leftInBlock -= 2;
   }
-  aa.emitNop(leftInBlock);
-}
-
-/*
- * Returns true if the given current frontier can have an nBytes-long
- * instruction written without any risk of cache-tearing.
- */
-bool isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
-  assert(nBytes <= int(kX64CacheLineSize));
-  uintptr_t iFrontier = uintptr_t(frontier) + offset;
-  uintptr_t lastByte = uintptr_t(frontier) + nBytes - 1;
-  return (iFrontier & ~kX64CacheLineMask) == (lastByte & ~kX64CacheLineMask);
-}
-
-void prepareForSmash(X64Assembler& a, int nBytes, int offset /* = 0 */) {
-  if (!isSmashable(a.frontier(), nBytes, offset)) {
-    int gapSize = (~(uintptr_t(a.frontier()) + offset) &
-                   kX64CacheLineMask) + 1;
-    a.emitNop(gapSize);
-    assert(isSmashable(a.frontier(), nBytes, offset));
-  }
-}
-
-/*
- * Call before emitting a test-jcc sequence. Inserts a nop gap such that after
- * writing a testBytes-long instruction, the frontier will be smashable.
- */
-void prepareForTestAndSmash(Asm& a, int testBytes, TestAndSmashFlags flags) {
-  switch (flags) {
-  case TestAndSmashFlags::kAlignJcc:
-    prepareForSmash(a, testBytes + kJmpccLen, testBytes);
-    assert(isSmashable(a.frontier() + testBytes, kJmpccLen));
-    break;
-  case TestAndSmashFlags::kAlignJccImmediate:
-    prepareForSmash(a,
-                    testBytes + kJmpccLen,
-                    testBytes + kJmpccLen - kJmpImmBytes);
-    assert(isSmashable(a.frontier() + testBytes, kJmpccLen,
-                       kJmpccLen - kJmpImmBytes));
-    break;
-  case TestAndSmashFlags::kAlignJccAndJmp:
-    // Ensure that the entire jcc, and the entire jmp are smashable
-    // (but we dont need them both to be in the same cache line)
-    prepareForSmash(a, testBytes + kJmpccLen, testBytes);
-    prepareForSmash(a, testBytes + kJmpccLen + kJmpLen, testBytes + kJmpccLen);
-    assert(isSmashable(a.frontier() + testBytes, kJmpccLen));
-    assert(isSmashable(a.frontier() + testBytes + kJmpccLen, kJmpLen));
-    break;
+  if (leftInBlock > 0) {
+    a.emitInt3s(leftInBlock);
   }
 }
 
@@ -219,6 +170,15 @@ struct IfCountNotStatic {
   }
 };
 
+
+void emitTransCounterInc(Asm& a) {
+  if (!tx64->isTransDBEnabled()) return;
+
+  a.    movq (tx64->getTransCounterAddr(), rAsm);
+  a.    lock ();
+  a.    incq (*rAsm);
+}
+
 void emitIncRef(Asm& as, PhysReg base) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitAssertRefCount(as, base);
@@ -305,18 +265,6 @@ void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg) {
   as.   decq(dstReg);
 }
 
-void emitExitSlowStats(Asm& as, const Func* func, SrcKey dest) {
-  if (RuntimeOption::EnableInstructionCounts ||
-      HPHP::Trace::moduleEnabled(HPHP::Trace::stats, 3)) {
-    Stats::emitInc(as,
-                   Stats::opcodeToIRPreStatCounter(
-                     Op(*func->unit()->at(dest.offset()))),
-                   -1,
-                   Transl::CC_None,
-                   true);
-  }
-}
-
 void emitCall(Asm& a, TCA dest) {
   if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
     a.    call(dest);
@@ -346,23 +294,9 @@ void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
 
 void emitRB(X64Assembler& a,
             Trace::RingBufferType t,
-            SrcKey sk, RegSet toSave) {
-  if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
-    return;
-  }
-  PhysRegSaver rs(a, toSave | kSpecialCrossTraceRegs);
-  int arg = 0;
-  a.    emitImmReg(t, argNumToRegName[arg++]);
-  a.    emitImmReg(sk.getFuncId(), argNumToRegName[arg++]);
-  a.    emitImmReg(sk.offset(), argNumToRegName[arg++]);
-  a.    call((TCA)Trace::ringbufferEntry);
-}
-
-void emitRB(X64Assembler& a,
-            Trace::RingBufferType t,
             const char* msg,
             RegSet toSave) {
-  if (!Trace::moduleEnabledRelease(Trace::tx64, 3)) {
+  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
     return;
   }
   PhysRegSaver save(a, toSave | kSpecialCrossTraceRegs);
@@ -373,10 +307,24 @@ void emitRB(X64Assembler& a,
   a.    call((TCA)Trace::ringbufferMsg);
 }
 
+void emitTraceCall(CodeBlock& cb, int64_t pcOff) {
+  // TODO(2967396) implement properly, move function
+  if (arch() == Arch::ARM) return;
+
+  Asm as { cb };
+  // call to a trace function
+  as.mov_imm64_reg((int64_t)as.frontier(), reg::rcx);
+  as.mov_reg64_reg64(rVmFp, reg::rdi);
+  as.mov_reg64_reg64(rVmSp, reg::rsi);
+  as.mov_imm64_reg(pcOff, reg::rdx);
+  // do the call; may use a trampoline
+  emitCall(as, (TCA)traceCallback);
+}
+
 void emitTestSurpriseFlags(Asm& a) {
   static_assert(RequestInjectionData::LastFlag < (1 << 8),
                 "Translator assumes RequestInjectionFlags fit in one byte");
-  a.    testb((int8_t)0xff, rVmTl[TargetCache::kConditionFlagsOff]);
+  a.    testb((int8_t)0xff, rVmTl[RDS::kConditionFlagsOff]);
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,

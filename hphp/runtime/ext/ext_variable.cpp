@@ -53,7 +53,7 @@ double f_floatval(CVarRef v) { return v.toDouble();}
 String f_strval(CVarRef v) { return v.toString();}
 bool f_boolval(CVarRef v) { return v.toBoolean();}
 
-bool f_settype(VRefParam var, CStrRef type) {
+bool f_settype(VRefParam var, const String& type) {
   if      (type == s_boolean) var = var.toBoolean();
   else if (type == s_bool   ) var = var.toBoolean();
   else if (type == s_integer) var = var.toInt64();
@@ -181,7 +181,7 @@ void f_debug_zval_dump(CVarRef variable) {
   vs.serialize(variable, false);
 }
 
-Variant f_unserialize(CStrRef str, CArrRef class_whitelist /* = empty_array */) {
+Variant f_unserialize(const String& str, CArrRef class_whitelist /* = empty_array */) {
   return unserialize_from_string(str, class_whitelist);
 }
 
@@ -197,7 +197,7 @@ Array f_get_defined_vars() {
   }
 }
 
-bool f_import_request_variables(CStrRef types, CStrRef prefix /* = "" */) {
+bool f_import_request_variables(const String& types, const String& prefix /* = "" */) {
   throw NotSupportedException(__func__,
                               "It is bad coding practice to remove scoping of "
                               "variables just to achieve coding convenience, "
@@ -209,7 +209,7 @@ bool f_import_request_variables(CStrRef types, CStrRef prefix /* = "" */) {
 }
 
 int64_t f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
-                  CStrRef prefix /* = "" */) {
+                  const String& prefix /* = "" */) {
   bool reference = extract_type & EXTR_REFS;
   extract_type &= ~EXTR_REFS;
 

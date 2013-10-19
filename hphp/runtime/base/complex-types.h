@@ -17,9 +17,10 @@
 #ifndef incl_HPHP_COMPLEX_TYPES_H_
 #define incl_HPHP_COMPLEX_TYPES_H_
 
+#include "hphp/runtime/base/hphp-value.h"
+
 #define incl_HPHP_INSIDE_HPHP_COMPLEX_TYPES_H_
 
-#include "hphp/runtime/base/hphp-value.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"

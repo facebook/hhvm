@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_EXTRADATA_H_
 #define incl_HPHP_VM_EXTRADATA_H_
 
+#include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -121,13 +122,13 @@ struct LocalId : IRExtraData {
   uint32_t locId;
 };
 
-struct LdLocData : LocalId {
-  explicit LdLocData(uint32_t id, SSATmp* src)
+struct LocalData : LocalId {
+  explicit LocalData(uint32_t id, SSATmp* src)
     : LocalId(id)
     , valSrc(src)
   {}
 
-  bool cseEquals(const LdLocData& o) const {
+  bool cseEquals(const LocalData& o) const {
     return LocalId::cseEquals(o) && valSrc == o.valSrc;
   }
   size_t cseHash() const {
@@ -259,7 +260,7 @@ struct TypeProfileData : IRExtraData {
   int32_t param;
   const Func* func;
   std::string show() const {
-    return folly::to<std::string>(func->fullName()->data(), ":", param);
+    return folly::to<std::string>(func->fullName()->data(), ",", param);
   }
 };
 
@@ -384,6 +385,45 @@ struct StaticLocName : IRExtraData {
   const StringData* name;
 };
 
+struct LdFuncCachedData : IRExtraData {
+  explicit LdFuncCachedData(const StringData* name)
+    : name(name)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(name->data());
+  }
+
+  size_t cseHash() const { return name->hash(); }
+  bool cseEquals(const LdFuncCachedData& o) const {
+    return name == o.name;
+  }
+
+  const StringData* name;
+};
+
+struct LdFuncCachedUData : IRExtraData {
+  explicit LdFuncCachedUData(const StringData* name,
+                             const StringData* fallback)
+    : name(name)
+    , fallback(fallback)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(name->data(), ',', fallback->data());
+  }
+
+  size_t cseHash() const {
+    return hash_int64_pair(name->hash(), fallback->hash());
+  }
+  bool cseEquals(const LdFuncCachedUData& o) const {
+    return name == o.name && fallback == o.fallback;
+  }
+
+  const StringData* name;
+  const StringData* fallback;
+};
+
 /*
  * The name of a class, and the expected Class* at runtime.
  */
@@ -473,6 +513,31 @@ struct ReDefSPData : IRExtraData {
   bool spansCall;
 };
 
+struct RBTraceData : IRExtraData {
+  RBTraceData(Trace::RingBufferType t, SrcKey sk_)
+    : type(t)
+    , sk(sk_)
+    , msg(nullptr)
+  {}
+
+  RBTraceData(Trace::RingBufferType t, const StringData* msg_)
+    : type(t)
+    , sk()
+    , msg(msg_)
+  {
+    assert(msg->isStatic());
+  }
+
+  std::string show() const {
+    auto const data = msg ? msg->data() : showShort(sk);
+    return folly::format("{}: {}", ringbufferName(type), data).str();
+  }
+
+  Trace::RingBufferType type;
+  SrcKey sk;
+  const StringData* msg;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -488,9 +553,9 @@ X(GuardLoc,                     LocalId);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
 X(OverrideLoc,                  LocalId);
-X(LdLocAddr,                    LdLocData);
+X(LdLocAddr,                    LocalData);
 X(DecRefLoc,                    LocalId);
-X(LdLoc,                        LdLocData);
+X(LdLoc,                        LocalData);
 X(StLoc,                        LocalId);
 X(StLocNT,                      LocalId);
 X(IterFree,                     IterId);
@@ -525,6 +590,9 @@ X(CallArray,                    CallArrayData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);
 X(LdStaticLocCached,            StaticLocName);
+X(LdFuncCached,                 LdFuncCachedData);
+X(LdFuncCachedSafe,             LdFuncCachedData);
+X(LdFuncCachedU,                LdFuncCachedUData);
 X(ReqBindJmpGt,                 ReqBindJccData);
 X(ReqBindJmpGte,                ReqBindJccData);
 X(ReqBindJmpLt,                 ReqBindJccData);
@@ -547,6 +615,7 @@ X(CreateContFunc,               CreateContData);
 X(CreateContMeth,               CreateContData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
+X(RBTrace,                      RBTraceData);
 
 #undef X
 

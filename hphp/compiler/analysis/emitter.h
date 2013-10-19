@@ -349,7 +349,7 @@ public:
   bool evalStackIsUnknown() { return m_evalStackIsUnknown; }
   void popEvalStack(char symFlavor, int arg = -1, int pos = -1);
   void popSymbolicLocal(Op opcode, int arg = -1, int pos = -1);
-  void popEvalStackLMany();
+  void popEvalStackMMany();
   void popEvalStackMany(int len, char symFlavor);
   void popEvalStackCVMany(int len);
   void pushEvalStack(char symFlavor);
@@ -374,12 +374,14 @@ public:
   class IncludeTimeFatalException : public Exception {
   public:
     ConstructPtr m_node;
+    bool m_parseFatal;
     IncludeTimeFatalException(ConstructPtr node, const char* fmt, ...)
-        : Exception(), m_node(node) {
+        : Exception(), m_node(node), m_parseFatal(false) {
       va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
     }
     virtual ~IncludeTimeFatalException() throw() {}
     EXCEPTION_COMMON_IMPL(IncludeTimeFatalException);
+    void setParseFatal(bool b = true) { m_parseFatal = b; }
   };
 
   void pushIterScope(Id id, IterKind kind) {
@@ -512,9 +514,6 @@ private:
     int nonZeroI;
     int defI;
   };
-
-private:
-  void emitFatal(Emitter& e, const char* message);
 
 private:
   static const size_t kMinStringSwitchCases = 8;
@@ -681,14 +680,16 @@ public:
   void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                          bool byRef);
   void emitBuiltinDefaultArg(Emitter& e, Variant& v, DataType t, int paramId);
-  PreClass::Hoistable emitClass(Emitter& e, ClassScopePtr cNode,
-                                bool topLevel);
+  void emitClass(Emitter& e, ClassScopePtr cNode, bool topLevel);
   void emitTypedef(Emitter& e, TypedefStatementPtr);
   void emitForeachListAssignment(Emitter& e, ListAssignmentPtr la,
                                  int vLocalId);
   void emitForeach(Emitter& e, ForEachStatementPtr fe);
   void emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc);
-  void emitMakeUnitFatal(Emitter& e, const std::string& message);
+  void emitMakeUnitFatal(Emitter& e,
+                         const char* msg,
+                         FatalKind k = FatalKind::Runtime,
+                         bool skipFrame = false);
 
   void addFunclet(Thunklet* body, Label* entry);
   void emitFunclets(Emitter& e);

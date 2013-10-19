@@ -71,7 +71,18 @@
                     "name": "keys",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the keys from this Vector.",
+                    "desc": "Returns a Vector built from the keys of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a clone of this Vector.",
                     "return": {
                         "type": "Object"
                     },
@@ -341,6 +352,17 @@
                     "flags": [
                     ],
                     "desc": "Returns a copy of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this Vector.",
                     "return": {
                         "type": "Object"
                     },
@@ -682,11 +704,351 @@
             ]
         },
         {
+          "name": "FrozenVector",
+          "ifaces": [
+            "ConstVector"
+          ],
+          "flags": [
+            "IsFinal",
+            "IsCppSerializable",
+            "NoDefaultSweep"
+          ],
+          "funcs": [
+            {
+                "name": "__construct",
+                "flags": [
+                ],
+                "desc": "Returns a FrozenVector built from the values produced by the specified Iterable.",
+                "return": {
+                    "type": null
+                },
+                "args": [
+                    {
+                        "name": "iterable",
+                        "type": "Variant",
+                        "value": "null"
+                    }
+                ]
+            },
+            {
+                  "name": "isEmpty",
+                  "flags": [
+                  ],
+                  "desc": "Returns true if the FrozenVector is empty, false otherwise.",
+                  "return": {
+                      "type": "Boolean"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "count",
+                  "flags": [
+                  ],
+                  "desc": "Returns the number of values in the FrozenVector.",
+                  "return": {
+                      "type": "Int64"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "items",
+                  "flags": [
+                  ],
+                  "desc": "Returns an Iterable that produces the values from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "containsKey",
+                  "flags": [
+                  ],
+                  "desc": "Returns true if the specified key is present in the FrozenVector, returns false otherwise.",
+                  "return": {
+                      "type": "Boolean"
+                  },
+                  "args": [
+                      {
+                          "name": "key",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "at",
+                  "flags": [
+                  ],
+                  "desc": "Returns the value at the specified key. If the key is not present, an exception is thrown.",
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "key",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "get",
+                  "flags": [
+                  ],
+                  "desc": "Returns the value at the specified key. If the key is not present, null is returned.",
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "key",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "getIterator",
+                  "flags": [
+                  ],
+                  "desc": "Returns an iterator that points to beginning of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "map",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Vector of the values produced by applying the specified callback on each value from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "callback",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                 "name": "mapWithKey",
+                 "flags": [
+                  ],
+                  "desc": "Returns a Vector of the values produced by applying the specified callback on each key and value from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "callback",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "filter",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Vector of all the values from this FrozenVector for which the specified callback returns true.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                    {
+                        "name": "callback",
+                        "type": "Variant"
+                    }
+                  ]
+              },
+              {
+                  "name": "filterWithKey",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Vector of all the values from this FrozenVector for which the specified callback returns true.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "callback",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "zip",
+                  "flags": [
+                  ],
+                  "desc": "Returns a KeyedIterable produced by combined the specified Iterables pair-wise.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "iterable",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "kvzip",
+                  "flags": [
+                  ],
+                  "desc": "Returns an Iterable that produces the key\/value pairs from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "keys",
+                  "flags": [
+                  ],
+                  "desc": "Returns an Iterable that produces the keys from this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "__toString",
+                  "return": {
+                      "type": "String"
+                  },
+                  "flags": [
+                  ],
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "__get",
+                  "flags": [
+                  ],
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "name",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "__set",
+                  "flags": [
+                  ],
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "name",
+                          "type": "Variant"
+                      },
+                      {
+                          "name": "value",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "__isset",
+                  "flags": [
+                  ],
+                  "return": {
+                      "type": "Boolean"
+                  },
+                  "args": [
+                      {
+                          "name": "name",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "__unset",
+                  "flags": [
+                  ],
+                  "return": {
+                      "type": "Variant"
+                  },
+                  "args": [
+                      {
+                          "name": "name",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "toVector",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Vector built from the values of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "toFrozenVector",
+                  "flags": [
+                  ],
+                  "desc": "Returns a copy of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "toMap",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Map built from the keys and values of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "toStableMap",
+                  "flags": [
+                  ],
+                  "desc": "Returns a StableMap built from the keys and values of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "toSet",
+                  "flags": [
+                  ],
+                  "desc": "Returns a Set built from the values of this FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                  ]
+             }
+            ]
+        },
+        {
             "name": "VectorIterator",
             "ifaces": [
                 "KeyedIterator"
             ],
-            "desc": "An iterator implementation for iterating over a Vector.",
+            "desc": "An iterator implementation for iterating over a Vector\/FrozenVector.",
             "flags": [
                 "IsFinal",
                 "NoDefaultSweep"
@@ -826,7 +1188,7 @@
                     "name": "keys",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the keys from this Map.",
+                    "desc": "Returns a Vector built from the keys of this Map.",
                     "return": {
                         "type": "Object"
                     },
@@ -1061,6 +1423,17 @@
                     "args": [
                     ]
                 },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
                 {
                     "name": "toMap",
                     "flags": [
@@ -1095,21 +1468,10 @@
                     ]
                 },
                 {
-                    "name": "copyAsArray",
-                    "flags": [
-                    ],
-                    "desc": "Returns an array built from the keys and values from this Map.",
-                    "return": {
-                        "type": "VariantMap"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "values",
                     "flags": [
                     ],
-                    "desc": "Returns a Vector built from the values from this Map.",
+                    "desc": "Returns a Vector built from the values of this Map.",
                     "return": {
                         "type": "Object"
                     },
@@ -1489,7 +1851,7 @@
                     "name": "keys",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the keys from this StableMap.",
+                    "desc": "Returns a Vector built from the keys of this StableMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -1724,6 +2086,17 @@
                     "args": [
                     ]
                 },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
                 {
                     "name": "toMap",
                     "flags": [
@@ -1758,21 +2131,10 @@
                     ]
                 },
                 {
-                    "name": "copyAsArray",
-                    "flags": [
-                    ],
-                    "desc": "Returns an array built from the keys and values from this StableMap.",
-                    "return": {
-                        "type": "VariantMap"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "values",
                     "flags": [
                     ],
-                    "desc": "Returns a Vector built from the values from this StableMap.",
+                    "desc": "Returns a Vector built from the values of this StableMap.",
                     "return": {
                         "type": "Object"
                     },
@@ -2149,6 +2511,17 @@
                     ]
                 },
                 {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "lazy",
                     "flags": [
                     ],
@@ -2246,6 +2619,17 @@
                     "flags": [
                     ],
                     "desc": "Returns a Vector built from the values of this Set.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this Set.",
                     "return": {
                         "type": "Object"
                     },
@@ -2613,7 +2997,18 @@
                     "name": "keys",
                     "flags": [
                     ],
-                    "desc": "Returns an Iterable that produces the keys from this Pair.",
+                    "desc": "Returns a Vector built from the keys of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this Pair.",
                     "return": {
                         "type": "Object"
                     },
@@ -2658,6 +3053,17 @@
                     "flags": [
                     ],
                     "desc": "Returns a Vector build from the values from this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this Pair.",
                     "return": {
                         "type": "Object"
                     },

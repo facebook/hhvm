@@ -34,8 +34,14 @@
 
 #define USE_VARARGS
 #define PREFER_STDARG
+
+#ifdef USE_EDITLINE
+#include <editline/readline.h>
+#include <histedit.h>
+#else
 #include <readline/readline.h>
 #include <readline/history.h>
+#endif
 
 using namespace HPHP::Util::TextArt;
 
@@ -111,7 +117,11 @@ void DebuggerClient::onSignal(int sig) {
     m_sigCount++;
     m_sigNum = CmdSignal::SignalBreak;
   } else {
-    rl_replace_line("", 0);
+    rl_line_buffer[0] = '\0';
+#ifndef USE_EDITLINE
+    rl_free_line_state();
+    rl_cleanup_after_signal();
+#endif
     rl_redisplay();
   }
 }
@@ -140,7 +150,9 @@ public:
     rl_attempted_completion_function = debugger_completion;
     rl_basic_word_break_characters = PHP_WORD_BREAK_CHARACTERS;
 
+#ifndef USE_EDITLINE
     rl_catch_signals = 0;
+#endif
     signal(SIGINT, debugger_signal_handler);
 
     TRACE(3, "ReadlineApp::ReadlineApp, about to call read_history\n");
@@ -174,11 +186,12 @@ public:
   }
 
   void animate() {
-    TRACE(2, "ReadlineWaitCursor::animate\n");
-    m_line = rl_line_buffer;
+    if (rl_point <= 0) return;
+    auto p = rl_point - 1;
+    auto orig = rl_line_buffer[p];
     while (m_waiting) {
-      frame('|'); frame('/'); frame('-'); frame('\\');
-      rl_replace_line(m_line.c_str(), 1);
+      frame('|', p); frame('/', p); frame('-', p); frame('\\', p);
+      rl_line_buffer[p] = orig;
       rl_redisplay();
     }
   }
@@ -186,12 +199,9 @@ public:
 private:
   AsyncFunc<ReadlineWaitCursor> m_thread;
   bool m_waiting;
-  string m_line;
 
-  void frame(char ch) {
-  TRACE(2, "ReadlineWaitCursor::getStaticDebuggerClient\n");
-    string line = m_line + ch;
-    rl_replace_line(line.c_str(), 1);
+  void frame(char ch, int point) {
+    rl_line_buffer[point] = ch;
     rl_redisplay();
     usleep(100000);
   }
@@ -203,6 +213,7 @@ int DebuggerClient::LineWidth = 76;
 int DebuggerClient::CodeBlockSize = 20;
 int DebuggerClient::ScrollBlockSize = 20;
 const char *DebuggerClient::LineNoFormat = "%4d ";
+const char *DebuggerClient::LineNoFormatWithStar = "%4d*";
 const char *DebuggerClient::LocalPrompt = "hphpd";
 const char *DebuggerClient::ConfigFileName = ".hphpd.hdf";
 const char *DebuggerClient::HistoryFileName = ".hphpd.history";
@@ -407,7 +418,8 @@ DebuggerClient::DebuggerClient()
       m_sigNum(CmdSignal::SignalNone), m_sigCount(0),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_listLineFocus(0),
-      m_stacktraceAsync(false), m_frame(0) {
+      m_stacktraceAsync(false), m_frame(0),
+      m_unknownCmd(false) {
   TRACE(2, "DebuggerClient::DebuggerClient\n");
   Debugger::InitUsageLogging();
 }
@@ -785,7 +797,6 @@ void DebuggerClient::addCompletion(AutoComplete type) {
   }
 
   if (type == AutoCompleteFunctions || type == AutoCompleteClassMethods) {
-    rl_completion_suppress_append = 1;
     promptFunctionPrototype();
   }
 }
@@ -1089,6 +1100,10 @@ void DebuggerClient::console() {
         // treat ^D as quit
         print("quit");
         line = "quit";
+      } else {
+#ifdef USE_EDITLINE
+        print("%s", line); // Stay consistent with the readline library
+#endif
       }
     } else if (!NoPrompt && RuntimeOption::EnableDebuggerPrompt) {
       print("%s%s", getPrompt().c_str(), line);
@@ -1189,7 +1204,8 @@ void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
   }
 }
 
-bool DebuggerClient::code(CStrRef source, int line1 /*= 0*/, int line2 /*= 0*/,
+bool DebuggerClient::code(const String& source, int line1 /*= 0*/,
+                          int line2 /*= 0*/,
                           int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                           int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   TRACE(2, "DebuggerClient::code\n");
@@ -1238,6 +1254,9 @@ char DebuggerClient::ask(const char *fmt, ...) {
   fflush(stdout);
   auto input = readline("");
   if (input == nullptr) return ' ';
+#ifdef USE_EDITLINE
+  print("%s", input); // Stay consistent with the readline library
+#endif
   if (strlen(input) > 0) return tolower(input[0]);
   return ' ';
 }
@@ -1270,7 +1289,7 @@ void DebuggerClient::print(const std::string &s) {
   fflush(stdout);
 }
 
-void DebuggerClient::print(CStrRef msg) {
+void DebuggerClient::print(const String& msg) {
   TRACE(2, "DebuggerClient::print(CStrRef msg)\n");
   DWRITE(msg.data(), 1, msg.length(), stdout);
   DWRITE("\n", 1, 1, stdout);
@@ -1278,7 +1297,7 @@ void DebuggerClient::print(CStrRef msg) {
 }
 
 #define IMPLEMENT_COLOR_OUTPUT(name, where, color)                      \
-  void DebuggerClient::name(CStrRef msg) {                              \
+  void DebuggerClient::name(const String& msg) {                              \
     if (UseColor && color && RuntimeOption::EnableDebuggerColor) {      \
       DWRITE(color, 1, strlen(color), where);                           \
     }                                                                   \
@@ -1555,6 +1574,9 @@ do {                                         \
 bool DebuggerClient::process() {
   TRACE(2, "DebuggerClient::process\n");
   clearCachedLocal();
+
+  // assume it is a known command.
+  m_unknownCmd = false;
   switch (tolower(m_command[0])) {
     case '@':
     case '=':
@@ -1588,6 +1610,7 @@ bool DebuggerClient::process() {
         DebuggerCommandPtr deleter(cmd);
         cmd->onClient(*this);
       } else {
+        m_unknownCmd = true;
         processTakeCode();
       }
       return true;

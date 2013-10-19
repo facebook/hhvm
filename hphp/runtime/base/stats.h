@@ -19,12 +19,10 @@
 #include <atomic>
 
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/util/asm-x64.h"
+#include "hphp/util/data-block.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
-
-namespace Transl { class X64Assembler; }
 namespace Stats {
 
 #include "hphp/runtime/vm/stats-opcodeDef.h"
@@ -38,8 +36,6 @@ namespace Stats {
   STAT(TgtCache_StaticMiss) \
   STAT(TgtCache_ClsCnsHit) \
   STAT(TgtCache_ClsCnsMiss) \
-  STAT(TgtCache_KnownClsHit) \
-  STAT(TgtCache_KnownClsMiss) \
   STAT(TgtCache_FuncDHit) \
   STAT(TgtCache_FuncDMiss) \
   STAT(TgtCache_CtorDHit) \
@@ -244,20 +240,16 @@ inline StatCounter opcodeToIRPostStatCounter(Op opc) {
 }
 
 // Both emitIncs use r10.
-extern void emitInc(Transl::X64Assembler& a,
+extern void emitInc(CodeBlock& cb,
                     uint64_t* tl_table,
                     uint index,
                     int n = 1,
-                    Transl::ConditionCode cc = Transl::CC_None,
                     bool force = false);
-inline void emitInc(Transl::X64Assembler& a, StatCounter stat, int n = 1,
-                    Transl::ConditionCode cc = Transl::CC_None,
+inline void emitInc(CodeBlock& cb, StatCounter stat, int n = 1,
                     bool force = false) {
-  emitInc(a, &tl_counters[0], stat, n, cc, force);
+  emitInc(cb, &tl_counters[0], stat, n, force);
 }
 
-extern void emitIncTranslOp(Transl::X64Assembler& a, Op opc,
-                            bool force = false);
 extern void init();
 extern void dump();
 extern void clear();

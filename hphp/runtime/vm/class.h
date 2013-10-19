@@ -22,21 +22,19 @@
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/range.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
-// Forward declaration.
 class ClassInfo;
 class ClassInfoVM;
 class HphpArray;
 class ObjectData;
 struct HhbcExtClassInfo;
-
-
-// Forward declarations.
 class Func;
 class FuncEmitter;
 class Unit;
@@ -48,6 +46,17 @@ class PreClass;
 typedef hphp_hash_set<const StringData*, string_data_hash,
                       string_data_isame> TraitNameSet;
 typedef hphp_hash_set<const Class*, pointer_hash<Class> > ClassSet;
+
+/*
+ * User attributes on various runtime structures are stored in this
+ * map, currently.
+ */
+typedef hphp_hash_map<
+  const StringData*,
+  TypedValue,
+  string_data_hash,
+  string_data_isame
+> UserAttributeMap;
 
 typedef ObjectData*(*BuiltinCtorFunction)(Class*);
 
@@ -121,9 +130,9 @@ class PreClass : public AtomicCountable {
 
     PreClass* preClass() const { return m_preClass; }
     const StringData* name() const { return m_name; }
-    CStrRef nameRef() const { return *(String*)&m_name; }
+    const String& nameRef() const { return *(String*)&m_name; }
     const StringData* mangledName() const { return m_mangledName; }
-    CStrRef mangledNameRef() const { return *(String*)(&m_mangledName); }
+    const String& mangledNameRef() const { return *(String*)(&m_mangledName); }
     Attr attrs() const { return m_attrs; }
     const StringData* typeConstraint() const { return m_typeConstraint; }
     DataType hphpcType() const { return m_hphpcType; }
@@ -151,7 +160,7 @@ class PreClass : public AtomicCountable {
 
     PreClass* preClass() const { return m_preClass; }
     const StringData* name() const { return m_name; }
-    CStrRef nameRef() const { return *(String*)&m_name; }
+    const String& nameRef() const { return *(String*)&m_name; }
     const StringData* typeConstraint() const { return m_typeConstraint; }
     const TypedValue& val() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
@@ -235,8 +244,6 @@ class PreClass : public AtomicCountable {
   typedef FixedVector<const StringData*> UsedTraitVec;
   typedef FixedVector<TraitPrecRule> TraitPrecRuleVec;
   typedef FixedVector<TraitAliasRule> TraitAliasRuleVec;
-  typedef hphp_hash_map<const StringData*, TypedValue, string_data_hash,
-                        string_data_isame> UserAttributeMap;
 
   PreClass(Unit* unit, int line1, int line2, Offset o, const StringData* n,
            Attr attrs, const StringData* parent, const StringData* docComment,
@@ -249,11 +256,11 @@ class PreClass : public AtomicCountable {
   int line2() const { return m_line2; }
   Offset getOffset() const { return m_offset; }
   const StringData* name() const { return m_name; }
-  CStrRef nameRef() const { return *(String*)(&m_name); }
+  const String& nameRef() const { return *(String*)(&m_name); }
   Attr attrs() const { return m_attrs; }
   static Offset attrsOffset() { return offsetof(PreClass, m_attrs); }
   const StringData* parent() const { return m_parent; }
-  CStrRef parentRef() const { return *(String*)(&m_parent); }
+  const String& parentRef() const { return *(String*)(&m_parent); }
   const StringData* docComment() const { return m_docComment; }
   Id id() const { return m_id; }
   const InterfaceVec& interfaces() const { return m_interfaces; }
@@ -398,7 +405,7 @@ struct Class : AtomicCountable {
     TypedValue m_val;
     const StringData* m_phpCode;
     const StringData* m_typeConstraint;
-    CStrRef nameRef() const { return *(String*)&m_name; }
+    const String& nameRef() const { return *(String*)&m_name; }
   };
 
   class PropInitVec {
@@ -475,7 +482,7 @@ struct Class : AtomicCountable {
    * isZombie() returns true if this class has been logically destroyed,
    * but needed to be preserved due to outstanding references.
    */
-  bool isZombie() const { return !m_cachedOffset; }
+  bool isZombie() const { return !m_cachedClass.bound(); }
 
   Avail avail(Class *&parent, bool tryAutoload = false) const;
 
@@ -518,10 +525,10 @@ struct Class : AtomicCountable {
   Class* parent() const {
     return m_parent.get();
   }
-  CStrRef nameRef() const {
+  const String& nameRef() const {
     return m_preClass->nameRef();
   }
-  CStrRef parentRef() const {
+  const String& parentRef() const {
     return m_preClass->parentRef();
   }
 
@@ -578,6 +585,7 @@ struct Class : AtomicCountable {
   int builtinPropSize() const { return m_builtinPropSize; }
   BuiltinCtorFunction instanceCtor() const { return m_instanceCtor; }
   bool isCppSerializable() const;
+  bool isCollectionClass() const;
 
   // Interfaces this class declares in its "implements" clause.
   boost::iterator_range<const ClassPtr*> declInterfaces() const {
@@ -597,16 +605,6 @@ struct Class : AtomicCountable {
   }
 
   bool isPersistent() const { return m_attrCopy & AttrPersistent; }
-
-  /*
-   * We have a call site for an object method, which previously
-   * invoked func, but this call has a different Class (*this).  See
-   * if we can figure out the correct Func to call.
-   *
-   * Since this exists to be inlined into a single callsite in targetcache,
-   * and the dependencies are a bit hairy, it's defined in targetcache.cpp.
-   */
-  const Func* wouldCall(const Func* prev) const;
 
   // Finds the base class defining the given method (NULL if none).
   // Note: for methods imported via traits, the base class is the one that
@@ -660,9 +658,14 @@ struct Class : AtomicCountable {
 
   void initialize() const;
   void initPropHandle() const;
-  unsigned propHandle() const { return m_propDataCache; }
+  RDS::Handle classHandle() const { return m_cachedClass.handle(); }
+  void setClassHandle(RDS::Link<Class*> link) const {
+    assert(!m_cachedClass.bound());
+    m_cachedClass = link;
+  }
+  RDS::Handle propHandle() const { return m_propDataCache.handle(); }
   void initSPropHandle() const;
-  unsigned sPropHandle() const { return m_propSDataCache; }
+  RDS::Handle sPropHandle() const { return m_propSDataCache.handle(); }
   void initProps() const;
   TypedValue* initSProps() const;
   Class* getCached() const;
@@ -838,12 +841,10 @@ private:
   int32_t m_builtinPropSize;
   int32_t m_declPropNumAccessible;
   unsigned m_classVecLen;
-public:
-  unsigned m_cachedOffset; // used by Unit
-private:
-  unsigned m_propDataCache;
-  unsigned m_propSDataCache;
-  unsigned m_nonScalarConstantCache;
+  mutable RDS::Link<Class*> m_cachedClass; // can this be const Class*?
+  mutable RDS::Link<PropInitVec*> m_propDataCache;
+  mutable RDS::Link<TypedValue*> m_propSDataCache;
+  mutable RDS::Link<Array> m_nonScalarConstantCache;
   BuiltinCtorFunction m_instanceCtor;
   ConstMap m_constants;
 
@@ -883,6 +884,21 @@ inline bool isInterface(const Class* cls) {
 inline bool isNormalClass(const Class* cls ) {
   return !(cls->attrs() & (AttrTrait | AttrInterface));
 }
+
+/*
+ * Returns whether a class is persistent *and* has a persistent RDS
+ * handle.  You probably mean this instead of cls->isPersistent(),
+ * which only checks the attributes.
+ *
+ * A persistent class can end up with a non-persistent RDS handle if
+ * we had to allocate the handle before we loaded the class.
+ */
+inline bool classHasPersistentRDS(const Class* cls) {
+  return (RuntimeOption::RepoAuthoritative &&
+          cls &&
+          RDS::isPersistentHandle(cls->classHandle()));
+}
+
 
 } // HPHP
 

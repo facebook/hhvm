@@ -52,7 +52,7 @@ public:
 
   CLASSNAME_IS("MCrypt");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   MCRYPT m_td;
   bool m_init;
@@ -76,8 +76,8 @@ static mcrypt_data s_globals;
 #endif
 #define MCRYPT_OPEN_MODULE_FAILED "Module initialization failed"
 
-static Variant php_mcrypt_do_crypt(CStrRef cipher, CStrRef key, CStrRef data,
-                                   CStrRef mode, CStrRef iv, bool dencrypt) {
+static Variant php_mcrypt_do_crypt(const String& cipher, const String& key, const String& data,
+                                   const String& mode, const String& iv, bool dencrypt) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
                                  (char*)mode.data(),
@@ -179,7 +179,7 @@ static Variant php_mcrypt_do_crypt(CStrRef cipher, CStrRef key, CStrRef data,
   return s.setSize(data_size);
 }
 
-static Variant mcrypt_generic(CResRef td, CStrRef data, bool dencrypt) {
+static Variant mcrypt_generic(CResRef td, const String& data, bool dencrypt) {
   MCrypt *pm = td.getTyped<MCrypt>();
   if (!pm->m_init) {
     raise_warning("Operation disallowed prior to mcrypt_generic_init().");
@@ -219,8 +219,8 @@ static Variant mcrypt_generic(CResRef td, CStrRef data, bool dencrypt) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_mcrypt_module_open(CStrRef algorithm, CStrRef algorithm_directory,
-                             CStrRef mode, CStrRef mode_directory) {
+Variant f_mcrypt_module_open(const String& algorithm, const String& algorithm_directory,
+                             const String& mode, const String& mode_directory) {
   MCRYPT td = mcrypt_module_open
     ((char*)algorithm.data(),
      (char*)(algorithm_directory.empty() ? MCG(algorithms_dir).data() :
@@ -242,7 +242,7 @@ bool f_mcrypt_module_close(CResRef td) {
   return true;
 }
 
-Array f_mcrypt_list_algorithms(CStrRef lib_dir /* = null_string */) {
+Array f_mcrypt_list_algorithms(const String& lib_dir /* = null_string */) {
   String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
 
   int count = 0;
@@ -258,7 +258,7 @@ Array f_mcrypt_list_algorithms(CStrRef lib_dir /* = null_string */) {
   return ret;
 }
 
-Array f_mcrypt_list_modes(CStrRef lib_dir /* = null_string */) {
+Array f_mcrypt_list_modes(const String& lib_dir /* = null_string */) {
   String dir = lib_dir.empty() ? String(MCG(modes_dir)) : lib_dir;
 
   int count = 0;
@@ -274,22 +274,22 @@ Array f_mcrypt_list_modes(CStrRef lib_dir /* = null_string */) {
   return ret;
 }
 
-int64_t f_mcrypt_module_get_algo_block_size(CStrRef algorithm,
-                                        CStrRef lib_dir /* = null_string */) {
+int64_t f_mcrypt_module_get_algo_block_size(const String& algorithm,
+                                        const String& lib_dir /* = null_string */) {
   String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
   return mcrypt_module_get_algo_block_size((char*)algorithm.data(),
                                            (char*)dir.data());
 }
 
-int64_t f_mcrypt_module_get_algo_key_size(CStrRef algorithm,
-                                      CStrRef lib_dir /* = null_string */) {
+int64_t f_mcrypt_module_get_algo_key_size(const String& algorithm,
+                                      const String& lib_dir /* = null_string */) {
   String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
   return mcrypt_module_get_algo_key_size((char*)algorithm.data(),
                                          (char*)dir.data());
 }
 
-Array f_mcrypt_module_get_supported_key_sizes(CStrRef algorithm,
-                                              CStrRef lib_dir /* = null_string */) {
+Array f_mcrypt_module_get_supported_key_sizes(const String& algorithm,
+                                              const String& lib_dir /* = null_string */) {
   String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
 
   int count = 0;
@@ -304,29 +304,29 @@ Array f_mcrypt_module_get_supported_key_sizes(CStrRef algorithm,
   return ret;
 }
 
-bool f_mcrypt_module_is_block_algorithm_mode(CStrRef mode,
-                                             CStrRef lib_dir /* = null_string */) {
+bool f_mcrypt_module_is_block_algorithm_mode(const String& mode,
+                                             const String& lib_dir /* = null_string */) {
   String dir = lib_dir.empty() ? String(MCG(modes_dir)) : lib_dir;
   return mcrypt_module_is_block_algorithm_mode((char*)mode.data(),
                                                (char*)dir.data()) == 1;
 }
 
-bool f_mcrypt_module_is_block_algorithm(CStrRef algorithm,
-                                        CStrRef lib_dir /* = null_string */) {
+bool f_mcrypt_module_is_block_algorithm(const String& algorithm,
+                                        const String& lib_dir /* = null_string */) {
   String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
   return mcrypt_module_is_block_algorithm((char*)algorithm.data(),
                                           (char*)dir.data()) == 1;
 }
 
-bool f_mcrypt_module_is_block_mode(CStrRef mode,
-                                   CStrRef lib_dir /* = null_string */) {
+bool f_mcrypt_module_is_block_mode(const String& mode,
+                                   const String& lib_dir /* = null_string */) {
   String dir = lib_dir.empty() ? String(MCG(modes_dir)) : lib_dir;
   return mcrypt_module_is_block_mode((char*)mode.data(),
                                      (char*)dir.data()) == 1;
 }
 
-bool f_mcrypt_module_self_test(CStrRef algorithm,
-                               CStrRef lib_dir /* = null_string */) {
+bool f_mcrypt_module_self_test(const String& algorithm,
+                               const String& lib_dir /* = null_string */) {
   String dir = lib_dir.empty() ? String(MCG(algorithms_dir)) : lib_dir;
   return mcrypt_module_self_test((char*)algorithm.data(),
                                  (char*)dir.data()) == 0;
@@ -368,37 +368,37 @@ Variant f_mcrypt_create_iv(int size, int source /* = 0 */) {
   return String(iv, n, AttachString);
 }
 
-Variant f_mcrypt_encrypt(CStrRef cipher, CStrRef key, CStrRef data,
-                         CStrRef mode, CStrRef iv /* = null_string */) {
+Variant f_mcrypt_encrypt(const String& cipher, const String& key, const String& data,
+                         const String& mode, const String& iv /* = null_string */) {
   return php_mcrypt_do_crypt(cipher, key, data, mode, iv, false);
 }
 
-Variant f_mcrypt_decrypt(CStrRef cipher, CStrRef key, CStrRef data,
-                         CStrRef mode, CStrRef iv /* = null_string */) {
+Variant f_mcrypt_decrypt(const String& cipher, const String& key, const String& data,
+                         const String& mode, const String& iv /* = null_string */) {
   return php_mcrypt_do_crypt(cipher, key, data, mode, iv, true);
 }
 
-Variant f_mcrypt_cbc(CStrRef cipher, CStrRef key, CStrRef data, int mode,
-                     CStrRef iv /* = null_string */) {
+Variant f_mcrypt_cbc(const String& cipher, const String& key, const String& data, int mode,
+                     const String& iv /* = null_string */) {
   return php_mcrypt_do_crypt(cipher, key, data, "cbc", iv, mode);
 }
 
-Variant f_mcrypt_cfb(CStrRef cipher, CStrRef key, CStrRef data, int mode,
-                     CStrRef iv /* = null_string */) {
+Variant f_mcrypt_cfb(const String& cipher, const String& key, const String& data, int mode,
+                     const String& iv /* = null_string */) {
   return php_mcrypt_do_crypt(cipher, key, data, "cfb", iv, mode);
 }
 
-Variant f_mcrypt_ecb(CStrRef cipher, CStrRef key, CStrRef data, int mode,
-                     CStrRef iv /* = null_string */) {
+Variant f_mcrypt_ecb(const String& cipher, const String& key, const String& data, int mode,
+                     const String& iv /* = null_string */) {
   return php_mcrypt_do_crypt(cipher, key, data, "ecb", iv, mode);
 }
 
-Variant f_mcrypt_ofb(CStrRef cipher, CStrRef key, CStrRef data, int mode,
-                     CStrRef iv /* = null_string */) {
+Variant f_mcrypt_ofb(const String& cipher, const String& key, const String& data, int mode,
+                     const String& iv /* = null_string */) {
   return php_mcrypt_do_crypt(cipher, key, data, "ofb", iv, mode);
 }
 
-Variant f_mcrypt_get_block_size(CStrRef cipher, CStrRef module /* = null_string */) {
+Variant f_mcrypt_get_block_size(const String& cipher, const String& module /* = null_string */) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
                                  (char*)module.data(),
@@ -413,7 +413,7 @@ Variant f_mcrypt_get_block_size(CStrRef cipher, CStrRef module /* = null_string 
   return ret;
 }
 
-Variant f_mcrypt_get_cipher_name(CStrRef cipher) {
+Variant f_mcrypt_get_cipher_name(const String& cipher) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
                                  (char*)"ecb",
@@ -436,7 +436,7 @@ Variant f_mcrypt_get_cipher_name(CStrRef cipher) {
   return ret;
 }
 
-Variant f_mcrypt_get_iv_size(CStrRef cipher, CStrRef mode) {
+Variant f_mcrypt_get_iv_size(const String& cipher, const String& mode) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
                                  (char*)mode.data(),
@@ -451,7 +451,7 @@ Variant f_mcrypt_get_iv_size(CStrRef cipher, CStrRef mode) {
   return ret;
 }
 
-int64_t f_mcrypt_get_key_size(CStrRef cipher, CStrRef module) {
+int64_t f_mcrypt_get_key_size(const String& cipher, const String& module) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
                                  (char*)module.data(),
@@ -521,7 +521,7 @@ int64_t f_mcrypt_enc_self_test(CResRef td) {
   return mcrypt_enc_self_test(td.getTyped<MCrypt>()->m_td);
 }
 
-int64_t f_mcrypt_generic_init(CResRef td, CStrRef key, CStrRef iv) {
+int64_t f_mcrypt_generic_init(CResRef td, const String& key, const String& iv) {
   MCrypt *pm = td.getTyped<MCrypt>();
   int max_key_size = mcrypt_enc_get_key_size(pm->m_td);
   int iv_size = mcrypt_enc_get_iv_size(pm->m_td);
@@ -578,11 +578,11 @@ int64_t f_mcrypt_generic_init(CResRef td, CStrRef key, CStrRef iv) {
   return result;
 }
 
-Variant f_mcrypt_generic(CResRef td, CStrRef data) {
+Variant f_mcrypt_generic(CResRef td, const String& data) {
   return mcrypt_generic(td, data, false);
 }
 
-Variant f_mdecrypt_generic(CResRef td, CStrRef data) {
+Variant f_mdecrypt_generic(CResRef td, const String& data) {
   return mcrypt_generic(td, data, true);
 }
 

@@ -25,30 +25,30 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // zlib functions
 
-Variant f_readgzfile(CStrRef filename, bool use_include_path = false);
-Variant f_gzfile(CStrRef filename, bool use_include_path = false);
-Variant f_gzcompress(CStrRef data, int level = -1);
-Variant f_gzuncompress(CStrRef data, int limit = 0);
-Variant f_gzdeflate(CStrRef data, int level = -1);
-Variant f_gzinflate(CStrRef data, int limit = 0);
-Variant f_gzencode(CStrRef data, int level = -1,
+Variant f_readgzfile(const String& filename, bool use_include_path = false);
+Variant f_gzfile(const String& filename, bool use_include_path = false);
+Variant f_gzcompress(const String& data, int level = -1);
+Variant f_gzuncompress(const String& data, int limit = 0);
+Variant f_gzdeflate(const String& data, int level = -1);
+Variant f_gzinflate(const String& data, int limit = 0);
+Variant f_gzencode(const String& data, int level = -1,
                    int encoding_mode = k_FORCE_GZIP);
-Variant f_gzdecode(CStrRef data);
+Variant f_gzdecode(const String& data);
 String f_zlib_get_coding_type();
-Variant f_qlzcompress(CStrRef data, int level = 1);
-Variant f_qlzuncompress(CStrRef data, int level = 1);
-Variant f_sncompress(CStrRef data);
-Variant f_snuncompress(CStrRef data);
-Variant f_nzcompress(CStrRef uncompressed);
-Variant f_nzuncompress(CStrRef compressed);
-Variant f_lz4compress(CStrRef uncompressed);
-Variant f_lz4hccompress(CStrRef uncompressed);
-Variant f_lz4uncompress(CStrRef compressed);
+Variant f_qlzcompress(const String& data, int level = 1);
+Variant f_qlzuncompress(const String& data, int level = 1);
+Variant f_sncompress(const String& data);
+Variant f_snuncompress(const String& data);
+Variant f_nzcompress(const String& uncompressed);
+Variant f_nzuncompress(const String& compressed);
+Variant f_lz4compress(const String& uncompressed);
+Variant f_lz4hccompress(const String& uncompressed);
+Variant f_lz4uncompress(const String& compressed);
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions
 
-Resource f_gzopen(CStrRef filename, CStrRef mode,
+Resource f_gzopen(const String& filename, const String& mode,
                   bool use_include_path = false);
 
 bool f_gzclose(CResRef zp);
@@ -60,10 +60,10 @@ bool f_gzrewind(CResRef zp);
 Variant f_gzgetc(CResRef zp);
 Variant f_gzgets(CResRef zp, int64_t length = 1024);
 Variant f_gzgetss(CResRef zp, int64_t length = 0,
-                  CStrRef allowable_tags = null_string);
+                  const String& allowable_tags = null_string);
 Variant f_gzpassthru(CResRef zp);
-Variant f_gzputs(CResRef zp, CStrRef str, int64_t length = 0);
-Variant f_gzwrite(CResRef zp, CStrRef str, int64_t length = 0);
+Variant f_gzputs(CResRef zp, const String& str, int64_t length = 0);
+Variant f_gzwrite(CResRef zp, const String& str, int64_t length = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

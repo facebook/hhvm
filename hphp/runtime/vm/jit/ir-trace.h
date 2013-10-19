@@ -18,7 +18,6 @@
 #define incl_HPHP_VM_TRACE_H_
 
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/ir.h"
 
 namespace HPHP { namespace JIT {
 
@@ -33,7 +32,7 @@ struct IRTrace : private boost::noncopyable {
   typedef std::list<Block*>::const_iterator const_iterator;
   typedef std::list<Block*>::iterator iterator;
 
-  explicit IRTrace(IRUnit& unit, Block* first, uint32_t bcOff);
+  explicit IRTrace(IRUnit& unit, Block* first);
 
   std::list<Block*>& blocks() { return m_blocks; }
   const std::list<Block*>& blocks() const { return m_blocks; }
@@ -50,46 +49,44 @@ struct IRTrace : private boost::noncopyable {
         iterator begin()        { return blocks().begin(); }
         iterator end()          { return blocks().end(); }
 
-  // Unlink a block from a trace. Updates any successor blocks that
+  // Unlink a block from a trace by forwarding any incoming edges to the
+  // block's successor, then erasing it.
+  iterator unlink(iterator it);
+
+  // Erase a block from a trace. Updates any successor blocks that
   // have a DefLabel with a dest depending on this block.
   iterator erase(iterator it);
 
   // Add a block to the back of this trace's block list.
   Block* push_back(Block* b);
 
-  // temporary data field for use by individual passes
-  //
-  // Used by LinearScan as a "fake" instruction id, that comes
-  // between the id of the last instruction that branches to
-  // this exit trace, and the next instruction on the main trace.
-  uint32_t data() const { return m_data; }
-  void setData(uint32_t d) { m_data = d; }
-
-  uint32_t bcOff() const { return m_bcOff; }
   bool isMain() const;
 
-  // return true if this trace's first block starts with BeginCatch
-  bool isCatch() const;
-
-  std::list<IRTrace*>& exitTraces();
-  const std::list<IRTrace*>& exitTraces() const;
-
   std::string toString() const;
+  const IRUnit& unit() const { return m_unit; }
 
 private:
   IRUnit& m_unit;
-  // offset of the first bytecode in this trace; 0 if this trace doesn't
-  // represent a bytecode boundary.
-  uint32_t m_bcOff;
-  uint32_t m_data;
   std::list<Block*> m_blocks; // Blocks in main trace starting with entry block
 };
 
-inline IRTrace::IRTrace(IRUnit& unit, Block* first, uint32_t bcOff)
-  : m_unit(unit)
-  , m_bcOff(bcOff)
-{
+inline IRTrace::IRTrace(IRUnit& unit, Block* first)
+  : m_unit(unit) {
   push_back(first);
+}
+
+inline IRTrace::iterator IRTrace::unlink(iterator blockIt) {
+  // Update any predecessors to point to the empty block's next block.
+  auto block = *blockIt;
+  assert(block->empty());
+  auto next = block->next();
+  for (auto it = block->preds().begin(); it != block->preds().end(); ) {
+    auto cur = it;
+    ++it;
+    cur->setTo(next);
+  }
+
+  return erase(blockIt);
 }
 
 inline IRTrace::iterator IRTrace::erase(iterator it) {
@@ -106,14 +103,6 @@ inline Block* IRTrace::push_back(Block* b) {
   b->setTrace(this);
   m_blocks.push_back(b);
   return b;
-}
-
-// Catch traces always start with DefLabel; BeginCatch.
-inline bool IRTrace::isCatch() const {
-  if (front()->empty()) return false;
-  auto it = front()->skipHeader();
-  if (it == front()->begin()) return false;
-  return (--it)->op() == BeginCatch;
 }
 
 // defined here to avoid circular dependency

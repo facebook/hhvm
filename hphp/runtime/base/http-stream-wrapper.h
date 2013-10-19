@@ -30,7 +30,7 @@ class HttpStreamWrapper : public Stream::Wrapper {
   HttpStreamWrapper() {
     m_isLocal = false;
   }
-  virtual File* open(CStrRef filename, CStrRef mode,
+  virtual File* open(const String& filename, const String& mode,
                      int options, CVarRef context);
 };
 

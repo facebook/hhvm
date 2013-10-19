@@ -41,7 +41,8 @@ std::string show(SrcKey sk) {
 }
 
 std::string showShort(SrcKey sk) {
-  return folly::format("{}(id 0x{:#x})@{}",
+  if (!sk.valid()) return "<invalid SrcKey>";
+  return folly::format("{}(id {:#x})@{}",
                        sk.func()->fullName()->data(), sk.getFuncId(),
                        sk.offset()).str();
 }
@@ -62,7 +63,7 @@ std::string SrcKey::getSymbol() const {
   const Unit* u = unit();
 
   if (f->isBuiltin()) {
-    return f->name()->data();
+    return f->fullName()->data();
   }
 
   if (f->isPseudoMain()) {
@@ -73,18 +74,19 @@ std::string SrcKey::getSymbol() const {
     ).str();
   }
 
-  if (f->isMethod()) {
+  if (f->isMethod() && !f->cls()) {
     return folly::format(
       "{}::{}::line-{}",
-      f->cls()->name()->data(),
+      f->preClass()->name()->data(),
       f->name()->data(),
       u->getLineNumber(m_offset)
     ).str();
   }
 
+  // methods with a cls() and functions
   return folly::format(
     "{}::line-{}",
-    f->name()->data(),
+    f->fullName()->data(),
     u->getLineNumber(m_offset)
   ).str();
 }

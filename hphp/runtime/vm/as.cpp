@@ -782,6 +782,15 @@ template<class Target> Target read_opcode_arg(AsmState& as) {
   }
 }
 
+uint8_t read_AssertT_arg(AsmState& as) {
+  auto const str = read_opcode_arg<std::string>(as);
+#define ASSERTT_OP(x) if (str == #x) return static_cast<uint8_t>(AssertTOp::x);
+  ASSERTT_OPS
+#undef ASSERTT_OP
+  as.error("unknown AssertT operand");
+  NOT_REACHED();
+}
+
 const StringData* read_litstr(AsmState& as) {
   as.in.skipSpaceTab();
   std::string strVal;
@@ -1002,8 +1011,11 @@ OpcodeParserMap opcode_parsers;
                    read_opcode_arg<std::string>(as)))
 #define IMM_IA   as.ue->emitIVA(as.getIterId( \
                    read_opcode_arg<int32_t>(as)))
-#define IMM_OA   as.ue->emitByte(               \
-                   uint8_t(read_opcode_arg<int32_t>(as))) // TODO op names
+#define IMM_OA   as.ue->emitByte(                                       \
+                    (thisOpcode == Op::AssertTL ||                      \
+                     thisOpcode == Op::AssertTStk) ? read_AssertT_arg(as) \
+                    : uint8_t(read_opcode_arg<int32_t>(as)))
+                     // TODO more subop names
 #define IMM_AA   as.ue->emitInt32(as.ue->mergeArray(read_litarray(as)))
 
 /*
@@ -1068,12 +1080,13 @@ OpcodeParserMap opcode_parsers;
 #define NUM_POP_ONE(a) 1
 #define NUM_POP_TWO(a,b) 2
 #define NUM_POP_THREE(a,b,c) 3
-#define NUM_POP_LMANY() vecImmStackValues
-#define NUM_POP_V_LMANY() (1 + vecImmStackValues)
-#define NUM_POP_R_LMANY() (1 + vecImmStackValues)
-#define NUM_POP_C_LMANY() (1 + vecImmStackValues)
+#define NUM_POP_MMANY vecImmStackValues
+#define NUM_POP_V_MMANY (1 + vecImmStackValues)
+#define NUM_POP_R_MMANY (1 + vecImmStackValues)
+#define NUM_POP_C_MMANY (1 + vecImmStackValues)
 #define NUM_POP_FMANY immIVA /* number of arguments */
 #define NUM_POP_CVMANY immIVA /* number of arguments */
+#define NUM_POP_CVUMANY immIVA /* number of arguments */
 #define NUM_POP_CMANY immIVA /* number of arguments */
 
 #define O(name, imm, pop, push, flags)                            \
@@ -1147,12 +1160,13 @@ OPCODES
 #undef NUM_POP_TWO
 #undef NUM_POP_THREE
 #undef NUM_POP_POS_N
-#undef NUM_POP_LMANY
-#undef NUM_POP_V_LMANY
-#undef NUM_POP_R_LMANY
-#undef NUM_POP_C_LMANY
+#undef NUM_POP_MMANY
+#undef NUM_POP_V_MMANY
+#undef NUM_POP_R_MMANY
+#undef NUM_POP_C_MMANY
 #undef NUM_POP_FMANY
 #undef NUM_POP_CVMANY
+#undef NUM_POP_CVUMANY
 #undef NUM_POP_CMANY
 
 void initialize_opcode_map() {
@@ -1971,6 +1985,8 @@ UnitEmitter* assemble_string(const char*code, int codeLen,
     ue->emitOp(OpString);
     ue->emitInt32(ue->mergeLitstr(makeStaticString(e.what())));
     ue->emitOp(OpFatal);
+    ue->emitByte(uint8_t(FatalKind::Runtime));
+    ue->emitByte(false /* skipFrame */);
     FuncEmitter* fe = ue->getMain();
     fe->setMaxStackCells(kNumActRecCells + 1);
     // XXX line numbers are bogus

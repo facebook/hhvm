@@ -53,9 +53,9 @@ public:
 
   virtual bool support(SupportedMethod method);
   virtual bool closer();
-  virtual bool preparer(CStrRef sql, sp_PDOStatement *stmt, CVarRef options);
-  virtual int64_t doer(CStrRef sql);
-  virtual bool quoter(CStrRef input, String &quoted, PDOParamType paramtype);
+  virtual bool preparer(const String& sql, sp_PDOStatement *stmt, CVarRef options);
+  virtual int64_t doer(const String& sql);
+  virtual bool quoter(const String& input, String &quoted, PDOParamType paramtype);
   virtual bool begin();
   virtual bool commit();
   virtual bool rollback();
@@ -85,7 +85,7 @@ public:
   PDOMySqlStatement(PDOMySqlConnection *conn, MYSQL *server);
   virtual ~PDOMySqlStatement();
 
-  bool create(CStrRef sql, CArrRef options);
+  bool create(const String& sql, CArrRef options);
 
   virtual bool support(SupportedMethod method);
   virtual bool executer();
@@ -461,7 +461,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
   return einfo->errcode;
 }
 
-bool PDOMySqlConnection::preparer(CStrRef sql, sp_PDOStatement *stmt,
+bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
                                   CVarRef options) {
   PDOMySqlStatement *s = new PDOMySqlStatement(this, m_server);
   *stmt = s;
@@ -484,7 +484,7 @@ bool PDOMySqlConnection::preparer(CStrRef sql, sp_PDOStatement *stmt,
   return false;
 }
 
-int64_t PDOMySqlConnection::doer(CStrRef sql) {
+int64_t PDOMySqlConnection::doer(const String& sql) {
   if (mysql_real_query(m_server, sql.data(), sql.size())) {
     handleError(__FILE__, __LINE__);
     return -1;
@@ -509,7 +509,7 @@ int64_t PDOMySqlConnection::doer(CStrRef sql) {
   return c;
 }
 
-bool PDOMySqlConnection::quoter(CStrRef input, String &quoted,
+bool PDOMySqlConnection::quoter(const String& input, String &quoted,
                                 PDOParamType paramtype) {
   String s(2 * input.size() + 3, ReserveString);
   char *buf = s.bufferSlice().ptr;
@@ -844,7 +844,7 @@ PDOMySqlStatement::~PDOMySqlStatement() {
   }
 }
 
-bool PDOMySqlStatement::create(CStrRef sql, CArrRef options) {
+bool PDOMySqlStatement::create(const String& sql, CArrRef options) {
   supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 
   String nsql;

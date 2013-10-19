@@ -33,15 +33,15 @@ public:
              const std::string &sourceRoot);
   explicit RequestURI(const std::string & rpcFunc);
 
-  CStrRef originalURL() const { return m_originalURL; }
-  CStrRef resolvedURL() const { return m_resolvedURL; }
-  CStrRef queryString() const { return m_queryString; }
+  const String& originalURL() const { return m_originalURL; }
+  const String& resolvedURL() const { return m_resolvedURL; }
+  const String& queryString() const { return m_queryString; }
 
-  CStrRef path() const { return m_path; }
+  const String& path() const { return m_path; }
   const char *ext() const { return m_ext; }
-  CStrRef absolutePath() const { return m_absolutePath; }
-  CStrRef pathInfo() const { return m_pathInfo; }
-  CStrRef origPathInfo() const { return m_origPathInfo; }
+  const String& absolutePath() const { return m_absolutePath; }
+  const String& pathInfo() const { return m_pathInfo; }
+  const String& origPathInfo() const { return m_origPathInfo; }
 
   bool rewritten() const { return m_rewritten; }
   bool defaultDoc() const { return m_defaultDoc; }
@@ -82,14 +82,14 @@ private:
   bool virtualFileExists(const VirtualHost *vhost,
                          const std::string &pathTranslation,
                          const std::string &sourceRoot,
-                         CStrRef filename);
+                         const String& filename);
   bool virtualFolderExists(const VirtualHost *vhost,
                            const std::string &pathTranslation,
                            const std::string &sourceRoot,
-                           CStrRef foldername);
+                           const String& foldername);
   void processExt();
 
-  static const char *parseExt(CStrRef s);
+  static const char *parseExt(const String& s);
   static void PrependSlash(String &s);
 
 };

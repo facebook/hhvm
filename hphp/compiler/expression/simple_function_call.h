@@ -42,7 +42,13 @@ public:
   void setValid() { m_valid = true; }
   void setFromCompiler() { m_fromCompiler = true; }
   void setThrowFatal() { m_type = FunType::ThrowFatal; }
-  int isFatalFunction() const { return m_type == FunType::ThrowFatal; }
+  void setThrowParseFatal() { m_type = FunType::ThrowParseFatal; }
+  bool isParseFatalFunction() const {
+    return m_type == FunType::ThrowParseFatal;
+  }
+  bool isFatalFunction() const {
+    return isParseFatalFunction() ||  m_type == FunType::ThrowFatal;
+  }
   int isStaticCompact() const { return m_type == FunType::StaticCompact; }
 
   // define(<literal-string>, <scalar>);
@@ -93,6 +99,7 @@ protected:
     GetDefinedVars,
     FBCallUserFuncSafe,
     ThrowFatal,
+    ThrowParseFatal,
     ClassAlias,
   };
 

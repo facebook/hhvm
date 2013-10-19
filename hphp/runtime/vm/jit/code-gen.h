@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
@@ -33,6 +33,7 @@ struct ArgGroup;
 enum class DestType : unsigned {
   None,  // return void (no valid registers)
   SSA,   // return a single-register value
+  SSA2,  // return a two-register value (pair)
   TV     // return a TypedValue packed in two registers
 };
 
@@ -71,6 +72,8 @@ struct AsmInfo {
   StateVector<IRInstruction,TcaRange> instRanges;
   StateVector<Block,TcaRange> asmRanges;
   StateVector<Block,TcaRange> astubRanges;
+
+  void updateForInstruction(IRInstruction* inst, TCA start, TCA end);
 };
 
 typedef StateVector<IRInstruction, RegSet> LiveRegs;
@@ -79,16 +82,13 @@ typedef StateVector<IRInstruction, RegSet> LiveRegs;
 // and address information produced during codegen.
 struct CodegenState {
   CodegenState(const IRUnit& unit, const RegAllocInfo& regs,
-               const LiveRegs& liveRegs, const LifetimeInfo* lifetime,
-               AsmInfo* asmInfo)
+               const LiveRegs& liveRegs, AsmInfo* asmInfo)
     : patches(unit, nullptr)
     , addresses(unit, nullptr)
     , regs(regs)
     , liveRegs(liveRegs)
-    , lifetime(lifetime)
     , asmInfo(asmInfo)
     , catches(unit, CatchInfo())
-    , catchTrace(nullptr)
   {}
 
   // Each block has a list of addresses to patch, and an address if
@@ -96,9 +96,9 @@ struct CodegenState {
   StateVector<Block,void*> patches;
   StateVector<Block,TCA> addresses;
 
-  // True if this block's terminal Jmp_ has a desination equal to the
+  // True if this block's terminal Jmp has a desination equal to the
   // next block in the same assmbler.
-  bool noTerminalJmp_;
+  bool noTerminalJmp;
 
   // output from register allocator
   const RegAllocInfo& regs;
@@ -108,20 +108,12 @@ struct CodegenState {
   // registers.
   const LiveRegs& liveRegs;
 
-  // Optional information used when pretty-printing code after codegen.
-  // when not available, these are nullptrs.
-  const LifetimeInfo* lifetime;
-
   // Output: start/end ranges of machine code addresses of each instruction.
   AsmInfo* asmInfo;
 
   // Used to pass information about the state of the world at native
   // calls between cgCallHelper and cgBeginCatch.
   StateVector<Block, CatchInfo> catches;
-
-  // If non-null, represents the catch trace for the current
-  // instruction, to be registered with the unwinder.
-  IRTrace* catchTrace;
 };
 
 constexpr Reg64  rCgGP  (reg::r11);
@@ -131,16 +123,18 @@ constexpr RegXMM rCgXMM1(reg::xmm1);
 struct CodeGenerator {
   typedef Transl::X64Assembler Asm;
 
-  CodeGenerator(IRTrace* trace, CodeBlock& mainCode, CodeBlock& stubsCode,
+  CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
                 Transl::TranslatorX64* tx64, CodegenState& state)
-    : m_as(mainCode)
+    : m_unit(unit)
+    , m_mainCode(mainCode)
+    , m_stubsCode(stubsCode)
+    , m_as(mainCode)
     , m_astubs(stubsCode)
     , m_tx64(tx64)
     , m_state(state)
     , m_regs(state.regs)
     , m_rScratch(InvalidReg)
     , m_curInst(nullptr)
-    , m_curTrace(trace)
   {
   }
 
@@ -160,6 +154,7 @@ private:
   CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
   CallDest callDest(SSATmp* dst) const;
   CallDest callDestTV(SSATmp* dst) const;
+  CallDest callDest2(SSATmp* dst) const;
 
   // Main call helper:
   void cgCallHelper(Asm& a,
@@ -252,7 +247,7 @@ private:
 
   void emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
                                     PhysReg      thisReg,
-                                    Transl::TargetCache::CacheHandle& ch);
+                                    RDS::Handle& ch);
 
   void cgJcc(IRInstruction* inst);        // helper
   void cgReqBindJcc(IRInstruction* inst); // helper
@@ -324,7 +319,7 @@ private:
   void cgMIterInitCommon(IRInstruction* inst);
   void cgLdFuncCachedCommon(IRInstruction* inst);
   void cgLookupCnsCommon(IRInstruction* inst);
-  TargetCache::CacheHandle cgLdClsCachedCommon(IRInstruction* inst);
+  RDS::Handle cgLdClsCachedCommon(IRInstruction* inst);
   void emitFwdJcc(ConditionCode cc, Block* target);
   void emitFwdJcc(Asm& a, ConditionCode cc, Block* target);
   void emitContVarEnvHelperCall(SSATmp* fp, TCA helper);
@@ -409,6 +404,9 @@ private:
   void print() const;
 
 private:
+  const IRUnit&       m_unit;
+  CodeBlock&          m_mainCode;
+  CodeBlock&          m_stubsCode;
   Asm                 m_as;  // current "main" assembler
   Asm                 m_astubs; // for stubs and other cold code
   TranslatorX64*      m_tx64;
@@ -416,7 +414,6 @@ private:
   const RegAllocInfo& m_regs;
   Reg64               m_rScratch; // currently selected GP scratch reg
   IRInstruction*      m_curInst;  // current instruction being generated
-  IRTrace*            m_curTrace;
 };
 
 class ArgDesc {
@@ -475,7 +472,7 @@ private:
  *   assert(args.size() == 3);
  */
 struct ArgGroup {
-  typedef std::vector<ArgDesc> ArgVec;
+  typedef smart::vector<ArgDesc> ArgVec;
 
   explicit ArgGroup(const RegAllocInfo& regs)
       : m_regs(regs), m_override(nullptr)
@@ -519,13 +516,6 @@ struct ArgGroup {
 
   ArgGroup& ssa(SSATmp* tmp) {
     push_arg(ArgDesc(tmp, m_regs[tmp]));
-    return *this;
-  }
-
-  ArgGroup& ssas(IRInstruction* inst, unsigned begin, unsigned count = 1) {
-    for (SSATmp* s : inst->srcs().subpiece(begin, count)) {
-      push_arg(ArgDesc(s, m_regs[s]));
-    }
     return *this;
   }
 
@@ -593,15 +583,12 @@ const Func* loadClassCtor(Class* cls);
 
 ObjectData* createClHelper(Class*, int, ActRec*, TypedValue*);
 
-void genCodeForTrace(IRTrace*                trace,
-                     CodeBlock&              mainCode,
-                     CodeBlock&              stubsCode,
-                     IRUnit&                 unit,
-                     vector<TransBCMapping>* bcMap,
-                     TranslatorX64*          tx64,
-                     const RegAllocInfo&     regs,
-                     const LifetimeInfo*     lifetime = nullptr,
-                     AsmInfo*                asmInfo = nullptr);
+void genCode(CodeBlock&              mainCode,
+             CodeBlock&              stubsCode,
+             IRUnit&                 unit,
+             vector<TransBCMapping>* bcMap,
+             TranslatorX64*          tx64,
+             const RegAllocInfo&     regs);
 
 }}
 

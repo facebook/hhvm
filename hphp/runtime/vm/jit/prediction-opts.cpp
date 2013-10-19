@@ -60,12 +60,13 @@ bool instructionsAreSinkable(InputIterator first, InputIterator last) {
  * Optimizations that try to hoist CheckType instructions so that we
  * can specialize code earlier and avoid generic operations.
  */
-void optimizePredictions(IRTrace* const trace, IRUnit& unit) {
+void optimizePredictions(IRUnit& unit) {
+  auto const trace = unit.main();
   FTRACE(5, "PredOpts:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "PredOpts:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
   auto const sortedBlocks = folly::lazy([&]{
-    return rpoSortCfg(trace, unit);
+    return rpoSortCfg(unit);
   });
 
   /*
@@ -156,7 +157,7 @@ void optimizePredictions(IRTrace* const trace, IRUnit& unit) {
    * unlink the block containing the CheckType instruction they are
    * visiting.
    */
-  if (!trace->isMain()) return;
+  assert(trace->isMain());
   bool needsReflow = false;
   for (Block* b : trace->blocks()) {
     for (auto& inst : *b) {

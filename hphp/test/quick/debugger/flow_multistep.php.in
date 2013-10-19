@@ -18,15 +18,15 @@ break clear all
 break flow_multistep.php:54
 run
 break clear all
-step 10
+step 12
 out 2
 out
 continue
 break flow_multistep.php:54
 run
 break clear all
-step 10
-next 3
+step 12
+next 5
 next
 continue
 quit

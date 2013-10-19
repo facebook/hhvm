@@ -216,6 +216,7 @@ public:
   static bool ParseTimeOpts;
   static bool OutputHHBC;
   static bool EnableHipHopSyntax;
+  static bool EnableZendCompat;
   static bool JitEnableRenameFunction;
   static bool EnableHipHopExperimentalSyntax;
   static bool EnableShortTags;

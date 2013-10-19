@@ -12,6 +12,10 @@
         {
             "name": "PHP_DEBUG",
             "type": "Boolean"
+        },
+        {
+            "name": "PHP_MAXPATHLEN",
+            "type": "Int64"
         }
     ],
     "funcs": [

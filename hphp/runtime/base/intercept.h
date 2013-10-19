@@ -21,6 +21,7 @@
 #include "hphp/util/case-insensitive.h"
 
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 // fb_intercept()
 
@@ -29,58 +30,37 @@ namespace HPHP {
  * instead. If it returns FALSE, continues execution. Otherwise, return its
  * return.
  */
-bool register_intercept(CStrRef name, CVarRef callback, CVarRef data);
+bool register_intercept(const String& name, CVarRef callback, CVarRef data);
 
 /**
  * Check to see if it is actually intercepted for current request.
  */
-Variant *get_intercept_handler(CStrRef name, char* flag);
+Variant *get_intercept_handler(const String& name, char* flag);
 
 /**
  * Check to see if it is actually intercepted for current request,
  * when we already know its flag is set
  */
-Variant *get_enabled_intercept_handler(CStrRef name);
+Variant *get_enabled_intercept_handler(const String& name);
 
 /**
  * Call intercept handler with original parameters.
  */
-bool handle_intercept(CVarRef handler, CStrRef name, CArrRef params,
+bool handle_intercept(CVarRef handler, const String& name, CArrRef params,
                       Variant &ret);
 
 /**
  * Removes a previously registered flag.
  */
-void unregister_intercept_flag(CStrRef name, char *flag);
+void unregister_intercept_flag(const String& name, char *flag);
 
 ///////////////////////////////////////////////////////////////////////////////
 // fb_rename_function()
 
-/**
- * Functions on the specified list will be the only ones that are allowed
- * to rename. Without calling this function, all functions are allowed to
- * rename, even including built-in functions.
- */
-void check_renamed_functions(CArrRef names);
-
-/**
- * Checks to see if the specified function is on the allow list.
- */
-bool check_renamed_function(CStrRef name);
-
-/**
- * Rename a function.
- */
-void rename_function(CStrRef old_name, CStrRef new_name);
-
-/**
- * Get the actual function to call.
- */
-String get_renamed_function(CStrRef name);
-
-extern DECLARE_THREAD_LOCAL_NO_CHECK(bool, s_hasRenamedFunction);
+void rename_function(const String& old_name, const String& new_name);
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // incl_HPHP_INTERCEPT_H_

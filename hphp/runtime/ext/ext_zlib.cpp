@@ -43,7 +43,7 @@ namespace {
 
 static class ZlibStreamWrapper : public Stream::Wrapper {
  public:
-  virtual File* open(CStrRef filename, CStrRef mode,
+  virtual File* open(const String& filename, const String& mode,
                      int options, CVarRef context) {
     String fname;
     static const char cz[] = "compress.zlib://";
@@ -252,7 +252,7 @@ static Variant gzinflate(const char *data, int len, int limit /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_readgzfile(CStrRef filename, bool use_include_path /* = false */) {
+Variant f_readgzfile(const String& filename, bool use_include_path /* = false */) {
   Resource stream = f_gzopen(filename, "rb", use_include_path);
   if (stream.isNull()) {
     return false;
@@ -260,7 +260,7 @@ Variant f_readgzfile(CStrRef filename, bool use_include_path /* = false */) {
   return f_gzpassthru(stream);
 }
 
-Variant f_gzfile(CStrRef filename, bool use_include_path /* = false */) {
+Variant f_gzfile(const String& filename, bool use_include_path /* = false */) {
   Resource stream = f_gzopen(filename, "rb", use_include_path);
   if (stream.isNull()) {
     return false;
@@ -274,23 +274,23 @@ Variant f_gzfile(CStrRef filename, bool use_include_path /* = false */) {
   return ret;
 }
 
-Variant f_gzcompress(CStrRef data, int level /* = -1 */) {
+Variant f_gzcompress(const String& data, int level /* = -1 */) {
   return gzcompress(data.data(), data.size(), level);
 }
 
-Variant f_gzuncompress(CStrRef data, int limit /* = 0 */) {
+Variant f_gzuncompress(const String& data, int limit /* = 0 */) {
   return gzuncompress(data.data(), data.size(), limit);
 }
 
-Variant f_gzdeflate(CStrRef data, int level /* = -1 */) {
+Variant f_gzdeflate(const String& data, int level /* = -1 */) {
   return gzdeflate(data.data(), data.size(), level);
 }
 
-Variant f_gzinflate(CStrRef data, int limit /* = 0 */) {
+Variant f_gzinflate(const String& data, int limit /* = 0 */) {
   return gzinflate(data.data(), data.size(), limit);
 }
 
-Variant f_gzencode(CStrRef data, int level /* = -1 */,
+Variant f_gzencode(const String& data, int level /* = -1 */,
                    int encoding_mode /* = k_FORCE_GZIP */) {
   int len = data.size();
   char *ret = gzencode(data.data(), len, level, encoding_mode);
@@ -300,7 +300,7 @@ Variant f_gzencode(CStrRef data, int level /* = -1 */,
   return String(ret, len, AttachString);
 }
 
-Variant f_gzdecode(CStrRef data) {
+Variant f_gzdecode(const String& data) {
   int len = data.size();
   char *ret = gzdecode(data.data(), len);
   if (ret == NULL) {
@@ -316,7 +316,7 @@ String f_zlib_get_coding_type() {
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions
 
-Resource f_gzopen(CStrRef filename, CStrRef mode,
+Resource f_gzopen(const String& filename, const String& mode,
                   bool use_include_path /* = false */) {
   File *file = NEWOBJ(ZipFile)();
   Resource handle(file);
@@ -353,16 +353,16 @@ Variant f_gzgets(CResRef zp, int64_t length /* = 1024 */) {
   return f_fgets(zp, length);
 }
 Variant f_gzgetss(CResRef zp, int64_t length /* = 0 */,
-                  CStrRef allowable_tags /* = null_string */) {
+                  const String& allowable_tags /* = null_string */) {
   return f_fgetss(zp, length, allowable_tags);
 }
 Variant f_gzpassthru(CResRef zp) {
   return f_fpassthru(zp);
 }
-Variant f_gzputs(CResRef zp, CStrRef str, int64_t length /* = 0 */) {
+Variant f_gzputs(CResRef zp, const String& str, int64_t length /* = 0 */) {
   return f_fwrite(zp, str, length);
 }
-Variant f_gzwrite(CResRef zp, CStrRef str, int64_t length /* = 0 */) {
+Variant f_gzwrite(CResRef zp, const String& str, int64_t length /* = 0 */) {
   return f_fwrite(zp, str, length);
 }
 
@@ -410,7 +410,7 @@ namespace QuickLZ3 {
 
 #endif // HAVE_QUICKLZ
 
-Variant f_qlzcompress(CStrRef data, int level /* = 1 */) {
+Variant f_qlzcompress(const String& data, int level /* = 1 */) {
 #ifndef HAVE_QUICKLZ
   throw NotSupportedException(__func__, "QuickLZ library cannot be found");
 #else
@@ -452,7 +452,7 @@ Variant f_qlzcompress(CStrRef data, int level /* = 1 */) {
 #endif
 }
 
-Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
+Variant f_qlzuncompress(const String& data, int level /* = 1 */) {
 #ifndef HAVE_QUICKLZ
   throw NotSupportedException(__func__, "QuickLZ library cannot be found");
 #else
@@ -506,7 +506,7 @@ Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
 #endif
 }
 
-Variant f_sncompress(CStrRef data) {
+Variant f_sncompress(const String& data) {
 #ifndef HAVE_SNAPPY
   throw NotSupportedException(__func__, "Snappy library cannot be found");
 #else
@@ -521,7 +521,7 @@ Variant f_sncompress(CStrRef data) {
 #endif
 }
 
-Variant f_snuncompress(CStrRef data) {
+Variant f_snuncompress(const String& data) {
 #ifndef HAVE_SNAPPY
   throw NotSupportedException(__func__, "Snappy library cannot be found");
 #else
@@ -549,7 +549,7 @@ typedef struct nzlib_format_s {
     Bytef buf[0];
 } nzlib_format_t;
 
-Variant f_nzcompress(CStrRef uncompressed) {
+Variant f_nzcompress(const String& uncompressed) {
   size_t len = compressBound(uncompressed.size());
   String str(sizeof(nzlib_format_t) + len, ReserveString);
   nzlib_format_t* format = (nzlib_format_t*)str.bufferSlice().ptr;
@@ -565,7 +565,7 @@ Variant f_nzcompress(CStrRef uncompressed) {
   return false;
 }
 
-Variant f_nzuncompress(CStrRef compressed) {
+Variant f_nzuncompress(const String& compressed) {
   if (compressed.size() < (ssize_t)sizeof(nzlib_format_t)) {
     return false;
   }
@@ -629,7 +629,7 @@ int VarintDecode(const char** src, int max_size) {
   return val;
 }
 
-Variant f_lz4compress(CStrRef uncompressed) {
+Variant f_lz4compress(const String& uncompressed) {
   int bufsize = LZ4_compressBound(uncompressed.size());
   if (bufsize < 0) {
     return false;
@@ -651,7 +651,7 @@ Variant f_lz4compress(CStrRef uncompressed) {
   return s.setSize(bufsize);
 }
 
-Variant f_lz4hccompress(CStrRef uncompressed) {
+Variant f_lz4hccompress(const String& uncompressed) {
   int bufsize = LZ4_compressBound(uncompressed.size());
   if (bufsize < 0) {
     return false;
@@ -672,7 +672,7 @@ Variant f_lz4hccompress(CStrRef uncompressed) {
   return s.shrink(bufsize);
 }
 
-Variant f_lz4uncompress(CStrRef compressed) {
+Variant f_lz4uncompress(const String& compressed) {
   const char* compressed_ptr = compressed.data();
   int dsize = VarintDecode(&compressed_ptr, compressed.size());
   if (dsize < 0) {

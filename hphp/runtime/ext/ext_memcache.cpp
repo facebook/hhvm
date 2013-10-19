@@ -28,8 +28,8 @@
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(memcache);
 
-bool ini_on_update_hash_strategy(CStrRef value, void *p);
-bool ini_on_update_hash_function(CStrRef value, void *p);
+bool ini_on_update_hash_strategy(const String& value, void *p);
+bool ini_on_update_hash_function(const String& value, void *p);
 
 class MEMCACHEGlobals : public RequestEventHandler {
 public:
@@ -55,7 +55,7 @@ public:
 IMPLEMENT_STATIC_REQUEST_LOCAL(MEMCACHEGlobals, s_memcache_globals);
 #define MEMCACHEG(name) s_memcache_globals->name
 
-bool ini_on_update_hash_strategy(CStrRef value, void *p) {
+bool ini_on_update_hash_strategy(const String& value, void *p) {
   if (!strncasecmp(value.data(), "standard", sizeof("standard"))) {
     MEMCACHEG(hash_strategy) = "standard";
   } else if (!strncasecmp(value.data(), "standard", sizeof("consistent"))) {
@@ -66,7 +66,7 @@ bool ini_on_update_hash_strategy(CStrRef value, void *p) {
   return true;
 }
 
-bool ini_on_update_hash_function(CStrRef value, void *p) {
+bool ini_on_update_hash_function(const String& value, void *p) {
   if (!strncasecmp(value.data(), "crc32", sizeof("crc32"))) {
     MEMCACHEG(hash_strategy) = "crc32";
   } else if (!strncasecmp(value.data(), "fnv", sizeof("fnv"))) {
@@ -111,7 +111,7 @@ void c_Memcache::t___construct() {
   return;
 }
 
-bool c_Memcache::t_connect(CStrRef host, int port /*= 0*/,
+bool c_Memcache::t_connect(const String& host, int port /*= 0*/,
                            int timeout /*= 0*/,
                            int timeoutms /*= 0*/) {
   memcached_return_t ret;
@@ -125,7 +125,7 @@ bool c_Memcache::t_connect(CStrRef host, int port /*= 0*/,
   return (ret == MEMCACHED_SUCCESS);
 }
 
-bool c_Memcache::t_pconnect(CStrRef host, int port /*= 0*/,
+bool c_Memcache::t_pconnect(const String& host, int port /*= 0*/,
                             int timeout /*= 0*/,
                             int timeoutms /*= 0*/) {
   return t_connect(host, port, timeout, timeoutms);
@@ -161,7 +161,7 @@ Variant static memcache_fetch_from_storage(const char *payload,
   return ret;
 }
 
-bool c_Memcache::t_add(CStrRef key, CVarRef var, int flag /*= 0*/,
+bool c_Memcache::t_add(const String& key, CVarRef var, int flag /*= 0*/,
                        int expire /*= 0*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
@@ -179,7 +179,7 @@ bool c_Memcache::t_add(CStrRef key, CVarRef var, int flag /*= 0*/,
   return (ret == MEMCACHED_SUCCESS);
 }
 
-bool c_Memcache::t_set(CStrRef key, CVarRef var, int flag /*= 0*/,
+bool c_Memcache::t_set(const String& key, CVarRef var, int flag /*= 0*/,
                        int expire /*= 0*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
@@ -201,7 +201,7 @@ bool c_Memcache::t_set(CStrRef key, CVarRef var, int flag /*= 0*/,
   return false;
 }
 
-bool c_Memcache::t_replace(CStrRef key, CVarRef var, int flag /*= 0*/,
+bool c_Memcache::t_replace(const String& key, CVarRef var, int flag /*= 0*/,
                            int expire /*= 0*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
@@ -298,7 +298,7 @@ Variant c_Memcache::t_get(CVarRef key, VRefParam flags /*= null*/) {
   return false;
 }
 
-bool c_Memcache::t_delete(CStrRef key, int expire /*= 0*/) {
+bool c_Memcache::t_delete(const String& key, int expire /*= 0*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -310,7 +310,7 @@ bool c_Memcache::t_delete(CStrRef key, int expire /*= 0*/) {
   return (ret == MEMCACHED_SUCCESS);
 }
 
-int64_t c_Memcache::t_increment(CStrRef key, int offset /*= 1*/) {
+int64_t c_Memcache::t_increment(const String& key, int offset /*= 1*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -327,7 +327,7 @@ int64_t c_Memcache::t_increment(CStrRef key, int offset /*= 1*/) {
   return false;
 }
 
-int64_t c_Memcache::t_decrement(CStrRef key, int offset /*= 1*/) {
+int64_t c_Memcache::t_decrement(const String& key, int offset /*= 1*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
     return false;
@@ -392,7 +392,7 @@ bool c_Memcache::t_setoptimeout(int64_t timeoutms) {
   return true;
 }
 
-int64_t c_Memcache::t_getserverstatus(CStrRef host, int port /* = 0 */) {
+int64_t c_Memcache::t_getserverstatus(const String& host, int port /* = 0 */) {
   /* intentionally doing nothing for now */
   return 1;
 }
@@ -447,7 +447,7 @@ Array static memcache_build_stats(const memcached_st *ptr,
 }
 
 
-Array c_Memcache::t_getstats(CStrRef type /* = null_string */,
+Array c_Memcache::t_getstats(const String& type /* = null_string */,
                              int slabid /* = 0 */, int limit /* = 100 */) {
   if (!memcached_server_count(&m_memcache)) {
     return NULL;
@@ -477,7 +477,7 @@ Array c_Memcache::t_getstats(CStrRef type /* = null_string */,
   return memcache_build_stats(&m_memcache, &stats, &ret);
 }
 
-Array c_Memcache::t_getextendedstats(CStrRef type /* = null_string */,
+Array c_Memcache::t_getextendedstats(const String& type /* = null_string */,
                                      int slabid /* = 0 */,
                                      int limit /* = 100 */) {
   memcached_return_t ret;
@@ -518,7 +518,7 @@ Array c_Memcache::t_getextendedstats(CStrRef type /* = null_string */,
   return return_val;
 }
 
-bool c_Memcache::t_setserverparams(CStrRef host, int port /* = 11211 */,
+bool c_Memcache::t_setserverparams(const String& host, int port /* = 11211 */,
                                    int timeout /* = 0 */,
                                    int retry_interval /* = 0 */,
                                    bool status /* = true */,
@@ -527,7 +527,7 @@ bool c_Memcache::t_setserverparams(CStrRef host, int port /* = 11211 */,
   return true;
 }
 
-bool c_Memcache::t_addserver(CStrRef host, int port /* = 11211 */,
+bool c_Memcache::t_addserver(const String& host, int port /* = 11211 */,
                              bool persistent /* = false */,
                              int weight /* = 0 */, int timeout /* = 0 */,
                              int retry_interval /* = 0 */,
@@ -559,7 +559,7 @@ Variant c_Memcache::t___destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 // these all pass to their OO equivalents
 
-Object f_memcache_connect(CStrRef host, int port /* = 0 */,
+Object f_memcache_connect(const String& host, int port /* = 0 */,
                           int timeout /* = 0 */, int timeoutms /* = 0 */) {
   c_Memcache *memcache_obj = NEWOBJ(c_Memcache)();
   Object ret(memcache_obj);
@@ -567,24 +567,24 @@ Object f_memcache_connect(CStrRef host, int port /* = 0 */,
   return ret;
 }
 
-Object f_memcache_pconnect(CStrRef host, int port /* = 0 */,
+Object f_memcache_pconnect(const String& host, int port /* = 0 */,
                            int timeout /* = 0 */, int timeoutms /* = 0 */) {
   return f_memcache_connect(host, port, timeout, timeoutms);
 }
 
-bool f_memcache_add(CObjRef memcache, CStrRef key, CVarRef var,
+bool f_memcache_add(CObjRef memcache, const String& key, CVarRef var,
                     int flag /* = 0 */, int expire /* = 0 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_add(key, var, flag, expire);
 }
 
-bool f_memcache_set(CObjRef memcache, CStrRef key, CVarRef var,
+bool f_memcache_set(CObjRef memcache, const String& key, CVarRef var,
                     int flag /* = 0 */, int expire /* = 0 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_set(key, var, flag, expire);
 }
 
-bool f_memcache_replace(CObjRef memcache, CStrRef key, CVarRef var,
+bool f_memcache_replace(CObjRef memcache, const String& key, CVarRef var,
                         int flag /* = 0 */, int expire /* = 0 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_replace(key, var, flag, expire);
@@ -596,18 +596,18 @@ Variant f_memcache_get(CObjRef memcache, CVarRef key,
   return memcache_obj->t_get(key, flags);
 }
 
-bool f_memcache_delete(CObjRef memcache, CStrRef key, int expire /* = 0 */) {
+bool f_memcache_delete(CObjRef memcache, const String& key, int expire /* = 0 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_delete(key, expire);
 }
 
-int64_t f_memcache_increment(CObjRef memcache, CStrRef key,
+int64_t f_memcache_increment(CObjRef memcache, const String& key,
                            int offset /* = 1 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_increment(key, offset);
 }
 
-int64_t f_memcache_decrement(CObjRef memcache, CStrRef key,
+int64_t f_memcache_decrement(CObjRef memcache, const String& key,
                            int offset /* = 1 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_decrement(key, offset);
@@ -637,7 +637,7 @@ bool f_memcache_setoptimeout(CObjRef memcache, int timeoutms) {
   return memcache_obj->t_setoptimeout(timeoutms);
 }
 
-int64_t f_memcache_get_server_status(CObjRef memcache, CStrRef host,
+int64_t f_memcache_get_server_status(CObjRef memcache, const String& host,
                                  int port /* = 0 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_getserverstatus(host, port);
@@ -649,21 +649,21 @@ bool f_memcache_set_compress_threshold(CObjRef memcache, int threshold,
   return memcache_obj->t_setcompressthreshold(threshold, min_savings);
 }
 
-Array f_memcache_get_stats(CObjRef memcache, CStrRef type /* = null_string */,
+Array f_memcache_get_stats(CObjRef memcache, const String& type /* = null_string */,
                            int slabid /* = 0 */, int limit /* = 100 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_getstats(type, slabid, limit);
 }
 
 Array f_memcache_get_extended_stats(CObjRef memcache,
-                                    CStrRef type /* = null_string */,
+                                    const String& type /* = null_string */,
                                     int slabid /* = 0 */,
                                     int limit /* = 100 */) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_getextendedstats(type, slabid, limit);
 }
 
-bool f_memcache_set_server_params(CObjRef memcache, CStrRef host,
+bool f_memcache_set_server_params(CObjRef memcache, const String& host,
                                  int port /* = 11211 */,
                                  int timeout /* = 0 */,
                                  int retry_interval /* = 0 */,
@@ -674,7 +674,7 @@ bool f_memcache_set_server_params(CObjRef memcache, CStrRef host,
                                          status, failure_callback);
 }
 
-bool f_memcache_add_server(CObjRef memcache, CStrRef host,
+bool f_memcache_add_server(CObjRef memcache, const String& host,
                            int port /* = 11211 */,
                            bool persistent /* = false */,
                            int weight /* = 0 */,

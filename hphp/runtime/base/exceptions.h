@@ -34,12 +34,16 @@ public:
   ExtendedException(SkipFrame frame, const std::string &msg);
   ExtendedException(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
   Array getBackTrace() const;
+  // a silent exception does not have its exception message logged
+  bool isSilent() const { return m_silent; }
+  void setSilent(bool s = true) { m_silent = s; }
   virtual ~ExtendedException() throw() {}
   EXCEPTION_COMMON_IMPL(ExtendedException);
 protected:
   ArrayHolder m_btp;
 private:
   void computeBacktrace(bool skipFrame = false);
+  bool m_silent;
 };
 
 class Assertion : public ExtendedException {
@@ -140,8 +144,11 @@ public:
   virtual ~ParseTimeFatalException() throw() {}
   EXCEPTION_COMMON_IMPL(ParseTimeFatalException);
 
+  void setParseFatal(bool b = true) { m_parseFatal = b; }
+
   std::string m_file;
   int m_line;
+  bool m_parseFatal;
 };
 
 class FatalErrorException : public ExtendedException {
@@ -293,8 +300,23 @@ class PhpFileDoesNotExistException : public ExtendedException {
 public:
   explicit PhpFileDoesNotExistException(const char *file)
     : ExtendedException("File could not be loaded: %s", file) {}
+  explicit PhpFileDoesNotExistException(const char *msg, bool empty_file)
+    : ExtendedException("%s", msg) {
+      assert(empty_file);
+    }
   virtual ~PhpFileDoesNotExistException() throw() {}
   EXCEPTION_COMMON_IMPL(PhpFileDoesNotExistException);
+};
+
+class NoFileSpecifiedException : public PhpFileDoesNotExistException {
+public:
+  explicit NoFileSpecifiedException()
+    : PhpFileDoesNotExistException(
+        "Nothing to do. Either pass a .php file to run, or use -m server",
+        true
+      ) {}
+  virtual ~NoFileSpecifiedException() throw() {}
+  EXCEPTION_COMMON_IMPL(NoFileSpecifiedException);
 };
 
 class RequestTimeoutException : public FatalErrorException {

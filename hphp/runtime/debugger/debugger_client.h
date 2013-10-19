@@ -42,6 +42,7 @@ public:
   static int CodeBlockSize;
   static int ScrollBlockSize;
   static const char *LineNoFormat;
+  static const char *LineNoFormatWithStar;
   static const char *LocalPrompt;
   static const char *ConfigFileName;
   static const char *HistoryFileName;
@@ -140,13 +141,14 @@ public:
   void output (const std::string &s);
   void error  (const std::string &s);
 
-  void print  (CStrRef s);
-  void help   (CStrRef s);
-  void info   (CStrRef s);
-  void output (CStrRef s);
-  void error  (CStrRef s);
+  void print  (const String& s);
+  void help   (const String& s);
+  void info   (const String& s);
+  void output (const String& s);
+  void error  (const String& s);
 
-  bool code(CStrRef source, int lineFocus = 0, int line1 = 0, int line2 = 0,
+  bool code(const String& source, int lineFocus = 0, int line1 = 0,
+            int line2 = 0,
             int charFocus0 = 0, int lineFocus1 = 0, int charFocus1 = 0);
   void shortCode(BreakPointInfoPtr bp);
   char ask(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
@@ -309,6 +311,7 @@ public:
   // Internal testing helpers. Only used by internal tests!!!
   bool internalTestingIsClientStopped() const { return m_stopped; }
 
+  bool unknownCmdReceived() const { return m_unknownCmd; }
 private:
   enum InputState {
     TakingCommand,
@@ -438,6 +441,8 @@ private:
 
   // Zend executable for CmdZend, overridable via config.
   std::string m_zendExe;
+
+  bool m_unknownCmd;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

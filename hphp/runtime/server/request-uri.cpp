@@ -25,8 +25,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
-                       const std::string &sourceRoot,
-                       const std::string &pathTranslation)
+                       const std::string &pathTranslation,
+                       const std::string &sourceRoot)
   :  m_rewritten(false), m_defaultDoc(false), m_done(false),
      m_forbidden(false), m_ext(nullptr) {
   if (!process(vhost, transport, sourceRoot, pathTranslation,
@@ -230,7 +230,7 @@ bool RequestURI::resolveURL(const VirtualHost *vhost,
 bool RequestURI::virtualFileExists(const VirtualHost *vhost,
                                    const string &sourceRoot,
                                    const string &pathTranslation,
-                                   CStrRef filename) {
+                                   const String& filename) {
   if (filename.empty() || filename.charAt(filename.length() - 1) == '/') {
     return false;
   }
@@ -270,7 +270,7 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
 bool RequestURI::virtualFolderExists(const VirtualHost *vhost,
                                      const string &sourceRoot,
                                      const string &pathTranslation,
-                                     CStrRef foldername) {
+                                     const String& foldername) {
   if (!vhost->getDocumentRoot().empty()) {
     string fullname = foldername.data();
     // If there is a trailing slash, remove it
@@ -323,7 +323,7 @@ void RequestURI::processExt() {
 /*
  * Parse file extension from a path
  */
-const char *RequestURI::parseExt(CStrRef s) {
+const char *RequestURI::parseExt(const String& s) {
   int pos = s.rfind('.');
   if (pos == -1) {
     return nullptr;

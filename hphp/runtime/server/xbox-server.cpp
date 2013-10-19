@@ -31,7 +31,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-XboxTransport::XboxTransport(CStrRef message, CStrRef reqInitDoc /* = "" */)
+XboxTransport::XboxTransport(const String& message, const String& reqInitDoc /* = "" */)
     : m_refCount(0), m_done(false), m_code(0), m_event(nullptr) {
   Timer::GetMonotonicTime(m_queueTime);
 
@@ -199,12 +199,12 @@ const StaticString
   s_localhost("localhost"),
   s_127_0_0_1("127.0.0.1");
 
-static bool isLocalHost(CStrRef host) {
+static bool isLocalHost(const String& host) {
   return host.empty() || host == s_localhost || host == s_127_0_0_1;
 }
 
-bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
-                             CStrRef host /* = "localhost" */) {
+bool XboxServer::SendMessage(const String& message, Variant &ret, int timeout_ms,
+                             const String& host /* = "localhost" */) {
   if (isLocalHost(host)) {
     XboxTransport *job;
     {
@@ -278,8 +278,8 @@ bool XboxServer::SendMessage(CStrRef message, Variant &ret, int timeout_ms,
   return false;
 }
 
-bool XboxServer::PostMessage(CStrRef message,
-                             CStrRef host /* = "localhost" */) {
+bool XboxServer::PostMessage(const String& message,
+                             const String& host /* = "localhost" */) {
   if (isLocalHost(host)) {
     Lock l(s_dispatchMutex);
     if (!s_dispatcher) {
@@ -324,7 +324,7 @@ class XboxTask : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(XboxTask)
 
-  XboxTask(CStrRef message, CStrRef reqInitDoc = "") {
+  XboxTask(const String& message, const String& reqInitDoc = "") {
     m_job = new XboxTransport(message, reqInitDoc);
     m_job->incRefCount();
   }
@@ -337,7 +337,7 @@ public:
 
   CLASSNAME_IS("XboxTask");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
 private:
   XboxTransport *m_job;
@@ -346,7 +346,7 @@ IMPLEMENT_OBJECT_ALLOCATION(XboxTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource XboxServer::TaskStart(CStrRef msg, CStrRef reqInitDoc /* = "" */,
+Resource XboxServer::TaskStart(const String& msg, const String& reqInitDoc /* = "" */,
     ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */) {
   {
     Lock l(s_dispatchMutex);

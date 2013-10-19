@@ -5,7 +5,7 @@ But wont break until file printThis.php has been loaded.
 run
 Breakpoint 1 reached at Foo::method() on line 5 of %s/printThis.php
    4   function method() {
-   5     $other = $this;
+   5*    $other = $this;
    6   }
 
 print $this
@@ -17,7 +17,7 @@ Foo Object
 continue
 Breakpoint 1 reached at Foo::method() on line 5 of %s/printThis.php
    4   function method() {
-   5     $other = $this;
+   5*    $other = $this;
    6   }
 
 print $this

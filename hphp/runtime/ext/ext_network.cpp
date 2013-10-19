@@ -124,7 +124,7 @@ Variant f_gethostname() {
   return canon_hname;
 }
 
-Variant f_gethostbyaddr(CStrRef ip_address) {
+Variant f_gethostbyaddr(const String& ip_address) {
   IOStatusHelper io("gethostbyaddr", ip_address.data());
   struct addrinfo hints, *res, *res0;
   char h_name[NI_MAXHOST];
@@ -149,7 +149,7 @@ Variant f_gethostbyaddr(CStrRef ip_address) {
   return ip_address;
 }
 
-String f_gethostbyname(CStrRef hostname) {
+String f_gethostbyname(const String& hostname) {
   IOStatusHelper io("gethostbyname", hostname.data());
   if (RuntimeOption::EnableDnsCache) {
     Variant success;
@@ -182,7 +182,7 @@ String f_gethostbyname(CStrRef hostname) {
   return ret;
 }
 
-Variant f_gethostbynamel(CStrRef hostname) {
+Variant f_gethostbynamel(const String& hostname) {
   IOStatusHelper io("gethostbynamel", hostname.data());
   Util::HostEnt result;
   if (!Util::safe_gethostbyname(hostname.data(), result)) {
@@ -197,7 +197,7 @@ Variant f_gethostbynamel(CStrRef hostname) {
   return ret;
 }
 
-Variant f_getprotobyname(CStrRef name) {
+Variant f_getprotobyname(const String& name) {
   Lock lock(NetworkMutex);
 
   struct protoent *ent = getprotobyname(name.data());
@@ -217,7 +217,7 @@ Variant f_getprotobynumber(int number) {
   return String(ent->p_name, CopyString);
 }
 
-Variant f_getservbyname(CStrRef service, CStrRef protocol) {
+Variant f_getservbyname(const String& service, const String& protocol) {
   Lock lock(NetworkMutex);
 
   struct servent *serv = getservbyname(service.data(), protocol.data());
@@ -227,7 +227,7 @@ Variant f_getservbyname(CStrRef service, CStrRef protocol) {
   return ntohs(serv->s_port);
 }
 
-Variant f_getservbyport(int port, CStrRef protocol) {
+Variant f_getservbyport(int port, const String& protocol) {
   Lock lock(NetworkMutex);
 
   struct servent *serv = getservbyport(htons(port), protocol.data());
@@ -237,7 +237,7 @@ Variant f_getservbyport(int port, CStrRef protocol) {
   return String(serv->s_name, CopyString);
 }
 
-Variant f_inet_ntop(CStrRef in_addr) {
+Variant f_inet_ntop(const String& in_addr) {
   int af = AF_INET;
   if (in_addr.size() == 16) {
     af = AF_INET6;
@@ -254,7 +254,7 @@ Variant f_inet_ntop(CStrRef in_addr) {
   return String(buffer, CopyString);
 }
 
-Variant f_inet_pton(CStrRef address) {
+Variant f_inet_pton(const String& address) {
   int af = AF_INET;
   const char *saddress = address.data();
   if (strchr(saddress, ':')) {
@@ -277,7 +277,7 @@ Variant f_inet_pton(CStrRef address) {
 
 const StaticString s_255_255_255_255("255.255.255.255");
 
-Variant f_ip2long(CStrRef ip_address) {
+Variant f_ip2long(const String& ip_address) {
   unsigned long int ip;
   if (ip_address.empty() ||
       (ip = inet_addr(ip_address.data())) == INADDR_NONE) {
@@ -317,7 +317,7 @@ static void php_dns_free_res(struct __res_state *res) {
 #endif
 }
 
-bool f_dns_check_record(CStrRef host, CStrRef type /* = null_string */) {
+bool f_dns_check_record(const String& host, const String& type /* = null_string */) {
   IOStatusHelper io("dns_check_record", host.data());
   const char *stype;
   if (type.empty()) {
@@ -359,7 +359,7 @@ bool f_dns_check_record(CStrRef host, CStrRef type /* = null_string */) {
   return (i >= 0);
 }
 
-bool f_checkdnsrr(CStrRef host, CStrRef type /* = null_string */) {
+bool f_checkdnsrr(const String& host, const String& type /* = null_string */) {
   return f_dns_check_record(host, type);
 }
 
@@ -686,7 +686,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
   return cp;
 }
 
-Variant f_dns_get_record(CStrRef hostname, int type /* = -1 */,
+Variant f_dns_get_record(const String& hostname, int type /* = -1 */,
                          VRefParam authns /* = null */,
                          VRefParam addtl /* = null */) {
   IOStatusHelper io("dns_get_record", hostname.data(), type);
@@ -811,7 +811,7 @@ Variant f_dns_get_record(CStrRef hostname, int type /* = -1 */,
   return ret;
 }
 
-bool f_dns_get_mx(CStrRef hostname, VRefParam mxhosts,
+bool f_dns_get_mx(const String& hostname, VRefParam mxhosts,
                   VRefParam weights /* = null */) {
   IOStatusHelper io("dns_get_mx", hostname.data());
   int count, qdc;
@@ -880,7 +880,7 @@ bool f_dns_get_mx(CStrRef hostname, VRefParam mxhosts,
   return true;
 }
 
-bool f_getmxrr(CStrRef hostname, VRefParam mxhosts,
+bool f_getmxrr(const String& hostname, VRefParam mxhosts,
                VRefParam weight /* = uninit_null() */) {
   return f_dns_get_mx(hostname, ref(mxhosts), weight);
 }
@@ -908,7 +908,7 @@ bool f_socket_set_timeout(CResRef stream, int seconds,
 ///////////////////////////////////////////////////////////////////////////////
 // http
 
-void f_header(CStrRef str, bool replace /* = true */,
+void f_header(const String& str, bool replace /* = true */,
               int http_response_code /* = 0 */) {
   if (f_headers_sent()) {
     raise_warning("Cannot modify header information - headers already sent");
@@ -932,14 +932,21 @@ void f_header(CStrRef str, bool replace /* = true */,
     // handle single line of status code
     if (header->size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) {
       int code = 200;
+      const char *reason = nullptr;
       for (const char *ptr = header_line; *ptr; ptr++) {
         if (*ptr == ' ' && *(ptr + 1) != ' ') {
           code = atoi(ptr + 1);
+          for (ptr++; *ptr; ptr++) {
+            if (*ptr == ' ' && *(ptr + 1) != ' ') {
+              reason = ptr + 1;
+              break;
+            }
+          }
           break;
         }
       }
       if (code) {
-        transport->setResponse(code, "explicit_header");
+        transport->setResponse(code, reason);
       }
       return;
     }
@@ -1030,7 +1037,7 @@ bool f_header_register_callback(CVarRef callback) {
   return transport->setHeaderCallback(callback);
 }
 
-void f_header_remove(CStrRef name /* = null_string */) {
+void f_header_remove(const String& name /* = null_string */) {
   if (f_headers_sent()) {
     raise_warning("Cannot modify header information - headers already sent");
   }
@@ -1053,9 +1060,9 @@ int f_get_http_request_size() {
   }
 }
 
-bool f_setcookie(CStrRef name, CStrRef value /* = null_string */,
-                 int64_t expire /* = 0 */, CStrRef path /* = null_string */,
-                 CStrRef domain /* = null_string */, bool secure /* = false */,
+bool f_setcookie(const String& name, const String& value /* = null_string */,
+                 int64_t expire /* = 0 */, const String& path /* = null_string */,
+                 const String& domain /* = null_string */, bool secure /* = false */,
                  bool httponly /* = false */) {
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -1065,9 +1072,9 @@ bool f_setcookie(CStrRef name, CStrRef value /* = null_string */,
   return false;
 }
 
-bool f_setrawcookie(CStrRef name, CStrRef value /* = null_string */,
-                    int64_t expire /* = 0 */, CStrRef path /* = null_string */,
-                    CStrRef domain /* = null_string */,
+bool f_setrawcookie(const String& name, const String& value /* = null_string */,
+                    int64_t expire /* = 0 */, const String& path /* = null_string */,
+                    const String& domain /* = null_string */,
                     bool secure /* = false */,
                     bool httponly /* = false */) {
   Transport *transport = g_context->getTransport();
@@ -1084,7 +1091,7 @@ void f_define_syslog_variables() {
   // do nothing, since all variables are defined as constants already
 }
 
-bool f_openlog(CStrRef ident, int option, int facility) {
+bool f_openlog(const String& ident, int option, int facility) {
   openlog(ident.data(), option, facility);
   return true;
 }
@@ -1094,7 +1101,7 @@ bool f_closelog() {
   return true;
 }
 
-bool f_syslog(int priority, CStrRef message) {
+bool f_syslog(int priority, const String& message) {
   syslog(priority, "%s", message.data());
   return true;
 }

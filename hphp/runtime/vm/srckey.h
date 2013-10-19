@@ -54,6 +54,10 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
     , m_offset{off}
   {}
 
+  bool valid() const {
+    return m_funcId != InvalidFuncId;
+  }
+
   // Packed representation of SrcKeys for use in contexts where we
   // want atomicity.  (SrcDB.)
   AtomicInt toAtomicInt() const {

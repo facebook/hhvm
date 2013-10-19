@@ -109,8 +109,8 @@ public:
    */
   JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
            bool dropStack, int lifoSwitchThreshold=INT_MAX,
-           int maxJobQueuingMs=-1, int numPriorities=1)
-      : SynchronizableMulti(threadRoundRobin ? 1 : threadCount),
+           int maxJobQueuingMs=-1, int numPriorities=1, int groups = 1)
+      : SynchronizableMulti(threadRoundRobin ? 1 : threadCount, groups),
         m_jobCount(0), m_stopped(false), m_workerCount(0),
         m_dropCacheTimeout(dropCacheTimeout), m_dropStack(dropStack),
         m_lifoSwitchThreshold(lifoSwitchThreshold),
@@ -138,14 +138,14 @@ public:
    * by this queue class, it's up to a worker class on whether to deallocate
    * the job object correctly.
    */
-  TJob dequeueMaybeExpired(int id, bool inc, bool* expired) {
+  TJob dequeueMaybeExpired(int id, int q, bool inc, bool* expired) {
     if (id == m_jobReaperId.load()) {
       *expired = true;
-      return dequeueOnlyExpiredImpl(id, inc);
+      return dequeueOnlyExpiredImpl(id, q, inc);
     }
     timespec now;
     Timer::GetMonotonicTime(now);
-    return dequeueMaybeExpiredImpl(id, inc, now, expired);
+    return dequeueMaybeExpiredImpl(id, q, inc, now, expired);
   }
 
   /**
@@ -198,7 +198,7 @@ public:
 
  private:
   friend class JobQueue_Expiration_Test;
-  TJob dequeueMaybeExpiredImpl(int id, bool inc, const timespec& now,
+  TJob dequeueMaybeExpiredImpl(int id, int q, bool inc, const timespec& now,
                                bool* expired) {
     *expired = false;
     Lock lock(this);
@@ -208,8 +208,8 @@ public:
         throw StopSignal();
       }
       if (m_dropCacheTimeout <= 0 || flushed) {
-        wait(id, false);
-      } else if (!wait(id, true, m_dropCacheTimeout)) {
+        wait(id, q, false);
+      } else if (!wait(id, q, true, m_dropCacheTimeout)) {
         // since we timed out, maybe we can turn idle without holding memory
         if (m_jobCount == 0) {
           ScopedUnlock unlock(this);
@@ -256,7 +256,7 @@ public:
     return TJob();  // make compiler happy.
   }
 
-  TJob dequeueOnlyExpiredImpl(int id, bool inc) {
+  TJob dequeueOnlyExpiredImpl(int id, int q, bool inc) {
     Lock lock(this);
     assert(m_maxJobQueuingMs > 0);
     while(!m_stopped) {
@@ -282,7 +282,7 @@ public:
                         waitTimeForQueue);
         }
       }
-      if (wait(id, false, waitTimeUs / 1000000, waitTimeUs % 1000000)) {
+      if (wait(id, q, false, waitTimeUs / 1000000, waitTimeUs % 1000000)) {
         // We got woken up by somebody calling notify (as opposed to timeout),
         // then some work might be on the queue. We only expire things here,
         // so let's notify somebody else as well.
@@ -307,14 +307,15 @@ template<class TJob, class Policy>
 struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
   JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
            bool dropStack, int lifoSwitchThreshold=INT_MAX,
-           int maxJobQueuingMs=-1, int numPriorities=1) :
+           int maxJobQueuingMs=-1, int numPriorities=1, int groups = 1) :
     JobQueue<TJob,false,Policy>(threadCount,
                                 threadRoundRobin,
                                 dropCacheTimeout,
                                 dropStack,
                                 lifoSwitchThreshold,
                                 maxJobQueuingMs,
-                                numPriorities) {
+                                numPriorities,
+                                groups) {
     pthread_cond_init(&m_cond, nullptr);
   }
   ~JobQueue() {
@@ -398,7 +399,8 @@ public:
     while (!m_stopped) {
       try {
         bool expired = false;
-        TJob job = m_queue->dequeueMaybeExpired(m_id, countActive, &expired);
+        TJob job = m_queue->dequeueMaybeExpired(m_id, Util::s_numaNode,
+                                                countActive, &expired);
         if (expired) {
           abortJob(job);
         } else {
@@ -451,11 +453,12 @@ public:
   JobQueueDispatcher(int threadCount, bool threadRoundRobin,
                      int dropCacheTimeout, bool dropStack, void *opaque,
                      int lifoSwitchThreshold = INT_MAX,
-                     int maxJobQueuingMs = -1, int numPriorities = 1)
+                     int maxJobQueuingMs = -1, int numPriorities = 1,
+                     int groups = 1)
       : m_stopped(true), m_id(0), m_opaque(opaque),
         m_maxThreadCount(threadCount),
         m_queue(threadCount, threadRoundRobin, dropCacheTimeout, dropStack,
-                lifoSwitchThreshold, maxJobQueuingMs, numPriorities),
+                lifoSwitchThreshold, maxJobQueuingMs, numPriorities, groups),
         m_startReaperThread(maxJobQueuingMs > 0) {
     assert(threadCount >= 1);
     if (!TWorker::CountActive) {

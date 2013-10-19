@@ -138,6 +138,13 @@ struct UniqueStubs {
    * dispatches to the translation.
    */
   TCA funcBodyHelperThunk;
+
+  /*
+   * Utility for logging stubs addresses during startup and registering the gdb
+   * symbols. It's often useful to know where they were when debugging.
+   */
+  TCA add(const char* name, TCA start);
+
 };
 
 //////////////////////////////////////////////////////////////////////

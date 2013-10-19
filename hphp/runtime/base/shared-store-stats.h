@@ -19,7 +19,7 @@
 
 #include <tbb/concurrent_hash_map.h>
 
-#include "hphp/runtime/base/shared-variant.h"
+#include "hphp/runtime/base/apc-variant.h"
 #include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
@@ -47,7 +47,7 @@ private:
 
 public:
   char *key;
-  SharedVariantStats var;
+  APCVariantStats var;
   int32_t totalSize;
   int32_t keySize;
   bool isGroup;
@@ -83,18 +83,18 @@ public:
     if (key) free(key);
   }
 
-  void calcInd(const StringData *key, const SharedVariant *var);
+  void calcInd(const StringData *key, const APCVariant *var);
   void addToGroup(SharedValueProfile *ind);
   void removeFromGroup(SharedValueProfile *ind);
 };
 
 class SharedStoreStats {
 public:
-  static void onStore(const StringData *key, const SharedVariant *var,
+  static void onStore(const StringData *key, const APCVariant *var,
                       int64_t ttl, bool prime);
-  static void onDelete(const StringData *key, const SharedVariant *var,
+  static void onDelete(const StringData *key, const APCVariant *var,
                        bool replace, bool noTTL);
-  static void onGet(const StringData *key, const SharedVariant *var);
+  static void onGet(const StringData *key, const APCVariant *var);
 
   static std::string report_basic();
   static std::string report_basic_flat();

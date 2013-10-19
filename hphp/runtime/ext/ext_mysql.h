@@ -109,15 +109,15 @@ public:
   /**
    * A connection may be persistent across multiple HTTP requests.
    */
-  static MySQL *GetPersistent(CStrRef host, int port, CStrRef socket,
-                              CStrRef username, CStrRef password,
+  static MySQL *GetPersistent(const String& host, int port, const String& socket,
+                              const String& username, const String& password,
                               int client_flags) {
     return GetCachedImpl("mysql::persistent_conns", host, port, socket,
                          username, password, client_flags);
   }
 
-  static void SetPersistent(CStrRef host, int port, CStrRef socket,
-                            CStrRef username, CStrRef password,
+  static void SetPersistent(const String& host, int port, const String& socket,
+                            const String& username, const String& password,
                             int client_flags, MySQL *conn) {
     SetCachedImpl("mysql::persistent_conns", host, port, socket,
                   username, password, client_flags, conn);
@@ -132,15 +132,15 @@ public:
 private:
   static int s_default_port;
 
-  static String GetHash(CStrRef host, int port, CStrRef socket,
-                        CStrRef username, CStrRef password, int client_flags);
+  static String GetHash(const String& host, int port, const String& socket,
+                        const String& username, const String& password, int client_flags);
 
-  static MySQL *GetCachedImpl(const char *name, CStrRef host, int port,
-                              CStrRef socket, CStrRef username,
-                              CStrRef password, int client_flags);
+  static MySQL *GetCachedImpl(const char *name, const String& host, int port,
+                              const String& socket, const String& username,
+                              const String& password, int client_flags);
 
-  static void SetCachedImpl(const char *name, CStrRef host, int port,
-                            CStrRef socket, CStrRef username, CStrRef password,
+  static void SetCachedImpl(const char *name, const String& host, int port,
+                            const String& socket, const String& username, const String& password,
                             int client_flags, MySQL *conn);
 
 public:
@@ -154,18 +154,18 @@ public:
 
   CLASSNAME_IS("mysql link")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
   virtual bool isInvalid() const { return m_conn == nullptr; }
 
-  bool connect(CStrRef host, int port, CStrRef socket, CStrRef username,
-               CStrRef password, CStrRef database, int client_flags,
+  bool connect(const String& host, int port, const String& socket, const String& username,
+               const String& password, const String& database, int client_flags,
                int connect_timeout);
 #ifdef FACEBOOK
-  bool async_connect(CStrRef host, int port, CStrRef socket, CStrRef username,
-                     CStrRef password, CStrRef database);
+  bool async_connect(const String& host, int port, const String& socket, const String& username,
+                     const String& password, const String& database);
 #endif
-  bool reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
-                 CStrRef password, CStrRef database, int client_flags,
+  bool reconnect(const String& host, int port, const String& socket, const String& username,
+                 const String& password, const String& database, int client_flags,
                  int connect_timeout);
 
   MYSQL *get() { return m_conn;}
@@ -217,7 +217,7 @@ public:
 
   CLASSNAME_IS("mysql result")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   void close() {
     if (m_res) {
@@ -285,55 +285,55 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 // connection functions
 
-Variant f_mysql_connect(CStrRef server = null_string,
-                        CStrRef username = null_string,
-                        CStrRef password = null_string,
+Variant f_mysql_connect(const String& server = null_string,
+                        const String& username = null_string,
+                        const String& password = null_string,
                         bool new_link = false,
                         int client_flags = 0,
                         int connect_timeout_ms = -1,
                         int query_timeout_ms = -1);
-Variant f_mysql_pconnect(CStrRef server = null_string,
-                         CStrRef username = null_string,
-                         CStrRef password = null_string,
+Variant f_mysql_pconnect(const String& server = null_string,
+                         const String& username = null_string,
+                         const String& password = null_string,
                          int client_flags = 0,
                          int connect_timeout_ms = -1,
                          int query_timeout_ms = -1);
 
-Variant f_mysql_connect_with_db(CStrRef server = null_string,
-                        CStrRef username = null_string,
-                        CStrRef password = null_string,
-                        CStrRef database = null_string,
+Variant f_mysql_connect_with_db(const String& server = null_string,
+                        const String& username = null_string,
+                        const String& password = null_string,
+                        const String& database = null_string,
                         bool new_link = false,
                         int client_flags = 0,
                         int connect_timeout_ms = -1,
                         int query_timeout_ms = -1);
-Variant f_mysql_pconnect_with_db(CStrRef server = null_string,
-                         CStrRef username = null_string,
-                         CStrRef password = null_string,
-                         CStrRef database = null_string,
+Variant f_mysql_pconnect_with_db(const String& server = null_string,
+                         const String& username = null_string,
+                         const String& password = null_string,
+                         const String& database = null_string,
                          int client_flags = 0,
                          int connect_timeout_ms = -1,
                          int query_timeout_ms = -1);
 
-Variant f_mysql_async_connect_start(CStrRef server = null_string,
-                                    CStrRef username = null_string,
-                                    CStrRef password = null_string,
-                                    CStrRef database = null_string);
+Variant f_mysql_async_connect_start(const String& server = null_string,
+                                    const String& username = null_string,
+                                    const String& password = null_string,
+                                    const String& database = null_string);
 bool f_mysql_async_connect_completed(CVarRef link_identifier);
-bool f_mysql_async_query_start(CStrRef query, CVarRef link_identifier);
+bool f_mysql_async_query_start(const String& query, CVarRef link_identifier);
 Variant f_mysql_async_query_result(CVarRef link_identifier);
 bool f_mysql_async_query_completed(CVarRef result);
 Variant f_mysql_async_fetch_array(CVarRef result, int result_type = 1);
 Variant f_mysql_async_wait_actionable(CVarRef items, double timeout);
 int64_t f_mysql_async_status(CVarRef link_identifier);
 
-String f_mysql_escape_string(CStrRef unescaped_string);
+String f_mysql_escape_string(const String& unescaped_string);
 
-Variant f_mysql_real_escape_string(CStrRef unescaped_string,
+Variant f_mysql_real_escape_string(const String& unescaped_string,
                                    CVarRef link_identifier = uninit_null());
 
 String f_mysql_get_client_info();
-Variant f_mysql_set_charset(CStrRef charset,
+Variant f_mysql_set_charset(const String& charset,
                                    CVarRef link_identifier = uninit_null());
 Variant f_mysql_ping(CVarRef link_identifier = uninit_null());
 Variant f_mysql_client_encoding(CVarRef link_identifier = uninit_null());
@@ -352,25 +352,25 @@ Variant f_mysql_info(CVarRef link_identifier = uninit_null());
 Variant f_mysql_insert_id(CVarRef link_identifier = uninit_null());
 Variant f_mysql_stat(CVarRef link_identifier = uninit_null());
 Variant f_mysql_thread_id(CVarRef link_identifier = uninit_null());
-Variant f_mysql_create_db(CStrRef db,
+Variant f_mysql_create_db(const String& db,
                                  CVarRef link_identifier = uninit_null());
-Variant f_mysql_select_db(CStrRef db,
+Variant f_mysql_select_db(const String& db,
                                  CVarRef link_identifier = uninit_null());
-Variant f_mysql_drop_db(CStrRef db,
+Variant f_mysql_drop_db(const String& db,
                                CVarRef link_identifier = uninit_null());
 Variant f_mysql_affected_rows(CVarRef link_identifier = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
 // query functions
 
-Variant mysql_makevalue(CStrRef data, MYSQL_FIELD *mysql_field);
-Variant mysql_makevalue(CStrRef data, enum_field_types field_type);
+Variant mysql_makevalue(const String& data, MYSQL_FIELD *mysql_field);
+Variant mysql_makevalue(const String& data, enum_field_types field_type);
 
 bool f_mysql_set_timeout(int query_timeout_ms = -1,
                          CVarRef link_identifier = uninit_null());
 
-Variant f_mysql_query(CStrRef query, CVarRef link_identifier = uninit_null());
-Variant f_mysql_multi_query(CStrRef query, CVarRef link_identifier = uninit_null());
+Variant f_mysql_query(const String& query, CVarRef link_identifier = uninit_null());
+Variant f_mysql_multi_query(const String& query, CVarRef link_identifier = uninit_null());
 
 int f_mysql_next_result(CVarRef link_identifier = uninit_null());
 
@@ -378,15 +378,15 @@ bool f_mysql_more_results(CVarRef link_identifier = uninit_null());
 
 Variant f_mysql_fetch_result(CVarRef link_identifier = uninit_null());
 
-Variant f_mysql_unbuffered_query(CStrRef query,
+Variant f_mysql_unbuffered_query(const String& query,
                                  CVarRef link_identifier = uninit_null());
-Variant f_mysql_db_query(CStrRef database, CStrRef query,
+Variant f_mysql_db_query(const String& database, const String& query,
                          CVarRef link_identifier = uninit_null());
 Variant f_mysql_list_dbs(CVarRef link_identifier = uninit_null());
 
-Variant f_mysql_list_tables(CStrRef database,
+Variant f_mysql_list_tables(const String& database,
                             CVarRef link_identifier = uninit_null());
-Variant f_mysql_list_fields(CStrRef database_name, CStrRef table_name,
+Variant f_mysql_list_fields(const String& database_name, const String& table_name,
                             CVarRef link_identifier = uninit_null());
 Variant f_mysql_list_processes(CVarRef link_identifier = uninit_null());
 
@@ -403,7 +403,7 @@ Variant f_mysql_fetch_array(CVarRef result, int result_type = 3);
 
 Variant f_mysql_fetch_lengths(CVarRef result);
 
-Variant f_mysql_fetch_object(CVarRef result, CStrRef class_name = "stdClass",
+Variant f_mysql_fetch_object(CVarRef result, const String& class_name = "stdClass",
                              CArrRef params = uninit_null().toArray());
 
 Variant f_mysql_result(CVarRef result, int row, CVarRef field = null_variant);

@@ -30,10 +30,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_icu_match(CStrRef pattern, CStrRef subject,
+Variant f_icu_match(const String& pattern, const String& subject,
                     VRefParam matches = uninit_null(), int64_t flags = 0);
-String f_icu_transliterate(CStrRef str, bool remove_accents);
-Array f_icu_tokenize(CStrRef text);
+String f_icu_transliterate(const String& str, bool remove_accents);
+Array f_icu_tokenize(const String& text);
 extern const int64_t k_UREGEX_CASE_INSENSITIVE;
 extern const int64_t k_UREGEX_COMMENTS;
 extern const int64_t k_UREGEX_DOTALL;

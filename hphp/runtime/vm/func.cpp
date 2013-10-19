@@ -25,9 +25,10 @@
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/blob-helper.h"
@@ -217,7 +218,7 @@ Func::Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
   , m_name(name)
   , m_namedEntity(nullptr)
   , m_refBitVal(0)
-  , m_cachedOffset(0)
+  , m_cachedFunc(RDS::kInvalidHandle)
   , m_maxStackCells(0)
   , m_numParams(0)
   , m_attrs(attrs)
@@ -533,6 +534,7 @@ void Func::prettyPrint(std::ostream& out) const {
       out << std::endl;
     }
   }
+
   const EHEntVec& ehtab = shared()->m_ehtab;
   for (EHEntVec::const_iterator it = ehtab.begin(); it != ehtab.end(); ++it) {
     bool catcher = it->m_type == EHEnt::Type::Catch;
@@ -559,6 +561,16 @@ void Func::prettyPrint(std::ostream& out) const {
       out << " parentIndex " << it->m_parentIndex;
     }
     out << std::endl;
+  }
+
+  for (auto& fpi : fpitab()) {
+    out << " FPI " << fpi.m_fpushOff << "-" << fpi.m_fcallOff
+        << "; fpOff = " << fpi.m_fpOff;
+    if (fpi.m_parentIndex != -1) {
+      out << " parentIndex = " << fpi.m_parentIndex
+          << " (depth " << fpi.m_fpiDepth << ")";
+    }
+    out << '\n';
   }
 }
 
@@ -641,8 +653,8 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
       }
       pi->type = fpi.typeConstraint().hasConstraint() ?
         fpi.typeConstraint().typeName()->data() : "";
-      for (UserAttributeMap::const_iterator it = fpi.userAttributes().begin();
-           it != fpi.userAttributes().end(); ++it) {
+      for (auto it = fpi.userAttributes().begin();
+          it != fpi.userAttributes().end(); ++it) {
         // convert the typedvalue to a cvarref and push into pi.
         auto userAttr = new ClassInfo::UserAttributeInfo;
         assert(it->first->isStatic());
@@ -711,15 +723,6 @@ void Func::SharedData::atomicRelease() {
   delete this;
 }
 
-Func** Func::getCachedAddr() {
-  assert(!isMethod());
-  return getCachedFuncAddr(m_cachedOffset);
-}
-
-void Func::setCached() {
-  setCachedFunc(this, isDebuggerAttached());
-}
-
 const Func* Func::getGeneratorBody(const StringData* name) const {
   if (isNonClosureMethod()) {
     return cls()->lookupMethod(name);
@@ -748,6 +751,20 @@ int Func::getDVEntryNumParams(Offset offset) const {
   return -1;
 }
 
+bool Func::shouldPGO() const {
+  if (!RuntimeOption::EvalJitPGO) return false;
+
+  // Cloned closures use the func prologue tables to hold the
+  // addresses of the DV funclets, and not real prologues.  The
+  // mechanism to retranslate prologues currently assumes that the
+  // prologue tables contain real prologues, so it doesn't properly
+  // handle cloned closures for now.  So don't profile & retranslate
+  // them for now.
+  if (isClonedClosure()) return false;
+
+  if (!RuntimeOption::EvalJitPGOHotOnly) return true;
+  return attrs() & AttrHot;
+}
 
 //=============================================================================
 // FuncEmitter.
@@ -764,6 +781,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
   , m_retTypeConstraint(nullptr)
+  , m_ehTabSorted(false)
   , m_returnType(KindOfInvalid)
   , m_top(false)
   , m_isClosureBody(false)
@@ -790,6 +808,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_numIterators(0)
   , m_nextFreeIterator(0)
   , m_retTypeConstraint(nullptr)
+  , m_ehTabSorted(false)
   , m_returnType(KindOfInvalid)
   , m_top(false)
   , m_isClosureBody(false)
@@ -828,8 +847,33 @@ void FuncEmitter::finish(Offset past, bool load) {
 }
 
 EHEnt& FuncEmitter::addEHEnt() {
+  assert(!m_ehTabSorted
+    || "should only mark the ehtab as sorted after adding all of them");
   m_ehtab.push_back(EHEnt());
+  m_ehtab.back().m_parentIndex = 7777;
   return m_ehtab.back();
+}
+
+void FuncEmitter::setEhTabIsSorted() {
+  m_ehTabSorted = true;
+  if (!debug) return;
+
+  Offset curBase = 0;
+  for (size_t i = 0; i < m_ehtab.size(); ++i) {
+    auto& eh = m_ehtab[i];
+
+    // Base offsets must be monotonically increasing.
+    always_assert(curBase <= eh.m_base);
+    curBase = eh.m_base;
+
+    // Parent should come before, and must enclose this guy.
+    always_assert(eh.m_parentIndex == -1 || eh.m_parentIndex < i);
+    if (eh.m_parentIndex != -1) {
+      auto& parent = m_ehtab[eh.m_parentIndex];
+      always_assert(parent.m_base <= eh.m_base &&
+                    parent.m_past >= eh.m_past);
+    }
+  }
 }
 
 FPIEnt& FuncEmitter::addFPIEnt() {
@@ -935,6 +979,8 @@ struct EHEntComp {
 }
 
 void FuncEmitter::sortEHTab() {
+  if (m_ehTabSorted) return;
+
   std::sort(m_ehtab.begin(), m_ehtab.end(), EHEntComp());
 
   for (unsigned int i = 0; i < m_ehtab.size(); i++) {
@@ -948,11 +994,18 @@ void FuncEmitter::sortEHTab() {
       }
     }
   }
+
+  setEhTabIsSorted();
 }
 
 void FuncEmitter::sortFPITab(bool load) {
   // Sort it and fill in parent info
-  std::sort(m_fpitab.begin(), m_fpitab.end(), FPIEntComp());
+  std::sort(
+    begin(m_fpitab), end(m_fpitab),
+    [&] (const FPIEnt& a, const FPIEnt& b) {
+      return a.m_fpushOff < b.m_fpushOff;
+    }
+  );
   for (unsigned int i = 0; i < m_fpitab.size(); i++) {
     m_fpitab[i].m_parentIndex = -1;
     m_fpitab[i].m_fpiDepth = 1;
@@ -1301,6 +1354,7 @@ void FuncRepoProxy::GetFuncsStmt
       assert(fe->sn() == funcSn);
       fe->setTop(top);
       fe->serdeMetaData(extraBlob);
+      fe->setEhTabIsSorted();
       fe->finish(fe->past(), true);
       ue.recordFunction(fe);
     }

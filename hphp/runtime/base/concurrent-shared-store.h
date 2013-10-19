@@ -21,7 +21,7 @@
 
 #include "hphp/util/smalllocks.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/shared-variant.h"
+#include "hphp/runtime/base/apc-variant.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -39,13 +39,13 @@ struct StoreValue {
   StoreValue(const StoreValue& v) : var(v.var), sAddr(v.sAddr),
                                     expiry(v.expiry), size(v.size),
                                     sSize(v.sSize) {}
-  void set(SharedVariant *v, int64_t ttl);
+  void set(APCVariant *v, int64_t ttl);
   bool expired() const;
 
   // Mutable fields here are so that we can deserialize the object from disk
   // while holding a const pointer to the StoreValue. Mostly a hacky workaround
   // for how we use TBB
-  mutable SharedVariant *var;
+  mutable APCVariant *var;
   char *sAddr; // For file storage
   int64_t expiry;
   mutable int32_t size;
@@ -72,7 +72,7 @@ struct ConcurrentTableSharedStore {
     KeyValuePair() : value(nullptr), sAddr(nullptr) {}
     litstr key;
     int len;
-    SharedVariant *value;
+    APCVariant *value;
     char *sAddr;
     int32_t sSize;
 
@@ -81,7 +81,7 @@ struct ConcurrentTableSharedStore {
     }
   };
 
-  static std::string GetSkeleton(CStrRef key);
+  static std::string GetSkeleton(const String& key);
 
   explicit ConcurrentTableSharedStore(int id)
     : m_id(id)
@@ -94,17 +94,17 @@ struct ConcurrentTableSharedStore {
     operator=(const ConcurrentTableSharedStore&) = delete;
 
   int size() const { return m_vars.size(); }
-  bool get(CStrRef key, Variant &value);
-  bool store(CStrRef key, CVarRef val, int64_t ttl,
+  bool get(const String& key, Variant &value);
+  bool store(const String& key, CVarRef val, int64_t ttl,
                      bool overwrite = true);
-  int64_t inc(CStrRef key, int64_t step, bool &found);
-  bool cas(CStrRef key, int64_t old, int64_t val);
-  bool exists(CStrRef key);
-  bool erase(CStrRef key, bool expired = false);
+  int64_t inc(const String& key, int64_t step, bool &found);
+  bool cas(const String& key, int64_t old, int64_t val);
+  bool exists(const String& key);
+  bool erase(const String& key, bool expired = false);
   bool clear();
 
   void prime(const std::vector<KeyValuePair> &vars);
-  bool constructPrime(CStrRef v, KeyValuePair& item, bool serialized);
+  bool constructPrime(const String& v, KeyValuePair& item, bool serialized);
   bool constructPrime(CVarRef v, KeyValuePair& item);
   void primeDone();
 
@@ -162,11 +162,11 @@ private:
   };
 
 private:
-  SharedVariant* construct(CVarRef v) {
-    return SharedVariant::Create(v, false);
+  APCVariant* construct(CVarRef v) {
+    return APCVariant::Create(v, false);
   }
 
-  bool eraseImpl(CStrRef key, bool expired);
+  bool eraseImpl(const String& key, bool expired);
 
   void eraseAcc(Map::accessor &acc) {
     const char *pkey = acc->first;
@@ -179,9 +179,9 @@ private:
 
   void addToExpirationQueue(const char* key, int64_t etime);
 
-  bool handleUpdate(CStrRef key, SharedVariant* svar);
-  bool handlePromoteObj(CStrRef key, SharedVariant* svar, CVarRef valye);
-  SharedVariant* unserialize(CStrRef key, const StoreValue* sval);
+  bool handleUpdate(const String& key, APCVariant* svar);
+  bool handlePromoteObj(const String& key, APCVariant* svar, CVarRef valye);
+  APCVariant* unserialize(const String& key, const StoreValue* sval);
 
 private:
   int m_id;

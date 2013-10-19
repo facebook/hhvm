@@ -71,18 +71,6 @@ inline RegSaveFlags operator~(const RegSaveFlags& f) {
   return RegSaveFlags(~int(f));
 }
 
-int64_t ak_exist_string(ArrayData* arr, StringData* key);
-int64_t ak_exist_int(ArrayData* arr, int64_t key);
-int64_t ak_exist_string_obj(ObjectData* obj, StringData* key);
-int64_t ak_exist_int_obj(ObjectData* obj, int64_t key);
-
-TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
-TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
-TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
-
-TypedValue* ldGblAddrHelper(StringData* name);
-TypedValue* ldGblAddrDefHelper(StringData* name);
-
 }}
 
 #endif

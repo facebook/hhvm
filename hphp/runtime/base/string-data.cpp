@@ -18,7 +18,7 @@
 
 #include <cmath>
 
-#include "hphp/runtime/base/shared-variant.h"
+#include "hphp/runtime/base/apc-variant.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/util/alloc.h"
@@ -51,9 +51,9 @@ NEVER_INLINE void throw_string_too_large2(size_t len) {
 ALWAYS_INLINE
 std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
   auto const needed = static_cast<uint32_t>(sizeof(StringData) + len + 1);
-  if (LIKELY(needed <= MemoryManager::kMaxSmartSize)) {
+  if (LIKELY(needed <= kMaxSmartSize)) {
     auto const cap = MemoryManager::smartSizeClass(needed);
-    auto const sd  = static_cast<StringData*>(MM().smartMallocSize(cap));
+    auto const sd  = static_cast<StringData*>(MM().smartMallocSizeLogged(cap));
     return std::make_pair(sd, cap);
   }
 
@@ -62,17 +62,17 @@ std::pair<StringData*,uint32_t> allocFlatForLen(uint32_t len) {
   }
 
   auto const cap = needed;
-  auto const ret = MM().smartMallocSizeBig(cap);
+  auto const ret = MM().smartMallocSizeBigLogged(cap);
   return std::make_pair(static_cast<StringData*>(ret.first),
                         static_cast<uint32_t>(ret.second));
 }
 
 ALWAYS_INLINE
 void freeForSize(void* vp, uint32_t size) {
-  if (LIKELY(size <= MemoryManager::kMaxSmartSize)) {
-    return MM().smartFreeSize(vp, size);
+  if (LIKELY(size <= kMaxSmartSize)) {
+    return MM().smartFreeSizeLogged(vp, size);
   }
-  return MM().smartFreeSizeBig(vp, size);
+  return MM().smartFreeSizeBigLogged(vp, size);
 }
 
 }
@@ -129,7 +129,7 @@ ALWAYS_INLINE void StringData::delist() {
 }
 
 void StringData::sweepAll() {
-  auto& head = MemoryManager::TheMemoryManager()->m_strings;
+  auto& head = MM().m_strings;
   for (SweepNode *next, *n = head.next; n != &head; n = next) {
     next = n->next;
     assert(next && uintptr_t(next) != kSmartFreeWord);
@@ -272,7 +272,7 @@ StringData* StringData::Make(int reserveLen) {
 }
 
 StringData* StringData::append(StringSlice range) {
-  assert(!isStatic() && getCount() <= 1);
+  assert(!hasMultipleRefs());
 
   auto s = range.ptr;
   auto const len = range.len;
@@ -314,7 +314,7 @@ StringData* StringData::append(StringSlice range) {
 }
 
 StringData* StringData::reserve(int cap) {
-  assert(!isImmutable() && m_count <= 1 && cap >= 0);
+  assert(!isImmutable() && !hasMultipleRefs() && cap >= 0);
   assert(isFlat());
 
   if (cap + 1 <= capacity()) return this;

@@ -132,7 +132,7 @@ c_XMLReader::~c_XMLReader() {
 void c_XMLReader::t___construct() {
 }
 
-bool c_XMLReader::t_open(CStrRef uri, CStrRef encoding /*= null_string*/, int64_t options /*= 0*/) {
+bool c_XMLReader::t_open(const String& uri, const String& encoding /*= null_string*/, int64_t options /*= 0*/) {
   if (m_ptr) {
     t_close();
   }
@@ -159,7 +159,7 @@ bool c_XMLReader::t_open(CStrRef uri, CStrRef encoding /*= null_string*/, int64_
   return true;
 }
 
-bool c_XMLReader::t_xml(CStrRef source, CStrRef encoding /*= null_string*/, int64_t options /*= 0*/) {
+bool c_XMLReader::t_xml(const String& source, const String& encoding /*= null_string*/, int64_t options /*= 0*/) {
   xmlParserInputBufferPtr inputbfr = xmlParserInputBufferCreateMem(source.c_str(), source.size(), XML_CHAR_ENCODING_NONE);
 
   if (inputbfr != NULL) {
@@ -238,7 +238,7 @@ bool c_XMLReader::t_read() {
   return false;
 }
 
-bool c_XMLReader::t_next(CStrRef localname /*= null_string*/) {
+bool c_XMLReader::t_next(const String& localname /*= null_string*/) {
   if (m_ptr) {
     int ret = xmlTextReaderNext(m_ptr);
     while (!localname.empty() && ret == 1) {
@@ -315,7 +315,7 @@ Variant c_XMLReader::string_func_string_arg(String value, xmlreader_read_one_cha
   }
 }
 
-Variant c_XMLReader::t_getattribute(CStrRef name) {
+Variant c_XMLReader::t_getattribute(const String& name) {
   return string_func_string_arg(name, xmlTextReaderGetAttribute);
 }
 
@@ -333,7 +333,7 @@ Variant c_XMLReader::t_getattributeno(int64_t index) {
   }
 }
 
-Variant c_XMLReader::t_getattributens(CStrRef name, CStrRef namespaceURI) {
+Variant c_XMLReader::t_getattributens(const String& name, const String& namespaceURI) {
   if (name.empty() || namespaceURI.empty()) {
     raise_warning("Attribute Name and Namespace URI cannot be empty");
     return false;
@@ -355,7 +355,7 @@ Variant c_XMLReader::t_getattributens(CStrRef name, CStrRef namespaceURI) {
   }
 }
 
-bool c_XMLReader::t_movetoattribute(CStrRef name) {
+bool c_XMLReader::t_movetoattribute(const String& name) {
   if (name.empty()) {
     raise_warning("Attribute Name is required");
     return false;
@@ -380,7 +380,7 @@ bool c_XMLReader::t_movetoattributeno(int64_t index) {
   return false;
 }
 
-bool c_XMLReader::t_movetoattributens(CStrRef name, CStrRef namespaceURI) {
+bool c_XMLReader::t_movetoattributens(const String& name, const String& namespaceURI) {
   if (name.empty() || namespaceURI.empty()) {
     raise_warning("Attribute Name and Namespace URI cannot be empty");
     return false;
@@ -428,11 +428,11 @@ bool c_XMLReader::t_getparserproperty(int64_t property) {
   return ret;
 }
 
-Variant c_XMLReader::t_lookupnamespace(CStrRef prefix) {
+Variant c_XMLReader::t_lookupnamespace(const String& prefix) {
   return string_func_string_arg(prefix, xmlTextReaderLookupNamespace);
 }
 
-bool c_XMLReader::t_setschema(CStrRef source) {
+bool c_XMLReader::t_setschema(const String& source) {
   if (source.empty()) {
     raise_warning("Schema data source is required");
     return false;
@@ -491,11 +491,11 @@ bool c_XMLReader::set_relaxng_schema(String source, int type) {
   return false;
 }
 
-bool c_XMLReader::t_setrelaxngschema(CStrRef filename) {
+bool c_XMLReader::t_setrelaxngschema(const String& filename) {
   return set_relaxng_schema(filename, XMLREADER_LOAD_FILE);
 }
 
-bool c_XMLReader::t_setrelaxngschemasource(CStrRef source) {
+bool c_XMLReader::t_setrelaxngschemasource(const String& source) {
   return set_relaxng_schema(source, XMLREADER_LOAD_STRING);
 }
 

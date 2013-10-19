@@ -118,6 +118,12 @@ namespace {
 namespace StackSym {
   static const char None = 0x00;
 
+  /*
+   * We don't actually track the U flavor (we treat it as a C),
+   * because there's nothing important to do with it for emission.
+   * The verifier will check they are only created at the appropriate
+   * times.
+   */
   static const char C = 0x01; // Cell symbolic flavor
   static const char V = 0x02; // Var symbolic flavor
   static const char A = 0x03; // Classref symbolic flavor
@@ -287,12 +293,13 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_TWO(t1,t2) 2
 #define COUNT_THREE(t1,t2,t3) 3
 #define COUNT_FOUR(t1,t2,t3,t4) 4
-#define COUNT_LMANY() 0
-#define COUNT_C_LMANY() 0
-#define COUNT_R_LMANY() 0
-#define COUNT_V_LMANY() 0
+#define COUNT_MMANY 0
+#define COUNT_C_MMANY 0
+#define COUNT_R_MMANY 0
+#define COUNT_V_MMANY 0
 #define COUNT_FMANY 0
 #define COUNT_CVMANY 0
+#define COUNT_CVUMANY 0
 #define COUNT_CMANY 0
 
 #define ONE(t) \
@@ -333,21 +340,22 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
   POP_##t2(1);                   \
   POP_##t3(2);                   \
   POP_##t4(3)
-#define POP_LMANY() \
-  getEmitterVisitor().popEvalStackLMany()
-#define POP_C_LMANY() \
+#define POP_MMANY \
+  getEmitterVisitor().popEvalStackMMany()
+#define POP_C_MMANY \
   getEmitterVisitor().popEvalStack(StackSym::C); \
-  getEmitterVisitor().popEvalStackLMany()
-#define POP_V_LMANY() \
+  getEmitterVisitor().popEvalStackMMany()
+#define POP_V_MMANY \
   getEmitterVisitor().popEvalStack(StackSym::V); \
-  getEmitterVisitor().popEvalStackLMany()
-#define POP_R_LMANY() \
+  getEmitterVisitor().popEvalStackMMany()
+#define POP_R_MMANY \
   getEmitterVisitor().popEvalStack(StackSym::R); \
-  getEmitterVisitor().popEvalStackLMany()
+  getEmitterVisitor().popEvalStackMMany()
 #define POP_FMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::F)
 #define POP_CVMANY \
   getEmitterVisitor().popEvalStackCVMany(a1)
+#define POP_CVUMANY POP_CVMANY
 #define POP_CMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::C)
 
@@ -409,6 +417,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define PUSH_INS_2(t) PUSH_INS_2_##t
 
 #define PUSH_CV getEmitterVisitor().pushEvalStack(StackSym::C)
+#define PUSH_UV PUSH_CV
 #define PUSH_VV getEmitterVisitor().pushEvalStack(StackSym::V)
 #define PUSH_AV getEmitterVisitor().pushEvalStack(StackSym::A)
 #define PUSH_RV getEmitterVisitor().pushEvalStack(StackSym::R)
@@ -574,10 +583,10 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_TWO
 #undef POP_THREE
 #undef POP_FOUR
-#undef POP_LMANY
-#undef POP_C_LMANY
-#undef POP_V_LMANY
-#undef POP_R_LMANY
+#undef POP_MMANY
+#undef POP_C_MMANY
+#undef POP_V_MMANY
+#undef POP_R_MMANY
 #undef POP_CV
 #undef POP_VV
 #undef POP_HV
@@ -587,6 +596,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_LREST
 #undef POP_FMANY
 #undef POP_CVMANY
+#undef POP_CVUMANY
 #undef POP_CMANY
 #undef POP_LA_ONE
 #undef POP_LA_TWO
@@ -609,6 +619,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef PUSH_THREE
 #undef PUSH_FOUR
 #undef PUSH_CV
+#undef PUSH_UV
 #undef PUSH_VV
 #undef PUSH_HV
 #undef PUSH_AV
@@ -1277,7 +1288,7 @@ void EmitterVisitor::popSymbolicLocal(Op op, int arg, int pos) {
   }
 }
 
-void EmitterVisitor::popEvalStackLMany() {
+void EmitterVisitor::popEvalStackMMany() {
   while (!m_evalStack.empty()) {
     char sym = m_evalStack.top();
     char symFlavor = StackSym::GetSymFlavor(sym);
@@ -1677,7 +1688,6 @@ void EmitterVisitor::visit(FileScopePtr file) {
     TypedValue mainReturn;
     mainReturn.m_type = KindOfInvalid;
     bool notMergeOnly = false;
-    PreClass::Hoistable allHoistable = PreClass::AlwaysHoistable;
     for (i = 0; i < nk; i++) {
       StatementPtr s = (*stmts)[i];
       switch (s->getKindOf()) {
@@ -1689,8 +1699,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
           // Handle classes directly here, since only top-level classes are
           // hoistable.
           ClassScopePtr cNode = s->getClassScope();
-          PreClass::Hoistable h = emitClass(e, cNode, true);
-          if (h < allHoistable) allHoistable = h;
+          emitClass(e, cNode, true);
           break;
         }
         case Statement::KindOfTypedefStatement:
@@ -1788,19 +1797,25 @@ void EmitterVisitor::visit(FileScopePtr file) {
           visit(s);
       }
     }
-    if (mainReturn.m_type == KindOfInvalid) {
-      tvWriteUninit(&mainReturn);
-      tvAsVariant(&mainReturn) = 1;
+
+    if (!notMergeOnly) {
+      m_ue.setMergeOnly(true);
+      if (mainReturn.m_type == KindOfInvalid) {
+        tvWriteUninit(&mainReturn);
+        tvAsVariant(&mainReturn) = 1;
+      }
+      m_ue.setMainReturn(&mainReturn);
     }
-    m_ue.setMainReturn(&mainReturn);
-    m_ue.setMergeOnly(!notMergeOnly);
 
     // Pseudo-main returns the integer value 1 by default. If the
     // current position in the bytecode is reachable, emit code to
     // return 1.
     if (currentPositionIsReachable()) {
+      LocationPtr loc(new Location());
+      e.setTempLocation(loc);
       e.Int(1);
       e.RetC();
+      e.setTempLocation(LocationPtr());
     }
   }
 
@@ -1990,12 +2005,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   return ret;
 }
 
-void EmitterVisitor::emitFatal(Emitter& e, const char* message) {
-  const StringData* msg = makeStaticString(message);
-  e.String(msg);
-  e.Fatal(0);
-}
-
 bool EmitterVisitor::visitImpl(ConstructPtr node) {
   if (!node) return false;
 
@@ -2009,8 +2018,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         return false;
 
       case Statement::KindOfTypedefStatement: {
-        emitFatal(e, "Type statements are currently only allowed at "
-                     "the top-level");
+        emitMakeUnitFatal(e, "Type statements are currently only allowed at "
+                             "the top-level");
         return false;
       }
 
@@ -2025,8 +2034,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (bs->getDepth() > 1) {
             msg << "s";
           }
-          e.String(makeStaticString(msg.str()));
-          e.Fatal(0);
+          emitMakeUnitFatal(e, msg.str().c_str());
           return false;
         }
 
@@ -2908,22 +2916,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           }
           const std::string* clsName = nullptr;
           cls->getString(clsName);
-          int cType = 0;
-          if (!strcasecmp(clsName->c_str(), "vector")) {
-            cType = Collection::VectorType;
-          } else if (!strcasecmp(clsName->c_str(), "map")) {
-            cType = Collection::MapType;
-          } else if (!strcasecmp(clsName->c_str(), "stablemap")) {
-            cType = Collection::StableMapType;
-          } else if (!strcasecmp(clsName->c_str(), "set")) {
-            cType = Collection::SetType;
-          } else if (!strcasecmp(clsName->c_str(), "pair")) {
-            cType = Collection::PairType;
+          int cType = Collection::stringToType(*clsName);
+          if (cType == Collection::PairType) {
             if (nElms != 2) {
               throw IncludeTimeFatalException(b,
                 "Pair objects must have exactly 2 elements");
             }
-          } else {
+          } else if (cType == Collection::InvalidType) {
             throw IncludeTimeFatalException(b,
               "Cannot use collection initialization for non-collection class");
           }
@@ -3163,7 +3162,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             if (p->getScalarValue(v)) {
               assert(v.isString());
               StringData* msg = makeStaticString(v.toString());
-              throw IncludeTimeFatalException(call, "%s", msg->data());
+              auto exn = IncludeTimeFatalException(call, "%s", msg->data());
+              exn.setParseFatal(call->isParseFatalFunction());
+              throw exn;
             }
             not_reached();
           }
@@ -3917,23 +3918,18 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           clsName = oss.str();
         }
 
-        StringData* className = makeStaticString(clsName);
-
         if (Option::WholeProgram) {
           int my_id;
           {
             EmittedClosures::accessor acc;
-            s_emittedClosures.insert(acc, className);
+            s_emittedClosures.insert(acc, makeStaticString(clsName));
             my_id = ++acc->second;
           }
           if (my_id > 1) {
             // The closure was from a trait, so we need a unique name in the
-            // implementing class
-            className = makeStaticString(
-              // _ is different from the #, which is used for many closures in
-              // the same func in ParserBase::newClosureName
-              className->toCPPString() + '_' + std::to_string(my_id)
-            );
+            // implementing class. _ is different from the #, which is used for
+            // many closures in the same func in ParserBase::newClosureName
+            folly::toAppend('_', my_id, &clsName);
           }
         }
 
@@ -4760,15 +4756,14 @@ void EmitterVisitor::emitUnset(Emitter& e,
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
       case StackSym::CG: e.UnsetG(); break;
       case StackSym::LS: // fall through
-      case StackSym::CS:
+      case StackSym::CS: {
         assert(exp);
-        e.String(
-          makeStaticString("Attempt to unset static property " +
-                                      exp->getText())
-        );
-        e.Fatal(0);
-        break;
 
+        std::ostringstream s;
+        s << "Attempt to unset static property " << exp->getText();
+        emitMakeUnitFatal(e, s.str().c_str());
+        break;
+      }
       default: {
         unexpectedStackSym(sym, "emitUnset");
         break;
@@ -5513,21 +5508,27 @@ determine_type_constraint(const ParameterExpressionPtr& par) {
     // We only care about a subset of extended type constaints:
     // typevar
     // nullable
+    // soft
     //
-    // If a constraint it both, nullable and a typevar, we don't need
-    // to flag it as nullable, because it will get dropped.
+    // For everything else, we return {}. We also return {} for annotations
+    // we don't know how to handle.
+    if (annot->isFunction() || annot->isMixed()) {
+      return {};
+    }
     if (annot->isTypeVar()) {
       flags = flags | TypeConstraint::TypeVar;
-    } else if (annot->isNullable()) {
+    }
+    if (annot->isNullable()) {
       flags = flags | TypeConstraint::Nullable;
-      if (annot->isSoft() || annot->isFunction()) {
-        return {};
-      }
-    } else {
+    }
+    if (annot->isSoft()) {
+      flags = flags | TypeConstraint::Soft;
+    }
+    if (flags == (TypeConstraint::ExtendedHint | TypeConstraint::HHType)) {
       return {};
     }
 
-    auto strippedName = annot->stripNullable().vanillaName();
+    auto strippedName = annot->stripNullable().stripSoft().vanillaName();
 
     return TypeConstraint{
       makeStaticString(strippedName),
@@ -5637,8 +5638,7 @@ void EmitterVisitor::emitPostponedMeths() {
 void EmitterVisitor::bindUserAttributes(MethodStatementPtr meth,
                                         FuncEmitter *fe,
                                         bool &allowOverride) {
-  const FunctionScope::UserAttributeMap& userAttrs =
-    meth->getFunctionScope()->userAttributes();
+  auto const& userAttrs = meth->getFunctionScope()->userAttributes();
   for (auto& attr : userAttrs) {
     if (attr.first == "__Overridable") {
       allowOverride = true;
@@ -5884,10 +5884,10 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   }
 
   if (funcScope->isAbstract()) {
-    StringData* msg = makeStaticString(
-      "Cannot call abstract method " + meth->getOriginalFullName() + "()");
-    e.String(msg);
-    e.Fatal(1);
+    std::ostringstream s;
+    s << "Cannot call abstract method " << meth->getOriginalFullName() << "()";
+    emitMakeUnitFatal(e, s.str().c_str(),
+                      FatalKind::Runtime, true /* skipFrame */);
   }
 }
 
@@ -5902,12 +5902,17 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
 
   // if the current position is reachable, emit code to return null
   if (currentPositionIsReachable()) {
+    LocationPtr loc(new Location(*meth->getLocation().get()));
+    loc->line0 = loc->line1;
+    loc->char0 = loc->char1-1;
+    e.setTempLocation(loc);
     e.Null();
     if ((meth->getStmts() && meth->getStmts()->isGuarded())) {
       m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::GuardedThis,
                      false, 0, 0);
     }
     e.RetC();
+    e.setTempLocation(LocationPtr());
   }
 
   FuncFinisher ff(this, e, m_curFunc);
@@ -6642,17 +6647,18 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   m_ue.mergeLitstr(name);
   m_ue.mergeLitstr(value);
 
-  Typedef record;
+  TypeAlias record;
   record.name     = name;
   record.value    = value;
   record.kind     = kind;
   record.nullable = nullable;
-  Id id = m_ue.addTypedef(record);
-  e.DefTypedef(id);
+  Id id = m_ue.addTypeAlias(record);
+  e.DefTypeAlias(id);
 }
 
-PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
-                                              bool toplevel) {
+void EmitterVisitor::emitClass(Emitter& e,
+                               ClassScopePtr cNode,
+                               bool toplevel) {
   InterfaceStatementPtr is(
     static_pointer_cast<InterfaceStatement>(cNode->getStmt()));
   StringData* className = makeStaticString(cNode->getOriginalName());
@@ -6725,9 +6731,8 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
   for (size_t i = 0; i < usedTraits.size(); i++) {
     pce->addUsedTrait(makeStaticString(usedTraits[i]));
   }
-  const ClassScope::UserAttributeMap& userAttrs = cNode->userAttributes();
-  for (ClassScope::UserAttributeMap::const_iterator it = userAttrs.begin();
-       it != userAttrs.end(); ++it) {
+  auto const& userAttrs = cNode->userAttributes();
+  for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
     const StringData* uaName = makeStaticString(it->first);
     ExpressionPtr uaValue = it->second;
     assert(uaValue);
@@ -6902,8 +6907,6 @@ PreClass::Hoistable EmitterVisitor::emitClass(Emitter& e, ClassScopePtr cNode,
     assert(added);
     postponeCinit(is, fe, nonScalarConstVec);
   }
-
-  return hoistable;
 }
 
 namespace {
@@ -7184,10 +7187,13 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
   dontRollback.set(e);
 }
 
-void EmitterVisitor::emitMakeUnitFatal(Emitter& e, const std::string& msg) {
-  StringData* sd = makeStaticString(msg);
+void EmitterVisitor::emitMakeUnitFatal(Emitter& e,
+                                       const char* msg,
+                                       FatalKind k /* = FatalKind::Runtime */,
+                                       bool skipFrame /* = false */) {
+  const StringData* sd = makeStaticString(msg);
   e.String(sd);
-  e.Fatal(0);
+  e.Fatal(uint8_t(k), uint8_t(skipFrame));
 }
 
 void EmitterVisitor::addFunclet(Thunklet* body, Label* entry) {
@@ -7455,7 +7461,8 @@ static UnitEmitter* emitHHBCUnitEmitter(AnalysisResultPtr ar, FileScopePtr fsp,
     EmitterVisitor fev(*ue);
     Emitter emitter(ex.m_node, *ue, fev);
     FuncFinisher ff(&fev, emitter, ue->getMain());
-    fev.emitMakeUnitFatal(emitter, ex.getMessage());
+    auto kind = ex.m_parseFatal ? FatalKind::Parse : FatalKind::Runtime;
+    fev.emitMakeUnitFatal(emitter, ex.getMessage().c_str(), kind);
   }
   return ue;
 }
@@ -7801,6 +7808,11 @@ static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
   assert(ue != nullptr);
 
   if (Option::GenerateTextHHBC) {
+    // TODO(#2973538): Move HHBC text generation to after all the
+    // units are created, and get rid of the LitstrTable locking,
+    // since it won't be needed in that case.
+    LitstrTable::get().mutex().lock();
+    LitstrTable::get().setReading();
     std::unique_ptr<Unit> unit(ue->create());
     std::string fullPath = AnalysisResult::prepareFile(
       ar->getOutputPath().c_str(), Option::UserFilePrefix + fsp->getName(),
@@ -7815,6 +7827,8 @@ static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
       cg.printRaw(unit->toString().c_str());
       f.close();
     }
+    LitstrTable::get().setWriting();
+    LitstrTable::get().mutex().unlock();
   }
 
   return ue;
@@ -7901,16 +7915,21 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
   }
 
   // Clean up.
-  for (std::vector<UnitEmitter*>::const_iterator it = ues.begin();
-       it != ues.end(); ++it) {
-      UnitEmitter* ue = *it;
-      // Commit units individually if an error occurred during batch commit.
-      if (err) {
-        repo.commitUnit(ue, UnitOrigin::File);
-      }
-      delete ue;
+  for (auto ue : ues) {
+    // Commit units individually if an error occurred during batch commit.
+    if (err) {
+      repo.commitUnit(ue, UnitOrigin::File);
+    }
+    delete ue;
   }
   ues.clear();
+}
+
+static void commitLitstrs() {
+  Repo& repo = Repo::get();
+  RepoTxn txn(repo);
+  repo.insertLitstrs(txn, UnitOrigin::File);
+  txn.commit();
 }
 
 /**
@@ -7923,6 +7942,8 @@ void emitAllHHBC(AnalysisResultPtr ar) {
     threadCount = nFiles;
   }
   if (!threadCount) threadCount = 1;
+
+  LitstrTable::get().setWriting();
 
   /* there is a race condition in the first call to
      makeStaticString. Make sure we dont hit it */
@@ -7969,6 +7990,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
         break;
       }
     }
+    commitLitstrs();
   } else {
     dispatcher.waitEmpty();
   }
@@ -7990,6 +8012,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
   if (UNLIKELY(!code)) {
     // Do initialization when code is null; see above.
     Option::EnableHipHopSyntax = RuntimeOption::EnableHipHopSyntax;
+    Option::EnableZendCompat = RuntimeOption::EnableZendCompat;
     Option::JitEnableRenameFunction =
       RuntimeOption::EvalJitEnableRenameFunction;
     for (auto& i : RuntimeOption::DynamicInvokeFunctions) {

@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/server/source-root-info.h"
 
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/pendq.h"
@@ -90,7 +90,6 @@ void PhpFile::decRefAndDelete() {
   };
 
   if (decRef() == 0) {
-    if (RuntimeOption::EvalJit) Transl::Translator::Get()->invalidateFile(this);
     Treadmill::WorkItem::enqueue(new FileInvalidationTrigger(this));
   }
 }
@@ -254,7 +253,7 @@ PhpFile *FileRepository::checkoutFile(StringData *rname,
   if (isNew) {
     acc->second = new PhpFileWrapper(s, ret);
     ret->incRef();
-    ret->setId(Transl::TargetCache::allocBit());
+    ret->setId(RDS::allocBit());
   } else {
     PhpFile *f = old->getPhpFile();
     if (f != ret) {
@@ -480,7 +479,7 @@ struct ResolveIncludeContext {
 
 const StaticString s_file_url("file://");
 
-static bool findFileWrapper(CStrRef file, void* ctx) {
+static bool findFileWrapper(const String& file, void* ctx) {
   ResolveIncludeContext* context = (ResolveIncludeContext*)ctx;
   assert(context->path.isNull());
 

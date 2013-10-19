@@ -46,7 +46,7 @@ public:
   static int64_t GetInstructionCount(void);
   static int64_t GetLoadCount(void);
   static int64_t GetStoreCount(void);
-  static bool SetPerfEvents(CStrRef events);
+  static bool SetPerfEvents(const String& events);
   static void GetPerfEvents(Array& ret);
   static void ClearPerfEvents();
 
@@ -56,7 +56,7 @@ public:
   int64_t getStoreCount(void);
   bool eventExists(char *event);
   bool addPerfEvent(char* event);
-  bool setPerfEvents(CStrRef events);
+  bool setPerfEvents(const String& events);
   void getPerfEvents(Array& ret);
   void clearPerfEvents();
 
@@ -90,7 +90,7 @@ public:
          { return s_counter.getLoadCount(); }
   static int64_t GetStoreCount(void)
          { return s_counter.getStoreCount(); }
-  static bool SetPerfEvents(CStrRef events)
+  static bool SetPerfEvents(const String& events)
          { return s_counter.setPerfEvents(events); }
   static void GetPerfEvents(Array& ret)
          { s_counter.getPerfEvents(ret); }
@@ -108,7 +108,7 @@ public:
         { return false; }
   bool  addPerfEvent(char* event)
         { return false; }
-  bool  setPerfEvents(CStrRef events)
+  bool  setPerfEvents(const String& events)
         { return false; }
   void  getPerfEvents(Array& ret) { }
   void  clearPerfEvents() { }

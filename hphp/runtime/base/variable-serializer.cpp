@@ -56,7 +56,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   }
 }
 
-void VariableSerializer::setObjectInfo(CStrRef objClass, int objId,
+void VariableSerializer::setObjectInfo(const String& objClass, int objId,
                                        char objCode) {
   assert(objCode == 'O' || objCode == 'V' || objCode == 'K');
   m_objClass = objClass;
@@ -69,7 +69,7 @@ void VariableSerializer::getResourceInfo(String &rsrcName, int &rsrcId) {
   rsrcId = m_rsrcId;
 }
 
-void VariableSerializer::setResourceInfo(CStrRef rsrcName, int rsrcId) {
+void VariableSerializer::setResourceInfo(const String& rsrcName, int rsrcId) {
   m_rsrcName = rsrcName;
   m_rsrcId = rsrcId;
   m_objCode = 0;
@@ -480,7 +480,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
   }
 }
 
-void VariableSerializer::write(CStrRef v) {
+void VariableSerializer::write(const String& v) {
   if (m_type == Type::APCSerialize && !v.isNull() && v->isStatic()) {
     union {
       char buf[8];
@@ -758,6 +758,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
     }
 
     if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
+      m_buf->append("\n");
       m_indent += (info.indent_delta = 4);
     }
 
@@ -776,7 +777,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData) {
   }
 }
 
-void VariableSerializer::writePropertyKey(CStrRef prop) {
+void VariableSerializer::writePropertyKey(const String& prop) {
   const char *key = prop.data();
   int kl = prop.size();
   if (!*key && kl) {
@@ -865,7 +866,9 @@ void VariableSerializer::writeArrayKey(Variant key) {
       m_buf->append(',');
     }
     if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
-      m_buf->append("\n");
+      if (!info.first_element) {
+        m_buf->append("\n");
+      }
       indent();
     }
     if (!info.is_vector) {
@@ -925,7 +928,9 @@ void VariableSerializer::writeCollectionKeylessPrefix() {
       m_buf->append(',');
     }
     if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
-      m_buf->append("\n");
+      if (!info.first_element) {
+        m_buf->append("\n");
+      }
       indent();
     }
     break;
@@ -1023,8 +1028,8 @@ void VariableSerializer::writeArrayFooter() {
   m_arrayInfos.pop_back();
 }
 
-void VariableSerializer::writeSerializableObject(CStrRef clsname,
-                                                 CStrRef serialized) {
+void VariableSerializer::writeSerializableObject(const String& clsname,
+                                                 const String& serialized) {
   m_buf->append("C:");
   m_buf->append(clsname.size());
   m_buf->append(":\"");

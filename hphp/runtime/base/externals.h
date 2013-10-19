@@ -41,12 +41,12 @@ Variant invoke(const char *function, CArrRef params, strhash_t hash = -1,
 /**
  * Getting a static property
  */
-extern Variant get_static_property(CStrRef s, const char *prop);
+extern Variant get_static_property(const String& s, const char *prop);
 
 /**
  * Getting the init value of a class variable
  */
-extern Variant get_class_var_init(CStrRef s, const char *var);
+extern Variant get_class_var_init(const String& s, const char *var);
 
 /**
  * Class/function meta info entirely encoded here as a const char * array.

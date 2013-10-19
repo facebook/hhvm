@@ -44,7 +44,6 @@ public:
   }
 
   void clear() {
-    *s_hasRenamedFunction = false;
     m_use_allowed_functions = false;
     m_allowed_functions.clear();
     m_renamed_functions.clear();
@@ -69,7 +68,6 @@ public:
   StringIMap<Variant> m_intercept_handlers;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(bool, s_hasRenamedFunction);
 
 static Mutex s_mutex;
 typedef StringIMap<vector<char*> > RegisteredFlagsMap;
@@ -84,7 +82,7 @@ static void flag_maybe_interrupted(vector<char*> &flags) {
   }
 }
 
-bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
+bool register_intercept(const String& name, CVarRef callback, CVarRef data) {
   StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
   if (!callback.toBoolean()) {
     if (name.empty()) {
@@ -125,7 +123,7 @@ bool register_intercept(CStrRef name, CVarRef callback, CVarRef data) {
   return true;
 }
 
-Variant *get_enabled_intercept_handler(CStrRef name) {
+Variant *get_enabled_intercept_handler(const String& name) {
   Variant *handler = nullptr;
   StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
   StringIMap<Variant>::iterator iter = handlers.find(name);
@@ -140,7 +138,7 @@ Variant *get_enabled_intercept_handler(CStrRef name) {
   return handler;
 }
 
-Variant *get_intercept_handler(CStrRef name, char* flag) {
+Variant *get_intercept_handler(const String& name, char* flag) {
   TRACE(1, "get_intercept_handler %s flag is %d\n",
         name.get()->data(), (int)*flag);
   if (*flag == -1) {
@@ -163,7 +161,7 @@ Variant *get_intercept_handler(CStrRef name, char* flag) {
   return handler;
 }
 
-void unregister_intercept_flag(CStrRef name, char *flag) {
+void unregister_intercept_flag(const String& name, char *flag) {
   Lock lock(s_mutex);
   RegisteredFlagsMap::iterator iter =
     s_registered_flags.find(name);
@@ -181,24 +179,45 @@ void unregister_intercept_flag(CStrRef name, char *flag) {
 ///////////////////////////////////////////////////////////////////////////////
 // fb_rename_function()
 
-void check_renamed_functions(CArrRef names) {
-  g_vmContext->addRenameableFunctions(names.get());
-}
+void rename_function(const String& old_name, const String& new_name) {
+  auto const old = old_name.get();
+  auto const n3w = new_name.get();
+  auto const oldNe = const_cast<NamedEntity*>(Unit::GetNamedEntity(old));
+  auto const newNe = const_cast<NamedEntity*>(Unit::GetNamedEntity(n3w));
 
-bool check_renamed_function(CStrRef name) {
-  return g_vmContext->isFunctionRenameable(name.get());
-}
-
-void rename_function(CStrRef old_name, CStrRef new_name) {
-  g_vmContext->renameFunction(old_name.get(), new_name.get());
-}
-
-String get_renamed_function(CStrRef name) {
-  HPHP::Func* f = HPHP::Unit::lookupFunc(name.get());
-  if (f) {
-    return f->nameRef();
+  Func* func = Unit::lookupFunc(oldNe);
+  if (!func) {
+    // It's the caller's responsibility to ensure that the old function
+    // exists.
+    not_reached();
   }
-  return name;
+
+  if (!(func->attrs() & AttrDynamicInvoke)) {
+    // When EvalJitEnableRenameFunction is false, the translator may wire
+    // non-DynamicInvoke Func*'s into the TC. Don't rename functions.
+    if (RuntimeOption::EvalJit && !RuntimeOption::EvalJitEnableRenameFunction) {
+      raise_error("You must explicitly enable fb_rename_function in the JIT "
+                  "(-v Eval.JitEnableRenameFunction=true)");
+    }
+  }
+
+  Func *fnew = Unit::lookupFunc(newNe);
+  if (fnew && fnew != func) {
+    // To match hphpc, we silently ignore functions defined in user code that
+    // have the same name as a function defined in a separable extension
+    if (!fnew->isAllowOverride()) {
+      raise_error("Function already defined: %s", n3w->data());
+    }
+    return;
+  }
+
+  oldNe->setCachedFunc(nullptr);
+  newNe->m_cachedFunc.bind();
+  newNe->setCachedFunc(func);
+
+  if (RuntimeOption::EvalJit) {
+    JIT::invalidateForRenameFunction(old);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

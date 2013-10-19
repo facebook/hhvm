@@ -126,16 +126,7 @@ void removeDeadInstructions(IRTrace* trace, const DceState& state) {
               });
       return state[inst].isDead();
     });
-    if (block->empty()) {
-      // Update any predecessors to point to the empty block's next block.
-      auto next = block->next();
-      for (auto it = block->preds().begin(); it != block->preds().end(); ) {
-        auto cur = it;
-        ++it;
-        cur->setTo(next);
-      }
-      trace->erase(cur);
-    }
+    if (block->empty()) trace->unlink(cur);
   }
 }
 
@@ -155,13 +146,14 @@ bool isUnguardedLoad(IRInstruction* inst) {
 // removeUnreachable erases unreachable blocks from trace, and returns
 // a sorted list of the remaining blocks.
 BlockList removeUnreachable(IRTrace* trace, IRUnit& unit) {
+  assert(trace == unit.main());
   FTRACE(5, "RemoveUnreachable:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "RemoveUnreachable:^^^^^^^^^^^^^^^^^^^^\n"); };
 
   // 1. simplify unguarded loads to remove unnecssary branches, and
   //    perform copy propagation on every instruction. Targets that become
   //    unreachable from this pass will be eliminated in step 2 below.
-  forEachTraceInst(trace, [](IRInstruction* inst) {
+  forEachTraceInst(unit, [](IRInstruction* inst) {
     copyProp(inst);
     // if this is a load that does not generate a guard, then get rid
     // of its label so that its not an essential control-flow
@@ -178,7 +170,7 @@ BlockList removeUnreachable(IRTrace* trace, IRUnit& unit) {
   // 2. get a list of reachable blocks by sorting them, and erase any
   //    blocks that are unreachable.
   bool needsReflow = false;
-  BlockList blocks = rpoSortCfg(trace, unit);
+  BlockList blocks = rpoSortCfg(unit);
   StateVector<Block, bool> reachable(unit, false);
   for (Block* b : blocks) reachable[b] = true;
   for (Block* b : blocks) {
@@ -190,21 +182,21 @@ BlockList removeUnreachable(IRTrace* trace, IRUnit& unit) {
       }
     });
   }
-  forEachTrace(trace, [&](IRTrace* t) {
+  forEachTrace(unit, [&](IRTrace* t) {
     for (auto bit = t->begin(); bit != t->end();) {
       if (reachable[*bit]) {
         ++bit;
         continue;
       }
       FTRACE(5, "erasing block {}\n", (*bit)->id());
-      if ((*bit)->taken() && (*bit)->back()->op() == Jmp_) {
+      if ((*bit)->taken() && (*bit)->back()->op() == Jmp) {
         needsReflow = true;
       }
       bit = t->erase(bit);
     }
   });
 
-  // 3. if we removed any whole blocks that ended in Jmp_
+  // 3. if we removed any whole blocks that ended in Jmp
   //    instructions, reflow all types in case they change the
   //    incoming types of DefLabel instructions.
   if (needsReflow) reflowTypes(blocks.front(), blocks);
@@ -223,7 +215,7 @@ initInstructions(const BlockList& blocks, DceState& state) {
         state[inst].setLive();
         wl.push_back(&inst);
       }
-      if (inst.op() == DecRefNZ) {
+      if (RuntimeOption::EvalHHIREnableRefCountOpt && inst.op() == DecRefNZ) {
         auto* srcInst = inst.src(0)->inst();
         Opcode srcOpc = srcInst->op();
         if (srcOpc != DefConst) {
@@ -249,12 +241,13 @@ void optimizeRefCount(IRTrace* trace, IRTrace* main, DceState& state,
                       UseCounts& uses) {
   assert(trace && main->isMain());
   WorkList decrefs;
-  forEachInst(trace, [&](IRInstruction* inst) {
+  forEachInst(trace->blocks(), [&](IRInstruction* inst) {
     if (inst->op() == IncRef && !state[inst].countConsumedAny()) {
       // This assert is often hit when an instruction should have a
       // consumesReferences flag but doesn't.
       auto& s = state[inst];
-      always_assert_log(s.decRefNZed(), [&]{
+      always_assert_log(inst->src(0)->type().notCounted() || s.decRefNZed(),
+      [&]{
         return folly::format("\n{} has state {} in trace:\n{}{}\n",
                inst->toString(), s.toString(), main->toString(),
                trace == main ? "" : trace->toString()).str();
@@ -321,10 +314,10 @@ void optimizeRefCount(IRTrace* trace, IRTrace* main, DceState& state,
 void sinkIncRefs(IRTrace* trace, IRUnit& unit, DceState& state) {
   assert(trace->isMain());
 
-  assert(trace->back()->back()->op() != Jmp_);
+  assert(trace->back()->back()->op() != Jmp);
 
   auto copyPropTrace = [] (IRTrace* trace) {
-    forEachInst(trace, copyProp);
+    forEachInst(trace->blocks(), copyProp);
   };
 
   WorkList toSink;
@@ -347,7 +340,7 @@ void sinkIncRefs(IRTrace* trace, IRUnit& unit, DceState& state) {
       assert(!sunkTmps[inst->dst()]);
       sunkTmps[inst->dst()] = sunkInst->dst();
     }
-    forEachInst(exit, [&](IRInstruction* inst) {
+    forEachInst(exit->blocks(), [&](IRInstruction* inst) {
       // Replace the original tmps with the sunk tmps.
       for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
         SSATmp* src = inst->src(i);
@@ -366,7 +359,7 @@ void sinkIncRefs(IRTrace* trace, IRUnit& unit, DceState& state) {
   // which exit traces we already pushed sunk IncRefs to, so that we won't push
   // them multiple times.
   boost::dynamic_bitset<> pushedTo(unit.numBlocks());
-  forEachInst(trace, [&](IRInstruction* inst) {
+  forEachInst(trace->blocks(), [&](IRInstruction* inst) {
     if (inst->op() == IncRef) {
       // Must be REFCOUNT_CONSUMED or REFCOUNT_CONSUMED_OFF_TRACE;
       // otherwise, it should be already removed in optimizeRefCount.
@@ -416,7 +409,7 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRUnit& unit,
   bool killedFrames = false;
 
   smart::map<SSATmp*, Offset> retFixupMap;
-  forEachInst(trace, [&](IRInstruction* inst) {
+  forEachInst(trace->blocks(), [&](IRInstruction* inst) {
     if (!state[inst].isDead()) return;
     switch (inst->op()) {
     // We don't need to generate stores to a frame if it can be
@@ -520,7 +513,7 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRUnit& unit,
    * that were weak uses may need modifications now that their frame
    * is going away.
    */
-  forEachInst(trace, [&](IRInstruction* inst) {
+  forEachInst(trace->blocks(), [&](IRInstruction* inst) {
     switch (inst->op()) {
     case DefInlineSP:
       {
@@ -641,9 +634,10 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
 
 // Publicly exported functions:
 
-void eliminateDeadCode(IRTrace* trace, IRUnit& unit) {
+void eliminateDeadCode(IRUnit& unit) {
+  auto trace = unit.main();
   auto removeEmptyExitTraces = [&] {
-    trace->exitTraces().remove_if([](IRTrace* exit) {
+    unit.exits().remove_if([](IRTrace* exit) {
       return exit->blocks().empty();
     });
   };
@@ -654,7 +648,7 @@ void eliminateDeadCode(IRTrace* trace, IRUnit& unit) {
 
   // Ensure that main trace doesn't unconditionally jump to an exit
   // trace.  This invariant is needed by the ref-counting optimization.
-  eliminateUnconditionalJump(trace);
+  eliminateUnconditionalJump(unit);
 
   // mark the essential instructions and add them to the initial
   // work list; this will also mark reachable exit traces. All
@@ -687,20 +681,22 @@ void eliminateDeadCode(IRTrace* trace, IRUnit& unit) {
 
       // If inst consumes this source, find the true source instruction and
       // mark it as consumed if it's an IncRef.
-      if (inst->consumesReference(i)) {
+      if (RuntimeOption::EvalHHIREnableRefCountOpt && inst->consumesReference(i)) {
         consumeIncRef(inst, src, state);
       }
     }
   }
 
   // Optimize IncRefs and DecRefs.
-  forEachTrace(trace, [&](IRTrace* t) {
-    optimizeRefCount(t, unit.main(), state, uses);
-  });
+  if (RuntimeOption::EvalHHIREnableRefCountOpt) {
+    forEachTrace(unit, [&](IRTrace* t) {
+      optimizeRefCount(t, unit.main(), state, uses);
+    });
 
-  if (RuntimeOption::EvalHHIREnableSinking) {
-    // Sink IncRefs consumed off trace.
-    sinkIncRefs(trace, unit, state);
+    if (RuntimeOption::EvalHHIREnableSinking) {
+      // Sink IncRefs consumed off trace.
+      sinkIncRefs(trace, unit, state);
+    }
   }
 
   // Optimize unused inlined activation records.  It's not necessary
@@ -709,7 +705,7 @@ void eliminateDeadCode(IRTrace* trace, IRUnit& unit) {
 
   // now remove instructions whose id == DEAD
   removeDeadInstructions(trace, state);
-  for (IRTrace* exit : trace->exitTraces()) {
+  for (IRTrace* exit : unit.exits()) {
     removeDeadInstructions(exit, state);
   }
 

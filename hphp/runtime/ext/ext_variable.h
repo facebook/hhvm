@@ -51,7 +51,7 @@ double f_doubleval(CVarRef v);
 double f_floatval(CVarRef v);
 String f_strval(CVarRef v);
 
-bool f_settype(VRefParam var, CStrRef type);
+bool f_settype(VRefParam var, const String& type);
 
 ///////////////////////////////////////////////////////////////////////////////
 // input/output
@@ -62,7 +62,7 @@ void f_var_dump(CVarRef v);
 void f_var_dump(int _argc, CVarRef expression, CArrRef _argv = null_array);
 void f_debug_zval_dump(CVarRef variable);
 String f_serialize(CVarRef value);
-Variant f_unserialize(CStrRef str,
+Variant f_unserialize(const String& str,
                       CArrRef class_whitelist = empty_array);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ Variant f_unserialize(CStrRef str,
 
 Array f_get_defined_vars();
 
-bool f_import_request_variables(CStrRef types, CStrRef prefix = "");
+bool f_import_request_variables(const String& types, const String& prefix = "");
 
 #define EXTR_OVERWRITE          0
 #define EXTR_SKIP               1
@@ -82,7 +82,7 @@ bool f_import_request_variables(CStrRef types, CStrRef prefix = "");
 #define EXTR_REFS               0x100
 
 int64_t f_extract(CArrRef var_array, int extract_type = EXTR_OVERWRITE,
-                  CStrRef prefix = "");
+                  const String& prefix = "");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

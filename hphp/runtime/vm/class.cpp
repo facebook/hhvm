@@ -17,9 +17,10 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/util/util.h"
 #include "hphp/util/debug.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/request-arena.h"
@@ -31,8 +32,6 @@
 #include <algorithm>
 
 namespace HPHP {
-
-namespace TargetCache = Transl::TargetCache;
 
 static StringData* sd86ctor = makeStaticString("86ctor");
 static StringData* sd86pinit = makeStaticString("86pinit");
@@ -211,10 +210,10 @@ Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
   , m_clsInfo(nullptr)
   , m_builtinPropSize(0)
   , m_classVecLen(classVecLen)
-  , m_cachedOffset(0)
-  , m_propDataCache(-1)
-  , m_propSDataCache(-1)
-  , m_nonScalarConstantCache(0)
+  , m_cachedClass(RDS::kInvalidHandle)
+  , m_propDataCache(RDS::kInvalidHandle)
+  , m_propSDataCache(RDS::kInvalidHandle)
+  , m_nonScalarConstantCache(RDS::kInvalidHandle)
   , m_instanceCtor(nullptr)
   , m_nextClass(nullptr)
 {
@@ -299,13 +298,13 @@ void Class::destroy() {
    * If we were never put on NamedEntity::classList, or
    * we've already been destroy'd, there's nothing to do
    */
-  if (!m_cachedOffset) return;
+  if (!m_cachedClass.bound()) return;
 
   Lock l(Unit::s_classesMutex);
   // Need to recheck now we have the lock
-  if (!m_cachedOffset) return;
+  if (!m_cachedClass.bound()) return;
   // Only do this once.
-  m_cachedOffset = 0;
+  m_cachedClass = RDS::Link<Class*>(RDS::kInvalidHandle);
 
   PreClass* pcls = m_preClass.get();
   pcls->namedEntity()->removeClass(this);
@@ -321,35 +320,33 @@ void Class::destroy() {
 }
 
 void Class::atomicRelease() {
-  assert(!m_cachedOffset);
+  assert(!m_cachedClass.bound());
   assert(!getCount());
   this->~Class();
   Util::low_free(this);
 }
 
 Class *Class::getCached() const {
-  return *(Class**)TargetCache::handleToPtr(m_cachedOffset);
+  return *m_cachedClass;
 }
 
 void Class::setCached() {
-  *(Class**)TargetCache::handleToPtr(m_cachedOffset) = this;
+  *m_cachedClass = this;
 }
 
 bool Class::verifyPersistent() const {
   if (!(attrs() & AttrPersistent)) return false;
   if (m_parent.get() &&
-      !TargetCache::isPersistentHandle(m_parent->m_cachedOffset)) {
+      !RDS::isPersistentHandle(m_parent->classHandle())) {
     return false;
   }
   for (auto const& declInterface : declInterfaces()) {
-    if (!TargetCache::isPersistentHandle(
-          declInterface->m_cachedOffset)) {
+    if (!RDS::isPersistentHandle(declInterface->classHandle())) {
       return false;
     }
   }
   for (auto const& usedTrait : m_usedTraits) {
-    if (!TargetCache::isPersistentHandle(
-          usedTrait->m_cachedOffset)) {
+    if (!RDS::isPersistentHandle(usedTrait->classHandle())) {
       return false;
     }
   }
@@ -862,15 +859,10 @@ Cell Class::clsCnsGet(const StringData* clsCnsName) const {
 
   // This constant has a non-scalar initializer, meaning it will be
   // potentially different in different requests, which we store
-  // separately in an array living off target cache.
-  if (UNLIKELY(!m_nonScalarConstantCache)) {
-    TargetCache::allocNonScalarClassConstantMap(
-      const_cast<unsigned*>(&m_nonScalarConstantCache));
-  }
+  // separately in an array living off in RDS.
+  m_nonScalarConstantCache.bind();
+  auto& clsCnsData = *m_nonScalarConstantCache;
 
-  auto& clsCnsData = TargetCache::handleToRef<Array>(
-    m_nonScalarConstantCache
-  );
   if (clsCnsData.get() == nullptr) {
     clsCnsData = Array::attach(HphpArray::MakeReserve(m_constants.size()));
   } else {
@@ -907,8 +899,8 @@ Cell Class::clsCnsGet(const StringData* clsCnsName) const {
 DataType Class::clsCnsType(const StringData* cnsName) const {
   Slot slot;
   auto const cns = cnsNameToTV(cnsName, slot);
-  // TODO(#2913342): lookup the constant in target cache in case it's
-  // dynamic and already initialized.
+  // TODO(#2913342): lookup the constant in RDS in case it's dynamic
+  // and already initialized.
   if (!cns) return KindOfUninit;
   return cns->m_type;
 }
@@ -922,7 +914,8 @@ void Class::setParent() {
         makeStaticString("__MockClass");
       if (!(attrs & AttrFinal) ||
           m_preClass->userAttributes().find(sd___MockClass) ==
-          m_preClass->userAttributes().end()) {
+          m_preClass->userAttributes().end() ||
+          m_parent->isCollectionClass()) {
         raise_error("Class %s may not inherit from %s (%s)",
                     m_preClass->name()->data(),
                     ((attrs & AttrFinal)     ? "final class" :
@@ -2323,18 +2316,12 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
   cellDup(v, m_data[m_size++]);
 }
 
-using Transl::TargetCache::handleToRef;
-
 const Class::PropInitVec* Class::getPropData() const {
-  if (m_propDataCache == (unsigned)-1) return nullptr;
-  return handleToRef<PropInitVec*>(m_propDataCache);
+  return m_propDataCache.bound() ? *m_propDataCache : nullptr;
 }
 
 void Class::initPropHandle() const {
-  if (UNLIKELY(m_propDataCache == (unsigned)-1)) {
-    const_cast<unsigned&>(m_propDataCache) =
-      TargetCache::allocClassInitProp(name());
-  }
+  m_propDataCache.bind();
 }
 
 void Class::initProps() const {
@@ -2344,19 +2331,15 @@ void Class::initProps() const {
 void Class::setPropData(PropInitVec* propData) const {
   assert(getPropData() == nullptr);
   initPropHandle();
-  handleToRef<PropInitVec*>(m_propDataCache) = propData;
+  *m_propDataCache = propData;
 }
 
 TypedValue* Class::getSPropData() const {
-  if (m_propSDataCache == (unsigned)-1) return nullptr;
-  return handleToRef<TypedValue*>(m_propSDataCache);
+  return m_propSDataCache.bound() ? *m_propSDataCache : nullptr;
 }
 
 void Class::initSPropHandle() const {
-  if (UNLIKELY(m_propSDataCache == (unsigned)-1)) {
-    const_cast<unsigned&>(m_propSDataCache) =
-      TargetCache::allocClassInitSProp(name());
-  }
+  m_propSDataCache.bind();
 }
 
 TypedValue* Class::initSProps() const {
@@ -2368,7 +2351,7 @@ TypedValue* Class::initSProps() const {
 void Class::setSPropData(TypedValue* sPropData) const {
   assert(getSPropData() == nullptr);
   initSPropHandle();
-  handleToRef<TypedValue*>(m_propSDataCache) = sPropData;
+  *m_propSDataCache = sPropData;
 }
 
 void Class::getChildren(std::vector<TypedValue*>& out) {
@@ -2383,6 +2366,12 @@ bool Class::isCppSerializable() const {
   assert(builtinPropSize() > 0); // Only call this on CPP classes
   return clsInfo() &&
     (clsInfo()->getAttribute() & ClassInfo::IsCppSerializable);
+}
+
+bool Class::isCollectionClass() const {
+  auto s = name();
+  return Collection::stringToType(s->data(), s->size()) !=
+         Collection::InvalidType;
 }
 
 } // HPHP::VM

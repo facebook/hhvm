@@ -50,9 +50,7 @@ NormalizedInstruction::~NormalizedInstruction() { }
  *   Helpers for recovering context of this instruction.
  */
 Op NormalizedInstruction::op() const {
-  auto op = toOp(*pc());
-  assert(isValidOpcode(op));
-  return (Op)op;
+  return toOp(*pc());
 }
 
 Op NormalizedInstruction::mInstrOp() const {

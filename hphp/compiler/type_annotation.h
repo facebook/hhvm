@@ -92,6 +92,16 @@ public:
   }
 
   /*
+   * Return a shallow copy of this TypeAnnotation, except with
+   * softness stripped.
+   */
+  TypeAnnotation stripSoft() const {
+    auto ret = *this;
+    ret.m_soft = false;
+    return ret;
+  }
+
+  /*
    * Return whether this TypeAnnotation is equal to the "mixed" type.
    */
   bool isMixed() const { return !m_name.compare("mixed"); }

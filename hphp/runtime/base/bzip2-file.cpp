@@ -42,7 +42,7 @@ void BZ2File::sweep() {
   File::sweep();
 }
 
-bool BZ2File::open(CStrRef filename, CStrRef mode) {
+bool BZ2File::open(const String& filename, const String& mode) {
   assert(m_bzFile == nullptr);
 
   return m_innerFile->open(filename, mode) &&

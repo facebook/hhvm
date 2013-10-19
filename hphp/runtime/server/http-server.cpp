@@ -208,8 +208,7 @@ void HttpServer::onServerShutdown() {
   }
 }
 
-void HttpServer::takeoverShutdown(HPHP::Server* server) {
-  assert(server == m_pageServer.get());
+void HttpServer::takeoverShutdown() {
   // We want to synchronously shut down our satellite servers to free up ports,
   // then asynchronously shut down everything else.
   onServerShutdown();

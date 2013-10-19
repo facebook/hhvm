@@ -25,7 +25,7 @@ namespace HPHP {
 
 typedef unsigned long filter_map[256];
 
-static String php_filter_encode_html(CStrRef value,
+static String php_filter_encode_html(const String& value,
                                      const unsigned char *chars) {
   int len = value.length();
   unsigned char *s = (unsigned char *)value.data();
@@ -59,7 +59,7 @@ static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 #define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
 
-static Variant php_filter_encode_url(CStrRef value, const unsigned char* chars,
+static Variant php_filter_encode_url(const String& value, const unsigned char* chars,
                                      const int char_len, int high, int low,
                                      int encode_nul) {
   unsigned char tmp[256];
@@ -92,7 +92,7 @@ static Variant php_filter_encode_url(CStrRef value, const unsigned char* chars,
   return str.detach();
 }
 
-static Variant php_filter_strip(CStrRef value, long flags) {
+static Variant php_filter_strip(const String& value, long flags) {
   unsigned char *str;
   int i;
   int len = value.length();
@@ -133,7 +133,7 @@ static void filter_map_update(filter_map *map, int flag,
   }
 }
 
-static Variant filter_map_apply(CStrRef value, filter_map *map) {
+static Variant filter_map_apply(const String& value, filter_map *map) {
   unsigned char *str;
   int i;
   int len = value.length();

@@ -172,12 +172,12 @@ NameValueTableWrapper::AppendWithRef(ArrayData*, CVarRef v, bool copy) {
 }
 
 ArrayData*
-NameValueTableWrapper::Plus(ArrayData*, const ArrayData* elems, bool copy) {
+NameValueTableWrapper::Plus(ArrayData*, const ArrayData* elems) {
   throw NotImplementedException("plus on $GLOBALS");
 }
 
 ArrayData*
-NameValueTableWrapper::Merge(ArrayData*, const ArrayData* elems, bool copy) {
+NameValueTableWrapper::Merge(ArrayData*, const ArrayData* elems) {
   throw NotImplementedException("merge on $GLOBALS");
 }
 
@@ -251,9 +251,15 @@ ArrayData* NameValueTableWrapper::EscalateForSort(ArrayData* ad) {
 void NameValueTableWrapper::Ksort(ArrayData*, int sort_flags, bool ascending) {}
 void NameValueTableWrapper::Sort(ArrayData*, int sort_flags, bool ascending) {}
 void NameValueTableWrapper::Asort(ArrayData*, int sort_flags, bool ascending) {}
-void NameValueTableWrapper::Uksort(ArrayData*, CVarRef cmp_function) {}
-void NameValueTableWrapper::Usort(ArrayData*, CVarRef cmp_function) {}
-void NameValueTableWrapper::Uasort(ArrayData*, CVarRef cmp_function) {}
+bool NameValueTableWrapper::Uksort(ArrayData*, CVarRef cmp_function) {
+  return true;
+}
+bool NameValueTableWrapper::Usort(ArrayData*, CVarRef cmp_function) {
+  return true;
+}
+bool NameValueTableWrapper::Uasort(ArrayData*, CVarRef cmp_function) {
+  return true;
+}
 
 bool NameValueTableWrapper::IsVectorData(const ArrayData*) {
   return false;

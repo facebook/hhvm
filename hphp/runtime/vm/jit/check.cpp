@@ -90,8 +90,10 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  * 6. If the DefLabel produces a value, all of its incoming edges must be from
  *    blocks listed in the block list for this block's Trace.
  * 7. Any path from this block to a Block that expects values must be
- *    from a Jmp_ instruciton.
+ *    from a Jmp instruciton.
  * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
+ * 9. If this block is a catch block, it must have at most one predecessor
+ *    and the trace containing it must contain exactly this block.
  */
 bool checkBlock(Block* b) {
   auto it = b->begin();
@@ -127,9 +129,9 @@ bool checkBlock(Block* b) {
 
   // Invariant #7
   if (b->taken()) {
-    // only Jmp_ can branch to a join block expecting values.
+    // only Jmp can branch to a join block expecting values.
     DEBUG_ONLY IRInstruction* branch = b->back();
-    DEBUG_ONLY auto numArgs = branch->op() == Jmp_ ? branch->numSrcs() : 0;
+    DEBUG_ONLY auto numArgs = branch->op() == Jmp ? branch->numSrcs() : 0;
     assert(numBlockParams(b->taken()) == numArgs);
   }
 
@@ -144,24 +146,15 @@ bool checkBlock(Block* b) {
     }
   }
 
+  // Invariant #9
+  if (b->isCatch()) {
+    // keyed off a tca, so there needs to be exactly one
+    assert(b->trace()->blocks().size() == 1);
+    assert(b->preds().size() <= 1);
+  }
+
   return true;
 }
-
-/*
- * Check that every catch trace has at most one incoming branch and a single
- * block.
- */
-bool checkCatchTraces(IRTrace* trace, const IRUnit& unit) {
-  forEachTraceBlock(trace, [&](Block* b) {
-    auto trace = b->trace();
-    if (trace->isCatch()) {
-      assert(trace->blocks().size() == 1);
-      assert(b->preds().size() <= 1);
-    }
-  });
-  return true;
-}
-
 }
 
 const Edge* takenEdge(IRInstruction* inst) {
@@ -188,11 +181,11 @@ const Edge* nextEdge(Block* b) {
  * 5. Each predecessor of a reachable block must be reachable (deleted
  *    blocks must not have out-edges to reachable blocks).
  */
-bool checkCfg(IRTrace* trace, const IRUnit& unit) {
-  forEachTraceBlock(trace, checkBlock);
+bool checkCfg(const IRUnit& unit) {
+  forEachTraceBlock(unit, checkBlock);
 
   // Check valid successor/predecessor edges.
-  auto const blocks = rpoSortCfg(trace, unit);
+  auto const blocks = rpoSortCfg(unit);
   std::unordered_set<const Edge*> edges;
   for (Block* b : blocks) {
     auto checkEdge = [&] (const Edge* e) {
@@ -211,10 +204,8 @@ bool checkCfg(IRTrace* trace, const IRUnit& unit) {
     }
   }
 
-  checkCatchTraces(trace, unit);
-
   // visit dom tree in preorder, checking all tmps
-  auto const children = findDomChildren(blocks);
+  auto const children = findDomChildren(unit, blocks);
   StateVector<SSATmp, bool> defined0(unit, false);
   forPreorderDoms(blocks.front(), children, defined0,
                   [] (Block* block, StateVector<SSATmp, bool>& defined) {
@@ -240,9 +231,9 @@ bool checkCfg(IRTrace* trace, const IRUnit& unit) {
   return true;
 }
 
-bool checkTmpsSpanningCalls(IRTrace* trace, const IRUnit& unit) {
-  auto const blocks   = rpoSortCfg(trace, unit);
-  auto const children = findDomChildren(blocks);
+bool checkTmpsSpanningCalls(const IRUnit& unit) {
+  auto const blocks = rpoSortCfg(unit);
+  auto const children = findDomChildren(unit, blocks);
 
   // CallBuiltin is ok because it is not a php-level call.  (It will
   // call a C++ helper and we can push/pop around it normally.)
@@ -303,11 +294,9 @@ bool checkTmpsSpanningCalls(IRTrace* trace, const IRUnit& unit) {
   return isValid;
 }
 
-bool checkRegisters(IRTrace* trace, const IRUnit& unit,
-                    const RegAllocInfo& regs) {
-  assert(checkCfg(trace, unit));
-
-  auto blocks = rpoSortCfg(trace, unit);
+bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
+  assert(checkCfg(unit));
+  auto blocks = rpoSortCfg(unit);
   StateVector<Block, RegState> states(unit, RegState());
   StateVector<Block, bool> reached(unit, false);
   for (auto* block : blocks) {

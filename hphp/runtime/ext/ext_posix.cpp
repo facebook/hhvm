@@ -60,7 +60,7 @@ const int64_t k_POSIX_X_OK = X_OK;
 const int64_t k_POSIX_W_OK = W_OK;
 const int64_t k_POSIX_R_OK = R_OK;
 
-bool f_posix_access(CStrRef file, int mode /* = 0 */) {
+bool f_posix_access(const String& file, int mode /* = 0 */) {
   String path = File::TranslatePath(file);
   if (path.empty()) {
     return false;
@@ -111,7 +111,7 @@ const StaticString
   s_shell("shell");
 
 static Variant php_posix_group_to_array(int gid,
-                   CStrRef gname = null_variant.toString()) {
+                   const String& gname = null_variant.toString()) {
   // Don't pass a gid *and* a gname to this.
   assert((gid <  0) || gname.size() == 0);
 
@@ -157,7 +157,7 @@ Variant f_posix_getgrgid(int gid) {
   return php_posix_group_to_array(gid);
 }
 
-Variant f_posix_getgrnam(CStrRef name) {
+Variant f_posix_getgrnam(const String& name) {
   return php_posix_group_to_array(-1, name.data());
 }
 
@@ -206,7 +206,7 @@ int64_t f_posix_getppid() {
 }
 
 static Variant php_posix_passwd_to_array(int uid,
-                   CStrRef name = null_variant.toString()) {
+                   const String& name = null_variant.toString()) {
   // Don't pass a uid *and* a name to this.
   assert((uid <  0) || name.size() == 0);
 
@@ -246,7 +246,7 @@ static Variant php_posix_passwd_to_array(int uid,
   return ret.create();
 }
 
-Variant f_posix_getpwnam(CStrRef username) {
+Variant f_posix_getpwnam(const String& username) {
   return php_posix_passwd_to_array(-1, username);
 }
 
@@ -320,7 +320,7 @@ int64_t f_posix_getuid() {
   return getuid();
 }
 
-bool f_posix_initgroups(CStrRef name, int base_group_id) {
+bool f_posix_initgroups(const String& name, int base_group_id) {
   if (name.empty()) return false;
   return !initgroups(name.data(), base_group_id);
 }
@@ -347,11 +347,11 @@ bool f_posix_kill(int pid, int sig) {
   return kill(pid, sig) >= 0;
 }
 
-bool f_posix_mkfifo(CStrRef pathname, int mode) {
+bool f_posix_mkfifo(const String& pathname, int mode) {
   return mkfifo(pathname.data(), mode) >= 0;
 }
 
-bool f_posix_mknod(CStrRef pathname, int mode, int major /* = 0 */,
+bool f_posix_mknod(const String& pathname, int mode, int major /* = 0 */,
                    int minor /* = 0 */) {
   dev_t php_dev = 0;
   if ((mode & S_IFCHR) || (mode & S_IFBLK)) {

@@ -65,14 +65,14 @@ but may not form loops.
 No Variables are defined on entry to the main Trace.
 
 Blocks which are join points may start with a DefLabel with destination
-Variables.  In that case, each predecessor must be a Jmp_ passing a matching
-number of source Variables.  In this case the Jmp_ acts as a tail-call, passing
+Variables.  In that case, each predecessor must be a Jmp passing a matching
+number of source Variables.  In this case the Jmp acts as a tail-call, passing
 arguments the same way a plain call would.
 
-Together, the sources of the Jmp_ instructions and the destinations of the
+Together, the sources of the Jmp instructions and the destinations of the
 DefLabel instructions act as traditional SSA Phi pseudo-functions; The type
 of the label's destination is the type-union of the corresponding sources.
-Because the Jmp_ sources are at the ends of blocks, they do not violate the
+Because the Jmp sources are at the ends of blocks, they do not violate the
 SSA dominator rule (rule 2, above).
 
 Implementation note: The JIT's compilation unit ("Trace" in this spec) actually
@@ -478,7 +478,7 @@ D:CountedStr = AssertNonNull S0:{Nullptr|CountedStr}
 
 CheckStaticLocInit S0:BoxedCell -> L
 
-  Check if the static local target cache RefData represented by S0 is
+  Check if the static local (RDS) RefData represented by S0 is
   initialized, and if not branch to L.
 
 
@@ -685,12 +685,12 @@ ExitOnVarEnv S0:FramePtr -> L
   Loads the VarEnv slot off the ActRec pointed to by S0.  If it is
   non-zero, jumps to the exit-trace label L.
 
-Jmp_ [S:T ...] -> L
+Jmp [S:T ...] -> L
 
   Unconditional jump to L.  L is the name of a DefLabel instruction.
   Each the sources are copied to the corresponding destinations of the
   target L.  The number of destinations on L must match the number of
-  sources of this Jmp_.
+  sources of this Jmp.
 
 DefLabel
 D:T ... = DefLabel
@@ -701,12 +701,12 @@ D:T ... = DefLabel
   with a DefLabel instruction.
 
   DefLabel can optionally define one or more destination variables.  In that
-  case, the values are passed to it by Jmp_ instruction(s) with the same
+  case, the values are passed to it by Jmp instruction(s) with the same
   number of sources.  The type of each destination variable is the least common
-  supertype of each of the corresponding Jmp_ sources.
+  supertype of each of the corresponding Jmp sources.
 
   Note that when a label defines destination variables, it is only reachable
-  from the Jmp_ instruction.  Other branch instructions cannot pass arguments.
+  from the Jmp instruction.  Other branch instructions cannot pass arguments.
 
 
 6. Reference manipulation
@@ -870,19 +870,19 @@ D:Cls = LdCls S0:Str S1:ConstCls
 
 D:Cls = LdClsCached S0:ConstStr
 
-  Loads the class named S0 via the target cache. Invokes autoload and
-  may raise an error if the class is not defined.
+  Loads the class named S0 via the RDS. Invokes autoload and may raise
+  an error if the class is not defined.
 
 D:Cls = LdClsCachedSafe S0:ConstStr [ -> L ]
 
-  Loads the class whose name is S0 out of the target cache. If the class is not
+  Loads the class whose name is S0 out of the RDS. If the class is not
   defined, returns null and optionally branches to L.
 
 D:T = LdClsCns<T,className,constName> [ -> L ]
 
-  Loads the named class constant for a class via the target cache.
-  This instruction should generally be followed by CheckInit, unless
-  we know the class is already loaded.
+  Loads the named class constant for a class via the RDS.  This
+  instruction should generally be followed by CheckInit, unless we
+  know the class is already loaded.
 
   If the optional label L is specified and the loaded value's type
   does not match T, this instruction does not load into D and
@@ -895,21 +895,21 @@ D:T = LdClsCns<T,className,constName> [ -> L ]
 D:T = LookupCns<T,constName>
 D:T = LookupCnsE<T,constName>
 
-  Load a constant via the target cache. Raises an undefined constant
-  notice if the constant cannot be defined. The E variant will instead
-  throw a fatal error if it cannot define the constant.
+  Load a constant via the RDS.  Raises an undefined constant notice if
+  the constant cannot be defined.  The E variant will instead throw a
+  fatal error if it cannot define the constant.
 
 D:T = LookupCnsU<T,constName,fallbackName>
 
-  Load an unqualified constant via the target cache, first by trying
-  constName, then by trying fallbackName. Raises a notice if neither
-  can be found.
+  Load an unqualified constant via the RDS, first by trying constName,
+  then by trying fallbackName.  Raises a notice if neither can be
+  found.
 
 D:T = LookupClsCns<T,className,constName>
 
-  Load a class constant for a class via the target cache, invoking
-  autoload if it is not defined.  This instruction may raise an
-  undefined constant error if autoload cannot define the constant.
+  Load a class constant for a class via the RDS, invoking autoload if
+  it is not defined.  This instruction may raise an undefined constant
+  error if autoload cannot define the constant.
 
 D:FuncCtx = LdClsMethodFCache S0:ConstStr S1:ConstStr
                               S2:{Obj|Cls|Ctx} S3:FramePtr L:Label
@@ -972,7 +972,7 @@ D:PtrToGen = LdClsPropAddr S0:Cls S1:Str S2:ConstCls [ -> L ]
 D:PtrToGen = LdClsPropAddrCached S0:Cls S1:ConstStr S2:ConstStr
                                  S3:ConstCls [ -> L ]
 
-  Loads a pointer to a static class property via the target cache. S0
+  Loads a pointer to a static class property via the RDS. S0
   points to the class, S1 is the property name, S2 is the class name,
   and S3 is the class representing the context of the code accessing
   the property.  If class S0 does not have a visible and accessible
@@ -1002,16 +1002,23 @@ D:Func = LdFunc S0:Str
   Loads the Func whose name is S0.  Fatal if the named function is
   not defined, and the function autoloader fails to define it.
 
-D:Func = LdFuncCached S0:ConstStr
+D:Func = LdFuncCached<funcName>
 
-  Loads the Func whose name is S0 from the target cache. Fatal if the
-  named function is not defined, and the function autoloader fails to
-  define it.
+  Loads the Func whose name is funcName from the RDS, invoking
+  autoload if it not defined yet.  Fatal if function autoloader fails
+  to define it.
 
-D:Func = LdFuncCachedSafe S0:ConstStr [ -> L ]
+D:Func = LdFuncCachedSafe<funcName> [ -> L ]
 
-  Loads the Func named S0 from the target cache. If the function is not
-  defined, returns null and optionally branches to L.
+  Try to load the Func named funcName from the RDS.  If the function
+  is not defined, returns null and optionally branches to L.
+
+D:Func = LdFuncCachedU<funcName,fallbackName>
+
+  Try to load a Func named funcName from the RDS, if it isn't defined,
+  try to load a Func named fallbackName.  If that also isn't defined,
+  invoke autoload.  If this still doesn't result in a Func, raise a
+  fatal error.
 
 D:Func& = LdARFuncPtr S0:{StkPtr|FramePtr} S1:ConstInt
 
@@ -1552,8 +1559,8 @@ D:BoxedCell = ClosureStaticLocInit S0:ConstStr S1:FramePtr S2:Cell
 
 StaticLocInitCached S0:BoxedCell S1:Cell
 
-  Assuming S0 is an uninitialized static local target cache slot,
-  initialize it by setting it to the value of S1.
+  Assuming S0 is an uninitialized static local RDS slot, initialize it
+  by setting it to the value of S1.
 
 PrintStr S0:Str
 PrintInt S1:Int
@@ -2157,8 +2164,13 @@ BeginCatch
 
 EndCatch S0:StkPtr
 
-  Marks the end of a catch region and returns control to the unwinder if
-  appropriate. Exact behavior is implementation and architecture specific.
+  Marks the end of a catch region and returns control to the unwinder. Exact
+  behavior is implementation and architecture specific.
+
+TryEndCatch S0:StkPtr
+
+  Marks a potential end of a catch region and might return control to the
+  unwinder. Exact behavior is implementation and architecture specific.
 
 D:Cell = LdUnwinderValue
 

@@ -62,7 +62,7 @@ ObjectData* new_{0:s}_Instance(HPHP::Class* cls) {{
   size_t nProps = cls->numDeclProperties();
   size_t builtinPropSize = sizeof(c_{0:s}) - sizeof(ObjectData);
   size_t size = ObjectData::sizeForNProps(nProps) + builtinPropSize;
-  return new (MM().objMalloc(size)) c_{0:s}(cls);
+  return new (MM().objMallocLogged(size)) c_{0:s}(cls);
 }})",
     className) << "\n\n";
 }

@@ -40,7 +40,11 @@ IMPLEMENT_DEFAULT_EXTENSION(iconv);
 ///////////////////////////////////////////////////////////////////////////////
 
 #define _php_iconv_memequal(a, b, c) \
-  ((c) == sizeof(unsigned long) ? *((unsigned long *)(a)) == *((unsigned long *)(b)) : ((c) == sizeof(unsigned int) ? *((unsigned int *)(a)) == *((unsigned int *)(b)) : memcmp(a, b, c) == 0))
+  ((c) == sizeof(unsigned long)                                         \
+   ? *((unsigned long *)(a)) == *((unsigned long *)(b))                 \
+   : ((c) == sizeof(unsigned int)                                       \
+      ? *((unsigned int *)(a)) == *((unsigned int *)(b))                \
+      : memcmp(a, b, c) == 0))
 
 static char _generic_superset_name[] = "UCS-4LE";
 #define GENERIC_SUPERSET_NAME _generic_superset_name
@@ -129,7 +133,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(ICONVGlobals, s_iconv_globals);
 #ifndef ICONV_CSNMAXLEN
 #define ICONV_CSNMAXLEN 64
 #endif
-static bool validate_charset(CStrRef charset) {
+static bool validate_charset(const String& charset) {
   if (charset.size() >= ICONV_CSNMAXLEN) {
     throw_invalid_argument
       ("Charset parameter exceeds the maximum allowed "
@@ -139,7 +143,7 @@ static bool validate_charset(CStrRef charset) {
   return true;
 }
 
-static Variant check_charset(CStrRef charset) {
+static Variant check_charset(const String& charset) {
   if (!validate_charset(charset)) return false;
   if (charset.empty()) {
     return ICONVG(internal_encoding);
@@ -1261,7 +1265,7 @@ const StaticString
   s_line_length("line-length"),
   s_line_break_chars("line-break-chars");
 
-Variant f_iconv_mime_encode(CStrRef field_name, CStrRef field_value,
+Variant f_iconv_mime_encode(const String& field_name, const String& field_value,
                             CVarRef preferences /* = null_variant */) {
   php_iconv_enc_scheme_t scheme_id = PHP_ICONV_ENC_SCHEME_BASE64;
   String in_charset;
@@ -1617,8 +1621,8 @@ Variant f_iconv_mime_encode(CStrRef field_name, CStrRef field_value,
   return ret.detach();
 }
 
-Variant f_iconv_mime_decode(CStrRef encoded_string, int mode /* = 0 */,
-                            CStrRef charset /* = null_string */) {
+Variant f_iconv_mime_decode(const String& encoded_string, int mode /* = 0 */,
+                            const String& charset /* = null_string */) {
   Variant encoded = check_charset(charset);
   if (same(encoded, false)) return false;
   String enc = encoded.toString();
@@ -1634,9 +1638,9 @@ Variant f_iconv_mime_decode(CStrRef encoded_string, int mode /* = 0 */,
   return false;
 }
 
-Variant f_iconv_mime_decode_headers(CStrRef encoded_headers,
+Variant f_iconv_mime_decode_headers(const String& encoded_headers,
                                     int mode /* = 0 */,
-                                    CStrRef charset /* = null_string */) {
+                                    const String& charset /* = null_string */) {
   Variant encoded = check_charset(charset);
   if (same(encoded, false)) return false;
   String enc = encoded.toString();
@@ -1712,7 +1716,7 @@ const StaticString
   s_all("all");
 
 
-Variant f_iconv_get_encoding(CStrRef type /* = "all" */) {
+Variant f_iconv_get_encoding(const String& type /* = "all" */) {
   if (type == s_all) {
     Array ret;
     ret.set(s_input_encoding,    ICONVG(input_encoding));
@@ -1726,7 +1730,7 @@ Variant f_iconv_get_encoding(CStrRef type /* = "all" */) {
   return false;
 }
 
-bool f_iconv_set_encoding(CStrRef type, CStrRef charset) {
+bool f_iconv_set_encoding(const String& type, const String& charset) {
   if (!validate_charset(charset)) return false;
   if (type == s_input_encoding) {
     ICONVG(input_encoding) = charset;
@@ -1740,7 +1744,8 @@ bool f_iconv_set_encoding(CStrRef type, CStrRef charset) {
   return true;
 }
 
-Variant f_iconv(CStrRef in_charset, CStrRef out_charset, CStrRef str) {
+Variant f_iconv(const String& in_charset, const String& out_charset,
+                const String& str) {
   if (!validate_charset(in_charset)) return false;
   if (!validate_charset(out_charset)) return false;
 
@@ -1756,7 +1761,8 @@ Variant f_iconv(CStrRef in_charset, CStrRef out_charset, CStrRef str) {
   return false;
 }
 
-Variant f_iconv_strlen(CStrRef str, CStrRef charset /* = null_string */) {
+Variant f_iconv_strlen(const String& str,
+                       const String& charset /* = null_string */) {
   Variant encoded = check_charset(charset);
   if (same(encoded, false)) return false;
   String enc = encoded.toString();
@@ -1770,8 +1776,9 @@ Variant f_iconv_strlen(CStrRef str, CStrRef charset /* = null_string */) {
   return false;
 }
 
-Variant f_iconv_strpos(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
-                       CStrRef charset /* = null_string */) {
+Variant f_iconv_strpos(const String& haystack, const String& needle,
+                       int offset /* = 0 */,
+                       const String& charset /* = null_string */) {
   if (offset < 0) {
     raise_warning("Offset not contained in string.");
     return false;
@@ -1794,8 +1801,8 @@ Variant f_iconv_strpos(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
   return false;
 }
 
-Variant f_iconv_strrpos(CStrRef haystack, CStrRef needle,
-                        CStrRef charset /* = null_string */) {
+Variant f_iconv_strrpos(const String& haystack, const String& needle,
+                        const String& charset /* = null_string */) {
   if (needle.size() < 1) {
     return false;
   }
@@ -1814,8 +1821,9 @@ Variant f_iconv_strrpos(CStrRef haystack, CStrRef needle,
   return false;
 }
 
-Variant f_iconv_substr(CStrRef str, int offset, int length /* = INT_MAX */,
-                       CStrRef charset /* = null_string */) {
+Variant f_iconv_substr(const String& str, int offset,
+                       int length /* = INT_MAX */,
+                       const String& charset /* = null_string */) {
   Variant encoded = check_charset(charset);
   if (same(encoded, false)) return false;
   String enc = encoded.toString();
@@ -1829,7 +1837,7 @@ Variant f_iconv_substr(CStrRef str, int offset, int length /* = INT_MAX */,
   return false;
 }
 
-String f_ob_iconv_handler(CStrRef contents, int status) {
+String f_ob_iconv_handler(const String& contents, int status) {
   String mimetype = g_context->getMimeType();
   if (!mimetype.empty()) {
     char *out_buffer;

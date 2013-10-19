@@ -33,9 +33,10 @@ int64_t f_intl_get_error_code();
 String f_intl_get_error_message();
 String f_intl_error_name(int64_t error_code);
 bool f_intl_is_failure(int64_t error_code);
-Variant f_collator_asort(CVarRef obj, VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
-Variant f_collator_compare(CVarRef obj, CStrRef str1, CStrRef str2);
-Variant f_collator_create(CStrRef locale);
+Variant f_collator_asort(
+  CVarRef obj, VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
+Variant f_collator_compare(CVarRef obj, const String& str1, const String& str2);
+Variant f_collator_create(const String& locale);
 Variant f_collator_get_attribute(CVarRef obj, int64_t attr);
 Variant f_collator_get_error_code(CVarRef obj);
 Variant f_collator_get_error_message(CVarRef obj);
@@ -44,10 +45,17 @@ Variant f_collator_get_strength(CVarRef obj);
 Variant f_collator_set_attribute(CVarRef obj, int64_t attr, int64_t val);
 Variant f_collator_set_strength(CVarRef obj, int64_t strength);
 Variant f_collator_sort_with_sort_keys(CVarRef obj, VRefParam arr);
-Variant f_collator_sort(CVarRef obj, VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
-Variant f_idn_to_ascii(CStrRef domain, int64_t options = 0, int64_t variant = 0, VRefParam idna_info = uninit_null());
-Variant f_idn_to_unicode(CStrRef domain, int64_t options = 0, int64_t variant = 0, VRefParam idna_info = uninit_null());
-Variant f_idn_to_utf8(CStrRef domain, int64_t options = 0, int64_t variant = 0, VRefParam idna_info = uninit_null());
+Variant f_collator_sort(
+  CVarRef obj, VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
+Variant f_idn_to_ascii(
+  const String& domain, int64_t options = 0, int64_t variant = 0,
+  VRefParam idna_info = uninit_null());
+Variant f_idn_to_unicode(
+  const String& domain, int64_t options = 0, int64_t variant = 0,
+  VRefParam idna_info = uninit_null());
+Variant f_idn_to_utf8(
+  const String& domain, int64_t options = 0, int64_t variant = 0,
+  VRefParam idna_info = uninit_null());
 extern const int64_t q_Collator$$SORT_REGULAR;
 extern const int64_t q_Collator$$SORT_NUMERIC;
 extern const int64_t q_Collator$$SORT_STRING;
@@ -84,10 +92,11 @@ class c_Collator : public ExtObjectData, public Sweepable {
   // need to implement
   public: c_Collator(Class* cls = c_Collator::classof());
   public: ~c_Collator();
-  public: void t___construct(CStrRef locale);
-  public: bool t_asort(VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
-  public: Variant t_compare(CStrRef str1, CStrRef str2);
-  public: static Variant ti_create(CStrRef locale);
+  public: void t___construct(const String& locale);
+  public: bool t_asort(
+    VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
+  public: Variant t_compare(const String& str1, const String& str2);
+  public: static Variant ti_create(const String& locale);
   public: int64_t t_getattribute(int64_t attr);
   public: int64_t t_geterrorcode();
   public: String t_geterrormessage();
@@ -96,7 +105,8 @@ class c_Collator : public ExtObjectData, public Sweepable {
   public: bool t_setattribute(int64_t attr, int64_t val);
   public: bool t_setstrength(int64_t strength);
   public: bool t_sortwithsortkeys(VRefParam arr);
-  public: bool t_sort(VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
+  public: bool t_sort(
+    VRefParam arr, int64_t sort_flag = q_Collator$$SORT_REGULAR);
 
  private:
   String     m_locale;
@@ -125,8 +135,10 @@ class c_Normalizer : public ExtObjectData, public Sweepable {
   public: c_Normalizer(Class* cls = c_Normalizer::classof());
   public: ~c_Normalizer();
   public: void t___construct();
-  public: static Variant ti_isnormalized(CStrRef input, int64_t form = q_Normalizer$$FORM_C);
-  public: static Variant ti_normalize(CStrRef input, int64_t form = q_Normalizer$$FORM_C);
+  public: static Variant ti_isnormalized(
+    const String& input, int64_t form = q_Normalizer$$FORM_C);
+  public: static Variant ti_normalize(
+    const String& input, int64_t form = q_Normalizer$$FORM_C);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,2 @@
+HipHop Warning: Argument 1 to foo() must be of type @Bar, Foo given in %s on line 10
+HipHop Fatal error: Call to undefined method Foo::frob from anonymous context in %s on line 8

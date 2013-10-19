@@ -20,11 +20,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_override_function(CStrRef name, CStrRef args, CStrRef code) {
+bool f_override_function(const String& name, const String& args,
+                         const String& code) {
   throw NotSupportedException(__func__, "dynamic coding is not supported");
 }
 
-bool f_rename_function(CStrRef orig_name, CStrRef new_name) {
+bool f_rename_function(const String& orig_name, const String& new_name) {
   throw NotSupportedException(__func__, "dynamic coding is not supported");
 }
 
@@ -32,12 +33,12 @@ void f_apd_set_browser_trace() {
   throw NotSupportedException(__func__, "apd is not supported");
 }
 
-String f_apd_set_pprof_trace(CStrRef dumpdir /* = null_string */,
-                             CStrRef frament /* = null_string */) {
+String f_apd_set_pprof_trace(const String& dumpdir /* = null_string */,
+                             const String& frament /* = null_string */) {
   throw NotSupportedException(__func__, "apd is not supported");
 }
 
-bool f_apd_set_session_trace_socket(CStrRef ip_or_filename, int domain,
+bool f_apd_set_session_trace_socket(const String& ip_or_filename, int domain,
                                     int port, int mask) {
   throw NotSupportedException(__func__, "apd is not supported");
 }
@@ -54,7 +55,7 @@ bool f_apd_continue() {
   throw NotSupportedException(__func__, "apd is not supported");
 }
 
-bool f_apd_echo(CStrRef output) {
+bool f_apd_echo(const String& output) {
   throw NotSupportedException(__func__, "apd is not supported");
 }
 

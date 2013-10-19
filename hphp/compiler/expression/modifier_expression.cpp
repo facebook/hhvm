@@ -54,7 +54,8 @@ bool ModifierExpression::isPublic() const {
     switch (m_modifiers[i]) {
     case T_PUBLIC:      return true;
     case T_PROTECTED:
-    case T_PRIVATE:     return false;
+    case T_PRIVATE:
+      return false;
     default:
       break;
     }
@@ -69,6 +70,10 @@ bool ModifierExpression::hasModifier(int modifier) const {
     }
   }
   return false;
+}
+
+bool ModifierExpression::isExplicitlyPublic() const {
+  return hasModifier(T_PUBLIC);
 }
 
 bool ModifierExpression::isProtected() const {

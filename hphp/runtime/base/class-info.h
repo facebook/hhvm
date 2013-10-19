@@ -197,8 +197,8 @@ public:
   /**
    * Locate one function.
    */
-  static const MethodInfo *FindSystemFunction(CStrRef name);
-  static const MethodInfo *FindFunction(CStrRef name);
+  static const MethodInfo *FindSystemFunction(const String& name);
+  static const MethodInfo *FindFunction(const String& name);
 
   /**
    * Return a list of declared classes.
@@ -208,12 +208,12 @@ public:
   /**
    * Locate one class.
    */
-  static const ClassInfo *FindClass(CStrRef name);
+  static const ClassInfo *FindClass(const String& name);
 
   /**
    * Locate one system class.
    */
-  static const ClassInfo *FindSystemClass(CStrRef name);
+  static const ClassInfo *FindSystemClass(const String& name);
 
   /**
    * Return a list of declared interfaces.
@@ -228,32 +228,32 @@ public:
   /**
    * Locate one interface.
    */
-  static const ClassInfo *FindInterface(CStrRef name);
+  static const ClassInfo *FindInterface(const String& name);
 
   /**
    * Locate one system interface.
    */
-  static const ClassInfo *FindSystemInterface(CStrRef name);
+  static const ClassInfo *FindSystemInterface(const String& name);
 
   /**
    * Locate one trait.
    */
-  static const ClassInfo *FindTrait(CStrRef name);
+  static const ClassInfo *FindTrait(const String& name);
 
   /**
    * Locate one system trait.
    */
-  static const ClassInfo *FindSystemTrait(CStrRef name);
+  static const ClassInfo *FindSystemTrait(const String& name);
 
   /**
    * Locate either a class, interface, or trait.
    */
-  static const ClassInfo *FindClassInterfaceOrTrait(CStrRef name);
+  static const ClassInfo *FindClassInterfaceOrTrait(const String& name);
 
   /**
    * Locate either a system class, system interface, or system trait.
    */
-  static const ClassInfo *FindSystemClassInterfaceOrTrait(CStrRef name);
+  static const ClassInfo *FindSystemClassInterfaceOrTrait(const String& name);
 
   /**
    * Get all statically known system constants, unless explicitly
@@ -267,7 +267,8 @@ public:
    * interfaces.
    *   type: 0: unknown; 1: class; 2: interface
    */
-  static bool GetClassMethods(MethodVec &ret, CStrRef classname, int type = 0);
+  static bool GetClassMethods(MethodVec &ret, const String& classname,
+                              int type = 0);
   static bool GetClassMethods(MethodVec &ret, const ClassInfo *classInfo);
 
   /**
@@ -329,7 +330,7 @@ public:
   int getLine1() const { return checkCurrent()->m_line1;}
   int getLine2() const { return checkCurrent()->m_line2;}
   virtual const ClassInfo* getCurrentOrNull() const { return this; }
-  virtual CStrRef getName() const { return m_name;}
+  virtual const String& getName() const { return m_name;}
   const char *getDocComment() const { return m_docComment; }
 
   virtual void postInit();
@@ -337,7 +338,7 @@ public:
   /**
    * Parents of this class.
    */
-  virtual CStrRef getParentClass() const = 0;
+  virtual const String& getParentClass() const = 0;
   const ClassInfo *getParentClassInfo() const;
   virtual const InterfaceSet &getInterfaces() const = 0;
   virtual const InterfaceVec &getInterfacesVec() const = 0;
@@ -350,8 +351,8 @@ public:
    */
   virtual const MethodMap &getMethods() const = 0;    // non-recursively
   virtual const MethodVec &getMethodsVec() const = 0; // non-recursively
-  MethodInfo *getMethodInfo(CStrRef name) const;
-  MethodInfo *hasMethod(CStrRef name,
+  MethodInfo *getMethodInfo(const String& name) const;
+  MethodInfo *hasMethod(const String& name,
                         ClassInfo *&classInfo,
                         bool interfaces = false) const;
 
@@ -405,7 +406,7 @@ public:
   virtual ~ClassInfoUnique();
 
   // implementing ClassInfo
-  CStrRef getParentClass() const { return m_parent;}
+  const String& getParentClass() const { return m_parent;}
   const ClassInfo *getParentClassInfo() const;
   const InterfaceSet &getInterfaces() const { return m_interfaces;}
   const InterfaceVec &getInterfacesVec() const { return m_interfacesVec;}
@@ -450,9 +451,11 @@ public:
   virtual Array getClasses() const = 0;
   virtual Array getInterfaces() const = 0;
   virtual Array getTraits() const = 0;
-  virtual const ClassInfo::MethodInfo *findFunction(CStrRef name) const = 0;
-  virtual const ClassInfo *findClassLike(CStrRef name) const = 0;
-  virtual const ClassInfo::ConstantInfo *findConstant(CStrRef name) const = 0;
+  virtual const ClassInfo::MethodInfo*
+  findFunction(const String& name) const = 0;
+  virtual const ClassInfo *findClassLike(const String& name) const = 0;
+  virtual const ClassInfo::ConstantInfo*
+  findConstant(const String& name) const = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

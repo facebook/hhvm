@@ -26,6 +26,7 @@
 #include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/service-data.h"
 #include "hphp/util/timer.h"
 
 using std::set;
@@ -36,8 +37,8 @@ namespace HPHP {
 
 class PageletTransport : public Transport, public Synchronizable {
 public:
-  PageletTransport(CStrRef url, CArrRef headers, CStrRef postData,
-                   CStrRef remoteHost, const set<string> &rfc1867UploadedFiles,
+  PageletTransport(const String& url, CArrRef headers, const String& postData,
+                   const String& remoteHost, const set<string> &rfc1867UploadedFiles,
                    CArrRef files, int timeoutSeconds)
       : m_refCount(0),
         m_timeoutSeconds(timeoutSeconds),
@@ -130,11 +131,11 @@ public:
     m_done = true;
     notify();
   }
-  virtual bool isUploadedFile(CStrRef filename) {
+  virtual bool isUploadedFile(const String& filename) {
     return m_rfc1867UploadedFiles.find(filename.c_str()) !=
            m_rfc1867UploadedFiles.end();
   }
-  virtual bool moveUploadedFile(CStrRef filename, CStrRef destination) {
+  virtual bool moveUploadedFile(const String& filename, const String& destination) {
     if (!isUploadedFile(filename.c_str())) {
       Logger::Error("%s is not an uploaded file.", filename.c_str());
       return false;
@@ -276,8 +277,8 @@ class PageletTask : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(PageletTask)
 
-  PageletTask(CStrRef url, CArrRef headers, CStrRef post_data,
-              CStrRef remote_host,
+  PageletTask(const String& url, CArrRef headers, const String& post_data,
+              const String& remote_host,
               const std::set<std::string> &rfc1867UploadedFiles,
               CArrRef files, int timeoutSeconds) {
     m_job = new PageletTransport(url, headers, remote_host, post_data,
@@ -293,7 +294,7 @@ public:
 
   CLASSNAME_IS("PageletTask");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
 private:
   PageletTransport *m_job;
@@ -336,11 +337,14 @@ void PageletServer::Stop() {
   }
 }
 
-Resource PageletServer::TaskStart(CStrRef url, CArrRef headers,
-                                  CStrRef remote_host,
-                                  CStrRef post_data /* = null_string */,
+Resource PageletServer::TaskStart(const String& url, CArrRef headers,
+                                  const String& remote_host,
+                                  const String& post_data /* = null_string */,
                                   CArrRef files /* = null_array */,
                                   int timeoutSeconds /* = -1 */) {
+  static auto pageletOverflowCounter =
+    ServiceData::createTimeseries("pagelet_overflow",
+                                  { ServiceData::StatsType::COUNT });
   {
     Lock l(s_dispatchMutex);
     if (!s_dispatcher) {
@@ -349,6 +353,7 @@ Resource PageletServer::TaskStart(CStrRef url, CArrRef headers,
     if (RuntimeOption::PageletServerQueueLimit > 0 &&
         s_dispatcher->getQueuedJobs() >
         RuntimeOption::PageletServerQueueLimit) {
+      pageletOverflowCounter->addValue(1);
       return null_resource;
     }
   }

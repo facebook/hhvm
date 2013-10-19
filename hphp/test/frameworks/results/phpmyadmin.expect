@@ -1,0 +1,9 @@
+No headers testing.
+Please install runkit and enable runkit.internal_override!
+PHPUnit 3.7.27 by Sebastian Bergmann.
+
+The Xdebug extension is not loaded. No code coverage will be generated.
+
+
+HipHop Notice: Use of undefined constant DRIZZLE_CON_NONE - assumed 'DRIZZLE_CON_NONE'
+HipHop Fatal error: Undefined function: mysqli_report in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpmyadmin/libraries/dbi/DBIMysqli.class.php on line 35

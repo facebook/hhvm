@@ -210,6 +210,19 @@ bad_tests = (
     '/tests/lang/045.php',
     '/Zend/tests/lsb_021.php',
     '/Zend/tests/lsb_022.php',
+
+
+    # flaky for various reasons
+    '/ext/standard/tests/network/gethostbyname_error004.php',
+    '/ext/standard/tests/network/getmxrr.php',
+    '/ext/sockets/tests/socket_getpeername_ipv6loop.php',
+
+    # broken: t2991109
+    '/ext/zlib/tests/gzfile_variation5.php',
+    '/ext/zlib/tests/readgzfile_variation5.php',
+
+    # broken: t3036086
+    '/Zend/tests/bug55007.php',
 )
 
 # Tests that work but not in repo mode
@@ -274,6 +287,11 @@ norepo_tests = (
     '/ext/standard/tests/class_object/get_declared_traits_variation1.php',
     '/ext/standard/tests/class_object/interface_exists_variation3.php',
     '/ext/standard/tests/class_object/interface_exists_variation4.php',
+    '/ext/standard/tests/file/file_get_contents_basic.php',
+    '/ext/standard/tests/file/file_get_contents_file_put_contents_basic.php',
+    '/ext/standard/tests/file/file_get_contents_file_put_contents_variation1.php',
+    '/ext/standard/tests/file/file_get_contents_file_put_contents_variation2.php',
+    '/ext/standard/tests/file/file_get_contents_variation1.php',
     '/ext/standard/tests/general_functions/is_numeric.php',
     '/ext/standard/tests/math/abs.php',
     '/ext/standard/tests/math/pow.php',
@@ -335,8 +353,8 @@ other_files = (
     '/Zend/tests/ns_069.inc',
     '/Zend/tests/unset.inc',
     '/ext/calendar/tests/skipif.inc',
-    '/ext/ctests/url/curl_testdata1.txt',
-    '/ext/ctests/url/curl_testdata2.txt',
+    '/ext/curl/tests/curl_testdata1.txt',
+    '/ext/curl/tests/curl_testdata2.txt',
     '/ext/date/tests/DateTime_data-absolute.inc',
     '/ext/date/tests/DateTime_data-dates.inc',
     '/ext/date/tests/DateTime_data-fall-type2-type2.inc',
@@ -423,6 +441,7 @@ other_files = (
     '/ext/standard/tests/class_object/AutoLoaded.inc',
     '/ext/standard/tests/class_object/AutoTrait.inc',
     '/ext/standard/tests/file/bug40501.csv',
+    '/ext/standard/tests/file/file.inc',
     '/ext/standard/tests/file/fopen_include_path.inc',
     '/ext/standard/tests/file/test.csv',
     '/ext/standard/tests/file/test2.csv',
@@ -466,7 +485,8 @@ parser.add_argument(
     "-z",
     "--zend_path",
     type=str,
-    help="zend path to import tests from."
+    required=True,
+    help="zend path to import tests from. git clone https://github.com/php/php-src"
 )
 parser.add_argument(
     "-o",
@@ -763,47 +783,39 @@ def walk(filename, source_dir):
     if '/ext/ftp/tests/ftp_' in full_dest_filename:
         test = test.replace('localfile.txt',
             os.path.basename(full_dest_filename).replace('.php', '.txt'))
+    if '/Zend/tests/bug36759.php' in full_dest_filename:
+        pseudomain = '$y = new Bar();\n$x = new Foo($y);\n'
+        test = test.replace(pseudomain,
+                            'function main() {\n' + pseudomain + '}\nmain();\n')
+    if '/Zend/tests/bug55007.php' in full_dest_filename:
+        test = test.replace('$a[]', '$a[];')
 
     file(full_dest_filename, 'w').write(test)
 
-if args.zend_path:
-    def should_import(filename):
-        for bad in no_import:
-            if bad in filename:
-                return False
-        return True
+def should_import(filename):
+    for bad in no_import:
+        if bad in filename:
+            return False
+    return True
 
-    for root, dirs, files in os.walk(args.zend_path):
-        for filename in files:
-            full_file = os.path.join(root, filename)
+for root, dirs, files in os.walk(args.zend_path):
+    for filename in files:
+        full_file = os.path.join(root, filename)
 
-            def matches(patterns):
-                if not patterns:
+        def matches(patterns):
+            if not patterns:
+                return True
+            for pattern in patterns:
+                if pattern in full_file:
                     return True
-                for pattern in patterns:
-                    if pattern in full_file:
-                        return True
-                return False
+            return False
 
-            if matches(args.only) and should_import(full_file):
-                walk(full_file, root.replace(args.zend_path, ''))
+        if matches(args.only) and should_import(full_file):
+            walk(full_file, root.replace(args.zend_path, ''))
 
 if not os.path.isdir('test/zend/all'):
-    if args.zend_path:
-        print "No test/zend/all. Maybe no tests were imported?"
-        sys.exit(0)
-    else:
-        print "Running all tests from test/zend/bad"
-        shutil.copytree('test/zend/bad', 'test/zend/all')
-
-        for filename in other_files:
-            dest_dir = os.path.dirname('test/zend/all/' + filename)
-            if not os.path.exists(dest_dir):
-                os.makedirs(dest_dir)
-            shutil.copyfile(
-                'test/zend/good/' + filename,
-                'test/zend/all/' + filename
-            )
+    print "No test/zend/all. Maybe no tests were imported?"
+    sys.exit(0)
 else:
     print "Running all tests from zend/all"
 

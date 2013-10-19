@@ -27,28 +27,28 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // DNS
 Variant f_gethostname();
-Variant f_gethostbyaddr(CStrRef ip_address);
-String f_gethostbyname(CStrRef hostname);
-Variant f_gethostbynamel(CStrRef hostname);
-Variant f_getprotobyname(CStrRef name);
+Variant f_gethostbyaddr(const String& ip_address);
+String f_gethostbyname(const String& hostname);
+Variant f_gethostbynamel(const String& hostname);
+Variant f_getprotobyname(const String& name);
 Variant f_getprotobynumber(int number);
-Variant f_getservbyname(CStrRef service, CStrRef protocol);
-Variant f_getservbyport(int port, CStrRef protocol);
-Variant f_inet_ntop(CStrRef in_addr);
-Variant f_inet_pton(CStrRef address);
-Variant f_ip2long(CStrRef ip_address);
+Variant f_getservbyname(const String& service, const String& protocol);
+Variant f_getservbyport(int port, const String& protocol);
+Variant f_inet_ntop(const String& in_addr);
+Variant f_inet_pton(const String& address);
+Variant f_ip2long(const String& ip_address);
 String f_long2ip(int proper_address);
 
-bool f_dns_check_record(CStrRef host, CStrRef type = null_string);
+bool f_dns_check_record(const String& host, const String& type = null_string);
 
-bool f_checkdnsrr(CStrRef host, CStrRef type = null_string);
+bool f_checkdnsrr(const String& host, const String& type = null_string);
 
-Variant f_dns_get_record(CStrRef hostname, int type = -1, VRefParam authns = uninit_null(),
+Variant f_dns_get_record(const String& hostname, int type = -1, VRefParam authns = uninit_null(),
                          VRefParam addtl = uninit_null());
 
-bool f_dns_get_mx(CStrRef hostname, VRefParam mxhosts, VRefParam weights = uninit_null());
+bool f_dns_get_mx(const String& hostname, VRefParam mxhosts, VRefParam weights = uninit_null());
 
-bool f_getmxrr(CStrRef hostname, VRefParam mxhosts,
+bool f_getmxrr(const String& hostname, VRefParam mxhosts,
                VRefParam weight = uninit_null());
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,11 +57,11 @@ bool f_getmxrr(CStrRef hostname, VRefParam mxhosts,
 Variant sockopen_impl(const Util::HostURL &hosturl,
                       VRefParam errnum, VRefParam errstr,
                       double timeout = -1.0, bool persistent = false);
-Variant f_fsockopen(CStrRef hostname, int port = -1,
+Variant f_fsockopen(const String& hostname, int port = -1,
                     VRefParam errnum = uninit_null(),
                     VRefParam errstr = uninit_null(), double timeout = -1.0);
 
-Variant f_pfsockopen(CStrRef hostname, int port = -1,
+Variant f_pfsockopen(const String& hostname, int port = -1,
                      VRefParam errnum = uninit_null(),
                      VRefParam errstr = uninit_null(), double timeout = -1.0);
 
@@ -75,7 +75,7 @@ bool f_socket_set_timeout(CResRef stream, int seconds,
 ///////////////////////////////////////////////////////////////////////////////
 // http
 
-void f_header(CStrRef str, bool replace = true, int http_response_code = 0);
+void f_header(const String& str, bool replace = true, int http_response_code = 0);
 
 Variant f_http_response_code(int response_code = 0);
 
@@ -85,16 +85,16 @@ bool f_headers_sent(VRefParam file = uninit_null(), VRefParam line = uninit_null
 
 bool f_header_register_callback(CVarRef callback);
 
-void f_header_remove(CStrRef name = null_string);
+void f_header_remove(const String& name = null_string);
 
 int f_get_http_request_size();
 
-bool f_setcookie(CStrRef name, CStrRef value = null_string, int64_t expire = 0,
-                 CStrRef path = null_string, CStrRef domain = null_string,
+bool f_setcookie(const String& name, const String& value = null_string, int64_t expire = 0,
+                 const String& path = null_string, const String& domain = null_string,
                  bool secure = false, bool httponly = false);
 
-bool f_setrawcookie(CStrRef name, CStrRef value = null_string, int64_t expire = 0,
-                    CStrRef path = null_string, CStrRef domain = null_string,
+bool f_setrawcookie(const String& name, const String& value = null_string, int64_t expire = 0,
+                    const String& path = null_string, const String& domain = null_string,
                     bool secure = false, bool httponly = false);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -102,11 +102,11 @@ bool f_setrawcookie(CStrRef name, CStrRef value = null_string, int64_t expire = 
 
 void f_define_syslog_variables();
 
-bool f_openlog(CStrRef ident, int option, int facility);
+bool f_openlog(const String& ident, int option, int facility);
 
 bool f_closelog();
 
-bool f_syslog(int priority, CStrRef message);
+bool f_syslog(int priority, const String& message);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

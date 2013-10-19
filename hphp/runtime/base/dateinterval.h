@@ -68,10 +68,10 @@ public:
     static const StaticString result("DateInterval");
     return result;
   }
-  CStrRef o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const { return classnameof(); }
 
   DateInterval();
-  explicit DateInterval(CStrRef date_interval, bool date_string = false);
+  explicit DateInterval(const String& date_interval, bool date_string = false);
   explicit DateInterval(timelib_rel_time *di);
 
   int64_t getYears()      const    { return m_di->y;                      }
@@ -97,9 +97,9 @@ public:
     if (isValid()) TIMELIB_REL_DAYS_SET(m_di, value);
   }
 
-  bool setDateString(CStrRef date_string);
-  bool setInterval(CStrRef date_interval);
-  String format(CStrRef format_spec);
+  bool setDateString(const String& date_string);
+  bool setInterval(const String& date_interval);
+  String format(const String& format_spec);
 
   bool isValid() const { return get(); }
   SmartResource<DateInterval> cloneDateInterval() const;

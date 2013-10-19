@@ -15,7 +15,7 @@ broke();
 
 class c {
   function genclo() {
-    return function() use($this) {
+    return function() {
       yield $this;
     };
   }

@@ -18,6 +18,7 @@
 #include "hphp/util/disasm.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/abi-cxx.h"
+#include "hphp/vixl/a64/disasm-a64.h"
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/ir.h"
@@ -84,8 +85,8 @@ static std::string constToString(Type t, const ConstData* c) {
     os << "None:" << c->as<int64_t>();
   } else if (t.isPtr()) {
     os << folly::format("{}({:#x})", t.toString(), c->as<uint64_t>());
-  } else if (t.subtypeOf(Type::CacheHandle)) {
-    os << folly::format("CacheHandle({:#x})", c->as<int64_t>());
+  } else if (t.subtypeOf(Type::RDSHandle)) {
+    os << folly::format("RDS::Handle({:#x})", c->as<int64_t>());
   } else {
     not_reached();
   }
@@ -188,7 +189,7 @@ void printSrcs(std::ostream& os, const IRInstruction* inst,
 
 void printLabel(std::ostream& os, const Block* block) {
   os << color(ANSI_COLOR_MAGENTA);
-  os << "L" << block->id();
+  os << "B" << block->id();
   switch (block->hint()) {
   case Block::Hint::Unlikely:    os << "<Unlikely>"; break;
   case Block::Hint::Likely:      os << "<Likely>"; break;
@@ -280,18 +281,19 @@ void print(const SSATmp* tmp) {
 }
 
 void print(const IRTrace* trace) {
-  print(std::cout, trace);
+  print(std::cout, trace->unit(), trace);
 }
 
 std::string IRTrace::toString() const {
   std::ostringstream out;
-  print(out, this, nullptr);
+  print(out, unit(), this, nullptr);
   return out.str();
 }
 
 // Print unlikely blocks at the end in normal generation.  If we have
 // asmInfo, order the blocks based on how they were layed out.
-static smart::vector<Block*> blocks(const IRTrace* trace,
+static smart::vector<Block*> blocks(const IRUnit& unit,
+                                    const IRTrace* trace,
                                     const AsmInfo* asmInfo) {
   smart::vector<Block*> blocks;
 
@@ -304,18 +306,21 @@ static smart::vector<Block*> blocks(const IRTrace* trace,
         blocks.push_back(block);
       }
     }
-    for (IRTrace* e : trace->exitTraces()) {
-      unlikely.insert(unlikely.end(),
-                      e->blocks().begin(),
-                      e->blocks().end());
+    if (trace->isMain()) {
+      for (auto exit : unit.exits()) {
+        unlikely.insert(unlikely.end(), exit->blocks().begin(),
+                        exit->blocks().end());
+      }
     }
     blocks.insert(blocks.end(), unlikely.begin(), unlikely.end());
     return blocks;
   }
 
   blocks.assign(trace->blocks().begin(), trace->blocks().end());
-  for (IRTrace* e : trace->exitTraces()) {
-    blocks.insert(blocks.end(), e->blocks().begin(), e->blocks().end());
+  if (trace->isMain()) {
+    for (auto exit : unit.exits()) {
+      blocks.insert(blocks.end(), exit->blocks().begin(), exit->blocks().end());
+    }
   }
   std::sort(
     blocks.begin(),
@@ -328,16 +333,33 @@ static smart::vector<Block*> blocks(const IRTrace* trace,
   return blocks;
 }
 
-void print(std::ostream& os, const IRTrace* trace, const RegAllocInfo* regs,
-           const LifetimeInfo* lifetime, const AsmInfo* asmInfo,
-           const GuardConstraints* guards) {
-  static const int kIndent = 4;
-  Disasm disasm(Disasm::Options().indent(kIndent + 4)
-                                 .printEncoding(dumpIREnabled(kExtraLevel))
-                                 .color(color(ANSI_COLOR_BROWN)));
+static constexpr auto kIndent = 4;
 
+static void disasmRange(std::ostream& os, TCA begin, TCA end) {
+  if (arch() == Arch::X64) {
+    Disasm disasm(Disasm::Options().indent(kIndent + 4)
+                  .printEncoding(dumpIREnabled(kExtraLevel))
+                  .color(color(ANSI_COLOR_BROWN)));
+    disasm.disasm(os, begin, end);
+  } else if (arch() == Arch::ARM) {
+    using namespace vixl;
+    Decoder dec;
+    PrintDisassembler disasm(os, kIndent + 4, dumpIREnabled(kExtraLevel),
+                             color(ANSI_COLOR_BROWN));
+    dec.AppendVisitor(&disasm);
+    assert(begin <= end);
+    for (; begin < end; begin += kInstructionSize) {
+      dec.Decode(Instruction::Cast(begin));
+    }
+  }
+
+}
+
+void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
+           const RegAllocInfo* regs, const LifetimeInfo* lifetime,
+           const AsmInfo* asmInfo, const GuardConstraints* guards) {
   BCMarker curMarker;
-  for (Block* block : blocks(trace, asmInfo)) {
+  for (Block* block : blocks(unit, trace, asmInfo)) {
     if (!block->isMain()) {
       os << "\n" << color(ANSI_COLOR_GREEN)
          << "    -------  Exit Trace  -------"
@@ -422,7 +444,7 @@ void print(std::ostream& os, const IRTrace* trace, const RegAllocInfo* regs,
       if (asmInfo) {
         TcaRange instRange = asmInfo->instRanges[inst];
         if (!instRange.empty()) {
-          disasm.disasm(os, instRange.begin(), instRange.end());
+          disasmRange(os, instRange.begin(), instRange.end());
           os << '\n';
           assert(instRange.end() >= blockRange.start() &&
                  instRange.end() <= blockRange.end());
@@ -437,12 +459,12 @@ void print(std::ostream& os, const IRTrace* trace, const RegAllocInfo* regs,
       // jmp to next block), and AStubs code.
       if (!blockRange.empty()) {
         os << std::string(kIndent, ' ') << punc("A:") << "\n";
-        disasm.disasm(os, blockRange.start(), blockRange.end());
+        disasmRange(os, blockRange.start(), blockRange.end());
       }
       auto astubRange = asmInfo->astubRanges[block];
       if (!astubRange.empty()) {
         os << std::string(kIndent, ' ') << punc("AStubs:") << "\n";
-        disasm.disasm(os, astubRange.start(), astubRange.end());
+        disasmRange(os, astubRange.start(), astubRange.end());
       }
       if (!blockRange.empty() || !astubRange.empty()) {
         os << '\n';
@@ -460,18 +482,9 @@ void print(std::ostream& os, const IRTrace* trace, const RegAllocInfo* regs,
   }
 }
 
-void dumpTraceImpl(const IRTrace* trace,
-                   std::ostream& out,
-                   const RegAllocInfo* regs,
-                   const LifetimeInfo* lifetime,
-                   const AsmInfo* asmInfo,
-                   const GuardConstraints* guards) {
-  print(out, trace, regs, lifetime, asmInfo, guards);
-}
-
 // Suggested captions: "before jiffy removal", "after goat saturation",
 // etc.
-void dumpTrace(int level, const IRTrace* trace, const char* caption,
+void dumpTrace(int level, const IRUnit& unit, const char* caption,
                const RegAllocInfo* regs, const LifetimeInfo* lifetime,
                AsmInfo* ai, const GuardConstraints* guards) {
   if (dumpIREnabled(level)) {
@@ -481,7 +494,7 @@ void dumpTrace(int level, const IRTrace* trace, const char* caption,
         << folly::format(bannerFmt, caption)
         << color(ANSI_COLOR_END)
         ;
-    dumpTraceImpl(trace, str, regs, lifetime, ai, guards);
+    print(str, unit, unit.main(), regs, lifetime, ai, guards);
     str << color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN)
         << folly::format(bannerFmt, "")
         << color(ANSI_COLOR_END)

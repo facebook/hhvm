@@ -29,19 +29,19 @@ class Directory;
 
 class FileStreamWrapper : public Stream::Wrapper {
  public:
-  static MemFile* openFromCache(CStrRef filename, CStrRef mode);
-  virtual File* open(CStrRef filename, CStrRef mode,
+  static MemFile* openFromCache(const String& filename, const String& mode);
+  virtual File* open(const String& filename, const String& mode,
                      int options, CVarRef context);
-  virtual int access(CStrRef path, int mode) {
+  virtual int access(const String& path, int mode) {
     return ::access(File::TranslatePath(path).data(), mode);
   }
-  virtual int stat(CStrRef path, struct stat* buf) {
+  virtual int stat(const String& path, struct stat* buf) {
     return ::stat(File::TranslatePath(path).data(), buf);
   }
-  virtual int lstat(CStrRef path, struct stat* buf) {
+  virtual int lstat(const String& path, struct stat* buf) {
     return ::lstat(File::TranslatePath(path).data(), buf);
   }
-  virtual Directory* opendir(CStrRef path);
+  virtual Directory* opendir(const String& path);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

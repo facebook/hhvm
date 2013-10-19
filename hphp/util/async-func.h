@@ -160,7 +160,6 @@ public:
   }
 
   void setNoInit() { m_noInit = true; }
-
 private:
   Synchronizable m_stopMonitor;
 
@@ -174,6 +173,7 @@ private:
   pthread_attr_t m_attr;
   pthread_t m_threadId;
   Exception* m_exception; // exception was thrown and thread was terminated
+  int m_node;
   bool m_stopped;
   bool m_noInit;
 

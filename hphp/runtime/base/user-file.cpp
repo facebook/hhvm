@@ -88,7 +88,7 @@ const Func* UserFile::lookupMethod(const StringData* name) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant UserFile::invoke(const Func *func, CStrRef name,
+Variant UserFile::invoke(const Func *func, const String& name,
                          CArrRef args, bool &success) {
   Transl::VMRegAnchor _;
 
@@ -154,7 +154,7 @@ Variant UserFile::invoke(const Func *func, CStrRef name,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool UserFile::open(CStrRef filename, CStrRef mode) {
+bool UserFile::open(const String& filename, const String& mode) {
   // bool stream_open($path, $mode, $options, &$opened_path)
   bool success = false;
   Variant opened_path;

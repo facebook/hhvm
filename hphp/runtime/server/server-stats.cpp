@@ -909,8 +909,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
                   toString(DateTime::DateFormatCookie).data());
     w->writeEntry("duration", format_duration(duration));
     if (ts.m_requestCount > 0) {
-      MemoryUsageStats stats;
-      ts.m_mm->getStatsSafe(stats);
+      auto const stats = ts.m_mm->getStatsCopy();
       w->beginObject("memory");
       w->writeEntry("current usage", stats.usage);
       w->writeEntry("current alloc", stats.alloc);
@@ -1262,8 +1261,7 @@ ServerStatsHelper::~ServerStatsHelper() {
 #endif
 
     if (m_track & TRACK_MEMORY) {
-      MemoryManager *mm = MemoryManager::TheMemoryManager();
-      int64_t mem = mm->getStats(true).peakUsage;
+      int64_t mem = MM().getStats().peakUsage;
       ServerStats::Log(string("mem.") + m_section, mem);
     }
 

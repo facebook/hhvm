@@ -11,6 +11,8 @@
  *   r9  / x5:  uint8_t* targetCacheBase
  */
 
+#include "hphp/runtime/vm/jit/reserved-stack.h"
+
 #ifndef __APPLE__
 #define CFI(x)         .cfi_##x
 #define CFI2(x, y)     .cfi_##x y
@@ -63,8 +65,8 @@ ETCH_NAME(enterTCHelper:)
    * 16-byte aligned.
    */
 
-  sub $0x280, %rsp // kReservedRSPScratchSpace
-  CFI2(adjust_cfa_offset, 0x280)
+  sub $RESERVED_STACK_TOTAL_SPACE, %rsp
+  CFI2(adjust_cfa_offset, RESERVED_STACK_TOTAL_SPACE)
 
   /*
    * If returning from a BIND_CALL request, push the return IP saved
@@ -81,8 +83,8 @@ ETCH_LABEL(enterTCHelper$jumpToTC:)
   call *%rdx
 ETCH_LABEL(enterTCHelper$serviceReqLabel:)
 
-  add $0x280, %rsp // kReservedRSPScratchSpace
-  CFI2(adjust_cfa_offset, -0x280)
+  add $RESERVED_STACK_TOTAL_SPACE, %rsp
+  CFI2(adjust_cfa_offset, -RESERVED_STACK_TOTAL_SPACE)
   // Restore infoPtr into %rbx
   pop %rbx
   CFI2(adjust_cfa_offset, -8)

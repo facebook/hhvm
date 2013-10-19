@@ -65,12 +65,12 @@ void ResourceData::dump() const {
 
 const StaticString s_Unknown("Unknown");
 
-CStrRef ResourceData::o_getClassName() const {
+const String& ResourceData::o_getClassName() const {
   if (isInvalid()) return s_Unknown;
   return o_getClassNameHook();
 }
 
-CStrRef ResourceData::o_getClassNameHook() const {
+const String& ResourceData::o_getClassNameHook() const {
   throw FatalErrorException("Resource did not provide a name");
 }
 
@@ -83,7 +83,7 @@ void ResourceData::serializeImpl(VariableSerializer *serializer) const {
   serializer->setResourceInfo(saveName, saveId);
 }
 
-CStrRef ResourceData::o_getResourceName() const {
+const String& ResourceData::o_getResourceName() const {
   return o_getClassName();
 }
 

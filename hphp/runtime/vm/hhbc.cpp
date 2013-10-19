@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/stats.h"
 #include <sstream>
 
@@ -361,12 +362,13 @@ int instrNumPops(const Op* opcode) {
 #define TWO(...) 2
 #define THREE(...) 3
 #define FOUR(...) 4
-#define LMANY(...) -1
-#define C_LMANY(...) -2
-#define V_LMANY(...) -2
-#define R_LMANY(...) -2
+#define MMANY -1
+#define C_MMANY -2
+#define V_MMANY -2
+#define R_MMANY -2
 #define FMANY -3
 #define CVMANY -3
+#define CVUMANY -3
 #define CMANY -3
 #define O(name, imm, pop, push, flags) pop,
     OPCODES
@@ -375,12 +377,13 @@ int instrNumPops(const Op* opcode) {
 #undef TWO
 #undef THREE
 #undef FOUR
-#undef LMANY
-#undef C_LMANY
-#undef V_LMANY
-#undef R_LMANY
+#undef MMANY
+#undef C_MMANY
+#undef V_MMANY
+#undef R_MMANY
 #undef FMANY
 #undef CVMANY
+#undef CVUMANY
 #undef CMANY
 #undef O
   };
@@ -430,6 +433,102 @@ int instrNumPushes(const Op* opcode) {
 #undef O
   };
   return numberOfPushes[uint8_t(*opcode)];
+}
+
+namespace {
+FlavorDesc doFlavor(uint32_t i) {
+  always_assert(0 && "Invalid stack index");
+}
+template<typename... Args>
+FlavorDesc doFlavor(uint32_t i, FlavorDesc f, Args&&... args) {
+  return i == 0 ? f : doFlavor(i - 1, std::forward<Args>(args)...);
+}
+
+FlavorDesc minstrFlavor(const Op* op, uint32_t i, FlavorDesc top) {
+  if (top != NOV) {
+    if (i == 0) return top;
+    --i;
+  }
+  auto const location = getMLocation(op);
+  switch (location.lcode) {
+    // No stack input for the location
+    case LL: case LH: case LGL: case LNL: break;
+
+    // CV on top
+    case LC: case LGC: case LNC:
+      if (i == 0) return CV;
+      --i;
+      break;
+
+    // AV on top
+    case LSL:
+      if (i == 0) return AV;
+      --i;
+      break;
+
+    // RV on top
+    case LR:
+      if (i == 0) return RV;
+      --i;
+      break;
+
+    // AV on top, CV below
+    case LSC:
+      if (i == 0) return AV;
+      if (i == 1) return CV;
+      i -= 2;
+      break;
+
+    case NumLocationCodes: not_reached();
+  }
+
+  if (i < getImmVector(op).numStackValues()) return CV;
+  always_assert(0 && "Invalid stack index");
+}
+
+FlavorDesc manyFlavor(const Op* op, uint32_t i, FlavorDesc flavor) {
+  if (i < getImm(op, 0).u_IVA) return flavor;
+  always_assert(0 && "Invalid stack index");
+}
+}
+
+/**
+ * Returns the expected input flavor of stack slot idx.
+ */
+FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
+  auto constexpr nov = NOV;
+#define NOV always_assert(0 && "Opcode has no stack inputs");
+#define ONE(f1) return doFlavor(idx, f1);
+#define TWO(f1, f2) return doFlavor(idx, f1, f2);
+#define THREE(f1, f2, f3) return doFlavor(idx, f1, f2, f3);
+#define FOUR(f1, f2, f3, f4) return doFlavor(idx, f1, f2, f3, f4);
+#define MMANY return minstrFlavor(op, idx, nov);
+#define C_MMANY return minstrFlavor(op, idx, CV);
+#define V_MMANY return minstrFlavor(op, idx, VV);
+#define R_MMANY return minstrFlavor(op, idx, RV);
+#define FMANY return manyFlavor(op, idx, FV);
+#define CVMANY return manyFlavor(op, idx, CVV);
+#define CVUMANY return manyFlavor(op, idx, CVUV);
+#define CMANY return manyFlavor(op, idx, CV);
+#define O(name, imm, pop, push, flags) case Op::name: pop
+  switch (*op) {
+    OPCODES
+  }
+  not_reached();
+#undef NOV
+#undef ONE
+#undef TWO
+#undef THREE
+#undef FOUR
+#undef MMANY
+#undef C_MMANY
+#undef V_MMANY
+#undef R_MMANY
+#undef FMANY
+#undef CVMANY
+#undef CVUMANY
+#undef CMANY
+#undef O
 }
 
 StackTransInfo instrStackTransInfo(const Op* opcode) {
@@ -485,7 +584,7 @@ StackTransInfo instrStackTransInfo(const Op* opcode) {
     ret.pos = peekPokeType[uint8_t(*opcode)];
     return ret;
   default:
-    NOT_REACHED();
+    not_reached();
   }
 }
 
@@ -690,6 +789,16 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   static const int setopNamesCount =
     (int)(sizeof(setopNames)/sizeof(const char*));
 
+  auto assertTName = [&] (int immVal) {
+#   define ASSERTT_OP(x) case AssertTOp::x: return #x;
+    switch (static_cast<AssertTOp>(immVal)) {
+      ASSERTT_OPS
+    }
+#   undef ASSERTT_OP
+    assert(false);
+    return "<" "?" ">";
+  };
+
   std::stringstream out;
   const Op* iStart = it;
   Op op = *it;
@@ -734,6 +843,9 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   case OpSetOpM:                                                  \
     out << ((immVal >=0 && immVal < setopNamesCount) ?            \
             setopNames[immVal] : "?");                            \
+    break;                                                        \
+  case Op::AssertTL: case Op::AssertTStk:                         \
+    out << assertTName(immVal);                                   \
     break;                                                        \
   default:                                                        \
     out << immVal;                                                \
@@ -960,6 +1072,14 @@ MInstrLocation getMLocation(const Op* opcode) {
   auto const imm = numLocationCodeImms(lcode) ? decodeVariableSizeImm(&vec)
                                               : 0;
   return {lcode, imm};
+}
+
+bool hasMVector(Op op) {
+  auto const num = numImmediates(op);
+  for (int i = 0; i < num; ++i) {
+    if (immType(op, i) == MA) return true;
+  }
+  return false;
 }
 
 std::vector<MVectorItem> getMVector(const Op* opcode) {

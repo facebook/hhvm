@@ -28,6 +28,7 @@
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/reserved-stack.h"
 
 namespace HPHP { namespace Transl {
 
@@ -52,8 +53,8 @@ constexpr PhysReg rVmFp      = reg::rbp;
 constexpr PhysReg rVmSp      = reg::rbx;
 
 /*
- * Target cache pointer.  Always points to the base of the target
- * cache block for the current request.
+ * RDS base pointer.  Always points to the base of the RDS block for
+ * the current request.
  */
 constexpr PhysReg rVmTl      = reg::r12;
 
@@ -212,14 +213,9 @@ const RegSet kAllX64Regs = RegSet(kAllRegs).add(reg::r10)
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * This much space (in bytes) at 8(%rsp) is allocated on entry to the
- * TC and made available for scratch purposes (right above the return
- * address).  It is used as spill locations by HHIR (see LinearScan),
- * and for MInstrState in both HHIR and translator-x64-vector.cpp.
- */
-const size_t kReservedRSPScratchSpace = 0x280;
-const size_t kReservedRSPSpillSpace   = 0x200;
+const size_t kReservedRSPMInstrStateSpace = RESERVED_STACK_MINSTR_STATE_SPACE;
+const size_t kReservedRSPSpillSpace       = RESERVED_STACK_SPILL_SPACE;
+const size_t kReservedRSPTotalSpace       = RESERVED_STACK_TOTAL_SPACE;
 
 //////////////////////////////////////////////////////////////////////
 

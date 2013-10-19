@@ -92,8 +92,8 @@ ObjectData* SystemLib::AllocInvalidOperationExceptionObject(CVarRef message) {
   CREATE_AND_CONSTRUCT(InvalidOperationException, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocDOMDocumentObject(CStrRef version,
-                                              CStrRef encoding) {
+ObjectData* SystemLib::AllocDOMDocumentObject(const String& version,
+                                              const String& encoding) {
   CREATE_AND_CONSTRUCT(DOMDocument, make_packed_array(version, encoding));
 }
 

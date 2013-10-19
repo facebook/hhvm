@@ -13,10 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/base/builtin-functions.h"
+
+#include "hphp/vixl/a64/simulator-a64.h"
 
 namespace HPHP {
 namespace Transl {
@@ -37,9 +40,30 @@ register Cell* sp asm("rbx");
 Cell* sp;
 #endif
 
+namespace {
+
+inline Cell* hardwareStackPtr() {
+  if (RuntimeOption::EvalSimulateARM) {
+    return reinterpret_cast<Cell*>(
+      g_vmContext->m_activeSims.back()->xreg(JIT::ARM::rVmSp.code())
+    );
+  }
+  return sp;
+}
+
+inline void setHardwareStackPtr(Cell* newSp) {
+  if (RuntimeOption::EvalSimulateARM) {
+    g_vmContext->m_activeSims.back()->set_xreg(JIT::ARM::rVmSp.code(), newSp);
+    return;
+  }
+  sp = newSp;
+}
+
+}
+
 static void setupAfterPrologue(ActRec* fp) {
   g_vmContext->m_fp = fp;
-  g_vmContext->m_stack.top() = sp;
+  g_vmContext->m_stack.top() = hardwareStackPtr();
   int nargs = fp->numArgs();
   int nparams = fp->m_func->numParams();
   Offset firstDVInitializer = InvalidAbsoluteOffset;
@@ -63,7 +87,7 @@ static void setupAfterPrologue(ActRec* fp) {
 TCA fcallHelper(ActRec* ar) {
   try {
     TCA tca =
-      Translator::Get()->funcPrologue((Func*)ar->m_func, ar->numArgs(), ar);
+      tx64->getFuncPrologue((Func*)ar->m_func, ar->numArgs(), ar);
     if (tca) {
       return tca;
     }
@@ -88,7 +112,7 @@ TCA fcallHelper(ActRec* ar) {
       DECLARE_FRAME_POINTER(framePtr);
       framePtr->m_savedRip = rip;
       framePtr->m_savedRbp = (uint64_t)g_vmContext->m_fp;
-      sp = g_vmContext->m_stack.top();
+      setHardwareStackPtr(g_vmContext->m_stack.top());
       return nullptr;
     }
     setupAfterPrologue(ar);
@@ -144,7 +168,7 @@ void functionEnterHelper(const ActRec* ar) {
   */
   framePtr->m_savedRip = savedRip;
   framePtr->m_savedRbp = savedRbp;
-  sp = g_vmContext->m_stack.top();
+  setHardwareStackPtr(g_vmContext->m_stack.top());
 }
 
 HOT_FUNC_VM

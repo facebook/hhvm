@@ -113,7 +113,7 @@ int64_t f_pcntl_alarm(int seconds) {
   return alarm(seconds);
 }
 
-void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
+void f_pcntl_exec(const String& path, CArrRef args /* = null_array */,
                   CArrRef envs /* = null_array */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(path.data())) {
     return;
@@ -430,7 +430,7 @@ private:
   FILE *m_proc;
 };
 
-String f_shell_exec(CStrRef cmd) {
+String f_shell_exec(const String& cmd) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(cmd.c_str());
   if (!fp) return "";
@@ -439,7 +439,7 @@ String f_shell_exec(CStrRef cmd) {
   return sbuf.detach();
 }
 
-String f_exec(CStrRef command, VRefParam output /* = null */,
+String f_exec(const String& command, VRefParam output /* = null */,
               VRefParam return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command.c_str());
@@ -470,7 +470,7 @@ String f_exec(CStrRef command, VRefParam output /* = null */,
   return f_rtrim(lines[count - 1].toString());
 }
 
-void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
+void f_passthru(const String& command, VRefParam return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command.c_str());
   if (!fp) return;
@@ -488,7 +488,7 @@ void f_passthru(CStrRef command, VRefParam return_var /* = null */) {
   return_var = ret;
 }
 
-String f_system(CStrRef command, VRefParam return_var /* = null */) {
+String f_system(const String& command, VRefParam return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command.c_str());
   if (!fp) return "";
@@ -529,9 +529,9 @@ public:
   String command;
   Variant env;
 
-  CLASSNAME_IS("Process");
+  CLASSNAME_IS("process");
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   int close() {
     // Although the PHP doc about proc_close() says that the pipes need to be
@@ -604,7 +604,7 @@ public:
     return true;
   }
 
-  bool readPipe(CStrRef zmode) {
+  bool readPipe(const String& zmode) {
     mode = DESC_PIPE;
     int newpipe[2];
     if (0 != pipe(newpipe)) {
@@ -625,7 +625,7 @@ public:
     return true;
   }
 
-  bool openFile(CStrRef zfile, CStrRef zmode) {
+  bool openFile(const String& zfile, const String& zmode) {
     mode = DESC_FILE;
     /* try a wrapper */
     FILE *file = fopen(zfile.c_str(), zmode.c_str());
@@ -736,7 +736,7 @@ static bool pre_proc_open(CArrRef descriptorspec,
   return false;
 }
 
-static Variant post_proc_open(CStrRef cmd, Variant &pipes,
+static Variant post_proc_open(const String& cmd, Variant &pipes,
                               CVarRef env, vector<DescriptorItem> &items,
                               pid_t child) {
   if (child < 0) {
@@ -753,18 +753,23 @@ static Variant post_proc_open(CStrRef cmd, Variant &pipes,
   proc->command = cmd;
   proc->child = child;
   proc->env = env;
+
+  // need to set pipes to a new empty array, ignoring whatever it was
+  // previously set to
+  pipes = Variant(Array::Create());
+
   for (int i = 0; i < (int)items.size(); i++) {
     Resource f = items[i].dupParent();
     if (!f.isNull()) {
       proc->pipes.append(f);
+      pipes.set(items[i].index, f);
     }
-    pipes.set(items[i].index, f);
   }
   return Resource(proc);
 }
 
-Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, VRefParam pipes,
-                    CStrRef cwd /* = null_string */,
+Variant f_proc_open(const String& cmd, CArrRef descriptorspec, VRefParam pipes,
+                    const String& cwd /* = null_string */,
                     CVarRef env /* = null_variant */,
                     CVarRef other_options /* = null_variant */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
@@ -943,7 +948,7 @@ bool f_proc_nice(int increment) {
 ///////////////////////////////////////////////////////////////////////////////
 // string functions
 
-String f_escapeshellarg(CStrRef arg) {
+String f_escapeshellarg(const String& arg) {
   if (!arg.empty()) {
     char *ret = string_escape_shell_arg(arg.c_str());
     return String(ret, AttachString);
@@ -951,7 +956,7 @@ String f_escapeshellarg(CStrRef arg) {
   return arg;
 }
 
-String f_escapeshellcmd(CStrRef command) {
+String f_escapeshellcmd(const String& command) {
   if (!command.empty()) {
     char *ret = string_escape_shell_cmd(command.c_str());
     return String(ret, AttachString);

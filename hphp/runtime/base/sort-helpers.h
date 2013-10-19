@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/util/safesort.h"
 
@@ -66,6 +67,11 @@ struct IntElmCompare {
                (string_strcmp(sLeft, lenLeft, sRight, lenRight) < 0) :
                (string_strcmp(sLeft, lenLeft, sRight, lenRight) > 0);
     }
+    if (sort_flags == SORT_STRING_CASE) {
+      return ascending ?
+               (bstrcasecmp(sLeft, lenLeft, sRight, lenRight) < 0) :
+               (bstrcasecmp(sLeft, lenLeft, sRight, lenRight) > 0);
+    }
     if (sort_flags == SORT_LOCALE_STRING) {
       return ascending ? (strcoll(sLeft, sRight) < 0) :
                          (strcoll(sLeft, sRight) > 0);
@@ -109,6 +115,11 @@ struct StrElmCompare {
       return ascending ?
                (string_strcmp(sLeft, lenLeft, sRight, lenRight) < 0) :
                (string_strcmp(sLeft, lenLeft, sRight, lenRight) > 0);
+    }
+    if (sort_flags == SORT_STRING_CASE) {
+      return ascending ?
+               (bstrcasecmp(sLeft, lenLeft, sRight, lenRight) < 0) :
+               (bstrcasecmp(sLeft, lenLeft, sRight, lenRight) > 0);
     }
     if (sort_flags == SORT_LOCALE_STRING) {
       return ascending ? (strcoll(sLeft, sRight) < 0) :
@@ -175,6 +186,11 @@ struct ElmCompare {
                      (string_strcmp(sLeft, lenLeft, sRight, lenRight) < 0) :
                      (string_strcmp(sLeft, lenLeft, sRight, lenRight) > 0);
           }
+          if (sort_flags == SORT_STRING_CASE) {
+            return ascending ?
+                     (bstrcasecmp(sLeft, lenLeft, sRight, lenRight) < 0) :
+                     (bstrcasecmp(sLeft, lenLeft, sRight, lenRight) > 0);
+          }
           if (sort_flags == SORT_LOCALE_STRING) {
             return ascending ? (strcoll(sLeft, sRight) < 0) :
                                (strcoll(sLeft, sRight) > 0);
@@ -213,6 +229,11 @@ struct ElmCompare {
       return ascending ?
                (string_strcmp(sLeft, lenLeft, sRight, lenRight) < 0) :
                (string_strcmp(sLeft, lenLeft, sRight, lenRight) > 0);
+    }
+    if (sort_flags == SORT_STRING_CASE) {
+      return ascending ?
+               (bstrcasecmp(sLeft, lenLeft, sRight, lenRight) < 0) :
+               (bstrcasecmp(sLeft, lenLeft, sRight, lenRight) > 0);
     }
     if (sort_flags == SORT_LOCALE_STRING) {
       return ascending ?

@@ -23,7 +23,7 @@
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -38,6 +38,8 @@ extern "C" void __deregister_frame(void*);
 TRACE_SET_MOD(unwind);
 
 namespace HPHP { namespace Transl {
+
+RDS::Link<UnwindRDS> unwindRdsInfo(RDS::kInvalidHandle);
 
 namespace {
 
@@ -86,16 +88,17 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
          "returning _URC_INSTALL_CONTEXT\n",
          catchTrace, rip, ism);
 
-  // In theory the unwind api will let us set registers in the frame before
-  // executing our landing pad. In practice, trying to use their recommended
-  // scratch registers results in a SEGV inside _Unwind_SetGR, so we pass
-  // things to the handler using the target cache. This also simplifies the
-  // handler code because it doesn't have to worry about saving its arguments
-  // somewhere while executing the exit trace.
-  TargetCache::header()->unwinderScratch = (int64_t)exn;
-  TargetCache::header()->doSideExit = ism;
+  // In theory the unwind api will let us set registers in the frame
+  // before executing our landing pad. In practice, trying to use
+  // their recommended scratch registers results in a SEGV inside
+  // _Unwind_SetGR, so we pass things to the handler using the
+  // RDS. This also simplifies the handler code because it doesn't
+  // have to worry about saving its arguments somewhere while
+  // executing the exit trace.
+  unwindRdsInfo->unwinderScratch = (int64_t)exn;
+  unwindRdsInfo->doSideExit = ism;
   if (ism) {
-    TargetCache::header()->unwinderTv = ism->tv();
+    unwindRdsInfo->unwinderTv = ism->tv();
   }
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
   tl_regState = VMRegState::DIRTY;
@@ -183,6 +186,11 @@ void deregister_unwind_region(std::vector<char>* p) {
 
 UnwindInfoHandle
 register_unwind_region(unsigned char* startAddr, size_t size) {
+  // The first time we're called, this will dynamically link the data
+  // we need in the request data segment.  All future JIT translations
+  // of catch traces may use offsets based on this handle.
+  unwindRdsInfo.bind();
+
   std::unique_ptr<std::vector<char>> bufferMem(new std::vector<char>);
   std::vector<char>& buffer = *bufferMem;
 

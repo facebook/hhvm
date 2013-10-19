@@ -22,7 +22,7 @@
             ],
             "return": {
                 "type": "Object",
-                "desc": "A ContinuationWaitHandle that is running in a specified context"
+                "desc": "An AsyncFunctionWaitHandle that is running in a specified context"
             },
             "args": [
                 {
@@ -39,41 +39,9 @@
             ],
             "return": {
                 "type": "Object",
-                "desc": "A ContinuationWaitHandle that is running in the current context"
+                "desc": "An AsyncFunctionWaitHandle that is running in the current context"
             },
             "args": [
-            ]
-        },
-        {
-            "name": "asio_set_on_failed_callback",
-            "desc": "DEPRECATED: use ContinuationWaitHandle::setOnFailCallback()",
-            "flags": [
-            ],
-            "return": {
-                "type": null
-            },
-            "args": [
-                {
-                    "name": "on_failed_cb",
-                    "type": "Variant",
-                    "desc": "A Closure to be called when wait handle fails"
-                }
-            ]
-        },
-        {
-            "name": "asio_set_on_started_callback",
-            "desc": "DEPRECATED: use ContinuationWaitHandle::setOnCreateCallback()",
-            "flags": [
-            ],
-            "return": {
-                "type": null
-            },
-            "args": [
-                {
-                    "name": "on_started_cb",
-                    "type": "Variant",
-                    "desc": "A Closure to be called when wait handle is started"
-                }
             ]
         }
     ],
@@ -376,7 +344,7 @@
                     ],
                     "return": {
                         "type": "Object",
-                        "desc": "A ContinuationWaitHandle that was being executed when this wait handle was constructed"
+                        "desc": "An AsyncFunctionWaitHandle that was being executed when this wait handle was constructed"
                     },
                     "args": [
                     ]
@@ -435,9 +403,9 @@
             ]
         },
         {
-            "name": "ContinuationWaitHandle",
+            "name": "AsyncFunctionWaitHandle",
             "parent": "BlockableWaitHandle",
-            "desc": "A wait handle representing asynchronous execution powered by Continuation",
+            "desc": "A wait handle representing asynchronous execution of async function",
             "flags": [
                 "NoDefaultSweep"
             ],
@@ -455,7 +423,7 @@
                 },
                 {
                     "name": "setOnCreateCallback",
-                    "desc": "Set callback to be called when a continuation wait handle is created",
+                    "desc": "Set callback to be called when an AsyncFunctionWaitHandle is created",
                     "flags": [
                         "IsStatic",
                         "HipHopSpecific"
@@ -467,13 +435,13 @@
                         {
                             "name": "on_create_cb",
                             "type": "Variant",
-                            "desc": "A Closure to be called when continuation is created"
+                            "desc": "A Closure to be called when an AsyncFunctionWaitHandle is created"
                         }
                     ]
                 },
                 {
-                    "name": "setOnYieldCallback",
-                    "desc": "Set callback to be called when a continuation yields",
+                    "name": "setOnAwaitCallback",
+                    "desc": "Set callback to be called when an async function blockingly awaits",
                     "flags": [
                         "IsStatic",
                         "HipHopSpecific"
@@ -483,15 +451,15 @@
                     },
                     "args": [
                         {
-                            "name": "on_yield_cb",
+                            "name": "on_await_cb",
                             "type": "Variant",
-                            "desc": "A Closure to be called when continuations yields"
+                            "desc": "A Closure to be called when an async function blockingly await"
                         }
                     ]
                 },
                 {
                     "name": "setOnSuccessCallback",
-                    "desc": "Set callback to be called when a continuation finishes successfully",
+                    "desc": "Set callback to be called when an async function finishes successfully",
                     "flags": [
                         "IsStatic",
                         "HipHopSpecific"
@@ -503,13 +471,13 @@
                         {
                             "name": "on_success_cb",
                             "type": "Variant",
-                            "desc": "A Closure to be called when continuations finishes"
+                            "desc": "A Closure to be called when an async function finishes"
                         }
                     ]
                 },
                 {
                     "name": "setOnFailCallback",
-                    "desc": "Set callback to be called when a continuation fails",
+                    "desc": "Set callback to be called when an async function fails",
                     "flags": [
                         "IsStatic",
                         "HipHopSpecific"
@@ -521,7 +489,7 @@
                         {
                             "name": "on_fail_cb",
                             "type": "Variant",
-                            "desc": "A Closure to be called when continuations fails"
+                            "desc": "A Closure to be called when an async function fails"
                         }
                     ]
                 },

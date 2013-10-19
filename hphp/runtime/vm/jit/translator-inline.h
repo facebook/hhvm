@@ -45,20 +45,27 @@ inline ActRec*& vmFirstAR() { return g_vmContext->m_firstAR; }
 inline ActRec* liveFrame()    { return (ActRec*)vmfp(); }
 inline const Func* liveFunc() { return liveFrame()->m_func; }
 inline const Unit* liveUnit() { return liveFunc()->unit(); }
-inline Class* liveClass() {
-  const auto* func = liveFunc();
-  auto* cls = func->cls();
-  if (func->isPseudoMain() || func->isTraitMethod() || cls == nullptr) {
-    return nullptr;
-  }
-  return cls;
-}
+inline Class* liveClass() { return liveFunc()->cls(); }
+
 inline Offset liveSpOff() {
   Cell* fp = vmfp();
   if (liveFunc()->isGenerator()) {
     fp = (Cell*)Stack::generatorStackBase((ActRec*)fp);
   }
   return fp - vmsp();
+}
+
+namespace JIT {
+
+enum class Arch {
+  X64,
+  ARM,
+};
+
+inline Arch arch() {
+  return RuntimeOption::EvalSimulateARM ? Arch::ARM : Arch::X64;
+}
+
 }
 
 namespace Transl {
@@ -80,6 +87,11 @@ inline uintptr_t tlsBase() {
 inline ptrdiff_t cellsToBytes(int nCells) {
   return nCells * sizeof(Cell);
 }
+
+inline int64_t localOffset(int64_t locId) {
+  return -cellsToBytes(locId + 1);
+}
+
 
 struct VMRegAnchor : private boost::noncopyable {
   VMRegState m_old;

@@ -77,6 +77,11 @@ void moveToBlock(Block::iterator first,
  */
 void reflowTypes(Block*, const BlockList& blocks);
 
+/*
+ * Recomputes the output type of each of inst's dests.
+ */
+void retypeDests(IRInstruction* inst);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

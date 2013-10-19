@@ -1,0 +1,114 @@
+PHPUnit 3.7.27 by Sebastian Bergmann.
+
+Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/paris/phpunit.xml
+
+
+Starting test 'ModelPrefixingTest::testStaticPropertyExists'.
+.
+Starting test 'ModelPrefixingTest::testSettingAndUnsettingStaticPropertyValue'.
+.
+Starting test 'ModelPrefixingTest::testNoPrefixOnAutoTableName'.
+.
+Starting test 'ModelPrefixingTest::testPrefixOnAutoTableName'.
+.
+Starting test 'ModelPrefixingTest::testPrefixOnAutoTableNameWithTableSpecified'.
+.
+Starting test 'MultipleConnectionsTest::testMultipleConnections'.
+.
+Starting test 'MultipleConnectionsTest::testCustomConnectionName'.
+.
+Starting test 'ParisTest::testSimpleAutoTableName'.
+.
+Starting test 'ParisTest::testComplexModelClassName'.
+.
+Starting test 'ParisTest::testModelWithCustomTable'.
+.
+Starting test 'ParisTest::testCustomIDColumn'.
+.
+Starting test 'ParisTest::testFilterWithNoArguments'.
+.
+Starting test 'ParisTest::testFilterWithArguments'.
+.
+Starting test 'ParisTest::testInsertData'.
+.
+Starting test 'ParisTest::testUpdateData'.
+.
+Starting test 'ParisTest::testDeleteData'.
+.
+Starting test 'ParisTest::testInsertingDataContainingAnExpression'.
+.
+Starting test 'ParisTest::testHasOneRelation'.
+.
+Starting test 'ParisTest::testHasOneWithCustomForeignKeyName'.
+.
+Starting test 'ParisTest::testHasOneWithCustomForeignKeyNameInBaseAndAssociatedTables'.
+.
+Starting test 'ParisTest::testBelongsToRelation'.
+.
+Starting test 'ParisTest::testBelongsToRelationWithCustomForeignKeyName'.
+.
+Starting test 'ParisTest::testBelongsToRelationWithCustomForeignKeyNameInBaseAndAssociatedTables'.
+.
+Starting test 'ParisTest::testHasManyRelation'.
+.
+Starting test 'ParisTest::testHasManyRelationWithCustomForeignKeyName'.
+.
+Starting test 'ParisTest::testHasManyRelationWithCustomForeignKeyNameInBaseAndAssociatedTables'.
+.
+Starting test 'ParisTest::testHasManyThroughRelation'.
+.
+Starting test 'ParisTest::testHasManyThroughRelationWithCustomIntermediateModelAndKeyNames'.
+.
+Starting test 'ParisTest::testHasManyThroughRelationWithCustomIntermediateModelAndKeyNamesAndCustomForeignKeyInBaseAndAssociatedTables'.
+.
+Starting test 'ParisTest::testHasManyThroughRelationWithCustomIntermediateModelAndKeyNamesAndCustomForeignKeyInAssociatedTable'.
+.
+Starting test 'ParisTest::testHasManyThroughRelationWithCustomIntermediateModelAndKeyNamesAndCustomForeignKeyInBaseTable'.
+.
+Starting test 'ParisTest::testFindResultSet'.
+.
+Starting test 'Paris\Tests\ModelPrefixingTest53::testNoPrefixOnAutoTableName'.
+.
+Starting test 'Paris\Tests\ModelPrefixingTest53::testPrefixOnAutoTableName'.
+.
+Starting test 'Paris\Tests\ModelPrefixingTest53::testPrefixOnAutoTableNameWithTableSpecified'.
+.
+Starting test 'Paris\Tests\ModelPrefixingTest53::testNamespacePrefixSwitching'.
+.
+Starting test 'Paris\Tests\ModelPrefixingTest53::testPrefixOnHasManyThroughRelation'.
+.
+Starting test 'Paris\Tests\ModelPrefixingTest53::testPrefixOnHasManyThroughRelationWithCustomIntermediateModelAndKeyNames'.
+.
+Starting test 'Paris\Tests\ParisTest53::testNamespacedTableName'.
+.
+Starting test 'Paris\Tests\ParisTest53::testModelWithCustomTable'.
+.
+Starting test 'Paris\Tests\ParisTest53::testShortcut'.
+.
+Starting test 'Psr1Test53::testInsertData'.
+.
+Starting test 'Psr1Test53::testUpdateData'.
+.
+Starting test 'Psr1Test53::testDeleteData'.
+.
+Starting test 'Psr1Test53::testInsertingDataContainingAnExpression'.
+.
+Starting test 'Psr1Test53::testHasOneRelation'.
+.
+Starting test 'Psr1Test53::testHasOneWithCustomForeignKeyName'.
+.
+Starting test 'Psr1Test53::testBelongsToRelation'.
+.
+Starting test 'Psr1Test53::testBelongsToRelationWithCustomForeignKeyName'.
+.
+Starting test 'Psr1Test53::testHasManyRelation'.
+.
+Starting test 'Psr1Test53::testHasManyRelationWithCustomForeignKeyName'.
+.
+Starting test 'Psr1Test53::testHasManyThroughRelation'.
+.
+Starting test 'Psr1Test53::testHasManyThroughRelationWithCustomIntermediateModelAndKeyNames'.
+.
+
+Time: 9.4 seconds, Memory: 3.95Mb
+OK (53 tests, 61 assertions)

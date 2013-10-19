@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory-manager.h"
 
-#include <boost/static_assert.hpp>
 #include <boost/intrusive_ptr.hpp>
 
 #include <stdint.h>
@@ -144,8 +143,35 @@ enum Type {
   StableMapType = 3,
   SetType = 4,
   PairType = 5,
-  MaxNumTypes = 6
+  FrozenVectorType = 6,
+  MaxNumTypes = 7
 };
+inline Type stringToType(const char* str, size_t len) {
+  switch (len) {
+    case 3:
+      if (!strcasecmp(str, "map")) return MapType;
+      if (!strcasecmp(str, "set")) return SetType;
+      break;
+    case 4:
+      if (!strcasecmp(str, "pair")) return PairType;
+      break;
+    case 6:
+      if (!strcasecmp(str, "vector")) return VectorType;
+      break;
+    case 9:
+      if (!strcasecmp(str, "stablemap")) return StableMapType;
+      break;
+    case 12:
+      if (!strcasecmp(str, "frozenvector")) return FrozenVectorType;
+      break;
+    default:
+      break;
+  }
+  return InvalidType;
+}
+inline Type stringToType(const std::string& s) {
+  return stringToType(s.c_str(), s.size());
+}
 }
 
 /**
@@ -155,7 +181,7 @@ enum Type {
  * cleaner.
  */
 typedef const char * litstr; /* literal string */
-typedef const String & CStrRef;
+//typedef const String & CStrRef;
 typedef const Array & CArrRef;
 typedef const Object & CObjRef;
 typedef const Resource & CResRef;
@@ -466,6 +492,21 @@ typedef hphp_hash_set<Offset> OffsetSet;
  */
 typedef uint32_t Slot;
 const Slot kInvalidSlot = Slot(-1);
+
+/*
+ * Handles into Request Data Segment.  These are offsets from
+ * RDS::tl_base.  See rds.h.
+ */
+namespace RDS {
+  typedef uint32_t Handle;
+  constexpr Handle kInvalidHandle = 0;
+}
+
+/*
+ * Unique identifier for a Func*.
+ */
+typedef uint32_t FuncId;
+constexpr FuncId InvalidFuncId = FuncId(-1LL);
 
 /*
  * Special types that are not relevant to the runtime as a whole.

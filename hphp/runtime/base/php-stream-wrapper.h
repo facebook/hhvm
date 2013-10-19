@@ -26,7 +26,7 @@ namespace HPHP {
 class PhpStreamWrapper : public Stream::Wrapper {
  public:
   File *openFD(const char *sFD);
-  virtual File* open(CStrRef filename, CStrRef mode,
+  virtual File* open(const String& filename, const String& mode,
                      int options, CVarRef context);
 };
 

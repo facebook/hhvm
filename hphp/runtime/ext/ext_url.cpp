@@ -28,7 +28,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_base64_decode(CStrRef data, bool strict /* = false */) {
+Variant f_base64_decode(const String& data, bool strict /* = false */) {
   String decoded = StringUtil::Base64Decode(data, strict);
   if (decoded.isNull()) {
     return false;
@@ -36,7 +36,7 @@ Variant f_base64_decode(CStrRef data, bool strict /* = false */) {
   return decoded;
 }
 
-String f_base64_encode(CStrRef data) {
+String f_base64_encode(const String& data) {
   String encoded = StringUtil::Base64Encode(data);
   if (encoded.isNull()) {
     return false;
@@ -44,7 +44,7 @@ String f_base64_encode(CStrRef data) {
   return encoded;
 }
 
-Variant f_get_headers(CStrRef url, int format /* = 0 */) {
+Variant f_get_headers(const String& url, int format /* = 0 */) {
   Variant c = f_curl_init();
   f_curl_setopt(c.toResource(), k_CURLOPT_URL, url);
   f_curl_setopt(c.toResource(), k_CURLOPT_RETURNTRANSFER, true);
@@ -77,7 +77,7 @@ Variant f_get_headers(CStrRef url, int format /* = 0 */) {
   return assoc;
 }
 
-static String normalize_variable_name(CStrRef name) {
+static String normalize_variable_name(const String& name) {
   StringBuffer sb;
   for (int i = 0; i < name.size(); i++) {
     char ch = name.charAt(i);
@@ -94,7 +94,7 @@ static String normalize_variable_name(CStrRef name) {
   return sb.detach();
 }
 
-Array f_get_meta_tags(CStrRef filename, bool use_include_path /* = false */) {
+Array f_get_meta_tags(const String& filename, bool use_include_path /* = false */) {
   String f = f_file_get_contents(filename);
 
   Variant matches;
@@ -113,8 +113,8 @@ Array f_get_meta_tags(CStrRef filename, bool use_include_path /* = false */) {
 
 static void url_encode_array(StringBuffer &ret, CVarRef varr,
                              std::set<void*> &seen_arrs,
-                             CStrRef num_prefix, CStrRef key_prefix,
-                             CStrRef key_suffix, CStrRef arg_sep) {
+                             const String& num_prefix, const String& key_prefix,
+                             const String& key_suffix, const String& arg_sep) {
   void *id = varr.is(KindOfArray) ?
     (void*)varr.getArrayData() : (void*)varr.getObjectData();
   if (!seen_arrs.insert(id).second) {
@@ -182,8 +182,8 @@ static void url_encode_array(StringBuffer &ret, CVarRef varr,
 const StaticString s_arg_separator_output("arg_separator.output");
 
 Variant f_http_build_query(CVarRef formdata,
-                           CStrRef numeric_prefix /* = null_string */,
-                           CStrRef arg_separator /* = null_string */) {
+                           const String& numeric_prefix /* = null_string */,
+                           const String& arg_separator /* = null_string */) {
   if (!formdata.is(KindOfArray) && !formdata.is(KindOfObject)) {
     throw_invalid_argument("formdata: (need Array or Object)");
     return false;
@@ -237,7 +237,7 @@ const StaticString
 #define PHP_URL_QUERY 6
 #define PHP_URL_FRAGMENT 7
 
-Variant f_parse_url(CStrRef url, int component /* = -1 */) {
+Variant f_parse_url(const String& url, int component /* = -1 */) {
   Url resource;
   if (!url_parse(resource, url.data(), url.size())) {
     return false;
@@ -278,19 +278,19 @@ Variant f_parse_url(CStrRef url, int component /* = -1 */) {
   return ret.create();
 }
 
-String f_rawurldecode(CStrRef str) {
+String f_rawurldecode(const String& str) {
   return StringUtil::UrlDecode(str, false);
 }
 
-String f_rawurlencode(CStrRef str) {
+String f_rawurlencode(const String& str) {
   return StringUtil::UrlEncode(str, false);
 }
 
-String f_urldecode(CStrRef str) {
+String f_urldecode(const String& str) {
   return StringUtil::UrlDecode(str, true);
 }
 
-String f_urlencode(CStrRef str) {
+String f_urlencode(const String& str) {
   return StringUtil::UrlEncode(str, true);
 }
 

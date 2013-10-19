@@ -17,6 +17,7 @@
 #define incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/asm-x64.h"
@@ -212,6 +213,10 @@ namespace X64 {
 TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
                        ServiceRequest req, const ServiceReqArgVec& argInfo);
 }
+namespace ARM {
+TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
+                       ServiceRequest req, const ServiceReqArgVec& argInfo);
+}
 
 template<typename... Arg>
 TCA emitServiceReq(CodeBlock& cb, SRFlags flags, ServiceRequest sr, Arg... a) {
@@ -222,7 +227,11 @@ TCA emitServiceReq(CodeBlock& cb, SRFlags flags, ServiceRequest sr, Arg... a) {
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);
-  return X64::emitServiceReqWork(cb, cb.frontier(), true, flags, sr, argv);
+  if (arch() == Arch::ARM) {
+    return ARM::emitServiceReqWork(cb, cb.frontier(), true, flags, sr, argv);
+  } else {
+    return X64::emitServiceReqWork(cb, cb.frontier(), true, flags, sr, argv);
+  }
 }
 
 template<typename... Arg>
@@ -240,7 +249,11 @@ TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);
-  return X64::emitServiceReqWork(cb, start, false, SRFlags::None, sr, argv);
+  if (arch() == Arch::ARM) {
+    return ARM::emitServiceReqWork(cb, start, false, SRFlags::None, sr, argv);
+  } else {
+    return X64::emitServiceReqWork(cb, start, false, SRFlags::None, sr, argv);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

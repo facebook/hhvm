@@ -37,24 +37,24 @@ String f_ob_get_flush();
 int64_t f_ob_get_length();
 int64_t f_ob_get_level();
 Array f_ob_get_status(bool full_status = false);
-String f_ob_gzhandler(CStrRef buffer, int mode);
+String f_ob_gzhandler(const String& buffer, int mode);
 void f_ob_implicit_flush(bool flag = true);
 Array f_ob_list_handlers();
-bool f_output_add_rewrite_var(CStrRef name, CStrRef value);
+bool f_output_add_rewrite_var(const String& name, const String& value);
 bool f_output_reset_rewrite_vars();
 
-void f_hphp_crash_log(CStrRef name, CStrRef value);
+void f_hphp_crash_log(const String& name, const String& value);
 
-void f_hphp_stats(CStrRef name, int64_t value);
-int64_t f_hphp_get_stats(CStrRef name);
+void f_hphp_stats(const String& name, int64_t value);
+int64_t f_hphp_get_stats(const String& name);
 Array f_hphp_get_status();
 Array f_hphp_get_iostatus();
-void f_hphp_set_iostatus_address(CStrRef name);
+void f_hphp_set_iostatus_address(const String& name);
 Variant f_hphp_get_timers(bool get_as_float = true);
 Variant f_hphp_output_global_state(bool serialize = true);
 int64_t f_hphp_instruction_counter(void);
 Variant f_hphp_get_hardware_counters(void);
-bool f_hphp_set_hardware_events(CStrRef events);
+bool f_hphp_set_hardware_events(const String& events);
 void f_hphp_clear_hardware_events(void);
 
 ///////////////////////////////////////////////////////////////////////////////

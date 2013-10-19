@@ -4,14 +4,14 @@
   and one another */
 // create a dir 
 $file_path = dirname(__FILE__);
-$dirname = "$file_path/rename_variation_dir"; 
+$dirname = "$file_path/rename_variation5_dir";
 mkdir($dirname);
 //create a file
-$filename = "$file_path/rename_variation.tmp"; 
+$filename = "$file_path/rename_variation5.tmp";
 $fp = fopen($filename, "w");
 fclose($fp);
 // create a link
-$linkname = "$file_path/rename_variation_link.tmp";
+$linkname = "$file_path/rename_variation5_link.tmp";
 symlink($filename, $linkname);
 
 echo "\n-- Renaming link to same link name --\n";
@@ -43,7 +43,7 @@ var_dump( rename($dirname, $linkname) );
 echo "Done\n";
 ?><?php
 $file_path = dirname(__FILE__);
-unlink($file_path."/rename_variation_link.tmp");
-unlink($file_path."/rename_variation.tmp");
-rmdir($file_path."/rename_variation_dir");
+unlink($file_path."/rename_variation5_link.tmp");
+unlink($file_path."/rename_variation5.tmp");
+rmdir($file_path."/rename_variation5_dir");
 ?>

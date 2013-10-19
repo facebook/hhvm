@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot use $this as lexical variable in %s/hphp/test/quick/closure_use_this.php on line 3

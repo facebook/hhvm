@@ -217,8 +217,8 @@ public:
 
   const char *getName() const { return m_name;}
 
-  PDOConnection *createConnection(CStrRef datasource, CStrRef username,
-                                  CStrRef password, CArrRef options);
+  PDOConnection *createConnection(const String& datasource, const String& username,
+                                  const String& password, CArrRef options);
 
 private:
   static PDODriverMap s_drivers;
@@ -262,7 +262,7 @@ public:
 
   CLASSNAME_IS("PDOConnection")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   // alloc/release persistent storage.
   virtual void persistentSave();
@@ -274,13 +274,13 @@ public:
   virtual bool closer();
 
   /* prepare a statement and stash driver specific portion into stmt */
-  virtual bool preparer(CStrRef sql, sp_PDOStatement *stmt, CVarRef options);
+  virtual bool preparer(const String& sql, sp_PDOStatement *stmt, CVarRef options);
 
   /* execute a statement (that does not return a result set) */
-  virtual int64_t doer(CStrRef sql);
+  virtual int64_t doer(const String& sql);
 
   /* quote a string */
-  virtual bool quoter(CStrRef input, String &quoted, PDOParamType paramtype);
+  virtual bool quoter(const String& input, String &quoted, PDOParamType paramtype);
 
   /* transaction related */
   virtual bool begin();
@@ -395,7 +395,7 @@ public:
 
   CLASSNAME_IS("PDOColumn")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
 public:
   String name;
@@ -414,7 +414,7 @@ public:
 
   CLASSNAME_IS("PDOBoundParam")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
 public:
   int64_t paramno;           /* if -1, then it has a name, and we don't
@@ -461,7 +461,7 @@ public:
 
   CLASSNAME_IS("PDOStatement")
   // overriding ResourceData
-  virtual CStrRef o_getClassNameHook() const { return classnameof(); }
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
 
   virtual bool support(SupportedMethod method);
 
@@ -604,7 +604,7 @@ public:
   const char *named_rewrite_template;
 };
 
-int pdo_parse_params(PDOStatement *stmt, CStrRef in, String &out);
+int pdo_parse_params(PDOStatement *stmt, const String& in, String &out);
 void pdo_raise_impl_error(sp_PDOConnection dbh, sp_PDOStatement stmt,
                           const char *sqlstate, const char *supp);
 void throw_pdo_exception(CVarRef code, CVarRef info,

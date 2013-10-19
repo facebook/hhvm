@@ -15,14 +15,15 @@
 */
 
 #include "hphp/util/ringbuffer.h"
-#include "hphp/util/util.h"
-#include "hphp/util/assertions.h"
 
 #include <algorithm>
 #include <atomic>
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
+
+#include "hphp/util/util.h"
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 namespace Trace {
@@ -34,6 +35,15 @@ static const int kMaxRBBytes = 1 << 19; // 512KB
 __thread int  tl_rbPtr;
 __thread char tl_ring[kMaxRBBytes];
 __thread const char _unused[] = "\n----END OF RINGBUFFER---\n";
+
+const char* ringbufferName(RingBufferType t) {
+  switch (t) {
+#   define RBTYPE(n) case RBType##n: return #n;
+    RBTYPES
+#   undef RBTYPE
+  }
+  not_reached();
+}
 
 KEEP_SECTION
 void vtraceRingbuffer(const char* fmt, va_list ap) {
@@ -66,27 +76,6 @@ void dumpRingbuffer() {
   write(1, tl_ring, tl_rbPtr);
 }
 
-/*
- * Thread-shared, binary ringbuffer. Includes thread-private ASCII
- * ringbuffers by reference. Beware that very old ASCII entries can
- * be corrupt; still, this is better than nothing.
- */
-struct RingBufferEntry {
-  // 0 - 7
-  uint32_t m_threadId;
-  uint16_t m_type;
-  uint16_t m_offset;
-
-  // 8 - 15
-  uint64_t m_funcId;
-
-  // 16-31
-  const char* m_msg;
-  uint32_t m_len; // m_msg and m_len are specific to Msg
-  uint32_t m_seq; // sequence number
-};
-
-static const int kMaxRBEntries = (1 << 20); // Must exceed number of threads
 RingBufferEntry g_ring[kMaxRBEntries];
 std::atomic<int> g_ringIdx(0);
 std::atomic<uint32_t> g_seqnum(0);
@@ -115,10 +104,10 @@ initEntry(RingBufferType t) {
 }
 
 static inline RingBufferEntry*
-initEntry(RingBufferType t, uint64_t funcId, int offset) {
+initEntry(RingBufferType t, uint64_t sk, uint64_t data) {
   RingBufferEntry* rb = allocEntry(t);
-  rb->m_funcId = funcId;
-  rb->m_offset = offset;
+  rb->m_sk = sk;
+  rb->m_data = data;
   return rb;
 }
 
@@ -130,89 +119,8 @@ ringbufferMsg(const char* msg, size_t msgLen, RingBufferType t) {
 }
 
 void
-ringbufferEntry(RingBufferType t, uint64_t funcId, int offset) {
-  (void) initEntry(t, funcId, offset);
-}
-
-void dumpEntry(const RingBufferEntry* e) {
-  static const char* names[] = {
-#define RBTYPE(x) #x,
-    RBTYPES
-#undef RBTYPE
-  };
-  switch(e->m_type) {
-    case RBTypeUninit: return;
-    case RBTypeMsg: {
-      printf("%#x %10u ", e->m_threadId, e->m_seq);
-      // The strings in thread-private ring buffers are not null-terminated;
-      // we also can't trust their length, since they might wrap around.
-      fwrite(e->m_msg,
-             std::min(size_t(e->m_len), strlen(e->m_msg)),
-             1,
-             stdout);
-      printf("\n");
-      break;
-    }
-    case RBTypeFuncEntry:
-    case RBTypeFuncExit: {
-      static __thread int indentDepth;
-      // Quick and dirty attempt at dtrace -F style function nesting.
-      // Looks like:
-      //
-      //    ... FuncEntry    caller
-      //    ... FuncEntry        callee
-      //    ... FuncExit         callee
-      //    ... FuncExit     caller
-      //
-      // Take this indentation with a grain of salt; it's only reliable
-      // within a single thread, and since we still miss some function
-      // entries and exits can get confused.
-      indentDepth -= e->m_type == RBTypeFuncExit;
-      if (indentDepth < 0) indentDepth = 0;
-      printf("%#x %10u %20s %*s%s\n",
-             e->m_threadId, e->m_seq,
-             names[e->m_type], 4*indentDepth, " ", e->m_msg);
-      indentDepth += e->m_type == RBTypeFuncEntry;
-      break;
-    }
-    default: {
-      printf("%#x %10u %#" PRIx64 " %d %20s\n",
-             e->m_threadId, e->m_seq, e->m_funcId, e->m_offset,
-             names[e->m_type]);
-      break;
-    }
-  }
-}
-
-// From gdb:
-//    (gdb) set language c++
-//    (gdb) call HPHP::Trace::dumpRingBuffer(100)
-//
-//    or
-//
-//    (gdb) call HPHP::Trace::dumpRingBufferMasked(100,
-//       (1 << HPHP::Trace::RBTypeFuncEntry))
-
-KEEP_SECTION
-void dumpRingBufferMasked(int numEntries, uint32_t types) {
-  int startIdx = (g_ringIdx.load() - numEntries) % kMaxRBEntries;
-  while (startIdx < 0) {
-    startIdx += kMaxRBEntries;
-  }
-  assert(startIdx >= 0 && startIdx < kMaxRBEntries);
-  int numDumped = 0;
-  for (int i = 0; i < kMaxRBEntries && numDumped < numEntries; i++) {
-    RingBufferEntry* rb = &g_ring[(startIdx + i) % kMaxRBEntries];
-    if ((1 << rb->m_type) & types) {
-      numDumped++;
-      dumpEntry(rb);
-    }
-  }
-}
-
-KEEP_SECTION
-void dumpRingBuffer(int numEntries) {
-  dumpRingBufferMasked(numEntries, -1u);
+ringbufferEntry(RingBufferType t, uint64_t sk, uint64_t data) {
+  (void) initEntry(t, sk, data);
 }
 
 }

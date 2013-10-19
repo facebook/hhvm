@@ -43,7 +43,7 @@
 
 BEGIN_EXTERN_C()
 ZEND_API inline zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only TSRMLS_DC) {
-  return instance_ce->classof(ce);
+  return instance_ce->hphp_class->classof(ce->hphp_class);
 }
 ZEND_API inline zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce TSRMLS_DC) {
   return instanceof_function_ex(instance_ce, ce, 0 TSRMLS_CC);
@@ -113,6 +113,23 @@ inline zend_uchar is_numeric_string(const char *str, int length, long *lval, dou
   return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
 }
 
+static inline const void *zend_memrchr(const void *s, int c, size_t n)
+{
+  register const unsigned char *e;
+
+  if (n <= 0) {
+    return NULL;
+  }
+
+  for (e = (const unsigned char *)s + n - 1; e >= (const unsigned char *)s; e--) {
+    if (*e == (const unsigned char)c) {
+      return (const void *)e;
+    }
+  }
+
+  return NULL;
+}
+
 BEGIN_EXTERN_C()
 ZEND_API inline void _convert_to_string(zval *op ZEND_FILE_LINE_DC) {
   tvCastToStringInPlace(op->tv());
@@ -126,8 +143,24 @@ ZEND_API inline void convert_to_double(zval *op) {
 ZEND_API inline void convert_to_boolean(zval *op) {
   tvCastToBooleanInPlace(op->tv());
 }
+ZEND_API inline void convert_to_array(zval *op) {
+  tvCastToArrayInPlace(op->tv());
+}
 #define convert_to_cstring(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
+
+ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC);
+ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+
+ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
+ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
+ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2);
+ZEND_API int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3);
+ZEND_API int zend_binary_strcmp(const char *s1, uint len1, const char *s2, uint len2);
+ZEND_API int zend_binary_strncmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
+ZEND_API int zend_binary_strcasecmp(const char *s1, uint len1, const char *s2, uint len2);
+ZEND_API int zend_binary_strncasecmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
+ZEND_API int zend_binary_strncasecmp_l(const char *s1, uint len1, const char *s2, uint len2, uint length);
 
 END_EXTERN_C()
 
@@ -167,7 +200,7 @@ private:
 public:
   explicit ZArrVal(HPHP::TypedValue* tv) : m_tv(tv) {}
   void cowCheck() {
-    if (m_tv->m_data.parr->getCount() > 1) {
+    if (m_tv->m_data.parr->hasMultipleRefs()) {
       HPHP::ArrayData* a = m_tv->m_data.parr->copy();
       a->incRefCount();
       m_tv->m_data.parr->decRefCount();
@@ -197,8 +230,8 @@ public:
   }
 };
 
-inline ZArrVal zval_get_arrval(zval &z) {
-  return ZArrVal(z.tv());
+inline ZArrVal zval_get_arrval(const zval &z) {
+  return ZArrVal(const_cast<zval*>(&z)->tv());
 }
 
 #define Z_LVAL(zval)        (zval_follow_ref(zval).m_data.num)
@@ -249,5 +282,38 @@ inline ZArrVal zval_get_arrval(zval &z) {
 HPHP::DataType& Z_TYPE(const zval& z);
 #define Z_TYPE_P(zval_p)  Z_TYPE(*zval_p)
 #define Z_TYPE_PP(zval_pp)  Z_TYPE(**zval_pp)
+
+static inline char *
+zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
+{
+  char *p = haystack;
+  char ne = needle[needle_len-1];
+
+  if (needle_len == 1) {
+    return (char *)memchr(p, *needle, (end-p));
+  }
+
+  if (needle_len > end-haystack) {
+    return NULL;
+  }
+
+  end -= needle_len;
+
+  while (p <= end) {
+    if ((p = (char *)memchr(p, *needle, (end-p+1))) && ne == p[needle_len-1]) {
+      if (!memcmp(needle, p, needle_len-1)) {
+        return p;
+      }
+    }
+
+    if (p == NULL) {
+      return NULL;
+    }
+
+    p++;
+  }
+
+  return NULL;
+}
 
 #endif

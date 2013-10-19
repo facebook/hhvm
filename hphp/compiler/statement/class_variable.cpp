@@ -84,6 +84,17 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
                    "Properties cannot be declared final");
   }
 
+  if ((m_modifiers->isExplicitlyPublic() +
+       m_modifiers->isProtected() +
+       m_modifiers->isPrivate()) > 1) {
+    m_modifiers->parseTimeFatal(
+      Compiler::InvalidAttribute,
+      "%s: properties of %s",
+      Strings::PICK_ACCESS_MODIFIER,
+      scope->getOriginalName().c_str()
+    );
+  }
+
   for (int i = 0; i < m_declaration->getCount(); i++) {
     VariableTablePtr variables = scope->getVariables();
     ExpressionPtr exp = (*m_declaration)[i];

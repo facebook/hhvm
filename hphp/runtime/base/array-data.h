@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class SharedVariant;
+class APCVariant;
 struct TypedValue;
 class HphpArray;
 
@@ -47,7 +47,6 @@ class ArrayData {
     kMixedKind,   // HphpArray arbitrary int or string keys, maybe holes
     kSharedKind,  // SharedArray
     kNvtwKind,    // NameValueTableWrapper
-    kPolicyKind,  // PolicyArray
     kNumKinds // insert new values before kNumKinds.
   };
 
@@ -95,6 +94,11 @@ class ArrayData {
     , m_count(0)
     , m_strongIterators(nullptr)
   {}
+
+  /*
+   * NOTE: HphpArray no longer calls the destructor or destroy() here.
+   * If you need to add logic, revisit HphpArray::Release{,Packed}.
+   */
 
   void destroy() {
     // If there are any strong iterators pointing to this array, they need
@@ -186,7 +190,6 @@ public:
   /*
    * Specific derived class type querying operators.
    */
-  bool isPolicyArray() const { return m_kind == kPolicyKind; }
   bool isPacked() const { return m_kind == kPackedKind; }
   bool isHphpArray() const {
     return m_kind <= kMixedKind;
@@ -203,10 +206,10 @@ public:
    */
   bool isVectorData() const;
 
-  static SharedVariant *GetSharedVariant(const ArrayData* ad) {
+  static APCVariant *GetSharedVariant(const ArrayData* ad) {
     return nullptr;
   }
-  SharedVariant* getSharedVariant();
+  APCVariant* getSharedVariant();
 
   /**
    * Whether or not this array has a referenced Variant or Object appearing
@@ -305,23 +308,23 @@ public:
    * the virtual method.  Helpers that take a CVarRef key dispatch to either
    * the StringData* or int64_t key-type helpers.
    */
-  bool exists(CStrRef k) const;
+  bool exists(const String& k) const;
   bool exists(CVarRef k) const;
   CVarRef get(int64_t k, bool error = false) const;
   CVarRef get(const StringData* k, bool error = false) const;
-  CVarRef get(CStrRef k, bool error = false) const;
+  CVarRef get(const String& k, bool error = false) const;
   CVarRef get(CVarRef k, bool error = false) const;
-  ArrayData *lval(CStrRef k, Variant *&ret, bool copy);
+  ArrayData *lval(const String& k, Variant *&ret, bool copy);
   ArrayData *lval(CVarRef k, Variant *&ret, bool copy);
-  ArrayData *set(CStrRef k, CVarRef v, bool copy);
+  ArrayData *set(const String& k, CVarRef v, bool copy);
   ArrayData *set(CVarRef k, CVarRef v, bool copy);
   ArrayData *set(const StringData*, CVarRef, bool) = delete;
-  ArrayData *setRef(CStrRef k, CVarRef v, bool copy);
+  ArrayData *setRef(const String& k, CVarRef v, bool copy);
   ArrayData *setRef(CVarRef k, CVarRef v, bool copy);
   ArrayData *setRef(const StringData*, CVarRef, bool) = delete;
-  ArrayData *add(CStrRef k, CVarRef v, bool copy);
+  ArrayData *add(const String& k, CVarRef v, bool copy);
   ArrayData *add(CVarRef k, CVarRef v, bool copy);
-  ArrayData *remove(CStrRef k, bool copy);
+  ArrayData *remove(const String& k, bool copy);
   ArrayData *remove(CVarRef k, bool copy);
 
   ssize_t iter_begin() const;
@@ -379,18 +382,19 @@ public:
   void ksort(int sort_flags, bool ascending);
   void sort(int sort_flags, bool ascending);
   void asort(int sort_flags, bool ascending);
-  void uksort(CVarRef cmp_function);
-  void usort(CVarRef cmp_function);
-  void uasort(CVarRef cmp_function);
+  bool uksort(CVarRef cmp_function);
+  bool usort(CVarRef cmp_function);
+  bool uasort(CVarRef cmp_function);
 
   // default sort implementations
   static void Ksort(ArrayData*, int sort_flags, bool ascending);
   static void Sort(ArrayData*, int sort_flags, bool ascending);
   static void Asort(ArrayData*, int sort_flags, bool ascending);
-  static void Uksort(ArrayData*, CVarRef cmp_function);
-  static void Usort(ArrayData*, CVarRef cmp_function);
-  static void Uasort(ArrayData*, CVarRef cmp_function);
+  static bool Uksort(ArrayData*, CVarRef cmp_function);
+  static bool Usort(ArrayData*, CVarRef cmp_function);
+  static bool Uasort(ArrayData*, CVarRef cmp_function);
 
+  // TODO(#2941952)
   static void ZSetInt(ArrayData* ad, int64_t k, RefData* v);
   static void ZSetStr(ArrayData* ad, StringData* k, RefData* v);
   static void ZAppend(ArrayData* ad, RefData* v);
@@ -421,13 +425,21 @@ public:
    */
   ArrayData* appendWithRef(CVarRef v, bool copy);
 
-  /**
-   * Implementing array appending and merging. If "copy" is true, make a copy
-   * first then append/merge arrays. Return NULL if escalation is not needed,
-   * or an escalated array data.
+  /*
+   * Implements array appending and merging.
+   *
+   * Returns a new array that is a copy of this combined with elems in
+   * the appropriate manner.  Copies the array even if *this has
+   * enough space.
+   *
+   * The returned array has already been incref'd.
+   *
+   * NB. the merge() function does *not* exactly implement
+   * array_merge.  The key renumbering step currently must be
+   * performed by the caller.
    */
-  ArrayData* plus(const ArrayData *elems, bool copy);
-  ArrayData* merge(const ArrayData *elems, bool copy);
+  ArrayData* plus(const ArrayData* elems);
+  ArrayData* merge(const ArrayData* elems);
 
   /**
    * Stack function: pop the last item and return it.
@@ -516,10 +528,10 @@ public:
   static CVarRef getNotFound(const StringData* k);
   CVarRef getNotFound(int64_t k, bool error) const;
   CVarRef getNotFound(const StringData* k, bool error) const;
-  static CVarRef getNotFound(CStrRef k);
+  static CVarRef getNotFound(const String& k);
   static CVarRef getNotFound(CVarRef k);
 
-  static bool IsValidKey(CStrRef k);
+  static bool IsValidKey(const String& k);
   static bool IsValidKey(CVarRef k);
   static bool IsValidKey(const StringData* k) { return k; }
 
@@ -596,24 +608,24 @@ struct ArrayFunctions {
   void (*ksort[NK])(ArrayData* ad, int sort_flags, bool ascending);
   void (*sort[NK])(ArrayData* ad, int sort_flags, bool ascending);
   void (*asort[NK])(ArrayData* ad, int sort_flags, bool ascending);
-  void (*uksort[NK])(ArrayData* ad, CVarRef cmp_function);
-  void (*usort[NK])(ArrayData* ad, CVarRef cmp_function);
-  void (*uasort[NK])(ArrayData* ad, CVarRef cmp_function);
+  bool (*uksort[NK])(ArrayData* ad, CVarRef cmp_function);
+  bool (*usort[NK])(ArrayData* ad, CVarRef cmp_function);
+  bool (*uasort[NK])(ArrayData* ad, CVarRef cmp_function);
   ArrayData* (*copy[NK])(const ArrayData*);
   ArrayData* (*copyWithStrongIterators[NK])(const ArrayData*);
   ArrayData* (*nonSmartCopy[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, CVarRef v, bool copy);
   ArrayData* (*appendRef[NK])(ArrayData*, CVarRef v, bool copy);
   ArrayData* (*appendWithRef[NK])(ArrayData*, CVarRef v, bool copy);
-  ArrayData* (*plus[NK])(ArrayData*, const ArrayData* elems, bool copy);
-  ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems, bool copy);
+  ArrayData* (*plus[NK])(ArrayData*, const ArrayData* elems);
+  ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);
   ArrayData* (*prepend[NK])(ArrayData*, CVarRef value, bool copy);
   void (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);
-  SharedVariant* (*getSharedVariant[NK])(const ArrayData*);
+  APCVariant* (*getSharedVariant[NK])(const ArrayData*);
   void (*zSetInt[NK])(ArrayData*, int64_t k, RefData* v);
   void (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
   void (*zAppend[NK])(ArrayData*, RefData* v);

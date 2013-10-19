@@ -56,19 +56,19 @@ String f_magickgetversionstring() {
   throw NotImplementedException(__func__);
 }
 
-String f_magickqueryconfigureoption(CStrRef option) {
+String f_magickqueryconfigureoption(const String& option) {
   throw NotImplementedException(__func__);
 }
 
-Array f_magickqueryconfigureoptions(CStrRef pattern) {
+Array f_magickqueryconfigureoptions(const String& pattern) {
   throw NotImplementedException(__func__);
 }
 
-Array f_magickqueryfonts(CStrRef pattern) {
+Array f_magickqueryfonts(const String& pattern) {
   throw NotImplementedException(__func__);
 }
 
-Array f_magickqueryformats(CStrRef pattern) {
+Array f_magickqueryformats(const String& pattern) {
   throw NotImplementedException(__func__);
 }
 
@@ -93,7 +93,7 @@ Resource f_newpixelregioniterator(CResRef mgck_wnd, int x, int y, int columns,
   throw NotImplementedException(__func__);
 }
 
-Resource f_newpixelwand(CStrRef imagemagick_col_str /* = null_string */) {
+Resource f_newpixelwand(const String& imagemagick_col_str /* = null_string */) {
   throw NotImplementedException(__func__);
 }
 
@@ -190,7 +190,7 @@ void f_drawaffine(CResRef drw_wnd, double sx, double sy, double rx, double ry,
   throw NotImplementedException(__func__);
 }
 
-void f_drawannotation(CResRef drw_wnd, double x, double y, CStrRef text) {
+void f_drawannotation(CResRef drw_wnd, double x, double y, const String& text) {
   throw NotImplementedException(__func__);
 }
 
@@ -211,7 +211,7 @@ void f_drawcolor(CResRef drw_wnd, double x, double y, int paint_method) {
   throw NotImplementedException(__func__);
 }
 
-void f_drawcomment(CResRef drw_wnd, CStrRef comment) {
+void f_drawcomment(CResRef drw_wnd, const String& comment) {
   throw NotImplementedException(__func__);
 }
 
@@ -503,7 +503,7 @@ void f_drawscale(CResRef drw_wnd, double x, double y) {
   throw NotImplementedException(__func__);
 }
 
-bool f_drawsetclippath(CResRef drw_wnd, CStrRef clip_path) {
+bool f_drawsetclippath(CResRef drw_wnd, const String& clip_path) {
   throw NotImplementedException(__func__);
 }
 
@@ -527,7 +527,7 @@ void f_drawsetfillopacity(CResRef drw_wnd, double fill_opacity) {
   throw NotImplementedException(__func__);
 }
 
-bool f_drawsetfillpatternurl(CResRef drw_wnd, CStrRef fill_url) {
+bool f_drawsetfillpatternurl(CResRef drw_wnd, const String& fill_url) {
   throw NotImplementedException(__func__);
 }
 
@@ -535,11 +535,11 @@ void f_drawsetfillrule(CResRef drw_wnd, int fill_rule) {
   throw NotImplementedException(__func__);
 }
 
-bool f_drawsetfont(CResRef drw_wnd, CStrRef font_file) {
+bool f_drawsetfont(CResRef drw_wnd, const String& font_file) {
   throw NotImplementedException(__func__);
 }
 
-bool f_drawsetfontfamily(CResRef drw_wnd, CStrRef font_family) {
+bool f_drawsetfontfamily(CResRef drw_wnd, const String& font_family) {
   throw NotImplementedException(__func__);
 }
 
@@ -601,7 +601,7 @@ void f_drawsetstrokeopacity(CResRef drw_wnd, double stroke_opacity) {
   throw NotImplementedException(__func__);
 }
 
-bool f_drawsetstrokepatternurl(CResRef drw_wnd, CStrRef stroke_url) {
+bool f_drawsetstrokepatternurl(CResRef drw_wnd, const String& stroke_url) {
   throw NotImplementedException(__func__);
 }
 
@@ -621,7 +621,7 @@ void f_drawsettextdecoration(CResRef drw_wnd, int decoration_type) {
   throw NotImplementedException(__func__);
 }
 
-void f_drawsettextencoding(CResRef drw_wnd, CStrRef encoding) {
+void f_drawsettextencoding(CResRef drw_wnd, const String& encoding) {
   throw NotImplementedException(__func__);
 }
 
@@ -629,7 +629,7 @@ void f_drawsettextundercolor(CResRef drw_wnd, CResRef undercolor_pxl_wnd) {
   throw NotImplementedException(__func__);
 }
 
-bool f_drawsetvectorgraphics(CResRef drw_wnd, CStrRef vector_graphics) {
+bool f_drawsetvectorgraphics(CResRef drw_wnd, const String& vector_graphics) {
   throw NotImplementedException(__func__);
 }
 
@@ -654,7 +654,7 @@ void f_pushdrawingwand(CResRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-void f_drawpushclippath(CResRef drw_wnd, CStrRef clip_path_id) {
+void f_drawpushclippath(CResRef drw_wnd, const String& clip_path_id) {
   throw NotImplementedException(__func__);
 }
 
@@ -662,7 +662,8 @@ void f_drawpushdefs(CResRef drw_wnd) {
   throw NotImplementedException(__func__);
 }
 
-void f_drawpushpattern(CResRef drw_wnd, CStrRef pattern_id, double x, double y,
+void f_drawpushpattern(CResRef drw_wnd, const String& pattern_id,
+                       double x, double y,
                        double width, double height) {
   throw NotImplementedException(__func__);
 }
@@ -701,7 +702,7 @@ bool f_magickaffinetransformimage(CResRef mgck_wnd, CResRef drw_wnd) {
 }
 
 bool f_magickannotateimage(CResRef mgck_wnd, CResRef drw_wnd, double x,
-                           double y, double angle, CStrRef text) {
+                           double y, double angle, const String& text) {
   throw NotImplementedException(__func__);
 }
 
@@ -741,7 +742,8 @@ bool f_magickclipimage(CResRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickclippathimage(CResRef mgck_wnd, CStrRef pathname, bool inside) {
+bool f_magickclippathimage(CResRef mgck_wnd, const String& pathname,
+                           bool inside) {
   throw NotImplementedException(__func__);
 }
 
@@ -764,7 +766,7 @@ Resource f_magickcombineimages(CResRef mgck_wnd, int channel_type) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickcommentimage(CResRef mgck_wnd, CStrRef comment) {
+bool f_magickcommentimage(CResRef mgck_wnd, const String& comment) {
   throw NotImplementedException(__func__);
 }
 
@@ -779,7 +781,7 @@ bool f_magickcompositeimage(CResRef mgck_wnd, CResRef composite_wnd,
 }
 
 bool f_magickconstituteimage(CResRef mgck_wnd, double columns, double rows,
-                             CStrRef smap, int storage_type,
+                             const String& smap, int storage_type,
                              CArrRef pixel_array) {
   throw NotImplementedException(__func__);
 }
@@ -864,7 +866,7 @@ bool f_magickframeimage(CResRef mgck_wnd, CResRef matte_color, double width,
   throw NotImplementedException(__func__);
 }
 
-Resource f_magickfximage(CResRef mgck_wnd, CStrRef expression,
+Resource f_magickfximage(CResRef mgck_wnd, const String& expression,
                          int channel_type /* = 0 */) {
   throw NotImplementedException(__func__);
 }
@@ -879,13 +881,13 @@ bool f_magickgaussianblurimage(CResRef mgck_wnd, double radius, double sigma,
   throw NotImplementedException(__func__);
 }
 
-double f_magickgetcharheight(CResRef mgck_wnd, CResRef drw_wnd, CStrRef txt,
-                             bool multiline /* = false */) {
+double f_magickgetcharheight(CResRef mgck_wnd, CResRef drw_wnd,
+                             const String& txt, bool multiline /* = false */) {
   throw NotImplementedException(__func__);
 }
 
-double f_magickgetcharwidth(CResRef mgck_wnd, CResRef drw_wnd, CStrRef txt,
-                            bool multiline /* = false */) {
+double f_magickgetcharwidth(CResRef mgck_wnd, CResRef drw_wnd,
+                            const String& txt, bool multiline /* = false */) {
   throw NotImplementedException(__func__);
 }
 
@@ -1018,12 +1020,12 @@ String f_magickgetimagemimetype(CResRef mgck_wnd) {
 }
 
 Array f_magickgetimagepixels(CResRef mgck_wnd, int x_offset, int y_offset,
-                             double columns, double rows, CStrRef smap,
+                             double columns, double rows, const String& smap,
                              int storage_type) {
   throw NotImplementedException(__func__);
 }
 
-String f_magickgetimageprofile(CResRef mgck_wnd, CStrRef name) {
+String f_magickgetimageprofile(CResRef mgck_wnd, const String& name) {
   throw NotImplementedException(__func__);
 }
 
@@ -1079,7 +1081,8 @@ int64_t f_magickgetinterlacescheme(CResRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-double f_magickgetmaxtextadvance(CResRef mgck_wnd, CResRef drw_wnd, CStrRef txt,
+double f_magickgetmaxtextadvance(CResRef mgck_wnd, CResRef drw_wnd,
+                                 const String& txt,
                                  bool multiline /* = false */) {
   throw NotImplementedException(__func__);
 }
@@ -1100,22 +1103,26 @@ Array f_magickgetsize(CResRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-double f_magickgetstringheight(CResRef mgck_wnd, CResRef drw_wnd, CStrRef txt,
+double f_magickgetstringheight(CResRef mgck_wnd, CResRef drw_wnd,
+                               const String& txt,
                                bool multiline /* = false */) {
   throw NotImplementedException(__func__);
 }
 
-double f_magickgetstringwidth(CResRef mgck_wnd, CResRef drw_wnd, CStrRef txt,
+double f_magickgetstringwidth(CResRef mgck_wnd, CResRef drw_wnd,
+                              const String& txt,
                               bool multiline /* = false */) {
   throw NotImplementedException(__func__);
 }
 
-double f_magickgettextascent(CResRef mgck_wnd, CResRef drw_wnd, CStrRef txt,
+double f_magickgettextascent(CResRef mgck_wnd, CResRef drw_wnd,
+                             const String& txt,
                              bool multiline /* = false */) {
   throw NotImplementedException(__func__);
 }
 
-double f_magickgettextdescent(CResRef mgck_wnd, CResRef drw_wnd, CStrRef txt,
+double f_magickgettextdescent(CResRef mgck_wnd, CResRef drw_wnd,
+                              const String& txt,
                               bool multiline /* = false */) {
   throw NotImplementedException(__func__);
 }
@@ -1136,7 +1143,7 @@ bool f_magickimplodeimage(CResRef mgck_wnd, double amount) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicklabelimage(CResRef mgck_wnd, CStrRef label) {
+bool f_magicklabelimage(CResRef mgck_wnd, const String& label) {
   throw NotImplementedException(__func__);
 }
 
@@ -1173,10 +1180,10 @@ bool f_magickmodulateimage(CResRef mgck_wnd, double brightness,
 
 Resource f_magickmontageimage(CResRef mgck_wnd,
                               CResRef drw_wnd,
-                              CStrRef tile_geometry,
-                              CStrRef thumbnail_geometry,
+                              const String& tile_geometry,
+                              const String& thumbnail_geometry,
                               int montage_mode,
-                              CStrRef frame) {
+                              const String& frame) {
   throw NotImplementedException(__func__);
 }
 
@@ -1199,7 +1206,7 @@ bool f_magicknegateimage(CResRef mgck_wnd, bool only_the_gray /* = false */,
 }
 
 bool f_magicknewimage(CResRef mgck_wnd, double width, double height,
-                      CStrRef imagemagick_col_str /* = null_string */) {
+                      const String& imagemagick_col_str /* = null_string */) {
   throw NotImplementedException(__func__);
 }
 
@@ -1227,7 +1234,7 @@ bool f_magickpainttransparentimage(CResRef mgck_wnd,
   throw NotImplementedException(__func__);
 }
 
-bool f_magickpingimage(CResRef mgck_wnd, CStrRef filename) {
+bool f_magickpingimage(CResRef mgck_wnd, const String& filename) {
   throw NotImplementedException(__func__);
 }
 
@@ -1243,19 +1250,26 @@ bool f_magickpreviousimage(CResRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickprofileimage(CResRef mgck_wnd, CStrRef name, CStrRef profile /* = null_string */) {
+bool f_magickprofileimage(CResRef mgck_wnd, const String& name,
+                          const String& profile /* = null_string */) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickquantizeimage(CResRef mgck_wnd, double number_colors, int colorspace_type, double treedepth, bool dither, bool measure_error) {
+bool f_magickquantizeimage(CResRef mgck_wnd, double number_colors,
+                           int colorspace_type, double treedepth, bool dither,
+                           bool measure_error) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickquantizeimages(CResRef mgck_wnd, double number_colors, int colorspace_type, double treedepth, bool dither, bool measure_error) {
+bool f_magickquantizeimages(CResRef mgck_wnd, double number_colors,
+                            int colorspace_type, double treedepth, bool dither,
+                            bool measure_error) {
   throw NotImplementedException(__func__);
 }
 
-Array f_magickqueryfontmetrics(CResRef mgck_wnd, CResRef drw_wnd, CStrRef txt, bool multiline /* = false */) {
+Array f_magickqueryfontmetrics(CResRef mgck_wnd, CResRef drw_wnd,
+                               const String& txt,
+                               bool multiline /* = false */) {
   throw NotImplementedException(__func__);
 }
 
@@ -1263,15 +1277,16 @@ bool f_magickradialblurimage(CResRef mgck_wnd, double angle) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickraiseimage(CResRef mgck_wnd, double width, double height, int x, int y, bool raise) {
+bool f_magickraiseimage(CResRef mgck_wnd, double width, double height, int x,
+                        int y, bool raise) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickreadimage(CResRef mgck_wnd, CStrRef filename) {
+bool f_magickreadimage(CResRef mgck_wnd, const String& filename) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickreadimageblob(CResRef mgck_wnd, CStrRef blob) {
+bool f_magickreadimageblob(CResRef mgck_wnd, const String& blob) {
   throw NotImplementedException(__func__);
 }
 
@@ -1291,7 +1306,7 @@ bool f_magickremoveimage(CResRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-String f_magickremoveimageprofile(CResRef mgck_wnd, CStrRef name) {
+String f_magickremoveimageprofile(CResRef mgck_wnd, const String& name) {
   throw NotImplementedException(__func__);
 }
 
@@ -1299,7 +1314,8 @@ bool f_magickremoveimageprofiles(CResRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickresampleimage(CResRef mgck_wnd, double x_resolution, double y_resolution, int filter_type, double blur) {
+bool f_magickresampleimage(CResRef mgck_wnd, double x_resolution,
+                           double y_resolution, int filter_type, double blur) {
   throw NotImplementedException(__func__);
 }
 
@@ -1307,7 +1323,8 @@ void f_magickresetiterator(CResRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickresizeimage(CResRef mgck_wnd, double columns, double rows, int filter_type, double blur) {
+bool f_magickresizeimage(CResRef mgck_wnd, double columns, double rows,
+                         int filter_type, double blur) {
   throw NotImplementedException(__func__);
 }
 
@@ -1335,7 +1352,8 @@ bool f_magicksetcompressionquality(CResRef mgck_wnd, double quality) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetfilename(CResRef mgck_wnd, CStrRef filename /* = null_string */) {
+bool f_magicksetfilename(CResRef mgck_wnd,
+                         const String& filename /* = null_string */) {
   throw NotImplementedException(__func__);
 }
 
@@ -1343,7 +1361,7 @@ void f_magicksetfirstiterator(CResRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetformat(CResRef mgck_wnd, CStrRef format) {
+bool f_magicksetformat(CResRef mgck_wnd, const String& format) {
   throw NotImplementedException(__func__);
 }
 
@@ -1351,7 +1369,8 @@ bool f_magicksetimage(CResRef mgck_wnd, CResRef replace_wand) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetimagebackgroundcolor(CResRef mgck_wnd, CResRef background_pxl_wnd) {
+bool f_magicksetimagebackgroundcolor(CResRef mgck_wnd,
+                                     CResRef background_pxl_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -1367,7 +1386,8 @@ bool f_magicksetimagebordercolor(CResRef mgck_wnd, CResRef border_pxl_wnd) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetimagecolormapcolor(CResRef mgck_wnd, double index, CResRef mapcolor_pxl_wnd) {
+bool f_magicksetimagecolormapcolor(CResRef mgck_wnd, double index,
+                                   CResRef mapcolor_pxl_wnd) {
   throw NotImplementedException(__func__);
 }
 
@@ -1391,7 +1411,8 @@ bool f_magicksetimagedelay(CResRef mgck_wnd, double delay) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetimagedepth(CResRef mgck_wnd, int depth, int channel_type /* = 0 */) {
+bool f_magicksetimagedepth(CResRef mgck_wnd, int depth,
+                           int channel_type /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
@@ -1399,11 +1420,12 @@ bool f_magicksetimagedispose(CResRef mgck_wnd, int dispose_type) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetimagefilename(CResRef mgck_wnd, CStrRef filename /* = null_string */) {
+bool f_magicksetimagefilename(CResRef mgck_wnd,
+                              const String& filename /* = null_string */) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetimageformat(CResRef mgck_wnd, CStrRef format) {
+bool f_magicksetimageformat(CResRef mgck_wnd, const String& format) {
   throw NotImplementedException(__func__);
 }
 
@@ -1431,15 +1453,19 @@ bool f_magicksetimagemattecolor(CResRef mgck_wnd, CResRef matte_pxl_wnd) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetimageoption(CResRef mgck_wnd, CStrRef format, CStrRef key, CStrRef value) {
+bool f_magicksetimageoption(CResRef mgck_wnd, const String& format,
+                            const String& key, const String& value) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetimagepixels(CResRef mgck_wnd, int x_offset, int y_offset, double columns, double rows, CStrRef smap, int storage_type, CArrRef pixel_array) {
+bool f_magicksetimagepixels(CResRef mgck_wnd, int x_offset, int y_offset,
+                            double columns, double rows, const String& smap,
+                            int storage_type, CArrRef pixel_array) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetimageprofile(CResRef mgck_wnd, CStrRef name, CStrRef profile) {
+bool f_magicksetimageprofile(CResRef mgck_wnd, const String& name,
+                             const String& profile) {
   throw NotImplementedException(__func__);
 }
 
@@ -1451,7 +1477,8 @@ bool f_magicksetimagerenderingintent(CResRef mgck_wnd, int rendering_intent) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetimageresolution(CResRef mgck_wnd, double x_resolution, double y_resolution) {
+bool f_magicksetimageresolution(CResRef mgck_wnd, double x_resolution,
+                                double y_resolution) {
   throw NotImplementedException(__func__);
 }
 
@@ -1467,7 +1494,8 @@ bool f_magicksetimageunits(CResRef mgck_wnd, int resolution_type) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetimagevirtualpixelmethod(CResRef mgck_wnd, int virtual_pixel_method) {
+bool f_magicksetimagevirtualpixelmethod(CResRef mgck_wnd,
+                                        int virtual_pixel_method) {
   throw NotImplementedException(__func__);
 }
 
@@ -1483,15 +1511,17 @@ void f_magicksetlastiterator(CResRef mgck_wnd) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetpassphrase(CResRef mgck_wnd, CStrRef passphrase) {
+bool f_magicksetpassphrase(CResRef mgck_wnd, const String& passphrase) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetresolution(CResRef mgck_wnd, double x_resolution, double y_resolution) {
+bool f_magicksetresolution(CResRef mgck_wnd, double x_resolution,
+                           double y_resolution) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksetsamplingfactors(CResRef mgck_wnd, double number_factors, CArrRef sampling_factors) {
+bool f_magicksetsamplingfactors(CResRef mgck_wnd, double number_factors,
+                                CArrRef sampling_factors) {
   throw NotImplementedException(__func__);
 }
 
@@ -1503,7 +1533,8 @@ bool f_magicksetwandsize(CResRef mgck_wnd, int columns, int rows) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicksharpenimage(CResRef mgck_wnd, double radius, double sigma, int channel_type /* = 0 */) {
+bool f_magicksharpenimage(CResRef mgck_wnd, double radius, double sigma,
+                          int channel_type /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
@@ -1511,7 +1542,8 @@ bool f_magickshaveimage(CResRef mgck_wnd, int columns, int rows) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickshearimage(CResRef mgck_wnd, CResRef background, double x_shear, double y_shear) {
+bool f_magickshearimage(CResRef mgck_wnd, CResRef background, double x_shear,
+                        double y_shear) {
   throw NotImplementedException(__func__);
 }
 
@@ -1519,7 +1551,8 @@ bool f_magicksolarizeimage(CResRef mgck_wnd, double threshold) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickspliceimage(CResRef mgck_wnd, double width, double height, int x, int y) {
+bool f_magickspliceimage(CResRef mgck_wnd, double width, double height, int x,
+                         int y) {
   throw NotImplementedException(__func__);
 }
 
@@ -1527,7 +1560,8 @@ bool f_magickspreadimage(CResRef mgck_wnd, double radius) {
   throw NotImplementedException(__func__);
 }
 
-Resource f_magicksteganoimage(CResRef mgck_wnd, CResRef watermark_wand, int offset) {
+Resource f_magicksteganoimage(CResRef mgck_wnd, CResRef watermark_wand,
+                              int offset) {
   throw NotImplementedException(__func__);
 }
 
@@ -1547,15 +1581,18 @@ Resource f_magicktextureimage(CResRef mgck_wnd, CResRef texture_wand) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickthresholdimage(CResRef mgck_wnd, double threshold, int channel_type /* = 0 */) {
+bool f_magickthresholdimage(CResRef mgck_wnd, double threshold,
+                            int channel_type /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magicktintimage(CResRef mgck_wnd, int tint_pxl_wnd, CResRef opacity_pxl_wnd) {
+bool f_magicktintimage(CResRef mgck_wnd, int tint_pxl_wnd,
+                       CResRef opacity_pxl_wnd) {
   throw NotImplementedException(__func__);
 }
 
-Resource f_magicktransformimage(CResRef mgck_wnd, CStrRef crop, CStrRef geometry) {
+Resource f_magicktransformimage(CResRef mgck_wnd, const String& crop,
+                                const String& geometry) {
   throw NotImplementedException(__func__);
 }
 
@@ -1563,7 +1600,9 @@ bool f_magicktrimimage(CResRef mgck_wnd, double fuzz) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickunsharpmaskimage(CResRef mgck_wnd, double radius, double sigma, double amount, double threshold, int channel_type /* = 0 */) {
+bool f_magickunsharpmaskimage(CResRef mgck_wnd, double radius, double sigma,
+                              double amount, double threshold,
+                              int channel_type /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
@@ -1575,7 +1614,7 @@ bool f_magickwhitethresholdimage(CResRef mgck_wnd, CResRef threshold_pxl_wnd) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickwriteimage(CResRef mgck_wnd, CStrRef filename) {
+bool f_magickwriteimage(CResRef mgck_wnd, const String& filename) {
   throw NotImplementedException(__func__);
 }
 
@@ -1583,7 +1622,8 @@ bool f_magickwriteimagefile(CResRef mgck_wnd, CResRef handle) {
   throw NotImplementedException(__func__);
 }
 
-bool f_magickwriteimages(CResRef mgck_wnd, CStrRef filename /* = "" */, bool join_images /* = false */) {
+bool f_magickwriteimages(CResRef mgck_wnd, const String& filename /* = "" */,
+                         bool join_images /* = false */) {
   throw NotImplementedException(__func__);
 }
 
@@ -1715,7 +1755,7 @@ void f_pixelsetbluequantum(CResRef pxl_wnd, double blue) {
   throw NotImplementedException(__func__);
 }
 
-void f_pixelsetcolor(CResRef pxl_wnd, CStrRef imagemagick_col_str) {
+void f_pixelsetcolor(CResRef pxl_wnd, const String& imagemagick_col_str) {
   throw NotImplementedException(__func__);
 }
 
@@ -1759,7 +1799,8 @@ void f_pixelsetopacityquantum(CResRef pxl_wnd, double opacity) {
   throw NotImplementedException(__func__);
 }
 
-void f_pixelsetquantumcolor(CResRef pxl_wnd, double red, double green, double blue, double opacity /* = 0.0 */) {
+void f_pixelsetquantumcolor(CResRef pxl_wnd, double red, double green,
+                            double blue, double opacity /* = 0.0 */) {
   throw NotImplementedException(__func__);
 }
 

@@ -49,16 +49,17 @@ class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
   public: c_DateTime(Class* cls = c_DateTime::classof());
   public: ~c_DateTime();
   public: Object t_add(CObjRef interval);
-  public: void t___construct(CStrRef time = "now",
+  public: void t___construct(const String& time = "now",
                              CObjRef timezone = null_object);
-  public: static Object ti_createfromformat(CStrRef format, CStrRef time, CObjRef timezone = null_object);
+  public: static Object ti_createfromformat(
+    const String& format, const String& time, CObjRef timezone = null_object);
   public: Object t_diff(CObjRef datetime2, bool absolute = false);
-  public: String t_format(CStrRef format);
+  public: String t_format(const String& format);
   public: static Array ti_getlasterrors();
   public: int64_t t_getoffset();
   public: int64_t t_gettimestamp();
   public: Variant t_gettimezone();
-  public: Object t_modify(CStrRef modify);
+  public: Object t_modify(const String& modify);
   public: Object t_setdate(int64_t year, int64_t month, int64_t day);
   public: Object t_setisodate(int64_t year, int64_t week, int64_t day = 1);
   public: Object t_settime(int64_t hour, int64_t minute, int64_t second = 0);
@@ -114,7 +115,7 @@ class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
   // need to implement
   public: c_DateTimeZone(Class* cls = c_DateTimeZone::classof());
   public: ~c_DateTimeZone();
-  public: void t___construct(CStrRef timezone);
+  public: void t___construct(const String& timezone);
   public: Array t_getlocation();
   public: String t_getname();
   public: int64_t t_getoffset(CObjRef datetime);
@@ -157,11 +158,11 @@ class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|
   // need to implement
   public: c_DateInterval(Class* cls = c_DateInterval::classof());
   public: ~c_DateInterval();
-  public: void t___construct(CStrRef interval_spec);
+  public: void t___construct(const String& interval_spec);
   public: Variant t___get(Variant member);
   public: Variant t___set(Variant member, Variant value);
-  public: static Object ti_createfromdatestring(CStrRef time);
-  public: String t_format(CStrRef format);
+  public: static Object ti_createfromdatestring(const String& time);
+  public: String t_format(const String& format);
 
 
   public: static Object wrap(SmartResource<DateInterval> di) {
@@ -199,31 +200,31 @@ Variant f_gmmktime(int hour = INT_MAX, int minute = INT_MAX,
                    int second = INT_MAX,
                    int month = INT_MAX, int day = INT_MAX,
                    int year = INT_MAX);
-Variant f_idate(CStrRef format, int64_t timestamp = TimeStamp::Current());
-Variant f_date(CStrRef format, int64_t timestamp = TimeStamp::Current());
-Variant f_gmdate(CStrRef format,
+Variant f_idate(const String& format, int64_t timestamp = TimeStamp::Current());
+Variant f_date(const String& format, int64_t timestamp = TimeStamp::Current());
+Variant f_gmdate(const String& format,
                  int64_t timestamp = TimeStamp::Current());
-Variant f_strftime(CStrRef format,
+Variant f_strftime(const String& format,
                    int64_t timestamp = TimeStamp::Current());
-String f_gmstrftime(CStrRef format,
+String f_gmstrftime(const String& format,
                     int64_t timestamp = TimeStamp::Current());
 Array f_getdate(int64_t timestamp = TimeStamp::Current());
 Array f_localtime(int64_t timestamp = TimeStamp::Current(),
                   bool is_associative = false);
-Variant f_strptime(CStrRef date, CStrRef format);
-Variant f_strtotime(CStrRef input,
+Variant f_strptime(const String& date, const String& format);
+Variant f_strtotime(const String& input,
                     int64_t timestamp = TimeStamp::Current());
 
 ///////////////////////////////////////////////////////////////////////////////
 // timezone
 
 String f_date_default_timezone_get();
-bool f_date_default_timezone_set(CStrRef name);
+bool f_date_default_timezone_set(const String& name);
 Array f_timezone_identifiers_list();
 Array f_timezone_abbreviations_list();
-Variant f_timezone_name_from_abbr(CStrRef abbr, int gmtoffset = -1,
+Variant f_timezone_name_from_abbr(const String& abbr, int gmtoffset = -1,
                                   bool isdst = true);
-Object f_timezone_open(CStrRef timezone);
+Object f_timezone_open(const String& timezone);
 Array f_timezone_location_get(CObjRef timezone);
 String f_timezone_name_get(CObjRef object);
 int64_t f_timezone_offset_get(CObjRef object, CObjRef dt);
@@ -235,10 +236,10 @@ String f_timezone_version_get();
 
 bool f_checkdate(int month, int day, int year);
 Object f_date_add(CObjRef datetime, CObjRef interval);
-Object f_date_create_from_format(CStrRef format,
-                                 CStrRef time,
+Object f_date_create_from_format(const String& format,
+                                 const String& time,
                                  CObjRef timezone = null_object);
-Object f_date_create(CStrRef time = null_string,
+Object f_date_create(const String& time = null_string,
                      CObjRef timezone = null_object);
 void f_date_date_set(CObjRef object, int year, int month, int day);
 Object f_date_diff(CObjRef datetime,
@@ -246,13 +247,13 @@ Object f_date_diff(CObjRef datetime,
                    bool absolute = false);
 void f_date_isodate_set(CObjRef object, int year, int week,
                         int day = 1);
-String f_date_format(CObjRef object, CStrRef format);
+String f_date_format(CObjRef object, const String& format);
 Array f_date_get_last_errors();
-Object f_date_interval_create_from_date_string(CStrRef time);
-String f_date_interval_format(CObjRef interval, CStrRef format_spec);
-void f_date_modify(CObjRef object, CStrRef modify);
+Object f_date_interval_create_from_date_string(const String& time);
+String f_date_interval_format(CObjRef interval, const String& format_spec);
+void f_date_modify(CObjRef object, const String& modify);
 int64_t f_date_offset_get(CObjRef object);
-Variant f_date_parse(CStrRef date);
+Variant f_date_parse(const String& date);
 void f_date_time_set(CObjRef object, int hour, int minute,
                      int second = 0);
 int64_t f_date_timestamp_get(CObjRef datetime);

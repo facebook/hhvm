@@ -54,7 +54,7 @@ extern const int64_t k_POSIX_X_OK;
 extern const int64_t k_POSIX_W_OK;
 extern const int64_t k_POSIX_R_OK;
 
-bool f_posix_access(CStrRef file, int mode = 0);
+bool f_posix_access(const String& file, int mode = 0);
 
 String f_posix_ctermid();
 
@@ -70,7 +70,7 @@ int64_t f_posix_getgid();
 
 Variant f_posix_getgrgid(int gid);
 
-Variant f_posix_getgrnam(CStrRef name);
+Variant f_posix_getgrnam(const String& name);
 
 Variant f_posix_getgroups();
 
@@ -84,7 +84,7 @@ int64_t f_posix_getpid();
 
 int64_t f_posix_getppid();
 
-Variant f_posix_getpwnam(CStrRef username);
+Variant f_posix_getpwnam(const String& username);
 
 Variant f_posix_getpwuid(int uid);
 
@@ -94,15 +94,15 @@ Variant f_posix_getsid(int pid);
 
 int64_t f_posix_getuid();
 
-bool f_posix_initgroups(CStrRef name, int base_group_id);
+bool f_posix_initgroups(const String& name, int base_group_id);
 
 bool f_posix_isatty(CVarRef fd);
 
 bool f_posix_kill(int pid, int sig);
 
-bool f_posix_mkfifo(CStrRef pathname, int mode);
+bool f_posix_mkfifo(const String& pathname, int mode);
 
-bool f_posix_mknod(CStrRef pathname, int mode, int major = 0, int minor = 0);
+bool f_posix_mknod(const String& pathname, int mode, int major = 0, int minor = 0);
 
 bool f_posix_setegid(int gid);
 

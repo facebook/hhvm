@@ -1,0 +1,26 @@
+# HHVM build results
+*.hhbc
+*.[oa]
+/hhvm/hhvm
+/hhvm/hphp
+
+# vim swapfiles
+.*.swp
+.*.swo
+
+# tags files
+*/tags
+*/TAGS
+
+# logs
+*.log
+
+# git patch files
+*.diff
+
+# OS X
+.DS_Store
+._.DS_Store
+
+# gdb
+.gdb_history

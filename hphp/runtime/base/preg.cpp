@@ -109,7 +109,7 @@ void pcre_reinit() {
   s_pcreCacheMap = newMap;
 }
 
-static const pcre_cache_entry* lookup_cached_pcre(CStrRef regex) {
+static const pcre_cache_entry* lookup_cached_pcre(const String& regex) {
   assert(s_pcreCacheMap);
   PCREStringMap::iterator it;
   if ((it = s_pcreCacheMap->find(regex.get())) != s_pcreCacheMap->end()) {
@@ -119,7 +119,7 @@ static const pcre_cache_entry* lookup_cached_pcre(CStrRef regex) {
 }
 
 static const pcre_cache_entry*
-insert_cached_pcre(CStrRef regex, const pcre_cache_entry* ent) {
+insert_cached_pcre(const String& regex, const pcre_cache_entry* ent) {
   assert(s_pcreCacheMap);
   auto pair = s_pcreCacheMap->insert(
     PCREEntry(makeStaticString(regex.get()), ent));
@@ -172,7 +172,8 @@ private:
 typedef FreeHelperImpl<true> SmartFreeHelper;
 }
 
-static const pcre_cache_entry* pcre_get_compiled_regex_cache(CStrRef regex) {
+static const pcre_cache_entry*
+pcre_get_compiled_regex_cache(const String& regex) {
   /* Try to lookup the cached regex entry, and if successful, just pass
      back the compiled pattern, otherwise go on and compile it. */
   if (const pcre_cache_entry* pce = lookup_cached_pcre(regex)) {
@@ -356,7 +357,7 @@ static int *create_offset_array(const pcre_cache_entry *pce,
   return (int *)smart_malloc(size_offsets * sizeof(int));
 }
 
-static pcre* pcre_get_compiled_regex(CStrRef regex, pcre_extra **extra,
+static pcre* pcre_get_compiled_regex(const String& regex, pcre_extra **extra,
                                      int *preg_options) {
   const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(regex);
   if (extra) {
@@ -368,8 +369,8 @@ static pcre* pcre_get_compiled_regex(CStrRef regex, pcre_extra **extra,
   return pce ? pce->re : nullptr;
 }
 
-static inline void add_offset_pair(Variant &result, CStrRef str, int offset,
-                                   const char *name) {
+static inline void add_offset_pair(Variant &result, const String& str,
+                                   int offset, const char *name) {
   ArrayInit match_pair(2);
   match_pair.set(str);
   match_pair.set(offset);
@@ -439,7 +440,7 @@ static void pcre_handle_exec_error(int pcre_code) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
+Variant preg_grep(const String& pattern, CArrRef input, int flags /* = 0 */) {
   const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
   if (pce == nullptr) {
     return false;
@@ -498,7 +499,7 @@ Variant preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
+static Variant preg_match_impl(const String& pattern, const String& subject,
                                Variant *subpats, int flags, int start_offset,
                                bool global) {
   const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
@@ -746,28 +747,29 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
   return matched;
 }
 
-Variant preg_match(CStrRef pattern, CStrRef subject,
+Variant preg_match(const String& pattern, const String& subject,
                    Variant &matches, int flags /* = 0 */,
                    int offset /* = 0 */) {
   return preg_match_impl(pattern, subject, &matches, flags, offset, false);
 }
-Variant preg_match(CStrRef pattern, CStrRef subject, int flags /* = 0 */,
-                   int offset /* = 0 */) {
+Variant preg_match(const String& pattern, const String& subject,
+                   int flags /* = 0 */, int offset /* = 0 */) {
   return preg_match_impl(pattern, subject, nullptr, flags, offset, false);
 }
 
-Variant preg_match_all(CStrRef pattern, CStrRef subject, Variant &matches,
+Variant preg_match_all(const String& pattern, const String& subject,
+                       Variant &matches,
                        int flags /* = 0 */, int offset /* = 0 */) {
   return preg_match_impl(pattern, subject, &matches, flags, offset, true);
 }
-Variant preg_match_all(CStrRef pattern, CStrRef subject,
+Variant preg_match_all(const String& pattern, const String& subject,
                        int flags /* = 0 */, int offset /* = 0 */) {
   return preg_match_impl(pattern, subject, nullptr, flags, offset, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static String preg_do_repl_func(CVarRef function, CStrRef subject,
+static String preg_do_repl_func(CVarRef function, const String& subject,
                                 int *offsets, int count) {
   Array subpats = Array::Create();
   for (int i = 0; i < count; i++) {
@@ -817,7 +819,7 @@ static bool preg_get_backref(const char **str, int *backref) {
   return true;
 }
 
-static String php_pcre_replace(CStrRef pattern, CStrRef subject,
+static String php_pcre_replace(const String& pattern, const String& subject,
                                CVarRef replace_var, bool callable,
                                int limit, int *replace_count) {
   const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
@@ -1324,7 +1326,10 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
     start_offset = offsets[1];
   }
 
-  start_offset = last_match - ssubject.data(); /* the offset might have been incremented, but without further successful matches */
+  start_offset = last_match - ssubject.data(); /* offset might have
+                                                * been incremented,
+                                                * but without further
+                                                * successful matches */
   if (!no_empty || start_offset < ssubject.size()) {
     if (offset_capture) {
       /* Add the last (match, offset) pair to the return value */
@@ -1344,7 +1349,8 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String preg_quote(CStrRef str, CStrRef delimiter /* = null_string */) {
+String preg_quote(const String& str,
+                  const String& delimiter /* = null_string */) {
   const char *in_str = str.data();
   const char *in_str_end = in_str + str.size();
 
@@ -1443,7 +1449,8 @@ static void php_reg_eprint(int err, regex_t *re) {
   smart_free(message);
 }
 
-Variant php_split(CStrRef spliton, CStrRef str, int count, bool icase) {
+Variant php_split(const String& spliton, const String& str, int count,
+                  bool icase) {
   const char *strp = str.data();
   const char *endp = strp + str.size();
 

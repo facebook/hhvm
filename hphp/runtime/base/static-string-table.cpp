@@ -17,8 +17,9 @@
 
 #include "folly/AtomicHashMap.h"
 
+#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 
 namespace HPHP {
 
@@ -90,9 +91,13 @@ struct strintern_hash {
   }
 };
 
-// The uint32_t is used to hold TargetCache offsets for constants
-typedef folly::AtomicHashMap<StrInternKey,uint32_t,strintern_hash,strintern_eq>
-        StringDataMap;
+// The uint32_t is used to hold RDS offsets for constants
+typedef folly::AtomicHashMap<
+  StrInternKey,
+  RDS::Link<TypedValue>,
+  strintern_hash,
+  strintern_eq
+> StringDataMap;
 StringDataMap* s_stringDataMap;
 
 // If a string is static it better be the one in the table.
@@ -126,7 +131,10 @@ StringData** precomputed_chars = precompute_chars();
 
 StringData* insertStaticString(StringSlice slice) {
   auto const sd = StringData::MakeStatic(slice);
-  auto pair = s_stringDataMap->insert(make_intern_key(sd), 0);
+  auto pair = s_stringDataMap->insert(
+    make_intern_key(sd),
+    RDS::Link<TypedValue>(RDS::kInvalidHandle)
+  );
   if (!pair.second) {
     sd->destructStatic();
   }
@@ -209,47 +217,45 @@ StringData* makeStaticString(char c) {
   return precomputed_chars[(uint8_t)c];
 }
 
-uint32_t lookupCnsHandle(const StringData* cnsName) {
+RDS::Handle lookupCnsHandle(const StringData* cnsName) {
   assert(s_stringDataMap);
   auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   if (it != s_stringDataMap->end()) {
-    return it->second;
+    return it->second.handle();
   }
   return 0;
 }
 
-uint32_t makeCnsHandle(const StringData* cnsName, bool persistent) {
-  uint32_t val = lookupCnsHandle(cnsName);
+RDS::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
+  auto const val = lookupCnsHandle(cnsName);
   if (val) return val;
   if (!cnsName->isStatic()) {
     // Its a dynamic constant, that doesn't correspond to
     // an already allocated handle. We'll allocate it in
-    // the request local TargetCache::s_constants instead.
+    // the request local RDS::s_constants instead.
     return 0;
   }
   auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   assert(it != s_stringDataMap->end());
-  if (!it->second) {
-    Transl::TargetCache::allocConstant(&it->second, persistent);
-  }
-  return it->second;
+  it->second.bind<kTVXmmAlign>(persistent ? RDS::Mode::Persistent
+                                          : RDS::Mode::Normal);
+  return it->second.handle();
 }
 
 const StaticString s_user("user");
 const StaticString s_Core("Core");
 Array lookupDefinedConstants(bool categorize /*= false */) {
   assert(s_stringDataMap);
-  Array usr(Transl::TargetCache::s_constants());
+  Array usr(RDS::s_constants());
   Array sys;
 
   for (StringDataMap::const_iterator it = s_stringDataMap->begin();
        it != s_stringDataMap->end(); ++it) {
-    if (it->second) {
+    if (it->second.bound()) {
       Array *tbl = (categorize &&
-                    Transl::TargetCache::isPersistentHandle(it->second))
+                    RDS::isPersistentHandle(it->second.handle()))
                  ? &sys : &usr;
-      auto& tv =
-        Transl::TargetCache::handleToRef<TypedValue>(it->second);
+      auto& tv = *it->second;
       if (tv.m_type != KindOfUninit) {
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         tbl->set(key, tvAsVariant(&tv), true);

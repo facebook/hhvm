@@ -23,24 +23,24 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_base64_decode(CStrRef data, bool strict = false);
-String f_base64_encode(CStrRef data);
+Variant f_base64_decode(const String& data, bool strict = false);
+String f_base64_encode(const String& data);
 
-Variant f_get_headers(CStrRef url, int format = 0);
-Array f_get_meta_tags(CStrRef filename, bool use_include_path = false);
+Variant f_get_headers(const String& url, int format = 0);
+Array f_get_meta_tags(const String& filename, bool use_include_path = false);
 
 Variant f_http_build_query(CVarRef formdata,
-                           CStrRef numeric_prefix = null_string,
-                           CStrRef arg_separator = null_string);
-Variant f_parse_url(CStrRef url, int component = -1);
+                           const String& numeric_prefix = null_string,
+                           const String& arg_separator = null_string);
+Variant f_parse_url(const String& url, int component = -1);
 
-String f_rawurldecode(CStrRef str);
+String f_rawurldecode(const String& str);
 
-String f_rawurlencode(CStrRef str);
+String f_rawurlencode(const String& str);
 
-String f_urldecode(CStrRef str);
+String f_urldecode(const String& str);
 
-String f_urlencode(CStrRef str);
+String f_urlencode(const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

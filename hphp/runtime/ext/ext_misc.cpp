@@ -47,6 +47,7 @@ const bool k_PHP_DEBUG =
         false;
 #endif
 
+const int64_t k_PHP_MAXPATHLEN = MAXPATHLEN;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -97,7 +98,7 @@ static Class* getClassByName(const char* name, int len) {
   return cls;
 }
 
-Variant f_constant(CStrRef name) {
+Variant f_constant(const String& name) {
   if (!name.get()) return uninit_null();
   const char *data = name.data();
   int len = name.length();
@@ -138,7 +139,7 @@ Variant f_constant(CStrRef name) {
   return uninit_null();
 }
 
-bool f_define(CStrRef name, CVarRef value,
+bool f_define(const String& name, CVarRef value,
               bool case_insensitive /* = false */) {
   if (case_insensitive) {
     raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
@@ -146,7 +147,7 @@ bool f_define(CStrRef name, CVarRef value,
   return Unit::defCns(name.get(), value.asCell());
 }
 
-bool f_defined(CStrRef name, bool autoload /* = true */) {
+bool f_defined(const String& name, bool autoload /* = true */) {
   if (!name.get()) return false;
   const char *data = name.data();
   int len = name.length();
@@ -193,7 +194,7 @@ Variant f_exit(CVarRef status /* = null_variant */) {
   throw ExitException(status.toInt32());
 }
 
-Variant f_get_browser(CStrRef user_agent /* = null_string */,
+Variant f_get_browser(const String& user_agent /* = null_string */,
                       bool return_array /* = false */) {
   throw NotSupportedException(__func__, "bad idea");
 }
@@ -202,7 +203,7 @@ void f___halt_compiler() {
   // do nothing
 }
 
-Variant f_show_source(CStrRef filename, bool ret /* = false */) {
+Variant f_show_source(const String& filename, bool ret /* = false */) {
   throw NotSupportedException(__func__, "PHP specific");
 }
 
@@ -210,11 +211,11 @@ int64_t f_ignore_user_abort(bool setting /* = false */) {
   return 0;
 }
 
-Variant f_pack(int _argc, CStrRef format, CArrRef _argv /* = null_array */) {
+Variant f_pack(int _argc, const String& format, CArrRef _argv /* = null_array */) {
   return ZendPack().pack(format, _argv);
 }
 
-bool f_php_check_syntax(CStrRef filename, VRefParam error_message /* = null */) {
+bool f_php_check_syntax(const String& filename, VRefParam error_message /* = null */) {
   throw NotSupportedException(__func__, "PHP specific");
 }
 
@@ -285,7 +286,7 @@ bool f_time_sleep_until(double timestamp) {
   return true;
 }
 
-String f_uniqid(CStrRef prefix /* = null_string */,
+String f_uniqid(const String& prefix /* = null_string */,
                 bool more_entropy /* = false */) {
   if (!more_entropy) {
     usleep(1);
@@ -307,7 +308,7 @@ String f_uniqid(CStrRef prefix /* = null_string */,
   return String(uniqid, CopyString);
 }
 
-Variant f_unpack(CStrRef format, CStrRef data) {
+Variant f_unpack(const String& format, const String& data) {
   return ZendPack().unpack(format, data);
 }
 
@@ -318,7 +319,7 @@ Array f_sys_getloadavg() {
 }
 
 
-Array f_token_get_all(CStrRef source) {
+Array f_token_get_all(const String& source) {
   Scanner scanner(source.data(), source.size(),
                   RuntimeOption::GetScannerType() | Scanner::ReturnAllTokens);
   ScannerToken tok;

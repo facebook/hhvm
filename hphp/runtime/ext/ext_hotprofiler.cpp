@@ -329,8 +329,8 @@ uint64_t
 get_allocs()
 {
 #ifdef USE_JEMALLOC
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  return mm->getAllocated();
+  auto& mm = MM();
+  return mm.getAllocated();
 #endif
 #ifdef USE_TCMALLOC
   if (MallocExtensionInstance) {
@@ -347,8 +347,8 @@ uint64_t
 get_frees()
 {
 #ifdef USE_JEMALLOC
-  MemoryManager *mm = MemoryManager::TheMemoryManager();
-  return mm->getDeallocated();
+  auto& mm = MM();
+  return mm.getDeallocated();
 #endif
 #ifdef USE_TCMALLOC
   if (MallocExtensionInstance) {
@@ -754,8 +754,7 @@ public:
     }
 
     if (m_flags & TrackMemory) {
-      MemoryManager *mm = MemoryManager::TheMemoryManager();
-      const MemoryUsageStats &stats = mm->getStats(true);
+      auto const& stats = MM().getStats();
       m_stack->m_mu_start  = stats.usage;
       m_stack->m_pmu_start = stats.peakUsage;
     } else if (m_flags & TrackMalloc) {
@@ -776,8 +775,7 @@ public:
     }
 
     if (m_flags & TrackMemory) {
-      MemoryManager *mm = MemoryManager::TheMemoryManager();
-      const MemoryUsageStats &stats = mm->getStats(true);
+      auto const& stats = MM().getStats();
       int64_t mu_end = stats.usage;
       int64_t pmu_end = stats.peakUsage;
       counts.memory += mu_end - m_stack->m_mu_start;
@@ -818,7 +816,7 @@ class TraceWalker {
 
   ~TraceWalker() {
     free(m_arcBuff);
-    for (auto& r : m_recursion) delete r.first;
+    for (auto& r : m_recursion) delete[] r.first;
   }
 
   void walk(TraceIterator begin, TraceIterator end, Stats& stats) {
@@ -841,7 +839,7 @@ class TraceWalker {
         Frame fr;
         fr.trace = current;
         fr.level = level - 1;
-        fr.len = strlen(current->symbol);
+        fr.len = symbolLength(current->symbol);
         checkArcBuff(fr.len);
         m_stack.push_back(fr);
       } else if (m_stack.size() > 1) {
@@ -957,6 +955,17 @@ class TraceWalker {
     incStats(m_arcBuff, tIt, callee, stats);
   }
 
+  // Computes the length of the symbol without $continuation on the
+  // end, to ensure that work done in continuations and the original
+  // function are counted together.
+  int symbolLength(const char* symbol) {
+    auto len = strlen(symbol);
+    if ((len > 13) && (strcmp(&symbol[len - 13], "$continuation") == 0)) {
+      return len - 13;
+    }
+    return len;
+  }
+
   vector<std::pair<char*, int>> m_recursion;
   vector<Frame> m_stack;
   int m_arcBuffLen;
@@ -1066,7 +1075,7 @@ class TraceProfiler : public Profiler {
     }
     {
       DECLARE_THREAD_INFO
-      MemoryManager::MaskAlloc masker(info->m_mm);
+      MemoryManager::MaskAlloc masker(*info->m_mm);
       TraceEntry *r = (TraceEntry*)realloc((void *)m_traceBuffer,
                                            new_array_size * sizeof(TraceEntry));
 
@@ -1116,8 +1125,7 @@ class TraceProfiler : public Profiler {
       te.cpu = vtsc(m_MHz);
     }
     if (m_flags & TrackMemory) {
-      MemoryManager *mm = MemoryManager::TheMemoryManager();
-      const MemoryUsageStats &stats = mm->getStats(true);
+      auto const& stats = MM().getStats();
       te.memory = stats.usage;
       te.peak_memory = stats.peakUsage;
     } else if (m_flags & TrackMalloc) {
@@ -1393,7 +1401,7 @@ public:
    * The whole purpose to make sure "const char *" is safe to take on these
    * strings.
    */
-  void cacheString(CStrRef name) {
+  void cacheString(const String& name) {
     m_artificialFrameNames.append(name);
   }
 
@@ -1461,7 +1469,7 @@ void f_fb_setprofile(CVarRef callback) {
   }
 }
 
-void f_xhprof_frame_begin(CStrRef name) {
+void f_xhprof_frame_begin(const String& name) {
 #ifdef HOTPROFILER
   Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
   if (prof) {

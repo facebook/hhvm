@@ -40,9 +40,9 @@ public:
 
   virtual bool support(SupportedMethod method);
   virtual bool closer();
-  virtual bool preparer(CStrRef sql, sp_PDOStatement *stmt, CVarRef options);
-  virtual int64_t doer(CStrRef sql);
-  virtual bool quoter(CStrRef input, String &quoted, PDOParamType paramtype);
+  virtual bool preparer(const String& sql, sp_PDOStatement *stmt, CVarRef options);
+  virtual int64_t doer(const String& sql);
+  virtual bool quoter(const String& input, String &quoted, PDOParamType paramtype);
   virtual bool begin();
   virtual bool commit();
   virtual bool rollback();
@@ -194,7 +194,7 @@ bool PDOSqliteConnection::closer() {
   return true;
 }
 
-bool PDOSqliteConnection::preparer(CStrRef sql, sp_PDOStatement *stmt,
+bool PDOSqliteConnection::preparer(const String& sql, sp_PDOStatement *stmt,
                                    CVarRef options) {
   if (options.toArray().exists(PDO_ATTR_CURSOR) &&
       options[PDO_ATTR_CURSOR].toInt64() != PDO_CURSOR_FWDONLY) {
@@ -217,7 +217,7 @@ bool PDOSqliteConnection::preparer(CStrRef sql, sp_PDOStatement *stmt,
   return false;
 }
 
-int64_t PDOSqliteConnection::doer(CStrRef sql) {
+int64_t PDOSqliteConnection::doer(const String& sql) {
   char *errmsg = NULL;
   if (sqlite3_exec(m_db, sql.data(), NULL, NULL, &errmsg) != SQLITE_OK) {
     handleError(__FILE__, __LINE__);
@@ -227,7 +227,7 @@ int64_t PDOSqliteConnection::doer(CStrRef sql) {
   return sqlite3_changes(m_db);
 }
 
-bool PDOSqliteConnection::quoter(CStrRef input, String &quoted,
+bool PDOSqliteConnection::quoter(const String& input, String &quoted,
                                  PDOParamType paramtype) {
   int len = 2 * input.size() + 3;
   String s(len, ReserveString);

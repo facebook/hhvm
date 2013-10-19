@@ -32,9 +32,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Object f_hphp_create_continuation(CStrRef clsname,
-                                          CStrRef funcname,
-                                          CStrRef origFuncName,
+Object f_hphp_create_continuation(const String& clsname,
+                                          const String& funcname,
+                                          const String& origFuncName,
                                           CArrRef args /* = null_array */) {
   throw_fatal("Invalid call hphp_create_continuation");
   return NULL;
@@ -87,7 +87,7 @@ void c_Continuation::t_update_key(int64_t label, CVarRef key, CVarRef value) {
 
 Object c_Continuation::t_getwaithandle() {
   if (m_waitHandle.isNull()) {
-    c_ContinuationWaitHandle::Create(this);
+    c_AsyncFunctionWaitHandle::Create(this);
     assert(!m_waitHandle.isNull());
   }
   return m_waitHandle;

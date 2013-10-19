@@ -30,10 +30,10 @@ namespace HPHP {
  * but the value held here must not be KindOfRef.
  *
  * RefData's are also used to implement static locals, but in this
- * case the RefData itself is allocated in TargetCache rather than on
+ * case the RefData itself is allocated in RDS rather than on
  * the heap.  Note that generally speaking a RefData should never
  * contain KindOfUninit, *except* uninitialized RefDatas for this
- * TargetCache case.
+ * RDS case.
  *
  * RefDatas are also used by the PHP extension compatibility layer to
  * represent "zvals". Because zvals can be shared by multiple things
@@ -42,10 +42,9 @@ namespace HPHP {
  * refcount of a RefData - instead the real refcount can be computed
  * by calling getRealCount() (which simply adds the m_count and m_cow
  * fields together). When the m_count field is decremented to 0, the
- * refdata_after_decref_helper() helper function gets called. This
- * help will either free the RefData (if the "real" refcount has
- * reached 0) or it will update the m_count and m_cow fields
- * appropriately.
+ * release() method gets called. This will either free the RefData
+ * (if the "real" refcount has reached 0) or it will update the
+ * m_count and m_cow fields appropriately.
  *
  * For more info on the PHP extension compatibility layer, check out
  * the documentation at "doc/php.extension.compat.layer".
@@ -54,43 +53,52 @@ struct RefData {
   enum class Magic : uint64_t { kMagic = 0xfacefaceb00cb00c };
 
   /*
-   * Some RefData's (static locals) are allocated in TargetCache, and
+   * Some RefData's (static locals) are allocated in RDS, and
    * live until the end of the request.  In this case, we start with a
    * reference count to keep it alive.
    *
-   * Note that the JIT accesses target cache RefDatas directly---if
-   * you need to change how initialization works it keep that up to
-   * date.
+   * Note that the JIT accesses RDS RefDatas directly---if you need to
+   * change how initialization works it keep that up to date.
    */
-  void initInTargetCache() {
-    assert(isUninitializedInTargetCache());
+  void initInRDS() {
+    assert(isUninitializedInRDS());
     m_count = 1;
     assert(static_cast<bool>(m_magic = Magic::kMagic)); // assign magic
     assert(m_cowAndZ == 0);
   }
 
   /*
-   * For RefDatas in TargetCache, we need a way to check if they are
+   * For RefDatas in RDS, we need a way to check if they are
    * initialized while avoiding the usual m_magic assertions (m_magic
    * will be zero if it's not initialized).  This function does that.
    */
-  bool isUninitializedInTargetCache() const {
+  bool isUninitializedInRDS() const {
     return m_tv.m_type == KindOfUninit;
   }
 
   /*
    * Create a RefData, allocated in the request local heap.
    */
-  static RefData* Make(DataType t, int64_t datum) {
-    return new (MM().smartMallocSize(sizeof(RefData))) RefData(t, datum);
+  static RefData* Make(TypedValue tv) {
+    return new (MM().smartMallocSizeLogged(sizeof(RefData)))
+      RefData(tv.m_type, tv.m_data.num);
   }
 
   /*
    * Deallocate a RefData.
    */
   void release() {
+    if (UNLIKELY(m_cow)) {
+      m_count = 1;
+      m_cowAndZ = 0;
+      return;
+    }
     this->~RefData();
-    MM().smartFreeSize(this, sizeof(RefData));
+    MM().smartFreeSizeLogged(this, sizeof(RefData));
+  }
+
+  void releaseMem() const {
+    MM().smartFreeSizeLogged(const_cast<RefData*>(this), sizeof(RefData));
   }
 
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
@@ -305,22 +313,9 @@ public:
 
 ALWAYS_INLINE void decRefRef(RefData* ref) {
   if (ref->decRefCount() == 0) {
-    if (ref->m_cow) {
-      ref->m_count = 1;
-      ref->m_cowAndZ = 0;
-      return;
-    }
     ref->release();
   }
 }
-
-/**
- * When m_count is decremented and reaches 0, this helper function is called.
- * If the "real" refcount (as given by getRealCount()) is 0 the RefData will
- * be freed, otherwise the RefData's m_count, m_cow, and m_z fields will be
- * updated appropriately.
- */
-void refdata_after_decref_helper(RefData* ref);
 
 } // namespace HPHP
 

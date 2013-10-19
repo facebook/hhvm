@@ -56,7 +56,8 @@ struct IRTranslator {
   IRTranslator(Offset bcOff, Offset spOff, const Func* curFunc);
 
   void translateInstr(const NormalizedInstruction& i);
-  void checkType(const Transl::Location& l, const Transl::RuntimeType& rtt);
+  void checkType(const Transl::Location& l, const Transl::RuntimeType& rtt,
+                 bool outerOnly);
   void assertType(const Transl::Location&, const Transl::RuntimeType&);
   HhbcTranslator& hhbcTrans() { return m_hhbcTrans; }
 

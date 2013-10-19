@@ -31,9 +31,9 @@ public:
   virtual ~UserFile();
 
   // overriding ResourceData
-  CStrRef o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const { return classnameof(); }
 
-  virtual bool open(CStrRef filename, CStrRef mode);
+  virtual bool open(const String& filename, const String& mode);
   virtual bool close();
   virtual int64_t readImpl(char *buffer, int64_t length);
   virtual int getc() {
@@ -61,8 +61,9 @@ protected:
   int m_options;
   Object m_obj;
 
-  Variant invoke(const Func *func, CStrRef name, CArrRef args, bool &success);
-  Variant invoke(const Func *func, CStrRef name, CArrRef args) {
+  Variant invoke(const Func *func, const String& name, CArrRef args,
+                 bool &success);
+  Variant invoke(const Func *func, const String& name, CArrRef args) {
     bool success;
     return invoke(func, name, args, success);
   }

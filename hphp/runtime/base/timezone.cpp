@@ -104,7 +104,7 @@ timelib_tzinfo* TimeZone::GetTimeZoneInfoRaw(char* name,
   return GetTimeZoneInfo(name, db).get();
 }
 
-bool TimeZone::IsValid(CStrRef name) {
+bool TimeZone::IsValid(const String& name) {
   return timelib_timezone_id_is_valid((char*)name.data(), GetDatabase());
 }
 
@@ -136,7 +136,7 @@ SmartResource<TimeZone> TimeZone::Current() {
   return NEWOBJ(TimeZone)(CurrentName());
 }
 
-bool TimeZone::SetCurrent(CStrRef zone) {
+bool TimeZone::SetCurrent(const String& zone) {
   if (!IsValid(zone)) {
     raise_notice("Timezone ID '%s' is invalid", zone.data());
     return false;
@@ -201,7 +201,7 @@ TimeZone::TimeZone() {
   m_tzi = TimeZoneInfo();
 }
 
-TimeZone::TimeZone(CStrRef name) {
+TimeZone::TimeZone(const String& name) {
   m_tzi = GetTimeZoneInfo((char*)name.data(), GetDatabase());
 }
 

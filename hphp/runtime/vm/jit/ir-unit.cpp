@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/vm/jit/ir-unit.h"
-
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-trace.h"
 
@@ -56,33 +55,29 @@ SSATmp* IRUnit::findConst(ConstData& cdata, Type ctype) {
   return m_constTable.insert(cloneInstruction(&inst)->dst());
 }
 
-IRTrace* IRUnit::makeTrace(const Func* func, uint32_t bcOff) {
-  return new (m_arena) IRTrace(*this, defBlock(func), bcOff);
-}
-
-IRTrace* IRUnit::makeMain(const Func* func, uint32_t bcOff) {
+Block* IRUnit::makeMain(const Func* func, uint32_t bcOff) {
   assert(!m_main);
-  return m_main = makeTrace(func, bcOff);
+  auto entry = defBlock(func);
+  m_bcOff = bcOff;
+  m_main = new (m_arena) IRTrace(*this, entry);
+  return entry;
 }
 
-IRTrace* IRUnit::addExit(const Func* func, uint32_t bcOff) {
-  auto exit = makeTrace(func, bcOff);
-  m_exits.push_back(exit);
+Block* IRUnit::addExit(const Func* func) {
+  auto exit = defBlock(func);
+  exit->setHint(Block::Hint::Unlikely);
+  m_exits.push_back(new (m_arena) IRTrace(*this, exit));
   return exit;
 }
 
+Block* IRUnit::entry() const {
+  return m_main->front();
+}
+
+// IRTrace methods declared here because of circular dependencies.
+
 bool IRTrace::isMain() const {
   return this == m_unit.main();
-}
-
-IRUnit::ExitList& IRTrace::exitTraces() {
-  assert(isMain());
-  return m_unit.exits();
-}
-
-const IRUnit::ExitList& IRTrace::exitTraces() const {
-  assert(isMain());
-  return m_unit.exits();
 }
 
 }}

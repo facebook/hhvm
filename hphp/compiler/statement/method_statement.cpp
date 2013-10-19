@@ -199,6 +199,18 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
   FunctionScopeRawPtr fs = getFunctionScope();
   const bool isNative = fs->isNative();
   if (m_modifiers) {
+    if ((m_modifiers->isExplicitlyPublic() +
+         m_modifiers->isProtected() +
+         m_modifiers->isPrivate()) > 1) {
+      m_modifiers->parseTimeFatal(
+        Compiler::InvalidAttribute,
+        "%s: method %s::%s()",
+        Strings::PICK_ACCESS_MODIFIER,
+        classScope->getOriginalName().c_str(),
+        getOriginalName().c_str()
+      );
+    }
+
     if (classScope->isInterface()) {
       if (m_modifiers->isProtected() || m_modifiers->isPrivate() ||
           m_modifiers->isAbstract()  || m_modifiers->isFinal() ||
@@ -207,6 +219,15 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
           Compiler::InvalidAttribute,
           "Access type for interface method %s::%s() must be omitted",
           classScope->getOriginalName().c_str(), getOriginalName().c_str());
+      }
+      // FIXME: WholeProgram check is temporary (t3044335)
+      if (!Option::WholeProgram && m_modifiers->isAsync()) {
+        m_modifiers->parseTimeFatal(
+          Compiler::InvalidAttribute,
+          Strings::ASYNC_WITHOUT_BODY,
+          "interface", classScope->getOriginalName().c_str(),
+          getOriginalName().c_str()
+        );
       }
     }
     if (m_modifiers->isAbstract()) {
@@ -232,6 +253,15 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
                        "Abstract method %s::%s() cannot contain body",
                        classScope->getOriginalName().c_str(),
                        getOriginalName().c_str());
+      }
+      // FIXME: WholeProgram check is temporary (t3044335)
+      if (!Option::WholeProgram && m_modifiers->isAsync()) {
+        m_modifiers->parseTimeFatal(
+          Compiler::InvalidAttribute,
+          Strings::ASYNC_WITHOUT_BODY,
+          "abstract", classScope->getOriginalName().c_str(),
+          getOriginalName().c_str()
+        );
       }
     }
     if (isNative) {
@@ -419,7 +449,7 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
           funcScope->setOverriding(Type::Variant, Type::Variant);
           paramCount = 1;
         } else if (m_name == "__tostring") {
-          funcScope->setOverriding(Type::String);
+          // do nothing
         } else if (m_name == "__clone") {
           funcScope->setOverriding(Type::Variant);
         } else {

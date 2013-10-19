@@ -1,0 +1,7 @@
+string(0) ""
+string(6) "foobar"
+string(13) "foobar foobar"
+HipHop Warning: unable to decode base64 data in %s/test/slow/data-rfc2397/bad-data.php on line 14
+bool(false)
+HipHop Warning: unable to decode base64 data in %s/test/slow/data-rfc2397/bad-data.php on line 14
+bool(false)

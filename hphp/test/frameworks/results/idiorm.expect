@@ -1,0 +1,411 @@
+PHPUnit 3.7.27 by Sebastian Bergmann.
+
+Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/idiorm/phpunit.xml
+
+
+Starting test 'CacheTest::testQueryGenerationOnlyOccursOnce'.
+.
+Starting test 'CacheTest::testQueryGenerationOnlyOccursOnceWithMultipleConnections'.
+.
+Starting test 'ConfigTest::testSettingIdColumn'.
+.
+Starting test 'ConfigTest::testSettingIdColumnOverridesOne'.
+.
+Starting test 'ConfigTest::testSettingIdColumnOverridesTwo'.
+.
+Starting test 'ConfigTest::testSettingIdColumnOverridesThree'.
+.
+Starting test 'ConfigTest::testInstanceIdColumnOne'.
+.
+Starting test 'ConfigTest::testInstanceIdColumnTwo'.
+.
+Starting test 'ConfigTest::testInstanceIdColumnThree'.
+.
+Starting test 'ConfigTest::testGetConfig'.
+.
+Starting test 'ConfigTest::testGetConfigArray'.
+.
+Starting test 'IdiormResultSetTest::testGet'.
+.
+Starting test 'IdiormResultSetTest::testConstructor'.
+.
+Starting test 'IdiormResultSetTest::testSetResultsAndGetResults'.
+.
+Starting test 'IdiormResultSetTest::testAsArray'.
+.
+Starting test 'IdiormResultSetTest::testCount'.
+.
+Starting test 'IdiormResultSetTest::testGetIterator'.
+.
+Starting test 'IdiormResultSetTest::testForeach'.
+.
+Starting test 'IdiormResultSetTest::testCallingMethods'.
+.
+Starting test 'MultipleConnectionTest::testMultiplePdoConnections'.
+.
+Starting test 'MultipleConnectionTest::testRawExecuteOverAlternateConnection'.
+.
+Starting test 'MultipleConnectionTest::testFindOneOverDifferentConnections'.
+.
+Starting test 'ORMTest::testStaticAtrributes'.
+.
+Starting test 'ORMTest::testForTable'.
+.
+Starting test 'ORMTest::testCreate'.
+.
+Starting test 'ORMTest::testIsNew'.
+.
+Starting test 'ORMTest::testIsDirty'.
+.
+Starting test 'ORMTest::testArrayAccess'.
+.
+Starting test 'ORMTest::testFindResultSet'.
+.
+Starting test 'ORMTest::testFindResultSetByDefault'.
+.
+Starting test 'ORMTest::testGetLastPdoStatement'.
+.
+Starting test 'QueryBuilderMssqlTest::testFindOne'.
+.
+Starting test 'QueryBuilderMssqlTest::testLimit'.
+.
+Starting test 'QueryBuilderTest::testFindMany'.
+.
+Starting test 'QueryBuilderTest::testFindOne'.
+.
+Starting test 'QueryBuilderTest::testFindOneWithPrimaryKeyFilter'.
+.
+Starting test 'QueryBuilderTest::testWhereIdIs'.
+.
+Starting test 'QueryBuilderTest::testSingleWhereClause'.
+.
+Starting test 'QueryBuilderTest::testMultipleWhereClauses'.
+.
+Starting test 'QueryBuilderTest::testWhereNotEqual'.
+.
+Starting test 'QueryBuilderTest::testWhereLike'.
+.
+Starting test 'QueryBuilderTest::testWhereNotLike'.
+.
+Starting test 'QueryBuilderTest::testWhereIn'.
+.
+Starting test 'QueryBuilderTest::testWhereNotIn'.
+.
+Starting test 'QueryBuilderTest::testLimit'.
+.
+Starting test 'QueryBuilderTest::testLimitAndOffset'.
+.
+Starting test 'QueryBuilderTest::testOrderByDesc'.
+.
+Starting test 'QueryBuilderTest::testOrderByAsc'.
+.
+Starting test 'QueryBuilderTest::testOrderByExpression'.
+.
+Starting test 'QueryBuilderTest::testMultipleOrderBy'.
+.
+Starting test 'QueryBuilderTest::testGroupBy'.
+.
+Starting test 'QueryBuilderTest::testMultipleGroupBy'.
+.
+Starting test 'QueryBuilderTest::testGroupByExpression'.
+.
+Starting test 'QueryBuilderTest::testHaving'.
+.
+Starting test 'QueryBuilderTest::testMultipleHaving'.
+.
+Starting test 'QueryBuilderTest::testHavingNotEqual'.
+.
+Starting test 'QueryBuilderTest::testHavingLike'.
+.
+Starting test 'QueryBuilderTest::testHavingNotLike'.
+.
+Starting test 'QueryBuilderTest::testHavingIn'.
+.
+Starting test 'QueryBuilderTest::testHavingNotIn'.
+.
+Starting test 'QueryBuilderTest::testHavingLessThan'.
+.
+Starting test 'QueryBuilderTest::testHavingLessThanOrEqualAndGreaterThanOrEqual'.
+.
+Starting test 'QueryBuilderTest::testHavingNull'.
+.  63 / 200 ( 31%)
+
+Starting test 'QueryBuilderTest::testHavingNotNull'.
+.
+Starting test 'QueryBuilderTest::testRawHaving'.
+.
+Starting test 'QueryBuilderTest::testComplexQuery'.
+.
+Starting test 'QueryBuilderTest::testWhereLessThanAndGreaterThan'.
+.
+Starting test 'QueryBuilderTest::testWhereLessThanAndEqualAndGreaterThanAndEqual'.
+.
+Starting test 'QueryBuilderTest::testWhereNull'.
+.
+Starting test 'QueryBuilderTest::testWhereNotNull'.
+.
+Starting test 'QueryBuilderTest::testRawWhereClause'.
+.
+Starting test 'QueryBuilderTest::testRawWhereClauseWithPercentSign'.
+.
+Starting test 'QueryBuilderTest::testRawWhereClauseWithNoParameters'.
+.
+Starting test 'QueryBuilderTest::testRawWhereClauseInMethodChain'.
+.
+Starting test 'QueryBuilderTest::testRawQuery'.
+.
+Starting test 'QueryBuilderTest::testRawQueryWithParameters'.
+.
+Starting test 'QueryBuilderTest::testSimpleResultColumn'.
+.
+Starting test 'QueryBuilderTest::testMultipleSimpleResultColumns'.
+.
+Starting test 'QueryBuilderTest::testSpecifyTableNameAndColumnInResultColumns'.
+.
+Starting test 'QueryBuilderTest::testMainTableAlias'.
+.
+Starting test 'QueryBuilderTest::testAliasesInResultColumns'.
+.
+Starting test 'QueryBuilderTest::testAliasesInSelectManyResults'.
+.
+Starting test 'QueryBuilderTest::testLiteralExpressionInResultColumn'.
+.
+Starting test 'QueryBuilderTest::testLiteralExpressionInSelectManyResultColumns'.
+.
+Starting test 'QueryBuilderTest::testSimpleJoin'.
+.
+Starting test 'QueryBuilderTest::testSimpleJoinWithWhereIdIsMethod'.
+.
+Starting test 'QueryBuilderTest::testInnerJoin'.
+.
+Starting test 'QueryBuilderTest::testLeftOuterJoin'.
+.
+Starting test 'QueryBuilderTest::testRightOuterJoin'.
+.
+Starting test 'QueryBuilderTest::testFullOuterJoin'.
+.
+Starting test 'QueryBuilderTest::testMultipleJoinSources'.
+.
+Starting test 'QueryBuilderTest::testJoinWithAliases'.
+.
+Starting test 'QueryBuilderTest::testJoinWithAliasesAndWhere'.
+.
+Starting test 'QueryBuilderTest::testJoinWithStringConstraint'.
+.
+Starting test 'QueryBuilderTest::testSelectWithDistinct'.
+.
+Starting test 'QueryBuilderTest::testInsertData'.
+.
+Starting test 'QueryBuilderTest::testInsertDataContainingAnExpression'.
+.
+Starting test 'QueryBuilderTest::testInsertDataUsingArrayAccess'.
+.
+Starting test 'QueryBuilderTest::testUpdateData'.
+.
+Starting test 'QueryBuilderTest::testUpdateDataContainingAnExpression'.
+.
+Starting test 'QueryBuilderTest::testUpdateMultipleFields'.
+.
+Starting test 'QueryBuilderTest::testUpdateMultipleFieldsContainingAnExpression'.
+.
+Starting test 'QueryBuilderTest::testUpdateMultipleFieldsContainingAnExpressionAndOverridePreviouslySetExpression'.
+.
+Starting test 'QueryBuilderTest::testDeleteData'.
+.
+Starting test 'QueryBuilderTest::testDeleteMany'.
+.
+Starting test 'QueryBuilderTest::testCount'.
+.
+Starting test 'QueryBuilderTest::testIgnoreSelectAndCount'.
+.
+Starting test 'QueryBuilderTest::testMax'.
+.
+Starting test 'QueryBuilderTest::testMin'.
+.
+Starting test 'QueryBuilderTest::testAvg'.
+.
+Starting test 'QueryBuilderTest::testSum'.
+.
+Starting test 'QueryBuilderTest::testIssue12IncorrectQuotingOfColumnWildcard'.
+.
+Starting test 'QueryBuilderTest::testIssue57LogQueryRaisesWarningWhenPercentSymbolSupplied'.
+.
+Starting test 'QueryBuilderTest::testIssue57LogQueryRaisesWarningWhenQuestionMarkSupplied'.
+.
+Starting test 'QueryBuilderTest::testIssue74EscapingQuoteMarksIn_quote_identifier_part'.
+.
+Starting test 'QueryBuilderTest::testIssue90UsingSetExprAloneDoesTriggerQueryGeneration'.
+.
+Starting test 'ConfigTest53::testLoggerCallback'.
+.
+Starting test 'QueryBuilderPsr1Test53::testFindMany'.
+.
+Starting test 'QueryBuilderPsr1Test53::testFindOne'.
+.
+Starting test 'QueryBuilderPsr1Test53::testFindOneWithPrimaryKeyFilter'.
+.
+Starting test 'QueryBuilderPsr1Test53::testWhereIdIs'.
+.
+Starting test 'QueryBuilderPsr1Test53::testSingleWhereClause'.
+.
+Starting test 'QueryBuilderPsr1Test53::testMultipleWhereClauses'.
+.
+Starting test 'QueryBuilderPsr1Test53::testWhereNotEqual'.
+.
+Starting test 'QueryBuilderPsr1Test53::testWhereLike'.
+.
+Starting test 'QueryBuilderPsr1Test53::testWhereNotLike'.
+. 126 / 200 ( 63%)
+
+Starting test 'QueryBuilderPsr1Test53::testWhereIn'.
+.
+Starting test 'QueryBuilderPsr1Test53::testWhereNotIn'.
+.
+Starting test 'QueryBuilderPsr1Test53::testLimit'.
+.
+Starting test 'QueryBuilderPsr1Test53::testLimitAndOffset'.
+.
+Starting test 'QueryBuilderPsr1Test53::testOrderByDesc'.
+.
+Starting test 'QueryBuilderPsr1Test53::testOrderByAsc'.
+.
+Starting test 'QueryBuilderPsr1Test53::testOrderByExpression'.
+.
+Starting test 'QueryBuilderPsr1Test53::testMultipleOrderBy'.
+.
+Starting test 'QueryBuilderPsr1Test53::testGroupBy'.
+.
+Starting test 'QueryBuilderPsr1Test53::testMultipleGroupBy'.
+.
+Starting test 'QueryBuilderPsr1Test53::testGroupByExpression'.
+.
+Starting test 'QueryBuilderPsr1Test53::testHaving'.
+.
+Starting test 'QueryBuilderPsr1Test53::testMultipleHaving'.
+.
+Starting test 'QueryBuilderPsr1Test53::testHavingNotEqual'.
+.
+Starting test 'QueryBuilderPsr1Test53::testHavingLike'.
+.
+Starting test 'QueryBuilderPsr1Test53::testHavingNotLike'.
+.
+Starting test 'QueryBuilderPsr1Test53::testHavingIn'.
+.
+Starting test 'QueryBuilderPsr1Test53::testHavingNotIn'.
+.
+Starting test 'QueryBuilderPsr1Test53::testHavingLessThan'.
+.
+Starting test 'QueryBuilderPsr1Test53::testHavingLessThanOrEqualAndGreaterThanOrEqual'.
+.
+Starting test 'QueryBuilderPsr1Test53::testHavingNull'.
+.
+Starting test 'QueryBuilderPsr1Test53::testHavingNotNull'.
+.
+Starting test 'QueryBuilderPsr1Test53::testRawHaving'.
+.
+Starting test 'QueryBuilderPsr1Test53::testComplexQuery'.
+.
+Starting test 'QueryBuilderPsr1Test53::testWhereLessThanAndGreaterThan'.
+.
+Starting test 'QueryBuilderPsr1Test53::testWhereLessThanAndEqualAndGreaterThanAndEqual'.
+.
+Starting test 'QueryBuilderPsr1Test53::testWhereNull'.
+.
+Starting test 'QueryBuilderPsr1Test53::testWhereNotNull'.
+.
+Starting test 'QueryBuilderPsr1Test53::testRawWhereClause'.
+.
+Starting test 'QueryBuilderPsr1Test53::testRawWhereClauseWithPercentSign'.
+.
+Starting test 'QueryBuilderPsr1Test53::testRawWhereClauseWithNoParameters'.
+.
+Starting test 'QueryBuilderPsr1Test53::testRawWhereClauseInMethodChain'.
+.
+Starting test 'QueryBuilderPsr1Test53::testRawQuery'.
+.
+Starting test 'QueryBuilderPsr1Test53::testRawQueryWithParameters'.
+.
+Starting test 'QueryBuilderPsr1Test53::testSimpleResultColumn'.
+.
+Starting test 'QueryBuilderPsr1Test53::testMultipleSimpleResultColumns'.
+.
+Starting test 'QueryBuilderPsr1Test53::testSpecifyTableNameAndColumnInResultColumns'.
+.
+Starting test 'QueryBuilderPsr1Test53::testMainTableAlias'.
+.
+Starting test 'QueryBuilderPsr1Test53::testAliasesInResultColumns'.
+.
+Starting test 'QueryBuilderPsr1Test53::testAliasesInSelectManyResults'.
+.
+Starting test 'QueryBuilderPsr1Test53::testLiteralExpressionInResultColumn'.
+.
+Starting test 'QueryBuilderPsr1Test53::testLiteralExpressionInSelectManyResultColumns'.
+.
+Starting test 'QueryBuilderPsr1Test53::testSimpleJoin'.
+.
+Starting test 'QueryBuilderPsr1Test53::testSimpleJoinWithWhereIdIsMethod'.
+.
+Starting test 'QueryBuilderPsr1Test53::testInnerJoin'.
+.
+Starting test 'QueryBuilderPsr1Test53::testLeftOuterJoin'.
+.
+Starting test 'QueryBuilderPsr1Test53::testRightOuterJoin'.
+.
+Starting test 'QueryBuilderPsr1Test53::testFullOuterJoin'.
+.
+Starting test 'QueryBuilderPsr1Test53::testMultipleJoinSources'.
+.
+Starting test 'QueryBuilderPsr1Test53::testJoinWithAliases'.
+.
+Starting test 'QueryBuilderPsr1Test53::testJoinWithAliasesAndWhere'.
+.
+Starting test 'QueryBuilderPsr1Test53::testJoinWithStringConstraint'.
+.
+Starting test 'QueryBuilderPsr1Test53::testSelectWithDistinct'.
+.
+Starting test 'QueryBuilderPsr1Test53::testInsertData'.
+.
+Starting test 'QueryBuilderPsr1Test53::testInsertDataContainingAnExpression'.
+.
+Starting test 'QueryBuilderPsr1Test53::testInsertDataUsingArrayAccess'.
+.
+Starting test 'QueryBuilderPsr1Test53::testUpdateData'.
+.
+Starting test 'QueryBuilderPsr1Test53::testUpdateDataContainingAnExpression'.
+.
+Starting test 'QueryBuilderPsr1Test53::testUpdateMultipleFields'.
+.
+Starting test 'QueryBuilderPsr1Test53::testUpdateMultipleFieldsContainingAnExpression'.
+.
+Starting test 'QueryBuilderPsr1Test53::testUpdateMultipleFieldsContainingAnExpressionAndOverridePreviouslySetExpression'.
+.
+Starting test 'QueryBuilderPsr1Test53::testDeleteData'.
+.
+Starting test 'QueryBuilderPsr1Test53::testDeleteMany'.
+. 189 / 200 ( 94%)
+
+Starting test 'QueryBuilderPsr1Test53::testCount'.
+.
+Starting test 'QueryBuilderPsr1Test53::testIgnoreSelectAndCount'.
+.
+Starting test 'QueryBuilderPsr1Test53::testMax'.
+.
+Starting test 'QueryBuilderPsr1Test53::testMin'.
+.
+Starting test 'QueryBuilderPsr1Test53::testAvg'.
+.
+Starting test 'QueryBuilderPsr1Test53::testSum'.
+.
+Starting test 'QueryBuilderPsr1Test53::testIssue12IncorrectQuotingOfColumnWildcard'.
+.
+Starting test 'QueryBuilderPsr1Test53::testIssue57LogQueryRaisesWarningWhenPercentSymbolSupplied'.
+.
+Starting test 'QueryBuilderPsr1Test53::testIssue57LogQueryRaisesWarningWhenQuestionMarkSupplied'.
+.
+Starting test 'QueryBuilderPsr1Test53::testIssue74EscapingQuoteMarksIn_quote_identifier_part'.
+.
+Starting test 'QueryBuilderPsr1Test53::testIssue90UsingSetExprAloneDoesTriggerQueryGeneration'.
+.
+
+Time: 12.32 seconds, Memory: 7.89Mb
+OK (200 tests, 226 assertions)

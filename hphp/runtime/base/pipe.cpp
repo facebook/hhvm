@@ -30,7 +30,7 @@ Pipe::~Pipe() {
   closeImpl();
 }
 
-bool Pipe::open(CStrRef filename, CStrRef mode) {
+bool Pipe::open(const String& filename, const String& mode) {
   assert(m_stream == nullptr);
   assert(m_fd == -1);
 

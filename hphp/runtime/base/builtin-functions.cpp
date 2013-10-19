@@ -74,6 +74,8 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
+typedef smart::unique_ptr<CufIter>::type SmartCufIterPtr;
+
 bool array_is_valid_callback(CArrRef arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
@@ -351,7 +353,62 @@ Variant vm_call_user_func(CVarRef function, CArrRef params,
   return ret;
 }
 
-Variant invoke(CStrRef function, CArrRef params, strhash_t hash /* = -1 */,
+/*
+ * Helper method from converting between a PHP function and a CufIter.
+ */
+static bool vm_decode_function_cufiter(CVarRef function,
+                                       SmartCufIterPtr& cufIter) {
+  ObjectData* obj = nullptr;
+  HPHP::Class* cls = nullptr;
+  HPHP::Transl::CallerFrame cf;
+  StringData* invName = nullptr;
+  // Don't warn here, let the caller decide what to do if the func is nullptr.
+  const HPHP::Func* func = vm_decode_function(function, cf(), false,
+                                              obj, cls, invName, false);
+  if (func == nullptr) {
+    return false;
+  }
+
+  cufIter = smart::make_unique<CufIter>();
+  cufIter->setFunc(func);
+  cufIter->setName(invName);
+  if (obj) {
+    cufIter->setCtx(obj);
+    obj->incRefCount();
+  } else {
+    cufIter->setCtx(cls);
+  }
+
+  return true;
+}
+
+/*
+ * Wraps calling an (autoload) PHP function from a CufIter.
+ */
+static Variant vm_call_user_func_cufiter(const CufIter& cufIter,
+                                         CArrRef params) {
+  ObjectData* obj = nullptr;
+  HPHP::Class* cls = nullptr;
+  StringData* invName = cufIter.name();
+  const HPHP::Func* f = cufIter.func();
+  if (cufIter.ctx()) {
+    if (uintptr_t(cufIter.ctx()) & 1) {
+      cls = (Class*)(uintptr_t(cufIter.ctx()) & ~1);
+    } else {
+      obj = (ObjectData*)cufIter.ctx();
+    }
+  }
+  assert(!obj || !cls);
+  if (invName) {
+    invName->incRefCount();
+  }
+  Variant ret;
+  g_vmContext->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
+                          nullptr, invName, ExecutionContext::InvokeCuf);
+  return ret;
+}
+
+Variant invoke(const String& function, CArrRef params, strhash_t hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   Func* func = Unit::loadFunc(function.get());
   if (func) {
@@ -368,8 +425,8 @@ Variant invoke(const char *function, CArrRef params, strhash_t hash /* = -1*/,
   return invoke(funcName, params, hash, tryInterp, fatal);
 }
 
-Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
-                             bool fatal /* = true */) {
+Variant invoke_static_method(const String& s, const String& method,
+                             CArrRef params, bool fatal /* = true */) {
   HPHP::Class* class_ = Unit::lookupClass(s.get());
   if (class_ == nullptr) {
     o_invoke_failed(s.data(), method.data(), fatal);
@@ -432,7 +489,7 @@ void NEVER_INLINE throw_null_object_prop() {
   raise_error("Trying to set property of non-object");
 }
 
-void NEVER_INLINE throw_invalid_property_name(CStrRef name) {
+void NEVER_INLINE throw_invalid_property_name(const String& name) {
   if (!name.size()) {
     throw EmptyObjectPropertyException();
   } else {
@@ -497,11 +554,11 @@ void check_collection_cast_to_array() {
   }
 }
 
-Object create_object_only(CStrRef s) {
+Object create_object_only(const String& s) {
   return g_vmContext->createObjectOnly(s.get());
 }
 
-Object create_object(CStrRef s, CArrRef params, bool init /* = true */) {
+Object create_object(const String& s, CArrRef params, bool init /* = true */) {
   return g_vmContext->createObject(s.get(), params, init);
 }
 
@@ -747,13 +804,13 @@ Variant unserialize_ex(const char* str, int len,
   return v;
 }
 
-Variant unserialize_ex(CStrRef str,
+Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,
                        CArrRef class_whitelist /* = null_array */) {
   return unserialize_ex(str.data(), str.size(), type, class_whitelist);
 }
 
-String concat3(CStrRef s1, CStrRef s2, CStrRef s3) {
+String concat3(const String& s1, const String& s2, const String& s3) {
   StringSlice r1 = s1.slice();
   StringSlice r2 = s2.slice();
   StringSlice r3 = s3.slice();
@@ -767,7 +824,8 @@ String concat3(CStrRef s1, CStrRef s2, CStrRef s3) {
   return str;
 }
 
-String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
+String concat4(const String& s1, const String& s2, const String& s3,
+               const String& s4) {
   StringSlice r1 = s1.slice();
   StringSlice r2 = s2.slice();
   StringSlice r3 = s3.slice();
@@ -825,7 +883,8 @@ bool interface_supports_double(const std::string& n) {
   return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
 }
 
-Variant include_impl_invoke(CStrRef file, bool once, const char *currentDir) {
+Variant include_impl_invoke(const String& file, bool once,
+                            const char *currentDir) {
   if (file[0] == '/') {
     if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
       try {
@@ -844,7 +903,7 @@ Variant include_impl_invoke(CStrRef file, bool once, const char *currentDir) {
   }
 }
 
-Variant invoke_file(CStrRef s, bool once, const char *currentDir) {
+Variant invoke_file(const String& s, bool once, const char *currentDir) {
   Variant r;
   if (invoke_file_impl(r, s, once, currentDir)) {
     return r;
@@ -852,7 +911,7 @@ Variant invoke_file(CStrRef s, bool once, const char *currentDir) {
   return throw_missing_file(s.c_str());
 }
 
-bool invoke_file_impl(Variant &res, CStrRef path, bool once,
+bool invoke_file_impl(Variant &res, const String& path, bool once,
                       const char *currentDir) {
   bool initial;
   HPHP::Eval::PhpFile* efile =
@@ -881,7 +940,7 @@ struct IncludeImplInvokeContext {
   Variant returnValue;
 };
 
-static bool include_impl_invoke_context(CStrRef file, void* ctx) {
+static bool include_impl_invoke_context(const String& file, void* ctx) {
   struct IncludeImplInvokeContext* context = (IncludeImplInvokeContext*)ctx;
   bool invoked_file = false;
   try {
@@ -899,8 +958,8 @@ static bool include_impl_invoke_context(CStrRef file, void* ctx) {
  * determine if a path references a real file.  ctx is a pointer to some context
  * information that will be passed through to tryFile.  (It's a hacky closure)
  */
-String resolve_include(CStrRef file, const char* currentDir,
-                       bool (*tryFile)(CStrRef file, void*), void* ctx) {
+String resolve_include(const String& file, const char* currentDir,
+                       bool (*tryFile)(const String& file, void*), void* ctx) {
   const char* c_file = file->data();
 
   if (!File::IsPlainFilePath(file)) {
@@ -979,7 +1038,7 @@ String resolve_include(CStrRef file, const char* currentDir,
   return String();
 }
 
-static Variant include_impl(CStrRef file, bool once,
+static Variant include_impl(const String& file, bool once,
                             const char *currentDir, bool required,
                             bool raiseNotice) {
   struct IncludeImplInvokeContext ctx = {once, currentDir};
@@ -1002,38 +1061,40 @@ static Variant include_impl(CStrRef file, bool once,
   return ctx.returnValue;
 }
 
-Variant include(CStrRef file, bool once /* = false */,
+Variant include(const String& file, bool once /* = false */,
                 const char *currentDir /* = NULL */,
                 bool raiseNotice /*= true*/) {
   return include_impl(file, once, currentDir, false, raiseNotice);
 }
 
-Variant require(CStrRef file, bool once /* = false */,
+Variant require(const String& file, bool once /* = false */,
                 const char *currentDir /* = NULL */,
                 bool raiseNotice /*= true*/) {
   return include_impl(file, once, currentDir, true, raiseNotice);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// class Limits
+// class AutoloadHandler
 
 IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
 void AutoloadHandler::requestInit() {
-  assert(m_handlers.get() == nullptr);
-  assert(m_loading.get() == nullptr);
   assert(m_map.get() == nullptr);
   assert(m_map_root.get() == nullptr);
+  assert(m_loading.get() == nullptr);
+  m_spl_stack_inited = false;
+  new (&m_handlers) smart::deque<HandlerBundle>();
 }
 
 void AutoloadHandler::requestShutdown() {
-  m_handlers.reset();
-  m_loading.reset();
   m_map.reset();
   m_map_root.reset();
+  m_loading.reset();
+  // m_spl_stack_inited will be re-initialized by the next requestInit
+  // m_handlers will be re-initialized by the next requestInit
 }
 
-bool AutoloadHandler::setMap(CArrRef map, CStrRef root) {
+bool AutoloadHandler::setMap(CArrRef map, const String& root) {
   this->m_map = map;
   this->m_map_root = root;
   return true;
@@ -1042,21 +1103,21 @@ bool AutoloadHandler::setMap(CArrRef map, CStrRef root) {
 class ClassExistsChecker {
  public:
   ClassExistsChecker() {}
-  bool operator()(CStrRef name) const {
+  bool operator()(const String& name) const {
     return Unit::lookupClass(name.get()) != nullptr;
   }
 };
 
 class ConstantExistsChecker {
  public:
-  bool operator()(CStrRef name) const {
+  bool operator()(const String& name) const {
     return Unit::lookupCns(name.get()) != nullptr;
   }
 };
 
 template <class T>
-AutoloadHandler::Result AutoloadHandler::loadFromMap(CStrRef name,
-                                                     CStrRef kind,
+AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
+                                                     const String& kind,
                                                      bool toLower,
                                                      const T &checkExists) {
   assert(!m_map.isNull());
@@ -1120,11 +1181,12 @@ bool AutoloadHandler::autoloadConstant(StringData* name) {
     loadFromMap(name, s_constant, false, ConstantExistsChecker()) != Failure;
 }
 
-bool AutoloadHandler::autoloadType(CStrRef name) {
+bool AutoloadHandler::autoloadType(const String& name) {
   return !m_map.isNull() &&
     loadFromMap(name, s_type, true,
-      [] (CStrRef name) {
-        return Unit::GetNamedEntity(name.get())->getCachedTypedef() != nullptr;
+      [] (const String& name) {
+        return Unit::GetNamedEntity(name.get())->
+          getCachedTypeAlias() != nullptr;
       }
     ) != Failure;
 }
@@ -1134,7 +1196,7 @@ bool AutoloadHandler::autoloadType(CStrRef name) {
  * false otherwise. When this function returns true, it is the caller's
  * responsibility to check if the given class or interface exists.
  */
-bool AutoloadHandler::invokeHandler(CStrRef className,
+bool AutoloadHandler::invokeHandler(const String& className,
                                     bool forceSplStack /* = false */) {
   if (!m_map.isNull()) {
     ClassExistsChecker ce;
@@ -1147,7 +1209,10 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
   }
   // If we end up in a recursive autoload loop where we try to load the same
   // class twice, just fail the load to mimic PHP as many frameworks rely on it
-  if (m_loading.valueExists(className)) {
+  // unless we are forcing a restart (due to spl_autoload_call) in which case
+  // it's allowed to re-enter. This means we can still overflow the stack if
+  // there is a loop when using spl_autoload_call directly but this is parity.
+  if (!forceSplStack && m_loading.valueExists(className)) {
     return false;
   }
 
@@ -1160,20 +1225,20 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
   };
 
   Array params = PackedArrayInit(1).append(className).toArray();
-  if (m_handlers.isNull() && !forceSplStack) {
+  if (!m_spl_stack_inited && !forceSplStack) {
     if (function_exists(s___autoload)) {
       invoke(s___autoload, params, -1, true, false);
       return true;
     }
     return false;
   }
-  if (m_handlers.isNull() || m_handlers->empty()) {
+  if (!m_spl_stack_inited || m_handlers.empty()) {
     return false;
   }
   Object autoloadException;
-  for (ArrayIter iter(m_handlers); iter; ++iter) {
+  for (const HandlerBundle& hb : m_handlers) {
     try {
-      vm_call_user_func(iter.second(), params);
+      vm_call_user_func_cufiter(*hb.m_cufIter, params);
     } catch (Object& ex) {
       assert(ex.instanceof(SystemLib::s_ExceptionClass));
       if (autoloadException.isNull()) {
@@ -1199,22 +1264,58 @@ bool AutoloadHandler::invokeHandler(CStrRef className,
   return true;
 }
 
-bool AutoloadHandler::addHandler(CVarRef handler, bool prepend) {
-  String name = getSignature(handler);
-  if (name.isNull()) return false;
+Array AutoloadHandler::getHandlers() {
+  if (!m_spl_stack_inited) {
+    return null_array;
+  }
 
-  if (m_handlers.isNull()) {
-    m_handlers = Array::Create();
+  PackedArrayInit handlers(m_handlers.size());
+
+  for (const HandlerBundle& hb : m_handlers) {
+    handlers.append(hb.m_handler);
+  }
+
+  return handlers.toArray();
+}
+
+bool AutoloadHandler::CompareBundles::operator()(
+  const HandlerBundle& hb) {
+  auto const& lhs = *m_cufIter;
+  auto const& rhs = *hb.m_cufIter;
+
+  if (lhs.ctx() != rhs.ctx()) {
+    // We only consider ObjectData* for equality (not a Class*) so if either is
+    // an object these are not considered equal.
+    if (!(uintptr_t(lhs.ctx()) & 1) || !(uintptr_t(rhs.ctx()) & 1)) {
+      return false;
+    }
+  }
+
+  return lhs.func() == rhs.func();
+}
+
+bool AutoloadHandler::addHandler(CVarRef handler, bool prepend) {
+  SmartCufIterPtr cufIter = nullptr;
+  if (!vm_decode_function_cufiter(handler, cufIter)) {
+    return false;
+  }
+
+  m_spl_stack_inited = true;
+
+  // Zend doesn't modify the order of the list if the handler is already
+  // registered.
+  auto const& compareBundles = CompareBundles(cufIter.get());
+  if (std::find_if(m_handlers.begin(), m_handlers.end(), compareBundles) !=
+      m_handlers.end()) {
+    return true;
   }
 
   if (!prepend) {
-    // The following ensures that the handler is added at the end
-    m_handlers.remove(name, true);
-    m_handlers.add(name, handler, true);
+    m_handlers.emplace_back(handler, cufIter);
   } else {
-    // This adds the handler at the beginning
-    m_handlers = make_map_array(name, handler) + m_handlers;
+    m_handlers.emplace_front(handler, cufIter);
   }
+
   return true;
 }
 
@@ -1223,38 +1324,24 @@ bool AutoloadHandler::isRunning() {
 }
 
 void AutoloadHandler::removeHandler(CVarRef handler) {
-  String name = getSignature(handler);
-  if (name.isNull()) return;
-  m_handlers.remove(name, true);
+  SmartCufIterPtr cufIter = nullptr;
+  if (!vm_decode_function_cufiter(handler, cufIter)) {
+    return;
+  }
+
+  // Use find_if instead of remove_if since we know there can only be one match
+  // in the vector.
+  auto const& compareBundles = CompareBundles(cufIter.get());
+  m_handlers.erase(
+    std::find_if(m_handlers.begin(), m_handlers.end(), compareBundles));
 }
 
 void AutoloadHandler::removeAllHandlers() {
-  m_handlers.reset();
+  m_spl_stack_inited = false;
+  m_handlers.clear();
 }
 
-String AutoloadHandler::getSignature(CVarRef handler) {
-  Variant name;
-  if (!f_is_callable(handler, false, ref(name))) {
-    return null_string;
-  }
-  String lName = f_strtolower(name.toString());
-  if (handler.isArray()) {
-    Variant first = handler.getArrayData()->get(int64_t(0));
-    if (first.isObject()) {
-      // Add the object address as part of the signature
-      int64_t data = (int64_t)first.getObjectData();
-      lName += String((const char *)&data, sizeof(data), CopyString);
-    }
-  } else if (handler.isObject()) {
-    // "lName" will just be "classname::__invoke",
-    // add object address to differentiate the signature
-    int64_t data = (int64_t)handler.getObjectData();
-    lName += String((const char*)&data, sizeof(data), CopyString);
-  }
-  return lName;
-}
-
-bool function_exists(CStrRef function_name) {
+bool function_exists(const String& function_name) {
   auto f = HPHP::Unit::lookupFunc(function_name.get());
   return (f != nullptr) &&
          (f->builtinFuncPtr() != Native::unimplementedWrapper);

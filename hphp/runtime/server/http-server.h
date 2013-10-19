@@ -46,7 +46,7 @@ public:
   void flushLog();
   void watchDog();
 
-  void takeoverShutdown(HPHP::Server* server);
+  void takeoverShutdown();
 
   ServerPtr getPageServer() { return m_pageServer;}
   void getSatelliteStats(vector<std::pair<std::string, int>> *stats);

@@ -6,6 +6,7 @@ variable
 next
 next
 next
+next
 break clear all
 continue
 break flow.php:18
@@ -16,6 +17,7 @@ step
 variable
 step
 variable
+next
 next
 step
 break clear all
@@ -29,9 +31,7 @@ break flow.php:7
 @test(4)
 break clear all
 out
-step
 out
-next
 out
 continue
 break flow.php:46

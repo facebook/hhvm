@@ -25,11 +25,13 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdOut);
 class CmdOut : public CmdFlowControl {
 public:
-  CmdOut() : CmdFlowControl(KindOfOut) {}
+  CmdOut() : CmdFlowControl(KindOfOut), m_skippingOverPopR(false) {}
 
   virtual void help(DebuggerClient &client);
   virtual void onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt);
   virtual void onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt);
+private:
+  bool m_skippingOverPopR;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

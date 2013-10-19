@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/repo-helpers.h"
+#include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 
@@ -167,7 +168,7 @@ class PreClassEmitter {
   std::vector<const StringData*> m_usedTraits;
   std::vector<PreClass::TraitPrecRule> m_traitPrecRules;
   std::vector<PreClass::TraitAliasRule> m_traitAliasRules;
-  PreClass::UserAttributeMap m_userAttributes;
+  UserAttributeMap m_userAttributes;
   MethodVec m_methods;
   MethodMap m_methodMap;
   PropMap::Builder m_propMap;

@@ -23,18 +23,20 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant preg_grep(CStrRef pattern, CArrRef input, int flags = 0);
+Variant preg_grep(const String& pattern, CArrRef input, int flags = 0);
 
-Variant preg_match(CStrRef pattern, CStrRef subject, Variant &matches,
+Variant preg_match(const String& pattern, const String& subject,
+                   Variant &matches,
                    int flags = 0, int offset = 0);
 
-Variant preg_match(CStrRef pattern, CStrRef subject, int flags = 0,
+Variant preg_match(const String& pattern, const String& subject, int flags = 0,
                    int offset = 0);
 
-Variant preg_match_all(CStrRef pattern, CStrRef subject, Variant &matches,
+Variant preg_match_all(const String& pattern, const String& subject,
+                       Variant &matches,
                        int flags = 0, int offset = 0);
 
-Variant preg_match_all(CStrRef pattern, CStrRef subject,
+Variant preg_match_all(const String& pattern, const String& subject,
                        int flags = 0, int offset = 0);
 
 Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
@@ -47,8 +49,9 @@ int preg_replace_callback(Variant &result, CVarRef pattern, CVarRef callback,
 
 Variant preg_split(CVarRef pattern, CVarRef subject, int limit = -1,
                    int flags = 0);
-String preg_quote(CStrRef str, CStrRef delimiter = null_string);
-Variant php_split(CStrRef spliton, CStrRef str, int count, bool icase);
+String preg_quote(const String& str, const String& delimiter = null_string);
+Variant php_split(const String& spliton, const String& str, int count,
+                  bool icase);
 
 int preg_last_error();
 

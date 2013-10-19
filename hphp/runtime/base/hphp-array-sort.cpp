@@ -25,6 +25,8 @@
 // inline methods of HphpArray
 #include "hphp/runtime/base/hphp-array-defs.h"
 
+#include <folly/ScopeGuard.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -71,8 +73,8 @@ HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
     // No need to loop over the elements, we're done
     return GenericSort;
   }
-  Elm* start = m_data;
-  Elm* end = m_data + m_used;
+  Elm* start = data();
+  Elm* end = data() + m_used;
   bool allInts UNUSED = true;
   bool allStrs UNUSED = true;
   for (;;) {
@@ -106,7 +108,7 @@ HphpArray::preSort(const AccessorT& acc, bool checkTypes) {
     memcpy(start, end, sizeof(Elm));
   }
 done:
-  m_used = start - m_data;
+  m_used = start - data();
   assert(m_size == m_used);
   if (checkTypes) {
     return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
@@ -126,7 +128,7 @@ void HphpArray::postSort(bool resetKeys) {
   initHash(tableSize);
   if (resetKeys) {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
-      auto& e = m_data[pos];
+      auto& e = data()[pos];
       if (e.hasStrKey()) decRefStr(e.key);
       e.setIntKey(pos);
       m_hash[pos] = pos;
@@ -134,7 +136,7 @@ void HphpArray::postSort(bool resetKeys) {
     m_nextKI = m_size;
   } else {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
-      auto& e = m_data[pos];
+      auto& e = data()[pos];
       auto ei = findForNewInsert(e.hasIntKey() ? e.ikey : e.hash());
       *ei = pos;
     }
@@ -151,10 +153,10 @@ ArrayData* HphpArray::EscalateForSort(ArrayData* ad) {
   case flag: { \
     if (ascending) { \
       cmp_type##Compare<acc_type, flag, true> comp; \
-      HPHP::Sort::sort(a->m_data, a->m_data + a->m_size, comp); \
+      HPHP::Sort::sort(a->data(), a->data() + a->m_size, comp); \
     } else { \
       cmp_type##Compare<acc_type, flag, false> comp; \
-      HPHP::Sort::sort(a->m_data, a->m_data + a->m_size, comp); \
+      HPHP::Sort::sort(a->data(), a->data() + a->m_size, comp); \
     } \
     break; \
   }
@@ -164,6 +166,7 @@ ArrayData* HphpArray::EscalateForSort(ArrayData* ad) {
     SORT_CASE(SORT_REGULAR, cmp_type, acc_type) \
     SORT_CASE(SORT_NUMERIC, cmp_type, acc_type) \
     SORT_CASE(SORT_STRING, cmp_type, acc_type) \
+    SORT_CASE(SORT_STRING_CASE, cmp_type, acc_type) \
     SORT_CASE(SORT_LOCALE_STRING, cmp_type, acc_type) \
     SORT_CASE(SORT_NATURAL, cmp_type, acc_type) \
     SORT_CASE(SORT_NATURAL_CASE, cmp_type, acc_type) \
@@ -223,36 +226,37 @@ void HphpArray::Asort(ArrayData* ad, int sort_flags, bool ascending) {
       if (resetKeys) {                                          \
         a->m_nextKI = 0;                                        \
       }                                                         \
-      return;                                                   \
+      return true;                                              \
+    }                                                           \
+    CallCtx ctx;                                                \
+    Transl::CallerFrame cf;                                     \
+    vm_decode_function(cmp_function, cf(), false, ctx);         \
+    if (!ctx.func) {                                            \
+      return false;                                             \
     }                                                           \
     a->preSort<acc_type>(acc_type(), false);                    \
     a->m_pos = ssize_t(0);                                      \
-    try {                                                       \
-      ElmUCompare<acc_type> comp;                               \
-      Transl::CallerFrame cf;                                   \
-      CallCtx ctx;                                              \
-      vm_decode_function(cmp_function, cf(), false, ctx);       \
-      comp.ctx = &ctx;                                          \
-      HPHP::Sort::sort(a->m_data, a->m_data + a->m_size, comp); \
-    } catch (...) {                                             \
+    SCOPE_EXIT {                                                \
       /* Make sure we leave the array in a consistent state */  \
       a->postSort(resetKeys);                                   \
-      throw;                                                    \
-    }                                                           \
-    a->postSort(resetKeys);                                     \
+    };                                                          \
+    ElmUCompare<acc_type> comp;                                 \
+    comp.ctx = &ctx;                                            \
+    HPHP::Sort::sort(a->data(), a->data() + a->m_size, comp);   \
+    return true;                                                \
   } while (0)
 
-void HphpArray::Uksort(ArrayData* ad, CVarRef cmp_function) {
+bool HphpArray::Uksort(ArrayData* ad, CVarRef cmp_function) {
   auto a = asHphpArray(ad);
   USER_SORT_BODY(KeyAccessor, false);
 }
 
-void HphpArray::Usort(ArrayData* ad, CVarRef cmp_function) {
+bool HphpArray::Usort(ArrayData* ad, CVarRef cmp_function) {
   auto a = asHphpArray(ad);
   USER_SORT_BODY(ValAccessor, true);
 }
 
-void HphpArray::Uasort(ArrayData* ad, CVarRef cmp_function) {
+bool HphpArray::Uasort(ArrayData* ad, CVarRef cmp_function) {
   auto a = asHphpArray(ad);
   USER_SORT_BODY(ValAccessor, false);
 }

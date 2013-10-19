@@ -162,8 +162,8 @@ class CompactRequestData : public RequestEventHandler {
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(CompactRequestData, s_compact_request_data);
 
-static void thrift_error(CStrRef what, TError why) ATTRIBUTE_NORETURN;
-static void thrift_error(CStrRef what, TError why) {
+static void thrift_error(const String& what, TError why) ATTRIBUTE_NORETURN;
+static void thrift_error(const String& what, TError why) {
   throw create_object("TProtocolException", make_packed_array(what, why));
 }
 
@@ -183,7 +183,7 @@ class CompactWriter {
       version = _version;
     }
 
-    void writeHeader(CStrRef name, uint8_t msgtype, uint32_t seqid) {
+    void writeHeader(const String& name, uint8_t msgtype, uint32_t seqid) {
       writeUByte(PROTOCOL_ID);
       writeUByte(version | (msgtype << TYPE_SHIFT_AMOUNT));
       writeVarint(seqid);
@@ -477,7 +477,7 @@ class CompactWriter {
       transport->write((char*)buf, wsize);
     }
 
-    void writeString(CStrRef s) {
+    void writeString(const String& s) {
       auto slice = s.slice();
       writeVarint(slice.len);
       transport->write(slice.ptr, slice.len);
@@ -500,7 +500,7 @@ class CompactReader {
       containerHistory() {
     }
 
-    Variant read(CStrRef resultClassName) {
+    Variant read(const String& resultClassName) {
       uint8_t protoId = readUByte();
       if (protoId != PROTOCOL_ID) {
         thrift_error("Bad protocol id in TCompact message", ERR_BAD_VERSION);
@@ -955,7 +955,7 @@ int f_thrift_protocol_set_compact_version(int version) {
 }
 
 void f_thrift_protocol_write_compact(CObjRef transportobj,
-                                     CStrRef method_name,
+                                     const String& method_name,
                                      int64_t msgtype,
                                      CObjRef request_struct,
                                      int seqid) {
@@ -970,7 +970,7 @@ void f_thrift_protocol_write_compact(CObjRef transportobj,
 }
 
 Variant f_thrift_protocol_read_compact(CObjRef transportobj,
-                                       CStrRef obj_typename) {
+                                       const String& obj_typename) {
   CompactReader reader(transportobj);
   return reader.read(obj_typename);
 }

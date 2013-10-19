@@ -60,7 +60,7 @@ struct LinearScan : private boost::noncopyable {
   static const int NumRegs = kNumRegs;
 
   explicit LinearScan(IRUnit&);
-  RegAllocInfo allocRegs(IRTrace*, LifetimeInfo*);
+  RegAllocInfo allocRegs();
 
 private:
   class RegState {
@@ -141,8 +141,8 @@ private:
     return m_unit.cns(val);
   }
   void initFreeList();
-  void coalesce(IRTrace* trace);
-  void genSpillStats(IRTrace* trace, int numSpillLocs);
+  void coalesce();
+  void genSpillStats(int numSpillLocs);
   void allocRegsOneTrace(BlockList::iterator& blockIt,
                          ExitTraceMap& etm);
   void allocRegsToTrace();
@@ -204,7 +204,7 @@ private:
   // stores pre-coloring hints
   PreColoringHint m_preColoringHint;
 
-  // a map from SSATmp* to a list of Jmp_ instructions that have it as
+  // a map from SSATmp* to a list of Jmp instructions that have it as
   // a source.
   typedef smart::vector<IRInstruction*> JmpList;
   StateVector<SSATmp, JmpList> m_jmps;
@@ -214,9 +214,13 @@ private:
   // SSATmps requiring 2 64-bit registers that are eligible for
   // allocation to a single XMM register
   boost::dynamic_bitset<> m_fullXMMCandidates;
+
+  // reserved linear ids for each exit trace
+  smart::flat_map<IRTrace*, uint32_t> m_exitIds;
 };
 
-static_assert(kReservedRSPSpillSpace == NumPreAllocatedSpillLocs * sizeof(void*),
+static_assert(kReservedRSPSpillSpace ==
+              NumPreAllocatedSpillLocs * sizeof(void*),
               "kReservedRSPSpillSpace changes require updates in "
               "LinearScan");
 
@@ -276,6 +280,7 @@ void LinearScan::StateSave::restore(LinearScan* ls) {
 
 LinearScan::LinearScan(IRUnit& unit)
   : m_unit(unit)
+  , m_idoms(unit, nullptr)
   , m_spillSlots(unit, -1)
   , m_lifetime(unit)
   , m_linear(m_lifetime.linear)
@@ -284,6 +289,7 @@ LinearScan::LinearScan(IRUnit& unit)
   , m_allocInfo(unit)
   , m_fullXMMCandidates(unit.numTmps())
 {
+  m_exitIds.reserve(unit.exits().size());
   for (int i = 0; i < kNumRegs; i++) {
     m_regs[i].m_ssaTmp = nullptr;
     m_regs[i].m_reg = PhysReg(i);
@@ -734,7 +740,7 @@ void LinearScan::collectInfo(BlockList::iterator it, IRTrace* trace) {
     bool offTrace = block->trace() != trace;
     if (offTrace) {
       if (!trace->isMain()) return;
-      int lastId = block->trace()->data();
+      int lastId = m_exitIds[block->trace()];
       for (IRInstruction& inst : *block) {
         for (auto* src : inst.srcs()) {
           if (lastId > m_uses[src].lastUse) {
@@ -751,7 +757,7 @@ void LinearScan::collectInfo(BlockList::iterator it, IRTrace* trace) {
       }
 
       IRInstruction* jmp = block->back();
-      if (jmp->op() == Jmp_ && jmp->numSrcs() != 0) {
+      if (jmp->op() == Jmp && jmp->numSrcs() != 0) {
         for (SSATmp* src : jmp->srcs()) {
           m_jmps[src].push_back(jmp);
         }
@@ -866,7 +872,7 @@ void LinearScan::computePreColoringHint() {
 }
 
 // Given a label, dest index for that label, and register index, scan
-// the sources of all incoming Jmp_s to see if any have a register
+// the sources of all incoming Jmps to see if any have a register
 // allocated at the specified index.
 static RegNumber findLabelSrcReg(const RegAllocInfo& regs, IRInstruction* label,
                                  unsigned dstIdx, uint32_t regIndex) {
@@ -880,8 +886,8 @@ static RegNumber findLabelSrcReg(const RegAllocInfo& regs, IRInstruction* label,
 
 // This function attempts to find a pre-coloring hint from two
 // different sources: If tmp comes from a DefLabel, it will scan up to
-// the SSATmps providing values to incoming Jmp_s to look for a
-// hint. If tmp is consumed by a Jmp_, look for other incoming Jmp_s
+// the SSATmps providing values to incoming Jmps to look for a
+// hint. If tmp is consumed by a Jmp, look for other incoming Jmps
 // to its destination and see if any of them have already been given a
 // register. If all of these fail, let normal register allocation
 // proceed unhinted.
@@ -905,7 +911,7 @@ RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
         auto reg = findLabelSrcReg(m_allocInfo, srcInst, i, regIndex);
         // Until we handle loops, it's a bug to try and allocate a
         // register to a DefLabel's dest before all of its incoming
-        // Jmp_s have had their srcs allocated, unless the incoming
+        // Jmps have had their srcs allocated, unless the incoming
         // block is unreachable.
         const DEBUG_ONLY bool unreachable =
           std::find(m_blocks.begin(), m_blocks.end(),
@@ -917,19 +923,19 @@ RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
     not_reached();
   }
 
-  // If srcInst wasn't a label, check if tmp is used by any Jmp_
-  // instructions. If it is, trace to the Jmp_'s label and use the
+  // If srcInst wasn't a label, check if tmp is used by any Jmp
+  // instructions. If it is, trace to the Jmp's label and use the
   // same procedure as above.
   for (unsigned ji = 0, jn = jmps.size(); ji < jn; ++ji) {
     IRInstruction* jmp = jmps[ji];
     IRInstruction* label = jmp->taken()->front();
 
-    // Figure out which src of the Jmp_ is tmp
+    // Figure out which src of the Jmp is tmp
     for (unsigned si = 0, sn = jmp->numSrcs(); si < sn; ++si) {
       SSATmp* src = jmp->src(si);
       if (tmp == src) {
         // For now, a DefLabel should never have a register assigned
-        // to it before any of its incoming Jmp_ instructions.
+        // to it before any of its incoming Jmp instructions.
         always_assert(m_allocInfo[label->dst(si)].reg(regIndex) ==
                       reg::noreg);
         auto reg = findLabelSrcReg(m_allocInfo, label, si, regIndex);
@@ -953,8 +959,8 @@ void LinearScan::initFreeList() {
   }
 }
 
-void LinearScan::coalesce(IRTrace* trace) {
-  forEachTraceInst(trace, [](IRInstruction* inst) {
+void LinearScan::coalesce() {
+  forEachTraceInst(m_unit, [](IRInstruction* inst) {
     for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
       SSATmp* src = inst->src(i);
       SSATmp* origSrc = canonicalize(src);
@@ -983,12 +989,12 @@ void LinearScan::numberInstructions(const BlockList& blocks) {
     if (block->taken() && block->isMain() && !block->taken()->isMain()) {
       // reserve a spot for the lastUseId when we're processing the main
       // trace, if the last use is really in an exit trace.
-      block->taken()->trace()->setData(nextId++);
+      m_exitIds[block->taken()->trace()] = nextId++;
     }
   }
 }
 
-void LinearScan::genSpillStats(IRTrace* trace, int numSpillLocs) {
+void LinearScan::genSpillStats(int numSpillLocs) {
   if (!moduleEnabled(HPHP::Trace::statgroups, 1)) return;
   static bool enabled = getenv("HHVM_STATS_SPILLS");
   if (!enabled) return;
@@ -1023,11 +1029,11 @@ void LinearScan::genSpillStats(IRTrace* trace, int numSpillLocs) {
   static StringData* exitReloads = makeStaticString("ExitReloads");
   static StringData* spillSpace = makeStaticString("SpillSpace");
 
-  auto const marker = trace->front()->front()->marker();
+  auto entry = m_unit.entry(); // entry block
+  auto const marker = entry->front()->marker();
   auto addStat = [&](const StringData* key, int value) {
-    trace->front()->prepend(m_unit.gen(IncStatGrouped, marker,
-                                            cns(spillStats), cns(key),
-                                            cns(value)));
+    entry->prepend(m_unit.gen(IncStatGrouped, marker,
+                              cns(spillStats), cns(key), cns(value)));
   };
   addStat(mainSpills, numMainSpills);
   addStat(mainReloads, numMainReloads);
@@ -1069,14 +1075,14 @@ void LinearScan::findFullXMMCandidates() {
   m_fullXMMCandidates -= notCandidates;
 }
 
-RegAllocInfo LinearScan::allocRegs(IRTrace* trace, LifetimeInfo* lifetime) {
+RegAllocInfo LinearScan::allocRegs() {
   if (RuntimeOption::EvalHHIREnableCoalescing) {
     // <coalesce> doesn't need instruction numbering.
-    coalesce(trace);
+    coalesce();
   }
 
-  m_blocks = rpoSortCfg(trace, m_unit);
-  m_idoms = findDominators(m_blocks);
+  m_blocks = rpoSortCfg(m_unit);
+  m_idoms = findDominators(m_unit, m_blocks);
 
   if (!packed_tv) {
     findFullXMMCandidates();
@@ -1096,11 +1102,11 @@ RegAllocInfo LinearScan::allocRegs(IRTrace* trace, LifetimeInfo* lifetime) {
     PUNT(LinearScan_TooManySpills);
   }
 
-  if (m_slots.size()) genSpillStats(trace, numSpillLocs);
+  if (m_slots.size()) genSpillStats(numSpillLocs);
 
-  if (lifetime) {
-    lifetime->linear = std::move(m_linear);
-    lifetime->uses = std::move(m_uses);
+  if (dumpIREnabled()) {
+    dumpTrace(kRegAllocLevel, m_unit, " after reg alloc ", &m_allocInfo,
+              &m_lifetime, nullptr, nullptr);
   }
   return m_allocInfo;
 }
@@ -1445,9 +1451,8 @@ void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32_t index, int argNum) {
 
 //////////////////////////////////////////////////////////////////////
 
-RegAllocInfo allocRegsForTrace(IRTrace* trace, IRUnit& unit,
-                               LifetimeInfo* lifetime) {
-  return LinearScan(unit).allocRegs(trace, lifetime);
+RegAllocInfo allocRegsForUnit(IRUnit& unit) {
+  return LinearScan(unit).allocRegs();
 }
 
 }} // HPHP::JIT

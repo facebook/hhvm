@@ -153,6 +153,8 @@ Instruction* Instruction::ImmPCOffsetTarget() {
   if (IsPCRelAddressing()) {
     // PC-relative addressing. Only ADR is supported.
     offset = ImmPCRel();
+  } else if (IsLoadOrStore()) {
+    offset = ImmLLiteral() << kInstructionSizeLog2;
   } else {
     // All PC-relative branches.
     assert(BranchType() != UnknownBranchType);
@@ -178,6 +180,8 @@ inline int Instruction::ImmBranch() const {
 void Instruction::SetImmPCOffsetTarget(Instruction* target) {
   if (IsPCRelAddressing()) {
     SetPCRelImmTarget(target);
+  } else if (IsLoadOrStore()) {
+    SetPCRelLoadStoreTarget(target);
   } else {
     SetBranchImmTarget(target);
   }
@@ -191,6 +195,13 @@ void Instruction::SetPCRelImmTarget(Instruction* target) {
   Instr imm = Assembler::ImmPCRelAddress(target - this);
 
   SetInstructionBits(Mask(~ImmPCRel_mask) | imm);
+}
+
+
+void Instruction::SetPCRelLoadStoreTarget(Instruction* target) {
+  int offset = (target - this) >> kInstructionSizeLog2;
+  Instr imm = Assembler::ImmPCRelLoadStoreAddress(offset);
+  SetInstructionBits(Mask(~ImmLLiteral_mask) | imm);
 }
 
 

@@ -41,9 +41,7 @@ break flow_small.php:7
 @test(4)
 break clear all
 out
-step
 out
-next
 out
 continue
 break flow_small.php:46

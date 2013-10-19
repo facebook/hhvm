@@ -253,38 +253,53 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   HeaderMap headers;
   transport->getHeaders(headers);
 
-  static int bad_request_count = -1;
-  for (HeaderMap::const_iterator iter = headers.begin();
-       iter != headers.end(); ++iter) {
-    const vector<string> &values = iter->second;
+  static std::atomic<int> badRequests(-1);
 
-    // Detect suspicious headers.  We are about to modify header names
-    // for the SERVER variable.  This means that it is possible to
-    // deliberately cause a header collision, which an attacker could
-    // use to sneak a header past a proxy that would either overwrite
-    // or filter it otherwise.  Client code should use
-    // apache_request_headers() to retrieve the original headers if
-    // they are security-critical.
-    if (RuntimeOption::LogHeaderMangle != 0) {
-      String key = "HTTP_";
-      key += f_strtoupper(iter->first).replace("-","_");
-      if (server.asArrRef().exists(key)) {
-        if (!(++bad_request_count % RuntimeOption::LogHeaderMangle)) {
-          Logger::Warning(
-            "HeaderMangle warning: "
-            "The header %s overwrote another header which mapped to the same "
-            "key. This happens because PHP normalises - to _, ie AN_EXAMPLE "
-            "and AN-EXAMPLE are equivalent.  You should treat this as "
-            "malicious.",
-            iter->first.c_str());
-        }
-      }
+  std::vector<std::string> badHeaders;
+  for (auto const& header : headers) {
+    auto const& key = header.first;
+    auto const& values = header.second;
+    auto normalizedKey = String("HTTP_") + f_strtoupper(key).replace("-", "_");
+
+    // Detect suspicious headers.  We are about to modify header names for
+    // the SERVER variable.  This means that it is possible to deliberately
+    // cause a header collision, which an attacker could use to sneak a
+    // header past a proxy that would either overwrite or filter it
+    // otherwise.  Client code should use apache_request_headers() to
+    // retrieve the original headers if they are security-critical.
+    if (RuntimeOption::LogHeaderMangle != 0 &&
+        server.asArrRef().exists(normalizedKey)) {
+      badHeaders.push_back(key);
     }
 
-    for (unsigned int i = 0; i < values.size(); i++) {
-      String key = "HTTP_";
-      key += f_strtoupper(iter->first).replace("-", "_");
-      server.set(key, String(values[i]));
+    if (!values.empty()) {
+      // When a header has multiple values, we always take the last one.
+      server.set(normalizedKey, String(values.back()));
+    }
+  }
+
+  if (!badHeaders.empty()) {
+    auto reqId = badRequests.fetch_add(1, std::memory_order_acq_rel) + 1;
+    if (!(reqId % RuntimeOption::LogHeaderMangle)) {
+      std::string badNames = folly::join(", ", badHeaders);
+      std::string allHeaders;
+
+      const char* separator = "";
+      for (auto const& header : headers) {
+        for (auto const& value : header.second) {
+          folly::toAppend(separator, header.first, ": ", value,
+                          &allHeaders);
+          separator = "\n";
+        }
+      }
+
+      Logger::Warning(
+        "HeaderMangle warning: "
+        "The header(s) [%s] overwrote other headers which mapped to the same "
+        "key. This happens because PHP normalises - to _, ie AN_EXAMPLE "
+        "and AN-EXAMPLE are equivalent.  You should treat this as "
+        "malicious. All headers from this request:\n%s",
+        badNames.c_str(), allHeaders.c_str());
     }
   }
 

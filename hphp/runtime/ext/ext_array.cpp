@@ -790,7 +790,7 @@ static Variant iter_op_impl(VRefParam refParam, Op op, NonArrayRet nonArray) {
 
   auto ad = cell.m_data.parr;
   if (Cow == CowTag::Yes) {
-    if (ad->getCount() > 1 && !ad->isInvalid() && !ad->noCopyOnWrite()) {
+    if (ad->hasMultipleRefs() && !ad->isInvalid() && !ad->noCopyOnWrite()) {
       ad = ad->copy();
       cellSet(make_tv<KindOfArray>(ad), cell);
     }
@@ -1122,7 +1122,7 @@ public:
   intl_error &getErrorCodeRef() {
     return m_errcode;
   }
-  bool setLocale(CStrRef locale) {
+  bool setLocale(const String& locale) {
     if (m_locale.same(locale)) {
       return true;
     }
@@ -1205,12 +1205,19 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 
 static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
   switch (sort_flags) {
+  case SORT_NATURAL:
+    return Array::SortNatural;
+  case SORT_NATURAL_CASE:
+    return Array::SortNaturalCase;
   case SORT_NUMERIC:
     return ascending ?
       Array::SortNumericAscending : Array::SortNumericDescending;
   case SORT_STRING:
     return ascending ?
       Array::SortStringAscending : Array::SortStringDescending;
+  case SORT_STRING_CASE:
+    return ascending ?
+      Array::SortStringAscendingCase : Array::SortStringDescendingCase;
   case SORT_LOCALE_STRING:
     return ascending ?
       Array::SortLocaleStringAscending : Array::SortLocaleStringDescending;
@@ -1359,15 +1366,13 @@ bool f_usort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
     Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
-    ast->usort(cmp_function);
-    return true;
+    return ast->usort(cmp_function);
   }
   if (array.isObject()) {
     ObjectData* obj = array.getObjectData();
     if (obj->getCollectionType() == Collection::VectorType) {
       c_Vector* vec = static_cast<c_Vector*>(obj);
-      vec->usort(cmp_function);
-      return true;
+      return vec->usort(cmp_function);
     }
   }
   throw_bad_array_exception();
@@ -1378,15 +1383,13 @@ bool f_uasort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
     Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
-    ast->uasort(cmp_function);
-    return true;
+    return ast->uasort(cmp_function);
   }
   if (array.isObject()) {
     ObjectData* obj = array.getObjectData();
     if (obj->getCollectionType() == Collection::StableMapType) {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      smp->uasort(cmp_function);
-      return true;
+      return smp->uasort(cmp_function);
     }
   }
   throw_bad_array_exception();
@@ -1397,15 +1400,13 @@ bool f_uksort(VRefParam array, CVarRef cmp_function) {
   if (array.isArray()) {
     Array& arr_array = array.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
-    ast->uksort(cmp_function);
-    return true;
+    return ast->uksort(cmp_function);
   }
   if (array.isObject()) {
     ObjectData* obj = array.getObjectData();
     if (obj->getCollectionType() == Collection::StableMapType) {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
-      smp->uksort(cmp_function);
-      return true;
+      return smp->uksort(cmp_function);
     }
   }
   throw_bad_array_exception();
@@ -1478,7 +1479,7 @@ String f_i18n_loc_get_default() {
   return s_collator->getLocale();
 }
 
-bool f_i18n_loc_set_default(CStrRef locale) {
+bool f_i18n_loc_set_default(const String& locale) {
   return s_collator->setLocale(locale);
 }
 

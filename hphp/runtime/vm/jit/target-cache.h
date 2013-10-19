@@ -13,242 +13,85 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef INCL_TARGETCACHE_H_
-#define INCL_TARGETCACHE_H_
+#ifndef incl_HPHP_RUNTIME_VM_JIT_TARGETCACHE_H_
+#define incl_HPHP_RUNTIME_VM_JIT_TARGETCACHE_H_
 
-#include "hphp/runtime/vm/func.h"
 #include "hphp/util/util.h"
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/unwind-x64.h"
-#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/rds.h"
 
 namespace HPHP {
-namespace Transl {
-namespace TargetCache {
+  struct Func;
+  struct ActRec;
+  struct StringData;
+  struct TypedValue;
+  struct Class;
+  struct NamedEntity;
+}
 
-void requestInit();
-void requestExit();
-void threadInit();
-void threadExit();
-void flush();
+namespace HPHP { namespace JIT {
+
+//////////////////////////////////////////////////////////////////////
 
 /*
- * The targetCaches are physically thread-private, but they share their
- * layout. So the memory is in tl_targetCaches, but we allocate it via the
- * global s_frontier. This is protected by the translator's write-lease.
+ * Per-callsite dynamic function name lookups (where the name of the
+ * function isn't known at translation time).  4-way cache.
  */
-extern __thread void* tl_targetCaches;
-extern size_t s_frontier;
-extern size_t s_persistent_frontier;
-extern size_t s_persistent_start;
-
-/*
- * Array of dynamically defined constants
- */
-extern __thread std::aligned_storage<sizeof(Array),alignof(Array)>::type
-  s_constantsStorage;
-
-ALWAYS_INLINE Array& s_constants() {
-  void* vp = &s_constantsStorage;
-  return *static_cast<Array*>(vp);
-}
-
-/*
- * The fields in TargetCacheHeader are pre-allocated at process
- * startup and live at the beginning of the targetCache.
- */
-struct TargetCacheHeader {
-  ssize_t conditionFlags;
-
-  // Used to pass values between unwinder code and catch traces:
-  int64_t unwinderScratch;
-  TypedValue unwinderTv;
-  bool doSideExit;
-};
-
-inline TargetCacheHeader* header() {
-  return (TargetCacheHeader*)tl_targetCaches;
-}
-
-constexpr int kConditionFlagsOff =
-  offsetof(TargetCacheHeader, conditionFlags);
-constexpr int kUnwinderScratchOff =
-  offsetof(TargetCacheHeader, unwinderScratch);
-constexpr int kUnwinderSideExitOff =
-  offsetof(TargetCacheHeader, doSideExit);
-constexpr int kUnwinderTvOff =
-  offsetof(TargetCacheHeader, unwinderTv);
-
-/*
- * Some caches have different numbers of lines. This is our default.
- */
-static const int kDefaultNumLines = 4;
-
-/*
- * The lookup functions are called into from generated assembly and passed an
- * opaque handle into the request-private targetcache.
- */
-typedef ptrdiff_t CacheHandle;
-
-enum PHPNameSpace {
-  NSCtor,
-  NSFixedCall,
-  NSDynFunction,
-  NSStaticMethod,
-  NSStaticMethodF,
-  NSClass,
-  NSClsInitProp,
-  NSClsInitSProp,
-
-  NumInsensitive, NS_placeholder = NumInsensitive-1,
-
-  NSConstant,
-  NSClassConstant,
-  NSGlobal,
-  NSSProp,
-  NSProperty,
-  NSCnsBits,
-
-  NumNameSpaces,
-  NumCaseSensitive = NumNameSpaces - NumInsensitive,
-  FirstCaseSensitive = NumInsensitive,
-
-  NSInvalid = -1,
-  NSPersistent = -2
-};
-
-template <bool sensitive>
-CacheHandle namedAlloc(PHPNameSpace where, const StringData* name,
-                       int numBytes, int align);
-
-template<PHPNameSpace where>
-CacheHandle namedAlloc(const StringData* name, int numBytes, int align) {
-  return namedAlloc<(where >= FirstCaseSensitive)>(where, name,
-                                                   numBytes, align);
-}
-
-size_t allocBit();
-CacheHandle bitOffToHandleAndMask(size_t bit, uint8_t &mask);
-bool testBit(CacheHandle handle, uint32_t mask);
-bool testBit(size_t bit);
-bool testAndSetBit(CacheHandle handle, uint32_t mask);
-bool testAndSetBit(size_t bit);
-bool isPersistentHandle(CacheHandle handle);
-bool classIsPersistent(const Class* cls);
-
-CacheHandle ptrToHandle(const void*);
-
-template<typename T = void>
-static inline T*
-handleToPtr(CacheHandle h) {
-  assert(h < RuntimeOption::EvalJitTargetCacheSize);
-  return (T*)((char*)tl_targetCaches + h);
-}
-
-template<class T>
-T& handleToRef(CacheHandle h) {
-  return *static_cast<T*>(handleToPtr(h));
-}
-
-inline ssize_t* conditionFlagsPtr() {
-  return &header()->conditionFlags;
-}
-
-inline ssize_t loadConditionFlags() {
-  return atomic_acquire_load(conditionFlagsPtr());
-}
-
-void invalidateForRename(const StringData* name);
-
-/*
- * Some caches have a Lookup != k, because the TC passes a container
- * with other necessary info to Cache::lookup. E.g., when looking up
- * function preludes, we also need the number of arguments. Since
- * the current ActRec encapsulates both, we pass in an ActRec to
- * Cache::lookup even though CallCache maps Funcs to TCAs.
- *
- * KNLines must be a power of two.
- */
-template<typename Key, typename Value, class LookupKey,
-  PHPNameSpace NameSpace = NSInvalid,
-  int KNLines = kDefaultNumLines,
-  typename ReturnValue = Value>
-class Cache {
-public:
-  typedef Cache<Key, Value, LookupKey, NameSpace, KNLines, ReturnValue> Self;
-  static const int kNumLines = KNLines;
+struct FuncCache {
+  static constexpr int kNumLines = 4;
 
   struct Pair {
-    Key   m_key;
-    Value m_value;
-  } m_pairs[kNumLines];
+    StringData*  m_key;
+    const Func*  m_value;
+  };
 
-  static inline Self* cacheAtHandle(CacheHandle handle) {
-    return (Self*)handleToPtr(handle);
-  }
+  static RDS::Handle alloc();
+  static const Func* lookup(RDS::Handle, StringData* lookup);
 
-  inline Pair* keyToPair(Key k) {
-    if (kNumLines == 1) {
-      return &m_pairs[0];
-    }
-    assert(HPHP::Util::isPowerOfTwo(kNumLines));
-    return m_pairs + (hashKey(k) & (kNumLines - 1));
-  }
-
-protected:
-  // Each instance needs to implement this
-  static int hashKey(Key k);
-
-public:
-  typedef Key CacheKey;
-  typedef LookupKey CacheLookupKey;
-  typedef Value CacheValue;
-
-  static CacheHandle alloc(const StringData* name = nullptr) {
-    // Each lookup should access exactly one Pair so there's no point
-    // in making sure the entire cache fits on one cache line.
-    return namedAlloc<NameSpace>(name, sizeof(Self), sizeof(Pair));
-  }
-  inline CacheHandle cacheHandle() const {
-    return ptrToHandle(this);
-  }
-  static void invalidate(CacheHandle chand, Key lookup) {
-    Pair* pair = cacheAtHandle(chand)->keyToPair(lookup);
-    memset(pair, 0, sizeof(Pair));
-  }
-  static void invalidate(CacheHandle chand) {
-    Self *thiz = cacheAtHandle(chand);
-    memset(thiz, 0, sizeof(*thiz));
-  }
-  static ReturnValue lookup(CacheHandle chand, LookupKey lookup,
-                            const void* extraKey = nullptr);
+  Pair m_pairs[kNumLines];
 };
 
-struct FixedFuncCache {
-  const Func* m_func;
+/*
+ * In order to handle fb_rename_function (when it is enabled), we need
+ * to invalidate dynamic function call caches (the FuncCache).  This
+ * hook is called when fb_rename_function is used.
+ */
+void invalidateForRenameFunction(const StringData* name);
 
-  static inline FixedFuncCache* cacheAtHandle(CacheHandle handle) {
-    return (FixedFuncCache*)handleToPtr(handle);
-  }
+//////////////////////////////////////////////////////////////////////
 
-  static void invalidate(CacheHandle handle) {
-    FixedFuncCache* thiz = cacheAtHandle(handle);
-    thiz->m_func = nullptr;
-  }
+/*
+ * Per-callsite dynamic class name lookups (where the name of the
+ * class isn't known at translation time).  4-way cache.
+ */
+struct ClassCache {
+  static constexpr int kNumLines = 4;
 
-  static const Func* lookupUnknownFunc(StringData* name);
+  struct Pair {
+    StringData*  m_key;
+    const Class* m_value;
+  };
+
+  static RDS::Handle alloc();
+  static const Class* lookup(RDS::Handle, StringData* lookup);
+
+  Pair m_pairs[kNumLines];
 };
+
+//////////////////////////////////////////////////////////////////////
 
 struct StaticMethodCache {
   const Func* m_func;
   const Class* m_cls;
-  static CacheHandle alloc(const StringData* cls, const StringData* meth,
-                           const char* ctxName);
-  static const Func* lookupIR(CacheHandle chand,
+
+  static RDS::Handle alloc(const StringData* cls,
+                      const StringData* meth,
+                      const char* ctxName);
+  static const Func* lookupIR(RDS::Handle chand,
                               const NamedEntity* ne, const StringData* cls,
                               const StringData* meth, TypedValue* vmfp,
                               TypedValue* vmsp);
-  static const Func* lookup(CacheHandle chand,
+  static const Func* lookup(RDS::Handle chand,
                             const NamedEntity* ne, const StringData* cls,
                             const StringData* meth);
 };
@@ -257,97 +100,29 @@ struct StaticMethodFCache {
   const Func* m_func;
   int m_static;
 
-  static CacheHandle alloc(const StringData* cls, const StringData* meth,
-                           const char* ctxName);
-  static const Func* lookupIR(CacheHandle chand, const Class* cls,
+  static RDS::Handle alloc(const StringData* cls,
+                      const StringData* meth,
+                      const char* ctxName);
+  static const Func* lookupIR(RDS::Handle chand, const Class* cls,
                               const StringData* meth, TypedValue* vmfp);
 };
 
-typedef Cache<const StringData*, const Func*, StringData*, NSDynFunction>
-  FuncCache;
-typedef Cache<uintptr_t, const Func*, ActRec*, NSInvalid, 1, void>
-  MethodCache;
-typedef Cache<StringData*, const Class*, StringData*, NSClass> ClassCache;
+//////////////////////////////////////////////////////////////////////
 
 /*
- * Classes.
+ * Static properties.
  *
- * The request-private Class* for a given class name. This is used when
- * the class name is known at translation time.
+ * We only cache statically known property name references from within
+ * the class.  Current statistics shows in class references dominating
+ * by 91.5% of all static property access.
  */
-CacheHandle allocKnownClass(const Class* name);
-CacheHandle allocKnownClass(const NamedEntity* name, bool persistent);
-CacheHandle allocKnownClass(const StringData* name);
-typedef Class* (*lookupKnownClass_func_t)(Class** cache,
-                                          const StringData* clsName,
-                                          bool isClass);
-template<bool checkOnly>
-Class* lookupKnownClass(Class** cache, const StringData* clsName,
-                        bool isClass);
-CacheHandle allocClassInitProp(const StringData* name);
-CacheHandle allocClassInitSProp(const StringData* name);
-
-/*
- * Functions.
- */
-CacheHandle allocFixedFunction(const NamedEntity* ne, bool persistent);
-CacheHandle allocFixedFunction(const StringData* name);
-
-/*
- * Type aliases.
- *
- * Request-private values for type aliases (typedefs).  When a typedef
- * is defined, the entry for it is cached.  This reserves enough space
- * for a TypedefReq struct.
- */
-CacheHandle allocTypedef(const NamedEntity* name);
-
-/*
- * Constants.
- *
- * The request-private value of a constant.
- */
-CacheHandle allocConstant(uint32_t* handlep, bool persistent);
-
-CacheHandle allocClassConstant(StringData* name);
-TypedValue lookupClassConstantTv(TypedValue* cache,
-                                 const NamedEntity* ne,
-                                 const StringData* cls,
-                                 const StringData* cns);
-
-/*
- * Non-scalar class constants are stored in TargetCache slots as
- * Arrays.
- */
-CacheHandle allocNonScalarClassConstantMap(unsigned* handleOut);
-
-/*
- * Static locals.
- *
- * For normal functions, static locals are allocated as RefData's that
- * live in TargetCache.  Note that we don't put closures or
- * generatorFromClosure locals here because they are per-instance.
- */
-CacheHandle allocStaticLocal(const Func*, const StringData*);
-
-/*
- * Static properties.  We only cache statically known property name
- * references from within the class.  Current statistics shows in
- * class references dominating by 91.5% of all static property access.
- */
-class SPropCache {
-private:
-  static inline SPropCache* cacheAtHandle(CacheHandle handle) {
-    return (SPropCache*)(uintptr_t(tl_targetCaches) + handle);
-  }
-public:
+struct SPropCache {
   TypedValue* m_tv;  // public; it is used from TC and we assert the offset
-  static CacheHandle alloc(const StringData* sd = nullptr) {
-    return namedAlloc<NSSProp>(sd, sizeof(SPropCache), sizeof(SPropCache));
-  }
+
+  static RDS::Handle alloc(const StringData* sd);
 
   template<bool raiseOnError>
-  static TypedValue* lookup(CacheHandle handle, const Class* cls,
+  static TypedValue* lookup(RDS::Handle handle, const Class* cls,
                             const StringData* nm, Class* ctx);
 
   template<bool raiseOnError>
@@ -355,11 +130,33 @@ public:
                                  Class* ctx);
 };
 
-void methodCacheSlowPath(MethodCache::Pair* mce,
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Method cache entries cache the dispatch target for a function call.
+ * The key is a Class*, but the low bits are reused for other
+ * purposes.  The fast path in the TC doesn't have to check these
+ * bits---it just checks if m_key is bitwise equal to the candidate
+ * Class* it has, and if so it accepts m_value.
+ *
+ * The MethodCache line consists of a Class* key (stored as a
+ * uintptr_t) and a Func*.  The low bit of the key is set if the
+ * function call is a magic call (in which case the cached Func* is
+ * the __call function).  The second lowest bit of the key is set if
+ * the cached Func has AttrStatic.
+ */
+struct MethodCache {
+  uintptr_t m_key;
+  const Func* m_value;
+};
+
+void methodCacheSlowPath(MethodCache* mce,
                          ActRec* ar,
                          StringData* name,
                          Class* cls);
 
-} } }
+//////////////////////////////////////////////////////////////////////
+
+}}
 
 #endif

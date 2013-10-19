@@ -52,7 +52,7 @@ void ThriftBuffer::reset(bool read) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ThriftBuffer::write(CStrRef data) {
+void ThriftBuffer::write(const String& data) {
   int32_t len = data.size();
   write(len);
 
@@ -191,7 +191,7 @@ void ThriftBuffer::throwInvalidStringSize(int size) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static Variant unserialize_with_no_notice(CStrRef str) {
+static Variant unserialize_with_no_notice(const String& str) {
   VariableUnserializer vu(str.data(), str.data() + str.size(),
       VariableUnserializer::Type::Serialize, true);
   Variant v;

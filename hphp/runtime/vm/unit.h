@@ -25,8 +25,9 @@
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/util/range.h"
 #include "hphp/parser/location.h"
-#include "hphp/runtime/base/md5.h"
+#include "hphp/util/md5.h"
 #include "hphp/util/tiny-vector.h"
+#include "hphp/runtime/vm/type-alias.h"
 
 namespace HPHP {
 // Forward declarations.
@@ -136,7 +137,7 @@ class EHEnt {
       (m_iterId)
       (m_fault)
       (m_itRef)
-      // eh.m_parentIndex is re-computed in sortEHTab, not serialized.
+      (m_parentIndex)
       ;
     if (m_type == Type::Catch) {
       sd(m_catches);
@@ -158,13 +159,6 @@ class FPIEnt {
     // These fields are recomputed by sortFPITab:
     // m_parentIndex;
     // m_fpiDepth;
-  }
-};
-
-class FPIEntComp {
- public:
-  bool operator() (const FPIEnt &fpi1, const FPIEnt &fpi2) {
-    return fpi1.m_fpushOff < fpi2.m_fpushOff;
   }
 };
 
@@ -242,44 +236,6 @@ typedef std::map<int, OffsetRangeVec> LineToOffsetRangeVecMap;
 typedef TableEntry<const Func*> FuncEntry;
 typedef std::vector<FuncEntry> FuncTable;
 
-/*
- * This is the runtime representation of a typedef.  Typedefs are only
- * allowed when hip hop extensions are enabled.
- *
- * The m_kind field is KindOfObject whenever the typedef is basically
- * just a name.  At runtime we still might resolve this name to
- * another typedef, becoming a typedef for KindOfArray or something in
- * that request.
- *
- * For the per-request struct, see TypedefReq below.
- */
-struct Typedef {
-  const StringData* name;
-  const StringData* value;
-  DataType          kind;
-  bool              nullable; // Null is allowed; for ?Foo typedefs
-
-  template<class SerDe> void serde(SerDe& sd) {
-    sd(name)
-      (value)
-      (kind)
-      (nullable)
-      ;
-  }
-};
-
-/*
- * In a given request, a defined typedef is turned into a TypedefReq
- * struct.  This contains the information needed to validate parameter
- * type hints for a typedef at runtime.
- */
-struct TypedefReq {
-  DataType kind;          // may be KindOfAny for "mixed"
-  bool nullable;          // for option types, like ?Foo
-  Class* klass;           // nullptr if kind != KindOfObject
-  const StringData* name; // needed for error messages; nullptr if not defined
-};
-
 //==============================================================================
 // (const StringData*) versus (StringData*)
 //
@@ -287,6 +243,54 @@ struct TypedefReq {
 // makeStaticString().  Therefore no reference counting is required.
 //
 //==============================================================================
+
+// Functions for differentiating global litstrId's from unit-local Id's.
+const int kGlobalLitstrOffset = 0x40000000;
+inline bool isGlobalLitstrId(Id id) { return id >= kGlobalLitstrOffset; }
+inline Id encodeGlobalLitstrId(Id id) { return id + kGlobalLitstrOffset; }
+inline Id decodeGlobalLitstrId(Id id) { return id - kGlobalLitstrOffset; }
+
+/*
+ * Global table of literal strings.  This can only be safely used when
+ * the repo is built in WholeProgram mode and run in RepoAuthoritative
+ * mode.
+ */
+class LitstrTable {
+private:
+  static LitstrTable* s_litstrTable;
+
+public:
+  static void init() {
+    LitstrTable::s_litstrTable = new LitstrTable();
+  }
+
+  static LitstrTable& get() {
+    return *LitstrTable::s_litstrTable;
+  }
+
+  ~LitstrTable() {}
+  Id mergeLitstr(const StringData* litstr);
+  size_t numLitstrs() { return m_namedInfo.size(); }
+  StringData* lookupLitstrId(Id id) const;
+  const NamedEntity* lookupNamedEntityId(Id id) const;
+  const NamedEntityPair& lookupNamedEntityPairId(Id id) const;
+  void insert(RepoTxn& txn, UnitOrigin uo);
+  Mutex& mutex() { return m_mutex; }
+
+  void setReading() { m_safeToRead = true; }
+  void setWriting() { m_safeToRead = false; }
+
+private:
+  LitstrTable() {}
+  typedef hphp_hash_map<const StringData*, Id,
+                        string_data_hash, string_data_same> LitstrMap;
+
+  LitstrMap m_litstr2id;
+  std::vector<const StringData*> m_litstrs;
+  std::vector<NamedEntityPair> m_namedInfo;
+  Mutex m_mutex;
+  std::atomic<bool> m_safeToRead;
+};
 
 /*
  * Metadata about a compilation unit.
@@ -440,7 +444,7 @@ struct Unit {
     assert(m_filepath);
     return m_filepath;
   }
-  CStrRef filepathRef() const {
+  const String& filepathRef() const {
     assert(m_filepath);
     return *(String*)(&m_filepath);
   }
@@ -463,16 +467,27 @@ struct Unit {
   size_t numLitstrs() const {
     return m_namedInfo.size();
   }
+
   StringData* lookupLitstrId(Id id) const {
+    if (isGlobalLitstrId(id)) {
+      return LitstrTable::get().lookupLitstrId(decodeGlobalLitstrId(id));
+    }
     assert(id >= 0 && id < Id(m_namedInfo.size()));
     return const_cast<StringData*>(m_namedInfo[id].first);
   }
 
   const NamedEntity* lookupNamedEntityId(Id id) const {
+    if (isGlobalLitstrId(id)) {
+      return LitstrTable::get().lookupNamedEntityId(decodeGlobalLitstrId(id));
+    }
     return lookupNamedEntityPairId(id).second;
   }
 
   const NamedEntityPair& lookupNamedEntityPairId(Id id) const {
+    if (isGlobalLitstrId(id)) {
+      auto decodedId = decodeGlobalLitstrId(id);
+      return LitstrTable::get().lookupNamedEntityPairId(decodedId);
+    }
     assert(id < Id(m_namedInfo.size()));
     const NamedEntityPair &ne = m_namedInfo[id];
     assert(ne.first);
@@ -483,6 +498,8 @@ struct Unit {
     }
     return ne;
   }
+
+  bool checkStringId(Id id) const;
 
   size_t numArrays() const {
     return m_arrays.size();
@@ -499,7 +516,7 @@ struct Unit {
   static Class* defClass(const HPHP::PreClass* preClass,
                          bool failIsFatal = true);
   static bool aliasClass(Class* original, const StringData* alias);
-  void defTypedef(Id id);
+  void defTypeAlias(Id id);
 
   static Cell* lookupCns(const StringData* cnsName);
   static Cell* lookupPersistentCns(const StringData* cnsName);
@@ -582,9 +599,12 @@ struct Unit {
                           Attr typeAttrs);
 
   bool compileTimeFatal(const StringData*& msg, int& line) const;
+  bool parseFatal(const StringData*& msg, int& line) const;
   const TypedValue *getMainReturn() const {
+    assert(isMergeOnly());
     return &m_mainReturn;
   }
+
 private:
   template <bool debugger>
   void mergeImpl(void* tcbase, UnitMergeInfo* mi);
@@ -653,9 +673,9 @@ public:
   bool isInterpretOnly() const { return m_interpretOnly; }
   void setInterpretOnly() { m_interpretOnly = true; }
   bool isMergeOnly() const { return m_mergeOnly; }
-  void clearMergeOnly() { m_mergeOnly = false; }
   bool isEmpty() const { return m_mergeState & UnitMergeStateEmpty; }
   void* replaceUnit() const;
+
 public:
   static Mutex s_classesMutex;
 
@@ -726,7 +746,7 @@ private:
   std::vector<NamedEntityPair> m_namedInfo;
   std::vector<const ArrayData*> m_arrays;
   PreClassPtrVec m_preClasses;
-  FixedVector<Typedef> m_typedefs;
+  FixedVector<TypeAlias> m_typeAliases;
   UnitMergeInfo* m_mergeInfo;
   unsigned m_cacheOffset;
   int8_t m_repoId;
@@ -764,8 +784,9 @@ class UnitEmitter {
   void setMainReturn(const TypedValue* v) { m_mainReturn = *v; }
   void setMergeOnly(bool b) { m_mergeOnly = b; }
   const MD5& md5() const { return m_md5; }
-  Id addTypedef(const Typedef& td);
+  Id addTypeAlias(const TypeAlias& td);
   Id mergeLitstr(const StringData* litstr);
+  Id mergeUnitLitstr(const StringData* litstr);
   Id mergeArray(ArrayData* a, const StringData* key=nullptr);
   FuncEmitter* getMain();
   void initMain(int line1, int line2);
@@ -904,8 +925,41 @@ class UnitEmitter {
   std::vector<std::pair<Offset,SourceLoc> > m_sourceLocTab;
   std::vector<std::pair<Offset,const FuncEmitter*> > m_feTab;
   LineTable m_lineTable;
-  std::vector<Typedef> m_typedefs;
+  std::vector<TypeAlias> m_typeAliases;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Member functions of LitstrTable inlined for perf.  Must come after
+ * Unit definition to break circular dependences.
+ */
+inline
+StringData* LitstrTable::lookupLitstrId(Id id) const {
+  assert(m_safeToRead);
+  assert(id >= 0 && id < Id(s_litstrTable->m_litstrs.size()));
+  return const_cast<StringData*>(s_litstrTable->m_litstrs[id]);
+}
+
+inline
+const NamedEntity* LitstrTable::lookupNamedEntityId(Id id) const {
+  assert(m_safeToRead);
+  return lookupNamedEntityPairId(id).second;
+}
+
+inline
+const NamedEntityPair& LitstrTable::lookupNamedEntityPairId(Id id) const {
+  assert(m_safeToRead);
+  assert(id >= 0 && id < Id(s_litstrTable->m_namedInfo.size()));
+  const NamedEntityPair& ne = s_litstrTable->m_namedInfo[id];
+  assert(ne.first);
+  assert(ne.first->data()[ne.first->size()] == 0);
+  assert(ne.first->data()[0] != '\\');
+  if (UNLIKELY(!ne.second)) {
+    const_cast<const NamedEntity*&>(ne.second) = Unit::GetNamedEntity(ne.first);
+  }
+  return ne;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -943,7 +997,7 @@ class UnitRepoProxy : public RepoProxy {
                 size_t bclen, const uchar* bc_meta, size_t bc_meta_len,
                 const TypedValue* mainReturn, bool mergeOnly,
                 const LineTable& lines,
-                const std::vector<Typedef>&);
+                const std::vector<TypeAlias>&);
   };
   class GetUnitStmt : public RepoProxy::Stmt {
    public:

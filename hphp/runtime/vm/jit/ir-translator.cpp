@@ -29,7 +29,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/base/stats.h"
@@ -96,13 +96,13 @@ bool isInferredType(const NormalizedInstruction& i) {
           NormalizedInstruction::OutputUse::Inferred);
 }
 
-JIT::Type getInferredOrPredictedType(const NormalizedInstruction& i) {
+Type getInferredOrPredictedType(const NormalizedInstruction& i) {
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
   if (u == NormalizedInstruction::OutputUse::Inferred ||
      (u == NormalizedInstruction::OutputUse::Used && i.outputPredicted)) {
-    return JIT::Type(i.outStack->rtt);
+    return Type(i.outStack->rtt);
   }
-  return JIT::Type::None;
+  return Type::None;
 }
 }
 
@@ -112,7 +112,8 @@ IRTranslator::IRTranslator(Offset bcOff, Offset spOff, const Func* curFunc)
 }
 
 void IRTranslator::checkType(const Transl::Location& l,
-                             const Transl::RuntimeType& rtt) {
+                             const Transl::RuntimeType& rtt,
+                             bool outerOnly) {
   // We can get invalid inputs as a side effect of reading invalid
   // items out of BBs we truncate; they don't need guards.
   if (rtt.isVagueValue() || l.isThis()) return;
@@ -125,12 +126,12 @@ void IRTranslator::checkType(const Transl::Location& l,
       if (type.subtypeOf(Type::Cls)) {
         m_hhbcTrans.assertTypeStack(stackOffset, type);
       } else {
-        m_hhbcTrans.guardTypeStack(stackOffset, type);
+        m_hhbcTrans.guardTypeStack(stackOffset, type, outerOnly);
       }
       break;
     }
     case Location::Local:
-      m_hhbcTrans.guardTypeLocal(l.offset, Type(rtt));
+      m_hhbcTrans.guardTypeLocal(l.offset, Type(rtt), outerOnly);
       break;
 
     case Location::Iter:
@@ -243,7 +244,7 @@ IRTranslator::translateLtGtOp(const NormalizedInstruction& i) {
 
   DataType leftType = i.inputs[0]->outerType();
   DataType rightType = i.inputs[1]->outerType();
-  bool ok = HPHP::TypeConstraint::equivDataTypes(leftType, rightType) &&
+  bool ok = equivDataTypes(leftType, rightType) &&
     (i.inputs[0]->isNull() ||
      leftType == KindOfBoolean ||
      i.inputs[0]->isInt());
@@ -375,6 +376,17 @@ IRTranslator::translateUnboxR(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translateBoxR(const NormalizedInstruction& i) {
+  if (i.noOp) {
+    // statically proved to be unboxed -- just pass that info to the IR
+    TRACE(1, "HHIR: translateBoxR: output inferred to be Box\n");
+    m_hhbcTrans.assertTypeStack(0, JIT::Type::BoxedCell);
+  } else {
+    HHIR_UNIMPLEMENTED(BoxR);
+  }
+}
+
+void
 IRTranslator::translateNull(const NormalizedInstruction& i) {
   assert(i.inputs.size() == 0);
 
@@ -449,6 +461,14 @@ IRTranslator::translateFloor(const NormalizedInstruction& i) {
 void
 IRTranslator::translateCeil(const NormalizedInstruction& i) {
   HHIR_EMIT(Ceil);
+}
+
+void IRTranslator::translateAssertTL(const NormalizedInstruction& i) {
+  HHIR_EMIT(AssertTL, i.imm[0].u_LA, static_cast<AssertTOp>(i.imm[1].u_OA));
+}
+
+void IRTranslator::translateAssertTStk(const NormalizedInstruction& i) {
+  HHIR_EMIT(AssertTStk, i.imm[0].u_IVA, static_cast<AssertTOp>(i.imm[1].u_OA));
 }
 
 void
@@ -1018,6 +1038,7 @@ IRTranslator::translateFPushFuncU(const NormalizedInstruction& i) {
 void
 IRTranslator::translateFPassCOp(const NormalizedInstruction& i) {
   auto const op = i.op();
+  if (i.noOp) return;
   if (i.preppedByRef && (op == OpFPassCW || op == OpFPassCE)) {
     // These cases might have to raise a warning or an error
     HHIR_UNIMPLEMENTED(FPassCW_FPassCE_byref);
@@ -1215,9 +1236,14 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     if (op == OpFCallArray) return refuse("FCallArray");
 
     cost += 1;
-    if (hasImmVector(op)) {
-      cost += getMVector(reinterpret_cast<const Op*>(iter.sk().pc())).size();
-      // static cost + scale factor for vector ops
+
+    // Check for an immediate vector, and if it's present add its size to the
+    // cost.
+    auto const pc = reinterpret_cast<const Op*>(iter.sk().pc());
+    if (hasMVector(op)) {
+      cost += getMVector(pc).size();
+    } else if (hasImmVector(op)) {
+      cost += getImmVector(pc).size();
     }
 
     if (cost > RuntimeOption::EvalHHIRInliningMaxCost) {
@@ -1581,9 +1607,24 @@ static bool isPop(Op opc) {
 void
 IRTranslator::passPredictedAndInferredTypes(const NormalizedInstruction& i) {
   if (!i.outStack || i.breaksTracelet) return;
+  auto const jitType = Type(i.outStack->rtt);
+
+  if (RuntimeOption::EvalHHIRRelaxGuards) {
+    if (i.outputPredicted) {
+      if (i.outputPredictionStatic && jitType.notCounted()) {
+        // If the prediction is from static analysis it really means jitType |
+        // InitNull. When jitType is an uncounted type, we know that the value
+        // will always be an uncounted type, so we assert that fact before
+        // doing the real check. This allows us to relax the CheckType away
+        // while still eliminating some refcounting operations.
+        m_hhbcTrans.assertTypeStack(0, Type::Uncounted);
+      }
+      m_hhbcTrans.checkTypeTopOfStack(jitType, i.next->offset());
+    }
+    return;
+  }
 
   NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
-  JIT::Type jitType = JIT::Type(i.outStack->rtt);
 
   if (u == NormalizedInstruction::OutputUse::Inferred) {
     TRACE(1, "irPassPredictedAndInferredTypes: output inferred as %s\n",
@@ -1615,42 +1656,61 @@ void IRTranslator::interpretInstr(const NormalizedInstruction& i) {
   m_hhbcTrans.emitInterpOne(i);
 }
 
-void IRTranslator::translateInstr(const NormalizedInstruction& i) {
-  m_hhbcTrans.setBcOff(i.source.offset(),
-                       i.breaksTracelet && !m_hhbcTrans.isInlining());
+static Type flavorToType(FlavorDesc f) {
+  switch (f) {
+    case NOV: not_reached();
+
+    case CV: return Type::Cell;  // TODO(#3029148) this could be Cell - Uninit
+    case UV: return Type::Uninit;
+    case VV: return Type::BoxedCell;
+    case AV: return Type::Cls;
+    case RV: case FV: case CVV: case CVUV: return Type::Gen;
+  }
+  not_reached();
+}
+
+void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
+  m_hhbcTrans.setBcOff(ni.source.offset(),
+                       ni.breaksTracelet && !m_hhbcTrans.isInlining());
   FTRACE(1, "\n{:-^60}\n", folly::format("translating {} with stack:\n{}",
-                                         i.toString(),
+                                         ni.toString(),
                                          m_hhbcTrans.showStack()));
   // When profiling, we disable type predictions to avoid side exits
-  assert(Transl::tx64->mode() != TransProfile || !i.outputPredicted);
+  assert(Transl::tx64->mode() != TransProfile || !ni.outputPredicted);
 
-  if (i.guardedThis) {
+  if (ni.guardedThis) {
     // Task #2067635: This should really generate an AssertThis
     m_hhbcTrans.setThisAvailable();
   }
 
   if (moduleEnabled(HPHP::Trace::stats, 2)) {
-    m_hhbcTrans.emitIncStat(Stats::opcodeToIRPreStatCounter(i.op()), 1);
+    m_hhbcTrans.emitIncStat(Stats::opcodeToIRPreStatCounter(ni.op()), 1);
   }
   if (RuntimeOption::EnableInstructionCounts ||
       moduleEnabled(HPHP::Trace::stats, 3)) {
     // If the instruction takes a slow exit, the exit trace will
     // decrement the post counter for that opcode.
-    m_hhbcTrans.emitIncStat(Stats::opcodeToIRPostStatCounter(i.op()),
+    m_hhbcTrans.emitIncStat(Stats::opcodeToIRPostStatCounter(ni.op()),
                             1, true);
   }
 
-  if (instrMustInterp(i) || i.interp) {
-    interpretInstr(i);
-  } else {
-    translateInstrWork(i);
+  auto pc = reinterpret_cast<const Op*>(ni.pc());
+  for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
+    auto const type = flavorToType(instrInputFlavor(pc, i));
+    if (type != Type::Gen) m_hhbcTrans.assertTypeStack(i, type);
   }
 
-  if (Transl::callDestroysLocals(i, m_hhbcTrans.curFunc())) {
+  if (instrMustInterp(ni) || ni.interp) {
+    interpretInstr(ni);
+  } else {
+    translateInstrWork(ni);
+  }
+
+  if (Transl::callDestroysLocals(ni, m_hhbcTrans.curFunc())) {
     m_hhbcTrans.emitSmashLocals();
   }
 
-  passPredictedAndInferredTypes(i);
+  passPredictedAndInferredTypes(ni);
 }
 
 }}

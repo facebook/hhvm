@@ -26,9 +26,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_simplexml_import_dom(CObjRef node,
-                               CStrRef class_name = "SimpleXMLElement");
-Variant f_simplexml_load_string(CStrRef data, CStrRef class_name = "SimpleXMLElement", int64_t options = 0, CStrRef ns = "", bool is_prefix = false);
-Variant f_simplexml_load_file(CStrRef filename, CStrRef class_name = "SimpleXMLElement", int64_t options = 0, CStrRef ns = "", bool is_prefix = false);
+                               const String& class_name = "SimpleXMLElement");
+Variant f_simplexml_load_string(const String& data, const String& class_name = "SimpleXMLElement", int64_t options = 0, const String& ns = "", bool is_prefix = false);
+Variant f_simplexml_load_file(const String& filename, const String& class_name = "SimpleXMLElement", int64_t options = 0, const String& ns = "", bool is_prefix = false);
 Variant f_libxml_get_errors();
 Variant f_libxml_get_last_error();
 void f_libxml_clear_errors();
@@ -54,23 +54,23 @@ class c_SimpleXMLElement :
   // need to implement
   public: c_SimpleXMLElement(Class* cls = c_SimpleXMLElement::classof());
   public: ~c_SimpleXMLElement();
-  public: void t___construct(CStrRef data, int64_t options = 0, bool data_is_url = false, CStrRef ns = "", bool is_prefix = false);
+  public: void t___construct(const String& data, int64_t options = 0, bool data_is_url = false, const String& ns = "", bool is_prefix = false);
   public: bool t_offsetexists(CVarRef index);
   public: Variant t_offsetget(CVarRef index);
   public: void t_offsetset(CVarRef index, CVarRef newvalue);
   public: void t_offsetunset(CVarRef index);
   public: Variant t_getiterator();
   public: int64_t t_count();
-  public: Variant t_xpath(CStrRef path);
-  public: bool t_registerxpathnamespace(CStrRef prefix, CStrRef ns);
-  public: Variant t_asxml(CStrRef filename = "");
+  public: Variant t_xpath(const String& path);
+  public: bool t_registerxpathnamespace(const String& prefix, const String& ns);
+  public: Variant t_asxml(const String& filename = "");
   public: Array t_getnamespaces(bool recursive = false);
   public: Array t_getdocnamespaces(bool recursive = false);
-  public: Object t_children(CStrRef ns = "", bool is_prefix = false);
+  public: Object t_children(const String& ns = "", bool is_prefix = false);
   public: String t_getname();
-  public: Object t_attributes(CStrRef ns = "", bool is_prefix = false);
-  public: Variant t_addchild(CStrRef qname, CStrRef value = null_string, CStrRef ns = null_string);
-  public: void t_addattribute(CStrRef qname, CStrRef value = null_string, CStrRef ns = null_string);
+  public: Object t_attributes(const String& ns = "", bool is_prefix = false);
+  public: Variant t_addchild(const String& qname, const String& value = null_string, const String& ns = null_string);
+  public: void t_addattribute(const String& qname, const String& value = null_string, const String& ns = null_string);
   public: String t___tostring();
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);

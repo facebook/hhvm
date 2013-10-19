@@ -25,26 +25,26 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Object f_memcache_connect(CStrRef host, int port = 0, int timeout = 0, int timeoutms = 0);
-Object f_memcache_pconnect(CStrRef host, int port = 0, int timeout = 0, int timeoutms = 0);
-bool f_memcache_add(CObjRef memcache, CStrRef key, CVarRef var, int flag = 0, int expire = 0);
-bool f_memcache_set(CObjRef memcache, CStrRef key, CVarRef var, int flag = 0, int expire = 0);
-bool f_memcache_replace(CObjRef memcache, CStrRef key, CVarRef var, int flag = 0, int expire = 0);
+Object f_memcache_connect(const String& host, int port = 0, int timeout = 0, int timeoutms = 0);
+Object f_memcache_pconnect(const String& host, int port = 0, int timeout = 0, int timeoutms = 0);
+bool f_memcache_add(CObjRef memcache, const String& key, CVarRef var, int flag = 0, int expire = 0);
+bool f_memcache_set(CObjRef memcache, const String& key, CVarRef var, int flag = 0, int expire = 0);
+bool f_memcache_replace(CObjRef memcache, const String& key, CVarRef var, int flag = 0, int expire = 0);
 Variant f_memcache_get(CObjRef memcache, CVarRef key, VRefParam flags = uninit_null());
-bool f_memcache_delete(CObjRef memcache, CStrRef key, int expire = 0);
-int64_t f_memcache_increment(CObjRef memcache, CStrRef key, int offset = 1);
-int64_t f_memcache_decrement(CObjRef memcache, CStrRef key, int offset = 1);
+bool f_memcache_delete(CObjRef memcache, const String& key, int expire = 0);
+int64_t f_memcache_increment(CObjRef memcache, const String& key, int offset = 1);
+int64_t f_memcache_decrement(CObjRef memcache, const String& key, int offset = 1);
 bool f_memcache_close(CObjRef memcache);
 bool f_memcache_debug(bool onoff);
 Variant f_memcache_get_version(CObjRef memcache);
 bool f_memcache_flush(CObjRef memcache, int timestamp = 0);
 bool f_memcache_setoptimeout(CObjRef memcache, int timeoutms);
-int64_t f_memcache_get_server_status(CObjRef memcache, CStrRef host, int port = 0);
+int64_t f_memcache_get_server_status(CObjRef memcache, const String& host, int port = 0);
 bool f_memcache_set_compress_threshold(CObjRef memcache, int threshold, double min_savings = 0.2);
-Array f_memcache_get_stats(CObjRef memcache, CStrRef type = null_string, int slabid = 0, int limit = 100);
-Array f_memcache_get_extended_stats(CObjRef memcache, CStrRef type = null_string, int slabid = 0, int limit = 100);
-bool f_memcache_set_server_params(CObjRef memcache, CStrRef host, int port = 11211, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant);
-bool f_memcache_add_server(CObjRef memcache, CStrRef host, int port = 11211, bool persistent = false, int weight = 0, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant, int timeoutms = 0);
+Array f_memcache_get_stats(CObjRef memcache, const String& type = null_string, int slabid = 0, int limit = 100);
+Array f_memcache_get_extended_stats(CObjRef memcache, const String& type = null_string, int slabid = 0, int limit = 100);
+bool f_memcache_set_server_params(CObjRef memcache, const String& host, int port = 11211, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant);
+bool f_memcache_add_server(CObjRef memcache, const String& host, int port = 11211, bool persistent = false, int weight = 0, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant, int timeoutms = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Memcache
@@ -58,25 +58,25 @@ class c_Memcache : public ExtObjectData, public Sweepable {
   public: c_Memcache(Class* cls = c_Memcache::classof());
   public: ~c_Memcache();
   public: void t___construct();
-  public: bool t_connect(CStrRef host, int port = 0, int timeout = 0, int timeoutms = 0);
-  public: bool t_pconnect(CStrRef host, int port = 0, int timeout = 0, int timeoutms = 0);
-  public: bool t_add(CStrRef key, CVarRef var, int flag = 0, int expire = 0);
-  public: bool t_set(CStrRef key, CVarRef var, int flag = 0, int expire = 0);
-  public: bool t_replace(CStrRef key, CVarRef var, int flag = 0, int expire = 0);
+  public: bool t_connect(const String& host, int port = 0, int timeout = 0, int timeoutms = 0);
+  public: bool t_pconnect(const String& host, int port = 0, int timeout = 0, int timeoutms = 0);
+  public: bool t_add(const String& key, CVarRef var, int flag = 0, int expire = 0);
+  public: bool t_set(const String& key, CVarRef var, int flag = 0, int expire = 0);
+  public: bool t_replace(const String& key, CVarRef var, int flag = 0, int expire = 0);
   public: Variant t_get(CVarRef key, VRefParam flags = uninit_null());
-  public: bool t_delete(CStrRef key, int expire = 0);
-  public: int64_t t_increment(CStrRef key, int offset = 1);
-  public: int64_t t_decrement(CStrRef key, int offset = 1);
+  public: bool t_delete(const String& key, int expire = 0);
+  public: int64_t t_increment(const String& key, int offset = 1);
+  public: int64_t t_decrement(const String& key, int offset = 1);
   public: Variant t_getversion();
   public: bool t_flush(int expire = 0);
   public: bool t_setoptimeout(int64_t timeoutms);
   public: bool t_close();
-  public: int64_t t_getserverstatus(CStrRef host, int port = 0);
+  public: int64_t t_getserverstatus(const String& host, int port = 0);
   public: bool t_setcompressthreshold(int threshold, double min_savings = 0.2);
-  public: Array t_getstats(CStrRef type = null_string, int slabid = 0, int limit = 100);
-  public: Array t_getextendedstats(CStrRef type = null_string, int slabid = 0, int limit = 100);
-  public: bool t_setserverparams(CStrRef host, int port = 11211, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant);
-  public: bool t_addserver(CStrRef host, int port = 11211, bool persistent = false, int weight = 0, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant, int timeoutms = 0);
+  public: Array t_getstats(const String& type = null_string, int slabid = 0, int limit = 100);
+  public: Array t_getextendedstats(const String& type = null_string, int slabid = 0, int limit = 100);
+  public: bool t_setserverparams(const String& host, int port = 11211, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant);
+  public: bool t_addserver(const String& host, int port = 11211, bool persistent = false, int weight = 0, int timeout = 0, int retry_interval = 0, bool status = true, CVarRef failure_callback = null_variant, int timeoutms = 0);
   public: Variant t___destruct();
 
 

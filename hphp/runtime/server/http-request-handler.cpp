@@ -165,7 +165,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   // request URI
   string pathTranslation = m_pathTranslation ?
     vhost->getPathTranslation().c_str() : "";
-  RequestURI reqURI(vhost, transport, sourceRootInfo.path(), pathTranslation);
+  RequestURI reqURI(vhost, transport, pathTranslation, sourceRootInfo.path());
   if (reqURI.done()) {
     return; // already handled with redirection or 404
   }

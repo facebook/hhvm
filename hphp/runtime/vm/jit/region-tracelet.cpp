@@ -143,7 +143,7 @@ RegionDescPtr RegionFormer::go() {
       m_ht.assertTypeStack(lt.location.stackOffset(), t);
       m_curBlock->addPredicted(m_sk, RegionDesc::TypePred{lt.location, t});
     } else {
-      m_ht.guardTypeLocation(lt.location, t);
+      m_ht.guardTypeLocation(lt.location, t, true /* outerOnly */);
     }
   }
 
@@ -201,7 +201,8 @@ RegionDescPtr RegionFormer::go() {
       break;
     }
 
-    if (m_inst.breaksTracelet) break;
+    // We successfully translated the instruction, so update m_sk.
+    m_sk.advance(m_curBlock->unit());
 
     if (inlineReturn) {
       // If we just translated an inlined RetC, grab the updated SrcKey from
@@ -211,23 +212,27 @@ RegionDescPtr RegionFormer::go() {
       m_arStates.pop_back();
       m_blockFinished = true;
       continue;
+    } else if (m_inst.breaksTracelet) {
+      FTRACE(1, "selectTracelet: tracelet broken after {}\n", m_inst);
+      // We don't currently support partial inlining.
+      assert(!m_ht.isInlining());
+      break;
     } else {
       assert(m_sk.func() == m_ht.curFunc());
     }
 
     if (isFCallStar(m_inst.op())) m_arStates.back().pop();
 
-    // Advance sk and check the prediction, if any. Since the current
-    // instruction is over, advance HhbcTranslator's sk before
-    // emitting the prediction.
-    m_sk.advance(m_curBlock->unit());
+    // Since the current instruction is over, advance HhbcTranslator's sk
+    // before emitting the prediction (if any).
     if (doPrediction) {
       m_ht.setBcOff(m_sk.offset(), false);
       m_ht.checkTypeStack(0, m_inst.outPred, m_sk.offset());
     }
   }
 
-  dumpTrace(2, m_ht.traceBuilder().trace(), " after tracelet formation ",
+  m_ht.end(m_sk.offset());
+  dumpTrace(2, m_ht.unit(), " after tracelet formation ",
             nullptr, nullptr, nullptr, m_ht.traceBuilder().guards());
 
   if (m_region && !m_region->blocks.empty()) recordDependencies();
@@ -490,21 +495,19 @@ void RegionFormer::recordDependencies() {
   }
 
   // Relax guards and record the ones that survived.
-  auto trace = m_ht.traceBuilder().trace();
   auto& firstBlock = *m_region->blocks.front();
   auto blockStart = firstBlock.start();
+  auto& unit = m_ht.unit();
   auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
-
-  auto changed =  doRelax ? relaxGuards(trace, m_ht.unit(),
-                                        *m_ht.traceBuilder().guards())
-                          : false;
-  visitGuards(trace, [&](const RegionDesc::Location& loc, Type type) {
+  auto changed = doRelax ? relaxGuards(unit, *m_ht.traceBuilder().guards())
+                         : false;
+  visitGuards(unit, [&](const RegionDesc::Location& loc, Type type) {
     RegionDesc::TypePred pred{loc, type};
     FTRACE(1, "selectTracelet adding guard {}\n", show(pred));
     firstBlock.addPredicted(blockStart, pred);
   });
   if (changed) {
-    dumpTrace(3, m_ht.traceBuilder().trace(), " after guard relaxation ",
+    dumpTrace(3, unit, " after guard relaxation ",
               nullptr, nullptr, nullptr, m_ht.traceBuilder().guards());
   }
 

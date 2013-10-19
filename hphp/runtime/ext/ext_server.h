@@ -38,18 +38,18 @@ enum PageletStatusType {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool f_dangling_server_proxy_old_request();
-bool f_dangling_server_proxy_new_request(CStrRef host);
+bool f_dangling_server_proxy_new_request(const String& host);
 bool f_pagelet_server_is_enabled();
-Resource f_pagelet_server_task_start(CStrRef url, CArrRef headers = null_array, CStrRef post_data = null_string, CArrRef files = null_array);
+Resource f_pagelet_server_task_start(const String& url, CArrRef headers = null_array, const String& post_data = null_string, CArrRef files = null_array);
 int64_t f_pagelet_server_task_status(CResRef task);
 String f_pagelet_server_task_result(CResRef task, VRefParam headers, VRefParam code, int64_t timeout_ms);
 void f_pagelet_server_flush();
-bool f_xbox_send_message(CStrRef msg, VRefParam ret, int64_t timeout_ms, CStrRef host = "localhost");
-bool f_xbox_post_message(CStrRef msg, CStrRef host = "localhost");
-Resource f_xbox_task_start(CStrRef message);
+bool f_xbox_send_message(const String& msg, VRefParam ret, int64_t timeout_ms, const String& host = "localhost");
+bool f_xbox_post_message(const String& msg, const String& host = "localhost");
+Resource f_xbox_task_start(const String& message);
 bool f_xbox_task_status(CResRef task);
 int64_t f_xbox_task_result(CResRef task, int64_t timeout_ms, VRefParam ret);
-Variant f_xbox_process_call_message(CStrRef msg);
+Variant f_xbox_process_call_message(const String& msg);
 int64_t f_xbox_get_thread_timeout();
 void f_xbox_set_thread_timeout(int timeout);
 void f_xbox_schedule_thread_reset();

@@ -367,7 +367,7 @@ String CmdInfo::GetParams(CArrRef params, bool varg,
   return args.detach();
 }
 
-String CmdInfo::GetModifier(CArrRef info, CStrRef name) {
+String CmdInfo::GetModifier(CArrRef info, const String& name) {
   if (info[name].toBoolean()) {
     return name + " ";
   }

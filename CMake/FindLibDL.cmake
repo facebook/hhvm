@@ -21,7 +21,7 @@ CHECK_C_SOURCE_RUNS("#include <dlfcn.h>
 void testfunc() {}
 int main() {
   testfunc();
-  return dyslm(0, "_testfunc") != (void*)0;
+  return dyslm(0, \"_testfunc\") != (void*)0;
 }" LIBDL_NEEDS_UNDERSCORE)
 
 mark_as_advanced(LIBDL_INCLUDE_DIRS LIBDL_LIBRARIES LIBDL_NEEDS_UNDERSCORE)

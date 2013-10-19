@@ -1,0 +1,20 @@
+aaa,bbb
+aaa,"""bbb"""
+"""aaa""","""bbb"""
+aaa,bbb
+"""aaa""",bbb
+"""aaa""","   ""bbb"""
+,
+aaa,
+,"""aaa"""
+"""""",""""""
+"""""""""""""",
+"""""""""""",aaa
+aaa,"bbb   "
+aaa,"""bbb   """
+"aaa""aaa""","""bbb""bbb"
+"aaa""aaa""""""",bbb
+aaa,"""\"bbb",ccc
+"aaa""\"a""","""bbb"""
+"""\"""","""aaa"""
+"""\"""""",aaa

@@ -264,11 +264,13 @@ Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
   return g_hphp_build_native_class_unit(builtinClasses, numBuiltinClasses);
 }
 
-Unit* compile_string(const char* s, size_t sz, const char* fname) {
+Unit* compile_string(const char* s,
+                     size_t sz,
+                     const char* fname /* = nullptr */) {
   MD5 md5;
   int out_len;
 
-  char * md5str = string_md5(s, sz, false, out_len);
+  char* md5str = string_md5(s, sz, false, out_len);
   md5 = MD5(md5str);
   free(md5str);
 

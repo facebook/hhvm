@@ -107,8 +107,11 @@ public:
    * are the only functions a parser calls upon analysis results.
    */
   FunctionScopePtr setTree(AnalysisResultConstPtr ar, StatementListPtr tree);
-  void cleanupForError(AnalysisResultConstPtr ar,
-                       int line, const std::string &msg);
+  void cleanupForError(AnalysisResultConstPtr ar);
+  void makeFatal(AnalysisResultConstPtr ar,
+                 const std::string& msg, int line);
+  void makeParseFatal(AnalysisResultConstPtr ar,
+                      const std::string& msg, int line);
 
   bool addFunction(AnalysisResultConstPtr ar, FunctionScopePtr funcScope);
   bool addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope);

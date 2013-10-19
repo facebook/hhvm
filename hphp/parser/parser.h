@@ -100,7 +100,8 @@ public:
   void setRuleLocation(Location *loc) {
     m_loc = *loc;
   }
-  virtual void fatal(Location *loc, const char *msg) {}
+  virtual void fatal(const Location* loc, const char* msg) {}
+  virtual void parseFatal(const Location* loc, const char* msg) {}
 
   void pushFuncLocation();
   LocationPtr popFuncLocation();

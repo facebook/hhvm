@@ -174,10 +174,16 @@ bool Parser::parse() {
                                     "Parse error: %s",
                                     errString().c_str());
     }
-  } catch (ParseTimeFatalException &e) {
-    m_file->cleanupForError(m_ar, e.m_line, e.getMessage());
+    return true;
+  } catch (const ParseTimeFatalException& e) {
+    m_file->cleanupForError(m_ar);
+    if (e.m_parseFatal) {
+      m_file->makeParseFatal(m_ar, e.getMessage(), e.m_line);
+    } else {
+      m_file->makeFatal(m_ar, e.getMessage(), e.m_line);
+    }
+    return false;
   }
-  return true;
 }
 
 void Parser::error(const char* fmt, ...) {
@@ -190,9 +196,16 @@ void Parser::error(const char* fmt, ...) {
   fatal(&m_loc, msg.c_str());
 }
 
-void Parser::fatal(Location *loc, const char *msg) {
-  throw ParseTimeFatalException(loc->file, loc->line0,
-                                "%s", msg);
+void Parser::parseFatal(const Location* loc, const char* msg) {
+  // we can't use loc->file, as the bison parser doesn't track that in YYLTYPE
+  auto file = m_file->getName().c_str();
+  auto exn = ParseTimeFatalException(file, loc->line0, "%s", msg);
+  exn.setParseFatal();
+  throw exn;
+}
+
+void Parser::fatal(const Location* loc, const char* msg) {
+  throw ParseTimeFatalException(loc->file, loc->line0, "%s", msg);
 }
 
 string Parser::errString() {

@@ -493,6 +493,20 @@ bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
   return true;
 }
 
+bool Unit::parseFatal(const StringData*& msg, int& line) const {
+  if (!compileTimeFatal(msg, line)) {
+    return false;
+  }
+
+  const Opcode* pc = getMain()->getEntry();
+
+  // two opcodes + String's ID
+  pc += sizeof(Id) + 2;
+
+  auto kind_char = *pc;
+  return kind_char == uint8_t(FatalKind::Parse);
+}
+
 class FrameRestore {
  public:
   explicit FrameRestore(const PreClass* preClass) {

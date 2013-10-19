@@ -24,16 +24,19 @@ int ExitException::ExitCode = 0;
 ///////////////////////////////////////////////////////////////////////////////
 
 ExtendedException::ExtendedException() : Exception() {
+  m_silent = false;
   computeBacktrace();
 }
 
 ExtendedException::ExtendedException(const std::string &msg) {
   m_msg = msg;
+  m_silent = false;
   computeBacktrace();
 }
 
 ExtendedException::ExtendedException(SkipFrame, const std::string &msg) {
   m_msg = msg;
+  m_silent = false;
   computeBacktrace(true);
 }
 
@@ -42,6 +45,7 @@ ExtendedException::ExtendedException(const char *fmt, ...) {
   va_start(ap, fmt);
   format(fmt, ap);
   va_end(ap);
+  m_silent = false;
   computeBacktrace();
 }
 

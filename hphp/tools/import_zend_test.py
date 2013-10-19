@@ -220,6 +220,9 @@ bad_tests = (
     # broken: t2991109
     '/ext/zlib/tests/gzfile_variation5.php',
     '/ext/zlib/tests/readgzfile_variation5.php',
+
+    # broken: t3036086
+    '/Zend/tests/bug55007.php',
 )
 
 # Tests that work but not in repo mode
@@ -784,7 +787,8 @@ def walk(filename, source_dir):
         pseudomain = '$y = new Bar();\n$x = new Foo($y);\n'
         test = test.replace(pseudomain,
                             'function main() {\n' + pseudomain + '}\nmain();\n')
-
+    if '/Zend/tests/bug55007.php' in full_dest_filename:
+        test = test.replace('$a[]', '$a[];')
 
     file(full_dest_filename, 'w').write(test)
 

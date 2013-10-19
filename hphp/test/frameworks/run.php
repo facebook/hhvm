@@ -142,6 +142,9 @@ class PHPUnitPatterns {
   static string $test_name_pattern =
  "/Starting test '([_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set #[0-9]+)?)/";
 
+  static string $pear_test_name_pattern =
+ "/Starting test '([\-_a-zA-Z0-9\/]*\.phpt)/";
+
   // Matches:
   //    E
   //    .
@@ -292,7 +295,7 @@ class Frameworks {
                   'pull_repository' => "https://github.com/javer/dbal",
                   'git_commit' => "hhvm-pdo-implement-interfaces",
                  },
-              }
+              },
           },
         'twig' =>
           Map {
@@ -306,13 +309,13 @@ class Frameworks {
             'git_path' => "git@github.com:joomla/joomla-framework.git",
             'git_commit' => "4669cd3b123e768f55545acb284bee666ce778c4",
           },
-        /* Requires some sort of database setup.
         'magento2' =>
           Map {
             'install_root' => __DIR__."/frameworks/magento2",
             'git_path' => "git@github.com:magento/magento2.git",
             'git_commit' => "a15ecb31976feb4ecb62f85257ff6b606fbdbc00",
-          },*/
+            'test_path' => __DIR__."/frameworks/magento2/dev/tests/unit",
+          },
         'phpmyadmin' =>
           Map {
             'install_root' => __DIR__."/frameworks/phpmyadmin",
@@ -325,7 +328,7 @@ class Frameworks {
             'git_path' => "git@github.com:phpbb/phpbb3.git",
             'git_commit' => "80b21e8049a138d07553288029abf66700da9a5c",
           },
-        /*'pear' =>
+        'pear' =>
           Map {
             'install_root' => __DIR__."/frameworks/pear-core",
             'git_path' => "git@github.com:pear/pear-core.git",
@@ -333,7 +336,15 @@ class Frameworks {
             'test_path' => __DIR__."/frameworks/pear-core",
             'test_run_command' => get_hhvm_build()." ".__DIR__.
                                   "/vendor/bin/phpunit --debug tests",
-          },*/
+            'pull_requests' =>
+              Vector {
+                Map {
+                  'pull_dir' => __DIR__."/frameworks/pear-core",
+                  'pull_repository' => "https://github.com/pear/Console_Getopt",
+                  'git_commit' => "trunk",
+                 },
+              },
+          },
         /* Requires a mediawiki install to run tests :(
         'mediawiki' =>
           Map {
@@ -873,6 +884,12 @@ function run_single_test_suite(string $fw_name, string $summary_file,
   $ret_val = 0;
   $just_raw_results_and_errors = false;
 
+  // Test name pattern can be different depending on the framework,
+  // although most follow the default.
+  $test_name_pattern = PHPUnitPatterns::$test_name_pattern;
+  if ($fw_name == "pear") {
+    $test_name_pattern = PHPUnitPatterns::$pear_test_name_pattern;
+  }
 
   /***********************************
    * Have we run the tests before?
@@ -889,7 +906,7 @@ function run_single_test_suite(string $fw_name, string $summary_file,
       // Color codes would have already been stripped out. Don't need those.
       $compare_tests = get_fw_tests_to_run(
         $expect_file,
-        PHPUnitPatterns::$test_name_pattern,
+        $test_name_pattern,
         PHPUnitPatterns::$status_code_pattern,
         PHPUnitPatterns::$stop_parsing_pattern
       );
@@ -950,8 +967,7 @@ function run_single_test_suite(string $fw_name, string $summary_file,
         $just_raw_results_and_errors = true;
       }
       if (!$just_raw_results_and_errors &&
-          preg_match(PHPUnitPatterns::$test_name_pattern, $line,
-                     $tn_matches) === 1) {
+          preg_match($test_name_pattern, $line, $tn_matches) === 1) {
         // The subpattern of the "Starting test" line is the actual test.
         $match = $tn_matches[1];
         do {
@@ -1057,8 +1073,8 @@ function run_single_test_suite(string $fw_name, string $summary_file,
     }
   } else {
     $csv_only ? error()
-                  : error("Could not open process to run test for framework ".
-                          $fw_name);
+              : error("Could not open process to run test for framework ".
+                      $fw_name);
   }
   chdir(__DIR__);
   return $ret_val;

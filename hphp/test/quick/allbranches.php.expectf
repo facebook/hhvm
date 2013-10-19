@@ -921,6 +921,7 @@ abcd > 2
 0.3 is_double
 0.3 is_double
 str is_string
+HipHop Notice: Array to string conversion in %s
 Array is_array
 snee! is_object
 0 is_int
@@ -928,6 +929,7 @@ snee! is_object
 0.3 is_double
 0.3 is_double
 str is_string
+HipHop Notice: Array to string conversion in %s
 Array is_array
 snee! is_object
 0 is_int
@@ -935,5 +937,6 @@ snee! is_object
 0.3 is_double
 0.3 is_double
 str is_string
+HipHop Notice: Array to string conversion in %s
 Array is_array
 snee! is_object

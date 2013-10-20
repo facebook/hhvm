@@ -1413,6 +1413,79 @@ void preInputApplyMetaData(Unit::MetaHandle metaHand,
   }
 }
 
+static bool isTypeAssert(const NormalizedInstruction* ni) {
+  return ni->op() == Op::AssertTL || ni->op() == Op::AssertTStk;
+}
+
+void Translator::handleAssertionEffects(Tracelet& t,
+                                        const NormalizedInstruction& ni,
+                                        TraceletContext& tas) {
+  assert(isTypeAssert(&ni));
+
+  auto const aop = static_cast<AssertTOp>(ni.imm[1].u_OA);
+  auto const dt = [&]() -> folly::Optional<DataType> {
+    switch (aop) {
+    case AssertTOp::Uninit:   return KindOfUninit;
+    case AssertTOp::InitNull: return KindOfNull;
+    case AssertTOp::Int:      return KindOfInt64;
+    case AssertTOp::Dbl:      return KindOfDouble;
+    case AssertTOp::Res:      return KindOfResource;
+    case AssertTOp::Null:     return folly::none;
+    case AssertTOp::Bool:     return KindOfBoolean;
+    case AssertTOp::Str:      return KindOfString;
+    case AssertTOp::Arr:      return KindOfArray;
+    case AssertTOp::Obj:      return KindOfObject;
+
+    // Since these don't correspond to data types, there's not much we
+    // can do in the current situation.
+    case AssertTOp::InitUnc:
+    case AssertTOp::Unc:
+    case AssertTOp::InitCell:
+      // These could also remove guards, but it's a little too hard to
+      // get this information to hhbc-translator with this legacy
+      // tracelet stuff since they don't map directly to a DataType.
+      return folly::none;
+    }
+    not_reached();
+  }();
+  if (!dt) return;
+
+  auto const loc = [&] {
+    switch (ni.op()) {
+    case Op::AssertTL:    return Location(Location::Local, ni.imm[0].u_LA);
+    case Op::AssertTStk:  return Location(Location::Stack, ni.imm[0].u_IVA);
+    default:
+      not_reached();
+    }
+  }();
+  if (loc.isInvalid()) return;
+  auto const dl = t.newDynLocation(loc, *dt);
+
+  // No need for m_resolvedDeps---because we're in the bytecode stream
+  // we don't need to tell hhbc-translator about it out of band.
+  auto& curVal = tas.m_currentMap[dl->location];
+  if (curVal && !curVal->rtt.isVagueValue()) {
+    if (curVal->rtt.outerType() != dl->rtt.outerType()) {
+      /*
+       * The tracked type disagrees with ahead of time analysis.  A
+       * similar case occurs in applyInputMetaData.
+       *
+       * Either static analysis is wrong, this was a mispredicted type
+       * from warmup profiling, or the code is unreachable because we're
+       * about to fatal (e.g. a VerifyParamType is about to throw).
+       *
+       * Punt this opcode to end the trace.
+       */
+      punt();
+    }
+    // Otherwise, we may have more information than is in the
+    // AssertTStk.
+    return;
+  }
+  FTRACE(1, "assertion effects {} -> {}\n", dl->pretty());
+  curVal = dl;
+}
+
 bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
                                     NormalizedInstruction* ni,
                                     TraceletContext& tas,
@@ -3225,13 +3298,17 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     // Translation could fail entirely (because of an unknown opcode), or
     // encounter an input that cannot be computed.
     try {
+      if (isTypeAssert(ni)) handleAssertionEffects(t, *ni, tas);
       preInputApplyMetaData(metaHand, ni);
       InputInfos inputInfos;
-      getInputsImpl(t.m_sk, ni, stackFrameOffset, inputInfos, sk.func(),
-      [&](int i) {
-        return Type(
-          tas.currentType(Location(Location::Local, i)));
-      });
+      getInputsImpl(
+        t.m_sk, ni, stackFrameOffset, inputInfos, sk.func(),
+        [&](int i) {
+          return Type(
+            tas.currentType(Location(Location::Local, i)));
+        }
+      );
+
       bool noOp = applyInputMetaData(metaHand, ni, tas, inputInfos);
       if (noOp) {
         t.m_instrStream.append(ni);
@@ -3425,7 +3502,9 @@ breakBB:
     // to be pushed on the stack, and the next tracelet will have to guard on
     // the type. Similarly, This, Self and Parent will lose type information
     // thats only useful in the following tracelet.
-    if (isLiteral(ni->op()) || isThisSelfOrParent(ni->op())) {
+    if (isLiteral(ni->op()) ||
+        isThisSelfOrParent(ni->op()) ||
+        isTypeAssert(ni)) {
       ni = ni->prev;
       continue;
     }

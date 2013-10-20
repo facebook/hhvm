@@ -369,6 +369,9 @@ private:
                           NormalizedInstruction* ni,
                           TraceletContext& tas,
                           InputInfos& ii);
+  void handleAssertionEffects(Tracelet&,
+                              const NormalizedInstruction&,
+                              TraceletContext&);
   void getOutputs(Tracelet& t,
                   NormalizedInstruction* ni,
                   int& currentStackOffset,
@@ -753,7 +756,8 @@ enum OutTypeConstraints {
   OutClassRef,          // KindOfClass
   OutFPushCufSafe,      // FPushCufSafe pushes two values of different
                         // types and an ActRec
-  OutNone
+
+  OutNone,
 };
 
 /*

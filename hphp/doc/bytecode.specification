@@ -631,11 +631,12 @@ each use of the FCall* instruction must be the last instruction in exactly one
 FPI region. Finally, the FPass* instructions may not be used outside an FPI
 region.
 
-9) Each FPI region may not contain backward jumps, nor may it contain forward
-jumps that jump outside the end of the FPI region. Also, there may not be jumps
-anywhere in the function that transfer control from the outside of a given FPI
-region to the inside of that region. Finally, an FPI region may not contain the
-Ret*, Unwind, Throw, or Fatal instructions.
+9) Each FPI region may not contain backward jumps, nor may it contain
+forward jumps that jump outside the end of the FPI region.  Also, there may
+not be jumps anywhere in the function that transfer control from the outside
+of a given FPI region to the inside of that region.  An FPI region may not
+contain the Ret*, Unwind, Throw, or Fatal instructions.  Finally, an FPI
+region may not contain a catch, fault, or DV entry offset.
 
 10) The depth of the FPI stack at any given point in the bytecode must be the
 same for all possible control flow paths. Also, for any given FPI region that
@@ -650,14 +651,15 @@ instructions must have a depth of n as well. Finally, no instruction between an
 FPush* and its corresponding FCall* may consume any of the values from the
 evaluation stack that were pushed onto the stack before the FPush* instruction.
 
-12) The initialization 'state' of each iterator variable must be known at every
-point in the code and must be the same for all control paths. There are three
-possible states: (1) uninitialized, (2) "iter-initialized" (initialized via
-IterInit*), and (3) "miter-initialized" (initialized via MIterInit*). Every
-range of bytecode for which an iterator variable i is initialized must be
-protected by a fault funclet that unsets i by calling IterFree or MIterFree so
-that when the unwinder or dispatcher pops the current frame, each iterator
-variable is uninitialized.
+12) The initialization state of each iterator variable must be known at
+every point in the code and must be the same for all control paths.  There
+are four possible states: (1) uninitialized, (2) "iter-initialized"
+(initialized via IterInit*), (3) "miter-initialized" (initialized via
+MIterInit*), and (4) "cuf-initialized" (initialized via DecodeCufIter).
+Every range of bytecode for which an iterator variable i is initialized must
+be protected by a fault funclet that unsets i by calling IterFree,
+MIterFree, or CIterFree, so that when the unwinder or dispatcher pops the
+current frame, each iterator variable is uninitialized.
 
 13) The iterator variable referenced by IterInit* or MIterInit* or
 DecodeCufIter must be in the uninitialized state when the instruction
@@ -1753,7 +1755,7 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
 
 DecodeCufIter <iterator id> [C] -> [C]
   This instruction looks up $1 as a callable, and writes enough information
-  to iterator %1 for FPushDecoded to be able to push an actrec, as if it had
+  to iterator %1 for FPushCufIter to be able to push an actrec, as if it had
   been given the callable.
   If the function is successfully decoded, pushes true, otherwise, pushes
   false, and sets up iter to call a function that does nothing, and returns

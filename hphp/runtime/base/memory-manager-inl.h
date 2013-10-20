@@ -106,9 +106,8 @@ struct MemoryManager::SmallNode {
  * allocated.
  */
 struct MemoryManager::DebugHeader {
-  static constexpr uintptr_t kAllocatedMagic =
-                             (static_cast<size_t>(1) << 63) - 0xfac3;
-  static constexpr size_t kFreedMagic = static_cast<size_t>(-1);
+  static constexpr uintptr_t kAllocatedMagic = 0xDB6000A110C0A7EDull;
+  static constexpr size_t kFreedMagic =        0x5AB07A6ED4110CEEull;
 
   uintptr_t allocatedMagic;
   size_t requestedSize;     // zero for size-untracked allocator

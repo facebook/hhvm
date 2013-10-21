@@ -109,10 +109,10 @@ protected:
   TakeoverState m_takeover_state;
 
   // Target socket
-  int m_sock;
+  int m_sock{-1};
 
   // User callback for events
-  Callback *m_callback;
+  Callback *m_callback{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

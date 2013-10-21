@@ -46,7 +46,7 @@ public:
   void flushLog();
   void watchDog();
 
-  void takeoverShutdown();
+  void takeoverShutdown() override;
 
   ServerPtr getPageServer() { return m_pageServer;}
   void getSatelliteStats(vector<std::pair<std::string, int>> *stats);

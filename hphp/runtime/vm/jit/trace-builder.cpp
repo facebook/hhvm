@@ -279,8 +279,12 @@ SSATmp* TraceBuilder::preOptimizeDecRef(IRInstruction* inst) {
    * available.  I.e. by the time they get to the DecRef we won't see
    * it in isValueAvailable anymore and won't convert to DecRefNZ.
    */
-  auto const srcInst = inst->src(0)->inst();
-  if (srcInst->op() == IncRef) {
+  auto srcInst = inst->src(0)->inst();
+  while (srcInst->isPassthrough() && !srcInst->is(IncRef)) {
+    srcInst = srcInst->getPassthroughValue()->inst();
+  }
+
+  if (srcInst->is(IncRef)) {
     if (m_state.isValueAvailable(srcInst->src(0))) {
       inst->setOpcode(DecRefNZ);
     }

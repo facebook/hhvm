@@ -145,8 +145,8 @@ struct HhbcTranslator {
   void checkTypeStack(uint32_t idx, Type type, Offset dest);
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
   void overrideTypeLocal(uint32_t localIndex, Type type);
-  void assertTypeLocation(const RegionDesc::Location& loc, Type type);
-  void checkTypeLocation(const RegionDesc::Location& loc, Type type,
+  void assertType(const RegionDesc::Location& loc, Type type);
+  void checkType(const RegionDesc::Location& loc, Type type,
                          Offset dest);
   void assertString(const RegionDesc::Location& loc, const StringData* sd);
 
@@ -232,7 +232,6 @@ struct HhbcTranslator {
   void emitBindG(const StringData* gblName);
   void emitUnsetL(int32_t id);
   void emitUnsetN();
-  void emitUnsetG(const StringData* gblName);
   void emitIssetL(int32_t id);
   void emitIssetS(const StringData* propName);
   void emitIssetG(const StringData* gblName);
@@ -369,9 +368,9 @@ struct HhbcTranslator {
   void emitNot();
   void emitNativeImpl();
 
-  void emitClassExists(const StringData* clsName);
-  void emitInterfaceExists(const StringData* ifaceName);
-  void emitTraitExists(const StringData* traitName);
+  void emitClassExists();
+  void emitInterfaceExists();
+  void emitTraitExists();
 
   void emitStaticLocInit(uint32_t varId, uint32_t litStrId);
   void emitStaticLoc(uint32_t varId, uint32_t litStrId);

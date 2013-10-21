@@ -3630,13 +3630,13 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         // These 'predictions' mean the type is InitNull or the predicted type,
         // so we assert InitNull | t, then guard t. This allows certain
         // optimizations in the IR.
-        hhbcTrans.assertTypeLocation(loc, Type::InitNull | t);
-        hhbcTrans.checkTypeLocation(loc, t, offset);
+        hhbcTrans.assertType(loc, Type::InitNull | t);
+        hhbcTrans.checkType(loc, t, offset);
         updateType();
         break;
       }
       case Unit::MetaInfo::Kind::DataTypeInferred: {
-        hhbcTrans.assertTypeLocation(
+        hhbcTrans.assertType(
           stackFilter(inst.inputs[arg]->location).toLocation(inst.stackOffset),
           Type(DataType(info.m_data)));
         updateType();
@@ -3780,12 +3780,12 @@ Translator::translateRegion(const RegionDesc& region,
         if (type.subtypeOf(Type::Cls)) {
           // Do not generate guards for class; instead assert the type
           assert(loc.tag() == JIT::RegionDesc::Location::Tag::Stack);
-          ht.assertTypeLocation(loc, type);
+          ht.assertType(loc, type);
         } else if (isFirstRegionInstr) {
           bool checkOuterTypeOnly = m_mode != TransProfile;
           ht.guardTypeLocation(loc, type, checkOuterTypeOnly);
         } else {
-          ht.checkTypeLocation(loc, type, sk.offset());
+          ht.checkType(loc, type, sk.offset());
         }
       }
 
@@ -3893,7 +3893,7 @@ Translator::translateRegion(const RegionDesc& region,
       }
 
       // Check the prediction. If the predicted type is less specific than what
-      // is currently on the eval stack, checkTypeLocation won't emit any code.
+      // is currently on the eval stack, checkType won't emit any code.
       if (doPrediction) {
         ht.checkTypeStack(0, inst.outPred,
                           sk.advanced(block->unit()).offset());

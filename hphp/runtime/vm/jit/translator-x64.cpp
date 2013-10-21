@@ -1978,6 +1978,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
     // Translate each instruction in the tracelet
     for (auto* ni = t.m_instrStream.first; ni && !ht.hasExit();
          ni = ni->next) {
+      ht.setBcOff(ni->source.offset(), ni->breaksTracelet && !ht.isInlining());
       readMetaData(metaHand, *ni, m_irTrans->hhbcTrans(), MetaMode::Legacy);
 
       try {

@@ -216,9 +216,12 @@ initInstructions(const BlockList& blocks, DceState& state) {
       }
       if (RuntimeOption::EvalHHIREnableRefCountOpt && inst.op() == DecRefNZ) {
         auto* srcInst = inst.src(0)->inst();
-        Opcode srcOpc = srcInst->op();
-        if (srcOpc != DefConst) {
-          assert(srcInst->op() == IncRef);
+        while (srcInst->isPassthrough() && !srcInst->is(IncRef)) {
+          srcInst = srcInst->getPassthroughValue()->inst();
+        }
+
+        if (!srcInst->is(DefConst)) {
+          assert(srcInst->is(IncRef));
           assert(state[srcInst].isDead()); // IncRef isn't essential so it
                                            // should be dead here
           state[srcInst].setDecRefNZed();

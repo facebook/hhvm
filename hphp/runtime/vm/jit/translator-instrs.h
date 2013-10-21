@@ -128,7 +128,6 @@
   CASE(MIterInitK) \
   CASE(MIterNext) \
   CASE(MIterNextK) \
-  CASE(ReqDoc) \
   CASE(DefCls) \
   CASE(DefFunc) \
   CASE(Self) \
@@ -159,7 +158,6 @@
   CASE(LateBoundCls) \
   CASE(IssetS) \
   CASE(IssetG) \
-  CASE(UnsetG) \
   CASE(EmptyS) \
   CASE(EmptyG) \
   CASE(VGetS) \

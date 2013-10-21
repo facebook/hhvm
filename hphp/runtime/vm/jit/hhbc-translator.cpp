@@ -810,11 +810,6 @@ void HhbcTranslator::emitUnsetN() {
   emitInterpOne(Type::None, 1);
 }
 
-void HhbcTranslator::emitUnsetG(const StringData* gblName) {
-  // No reason to punt, translator-x64 does emitInterpOne as well
-  emitInterpOne(Type::None, 1);
-}
-
 void HhbcTranslator::emitUnsetL(int32_t id) {
   auto const prev = ldLoc(id, DataTypeCountness);
   gen(StLoc, LocalId(id), m_tb->fp(), m_tb->genDefUninit());
@@ -947,16 +942,18 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
   PUNT(SetOpL);
 }
 
-void HhbcTranslator::emitClassExists(const StringData* clsName) {
+void HhbcTranslator::emitClassExists() {
+  // If this is ever implemented, make sure InterfaceExists and
+  // TraitExists are updated appropriately.
   emitInterpOne(Type::Bool, 2);
 }
 
-void HhbcTranslator::emitInterfaceExists(const StringData* ifaceName) {
-  emitClassExists(ifaceName);
+void HhbcTranslator::emitInterfaceExists() {
+  emitClassExists();
 }
 
-void HhbcTranslator::emitTraitExists(const StringData* traitName) {
-  emitClassExists(traitName);
+void HhbcTranslator::emitTraitExists() {
+  emitClassExists();
 }
 
 void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
@@ -1024,10 +1021,6 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
   );
   gen(StLoc, LocalId(locId), m_tb->fp(), gen(IncRef, box));
   push(res);
-}
-
-void HhbcTranslator::emitReqDoc(const StringData* name) {
-  PUNT(ReqDoc);
 }
 
 template<class Lambda>
@@ -3000,7 +2993,7 @@ void HhbcTranslator::overrideTypeLocal(uint32_t locId, Type type) {
   gen(OverrideLoc, type, LocalId(locId), m_tb->fp());
 }
 
-void HhbcTranslator::checkTypeLocation(const RegionDesc::Location& loc,
+void HhbcTranslator::checkType(const RegionDesc::Location& loc,
                                        Type type, Offset dest) {
   assert(type.subtypeOf(Type::Gen));
   typedef RegionDesc::Location::Tag T;
@@ -3010,7 +3003,7 @@ void HhbcTranslator::checkTypeLocation(const RegionDesc::Location& loc,
   }
 }
 
-void HhbcTranslator::assertTypeLocation(const RegionDesc::Location& loc,
+void HhbcTranslator::assertType(const RegionDesc::Location& loc,
                                         Type type) {
   assert(type.subtypeOf(Type::StackElem));
   typedef RegionDesc::Location::Tag T;

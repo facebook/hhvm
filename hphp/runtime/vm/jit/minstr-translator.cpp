@@ -607,14 +607,8 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
     // care about its specialized type.
     constrainBase(DataTypeSpecific);
     constrainCollectionOpBase();
-    // With array kind specialization it's possible that the base
-    // could become a less-specialized kind due to an earlier SetM.
-    // That's ok, we just have to generate generic code for later
-    // operations.
-    assert(m_base->isA(baseType.unbox()) ||
-           (m_base->isArray() && baseType.isArray()));
   } else {
-    // Everything else is passed by reference. We don't have to worry about
+    // Everything else is passed by pointer. We don't have to worry about
     // unboxing here, since all the generic helpers understand boxed bases.
     if (baseType.isBoxed()) {
       SSATmp* box = getBase(DataTypeSpecific);
@@ -716,8 +710,11 @@ void HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
   auto type = simpleCollectionOp();
   switch (type) {
     case SimpleOp::None:
+      return;
+
     case SimpleOp::Array:
     case SimpleOp::String:
+      m_tb.constrainValue(m_base, DataTypeSpecific);
       return;
 
     case SimpleOp::Vector:

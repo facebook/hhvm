@@ -4040,23 +4040,28 @@ string
 TransRec::print(uint64_t profCount) const {
   std::string ret;
 
+  // Split up the call to prevent template explosion
   ret += folly::format(
            "Translation {} {{\n"
            "  src.md5 = {}\n"
            "  src.funcId = {}\n"
            "  src.startOffset = {}\n"
-           "  src.stopOffset = {}\n"
+           "  src.stopOffset = {}\n",
+           id, md5, src.getFuncId(), src.offset(), bcStopOffset).str();
+
+  ret += folly::format(
            "  kind = {} ({})\n"
            "  aStart = {}\n"
            "  aLen = {:#x}\n"
            "  stubStart = {}\n"
-           "  stubLen = {:#x}\n"
+           "  stubLen = {:#x}\n",
+           static_cast<uint32_t>(kind), getTransKindName(kind),
+           aStart, aLen, astubsStart, astubsLen).str();
+
+  ret += folly::format(
            "  profCount = {}\n"
            "  bcMapping = {}\n",
-           id, md5, src.getFuncId(), src.offset(),
-           bcStopOffset, static_cast<uint32_t>(kind), getTransKindName(kind),
-           aStart, aLen,
-           astubsStart, astubsLen, profCount, bcMapping.size()).str();
+           profCount, bcMapping.size()).str();
 
   for (auto const& info : bcMapping) {
     ret += folly::format(

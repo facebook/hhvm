@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -226,6 +227,14 @@ bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
 }
 
 void EventHook::onFunctionExit(const ActRec* ar) {
+  auto const inlinedRip = Transl::Translator::Get()->uniqueStubs.retInlHelper;
+  if ((Transl::TCA)ar->m_savedRip == inlinedRip) {
+    // Inlined calls normally skip the function enter and exit events. If we
+    // side exit in an inlined callee, we want to make sure to skip the exit
+    // event to avoid unbalancing the call stack.
+    return;
+  }
+
 #ifdef HOTPROFILER
   Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
   if (profiler != nullptr) {

@@ -33,8 +33,8 @@ IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
   return label;
 }
 
-Block* IRUnit::defBlock(const Func* func) {
-  return new (m_arena) Block(m_nextBlockId++, func);
+Block* IRUnit::defBlock() {
+  return new (m_arena) Block(m_nextBlockId++);
 }
 
 IRInstruction* IRUnit::mov(SSATmp* dst, SSATmp* src, BCMarker marker) {
@@ -55,16 +55,16 @@ SSATmp* IRUnit::findConst(ConstData& cdata, Type ctype) {
   return m_constTable.insert(cloneInstruction(&inst)->dst());
 }
 
-Block* IRUnit::makeMain(const Func* func, uint32_t bcOff) {
+Block* IRUnit::makeMain(uint32_t bcOff) {
   assert(!m_main);
-  auto entry = defBlock(func);
+  auto entry = defBlock();
   m_bcOff = bcOff;
   m_main = new (m_arena) IRTrace(*this, entry);
   return entry;
 }
 
-Block* IRUnit::addExit(const Func* func) {
-  auto exit = defBlock(func);
+Block* IRUnit::addExit() {
+  auto exit = defBlock();
   exit->setHint(Block::Hint::Unlikely);
   m_exits.push_back(new (m_arena) IRTrace(*this, exit));
   return exit;

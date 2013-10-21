@@ -210,9 +210,9 @@ struct TraceBuilder {
    * the SSATmp for the merged value.
    */
   template <class Branch, class Next, class Taken>
-  SSATmp* cond(const Func* func, Branch branch, Next next, Taken taken) {
-    Block* taken_block = m_unit.defBlock(func);
-    Block* done_block = m_unit.defBlock(func);
+  SSATmp* cond(Branch branch, Next next, Taken taken) {
+    Block* taken_block = m_unit.defBlock();
+    Block* done_block = m_unit.defBlock();
     IRInstruction* label = m_unit.defLabel(1, m_state.marker());
     done_block->push_back(label);
     DisableCseGuard guard(*this);
@@ -234,9 +234,9 @@ struct TraceBuilder {
    * iff the branch emitted in the branch lambda is taken.
    */
   template <class Branch, class Taken>
-  void ifThen(const Func* func, Branch branch, Taken taken) {
-    Block* taken_block = m_unit.defBlock(func);
-    Block* done_block = m_unit.defBlock(func);
+  void ifThen(Branch branch, Taken taken) {
+    Block* taken_block = m_unit.defBlock();
+    Block* done_block = m_unit.defBlock();
     DisableCseGuard guard(*this);
     branch(taken_block);
     assert(!m_curTrace->back()->next());
@@ -254,8 +254,8 @@ struct TraceBuilder {
    * taken.
    */
   template <class Branch, class Next>
-  void ifElse(const Func* func, Branch branch, Next next) {
-    Block* done_block = m_unit.defBlock(func);
+  void ifElse(Branch branch, Next next) {
+    Block* done_block = m_unit.defBlock();
     DisableCseGuard guard(*this);
     branch(done_block);
     next();
@@ -268,9 +268,7 @@ struct TraceBuilder {
    * a cold path, which always exits the tracelet without control flow
    * rejoining the main line.
    */
-  Block* makeExit() {
-    return m_unit.addExit(curFunc());
-  }
+  Block* makeExit() { return m_unit.addExit(); }
 
   /*
    * Get all typed locations in current translation.

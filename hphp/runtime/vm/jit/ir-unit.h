@@ -236,7 +236,7 @@ public:
    * Some helpers for creating specific instruction patterns.
    */
   IRInstruction* defLabel(unsigned numDst, BCMarker marker);
-  Block* defBlock(const Func* f);
+  Block* defBlock();
 
   template<typename T> SSATmp* cns(T val) {
     return cns(val, typeForConst(val));
@@ -262,8 +262,8 @@ public:
   /*
    * Create a new trace
    */
-  Block* makeMain(const Func* func, uint32_t bcOff);
-  Block* addExit(const Func* func);
+  Block* makeMain(uint32_t bcOff);
+  Block* addExit();
 
   Arena&   arena()               { return m_arena; }
   uint32_t numTmps() const       { return m_nextOpndId; }

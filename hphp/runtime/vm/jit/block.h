@@ -41,15 +41,12 @@ struct Block : boost::noncopyable {
   // Execution frequency hint; codegen will put Unlikely blocks in astubs.
   enum class Hint { Neither, Likely, Unlikely };
 
-  Block(unsigned id, const Func* func)
+  explicit Block(unsigned id)
     : m_trace(nullptr)
-    , m_func(func)
     , m_next(this, nullptr)
     , m_id(id)
     , m_hint(Hint::Neither)
   {}
-
-  const IRInstruction* beginCatch() const;
 
   uint32_t    id() const           { return m_id; }
   IRTrace*    trace() const        { return m_trace; }
@@ -147,7 +144,6 @@ struct Block : boost::noncopyable {
  private:
   InstructionList m_instrs; // instructions in this block
   IRTrace* m_trace;         // owner of this block.
-  const Func* m_func;       // which func are we in
   Edge m_next;              // fall-through path; null if back()->isTerminal().
   const unsigned m_id;      // unit-assigned unique id of this block
   unsigned m_postid;        // postorder number of this block
@@ -156,13 +152,6 @@ struct Block : boost::noncopyable {
 };
 
 typedef smart::vector<Block*> BlockList;
-
-inline const IRInstruction* Block::beginCatch() const {
-  auto it = begin();
-  ++it;
-  assert(it->op() == BeginCatch);
-  return &*it;
-}
 
 inline IRInstruction* Block::back() const {
   assert(!m_instrs.empty());

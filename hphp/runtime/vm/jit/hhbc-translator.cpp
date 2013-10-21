@@ -658,7 +658,6 @@ void HhbcTranslator::emitCnsCommon(uint32_t id,
   } else {
     SSATmp* c1 = gen(LdCns, cnsType, cnsNameTmp);
     result = m_tb->cond(
-      curFunc(),
       [&] (Block* taken) { // branch
         gen(CheckInit, taken, c1);
       },
@@ -974,7 +973,6 @@ void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
     auto const cachedBox =
       gen(LdStaticLocCached, StaticLocName { curFunc(), name });
     m_tb->ifThen(
-      curFunc(),
       [&] (Block* taken) {
         gen(CheckStaticLocInit, taken, cachedBox);
       },
@@ -1003,7 +1001,6 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
 
   auto const box = gen(LdStaticLocCached, StaticLocName { curFunc(), name });
   auto const res = m_tb->cond(
-    curFunc(),
     [&] (Block* taken) {
       gen(CheckStaticLocInit, taken, box);
     },
@@ -2805,8 +2802,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
 void HhbcTranslator::emitJmpSurpriseCheck() {
   auto catchTrace = makeCatch();
 
-  m_tb->ifThen(curFunc(),
-               [&](Block* taken) {
+  m_tb->ifThen([&](Block* taken) {
                  gen(CheckSurpriseFlags, taken);
                },
                [&] {
@@ -2818,8 +2814,7 @@ void HhbcTranslator::emitJmpSurpriseCheck() {
 void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal) {
   emitRB(Trace::RBTypeFuncExit, curFunc()->fullName());
 
-  m_tb->ifThen(curFunc(),
-               [&](Block* taken) {
+  m_tb->ifThen([&](Block* taken) {
                  gen(CheckSurpriseFlags, taken);
                },
                [&] {
@@ -3286,8 +3281,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
     SSATmp* isInstance = haveBit
       ? gen(InstanceOfBitmask, objClass, cns(clsName))
       : gen(ExtendsClass, objClass, constraint);
-    m_tb->ifThen(curFunc(),
-      [&](Block* taken) {
+    m_tb->ifThen([&](Block* taken) {
         gen(JmpZero, taken, isInstance);
       },
       [&] { // taken: the param type does not match
@@ -3549,7 +3543,7 @@ void HhbcTranslator::emitIsset(const StringData* name,
                                EmitLdAddrFun emitLdAddr) {
   if (!(this->*checkSupported)(name, Type::Bool, 0)) return;
   SSATmp* ptr = nullptr;
-  SSATmp* result = m_tb->cond(curFunc(),
+  SSATmp* result = m_tb->cond(
                         [&] (Block* taken) { // branch
                           ptr = (this->*emitLdAddr)(name, taken);
                         },
@@ -3575,7 +3569,7 @@ void HhbcTranslator::emitEmpty(const StringData* name,
                                EmitLdAddrFun emitLdAddr) {
   if (!(this->*checkSupported)(name, Type::Bool, 0)) return;
   SSATmp* ptr = nullptr;
-  SSATmp* result = m_tb->cond(curFunc(),
+  SSATmp* result = m_tb->cond(
                         [&] (Block* taken) {
                           ptr = (this->*emitLdAddr)(name, taken);
                         },
@@ -3928,7 +3922,6 @@ void HhbcTranslator::emitMod() {
 
   // check for -1 (dynamic version)
   SSATmp *res = m_tb->cond(
-    curFunc(),
     [&] (Block* taken) {
       SSATmp* negone = gen(Eq, tr, cns(-1));
       gen(JmpNZero, taken, negone);

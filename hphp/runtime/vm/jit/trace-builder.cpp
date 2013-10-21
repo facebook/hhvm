@@ -35,7 +35,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   : m_unit(unit)
   , m_simplifier(*this)
   , m_state(unit, initialSpOffsetFromFp, func)
-  , m_curTrace(m_unit.makeMain(func, initialBcOffset)->trace())
+  , m_curTrace(m_unit.makeMain(initialBcOffset)->trace())
   , m_curBlock(nullptr)
   , m_enableSimplification(false)
   , m_inReoptimize(false)
@@ -124,7 +124,7 @@ void TraceBuilder::appendInstruction(IRInstruction* inst) {
     IRInstruction* prev = block->back();
     if (prev->isBlockEnd()) {
       // start a new block
-      Block* next = m_unit.defBlock(m_state.func());
+      Block* next = m_unit.defBlock();
       m_curTrace->push_back(next);
       if (!prev->isTerminal()) {
         // new block is reachable from old block so link it.

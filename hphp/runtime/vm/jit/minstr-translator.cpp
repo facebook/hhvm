@@ -946,7 +946,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::checkInitProp(
 
   if (!needsCheck) return propAddr;
 
-  return m_tb.cond(m_ht.curFunc(),
+  return m_tb.cond(
     [&] (Block* taken) {
       gen(CheckInitMem, taken, propAddr, cns(0));
     },
@@ -1003,7 +1003,7 @@ void HhbcTranslator::MInstrTranslator::emitPropSpecialized(const MInstrAttr mia,
     m_base = checkInitProp(m_base, propAddr, propInfo, doWarn, doDefine);
   } else {
     SSATmp* baseAsObj = nullptr;
-    m_base = m_tb.cond(m_ht.curFunc(),
+    m_base = m_tb.cond(
       [&] (Block* taken) {
         // baseAsObj is only available in the Next branch
         baseAsObj = gen(LdMem, Type::Obj, taken, m_base, cns(0));
@@ -1229,7 +1229,7 @@ void HhbcTranslator::MInstrTranslator::emitRatchetRefs() {
     return;
   }
 
-  m_base = m_tb.cond(m_ht.curFunc(),
+  m_base = m_tb.cond(
     [&] (Block* taken) {
       gen(CheckInitMem, taken, m_misBase, cns(HHIR_MISOFF(tvRef)));
     },

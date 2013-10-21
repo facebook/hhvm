@@ -158,7 +158,7 @@ bool CmdList::listFileRange(DebuggerClient &client,
 const StaticString
   s_methods("methods"),
   s_file("file"),
-  s_line1("line2"),
+  s_line1("line1"),
   s_line2("line2");
 
 // Sends an Info command to the server to retrieve source location
@@ -278,6 +278,9 @@ void CmdList::onClient(DebuggerClient &client) {
       } else {
         if (!DebuggerClient::IsValidNumber(arg)) {
           if (m_file.empty()) {
+            if (client.argCount() == 1 && listFunctionOrClass(client)) {
+              return;
+            }
             m_file = arg;
             m_line1 = 1;
             m_line2 = DebuggerClient::CodeBlockSize;
@@ -320,12 +323,9 @@ void CmdList::onClient(DebuggerClient &client) {
     }
   }
 
-  if (listFileRange(client, line, charFocus0, lineFocus1, charFocus1)) {
-    return;
-  } else if (client.argCount() != 1 || !listFunctionOrClass(client)) {
-    client.error(
-      "Unable to read specified function, class or source file location.");
-    return;
+   if (!listFileRange(client, line, charFocus0, lineFocus1, charFocus1)) {
+     client.error(
+       "Unable to read specified function, class or source file location.");
   }
 }
 
@@ -350,7 +350,8 @@ bool CmdList::onServer(DebuggerProxy &proxy) {
     }
   }
   RuntimeOption::WarningFrequency = savedWarningFrequency;
-  if (!m_code.toBoolean() && m_file == "systemlib.php") {
+  if (!m_code.toBoolean() &&
+    m_file.find("systemlib.php") == m_file.length() - 13) {
     m_code = SystemLib::s_source;
   }
   return proxy.sendToClient((DebuggerCommand*)this);

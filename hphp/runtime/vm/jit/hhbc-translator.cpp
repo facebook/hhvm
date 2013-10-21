@@ -2468,17 +2468,18 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
   }
 }
 
-void HhbcTranslator::emitFPushClsMethodF(int32_t           numParams,
-                                         const Class*      cls,
-                                         const StringData* methName) {
-
-  assert(cls);
-  assert(methName && methName->isStatic());
-
+void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
   Block* exitBlock = makeExitSlow();
 
-  UNUSED SSATmp* clsVal  = popC();
-  UNUSED SSATmp* methVal = popC();
+  auto classTmp = popA();
+  auto methodTmp = popC();
+  assert(classTmp->isA(Type::Cls));
+  if (!classTmp->isConst() || !methodTmp->isString() || !methodTmp->isConst()) {
+    PUNT(FPushClsMethodF-unknownClassOrMethod);
+  }
+
+  auto const cls = classTmp->getValClass();
+  auto const methName = methodTmp->getValStr();
 
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(cls, methName, magicCall,

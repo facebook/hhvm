@@ -844,23 +844,7 @@ IRTranslator::translateFPushClsMethodD(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateFPushClsMethodF(const NormalizedInstruction& i) {
-  // For now, only support cases where both the class and the method are known.
-  const int classIdx  = 0;
-  const int methodIdx = 1;
-  DynLocation* classLoc  = i.inputs[classIdx];
-  DynLocation* methodLoc = i.inputs[methodIdx];
-
-  HHIR_UNIMPLEMENTED_WHEN(!(methodLoc->isString() &&
-                            methodLoc->rtt.valueString() != nullptr &&
-                            classLoc->valueType() == KindOfClass &&
-                            classLoc->rtt.valueClass() != nullptr),
-                          FPushClsMethodF_unknown);
-
-  auto cls = classLoc->rtt.valueClass();
-  HHIR_EMIT(FPushClsMethodF,
-            i.imm[0].u_IVA, // # of arguments
-            cls,
-            methodLoc->rtt.valueString());
+  HHIR_EMIT(FPushClsMethodF, i.imm[0].u_IVA /* # of arguments */);
 }
 
 void

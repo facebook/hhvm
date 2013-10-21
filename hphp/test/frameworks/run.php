@@ -202,19 +202,19 @@ class Frameworks {
         'assetic' =>
           Map {
             'install_root' => __DIR__."/frameworks/assetic",
-            'git_path' => "git@github.com:kriswallsmith/assetic.git",
+            'git_path' => "https://github.com/kriswallsmith/assetic.git",
             'git_commit' => "e0646fa52937c4e5ce61ce089ada28c509b01b40",
           },
         'paris' =>
           Map {
             'install_root' => __DIR__."/frameworks/paris",
-            'git_path' => "git@github.com:j4mie/paris.git",
+            'git_path' => "https://github.com/j4mie/paris.git",
             'git_commit' => "b60d0857d10dec757427b336c427c1f13b6a5e48",
           },
         'idiorm' =>
           Map {
             'install_root' => __DIR__."/frameworks/idiorm",
-            'git_path' => "git@github.com:j4mie/idiorm.git",
+            'git_path' => "https://github.com/j4mie/idiorm.git",
             'git_commit' => "3be516b440734811b58bb9d0b458a4109b49af71",
           },
         /* Cannot download 1 out of 10 or so symfony dependencies with hhvm.
@@ -234,31 +234,31 @@ class Frameworks {
         'symfony' =>
           Map {
             'install_root' => __DIR__."/frameworks/symfony",
-            'git_path' => "git@github.com:symfony/symfony.git",
+            'git_path' => "https://github.com/symfony/symfony.git",
             'git_commit' => "98c0d38a440e91adeb0ac12928174046596cd8e1",
           },
         'codeigniter' =>
           Map {
             'install_root' => __DIR__."/frameworks/CodeIgniter",
-            'git_path' => "git@github.com:EllisLab/CodeIgniter.git",
+            'git_path' => "https://github.com/EllisLab/CodeIgniter.git",
             'git_commit' => "57ba100129c2807153d88dc4e1d423f6e6c8a9a6",
           },
         'laravel' =>
           Map {
             'install_root' => __DIR__."/frameworks/laravel",
-            'git_path' => "git@github.com:laravel/framework.git",
+            'git_path' => "https://github.com/laravel/framework.git",
             'git_commit' => "6ea8d8b5b3c921e9fe02bfafa44d2601d206ed6e",
           },
         'zf2' =>
           Map {
             'install_root' => __DIR__."/frameworks/zf2",
-            'git_path' => "git@github.com:zendframework/zf2.git",
+            'git_path' => "https://github.com/zendframework/zf2.git",
             'git_commit' => "3bd643acb98a5f6a9e5abd45785171f6685b4a3c",
           },
         'yii' =>
           Map {
             'install_root' => __DIR__."/frameworks/yii",
-            'git_path' => "git@github.com:yiisoft/yii.git",
+            'git_path' => "https://github.com/yiisoft/yii.git",
             'git_commit' => "d36b1f58ded2deacd4c5562c5205871db76bde5d",
             'test_path' => __DIR__."/frameworks/yii/tests",
             'test_run_command' => get_hhvm_build()." ".__DIR__.
@@ -267,25 +267,25 @@ class Frameworks {
         'slim' =>
           Map {
             'install_root' => __DIR__."/frameworks/Slim",
-            'git_path' => "git@github.com:codeguy/Slim.git",
+            'git_path' => "https://github.com/codeguy/Slim.git",
             'git_commit' => "2e540cc392644b9b5cdcc57e5576db5a92ca2149",
           },
         /*'wordpress' =>
           Map {
             'install_root' => __DIR__."/frameworks/wordpress-unit-tests",
-            'git_path' => "git@github.com:kurtpayne/wordpress-unit-tests.git",
+            'git_path' => "https://github.com/kurtpayne/wordpress-unit-tests.git",
             'git_commit' => "a2820a710a6605cca06ae5191ce888c51b22b0fe",
           },*/
         'composer' =>
           Map {
             'install_root' => __DIR__."/frameworks/composer",
-            'git_path' => "git@github.com:composer/composer.git",
+            'git_path' => "https://github.com/composer/composer.git",
             'git_commit' => "7defc95e4b9eded1156386b269a9d7d28fa73710",
           },
         'doctrine2' =>
           Map {
             'install_root' => __DIR__."/frameworks/doctrine2",
-            'git_path' => "git@github.com:doctrine/doctrine2.git",
+            'git_path' => "https://github.com/doctrine/doctrine2.git",
             'git_commit' => "bd7c7ebaf353f038fae2f828802ecda823190759",
             'pull_requests' =>
               Vector {
@@ -300,38 +300,38 @@ class Frameworks {
         'twig' =>
           Map {
             'install_root' => __DIR__."/frameworks/Twig",
-            'git_path' => "git@github.com:fabpot/Twig.git",
+            'git_path' => "https://github.com/fabpot/Twig.git",
             'git_commit' => "d827c601e3afea6535fede5e39c9f91c12fc2e66",
           },
         'joomla' =>
           Map {
             'install_root' => __DIR__."/frameworks/joomla-framework",
-            'git_path' => "git@github.com:joomla/joomla-framework.git",
+            'git_path' => "https://github.com/joomla/joomla-framework.git",
             'git_commit' => "4669cd3b123e768f55545acb284bee666ce778c4",
           },
         'magento2' =>
           Map {
             'install_root' => __DIR__."/frameworks/magento2",
-            'git_path' => "git@github.com:magento/magento2.git",
+            'git_path' => "https://github.com/magento/magento2.git",
             'git_commit' => "a15ecb31976feb4ecb62f85257ff6b606fbdbc00",
             'test_path' => __DIR__."/frameworks/magento2/dev/tests/unit",
           },
         'phpmyadmin' =>
           Map {
             'install_root' => __DIR__."/frameworks/phpmyadmin",
-            'git_path' => "git@github.com:phpmyadmin/phpmyadmin.git",
+            'git_path' => "https://github.com/phpmyadmin/phpmyadmin.git",
             'git_commit' => "6706fc1f9a7e8893cbe2672e9f26b30b3c49da52",
           },
         'phpbb3' =>
           Map {
             'install_root' => __DIR__."/frameworks/phpbb3",
-            'git_path' => "git@github.com:phpbb/phpbb3.git",
+            'git_path' => "https://github.com/phpbb/phpbb3.git",
             'git_commit' => "80b21e8049a138d07553288029abf66700da9a5c",
           },
         'pear' =>
           Map {
             'install_root' => __DIR__."/frameworks/pear-core",
-            'git_path' => "git@github.com:pear/pear-core.git",
+            'git_path' => "https://github.com/pear/pear-core.git",
             'git_commit' => "9efe6005fd7a16c56773248d6878deec93481d39",
             'test_path' => __DIR__."/frameworks/pear-core",
             'test_run_command' => get_hhvm_build()." ".__DIR__.
@@ -349,13 +349,13 @@ class Frameworks {
         'mediawiki' =>
           Map {
             'install_root' => __DIR__."/frameworks/mediawiki-core",
-            'git_path' => "git@github.com:wikimedia/mediawiki-core.git",
+            'git_path' => "https://github.com/wikimedia/mediawiki-core.git",
             'git_commit' => "7b9549088534ac636d131e054631adb16b39bd1e",
           },*/
         'typo3' =>
           Map {
             'install_root' => __DIR__."/frameworks/typo3",
-            'git_path' => "git@github.com:TYPO3/TYPO3.CMS.git",
+            'git_path' => "https://github.com/TYPO3/TYPO3.CMS.git",
             'git_commit' => "085ca118bcb08213732c9e15462b6e2c073665e4",
             'test_path' => __DIR__."/frameworks/typo3/typo3",
             'test_run_command' => get_hhvm_build()." cli_dispatch.phpsh ".
@@ -364,20 +364,20 @@ class Frameworks {
         'drupal' =>
           Map {
             'install_root' => __DIR__."/frameworks/drupal",
-            'git_path' => "git@github.com:drupal/drupal.git",
+            'git_path' => "https://github.com/drupal/drupal.git",
             'git_commit' => "adaf8355074ba3e142f61e10f1790382db5defb9",
           },
         /*
         'twitteroauth' =>
           Map {
             'install_root' => __DIR__."/frameworks/twitteroauth",
-            'git_path' => "git@github.com:abraham/twitteroauth.git",
+            'git_path' => "https://github.com/abraham/twitteroauth.git",
             'git_commit' => "4b775766fe3526ebc67ee20c97ff29a3b47bc5d8",
           },*/
         /*'thinkup' =>
           Map {
             'install_root' => __DIR__."/frameworks/thinkup",
-            'git_path' => "git@github.com:ginatrapani/ThinkUp.git",
+            'git_path' => "https://github.com/ginatrapani/ThinkUp.git",
             'git_commit' => "ae84fd6522ab0f15c36fd99e7bd55cef3e3ed90b",
             'test_path' => __DIR__."/frameworks/thinkup/tests",
             'test_run_command' => get_hhvm_build()." all_tests.php",
@@ -385,7 +385,7 @@ class Frameworks {
         /*'cakephp' =>
           Map {
             'install_root' => __DIR__."/frameworks/cakephp",
-            'git_path' => "git@github.com:cakephp/cakephp.git",
+            'git_path' => "https://github.com/cakephp/cakephp.git",
             'git_commit' => "bb4716a9ee628e15bf5854fa4e202e498591ec46",
             'test_path' => __DIR__."/frameworks/cakephp",
             // FIX: May have to update "cake" script to call "hhvm"
@@ -394,7 +394,7 @@ class Frameworks {
         'facebook-php-sdk' =>
           Map {
             'install_root' => __DIR__."/frameworks/facebook-php-sdk",
-            'git_path' => "git@github.com:facebook/facebook-php-sdk.git",
+            'git_path' => "https://github.com/facebook/facebook-php-sdk.git",
             'git_commit' => "16d696c138b82003177d0b4841a3e4652442e5b1",
             'test_path' => __DIR__."/frameworks/facebook-php-sdk",
             'test_run_command' => get_hhvm_build()." ".__DIR__.
@@ -405,7 +405,7 @@ class Frameworks {
         'phpunit' =>
           Map {
             'install_root' => __DIR__."/frameworks/phpunit",
-            'git_path' => "git@github.com:sebastianbergmann/phpunit.git",
+            'git_path' => "https://github.com/sebastianbergmann/phpunit.git",
             'git_commit' => "0ce13a8c9ff41d9c0d69ebd216bcc66b5f047246",
             'test_path' => __DIR__."/frameworks/phpunit",
             'test_run_command' => get_hhvm_build()." ".__DIR__.

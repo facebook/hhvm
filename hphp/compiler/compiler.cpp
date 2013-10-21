@@ -344,8 +344,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     return 1;
   }
   if (vm.count("version")) {
-#ifdef HPHP_VERSION
-#undef HPHP_VERSION
+#ifdef HHVM_VERSION
+#undef HHVM_VERSION
 #endif
 
 #ifdef HPHP_COMPILER_STR
@@ -358,7 +358,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 #define HPHP_COMPILER_STR "HipHop Compiler v"
 #endif
 
-#define HPHP_VERSION(v) cout << HPHP_COMPILER_STR #v << "\n";
+#define HHVM_VERSION(v) cout << HPHP_COMPILER_STR #v << "\n";
 #include "../version" // nolint
 
     cout << "Compiler: " << kCompilerId << "\n";

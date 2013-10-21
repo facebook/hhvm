@@ -539,10 +539,10 @@ std::string Process::GetAppName() {
 }
 
 std::string Process::GetAppVersion() {
-#ifdef HPHP_VERSION
-#undefine HPHP_VERSION
+#ifdef HHVM_VERSION
+#undefine HHVM_VERSION
 #endif
-#define HPHP_VERSION(v) return #v;
+#define HHVM_VERSION(v) return #v;
 #include "../version" // nolint
 }
 

@@ -2313,18 +2313,28 @@ void HhbcTranslator::emitFPushFuncArr(int32_t numParams) {
 }
 
 void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
-                                         int32_t methodNameStrId,
-                                         const Class* baseClass) {
+                                         int32_t methodNameStrId) {
+  SSATmp* obj = popC();
+  SSATmp* objOrCls = obj;
+  if (!obj->isA(Type::Obj)) PUNT(FPushObjMethodD-nonObj);
+
+  const Class* baseClass = nullptr;
+  if (obj->type().isSpecialized() &&
+      !m_tb->constrainValue(obj, TypeConstraint(DataTypeSpecialized,
+                                                Type::Cell).setWeak())) {
+    // If we know the class without having to specialize a guard any
+    // further, use it.
+    baseClass = obj->type().getClass();
+  }
+
   const StringData* methodName = lookupStringId(methodNameStrId);
   bool magicCall = false;
   const Func* func = HPHP::Transl::lookupImmutableMethod(baseClass,
-                                                             methodName,
-                                                             magicCall,
+                                                         methodName,
+                                                         magicCall,
                                                          /* staticLookup: */
-                                                             false,
-                                                             curClass());
-  SSATmp* obj = popC();
-  SSATmp* objOrCls = obj;
+                                                         false,
+                                                         curClass());
 
   if (!func) {
     if (baseClass && !(baseClass->attrs() & AttrInterface)) {

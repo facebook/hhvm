@@ -286,8 +286,7 @@ struct HhbcTranslator {
                            int32_t methodNameStrId,
                            int32_t clssNamedEntityPairId);
   void emitFPushObjMethodD(int32_t numParams,
-                           int32_t methodNameStrId,
-                           const Class* baseClass);
+                           int32_t methodNameStrId);
   void emitFPushClsMethodF(int32_t             numParams,
                            const Class*      cls,
                            const StringData* methName);

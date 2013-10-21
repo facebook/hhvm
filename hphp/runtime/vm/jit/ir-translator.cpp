@@ -837,9 +837,9 @@ IRTranslator::translateFPushFunc(const NormalizedInstruction& i) {
 void
 IRTranslator::translateFPushClsMethodD(const NormalizedInstruction& i) {
   HHIR_EMIT(FPushClsMethodD,
-             (i.imm[0].u_IVA),
-             (i.imm[1].u_SA),
-             (i.imm[2].u_SA));
+            i.imm[0].u_IVA, // num params
+            i.imm[1].u_SA,  // method name
+            i.imm[2].u_SA); // class name
 }
 
 void
@@ -865,16 +865,9 @@ IRTranslator::translateFPushClsMethodF(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateFPushObjMethodD(const NormalizedInstruction& i) {
-  assert(i.inputs.size() == 1);
-  HHIR_UNIMPLEMENTED_WHEN((i.inputs[0]->valueType() != KindOfObject),
-                          FPushObjMethod_nonObj);
-  assert(i.inputs[0]->valueType() == KindOfObject);
-  const Class* baseClass = i.inputs[0]->rtt.valueClass();
-
   HHIR_EMIT(FPushObjMethodD,
-            i.imm[0].u_IVA,
-            i.imm[1].u_IVA,
-            baseClass);
+            i.imm[0].u_IVA, // numParams
+            i.imm[1].u_SA); // methodName
 }
 
 void IRTranslator::translateFPushCtor(const NormalizedInstruction& i) {
@@ -889,8 +882,6 @@ void IRTranslator::translateFPushCtorD(const NormalizedInstruction& i) {
 void IRTranslator::translateCreateCl(const NormalizedInstruction& i) {
   HHIR_EMIT(CreateCl, (i.imm[0].u_IVA), (i.imm[1].u_SA));
 }
-
-// static void fatalNullThis() { raise_error(Strings::FATAL_NULL_THIS); }
 
 void
 IRTranslator::translateThis(const NormalizedInstruction &i) {

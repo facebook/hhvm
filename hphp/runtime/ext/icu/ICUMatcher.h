@@ -18,12 +18,13 @@
 #define incl_HPHP_ICU_MATCHER_H_
 
 #include <boost/scoped_ptr.hpp>
-#include <unicode/regex.h>
 
 // Avoid dragging in the icu namespace.
 #ifndef U_USING_ICU_NAMESPACE
 #define U_USING_ICU_NAMESPACE 0
 #endif
+
+#include <unicode/regex.h>
 
 namespace HPHP {
 // Wrapper class around icu::RegexMatcher that provides a default constructor

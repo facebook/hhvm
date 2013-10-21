@@ -7861,12 +7861,13 @@ class UEQ : public Synchronizable {
 };
 static UEQ s_ueq;
 
-class EmitterWorker : public JobQueueWorker<FileScopeRawPtr, true, true> {
+class EmitterWorker
+  : public JobQueueWorker<FileScopeRawPtr, void*, true, true> {
  public:
   EmitterWorker() : m_ret(true) {}
   virtual void doJob(JobType job) {
     try {
-      AnalysisResultPtr ar = ((AnalysisResult*)m_opaque)->shared_from_this();
+      AnalysisResultPtr ar = ((AnalysisResult*)m_context)->shared_from_this();
       UnitEmitter* ue = emitHHBCVisitor(ar, job);
       if (Option::GenerateBinaryHHBC) {
         s_ueq.push(ue);
@@ -7887,8 +7888,7 @@ class EmitterWorker : public JobQueueWorker<FileScopeRawPtr, true, true> {
 
 static void addEmitterWorker(AnalysisResultPtr ar, StatementPtr sp,
                              void *data) {
-  ((JobQueueDispatcher<EmitterWorker::JobType,
-    EmitterWorker>*)data)->enqueue(sp->getFileScope());
+  ((JobQueueDispatcher<EmitterWorker>*)data)->enqueue(sp->getFileScope());
 }
 
 static void batchCommit(std::vector<UnitEmitter*>& ues) {
@@ -7953,7 +7953,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
     TypeConstraint tc;
   }
 
-  JobQueueDispatcher<EmitterWorker::JobType, EmitterWorker>
+  JobQueueDispatcher<EmitterWorker>
     dispatcher(threadCount, true, 0, false, ar.get());
 
   dispatcher.start();

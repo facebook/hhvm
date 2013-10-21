@@ -967,11 +967,14 @@ struct OptVisitor {
 
   AnalysisResultPtr m_ar;
   unsigned m_nscope;
-  JobQueueDispatcher<BlockScope *, OptWorker<When> > *m_dispatcher;
+  JobQueueDispatcher<OptWorker<When>> *m_dispatcher;
 };
 
 template <typename When>
-class OptWorker : public JobQueueWorker<BlockScope *, true, true> {
+class OptWorker : public JobQueueWorker<BlockScope*,
+                                        void*,
+                                        true,
+                                        true> {
 public:
   OptWorker() {}
 
@@ -990,8 +993,8 @@ public:
     acc->second += 1;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
     try {
-      DepthFirstVisitor<When, OptVisitor > *visitor =
-        (DepthFirstVisitor<When, OptVisitor >*)m_opaque;
+      auto visitor =
+        (DepthFirstVisitor<When, OptVisitor>*) m_context;
       {
         Lock ldep(BlockScope::s_depsMutex);
         Lock lstate(BlockScope::s_jobStateMutex);
@@ -1180,7 +1183,7 @@ void OptWorker<Pre>::onThreadExit() {
     } \
     if (threadCount <= 0) threadCount = 1; \
     this->m_data.m_dispatcher = \
-      new JobQueueDispatcher<BlockScope *, worker >( \
+      new JobQueueDispatcher<worker>( \
         threadCount, true, 0, false, this); \
   } while (0)
 
@@ -1225,7 +1228,7 @@ template <typename When>
 void
 AnalysisResult::preWaitCallback(bool first,
                                 const BlockScopeRawPtrQueue &scopes,
-                                void *opaque) {
+                                void *context) {
   // default is no-op
 }
 
@@ -1234,7 +1237,7 @@ bool
 AnalysisResult::postWaitCallback(bool first,
                                  bool again,
                                  const BlockScopeRawPtrQueue &scopes,
-                                 void *opaque) {
+                                 void *context) {
   // default is no-op
   return again;
 }
@@ -1299,7 +1302,7 @@ struct BIPairCmp {
 template <typename When>
 void
 AnalysisResult::processScopesParallel(const char *id,
-                                      void *opaque /* = NULL */) {
+                                      void *context /* = NULL */) {
   BlockScopeRawPtrQueue scopes;
   getScopesSet(scopes);
 
@@ -1336,7 +1339,7 @@ AnalysisResult::processScopesParallel(const char *id,
 
     BlockScopeRawPtrQueue enqueued;
     again = dfv.visitParallel(scopes, first, enqueued);
-    preWaitCallback<When>(first, scopes, opaque);
+    preWaitCallback<When>(first, scopes, context);
 
 #ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
     {
@@ -1390,7 +1393,7 @@ AnalysisResult::processScopesParallel(const char *id,
     std::cout << "Number of waiting scopes: " << numWaiting << std::endl;
 #endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
 
-    again = postWaitCallback<When>(first, again, scopes, opaque);
+    again = postWaitCallback<When>(first, again, scopes, context);
     first = false;
   } while (again);
   dfv.data().stop();
@@ -1562,7 +1565,8 @@ DepthFirstVisitor<InferTypes, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
 
 template<>
 bool AnalysisResult::postWaitCallback<InferTypes>(
-    bool first, bool again, const BlockScopeRawPtrQueue &scopes, void *opaque) {
+    bool first, bool again,
+    const BlockScopeRawPtrQueue &scopes, void *context) {
 
 #ifdef HPHP_INSTRUMENT_TYPE_INF
   std::cout << "Number of rescheduled: " <<
@@ -1668,12 +1672,12 @@ StatementPtr DepthFirstVisitor<Post, OptVisitor>::visit(StatementPtr stmt) {
   return stmt->postOptimize(this->m_data.m_ar);
 }
 
-class FinalWorker : public JobQueueWorker<MethodStatementPtr> {
+class FinalWorker : public JobQueueWorker<MethodStatementPtr, AnalysisResult*> {
 public:
   virtual void doJob(MethodStatementPtr m) {
     try {
       AliasManager am(1);
-      am.finalSetup(((AnalysisResult*)m_opaque)->shared_from_this(), m);
+      am.finalSetup(m_context->shared_from_this(), m);
     } catch (Exception &e) {
       Logger::Error("%s", e.getMessage().c_str());
     }
@@ -1682,11 +1686,11 @@ public:
 
 template<>
 void AnalysisResult::preWaitCallback<Post>(
-    bool first, const BlockScopeRawPtrQueue &scopes, void *opaque) {
-  assert(!Option::ControlFlow || opaque != nullptr);
+    bool first, const BlockScopeRawPtrQueue &scopes, void *context) {
+  assert(!Option::ControlFlow || context != nullptr);
   if (first && Option::ControlFlow) {
-    JobQueueDispatcher<FinalWorker::JobType, FinalWorker> *dispatcher
-      = (JobQueueDispatcher<FinalWorker::JobType, FinalWorker> *) opaque;
+    auto *dispatcher
+      = (JobQueueDispatcher<FinalWorker> *) context;
     for (BlockScopeRawPtrQueue::const_iterator it = scopes.begin(),
            end = scopes.end(); it != end; ++it) {
       BlockScopeRawPtr scope = *it;
@@ -1710,7 +1714,7 @@ void AnalysisResult::postOptimize() {
     }
     if (threadCount <= 0) threadCount = 1;
 
-    JobQueueDispatcher<FinalWorker::JobType, FinalWorker> dispatcher(
+    JobQueueDispatcher<FinalWorker> dispatcher(
       threadCount, true, 0, false, this);
 
     processScopesParallel<Post>("PostOptimize", &dispatcher);

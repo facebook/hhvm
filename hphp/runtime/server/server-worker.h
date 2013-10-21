@@ -45,7 +45,7 @@ private:
 
 template <typename JobPtr, typename TransportTraits>
 struct ServerWorker
-  : JobQueueWorker<JobPtr,true,false,JobQueueDropVMStack>
+  : JobQueueWorker<JobPtr,Server*,true,false,JobQueueDropVMStack>
 {
   ServerWorker() {}
   virtual ~ServerWorker() {}
@@ -65,23 +65,22 @@ struct ServerWorker
    * Called when thread enters and exits.
    */
   virtual void onThreadEnter() {
-    assert(this->m_opaque);
-    Server *server = (Server*)this->m_opaque;
-    m_handler = server->createRequestHandler();
+    assert(this->m_context);
+    m_handler = this->m_context->createRequestHandler();
     m_requestsTimedOutOnQueue =
       ServiceData::createTimeseries("requests_timed_out_on_queue",
                                     {ServiceData::StatsType::COUNT});
   }
 
   virtual void onThreadExit() {
-    assert(this->m_opaque);
+    assert(this->m_context);
     m_handler.reset();
   }
 
 protected:
 
   void doJobImpl(JobPtr job, bool abort) {
-    TransportTraits traits(job, this->m_opaque, this->m_id);
+    TransportTraits traits(job, this->m_context, this->m_id);
     Server *server = traits.getServer();
     Transport *transport = traits.getTransport();
 

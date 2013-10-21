@@ -244,7 +244,7 @@ static int64_t to_ms(const timespec& ts) {
 }
 
 struct PageletWorker
-  : JobQueueWorker<PageletTransport*,true,false,JobQueueDropVMStack>
+  : JobQueueWorker<PageletTransport*,Server*,true,false,JobQueueDropVMStack>
 {
   virtual void doJob(PageletTransport *job) {
     try {
@@ -304,7 +304,7 @@ IMPLEMENT_OBJECT_ALLOCATION(PageletTask)
 ///////////////////////////////////////////////////////////////////////////////
 // implementing PageletServer
 
-static JobQueueDispatcher<PageletTransport*, PageletWorker> *s_dispatcher;
+static JobQueueDispatcher<PageletWorker> *s_dispatcher;
 static Mutex s_dispatchMutex;
 
 bool PageletServer::Enabled() {
@@ -316,7 +316,7 @@ void PageletServer::Restart() {
   if (RuntimeOption::PageletServerThreadCount > 0) {
     {
       Lock l(s_dispatchMutex);
-      s_dispatcher = new JobQueueDispatcher<PageletTransport*, PageletWorker>
+      s_dispatcher = new JobQueueDispatcher<PageletWorker>
         (RuntimeOption::PageletServerThreadCount,
          RuntimeOption::PageletServerThreadRoundRobin,
          RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds,

@@ -1,0 +1,70 @@
+array(25) {
+  ["FileName"]=>
+  string(11) "gh1193.tiff"
+  ["FileDateTime"]=>
+  int(%s)
+  ["FileSize"]=>
+  int(566)
+  ["FileType"]=>
+  int(7)
+  ["MimeType"]=>
+  string(10) "image/tiff"
+  ["SectionsFound"]=>
+  string(13) "ANY_TAG, IFD0"
+  ["COMPUTED"]=>
+  array(5) {
+    ["html"]=>
+    string(22) "width="20" height="20""
+    ["Height"]=>
+    int(20)
+    ["Width"]=>
+    int(20)
+    ["IsColor"]=>
+    int(1)
+    ["ByteOrderMotorola"]=>
+    int(0)
+  }
+  ["NewSubFile"]=>
+  int(0)
+  ["ImageWidth"]=>
+  int(20)
+  ["ImageLength"]=>
+  int(20)
+  ["BitsPerSample"]=>
+  array(3) {
+    [0]=>
+    int(8)
+    [1]=>
+    int(8)
+    [2]=>
+    int(8)
+  }
+  ["Compression"]=>
+  int(5)
+  ["PhotometricInterpretation"]=>
+  int(2)
+  ["DocumentName"]=>
+  string(56) "/var/www/w/phase3/tests/phpunit/includes/media/test.tiff"
+  ["ImageDescription"]=>
+  string(17) "Created with GIMP"
+  ["StripOffsets"]=>
+  int(8)
+  ["Orientation"]=>
+  int(1)
+  ["SamplesPerPixel"]=>
+  int(3)
+  ["RowsPerStrip"]=>
+  int(64)
+  ["StripByteCounts"]=>
+  int(238)
+  ["XResolution"]=>
+  string(19) "1207959552/16777216"
+  ["YResolution"]=>
+  string(19) "1207959552/16777216"
+  ["PlanarConfiguration"]=>
+  int(1)
+  ["ResolutionUnit"]=>
+  int(2)
+  ["Predictor"]=>
+  int(2)
+}

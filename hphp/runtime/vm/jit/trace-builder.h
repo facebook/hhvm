@@ -96,14 +96,14 @@ struct TraceBuilder {
   void setThisAvailable() { m_state.setThisAvailable(); }
 
   bool shouldConstrainGuards() const;
-  void constrainGuard(IRInstruction* inst, TypeConstraint tc);
-  SSATmp* constrainValue(SSATmp* const val, TypeConstraint tc);
-  void constrainLocal(uint32_t id, TypeConstraint tc,
+  bool constrainGuard(IRInstruction* inst, TypeConstraint tc);
+  bool constrainValue(SSATmp* const val, TypeConstraint tc);
+  bool constrainLocal(uint32_t id, TypeConstraint tc,
                       const std::string& why);
-  void constrainLocal(uint32_t id, SSATmp* valSrc, TypeConstraint tc,
+  bool constrainLocal(uint32_t id, SSATmp* valSrc, TypeConstraint tc,
                       const std::string& why);
-  void constrainStack(int32_t offset, TypeConstraint tc);
-  void constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
+  bool constrainStack(int32_t offset, TypeConstraint tc);
+  bool constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
 
   Type localType(uint32_t id, TypeConstraint tc);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);

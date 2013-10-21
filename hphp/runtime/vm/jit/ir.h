@@ -126,6 +126,10 @@ class FailedCodeGen : public std::runtime_error {
  *     DUnbox(N) single dst has unboxed type of src N
  *     DBox(N)   single dst has boxed type of src N
  *     DParam    single dst has type of the instruction's type parameter
+ *     DLdRef    single dst has type of the instruction's type parameter, with
+ *               any specialization removed
+ *     DThis     single dst has type Obj<ctx>, where ctx is the
+ *               current context class
  *     DArith    single dst has a type based on arithmetic type rules
  *     DMulti    multiple dests. type and number depend on instruction
  *     DSetElem  single dst is a subset of CountedStr|Nullptr depending on
@@ -356,8 +360,8 @@ O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),               NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
 O(LdElem,                      D(Cell), S(PtrToCell) S(Int),      E|Mem|Refs) \
-O(LdRef,                        DParam, S(BoxedCell),                     NF) \
-O(LdThis,                       D(Obj), S(FramePtr),                       C) \
+O(LdRef,                        DLdRef, S(BoxedCell),                     NF) \
+O(LdThis,                        DThis, S(FramePtr),                       C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
 O(LdConst,                      DParam, NA,                                C) \
 O(DefConst,                     DParam, NA,                                C) \

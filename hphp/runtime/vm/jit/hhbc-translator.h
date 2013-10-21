@@ -59,7 +59,8 @@ struct EvalStack {
     }
     SSATmp* tmp = m_vector.back();
     m_vector.pop_back();
-    return m_tb.constrainValue(tmp, tc);
+    m_tb.constrainValue(tmp, tc);
+    return tmp;
   }
 
   SSATmp* top(TypeConstraint tc, uint32_t offset = 0) const {
@@ -67,7 +68,8 @@ struct EvalStack {
       return nullptr;
     }
     uint32_t index = m_vector.size() - 1 - offset;
-    return m_tb.constrainValue(m_vector[index], tc);
+    m_tb.constrainValue(m_vector[index], tc);
+    return m_vector[index];
   }
 
   void replace(uint32_t offset, SSATmp* tmp) {

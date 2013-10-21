@@ -470,6 +470,30 @@ Type binArithResultType(Opcode op, Type t1, Type t2) {
   return Type::Int;
 }
 
+Type ldRefReturn(const IRInstruction* inst) {
+  // Guarding on specific classes/array kinds is expensive enough that we only
+  // want to do it in situations we've confirmed the benefit.
+  return inst->typeParam().unspecialize();
+}
+
+Type thisReturn(const IRInstruction* inst) {
+  auto fpInst = inst->src(0)->inst();
+
+  // Find the instruction that created the current frame and grab the context
+  // class from it. $this, if present, is always going to be the context class
+  // or a subclass of the context.
+  while (!fpInst->is(DefFP, DefInlineFP)) {
+    assert(fpInst->dst()->isA(Type::FramePtr));
+    assert(fpInst->is(GuardLoc, CheckLoc, AssertLoc, PassFP));
+    fpInst = fpInst->src(0)->inst();
+  }
+  auto const func = fpInst->is(DefFP) ? fpInst->marker().func
+                                      : fpInst->extra<DefInlineFP>()->target;
+  func->validate();
+  assert(func->isMethod() || func->isPseudoMain());
+  return Type::Obj.specialize(func->cls());
+}
+
 }
 
 Type boxType(Type t) {
@@ -498,6 +522,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DUnbox(n) return inst->src(n)->type().unbox();
 #define DBox(n)   return boxType(inst->src(n)->type());
 #define DParam    return inst->typeParam();
+#define DLdRef    return ldRefReturn(inst);
+#define DThis     return thisReturn(inst);
 #define DMulti    return Type::None;
 #define DStk(in)  return stkReturn(inst, dstId,                         \
                                    [&]() -> Type { in not_reached(); });
@@ -523,6 +549,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DUnbox
 #undef DBox
 #undef DParam
+#undef DLdRef
+#undef DThis
 #undef DMulti
 #undef DStk
 #undef DSetElem
@@ -646,6 +674,13 @@ void assertOperandTypes(const IRInstruction* inst) {
                        errorMessage).str());
   };
 
+  auto requireTypeParam = [&] {
+    auto const t = inst->typeParam();
+    checkDst(t != Type::Bottom &&
+             (t != Type::None || inst->is(DefConst)),
+             "Invalid paramType for DParam instruction");
+  };
+
   auto checkSpills = [&] {
     for (; curSrc < inst->numSrcs(); ++curSrc) {
       // SpillStack slots may be stack types or None, if the
@@ -690,9 +725,9 @@ void assertOperandTypes(const IRInstruction* inst) {
                              "invalid src num");
 #define DofS(src)   checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
-#define DParam      checkDst(inst->typeParam() != Type::None ||      \
-                             inst->op() == DefConst /* for DefNone */, \
-                             "DParam with paramType None");
+#define DParam      requireTypeParam();
+#define DLdRef      requireTypeParam();
+#define DThis
 #define DArith      checkDst(inst->typeParam() == Type::None, \
                              "DArith should have no type parameter");
 
@@ -726,6 +761,8 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DBox
 #undef DofS
 #undef DParam
+#undef DLdRef
+#undef DThis
 #undef DArith
 
 }

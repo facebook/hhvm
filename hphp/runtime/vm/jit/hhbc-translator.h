@@ -309,8 +309,8 @@ struct HhbcTranslator {
   void emitClsCnsD(int32_t cnsNameStrId, int32_t clsNameStrId, Type outPred);
   void emitClsCns(int32_t cnsNameStrId);
   void emitAKExists();
-  void emitAGetC(const StringData* clsName);
-  void emitAGetL(int localId, const StringData* clsName);
+  void emitAGetC();
+  void emitAGetL(int localId);
   void emitIsNullL(int id);
   void emitIsNullC();
   void emitIsArrayL(int id);
@@ -717,7 +717,7 @@ private:
   SSATmp* emitLdClsPropAddrOrExit(Block* block, SSATmp* name);
 
   void emitUnboxRAux();
-  void emitAGet(SSATmp* src, const StringData* clsName);
+  void emitAGet(SSATmp* src);
   void emitRetFromInlined(Type type);
   SSATmp* emitDecRefLocalsInline(SSATmp* retVal);
   void emitRet(Type type, bool freeInline);

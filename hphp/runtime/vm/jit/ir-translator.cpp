@@ -563,19 +563,12 @@ IRTranslator::translateNativeImpl(const NormalizedInstruction& ni) {
   HHIR_EMIT(NativeImpl);
 }
 
-const int kEmitClsLocalIdx = 0;
-
 void IRTranslator::translateAGetC(const NormalizedInstruction& ni) {
-  const StringData* clsName =
-    ni.inputs[kEmitClsLocalIdx]->rtt.valueStringOrNull();
-  HHIR_EMIT(AGetC, clsName);
+  HHIR_EMIT(AGetC);
 }
 
 void IRTranslator::translateAGetL(const NormalizedInstruction& i) {
-  assert(i.inputs[kEmitClsLocalIdx]->isLocal());
-  const DynLocation* dynLoc = i.inputs[kEmitClsLocalIdx];
-  const StringData* clsName = dynLoc->rtt.valueStringOrNull();
-  HHIR_EMIT(AGetL, dynLoc->location.offset, clsName);
+  HHIR_EMIT(AGetL, i.imm[0].u_LA);
 }
 
 void IRTranslator::translateSelf(const NormalizedInstruction& i) {

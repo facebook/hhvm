@@ -3357,39 +3357,37 @@ void HhbcTranslator::emitCastString() {
   gen(DecRef, src);
 }
 
-static
-bool isSupportedAGet(SSATmp* classSrc, const StringData* clsName) {
-  return (classSrc->isA(Type::Obj) || classSrc->isA(Type::Str) || clsName);
+static bool isSupportedAGet(SSATmp* classSrc) {
+  return (classSrc->isA(Type::Obj) || classSrc->isA(Type::Str));
 }
 
-void HhbcTranslator::emitAGet(SSATmp* classSrc, const StringData* clsName) {
+void HhbcTranslator::emitAGet(SSATmp* classSrc) {
   auto const catchBlock = makeCatch();
 
   if (classSrc->isA(Type::Str)) {
     push(gen(LdCls, catchBlock, classSrc, cns(curClass())));
   } else if (classSrc->isA(Type::Obj)) {
     push(gen(LdObjClass, classSrc));
-  } else if (clsName) {
-    push(gen(LdCls, catchBlock, cns(clsName), cns(curClass())));
   } else {
     not_reached();
   }
 }
 
-void HhbcTranslator::emitAGetC(const StringData* clsName) {
-  if (isSupportedAGet(topC(), clsName)) {
-    SSATmp* src = popC();
-    emitAGet(src, clsName);
-    gen(DecRef, src);
+void HhbcTranslator::emitAGetC() {
+  auto const name = topC();
+  if (isSupportedAGet(name)) {
+    popC();
+    emitAGet(name);
+    gen(DecRef, name);
   } else {
     emitInterpOne(Type::Cls, 1);
   }
 }
 
-void HhbcTranslator::emitAGetL(int id, const StringData* clsName) {
+void HhbcTranslator::emitAGetL(int id) {
   auto const src = ldLocInner(id, makeExit(), DataTypeSpecific);
-  if (isSupportedAGet(src, clsName)) {
-    emitAGet(src, clsName);
+  if (isSupportedAGet(src)) {
+    emitAGet(src);
   } else {
     PUNT(AGetL); // need to teach interpone about local uses
   }

@@ -163,8 +163,8 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
       if (index < 2)  return getStackValue(prevSp, index);
       break;
     case Op::UnpackCont:
-      if (index == 0) return StackValueInfo { inst, Type::Cell };
-      if (index == 1) return StackValueInfo { inst, Type::Int };
+      if (index == 0) return StackValueInfo { inst, Type::Int };
+      if (index == 1) return StackValueInfo { inst, Type::Cell };
       break;
     case Op::FPushCufSafe:
       if (index == kNumActRecCells) return StackValueInfo { inst, Type::Bool };

@@ -338,7 +338,6 @@ PUNT_OPCODE(ContSetRunning)
 PUNT_OPCODE(ContValid)
 PUNT_OPCODE(ContArIncKey)
 PUNT_OPCODE(ContArUpdateIdx)
-PUNT_OPCODE(LdContArRaw)
 PUNT_OPCODE(StContArRaw)
 PUNT_OPCODE(LdContArValue)
 PUNT_OPCODE(StContArValue)
@@ -728,6 +727,21 @@ void CodeGenerator::cgLdRaw(IRInstruction* inst) {
     auto offsetReg = x2a(m_regs[offset].reg());
     assert(inst->dst()->type().nativeSize() == sz::qword);
     m_as.  Ldr  (destReg, addrReg[offsetReg]);
+  }
+}
+
+void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
+  auto destReg     = x2a(m_regs[inst->dst()].reg());
+  auto contArReg   = x2a(m_regs[inst->src(0)].reg());
+  auto kind        = inst->src(1)->getValInt();
+  auto const& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
+
+  auto off = slot.offset() - c_Continuation::getArOffset(curFunc());
+  switch (slot.size()) {
+    case sz::byte:  m_as.  Ldrb  (destReg.W(), contArReg[off]); break;
+    case sz::dword: m_as.  Ldr   (destReg.W(), contArReg[off]); break;
+    case sz::qword: m_as.  Ldr   (destReg, contArReg[off]); break;
+    default:        not_implemented();
   }
 }
 

@@ -267,8 +267,7 @@ struct HhbcTranslator {
   void emitFPassR();
   void emitFPassV();
   void emitFPushCufIter(int32_t numParams, int32_t itId);
-  void emitFPushCufOp(Op op, Class* cls, StringData* invName,
-                      const Func* func, int numArgs);
+  void emitFPushCufOp(Op op, int numArgs);
   void emitFPushActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
                        const StringData* invName = nullptr);
   void emitFPushFuncCommon(const Func* func,

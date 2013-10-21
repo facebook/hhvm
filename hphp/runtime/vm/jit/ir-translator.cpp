@@ -948,88 +948,9 @@ IRTranslator::translateFPushCufIter(const NormalizedInstruction& i) {
   HHIR_EMIT(FPushCufIter, i.imm[0].u_IVA, i.imm[1].u_IA);
 }
 
-static const Func*
-findCuf(const NormalizedInstruction& ni,
-                    Class*& cls, StringData*& invName, bool& forward) {
-  forward = (ni.op() == OpFPushCufF);
-  cls = nullptr;
-  invName = nullptr;
-
-  DynLocation* callable = ni.inputs[ni.op() == OpFPushCufSafe ? 1 : 0];
-
-  const StringData* str =
-    callable->isString() ? callable->rtt.valueString() : nullptr;
-  const ArrayData* arr =
-    callable->isArray() ? callable->rtt.valueArray() : nullptr;
-
-  StringData* sclass = nullptr;
-  StringData* sname = nullptr;
-  if (str) {
-    Func* f = HPHP::Unit::lookupFunc(str);
-    if (f) return f;
-    String name(const_cast<StringData*>(str));
-    int pos = name.find("::");
-    if (pos <= 0 || pos + 2 >= name.size() ||
-        name.find("::", pos + 2) != String::npos) {
-      return nullptr;
-    }
-    sclass = makeStaticString(name.substr(0, pos).get());
-    sname = makeStaticString(name.substr(pos + 2).get());
-  } else if (arr) {
-    if (arr->size() != 2) return nullptr;
-    CVarRef e0 = arr->get(int64_t(0), false);
-    CVarRef e1 = arr->get(int64_t(1), false);
-    if (!e0.isString() || !e1.isString()) return nullptr;
-    sclass = e0.getStringData();
-    sname = e1.getStringData();
-    String name(sname);
-    if (name.find("::") != String::npos) return nullptr;
-  } else {
-    return nullptr;
-  }
-
-  Class* ctx = ni.func()->cls();
-
-  if (sclass->isame(s_self.get())) {
-    if (!ctx) return nullptr;
-    cls = ctx;
-    forward = true;
-  } else if (sclass->isame(s_parent.get())) {
-    if (!ctx || !ctx->parent()) return nullptr;
-    cls = ctx->parent();
-    forward = true;
-  } else if (sclass->isame(s_static.get())) {
-    return nullptr;
-  } else {
-    cls = Unit::lookupUniqueClass(sclass);
-    if (!cls) return nullptr;
-  }
-
-  bool magicCall = false;
-  const Func* f = lookupImmutableMethod(cls, sname, magicCall,
-                                        /* staticLookup = */ true, ctx);
-  if (!f || (forward && !ctx->classof(f->cls()))) {
-    /*
-     * To preserve the invariant that the lsb class
-     * is an instance of the context class, we require
-     * that f's class is an instance of the context class.
-     * This is conservative, but without it, we would need
-     * a runtime check to decide whether or not to forward
-     * the lsb class
-     */
-    return nullptr;
-  }
-  if (magicCall) invName = sname;
-  return f;
-}
-
 void
 IRTranslator::translateFPushCufOp(const NormalizedInstruction& i) {
-  Class* cls = nullptr;
-  StringData* invName = nullptr;
-  bool forward = false;
-  const Func* func = findCuf(i, cls, invName, forward);
-  HHIR_EMIT(FPushCufOp, i.op(), cls, invName, func, i.imm[0].u_IVA);
+  HHIR_EMIT(FPushCufOp, i.op(), i.imm[0].u_IVA);
 }
 
 void

@@ -1907,13 +1907,89 @@ void HhbcTranslator::emitFPushCufIter(int32_t numParams,
       sp, m_tb->fp());
 }
 
-void HhbcTranslator::emitFPushCufOp(Op op, Class* cls, StringData* invName,
-                                    const Func* callee, int numArgs) {
+static const Func*
+findCuf(Op op, SSATmp* callable, Class* ctx, Class*& cls, StringData*& invName)
+{
+  bool forward = (op == OpFPushCufF);
+  cls = nullptr;
+  invName = nullptr;
+
+  const StringData* str =
+    callable->isA(Type::Str) && callable->isConst() ? callable->getValStr()
+                                                    : nullptr;
+  const ArrayData* arr =
+    callable->isA(Type::Arr) && callable->isConst() ? callable->getValArr()
+                                                    : nullptr;
+
+  StringData* sclass = nullptr;
+  StringData* sname = nullptr;
+  if (str) {
+    Func* f = HPHP::Unit::lookupFunc(str);
+    if (f) return f;
+    String name(const_cast<StringData*>(str));
+    int pos = name.find("::");
+    if (pos <= 0 || pos + 2 >= name.size() ||
+        name.find("::", pos + 2) != String::npos) {
+      return nullptr;
+    }
+    sclass = makeStaticString(name.substr(0, pos).get());
+    sname = makeStaticString(name.substr(pos + 2).get());
+  } else if (arr) {
+    if (arr->size() != 2) return nullptr;
+    CVarRef e0 = arr->get(int64_t(0), false);
+    CVarRef e1 = arr->get(int64_t(1), false);
+    if (!e0.isString() || !e1.isString()) return nullptr;
+    sclass = e0.getStringData();
+    sname = e1.getStringData();
+    String name(sname);
+    if (name.find("::") != String::npos) return nullptr;
+  } else {
+    return nullptr;
+  }
+
+  if (sclass->isame(s_self.get())) {
+    if (!ctx) return nullptr;
+    cls = ctx;
+    forward = true;
+  } else if (sclass->isame(s_parent.get())) {
+    if (!ctx || !ctx->parent()) return nullptr;
+    cls = ctx->parent();
+    forward = true;
+  } else if (sclass->isame(s_static.get())) {
+    return nullptr;
+  } else {
+    cls = Unit::lookupUniqueClass(sclass);
+    if (!cls) return nullptr;
+  }
+
+  bool magicCall = false;
+  const Func* f = lookupImmutableMethod(cls, sname, magicCall,
+                                        /* staticLookup = */ true, ctx);
+  if (!f || (forward && !ctx->classof(f->cls()))) {
+    /*
+     * To preserve the invariant that the lsb class
+     * is an instance of the context class, we require
+     * that f's class is an instance of the context class.
+     * This is conservative, but without it, we would need
+     * a runtime check to decide whether or not to forward
+     * the lsb class
+     */
+    return nullptr;
+  }
+  if (magicCall) invName = sname;
+  return f;
+}
+
+void HhbcTranslator::emitFPushCufOp(Op op, int numArgs) {
   const bool safe = op == OpFPushCufSafe;
   const bool forward = op == OpFPushCufF;
+  SSATmp* callable = topC(safe ? 1 : 0);
+
+  Class* cls = nullptr;
+  StringData* invName = nullptr;
+  const Func* callee = findCuf(op, callable, curClass(), cls, invName);
 
   if (!callee) {
-    SSATmp* callable = topC(safe ? 1 : 0);
     // The most common type for the callable in this case is Arr. We
     // can't really do better than the interpreter here, so punt.
     SPUNT(makeStaticString(

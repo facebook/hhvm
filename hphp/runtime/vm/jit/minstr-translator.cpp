@@ -999,14 +999,12 @@ void HhbcTranslator::MInstrTranslator::emitPropSpecialized(const MInstrAttr mia,
     SSATmp* propAddr = gen(LdPropAddr, m_base, cns(propInfo.offset));
     m_base = checkInitProp(m_base, propAddr, propInfo, doWarn, doDefine);
   } else {
-    SSATmp* baseAsObj = nullptr;
     m_base = m_tb.cond(
       [&] (Block* taken) {
-        // baseAsObj is only available in the Next branch
-        baseAsObj = gen(LdMem, Type::Obj, taken, m_base, cns(0));
+        return gen(LdMem, Type::Obj, taken, m_base, cns(0));
       },
-      [&] { // Next: Base is an object. Load property address and
-            // check for uninit
+      [&] (SSATmp* baseAsObj) {
+        // Next: Base is an object. Load property address and check for uninit
         return checkInitProp(baseAsObj,
                              gen(LdPropAddr, baseAsObj,
                                  cns(propInfo.offset)),

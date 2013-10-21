@@ -203,11 +203,20 @@ struct TraceBuilder {
     m_curTrace->back()->setHint(h);
   }
 
+ private:
+  template<typename T> struct BranchImpl;
+ public:
   /*
-   * cond() generates if-then-else blocks within a trace.  The caller
-   * supplies lambdas to create the branch, next-body, and taken-body.
-   * The next and taken lambdas must return one SSATmp* value; cond() returns
-   * the SSATmp for the merged value.
+   * cond() generates if-then-else blocks within a trace.  The caller supplies
+   * lambdas to create the branch, next-body, and taken-body.  The next and
+   * taken lambdas must return one SSATmp* value; cond() returns the SSATmp for
+   * the merged value.
+   *
+   * If branch returns void, next must take zero arguments. If branch returns
+   * SSATmp*, next must take one SSATmp* argument. This allows branch to return
+   * an SSATmp* that is only defined in the next branch, without letting it
+   * escape into the caller's scope (most commonly used with things like
+   * LdMem).
    */
   template <class Branch, class Next, class Taken>
   SSATmp* cond(Branch branch, Next next, Taken taken) {
@@ -216,8 +225,9 @@ struct TraceBuilder {
     IRInstruction* label = m_unit.defLabel(1, m_state.marker());
     done_block->push_back(label);
     DisableCseGuard guard(*this);
-    branch(taken_block);
-    SSATmp* v1 = next();
+
+    typedef decltype(branch(taken_block)) T;
+    SSATmp* v1 = BranchImpl<T>::go(branch, taken_block, next);
     gen(Jmp, done_block, v1);
     appendBlock(taken_block);
     SSATmp* v2 = taken();
@@ -345,6 +355,25 @@ private:
 
   GuardConstraints m_guardConstraints;
 
+};
+
+/*
+ * BranchImpl is used by TraceBuilder::cond to support branch and next lambdas
+ * with different signatures. See cond for details.
+ */
+template<> struct TraceBuilder::BranchImpl<void> {
+  template<typename Branch, typename Next>
+  static SSATmp* go(Branch branch, Block* taken, Next next) {
+    branch(taken);
+    return next();
+  }
+};
+
+template<> struct TraceBuilder::BranchImpl<SSATmp*> {
+  template<typename Branch, typename Next>
+  static SSATmp* go(Branch branch, Block* taken, Next next) {
+    return next(branch(taken));
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -407,7 +407,7 @@ O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
 O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),    C|E|N|Er) \
 O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr),   E|N|Refs|Er) \
 O(LdObjInvoke,                 D(Func), S(Cls),                           NF) \
-O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
+O(LdGblAddrDef,            D(PtrToGen), S(Str),                          E|N) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                            N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
 O(LdArrFuncCtx,                     ND, S(Arr) \

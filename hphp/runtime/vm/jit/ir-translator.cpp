@@ -90,22 +90,6 @@ static const bool debug = false;
     }                                                   \
   } while (0)
 
-namespace {
-bool isInferredType(const NormalizedInstruction& i) {
-  return (i.getOutputUsage(i.outStack) ==
-          NormalizedInstruction::OutputUse::Inferred);
-}
-
-Type getInferredOrPredictedType(const NormalizedInstruction& i) {
-  NormalizedInstruction::OutputUse u = i.getOutputUsage(i.outStack);
-  if (u == NormalizedInstruction::OutputUse::Inferred ||
-     (u == NormalizedInstruction::OutputUse::Used && i.outputPredicted)) {
-    return Type(i.outStack->rtt);
-  }
-  return Type::None;
-}
-}
-
 IRTranslator::IRTranslator(Offset bcOff, Offset spOff, const Func* curFunc)
   : m_hhbcTrans(bcOff, spOff, curFunc)
 {
@@ -688,45 +672,34 @@ void IRTranslator::translateTraitExists(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateVGetS(const NormalizedInstruction& i) {
-  const int kPropNameIdx = 1;
-  const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
-  HHIR_EMIT(VGetS, propName);
+  HHIR_EMIT(VGetS);
 }
 
 void
 IRTranslator::translateVGetG(const NormalizedInstruction& i) {
-  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
-  HHIR_EMIT(VGetG, name);
+  HHIR_EMIT(VGetG);
 }
 
 void IRTranslator::translateBindS(const NormalizedInstruction& i) {
-  const int kPropIdx = 2;
-  const StringData* propName = i.inputs[kPropIdx]->rtt.valueStringOrNull();
-  HHIR_EMIT(BindS, propName);
+  HHIR_EMIT(BindS);
 }
 
 void IRTranslator::translateEmptyS(const NormalizedInstruction& i) {
-  const int kPropNameIdx = 1;
-  const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
-  HHIR_EMIT(EmptyS, propName);
+  HHIR_EMIT(EmptyS);
 }
 
 void IRTranslator::translateEmptyG(const NormalizedInstruction& i) {
-  const StringData* gblName = i.inputs[0]->rtt.valueStringOrNull();
-  HHIR_EMIT(EmptyG, gblName);
+  HHIR_EMIT(EmptyG);
 }
 
 void
 IRTranslator::translateIssetS(const NormalizedInstruction& i) {
-  const int kPropNameIdx = 1;
-  const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
-  HHIR_EMIT(IssetS, propName);
+  HHIR_EMIT(IssetS);
 }
 
 void
 IRTranslator::translateIssetG(const NormalizedInstruction& i) {
-  const StringData* gblName = i.inputs[0]->rtt.valueStringOrNull();
-  HHIR_EMIT(IssetG, gblName);
+  HHIR_EMIT(IssetG);
 }
 
 void
@@ -735,32 +708,24 @@ IRTranslator::translateUnsetN(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateCGetS(const NormalizedInstruction& i) {
-  const int kPropNameIdx = 1;
-  const StringData* propName = i.inputs[kPropNameIdx]->rtt.valueStringOrNull();
-  HHIR_EMIT(CGetS, propName,
-            getInferredOrPredictedType(i), isInferredType(i));
+  HHIR_EMIT(CGetS);
 }
 
 void IRTranslator::translateSetS(const NormalizedInstruction& i) {
-  const int kPropIdx = 2;
-  const StringData* propName = i.inputs[kPropIdx]->rtt.valueStringOrNull();
-  HHIR_EMIT(SetS, propName);
+  HHIR_EMIT(SetS);
 }
 
 void
 IRTranslator::translateCGetG(const NormalizedInstruction& i) {
-  const StringData* name = i.inputs[0]->rtt.valueStringOrNull();
-  HHIR_EMIT(CGetG, name, getInferredOrPredictedType(i), isInferredType(i));
+  HHIR_EMIT(CGetG);
 }
 
 void IRTranslator::translateSetG(const NormalizedInstruction& i) {
-  const StringData* name = i.inputs[1]->rtt.valueStringOrNull();
-  HHIR_EMIT(SetG, name);
+  HHIR_EMIT(SetG);
 }
 
 void IRTranslator::translateBindG(const NormalizedInstruction& i) {
-  const StringData* name = i.inputs[1]->rtt.valueStringOrNull();
-  HHIR_EMIT(BindG, name);
+  HHIR_EMIT(BindG);
 }
 
 void

@@ -178,12 +178,12 @@ struct TraceletContext;
 // Return a summary string of the bytecode in a tracelet.
 std::string traceletShape(const Tracelet&);
 
-class TranslationFailedExc : public std::exception {
+class TranslationFailedExc : public std::runtime_error {
  public:
-  const char* m_file; // must be static
-  const int m_line;
-  TranslationFailedExc(const char* file, int line) :
-    m_file(file), m_line(line) { }
+  TranslationFailedExc(const char* file, int line)
+    : std::runtime_error(folly::format("TranslationFailedExc @ {}:{}",
+                                       file, line).str())
+  {}
 };
 
 class UnknownInputExc : public std::runtime_error {

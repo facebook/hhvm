@@ -217,31 +217,17 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   auto const typeParam = inst->typeParam();
 
   if (prevType.not(typeParam)) {
-    /* Task #2553746
-     * This is triggering for a case where the tracked state says the local is
-     * InitNull but the AssertLoc says it's Str. */
-    static auto const error =
-      makeStaticString("Internal error: static analysis was "
-                       "wrong about a local variable's type.");
-    auto* errorInst = m_unit.gen(RaiseError, inst->marker(), cns(error));
-    inst->become(m_unit, errorInst);
+    TRACE_PUNT("Invalid AssertLoc");
+  }
 
-    // It's not a disaster to generate this in unreachable code for
-    // now. t2590033.
-    if (false) {
-      assert_log(false,  [&]{
-          return folly::format("\npreOptimizeAssertLoc: prevType: {} "
-                               "typeParam: {}\nin instr: {}\nin trace: {}\n",
-                               prevType.toString(),
-                               typeParam.toString(),
-                               inst->toString(),
-                               m_unit.main()->toString()).str();
-        });
-    }
-  } else if (shouldElideAssertType(prevType, typeParam, nullptr)) {
-    // The type we're asserting is worse than the last known type.
+  if (shouldElideAssertType(prevType, typeParam, nullptr)) {
     return inst->src(0);
   }
+
+  if (filterAssertType(inst, prevType)) {
+    constrainLocal(locId, categoryForType(prevType), "AssertLoc");
+  }
+
   return nullptr;
 }
 

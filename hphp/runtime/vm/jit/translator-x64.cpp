@@ -2037,9 +2037,9 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       folly::format("{}\n\nActive Trace:\n{}\n",
                     fa.summary, ht.trace()->toString()).str());
     abort();
-  } catch (const std::exception& e) {
-    FTRACE(1, "HHIR: FAILED with exception: {}\n", e.what());
-    assert(0);
+  } catch (const JIT::FailedTraceGen& e) {
+    FTRACE(1, "HHIR: FAILED to translate whole trace: {}\n",
+           e.what());
   }
   return Failure;
 }

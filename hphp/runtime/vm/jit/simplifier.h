@@ -211,6 +211,13 @@ struct StackValueInfo {
 };
 
 /*
+ * If the typeParam of inst isn't a subtype of oldType, filter out the
+ * parts of the typeParam that aren't in oldType and return
+ * true. Otherwise, return false.
+ */
+bool filterAssertType(IRInstruction* inst, Type oldType);
+
+/*
  * Track down a value or type using the StkPtr chain.
  *
  * The spansCall parameter tracks whether the returned value's

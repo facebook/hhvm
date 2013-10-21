@@ -81,6 +81,14 @@ class FailedIRGen : public std::runtime_error {
   {}
 };
 
+class FailedTraceGen : public std::runtime_error {
+ public:
+  FailedTraceGen(const char* file, int line, const char* why)
+    : std::runtime_error(folly::format("FailedTraceGen @ {}:{} - {}",
+                                       file, line, why).str())
+  {}
+};
+
 class FailedCodeGen : public std::runtime_error {
  public:
   const char*    file;
@@ -107,6 +115,10 @@ class FailedCodeGen : public std::runtime_error {
   throw FailedIRGen(__FILE__, __LINE__, instr);     \
 } while(0)
 #define PUNT(instr) SPUNT(#instr)
+#define TRACE_PUNT(why) do { \
+  throw FailedTraceGen(__FILE__, __LINE__, why); \
+} while(0)
+
 
 //////////////////////////////////////////////////////////////////////
 

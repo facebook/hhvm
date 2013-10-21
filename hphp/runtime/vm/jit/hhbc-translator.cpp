@@ -3091,6 +3091,30 @@ void HhbcTranslator::assertString(const RegionDesc::Location& loc,
   }
 }
 
+void HhbcTranslator::assertClass(const RegionDesc::Location& loc,
+                                 const Class* cls) {
+  Type curType;
+  typedef RegionDesc::Location::Tag T;
+  switch (loc.tag()) {
+    case T::Stack:
+      curType = topType(loc.stackOffset(), DataTypeSpecific);
+      break;
+
+    case T::Local:
+      curType = m_tb->localType(loc.localId(), DataTypeSpecific);
+      break;
+  }
+
+  if (curType.canSpecializeClass() && curType.isSpecialized()) {
+    curType = curType.unspecialize();
+  }
+  assert(curType.isBoxed() || curType.notBoxed());
+  if (curType.canSpecializeClass()) {
+    assertType(loc, curType.specialize(cls) |
+               (curType.isBoxed() ? Type::BoxedInitNull : Type::InitNull));
+  }
+}
+
 /*
  * Creates a RuntimeType struct from a program location. This needs access to
  * more than just the location's type because RuntimeType includes known

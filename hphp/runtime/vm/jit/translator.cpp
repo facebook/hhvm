@@ -3285,7 +3285,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
         ni->inputs.push_back(dl);
       }
     } catch (TranslationFailedExc& tfe) {
-      SKTRACE(1, sk, "Translator fail: %s:%d\n", tfe.m_file, tfe.m_line);
+      SKTRACE(1, sk, "Translator fail: %s\n", tfe.what());
       if (!t.m_numOpcodes) {
         t.m_analysisFailed = true;
         t.m_instrStream.append(ni);
@@ -3309,8 +3309,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     try {
       getOutputs(t, ni, stackFrameOffset, doVarEnvTaint);
     } catch (TranslationFailedExc& tfe) {
-      SKTRACE(1, sk, "Translator getOutputs fail: %s:%d\n",
-              tfe.m_file, tfe.m_line);
+      SKTRACE(1, sk, "Translator getOutputs fail: %s\n", tfe.what());
       if (!t.m_numOpcodes) {
         t.m_analysisFailed = true;
         t.m_instrStream.append(ni);
@@ -3650,10 +3649,9 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         break;
       }
       case Unit::MetaInfo::Kind::Class: {
-        RuntimeType& rtt = inst.inputs[arg]->rtt;
-        if (rtt.valueType() != KindOfObject) {
-          continue;
-        }
+        auto& rtt = inst.inputs[arg]->rtt;
+        auto const& location = inst.inputs[arg]->location;
+        if (rtt.valueType() != KindOfObject) break;
 
         const StringData* metaName = inst.unit()->lookupLitstrId(info.m_data);
         const StringData* rttName =
@@ -3662,20 +3660,27 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         // as long as metaCls is more derived than rttCls.
         Class* metaCls = Unit::lookupUniqueClass(metaName);
         Class* rttCls = rttName ? Unit::lookupUniqueClass(rttName) : nullptr;
-        if (metaCls && rttCls && metaCls != rttCls &&
-            !metaCls->classof(rttCls)) {
+        if (!metaCls || (rttCls && metaCls != rttCls &&
+                         !metaCls->classof(rttCls))) {
           // Runtime type is more derived
-          metaCls = 0;
+          metaCls = rttCls;
         }
-        if (metaCls && metaCls != rttCls) {
-          SKTRACE(1, inst.source, "replacing input %d with a MetaInfo-supplied "
-                  "class of %s; old type = %s\n",
-                  arg, metaName->data(), rtt.pretty().c_str());
-          if (rtt.isRef()) {
-            rtt = RuntimeType(KindOfRef, KindOfObject, metaCls);
-          } else {
-            rtt = RuntimeType(KindOfObject, KindOfNone, metaCls);
-          }
+        if (!metaCls) break;
+        if (location.space != Location::This) {
+          hhbcTrans.assertClass(
+            stackFilter(location).toLocation(inst.stackOffset), metaCls);
+        } else {
+          assert(metaCls->classof(hhbcTrans.curClass()));
+        }
+
+        if (metaCls == rttCls) break;
+        SKTRACE(1, inst.source, "replacing input %d with a MetaInfo-supplied "
+                "class of %s; old type = %s\n",
+                arg, metaName->data(), rtt.pretty().c_str());
+        if (rtt.isRef()) {
+          rtt = RuntimeType(KindOfRef, KindOfObject, metaCls);
+        } else {
+          rtt = RuntimeType(KindOfObject, KindOfNone, metaCls);
         }
         break;
       }

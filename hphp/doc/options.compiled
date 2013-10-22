@@ -789,3 +789,21 @@ kill it to avoid extra server cost by turning on KillOnTimeout.
 This feature allows a machine to overwrite configurations just by matching
 machine names with specified regex pattern. This block of configuration can
 appear at any location of the file, even at top.
+
+= PHP File Extensions
+
+By default any file with .php in the URL is treated as PHP Source code and is passed
+through the HHVM Engine for interpretation.
+
+In case a different file extension need to be supported in the URL. Use this configuration
+option.
+
+    PhpFile {
+        Extensions {
+            php  = application/php
+            hphp = application/x-hhvm-php
+        }
+    }
+
+Note that only the extensions are important. Content type beside the extension is provided
+for completeness.

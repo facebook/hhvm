@@ -296,6 +296,12 @@ std::string IRTrace::toString() const {
   return out.str();
 }
 
+std::string IRUnit::toString() const {
+  std::ostringstream out;
+  print(out, *this);
+  return out.str();
+}
+
 // Print unlikely blocks at the end in normal generation.  If we have
 // asmInfo, order the blocks based on how they were layed out.
 static smart::vector<Block*> blocks(const IRUnit& unit,

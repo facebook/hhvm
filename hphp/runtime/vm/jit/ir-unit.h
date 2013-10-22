@@ -277,6 +277,7 @@ public:
   ExitList& exits() { return m_exits; }
   const ExitList& exits() const { return m_exits; }
   Block* entry() const;
+  std::string toString() const;
 
 private:
   SSATmp* findConst(ConstData& cdata, Type t);

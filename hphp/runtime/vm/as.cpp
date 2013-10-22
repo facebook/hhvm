@@ -791,6 +791,15 @@ uint8_t read_AssertT_arg(AsmState& as) {
   NOT_REACHED();
 }
 
+uint8_t read_Fatal_arg(AsmState& as) {
+  auto const str = read_opcode_arg<std::string>(as);
+#define FATAL_OP(x) if (str == #x) return static_cast<uint8_t>(FatalOp::x);
+  FATAL_OPS
+#undef FATAL_OP
+  as.error("unknown Fatal operand");
+  NOT_REACHED();
+}
+
 const StringData* read_litstr(AsmState& as) {
   as.in.skipSpaceTab();
   std::string strVal;
@@ -1013,8 +1022,9 @@ OpcodeParserMap opcode_parsers;
                    read_opcode_arg<int32_t>(as)))
 #define IMM_OA   as.ue->emitByte(                                       \
                     (thisOpcode == Op::AssertTL ||                      \
-                     thisOpcode == Op::AssertTStk) ? read_AssertT_arg(as) \
-                    : uint8_t(read_opcode_arg<int32_t>(as)))
+                     thisOpcode == Op::AssertTStk) ? read_AssertT_arg(as) : \
+                    thisOpcode == Op::Fatal ? read_Fatal_arg(as) :      \
+                    uint8_t(read_opcode_arg<int32_t>(as)))
                      // TODO more subop names
 #define IMM_AA   as.ue->emitInt32(as.ue->mergeArray(read_litarray(as)))
 
@@ -1985,8 +1995,7 @@ UnitEmitter* assemble_string(const char*code, int codeLen,
     ue->emitOp(OpString);
     ue->emitInt32(ue->mergeLitstr(makeStaticString(e.what())));
     ue->emitOp(OpFatal);
-    ue->emitByte(uint8_t(FatalKind::Runtime));
-    ue->emitByte(false /* skipFrame */);
+    ue->emitByte(static_cast<uint8_t>(FatalOp::Runtime));
     FuncEmitter* fe = ue->getMain();
     fe->setMaxStackCells(kNumActRecCells + 1);
     // XXX line numbers are bogus

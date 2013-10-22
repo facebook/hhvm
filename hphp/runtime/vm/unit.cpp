@@ -504,7 +504,7 @@ bool Unit::parseFatal(const StringData*& msg, int& line) const {
   pc += sizeof(Id) + 2;
 
   auto kind_char = *pc;
-  return kind_char == uint8_t(FatalKind::Parse);
+  return kind_char == static_cast<uint8_t>(FatalOp::Parse);
 }
 
 class FrameRestore {

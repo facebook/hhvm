@@ -5891,8 +5891,7 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   if (funcScope->isAbstract()) {
     std::ostringstream s;
     s << "Cannot call abstract method " << meth->getOriginalFullName() << "()";
-    emitMakeUnitFatal(e, s.str().c_str(),
-                      FatalKind::Runtime, true /* skipFrame */);
+    emitMakeUnitFatal(e, s.str().c_str(), FatalOp::RuntimeOmitFrame);
   }
 }
 
@@ -7194,11 +7193,10 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
 
 void EmitterVisitor::emitMakeUnitFatal(Emitter& e,
                                        const char* msg,
-                                       FatalKind k /* = FatalKind::Runtime */,
-                                       bool skipFrame /* = false */) {
+                                       FatalOp k) {
   const StringData* sd = makeStaticString(msg);
   e.String(sd);
-  e.Fatal(uint8_t(k), uint8_t(skipFrame));
+  e.Fatal(static_cast<uint8_t>(k));
 }
 
 void EmitterVisitor::addFunclet(Thunklet* body, Label* entry) {
@@ -7466,7 +7464,7 @@ static UnitEmitter* emitHHBCUnitEmitter(AnalysisResultPtr ar, FileScopePtr fsp,
     EmitterVisitor fev(*ue);
     Emitter emitter(ex.m_node, *ue, fev);
     FuncFinisher ff(&fev, emitter, ue->getMain());
-    auto kind = ex.m_parseFatal ? FatalKind::Parse : FatalKind::Runtime;
+    auto kind = ex.m_parseFatal ? FatalOp::Parse : FatalOp::Runtime;
     fev.emitMakeUnitFatal(emitter, ex.getMessage().c_str(), kind);
   }
   return ue;

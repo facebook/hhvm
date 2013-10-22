@@ -688,8 +688,7 @@ public:
   void emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc);
   void emitMakeUnitFatal(Emitter& e,
                          const char* msg,
-                         FatalKind k = FatalKind::Runtime,
-                         bool skipFrame = false);
+                         FatalOp k = FatalOp::Runtime);
 
   void addFunclet(Thunklet* body, Label* entry);
   void emitFunclets(Emitter& e);

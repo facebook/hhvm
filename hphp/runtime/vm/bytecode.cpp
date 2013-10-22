@@ -3960,17 +3960,21 @@ OPTBLD_INLINE void VMExecutionContext::iopFatal(PC& pc) {
   TypedValue* top = m_stack.topTV();
   std::string msg;
   DECODE_OA(kind_char);
-  DECODE_OA(skipFrame);
   if (IS_STRING_TYPE(top->m_type)) {
     msg = top->m_data.pstr->data();
   } else {
     msg = "Fatal error message not a string";
   }
   m_stack.popTV();
-  if (skipFrame) {
+
+  switch (static_cast<FatalOp>(kind_char)) {
+  case FatalOp::RuntimeOmitFrame:
     raise_error_without_first_frame(msg);
-  } else {
+    break;
+  case FatalOp::Runtime:
+  case FatalOp::Parse:
     raise_error(msg);
+    break;
   }
 }
 

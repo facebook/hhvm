@@ -1165,16 +1165,15 @@ Exit    [C]  ->  [C:Null]
   set the exit status to 0, push null onto the stack, and then it will
   terminate execution.
 
-Fatal <error kind> <skip frame>  [C]  ->  []
+Fatal <fatal subop>  [C]  ->  []
 
   Fatal. This instruction throws a fatal error using $1 as the error message.
   If $1 is not a string, this instruction throws a fatal error with an error
   message that indicates that the error message was not a string.
-  Setting %1 to 0 will throw a runtime fatal error.
-  Setting %1 to 1 will throw a parse fatal error.
-  Setting %2 to 0 will include the full backtrace.
-  Setting %2 to 1 will make the backtrace not include the topmost frame. This
-  is useful when fatalling from functions that shouldn't be seen from userland.
+  Setting %1 to 0 will throw a runtime fatal error with a full backtrace.
+  Setting %1 to 1 will throw a parse fatal error with a full backtrace.
+  Setting %1 to 2 will throw a runtime fatal error with the
+    backtrace omitting the top frame.
 
 
 4. Control flow instructions

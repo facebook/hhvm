@@ -533,15 +533,11 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         if (op > 1) ok = false;
         break;
       case OpFatal:
-        switch (static_cast<FatalKind>(op)) {
-        default: {
-          error("invalid error kind for Fatal: %d\n", op);
-          ok = false;
-        }
-        case FatalKind::Parse:
-        case FatalKind::Runtime:
-          break;
-        }
+#define FATAL_OP(x) if (FatalOp::x == static_cast<FatalOp>(op)) break;
+        FATAL_OPS
+#undef FATAL_OP
+        error("invalid error kind for Fatal: %d\n", op);
+        ok = false;
         break;
       }
       break;

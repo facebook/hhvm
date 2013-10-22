@@ -788,7 +788,7 @@ void HhbcTranslator::emitCGetL(int32_t id) {
 void HhbcTranslator::emitCGetL2(int32_t id) {
   auto exitBlock = makeExit();
   auto catchBlock = makeCatch();
-  SSATmp* oldTop = pop(Type::Gen);
+  SSATmp* oldTop = pop(Type::StackElem);
   pushIncRef(ldLocInnerWarn(id, exitBlock, DataTypeCountnessInit, catchBlock));
   push(oldTop);
 }

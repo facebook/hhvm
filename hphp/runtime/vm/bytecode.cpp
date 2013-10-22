@@ -204,6 +204,7 @@ Transl::Translator* tx() {
 
 #define DECODE_LA(var) DECODE_IVA(var)
 #define DECODE_IA(var) DECODE_IVA(var)
+#define DECODE_OA(var) DECODE(unsigned char, var)
 
 #define DECODE_ITER_LIST(typeList, idList, vecLen) \
   DECODE(int32_t, vecLen);                         \

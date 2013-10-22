@@ -123,7 +123,8 @@ Variant f_end(VRefParam array);
 bool f_in_array(CVarRef needle, CVarRef haystack, bool strict = false);
 Variant f_range(CVarRef low, CVarRef high, CVarRef step = 1);
 
-Variant f_array_diff(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array);
+Variant f_array_diff(int _argc, CVarRef container1, CVarRef container2, CArrRef _argv = null_array);
+Variant f_array_diff_key(int _argc, CVarRef container1, CVarRef container2, CArrRef _argv = null_array);
 Variant f_array_udiff(int _argc, CVarRef array1, CVarRef array2,
                       CVarRef data_compare_func, CArrRef _argv = null_array);
 Variant f_array_diff_assoc(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array);
@@ -134,11 +135,11 @@ Variant f_array_udiff_assoc(int _argc, CVarRef array1, CVarRef array2,
 Variant f_array_udiff_uassoc(int _argc, CVarRef array1, CVarRef array2,
                              CVarRef data_compare_func,
                              CVarRef key_compare_func, CArrRef _argv = null_array);
-Variant f_array_diff_key(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array);
 Variant f_array_diff_ukey(int _argc, CVarRef array1, CVarRef array2,
                           CVarRef key_compare_func, CArrRef _argv = null_array);
 
-Variant f_array_intersect(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array);
+Variant f_array_intersect(int _argc, CVarRef container1, CVarRef container2, CArrRef _argv = null_array);
+Variant f_array_intersect_key(int _argc, CVarRef container1, CVarRef container2, CArrRef _argv = null_array);
 Variant f_array_uintersect(int _argc, CVarRef array1, CVarRef array2,
                            CVarRef data_compare_func, CArrRef _argv = null_array);
 Variant f_array_intersect_assoc(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array);
@@ -149,7 +150,6 @@ Variant f_array_uintersect_assoc(int _argc, CVarRef array1, CVarRef array2,
 Variant f_array_uintersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
                                   CVarRef data_compare_func,
                                   CVarRef key_compare_func, CArrRef _argv = null_array);
-Variant f_array_intersect_key(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv = null_array);
 Variant f_array_intersect_ukey(int _argc, CVarRef array1, CVarRef array2,
                                CVarRef key_compare_func, CArrRef _argv = null_array);
 

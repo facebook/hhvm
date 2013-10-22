@@ -1,10 +1,7 @@
 <?php
 function f($x) {
-  $arr = array();
-  foreach ($x as $k => $v) {
-    $arr[$k] = $v;
-  }
-  usort($arr, function($a,$b) {
+  $arr = (array)$x;
+  uasort($arr, function($a,$b) {
     if (is_int($a) != is_int($b)) {
       if (is_int($a)) return -1;
       return 1;

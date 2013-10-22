@@ -46,6 +46,13 @@ void print(std::ostream& ostream, const SSATmp*,
            bool printLastUse = false);
 void print(const SSATmp*);
 
+// Block
+void print(std::ostream& os, const Block* block,
+           const RegAllocInfo* regs = nullptr,
+           const LifetimeInfo* lifetime = nullptr,
+           const AsmInfo* asmInfo = nullptr,
+           const GuardConstraints* guards = nullptr);
+
 // Trace
 void print(std::ostream& ostream, const IRUnit&, const IRTrace*,
            const RegAllocInfo* regs = nullptr,

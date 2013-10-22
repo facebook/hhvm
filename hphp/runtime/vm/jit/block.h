@@ -141,6 +141,8 @@ struct Block : boost::noncopyable {
 
   friend const Edge* nextEdge(Block*); // only for validation
 
+  std::string toString() const;
+
  private:
   InstructionList m_instrs; // instructions in this block
   IRTrace* m_trace;         // owner of this block.

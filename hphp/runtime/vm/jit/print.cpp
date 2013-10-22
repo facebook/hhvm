@@ -284,6 +284,12 @@ void print(const IRTrace* trace) {
   print(std::cout, trace->unit(), trace);
 }
 
+std::string Block::toString() const {
+  std::ostringstream out;
+  print(out, this);
+  return out.str();
+}
+
 std::string IRTrace::toString() const {
   std::ostringstream out;
   print(out, unit(), this, nullptr);
@@ -355,130 +361,137 @@ static void disasmRange(std::ostream& os, TCA begin, TCA end) {
 
 }
 
-void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
+void print(std::ostream& os, const Block* block,
            const RegAllocInfo* regs, const LifetimeInfo* lifetime,
            const AsmInfo* asmInfo, const GuardConstraints* guards) {
   BCMarker curMarker;
-  for (Block* block : blocks(unit, trace, asmInfo)) {
-    if (!block->isMain()) {
-      os << "\n" << color(ANSI_COLOR_GREEN)
-         << "    -------  Exit Trace  -------"
-         << color(ANSI_COLOR_END) << '\n';
-      curMarker = BCMarker();
-    }
 
-    TcaRange blockRange = asmInfo ? asmInfo->asmRanges[block] :
-                          TcaRange(nullptr, nullptr);
+  if (!block->isMain()) {
+    os << "\n" << color(ANSI_COLOR_GREEN)
+       << "    -------  Exit Trace  -------"
+       << color(ANSI_COLOR_END) << '\n';
+    curMarker = BCMarker();
+  }
 
-    os << '\n' << std::string(kIndent - 3, ' ');
-    printLabel(os, block);
-    os << punc(":") << "\n";
+  TcaRange blockRange = asmInfo ? asmInfo->asmRanges[block] :
+    TcaRange(nullptr, nullptr);
 
-    const char* markerEndl = "";
-    for (auto it = block->begin(); it != block->end();) {
-      auto& inst = *it; ++it;
+  os << '\n' << std::string(kIndent - 3, ' ');
+  printLabel(os, block);
+  os << punc(":") << "\n";
 
-      if (inst.marker() != curMarker) {
-        std::ostringstream mStr;
-        auto const& newMarker = inst.marker();
-        auto func = newMarker.func;
-        if (!func) {
-          os << color(ANSI_COLOR_BLUE)
-             << std::string(kIndent, ' ')
-             << "--- invalid marker"
-             << color(ANSI_COLOR_END)
-             << '\n';
-        } else {
-          if (func != curMarker.func) {
-            func->prettyPrint(mStr);
-          }
-          mStr << std::string(kIndent, ' ')
-               << newMarker.show()
-               << '\n';
+  const char* markerEndl = "";
+  for (auto it = block->begin(); it != block->end();) {
+    auto& inst = *it; ++it;
 
-          auto bcOffset = newMarker.bcOff;
-          func->unit()->prettyPrint(
-            mStr, Unit::PrintOpts()
-                       .range(bcOffset, bcOffset+1)
-                       .noLineNumbers()
-                       .noFuncs()
-                       .indent(0));
-          std::vector<std::string> vec;
-          folly::split('\n', mStr.str(), vec);
-          os << markerEndl;
-          markerEndl = "\n";
-          for (auto& s : vec) {
-            if (s.empty()) continue;
-            os << color(ANSI_COLOR_BLUE) << s << color(ANSI_COLOR_END) << '\n';
-          }
+    if (inst.marker() != curMarker) {
+      std::ostringstream mStr;
+      auto const& newMarker = inst.marker();
+      auto func = newMarker.func;
+      if (!func) {
+        os << color(ANSI_COLOR_BLUE)
+           << std::string(kIndent, ' ')
+           << "--- invalid marker"
+           << color(ANSI_COLOR_END)
+           << '\n';
+      } else {
+        if (func != curMarker.func) {
+          func->prettyPrint(mStr);
         }
+        mStr << std::string(kIndent, ' ')
+             << newMarker.show()
+             << '\n';
 
-        curMarker = newMarker;
+        auto bcOffset = newMarker.bcOff;
+        func->unit()->prettyPrint(
+          mStr, Unit::PrintOpts()
+          .range(bcOffset, bcOffset+1)
+          .noLineNumbers()
+          .noFuncs()
+          .indent(0));
+        std::vector<std::string> vec;
+        folly::split('\n', mStr.str(), vec);
+        os << markerEndl;
+        markerEndl = "\n";
+        for (auto& s : vec) {
+          if (s.empty()) continue;
+          os << color(ANSI_COLOR_BLUE) << s << color(ANSI_COLOR_END) << '\n';
+        }
       }
 
-      if (inst.op() == DefLabel) {
-        // print phi pseudo-instructions
-        for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
-          os << std::string(kIndent +
-                            folly::format("({}) ", inst.id()).str().size(),
-                            ' ');
-          JIT::print(os, inst.dst(i), regs, lifetime, false);
-          os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
-             << color(ANSI_COLOR_END);
-          bool first = true;
-          inst.block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
+      curMarker = newMarker;
+    }
+
+    if (inst.op() == DefLabel) {
+      // print phi pseudo-instructions
+      for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
+        os << std::string(kIndent +
+                          folly::format("({}) ", inst.id()).str().size(),
+                          ' ');
+        JIT::print(os, inst.dst(i), regs, lifetime, false);
+        os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
+           << color(ANSI_COLOR_END);
+        bool first = true;
+        inst.block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
             if (!first) os << punc(", ");
             first = false;
             printSrc(os, jmp, i, regs, lifetime);
             os << punc("@");
             printLabel(os, jmp->block());
           });
-          os << '\n';
-        }
-      }
-
-      os << std::string(kIndent, ' ');
-      JIT::print(os, &inst, regs, lifetime, guards);
-      os << '\n';
-
-      if (asmInfo) {
-        TcaRange instRange = asmInfo->instRanges[inst];
-        if (!instRange.empty()) {
-          disasmRange(os, instRange.begin(), instRange.end());
-          os << '\n';
-          assert(instRange.end() >= blockRange.start() &&
-                 instRange.end() <= blockRange.end());
-          blockRange = TcaRange(instRange.end(), blockRange.end());
-        }
-      }
-    }
-
-    if (asmInfo) {
-      // print code associated with this block that isn't tied to any
-      // instruction.  This includes code after the last isntruction (e.g.
-      // jmp to next block), and AStubs code.
-      if (!blockRange.empty()) {
-        os << std::string(kIndent, ' ') << punc("A:") << "\n";
-        disasmRange(os, blockRange.start(), blockRange.end());
-      }
-      auto astubRange = asmInfo->astubRanges[block];
-      if (!astubRange.empty()) {
-        os << std::string(kIndent, ' ') << punc("AStubs:") << "\n";
-        disasmRange(os, astubRange.start(), astubRange.end());
-      }
-      if (!blockRange.empty() || !astubRange.empty()) {
         os << '\n';
       }
     }
 
-    os << std::string(kIndent - 2, ' ');
-    if (auto next = block->next()) {
-      os << punc("-> ");
-      printLabel(os, next);
-      os << '\n';
-    } else {
-      os << "no fallthrough\n";
+    os << std::string(kIndent, ' ');
+    JIT::print(os, &inst, regs, lifetime, guards);
+    os << '\n';
+
+    if (asmInfo) {
+      TcaRange instRange = asmInfo->instRanges[inst];
+      if (!instRange.empty()) {
+        disasmRange(os, instRange.begin(), instRange.end());
+        os << '\n';
+        assert(instRange.end() >= blockRange.start() &&
+               instRange.end() <= blockRange.end());
+        blockRange = TcaRange(instRange.end(), blockRange.end());
+      }
     }
+  }
+
+  if (asmInfo) {
+    // print code associated with this block that isn't tied to any
+    // instruction.  This includes code after the last isntruction (e.g.
+    // jmp to next block), and AStubs code.
+    if (!blockRange.empty()) {
+      os << std::string(kIndent, ' ') << punc("A:") << "\n";
+      disasmRange(os, blockRange.start(), blockRange.end());
+    }
+    auto astubRange = asmInfo->astubRanges[block];
+    if (!astubRange.empty()) {
+      os << std::string(kIndent, ' ') << punc("AStubs:") << "\n";
+      disasmRange(os, astubRange.start(), astubRange.end());
+    }
+    if (!blockRange.empty() || !astubRange.empty()) {
+      os << '\n';
+    }
+  }
+
+  os << std::string(kIndent - 2, ' ');
+  if (auto next = block->next()) {
+    os << punc("-> ");
+    printLabel(os, next);
+    os << '\n';
+  } else {
+    os << "no fallthrough\n";
+  }
+}
+
+void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
+           const RegAllocInfo* regs, const LifetimeInfo* lifetime,
+           const AsmInfo* asmInfo, const GuardConstraints* guards) {
+  for (Block* block : blocks(unit, trace, asmInfo)) {
+    print(os, block, regs, lifetime, asmInfo, guards);
   }
 }
 

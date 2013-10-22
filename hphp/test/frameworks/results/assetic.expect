@@ -1,4 +1,4 @@
-PHPUnit 3.8-g0a354ee by Sebastian Bergmann.
+PHPUnit 3.8-g052a1cc by Sebastian Bergmann.
 
 Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/assetic/phpunit.xml.dist
 
@@ -143,7 +143,6 @@ Starting test 'Assetic\Test\Asset\GlobAssetTest::testLoad'.
 Starting test 'Assetic\Test\Asset\GlobAssetTest::testDump'.
 .
 Starting test 'Assetic\Test\Asset\HttpAssetTest::testGetLastModified'.
-SlowTimer [5001ms] at curl: http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js
 F
 Starting test 'Assetic\Test\Asset\HttpAssetTest::testProtocolRelativeUrl'.
 E
@@ -444,17 +443,14 @@ E
 Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #0 ('body { background: url(%s); background: url(%s); }', 'css/body.css', 'css/build/main.css', '../images/bg.gif', '../images/bg2.gif', '../../images/bg.gif', '../../images/bg2.gif')'.
 E
 Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #1 ('body { background: url(%s);
-background: url(%s); }', 'css/body.css', 'css/build/main.css', '../images/bg.gif', '../images/bg2.gif', '../../images/bg.gif', '../../images/bg2.gif')'.
 E
 Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #2 ('@import "%s"; @import "%s";', 'css/imports.css', 'css/build/main.css', 'import.css', 'import2.css', '../import.css', '../import2.css')'.
 E
 Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #3 ('@import "%s";
-@import "%s";', 'css/imports.css', 'css/build/main.css', 'import.css', 'import2.css', '../import.css', '../import2.css')'.
 E
 Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #4 ('@import "%s"; body { background: url(%s); }', 'css/body.css', 'css/build/main.css', 'import.css', '../images/bg2.gif', '../import.css', '../../images/bg2.gif')'.
 E
 Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #5 ('@import "%s";
-body { background: url(%s); }', 'css/body.css', 'css/build/main.css', 'import.css', '../images/bg2.gif', '../import.css', '../../images/bg2.gif')'.
 E
 Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testNoTargetPath'.
 .

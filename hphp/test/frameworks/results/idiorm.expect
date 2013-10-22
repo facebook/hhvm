@@ -1,4 +1,4 @@
-PHPUnit 3.7.27 by Sebastian Bergmann.
+PHPUnit 3.7.28 by Sebastian Bergmann.
 
 Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/idiorm/phpunit.xml
 
@@ -407,5 +407,4 @@ Starting test 'QueryBuilderPsr1Test53::testIssue74EscapingQuoteMarksIn_quote_ide
 Starting test 'QueryBuilderPsr1Test53::testIssue90UsingSetExprAloneDoesTriggerQueryGeneration'.
 .
 
-Time: 12.32 seconds, Memory: 7.89Mb
 OK (200 tests, 226 assertions)

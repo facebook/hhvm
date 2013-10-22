@@ -163,7 +163,7 @@ class PHPUnitPatterns {
   // results. Any test names after that line are probably detailed error
   // information.
   static string $stop_parsing_pattern =
-                "/^Time: \d+.\d+ seconds, Memory: \d+.\d+/";
+                "/^Time: \d+.\d+ (seconds|ms), Memory: \d+.\d+/";
 
   static string $tests_ok_pattern = "/OK \(\d+ tests, \d+ assertions\)/";
   static string $tests_failure_pattern = "/Tests: \d+, Assertions: \d+.*[.]/";
@@ -182,6 +182,18 @@ class Frameworks {
     // Some tests are commented out because they may need to be special cased as
     // they require special testing commands, mock databases, etc.
     //
+    // In order to get frameworks to work correctly, may need to grab more code
+    // via some sort of pull request:
+    //
+    //  - pull:      The code we need is in a that doesn't affect the primary
+    //               branch or SHA (e.g., 'vendor') and we can just do
+    //               a 'git pull' since any branch or HEAD change doesn't matter
+    //  - submodule: The code we are adding may be in the root framework dir
+    //               so that can affect the framework branch or SHA. If we
+    //               pull/merge, the HEAD SHA changes. (FIX IF THIS DOESN'T
+    //               HAVE TO BE THE CASE). And, if that happens, we will always
+    //               be redownloading the framework since the SHA is different
+    //               than what we expect. Use a submodule/move technique.
     // IF WE HAVE A BLACKLIST FOR FLAKEY TESTS THAT PASS OR FAIL DEPENDING ON
     // THE POSITION OF THE MOON (OR AN UKNOWN BUG IN HHVM), THESE ARE THE
     // CANDIDATES:
@@ -217,20 +229,6 @@ class Frameworks {
             'git_path' => "https://github.com/j4mie/idiorm.git",
             'git_commit' => "3be516b440734811b58bb9d0b458a4109b49af71",
           },
-        /* Cannot download 1 out of 10 or so symfony dependencies with hhvm.
-           Most of them are retrieved except this one:
-
-           - Installing phing/phing (2.6.1)
-             Downloading: 100%
-             Download failed, retrying...
-             Downloading: 100%
-             Download failed, retrying...
-             Downloading: 100%
-             oss_framework_test_script.php: Couldn't download dependencies for
-             symfony!Removing framework
-
-           This one works with Zend for some reason?*/
-
         'symfony' =>
           Map {
             'install_root' => __DIR__."/frameworks/symfony",
@@ -273,7 +271,8 @@ class Frameworks {
         /*'wordpress' =>
           Map {
             'install_root' => __DIR__."/frameworks/wordpress-unit-tests",
-            'git_path' => "https://github.com/kurtpayne/wordpress-unit-tests.git",
+            'git_path' => "https://github.com/kurtpayne/".
+                          "wordpress-unit-tests.git",
             'git_commit' => "a2820a710a6605cca06ae5191ce888c51b22b0fe",
           },*/
         'composer' =>
@@ -294,6 +293,7 @@ class Frameworks {
                                  "/vendor/doctrine/dbal",
                   'pull_repository' => "https://github.com/javer/dbal",
                   'git_commit' => "hhvm-pdo-implement-interfaces",
+                  'type' => 'pull',
                  },
               },
           },
@@ -342,25 +342,31 @@ class Frameworks {
                   'pull_dir' => __DIR__."/frameworks/pear-core",
                   'pull_repository' => "https://github.com/pear/Console_Getopt",
                   'git_commit' => "trunk",
+                  'type' => 'submodulemove',
+                  'move_from_dir' => __DIR__.
+                                     "/frameworks/pear-core/Console_Getopt",
                  },
               },
           },
-        /* Requires a mediawiki install to run tests :(
         'mediawiki' =>
           Map {
             'install_root' => __DIR__."/frameworks/mediawiki-core",
             'git_path' => "https://github.com/wikimedia/mediawiki-core.git",
-            'git_commit' => "7b9549088534ac636d131e054631adb16b39bd1e",
-          },*/
-        'typo3' =>
+            'git_commit' => "8c5733c44977232ca42454ae7f1ae0fd01770b37",
+            'test_path' => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
+            'test_run_command' => get_hhvm_build()." phpunit.php ".
+                                  "--exclude-group=Database",
+          },
+        /*'typo3' =>
           Map {
             'install_root' => __DIR__."/frameworks/typo3",
             'git_path' => "https://github.com/TYPO3/TYPO3.CMS.git",
             'git_commit' => "085ca118bcb08213732c9e15462b6e2c073665e4",
-            'test_path' => __DIR__."/frameworks/typo3/typo3",
-            'test_run_command' => get_hhvm_build()." cli_dispatch.phpsh ".
+            'test_path' => __DIR__."/frameworks/typo3",
+            'test_run_command' => get_hhvm_build().
+                                  " ./typo3/cli_dispatch.phpsh ".
                                   __DIR__."/vendor/bin/phpunit --debug",
-          },
+          },*/
         'drupal' =>
           Map {
             'install_root' => __DIR__."/frameworks/drupal",
@@ -530,7 +536,10 @@ function get_unit_testing_infra_dependencies(bool $csv_only): void {
   if (!(file_exists($phpunit_binary))) {
     verbose("\nDownloading PHPUnit in order to run tests. There may be an ".
             "output delay while the download begins.\n", !$csv_only);
-    $phpunit_install_command = get_hhvm_build()." ".__DIR__.
+    // Use the timeout to avoid curl SlowTimer timeouts and problems
+    $phpunit_install_command = get_hhvm_build()." ".
+                               "-v ResourceLimit.SocketDefaultTimeout=30 ".
+                               __DIR__.
                                "/composer.phar install --dev --verbose 2>&1";
     $ret = run_install($phpunit_install_command, __DIR__,
                        ProxyInformation::$proxies, $csv_only);
@@ -573,8 +582,20 @@ function install_framework(string $name, bool $verbose, bool $csv_only,
   $git_ret = run_install($git_command, $install_root,
                          ProxyInformation::$proxies, $csv_only);
   if ($git_ret !== 0) {
+    remove_dir_recursive($install_root);
     $csv_only ? error()
-              : error("Could not checkout baseline test code for $name!\n");
+              : error("Could not checkout baseline code for ".$name."!".
+                      " Removing framework!\n");
+  }
+
+  /******************************
+   *       MEDIAWIKI SPECIFIC
+   ******************************/
+  // Need to have an empty LocalSettings.php file for testing to work.
+  if ($name === "mediawiki") {
+    verbose("Adding LocalSettings.php file to Mediawiki test dir.\n", $verbose);
+    $touch_command = "touch ".$install_root."/LocalSettings.php";
+    exec($touch_command);
   }
 
   /*******************************
@@ -587,7 +608,10 @@ function install_framework(string $name, bool $verbose, bool $csv_only,
   // Check to see if composer dependencies are necessary to run the test
   if ($composer_json_path !== null) {
     verbose("Retrieving dependencies for framework $name......\n", $verbose);
-    $dependencies_install_cmd = get_hhvm_build()." ".__DIR__.
+    // Use the timeout to avoid curl SlowTimer timeouts and problems
+    $dependencies_install_cmd = get_hhvm_build()." ".
+                                "-v ResourceLimit.SocketDefaultTimeout=30 ".
+                                __DIR__.
                                 "/composer.phar install --dev";
     $install_ret = run_install($dependencies_install_cmd, $composer_json_path,
                                ProxyInformation::$proxies, $csv_only);
@@ -643,14 +667,33 @@ function install_framework(string $name, bool $verbose, bool $csv_only,
       $dir = $pr["pull_dir"];
       $rep = $pr["pull_repository"];
       $gc = $pr["git_commit"];
+      $type = $pr["type"];
+      $move_from_dir = null;
       chdir($dir);
-      // Checkout out our baseline test code via SHA
-      $git_command = "git pull --no-edit ".$rep." ".$gc;
+      $git_command = "";
+      verbose("Pulling code from ".$rep. " and branch/commit ".$gc."\n",
+              $verbose);
+      if ($type === "pull") {
+        $git_command = "git pull --no-edit ".$rep." ".$gc;
+      } else if ($type === "submodulemove") {
+        $git_command = "git submodule add -b ".$gc." ".$rep;
+        $move_from_dir = $pr["move_from_dir"];
+      }
+      verbose("Pull request command: ".$git_command."\n", $verbose);
       $git_ret = run_install($git_command, $dir,
                              ProxyInformation::$proxies, $csv_only);
       if ($git_ret !== 0) {
+        remove_dir_recursive($install_root);
         $csv_only ? error()
-                  : error("Could not checkout baseline test code for $name!\n");
+                  : error("Could not get pull request code for ".$name."!".
+                          " Removing framework!\n");
+      }
+      if ($move_from_dir !== null) {
+        $mv_command = "mv ".$move_from_dir."/* ".$dir;
+        verbose("Move command: ".$mv_command."\n", $verbose);
+        exec($mv_command);
+        verbose("After move, removing: ".$move_from_dir."\n", $verbose);
+        remove_dir_recursive($move_from_dir);
       }
       chdir(__DIR__);
     }
@@ -809,6 +852,7 @@ THUMBSDOWN
           $not_first = true;
           print $value;
         }
+        print "\n";
       } else {
         print "\nALL TESTS COMPLETE!\n";
         print "SUMMARY:\n";
@@ -952,6 +996,16 @@ function run_single_test_suite(string $fw_name, string $summary_file,
       $line = fgets($pipes[1]);
       $line = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
                            "", $line);
+      if (preg_match(PHPUnitPatterns::$stop_parsing_pattern, $line,
+                     $sp_matches) === 1) {
+        // Get rid of the next blank line after the stopping pattern
+        // and get the next piece of data
+        fgets($pipes[1]);
+        $line = fgets($pipes[1]);
+        $line = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
+                             "", $line);
+        $just_raw_results_and_errors = true;
+      }
       $raw_results .= $line;
       if ($just_raw_results_and_errors) {
         // Don't output final test data in error file
@@ -959,12 +1013,6 @@ function run_single_test_suite(string $fw_name, string $summary_file,
             preg_match(PHPUnitPatterns::$tests_failure_pattern, $line) === 0) {
           $error_information .= $line;
         }
-      }
-      if (preg_match(PHPUnitPatterns::$stop_parsing_pattern, $line,
-                     $sp_matches) === 1) {
-        // Get rid of the next blank line after the stopping pattern
-        fgets($pipes[1]);
-        $just_raw_results_and_errors = true;
       }
       if (!$just_raw_results_and_errors &&
           preg_match($test_name_pattern, $line, $tn_matches) === 1) {
@@ -974,17 +1022,24 @@ function run_single_test_suite(string $fw_name, string $summary_file,
           $status = fgets($pipes[1]);
           $status = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
                                  "", $status);
-          $raw_results .= $status;
           if (strpos($status, 'HipHop Fatal') !== false ||
               strpos($status, "hhvm:") !== false) {
             // We have hit a fatal or some nasty assert. Escape now and try to
             // get the results written.
             $error_information .= $status;
+            $raw_results .= $status;
             break 2;
           }
         } while (!feof($pipes[1]) &&
                  preg_match(PHPUnitPatterns::$status_code_pattern,
                             $status) === 0);
+        // Could be due to a fatal in optimized mode where reasoning is not
+        // printed to console (and is only printed in debug mode)
+        if ($status === "") {
+          $status = "UNKNOWN STATUS";
+          $error_information .= $status;
+        }
+        $raw_results .= $status;
         if ($compare_tests !== null && $compare_tests->containsKey($match)) {
           if (strlen($status) > 0) {
             $status = $status[0]; // In case we had "F 252 / 364 (69 %)"
@@ -1032,9 +1087,6 @@ function run_single_test_suite(string $fw_name, string $summary_file,
           }
         }
       }
-      // Use this if we hit a fatal before we match any tests. Normally
-      // $line is "" if we fatal before then.
-      $prev_line = $line;
     }
 
     // If we have fataled before any tests were run or test statuses were found,
@@ -1052,10 +1104,6 @@ function run_single_test_suite(string $fw_name, string $summary_file,
     file_put_contents($results_file, $raw_results);
     file_put_contents($errors_file, $error_information);
     file_put_contents($diff_file, $diff_information);
-    // If the first baseline run, make both the same.
-    if (!file_exists($expect_file)) {
-      copy($results_file, $expect_file);
-    }
 
    /****************************************
     * Test complete. Create results for
@@ -1071,6 +1119,12 @@ function run_single_test_suite(string $fw_name, string $summary_file,
       $decoded_results[$fw_name] = $pct;
       file_put_contents($summary_file, json_encode($decoded_results));
     }
+
+    // If the first baseline run, make both the same.
+    if (!file_exists($expect_file)) {
+      copy($results_file, $expect_file);
+    }
+
   } else {
     $csv_only ? error()
               : error("Could not open process to run test for framework ".
@@ -1447,6 +1501,9 @@ function get_hhvm_build(bool $with_jit = true): string {
   } else {
     error("HHVM build doesn't exist. Did you build yet?");
   }
+  $repo_loc = tempnam('/tmp', 'framework-test');
+  $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
+  $build .= $repo_args;
   if ($with_jit) {
     $build .= " -v Eval.Jit=true";
   }

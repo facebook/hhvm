@@ -57,7 +57,7 @@ Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezon
 .
 Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezone with data set #2 ('2007-01-31 21:00:00', DateTimeZone, 'Australia/Canberra', 'DateTimePlus uses the specified timezone if provided.')'.
 .
-Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezone with data set #3 (2013-10-15 06:29:54 Pacific/Midway, NULL, 'Pacific/Midway', 'DateTimePlus uses the specified timezone if provided.')'.
+Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezone with data set #3 (2013-10-22 06:31:28 Pacific/Midway, NULL, 'Pacific/Midway', 'DateTimePlus uses the specified timezone if provided.')'.
 .
 Starting test 'Drupal\Tests\Component\Datetime\DateTimePlusTest::testDateTimezoneWithDateTimeObject'.
 .
@@ -265,13 +265,13 @@ Starting test 'Drupal\Tests\Component\Utility\TimerTest::testTimer'.
 .
 Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #0 (0, 0)'.
 .
-Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #1 (52, 0, true)'.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #1 (59, 0, true)'.
 .
-Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #2 (46, 0, true)'.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #2 (39, 0, true)'.
 .
 Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #3 (1, 1)'.
 .
-Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #4 (86, 1, true)'.
+Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #4 (59, 1, true)'.
 .
 Starting test 'Drupal\Tests\Component\Utility\UnicodeTest::testStatus with data set #5 (-1, -1)'.
 .
@@ -653,10 +653,6 @@ Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalize
 Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #2 ('<ScRipt sRc=http://www.example.com/>', 'script', 'HTML tag stripping evasion -- varying case.')'.
 .
 Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #3 ('<script
-src
-=
-http://www.example.com/
->', 'script', 'HTML tag stripping evasion -- multiline tag.')'.
 .
 Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #4 ('<script/a src=http://www.example.com/a.js></script>', 'script', 'HTML tag stripping evasion -- non whitespace character after tag name.')'.
 .
@@ -731,13 +727,6 @@ Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalize
 Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #39 ('<img src="jav&#x0D;ascript:alert(0)">', 'script', 'HTML scheme clearing evasion -- an encoded, embedded carriage return.', array('img'))'.
 .
 Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #40 ('<img src="
-
-
-j
-a
-va
-s
-cript:alert(0)">', 'cript', 'HTML scheme clearing evasion -- broken into many lines.', array('img'))'.
 .
 Starting test 'Drupal\Tests\Component\Utility\XssTest::testFilterXssNotNormalized with data set #41 ('<img src="jav' . "\0" . 'a' . "\0" . '' . "\0" . 'cript:alert(0)">', 'cript', 'HTML scheme clearing evasion -- embedded nulls.', array('img'))'.
 .
@@ -829,158 +818,32 @@ Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender
 Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #0 (array(array(0, true, 'external', 'all', true, 'http://example.com/popular.js', array())), array(array('html_tag', 'link', array('stylesheet', 'http://example.com/popular.js', 'all'), array())))'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #1 (array(array(0, false, 'inline', 'all', false, '.girlfriend { display: none; }', array())), array(array('html_tag', 'style', '.girlfriend { display: none; }', array('all'), array(), '
-/* <![CDATA[ */
-', '
-/* ]]> */
-')))'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #2 (array(array(0, true, 'file', 'all', true, 'public://css/file-every_page-all', array())), array(array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/file-every_page-all?0', 'all'), array())))'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #3 (array(array(0, false, 'file', 'all', true, 'public://css/1.css', array()), array(0, false, 'file', 'all', true, 'public://css/2.css', array()), array(0, false, 'file', 'all', true, 'public://css/3.css', array()), array(0, false, 'file', 'all', true, 'public://css/4.css', array()), array(0, false, 'file', 'all', true, 'public://css/5.css', array()), array(0, false, 'file', 'all', true, 'public://css/6.css', array()), array(0, false, 'file', 'all', true, 'public://css/7.css', array()), array(0, false, 'file', 'all', true, 'public://css/8.css', array()), array(0, false, 'file', 'all', true, 'public://css/9.css', array()), array(0, false, 'file', 'all', true, 'public://css/10.css', array()), array(0, false, 'file', 'all', true, 'public://css/11.css', array()), array(0, false, 'file', 'all', true, 'public://css/12.css', array()), array(0, false, 'file', 'all', true, 'public://css/13.css', array()), array(0, false, 'file', 'all', true, 'public://css/14.css', array()), array(0, false, 'file', 'all', true, 'public://css/15.css', array()), array(0, false, 'file', 'all', true, 'public://css/16.css', array()), array(0, false, 'file', 'all', true, 'public://css/17.css', array()), array(0, false, 'file', 'all', true, 'public://css/18.css', array()), array(0, false, 'file', 'all', true, 'public://css/19.css', array()), array(0, false, 'file', 'all', true, 'public://css/20.css', array()), array(0, false, 'file', 'all', true, 'public://css/21.css', array()), array(0, false, 'file', 'all', true, 'public://css/22.css', array()), array(0, false, 'file', 'all', true, 'public://css/23.css', array()), array(0, false, 'file', 'all', true, 'public://css/24.css', array()), array(0, false, 'file', 'all', true, 'public://css/25.css', array()), array(0, false, 'file', 'all', true, 'public://css/26.css', array()), array(0, false, 'file', 'all', true, 'public://css/27.css', array()), array(0, false, 'file', 'all', true, 'public://css/28.css', array()), array(0, false, 'file', 'all', true, 'public://css/29.css', array()), array(0, false, 'file', 'all', true, 'public://css/30.css', array()), array(0, false, 'file', 'all', true, 'public://css/31.css', array())), array(array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/1.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/2.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/3.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/4.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/5.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/6.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/7.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/8.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/9.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/10.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/11.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/12.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/13.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/14.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/15.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/16.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/17.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/18.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/19.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/20.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/21.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/22.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/23.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/24.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/25.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/26.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/27.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/28.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/29.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/30.css?0', 'all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/31.css?0', 'all'), array())))'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #4 (array(array(0, false, 'file', 'all', true, 'public://css/1.css', array()), array(0, false, 'file', 'all', true, 'public://css/2.css', array()), array(0, false, 'file', 'all', true, 'public://css/3.css', array()), array(0, false, 'file', 'all', true, 'public://css/4.css', array()), array(0, false, 'file', 'all', true, 'public://css/5.css', array()), array(0, false, 'file', 'all', true, 'public://css/6.css', array()), array(0, false, 'file', 'all', true, 'public://css/7.css', array()), array(0, false, 'file', 'all', true, 'public://css/8.css', array()), array(0, false, 'file', 'all', true, 'public://css/9.css', array()), array(0, false, 'file', 'all', true, 'public://css/10.css', array()), array(0, false, 'file', 'all', true, 'public://css/11.css', array()), array(0, false, 'file', 'all', true, 'public://css/12.css', array()), array(0, false, 'file', 'all', true, 'public://css/13.css', array()), array(0, false, 'file', 'all', true, 'public://css/14.css', array()), array(0, false, 'file', 'all', true, 'public://css/15.css', array()), array(0, false, 'file', 'all', true, 'public://css/16.css', array()), array(0, false, 'file', 'all', true, 'public://css/17.css', array()), array(0, false, 'file', 'all', true, 'public://css/18.css', array()), array(0, false, 'file', 'all', true, 'public://css/19.css', array()), array(0, false, 'file', 'all', true, 'public://css/20.css', array()), array(0, false, 'file', 'all', true, 'public://css/21.css', array()), array(0, false, 'file', 'all', true, 'public://css/22.css', array()), array(0, false, 'file', 'all', true, 'public://css/23.css', array()), array(0, false, 'file', 'all', true, 'public://css/24.css', array()), array(0, false, 'file', 'all', true, 'public://css/25.css', array()), array(0, false, 'file', 'all', true, 'public://css/26.css', array()), array(0, false, 'file', 'all', true, 'public://css/27.css', array()), array(0, false, 'file', 'all', true, 'public://css/28.css', array()), array(0, false, 'file', 'all', true, 'public://css/29.css', array()), array(0, false, 'file', 'all', true, 'public://css/30.css', array()), array(0, false, 'file', 'all', true, 'public://css/31.css', array()), array(0, false, 'file', 'all', true, 'public://css/32.css', array())), array(array('html_tag', 'style', '
-@import url("file_create_url:public://css/1.css?0");
-@import url("file_create_url:public://css/2.css?0");
-@import url("file_create_url:public://css/3.css?0");
-@import url("file_create_url:public://css/4.css?0");
-@import url("file_create_url:public://css/5.css?0");
-@import url("file_create_url:public://css/6.css?0");
-@import url("file_create_url:public://css/7.css?0");
-@import url("file_create_url:public://css/8.css?0");
-@import url("file_create_url:public://css/9.css?0");
-@import url("file_create_url:public://css/10.css?0");
-@import url("file_create_url:public://css/11.css?0");
-@import url("file_create_url:public://css/12.css?0");
-@import url("file_create_url:public://css/13.css?0");
-@import url("file_create_url:public://css/14.css?0");
-@import url("file_create_url:public://css/15.css?0");
-@import url("file_create_url:public://css/16.css?0");
-@import url("file_create_url:public://css/17.css?0");
-@import url("file_create_url:public://css/18.css?0");
-@import url("file_create_url:public://css/19.css?0");
-@import url("file_create_url:public://css/20.css?0");
-@import url("file_create_url:public://css/21.css?0");
-@import url("file_create_url:public://css/22.css?0");
-@import url("file_create_url:public://css/23.css?0");
-@import url("file_create_url:public://css/24.css?0");
-@import url("file_create_url:public://css/25.css?0");
-@import url("file_create_url:public://css/26.css?0");
-@import url("file_create_url:public://css/27.css?0");
-@import url("file_create_url:public://css/28.css?0");
-@import url("file_create_url:public://css/29.css?0");
-@import url("file_create_url:public://css/30.css?0");
-@import url("file_create_url:public://css/31.css?0");
-', array('all'), array()), array('html_tag', 'style', '
-@import url("file_create_url:public://css/32.css?0");
-', array('all'), array())))'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #5 (array(array(0, false, 'file', 'all', true, 'public://css/1.css', array()), array(0, false, 'file', 'all', true, 'public://css/2.css', array()), array(0, false, 'file', 'all', true, 'public://css/3.css', array()), array(0, false, 'file', 'all', true, 'public://css/4.css', array()), array(0, false, 'file', 'all', true, 'public://css/5.css', array()), array(0, false, 'file', 'all', true, 'public://css/6.css', array()), array(0, false, 'file', 'all', true, 'public://css/7.css', array()), array(0, false, 'file', 'all', true, 'public://css/8.css', array()), array(0, false, 'file', 'all', true, 'public://css/9.css', array()), array(0, false, 'file', 'screen', true, 'public://css/10.css', array()), array(0, false, 'file', 'all', true, 'public://css/11.css', array()), array(0, false, 'file', 'all', true, 'public://css/12.css', array()), array(0, false, 'file', 'all', true, 'public://css/13.css', array()), array(0, false, 'file', 'all', true, 'public://css/14.css', array()), array(0, false, 'file', 'all', true, 'public://css/15.css', array()), array(0, false, 'file', 'all', true, 'public://css/16.css', array()), array(0, false, 'file', 'all', true, 'public://css/17.css', array()), array(0, false, 'file', 'all', true, 'public://css/18.css', array()), array(0, false, 'file', 'all', true, 'public://css/19.css', array()), array(0, false, 'file', 'print', true, 'public://css/20.css', array()), array(0, false, 'file', 'all', true, 'public://css/21.css', array()), array(0, false, 'file', 'all', true, 'public://css/22.css', array()), array(0, false, 'file', 'all', true, 'public://css/23.css', array()), array(0, false, 'file', 'all', true, 'public://css/24.css', array()), array(0, false, 'file', 'all', true, 'public://css/25.css', array()), array(0, false, 'file', 'all', true, 'public://css/26.css', array()), array(0, false, 'file', 'all', true, 'public://css/27.css', array()), array(0, false, 'file', 'all', true, 'public://css/28.css', array()), array(0, false, 'file', 'all', true, 'public://css/29.css', array()), array(0, false, 'file', 'all', true, 'public://css/30.css', array()), array(0, false, 'file', 'all', true, 'public://css/31.css', array()), array(0, false, 'file', 'all', true, 'public://css/32.css', array())), array(array('html_tag', 'style', '
-@import url("file_create_url:public://css/1.css?0");
-@import url("file_create_url:public://css/2.css?0");
-@import url("file_create_url:public://css/3.css?0");
-@import url("file_create_url:public://css/4.css?0");
-@import url("file_create_url:public://css/5.css?0");
-@import url("file_create_url:public://css/6.css?0");
-@import url("file_create_url:public://css/7.css?0");
-@import url("file_create_url:public://css/8.css?0");
-@import url("file_create_url:public://css/9.css?0");
-', array('all'), array()), array('html_tag', 'style', '
-@import url("file_create_url:public://css/10.css?0");
-', array('screen'), array()), array('html_tag', 'style', '
-@import url("file_create_url:public://css/11.css?0");
-@import url("file_create_url:public://css/12.css?0");
-@import url("file_create_url:public://css/13.css?0");
-@import url("file_create_url:public://css/14.css?0");
-@import url("file_create_url:public://css/15.css?0");
-@import url("file_create_url:public://css/16.css?0");
-@import url("file_create_url:public://css/17.css?0");
-@import url("file_create_url:public://css/18.css?0");
-@import url("file_create_url:public://css/19.css?0");
-', array('all'), array()), array('html_tag', 'style', '
-@import url("file_create_url:public://css/20.css?0");
-', array('print'), array()), array('html_tag', 'style', '
-@import url("file_create_url:public://css/21.css?0");
-@import url("file_create_url:public://css/22.css?0");
-@import url("file_create_url:public://css/23.css?0");
-@import url("file_create_url:public://css/24.css?0");
-@import url("file_create_url:public://css/25.css?0");
-@import url("file_create_url:public://css/26.css?0");
-@import url("file_create_url:public://css/27.css?0");
-@import url("file_create_url:public://css/28.css?0");
-@import url("file_create_url:public://css/29.css?0");
-@import url("file_create_url:public://css/30.css?0");
-@import url("file_create_url:public://css/31.css?0");
-@import url("file_create_url:public://css/32.css?0");
-', array('all'), array())))'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRender with data set #6 (array(array(0, false, 'file', 'all', true, 'public://css/1.css', array()), array(0, false, 'file', 'all', true, 'public://css/2.css', array()), array(0, false, 'file', 'all', true, 'public://css/3.css', array()), array(0, false, 'file', 'all', true, 'public://css/4.css', array()), array(0, false, 'file', 'all', true, 'public://css/5.css', array()), array(0, false, 'file', 'all', true, 'public://css/6.css', array()), array(0, false, 'file', 'all', true, 'public://css/7.css', array()), array(0, false, 'file', 'all', true, 'public://css/8.css', array()), array(0, false, 'file', 'all', true, 'public://css/9.css', array()), array(0, false, 'file', 'all', true, 'public://css/10.css', array()), array(0, false, 'file', 'all', true, 'public://css/11.css', array()), array(0, false, 'file', 'all', true, 'public://css/12.css', array()), array(0, false, 'file', 'all', true, 'public://css/13.css', array()), array(0, false, 'file', 'all', true, 'public://css/14.css', array()), array(0, false, 'file', 'all', false, 'public://css/15.css', array()), array(0, false, 'file', 'all', true, 'public://css/16.css', array()), array(0, false, 'file', 'all', true, 'public://css/17.css', array()), array(0, false, 'file', 'all', true, 'public://css/18.css', array()), array(0, false, 'file', 'all', true, 'public://css/19.css', array()), array(0, false, 'file', 'all', true, 'public://css/20.css', array()), array(0, false, 'file', 'all', true, 'public://css/21.css', array()), array(0, false, 'file', 'all', true, 'public://css/22.css', array()), array(0, false, 'file', 'all', true, 'public://css/23.css', array()), array(0, false, 'file', 'all', true, 'public://css/24.css', array()), array(0, false, 'file', 'all', true, 'public://css/25.css', array()), array(0, false, 'file', 'all', true, 'public://css/26.css', array()), array(0, false, 'file', 'all', true, 'public://css/27.css', array()), array(0, false, 'file', 'all', true, 'public://css/28.css', array()), array(0, false, 'file', 'all', true, 'public://css/29.css', array()), array(0, false, 'file', 'all', true, 'public://css/30.css', array()), array(0, false, 'file', 'all', true, 'public://css/31.css', array()), array(0, false, 'file', 'all', true, 'public://css/32.css', array())), array(array('html_tag', 'style', '
-@import url("file_create_url:public://css/1.css?0");
-@import url("file_create_url:public://css/2.css?0");
-@import url("file_create_url:public://css/3.css?0");
-@import url("file_create_url:public://css/4.css?0");
-@import url("file_create_url:public://css/5.css?0");
-@import url("file_create_url:public://css/6.css?0");
-@import url("file_create_url:public://css/7.css?0");
-@import url("file_create_url:public://css/8.css?0");
-@import url("file_create_url:public://css/9.css?0");
-@import url("file_create_url:public://css/10.css?0");
-@import url("file_create_url:public://css/11.css?0");
-@import url("file_create_url:public://css/12.css?0");
-@import url("file_create_url:public://css/13.css?0");
-@import url("file_create_url:public://css/14.css?0");
-', array('all'), array()), array('html_tag', 'link', array('stylesheet', 'file_create_url:public://css/15.css?0', 'all'), array()), array('html_tag', 'style', '
-@import url("file_create_url:public://css/16.css?0");
-@import url("file_create_url:public://css/17.css?0");
-@import url("file_create_url:public://css/18.css?0");
-@import url("file_create_url:public://css/19.css?0");
-@import url("file_create_url:public://css/20.css?0");
-@import url("file_create_url:public://css/21.css?0");
-@import url("file_create_url:public://css/22.css?0");
-@import url("file_create_url:public://css/23.css?0");
-@import url("file_create_url:public://css/24.css?0");
-@import url("file_create_url:public://css/25.css?0");
-@import url("file_create_url:public://css/26.css?0");
-@import url("file_create_url:public://css/27.css?0");
-@import url("file_create_url:public://css/28.css?0");
-@import url("file_create_url:public://css/29.css?0");
-@import url("file_create_url:public://css/30.css?0");
-@import url("file_create_url:public://css/31.css?0");
-@import url("file_create_url:public://css/32.css?0");
-', array('all'), array())))'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssCollectionRendererUnitTest::testRenderInvalidType'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimizeProvider'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #0 (array(-100, true, 'file', 0.012, 'all', true, '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Asset/css_test_files/css_input_without_import.css', array(true, true), 'css_input_without_import.css'), 'body{margin:0;padding:0;background:#edf5fa;font:76%/170% Verdana,sans-serif;color:#494949;}.this .is .a .test{font:1em/100% Verdana,sans-serif;color:#494949;}.this
-.is
-.a
-.test{font:1em/100% Verdana,sans-serif;color:#494949;}some :pseudo .thing{border-radius:3px;}::-moz-selection{background:#000;color:#fff;}::selection{background:#000;color:#fff;}@media print{*{background:#000 !important;color:#fff !important;}@page{margin:0.5cm;}}@media screen and (max-device-width:480px){background:#000;color:#fff;}textarea,select{font:1em/160% Verdana,sans-serif;color:#494949;}
-')'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #1 (array(-100, true, 'file', 0.013, 'all', true, '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Asset/css_test_files/css_input_with_import.css', array(true, true), 'css_input_with_import.css'), 'ul,select{font:1em/160% Verdana,sans-serif;color:#494949;}.ui-icon{background-image:url(file_create_url:/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Asset/css_test_files/images/icon.png);}
-p,select{font:1em/160% Verdana,sans-serif;color:#494949;}
-@import url("http://example.com/style.css");@import url("//example.com/style.css");body{margin:0;padding:0;background:#edf5fa;font:76%/170% Verdana,sans-serif;color:#494949;}.this .is .a .test{font:1em/100% Verdana,sans-serif;color:#494949;}.this
-.is
-.a
-.test{font:1em/100% Verdana,sans-serif;color:#494949;}textarea,select{font:1em/160% Verdana,sans-serif;color:#494949;}
-')'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #2 (array(-100, true, 'file', 0.013, 'all', true, '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Asset/css_test_files/comment_hacks.css', array(true, true), 'comment_hacks.css'), '.test1{display:block;}html .clear-block{height:1%;}.clear-block{display:block;font:italic bold 12px/30px Georgia,serif;}.test2{display:block;}.bkslshv1{background-color:#c00;}.test3{display:block;}.test4{display:block;}.comment-in-double-quotes:before{content:"/* ";}.this_rule_must_stay{color:#f00;background-color:#fff;}.comment-in-double-quotes:after{content:" */";}.comment-in-single-quotes:before{content:\'/*\';}.this_rule_must_stay{color:#f00;background-color:#fff;}.comment-in-single-quotes:after{content:\'*/\';}.comment-in-mixed-quotes:before{content:\'"/*"\';}.this_rule_must_stay{color:#f00;background-color:#fff;}.comment-in-mixed-quotes:after{content:"\'*/\'";}.comment-in-quotes-with-escaped:before{content:\'/* \\" \\\' */\';}.this_rule_must_stay{color:#f00;background-color:#fff;}.comment-in-quotes-with-escaped:after{content:"*/ \\" \\ \'";}
-')'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #3 (array(0, false, 'inline', 0.012, 'all', true, '.girlfriend { display: none; }', array(true, true)), '.girlfriend{display:none;}
-')'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #4 (array(0, false, 'inline', 0.013, 'all', false, '#home body { position: fixed; }', array(true, true)), '#home body { position: fixed; }')'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #5 (array(-100, true, 'file', 0.013, 'all', true, '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Asset/css_test_files/css_subfolder/css_input_with_import.css', array(true, true), 'css_input_with_import.css'), 'ul,select{font:1em/160% Verdana,sans-serif;color:#494949;}.ui-icon{background-image:url(file_create_url:/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/tests/Drupal/Tests/Core/Asset/css_test_files/images/icon.png);}
-p,select{font:1em/160% Verdana,sans-serif;color:#494949;}
-body{margin:0;padding:0;background:#edf5fa;font:76%/170% Verdana,sans-serif;color:#494949;}.this .is .a .test{font:1em/100% Verdana,sans-serif;color:#494949;}.this
-.is
-.a
-.test{font:1em/100% Verdana,sans-serif;color:#494949;}textarea,select{font:1em/160% Verdana,sans-serif;color:#494949;}
-')'.
 .
 Starting test 'Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimizeRemoveCharset'.
 .
@@ -1523,7 +1386,7 @@ F
 Starting test 'Drupal\Tests\Core\Utility\LinkGeneratorTest::testGenerateActive'.
 .
 
-Time: 01:04, Memory: 36.91Mb
+Time: 46 seconds, Memory: 50.72Mb
 
 There were 7 failures:
 

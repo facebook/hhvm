@@ -1,4 +1,4 @@
-PHPUnit 3.7.27 by Sebastian Bergmann.
+PHPUnit 3.7.28 by Sebastian Bergmann.
 
 Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/paris/phpunit.xml
 
@@ -110,5 +110,4 @@ Starting test 'Psr1Test53::testHasManyThroughRelation'.
 Starting test 'Psr1Test53::testHasManyThroughRelationWithCustomIntermediateModelAndKeyNames'.
 .
 
-Time: 9.4 seconds, Memory: 3.95Mb
 OK (53 tests, 61 assertions)

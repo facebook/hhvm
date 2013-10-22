@@ -1,4 +1,4 @@
-PHPUnit 3.7.27 by Sebastian Bergmann.
+PHPUnit 3.7.28 by Sebastian Bergmann.
 
 Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/phpunit.xml.dist
 
@@ -1357,134 +1357,40 @@ Starting test 'Symfony\Bridge\Twig\Tests\Node\SearchAndRenderBlockNodeTest::test
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\ScopeTest::testScopeInitiation'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationDefaultDomainNodeVisitorTest::testDefaultDomainAssignment with data set #0 (Twig_Node_Expression_Filter(
-  node: Twig_Node_Expression_Constant(value: 'message')
-  filter: Twig_Node_Expression_Constant(value: 'trans')
-  arguments: Twig_Node()
-))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationDefaultDomainNodeVisitorTest::testDefaultDomainAssignment with data set #1 (Twig_Node_Expression_Filter(
-  node: Twig_Node_Expression_Constant(value: 'message')
-  filter: Twig_Node_Expression_Constant(value: 'transchoice')
-  arguments: Twig_Node()
-))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationDefaultDomainNodeVisitorTest::testDefaultDomainAssignment with data set #2 (Symfony\Bridge\Twig\Node\TransNode(
-  count: 
-  body: Twig_Node_Body(data: 'message')
-  domain: 
-  vars: 
-  locale: 
-))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationDefaultDomainNodeVisitorTest::testNewModuleWithoutDefaultDomainTag with data set #0 (Twig_Node_Expression_Filter(
-  node: Twig_Node_Expression_Constant(value: 'message')
-  filter: Twig_Node_Expression_Constant(value: 'trans')
-  arguments: Twig_Node()
-))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationDefaultDomainNodeVisitorTest::testNewModuleWithoutDefaultDomainTag with data set #1 (Twig_Node_Expression_Filter(
-  node: Twig_Node_Expression_Constant(value: 'message')
-  filter: Twig_Node_Expression_Constant(value: 'transchoice')
-  arguments: Twig_Node()
-))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationDefaultDomainNodeVisitorTest::testNewModuleWithoutDefaultDomainTag with data set #2 (Symfony\Bridge\Twig\Node\TransNode(
-  count: 
-  body: Twig_Node_Body(data: 'message')
-  domain: 
-  vars: 
-  locale: 
-))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationNodeVisitorTest::testMessagesExtraction with data set #0 (Twig_Node_Expression_Filter(
-  node: Twig_Node_Expression_Constant(value: 'new key')
-  filter: Twig_Node_Expression_Constant(value: 'trans')
-  arguments: Twig_Node()
-), array(array('new key', NULL)))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationNodeVisitorTest::testMessagesExtraction with data set #1 (Twig_Node_Expression_Filter(
-  node: Twig_Node_Expression_Constant(value: 'new key')
-  filter: Twig_Node_Expression_Constant(value: 'transchoice')
-  arguments: Twig_Node()
-), array(array('new key', NULL)))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationNodeVisitorTest::testMessagesExtraction with data set #2 (Symfony\Bridge\Twig\Node\TransNode(
-  count: 
-  body: Twig_Node_Body(data: 'new key')
-  domain: 
-  vars: 
-  locale: 
-), array(array('new key', NULL)))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationNodeVisitorTest::testMessagesExtraction with data set #3 (Twig_Node_Expression_Filter(
-  node: Twig_Node_Expression_Constant(value: 'new key')
-  filter: Twig_Node_Expression_Constant(value: 'trans')
-  arguments: Twig_Node(
-               0: Twig_Node_Expression_Array()
-               1: Twig_Node_Expression_Constant(value: 'domain')
-             )
-), array(array('new key', 'domain')))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationNodeVisitorTest::testMessagesExtraction with data set #4 (Twig_Node_Expression_Filter(
-  node: Twig_Node_Expression_Constant(value: 'new key')
-  filter: Twig_Node_Expression_Constant(value: 'transchoice')
-  arguments: Twig_Node(
-               0: Twig_Node_Expression_Constant(value: 0)
-               1: Twig_Node_Expression_Array()
-               2: Twig_Node_Expression_Constant(value: 'domain')
-             )
-), array(array('new key', 'domain')))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationNodeVisitorTest::testMessagesExtraction with data set #5 (Symfony\Bridge\Twig\Node\TransNode(
-  count: 
-  body: Twig_Node_Body(data: 'new key')
-  domain: Twig_Node_Expression_Constant(value: 'domain')
-  vars: 
-  locale: 
-), array(array('new key', 'domain')))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\NodeVisitor\TranslationNodeVisitorTest::testMessageExtractionWithInvalidDomainNode'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\Node\FormThemeTokenParserTest::testCompile with data set #0 ('{% form_theme form "tpl1" %}', Symfony\Bridge\Twig\Node\FormThemeNode(
-  form: Twig_Node_Expression_Name(name: 'form', is_defined_test: false, ignore_strict_check: false, always_defined: false)
-  resources: Twig_Node_Expression_Array(
-               0: Twig_Node_Expression_Constant(value: 0)
-               1: Twig_Node_Expression_Constant(value: 'tpl1')
-             )
-))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\Node\FormThemeTokenParserTest::testCompile with data set #1 ('{% form_theme form "tpl1" "tpl2" %}', Symfony\Bridge\Twig\Node\FormThemeNode(
-  form: Twig_Node_Expression_Name(name: 'form', is_defined_test: false, ignore_strict_check: false, always_defined: false)
-  resources: Twig_Node_Expression_Array(
-               0: Twig_Node_Expression_Constant(value: 0)
-               1: Twig_Node_Expression_Constant(value: 'tpl1')
-               2: Twig_Node_Expression_Constant(value: 1)
-               3: Twig_Node_Expression_Constant(value: 'tpl2')
-             )
-))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\Node\FormThemeTokenParserTest::testCompile with data set #2 ('{% form_theme form with "tpl1" %}', Symfony\Bridge\Twig\Node\FormThemeNode(
-  form: Twig_Node_Expression_Name(name: 'form', is_defined_test: false, ignore_strict_check: false, always_defined: false)
-  resources: Twig_Node_Expression_Constant(value: 'tpl1')
-))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\Node\FormThemeTokenParserTest::testCompile with data set #3 ('{% form_theme form with ["tpl1"] %}', Symfony\Bridge\Twig\Node\FormThemeNode(
-  form: Twig_Node_Expression_Name(name: 'form', is_defined_test: false, ignore_strict_check: false, always_defined: false)
-  resources: Twig_Node_Expression_Array(
-               0: Twig_Node_Expression_Constant(value: 0)
-               1: Twig_Node_Expression_Constant(value: 'tpl1')
-             )
-))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\Node\FormThemeTokenParserTest::testCompile with data set #4 ('{% form_theme form with ["tpl1", "tpl2"] %}', Symfony\Bridge\Twig\Node\FormThemeNode(
-  form: Twig_Node_Expression_Name(name: 'form', is_defined_test: false, ignore_strict_check: false, always_defined: false)
-  resources: Twig_Node_Expression_Array(
-               0: Twig_Node_Expression_Constant(value: 0)
-               1: Twig_Node_Expression_Constant(value: 'tpl1')
-               2: Twig_Node_Expression_Constant(value: 1)
-               3: Twig_Node_Expression_Constant(value: 'tpl2')
-             )
-))'.
 .
 Starting test 'Symfony\Bridge\Twig\Tests\Translation\TwigExtractorTest::testExtract with data set #0 ('{{ "new key" | trans() }}', array('messages'))'.
 .
@@ -1554,13 +1460,13 @@ Starting test 'Symfony\Component\BrowserKit\Tests\ClientTest::testRequestCookies
 Starting test 'Symfony\Component\BrowserKit\Tests\ClientTest::testRequestSecureCookies'.
 .
 Starting test 'Symfony\Component\BrowserKit\Tests\ClientTest::testClick'.
-.
+E
 Starting test 'Symfony\Component\BrowserKit\Tests\ClientTest::testClickForm'.
-.
+E
 Starting test 'Symfony\Component\BrowserKit\Tests\ClientTest::testSubmit'.
-.
+E
 Starting test 'Symfony\Component\BrowserKit\Tests\ClientTest::testSubmitPreserveAuth'.
-.
+E
 Starting test 'Symfony\Component\BrowserKit\Tests\ClientTest::testFollowRedirect'.
 .
 Starting test 'Symfony\Component\BrowserKit\Tests\ClientTest::testFollowRedirectWithMaxRedirects'.
@@ -1770,102 +1676,28 @@ Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::te
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testClassWithTraitsReordering with data set #1 (array('ClassesWithParents\\E'))'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testFixNamespaceDeclarations with data set #0 ('namespace;
-class Foo {}
-', 'namespace
-{
-class Foo {}
-}')'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testFixNamespaceDeclarations with data set #1 ('namespace Foo;
-class Foo {}
-', 'namespace Foo
-{
-class Foo {}
-}')'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testFixNamespaceDeclarations with data set #2 ('namespace   Bar ;
-class Foo {}
-', 'namespace Bar
-{
-class Foo {}
-}')'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testFixNamespaceDeclarations with data set #3 ('namespace Foo\\Bar;
-class Foo {}
-', 'namespace Foo\\Bar
-{
-class Foo {}
-}')'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testFixNamespaceDeclarations with data set #4 ('namespace Foo\\Bar\\Bar
-{
-class Foo {}
-}
-', 'namespace Foo\\Bar\\Bar
-{
-class Foo {}
-}')'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testFixNamespaceDeclarations with data set #5 ('namespace
-{
-class Foo {}
-}
-', 'namespace
-{
-class Foo {}
-}')'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testFixNamespaceDeclarationsWithoutTokenizer with data set #0 ('namespace;
-class Foo {}
-', 'namespace
-{
-class Foo {}
-}
-')'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testFixNamespaceDeclarationsWithoutTokenizer with data set #1 ('namespace Foo;
-class Foo {}
-', 'namespace Foo
-{
-class Foo {}
-}
-')'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testFixNamespaceDeclarationsWithoutTokenizer with data set #2 ('namespace   Bar ;
-class Foo {}
-', 'namespace   Bar
-{
-class Foo {}
-}
-')'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testFixNamespaceDeclarationsWithoutTokenizer with data set #3 ('namespace Foo\\Bar;
-class Foo {}
-', 'namespace Foo\\Bar
-{
-class Foo {}
-}
-')'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testFixNamespaceDeclarationsWithoutTokenizer with data set #4 ('namespace Foo\\Bar\\Bar
-{
-class Foo {}
-}
-', 'namespace Foo\\Bar\\Bar
-{
-class Foo {}
-}
-')'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testFixNamespaceDeclarationsWithoutTokenizer with data set #5 ('namespace
-{
-class Foo {}
-}
-', 'namespace
-{
-class Foo {}
-}
-')'.
 .
 Starting test 'Symfony\Component\ClassLoader\Tests\ClassCollectionLoaderTest::testUnableToLoadClassException'.
 .
@@ -2620,1335 +2452,125 @@ Starting test 'Symfony\Component\Console\Tests\Command\ListCommandTest::testExec
 Starting test 'Symfony\Component\Console\Tests\Command\ListCommandTest::testExecuteListsCommandsWithNamespaceArgument'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeInputArgument with data set #0 (Symfony\Component\Console\Input\InputArgument, '{"name":"argument_name","is_required":true,"is_array":false,"description":"","default":null}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeInputArgument with data set #1 (Symfony\Component\Console\Input\InputArgument, '{"name":"argument_name","is_required":false,"is_array":true,"description":"argument description","default":[]}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeInputArgument with data set #2 (Symfony\Component\Console\Input\InputArgument, '{"name":"argument_name","is_required":false,"is_array":false,"description":"argument description","default":"default_value"}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeInputOption with data set #0 (Symfony\Component\Console\Input\InputOption, '{"name":"--option_name","shortcut":"-o","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"","default":false}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeInputOption with data set #1 (Symfony\Component\Console\Input\InputOption, '{"name":"--option_name","shortcut":"-o","accept_value":true,"is_value_required":false,"is_multiple":false,"description":"option description","default":"default_value"}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeInputOption with data set #2 (Symfony\Component\Console\Input\InputOption, '{"name":"--option_name","shortcut":"-o","accept_value":true,"is_value_required":true,"is_multiple":false,"description":"option description","default":null}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeInputOption with data set #3 (Symfony\Component\Console\Input\InputOption, '{"name":"--option_name","shortcut":"-o","accept_value":true,"is_value_required":false,"is_multiple":true,"description":"option description","default":[]}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeInputDefinition with data set #0 (Symfony\Component\Console\Input\InputDefinition, '{"arguments":[],"options":[]}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeInputDefinition with data set #1 (Symfony\Component\Console\Input\InputDefinition, '{"arguments":{"argument_name":{"name":"argument_name","is_required":true,"is_array":false,"description":"","default":null}},"options":[]}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeInputDefinition with data set #2 (Symfony\Component\Console\Input\InputDefinition, '{"arguments":[],"options":{"option_name":{"name":"--option_name","shortcut":"-o","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"","default":false}}}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeInputDefinition with data set #3 (Symfony\Component\Console\Input\InputDefinition, '{"arguments":{"argument_name":{"name":"argument_name","is_required":true,"is_array":false,"description":"","default":null}},"options":{"option_name":{"name":"--option_name","shortcut":"-o","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"","default":false}}}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeCommand with data set #0 (Symfony\Component\Console\Tests\Fixtures\DescriptorCommand1, '{"name":"descriptor:command1","usage":"descriptor:command1","description":"command 1 description","help":"command 1 help","aliases":["alias1","alias2"],"definition":{"arguments":[],"options":[]}}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeCommand with data set #1 (Symfony\Component\Console\Tests\Fixtures\DescriptorCommand2, '{"name":"descriptor:command2","usage":"descriptor:command2 [-o|--option_name] argument_name","description":"command 2 description","help":"command 2 help","aliases":[],"definition":{"arguments":{"argument_name":{"name":"argument_name","is_required":true,"is_array":false,"description":"","default":null}},"options":{"option_name":{"name":"--option_name","shortcut":"-o","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"","default":false}}}}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeApplication with data set #0 (Symfony\Component\Console\Tests\Fixtures\DescriptorApplication1, '{"commands":[{"name":"help","usage":"help [--xml] [--format=\\"...\\"] [--raw] [command_name]","description":"Displays help for a command","help":"The <info>help<\\/info> command displays help for a given command:\\n\\n  <info>php app\\/console help list<\\/info>\\n\\nYou can also output the help in other formats by using the <comment>--format<\\/comment> option:\\n\\n  <info>php app\\/console help --format=xml list<\\/info>\\n\\nTo display the list of available commands, please use the <info>list<\\/info> command.","aliases":[],"definition":{"arguments":{"command_name":{"name":"command_name","is_required":false,"is_array":false,"description":"The command name","default":"help"}},"options":{"xml":{"name":"--xml","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"To output help as XML","default":false},"format":{"name":"--format","shortcut":"","accept_value":true,"is_value_required":true,"is_multiple":false,"description":"To output help in other formats","default":"txt"},"raw":{"name":"--raw","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"To output raw command help","default":false},"help":{"name":"--help","shortcut":"-h","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Display this help message.","default":false},"quiet":{"name":"--quiet","shortcut":"-q","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Do not output any message.","default":false},"verbose":{"name":"--verbose","shortcut":"-v|-vv|-vvv","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug","default":false},"version":{"name":"--version","shortcut":"-V","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Display this application version.","default":false},"ansi":{"name":"--ansi","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Force ANSI output.","default":false},"no-ansi":{"name":"--no-ansi","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Disable ANSI output.","default":false},"no-interaction":{"name":"--no-interaction","shortcut":"-n","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Do not ask any interactive question.","default":false}}}},{"name":"list","usage":"list [--xml] [--raw] [--format=\\"...\\"] [namespace]","description":"Lists commands","help":"The <info>list<\\/info> command lists all commands:\\n\\n  <info>php app\\/console list<\\/info>\\n\\nYou can also display the commands for a specific namespace:\\n\\n  <info>php app\\/console list test<\\/info>\\n\\nYou can also output the information in other formats by using the <comment>--format<\\/comment> option:\\n\\n  <info>php app\\/console list --format=xml<\\/info>\\n\\nIt\'s also possible to get raw list of commands (useful for embedding command runner):\\n\\n  <info>php app\\/console list --raw<\\/info>","aliases":[],"definition":{"arguments":{"namespace":{"name":"namespace","is_required":false,"is_array":false,"description":"The namespace name","default":null}},"options":{"xml":{"name":"--xml","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"To output list as XML","default":false},"raw":{"name":"--raw","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"To output raw command list","default":false},"format":{"name":"--format","shortcut":"","accept_value":true,"is_value_required":true,"is_multiple":false,"description":"To output list in other formats","default":"txt"}}}}],"namespaces":[{"id":"_global","commands":["help","list"]}]}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\JsonDescriptorTest::testDescribeApplication with data set #1 (Symfony\Component\Console\Tests\Fixtures\DescriptorApplication2, '{"commands":[{"name":"help","usage":"help [--xml] [--format=\\"...\\"] [--raw] [command_name]","description":"Displays help for a command","help":"The <info>help<\\/info> command displays help for a given command:\\n\\n  <info>php app\\/console help list<\\/info>\\n\\nYou can also output the help in other formats by using the <comment>--format<\\/comment> option:\\n\\n  <info>php app\\/console help --format=xml list<\\/info>\\n\\nTo display the list of available commands, please use the <info>list<\\/info> command.","aliases":[],"definition":{"arguments":{"command_name":{"name":"command_name","is_required":false,"is_array":false,"description":"The command name","default":"help"}},"options":{"xml":{"name":"--xml","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"To output help as XML","default":false},"format":{"name":"--format","shortcut":"","accept_value":true,"is_value_required":true,"is_multiple":false,"description":"To output help in other formats","default":"txt"},"raw":{"name":"--raw","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"To output raw command help","default":false},"help":{"name":"--help","shortcut":"-h","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Display this help message.","default":false},"quiet":{"name":"--quiet","shortcut":"-q","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Do not output any message.","default":false},"verbose":{"name":"--verbose","shortcut":"-v|-vv|-vvv","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug","default":false},"version":{"name":"--version","shortcut":"-V","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Display this application version.","default":false},"ansi":{"name":"--ansi","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Force ANSI output.","default":false},"no-ansi":{"name":"--no-ansi","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Disable ANSI output.","default":false},"no-interaction":{"name":"--no-interaction","shortcut":"-n","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Do not ask any interactive question.","default":false}}}},{"name":"list","usage":"list [--xml] [--raw] [--format=\\"...\\"] [namespace]","description":"Lists commands","help":"The <info>list<\\/info> command lists all commands:\\n\\n  <info>php app\\/console list<\\/info>\\n\\nYou can also display the commands for a specific namespace:\\n\\n  <info>php app\\/console list test<\\/info>\\n\\nYou can also output the information in other formats by using the <comment>--format<\\/comment> option:\\n\\n  <info>php app\\/console list --format=xml<\\/info>\\n\\nIt\'s also possible to get raw list of commands (useful for embedding command runner):\\n\\n  <info>php app\\/console list --raw<\\/info>","aliases":[],"definition":{"arguments":{"namespace":{"name":"namespace","is_required":false,"is_array":false,"description":"The namespace name","default":null}},"options":{"xml":{"name":"--xml","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"To output list as XML","default":false},"raw":{"name":"--raw","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"To output raw command list","default":false},"format":{"name":"--format","shortcut":"","accept_value":true,"is_value_required":true,"is_multiple":false,"description":"To output list in other formats","default":"txt"}}}},{"name":"descriptor:command1","usage":"descriptor:command1","description":"command 1 description","help":"command 1 help","aliases":["alias1","alias2"],"definition":{"arguments":[],"options":{"help":{"name":"--help","shortcut":"-h","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Display this help message.","default":false},"quiet":{"name":"--quiet","shortcut":"-q","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Do not output any message.","default":false},"verbose":{"name":"--verbose","shortcut":"-v|-vv|-vvv","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug","default":false},"version":{"name":"--version","shortcut":"-V","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Display this application version.","default":false},"ansi":{"name":"--ansi","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Force ANSI output.","default":false},"no-ansi":{"name":"--no-ansi","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Disable ANSI output.","default":false},"no-interaction":{"name":"--no-interaction","shortcut":"-n","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Do not ask any interactive question.","default":false}}}},{"name":"descriptor:command2","usage":"descriptor:command2 [-o|--option_name] argument_name","description":"command 2 description","help":"command 2 help","aliases":[],"definition":{"arguments":{"argument_name":{"name":"argument_name","is_required":true,"is_array":false,"description":"","default":null}},"options":{"option_name":{"name":"--option_name","shortcut":"-o","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"","default":false},"help":{"name":"--help","shortcut":"-h","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Display this help message.","default":false},"quiet":{"name":"--quiet","shortcut":"-q","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Do not output any message.","default":false},"verbose":{"name":"--verbose","shortcut":"-v|-vv|-vvv","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug","default":false},"version":{"name":"--version","shortcut":"-V","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Display this application version.","default":false},"ansi":{"name":"--ansi","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Force ANSI output.","default":false},"no-ansi":{"name":"--no-ansi","shortcut":"","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Disable ANSI output.","default":false},"no-interaction":{"name":"--no-interaction","shortcut":"-n","accept_value":false,"is_value_required":false,"is_multiple":false,"description":"Do not ask any interactive question.","default":false}}}}],"namespaces":[{"id":"_global","commands":["alias1","alias2","help","list"]},{"id":"descriptor","commands":["descriptor:command1","descriptor:command2"]}]}
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeInputArgument with data set #0 (Symfony\Component\Console\Input\InputArgument, '**argument_name:**
-
-* Name: argument_name
-* Is required: yes
-* Is array: no
-* Description: <none>
-* Default: `NULL`
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeInputArgument with data set #1 (Symfony\Component\Console\Input\InputArgument, '**argument_name:**
-
-* Name: argument_name
-* Is required: no
-* Is array: yes
-* Description: argument description
-* Default: `array ()`
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeInputArgument with data set #2 (Symfony\Component\Console\Input\InputArgument, '**argument_name:**
-
-* Name: argument_name
-* Is required: no
-* Is array: no
-* Description: argument description
-* Default: `\'default_value\'`
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeInputOption with data set #0 (Symfony\Component\Console\Input\InputOption, '**option_name:**
-
-* Name: `--option_name`
-* Shortcut: `-o`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: <none>
-* Default: `false`
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeInputOption with data set #1 (Symfony\Component\Console\Input\InputOption, '**option_name:**
-
-* Name: `--option_name`
-* Shortcut: `-o`
-* Accept value: yes
-* Is value required: no
-* Is multiple: no
-* Description: option description
-* Default: `\'default_value\'`
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeInputOption with data set #2 (Symfony\Component\Console\Input\InputOption, '**option_name:**
-
-* Name: `--option_name`
-* Shortcut: `-o`
-* Accept value: yes
-* Is value required: yes
-* Is multiple: no
-* Description: option description
-* Default: `NULL`
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeInputOption with data set #3 (Symfony\Component\Console\Input\InputOption, '**option_name:**
-
-* Name: `--option_name`
-* Shortcut: `-o`
-* Accept value: yes
-* Is value required: no
-* Is multiple: yes
-* Description: option description
-* Default: `array ()`
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeInputDefinition with data set #0 (Symfony\Component\Console\Input\InputDefinition, '')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeInputDefinition with data set #1 (Symfony\Component\Console\Input\InputDefinition, '### Arguments:
-
-**argument_name:**
-
-* Name: argument_name
-* Is required: yes
-* Is array: no
-* Description: <none>
-* Default: `NULL`
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeInputDefinition with data set #2 (Symfony\Component\Console\Input\InputDefinition, '### Options:
-
-**option_name:**
-
-* Name: `--option_name`
-* Shortcut: `-o`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: <none>
-* Default: `false`
-')'.
 .  1239 / 11524 ( 10%)
 
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeInputDefinition with data set #3 (Symfony\Component\Console\Input\InputDefinition, '### Arguments:
-
-**argument_name:**
-
-* Name: argument_name
-* Is required: yes
-* Is array: no
-* Description: <none>
-* Default: `NULL`
-
-### Options:
-
-**option_name:**
-
-* Name: `--option_name`
-* Shortcut: `-o`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: <none>
-* Default: `false`
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeCommand with data set #0 (Symfony\Component\Console\Tests\Fixtures\DescriptorCommand1, 'descriptor:command1
--------------------
-
-* Description: command 1 description
-* Usage: `descriptor:command1`
-* Aliases: `alias1`, `alias2`
-
-command 1 help
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeCommand with data set #1 (Symfony\Component\Console\Tests\Fixtures\DescriptorCommand2, 'descriptor:command2
--------------------
-
-* Description: command 2 description
-* Usage: `descriptor:command2 [-o|--option_name] argument_name`
-* Aliases: <none>
-
-command 2 help
-
-### Arguments:
-
-**argument_name:**
-
-* Name: argument_name
-* Is required: yes
-* Is array: no
-* Description: <none>
-* Default: `NULL`
-
-### Options:
-
-**option_name:**
-
-* Name: `--option_name`
-* Shortcut: `-o`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: <none>
-* Default: `false`
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeApplication with data set #0 (Symfony\Component\Console\Tests\Fixtures\DescriptorApplication1, 'UNKNOWN
-=======
-
-* help
-* list
-
-help
-----
-
-* Description: Displays help for a command
-* Usage: `help [--xml] [--format="..."] [--raw] [command_name]`
-* Aliases: <none>
-
-The <info>help</info> command displays help for a given command:
-
-  <info>php app/console help list</info>
-
-You can also output the help in other formats by using the <comment>--format</comment> option:
-
-  <info>php app/console help --format=xml list</info>
-
-To display the list of available commands, please use the <info>list</info> command.
-
-### Arguments:
-
-**command_name:**
-
-* Name: command_name
-* Is required: no
-* Is array: no
-* Description: The command name
-* Default: `\'help\'`
-
-### Options:
-
-**xml:**
-
-* Name: `--xml`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: To output help as XML
-* Default: `false`
-
-**format:**
-
-* Name: `--format`
-* Shortcut: <none>
-* Accept value: yes
-* Is value required: yes
-* Is multiple: no
-* Description: To output help in other formats
-* Default: `\'txt\'`
-
-**raw:**
-
-* Name: `--raw`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: To output raw command help
-* Default: `false`
-
-**help:**
-
-* Name: `--help`
-* Shortcut: `-h`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Display this help message.
-* Default: `false`
-
-**quiet:**
-
-* Name: `--quiet`
-* Shortcut: `-q`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Do not output any message.
-* Default: `false`
-
-**verbose:**
-
-* Name: `--verbose`
-* Shortcut: `-v|-vv|-vvv`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
-* Default: `false`
-
-**version:**
-
-* Name: `--version`
-* Shortcut: `-V`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Display this application version.
-* Default: `false`
-
-**ansi:**
-
-* Name: `--ansi`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Force ANSI output.
-* Default: `false`
-
-**no-ansi:**
-
-* Name: `--no-ansi`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Disable ANSI output.
-* Default: `false`
-
-**no-interaction:**
-
-* Name: `--no-interaction`
-* Shortcut: `-n`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Do not ask any interactive question.
-* Default: `false`
-
-list
-----
-
-* Description: Lists commands
-* Usage: `list [--xml] [--raw] [--format="..."] [namespace]`
-* Aliases: <none>
-
-The <info>list</info> command lists all commands:
-
-  <info>php app/console list</info>
-
-You can also display the commands for a specific namespace:
-
-  <info>php app/console list test</info>
-
-You can also output the information in other formats by using the <comment>--format</comment> option:
-
-  <info>php app/console list --format=xml</info>
-
-It\'s also possible to get raw list of commands (useful for embedding command runner):
-
-  <info>php app/console list --raw</info>
-
-### Arguments:
-
-**namespace:**
-
-* Name: namespace
-* Is required: no
-* Is array: no
-* Description: The namespace name
-* Default: `NULL`
-
-### Options:
-
-**xml:**
-
-* Name: `--xml`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: To output list as XML
-* Default: `false`
-
-**raw:**
-
-* Name: `--raw`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: To output raw command list
-* Default: `false`
-
-**format:**
-
-* Name: `--format`
-* Shortcut: <none>
-* Accept value: yes
-* Is value required: yes
-* Is multiple: no
-* Description: To output list in other formats
-* Default: `\'txt\'`
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\MarkdownDescriptorTest::testDescribeApplication with data set #1 (Symfony\Component\Console\Tests\Fixtures\DescriptorApplication2, 'My Symfony application
-======================
-
-* alias1
-* alias2
-* help
-* list
-
-**descriptor:**
-
-* descriptor:command1
-* descriptor:command2
-
-help
-----
-
-* Description: Displays help for a command
-* Usage: `help [--xml] [--format="..."] [--raw] [command_name]`
-* Aliases: <none>
-
-The <info>help</info> command displays help for a given command:
-
-  <info>php app/console help list</info>
-
-You can also output the help in other formats by using the <comment>--format</comment> option:
-
-  <info>php app/console help --format=xml list</info>
-
-To display the list of available commands, please use the <info>list</info> command.
-
-### Arguments:
-
-**command_name:**
-
-* Name: command_name
-* Is required: no
-* Is array: no
-* Description: The command name
-* Default: `\'help\'`
-
-### Options:
-
-**xml:**
-
-* Name: `--xml`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: To output help as XML
-* Default: `false`
-
-**format:**
-
-* Name: `--format`
-* Shortcut: <none>
-* Accept value: yes
-* Is value required: yes
-* Is multiple: no
-* Description: To output help in other formats
-* Default: `\'txt\'`
-
-**raw:**
-
-* Name: `--raw`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: To output raw command help
-* Default: `false`
-
-**help:**
-
-* Name: `--help`
-* Shortcut: `-h`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Display this help message.
-* Default: `false`
-
-**quiet:**
-
-* Name: `--quiet`
-* Shortcut: `-q`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Do not output any message.
-* Default: `false`
-
-**verbose:**
-
-* Name: `--verbose`
-* Shortcut: `-v|-vv|-vvv`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
-* Default: `false`
-
-**version:**
-
-* Name: `--version`
-* Shortcut: `-V`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Display this application version.
-* Default: `false`
-
-**ansi:**
-
-* Name: `--ansi`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Force ANSI output.
-* Default: `false`
-
-**no-ansi:**
-
-* Name: `--no-ansi`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Disable ANSI output.
-* Default: `false`
-
-**no-interaction:**
-
-* Name: `--no-interaction`
-* Shortcut: `-n`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Do not ask any interactive question.
-* Default: `false`
-
-list
-----
-
-* Description: Lists commands
-* Usage: `list [--xml] [--raw] [--format="..."] [namespace]`
-* Aliases: <none>
-
-The <info>list</info> command lists all commands:
-
-  <info>php app/console list</info>
-
-You can also display the commands for a specific namespace:
-
-  <info>php app/console list test</info>
-
-You can also output the information in other formats by using the <comment>--format</comment> option:
-
-  <info>php app/console list --format=xml</info>
-
-It\'s also possible to get raw list of commands (useful for embedding command runner):
-
-  <info>php app/console list --raw</info>
-
-### Arguments:
-
-**namespace:**
-
-* Name: namespace
-* Is required: no
-* Is array: no
-* Description: The namespace name
-* Default: `NULL`
-
-### Options:
-
-**xml:**
-
-* Name: `--xml`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: To output list as XML
-* Default: `false`
-
-**raw:**
-
-* Name: `--raw`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: To output raw command list
-* Default: `false`
-
-**format:**
-
-* Name: `--format`
-* Shortcut: <none>
-* Accept value: yes
-* Is value required: yes
-* Is multiple: no
-* Description: To output list in other formats
-* Default: `\'txt\'`
-
-descriptor:command1
--------------------
-
-* Description: command 1 description
-* Usage: `descriptor:command1`
-* Aliases: `alias1`, `alias2`
-
-command 1 help
-
-### Options:
-
-**help:**
-
-* Name: `--help`
-* Shortcut: `-h`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Display this help message.
-* Default: `false`
-
-**quiet:**
-
-* Name: `--quiet`
-* Shortcut: `-q`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Do not output any message.
-* Default: `false`
-
-**verbose:**
-
-* Name: `--verbose`
-* Shortcut: `-v|-vv|-vvv`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
-* Default: `false`
-
-**version:**
-
-* Name: `--version`
-* Shortcut: `-V`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Display this application version.
-* Default: `false`
-
-**ansi:**
-
-* Name: `--ansi`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Force ANSI output.
-* Default: `false`
-
-**no-ansi:**
-
-* Name: `--no-ansi`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Disable ANSI output.
-* Default: `false`
-
-**no-interaction:**
-
-* Name: `--no-interaction`
-* Shortcut: `-n`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Do not ask any interactive question.
-* Default: `false`
-
-descriptor:command2
--------------------
-
-* Description: command 2 description
-* Usage: `descriptor:command2 [-o|--option_name] argument_name`
-* Aliases: <none>
-
-command 2 help
-
-### Arguments:
-
-**argument_name:**
-
-* Name: argument_name
-* Is required: yes
-* Is array: no
-* Description: <none>
-* Default: `NULL`
-
-### Options:
-
-**option_name:**
-
-* Name: `--option_name`
-* Shortcut: `-o`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: <none>
-* Default: `false`
-
-**help:**
-
-* Name: `--help`
-* Shortcut: `-h`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Display this help message.
-* Default: `false`
-
-**quiet:**
-
-* Name: `--quiet`
-* Shortcut: `-q`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Do not output any message.
-* Default: `false`
-
-**verbose:**
-
-* Name: `--verbose`
-* Shortcut: `-v|-vv|-vvv`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
-* Default: `false`
-
-**version:**
-
-* Name: `--version`
-* Shortcut: `-V`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Display this application version.
-* Default: `false`
-
-**ansi:**
-
-* Name: `--ansi`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Force ANSI output.
-* Default: `false`
-
-**no-ansi:**
-
-* Name: `--no-ansi`
-* Shortcut: <none>
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Disable ANSI output.
-* Default: `false`
-
-**no-interaction:**
-
-* Name: `--no-interaction`
-* Shortcut: `-n`
-* Accept value: no
-* Is value required: no
-* Is multiple: no
-* Description: Do not ask any interactive question.
-* Default: `false`
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeInputArgument with data set #0 (Symfony\Component\Console\Input\InputArgument, ' <info>argument_name</info>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeInputArgument with data set #1 (Symfony\Component\Console\Input\InputArgument, ' <info>argument_name</info> argument description
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeInputArgument with data set #2 (Symfony\Component\Console\Input\InputArgument, ' <info>argument_name</info> argument description<comment> (default: "default_value")</comment>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeInputOption with data set #0 (Symfony\Component\Console\Input\InputOption, ' <info>--option_name</info> (-o)
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeInputOption with data set #1 (Symfony\Component\Console\Input\InputOption, ' <info>--option_name</info> (-o) option description<comment> (default: "default_value")</comment>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeInputOption with data set #2 (Symfony\Component\Console\Input\InputOption, ' <info>--option_name</info> (-o) option description
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeInputOption with data set #3 (Symfony\Component\Console\Input\InputOption, ' <info>--option_name</info> (-o) option description<comment> (multiple values allowed)</comment>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeInputDefinition with data set #0 (Symfony\Component\Console\Input\InputDefinition, '')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeInputDefinition with data set #1 (Symfony\Component\Console\Input\InputDefinition, '<comment>Arguments:</comment>
- <info>argument_name </info>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeInputDefinition with data set #2 (Symfony\Component\Console\Input\InputDefinition, '<comment>Options:</comment>
- <info>--option_name</info> (-o)
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeInputDefinition with data set #3 (Symfony\Component\Console\Input\InputDefinition, '<comment>Arguments:</comment>
- <info>argument_name     </info> 
-
-<comment>Options:</comment>
- <info>--option_name</info> (-o)
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeCommand with data set #0 (Symfony\Component\Console\Tests\Fixtures\DescriptorCommand1, '<comment>Usage:</comment>
- descriptor:command1
-
-<comment>Aliases:</comment> <info>alias1, alias2</info>
-
-<comment>Help:</comment>
- command 1 help
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeCommand with data set #1 (Symfony\Component\Console\Tests\Fixtures\DescriptorCommand2, '<comment>Usage:</comment>
- descriptor:command2 [-o|--option_name] argument_name
-
-<comment>Arguments:</comment>
- <info>argument_name     </info> 
-
-<comment>Options:</comment>
- <info>--option_name</info> (-o) 
-
-<comment>Help:</comment>
- command 2 help
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeApplication with data set #0 (Symfony\Component\Console\Tests\Fixtures\DescriptorApplication1, '<info>Console Tool</info>
-
-<comment>Usage:</comment>
-  [options] command [arguments]
-
-<comment>Options:</comment>
-  <info>--help</info>           <info>-h</info> Display this help message.
-  <info>--quiet</info>          <info>-q</info> Do not output any message.
-  <info>--verbose</info>        <info>-v|vv|vvv</info> Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
-  <info>--version</info>        <info>-V</info> Display this application version.
-  <info>--ansi</info>              Force ANSI output.
-  <info>--no-ansi</info>           Disable ANSI output.
-  <info>--no-interaction</info> <info>-n</info> Do not ask any interactive question.
-
-<comment>Available commands:</comment>
-  <info>help  </info> Displays help for a command
-  <info>list  </info> Lists commands
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\TextDescriptorTest::testDescribeApplication with data set #1 (Symfony\Component\Console\Tests\Fixtures\DescriptorApplication2, '<info>My Symfony application</info> version <comment>v1.0</comment>
-
-<comment>Usage:</comment>
-  [options] command [arguments]
-
-<comment>Options:</comment>
-  <info>--help</info>           <info>-h</info> Display this help message.
-  <info>--quiet</info>          <info>-q</info> Do not output any message.
-  <info>--verbose</info>        <info>-v|vv|vvv</info> Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
-  <info>--version</info>        <info>-V</info> Display this application version.
-  <info>--ansi</info>              Force ANSI output.
-  <info>--no-ansi</info>           Disable ANSI output.
-  <info>--no-interaction</info> <info>-n</info> Do not ask any interactive question.
-
-<comment>Available commands:</comment>
-  <info>alias1               </info> command 1 description
-  <info>alias2               </info> command 1 description
-  <info>help                 </info> Displays help for a command
-  <info>list                 </info> Lists commands
-<comment>descriptor</comment>
-  <info>descriptor:command1  </info> command 1 description
-  <info>descriptor:command2  </info> command 2 description
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeInputArgument with data set #0 (Symfony\Component\Console\Input\InputArgument, '<?xml version="1.0" encoding="UTF-8"?>
-<argument name="argument_name" is_required="1" is_array="0">
-  <description></description>
-  <defaults/>
-</argument>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeInputArgument with data set #1 (Symfony\Component\Console\Input\InputArgument, '<?xml version="1.0" encoding="UTF-8"?>
-<argument name="argument_name" is_required="0" is_array="1">
-  <description>argument description</description>
-  <defaults/>
-</argument>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeInputArgument with data set #2 (Symfony\Component\Console\Input\InputArgument, '<?xml version="1.0" encoding="UTF-8"?>
-<argument name="argument_name" is_required="0" is_array="0">
-  <description>argument description</description>
-  <defaults>
-    <default>default_value</default>
-  </defaults>
-</argument>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeInputOption with data set #0 (Symfony\Component\Console\Input\InputOption, '<?xml version="1.0" encoding="UTF-8"?>
-<option name="--option_name" shortcut="-o" accept_value="0" is_value_required="0" is_multiple="0">
-  <description></description>
-</option>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeInputOption with data set #1 (Symfony\Component\Console\Input\InputOption, '<?xml version="1.0" encoding="UTF-8"?>
-<option name="--option_name" shortcut="-o" accept_value="1" is_value_required="0" is_multiple="0">
-  <description>option description</description>
-  <defaults>
-    <default>default_value</default>
-  </defaults>
-</option>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeInputOption with data set #2 (Symfony\Component\Console\Input\InputOption, '<?xml version="1.0" encoding="UTF-8"?>
-<option name="--option_name" shortcut="-o" accept_value="1" is_value_required="1" is_multiple="0">
-  <description>option description</description>
-  <defaults/>
-</option>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeInputOption with data set #3 (Symfony\Component\Console\Input\InputOption, '<?xml version="1.0" encoding="UTF-8"?>
-<option name="--option_name" shortcut="-o" accept_value="1" is_value_required="0" is_multiple="1">
-  <description>option description</description>
-  <defaults/>
-</option>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeInputDefinition with data set #0 (Symfony\Component\Console\Input\InputDefinition, '<?xml version="1.0" encoding="UTF-8"?>
-<definition>
-  <arguments/>
-  <options/>
-</definition>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeInputDefinition with data set #1 (Symfony\Component\Console\Input\InputDefinition, '<?xml version="1.0" encoding="UTF-8"?>
-<definition>
-  <arguments>
-    <argument name="argument_name" is_required="1" is_array="0">
-      <description></description>
-      <defaults/>
-    </argument>
-  </arguments>
-  <options/>
-</definition>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeInputDefinition with data set #2 (Symfony\Component\Console\Input\InputDefinition, '<?xml version="1.0" encoding="UTF-8"?>
-<definition>
-  <arguments/>
-  <options>
-    <option name="--option_name" shortcut="-o" accept_value="0" is_value_required="0" is_multiple="0">
-      <description></description>
-    </option>
-  </options>
-</definition>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeInputDefinition with data set #3 (Symfony\Component\Console\Input\InputDefinition, '<?xml version="1.0" encoding="UTF-8"?>
-<definition>
-  <arguments>
-    <argument name="argument_name" is_required="1" is_array="0">
-      <description></description>
-      <defaults/>
-    </argument>
-  </arguments>
-  <options>
-    <option name="--option_name" shortcut="-o" accept_value="0" is_value_required="0" is_multiple="0">
-      <description></description>
-    </option>
-  </options>
-</definition>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeCommand with data set #0 (Symfony\Component\Console\Tests\Fixtures\DescriptorCommand1, '<?xml version="1.0" encoding="UTF-8"?>
-<command id="descriptor:command1" name="descriptor:command1">
-  <usage>descriptor:command1</usage>
-  <description>command 1 description</description>
-  <help>command 1 help</help>
-  <aliases>
-    <alias>alias1</alias>
-    <alias>alias2</alias>
-  </aliases>
-  <arguments/>
-  <options/>
-</command>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeCommand with data set #1 (Symfony\Component\Console\Tests\Fixtures\DescriptorCommand2, '<?xml version="1.0" encoding="UTF-8"?>
-<command id="descriptor:command2" name="descriptor:command2">
-  <usage>descriptor:command2 [-o|--option_name] argument_name</usage>
-  <description>command 2 description</description>
-  <help>command 2 help</help>
-  <aliases/>
-  <arguments>
-    <argument name="argument_name" is_required="1" is_array="0">
-      <description></description>
-      <defaults/>
-    </argument>
-  </arguments>
-  <options>
-    <option name="--option_name" shortcut="-o" accept_value="0" is_value_required="0" is_multiple="0">
-      <description></description>
-    </option>
-  </options>
-</command>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeApplication with data set #0 (Symfony\Component\Console\Tests\Fixtures\DescriptorApplication1, '<?xml version="1.0" encoding="UTF-8"?>
-<symfony>
-  <commands>
-    <command id="help" name="help">
-      <usage>help [--xml] [--format="..."] [--raw] [command_name]</usage>
-      <description>Displays help for a command</description>
-      <help>The &lt;info&gt;help&lt;/info&gt; command displays help for a given command:
- 
-   &lt;info&gt;php app/console help list&lt;/info&gt;
- 
- You can also output the help in other formats by using the &lt;comment&gt;--format&lt;/comment&gt; option:
- 
-   &lt;info&gt;php app/console help --format=xml list&lt;/info&gt;
- 
- To display the list of available commands, please use the &lt;info&gt;list&lt;/info&gt; command.</help>
-      <aliases/>
-      <arguments>
-        <argument name="command_name" is_required="0" is_array="0">
-          <description>The command name</description>
-          <defaults>
-            <default>help</default>
-          </defaults>
-        </argument>
-      </arguments>
-      <options>
-        <option name="--xml" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>To output help as XML</description>
-        </option>
-        <option name="--format" shortcut="" accept_value="1" is_value_required="1" is_multiple="0">
-          <description>To output help in other formats</description>
-          <defaults>
-            <default>txt</default>
-          </defaults>
-        </option>
-        <option name="--raw" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>To output raw command help</description>
-        </option>
-        <option name="--help" shortcut="-h" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Display this help message.</description>
-        </option>
-        <option name="--quiet" shortcut="-q" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Do not output any message.</description>
-        </option>
-        <option name="--verbose" shortcut="-v" shortcuts="-v|-vv|-vvv" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug</description>
-        </option>
-        <option name="--version" shortcut="-V" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Display this application version.</description>
-        </option>
-        <option name="--ansi" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Force ANSI output.</description>
-        </option>
-        <option name="--no-ansi" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Disable ANSI output.</description>
-        </option>
-        <option name="--no-interaction" shortcut="-n" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Do not ask any interactive question.</description>
-        </option>
-      </options>
-    </command>
-    <command id="list" name="list">
-      <usage>list [--xml] [--raw] [--format="..."] [namespace]</usage>
-      <description>Lists commands</description>
-      <help>The &lt;info&gt;list&lt;/info&gt; command lists all commands:
- 
-   &lt;info&gt;php app/console list&lt;/info&gt;
- 
- You can also display the commands for a specific namespace:
- 
-   &lt;info&gt;php app/console list test&lt;/info&gt;
- 
- You can also output the information in other formats by using the &lt;comment&gt;--format&lt;/comment&gt; option:
- 
-   &lt;info&gt;php app/console list --format=xml&lt;/info&gt;
- 
- It\'s also possible to get raw list of commands (useful for embedding command runner):
- 
-   &lt;info&gt;php app/console list --raw&lt;/info&gt;</help>
-      <aliases/>
-      <arguments>
-        <argument name="namespace" is_required="0" is_array="0">
-          <description>The namespace name</description>
-          <defaults/>
-        </argument>
-      </arguments>
-      <options>
-        <option name="--xml" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>To output list as XML</description>
-        </option>
-        <option name="--raw" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>To output raw command list</description>
-        </option>
-        <option name="--format" shortcut="" accept_value="1" is_value_required="1" is_multiple="0">
-          <description>To output list in other formats</description>
-          <defaults>
-            <default>txt</default>
-          </defaults>
-        </option>
-      </options>
-    </command>
-  </commands>
-  <namespaces>
-    <namespace id="_global">
-      <command>help</command>
-      <command>list</command>
-    </namespace>
-  </namespaces>
-</symfony>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Descriptor\XmlDescriptorTest::testDescribeApplication with data set #1 (Symfony\Component\Console\Tests\Fixtures\DescriptorApplication2, '<?xml version="1.0" encoding="UTF-8"?>
-<symfony name="My Symfony application" version="v1.0">
-  <commands>
-    <command id="help" name="help">
-      <usage>help [--xml] [--format="..."] [--raw] [command_name]</usage>
-      <description>Displays help for a command</description>
-      <help>The &lt;info&gt;help&lt;/info&gt; command displays help for a given command:
- 
-   &lt;info&gt;php app/console help list&lt;/info&gt;
- 
- You can also output the help in other formats by using the &lt;comment&gt;--format&lt;/comment&gt; option:
- 
-   &lt;info&gt;php app/console help --format=xml list&lt;/info&gt;
- 
- To display the list of available commands, please use the &lt;info&gt;list&lt;/info&gt; command.</help>
-      <aliases/>
-      <arguments>
-        <argument name="command_name" is_required="0" is_array="0">
-          <description>The command name</description>
-          <defaults>
-            <default>help</default>
-          </defaults>
-        </argument>
-      </arguments>
-      <options>
-        <option name="--xml" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>To output help as XML</description>
-        </option>
-        <option name="--format" shortcut="" accept_value="1" is_value_required="1" is_multiple="0">
-          <description>To output help in other formats</description>
-          <defaults>
-            <default>txt</default>
-          </defaults>
-        </option>
-        <option name="--raw" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>To output raw command help</description>
-        </option>
-        <option name="--help" shortcut="-h" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Display this help message.</description>
-        </option>
-        <option name="--quiet" shortcut="-q" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Do not output any message.</description>
-        </option>
-        <option name="--verbose" shortcut="-v" shortcuts="-v|-vv|-vvv" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug</description>
-        </option>
-        <option name="--version" shortcut="-V" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Display this application version.</description>
-        </option>
-        <option name="--ansi" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Force ANSI output.</description>
-        </option>
-        <option name="--no-ansi" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Disable ANSI output.</description>
-        </option>
-        <option name="--no-interaction" shortcut="-n" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Do not ask any interactive question.</description>
-        </option>
-      </options>
-    </command>
-    <command id="list" name="list">
-      <usage>list [--xml] [--raw] [--format="..."] [namespace]</usage>
-      <description>Lists commands</description>
-      <help>The &lt;info&gt;list&lt;/info&gt; command lists all commands:
- 
-   &lt;info&gt;php app/console list&lt;/info&gt;
- 
- You can also display the commands for a specific namespace:
- 
-   &lt;info&gt;php app/console list test&lt;/info&gt;
- 
- You can also output the information in other formats by using the &lt;comment&gt;--format&lt;/comment&gt; option:
- 
-   &lt;info&gt;php app/console list --format=xml&lt;/info&gt;
- 
- It\'s also possible to get raw list of commands (useful for embedding command runner):
- 
-   &lt;info&gt;php app/console list --raw&lt;/info&gt;</help>
-      <aliases/>
-      <arguments>
-        <argument name="namespace" is_required="0" is_array="0">
-          <description>The namespace name</description>
-          <defaults/>
-        </argument>
-      </arguments>
-      <options>
-        <option name="--xml" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>To output list as XML</description>
-        </option>
-        <option name="--raw" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>To output raw command list</description>
-        </option>
-        <option name="--format" shortcut="" accept_value="1" is_value_required="1" is_multiple="0">
-          <description>To output list in other formats</description>
-          <defaults>
-            <default>txt</default>
-          </defaults>
-        </option>
-      </options>
-    </command>
-    <command id="descriptor:command1" name="descriptor:command1">
-      <usage>descriptor:command1</usage>
-      <description>command 1 description</description>
-      <help>command 1 help</help>
-      <aliases>
-        <alias>alias1</alias>
-        <alias>alias2</alias>
-      </aliases>
-      <arguments/>
-      <options>
-        <option name="--help" shortcut="-h" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Display this help message.</description>
-        </option>
-        <option name="--quiet" shortcut="-q" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Do not output any message.</description>
-        </option>
-        <option name="--verbose" shortcut="-v" shortcuts="-v|-vv|-vvv" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug</description>
-        </option>
-        <option name="--version" shortcut="-V" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Display this application version.</description>
-        </option>
-        <option name="--ansi" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Force ANSI output.</description>
-        </option>
-        <option name="--no-ansi" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Disable ANSI output.</description>
-        </option>
-        <option name="--no-interaction" shortcut="-n" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Do not ask any interactive question.</description>
-        </option>
-      </options>
-    </command>
-    <command id="descriptor:command2" name="descriptor:command2">
-      <usage>descriptor:command2 [-o|--option_name] argument_name</usage>
-      <description>command 2 description</description>
-      <help>command 2 help</help>
-      <aliases/>
-      <arguments>
-        <argument name="argument_name" is_required="1" is_array="0">
-          <description></description>
-          <defaults/>
-        </argument>
-      </arguments>
-      <options>
-        <option name="--option_name" shortcut="-o" accept_value="0" is_value_required="0" is_multiple="0">
-          <description></description>
-        </option>
-        <option name="--help" shortcut="-h" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Display this help message.</description>
-        </option>
-        <option name="--quiet" shortcut="-q" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Do not output any message.</description>
-        </option>
-        <option name="--verbose" shortcut="-v" shortcuts="-v|-vv|-vvv" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug</description>
-        </option>
-        <option name="--version" shortcut="-V" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Display this application version.</description>
-        </option>
-        <option name="--ansi" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Force ANSI output.</description>
-        </option>
-        <option name="--no-ansi" shortcut="" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Disable ANSI output.</description>
-        </option>
-        <option name="--no-interaction" shortcut="-n" accept_value="0" is_value_required="0" is_multiple="0">
-          <description>Do not ask any interactive question.</description>
-        </option>
-      </options>
-    </command>
-  </commands>
-  <namespaces>
-    <namespace id="_global">
-      <command>alias1</command>
-      <command>alias2</command>
-      <command>help</command>
-      <command>list</command>
-    </namespace>
-    <namespace id="descriptor">
-      <command>descriptor:command1</command>
-      <command>descriptor:command2</command>
-    </namespace>
-  </namespaces>
-</symfony>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Formatter\OutputFormatterStyleStackTest::testPush'.
 .
@@ -4002,8 +2624,6 @@ Starting test 'Symfony\Component\Console\Tests\Helper\DialogHelperTest::testAsk'
 Starting test 'Symfony\Component\Console\Tests\Helper\DialogHelperTest::testAskWithAutocomplete'.
 S
 Starting test 'Symfony\Component\Console\Tests\Helper\DialogHelperTest::testAskHiddenResponse'.
-stty: standard input: Invalid argument
-stty: standard input: Invalid argument
 F
 Starting test 'Symfony\Component\Console\Tests\Helper\DialogHelperTest::testAskConfirmation'.
 .
@@ -4058,137 +2678,38 @@ Starting test 'Symfony\Component\Console\Tests\Helper\ProgressHelperTest::testCl
 Starting test 'Symfony\Component\Console\Tests\Helper\ProgressHelperTest::testPercentNotHundredBeforeComplete'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRender with data set #0 (array('ISBN', 'Title', 'Author'), array(array('99921-58-10-7', 'Divine Comedy', 'Dante Alighieri'), array('9971-5-0210-0', 'A Tale of Two Cities', 'Charles Dickens'), array('960-425-059-0', 'The Lord of the Rings', 'J. R. R. Tolkien'), array('80-902734-1-6', 'And Then There Were None', 'Agatha Christie')), 0, '+---------------+--------------------------+------------------+
-| ISBN          | Title                    | Author           |
-+---------------+--------------------------+------------------+
-| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
-| 9971-5-0210-0 | A Tale of Two Cities     | Charles Dickens  |
-| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
-| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
-+---------------+--------------------------+------------------+
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRender with data set #1 (array('ISBN', 'Title', 'Author'), array(array('99921-58-10-7', 'Divine Comedy', 'Dante Alighieri'), array('9971-5-0210-0', 'A Tale of Two Cities', 'Charles Dickens'), array('960-425-059-0', 'The Lord of the Rings', 'J. R. R. Tolkien'), array('80-902734-1-6', 'And Then There Were None', 'Agatha Christie')), 1, ' =============== ========================== ================== 
-  ISBN            Title                      Author            
- =============== ========================== ================== 
-  99921-58-10-7   Divine Comedy              Dante Alighieri   
-  9971-5-0210-0   A Tale of Two Cities       Charles Dickens   
-  960-425-059-0   The Lord of the Rings      J. R. R. Tolkien  
-  80-902734-1-6   And Then There Were None   Agatha Christie   
- =============== ========================== ================== 
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRender with data set #2 (array('ISBN', 'Title'), array(array('99921-58-10-7', 'Divine Comedy', 'Dante Alighieri'), array('9971-5-0210-0'), array('960-425-059-0', 'The Lord of the Rings', 'J. R. R. Tolkien'), array('80-902734-1-6', 'And Then There Were None', 'Agatha Christie')), 0, '+---------------+--------------------------+------------------+
-| ISBN          | Title                    |                  |
-+---------------+--------------------------+------------------+
-| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
-| 9971-5-0210-0 |                          |                  |
-| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
-| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
-+---------------+--------------------------+------------------+
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRender with data set #3 (array(), array(array('99921-58-10-7', 'Divine Comedy', 'Dante Alighieri'), array('9971-5-0210-0'), array('960-425-059-0', 'The Lord of the Rings', 'J. R. R. Tolkien'), array('80-902734-1-6', 'And Then There Were None', 'Agatha Christie')), 0, '+---------------+--------------------------+------------------+
-| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
-| 9971-5-0210-0 |                          |                  |
-| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
-| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
-+---------------+--------------------------+------------------+
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRender with data set #4 (array('ISBN', 'Title'), array(), 0, '+------+-------+
-| ISBN | Title |
-+------+-------+
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRender with data set #5 (array(), array(), 0, '')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRenderAddRows with data set #0 (array('ISBN', 'Title', 'Author'), array(array('99921-58-10-7', 'Divine Comedy', 'Dante Alighieri'), array('9971-5-0210-0', 'A Tale of Two Cities', 'Charles Dickens'), array('960-425-059-0', 'The Lord of the Rings', 'J. R. R. Tolkien'), array('80-902734-1-6', 'And Then There Were None', 'Agatha Christie')), 0, '+---------------+--------------------------+------------------+
-| ISBN          | Title                    | Author           |
-+---------------+--------------------------+------------------+
-| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
-| 9971-5-0210-0 | A Tale of Two Cities     | Charles Dickens  |
-| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
-| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
-+---------------+--------------------------+------------------+
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRenderAddRows with data set #1 (array('ISBN', 'Title', 'Author'), array(array('99921-58-10-7', 'Divine Comedy', 'Dante Alighieri'), array('9971-5-0210-0', 'A Tale of Two Cities', 'Charles Dickens'), array('960-425-059-0', 'The Lord of the Rings', 'J. R. R. Tolkien'), array('80-902734-1-6', 'And Then There Were None', 'Agatha Christie')), 1, ' =============== ========================== ================== 
-  ISBN            Title                      Author            
- =============== ========================== ================== 
-  99921-58-10-7   Divine Comedy              Dante Alighieri   
-  9971-5-0210-0   A Tale of Two Cities       Charles Dickens   
-  960-425-059-0   The Lord of the Rings      J. R. R. Tolkien  
-  80-902734-1-6   And Then There Were None   Agatha Christie   
- =============== ========================== ================== 
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRenderAddRows with data set #2 (array('ISBN', 'Title'), array(array('99921-58-10-7', 'Divine Comedy', 'Dante Alighieri'), array('9971-5-0210-0'), array('960-425-059-0', 'The Lord of the Rings', 'J. R. R. Tolkien'), array('80-902734-1-6', 'And Then There Were None', 'Agatha Christie')), 0, '+---------------+--------------------------+------------------+
-| ISBN          | Title                    |                  |
-+---------------+--------------------------+------------------+
-| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
-| 9971-5-0210-0 |                          |                  |
-| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
-| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
-+---------------+--------------------------+------------------+
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRenderAddRows with data set #3 (array(), array(array('99921-58-10-7', 'Divine Comedy', 'Dante Alighieri'), array('9971-5-0210-0'), array('960-425-059-0', 'The Lord of the Rings', 'J. R. R. Tolkien'), array('80-902734-1-6', 'And Then There Were None', 'Agatha Christie')), 0, '+---------------+--------------------------+------------------+
-| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
-| 9971-5-0210-0 |                          |                  |
-| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
-| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
-+---------------+--------------------------+------------------+
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRenderAddRows with data set #4 (array('ISBN', 'Title'), array(), 0, '+------+-------+
-| ISBN | Title |
-+------+-------+
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRenderAddRows with data set #5 (array(), array(), 0, '')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRenderAddRowsOneByOne with data set #0 (array('ISBN', 'Title', 'Author'), array(array('99921-58-10-7', 'Divine Comedy', 'Dante Alighieri'), array('9971-5-0210-0', 'A Tale of Two Cities', 'Charles Dickens'), array('960-425-059-0', 'The Lord of the Rings', 'J. R. R. Tolkien'), array('80-902734-1-6', 'And Then There Were None', 'Agatha Christie')), 0, '+---------------+--------------------------+------------------+
-| ISBN          | Title                    | Author           |
-+---------------+--------------------------+------------------+
-| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
-| 9971-5-0210-0 | A Tale of Two Cities     | Charles Dickens  |
-| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
-| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
-+---------------+--------------------------+------------------+
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRenderAddRowsOneByOne with data set #1 (array('ISBN', 'Title', 'Author'), array(array('99921-58-10-7', 'Divine Comedy', 'Dante Alighieri'), array('9971-5-0210-0', 'A Tale of Two Cities', 'Charles Dickens'), array('960-425-059-0', 'The Lord of the Rings', 'J. R. R. Tolkien'), array('80-902734-1-6', 'And Then There Were None', 'Agatha Christie')), 1, ' =============== ========================== ================== 
-  ISBN            Title                      Author            
- =============== ========================== ================== 
-  99921-58-10-7   Divine Comedy              Dante Alighieri   
-  9971-5-0210-0   A Tale of Two Cities       Charles Dickens   
-  960-425-059-0   The Lord of the Rings      J. R. R. Tolkien  
-  80-902734-1-6   And Then There Were None   Agatha Christie   
- =============== ========================== ================== 
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRenderAddRowsOneByOne with data set #2 (array('ISBN', 'Title'), array(array('99921-58-10-7', 'Divine Comedy', 'Dante Alighieri'), array('9971-5-0210-0'), array('960-425-059-0', 'The Lord of the Rings', 'J. R. R. Tolkien'), array('80-902734-1-6', 'And Then There Were None', 'Agatha Christie')), 0, '+---------------+--------------------------+------------------+
-| ISBN          | Title                    |                  |
-+---------------+--------------------------+------------------+
-| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
-| 9971-5-0210-0 |                          |                  |
-| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
-| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
-+---------------+--------------------------+------------------+
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRenderAddRowsOneByOne with data set #3 (array(), array(array('99921-58-10-7', 'Divine Comedy', 'Dante Alighieri'), array('9971-5-0210-0'), array('960-425-059-0', 'The Lord of the Rings', 'J. R. R. Tolkien'), array('80-902734-1-6', 'And Then There Were None', 'Agatha Christie')), 0, '+---------------+--------------------------+------------------+
-| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
-| 9971-5-0210-0 |                          |                  |
-| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
-| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
-+---------------+--------------------------+------------------+
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRenderAddRowsOneByOne with data set #4 (array('ISBN', 'Title'), array(), 0, '+------+-------+
-| ISBN | Title |
-+------+-------+
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Helper\TableHelperTest::testRenderAddRowsOneByOne with data set #5 (array(), array(), 0, '')'.
 .
@@ -4442,13 +2963,8 @@ Starting test 'Symfony\Component\Console\Tests\Input\StringInputTest::testTokeni
 .
 Starting test 'Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data set #4 ('\'quoted\'', array('quoted'), '->tokenize() parses quoted arguments')'.
 .
-Starting test 'Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data set #5 ('\'ab
-c	d\'', array('ab
-c	d'), '->tokenize() parses whitespace chars in strings')'.
-.
-Starting test 'Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data set #6 ('\'a\'\'b\'
-\'c\'	\'d\'', array('a', 'b', 'c', 'd'), '->tokenize() parses whitespace chars between args as spaces')'.
-.
+Starting test 'Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data set #5 ('\'a.
+Starting test 'Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data set #6 ('\'a\'.
 Starting test 'Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data set #7 ('\\"quoted\\"', array('"quoted"'), '->tokenize() parses escaped-quoted arguments')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data set #8 ('\\\'quoted\\\'', array('\'quoted\''), '->tokenize() parses escaped-quoted arguments')'.
@@ -4507,10 +3023,8 @@ Starting test 'Symfony\Component\Console\Tests\Output\OutputTest::testWriteWithV
 Starting test 'Symfony\Component\Console\Tests\Output\OutputTest::testWriteAnArrayOfMessages'.
 .
 Starting test 'Symfony\Component\Console\Tests\Output\OutputTest::testWriteRawMessage with data set #0 ('<info>foo</info>', 1, '<info>foo</info>
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Output\OutputTest::testWriteRawMessage with data set #1 ('<info>foo</info>', 2, 'foo
-')'.
 .
 Starting test 'Symfony\Component\Console\Tests\Output\OutputTest::testWriteWithDecorationTurnedOff'.
 .
@@ -4773,8 +3287,6 @@ Starting test 'Symfony\Component\CssSelector\Tests\Handler\StringHandlerTest::te
 Starting test 'Symfony\Component\CssSelector\Tests\Handler\WhitespaceHandlerTest::testHandleValue with data set #0 (' ', <whitespace " " at 0>, '')'.
 .
 Starting test 'Symfony\Component\CssSelector\Tests\Handler\WhitespaceHandlerTest::testHandleValue with data set #1 ('
-', <whitespace "
-" at 0>, '')'.
 .
 Starting test 'Symfony\Component\CssSelector\Tests\Handler\WhitespaceHandlerTest::testHandleValue with data set #2 ('	', <whitespace "	" at 0>, '')'.
 .
@@ -4809,15 +3321,12 @@ Starting test 'Symfony\Component\CssSelector\Tests\Parser\ParserTest::testParser
 Starting test 'Symfony\Component\CssSelector\Tests\Parser\ParserTest::testParser with data set #9 ('div > .foo', array('CombinedSelector[Element[div] > Class[Element[*].foo]]'))'.
 .
 Starting test 'Symfony\Component\CssSelector\Tests\Parser\ParserTest::testParser with data set #10 ('div 
->  	 	 .foo', array('CombinedSelector[Element[div] > Class[Element[*].foo]]'))'.
 .
 Starting test 'Symfony\Component\CssSelector\Tests\Parser\ParserTest::testParser with data set #11 ('td.foo,.bar', array('Class[Element[td].foo]', 'Class[Element[*].bar]'))'.
 .
 Starting test 'Symfony\Component\CssSelector\Tests\Parser\ParserTest::testParser with data set #12 ('td.foo, .bar', array('Class[Element[td].foo]', 'Class[Element[*].bar]'))'.
 .
 Starting test 'Symfony\Component\CssSelector\Tests\Parser\ParserTest::testParser with data set #13 ('td.foo	
- ,	
- .bar', array('Class[Element[td].foo]', 'Class[Element[*].bar]'))'.
 .
 Starting test 'Symfony\Component\CssSelector\Tests\Parser\ParserTest::testParser with data set #14 ('td.foo,.bar', array('Class[Element[td].foo]', 'Class[Element[*].bar]'))'.
 .
@@ -4825,8 +3334,6 @@ Starting test 'Symfony\Component\CssSelector\Tests\Parser\ParserTest::testParser
 .  1652 / 11524 ( 14%)
 
 Starting test 'Symfony\Component\CssSelector\Tests\Parser\ParserTest::testParser with data set #16 ('td.foo	
- ,	
- .bar', array('Class[Element[td].foo]', 'Class[Element[*].bar]'))'.
 .
 Starting test 'Symfony\Component\CssSelector\Tests\Parser\ParserTest::testParser with data set #17 ('div, td.foo, div.bar span', array('Element[div]', 'Class[Element[td].foo]', 'CombinedSelector[Class[Element[div].bar] <followed> Element[span]]'))'.
 .
@@ -5532,95 +4039,15 @@ Starting test 'Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest::tes
 Starting test 'Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest::testHeadersForHttpException'.
 .
 Starting test 'Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest::testFlattenHttpException with data set #0 (exception 'Exception' with message 'test' in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/src/Symfony/Component/Debug/Tests/Exception/FlattenExceptionTest.php:176
-Stack trace:
-#0 (): Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest->flattenDataProvider()
-#1 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Test.php(267): ReflectionMethod->invoke()
-#2 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(481): PHPUnit_Util_Test::getProvidedData()
-#3 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(834): PHPUnit_Framework_TestSuite::createTest()
-#4 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(212): PHPUnit_Framework_TestSuite->addTestMethod()
-#5 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(315): PHPUnit_Framework_TestSuite->__construct()
-#6 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(389): PHPUnit_Framework_TestSuite->addTestSuite()
-#7 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(416): PHPUnit_Framework_TestSuite->addTestFile()
-#8 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Configuration.php(873): PHPUnit_Framework_TestSuite->addTestFiles()
-#9 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Configuration.php(789): PHPUnit_Util_Configuration->getTestSuite()
-#10 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(657): PHPUnit_Util_Configuration->getTestSuiteConfiguration()
-#11 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(138): PHPUnit_TextUI_Command->handleArguments()
-#12 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(129): PHPUnit_TextUI_Command->run()
-#13 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit(63): PHPUnit_TextUI_Command::main()
-#14 {main}, 500)'.
 .
 Starting test 'Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest::testPrevious with data set #0 (exception 'Exception' with message 'test' in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/src/Symfony/Component/Debug/Tests/Exception/FlattenExceptionTest.php:176
-Stack trace:
-#0 (): Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest->flattenDataProvider()
-#1 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Test.php(267): ReflectionMethod->invoke()
-#2 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(481): PHPUnit_Util_Test::getProvidedData()
-#3 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(834): PHPUnit_Framework_TestSuite::createTest()
-#4 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(212): PHPUnit_Framework_TestSuite->addTestMethod()
-#5 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(315): PHPUnit_Framework_TestSuite->__construct()
-#6 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(389): PHPUnit_Framework_TestSuite->addTestSuite()
-#7 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(416): PHPUnit_Framework_TestSuite->addTestFile()
-#8 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Configuration.php(873): PHPUnit_Framework_TestSuite->addTestFiles()
-#9 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Configuration.php(789): PHPUnit_Util_Configuration->getTestSuite()
-#10 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(657): PHPUnit_Util_Configuration->getTestSuiteConfiguration()
-#11 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(138): PHPUnit_TextUI_Command->handleArguments()
-#12 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(129): PHPUnit_TextUI_Command->run()
-#13 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit(63): PHPUnit_TextUI_Command::main()
-#14 {main}, 500)'.
 .
 Starting test 'Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest::testLine with data set #0 (exception 'Exception' with message 'test' in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/src/Symfony/Component/Debug/Tests/Exception/FlattenExceptionTest.php:176
-Stack trace:
-#0 (): Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest->flattenDataProvider()
-#1 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Test.php(267): ReflectionMethod->invoke()
-#2 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(481): PHPUnit_Util_Test::getProvidedData()
-#3 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(834): PHPUnit_Framework_TestSuite::createTest()
-#4 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(212): PHPUnit_Framework_TestSuite->addTestMethod()
-#5 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(315): PHPUnit_Framework_TestSuite->__construct()
-#6 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(389): PHPUnit_Framework_TestSuite->addTestSuite()
-#7 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(416): PHPUnit_Framework_TestSuite->addTestFile()
-#8 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Configuration.php(873): PHPUnit_Framework_TestSuite->addTestFiles()
-#9 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Configuration.php(789): PHPUnit_Util_Configuration->getTestSuite()
-#10 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(657): PHPUnit_Util_Configuration->getTestSuiteConfiguration()
-#11 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(138): PHPUnit_TextUI_Command->handleArguments()
-#12 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(129): PHPUnit_TextUI_Command->run()
-#13 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit(63): PHPUnit_TextUI_Command::main()
-#14 {main}, 500)'.
 .
 Starting test 'Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest::testFile with data set #0 (exception 'Exception' with message 'test' in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/src/Symfony/Component/Debug/Tests/Exception/FlattenExceptionTest.php:176
-Stack trace:
-#0 (): Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest->flattenDataProvider()
-#1 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Test.php(267): ReflectionMethod->invoke()
-#2 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(481): PHPUnit_Util_Test::getProvidedData()
-#3 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(834): PHPUnit_Framework_TestSuite::createTest()
-#4 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(212): PHPUnit_Framework_TestSuite->addTestMethod()
-#5 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(315): PHPUnit_Framework_TestSuite->__construct()
-#6 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(389): PHPUnit_Framework_TestSuite->addTestSuite()
-#7 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(416): PHPUnit_Framework_TestSuite->addTestFile()
-#8 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Configuration.php(873): PHPUnit_Framework_TestSuite->addTestFiles()
-#9 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Configuration.php(789): PHPUnit_Util_Configuration->getTestSuite()
-#10 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(657): PHPUnit_Util_Configuration->getTestSuiteConfiguration()
-#11 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(138): PHPUnit_TextUI_Command->handleArguments()
-#12 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(129): PHPUnit_TextUI_Command->run()
-#13 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit(63): PHPUnit_TextUI_Command::main()
-#14 {main}, 500)'.
 .  2006 / 11524 ( 17%)
 
 Starting test 'Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest::testToArray with data set #0 (exception 'Exception' with message 'test' in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/src/Symfony/Component/Debug/Tests/Exception/FlattenExceptionTest.php:176
-Stack trace:
-#0 (): Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest->flattenDataProvider()
-#1 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Test.php(267): ReflectionMethod->invoke()
-#2 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(481): PHPUnit_Util_Test::getProvidedData()
-#3 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(834): PHPUnit_Framework_TestSuite::createTest()
-#4 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(212): PHPUnit_Framework_TestSuite->addTestMethod()
-#5 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(315): PHPUnit_Framework_TestSuite->__construct()
-#6 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(389): PHPUnit_Framework_TestSuite->addTestSuite()
-#7 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Framework/TestSuite.php(416): PHPUnit_Framework_TestSuite->addTestFile()
-#8 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Configuration.php(873): PHPUnit_Framework_TestSuite->addTestFiles()
-#9 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/Util/Configuration.php(789): PHPUnit_Util_Configuration->getTestSuite()
-#10 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(657): PHPUnit_Util_Configuration->getTestSuiteConfiguration()
-#11 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(138): PHPUnit_TextUI_Command->handleArguments()
-#12 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php(129): PHPUnit_TextUI_Command->run()
-#13 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit(63): PHPUnit_TextUI_Command::main()
-#14 {main}, 500)'.
 .
 Starting test 'Symfony\Component\Debug\Tests\Exception\FlattenExceptionTest::testRecursionInArguments'.
 .
@@ -6082,8 +4509,6 @@ Starting test 'Symfony\Component\DependencyInjection\Tests\Loader\IniFileLoaderT
 Starting test 'Symfony\Component\DependencyInjection\Tests\Loader\IniFileLoaderTest::testExceptionIsRaisedWhenIniFileDoesNotExist'.
 .
 Starting test 'Symfony\Component\DependencyInjection\Tests\Loader\IniFileLoaderTest::testExceptionIsRaisedWhenIniFileCannotBeParsed'.
-syntax error, unexpected '{' in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/src/Symfony/Component/DependencyInjection/Tests/Fixtures/ini/nonvalid.ini on line 1
-
 .
 Starting test 'Symfony\Component\DependencyInjection\Tests\Loader\IniFileLoaderTest::testSupports'.
 .
@@ -6179,48 +4604,48 @@ Starting test 'Symfony\Component\DependencyInjection\Tests\ReferenceTest::testCa
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testConstructor'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAdd'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddInvalidNode'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddHtmlContent'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddHtmlContentCharset'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddHtmlContentInvalidBaseTag'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddHtmlContentUnsupportedCharset'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddHtmlContentWithErrors'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddXmlContent'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddXmlContentCharset'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddXmlContentWithErrors'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddContent'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddDocument'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddNodeList'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddNodes'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAddNode'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testClear'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testEq'.
 E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testEach'.
-F
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testReduce'.
 F  2301 / 11524 ( 19%)
 
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testAttr'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testText'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testHtml'.
 E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testExtract'.
@@ -6252,15 +4677,15 @@ Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testSelectLink'.
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testSelectButton'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testLink'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testLinks'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testForm'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testLast'.
 E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testFirst'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testSiblings'.
 E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testNextAll'.
@@ -6270,9 +4695,9 @@ E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testChildren'.
 E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testParents'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\CrawlerTest::testBaseTag'.
-.
+E
 Starting test 'Symfony\Component\DomCrawler\Tests\Field\ChoiceFormFieldTest::testInitialize'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\Field\ChoiceFormFieldTest::testGetType'.
@@ -6324,40 +4749,29 @@ F
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testMultiValuedFields'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testConstructor with data set #0 ('does not take into account input fields without a name attribute', '<input type="text" value="foo" />
-                 <input type="submit" />', array())'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testConstructor with data set #1 ('does not take into account input fields with an empty name attribute value', '<input type="text" name="" value="foo" />
-                 <input type="submit" />', array())'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testConstructor with data set #2 ('takes into account disabled input fields', '<input type="text" name="foo" value="foo" disabled="disabled" />
-                 <input type="submit" />', array(array('InputFormField', 'foo')))'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testConstructor with data set #3 ('appends the submitted button value', '<input type="submit" name="bar" value="bar" />', array(array('InputFormField', 'bar')))'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testConstructor with data set #4 ('appends the submitted button value for Button element', '<button type="submit" name="bar" value="bar">Bar</button>', array(array('InputFormField', 'bar')))'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testConstructor with data set #5 ('appends the submitted button value but not other submit buttons', '<input type="submit" name="bar" value="bar" />
-                 <input type="submit" name="foobar" value="foobar" />', array(array('InputFormField', 'foobar')))'.
 .  2360 / 11524 ( 20%)
 
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testConstructor with data set #6 ('returns textareas', '<textarea name="foo">foo</textarea>
-                 <input type="submit" />', array(array('TextareaFormField', 'foo')))'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testConstructor with data set #7 ('returns inputs', '<input type="text" name="foo" value="foo" />
-                 <input type="submit" />', array(array('InputFormField', 'foo')))'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testConstructor with data set #8 ('returns checkboxes', '<input type="checkbox" name="foo" value="foo" checked="checked" />
-                 <input type="submit" />', array(array('ChoiceFormField', 'foo')))'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testConstructor with data set #9 ('returns not-checked checkboxes', '<input type="checkbox" name="foo" value="foo" />
-                 <input type="submit" />', array(array('ChoiceFormField', false)))'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testConstructor with data set #10 ('returns radio buttons', '<input type="radio" name="foo" value="foo" />
-                 <input type="radio" name="foo" value="bar" checked="bar" />
-                 <input type="submit" />', array(array('ChoiceFormField', 'bar')))'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testConstructor with data set #11 ('returns file inputs', '<input type="file" name="foo" />
-                 <input type="submit" />', array(array('FileFormField', array('', '', '', 4, 0))))'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\FormTest::testGetFormNode'.
 F
@@ -6460,10 +4874,8 @@ Starting test 'Symfony\Component\DomCrawler\Tests\LinkTest::testGetUri with data
 Starting test 'Symfony\Component\DomCrawler\Tests\LinkTest::testGetUri with data set #1 ('/foo', 'http://localhost/bar/foo', 'http://localhost/foo')'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\LinkTest::testGetUri with data set #2 ('
-            /foo', 'http://localhost/bar/foo/', 'http://localhost/foo')'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\LinkTest::testGetUri with data set #3 ('/foo
-            ', 'http://localhost/bar/foo', 'http://localhost/foo')'.
 .
 Starting test 'Symfony\Component\DomCrawler\Tests\LinkTest::testGetUri with data set #4 ('foo', 'http://localhost/bar/foo/', 'http://localhost/bar/foo/foo')'.
 .  2419 / 11524 ( 20%)
@@ -6662,393 +5074,141 @@ Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\LexerTest::testTo
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ArgumentsNodeTest::testSerialization'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ArgumentsNodeTest::testEvaluate with data set #0 (array('a', 'b'), ArgumentsNode(
-    ConstantNode(value: 'b')
-    ConstantNode(value: 'a')
-    ConstantNode(value: 0)
-    ConstantNode(value: 'b')
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ArgumentsNodeTest::testCompile with data set #0 ('"a", "b"', ArgumentsNode(
-    ConstantNode(value: 'b')
-    ConstantNode(value: 'a')
-    ConstantNode(value: 0)
-    ConstantNode(value: 'b')
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #0 (true, BinaryNode(operator: 'or'
-    ConstantNode(value: true)
-    ConstantNode(value: false)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #1 (true, BinaryNode(operator: '||'
-    ConstantNode(value: true)
-    ConstantNode(value: false)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #2 (false, BinaryNode(operator: 'and'
-    ConstantNode(value: true)
-    ConstantNode(value: false)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #3 (false, BinaryNode(operator: '&&'
-    ConstantNode(value: true)
-    ConstantNode(value: false)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #4 (0, BinaryNode(operator: '&'
-    ConstantNode(value: 2)
-    ConstantNode(value: 4)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #5 (6, BinaryNode(operator: '|'
-    ConstantNode(value: 2)
-    ConstantNode(value: 4)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #6 (6, BinaryNode(operator: '^'
-    ConstantNode(value: 2)
-    ConstantNode(value: 4)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #7 (true, BinaryNode(operator: '<'
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #8 (true, BinaryNode(operator: '<='
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #9 (true, BinaryNode(operator: '<='
-    ConstantNode(value: 1)
-    ConstantNode(value: 1)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #10 (false, BinaryNode(operator: '>'
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #11 (false, BinaryNode(operator: '>='
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #12 (true, BinaryNode(operator: '>='
-    ConstantNode(value: 1)
-    ConstantNode(value: 1)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #13 (true, BinaryNode(operator: '==='
-    ConstantNode(value: true)
-    ConstantNode(value: true)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #14 (false, BinaryNode(operator: '!=='
-    ConstantNode(value: true)
-    ConstantNode(value: true)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #15 (false, BinaryNode(operator: '=='
-    ConstantNode(value: 2)
-    ConstantNode(value: 1)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #16 (true, BinaryNode(operator: '!='
-    ConstantNode(value: 2)
-    ConstantNode(value: 1)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #17 (-1, BinaryNode(operator: '-'
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #18 (3, BinaryNode(operator: '+'
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #19 (4, BinaryNode(operator: '*'
-    ConstantNode(value: 2)
-    ConstantNode(value: 2)
-))'.
 .  2537 / 11524 ( 22%)
 
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #20 (1, BinaryNode(operator: '/'
-    ConstantNode(value: 2)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #21 (1, BinaryNode(operator: '%'
-    ConstantNode(value: 5)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #22 (25, BinaryNode(operator: '**'
-    ConstantNode(value: 5)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #23 ('ab', BinaryNode(operator: '~'
-    ConstantNode(value: 'a')
-    ConstantNode(value: 'b')
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #24 (true, BinaryNode(operator: 'in'
-    ConstantNode(value: 'a')
-    ArrayNode(
-        ConstantNode(value: 0)
-        ConstantNode(value: 'a')
-        ConstantNode(value: 1)
-        ConstantNode(value: 'b')
-    )
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #25 (false, BinaryNode(operator: 'in'
-    ConstantNode(value: 'c')
-    ArrayNode(
-        ConstantNode(value: 0)
-        ConstantNode(value: 'a')
-        ConstantNode(value: 1)
-        ConstantNode(value: 'b')
-    )
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #26 (true, BinaryNode(operator: 'not in'
-    ConstantNode(value: 'c')
-    ArrayNode(
-        ConstantNode(value: 0)
-        ConstantNode(value: 'a')
-        ConstantNode(value: 1)
-        ConstantNode(value: 'b')
-    )
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #27 (false, BinaryNode(operator: 'not in'
-    ConstantNode(value: 'a')
-    ArrayNode(
-        ConstantNode(value: 0)
-        ConstantNode(value: 'a')
-        ConstantNode(value: 1)
-        ConstantNode(value: 'b')
-    )
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #28 (array(1, 2, 3), BinaryNode(operator: '..'
-    ConstantNode(value: 1)
-    ConstantNode(value: 3)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #29 (1, BinaryNode(operator: '=~'
-    ConstantNode(value: 'abc')
-    ConstantNode(value: '/^[a-z]+$/')
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testEvaluate with data set #30 (false, BinaryNode(operator: '!~'
-    ConstantNode(value: 'abc')
-    ConstantNode(value: '/^[a-z]+$/')
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #0 ('(true || false)', BinaryNode(operator: 'or'
-    ConstantNode(value: true)
-    ConstantNode(value: false)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #1 ('(true || false)', BinaryNode(operator: '||'
-    ConstantNode(value: true)
-    ConstantNode(value: false)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #2 ('(true && false)', BinaryNode(operator: 'and'
-    ConstantNode(value: true)
-    ConstantNode(value: false)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #3 ('(true && false)', BinaryNode(operator: '&&'
-    ConstantNode(value: true)
-    ConstantNode(value: false)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #4 ('(2 & 4)', BinaryNode(operator: '&'
-    ConstantNode(value: 2)
-    ConstantNode(value: 4)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #5 ('(2 | 4)', BinaryNode(operator: '|'
-    ConstantNode(value: 2)
-    ConstantNode(value: 4)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #6 ('(2 ^ 4)', BinaryNode(operator: '^'
-    ConstantNode(value: 2)
-    ConstantNode(value: 4)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #7 ('(1 < 2)', BinaryNode(operator: '<'
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #8 ('(1 <= 2)', BinaryNode(operator: '<='
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #9 ('(1 <= 1)', BinaryNode(operator: '<='
-    ConstantNode(value: 1)
-    ConstantNode(value: 1)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #10 ('(1 > 2)', BinaryNode(operator: '>'
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #11 ('(1 >= 2)', BinaryNode(operator: '>='
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #12 ('(1 >= 1)', BinaryNode(operator: '>='
-    ConstantNode(value: 1)
-    ConstantNode(value: 1)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #13 ('(true === true)', BinaryNode(operator: '==='
-    ConstantNode(value: true)
-    ConstantNode(value: true)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #14 ('(true !== true)', BinaryNode(operator: '!=='
-    ConstantNode(value: true)
-    ConstantNode(value: true)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #15 ('(2 == 1)', BinaryNode(operator: '=='
-    ConstantNode(value: 2)
-    ConstantNode(value: 1)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #16 ('(2 != 1)', BinaryNode(operator: '!='
-    ConstantNode(value: 2)
-    ConstantNode(value: 1)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #17 ('(1 - 2)', BinaryNode(operator: '-'
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #18 ('(1 + 2)', BinaryNode(operator: '+'
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #19 ('(2 * 2)', BinaryNode(operator: '*'
-    ConstantNode(value: 2)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #20 ('(2 / 2)', BinaryNode(operator: '/'
-    ConstantNode(value: 2)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #21 ('(5 % 2)', BinaryNode(operator: '%'
-    ConstantNode(value: 5)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #22 ('pow(5, 2)', BinaryNode(operator: '**'
-    ConstantNode(value: 5)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #23 ('("a" . "b")', BinaryNode(operator: '~'
-    ConstantNode(value: 'a')
-    ConstantNode(value: 'b')
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #24 ('in_array("a", array(0 => "a", 1 => "b"))', BinaryNode(operator: 'in'
-    ConstantNode(value: 'a')
-    ArrayNode(
-        ConstantNode(value: 0)
-        ConstantNode(value: 'a')
-        ConstantNode(value: 1)
-        ConstantNode(value: 'b')
-    )
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #25 ('in_array("c", array(0 => "a", 1 => "b"))', BinaryNode(operator: 'in'
-    ConstantNode(value: 'c')
-    ArrayNode(
-        ConstantNode(value: 0)
-        ConstantNode(value: 'a')
-        ConstantNode(value: 1)
-        ConstantNode(value: 'b')
-    )
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #26 ('!in_array("c", array(0 => "a", 1 => "b"))', BinaryNode(operator: 'not in'
-    ConstantNode(value: 'c')
-    ArrayNode(
-        ConstantNode(value: 0)
-        ConstantNode(value: 'a')
-        ConstantNode(value: 1)
-        ConstantNode(value: 'b')
-    )
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #27 ('!in_array("a", array(0 => "a", 1 => "b"))', BinaryNode(operator: 'not in'
-    ConstantNode(value: 'a')
-    ArrayNode(
-        ConstantNode(value: 0)
-        ConstantNode(value: 'a')
-        ConstantNode(value: 1)
-        ConstantNode(value: 'b')
-    )
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #28 ('range(1, 3)', BinaryNode(operator: '..'
-    ConstantNode(value: 1)
-    ConstantNode(value: 3)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #29 ('preg_match("/^[a-z]+/i\\$/", "abc")', BinaryNode(operator: '=~'
-    ConstantNode(value: 'abc')
-    ConstantNode(value: '/^[a-z]+/i$/')
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\BinaryNodeTest::testCompile with data set #30 ('!preg_match("/^[a-z]+\\$/", "abc")', BinaryNode(operator: '!~'
-    ConstantNode(value: 'abc')
-    ConstantNode(value: '/^[a-z]+$/')
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ConditionalNodeTest::testEvaluate with data set #0 (1, ConditionalNode(
-    ConstantNode(value: true)
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ConditionalNodeTest::testEvaluate with data set #1 (2, ConditionalNode(
-    ConstantNode(value: false)
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ConditionalNodeTest::testCompile with data set #0 ('((true) ? (1) : (2))', ConditionalNode(
-    ConstantNode(value: true)
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ConditionalNodeTest::testCompile with data set #1 ('((false) ? (1) : (2))', ConditionalNode(
-    ConstantNode(value: false)
-    ConstantNode(value: 1)
-    ConstantNode(value: 2)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ConstantNodeTest::testEvaluate with data set #0 (false, ConstantNode(value: false))'.
 .
@@ -7080,104 +5240,24 @@ Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ConstantNodeTest:
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ConstantNodeTest::testCompile with data set #6 ('array(0 => 1, "b" => "a")', ConstantNode(value: array (  0 => 1,  'b' => 'a',)))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\FunctionNodeTest::testEvaluate with data set #0 ('bar', FunctionNode(name: 'foo'
-    Node(
-        ConstantNode(value: 'bar')
-    )
-), array(), array(array(Closure$Symfony\Component\ExpressionLanguage\Tests\Node\FunctionNodeTest::getCallables, Closure$Symfony\Component\ExpressionLanguage\Tests\Node\FunctionNodeTest::getCallables#2)))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\FunctionNodeTest::testCompile with data set #0 ('foo("bar")', FunctionNode(name: 'foo'
-    Node(
-        ConstantNode(value: 'bar')
-    )
-), array(array(Closure$Symfony\Component\ExpressionLanguage\Tests\Node\FunctionNodeTest::getCallables, Closure$Symfony\Component\ExpressionLanguage\Tests\Node\FunctionNodeTest::getCallables#2)))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\GetAttrNodeTest::testEvaluate with data set #0 ('b', GetAttrNode(type: 3
-    NameNode(name: 'foo')
-    ConstantNode(value: 0)
-    ArrayNode(
-        ConstantNode(value: 'b')
-        ConstantNode(value: 'a')
-        ConstantNode(value: 0)
-        ConstantNode(value: 'b')
-    )
-), array(array('a', 'b')))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\GetAttrNodeTest::testEvaluate with data set #1 ('a', GetAttrNode(type: 3
-    NameNode(name: 'foo')
-    ConstantNode(value: 'b')
-    ArrayNode(
-        ConstantNode(value: 'b')
-        ConstantNode(value: 'a')
-        ConstantNode(value: 0)
-        ConstantNode(value: 'b')
-    )
-), array(array('a', 'b')))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\GetAttrNodeTest::testEvaluate with data set #2 ('bar', GetAttrNode(type: 1
-    NameNode(name: 'foo')
-    ConstantNode(value: 'foo')
-    ArrayNode(
-        ConstantNode(value: 'b')
-        ConstantNode(value: 'a')
-        ConstantNode(value: 0)
-        ConstantNode(value: 'b')
-    )
-), array(Symfony\Component\ExpressionLanguage\Tests\Node\Obj))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\GetAttrNodeTest::testEvaluate with data set #3 ('baz', GetAttrNode(type: 2
-    NameNode(name: 'foo')
-    ConstantNode(value: 'foo')
-    ArrayNode(
-        ConstantNode(value: 'b')
-        ConstantNode(value: 'a')
-        ConstantNode(value: 0)
-        ConstantNode(value: 'b')
-    )
-), array(Symfony\Component\ExpressionLanguage\Tests\Node\Obj))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\GetAttrNodeTest::testCompile with data set #0 ('$foo[0]', GetAttrNode(type: 3
-    NameNode(name: 'foo')
-    ConstantNode(value: 0)
-    ArrayNode(
-        ConstantNode(value: 'b')
-        ConstantNode(value: 'a')
-        ConstantNode(value: 0)
-        ConstantNode(value: 'b')
-    )
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\GetAttrNodeTest::testCompile with data set #1 ('$foo["b"]', GetAttrNode(type: 3
-    NameNode(name: 'foo')
-    ConstantNode(value: 'b')
-    ArrayNode(
-        ConstantNode(value: 'b')
-        ConstantNode(value: 'a')
-        ConstantNode(value: 0)
-        ConstantNode(value: 'b')
-    )
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\GetAttrNodeTest::testCompile with data set #2 ('$foo->foo', GetAttrNode(type: 1
-    NameNode(name: 'foo')
-    ConstantNode(value: 'foo')
-    ArrayNode(
-        ConstantNode(value: 'b')
-        ConstantNode(value: 'a')
-        ConstantNode(value: 0)
-        ConstantNode(value: 'b')
-    )
-), array(Symfony\Component\ExpressionLanguage\Tests\Node\Obj))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\GetAttrNodeTest::testCompile with data set #3 ('$foo->foo(array("b" => "a", 0 => "b"))', GetAttrNode(type: 2
-    NameNode(name: 'foo')
-    ConstantNode(value: 'foo')
-    ArrayNode(
-        ConstantNode(value: 'b')
-        ConstantNode(value: 'a')
-        ConstantNode(value: 0)
-        ConstantNode(value: 'b')
-    )
-), array(Symfony\Component\ExpressionLanguage\Tests\Node\Obj))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\NameNodeTest::testEvaluate with data set #0 ('bar', NameNode(name: 'foo'), array('bar'))'.
 .
@@ -7188,36 +5268,20 @@ Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\NodeTest::testToS
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\NodeTest::testSerialization'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\UnaryNodeTest::testEvaluate with data set #0 (-1, UnaryNode(operator: '-'
-    ConstantNode(value: 1)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\UnaryNodeTest::testEvaluate with data set #1 (3, UnaryNode(operator: '+'
-    ConstantNode(value: 3)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\UnaryNodeTest::testEvaluate with data set #2 (false, UnaryNode(operator: '!'
-    ConstantNode(value: true)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\UnaryNodeTest::testEvaluate with data set #3 (false, UnaryNode(operator: 'not'
-    ConstantNode(value: true)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\UnaryNodeTest::testCompile with data set #0 ('(-1)', UnaryNode(operator: '-'
-    ConstantNode(value: 1)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\UnaryNodeTest::testCompile with data set #1 ('(+3)', UnaryNode(operator: '+'
-    ConstantNode(value: 3)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\UnaryNodeTest::testCompile with data set #2 ('(!true)', UnaryNode(operator: '!'
-    ConstantNode(value: true)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\UnaryNodeTest::testCompile with data set #3 ('(!true)', UnaryNode(operator: 'not'
-    ConstantNode(value: true)
-))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\ParsedExpressionTest::testSerialization'.
 .
@@ -7236,82 +5300,24 @@ Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ParserTest::testP
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ParserTest::testParse with data set #5 (ConstantNode(value: NULL), 'null')'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ParserTest::testParse with data set #6 (UnaryNode(operator: '-'
-    ConstantNode(value: 3)
-), '-3')'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ParserTest::testParse with data set #7 (BinaryNode(operator: '-'
-    ConstantNode(value: 3)
-    ConstantNode(value: 3)
-), '3 - 3')'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ParserTest::testParse with data set #8 (BinaryNode(operator: '*'
-    BinaryNode(operator: '-'
-        ConstantNode(value: 3)
-        ConstantNode(value: 3)
-    )
-    ConstantNode(value: 2)
-), '(3 - 3) * 2')'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ParserTest::testParse with data set #9 (GetAttrNode(type: 1
-    NameNode(name: 'foo')
-    ConstantNode(value: 'bar')
-    ArgumentsNode()
-), 'foo.bar', array('foo'))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ParserTest::testParse with data set #10 (GetAttrNode(type: 2
-    NameNode(name: 'foo')
-    ConstantNode(value: 'bar')
-    ArgumentsNode()
-), 'foo.bar()', array('foo'))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ParserTest::testParse with data set #11 (GetAttrNode(type: 2
-    NameNode(name: 'foo')
-    ConstantNode(value: 'not')
-    ArgumentsNode()
-), 'foo.not()', array('foo'))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ParserTest::testParse with data set #12 (GetAttrNode(type: 2
-    NameNode(name: 'foo')
-    ConstantNode(value: 'bar')
-    ArgumentsNode(
-        ConstantNode(value: 0)
-        ConstantNode(value: 'arg1')
-        ConstantNode(value: 1)
-        ConstantNode(value: 2)
-        ConstantNode(value: 2)
-        ConstantNode(value: true)
-    )
-), 'foo.bar("arg1", 2, true)', array('foo'))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ParserTest::testParse with data set #13 (GetAttrNode(type: 3
-    NameNode(name: 'foo')
-    ConstantNode(value: 3)
-    ArgumentsNode()
-), 'foo[3]', array('foo'))'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ParserTest::testParse with data set #14 (ConditionalNode(
-    ConstantNode(value: true)
-    ConstantNode(value: true)
-    ConstantNode(value: false)
-), 'true ? true : false')'.
 .
 Starting test 'Symfony\Component\ExpressionLanguage\Tests\Node\ParserTest::testParse with data set #15 (GetAttrNode(type: 3
-    GetAttrNode(type: 1
-        GetAttrNode(type: 2
-            GetAttrNode(type: 2
-                NameNode(name: 'foo')
-                ConstantNode(value: 'bar')
-                ArgumentsNode()
-            )
-            ConstantNode(value: 'foo')
-            ArgumentsNode()
-        )
-        ConstantNode(value: 'baz')
-        ArgumentsNode()
-    )
-    ConstantNode(value: '3')
-    ArgumentsNode()
-), 'foo.bar().foo().baz[3]', array('foo'))'.
 .
 Starting test 'Symfony\Component\Filesystem\Tests\FilesystemTest::testCopyCreatesNewFile'.
 .

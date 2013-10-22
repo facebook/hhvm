@@ -1,0 +1,649 @@
+PHPUnit 3.7.28 by Sebastian Bergmann.
+
+Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/suite.xml
+
+.......SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS...............   61 / 7166 (  0%)
+.............................................................  122 / 7166 (  1%)
+.............................................................  183 / 7166 (  2%)
+.............................................................  244 / 7166 (  3%)
+.............................................................  305 / 7166 (  4%)
+.............................................................  366 / 7166 (  5%)
+.............................................................  427 / 7166 (  5%)
+.............................................................  488 / 7166 (  6%)
+.............................................................  549 / 7166 (  7%)
+.............................................................  610 / 7166 (  8%)
+.............................................................  671 / 7166 (  9%)
+.............................................................  732 / 7166 ( 10%)
+.............................................................  793 / 7166 ( 11%)
+.............................................................  854 / 7166 ( 11%)
+.............................................................  915 / 7166 ( 12%)
+.............................................................  976 / 7166 ( 13%)
+............................................................. 1037 / 7166 ( 14%)
+............................................................. 1098 / 7166 ( 15%)
+............................................................. 1159 / 7166 ( 16%)
+............................................................. 1220 / 7166 ( 17%)
+........................................................FF... 1281 / 7166 ( 17%)
+....F.............................FF......................... 1342 / 7166 ( 18%)
+............................................................. 1403 / 7166 ( 19%)
+............................................................. 1464 / 7166 ( 20%)
+............................................................. 1525 / 7166 ( 21%)
+............................................................. 1586 / 7166 ( 22%)
+............................................................. 1647 / 7166 ( 22%)
+............................................................. 1708 / 7166 ( 23%)
+............................................................. 1769 / 7166 ( 24%)
+............................................................. 1830 / 7166 ( 25%)
+............................................................. 1891 / 7166 ( 26%)
+............................................................. 1952 / 7166 ( 27%)
+............................................................. 2013 / 7166 ( 28%)
+............................................................. 2074 / 7166 ( 28%)
+............................................................. 2135 / 7166 ( 29%)
+............................................................. 2196 / 7166 ( 30%)
+............................................................. 2257 / 7166 ( 31%)
+............................................................. 2318 / 7166 ( 32%)
+............................................................. 2379 / 7166 ( 33%)
+............................................................. 2440 / 7166 ( 34%)
+...FF.............................EEE........................ 2501 / 7166 ( 34%)
+............................................................. 2562 / 7166 ( 35%)
+......F...................................................... 2623 / 7166 ( 36%)
+............................................................. 2684 / 7166 ( 37%)
+............................................................. 2745 / 7166 ( 38%)
+............................................................. 2806 / 7166 ( 39%)
+............................................................. 2867 / 7166 ( 40%)
+............................................................. 2928 / 7166 ( 40%)
+............................................................. 2989 / 7166 ( 41%)
+............................................................. 3050 / 7166 ( 42%)
+............................................................. 3111 / 7166 ( 43%)
+............................................................. 3172 / 7166 ( 44%)
+............................................................. 3233 / 7166 ( 45%)
+............................................................. 3294 / 7166 ( 45%)
+............................................................. 3355 / 7166 ( 46%)
+.................EEE........F................................ 3416 / 7166 ( 47%)
+............................................................. 3477 / 7166 ( 48%)
+............................................................. 3538 / 7166 ( 49%)
+............................................................. 3599 / 7166 ( 50%)
+......................................................SSSSSSS 3660 / 7166 ( 51%)
+SS........................................................... 3721 / 7166 ( 51%)
+............................................................. 3782 / 7166 ( 52%)
+............................................................. 3843 / 7166 ( 53%)
+............................................................. 3904 / 7166 ( 54%)
+............................................................. 3965 / 7166 ( 55%)
+............................................................. 4026 / 7166 ( 56%)
+............................................................. 4087 / 7166 ( 57%)
+............................................................. 4148 / 7166 ( 57%)
+............................................................. 4209 / 7166 ( 58%)
+............................................................. 4270 / 7166 ( 59%)
+............................................................. 4331 / 7166 ( 60%)
+........................S.................................... 4392 / 7166 ( 61%)
+............................................................. 4453 / 7166 ( 62%)
+............................................................. 4514 / 7166 ( 62%)
+............................................................. 4575 / 7166 ( 63%)
+............................................................. 4636 / 7166 ( 64%)
+............................................................. 4697 / 7166 ( 65%)
+............................................................. 4758 / 7166 ( 66%)
+............................................................. 4819 / 7166 ( 67%)
+............................................................. 4880 / 7166 ( 68%)
+............................................................. 4941 / 7166 ( 68%)
+............................................................. 5002 / 7166 ( 69%)
+............................................................. 5063 / 7166 ( 70%)
+............................................................. 5124 / 7166 ( 71%)
+............................................................. 5185 / 7166 ( 72%)
+..................
+
+Time: 2.61 minutes, Memory: 216.92Mb
+
+There were 6 errors:
+
+1) CSSMinTest::testMinifyWithCSSStringValues with data set #0 ('foo { content: "  "; }', 'foo{content:"  "}')
+Out of bounds
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/vendor/composer/ClassLoader.php:201
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/vendor/composer/ClassLoader.php:184
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:512
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/libs/CSSMinTest.php:119
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+2) CSSMinTest::testMinifyWithCSSStringValues with data set #1 ('foo { content: \'	\'; }', 'foo{content:\'	\'}')
+Out of bounds
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/vendor/composer/ClassLoader.php:201
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/vendor/composer/ClassLoader.php:184
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:512
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/libs/CSSMinTest.php:119
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+3) CSSMinTest::testMinifyWithCSSStringValues with data set #2 ('foo::after { content: "{;}"; position: absolute; }', 'foo::after{content:"{;}";position:absolute}')
+Out of bounds
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/vendor/composer/ClassLoader.php:201
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/vendor/composer/ClassLoader.php:184
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:512
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/libs/CSSMinTest.php:119
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+4) SiteListTest::testSerialization with data set #0 (SiteList)
+Creating default object from empty value
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/includes/libs/GenericArrayObject.php:222
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/includes/site/SiteList.php:287
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/site/SiteListTest.php:186
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+5) SiteListTest::testSerialization with data set #1 (SiteList)
+Creating default object from empty value
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/includes/libs/GenericArrayObject.php:222
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/includes/site/SiteList.php:287
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/site/SiteListTest.php:186
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+6) SiteListTest::testSerialization with data set #2 (SiteList)
+Creating default object from empty value
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/includes/libs/GenericArrayObject.php:222
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/includes/site/SiteList.php:287
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/site/SiteListTest.php:186
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+--
+
+
+There were 9 failures:
+
+1) HttpTest::testValidateCookieDomain with data set #0 (false, 'org')
+org
+Failed asserting that true matches expected false.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/HttpTest.php:17
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+2) HttpTest::testValidateCookieDomain with data set #1 (false, '.org')
+.org
+Failed asserting that true matches expected false.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/HttpTest.php:17
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+3) HttpTest::testValidateCookieDomain with data set #9 (false, 'uk')
+uk
+Failed asserting that true matches expected false.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/HttpTest.php:17
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+4) HttpTest::testIsValidUri with data set #16 (false, 'http://!"èèè¿¿¿~~\'', 'hostname is made of any non whitespace')
+hostname is made of any non whitespace
+Failed asserting that true matches expected false.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/HttpTest.php:59
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+5) HttpTest::testIsValidUri with data set #17 (false, 'http://exam:ple.org/', 'hostname can not use colons!')
+hostname can not use colons!
+Failed asserting that true matches expected false.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/HttpTest.php:59
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+6) CSSJanusTest::testTransformBroken with data set #0 ('foo-left-x[attr="x"] { width: 0; }', 'foo-left-x[attr="x"] { width: 0; }')
+Test flipping
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+-'foo-left-x[attr="x"] { width: 0; }'
++'foo-right-x[attr="x"] { width: 0; }'
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/libs/CSSJanusTest.php:50
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+7) CSSJanusTest::testTransformBroken with data set #1 ('.foo[data-left="x"] { width: 0; }', '.foo[data-left="x"] { width: 0; }')
+Test flipping
+Failed asserting that two strings are equal.
+--- Expected
++++ Actual
+@@ @@
+-'.foo[data-left="x"] { width: 0; }'
++'.foo[data-right="x"] { width: 0; }'
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/libs/CSSJanusTest.php:50
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+8) BitmapMetadataHandlerTest::testIPTCDatesInvalid
+Failed asserting that true is false.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/media/BitmapMetadataHandlerTest.php:87
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+9) UploadBaseTest::testTitleValidation with data set #5 ('A', NULL, 8, 'upload title without extension')
+upload title without extension code
+Failed asserting that 9 matches expected 8.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/upload/UploadBaseTest.php:41
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+There were 49 skipped tests:
+
+1) CdbTest::testCdb
+Native CDB support is not available
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CdbTest.php:11
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+2) CdbTest::testMediaWikiTestCaseParentSetupCalled
+Native CDB support is not available
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CdbTest.php:11
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+3) CollationTest::testIsPrefix with data set #0 ('en', 'A', 'AA')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+4) CollationTest::testIsPrefix with data set #1 ('en', 'A', 'AAA')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+5) CollationTest::testIsPrefix with data set #2 ('en', 'Д', 'ДЂ')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+6) CollationTest::testIsPrefix with data set #3 ('en', 'Д', 'ДA')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+7) CollationTest::testIsPrefix with data set #4 ('fi', 'Z', 'Ʒ')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+8) CollationTest::testIsPrefix with data set #5 ('sv', 't', 'Þ')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+9) CollationTest::testIsPrefix with data set #6 ('en', 'ꦲ', 'ꦲꦤ')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+10) CollationTest::testIsPrefix with data set #7 ('en', 'ꦲ', 'ꦲД')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+11) CollationTest::testIsPrefix with data set #8 ('en', 'A', 'Aꦲ')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+12) CollationTest::testNotIsPrefix with data set #0 ('en', 'A', 'B')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+13) CollationTest::testNotIsPrefix with data set #1 ('en', 'AC', 'ABC')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+14) CollationTest::testNotIsPrefix with data set #2 ('en', 'Z', 'Ʒ')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+15) CollationTest::testNotIsPrefix with data set #3 ('en', 'A', 'ꦲ')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+16) CollationTest::testGetFirstLetter with data set #0 ('uppercase', 'Abc', 'A')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+17) CollationTest::testGetFirstLetter with data set #1 ('uppercase', 'abc', 'A')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+18) CollationTest::testGetFirstLetter with data set #2 ('identity', 'abc', 'a')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+19) CollationTest::testGetFirstLetter with data set #3 ('uca-en', 'abc', 'A')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+20) CollationTest::testGetFirstLetter with data set #4 ('uca-en', ' ', ' ')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+21) CollationTest::testGetFirstLetter with data set #5 ('uca-en', 'Êveryone', 'E')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+22) CollationTest::testGetFirstLetter with data set #6 ('uca-vi', 'Êveryone', 'Ê')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+23) CollationTest::testGetFirstLetter with data set #7 ('uca-sv', 'The', 'T')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+24) CollationTest::testGetFirstLetter with data set #8 ('uca-sv', 'Å', 'Å')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+25) CollationTest::testGetFirstLetter with data set #9 ('uca-hu', 'dzsdo', 'Dzs')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+26) CollationTest::testGetFirstLetter with data set #10 ('uca-hu', 'dzdso', 'Dz')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+27) CollationTest::testGetFirstLetter with data set #11 ('uca-hu', 'CSD', 'Cs')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+28) CollationTest::testGetFirstLetter with data set #12 ('uca-root', 'CSD', 'C')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+29) CollationTest::testGetFirstLetter with data set #13 ('uca-fi', 'Ǥ', 'G')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+30) CollationTest::testGetFirstLetter with data set #14 ('uca-fi', 'Ŧ', 'T')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+31) CollationTest::testGetFirstLetter with data set #15 ('uca-fi', 'Ʒ', 'Z')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+32) CollationTest::testGetFirstLetter with data set #16 ('uca-fi', 'Ŋ', 'N')
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+33) CollationTest::testMediaWikiTestCaseParentSetupCalled
+These tests require intl extension
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/CollationTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+34) DiffHistoryBlobTest::testXdiffAdler32 with data set #0 ('', 'Empty string')
+The xdiff extension is not available
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/DiffHistoryBlobTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+35) DiffHistoryBlobTest::testXdiffAdler32 with data set #1 ('' . "\0" . '', 'Null')
+The xdiff extension is not available
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/DiffHistoryBlobTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+36) DiffHistoryBlobTest::testXdiffAdler32 with data set #2 ('' . "\0" . '' . "\0" . '' . "\0" . '', 'Several nulls')
+The xdiff extension is not available
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/DiffHistoryBlobTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+37) DiffHistoryBlobTest::testXdiffAdler32 with data set #3 ('Hello', 'An ASCII string')
+The xdiff extension is not available
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/DiffHistoryBlobTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+38) DiffHistoryBlobTest::testXdiffAdler32 with data set #4 ('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'A string larger than xdiff\'s NMAX (5552)')
+The xdiff extension is not available
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/DiffHistoryBlobTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+39) DiffHistoryBlobTest::testMediaWikiTestCaseParentSetupCalled
+The xdiff extension is not available
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/includes/DiffHistoryBlobTest.php:6
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+40) LanguageGvTest::testGetPluralRuleType with data set #0 ('Form 4', 0)
+This test won't work since convertPlural for gv doesn't seem to actually follow our plural rules.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/languages/LanguageGvTest.php:20
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+41) LanguageGvTest::testGetPluralRuleType with data set #1 ('Form 2', 1)
+This test won't work since convertPlural for gv doesn't seem to actually follow our plural rules.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/languages/LanguageGvTest.php:20
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+42) LanguageGvTest::testGetPluralRuleType with data set #2 ('Form 3', 2)
+This test won't work since convertPlural for gv doesn't seem to actually follow our plural rules.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/languages/LanguageGvTest.php:20
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+43) LanguageGvTest::testGetPluralRuleType with data set #3 ('Form 4', 3)
+This test won't work since convertPlural for gv doesn't seem to actually follow our plural rules.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/languages/LanguageGvTest.php:20
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+44) LanguageGvTest::testGetPluralRuleType with data set #4 ('Form 1', 20)
+This test won't work since convertPlural for gv doesn't seem to actually follow our plural rules.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/languages/LanguageGvTest.php:20
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+45) LanguageGvTest::testGetPluralRuleType with data set #5 ('Form 2', 21)
+This test won't work since convertPlural for gv doesn't seem to actually follow our plural rules.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/languages/LanguageGvTest.php:20
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+46) LanguageGvTest::testGetPluralRuleType with data set #6 ('Form 3', 22)
+This test won't work since convertPlural for gv doesn't seem to actually follow our plural rules.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/languages/LanguageGvTest.php:20
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+47) LanguageGvTest::testGetPluralRuleType with data set #7 ('Form 4', 23)
+This test won't work since convertPlural for gv doesn't seem to actually follow our plural rules.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/languages/LanguageGvTest.php:20
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+48) LanguageGvTest::testGetPluralRuleType with data set #8 ('Form 4', 50)
+This test won't work since convertPlural for gv doesn't seem to actually follow our plural rules.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/languages/LanguageGvTest.php:20
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+49) LanguageTest::testKnownCldrLanguageTag
+The LanguageNames class is not available. The cldr extension is probably not installed.
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/languages/LanguageTest.php:474
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiTestCase.php:116
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:80
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/mediawiki-core/tests/phpunit/MediaWikiPHPUnitCommand.php:64
+
+FAILURES!
+Tests: 5203, Assertions: 35024, Failures: 9, Errors: 6, Skipped: 49.

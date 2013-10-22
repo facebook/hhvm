@@ -1,5 +1,5 @@
 HipHop Warning: HipHop currently does not support circular reference collection in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/tests/bootstrap.php on line 57
-PHPUnit 3.7.27 by Sebastian Bergmann.
+PHPUnit 3.7.28 by Sebastian Bergmann.
 
 Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/phpunit.xml.dist
 

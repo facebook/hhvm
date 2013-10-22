@@ -1,4 +1,4 @@
-PHPUnit 3.7.27 by Sebastian Bergmann.
+PHPUnit 3.7.28 by Sebastian Bergmann.
 
 
 Starting test 'PHPSDKTestCase::testConstructor'.
@@ -233,5 +233,4 @@ Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #3 ('evil.com',
 Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #4 ('foo.fbrell.com', 'bar.fbrell.com', false)'.
 .
 
-Time: 16.33 seconds, Memory: 7.13Mb
 OK (115 tests, 217 assertions)

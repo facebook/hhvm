@@ -1,4 +1,4 @@
-PHPUnit 3.7.27 by Sebastian Bergmann.
+PHPUnit 3.7.28 by Sebastian Bergmann.
 
 
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/bug16077.phpt'.
@@ -1451,7 +1451,7 @@ Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-cor
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/pear_autoloader.phpt'.
 S
 
-Time: 43.78 minutes, Memory: 2.42Mb
+Time: 25.2 minutes, Memory: 9.53Mb
 
 There were 174 failures:
 
@@ -5508,8 +5508,8 @@ There were 174 failures:
 +)
 +Received:
 +array (
-+  'file' => '',
-+  'line' => 1,
++  'file' => '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context_eval.php',
++  'line' => 4,
 +  'function' => 'include',
 +)
  tests done
@@ -5533,8 +5533,8 @@ There were 174 failures:
 +)
 +Received:
 +array (
-+  'file' => '',
-+  'line' => 1,
++  'file' => '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context_eval_staticPush.php',
++  'line' => 4,
 +  'function' => 'include',
 +)
  tests done
@@ -5611,8 +5611,8 @@ There were 174 failures:
 +)
 +Received:
 +array (
-+  'file' => '',
-+  'line' => 1,
++  'file' => '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_eval.php',
++  'line' => 7,
 +  'function' => 'include',
 +)
  tests done
@@ -5637,8 +5637,8 @@ There were 174 failures:
 +)
 +Received:
 +array (
-+  'file' => '',
-+  'line' => 1,
++  'file' => '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_eval_staticPush.php',
++  'line' => 7,
 +  'function' => 'include',
 +)
  tests done
@@ -5716,8 +5716,8 @@ There were 174 failures:
 +)
 +Received:
 +array (
-+  'file' => '',
-+  'line' => 1,
++  'file' => '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context_eval.php',
++  'line' => 9,
 +  'function' => 'include',
 +)
  tests done
@@ -5743,8 +5743,8 @@ There were 174 failures:
 +)
 +Received:
 +array (
-+  'file' => '',
-+  'line' => 1,
++  'file' => '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context_eval_staticPush.php',
++  'line' => 9,
 +  'function' => 'include',
 +)
  tests done
@@ -5822,8 +5822,8 @@ There were 174 failures:
 +)
 +Received:
 +array (
-+  'file' => '',
-+  'line' => 1,
++  'file' => '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context_eval.php',
++  'line' => 9,
 +  'function' => 'include',
 +)
  tests done
@@ -5849,8 +5849,8 @@ There were 174 failures:
 +)
 +Received:
 +array (
-+  'file' => '',
-+  'line' => 1,
++  'file' => '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context_eval_staticPush.php',
++  'line' => 9,
 +  'function' => 'include',
 +)
  tests done

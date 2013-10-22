@@ -20,7 +20,7 @@ Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testVendorsClassMap
 Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testVendorsClassMapAutoloadingWithTargetDir'.
 .
 Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testClassMapAutoloadingEmptyDirAndExactFile'.
-F
+.
 Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testFilesAutoloadGeneration'.
 .
 Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testFilesAutoloadOrderByDependencies'.
@@ -40,11 +40,11 @@ Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testPreAndPostEvent
 Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testUseGlobalIncludePath'.
 .
 Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testVendorDirExcludedFromWorkingDir'.
-F
+.
 Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testUpLevelRelativePaths'.
-F
+.
 Starting test 'Composer\Test\Autoload\AutoloadGeneratorTest::testEmptyPaths'.
-F
+.
 Starting test 'Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #0 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/Namespaced', array('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/Namespaced/Bar.inc', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/Namespaced/Foo.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/Namespaced/Baz.php'))'.
 .
 Starting test 'Composer\Test\Autoload\ClassMapGeneratorTest::testCreateMap with data set #1 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/beta/NamespaceCollision', array('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/beta/NamespaceCollision/A/B/Bar.php', '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/Fixtures/beta/NamespaceCollision/A/B/Foo.php'))'.
@@ -538,17 +538,12 @@ Starting test 'Composer\Test\InstallerTest::testInstaller with data set #0 (a-1.
 Starting test 'Composer\Test\InstallerTest::testInstaller with data set #1 (a-1.0.0.0, Composer\Repository\ArrayRepository, array(array(b-1.0.0.0)))'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #0 ('updating-dev-from-lock-removes-old-deps.test', 'Installing locked dev packages should remove old dependencies', NULL, array(array('dev-master'), 'dev'), array(array(array('a/devpackage', 'dev-master', array('newref', '', 'git'), array())), NULL, array(), 'dev', array(), '3623df5f6efb923f1d6fe3f729771f73'), array(array('a/devpackage', 'dev-master', array('oldref', '', 'git'), array('*')), array('a/dependency', 'dev-master', array('ref', '', 'git'), array())), 'install', array(), '', 'Uninstalling a/dependency (dev-master ref)
-Updating a/devpackage (dev-master oldref) to a/devpackage (dev-master newref)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #1 ('update-whitelist-locked-require.test', 'Update with a package whitelist only updates those packages and their dependencies if they are not present in composer.json', NULL, array(array(array('package', array(array('whitelisted', '1.1.0', array('1.1.0', '1.*')), array('whitelisted', '1.0.0', array('1.0.0', '1.*')), array('dependency', '1.1.0'), array('dependency', '1.0.0'), array('fixed-dependency', '1.1.0', array('1.*')), array('fixed-dependency', '1.0.0', array('1.*')), array('fixed-sub-dependency', '1.1.0'), array('fixed-sub-dependency', '1.0.0')))), array('1.*', '1.*')), array(), array(array('whitelisted', '1.0.0', array('1.0.0', '1.*')), array('dependency', '1.0.0'), array('fixed-dependency', '1.0.0', array('1.*')), array('fixed-sub-dependency', '1.0.0')), 'update whitelisted', array(), '', 'Updating dependency (1.0.0) to dependency (1.1.0)
-Updating whitelisted (1.0.0) to whitelisted (1.1.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #2 ('provide-priorities.test', 'Provide only applies when no existing package has the given name', NULL, array(array(array('package', array(array('higher-prio-hijacker', '1.1.0', array('1.0.0')), array('provider2', '1.1.0', array('1.0.0')))), array('package', array(array('package', '0.9.0'), array('package', '1.0.0'), array('hijacker', '1.1.0', array('1.0.0')), array('provider3', '1.1.0', array('1.0.0'))))), array('1.*', '1.*', '1.1.0')), array(), array(), 'install', array(), '', 'Installing package (1.0.0)
-Installing provider2 (1.1.0)
-Installing provider3 (1.1.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #3 ('install-missing-alias-from-lock.test', 'Installing an old alias that doesn\'t exist anymore from a lock is possible', NULL, array(array(array('package', array(array('a/a', 'dev-master', array(array('2.2.x-dev')), array('master', 'git', ''))))), array('2.1.*'), 'dev'), array(array(array('a/a', 'dev-master', '9999999-dev', array(array('2.1.x-dev')), array('oldmaster', 'git', ''), 'library')), NULL, array(), 'dev', array(), '9cbb2de69f0ebc350cc1c4ab8694fcf0'), array(), 'install', array(), '', 'Installing a/a (dev-master oldmaster)
-Marking a/a (2.1.x-dev oldmaster) as installed, alias of a/a (dev-master oldmaster)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #4 ('partial-update-without-lock.test', 'Partial update without lock file should update everything whitelisted, remove overly unstable packages', NULL, array(array(array('package', array(array('a/old', '1.0.0'), array('a/old', '2.0.0'), array('b/unstable', '1.0.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '1.0.0'), array('d/removed', '1.0.0')))), array('*', '*', '*')), array(), array(array('a/old', '1.0.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '1.0.0'), array('d/removed', '1.0.0')), 'update b/unstable', array(array(array('a/old', '1.0.0', 'library'), array('b/unstable', '1.0.0', 'library'), array('c/uptodate', '1.0.0', 'library'), array('d/removed', '1.0.0', 'library')), array(), array(), 'stable', array(), array(), array()), '', 'Updating b/unstable (1.1.0-alpha) to b/unstable (1.0.0)')'.
 .
@@ -557,36 +552,20 @@ Starting test 'Composer\Test\InstallerTest::testIntegration with data set #5 ('u
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #6 ('install-dev-using-dist.test', 'Installs a dev package from lock using dist', NULL, array(array(array('package', array(array('a/a', 'dev-master', '9999999-dev', array('zip', 'http://www.example.com/dist.zip', '459720ff3b74ee0c0d159277c6f2f5df89d8a4f6'))))), array('dev-master'), 'dev'), array(), array(), 'install --prefer-dist', array(array(array('a/a', 'dev-master', array('zip', 'http://www.example.com/dist.zip', '459720ff3b74ee0c0d159277c6f2f5df89d8a4f6', NULL), 'library')), array(), array(), 'dev', array(20), array(), array()), '', 'Installing a/a (dev-master)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #7 ('suggest-uninstalled.test', 'Suggestions are displayed', NULL, array(array(array('package', array(array('a/a', '1.0.0', array('an obscure reason'))))), array('1.0.0')), array(), array(), 'install', array(), '<info>Loading composer repositories with package information</info>
-<info>Installing dependencies</info>
-a/a suggests installing b/b (an obscure reason)
-<info>Writing lock file</info>
-<info>Generating autoload files</info>
-', 'Installing a/a (1.0.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #8 ('update-whitelist-reads-lock.test', 'Limited update takes rules from lock if available, and not from the installed repo + composer.json', NULL, array(array(array('package', array(array('toupdate/installed', '1.1.0'), array('toupdate/installed', '1.0.0'), array('toupdate/notinstalled', '1.1.0'), array('toupdate/notinstalled', '1.0.0'), array('old/installed', '0.9.0'), array('old/installed', '1.0.0')))), array('1.*', '1.*', '*')), array(array(array('old/installed', '1.0.0'), array('toupdate/installed', '1.0.0'), array('toupdate/notinstalled', '1.0.0')), NULL, array(), 'stable', array(), 'ff6b3054b62c0519c28f9a4d70dbcbca'), array(array('toupdate/installed', '1.0.0'), array('old/installed', '0.9.0')), 'update toupdate/installed', array(), '', 'Updating old/installed (0.9.0) to old/installed (1.0.0)
-Updating toupdate/installed (1.0.0) to toupdate/installed (1.1.0)
-Installing toupdate/notinstalled (1.0.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #9 ('update-dev-to-new-ref-picks-up-changes.test', 'Updating a dev package to its latest ref should pick up new dependencies', NULL, array(array(array('package', array(array('a/devpackage', 'dev-master', array('newref', '', 'git'), array('*')), array('a/dependency', 'dev-master', array('ref', '', 'git'), array())))), array('dev-master'), 'dev'), array(), array(array('a/devpackage', 'dev-master', array('oldref', '', 'git'), array())), 'update', array(), '', 'Installing a/dependency (dev-master ref)
-Updating a/devpackage (dev-master oldref) to a/devpackage (dev-master newref)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #10 ('suggest-replaced.test', 'Suggestions are not displayed for packages if they are replaced', NULL, array(array(array('package', array(array('a/a', '1.0.0', array('an obscure reason')), array('c/c', '1.0.0', array('1.0.0'))))), array('1.0.0', '1.0.0')), array(), array(), 'install', array(), '<info>Loading composer repositories with package information</info>
-<info>Installing dependencies</info>
-<info>Writing lock file</info>
-<info>Generating autoload files</info>
-', 'Installing a/a (1.0.0)
-Installing c/c (1.0.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #11 ('disjunctive-multi-constraints.test', 'Disjunctive multi constraints work', NULL, array(array(array('package', array(array('foo', '1.1.0'), array('foo', '1.0.0'), array('bar', '1.1.0', array('1.0.*'))))), array('1.*', '1.0.*|1.1.*')), array(), array(), 'install', array(), '', 'Installing foo (1.0.0)
-Installing bar (1.1.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #12 ('updating-dev-updates-url-and-reference.test', 'Updating a dev package for new reference updates the url and reference', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('newref', 'newurl', 'git'), array('newref', 'newurl', 'zip', ''))))), 'dev', array('dev-master')), array(array(array('a/a', 'dev-master', array('oldref', 'oldurl', 'git'), array('oldref', 'oldurl', 'zip', ''))), NULL, array(), 'dev', array(20), '55028825b2f4578970255da741113646'), array(array('a/a', 'dev-master', array('oldref', 'oldurl', 'git'), array('oldref', 'oldurl', 'zip', ''))), 'update', array(array(array('a/a', 'dev-master', 'library', array('newref', 'newurl', 'git'), array('newref', 'newurl', 'zip', ''))), array(), array(), 'dev', array(20), array(), array()), '', 'Updating a/a (dev-master oldref) to a/a (dev-master newref)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #13 ('update-all-dry-run.test', 'Updates updateable packages in dry-run mode', NULL, array(array(array('package', array(array('a/a', '1.0.0'), array('a/a', '1.0.1'), array('a/a', '1.1.0'), array('a/b', '1.0.0'), array('a/b', '1.0.1'), array('a/b', '2.0.0'), array('a/c', '1.0.0'), array('a/c', '2.0.0')))), array('1.0.*', '1.*'), array('*')), array(), array(array('a/a', '1.0.0'), array('a/c', '1.0.0'), array('a/b', '1.0.0')), 'update --dev --dry-run', array(), '', 'Updating a/a (1.0.0) to a/a (1.0.1)
-Updating a/b (1.0.0) to a/b (2.0.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #14 ('replace-priorities.test', 'Replace takes precedence only in higher priority repositories', NULL, array(array(array('package', array(array('forked', '1.1.0', array('1.1.0')))), array('package', array(array('package', '1.0.0'), array('package2', '1.0.0'), array('hijacker', '1.1.0', array('1.1.0'))))), array('1.*', '1.*')), array(), array(), 'install', array(), '', 'Installing package (1.0.0)
-Installing forked (1.1.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #15 ('install-simple.test', 'Installs a simple package with exact match requirement', NULL, array(array(array('package', array(array('a/a', '1.0.0')))), array('1.0.0')), array(), array(), 'install', array(), '', 'Installing a/a (1.0.0)')'.
 .
@@ -595,31 +574,16 @@ Starting test 'Composer\Test\InstallerTest::testIntegration with data set #16 ('
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #17 ('update-downgrades-unstable-packages.test', 'Downgrading from unstable to more stable package should work even if already installed', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('abcd', '', 'git')), array('a/a', '1.0.0', array('1.0.0', '', 'git'), array('1.0.0', '', 'zip', '')), array('b/b', 'dev-master', array('abcd', '', 'git')), array('b/b', '1.0.0', array('1.0.0', '', 'git'), array('1.0.0', '', 'zip', ''))))), array('*', '*@dev')), array(), array(array('a/a', 'dev-master', array('abcd', '', 'git')), array('b/b', 'dev-master', array('abcd', '', 'git'))), 'update', array(), '', 'Updating a/a (dev-master abcd) to a/a (1.0.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #18 ('install-dev.test', 'Installs a package in dev env', NULL, array(array(array('package', array(array('a/a', '1.0.0'), array('a/b', '1.0.0')))), array('1.0.0'), array('1.0.0')), array(), array(), 'install --dev', array(), '', 'Installing a/a (1.0.0)
-Installing a/b (1.0.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #19 ('partial-update-from-lock.test', 'Partial update from lock file should update everything to the state of the lock, remove overly unstable packages', NULL, array(array(array('package', array(array('a/old', '1.0.0'), array('a/old', '2.0.0'), array('b/unstable', '1.0.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '1.0.0'), array('d/removed', '1.0.0')))), array('*', '*', '*')), array(array(array('a/old', '1.0.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '1.0.0'), array('d/removed', '1.0.0')), array(), array(), 'stable', array(15), array(), array(), 'a1ef5a86d0a6f1851c03dc25941dd620'), array(array('a/old', '0.9.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '2.0.0')), 'update b/unstable', array(array(array('a/old', '1.0.0', 'library'), array('b/unstable', '1.0.0', 'library'), array('c/uptodate', '1.0.0', 'library')), array(), array(), 'stable', array(), array(), array()), '', 'Updating a/old (0.9.0) to a/old (1.0.0)
-Updating c/uptodate (2.0.0) to c/uptodate (1.0.0)
-Updating b/unstable (1.1.0-alpha) to b/unstable (1.0.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #20 ('plugins-are-installed-first.test', 'Composer installers are installed first if they have no requirements', NULL, array(array(array('package', array(array('pkg', '1.0.0'), array('pkg2', '1.0.0'), array('inst', '1.0.0', 'composer-plugin'), array('inst2', '1.0.0', 'composer-plugin', array('*'))))), array('1.0.0', '1.0.0', '1.0.0')), array(), array(), 'install', array(), '', 'Installing inst (1.0.0)
-Installing pkg (1.0.0)
-Installing pkg2 (1.0.0)
-Installing inst2 (1.0.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #21 ('partial-update-downgrades-non-whitelisted-unstable.test', 'Partial update from lock file should apply lock file and downgrade unstable packages even if not whitelisted', NULL, array(array(array('package', array(array('a/old', '1.0.0'), array('a/old', '2.0.0'), array('b/unstable', '1.0.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '1.0.0'), array('d/removed', '1.0.0')))), array('*', '*', '*')), array(array(array('a/old', '1.0.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '1.0.0'), array('d/removed', '1.0.0')), array(), array(), 'stable', array(15), array(), array(), 'a1ef5a86d0a6f1851c03dc25941dd620'), array(array('a/old', '0.9.0'), array('b/unstable', '1.1.0-alpha'), array('c/uptodate', '2.0.0')), 'update c/uptodate', array(array(array('a/old', '1.0.0', 'library'), array('b/unstable', '1.0.0', 'library'), array('c/uptodate', '2.0.0', 'library')), array(), array(), 'stable', array(), array(), array()), '', 'Updating a/old (0.9.0) to a/old (1.0.0)
-Updating b/unstable (1.1.0-alpha) to b/unstable (1.0.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #22 ('update-whitelist-patterns.test', 'Update with a package whitelist only updates those corresponding to the pattern', NULL, array(array(array('package', array(array('vendor/Test-Package', '2.0'), array('vendor/NotMe', '2.0'), array('exact/Test-Package', '2.0'), array('notexact/TestPackage', '2.0'), array('all/Package1', '2.0'), array('all/Package2', '2.0'), array('another/another', '2.0'), array('no/regexp', '2.0')))), array('*.*', '*.*', '*.*', '*.*', '*.*', '*.*', '*.*', '*.*')), array(), array(array('vendor/Test-Package', '1.0'), array('vendor/NotMe', '1.0'), array('exact/Test-Package', '1.0'), array('notexact/TestPackage', '1.0'), array('all/Package1', '1.0'), array('all/Package2', '1.0'), array('another/another', '1.0'), array('no/regexp', '1.0')), 'update vendor/Test* exact/Test-Package notexact/Test all/* no/reg?xp', array(), '', 'Updating vendor/Test-Package (1.0) to vendor/Test-Package (2.0)
-Updating exact/Test-Package (1.0) to exact/Test-Package (2.0)
-Updating all/Package1 (1.0) to all/Package1 (2.0)
-Updating all/Package2 (1.0) to all/Package2 (2.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #23 ('aliased-priority.test', 'Aliases take precedence over default package', NULL, array(array(array('package', array(array('a/c', 'dev-feature-foo', array('feat.f', 'git', '')), array('a/b', 'dev-master', array(array('1.0.x-dev')), array('forked', 'git', '')))), array('package', array(array('a/a', 'dev-master', array(array('1.0.x-dev')), array('master', 'git', ''), array('dev-master', 'dev-master')), array('a/b', 'dev-master', array(array('1.0.x-dev')), array('master', 'git', '')), array('a/c', 'dev-master')))), array('1.*', '1.*', 'dev-feature-foo as dev-master'), 'dev'), array(), array(), 'install', array(), '', 'Installing a/c (dev-feature-foo feat.f)
-Marking a/c (dev-master feat.f) as installed, alias of a/c (dev-feature-foo feat.f)
-Installing a/b (dev-master forked)
-Installing a/a (dev-master master)
-Marking a/a (1.0.x-dev master) as installed, alias of a/a (dev-master master)
-Marking a/b (1.0.x-dev forked) as installed, alias of a/b (dev-master forked)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #24 ('install-from-empty-lock.test', 'Requirements from the composer file are not installed if the lock file is present', NULL, array(array(array('package', array(array('required', '1.0.0'), array('newly-required', '1.0.0')))), array('1.0.0', '1.0.0')), array(array(array('required', '1.0.0')), NULL, array(), 'stable', array(), 'aec448c7ab28f70b2b294451d7419cd5'), array(), 'install', array(), '', 'Installing required (1.0.0)')'.
 .
@@ -630,40 +594,24 @@ Starting test 'Composer\Test\InstallerTest::testIntegration with data set #26 ('
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #27 ('circular-dependency.test', 'Circular dependencies are possible between packages', NULL, array('root/package', 'library', 'dev', 'dev-master', array('1.0'), array('self.version'), array(array('2.0-dev')), array(array('package', array(array('required/package', '1.0', 'library', array('some.branch', 'git', ''), array('2.*')))), array('package', array(array('root/package', '2.0-dev', 'library', array('other.branch', 'git', ''), array('self.version')))))), array(), array(), 'update', array(), '', 'Installing required/package (1.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #28 ('update-all.test', 'Updates updateable packages', NULL, array(array(array('package', array(array('a/a', '1.0.0'), array('a/a', '1.0.1'), array('a/a', '1.1.0'), array('a/b', '1.0.0'), array('a/b', '1.0.1'), array('a/b', '2.0.0'), array('a/c', '1.0.0'), array('a/c', '2.0.0')))), array('1.0.*', '1.*'), array('*')), array(), array(array('a/a', '1.0.0'), array('a/c', '1.0.0'), array('a/b', '1.0.0')), 'update --dev', array(), '', 'Updating a/a (1.0.0) to a/a (1.0.1)
-Updating a/b (1.0.0) to a/b (2.0.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #29 ('suggest-installed.test', 'Suggestions are not displayed for installed packages', NULL, array(array(array('package', array(array('a/a', '1.0.0', array('an obscure reason')), array('b/b', '1.0.0')))), array('1.0.0', '1.0.0')), array(), array(), 'install', array(), '<info>Loading composer repositories with package information</info>
-<info>Installing dependencies</info>
-<info>Writing lock file</info>
-<info>Generating autoload files</info>
-', 'Installing a/a (1.0.0)
-Installing b/b (1.0.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #30 ('aliased-priority-conflicting.test', 'Aliases take precedence over default package even if default is selected', NULL, array(array(array('package', array(array('a/req', 'dev-feature-foo', array('feat.f', 'git', '')), array('a/req', 'dev-master', array(array('1.0.x-dev')), array('forked', 'git', '')))), array('package', array(array('a/a', 'dev-master', array('dev-master')), array('a/b', 'dev-master', array('dev-master')), array('a/req', 'dev-master', array(array('1.0.x-dev')), array('master', 'git', ''))))), array('dev-master', 'dev-master', 'dev-feature-foo as dev-master'), 'dev'), array(), array(), 'install', array(), '', 'Installing a/req (dev-feature-foo feat.f)
-Marking a/req (dev-master feat.f) as installed, alias of a/req (dev-feature-foo feat.f)
-Installing a/a (dev-master)
-Installing a/b (dev-master)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #31 ('update-installed-alias-dry-run.test', 'Updates installed alias packages in dry-run mode', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('2.0.*'), array('abcdef', '', 'git'), array(array('1.0.x-dev'))), array('b/b', 'dev-master', array('123456', '', 'git'), array(array('2.0.x-dev')))))), array('~1.0@dev', '@dev')), array(), array(array('a/a', 'dev-master', array('2.0.*'), array('abcdef', '', 'git'), array(array('1.0.x-dev'))), array('b/b', 'dev-master', array('123456', '', 'git'), array(array('2.0.x-dev')))), 'update --dry-run', array(), '', '')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #32 ('update-alias.test', 'Update aliased package to non-aliased version', NULL, array(array(array('package', array(array('a/a', 'dev-master', array(array('1.0.x-dev')), array('master', 'git', '')), array('a/a', 'dev-foo', array('foo', 'git', ''))))), array('dev-foo')), array(), array(array('a/a', 'dev-master', array(array('1.0.x-dev')), array('master', 'git', ''))), 'update', array(), '', 'Updating a/a (dev-master master) to a/a (dev-foo foo)
-Marking a/a (1.0.x-dev master) as uninstalled, alias of a/a (dev-master master)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #33 ('update-installed-alias.test', 'Updates installed alias packages', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('2.0.*'), array('abcdef', '', 'git'), array(array('1.0.x-dev'))), array('b/b', 'dev-master', array('123456', '', 'git'), array(array('2.0.x-dev')))))), array('~1.0@dev', '@dev')), array(), array(array('a/a', 'dev-master', array('2.0.*'), array('abcdef', '', 'git'), array(array('1.0.x-dev'))), array('b/b', 'dev-master', array('123456', '', 'git'), array(array('2.0.x-dev')))), 'update', array(), '', '')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #34 ('alias-with-reference.test', 'Aliases of referenced packages work', NULL, array(array(array('package', array(array('a/aliased', 'dev-master', array('orig', 'git', '')), array('b/requirer', '1.0.0', array('1.0.0'), array('1.0.0', 'git', ''))))), array('dev-master#abcd as 1.0.0', '*')), array(), array(), 'install', array(), '', 'Installing a/aliased (dev-master abcd)
-Marking a/aliased (1.0.0) as installed, alias of a/aliased (dev-master abcd)
-Installing b/requirer (1.0.0)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #35 ('install-reference.test', 'Installs a dev package forcing it\'s reference', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('abc123', '', 'git'))))), array('dev-master#def000')), array(), array(), 'install', array(), '', 'Installing a/a (dev-master def000)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #36 ('install-aliased-alias.test', 'Installing double aliased package', NULL, array(array(array('package', array(array('a/a', 'dev-master', array('file', ''), array('dev-master')), array('b/b', 'dev-foo', array(array('1.0.x-dev')), array('file', ''))))), array('dev-master', '1.0.x-dev as dev-master'), 'dev'), array(), array(), 'install', array(), '', 'Installing b/b (dev-foo)
-Marking b/b (dev-master) as installed, alias of b/b (dev-foo)
-Installing a/a (dev-master)
-Marking b/b (1.0.x-dev) as installed, alias of b/b (dev-foo)')'.
 .
 Starting test 'Composer\Test\InstallerTest::testIntegration with data set #37 ('update-whitelist.test', 'Update with a package whitelist only updates those packages and their dependencies listed as command arguments', NULL, array(array(array('package', array(array('fixed', '1.1.0'), array('fixed', '1.0.0'), array('whitelisted', '1.1.0', array('1.1.0')), array('whitelisted', '1.0.0', array('1.0.0')), array('dependency', '1.1.0'), array('dependency', '1.0.0'), array('unrelated', '1.1.0', array('1.*')), array('unrelated', '1.0.0', array('1.*')), array('unrelated-dependency', '1.1.0'), array('unrelated-dependency', '1.0.0')))), array('1.*', '1.*', '1.*')), array(), array(array('fixed', '1.0.0'), array('whitelisted', '1.0.0', array('1.0.0')), array('dependency', '1.0.0'), array('unrelated', '1.0.0', array('1.*')), array('unrelated-dependency', '1.0.0')), 'update whitelisted', array(), '', 'Updating dependency (1.0.0) to dependency (1.1.0)
-Updating whitelisted (1.0.0) to whitelisted (1.1.0)')'.
 .
 Starting test 'Composer\Test\Json\JsonFileTest::testParseErrorDetectExtraComma'.
 .
@@ -693,7 +641,7 @@ Starting test 'Composer\Test\Json\JsonFileTest::testSimpleJsonString'.
 Starting test 'Composer\Test\Json\JsonFileTest::testTrailingBackslash'.
 .
 Starting test 'Composer\Test\Json\JsonFileTest::testFormatEmptyArray'.
-F
+.
 Starting test 'Composer\Test\Json\JsonFileTest::testEscape'.
 .
 Starting test 'Composer\Test\Json\JsonFileTest::testUnicode'.
@@ -707,248 +655,40 @@ Starting test 'Composer\Test\Json\JsonFileTest::testEscapedBackslashes'.
 Starting test 'Composer\Test\Json\JsonFileTest::testEscapedUnicode'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #0 ('{}', 'require', 'vendor/baz', 'qux', '{
-    "require": {
-        "vendor/baz": "qux"
-    }
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #1 ('{
-    "foo": "bar"
-}', 'require', 'vendor/baz', 'qux', '{
-    "foo": "bar",
-    "require": {
-        "vendor/baz": "qux"
-    }
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #2 ('{
-    "require": {
-    }
-}', 'require', 'vendor/baz', 'qux', '{
-    "require": {
-        "vendor/baz": "qux"
-    }
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #3 ('{
-    "require": {
-        "foo": "bar"
-    }
-}', 'require', 'vendor/baz', 'qux', '{
-    "require": {
-        "foo": "bar",
-        "vendor/baz": "qux"
-    }
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #4 ('{
-    "require":
-    {
-        "foo": "bar",
-        "vendor/baz": "baz"
-    }
-}', 'require', 'vendor/baz', 'qux', '{
-    "require":
-    {
-        "foo": "bar",
-        "vendor/baz": "qux"
-    }
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #5 ('{
-    "require":
-    {
-        "foo": "bar",
-        "vendor\\/baz": "baz"
-    }
-}', 'require', 'vendor/baz', 'qux', '{
-    "require":
-    {
-        "foo": "bar",
-        "vendor/baz": "qux"
-    }
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #6 ('{
-    "require": {
-        "foo": "bar"
-    },
-    "repositories": [{
-        "type": "package",
-        "package": {
-            "require": {
-                "foo": "bar"
-            }
-        }
-    }]
-}', 'require', 'foo', 'qux', '{
-    "require": {
-        "foo": "qux"
-    },
-    "repositories": [{
-        "type": "package",
-        "package": {
-            "require": {
-                "foo": "bar"
-            }
-        }
-    }]
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddLink with data set #7 ('{
-    "repositories": [{
-        "type": "package",
-        "package": {
-            "require": {
-                "foo": "bar"
-            }
-        }
-    }]
-}', 'require', 'foo', 'qux', '{
-    "repositories": [{
-        "type": "package",
-        "package": {
-            "require": {
-                "foo": "bar"
-            }
-        }
-    }],
-    "require": {
-        "foo": "qux"
-    }
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones first" ('{
-    "repositories": {
-        "foo": {
-            "foo": "bar",
-            "bar": "baz"
-        },
-        "bar": {
-            "foo": "bar",
-            "bar": "baz"
-        }
-    }
-}', 'foo', true, '{
-    "repositories": {
-        "bar": {
-            "foo": "bar",
-            "bar": "baz"
-        }
-    }
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones last" ('{
-    "repositories": {
-        "foo": {
-            "foo": "bar",
-            "bar": "baz"
-        },
-        "bar": {
-            "foo": "bar",
-            "bar": "baz"
-        }
-    }
-}', 'bar', true, '{
-    "repositories": {
-        "foo": {
-            "foo": "bar",
-            "bar": "baz"
-        }
-    }
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones unique" ('{
-    "repositories": {
-        "foo": {
-            "foo": "bar",
-            "bar": "baz"
-        }
-    }
-}', 'foo', true, '{
-    "repositories": {
-    }
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on simple ones middle" ('{
-    "repositories": {
-        "foo": {
-            "foo": "bar",
-            "bar": "baz"
-        },
-        "bar": {
-            "foo": "bar",
-            "bar": "baz"
-        },
-        "baz": {
-            "foo": "bar",
-            "bar": "baz"
-        }
-    }
-}', 'bar', true, '{
-    "repositories": {
-        "foo": {
-            "foo": "bar",
-            "bar": "baz"
-        },
-        "baz": {
-            "foo": "bar",
-            "bar": "baz"
-        }
-    }
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on empty repos" ('{
-    "repositories": {
-    }
-}', 'bar', true)'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on empty repos2" ('{
-    "repositories": {}
-}', 'bar', true)'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on missing repos" ('{
-}', 'bar', true)'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "works on deep repos" ('{
-    "repositories": {
-        "foo": {
-            "package": { "bar": "baz" }
-        }
-    }
-}', 'foo', true, '{
-    "repositories": {
-    }
-}
-')'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "fails on deep repos with borked texts" ('{
-    "repositories": {
-        "foo": {
-            "package": { "bar": "ba{z" }
-        }
-    }
-}', 'bar', false)'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testRemoveSubNode with data set "fails on deep repos with borked texts2" ('{
-    "repositories": {
-        "foo": {
-            "package": { "bar": "ba}z" }
-        }
-    }
-}', 'bar', false)'.
 .
 Starting test 'Composer\Test\Json\JsonManipulatorTest::testAddRepositoryCanInitializeEmptyRepositories'.
 .
@@ -1752,7 +1492,6 @@ Starting test 'Composer\Test\Util\RemoteFilesystemTest::testCallbackGetNotifyPro
 Starting test 'Composer\Test\Util\RemoteFilesystemTest::testCallbackGetNotifyFailure404'.
 .
 Starting test 'Composer\Test\Util\RemoteFilesystemTest::testCaptureAuthenticationParamsFromUrl'.
-SlowTimer [5001ms] at curl: http://user:pass@www.example.com/something
 F
 Starting test 'Composer\Test\Util\RemoteFilesystemTest::testGetContents'.
 .
@@ -2261,7 +2000,7 @@ F
 Starting test 'Composer\Test\Util\SvnTest::testInteractiveString'.
 .
 
-Time: 1.7 minutes, Memory: 44.35Mb
+Time: 1.46 minutes, Memory: 61.01Mb
 
 There were 6 errors:
 
@@ -2284,9 +2023,9 @@ ErrorException: Not a valid directory resource
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
 
 3) Composer\Test\Package\Archiver\ArchiveManagerTest::testArchiveTar
-ErrorException: Argument 2 passed to PharData::__construct() must be an instance of int, null given
+Exception: Not implemented yet
 
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/src/Composer/Package/Archiver/PharArchiver.php:40
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/src/Composer/Package/Archiver/PharArchiver.php:42
 /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/src/Composer/Package/Archiver/ArchiveManager.php:145
 /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/ArchiveManagerTest.php:48
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
@@ -2294,18 +2033,18 @@ ErrorException: Argument 2 passed to PharData::__construct() must be an instance
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
 
 4) Composer\Test\Package\Archiver\PharArchiverTest::testTarArchive
-ErrorException: Argument 2 passed to PharData::__construct() must be an instance of int, null given
+Exception: Not implemented yet
 
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/src/Composer/Package/Archiver/PharArchiver.php:40
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/src/Composer/Package/Archiver/PharArchiver.php:42
 /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/PharArchiverTest.php:28
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
 
 5) Composer\Test\Package\Archiver\PharArchiverTest::testZipArchive
-ErrorException: Argument 2 passed to PharData::__construct() must be an instance of int, null given
+Exception: Not implemented yet
 
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/src/Composer/Package/Archiver/PharArchiver.php:40
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/src/Composer/Package/Archiver/PharArchiver.php:42
 /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Package/Archiver/PharArchiverTest.php:43
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
@@ -2323,101 +2062,16 @@ RuntimeException: The artifact repository requires PHP's zip extension
 --
 
 
-There were 9 failures:
+There were 4 failures:
 
-1) Composer\Test\Autoload\AutoloadGeneratorTest::testClassMapAutoloadingEmptyDirAndExactFile
-Failed asserting that two arrays are equal.
---- Expected
-+++ Actual
-@@ @@
- Array (
-     'ClassMapBar' => '/tmp/cmptest-23319eedc017ffbc...st.php'
--    'ClassMapBaz' => '/tmp/cmptest-23319eedc017ffbc...st.php'
-     'ClassMapFoo' => '/tmp/cmptest-23319eedc017ffbc.../a.php'
- )
-
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/AutoloadGeneratorTest.php:344
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
-
-2) Composer\Test\Autoload\AutoloadGeneratorTest::testVendorDirExcludedFromWorkingDir
-Failed asserting that two strings are equal.
---- Expected
-+++ Actual
-@@ @@
- return array(
--    'Bar\\Bar' => $vendorDir . '/b/b/classmaps/classes.php',
-     'Bar\\Foo' => $vendorDir . '/b/b/lib/Bar/Foo.php',
-     'Foo\\Bar' => $baseDir . '/src/Foo/Bar.php',
-     'Foo\\Foo' => $baseDir . '/classmap/classes.php',
- );
- '
-
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/AutoloadGeneratorTest.php:757
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
-
-3) Composer\Test\Autoload\AutoloadGeneratorTest::testUpLevelRelativePaths
-Failed asserting that two strings are equal.
---- Expected
-+++ Actual
-@@ @@
-     'Foo\\Bar' => $baseDir . '/../src/Foo/Bar.php',
--    'Foo\\Foo' => $baseDir . '/../classmap/classes.php',
- );
- '
-
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/AutoloadGeneratorTest.php:817
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
-
-4) Composer\Test\Autoload\AutoloadGeneratorTest::testEmptyPaths
-Failed asserting that two strings are equal.
---- Expected
-+++ Actual
-@@ @@
- return array(
--    'Classmap\\Foo' => $baseDir . '/class.php',
-     'Foo\\Bar' => $baseDir . '/Foo/Bar.php',
- );
- '
-
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Autoload/AutoloadGeneratorTest.php:869
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
-
-5) Composer\Test\Json\JsonFileTest::testFormatEmptyArray
-Failed asserting that two strings are equal.
---- Expected
-+++ Actual
-@@ @@
- '{
-     "test": [
--
-     ],
-     "test2": {
--
-     }
- }'
-
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Json/JsonFileTest.php:216
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Json/JsonFileTest.php:142
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
-
-6) Composer\Test\Util\ErrorHandlerTest::testErrorHandlerCaptureWarning
+1) Composer\Test\Util\ErrorHandlerTest::testErrorHandlerCaptureWarning
 Failed asserting that exception message 'Invalid operand type was used: array_merge expects array(s)' contains 'array_merge(): Argument #2 is not an array'.
 
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:176
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
 
-7) Composer\Test\Util\RemoteFilesystemTest::testCaptureAuthenticationParamsFromUrl
+2) Composer\Test\Util\RemoteFilesystemTest::testCaptureAuthenticationParamsFromUrl
 Failed asserting that 0 matches expected 404.
 
 /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/composer/tests/Composer/Test/Util/RemoteFilesystemTest.php:160
@@ -2425,7 +2079,7 @@ Failed asserting that 0 matches expected 404.
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
 
-8) Composer\Test\Util\StreamContextFactoryTest::testEnsureThatfixHttpHeaderFieldMovesContentTypeToEndOfOptions
+3) Composer\Test\Util\StreamContextFactoryTest::testEnsureThatfixHttpHeaderFieldMovesContentTypeToEndOfOptions
 Failed asserting that two strings are equal.
 --- Expected
 +++ Actual
@@ -2441,7 +2095,7 @@ Failed asserting that two strings are equal.
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/phpunit/phpunit/PHPUnit/TextUI/Command.php:129
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
 
-9) Composer\Test\Util\SvnTest::testCredentials with data set #2 ('svn://johndoe@example.org', ' --username \'johndoe\' --password \'\' ')
+4) Composer\Test\Util\SvnTest::testCredentials with data set #2 ('svn://johndoe@example.org', ' --username \'johndoe\' --password \'\' ')
 Failed asserting that two strings are equal.
 --- Expected
 +++ Actual
@@ -2455,4 +2109,4 @@ Failed asserting that two strings are equal.
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
 
 FAILURES!
-Tests: 990, Assertions: 1734, Failures: 9, Errors: 6, Skipped: 1.
+Tests: 990, Assertions: 1753, Failures: 4, Errors: 6, Skipped: 1.

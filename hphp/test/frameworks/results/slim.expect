@@ -1,4 +1,4 @@
-PHPUnit 3.7.27 by Sebastian Bergmann.
+PHPUnit 3.7.28 by Sebastian Bergmann.
 
 Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/phpunit.xml.dist
 
@@ -284,11 +284,11 @@ Starting test 'SlimHttpUtilTest::testDecryptWhenDataIsEmptyString'.
 Starting test 'SlimHttpUtilTest::testEncryptAndDecryptWhenKeyAndIvAreTooLong'.
 .
 Starting test 'SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithValidData'.
-.
+E
 Starting test 'SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithOldExpiration'.
-.
+E
 Starting test 'SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithTamperedData'.
-.
+E
 Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValue'.
 .
 Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueWhenCookieAlreadySet'.
@@ -308,7 +308,7 @@ Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAnd
 Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAndSecureAndHttpOnly'.
 .
 Starting test 'SlimHttpUtilTest::testSerializeCookiesAndDecryptWithStringExpires'.
-.
+E
 Starting test 'SlimHttpUtilTest::testDeleteCookieHeaderWithSurvivingCookie'.
 .
 Starting test 'SlimHttpUtilTest::testDeleteCookieHeaderWithoutSurvivingCookie'.
@@ -376,15 +376,6 @@ Starting test 'ContentTypesTest::testParsesJsonWithError'.
 Starting test 'ContentTypesTest::testParsesXml'.
 .
 Starting test 'ContentTypesTest::testParsesXmlWithError'.
-Entity: line 1: parser error : Opening and ending tag mismatch: author line 1 and book
-<books><book><id>1</id><author>Clive Cussler</book></books>
-                                                   ^
-Entity: line 1: parser error : expected '>'
-<books><book><id>1</id><author>Clive Cussler</book></books>
-                                                         ^
-Entity: line 1: parser error : Premature end of data in tag books line 1
-<books><book><id>1</id><author>Clive Cussler</book></books>
-                                                           ^
 .
 Starting test 'ContentTypesTest::testParsesCsv'.
 .
@@ -416,9 +407,6 @@ Starting test 'MethodOverrideTest::testOverrideMethodAsHeader'.
 Starting test 'PrettyExceptionsTest::testReturnsUnchangedSuccessResponse'.
 .
 Starting test 'PrettyExceptionsTest::testReturnsDiagnosticsForErrorResponse'.
-
-
-foo
 .
 Starting test 'PrettyExceptionsTest::testResponseContentTypeIsOverriddenToHtml'.
 .
@@ -749,26 +737,54 @@ Starting test 'ViewTest::testDisplay'.
 Starting test 'ViewTest::testDisplayTemplateThatDoesNotExist'.
 .
 
-Time: 19.31 seconds, Memory: 12.06Mb
-There were 3 errors:
+There were 7 errors:
 
-1) SessionCookieTest::testSessionCookieIsCreated
+1) SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithValidData
+Argument 2 to hash_hmac() must be of type ?string, int given
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/Slim/Http/Util.php:227
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Http/UtilTest.php:135
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+2) SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithOldExpiration
+Argument 2 to hash_hmac() must be of type ?string, int given
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/Slim/Http/Util.php:227
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Http/UtilTest.php:159
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+3) SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithTamperedData
+Argument 2 to hash_hmac() must be of type ?string, int given
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/Slim/Http/Util.php:227
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Http/UtilTest.php:178
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+4) SlimHttpUtilTest::testSerializeCookiesAndDecryptWithStringExpires
+Argument 2 to hash_hmac() must be of type ?string, int given
+
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/Slim/Http/Util.php:227
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/Slim/Http/Util.php:201
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Http/UtilTest.php:354
+/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
+
+5) SessionCookieTest::testSessionCookieIsCreated
 Trying to destroy uninitialized session
 
 /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Middleware/SessionCookieTest.php:39
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
 
-2) SessionCookieTest::testSessionIsPopulatedFromCookie
+6) SessionCookieTest::testSessionIsPopulatedFromCookie
 Trying to destroy uninitialized session
 
 /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Middleware/SessionCookieTest.php:39
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
 
-3) SessionCookieTest::testSessionIsPopulatedAsEmptyIfNoCookie
+7) SessionCookieTest::testSessionIsPopulatedAsEmptyIfNoCookie
 Trying to destroy uninitialized session
 
 /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Middleware/SessionCookieTest.php:39
 /data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
 
 FAILURES!
-Tests: 364, Assertions: 587, Errors: 3.
+Tests: 364, Assertions: 580, Errors: 7.

@@ -1,4 +1,4 @@
-PHPUnit 3.7.27 by Sebastian Bergmann.
+PHPUnit 3.7.28 by Sebastian Bergmann.
 
 Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/yii/tests/phpunit.xml
 
@@ -262,4 +262,4 @@ S
 Starting test 'CRedisCacheTest::testMultiByteGetAndSet'.
 S
 Starting test 'MessageCommandTest::testEmptyArgs'.
-HipHop Fatal error: syntax error, unexpected $end
+hhvm: hphp/runtime/ext/ext_domdocument.cpp:1167: void HPHP::removeOrphan(HPHP::XmlNodeSet&, xmlNodePtr): Assertion `orphans.find(node) != orphans.end()' failed.

@@ -114,6 +114,23 @@ static void smashX64JmpOrCall(TCA addr, TCA dest, bool isCall) {
   }
 }
 
+static void smashARMJmpOrCall(TCA addr, TCA dest, bool isCall) {
+  // Assert that this is actually the instruction sequence we expect
+  DEBUG_ONLY auto ldr = vixl::Instruction::Cast(addr);
+  DEBUG_ONLY auto br = vixl::Instruction::Cast(addr + 4);
+  assert(ldr->Bits(31, 24) == 0x58);
+  assert(br->Bits(31, 10) == 0x3587C0 && br->Bits(4, 0) == 0);
+
+  // This offset is asserted in emitSmashableJump. We wrote two instructions,
+  // and then the jump/call destination was written at the next 8-byte boundary.
+  auto dataPtr = addr + 8;
+  if ((uintptr_t(dataPtr) & 7) != 0) {
+    dataPtr += 4;
+    assert((uintptr_t(dataPtr) & 7) == 0);
+  }
+  *reinterpret_cast<TCA*>(dataPtr) = dest;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void smashJmp(TCA jmpAddr, TCA newDest) {
@@ -121,6 +138,8 @@ void smashJmp(TCA jmpAddr, TCA newDest) {
   FTRACE(2, "smashJmp: {} -> {}\n", jmpAddr, newDest);
   if (arch() == Arch::X64) {
     smashX64JmpOrCall(jmpAddr, newDest, false);
+  } else if (arch() == Arch::ARM) {
+    smashARMJmpOrCall(jmpAddr, newDest, false);
   } else {
     not_implemented();
   }
@@ -235,7 +254,7 @@ Transl::TCA jmpTarget(Transl::TCA jmp) {
     if (ldr->Bits(31, 24) != 0x58) return nullptr;
 
     Instruction* br = Instruction::Cast(jmp + 4);
-    if (br->Bits(31, 10) != 0x3587C0 || br->Bits(5, 0) != 0) return nullptr;
+    if (br->Bits(31, 10) != 0x3587C0 || br->Bits(4, 0) != 0) return nullptr;
 
     uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 8);
     if ((dest & 7) != 0) {
@@ -258,7 +277,7 @@ Transl::TCA jccTarget(Transl::TCA jmp) {
     if (b->Bits(31, 24) != 0x54 || b->Bit(4) != 0) return nullptr;
 
     Instruction* br = Instruction::Cast(jmp + 8);
-    if (br->Bits(31, 10) != 0x3587C0 || br->Bits(5, 0) != 0) return nullptr;
+    if (br->Bits(31, 10) != 0x3587C0 || br->Bits(4, 0) != 0) return nullptr;
 
     uintptr_t dest = reinterpret_cast<uintptr_t>(jmp + 8);
     if ((dest & 7) != 0) {

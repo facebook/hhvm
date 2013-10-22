@@ -27,9 +27,9 @@ namespace HPHP {
 struct ArrayInit {
   enum MapInit { mapInit };
 
-  explicit ArrayInit(ssize_t n);
+  explicit ArrayInit(size_t n);
 
-  ArrayInit(ssize_t n, MapInit);
+  ArrayInit(size_t n, MapInit);
 
   ArrayInit(ArrayInit&& other)
     : m_data(other.m_data)

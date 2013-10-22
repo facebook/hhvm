@@ -88,9 +88,7 @@ TakeoverAgent::TakeoverAgent(const std::string &fname)
   : m_delete_handle(nullptr),
     m_transfer_fname(fname),
     m_took_over(false),
-    m_takeover_state(TakeoverState::NotStarted),
-    m_sock(-1),
-    m_callback(nullptr)
+    m_takeover_state(TakeoverState::NotStarted)
 {
 }
 

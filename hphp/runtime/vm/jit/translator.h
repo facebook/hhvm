@@ -254,6 +254,7 @@ const char* getTransKindName(TransKind kind);
  * Used to maintain a mapping from the bytecode to its corresponding x86.
  */
 struct TransBCMapping {
+  MD5    md5;
   Offset bcStart;
   TCA    aStart;
   TCA    astubsStart;
@@ -267,7 +268,7 @@ struct TransRec {
   TransKind               kind;
   SrcKey                  src;
   MD5                     md5;
-  uint32_t                  bcStopOffset;
+  Offset                  bcStopOffset;
   vector<DynLocation>     dependencies;
   TCA                     aStart;
   uint32_t                  aLen;

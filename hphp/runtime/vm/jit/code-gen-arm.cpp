@@ -169,6 +169,18 @@ PUNT_OPCODE(ReqBindJmpInstanceOfBitmask)
 PUNT_OPCODE(ReqBindJmpNInstanceOfBitmask)
 PUNT_OPCODE(ReqBindJmpZero)
 PUNT_OPCODE(ReqBindJmpNZero)
+PUNT_OPCODE(SideExitJmpGt)
+PUNT_OPCODE(SideExitJmpGte)
+PUNT_OPCODE(SideExitJmpLt)
+PUNT_OPCODE(SideExitJmpLte)
+PUNT_OPCODE(SideExitJmpEq)
+PUNT_OPCODE(SideExitJmpNeq)
+PUNT_OPCODE(SideExitJmpSame)
+PUNT_OPCODE(SideExitJmpNSame)
+PUNT_OPCODE(SideExitJmpInstanceOfBitmask)
+PUNT_OPCODE(SideExitJmpNInstanceOfBitmask)
+PUNT_OPCODE(SideExitJmpZero)
+PUNT_OPCODE(SideExitJmpNZero)
 PUNT_OPCODE(SideExitGuardLoc)
 PUNT_OPCODE(JmpIndirect)
 PUNT_OPCODE(CheckSurpriseFlags)
@@ -840,7 +852,8 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
     // marker since the last instruction, update the bc mapping.
     if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
         m_tx64->isTransDBEnabled() && bcMap) {
-      bcMap->push_back(TransBCMapping{inst->marker().bcOff,
+      bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
+                                      inst->marker().bcOff,
                                       m_as.frontier(),
                                       m_astubs.frontier()});
       prevMarker = inst->marker();

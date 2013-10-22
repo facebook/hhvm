@@ -462,6 +462,61 @@ inline typename V::MapType FBUnserializer<V>::unserializeMap() {
 }
 
 template <class V>
+inline folly::StringPiece FBUnserializer<V>::getSerializedMap() {
+  const char* head = p_;
+  p_ += CODE_SIZE;
+
+  size_t code = nextCode();
+  while (code != FB_SERIALIZE_STOP) {
+    switch (code) {
+      case FB_SERIALIZE_BYTE:
+        p_ += (CODE_SIZE + INT8_SIZE);
+        break;
+      case FB_SERIALIZE_I16:
+        p_ += (CODE_SIZE + INT16_SIZE);
+        break;
+      case FB_SERIALIZE_I32:
+        p_ += (CODE_SIZE + INT32_SIZE);
+        break;
+      case FB_SERIALIZE_I64:
+        p_ += (CODE_SIZE + INT64_SIZE);
+        break;
+      case FB_SERIALIZE_VARCHAR:
+      case FB_SERIALIZE_STRING:
+        unserializeStringPiece();
+        break;
+      case FB_SERIALIZE_STRUCT:
+        {
+          getSerializedMap();
+          break;
+        }
+      case FB_SERIALIZE_NULL:
+        {
+           p_ += CODE_SIZE;
+           break;
+        }
+      case FB_SERIALIZE_DOUBLE:
+        {
+          p_ += (CODE_SIZE + DOUBLE_SIZE);
+          break;
+        }
+      case FB_SERIALIZE_BOOLEAN:
+        {
+          p_ += (CODE_SIZE + BOOLEAN_SIZE);
+          break;
+        }
+      default:
+        throw UnserializeError("Invalid code: " + folly::to<std::string>(code)
+                               + " at location " + folly::to<std::string>(p_));
+    }
+    code = nextCode();
+  }
+  p_ += CODE_SIZE;
+  const char* tail = p_;
+  return folly::StringPiece(head, tail);
+}
+
+template <class V>
 inline typename V::VariantType FBUnserializer<V>::unserializeThing() {
   size_t code = nextCode();
 

@@ -19,6 +19,10 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#include <map>
+#include <string>
+#include <algorithm>
+#include <mutex>
 
 #include <cxxabi.h>
 #include <execinfo.h>
@@ -27,7 +31,29 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
+typedef std::lock_guard<std::mutex> G;
+std::mutex nameCacheLock;
+std::map<void*,std::string> nameCache;
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
 char* getNativeFunctionName(void* codeAddr) {
+  {
+    G g(nameCacheLock);
+    auto it = nameCache.find(codeAddr);
+    if (it != end(nameCache)) {
+      auto ret = new char[it->second.size() + 1];
+      std::copy(it->second.data(),
+                it->second.data() + it->second.size() + 1,
+                ret);
+      return ret;
+    }
+  }
+
   void* buf[1] = {codeAddr};
   char** symbols = backtrace_symbols(buf, 1);
   char* functionName = nullptr;
@@ -70,6 +96,11 @@ char* getNativeFunctionName(void* codeAddr) {
 #define MAX_ADDR_HEX_LEN 40
     functionName = new char[MAX_ADDR_HEX_LEN + 3];
     std::sprintf(functionName, "%40p", codeAddr);
+  }
+
+  {
+    G g(nameCacheLock);
+    nameCache[codeAddr] = std::string(functionName);
   }
   return functionName;
 }

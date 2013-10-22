@@ -666,10 +666,10 @@ void CodeGenerator::cgReqBindJcc(IRInstruction* inst) {
                  inst->extra<ReqBindJccData>());
 }
 
-#define X(x)                                                              \
-  void CodeGenerator::cgReqBind##x(IRInstruction* i) { cgReqBindJcc(i); } \
-  void CodeGenerator::cg##x       (IRInstruction* i) { cgJcc(i);        }
-
+#define X(x)                                                                \
+  void CodeGenerator::cgReqBind##x (IRInstruction* i) { cgReqBindJcc(i);  } \
+  void CodeGenerator::cgSideExit##x(IRInstruction* i) { cgSideExitJcc(i); } \
+  void CodeGenerator::cg##x        (IRInstruction* i) { cgJcc(i);         }
 X(JmpGt);
 X(JmpGte);
 X(JmpLt);
@@ -2028,6 +2028,22 @@ void CodeGenerator::cgReqBindJmpNInstanceOfBitmask(IRInstruction* inst) {
   emitInstanceBitmaskCheck(inst);
   emitReqBindJcc(opToConditionCode(inst->op()),
                  inst->extra<ReqBindJccData>());
+}
+
+void CodeGenerator::cgSideExitJmpInstanceOfBitmask(IRInstruction* inst) {
+  auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken);
+  emitInstanceBitmaskCheck(inst);
+  emitBindSideExit(m_mainCode, m_stubsCode,
+                   opToConditionCode(inst->op()),
+                   sk);
+}
+
+void CodeGenerator::cgSideExitJmpNInstanceOfBitmask(IRInstruction* inst) {
+  auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken);
+  emitInstanceBitmaskCheck(inst);
+  emitBindSideExit(m_mainCode, m_stubsCode,
+                   opToConditionCode(inst->op()),
+                   sk);
 }
 
 /*
@@ -4563,6 +4579,14 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
                     extra->taken);
 }
 
+void CodeGenerator::cgSideExitJcc(IRInstruction* inst) {
+  auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken);
+  emitCompare(inst->src(0), inst->src(1));
+  emitBindSideExit(m_mainCode, m_stubsCode,
+                   opToConditionCode(inst->op()),
+                   sk);
+}
+
 void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
   assert(inst->dst()->type() == Type::PtrToCell);
   assert(m_regs[inst->dst()].reg() == rsp);
@@ -5281,6 +5305,22 @@ void CodeGenerator::cgReqBindJmpNZero(IRInstruction* inst) {
   emitReqBindJcc(CC_NZ, inst->extra<ReqBindJmpNZero>());
 }
 
+void CodeGenerator::cgSideExitJmpZero(IRInstruction* inst) {
+  auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken);
+  emitTestZero(inst->src(0));
+  emitBindSideExit(m_mainCode, m_stubsCode,
+                   opToConditionCode(inst->op()),
+                   sk);
+}
+
+void CodeGenerator::cgSideExitJmpNZero(IRInstruction* inst) {
+  auto const sk = SrcKey(curFunc(), inst->extra<SideExitJccData>()->taken);
+  emitTestZero(inst->src(0));
+  emitBindSideExit(m_mainCode, m_stubsCode,
+                   opToConditionCode(inst->op()),
+                   sk);
+}
+
 void CodeGenerator::cgJmp(IRInstruction* inst) {
   Block* target = inst->taken();
   if (unsigned n = inst->numSrcs()) {
@@ -5960,7 +6000,8 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
     // marker since the last instruction, update the bc mapping.
     if ((!prevMarker.valid() || inst->marker() != prevMarker) &&
         m_tx64->isTransDBEnabled() && bcMap) {
-      bcMap->push_back(TransBCMapping{inst->marker().bcOff,
+      bcMap->push_back(TransBCMapping{inst->marker().func->unit()->md5(),
+                                      inst->marker().bcOff,
                                       m_as.frontier(),
                                       m_astubs.frontier()});
       prevMarker = inst->marker();

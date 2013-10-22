@@ -102,6 +102,8 @@ public:
   /**
    * Constructor and destructor.
    */
+  LibEventServer(const std::string &address, int port, int thread)
+      : LibEventServer(ServerOptions(address, port, thread)) {}
   explicit LibEventServer(const ServerOptions &options);
   ~LibEventServer();
 
@@ -120,8 +122,8 @@ public:
   }
   int getLibEventConnectionCount();
 
-  void addTakeoverListener(TakeoverListener* listener);
-  void removeTakeoverListener(TakeoverListener* listener);
+  void addTakeoverListener(TakeoverListener* listener) override;
+  void removeTakeoverListener(TakeoverListener* listener) override;
 
   /**
    * Request handler called by evhttp library.
@@ -148,9 +150,9 @@ public:
   /**
    * TakeoverAgent::Callback
    */
-  int onTakeoverRequest(TakeoverAgent::RequestType type);
+  int onTakeoverRequest(TakeoverAgent::RequestType type) override;
 
-  void takeoverAborted();
+  void takeoverAborted() override;
 
 protected:
   virtual int getAcceptSocket();

@@ -36,7 +36,8 @@ sudo apt-fast -y install git-core cmake g++ libboost1.48-dev libmysqlclient-dev 
   libboost-program-options1.48-dev libboost-filesystem1.48-dev wget memcached \
   libreadline-dev libncurses-dev libmemcached-dev libbz2-dev \
   libc-client2007e-dev php5-mcrypt php5-imagick libgoogle-perftools-dev \
-  libcloog-ppl0 libelf-dev libdwarf-dev libunwind7-dev subversion &
+  libcloog-ppl0 libelf-dev libdwarf-dev libunwind7-dev subversion \
+  python-software-properties &
 
 git clone git://github.com/libevent/libevent.git --quiet &
 git clone git://github.com/bagder/curl.git --quiet &
@@ -59,6 +60,18 @@ else
     echo "$FAIL errors while downloading!"
     exit 100
 fi 
+
+# Leave this install till after the main parallel package install above
+# since it adds a non-12.04 package repo and we don't want to
+# pull EVERYTHING in, just the newer gcc compiler (and toolchain)
+sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+sudo apt-get -y update
+sudo apt-get -y install gcc-4.7 g++-4.7
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.7 60 \
+                         --slave /usr/bin/g++ g++ /usr/bin/g++-4.7
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 40 \
+                         --slave /usr/bin/g++ g++ /usr/bin/g++-4.6
+sudo update-alternatives --set gcc /usr/bin/gcc-4.7
 
 # libevent
 cd libevent

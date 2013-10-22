@@ -249,8 +249,9 @@ private:
                                     PhysReg      thisReg,
                                     RDS::Handle& ch);
 
-  void cgJcc(IRInstruction* inst);        // helper
-  void cgReqBindJcc(IRInstruction* inst); // helper
+  void cgJcc(IRInstruction* inst);          // helper
+  void cgReqBindJcc(IRInstruction* inst);   // helper
+  void cgSideExitJcc(IRInstruction* inst);  // helper
   void cgCmpHelper(IRInstruction* inst,
                    void (Asm::*setter)(Reg8),
                    int64_t (*str_cmp_str)(StringData*, StringData*),

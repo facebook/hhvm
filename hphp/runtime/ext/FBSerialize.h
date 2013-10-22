@@ -140,10 +140,16 @@ class FBUnserializer : private FBSerializeBase {
   typename V::StringType unserializeString();
   folly::StringPiece unserializeStringPiece();
   typename V::MapType unserializeMap();
+  // read the next map but don't unserialze it (for lazy or delay
+  // unserialization)
+  folly::StringPiece getSerializedMap();
   typename V::VariantType unserializeThing();
 
   void advance(size_t delta);
   Code nextCode() const;
+  bool done() const {
+    return p_ == end_;
+  }
  private:
   void need(size_t n) const;
 

@@ -3455,12 +3455,14 @@ bool isSupportedAGet(SSATmp* classSrc, const StringData* clsName) {
 }
 
 void HhbcTranslator::emitAGet(SSATmp* classSrc, const StringData* clsName) {
+  auto const catchBlock = makeCatch();
+
   if (classSrc->isA(Type::Str)) {
-    push(gen(LdCls, classSrc, cns(curClass())));
+    push(gen(LdCls, catchBlock, classSrc, cns(curClass())));
   } else if (classSrc->isA(Type::Obj)) {
     push(gen(LdObjClass, classSrc));
   } else if (clsName) {
-    push(gen(LdCls, cns(clsName), cns(curClass())));
+    push(gen(LdCls, catchBlock, cns(clsName), cns(curClass())));
   } else {
     not_reached();
   }

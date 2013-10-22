@@ -18,12 +18,13 @@
 #define incl_HPHP_ICU_TRANSLITERATOR_H_
 
 #include <boost/scoped_ptr.hpp>
-#include <unicode/translit.h>
 
 // Avoid dragging in the icu namespace.
 #ifndef U_USING_ICU_NAMESPACE
 #define U_USING_ICU_NAMESPACE 0
 #endif
+
+#include <unicode/translit.h>
 
 namespace HPHP {
 // Wrapper class around icu::Transliterator that provides a default constructor

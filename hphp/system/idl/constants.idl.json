@@ -1808,6 +1808,10 @@
             "value": "2.3.0-dev"
         },
         {
+            "name": "HHVM_VERSION",
+            "value": "2.3.0-dev"
+        },
+        {
             "name": "HTML_ENTITIES",
             "value": 1
         },

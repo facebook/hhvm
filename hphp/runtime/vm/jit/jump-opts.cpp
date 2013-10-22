@@ -156,7 +156,7 @@ void optimizeCondTraceExit(IRUnit& unit) {
  * branch to "normal exits".  We can optimize these into the
  * SideExitGuard* instructions that can be patched in place.
  */
-void optimizeSideExits(IRUnit& unit) {
+void optimizeSideExitChecks(IRUnit& unit) {
   auto trace = unit.main();
   FTRACE(5, "SideExit:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "SideExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
@@ -196,6 +196,46 @@ void optimizeSideExits(IRUnit& unit) {
   });
 }
 
+/*
+ * Look for Jcc instructions in the main trace that
+ * branch to "normal exits".  We can optimize these into the
+ * SideExitJcc* instructions that can be patched in place.
+ */
+void optimizeSideExitJccs(IRUnit& unit) {
+  auto trace = unit.main();
+  FTRACE(5, "SideExitJcc:vvvvvvvvvvvvvvvvvvvvv\n");
+  SCOPE_EXIT { FTRACE(5, "SideExitJcc:^^^^^^^^^^^^^^^^^^^^^\n"); };
+
+  forEachInst(trace->blocks(), [&] (IRInstruction* inst) {
+    if (!jccCanBeDirectExit(inst->op())) return;
+    auto const exitBlock = inst->taken();
+    if (!isNormalExit(exitBlock)) return;
+
+    auto it = exitBlock->backIter();
+    auto& reqBindJmp = *(it--);
+    auto& syncABI = *it;
+    assert(syncABI.op() == SyncABIRegs);
+
+    FTRACE(5, "converting jcc ({}) to side exit\n",
+           inst->id());
+
+    auto const newOpcode = jmpToSideExitJmp(inst->op());
+    SideExitJccData data;
+    data.taken = reqBindJmp.extra<ReqBindJmp>()->offset;
+
+    auto const block = inst->block();
+    block->insert(block->iteratorTo(inst),
+                  unit.cloneInstruction(&syncABI));
+
+    unit.replace(
+      inst,
+      newOpcode,
+      data,
+      std::make_pair(inst->numSrcs(), inst->srcs().begin())
+    );
+  });
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -222,7 +262,8 @@ void optimizeJumps(IRUnit& unit) {
 
   if (RuntimeOption::EvalHHIRDirectExit) {
     optimizeCondTraceExit(unit);
-    optimizeSideExits(unit);
+    optimizeSideExitChecks(unit);
+    optimizeSideExitJccs(unit);
   }
 }
 

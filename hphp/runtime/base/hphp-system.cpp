@@ -20,10 +20,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#ifdef HPHP_VERSION
-#undef HPHP_VERSION
+#ifdef HHVM_VERSION
+#undef HHVM_VERSION
 #endif
-#define HPHP_VERSION(v) return #v;
+#define HHVM_VERSION(v) return #v;
 const char* getHphpCompilerVersion() {
 #include "../../version" // nolint
 }

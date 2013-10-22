@@ -45,6 +45,10 @@ int emulate_zend(int argc, char** argv){
   vector<string> newargv;
 
   newargv.push_back(argv[0]);
+#ifdef PHP_DEFAULT_HDF
+  newargv.push_back("-c");
+  newargv.push_back(PHP_DEFAULT_HDF);
+#endif
 
   bool lint = false;
   bool show = false;

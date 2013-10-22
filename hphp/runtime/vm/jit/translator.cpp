@@ -4038,35 +4038,36 @@ TransRec::TransRec(SrcKey                   s,
 
 string
 TransRec::print(uint64_t profCount) const {
-  const size_t kBufSize = 1000;
-  static char formatBuf[kBufSize];
+  std::string ret;
 
-  snprintf(formatBuf, kBufSize,
-           "Translation %d {\n"
-           "  src.md5 = %s\n"
-           "  src.funcId = %u\n"
-           "  src.startOffset = 0x%x\n"
-           "  src.stopOffset = 0x%x\n"
-           "  kind = %u (%s)\n"
-           "  aStart = %p\n"
-           "  aLen = 0x%x\n"
-           "  stubStart = %p\n"
-           "  stubLen = 0x%x\n"
-           "  profCount = %" PRIu64 "\n"
-           "  bcMapping = %lu\n",
-           id, md5.toString().c_str(), src.getFuncId(), src.offset(),
-           bcStopOffset, kind, getTransKindName(kind), aStart, aLen,
-           astubsStart, astubsLen, profCount, bcMapping.size());
+  // Split up the call to prevent template explosion
+  ret += folly::format(
+           "Translation {} {{\n"
+           "  src.md5 = {}\n"
+           "  src.funcId = {}\n"
+           "  src.startOffset = {}\n"
+           "  src.stopOffset = {}\n",
+           id, md5, src.getFuncId(), src.offset(), bcStopOffset).str();
 
-  string ret(formatBuf);
+  ret += folly::format(
+           "  kind = {} ({})\n"
+           "  aStart = {}\n"
+           "  aLen = {:#x}\n"
+           "  stubStart = {}\n"
+           "  stubLen = {:#x}\n",
+           static_cast<uint32_t>(kind), getTransKindName(kind),
+           aStart, aLen, astubsStart, astubsLen).str();
 
-  for (size_t i = 0; i < bcMapping.size(); i++) {
-    snprintf(formatBuf, kBufSize, "    0x%x %p %p\n",
-             bcMapping[i].bcStart,
-             bcMapping[i].aStart,
-             bcMapping[i].astubsStart);
+  ret += folly::format(
+           "  profCount = {}\n"
+           "  bcMapping = {}\n",
+           profCount, bcMapping.size()).str();
 
-    ret += string(formatBuf);
+  for (auto const& info : bcMapping) {
+    ret += folly::format(
+      "    {} {} {} {}\n",
+      info.md5, info.bcStart,
+      info.aStart, info.astubsStart).str();
   }
 
   ret += "}\n\n";

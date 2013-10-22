@@ -210,8 +210,8 @@ extern void *MALLOC(size_t);
 
 #if defined(IEEE_LITTLE_ENDIAN) + defined(IEEE_BIG_ENDIAN) + defined(VAX) + \
         defined(IBM) != 1
-  Exactly one of IEEE_LITTLE_ENDIAN IEEE_BIG_ENDIAN, VAX, or
-  IBM should be defined.
+#error Exactly one of IEEE_LITTLE_ENDIAN, IEEE_BIG_ENDIAN, VAX, or IBM \
+       should be defined.
 #endif
 
   typedef union {

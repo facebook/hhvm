@@ -1036,10 +1036,10 @@ static int execute_program_impl(int argc, char** argv) {
     return 0;
   }
   if (vm.count("version")) {
-#ifdef HPHP_VERSION
-#undefine HPHP_VERSION
+#ifdef HHVM_VERSION
+#undefine HHVM_VERSION
 #endif
-#define HPHP_VERSION(v) const char *version = #v;
+#define HHVM_VERSION(v) const char *version = #v;
 #include "../../version" // nolint
 
     cout << "HipHop VM";

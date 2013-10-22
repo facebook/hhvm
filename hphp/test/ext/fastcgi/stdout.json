@@ -1,0 +1,205 @@
+[
+  {
+    "command": "send",
+    "message": "01010001000800??000101??????????"
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "transaction_exists",
+      "request_id": 1,
+      "result": true
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "stdout",
+      "request_id": 1,
+      "message": "If your favorite one isn’t there, leave a comment and we’ll try to add it. Or if you want to become the packager for that distro, great! Bundle it up and then update the wiki. The new packages have their files moved around a bit. Everything is now named hhvm in there, so if your scripts relied on anything named hiphop-php please update them.\n"
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "stdout",
+      "request_id": 1,
+      "message": "This release was a 17% CPU reduction for running facebook.com compared to HHVM 2.1.0. It also supports many more frameworks out of the box like Symfony, CodeIgniter, Laravel, and many more.\n"
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "stdout",
+      "request_id": 1,
+      "message": "Some big changes you might notice ..."
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "stdout",
+      "request_id": 1,
+      "message": ""
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "stdout",
+      "request_id": 1,
+      "length": 10
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "stdout",
+      "request_id": 1,
+      "length": 100
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "stdout",
+      "request_id": 1,
+      "length": 1000
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "stdout",
+      "request_id": 1,
+      "length": 10000
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "stdout",
+      "request_id": 1,
+      "length": 100000
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "stdout",
+      "request_id": 1,
+      "length": 200000
+    }
+  },
+  {
+    "command": "recv",
+    "message": "01060001015c04??496620796f7572206661766f72697465206f6e652069736ee28099742074686572652c206c65617665206120636f6d6d656e7420616e64207765e280996c6c2074727920746f206164642069742e204f7220696620796f752077616e7420746f206265636f6d6520746865207061636b6167657220666f7220746861742064697374726f2c206772656174212042756e646c6520697420757020616e64207468656e20757064617465207468652077696b692e20546865206e6577207061636b6167657320686176652074686569722066696c6573206d6f7665642061726f756e642061206269742e2045766572797468696e67206973206e6f77206e616d6564206868766d20696e2074686572652c20736f20696620796f757220736372697074732072656c696564206f6e20616e797468696e67206e616d656420686970686f702d70687020706c6561736520757064617465207468656d2e0a????????"
+  },
+  {
+    "command": "recv",
+    "message": "0106000100be02??546869732072656c65617365207761732061203137252043505520726564756374696f6e20666f722072756e6e696e672066616365626f6f6b2e636f6d20636f6d706172656420746f204848564d20322e312e302e20497420616c736f20737570706f727473206d616e79206d6f7265206672616d65776f726b73206f7574206f662074686520626f78206c696b652053796d666f6e792c20436f646549676e697465722c204c61726176656c2c20616e64206d616e79206d6f72652e0a????"
+  },
+  {
+    "command": "recv",
+    "message": "01060001002503??"
+  },
+  {
+    "command": "recv",
+    "length": 40
+  },
+  {
+    "command": "recv",
+    "message": "01060001000a06??"
+  },
+  {
+    "command": "recv",
+    "length": 16
+  },
+  {
+    "command": "recv",
+    "message": "01060001006404??"
+  },
+  {
+    "command": "recv",
+    "length": 104
+  },
+  {
+    "command": "recv",
+    "message": "0106000103e800??"
+  },
+  {
+    "command": "recv",
+    "length": 1000
+  },
+  {
+    "command": "recv",
+    "message": "01060001271000??"
+  },
+  {
+    "command": "recv",
+    "length": 10000
+  },
+  {
+    "command": "recv",
+    "message": "01060001ffff01??"
+  },
+  {
+    "command": "recv",
+    "length": 65536
+  },
+  {
+    "command": "recv",
+    "message": "0106000186a107??"
+  },
+  {
+    "command": "recv",
+    "length": 34472
+  },
+  {
+    "command": "recv",
+    "message": "01060001ffff01??"
+  },
+  {
+    "command": "recv",
+    "length": 65536
+  },
+  {
+    "command": "recv",
+    "message": "01060001ffff01??"
+  },
+  {
+    "command": "recv",
+    "length": 65536
+  },
+  {
+    "command": "recv",
+    "message": "01060001ffff01??"
+  },
+  {
+    "command": "recv",
+    "length": 65536
+  },
+  {
+    "command": "recv",
+    "message": "010600010d4305??"
+  },
+  {
+    "command": "recv",
+    "length": 3400
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "session_closed",
+      "result": false
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "session_error",
+      "result": false
+    }
+  }
+]
+

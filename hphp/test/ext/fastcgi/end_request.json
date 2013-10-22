@@ -1,0 +1,26 @@
+[
+  {
+    "command": "send",
+    "message": "01010001000800??000101??????????"
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "transaction_exists", 
+      "request_id": 1, 
+      "result": true
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "end_transaction",
+      "request_id": 1
+    }
+  },
+  {
+    "command": "recv",
+    "message": "01030001000800??0000000000??????"
+  }
+]
+

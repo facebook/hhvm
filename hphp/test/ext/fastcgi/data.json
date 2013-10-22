@@ -1,0 +1,26 @@
+[
+  {
+    "command": "send",
+    "message": "01010001000800??000101??????????"
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "transaction_exists",
+      "request_id": 1,
+      "result": true
+    }
+  },
+  {
+    "command": "send",
+    "message": "01080001005e00??556e6976616c656e7420466f756e646174696f6e73206f66204d617468656d617469637320697320566c6164696d697220566f65766f64736b79e2809973206e65772070726f6772616d20666f72206120636f6d70726568656e73697665"
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "session_error",
+      "result": true
+    }
+  }
+]
+

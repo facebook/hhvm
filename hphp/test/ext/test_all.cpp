@@ -22,6 +22,8 @@
 #include "hphp/test/ext/test_util.h"
 #include "hphp/test/ext/test_ext.h"
 #include "hphp/test/ext/test_server.h"
+#include "hphp/test/ext/test_fastcgi.h"
+#include "hphp/test/ext/test_fastcgi_protocol.h"
 #include "hphp/compiler/option.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,6 +35,13 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
   if (suite == "TestLibEventServer") {
     Option::EnableEval = Option::FullEval;
     RUN_TESTSUITE(TestLibEventServer);
+    return;
+  }
+
+  if (set == "TestFastCGI") {
+    Option::EnableEval = Option::FullEval;
+    RUN_TESTSUITE(TestFastCGIServer);
+    RUN_TESTSUITE(TestFastCGIProtocol);
     return;
   }
 

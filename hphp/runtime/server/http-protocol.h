@@ -31,8 +31,48 @@ class StringBuffer;
 class HttpProtocol {
 public:
   static const VirtualHost *GetVirtualHost(Transport *transport);
-  static void PrepareSystemVariables(Transport *transport, const RequestURI &r,
-                                     const SourceRootInfo &sourceRootInfo);
+  static void PrepareSystemVariables(Transport *transport,
+                                     const RequestURI &r,
+                                     const SourceRootInfo &sri);
+  static void StartRequest();
+  static void PrepareEnv(Variant& env,
+                         Transport *transport);
+  static void PrepareRequestVariables(Variant& request,
+                                      Variant& get,
+                                      Variant& post,
+                                      Variant& raw_post,
+                                      Variant& files,
+                                      Variant& cookie,
+                                      Transport *transport,
+                                      const RequestURI &r);
+  static void PrepareGetVariable(Variant& get,
+                                 const RequestURI &r);
+  static void PreparePostVariables(Variant& post,
+                                   Variant& raw_post,
+                                   Variant& files,
+                                   Transport *transport);
+  static bool PrepareCookieVariable(Variant& cookie,
+                                    Transport *transport);
+  static void PrepareServerVariable(Variant& server,
+                                    Transport *transport,
+                                    const RequestURI &r,
+                                    const SourceRootInfo &sri,
+                                    const VirtualHost *vhost);
+  static void CopyHeaderVariables(Variant& server,
+                                  const HeaderMap& headers,
+                                  bool normalize);
+  static void CopyServerInfo(Variant& server,
+                             Transport *transport,
+                             const VirtualHost *vhost);
+  static void CopyRemoteInfo(Variant& server,
+                             Transport *transport);
+  static void CopyAuthInfo(Variant& server,
+                           Transport *transport);
+  static void CopyPathInfo(Variant& server,
+                           Transport *transport,
+                           const RequestURI &r,
+                           const VirtualHost *vhost);
+
   static bool ProxyRequest(Transport *transport, bool force,
                            const std::string &url, int &code,
                            std::string &error, StringBuffer &response,
@@ -41,11 +81,16 @@ public:
   static std::string RecordRequest(Transport *transport);
   static void ClearRecord(bool success, const std::string &tmpfile);
 
-  static void DecodeParameters(Variant &variables, const char *data, int size,
+  static void DecodeParameters(Variant &variables,
+                               const char *data,
+                               int size,
                                bool post = false);
   static void DecodeRfc1867(Transport *transport,
-                            Variant &post, Variant &files, int contentLength,
-                            const void *&data, int &size,
+                            Variant &post,
+                            Variant &files,
+                            int contentLength,
+                            const void *&data,
+                            int &size,
                             std::string boundary);
   static void DecodeCookies(Variant &variables, char *data);
   static bool IsRfc1867(const std::string contentType, std::string &boundary);

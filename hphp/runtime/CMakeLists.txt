@@ -15,9 +15,6 @@ if(NOT LINUX)
 	list(REMOVE_ITEM CXX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.cpp)
 endif()
 
-# Not working with off-the-shelf libevent
-list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/server/server-name-indication.cpp")
-
 # remove ext_hhvm, and anything in a test folder
 foreach (file ${CXX_SOURCES})
 	if (${file} MATCHES "ext_hhvm")
@@ -27,6 +24,18 @@ foreach (file ${CXX_SOURCES})
 		list(REMOVE_ITEM CXX_SOURCES ${file})
 	endif()
 endforeach(file ${CXX_SOURCES})
+
+if(NOT HAVE_CUSTOM_LIBEVENT)
+	# Not working with off-the-shelf libevent
+	list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/server/server-name-indication.cpp")
+	foreach (file ${CXX_SOURCES})
+		if(${file} MATCHES "/server/libevent-")
+			list(REMOVE_ITEM CXX_SOURCES ${file})
+		endif()
+	endforeach(file ${CXX_SOURES})
+endif()
+
+include_directories("${HPHP_HOME}/hphp/third_party")
 
 ADD_LIBRARY(hphp_runtime_static STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})

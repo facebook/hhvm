@@ -1,0 +1,61 @@
+[
+  {
+    "command": "send",
+    "message": "01aa0000000000??"
+  },
+  {
+    "command": "send",
+    "message": "01bb0000000800??"
+  },
+  {
+    "command": "send",
+    "length": 8
+  },
+  {
+    "command": "send",
+    "message": "01cc0000012300??"
+  },
+  {
+    "command": "send",
+    "length": 291
+  },
+  {
+    "command": "send",
+    "message": "01dd0000ffff00??"
+  },
+  {
+    "command": "send",
+    "length": 65535
+  },
+  {
+    "command": "recv",
+    "message": "010b0000000800??aa??????????????"
+  },
+  {
+    "command": "recv",
+    "message": "010b0000000800??bb??????????????"
+  },
+  {
+    "command": "recv",
+    "message": "010b0000000800??cc??????????????"
+  },
+  {
+    "command": "recv",
+    "message": "010b0000000800??dd??????????????"
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "session_closed",
+      "result": false
+    }
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "session_error",
+      "result": false
+    }
+  }
+]
+

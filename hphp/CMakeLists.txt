@@ -32,6 +32,8 @@ add_subdirectory(third_party/timelib)
 add_subdirectory(third_party/lz4)
 add_subdirectory(third_party/double-conversion)
 add_subdirectory(third_party/folly)
+add_subdirectory(third_party/ti)
+add_subdirectory(third_party/thrift)
 
 add_subdirectory(vixl)
 add_subdirectory(neo)

@@ -225,7 +225,7 @@ public:
    *   http://facebook.com/foo?x=1       server object is "/foo?x=1"
    *   http://facebook.com/foo/bar?x=1   server object is "/foo/bar?x=1"
    */
-  const char *getServerObject();
+  virtual const char *getServerObject();
 
   /**
    * We define a "command" as the part of URL without parameters:

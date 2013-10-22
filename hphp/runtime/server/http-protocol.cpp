@@ -30,10 +30,13 @@
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include <boost/lexical_cast.hpp>
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
 using std::map;
+using boost::lexical_cast;
+using boost::bad_lexical_cast;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -147,9 +150,9 @@ static auto const s_arraysToClear = {
 void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const RequestURI &r,
                                           const SourceRootInfo &sri) {
-  const VirtualHost *vhost = VirtualHost::GetCurrent();
 
-  GlobalVariables* g = get_global_variables();
+  const VirtualHost *vhost = VirtualHost::GetCurrent();
+  GlobalVariables *g = get_global_variables();
   Variant emptyArr(HphpArray::GetStaticEmptyArray());
   for (auto& key : s_arraysToClear) {
     g->remove(key.get(), false);
@@ -157,11 +160,26 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   }
   g->set(s_HTTP_RAW_POST_DATA, empty_string, false);
 
-  Variant& server = g->getRef(s__SERVER);
-  server.set(s_REQUEST_START_TIME, time(nullptr));
+  StartRequest();
+  PrepareEnv(g->getRef(s__ENV), transport);
+  PrepareRequestVariables(g->getRef(s__REQUEST),
+                          g->getRef(s__GET),
+                          g->getRef(s__POST),
+                          g->getRef(s_HTTP_RAW_POST_DATA),
+                          g->getRef(s__FILES),
+                          g->getRef(s__COOKIE),
+                          transport,
+                          r);
+  PrepareServerVariable(g->getRef(s__SERVER),
+                        transport,
+                        r,
+                        sri,
+                        vhost);
+}
 
+void HttpProtocol::PrepareEnv(Variant& env,
+                              Transport *transport) {
   // $_ENV
-  Variant& env = g->getRef(s__ENV);
   process_env_variables(env);
   env.set(s_HPHP, 1);
   env.set(s_HHVM, 1);
@@ -176,109 +194,155 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     env.set(s_HPHP_HOTPROFILER, 1);
 #endif
   }
+}
 
-  Variant &request = g->getRef(s__REQUEST);
+void HttpProtocol::PrepareRequestVariables(Variant& request,
+                                           Variant& get,
+                                           Variant& post,
+                                           Variant& raw_post,
+                                           Variant& files,
+                                           Variant& cookie,
+                                           Transport *transport,
+                                           const RequestURI &r) {
 
   // $_GET and $_REQUEST
   if (!r.queryString().empty()) {
-    Variant &get = g->getRef(s__GET);
-    DecodeParameters(get, r.queryString().data(),
-                     r.queryString().size());
+    PrepareGetVariable(get, r);
     CopyParams(request, get);
   }
 
-  string contentType = transport->getHeader("Content-Type");
-  string contentLength = transport->getHeader("Content-Length");
   // $_POST and $_REQUEST
   if (transport->getMethod() == Transport::Method::POST) {
-    bool needDelete = false;
-    int size = 0;
-    const void *data = transport->getPostData(size);
-    if (data && size) {
-      string boundary;
-      int content_length = atoi(contentLength.c_str());
-      bool rfc1867Post = IsRfc1867(contentType, boundary);
-      string files;
-      if (rfc1867Post) {
-        if (content_length > VirtualHost::GetMaxPostSize()) {
-          // $_POST and $_FILES are empty
-          Logger::Warning("POST Content-Length of %d bytes exceeds "
-                          "the limit of %" PRId64 " bytes",
-                          content_length, VirtualHost::GetMaxPostSize());
-          while (transport->hasMorePostData()) {
-            int delta = 0;
-            transport->getMorePostData(delta);
-          }
-        } else {
-          if (transport->hasMorePostData()) {
-            needDelete = true;
-            data = Util::buffer_duplicate(data, size);
-          }
-          DecodeRfc1867(transport, g->getRef(s__POST), g->getRef(s__FILES),
-                        content_length, data, size, boundary);
-        }
-        assert(!transport->getFiles(files));
-      } else {
-        needDelete = read_all_post_data(transport, data, size);
-
-        bool decodeData = strncasecmp(contentType.c_str(),
-                                       DEFAULT_POST_CONTENT_TYPE,
-                                       sizeof(DEFAULT_POST_CONTENT_TYPE)-1) == 0;
-        // Always decode data for now. (macvicar)
-        decodeData = true;
-
-        if (decodeData) {
-          DecodeParameters(g->getRef(s__POST), (const char*)data, size, true);
-        }
-
-        bool ret = transport->getFiles(files);
-        if (ret) {
-          g->getRef(s__FILES) = unserialize_from_string(files);
-        }
-      }
-      CopyParams(request, g->getRef(s__POST));
-      if (needDelete) {
-        if (RuntimeOption::AlwaysPopulateRawPostData &&
-            uint32_t(size) <= StringData::MaxSize) {
-          g->getRef(s_HTTP_RAW_POST_DATA) =
-            String((char*)data, size, AttachString);
-        } else {
-          free((void *)data);
-        }
-      } else {
-        // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
-        if (uint32_t(size) <= StringData::MaxSize) {
-          g->getRef(s_HTTP_RAW_POST_DATA) =
-            String((char*)data, size, CopyString);
-        }
-      }
-    }
+    PreparePostVariables(post, raw_post, files, transport);
+    CopyParams(request, post);
   }
 
   // $_COOKIE
+  if (PrepareCookieVariable(cookie, transport)) {
+    CopyParams(request, cookie);
+  }
+}
+
+void HttpProtocol::PrepareGetVariable(Variant& get,
+                                      const RequestURI &r) {
+  DecodeParameters(get,
+                   r.queryString().data(),
+                   r.queryString().size());
+}
+
+void HttpProtocol::PreparePostVariables(Variant& post,
+                                        Variant& raw_post,
+                                        Variant& files,
+                                        Transport *transport) {
+
+  string contentType = transport->getHeader("Content-Type");
+  string contentLength = transport->getHeader("Content-Length");
+
+  bool needDelete = false;
+  int size = 0;
+  const void *data = transport->getPostData(size);
+  if (data && size) {
+    string boundary;
+    int content_length = atoi(contentLength.c_str());
+    bool rfc1867Post = IsRfc1867(contentType, boundary);
+    string files_str;
+    if (rfc1867Post) {
+      if (content_length > VirtualHost::GetMaxPostSize()) {
+        // $_POST and $_FILES are empty
+        Logger::Warning("POST Content-Length of %d bytes exceeds "
+                        "the limit of %" PRId64 " bytes",
+                        content_length, VirtualHost::GetMaxPostSize());
+        while (transport->hasMorePostData()) {
+          int delta = 0;
+          transport->getMorePostData(delta);
+        }
+      } else {
+        if (transport->hasMorePostData()) {
+          needDelete = true;
+          data = Util::buffer_duplicate(data, size);
+        }
+        DecodeRfc1867(transport,
+                      post,
+                      files,
+                      content_length,
+                      data,
+                      size,
+                      boundary);
+      }
+      assert(!transport->getFiles(files_str));
+    } else {
+      needDelete = read_all_post_data(transport, data, size);
+
+      bool decodeData = strncasecmp(contentType.c_str(),
+                                    DEFAULT_POST_CONTENT_TYPE,
+                                    sizeof(DEFAULT_POST_CONTENT_TYPE)-1) == 0;
+      // Always decode data for now. (macvicar)
+      decodeData = true;
+
+      if (decodeData) {
+        DecodeParameters(post, (const char*)data, size, true);
+      }
+
+      bool ret = transport->getFiles(files_str);
+      if (ret) {
+        files = unserialize_from_string(files_str);
+      }
+    }
+
+    if (needDelete) {
+      if (RuntimeOption::AlwaysPopulateRawPostData &&
+          uint32_t(size) <= StringData::MaxSize) {
+        raw_post = String((char*)data, size, AttachString);
+      } else {
+        free((void *)data);
+      }
+    } else {
+      // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
+      if (uint32_t(size) <= StringData::MaxSize) {
+        raw_post = String((char*)data, size, CopyString);
+      }
+    }
+  }
+}
+
+bool HttpProtocol::PrepareCookieVariable(Variant& cookie,
+                                         Transport *transport) {
+
   string cookie_data = transport->getHeader("Cookie");
   if (!cookie_data.empty()) {
     StringBuffer sb;
     sb.append(cookie_data);
-    DecodeCookies(g->getRef(s__COOKIE), (char*)sb.data());
-    CopyParams(request, g->getRef(s__COOKIE));
+    DecodeCookies(cookie, (char*)sb.data());
+    return true;
+  } else {
+    return false;
   }
+}
 
-  // $_SERVER
-
-  // HTTP_ headers -- we don't exclude headers we handle elsewhere (e.g.,
-  // Content-Type, Authorization), since the CGI "spec" merely says the server
-  // "may" exclude them; this is not what APE does, but it's harmless.
-  HeaderMap headers;
-  transport->getHeaders(headers);
-
+void HttpProtocol::CopyHeaderVariables(Variant& server,
+                                       const HeaderMap& headers,
+                                       bool normalize) {
   static std::atomic<int> badRequests(-1);
+
+  if (!normalize) {
+    for (HeaderMap::const_iterator iter = headers.begin();
+         iter != headers.end();
+         ++iter) {
+      const vector<string> &values = iter->second;
+      for (unsigned int i = 0; i < values.size(); i++) {
+        String key = f_strtoupper(iter->first).replace("-", "_");
+        server.set(key, String(values[i]));
+      }
+    }
+    return;
+  }
 
   std::vector<std::string> badHeaders;
   for (auto const& header : headers) {
     auto const& key = header.first;
     auto const& values = header.second;
     auto normalizedKey = String("HTTP_") + f_strtoupper(key).replace("-", "_");
+
 
     // Detect suspicious headers.  We are about to modify header names for
     // the SERVER variable.  This means that it is possible to deliberately
@@ -316,15 +380,20 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
         "HeaderMangle warning: "
         "The header(s) [%s] overwrote other headers which mapped to the same "
         "key. This happens because PHP normalises - to _, ie AN_EXAMPLE "
-        "and AN-EXAMPLE are equivalent.  You should treat this as "
+        "and AN-EXAMPLE are equivalent. You should treat this as "
         "malicious. All headers from this request:\n%s",
         badNames.c_str(), allHeaders.c_str());
     }
   }
+}
 
-  string host = transport->getHeader("Host");
-  String hostName(VirtualHost::GetCurrent()->serverName(host));
-  string hostHeader(host);
+void HttpProtocol::CopyServerInfo(Variant& server,
+                                  Transport *transport,
+                                  const VirtualHost *vhost) {
+
+  string hostHeader = transport->getHeader("Host");
+  String hostName(vhost->serverName(hostHeader));
+
   if (hostHeader.empty()) {
     server.set(s_HTTP_HOST, hostName);
     StackTraceNoHeap::AddExtraLogging("Server", hostName.data());
@@ -340,14 +409,25 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     }
   }
 
-  // APE sets CONTENT_TYPE and CONTENT_LENGTH without HTTP_
-  if (!contentType.empty()) {
-    server.set(s_CONTENT_TYPE, String(contentType));
-  }
-  if (!contentLength.empty()) {
-    server.set(s_CONTENT_LENGTH, String(contentLength));
-  }
+  server.set(s_GATEWAY_INTERFACE, s_CGI_1_1);
+  server.set(s_SERVER_ADDR, String(RuntimeOption::ServerPrimaryIP));
+  server.set(s_SERVER_NAME, hostName);
+  server.set(s_SERVER_PORT, RuntimeOption::ServerPort);
+  server.set(s_SERVER_SOFTWARE, s_HPHP);
+  server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
+  server.set(s_SERVER_ADMIN, empty_string);
+  server.set(s_SERVER_SIGNATURE, empty_string);
+}
 
+void HttpProtocol::CopyRemoteInfo(Variant& server,
+                                  Transport *transport) {
+  server.set(s_REMOTE_ADDR, String(transport->getRemoteHost(), CopyString));
+  server.set(s_REMOTE_HOST, empty_string); // I don't think we need to nslookup
+  server.set(s_REMOTE_PORT, transport->getRemotePort());
+}
+
+void HttpProtocol::CopyAuthInfo(Variant& server,
+                                Transport *transport) {
   // APE processes Authorization: Basic into PHP_AUTH_USER and PHP_AUTH_PW
   string authorization = transport->getHeader("Authorization");
   if (!authorization.empty()) {
@@ -363,15 +443,42 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       }
     }
   }
+}
 
+void HttpProtocol::CopyPathInfo(Variant& server,
+                                Transport *transport,
+                                const RequestURI& r,
+                                const VirtualHost *vhost) {
   server.set(s_REQUEST_URI, String(transport->getUrl(), CopyString));
   server.set(s_SCRIPT_URL, r.originalURL());
   String prefix(transport->isSSL() ? "https://" : "http://");
-  String port_suffix("");
 
   // Need to append port
-  if (!transport->isSSL() && RuntimeOption::ServerPort != 80) {
-    port_suffix = folly::format(":{}", RuntimeOption::ServerPort).str();
+  DCHECK(server.toCArrRef().exists(s_SERVER_PORT));
+  std::string serverPort = "80";
+  if (server.toCArrRef().exists(s_SERVER_PORT)) {
+    CHECK(server[s_SERVER_PORT].isInteger() ||
+          server[s_SERVER_PORT].isString());
+    if (server[s_SERVER_PORT].isInteger()) {
+      serverPort = lexical_cast<string>(server[s_SERVER_PORT].toInt32());
+    } else {
+      serverPort = server[s_SERVER_PORT].toString()->data();
+    }
+  }
+
+  String port_suffix("");
+  if (!transport->isSSL() && serverPort != "80") {
+    port_suffix = folly::format(":{}", serverPort).str();
+  }
+
+  string hostHeader;
+  if (server.toCArrRef().exists(s_HTTP_HOST)) {
+    hostHeader = server[s_HTTP_HOST].toCStrRef()->data();
+  }
+  String hostName;
+  if (server.toCArrRef().exists(s_SERVER_NAME)) {
+    DCHECK(server[s_SERVER_NAME].isString());
+    hostName = server[s_SERVER_NAME].toCStrRef();
   }
   server.set(s_SCRIPT_URI,
              String(prefix + (hostHeader.empty() ? hostName + port_suffix :
@@ -396,31 +503,35 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   } else {
     server.set(s_SCRIPT_NAME, r.resolvedURL());
   }
+
   if (r.rewritten()) {
     server.set(s_PHP_SELF, r.originalURL());
   } else {
-    server.set(s_PHP_SELF, r.resolvedURL() + r.origPathInfo());
+    server.set(s_PHP_SELF, hostName + r.origPathInfo());
+  }
+
+  String documentRoot;
+  if (RuntimeOption::ServerType != "fastcgi") {
+    documentRoot = vhost->getDocumentRoot();
+    server.set(s_DOCUMENT_ROOT, documentRoot);
+  } else if (server.asCArrRef().exists(s_DOCUMENT_ROOT)) {
+    CHECK(server[s_DOCUMENT_ROOT].isString());
+    documentRoot = server[s_DOCUMENT_ROOT].toCStrRef();
   }
 
   server.set(s_SCRIPT_FILENAME, r.absolutePath());
+
   if (r.pathInfo().empty()) {
     server.set(s_PATH_TRANSLATED, r.absolutePath());
   } else {
+    DCHECK(server.toCArrRef().exists(s_DOCUMENT_ROOT));
+    DCHECK(server[s_DOCUMENT_ROOT].isString());
     server.set(s_PATH_TRANSLATED,
-               String(vhost->getDocumentRoot() + r.pathInfo().data()));
+               String(server[s_DOCUMENT_ROOT].toCStrRef() +
+                      r.pathInfo().data()));
     server.set(s_PATH_INFO, r.pathInfo());
   }
 
-  server.set(s_argv, make_packed_array(r.queryString()));
-  server.set(s_argc, 1);
-  server.set(s_GATEWAY_INTERFACE, s_CGI_1_1);
-  server.set(s_SERVER_ADDR, String(RuntimeOption::ServerPrimaryIP));
-  server.set(s_SERVER_NAME, hostName);
-  server.set(s_SERVER_PORT, RuntimeOption::ServerPort);
-  server.set(s_SERVER_SOFTWARE, s_HPHP);
-  server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
-  server.set(s_SERVER_ADMIN, empty_string);
-  server.set(s_SERVER_SIGNATURE, empty_string);
   switch (transport->getMethod()) {
   case Transport::Method::GET:  server.set(s_REQUEST_METHOD, s_GET);  break;
   case Transport::Method::HEAD: server.set(s_REQUEST_METHOD, s_HEAD); break;
@@ -431,8 +542,20 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       server.set(s_REQUEST_METHOD, transport->getExtendedMethod());
     }
     break;
-  default:              server.set(s_REQUEST_METHOD, empty_string);     break;
+  default:
+    server.set(s_REQUEST_METHOD, empty_string); break;
   }
+  server.set(s_HTTPS, transport->isSSL() ? s_1 : empty_string);
+  server.set(s_QUERY_STRING, r.queryString());
+
+  server.set(s_argv, make_packed_array(r.queryString()));
+  server.set(s_argc, 1);
+}
+
+void HttpProtocol::StartRequest() {
+  GlobalVariables *g = get_global_variables();
+  Variant& server = g->getRef(s__SERVER);
+  server.set(s_REQUEST_START_TIME, time(nullptr));
   time_t now;
   struct timeval tp = {0};
   double now_double;
@@ -443,16 +566,45 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     now = time(nullptr);
     now_double = (double)now;
   }
-  server.set(s_HTTPS, transport->isSSL() ? s_1 : empty_string);
   server.set(s_REQUEST_TIME, now);
   server.set(s_REQUEST_TIME_FLOAT, now_double);
-  server.set(s_QUERY_STRING, r.queryString());
+}
 
-  server.set(s_REMOTE_ADDR, String(transport->getRemoteHost(), CopyString));
-  server.set(s_REMOTE_HOST, empty_string); // I don't think we need to nslookup
-  server.set(s_REMOTE_PORT, transport->getRemotePort());
+void HttpProtocol::PrepareServerVariable(Variant& server,
+                                         Transport *transport,
+                                         const RequestURI &r,
+                                         const SourceRootInfo &sri,
+                                         const VirtualHost *vhost) {
+  // $_SERVER
 
-  server.set(s_DOCUMENT_ROOT, String(vhost->getDocumentRoot()));
+  string contentType = transport->getHeader("Content-Type");
+  string contentLength = transport->getHeader("Content-Length");
+
+  // HTTP_ headers -- we don't exclude headers we handle elsewhere (e.g.,
+  // Content-Type, Authorization), since the CGI "spec" merely says the server
+  // "may" exclude them; this is not what APE does, but it's harmless.
+  HeaderMap headers;
+  transport->getHeaders(headers);
+  if (RuntimeOption::ServerType != "fastcgi") {
+    CopyHeaderVariables(server, headers, true);
+    CopyServerInfo(server, transport, vhost);
+    CopyRemoteInfo(server, transport);
+    CopyAuthInfo(server, transport);
+  } else {
+    CopyHeaderVariables(server, headers, false);
+  }
+
+  CopyPathInfo(server, transport, r, vhost);
+
+  // APE sets CONTENT_TYPE and CONTENT_LENGTH without HTTP_
+  if (!contentType.empty()) {
+    server.set(s_CONTENT_TYPE, String(contentType));
+  }
+  if (!contentLength.empty()) {
+    server.set(s_CONTENT_LENGTH, String(contentLength));
+  }
+
+  CopyPathInfo(server, transport, r, vhost);
 
   for (map<string, string>::const_iterator iter =
          RuntimeOption::ServerVariables.begin();
@@ -624,11 +776,19 @@ bool HttpProtocol::IsRfc1867(const string contentType, string &boundary) {
 }
 
 void HttpProtocol::DecodeRfc1867(Transport *transport,
-                                 Variant &post, Variant &files,
-                                 int contentLength, const void *&data,
-                                 int &size, string boundary) {
-  rfc1867PostHandler(transport, post, files, contentLength,
-                     data, size, boundary);
+                                 Variant &post,
+                                 Variant &files,
+                                 int contentLength,
+                                 const void *&data,
+                                 int &size,
+                                 string boundary) {
+  rfc1867PostHandler(transport,
+                     post,
+                     files,
+                     contentLength,
+                     data,
+                     size,
+                     boundary);
 }
 
 const char *HttpProtocol::GetReasonString(int code) {

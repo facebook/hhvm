@@ -85,13 +85,10 @@ include_directories(${LIBEVENT_INCLUDE_DIR})
 
 set(CMAKE_REQUIRED_LIBRARIES "${LIBEVENT_LIB}")
 CHECK_FUNCTION_EXISTS("evhttp_bind_socket_with_fd" HAVE_CUSTOM_LIBEVENT)
-if (NOT HAVE_CUSTOM_LIBEVENT)
-	unset(HAVE_CUSTOM_LIBEVENT CACHE)
-	unset(LIBEVENT_INCLUDE_DIR CACHE)
-	unset(LIBEVENT_LIB CACHE)
-	unset(LibEvent_FOUND CACHE)
-	message(FATAL_ERROR "Custom libevent is required with HipHop patches")
-endif ()
+if(HAVE_CUSTOM_LIBEVENT)
+        message("Using custom LIBEVENT")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_CUSTOM_LIBEVENT")
+endif()
 set(CMAKE_REQUIRED_LIBRARIES)
 
 # GD checks

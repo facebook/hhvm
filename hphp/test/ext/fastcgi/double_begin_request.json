@@ -1,0 +1,26 @@
+[
+  {
+    "command": "send",
+    "message": "01010001000800??000101??????????"
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "transaction_exists",
+      "request_id": 1,
+      "result": true
+    }
+  },
+  {
+    "command": "send",
+    "message": "01010001000800??000101??????????"
+  },
+  {
+    "command": "call",
+    "args": {
+      "name": "session_error",
+      "result": true
+    }
+  }
+]
+

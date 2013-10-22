@@ -125,7 +125,7 @@ namespace detail {
       if (m_visited.test(block->id())) return;
       m_visited.set(block->id());
       Block* taken = block->taken();
-      if (taken && taken->trace()->isMain() != block->trace()->isMain()) {
+      if (taken && !cold(block) && cold(taken)) {
         walk(taken);
         taken = nullptr;
       }
@@ -133,7 +133,8 @@ namespace detail {
       if (taken) walk(taken);
       m_visitor(block);
     }
-
+  private:
+    static bool cold(Block* b) { return b->hint() == Block::Hint::Unlikely; }
   private:
     boost::dynamic_bitset<> m_visited;
     Visitor &m_visitor;

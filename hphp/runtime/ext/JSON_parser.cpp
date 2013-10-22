@@ -490,6 +490,10 @@ static void object_set(Variant &var, const String& key, CVarRef value,
 
 static void attach_zval(json_parser *json, const String& key,
                         int assoc) {
+  if (json->the_top < 1) {
+    return;
+  }
+
   Variant &root = json->the_zstack[json->the_top - 1];
   Variant &child =  json->the_zstack[json->the_top];
   int up_mode = json->the_stack[json->the_top - 1];

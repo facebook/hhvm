@@ -219,6 +219,7 @@ public:
   static std::vector<std::string> AllowedDirectories;
   static std::set<std::string> AllowedFiles;
   static hphp_string_imap<std::string> StaticFileExtensions;
+  static hphp_string_imap<std::string> PhpFileExtensions;
   static std::set<std::string> ForbiddenFileExtensions;
   static std::set<std::string> StaticFileGenerators;
   static FilesMatchPtrVec FilesMatches;

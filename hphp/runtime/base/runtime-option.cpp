@@ -227,6 +227,7 @@ bool RuntimeOption::SafeFileAccess = false;
 std::vector<std::string> RuntimeOption::AllowedDirectories;
 std::set<std::string> RuntimeOption::AllowedFiles;
 hphp_string_imap<std::string> RuntimeOption::StaticFileExtensions;
+hphp_string_imap<std::string> RuntimeOption::PhpFileExtensions;
 std::set<std::string> RuntimeOption::ForbiddenFileExtensions;
 std::set<std::string> RuntimeOption::StaticFileGenerators;
 FilesMatchPtrVec RuntimeOption::FilesMatches;
@@ -980,6 +981,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
         FilesMatches.push_back(FilesMatchPtr(new FilesMatch(hdf)));
       }
     }
+  }
+  {
+    Hdf phpfile = config["PhpFile"];
+    phpfile["Extensions"].get(PhpFileExtensions);
   }
   {
     Hdf admin = config["AdminServer"];

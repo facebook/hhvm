@@ -177,14 +177,6 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   const char *data; int len;
   const char *ext = reqURI.ext();
-  char *lc_ext = NULL;
-
-  if (ext) {
-      lc_ext = strndup(ext, strlen(ext));
-      for(int q = 0; lc_ext[q]; q++){
-        lc_ext[q] = tolower(lc_ext[q]);
-      }
-  }
 
   if (reqURI.forbidden()) {
     transport->sendString("Forbidden", 403);
@@ -214,16 +206,15 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   //
   // PhpFile {
   //    Extensions {
-  //        php  = application/php
   //        hphp = application/x-hhvm-php
   //    }
   // }
   //
   // First preferences is given to the Configuration entry
   bool is_php = false;
-  if (lc_ext && !RuntimeOption::PhpFileExtensions.empty()) {
+  if (ext && !RuntimeOption::PhpFileExtensions.empty()) {
       hphp_string_imap<string>::const_iterator phpiter =
-        RuntimeOption::PhpFileExtensions.find(lc_ext);
+        RuntimeOption::PhpFileExtensions.find(ext);
       if (phpiter != RuntimeOption::PhpFileExtensions.end()) {
           is_php = true;
       }
@@ -232,8 +223,6 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   if (!is_php && ext && strcasecmp(ext, "php") == 0) {
       is_php = true;
   }
-  // free the buffer for lc_ext
-  free(lc_ext);
 
   // If this is not a php file, check the static and dynamic content caches
   if (!is_php) {

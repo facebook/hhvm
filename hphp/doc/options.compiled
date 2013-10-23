@@ -790,7 +790,7 @@ This feature allows a machine to overwrite configurations just by matching
 machine names with specified regex pattern. This block of configuration can
 appear at any location of the file, even at top.
 
-= PHP File Extensions
+= PHP File Extensions (Optional)
 
 By default any file with .php in the URL is treated as PHP Source code and is passed
 through the HHVM Engine for interpretation.
@@ -800,10 +800,13 @@ option.
 
     PhpFile {
         Extensions {
-            php  = application/php
             hphp = application/x-hhvm-php
+            do   = application/x-php
         }
     }
 
 Note that only the extensions are important. Content type beside the extension is provided
 for completeness.
+
+For majority of the users, this feature is not required as .php extension is handled automatically
+

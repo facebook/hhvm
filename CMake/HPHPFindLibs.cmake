@@ -315,6 +315,10 @@ else()
 	add_definitions(-DSKIP_IMAP_GSS=1)
 endif()
 
+if (LINK_PAM)
+	find_package(Libpam REQUIRED)
+endif()
+
 if (NOT CCLIENT_HAS_SSL)
 	add_definitions(-DSKIP_IMAP_SSL=1)
 endif()
@@ -475,7 +479,7 @@ endif()
 	target_link_libraries(${target} ${NCURSES_LIBRARY})
 	target_link_libraries(${target} ${CCLIENT_LIBRARY})
 
-	if (CCLIENT_NEEDS_PAM)
+    if (CCLIENT_NEEDS_PAM OR LINK_PAM)
 		target_link_libraries(${target} ${PAM_LIBRARY})
 	endif()
 

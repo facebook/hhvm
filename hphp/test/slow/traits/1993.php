@@ -2,14 +2,10 @@
 
 function get_declared_user_traits() {
   $ret = array();
-  $system_traits = Set {
-    'strictiterable',
-    'strictkeyediterable',
-    'lazyiterable',
-    'lazykeyediterable'
-  };
   foreach (get_declared_traits() as $v) {
-    if (!$system_traits->contains(strtolower($v))) {
+    // exclude system traits
+    $rc = new ReflectionClass($v);
+    if ('systemlib.php' !== basename($rc->getFileName())) {
       $ret[] = $v;
     }
   }

@@ -5699,7 +5699,8 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
   const Location* sLoc = meth->getLocation().get();
   fe->setLocation(sLoc->line0, sLoc->line1);
-  fe->setDocComment(meth->getDocComment().c_str());
+  fe->setDocComment(
+    Option::GenerateDocComments ? meth->getDocComment().c_str() : "");
   fe->setReturnType(meth->retTypeAnnotation()->dataType());
   fe->setMaxStackCells(kNumActRecCells + 1);
   fe->setReturnTypeConstraint(
@@ -5787,12 +5788,15 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
   }
 
   const Location* sLoc = meth->getLocation().get();
+  StringData* methDoc = Option::GenerateDocComments ?
+    makeStaticString(meth->getDocComment()) : empty_string.get();
+
   fe->init(sLoc->line0,
            sLoc->line1,
            m_ue.bcPos(),
            buildMethodAttrs(meth, fe, top, allowOverride),
            top,
-           makeStaticString(meth->getDocComment()));
+           methDoc);
 }
 
 void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
@@ -6668,7 +6672,8 @@ void EmitterVisitor::emitClass(Emitter& e,
   StringData* className = makeStaticString(cNode->getOriginalName());
   StringData* parentName =
     makeStaticString(cNode->getOriginalParent());
-  StringData* classDoc = makeStaticString(cNode->getDocComment());
+  StringData* classDoc = Option::GenerateDocComments ?
+    makeStaticString(cNode->getDocComment()) : empty_string.get();
   Attr attr = cNode->isInterface() ? AttrInterface :
               cNode->isTrait()     ? AttrTrait     :
               cNode->isAbstract()  ? AttrAbstract  :
@@ -6789,7 +6794,8 @@ void EmitterVisitor::emitClass(Emitter& e,
             : KindOfInvalid;
 
           StringData* propName = makeStaticString(var->getName());
-          StringData* propDoc = empty_string.get();
+          StringData* propDoc = Option::GenerateDocComments ?
+            makeStaticString(var->getDocComment()) : empty_string.get();
           TypedValue tvVal;
           // Some properties may need to be marked with the AttrDeepInit
           // attribute, while other properties should not be marked with

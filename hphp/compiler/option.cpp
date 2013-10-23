@@ -131,10 +131,7 @@ int Option::GetScannerType() {
 }
 
 int Option::InvokeFewArgsCount = 6;
-bool Option::InvokeWithSpecificArgs = true;
-bool Option::FlattenInvoke = true;
 int Option::InlineFunctionThreshold = -1;
-bool Option::UseVirtualDispatch = false;
 bool Option::EliminateDeadCode = true;
 bool Option::CopyProp = false;
 bool Option::LocalCopyProp = true;
@@ -153,8 +150,6 @@ bool Option::AllVolatile = false;
 
 StringBag Option::OptionStrings;
 
-bool Option::GenerateCppLibCode = false;
-bool Option::GenerateSourceInfo = false;
 bool Option::GenerateDocComments = true;
 
 void (*Option::m_hookHandler)(Hdf &config);
@@ -289,10 +284,7 @@ void Option::Load(Hdf &config) {
   AllDynamic = config["AllDynamic"].getBool(true);
   AllVolatile = config["AllVolatile"].getBool();
 
-  GenerateCppLibCode       = config["GenerateCppLibCode"].getBool(false);
-  GenerateSourceInfo       = config["GenerateSourceInfo"].getBool(false);
   GenerateDocComments      = config["GenerateDocComments"].getBool(true);
-  UseVirtualDispatch       = config["UseVirtualDispatch"].getBool(false);
   EliminateDeadCode        = config["EliminateDeadCode"].getBool(true);
   CopyProp                 = config["CopyProp"].getBool(false);
   LocalCopyProp            = config["LocalCopyProp"].getBool(true);

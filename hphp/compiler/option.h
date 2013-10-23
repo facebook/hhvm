@@ -238,10 +238,7 @@ public:
    * Optimizations
    */
   static int InvokeFewArgsCount;
-  static bool InvokeWithSpecificArgs;
-  static bool FlattenInvoke;
   static int InlineFunctionThreshold;
-  static bool UseVirtualDispatch;
   static bool EliminateDeadCode;
   static bool CopyProp;
   static bool LocalCopyProp;
@@ -252,8 +249,6 @@ public:
   /**
    * Output options
    */
-  static bool GenerateCppLibCode;
-  static bool GenerateSourceInfo;
   static bool GenerateDocComments;
   static bool ControlFlow;
   static bool VariableCoalescing;

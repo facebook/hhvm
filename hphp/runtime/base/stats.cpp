@@ -18,7 +18,6 @@
 
 #include "hphp/util/base.h"
 #include "hphp/util/data-block.h"
-#include "hphp/runtime/vm/jit/x64-util.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
 namespace HPHP {

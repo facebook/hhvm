@@ -70,6 +70,7 @@
 
 #include "hphp/vixl/a64/decoder-a64.h"
 #include "hphp/vixl/a64/disasm-a64.h"
+#include "hphp/vixl/a64/macro-assembler-a64.h"
 #include "hphp/vixl/a64/simulator-a64.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
@@ -109,13 +110,14 @@
 #include "hphp/runtime/vm/jit/tracelet.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
-#include "hphp/runtime/vm/jit/x64-util.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/func-prologues.h"
 #include "hphp/runtime/vm/jit/func-prologues-x64.h"
 #include "hphp/runtime/vm/jit/func-prologues-arm.h"
+#include "hphp/runtime/vm/jit/debug-guards.h"
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
@@ -2431,11 +2433,11 @@ bool TranslatorX64::addDbgGuards(const Unit* unit) {
     // We may have a SrcKey to a deleted function. NB: this may miss a
     // race with deleting a Func. See task #2826313.
     if (!Func::isFuncIdValid(sk.getFuncId())) continue;
-    SrcRec& sr = *it->second;
-    if (sr.unitMd5() == unit->md5() &&
-        !sr.hasDebuggerGuard() &&
+    SrcRec* sr = it->second;
+    if (sr->unitMd5() == unit->md5() &&
+        !sr->hasDebuggerGuard() &&
         isSrcKeyInBL(sk)) {
-      addDbgGuardImpl(sk, sr);
+      JIT::addDbgGuardImpl(sk, sr);
     }
   }
   s_writeLease.drop();
@@ -2471,39 +2473,11 @@ bool TranslatorX64::addDbgGuard(const Func* func, Offset offset) {
   }
   {
     if (SrcRec* sr = m_srcDB.find(sk)) {
-      addDbgGuardImpl(sk, *sr);
+      JIT::addDbgGuardImpl(sk, sr);
     }
   }
   s_writeLease.drop();
   return true;
-}
-
-void TranslatorX64::addDbgGuardImpl(SrcKey sk, SrcRec& srcRec) {
-  TCA dbgGuard = mainCode.frontier();
-  assert(JIT::arch() == JIT::Arch::X64);
-  Asm a { mainCode };
-
-  // Emit the checks for debugger attach
-  emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, rAsm);
-  static COff dbgOff = offsetof(ThreadInfo, m_reqInjectionData) +
-    RequestInjectionData::debuggerReadOnlyOffset();
-  a.   load_reg64_disp_reg32(rAsm, dbgOff, rAsm);
-  a.   testb((int8_t)0xff, rbyte(rAsm));
-
-  // Branch to a special REQ_INTERPRET if attached
-  {
-    TCA fallback = emitServiceReq(stubsCode, JIT::REQ_INTERPRET, sk.offset(), 0);
-    a. jnz(fallback);
-  }
-
-  // Emit a jump to the actual code
-  TCA realCode = srcRec.getTopTranslation();
-  JIT::prepareForSmash(mainCode, kJmpLen);
-  TCA dbgBranchGuardSrc = mainCode.frontier();
-  a.   jmp(realCode);
-
-  // Add it to srcRec
-  srcRec.addDebuggerGuard(dbgGuard, dbgBranchGuardSrc);
 }
 
 bool TranslatorX64::dumpTCCode(const char* filename) {

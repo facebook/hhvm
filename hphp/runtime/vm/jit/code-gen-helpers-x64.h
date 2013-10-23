@@ -84,6 +84,53 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
                                  bool inTracelet, FixupMap& fixupMap,
                                  Fixup fixup);
 
+#ifdef USE_GCC_FAST_TLS
+
+/*
+ * TLS access: XXX we currently only support static-style TLS directly
+ * linked off of FS.
+ *
+ * x86 terminology review: "Virtual addresses" are subject to both
+ * segmented translation and paged translation. "Linear addresses" are
+ * post-segmentation address, subject only to paging. C and C++ generally
+ * only have access to bitwise linear addresses.
+ *
+ * TLS data live at negative virtual addresses off FS: the first datum
+ * is typically at VA(FS:-sizeof(datum)). Linux's x64 ABI stores the linear
+ * address of the base of TLS at VA(FS:0). While this is just a convention, it
+ * is firm: gcc builds binaries that assume it when, e.g., evaluating
+ * "&myTlsDatum".
+ *
+ * The virtual addresses of TLS data are not exposed to C/C++. To figure it
+ * out, we take a datum's linear address, and subtract it from the linear
+ * address where TLS starts.
+ */
+template<typename T>
+inline void
+emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
+            RegNumber reg) {
+  uintptr_t virtualAddress = uintptr_t(&datum.m_node.m_p) - tlsBase();
+  a.    fs();
+  a.    load_disp32_reg64(virtualAddress, reg);
+}
+
+#else // USE_GCC_FAST_TLS
+
+template<typename T>
+inline void
+emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum,
+            RegNumber reg) {
+  PhysRegSaver(a, kGPCallerSaved); // we don't know for sure what's alive
+  a.    emitImmReg(&datum.m_key, argNumToRegName[0]);
+  a.    call((TCA)pthread_getspecific);
+  if (reg != reg::rax) {
+    a.    mov_reg64_reg64(reg::rax, reg);
+  }
+}
+
+#endif // USE_GCC_FAST_TLS
+
+
 template<class Mem>
 void emitLoadReg(Asm& as, Mem mem, PhysReg reg) {
   assert(reg != InvalidReg);

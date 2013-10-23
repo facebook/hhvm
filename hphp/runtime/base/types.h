@@ -282,7 +282,7 @@ public:
     m_debugger = d;
     updateJit();
   }
-  static uint32_t debuggerReadOnlyOffset() {
+  static constexpr uint32_t debuggerReadOnlyOffset() {
     return offsetof(RequestInjectionData, m_debugger);
   }
   bool getDebuggerIntr() const { return m_debuggerIntr; }

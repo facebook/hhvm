@@ -28,7 +28,6 @@
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/x64-util.h"
 #include "hphp/runtime/vm/jit/ir.h"
 
 namespace HPHP { namespace JIT { namespace X64 {

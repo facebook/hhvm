@@ -201,6 +201,8 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   }
 }
 
+void (*Class::MethodCreateHook)(Class* cls, MethodMap::Builder& builder);
+
 Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
   : m_preClass(PreClassPtr(preClass))
   , m_parent(parent)
@@ -1433,6 +1435,12 @@ void Class::setMethods() {
       f = f->clone(f->attrs() & AttrClone ? this : f->cls());
       f->setNewFuncId();
     }
+  }
+
+  if (Class::MethodCreateHook) {
+    Class::MethodCreateHook(this, builder);
+    // running MethodCreateHook may add methods to builder
+    m_traitsEndIdx = builder.size();
   }
 
   // If class is not abstract, check that all abstract methods have been defined

@@ -22,6 +22,7 @@
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/range.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/hphp-value.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
@@ -409,7 +410,7 @@ struct Class : AtomicCountable {
   };
 
   class PropInitVec {
-  public:
+   public:
     PropInitVec();
     const PropInitVec& operator=(const PropInitVec&);
     ~PropInitVec();
@@ -428,7 +429,7 @@ struct Class : AtomicCountable {
     void push_back(const TypedValue& v);
     size_t size() const { return m_size; }
 
-  private:
+   private:
     PropInitVec(const PropInitVec&);
     TypedValueAux* m_data;
     unsigned m_size;
@@ -440,6 +441,9 @@ struct Class : AtomicCountable {
           TraitAliasVec;
   typedef IndexedStringMap<Class*,true,int> InterfaceMap;
   typedef IndexedStringMap<Func*,false,Slot> MethodMap;
+
+  /* If set, runs during setMethods() */
+  static void (*MethodCreateHook)(Class* cls, MethodMap::Builder& builder);
 
   /*
    * Allocate a new Class object.
@@ -905,7 +909,6 @@ inline bool classHasPersistentRDS(const Class* cls) {
           cls &&
           RDS::isPersistentHandle(cls->classHandle()));
 }
-
 
 } // HPHP
 

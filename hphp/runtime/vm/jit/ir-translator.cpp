@@ -332,6 +332,12 @@ IRTranslator::translateUnboxR(const NormalizedInstruction& i) {
   }
 }
 
+void IRTranslator::translateUnboxRNop(const NormalizedInstruction& i) {
+  TRACE(1, "HHIR: translateUnboxR: output inferred to be Cell\n");
+  assert(i.noOp);
+  m_hhbcTrans.assertTypeStack(0, JIT::Type::Cell);
+}
+
 void
 IRTranslator::translateBoxR(const NormalizedInstruction& i) {
   if (i.noOp) {
@@ -341,6 +347,11 @@ IRTranslator::translateBoxR(const NormalizedInstruction& i) {
   } else {
     HHIR_UNIMPLEMENTED(BoxR);
   }
+}
+
+void IRTranslator::translateBoxRNop(const NormalizedInstruction& i) {
+  assert(i.noOp);
+  m_hhbcTrans.assertTypeStack(0, JIT::Type::BoxedCell);
 }
 
 void
@@ -916,6 +927,10 @@ IRTranslator::translateFPassV(const NormalizedInstruction& i) {
     return;
   }
   HHIR_EMIT(FPassV);
+}
+
+void IRTranslator::translateFPassVNop(const NormalizedInstruction& i) {
+  assert(i.noOp);
 }
 
 void

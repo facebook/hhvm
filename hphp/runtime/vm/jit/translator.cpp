@@ -926,7 +926,9 @@ static const struct {
   { OpBox,         {Stack1,           Stack1,       OutVInput,         0 }},
   { OpUnbox,       {Stack1,           Stack1,       OutCInput,         0 }},
   { OpBoxR,        {Stack1,           Stack1,       OutVInput,         0 }},
+  { OpBoxRNop,     {None,             None,         OutNone,           0 }},
   { OpUnboxR,      {Stack1,           Stack1,       OutCInput,         0 }},
+  { OpUnboxRNop,   {None,             None,         OutNone,           0 }},
 
   /*** 2. Literal and constant instructions ***/
 
@@ -1139,6 +1141,7 @@ static const struct {
   { OpFPassC,      {FuncdRef,         None,         OutSameAsInput,    0 }},
   { OpFPassCW,     {FuncdRef,         None,         OutSameAsInput,    0 }},
   { OpFPassCE,     {FuncdRef,         None,         OutSameAsInput,    0 }},
+  { OpFPassVNop,   {None,             None,         OutNone,           0 }},
   { OpFPassV,      {Stack1|FuncdRef,  Stack1,       OutUnknown,        0 }},
   { OpFPassR,      {Stack1|FuncdRef,  Stack1,       OutFInputR,        0 }},
   { OpFPassL,      {Local|FuncdRef,   Stack1,       OutFInputL,        1 }},
@@ -1413,14 +1416,27 @@ void preInputApplyMetaData(Unit::MetaHandle metaHand,
   }
 }
 
-static bool isTypeAssert(const NormalizedInstruction* ni) {
-  return ni->op() == Op::AssertTL || ni->op() == Op::AssertTStk;
+static bool isTypeAssert(Op op) {
+  return op == Op::AssertTL || op == Op::AssertTStk;
+}
+
+static bool isAlwaysNop(Op op) {
+  if (isTypeAssert(op)) return true;
+  switch (op) {
+  case Op::UnboxRNop:
+  case Op::BoxRNop:
+  case Op::FPassVNop:
+  case Op::FPassC:
+    return true;
+  default:
+    return false;
+  }
 }
 
 void Translator::handleAssertionEffects(Tracelet& t,
                                         const NormalizedInstruction& ni,
                                         TraceletContext& tas) {
-  assert(isTypeAssert(&ni));
+  assert(isTypeAssert(ni.op()));
 
   auto const aop = static_cast<AssertTOp>(ni.imm[1].u_OA);
   auto const dt = [&]() -> folly::Optional<DataType> {
@@ -1490,6 +1506,11 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
                                     NormalizedInstruction* ni,
                                     TraceletContext& tas,
                                     InputInfos &inputInfos) {
+  if (isAlwaysNop(ni->op())) {
+    ni->noOp = true;
+    return true;
+  }
+
   if (!metaHand.findMeta(ni->unit(), ni->offset())) return false;
 
   Unit::MetaInfo info;
@@ -3298,7 +3319,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     // Translation could fail entirely (because of an unknown opcode), or
     // encounter an input that cannot be computed.
     try {
-      if (isTypeAssert(ni)) handleAssertionEffects(t, *ni, tas);
+      if (isTypeAssert(ni->op())) handleAssertionEffects(t, *ni, tas);
       preInputApplyMetaData(metaHand, ni);
       InputInfos inputInfos;
       getInputsImpl(
@@ -3504,7 +3525,7 @@ breakBB:
     // thats only useful in the following tracelet.
     if (isLiteral(ni->op()) ||
         isThisSelfOrParent(ni->op()) ||
-        isTypeAssert(ni)) {
+        isTypeAssert(ni->op())) {
       ni = ni->prev;
       continue;
     }
@@ -3628,6 +3649,11 @@ const char* Translator::translateResultName(TranslateResult r) {
  */
 void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
                   HhbcTranslator& hhbcTrans, MetaMode metaMode /* = Normal */) {
+  if (isAlwaysNop(inst.op())) {
+    inst.noOp = true;
+    return;
+  }
+
   if (!handle.findMeta(inst.unit(), inst.offset())) return;
 
   Unit::MetaInfo info;

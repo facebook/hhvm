@@ -1903,11 +1903,10 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     /* we dont support V in M-vectors, so leave it as an R in that
        case */
     assert(m_evalStack.get(m_evalStack.size() - 1) == StackSym::R);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
     if (ref) {
-      e.BoxR();
+      e.BoxRNop();
     } else {
-      e.UnboxR();
+      e.UnboxRNop();
     }
   }
 
@@ -2707,8 +2706,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           {
             FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
             e.Int(0);
-            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
-                           false, 0, 0);
             e.FPassC(0);
           }
           e.FCall(1);
@@ -3101,8 +3098,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         if (el->getType() == '`') {
           emitConvertToCell(e);
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
-                         false, 0, 0);
           e.FPassC(0);
           delete fpi;
           e.FCall(1);
@@ -3240,9 +3235,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitConvertToCell(e);
           e.False();
           e.FCallBuiltin(2, 1, s_count);
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
-                         false, 0, 0);
-          e.UnboxR();
+          e.UnboxRNop();
           return true;
         } else if (call->isCallToFunction("func_get_args") &&
                    m_curFunc->isGenerator()) {
@@ -4579,13 +4572,11 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
       if (passByRefKind == PassByRefKind::AllowCell ||
           m_evalStack.get(m_evalStack.size() - 1) != StackSym::C) {
         emitVGet(e);
-        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
-        e.FPassV(paramId);
+        e.FPassVNop(paramId);
         return;
       }
     } else {
       emitCGet(e);
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
       e.FPassC(paramId);
       return;
     }
@@ -6052,9 +6043,7 @@ void EmitterVisitor::emitSetFuncGetArgs(Emitter& e) {
     Id local = m_curFunc->lookupVarId(s_continuationVarArgsLocal);
     emitVirtualLocal(local);
     e.FCallBuiltin(0, 0, s_func_get_args);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
-                   false, 0, 0);
-    e.UnboxR();
+    e.UnboxRNop();
     emitSet(e);
     e.PopC();
   }
@@ -6397,7 +6386,6 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
     for (int i = param; i < nParams; i++) {
       visit((*params)[i]);
       emitConvertToCell(e);
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
       e.FPassC(i - param);
     }
   }
@@ -7164,7 +7152,6 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     emitVirtualLocal(oldLevelLoc);
     emitCGet(e);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
     e.FPassC(0);
   }
   e.FCall(1);
@@ -7181,7 +7168,6 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     emitVirtualLocal(oldLevelLoc);
     emitCGet(e);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
     e.FPassC(0);
   }
   e.FCall(1);

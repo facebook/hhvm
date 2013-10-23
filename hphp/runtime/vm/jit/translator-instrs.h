@@ -26,6 +26,8 @@
   CASE(PopR) \
   CASE(UnboxR) \
   CASE(BoxR) \
+  CASE(UnboxRNop) \
+  CASE(BoxRNop) \
   CASE(Null) \
   CASE(NullUninit) \
   CASE(True) \
@@ -105,6 +107,8 @@
   CASE(FPassM) \
   CASE(FPassS) \
   CASE(FPassG) \
+  CASE(FPassV) \
+  CASE(FPassVNop) \
   CASE(This) \
   CASE(BareThis) \
   CASE(CheckThis) \
@@ -166,7 +170,6 @@
   CASE(IterFree) \
   CASE(MIterFree) \
   CASE(IterBreak) \
-  CASE(FPassV) \
   CASE(UnsetN) \
   CASE(DecodeCufIter) \
   CASE(Shl) \

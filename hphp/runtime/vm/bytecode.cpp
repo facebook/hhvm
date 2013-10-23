@@ -3367,11 +3367,21 @@ OPTBLD_INLINE void VMExecutionContext::iopBoxR(PC& pc) {
   }
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopBoxRNop(PC& pc) {
+  NEXT();
+  assert(refIsPlausible(*m_stack.topTV()));
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopUnboxR(PC& pc) {
   NEXT();
   if (m_stack.topTV()->m_type == KindOfRef) {
     m_stack.unbox();
   }
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopUnboxRNop(PC& pc) {
+  NEXT();
+  assert(cellIsPlausible(*m_stack.topTV()));
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopNull(PC& pc) {
@@ -5691,14 +5701,10 @@ static inline ActRec* arFromInstr(TypedValue* sp, const Op* pc) {
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopFPassC(PC& pc) {
-#ifdef DEBUG
-  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
-#endif
+  DEBUG_ONLY auto const ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
-#ifdef DEBUG
   assert(paramId < ar->numArgs());
-#endif
 }
 
 #define FPASSC_CHECKED_PRELUDE                                                \
@@ -5741,6 +5747,14 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassV(PC& pc) {
   if (!func->byRef(paramId)) {
     m_stack.unbox();
   }
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopFPassVNop(PC& pc) {
+  DEBUG_ONLY auto const ar = arFromInstr(m_stack.top(), (Op*)pc);
+  NEXT();
+  DECODE_IVA(paramId);
+  assert(paramId < ar->numArgs());
+  assert(ar->m_func->byRef(paramId));
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopFPassR(PC& pc) {

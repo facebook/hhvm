@@ -827,6 +827,10 @@ BoxR    [R:<T>]  ->  [V:<T>]
   If $1 is a cell at run time, this instruction creates a new ref, sets the new
   ref to point at a copy of cell $1, and pushes the ref onto the stack.
 
+BoxRNop   [R:<T>]  ->  [C:<T>]
+
+  Box, no op.  $1 must be statically known to be boxed.
+
 UnboxR    [R:<T>]  ->  [C:<T>]
 
   Unbox. If $1 is a cell at run time, this instruction does nothing.
@@ -834,6 +838,10 @@ UnboxR    [R:<T>]  ->  [C:<T>]
   If $1 is a ref at run time, this instruction creates a copy of the cell that
   ref $1 points to, and pushes the cell onto the stack.
 
+UnboxRNop   [R:<T>]  ->  [C:<T>]
+
+  UnboxR, no op.  $1 must be statically known to be unboxed.  This
+  instruction pushes $1 on the stack as a cell.
 
 2. Literal and constant instructions
 ------------------------------------
@@ -1808,6 +1816,11 @@ FPassV <param id>    [V]  ->  [F]
   FPI pass parameter. If parameter %1 is pass by value, this instruction will
   unbox $1 and push it onto the stack as a cell. If parameter %1 is pass by
   reference, this instruction will push $1 onto the stack as a ref.
+
+FPassVNop <param id> [V]  ->  [F]
+
+  FPI pass parameter, no op.  Parameter %1 must be statically known to be
+  pass by reference.  This instruction pushes $1 onto the stack as a ref.
 
 FPassR <param id>    [R]  ->  [F]
 

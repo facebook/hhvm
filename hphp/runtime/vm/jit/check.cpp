@@ -37,7 +37,7 @@ TRACE_SET_MOD(hhir);
 
 struct RegState {
   RegState();
-  SSATmp*& tmp(const RegisterInfo& info, int i);
+  SSATmp*& tmp(const PhysLoc&, int i);
   void merge(const RegState& other);
   SSATmp* regs[kNumRegs];  // which tmp is in each register
   SSATmp* slots[NumPreAllocatedSpillLocs]; // which tmp is in each spill slot
@@ -48,13 +48,12 @@ RegState::RegState() {
   memset(slots, 0, sizeof(slots));
 }
 
-SSATmp*& RegState::tmp(const RegisterInfo& info, int i) {
-  if (info.spilled()) {
-    auto slot = info.spillInfo(i).slot();
-    assert(unsigned(slot) < NumPreAllocatedSpillLocs);
-    return slots[slot];
+SSATmp*& RegState::tmp(const PhysLoc& loc, int i) {
+  if (loc.spilled()) {
+    assert(loc.slot(i) < NumPreAllocatedSpillLocs);
+    return slots[loc.slot(i)];
   }
-  auto r = info.reg(i);
+  auto r = loc.reg(i);
   assert(r != Transl::InvalidReg && unsigned(int(r)) < kNumRegs);
   return regs[int(r)];
 }
@@ -322,8 +321,8 @@ bool checkShuffle(const IRInstruction& inst, const RegAllocInfo& regs) {
     assert(rs.isFullXMM() == rd.isFullXMM());
     for (int j = 0; j < rd.numAllocatedRegs(); ++j) {
       if (rd.spilled()) {
-        assert(!destSlots.test(rd.spillInfo(j).slot()));
-        destSlots.set(rd.spillInfo(j).slot());
+        assert(!destSlots.test(rd.slot(j)));
+        destSlots.set(rd.slot(j));
       } else {
         assert(!destRegs.contains(rd.reg(j))); // no duplicate dests
         destRegs.add(rd.reg(j));
@@ -359,7 +358,7 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
                (needed == 2 && allocated == 1 && rs.isFullXMM()));
         if (allocated == 2) {
           if (rs.spilled()) {
-            assert(rs.spillInfo(0).slot() != rs.spillInfo(1).slot());
+            assert(rs.slot(0) != rs.slot(1));
           } else {
             assert(rs.reg(0) != rs.reg(1));
           }
@@ -368,9 +367,9 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
           assert(state.tmp(rs, i) == src);
         }
       }
-      auto update = [&](SSATmp* t, const RegisterInfo& rd) {
-        for (unsigned i = 0, n = rd.numAllocatedRegs(); i < n; ++i) {
-          state.tmp(rd, i) = t;
+      auto update = [&](SSATmp* tmp, const PhysLoc& loc) {
+        for (unsigned i = 0, n = loc.numAllocatedRegs(); i < n; ++i) {
+          state.tmp(loc, i) = tmp;
         }
       };
       if (inst.op() == Shuffle) {
@@ -384,7 +383,8 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
         }
       }
     }
-    // State contains register/spill info at current block end.
+    // State contains the PhysLoc->SSATmp reverse mappings at block end;
+    // propagate the state to succ
     auto updateEdge = [&](Block* succ) {
       if (!reached[succ]) {
         states[succ] = state;

@@ -137,8 +137,8 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
      << color(ANSI_COLOR_END);
 }
 
-const RegisterInfo* regInfo(const RegAllocInfo* regs,
-                            const IRInstruction* inst, const SSATmp* t) {
+const PhysLoc* loc(const RegAllocInfo* regs,
+                   const IRInstruction* inst, const SSATmp* t) {
   return regs ? &(*regs)[inst][t] : nullptr;
 }
 
@@ -149,7 +149,7 @@ void printDst(std::ostream& os, const IRInstruction* inst,
   const char* sep = "";
   for (const SSATmp& dst : inst->dsts()) {
     os << punc(sep);
-    print(os, &dst, regInfo(regs, inst, &dst), lifetime, true);
+    print(os, &dst, loc(regs, inst, &dst), lifetime, true);
     sep = ", ";
   }
   os << punc(" = ");
@@ -163,7 +163,7 @@ void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
         lifetime->uses[src].lastUse == lifetime->linear[inst]) {
       ostream << "~";
     }
-    print(ostream, src, regInfo(regs, inst, src), lifetime);
+    print(ostream, src, loc(regs, inst, src), lifetime);
   } else {
     ostream << color(ANSI_COLOR_RED)
             << "!!!NULL @ " << i
@@ -235,19 +235,19 @@ void print(const IRInstruction* inst) {
   std::cerr << std::endl;
 }
 
-std::ostream& operator<<(std::ostream& os, const RegisterInfo& operand) {
-  auto sz = operand.numAllocatedRegs();
+std::ostream& operator<<(std::ostream& os, const PhysLoc& loc) {
+  auto sz = loc.numAllocatedRegs();
   if (!sz) return os;
   os << '(';
   auto delim = "";
   for (int i = 0; i < sz; ++i) {
-    if (!operand.spilled()) {
-      PhysReg reg = operand.reg(i);
+    if (!loc.spilled()) {
+      PhysReg reg = loc.reg(i);
       auto name = reg.type() == PhysReg::GP ? reg::regname(Reg64(reg)) :
                   reg::regname(RegXMM(reg));
       os << delim << name;
     } else {
-      os << delim << "spill[" << operand.spillInfo(i).slot() << "]";
+      os << delim << "spill[" << loc.slot(i) << "]";
     }
     delim = ",";
   }
@@ -255,10 +255,9 @@ std::ostream& operator<<(std::ostream& os, const RegisterInfo& operand) {
   return os;
 }
 
-void printRegisterInfo(std::ostream& os, const RegisterInfo& operand) {
-  auto sz = operand.numAllocatedRegs();
-  if (sz > 0) {
-    os << color(ANSI_COLOR_BROWN) << operand << color(ANSI_COLOR_END);
+void printPhysLoc(std::ostream& os, const PhysLoc& loc) {
+  if (loc.numAllocatedRegs() > 0) {
+    os << color(ANSI_COLOR_BROWN) << loc << color(ANSI_COLOR_END);
   }
 }
 
@@ -267,13 +266,13 @@ std::string ShuffleData::show() const {
   auto delim = "";
   for (unsigned i = 0; i < size; ++i) {
     os << delim;
-    printRegisterInfo(os, dests[i]);
+    printPhysLoc(os, dests[i]);
     delim = ",";
   }
   return os.str();
 }
 
-void print(std::ostream& os, const SSATmp* tmp, const RegisterInfo* operand,
+void print(std::ostream& os, const SSATmp* tmp, const PhysLoc* loc,
            const LifetimeInfo* lifetime, bool printLastUse) {
   if (tmp->inst()->op() == DefConst) {
     os << constToString(tmp->inst()->typeParam(),
@@ -288,8 +287,8 @@ void print(std::ostream& os, const SSATmp* tmp, const RegisterInfo* operand,
        << "@" << lifetime->uses[tmp].lastUse << "#" << lifetime->uses[tmp].count
        << color(ANSI_COLOR_END);
   }
-  if (operand) {
-    printRegisterInfo(os, *operand);
+  if (loc) {
+    printPhysLoc(os, *loc);
   }
   os << punc(":")
      << color(ANSI_COLOR_GREEN)
@@ -458,7 +457,7 @@ void print(std::ostream& os, const Block* block,
                           folly::format("({}) ", inst.id()).str().size(),
                           ' ');
         auto dst = inst.dst(i);
-        JIT::print(os, dst, regInfo(regs, &inst, dst), lifetime, false);
+        JIT::print(os, dst, loc(regs, &inst, dst), lifetime, false);
         os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
            << color(ANSI_COLOR_END);
         bool first = true;

@@ -142,10 +142,10 @@ struct CodeGenerator {
 private:
   Address cgInst(IRInstruction* inst);
 
-  const RegisterInfo curOpd(const SSATmp* t) const {
+  const PhysLoc curOpd(const SSATmp* t) const {
     return m_state.regs[m_curInst][t];
   }
-  const RegisterInfo curOpd(const SSATmp& t) const {
+  const PhysLoc curOpd(const SSATmp& t) const {
     return curOpd(&t);
   }
   const RegAllocInfo::RegMap& curOpds() const {
@@ -287,7 +287,7 @@ private:
   void emitLoadImm(Asm& as, int64_t val, PhysReg dstReg);
   PhysReg prepXMMReg(const SSATmp* tmp,
                      Asm& as,
-                     const RegisterInfo& info,
+                     const PhysLoc&,
                      RegXMM rXMMScratch);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
@@ -457,7 +457,7 @@ private: // These should be created using ArgGroup.
     , m_done(false)
   {}
 
-  explicit ArgDesc(SSATmp* tmp, const RegisterInfo& info, bool val = true);
+  explicit ArgDesc(SSATmp* tmp, const PhysLoc&, bool val = true);
 
 private:
   Kind m_kind;

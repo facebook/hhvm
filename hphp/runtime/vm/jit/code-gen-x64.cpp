@@ -112,7 +112,7 @@ const char* getContextName(Class* ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-ArgDesc::ArgDesc(SSATmp* tmp, const RegisterInfo& info, bool val)
+ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val)
   : m_imm(-1), m_zeroExtend(false), m_done(false) {
   if (tmp->type() == Type::None) {
     assert(val);
@@ -140,7 +140,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, const RegisterInfo& info, bool val)
     return;
   }
   if (val || tmp->numNeededRegs() > 1) {
-    auto reg = info.reg(val ? 0 : 1);
+    auto reg = loc.reg(val ? 0 : 1);
     assert(reg != InvalidReg);
     m_imm = 0;
 
@@ -445,11 +445,11 @@ static int64_t convIntToDouble(int64_t i) {
  */
 PhysReg CodeGenerator::prepXMMReg(const SSATmp* tmp,
                                   Asm& as,
-                                  const RegisterInfo& info,
+                                  const PhysLoc& loc,
                                   RegXMM rCgXMM) {
   assert(tmp->isA(Type::Bool) || tmp->isA(Type::Int) || tmp->isA(Type::Dbl));
 
-  PhysReg reg = info.reg();
+  PhysReg reg = loc.reg();
 
   // Case 1: tmp is already in a XMM register
   if (reg.isXMM()) return reg;
@@ -463,7 +463,7 @@ PhysReg CodeGenerator::prepXMMReg(const SSATmp* tmp,
     }
     // Case 2.b: Bool or Int stored in GP reg
     assert(tmp->isA(Type::Bool) || tmp->isA(Type::Int));
-    zeroExtendIfBool(as, tmp, info.reg());
+    zeroExtendIfBool(as, tmp, loc.reg());
     as.pxor_xmm_xmm(rCgXMM, rCgXMM);
     as.cvtsi2sd_reg64_xmm(reg, rCgXMM);
     return rCgXMM;
@@ -2755,12 +2755,12 @@ void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
              curOpd(inst->dst()).reg());
 }
 
-void emitSpill(Asm& as, const RegisterInfo& s, const RegisterInfo& d, Type t) {
+void emitSpill(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
   assert(s.numAllocatedRegs() == d.numAllocatedRegs() ||
          (s.isFullXMM() && d.numAllocatedRegs() == 2));
   for (int i = 0, n = s.numAllocatedRegs(); i < n; ++i) {
     auto r = s.reg(i);
-    auto offset = d.spillInfo(i).offset();
+    auto offset = d.offset(i);
     if (s.isFullXMM()) {
       as.movdqa(r, reg::rsp[offset]);
     } else {
@@ -2770,12 +2770,12 @@ void emitSpill(Asm& as, const RegisterInfo& s, const RegisterInfo& d, Type t) {
   }
 }
 
-void emitReload(Asm& as, const RegisterInfo& s, const RegisterInfo& d, Type t) {
+void emitReload(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
   assert(s.numAllocatedRegs() == d.numAllocatedRegs() ||
          (s.numAllocatedRegs() == 2 && d.isFullXMM()));
   for (int i = 0, n = d.numAllocatedRegs(); i < n; ++i) {
     auto r = d.reg(i);
-    auto offset = s.spillInfo(i).offset();
+    auto offset = s.offset(i);
     if (d.isFullXMM()) {
       as.movdqa(reg::rsp[offset], r);
     } else {

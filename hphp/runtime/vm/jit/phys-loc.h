@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_OPERAND_H_
-#define incl_HPHP_VM_OPERAND_H_
+#ifndef incl_HPHP_VM_PHYS_LOC_H_
+#define incl_HPHP_VM_PHYS_LOC_H_
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
@@ -24,31 +24,6 @@ namespace HPHP { namespace JIT {
 using Transl::PhysReg;
 using Transl::RegSet;
 using Transl::InvalidReg;
-
-// Information about one spilled value.
-struct SpillInfo {
-  SpillInfo() : m_val(int(InvalidReg)) {}
-  explicit SpillInfo(uint32_t v) : m_val(v) {
-    assert(isValid());
-  }
-
-  // Return logical slot number
-  uint32_t slot() const {
-    assert(isValid());
-    return m_val;
-  }
-
-  bool isValid() const {
-    return int(m_val) != int(InvalidReg);
-  }
-
-  // return the offset from RSP for this slot; takes into account
-  // the native stack layout.
-  int offset() const;
-
-private:
-  uint32_t m_val;
-};
 
 // Native stack layout:
 // |               |
@@ -69,24 +44,13 @@ private:
 // return address.
 
 /*
- * compute the offset from RSP for a logical spill slot.  Given a logical
- * slot number, return a byte offset from RSP, taking into account the layout
- * above.  LinearScan punts if any extra spill locations would be required,
- * so all we really need to do is adjust for the return address and scale
- * by the machine word size.
+ * PhysLoc contains Register/spill locations for one SSATmp
  */
-inline int SpillInfo::offset() const {
-  return (m_val + 1) * sizeof(uint64_t);
-}
-
-// Register allocation info about one SSATmp
-class RegisterInfo {
-  enum { kMaxNumRegs = 2 };
+class PhysLoc {
+  enum Kind { kRegister, kFullXMM, kSpill };
 
 public:
-  RegisterInfo()
-      : m_isSpilled(false)
-      , m_fullXMM(false) {
+  PhysLoc() : m_kind(kRegister) {
     m_regs[0] = m_regs[1] = InvalidReg;
   }
 
@@ -98,7 +62,7 @@ public:
    * Reload instructions need to deal with SSATmps that are spilled.
    */
   bool hasReg(uint32_t i = 0) const {
-    return !m_isSpilled && m_regs[i] != InvalidReg;
+    return m_kind != kSpill && m_regs[i] != InvalidReg;
   }
 
   /*
@@ -114,17 +78,17 @@ public:
    * Returns InvalidReg for slots that aren't allocated.
    */
   PhysReg reg() const {
-    assert(!m_isSpilled);
+    assert(m_kind != kSpill);
     return m_regs[0];
   }
 
   PhysReg reg(uint32_t i) const {
-    assert(!m_isSpilled);
+    assert(m_kind != kSpill);
     return m_regs[i];
   }
 
   void setReg(PhysReg reg, uint32_t i) {
-    assert(!m_isSpilled);
+    assert(m_kind != kSpill);
     m_regs[i] = reg;
   }
 
@@ -133,14 +97,13 @@ public:
    * one 128-bit XMM register.
    */
   void setRegFullXMM(PhysReg reg) {
-    assert(reg.isXMM());
-    assert(!m_isSpilled);
+    assert(reg.isXMM() && m_kind != kSpill);
     m_regs[0] = reg;
-    m_fullXMM = true;
+    m_kind = kFullXMM;
   }
 
   bool spilled() const {
-    return m_isSpilled;
+    return m_kind == kSpill;
   }
 
   /*
@@ -148,52 +111,63 @@ public:
    * whole 128-bit XMM register.
    */
   bool isFullXMM() const {
-    return m_fullXMM;
+    return m_kind == kFullXMM;
   }
 
-  /* Returns the set of registers in this RegisterInfo */
+  /* Returns the set of registers in this PhysLoc */
   RegSet regs() const;
 
   /*
-   * Returns information about how to spill/fill a SSATmp.
-   *
-   * These functions are only valid if this SSATmp is being spilled or
-   * filled.  In all normal instructions (i.e. other than Spill and
-   * Reload), SSATmps are assigned registers instead of spill
-   * locations.
+   * Set/get information about this operand's spill location.
+   * slot is the logical slot number, offset is the offset in bytes
+   * from RSP.
    */
-  void setSpillInfo(int i, SpillInfo si) {
-    assert(si.isValid());
-    m_spillInfo[i] = si;
-    m_isSpilled = true;
+  void setSlot(int idx, uint32_t slot) {
+    assert(int(slot) != int(InvalidReg));
+    m_slots[idx] = slot;
+    m_kind = kSpill;
   }
 
-  SpillInfo spillInfo(int idx) const {
-    assert(m_isSpilled);
-    return m_spillInfo[idx];
+  uint32_t slot(int idx) const {
+    assert(m_kind == kSpill);
+    return m_slots[idx];
   }
 
-  bool operator==(const RegisterInfo& other) const {
-    return m_isSpilled == other.m_isSpilled &&
-           m_fullXMM == other.m_fullXMM &&
+  /*
+   * compute the offset from RSP for a logical spill slot.  Given a logical
+   * slot number, return a byte offset from RSP, taking into account the layout
+   * above.  LinearScan punts if any extra spill locations would be required,
+   * so all we really need to do is adjust for the return address and scale
+   * by the machine word size.
+   */
+  static int offset(uint32_t slot) {
+    return (slot + 1) * sizeof(uint64_t);
+  }
+
+  uint32_t offset(int idx) const {
+    assert(m_kind == kSpill);
+    return offset(m_slots[idx]);
+  }
+
+  bool operator==(const PhysLoc& other) const {
+    return m_kind == other.m_kind &&
            m_regs[0] == other.m_regs[0] &&
            m_regs[1] == other.m_regs[1];
   }
 
-  bool operator!=(const RegisterInfo& other) const {
+  bool operator!=(const PhysLoc& other) const {
     return !(*this == other);
   }
 
 private:
-  bool m_isSpilled;
-  bool m_fullXMM;
+  Kind m_kind;
   union {
-    PhysReg m_regs[kMaxNumRegs];
-    SpillInfo m_spillInfo[kMaxNumRegs];
+    PhysReg m_regs[2];
+    uint32_t m_slots[2];
   };
 };
 
-std::ostream& operator<<(std::ostream& os, const RegisterInfo&);
+std::ostream& operator<<(std::ostream& os, const PhysLoc&);
 
 }}
 

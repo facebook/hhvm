@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/operand.h"
+#include "hphp/runtime/vm/jit/phys-loc.h"
 
 namespace HPHP {
 namespace JIT{
@@ -23,22 +23,20 @@ using namespace Transl::reg;
 
 TRACE_SET_MOD(hhir);
 
-int RegisterInfo::numAllocatedRegs() const {
+int PhysLoc::numAllocatedRegs() const {
   // Return the number of register slots that actually have an allocated
   // register or spill slot.  We may not have allocated a full numNeededRegs()
   // worth of registers in some cases (if the value of this tmp wasn't used).
   // We rely on InvalidReg (-1) never being equal to a spill slot number.
-  int i = 0;
-  while (i < kMaxNumRegs && m_regs[i] != InvalidReg) {
-    ++i;
-  }
-  return i;
+  return m_regs[0] == InvalidReg ? 0 :
+         m_regs[1] == InvalidReg ? 1 : 2;
 }
 
-RegSet RegisterInfo::regs() const {
+RegSet PhysLoc::regs() const {
   RegSet regs;
-  for (int i = 0, n = numAllocatedRegs(); i < n; ++i) {
-    if (hasReg(i)) regs.add(reg(i));
+  if (hasReg(0)) {
+    regs.add(reg(0));
+    if (hasReg(1)) regs.add(reg(1));
   }
   return regs;
 }

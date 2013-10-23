@@ -20,7 +20,7 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/operand.h"
+#include "hphp/runtime/vm/jit/phys-loc.h"
 
 namespace HPHP { namespace JIT {
 
@@ -549,19 +549,19 @@ struct RBTraceData : IRExtraData {
 };
 
 /*
- * ShuffleData holds an array of destination operands for a Shuffle.
- * Each operand is a RegisterInfo struct referring to 1-2 registers
- * or spill slots.
+ * ShuffleData holds an array of destination locations for a Shuffle,
+ * one per source, as well as a capacity field so we can track the
+ * available space to add more srcs and dsts without reallocating.
  */
 struct ShuffleData : IRExtraData {
-  ShuffleData(RegisterInfo* d, uint32_t size, uint32_t cap)
-    : dests(d), size(size), cap(cap)
+  ShuffleData(PhysLoc* dests, uint32_t size, uint32_t cap)
+    : dests(dests), size(size), cap(cap)
   {}
   std::string show() const;
 public:
-  RegisterInfo* dests; // pointer to RegisterInfos
-  uint32_t size; // number of valid destinations
-  uint32_t cap; // available slots for more RegisterInfos & srcs
+  PhysLoc* dests; // array of up to [cap] PhysLocs
+  uint32_t size; // number of valid dests
+  uint32_t cap; // available slots for more dests & srcs
 };
 
 //////////////////////////////////////////////////////////////////////

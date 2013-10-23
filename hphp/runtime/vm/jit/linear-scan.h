@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/operand.h"
+#include "hphp/runtime/vm/jit/phys-loc.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -60,16 +60,16 @@ struct LifetimeInfo {
 
 struct RegAllocInfo {
   struct RegMap {
-    RegisterInfo& operator[](const SSATmp* k) { return m_map[k->id()]; }
-    RegisterInfo& operator[](const SSATmp& k) { return m_map[k.id()]; }
-    const RegisterInfo& operator[](const SSATmp* k) const {
+    PhysLoc& operator[](const SSATmp* k) { return m_map[k->id()]; }
+    PhysLoc& operator[](const SSATmp& k) { return m_map[k.id()]; }
+    const PhysLoc& operator[](const SSATmp* k) const {
       return m_map[k->id()];
     }
-    const RegisterInfo& operator[](const SSATmp& k) const {
+    const PhysLoc& operator[](const SSATmp& k) const {
       return m_map[k.id()];
     }
   private:
-    mutable smart::flat_map<uint32_t,RegisterInfo> m_map;
+    mutable smart::flat_map<uint32_t,PhysLoc> m_map;
   };
   explicit RegAllocInfo(const IRUnit& unit) : m_regs(unit, RegMap()) {}
   RegAllocInfo(const RegAllocInfo& other) : m_regs(other.m_regs) {}

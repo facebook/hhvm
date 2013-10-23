@@ -20,6 +20,7 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/operand.h"
 
 namespace HPHP { namespace JIT {
 
@@ -547,6 +548,22 @@ struct RBTraceData : IRExtraData {
   const StringData* msg;
 };
 
+/*
+ * ShuffleData holds an array of destination operands for a Shuffle.
+ * Each operand is a RegisterInfo struct referring to 1-2 registers
+ * or spill slots.
+ */
+struct ShuffleData : IRExtraData {
+  ShuffleData(RegisterInfo* d, uint32_t size, uint32_t cap)
+    : dests(d), size(size), cap(cap)
+  {}
+  std::string show() const;
+public:
+  RegisterInfo* dests; // pointer to RegisterInfos
+  uint32_t size; // number of valid destinations
+  uint32_t cap; // available slots for more RegisterInfos & srcs
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -638,6 +655,7 @@ X(CreateContMeth,               CreateContData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);
+X(Shuffle,                      ShuffleData);
 
 #undef X
 

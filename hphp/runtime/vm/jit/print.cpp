@@ -235,7 +235,45 @@ void print(const IRInstruction* inst) {
   std::cerr << std::endl;
 }
 
-void print(std::ostream& os, const SSATmp* tmp, const RegisterInfo* regInfo,
+std::ostream& operator<<(std::ostream& os, const RegisterInfo& operand) {
+  auto sz = operand.numAllocatedRegs();
+  if (!sz) return os;
+  os << '(';
+  auto delim = "";
+  for (int i = 0; i < sz; ++i) {
+    if (!operand.spilled()) {
+      PhysReg reg = operand.reg(i);
+      auto name = reg.type() == PhysReg::GP ? reg::regname(Reg64(reg)) :
+                  reg::regname(RegXMM(reg));
+      os << delim << name;
+    } else {
+      os << delim << "spill[" << operand.spillInfo(i).slot() << "]";
+    }
+    delim = ",";
+  }
+  os << ')';
+  return os;
+}
+
+void printRegisterInfo(std::ostream& os, const RegisterInfo& operand) {
+  auto sz = operand.numAllocatedRegs();
+  if (sz > 0) {
+    os << color(ANSI_COLOR_BROWN) << operand << color(ANSI_COLOR_END);
+  }
+}
+
+std::string ShuffleData::show() const {
+  std::ostringstream os;
+  auto delim = "";
+  for (unsigned i = 0; i < size; ++i) {
+    os << delim;
+    printRegisterInfo(os, dests[i]);
+    delim = ",";
+  }
+  return os.str();
+}
+
+void print(std::ostream& os, const SSATmp* tmp, const RegisterInfo* operand,
            const LifetimeInfo* lifetime, bool printLastUse) {
   if (tmp->inst()->op() == DefConst) {
     os << constToString(tmp->inst()->typeParam(),
@@ -250,27 +288,8 @@ void print(std::ostream& os, const SSATmp* tmp, const RegisterInfo* regInfo,
        << "@" << lifetime->uses[tmp].lastUse << "#" << lifetime->uses[tmp].count
        << color(ANSI_COLOR_END);
   }
-  if (regInfo) {
-    if (regInfo->spilled() || regInfo->numAllocatedRegs() > 0) {
-      os << color(ANSI_COLOR_BROWN) << '(';
-      if (!regInfo->spilled()) {
-        for (int i = 0, sz = regInfo->numAllocatedRegs(); i < sz; ++i) {
-          if (i != 0) os << ",";
-          PhysReg r = regInfo->reg(i);
-          if (r.type() == PhysReg::GP) {
-            os << reg::regname(Reg64(r));
-          } else {
-            os << reg::regname(RegXMM(r));
-          }
-        }
-      } else {
-        for (int i = 0, sz = tmp->numNeededRegs(); i < sz; ++i) {
-          if (i != 0) os << ",";
-          os << regInfo->spillInfo(i);
-        }
-      }
-      os << ')' << color(ANSI_COLOR_END);
-    }
+  if (operand) {
+    printRegisterInfo(os, *operand);
   }
   os << punc(":")
      << color(ANSI_COLOR_GREEN)

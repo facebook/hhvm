@@ -14,42 +14,33 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CHECK_H_
-#define incl_HPHP_VM_CHECK_H_
+#include "hphp/runtime/vm/jit/operand.h"
 
 namespace HPHP {
-namespace JIT {
+namespace JIT{
 
-class IRUnit;
-struct RegAllocInfo;
+using namespace Transl::reg;
 
-/*
- * Ensure valid SSA properties; each SSATmp must be defined exactly once,
- * only used in positions dominated by the definition.
- */
-bool checkCfg(const IRUnit&);
+TRACE_SET_MOD(hhir);
 
-/*
- * We can't have SSATmps spanning php-level calls, except for frame
- * pointers and constant values.
- *
- * We have no callee-saved registers in php, and there'd be nowhere to
- * spill these because all translations share the spill space.
- */
-bool checkTmpsSpanningCalls(const IRUnit&);
+int RegisterInfo::numAllocatedRegs() const {
+  // Return the number of register slots that actually have an allocated
+  // register or spill slot.  We may not have allocated a full numNeededRegs()
+  // worth of registers in some cases (if the value of this tmp wasn't used).
+  // We rely on InvalidReg (-1) never being equal to a spill slot number.
+  int i = 0;
+  while (i < kMaxNumRegs && m_regs[i] != InvalidReg) {
+    ++i;
+  }
+  return i;
+}
 
-/*
- * Make sure there's no shuffle instructions. (called right before register
- * allocation.
- */
-bool checkNoShuffles(const IRUnit&);
+RegSet RegisterInfo::regs() const {
+  RegSet regs;
+  for (int i = 0, n = numAllocatedRegs(); i < n; ++i) {
+    if (hasReg(i)) regs.add(reg(i));
+  }
+  return regs;
+}
 
-/*
- * Check register and spill slot assignments; registers and spill slots must
- * contain the correct SSATmp value at every point of use.
- */
-bool checkRegisters(const IRUnit&, const RegAllocInfo&);
-
-}}
-
-#endif
+}} // HPHP::JIT

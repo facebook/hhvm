@@ -27,23 +27,20 @@
 
 namespace HPHP {  namespace JIT {
 
+using Transl::kNumRegs;
+
 namespace {
 
 //////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(hhir);
 
-enum Limits : unsigned {
-  kNumRegisters = Transl::kNumRegs,
-  kNumSlots = NumPreAllocatedSpillLocs
-};
-
 struct RegState {
   RegState();
   SSATmp*& tmp(const RegisterInfo& info, int i);
   void merge(const RegState& other);
-  SSATmp* regs[kNumRegisters];  // which tmp is in each register
-  SSATmp* slots[kNumSlots]; // which tmp is in each spill slot
+  SSATmp* regs[kNumRegs];  // which tmp is in each register
+  SSATmp* slots[NumPreAllocatedSpillLocs]; // which tmp is in each spill slot
 };
 
 RegState::RegState() {
@@ -54,19 +51,19 @@ RegState::RegState() {
 SSATmp*& RegState::tmp(const RegisterInfo& info, int i) {
   if (info.spilled()) {
     auto slot = info.spillInfo(i).slot();
-    assert(unsigned(slot) < kNumSlots);
+    assert(unsigned(slot) < NumPreAllocatedSpillLocs);
     return slots[slot];
   }
   auto r = info.reg(i);
-  assert(r != Transl::InvalidReg && unsigned(int(r)) < kNumRegisters);
+  assert(r != Transl::InvalidReg && unsigned(int(r)) < kNumRegs);
   return regs[int(r)];
 }
 
 void RegState::merge(const RegState& other) {
-  for (unsigned i = 0; i < kNumRegisters; i++) {
+  for (unsigned i = 0; i < kNumRegs; i++) {
     if (regs[i] != other.regs[i]) regs[i] = nullptr;
   }
-  for (unsigned i = 0; i < kNumSlots; i++) {
+  for (unsigned i = 0; i < NumPreAllocatedSpillLocs; i++) {
     if (slots[i] != other.slots[i]) slots[i] = nullptr;
   }
 }
@@ -294,6 +291,50 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
   return isValid;
 }
 
+bool checkNoShuffles(const IRUnit& unit) {
+  postorderWalk(unit, [] (Block* b) {
+    for (DEBUG_ONLY auto& inst : *b) assert(inst.op() != Shuffle);
+  });
+  return true;
+}
+
+/*
+ * Check that each destination register or spill slot is unique,
+ * and that sources have the same number or less operands than
+ * destinations.
+ */
+bool checkShuffle(const IRInstruction& inst, const RegAllocInfo& regs) {
+  auto n = inst.numSrcs();
+  assert(n == inst.extra<Shuffle>()->size);
+  RegSet destRegs;
+  std::bitset<NumPreAllocatedSpillLocs> destSlots;
+  std::bitset<NumPreAllocatedSpillLocs> srcSlots;
+  for (uint32_t i = 0; i < n; ++i) {
+    DEBUG_ONLY auto& rs = regs[inst][inst.src(i)];
+    DEBUG_ONLY auto& rd = inst.extra<Shuffle>()->dests[i];
+    // rs could have less assigned registers/slots than rd, in these cases
+    // - when rs is empty, because the source is a constant.
+    // - when rd needs 2 and rs needs 1, and the source hasKnownType() but
+    // the dest type was more general, therefore needing the DataType in
+    // the second register.
+    assert(rs.numAllocatedRegs() <= rd.numAllocatedRegs());
+    assert(!rs.spilled() || !rd.spilled());
+    assert(rs.isFullXMM() == rd.isFullXMM());
+    for (int j = 0; j < rd.numAllocatedRegs(); ++j) {
+      if (rd.spilled()) {
+        assert(!destSlots.test(rd.spillInfo(j).slot()));
+        destSlots.set(rd.spillInfo(j).slot());
+      } else {
+        assert(!destRegs.contains(rd.reg(j))); // no duplicate dests
+        destRegs.add(rd.reg(j));
+      }
+    }
+    // don't let any spill slot appear on both sides of the copy.
+    assert((srcSlots & destSlots).none());
+  }
+  return true;
+}
+
 bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
   assert(checkCfg(unit));
   auto blocks = rpoSortCfg(unit);
@@ -302,22 +343,44 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
   for (auto* block : blocks) {
     RegState state = states[block];
     for (IRInstruction& inst : *block) {
+      if (inst.op() == Jmp) continue; // handled by Shuffle
       for (SSATmp* src : inst.srcs()) {
-        auto const &info = regs[inst][src];
-        if (!info.spilled() &&
-            (info.reg(0) == Transl::rVmSp ||
-             info.reg(0) == Transl::rVmFp)) {
+        auto const &rs = regs[inst][src];
+        if (!rs.spilled() &&
+            (rs.reg(0) == Transl::rVmSp ||
+             rs.reg(0) == Transl::rVmFp)) {
           // hack - ignore rbx and rbp
           continue;
         }
-        for (unsigned i = 0, n = info.numAllocatedRegs(); i < n; ++i) {
-          assert(state.tmp(info, i) == src);
+        DEBUG_ONLY auto allocated = rs.numAllocatedRegs();
+        DEBUG_ONLY auto needed = src->inst()->op() == DefConst ? 0 :
+                                 src->numNeededRegs();
+        assert(allocated == needed ||
+               (needed == 2 && allocated == 1 && rs.isFullXMM()));
+        if (allocated == 2) {
+          if (rs.spilled()) {
+            assert(rs.spillInfo(0).slot() != rs.spillInfo(1).slot());
+          } else {
+            assert(rs.reg(0) != rs.reg(1));
+          }
+        }
+        for (unsigned i = 0, n = rs.numAllocatedRegs(); i < n; ++i) {
+          assert(state.tmp(rs, i) == src);
         }
       }
-      for (SSATmp& dst : inst.dsts()) {
-        auto const &info = regs[inst][dst];
-        for (unsigned i = 0, n = info.numAllocatedRegs(); i < n; ++i) {
-          state.tmp(info, i) = &dst;
+      auto update = [&](SSATmp* t, const RegisterInfo& rd) {
+        for (unsigned i = 0, n = rd.numAllocatedRegs(); i < n; ++i) {
+          state.tmp(rd, i) = t;
+        }
+      };
+      if (inst.op() == Shuffle) {
+        checkShuffle(inst, regs);
+        for (uint32_t i = 0; i < inst.numSrcs(); ++i) {
+          update(inst.src(i), inst.extra<Shuffle>()->dests[i]);
+        }
+      } else {
+        for (auto& d : inst.dsts()) {
+          update(&d, regs[inst][d]);
         }
       }
     }

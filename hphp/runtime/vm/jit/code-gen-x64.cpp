@@ -680,7 +680,6 @@ X(JmpNSame);
 
 #undef X
 
-
 /**
  * Once the arg sources and dests are all assigned; emit moves and exchanges to
  * put all the args in desired registers. Any arguments that don't fit in
@@ -2756,54 +2755,101 @@ void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
              curOpd(inst->dst()).reg());
 }
 
+void emitSpill(Asm& as, const RegisterInfo& s, const RegisterInfo& d, Type t) {
+  assert(s.numAllocatedRegs() == d.numAllocatedRegs() ||
+         (s.isFullXMM() && d.numAllocatedRegs() == 2));
+  for (int i = 0, n = s.numAllocatedRegs(); i < n; ++i) {
+    auto r = s.reg(i);
+    auto offset = d.spillInfo(i).offset();
+    if (s.isFullXMM()) {
+      as.movdqa(r, reg::rsp[offset]);
+    } else {
+      // store the whole register even if it holds a bool or DataType
+      emitStoreReg(as, r, reg::rsp[offset]);
+    }
+  }
+}
+
+void emitReload(Asm& as, const RegisterInfo& s, const RegisterInfo& d, Type t) {
+  assert(s.numAllocatedRegs() == d.numAllocatedRegs() ||
+         (s.numAllocatedRegs() == 2 && d.isFullXMM()));
+  for (int i = 0, n = d.numAllocatedRegs(); i < n; ++i) {
+    auto r = d.reg(i);
+    auto offset = s.spillInfo(i).offset();
+    if (d.isFullXMM()) {
+      as.movdqa(reg::rsp[offset], r);
+    } else {
+      // load the whole register even if it holds a bool or DataType
+      emitLoadReg(as, reg::rsp[offset], r);
+    }
+  }
+}
+
 void CodeGenerator::cgSpill(IRInstruction* inst) {
   SSATmp* dst   = inst->dst();
   SSATmp* src   = inst->src(0);
-
   assert(dst->numNeededRegs() == src->numNeededRegs());
-  for (int locIndex = 0; locIndex < curOpd(src).numAllocatedRegs();
-       ++locIndex) {
-    // We do not need to mask booleans, since the IR will reload the spill
-    auto srcReg = curOpd(src).reg(locIndex);
-    auto sinfo = curOpd(dst).spillInfo(locIndex);
-    if (curOpd(src).isFullXMM()) {
-      m_as.movdqa(srcReg, reg::rsp[sinfo.offset()]);
-    } else {
-      int offset = sinfo.offset();
-      if (locIndex == 0 || packed_tv || src->type() <= Type::FuncCtx) {
-        emitStoreReg(m_as, srcReg, reg::rsp[offset]);
-      } else {
-        // Note that type field is shifted in memory
-        assert(srcReg.isGP());
-        offset += TVOFF(m_type) - (TVOFF(m_data) + sizeof(Value));
-        emitStoreTVType(m_as, srcReg, reg::rsp[offset]);
-      }
-    }
-  }
+  emitSpill(m_as, curOpd(src), curOpd(dst), src->type());
 }
 
 void CodeGenerator::cgReload(IRInstruction* inst) {
   SSATmp* dst   = inst->dst();
   SSATmp* src   = inst->src(0);
-
   assert(dst->numNeededRegs() == src->numNeededRegs());
-  for (int locIndex = 0; locIndex < curOpd(dst).numAllocatedRegs();
-       ++locIndex) {
-    auto dstReg = curOpd(dst).reg(locIndex);
-    auto sinfo = curOpd(src).spillInfo(locIndex);
-    if (curOpd(dst).isFullXMM()) {
-      assert(dstReg.isXMM());
-      m_as.movdqa(reg::rsp[sinfo.offset()], dstReg);
+  emitReload(m_as, curOpd(src), curOpd(dst), src->type());
+}
+
+void CodeGenerator::cgShuffle(IRInstruction* inst) {
+  // Each destination is unique, there are no mem-mem copies, and
+  // there are no cycles involving spill slots.  So do the shuffling
+  // in this order:
+  // 1. reg->mem (stores)
+  // 2. reg->reg (parallel copies)
+  // 3. mem->reg (loads) & imm->reg (constants)
+  int moves[kNumRegs];    // moves[dst] = src
+  memset(moves, -1, sizeof moves);
+  for (uint32_t i = 0, n = inst->numSrcs(); i < n; ++i) {
+    auto src = inst->src(i);
+    auto& rs = curOpd(src);
+    auto& rd = inst->extra<Shuffle>()->dests[i];
+    if (rd.spilled()) {
+      emitSpill(m_as, rs, rd, src->type());
+    } else if (!rs.spilled()) {
+      auto s0 = rs.reg(0);
+      auto d0 = rd.reg(0);
+      if (s0 != InvalidReg) moves[int(d0)] = int(s0);
+      auto s1 = rs.reg(1);
+      auto d1 = rd.reg(1);
+      if (s1 != InvalidReg) moves[int(d1)] = int(s1);
+    }
+  }
+  // Compute a serial order of moves and swaps
+  auto howTo = doRegMoves(moves, int(rCgGP));
+  for (auto& how : howTo) {
+    if (how.m_kind == MoveInfo::Kind::Move) {
+      emitMovRegReg(m_as, how.m_reg1, how.m_reg2);
     } else {
-      int offset = sinfo.offset();
-      if (locIndex == 0 || packed_tv || src->type() <= Type::FuncCtx) {
-        emitLoadReg(m_as, reg::rsp[offset], dstReg);
-      } else {
-        // Note that type field is shifted in memory
-        offset += TVOFF(m_type) - (TVOFF(m_data) + sizeof(Value));
-        assert(dstReg.isGP());
-        emitLoadTVType(m_as, reg::rsp[offset], dstReg);
-      }
+      // do swap - only support GPRs
+      assert(how.m_reg1.isGP() && how.m_reg2.isGP());
+      m_as.xchgq(how.m_reg1, how.m_reg2);
+    }
+  }
+  // now do reg<-mem loads and reg<-imm moves
+  for (uint32_t i = 0, n = inst->numSrcs(); i < n; ++i) {
+    auto src = inst->src(i);
+    auto& rs = curOpd(src);
+    auto& rd = inst->extra<Shuffle>()->dests[i];
+    if (rd.spilled()) continue;
+    if (rs.spilled()) {
+      emitReload(m_as, rs, rd, src->type());
+    } else if (rs.numAllocatedRegs() == 1 && rd.numAllocatedRegs() == 2) {
+      // move a src known type to a dest register
+      //         a.emitImmReg(args[i].imm().q(), dst);
+      assert(src->type().isKnownDataType());
+      m_as.emitImmReg(src->type().toDataType(), rd.reg(1));
+    } else if (rs.numAllocatedRegs() == 0) {
+      assert(rd.numAllocatedRegs() == 1 && src->inst()->op() == DefConst);
+      m_as.emitImmReg(src->getValBits(), rd.reg(0));
     }
   }
 }
@@ -2814,9 +2860,11 @@ void CodeGenerator::cgStPropWork(IRInstruction* inst, bool genTypeStore) {
   SSATmp* src   = inst->src(2);
   cgStore(curOpd(obj).reg()[prop->getValInt()], src, genTypeStore);
 }
+
 void CodeGenerator::cgStProp(IRInstruction* inst) {
   cgStPropWork(inst, true);
 }
+
 void CodeGenerator::cgStPropNT(IRInstruction* inst) {
   cgStPropWork(inst, false);
 }
@@ -2827,9 +2875,11 @@ void CodeGenerator::cgStMemWork(IRInstruction* inst, bool genStoreType) {
   SSATmp* src  = inst->src(2);
   cgStore(curOpd(addr).reg()[offset->getValInt()], src, genStoreType);
 }
+
 void CodeGenerator::cgStMem(IRInstruction* inst) {
   cgStMemWork(inst, true);
 }
+
 void CodeGenerator::cgStMemNT(IRInstruction* inst) {
   cgStMemWork(inst, false);
 }
@@ -2846,6 +2896,7 @@ void CodeGenerator::cgStRefWork(IRInstruction* inst, bool genStoreType) {
 void CodeGenerator::cgStRef(IRInstruction* inst) {
   cgStRefWork(inst, true);
 }
+
 void CodeGenerator::cgStRefNT(IRInstruction* inst) {
   cgStRefWork(inst, false);
 }
@@ -5320,47 +5371,8 @@ void CodeGenerator::cgSideExitJmpNZero(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgJmp(IRInstruction* inst) {
-  Block* target = inst->taken();
-  if (unsigned n = inst->numSrcs()) {
-    // Parallel-copy sources to the label's destination registers.
-    // TODO: t2040286: this only works if all destinations fit in registers.
-    auto srcs = inst->srcs();
-    auto dsts = target->front()->dsts();
-    auto& srcRegs = curOpds();
-    auto& dstRegs = m_state.regs[target->front()];
-    ArgGroup args(srcRegs);
-    for (unsigned i = 0, j = 0; i < n; i++) {
-      assert(srcs[i]->type() <= dsts[i].type());
-      auto dst = &dsts[i];
-      auto src = srcs[i];
-      // Currently, full XMM registers cannot be assigned to SSATmps
-      // passed from to Jmp to DefLabel. If this changes, it'll require
-      // teaching shuffleArgs() how to handle full XMM values.
-      assert(!srcRegs[src].isFullXMM() && !dstRegs[dst].isFullXMM());
-      if (dstRegs[dst].reg(0) == InvalidReg) continue; // dst is unused.
-      // first dst register
-      args.ssa(src);
-      args[j++].setDstReg(dstRegs[dst].reg(0));
-      // second dst register, if any
-      if (dst->numNeededRegs() == 2) {
-        if (src->numNeededRegs() < 2) {
-          // src has known data type, but dst doesn't - pass immediate type
-          assert(src->type().isKnownDataType());
-          args.imm(src->type().toDataType());
-        } else {
-          // pass src's second register
-          assert(srcRegs[src].reg(1) != InvalidReg);
-          args.reg(srcRegs[src].reg(1));
-        }
-        args[j++].setDstReg(dstRegs[dst].reg(1));
-      }
-    }
-    assert(args.numStackArgs() == 0 &&
-           "Jmp doesn't support passing arguments on the stack yet.");
-    shuffleArgs(m_as, args);
-  }
   if (!m_state.noTerminalJmp) {
-    emitFwdJmp(m_as, target, m_state);
+    emitFwdJmp(m_as, inst->taken(), m_state);
   }
 }
 

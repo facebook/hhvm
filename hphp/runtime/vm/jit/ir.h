@@ -542,6 +542,7 @@ O(InterpOneCF,               D(StkPtr), S(FramePtr) S(StkPtr),                \
                                                            T|E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
+O(Shuffle,                          ND, SUnk,                            Mem) \
 O(CreateContFunc,               D(Obj), NA,                          E|N|PRc) \
 O(CreateContMeth,               D(Obj), S(Ctx),                      E|N|PRc) \
 O(ContEnter,                        ND, S(FramePtr)                           \

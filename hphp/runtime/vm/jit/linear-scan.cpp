@@ -36,26 +36,6 @@ using namespace Transl::reg;
 
 TRACE_SET_MOD(hhir);
 
-int RegisterInfo::numAllocatedRegs() const {
-  // Return the number of register slots that actually have an allocated
-  // register or spill slot.  We may not have allocated a full numNeededRegs()
-  // worth of registers in some cases (if the value of this tmp wasn't used).
-  // We rely on InvalidReg (-1) never being equal to a spill slot number.
-  int i = 0;
-  while (i < kMaxNumRegs && m_regs[i] != InvalidReg) {
-    ++i;
-  }
-  return i;
-}
-
-RegSet RegisterInfo::regs() const {
-  RegSet regs;
-  for (int i = 0, n = numAllocatedRegs(); i < n; ++i) {
-    if (hasReg(i)) regs.add(reg(i));
-  }
-  return regs;
-}
-
 struct LinearScan : private boost::noncopyable {
   static const int NumRegs = kNumRegs;
 
@@ -165,6 +145,7 @@ private:
   PhysReg::Type getRegType(const SSATmp *tmp, int locIdx) const;
   bool crossNativeCall(const SSATmp* tmp) const;
   RegAllocInfo computeRegs() const;
+  void resolveJmpCopies();
 
   void dumpIR(const SSATmp* tmp, const char* msg) {
     if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhir, kExtraLevel)) {
@@ -1097,7 +1078,33 @@ void LinearScan::findFullXMMCandidates() {
   m_fullXMMCandidates -= notCandidates;
 }
 
+// Insert a Shuffle just before each Jmp, to copy the Jmp's src values
+// to the target label's assigned destination registers.
+void LinearScan::resolveJmpCopies() {
+  for (auto b : m_blocks) {
+    if (!b->taken()) continue;
+    auto jmp = b->back();
+    auto n = jmp->numSrcs();
+    if (jmp->op() == Jmp && n > 0) {
+      auto srcs = jmp->srcs();
+      auto dests = (RegisterInfo*)
+                   m_unit.arena().alloc(n * sizeof(RegisterInfo));
+      auto labelDests = jmp->taken()->front()->dsts();
+      for (unsigned i = 0; i < n; ++i) {
+        dests[i] = m_allocInfo[labelDests[i]];
+      }
+      auto shuffle = m_unit.gen(Shuffle, jmp->marker(),
+                                ShuffleData(dests, n, n),
+                                std::make_pair(n, &srcs[0]));
+      b->insert(b->iteratorTo(jmp), shuffle);
+    }
+  }
+}
+
 RegAllocInfo LinearScan::allocRegs() {
+  // Pre: Ensure there are no existing Shuffle instructions
+  assert(checkNoShuffles(m_unit));
+
   if (RuntimeOption::EvalHHIREnableCoalescing) {
     // <coalesce> doesn't need instruction numbering.
     coalesce();
@@ -1121,6 +1128,7 @@ RegAllocInfo LinearScan::allocRegs() {
 
   if (m_slots.size()) genSpillStats(numSpillLocs);
 
+  resolveJmpCopies();
   auto regs = computeRegs();
   if (dumpIREnabled()) {
     dumpTrace(kRegAllocLevel, m_unit, " after reg alloc ", &regs,

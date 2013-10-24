@@ -373,7 +373,7 @@ void sinkIncRefs(IRTrace* trace, IRUnit& unit, DceState& state) {
         assert(state[inst].countConsumed());
       }
     }
-    if (inst->op() == DecRefNZ) {
+    if (inst->op() == DecRefNZ && !state[inst].isDead()) {
       IRInstruction* srcInst = inst->src(0)->inst();
       if (state[srcInst].isDead()) {
         state[inst].setDead();

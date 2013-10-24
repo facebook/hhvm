@@ -80,7 +80,7 @@ class FuncChecker {
   bool checkInputs(State* cur, PC, Block* b);
   bool checkOutputs(State* cur, PC, Block* b);
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
-  bool checkEmptyStack(const EHEnt&, Block* b);
+  bool checkEHStack(const EHEnt&, Block* b);
   bool checkTerminal(State* cur, PC pc);
   bool checkFpi(State* cur, PC pc, Block* b);
   bool checkIter(State* cur, PC pc);
@@ -945,11 +945,11 @@ bool FuncChecker::checkFlow() {
     }
     ok &= checkSuccEdges(b, &cur);
   }
-  // Make sure eval stack is empty at start of each try region
+  // Make sure eval stack is correct at start of each try region
   for (Range<FixedVector<EHEnt> > i(m_func->ehtab()); !i.empty(); ) {
     const EHEnt& handler = i.popFront();
     if (handler.m_type == EHEnt::Type::Catch) {
-      ok &= checkEmptyStack(handler, builder.at(handler.m_base));
+      ok &= checkEHStack(handler, builder.at(handler.m_base));
     }
   }
   return ok;
@@ -1004,14 +1004,9 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   return ok;
 }
 
-bool FuncChecker::checkEmptyStack(const EHEnt& handler, Block* b) {
+bool FuncChecker::checkEHStack(const EHEnt& handler, Block* b) {
   const State& state = m_info[b->id].state_in;
   if (!state.stk) return true; // ignore unreachable block
-  if (state.stklen != 0) {
-    error("EH region starts with non-empty stack at B%d\n",
-           b->id);
-    return false;
-  }
   if (state.fpilen != 0) {
     error("EH region starts with non-empty FPI stack at B%d\n",
            b->id);

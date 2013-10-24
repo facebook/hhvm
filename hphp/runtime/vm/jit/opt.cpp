@@ -45,7 +45,7 @@ static void insertAfter(IRInstruction* definer, IRInstruction* inst) {
 static void insertRefCountAsserts(IRInstruction& inst, IRUnit& unit) {
   for (SSATmp& dst : inst.dsts()) {
     Type t = dst.type();
-    if (t.subtypeOf(Type::Counted | Type::StaticStr | Type::StaticArr)) {
+    if (t <= (Type::Counted | Type::StaticStr | Type::StaticArr)) {
       insertAfter(&inst, unit.gen(DbgAssertRefCount, inst.marker(), &dst));
     }
   }
@@ -62,7 +62,7 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRUnit& unit) {
   auto pos = block->iteratorTo(&inst); ++pos;
   for (unsigned i = 0, n = vals.size(); i < n; ++i) {
     Type t = vals[i]->type();
-    if (t.subtypeOf(Type::Gen)) {
+    if (t <= Type::Gen) {
       IRInstruction* addr = unit.gen(LdStackAddr,
                                      inst.marker(),
                                      Type::PtrToGen,

@@ -345,7 +345,7 @@ void HhbcTranslator::MInstrTranslator::checkMIState() {
 
   // IssetM with one vector array element and an Arr base
   const bool simpleArrayIsset = isIssetM && singleElem &&
-    baseType.subtypeOf(Type::Arr);
+    baseType <= Type::Arr;
   // IssetM with one vector array element and a collection type
   const bool simpleCollectionIsset = isIssetM && singleElem &&
     baseType.strictSubtypeOf(Type::Obj) &&
@@ -366,7 +366,7 @@ void HhbcTranslator::MInstrTranslator::checkMIState() {
     isOptimizableCollectionClass(baseType.getClass());
   const bool simpleStringOp = (isCGetM || isIssetM) && isSingle &&
     isSimpleBase() && mcodeMaybeArrayIntKey(m_ni.immVecM[0]) &&
-    baseType.subtypeOf(Type::Str);
+    baseType <= Type::Str;
 
   if (simpleProp || singlePropSet ||
       simpleArraySet || simpleArrayGet || simpleCollectionGet ||
@@ -569,7 +569,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
 
   if (base.location.isLocal()) {
     // Check for Uninit and warn/promote to InitNull as appropriate
-    if (baseType.subtypeOf(Type::Uninit)) {
+    if (baseType <= Type::Uninit) {
       if (mia & MIA_warn) {
         gen(RaiseUninitLoc, makeEmptyCatch(),
             cns(m_ht.curFunc()->localVarName(base.location.offset)));
@@ -658,14 +658,14 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
       isSimpleBase() &&
       isSingleMember()) {
 
-    if (baseType.subtypeOf(Type::Arr)) {
+    if (baseType <= Type::Arr) {
       if (mcodeMaybeArrayOrMapKey(m_ni.immVecM[0])) {
         SSATmp* key = getInput(m_mii.valCount() + 1, DataTypeGeneric);
         if (key->isA(Type::Int) || key->isA(Type::Str)) {
           return SimpleOp::Array;
         }
       }
-    } else if (baseType.subtypeOf(Type::Str) &&
+    } else if (baseType <= Type::Str &&
                mcodeMaybeArrayIntKey(m_ni.immVecM[0])) {
       SSATmp* key = getInput(m_mii.valCount() + 1, DataTypeGeneric);
       if (key->isA(Type::Int)) {
@@ -1121,7 +1121,7 @@ void HhbcTranslator::MInstrTranslator::emitElem() {
     SSATmp* uninit = m_tb.genPtrToUninit();
     Type baseType = m_base->type().strip();
     constrainBase(DataTypeSpecific);
-    if (baseType.subtypeOf(Type::Str)) {
+    if (baseType <= Type::Str) {
       m_ht.exceptionBarrier();
       gen(
         RaiseError,
@@ -2228,7 +2228,7 @@ void HhbcTranslator::MInstrTranslator::emitArraySet(SSATmp* key,
     } else if (base.location.space == Location::Stack) {
       MInstrEffects effects(newArr->inst());
       assert(effects.baseValChanged);
-      assert(effects.baseType.subtypeOf(Type::Arr));
+      assert(effects.baseType <= Type::Arr);
       m_ht.extendStack(baseStkIdx, Type::Gen);
       m_ht.replace(baseStkIdx, newArr);
     } else {
@@ -2265,7 +2265,7 @@ void setWithRefNewElem(TypedValue* base, TypedValue* val,
 void HhbcTranslator::MInstrTranslator::emitSetWithRefLElem() {
   SSATmp* key = getKey();
   SSATmp* locAddr = getValAddr();
-  if (m_base->type().strip().subtypeOf(Type::Arr) &&
+  if (m_base->type().strip() <= Type::Arr &&
       !locAddr->type().deref().maybeBoxed()) {
     constrainBase(DataTypeSpecific);
     emitSetElem();
@@ -2291,7 +2291,7 @@ void HhbcTranslator::MInstrTranslator::emitSetWithRefRProp() {
 }
 
 void HhbcTranslator::MInstrTranslator::emitSetWithRefNewElem() {
-  if (m_base->type().strip().subtypeOf(Type::Arr) &&
+  if (m_base->type().strip() <= Type::Arr &&
       getValue()->type().notBoxed()) {
     constrainBase(DataTypeSpecific);
     emitSetNewElem();
@@ -2587,7 +2587,7 @@ void HhbcTranslator::MInstrTranslator::emitUnsetElem() {
 
   Type baseType = m_base->type().strip();
   constrainBase(DataTypeSpecific);
-  if (baseType.subtypeOf(Type::Str)) {
+  if (baseType <= Type::Str) {
     m_ht.exceptionBarrier();
     gen(RaiseError,
              cns(makeStaticString(Strings::CANT_UNSET_STRING)));
@@ -2614,7 +2614,7 @@ void HhbcTranslator::MInstrTranslator::emitVGetNewElem() {
 
 void HhbcTranslator::MInstrTranslator::emitSetNewElem() {
   SSATmp* value = getValue();
-  if (m_base->type().subtypeOf(Type::PtrToArr)) {
+  if (m_base->type() <= Type::PtrToArr) {
     constrainBase(DataTypeSpecific);
     gen(SetNewElemArray, makeCatchSet(), m_base, value);
   } else {

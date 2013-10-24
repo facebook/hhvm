@@ -61,31 +61,31 @@ static std::string constToString(Type t, const ConstData* c) {
     } else {
       os << "Array(" << arr << ")";
     }
-  } else if (t.isNull() || t.subtypeOf(Type::Nullptr)) {
+  } else if (t.isNull() || t <= Type::Nullptr) {
     os << t.toString();
-  } else if (t.subtypeOf(Type::Func)) {
+  } else if (t <= Type::Func) {
     auto func = c->as<const Func*>();
     os << "Func(" << (func ? func->fullName()->data() : "0") << ")";
-  } else if (t.subtypeOf(Type::Cls)) {
+  } else if (t <= Type::Cls) {
     auto cls = c->as<const Class*>();
     os << "Cls(" << (cls ? cls->name()->data() : "0") << ")";
-  } else if (t.subtypeOf(Type::Cctx)) {
+  } else if (t <= Type::Cctx) {
     auto cls = reinterpret_cast<const Class*>(c->as<uintptr_t>() - 1);
     os << "Cctx(" << (cls ? cls->name()->data() : "0") << ")";
-  } else if (t.subtypeOf(Type::NamedEntity)) {
+  } else if (t <= Type::NamedEntity) {
     auto ne = c->as<const NamedEntity*>();
     os << "NamedEntity(" << ne << ")";
-  } else if (t.subtypeOf(Type::TCA)) {
+  } else if (t <= Type::TCA) {
     TCA tca = c->as<TCA>();
     auto name = getNativeFunctionName(tca);
     SCOPE_EXIT { free(name); };
     os << folly::format("TCA: {}({})", tca,
       boost::trim_copy(std::string(name)));
-  } else if (t.subtypeOf(Type::None)) {
+  } else if (t <= Type::None) {
     os << "None:" << c->as<int64_t>();
   } else if (t.isPtr()) {
     os << folly::format("{}({:#x})", t.toString(), c->as<uint64_t>());
-  } else if (t.subtypeOf(Type::RDSHandle)) {
+  } else if (t <= Type::RDSHandle) {
     os << folly::format("RDS::Handle({:#x})", c->as<int64_t>());
   } else {
     not_reached();

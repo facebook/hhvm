@@ -549,7 +549,7 @@ void FrameState::clearLocals() {
 
 void FrameState::refineLocalType(uint32_t id, Type type) {
   always_assert(id < m_locals.size());
-  assert(type.subtypeOf(m_locals[id].type));
+  assert(type <= m_locals[id].type);
   m_locals[id].type = type;
 }
 

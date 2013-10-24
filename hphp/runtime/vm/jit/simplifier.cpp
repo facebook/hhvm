@@ -1452,7 +1452,7 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   }
 
   // The src type is a subtype of the tested type; the result must be true.
-  if (srcType.subtypeOf(type)) {
+  if (srcType <= type) {
     return cns(trueSense);
   }
 
@@ -1918,7 +1918,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyCastStk(IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CastStk>()->offset);
-  if (info.knownType.subtypeOf(inst->typeParam())) {
+  if (info.knownType <= inst->typeParam()) {
     // No need to cast---the type was as good or better.
     inst->convertToNop();
   }
@@ -1928,7 +1928,7 @@ SSATmp* Simplifier::simplifyCastStk(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyCoerceStk(IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CoerceStk>()->offset);
-  if (info.knownType.subtypeOf(inst->typeParam())) {
+  if (info.knownType <= inst->typeParam()) {
     // No need to cast---the type was as good or better.
     inst->convertToNop();
   }
@@ -2034,7 +2034,7 @@ SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyAssertNonNull(IRInstruction* inst) {
   auto t = inst->typeParam();
   assert(t.maybe(Type::Nullptr));
-  if (t.subtypeOf(Type::Nullptr)) {
+  if (t <= Type::Nullptr) {
     return inst->src(0);
   }
   return nullptr;

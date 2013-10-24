@@ -442,9 +442,9 @@ void HhbcTranslator::emitPrint() {
     Opcode op;
     if (type.isString()) {
       op = PrintStr;
-    } else if (type.subtypeOf(Type::Int)) {
+    } else if (type <= Type::Int) {
       op = PrintInt;
-    } else if (type.subtypeOf(Type::Bool)) {
+    } else if (type <= Type::Bool) {
       op = PrintBool;
     } else {
       assert(type.isNull());
@@ -565,7 +565,7 @@ void HhbcTranslator::emitAddElemC() {
   // we don't want to constrain it if we're just going to InterpOne.
   auto kt = topC(1, DataTypeGeneric)->type();
   Opcode op;
-  if (kt.subtypeOf(Type::Int)) {
+  if (kt <= Type::Int) {
     op = AddElemIntKey;
   } else if (kt.isString()) {
     op = AddElemStrKey;
@@ -604,7 +604,7 @@ void HhbcTranslator::emitColAddElemC() {
     return emitInterpOne(Type::Obj, 3);
   }
   auto kt = topC(1, DataTypeGeneric)->type();
-  if (!kt.subtypeOf(Type::Int) && !kt.isString()) {
+  if (!(kt <= Type::Int) && !kt.isString()) {
     emitInterpOne(Type::Obj, 3);
     return;
   }
@@ -1522,7 +1522,7 @@ void HhbcTranslator::emitContSuspendK(int64_t labelId) {
   gen(DecRef, oldKey);
 
   auto const keyType = newKey->type();
-  if (keyType.subtypeOf(Type::Int)) {
+  if (keyType <= Type::Int) {
     gen(ContArUpdateIdx, m_tb->fp(), newKey);
   }
 
@@ -1630,13 +1630,13 @@ void HhbcTranslator::emitArrayIdx() {
   Type arrType = topC(1, DataTypeGeneric)->type();
   Type keyType = topC(2, DataTypeGeneric)->type();
 
-  if (UNLIKELY(!arrType.subtypeOf(Type::Arr))) {
+  if (!(arrType <= Type::Arr)) {
     // raise fatal
     emitInterpOne(Type::Cell, 3);
     return;
   }
 
-  if (UNLIKELY(keyType.subtypeOf(Type::Null))) {
+  if (keyType <= Type::Null) {
     SSATmp* def = popC(DataTypeGeneric); // def is just pushed back on the stack
     SSATmp* arr = popC();
     SSATmp* key = popC();
@@ -1647,8 +1647,7 @@ void HhbcTranslator::emitArrayIdx() {
     gen(DecRef, key);
     return;
   }
-  if (UNLIKELY(
-        !(keyType.subtypeOf(Type::Int) || keyType.subtypeOf(Type::Str)))) {
+  if (!(keyType <= Type::Int || keyType <= Type::Str)) {
     emitInterpOne(Type::Cell, 3);
     return;
   }
@@ -2835,38 +2834,38 @@ void HhbcTranslator::emitSwitch(const ImmVector& iv,
     zeroOff = defaultOff;
   }
 
-  if (type.subtypeOf(Type::Null)) {
+  if (type <= Type::Null) {
     gen(Jmp, makeExit(zeroOff));
     return;
   }
-  if (type.subtypeOf(Type::Bool)) {
+  if (type <= Type::Bool) {
     Offset nonZeroOff = bcOff() + iv.vec32()[iv.size() - 2];
     gen(JmpNZero, makeExit(nonZeroOff), switchVal);
     gen(Jmp, makeExit(zeroOff));
     return;
   }
 
-  if (type.subtypeOf(Type::Int)) {
+  if (type <= Type::Int) {
     // No special treatment needed
     index = switchVal;
-  } else if (type.subtypeOf(Type::Dbl)) {
+  } else if (type <= Type::Dbl) {
     // switch(Double|String|Obj)Helper do bounds-checking for us, so
     // we need to make sure the default case is in the jump table,
     // and don't emit our own bounds-checking code
     bounded = false;
     index = gen(LdSwitchDblIndex, switchVal, ssabase, ssatargets);
-  } else if (type.subtypeOf(Type::Str)) {
+  } else if (type <= Type::Str) {
     bounded = false;
     index = gen(LdSwitchStrIndex, switchVal, ssabase, ssatargets);
-  } else if (type.subtypeOf(Type::Obj)) {
+  } else if (type <= Type::Obj) {
     // switchObjHelper can throw exceptions and reenter the VM
     Block* catchBlock = nullptr;
-    if (type.subtypeOf(Type::Obj)) {
+    if (type <= Type::Obj) {
       catchBlock = makeCatch();
     }
     bounded = false;
     index = gen(LdSwitchObjIndex, catchBlock, switchVal, ssabase, ssatargets);
-  } else if (type.subtypeOf(Type::Arr)) {
+  } else if (type <= Type::Arr) {
     gen(DecRef, switchVal);
     gen(Jmp, makeExit(defaultOff));
     return;
@@ -2964,7 +2963,7 @@ void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
 
 void HhbcTranslator::guardTypeLocation(const RegionDesc::Location& loc,
                                        Type type, bool outerOnly) {
-  assert(type.subtypeOf(Type::Gen));
+  assert(type <= Type::Gen);
   typedef RegionDesc::Location::Tag T;
   switch (loc.tag()) {
     case T::Stack: guardTypeStack(loc.stackOffset(), type, outerOnly); break;
@@ -2987,7 +2986,7 @@ void HhbcTranslator::overrideTypeLocal(uint32_t locId, Type type) {
 
 void HhbcTranslator::checkType(const RegionDesc::Location& loc,
                                        Type type, Offset dest) {
-  assert(type.subtypeOf(Type::Gen));
+  assert(type <= Type::Gen);
   typedef RegionDesc::Location::Tag T;
   switch (loc.tag()) {
     case T::Stack: checkTypeStack(loc.stackOffset(), type, dest); break;
@@ -2997,7 +2996,7 @@ void HhbcTranslator::checkType(const RegionDesc::Location& loc,
 
 void HhbcTranslator::assertType(const RegionDesc::Location& loc,
                                         Type type) {
-  assert(type.subtypeOf(Type::StackElem));
+  assert(type <= Type::StackElem);
   typedef RegionDesc::Location::Tag T;
   switch (loc.tag()) {
     case T::Stack: assertTypeStack(loc.stackOffset(), type); break;
@@ -3007,7 +3006,7 @@ void HhbcTranslator::assertType(const RegionDesc::Location& loc,
 
 void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type,
                                     bool outerOnly) {
-  assert(type.subtypeOf(Type::Gen));
+  assert(type <= Type::Gen);
   assert(m_evalStack.size() == 0);
   assert(m_stackDeficit == 0); // This should only be called at the beginning
                                // of a trace, with a clean stack.
@@ -3020,7 +3019,7 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type,
 }
 
 void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {
-  assert(type.subtypeOf(Type::Gen));
+  assert(type <= Type::Gen);
   auto exit = makeExit(dest);
   if (idx < m_evalStack.size()) {
     FTRACE(1, "checkTypeStack(){}: generating CheckType for {}\n",
@@ -3847,7 +3846,7 @@ void HhbcTranslator::emitDiv() {
   auto dividend = topC(1);
 
   // we can't codegen this but we may be able to special case it away
-  if (!divisorType.subtypeOf(Type::Dbl) && !dividendType.subtypeOf(Type::Dbl)) {
+  if (!(divisorType <= Type::Dbl) && !(dividendType <= Type::Dbl)) {
     // TODO(#2570625): support integer-integer division, move this to simlifier:
     if (divisor->isConst()) {
       int64_t divisorVal;
@@ -3977,13 +3976,13 @@ void HhbcTranslator::emitMod() {
 
 void HhbcTranslator::emitSqrt() {
   auto const srcType = topC()->type();
-  if (srcType.subtypeOf(Type::Int)) {
+  if (srcType <= Type::Int) {
     auto const src = gen(ConvIntToDbl, popC());
     push(gen(Sqrt, src));
     return;
   }
 
-  if (srcType.subtypeOf(Type::Dbl)) {
+  if (srcType <= Type::Dbl) {
     auto const src = popC();
     push(gen(Sqrt, src));
     return;
@@ -3994,13 +3993,13 @@ void HhbcTranslator::emitSqrt() {
 
 void HhbcTranslator::emitBitNot() {
   auto const srcType = topC()->type();
-  if (srcType.subtypeOf(Type::Int)) {
+  if (srcType <= Type::Int) {
     auto const src = popC();
     push(gen(BitNot, src));
     return;
   }
 
-  if (srcType.subtypeOf(Type::Dbl)) {
+  if (srcType <= Type::Dbl) {
     auto const src = gen(ConvDblToInt, popC());
     push(gen(BitNot, src));
     return;
@@ -4067,7 +4066,7 @@ Type bitOpResult(Type t1, Type t2) {
   }
 
   auto both = t1 | t2;
-  if (both.subtypeOf(Type::Str)) return Type::Str;
+  if (both <= Type::Str) return Type::Str;
   return Type::Int;
 }
 
@@ -4670,7 +4669,7 @@ SSATmp* HhbcTranslator::ldLocInnerWarn(uint32_t id, Block* target,
   if (!catchBlock) catchBlock = makeCatch();
   auto const locVal = ldLocInner(id, target, constraint);
 
-  if (locVal->type().subtypeOf(Type::Uninit)) {
+  if (locVal->type() <= Type::Uninit) {
     m_tb->constrainLocal(id, DataTypeCountnessInit, "ldLocInnerWarn");
     gen(RaiseUninitLoc, catchBlock, cns(curFunc()->localVarName(id)));
     return m_tb->genDefInitNull();

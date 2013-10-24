@@ -184,7 +184,7 @@ SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
 
   auto const prevType = localType(locId, DataTypeSpecific);
 
-  if (prevType.subtypeOf(typeParam)) {
+  if (prevType <= typeParam) {
     return inst->src(0);
   } else {
     //

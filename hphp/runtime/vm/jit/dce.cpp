@@ -428,8 +428,7 @@ void optimizeActRecs(std::list<Block*>& blocks, DceState& state, IRUnit& unit,
       {
         auto const frameInst = inst->src(1)->inst();
         auto const reason = inst->src(2);
-        if (frameInst->op() == DefInlineFP &&
-            reason->type().subtypeOf(Type::Func)) {
+        if (frameInst->op() == DefInlineFP && reason->type() <= Type::Func) {
             FTRACE(5, "Marking SpillFrame for {}\n", frameInst->id());
           state[frameInst].incWeakUse();
         }

@@ -525,7 +525,7 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
       m_as.      mov_imm64_reg(src1->getValRawInt(), srcReg1);
     }
     if (src2->isConst()) {
-      if (src1Type.subtypeOf(Type::Bool)) {
+      if (src1Type <= Type::Bool) {
         m_as.    cmpb (src2->getValRawInt(), Reg8(int(srcReg1)));
       } else {
         m_as.    cmp_imm64_reg64(src2->getValRawInt(), srcReg1);
@@ -533,7 +533,7 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
     } else {
       // Note the reverse syntax in the assembler.
       // This cmp will compute srcReg1 - srcReg2
-      if (src1Type.subtypeOf(Type::Bool)) {
+      if (src1Type <= Type::Bool) {
         m_as.    cmpb (Reg8(int(srcReg2)), Reg8(int(srcReg1)));
       } else {
         m_as.    cmp_reg64_reg64(srcReg2, srcReg1);
@@ -1821,7 +1821,7 @@ Reg64 getDataPtrEnregistered(Asm& as,
 template<class Loc1, class Loc2, class JmpFn>
 void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
                                  JmpFn doJcc) {
-  assert(!type.subtypeOf(Type::Cls));
+  assert(!(type <= Type::Cls));
   ConditionCode cc;
   if (type.isString()) {
     emitTestTVType(m_as, KindOfStringBit, typeSrc);
@@ -1858,7 +1858,7 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
     auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
     m_as.cmpq(type.getClass(), reg[ObjectData::getVMClassOffset()]);
     doJcc(CC_E);
-  } else if (type.subtypeOf(Type::Arr) && type.hasArrayKind()) {
+  } else if (type <= Type::Arr && type.hasArrayKind()) {
     auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
     m_as.cmpb(type.getArrayKind(), reg[ArrayData::offsetofKind()]);
     doJcc(CC_E);
@@ -2770,7 +2770,7 @@ void CodeGenerator::cgSpill(IRInstruction* inst) {
       m_as.movdqa(srcReg, reg::rsp[sinfo.offset()]);
     } else {
       int offset = sinfo.offset();
-      if (locIndex == 0 || packed_tv || src->type().subtypeOf(Type::FuncCtx)) {
+      if (locIndex == 0 || packed_tv || src->type() <= Type::FuncCtx) {
         emitStoreReg(m_as, srcReg, reg::rsp[offset]);
       } else {
         // Note that type field is shifted in memory
@@ -2796,7 +2796,7 @@ void CodeGenerator::cgReload(IRInstruction* inst) {
       m_as.movdqa(reg::rsp[sinfo.offset()], dstReg);
     } else {
       int offset = sinfo.offset();
-      if (locIndex == 0 || packed_tv || src->type().subtypeOf(Type::FuncCtx)) {
+      if (locIndex == 0 || packed_tv || src->type() <= Type::FuncCtx) {
         emitLoadReg(m_as, reg::rsp[offset], dstReg);
       } else {
         // Note that type field is shifted in memory
@@ -3758,19 +3758,19 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
   args.addr(spReg, cellsToBytes(offset));
 
   TCA tvCastHelper;
-  if (type.subtypeOf(Type::Bool)) {
+  if (type <= Type::Bool) {
     tvCastHelper = (TCA)tvCastToBooleanInPlace;
-  } else if (type.subtypeOf(Type::Int)) {
+  } else if (type <= Type::Int) {
     tvCastHelper = (TCA)tvCastToInt64InPlace;
-  } else if (type.subtypeOf(Type::Dbl)) {
+  } else if (type <= Type::Dbl) {
     tvCastHelper = (TCA)tvCastToDoubleInPlace;
-  } else if (type.subtypeOf(Type::Arr)) {
+  } else if (type <= Type::Arr) {
     tvCastHelper = (TCA)tvCastToArrayInPlace;
-  } else if (type.subtypeOf(Type::Str)) {
+  } else if (type <= Type::Str) {
     tvCastHelper = (TCA)tvCastToStringInPlace;
-  } else if (type.subtypeOf(Type::Obj)) {
+  } else if (type <= Type::Obj) {
     tvCastHelper = (TCA)tvCastToObjectInPlace;
-  } else if (type.subtypeOf(Type::Res)) {
+  } else if (type <= Type::Res) {
     tvCastHelper = (TCA)tvCastToResourceInPlace;
   } else {
     not_reached();
@@ -3793,21 +3793,21 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
   args.addr(spReg, cellsToBytes(offset));
 
   TCA tvCoerceHelper;
-  if (type.subtypeOf(Type::Bool)) {
+  if (type <= Type::Bool) {
     tvCoerceHelper = (TCA)tvCoerceParamToBooleanInPlace;
-  } else if (type.subtypeOf(Type::Int)) {
+  } else if (type <= Type::Int) {
     // if casting to integer, pass 10 as the base for the conversion
     args.imm(10);
     tvCoerceHelper = (TCA)tvCoerceParamToInt64InPlace;
-  } else if (type.subtypeOf(Type::Dbl)) {
+  } else if (type <= Type::Dbl) {
     tvCoerceHelper = (TCA)tvCoerceParamToDoubleInPlace;
-  } else if (type.subtypeOf(Type::Arr)) {
+  } else if (type <= Type::Arr) {
     tvCoerceHelper = (TCA)tvCoerceParamToArrayInPlace;
-  } else if (type.subtypeOf(Type::Str)) {
+  } else if (type <= Type::Str) {
     tvCoerceHelper = (TCA)tvCoerceParamToStringInPlace;
-  } else if (type.subtypeOf(Type::Obj)) {
+  } else if (type <= Type::Obj) {
     tvCoerceHelper = (TCA)tvCoerceParamToObjectInPlace;
-  } else if (type.subtypeOf(Type::Res)) {
+  } else if (type <= Type::Res) {
     tvCoerceHelper = (TCA)tvCoerceParamToResourceInPlace;
   } else {
     not_reached();
@@ -3899,8 +3899,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     m_as.   cmov_reg64_reg64 (CC_Z, m_rScratch, dstType);
     return;
   }
-  if (returnType.subtypeOf(Type::Cell)
-      || returnType.subtypeOf(Type::BoxedCell)) {
+  if (returnType <= Type::Cell || returnType <= Type::BoxedCell) {
     // return type is Variant; fold KindOfUninit to KindOfNull
     assert(isCppByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
     assert(misReg != dstType);
@@ -4188,8 +4187,8 @@ void CodeGenerator::cgStore(MemRef dst,
   }
   if (src->isConst()) {
     int64_t val = 0;
-    if (type.subtypeOf(Type::Bool | Type::Int | Type::Dbl |
-                       Type::Arr | Type::StaticStr | Type::Cls)) {
+    if (type <= (Type::Bool | Type::Int | Type::Dbl |
+                 Type::Arr | Type::StaticStr | Type::Cls)) {
         val = src->getValBits();
     } else {
       not_reached();
@@ -5331,7 +5330,7 @@ void CodeGenerator::cgJmp(IRInstruction* inst) {
     auto& dstRegs = m_state.regs[target->front()];
     ArgGroup args(srcRegs);
     for (unsigned i = 0, j = 0; i < n; i++) {
-      assert(srcs[i]->type().subtypeOf(dsts[i].type()));
+      assert(srcs[i]->type() <= dsts[i].type());
       auto dst = &dsts[i];
       auto src = srcs[i];
       // Currently, full XMM registers cannot be assigned to SSATmps

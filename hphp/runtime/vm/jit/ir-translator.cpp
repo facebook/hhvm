@@ -107,7 +107,7 @@ void IRTranslator::checkType(const Transl::Location& l,
     case Location::Stack: {
       uint32_t stackOffset = locPhysicalOffset(l);
       JIT::Type type = JIT::Type(rtt);
-      if (type.subtypeOf(Type::Cls)) {
+      if (type <= Type::Cls) {
         m_hhbcTrans.assertTypeStack(stackOffset, type);
       } else {
         m_hhbcTrans.guardTypeStack(stackOffset, type, outerOnly);

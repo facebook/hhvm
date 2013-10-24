@@ -3861,7 +3861,7 @@ Translator::translateRegion(const RegionDesc& region,
         auto const& pred = typePreds.next();
         auto type = pred.type;
         auto loc  = pred.location;
-        if (type.subtypeOf(Type::Cls)) {
+        if (type <= Type::Cls) {
           // Do not generate guards for class; instead assert the type
           assert(loc.tag() == JIT::RegionDesc::Location::Tag::Stack);
           ht.assertType(loc, type);

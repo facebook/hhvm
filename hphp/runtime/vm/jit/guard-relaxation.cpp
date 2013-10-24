@@ -221,11 +221,11 @@ bool typeFitsConstraint(Type t, DataTypeCategory cat) {
       // value, so it's ok if we know whether t is counted or not. Arr and Str
       // are special cased because we don't guard on staticness for them.
       return t.notCounted() ||
-        t.subtypeOf(Type::Counted | Type::StaticArr | Type::StaticStr);
+             t <= (Type::Counted | Type::StaticArr | Type::StaticStr);
 
     case DataTypeCountnessInit:
       return typeFitsConstraint(t, DataTypeCountness) &&
-        (t.subtypeOf(Type::Uninit) || t.not(Type::Uninit));
+             (t <= Type::Uninit || t.not(Type::Uninit));
 
     case DataTypeSpecific:
       return t.isKnownDataType();
@@ -242,9 +242,9 @@ bool typeFitsConstraint(Type t, DataTypeCategory cat) {
  * relaxType(t, categoryForType(t)) == t
  */
 DataTypeCategory categoryForType(Type t) {
-  if (Type::Gen.subtypeOf(t)) return DataTypeGeneric;
-  if (Type::Uncounted.subtypeOf(t) || t.isCounted()) return DataTypeCountness;
-  if (Type::UncountedInit.subtypeOf(t)) return DataTypeCountnessInit;
+  if (t >= Type::Gen) return DataTypeGeneric;
+  if (t >= Type::Uncounted || t.isCounted()) return DataTypeCountness;
+  if (t >= Type::UncountedInit) return DataTypeCountnessInit;
   return t.isSpecialized() ? DataTypeSpecialized : DataTypeSpecific;
 }
 
@@ -253,7 +253,7 @@ DataTypeCategory categoryForType(Type t) {
  * required by cat.
  */
 Type relaxType(Type t, DataTypeCategory cat) {
-  always_assert(t.subtypeOf(Type::Gen));
+  always_assert(t <= Type::Gen);
 
   switch (cat) {
     case DataTypeGeneric:
@@ -263,7 +263,7 @@ Type relaxType(Type t, DataTypeCategory cat) {
       return t.notCounted() ? Type::Uncounted : t.unspecialize();
 
     case DataTypeCountnessInit:
-      if (t.subtypeOf(Type::Uninit)) return Type::Uninit;
+      if (t <= Type::Uninit) return Type::Uninit;
       return t.notCounted() ? Type::UncountedInit : t.unspecialize();
 
     case DataTypeSpecific:

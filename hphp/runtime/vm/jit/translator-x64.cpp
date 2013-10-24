@@ -312,7 +312,7 @@ TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
     if (nTrans >= RuntimeOption::EvalJitMaxTranslations + 1) return nullptr;
   }
 
-  m_mode = TransOptimize;
+  m_mode = TransLive;
   SCOPE_EXIT { m_mode = TransInvalid; };
   auto translArgs = TranslArgs(sk, align).transId(transId);
   if (setFuncBody) translArgs.setFuncBody();

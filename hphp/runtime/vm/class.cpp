@@ -2107,7 +2107,9 @@ void Class::setInstanceBitsImpl() {
     bits |= c->m_instanceBits;
   };
   if (m_parent.get()) setBits(m_parent.get());
-  for (auto& di : declInterfaces()) setBits(di.get());
+
+  int numIfaces = m_interfaces.size();
+  for (int i = 0; i < numIfaces; i++) setBits(m_interfaces[i]);
 
   // XXX: this assert fails on the initFlag; oops.
   if (unsigned bit = InstanceBits::lookup(m_preClass->name())) {

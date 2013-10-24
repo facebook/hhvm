@@ -1695,9 +1695,6 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
             out << " i" << argKind << arg << ":pc=" << sd->data();
             break;
           }
-          case Unit::MetaInfo::Kind::NopOut:
-            out << " Nop";
-            break;
           case Unit::MetaInfo::Kind::GuardedThis:
             out << " GuardedThis";
             break;

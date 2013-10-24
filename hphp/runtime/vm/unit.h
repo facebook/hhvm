@@ -317,7 +317,6 @@ struct Unit {
       None,
       String,
       Class,
-      NopOut,
 
       /*
        * Marks types that are proven to be a particular type by static

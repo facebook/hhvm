@@ -1108,12 +1108,8 @@ void MetaInfoBuilder::add(int pos, Unit::MetaInfo::Kind kind,
   if (mVector) arg |= Unit::MetaInfo::VectorArg;
   Vec& info = m_metaMap[pos];
   int i = info.size();
-  if (kind == Unit::MetaInfo::Kind::NopOut) {
-    info.clear();
-  } else if (i == 1 && info[0].m_kind == Unit::MetaInfo::Kind::NopOut) {
-    return;
-  } else if (kind == Unit::MetaInfo::Kind::DataTypeInferred ||
-             kind == Unit::MetaInfo::Kind::DataTypePredicted) {
+  if (kind == Unit::MetaInfo::Kind::DataTypeInferred ||
+      kind == Unit::MetaInfo::Kind::DataTypePredicted) {
     // Put DataType first, because if applyInputMetaData saw Class
     // first, it would call recordRead which mark the input as
     // needing a guard before we saw the DataType

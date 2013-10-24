@@ -1515,10 +1515,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
 
   Unit::MetaInfo info;
   if (!metaHand.nextArg(info)) return false;
-  if (info.m_kind == Unit::MetaInfo::Kind::NopOut) {
-    ni->noOp = true;
-    return true;
-  }
 
   /*
    * We need to adjust the indexes in MetaInfo::m_arg if this
@@ -1703,11 +1699,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         }
         break;
       }
-
-      case Unit::MetaInfo::Kind::NopOut:
-        // NopOut should always be the first and only annotation
-        // and was handled above.
-        not_reached();
 
       case Unit::MetaInfo::Kind::GuardedThis:
       case Unit::MetaInfo::Kind::NonRefCounted:
@@ -3658,10 +3649,6 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
 
   Unit::MetaInfo info;
   if (!handle.nextArg(info)) return;
-  if (info.m_kind == Unit::MetaInfo::Kind::NopOut) {
-    inst.noOp = true;
-    return;
-  }
 
   /*
    * We need to adjust the indexes in MetaInfo::m_arg if this instruction takes
@@ -3797,10 +3784,6 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         }
         break;
       }
-      case Unit::MetaInfo::Kind::NopOut:
-        // NopOut should always be the first and only annotation
-        // and was handled above.
-        not_reached();
 
       case Unit::MetaInfo::Kind::GuardedThis:
       case Unit::MetaInfo::Kind::NonRefCounted:

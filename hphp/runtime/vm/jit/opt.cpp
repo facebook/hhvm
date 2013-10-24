@@ -80,7 +80,7 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRUnit& unit) {
  * TODO: t2137231 Insert DbgAssertPtr at points that use or produces a GenPtr
  */
 static void insertAsserts(IRUnit& unit) {
-  postorderWalk([&](Block* block) {
+  postorderWalk(unit, [&](Block* block) {
       for (auto it = block->begin(), end = block->end(); it != end; ) {
         IRInstruction& inst = *it;
         ++it;
@@ -101,9 +101,7 @@ static void insertAsserts(IRUnit& unit) {
         }
         if (!inst.isBlockEnd()) insertRefCountAsserts(inst, unit);
       }
-    },
-    unit.numBlocks(),
-    unit.entry());
+    });
 }
 
 void optimize(IRUnit& unit, TraceBuilder& traceBuilder) {

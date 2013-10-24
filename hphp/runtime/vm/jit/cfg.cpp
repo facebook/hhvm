@@ -24,14 +24,11 @@ BlockList rpoSortCfg(const IRUnit& unit) {
   BlockList blocks;
   blocks.reserve(unit.numBlocks());
   unsigned next_id = 0;
-  postorderWalk(
+  postorderWalk(unit,
     [&](Block* block) {
       block->setPostId(next_id++);
       blocks.push_back(block);
-    },
-    unit.numBlocks(),
-    unit.entry()
-  );
+    });
   std::reverse(blocks.begin(), blocks.end());
   assert(blocks.size() <= unit.numBlocks());
   assert(next_id <= unit.numBlocks());

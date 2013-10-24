@@ -6027,11 +6027,10 @@ void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
  * Compute and save registers that are live *across* each inst, not including
  * registers whose lifetimes end at inst, nor registers defined by inst.
  */
-LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs,
-                         Block* start_block) {
+LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs) {
   StateVector<Block, RegSet> liveMap(unit, RegSet());
   LiveRegs live_regs(unit, RegSet());
-  postorderWalk(
+  postorderWalk(unit,
     [&](Block* block) {
       RegSet& live = liveMap[block];
       if (Block* taken = block->taken()) live = liveMap[taken];
@@ -6046,10 +6045,7 @@ LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs,
           live |= regs[inst][src].regs();
         }
       }
-    },
-    unit.numBlocks(),
-    start_block
-  );
+    });
   return live_regs;
 }
 
@@ -6060,7 +6056,7 @@ void genCodeImpl(CodeBlock& mainCode,
                  Transl::TranslatorX64* tx64,
                  const RegAllocInfo& regs,
                  AsmInfo* asmInfo) {
-  LiveRegs live_regs = computeLiveRegs(unit, regs, unit.entry());
+  LiveRegs live_regs = computeLiveRegs(unit, regs);
   CodegenState state(unit, regs, live_regs, asmInfo);
 
   // Returns: whether a block has already been emitted.

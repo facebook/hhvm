@@ -31,7 +31,7 @@ namespace HPHP { namespace JIT {
  * perform a depth-first postorder walk
  */
 template <class Visitor>
-void postorderWalk(Visitor visitor, unsigned num_blocks, Block* head);
+void postorderWalk(const IRUnit&, Visitor visitor);
 
 /*
  * Return an iterator into an rpo-sorted BlockList for a given Block.
@@ -145,9 +145,9 @@ namespace detail {
  * perform a depth-first postorder walk
  */
 template <class Visitor>
-void postorderWalk(Visitor visitor, unsigned num_blocks, Block* head) {
-  detail::PostorderSort<Visitor> ps(visitor, num_blocks);
-  ps.walk(head);
+void postorderWalk(const IRUnit& unit, Visitor visitor) {
+  detail::PostorderSort<Visitor> ps(visitor, unit.numBlocks());
+  ps.walk(unit.entry());
 }
 
 inline

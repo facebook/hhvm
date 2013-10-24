@@ -1652,13 +1652,16 @@ void Class::setProperties() {
         // property.
         PropMap::Builder::iterator it2 = curPropMap.find(preProp->name());
         if (it2 != curPropMap.end()) {
-          assert((curPropMap[it2->second].m_attrs
-                 & (AttrPublic|AttrProtected|AttrPrivate)) == AttrProtected);
+          Prop& prop = curPropMap[it2->second];
+          assert((prop.m_attrs & (AttrPublic|AttrProtected|AttrPrivate)) ==
+                 AttrProtected);
+          prop.m_class = this;
+          prop.m_docComment = preProp->docComment();
           const TypedValue& tv = m_preClass->lookupProp(preProp->name())->val();
           TypedValueAux& tvaux = m_declPropInit[it2->second];
           tvaux.m_data = tv.m_data;
           tvaux.m_type = tv.m_type;
-          copyDeepInitAttr(preProp, &curPropMap[it2->second]);
+          copyDeepInitAttr(preProp, &prop);
           break;
         }
         // Append a new protected property.
@@ -1683,6 +1686,8 @@ void Class::setProperties() {
         PropMap::Builder::iterator it2 = curPropMap.find(preProp->name());
         if (it2 != curPropMap.end()) {
           Prop& prop = curPropMap[it2->second];
+          prop.m_class = this;
+          prop.m_docComment = preProp->docComment();
           if ((prop.m_attrs & (AttrPublic|AttrProtected|AttrPrivate))
               == AttrProtected) {
             // Weaken protected property to public.
@@ -1695,7 +1700,7 @@ void Class::setProperties() {
           TypedValueAux& tvaux = m_declPropInit[it2->second];
           tvaux.m_data = tv.m_data;
           tvaux.m_type = tv.m_type;
-          copyDeepInitAttr(preProp, &curPropMap[it2->second]);
+          copyDeepInitAttr(preProp, &prop);
           break;
         }
         // Append a new public property.

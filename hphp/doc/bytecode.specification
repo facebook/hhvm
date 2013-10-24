@@ -867,6 +867,12 @@ NewArray    []  ->  [C:Arr]
 
   New array. Creates a new empty array and pushes it onto the stack.
 
+NewArrayReserve <capacity hint>    []  ->  [C:Arr]
+
+  New array, with capacity hint.  Creates a new array and pushes it
+  onto the stack.  The implementation may make use of the hint in %1
+  to pre-size the array.
+
 NewPackedArray <num elems>    [C..C]  ->  [C]
 
   New array. Creates a new array from the top %1 cells on the stack,

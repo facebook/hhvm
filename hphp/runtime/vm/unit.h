@@ -333,7 +333,6 @@ struct Unit {
       GuardedThis,
       GuardedCls,
       NoSurprise,
-      ArrayCapacity,
 
       /*
        * Information about the known class of a property base in the

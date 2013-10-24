@@ -523,7 +523,7 @@ void HhbcTranslator::emitArray(int arrayId) {
   push(cns(lookupArrayId(arrayId)));
 }
 
-void HhbcTranslator::emitNewArray(int capacity) {
+void HhbcTranslator::emitNewArrayReserve(int capacity) {
   if (capacity == 0) {
     push(cns(HphpArray::GetStaticEmptyArray()));
   } else {

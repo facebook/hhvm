@@ -37,6 +37,7 @@
   CASE(String) \
   CASE(Array) \
   CASE(NewArray) \
+  CASE(NewArrayReserve) \
   CASE(NewPackedArray) \
   CASE(NewCol) \
   CASE(Nop) \

@@ -396,7 +396,12 @@ IRTranslator::translateArray(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateNewArray(const NormalizedInstruction& i) {
-  HHIR_EMIT(NewArray, i.imm[0].u_IVA);
+  HHIR_EMIT(NewArrayReserve, 0);
+}
+
+void
+IRTranslator::translateNewArrayReserve(const NormalizedInstruction& i) {
+  HHIR_EMIT(NewArrayReserve, i.imm[0].u_IVA);
 }
 
 void

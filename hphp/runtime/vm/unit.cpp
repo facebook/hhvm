@@ -1704,9 +1704,6 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
           case Unit::MetaInfo::Kind::NoSurprise:
             out << " NoSurprise";
             break;
-          case Unit::MetaInfo::Kind::ArrayCapacity:
-            out << " capacity=" << info.m_data;
-            break;
           case Unit::MetaInfo::Kind::NonRefCounted:
             out << " :nrc=" << info.m_data;
             break;

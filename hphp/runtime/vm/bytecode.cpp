@@ -3443,8 +3443,13 @@ OPTBLD_INLINE void VMExecutionContext::iopArray(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopNewArray(PC& pc) {
   NEXT();
-  auto arr = HphpArray::MakeReserve(HphpArray::SmallSize);
-  m_stack.pushArrayNoRc(arr);
+  m_stack.pushArrayNoRc(HphpArray::MakeReserve(HphpArray::SmallSize));
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopNewArrayReserve(PC& pc) {
+  NEXT();
+  DECODE_IVA(capacity);
+  m_stack.pushArrayNoRc(HphpArray::MakeReserve(capacity));
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopNewPackedArray(PC& pc) {

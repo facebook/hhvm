@@ -2646,16 +2646,19 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           } else {
             assert(m_staticArrays.empty());
             ExpressionPtr ex = u->getExpression();
+            int capacityHint = -1;
             if (ex->getKindOf() == Expression::KindOfExpressionList) {
               ExpressionListPtr el(static_pointer_cast<ExpressionList>(ex));
               int capacity = el->getCount();
               if (capacity > 0) {
-                m_metaInfo.add(m_ue.bcPos(),
-                               Unit::MetaInfo::Kind::ArrayCapacity,
-                               false, 0, capacity);
+                capacityHint = capacity;
               }
             }
-            e.NewArray();
+            if (capacityHint != -1) {
+              e.NewArrayReserve(capacityHint);
+            } else {
+              e.NewArray();
+            }
             visit(ex);
           }
           return true;

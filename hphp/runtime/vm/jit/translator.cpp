@@ -941,6 +941,7 @@ static const struct {
   { OpString,      {None,             Stack1,       OutStringImm,      1 }},
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
+  { OpNewArrayReserve, {None,         Stack1,       OutArray,          1 }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray,         -2 }},
   { OpAddElemV,    {StackTop3,        Stack1,       OutArray,         -2 }},
@@ -1553,9 +1554,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       case Unit::MetaInfo::Kind::GuardedCls:
         ni->guardedCls = true;
-        break;
-      case Unit::MetaInfo::Kind::ArrayCapacity:
-        ni->imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
         // In TransProfile mode, disable type predictions to avoid side exits.
@@ -3698,9 +3696,6 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         break;
       case Unit::MetaInfo::Kind::GuardedCls:
         inst.guardedCls = true;
-        break;
-      case Unit::MetaInfo::Kind::ArrayCapacity:
-        inst.imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
         // When we're translating a Tracelet from Translator::analyze(), the

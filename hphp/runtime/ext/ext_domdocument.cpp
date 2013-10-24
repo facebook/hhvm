@@ -1162,9 +1162,8 @@ static void appendOrphan(XmlNodeSet &orphans, xmlNodePtr node) {
   }
 }
 
-static void removeOrphan(XmlNodeSet &orphans, xmlNodePtr node) {
+static void removeOrphanIfNeeded(XmlNodeSet &orphans, xmlNodePtr node) {
   if (node) {
-    assert(orphans.find(node) != orphans.end());
     orphans.erase(node);
   }
 }
@@ -1954,6 +1953,7 @@ Variant c_DOMNode::t_appendchild(CObjRef newnode) {
   c_DOMNode *newdomnode = newnode.getTyped<c_DOMNode>();
   xmlNodePtr child = newdomnode->m_node;
   xmlNodePtr new_child = NULL;
+
   if (dom_node_is_read_only(nodep) ||
       (child->parent != NULL && dom_node_is_read_only(child->parent))) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
@@ -2014,7 +2014,7 @@ Variant c_DOMNode::t_appendchild(CObjRef newnode) {
     }
   }
   if (newdomnode->doc().get()) {
-    removeOrphan(*newdomnode->doc()->m_orphans, newdomnode->m_node);
+    removeOrphanIfNeeded(*newdomnode->doc()->m_orphans, newdomnode->m_node);
   }
   dom_reconcile_ns(nodep->doc, new_child);
   return create_node_object(new_child, doc(), false);
@@ -2094,6 +2094,7 @@ Variant c_DOMNode::t_insertbefore(CObjRef newnode,
   xmlNodePtr child = domchildnode->m_node;
   xmlNodePtr new_child = NULL;
   int stricterror = doc()->m_stricterror;
+
   if (dom_node_is_read_only(parentp) ||
     (child->parent != NULL && dom_node_is_read_only(child->parent))) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
@@ -2207,7 +2208,7 @@ Variant c_DOMNode::t_insertbefore(CObjRef newnode,
     return false;
   }
   if (domchildnode->doc().get()) {
-    removeOrphan(*domchildnode->doc()->m_orphans, domchildnode->m_node);
+    removeOrphanIfNeeded(*domchildnode->doc()->m_orphans, domchildnode->m_node);
   }
   dom_reconcile_ns(parentp->doc, new_child);
   return create_node_object(new_child, doc(), false);

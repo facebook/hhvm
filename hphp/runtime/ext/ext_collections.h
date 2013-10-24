@@ -120,8 +120,11 @@ class c_Vector : public BaseVector {
   static c_Vector* Clone(ObjectData* obj);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
+
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
-                          int64_t sz, char type);
+                          int64_t sz, char type) {
+    BaseVector::Unserialize("Vector", obj, uns, sz, type);
+  }
 
   static uint sizeOffset() { return offsetof(c_Vector, m_size); }
   static uint dataOffset() { return offsetof(c_Vector, m_data); }
@@ -212,6 +215,11 @@ public:
 public:
 
   explicit c_FrozenVector(Class* cls = c_FrozenVector::classof());
+
+  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
+                          int64_t sz, char type) {
+    BaseVector::Unserialize("FrozenVector", obj, uns, sz, type);
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

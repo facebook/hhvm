@@ -312,6 +312,25 @@ bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   return true;
 }
 
+void BaseVector::Unserialize(const char* vectorType,
+                             ObjectData* obj,
+                             VariableUnserializer* uns,
+                             int64_t sz,
+                             char type) {
+  if (type != 'V') {
+    throw Exception("%s does not support the '%c' serialization "
+                    "format", vectorType, type);
+  }
+  auto bvec = static_cast<BaseVector*>(obj);
+  bvec->reserve(sz);
+  for (int64_t i = 0; i < sz; ++i) {
+    auto tv = &bvec->m_data[bvec->m_size];
+    tv->m_type = KindOfNull;
+    ++bvec->m_size;
+    tvAsVariant(tv).unserialize(uns, Uns::Mode::ColValue);
+  }
+}
+
 // Helpers
 
 Array BaseVector::toArrayImpl() const {

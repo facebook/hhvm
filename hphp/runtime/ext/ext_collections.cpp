@@ -670,24 +670,6 @@ void c_Vector::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throw e;
 }
 
-void c_Vector::Unserialize(ObjectData* obj,
-                           VariableUnserializer* uns,
-                           int64_t sz,
-                           char type) {
-  if (type != 'V') {
-    throw Exception("Vector does not support the '%c' serialization "
-                    "format", type);
-  }
-  auto vec = static_cast<c_Vector*>(obj);
-  vec->reserve(sz);
-  for (int64_t i = 0; i < sz; ++i) {
-    auto tv = &vec->m_data[vec->m_size];
-    tv->m_type = KindOfNull;
-    ++vec->m_size;
-    tvAsVariant(tv).unserialize(uns, Uns::Mode::ColValue);
-  }
-}
-
 c_VectorIterator::c_VectorIterator(Class* cls
     /*= c_VectorIterator::classof()*/) : ExtObjectData(cls) {
 }
@@ -4483,6 +4465,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   assert(obj->isCollection());
   int64_t sz = obj->getCollectionSize();
   if (obj->getCollectionType() == Collection::VectorType ||
+      obj->getCollectionType() == Collection::FrozenVectorType ||
       obj->getCollectionType() == Collection::SetType ||
       obj->getCollectionType() == Collection::PairType) {
     serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
@@ -4995,6 +4978,9 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
       break;
     case Collection::PairType:
       c_Pair::Unserialize(obj, uns, sz, type);
+      break;
+    case Collection::FrozenVectorType:
+      c_FrozenVector::Unserialize(obj, uns, sz, type);
       break;
     default:
       assert(false);

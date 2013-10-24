@@ -138,6 +138,9 @@ protected:
 
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
+  static void Unserialize(const char* vectorType, ObjectData* obj,
+                          VariableUnserializer* uns, int64_t sz, char type);
+
   // Properties
   uint m_size;
   TypedValue* m_data;

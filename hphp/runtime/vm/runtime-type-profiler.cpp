@@ -27,6 +27,8 @@
 #include "folly/dynamic.h"
 #include "folly/json.h"
 
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/util/atomic-vector.h"
 
 namespace HPHP {
@@ -56,6 +58,8 @@ typedef AtomicVector<FuncTypeCounter*> RuntimeProfileInfo;
 
 //////////////////////////////////////////////////////////////////////
 
+static const int kShowTopN = 6;
+
 static FuncTypeCounter emptyFuncCounter(1,0);
 static RuntimeProfileInfo* allProfileInfo;
 static std::atomic<int> counter(0);
@@ -79,21 +83,41 @@ const char* getTypeString(const TypedValue* value) {
   return getDataTypeString(value->m_type).c_str();
 }
 
-void logType(const Func* func, int64_t paramIndex, const char* typeString) {
-  assert(paramIndex <= func->numParams());
+void logType(const Func* func, int32_t paramIndex, const char* typeString) {
+  if (paramIndex > func->numParams()) {
+    // Don't bother logging types for extra args.
+    return;
+  }
   if (allProfileInfo->get(func->getFuncId()) == &emptyFuncCounter) {
     initFuncTypeProfileData(func);
   }
   auto it = allProfileInfo->get(func->getFuncId());
   TypeCounter* hashmap = it->get(paramIndex);
   try {
-    auto success = hashmap->insert(typeString, ProfileCounter());
-    if (!success.second) {
-      success.first->second.inc();
-    }
+    auto result = hashmap->insert(typeString, ProfileCounter());
+    result.first->second.inc();
   } catch (folly::AtomicHashMapFullError& e) {
     // Fail silently if hashmap is full
   }
+}
+
+Array getTopN(Array &allTypes, int n) {
+  Array ret;
+  for (int i = 0; i < n; i ++ ) {
+    double max = 0;
+    String max_key;
+    for (ArrayIter iter(allTypes); iter; ++iter) {
+      if (iter.second().toDouble() > max) {
+        max_key = iter.first().toString();
+        max = iter.second().toDouble();
+      }
+    }
+    if (max != 0) {
+      ret.set(max_key, VarNR(max));
+      allTypes.remove(max_key);
+    }
+  }
+  return ret;
 }
 
 }
@@ -104,9 +128,11 @@ void initTypeProfileStructure() {
   allProfileInfo = new RuntimeProfileInfo(750000, &emptyFuncCounter);
 }
 
-void profileOneArgument(const TypedValue value, const int paramIndex,
+void profileOneArgument(const TypedValue value, const int32_t paramIndex,
                         const Func* func) {
   assert(allProfileInfo != nullptr);
+  if (!func || !func->fullName()) return;
+
   const char* typeString = getTypeString(&value);
 
   if (func->fullName()->size() != 0) {
@@ -117,9 +143,40 @@ void profileOneArgument(const TypedValue value, const int paramIndex,
     counter++;
   }
 
-  if (counter.load() % RuntimeOption::EvalRuntimeTypeProfileLoggingFreq == 0) {
+  if (RuntimeOption::EvalRuntimeTypeProfileLoggingFreq &&
+      counter.load() % RuntimeOption::EvalRuntimeTypeProfileLoggingFreq == 0) {
     writeProfileInformationToDisk();
   }
+}
+
+void profileAllArguments(ActRec* ar) {
+  for (int i = 0; i < ar->m_func->numParams(); i++) {
+    logType(ar->m_func, i + 1, getTypeString(frame_local(ar, i)));
+  }
+}
+
+Array getPercentParamInfoArray(const Func* func) {
+  Array ret;
+  auto funcParamMap = allProfileInfo->get(func->getFuncId());
+  for (int i = 0; i <= func->numParams(); i++) {
+    Array types;
+    auto typeCount = funcParamMap->get(i);
+    if (typeCount == nullptr) {
+      break;
+    }
+    int64_t total = 0;
+    for (auto j = typeCount->begin(); j != typeCount->end(); j++) {
+      total += j->second.load();
+    }
+    for (auto j = typeCount->begin(); j != typeCount->end(); j++) {
+      String key = String(j->first);
+      int64_t count = j->second.load();
+      types.set(key, VarNR(double(count) / total));
+    }
+    Array topTypes = getTopN(types, kShowTopN);
+    ret.append(VarNR(topTypes));
+  }
+  return ret;
 }
 
 void writeProfileInformationToDisk() {

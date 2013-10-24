@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/parser/parser.h"
 #include "hphp/runtime/ext/util.h"
@@ -88,6 +89,7 @@ const StaticString
   s_closureobj("closureobj"),
   s_return_type("return_type"),
   s_type_hint("type_hint"),
+  s_type_profiling("type_profiling"),
   s_accessible("accessible");
 
 static const Class* get_cls(CVarRef class_or_object) {
@@ -514,6 +516,19 @@ static void set_function_info(Array &ret, const Func* func) {
   ret.set(s_is_generator, func->hasGeneratorAsBody());
 }
 
+static void set_type_profiling_info(Array& info, const Class* cls,
+                                    const Func* method) {
+  if (RuntimeOption::EvalRuntimeTypeProfile) {
+    VMRegAnchor _;
+    if (cls) {
+      Func* objMethod = cls->lookupMethod(method->fullName());
+      info.set(s_type_profiling, getPercentParamInfoArray(objMethod));
+    } else {
+      info.set(s_type_profiling, getPercentParamInfoArray(method));
+    }
+  }
+}
+
 static void set_method_info(Array &ret, ClassInfo::MethodInfo *info,
                             const ClassInfo *cls) {
   ret.set(s_name, info->name);
@@ -539,6 +554,9 @@ static bool isConstructor(const Func* func) {
 }
 
 static void set_method_info(Array &ret, const Func* func) {
+  if (RuntimeOption::EvalRuntimeTypeProfile && !ret.exists(s_type_profiling)) {
+    ret.set(s_type_profiling, Array());
+  }
   ret.set(s_name, VarNR(func->nameRef()));
   set_attrs(ret, get_modifiers(func->attrs(), false));
 
@@ -828,6 +846,9 @@ Array f_hphp_get_class_info(CVarRef name) {
       const Func* m = methods[i];
       if (m->isGenerated()) continue;
       Array info = Array::Create();
+      if (RuntimeOption::EvalRuntimeTypeProfile) {
+        set_type_profiling_info(info, cls, m);
+      }
       set_method_info(info, m);
       arr.set(f_strtolower(m->nameRef()), VarNR(info));
     }
@@ -932,10 +953,14 @@ Array f_hphp_get_class_info(CVarRef name) {
 
 Array f_hphp_get_function_info(const String& name) {
   Array ret;
+  if (name.get() == nullptr) return ret;
   const Func* func = Unit::loadFunc(name.get());
   if (!func) return ret;
   ret.set(s_name,       VarNR(func->name()));
   ret.set(s_closure,    empty_string);
+  if (RuntimeOption::EvalRuntimeTypeProfile) {
+    ret.set(s_type_profiling, getPercentParamInfoArray(func));
+  }
 
   // setting parameters and static variables
   set_function_info(ret, func);

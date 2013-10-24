@@ -2522,15 +2522,26 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
     // DataTypeGeneric is used because the Call instruction just spills the
     // values to the stack unmodified.
     params[numParams + 3 - i - 1] = popF(DataTypeGeneric);
-    if (RuntimeOption::EvalRuntimeTypeProfile && callee != nullptr
-        && params[numParams + 3 - i - 1] != nullptr) {
-      gen(TypeProfileFunc, TypeProfileData(i, callee),
-          params[numParams + 3 - i - 1]);
-    }
   }
+
   params[0] = spillStack();
   params[1] = cns(returnBcOffset);
   params[2] = callee ? cns(callee) : m_tb->genDefNull();
+
+  if (RuntimeOption::EvalRuntimeTypeProfile) {
+    for (uint32_t i = 0; i < numParams; i++) {
+      if (callee != nullptr &&
+          params[numParams + 3 - i - 1]) {
+        gen(TypeProfileFunc, TypeProfileData(i),
+            params[numParams + 3 - i - 1], cns(callee));
+      } else  {
+        SSATmp* func = gen(LdARFuncPtr, m_tb->sp(), cns(0));
+        gen(TypeProfileFunc, TypeProfileData(i),
+            params[numParams + 3 - i - 1], func);
+      }
+    }
+  }
+
   SSATmp** decayedPtr = params;
   gen(Call, std::make_pair(numParams + 3, decayedPtr));
   if (!m_fpiStack.empty()) {
@@ -2748,7 +2759,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   // about the type.
   SSATmp* retVal = pop(type, DataTypeGeneric);
   if (RuntimeOption::EvalRuntimeTypeProfile) {
-    gen(TypeProfileFunc, TypeProfileData(-1, curFunc), retVal);
+    gen(TypeProfileFunc, TypeProfileData(-1), retVal, cns(curFunc));
   }
   SSATmp* sp;
   if (freeInline) {

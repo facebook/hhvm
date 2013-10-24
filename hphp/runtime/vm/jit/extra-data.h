@@ -263,15 +263,13 @@ struct ActRecInfo : IRExtraData {
 };
 
 /*
- * Function pointer and parameter index for type profiling usage
+ * Parameter index for type profiling.
  */
 struct TypeProfileData : IRExtraData {
-  explicit TypeProfileData(int32_t param, const Func* func) : param(param),
-                                                              func(func) {}
+  explicit TypeProfileData(int32_t param) : param(param) {}
   int32_t param;
-  const Func* func;
   std::string show() const {
-    return folly::to<std::string>(func->fullName()->data(), ",", param);
+    return folly::to<std::string>(param);
   }
 };
 

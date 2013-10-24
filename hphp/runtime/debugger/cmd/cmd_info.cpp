@@ -15,6 +15,10 @@
 */
 
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
+
+#include "folly/dynamic.h"
+#include "folly/json.h"
+
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
 #include "hphp/runtime/ext/ext_reflection.h"
 #include "hphp/runtime/ext/ext_string.h"
@@ -50,7 +54,8 @@ const StaticString
   s_defaultText("defaultText"),
   s_parent("parent"),
   s_interfaces("interfaces"),
-  s_interface("interface");
+  s_interface("interface"),
+  s_type_profiling("type_profiling");
 
 void CmdInfo::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -444,9 +449,56 @@ bool CmdInfo::TryMethod(DebuggerClient &client, StringBuffer &sb, CArrRef info,
               func[s_name].toString().data(),
               GetParams(func[s_params].toArray(),
                         func[s_varg].toBoolean(), true).data());
+    if (func[s_type_profiling].toArray().size() != 0) {
+      sb.printf("Type profile:\n%s",
+                GetTypeProfilingInfo(func[s_type_profiling].toArray(),
+                                     func[s_params].toArray()).data());
+    }
     return true;
   }
   return false;
+}
+
+String CmdInfo::GetParam(CArrRef params, int index) {
+  StringBuffer param;
+  Array arg = params[index].toArray();
+  if (arg[s_ref].toBoolean()) {
+    param.append('&');
+  }
+  param.append('$');
+  param.append(arg[s_name].toString());
+  return param.detach();
+}
+
+String CmdInfo::GetTypeProfilingInfo(CArrRef profilingArray, CArrRef params) {
+  StringBuffer profile;
+  int index = 0;
+  StringBuffer args;
+  for (ArrayIter iter(profilingArray); iter; ++iter) {
+    profile.append("  ");
+    if (index == 0) {
+      profile.append("ReturnValue");
+    } else {
+      profile.append(GetParam(params, index - 1));
+    }
+    profile.append(":\n");
+    Array param = iter.second().toArray();
+    int type_number = 0;
+    for (ArrayIter type_count(param); type_count; ++type_count) {
+      profile.append("    ");
+      String type = type_count.first().toString();
+      profile.printf("%s: %f", type.data(),
+                     type_count.second().toDouble()* 100);
+      profile.append("%\n");
+      type_number++;
+      if (type_number > 10) {
+        profile.append("...\n");
+        break;
+      }
+    }
+    index++;
+  }
+  return profile.detach();
 }
 
 void CmdInfo::PrintInfo(DebuggerClient &client, StringBuffer &sb, CArrRef info,
@@ -458,6 +510,11 @@ void CmdInfo::PrintInfo(DebuggerClient &client, StringBuffer &sb, CArrRef info,
               info[s_name].toString().data(),
               GetParams(info[s_params].toArray(),
                         info[s_varg].toBoolean()).data());
+    if (info[s_type_profiling].toArray().size() != 0) {
+      sb.printf("Type profile:\n%s",
+                GetTypeProfilingInfo(info[s_type_profiling].toArray(),
+                                     info[s_params].toArray()).data());
+    }
     return;
   }
 

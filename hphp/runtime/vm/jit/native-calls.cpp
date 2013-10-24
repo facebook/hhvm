@@ -112,8 +112,7 @@ auto constexpr MemberKeyIS = ArgType::MemberKeyIS;
 static CallMap s_callMap {
     /* Opcode, Func, Dest, SyncPoint, Args */
     {TypeProfileFunc,    profileOneArgument, DNone, SNone,
-                           {{TV,0}, extra(&TypeProfileData::param),
-                                    extra(&TypeProfileData::func)}},
+                           {{TV,0}, extra(&TypeProfileData::param), {SSA, 1}}},
     {ConvBoolToArr,      convCellToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
     {ConvDblToArr,       convCellToArrHelper, DSSA, SNone,

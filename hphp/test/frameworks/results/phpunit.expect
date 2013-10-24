@@ -1,1857 +1,1803 @@
-PHPUnit 3.7.27-2-g0ce13a8 by Sebastian Bergmann.
-
-The Xdebug extension is not loaded. No code coverage will be generated.
-
-
-
-Starting test 'Framework_Assert_FunctionsTest::testLogicalAnd'.
+Framework_Assert_FunctionsTest::testLogicalAnd
 .
-Starting test 'Framework_Assert_FunctionsTest::testLogicalOr'.
+Framework_Assert_FunctionsTest::testLogicalOr
 .
-Starting test 'Framework_Assert_FunctionsTest::testLogicalXor'.
+Framework_Assert_FunctionsTest::testLogicalXor
 .
-Starting test 'Framework_AssertTest::testFail'.
+Framework_AssertTest::testFail
 .
-Starting test 'Framework_AssertTest::testAssertSplObjectStorageContainsObject'.
+Framework_AssertTest::testAssertSplObjectStorageContainsObject
 .
-Starting test 'Framework_AssertTest::testAssertArrayContainsObject'.
+Framework_AssertTest::testAssertArrayContainsObject
 .
-Starting test 'Framework_AssertTest::testAssertArrayContainsString'.
+Framework_AssertTest::testAssertArrayContainsString
 .
-Starting test 'Framework_AssertTest::testAssertContainsOnlyInstancesOf'.
+Framework_AssertTest::testAssertContainsOnlyInstancesOf
 .
-Starting test 'Framework_AssertTest::testAssertArrayHasKeyThrowsException'.
+Framework_AssertTest::testAssertArrayHasKeyThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertArrayHasIntegerKey'.
+Framework_AssertTest::testAssertArrayHasIntegerKey
 .
-Starting test 'Framework_AssertTest::testAssertArrayNotHasKeyThrowsException'.
+Framework_AssertTest::testAssertArrayNotHasKeyThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertArrayNotHasIntegerKey'.
+Framework_AssertTest::testAssertArrayNotHasIntegerKey
 .
-Starting test 'Framework_AssertTest::testAssertArrayHasStringKey'.
+Framework_AssertTest::testAssertArrayHasStringKey
 .
-Starting test 'Framework_AssertTest::testAssertArrayNotHasStringKey'.
+Framework_AssertTest::testAssertArrayNotHasStringKey
 .
-Starting test 'Framework_AssertTest::testAssertArrayHasKeyAcceptsArrayAccessValue'.
+Framework_AssertTest::testAssertArrayHasKeyAcceptsArrayAccessValue
 F
-Starting test 'Framework_AssertTest::testAssertArrayHasKeyProperlyFailsWithArrayAccessValue'.
+Framework_AssertTest::testAssertArrayHasKeyProperlyFailsWithArrayAccessValue
 .
-Starting test 'Framework_AssertTest::testAssertArrayNotHasKeyAcceptsArrayAccessValue'.
+Framework_AssertTest::testAssertArrayNotHasKeyAcceptsArrayAccessValue
 .
-Starting test 'Framework_AssertTest::testAssertArrayNotHasKeyPropertlyFailsWithArrayAccessValue'.
+Framework_AssertTest::testAssertArrayNotHasKeyPropertlyFailsWithArrayAccessValue
 F
-Starting test 'Framework_AssertTest::testAssertContainsThrowsException'.
+Framework_AssertTest::testAssertContainsThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertIteratorContainsObject'.
+Framework_AssertTest::testAssertIteratorContainsObject
 .
-Starting test 'Framework_AssertTest::testAssertIteratorContainsString'.
+Framework_AssertTest::testAssertIteratorContainsString
 .
-Starting test 'Framework_AssertTest::testAssertStringContainsString'.
+Framework_AssertTest::testAssertStringContainsString
 .
-Starting test 'Framework_AssertTest::testAssertNotContainsThrowsException'.
+Framework_AssertTest::testAssertNotContainsThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertSplObjectStorageNotContainsObject'.
+Framework_AssertTest::testAssertSplObjectStorageNotContainsObject
 .
-Starting test 'Framework_AssertTest::testAssertArrayNotContainsObject'.
+Framework_AssertTest::testAssertArrayNotContainsObject
 .
-Starting test 'Framework_AssertTest::testAssertArrayNotContainsString'.
+Framework_AssertTest::testAssertArrayNotContainsString
 .
-Starting test 'Framework_AssertTest::testAssertStringNotContainsString'.
+Framework_AssertTest::testAssertStringNotContainsString
 .
-Starting test 'Framework_AssertTest::testAssertContainsOnlyThrowsException'.
+Framework_AssertTest::testAssertContainsOnlyThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertContainsOnlyInstancesOfThrowsException'.
+Framework_AssertTest::testAssertContainsOnlyInstancesOfThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertArrayContainsOnlyIntegers'.
+Framework_AssertTest::testAssertArrayContainsOnlyIntegers
 .
-Starting test 'Framework_AssertTest::testAssertArrayNotContainsOnlyIntegers'.
+Framework_AssertTest::testAssertArrayNotContainsOnlyIntegers
 .
-Starting test 'Framework_AssertTest::testAssertArrayContainsOnlyStdClass'.
+Framework_AssertTest::testAssertArrayContainsOnlyStdClass
 .
-Starting test 'Framework_AssertTest::testAssertArrayNotContainsOnlyStdClass'.
+Framework_AssertTest::testAssertArrayNotContainsOnlyStdClass
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #0 ('a', 'A', 0, false, true)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #0
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #1 (array(1, 2), array(2, 1))'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #1
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #2 (array(1), array('1'))'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #2
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #3 (array(3, 2, 1), array(2, 3, 1), 0, true)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #3
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #4 (2.3, 2.5, 0.5)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #4
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #5 (array(2.3), array(2.5), 0.5)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #5
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #6 (array(array(2.3)), array(array(2.5)), 0.5)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #6
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #7 (Struct, Struct, 0.5)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #7
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #8 (array(Struct), array(Struct), 0.5)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #8
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #9 (1, 2, 1)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #9
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #10 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #10
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #11 (Book, Book)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #11
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #12 (SplObjectStorage, SplObjectStorage)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #12
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #13 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #13
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #14 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #14
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #15 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #15
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #16 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #16
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #17 (0, '0')'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #17
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #18 ('0', 0)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #18
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #19 (2.3, '2.3')'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #19
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #20 ('2.3', 2.3)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #20
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #21 ('0.33333333333333', 0.33333333333333)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #21
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #22 (0.33333333333333, '0.33333333333333')'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #22
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #23 ('string representation', string representation)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #23
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #24 (string representation, 'string representation')'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #24
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #25 (NULL, NULL)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #25
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #26 ('a', 'a')'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #26
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #27 (0, 0)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #27
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #28 (2.3, 2.3)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #28
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #29 (0.33333333333333, 0.33333333333333)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #29
 .  63 / 960 (  6%)
-
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #30 (-INF, -INF)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #30
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #31 (array(), array())'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #31
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #32 (array(1), array(1))'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #32
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #33 (array(NULL), array(NULL))'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #33
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #34 (array('a', array(1, 2)), array('a', array(1, 2)))'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #34
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #35 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #35
 .
-Starting test 'Framework_AssertTest::testAssertEqualsSucceeds with data set #36 (<resource>, <resource>)'.
+Framework_AssertTest::testAssertEqualsSucceeds with data set #36
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #0 ('a', 'b')'.
+Framework_AssertTest::testAssertEqualsFails with data set #0
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #1 ('a', 'A')'.
+Framework_AssertTest::testAssertEqualsFails with data set #1
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #2 (1, 2)'.
+Framework_AssertTest::testAssertEqualsFails with data set #2
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #3 (2, 1)'.
+Framework_AssertTest::testAssertEqualsFails with data set #3
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #4 (2.3, 4.2)'.
+Framework_AssertTest::testAssertEqualsFails with data set #4
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #5 (2.3, 4.2, 0.5)'.
+Framework_AssertTest::testAssertEqualsFails with data set #5
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #6 (array(2.3), array(4.2), 0.5)'.
+Framework_AssertTest::testAssertEqualsFails with data set #6
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #7 (array(array(2.3)), array(array(4.2)), 0.5)'.
+Framework_AssertTest::testAssertEqualsFails with data set #7
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #8 (Struct, Struct, 0.5)'.
+Framework_AssertTest::testAssertEqualsFails with data set #8
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #9 (array(Struct), array(Struct), 0.5)'.
+Framework_AssertTest::testAssertEqualsFails with data set #9
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #10 (NAN, NAN)'.
+Framework_AssertTest::testAssertEqualsFails with data set #10
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #11 (array(), array(1))'.
+Framework_AssertTest::testAssertEqualsFails with data set #11
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #12 (array(1), array())'.
+Framework_AssertTest::testAssertEqualsFails with data set #12
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #13 (array(NULL), array())'.
+Framework_AssertTest::testAssertEqualsFails with data set #13
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #14 (array(1, 2), array(1, 3))'.
+Framework_AssertTest::testAssertEqualsFails with data set #14
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #15 (array('a', array(1, 2)), array('a', array(2, 1)))'.
+Framework_AssertTest::testAssertEqualsFails with data set #15
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #16 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertEqualsFails with data set #16
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #17 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertEqualsFails with data set #17
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #18 (Book, Book)'.
+Framework_AssertTest::testAssertEqualsFails with data set #18
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #19 (Book, stdClass)'.
+Framework_AssertTest::testAssertEqualsFails with data set #19
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #20 (<resource>, <resource>)'.
+Framework_AssertTest::testAssertEqualsFails with data set #20
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #21 (SplObjectStorage, SplObjectStorage)'.
+Framework_AssertTest::testAssertEqualsFails with data set #21
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #22 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertEqualsFails with data set #22
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #23 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertEqualsFails with data set #23
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #24 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertEqualsFails with data set #24
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #25 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertEqualsFails with data set #25
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #26 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertEqualsFails with data set #26
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #27 (SampleClass, false)'.
+Framework_AssertTest::testAssertEqualsFails with data set #27
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #28 (false, SampleClass)'.
+Framework_AssertTest::testAssertEqualsFails with data set #28
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #29 (array(1, 2), false)'.
+Framework_AssertTest::testAssertEqualsFails with data set #29
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #30 (false, array(1, 2))'.
+Framework_AssertTest::testAssertEqualsFails with data set #30
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #31 (array(), stdClass)'.
+Framework_AssertTest::testAssertEqualsFails with data set #31
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #32 (stdClass, array())'.
+Framework_AssertTest::testAssertEqualsFails with data set #32
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #33 (0, 'Foobar')'.
+Framework_AssertTest::testAssertEqualsFails with data set #33
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #34 ('Foobar', 0)'.
+Framework_AssertTest::testAssertEqualsFails with data set #34
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #35 (3, NAN)'.
+Framework_AssertTest::testAssertEqualsFails with data set #35
 .
-Starting test 'Framework_AssertTest::testAssertEqualsFails with data set #36 (NAN, 3)'.
+Framework_AssertTest::testAssertEqualsFails with data set #36
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #0 ('a', 'b')'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #0
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #1 ('a', 'A')'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #1
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #2 (1, 2)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #2
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #3 (2, 1)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #3
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #4 (2.3, 4.2)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #4
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #5 (2.3, 4.2, 0.5)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #5
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #6 (array(2.3), array(4.2), 0.5)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #6
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #7 (array(array(2.3)), array(array(4.2)), 0.5)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #7
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #8 (Struct, Struct, 0.5)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #8
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #9 (array(Struct), array(Struct), 0.5)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #9
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #10 (NAN, NAN)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #10
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #11 (array(), array(1))'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #11
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #12 (array(1), array())'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #12
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #13 (array(NULL), array())'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #13
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #14 (array(1, 2), array(1, 3))'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #14
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #15 (array('a', array(1, 2)), array('a', array(2, 1)))'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #15
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #16 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #16
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #17 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #17
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #18 (Book, Book)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #18
 . 126 / 960 ( 13%)
-
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #19 (Book, stdClass)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #19
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #20 (<resource>, <resource>)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #20
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #21 (SplObjectStorage, SplObjectStorage)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #21
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #22 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #22
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #23 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #23
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #24 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #24
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #25 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #25
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #26 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #26
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #27 (SampleClass, false)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #27
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #28 (false, SampleClass)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #28
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #29 (array(1, 2), false)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #29
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #30 (false, array(1, 2))'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #30
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #31 (array(), stdClass)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #31
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #32 (stdClass, array())'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #32
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #33 (0, 'Foobar')'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #33
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #34 ('Foobar', 0)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #34
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #35 (3, NAN)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #35
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsSucceeds with data set #36 (NAN, 3)'.
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #36
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #0 ('a', 'A', 0, false, true)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #0
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #1 (array(1, 2), array(2, 1))'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #1
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #2 (array(1), array('1'))'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #2
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #3 (array(3, 2, 1), array(2, 3, 1), 0, true)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #3
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #4 (2.3, 2.5, 0.5)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #4
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #5 (array(2.3), array(2.5), 0.5)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #5
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #6 (array(array(2.3)), array(array(2.5)), 0.5)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #6
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #7 (Struct, Struct, 0.5)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #7
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #8 (array(Struct), array(Struct), 0.5)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #8
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #9 (1, 2, 1)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #9
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #10 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #10
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #11 (Book, Book)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #11
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #12 (SplObjectStorage, SplObjectStorage)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #12
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #13 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #13
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #14 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #14
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #15 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #15
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #16 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #16
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #17 (0, '0')'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #17
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #18 ('0', 0)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #18
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #19 (2.3, '2.3')'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #19
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #20 ('2.3', 2.3)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #20
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #21 ('0.33333333333333', 0.33333333333333)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #21
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #22 (0.33333333333333, '0.33333333333333')'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #22
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #23 ('string representation', string representation)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #23
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #24 (string representation, 'string representation')'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #24
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #25 (NULL, NULL)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #25
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #26 ('a', 'a')'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #26
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #27 (0, 0)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #27
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #28 (2.3, 2.3)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #28
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #29 (0.33333333333333, 0.33333333333333)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #29
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #30 (-INF, -INF)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #30
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #31 (array(), array())'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #31
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #32 (array(1), array(1))'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #32
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #33 (array(NULL), array(NULL))'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #33
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #34 (array('a', array(1, 2)), array('a', array(1, 2)))'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #34
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #35 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #35
 .
-Starting test 'Framework_AssertTest::testAssertNotEqualsFails with data set #36 (<resource>, <resource>)'.
+Framework_AssertTest::testAssertNotEqualsFails with data set #36
 .
-Starting test 'Framework_AssertTest::testAssertSameSucceeds with data set #0 (NULL, NULL)'.
+Framework_AssertTest::testAssertSameSucceeds with data set #0
 .
-Starting test 'Framework_AssertTest::testAssertSameSucceeds with data set #1 ('a', 'a')'.
+Framework_AssertTest::testAssertSameSucceeds with data set #1
 .
-Starting test 'Framework_AssertTest::testAssertSameSucceeds with data set #2 (0, 0)'.
+Framework_AssertTest::testAssertSameSucceeds with data set #2
 .
-Starting test 'Framework_AssertTest::testAssertSameSucceeds with data set #3 (2.3, 2.3)'.
+Framework_AssertTest::testAssertSameSucceeds with data set #3
 .
-Starting test 'Framework_AssertTest::testAssertSameSucceeds with data set #4 (0.33333333333333, 0.33333333333333)'.
+Framework_AssertTest::testAssertSameSucceeds with data set #4
 .
-Starting test 'Framework_AssertTest::testAssertSameSucceeds with data set #5 (-INF, -INF)'.
+Framework_AssertTest::testAssertSameSucceeds with data set #5
 .
-Starting test 'Framework_AssertTest::testAssertSameSucceeds with data set #6 (array(), array())'.
+Framework_AssertTest::testAssertSameSucceeds with data set #6
 .
-Starting test 'Framework_AssertTest::testAssertSameSucceeds with data set #7 (array(1), array(1))'.
+Framework_AssertTest::testAssertSameSucceeds with data set #7
 . 189 / 960 ( 19%)
-
-Starting test 'Framework_AssertTest::testAssertSameSucceeds with data set #8 (array(NULL), array(NULL))'.
+Framework_AssertTest::testAssertSameSucceeds with data set #8
 .
-Starting test 'Framework_AssertTest::testAssertSameSucceeds with data set #9 (array('a', array(1, 2)), array('a', array(1, 2)))'.
+Framework_AssertTest::testAssertSameSucceeds with data set #9
 .
-Starting test 'Framework_AssertTest::testAssertSameSucceeds with data set #10 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertSameSucceeds with data set #10
 .
-Starting test 'Framework_AssertTest::testAssertSameSucceeds with data set #11 (<resource>, <resource>)'.
+Framework_AssertTest::testAssertSameSucceeds with data set #11
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #0 ('a', 'b')'.
+Framework_AssertTest::testAssertSameFails with data set #0
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #1 ('a', 'A')'.
+Framework_AssertTest::testAssertSameFails with data set #1
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #2 (1, 2)'.
+Framework_AssertTest::testAssertSameFails with data set #2
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #3 (2, 1)'.
+Framework_AssertTest::testAssertSameFails with data set #3
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #4 (2.3, 4.2)'.
+Framework_AssertTest::testAssertSameFails with data set #4
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #5 (2.3, 4.2, 0.5)'.
+Framework_AssertTest::testAssertSameFails with data set #5
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #6 (array(2.3), array(4.2), 0.5)'.
+Framework_AssertTest::testAssertSameFails with data set #6
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #7 (array(array(2.3)), array(array(4.2)), 0.5)'.
+Framework_AssertTest::testAssertSameFails with data set #7
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #8 (Struct, Struct, 0.5)'.
+Framework_AssertTest::testAssertSameFails with data set #8
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #9 (array(Struct), array(Struct), 0.5)'.
+Framework_AssertTest::testAssertSameFails with data set #9
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #10 (NAN, NAN)'.
+Framework_AssertTest::testAssertSameFails with data set #10
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #11 (array(), array(1))'.
+Framework_AssertTest::testAssertSameFails with data set #11
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #12 (array(1), array())'.
+Framework_AssertTest::testAssertSameFails with data set #12
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #13 (array(NULL), array())'.
+Framework_AssertTest::testAssertSameFails with data set #13
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #14 (array(1, 2), array(1, 3))'.
+Framework_AssertTest::testAssertSameFails with data set #14
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #15 (array('a', array(1, 2)), array('a', array(2, 1)))'.
+Framework_AssertTest::testAssertSameFails with data set #15
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #16 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertSameFails with data set #16
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #17 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertSameFails with data set #17
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #18 (Book, Book)'.
+Framework_AssertTest::testAssertSameFails with data set #18
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #19 (Book, stdClass)'.
+Framework_AssertTest::testAssertSameFails with data set #19
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #20 (<resource>, <resource>)'.
+Framework_AssertTest::testAssertSameFails with data set #20
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #21 (SplObjectStorage, SplObjectStorage)'.
+Framework_AssertTest::testAssertSameFails with data set #21
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #22 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertSameFails with data set #22
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #23 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertSameFails with data set #23
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #24 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertSameFails with data set #24
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #25 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertSameFails with data set #25
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #26 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertSameFails with data set #26
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #27 (SampleClass, false)'.
+Framework_AssertTest::testAssertSameFails with data set #27
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #28 (false, SampleClass)'.
+Framework_AssertTest::testAssertSameFails with data set #28
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #29 (array(1, 2), false)'.
+Framework_AssertTest::testAssertSameFails with data set #29
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #30 (false, array(1, 2))'.
+Framework_AssertTest::testAssertSameFails with data set #30
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #31 (array(), stdClass)'.
+Framework_AssertTest::testAssertSameFails with data set #31
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #32 (stdClass, array())'.
+Framework_AssertTest::testAssertSameFails with data set #32
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #33 (0, 'Foobar')'.
+Framework_AssertTest::testAssertSameFails with data set #33
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #34 ('Foobar', 0)'.
+Framework_AssertTest::testAssertSameFails with data set #34
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #35 (3, NAN)'.
+Framework_AssertTest::testAssertSameFails with data set #35
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #36 (NAN, 3)'.
+Framework_AssertTest::testAssertSameFails with data set #36
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #37 ('a', 'A', 0, false, true)'.
+Framework_AssertTest::testAssertSameFails with data set #37
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #38 (array(1, 2), array(2, 1))'.
+Framework_AssertTest::testAssertSameFails with data set #38
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #39 (array(1), array('1'))'.
+Framework_AssertTest::testAssertSameFails with data set #39
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #40 (array(3, 2, 1), array(2, 3, 1), 0, true)'.
+Framework_AssertTest::testAssertSameFails with data set #40
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #41 (2.3, 2.5, 0.5)'.
+Framework_AssertTest::testAssertSameFails with data set #41
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #42 (array(2.3), array(2.5), 0.5)'.
+Framework_AssertTest::testAssertSameFails with data set #42
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #43 (array(array(2.3)), array(array(2.5)), 0.5)'.
+Framework_AssertTest::testAssertSameFails with data set #43
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #44 (Struct, Struct, 0.5)'.
+Framework_AssertTest::testAssertSameFails with data set #44
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #45 (array(Struct), array(Struct), 0.5)'.
+Framework_AssertTest::testAssertSameFails with data set #45
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #46 (1, 2, 1)'.
+Framework_AssertTest::testAssertSameFails with data set #46
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #47 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertSameFails with data set #47
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #48 (Book, Book)'.
+Framework_AssertTest::testAssertSameFails with data set #48
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #49 (SplObjectStorage, SplObjectStorage)'.
+Framework_AssertTest::testAssertSameFails with data set #49
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #50 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertSameFails with data set #50
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #51 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertSameFails with data set #51
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #52 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertSameFails with data set #52
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #53 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertSameFails with data set #53
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #54 (0, '0')'.
+Framework_AssertTest::testAssertSameFails with data set #54
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #55 ('0', 0)'.
+Framework_AssertTest::testAssertSameFails with data set #55
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #56 (2.3, '2.3')'.
+Framework_AssertTest::testAssertSameFails with data set #56
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #57 ('2.3', 2.3)'.
+Framework_AssertTest::testAssertSameFails with data set #57
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #58 ('0.33333333333333', 0.33333333333333)'.
+Framework_AssertTest::testAssertSameFails with data set #58
 . 252 / 960 ( 26%)
-
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #59 (0.33333333333333, '0.33333333333333')'.
+Framework_AssertTest::testAssertSameFails with data set #59
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #60 ('string representation', string representation)'.
+Framework_AssertTest::testAssertSameFails with data set #60
 .
-Starting test 'Framework_AssertTest::testAssertSameFails with data set #61 (string representation, 'string representation')'.
+Framework_AssertTest::testAssertSameFails with data set #61
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #0 ('a', 'b')'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #0
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #1 ('a', 'A')'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #1
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #2 (1, 2)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #2
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #3 (2, 1)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #3
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #4 (2.3, 4.2)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #4
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #5 (2.3, 4.2, 0.5)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #5
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #6 (array(2.3), array(4.2), 0.5)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #6
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #7 (array(array(2.3)), array(array(4.2)), 0.5)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #7
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #8 (Struct, Struct, 0.5)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #8
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #9 (array(Struct), array(Struct), 0.5)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #9
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #10 (NAN, NAN)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #10
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #11 (array(), array(1))'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #11
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #12 (array(1), array())'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #12
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #13 (array(NULL), array())'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #13
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #14 (array(1, 2), array(1, 3))'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #14
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #15 (array('a', array(1, 2)), array('a', array(2, 1)))'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #15
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #16 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #16
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #17 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #17
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #18 (Book, Book)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #18
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #19 (Book, stdClass)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #19
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #20 (<resource>, <resource>)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #20
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #21 (SplObjectStorage, SplObjectStorage)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #21
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #22 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #22
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #23 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #23
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #24 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #24
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #25 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #25
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #26 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #26
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #27 (SampleClass, false)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #27
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #28 (false, SampleClass)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #28
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #29 (array(1, 2), false)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #29
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #30 (false, array(1, 2))'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #30
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #31 (array(), stdClass)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #31
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #32 (stdClass, array())'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #32
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #33 (0, 'Foobar')'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #33
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #34 ('Foobar', 0)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #34
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #35 (3, NAN)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #35
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #36 (NAN, 3)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #36
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #37 ('a', 'A', 0, false, true)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #37
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #38 (array(1, 2), array(2, 1))'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #38
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #39 (array(1), array('1'))'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #39
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #40 (array(3, 2, 1), array(2, 3, 1), 0, true)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #40
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #41 (2.3, 2.5, 0.5)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #41
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #42 (array(2.3), array(2.5), 0.5)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #42
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #43 (array(array(2.3)), array(array(2.5)), 0.5)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #43
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #44 (Struct, Struct, 0.5)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #44
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #45 (array(Struct), array(Struct), 0.5)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #45
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #46 (1, 2, 1)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #46
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #47 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #47
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #48 (Book, Book)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #48
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #49 (SplObjectStorage, SplObjectStorage)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #49
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #50 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #50
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #51 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #51
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #52 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #52
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #53 (DOMDocument, DOMDocument)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #53
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #54 (0, '0')'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #54
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #55 ('0', 0)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #55
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #56 (2.3, '2.3')'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #56
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #57 ('2.3', 2.3)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #57
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #58 ('0.33333333333333', 0.33333333333333)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #58
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #59 (0.33333333333333, '0.33333333333333')'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #59
 . 315 / 960 ( 32%)
-
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #60 ('string representation', string representation)'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #60
 .
-Starting test 'Framework_AssertTest::testAssertNotSameSucceeds with data set #61 (string representation, 'string representation')'.
+Framework_AssertTest::testAssertNotSameSucceeds with data set #61
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFails with data set #0 (NULL, NULL)'.
+Framework_AssertTest::testAssertNotSameFails with data set #0
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFails with data set #1 ('a', 'a')'.
+Framework_AssertTest::testAssertNotSameFails with data set #1
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFails with data set #2 (0, 0)'.
+Framework_AssertTest::testAssertNotSameFails with data set #2
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFails with data set #3 (2.3, 2.3)'.
+Framework_AssertTest::testAssertNotSameFails with data set #3
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFails with data set #4 (0.33333333333333, 0.33333333333333)'.
+Framework_AssertTest::testAssertNotSameFails with data set #4
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFails with data set #5 (-INF, -INF)'.
+Framework_AssertTest::testAssertNotSameFails with data set #5
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFails with data set #6 (array(), array())'.
+Framework_AssertTest::testAssertNotSameFails with data set #6
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFails with data set #7 (array(1), array(1))'.
+Framework_AssertTest::testAssertNotSameFails with data set #7
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFails with data set #8 (array(NULL), array(NULL))'.
+Framework_AssertTest::testAssertNotSameFails with data set #8
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFails with data set #9 (array('a', array(1, 2)), array('a', array(1, 2)))'.
+Framework_AssertTest::testAssertNotSameFails with data set #9
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFails with data set #10 (SampleClass, SampleClass)'.
+Framework_AssertTest::testAssertNotSameFails with data set #10
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFails with data set #11 (<resource>, <resource>)'.
+Framework_AssertTest::testAssertNotSameFails with data set #11
 .
-Starting test 'Framework_AssertTest::testAssertXmlFileEqualsXmlFile'.
+Framework_AssertTest::testAssertXmlFileEqualsXmlFile
 .
-Starting test 'Framework_AssertTest::testAssertXmlFileNotEqualsXmlFile'.
+Framework_AssertTest::testAssertXmlFileNotEqualsXmlFile
 .
-Starting test 'Framework_AssertTest::testAssertXmlStringEqualsXmlFile'.
+Framework_AssertTest::testAssertXmlStringEqualsXmlFile
 .
-Starting test 'Framework_AssertTest::testXmlStringNotEqualsXmlFile'.
+Framework_AssertTest::testXmlStringNotEqualsXmlFile
 .
-Starting test 'Framework_AssertTest::testAssertXmlStringEqualsXmlString'.
+Framework_AssertTest::testAssertXmlStringEqualsXmlString
 .
-Starting test 'Framework_AssertTest::testAssertXmlStringNotEqualsXmlString'.
+Framework_AssertTest::testAssertXmlStringNotEqualsXmlString
 .
-Starting test 'Framework_AssertTest::testXMLStructureIsSame'.
+Framework_AssertTest::testXMLStructureIsSame
 .
-Starting test 'Framework_AssertTest::testXMLStructureWrongNumberOfAttributes'.
+Framework_AssertTest::testXMLStructureWrongNumberOfAttributes
 .
-Starting test 'Framework_AssertTest::testXMLStructureWrongNumberOfNodes'.
+Framework_AssertTest::testXMLStructureWrongNumberOfNodes
 .
-Starting test 'Framework_AssertTest::testXMLStructureIsSameButDataIsNot'.
+Framework_AssertTest::testXMLStructureIsSameButDataIsNot
 .
-Starting test 'Framework_AssertTest::testXMLStructureAttributesAreSameButValuesAreNot'.
+Framework_AssertTest::testXMLStructureAttributesAreSameButValuesAreNot
 .
-Starting test 'Framework_AssertTest::testXMLStructureIgnoreTextNodes'.
+Framework_AssertTest::testXMLStructureIgnoreTextNodes
 .
-Starting test 'Framework_AssertTest::testAssertStringEqualsNumeric'.
+Framework_AssertTest::testAssertStringEqualsNumeric
 .
-Starting test 'Framework_AssertTest::testAssertStringEqualsNumeric2'.
+Framework_AssertTest::testAssertStringEqualsNumeric2
 .
-Starting test 'Framework_AssertTest::testAssertFileExistsThrowsException'.
+Framework_AssertTest::testAssertFileExistsThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertFileExists'.
+Framework_AssertTest::testAssertFileExists
 .
-Starting test 'Framework_AssertTest::testAssertFileNotExistsThrowsException'.
+Framework_AssertTest::testAssertFileNotExistsThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertFileNotExists'.
+Framework_AssertTest::testAssertFileNotExists
 .
-Starting test 'Framework_AssertTest::testAssertObjectHasAttribute'.
+Framework_AssertTest::testAssertObjectHasAttribute
 .
-Starting test 'Framework_AssertTest::testAssertObjectNotHasAttribute'.
+Framework_AssertTest::testAssertObjectNotHasAttribute
 .
-Starting test 'Framework_AssertTest::testAssertNull'.
+Framework_AssertTest::testAssertNull
 .
-Starting test 'Framework_AssertTest::testAssertNotNull'.
+Framework_AssertTest::testAssertNotNull
 .
-Starting test 'Framework_AssertTest::testAssertTrue'.
+Framework_AssertTest::testAssertTrue
 .
-Starting test 'Framework_AssertTest::testAssertFalse'.
+Framework_AssertTest::testAssertFalse
 .
-Starting test 'Framework_AssertTest::testAssertRegExpThrowsException'.
+Framework_AssertTest::testAssertRegExpThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertRegExpThrowsException2'.
+Framework_AssertTest::testAssertRegExpThrowsException2
 .
-Starting test 'Framework_AssertTest::testAssertNotRegExpThrowsException'.
+Framework_AssertTest::testAssertNotRegExpThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertNotRegExpThrowsException2'.
+Framework_AssertTest::testAssertNotRegExpThrowsException2
 .
-Starting test 'Framework_AssertTest::testAssertRegExp'.
+Framework_AssertTest::testAssertRegExp
 .
-Starting test 'Framework_AssertTest::testAssertNotRegExp'.
+Framework_AssertTest::testAssertNotRegExp
 .
-Starting test 'Framework_AssertTest::testAssertSame'.
+Framework_AssertTest::testAssertSame
 .
-Starting test 'Framework_AssertTest::testAssertSame2'.
+Framework_AssertTest::testAssertSame2
 .
-Starting test 'Framework_AssertTest::testAssertNotSame'.
+Framework_AssertTest::testAssertNotSame
 .
-Starting test 'Framework_AssertTest::testAssertNotSame2'.
+Framework_AssertTest::testAssertNotSame2
 .
-Starting test 'Framework_AssertTest::testAssertNotSameFailsNull'.
+Framework_AssertTest::testAssertNotSameFailsNull
 .
-Starting test 'Framework_AssertTest::testGreaterThan'.
+Framework_AssertTest::testGreaterThan
 .
-Starting test 'Framework_AssertTest::testAttributeGreaterThan'.
+Framework_AssertTest::testAttributeGreaterThan
 .
-Starting test 'Framework_AssertTest::testGreaterThanOrEqual'.
+Framework_AssertTest::testGreaterThanOrEqual
 .
-Starting test 'Framework_AssertTest::testAttributeGreaterThanOrEqual'.
+Framework_AssertTest::testAttributeGreaterThanOrEqual
 .
-Starting test 'Framework_AssertTest::testLessThan'.
+Framework_AssertTest::testLessThan
 .
-Starting test 'Framework_AssertTest::testAttributeLessThan'.
+Framework_AssertTest::testAttributeLessThan
 .
-Starting test 'Framework_AssertTest::testLessThanOrEqual'.
+Framework_AssertTest::testLessThanOrEqual
 .
-Starting test 'Framework_AssertTest::testAttributeLessThanOrEqual'.
+Framework_AssertTest::testAttributeLessThanOrEqual
 .
-Starting test 'Framework_AssertTest::testReadAttribute'.
+Framework_AssertTest::testReadAttribute
 .
-Starting test 'Framework_AssertTest::testReadAttribute2'.
+Framework_AssertTest::testReadAttribute2
 F
-Starting test 'Framework_AssertTest::testReadAttribute3'.
+Framework_AssertTest::testReadAttribute3
 .
-Starting test 'Framework_AssertTest::testReadAttribute4'.
+Framework_AssertTest::testReadAttribute4
 .
-Starting test 'Framework_AssertTest::testReadAttribute5'.
+Framework_AssertTest::testReadAttribute5
 .
-Starting test 'Framework_AssertTest::testAssertPublicAttributeContains'.
+Framework_AssertTest::testAssertPublicAttributeContains
 . 378 / 960 ( 39%)
-
-Starting test 'Framework_AssertTest::testAssertPublicAttributeContainsOnly'.
+Framework_AssertTest::testAssertPublicAttributeContainsOnly
 .
-Starting test 'Framework_AssertTest::testAssertPublicAttributeNotContains'.
+Framework_AssertTest::testAssertPublicAttributeNotContains
 .
-Starting test 'Framework_AssertTest::testAssertPublicAttributeNotContainsOnly'.
+Framework_AssertTest::testAssertPublicAttributeNotContainsOnly
 .
-Starting test 'Framework_AssertTest::testAssertProtectedAttributeContains'.
+Framework_AssertTest::testAssertProtectedAttributeContains
 .
-Starting test 'Framework_AssertTest::testAssertProtectedAttributeNotContains'.
+Framework_AssertTest::testAssertProtectedAttributeNotContains
 .
-Starting test 'Framework_AssertTest::testAssertPrivateAttributeContains'.
+Framework_AssertTest::testAssertPrivateAttributeContains
 .
-Starting test 'Framework_AssertTest::testAssertPrivateAttributeNotContains'.
+Framework_AssertTest::testAssertPrivateAttributeNotContains
 .
-Starting test 'Framework_AssertTest::testAssertPublicAttributeEquals'.
+Framework_AssertTest::testAssertPublicAttributeEquals
 .
-Starting test 'Framework_AssertTest::testAssertPublicAttributeNotEquals'.
+Framework_AssertTest::testAssertPublicAttributeNotEquals
 .
-Starting test 'Framework_AssertTest::testAssertPublicAttributeSame'.
+Framework_AssertTest::testAssertPublicAttributeSame
 .
-Starting test 'Framework_AssertTest::testAssertPublicAttributeNotSame'.
+Framework_AssertTest::testAssertPublicAttributeNotSame
 .
-Starting test 'Framework_AssertTest::testAssertProtectedAttributeEquals'.
+Framework_AssertTest::testAssertProtectedAttributeEquals
 .
-Starting test 'Framework_AssertTest::testAssertProtectedAttributeNotEquals'.
+Framework_AssertTest::testAssertProtectedAttributeNotEquals
 .
-Starting test 'Framework_AssertTest::testAssertPrivateAttributeEquals'.
+Framework_AssertTest::testAssertPrivateAttributeEquals
 .
-Starting test 'Framework_AssertTest::testAssertPrivateAttributeNotEquals'.
+Framework_AssertTest::testAssertPrivateAttributeNotEquals
 .
-Starting test 'Framework_AssertTest::testAssertPublicStaticAttributeEquals'.
+Framework_AssertTest::testAssertPublicStaticAttributeEquals
 F
-Starting test 'Framework_AssertTest::testAssertPublicStaticAttributeNotEquals'.
+Framework_AssertTest::testAssertPublicStaticAttributeNotEquals
 F
-Starting test 'Framework_AssertTest::testAssertProtectedStaticAttributeEquals'.
+Framework_AssertTest::testAssertProtectedStaticAttributeEquals
 F
-Starting test 'Framework_AssertTest::testAssertProtectedStaticAttributeNotEquals'.
+Framework_AssertTest::testAssertProtectedStaticAttributeNotEquals
 F
-Starting test 'Framework_AssertTest::testAssertPrivateStaticAttributeEquals'.
+Framework_AssertTest::testAssertPrivateStaticAttributeEquals
 F
-Starting test 'Framework_AssertTest::testAssertPrivateStaticAttributeNotEquals'.
+Framework_AssertTest::testAssertPrivateStaticAttributeNotEquals
 F
-Starting test 'Framework_AssertTest::testAssertClassHasAttributeThrowsException'.
+Framework_AssertTest::testAssertClassHasAttributeThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertClassHasAttributeThrowsException2'.
+Framework_AssertTest::testAssertClassHasAttributeThrowsException2
 .
-Starting test 'Framework_AssertTest::testAssertClassNotHasAttributeThrowsException'.
+Framework_AssertTest::testAssertClassNotHasAttributeThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertClassNotHasAttributeThrowsException2'.
+Framework_AssertTest::testAssertClassNotHasAttributeThrowsException2
 .
-Starting test 'Framework_AssertTest::testAssertClassHasStaticAttributeThrowsException'.
+Framework_AssertTest::testAssertClassHasStaticAttributeThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertClassHasStaticAttributeThrowsException2'.
+Framework_AssertTest::testAssertClassHasStaticAttributeThrowsException2
 .
-Starting test 'Framework_AssertTest::testAssertClassNotHasStaticAttributeThrowsException'.
+Framework_AssertTest::testAssertClassNotHasStaticAttributeThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertClassNotHasStaticAttributeThrowsException2'.
+Framework_AssertTest::testAssertClassNotHasStaticAttributeThrowsException2
 .
-Starting test 'Framework_AssertTest::testAssertObjectHasAttributeThrowsException'.
+Framework_AssertTest::testAssertObjectHasAttributeThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertObjectHasAttributeThrowsException2'.
+Framework_AssertTest::testAssertObjectHasAttributeThrowsException2
 .
-Starting test 'Framework_AssertTest::testAssertObjectNotHasAttributeThrowsException'.
+Framework_AssertTest::testAssertObjectNotHasAttributeThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertObjectNotHasAttributeThrowsException2'.
+Framework_AssertTest::testAssertObjectNotHasAttributeThrowsException2
 .
-Starting test 'Framework_AssertTest::testClassHasPublicAttribute'.
+Framework_AssertTest::testClassHasPublicAttribute
 .
-Starting test 'Framework_AssertTest::testClassNotHasPublicAttribute'.
+Framework_AssertTest::testClassNotHasPublicAttribute
 .
-Starting test 'Framework_AssertTest::testClassHasPublicStaticAttribute'.
+Framework_AssertTest::testClassHasPublicStaticAttribute
 .
-Starting test 'Framework_AssertTest::testClassNotHasPublicStaticAttribute'.
+Framework_AssertTest::testClassNotHasPublicStaticAttribute
 .
-Starting test 'Framework_AssertTest::testObjectHasPublicAttribute'.
+Framework_AssertTest::testObjectHasPublicAttribute
 .
-Starting test 'Framework_AssertTest::testObjectNotHasPublicAttribute'.
+Framework_AssertTest::testObjectNotHasPublicAttribute
 .
-Starting test 'Framework_AssertTest::testObjectHasOnTheFlyAttribute'.
+Framework_AssertTest::testObjectHasOnTheFlyAttribute
 F
-Starting test 'Framework_AssertTest::testObjectNotHasOnTheFlyAttribute'.
+Framework_AssertTest::testObjectNotHasOnTheFlyAttribute
 F
-Starting test 'Framework_AssertTest::testObjectHasProtectedAttribute'.
+Framework_AssertTest::testObjectHasProtectedAttribute
 .
-Starting test 'Framework_AssertTest::testObjectNotHasProtectedAttribute'.
+Framework_AssertTest::testObjectNotHasProtectedAttribute
 .
-Starting test 'Framework_AssertTest::testObjectHasPrivateAttribute'.
+Framework_AssertTest::testObjectHasPrivateAttribute
 .
-Starting test 'Framework_AssertTest::testObjectNotHasPrivateAttribute'.
+Framework_AssertTest::testObjectNotHasPrivateAttribute
 .
-Starting test 'Framework_AssertTest::testAssertThatAttributeEquals'.
+Framework_AssertTest::testAssertThatAttributeEquals
 .
-Starting test 'Framework_AssertTest::testAssertThatAttributeEquals2'.
+Framework_AssertTest::testAssertThatAttributeEquals2
 .
-Starting test 'Framework_AssertTest::testAssertThatAttributeEqualTo'.
+Framework_AssertTest::testAssertThatAttributeEqualTo
 .
-Starting test 'Framework_AssertTest::testAssertThatAnything'.
+Framework_AssertTest::testAssertThatAnything
 .
-Starting test 'Framework_AssertTest::testAssertThatAnythingAndAnything'.
+Framework_AssertTest::testAssertThatAnythingAndAnything
 .
-Starting test 'Framework_AssertTest::testAssertThatAnythingOrAnything'.
+Framework_AssertTest::testAssertThatAnythingOrAnything
 .
-Starting test 'Framework_AssertTest::testAssertThatAnythingXorNotAnything'.
+Framework_AssertTest::testAssertThatAnythingXorNotAnything
 .
-Starting test 'Framework_AssertTest::testAssertThatContains'.
+Framework_AssertTest::testAssertThatContains
 .
-Starting test 'Framework_AssertTest::testAssertThatStringContains'.
+Framework_AssertTest::testAssertThatStringContains
 .
-Starting test 'Framework_AssertTest::testAssertThatContainsOnly'.
+Framework_AssertTest::testAssertThatContainsOnly
 .
-Starting test 'Framework_AssertTest::testAssertThatContainsOnlyInstancesOf'.
+Framework_AssertTest::testAssertThatContainsOnlyInstancesOf
 .
-Starting test 'Framework_AssertTest::testAssertThatArrayHasKey'.
+Framework_AssertTest::testAssertThatArrayHasKey
 .
-Starting test 'Framework_AssertTest::testAssertThatClassHasAttribute'.
+Framework_AssertTest::testAssertThatClassHasAttribute
 .
-Starting test 'Framework_AssertTest::testAssertThatClassHasStaticAttribute'.
+Framework_AssertTest::testAssertThatClassHasStaticAttribute
 .
-Starting test 'Framework_AssertTest::testAssertThatObjectHasAttribute'.
+Framework_AssertTest::testAssertThatObjectHasAttribute
 .
-Starting test 'Framework_AssertTest::testAssertThatEqualTo'.
+Framework_AssertTest::testAssertThatEqualTo
 .
-Starting test 'Framework_AssertTest::testAssertThatIdenticalTo'.
+Framework_AssertTest::testAssertThatIdenticalTo
 .
-Starting test 'Framework_AssertTest::testAssertThatIsInstanceOf'.
+Framework_AssertTest::testAssertThatIsInstanceOf
 . 441 / 960 ( 45%)
-
-Starting test 'Framework_AssertTest::testAssertThatIsType'.
+Framework_AssertTest::testAssertThatIsType
 .
-Starting test 'Framework_AssertTest::testAssertThatFileExists'.
+Framework_AssertTest::testAssertThatFileExists
 .
-Starting test 'Framework_AssertTest::testAssertThatGreaterThan'.
+Framework_AssertTest::testAssertThatGreaterThan
 .
-Starting test 'Framework_AssertTest::testAssertThatGreaterThanOrEqual'.
+Framework_AssertTest::testAssertThatGreaterThanOrEqual
 .
-Starting test 'Framework_AssertTest::testAssertThatLessThan'.
+Framework_AssertTest::testAssertThatLessThan
 .
-Starting test 'Framework_AssertTest::testAssertThatLessThanOrEqual'.
+Framework_AssertTest::testAssertThatLessThanOrEqual
 .
-Starting test 'Framework_AssertTest::testAssertThatMatchesRegularExpression'.
+Framework_AssertTest::testAssertThatMatchesRegularExpression
 .
-Starting test 'Framework_AssertTest::testAssertTagTypeTrue'.
+Framework_AssertTest::testAssertTagTypeTrue
 .
-Starting test 'Framework_AssertTest::testAssertTagTypeFalse'.
+Framework_AssertTest::testAssertTagTypeFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagIdTrue'.
+Framework_AssertTest::testAssertTagIdTrue
 .
-Starting test 'Framework_AssertTest::testAssertTagIdFalse'.
+Framework_AssertTest::testAssertTagIdFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagStringContentTrue'.
+Framework_AssertTest::testAssertTagStringContentTrue
 .
-Starting test 'Framework_AssertTest::testAssertTagStringContentFalse'.
+Framework_AssertTest::testAssertTagStringContentFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagRegexpContentTrue'.
+Framework_AssertTest::testAssertTagRegexpContentTrue
 .
-Starting test 'Framework_AssertTest::testAssertTagRegexpModifierContentTrue'.
+Framework_AssertTest::testAssertTagRegexpModifierContentTrue
 .
-Starting test 'Framework_AssertTest::testAssertTagRegexpContentFalse'.
+Framework_AssertTest::testAssertTagRegexpContentFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagCdataContentTrue'.
+Framework_AssertTest::testAssertTagCdataContentTrue
 .
-Starting test 'Framework_AssertTest::testAssertTagCdataontentFalse'.
+Framework_AssertTest::testAssertTagCdataontentFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagAttributesTrueA'.
+Framework_AssertTest::testAssertTagAttributesTrueA
 .
-Starting test 'Framework_AssertTest::testAssertTagAttributesTrueB'.
+Framework_AssertTest::testAssertTagAttributesTrueB
 .
-Starting test 'Framework_AssertTest::testAssertTagAttributesFalse'.
+Framework_AssertTest::testAssertTagAttributesFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagAttributesRegexpTrueA'.
+Framework_AssertTest::testAssertTagAttributesRegexpTrueA
 .
-Starting test 'Framework_AssertTest::testAssertTagAttributesRegexpTrueB'.
+Framework_AssertTest::testAssertTagAttributesRegexpTrueB
 .
-Starting test 'Framework_AssertTest::testAssertTagAttributesRegexpModifierTrue'.
+Framework_AssertTest::testAssertTagAttributesRegexpModifierTrue
 .
-Starting test 'Framework_AssertTest::testAssertTagAttributesRegexpModifierFalse'.
+Framework_AssertTest::testAssertTagAttributesRegexpModifierFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagAttributesRegexpFalse'.
+Framework_AssertTest::testAssertTagAttributesRegexpFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagAttributesMultiPartClassTrueA'.
+Framework_AssertTest::testAssertTagAttributesMultiPartClassTrueA
 .
-Starting test 'Framework_AssertTest::testAssertTagAttributesMultiPartClassTrueB'.
+Framework_AssertTest::testAssertTagAttributesMultiPartClassTrueB
 .
-Starting test 'Framework_AssertTest::testAssertTagAttributesMultiPartClassFalse'.
+Framework_AssertTest::testAssertTagAttributesMultiPartClassFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagParentTrue'.
+Framework_AssertTest::testAssertTagParentTrue
 F
-Starting test 'Framework_AssertTest::testAssertTagParentFalse'.
+Framework_AssertTest::testAssertTagParentFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagMultiplePossibleChildren'.
+Framework_AssertTest::testAssertTagMultiplePossibleChildren
 F
-Starting test 'Framework_AssertTest::testAssertTagChildTrue'.
+Framework_AssertTest::testAssertTagChildTrue
 F
-Starting test 'Framework_AssertTest::testAssertTagChildFalse'.
+Framework_AssertTest::testAssertTagChildFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagAncestorTrue'.
+Framework_AssertTest::testAssertTagAncestorTrue
 F
-Starting test 'Framework_AssertTest::testAssertTagAncestorFalse'.
+Framework_AssertTest::testAssertTagAncestorFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagDescendantTrue'.
+Framework_AssertTest::testAssertTagDescendantTrue
 F
-Starting test 'Framework_AssertTest::testAssertTagDescendantFalse'.
+Framework_AssertTest::testAssertTagDescendantFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagChildrenCountTrue'.
+Framework_AssertTest::testAssertTagChildrenCountTrue
 .
-Starting test 'Framework_AssertTest::testAssertTagChildrenCountFalse'.
+Framework_AssertTest::testAssertTagChildrenCountFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagChildrenLessThanTrue'.
+Framework_AssertTest::testAssertTagChildrenLessThanTrue
 .
-Starting test 'Framework_AssertTest::testAssertTagChildrenLessThanFalse'.
+Framework_AssertTest::testAssertTagChildrenLessThanFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagChildrenGreaterThanTrue'.
+Framework_AssertTest::testAssertTagChildrenGreaterThanTrue
 .
-Starting test 'Framework_AssertTest::testAssertTagChildrenGreaterThanFalse'.
+Framework_AssertTest::testAssertTagChildrenGreaterThanFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagChildrenOnlyTrue'.
+Framework_AssertTest::testAssertTagChildrenOnlyTrue
 F
-Starting test 'Framework_AssertTest::testAssertTagChildrenOnlyFalse'.
+Framework_AssertTest::testAssertTagChildrenOnlyFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagTypeIdTrueA'.
+Framework_AssertTest::testAssertTagTypeIdTrueA
 .
-Starting test 'Framework_AssertTest::testAssertTagTypeIdTrueB'.
+Framework_AssertTest::testAssertTagTypeIdTrueB
 .
-Starting test 'Framework_AssertTest::testAssertTagTypeIdTrueC'.
+Framework_AssertTest::testAssertTagTypeIdTrueC
 .
-Starting test 'Framework_AssertTest::testAssertTagTypeIdFalse'.
+Framework_AssertTest::testAssertTagTypeIdFalse
 .
-Starting test 'Framework_AssertTest::testAssertTagContentAttributes'.
+Framework_AssertTest::testAssertTagContentAttributes
 .
-Starting test 'Framework_AssertTest::testAssertParentContentAttributes'.
+Framework_AssertTest::testAssertParentContentAttributes
 F
-Starting test 'Framework_AssertTest::testAssertChildContentAttributes'.
+Framework_AssertTest::testAssertChildContentAttributes
 F
-Starting test 'Framework_AssertTest::testAssertChildSubChildren'.
+Framework_AssertTest::testAssertChildSubChildren
 F
-Starting test 'Framework_AssertTest::testAssertAncestorContentAttributes'.
+Framework_AssertTest::testAssertAncestorContentAttributes
 F
-Starting test 'Framework_AssertTest::testAssertDescendantContentAttributes'.
+Framework_AssertTest::testAssertDescendantContentAttributes
 F
-Starting test 'Framework_AssertTest::testAssertChildrenContentAttributes'.
+Framework_AssertTest::testAssertChildrenContentAttributes
 F
-Starting test 'Framework_AssertTest::testAssertNotTagTypeIdFalse'.
+Framework_AssertTest::testAssertNotTagTypeIdFalse
 .
-Starting test 'Framework_AssertTest::testAssertNotTagContentAttributes'.
+Framework_AssertTest::testAssertNotTagContentAttributes
 .
-Starting test 'Framework_AssertTest::testAssertSelectCountPresentTrue'.
+Framework_AssertTest::testAssertSelectCountPresentTrue
 .
-Starting test 'Framework_AssertTest::testAssertSelectCountPresentFalse'.
+Framework_AssertTest::testAssertSelectCountPresentFalse
 .
-Starting test 'Framework_AssertTest::testAssertSelectCountNotPresentTrue'.
+Framework_AssertTest::testAssertSelectCountNotPresentTrue
 .
-Starting test 'Framework_AssertTest::testAssertSelectNotPresentFalse'.
+Framework_AssertTest::testAssertSelectNotPresentFalse
 . 504 / 960 ( 52%)
-
-Starting test 'Framework_AssertTest::testAssertSelectCountChildTrue'.
+Framework_AssertTest::testAssertSelectCountChildTrue
 F
-Starting test 'Framework_AssertTest::testAssertSelectCountChildFalse'.
+Framework_AssertTest::testAssertSelectCountChildFalse
 .
-Starting test 'Framework_AssertTest::testAssertSelectCountDescendantTrue'.
+Framework_AssertTest::testAssertSelectCountDescendantTrue
 F
-Starting test 'Framework_AssertTest::testAssertSelectCountDescendantFalse'.
+Framework_AssertTest::testAssertSelectCountDescendantFalse
 .
-Starting test 'Framework_AssertTest::testAssertSelectCountGreaterThanTrue'.
+Framework_AssertTest::testAssertSelectCountGreaterThanTrue
 F
-Starting test 'Framework_AssertTest::testAssertSelectCountGreaterThanFalse'.
+Framework_AssertTest::testAssertSelectCountGreaterThanFalse
 .
-Starting test 'Framework_AssertTest::testAssertSelectCountGreaterThanEqualToTrue'.
+Framework_AssertTest::testAssertSelectCountGreaterThanEqualToTrue
 F
-Starting test 'Framework_AssertTest::testAssertSelectCountGreaterThanEqualToFalse'.
+Framework_AssertTest::testAssertSelectCountGreaterThanEqualToFalse
 .
-Starting test 'Framework_AssertTest::testAssertSelectCountLessThanTrue'.
+Framework_AssertTest::testAssertSelectCountLessThanTrue
 .
-Starting test 'Framework_AssertTest::testAssertSelectCountLessThanFalse'.
+Framework_AssertTest::testAssertSelectCountLessThanFalse
 F
-Starting test 'Framework_AssertTest::testAssertSelectCountLessThanEqualToTrue'.
+Framework_AssertTest::testAssertSelectCountLessThanEqualToTrue
 .
-Starting test 'Framework_AssertTest::testAssertSelectCountLessThanEqualToFalse'.
+Framework_AssertTest::testAssertSelectCountLessThanEqualToFalse
 F
-Starting test 'Framework_AssertTest::testAssertSelectCountRangeTrue'.
+Framework_AssertTest::testAssertSelectCountRangeTrue
 F
-Starting test 'Framework_AssertTest::testAssertSelectCountRangeFalse'.
+Framework_AssertTest::testAssertSelectCountRangeFalse
 .
-Starting test 'Framework_AssertTest::testAssertSelectEqualsContentPresentTrue'.
+Framework_AssertTest::testAssertSelectEqualsContentPresentTrue
 .
-Starting test 'Framework_AssertTest::testAssertSelectEqualsContentPresentFalse'.
+Framework_AssertTest::testAssertSelectEqualsContentPresentFalse
 .
-Starting test 'Framework_AssertTest::testAssertSelectEqualsContentNotPresentTrue'.
+Framework_AssertTest::testAssertSelectEqualsContentNotPresentTrue
 .
-Starting test 'Framework_AssertTest::testAssertSelectEqualsContentNotPresentFalse'.
+Framework_AssertTest::testAssertSelectEqualsContentNotPresentFalse
 .
-Starting test 'Framework_AssertTest::testAssertSelectRegExpContentPresentTrue'.
+Framework_AssertTest::testAssertSelectRegExpContentPresentTrue
 .
-Starting test 'Framework_AssertTest::testAssertSelectRegExpContentPresentFalse'.
+Framework_AssertTest::testAssertSelectRegExpContentPresentFalse
 .
-Starting test 'Framework_AssertTest::testAssertFileEquals'.
+Framework_AssertTest::testAssertFileEquals
 .
-Starting test 'Framework_AssertTest::testAssertFileNotEquals'.
+Framework_AssertTest::testAssertFileNotEquals
 .
-Starting test 'Framework_AssertTest::testAssertStringEqualsFile'.
+Framework_AssertTest::testAssertStringEqualsFile
 .
-Starting test 'Framework_AssertTest::testAssertStringNotEqualsFile'.
+Framework_AssertTest::testAssertStringNotEqualsFile
 .
-Starting test 'Framework_AssertTest::testAssertStringStartsWithThrowsException'.
+Framework_AssertTest::testAssertStringStartsWithThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertStringStartsWithThrowsException2'.
+Framework_AssertTest::testAssertStringStartsWithThrowsException2
 .
-Starting test 'Framework_AssertTest::testAssertStringStartsNotWithThrowsException'.
+Framework_AssertTest::testAssertStringStartsNotWithThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertStringStartsNotWithThrowsException2'.
+Framework_AssertTest::testAssertStringStartsNotWithThrowsException2
 .
-Starting test 'Framework_AssertTest::testAssertStringEndsWithThrowsException'.
+Framework_AssertTest::testAssertStringEndsWithThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertStringEndsWithThrowsException2'.
+Framework_AssertTest::testAssertStringEndsWithThrowsException2
 .
-Starting test 'Framework_AssertTest::testAssertStringEndsNotWithThrowsException'.
+Framework_AssertTest::testAssertStringEndsNotWithThrowsException
 .
-Starting test 'Framework_AssertTest::testAssertStringEndsNotWithThrowsException2'.
+Framework_AssertTest::testAssertStringEndsNotWithThrowsException2
 .
-Starting test 'Framework_AssertTest::testAssertStringStartsWith'.
+Framework_AssertTest::testAssertStringStartsWith
 .
-Starting test 'Framework_AssertTest::testAssertStringStartsNotWith'.
+Framework_AssertTest::testAssertStringStartsNotWith
 .
-Starting test 'Framework_AssertTest::testAssertStringEndsWith'.
+Framework_AssertTest::testAssertStringEndsWith
 .
-Starting test 'Framework_AssertTest::testAssertStringEndsNotWith'.
+Framework_AssertTest::testAssertStringEndsNotWith
 .
-Starting test 'Framework_AssertTest::testAssertStringMatchesFormat'.
+Framework_AssertTest::testAssertStringMatchesFormat
 .
-Starting test 'Framework_AssertTest::testAssertStringMatchesFormatFailure'.
+Framework_AssertTest::testAssertStringMatchesFormatFailure
 .
-Starting test 'Framework_AssertTest::testAssertStringNotMatchesFormat'.
+Framework_AssertTest::testAssertStringNotMatchesFormat
 .
-Starting test 'Framework_AssertTest::testAssertEmpty'.
+Framework_AssertTest::testAssertEmpty
 .
-Starting test 'Framework_AssertTest::testAssertNotEmpty'.
+Framework_AssertTest::testAssertNotEmpty
 .
-Starting test 'Framework_AssertTest::testAssertAttributeEmpty'.
+Framework_AssertTest::testAssertAttributeEmpty
 E
-Starting test 'Framework_AssertTest::testAssertAttributeNotEmpty'.
+Framework_AssertTest::testAssertAttributeNotEmpty
 E
-Starting test 'Framework_AssertTest::testMarkTestIncomplete'.
+Framework_AssertTest::testMarkTestIncomplete
 .
-Starting test 'Framework_AssertTest::testMarkTestSkipped'.
+Framework_AssertTest::testMarkTestSkipped
 .
-Starting test 'Framework_AssertTest::testAssertCount'.
+Framework_AssertTest::testAssertCount
 .
-Starting test 'Framework_AssertTest::testAssertCountThrowsExceptionIfExpectedCountIsNoInteger'.
+Framework_AssertTest::testAssertCountThrowsExceptionIfExpectedCountIsNoInteger
 .
-Starting test 'Framework_AssertTest::testAssertCountThrowsExceptionIfElementIsNotCountable'.
+Framework_AssertTest::testAssertCountThrowsExceptionIfElementIsNotCountable
 .
-Starting test 'Framework_AssertTest::testAssertSameSize'.
+Framework_AssertTest::testAssertSameSize
 .
-Starting test 'Framework_AssertTest::testAssertSameSizeThrowsExceptionIfExpectedIsNotCoutable'.
+Framework_AssertTest::testAssertSameSizeThrowsExceptionIfExpectedIsNotCoutable
 .
-Starting test 'Framework_AssertTest::testAssertSameSizeThrowsExceptionIfActualIsNotCountable'.
+Framework_AssertTest::testAssertSameSizeThrowsExceptionIfActualIsNotCountable
 .
-Starting test 'Framework_AssertTest::testAssertJsonStringEqualsJsonString'.
+Framework_AssertTest::testAssertJsonStringEqualsJsonString
 .
-Starting test 'Framework_AssertTest::testAssertJsonStringEqualsJsonStringErrorRaised with data set "error syntax in expected JSON" ('{"Mascott"::}', '{"Mascott" : "Tux"}')'.
+Framework_AssertTest::testAssertJsonStringEqualsJsonStringErrorRaised with data set "error
 .
-Starting test 'Framework_AssertTest::testAssertJsonStringEqualsJsonStringErrorRaised with data set "error UTF-8 in actual JSON" ('{"Mascott" : "Tux"}', '{"Mascott" : :}')'.
+Framework_AssertTest::testAssertJsonStringEqualsJsonStringErrorRaised with data set "error
 .
-Starting test 'Framework_AssertTest::testAssertJsonStringNotEqualsJsonString'.
+Framework_AssertTest::testAssertJsonStringNotEqualsJsonString
 .
-Starting test 'Framework_AssertTest::testAssertJsonStringNotEqualsJsonStringErrorRaised with data set "error syntax in expected JSON" ('{"Mascott"::}', '{"Mascott" : "Tux"}')'.
+Framework_AssertTest::testAssertJsonStringNotEqualsJsonStringErrorRaised with data set "error
 .
-Starting test 'Framework_AssertTest::testAssertJsonStringNotEqualsJsonStringErrorRaised with data set "error UTF-8 in actual JSON" ('{"Mascott" : "Tux"}', '{"Mascott" : :}')'.
+Framework_AssertTest::testAssertJsonStringNotEqualsJsonStringErrorRaised with data set "error
 .
-Starting test 'Framework_AssertTest::testAssertJsonStringEqualsJsonFile'.
+Framework_AssertTest::testAssertJsonStringEqualsJsonFile
 .
-Starting test 'Framework_AssertTest::testAssertJsonStringEqualsJsonFileExpectingExpectationFailedException'.
+Framework_AssertTest::testAssertJsonStringEqualsJsonFileExpectingExpectationFailedException
 .
-Starting test 'Framework_AssertTest::testAssertJsonStringEqualsJsonFileExpectingException'.
+Framework_AssertTest::testAssertJsonStringEqualsJsonFileExpectingException
 .
-Starting test 'Framework_AssertTest::testAssertJsonStringNotEqualsJsonFile'.
+Framework_AssertTest::testAssertJsonStringNotEqualsJsonFile
 .
-Starting test 'Framework_AssertTest::testAssertJsonStringNotEqualsJsonFileExpectingException'.
+Framework_AssertTest::testAssertJsonStringNotEqualsJsonFileExpectingException
 .
-Starting test 'Framework_AssertTest::testAssertJsonFileNotEqualsJsonFile'.
+Framework_AssertTest::testAssertJsonFileNotEqualsJsonFile
 . 567 / 960 ( 59%)
-
-Starting test 'Framework_AssertTest::testAssertJsonFileEqualsJsonFile'.
+Framework_AssertTest::testAssertJsonFileEqualsJsonFile
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #0 (NULL, NULL, 'PHPUnit_Framework_Comparator_Scalar')'.
+Framework_ComparatorTest::testGetInstance with data set #0
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #1 (NULL, true, 'PHPUnit_Framework_Comparator_Scalar')'.
+Framework_ComparatorTest::testGetInstance with data set #1
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #2 (true, NULL, 'PHPUnit_Framework_Comparator_Scalar')'.
+Framework_ComparatorTest::testGetInstance with data set #2
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #3 (true, true, 'PHPUnit_Framework_Comparator_Scalar')'.
+Framework_ComparatorTest::testGetInstance with data set #3
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #4 (false, false, 'PHPUnit_Framework_Comparator_Scalar')'.
+Framework_ComparatorTest::testGetInstance with data set #4
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #5 (true, false, 'PHPUnit_Framework_Comparator_Scalar')'.
+Framework_ComparatorTest::testGetInstance with data set #5
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #6 (false, true, 'PHPUnit_Framework_Comparator_Scalar')'.
+Framework_ComparatorTest::testGetInstance with data set #6
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #7 ('', '', 'PHPUnit_Framework_Comparator_Scalar')'.
+Framework_ComparatorTest::testGetInstance with data set #7
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #8 ('0', '0', 'PHPUnit_Framework_Comparator_Numeric')'.
+Framework_ComparatorTest::testGetInstance with data set #8
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #9 ('0', 0, 'PHPUnit_Framework_Comparator_Numeric')'.
+Framework_ComparatorTest::testGetInstance with data set #9
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #10 (0, '0', 'PHPUnit_Framework_Comparator_Numeric')'.
+Framework_ComparatorTest::testGetInstance with data set #10
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #11 (0, 0, 'PHPUnit_Framework_Comparator_Numeric')'.
+Framework_ComparatorTest::testGetInstance with data set #11
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #12 (1, 0, 'PHPUnit_Framework_Comparator_Double')'.
+Framework_ComparatorTest::testGetInstance with data set #12
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #13 (0, 1, 'PHPUnit_Framework_Comparator_Double')'.
+Framework_ComparatorTest::testGetInstance with data set #13
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #14 (1, 1, 'PHPUnit_Framework_Comparator_Double')'.
+Framework_ComparatorTest::testGetInstance with data set #14
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #15 (array(1), array(1), 'PHPUnit_Framework_Comparator_Array')'.
+Framework_ComparatorTest::testGetInstance with data set #15
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #16 (<resource>, <resource>, 'PHPUnit_Framework_Comparator_Resource')'.
+Framework_ComparatorTest::testGetInstance with data set #16
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #17 (stdClass, stdClass, 'PHPUnit_Framework_Comparator_Object')'.
+Framework_ComparatorTest::testGetInstance with data set #17
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #18 (SplObjectStorage, SplObjectStorage, 'PHPUnit_Framework_Comparator_SplObjectStorage')'.
+Framework_ComparatorTest::testGetInstance with data set #18
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #19 (exception 'Exception' with message '' in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Framework/ComparatorTest.php:89
+Framework_ComparatorTest::testGetInstance with data set #19
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #20 (DOMDocument, DOMDocument, 'PHPUnit_Framework_Comparator_DOMDocument')'.
+Framework_ComparatorTest::testGetInstance with data set #20
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #21 (<resource>, array(1), 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #21
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #22 (array(1), <resource>, 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #22
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #23 (<resource>, '1', 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #23
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #24 ('1', <resource>, 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #24
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #25 (<resource>, stdClass, 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #25
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #26 (stdClass, <resource>, 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #26
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #27 (stdClass, array(1), 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #27
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #28 (array(1), stdClass, 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #28
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #29 (stdClass, '1', 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #29
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #30 ('1', stdClass, 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #30
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #31 (string representation, '1', 'PHPUnit_Framework_Comparator_Scalar')'.
+Framework_ComparatorTest::testGetInstance with data set #31
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #32 ('1', string representation, 'PHPUnit_Framework_Comparator_Scalar')'.
+Framework_ComparatorTest::testGetInstance with data set #32
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #33 (1, stdClass, 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #33
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #34 (stdClass, 1, 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #34
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #35 (1, array(1), 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #35
 .
-Starting test 'Framework_ComparatorTest::testGetInstance with data set #36 (array(1), 1, 'PHPUnit_Framework_Comparator_Type')'.
+Framework_ComparatorTest::testGetInstance with data set #36
 .
-Starting test 'Framework_ComparatorTest::testRegister'.
+Framework_ComparatorTest::testRegister
 .
-Starting test 'Framework_ComparatorTest::testUnregister'.
+Framework_ComparatorTest::testUnregister
 .
-Starting test 'Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "expected" ('Expected value JSON decode error - ', 'expected')'.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "expected"
 .
-Starting test 'Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "actual" ('Actual value JSON decode error - ', 'actual')'.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "actual"
 .
-Starting test 'Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "default" ('', '')'.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "default"
 .
-Starting test 'Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_NONE" (NULL, 'json_error_none', '')'.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_NONE"
 .
-Starting test 'Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_DEPTH" ('Maximum stack depth exceeded', 1, '')'.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_DEPTH"
 .
-Starting test 'Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "prefixed JSON_ERROR_DEPTH" ('TUX: Maximum stack depth exceeded', 1, 'TUX: ')'.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "prefixed
 .
-Starting test 'Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_STATE_MISMatch" ('Underflow or the modes mismatch', 2, '')'.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_STATE_MISMatch"
 .
-Starting test 'Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_CTRL_CHAR" ('Unexpected control character found', 3, '')'.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_CTRL_CHAR"
 .
-Starting test 'Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_SYNTAX" ('Syntax error, malformed JSON', 4, '')'.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_SYNTAX"
 .
-Starting test 'Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_UTF8`" ('Malformed UTF-8 characters, possibly incorrectly encoded', 5, '')'.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_UTF8`"
 .
-Starting test 'Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "Invalid error indicator" ('Unknown error', 55, '')'.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "Invalid
 .
-Starting test 'Framework_Constraint_JsonMatchesTest::testEvaluate with data set "valid JSON" (true, '{"Mascott":"Tux"}', '{"Mascott":"Tux"}')'.
+Framework_Constraint_JsonMatchesTest::testEvaluate with data set "valid
 .
-Starting test 'Framework_Constraint_JsonMatchesTest::testEvaluate with data set "error syntax" (false, '{"Mascott"::}', '{"Mascott":"Tux"}')'.
+Framework_Constraint_JsonMatchesTest::testEvaluate with data set "error
 .
-Starting test 'Framework_Constraint_JsonMatchesTest::testEvaluate with data set "error UTF-8" (false, '"\\\\xB1\\\\x31"', '{"Mascott":"Tux"}')'.
+Framework_Constraint_JsonMatchesTest::testEvaluate with data set "error
 .
-Starting test 'Framework_Constraint_JsonMatchesTest::testEvaluate with data set "invalid JSON in class instantiation" (false, '{"Mascott":"Tux"}', '{"Mascott"::}')'.
+Framework_Constraint_JsonMatchesTest::testEvaluate with data set "invalid
 .
-Starting test 'Framework_Constraint_JsonMatchesTest::testToString'.
+Framework_Constraint_JsonMatchesTest::testToString
 .
-Starting test 'Framework_ConstraintTest::testConstraintArrayHasKey'.
+Framework_ConstraintTest::testConstraintArrayHasKey
 .
-Starting test 'Framework_ConstraintTest::testConstraintArrayHasKey2'.
+Framework_ConstraintTest::testConstraintArrayHasKey2
 .
-Starting test 'Framework_ConstraintTest::testConstraintArrayNotHasKey'.
+Framework_ConstraintTest::testConstraintArrayNotHasKey
 .
-Starting test 'Framework_ConstraintTest::testConstraintArrayNotHasKey2'.
+Framework_ConstraintTest::testConstraintArrayNotHasKey2
 .
-Starting test 'Framework_ConstraintTest::testConstraintFileExists'.
+Framework_ConstraintTest::testConstraintFileExists
 .
-Starting test 'Framework_ConstraintTest::testConstraintFileExists2'.
+Framework_ConstraintTest::testConstraintFileExists2
 .
-Starting test 'Framework_ConstraintTest::testConstraintFileNotExists'.
+Framework_ConstraintTest::testConstraintFileNotExists
 . 630 / 960 ( 65%)
-
-Starting test 'Framework_ConstraintTest::testConstraintFileNotExists2'.
+Framework_ConstraintTest::testConstraintFileNotExists2
 .
-Starting test 'Framework_ConstraintTest::testConstraintGreaterThan'.
+Framework_ConstraintTest::testConstraintGreaterThan
 .
-Starting test 'Framework_ConstraintTest::testConstraintGreaterThan2'.
+Framework_ConstraintTest::testConstraintGreaterThan2
 .
-Starting test 'Framework_ConstraintTest::testConstraintNotGreaterThan'.
+Framework_ConstraintTest::testConstraintNotGreaterThan
 .
-Starting test 'Framework_ConstraintTest::testConstraintNotGreaterThan2'.
+Framework_ConstraintTest::testConstraintNotGreaterThan2
 .
-Starting test 'Framework_ConstraintTest::testConstraintGreaterThanOrEqual'.
+Framework_ConstraintTest::testConstraintGreaterThanOrEqual
 .
-Starting test 'Framework_ConstraintTest::testConstraintGreaterThanOrEqual2'.
+Framework_ConstraintTest::testConstraintGreaterThanOrEqual2
 .
-Starting test 'Framework_ConstraintTest::testConstraintNotGreaterThanOrEqual'.
+Framework_ConstraintTest::testConstraintNotGreaterThanOrEqual
 .
-Starting test 'Framework_ConstraintTest::testConstraintNotGreaterThanOrEqual2'.
+Framework_ConstraintTest::testConstraintNotGreaterThanOrEqual2
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsAnything'.
+Framework_ConstraintTest::testConstraintIsAnything
 .
-Starting test 'Framework_ConstraintTest::testConstraintNotIsAnything'.
+Framework_ConstraintTest::testConstraintNotIsAnything
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual'.
+Framework_ConstraintTest::testConstraintIsEqual
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #0 (1, 0, 'Failed asserting that 0 matches expected 1.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #0
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #1 (1.1, 0, 'Failed asserting that 0 matches expected 1.1.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #1
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #2 ('a', 'b', 'Failed asserting that two strings are equal.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #2
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #3 ('a
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #3
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #4 (1, array(0), 'Array (...) does not match expected type "integer".
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #4
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #5 (array(0), 1, '1 does not match expected type "array".
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #5
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #6 (array(0), array(1), 'Failed asserting that two arrays are equal.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #6
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #7 (array(true), array('true'), 'Failed asserting that two arrays are equal.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #7
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #8 (array(0, array(1), array(2), 3), array(0, array(4), array(2), 3), 'Failed asserting that two arrays are equal.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #8
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #9 (stdClass, array(0), 'Array (...) does not match expected type "object".
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #9
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #10 (array(0), stdClass, 'stdClass Object (...) does not match expected type "array".
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #10
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #11 (stdClass, stdClass, 'Failed asserting that two objects are equal.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #11
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #12 (stdClass, stdClass, 'Failed asserting that two objects are equal.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #12
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #13 (SplObjectStorage, SplObjectStorage, 'Failed asserting that two objects are equal.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #13
 F
-Starting test 'Framework_ConstraintTest::testConstraintIsEqual2 with data set #14 (DOMDocument, DOMDocument, 'Failed asserting that two DOM documents are equal.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #14
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNotEqual'.
+Framework_ConstraintTest::testConstraintIsNotEqual
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNotEqual2'.
+Framework_ConstraintTest::testConstraintIsNotEqual2
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsIdentical'.
+Framework_ConstraintTest::testConstraintIsIdentical
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsIdentical2'.
+Framework_ConstraintTest::testConstraintIsIdentical2
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsIdentical3'.
+Framework_ConstraintTest::testConstraintIsIdentical3
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNotIdentical'.
+Framework_ConstraintTest::testConstraintIsNotIdentical
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNotIdentical2'.
+Framework_ConstraintTest::testConstraintIsNotIdentical2
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNotIdentical3'.
+Framework_ConstraintTest::testConstraintIsNotIdentical3
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsInstanceOf'.
+Framework_ConstraintTest::testConstraintIsInstanceOf
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsInstanceOf2'.
+Framework_ConstraintTest::testConstraintIsInstanceOf2
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNotInstanceOf'.
+Framework_ConstraintTest::testConstraintIsNotInstanceOf
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNotInstanceOf2'.
+Framework_ConstraintTest::testConstraintIsNotInstanceOf2
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsType'.
+Framework_ConstraintTest::testConstraintIsType
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsType2'.
+Framework_ConstraintTest::testConstraintIsType2
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNotType'.
+Framework_ConstraintTest::testConstraintIsNotType
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNotType2'.
+Framework_ConstraintTest::testConstraintIsNotType2
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNull'.
+Framework_ConstraintTest::testConstraintIsNull
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNull2'.
+Framework_ConstraintTest::testConstraintIsNull2
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNotNull'.
+Framework_ConstraintTest::testConstraintIsNotNull
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsNotNull2'.
+Framework_ConstraintTest::testConstraintIsNotNull2
 .
-Starting test 'Framework_ConstraintTest::testConstraintLessThan'.
+Framework_ConstraintTest::testConstraintLessThan
 .
-Starting test 'Framework_ConstraintTest::testConstraintLessThan2'.
+Framework_ConstraintTest::testConstraintLessThan2
 .
-Starting test 'Framework_ConstraintTest::testConstraintNotLessThan'.
+Framework_ConstraintTest::testConstraintNotLessThan
 .
-Starting test 'Framework_ConstraintTest::testConstraintNotLessThan2'.
+Framework_ConstraintTest::testConstraintNotLessThan2
 .
-Starting test 'Framework_ConstraintTest::testConstraintLessThanOrEqual'.
+Framework_ConstraintTest::testConstraintLessThanOrEqual
 .
-Starting test 'Framework_ConstraintTest::testConstraintCallback'.
+Framework_ConstraintTest::testConstraintCallback
 .
-Starting test 'Framework_ConstraintTest::testConstraintCallbackFailure'.
+Framework_ConstraintTest::testConstraintCallbackFailure
 .
-Starting test 'Framework_ConstraintTest::testConstraintCallbackInvalidFunctionArgument'.
+Framework_ConstraintTest::testConstraintCallbackInvalidFunctionArgument
 .
-Starting test 'Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithEmptyArray'.
+Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithEmptyArray
 .
-Starting test 'Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithBadArray'.
+Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithBadArray
 .
-Starting test 'Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithObject'.
+Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithObject
 .
-Starting test 'Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithClassname'.
+Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithClassname
 .
-Starting test 'Framework_ConstraintTest::testConstraintLessThanOrEqual2'.
+Framework_ConstraintTest::testConstraintLessThanOrEqual2
 .
-Starting test 'Framework_ConstraintTest::testConstraintNotLessThanOrEqual'.
+Framework_ConstraintTest::testConstraintNotLessThanOrEqual
 .
-Starting test 'Framework_ConstraintTest::testConstraintNotLessThanOrEqual2'.
+Framework_ConstraintTest::testConstraintNotLessThanOrEqual2
 .
-Starting test 'Framework_ConstraintTest::testConstraintClassHasAttribute'.
+Framework_ConstraintTest::testConstraintClassHasAttribute
 . 693 / 960 ( 72%)
-
-Starting test 'Framework_ConstraintTest::testConstraintClassHasAttribute2'.
+Framework_ConstraintTest::testConstraintClassHasAttribute2
 .
-Starting test 'Framework_ConstraintTest::testConstraintClassNotHasAttribute'.
+Framework_ConstraintTest::testConstraintClassNotHasAttribute
 .
-Starting test 'Framework_ConstraintTest::testConstraintClassNotHasAttribute2'.
+Framework_ConstraintTest::testConstraintClassNotHasAttribute2
 .
-Starting test 'Framework_ConstraintTest::testConstraintClassHasStaticAttribute'.
+Framework_ConstraintTest::testConstraintClassHasStaticAttribute
 .
-Starting test 'Framework_ConstraintTest::testConstraintClassHasStaticAttribute2'.
+Framework_ConstraintTest::testConstraintClassHasStaticAttribute2
 .
-Starting test 'Framework_ConstraintTest::testConstraintClassNotHasStaticAttribute'.
+Framework_ConstraintTest::testConstraintClassNotHasStaticAttribute
 .
-Starting test 'Framework_ConstraintTest::testConstraintClassNotHasStaticAttribute2'.
+Framework_ConstraintTest::testConstraintClassNotHasStaticAttribute2
 .
-Starting test 'Framework_ConstraintTest::testConstraintObjectHasAttribute'.
+Framework_ConstraintTest::testConstraintObjectHasAttribute
 .
-Starting test 'Framework_ConstraintTest::testConstraintObjectHasAttribute2'.
+Framework_ConstraintTest::testConstraintObjectHasAttribute2
 .
-Starting test 'Framework_ConstraintTest::testConstraintObjectNotHasAttribute'.
+Framework_ConstraintTest::testConstraintObjectNotHasAttribute
 .
-Starting test 'Framework_ConstraintTest::testConstraintObjectNotHasAttribute2'.
+Framework_ConstraintTest::testConstraintObjectNotHasAttribute2
 .
-Starting test 'Framework_ConstraintTest::testConstraintPCREMatch'.
+Framework_ConstraintTest::testConstraintPCREMatch
 .
-Starting test 'Framework_ConstraintTest::testConstraintPCREMatch2'.
+Framework_ConstraintTest::testConstraintPCREMatch2
 .
-Starting test 'Framework_ConstraintTest::testConstraintPCRENotMatch'.
+Framework_ConstraintTest::testConstraintPCRENotMatch
 .
-Starting test 'Framework_ConstraintTest::testConstraintPCRENotMatch2'.
+Framework_ConstraintTest::testConstraintPCRENotMatch2
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringMatches'.
+Framework_ConstraintTest::testConstraintStringMatches
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringMatches2'.
+Framework_ConstraintTest::testConstraintStringMatches2
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringMatches3'.
+Framework_ConstraintTest::testConstraintStringMatches3
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringMatches4'.
+Framework_ConstraintTest::testConstraintStringMatches4
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringMatches5'.
+Framework_ConstraintTest::testConstraintStringMatches5
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringMatches6'.
+Framework_ConstraintTest::testConstraintStringMatches6
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringStartsWith'.
+Framework_ConstraintTest::testConstraintStringStartsWith
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringStartsWith2'.
+Framework_ConstraintTest::testConstraintStringStartsWith2
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringStartsNotWith'.
+Framework_ConstraintTest::testConstraintStringStartsNotWith
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringStartsNotWith2'.
+Framework_ConstraintTest::testConstraintStringStartsNotWith2
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringContains'.
+Framework_ConstraintTest::testConstraintStringContains
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringContains2'.
+Framework_ConstraintTest::testConstraintStringContains2
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringNotContains'.
+Framework_ConstraintTest::testConstraintStringNotContains
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringNotContains2'.
+Framework_ConstraintTest::testConstraintStringNotContains2
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringEndsWith'.
+Framework_ConstraintTest::testConstraintStringEndsWith
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringEndsWith2'.
+Framework_ConstraintTest::testConstraintStringEndsWith2
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringEndsNotWith'.
+Framework_ConstraintTest::testConstraintStringEndsNotWith
 .
-Starting test 'Framework_ConstraintTest::testConstraintStringEndsNotWith2'.
+Framework_ConstraintTest::testConstraintStringEndsNotWith2
 .
-Starting test 'Framework_ConstraintTest::testConstraintArrayContains'.
+Framework_ConstraintTest::testConstraintArrayContains
 .
-Starting test 'Framework_ConstraintTest::testConstraintArrayContains2'.
+Framework_ConstraintTest::testConstraintArrayContains2
 .
-Starting test 'Framework_ConstraintTest::testConstraintArrayNotContains'.
+Framework_ConstraintTest::testConstraintArrayNotContains
 .
-Starting test 'Framework_ConstraintTest::testConstraintArrayNotContains2'.
+Framework_ConstraintTest::testConstraintArrayNotContains2
 .
-Starting test 'Framework_ConstraintTest::testConstraintSplObjectStorageContains'.
+Framework_ConstraintTest::testConstraintSplObjectStorageContains
 .
-Starting test 'Framework_ConstraintTest::testConstraintSplObjectStorageContains2'.
+Framework_ConstraintTest::testConstraintSplObjectStorageContains2
 .
-Starting test 'Framework_ConstraintTest::testAttributeEqualTo'.
+Framework_ConstraintTest::testAttributeEqualTo
 .
-Starting test 'Framework_ConstraintTest::testAttributeEqualTo2'.
+Framework_ConstraintTest::testAttributeEqualTo2
 .
-Starting test 'Framework_ConstraintTest::testAttributeNotEqualTo'.
+Framework_ConstraintTest::testAttributeNotEqualTo
 .
-Starting test 'Framework_ConstraintTest::testAttributeNotEqualTo2'.
+Framework_ConstraintTest::testAttributeNotEqualTo2
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEmpty'.
+Framework_ConstraintTest::testConstraintIsEmpty
 .
-Starting test 'Framework_ConstraintTest::testConstraintIsEmpty2'.
+Framework_ConstraintTest::testConstraintIsEmpty2
 .
-Starting test 'Framework_ConstraintTest::testConstraintCountWithAnArray'.
+Framework_ConstraintTest::testConstraintCountWithAnArray
 .
-Starting test 'Framework_ConstraintTest::testConstraintCountWithAnIteratorWhichDoesNotImplementCountable'.
+Framework_ConstraintTest::testConstraintCountWithAnIteratorWhichDoesNotImplementCountable
 .
-Starting test 'Framework_ConstraintTest::testConstraintCountWithAnObjectImplementingCountable'.
+Framework_ConstraintTest::testConstraintCountWithAnObjectImplementingCountable
 .
-Starting test 'Framework_ConstraintTest::testConstraintCountFailing'.
+Framework_ConstraintTest::testConstraintCountFailing
 .
-Starting test 'Framework_ConstraintTest::testConstraintNotCountFailing'.
+Framework_ConstraintTest::testConstraintNotCountFailing
 .
-Starting test 'Framework_ConstraintTest::testConstraintSameSizeWithAnArray'.
+Framework_ConstraintTest::testConstraintSameSizeWithAnArray
 .
-Starting test 'Framework_ConstraintTest::testConstraintSameSizeWithAnIteratorWhichDoesNotImplementCountable'.
+Framework_ConstraintTest::testConstraintSameSizeWithAnIteratorWhichDoesNotImplementCountable
 .
-Starting test 'Framework_ConstraintTest::testConstraintSameSizeWithAnObjectImplementingCountable'.
+Framework_ConstraintTest::testConstraintSameSizeWithAnObjectImplementingCountable
 .
-Starting test 'Framework_ConstraintTest::testConstraintSameSizeFailing'.
+Framework_ConstraintTest::testConstraintSameSizeFailing
 .
-Starting test 'Framework_ConstraintTest::testConstraintNotSameSizeFailing'.
+Framework_ConstraintTest::testConstraintNotSameSizeFailing
 .
-Starting test 'Framework_SuiteTest::testAddTestSuite'.
+Framework_SuiteTest::testAddTestSuite
 .
-Starting test 'Framework_SuiteTest::testInheritedTests'.
+Framework_SuiteTest::testInheritedTests
 .
-Starting test 'Framework_SuiteTest::testNoTestCases'.
+Framework_SuiteTest::testNoTestCases
 .
-Starting test 'Framework_SuiteTest::testNoTestCaseClass'.
+Framework_SuiteTest::testNoTestCaseClass
 .
-Starting test 'Framework_SuiteTest::testNotExistingTestCase'.
+Framework_SuiteTest::testNotExistingTestCase
 .
-Starting test 'Framework_SuiteTest::testNotPublicTestCase'.
+Framework_SuiteTest::testNotPublicTestCase
 .
-Starting test 'Framework_SuiteTest::testNotVoidTestCase'.
+Framework_SuiteTest::testNotVoidTestCase
 .
-Starting test 'Framework_SuiteTest::testOneTestCase'.
+Framework_SuiteTest::testOneTestCase
 . 756 / 960 ( 78%)
-
-Starting test 'Framework_SuiteTest::testShadowedTests'.
+Framework_SuiteTest::testShadowedTests
 .
-Starting test 'Framework_TestCaseTest::testCaseToString'.
+Framework_TestCaseTest::testCaseToString
 .
-Starting test 'Framework_TestCaseTest::testSuccess'.
+Framework_TestCaseTest::testSuccess
 .
-Starting test 'Framework_TestCaseTest::testFailure'.
+Framework_TestCaseTest::testFailure
 .
-Starting test 'Framework_TestCaseTest::testError'.
+Framework_TestCaseTest::testError
 .
-Starting test 'Framework_TestCaseTest::testExceptionInSetUp'.
+Framework_TestCaseTest::testExceptionInSetUp
 .
-Starting test 'Framework_TestCaseTest::testExceptionInAssertPreConditions'.
+Framework_TestCaseTest::testExceptionInAssertPreConditions
 .
-Starting test 'Framework_TestCaseTest::testExceptionInTest'.
+Framework_TestCaseTest::testExceptionInTest
 .
-Starting test 'Framework_TestCaseTest::testExceptionInAssertPostConditions'.
+Framework_TestCaseTest::testExceptionInAssertPostConditions
 .
-Starting test 'Framework_TestCaseTest::testExceptionInTearDown'.
+Framework_TestCaseTest::testExceptionInTearDown
 .
-Starting test 'Framework_TestCaseTest::testNoArgTestCasePasses'.
+Framework_TestCaseTest::testNoArgTestCasePasses
 .
-Starting test 'Framework_TestCaseTest::testWasRun'.
+Framework_TestCaseTest::testWasRun
 .
-Starting test 'Framework_TestCaseTest::testException'.
+Framework_TestCaseTest::testException
 .
-Starting test 'Framework_TestCaseTest::testNoException'.
+Framework_TestCaseTest::testNoException
 .
-Starting test 'Framework_TestCaseTest::testWrongException'.
+Framework_TestCaseTest::testWrongException
 .
-Starting test 'Framework_TestCaseTest::testGlobalsBackupPre'.
+Framework_TestCaseTest::testGlobalsBackupPre
 .
-Starting test 'Framework_TestCaseTest::testGlobalsBackupPost'.
+Framework_TestCaseTest::testGlobalsBackupPost
 .
-Starting test 'Framework_TestCaseTest::testStaticAttributesBackupPre'.
+Framework_TestCaseTest::testStaticAttributesBackupPre
 .
-Starting test 'Framework_TestCaseTest::testStaticAttributesBackupPost'.
+Framework_TestCaseTest::testStaticAttributesBackupPost
 F
-Starting test 'Framework_TestCaseTest::testExpectOutputStringFooActualFoo'.
+Framework_TestCaseTest::testExpectOutputStringFooActualFoo
 .
-Starting test 'Framework_TestCaseTest::testExpectOutputStringFooActualBar'.
+Framework_TestCaseTest::testExpectOutputStringFooActualBar
 .
-Starting test 'Framework_TestCaseTest::testExpectOutputRegexFooActualFoo'.
+Framework_TestCaseTest::testExpectOutputRegexFooActualFoo
 .
-Starting test 'Framework_TestCaseTest::testExpectOutputRegexFooActualBar'.
+Framework_TestCaseTest::testExpectOutputRegexFooActualBar
 .
-Starting test 'Framework_TestCaseTest::testSkipsIfRequiresHigherVersionOfPHPUnit'.
+Framework_TestCaseTest::testSkipsIfRequiresHigherVersionOfPHPUnit
 .
-Starting test 'Framework_TestCaseTest::testSkipsIfRequiresHigherVersionOfPHP'.
+Framework_TestCaseTest::testSkipsIfRequiresHigherVersionOfPHP
 .
-Starting test 'Framework_TestCaseTest::testSkipsIfRequiresNonExistingFunction'.
+Framework_TestCaseTest::testSkipsIfRequiresNonExistingFunction
 .
-Starting test 'Framework_TestCaseTest::testSkipsIfRequiresNonExistingExtension'.
+Framework_TestCaseTest::testSkipsIfRequiresNonExistingExtension
 .
-Starting test 'Framework_TestCaseTest::testSkipsProvidesMessagesForAllSkippingReasons'.
+Framework_TestCaseTest::testSkipsProvidesMessagesForAllSkippingReasons
 .
-Starting test 'Framework_TestCaseTest::testRequiringAnExistingFunctionDoesNotSkip'.
+Framework_TestCaseTest::testRequiringAnExistingFunctionDoesNotSkip
 .
-Starting test 'Framework_TestCaseTest::testRequiringAnExistingExtensionDoesNotSkip'.
+Framework_TestCaseTest::testRequiringAnExistingExtensionDoesNotSkip
 .
-Starting test 'Framework_TestCaseTest::testCurrentWorkingDirectoryIsRestored'.
+Framework_TestCaseTest::testCurrentWorkingDirectoryIsRestored
 .
-Starting test 'Framework_TestFailureTest::testToString'.
+Framework_TestFailureTest::testToString
 .
-Starting test 'Framework_TestImplementorTest::testSuccessfulRun'.
+Framework_TestImplementorTest::testSuccessfulRun
 .
-Starting test 'Framework_TestListenerTest::testError'.
+Framework_TestListenerTest::testError
 .
-Starting test 'Framework_TestListenerTest::testFailure'.
+Framework_TestListenerTest::testFailure
 .
-Starting test 'Framework_TestListenerTest::testStartStop'.
+Framework_TestListenerTest::testStartStop
 .
-Starting test 'Extensions_RepeatedTestTest::testRepeatedOnce'.
+Extensions_RepeatedTestTest::testRepeatedOnce
 .
-Starting test 'Extensions_RepeatedTestTest::testRepeatedMoreThanOnce'.
+Extensions_RepeatedTestTest::testRepeatedMoreThanOnce
 .
-Starting test 'Extensions_RepeatedTestTest::testRepeatedZero'.
+Extensions_RepeatedTestTest::testRepeatedZero
 .
-Starting test 'Extensions_RepeatedTestTest::testRepeatedNegative'.
+Extensions_RepeatedTestTest::testRepeatedNegative
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/1021.phpt'.
+Runner_BaseTestRunnerTest::testInvokeNonStaticSuite
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/523.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/578.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 221
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/684.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/783.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/GitHub/244.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/GitHub/322.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/GitHub/433.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/GitHub/445.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/GitHub/498.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/GitHub/503.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/GitHub/581.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/GitHub/74.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/GitHub/765.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/Regression/GitHub/863.phpt'.
-.
-Starting test 'Runner_BaseTestRunnerTest::testInvokeNonStaticSuite'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/abstract-test-class.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/concrete-test-class.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/dataprovider-log-xml-isolation.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/dataprovider-log-xml.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/dataprovider-testdox.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/debug.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/default-isolation.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F 819 / 960 ( 85%)
-
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/default.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/dependencies-isolation.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/dependencies.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/dependencies2-isolation.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/dependencies2.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/dependencies3-isolation.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/dependencies3.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/empty-testcase.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/exception-stack.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/exclude-group-isolation.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/exclude-group.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/failure-isolation.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/failure.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/fatal-isolation.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/fatal.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/filter-class-isolation.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/filter-class.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/filter-method-isolation.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/filter-method.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/filter-no-results.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/group-isolation.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/group.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/help.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/help2.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/list-groups.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/log-json.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/log-tap.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/log-xml.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/strict-incomplete.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/strict-isolation.phpt'.
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-HipHop Warning: Out of bounds in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/vendor/composer/ClassLoader.php on line 201
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/strict.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/tap.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/test-suffix-multiple.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/test-suffix-single.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/testdox-html.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/testdox-text.phpt'.
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/TextUI/testdox.phpt'.
-.
-Starting test 'Util_ClassTest::testGetObjectAttributeCanHandleDynamicVariables'.
+Util_ClassTest::testGetObjectAttributeCanHandleDynamicVariables
 E
-Starting test 'Util_ConfigurationTest::testExceptionIsThrownForNotExistingConfigurationFile'.
+Util_ConfigurationTest::testExceptionIsThrownForNotExistingConfigurationFile
 .
-Starting test 'Util_ConfigurationTest::testFilterConfigurationIsReadCorrectly'.
+Util_ConfigurationTest::testFilterConfigurationIsReadCorrectly
 .
-Starting test 'Util_ConfigurationTest::testGroupConfigurationIsReadCorrectly'.
+Util_ConfigurationTest::testGroupConfigurationIsReadCorrectly
 .
-Starting test 'Util_ConfigurationTest::testListenerConfigurationIsReadCorrectly'.
+Util_ConfigurationTest::testListenerConfigurationIsReadCorrectly
 .
-Starting test 'Util_ConfigurationTest::testLoggingConfigurationIsReadCorrectly'.
+Util_ConfigurationTest::testLoggingConfigurationIsReadCorrectly
 .
-Starting test 'Util_ConfigurationTest::testPHPConfigurationIsReadCorrectly'.
+Util_ConfigurationTest::testPHPConfigurationIsReadCorrectly
 .
-Starting test 'Util_ConfigurationTest::testPHPConfigurationIsHandledCorrectly'.
+Util_ConfigurationTest::testPHPConfigurationIsHandledCorrectly
 .
-Starting test 'Util_ConfigurationTest::testPHPUnitConfigurationIsReadCorrectly'.
+Util_ConfigurationTest::testPHPUnitConfigurationIsReadCorrectly
 .
-Starting test 'Util_ConfigurationTest::testSeleniumBrowserConfigurationIsReadCorrectly'.
+Util_ConfigurationTest::testSeleniumBrowserConfigurationIsReadCorrectly
 .
-Starting test 'Util_ConfigurationTest::testXincludeInConfiguration'.
+Util_ConfigurationTest::testXincludeInConfiguration
 .
-Starting test 'Util_DiffTest::testComparisonErrorMessage'.
+Util_DiffTest::testComparisonErrorMessage
 .
-Starting test 'Util_DiffTest::testComparisonErrorMessage_toArray'.
+Util_DiffTest::testComparisonErrorMessage_toArray
 .
-Starting test 'Util_DiffTest::testComparisonErrorStartSame'.
+Util_DiffTest::testComparisonErrorStartSame
 .
-Starting test 'Util_DiffTest::testComparisonErrorStartSame_toArray'.
+Util_DiffTest::testComparisonErrorStartSame_toArray
 .
-Starting test 'Util_DiffTest::testComparisonErrorEndSame'.
+Util_DiffTest::testComparisonErrorEndSame
 .
-Starting test 'Util_DiffTest::testComparisonErrorEndSame_toArray'.
+Util_DiffTest::testComparisonErrorEndSame_toArray
 .
-Starting test 'Util_DiffTest::testComparisonErrorStartAndEndSame'.
+Util_DiffTest::testComparisonErrorStartAndEndSame
 .
-Starting test 'Util_DiffTest::testComparisonErrorStartAndEndSame_toArray'.
+Util_DiffTest::testComparisonErrorStartAndEndSame_toArray
 .
-Starting test 'Util_DiffTest::testComparisonErrorStartSameComplete'.
+Util_DiffTest::testComparisonErrorStartSameComplete
 .
-Starting test 'Util_DiffTest::testComparisonErrorStartSameComplete_toArray'.
+Util_DiffTest::testComparisonErrorStartSameComplete_toArray
 .
-Starting test 'Util_DiffTest::testComparisonErrorEndSameComplete'.
+Util_DiffTest::testComparisonErrorEndSameComplete
 .
-Starting test 'Util_DiffTest::testComparisonErrorEndSameComplete_toArray'.
+Util_DiffTest::testComparisonErrorEndSameComplete_toArray
 .
-Starting test 'Util_DiffTest::testComparisonErrorOverlapingMatches'.
+Util_DiffTest::testComparisonErrorOverlapingMatches
 .
-Starting test 'Util_DiffTest::testComparisonErrorOverlapingMatches_toArray'.
+Util_DiffTest::testComparisonErrorOverlapingMatches_toArray
 .
-Starting test 'Util_DiffTest::testComparisonErrorOverlapingMatches2'.
+Util_DiffTest::testComparisonErrorOverlapingMatches2
 . 882 / 960 ( 91%)
-
-Starting test 'Util_DiffTest::testComparisonErrorOverlapingMatches2_toArray'.
+Util_DiffTest::testComparisonErrorOverlapingMatches2_toArray
 .
-Starting test 'Util_TestDox_NamePrettifierTest::testTitleHasSensibleDefaults'.
+Util_TestDox_NamePrettifierTest::testTitleHasSensibleDefaults
 .
-Starting test 'Util_TestDox_NamePrettifierTest::testCaterForUserDefinedSuffix'.
+Util_TestDox_NamePrettifierTest::testCaterForUserDefinedSuffix
 .
-Starting test 'Util_TestDox_NamePrettifierTest::testCaterForUserDefinedPrefix'.
-UNKNOWN STATUS
+Util_TestDox_NamePrettifierTest::testCaterForUserDefinedPrefix
+.
+Util_TestDox_NamePrettifierTest::testTestNameIsConvertedToASentence
+.
+Util_TestDox_NamePrettifierTest::testTestNameIsNotGroupedWhenNotInSequence
+.
+Util_TestTest::testGetExpectedException
+.
+Util_TestTest::testGetRequirements with data set #0
+.
+Util_TestTest::testGetRequirements with data set #1
+.
+Util_TestTest::testGetRequirements with data set #2
+.
+Util_TestTest::testGetRequirements with data set #3
+.
+Util_TestTest::testGetRequirements with data set #4
+.
+Util_TestTest::testGetRequirements with data set #5
+.
+Util_TestTest::testGetRequirements with data set #6
+.
+Util_TestTest::testGetRequirements with data set #7
+.
+Util_TestTest::testGetRequirements with data set #8
+.
+Util_TestTest::testGetRequirements with data set #9
+.
+Util_TestTest::testGetRequirements with data set #10
+.
+Util_TestTest::testGetRequirementsMergesClassAndMethodDocBlocks
+.
+Util_TestTest::testGetProvidedDataRegEx
+.
+Util_TestTest::testParseAnnotation
+.
+Util_TestTest::testParseAnnotationThatIsOnlyOneLine
+.
+Util_TypeTest::testExport with data set #0
+.
+Util_TypeTest::testExport with data set #1
+.
+Util_TypeTest::testExport with data set #2
+.
+Util_TypeTest::testExport with data set #3
+.
+Util_TypeTest::testExport with data set #4
+.
+Util_TypeTest::testExport with data set #5
+.
+Util_TypeTest::testExport with data set #6
+.
+Util_TypeTest::testExport with data set #7
+.
+Util_TypeTest::testExport with data set #8
+.
+Util_TypeTest::testExport with data set #9
+.
+Util_TypeTest::testExport with data set #10
+.
+Util_TypeTest::testExport with data set #11
+.
+Util_TypeTest::testExport with data set #12
+.
+Util_TypeTest::testExport with data set #13
+.
+Util_TypeTest::testExport with data set #14
+.
+Util_TypeTest::testShortenedExport with data set #0
+.
+Util_TypeTest::testShortenedExport with data set #1
+.
+Util_TypeTest::testShortenedExport with data set #2
+.
+Util_TypeTest::testShortenedExport with data set #3
+.
+Util_TypeTest::testShortenedExport with data set #4
+.
+Util_TypeTest::testShortenedExport with data set #5
+.
+Util_TypeTest::testShortenedExport with data set #6
+.
+Util_TypeTest::testShortenedExport with data set #7
+.
+Util_TypeTest::testShortenedExport with data set #8
+.
+Util_TypeTest::testShortenedExport with data set #9
+.
+Util_TypeTest::testShortenedExport with data set #10
+.
+Util_TypeTest::testNonBinaryStringExport with data set #0
+.
+Util_TypeTest::testNonBinaryStringExport with data set #1
+.
+Util_TypeTest::testNonBinaryStringExport with data set #2
+.
+Util_XMLTest::testAssertValidKeysValidKeys
+.
+Util_XMLTest::testAssertValidKeysValidKeysEmpty
+.
+Util_XMLTest::testAssertValidKeysDefaultValuesA
+.
+Util_XMLTest::testAssertValidKeysDefaultValuesB
+.
+Util_XMLTest::testAssertValidKeysInvalidKey
+.
+Util_XMLTest::testAssertValidKeysInvalidKeys
+.
+Util_XMLTest::testConvertAssertSelect
+.
+Util_XMLTest::testConvertAssertSelectElt
+.
+Util_XMLTest::testConvertAssertClass
+.
+Util_XMLTest::testConvertAssertId
+.
+Util_XMLTest::testConvertAssertAttribute
+.
+Util_XMLTest::testConvertAssertAttributeSpaces
+. 945 / 960 ( 98%)
+Util_XMLTest::testConvertAssertAttributeMultipleSpaces
+.
+Util_XMLTest::testConvertAssertSelectEltClass
+.
+Util_XMLTest::testConvertAssertSelectEltId
+.
+Util_XMLTest::testConvertAssertSelectEltAttrEqual
+.
+Util_XMLTest::testConvertAssertSelectEltMultiAttrEqual
+.
+Util_XMLTest::testConvertAssertSelectEltAttrHasOne
+.
+Util_XMLTest::testConvertAssertSelectEltAttrContains
+.
+Util_XMLTest::testConvertAssertSelectEltChild
+.
+Util_XMLTest::testConvertAssertSelectEltDescendant
+.
+Util_XMLTest::testConvertAssertSelectContent
+.
+Util_XMLTest::testConvertAssertSelectTrue
+.
+Util_XMLTest::testConvertAssertSelectFalse
+.
+Util_XMLTest::testConvertAssertNumber
+.
+Util_XMLTest::testConvertAssertRange
+.
+Util_XMLTest::testPrepareStringEscapesChars
+.
+Tests: 960, Assertions: 1545, Failures: 48, Errors: 3.

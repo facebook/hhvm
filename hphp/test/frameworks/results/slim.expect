@@ -1,790 +1,729 @@
-PHPUnit 3.7.28 by Sebastian Bergmann.
-
-Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/phpunit.xml.dist
-
-
-Starting test 'EnvironmentTest::testMockEnvironment'.
+EnvironmentTest::testMockEnvironment
 .
-Starting test 'EnvironmentTest::testSetsHttpMethod'.
+EnvironmentTest::testSetsHttpMethod
 .
-Starting test 'EnvironmentTest::testParsesPathsWithoutUrlRewriteInSubdirectory'.
+EnvironmentTest::testParsesPathsWithoutUrlRewriteInSubdirectory
 .
-Starting test 'EnvironmentTest::testParsesPathsWithoutUrlRewriteInRootDirectory'.
+EnvironmentTest::testParsesPathsWithoutUrlRewriteInRootDirectory
 .
-Starting test 'EnvironmentTest::testParsesPathsWithoutUrlRewriteInRootDirectoryForAppRootUri'.
+EnvironmentTest::testParsesPathsWithoutUrlRewriteInRootDirectoryForAppRootUri
 .
-Starting test 'EnvironmentTest::testParsesPathsWithUrlRewriteInSubdirectory'.
+EnvironmentTest::testParsesPathsWithUrlRewriteInSubdirectory
 .
-Starting test 'EnvironmentTest::testParsesPathsWithUrlRewriteInRootDirectory'.
+EnvironmentTest::testParsesPathsWithUrlRewriteInRootDirectory
 .
-Starting test 'EnvironmentTest::testParsesPathsWithUrlRewriteInRootDirectoryForAppRootUri'.
+EnvironmentTest::testParsesPathsWithUrlRewriteInRootDirectoryForAppRootUri
 .
-Starting test 'EnvironmentTest::testParsesQueryString'.
+EnvironmentTest::testParsesQueryString
 .
-Starting test 'EnvironmentTest::testRemovesQueryStringFromPathInfo'.
+EnvironmentTest::testRemovesQueryStringFromPathInfo
 .
-Starting test 'EnvironmentTest::testPathInfoRetainsUrlEncodedCharacters'.
+EnvironmentTest::testPathInfoRetainsUrlEncodedCharacters
 .
-Starting test 'EnvironmentTest::testParsesQueryStringThatDoesNotExist'.
+EnvironmentTest::testParsesQueryStringThatDoesNotExist
 .
-Starting test 'EnvironmentTest::testServerNameIsNotEmpty'.
+EnvironmentTest::testServerNameIsNotEmpty
 .
-Starting test 'EnvironmentTest::testServerPortIsNotEmpty'.
+EnvironmentTest::testServerPortIsNotEmpty
 .
-Starting test 'EnvironmentTest::testUnsetsContentTypeAndContentLength'.
+EnvironmentTest::testUnsetsContentTypeAndContentLength
 .
-Starting test 'EnvironmentTest::testSetsSpecialHeaders'.
+EnvironmentTest::testSetsSpecialHeaders
 .
-Starting test 'EnvironmentTest::testHttps'.
+EnvironmentTest::testHttps
 .
-Starting test 'EnvironmentTest::testNotHttps'.
+EnvironmentTest::testNotHttps
 .
-Starting test 'EnvironmentTest::testNotHttpsIIS'.
+EnvironmentTest::testNotHttpsIIS
 .
-Starting test 'EnvironmentTest::testInputIsEmptyString'.
+EnvironmentTest::testInputIsEmptyString
 .
-Starting test 'EnvironmentTest::testErrorResource'.
+EnvironmentTest::testErrorResource
 .
-Starting test 'SetTest::testSet'.
+SetTest::testSet
 .
-Starting test 'SetTest::testGet'.
+SetTest::testGet
 .
-Starting test 'SetTest::testGetNotExists'.
+SetTest::testGetNotExists
 .
-Starting test 'SetTest::testAdd'.
+SetTest::testAdd
 .
-Starting test 'SetTest::testAll'.
+SetTest::testAll
 .
-Starting test 'SetTest::testKeys'.
+SetTest::testKeys
 .
-Starting test 'SetTest::testRemove'.
+SetTest::testRemove
 .
-Starting test 'SetTest::testClear'.
+SetTest::testClear
 .
-Starting test 'SetTest::testArrayAccessGet'.
+SetTest::testArrayAccessGet
 .
-Starting test 'SetTest::testArrayAccessSet'.
+SetTest::testArrayAccessSet
 .
-Starting test 'SetTest::testArrayAccessExists'.
+SetTest::testArrayAccessExists
 .
-Starting test 'SetTest::testArrayAccessUnset'.
+SetTest::testArrayAccessUnset
 .
-Starting test 'SetTest::testCount'.
+SetTest::testCount
 .
-Starting test 'SetTest::testGetIterator'.
+SetTest::testGetIterator
 .
-Starting test 'SetTest::testProtect'.
+SetTest::testProtect
 .
-Starting test 'CookiesTest::testSetWithStringValue'.
+CookiesTest::testSetWithStringValue
 .
-Starting test 'CookiesTest::testSetWithArrayValue'.
+CookiesTest::testSetWithArrayValue
 .
-Starting test 'CookiesTest::testRemove'.
+CookiesTest::testRemove
 .
-Starting test 'HeadersTest::testNormalizesKey'.
+HeadersTest::testNormalizesKey
 .
-Starting test 'HeadersTest::testExtractHeaders'.
+HeadersTest::testExtractHeaders
 .
-Starting test 'RequestTest::testGetMethod'.
+RequestTest::testGetMethod
 .
-Starting test 'RequestTest::testIsGet'.
+RequestTest::testIsGet
 .
-Starting test 'RequestTest::testIsPost'.
+RequestTest::testIsPost
 .
-Starting test 'RequestTest::testIsPut'.
+RequestTest::testIsPut
 .
-Starting test 'RequestTest::testIsDelete'.
+RequestTest::testIsDelete
 .
-Starting test 'RequestTest::testIsOptions'.
+RequestTest::testIsOptions
 .
-Starting test 'RequestTest::testIsHead'.
+RequestTest::testIsHead
 .
-Starting test 'RequestTest::testIsPatch'.
+RequestTest::testIsPatch
 .
-Starting test 'RequestTest::testIsAjaxWithHeader'.
+RequestTest::testIsAjaxWithHeader
 .
-Starting test 'RequestTest::testIsAjaxWithQueryParameter'.
+RequestTest::testIsAjaxWithQueryParameter
 .
-Starting test 'RequestTest::testIsAjaxWithoutHeaderOrQueryParameter'.
+RequestTest::testIsAjaxWithoutHeaderOrQueryParameter
 .
-Starting test 'RequestTest::testIsAjaxWithMisspelledHeader'.
+RequestTest::testIsAjaxWithMisspelledHeader
 .
-Starting test 'RequestTest::testParamsFromQueryString'.
+RequestTest::testParamsFromQueryString
 .
-Starting test 'RequestTest::testParamsFromRequestBody'.
+RequestTest::testParamsFromRequestBody
 .
-Starting test 'RequestTest::testGet'.
+RequestTest::testGet
 .
-Starting test 'RequestTest::testGetWithoutMultibyte'.
+RequestTest::testGetWithoutMultibyte
 .
-Starting test 'RequestTest::testPost'.
+RequestTest::testPost
 .
-Starting test 'RequestTest::testPostWithoutMultibyte'.
+RequestTest::testPostWithoutMultibyte
 .
-Starting test 'RequestTest::testPostWithoutInput'.
+RequestTest::testPostWithoutInput
 .
-Starting test 'RequestTest::testPostWithMultipartRequest'.
+RequestTest::testPostWithMultipartRequest
 .
-Starting test 'RequestTest::testPut'.
+RequestTest::testPut
 .
-Starting test 'RequestTest::testPatch'.
+RequestTest::testPatch
 .  63 / 364 ( 17%)
-
-Starting test 'RequestTest::testDelete'.
+RequestTest::testDelete
 .
-Starting test 'RequestTest::testCookies'.
+RequestTest::testCookies
 .
-Starting test 'RequestTest::testIsFormDataContentFormUrlencoded'.
+RequestTest::testIsFormDataContentFormUrlencoded
 .
-Starting test 'RequestTest::testIsFormDataPostContentUnknown'.
+RequestTest::testIsFormDataPostContentUnknown
 .
-Starting test 'RequestTest::testIsFormDataPostContentUnknownWithMethodOverride'.
+RequestTest::testIsFormDataPostContentUnknownWithMethodOverride
 .
-Starting test 'RequestTest::testIsNotFormData'.
+RequestTest::testIsNotFormData
 .
-Starting test 'RequestTest::testHeaders'.
+RequestTest::testHeaders
 .
-Starting test 'RequestTest::testHeaderRemovesHttpPrefix'.
+RequestTest::testHeaderRemovesHttpPrefix
 .
-Starting test 'RequestTest::testGetBodyWhenExists'.
+RequestTest::testGetBodyWhenExists
 .
-Starting test 'RequestTest::testGetBodyWhenNotExists'.
+RequestTest::testGetBodyWhenNotExists
 .
-Starting test 'RequestTest::testGetContentTypeWhenExists'.
+RequestTest::testGetContentTypeWhenExists
 .
-Starting test 'RequestTest::testGetContentTypeWhenNotExists'.
+RequestTest::testGetContentTypeWhenNotExists
 .
-Starting test 'RequestTest::testGetMediaTypeWhenExists'.
+RequestTest::testGetMediaTypeWhenExists
 .
-Starting test 'RequestTest::testGetMediaTypeWhenNotExists'.
+RequestTest::testGetMediaTypeWhenNotExists
 .
-Starting test 'RequestTest::testGetMediaTypeWhenNoParamsExist'.
+RequestTest::testGetMediaTypeWhenNoParamsExist
 .
-Starting test 'RequestTest::testGetMediaTypeParams'.
+RequestTest::testGetMediaTypeParams
 .
-Starting test 'RequestTest::testGetMediaTypeParamsWhenNotExists'.
+RequestTest::testGetMediaTypeParamsWhenNotExists
 .
-Starting test 'RequestTest::testGetContentCharset'.
+RequestTest::testGetContentCharset
 .
-Starting test 'RequestTest::testGetContentCharsetWhenNotExists'.
+RequestTest::testGetContentCharsetWhenNotExists
 .
-Starting test 'RequestTest::testGetContentLength'.
+RequestTest::testGetContentLength
 .
-Starting test 'RequestTest::testGetContentLengthWhenNotExists'.
+RequestTest::testGetContentLengthWhenNotExists
 .
-Starting test 'RequestTest::testGetHost'.
+RequestTest::testGetHost
 .
-Starting test 'RequestTest::testGetHostAndStripPort'.
+RequestTest::testGetHostAndStripPort
 .
-Starting test 'RequestTest::testGetHostWhenNotExists'.
+RequestTest::testGetHostWhenNotExists
 .
-Starting test 'RequestTest::testGetHostWithPort'.
+RequestTest::testGetHostWithPort
 .
-Starting test 'RequestTest::testGetHostDoesntDulplicatePort'.
+RequestTest::testGetHostDoesntDulplicatePort
 .
-Starting test 'RequestTest::testGetPort'.
+RequestTest::testGetPort
 .
-Starting test 'RequestTest::testGetSchemeIfHttp'.
+RequestTest::testGetSchemeIfHttp
 .
-Starting test 'RequestTest::testGetSchemeIfHttps'.
+RequestTest::testGetSchemeIfHttps
 .
-Starting test 'RequestTest::testAppPathsInSubdirectoryWithoutHtaccess'.
+RequestTest::testAppPathsInSubdirectoryWithoutHtaccess
 .
-Starting test 'RequestTest::testAppPathsInSubdirectoryWithHtaccess'.
+RequestTest::testAppPathsInSubdirectoryWithHtaccess
 .
-Starting test 'RequestTest::testAppPathsInRootDirectoryWithoutHtaccess'.
+RequestTest::testAppPathsInRootDirectoryWithoutHtaccess
 .
-Starting test 'RequestTest::testAppPathsInRootDirectoryWithHtaccess'.
+RequestTest::testAppPathsInRootDirectoryWithHtaccess
 .
-Starting test 'RequestTest::testGetUrl'.
+RequestTest::testGetUrl
 .
-Starting test 'RequestTest::testGetUrlWithCustomPort'.
+RequestTest::testGetUrlWithCustomPort
 .
-Starting test 'RequestTest::testGetUrlWithHttps'.
+RequestTest::testGetUrlWithHttps
 .
-Starting test 'RequestTest::testGetIp'.
+RequestTest::testGetIp
 .
-Starting test 'RequestTest::testGetIpWithClientIp'.
+RequestTest::testGetIpWithClientIp
 .
-Starting test 'RequestTest::testGetIpWithForwardedFor'.
+RequestTest::testGetIpWithForwardedFor
 .
-Starting test 'RequestTest::testGetReferrer'.
+RequestTest::testGetReferrer
 .
-Starting test 'RequestTest::testGetReferrerWhenNotExists'.
+RequestTest::testGetReferrerWhenNotExists
 .
-Starting test 'RequestTest::testGetUserAgent'.
+RequestTest::testGetUserAgent
 .
-Starting test 'RequestTest::testGetUserAgentWhenNotExists'.
+RequestTest::testGetUserAgentWhenNotExists
 .
-Starting test 'ResponseTest::testConstructWithoutArgs'.
+ResponseTest::testConstructWithoutArgs
 .
-Starting test 'ResponseTest::testConstructWithArgs'.
+ResponseTest::testConstructWithArgs
 .
-Starting test 'ResponseTest::testGetStatus'.
+ResponseTest::testGetStatus
 .
-Starting test 'ResponseTest::testSetStatus'.
+ResponseTest::testSetStatus
 .
-Starting test 'ResponseTest::testStatusGetOld'.
+ResponseTest::testStatusGetOld
 .
-Starting test 'ResponseTest::testStatusSetOld'.
+ResponseTest::testStatusSetOld
 .
-Starting test 'ResponseTest::testGetBody'.
+ResponseTest::testGetBody
 .
-Starting test 'ResponseTest::testSetBody'.
+ResponseTest::testSetBody
 .
-Starting test 'ResponseTest::testWrite'.
+ResponseTest::testWrite
 .
-Starting test 'ResponseTest::testLength'.
+ResponseTest::testLength
 .
-Starting test 'ResponseTest::testFinalize'.
+ResponseTest::testFinalize
 .
-Starting test 'ResponseTest::testFinalizeWithEmptyBody'.
+ResponseTest::testFinalizeWithEmptyBody
 .
-Starting test 'ResponseTest::testRedirect'.
+ResponseTest::testRedirect
 .
-Starting test 'ResponseTest::testIsEmpty'.
+ResponseTest::testIsEmpty
 .
-Starting test 'ResponseTest::testIsClientError'.
+ResponseTest::testIsClientError
 .
-Starting test 'ResponseTest::testIsForbidden'.
+ResponseTest::testIsForbidden
 .
-Starting test 'ResponseTest::testIsInformational'.
+ResponseTest::testIsInformational
 .
-Starting test 'ResponseTest::testIsNotFound'.
+ResponseTest::testIsNotFound
 .
-Starting test 'ResponseTest::testIsOk'.
+ResponseTest::testIsOk
 .
-Starting test 'ResponseTest::testIsSuccessful'.
+ResponseTest::testIsSuccessful
 . 126 / 364 ( 34%)
-
-Starting test 'ResponseTest::testIsRedirect'.
+ResponseTest::testIsRedirect
 .
-Starting test 'ResponseTest::testIsRedirection'.
+ResponseTest::testIsRedirection
 .
-Starting test 'ResponseTest::testIsServerError'.
+ResponseTest::testIsServerError
 .
-Starting test 'ResponseTest::testMessageForCode'.
+ResponseTest::testMessageForCode
 .
-Starting test 'ResponseTest::testMessageForCodeWithInvalidCode'.
+ResponseTest::testMessageForCodeWithInvalidCode
 .
-Starting test 'SlimHttpUtilTest::testStripSlashesWithoutMagicQuotes'.
+SlimHttpUtilTest::testStripSlashesWithoutMagicQuotes
 .
-Starting test 'SlimHttpUtilTest::testStripSlashesFromArrayWithoutMagicQuotes'.
+SlimHttpUtilTest::testStripSlashesFromArrayWithoutMagicQuotes
 .
-Starting test 'SlimHttpUtilTest::testStripSlashesWithMagicQuotes'.
+SlimHttpUtilTest::testStripSlashesWithMagicQuotes
 .
-Starting test 'SlimHttpUtilTest::testStripSlashesFromArrayWithMagicQuotes'.
+SlimHttpUtilTest::testStripSlashesFromArrayWithMagicQuotes
 .
-Starting test 'SlimHttpUtilTest::testEncryptAndDecryptWithValidData'.
+SlimHttpUtilTest::testEncryptAndDecryptWithValidData
 .
-Starting test 'SlimHttpUtilTest::testEncryptWhenDataIsEmptyString'.
+SlimHttpUtilTest::testEncryptWhenDataIsEmptyString
 .
-Starting test 'SlimHttpUtilTest::testDecryptWhenDataIsEmptyString'.
+SlimHttpUtilTest::testDecryptWhenDataIsEmptyString
 .
-Starting test 'SlimHttpUtilTest::testEncryptAndDecryptWhenKeyAndIvAreTooLong'.
+SlimHttpUtilTest::testEncryptAndDecryptWhenKeyAndIvAreTooLong
 .
-Starting test 'SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithValidData'.
+SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithValidData
 E
-Starting test 'SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithOldExpiration'.
+SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithOldExpiration
 E
-Starting test 'SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithTamperedData'.
+SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithTamperedData
 E
-Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValue'.
+SlimHttpUtilTest::testSetCookieHeaderWithNameAndValue
 .
-Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueWhenCookieAlreadySet'.
+SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueWhenCookieAlreadySet
 .
-Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomain'.
+SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomain
 .
-Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPath'.
+SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPath
 .
-Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAsString'.
+SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAsString
 .
-Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAsInteger'.
+SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAsInteger
 .
-Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAsZero'.
+SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAsZero
 .
-Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAndSecure'.
+SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAndSecure
 .
-Starting test 'SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAndSecureAndHttpOnly'.
+SlimHttpUtilTest::testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAndSecureAndHttpOnly
 .
-Starting test 'SlimHttpUtilTest::testSerializeCookiesAndDecryptWithStringExpires'.
+SlimHttpUtilTest::testSerializeCookiesAndDecryptWithStringExpires
 E
-Starting test 'SlimHttpUtilTest::testDeleteCookieHeaderWithSurvivingCookie'.
+SlimHttpUtilTest::testDeleteCookieHeaderWithSurvivingCookie
 .
-Starting test 'SlimHttpUtilTest::testDeleteCookieHeaderWithoutSurvivingCookie'.
+SlimHttpUtilTest::testDeleteCookieHeaderWithoutSurvivingCookie
 .
-Starting test 'SlimHttpUtilTest::testDeleteCookieHeaderWithMatchingDomain'.
+SlimHttpUtilTest::testDeleteCookieHeaderWithMatchingDomain
 .
-Starting test 'SlimHttpUtilTest::testDeleteCookieHeaderWithoutMatchingDomain'.
+SlimHttpUtilTest::testDeleteCookieHeaderWithoutMatchingDomain
 .
-Starting test 'SlimHttpUtilTest::testParsesCookieHeader'.
+SlimHttpUtilTest::testParsesCookieHeader
 .
-Starting test 'SlimHttpUtilTest::testParsesCookieHeaderWithCommaSeparator'.
+SlimHttpUtilTest::testParsesCookieHeaderWithCommaSeparator
 .
-Starting test 'SlimHttpUtilTest::testPrefersLeftmostCookieWhenManyCookiesWithSameName'.
+SlimHttpUtilTest::testPrefersLeftmostCookieWhenManyCookiesWithSameName
 .
-Starting test 'LogTest::testEnabled'.
+LogTest::testEnabled
 .
-Starting test 'LogTest::testGetLevel'.
+LogTest::testGetLevel
 .
-Starting test 'LogTest::testSetLevel'.
+LogTest::testSetLevel
 .
-Starting test 'LogTest::testSetInvalidLevel'.
+LogTest::testSetInvalidLevel
 .
-Starting test 'LogTest::testLogDebug'.
+LogTest::testLogDebug
 .
-Starting test 'LogTest::testLogDebugExcludedByLevel'.
+LogTest::testLogDebugExcludedByLevel
 .
-Starting test 'LogTest::testLogInfo'.
+LogTest::testLogInfo
 .
-Starting test 'LogTest::testLogInfoExcludedByLevel'.
+LogTest::testLogInfoExcludedByLevel
 .
-Starting test 'LogTest::testLogNotice'.
+LogTest::testLogNotice
 .
-Starting test 'LogTest::testLogNoticeExcludedByLevel'.
+LogTest::testLogNoticeExcludedByLevel
 .
-Starting test 'LogTest::testLogWarn'.
+LogTest::testLogWarn
 .
-Starting test 'LogTest::testLogWarnExcludedByLevel'.
+LogTest::testLogWarnExcludedByLevel
 .
-Starting test 'LogTest::testLogError'.
+LogTest::testLogError
 .
-Starting test 'LogTest::testLogErrorExcludedByLevel'.
+LogTest::testLogErrorExcludedByLevel
 .
-Starting test 'LogTest::testLogCritical'.
+LogTest::testLogCritical
 .
-Starting test 'LogTest::testLogCriticalExcludedByLevel'.
+LogTest::testLogCriticalExcludedByLevel
 .
-Starting test 'LogTest::testLogAlert'.
+LogTest::testLogAlert
 .
-Starting test 'LogTest::testLogAlertExcludedByLevel'.
+LogTest::testLogAlertExcludedByLevel
 .
-Starting test 'LogTest::testLogEmergency'.
+LogTest::testLogEmergency
 .
-Starting test 'LogTest::testInterpolateMessage'.
+LogTest::testInterpolateMessage
 .
-Starting test 'LogTest::testGetAndSetWriter'.
+LogTest::testGetAndSetWriter
 .
-Starting test 'LogWriterTest::testInstantiation'.
+LogWriterTest::testInstantiation
 .
-Starting test 'LogWriterTest::testInstantiationWithNonResource'.
+LogWriterTest::testInstantiationWithNonResource
 .
-Starting test 'ContentTypesTest::testParsesJson'.
+ContentTypesTest::testParsesJson
 .
-Starting test 'ContentTypesTest::testParsesJsonWithError'.
+ContentTypesTest::testParsesJsonWithError
 .
-Starting test 'ContentTypesTest::testParsesXml'.
+ContentTypesTest::testParsesXml
 .
-Starting test 'ContentTypesTest::testParsesXmlWithError'.
+ContentTypesTest::testParsesXmlWithError
 .
-Starting test 'ContentTypesTest::testParsesCsv'.
+ContentTypesTest::testParsesCsv
 .
-Starting test 'ContentTypesTest::testParsesRequestBodyWithMediaType'.
+ContentTypesTest::testParsesRequestBodyWithMediaType
 .
-Starting test 'SlimFlashTest::testSetFlashForNextRequest'.
+SlimFlashTest::testSetFlashForNextRequest
 . 189 / 364 ( 51%)
-
-Starting test 'SlimFlashTest::testSetFlashForCurrentRequest'.
+SlimFlashTest::testSetFlashForCurrentRequest
 .
-Starting test 'SlimFlashTest::testLoadsFlashFromPreviousRequest'.
+SlimFlashTest::testLoadsFlashFromPreviousRequest
 .
-Starting test 'SlimFlashTest::testKeepFlashFromPreviousRequest'.
+SlimFlashTest::testKeepFlashFromPreviousRequest
 .
-Starting test 'SlimFlashTest::testFlashMessagesFromPreviousRequestDoNotPersist'.
+SlimFlashTest::testFlashMessagesFromPreviousRequestDoNotPersist
 .
-Starting test 'SlimFlashTest::testFlashArrayAccess'.
+SlimFlashTest::testFlashArrayAccess
 .
-Starting test 'SlimFlashTest::testIteration'.
+SlimFlashTest::testIteration
 .
-Starting test 'MethodOverrideTest::testOverrideMethodAsPost'.
+MethodOverrideTest::testOverrideMethodAsPost
 .
-Starting test 'MethodOverrideTest::testDoesNotOverrideMethodIfNotPost'.
+MethodOverrideTest::testDoesNotOverrideMethodIfNotPost
 .
-Starting test 'MethodOverrideTest::testDoesNotOverrideMethodAsPostWithoutParameter'.
+MethodOverrideTest::testDoesNotOverrideMethodAsPostWithoutParameter
 .
-Starting test 'MethodOverrideTest::testOverrideMethodAsHeader'.
+MethodOverrideTest::testOverrideMethodAsHeader
 .
-Starting test 'PrettyExceptionsTest::testReturnsUnchangedSuccessResponse'.
+PrettyExceptionsTest::testReturnsUnchangedSuccessResponse
 .
-Starting test 'PrettyExceptionsTest::testReturnsDiagnosticsForErrorResponse'.
+PrettyExceptionsTest::testReturnsDiagnosticsForErrorResponse
 .
-Starting test 'PrettyExceptionsTest::testResponseContentTypeIsOverriddenToHtml'.
+PrettyExceptionsTest::testResponseContentTypeIsOverriddenToHtml
 .
-Starting test 'PrettyExceptionsTest::testExceptionTypeIsInResponseBody'.
+PrettyExceptionsTest::testExceptionTypeIsInResponseBody
 .
-Starting test 'SessionCookieTest::testSessionCookieIsCreated'.
+SessionCookieTest::testSessionCookieIsCreated
 E
-Starting test 'SessionCookieTest::testSessionIsPopulatedFromCookie'.
+SessionCookieTest::testSessionIsPopulatedFromCookie
 E
-Starting test 'SessionCookieTest::testSessionIsPopulatedAsEmptyIfNoCookie'.
+SessionCookieTest::testSessionIsPopulatedAsEmptyIfNoCookie
 E
-Starting test 'MiddlewareTest::testSetApplication'.
+MiddlewareTest::testSetApplication
 .
-Starting test 'MiddlewareTest::testGetApplication'.
+MiddlewareTest::testGetApplication
 .
-Starting test 'MiddlewareTest::testSetNextMiddleware'.
+MiddlewareTest::testSetNextMiddleware
 .
-Starting test 'MiddlewareTest::testGetNextMiddleware'.
+MiddlewareTest::testGetNextMiddleware
 .
-Starting test 'RouteTest::testGetPattern'.
+RouteTest::testGetPattern
 .
-Starting test 'RouteTest::testGetName'.
+RouteTest::testGetName
 .
-Starting test 'RouteTest::testSetName'.
+RouteTest::testSetName
 .
-Starting test 'RouteTest::testGetCallable'.
+RouteTest::testGetCallable
 .
-Starting test 'RouteTest::testSetCallable'.
+RouteTest::testSetCallable
 .
-Starting test 'RouteTest::testSetCallableWithInvalidArgument'.
+RouteTest::testSetCallableWithInvalidArgument
 .
-Starting test 'RouteTest::testGetParams'.
+RouteTest::testGetParams
 .
-Starting test 'RouteTest::testSetParams'.
+RouteTest::testSetParams
 .
-Starting test 'RouteTest::testGetParam'.
+RouteTest::testGetParam
 .
-Starting test 'RouteTest::testGetParamThatDoesNotExist'.
+RouteTest::testGetParamThatDoesNotExist
 .
-Starting test 'RouteTest::testSetParam'.
+RouteTest::testSetParam
 .
-Starting test 'RouteTest::testSetParamThatDoesNotExist'.
+RouteTest::testSetParamThatDoesNotExist
 .
-Starting test 'RouteTest::testMatches'.
+RouteTest::testMatches
 .
-Starting test 'RouteTest::testMatchesIsFalse'.
+RouteTest::testMatchesIsFalse
 .
-Starting test 'RouteTest::testMatchesPatternWithTrailingSlash'.
+RouteTest::testMatchesPatternWithTrailingSlash
 .
-Starting test 'RouteTest::testMatchesPatternWithoutTrailingSlash'.
+RouteTest::testMatchesPatternWithoutTrailingSlash
 .
-Starting test 'RouteTest::testMatchesWithConditions'.
+RouteTest::testMatchesWithConditions
 .
-Starting test 'RouteTest::testMatchesWithConditionsIsFalse'.
+RouteTest::testMatchesWithConditionsIsFalse
 .
-Starting test 'RouteTest::testMatchesWithValidRfc2396PathComponent'.
+RouteTest::testMatchesWithValidRfc2396PathComponent
 .
-Starting test 'RouteTest::testMatchesWithUnreservedMarks'.
+RouteTest::testMatchesWithUnreservedMarks
 .
-Starting test 'RouteTest::testMatchesOptionalParameters'.
+RouteTest::testMatchesOptionalParameters
 .
-Starting test 'RouteTest::testGetConditions'.
+RouteTest::testGetConditions
 .
-Starting test 'RouteTest::testSetDefaultConditions'.
+RouteTest::testSetDefaultConditions
 .
-Starting test 'RouteTest::testGetDefaultConditions'.
+RouteTest::testGetDefaultConditions
 .
-Starting test 'RouteTest::testDefaultConditionsAssignedToInstance'.
+RouteTest::testDefaultConditionsAssignedToInstance
 .
-Starting test 'RouteTest::testMatchesWildcard'.
+RouteTest::testMatchesWildcard
 .
-Starting test 'RouteTest::testMatchesMultipleWildcards'.
+RouteTest::testMatchesMultipleWildcards
 .
-Starting test 'RouteTest::testMatchesParamsAndWildcards'.
+RouteTest::testMatchesParamsAndWildcards
 .
-Starting test 'RouteTest::testMatchesParamsWithOptionalWildcard'.
+RouteTest::testMatchesParamsWithOptionalWildcard
 .
-Starting test 'RouteTest::testSetMiddleware'.
+RouteTest::testSetMiddleware
 .
-Starting test 'RouteTest::testSetMiddlewareMultipleTimes'.
+RouteTest::testSetMiddlewareMultipleTimes
 .
-Starting test 'RouteTest::testSetMiddlewareWithArray'.
+RouteTest::testSetMiddlewareWithArray
 .
-Starting test 'RouteTest::testSetMiddlewareWithInvalidArgument'.
+RouteTest::testSetMiddlewareWithInvalidArgument
 .
-Starting test 'RouteTest::testSetMiddlewareWithArrayWithInvalidArgument'.
+RouteTest::testSetMiddlewareWithArrayWithInvalidArgument
 .
-Starting test 'RouteTest::testGetMiddleware'.
+RouteTest::testGetMiddleware
 .
-Starting test 'RouteTest::testSetHttpMethods'.
+RouteTest::testSetHttpMethods
 .
-Starting test 'RouteTest::testGetHttpMethods'.
+RouteTest::testGetHttpMethods
 .
-Starting test 'RouteTest::testAppendHttpMethods'.
+RouteTest::testAppendHttpMethods
 .
-Starting test 'RouteTest::testAppendHttpMethodsWithVia'.
+RouteTest::testAppendHttpMethodsWithVia
 .
-Starting test 'RouteTest::testSupportsHttpMethod'.
+RouteTest::testSupportsHttpMethod
 .
-Starting test 'RouteTest::testDispatch'.
+RouteTest::testDispatch
 .
-Starting test 'RouteTest::testDispatchWithMiddlware'.
+RouteTest::testDispatchWithMiddlware
 . 252 / 364 ( 69%)
-
-Starting test 'RouteTest::testRouteMiddlwareArguments'.
+RouteTest::testRouteMiddlwareArguments
 .
-Starting test 'RouterTest::testConstruct'.
+RouterTest::testConstruct
 .
-Starting test 'RouterTest::testMap'.
+RouterTest::testMap
 .
-Starting test 'RouterTest::testAddNamedRoute'.
+RouterTest::testAddNamedRoute
 .
-Starting test 'RouterTest::testAddNamedRouteWithDuplicateKey'.
+RouterTest::testAddNamedRouteWithDuplicateKey
 .
-Starting test 'RouterTest::testGetNamedRoute'.
+RouterTest::testGetNamedRoute
 .
-Starting test 'RouterTest::testGetNamedRoutes'.
+RouterTest::testGetNamedRoutes
 .
-Starting test 'RouterTest::testHasNamedRoute'.
+RouterTest::testHasNamedRoute
 .
-Starting test 'RouterTest::testGetCurrentRoute'.
+RouterTest::testGetCurrentRoute
 .
-Starting test 'RouterTest::testGetCurrentRouteIfMatchedRoutes'.
+RouterTest::testGetCurrentRouteIfMatchedRoutes
 .
-Starting test 'RouterTest::testGetCurrentRouteIfNoMatchedRoutes'.
+RouterTest::testGetCurrentRouteIfNoMatchedRoutes
 .
-Starting test 'RouterTest::testGetMatchedRoutes'.
+RouterTest::testGetMatchedRoutes
 .
-Starting test 'RouterTest::testUrlFor'.
+RouterTest::testUrlFor
 .
-Starting test 'RouterTest::testUrlForIfNoSuchRoute'.
+RouterTest::testUrlForIfNoSuchRoute
 .
-Starting test 'SlimTest::testHasVersionConstant'.
+SlimTest::testHasVersionConstant
 .
-Starting test 'SlimTest::testDefaultInstanceProperties'.
+SlimTest::testDefaultInstanceProperties
 .
-Starting test 'SlimTest::testGetDefaultInstance'.
+SlimTest::testGetDefaultInstance
 .
-Starting test 'SlimTest::testGetNamedInstance'.
+SlimTest::testGetNamedInstance
 .
-Starting test 'SlimTest::testSlimAutoloaderIgnoresNonSlimClass'.
+SlimTest::testSlimAutoloaderIgnoresNonSlimClass
 .
-Starting test 'SlimTest::testGetSettingThatExists'.
+SlimTest::testGetSettingThatExists
 .
-Starting test 'SlimTest::testGetSettingThatDoesNotExist'.
+SlimTest::testGetSettingThatDoesNotExist
 .
-Starting test 'SlimTest::testSetSetting'.
+SlimTest::testSetSetting
 .
-Starting test 'SlimTest::testBatchSetSettings'.
+SlimTest::testBatchSetSettings
 .
-Starting test 'SlimTest::testGetDefaultMode'.
+SlimTest::testGetDefaultMode
 .
-Starting test 'SlimTest::testGetModeFromEnvironment'.
+SlimTest::testGetModeFromEnvironment
 .
-Starting test 'SlimTest::testGetModeFromSettings'.
+SlimTest::testGetModeFromSettings
 .
-Starting test 'SlimTest::testModeConfiguration'.
+SlimTest::testModeConfiguration
 .
-Starting test 'SlimTest::testModeConfigurationWhenModeDoesNotMatch'.
+SlimTest::testModeConfigurationWhenModeDoesNotMatch
 .
-Starting test 'SlimTest::testModeConfigurationWhenNotCallable'.
+SlimTest::testModeConfigurationWhenNotCallable
 .
-Starting test 'SlimTest::testGetModeFromGetEnv'.
+SlimTest::testGetModeFromGetEnv
 .
-Starting test 'SlimTest::testGenericRoute'.
+SlimTest::testGenericRoute
 .
-Starting test 'SlimTest::testGetRouteIsAlsoMappedAsHead'.
+SlimTest::testGetRouteIsAlsoMappedAsHead
 .
-Starting test 'SlimTest::testGetRoute'.
+SlimTest::testGetRoute
 .
-Starting test 'SlimTest::testPostRoute'.
+SlimTest::testPostRoute
 .
-Starting test 'SlimTest::testPutRoute'.
+SlimTest::testPutRoute
 .
-Starting test 'SlimTest::testPatchRoute'.
+SlimTest::testPatchRoute
 .
-Starting test 'SlimTest::testDeleteRoute'.
+SlimTest::testDeleteRoute
 .
-Starting test 'SlimTest::testOptionsRoute'.
+SlimTest::testOptionsRoute
 .
-Starting test 'SlimTest::testRouteGroups'.
+SlimTest::testRouteGroups
 .
-Starting test 'SlimTest::testAnyRoute'.
+SlimTest::testAnyRoute
 .
-Starting test 'SlimTest::testRouteWithoutSlashAndUrlWithOne'.
+SlimTest::testRouteWithoutSlashAndUrlWithOne
 .
-Starting test 'SlimTest::testRouteWithUrlEncodedCharacters'.
+SlimTest::testRouteWithUrlEncodedCharacters
 .
-Starting test 'SlimTest::testSetSlimViewFromString'.
+SlimTest::testSetSlimViewFromString
 .
-Starting test 'SlimTest::testSetSlimViewFromInstance'.
+SlimTest::testSetSlimViewFromInstance
 .
-Starting test 'SlimTest::testViewDataTransfer'.
+SlimTest::testViewDataTransfer
 .
-Starting test 'SlimTest::testRenderTemplateWithData'.
+SlimTest::testRenderTemplateWithData
 .
-Starting test 'SlimTest::testRenderTemplateWithDataAndStatus'.
+SlimTest::testRenderTemplateWithDataAndStatus
 .
-Starting test 'SlimTest::testGetLog'.
+SlimTest::testGetLog
 .
-Starting test 'SlimTest::testLastModifiedMatch'.
+SlimTest::testLastModifiedMatch
 .
-Starting test 'SlimTest::testLastModifiedDoesNotMatch'.
+SlimTest::testLastModifiedDoesNotMatch
 .
-Starting test 'SlimTest::testLastModifiedOnlyAcceptsIntegers'.
+SlimTest::testLastModifiedOnlyAcceptsIntegers
 .
-Starting test 'SlimTest::testLastModifiedHeaderFormat'.
+SlimTest::testLastModifiedHeaderFormat
 .
-Starting test 'SlimTest::testEtagMatches'.
+SlimTest::testEtagMatches
 .
-Starting test 'SlimTest::testEtagDoesNotMatch'.
+SlimTest::testEtagDoesNotMatch
 .
-Starting test 'SlimTest::testETagWithInvalidType'.
+SlimTest::testETagWithInvalidType
 .
-Starting test 'SlimTest::testExpiresAsString'.
+SlimTest::testExpiresAsString
 .
-Starting test 'SlimTest::testExpiresAsInteger'.
+SlimTest::testExpiresAsInteger
 .
-Starting test 'SlimTest::testSetCookie'.
+SlimTest::testSetCookie
 .
-Starting test 'SlimTest::testGetCookie'.
+SlimTest::testGetCookie
 .
-Starting test 'SlimTest::testGetCookieThatDoesNotExist'.
+SlimTest::testGetCookieThatDoesNotExist
 .
-Starting test 'SlimTest::testDeleteCookie'.
+SlimTest::testDeleteCookie
 .
-Starting test 'SlimTest::testGetRoot'.
+SlimTest::testGetRoot
 .
-Starting test 'SlimTest::testStop'.
+SlimTest::testStop
 . 315 / 364 ( 86%)
-
-Starting test 'SlimTest::testStopWithSubsequentOutput'.
+SlimTest::testStopWithSubsequentOutput
 .
-Starting test 'SlimTest::testStopOutputWithOutputBufferingOnAndPreContent'.
+SlimTest::testStopOutputWithOutputBufferingOnAndPreContent
 .
-Starting test 'SlimTest::testStopDoesNotLeaveOutputBuffersOpen'.
+SlimTest::testStopDoesNotLeaveOutputBuffersOpen
 .
-Starting test 'SlimTest::testHalt'.
+SlimTest::testHalt
 .
-Starting test 'SlimTest::testHaltOutputWithOutputBufferingOnAndPreContent'.
+SlimTest::testHaltOutputWithOutputBufferingOnAndPreContent
 .
-Starting test 'SlimTest::testHaltDoesNotLeaveOutputBuffersOpen'.
+SlimTest::testHaltDoesNotLeaveOutputBuffersOpen
 .
-Starting test 'SlimTest::testPass'.
+SlimTest::testPass
 .
-Starting test 'SlimTest::testPassWithSubsequentRoute'.
+SlimTest::testPassWithSubsequentRoute
 .
-Starting test 'SlimTest::testPassWithoutSubsequentRoute'.
+SlimTest::testPassWithoutSubsequentRoute
 .
-Starting test 'SlimTest::testContentType'.
+SlimTest::testContentType
 .
-Starting test 'SlimTest::testStatus'.
+SlimTest::testStatus
 .
-Starting test 'SlimTest::testSlimUrlFor'.
+SlimTest::testSlimUrlFor
 .
-Starting test 'SlimTest::testRedirect'.
+SlimTest::testRedirect
 .
-Starting test 'SlimTest::testRun'.
+SlimTest::testRun
 .
-Starting test 'SlimTest::testRunOutputWithOutputBufferingOnAndPreContent'.
+SlimTest::testRunOutputWithOutputBufferingOnAndPreContent
 .
-Starting test 'SlimTest::testRunDoesNotLeaveAnyOutputBuffersOpen'.
+SlimTest::testRunDoesNotLeaveAnyOutputBuffersOpen
 .
-Starting test 'SlimTest::testAddMiddleware'.
+SlimTest::testAddMiddleware
 .
-Starting test 'SlimTest::testSetFlashForNextRequest'.
+SlimTest::testSetFlashForNextRequest
 .
-Starting test 'SlimTest::testSetFlashForCurrentRequest'.
+SlimTest::testSetFlashForCurrentRequest
 .
-Starting test 'SlimTest::testKeepFlashForNextRequest'.
+SlimTest::testKeepFlashForNextRequest
 .
-Starting test 'SlimTest::testNotFound'.
+SlimTest::testNotFound
 .
-Starting test 'SlimTest::testSlimError'.
+SlimTest::testSlimError
 .
-Starting test 'SlimTest::testDefaultHandlerLogsTheErrorWhenDebugIsFalse'.
+SlimTest::testDefaultHandlerLogsTheErrorWhenDebugIsFalse
 .
-Starting test 'SlimTest::testErrorWithMultipleApps'.
+SlimTest::testErrorWithMultipleApps
 .
-Starting test 'SlimTest::testErrorHandlerUsesCurrentResponseObject'.
+SlimTest::testErrorHandlerUsesCurrentResponseObject
 .
-Starting test 'SlimTest::testHandleErrors'.
+SlimTest::testHandleErrors
 .
-Starting test 'SlimTest::testErrorHandler'.
+SlimTest::testErrorHandler
 .
-Starting test 'SlimTest::testErrorHandlerIfNotCallable'.
+SlimTest::testErrorHandlerIfNotCallable
 .
-Starting test 'SlimTest::testNotFoundHandler'.
+SlimTest::testNotFoundHandler
 .
-Starting test 'SlimTest::testNotFoundHandlerIfNotCallable'.
+SlimTest::testNotFoundHandlerIfNotCallable
 .
-Starting test 'SlimTest::testRegistersAndCallsHooksByPriority'.
+SlimTest::testRegistersAndCallsHooksByPriority
 .
-Starting test 'SlimTest::testHookInvalidCallable'.
+SlimTest::testHookInvalidCallable
 .
-Starting test 'SlimTest::testHookInvocationIfNotExists'.
+SlimTest::testHookInvocationIfNotExists
 .
-Starting test 'SlimTest::testHookClear'.
+SlimTest::testHookClear
 .
-Starting test 'SlimTest::testDerivedClassCanOverrideStaticFunction'.
+SlimTest::testDerivedClassCanOverrideStaticFunction
 .
-Starting test 'ViewTest::testGetDataAll'.
+ViewTest::testGetDataAll
 .
-Starting test 'ViewTest::testGetDataKeyExists'.
+ViewTest::testGetDataKeyExists
 .
-Starting test 'ViewTest::testGetDataKeyNotExists'.
+ViewTest::testGetDataKeyNotExists
 .
-Starting test 'ViewTest::testSetDataKeyValue'.
+ViewTest::testSetDataKeyValue
 .
-Starting test 'ViewTest::testSetDataKeyValueAsClosure'.
+ViewTest::testSetDataKeyValueAsClosure
 .
-Starting test 'ViewTest::testSetDataArray'.
+ViewTest::testSetDataArray
 .
-Starting test 'ViewTest::testSetDataInvalidArgument'.
+ViewTest::testSetDataInvalidArgument
 .
-Starting test 'ViewTest::testAppendData'.
+ViewTest::testAppendData
 .
-Starting test 'ViewTest::testAppendDataOverwrite'.
+ViewTest::testAppendDataOverwrite
 .
-Starting test 'ViewTest::testAppendDataInvalidArgument'.
+ViewTest::testAppendDataInvalidArgument
 .
-Starting test 'ViewTest::testGetTemplatesDirectory'.
+ViewTest::testGetTemplatesDirectory
 .
-Starting test 'ViewTest::testSetTemplatesDirectory'.
+ViewTest::testSetTemplatesDirectory
 .
-Starting test 'ViewTest::testDisplay'.
+ViewTest::testDisplay
 .
-Starting test 'ViewTest::testDisplayTemplateThatDoesNotExist'.
+ViewTest::testDisplayTemplateThatDoesNotExist
 .
-
-There were 7 errors:
-
-1) SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithValidData
-Argument 2 to hash_hmac() must be of type ?string, int given
-
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/Slim/Http/Util.php:227
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Http/UtilTest.php:135
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
-
-2) SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithOldExpiration
-Argument 2 to hash_hmac() must be of type ?string, int given
-
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/Slim/Http/Util.php:227
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Http/UtilTest.php:159
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
-
-3) SlimHttpUtilTest::testEncodeAndDecodeSecureCookieWithTamperedData
-Argument 2 to hash_hmac() must be of type ?string, int given
-
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/Slim/Http/Util.php:227
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Http/UtilTest.php:178
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
-
-4) SlimHttpUtilTest::testSerializeCookiesAndDecryptWithStringExpires
-Argument 2 to hash_hmac() must be of type ?string, int given
-
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/Slim/Http/Util.php:227
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/Slim/Http/Util.php:201
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Http/UtilTest.php:354
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
-
-5) SessionCookieTest::testSessionCookieIsCreated
-Trying to destroy uninitialized session
-
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Middleware/SessionCookieTest.php:39
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
-
-6) SessionCookieTest::testSessionIsPopulatedFromCookie
-Trying to destroy uninitialized session
-
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Middleware/SessionCookieTest.php:39
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
-
-7) SessionCookieTest::testSessionIsPopulatedAsEmptyIfNoCookie
-Trying to destroy uninitialized session
-
-/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/Slim/tests/Middleware/SessionCookieTest.php:39
-/data/users/joelm/fbcode/hphp/test/frameworks/vendor/bin/phpunit:63
-
-FAILURES!
 Tests: 364, Assertions: 580, Errors: 7.

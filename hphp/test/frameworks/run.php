@@ -137,10 +137,13 @@ class ProxyInformation {
 
 class PHPUnitPatterns {
   // Matches:
-  //   Starting test 'PrettyExceptionsTest::testReturnsDiagnostics'.
-  //   Starting test 'Assetic\Test\::testMethods with data set #1 ('getRoot')'.
+  //   PrettyExceptionsTest::testReturnsDiagnostics
+  //   Assetic\Test\::testMethods with data set #1 ('getRoot')'
+  //   Composer\Test\::testMe with data set "parses dates w/ -"
+  // The "with data set" can either have a # or " after it and then any char
+  // before a resulting " or (
   static string $test_name_pattern =
- "/Starting test '([_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set #[0-9]+)?)/";
+  "/[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\"|#)[^\"|^( \)|^\n]+(\")?)?/";
 
   static string $pear_test_name_pattern =
  "/Starting test '([\-_a-zA-Z0-9\/]*\.phpt)/";
@@ -163,10 +166,17 @@ class PHPUnitPatterns {
   // results. Any test names after that line are probably detailed error
   // information.
   static string $stop_parsing_pattern =
-                "/^Time: \d+.\d+ (seconds|ms), Memory: \d+.\d+/";
+          "/^Time: \d+(\.\d+)? (seconds|ms|minutes|hours), Memory: \d+(\.\d+)/";
 
   static string $tests_ok_pattern = "/OK \(\d+ tests, \d+ assertions\)/";
   static string $tests_failure_pattern = "/Tests: \d+, Assertions: \d+.*[.]/";
+
+  static string $header_pattern =
+                "/PHPUnit \d+.[0-9a-zA-Z\-\.]*( by Sebastian Bergmann.)?/";
+
+  static string $config_file_pattern = "/Configuration read from/";
+
+  static string $xdebug_pattern = "/The Xdebug extension is not loaded./";
 }
 
 class Frameworks {
@@ -354,7 +364,7 @@ class Frameworks {
             'git_path' => "https://github.com/wikimedia/mediawiki-core.git",
             'git_commit' => "8c5733c44977232ca42454ae7f1ae0fd01770b37",
             'test_path' => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
-            'test_run_command' => get_hhvm_build()." phpunit.php ".
+            'test_run_command' => get_hhvm_build()." phpunit.php --debug ".
                                   "--exclude-group=Database",
           },
         /*'typo3' =>
@@ -466,7 +476,7 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
          "if necessary.\n", $verbose);
   }
 
-  $timeout = 1800; // 1800 seconds is the default run time before timeout
+  $timeout = 3600; // 3600 seconds is the default run time before timeout
   if ($options->containsKey('timeout')) {
     $timeout = (int) $options['timeout'];
     // Remove timeout option and its value from the $tests vector
@@ -831,28 +841,22 @@ THUMBSDOWN
       ksort($decoded_results);
 
       if ($csv_only) {
-        $not_first = false; // To avoid trailing comma
         if ($csv_header) {
-          print "date,";
+          $print_str = str_pad("date,", 20);
           foreach ($decoded_results as $key => $value) {
-            if ($not_first) {
-              print ",";
-            }
-            $not_first = true;
-            print $key;
+            $print_str .= str_pad($key.",", 20);
           }
-          print PHP_EOL;
-          $not_first = false;
+          $print_str = rtrim($print_str, ",");
+          $print_str .= PHP_EOL;
+          print $print_str;
         }
-        print date("Y-m-d").",";
+        $print_str = str_pad(date("Y-m-d"), 20);
         foreach ($decoded_results as $key => $value) {
-          if ($not_first) {
-            print ",";
-          }
-          $not_first = true;
-          print $value;
+          $print_str .= str_pad($value.",", 20);
         }
-        print "\n";
+        $print_str = rtrim($print_str, ",");
+        $print_str .= PHP_EOL;
+        print $print_str;
       } else {
         print "\nALL TESTS COMPLETE!\n";
         print "SUMMARY:\n";
@@ -922,11 +926,14 @@ function run_single_test_suite(string $fw_name, string $summary_file,
   $match = null;
   $line = null;
   $status = null;
-  $raw_results = "";
+  $tests_and_results = "";
   $error_information = "";
   $diff_information = "";
   $ret_val = 0;
-  $just_raw_results_and_errors = false;
+  $just_errors = false;
+  $started_tests = false;
+  $final_stats = "";
+  $fatal = false;
 
   // Test name pattern can be different depending on the framework,
   // although most follow the default.
@@ -944,7 +951,7 @@ function run_single_test_suite(string $fw_name, string $summary_file,
   if (file_exists($expect_file)) {
     if ($generate_new_expect_file) {
       unlink($expect_file);
-      verbose("Resetting the expect file. ".
+      verbose("Resetting the expect file for ".$fw_name.". ".
               "Establishing new baseline with gray dots...\n", !$csv_only);
     } else {
       // Color codes would have already been stripped out. Don't need those.
@@ -996,28 +1003,41 @@ function run_single_test_suite(string $fw_name, string $summary_file,
       $line = fgets($pipes[1]);
       $line = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
                            "", $line);
-      if (preg_match(PHPUnitPatterns::$stop_parsing_pattern, $line,
-                     $sp_matches) === 1) {
-        // Get rid of the next blank line after the stopping pattern
-        // and get the next piece of data
+      // We want blank lines, but only when we are printing out the raw
+      // error information
+      if (!$just_errors && ($line === "" || $line === PHP_EOL)) {
+        continue;
+      }
+      if (preg_match(PHPUnitPatterns::$header_pattern, $line) === 1 ||
+          preg_match(PHPUnitPatterns::$config_file_pattern, $line) === 1 ||
+          preg_match(PHPUnitPatterns::$xdebug_pattern, $line) === 1) {
+            continue;
+      }
+      if (preg_match(PHPUnitPatterns::$stop_parsing_pattern, $line) === 1) {
+        // Get rid of the next blank line after this
         fgets($pipes[1]);
-        $line = fgets($pipes[1]);
-        $line = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
-                             "", $line);
-        $just_raw_results_and_errors = true;
+        $just_errors = true;
+        continue;
       }
-      $raw_results .= $line;
-      if ($just_raw_results_and_errors) {
-        // Don't output final test data in error file
-        if (preg_match(PHPUnitPatterns::$tests_ok_pattern, $line) === 0 &&
-            preg_match(PHPUnitPatterns::$tests_failure_pattern, $line) === 0) {
-          $error_information .= $line;
+      // If we have finished the tests, then we are just printing any error info
+      // and getting the final stats
+      if ($just_errors) {
+        // The last line will generally be the stats. However, error info can
+        // have stats looking lines (matching these patterns) as part of them.
+        // PHPUnit is notorious for this. But, the last line will overwrite
+        // all of them with final stats
+        if (preg_match(PHPUnitPatterns::$tests_ok_pattern, $line) === 1 ||
+            preg_match(PHPUnitPatterns::$tests_failure_pattern, $line) === 1) {
+          $final_stats = $line;
         }
+        $error_information .= $line;
+        continue;
       }
-      if (!$just_raw_results_and_errors &&
+      if (!$just_errors &&
           preg_match($test_name_pattern, $line, $tn_matches) === 1) {
-        // The subpattern of the "Starting test" line is the actual test.
-        $match = $tn_matches[1];
+        $started_tests = true;
+        $match = $tn_matches[0];
+        $tests_and_results .= $match.PHP_EOL;
         do {
           $status = fgets($pipes[1]);
           $status = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
@@ -1027,7 +1047,8 @@ function run_single_test_suite(string $fw_name, string $summary_file,
             // We have hit a fatal or some nasty assert. Escape now and try to
             // get the results written.
             $error_information .= $status;
-            $raw_results .= $status;
+            $tests_and_results .= $status;
+            $fatal = true;
             break 2;
           }
         } while (!feof($pipes[1]) &&
@@ -1039,7 +1060,7 @@ function run_single_test_suite(string $fw_name, string $summary_file,
           $status = "UNKNOWN STATUS";
           $error_information .= $status;
         }
-        $raw_results .= $status;
+        $tests_and_results .= $status;
         if ($compare_tests !== null && $compare_tests->containsKey($match)) {
           if (strlen($status) > 0) {
             $status = $status[0]; // In case we had "F 252 / 364 (69 %)"
@@ -1063,7 +1084,8 @@ function run_single_test_suite(string $fw_name, string $summary_file,
               verbose(Colors::BLUE."F".Colors::NONE, !$csv_only);
             }
             verbose(PHP_EOL."Different status in ".$fw_name." for test ".
-                    $match.PHP_EOL,!$csv_only);
+                    $match." was ".$compare_tests[$match]. " and now is ".
+                    $status.PHP_EOL, !$csv_only);
             $diff_information .= "----------------------".PHP_EOL;
             $diff_information .= $match.PHP_EOL.PHP_EOL;
             $diff_information .= "EXPECTED: ".$compare_tests[$match].PHP_EOL;
@@ -1079,21 +1101,31 @@ function run_single_test_suite(string $fw_name, string $summary_file,
             $ret_val = -1;
             verbose(Colors::LIGHTBLUE."F".Colors::NONE, !$csv_only);
             verbose(PHP_EOL."Different status in ".$fw_name." for test ".
-                    $match.PHP_EOL,!$csv_only);
+                    $match.". Having problem loading test ".$match.PHP_EOL,
+                    !$csv_only);
             $diff_information .= "----------------------".PHP_EOL;
             $diff_information .= "Problem loading: ".$match.PHP_EOL.PHP_EOL;
           } else {
             verbose(Colors::GRAY.".".Colors::NONE, !$csv_only);
           }
         }
+      } else if (!$started_tests) {
+        // If we have fataled before any tests were run or test statuses were
+        // found, assume we have error information.
+        // If we get here, we have gotten through all the PHPUnit header
+        // information, but we haven't started the tests yet.
+        $error_information .= $line;
       }
     }
-
-    // If we have fataled before any tests were run or test statuses were found,
-    // assume most of the $raw_results was error information.
-    if ($status === null) {
-      $error_information .= $raw_results;
+    // Remove final stat line from error string
+    if (!$fatal) {
+      $error_information = substr($error_information, 0,
+                                  strrpos(rtrim($error_information), PHP_EOL));
     }
+    // Add the final stats here that we saved above due to the possibility
+    // of tests outputting stat like strings throughout the one. We only
+    // wanted the last one (the real one) in the output.
+    $tests_and_results .= $final_stats;
 
     fclose($pipes[1]);
     fclose($pipes[2]);
@@ -1101,7 +1133,7 @@ function run_single_test_suite(string $fw_name, string $summary_file,
       $ret_val = -1;
     }
 
-    file_put_contents($results_file, $raw_results);
+    file_put_contents($results_file, $tests_and_results);
     file_put_contents($errors_file, $error_information);
     file_put_contents($diff_file, $diff_information);
 
@@ -1193,7 +1225,7 @@ function get_fw_tests_to_run(string $expect_file, string $test_name_pattern,
                preg_match($status_code_pattern, $status) === 0);
       // The second match will be the test name only from the "Starting test..."
       // match string
-      $tests[$matches[1]] = $status[0];
+      $tests[$matches[0]] = $status[0];
     }
   }
   if ($tests->isEmpty()) {
@@ -1207,12 +1239,12 @@ function get_fw_tests_to_run(string $expect_file, string $test_name_pattern,
 function get_framework_pass_percentage(string $name,
                                        string $results_file,
                                        bool $verbose): mixed {
-  // Get the last 4 lines of the results file which will give us the surface
+  // Get the last line of the results file which will give us the surface
   // area necessary to get the final stats.
   $file = escapeshellarg($results_file);
-  if (($lines = `tail -n 4 $file`) === "") {
-    error("Error occured. Probably could not open final ".
-          "pass/fail file: $results_file");
+  // If we can't get results surface area, assume FATAL.
+  if (($lines = `tail -n 1 $file`) === "") {
+    return "Fatal";
   }
 
   // clean pattern represents: OK (364 tests, 590 assertions)

@@ -1,129 +1,124 @@
-PHPUnit 3.7.28 by Sebastian Bergmann.
-
-Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/CodeIgniter/tests/phpunit.xml
-
-
-Starting test 'Benchmark_test::test_mark'.
+Benchmark_test::test_mark
 .
-Starting test 'Benchmark_test::test_elapsed_time'.
+Benchmark_test::test_elapsed_time
 .
-Starting test 'Benchmark_test::test_memory_usage'.
+Benchmark_test::test_memory_usage
 .
-Starting test 'Common_test::test_is_php'.
+Common_test::test_is_php
 .
-Starting test 'Common_test::test_stringify_attributes'.
+Common_test::test_stringify_attributes
 .
-Starting test 'Common_test::test_stringify_js_attributes'.
+Common_test::test_stringify_js_attributes
 .
-Starting test 'Common_test::test_html_escape'.
+Common_test::test_html_escape
 .
-Starting test 'Config_test::test_item'.
+Config_test::test_item
 .
-Starting test 'Config_test::test_set_item'.
+Config_test::test_set_item
 .
-Starting test 'Config_test::test_slash_item'.
+Config_test::test_slash_item
 .
-Starting test 'Config_test::test_base_url'.
+Config_test::test_base_url
 .
-Starting test 'Config_test::test_site_url'.
+Config_test::test_site_url
 .
-Starting test 'Config_test::test_system_url'.
+Config_test::test_system_url
 .
-Starting test 'Config_test::test_load'.
+Config_test::test_load
 E
-Starting test 'Config_test::test_load_nonexistent'.
+Config_test::test_load_nonexistent
 .
-Starting test 'Input_test::test_get_not_exists'.
+Input_test::test_get_not_exists
 .
-Starting test 'Input_test::test_get_exist'.
+Input_test::test_get_exist
 .
-Starting test 'Input_test::test_get_exist_with_xss_clean'.
+Input_test::test_get_exist_with_xss_clean
 .
-Starting test 'Input_test::test_post_not_exists'.
+Input_test::test_post_not_exists
 .
-Starting test 'Input_test::test_post_exist'.
+Input_test::test_post_exist
 .
-Starting test 'Input_test::test_post_exist_with_xss_clean'.
+Input_test::test_post_exist_with_xss_clean
 .
-Starting test 'Input_test::test_post_get'.
+Input_test::test_post_get
 .
-Starting test 'Input_test::test_get_post'.
+Input_test::test_get_post
 .
-Starting test 'Input_test::test_cookie'.
+Input_test::test_cookie
 .
-Starting test 'Input_test::test_server'.
+Input_test::test_server
 .
-Starting test 'Input_test::test_fetch_from_array'.
+Input_test::test_fetch_from_array
 .
-Starting test 'Input_test::test_valid_ip'.
+Input_test::test_valid_ip
 .
-Starting test 'Input_test::test_method'.
+Input_test::test_method
 .
-Starting test 'Input_test::test_is_ajax_request'.
+Input_test::test_is_ajax_request
 .
-Starting test 'Lang_test::test_load'.
+Lang_test::test_load
 E
-Starting test 'Lang_test::test_load_with_unspecified_language'.
+Lang_test::test_load_with_unspecified_language
 E
-Starting test 'Loader_test::test_library'.
+Loader_test::test_library
 E
-Starting test 'Loader_test::test_library_extension'.
+Loader_test::test_library_extension
 E
-Starting test 'Loader_test::test_library_config'.
+Loader_test::test_library_config
 E
-Starting test 'Loader_test::test_load_library_in_application_dir'.
+Loader_test::test_load_library_in_application_dir
 E
-Starting test 'Loader_test::test_driver'.
+Loader_test::test_driver
 E
-Starting test 'Loader_test::test_models'.
+Loader_test::test_models
 E
-Starting test 'Loader_test::test_model_subdir'.
+Loader_test::test_model_subdir
 E
-Starting test 'Loader_test::test_non_existent_model'.
+Loader_test::test_non_existent_model
 .
-Starting test 'Loader_test::test_load_view'.
+Loader_test::test_load_view
 E
-Starting test 'Loader_test::test_non_existent_view'.
+Loader_test::test_non_existent_view
 .
-Starting test 'Loader_test::test_file'.
+Loader_test::test_file
 E
-Starting test 'Loader_test::test_vars'.
+Loader_test::test_vars
 .
-Starting test 'Loader_test::test_helper'.
+Loader_test::test_helper
 E
-Starting test 'Loader_test::test_non_existent_helper'.
+Loader_test::test_non_existent_helper
 .
-Starting test 'Loader_test::test_loading_multiple_helpers'.
+Loader_test::test_loading_multiple_helpers
 E
-Starting test 'Loader_test::test_language'.
+Loader_test::test_language
 .
-Starting test 'Loader_test::test_packages'.
+Loader_test::test_packages
 E
-Starting test 'Loader_test::test_load_config'.
+Loader_test::test_load_config
 .
-Starting test 'Loader_test::test_initialize'.
+Loader_test::test_initialize
 E
-Starting test 'Output_test::test_set_get_append_output'.
+Output_test::test_set_get_append_output
 .
-Starting test 'Output_test::test_minify'.
+Output_test::test_minify
 .
-Starting test 'Output_test::test_get_content_type'.
+Output_test::test_get_content_type
 .
-Starting test 'Output_test::test_get_header'.
+Output_test::test_get_header
 E
-Starting test 'Security_test::test_csrf_verify'.
+Security_test::test_csrf_verify
 .
-Starting test 'Security_test::test_csrf_verify_invalid'.
+Security_test::test_csrf_verify_invalid
 .
-Starting test 'Security_test::test_csrf_verify_valid'.
+Security_test::test_csrf_verify_valid
 .
-Starting test 'Security_test::test_get_csrf_hash'.
+Security_test::test_get_csrf_hash
 .
-Starting test 'Security_test::test_get_csrf_token_name'.
+Security_test::test_get_csrf_token_name
 .
-Starting test 'Security_test::test_xss_clean'.
+Security_test::test_xss_clean
 .
-Starting test 'Security_test::test_xss_hash'.
+Security_test::test_xss_hash
 .
-Starting test 'Security_test::test_entity_decode'.
+Security_test::test_entity_decode
 HipHop Fatal error: preg_replace is not going to be supported: Modifier /e must be used with the form f("<replacement string>") or f("<replacement string>"); in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/CodeIgniter/system/core/Security.php on line 557

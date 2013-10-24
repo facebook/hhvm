@@ -720,9 +720,9 @@ class Variant : private TypedValue {
                    Uns::Mode mode = Uns::Mode::Value);
 
   /**
-   * Get the wrapped APCVariant, if any.
+   * Get the wrapped APCHandle, if any.
    */
-  APCVariant *getSharedVariant() const;
+  APCHandle *getAPCHandle() const;
 
   /*
    * Print information about a variant to stdout.  For debugging

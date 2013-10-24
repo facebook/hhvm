@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class APCVariant;
+class APCHandle;
 struct TypedValue;
 class HphpArray;
 
@@ -210,10 +210,10 @@ public:
    */
   bool isVectorData() const;
 
-  static APCVariant *GetSharedVariant(const ArrayData* ad) {
+  static APCHandle *GetAPCHandle(const ArrayData* ad) {
     return nullptr;
   }
-  APCVariant* getSharedVariant();
+  APCHandle* getAPCHandle();
 
   /**
    * Whether or not this array has a referenced Variant or Object appearing
@@ -629,7 +629,7 @@ struct ArrayFunctions {
   void (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);
-  APCVariant* (*getSharedVariant[NK])(const ArrayData*);
+  APCHandle* (*getAPCHandle[NK])(const ArrayData*);
   ArrayData* (*zSetInt[NK])(ArrayData*, int64_t k, RefData* v);
   ArrayData* (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
   ArrayData* (*zAppend[NK])(ArrayData*, RefData* v);

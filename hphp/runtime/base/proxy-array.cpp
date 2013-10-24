@@ -312,8 +312,8 @@ bool ProxyArray::IsVectorData(const ArrayData* ad) {
   return innerArr(ad)->isVectorData();
 }
 
-APCVariant *ProxyArray::GetSharedVariant(const ArrayData* ad) {
-  return innerArr(ad)->getSharedVariant();
+APCHandle *ProxyArray::GetAPCHandle(const ArrayData* ad) {
+  return innerArr(ad)->getAPCHandle();
 }
 
 ArrayData* ProxyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {

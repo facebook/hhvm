@@ -311,11 +311,11 @@ extern const ArrayFunctions g_array_funcs = {
     &APCLocalArray::Escalate,
     &ArrayData::Escalate,
     &ProxyArray::Escalate },
-  // getSharedVariant
-  { &ArrayData::GetSharedVariant, &ArrayData::GetSharedVariant,
-    &APCLocalArray::GetSharedVariant,
-    &ArrayData::GetSharedVariant,
-    &ProxyArray::GetSharedVariant },
+  // getAPCHandle
+  { &ArrayData::GetAPCHandle, &ArrayData::GetAPCHandle,
+    &APCLocalArray::GetAPCHandle,
+    &ArrayData::GetAPCHandle,
+    &ProxyArray::GetAPCHandle },
   // zSetInt
   { &HphpArray::ZSetInt, &HphpArray::ZSetInt,
     &ArrayData::ZSetInt,

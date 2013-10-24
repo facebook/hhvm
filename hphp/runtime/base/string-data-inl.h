@@ -97,11 +97,6 @@ inline bool StringData::isStatic() const {
   return !isRefCounted();
 }
 
-inline APCVariant* StringData::getSharedVariant() const {
-  if (isShared()) return sharedPayload()->shared;
-  return nullptr;
-}
-
 inline StringSlice StringData::slice() const {
   return StringSlice(m_data, m_len);
 }

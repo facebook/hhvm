@@ -346,8 +346,8 @@ inline ArrayData* ArrayData::merge(const ArrayData* elms) {
   return g_array_funcs.merge[m_kind](this, elms);
 }
 
-inline APCVariant* ArrayData::getSharedVariant() {
-  return g_array_funcs.getSharedVariant[m_kind](this);
+inline APCHandle* ArrayData::getAPCHandle() {
+  return g_array_funcs.getAPCHandle[m_kind](this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

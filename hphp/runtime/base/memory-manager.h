@@ -121,7 +121,7 @@ constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 
 /*
  * This is the header MemoryManager uses for large allocations, and
- * it's also used for StringData's that wrap APCVariant.
+ * it's also used for StringData's that wrap APCHandle.
  *
  * TODO(#2946560): refactor this not to be shared with StringData.
  */

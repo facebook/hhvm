@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-init.h"
@@ -26,16 +27,20 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 CVarRef APCLocalArray::getValueRef(ssize_t pos) const {
-  APCVariant *sv = m_arr->getValue(pos);
+  APCHandle *sv = m_arr->getValue(pos);
   DataType t = sv->getType();
-  if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
+  if (!IS_REFCOUNTED_TYPE(t)) {
+    return APCTypedValue::fromHandle(sv)->asCVarRef();
+  }
   if (LIKELY(m_localCache != nullptr)) {
-    assert(unsigned(pos) < m_arr->arrCap());
+    assert(unsigned(pos) < m_arr->capacity());
     TypedValue* tv = &m_localCache[pos];
-    if (tv->m_type != KindOfUninit) return tvAsCVarRef(tv);
+    if (tv->m_type != KindOfUninit) {
+      return tvAsCVarRef(tv);
+    }
   } else {
     static_assert(KindOfUninit == 0, "must be 0 since we use smart_calloc");
-    unsigned cap = m_arr->arrCap();
+    unsigned cap = m_arr->capacity();
     m_localCache = (TypedValue*) smart_calloc(cap, sizeof(TypedValue));
   }
   TypedValue* tv = &m_localCache[pos];
@@ -44,41 +49,21 @@ CVarRef APCLocalArray::getValueRef(ssize_t pos) const {
   return tvAsCVarRef(tv);
 }
 
-CVarRef APCLocalArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
-  return asSharedArray(ad)->getValueRef(pos);
-}
-
-APCVariant* APCLocalArray::GetSharedVariant(const ArrayData* ad) {
-  auto a = asSharedArray(ad);
-  if (a->m_arr->shouldCache()) return nullptr;
-  return a->m_arr;
-}
-
 ALWAYS_INLINE APCLocalArray::~APCLocalArray() {
   if (m_localCache) {
-    for (TypedValue* tv = m_localCache, *end = tv + m_arr->arrCap();
+    for (TypedValue* tv = m_localCache, *end = tv + m_arr->capacity();
          tv < end; ++tv) {
       tvRefcountedDecRef(tv);
     }
     smart_free(m_localCache);
   }
-  m_arr->decRef();
+  m_arr->getHandle()->decRef();
 }
 
 void APCLocalArray::Release(ArrayData* ad) {
   auto const smap = asSharedArray(ad);
   smap->~APCLocalArray();
   MM().smartFreeSize(smap, sizeof(APCLocalArray));
-}
-
-inline APCLocalArray* APCLocalArray::asSharedArray(ArrayData* ad) {
-  assert(ad->kind() == kSharedKind);
-  return static_cast<APCLocalArray*>(ad);
-}
-
-inline const APCLocalArray* APCLocalArray::asSharedArray(const ArrayData* ad) {
-  assert(ad->kind() == kSharedKind);
-  return static_cast<const APCLocalArray*>(ad);
 }
 
 bool APCLocalArray::IsVectorData(const ArrayData* ad) {
@@ -107,6 +92,28 @@ ssize_t APCLocalArray::getIndex(const StringData* k) const {
   return m_arr->getIndex(k);
 }
 
+ArrayData* APCLocalArray::loadElems() const {
+  auto count = m_arr->size();
+  ArrayData* elems;
+  if (m_arr->isPacked()) {
+    PackedArrayInit ai(count);
+    for (uint i = 0; i < count; i++) {
+      ai.append(getValueRef(i));
+    }
+    elems = ai.create();
+  } else {
+    ArrayInit ai(count);
+    for (uint i = 0; i < count; i++) {
+      ai.add(getKey(i), getValueRef(i), true);
+    }
+    elems = ai.create();
+  }
+  if (elems->isStatic()) {
+    elems = elems->copy();
+  }
+  return elems;
+}
+
 /* if a2 is modified copy of a1 (i.e. != a1), then release a1 and return a2 */
 static inline ArrayData* releaseIfCopied(ArrayData* a1, ArrayData* a2) {
   if (a1 != a2) a1->release();
@@ -114,13 +121,13 @@ static inline ArrayData* releaseIfCopied(ArrayData* a1, ArrayData* a2) {
 }
 
 ArrayData *APCLocalArray::LvalInt(ArrayData* ad, int64_t k, Variant *&ret,
-                              bool copy) {
+                                  bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->lval(k, ret, false));
 }
 
 ArrayData *APCLocalArray::LvalStr(ArrayData* ad, StringData* k, Variant *&ret,
-                              bool copy) {
+                                  bool copy) {
   ArrayData *escalated = Escalate(ad);
   return releaseIfCopied(escalated, escalated->lval(k, ret, false));
 }
@@ -203,7 +210,7 @@ ArrayData *APCLocalArray::Prepend(ArrayData* ad, CVarRef v, bool copy) {
 
 ArrayData *APCLocalArray::Escalate(const ArrayData* ad) {
   auto smap = asSharedArray(ad);
-  auto ret = smap->m_arr->loadElems(*smap);
+  auto ret = smap->loadElems();
   assert(!ret->isStatic());
   return ret;
 }
@@ -215,16 +222,17 @@ TypedValue* APCLocalArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return (TypedValue*)&a->getValueRef(index);
 }
 
-TypedValue* APCLocalArray::NvGetStr(
-    const ArrayData* ad, const StringData* key) {
+TypedValue* APCLocalArray::NvGetStr(const ArrayData* ad,
+                                    const StringData* key) {
   auto a = asSharedArray(ad);
   auto index = a->getIndex(key);
   if (index == -1) return nullptr;
   return (TypedValue*)&a->getValueRef(index);
 }
 
-void APCLocalArray::NvGetKey(
-    const ArrayData* ad, TypedValue* out, ssize_t pos) {
+void APCLocalArray::NvGetKey(const ArrayData* ad,
+                             TypedValue* out,
+                             ssize_t pos) {
   auto a = asSharedArray(ad);
   Variant k = a->m_arr->getKey(pos);
   TypedValue* tv = k.asTypedValue();
@@ -236,7 +244,7 @@ void APCLocalArray::NvGetKey(
 
 ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad) {
   auto a = asSharedArray(ad);
-  auto ret = a->m_arr->loadElems(*a);
+  auto ret = a->loadElems();
   assert(!ret->isStatic());
   return ret;
 }

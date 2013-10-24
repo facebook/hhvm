@@ -198,7 +198,7 @@ static void normalizeKey(const char *key, char *normalizedKey, size_t outlen) {
 // Helpers to handle profile entry
 
 void SharedValueProfile::calcInd(const StringData *key,
-                                 const APCVariant *variant) {
+                                 const APCHandle *variant) {
   keySize = key->size();
   variant->getStats(&var);
   totalSize = keySize + var.dataTotalSize;
@@ -419,7 +419,7 @@ void SharedStoreStats::addPurgingTime(int64_t purgingTime) {
   s_purgingTime.fetch_add(purgingTime, std::memory_order_relaxed);
 }
 
-void SharedStoreStats::onDelete(const StringData *key, const APCVariant *var,
+void SharedStoreStats::onDelete(const StringData *key, const APCHandle *var,
                                 bool replace, bool noTTL) {
   char normalizedKey[MAX_KEY_LEN + 1];
 
@@ -457,7 +457,7 @@ void SharedStoreStats::onDelete(const StringData *key, const APCVariant *var,
   }
 }
 
-void SharedStoreStats::onGet(const StringData *key, const APCVariant *var) {
+void SharedStoreStats::onGet(const StringData *key, const APCHandle *var) {
   ReadLock l(s_rwlock);
   StatsMap::const_accessor cacc;
   if (s_detailMap.find(cacc, (char*)key->data())) {
@@ -467,7 +467,7 @@ void SharedStoreStats::onGet(const StringData *key, const APCVariant *var) {
   }
 }
 
-void SharedStoreStats::onStore(const StringData *key, const APCVariant *var,
+void SharedStoreStats::onStore(const StringData *key, const APCHandle *var,
                                int64_t ttl, bool prime) {
   char normalizedKey[MAX_KEY_LEN + 1];
 

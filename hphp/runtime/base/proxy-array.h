@@ -88,7 +88,7 @@ public: // ArrayData implementation
   static bool ValidFullPos(const ArrayData*, const FullPos & fp);
   static bool AdvanceFullPos(ArrayData*, FullPos&);
   static bool IsVectorData(const ArrayData*);
-  static APCVariant *GetSharedVariant(const ArrayData* ad);
+  static APCHandle *GetAPCHandle(const ArrayData* ad);
 
   static ArrayData* EscalateForSort(ArrayData*);
   static void Ksort(ArrayData*, int sort_flags, bool ascending);

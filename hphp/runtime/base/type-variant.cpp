@@ -2029,19 +2029,6 @@ void Variant::unserialize(VariableUnserializer *uns,
   }
 }
 
-APCVariant *Variant::getSharedVariant() const {
-  if (m_type == KindOfRef) {
-    return m_data.pref->var()->getSharedVariant();
-  }
-  if (m_type == KindOfString) {
-    return m_data.pstr->getSharedVariant();
-  }
-  if (m_type == KindOfArray) {
-    return m_data.parr->getSharedVariant();
-  }
-  return nullptr;
-}
-
 void Variant::dump() const {
   VariableSerializer vs(VariableSerializer::Type::VarDump);
   String ret(vs.serialize(*this, true));

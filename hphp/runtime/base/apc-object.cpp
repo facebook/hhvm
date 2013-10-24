@@ -21,19 +21,52 @@
 #include "hphp/util/logger.h"
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/apc-variant.h"
+#include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/ext/ext_apc.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+APCHandle* APCObject::MakeAPCObject(APCHandle* obj, CVarRef value) {
+  if (!value.is(KindOfObject) || obj->getObjAttempted()) {
+    return nullptr;
+  }
+  obj->setObjAttempted();
+  ObjectData *o = value.getObjectData();
+  if (o->instanceof(SystemLib::s_SerializableClass)) {
+    // should also check the object itself
+    return nullptr;
+  }
+  PointerSet seen;
+  if (o->hasInternalReference(seen, true)) {
+    return nullptr;
+  }
+  APCHandle* tmp = APCHandle::Create(value, false, true, true);
+  tmp->setObjAttempted();
+  return tmp;
+}
+
+Variant APCObject::MakeObject(APCHandle* handle) {
+  if (handle->getIsObj()) {
+    return APCObject::fromHandle(handle)->createObject();
+  }
+  StringData* serObj = APCString::fromHandle(handle)->getStringData();
+  return apc_unserialize(serObj->data(), serObj->size());
+}
+
+void APCObject::Delete(APCHandle* handle) {
+  (handle->getIsObj()) ? delete APCObject::fromHandle(handle)
+                       : delete APCString::fromHandle(handle);
+}
+
 APCObject::APCObject(ObjectData* obj)
-  : m_cls(obj->o_getClassName().get())
+  : m_handle(KindOfObject), m_cls(obj->o_getClassName().get())
 {
   assert(m_cls->isStatic());
 
@@ -41,6 +74,9 @@ APCObject::APCObject(ObjectData* obj)
   // have no internal references and do not implement the serializable
   // interface.
   assert(!obj->instanceof(SystemLib::s_SerializableClass));
+
+  m_handle.setIsObj();
+  m_handle.mustCache();
 
   Array props;
   obj->o_getArray(props, false);
@@ -56,9 +92,9 @@ APCObject::APCObject(ObjectData* obj)
     Variant key(it.first());
     assert(key.isString());
     CVarRef value = it.secondRef();
-    APCVariant *val = nullptr;
+    APCHandle *val = nullptr;
     if (!value.isNull()) {
-      val = new APCVariant(value, false, true, true);
+      val = APCHandle::Create(value, false, true, true);
     }
 
     auto const keySD = key.getStringData();
@@ -85,7 +121,7 @@ APCObject::~APCObject() {
   }
 }
 
-Object APCObject::getObject() const {
+Object APCObject::createObject() const {
   Object obj;
   try {
     obj = create_object_only(m_cls);
@@ -113,7 +149,11 @@ Object APCObject::getObject() const {
   return obj;
 }
 
-void APCObject::getSizeStats(APCVariantStats* stats) const {
+//
+// Stats API
+//
+
+void APCObject::getSizeStats(APCHandleStats* stats) const {
   stats->initStats();
   stats->dataTotalSize += sizeof(APCObject) + sizeof(Prop) * m_propCount;
 
@@ -124,7 +164,7 @@ void APCObject::getSizeStats(APCVariantStats* stats) const {
       stats->dataTotalSize += sizeof(StringData) + sd->size();
     }
     if (m_props[i].val) {
-      APCVariantStats childStats;
+      APCHandleStats childStats;
       m_props[i].val->getStats(&childStats);
       stats->addChildStats(&childStats);
     }

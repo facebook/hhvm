@@ -17,15 +17,16 @@
 #ifndef incl_HPHP_APC_ARRAY_H_
 #define incl_HPHP_APC_ARRAY_H_
 
+#include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/util/atomic.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/hash.h"
-#include "hphp/util/atomic.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class APCVariant;
+class APCLocalArray;
 
 /**
  * APCArray is a php-style array that can take strings and
@@ -34,87 +35,136 @@ class APCVariant;
  * removed.
  */
 struct APCArray {
-  int indexOf(const StringData* key);
-  int indexOf(int64_t key);
+  // Entry point to create an APCArray of any kind
+  static APCHandle* MakeShared(ArrayData* data,
+                               bool inner,
+                               bool unserializeObj);
+  static APCHandle* MakeShared();
 
-  APCVariant* getKeyIndex(int index) {
-    assert(index < size());
-    return buckets()[index].key;
+  static Variant MakeArray(APCHandle* handle);
+
+  static void Delete(APCHandle* handle);
+
+  static APCArray* fromHandle(APCHandle* handle) {
+    assert(offsetof(APCArray, m_handle) == 0);
+    return reinterpret_cast<APCArray*>(handle);
   }
 
-  APCVariant* getValIndex(int index) {
-    assert(index < size());
-    return buckets()[index].val;
+  APCHandle* getHandle() {
+    return &m_handle;
   }
 
-  unsigned size() const {
-    return m.m_num;
+  bool shouldCache() const {
+    return m_handle.m_shouldCache;
+  }
+
+  //
+  // Array API
+  //
+
+  size_t size() const {
+    return isPacked() ? m_size : m.m_num;
   }
 
   unsigned capacity() const {
-    return m.m_capacity_mask + 1;
+    return isPacked() ? m_size : m.m_capacity_mask + 1;
   }
 
-  size_t getStructSize() {
-    size_t size = sizeof(APCArray) +
-                  sizeof(Bucket) * m.m_num +
-                  sizeof(int) * (m.m_capacity_mask + 1);
-    return size;
+  Variant getKey(ssize_t pos) const {
+    if (isPacked()) {
+      assert(static_cast<size_t>(pos) < m_size);
+      return pos;
+    }
+    assert(static_cast<size_t>(pos) < m.m_num);
+    return buckets()[pos].key->toLocal();
   }
 
-  static APCArray* Create(ArrayData* arr, bool unserializeObj,
-                                bool& shouldCache);
-  static void Destroy(APCArray* im);
+  APCHandle* getValue(ssize_t pos) const {
+    if (isPacked()) {
+      assert(static_cast<size_t>(pos) < m_size);
+      return vals()[pos];
+    }
+    assert(static_cast<size_t>(pos) < m.m_num);
+    return buckets()[pos].val;
+  }
+
+  ssize_t getIndex(const StringData* key) const {
+    return isPacked() ? -1 : indexOf(key);
+  }
+
+  ssize_t getIndex(int64_t key) const {
+    if (isPacked()) {
+      return (static_cast<uint64_t>(key) >= m_size) ? -1 : key;
+    }
+    return indexOf(key);
+  }
+
+  void incRef() { m_handle.incRef(); }
+  void decRef() { m_handle.decRef(); }
+  bool isPacked() const { return m_handle.isPacked(); }
 
 private:
+  explicit APCArray(size_t size) : m_handle(KindOfArray), m_size(size) {
+    m_handle.setPacked();
+  }
+  explicit APCArray(unsigned int cap)
+      : m_handle(KindOfArray) {
+    m.m_capacity_mask = cap - 1;
+    m.m_num = 0;
+  }
+  ~APCArray();
+
+  APCArray(const APCArray&) = delete;
+  APCArray& operator=(const APCArray&) = delete;
+
+  void operator delete(void* ptr) { free(ptr); }
+
   struct Bucket {
     /** index of the next bucket, or -1 if the end of a chain */
     int next;
     /** the value of this bucket */
-    APCVariant *key;
-    APCVariant *val;
+    APCHandle *key;
+    APCHandle *val;
   };
 
-private:
-  APCArray() {}
-  ~APCArray() {}
-  void add(int pos, APCVariant *key, APCVariant *val);
+  //
+  // Create API
+  //
+  static APCHandle* MakeShared(ArrayData* data,
+                               bool unserializeObj);
+  static APCHandle* MakePackedShared(ArrayData* data,
+                                     bool unserializeObj);
 
-  /** index of the beginning of each hash chain */
+  void mustCache() { m_handle.m_shouldCache = true; }
+  void setPacked() { m_handle.setPacked(); }
+
+  //
+  // Array internal API
+  //
+  void add(APCHandle *key, APCHandle *val);
+  ssize_t indexOf(const StringData* key) const;
+  ssize_t indexOf(int64_t key) const;
+
+  /* index of the beginning of each hash chain */
   int *hash() const { return (int*)(this + 1); }
-  /** buckets, stored in index order */
+  /* buckets, stored in index order */
   Bucket* buckets() const { return (Bucket*)(hash() + m.m_capacity_mask + 1); }
+  /* start of the data for packed array */
+  APCHandle** vals() const { return (APCHandle**)(this + 1); }
 
 private:
+  friend struct APCHandle;
+
+  APCHandle m_handle;
   union {
+    // for map style arrays
     struct {
       unsigned int m_capacity_mask;
       unsigned int m_num;
     } m;
-    APCVariant* align_dummy;
+    // for packed arrays
+    size_t m_size;
   };
-};
-
-/*
- * APCPackedArray is the APC version of a PackedArray,
- * i.e. an array with int keys in order 0..size-1.  We only store
- * the values.
- */
-struct APCPackedArray {
-  explicit APCPackedArray(size_t size) : m_size(size) {}
-  ~APCPackedArray();
-  APCVariant** vals() { return (APCVariant**)(this + 1); }
-  void *operator new(size_t sz, int num) {
-    assert(sz == sizeof(APCPackedArray));
-    return malloc(sizeof(APCPackedArray) + num * sizeof(APCVariant*));
-  }
-  void operator delete(void* ptr) { free(ptr); }
-  // just to keep the compiler happy; used if the constructor throws
-  void operator delete(void* ptr, int num) { free(ptr); }
-  size_t size() const { return m_size; }
-
-private:
-  size_t const m_size;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

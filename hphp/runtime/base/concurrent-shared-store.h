@@ -21,7 +21,7 @@
 
 #include "hphp/util/smalllocks.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/apc-variant.h"
+#include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -39,13 +39,13 @@ struct StoreValue {
   StoreValue(const StoreValue& v) : var(v.var), sAddr(v.sAddr),
                                     expiry(v.expiry), size(v.size),
                                     sSize(v.sSize) {}
-  void set(APCVariant *v, int64_t ttl);
+  void set(APCHandle *v, int64_t ttl);
   bool expired() const;
 
   // Mutable fields here are so that we can deserialize the object from disk
   // while holding a const pointer to the StoreValue. Mostly a hacky workaround
   // for how we use TBB
-  mutable APCVariant *var;
+  mutable APCHandle *var;
   char *sAddr; // For file storage
   int64_t expiry;
   mutable int32_t size;
@@ -72,7 +72,7 @@ struct ConcurrentTableSharedStore {
     KeyValuePair() : value(nullptr), sAddr(nullptr) {}
     litstr key;
     int len;
-    APCVariant *value;
+    APCHandle *value;
     char *sAddr;
     int32_t sSize;
 
@@ -162,8 +162,8 @@ private:
   };
 
 private:
-  APCVariant* construct(CVarRef v) {
-    return APCVariant::Create(v, false);
+  APCHandle* construct(CVarRef v) {
+    return APCHandle::Create(v, false);
   }
 
   bool eraseImpl(const String& key, bool expired);
@@ -179,9 +179,9 @@ private:
 
   void addToExpirationQueue(const char* key, int64_t etime);
 
-  bool handleUpdate(const String& key, APCVariant* svar);
-  bool handlePromoteObj(const String& key, APCVariant* svar, CVarRef valye);
-  APCVariant* unserialize(const String& key, const StoreValue* sval);
+  bool handleUpdate(const String& key, APCHandle* svar);
+  bool handlePromoteObj(const String& key, APCHandle* svar, CVarRef valye);
+  APCHandle* unserialize(const String& key, const StoreValue* sval);
 
 private:
   int m_id;

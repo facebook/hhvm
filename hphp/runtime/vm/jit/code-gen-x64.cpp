@@ -237,15 +237,14 @@ NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
 NOOP_OPCODE(DefSP)
 NOOP_OPCODE(AssertLoc)
-NOOP_OPCODE(OverrideLoc)
 NOOP_OPCODE(OverrideLocVal)
-NOOP_OPCODE(SmashLocals)
 NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(AssertStkVal)
 NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
 NOOP_OPCODE(ExceptionBarrier)
 NOOP_OPCODE(InlineFPAnchor)
+NOOP_OPCODE(TakeStack)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -341,8 +340,6 @@ CALL_STK_OPCODE(ElemDX)
 CALL_STK_OPCODE(ElemUX)
 CALL_OPCODE(ArrayGet)
 CALL_OPCODE(StringGet)
-CALL_OPCODE(VectorGet)
-CALL_OPCODE(PairGet)
 CALL_OPCODE(MapGet)
 CALL_OPCODE(StableMapGet)
 CALL_OPCODE(CGetElem)
@@ -351,7 +348,6 @@ CALL_STK_OPCODE(BindElem)
 CALL_STK_OPCODE(SetWithRefElem)
 CALL_STK_OPCODE(SetWithRefNewElem)
 CALL_OPCODE(ArraySet)
-CALL_OPCODE(VectorSet)
 CALL_OPCODE(MapSet)
 CALL_OPCODE(StableMapSet)
 CALL_OPCODE(ArraySetRef)
@@ -1830,7 +1826,12 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
                                  JmpFn doJcc) {
   assert(!(type <= Type::Cls));
   ConditionCode cc;
-  if (type.isString()) {
+  if (type <= Type::StaticStr) {
+    emitCmpTVType(m_as, KindOfStaticString, typeSrc);
+    cc = CC_E;
+  } else if (type <= Type::Str) {
+    assert(type != Type::CountedStr &&
+           "We don't support guarding on CountedStr");
     emitTestTVType(m_as, KindOfStringBit, typeSrc);
     cc = CC_NZ;
   } else if (type.equals(Type::UncountedInit)) {
@@ -3068,28 +3069,23 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src) {
 }
 
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
-  SSATmp* dst = inst->dst();
   SSATmp* src = inst->src(0);
   Type type   = src->type();
 
   if (type.notCounted()) return;
 
   cgIncRefWork(type, src);
-  shuffle2(m_as, curOpd(src).reg(0), curOpd(src).reg(1),
-           curOpd(dst).reg(0), curOpd(dst).reg(1));
 }
 
 void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
   if (inst->src(0)->isA(Type::Obj)) return cgIncRef(inst);
 
   auto const src = curOpd(inst->src(0)).reg();
-  auto const dst = curOpd(inst->dst()).reg();
   auto& a = m_as;
 
-  emitMovRegReg(a, src, dst);
-  a.    testb  (0x1, rbyte(dst));
+  a.    testb  (0x1, rbyte(src));
   ifThen(a, CC_Z, [&] {
-    emitIncRef(a, dst);
+    emitIncRef(a, src);
   });
 }
 
@@ -3140,7 +3136,7 @@ void CodeGenerator::cgDecRefLoc(IRInstruction* inst) {
 
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   auto const rFp       = curOpd(inst->src(0)).reg();
-  auto const numLocals = inst->src(1)->getValInt();
+  auto const numLocals = curFunc()->numLocals();
   auto const rDest     = curOpd(inst->dst()).reg();
   auto& a = m_as;
 
@@ -3463,11 +3459,6 @@ void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   // Therefore, we don't generate zero-checking code.
   assert(!inst->taken());
   cgDecRefWork(inst, false);
-}
-
-void CodeGenerator::cgDecRefNZOrBranch(IRInstruction* inst) {
-  assert(inst->taken());
-  cgDecRefWork(inst, true);
 }
 
 void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
@@ -5416,7 +5407,6 @@ void CodeGenerator::cgLdCns(IRInstruction* inst) {
 void CodeGenerator::cgLookupCnsCommon(IRInstruction* inst) {
   SSATmp* cnsNameTmp = inst->src(0);
 
-  assert(inst->typeParam() == Type::Cell);
   assert(cnsNameTmp->isConst() && cnsNameTmp->type() == Type::StaticStr);
 
   auto const cnsName = cnsNameTmp->getValStr();
@@ -5444,7 +5434,6 @@ void CodeGenerator::cgLookupCnsU(IRInstruction* inst) {
   SSATmp* cnsNameTmp = inst->src(0);
   SSATmp* fallbackNameTmp = inst->src(1);
 
-  assert(inst->typeParam() == Type::Cell);
   assert(cnsNameTmp->isConst() && cnsNameTmp->type() == Type::StaticStr);
   assert(fallbackNameTmp->isConst() &&
          fallbackNameTmp->type() == Type::StaticStr);
@@ -5698,8 +5687,8 @@ void CodeGenerator::cgConcatCellCell(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
-  SSATmp* fp = inst->src(0);
-  SSATmp* sp = inst->src(1);
+  SSATmp* sp = inst->src(0);
+  SSATmp* fp = inst->src(1);
   int64_t pcOff = inst->extra<InterpOneData>()->bcOff;
 
   auto opc = *(curFunc()->unit()->at(pcOff));
@@ -5717,7 +5706,7 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
 
   auto const& extra = *inst->extra<InterpOne>();
   auto newSpReg = curOpd(inst->dst()).reg();
-  assert(newSpReg == curOpd(inst->src(1)).reg());
+  assert(newSpReg == curOpd(inst->src(0)).reg());
 
   int64_t spAdjustBytes = cellsToBytes(extra.cellsPopped - extra.cellsPushed);
   if (spAdjustBytes != 0) {

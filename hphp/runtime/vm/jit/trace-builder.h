@@ -49,8 +49,7 @@ namespace HPHP {  namespace JIT {
  *      Before an instruction is linked into the trace, TraceBuilder
  *      internally runs preOptimize() on it, which can do some
  *      tracelet-state related modifications to the instruction.  For
- *      example, it can eliminate redundant guards or weaken DecRef
- *      instructions that cannot go to zero to DecRefNZ.
+ *      example, it can eliminate redundant guards.
  *
  *   - value numbering
  *
@@ -309,7 +308,6 @@ private:
   SSATmp*   preOptimizeAssertLoc(IRInstruction*);
   SSATmp*   preOptimizeLdThis(IRInstruction*);
   SSATmp*   preOptimizeLdCtx(IRInstruction*);
-  SSATmp*   preOptimizeDecRef(IRInstruction*);
   SSATmp*   preOptimizeDecRefThis(IRInstruction*);
   SSATmp*   preOptimizeDecRefLoc(IRInstruction*);
   SSATmp*   preOptimizeLdLoc(IRInstruction*);

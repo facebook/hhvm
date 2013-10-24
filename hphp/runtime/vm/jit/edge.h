@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_EDGE_H_
 
 #include <boost/intrusive/list.hpp>
+#include <boost/noncopyable.hpp>
 
 namespace HPHP { namespace JIT {
 
@@ -28,7 +29,7 @@ struct Block;
  * successor block that maintains a list of predecessors of each block.
  * The predecessor list is updated by calling setTo().
  */
-struct Edge {
+struct Edge : private boost::noncopyable {
   Edge() : m_to(nullptr), m_from(nullptr) {}
   Edge(const Edge& other) : m_to(nullptr), m_from(nullptr) {
     setTo(other.m_to);

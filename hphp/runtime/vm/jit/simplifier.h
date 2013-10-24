@@ -128,6 +128,7 @@ private:
   SSATmp* simplifyLdCtx(IRInstruction*);
   SSATmp* simplifyLdClsCtx(IRInstruction*);
   SSATmp* simplifyGetCtxFwdCall(IRInstruction* inst);
+  SSATmp* simplifyConvClsToCctx(IRInstruction* inst);
   SSATmp* simplifySpillStack(IRInstruction* inst);
   SSATmp* simplifyCall(IRInstruction* inst);
   SSATmp* simplifyCmp(Opcode opName, IRInstruction* inst,
@@ -139,6 +140,7 @@ private:
   SSATmp* simplifyCoerceStk(IRInstruction*);
   SSATmp* simplifyAssertStk(IRInstruction*);
   SSATmp* simplifyLdStack(IRInstruction*);
+  SSATmp* simplifyTakeStack(IRInstruction*);
   SSATmp* simplifyLdStackAddr(IRInstruction*);
   SSATmp* simplifyDecRefStack(IRInstruction*);
   SSATmp* simplifyDecRefLoc(IRInstruction*);
@@ -255,10 +257,20 @@ bool canUseSPropCache(SSATmp* clsTmp,
                       const StringData* propName,
                       const Class* ctx);
 
+
 /*
- * Traces through any IncRefs to get the true value of tmp.
+ * Returns the canonical version of the given value by tracing through any
+ * passthrough instructions (Mov, CheckType, etc...).
  */
-SSATmp* chaseIncRefs(SSATmp* tmp);
+const SSATmp* canonical(const SSATmp* tmp);
+SSATmp* canonical(SSATmp* tmp);
+
+/*
+ * Assuming sp is the VM stack pointer either from inside an FPI region or an
+ * inlined call, find the SpillFrame instruction that defined the current
+ * frame. Returns nullptr if the frame can't be found.
+ */
+IRInstruction* findSpillFrame(SSATmp* sp);
 
 //////////////////////////////////////////////////////////////////////
 

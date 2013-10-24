@@ -731,11 +731,6 @@ IRTranslator::translateIssetG(const NormalizedInstruction& i) {
   HHIR_EMIT(IssetG);
 }
 
-void
-IRTranslator::translateUnsetN(const NormalizedInstruction& i) {
-  HHIR_EMIT(UnsetN);
-}
-
 void IRTranslator::translateCGetS(const NormalizedInstruction& i) {
   HHIR_EMIT(CGetS);
 }
@@ -999,7 +994,8 @@ IRTranslator::translateFCallBuiltin(const NormalizedInstruction& i) {
   int numNonDefault  = i.imm[1].u_IVA;
   Id funcId = i.imm[2].u_SA;
 
-  HHIR_EMIT(FCallBuiltin, numArgs, numNonDefault, funcId);
+  HHIR_EMIT(FCallBuiltin, numArgs, numNonDefault, funcId,
+            Transl::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
 bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
@@ -1160,7 +1156,8 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
     }
   }
 
-  HHIR_EMIT(FCall, numArgs, returnBcOffset, i.funcd);
+  HHIR_EMIT(FCall, numArgs, returnBcOffset, i.funcd,
+            Transl::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
 void
@@ -1169,7 +1166,8 @@ IRTranslator::translateFCallArray(const NormalizedInstruction& i) {
   SrcKey next = i.nextSk();
   const Offset after = next.offset();
 
-  HHIR_EMIT(FCallArray, pcOffset, after);
+  HHIR_EMIT(FCallArray, pcOffset, after,
+            Transl::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
 void
@@ -1548,10 +1546,6 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
     interpretInstr(ni);
   } else {
     translateInstrWork(ni);
-  }
-
-  if (Transl::callDestroysLocals(ni, ht.curFunc())) {
-    ht.emitSmashLocals();
   }
 
   passPredictedAndInferredTypes(ni);

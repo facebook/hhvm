@@ -229,6 +229,30 @@ const bool enabled = true;
 #define TRACE_SET_MOD(name)  \
   static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
+/*
+ * The Indent struct and ITRACE are used for tracing with nested
+ * indentation. Create an Indent object on the stack to increase the nesting
+ * level, then use ITRACE just as you would use FTRACE.
+ */
+extern __thread int indentDepth;
+struct Indent {
+  explicit Indent(int n = 2) : n(n) { indentDepth += n; }
+  ~Indent()                         { indentDepth -= n; }
+
+  int n;
+};
+
+inline std::string indent() {
+  return std::string(indentDepth, ' ');
+}
+
+template<typename... Args>
+inline void itraceImpl(const char* fmtRaw, Args&&... args) {
+  auto const fmt = indent() + fmtRaw;
+  Trace::ftraceRelease(fmt, std::forward<Args>(args)...);
+}
+#define ITRACE(level, ...) ONTRACE((level), Trace::itraceImpl(__VA_ARGS__));
+
 void trace(const char *, ...) ATTRIBUTE_PRINTF(1,2);
 void trace(const std::string&);
 
@@ -249,6 +273,15 @@ void dumpRingbuffer();
 #define FTRACE_MOD(...) do { } while (0)
 #define TRACE_SET_MOD(name) \
   DEBUG_ONLY static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
+
+#define ITRACE(...)     do { } while (0)
+struct Indent {
+  Indent() {
+    always_assert(true && "If this struct is completely empty we get unused "
+                  "variable warnings in code that uses it.");
+  }
+};
+inline std::string indent() { return std::string(); }
 
 const bool enabled = false;
 

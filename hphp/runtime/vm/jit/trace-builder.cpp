@@ -57,7 +57,7 @@ TraceBuilder::~TraceBuilder() {
 bool TraceBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
   if (!RuntimeOption::EvalHHIRRelaxGuards) return false;
   if (inReoptimize()) return false;
-  if (tmp && tmp->isConst()) return false;
+  if (tmp && (tmp->isConst() || tmp->isA(Type::Cls))) return false;
 
   return true;
 }
@@ -125,6 +125,7 @@ void TraceBuilder::appendInstruction(IRInstruction* inst) {
     if (prev->isBlockEnd()) {
       // start a new block
       Block* next = m_unit.defBlock();
+      FTRACE(2, "lazily adding B{}\n", next->id());
       m_curTrace->push_back(next);
       if (!prev->isTerminal()) {
         // new block is reachable from old block so link it.
@@ -145,6 +146,7 @@ void TraceBuilder::appendBlock(Block* block) {
 
   m_state.finishBlock(m_curTrace->back());
 
+  FTRACE(2, "appending B{}\n", block->id());
   // Load up the state for the new block.
   m_state.startBlock(block);
   m_curTrace->push_back(block);
@@ -234,10 +236,14 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
 SSATmp* TraceBuilder::preOptimizeLdThis(IRInstruction* inst) {
   if (m_state.thisAvailable()) {
     auto fpInst = inst->src(0)->inst();
-    if (fpInst->op() == DefInlineFP) {
+    while (!fpInst->is(DefInlineFP, DefFP)) fpInst = fpInst->src(0)->inst();
+
+    if (fpInst->is(DefInlineFP)) {
       if (!m_state.frameSpansCall()) { // check that we haven't nuked the SSATmp
-        auto spInst = fpInst->src(0)->inst();
-        if (spInst->op() == SpillFrame && spInst->src(3)->isA(Type::Obj)) {
+        auto spInst = findSpillFrame(fpInst->src(0));
+        // In an inlined call, we should always be able to find our SpillFrame.
+        always_assert(spInst && spInst->src(0) == fpInst->src(1));
+        if (spInst->src(3)->isA(Type::Obj)) {
           return spInst->src(3);
         }
       }
@@ -252,33 +258,6 @@ SSATmp* TraceBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* TraceBuilder::preOptimizeDecRef(IRInstruction* inst) {
-  /*
-   * Refcount optimization:
-   *
-   * If the decref'ed value is guaranteed to be available after the decref,
-   * generate DecRefNZ instead of DecRef.
-   *
-   * This is safe WRT copy-on-write because all the instructions that
-   * could cause a COW return a new SSATmp that will replace the
-   * tracked state that we are using to determine the value is still
-   * available.  I.e. by the time they get to the DecRef we won't see
-   * it in isValueAvailable anymore and won't convert to DecRefNZ.
-   */
-  auto srcInst = inst->src(0)->inst();
-  while (srcInst->isPassthrough() && !srcInst->is(IncRef)) {
-    srcInst = srcInst->getPassthroughValue()->inst();
-  }
-
-  if (srcInst->is(IncRef)) {
-    if (m_state.isValueAvailable(srcInst->src(0))) {
-      inst->setOpcode(DecRefNZ);
-    }
-  }
-
-  return nullptr;
-}
-
 SSATmp* TraceBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
   /*
    * If $this is available, convert to an instruction sequence that
@@ -286,28 +265,8 @@ SSATmp* TraceBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
    */
   if (thisAvailable()) {
     auto const thiss = gen(LdThis, m_state.fp());
-    auto const thisInst = thiss->inst();
-
-    /*
-     * DecRef optimization for $this in an inlined frame: if a caller
-     * local contains the $this, we know it can't go to zero and can
-     * switch DecRef to DecRefNZ.
-     *
-     * It's ok not to do DecRefThis (which normally nulls out the ActRec
-     * $this), because there is still a reference to it in the caller
-     * frame, so debug_backtrace() can't see a non-live pointer value.
-     */
-    if (thisInst->op() == IncRef &&
-        m_state.callerHasValueAvailable(thisInst->src(0))) {
-      gen(DecRefNZ, thiss);
-      inst->convertToNop();
-      return nullptr;
-    }
-
-    assert(inst->src(0) == m_state.fp());
     gen(DecRef, thiss);
     inst->convertToNop();
-    return nullptr;
   }
 
   return nullptr;
@@ -404,7 +363,6 @@ SSATmp* TraceBuilder::preOptimize(IRInstruction* inst) {
     X(AssertLoc);
     X(LdThis);
     X(LdCtx);
-    X(DecRef);
     X(DecRefThis);
     X(DecRefLoc);
     X(LdLoc);
@@ -455,6 +413,7 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
   copyProp(inst);
 
   SSATmp* result = nullptr;
+
   if (m_state.enableCse() && inst->canCSE()) {
     result = m_state.cseLookup(inst, idoms);
     if (result) {
@@ -462,17 +421,12 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
       FTRACE(1, "  {}cse found: {}\n",
              indent(), result->inst()->toString());
 
-      // CheckType and AssertType are special. They're marked as both PRc and
-      // CRc to placate our refcounting optimizations, for for the purposes of
-      // CSE they're neither.
-      if (inst->is(CheckType, AssertType)) {
-        return result;
-      }
       assert(!inst->consumesReferences());
-      if (inst->producesReference()) {
+      if (inst->producesReference(0)) {
         // Replace with an IncRef
         FTRACE(1, "  {}cse of refcount-producing instruction\n", indent());
-        return gen(IncRef, result);
+        gen(IncRef, result);
+        return result;
       } else {
         return result;
       }

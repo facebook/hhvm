@@ -343,51 +343,11 @@ XLS::XLS(IRUnit& unit, RegAllocInfo& regs)
   }
 }
 
-// Insert an empty block on the edge pred->succ.
-Block* splitCriticalEdge(IRUnit& unit, Block* pred, Block* succ) {
-  assert(pred->taken() && pred->next() && succ->numPreds() > 1);
-  assert(pred->taken() == succ || pred->next() == succ);
-  Block* middle = unit.defBlock();
-  if (pred->taken() == succ) {
-    pred->back().setTaken(middle);
-  } else {
-    pred->setNext(middle);
-  }
-  auto& marker = succ->front().marker();
-  middle->prepend(unit.gen(Jmp, marker, succ));
-  middle->setHint(succ->hint());
-  pred->trace()->push_back(middle);
-  return middle;
-}
-
 // Split critical edges, remove dead predecessor edges, and put blocks
 // in a sutiable order.
 void XLS::prepareBlocks() {
+  splitCriticalEdges(m_unit);
   m_blocks = rpoSortCfg(m_unit);
-  bool modified = false;
-  IdSet<Block> visited;
-  for (auto b : m_blocks) {
-    visited.add(b);
-    int numPreds = 0;
-    b->forEachPred([&](Block* p) {
-      if (!visited[p]) {
-        p->setNext(nullptr);
-        if (!p->empty()) p->back().setTaken(nullptr);
-        modified = true;
-      }
-      numPreds++;
-    });
-    if (numPreds <= 1) continue;
-    b->forEachPred([&](Block* p) {
-      if (p->next() && p->taken()) {
-        splitCriticalEdge(m_unit, p, b);
-        modified = true;
-      }
-    });
-  }
-  if (modified) {
-    m_blocks = rpoSortCfg(m_unit);
-  }
 }
 
 // compute the position number for each instruction.  Each instruction

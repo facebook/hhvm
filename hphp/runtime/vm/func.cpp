@@ -496,7 +496,7 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrHot)       { out << " (hot)"; }
 }
 
-void Func::prettyPrint(std::ostream& out) const {
+void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
   if (isPseudoMain()) {
     out << "Pseudo-main";
   } else if (preClass() != nullptr) {
@@ -558,14 +558,16 @@ void Func::prettyPrint(std::ostream& out) const {
     out << std::endl;
   }
 
-  for (auto& fpi : fpitab()) {
-    out << " FPI " << fpi.m_fpushOff << "-" << fpi.m_fcallOff
-        << "; fpOff = " << fpi.m_fpOff;
-    if (fpi.m_parentIndex != -1) {
-      out << " parentIndex = " << fpi.m_parentIndex
-          << " (depth " << fpi.m_fpiDepth << ")";
+  if (opts.fpi) {
+    for (auto& fpi : fpitab()) {
+      out << " FPI " << fpi.m_fpushOff << "-" << fpi.m_fcallOff
+          << "; fpOff = " << fpi.m_fpOff;
+      if (fpi.m_parentIndex != -1) {
+        out << " parentIndex = " << fpi.m_parentIndex
+            << " (depth " << fpi.m_fpiDepth << ")";
+      }
+      out << '\n';
     }
-    out << '\n';
   }
 }
 

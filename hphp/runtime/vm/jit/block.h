@@ -74,10 +74,15 @@ struct Block : boost::noncopyable {
   // return the fallthrough block.  Should be nullptr if the last
   // instruction is a Terminal.
   Block* next() const { return m_next.to(); }
+  Edge*  nextEdge()   { return m_next.to() ?  &m_next : nullptr; }
   void setNext(Block* b) { m_next.setTo(b); }
 
   // return the target block if the last instruction is a branch.
   Block* taken() const { return empty() ? nullptr : back().taken(); }
+  Edge*  takenEdge()   { return empty() ? nullptr : back().takenEdge(); }
+
+  // returns the number of successors.
+  size_t numSuccs() const { return (bool)taken() + (bool)next(); }
 
   // return the postorder number of this block. (updated each time
   // sortBlocks() is called.
@@ -111,7 +116,7 @@ struct Block : boost::noncopyable {
 
   // visit each src that provides a value to label->dsts[i]. body
   // should take an IRInstruction* and an SSATmp*.
-  template<typename L> void forEachSrc(unsigned i, L body);
+  template<typename L> void forEachSrc(unsigned i, L body) const;
 
   // return the first src providing a value to label->dsts[i] for
   // which body(src) returns true, or nullptr if none are found.
@@ -128,7 +133,8 @@ struct Block : boost::noncopyable {
   iterator         end()         { return m_instrs.end(); }
   const_iterator   begin() const { return m_instrs.begin(); }
   const_iterator   end()   const { return m_instrs.end(); }
-  iterator erase(iterator pos)   { return m_instrs.erase(pos); }
+  iterator         erase(iterator pos);
+  iterator         erase(IRInstruction* inst);
   iterator insert(iterator pos, IRInstruction* inst);
   void splice(iterator pos, Block* from, iterator begin, iterator end,
               BCMarker newMarker);
@@ -175,6 +181,16 @@ inline Block::const_reference Block::back() const {
   return const_cast<Block*>(this)->back();
 }
 
+inline Block::iterator Block::erase(iterator pos) {
+  pos->setBlock(nullptr);
+  return m_instrs.erase(pos);
+}
+
+inline Block::iterator Block::erase(IRInstruction* inst) {
+  assert(inst->block() == this);
+  return erase(iteratorTo(inst));
+}
+
 inline Block::iterator Block::prepend(IRInstruction* inst) {
   assert(inst->marker().valid());
   auto it = skipHeader();
@@ -216,8 +232,8 @@ inline Block* Block::updatePreds(Edge* edge, Block* new_to) {
 }
 
 template<typename L> inline
-void Block::forEachSrc(unsigned i, L body) {
-  for (Edge& e : m_preds) {
+void Block::forEachSrc(unsigned i, L body) const {
+  for (auto const& e : m_preds) {
     auto jmp = &e.from()->back();
     assert(jmp->op() == Jmp && jmp->taken() == this);
     body(jmp, jmp->src(i));

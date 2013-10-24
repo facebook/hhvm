@@ -18,9 +18,10 @@
 #include "hphp/runtime/base/hphp-array-defs.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/jit/frame-state.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
-#include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
@@ -46,11 +47,9 @@ bool MInstrEffects::supported(const IRInstruction* inst) {
   return supported(inst->op());
 }
 
-void MInstrEffects::get(const IRInstruction* inst,
-                        StoreLocFunc storeLocalValue,
-                        SetLocTypeFunc setLocalType) {
-  // If the base for this instruction is a local address, the
-  // helper call might have side effects on the local's value
+void MInstrEffects::get(const IRInstruction* inst, LocalStateHook& hook) {
+  // If the base for this instruction is a local address, the helper call might
+  // have side effects on the local's value
   SSATmp* base = inst->src(minstrBaseIdx(inst));
   IRInstruction* locInstr = base->inst();
   if (locInstr->op() == LdLocAddr) {
@@ -61,8 +60,7 @@ void MInstrEffects::get(const IRInstruction* inst,
 
     MInstrEffects effects(inst);
     if (effects.baseTypeChanged || effects.baseValChanged) {
-      storeLocalValue(loc, nullptr);
-      setLocalType(loc, effects.baseType.derefIfPtr());
+      hook.setLocalType(loc, effects.baseType.derefIfPtr());
     }
   }
 }
@@ -124,6 +122,11 @@ void getBaseType(Opcode rawOp, bool predict,
        * CountedStr or the instruction will throw an exception and side
        * exit. */
       baseType = Type::CountedStr;
+    } else if (baseType.isString() &&
+               (rawOp == SetNewElem || rawOp == SetNewElemStk)) {
+      /* If the string base is empty, it will be promoted to an
+       * array. Otherwise the base will be left alone and we'll fatal. */
+      baseType = Type::Arr;
     } else {
       /* Regardless of whether or not promotion happens, we know the base
        * cannot be Null after the operation. If the base was a subtype of Null
@@ -1047,7 +1050,7 @@ void HhbcTranslator::MInstrTranslator::emitPropSpecialized(const MInstrAttr mia,
            *   #1789661 (this can cause bugs if bytecode.cpp promotes)
            *   #1124706 (we want to get rid of stdClass promotion in general)
            */
-          gen(ThrowNonObjProp);
+          gen(ThrowNonObjProp, makeCatch());
         }
         return initNull;
       }
@@ -1337,8 +1340,8 @@ void HhbcTranslator::MInstrTranslator::emitCGetProp() {
   if (propInfo.offset != -1) {
     emitPropSpecialized(MIA_warn, propInfo);
     SSATmp* cellPtr = gen(UnboxPtr, m_base);
-    SSATmp* propVal = gen(LdMem, Type::Cell, cellPtr, cns(0));
-    m_result = gen(IncRef, propVal);
+    m_result = gen(LdMem, Type::Cell, cellPtr, cns(0));
+    gen(IncRef, m_result);
     return;
   }
 
@@ -1463,11 +1466,11 @@ void HhbcTranslator::MInstrTranslator::emitSetProp() {
     emitPropSpecialized(MIA_define, propInfo);
     SSATmp* cellPtr = gen(UnboxPtr, m_base);
     SSATmp* oldVal = gen(LdMem, Type::Cell, cellPtr, cns(0));
-    // The object owns a reference now
-    SSATmp* increffed = gen(IncRef, value);
+
+    gen(IncRef, value);
     gen(StMem, cellPtr, cns(0), value);
     gen(DecRef, oldVal);
-    m_result = increffed;
+    m_result = value;
     return;
   }
 
@@ -1658,7 +1661,8 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* key) {
     [&] { // Next:
       auto res = gen(LdPackedArrayElem, m_base, key);
       auto unboxed = gen(Unbox, res);
-      return gen(IncRef, unboxed);
+      gen(IncRef, unboxed);
+      return unboxed;
     },
     [&] { // Taken:
       m_tb.hint(Block::Hint::Unlikely);
@@ -1736,12 +1740,11 @@ void HhbcTranslator::MInstrTranslator::emitVectorGet(SSATmp* key) {
   static_assert(sizeof(TypedValue) == 16,
                 "TypedValue size expected to be 16 bytes");
   auto idx = gen(Shl, key, cns(4));
-  SSATmp* value = gen(LdElem, base, idx);
-  m_result = gen(IncRef, value);
+  m_result = gen(LdElem, base, idx);
+  gen(IncRef, m_result);
 }
 
 void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
-  SSATmp* value;
   assert(key->isA(Type::Int));
   static_assert(sizeof(TypedValue) == 16,
                 "TypedValue size expected to be 16 bytes");
@@ -1753,20 +1756,21 @@ void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
     // no reason to check bounds
     SSATmp* base = gen(LdPairBase, m_base);
     auto index = cns(key->getValInt() << 4);
-    value = gen(LdElem, base, index);
+    m_result = gen(LdElem, base, index);
   } else {
     gen(CheckBounds, makeCatch(), key, cns(1));
     SSATmp* base = gen(LdPairBase, m_base);
     auto idx = gen(Shl, key, cns(4));
-    value = gen(LdElem, base, idx);
+    m_result = gen(LdElem, base, idx);
   }
-  m_result = gen(IncRef, value);
+  gen(IncRef, m_result);
 }
 
 template<KeyType keyType>
 static inline TypedValue mapGetImpl(
     c_Map* map, typename KeyTypeTraits<keyType>::rawType key) {
   TypedValue* ret = map->at(key);
+  tvRefcountedIncRef(ret);
   return *ret;
 }
 
@@ -1790,9 +1794,7 @@ void HhbcTranslator::MInstrTranslator::emitMapGet(SSATmp* key) {
 
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*);
   BUILD_OPTAB(keyType);
-  SSATmp* value = gen(MapGet, makeCatch(),
-                      cns((TCA)opFunc), m_base, key);
-  m_result = gen(IncRef, value);
+  m_result = gen(MapGet, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -1800,6 +1802,7 @@ template<KeyType keyType>
 static inline TypedValue stableMapGetImpl(
     c_StableMap* map, typename KeyTypeTraits<keyType>::rawType key) {
   TypedValue* ret = map->at(key);
+  tvRefcountedIncRef(ret);
   return *ret;
 }
 
@@ -1823,9 +1826,7 @@ void HhbcTranslator::MInstrTranslator::emitStableMapGet(SSATmp* key) {
 
   typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*);
   BUILD_OPTAB(keyType);
-  SSATmp* value = gen(StableMapGet, makeCatch(),
-                      cns((TCA)opFunc), m_base, key);
-  m_result = gen(IncRef, value);
+  m_result = gen(StableMapGet, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -2332,7 +2333,7 @@ void HhbcTranslator::MInstrTranslator::emitVectorSet(
           gen(VectorDoCow, m_base);
         });
 
-  SSATmp* increffed = gen(IncRef, value);
+  gen(IncRef, value);
   SSATmp* vecBase = gen(LdVectorBase, m_base);
   SSATmp* oldVal;
   static_assert(sizeof(TypedValue) == 16,
@@ -2342,7 +2343,7 @@ void HhbcTranslator::MInstrTranslator::emitVectorSet(
   gen(StElem, vecBase, idx, value);
   gen(DecRef, oldVal);
 
-  m_result = increffed;
+  m_result = value;
 }
 
 template<KeyType keyType>

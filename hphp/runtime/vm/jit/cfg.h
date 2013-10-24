@@ -43,7 +43,7 @@ BlockList::const_iterator rpoIteratorTo(const BlockList& cfg, Block* b);
 
 /*
  * Compute a reverse postorder list of the basic blocks reachable from
- * the IR's entry block.
+ * the IR's entry block. Updates the postId field of each reachable Block.
  *
  * Post: isRPOSorted(return value)
  */
@@ -54,6 +54,20 @@ BlockList rpoSortCfg(const IRUnit&);
  * order.
  */
 bool isRPOSorted(const BlockList&);
+
+/*
+ * Removes unreachable blocks from the unit and then splits any critical edges.
+ *
+ * Returns: true iff any modifications were made to the unit.
+ */
+bool splitCriticalEdges(IRUnit&);
+
+/*
+ * Remove unreachable blocks from the given unit.
+ *
+ * Returns: true iff one or more blocks were deleted.
+ */
+bool removeUnreachable(IRUnit& unit);
 
 /*
  * Compute the postorder number of each immediate dominator of each

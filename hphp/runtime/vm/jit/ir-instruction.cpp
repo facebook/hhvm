@@ -62,7 +62,7 @@ bool IRInstruction::isNative() const {
   return opcodeHasFlags(op(), CallsNative);
 }
 
-bool IRInstruction::producesReference() const {
+bool IRInstruction::producesReference(int dstNo) const {
   return opcodeHasFlags(op(), ProducesRC);
 }
 
@@ -72,11 +72,9 @@ bool IRInstruction::hasMemEffects() const {
 
 bool IRInstruction::canCSE() const {
   auto canCSE = opcodeHasFlags(op(), CanCSE);
-  // Make sure that instructions that are CSE'able can't produce a reference
-  // count or consume reference counts. CheckType/AssertType are special
-  // because they can refine a maybeCounted type to a notCounted type, so they
-  // logically consume and produce a reference without doing any work.
-  assert(!canCSE || !consumesReferences() || is(CheckType, AssertType));
+  // Make sure that instructions that are CSE'able can't consume reference
+  // counts.
+  assert(!canCSE || !consumesReferences());
   return canCSE && !mayReenterHelper();
 }
 
@@ -88,32 +86,64 @@ bool IRInstruction::consumesReference(int srcNo) const {
   if (!consumesReferences()) {
     return false;
   }
-  // CheckType/AssertType consume a reference if we're guarding from a
-  // maybeCounted type to a notCounted type.
-  if (m_op == CheckType || m_op == AssertType) {
-    assert(srcNo == 0);
-    return src(0)->type().maybeCounted() && typeParam().notCounted();
-  }
-  // SpillStack consumes inputs 2 and onward
-  if (m_op == SpillStack) return srcNo >= 2;
-  // Call consumes inputs 3 and onward
-  if (m_op == Call) return srcNo >= 3;
-  // StRetVal only consumes input 1
-  if (m_op == StRetVal) return srcNo == 1;
 
-  if (m_op == StLoc || m_op == StLocNT) {
-    // StLoc[NT] <stkptr>, <value>
-    return srcNo == 1;
+  switch (op()) {
+    case ConcatStrStr:
+    case ConcatStrInt:
+    case ConcatCellCell:
+      // Call a helper that decrefs the first argument
+      return srcNo == 0;
+
+    case StRef:
+    case StRefNT:
+    case StClosureArg:
+    case StClosureCtx:
+    case StContArValue:
+    case StContArKey:
+    case StRetVal:
+    case StLoc:
+    case StLocNT:
+      // Consume the value being stored, not the thing it's being stored into
+      return srcNo == 1;
+
+    case StProp:
+    case StPropNT:
+    case StMem:
+    case StMemNT:
+      // StProp[NT]|StMem[NT] <base>, <offset>, <value>
+      return srcNo == 2;
+
+    case ArraySet:
+    case ArraySetRef:
+      // Only consumes the reference to its input array
+      return srcNo == 1;
+
+    case SpillStack:
+      // Inputs 2+ are values to store
+      return srcNo >= 2;
+
+    case SpillFrame:
+      // Consumes the $this/Class field of the ActRec
+      return srcNo == 3;
+
+    case Call:
+      // Inputs 3+ are arguments to the function
+      return srcNo >= 3;
+
+    case ColAddElemC:
+      // value at index 2
+      return srcNo == 2;
+
+    case ColAddNewElemC:
+      // value at index 1
+      return srcNo == 1;
+
+    case CheckNullptr:
+      return srcNo == 0;
+
+    default:
+      return true;
   }
-  if (m_op == StProp || m_op == StPropNT || m_op == StMem || m_op == StMemNT) {
-    // StProp[NT]|StMem[NT] <base>, <offset>, <value>
-    return srcNo == 2;
-  }
-  if (m_op == ArraySet || m_op == ArraySetRef) {
-    // Only consumes the reference to its input array
-    return srcNo == 1;
-  }
-  return true;
 }
 
 bool IRInstruction::mayModifyRefs() const {
@@ -140,18 +170,8 @@ bool IRInstruction::mayRaiseError() const {
 }
 
 bool IRInstruction::isEssential() const {
-  Opcode opc = op();
-  if (is(IncRef, IncRefCtx, DecRefNZ, DecRefNZOrBranch)) {
-    // If the ref count optimization is turned off, mark all refcounting
-    // operations as essential.
-    if (!RuntimeOption::EvalHHIREnableRefCountOpt) return true;
-
-    // If the source of a DecRefNZ is not an IncRef, mark it as essential
-    // because we won't remove its source as well as itself.
-    if (is(DecRefNZ) && !src(0)->inst()->is(IncRef)) return true;
-  }
   return isControlFlow() ||
-         opcodeHasFlags(opc, Essential) ||
+         opcodeHasFlags(op(), Essential) ||
          mayReenterHelper();
 }
 
@@ -186,8 +206,6 @@ bool IRInstruction::isLoad() const {
     case VGetProp:
     case VGetPropStk:
     case ArrayGet:
-    case VectorGet:
-    case PairGet:
     case MapGet:
     case StableMapGet:
     case CGetElem:
@@ -216,7 +234,6 @@ bool IRInstruction::storesCell(uint32_t srcIdx) const {
       return srcIdx == 2;
 
     case ArraySet:
-    case VectorSet:
     case MapSet:
     case StableMapSet:
       return srcIdx == 3;
@@ -240,9 +257,11 @@ bool IRInstruction::storesCell(uint32_t srcIdx) const {
 
 SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
-  assert(m_op == IncRef || m_op == PassFP || m_op == PassSP ||
-         m_op == CheckType || m_op == AssertType ||
-         m_op == Mov);
+  assert(is(IncRef, PassFP, PassSP,
+            CheckType, AssertType, AssertNonNull,
+            StRef, StRefNT,
+            ColAddElemC, ColAddNewElemC,
+            Mov));
   return src(0);
 }
 
@@ -287,6 +306,14 @@ SSATmp* IRInstruction::modifiedStkPtr() const {
   SSATmp* sp = dst(hasMainDst() ? 1 : 0);
   assert(sp->isA(Type::StkPtr));
   return sp;
+}
+
+SSATmp* IRInstruction::previousStkPtr() const {
+  assert(modifiesStack());
+  assert(MInstrEffects::supported(this));
+  auto base = src(minstrBaseIdx(this));
+  assert(base->inst()->is(LdStackAddr));
+  return base->inst()->src(0);
 }
 
 bool IRInstruction::hasMainDst() const {

@@ -20,6 +20,8 @@
 
 namespace HPHP {  namespace JIT {
 
+TRACE_SET_MOD(hhir);
+
 IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
   IRInstruction inst(DefLabel, marker);
   IRInstruction* label = cloneInstruction(&inst);
@@ -34,6 +36,7 @@ IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
 }
 
 Block* IRUnit::defBlock() {
+  FTRACE(2, "IRUnit defining B{}\n", m_nextBlockId + 1);
   return new (m_arena) Block(m_nextBlockId++);
 }
 

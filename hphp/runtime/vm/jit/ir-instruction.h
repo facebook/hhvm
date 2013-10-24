@@ -286,6 +286,7 @@ struct IRInstruction {
    * be the last one in the block.
    */
   Block*     taken() const { return m_taken.to(); }
+  Edge*      takenEdge()   { return m_taken.to() ? &m_taken : nullptr; }
   void       setTaken(Block* b) {
     if (isTransient()) m_taken.setTransientTo(b);
     else m_taken.setTo(b);
@@ -333,7 +334,7 @@ struct IRInstruction {
   bool isNative() const;
   bool consumesReferences() const;
   bool consumesReference(int srcNo) const;
-  bool producesReference() const;
+  bool producesReference(int dstNo) const;
   bool mayModifyRefs() const;
   bool mayRaiseError() const;
   bool isEssential() const;
@@ -345,6 +346,7 @@ struct IRInstruction {
 
   bool modifiesStack() const;
   SSATmp* modifiedStkPtr() const;
+  SSATmp* previousStkPtr() const;
   // hasMainDst provides raw access to the HasDest flag, for instructions with
   // ModifiesStack set.
   bool hasMainDst() const;

@@ -31,7 +31,7 @@ void assert_fail_log(const char* title, const std::string& msg) {
   if (s_logger) {
     s_logger(title, msg);
   }
-  fprintf(stderr, "Assertion failure: %s\n", msg.c_str());
+  fprintf(stderr, "Assertion failure: %s\n%s", title, msg.c_str());
 }
 
 void register_assert_fail_logger(AssertFailLogger l) {

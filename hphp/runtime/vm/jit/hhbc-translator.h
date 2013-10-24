@@ -146,7 +146,6 @@ struct HhbcTranslator {
   void checkTypeLocal(uint32_t localIndex, Type type, Offset dest = -1);
   void checkTypeStack(uint32_t idx, Type type, Offset dest);
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
-  void overrideTypeLocal(uint32_t localIndex, Type type);
   void assertType(const RegionDesc::Location& loc, Type type);
   void checkType(const RegionDesc::Location& loc, Type type,
                          Offset dest);
@@ -168,10 +167,9 @@ struct HhbcTranslator {
 
   // Other public functions for irtranslator.
   void setThisAvailable();
-  void emitInterpOne(Type t, int popped);
-  void emitInterpOne(Type t, int popped, int pushed);
   void emitInterpOne(const NormalizedInstruction&);
-  void emitSmashLocals();
+  void emitInterpOne(Type t, int popped);
+  void emitInterpOne(Type t, int popped, int pushed, InterpOneData& id);
   std::string showStack() const;
   bool hasExit() const {
     return m_hasExit;
@@ -234,7 +232,6 @@ struct HhbcTranslator {
   void emitBindS();
   void emitBindG();
   void emitUnsetL(int32_t id);
-  void emitUnsetN();
   void emitIssetL(int32_t id);
   void emitIssetS();
   void emitIssetG();
@@ -302,15 +299,14 @@ struct HhbcTranslator {
   void emitFPushCtorCommon(SSATmp* cls,
                            SSATmp* obj,
                            const Func* func,
-                           int32_t numParams,
-                           Block* catchBlock);
+                           int32_t numParams);
   void emitCreateCl(int32_t numParams, int32_t classNameStrId);
-  void emitFCallArray(const Offset pcOffset, const Offset after);
-  void emitFCall(uint32_t numParams,
-                  Offset returnBcOffset,
-                  const Func* callee);
+  void emitFCallArray(const Offset pcOffset, const Offset after,
+                      bool destroyLocals);
+  void emitFCall(uint32_t numParams, Offset returnBcOffset,
+                 const Func* callee, bool destroyLocals);
   void emitFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault,
-                        int32_t funcId);
+                        int32_t funcId, bool destroyLocals);
   void emitClsCnsD(int32_t cnsNameStrId, int32_t clsNameStrId, Type outPred);
   void emitClsCns(int32_t cnsNameStrId);
   void emitAKExists();
@@ -715,22 +711,21 @@ private:
   SSATmp* checkSupportedName(uint32_t stackIdx);
   void destroyName(SSATmp* name);
   typedef SSATmp* (HhbcTranslator::*EmitLdAddrFn)(Block*, SSATmp* name);
-  typedef SSATmp* (HhbcTranslator::*EmitLdAddrFnNoBlock)(SSATmp* name);
   void emitCGet(uint32_t stackIdx, bool exitOnFailure, EmitLdAddrFn);
-  void emitVGet(uint32_t stackIdx, EmitLdAddrFnNoBlock);
-  void emitBind(uint32_t stackIdx, EmitLdAddrFnNoBlock);
-  void emitSet(uint32_t stackIdx, EmitLdAddrFnNoBlock);
+  void emitVGet(uint32_t stackIdx, EmitLdAddrFn);
+  void emitBind(uint32_t stackIdx, EmitLdAddrFn);
+  void emitSet(uint32_t stackIdx, EmitLdAddrFn);
   void emitIsset(uint32_t stackIdx, EmitLdAddrFn);
   void emitEmpty(uint32_t stackOff, EmitLdAddrFn);
   SSATmp* emitLdGblAddr(Block* block, SSATmp* name);
-  SSATmp* emitLdGblAddrDef(SSATmp* name);
+  SSATmp* emitLdGblAddrDef(Block* block, SSATmp* name);
   SSATmp* emitLdClsPropAddr(SSATmp* name) {
     return emitLdClsPropAddrOrExit(nullptr, name);
   }
   SSATmp* emitLdClsPropAddrOrExit(Block* block, SSATmp* name);
 
   void emitUnboxRAux();
-  void emitAGet(SSATmp* src);
+  void emitAGet(SSATmp* src, Block* catchBlock);
   void emitRetFromInlined(Type type);
   SSATmp* emitDecRefLocalsInline(SSATmp* retVal);
   void emitRet(Type type, bool freeInline);
@@ -753,7 +748,9 @@ private:
 
   Type interpOutputType(const NormalizedInstruction&,
                         folly::Optional<Type>&) const;
-  void interpOutputLocals(const NormalizedInstruction&);
+  smart::vector<InterpOneData::LocalType>
+  interpOutputLocals(const NormalizedInstruction&, bool& smashAll,
+                     Type pushedType);
 
 private: // Exit trace creation routines.
   Block* makeExit(Offset targetBcOff = -1);
@@ -784,8 +781,10 @@ private: // Exit trace creation routines.
    * only in slow paths.
    */
   Block* makeExitSlow();
-  Block* makeCatch();
   Block* makeExitOpt(Transl::TransID transId);
+
+  Block* makeCatch(std::vector<SSATmp*> extraSpill =
+                   std::vector<SSATmp*>());
 
   /*
    * Implementation for the above.  Takes spillValues, target offset,
@@ -857,7 +856,7 @@ private:
    * Eval stack helpers.
    */
   SSATmp* push(SSATmp* tmp);
-  SSATmp* pushIncRef(SSATmp* tmp) { return push(gen(IncRef, tmp)); }
+  SSATmp* pushIncRef(SSATmp* tmp) { gen(IncRef, tmp); return push(tmp); }
   SSATmp* pop(Type type, TypeConstraint tc = DataTypeSpecific);
   void    popDecRef(Type type, TypeConstraint tc = DataTypeCountness);
   void    discard(unsigned n);

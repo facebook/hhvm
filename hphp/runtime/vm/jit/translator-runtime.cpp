@@ -322,7 +322,6 @@ RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
   if (!inited) {
     cellCopy(val, *refData->tv());
   }
-  refData->incRefCount();
   return refData;
 }
 
@@ -815,8 +814,9 @@ ObjectData* newColHelper(uint32_t type, uint32_t size) {
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
   if (coll->isCollection()) {
     collectionInitAppend(coll, &value);
-    // decref the value as the collection helper incref'ed it
-    tvRefcountedDecRef(&value);
+    // consume the input value. the collection setter either threw or created a
+    // reference to value, so we can use a cheaper decref.
+    tvRefcountedDecRefNZ(value);
   } else {
     raise_error("ColAddNewElemC: $2 must be a collection");
   }
@@ -827,8 +827,9 @@ ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
                               TypedValue value) {
   if (coll->isCollection()) {
     collectionSet(coll, &key, &value);
-    // decref the value as the collection helper incref'ed it
-    tvRefcountedDecRef(&value);
+    // consume the input value. the collection setter either threw or created a
+    // reference to value, so we can use a cheaper decref.
+    tvRefcountedDecRefNZ(value);
   } else {
     raise_error("ColAddNewElemC: $2 must be a collection");
   }

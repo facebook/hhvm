@@ -157,7 +157,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
 
   case InterpOne:
   case InterpOneCF: {
-    SSATmp* prevSp = inst->src(1);
+    SSATmp* prevSp = inst->src(0);
     auto const& extra = *inst->extra<InterpOneData>();
     int64_t spAdjustment = extra.cellsPopped - extra.cellsPushed;
     Type resultType = inst->typeParam();
@@ -292,6 +292,36 @@ bool canUseSPropCache(SSATmp* clsTmp,
   return visible && accessible;
 }
 
+const SSATmp* canonical(const SSATmp* val) {
+  return canonical(const_cast<SSATmp*>(val));
+}
+
+SSATmp* canonical(SSATmp* value) {
+  auto inst = value->inst();
+
+  while (inst->isPassthrough()) {
+    value = inst->getPassthroughValue();
+    inst = value->inst();
+  }
+  return value;
+}
+
+IRInstruction* findSpillFrame(SSATmp* sp) {
+  auto inst = sp->inst();
+  while (!inst->is(SpillFrame)) {
+    assert(inst->dst()->isA(Type::StkPtr));
+    assert(!inst->is(RetAdjustStack, GenericRetDecRefs,
+                     ReDefSP, ReDefGeneratorSP));
+    if (inst->is(DefSP)) return nullptr;
+
+    // M-instr support opcodes have the previous sp in varying sources.
+    if (inst->modifiesStack()) inst = inst->previousStkPtr()->inst();
+    else                       inst = inst->src(0)->inst();
+  }
+
+  return inst;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 template<class... Args> SSATmp* Simplifier::cns(Args&&... cns) {
@@ -404,7 +434,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case PrintInt:
   case PrintBool:    return simplifyPrint(inst);
   case DecRef:
-  case DecRefNZOrBranch:
   case DecRefNZ:     return simplifyDecRef(inst);
   case IncRef:       return simplifyIncRef(inst);
   case IncRefCtx:    return simplifyIncRefCtx(inst);
@@ -417,6 +446,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case LdCtx:        return simplifyLdCtx(inst);
   case LdClsCtx:     return simplifyLdClsCtx(inst);
   case GetCtxFwdCall:return simplifyGetCtxFwdCall(inst);
+  case ConvClsToCctx: return simplifyConvClsToCctx(inst);
 
   case SpillStack:   return simplifySpillStack(inst);
   case Call:         return simplifyCall(inst);
@@ -424,6 +454,7 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case CoerceStk:    return simplifyCoerceStk(inst);
   case AssertStk:    return simplifyAssertStk(inst);
   case LdStack:      return simplifyLdStack(inst);
+  case TakeStack:    return simplifyTakeStack(inst);
   case LdStackAddr:  return simplifyLdStackAddr(inst);
   case DecRefStack:  return simplifyDecRefStack(inst);
   case DecRefLoc:    return simplifyDecRefLoc(inst);
@@ -537,6 +568,13 @@ SSATmp* Simplifier::simplifyGetCtxFwdCall(IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* Simplifier::simplifyConvClsToCctx(IRInstruction* inst) {
+  auto* srcInst = inst->src(0)->inst();
+  if (srcInst->is(LdClsCctx)) return srcInst->src(0);
+
+  return nullptr;
+}
+
 SSATmp* Simplifier::simplifyLdCls(IRInstruction* inst) {
   SSATmp* clsName = inst->src(0);
   if (clsName->isConst()) {
@@ -563,6 +601,17 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   SSATmp* src  = inst->src(0);
   auto const oldType = src->type();
   auto const newType = inst->typeParam();
+
+  if (m_tb.typeMightRelax(src)) return nullptr;
+
+  if (oldType.not(newType)) {
+    /* This guard will always fail. Probably an incorrect prediction from the
+     * frontend. We can't convert it to a Jmp because people may be relying on
+     * the src, so insert a Jmp before it. This CheckType and anything after it
+     * will be killed by DCE. */
+    gen(Jmp, inst->taken());
+    return nullptr;
+  }
 
   if (newType >= oldType) {
     /*
@@ -1147,13 +1196,6 @@ SSATmp* Simplifier::simplifyShr(IRInstruction* inst) {
                        return a >> b; });
 }
 
-SSATmp* chaseIncRefs(SSATmp* tmp) {
-  while (tmp->inst()->op() == IncRef) {
-    tmp = tmp->inst()->src(0);
-  }
-  return tmp;
-}
-
 template<class T, class U>
 static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   switch (opName) {
@@ -1183,8 +1225,7 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, IRInstruction* inst,
   auto const type2 = src2->type();
 
   // Identity optimization
-  if ((src1 == src2 || chaseIncRefs(src1) == chaseIncRefs(src2)) &&
-      type1.not(Type::Dbl)) {
+  if (src1 == src2 && type1.not(Type::Dbl)) {
     // (val1 == val1) does not simplify to true when val1 is a NaN
     return cns(bool(cmpOp(opName, 0, 0)));
   }
@@ -1478,8 +1519,12 @@ SSATmp* Simplifier::simplifyConcatCellCell(IRInstruction* inst) {
     return gen(ConcatStrInt, src1, src2);
   }
   if (src1->isA(Type::Int)) { // IntCell
-    auto const asStr = gen(ConvCellToStr, inst->taken(), src2);
-    return gen(ConcatIntStr, src1, asStr);
+    auto* asStr = gen(ConvCellToStr, inst->taken(), src2);
+    auto* result = gen(ConcatIntStr, src1, asStr);
+    // ConcatIntStr doesn't consume its second input so we have to decref it
+    // here.
+    gen(DecRef, asStr);
+    return result;
   }
   if (src2->isA(Type::Int)) { // CellInt
     auto const asStr = gen(ConvCellToStr, inst->taken(), src1);
@@ -1488,8 +1533,12 @@ SSATmp* Simplifier::simplifyConcatCellCell(IRInstruction* inst) {
     return gen(ConcatStrInt, asStr, src2);
   }
   if (src1->isA(Type::Str)) { // StrCell
-    auto const asStr = gen(ConvCellToStr, inst->taken(), src2);
-    return gen(ConcatStrStr, src1, asStr);
+    auto* asStr = gen(ConvCellToStr, inst->taken(), src2);
+    auto* result = gen(ConcatStrStr, src1, asStr);
+    // ConcatStrStr doesn't consume its second input so we have to decref it
+    // here.
+    gen(DecRef, asStr);
+    return result;
   }
   if (src2->isA(Type::Str)) { // CellStr
     auto const asStr = gen(ConvCellToStr, inst->taken(), src1);
@@ -1704,7 +1753,10 @@ SSATmp* Simplifier::simplifyConvCellToStr(IRInstruction* inst) {
   if (srcType.isArray())  return cns(makeStaticString("Array"));
   if (srcType.isDbl())    return gen(ConvDblToStr, src);
   if (srcType.isInt())    return gen(ConvIntToStr, src);
-  if (srcType.isString()) return gen(IncRef, src);
+  if (srcType.isString()) {
+    gen(IncRef, src);
+    return src;
+  }
   if (srcType.isObj())    return gen(ConvObjToStr, catchTrace, src);
   if (srcType.isRes())    return gen(ConvResToStr, catchTrace, src);
 
@@ -1840,15 +1892,19 @@ SSATmp* Simplifier::simplifyDecRef(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyIncRef(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   if (!m_tb.typeMightRelax(src) && !isRefCounted(src)) {
-    return src;
+    inst->convertToNop();
   }
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyIncRefCtx(IRInstruction* inst) {
-  if (inst->src(0)->isA(Type::Obj)) {
+  auto* ctx = inst->src(0);
+  if (ctx->isA(Type::Obj)) {
     inst->setOpcode(IncRef);
+  } else if (!m_tb.typeMightRelax(ctx) && ctx->type().notCounted()) {
+    inst->convertToNop();
   }
+
   return nullptr;
 }
 
@@ -1907,7 +1963,6 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
         inst->op() == JmpZero
           ? negateQueryOp(srcOpcode)
           : srcOpcode),
-      srcInst->marker(),
       srcInst->typeParam(), // if it had a type param
       inst->taken(),
       std::make_pair(ssas.size(), ssas.begin())
@@ -1968,11 +2023,22 @@ SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
   // any type information known.
   if (info.value && (!info.spansCall ||
                       info.value->inst()->op() == DefConst)) {
+    if (info.value->type().maybeCounted() || m_tb.typeMightRelax(info.value)) {
+      gen(TakeStack, info.value);
+    }
     return info.value;
   }
   inst->setTypeParam(
     Type::mostRefined(inst->typeParam(), info.knownType)
   );
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyTakeStack(IRInstruction* inst) {
+  if (inst->src(0)->type().notCounted() && !m_tb.typeMightRelax(inst->src(0))) {
+    inst->convertToNop();
+  }
+
   return nullptr;
 }
 
@@ -2017,6 +2083,9 @@ SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<StackOffset>()->offset);
   if (info.value && !info.spansCall) {
+    if (info.value->type().maybeCounted() || m_tb.typeMightRelax(info.value)) {
+      gen(TakeStack, info.value);
+    }
     inst->convertToNop();
     return gen(DecRef, info.value);
   }

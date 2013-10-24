@@ -178,7 +178,6 @@
   CASE(IterFree) \
   CASE(MIterFree) \
   CASE(IterBreak) \
-  CASE(UnsetN) \
   CASE(DecodeCufIter) \
   CASE(Shl) \
   CASE(Shr) \

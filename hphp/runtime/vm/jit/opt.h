@@ -29,6 +29,7 @@ class IRInstruction;
 /*
  * The main optimization passes, in the order they run.
  */
+void optimizeRefcounts(IRUnit&) noexcept;
 void optimizePredictions(IRUnit&);
 void optimizeJumps(IRUnit&);
 void eliminateUnconditionalJump(IRUnit&);

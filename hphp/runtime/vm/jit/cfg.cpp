@@ -15,10 +15,13 @@
 */
 
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/block.h"
 
 namespace HPHP {  namespace JIT {
+
+TRACE_SET_MOD(hhir);
 
 BlockList rpoSortCfg(const IRUnit& unit) {
   BlockList blocks;
@@ -41,6 +44,91 @@ bool isRPOSorted(const BlockList& blocks) {
     if ((*it)->postId() != id++) return false;
   }
   return true;
+}
+
+namespace {
+// If edge is critical, split it and return the new Block*. Otherwise, return
+// nullptr.
+Block* splitCriticalEdge(IRUnit& unit, Edge* edge) {
+  if (!edge) return nullptr;
+
+  auto* to = edge->to();
+  auto* from = edge->from();
+  if (to->numPreds() <= 1 || from->numSuccs() <= 1) return nullptr;
+
+  Block* middle = unit.defBlock();
+  FTRACE(3, "splitting edge from B{} -> B{} using B{}\n",
+         from->id(), to->id(), middle->id());
+  if (from->taken() == to) {
+    from->back().setTaken(middle);
+  } else {
+    assert(from->next() == to);
+    from->setNext(middle);
+  }
+
+  auto& marker = to->front().marker();
+  middle->prepend(unit.gen(Jmp, marker, to));
+  auto const unlikely = Block::Hint::Unlikely;
+  if (from->hint() == unlikely || to->hint() == unlikely) {
+    middle->setHint(unlikely);
+  }
+
+  unit.main()->push_back(middle);
+  return middle;
+}
+}
+
+bool splitCriticalEdges(IRUnit& unit) {
+  FTRACE(2, "splitting critical edges\n");
+  auto modified = removeUnreachable(unit);
+  auto const startBlocks = unit.numBlocks();
+
+  for (auto* block : unit.main()->blocks()) {
+    splitCriticalEdge(unit, block->takenEdge());
+    splitCriticalEdge(unit, block->nextEdge());
+  }
+
+  return modified || unit.numBlocks() != startBlocks;
+}
+
+bool removeUnreachable(IRUnit& unit) {
+  FTRACE(2, "removing unreachable blocks\n");
+
+  auto modified = false;
+  IdSet<Block> visited;
+  smart::stack<Block*> stack;
+  stack.push(unit.entry());
+
+  // Find all blocks reachable from the entry block.
+  while (!stack.empty()) {
+    auto* b = stack.top();
+    stack.pop();
+    if (visited[b]) continue;
+
+    visited.add(b);
+    if (auto* taken = b->taken()) {
+      if (!visited[taken]) stack.push(taken);
+    }
+    if (auto* next = b->next()) {
+      if (!visited[next]) stack.push(next);
+    }
+  }
+
+  // Erase any blocks not found above.
+  auto* trace = unit.main();
+  auto& blocks = trace->blocks();
+  for (auto it = blocks.begin(); it != blocks.end(); ) {
+    auto* b = *it;
+    if (!visited[b]) {
+      FTRACE(3, "removing unreachable B{}\n", b->id());
+      it = trace->erase(it);
+      modified = true;
+    } else {
+      ++it;
+    }
+  }
+
+  return modified;
 }
 
 /*

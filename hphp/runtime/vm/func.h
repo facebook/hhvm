@@ -198,7 +198,20 @@ struct Func {
 
   bool byRef(int32_t arg) const;
   bool mustBeRef(int32_t arg) const;
-  void prettyPrint(std::ostream& out) const;
+
+  struct PrintOpts {
+    PrintOpts()
+      : fpi(true)
+    {}
+
+    PrintOpts& noFpi() {
+      fpi = false;
+      return *this;
+    }
+
+    bool fpi;
+  };
+  void prettyPrint(std::ostream& out, const PrintOpts& = PrintOpts()) const;
 
   bool isPseudoMain() const { return m_name->empty(); }
   bool isBuiltin() const { return m_attrs & AttrBuiltin; }

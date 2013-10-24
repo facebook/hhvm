@@ -65,6 +65,7 @@ class IRUnit;
 struct IRInstruction;
 struct IRTrace;
 class SSATmp;
+struct LocalStateHook;
 
 class FailedIRGen : public std::runtime_error {
  public:
@@ -202,8 +203,8 @@ class FailedCodeGen : public std::runtime_error {
 
 #define IR_OPCODES                                                            \
 /*    name                      dstinfo srcinfo                      flags */ \
-O(CheckType,                    DParam, S(Gen),                  E|CRc|PRc|P) \
-O(AssertType,                   DParam, S(Gen,Cls),            C|E|CRc|PRc|P) \
+O(CheckType,                    DParam, S(Gen),                          E|P) \
+O(AssertType,                   DParam, S(Gen,Cls),                    C|E|P) \
 O(CheckTypeMem,                     ND, S(PtrToGen),                       E) \
 O(GuardLoc,                D(FramePtr), S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
@@ -220,9 +221,7 @@ O(GuardRefs,                        ND, S(Func)                               \
                                           S(Int)                              \
                                           S(Int),                          E) \
 O(AssertLoc,               D(FramePtr), S(FramePtr),                       E) \
-O(OverrideLoc,                      ND, S(FramePtr),                       E) \
 O(OverrideLocVal,                   ND, S(FramePtr) S(Gen),                E) \
-O(SmashLocals,                      ND, S(FramePtr),                       E) \
 O(BeginCatch,                       ND, NA,                            E|Mem) \
 O(EndCatch,                         ND, S(StkPtr),                   E|Mem|T) \
 O(TryEndCatch,                      ND, S(StkPtr),                     E|Mem) \
@@ -245,12 +244,12 @@ O(Not,                         D(Bool), S(Bool),                           C) \
 O(Shl,                          D(Int), S(Int) S(Int),                     C) \
 O(Shr,                          D(Int), S(Int) S(Int),                     C) \
                                                                               \
-O(ConvBoolToArr,                D(Arr), S(Bool),                         C|N) \
-O(ConvDblToArr,                 D(Arr), S(Dbl),                          C|N) \
-O(ConvIntToArr,                 D(Arr), S(Int),                          C|N) \
-O(ConvObjToArr,                 D(Arr), S(Obj),                      N|CRc|K) \
-O(ConvStrToArr,                 D(Arr), S(Str),                        N|CRc) \
-O(ConvCellToArr,                D(Arr), S(Cell),                     N|CRc|K) \
+O(ConvBoolToArr,                D(Arr), S(Bool),                     C|N|PRc) \
+O(ConvDblToArr,                 D(Arr), S(Dbl),                      C|N|PRc) \
+O(ConvIntToArr,                 D(Arr), S(Int),                      C|N|PRc) \
+O(ConvObjToArr,                 D(Arr), S(Obj),                  N|PRc|CRc|K) \
+O(ConvStrToArr,                 D(Arr), S(Str),                    N|PRc|CRc) \
+O(ConvCellToArr,                D(Arr), S(Cell),                 N|PRc|CRc|K) \
                                                                               \
 O(ConvArrToBool,               D(Bool), S(Arr),                          C|N) \
 O(ConvDblToBool,               D(Bool), S(Dbl),                            C) \
@@ -273,14 +272,14 @@ O(ConvObjToInt,                 D(Int), S(Obj),                       N|Er|K) \
 O(ConvStrToInt,                 D(Int), S(Str),                            N) \
 O(ConvCellToInt,                D(Int), S(Cell),                      N|Er|K) \
                                                                               \
-O(ConvCellToObj,                D(Obj), S(Cell),                     N|CRc|K) \
+O(ConvCellToObj,                D(Obj), S(Cell),                 N|CRc|PRc|K) \
                                                                               \
 O(ConvBoolToStr,          D(StaticStr), S(Bool),                           C) \
-O(ConvDblToStr,                 D(Str), S(Dbl),                            N) \
-O(ConvIntToStr,                 D(Str), S(Int),                            N) \
-O(ConvObjToStr,                 D(Str), S(Obj),                         N|Er) \
-O(ConvResToStr,                 D(Str), S(Res),                         N|Er) \
-O(ConvCellToStr,                D(Str), S(Cell),                        N|Er) \
+O(ConvDblToStr,                 D(Str), S(Dbl),                        N|PRc) \
+O(ConvIntToStr,                 D(Str), S(Int),                        N|PRc) \
+O(ConvObjToStr,                 D(Str), S(Obj),                     N|PRc|Er) \
+O(ConvResToStr,                 D(Str), S(Res),                     N|PRc|Er) \
+O(ConvCellToStr,                D(Str), S(Cell),                    N|PRc|Er) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
 O(ThingExists,                 D(Bool), S(Str),                  N|E|Er|Refs) \
@@ -363,14 +362,14 @@ O(RaiseArrayIndexNotice,            ND, S(Int),                 E|N|Mem|Refs) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
 O(CheckCold,                        ND, NA,                                E) \
-O(CheckNullptr,                     ND, S(CountedStr,Nullptr),            NF) \
+O(CheckNullptr,                     ND, S(CountedStr,Nullptr),         E|CRc) \
 O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
 O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                     E) \
 O(CheckPackedArrayElemNull,    D(Bool), S(Arr) S(Int),                     E) \
 O(VectorHasFrozenCopy,              ND, S(Obj),                           NF) \
 O(VectorDoCow,                      ND, S(Obj),                          N|E) \
-O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr),            NF) \
+O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr),             P) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
 O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
@@ -401,11 +400,11 @@ O(LdClsCctx,                    D(Cls), S(Cctx),                           C) \
 O(LdClsCns,                     DParam, NA,                               NF) \
 O(LookupClsRDSHandle,     D(RDSHandle), S(Str),                          C|N) \
 O(DerefClsRDSHandle,            D(Cls), S(RDSHandle),                     NF) \
-O(LookupClsCns,                 DParam, NA,                  E|Refs|Er|N|Mem) \
-O(LdCns,                        DParam, CStr,                             NF) \
-O(LookupCns,                    DParam, CStr,                E|Refs|Er|N|Mem) \
-O(LookupCnsE,                   DParam, CStr,                E|Refs|Er|N|Mem) \
-O(LookupCnsU,                   DParam, CStr CStr,           E|Refs|Er|N|Mem) \
+O(LookupClsCns,           D(Uncounted), NA,                  E|Refs|Er|N|Mem) \
+O(LdCns,                  D(Uncounted), CStr,                             NF) \
+O(LookupCns,              D(Uncounted), CStr,                E|Refs|Er|N|Mem) \
+O(LookupCnsE,             D(Uncounted), CStr,                E|Refs|Er|N|Mem) \
+O(LookupCnsU,             D(Uncounted), CStr CStr,           E|Refs|Er|N|Mem) \
 O(LookupClsMethod,                  ND, S(Cls)                                \
                                           S(Str)                              \
                                           S(StkPtr)                           \
@@ -419,7 +418,7 @@ O(LdClsMethodFCache,        D(FuncCtx), C(Cls)                                \
                                           CStr                                \
                                           S(Obj,Cls,Ctx)                      \
                                           S(FramePtr),              N|C|E|Er) \
-O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                  PRc) \
+O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                C|PRc) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
 O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
@@ -479,8 +478,9 @@ O(StProp,                           ND, S(Obj) S(Int) S(Gen), E|Mem|CRc|Refs) \
 O(StPropNT,                         ND, S(Obj) S(Int) S(Gen),      E|Mem|CRc) \
 O(StLoc,                            ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
 O(StLocNT,                          ND, S(FramePtr) S(Gen),        E|Mem|CRc) \
-O(StRef,                       DBox(1), S(BoxedCell) S(Cell), E|Mem|CRc|Refs) \
-O(StRefNT,                     DBox(1), S(BoxedCell) S(Cell),      E|Mem|CRc) \
+O(StRef,                       DBox(1), S(BoxedCell) S(Cell),                 \
+                                                            E|Mem|CRc|Refs|P) \
+O(StRefNT,                     DBox(1), S(BoxedCell) S(Cell),    E|Mem|CRc|P) \
 O(StRaw,                            ND, SUnk,                          E|Mem) \
 O(StElem,                           ND, S(PtrToCell)                          \
                                           S(Int)                              \
@@ -491,7 +491,7 @@ O(LdStaticLocCached,      D(BoxedCell), NA,                               NF) \
 O(CheckStaticLocInit,               ND, S(BoxedCell),                     NF) \
 O(ClosureStaticLocInit,   D(BoxedCell), CStr                                  \
                                           S(FramePtr)                         \
-                                          S(Cell),               PRc|E|N|Mem) \
+                                          S(Cell),                   E|N|Mem) \
 O(StaticLocInitCached,              ND, S(BoxedCell) S(Cell),              E) \
 O(SpillStack,                D(StkPtr), S(StkPtr) C(Int) SSpills,        CRc) \
 O(SpillFrame,                D(StkPtr), S(StkPtr)                             \
@@ -507,23 +507,23 @@ O(ReqRetranslate,                   ND, NA,                              T|E) \
 O(SyncABIRegs,                      ND, S(FramePtr) S(StkPtr),             E) \
 O(Mov,                         DofS(0), SUnk,                            C|P) \
 O(LdAddr,                      DofS(0), SUnk,                              C) \
-O(IncRef,                      DofS(0), S(Gen),                    Mem|PRc|P) \
-O(IncRefCtx,                    D(Ctx), S(Ctx),                        PRc|P) \
+O(IncRef,                           ND, S(Gen),                            E) \
+O(TakeStack,                        ND, S(StackElem),                      E) \
+O(IncRefCtx,                        ND, S(Ctx),                            E) \
 O(DecRefLoc,                        ND, S(FramePtr),            N|E|Mem|Refs) \
 O(DecRefStack,                      ND, S(StkPtr),              N|E|Mem|Refs) \
 O(DecRefThis,                       ND, S(FramePtr),            N|E|Mem|Refs) \
-O(GenericRetDecRefs,         D(StkPtr), S(FramePtr) C(Int),     E|N|Mem|Refs) \
-O(DecRef,                           ND, S(Gen),           N|E|Mem|CRc|Refs|K) \
+O(GenericRetDecRefs,         D(StkPtr), S(FramePtr),            E|N|Mem|Refs) \
+O(DecRef,                           ND, S(Gen),               N|E|Refs|K|CRc) \
+O(DecRefNZ,                         ND, S(Gen),                 N|E|Refs|CRc) \
 O(DecRefMem,                        ND, S(PtrToGen)                           \
                                           C(Int),           N|E|Mem|CRc|Refs) \
-O(DecRefNZ,                         ND, S(Gen),                      Mem|CRc) \
-O(DecRefNZOrBranch,                 ND, S(Gen),                      Mem|CRc) \
 O(DefLabel,                     DMulti, NA,                                E) \
 O(DefInlineFP,             D(FramePtr), S(StkPtr) S(StkPtr) S(FramePtr),  NF) \
 O(InlineReturn,                     ND, S(FramePtr),                       E) \
 O(DefFP,                   D(FramePtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(FramePtr),                       E) \
-O(DefInlineSP,               D(StkPtr), S(FramePtr) S(StkPtr),             E) \
+O(DefInlineSP,               D(StkPtr), S(StkPtr) S(FramePtr),             E) \
 O(ReDefSP,                   D(StkPtr), S(FramePtr) S(StkPtr),            NF) \
 O(PassSP,                    D(StkPtr), S(StkPtr),                         P) \
 O(PassFP,                  D(FramePtr), S(FramePtr),                       P) \
@@ -552,8 +552,8 @@ O(AddElemIntKey,                D(Arr), S(Arr)                                \
 O(AddNewElem,                   D(Arr), SUnk,                  N|Mem|CRc|PRc) \
 O(ColAddElemC,                  D(Obj), S(Obj)                                \
                                          S(Cell)                              \
-                                         S(Cell),              N|Mem|CRc|PRc) \
-O(ColAddNewElemC,               D(Obj), SUnk,                  N|Mem|CRc|PRc) \
+                                         S(Cell),             N|Mem|Er|CRc|P) \
+O(ColAddNewElemC,               D(Obj), S(Obj) S(Cell),       N|Mem|Er|CRc|P) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(ConcatStrStr,                 D(Str), S(Str) S(Str),             N|CRc|PRc) \
 O(ConcatIntStr,                 D(Str), S(Int) S(Str),                 N|PRc) \
@@ -561,9 +561,9 @@ O(ConcatStrInt,                 D(Str), S(Str) S(Int),             N|CRc|PRc) \
 O(ConcatCellCell,               D(Str), S(Cell) S(Cell),      N|CRc|PRc|Refs) \
 O(ArrayAdd,                     D(Arr), S(Arr) S(Arr),         N|Mem|CRc|PRc) \
 O(AKExists,                    D(Bool), S(Cell) S(Cell),                 C|N) \
-O(InterpOne,                 D(StkPtr), S(FramePtr) S(StkPtr),                \
+O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                              E|N|Mem|Refs|Er) \
-O(InterpOneCF,               D(StkPtr), S(FramePtr) S(StkPtr),                \
+O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                            T|E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
@@ -580,9 +580,9 @@ O(ContArIncKey,                     ND, S(FramePtr),                   E|Mem) \
 O(ContArUpdateIdx,                  ND, S(FramePtr) S(Int),            E|Mem) \
 O(LdContArRaw,                  DParam, S(FramePtr) C(Int),               NF) \
 O(StContArRaw,                      ND, S(FramePtr) C(Int) S(Gen),     E|Mem) \
-O(LdContArValue,                DParam, S(FramePtr),                      NF) \
+O(LdContArValue,                DParam, S(FramePtr),                     PRc) \
 O(StContArValue,                    ND, S(FramePtr) S(Cell),  E|Mem|CRc|Refs) \
-O(LdContArKey,                  DParam, S(FramePtr),                      NF) \
+O(LdContArKey,                  DParam, S(FramePtr),                     PRc) \
 O(StContArKey,                      ND, S(FramePtr) S(Gen),   E|Mem|CRc|Refs) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr)                         \
@@ -613,12 +613,12 @@ O(WIterNextK,                  D(Bool), S(FramePtr)                           \
 O(MIterInit,                   D(Bool), S(BoxedCell)                          \
                                           S(FramePtr)                         \
                                           C(Int)                              \
-                                          C(Int),           E|N|Mem|Refs|CRc) \
+                                          C(Int),               E|N|Mem|Refs) \
 O(MIterInitK,                  D(Bool), S(BoxedCell)                          \
                                           S(FramePtr)                         \
                                           C(Int)                              \
                                           C(Int)                              \
-                                          C(Int),           E|N|Mem|Refs|CRc) \
+                                          C(Int),               E|N|Mem|Refs) \
 O(MIterNext,                   D(Bool), S(FramePtr)                           \
                                           C(Int) C(Int),        E|N|Mem|Refs) \
 O(MIterNextK,                  D(Bool), S(FramePtr)                           \
@@ -646,12 +646,13 @@ O(CGetProp,                    D(Cell), C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
-                                          S(PtrToCell),      E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),  E|N|PRc|Mem|Refs|Er) \
 O_STK(VGetProp,           D(BoxedCell), C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
-                                          S(PtrToCell),MProp|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),                       \
+                                                   MProp|E|N|PRc|Mem|Refs|Er) \
 O_STK(BindProp,                     ND, C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
@@ -672,12 +673,12 @@ O_STK(SetOpProp,               D(Cell), C(TCA)                                \
                                           S(Cell)                             \
                                           S(Cell)                             \
                                           S(PtrToCell)                        \
-                                          C(Int),      MProp|E|N|Mem|Refs|Er) \
+                                          C(Int),  MProp|E|N|PRc|Mem|Refs|Er) \
 O_STK(IncDecProp,              D(Cell), C(TCA)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
                                           S(PtrToCell)                        \
-                                          C(Int),      MProp|E|N|Mem|Refs|Er) \
+                                          C(Int),  MProp|E|N|PRc|Mem|Refs|Er) \
 O(EmptyProp,                   D(Bool), C(TCA)                                \
                                           C(Cls)                              \
                                           S(Obj,PtrToGen)                     \
@@ -707,26 +708,21 @@ O(ArrayGet,                    D(Cell), C(TCA)                                \
 O(StringGet,              D(StaticStr), C(TCA)                                \
                                           S(Str)                              \
                                           S(Int),        C|N|PRc|Refs|Mem|Er) \
-O(VectorGet,                   D(Cell), C(TCA)                                \
-                                          S(Obj)                              \
-                                          S(Int),            E|N|Mem|Refs|Er) \
-O(PairGet,                     D(Cell), C(TCA)                                \
-                                          S(Obj)                              \
-                                          S(Int),            E|N|Mem|Refs|Er) \
 O(MapGet,                      D(Cell), C(TCA)                                \
                                           S(Obj)                              \
-                                          S(Int,Str),        E|N|Mem|Refs|Er) \
+                                          S(Int,Str),    E|N|PRc|Mem|Refs|Er) \
 O(StableMapGet,                D(Cell), C(TCA)                                \
                                           S(Obj)                              \
-                                          S(Int,Str),        E|N|Mem|Refs|Er) \
+                                          S(Int,Str),    E|N|PRc|Mem|Refs|Er) \
 O(CGetElem,                    D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
-                                          S(PtrToCell),      E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),  E|N|PRc|Mem|Refs|Er) \
 O_STK(VGetElem,           D(BoxedCell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
-                                          S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),                       \
+                                                   MElem|E|N|PRc|Mem|Refs|Er) \
 O_STK(BindElem,                     ND, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
@@ -736,10 +732,6 @@ O(ArraySet,                     D(Arr), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \
                                           S(Cell),    E|N|PRc|CRc|Refs|Mem|K) \
-O(VectorSet,                        ND, C(TCA)                                \
-                                          S(Obj)                              \
-                                          S(Int)                              \
-                                          S(Cell),           E|N|Mem|Refs|Er) \
 O(MapSet,                           ND, C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int,Str)                          \
@@ -752,11 +744,11 @@ O(ArraySetRef,                      ND, C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \
                                           S(Cell)                             \
-                                          S(BoxedArr),E|N|PRc|CRc|Refs|Mem|K) \
+                                          S(BoxedArr),    E|N|CRc|Refs|Mem|K) \
 O_STK(SetElem,                DSetElem, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
-                                          S(Cell),     MElem|E|N|Mem|Refs|Er) \
+                                          S(Cell), MElem|E|N|PRc|Mem|Refs|Er) \
 O_STK(SetWithRefElem,               ND, C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
@@ -769,11 +761,13 @@ O_STK(SetOpElem,               D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
                                           S(Cell)                             \
-                                          S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),                       \
+                                                   MElem|E|N|PRc|Mem|Refs|Er) \
 O_STK(IncDecElem,              D(Cell), C(TCA)                                \
                                           S(PtrToGen)                         \
                                           S(Cell)                             \
-                                          S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
+                                          S(PtrToCell),                       \
+                                                   MElem|E|N|PRc|Mem|Refs|Er) \
 O_STK(SetNewElem,                   ND, S(PtrToGen)                           \
                                           S(Cell),     MElem|E|N|Mem|Refs|Er) \
 O_STK(SetNewElemArray,              ND, S(PtrToArr)                           \
@@ -1125,18 +1119,9 @@ struct MInstrEffects {
   /*
    * MInstrEffects::get is used to allow multiple different consumers to deal
    * with the side effects of vector instructions. It takes an instruction and
-   * a series of callbacks, each of which will be called when the instruction
-   * has a certain effect:
-   *
-   * storeLocValue: This will be called when a local's value is changed.
-   * setLocType: This will be called when a local's type changes and the
-   *             new value is not known.
+   * a LocalStateHook, which is defined in frame-state.h.
    */
-  typedef std::function<void(uint32_t, SSATmp*)> StoreLocFunc;
-  typedef std::function<void(uint32_t, Type)> SetLocTypeFunc;
-  static void get(const IRInstruction*,
-                  StoreLocFunc storeLocValue,
-                  SetLocTypeFunc setLocType);
+  static void get(const IRInstruction*, LocalStateHook&);
 
   explicit MInstrEffects(const IRInstruction* inst);
   MInstrEffects(Opcode op, Type base);
@@ -1180,7 +1165,7 @@ typedef smart::flat_map<const IRInstruction*, TypeConstraint> GuardConstraints;
  * including the number it pops.)  That is, for each SSATmp in the
  * spill sources, this totals up whether it is an ActRec or a cell.
  */
-int32_t spillValueCells(IRInstruction* spillStack);
+int32_t spillValueCells(const IRInstruction* spillStack);
 
 bool isConvIntOrPtrToBool(IRInstruction* instr);
 

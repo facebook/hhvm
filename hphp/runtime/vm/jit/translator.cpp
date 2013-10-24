@@ -608,7 +608,10 @@ predictOutputs(SrcKey startSk,
      * since MInstrTranslator side exits in all uncommon cases.
      */
 
-    // If the base is a string, the output is probably a string.
+    auto const inDt = ni->inputs[0]->rtt.valueType();
+    // If the base is a string, the output is probably a string. Unless the
+    // member code is MW, then we're either going to fatal or promote the
+    // string to an array.
     Type baseType;
     switch (ni->immVec.locationCode()) {
       case LGL: case LGC:
@@ -620,12 +623,15 @@ predictOutputs(SrcKey startSk,
       default:
         baseType = Type(ni->inputs[1]->rtt);
     }
-    if (baseType.isString()) return KindOfString;
+    if (baseType.isString() && ni->immVecM.size() == 1) {
+      return ni->immVecM[0] == MW ? inDt : KindOfString;
+    }
 
     // Otherwise, it's probably the input type.
-    return ni->inputs[0]->rtt.valueType();
+    return inDt;
   }
 
+  auto const op = ni->op();
   static const double kAccept = 1.0;
   std::pair<DataType, double> pred = std::make_pair(KindOfAny, 0.0);
   // Type predictions grow tracelets, and can have a side effect of making
@@ -633,7 +639,7 @@ predictOutputs(SrcKey startSk,
   // lot. Get more conservative as evidence mounts that this is a
   // polymorphic tracelet.
   if (tx64->numTranslations(startSk) >= kTooPolyPred) return KindOfAny;
-  if (ni->op() == OpCGetS) {
+  if (op == OpCGetS) {
     const StringData* propName = ni->inputs[1]->rtt.valueStringOrNull();
     if (propName) {
       pred = predictType(TypeProfileKey(TypeProfileKey::StaticPropName,
@@ -643,7 +649,7 @@ predictOutputs(SrcKey startSk,
             pred.first,
             pred.second);
     }
-  } else if (hasImmVector(ni->op())) {
+  } else if (op == OpCGetM) {
     pred = predictMVec(ni);
   }
   if (pred.second < kAccept) {

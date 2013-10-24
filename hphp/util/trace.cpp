@@ -47,6 +47,8 @@ const char *tokNames[] = {
 #undef TM
 };
 
+__thread int indentDepth = 0;
+
 /*
  * Dummy class to get some code to run before main().
  */

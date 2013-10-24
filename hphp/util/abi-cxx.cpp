@@ -86,7 +86,14 @@ char* getNativeFunctionName(void* codeAddr) {
         char* demangledName = abi::__cxa_demangle(functionName, 0, 0, &status);
         if (status == 0) {
           delete [] functionName;
-          functionName = demangledName;
+
+          // Callers expect the buffer to have come from new[] but demangledName
+          // came from malloc. Copy to a buffer from new[].
+          auto const len = strlen(demangledName) + 1;
+          char* buf = new char[len];
+          std::copy(demangledName, demangledName + len, buf);
+          free(demangledName);
+          functionName = buf;
         }
       }
     }

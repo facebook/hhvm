@@ -351,12 +351,31 @@ struct DefInlineFPData : IRExtraData {
  * FCallArray offsets
  */
 struct CallArrayData : IRExtraData {
-  explicit CallArrayData(Offset pcOffset, Offset aft)
-    : pc(pcOffset), after(aft) {}
+  explicit CallArrayData(Offset pcOffset, Offset aft, bool destroyLocals)
+    : pc(pcOffset)
+    , after(aft)
+    , destroyLocals(destroyLocals)
+  {}
 
-  std::string show() const { return folly::to<std::string>(pc, ",", after); }
+  std::string show() const {
+    return folly::to<std::string>(pc, ",", after,
+                                  destroyLocals ? " destroy locals" : "");
+  }
 
   Offset pc, after;
+  bool destroyLocals;
+};
+
+struct CallData : IRExtraData {
+  explicit CallData(bool destroy)
+    : destroyLocals(destroy)
+  {}
+
+  std::string show() const {
+    return destroyLocals ? "destroy locals" : "";
+  }
+
+  bool destroyLocals;
 };
 
 /*
@@ -467,6 +486,22 @@ struct CheckDefinedClsData : IRExtraData {
  * Offset and stack deltas for InterpOne.
  */
 struct InterpOneData : IRExtraData {
+  struct LocalType {
+    explicit LocalType(uint32_t id = 0, Type type = Type::Bottom)
+      : id(id)
+      , type(type)
+    {}
+
+    uint32_t id;
+    Type type;
+  };
+
+  InterpOneData()
+    : nChangedLocals(0)
+    , changedLocals(nullptr)
+    , smashesAllLocals(false)
+  {}
+
   // Offset of the instruction to interpret, in the Unit indicated by
   // the current Marker.
   Offset bcOff;
@@ -480,10 +515,39 @@ struct InterpOneData : IRExtraData {
   // code instructions modify things below the top of the stack.
   Op opcode;
 
+  uint32_t nChangedLocals;
+  LocalType* changedLocals;
+
+  bool smashesAllLocals;
+
+  InterpOneData* clone(Arena& arena) const {
+    auto* id = new (arena) InterpOneData;
+    id->bcOff = bcOff;
+    id->cellsPopped = cellsPopped;
+    id->cellsPushed = cellsPushed;
+    id->opcode = opcode;
+    id->nChangedLocals = nChangedLocals;
+    id->changedLocals = new (arena) LocalType[nChangedLocals];
+    id->smashesAllLocals = smashesAllLocals;
+    std::copy(changedLocals, changedLocals + nChangedLocals, id->changedLocals);
+    return id;
+  }
+
   std::string show() const {
-    return folly::format("{}: bcOff:{}, popped:{}, pushed:{}",
-                         opcodeToName(opcode), bcOff, cellsPopped,
-                         cellsPushed).str();
+    std::string ret = folly::format("{}: bcOff:{}, popped:{}, pushed:{}",
+                                    opcodeToName(opcode), bcOff, cellsPopped,
+                                    cellsPushed).str();
+
+    assert(!smashesAllLocals || !nChangedLocals);
+    if (smashesAllLocals) ret += ", smashes all locals";
+    if (nChangedLocals) {
+      for (auto i = 0; i < nChangedLocals; ++i) {
+        ret += folly::format(", Local {} -> {}",
+                             changedLocals[i].id, changedLocals[i].type).str();
+      }
+    }
+
+    return ret;
   }
 };
 
@@ -606,10 +670,10 @@ X(LdSSwitchDestSlow,            LdSSwitchData);
 X(GuardLoc,                     LocalId);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
-X(OverrideLoc,                  LocalId);
+X(OverrideLocVal,               LocalId);
 X(LdLocAddr,                    LocalData);
-X(DecRefLoc,                    LocalId);
 X(LdLoc,                        LocalData);
+X(DecRefLoc,                    LocalId);
 X(StLoc,                        LocalId);
 X(StLocNT,                      LocalId);
 X(IterFree,                     IterId);
@@ -640,6 +704,8 @@ X(ReqBindJmp,                   BCOffset);
 X(ReqRetranslateOpt,            ReqRetransOptData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
+X(Call,                         CallData);
+X(CallBuiltin,                  CallData);
 X(CallArray,                    CallArrayData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);

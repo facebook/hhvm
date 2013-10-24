@@ -16,9 +16,11 @@ function generateDocComment(string $doccomment, array $func = null,
   }
   if (!empty($func['return'])) {
     $str .= "\n";
-    $v = "@return {$func['return']['type']} - " .
-         str_replace("\n", " ", $func['return']['desc']) . "\n";
-    $str .= implode("\n  ", explodE("\n",
+    $v = "@return {$func['return']['type']} - ";
+    $v .= isset($func['return']['desc'])
+       ? str_replace("\n", " ", $func['return']['desc']) . "\n"
+       : '';
+    $str .= implode("\n  ", explode("\n",
                     wordwrap($v, 70 - strlen($indent)))) . "\n";
   }
   $str = trim($str);
@@ -109,12 +111,12 @@ function generateCPPStub(array $func, array $classes): string {
     'bool' => ['bool', 'bool'],
     'int' => ['int64_t', 'int64_t'],
     'float' => ['double', 'double'],
-    'string' => ['CStrRef', 'String'],
+    'string' => ['const String&', 'String'],
     'array' => ['CArrRef', 'Array'],
     'object' => ['CObjRef', 'Object'],
     'resource' => ['CResRef', 'Resource'],
     'mixed' => ['CVarRef', 'Variant'],
-    'void' => [1=>'null'],
+    'void' => [1 =>'void'],
   ];
 
   $ret = 'static ';
@@ -144,7 +146,8 @@ function generateCPPStub(array $func, array $classes): string {
   }
   if (!empty($func['class']) || empty($func['alias']) ||
       !($method = getMethod($func['alias'], $classes))) {
-    return "$ret) {\n  throw NotImplementedException();\n}\n\n";
+    return "$ret) {\n  throw NotImplementedException(\"Not Implemented\");".
+           "\n}\n\n";
   }
   $ret .= ") {\n  ";
   if (!empty($func['return']['type']) &&

@@ -98,4 +98,42 @@ void emitTransCounterInc(vixl::MacroAssembler& a) {
   a.   Str   (rAsm2, rAsm[0]);
 }
 
+//////////////////////////////////////////////////////////////////////
+
+void emitIncRefKnownType(vixl::MacroAssembler& a,
+                         const vixl::Register& dataReg,
+                         const size_t disp) {
+  vixl::Label dontCount;
+
+  // Read the inner object.
+  a.   Ldr   (rAsm, dataReg[disp + TVOFF(m_data)]);
+  // Check the count for staticness.
+  static_assert(sizeof(RefCount) == 4, "");
+  auto const& rCount = rAsm.W();
+  a.   Ldr   (rCount, rAsm[FAST_REFCOUNT_OFFSET]);
+  // Careful: tbnz can only test a single bit, so you pass a bit position
+  // instead of a full-blown immediate. 0 = lsb, 63 = msb.
+  a.   Tbnz  (rCount.X(), RefCountStaticBitPos, &dontCount);
+  // Increment and store count.
+  a.   Add   (rCount, rCount, 1);
+  a.   Str   (rCount, rAsm[FAST_REFCOUNT_OFFSET]);
+
+  a.   bind  (&dontCount);
+}
+
+void emitIncRefGeneric(vixl::MacroAssembler& a,
+                       const vixl::Register& dataReg,
+                       const size_t disp) {
+  vixl::Label dontCount;
+
+  // Read the type; bail if it's not refcounted.
+  a.   Ldrb  (rAsm.W(), dataReg[disp + TVOFF(m_type)]);
+  a.   Cmp   (rAsm.W(), KindOfRefCountThreshold);
+  a.   B     (&dontCount, vixl::le);
+
+  emitIncRefKnownType(a, dataReg, disp);
+
+  a.   bind  (&dontCount);
+}
+
 }}}

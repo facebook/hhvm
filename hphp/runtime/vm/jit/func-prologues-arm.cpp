@@ -2,6 +2,7 @@
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
+#include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
@@ -106,8 +107,58 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   a.    Mov    (rVmFp, rStashedAR);
 
   auto numLocals = numParams;
+
   if (func->isClosureBody()) {
-    not_implemented();
+    int numUseVars = func->cls()->numDeclProperties() -
+                     func->numStaticLocals();
+
+    emitRegGetsRegPlusImm(a, rVmSp, rVmFp, -cellsToBytes(numParams));
+
+    auto const& rClosure = rAsm2;
+    a.    Ldr    (rClosure, rVmFp[AROFF(m_this)]);
+
+    // Swap in the $this or late bound class
+    a.    Ldr    (rAsm, rClosure[c_Closure::ctxOffset()]);
+    a.    Str    (rAsm, rVmFp[AROFF(m_this)]);
+
+    if (!(func->attrs() & AttrStatic)) {
+      vixl::Label notRealThis;
+      // This means "test bit 0" -- the LSB.
+      a.  Tbz    (rAsm, 0, &notRealThis);
+      // Clear the low bit
+      a.  Orr    (rAsm, rAsm, ~1ULL);
+      emitIncRefKnownType(a, rAsm, 0);
+      a.  bind   (&notRealThis);
+    }
+
+    // Put in the correct context
+    a.    Ldr    (rAsm, rClosure[c_Closure::funcOffset()]);
+    a.    Str    (rAsm, rVmFp[AROFF(m_func)]);
+
+    // Copy in all the use vars
+    int baseUVOffset = sizeof(ObjectData) + func->cls()->builtinPropSize();
+    for (auto i = 0; i < numUseVars + 1; i++) {
+      auto spOffset = -cellsToBytes(i + 1);
+      if (i == 0) {
+        // The closure is the first local.
+        // We don't incref because it used to be $this
+        // and now it is a local, so they cancel out
+        a.Mov    (rAsm, KindOfObject);
+        a.Strb   (rAsm.W(), rVmSp[spOffset + TVOFF(m_type)]);
+        a.Str    (rClosure, rVmSp[spOffset + TVOFF(m_data)]);
+        continue;
+      }
+
+      auto uvOffset = baseUVOffset + cellsToBytes(i - 1);
+
+      a.  Ldr    (rAsm, rClosure[uvOffset + TVOFF(m_data)]);
+      a.  Str    (rAsm, rVmSp[spOffset + TVOFF(m_data)]);
+      a.  Ldrb   (rAsm.W(), rClosure[uvOffset + TVOFF(m_type)]);
+      a.  Strb   (rAsm.W(), rVmSp[spOffset + TVOFF(m_type)]);
+      emitIncRefGeneric(a, rVmSp, spOffset);
+    }
+
+    numLocals += numUseVars + 1;
   }
 
   auto numUninitLocals = func->numLocals() - numLocals;

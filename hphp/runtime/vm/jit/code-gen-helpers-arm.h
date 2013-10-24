@@ -54,6 +54,21 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
 void emitTransCounterInc(vixl::MacroAssembler& a);
 
 /*
+ * Emits an incref after checking only the static bit, not the type.
+ */
+void emitIncRefKnownType(vixl::MacroAssembler& a,
+                         const vixl::Register& dataReg,
+                         size_t disp);
+/*
+ * The most generic form of incref. Given a register+offset indicating a pointer
+ * to a TypedValue, it checks the type for refcounted-ness and the inner
+ * object's count for static-ness before doing the incref.
+ */
+void emitIncRefGeneric(vixl::MacroAssembler& a,
+                       const vixl::Register& data,
+                       size_t disp);
+
+/*
  * Enables access to objects with the __thread storage class. See the
  * explanatory comment in code-gen-helpers-x64.h for how thread-local storage
  * works.

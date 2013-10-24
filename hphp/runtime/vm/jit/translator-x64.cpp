@@ -298,7 +298,7 @@ TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
     size_t nTrans = srcRec->translations().size();
     if (nTrans >= RuntimeOption::EvalJitMaxTranslations + 1) return nullptr;
 
-    m_mode = TransOptimize;
+    m_mode = TransLive;
     auto translArgs = TranslArgs(sk, align).transId(transId);
     if (setFuncBody) translArgs.setFuncBody();
     return retranslate(translArgs);

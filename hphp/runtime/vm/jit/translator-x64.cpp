@@ -273,6 +273,7 @@ bool TranslatorX64::prologuesWereRegenerated(const Func* func) {
 TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
   LeaseHolder writer(s_writeLease);
   if (!writer) return nullptr;
+  if (isDebuggerAttachedProcess()) return nullptr;
 
   TRACE(1, "retranslateOpt: transId = %u\n", transId);
 
@@ -325,7 +326,7 @@ TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
       translArgs.setFuncBody();
       setFuncBody = false;
     }
-    TCA regionStart = retranslate(translArgs);
+    TCA regionStart = translate(translArgs);
     if (funcStart == nullptr) {
       assert(regionStart);
       funcStart = regionStart;

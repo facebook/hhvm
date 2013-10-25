@@ -59,7 +59,7 @@ class c_SQLite3 : public ExtObjectData {
   public: String t_lasterrormsg();
   public: bool t_loadextension(const String& extension);
   public: int64_t t_changes();
-  public: String t_escapestring(const String& sql);
+  public: static String ti_escapestring(const String& sql);
   public: Variant t_prepare(const String& sql);
   public: Variant t_query(const String& sql);
   public: Variant t_querysingle(const String& sql, bool entire_row = false);

@@ -188,8 +188,15 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
      RuntimeOption::StaticFileGenerators.find(path) !=
      RuntimeOption::StaticFileGenerators.end());
 
+  // Determine which extensions should be treated as php
+  // source code. If the execution engine doesn't understand
+  // the source, the content will be spit out verbatim.
+  bool treatAsContent = ext && strcasecmp(ext, "php") != 0 &&
+    (RuntimeOption::PhpFileExtensions.empty() ||
+     !RuntimeOption::PhpFileExtensions.count(ext));
+
   // If this is not a php file, check the static and dynamic content caches
-  if (ext && strcasecmp(ext, "php") != 0) {
+  if (treatAsContent) {
     if (RuntimeOption::EnableStaticContentCache) {
       bool original = compressed;
       // check against static content cache

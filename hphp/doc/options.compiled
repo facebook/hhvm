@@ -789,3 +789,19 @@ kill it to avoid extra server cost by turning on KillOnTimeout.
 This feature allows a machine to overwrite configurations just by matching
 machine names with specified regex pattern. This block of configuration can
 appear at any location of the file, even at top.
+
+= PHP File Extensions
+
+By default any file with .php in the URL is treated as PHP source code and is
+passed through to the execution engine for processing. This configuration option
+allows other file extensions to be treated similarly. Note that .php is
+automatically treated as such and does not need to be specified in this list.
+
+    PhpFile {
+        Extensions {
+            phpt = application/x-phpt
+            hphp = application/x-hhvm-php
+        }
+    }
+
+The content type is not used and is just for descriptive purposes.

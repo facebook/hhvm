@@ -1229,6 +1229,8 @@ static const struct {
   { OpCeil,        {Stack1,           Stack1,       OutDouble,         0 }},
   { OpAssertTL,    {None,             None,         OutNone,           0 }},
   { OpAssertTStk,  {None,             None,         OutNone,           0 }},
+  { OpAssertObjL,  {None,             None,         OutNone,           0 }},
+  { OpAssertObjStk,{None,             None,         OutNone,           0 }},
   { OpBreakTraceHint,{None,           None,         OutNone,           0 }},
 
   /*** 14. Continuation instructions ***/
@@ -1420,7 +1422,8 @@ void preInputApplyMetaData(Unit::MetaHandle metaHand,
 }
 
 static bool isTypeAssert(Op op) {
-  return op == Op::AssertTL || op == Op::AssertTStk;
+  return op == Op::AssertTL || op == Op::AssertTStk ||
+         op == Op::AssertObjL || op == Op::AssertObjStk;
 }
 
 static bool isAlwaysNop(Op op) {
@@ -1438,22 +1441,84 @@ static bool isAlwaysNop(Op op) {
 
 void Translator::handleAssertionEffects(Tracelet& t,
                                         const NormalizedInstruction& ni,
-                                        TraceletContext& tas) {
+                                        TraceletContext& tas,
+                                        int currentStackOffset) {
   assert(isTypeAssert(ni.op()));
 
-  auto const aop = static_cast<AssertTOp>(ni.imm[1].u_OA);
-  auto const dt = [&]() -> folly::Optional<DataType> {
-    switch (aop) {
-    case AssertTOp::Uninit:   return KindOfUninit;
-    case AssertTOp::InitNull: return KindOfNull;
-    case AssertTOp::Int:      return KindOfInt64;
-    case AssertTOp::Dbl:      return KindOfDouble;
-    case AssertTOp::Res:      return KindOfResource;
+  auto const loc = [&] {
+    switch (ni.op()) {
+    case Op::AssertTL:
+    case Op::AssertObjL:
+      return Location(Location::Local, ni.imm[0].u_LA);
+    case Op::AssertTStk:
+    case Op::AssertObjStk:
+      return Location(Location::Stack,
+                      currentStackOffset - 1 - ni.imm[0].u_IVA);
+    default:
+      not_reached();
+    }
+  }();
+  if (loc.isInvalid()) return;
+
+  auto const rt = [&]() -> folly::Optional<RuntimeType> {
+    if (ni.op() == Op::AssertObjStk || ni.op() == Op::AssertObjL) {
+      /*
+       * Even though the class must be defined at the point of the
+       * AssertObj, we might not have defined it yet in this tracelet,
+       * or it might not be unique.  For now just restrict this to
+       * unique classes (we could also check parent of current
+       * context).
+       *
+       * There's nothing we can do with the 'exact' bit right now.
+       */
+      auto const cls = Unit::lookupUniqueClass(
+        ni.m_unit->lookupLitstrId(ni.imm[2].u_SA)
+      );
+      if (cls && (cls->attrs() & AttrUnique)) {
+        return RuntimeType{KindOfObject, KindOfNone, cls};
+      }
+      return folly::none;
+    }
+
+    switch (static_cast<AssertTOp>(ni.imm[1].u_OA)) {
+    case AssertTOp::Uninit:   return RuntimeType{KindOfUninit};
+    case AssertTOp::InitNull: return RuntimeType{KindOfNull};
+    case AssertTOp::Int:      return RuntimeType{KindOfInt64};
+    case AssertTOp::Dbl:      return RuntimeType{KindOfDouble};
+    case AssertTOp::Res:      return RuntimeType{KindOfResource};
     case AssertTOp::Null:     return folly::none;
-    case AssertTOp::Bool:     return KindOfBoolean;
-    case AssertTOp::Str:      return KindOfString;
-    case AssertTOp::Arr:      return KindOfArray;
-    case AssertTOp::Obj:      return KindOfObject;
+    case AssertTOp::Bool:     return RuntimeType{KindOfBoolean};
+    case AssertTOp::SStr:     return RuntimeType{KindOfString};
+    case AssertTOp::Str:      return RuntimeType{KindOfString};
+    case AssertTOp::SArr:     return RuntimeType{KindOfArray};
+    case AssertTOp::Arr:      return RuntimeType{KindOfArray};
+    case AssertTOp::Obj:      return RuntimeType{KindOfObject};
+
+    // We can turn these into information in hhbc-translator but can't
+    // really remove guards, since it can be more than one DataType,
+    // so don't do anything here.
+    case AssertTOp::OptInt:
+    case AssertTOp::OptDbl:
+    case AssertTOp::OptRes:
+    case AssertTOp::OptBool:
+    case AssertTOp::OptSStr:
+    case AssertTOp::OptStr:
+    case AssertTOp::OptSArr:
+    case AssertTOp::OptArr:
+    case AssertTOp::OptObj:
+      return folly::none;
+
+    case AssertTOp::Ref:
+      // We should be able to use this to avoid the outer-type guards
+      // on KindOfRefs, but for now we don't because of complications
+      // with communicating the predicted inner type to
+      // hhbc-translator.
+      return folly::none;
+
+    // There's really not much we can do with a Cell assertion at
+    // translation time, right now.
+    case AssertTOp::Cell:
+      return folly::none;
 
     // Since these don't correspond to data types, there's not much we
     // can do in the current situation.
@@ -1467,18 +1532,9 @@ void Translator::handleAssertionEffects(Tracelet& t,
     }
     not_reached();
   }();
-  if (!dt) return;
+  if (!rt) return;
 
-  auto const loc = [&] {
-    switch (ni.op()) {
-    case Op::AssertTL:    return Location(Location::Local, ni.imm[0].u_LA);
-    case Op::AssertTStk:  return Location(Location::Stack, ni.imm[0].u_IVA);
-    default:
-      not_reached();
-    }
-  }();
-  if (loc.isInvalid()) return;
-  auto const dl = t.newDynLocation(loc, *dt);
+  auto const dl = t.newDynLocation(loc, *rt);
 
   // No need for m_resolvedDeps---because we're in the bytecode stream
   // we don't need to tell hhbc-translator about it out of band.
@@ -1495,13 +1551,23 @@ void Translator::handleAssertionEffects(Tracelet& t,
        *
        * Punt this opcode to end the trace.
        */
+      FTRACE(1, "punting for {}\n", loc.pretty());
       punt();
     }
-    // Otherwise, we may have more information than is in the
-    // AssertTStk.
-    return;
+
+    auto const isSpecializedObj =
+      rt->outerType() == KindOfObject && rt->valueClass();
+    if (!isSpecializedObj || curVal->rtt.valueClass()) {
+      // Otherwise, we may have more information in the curVal
+      // RuntimeType than would come from the AssertT if we were
+      // tracking a literal value or something.
+      FTRACE(1, "assertion leaving curVal alone {}\n", curVal->pretty());
+      return;
+    }
   }
-  FTRACE(1, "assertion effects {} -> {}\n", dl->pretty());
+  FTRACE(1, "assertion effects {} -> {}\n",
+    curVal ? curVal->pretty() : std::string{},
+    dl->pretty());
   curVal = dl;
 }
 
@@ -3310,7 +3376,9 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     // Translation could fail entirely (because of an unknown opcode), or
     // encounter an input that cannot be computed.
     try {
-      if (isTypeAssert(ni->op())) handleAssertionEffects(t, *ni, tas);
+      if (isTypeAssert(ni->op())) {
+        handleAssertionEffects(t, *ni, tas, stackFrameOffset);
+      }
       preInputApplyMetaData(metaHand, ni);
       InputInfos inputInfos;
       getInputsImpl(

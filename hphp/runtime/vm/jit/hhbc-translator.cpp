@@ -3772,6 +3772,25 @@ static folly::Optional<Type> assertOpToType(AssertTOp op) {
   case AssertTOp::Str:        return Type::Str;
   case AssertTOp::Arr:        return Type::Arr;
   case AssertTOp::Obj:        return Type::Obj;
+  case AssertTOp::SStr:       return Type::StaticStr;
+  case AssertTOp::SArr:       return Type::StaticArr;
+
+  // These aren't enabled yet:
+  case AssertTOp::OptInt:
+  case AssertTOp::OptObj:
+  case AssertTOp::OptDbl:
+  case AssertTOp::OptBool:
+  case AssertTOp::OptSStr:
+  case AssertTOp::OptSArr:
+  case AssertTOp::OptStr:
+  case AssertTOp::OptArr:
+  case AssertTOp::OptRes:
+    return folly::none;
+
+  // We always know this at JIT time right now.
+  case AssertTOp::Cell:
+  case AssertTOp::Ref:
+    return folly::none;
 
   // The JIT can't currently handle the exact information in these
   // type assertions in some cases:
@@ -3792,6 +3811,19 @@ void HhbcTranslator::emitAssertTStk(int32_t offset, AssertTOp op) {
   if (auto const t = assertOpToType(op)) {
     assertTypeStack(offset, *t);
   }
+}
+
+Type HhbcTranslator::assertObjType(const StringData* name) {
+  auto const cls = Unit::lookupUniqueClass(name);
+  return classIsUniqueOrCtxParent(cls) ? Type::Obj.specialize(cls) : Type::Obj;
+}
+
+void HhbcTranslator::emitAssertObjL(int32_t loc, bool exact, Id id) {
+  assertTypeLocal(loc, assertObjType(lookupStringId(id)));
+}
+
+void HhbcTranslator::emitAssertObjStk(int32_t offset, bool exact, Id id) {
+  assertTypeStack(offset, assertObjType(lookupStringId(id)));
 }
 
 void HhbcTranslator::emitAbs() {

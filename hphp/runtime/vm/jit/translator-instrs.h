@@ -182,6 +182,8 @@
   CASE(Ceil) \
   CASE(AssertTL) \
   CASE(AssertTStk) \
+  CASE(AssertObjL) \
+  CASE(AssertObjStk) \
   /* */
 
   // These are instruction-like functions which cover more than one

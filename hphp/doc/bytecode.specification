@@ -3772,13 +3772,29 @@ ArrayIdx    [C C C] -> [C]
   if found. Otherwise, $1 is pushed onto the stack. A fatal error will be
   thrown if $3 is not an array.
 
-AssertTL   <local id>     <op>
-AssertTStk <stack offset> <op>
+AssertTL   <local id>     <op>   []  ->  []
+AssertTStk <stack offset> <op>   []  ->  []
 
-  These opcodes are currently only supplied for debugging purposes.  They
-  instruct the runtime that the value in the specified local or stack offset
-  must have a particular type.  The type sub-opcodes are not currently
-  specified, as they are particular to the implementation.
+  These opcodes may be used to communicate the results of ahead of
+  time static analysis to the runtime.  They indicate that the value
+  in the specified local or stack offset must be statically known to
+  have a particular type.  The sub opcodes shoud be used to indicate
+  the type, in an unspecified way.
+
+AssertObjL    <local id>     <exact> <class name>   []  ->  []
+AssertObjStk  <stack offset> <exact> <class name>   []  ->  []
+
+  These opcodes may be used to communicate the results of ahead of
+  time static analysis to the runtime.  They indicate that the value
+  in the specified local or stack offset must be statically known to
+  be an object of a particular class or interface type, or an object
+  that is a non-strict subtype of a particular class or interface
+  type.
+
+  %3 is a litstr id of a class or interface name.  If %2 is 1, the
+  type is asserted to be exactly an object of the class with the name
+  %3.  Otherwise, the type is asserted to be some non-strict subtype
+  of the specified class or interface.
 
 BreakTraceHint   []  ->  []
 

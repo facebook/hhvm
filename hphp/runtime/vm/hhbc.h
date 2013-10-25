@@ -326,17 +326,30 @@ enum IncDecOp {
 #define ASSERTT_OPS                             \
   ASSERTT_OP(Uninit)                            \
   ASSERTT_OP(InitNull)                          \
-  ASSERTT_OP(Int)                               \
-  ASSERTT_OP(Dbl)                               \
-  ASSERTT_OP(Res)                               \
   ASSERTT_OP(Null)                              \
+  ASSERTT_OP(Int)                               \
+  ASSERTT_OP(OptInt)                            \
+  ASSERTT_OP(Dbl)                               \
+  ASSERTT_OP(OptDbl)                            \
+  ASSERTT_OP(Res)                               \
+  ASSERTT_OP(OptRes)                            \
   ASSERTT_OP(Bool)                              \
+  ASSERTT_OP(OptBool)                           \
+  ASSERTT_OP(SStr)                              \
+  ASSERTT_OP(OptSStr)                           \
   ASSERTT_OP(Str)                               \
+  ASSERTT_OP(OptStr)                            \
+  ASSERTT_OP(SArr)                              \
+  ASSERTT_OP(OptSArr)                           \
   ASSERTT_OP(Arr)                               \
+  ASSERTT_OP(OptArr)                            \
   ASSERTT_OP(Obj)                               \
+  ASSERTT_OP(OptObj)                            \
   ASSERTT_OP(InitUnc)                           \
   ASSERTT_OP(Unc)                               \
-  ASSERTT_OP(InitCell)
+  ASSERTT_OP(InitCell)                          \
+  ASSERTT_OP(Cell)                              \
+  ASSERTT_OP(Ref)
 
 enum class AssertTOp : uint8_t {
 #define ASSERTT_OP(op) op,
@@ -512,6 +525,8 @@ enum SetOpOp {
   O(IsObjectL,       ONE(LA),          NOV,             ONE(CV),    NF) \
   O(AssertTL,        TWO(LA,OA),       NOV,             NOV,        NF) \
   O(AssertTStk,      TWO(IVA,OA),      NOV,             NOV,        NF) \
+  O(AssertObjL,      THREE(LA,IVA,SA), NOV,             NOV,        NF) \
+  O(AssertObjStk,    THREE(IVA,IVA,SA),NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(SetN,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \

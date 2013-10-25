@@ -371,7 +371,8 @@ private:
                           InputInfos& ii);
   void handleAssertionEffects(Tracelet&,
                               const NormalizedInstruction&,
-                              TraceletContext&);
+                              TraceletContext&,
+                              int currentStackOffset);
   void getOutputs(Tracelet& t,
                   NormalizedInstruction* ni,
                   int& currentStackOffset,

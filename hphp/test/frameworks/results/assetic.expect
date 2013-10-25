@@ -42,13 +42,13 @@ Assetic\Test\Asset\AssetCollectionTest::testIterationFilters
 .
 Assetic\Test\Asset\AssetCollectionTest::testSetContent
 .
-Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #0
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #0 
 .
-Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #1
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #1 
 .
-Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #2
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #2 
 .
-Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #3
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #3 
 .
 Assetic\Test\Asset\AssetCollectionTest::testGetLastModifiedWithValues
 .
@@ -84,15 +84,15 @@ Assetic\Test\Asset\AssetCollectionTest::testNewFilterOnCloneDoesNotPropagateToPr
 .
 Assetic\Test\Asset\AssetCollectionTest::testClearingFiltersWorksAfterCollectionHasBeenIterated
 .
-Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #0
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #0 
 .
-Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #1
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #1 
 .
-Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #2
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #2 
 .
-Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #3
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #3 
 .
-Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #4
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #4 
 .
 Assetic\Test\Asset\AssetReferenceTest::testLazyFilters
 .
@@ -252,11 +252,11 @@ Assetic\Test\Factory\AssetFactoryTest::testNoFilterManager
 . 126 / 354 ( 35%)
 Assetic\Test\Factory\AssetFactoryTest::testCreateAssetReference
 .
-Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #0
+Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #0 
 .
-Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #1
+Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #1 
 .
-Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #2
+Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #2 
 .
 Assetic\Test\Factory\AssetFactoryTest::testCreateFileAsset
 .
@@ -306,15 +306,15 @@ Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testDebugCached
 .
 Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testDebugCachedStale
 .
-Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #0
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #0 
 .
-Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #1
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #1 
 .
-Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #2
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #2 
 .
-Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #3
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #3 
 .
-Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #4
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #4 
 .
 Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testComplexFormula
 .
@@ -322,23 +322,23 @@ Assetic\Test\Factory\Resource\CoalescingDirectoryResourceTest::shouldFilterFiles
 .
 Assetic\Test\Factory\Resource\DirectoryResourceTest::testIsFresh
 .
-Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #0
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #0 
 .
-Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #1
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #1 
 .
-Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #2
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #2 
 .
-Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #0
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #0 
 .
-Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #1
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #1 
 .
-Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #2
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #2 
 .
 Assetic\Test\Factory\Resource\DirectoryResourceTest::testRecursiveIteration
 .
-Assetic\Test\Factory\Resource\DirectoryResourceTest::testTrailingSlash with data set #0
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testTrailingSlash with data set #0 
 .
-Assetic\Test\Factory\Resource\DirectoryResourceTest::testTrailingSlash with data set #1
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testTrailingSlash with data set #1 
 .
 Assetic\Test\Factory\Resource\DirectoryResourceTest::testInvalidDirectory
 .
@@ -386,61 +386,61 @@ Assetic\Test\Filter\CssEmbedFilterTest::testCssEmbedDataUri
 S
 Assetic\Test\Filter\CssEmbedFilterTest::testCssEmbedMhtml
 S
-Assetic\Test\Filter\CssImportFilterTest::testImport with data set #0
+Assetic\Test\Filter\CssImportFilterTest::testImport with data set #0 
 E
-Assetic\Test\Filter\CssImportFilterTest::testImport with data set #1
+Assetic\Test\Filter\CssImportFilterTest::testImport with data set #1 
 E
 Assetic\Test\Filter\CssImportFilterTest::testNonCssImport
 E
 Assetic\Test\Filter\CssMinFilterTest::testRelativeSourceUrlImportImports
 .
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #0
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #0 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #1
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #1 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #2
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #2 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #3
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #3 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #4
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #4 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #5
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #5 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #6
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #6 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #7
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #7 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #8
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #8 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #9
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #9 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #10
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #10 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #11
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #11 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #12
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #12 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #13
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #13 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #14
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #14 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #15
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #15 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #16
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #16 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #17
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #17 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #0
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #0 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #1
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #1 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #2
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #2 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #3
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #3 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #4
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #4 
 E
-Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #5
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #5 
 E
 Assetic\Test\Filter\CssRewriteFilterTest::testNoTargetPath
 .

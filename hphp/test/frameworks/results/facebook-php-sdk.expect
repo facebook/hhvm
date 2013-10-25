@@ -202,30 +202,30 @@ PHPSDKTestCase::testHttpProtocolForwarded
 .
 PHPSDKTestCase::testHttpProtocolForwardedSecure
 .
-PHPSDKTestCase::testEndsWith with data set #0
+PHPSDKTestCase::testEndsWith with data set #0 
 .
-PHPSDKTestCase::testEndsWith with data set #1
+PHPSDKTestCase::testEndsWith with data set #1 
 .
-PHPSDKTestCase::testEndsWith with data set #2
+PHPSDKTestCase::testEndsWith with data set #2 
 .
-PHPSDKTestCase::testEndsWith with data set #3
+PHPSDKTestCase::testEndsWith with data set #3 
 .
-PHPSDKTestCase::testEndsWith with data set #4
+PHPSDKTestCase::testEndsWith with data set #4 
 .
-PHPSDKTestCase::testEndsWith with data set #5
+PHPSDKTestCase::testEndsWith with data set #5 
 .
-PHPSDKTestCase::testEndsWith with data set #6
+PHPSDKTestCase::testEndsWith with data set #6 
 .
-PHPSDKTestCase::testEndsWith with data set #7
+PHPSDKTestCase::testEndsWith with data set #7 
 .
-PHPSDKTestCase::testIsAllowedDomain with data set #0
+PHPSDKTestCase::testIsAllowedDomain with data set #0 
 .
-PHPSDKTestCase::testIsAllowedDomain with data set #1
+PHPSDKTestCase::testIsAllowedDomain with data set #1 
 .
-PHPSDKTestCase::testIsAllowedDomain with data set #2
+PHPSDKTestCase::testIsAllowedDomain with data set #2 
 .
-PHPSDKTestCase::testIsAllowedDomain with data set #3
+PHPSDKTestCase::testIsAllowedDomain with data set #3 
 .
-PHPSDKTestCase::testIsAllowedDomain with data set #4
+PHPSDKTestCase::testIsAllowedDomain with data set #4 
 .
 OK (115 tests, 217 assertions)

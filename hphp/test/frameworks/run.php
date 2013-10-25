@@ -37,8 +37,9 @@
  *   - Error files showing all the errors and failures from running the test,
  *     suite or the fatal if the framework fatals.
  *
- *   - Timeout option for running tests. Thre is a default of 30 minutes to
- *     run each test, but this can be shortened or lengthened as desired.
+ *   - Timeout option for running individual tests. There is a default of 60
+ *     seconds to run each test, but this can be shortened or lengthened as
+ *     desired.
  *
  *   - Enhanced data output by the script to include "diff" type information
  *     about why a passing percentage is different from a previous run,
@@ -143,7 +144,7 @@ class PHPUnitPatterns {
   // The "with data set" can either have a # or " after it and then any char
   // before a resulting " or (
   static string $test_name_pattern =
-  "/[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\"|#)[^\"|^( \)|^\n]+(\")?)?/";
+  "/[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\"|#)[^\"|^\(|^\n]+(\")?)?/";
 
   static string $pear_test_name_pattern =
  "/Starting test '([\-_a-zA-Z0-9\/]*\.phpt)/";
@@ -476,7 +477,7 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
          "if necessary.\n", $verbose);
   }
 
-  $timeout = 3600; // 3600 seconds is the default run time before timeout
+  $timeout = 60; // seconds to any individual test for any framework
   if ($options->containsKey('timeout')) {
     $timeout = (int) $options['timeout'];
     // Remove timeout option and its value from the $tests vector
@@ -846,14 +847,18 @@ THUMBSDOWN
           foreach ($decoded_results as $key => $value) {
             $print_str .= str_pad($key.",", 20);
           }
+          // Get rid of the the last spaces and comma
+          $print_str = rtrim($print_str);
           $print_str = rtrim($print_str, ",");
           $print_str .= PHP_EOL;
           print $print_str;
         }
-        $print_str = str_pad(date("Y-m-d"), 20);
+        $print_str = str_pad(date("Y-m-d").",", 20);
         foreach ($decoded_results as $key => $value) {
           $print_str .= str_pad($value.",", 20);
         }
+        // Get rid of the the last spaces and comma
+        $print_str = rtrim($print_str);
         $print_str = rtrim($print_str, ",");
         $print_str .= PHP_EOL;
         print $print_str;
@@ -903,7 +908,7 @@ function run_single_test_suite(string $fw_name, string $summary_file,
   /***********************************
    *  Initial preparation
    **********************************/
-  $run_command = prepare_framework_test_run_command($fw_name, $timeout);
+  $run_command = prepare_framework_test_run_command($fw_name);
   $test_path = get_test_path($fw_name, $install_root, $verbose);
 
   verbose("Running test for $fw_name\n", $verbose);
@@ -999,7 +1004,13 @@ function run_single_test_suite(string $fw_name, string $summary_file,
   $process = proc_open($run_command, $descriptorspec, $pipes, $test_path, null);
   if (is_resource($process)) {
     fclose($pipes[0]);
+    $read_stream_arr = array($pipes[1]);
     while (!(feof($pipes[1]))) {
+     if (stream_select($read_stream_arr, null, null, $timeout) === false) {
+        $error_information .= "TEST TIMEOUT OCCURRED.";
+        $error_information .= " Last line read was: ".$line;
+        break;
+      }
       $line = fgets($pipes[1]);
       $line = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
                            "", $line);
@@ -1070,7 +1081,6 @@ function run_single_test_suite(string $fw_name, string $summary_file,
             // can print in color. Check this out later.
             verbose(Colors::GREEN.".".Colors::NONE, !$csv_only);
           } else {
-            $ret_val = -1;
             // We are different than we expected
             // Red if we go from pass to something else
             if ($compare_tests[$match] === '.') {
@@ -1098,7 +1108,6 @@ function run_single_test_suite(string $fw_name, string $summary_file,
           // before, but we are having an issue getting to the actual tests
           // (e.g., yii is one test suite that has behaved this way).
           if ($compare_tests !== null) {
-            $ret_val = -1;
             verbose(Colors::LIGHTBLUE."F".Colors::NONE, !$csv_only);
             verbose(PHP_EOL."Different status in ".$fw_name." for test ".
                     $match.". Having problem loading test ".$match.PHP_EOL,
@@ -1116,6 +1125,14 @@ function run_single_test_suite(string $fw_name, string $summary_file,
         // information, but we haven't started the tests yet.
         $error_information .= $line;
       }
+    }
+
+    // If we get here and haven't started any tests yet, let's assume that
+    // we have fataled and make the results and expect file be that actual
+    // error information.
+    if (!$started_tests) {
+      $tests_and_results .= $error_information;
+      $fatal = true;
     }
     // Remove final stat line from error string
     if (!$fatal) {
@@ -1152,9 +1169,14 @@ function run_single_test_suite(string $fw_name, string $summary_file,
       file_put_contents($summary_file, json_encode($decoded_results));
     }
 
-    // If the first baseline run, make both the same.
+    // If the first baseline run, make both the same. Otherwise, compare
+    // the expect and results file to see if they are the same. If they are
+    // then all is good. If not, thumbs down.
     if (!file_exists($expect_file)) {
       copy($results_file, $expect_file);
+    } else if (file_get_contents($results_file) !==
+               file_get_contents($expect_file)) {
+      $ret_val = -1;
     }
 
   } else {
@@ -1166,17 +1188,12 @@ function run_single_test_suite(string $fw_name, string $summary_file,
   return $ret_val;
 }
 
-function prepare_framework_test_run_command(string $fw_name,
-                                            int $timeout): string {
-  // Remember, timeouts are in minutes.
-  $run_command = __DIR__."/../../tools/timeout.sh -t $timeout";
+function prepare_framework_test_run_command(string $fw_name): string {
   if (Frameworks::$framework_info[$fw_name]
       ->contains('test_run_command')) {
-    $run_command .= " ".
-                 Frameworks::$framework_info[$fw_name]['test_run_command'];
+    $run_command = Frameworks::$framework_info[$fw_name]['test_run_command'];
   } else {
-    $run_command .= " ".get_hhvm_build()." ".__DIR__.
-                    "/vendor/bin/phpunit --debug";
+    $run_command = get_hhvm_build()." ".__DIR__."/vendor/bin/phpunit --debug";
   }
   $run_command .= " 2>&1";
   return $run_command;
@@ -1345,8 +1362,8 @@ INTRO;
     # creating new expected output files for all of the frameworks
     % hhvm run.php --all --redownload --record
 
-    # Run all framework tests with a timeout per test (in secs).
-    % hhvm run.php --all --timeout 600
+    # Run all framework tests with a timeout per individual test (in secs).
+    % hhvm run.php --all --timeout 30
 
     # Run one test.
     % hhvm run.php composer
@@ -1354,13 +1371,13 @@ INTRO;
     # Run multiple tests.
     % hhvm run.php composer assetic paris
 
-    # Run multiple tests with timeout for each test (in seconds).
+    # Run multiple tests with timeout for each individual test (in seconds).
     # Tests must come after the -- options
-    % hhvm run.php --timeout 600 composer assetic
+    % hhvm run.php --timeout 30 composer assetic
 
-    # Run multiple tests with timeout for each test (in seconds) and
+    # Run multiple tests with timeout for each individual test (in seconds) and
     # with verbose messages. Tests must come after the -- options.
-    % hhvm run.php --timeout 600 --verbose composer assetic
+    % hhvm run.php --timeout 30 --verbose composer assetic
 
     # Run all the tests, but only produce a machine readable csv
     # for data extraction into entities like charts.
@@ -1403,8 +1420,8 @@ function oss_test_option_map(): OptionInfoMap {
                                         "to be run are hardcoded in a Map in ".
                                         "this code."},
     'timeout:'            => Pair {'t', "Optional - The maximum amount of ".
-                                        "time, in secs, to allow a test to ".
-                                        "run."},
+                                        "time, in secs, to allow a individual".
+                                        "test to run. Default is 60 seconds."},
     'verbose'             => Pair {'v', "Optional - For a lot of messages ".
                                         "about what is going on."},
     'zend:'               => Pair {'z', "Optional - Try to use zend if ".
@@ -1526,7 +1543,8 @@ function get_hhvm_build(bool $with_jit = true): string {
   $build = "";
   // See if we are using an internal development build
   if ((file_exists($fbcode_root_dir."/_bin"))) {
-    $build .= $fbcode_root_dir."/_bin/hphp/hhvm/hhvm";
+    $build .= $fbcode_root_dir;
+    $build .= "/_bin/hphp/hhvm/hhvm -v Eval.EnableZendCompat=true";
   } else if (command_exists("hhvm")) {
   // Maybe we are in OSS land trying this script
     $build .= "hhvm";

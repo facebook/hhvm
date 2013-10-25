@@ -322,11 +322,11 @@ DatabaseConnectionTest::testResolvingCacheThroughClosure
 .
 DatabaseConnectorTest::testOptionResolution
 .
-DatabaseConnectorTest::testMySqlConnectCallsCreateConnectionWithProperArguments with data set #0
+DatabaseConnectorTest::testMySqlConnectCallsCreateConnectionWithProperArguments with data set #0 
 .
-DatabaseConnectorTest::testMySqlConnectCallsCreateConnectionWithProperArguments with data set #1
+DatabaseConnectorTest::testMySqlConnectCallsCreateConnectionWithProperArguments with data set #1 
 .
-DatabaseConnectorTest::testMySqlConnectCallsCreateConnectionWithProperArguments with data set #2
+DatabaseConnectorTest::testMySqlConnectCallsCreateConnectionWithProperArguments with data set #2 
 .
 DatabaseConnectorTest::testPostgresConnectCallsCreateConnectionWithProperArguments
 .
@@ -360,9 +360,9 @@ DatabaseEloquentBelongsToManyTest::testDetachMethodClearsAllPivotRecordsWhenNoID
 .
 DatabaseEloquentBelongsToManyTest::testCreateMethodCreatesNewModelAndInsertsAttachmentRecord
 .
-DatabaseEloquentBelongsToManyTest::testSyncMethodSyncsIntermediateTableWithGivenArray with data set #0
+DatabaseEloquentBelongsToManyTest::testSyncMethodSyncsIntermediateTableWithGivenArray with data set #0 
 .
-DatabaseEloquentBelongsToManyTest::testSyncMethodSyncsIntermediateTableWithGivenArray with data set #1
+DatabaseEloquentBelongsToManyTest::testSyncMethodSyncsIntermediateTableWithGivenArray with data set #1 
 .
 DatabaseEloquentBelongsToManyTest::testSyncMethodSyncsIntermediateTableWithGivenArrayAndAttributes
 .

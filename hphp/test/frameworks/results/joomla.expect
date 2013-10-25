@@ -68,13 +68,13 @@ Joomla\Application\Tests\AbstractWebApplicationTest::testCompressWithHeadersSent
 .
 Joomla\Application\Tests\AbstractWebApplicationTest::testCompressWithUnsupportedEncodings
 .
-Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #0
+Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #0 
 .
-Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #1
+Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #1 
 .
-Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #2
+Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #2 
 .
-Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #3
+Joomla\Application\Tests\AbstractWebApplicationTest::testDetectRequestUri with data set #3 
 .
 Joomla\Application\Tests\AbstractWebApplicationTest::testExecute
 .
@@ -100,9 +100,9 @@ Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithJavascriptR
 .
 Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithMoved
 .
-Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithUrl with data set #0
+Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithUrl with data set #0 
 .
-Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithUrl with data set #1
+Joomla\Application\Tests\AbstractWebApplicationTest::testRedirectWithUrl with data set #1 
 .
 Joomla\Application\Tests\AbstractWebApplicationTest::testRespond
 I
@@ -142,265 +142,265 @@ JApplicationWebClientTest::test__construct
 I
 JApplicationWebClientTest::test__get
 I
-JApplicationWebClientTest::testDetectBrowser with data set #0
+JApplicationWebClientTest::testDetectBrowser with data set #0 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #1
+JApplicationWebClientTest::testDetectBrowser with data set #1 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #2
+JApplicationWebClientTest::testDetectBrowser with data set #2 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #3
+JApplicationWebClientTest::testDetectBrowser with data set #3 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #4
+JApplicationWebClientTest::testDetectBrowser with data set #4 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #5
+JApplicationWebClientTest::testDetectBrowser with data set #5 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #6
+JApplicationWebClientTest::testDetectBrowser with data set #6 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #7
+JApplicationWebClientTest::testDetectBrowser with data set #7 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #8
+JApplicationWebClientTest::testDetectBrowser with data set #8 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #9
+JApplicationWebClientTest::testDetectBrowser with data set #9 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #10
+JApplicationWebClientTest::testDetectBrowser with data set #10 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #11
+JApplicationWebClientTest::testDetectBrowser with data set #11 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #12
+JApplicationWebClientTest::testDetectBrowser with data set #12 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #13
+JApplicationWebClientTest::testDetectBrowser with data set #13 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #14
+JApplicationWebClientTest::testDetectBrowser with data set #14 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #15
+JApplicationWebClientTest::testDetectBrowser with data set #15 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #16
+JApplicationWebClientTest::testDetectBrowser with data set #16 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #17
+JApplicationWebClientTest::testDetectBrowser with data set #17 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #18
+JApplicationWebClientTest::testDetectBrowser with data set #18 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #19
+JApplicationWebClientTest::testDetectBrowser with data set #19 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #20
+JApplicationWebClientTest::testDetectBrowser with data set #20 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #21
+JApplicationWebClientTest::testDetectBrowser with data set #21 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #22
+JApplicationWebClientTest::testDetectBrowser with data set #22 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #23
+JApplicationWebClientTest::testDetectBrowser with data set #23 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #24
+JApplicationWebClientTest::testDetectBrowser with data set #24 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #25
+JApplicationWebClientTest::testDetectBrowser with data set #25 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #26
+JApplicationWebClientTest::testDetectBrowser with data set #26 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #27
+JApplicationWebClientTest::testDetectBrowser with data set #27 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #28
+JApplicationWebClientTest::testDetectBrowser with data set #28 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #29
+JApplicationWebClientTest::testDetectBrowser with data set #29 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #30
+JApplicationWebClientTest::testDetectBrowser with data set #30 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #31
+JApplicationWebClientTest::testDetectBrowser with data set #31 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #32
+JApplicationWebClientTest::testDetectBrowser with data set #32 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #33
+JApplicationWebClientTest::testDetectBrowser with data set #33 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #34
+JApplicationWebClientTest::testDetectBrowser with data set #34 
 .
-JApplicationWebClientTest::testDetectBrowser with data set #35
+JApplicationWebClientTest::testDetectBrowser with data set #35 
 .
-JApplicationWebClientTest::testDetectEncoding with data set #0
+JApplicationWebClientTest::testDetectEncoding with data set #0 
 .
-JApplicationWebClientTest::testDetectEncoding with data set #1
+JApplicationWebClientTest::testDetectEncoding with data set #1 
 .
-JApplicationWebClientTest::testDetectEncoding with data set #2
+JApplicationWebClientTest::testDetectEncoding with data set #2 
 .
-JApplicationWebClientTest::testDetectEncoding with data set #3
+JApplicationWebClientTest::testDetectEncoding with data set #3 
 .
-JApplicationWebClientTest::testDetectEncoding with data set #4
+JApplicationWebClientTest::testDetectEncoding with data set #4 
 .
-JApplicationWebClientTest::testDetectEncoding with data set #5
+JApplicationWebClientTest::testDetectEncoding with data set #5 
 .
-JApplicationWebClientTest::testDetectEncoding with data set #6
+JApplicationWebClientTest::testDetectEncoding with data set #6 
 .
-JApplicationWebClientTest::testDetectEngine with data set #0
+JApplicationWebClientTest::testDetectEngine with data set #0 
 .
-JApplicationWebClientTest::testDetectEngine with data set #1
+JApplicationWebClientTest::testDetectEngine with data set #1 
 .
-JApplicationWebClientTest::testDetectEngine with data set #2
+JApplicationWebClientTest::testDetectEngine with data set #2 
 .
-JApplicationWebClientTest::testDetectEngine with data set #3
+JApplicationWebClientTest::testDetectEngine with data set #3 
 .
-JApplicationWebClientTest::testDetectEngine with data set #4
+JApplicationWebClientTest::testDetectEngine with data set #4 
 .
-JApplicationWebClientTest::testDetectEngine with data set #5
+JApplicationWebClientTest::testDetectEngine with data set #5 
 .
-JApplicationWebClientTest::testDetectEngine with data set #6
+JApplicationWebClientTest::testDetectEngine with data set #6 
 .  122 / 4133 (  2%)
-JApplicationWebClientTest::testDetectEngine with data set #7
+JApplicationWebClientTest::testDetectEngine with data set #7 
 .
-JApplicationWebClientTest::testDetectEngine with data set #8
+JApplicationWebClientTest::testDetectEngine with data set #8 
 .
-JApplicationWebClientTest::testDetectEngine with data set #9
+JApplicationWebClientTest::testDetectEngine with data set #9 
 .
-JApplicationWebClientTest::testDetectEngine with data set #10
+JApplicationWebClientTest::testDetectEngine with data set #10 
 .
-JApplicationWebClientTest::testDetectEngine with data set #11
+JApplicationWebClientTest::testDetectEngine with data set #11 
 .
-JApplicationWebClientTest::testDetectEngine with data set #12
+JApplicationWebClientTest::testDetectEngine with data set #12 
 .
-JApplicationWebClientTest::testDetectEngine with data set #13
+JApplicationWebClientTest::testDetectEngine with data set #13 
 .
-JApplicationWebClientTest::testDetectEngine with data set #14
+JApplicationWebClientTest::testDetectEngine with data set #14 
 .
-JApplicationWebClientTest::testDetectEngine with data set #15
+JApplicationWebClientTest::testDetectEngine with data set #15 
 .
-JApplicationWebClientTest::testDetectEngine with data set #16
+JApplicationWebClientTest::testDetectEngine with data set #16 
 .
-JApplicationWebClientTest::testDetectEngine with data set #17
+JApplicationWebClientTest::testDetectEngine with data set #17 
 .
-JApplicationWebClientTest::testDetectEngine with data set #18
+JApplicationWebClientTest::testDetectEngine with data set #18 
 .
-JApplicationWebClientTest::testDetectEngine with data set #19
+JApplicationWebClientTest::testDetectEngine with data set #19 
 .
-JApplicationWebClientTest::testDetectEngine with data set #20
+JApplicationWebClientTest::testDetectEngine with data set #20 
 .
-JApplicationWebClientTest::testDetectEngine with data set #21
+JApplicationWebClientTest::testDetectEngine with data set #21 
 .
-JApplicationWebClientTest::testDetectEngine with data set #22
+JApplicationWebClientTest::testDetectEngine with data set #22 
 .
-JApplicationWebClientTest::testDetectEngine with data set #23
+JApplicationWebClientTest::testDetectEngine with data set #23 
 .
-JApplicationWebClientTest::testDetectEngine with data set #24
+JApplicationWebClientTest::testDetectEngine with data set #24 
 .
-JApplicationWebClientTest::testDetectEngine with data set #25
+JApplicationWebClientTest::testDetectEngine with data set #25 
 .
-JApplicationWebClientTest::testDetectEngine with data set #26
+JApplicationWebClientTest::testDetectEngine with data set #26 
 .
-JApplicationWebClientTest::testDetectEngine with data set #27
+JApplicationWebClientTest::testDetectEngine with data set #27 
 .
-JApplicationWebClientTest::testDetectEngine with data set #28
+JApplicationWebClientTest::testDetectEngine with data set #28 
 .
-JApplicationWebClientTest::testDetectEngine with data set #29
+JApplicationWebClientTest::testDetectEngine with data set #29 
 .
-JApplicationWebClientTest::testDetectEngine with data set #30
+JApplicationWebClientTest::testDetectEngine with data set #30 
 .
-JApplicationWebClientTest::testDetectEngine with data set #31
+JApplicationWebClientTest::testDetectEngine with data set #31 
 .
-JApplicationWebClientTest::testDetectEngine with data set #32
+JApplicationWebClientTest::testDetectEngine with data set #32 
 .
-JApplicationWebClientTest::testDetectEngine with data set #33
+JApplicationWebClientTest::testDetectEngine with data set #33 
 .
-JApplicationWebClientTest::testDetectEngine with data set #34
+JApplicationWebClientTest::testDetectEngine with data set #34 
 .
-JApplicationWebClientTest::testDetectEngine with data set #35
+JApplicationWebClientTest::testDetectEngine with data set #35 
 .
-JApplicationWebClientTest::testDetectLanguage with data set #0
+JApplicationWebClientTest::testDetectLanguage with data set #0 
 .
-JApplicationWebClientTest::testDetectLanguage with data set #1
+JApplicationWebClientTest::testDetectLanguage with data set #1 
 .
-JApplicationWebClientTest::testDetectLanguage with data set #2
+JApplicationWebClientTest::testDetectLanguage with data set #2 
 .
-JApplicationWebClientTest::testDetectLanguage with data set #3
+JApplicationWebClientTest::testDetectLanguage with data set #3 
 .
-JApplicationWebClientTest::testDetectLanguage with data set #4
+JApplicationWebClientTest::testDetectLanguage with data set #4 
 .
-JApplicationWebClientTest::testDetectLanguage with data set #5
+JApplicationWebClientTest::testDetectLanguage with data set #5 
 .
-JApplicationWebClientTest::testDetectLanguage with data set #6
+JApplicationWebClientTest::testDetectLanguage with data set #6 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #0
+JApplicationWebClientTest::testDetectPlatform with data set #0 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #1
+JApplicationWebClientTest::testDetectPlatform with data set #1 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #2
+JApplicationWebClientTest::testDetectPlatform with data set #2 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #3
+JApplicationWebClientTest::testDetectPlatform with data set #3 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #4
+JApplicationWebClientTest::testDetectPlatform with data set #4 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #5
+JApplicationWebClientTest::testDetectPlatform with data set #5 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #6
+JApplicationWebClientTest::testDetectPlatform with data set #6 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #7
+JApplicationWebClientTest::testDetectPlatform with data set #7 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #8
+JApplicationWebClientTest::testDetectPlatform with data set #8 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #9
+JApplicationWebClientTest::testDetectPlatform with data set #9 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #10
+JApplicationWebClientTest::testDetectPlatform with data set #10 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #11
+JApplicationWebClientTest::testDetectPlatform with data set #11 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #12
+JApplicationWebClientTest::testDetectPlatform with data set #12 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #13
+JApplicationWebClientTest::testDetectPlatform with data set #13 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #14
+JApplicationWebClientTest::testDetectPlatform with data set #14 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #15
+JApplicationWebClientTest::testDetectPlatform with data set #15 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #16
+JApplicationWebClientTest::testDetectPlatform with data set #16 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #17
+JApplicationWebClientTest::testDetectPlatform with data set #17 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #18
+JApplicationWebClientTest::testDetectPlatform with data set #18 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #19
+JApplicationWebClientTest::testDetectPlatform with data set #19 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #20
+JApplicationWebClientTest::testDetectPlatform with data set #20 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #21
+JApplicationWebClientTest::testDetectPlatform with data set #21 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #22
+JApplicationWebClientTest::testDetectPlatform with data set #22 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #23
+JApplicationWebClientTest::testDetectPlatform with data set #23 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #24
+JApplicationWebClientTest::testDetectPlatform with data set #24 
 .  183 / 4133 (  4%)
-JApplicationWebClientTest::testDetectPlatform with data set #25
+JApplicationWebClientTest::testDetectPlatform with data set #25 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #26
+JApplicationWebClientTest::testDetectPlatform with data set #26 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #27
+JApplicationWebClientTest::testDetectPlatform with data set #27 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #28
+JApplicationWebClientTest::testDetectPlatform with data set #28 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #29
+JApplicationWebClientTest::testDetectPlatform with data set #29 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #30
+JApplicationWebClientTest::testDetectPlatform with data set #30 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #31
+JApplicationWebClientTest::testDetectPlatform with data set #31 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #32
+JApplicationWebClientTest::testDetectPlatform with data set #32 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #33
+JApplicationWebClientTest::testDetectPlatform with data set #33 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #34
+JApplicationWebClientTest::testDetectPlatform with data set #34 
 .
-JApplicationWebClientTest::testDetectPlatform with data set #35
+JApplicationWebClientTest::testDetectPlatform with data set #35 
 .
-JApplicationWebClientTest::testDetectRobot with data set #0
+JApplicationWebClientTest::testDetectRobot with data set #0 
 .
-JApplicationWebClientTest::testDetectRobot with data set #1
+JApplicationWebClientTest::testDetectRobot with data set #1 
 .
-JApplicationWebClientTest::testDetectRobot with data set #2
+JApplicationWebClientTest::testDetectRobot with data set #2 
 .
-JApplicationWebClientTest::testDetectRobot with data set #3
+JApplicationWebClientTest::testDetectRobot with data set #3 
 .
-JApplicationWebClientTest::testDetectRobot with data set #4
+JApplicationWebClientTest::testDetectRobot with data set #4 
 .
-JApplicationWebClientTest::testDetectRobot with data set #5
+JApplicationWebClientTest::testDetectRobot with data set #5 
 .
-JApplicationWebClientTest::testDetectRobot with data set #6
+JApplicationWebClientTest::testDetectRobot with data set #6 
 .
-JApplicationWebClientTest::testDetectRobot with data set #7
+JApplicationWebClientTest::testDetectRobot with data set #7 
 .
 Joomla\Archive\Tests\ArchiveTest::testExtractZip
 .
@@ -702,91 +702,91 @@ Joomla\Controller\Tests\BaseTest::testSetApplication
 .
 Joomla\Controller\Tests\BaseTest::testSetInput
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #0
+Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #0 
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #1
+Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #1 
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #2
+Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #2 
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #3
+Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #3 
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #4
+Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #4 
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #0
+Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #0 
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #1
+Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #1 
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #2
+Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #2 
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #3
+Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #3 
 .
-Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #4
+Joomla\Crypt\Tests\Cipher3DESTest::testEncrypt with data set #4 
 .
 Joomla\Crypt\Tests\Cipher3DESTest::testGenerateKey
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #0
+Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #0 
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #1
+Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #1 
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #2
+Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #2 
 .  366 / 4133 (  8%)
-Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #3
+Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #3 
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #4
+Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #4 
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #0
+Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #0 
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #1
+Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #1 
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #2
+Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #2 
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #3
+Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #3 
 .
-Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #4
+Joomla\Crypt\Tests\CipherBlowfishTest::testEncrypt with data set #4 
 .
 Joomla\Crypt\Tests\CipherBlowfishTest::testGenerateKey
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #0
+Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #0 
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #1
+Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #1 
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #2
+Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #2 
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #3
+Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #3 
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #4
+Joomla\Crypt\Tests\CipherRijndael256Test::testDecrypt with data set #4 
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #0
+Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #0 
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #1
+Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #1 
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #2
+Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #2 
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #3
+Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #3 
 .
-Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #4
+Joomla\Crypt\Tests\CipherRijndael256Test::testEncrypt with data set #4 
 .
 Joomla\Crypt\Tests\CipherRijndael256Test::testGenerateKey
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #0
+Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #0 
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #1
+Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #1 
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #2
+Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #2 
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #3
+Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #3 
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #4
+Joomla\Crypt\Tests\CipherSimpleTest::testDecrypt with data set #4 
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #0
+Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #0 
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #1
+Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #1 
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #2
+Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #2 
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #3
+Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #3 
 .
-Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #4
+Joomla\Crypt\Tests\CipherSimpleTest::testEncrypt with data set #4 
 .
 Joomla\Crypt\Tests\CipherSimpleTest::testGenerateKey
 .
@@ -816,17 +816,17 @@ Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "Blowfish_5"
 F
 Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "default"
 F
-Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Blowfish
+Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Blowfish Valid:"
 F
-Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Blowfish
+Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Blowfish Invalid:"
 .
-Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "MD5
+Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "MD5 Valid"
 .
-Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "MD5
+Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "MD5 Invalid"
 .
-Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Joomla
+Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Joomla Valid"
 .
-Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Joomla
+Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Joomla Invalid"
 .
 Joomla\Crypt\Tests\PasswordSimpleTest::testSetDefaultType with data set "Joomla"
 .

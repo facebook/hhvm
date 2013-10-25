@@ -42,95 +42,95 @@ Doctrine\Tests\ORM\ConfigurationTest::testSetGetQuoteStrategy
 .
 Doctrine\Tests\ORM\ConfigurationTest::testSetGetEntityListenerResolver
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #0
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #0 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #1
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #1 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #2
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #2 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #3
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #3 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #4
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #4 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #5
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #5 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #6
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #6 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #7
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #7 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #8
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #8 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #9
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #9 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #10
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #10 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #11
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #11 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #12
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #12 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #13
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #13 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #14
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #14 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #15
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #15 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #16
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #16 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #17
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #17 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #18
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #18 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #19
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #19 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #20
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #20 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #21
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #21 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #22
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #22 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #23
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #23 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #24
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #24 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #25
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #25 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #26
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #26 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #27
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #27 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #28
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #28 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #29
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #29 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #30
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #30 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #31
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #31 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #32
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #32 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #33
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #33 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #34
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #34 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #35
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #35 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #36
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #36 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #37
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #37 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #38
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #38 
 .   61 / 2068 (  2%)
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #39
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #39 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #40
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #40 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #41
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #41 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #42
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #42 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #43
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #43 
 .
-Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #44
+Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #44 
 .
 Doctrine\Tests\ORM\Entity\ConstructorTest::testFieldInitializationInConstructor
 .
@@ -157,28 +157,28 @@ Doctrine\Tests\ORM\EntityManagerTest::testCreateQueryBuilderAliasValid
 Doctrine\Tests\ORM\EntityManagerTest::testCreateQuery_DqlIsOptional
 .
 Doctrine\Tests\ORM\EntityManagerTest::testGetPartialReference
-E
+.
 Doctrine\Tests\ORM\EntityManagerTest::testCreateQuery
 .
-Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #0
+Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #0 
 .
-Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #1
+Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #1 
 .
-Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #2
+Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #2 
 .
-Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #3
+Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #3 
 .
-Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #4
+Doctrine\Tests\ORM\EntityManagerTest::testThrowsExceptionOnNonObjectValues with data set #4 
 .
-Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #0
+Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #0 
 .
-Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #1
+Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #1 
 .
-Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #2
+Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #2 
 .
-Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #3
+Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #3 
 .
-Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #4
+Doctrine\Tests\ORM\EntityManagerTest::testAffectedByErrorIfClosedException with data set #4 
 .
 Doctrine\Tests\ORM\EntityManagerTest::testTransactionalAcceptsReturn
 .
@@ -337,23 +337,23 @@ E
 Doctrine\Tests\ORM\Functional\CompositePrimaryKeyTest::testCompositeDqlEagerFetching
 E
 Doctrine\Tests\ORM\Functional\CompositePrimaryKeyTest::testCompositeCollectionMemberExpression
-E
+S
 Doctrine\Tests\ORM\Functional\CompositePrimaryKeyTest::testSpecifyUnknownIdentifierPrimaryKeyFails
 E
 Doctrine\Tests\ORM\Functional\CompositePrimaryKeyTest::testDeleteCompositePersistentCollection
 E
 Doctrine\Tests\ORM\Functional\DatabaseDriverTest::testIssue2059
-E
+S
 Doctrine\Tests\ORM\Functional\DatabaseDriverTest::testLoadMetadataFromDatabase
-E
+S
 Doctrine\Tests\ORM\Functional\DatabaseDriverTest::testLoadMetadataWithForeignKeyFromDatabase
-E
+S
 Doctrine\Tests\ORM\Functional\DatabaseDriverTest::testDetectManyToManyTables
-E
+S
 Doctrine\Tests\ORM\Functional\DatabaseDriverTest::testIgnoreManyToManyTableWithoutFurtherForeignKeyDetails
 E
 Doctrine\Tests\ORM\Functional\DatabaseDriverTest::testLoadMetadataFromDatabaseDetail
-E
+S
 Doctrine\Tests\ORM\Functional\DefaultValuesTest::testSimpleDetachMerge
 E
 Doctrine\Tests\ORM\Functional\DefaultValuesTest::testGetPartialReferenceWithDefaultValueNotEvaluatedInFlush
@@ -583,7 +583,7 @@ E
 Doctrine\Tests\ORM\Functional\LifecycleCallbackTest::testCascadedEntitiesCallsPrePersist
 E
 Doctrine\Tests\ORM\Functional\LifecycleCallbackTest::testLifecycleCallbacksGetInherited
-E
+.
 Doctrine\Tests\ORM\Functional\LifecycleCallbackTest::testLifecycleListener_ChangeUpdateChangeSet
 E
 Doctrine\Tests\ORM\Functional\LifecycleCallbackTest::testLifecycleCallbackEventArgs
@@ -601,11 +601,11 @@ E
 Doctrine\Tests\ORM\Functional\Locking\LockTest::testLockPessimisticWrite_NoTransaction_ThrowsException
 E
 Doctrine\Tests\ORM\Functional\Locking\LockTest::testLockPessimisticWrite
-E
+S
 Doctrine\Tests\ORM\Functional\Locking\LockTest::testLockPessimisticRead
-E
+S
 Doctrine\Tests\ORM\Functional\Locking\LockTest::testLockOptimisticNonVersionedThrowsExceptionInDQL
-E
+F
 Doctrine\Tests\ORM\Functional\Locking\OptimisticTest::testJoinedChildInsertSetsInitialVersionValue
 E  305 / 2068 ( 14%)
 Doctrine\Tests\ORM\Functional\Locking\OptimisticTest::testJoinedParentInsertSetsInitialVersionValue
@@ -685,7 +685,7 @@ E
 Doctrine\Tests\ORM\Functional\NativeQueryTest::testRSMBuilderThrowsExceptionOnColumnConflict
 E
 Doctrine\Tests\ORM\Functional\NativeQueryTest::testUnknownParentAliasThrowsException
-E
+F
 Doctrine\Tests\ORM\Functional\NativeQueryTest::testBasicNativeNamedQueryWithSqlResultSetMapping
 E
 Doctrine\Tests\ORM\Functional\NativeQueryTest::testBasicNativeNamedQueryWithResultClass
@@ -852,27 +852,27 @@ Doctrine\Tests\ORM\Functional\OrderedCollectionTest::testOrderedResultFromDqlQue
 E
 Doctrine\Tests\ORM\Functional\OrderedJoinedTableInheritanceCollectionTest::testOrderdOneToManyCollection
 E
-Doctrine\Tests\ORM\Functional\PaginationTest::testCountSimpleWithoutJoin with data set #0
+Doctrine\Tests\ORM\Functional\PaginationTest::testCountSimpleWithoutJoin with data set #0 
 E
-Doctrine\Tests\ORM\Functional\PaginationTest::testCountSimpleWithoutJoin with data set #1
+Doctrine\Tests\ORM\Functional\PaginationTest::testCountSimpleWithoutJoin with data set #1 
 E
-Doctrine\Tests\ORM\Functional\PaginationTest::testCountWithFetchJoin with data set #0
+Doctrine\Tests\ORM\Functional\PaginationTest::testCountWithFetchJoin with data set #0 
 E
-Doctrine\Tests\ORM\Functional\PaginationTest::testCountWithFetchJoin with data set #1
+Doctrine\Tests\ORM\Functional\PaginationTest::testCountWithFetchJoin with data set #1 
 E
 Doctrine\Tests\ORM\Functional\PaginationTest::testCountComplexWithOutputWalker
 E
-Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOff with data set #0
+Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOff with data set #0 
 E
-Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOff with data set #1
+Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOff with data set #1 
 E
-Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOn with data set #0
+Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOn with data set #0 
 E
-Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOn with data set #1
+Doctrine\Tests\ORM\Functional\PaginationTest::testIterateSimpleWithoutJoinFetchJoinHandlingOn with data set #1 
 E
-Doctrine\Tests\ORM\Functional\PaginationTest::testIterateWithFetchJoin with data set #0
+Doctrine\Tests\ORM\Functional\PaginationTest::testIterateWithFetchJoin with data set #0 
 E
-Doctrine\Tests\ORM\Functional\PaginationTest::testIterateWithFetchJoin with data set #1
+Doctrine\Tests\ORM\Functional\PaginationTest::testIterateWithFetchJoin with data set #1 
 E
 Doctrine\Tests\ORM\Functional\PaginationTest::testIterateComplexWithOutputWalker
 E
@@ -1003,11 +1003,11 @@ E
 Doctrine\Tests\ORM\Functional\QueryTest::testIterateResult_FetchJoinedCollection_ThrowsException
 E
 Doctrine\Tests\ORM\Functional\QueryTest::testGetSingleResultThrowsExceptionOnNoResult
-E
+F
 Doctrine\Tests\ORM\Functional\QueryTest::testGetSingleScalarResultThrowsExceptionOnNoResult
-E
+F
 Doctrine\Tests\ORM\Functional\QueryTest::testGetSingleScalarResultThrowsExceptionOnNonUniqueResult
-E
+F
 Doctrine\Tests\ORM\Functional\QueryTest::testModifiedLimitQuery
 E
 Doctrine\Tests\ORM\Functional\QueryTest::testSupportsQueriesWithEntityNamespaces
@@ -1169,7 +1169,7 @@ E
 Doctrine\Tests\ORM\Functional\SQLFilterTest::testOneToMany_ExtraLazySliceWithFilterOnCTI
 E
 Doctrine\Tests\ORM\Functional\SchemaTool\CompanySchemaTest::testGeneratedSchema
-E
+S
 Doctrine\Tests\ORM\Functional\SchemaTool\DBAL483Test::testDefaultValueIsComparedCorrectly
 E
 Doctrine\Tests\ORM\Functional\SchemaTool\DDC214Test::testCmsAddressModel
@@ -1196,32 +1196,32 @@ Doctrine\Tests\ORM\Functional\SchemaTool\PostgreSqlSchemaToolTest::testGetDropSc
 S
 Doctrine\Tests\ORM\Functional\SchemaTool\PostgreSqlSchemaToolTest::testUpdateSchemaWithPostgreSQLSchema
 S
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #0
-E
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #1
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #0 
 .
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #2
-E
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #3
-E
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #4
-E
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #5
-E
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #6
-E
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #7
-E
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #8
-E
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #9
-E
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #10
-E
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #11
-E
-Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #12
-E
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #1 
+.
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #2 
+.
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #3 
+.
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #4 
+.
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #5 
+.
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #6 
+.
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #7 
+.
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #8 
+.
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #9 
+.
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #10 
+.
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #11 
+.
+Doctrine\Tests\ORM\Functional\SchemaValidatorTest::testValidateModelSets with data set #12 
+.
 Doctrine\Tests\ORM\Functional\SequenceGeneratorTest::testHighAllocationSizeSequence
 S
 Doctrine\Tests\ORM\Functional\SingleTableCompositeKeyTest::testInsertWithCompositeKey
@@ -1471,9 +1471,9 @@ E
 Doctrine\Tests\ORM\Functional\Ticket\DDC1690Test::testChangeTracking
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC1695Test::testIssue
-E
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC1707Test::testPostLoadOnChild
-E
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC1719Test::testCreateRetrieveUpdateDelete
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC1734Test::testMergeWorksOnNonSerializedProxies
@@ -1521,11 +1521,11 @@ E
 Doctrine\Tests\ORM\Functional\Ticket\DDC2012Test::testIssue
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC2074Test::testShouldNotScheduleDeletionOnClonedInstances
-E
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC2084Test::testIssue
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC2084Test::testinvalidIdentifierBindingEntityException
-F
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC2090Test::testIssue
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC2106Test::testDetachedEntityAsId
@@ -1533,7 +1533,7 @@ E
 Doctrine\Tests\ORM\Functional\Ticket\DDC211Test::testIssue
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC2138Test::testForeignKeyOnSTIWithMultipleMapping
-E
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC2175Test::testIssue
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC2182Test::testPassColumnOptionsToJoinColumns
@@ -1625,7 +1625,7 @@ E
 Doctrine\Tests\ORM\Functional\Ticket\DDC599Test::testCascadeRemoveOnInheritanceHierarchy
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC599Test::testCascadeRemoveOnChildren
-E
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC618Test::testIndexByHydrateObject
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC618Test::testIndexByHydrateArray
@@ -1653,7 +1653,7 @@ E
 Doctrine\Tests\ORM\Functional\Ticket\DDC657Test::testTicketResult
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC698Test::testTicket
-E
+.
 Doctrine\Tests\ORM\Functional\Ticket\DDC719Test::testIsEmptySqlGeneration
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC729Test::testMergeManyToMany
@@ -1759,175 +1759,175 @@ E
 Doctrine\Tests\ORM\Functional\UnitOfWorkLifecycleTest::testMarkReadOnlyNonManaged
 E
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleEntityQuery
-E
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleEntityQueryWithAliasedUserEntity
-E
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleMultipleRootEntityQuery
-E
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleMultipleRootEntityQueryWithAliasedUserEntity
-E
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleMultipleRootEntityQueryWithAliasedArticleEntity
-E
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSimpleMultipleRootEntityQueryWithAliasedEntities
-E
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryNormalJoin with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryNormalJoin with data set #1
-E
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoin with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoin with data set #1
-E
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #1
-E
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryNormalJoin with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryNormalJoin with data set #1 
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoin with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoin with data set #1 
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #1 
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryMultipleFetchJoin
-E
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMixedQueryMultipleDeepMixedFetchJoin
-E
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testEntityQueryCustomResultSetOrder
-E
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with data set #1
-E
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with data set #1 
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testResultIteration
-E  915 / 2068 ( 44%)
+.  915 / 2068 ( 44%)
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testResultIterationWithAliasedUserEntity
-E
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSkipUnknownColumns
-E
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMissingIdForRootEntity with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMissingIdForRootEntity with data set #1
-E
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testIndexByAndMixedResult with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testIndexByAndMixedResult with data set #1
-E
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMissingIdForRootEntity with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testMissingIdForRootEntity with data set #1 
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testIndexByAndMixedResult with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testIndexByAndMixedResult with data set #1 
+.
 Doctrine\Tests\ORM\Hydration\CustomHydratorTest::testCustomHydrator
 .
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testSimpleEntityQuery
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testSimpleEntityQueryWithAliasedUserEntity
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testSimpleMultipleRootEntityQuery
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testSimpleMultipleRootEntityQueryWithAliasedUserEntity
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testSimpleMultipleRootEntityQueryWithAliasedArticleEntity
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testSimpleMultipleRootEntityQueryWithAliasedEntities
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryNormalJoin with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryNormalJoin with data set #1
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoin with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoin with data set #1
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #1
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleFetchJoin with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleFetchJoin with data set #1
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleDeepMixedFetchJoin with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleDeepMixedFetchJoin with data set #1
-E
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryNormalJoin with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryNormalJoin with data set #1 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoin with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoin with data set #1 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryFetchJoinCustomIndex with data set #1 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleFetchJoin with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleFetchJoin with data set #1 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleDeepMixedFetchJoin with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMixedQueryMultipleDeepMixedFetchJoin with data set #1 
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testEntityQueryCustomResultSetOrder
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testSkipUnknownColumns
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testScalarQueryWithoutResultVariables with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testScalarQueryWithoutResultVariables with data set #1
-E
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testScalarQueryWithoutResultVariables with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testScalarQueryWithoutResultVariables with data set #1 
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testCreatesProxyForLazyLoadingWithForeignKeys
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testCreatesProxyForLazyLoadingWithForeignKeysWithAliasedProductEntity
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testChainedJoinWithEmptyCollections
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testChainedJoinWithEmptyCollectionsWithAliasedUserEntity
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testResultIteration
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testResultIterationWithAliasedUserEntity
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testManyToManyHydration
-E
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testManyToManyHydrationWithAliasedUserEntity
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForRootEntity with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForRootEntity with data set #1
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForCollectionValuedChildEntity with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForCollectionValuedChildEntity with data set #1
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForSingleValuedChildEntity with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForSingleValuedChildEntity with data set #1
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByAndMixedResult with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByAndMixedResult with data set #1
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByScalarsOnly with data set #0
-E
-Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByScalarsOnly with data set #1
-E
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForRootEntity with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForRootEntity with data set #1 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForCollectionValuedChildEntity with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForCollectionValuedChildEntity with data set #1 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForSingleValuedChildEntity with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingIdForSingleValuedChildEntity with data set #1 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByAndMixedResult with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByAndMixedResult with data set #1 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByScalarsOnly with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testIndexByScalarsOnly with data set #1 
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingMetaMappingException
-F
+.
 Doctrine\Tests\ORM\Hydration\ObjectHydratorTest::testMissingDiscriminatorColumnException
-F
+.
 Doctrine\Tests\ORM\Hydration\ResultSetMappingTest::testBasicResultSetMapping
 .
 Doctrine\Tests\ORM\Hydration\ResultSetMappingTest::testFluentInterface
 .
 Doctrine\Tests\ORM\Hydration\ResultSetMappingTest::testAddNamedNativeQueryResultSetMapping
-E
+.
 Doctrine\Tests\ORM\Hydration\ResultSetMappingTest::testAddNamedNativeQueryResultSetMappingWithoutFields
-E
+.
 Doctrine\Tests\ORM\Hydration\ResultSetMappingTest::testAddNamedNativeQueryResultClass
-E
+.
 Doctrine\Tests\ORM\Hydration\ResultSetMappingTest::testIndexByMetadataColumn
 .
 Doctrine\Tests\ORM\Hydration\ScalarHydratorTest::testNewHydrationSimpleEntityQuery
-E
+.
 Doctrine\Tests\ORM\Hydration\ScalarHydratorTest::testHydrateScalarResults
 .
 Doctrine\Tests\ORM\Hydration\ScalarHydratorTest::testSkipUnknownColumns
-E
+.
 Doctrine\Tests\ORM\Hydration\SimpleObjectHydratorTest::testMissingDiscriminatorColumnException
-F
+.
 Doctrine\Tests\ORM\Hydration\SimpleObjectHydratorTest::testExtraFieldInResultSetShouldBeIgnore
-E
-Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #0
-E
-Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #1
-E
-Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #2
+.
+Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #0 
+.
+Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #1 
+.
+Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #2 
 .  976 / 2068 ( 47%)
-Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #3
+Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #3 
 .
 Doctrine\Tests\ORM\Id\AssignedGeneratorTest::testThrowsExceptionIfIdNotAssigned
 .
 Doctrine\Tests\ORM\Id\AssignedGeneratorTest::testCorrectIdGeneration
-E
+.
 Doctrine\Tests\ORM\Id\SequenceGeneratorTest::testGeneration
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testLoadMetadataForNonEntityThrowsException
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testColumnWithMissingTypeDefaultsToString
-E
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testGetAllClassNamesIsIdempotent
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testGetAllClassNamesIsIdempotentEvenWithDifferentDriverInstances
@@ -1937,19 +1937,19 @@ Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testGetAllClassNamesReturnsAlre
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testGetClassNamesReturnsOnlyTheAppropriateClasses
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testJoinTablesWithMappedSuperclassForAnnotationDriver
-E
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testInvalidMappedSuperClassWithManyToManyAssociation
-F
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testInvalidMappedSuperClassWithInheritanceInformation
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testInheritanceSkipsParentLifecycleCallbacks
-E
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testMappedSuperclassInMiddleOfInheritanceHierarchy
-E
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testInvalidFetchOptionThrowsException
-F
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testAttributeOverridesMappingWithTrait
-E
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testLoadMapping
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testEntityTableNameAndInheritance
@@ -1961,19 +1961,47 @@ Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testEntityUniqueConstraints
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testEntityOptions
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testEntitySequence
-F
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testEntityCustomGenerator
-F
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testFieldMappings
-E
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testVersionedField
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testFieldMappingsColumnNames
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testStringFieldMappings
-E
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testIdentifier
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testAssociations
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testOwningOneToOneAssociation
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testInverseOneToManyAssociation
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testManyToManyAssociationWithCascadeAll
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testLifecycleCallbacks
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testLifecycleCallbacksSupportMultipleMethodNames
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testJoinColumnUniqueAndNullable
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testColumnDefinition
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testJoinColumnOnDelete
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testDiscriminatorColumnDefaults
+.
+Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testMappedSuperclassWithRepository
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testDefaultFieldType
-E
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testIdentifierColumnDefinition
-F
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testNamingStrategy
-E
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testDiscriminatorColumnDefinition
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testInvalidEntityOrMappedSuperClassShouldMentionParentClasses
@@ -1987,15 +2015,15 @@ Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testNamedNativeQuery
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testSqlResultSetMapping
 .
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testAssociationOverridesMapping
-E
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testAttributeOverridesMapping
-E
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testEntityListeners
-E
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testEntityListenersOverride
-E
+.
 Doctrine\Tests\ORM\Mapping\AnnotationDriverTest::testEntityListenersNamingConvention
-E
+.
 Doctrine\Tests\ORM\Mapping\AnsiQuoteStrategyTest::testGetColumnName
 .
 Doctrine\Tests\ORM\Mapping\AnsiQuoteStrategyTest::testGetTableName
@@ -2009,31 +2037,31 @@ Doctrine\Tests\ORM\Mapping\AnsiQuoteStrategyTest::testColumnAlias
 Doctrine\Tests\ORM\Mapping\AnsiQuoteStrategyTest::testJoinColumnName
 .
 Doctrine\Tests\ORM\Mapping\AnsiQuoteStrategyTest::testReferencedJoinColumnName
-.
-Doctrine\Tests\ORM\Mapping\AnsiQuoteStrategyTest::testGetSequenceName
 . 1037 / 2068 ( 50%)
+Doctrine\Tests\ORM\Mapping\AnsiQuoteStrategyTest::testGetSequenceName
+.
 Doctrine\Tests\ORM\Mapping\BasicInheritanceMappingTest::testGetMetadataForTransientClassThrowsException
 .
 Doctrine\Tests\ORM\Mapping\BasicInheritanceMappingTest::testGetMetadataForSubclassWithTransientBaseClass
-E
+.
 Doctrine\Tests\ORM\Mapping\BasicInheritanceMappingTest::testGetMetadataForSubclassWithMappedSuperclass
-E
+.
 Doctrine\Tests\ORM\Mapping\BasicInheritanceMappingTest::testGetMetadataForSubclassWithMappedSuperclassWithRepository
-E
+.
 Doctrine\Tests\ORM\Mapping\BasicInheritanceMappingTest::testSerializationWithPrivateFieldsFromMappedSuperclass
-E
+.
 Doctrine\Tests\ORM\Mapping\BasicInheritanceMappingTest::testUnmappedSuperclassInHierarchy
-E
+.
 Doctrine\Tests\ORM\Mapping\BasicInheritanceMappingTest::testUnmappedEntityInHierarchy
-F
+.
 Doctrine\Tests\ORM\Mapping\BasicInheritanceMappingTest::testMappedSuperclassWithId
-E
+.
 Doctrine\Tests\ORM\Mapping\BasicInheritanceMappingTest::testGeneratedValueFromMappedSuperclass
-E
+.
 Doctrine\Tests\ORM\Mapping\BasicInheritanceMappingTest::testSequenceDefinitionInHierarchyWithSandwichMappedSuperclass
-E
+.
 Doctrine\Tests\ORM\Mapping\BasicInheritanceMappingTest::testMultipleMappedSuperclasses
-E
+.
 Doctrine\Tests\ORM\Mapping\ClassMetadataBuilderTest::testSetMappedSuperClass
 .
 Doctrine\Tests\ORM\Mapping\ClassMetadataBuilderTest::testSetCustomRepositoryClass

@@ -1,0 +1,43 @@
+log_update
+array(2) {
+  ["upsert"]=>
+  bool(true)
+  ["multiple"]=>
+  bool(true)
+}
+array(2) {
+  ["namespace"]=>
+  string(8) "test.col"
+  ["flags"]=>
+  int(3)
+}
+array(2) {
+  ["upsert"]=>
+  object(stdClass)#2 (0) {
+  }
+  ["multiple"]=>
+  object(stdClass)#3 (0) {
+  }
+}
+log_update
+array(1) {
+  ["upsert"]=>
+  bool(true)
+}
+array(2) {
+  ["namespace"]=>
+  string(8) "test.col"
+  ["flags"]=>
+  int(1)
+}
+log_update
+array(1) {
+  ["multiple"]=>
+  bool(true)
+}
+array(2) {
+  ["namespace"]=>
+  string(8) "test.col"
+  ["flags"]=>
+  int(2)
+}

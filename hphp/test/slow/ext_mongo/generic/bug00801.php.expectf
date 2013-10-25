@@ -1,0 +1,1 @@
+%s: Argument 2 passed to MongoCollection::insert() must be %s array, boolean given in %sbug00801.php on line %d

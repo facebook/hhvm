@@ -1,0 +1,3 @@
+%s: MongoGridFS::__construct(): The 'chunks' argument is deprecated and ignored in %sbug00805.php on line %d
+
+%s: MongoDB::getGridFS(): The 'chunks' argument is deprecated and ignored in %sbug00805.php on line %d

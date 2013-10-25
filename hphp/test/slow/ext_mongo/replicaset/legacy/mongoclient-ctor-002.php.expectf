@@ -1,0 +1,32 @@
+%s: Mongo::__construct(): The 'timeout' option is deprecated. Please use 'connectTimeoutMS' instead in %s on line %d
+HipHop Notice: %s
+HipHop Notice: %s
+array(5) {
+  ["replicaSet"]=>
+  string(%d) "%s"
+  ["timeout"]=>
+  string(2) "42"
+  ["username"]=>
+  array(1) {
+    [0]=>
+    string(9) "something"
+  }
+  ["password"]=>
+  array(1) {
+    [0]=>
+    string(4) "else"
+  }
+  ["connect"]=>
+  string(1) "0"
+}
+object(Mongo)#%d (4) {
+  ["connected"]=>
+  bool(false)
+  ["status"]=>
+  NULL
+  ["server%S:protected%S]=>
+  NULL
+  ["persistent%S:protected%S]=>
+  NULL
+}
+All done

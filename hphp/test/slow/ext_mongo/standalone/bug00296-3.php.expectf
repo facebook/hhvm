@@ -1,0 +1,16 @@
+log_delete
+array(1) {
+  ["justOne"]=>
+  bool(true)
+}
+array(2) {
+  ["namespace"]=>
+  string(8) "test.col"
+  ["flags"]=>
+  int(1)
+}
+array(1) {
+  ["justOne"]=>
+  object(stdClass)#2 (0) {
+  }
+}

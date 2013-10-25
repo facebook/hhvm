@@ -1,0 +1,53 @@
+Server type: PRIMARY (2)
+Putting all secondaries into recovery mode
+We should have detected that the servers are in maintenence mode now
+This should hit the primary as all secondaries are in recovery
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Enabling all secondaries again
+This should hit secondaries as they are no longer in recovery
+Server type: SECONDARY (4)
+Server type: SECONDARY (4)
+Server type: SECONDARY (4)
+Server type: SECONDARY (4)
+Server type: SECONDARY (4)
+Server type: SECONDARY (4)
+Server type: SECONDARY (4)
+Server type: SECONDARY (4)
+Server type: SECONDARY (4)
+Server type: SECONDARY (4)
+Putting all secondaries into recovery mode
+These should throw exception as we haven't detected that the server is in recovery mode yet
+Server type: SECONDARY (4)
+string(20) "MongoCursorException"
+string(%d) "%s: not master or secondary; cannot currently read from this replSet member"
+int(13436)
+Server type: SECONDARY (4)
+string(20) "MongoCursorException"
+string(%d) "%s: not master or secondary; cannot currently read from this replSet member"
+int(13436)
+Server type: SECONDARY (4)
+string(20) "MongoCursorException"
+string(%d) "%s: not master or secondary; cannot currently read from this replSet member"
+int(13436)
+This should hit the primary as all secondaries are in recovery
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Server type: PRIMARY (2)
+Enabling all secondaries again
+Everything should be in its original state now

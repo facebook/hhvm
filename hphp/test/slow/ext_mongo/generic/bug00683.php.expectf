@@ -1,0 +1,20 @@
+timeout only
+- Found option 'timeout' ('connectTimeoutMS'): 1
+
+%s: MongoClient::__construct(): The 'timeout' option is deprecated. Please use 'connectTimeoutMS' instead in %s on line %d
+timeout and connectTimeoutMS
+- Found option 'timeout' ('connectTimeoutMS'): 2
+
+%s: MongoClient::__construct(): The 'timeout' option is deprecated. Please use 'connectTimeoutMS' instead in %s on line %d
+- Replacing previously set value for 'connectTimeoutMS' (2)
+- Found option 'connectTimeoutMS': 3
+connectTimeoutMS only
+- Found option 'connectTimeoutMS': 4
+connectTimeoutMS and timeout
+- Found option 'connectTimeoutMS': 5
+- Replacing previously set value for 'connectTimeoutMS' (5)
+- Found option 'timeout' ('connectTimeoutMS'): 6
+
+%s: MongoClient::__construct(): The 'timeout' option is deprecated. Please use 'connectTimeoutMS' instead in %s on line %d
+connecttimeoutms lowercased
+- Found option 'connectTimeoutMS': 7

@@ -1,0 +1,40 @@
+NULL
+array(2) {
+  ["name"]=>
+  string(%d) "%s.create-col1"
+  ["options"]=>
+  array(5) {
+    ["create"]=>
+    string(11) "create-col1"
+    ["size"]=>
+    int(100)
+    ["capped"]=>
+    bool(true)
+    ["autoIndexId"]=>
+    bool(true)
+    ["max"]=>
+    int(5)
+  }
+}
+array(1) {
+  [0]=>
+  array(4) {
+    ["v"]=>
+    int(1)
+    ["key"]=>
+    array(1) {
+      ["_id"]=>
+      int(1)
+    }
+    ["ns"]=>
+    string(%d) "%s.create-col1"
+    ["name"]=>
+    string(4) "_id_"
+  }
+}
+int(5)
+int(6)
+int(7)
+int(8)
+int(9)
+int(5)

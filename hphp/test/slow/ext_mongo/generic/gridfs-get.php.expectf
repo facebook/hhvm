@@ -1,0 +1,17 @@
+File exists with ID: string(5) "file0"
+
+File exists with ID: int(452)
+
+File exists with ID: bool(true)
+
+File exists with ID: object(MongoId)#%d (1) {
+  ["$id"]=>
+  string(24) "%s"
+}
+
+File exists with ID: array(2) {
+  [0]=>
+  string(1) "a"
+  ["b"]=>
+  int(5)
+}

@@ -1,0 +1,17 @@
+bool(true)
+bool(true)
+bool(true)
+array(2) {
+  ["result"]=>
+  array(1) {
+    [0]=>
+    array(2) {
+      ["_id"]=>
+      int(1)
+      ["count"]=>
+      int(5)
+    }
+  }
+  ["ok"]=>
+  float(1)
+}

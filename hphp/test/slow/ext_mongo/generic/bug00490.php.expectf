@@ -1,0 +1,10 @@
+array(1) {
+  ["nolock"]=>
+  bool(false)
+}
+array(2) {
+  ["retval"]=>
+  string(23) "Goodbye, Joe, says Fred"
+  ["ok"]=>
+  float(1)
+}

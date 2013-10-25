@@ -1,0 +1,21 @@
+Now I should getmore
+log_getmore
+array(5) {
+  ["hash"]=>
+  string(%d) "%s:%d;-;.;%d"
+  ["type"]=>
+  int(1)
+  ["max_bson_size"]=>
+  int(16777216)
+  ["max_message_size"]=>
+  int(%d)
+  ["request_id"]=>
+  int(%d)
+}
+array(2) {
+  ["request_id"]=>
+  int(%d)
+  ["cursor_id"]=>
+  int(%d)
+}
+There should be a getmore query above

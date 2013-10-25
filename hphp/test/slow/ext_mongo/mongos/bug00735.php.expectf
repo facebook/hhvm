@@ -1,0 +1,305 @@
+===This should send 'nearest'===
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["distinct"]=>
+    string(6) "people"
+    ["key"]=>
+    string(3) "age"
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(7) "nearest"
+  }
+}
+array(1) {
+  ["type"]=>
+  string(7) "nearest"
+}
+===These should send 'secondary'===
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["distinct"]=>
+    string(6) "people"
+    ["key"]=>
+    string(3) "age"
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(9) "secondary"
+  }
+}
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["aggregate"]=>
+    string(10) "collection"
+    ["pipeline"]=>
+    array(1) {
+      [0]=>
+      array(0) {
+      }
+    }
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(9) "secondary"
+  }
+}
+array(1) {
+  ["type"]=>
+  string(9) "secondary"
+}
+array(1) {
+  ["type"]=>
+  string(9) "secondary"
+}
+===These should send 'primaryPreferred'===
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["aggregate"]=>
+    string(10) "collection"
+    ["pipeline"]=>
+    array(1) {
+      [0]=>
+      array(0) {
+      }
+    }
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(16) "primaryPreferred"
+  }
+}
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(1) {
+    ["count"]=>
+    string(10) "collection"
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(16) "primaryPreferred"
+  }
+}
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["count"]=>
+    string(10) "collection"
+    ["query"]=>
+    object(stdClass)#%d (0) {
+    }
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(16) "primaryPreferred"
+  }
+}
+array(3) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$explain"]=>
+  bool(true)
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(16) "primaryPreferred"
+  }
+}
+array(1) {
+  ["type"]=>
+  string(16) "primaryPreferred"
+}
+array(1) {
+  ["type"]=>
+  string(16) "primaryPreferred"
+}
+===This should send 'nearest'===
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["count"]=>
+    string(10) "collection"
+    ["query"]=>
+    array(0) {
+    }
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(7) "nearest"
+  }
+}
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["aggregate"]=>
+    string(10) "collection"
+    ["pipeline"]=>
+    array(1) {
+      [0]=>
+      array(0) {
+      }
+    }
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(7) "nearest"
+  }
+}
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["count"]=>
+    string(10) "collection"
+    ["query"]=>
+    array(0) {
+    }
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(7) "nearest"
+  }
+}
+array(1) {
+  ["type"]=>
+  string(7) "nearest"
+}
+===These should send 'secondary'===
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["aggregate"]=>
+    string(10) "collection"
+    ["pipeline"]=>
+    array(1) {
+      [0]=>
+      array(0) {
+      }
+    }
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(9) "secondary"
+  }
+}
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(1) {
+    ["count"]=>
+    string(10) "collection"
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(9) "secondary"
+  }
+}
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["count"]=>
+    string(10) "collection"
+    ["query"]=>
+    object(stdClass)#%d (0) {
+    }
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(9) "secondary"
+  }
+}
+array(3) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$explain"]=>
+  bool(true)
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(9) "secondary"
+  }
+}
+array(1) {
+  ["type"]=>
+  string(9) "secondary"
+}
+===These should send 'primaryPreferred'===
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["aggregate"]=>
+    string(10) "collection"
+    ["pipeline"]=>
+    array(1) {
+      [0]=>
+      array(0) {
+      }
+    }
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(16) "primaryPreferred"
+  }
+}
+command supports Read Preferences
+array(2) {
+  ["$query"]=>
+  array(2) {
+    ["count"]=>
+    string(10) "collection"
+    ["query"]=>
+    object(stdClass)#%d (0) {
+    }
+  }
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(16) "primaryPreferred"
+  }
+}
+array(3) {
+  ["$query"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["$explain"]=>
+  bool(true)
+  ["$readPreference"]=>
+  array(1) {
+    ["mode"]=>
+    string(16) "primaryPreferred"
+  }
+}
+array(1) {
+  ["type"]=>
+  string(16) "primaryPreferred"
+}

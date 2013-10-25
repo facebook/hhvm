@@ -1,0 +1,85 @@
+Fsync enabled by default
+array(2) {
+  ["getlasterror"]=>
+  int(1)
+  ["fsync"]=>
+  bool(true)
+}
+array(2) {
+  ["getlasterror"]=>
+  int(1)
+  ["fsync"]=>
+  bool(true)
+}
+array(2) {
+  ["getlasterror"]=>
+  int(1)
+  ["fsync"]=>
+  bool(true)
+}
+Setting it to false, per-query
+array(1) {
+  ["getlasterror"]=>
+  int(1)
+}
+array(1) {
+  ["getlasterror"]=>
+  int(1)
+}
+array(1) {
+  ["getlasterror"]=>
+  int(1)
+}
+Setting it to false, per-query, and w=0 to force no-gle
+Fsync disabled by default
+array(1) {
+  ["getlasterror"]=>
+  int(1)
+}
+array(1) {
+  ["getlasterror"]=>
+  int(1)
+}
+array(1) {
+  ["getlasterror"]=>
+  int(1)
+}
+Setting it to true, per-query
+array(2) {
+  ["getlasterror"]=>
+  int(1)
+  ["fsync"]=>
+  bool(true)
+}
+array(2) {
+  ["getlasterror"]=>
+  int(1)
+  ["fsync"]=>
+  bool(true)
+}
+array(2) {
+  ["getlasterror"]=>
+  int(1)
+  ["fsync"]=>
+  bool(true)
+}
+Fsync disabled by default, and gle
+Setting it to true, per-query, with gle=0
+array(2) {
+  ["getlasterror"]=>
+  int(1)
+  ["fsync"]=>
+  bool(true)
+}
+array(2) {
+  ["getlasterror"]=>
+  int(1)
+  ["fsync"]=>
+  bool(true)
+}
+array(2) {
+  ["getlasterror"]=>
+  int(1)
+  ["fsync"]=>
+  bool(true)
+}

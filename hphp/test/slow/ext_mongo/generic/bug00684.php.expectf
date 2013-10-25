@@ -1,0 +1,14 @@
+socketTimeoutMS (option)
+- Found option 'socketTimeoutMS': 1
+sockettimeoutms lowercased (option)
+- Found option 'socketTimeoutMS': 2
+socketTimeoutMS (string)
+Parsing localhost/?socketTimeoutMS=42
+- Found option 'socketTimeoutMS': 42
+sockettimeoutms lowercased (string)
+Parsing localhost/?sockettimeoutms=52
+- Found option 'socketTimeoutMS': 52
+socketTimeoutMS (string and option)
+Parsing localhost/?socketTimeoutMS=62
+- Found option 'socketTimeoutMS': 62
+- Found option 'socketTimeoutMS': 72

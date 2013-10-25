@@ -1,0 +1,22 @@
+string(27) "MongoCursorTimeoutException"
+string(%d) "%s:%d: Timed out waiting for header data"
+int(80)
+array(2) {
+  ["foo"]=>
+  int(%d)
+  ["_id"]=>
+  object(MongoId)#%d (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+}
+array(2) {
+  ["_id"]=>
+  object(MongoId)#%d (1) {
+    ["$id"]=>
+    string(24) "%s"
+  }
+  ["foo"]=>
+  string(%d) "bar"
+}
+===DONE===

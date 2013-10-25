@@ -1,0 +1,32 @@
+object(T)#%d (4) {
+  ["connected"]=>
+  bool(false)
+  ["status"]=>
+  NULL
+  ["server%S:protected%S]=>
+  NULL
+  ["persistent%Sprotected%S]=>
+  NULL
+}
+object(U)#%d (4) {
+  ["connected"]=>
+  bool(false)
+  ["status"]=>
+  NULL
+  ["server%S:protected%S]=>
+  NULL
+  ["persistent%Sprotected%S]=>
+  NULL
+}
+object(V)#%d (2) {
+  ["w"]=>
+  int(1)
+  ["wtimeout"]=>
+  int(10000)
+}
+object(X)#%d (2) {
+  ["w"]=>
+  int(1)
+  ["wtimeout"]=>
+  int(10000)
+}

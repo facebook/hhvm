@@ -1,0 +1,4 @@
+\: MongoDB::__construct(): invalid name \
+$: MongoDB::__construct(): invalid name $
+/: MongoDB::__construct(): invalid name /
+foo.bar: MongoDB::__construct(): invalid name foo.bar

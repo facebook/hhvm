@@ -1,0 +1,90 @@
+IO      FINE: is_gle_op: no
+
+Running test 0, with options: []:
+IO      FINE: is_gle_op: no
+
+Running test 1, with options: {"safe":0}:
+IO      FINE: is_gle_op: no
+
+Running test 2, with options: {"safe":1}:
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+IO      FINE: getting cursor body
+
+Running test 3, with options: {"safe":2}:
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: append_getlasterror: added w=2
+IO      FINE: append_getlasterror: added wtimeout=10000 (from collection property)
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+IO      FINE: getting cursor body
+%s:%d: norepl: no replication has been enabled, so w=%s won't work
+
+Running test 4, with options: {"safe":"majority"}:
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: append_getlasterror: added w='majority'
+IO      FINE: append_getlasterror: added wtimeout=10000 (from collection property)
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+IO      FINE: getting cursor body
+%s:%d: norepl: no replication has been enabled, so w=%s won't work
+
+Running test 5, with options: {"w":0}:
+IO      FINE: is_gle_op: no
+
+Running test 6, with options: {"w":1}:
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+IO      FINE: getting cursor body
+
+Running test 7, with options: {"w":2}:
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: append_getlasterror: added w=2
+IO      FINE: append_getlasterror: added wtimeout=10000 (from collection property)
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+IO      FINE: getting cursor body
+%s:%d: norepl: no replication has been enabled, so w=%s won't work
+
+Running test 8, with options: {"w":"majority"}:
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: append_getlasterror: added w='majority'
+IO      FINE: append_getlasterror: added wtimeout=10000 (from collection property)
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+IO      FINE: getting cursor body
+%s:%d: norepl: no replication has been enabled, so w=%s won't work
+
+Running test 9, with options: {"fsync":0}:
+IO      FINE: is_gle_op: no
+
+Running test 10, with options: {"fsync":1}:
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: append_getlasterror: added fsync=1
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+IO      FINE: getting cursor body
+
+Running test 11, with options: {"fsync":0,"w":1}:
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+IO      FINE: getting cursor body
+
+Running test 12, with options: {"fsync":1,"w":0}:
+IO      FINE: is_gle_op: yes
+IO      FINE: append_getlasterror
+IO      FINE: append_getlasterror: added fsync=1
+IO      FINE: getting reply
+IO      FINE: getting cursor header
+IO      FINE: getting cursor body

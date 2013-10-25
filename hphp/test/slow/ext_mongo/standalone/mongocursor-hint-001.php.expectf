@@ -1,0 +1,7 @@
+string(3) "x_1"
+array(1) {
+  ["x"]=>
+  int(1)
+}
+object(stdClass)#%d (0) {
+}

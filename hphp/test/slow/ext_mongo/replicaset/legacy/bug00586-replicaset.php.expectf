@@ -1,0 +1,3 @@
+bool(true)
+string(%d) "Could not store file: %s:%d: timeout"
+int(4)

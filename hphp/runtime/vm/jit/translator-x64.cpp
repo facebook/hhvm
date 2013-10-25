@@ -1846,8 +1846,16 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         // function entry.  We lazily create the tracelet here in this
         // case.
         if (m_mode == TransOptimize) {
-          m_mode = TransLive;
-          tp = analyze(sk);
+          if (sk.getFuncId() == liveFunc()->getFuncId() &&
+              liveUnit()->contains(vmpc()) &&
+              sk.offset() == liveUnit()->offsetOf(vmpc())) {
+            m_mode = TransLive;
+            tp = analyze(sk);
+          } else {
+            m_mode = TransInterp;
+            traceFree();
+            break;
+          }
         }
         FTRACE(1, "trying translateTracelet\n");
         assertCleanState();

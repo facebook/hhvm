@@ -900,7 +900,15 @@ function run_single_test_suite(string $fw_name, string $summary_file,
   $process = proc_open($run_command, $descriptorspec, $pipes, $test_path, null);
   if (is_resource($process)) {
     fclose($pipes[0]);
+    $r = array($pipes[1]);
+    $w = null;
+    $e = null;
     while (!(feof($pipes[1]))) {
+     if (stream_select($r, $w, $e, $timeout) === false) {
+        $error_information .= "TEST TIMEOUT OCCURRED.";
+        $error_information .= " Last line read was: ".$line;
+        break;
+      }
       $line = fgets($pipes[1]);
       $line = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
                            "", $line);

@@ -1,9 +1,8 @@
-# folly-config.h is a generated file from autotools
-# We need to do the equivalent checks here and use
-# add_definitions as needed
-add_definitions(-DFOLLY_NO_CONFIG=1)
-
 set(FOLLY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/folly")
+
+if (NOT EXISTS "${FOLLY_DIR}/Portability.h")
+	message(FATAL_ERROR "${FOLLY_DIR}/Portability.h missing, did you forget to run `git submodule init && git submodule update`?")
+endif()
 
 # Generated files from folly/build/generate_*.py
 auto_sources(genfiles "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/gen")
@@ -20,11 +19,15 @@ foreach (file ${files})
 endforeach()
 list(REMOVE_ITEM files
 	${FOLLY_DIR}/Benchmark.cpp
+	${FOLLY_DIR}/build/GenerateFingerprintTables.cpp
+	${FOLLY_DIR}/detail/Clock.cpp
 	${FOLLY_DIR}/experimental/File.cpp
 	${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracer.cpp
+	${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracerBenchmark.cpp
 	${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracerLib.cpp
 	${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracerTest.cpp
 	${FOLLY_DIR}/experimental/io/AsyncIO.cpp
+	${FOLLY_DIR}/experimental/io/HugePageUtil.cpp
 	${FOLLY_DIR}/experimental/symbolizer/SymbolizerTest.cpp
 	${FOLLY_DIR}/experimental/symbolizer/ElfUtil.cpp
     )
@@ -40,6 +43,11 @@ endif()
 # and some other folly pieces we're not including yet
 # For now, that's not actually a requirement, so skip it
 list(REMOVE_ITEM files ${FOLLY_DIR}/Subprocess.cpp)
+
+# io/Compression requires snappy library
+# Don't add dep until we need it
+list(REMOVE_ITEM files ${FOLLY_DIR}/io/Compression.cpp)
+
 add_library(folly STATIC ${files} ${genfiles} ${cfiles} )
 
 find_package(Boost 1.48.0 COMPONENTS system program_options filesystem regex REQUIRED)
@@ -51,15 +59,6 @@ include_directories(${LIBGLOG_INCLUDE_DIR})
 
 find_package(PThread REQUIRED)
 include_directories(${LIBPTHREAD_INCLUDE_DIRS})
-
-INCLUDE(CheckCXXSourceCompiles)
-CHECK_CXX_SOURCE_COMPILES("
-extern \"C\" void (*test_ifunc(void))() { return 0; }
-void func() __attribute__((ifunc(\"test_ifunc\")));
-" FOLLY_IFUNC)
-if (FOLLY_IFUNC)
-	add_definitions("-DHAVE_IFUNC=1")
-endif()
 
 target_link_libraries(folly ${Boost_LIBRARIES}
                             ${LIBGLOG_LIBRARY}

@@ -16,6 +16,7 @@
 #
 
 include(HPHPSetup)
+include(FollySetup)
 
 # HHVM Build
 SET(USE_HHVM TRUE)

@@ -194,6 +194,21 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
 //////////////////////////////////////////////////////////////////////
 
+TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
+  auto& mainCode = tx64->mainCode;
+  auto& stubsCode = tx64->stubsCode;
+  vixl::MacroAssembler a { mainCode };
+  vixl::MacroAssembler astubs { stubsCode };
+  TCA start = mainCode.frontier();
+  a.   Ldr   (rAsm.W(), rVmFp[AROFF(m_numArgsAndCtorFlag)]);
+  for (auto i = 0; i < dvs.size(); ++i) {
+    a. Cmp   (rAsm.W(), dvs[i].first);
+    emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second));
+  }
+  emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
+  return start;
+}
+
 SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
                         Func* func, bool funcIsMagic, int nPassed,
                         TCA& start, TCA& aStart) {

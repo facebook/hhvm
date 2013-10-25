@@ -541,7 +541,13 @@ TranslatorX64::getCallArrayPrologue(Func* func) {
     if (!writer) return nullptr;
     tca = func->getFuncBody();
     if (tca != uniqueStubs.funcBodyHelperThunk) return tca;
-    tca = JIT::X64::emitCallArrayPrologue(func, dvs);
+    if (JIT::arch() == JIT::Arch::X64) {
+      tca = JIT::X64::emitCallArrayPrologue(func, dvs);
+    } else if (JIT::arch() == JIT::Arch::ARM) {
+      tca = JIT::ARM::emitCallArrayPrologue(func, dvs);
+    } else {
+      not_implemented();
+    }
     func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base());

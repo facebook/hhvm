@@ -23,9 +23,6 @@ SET(USE_HHVM TRUE)
 SET(ENV{HHVM} 1)
 ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/hphp/hhvm/hhvm\\\"")
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
-
 add_subdirectory(tools/bootstrap)
 
 add_subdirectory(third_party/libafdt)

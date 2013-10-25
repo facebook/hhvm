@@ -439,6 +439,9 @@ struct Unit {
   Offset offsetOf(const Op* op) const {
     return offsetOf(reinterpret_cast<const Opcode*>(op));
   }
+  bool contains(const Opcode* op) const {
+    return op >= m_bc && op <= m_bc + m_bclen;
+  }
 
   const StringData* filepath() const {
     assert(m_filepath);

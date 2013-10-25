@@ -2345,7 +2345,16 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         FTRACE(1, "trying irTranslateTracelet\n");
         assertCleanState();
         if (m_mode == TransOptimize) {
-          m_mode = TransLive;
+          if (sk.getFuncId() == liveFunc()->getFuncId() &&
+              liveUnit()->contains(vmpc()) &&
+              sk.offset() == liveUnit()->offsetOf(vmpc())) {
+            m_mode = TransLive;
+            tp = analyze(sk);
+          } else {
+            m_mode = TransInterp;
+            traceFree();
+            break;
+          }
         }
         result = translateTracelet(t);
 

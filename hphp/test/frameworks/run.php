@@ -143,6 +143,8 @@ class PHPUnitPatterns {
   //   Composer\Test\::testMe with data set "parses dates w/ -"
   // The "with data set" can either have a # or " after it and then any char
   // before a resulting " or (
+  // Four \\\\ needed to match one \
+  // stackoverflow.com/questions/4025482/cant-escape-the-backslash-with-regex
   static string $test_name_pattern =
   "/[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\"|#)[^\"|^\(|^\n]+(\")?)?/";
 
@@ -153,10 +155,10 @@ class PHPUnitPatterns {
   //    E
   //    .
   //    .  252 / 364 ( 69%)
-  // Four \\\\ needed to match one \
-  // stackoverflow.com/questions/4025482/cant-escape-the-backslash-with-regex
+  //    .HipHop Warning
+  // That last example happened in Magento
   static string $status_code_pattern =
-                "/^[\.SFEI]$|^[\.SFEI][ \t]*[0-9]* \/ [0-9]* \([ 0-9]*%\)/";
+  "/^[\.SFEI]$|^[\.SFEI](HipHop)?|^[\.SFEI][ \t]*[0-9]* \/ [0-9]* \([ 0-9]*%\)/";
 
   // Get rid of codes like ^[[31;31m that may get output to the results file.
   // 0x1B is the hex code for the escape sequence ^[
@@ -448,6 +450,10 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
   $csv_only = false;
   $csv_header = false;
 
+  // Can't run all the framework tests and "all but" at the same time
+  if ($options->containsKey('all') && $options->containsKey('allexcept')) {
+    error("Cannot use --all and --allexcept together");
+  }
   // Can't be both summary and verbose. Summary trumps.
   if ($options->containsKey('csv') && $options->containsKey('verbose')) {
     error("Cannot be --csv and --verbose together");
@@ -519,13 +525,19 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
     run_test_suites(Frameworks::$framework_info->keys(), $timeout, $verbose,
               $csv_only, $csv_header, $force_redownload,
               $generate_new_expect_file, $zend_path);
+  } else if ($options->contains('allexcept')) {
+    // Run all the frameworks, but the ones we listed.
+    $frun = Vector::fromItems(array_diff(Frameworks::$framework_info->keys(),
+                              $frameworks));
+    run_test_suites($frun, $timeout, $verbose, $csv_only, $csv_header,
+                    $force_redownload, $generate_new_expect_file, $zend_path);
   } else if (count($frameworks) > 0) {
-    // Tests specified at the command line. At this point, $tests should only
-    // have tests to be run
+    // Frameworks specified at the command line. At this point, $frameworks
+    // should only have tests to be run
     run_test_suites($frameworks, $timeout, $verbose, $csv_only, $csv_header,
                     $force_redownload, $generate_new_expect_file, $zend_path);
   } else {
-    error("Specify tests to run or use --all");
+    error("Specify tests to run, use --all or use --allexcept");
   }
 }
 
@@ -870,10 +882,10 @@ THUMBSDOWN
         }
       }
     } else {
-      print "\nNO SUMMARY INFO AVAILABLE!\n";
+      verbose("\nNO SUMMARY INFO AVAILABLE!\n", !$csv_only);
     }
   } else {
-    error("No frameworks to tests!");
+    error("No frameworks to test!");
   }
 }
 
@@ -1063,6 +1075,8 @@ function run_single_test_suite(string $fw_name, string $summary_file,
             $tests_and_results .= $status;
             $fatal = true;
             break 2;
+          } else if (strpos($status, "hhvm:") !== false) {
+            $error_information .= $status;
           }
         } while (!feof($pipes[1]) &&
                  preg_match(PHPUnitPatterns::$status_code_pattern,
@@ -1072,12 +1086,12 @@ function run_single_test_suite(string $fw_name, string $summary_file,
         if ($status === "") {
           $status = "UNKNOWN STATUS";
           $error_information .= $status;
+        } else {
+          // In case we had "F 252 / 364 (69 %)" or ".HipHop Warning"
+          $status = $status[0];
         }
-        $tests_and_results .= $status;
+        $tests_and_results .= $status.PHP_EOL;
         if ($compare_tests !== null && $compare_tests->containsKey($match)) {
-          if (strlen($status) > 0) {
-            $status = $status[0]; // In case we had "F 252 / 364 (69 %)"
-          }
           if ($status === $compare_tests[$match]) {
             // FIX: posix_isatty(STDOUT) was always returning false, even though
             // can print in color. Check this out later.
@@ -1373,6 +1387,9 @@ INTRO;
     # Run multiple tests.
     % hhvm run.php composer assetic paris
 
+    # Run all tests except a few.
+    % hhvm run.php --allexcept pear symfony
+
     # Run multiple tests with timeout for each individual test (in seconds).
     # Tests must come after the -- options
     % hhvm run.php --timeout 30 composer assetic
@@ -1418,24 +1435,28 @@ EXAMPLES;
 function oss_test_option_map(): OptionInfoMap {
   return Map {
     'help'                => Pair {'h', "Print help message"},
-    'all'                 => Pair {'',  "Run all framework tests. The tests ".
-                                        "to be run are hardcoded in a Map in ".
-                                        "this code."},
-    'timeout:'            => Pair {'t', "Optional - The maximum amount of ".
+    'all'                 => Pair {'a',  "Run tests of all frameworks. The ".
+                                        "frameworks to be run are hardcoded ".
+                                        "in a Map in this code."},
+    'allexcept'           => Pair {'e', "Run all tests of all frameworks ".
+                                        "except for the ones listed. The ".
+                                        "tests must be at the end of the ".
+                                        "command argument list."},
+    'timeout:'            => Pair {'', "Optional - The maximum amount of ".
                                         "time, in secs, to allow a individual".
                                         "test to run. Default is 60 seconds."},
     'verbose'             => Pair {'v', "Optional - For a lot of messages ".
                                         "about what is going on."},
-    'zend:'               => Pair {'z', "Optional - Try to use zend if ".
+    'zend:'               => Pair {'', "Optional - Try to use zend if ".
                                         "retrieving dependencies with hhvm ".
                                         "fails. Currently, zend must be ".
                                         "installed and the path to the zend ".
                                         "binary specified."},
-    'redownload'          => Pair {'r', "Forces a redownload of the framework ".
+    'redownload'          => Pair {'', "Forces a redownload of the framework ".
                                         "code and dependencies."},
-    'record'              => Pair {'e', "Forces a new expect file for the ".
+    'record'              => Pair {'', "Forces a new expect file for the ".
                                         "framework test suite"},
-    'csv'                 => Pair {'c', "Just create the machine readable ".
+    'csv'                 => Pair {'', "Just create the machine readable ".
                                         "summary CSV for parsing and chart ".
                                         "display."},
     'csvheader'           => Pair {'',  "Add a header line for the summary ".

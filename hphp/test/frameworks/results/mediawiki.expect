@@ -119,7 +119,7 @@ ExtraParserTest::testReplaceSection
 ExtraParserTest::testGetPreloadText
 .
 ExtraParserTest::testMediaWikiTestCaseParentSetupCalled
-.   61 / 7166 (  0%)
+.
 FauxRequestTest::testGetSetHeader
 .
 FauxRequestTest::testMediaWikiTestCaseParentSetupCalled
@@ -241,7 +241,7 @@ GlobalTest::testSwapVarsTest
 GlobalTest::testWfPercentTest
 .
 GlobalTest::testWfShorthandToInteger with data set #0 
-.  122 / 7166 (  1%)
+.
 GlobalTest::testWfShorthandToInteger with data set #1 
 .
 GlobalTest::testWfShorthandToInteger with data set #2 
@@ -363,7 +363,7 @@ GlobalTest::testWfShellMaintenanceCmd with data set #2
 GlobalTest::testWfShellMaintenanceCmd with data set #3 
 .
 GlobalTest::testMediaWikiTestCaseParentSetupCalled
-.  183 / 7166 (  2%)
+.
 WfAssembleUrlTest::testWfAssembleUrl with data set #0 
 .
 WfAssembleUrlTest::testWfAssembleUrl with data set #1 
@@ -485,7 +485,7 @@ WfAssembleUrlTest::testWfAssembleUrl with data set #58
 WfAssembleUrlTest::testWfAssembleUrl with data set #59 
 .
 WfAssembleUrlTest::testWfAssembleUrl with data set #60 
-.  244 / 7166 (  3%)
+.
 WfAssembleUrlTest::testWfAssembleUrl with data set #61 
 .
 WfAssembleUrlTest::testWfAssembleUrl with data set #62 
@@ -607,7 +607,7 @@ WfAssembleUrlTest::testWfAssembleUrl with data set #119
 WfAssembleUrlTest::testWfAssembleUrl with data set #120 
 .
 WfAssembleUrlTest::testWfAssembleUrl with data set #121 
-.  305 / 7166 (  4%)
+.
 WfAssembleUrlTest::testWfAssembleUrl with data set #122 
 .
 WfAssembleUrlTest::testWfAssembleUrl with data set #123 
@@ -729,7 +729,7 @@ WfBCP47Test::testBCP47 with data set #10
 WfBCP47Test::testBCP47 with data set #11 
 .
 WfBCP47Test::testBCP47 with data set #12 
-.  366 / 7166 (  5%)
+.
 WfBCP47Test::testBCP47 with data set #13 
 .
 WfBCP47Test::testBCP47 with data set #14 
@@ -851,7 +851,7 @@ WfBaseConvertTest::testDigitToBase2 with data set #31
 WfBaseConvertTest::testDigitToBase2 with data set #32 
 .
 WfBaseConvertTest::testDigitToBase2 with data set #33 
-.  427 / 7166 (  5%)
+.
 WfBaseConvertTest::testDigitToBase2 with data set #34 
 .
 WfBaseConvertTest::testDigitToBase2 with data set #35 
@@ -973,7 +973,7 @@ WfBaseConvertTest::testDigitToBase5 with data set #20
 WfBaseConvertTest::testDigitToBase5 with data set #21 
 .
 WfBaseConvertTest::testDigitToBase5 with data set #22 
-.  488 / 7166 (  6%)
+.
 WfBaseConvertTest::testDigitToBase5 with data set #23 
 .
 WfBaseConvertTest::testDigitToBase5 with data set #24 
@@ -1095,7 +1095,7 @@ WfBaseConvertTest::testDigitToBase10 with data set #9
 WfBaseConvertTest::testDigitToBase10 with data set #10 
 .
 WfBaseConvertTest::testDigitToBase10 with data set #11 
-.  549 / 7166 (  7%)
+.
 WfBaseConvertTest::testDigitToBase10 with data set #12 
 .
 WfBaseConvertTest::testDigitToBase10 with data set #13 
@@ -1217,7 +1217,7 @@ WfBaseConvertTest::testDigitToBase16 with data set #34
 WfBaseConvertTest::testDigitToBase16 with data set #35 
 .
 WfBaseConvertTest::testDigitToBase36 with data set #0 
-.  610 / 7166 (  8%)
+.
 WfBaseConvertTest::testDigitToBase36 with data set #1 
 .
 WfBaseConvertTest::testDigitToBase36 with data set #2 
@@ -1339,7 +1339,7 @@ WfBaseConvertTest::testIdentity with data set #22
 WfBaseConvertTest::testIdentity with data set #23 
 .
 WfBaseConvertTest::testIdentity with data set #24 
-.  671 / 7166 (  9%)
+.
 WfBaseConvertTest::testIdentity with data set #25 
 .
 WfBaseConvertTest::testIdentity with data set #26 
@@ -1461,7 +1461,7 @@ WfExpandUrlTest::testWfExpandUrl with data set #12
 WfExpandUrlTest::testWfExpandUrl with data set #13 
 .
 WfExpandUrlTest::testWfExpandUrl with data set #14 
-.  732 / 7166 ( 10%)
+.
 WfExpandUrlTest::testWfExpandUrl with data set #15 
 .
 WfExpandUrlTest::testWfExpandUrl with data set #16 
@@ -1583,7 +1583,7 @@ WfExpandUrlTest::testWfExpandUrl with data set #73
 WfExpandUrlTest::testWfExpandUrl with data set #74 
 .
 WfExpandUrlTest::testWfExpandUrl with data set #75 
-.  793 / 7166 ( 11%)
+.
 WfExpandUrlTest::testWfExpandUrl with data set #76 
 .
 WfExpandUrlTest::testWfExpandUrl with data set #77 
@@ -1705,7 +1705,7 @@ WfExpandUrlTest::testWfExpandUrl with data set #134
 WfExpandUrlTest::testWfExpandUrl with data set #135 
 .
 WfExpandUrlTest::testWfExpandUrl with data set #136 
-.  854 / 7166 ( 11%)
+.
 WfExpandUrlTest::testWfExpandUrl with data set #137 
 .
 WfExpandUrlTest::testWfExpandUrl with data set #138 
@@ -1827,7 +1827,7 @@ WfExpandUrlTest::testWfExpandUrl with data set #195
 WfExpandUrlTest::testWfExpandUrl with data set #196 
 .
 WfExpandUrlTest::testWfExpandUrl with data set #197 
-.  915 / 7166 ( 12%)
+.
 WfExpandUrlTest::testWfExpandUrl with data set #198 
 .
 WfExpandUrlTest::testWfExpandUrl with data set #199 
@@ -1949,7 +1949,7 @@ WfExpandUrlTest::testWfExpandUrl with data set #256
 WfExpandUrlTest::testWfExpandUrl with data set #257 
 .
 WfExpandUrlTest::testWfExpandUrl with data set #258 
-.  976 / 7166 ( 13%)
+.
 WfExpandUrlTest::testWfExpandUrl with data set #259 
 .
 WfExpandUrlTest::testWfExpandUrl with data set #260 
@@ -2071,7 +2071,7 @@ WfRemoveDotSegmentsTest::testWfRemoveDotSegments with data set #0
 WfRemoveDotSegmentsTest::testWfRemoveDotSegments with data set #1 
 .
 WfRemoveDotSegmentsTest::testWfRemoveDotSegments with data set #2 
-. 1037 / 7166 ( 14%)
+.
 WfRemoveDotSegmentsTest::testWfRemoveDotSegments with data set #3 
 .
 WfRemoveDotSegmentsTest::testWfRemoveDotSegments with data set #4 
@@ -2193,7 +2193,7 @@ WfRemoveDotSegmentsTest::testWfRemoveDotSegments with data set #61
 WfRemoveDotSegmentsTest::testWfRemoveDotSegments with data set #62 
 .
 WfRemoveDotSegmentsTest::testWfRemoveDotSegments with data set #63 
-. 1098 / 7166 ( 15%)
+.
 WfRemoveDotSegmentsTest::testWfRemoveDotSegments with data set #64 
 .
 WfRemoveDotSegmentsTest::testMediaWikiTestCaseParentSetupCalled
@@ -2315,7 +2315,7 @@ WfUrlencodeTest::testEncodingUrlWith with data set #4
 WfUrlencodeTest::testEncodingUrlWith with data set #5 
 .
 WfUrlencodeTest::testEncodingUrlWith with data set #6 
-. 1159 / 7166 ( 16%)
+.
 WfUrlencodeTest::testEncodingUrlWith with data set #7 
 .
 WfUrlencodeTest::testEncodingUrlWith with data set #8 
@@ -2437,7 +2437,7 @@ HtmlTest::testXmlMimeType with data set #4
 HtmlTest::testXmlMimeType with data set #5 
 .
 HtmlTest::testExpandAttributesSkipsNullAndFalse
-. 1220 / 7166 ( 17%)
+.
 HtmlTest::testExpandAttributesForBooleans
 .
 HtmlTest::testExpandAttributesVariousExpansions
@@ -2559,7 +2559,7 @@ HttpTest::testValidateCookieDomain with data set #2
 HttpTest::testValidateCookieDomain with data set #3 
 .
 HttpTest::testValidateCookieDomain with data set #4 
-. 1281 / 7166 ( 17%)
+.
 HttpTest::testValidateCookieDomain with data set #5 
 .
 HttpTest::testValidateCookieDomain with data set #6 
@@ -2681,7 +2681,7 @@ HttpTest::testRelativeRedirections
 HttpTest::testMediaWikiTestCaseParentSetupCalled
 .
 IPTest::testisIPAddress
-. 1342 / 7166 ( 18%)
+.
 IPTest::testisIPv6
 .
 IPTest::testisIPv4
@@ -2803,7 +2803,7 @@ IPTest::testSplitHostAndPort with data set #7
 IPTest::testSplitHostAndPort with data set #8 
 .
 IPTest::testSplitHostAndPort with data set #9 
-. 1403 / 7166 ( 19%)
+.
 IPTest::testSplitHostAndPort with data set #10 
 .
 IPTest::testCombineHostAndPort with data set #0 
@@ -2925,7 +2925,7 @@ MWNamespaceTest::testIsTalk
 MWNamespaceTest::testGetSubject
 .
 MWNamespaceTest::testGetTalk
-. 1464 / 7166 ( 20%)
+.
 MWNamespaceTest::testGetTalkExceptionsForNsMedia
 .
 MWNamespaceTest::testGetTalkExceptionsForNsSpecial
@@ -3047,7 +3047,7 @@ ResourceLoaderTest::testRegisteredValidModulesAreAccessible with data set #0
 ResourceLoaderTest::testLessFileCompilation with data set #0 
 .
 ResourceLoaderTest::testMakePackedModulesString with data set #0 
-. 1525 / 7166 ( 21%)
+.
 ResourceLoaderTest::testMakePackedModulesString with data set #1 
 .
 ResourceLoaderTest::testMakePackedModulesString with data set #2 
@@ -3169,7 +3169,7 @@ SanitizerTest::testDecodeTagAttributes with data set #14
 SanitizerTest::testDecodeTagAttributes with data set #15 
 .
 SanitizerTest::testDecodeTagAttributes with data set #16 
-. 1586 / 7166 ( 22%)
+.
 SanitizerTest::testDecodeTagAttributes with data set #17 
 .
 SanitizerTest::testDecodeTagAttributes with data set #18 
@@ -3291,7 +3291,7 @@ SiteConfigurationTest::testSiteFromDbWithCallback
 SiteConfigurationTest::testParameterReplacement
 .
 SiteConfigurationTest::testGetAllGlobals
-. 1647 / 7166 ( 22%)
+.
 SiteConfigurationTest::testMediaWikiTestCaseParentSetupCalled
 .
 StringUtilsTest::testIsUtf8WithMbstring with data set "some ASCII"
@@ -3413,7 +3413,7 @@ StringUtilsTest::testIsUtf8WithMbstring with data set "maximum overlong sequence
 StringUtilsTest::testIsUtf8WithMbstring with data set "surrogates 1 
 .
 StringUtilsTest::testIsUtf8WithMbstring with data set "surrogates 2 
-. 1708 / 7166 ( 23%)
+.
 StringUtilsTest::testIsUtf8WithMbstring with data set "surrogates 3 
 .
 StringUtilsTest::testIsUtf8WithMbstring with data set "surrogates 4 
@@ -3535,7 +3535,7 @@ StringUtilsTest::testIsUtf8WithPhpFallbackImplementation with data set "overlong
 StringUtilsTest::testIsUtf8WithPhpFallbackImplementation with data set "overlong sequences 6"
 .
 StringUtilsTest::testIsUtf8WithPhpFallbackImplementation with data set "maximum overlong sequences 1"
-. 1769 / 7166 ( 24%)
+.
 StringUtilsTest::testIsUtf8WithPhpFallbackImplementation with data set "maximum overlong sequences 2"
 .
 StringUtilsTest::testIsUtf8WithPhpFallbackImplementation with data set "maximum overlong sequences 3"
@@ -3657,7 +3657,7 @@ TimestampTest::testHumanTimestamp with data set #9
 TimestampTest::testHumanTimestamp with data set #10 
 .
 TimestampTest::testHumanTimestamp with data set #11 
-. 1830 / 7166 ( 25%)
+.
 TimestampTest::testRelativeTimestamp with data set #0 
 .
 TimestampTest::testRelativeTimestamp with data set #1 
@@ -3779,7 +3779,7 @@ XmlSelectTest::testConstructParameters with data set #6
 XmlSelectTest::testConstructParameters with data set #7 
 .
 XmlSelectTest::testAddOption
-. 1891 / 7166 ( 26%)
+.
 XmlSelectTest::testAddOptionWithDefault
 .
 XmlSelectTest::testAddOptionWithFalse
@@ -3901,7 +3901,7 @@ ProcessCacheLRUTest::testFillingCache with data set #0
 ProcessCacheLRUTest::testFillingCache with data set #1 
 .
 ProcessCacheLRUTest::testFillingCache with data set #2 
-. 1952 / 7166 ( 27%)
+.
 ProcessCacheLRUTest::testFillingCache with data set #3 
 .
 ProcessCacheLRUTest::testReplaceExistingKeyShouldBumpEntryToTop
@@ -4023,7 +4023,7 @@ DatabaseSQLTest::testUpdate with data set #2
 DatabaseSQLTest::testDelete with data set #0 
 .
 DatabaseSQLTest::testDelete with data set #1 
-. 2013 / 7166 ( 28%)
+.
 DatabaseSQLTest::testUpsert with data set #0 
 .
 DatabaseSQLTest::testDeleteJoin with data set #0 
@@ -4145,7 +4145,7 @@ FileBackendTest::testSplitStoragePath with data set #10
 FileBackendTest::testNormalizeStoragePath with data set #0 
 .
 FileBackendTest::testNormalizeStoragePath with data set #1 
-. 2074 / 7166 ( 28%)
+.
 FileBackendTest::testNormalizeStoragePath with data set #2 
 .
 FileBackendTest::testNormalizeStoragePath with data set #3 
@@ -4267,7 +4267,7 @@ FileBackendTest::testGetLocalCopy with data set #2
 FileBackendTest::testGetLocalCopy with data set #3 
 .
 FileBackendTest::testGetLocalReference with data set #0 
-. 2135 / 7166 ( 29%)
+.
 FileBackendTest::testGetLocalReference with data set #1 
 .
 FileBackendTest::testGetLocalReference with data set #2 
@@ -4389,7 +4389,7 @@ FormatJsonTest::testEncodeDefault with data set #15
 FormatJsonTest::testEncodeDefault with data set #16 
 .
 FormatJsonTest::testEncodeDefault with data set #17 
-. 2196 / 7166 ( 30%)
+.
 FormatJsonTest::testEncodeDefault with data set #18 
 .
 FormatJsonTest::testEncodeUtf8 with data set #0 
@@ -4511,7 +4511,7 @@ FormatJsonTest::testEncodePhpBug46944
 FormatJsonTest::testDecodeReturnType
 .
 FormatJsonTest::testMediaWikiTestCaseParentSetupCalled
-. 2257 / 7166 ( 31%)
+.
 CSSJanusTest::testTransform with data set #0 
 .
 CSSJanusTest::testTransform with data set #1 
@@ -4633,7 +4633,7 @@ CSSJanusTest::testTransform with data set #58
 CSSJanusTest::testTransform with data set #59 
 .
 CSSJanusTest::testTransform with data set #60 
-. 2318 / 7166 ( 32%)
+.
 CSSJanusTest::testTransform with data set #61 
 .
 CSSJanusTest::testTransform with data set #62 
@@ -4755,7 +4755,7 @@ CSSJanusTest::testTransformAdvanced with data set #13
 CSSJanusTest::testTransformAdvanced with data set #14 
 .
 CSSJanusTest::testTransformAdvanced with data set #15 
-. 2379 / 7166 ( 33%)
+.
 CSSJanusTest::testTransformAdvanced with data set #16 
 .
 CSSJanusTest::testTransformAdvanced with data set #17 
@@ -4877,7 +4877,7 @@ CSSJanusTest::testTransformAdvanced with data set #74
 CSSJanusTest::testTransformAdvanced with data set #75 
 .
 CSSJanusTest::testTransformAdvanced with data set #76 
-. 2440 / 7166 ( 34%)
+.
 CSSJanusTest::testTransformAdvanced with data set #77 
 .
 CSSJanusTest::testTransformAdvanced with data set #78 
@@ -4999,7 +4999,7 @@ JavaScriptMinifierTest::testJavaScriptMinifierOutput with data set #4
 JavaScriptMinifierTest::testJavaScriptMinifierOutput with data set #5 
 .
 JavaScriptMinifierTest::testJavaScriptMinifierOutput with data set #6 
-. 2501 / 7166 ( 34%)
+.
 JavaScriptMinifierTest::testJavaScriptMinifierOutput with data set #7 
 .
 JavaScriptMinifierTest::testJavaScriptMinifierOutput with data set #8 
@@ -5121,7 +5121,7 @@ JavaScriptMinifierTest::testJavaScriptMinifierOutput with data set #65
 JavaScriptMinifierTest::testBug32548Exponent with data set #0 
 .
 JavaScriptMinifierTest::testBug32548Exponent with data set #1 
-. 2562 / 7166 ( 35%)
+.
 JavaScriptMinifierTest::testBug32548Exponent with data set #2 
 .
 JavaScriptMinifierTest::testMediaWikiTestCaseParentSetupCalled
@@ -5243,7 +5243,7 @@ GIFHandlerTest::testIsAnimanted with data set #1
 GIFHandlerTest::testGetImageArea with data set #0 
 .
 GIFHandlerTest::testGetImageArea with data set #1 
-. 2623 / 7166 ( 36%)
+.
 GIFHandlerTest::testIsMetadataValid with data set #0 
 .
 GIFHandlerTest::testIsMetadataValid with data set #1 
@@ -5365,7 +5365,7 @@ PNGHandlerTest::testIsMetadataValid with data set #3
 PNGHandlerTest::testIsMetadataValid with data set #4 
 .
 PNGHandlerTest::testGetMetadata with data set #0 
-. 2684 / 7166 ( 37%)
+.
 PNGHandlerTest::testGetMetadata with data set #1 
 .
 PNGHandlerTest::testMediaWikiTestCaseParentSetupCalled
@@ -5487,7 +5487,7 @@ CleanUpTest::testDoubleBytes
 CleanUpTest::testTripleBytes
 .
 CleanUpTest::testChunkRegression
-. 2745 / 7166 ( 38%)
+.
 CleanUpTest::testInterposeRegression
 .
 CleanUpTest::testOverlongRegression
@@ -5609,7 +5609,7 @@ MagicVariableTest::testCurrentdaytwoIsZeroPadded with data set #15
 MagicVariableTest::testCurrentdaytwoIsZeroPadded with data set #16 
 .
 MagicVariableTest::testCurrentdaytwoIsZeroPadded with data set #17 
-. 2806 / 7166 ( 39%)
+.
 MagicVariableTest::testCurrentdaytwoIsZeroPadded with data set #18 
 .
 MagicVariableTest::testCurrentdaytwoIsZeroPadded with data set #19 
@@ -5731,7 +5731,7 @@ MagicVariableTest::testLocaldaytwoIsZeroPadded with data set #14
 MagicVariableTest::testLocaldaytwoIsZeroPadded with data set #15 
 .
 MagicVariableTest::testLocaldaytwoIsZeroPadded with data set #16 
-. 2867 / 7166 ( 40%)
+.
 MagicVariableTest::testLocaldaytwoIsZeroPadded with data set #17 
 .
 MagicVariableTest::testLocaldaytwoIsZeroPadded with data set #18 
@@ -5853,7 +5853,7 @@ MagicVariableTest::testLocalmonthoneIsUnPadded with data set #8
 MagicVariableTest::testLocalmonthoneIsUnPadded with data set #9 
 .
 MagicVariableTest::testLocalmonthoneIsUnPadded with data set #10 
-. 2928 / 7166 ( 40%)
+.
 MagicVariableTest::testLocalmonthoneIsUnPadded with data set #11 
 .
 MagicVariableTest::testRevisiondayIsUnPadded with data set #0 
@@ -5975,7 +5975,7 @@ MagicVariableTest::testRevisiondaytwoIsZeroPadded with data set #26
 MagicVariableTest::testRevisiondaytwoIsZeroPadded with data set #27 
 .
 MagicVariableTest::testRevisiondaytwoIsZeroPadded with data set #28 
-. 2989 / 7166 ( 41%)
+.
 MagicVariableTest::testRevisiondaytwoIsZeroPadded with data set #29 
 .
 MagicVariableTest::testRevisiondaytwoIsZeroPadded with data set #30 
@@ -6097,7 +6097,7 @@ PreprocessorTest::testPreprocessorOutput with data set #7
 PreprocessorTest::testPreprocessorOutput with data set #8 
 .
 PreprocessorTest::testPreprocessorOutput with data set #9 
-. 3050 / 7166 ( 42%)
+.
 PreprocessorTest::testPreprocessorOutput with data set #10 
 .
 PreprocessorTest::testPreprocessorOutput with data set #11 
@@ -6219,7 +6219,7 @@ PreprocessorTest::testPreprocessorOutput with data set #68
 PreprocessorTest::testPreprocessorOutput with data set #69 
 .
 PreprocessorTest::testPreprocessorOutput with data set #70 
-. 3111 / 7166 ( 43%)
+.
 PreprocessorTest::testPreprocessorOutput with data set #71 
 .
 PreprocessorTest::testPreprocessorOutput with data set #72 
@@ -6341,7 +6341,7 @@ TagHookTest::testBadTagHooks with data set #1
 TagHookTest::testBadTagHooks with data set #2 
 .
 TagHookTest::testBadTagHooks with data set #3 
-. 3172 / 7166 ( 44%)
+.
 TagHookTest::testFunctionTagHooks with data set #0 
 .
 TagHookTest::testFunctionTagHooks with data set #1 
@@ -6463,7 +6463,7 @@ MediaWikiSiteTest::testAddInterwikiId with data set #2
 MediaWikiSiteTest::testAddInterwikiId with data set #3 
 .
 MediaWikiSiteTest::testAddInterwikiId with data set #4 
-. 3233 / 7166 ( 45%)
+.
 MediaWikiSiteTest::testAddInterwikiId with data set #5 
 .
 MediaWikiSiteTest::testAddInterwikiId with data set #6 
@@ -6585,7 +6585,7 @@ MediaWikiSiteTest::testSetGlobalId with data set #8
 MediaWikiSiteTest::testSetGlobalId with data set #9 
 .
 MediaWikiSiteTest::testSetGlobalId with data set #10 
-. 3294 / 7166 ( 45%)
+.
 MediaWikiSiteTest::testGetType with data set #0 
 .
 MediaWikiSiteTest::testGetType with data set #1 
@@ -6707,7 +6707,7 @@ MediaWikiSiteTest::testSerialization with data set #10
 MediaWikiSiteTest::testMediaWikiTestCaseParentSetupCalled
 .
 SiteListTest::testIsEmpty with data set #0 
-. 3355 / 7166 ( 46%)
+.
 SiteListTest::testIsEmpty with data set #1 
 .
 SiteListTest::testIsEmpty with data set #2 
@@ -6829,7 +6829,7 @@ LanguageArTest::testPlural with data set #9
 LanguageArTest::testPlural with data set #10 
 .
 LanguageArTest::testPlural with data set #11 
-. 3416 / 7166 ( 47%)
+.
 LanguageArTest::testPlural with data set #12 
 .
 LanguageArTest::testPlural with data set #13 
@@ -6951,7 +6951,7 @@ LanguageBe_taraskTest::testGetPluralRuleType with data set #3
 LanguageBe_taraskTest::testGetPluralRuleType with data set #4 
 .
 LanguageBe_taraskTest::testGetPluralRuleType with data set #5 
-. 3477 / 7166 ( 48%)
+.
 LanguageBe_taraskTest::testGetPluralRuleType with data set #6 
 .
 LanguageBe_taraskTest::testGetPluralRuleType with data set #7 
@@ -7073,7 +7073,7 @@ LanguageCsTest::testGetPluralRuleType with data set #6
 LanguageCsTest::testGetPluralRuleType with data set #7 
 .
 LanguageCsTest::testGetPluralRuleType with data set #8 
-. 3538 / 7166 ( 49%)
+.
 LanguageCsTest::testGetPluralRuleType with data set #9 
 .
 LanguageCsTest::testMediaWikiTestCaseParentSetupCalled
@@ -7195,7 +7195,7 @@ LanguageDsbTest::testPlural with data set #8
 LanguageDsbTest::testPlural with data set #9 
 .
 LanguageDsbTest::testGetPluralRuleType with data set #0 
-. 3599 / 7166 ( 50%)
+.
 LanguageDsbTest::testGetPluralRuleType with data set #1 
 .
 LanguageDsbTest::testGetPluralRuleType with data set #2 
@@ -7317,7 +7317,7 @@ S
 LanguageGvTest::testGetPluralRuleType with data set #5 
 S
 LanguageGvTest::testGetPluralRuleType with data set #6 
-S 3660 / 7166 ( 51%)
+S
 LanguageGvTest::testGetPluralRuleType with data set #7 
 S
 LanguageGvTest::testGetPluralRuleType with data set #8 
@@ -7439,7 +7439,7 @@ LanguageHrTest::testGetPluralRuleType with data set #5
 LanguageHrTest::testGetPluralRuleType with data set #6 
 .
 LanguageHrTest::testGetPluralRuleType with data set #7 
-. 3721 / 7166 ( 51%)
+.
 LanguageHrTest::testGetPluralRuleType with data set #8 
 .
 LanguageHrTest::testGetPluralRuleType with data set #9 
@@ -7561,7 +7561,7 @@ LanguageLnTest::testGetPluralRuleType with data set #2
 LanguageLnTest::testGetPluralRuleType with data set #3 
 .
 LanguageLnTest::testMediaWikiTestCaseParentSetupCalled
-. 3782 / 7166 ( 52%)
+.
 LanguageLtTest::testPlural with data set #0 
 .
 LanguageLtTest::testPlural with data set #1 
@@ -7683,7 +7683,7 @@ LanguageMgTest::testMediaWikiTestCaseParentSetupCalled
 LanguageMkTest::testPlural with data set #0 
 .
 LanguageMkTest::testPlural with data set #1 
-. 3843 / 7166 ( 53%)
+.
 LanguageMkTest::testPlural with data set #2 
 .
 LanguageMkTest::testPlural with data set #3 
@@ -7805,7 +7805,7 @@ LanguageMoTest::testGetPluralRuleType with data set #12
 LanguageMoTest::testGetPluralRuleType with data set #13 
 .
 LanguageMoTest::testMediaWikiTestCaseParentSetupCalled
-. 3904 / 7166 ( 54%)
+.
 LanguageMtTest::testPlural with data set #0 
 .
 LanguageMtTest::testPlural with data set #1 
@@ -7927,7 +7927,7 @@ LanguagePlTest::testPlural with data set #0
 LanguagePlTest::testPlural with data set #1 
 .
 LanguagePlTest::testPlural with data set #2 
-. 3965 / 7166 ( 55%)
+.
 LanguagePlTest::testPlural with data set #3 
 .
 LanguagePlTest::testPlural with data set #4 
@@ -8049,7 +8049,7 @@ LanguageRoTest::testPlural with data set #12
 LanguageRoTest::testPlural with data set #13 
 .
 LanguageRoTest::testGetPluralRuleType with data set #0 
-. 4026 / 7166 ( 56%)
+.
 LanguageRoTest::testGetPluralRuleType with data set #1 
 .
 LanguageRoTest::testGetPluralRuleType with data set #2 
@@ -8171,7 +8171,7 @@ LanguageSgsTest::testPluralAllForms with data set #0
 LanguageSgsTest::testPluralAllForms with data set #1 
 .
 LanguageSgsTest::testPluralAllForms with data set #2 
-. 4087 / 7166 ( 57%)
+.
 LanguageSgsTest::testPluralAllForms with data set #3 
 .
 LanguageSgsTest::testPluralAllForms with data set #4 
@@ -8293,7 +8293,7 @@ LanguageShTest::testGetPluralRuleType with data set #10
 LanguageShTest::testMediaWikiTestCaseParentSetupCalled
 .
 LanguageSkTest::testPlural with data set #0 
-. 4148 / 7166 ( 57%)
+.
 LanguageSkTest::testPlural with data set #1 
 .
 LanguageSkTest::testPlural with data set #2 
@@ -8415,7 +8415,7 @@ LanguageSrTest::testEasyConversions
 LanguageSrTest::testMixedConversions
 .
 LanguageSrTest::testSameAmountOfLatinAndCyrillicGetConverted
-. 4209 / 7166 ( 58%)
+.
 LanguageSrTest::testConversionToCyrillic
 .
 LanguageSrTest::testConversionToLatin
@@ -8537,7 +8537,7 @@ LanguageTest::testFormatTimePeriod with data set #28
 LanguageTest::testFormatTimePeriod with data set #29 
 .
 LanguageTest::testTruncate
-. 4270 / 7166 ( 59%)
+.
 LanguageTest::testTruncateHtml with data set #0 
 .
 LanguageTest::testTruncateHtml with data set #1 
@@ -8659,7 +8659,7 @@ LanguageTest::testMalformedLanguageTag with data set #14
 LanguageTest::testMalformedLanguageTag with data set #15 
 .
 LanguageTest::testMalformedLanguageTag with data set #16 
-. 4331 / 7166 ( 60%)
+.
 LanguageTest::testMalformedLanguageTag with data set #17 
 .
 LanguageTest::testMalformedLanguageTag with data set #18 
@@ -8781,7 +8781,7 @@ LanguageTest::testSprintfDate with data set #28
 LanguageTest::testSprintfDate with data set #29 
 .
 LanguageTest::testSprintfDate with data set #30 
-. 4392 / 7166 ( 61%)
+.
 LanguageTest::testSprintfDate with data set #31 
 .
 LanguageTest::testSprintfDate with data set #32 
@@ -8903,7 +8903,7 @@ LanguageTest::testSprintfDateNoZone with data set #35
 LanguageTest::testSprintfDateNoZone with data set #36 
 .
 LanguageTest::testSprintfDateNoZone with data set #37 
-. 4453 / 7166 ( 62%)
+.
 LanguageTest::testSprintfDateNoZone with data set #38 
 .
 LanguageTest::testSprintfDateNoZone with data set #39 
@@ -9025,7 +9025,7 @@ LanguageTest::testSprintfDateTZ with data set #42
 LanguageTest::testSprintfDateTZ with data set #43 
 .
 LanguageTest::testSprintfDateTZ with data set #44 
-. 4514 / 7166 ( 62%)
+.
 LanguageTest::testSprintfDateTZ with data set #45 
 .
 LanguageTest::testSprintfDateTZ with data set #46 
@@ -9147,7 +9147,7 @@ LanguageTest::testCheckTitleEncoding with data set #1
 LanguageTest::testCheckTitleEncoding with data set #2 
 .
 LanguageTest::testCheckTitleEncoding with data set #3 
-. 4575 / 7166 ( 63%)
+.
 LanguageTest::testCheckTitleEncoding with data set #4 
 .
 LanguageTest::testCheckTitleEncoding with data set #5 
@@ -9269,7 +9269,7 @@ LanguageTest::testTranslateBlockExpiry with data set #4
 LanguageTest::testTranslateBlockExpiry with data set #5 
 .
 LanguageTest::testTranslateBlockExpiry with data set #6 
-. 4636 / 7166 ( 64%)
+.
 LanguageTest::testTranslateBlockExpiry with data set #7 
 .
 LanguageTest::testTranslateBlockExpiry with data set #8 
@@ -9391,7 +9391,7 @@ LanguageUkTest::testPlural with data set #2
 LanguageUkTest::testPlural with data set #3 
 .
 LanguageUkTest::testPlural with data set #4 
-. 4697 / 7166 ( 65%)
+.
 LanguageUkTest::testPlural with data set #5 
 .
 LanguageUkTest::testPlural with data set #6 
@@ -9513,7 +9513,7 @@ CLDRPluralRuleEvaluatorTest::testValidRules with data set #26
 CLDRPluralRuleEvaluatorTest::testValidRules with data set #27 
 .
 CLDRPluralRuleEvaluatorTest::testValidRules with data set #28 
-. 4758 / 7166 ( 66%)
+.
 CLDRPluralRuleEvaluatorTest::testValidRules with data set #29 
 .
 CLDRPluralRuleEvaluatorTest::testValidRules with data set #30 
@@ -9635,7 +9635,7 @@ MaintenanceTest::testOutputIntermittentFalseAfterOtherChannel
 MaintenanceTest::testOutputWNullChannelIntermittentEmpty
 .
 MaintenanceTest::testOutputWNullChannelIntermittentFalse
-. 4819 / 7166 ( 67%)
+.
 MaintenanceTest::testOutputWChannelIntermittentEmpty
 .
 MaintenanceTest::testOutputWChannelIntermittentFalse
@@ -9757,7 +9757,7 @@ BaseDumpTest::testSynchronizeMissInWholeFirstFile
 BaseDumpTest::testMediaWikiTestCaseParentSetupCalled
 .
 AutoLoaderTest::testAutoLoadConfig
-. 4880 / 7166 ( 68%)
+.
 AutoLoaderTest::testMediaWikiTestCaseParentSetupCalled
 .
 ResourcesTest::testFileExistence with data set #0 
@@ -9879,7 +9879,7 @@ ResourcesTest::testFileExistence with data set #57
 ResourcesTest::testFileExistence with data set #58 
 .
 ResourcesTest::testFileExistence with data set #59 
-. 4941 / 7166 ( 68%)
+.
 ResourcesTest::testFileExistence with data set #60 
 .
 ResourcesTest::testFileExistence with data set #61 
@@ -10001,7 +10001,7 @@ ResourcesTest::testFileExistence with data set #118
 ResourcesTest::testFileExistence with data set #119 
 .
 ResourcesTest::testFileExistence with data set #120 
-. 5002 / 7166 ( 69%)
+.
 ResourcesTest::testFileExistence with data set #121 
 .
 ResourcesTest::testFileExistence with data set #122 
@@ -10123,7 +10123,7 @@ ResourcesTest::testFileExistence with data set #179
 ResourcesTest::testFileExistence with data set #180 
 .
 ResourcesTest::testFileExistence with data set #181 
-. 5063 / 7166 ( 70%)
+.
 ResourcesTest::testFileExistence with data set #182 
 .
 ResourcesTest::testFileExistence with data set #183 
@@ -10245,7 +10245,7 @@ ResourcesTest::testFileExistence with data set #240
 ResourcesTest::testFileExistence with data set #241 
 .
 ResourcesTest::testFileExistence with data set #242 
-. 5124 / 7166 ( 71%)
+.
 ResourcesTest::testFileExistence with data set #243 
 .
 ResourcesTest::testFileExistence with data set #244 
@@ -10367,7 +10367,7 @@ ResourcesTest::testFileExistence with data set #301
 ResourcesTest::testFileExistence with data set #302 
 .
 ResourcesTest::testFileExistence with data set #303 
-. 5185 / 7166 ( 72%)
+.
 ResourcesTest::testFileExistence with data set #304 
 .
 ResourcesTest::testFileExistence with data set #305 

@@ -123,7 +123,7 @@ QueryBuilderTest::testHavingLessThan
 QueryBuilderTest::testHavingLessThanOrEqualAndGreaterThanOrEqual
 .
 QueryBuilderTest::testHavingNull
-.  63 / 200 ( 31%)
+.
 QueryBuilderTest::testHavingNotNull
 .
 QueryBuilderTest::testRawHaving
@@ -249,7 +249,7 @@ QueryBuilderPsr1Test53::testWhereNotEqual
 QueryBuilderPsr1Test53::testWhereLike
 .
 QueryBuilderPsr1Test53::testWhereNotLike
-. 126 / 200 ( 63%)
+.
 QueryBuilderPsr1Test53::testWhereIn
 .
 QueryBuilderPsr1Test53::testWhereNotIn
@@ -375,7 +375,7 @@ QueryBuilderPsr1Test53::testUpdateMultipleFieldsContainingAnExpressionAndOverrid
 QueryBuilderPsr1Test53::testDeleteData
 .
 QueryBuilderPsr1Test53::testDeleteMany
-. 189 / 200 ( 94%)
+.
 QueryBuilderPsr1Test53::testCount
 .
 QueryBuilderPsr1Test53::testIgnoreSelectAndCount

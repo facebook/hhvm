@@ -123,7 +123,7 @@ Assetic\Test\Asset\FileAssetTest::testInvalidBase
 Assetic\Test\Asset\GlobAssetTest::testInterface
 .
 Assetic\Test\Asset\GlobAssetTest::testIteration
-.  63 / 354 ( 17%)
+.
 Assetic\Test\Asset\GlobAssetTest::testRecursiveIteration
 .
 Assetic\Test\Asset\GlobAssetTest::testGetLastModifiedType
@@ -135,9 +135,9 @@ Assetic\Test\Asset\GlobAssetTest::testLoad
 Assetic\Test\Asset\GlobAssetTest::testDump
 .
 Assetic\Test\Asset\HttpAssetTest::testGetLastModified
-F
+S
 Assetic\Test\Asset\HttpAssetTest::testProtocolRelativeUrl
-E
+S
 Assetic\Test\Asset\HttpAssetTest::testMalformedUrl
 .
 Assetic\Test\Asset\HttpAssetTest::testInvalidUrl
@@ -249,7 +249,7 @@ Assetic\Test\Factory\AssetFactoryTest::testNoAssetManagerReference
 Assetic\Test\Factory\AssetFactoryTest::testNoAssetManagerNotReference
 .
 Assetic\Test\Factory\AssetFactoryTest::testNoFilterManager
-. 126 / 354 ( 35%)
+.
 Assetic\Test\Factory\AssetFactoryTest::testCreateAssetReference
 .
 Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #0 
@@ -375,7 +375,7 @@ Assetic\Test\Filter\CallablesFilterTest::testDependencyExtractor
 Assetic\Test\Filter\CoffeeScriptFilterTest::testFilterLoad
 S
 Assetic\Test\Filter\CoffeeScriptFilterTest::testBare
-S 189 / 354 ( 53%)
+S
 Assetic\Test\Filter\CompassFilterTest::testFilterLoadWithScss
 S
 Assetic\Test\Filter\CompassFilterTest::testFilterLoadWithSass

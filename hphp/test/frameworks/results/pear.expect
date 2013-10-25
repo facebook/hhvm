@@ -123,7 +123,7 @@ Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-cor
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-get/test_fail.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-get/test_opt.phpt
-.  63 / 719 (  8%)
+.
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-help/test.phpt
 F
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-set/test.phpt
@@ -241,7 +241,7 @@ Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-cor
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_notinstalled.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_opt.phpt
-. 126 / 719 ( 17%)
+.
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_notinstalled.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_eq.phpt
@@ -367,7 +367,7 @@ Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-cor
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getPrompt.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getREST.phpt
-. 189 / 719 ( 26%)
+.
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getRegistry.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getSetValues.phpt
@@ -493,7 +493,7 @@ Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-cor
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_installPackage.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_rebuildDB.phpt
-. 252 / 719 ( 35%)
+.
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_setConfig.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_singleton.phpt
@@ -679,7 +679,7 @@ F
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_createfunction_staticPush.phpt
 F
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_eval.phpt
-F 378 / 719 ( 52%)
+F
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_eval_staticPush.phpt
 F
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_staticPush.phpt
@@ -805,7 +805,7 @@ F
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_complexlocalpackage2.phpt
 F
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_pear_to_pecl.phpt
-F 441 / 719 ( 61%)
+F
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_simplelocalpackage.phpt
 F
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_simplelocalpackage2.phpt
@@ -931,7 +931,7 @@ Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-cor
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addGroupExtensionDep.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addGroupPackageDepWithChannel.phpt
-. 504 / 719 ( 70%)
+.
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addGroupPackageDepWithURI.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addOsDep.phpt
@@ -1057,7 +1057,7 @@ F
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_otherleads.phpt
 F
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_singledeps.phpt
-F 567 / 719 ( 78%)
+F
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toXml/test_barebones.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toXml/test_barebones_packaging.phpt
@@ -1183,7 +1183,7 @@ Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-cor
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_noversion2.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_noversion3.phpt
-. 630 / 719 ( 87%)
+.
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_optional_deps.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_phprelease.phpt
@@ -1309,7 +1309,7 @@ Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-cor
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validPackageName.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validVersion.phpt
-. 693 / 719 ( 96%)
+.
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_date.phpt
 .
 Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_packagename.phpt

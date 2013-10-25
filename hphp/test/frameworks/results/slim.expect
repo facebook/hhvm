@@ -123,7 +123,7 @@ RequestTest::testPostWithMultipartRequest
 RequestTest::testPut
 .
 RequestTest::testPatch
-.  63 / 364 ( 17%)
+.
 RequestTest::testDelete
 .
 RequestTest::testCookies
@@ -249,7 +249,7 @@ ResponseTest::testIsNotFound
 ResponseTest::testIsOk
 .
 ResponseTest::testIsSuccessful
-. 126 / 364 ( 34%)
+.
 ResponseTest::testIsRedirect
 .
 ResponseTest::testIsRedirection
@@ -369,13 +369,13 @@ ContentTypesTest::testParsesJsonWithError
 ContentTypesTest::testParsesXml
 .
 ContentTypesTest::testParsesXmlWithError
-.
+E
 ContentTypesTest::testParsesCsv
 .
 ContentTypesTest::testParsesRequestBodyWithMediaType
 .
 SlimFlashTest::testSetFlashForNextRequest
-. 189 / 364 ( 51%)
+.
 SlimFlashTest::testSetFlashForCurrentRequest
 .
 SlimFlashTest::testLoadsFlashFromPreviousRequest
@@ -501,7 +501,7 @@ RouteTest::testSupportsHttpMethod
 RouteTest::testDispatch
 .
 RouteTest::testDispatchWithMiddlware
-. 252 / 364 ( 69%)
+.
 RouteTest::testRouteMiddlwareArguments
 .
 RouterTest::testConstruct
@@ -627,7 +627,7 @@ SlimTest::testDeleteCookie
 SlimTest::testGetRoot
 .
 SlimTest::testStop
-. 315 / 364 ( 86%)
+.
 SlimTest::testStopWithSubsequentOutput
 .
 SlimTest::testStopOutputWithOutputBufferingOnAndPreContent

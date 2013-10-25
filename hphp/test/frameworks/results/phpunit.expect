@@ -123,7 +123,7 @@ Framework_AssertTest::testAssertEqualsSucceeds with data set #27
 Framework_AssertTest::testAssertEqualsSucceeds with data set #28 
 .
 Framework_AssertTest::testAssertEqualsSucceeds with data set #29 
-.  63 / 960 (  6%)
+.
 Framework_AssertTest::testAssertEqualsSucceeds with data set #30 
 .
 Framework_AssertTest::testAssertEqualsSucceeds with data set #31 
@@ -249,7 +249,7 @@ Framework_AssertTest::testAssertNotEqualsSucceeds with data set #16
 Framework_AssertTest::testAssertNotEqualsSucceeds with data set #17 
 .
 Framework_AssertTest::testAssertNotEqualsSucceeds with data set #18 
-. 126 / 960 ( 13%)
+.
 Framework_AssertTest::testAssertNotEqualsSucceeds with data set #19 
 .
 Framework_AssertTest::testAssertNotEqualsSucceeds with data set #20 
@@ -375,7 +375,7 @@ Framework_AssertTest::testAssertSameSucceeds with data set #5
 Framework_AssertTest::testAssertSameSucceeds with data set #6 
 .
 Framework_AssertTest::testAssertSameSucceeds with data set #7 
-. 189 / 960 ( 19%)
+.
 Framework_AssertTest::testAssertSameSucceeds with data set #8 
 .
 Framework_AssertTest::testAssertSameSucceeds with data set #9 
@@ -501,7 +501,7 @@ Framework_AssertTest::testAssertSameFails with data set #56
 Framework_AssertTest::testAssertSameFails with data set #57 
 .
 Framework_AssertTest::testAssertSameFails with data set #58 
-. 252 / 960 ( 26%)
+.
 Framework_AssertTest::testAssertSameFails with data set #59 
 .
 Framework_AssertTest::testAssertSameFails with data set #60 
@@ -627,7 +627,7 @@ Framework_AssertTest::testAssertNotSameSucceeds with data set #57
 Framework_AssertTest::testAssertNotSameSucceeds with data set #58 
 .
 Framework_AssertTest::testAssertNotSameSucceeds with data set #59 
-. 315 / 960 ( 32%)
+.
 Framework_AssertTest::testAssertNotSameSucceeds with data set #60 
 .
 Framework_AssertTest::testAssertNotSameSucceeds with data set #61 
@@ -753,7 +753,7 @@ Framework_AssertTest::testReadAttribute4
 Framework_AssertTest::testReadAttribute5
 .
 Framework_AssertTest::testAssertPublicAttributeContains
-. 378 / 960 ( 39%)
+.
 Framework_AssertTest::testAssertPublicAttributeContainsOnly
 .
 Framework_AssertTest::testAssertPublicAttributeNotContains
@@ -879,7 +879,7 @@ Framework_AssertTest::testAssertThatEqualTo
 Framework_AssertTest::testAssertThatIdenticalTo
 .
 Framework_AssertTest::testAssertThatIsInstanceOf
-. 441 / 960 ( 45%)
+.
 Framework_AssertTest::testAssertThatIsType
 .
 Framework_AssertTest::testAssertThatFileExists
@@ -1005,7 +1005,7 @@ Framework_AssertTest::testAssertSelectCountPresentFalse
 Framework_AssertTest::testAssertSelectCountNotPresentTrue
 .
 Framework_AssertTest::testAssertSelectNotPresentFalse
-. 504 / 960 ( 52%)
+.
 Framework_AssertTest::testAssertSelectCountChildTrue
 F
 Framework_AssertTest::testAssertSelectCountChildFalse
@@ -1131,7 +1131,7 @@ Framework_AssertTest::testAssertJsonStringNotEqualsJsonFile
 Framework_AssertTest::testAssertJsonStringNotEqualsJsonFileExpectingException
 .
 Framework_AssertTest::testAssertJsonFileNotEqualsJsonFile
-. 567 / 960 ( 59%)
+.
 Framework_AssertTest::testAssertJsonFileEqualsJsonFile
 .
 Framework_ComparatorTest::testGetInstance with data set #0 
@@ -1173,6 +1173,10 @@ Framework_ComparatorTest::testGetInstance with data set #17
 Framework_ComparatorTest::testGetInstance with data set #18 
 .
 Framework_ComparatorTest::testGetInstance with data set #19 
+S
+PHPUnit_Util_Test::getProvidedData
+S
+PHPUnit_Util_Test::getProvidedData
 .
 Framework_ComparatorTest::testGetInstance with data set #20 
 .
@@ -1257,7 +1261,7 @@ Framework_ConstraintTest::testConstraintFileExists
 Framework_ConstraintTest::testConstraintFileExists2
 .
 Framework_ConstraintTest::testConstraintFileNotExists
-. 630 / 960 ( 65%)
+.
 Framework_ConstraintTest::testConstraintFileNotExists2
 .
 Framework_ConstraintTest::testConstraintGreaterThan
@@ -1383,7 +1387,7 @@ Framework_ConstraintTest::testConstraintNotLessThanOrEqual
 Framework_ConstraintTest::testConstraintNotLessThanOrEqual2
 .
 Framework_ConstraintTest::testConstraintClassHasAttribute
-. 693 / 960 ( 72%)
+.
 Framework_ConstraintTest::testConstraintClassHasAttribute2
 .
 Framework_ConstraintTest::testConstraintClassNotHasAttribute
@@ -1509,7 +1513,7 @@ Framework_SuiteTest::testNotPublicTestCase
 Framework_SuiteTest::testNotVoidTestCase
 .
 Framework_SuiteTest::testOneTestCase
-. 756 / 960 ( 78%)
+.
 Framework_SuiteTest::testShadowedTests
 .
 Framework_TestCaseTest::testCaseToString
@@ -1643,7 +1647,7 @@ Util_DiffTest::testComparisonErrorOverlapingMatches
 Util_DiffTest::testComparisonErrorOverlapingMatches_toArray
 .
 Util_DiffTest::testComparisonErrorOverlapingMatches2
-. 882 / 960 ( 91%)
+.
 Util_DiffTest::testComparisonErrorOverlapingMatches2_toArray
 .
 Util_TestDox_NamePrettifierTest::testTitleHasSensibleDefaults
@@ -1769,7 +1773,7 @@ Util_XMLTest::testConvertAssertId
 Util_XMLTest::testConvertAssertAttribute
 .
 Util_XMLTest::testConvertAssertAttributeSpaces
-. 945 / 960 ( 98%)
+.
 Util_XMLTest::testConvertAssertAttributeMultipleSpaces
 .
 Util_XMLTest::testConvertAssertSelectEltClass

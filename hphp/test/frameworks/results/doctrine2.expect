@@ -119,7 +119,7 @@ Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDe
 Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #37 
 .
 Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #38 
-.   61 / 2068 (  2%)
+.
 Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #39 
 .
 Doctrine\Tests\ORM\Decorator\EntityManagerDecoratorTest::testAllMethodCallsAreDelegatedToTheWrappedInstance with data set #40 
@@ -241,7 +241,7 @@ E
 Doctrine\Tests\ORM\Functional\BasicFunctionalTest::testOneToManyCascadeRemove
 E
 Doctrine\Tests\ORM\Functional\BasicFunctionalTest::testTextColumnSaveAndRetrieve
-E  122 / 2068 (  5%)
+E
 Doctrine\Tests\ORM\Functional\BasicFunctionalTest::testFlushDoesNotIssueUnnecessaryUpdates
 E
 Doctrine\Tests\ORM\Functional\BasicFunctionalTest::testRemoveEntityByReference
@@ -363,7 +363,7 @@ E
 Doctrine\Tests\ORM\Functional\DetachedEntityTest::testSerializeUnserializeModifyMerge
 E
 Doctrine\Tests\ORM\Functional\DetachedEntityTest::testDetachedEntityThrowsExceptionOnFlush
-E  183 / 2068 (  8%)
+E
 Doctrine\Tests\ORM\Functional\DetachedEntityTest::testUninitializedLazyAssociationsAreIgnoredOnMerge
 E
 Doctrine\Tests\ORM\Functional\DetachedEntityTest::testUseDetachedEntityAsQueryParameter
@@ -485,7 +485,7 @@ E
 Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testMatchingCriteriaGteComparison
 E
 Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testMatchingCriteriaAssocationByObjectInMemory
-E  244 / 2068 ( 11%)
+E
 Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testMatchingCriteriaAssocationInWithArray
 E
 Doctrine\Tests\ORM\Functional\EntityRepositoryTest::testMatchingCriteriaContainsComparison
@@ -607,10 +607,16 @@ S
 Doctrine\Tests\ORM\Functional\Locking\LockTest::testLockOptimisticNonVersionedThrowsExceptionInDQL
 F
 Doctrine\Tests\ORM\Functional\Locking\OptimisticTest::testJoinedChildInsertSetsInitialVersionValue
-E  305 / 2068 ( 14%)
+E
 Doctrine\Tests\ORM\Functional\Locking\OptimisticTest::testJoinedParentInsertSetsInitialVersionValue
 E
+Doctrine\Tests\ORM\Functional\Locking\OptimisticTest::testMultipleFlushesDoIncrementalUpdates
+E
 Doctrine\Tests\ORM\Functional\Locking\OptimisticTest::testStandardInsertSetsInitialVersionValue
+E
+Doctrine\Tests\ORM\Functional\Locking\OptimisticTest::testOptimisticTimestampSetsDefaultValue
+E
+Doctrine\Tests\ORM\Functional\ManyToManyBasicAssociationTest::testUnsetManyToMany
 E
 Doctrine\Tests\ORM\Functional\ManyToManyBasicAssociationTest::testBasicManyToManyJoin
 E
@@ -715,7 +721,7 @@ E
 Doctrine\Tests\ORM\Functional\NewOperatorTest::testShouldSupportsBasicUsage
 E
 Doctrine\Tests\ORM\Functional\NewOperatorTest::testShouldAssumeFromEntityNamespaceWhenNotGiven
-E  366 / 2068 ( 17%)
+E
 Doctrine\Tests\ORM\Functional\NewOperatorTest::testShouldSupportFromEntityNamespaceAlias
 E
 Doctrine\Tests\ORM\Functional\NewOperatorTest::testShouldSupportValueObjectNamespaceAlias
@@ -837,7 +843,7 @@ E
 Doctrine\Tests\ORM\Functional\OneToOneUnidirectionalAssociationTest::testSavesAOneToOneAssociationWithCascadeSaveSet
 E
 Doctrine\Tests\ORM\Functional\OneToOneUnidirectionalAssociationTest::testRemovesOneToOneAssociation
-E  427 / 2068 ( 20%)
+E
 Doctrine\Tests\ORM\Functional\OneToOneUnidirectionalAssociationTest::testLazyLoadsObjects
 E
 Doctrine\Tests\ORM\Functional\OneToOneUnidirectionalAssociationTest::testDoesNotLazyLoadObjectsIfConfigurationDoesNotAllowIt
@@ -926,6 +932,8 @@ Doctrine\Tests\ORM\Functional\ProxiesLikeEntitiesTest::testFindWithProxyName
 E
 Doctrine\Tests\ORM\Functional\QueryCacheTest::testQueryCache_DependsOnHints
 E
+Doctrine\Tests\ORM\Functional\QueryCacheTest::testQueryCache_NoHitSaveParserResult
+E
 Doctrine\Tests\ORM\Functional\QueryCacheTest::testQueryCache_HitDoesNotSaveParserResult
 E
 Doctrine\Tests\ORM\Functional\QueryDqlFunctionTest::testAggregateSum
@@ -951,7 +959,7 @@ E
 Doctrine\Tests\ORM\Functional\QueryDqlFunctionTest::testFunctionMod
 E
 Doctrine\Tests\ORM\Functional\QueryDqlFunctionTest::testFunctionSqrt
-E  488 / 2068 ( 23%)
+E
 Doctrine\Tests\ORM\Functional\QueryDqlFunctionTest::testFunctionUpper
 E
 Doctrine\Tests\ORM\Functional\QueryDqlFunctionTest::testFunctionSubstring
@@ -1073,12 +1081,14 @@ E
 Doctrine\Tests\ORM\Functional\ResultCacheTest::testResultCache
 E
 Doctrine\Tests\ORM\Functional\ResultCacheTest::testSetResultCacheId
-E  549 / 2068 ( 26%)
+E
 Doctrine\Tests\ORM\Functional\ResultCacheTest::testUseResultCache
 E
 Doctrine\Tests\ORM\Functional\ResultCacheTest::testUseResultCacheParams
 E
 Doctrine\Tests\ORM\Functional\ResultCacheTest::testNativeQueryResultCaching
+E
+Doctrine\Tests\ORM\Functional\ResultCacheTest::testResultCacheWithObjectParameter
 E
 Doctrine\Tests\ORM\Functional\SQLFilterTest::testConfigureFilter
 E
@@ -1169,6 +1179,8 @@ E
 Doctrine\Tests\ORM\Functional\SQLFilterTest::testOneToMany_ExtraLazySliceWithFilterOnCTI
 E
 Doctrine\Tests\ORM\Functional\SchemaTool\CompanySchemaTest::testGeneratedSchema
+E
+Doctrine\Tests\ORM\Functional\SchemaTool\CompanySchemaTest::testDropPartSchemaWithForeignKeys
 S
 Doctrine\Tests\ORM\Functional\SchemaTool\DBAL483Test::testDefaultValueIsComparedCorrectly
 E
@@ -1183,7 +1195,7 @@ S
 Doctrine\Tests\ORM\Functional\SchemaTool\MySqlSchemaToolTest::testGetCreateSchemaSql3
 S
 Doctrine\Tests\ORM\Functional\SchemaTool\MySqlSchemaToolTest::testGetCreateSchemaSql4
-S  610 / 2068 ( 29%)
+S
 Doctrine\Tests\ORM\Functional\SchemaTool\PostgreSqlSchemaToolTest::testPostgresMetadataSequenceIncrementedBy10
 S
 Doctrine\Tests\ORM\Functional\SchemaTool\PostgreSqlSchemaToolTest::testGetCreateSchemaSql
@@ -1305,7 +1317,7 @@ E
 Doctrine\Tests\ORM\Functional\Ticket\DDC117Test::testRemoveCompositeElement
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC117Test::testDqlRemoveCompositeElement
-E  671 / 2068 ( 32%)
+E
 Doctrine\Tests\ORM\Functional\Ticket\DDC117Test::testInverseSideAccess
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC117Test::testMixedCompositeKey
@@ -1427,7 +1439,7 @@ E
 Doctrine\Tests\ORM\Functional\Ticket\DDC1545Test::testUnlinkObjectsWithAssociationLoaded
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC1545Test::testChangeLink
-E  732 / 2068 ( 35%)
+E
 Doctrine\Tests\ORM\Functional\Ticket\DDC1545Test::testChangeLinkWithAssociationLoaded
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC1548Test::testIssue
@@ -1549,7 +1561,7 @@ E
 Doctrine\Tests\ORM\Functional\Ticket\DDC2252Test::testIssue
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC2256Test::testIssue
-E  793 / 2068 ( 38%)
+E
 Doctrine\Tests\ORM\Functional\Ticket\DDC2306Test::testIssue
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC2346Test::testIssue
@@ -1671,7 +1683,7 @@ E
 Doctrine\Tests\ORM\Functional\Ticket\DDC736Test::testDqlTreeWalkerReordering
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC742Test::testIssue
-E  854 / 2068 ( 41%)
+E
 Doctrine\Tests\ORM\Functional\Ticket\DDC748Test::testRefreshWithManyToOne
 E
 Doctrine\Tests\ORM\Functional\Ticket\DDC748Test::testRefreshOneToOne
@@ -1793,7 +1805,7 @@ Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with 
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testChainedJoinWithScalars with data set #1 
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testResultIteration
-.  915 / 2068 ( 44%)
+.
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testResultIterationWithAliasedUserEntity
 .
 Doctrine\Tests\ORM\Hydration\ArrayHydratorTest::testSkipUnknownColumns
@@ -1915,7 +1927,7 @@ Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar w
 Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #1 
 .
 Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #2 
-.  976 / 2068 ( 47%)
+.
 Doctrine\Tests\ORM\Hydration\SingleScalarHydratorTest::testHydrateSingleScalar with data set #3 
 .
 Doctrine\Tests\ORM\Id\AssignedGeneratorTest::testThrowsExceptionIfIdNotAssigned
@@ -2037,7 +2049,7 @@ Doctrine\Tests\ORM\Mapping\AnsiQuoteStrategyTest::testColumnAlias
 Doctrine\Tests\ORM\Mapping\AnsiQuoteStrategyTest::testJoinColumnName
 .
 Doctrine\Tests\ORM\Mapping\AnsiQuoteStrategyTest::testReferencedJoinColumnName
-. 1037 / 2068 ( 50%)
+.
 Doctrine\Tests\ORM\Mapping\AnsiQuoteStrategyTest::testGetSequenceName
 .
 Doctrine\Tests\ORM\Mapping\BasicInheritanceMappingTest::testGetMetadataForTransientClassThrowsException

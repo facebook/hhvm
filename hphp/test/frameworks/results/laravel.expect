@@ -123,7 +123,7 @@ CacheDatabaseStoreTest::testEncryptedValueIsUpdatedWhenInsertThrowsException
 CacheDatabaseStoreTest::testForeverCallsStoreItemWithReallyLongTime
 .
 CacheDatabaseStoreTest::testItemsMayBeRemovedFromCache
-.  63 / 929 (  6%)
+.
 CacheDatabaseStoreTest::testItemsMayBeFlushedFromCache
 .
 CacheFileStoreTest::testNullIsReturnedIfFileDoesntExist
@@ -249,7 +249,7 @@ ContainerContainerTest::testAbstractToConcreteResolution
 ContainerContainerTest::testNestedDependencyResolution
 .
 ContainerContainerTest::testContainerIsPassedToResolvers
-. 126 / 929 ( 13%)
+.
 ContainerContainerTest::testArrayAccess
 .
 ContainerContainerTest::testAliases
@@ -375,7 +375,7 @@ DatabaseEloquentBelongsToTest::testUpdateMethodRetrievesModelAndUpdates
 DatabaseEloquentBelongsToTest::testEagerConstraintsAreProperlyAdded
 .
 DatabaseEloquentBelongsToTest::testRelationIsProperlyInitialized
-. 189 / 929 ( 20%)
+.
 DatabaseEloquentBelongsToTest::testModelsAreProperlyMatchedToParents
 .
 DatabaseEloquentBelongsToTest::testAssociateMethodSetsForeignKeyOnModel

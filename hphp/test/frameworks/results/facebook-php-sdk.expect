@@ -123,7 +123,7 @@ PHPSDKTestCase::testValidCodeToToken
 PHPSDKTestCase::testSignedRequestWithoutAuthClearsDataInAvailData
 .
 PHPSDKTestCase::testFailedToGetUserFromAccessTokenClearsData
-.  63 / 115 ( 54%)
+.
 PHPSDKTestCase::testUserFromAccessTokenIsStored
 .
 PHPSDKTestCase::testUserFromAccessTokenPullsID

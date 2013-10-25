@@ -123,7 +123,7 @@ Drupal\Tests\Core\NestedArrayTest::testSetValueForce
 Drupal\Tests\Core\NestedArrayTest::testUnsetValue
 .
 Drupal\Tests\Core\NestedArrayTest::testKeyExists
-.  63 / 686 (  9%)
+.
 Drupal\Tests\Core\NestedArrayTest::testMergeDeepArray
 .
 Drupal\Tests\Component\Utility\RandomTest::testRandomStringUniqueness
@@ -249,7 +249,7 @@ Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #16
 Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #17 
 .
 Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #18 
-. 126 / 686 ( 18%)
+.
 Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #19 
 .
 Drupal\Tests\Component\Utility\StringTest::testDecodeEntities with data set #20 
@@ -375,7 +375,7 @@ Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #7
 Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #8 
 .
 Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #9 
-. 189 / 686 ( 27%)
+.
 Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #10 
 .
 Drupal\Tests\Component\Utility\UnicodeTest::testTruncate with data set #11 
@@ -501,7 +501,7 @@ Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #12
 Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #13 
 .
 Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #14 
-. 252 / 686 ( 36%)
+.
 Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #15 
 .
 Drupal\Tests\Component\Utility\UrlTest::testValidAbsolute with data set #16 
@@ -627,7 +627,7 @@ Drupal\Tests\Component\Utility\UrlTest::testInvalidRelative with data set #2
 Drupal\Tests\Component\Utility\UrlTest::testInvalidRelative with data set #3 
 .
 Drupal\Tests\Component\Utility\UrlTest::testInvalidRelative with data set #4 
-. 315 / 686 ( 45%)
+.
 Drupal\Tests\Component\Utility\UrlTest::testInvalidRelative with data set #5 
 .
 Drupal\Tests\Component\Utility\XssTest::testFilterXssNormalized with data set #0 
@@ -753,7 +753,7 @@ Drupal\Tests\Component\Uuid\UuidTest::testValidation with data set #1
 Drupal\Tests\Component\Uuid\UuidTest::testValidation with data set #2 
 .
 Drupal\Tests\Component\Uuid\UuidTest::testValidation with data set #3 
-. 378 / 686 ( 55%)
+.
 Drupal\Tests\Component\Uuid\UuidTest::testValidation with data set #4 
 .
 Drupal\Tests\Core\Access\AccessManagerTest::testSetChecks
@@ -824,6 +824,8 @@ Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimizeProvider
 .
 Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #0 
 .
+::
+.
 Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #1 
 .
 Drupal\Tests\Core\Asset\CssOptimizerUnitTest::testOptimize with data set #2 
@@ -879,7 +881,7 @@ Drupal\Tests\Core\Batch\BatchTest::testPercentages with data set #17
 Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testGet
 .
 Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testGetMultiple
-. 441 / 686 ( 64%)
+.
 Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testSet
 .
 Drupal\Tests\Core\Cache\BackendChainImplementationUnitTest::testDelete
@@ -1005,7 +1007,7 @@ F
 Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #2 
 .
 Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #3 
-. 504 / 686 ( 73%)
+.
 Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #4 
 .
 Drupal\Tests\Core\EventSubscriber\ReverseProxySubscriberUnitTest::testNoProxy
@@ -1131,7 +1133,7 @@ Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testGetWeight with data set #2
 Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testActive
 .
 Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testGetTitle
-. 567 / 686 ( 82%)
+.
 Drupal\Tests\Core\Menu\LocalTaskDefaultTest::testGetOptions
 .
 Drupal\Tests\Core\Menu\LocalTaskManagerTest::testGetLocalTasksForRouteSingleLevelTitle
@@ -1257,7 +1259,7 @@ Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #7
 Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #8 
 .
 Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #9 
-. 630 / 686 ( 91%)
+.
 Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #10 
 .
 Drupal\Tests\Core\Utility\ColorTest::testHexToRgb with data set #11 

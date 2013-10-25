@@ -119,7 +119,7 @@ Joomla\Application\Tests\AbstractWebApplicationTest::testIsSSLConnection
 Joomla\Application\Tests\ColorProcessorTest::testAddStyle
 .
 Joomla\Application\Tests\ColorProcessorTest::testStripColors
-.   61 / 4133 (  1%)
+.
 Joomla\Application\Tests\ColorProcessorTest::testProcess
 .
 Joomla\Application\Tests\ColorProcessorTest::testProcessNamed
@@ -241,7 +241,7 @@ JApplicationWebClientTest::testDetectEngine with data set #4
 JApplicationWebClientTest::testDetectEngine with data set #5 
 .
 JApplicationWebClientTest::testDetectEngine with data set #6 
-.  122 / 4133 (  2%)
+.
 JApplicationWebClientTest::testDetectEngine with data set #7 
 .
 JApplicationWebClientTest::testDetectEngine with data set #8 
@@ -363,7 +363,7 @@ JApplicationWebClientTest::testDetectPlatform with data set #22
 JApplicationWebClientTest::testDetectPlatform with data set #23 
 .
 JApplicationWebClientTest::testDetectPlatform with data set #24 
-.  183 / 4133 (  4%)
+.
 JApplicationWebClientTest::testDetectPlatform with data set #25 
 .
 JApplicationWebClientTest::testDetectPlatform with data set #26 
@@ -485,7 +485,7 @@ Joomla\Cache\Tests\FileTest::testCheckFilePath
 Joomla\Cache\Tests\FileTest::testCheckFilePath_exception1
 .
 Joomla\Cache\Tests\FileTest::testCheckFilePath_exception2
-I  244 / 4133 (  5%)
+I
 Joomla\Cache\Tests\FileTest::testFetchStreamUri
 .
 Joomla\Cache\Tests\FileTest::testIsExpired
@@ -607,7 +607,7 @@ I
 Joomla\Client\Tests\FtpClientTest::testSyst
 I
 Joomla\Client\Tests\FtpClientTest::testChdir
-I  305 / 4133 (  7%)
+I
 Joomla\Client\Tests\FtpClientTest::testReinit
 I
 Joomla\Client\Tests\FtpClientTest::testRename
@@ -729,7 +729,7 @@ Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #0
 Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #1 
 .
 Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #2 
-.  366 / 4133 (  8%)
+.
 Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #3 
 .
 Joomla\Crypt\Tests\CipherBlowfishTest::testDecrypt with data set #4 
@@ -851,7 +851,7 @@ Joomla\DI\Tests\ContainerTest::testBuildSharedObject
 Joomla\DI\Tests\ContainerTest::testCreateChild
 .
 Joomla\DI\Tests\ContainerTest::testExtend
-.  427 / 4133 ( 10%)
+.
 Joomla\DI\Tests\ContainerTest::testExtendValidatesKeyIsPresent
 .
 Joomla\DI\Tests\ContainerTest::testGetMethodArgsFromContainer

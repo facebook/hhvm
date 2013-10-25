@@ -119,7 +119,7 @@ Composer\Test\Json\JsonConfigSourceTest::testAddLink with data set #17
 Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #0 
 .
 Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #1 
-.   61 / 1002 (  6%)
+.
 Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #2 
 .
 Composer\Test\Json\JsonConfigSourceTest::testRemoveLink with data set #3 
@@ -241,7 +241,7 @@ Composer\Test\DependencyResolver\RuleTest::testSetAndGetId
 Composer\Test\DependencyResolver\RuleTest::testEqualsForRulesWithDifferentHashes
 .
 Composer\Test\DependencyResolver\RuleTest::testEqualsForRulesWithDifferLiteralsQuantity
-.  122 / 1002 ( 12%)
+.
 Composer\Test\DependencyResolver\RuleTest::testEqualsForRulesWithSameLiterals
 .
 Composer\Test\DependencyResolver\RuleTest::testSetAndGetType
@@ -363,7 +363,7 @@ Composer\Test\Downloader\DownloadManagerTest::testGetDownloaderForCorrectlyInsta
 Composer\Test\Downloader\DownloadManagerTest::testGetDownloaderForIncorrectlyInstalledSourcePackage
 .
 Composer\Test\Downloader\DownloadManagerTest::testFullPackageDownload
-.  183 / 1002 ( 18%)
+.
 Composer\Test\Downloader\DownloadManagerTest::testBadPackageDownload
 .
 Composer\Test\Downloader\DownloadManagerTest::testDistOnlyPackageDownload
@@ -485,7 +485,7 @@ Composer\Test\IO\NullIOTest::testgetAuthentications
 Composer\Test\IO\NullIOTest::testAsk
 .
 Composer\Test\IO\NullIOTest::testAskConfirmation
-.  244 / 1002 ( 24%)
+.
 Composer\Test\IO\NullIOTest::testAskAndValidate
 .
 Composer\Test\Installer\InstallationManagerTest::testAddGetInstaller
@@ -533,7 +533,7 @@ Composer\Test\InstallerTest::testIntegration with data set #0
 Composer\Test\InstallerTest::testIntegration with data set #1 
 .
 Composer\Test\InstallerTest::testIntegration with data set #2 
-.
+I
 Composer\Test\InstallerTest::testIntegration with data set #3 
 .
 Composer\Test\InstallerTest::testIntegration with data set #4 
@@ -545,19 +545,19 @@ Composer\Test\InstallerTest::testIntegration with data set #6
 Composer\Test\InstallerTest::testIntegration with data set #7 
 .
 Composer\Test\InstallerTest::testIntegration with data set #8 
-.
+I
 Composer\Test\InstallerTest::testIntegration with data set #9 
 .
 Composer\Test\InstallerTest::testIntegration with data set #10 
-.
+I
 Composer\Test\InstallerTest::testIntegration with data set #11 
-.
+I
 Composer\Test\InstallerTest::testIntegration with data set #12 
 .
 Composer\Test\InstallerTest::testIntegration with data set #13 
 .
 Composer\Test\InstallerTest::testIntegration with data set #14 
-.
+I
 Composer\Test\InstallerTest::testIntegration with data set #15 
 .
 Composer\Test\InstallerTest::testIntegration with data set #16 
@@ -565,17 +565,17 @@ Composer\Test\InstallerTest::testIntegration with data set #16
 Composer\Test\InstallerTest::testIntegration with data set #17 
 .
 Composer\Test\InstallerTest::testIntegration with data set #18 
-.
+I
 Composer\Test\InstallerTest::testIntegration with data set #19 
 .
 Composer\Test\InstallerTest::testIntegration with data set #20 
-.
+I
 Composer\Test\InstallerTest::testIntegration with data set #21 
 .
 Composer\Test\InstallerTest::testIntegration with data set #22 
 .
 Composer\Test\InstallerTest::testIntegration with data set #23 
-.
+I
 Composer\Test\InstallerTest::testIntegration with data set #24 
 .
 Composer\Test\InstallerTest::testIntegration with data set #25 
@@ -587,9 +587,9 @@ Composer\Test\InstallerTest::testIntegration with data set #27
 Composer\Test\InstallerTest::testIntegration with data set #28 
 .
 Composer\Test\InstallerTest::testIntegration with data set #29 
-.
+I
 Composer\Test\InstallerTest::testIntegration with data set #30 
-.
+I
 Composer\Test\InstallerTest::testIntegration with data set #31 
 .
 Composer\Test\InstallerTest::testIntegration with data set #32 
@@ -597,17 +597,17 @@ Composer\Test\InstallerTest::testIntegration with data set #32
 Composer\Test\InstallerTest::testIntegration with data set #33 
 .
 Composer\Test\InstallerTest::testIntegration with data set #34 
-.
+I
 Composer\Test\InstallerTest::testIntegration with data set #35 
 .
 Composer\Test\InstallerTest::testIntegration with data set #36 
-.
+I
 Composer\Test\InstallerTest::testIntegration with data set #37 
 .
 Composer\Test\Json\JsonFileTest::testParseErrorDetectExtraComma
 .
 Composer\Test\Json\JsonFileTest::testParseErrorDetectExtraCommaInArray
-.  305 / 1002 ( 30%)
+.
 Composer\Test\Json\JsonFileTest::testParseErrorDetectUnescapedBackslash
 .
 Composer\Test\Json\JsonFileTest::testParseErrorSkipsEscapedBackslash
@@ -729,7 +729,7 @@ Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data 
 Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #1 
 .
 Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #2 
-.  366 / 1002 ( 36%)
+.
 Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #3 
 .
 Composer\Test\Package\Archiver\HgExcludeFilterTest::testPatternEscape with data set #4 
@@ -851,7 +851,7 @@ Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucc
 Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #9 
 .
 Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #10 
-.  427 / 1002 ( 42%)
+.
 Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #11 
 .
 Composer\Test\Package\LinkConstraint\VersionConstraintTest::testVersionMatchSucceeds with data set #12 
@@ -973,7 +973,7 @@ Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data
 Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "none/2"
 .
 Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "parses state"
-.  488 / 1002 ( 48%)
+.
 Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "CI parsing"
 .
 Composer\Test\Package\Version\VersionParserTest::testNormalizeSucceeds with data set "delimiters"
@@ -1095,7 +1095,7 @@ Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with
 Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "shorthand beta"
 .
 Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "accepts spaces"
-.  549 / 1002 ( 54%)
+.
 Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "accepts master"
 .
 Composer\Test\Package\Version\VersionParserTest::testParseConstraintsSimple with data set "accepts master/2"
@@ -1217,7 +1217,7 @@ Composer\Test\Repository\ComposerRepositoryTest::testLoadData with data set #0
 Composer\Test\Repository\ComposerRepositoryTest::testLoadData with data set #1 
 .
 Composer\Test\Repository\ComposerRepositoryTest::testWhatProvides
-.  610 / 1002 ( 60%)
+.
 Composer\Test\Repository\CompositeRepositoryTest::testHasPackage
 .
 Composer\Test\Repository\CompositeRepositoryTest::testFindPackage
@@ -1339,7 +1339,7 @@ Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #21
 Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #22 
 .
 Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #23 
-.  671 / 1002 ( 66%)
+.
 Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #24 
 .
 Composer\Test\Util\FilesystemTest::testFindShortestPathCode with data set #25 
@@ -1461,7 +1461,7 @@ Composer\Test\Util\ProcessExecutorTest::testTimeout
 Composer\Test\Util\ProcessExecutorTest::testSplitLines
 .
 Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrl
-.  732 / 1002 ( 73%)
+.
 Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrlWithAuthorization
 .
 Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrlWithStreamOptions
@@ -1475,7 +1475,7 @@ Composer\Test\Util\RemoteFilesystemTest::testCallbackGetNotifyProgress
 Composer\Test\Util\RemoteFilesystemTest::testCallbackGetNotifyFailure404
 .
 Composer\Test\Util\RemoteFilesystemTest::testCaptureAuthenticationParamsFromUrl
-F
+S
 Composer\Test\Util\RemoteFilesystemTest::testGetContents
 .
 Composer\Test\Util\RemoteFilesystemTest::testCopy
@@ -1583,7 +1583,7 @@ Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #49
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #50 
 .
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #51 
-.  793 / 1002 ( 79%)
+.
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #52 
 .
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #53 
@@ -1705,7 +1705,7 @@ Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #110
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #111 
 .
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #112 
-.  854 / 1002 ( 85%)
+.
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #113 
 .
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #114 
@@ -1827,7 +1827,7 @@ Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #171
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #172 
 .
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #173 
-.  915 / 1002 ( 91%)
+.
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #174 
 .
 Composer\Test\Util\SpdxLicenseIdentifierTest::testValidate with data set #175 
@@ -1949,7 +1949,7 @@ Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set 
 Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #3 
 .
 Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #4 
-.  976 / 1002 ( 97%)
+.
 Composer\Test\Util\StreamContextFactoryTest::testGetContext with data set #0 
 .
 Composer\Test\Util\StreamContextFactoryTest::testGetContext with data set #1 

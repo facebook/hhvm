@@ -119,7 +119,7 @@ Twig_Tests_Extension_CoreTest::testRandomFunctionOfEmptyArrayThrowsException
 Twig_Tests_Extension_CoreTest::testRandomFunctionOnNonUTF8String
 .
 Twig_Tests_Extension_CoreTest::testReverseFilterOnNonUTF8String
-.   61 / 1035 (  5%)
+.
 Twig_Tests_Extension_SandboxTest::testSandboxWithInheritance
 .
 Twig_Tests_Extension_SandboxTest::testSandboxGloballySet
@@ -167,7 +167,7 @@ Twig_Tests_IntegrationTest::testIntegration with data set #15
 Twig_Tests_IntegrationTest::testIntegration with data set #16 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #17 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #18 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #19 
@@ -193,23 +193,23 @@ Twig_Tests_IntegrationTest::testIntegration with data set #28
 Twig_Tests_IntegrationTest::testIntegration with data set #29 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #30 
-.
+S
 Twig_Tests_IntegrationTest::testIntegration with data set #31 
-.
+I
 Twig_Tests_IntegrationTest::testIntegration with data set #32 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #33 
-.
+I
 Twig_Tests_IntegrationTest::testIntegration with data set #34 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #35 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #36 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #37 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #38 
-.
+I
 Twig_Tests_IntegrationTest::testIntegration with data set #39 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #40 
@@ -217,7 +217,7 @@ Twig_Tests_IntegrationTest::testIntegration with data set #40
 Twig_Tests_IntegrationTest::testIntegration with data set #41 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #42 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #43 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #44 
@@ -225,7 +225,7 @@ Twig_Tests_IntegrationTest::testIntegration with data set #44
 Twig_Tests_IntegrationTest::testIntegration with data set #45 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #46 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #47 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #48 
@@ -241,7 +241,7 @@ Twig_Tests_IntegrationTest::testIntegration with data set #52
 Twig_Tests_IntegrationTest::testIntegration with data set #53 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #54 
-.  122 / 1035 ( 11%)
+.
 Twig_Tests_IntegrationTest::testIntegration with data set #55 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #56 
@@ -251,7 +251,7 @@ Twig_Tests_IntegrationTest::testIntegration with data set #57
 Twig_Tests_IntegrationTest::testIntegration with data set #58 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #59 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #60 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #61 
@@ -269,7 +269,7 @@ Twig_Tests_IntegrationTest::testIntegration with data set #66
 Twig_Tests_IntegrationTest::testIntegration with data set #67 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #68 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #69 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #70 
@@ -287,9 +287,9 @@ Twig_Tests_IntegrationTest::testIntegration with data set #75
 Twig_Tests_IntegrationTest::testIntegration with data set #76 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #77 
-.
+S
 Twig_Tests_IntegrationTest::testIntegration with data set #78 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #79 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #80 
@@ -313,9 +313,9 @@ Twig_Tests_IntegrationTest::testIntegration with data set #88
 Twig_Tests_IntegrationTest::testIntegration with data set #89 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #90 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #91 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #92 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #93 
@@ -363,7 +363,7 @@ Twig_Tests_IntegrationTest::testIntegration with data set #113
 Twig_Tests_IntegrationTest::testIntegration with data set #114 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #115 
-.  183 / 1035 ( 17%)
+.
 Twig_Tests_IntegrationTest::testIntegration with data set #116 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #117 
@@ -381,13 +381,13 @@ Twig_Tests_IntegrationTest::testIntegration with data set #122
 Twig_Tests_IntegrationTest::testIntegration with data set #123 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #124 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #125 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #126 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #127 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #128 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #129 
@@ -427,15 +427,15 @@ Twig_Tests_IntegrationTest::testIntegration with data set #145
 Twig_Tests_IntegrationTest::testIntegration with data set #146 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #147 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #148 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #149 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #150 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #151 
-.
+F
 Twig_Tests_IntegrationTest::testIntegration with data set #152 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #153 
@@ -453,8 +453,14 @@ Twig_Tests_IntegrationTest::testIntegration with data set #158
 Twig_Tests_IntegrationTest::testIntegration with data set #159 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #160 
-.
+F
+parent::__construct
+S
 Twig_Tests_IntegrationTest::testIntegration with data set #162 
+F
+parent::__construct
+S
+self::REGION_S
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #164 
 .
@@ -481,13 +487,13 @@ Twig_Tests_IntegrationTest::testIntegration with data set #174
 Twig_Tests_IntegrationTest::testIntegration with data set #175 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #176 
-.  244 / 1035 ( 23%)
+.
 Twig_Tests_IntegrationTest::testIntegration with data set #177 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #178 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #179 
-.
+I
 Twig_Tests_IntegrationTest::testIntegration with data set #180 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #181 
@@ -497,9 +503,9 @@ Twig_Tests_IntegrationTest::testIntegration with data set #182
 Twig_Tests_IntegrationTest::testIntegration with data set #183 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #184 
-.
+I
 Twig_Tests_IntegrationTest::testIntegration with data set #185 
-.
+I
 Twig_Tests_IntegrationTest::testIntegration with data set #186 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #187 
@@ -513,7 +519,9 @@ Twig_Tests_IntegrationTest::testIntegration with data set #190
 Twig_Tests_IntegrationTest::testIntegration with data set #191 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #192 
-.
+E
+DateTime::createFromFormat
+E
 Twig_Tests_IntegrationTest::testIntegration with data set #193 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #194 
@@ -603,7 +611,7 @@ Twig_Tests_Loader_ChainTest::testExists
 Twig_Tests_Loader_FilesystemTest::testSecurity with data set #0 
 .
 Twig_Tests_Loader_FilesystemTest::testSecurity with data set #1 
-.  305 / 1035 ( 29%)
+.
 Twig_Tests_Loader_FilesystemTest::testSecurity with data set #2 
 .
 Twig_Tests_Loader_FilesystemTest::testSecurity with data set #3 
@@ -725,7 +733,7 @@ F
 Twig_Tests_Node_Expression_ConditionalTest::testConstructor
 .
 Twig_Tests_Node_Expression_ConditionalTest::testCompile with data set #0 
-.  366 / 1035 ( 35%)
+.
 Twig_Tests_Node_Expression_ConstantTest::testConstructor
 .
 Twig_Tests_Node_Expression_ConstantTest::testCompile with data set #0 
@@ -847,7 +855,7 @@ Twig_Tests_Node_IncludeTest::testCompile with data set #3
 Twig_Tests_Node_IncludeTest::testCompile with data set #4 
 .
 Twig_Tests_Node_MacroTest::testConstructor
-.  427 / 1035 ( 41%)
+.
 Twig_Tests_Node_MacroTest::testCompile with data set #0 
 .
 Twig_Tests_Node_ModuleTest::testConstructor
@@ -969,7 +977,7 @@ Twig_Tests_TemplateTest::testGetAttributeWithSandbox with data set #0
 Twig_Tests_TemplateTest::testGetAttributeWithSandbox with data set #1 
 .
 Twig_Tests_TemplateTest::testGetAttributeWithSandbox with data set #2 
-.  488 / 1035 ( 47%)
+.
 Twig_Tests_TemplateTest::testGetAttributeWithSandbox with data set #3 
 .
 Twig_Tests_TemplateTest::testGetAttributeWithTemplateAsObject with data set #0 
@@ -1091,7 +1099,7 @@ Twig_Tests_TemplateTest::testGetAttribute with data set #55
 Twig_Tests_TemplateTest::testGetAttribute with data set #56 
 .
 Twig_Tests_TemplateTest::testGetAttribute with data set #57 
-.  549 / 1035 ( 53%)
+.
 Twig_Tests_TemplateTest::testGetAttribute with data set #58 
 .
 Twig_Tests_TemplateTest::testGetAttribute with data set #59 
@@ -1213,7 +1221,7 @@ Twig_Tests_TemplateTest::testGetAttribute with data set #116
 Twig_Tests_TemplateTest::testGetAttribute with data set #117 
 .
 Twig_Tests_TemplateTest::testGetAttribute with data set #118 
-.  610 / 1035 ( 58%)
+.
 Twig_Tests_TemplateTest::testGetAttribute with data set #119 
 .
 Twig_Tests_TemplateTest::testGetAttribute with data set #120 
@@ -1335,7 +1343,7 @@ Twig_Tests_TemplateTest::testGetAttributeStrict with data set #46
 Twig_Tests_TemplateTest::testGetAttributeStrict with data set #47 
 .
 Twig_Tests_TemplateTest::testGetAttributeStrict with data set #48 
-.  671 / 1035 ( 64%)
+.
 Twig_Tests_TemplateTest::testGetAttributeStrict with data set #49 
 .
 Twig_Tests_TemplateTest::testGetAttributeStrict with data set #50 
@@ -1457,7 +1465,7 @@ Twig_Tests_TemplateTest::testGetAttributeStrict with data set #107
 Twig_Tests_TemplateTest::testGetAttributeStrict with data set #108 
 .
 Twig_Tests_TemplateTest::testGetAttributeStrict with data set #109 
-.  732 / 1035 ( 70%)
+.
 Twig_Tests_TemplateTest::testGetAttributeStrict with data set #110 
 .
 Twig_Tests_TemplateTest::testGetAttributeStrict with data set #111 
@@ -1579,7 +1587,7 @@ Twig_Tests_TemplateTest::testGetAttributeDefined with data set #37
 Twig_Tests_TemplateTest::testGetAttributeDefined with data set #38 
 .
 Twig_Tests_TemplateTest::testGetAttributeDefined with data set #39 
-.  793 / 1035 ( 76%)
+.
 Twig_Tests_TemplateTest::testGetAttributeDefined with data set #40 
 .
 Twig_Tests_TemplateTest::testGetAttributeDefined with data set #41 
@@ -1701,7 +1709,7 @@ Twig_Tests_TemplateTest::testGetAttributeDefined with data set #98
 Twig_Tests_TemplateTest::testGetAttributeDefined with data set #99 
 .
 Twig_Tests_TemplateTest::testGetAttributeDefined with data set #100 
-.  854 / 1035 ( 82%)
+.
 Twig_Tests_TemplateTest::testGetAttributeDefined with data set #101 
 .
 Twig_Tests_TemplateTest::testGetAttributeDefined with data set #102 
@@ -1823,7 +1831,7 @@ Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #28
 Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #29 
 .
 Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #30 
-.  915 / 1035 ( 88%)
+.
 Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #31 
 .
 Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #32 
@@ -1945,7 +1953,7 @@ Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #89
 Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #90 
 .
 Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #91 
-.  976 / 1035 ( 94%)
+.
 Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #92 
 .
 Twig_Tests_TemplateTest::testGetAttributeDefinedStrict with data set #93 

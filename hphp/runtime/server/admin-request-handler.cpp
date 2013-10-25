@@ -264,6 +264,26 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       HttpServer::Server->stop();
       break;
     }
+    if (cmd == "set-log-level") {
+      string result("OK\n");
+      string level = transport->getParam("level");
+      if (level == "None") {
+        Logger::LogLevel = Logger::LogNone;
+      } else if (level == "Error") {
+        Logger::LogLevel = Logger::LogError;
+      } else if (level == "Warning") {
+        Logger::LogLevel = Logger::LogWarning;
+      } else if (level == "Info") {
+        Logger::LogLevel = Logger::LogInfo;
+      } else if (level == "Verbose") {
+        Logger::LogLevel = Logger::LogVerbose;
+      } else {
+        result = "Failed to set log level\n";
+      }
+
+      transport->sendString(result);
+      break;
+    }
     if (cmd == "build-id") {
       transport->sendString(RuntimeOption::BuildId, 200);
       break;

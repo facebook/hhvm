@@ -176,7 +176,7 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
 
   // Note: unlike smart_malloc, we don't track internal fragmentation
   // in the usage stats when we're going through smartMallocSize.
-  m_usage += bytes;
+  m_stats.usage += bytes;
 
   unsigned i = (bytes - 1) >> kLgSizeQuantum;
   assert(i < kNumSizes);
@@ -198,7 +198,7 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   unsigned i = (bytes - 1) >> kLgSizeQuantum;
   assert(i < kNumSizes);
   m_sizeUntrackedFree[i].push(debugPreFree(ptr, bytes, bytes));
-  m_usage -= bytes;
+  m_stats.usage -= bytes;
 
   FTRACE(1, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);
 }
@@ -213,7 +213,10 @@ std::pair<void*,size_t> MemoryManager::smartMallocSizeBig(size_t bytes) {
          retptr, bytes, sz);
   return std::make_pair(retptr, sz);
 #else
-  auto const ret = smartMallocBig(debugAddExtra(bytes));
+  m_stats.usage += bytes;
+  // TODO(#2831116): we only add sizeof(SmallNode) so smartMallocBig
+  // can subtract it.
+  auto const ret = smartMallocBig(debugAddExtra(bytes + sizeof(SmallNode)));
   FTRACE(1, "smartMallocBig: {} ({} bytes)\n", ret, bytes);
   return std::make_pair(debugPostAllocate(ret, bytes, bytes), bytes);
 #endif
@@ -221,7 +224,7 @@ std::pair<void*,size_t> MemoryManager::smartMallocSizeBig(size_t bytes) {
 
 ALWAYS_INLINE
 void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
-  m_usage -= bytes;
+  m_stats.usage -= bytes;
   FTRACE(1, "smartFreeBig: {} ({} bytes)\n", vp, bytes);
   return smartFreeBig(static_cast<SweepNode*>(debugPreFree(vp, bytes, 0)) - 1);
 }
@@ -353,8 +356,6 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       m_prevAllocated = int64_t(*m_allocated);
     }
   }
-#else
-  stats.usage = m_usage;
 #endif
   if (stats.usage > stats.peakUsage) {
     // NOTE: the peak memory usage monotonically increases, so there cannot

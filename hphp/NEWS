@@ -2,7 +2,6 @@ Next release
   - <cool stuff goes here>
 
 "Sausage" 14-Oct-2013
-  - Fixed issue that caused memory_get_usage to report double the actual usage.
   - Direct invocation of callable arrays: $f = [$cls_or_instance, 'method']; $f()
   - ASAN clean
   - Support dynamically loadable extensions

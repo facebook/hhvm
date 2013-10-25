@@ -15,8 +15,8 @@ if (APPLE)
 endif()
 
 macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_OS EHHVM_ARCH)
-	set(f_SRC "${HPHP_HOME}/hphp/${REL}")
-	set(f_OBJ "${HPHP_HOME}/hphp/CMakeFiles/hphp_runtime_static.dir/${REL}.o")
+	set(f_SRC "${HPHP_HOME}/hphp/runtime/${REL}")
+	set(f_OBJ "${HPHP_HOME}/hphp/runtime/CMakeFiles/hphp_runtime_static.dir/${REL}.o")
 	list(APPEND ${SOURCES} "${f_SRC}.ext_hhvm.cpp")
 	list(APPEND ${HEADERS} "${f_SRC}.ext_hhvm.h")
 	add_custom_command(OUTPUT "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
@@ -28,7 +28,7 @@ macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_OS EHHVM_ARCH)
 	                   COMMENT "Generating ext_hhvm wrapper for ${REL}")
 endmacro()
 
-string(LENGTH "${HPHP_HOME}/hphp/" HPHP_DIR_LEN)
+string(LENGTH "${HPHP_HOME}/hphp/runtime/" HPHP_DIR_LEN)
 
 set(RECURSIVE_SOURCE_SUBDIRS "${HPHP_HOME}/hphp/runtime/ext")
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
@@ -42,7 +42,7 @@ foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 		endif()
 	endforeach()
 endforeach()
-EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS "runtime/base/builtin-functions.cpp" ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
+EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS "base/builtin-functions.cpp" ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
 
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
         auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")

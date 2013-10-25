@@ -24,21 +24,21 @@ namespace HPHP {
 
 // ConstCollection
 
-bool BaseVector::t_isempty() {
+bool BaseVector::isempty() {
   return !toBoolImpl();
 }
 
-int64_t BaseVector::t_count() {
+int64_t BaseVector::count() {
   return m_size;
 }
 
-Object BaseVector::t_items() {
+Object BaseVector::items() {
   return SystemLib::AllocLazyIterableViewObject(this);
 }
 
 // ConstIndexAccess
 
-bool BaseVector::t_containskey(CVarRef key) {
+bool BaseVector::containskey(CVarRef key) {
   if (key.isInteger()) {
     return contains(key.toInt64());
   }
@@ -46,7 +46,7 @@ bool BaseVector::t_containskey(CVarRef key) {
   return false;
 }
 
-Variant BaseVector::t_at(CVarRef key) {
+Variant BaseVector::at(CVarRef key) {
   if (key.isInteger()) {
     return tvAsCVarRef(at(key.toInt64()));
   }
@@ -54,7 +54,7 @@ Variant BaseVector::t_at(CVarRef key) {
   return uninit_null();
 }
 
-Variant BaseVector::t_get(CVarRef key) {
+Variant BaseVector::get(CVarRef key) {
   if (key.isInteger()) {
     TypedValue* tv = get(key.toInt64());
     if (tv) {
@@ -69,7 +69,7 @@ Variant BaseVector::t_get(CVarRef key) {
 
 // KeyedIterable
 
-Object BaseVector::t_getiterator() {
+Object BaseVector::getiterator() {
   c_VectorIterator* it = NEWOBJ(c_VectorIterator)();
   it->m_obj = this;
   it->m_pos = 0;
@@ -77,7 +77,7 @@ Object BaseVector::t_getiterator() {
   return it;
 }
 
-Object BaseVector::t_map(CVarRef callback) {
+void BaseVector::map(BaseVector* bvec, CVarRef callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -85,24 +85,21 @@ Object BaseVector::t_map(CVarRef callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
   uint sz = m_size;
-  vec->reserve(sz);
+  bvec->reserve(sz);
   for (uint i = 0; i < sz; ++i) {
-    TypedValue* tv = &vec->m_data[i];
+    TypedValue* tv = &bvec->m_data[i];
     int32_t version = m_version;
     g_vmContext->invokeFuncFew(tv, ctx, 1, &m_data[i]);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
     }
-    ++vec->m_size;
+    ++bvec->m_size;
   }
-  return obj;
 }
 
-Object BaseVector::t_mapwithkey(CVarRef callback) {
+void BaseVector::mapwithkey(BaseVector* bvec, CVarRef callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -110,12 +107,10 @@ Object BaseVector::t_mapwithkey(CVarRef callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
   uint sz = m_size;
-  vec->reserve(sz);
+  bvec->reserve(sz);
   for (uint i = 0; i < sz; ++i) {
-    TypedValue* tv = &vec->m_data[i];
+    TypedValue* tv = &bvec->m_data[i];
     int32_t version = m_version;
     TypedValue args[2] = {
       make_tv<KindOfInt64>(i),
@@ -126,12 +121,11 @@ Object BaseVector::t_mapwithkey(CVarRef callback) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();
     }
-    ++vec->m_size;
+    ++bvec->m_size;
   }
-  return obj;
 }
 
-Object BaseVector::t_filter(CVarRef callback) {
+void BaseVector::filter(BaseVector* bvec, CVarRef callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -139,8 +133,6 @@ Object BaseVector::t_filter(CVarRef callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
   uint sz = m_size;
   for (uint i = 0; i < sz; ++i) {
     Variant ret;
@@ -150,13 +142,12 @@ Object BaseVector::t_filter(CVarRef callback) {
       throw_collection_modified();
     }
     if (ret.toBoolean()) {
-      vec->add(&m_data[i]);
+      bvec->add(&m_data[i]);
     }
   }
-  return obj;
 }
 
-Object BaseVector::t_filterwithkey(CVarRef callback) {
+void BaseVector::filterwithkey(BaseVector* bvec, CVarRef callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
@@ -164,8 +155,6 @@ Object BaseVector::t_filterwithkey(CVarRef callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
   uint sz = m_size;
   for (uint i = 0; i < sz; ++i) {
     Variant ret;
@@ -179,39 +168,33 @@ Object BaseVector::t_filterwithkey(CVarRef callback) {
       throw_collection_modified();
     }
     if (ret.toBoolean()) {
-      vec->add(&m_data[i]);
+      bvec->add(&m_data[i]);
     }
   }
-  return obj;
 }
 
-Object BaseVector::t_zip(CVarRef iterable) {
+void BaseVector::zip(BaseVector* bvec, CVarRef iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
   uint sz = m_size;
-  vec->reserve(std::min(itSize, size_t(sz)));
+  bvec->reserve(std::min(itSize, size_t(sz)));
   for (uint i = 0; i < sz && iter; ++i, ++iter) {
     Variant v = iter.second();
-    if (vec->m_capacity <= vec->m_size) {
-      vec->grow();
+    if (bvec->m_capacity <= bvec->m_size) {
+      bvec->grow();
     }
     c_Pair* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
     pair->initAdd(&m_data[i]);
     pair->initAdd(cvarToCell(&v));
-    vec->m_data[i].m_data.pobj = pair;
-    vec->m_data[i].m_type = KindOfObject;
-    ++vec->m_size;
+    bvec->m_data[i].m_data.pobj = pair;
+    bvec->m_data[i].m_type = KindOfObject;
+    ++bvec->m_size;
   }
-  return obj;
 }
 
-Object BaseVector::t_kvzip() {
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
-  vec->reserve(m_size);
+void BaseVector::kvzip(BaseVector* bvec) {
+  bvec->reserve(m_size);
   for (uint i = 0; i < m_size; ++i) {
     c_Pair* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
@@ -219,28 +202,24 @@ Object BaseVector::t_kvzip() {
     pair->elm0.m_data.num = i;
     ++pair->m_size;
     pair->initAdd(&m_data[i]);
-    vec->m_data[i].m_data.pobj = pair;
-    vec->m_data[i].m_type = KindOfObject;
-    ++vec->m_size;
+    bvec->m_data[i].m_data.pobj = pair;
+    bvec->m_data[i].m_type = KindOfObject;
+    ++bvec->m_size;
   }
-  return obj;
 }
 
-Object BaseVector::t_keys() {
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
-  vec->reserve(m_size);
-  vec->m_size = m_size;
+void BaseVector::keys(BaseVector* bvec) {
+  bvec->reserve(m_size);
+  bvec->m_size = m_size;
   for (uint i = 0; i < m_size; ++i) {
-    vec->m_data[i].m_data.num = i;
-    vec->m_data[i].m_type = KindOfInt64;
+    bvec->m_data[i].m_data.num = i;
+    bvec->m_data[i].m_type = KindOfInt64;
   }
-  return obj;
 }
 
 // Others
 
-void BaseVector::t___construct(CVarRef iterable /* = null_variant */) {
+void BaseVector::construct(CVarRef iterable /* = null_variant */) {
   if (iterable.isNull()) return;
   init(iterable);
 }

@@ -33,32 +33,30 @@ void throwOOB(int64_t key);
 
 class BaseVector : public ExtObjectData {
 
-public:
-  // These are the methods visible from PHP land. BaseVector "implements"
-  // the ConstVector interface by implementing the three interfaces below.
+protected:
 
   // ConstCollection
-  bool t_isempty();
-  int64_t t_count();
-  Object t_items();
+  bool isempty();
+  int64_t count();
+  Object items();
 
   // ConstIndexAccess
-  bool t_containskey(CVarRef key);
-  Variant t_at(CVarRef key);
-  Variant t_get(CVarRef key);
+  bool containskey(CVarRef key);
+  Variant at(CVarRef key);
+  Variant get(CVarRef key);
 
   // KeyedIterable
-  Object t_getiterator();
-  Object t_map(CVarRef callback);
-  Object t_mapwithkey(CVarRef callback);
-  Object t_filter(CVarRef callback);
-  Object t_filterwithkey(CVarRef callback);
-  Object t_zip(CVarRef iterable);
-  Object t_kvzip();
-  Object t_keys();
+  Object getiterator();
+  void map(BaseVector* bvec, CVarRef callback);
+  void mapwithkey(BaseVector* bvec, CVarRef callback);
+  void filter(BaseVector* bvec, CVarRef callback);
+  void filterwithkey(BaseVector* bvec, CVarRef callback);
+  void zip(BaseVector* bvec, CVarRef iterable);
+  void kvzip(BaseVector* bvec);
+  void keys(BaseVector* bvec);
 
   // Others
-  void t___construct(CVarRef iterable = null_variant);
+  void construct(CVarRef iterable = null_variant);
 
 public:
 

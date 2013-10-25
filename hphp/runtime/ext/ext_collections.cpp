@@ -109,7 +109,7 @@ c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
 }
 
 void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
-  return BaseVector::t___construct(iterable);
+  BaseVector::construct(iterable);
 }
 
 void c_Vector::resize(int64_t sz, TypedValue* val) {
@@ -233,19 +233,22 @@ Object c_Vector::t_clear() {
 }
 
 bool c_Vector::t_isempty() {
-  return BaseVector::t_isempty();
+  return BaseVector::isempty();
 }
 
 int64_t c_Vector::t_count() {
-  return BaseVector::t_count();
+  return BaseVector::count();
 }
 
 Object c_Vector::t_items() {
-  return BaseVector::t_items();
+  return BaseVector::items();
 }
 
 Object c_Vector::t_keys() {
-  return BaseVector::t_keys();
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::keys(bv);
+  return obj;
 }
 
 Object c_Vector::t_values() {
@@ -257,15 +260,18 @@ Object c_Vector::t_lazy() {
 }
 
 Object c_Vector::t_kvzip() {
-  return BaseVector::t_kvzip();
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::kvzip(bv);
+  return obj;
 }
 
 Variant c_Vector::t_at(CVarRef key) {
-  return BaseVector::t_at(key);
+  return BaseVector::at(key);
 }
 
 Variant c_Vector::t_get(CVarRef key) {
-  return BaseVector::t_get(key);
+  return BaseVector::get(key);
 }
 
 bool c_Vector::t_contains(CVarRef key) {
@@ -273,7 +279,7 @@ bool c_Vector::t_contains(CVarRef key) {
 }
 
 bool c_Vector::t_containskey(CVarRef key) {
-  return BaseVector::t_containskey(key);
+  return BaseVector::containskey(key);
 }
 
 Object c_Vector::t_removekey(CVarRef key) {
@@ -404,27 +410,42 @@ void c_Vector::t_shuffle() {
 }
 
 Object c_Vector::t_getiterator() {
-  return BaseVector::t_getiterator();
+  return BaseVector::getiterator();
 }
 
 Object c_Vector::t_map(CVarRef callback) {
-  return BaseVector::t_map(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::map(bv, callback);
+  return obj;
 }
 
 Object c_Vector::t_mapwithkey(CVarRef callback) {
-  return BaseVector::t_mapwithkey(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::mapwithkey(bv, callback);
+  return obj;
 }
 
 Object c_Vector::t_filter(CVarRef callback) {
-  return BaseVector::t_filter(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::filter(bv, callback);
+  return obj;
 }
 
 Object c_Vector::t_filterwithkey(CVarRef callback) {
-  return BaseVector::t_filterwithkey(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::filterwithkey(bv, callback);
+  return obj;
 }
 
 Object c_Vector::t_zip(CVarRef iterable) {
-  return BaseVector::t_zip(iterable);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::zip(bv, iterable);
+  return obj;
 }
 
 Object c_Vector::t_set(CVarRef key, CVarRef value) {
@@ -719,69 +740,90 @@ void c_VectorIterator::t_rewind() {
 // ConstCollection
 
 bool c_FrozenVector::t_isempty() {
-  return BaseVector::t_isempty();
+  return BaseVector::isempty();
 }
 
 int64_t c_FrozenVector::t_count() {
-  return BaseVector::t_count();
+  return BaseVector::count();
 }
 
 Object c_FrozenVector::t_items() {
-  return BaseVector::t_items();
+  return BaseVector::items();
 }
 
 // ConstIndexAccess
 
 bool c_FrozenVector::t_containskey(CVarRef key) {
-  return BaseVector::t_containskey(key);
+  return BaseVector::containskey(key);
 }
 
 Variant c_FrozenVector::t_at(CVarRef key) {
-  return BaseVector::t_at(key);
+  return BaseVector::at(key);
 }
 
 Variant c_FrozenVector::t_get(CVarRef key) {
-  return BaseVector::t_get(key);
+  return BaseVector::get(key);
 }
 
 // KeyedIterable
 
 Object c_FrozenVector::t_getiterator() {
-  return BaseVector::t_getiterator();
+  return BaseVector::getiterator();
 }
 
 Object c_FrozenVector::t_map(CVarRef callback) {
-  return BaseVector::t_map(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::map(bv, callback);
+  return obj;
 }
 
 Object c_FrozenVector::t_mapwithkey(CVarRef callback) {
-  return BaseVector::t_mapwithkey(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::mapwithkey(bv, callback);
+  return obj;
 }
 
 Object c_FrozenVector::t_filter(CVarRef callback) {
-  return BaseVector::t_filter(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::filter(bv, callback);
+  return obj;
 }
 
 Object c_FrozenVector::t_filterwithkey(CVarRef callback) {
-  return BaseVector::t_filterwithkey(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::filterwithkey(bv, callback);
+  return obj;
 }
 
 Object c_FrozenVector::t_zip(CVarRef iterable) {
-  return BaseVector::t_zip(iterable);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::zip(bv, iterable);
+  return obj;
 }
 
 Object c_FrozenVector::t_kvzip() {
-  return BaseVector::t_kvzip();
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::kvzip(bv);
+  return obj;
 }
 
 Object c_FrozenVector::t_keys() {
-  return BaseVector::t_keys();
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::keys(bv);
+  return obj;
 }
 
 // Others
 
 void c_FrozenVector::t___construct(CVarRef iterable /* = null_variant */) {
-  BaseVector::t___construct(iterable);
+  BaseVector::construct(iterable);
 }
 
 c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {

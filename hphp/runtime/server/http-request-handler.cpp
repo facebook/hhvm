@@ -188,8 +188,44 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
      RuntimeOption::StaticFileGenerators.find(path) !=
      RuntimeOption::StaticFileGenerators.end());
 
+  // Determine which extensions should be treated as php
+  // source code. If the PHP interpreter doesn't understand
+  // the source, you will see the content being spit-out
+  // which is pretty normal, as php is supposed to understand
+  // only PHP.
+  //
+  // NOTE: Be sure to put the extensions in the config file to
+  // be lowercase only
+  //
+  // Below example states that
+  //
+  // .php is also regular php code
+  // .hphp is regular php code or the new "Hack Implementation"
+  //    which is understood by hhvm ?
+  //    https://raw.github.com/strangeloop/StrangeLoop2013/master/slides/sessions/Adams-TakingPHPSeriously.pdf
+  //
+  // PhpFile {
+  //    Extensions {
+  //        hphp = application/x-hhvm-php
+  //    }
+  // }
+  //
+  // First preferences is given to the Configuration entry
+  bool is_php = false;
+  if (ext && !RuntimeOption::PhpFileExtensions.empty()) {
+      hphp_string_imap<string>::const_iterator phpiter =
+        RuntimeOption::PhpFileExtensions.find(ext);
+      if (phpiter != RuntimeOption::PhpFileExtensions.end()) {
+          is_php = true;
+      }
+  }
+  // Only check if the config doesn't have this extension
+  if (!is_php && ext && strcasecmp(ext, "php") == 0) {
+      is_php = true;
+  }
+
   // If this is not a php file, check the static and dynamic content caches
-  if (ext && strcasecmp(ext, "php") != 0) {
+  if (!is_php) {
     if (RuntimeOption::EnableStaticContentCache) {
       bool original = compressed;
       // check against static content cache
@@ -271,6 +307,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   ThreadInfo::s_threadInfo->m_reqInjectionData.
     setTimeout(requestTimeoutSeconds);
 
+  // If the code reaches this place then is_php == true
   bool ret = false;
   try {
     ret = executePHPRequest(transport, reqURI, sourceRootInfo,
@@ -280,6 +317,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     transport->onSendEnd();
     hphp_context_exit(g_context.getNoCheck(), true, true, transport->getUrl());
   } catch (...) {
+    // FIXME: Isn't this a good idea to log this with details of exception ?
     Logger::Error("Unhandled exception in HPHP server engine.");
   }
   GetAccessLog().log(transport, vhost);

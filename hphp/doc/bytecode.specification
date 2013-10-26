@@ -1766,16 +1766,17 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
   passed (given by %1) and a reference to the FPI structure for the constructor
   for class x.
 
-DecodeCufIter <iterator id> [C] -> [C]
-  This instruction looks up $1 as a callable, and writes enough information
-  to iterator %1 for FPushCufIter to be able to push an actrec, as if it had
-  been given the callable.
-  If the function is successfully decoded, pushes true, otherwise, pushes
-  false, and sets up iter to call a function that does nothing, and returns
-  Null. No warning is raised.
+DecodeCufIter <iterator id>    [C]  ->  []
 
-FPushCufIter <num params> <iterator id> [] -> []
-  FPI push the result of a previous DecodeCufIter. No warning is raised.
+  This instruction looks up $1 as a callable, and writes enough
+  information to iterator %1 for FPushCufIter to be able to push an
+  actrec, as if it had been given the callable.  If the function is
+  not successfully decoded, sets up iter to call a function that does
+  nothing and returns Null.  No warning is raised.
+
+FPushCufIter <num params> <iterator id>   []  ->  []
+
+  FPI push the result of a previous DecodeCufIter.  No warning is raised.
 
 FPushCuf <num params>     [C]   ->  []
 FPushCufF <num params>    [C]   ->  []

@@ -1,8 +1,8 @@
 array(5) {
   [0]=>
-  string(3) "foo"
+  string(6) "A::foo"
   [1]=>
-  NULL
+  string(1) "A"
   [2]=>
   array(2) {
     [0]=>
@@ -20,9 +20,9 @@ object(lol)#1 (0) {
 lol
 array(5) {
   [0]=>
-  string(3) "foo"
+  string(6) "A::foo"
   [1]=>
-  NULL
+  string(1) "A"
   [2]=>
   array(2) {
     [0]=>

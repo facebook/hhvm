@@ -799,6 +799,7 @@ Nop    []  ->  []
 
   No operation. This instruction does nothing.
 
+PopA    [A]  ->  []
 PopC    [C]  ->  []
 PopV    [V]  ->  []
 PopR    [R]  ->  []

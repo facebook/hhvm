@@ -914,6 +914,7 @@ static const struct {
   /*** 1. Basic instructions ***/
 
   { OpNop,         {None,             None,         OutNone,           0 }},
+  { OpPopA,        {Stack1,           None,         OutNone,          -1 }},
   { OpPopC,        {Stack1|
                     DontGuardStack1,  None,         OutNone,          -1 }},
   { OpPopV,        {Stack1|

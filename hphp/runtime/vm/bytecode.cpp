@@ -3325,6 +3325,11 @@ OPTBLD_INLINE void VMExecutionContext::iopNop(PC& pc) {
   NEXT();
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopPopA(PC& pc) {
+  NEXT();
+  m_stack.popA();
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopPopC(PC& pc) {
   NEXT();
   m_stack.popC();

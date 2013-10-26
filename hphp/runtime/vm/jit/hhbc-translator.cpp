@@ -1747,6 +1747,8 @@ void HhbcTranslator::emitIsIntC()    { emitIsTypeC(Type::Int); }
 void HhbcTranslator::emitIsBoolC()   { emitIsTypeC(Type::Bool);}
 void HhbcTranslator::emitIsDoubleC() { emitIsTypeC(Type::Dbl); }
 
+void HhbcTranslator::emitPopA() { popA(); }
+
 void HhbcTranslator::emitPopC() {
   popDecRef(Type::Cell, {DataTypeGeneric, Type::Cell});
 }

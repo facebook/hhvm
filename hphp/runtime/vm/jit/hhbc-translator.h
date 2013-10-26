@@ -247,6 +247,7 @@ struct HhbcTranslator {
   // PreInc, PostInc, PreDec, PostDec
   void emitIncDecL(bool pre, bool inc, uint32_t id);
   void emitIncDecS(bool pre, bool inc);
+  void emitPopA();
   void emitPopC();
   void emitPopV();
   void emitPopR();

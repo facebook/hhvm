@@ -21,6 +21,7 @@
  */
 
 #define INSTRS \
+  CASE(PopA) \
   CASE(PopC) \
   CASE(PopV) \
   CASE(PopR) \

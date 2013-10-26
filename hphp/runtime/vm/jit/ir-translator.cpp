@@ -306,6 +306,10 @@ IRTranslator::translateAssignToLocalOp(const NormalizedInstruction& ni) {
   }
 }
 
+void IRTranslator::translatePopA(const NormalizedInstruction&) {
+  HHIR_EMIT(PopA);
+}
+
 void
 IRTranslator::translatePopC(const NormalizedInstruction& i) {
   HHIR_EMIT(PopC);

@@ -3783,17 +3783,21 @@ AssertTStk <stack offset> <op>
 
 CreateCont <function name>    []  ->  [C]
 
-  Creates a Continuation object and pushes it on the stack. The Continuation
-  will capture all defined local variables in the current function. The
-  Continuation will store a reference to the function named by the string
-  immediate to be used as its body.
+  Creates a Continuation object and pushes it on the stack.  The
+  Continuation will capture all defined local variables in the current
+  function, and marks them uninitialized on the current frame.  The
+  Continuation will store a reference to the function named by the
+  string immediate to be used as its body.
 
 CreateAsync <function name> <label id> <number of iterators>   [C]  ->  [C]
 
-  Analogy of CreateCont for async functions. Creates a Continuation object,
-  updates its label with <label id> immediate and stores a value from the stack
-  to its m_value field. Unlike CreateCont, it also copies the first
-  <number of iterators> iterators into the continuation frame.
+  Analogy of CreateCont for async functions.  Creates a Continuation
+  object, updates its label with <label id> immediate and stores a
+  value from the stack to its m_value field.  Like CreateCont, it
+  captures defined local variables in the current function, and marks
+  them uninitialized on the current frame.  Unlike CreateCont, it also
+  copies the first <number of iterators> iterators into the
+  continuation frame.
 
 ContEnter [C]  ->  []
 
@@ -3820,7 +3824,7 @@ ContSuspendK  <label id>    [C C]  ->  []
   to <label id>. Transfer control flow to the caller of the continuation body,
   which must be a non-static method of the Continuation class.
 
-UnpackCont    []  ->  [C:Int C]
+UnpackCont    []  ->  [C C:Int]
 
   Unpack continuation. Unpacks variables from the Continuation object in local
   0 into the containing environment. The stack will contain the current label of

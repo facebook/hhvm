@@ -4694,6 +4694,10 @@ OPTBLD_INLINE void VMExecutionContext::iopAssertTStk(PC& pc) {
   implAssertT(m_stack.indTV(stkSlot), static_cast<AssertTOp>(op));
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopBreakTraceHint(PC& pc) {
+  NEXT();
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopEmptyL(PC& pc) {
   NEXT();
   DECODE_LA(local);

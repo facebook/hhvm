@@ -21,6 +21,7 @@
  */
 
 #define INSTRS \
+  CASE(BreakTraceHint) \
   CASE(PopA) \
   CASE(PopC) \
   CASE(PopV) \

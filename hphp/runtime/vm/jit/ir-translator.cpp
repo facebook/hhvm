@@ -436,6 +436,9 @@ void IRTranslator::translateAssertTStk(const NormalizedInstruction& i) {
   HHIR_EMIT(AssertTStk, i.imm[0].u_IVA, static_cast<AssertTOp>(i.imm[1].u_OA));
 }
 
+void IRTranslator::translateBreakTraceHint(const NormalizedInstruction&) {
+}
+
 void
 IRTranslator::translateAddNewElemC(const NormalizedInstruction& i) {
   HHIR_EMIT(AddNewElemC);

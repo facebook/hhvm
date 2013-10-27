@@ -3779,6 +3779,13 @@ AssertTStk <stack offset> <op>
   must have a particular type.  The type sub-opcodes are not currently
   specified, as they are particular to the implementation.
 
+BreakTraceHint   []  ->  []
+
+  This opcode has no effects, but is a hint that code immediately
+  following it is probably not worth including in the same compilation
+  unit as the code in front of it.  In HHVM, this is used to tell the
+  JIT to break a Tracelet when it sees this opcode.
+
 14. Continuation creation and execution
 ---------------------------------------
 

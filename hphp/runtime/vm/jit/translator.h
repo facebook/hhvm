@@ -628,6 +628,7 @@ opcodeControlFlowInfo(const Op instr) {
     case OpEval:
     case OpNativeImpl:
     case OpContHandle:
+    case OpBreakTraceHint:
       return ControlFlowInfo::BreaksBB;
     case OpFCall:
     case OpFCallArray:

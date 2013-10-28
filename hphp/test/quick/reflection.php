@@ -236,10 +236,6 @@ print "--- getStaticProperties() ---\n";
           ;
 print "\n";
 
-print "--- setStaticPropertyValue() ---\n";
-var_dump($rb->setStaticPropertyValue('s0', 'new value for s0'));
-print "\n";
-
 print "--- getStaticPropertyValue() ---\n";
 var_dump($rb->getStaticPropertyValue('s0'));
 var_dump($rb->getStaticPropertyValue('s4'));

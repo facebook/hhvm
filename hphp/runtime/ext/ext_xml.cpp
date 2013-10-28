@@ -23,7 +23,46 @@
 #include <expat.h>
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(xml);
+const StaticString
+  s_functions("functions"),
+  s_dependencies("dependencies");
+
+static class xmlExtension : public Extension {
+  public:
+    xmlExtension() : Extension("xml") {}
+    virtual void moduleInfo(Array &info) {
+      Array functions = Array::Create();
+      functions.append(String("xml_parser_create"));
+      functions.append(String("xml_parser_free"));
+      functions.append(String("xml_parse"));
+      functions.append(String("xml_parse_into_struct"));
+      functions.append(String("xml_parser_create_ns"));
+      functions.append(String("xml_parser_get_option"));
+      functions.append(String("xml_parser_set_option"));
+      functions.append(String("xml_set_character_data_handler"));
+      functions.append(String("xml_set_default_handler"));
+      functions.append(String("xml_set_element_handler"));
+      functions.append(String("xml_set_processing_instruction_handler"));
+      functions.append(String("xml_set_start_namespace_decl_handler"));
+      functions.append(String("xml_set_end_namespace_decl_handler"));
+      functions.append(String("xml_set_unparsed_entity_decl_handler"));
+      functions.append(String("xml_set_external_entity_ref_handler"));
+      functions.append(String("xml_set_notation_decl_handler"));
+      functions.append(String("xml_set_object"));
+      functions.append(String("xml_get_current_byte_index"));
+      functions.append(String("xml_get_current_column_number"));
+      functions.append(String("xml_get_current_line_number"));
+      functions.append(String("xml_get_error_code"));
+      functions.append(String("xml_error_string"));
+      functions.append(String("utf8_decode"));
+      functions.append(String("utf8_encode"));
+      info.set(s_functions, functions);
+
+      Array dependencies = Array::Create();
+      dependencies.set(String("libxml"), String("Required"));
+      info.set(s_dependencies, dependencies);
+    }
+} s_xml_extension;
 ///////////////////////////////////////////////////////////////////////////////
 
 class XmlParser : public SweepableResourceData {

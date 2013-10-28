@@ -4,6 +4,18 @@
     ],
     "funcs": [
         {
+            "name": "hphp_authoritative_check",
+            "desc": "Internally used for erroring in whole program mode",
+            "flags": [
+                "HipHopSpecific",
+                "NoInjection"
+            ],
+            "return": {
+                "type": null
+            },
+            "args": []
+        },
+        {
             "name": "hphp_get_extension_info",
             "desc": "Internally used for getting extension's information.",
             "flags": [

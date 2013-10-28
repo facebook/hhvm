@@ -154,6 +154,12 @@ Variant invoke_static_method(const String& s, const String& method,
                              CArrRef params, bool fatal = true);
 
 /**
+ * Invoking an arbitrary ancestor's method
+ */
+Variant invoke_ancestor_method(const String& s, const String& method, CArrRef params,
+                               ObjectData *cls, bool fatal = true);
+
+/**
  * Fallback when a dynamic function call fails to find a user function
  * matching the name.  If no handlers are able to
  * invoke the function, throw an InvalidFunctionCallException.

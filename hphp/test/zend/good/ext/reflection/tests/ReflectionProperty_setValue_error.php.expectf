@@ -1,0 +1,35 @@
+Too few args:
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+
+Too many args:
+HipHop Warning: %s
+NULL
+
+Wrong type of arg:
+HipHop Warning: %s
+NULL
+
+Static property / too many args:
+HipHop Warning: %s
+NULL
+
+Static property / too few args:
+NULL
+string(11) "A new value"
+HipHop Warning: %s
+NULL
+string(11) "A new value"
+
+Static property / wrong type of arg:
+NULL
+string(17) "Another new value"
+
+Protected property:
+Cannot access non-public member TestClass::prot
+
+Instance without property:
+NULL
+string(8) "NewValue"

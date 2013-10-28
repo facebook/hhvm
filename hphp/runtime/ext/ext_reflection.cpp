@@ -33,8 +33,6 @@
 namespace HPHP {
 
 using Transl::VMRegAnchor;
-
-IMPLEMENT_DEFAULT_EXTENSION(Reflection);
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
@@ -46,6 +44,7 @@ const StaticString
   s_constructor("constructor"),
   s_functions("functions"),
   s_classes("classes"),
+  s_dependencies("dependencies"),
   s_access("access"),
   s_public("public"),
   s_protected("protected"),
@@ -92,6 +91,25 @@ const StaticString
   s_type_profiling("type_profiling"),
   s_accessible("accessible");
 
+static class ReflectionExtension : public Extension {
+  public:
+    ReflectionExtension() : Extension("reflection") {}
+    virtual void moduleInfo(Array &info) {
+      Array classes = Array::Create();
+      classes.append(string("Reflection"));
+      classes.append(string("ReflectionException"));
+      classes.append(string("ReflectionParameter"));
+      classes.append(string("ReflectionFunctionAbstract"));
+      classes.append(string("ReflectionFunction"));
+      classes.append(string("ReflectionClass"));
+      classes.append(string("ReflectionObject"));
+      classes.append(string("ReflectionProperty"));
+      classes.append(string("ReflectionMethod"));
+      classes.append(string("ReflectionExtension"));
+      info.set(s_classes, classes);
+    }
+} s_Reflection_extension;
+
 static const Class* get_cls(CVarRef class_or_object) {
   Class* cls = nullptr;
   if (class_or_object.is(KindOfObject)) {
@@ -108,13 +126,18 @@ Array f_hphp_get_extension_info(const String& name) {
 
   Extension *ext = Extension::GetExtension(name);
 
-  ret.set(s_name,      name);
-  ret.set(s_version,   ext ? ext->getVersion() : "");
-  ret.set(s_info,      empty_string);
-  ret.set(s_ini,       Array::Create());
-  ret.set(s_constants, Array::Create());
-  ret.set(s_functions, Array::Create());
-  ret.set(s_classes,   Array::Create());
+  ret.set(s_name,         name);
+  ret.set(s_version,      ext ? ext->getVersion() : "");
+  ret.set(s_info,         empty_string);
+  ret.set(s_ini,          Array::Create());
+  ret.set(s_constants,    Array::Create());
+  ret.set(s_functions,    Array::Create());
+  ret.set(s_classes,      Array::Create());
+  ret.set(s_dependencies, Array::Create());
+
+  if(ext) {
+    ext->moduleInfo(ret);
+  }
 
   return ret;
 }
@@ -212,7 +235,8 @@ static void set_property_info(Array &ret, ClassInfo::PropertyInfo *info,
 }
 
 
-static void set_instance_prop_info(Array &ret, const Class::Prop* prop) {
+static void set_instance_prop_info(Array &ret, const Class::Prop* prop,
+                                    const Class *cls) {
   ret.set(s_name, VarNR(prop->m_name));
   set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
   ret.set(s_class, VarNR(prop->m_class->name()));
@@ -221,6 +245,13 @@ static void set_instance_prop_info(Array &ret, const Class::Prop* prop) {
     ret.set(s_type, VarNR(prop->m_typeConstraint));
   } else {
     ret.set(s_type, false_varNR);
+  }
+  if(prop->m_hphpcType == KindOfInvalid) {
+    ret.set(s_default, null_varNR);
+  } else {
+    const PreClass *pCls = cls->preClass();
+    const PreClass::Prop *pProp = pCls->lookupProp(prop->m_name);
+    ret.set(s_default, tvAsCVarRef(&pProp->val()));
   }
 }
 
@@ -879,12 +910,12 @@ Array f_hphp_get_class_info(CVarRef name) {
       Array info = Array::Create();
       if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
         if (prop.m_class == cls) {
-          set_instance_prop_info(info, &prop);
+          set_instance_prop_info(info, &prop, prop.m_class);
           arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
         }
         continue;
       }
-      set_instance_prop_info(info, &prop);
+      set_instance_prop_info(info, &prop, prop.m_class);
       arr.set(*(String*)(&prop.m_name), VarNR(info));
     }
 
@@ -969,6 +1000,14 @@ Array f_hphp_get_function_info(const String& name) {
   return ret;
 }
 
+void f_hphp_authoritative_check() {
+  if (RuntimeOption::RepoAuthoritative) {
+    raise_error(
+      "Unable to use mutating Reflection methods in Whole Program mode"
+    );
+  }
+}
+
 Variant f_hphp_invoke(const String& name, CArrRef params) {
   return invoke(name.data(), params);
 }
@@ -979,7 +1018,7 @@ Variant f_hphp_invoke_method(CVarRef obj, const String& cls, const String& name,
     return invoke_static_method(cls, name, params);
   }
   ObjectData *o = obj.toCObjRef().get();
-  return o->o_invoke(name, params);
+  return invoke_ancestor_method(cls, name, params, o);
 }
 
 bool f_hphp_instanceof(CObjRef obj, const String& name) {
@@ -995,7 +1034,7 @@ Object f_hphp_create_object_without_constructor(const String& name) {
 }
 
 Variant f_hphp_get_property(CObjRef obj, const String& cls, const String& prop) {
-  return obj->o_get(prop, true /* error */, cls);
+  return obj->o_get(prop, false /* error */, cls);
 }
 
 void f_hphp_set_property(CObjRef obj, const String& cls, const String& prop,
@@ -1010,10 +1049,13 @@ void f_hphp_set_property(CObjRef obj, const String& cls, const String& prop,
 }
 
 Variant f_hphp_get_static_property(const String& cls, const String& prop, bool force) {
+  std::string msg;
   StringData* sd = cls.get();
   Class* class_ = lookup_class(sd);
   if (!class_) {
-    raise_error("Non-existent class %s", sd->data());
+    Util::string_printf(msg, "Non-existent class %s", sd->data());
+    Object e(SystemLib::AllocReflectionExceptionObject(msg));
+    throw e;
   }
   VMRegAnchor _;
   bool visible, accessible;
@@ -1022,22 +1064,29 @@ Variant f_hphp_get_static_property(const String& cls, const String& prop, bool f
     prop.get(), visible, accessible
   );
   if (tv == nullptr) {
-    raise_error("Class %s does not have a property named %s",
-                sd->data(), prop.get()->data());
+    Util::string_printf(msg, "Class %s does not have a property named %s",
+                        sd->data(), prop.get()->data());
+    Object e(SystemLib::AllocReflectionExceptionObject(msg));
+    throw e;
   }
   if (!visible || !accessible) {
-    raise_error("Invalid access to class %s's property %s",
-                sd->data(), prop.get()->data());
+    Util::string_printf(msg, "Invalid access to class %s's property %s",
+                        sd->data(), prop.get()->data());
+    Object e(SystemLib::AllocReflectionExceptionObject(msg));
+    throw e;
   }
   return tvAsVariant(tv);
 }
 
 void f_hphp_set_static_property(const String& cls, const String& prop, CVarRef value,
                                 bool force) {
+  std::string msg;
   StringData* sd = cls.get();
   Class* class_ = lookup_class(sd);
   if (!class_) {
-    raise_error("Non-existent class %s", sd->data());
+    Util::string_printf(msg, "Non-existent class %s", sd->data());
+    Object e(SystemLib::AllocReflectionExceptionObject(msg));
+    throw e;
   }
   VMRegAnchor _;
   bool visible, accessible;
@@ -1046,12 +1095,15 @@ void f_hphp_set_static_property(const String& cls, const String& prop, CVarRef v
     prop.get(), visible, accessible
   );
   if (tv == nullptr) {
-    raise_error("Class %s does not have a property named %s",
-                cls.get()->data(), prop.get()->data());
+    Util::string_printf(msg, "Class %s does not have a property named %s",
+                        sd->data(), prop.get()->data());
+    Object e(SystemLib::AllocReflectionExceptionObject(msg));
   }
   if (!visible || !accessible) {
-    raise_error("Invalid access to class %s's property %s",
-                sd->data(), prop.get()->data());
+    Util::string_printf(msg, "Invalid access to class %s's property %s",
+                        sd->data(), prop.get()->data());
+    Object e(SystemLib::AllocReflectionExceptionObject(msg));
+    throw e;
   }
   tvAsVariant(tv) = value;
 }

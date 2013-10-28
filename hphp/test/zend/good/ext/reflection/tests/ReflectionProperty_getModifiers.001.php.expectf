@@ -1,0 +1,28 @@
+**********************************
+Reflecting on property TestClass::pub
+
+getModifiers():
+int(256)
+
+**********************************
+**********************************
+Reflecting on property TestClass::stat
+
+getModifiers():
+int(257)
+
+**********************************
+**********************************
+Reflecting on property TestClass::prot
+
+getModifiers():
+int(512)
+
+**********************************
+**********************************
+Reflecting on property TestClass::priv
+
+getModifiers():
+int(1024)
+
+**********************************

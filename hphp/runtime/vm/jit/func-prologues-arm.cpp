@@ -216,8 +216,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
         a.  Mov  (argReg(0), func->name()->data());
         a.  Mov  (argReg(1), numParams);
         a.  Mov  (argReg(2), i);
-        emitCall(a, CppCall(Transl::raiseMissingArgument));
-        tx64->fixupMap().recordFixup(a.frontier(), fixup);
+        auto fixupAddr = emitCall(a, CppCall(Transl::raiseMissingArgument));
+        tx64->fixupMap().recordFixup(fixupAddr, fixup);
         break;
       }
     }
@@ -297,10 +297,10 @@ SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
     assert(func->numParams() == 2);
     // Special __call prologue
     a.   Mov   (argReg(0), rStashedAR);
-    emitCall(a, CppCall(Transl::shuffleArgsForMagicCall));
+    auto fixupAddr = emitCall(a, CppCall(Transl::shuffleArgsForMagicCall));
     if (memory_profiling) {
       tx64->fixupMap().recordFixup(
-        a.frontier(),
+        fixupAddr,
         Fixup(skFuncBody.offset() - func->base(), func->numSlotsInFrame())
       );
     }

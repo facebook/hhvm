@@ -27,7 +27,7 @@ void emitStoreRetIntoActRec(vixl::MacroAssembler& a) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCall(vixl::MacroAssembler& a, CppCall call) {
+TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
   if (call.isDirect()) {
     a. Mov  (rHostCallReg, reinterpret_cast<intptr_t>(call.getAddress()));
   } else {
@@ -37,8 +37,10 @@ void emitCall(vixl::MacroAssembler& a, CppCall call) {
 
   using namespace vixl;
   a.   Push    (x30, x29);
+  auto fixupAddr = a.frontier();
   a.   HostCall(5);
   a.   Pop     (x29, x30);
+  return fixupAddr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -71,15 +73,15 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
   astubs.  Mov  (argReg(0), rVmFp);
   void (*helper)(const ActRec*) = functionEnterHelper;
 
-  emitCall(astubs, CppCall(helper));
+  auto fixupAddr = emitCall(astubs, CppCall(helper));
   if (inTracelet) {
-    fixupMap.recordSyncPoint(stubsCode.frontier(),
+    fixupMap.recordSyncPoint(fixupAddr,
                              fixup.m_pcOffset, fixup.m_spOffset);
   } else {
     // If we're being called while generating a func prologue, we
     // have to record the fixup directly in the fixup map instead of
     // going through the pending fixup path like normal.
-    fixupMap.recordFixup(stubsCode.frontier(), fixup);
+    fixupMap.recordFixup(fixupAddr, fixup);
   }
   emitSmashableJump(stubsCode, mainCode.frontier(), CC_None);
 }

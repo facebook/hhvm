@@ -1169,6 +1169,20 @@ TranslatorX64::enterTC(TCA start, void* data) {
         decoder.AppendVisitor(&disasm);
       }
       vixl::Simulator sim(&decoder, std::cout);
+      sim.set_exception_hook(
+        [] (vixl::Simulator* s) {
+          if (tl_regState == VMRegState::DIRTY) {
+            // This is a pseudo-copy of the logic in sync_regstate.
+
+            ActRec fakeAr;
+            fakeAr.m_savedRbp = s->xreg(JIT::ARM::rVmFp.code());
+            fakeAr.m_savedRip = reinterpret_cast<uint64_t>(s->pc());
+
+            tx64->fixupMap().fixupWork(g_vmContext, &fakeAr);
+            tl_regState = VMRegState::CLEAN;
+          }
+        }
+      );
 
       g_vmContext->m_activeSims.push_back(&sim);
       SCOPE_EXIT { g_vmContext->m_activeSims.pop_back(); };

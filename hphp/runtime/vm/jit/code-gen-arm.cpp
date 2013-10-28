@@ -442,6 +442,15 @@ PUNT_OPCODE(DbgAssertType)
 
 //////////////////////////////////////////////////////////////////////
 
+void CodeGenerator::recordHostCallSyncPoint(vixl::MacroAssembler& as,
+                                            TCA tca) {
+  auto stackOff = m_curInst->marker().spOff;
+  auto pcOff = m_curInst->marker().bcOff - m_curInst->marker().func->base();
+  m_tx64->fixupMap().recordSyncPoint(tca, pcOff, stackOff);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 template<class Loc, class JmpFn>
 void CodeGenerator::emitTypeTest(Type type, Loc typeSrc, Loc dataSrc,
                                  JmpFn doJcc) {
@@ -802,6 +811,10 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
   m_as.   Mov    (argReg(0), fpReg);
   m_as.   Mov    (argReg(1), spReg);
   m_as.   Mov    (argReg(2), pcOff);
+
+  // Note that sync points for HostCalls have to be recorded at the *start* of
+  // the instruction.
+  recordHostCallSyncPoint(m_as, m_as.frontier());
   m_as.   HostCall(3);
 
   m_as.   Pop    (x29, x30);

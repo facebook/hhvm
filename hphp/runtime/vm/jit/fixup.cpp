@@ -62,6 +62,7 @@ FixupMap::fixupWork(VMExecutionContext* ec, ActRec* rbp) const {
   TRACE(1, "fixup(begin):\n");
 
   auto isVMFrame = [] (ActRec* ar) {
+    // If this assert is failing, you may have forgotten a sync point somewhere
     assert(ar);
     bool ret = uintptr_t(ar) - Util::s_stackLimit >= Util::s_stackSize;
     assert(!ret ||

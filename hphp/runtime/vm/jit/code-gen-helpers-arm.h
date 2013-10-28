@@ -13,6 +13,13 @@
 namespace HPHP { namespace JIT { namespace ARM {
 
 /*
+ * Records a fixup, compensating for the way the PC will be slightly different
+ * from how it is when resolving a fixup for a native call. Call this directly
+ * after emitting a HostCall.
+ */
+void recordHostCallSyncPoint(vixl::MacroAssembler& a);
+
+/*
  * Intelligently chooses between Add, Mov, and no-op.
  */
 void emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
@@ -31,8 +38,9 @@ void emitStoreRetIntoActRec(vixl::MacroAssembler& a);
 /*
  * All calls should go through here, because they need to be implemented
  * differently depending on whether we're simulating ARM or running native.
+ * Returns the address at which to record a fixup, if you need to.
  */
-void emitCall(vixl::MacroAssembler& a, CppCall call);
+Transl::TCA emitCall(vixl::MacroAssembler& a, CppCall call);
 
 /*
  * Swaps two registers. Uses XOR swap, so will not touch memory, flags, or any
@@ -82,6 +90,7 @@ inline void emitTLSLoad(vixl::MacroAssembler& a,
   a.   Mov  (rHostCallReg, Transl::tlsBaseNoInline);
   a.   Push (x30, x29);
   a.   HostCall(0);
+  // tlsBaseNoInline doesn't need a sync point
   a.   Pop  (x29, x30);
 
   a.   Add  (rReturnReg, rReturnReg,

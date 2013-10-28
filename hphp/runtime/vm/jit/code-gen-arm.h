@@ -72,6 +72,7 @@ struct CodeGenerator {
     return m_state.regs[m_curInst];
   }
 
+  void recordHostCallSyncPoint(vixl::MacroAssembler& as, Transl::TCA tca);
   void cgInterpOneCommon(IRInstruction* inst);
 
 #define O(name, dsts, srcs, flags) void cg##name(IRInstruction* inst);

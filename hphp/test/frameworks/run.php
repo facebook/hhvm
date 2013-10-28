@@ -885,6 +885,14 @@ function run_single_test_suite(string $fw_name, string $summary_file,
             "Establishing baseline with gray dots...\n", !$csv_only);
   }
 
+  /******************************
+   *       YII SPECIFIC
+   ******************************/
+  if ($fw_name === "yii") {
+    verbose("Removing file that might be leftover.\n", $verbose);
+    unlink($install_root."/tests/assets/ca6dd681/CAssetManagerTest.php");
+  }
+
   /*************************************
    * Run the test suite
    ************************************/

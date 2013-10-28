@@ -6532,6 +6532,11 @@ OPTBLD_INLINE void VMExecutionContext::iopDefCls(PC& pc) {
   Unit::defClass(c);
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopNopDefCls(PC& pc) {
+  NEXT();
+  DECODE_IVA(cid);
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopDefTypeAlias(PC& pc) {
   NEXT();
   DECODE_IVA(tid);

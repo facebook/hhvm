@@ -6707,8 +6707,8 @@ void EmitterVisitor::emitClass(Emitter& e,
   if (hoistable != PreClass::AlwaysHoistable) {
     e.DefCls(pce->id());
   } else {
-    // To atatch the line number to for error reporting...
-    e.Nop();
+    // To attach the line number to for error reporting.
+    e.NopDefCls(pce->id());
   }
   e.setTempLocation(LocationPtr());
   for (int i = firstInterface; i < nInterfaces; ++i) {

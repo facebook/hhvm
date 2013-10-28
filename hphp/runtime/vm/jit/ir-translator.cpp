@@ -855,6 +855,8 @@ void IRTranslator::translateDefCls(const NormalizedInstruction& i) {
   HHIR_EMIT(DefCls, cid, i.source.offset());
 }
 
+void IRTranslator::translateNopDefCls(const NormalizedInstruction&) {}
+
 void IRTranslator::translateDefFunc(const NormalizedInstruction& i) {
   int fid = i.imm[0].u_IVA;
   HHIR_EMIT(DefFunc, fid);

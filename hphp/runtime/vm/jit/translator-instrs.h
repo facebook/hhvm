@@ -136,6 +136,7 @@
   CASE(MIterNext) \
   CASE(MIterNextK) \
   CASE(DefCls) \
+  CASE(NopDefCls) \
   CASE(DefFunc) \
   CASE(Self) \
   CASE(Parent) \

@@ -3390,9 +3390,10 @@ WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
 
   For the non-W* flavors of these instructions, the locals are stored to
   with the same semantics as SetL (non-binding assignment).  The W* flavors
-  of these instructions do a binding assignment if the rhs (key or value)
-  was a reference, or if not they unset the old value of the local and then
-  do a non-binding assignment.
+  of these instructions do a binding assignment to %3 if the rhs was a
+  reference, or if not they unset the old value of the local and then do a
+  non-binding assignment.  The W* flavors still do a non-binding assignment
+  to %4.
 
   The logical value is computed differently depending on the iterator type
   that is initialized in %1:

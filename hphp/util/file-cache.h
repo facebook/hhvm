@@ -48,16 +48,12 @@ class FileCache {
   void write(const char *name, bool addDirectories = true);
   void write(const char *name, const char *fullpath); // name + data
 
-
   void save(const char *filename);
 
   /**
    * Reading data.
    */
-  short getVersion(const char *filename);
-  void load(const char *filename, bool onDemandUncompress, short version);
   void loadMmap(const char *filename, short version);
-  void adviseOutMemory();
   bool fileExists(const char *name, bool isRelative = true) const;
   bool dirExists(const char *name, bool isRelative = true) const;
   bool exists(const char *name, bool isRelative = true) const;
@@ -67,22 +63,13 @@ class FileCache {
 
   static std::string GetRelativePath(const char *path);
 
+  // To be removed (leftover from old cache implementation).
+  short getVersion(const char *filename);
+  void load(const char *filename, bool onDemandUncompress, short version);
+  void adviseOutMemory();
+
  private:
-  struct Buffer {
-    int len;     // uncompressed len     -1: PHP file, -2: directories
-    char *data;  // uncompressed data
-    int clen;    // compressed len
-    char *cdata; // compressed data
-  };
-  typedef hphp_hash_map<std::string, Buffer, string_hash> FileMap;
-
-  FileMap m_files;
-  int m_fd;
-  int m_size;
-  void *m_addr;
   std::unique_ptr<CacheManager> cache_manager_;
-
-  void writeDirectories(const char *name);
 };
 
 }   // namespace HPHP

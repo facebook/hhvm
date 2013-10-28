@@ -438,6 +438,7 @@ bool RuntimeOption::EnableDebuggerColor = true;
 bool RuntimeOption::EnableDebuggerPrompt = true;
 bool RuntimeOption::EnableDebuggerServer = false;
 bool RuntimeOption::EnableDebuggerUsageLog = false;
+bool RuntimeOption::DebuggerDisableIPv6 = false;
 int RuntimeOption::DebuggerServerPort = 8089;
 int RuntimeOption::DebuggerDefaultRpcPort = 8083;
 std::string RuntimeOption::DebuggerDefaultRpcAuth;
@@ -1168,6 +1169,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       EnableDebuggerServer = debugger["EnableDebuggerServer"].getBool();
       EnableDebuggerUsageLog = debugger["EnableDebuggerUsageLog"].getBool();
       DebuggerServerPort = debugger["Port"].getUInt16(8089);
+      DebuggerDisableIPv6 = debugger["DisableIPv6"].getBool(false);
       DebuggerDefaultSandboxPath = debugger["DefaultSandboxPath"].getString();
       DebuggerStartupDocument = debugger["StartupDocument"].getString();
       DebuggerSignalTimeout = debugger["SignalTimeout"].getInt32(1);

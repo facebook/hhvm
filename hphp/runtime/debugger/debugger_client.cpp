@@ -532,19 +532,8 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
     port = RuntimeOption::DebuggerServerPort;
   }
   info("Connecting to %s:%d...", host.c_str(), port);
-  Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
-                            host.c_str(), port);
-  // Ensure the socket is not swept---we expect to destruct it ourselves
-  // when ~DebuggerClient runs.
-  sock->unregister();
-  Resource obj(sock); // Destroy sock if we don't connect.
-  if (f_socket_connect(sock, String(host), port)) {
-    DMachineInfoPtr machine(new DMachineInfo());
-    machine->m_name = host;
-    machine->m_port = port;
-    machine->m_thrift.create(SmartPtr<Socket>(sock));
-    m_machines.push_back(machine);
-    switchMachine(machine);
+
+  if (tryConnect(host, port, false)) {
     return true;
   }
   error("Unable to connect to %s:%d.", host.c_str(), port);
@@ -556,18 +545,54 @@ bool DebuggerClient::reconnect() {
   assert(m_machine);
   string &host = m_machine->m_name;
   int port = m_machine->m_port;
-  if (port) {
-    info("Re-connecting to %s:%d...", host.c_str(), port);
-    m_machine->m_thrift.close(); // Close the old socket, it may still be open.
-    Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
-                              host.c_str(), port);
+  if (port <= 0) {
+    return false;
+  }
+
+  info("Re-connecting to %s:%d...", host.c_str(), port);
+  m_machine->m_thrift.close(); // Close the old socket, it may still be open.
+
+  if (tryConnect(host, port, true)) {
+    return true;
+  }
+
+  error("Still unable to connect to %s:%d.", host.c_str(), port);
+  return false;
+}
+
+bool DebuggerClient::tryConnect(const std::string &host, int port,
+    bool clearmachines) {
+  struct addrinfo *ai;
+  struct addrinfo hint;
+  memset(&hint, 0, sizeof(hint));
+  hint.ai_family = AF_UNSPEC;
+  hint.ai_socktype = SOCK_STREAM;
+  if (RuntimeOption::DebuggerDisableIPv6) {
+    hint.ai_family = AF_INET;
+  }
+
+  if (getaddrinfo(host.c_str(), nullptr, &hint, &ai)) {
+    return false;
+  }
+
+  SCOPE_EXIT {
+    freeaddrinfo(ai);
+  };
+
+  /* try possible families (v4, v6) until we get a connection */
+  struct addrinfo *cur;
+  for (cur = ai; cur; cur = ai->ai_next) {
+    Socket *sock = new Socket(socket(cur->ai_family, cur->ai_socktype, 0),
+                              cur->ai_family, cur->ai_addr->sa_data, port);
     sock->unregister();
     Resource obj(sock); // Destroy sock if we don't connect.
     if (f_socket_connect(sock, String(host), port)) {
-      for (unsigned int i = 0; i < m_machines.size(); i++) {
-        if (m_machines[i] == m_machine) {
-          m_machines.erase(m_machines.begin() + i);
-          break;
+      if (clearmachines) {
+        for (unsigned int i = 0; i < m_machines.size(); i++) {
+          if (m_machines[i] == m_machine) {
+            m_machines.erase(m_machines.begin() + i);
+            break;
+          }
         }
       }
       DMachineInfoPtr machine(new DMachineInfo());
@@ -578,7 +603,6 @@ bool DebuggerClient::reconnect() {
       switchMachine(machine);
       return true;
     }
-    error("Still unable to connect to %s:%d.", host.c_str(), port);
   }
   return false;
 }

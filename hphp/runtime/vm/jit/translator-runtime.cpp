@@ -616,46 +616,142 @@ void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip) {
   checkFrame(fp, sp, /*checkLocals*/true);
 }
 
-void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
+enum class OnFail { Warn, Fatal };
+
+template<OnFail FailBehavior, class FooNR>
+void loadFuncContextImpl(FooNR callableNR, ActRec* preLiveAR, ActRec* fp) {
+  static_assert(
+    std::is_same<FooNR,ArrNR>::value ||
+      std::is_same<FooNR,StrNR>::value,
+    "check loadFuncContextImpl for a new FooNR"
+  );
+
   ObjectData* inst = nullptr;
-  HPHP::Class* cls = nullptr;
+  Class* cls = nullptr;
   StringData* invName = nullptr;
 
-  try {
-
-    // if size != 2, throws exception
-    // if the first element of the array is a string classname, will autoload it
-    const Func* func = vm_decode_function(
-      Variant(arr),
-      fp,
-      /* forwarding */ false,
-      inst,
-      cls,
-      invName,
-      /* warn */ false
-    );
-    if (UNLIKELY(func == nullptr)) {
+  auto func = vm_decode_function(
+    VarNR(callableNR),
+    fp,
+    false, // forward
+    inst,
+    cls,
+    invName,
+    FailBehavior == OnFail::Warn
+  );
+  if (UNLIKELY(func == nullptr)) {
+    if (FailBehavior == OnFail::Fatal) {
       raise_error("Invalid callable (array)");
     }
-    assert(cls != nullptr); // array should resolve only to a method
+    func = SystemLib::s_nullFunc;
+  }
+
+  preLiveAR->m_func = func;
+  if (inst) {
+    inst->incRefCount();
+    preLiveAR->setThis(inst);
+  } else {
+    preLiveAR->setClass(cls);
+  }
+  if (UNLIKELY(invName != nullptr)) {
+    preLiveAR->setInvName(invName);
+  }
+}
+
+void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
+  try {
+    loadFuncContextImpl<OnFail::Fatal>(ArrNR(arr), preLiveAR, fp);
+  } catch (...) {
+    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
+    throw;
+  }
+}
+
+NEVER_INLINE
+static void fpushCufHelperArraySlowPath(ArrayData* arr,
+                                        ActRec* preLiveAR,
+                                        ActRec* fp) {
+  loadFuncContextImpl<OnFail::Warn>(ArrNR(arr), preLiveAR, fp);
+}
+
+ALWAYS_INLINE
+static bool strHasColon(StringData* sd) {
+  auto const sl = sd->slice();
+  auto const e = sl.ptr + sl.len;
+  for (auto p = sl.ptr; p != e; ++p) {
+    if (*p == ':') return true;
+  }
+  return false;
+}
+
+void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
+  try {
+    if (UNLIKELY(!arr->isPacked() || arr->getSize() != 2)) {
+      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
+    }
+
+    auto const elem0 = tvToCell(HphpArray::NvGetIntPacked(arr, 0));
+    auto const elem1 = tvToCell(HphpArray::NvGetIntPacked(arr, 1));
+
+    if (UNLIKELY(elem0->m_type != KindOfObject ||
+                 !IS_STRING_TYPE(elem1->m_type))) {
+      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
+    }
+
+    // If the string contains a class name (e.g. Foo::bar), all kinds
+    // of weird junk happens (wrt forwarding class contexts and
+    // things).  We just do a quick loop to try to bail out of this
+    // case.
+    if (UNLIKELY(strHasColon(elem1->m_data.pstr))) {
+      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
+    }
+
+    auto const inst = elem0->m_data.pobj;
+    auto const func = g_vmContext->lookupMethodCtx(
+      inst->getVMClass(),
+      elem1->m_data.pstr,
+      fp->m_func->cls(),
+      MethodLookup::CallType::ObjMethod
+    );
+    if (UNLIKELY(!func || (func->attrs() & AttrStatic))) {
+      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
+    }
 
     preLiveAR->m_func = func;
-    if (inst) {
-      inst->incRefCount();
-      preLiveAR->setThis(inst);
-    } else {
-      preLiveAR->setClass(cls);
+    inst->incRefCount();
+    preLiveAR->setThis(inst);
+  } catch (...) {
+    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
+    throw;
+  }
+}
+
+NEVER_INLINE
+static void fpushCufHelperStringSlowPath(StringData* sd,
+                                         ActRec* preLiveAR,
+                                         ActRec* fp) {
+  loadFuncContextImpl<OnFail::Warn>(StrNR(sd), preLiveAR, fp);
+}
+
+NEVER_INLINE
+static void fpushStringFail(const StringData* sd, ActRec* preLiveAR) {
+  throw_invalid_argument("function: method '%s' not found", sd->data());
+  preLiveAR->m_func = SystemLib::s_nullFunc;
+}
+
+void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
+  try {
+    if (UNLIKELY(strHasColon(sd))) {
+      return fpushCufHelperStringSlowPath(sd, preLiveAR, fp);
     }
-    if (UNLIKELY(invName != nullptr)) {
-      preLiveAR->setInvName(invName);
+
+    auto const func = Unit::loadFunc(sd);
+    preLiveAR->m_func = func;
+    if (UNLIKELY(!func)) {
+      return fpushStringFail(sd, preLiveAR);
     }
   } catch (...) {
-    // This is extreme shadiness. See the comments of
-    // arPreliveOverwriteCells() for more info on how this code gets the
-    // unwinder to restore the pre-FPush state.
-    auto firstActRecCell = arPreliveOverwriteCells(preLiveAR);
-    firstActRecCell->m_type = KindOfArray;
-    firstActRecCell->m_data.parr = arr;
+    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfString>(sd);
     throw;
   }
 }

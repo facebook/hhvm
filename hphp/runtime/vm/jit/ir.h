@@ -410,9 +410,15 @@ O(LdObjInvoke,                 D(Func), S(Cls),                           NF) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                          E|N) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                            N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
-O(LdArrFuncCtx,                     ND, S(Arr) \
-                                        S(StkPtr) \
-                                        S(FramePtr),               N|Refs|Er) \
+O(LdArrFuncCtx,                     ND, S(Arr)                                \
+                                          S(StkPtr)                           \
+                                          S(FramePtr),           E|N|Refs|Er) \
+O(LdArrFPushCuf,                    ND, S(Arr)                                \
+                                          S(StkPtr)                           \
+                                          S(FramePtr),           E|N|Refs|Er) \
+O(LdStrFPushCuf,                    ND, S(Str)                                \
+                                          S(StkPtr)                           \
+                                          S(FramePtr),           E|N|Refs|Er) \
 O(LdFunc,                      D(Func), S(Str),              E|N|CRc|Refs|Er) \
 O(LdFuncCached,                D(Func), NA,                    N|C|E|Refs|Er) \
 O(LdFuncCachedU,               D(Func), NA,                    N|C|E|Refs|Er) \

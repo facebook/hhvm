@@ -985,6 +985,19 @@ D:Func = LdObjInvoke S0:Cls -> B
   Try to load a cached non-static __invoke Func from the Class in S0,
   or branch to block B if it is not present.
 
+LdArrFuncCtx S0:Arr S1:StkPtr S2:FramePtr
+
+  Try to load an array as a function context.  This is for use
+  translating FPushFunc when the callee is an array.  This instruction
+  attempts to populate a partially created ActRec pointed to by S1.
+
+LdArrFPushCuf S0:Arr S1:StkPtr S2:FramePtr
+LdStrFPushCuf S0:Str S1:StkPtr S2:FramePtr
+
+  Try to resolve a method target for FPushCuf when the callee is an
+  Arr or Str, respectively.  These instructions mutate a partially
+  created ActRec pointed to by S1.
+
 D:Cls = LdObjClass S0:Obj
 
   Load the class out of the object in S0 and put it in D.

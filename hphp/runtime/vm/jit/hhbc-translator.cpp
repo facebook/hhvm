@@ -1909,9 +1909,11 @@ void HhbcTranslator::emitFPushCufIter(int32_t numParams,
       sp, m_tb->fp());
 }
 
-static const Func*
-findCuf(Op op, SSATmp* callable, Class* ctx, Class*& cls, StringData*& invName)
-{
+static const Func* findCuf(Op op,
+                           SSATmp* callable,
+                           Class* ctx,
+                           Class*& cls,
+                           StringData*& invName) {
   bool forward = (op == OpFPushCufF);
   cls = nullptr;
   invName = nullptr;
@@ -1926,7 +1928,7 @@ findCuf(Op op, SSATmp* callable, Class* ctx, Class*& cls, StringData*& invName)
   StringData* sclass = nullptr;
   StringData* sname = nullptr;
   if (str) {
-    Func* f = HPHP::Unit::lookupFunc(str);
+    Func* f = Unit::lookupFunc(str);
     if (f) return f;
     String name(const_cast<StringData*>(str));
     int pos = name.find("::");
@@ -1982,23 +1984,54 @@ findCuf(Op op, SSATmp* callable, Class* ctx, Class*& cls, StringData*& invName)
   return f;
 }
 
-void HhbcTranslator::emitFPushCufOp(Op op, int numArgs) {
+// FPushCuf when the callee is not known at compile time.
+void HhbcTranslator::emitFPushCufUnknown(Op op, int32_t numParams) {
+  if (op != Op::FPushCuf) {
+    PUNT(emitFPushCufUnknown-nonFPushCuf);
+  }
+
+  if (topC()->isA(Type::Obj)) {
+    return emitFPushFuncObj(numParams);
+  }
+
+  if (!topC()->type().subtypeOfAny(Type::Arr, Type::Str)) {
+    PUNT(emitFPushCufUnknown);
+  }
+
+  auto const catchBlock = makeCatch();
+  auto const callable   = popC();
+  emitFPushActRec(
+    m_tb->genDefNull(),
+    m_tb->genDefInitNull(),
+    numParams,
+    nullptr
+  );
+  auto const actRec     = spillStack();
+
+  /*
+   * This is a similar case to lookup for functions in FPushFunc or
+   * FPushObjMethod.  We can throw in a weird situation where the
+   * ActRec is already on the stack, but this bytecode isn't done
+   * executing yet.  See arPreliveOverwriteCells for details about why
+   * we need this marker.
+   */
+  updateMarker();
+
+  auto const opcode = callable->isA(Type::Arr) ? LdArrFPushCuf
+                                               : LdStrFPushCuf;
+  gen(opcode, catchBlock, callable, actRec, m_tb->fp());
+  gen(DecRef, callable);
+}
+
+void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
   const bool safe = op == OpFPushCufSafe;
   const bool forward = op == OpFPushCufF;
   SSATmp* callable = topC(safe ? 1 : 0);
 
   Class* cls = nullptr;
   StringData* invName = nullptr;
-  const Func* callee = findCuf(op, callable, curClass(), cls, invName);
-
-  if (!callee) {
-    // The most common type for the callable in this case is Arr. We
-    // can't really do better than the interpreter here, so punt.
-    SPUNT(makeStaticString(
-            folly::format("FPushCuf-{}",
-                          callable->type().toString()).str())
-          ->data());
-  }
+  auto const callee = findCuf(op, callable, curClass(), cls, invName);
+  if (!callee) return emitFPushCufUnknown(op, numArgs);
 
   SSATmp* ctx;
   SSATmp* safeFlag = cns(true); // This is always true until the slow exits

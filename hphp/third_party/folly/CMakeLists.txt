@@ -31,6 +31,9 @@ list(REMOVE_ITEM files
 	${FOLLY_DIR}/experimental/symbolizer/SymbolizerTest.cpp
 	${FOLLY_DIR}/experimental/symbolizer/ElfUtil.cpp
     )
+list(REMOVE_ITEM cfiles
+	${FOLLY_DIR}/experimental/exception_tracer/StackTrace.c
+    )
 
 # Remove non-portable items
 if (NOT LINUX)

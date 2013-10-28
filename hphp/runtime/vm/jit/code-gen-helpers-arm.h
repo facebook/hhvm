@@ -77,7 +77,13 @@ inline void emitTLSLoad(vixl::MacroAssembler& a,
 
 
 #else
-#  error not implemented yet
+template<typename T>
+inline void emitTLSLoad(vixl::MacroAssembler& a,
+                        const ThreadLocalNoCheck<T>& datum,
+                        const vixl::Register& destReg) {
+  // ARM-simulation mode isn't supported yet if FAST_TLS is off.
+  not_implemented();
+}
 #endif // USE_GCC_FAST_TLS
 
 }}}

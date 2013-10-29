@@ -494,6 +494,18 @@ Type thisReturn(const IRInstruction* inst) {
   return Type::Obj.specialize(func->cls());
 }
 
+Type allocObjReturn(const IRInstruction* inst) {
+  if (inst->op() == AllocObjFast) {
+    return Type::Obj.specialize(inst->extra<AllocObjFast>()->cls);
+  }
+  if (inst->op() == AllocObj) {
+    return inst->src(0)->isConst()
+      ? Type::Obj.specialize(inst->src(0)->getValClass())
+      : Type::Obj;
+  }
+  always_assert(0);
+}
+
 }
 
 Type boxType(Type t) {
@@ -522,6 +534,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DUnbox(n) return inst->src(n)->type().unbox();
 #define DBox(n)   return boxType(inst->src(n)->type());
 #define DParam    return inst->typeParam();
+#define DAllocObj return allocObjReturn(inst);
 #define DLdRef    return ldRefReturn(inst);
 #define DThis     return thisReturn(inst);
 #define DMulti    return Type::None;
@@ -549,6 +562,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DUnbox
 #undef DBox
 #undef DParam
+#undef DAllocObj
 #undef DLdRef
 #undef DThis
 #undef DMulti
@@ -727,6 +741,7 @@ void assertOperandTypes(const IRInstruction* inst) {
                              "invalid src num");
 #define DParam      requireTypeParam();
 #define DLdRef      requireTypeParam();
+#define DAllocObj
 #define DThis
 #define DArith      checkDst(inst->typeParam() == Type::None, \
                              "DArith should have no type parameter");
@@ -761,6 +776,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DBox
 #undef DofS
 #undef DParam
+#undef DAllocObj
 #undef DLdRef
 #undef DThis
 #undef DArith

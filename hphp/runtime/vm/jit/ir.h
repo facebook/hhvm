@@ -140,6 +140,8 @@ class FailedCodeGen : public std::runtime_error {
  *     DParam    single dst has type of the instruction's type parameter
  *     DLdRef    single dst has type of the instruction's type parameter, with
  *               any specialization removed
+ *     DAllocObj single dst has a type of a newly allocated object; may be a
+ *               specialized object type if the class is known
  *     DThis     single dst has type Obj<ctx>, where ctx is the
  *               current context class
  *     DArith    single dst has a type based on arithmetic type rules
@@ -434,8 +436,8 @@ O(LdSwitchDblIndex,             D(Int), S(Dbl) S(Int) S(Int),              N) \
 O(LdSwitchStrIndex,             D(Int), S(Str) S(Int) S(Int),          CRc|N) \
 O(LdSwitchObjIndex,             D(Int), S(Obj) S(Int) S(Int),       CRc|N|Er) \
 O(JmpSwitchDest,                    ND, S(Int),                          T|E) \
-O(AllocObj,                     D(Obj), S(Cls),                            N) \
-O(AllocObjFast,                 D(Obj), NA,                                N) \
+O(AllocObj,                  DAllocObj, S(Cls),                            N) \
+O(AllocObjFast,              DAllocObj, NA,                                N) \
 O(LdClsCtor,                   D(Func), S(Cls),                       C|Er|N) \
 O(StClosureFunc,                    ND, S(Obj),                            E) \
 O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \

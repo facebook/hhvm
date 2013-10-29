@@ -136,6 +136,7 @@ namespace {
 #define DUnbox(n) HasDest
 #define DBox(n)   HasDest
 #define DParam    HasDest
+#define DAllocObj HasDest
 #define DLdRef    HasDest
 #define DThis     HasDest
 #define DArith    HasDest
@@ -181,6 +182,7 @@ struct {
 #undef DUnbox
 #undef DBox
 #undef DParam
+#undef DAllocObj
 #undef DLdRef
 #undef DThis
 #undef DArith

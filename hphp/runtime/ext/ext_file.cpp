@@ -499,7 +499,7 @@ Variant f_file(const String& filename, int flags /* = 0 */,
     return false;
   }
   String content = contents.toString();
-  Array ret;
+  Array ret = Array::Create();
   if (content.empty()) {
     return ret;
   }

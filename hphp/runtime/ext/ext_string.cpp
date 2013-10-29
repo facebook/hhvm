@@ -439,14 +439,14 @@ Variant f_explode(const String& delimiter, const String& str, int limit /* = 0x7
 String f_implode(CVarRef arg1, CVarRef arg2 /* = null_variant */) {
   Array items;
   String delim;
-  if (arg1.is(KindOfArray)) {
-    items = arg1.toArray();
+  if (isContainer(arg1)) {
+    items = arg1;
     delim = arg2.toString();
-  } else if (arg2.is(KindOfArray)) {
-    items = arg2.toArray();
+  } else if (isContainer(arg2)) {
+    items = arg2;
     delim = arg1.toString();
   } else {
-    throw_bad_type_exception("arguments need at least one array");
+    throw_bad_type_exception("expected a container as one of the arguments");
     return String();
   }
   return StringUtil::Implode(items, delim);

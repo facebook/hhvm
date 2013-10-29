@@ -404,7 +404,7 @@
         },
         {
             "name": "implode",
-            "desc": "Join array elements with a glue string.\n\nimplode() can, for historical reasons, accept its parameters in either order. For consistency with explode(), however, it may be less confusing to use the documented order of arguments.",
+            "desc": "Join container elements with a glue string.\n\nimplode() can, for historical reasons, accept its parameters in either order. For consistency with explode(), however, it may be less confusing to use the documented order of arguments.",
             "flags": [
             ],
             "return": {
@@ -427,6 +427,7 @@
         },
         {
             "name": "join",
+            "desc": "An alias for implode().",
             "flags": [
             ],
             "return": {

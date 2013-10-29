@@ -113,8 +113,8 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
   return ret;
 }
 
-String StringUtil::Implode(CArrRef items, const String& delim) {
-  int size = items.size();
+String StringUtil::Implode(CVarRef items, const String& delim) {
+  int size = getContainerSize(items);
   if (size == 0) return "";
 
   String* sitems = (String*)smart_malloc(size * sizeof(String));

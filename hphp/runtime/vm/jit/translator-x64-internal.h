@@ -194,7 +194,6 @@ static inline void verifyTVOff(const MemoryRef& mr) {
 template<typename SrcType, typename OpndType>
 static inline void
 emitTestTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
-  verifyTVOff(src);
   if (sizeof(DataType) == 4) {
     a.  testl(src, toReg32(tvOp));
   } else {
@@ -205,7 +204,6 @@ emitTestTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
 template<typename SrcType, typename OpndType>
 static inline void
 emitLoadTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
-  verifyTVOff(src);
   if (sizeof(DataType) == 4) {
     a.  loadl(src, toReg32(tvOp));
   } else {
@@ -217,7 +215,6 @@ emitLoadTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
 template<typename SrcType, typename OpndType>
 static inline void
 emitCmpTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
-  verifyTVOff(src);
   if (sizeof(DataType) == 4) {
     a.  cmpl(src, toReg32(tvOp));
   } else {
@@ -228,7 +225,6 @@ emitCmpTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
 template<typename DestType, typename OpndType>
 static inline void
 emitStoreTVType(X64Assembler& a, OpndType tvOp, DestType dest) {
-  verifyTVOff(dest);
   if (sizeof(DataType) == 4) {
     a.  storel(toReg32(tvOp), dest);
   } else {

@@ -69,7 +69,15 @@ public:
       ikey = k;
       data.hash() = 0;
     }
+
+    static constexpr size_t dataOff() {
+      return offsetof(Elm, data);
+    }
   };
+
+  static constexpr size_t dataOff() {
+    return sizeof(HphpArray);
+  }
 
   /*
    * Allocate a new, empty, request-local HphpArray in packed mode,

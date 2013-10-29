@@ -176,6 +176,7 @@ bool IRInstruction::isLoad() const {
     case LdMem:
     case LdProp:
     case LdElem:
+    case LdPackedArrayElem:
     case LdRef:
     case LdThis:
     case LdStaticLocCached:

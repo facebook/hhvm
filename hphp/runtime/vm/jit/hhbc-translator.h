@@ -519,6 +519,8 @@ private:
     void emitArraySet(SSATmp* key, SSATmp* value);
     void emitArrayGet(SSATmp* key);
     void emitArrayIsset();
+    void emitPackedArrayGet(SSATmp* key);
+    void emitPackedArrayIsset();
     void emitStringGet(SSATmp* key);
     void emitStringIsset();
     void emitVectorSet(SSATmp* key, SSATmp* value);
@@ -601,6 +603,8 @@ private:
       None,
       // simple opcode on Array
       Array,
+      // simple opcode on Packed Array
+      PackedArray,
       // simple opcode on String
       String,
       // simple opcode on Vector* (c_Vector*)

@@ -209,6 +209,8 @@ static CallMap s_callMap {
     {VerifyParamFail,    VerifyParamTypeFail, DNone, SSync, {{SSA, 0}}},
     {RaiseUninitLoc,     raiseUndefVariable, DNone, SSync, {{SSA, 0}}},
     {RaiseWarning,       raiseWarning, DNone, SSync, {{SSA, 0}}},
+    {RaiseArrayIndexNotice,
+                         raiseArrayIndexNotice, DNone, SSync, {{SSA, 0}}},
     {WarnNonObjProp,     raisePropertyOnNonObject, DNone, SSync, {}},
     {ThrowNonObjProp,    throw_null_object_prop, DNone, SSync, {}},
     {RaiseUndefProp,     raiseUndefProp, DNone, SSync,

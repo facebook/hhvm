@@ -316,6 +316,7 @@ CALL_OPCODE(ThrowNonObjProp)
 CALL_OPCODE(RaiseUndefProp)
 CALL_OPCODE(RaiseError)
 CALL_OPCODE(RaiseWarning)
+CALL_OPCODE(RaiseArrayIndexNotice)
 CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(ClosureStaticLocInit)
 CALL_OPCODE(ArrayIdx)
@@ -4208,8 +4209,8 @@ void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
   }
 }
 
-template<class MemRef>
-void CodeGenerator::cgStoreTypedValue(MemRef dst, SSATmp* src) {
+template<class BaseRef>
+void CodeGenerator::cgStoreTypedValue(BaseRef dst, SSATmp* src) {
   assert(src->type().needsReg());
   auto srcReg0 = curOpd(src).reg(0);
   auto srcReg1 = curOpd(src).reg(1);
@@ -4217,15 +4218,15 @@ void CodeGenerator::cgStoreTypedValue(MemRef dst, SSATmp* src) {
     // Whole typed value is stored in single XMM reg srcReg0
     assert(RuntimeOption::EvalHHIRAllocXMMRegs);
     assert(srcReg1 == InvalidReg);
-    m_as.movdqa(srcReg0, *(dst.r + TVOFF(m_data)));
+    m_as.movdqa(srcReg0, loadTVData(dst));
     return;
   }
-  m_as.storeq(srcReg0, *(dst.r + TVOFF(m_data)));
-  emitStoreTVType(m_as, srcReg1, *(dst.r + TVOFF(m_type)));
+  m_as.storeq(srcReg0, loadTVData(dst));
+  emitStoreTVType(m_as, srcReg1, loadTVType(dst));
 }
 
-template<class MemRef>
-void CodeGenerator::cgStore(MemRef dst,
+template<class BaseRef>
+void CodeGenerator::cgStore(BaseRef dst,
                             SSATmp* src,
                             bool genStoreType) {
   Type type = src->type();
@@ -4235,7 +4236,7 @@ void CodeGenerator::cgStore(MemRef dst,
   }
   // store the type
   if (genStoreType) {
-    emitStoreTVType(m_as, type.toDataType(), *(dst.r + TVOFF(m_type)));
+    emitStoreTVType(m_as, type.toDataType(), loadTVType(dst));
   }
   if (type.isNull()) {
     // no need to store a value for null or uninit
@@ -4249,23 +4250,23 @@ void CodeGenerator::cgStore(MemRef dst,
     } else {
       not_reached();
     }
-    m_as.storeq(val, *(dst.r + TVOFF(m_data)));
+    m_as.storeq(val, loadTVData(dst));
   } else {
     zeroExtendIfBool(m_as, src, curOpd(src).reg());
-    emitStoreReg(m_as, curOpd(src).reg(), *(dst.r + TVOFF(m_data)));
+    emitStoreReg(m_as, curOpd(src).reg(), loadTVData(dst));
   }
 }
 
-template<class MemRef>
-void CodeGenerator::cgLoad(SSATmp* dst, MemRef base, Block* label) {
+template<class BaseRef>
+void CodeGenerator::cgLoad(SSATmp* dst, BaseRef base, Block* label) {
   Type type = dst->type();
   if (type.needsReg()) {
     return cgLoadTypedValue(dst, base, label);
   }
   if (label != NULL) {
     emitTypeCheck(type,
-                  *(base.r + TVOFF(m_type)),
-                  *(base.r + TVOFF(m_data)),
+                  loadTVType(base),
+                  loadTVData(base),
                   label);
   }
   if (type.isNull()) return; // these are constants
@@ -4274,9 +4275,9 @@ void CodeGenerator::cgLoad(SSATmp* dst, MemRef base, Block* label) {
   if (dstReg == InvalidReg) return;
 
   if (type == Type::Bool) {
-    m_as.loadl(*(base.r + TVOFF(m_data)),  toReg32(dstReg));
+    m_as.loadl(loadTVData(base),  toReg32(dstReg));
   } else {
-    emitLoadReg(m_as, *(base.r + TVOFF(m_data)),  dstReg);
+    emitLoadReg(m_as, loadTVData(base),  dstReg);
   }
 }
 
@@ -4304,9 +4305,9 @@ static MemoryRef makeMemoryRef(Asm& as,
 
 // If label is not null and type is not Gen, this method generates a check
 // that bails to the label if the loaded typed value doesn't match dst type.
-template<class MemRef>
+template<class BaseRef>
 void CodeGenerator::cgLoadTypedValue(SSATmp* dst,
-                                     MemRef ref,
+                                     BaseRef ref,
                                      Block* label) {
   Type type = dst->type();
   auto valueDstReg = curOpd(dst).reg(0);
@@ -4317,7 +4318,7 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst,
     // Whole typed value is stored in single XMM reg valueDstReg
     assert(RuntimeOption::EvalHHIRAllocXMMRegs);
     assert(typeDstReg == InvalidReg);
-    m_as.movdqa(*(ref.r + TVOFF(m_data)), valueDstReg);
+    m_as.movdqa(loadTVData(ref), valueDstReg);
     return;
   }
 
@@ -4327,9 +4328,10 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst,
     return;
   }
 
+  bool isResolved = true;
   auto origRef = ref;
-  ref = resolveRegCollision(typeDstReg, ref);
-  if (ref.r.base == InvalidReg) {
+  ref = resolveRegCollision(typeDstReg, ref, isResolved);
+  if (!isResolved) {
     // An InvalidReg in the base of the returned IndexedMemoryRef means
     // there was a collision with the registers that could not be resolved.
     // Re-enter with a MemoryRef (slow path).
@@ -4338,22 +4340,22 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst,
   }
   // Load type if it's not dead
   if (typeDstReg != InvalidReg) {
-    emitLoadTVType(m_as, *(ref.r + TVOFF(m_type)), typeDstReg);
+    emitLoadTVType(m_as, loadTVType(ref), typeDstReg);
     if (label) {
       emitTypeCheck(type, typeDstReg,
                     valueDstReg, label);
     }
   } else if (label) {
     emitTypeCheck(type,
-                  *(ref.r + TVOFF(m_type)),
-                  *(ref.r + TVOFF(m_data)),
+                  loadTVType(ref),
+                  loadTVData(ref),
                   label);
   }
 
   // Load value if it's not dead
   if (valueDstReg == InvalidReg) return;
 
-  m_as.loadq(*(ref.r + TVOFF(m_data)), valueDstReg);
+  m_as.loadq(loadTVData(ref), valueDstReg);
 }
 
 // May return an invalid IndexedMemoryRef to signal that there is no
@@ -4361,13 +4363,16 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst,
 // to solve the issue (e.g. change the IndexedMemoryRef into a MemoryRef)
 // An invalid IndexedMemoryRef has the base set to InvalidReg.
 IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
-                                                    IndexedMemoryRef memRef) {
+                                                    IndexedMemoryRef memRef,
+                                                    bool& isResolved) {
+  isResolved = true;
   Reg64 base = memRef.r.base;
   Reg64 index = memRef.r.index;
   bool scratchTaken = (base == m_rScratch || index == m_rScratch);
   if (base == dst) {
     if (scratchTaken) {
       // bail, the caller will manage somehow
+      isResolved = false;
       return InvalidReg[InvalidReg];
     }
     // use the scratch register instead
@@ -4376,6 +4381,7 @@ IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
   } else if (index == dst) {
     if (scratchTaken) {
       // bail, the caller will manage somehow
+      isResolved = false;
       return InvalidReg[InvalidReg];
     }
     // use the scratch register instead
@@ -4386,7 +4392,9 @@ IndexedMemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
 }
 
 MemoryRef CodeGenerator::resolveRegCollision(PhysReg dst,
-                                             MemoryRef memRef) {
+                                             MemoryRef memRef,
+                                             bool& isResolved) {
+  isResolved = true;
   if (memRef.r.base == dst) {
     assert(memRef.r.base != m_rScratch);
     // use the scratch register instead
@@ -4431,6 +4439,88 @@ void CodeGenerator::cgStringIsset(IRInstruction* inst) {
     m_as.cmpl(r32(curOpd(idx).reg()), strReg[StringData::sizeOffset()]);
   }
   m_as.setnbe(rbyte(dstReg));
+}
+
+void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
+  Block* label = inst->taken();
+  assert(label);
+  SSATmp* arr = inst->src(0);
+  assert(arr->type().getArrayKind() == ArrayData::kPackedKind);
+  auto arrReg = curOpd(arr).reg();
+  auto idx = inst->src(1);
+  if (idx->isConst()) {
+    m_as.cmpl(idx->getValInt(), arrReg[ArrayData::sizeOff()]);
+  } else {
+    m_as.cmpl(r32(curOpd(idx).reg()), arrReg[ArrayData::sizeOff()]);
+  }
+  emitFwdJcc(CC_BE, label);
+}
+
+/**
+ * Load the pointer to the HphpArray::Elm struct into the destination register.
+ * It performs the load with 2 lea instruction which seems to lead to code that
+ * is shorter and faster.
+ * It's passed the pointer to the HphpArray and the index into the array. The
+ * index must be inbound.
+ *
+ * Essentially given a pointer 'array' to a HphpArray and an index 'idx' the
+ * computation to get to the HphpArray::Elm is the following
+ * array + HphpArray::dataOff() + idx * sizeof(HphpArray::Elm)
+ * and given sizeof(HphpArray::Elm) = 24
+ * array + HphpArray::dataOff() + idx * 24
+ * because of the lea constraints we do
+ * array + HphpArray::dataOff() + 8 * (idx * 3)
+ * and we use a lea to compute idx * 3 so
+ * dst <- idx * 2 + idx
+ * dst <- array + HphpArray::dataOff() + reg * 8
+ * which is what this function does
+ */
+static void emitLoadPackedArrayElemAddr(Asm& a,
+                                        PhysReg arr,
+                                        PhysReg idx,
+                                        PhysReg dst) {
+  static_assert(sizeof(HphpArray::Elm) == 24,
+                "HphpArray:Elm size must be 24 bytes");
+  auto scaledIdx1 = idx * 2;
+  a.lea(idx[scaledIdx1], dst);
+  auto scaledIdx2 = dst * 8;
+  auto scaledIdxDsp = scaledIdx2 + HphpArray::dataOff();
+  a.lea(arr[scaledIdxDsp], dst);
+}
+
+void CodeGenerator::cgLdPackedArrayElem(IRInstruction* inst) {
+  auto arrReg = curOpd(inst->src(0)).reg();
+  auto idx = inst->src(1);
+  if (idx->isConst()) {
+    size_t offset = HphpArray::dataOff() +
+                    idx->getValInt() * sizeof(HphpArray::Elm) +
+                    HphpArray::Elm::dataOff();
+    cgLoad(inst->dst(), arrReg[offset]);
+  } else {
+    auto idxReg = curOpd(idx).reg();
+    emitLoadPackedArrayElemAddr(m_as, arrReg, idxReg, m_rScratch);
+    cgLoad(inst->dst(), m_rScratch[HphpArray::Elm::dataOff()]);
+  }
+}
+
+void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
+  auto arrReg = curOpd(inst->src(0)).reg();
+  auto idx = inst->src(1);
+  if (idx->isConst()) {
+    size_t offset = HphpArray::dataOff() +
+                    idx->getValInt() * sizeof(HphpArray::Elm) +
+                    HphpArray::Elm::dataOff() +
+                    TVOFF(m_type);
+    emitCmpTVType(m_as, KindOfNull, arrReg[offset]);
+  } else {
+    emitLoadPackedArrayElemAddr(m_as, arrReg, curOpd(idx).reg(), m_rScratch);
+    emitCmpTVType(m_as, KindOfNull,
+                  m_rScratch[HphpArray::Elm::dataOff() + TVOFF(m_type)]);
+  }
+
+  auto dstReg = curOpd(inst->dst()).reg();
+  m_as.setne(rbyte(dstReg));
+  m_as.movzbl(rbyte(dstReg), r32(dstReg));
 }
 
 void CodeGenerator::cgCheckBounds(IRInstruction* inst) {

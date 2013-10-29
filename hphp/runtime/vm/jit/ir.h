@@ -355,12 +355,15 @@ O(ExitOnVarEnv,                     ND, S(FramePtr),                       E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                     N|E) \
 O(RaiseError,                       ND, S(Str),            E|N|Mem|Refs|T|Er) \
 O(RaiseWarning,                     ND, S(Str),              E|N|Mem|Refs|Er) \
+O(RaiseArrayIndexNotice,            ND, S(Int),                 E|N|Mem|Refs) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
 O(CheckCold,                        ND, NA,                                E) \
 O(CheckNullptr,                     ND, S(CountedStr,Nullptr),            NF) \
 O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
+O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                     E) \
+O(CheckPackedArrayElemNull,    D(Bool), S(Arr) S(Int),                     E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr),            NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
 O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
@@ -375,6 +378,7 @@ O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),               NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
 O(LdElem,                      D(Cell), S(PtrToCell) S(Int),      E|Mem|Refs) \
+O(LdPackedArrayElem,            D(Gen), S(Arr) S(Int),            E|Mem|Refs) \
 O(LdRef,                        DLdRef, S(BoxedCell),                     NF) \
 O(LdThis,                        DThis, S(FramePtr),                       C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \

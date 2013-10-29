@@ -189,16 +189,21 @@ private:
 
   // helpers to load a value in dst. When label is not null a type check
   // is performed against value to ensure it is of the type expected by dst
-  template<class MemRef>
-  void cgLoad(SSATmp* dst, MemRef value, Block* label = nullptr);
-  template<class MemRef>
-  void cgLoadTypedValue(SSATmp* dst, MemRef base, Block* label = nullptr);
+  template<class BaseRef>
+  void cgLoad(SSATmp* dst, BaseRef value, Block* label = nullptr);
+  template<class BaseRef>
+  void cgLoadTypedValue(SSATmp* dst, BaseRef base, Block* label = nullptr);
 
-  // internal helper to manage register conflicts from (Indexed)MemoryRef
-  // source to PhysReg destination. They may fail in resolving conflicts
-  // in which case the returned *MemoryRef will have an InvalidReg base.
-  IndexedMemoryRef resolveRegCollision(PhysReg dst, IndexedMemoryRef value);
-  MemoryRef resolveRegCollision(PhysReg dst, MemoryRef value);
+  // internal helpers to manage register conflicts from a source to a PhysReg
+  // destination.
+  // If the conflict cannot be resolved the out param isResolved is set to
+  // false and the caller should take proper action
+  IndexedMemoryRef resolveRegCollision(PhysReg dst,
+                                       IndexedMemoryRef value,
+                                       bool& isResolved);
+  MemoryRef resolveRegCollision(PhysReg dst,
+                                MemoryRef value,
+                                bool& isResolved);
 
   template<class Loc1, class Loc2, class JmpFn>
   void emitTypeTest(Type type,
@@ -598,6 +603,31 @@ void genCode(CodeBlock&              mainCode,
              vector<TransBCMapping>* bcMap,
              TranslatorX64*          tx64,
              const RegAllocInfo&     regs);
+
+// Helpers to compute a reference to a TypedValue type and data
+inline MemoryRef loadTVType(PhysReg reg) {
+  return reg[TVOFF(m_type)];
+}
+
+inline MemoryRef loadTVData(PhysReg reg) {
+  return reg[TVOFF(m_data)];
+}
+
+inline MemoryRef loadTVType(MemoryRef ref) {
+  return *(ref.r + TVOFF(m_type));
+}
+
+inline MemoryRef loadTVData(MemoryRef ref) {
+  return *(ref.r + TVOFF(m_data));
+}
+
+inline IndexedMemoryRef loadTVType(IndexedMemoryRef ref) {
+  return *(ref.r + TVOFF(m_type));
+}
+
+inline IndexedMemoryRef loadTVData(IndexedMemoryRef ref) {
+  return *(ref.r + TVOFF(m_data));
+}
 
 }}
 

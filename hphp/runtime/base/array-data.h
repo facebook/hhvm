@@ -509,6 +509,10 @@ public:
     return offsetof(ArrayData, m_kind);
   }
 
+  static constexpr size_t sizeOff() {
+    return offsetof(ArrayData, m_size);
+  }
+
   static const char* kindToString(ArrayKind kind);
 
  private:

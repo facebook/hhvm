@@ -655,14 +655,20 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
   SSATmp* base = getInput(m_mii.valCount(), DataTypeGeneric);
   auto baseType = base->type().unbox();
   HPHP::Op op = m_ni.mInstrOp();
-  if ((op == OpSetM || op == OpCGetM || op == OpIssetM) &&
+  bool readInst = (op == OpCGetM || op == OpIssetM);
+  if ((op == OpSetM || readInst) &&
       isSimpleBase() &&
       isSingleMember()) {
 
     if (baseType <= Type::Arr) {
+      auto const isPacked = (baseType.hasArrayKind() &&
+                            baseType.getArrayKind() == ArrayData::kPackedKind);
       if (mcodeMaybeArrayOrMapKey(m_ni.immVecM[0])) {
         SSATmp* key = getInput(m_mii.valCount() + 1, DataTypeGeneric);
         if (key->isA(Type::Int) || key->isA(Type::Str)) {
+          if (isPacked && readInst && key->isA(Type::Int)) {
+            return SimpleOp::PackedArray;
+          }
           return SimpleOp::Array;
         }
       }
@@ -672,7 +678,7 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
       if (key->isA(Type::Int)) {
         // Don't bother with SetM on strings, because profile data
         // shows it basically never happens.
-        if (op == OpCGetM || op == OpIssetM) {
+        if (readInst) {
           return SimpleOp::String;
         }
       }
@@ -718,6 +724,7 @@ void HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
       m_tb.constrainValue(m_base, DataTypeSpecific);
       return;
 
+    case SimpleOp::PackedArray:
     case SimpleOp::Vector:
     case SimpleOp::Map:
     case SimpleOp::StableMap:
@@ -1644,11 +1651,24 @@ static TypedValue arrayGetNotFound(const StringData* k) {
   return v;
 }
 
-namespace VectorHelpers {
-TypedValue packedArrayGetI(ArrayData* a, TypedValue* key) {
-  int64_t ki = keyAsRaw<KeyType::Int>(key);
-  return HphpArray::GetCellIntPacked(a, ki);
-}
+void HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* key) {
+  assert(m_base->isA(Type::Arr) &&
+         m_base->type().getArrayKind() == ArrayData::kPackedKind);
+  m_result = m_tb.cond(
+    [&] (Block* taken) {
+      gen(CheckPackedArrayBounds, taken, m_base, key);
+    },
+    [&] { // Next:
+      auto res = gen(LdPackedArrayElem, m_base, key);
+      auto unboxed = gen(Unbox, res);
+      return gen(IncRef, unboxed);
+    },
+    [&] { // Taken:
+      m_tb.hint(Block::Hint::Unlikely);
+      gen(RaiseArrayIndexNotice, key);
+      return m_tb.genDefInitNull();
+    }
+  );
 }
 
 template<KeyType keyType, bool checkForInt>
@@ -1688,15 +1708,6 @@ void HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
   typedef TypedValue (*OpFunc)(ArrayData*, TypedValue*);
   BUILD_OPTAB_HOT(keyType, checkForInt);
   assert(m_base->isA(Type::Arr));
-
-  auto baseType = m_base->type();
-  if (baseType.hasArrayKind() &&
-      baseType.getArrayKind() == ArrayData::kPackedKind &&
-      key->isA(Type::Int)) {
-    // DataTypeSpecialized because we care about the array kind
-    constrainBase(DataTypeSpecialized);
-    opFunc = VectorHelpers::packedArrayGetI;
-  }
   m_result = gen(ArrayGet, cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
@@ -1860,6 +1871,9 @@ void HhbcTranslator::MInstrTranslator::emitCGetElem() {
   case SimpleOp::Array:
     emitArrayGet(key);
     break;
+  case SimpleOp::PackedArray:
+    emitPackedArrayGet(key);
+    break;
   case SimpleOp::String:
     emitStringGet(key);
     break;
@@ -1964,9 +1978,20 @@ void HhbcTranslator::MInstrTranslator::emitIssetEmptyElem(bool isEmpty) {
 }
 #undef HELPER_TABLE
 
-static uint64_t packedArrayIssetI(ArrayData* a, TypedValue* key) {
-  int64_t ki = keyAsRaw<KeyType::Int>(key);
-  return HphpArray::IssetIntPacked(a, ki);
+void HhbcTranslator::MInstrTranslator::emitPackedArrayIsset() {
+  assert(m_base->type().getArrayKind() == ArrayData::kPackedKind);
+  SSATmp* key = getKey();
+  m_result = m_tb.cond(
+    [&] (Block* taken) {
+      gen(CheckPackedArrayBounds, taken, m_base, key);
+    },
+    [&] { // Next:
+      return gen(CheckPackedArrayElemNull, m_base, key);
+    },
+    [&] { // Taken:
+      return cns(false);
+    }
+  );
 }
 
 template<KeyType keyType, bool checkForInt>
@@ -2002,14 +2027,6 @@ void HhbcTranslator::MInstrTranslator::emitArrayIsset() {
   typedef uint64_t (*OpFunc)(ArrayData*, TypedValue*);
   BUILD_OPTAB(keyType, checkForInt);
   assert(m_base->isA(Type::Arr));
-  auto baseType = m_base->type();
-  if (baseType.hasArrayKind() &&
-      baseType.getArrayKind() == ArrayData::kPackedKind &&
-      key->isA(Type::Int)) {
-    // DataTypeSpecialized because we care about the array kind
-    constrainBase(DataTypeSpecialized);
-    opFunc = packedArrayIssetI;
-  }
   m_result = gen(ArrayIsset, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
@@ -2122,6 +2139,9 @@ void HhbcTranslator::MInstrTranslator::emitIssetElem() {
   switch (simpleOpType) {
   case SimpleOp::Array:
     emitArrayIsset();
+    break;
+  case SimpleOp::PackedArray:
+    emitPackedArrayIsset();
     break;
   case SimpleOp::String:
     emitStringIsset();
@@ -2424,9 +2444,13 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
   SSATmp* key = getKey();
 
   SimpleOp simpleOpType = simpleCollectionOp();
+  assert(simpleOpType != SimpleOp::PackedArray);
   switch (simpleOpType) {
   case SimpleOp::Array:
     emitArraySet(key, value);
+    break;
+  case SimpleOp::PackedArray:
+    not_reached();
     break;
   case SimpleOp::String:
     not_reached();

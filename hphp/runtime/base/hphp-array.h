@@ -337,6 +337,8 @@ private:
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
+  static ArrayData* ArrayPlusGeneric(HphpArray*, const ArrayData*);
+  static ArrayData* ArrayMergeGeneric(HphpArray*, const ArrayData*);
 
   // convert in-place from kPackedKind to kMixedKind: fill in keys & hashtable
   HphpArray* packedToMixed();

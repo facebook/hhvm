@@ -596,44 +596,36 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
       bitsOff -= sizeof(uint64_t);
     }
 
-    if (vals64 == 0 || (mask64 & (mask64 - 1)) == 0) {
-      // If vals64 is zero, or we're testing a single
-      // bit, we can get away with a single test,
-      // rather than mask-and-compare
-      m_as.    Ldr  (rAsm2, bitsPtrReg[bitsOff]);
-      if (mask64Reg.IsValid()) {
-        m_as.  Tst  (rAsm2, mask64Reg);
-      } else {
-        assert(vixl::Assembler::IsImmLogical(mask64, vixl::kXRegSize));
-        m_as.  Tst  (rAsm2, mask64);
-      }
-      if (vals64) cond = CC_E;
+    // Don't need the bits pointer after this point
+    auto bitsReg = rAsm;
+    // Load the bits
+    m_as.    Ldr  (bitsReg, bitsPtrReg[bitsOff]);
+
+    // Mask the bits. There are restrictions on what can be encoded as an
+    // immediate in ARM's logical instructions, and if they're not met, we'll
+    // have to use a register.
+    if (vixl::Assembler::IsImmLogical(mask64, vixl::kXRegSize)) {
+      m_as.  And  (bitsReg, bitsReg, mask64);
     } else {
-      auto bitsValReg = rAsm;
-      m_as.    Ldr  (bitsValReg, bitsPtrReg[bitsOff]);
-      if (debug) bitsPtrReg = Register();
-
-      //     bitsValReg <- bitsValReg & mask64
-      // NB: these 'And' ops don't set flags. They don't need to.
       if (mask64Reg.IsValid()) {
-        m_as.  And    (bitsValReg, bitsValReg, mask64Reg);
+        m_as.And  (bitsReg, bitsReg, mask64Reg);
       } else {
-        // There are restrictions on the immediates that can be encoded into
-        // logical ops. If the mask doesn't meet those restrictions, we have to
-        // load it into a register first.
-        if (vixl::Assembler::IsImmLogical(mask64, vixl::kXRegSize)) {
-          m_as.And    (bitsValReg, bitsValReg, mask64);
-        } else {
-          m_as.Mov    (rAsm2, mask64);
-          m_as.And    (bitsValReg, bitsValReg, rAsm2);
-        }
+        m_as.Mov  (rAsm2, mask64);
+        m_as.And  (bitsReg, bitsReg, rAsm2);
       }
+    }
 
-      //   If bitsValReg != vals64, then goto Exit
+    // Now do the compare. There are also restrictions on immediates in
+    // arithmetic instructions (of which Cmp is one; it's just a subtract that
+    // sets flags), so same deal as with the mask immediate above.
+    if (vixl::Assembler::IsImmArithmetic(vals64)) {
+      m_as.  Cmp  (bitsReg, vals64);
+    } else {
       if (vals64Reg.IsValid()) {
-        m_as.  Cmp    (bitsValReg, vals64Reg);
+        m_as.Cmp  (bitsReg, vals64Reg);
       } else {
-        m_as.  Cmp    (bitsValReg, vals64);
+        m_as.Mov  (rAsm2, vals64);
+        m_as.Cmp  (bitsReg, rAsm2);
       }
     }
     destSR->emitFallbackJump(m_mainCode, cond);

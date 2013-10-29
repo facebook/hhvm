@@ -40,6 +40,13 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
   auto fixupAddr = a.frontier();
   a.   HostCall(5);
   a.   Pop     (x29, x30);
+
+  // Note that the fixup address for a HostCall is directly *before* the
+  // HostCall, not after as in the native case. This is because, in simulation
+  // mode we look at the simulator's PC at the time the fixup is invoked, and it
+  // will still be pointing to the HostCall; it's not advanced past it until the
+  // host call returns. In the native case, by contrast, we'll be looking at
+  // return addresses, which point after the call.
   return fixupAddr;
 }
 

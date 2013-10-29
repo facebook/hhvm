@@ -41,7 +41,13 @@ void emitCallToExit(UniqueStubs& us) {
 void emitReturnHelpers(UniqueStubs& us) {
   MacroAssembler a { tx64->stubsCode };
 
-  us.retHelper = us.genRetHelper = us.retInlHelper = a.frontier();
+  us.retHelper = a.frontier();
+  a.   Brk   (0);
+
+  us.retInlHelper = a.frontier();
+  a.   Brk   (0);
+
+  us.genRetHelper = a.frontier();
   a.   Brk   (0);
 
   us.add("retHelper", us.retHelper);

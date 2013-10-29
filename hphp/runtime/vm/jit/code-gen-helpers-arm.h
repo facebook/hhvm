@@ -13,13 +13,6 @@
 namespace HPHP { namespace JIT { namespace ARM {
 
 /*
- * Records a fixup, compensating for the way the PC will be slightly different
- * from how it is when resolving a fixup for a native call. Call this directly
- * after emitting a HostCall.
- */
-void recordHostCallSyncPoint(vixl::MacroAssembler& a);
-
-/*
  * Intelligently chooses between Add, Mov, and no-op.
  */
 void emitRegGetsRegPlusImm(vixl::MacroAssembler& as,

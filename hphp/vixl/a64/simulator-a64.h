@@ -147,7 +147,7 @@ class Simulator : public DecoderVisitor {
   void RunFrom(Instruction* first);
 
   // Simulation helpers.
-  inline Instruction* pc() { return pc_; }
+  inline Instruction* pc() const { return pc_; }
   inline void set_pc(Instruction* new_pc) {
     pc_ = new_pc;
     pc_modified_ = true;

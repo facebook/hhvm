@@ -1612,6 +1612,10 @@ class Assembler {
     return IsImmLogical(value, width, &ignored, &ignored, &ignored);
   }
 
+  static bool IsImmArithmetic(int64_t value) {
+    return IsImmAddSub(value);
+  }
+
  protected:
   inline const Register& AppropriateZeroRegFor(const CPURegister& reg) const {
     return reg.Is64Bits() ? xzr : wzr;

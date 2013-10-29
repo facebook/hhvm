@@ -4205,14 +4205,20 @@ Type HhbcTranslator::interpOutputType(
     case OutCInput: {
       auto ttype = topType(0);
       if (ttype.notBoxed()) return ttype;
-      checkTypeType = ttype.unbox();
+      // All instructions that are OutCInput or OutCInputL cannot push uninit or
+      // a ref, so only specific inner types need to be checked.
+      if (ttype.innerType().strictSubtypeOf(Type::InitCell)) {
+        checkTypeType = ttype.unbox();
+      }
       return Type::Cell;
     }
 
     case OutCInputL: {
       auto ltype = localType();
       if (ltype.notBoxed()) return ltype;
-      checkTypeType = ltype.unbox();
+      if (ltype.innerType().strictSubtypeOf(Type::InitCell)) {
+        checkTypeType = ltype.unbox();
+      }
       return Type::Cell;
     }
   }

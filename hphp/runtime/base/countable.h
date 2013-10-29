@@ -73,6 +73,15 @@ inline void assert_refcount_realistic_ns_nz(int32_t count) {
   assert((uint32_t)count - 1 < (uint32_t)RefCountMaxRealistic);
 }
 
+#define DECREF_AND_RELEASE_MAYBE_STATIC(thiz, action) do {              \
+    assert(!MemoryManager::sweeping());                                 \
+    assert_refcount_realistic_nz(thiz->m_count);                        \
+    if (!((uint32_t)thiz->m_count & (uint32_t)RefCountStaticValue) &&   \
+        !--thiz->m_count) {                                             \
+      action;                                                           \
+    }                                                                   \
+  } while (false)
+
 /**
  * Ref-counted types have a m_count field at FAST_REFCOUNT_OFFSET
  * and define counting methods with these macros.
@@ -106,11 +115,7 @@ inline void assert_refcount_realistic_ns_nz(int32_t count) {
   }                                                                     \
                                                                         \
   ALWAYS_INLINE void decRefAndRelease() {                               \
-    assert(!MemoryManager::sweeping());                                 \
-    assert_refcount_realistic_nz(m_count);                              \
-    if (decRefCount() == 0) {                                           \
-      release();                                                        \
-    }                                                                   \
+    DECREF_AND_RELEASE_MAYBE_STATIC(this, release());                   \
   }
 
 #define IMPLEMENT_COUNTABLE_METHODS             \

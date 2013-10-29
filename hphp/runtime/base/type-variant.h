@@ -95,8 +95,9 @@ class Variant : private TypedValue {
   explicit Variant(NoInit) {}
   enum NoInc { noInc = 0 };
 
-  void destruct();
-  static void destructData(RefData* num, DataType t);
+  static ALWAYS_INLINE void destructData(RefData* num, DataType t) {
+    tvDecRefHelper(t, uint64_t(num));
+  }
 
   // D462768 showed no gain from inlining, even just with INLINE_VARIANT_HELPER.
   ~Variant();
@@ -277,8 +278,6 @@ class Variant : private TypedValue {
   }
 
  private:
-  ALWAYS_INLINE void destructImpl();
-  ALWAYS_INLINE static void destructDataImpl(RefData* d, DataType t);
   friend class VarNR;
 
  public:

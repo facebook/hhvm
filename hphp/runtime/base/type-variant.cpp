@@ -262,47 +262,21 @@ const RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&RefData::release),
 };
 
-ALWAYS_INLINE
-void Variant::destructDataImpl(RefData* data, DataType t) {
-  assert(IS_REFCOUNTED_TYPE(t));
-  assert(IS_REAL_TYPE(t));
-  assert_refcount_realistic_nz(data->getCount());
-  if (data->decRefCount() == 0) {
-    assert(t == KindOfString || t == KindOfArray ||
-           t == KindOfObject || t == KindOfResource ||
-           t == KindOfRef);
-    g_destructors[typeToDestrIndex(t)](data);
+HOT_FUNC
+Variant::~Variant() {
+  if (IS_REFCOUNTED_TYPE(m_type)) {
+    tvDecRefHelper(m_type, uint64_t(m_data.pref));
   }
 }
 
-ALWAYS_INLINE
-void Variant::destructImpl() {
-  destructDataImpl(m_data.pref, m_type);
-}
-
-HOT_FUNC_VM
+HOT_FUNC
 void tvDecRefHelper(DataType type, uint64_t datum) {
   assert(type == KindOfString || type == KindOfArray ||
          type == KindOfObject || type == KindOfResource ||
          type == KindOfRef);
-  if (((RefData*)datum)->decRefCount() == 0) {
-    g_destructors[typeToDestrIndex(type)]((void*)datum);
-  }
-}
-
-HOT_FUNC
-void Variant::destruct() {
-  destructImpl();
-}
-
-HOT_FUNC
-void Variant::destructData(RefData* data, DataType t) {
-  destructDataImpl(data, t);
-}
-
-HOT_FUNC
-Variant::~Variant() {
-  if (IS_REFCOUNTED_TYPE(m_type)) destructImpl();
+  DECREF_AND_RELEASE_MAYBE_STATIC(
+    ((RefData*)datum),
+    g_destructors[typeToDestrIndex(type)]((void*)datum));
 }
 
 HOT_FUNC

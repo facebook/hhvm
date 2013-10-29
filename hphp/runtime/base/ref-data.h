@@ -102,7 +102,7 @@ struct RefData {
     MM().smartFreeSizeLogged(const_cast<RefData*>(this), sizeof(RefData));
   }
 
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
+  IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
 
   // Memory allocator methods
   void dump() const;

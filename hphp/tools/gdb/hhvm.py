@@ -1,24 +1,23 @@
-#
-# Python GDB macros for inspecting hhvm data types.
-#
-#
-#  To use, add this to your .gdbinit:
-#
-#    source path/to/hhvm/repo/tools/gdb/hhvm.py
-#
-# Then just use "p foo" as normal, and if it's one of the supported
-# types it'll be prettier.  If the macros go off the rails, you can
-# use "p/r foo" to get back to raw printing.
-#
-#
+"""
+Python GDB macros for inspecting hhvm data types.
 
+To use, add this to your .gdbinit:
+
+   source path/to/hhvm/repo/tools/gdb/hhvm.py
+
+Then just use "p foo" and "x foo" as normal, and if it's one of the
+supported types it'll be prettier.  If the macros go off the rails,
+you can use "p/r foo" to get back to raw printing.
+"""
+# @lint-avoid-python-3-compatibility-imports
 import gdb
 import re
 
-def StringDataVal(val):
+def string_data_val(val):
     return val['m_data'].string("utf-8", 'ignore', val['m_len'])
 
 class TypedValuePrinter:
+    RECOGNIZE = '^HPHP::(TypedValue|VM::Cell|Variant|VarNR)$'
     def __init__(self, val):
         tv = gdb.lookup_type('HPHP::TypedValue')
         self.val = val.cast(tv)
@@ -42,7 +41,7 @@ class TypedValuePrinter:
         elif v == 0x0b:
             return "Tv: %g" % self.val['m_data']['dbl']
         elif v == 0x0c or v == 0x14:
-            return "Tv: '%s'" % StringDataVal(self.val['m_data']['pstr'].
+            return "Tv: '%s'" % string_data_val(self.val['m_data']['pstr'].
                                             dereference())
         elif v == 0x20:
             return "Tv: %s" % self.val['m_data']['parr'].dereference()
@@ -56,13 +55,15 @@ class TypedValuePrinter:
             return "Type %d" % v
 
 class StringDataPrinter:
+    RECOGNIZE = '^HPHP::StringData$'
     def __init__(self, val):
         self.val = val
 
     def to_string(self):
-        return "Str: '%s'" % StringDataVal(self.val)
+        return "Str: '%s'" % string_data_val(self.val)
 
 class ArrayDataPrinter:
+    RECOGNIZE = '^HPHP::(ArrayData|HphpArray)$'
     class _iterator:
         def __init__(self, kind, begin, end):
             self.kind = kind
@@ -85,7 +86,7 @@ class ArrayDataPrinter:
             elif data['m_aux']['u_hash'] == 0:
                 key = '%d' % elt['ikey']
             else:
-                key = '"%s"' % StringDataVal(elt['key'].dereference())
+                key = '"%s"' % string_data_val(elt['key'].dereference())
             self.cur = self.cur + 1
             self.count = self.count + 1
             return (key, data)
@@ -125,6 +126,7 @@ class ArrayDataPrinter:
 objectDataCount = 100
 
 class ObjectDataPrinter:
+    RECOGNIZE = '^HPHP::(ObjectData|Instance)$'
     class _iterator:
         def __init__(self, val, cls, begin, end):
             self.cur = begin
@@ -150,7 +152,7 @@ class ObjectDataPrinter:
 
             self.addr = self.addr + 1
             self.cur = self.cur + 1
-            return (StringDataVal(elt['m_name']), tv)
+            return (string_data_val(elt['m_name']), tv)
 
     def __init__(self, val):
         self.dtype = val.dynamic_type
@@ -169,10 +171,11 @@ class ObjectDataPrinter:
 
     def to_string(self):
         return "Object of class %s @ 0x%x" % (
-            StringDataVal(self.cls['m_preClass']['m_px']['m_name']),
+            string_data_val(self.cls['m_preClass']['m_px']['m_name']),
             self.val.address)
 
 class SmartPtrPrinter:
+    RECOGNIZE = '^HPHP::((Static)?String|Array|Object|SmartPtr<.*>)$'
     class _iterator:
         def __init__(self, begin, end):
             self.cur = begin
@@ -207,6 +210,7 @@ class SmartPtrPrinter:
         return "SmartPtr<%s>(Null)" % tag
 
 class RefDataPrinter:
+    RECOGNIZE = '^HPHP::RefData$'
     def __init__(self, val):
         self.val = val
 
@@ -214,20 +218,24 @@ class RefDataPrinter:
         return "Ref: %s" % self.val['m_tv']
 
 class ResourceDataPrinter:
+    RECOGNIZE = '^HPHP::ResourceData$'
     def __init__(self, val):
         self.val = val
 
     def to_string(self):
         return "Res #%d" % self.val['o_id']
 
-dict = {}
-dict[re.compile('^HPHP::TypedValue|HPHP::VM::Cell|HPHP::Variant|HPHP::VarNR$')] = lambda val: TypedValuePrinter(val)
-dict[re.compile('^HPHP::StringData$')] = lambda val: StringDataPrinter(val)
-dict[re.compile('^HPHP::(ArrayData|HphpArray)$')] = lambda val: ArrayDataPrinter(val)
-dict[re.compile('^HPHP::(ObjectData|Instance)$')] = lambda val: ObjectDataPrinter(val)
-dict[re.compile('^HPHP::RefData$')] = lambda val: RefDataPrinter(val)
-dict[re.compile('^HPHP::ResourceData$')] = lambda val: ResourceDataPrinter(val)
-dict[re.compile('^HPHP::((Static)?String|Array|Object|SmartPtr<.*>)$')] = lambda val: SmartPtrPrinter(val)
+printer_classes = [
+    TypedValuePrinter,
+    StringDataPrinter,
+    ArrayDataPrinter,
+    ObjectDataPrinter,
+    SmartPtrPrinter,
+    RefDataPrinter,
+    ResourceDataPrinter,
+]
+type_printers = dict((re.compile(cls.RECOGNIZE), cls)
+                     for cls in printer_classes)
 
 def lookup_function(val):
     type = val.type
@@ -241,15 +249,14 @@ def lookup_function(val):
     if typename == None:
         return None
 
-    # Iterate over local dictionary of types to determine
-    # if a printer is registered for that type.  Return an
-    # instantiation of the printer if found.
-    for function in dict:
-        if function.search (typename):
-            return dict[function] (val)
+    # Iterate over local dict of types to determine if a printer is
+    # registered for that type.  Return an instantiation of the
+    # printer if found.
+    for recognizer_regex, func in type_printers.iteritems():
+        if recognizer_regex.search(typename):
+            return func(val)
 
     # Cannot find a pretty printer.  Return None.
     return None
 
 gdb.pretty_printers.append(lookup_function)
-

@@ -57,6 +57,97 @@ protected:
 
   // Others
   void construct(CVarRef iterable = null_variant);
+  Object lazy();
+  Array toarray();
+  Array tokeysarray();
+  Array tovaluesarray();
+  int64_t linearsearch(CVarRef search_value);
+
+  template<typename T>
+  static Object slice(const char* vecType, CVarRef vec, CVarRef offset,
+                      CVarRef len = uninit_null()) {
+
+    std::string notVecMsg = std::string("vec must be an instance of ") +
+                            std::string(vecType);
+
+    if (!vec.isObject()) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(notVecMsg));
+      throw e;
+    }
+    ObjectData* obj = vec.getObjectData();
+    if (obj->getVMClass() != T::classof()) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(notVecMsg));
+      throw e;
+    }
+    if (!offset.isInteger()) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Parameter offset must be an integer"));
+      throw e;
+    }
+    if (!len.isNull() && !len.isInteger()) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Parameter len must be null or an integer"));
+      throw e;
+    }
+    T* target;
+    Object ret = target = NEWOBJ(T)();
+    auto v = static_cast<T*>(obj);
+    int64_t sz = v->m_size;
+    int64_t startPos = offset.toInt64();
+    if (UNLIKELY(uint64_t(startPos) >= uint64_t(sz))) {
+      if (startPos >= 0) {
+        return ret;
+      }
+      startPos += sz;
+      if (startPos < 0) {
+        startPos = 0;
+      }
+    }
+    int64_t endPos;
+    if (len.isInteger()) {
+      int64_t intLen = len.toInt64();
+      if (LIKELY(intLen > 0)) {
+        endPos = startPos + intLen;
+        if (endPos > sz) {
+          endPos = sz;
+        }
+      } else {
+        if (intLen == 0) {
+          return ret;
+        }
+        endPos = sz + intLen;
+        if (endPos <= startPos) {
+          return ret;
+        }
+      }
+    } else {
+      endPos = sz;
+    }
+    assert(startPos < endPos);
+    uint targetSize = endPos - startPos;
+    TypedValue* data;
+    target->m_capacity = target->m_size = targetSize;
+    target->m_data = data =
+      (TypedValue*)smart_malloc(targetSize * sizeof(TypedValue));
+    for (uint i = 0; i < targetSize; ++i, ++startPos) {
+      cellDup(v->m_data[startPos], data[i]);
+    }
+    return ret;
+  }
+
+  template<typename T>
+  static T* Clone(ObjectData* obj) {
+    auto thiz = static_cast<T*>(obj);
+    auto target = static_cast<T*>(obj->cloneImpl());
+    uint sz = thiz->m_size;
+    TypedValue* data;
+    target->m_capacity = target->m_size = sz;
+    target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
+    for (int i = 0; i < sz; ++i) {
+      cellDup(thiz->m_data[i], data[i]);
+    }
+    return target;
+  }
 
 public:
 

@@ -134,19 +134,6 @@ void c_Vector::resize(int64_t sz, TypedValue* val) {
   }
 }
 
-c_Vector* c_Vector::Clone(ObjectData* obj) {
-  auto thiz = static_cast<c_Vector*>(obj);
-  auto target = static_cast<c_Vector*>(obj->cloneImpl());
-  uint sz = thiz->m_size;
-  TypedValue* data;
-  target->m_capacity = target->m_size = sz;
-  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
-  for (int i = 0; i < sz; ++i) {
-    cellDup(thiz->m_data[i], data[i]);
-  }
-  return target;
-}
-
 Object c_Vector::t_add(CVarRef val) {
   TypedValue* tv = cvarToCell(&val);
   add(tv);
@@ -252,11 +239,11 @@ Object c_Vector::t_keys() {
 }
 
 Object c_Vector::t_values() {
-  return Object::attach(c_Vector::Clone(this));
+  return Object::attach(BaseVector::Clone<c_Vector>(this));
 }
 
 Object c_Vector::t_lazy() {
-  return SystemLib::AllocLazyKeyedIterableViewObject(this);
+  return BaseVector::lazy();
 }
 
 Object c_Vector::t_kvzip() {
@@ -302,20 +289,15 @@ Object c_Vector::t_removekey(CVarRef key) {
 }
 
 Array c_Vector::t_toarray() {
-  return toArrayImpl();
+  return BaseVector::toarray();
 }
 
 Array c_Vector::t_tokeysarray() {
-  PackedArrayInit ai(m_size);
-  uint sz = m_size;
-  for (uint i = 0; i < sz; ++i) {
-    ai.append((int64_t)i);
-  }
-  return ai.toArray();
+  return BaseVector::tokeysarray();
 }
 
 Array c_Vector::t_tovaluesarray() {
-  return toArrayImpl();
+  return BaseVector::tovaluesarray();
 }
 
 void c_Vector::t_reverse() {
@@ -393,13 +375,7 @@ void c_Vector::t_splice(CVarRef offset, CVarRef len /* = null */,
 }
 
 int64_t c_Vector::t_linearsearch(CVarRef search_value) {
-  uint sz = m_size;
-  for (uint i = 0; i < sz; ++i) {
-    if (same(search_value, tvAsCVarRef(&m_data[i]))) {
-      return i;
-    }
-  }
-  return -1;
+  return BaseVector::linearsearch(search_value);
 }
 
 void c_Vector::t_shuffle() {
@@ -514,73 +490,9 @@ Object c_Vector::ti_fromarray(CVarRef arr) {
   return ret;
 }
 
-Variant c_Vector::ti_slice(CVarRef vec, CVarRef offset,
-                           CVarRef len /* = null */) {
-  if (!vec.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "vec must be an instance of Vector"));
-    throw e;
-  }
-  ObjectData* obj = vec.getObjectData();
-  if (obj->getVMClass() != c_Vector::classof()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "vec must be an instance of Vector"));
-    throw e;
-  }
-  if (!offset.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter offset must be an integer"));
-    throw e;
-  }
-  if (!len.isNull() && !len.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter len must be null or an integer"));
-    throw e;
-  }
-  c_Vector* target;
-  Object ret = target = NEWOBJ(c_Vector)();
-  auto v = static_cast<c_Vector*>(obj);
-  int64_t sz = v->m_size;
-  int64_t startPos = offset.toInt64();
-  if (UNLIKELY(uint64_t(startPos) >= uint64_t(sz))) {
-    if (startPos >= 0) {
-      return ret;
-    }
-    startPos += sz;
-    if (startPos < 0) {
-      startPos = 0;
-    }
-  }
-  int64_t endPos;
-  if (len.isInteger()) {
-    int64_t intLen = len.toInt64();
-    if (LIKELY(intLen > 0)) {
-      endPos = startPos + intLen;
-      if (endPos > sz) {
-        endPos = sz;
-      }
-    } else {
-      if (intLen == 0) {
-        return ret;
-      }
-      endPos = sz + intLen;
-      if (endPos <= startPos) {
-        return ret;
-      }
-    }
-  } else {
-    endPos = sz;
-  }
-  assert(startPos < endPos);
-  uint targetSize = endPos - startPos;
-  TypedValue* data;
-  target->m_capacity = target->m_size = targetSize;
-  target->m_data = data =
-    (TypedValue*)smart_malloc(targetSize * sizeof(TypedValue));
-  for (uint i = 0; i < targetSize; ++i, ++startPos) {
-    cellDup(v->m_data[startPos], data[i]);
-  }
-  return ret;
+Object c_Vector::ti_slice(CVarRef vec, CVarRef offset,
+                          CVarRef len /* = null */) {
+  return BaseVector::slice<c_Vector>("Vector", vec, offset, len);
 }
 
 void c_Vector::throwOOB(int64_t key) {
@@ -820,11 +732,43 @@ Object c_FrozenVector::t_keys() {
   return obj;
 }
 
+Object c_FrozenVector::ti_slice(CVarRef vec, CVarRef offset,
+                                CVarRef len /* = null */) {
+  return BaseVector::slice<c_FrozenVector>("FrozenVector", vec, offset, len);
+}
+
 // Others
 
 void c_FrozenVector::t___construct(CVarRef iterable /* = null_variant */) {
   BaseVector::construct(iterable);
 }
+
+Object c_FrozenVector::t_lazy() {
+  return BaseVector::lazy();
+}
+
+Array c_FrozenVector::t_toarray() {
+  return BaseVector::toarray();
+}
+
+Array c_FrozenVector::t_tokeysarray() {
+  return BaseVector::tokeysarray();
+}
+
+Array c_FrozenVector::t_tovaluesarray() {
+  return BaseVector::tovaluesarray();
+}
+
+int64_t c_FrozenVector::t_linearsearch(CVarRef search_value) {
+  return BaseVector::linearsearch(search_value);
+}
+
+Object c_FrozenVector::t_values() {
+  return Object::attach(BaseVector::Clone<c_FrozenVector>(this));
+}
+
+
+// Non PHP methods.
 
 c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
 

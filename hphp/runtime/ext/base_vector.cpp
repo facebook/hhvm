@@ -224,6 +224,39 @@ void BaseVector::construct(CVarRef iterable /* = null_variant */) {
   init(iterable);
 }
 
+Object BaseVector::lazy() {
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
+}
+
+Array BaseVector::toarray() {
+  return toArrayImpl();
+}
+
+Array BaseVector::tokeysarray() {
+  PackedArrayInit ai(m_size);
+  uint sz = m_size;
+  for (uint i = 0; i < sz; ++i) {
+    ai.append((int64_t)i);
+  }
+  return ai.toArray();
+}
+
+Array BaseVector::tovaluesarray() {
+  return toArrayImpl();
+}
+
+int64_t BaseVector::linearsearch(CVarRef search_value) {
+  uint sz = m_size;
+  for (uint i = 0; i < sz; ++i) {
+    if (same(search_value, tvAsCVarRef(&m_data[i]))) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+// Non PHP-land methods.
+
 bool BaseVector::OffsetIsset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   auto vec = static_cast<BaseVector*>(obj);

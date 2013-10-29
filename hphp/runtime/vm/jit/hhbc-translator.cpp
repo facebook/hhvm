@@ -835,7 +835,7 @@ void HhbcTranslator::emitSetL(int32_t id) {
   // about the type of the value. stLoc needs to IncRef the value so it may
   // constrain it further.
   auto const src = popC(DataTypeGeneric);
-  push(stLoc(id, exit, src));
+  pushStLoc(id, exit, src);
 }
 
 void HhbcTranslator::emitIncDecL(bool pre, bool inc, uint32_t id) {
@@ -936,7 +936,7 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
       loc->isA(Type::Bool) ? gen(ConvBoolToInt, loc) : loc,
       val->isA(Type::Bool) ? gen(ConvBoolToInt, val) : val
     );
-    push(stLoc(id, exitBlock, result));
+    pushStLoc(id, exitBlock, result);
     return;
   }
 
@@ -4715,8 +4715,11 @@ SSATmp* HhbcTranslator::ldLocInnerWarn(uint32_t id, Block* target,
 /*
  * Store to a local, if it's boxed set the value on the inner cell.
  *
- * Returns the value that was stored to the local, after incrementing
- * its reference count.
+ * Returns the value that was stored to the local. Assumes that 'newVal'
+ * has already been incremented, with this Store consuming the
+ * ref-count increment. If the caller of this function needs to
+ * push the stored value on stack, it is responsible for incrementing
+ * the ref-count before doing the push.
  *
  * Pre: !newVal->type().isBoxed() && !newVal->type().maybeBoxed()
  * Pre: exit != nullptr if the local may be boxed
@@ -4733,11 +4736,10 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
 
   if (oldLoc->type().notBoxed()) {
     gen(StLoc, LocalId(id), m_tb->fp(), newVal);
-    auto const ret = doRefCount ? gen(IncRef, newVal) : newVal;
     if (doRefCount) {
       gen(DecRef, oldLoc);
     }
-    return ret;
+    return newVal;
   }
 
   // It's important that the IncRef happens after the LdRef, since the
@@ -4746,14 +4748,19 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
   auto const innerCell = gen(
     LdRef, oldLoc->type().innerType(), exit, oldLoc
   );
-  auto const ret = doRefCount ? gen(IncRef, newVal) : newVal;
   gen(StRef, oldLoc, newVal);
   if (doRefCount) {
     m_tb->constrainValue(newVal, DataTypeCountness);
     gen(DecRef, innerCell);
   }
 
-  return ret;
+  return newVal;
+}
+
+SSATmp* HhbcTranslator::pushStLoc(uint32_t id, Block* exit, SSATmp* newVal) {
+  const bool doRefCount = true;
+  SSATmp* ret = stLocImpl(id, exit, newVal, doRefCount);
+  return pushIncRef(ret);
 }
 
 SSATmp* HhbcTranslator::stLoc(uint32_t id, Block* exit, SSATmp* newVal) {

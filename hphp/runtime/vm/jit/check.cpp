@@ -311,11 +311,12 @@ bool checkShuffle(const IRInstruction& inst, const RegAllocInfo& regs) {
   for (uint32_t i = 0; i < n; ++i) {
     DEBUG_ONLY auto& rs = regs[inst][inst.src(i)];
     DEBUG_ONLY auto& rd = inst.extra<Shuffle>()->dests[i];
-    // rs could have less assigned registers/slots than rd, in these cases
+    if (rd.numAllocatedRegs() == 0) continue; // dest was unused; ignore.
+    // rs could have less assigned registers/slots than rd, in these cases:
     // - when rs is empty, because the source is a constant.
-    // - when rd needs 2 and rs needs 1, and the source hasKnownType() but
-    // the dest type was more general, therefore needing the DataType in
-    // the second register.
+    // - when rd needs 2 and rs needs 0 or 1, and the source is either constant
+    //   or hasKnownType() without being constant, and the dest type is more
+    //   general than the src type due to a control-flow join.
     assert(rs.numAllocatedRegs() <= rd.numAllocatedRegs());
     assert(!rs.spilled() || !rd.spilled());
     assert(rs.isFullXMM() == rd.isFullXMM());

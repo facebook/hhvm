@@ -2812,6 +2812,7 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     auto src = inst->src(i);
     auto& rs = curOpd(src);
     auto& rd = inst->extra<Shuffle>()->dests[i];
+    if (rd.numAllocatedRegs() == 0) continue; // ignore unused dests.
     if (rd.spilled()) {
       emitSpill(m_as, rs, rd, src->type());
     } else if (!rs.spilled()) {
@@ -2839,17 +2840,21 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     auto src = inst->src(i);
     auto& rs = curOpd(src);
     auto& rd = inst->extra<Shuffle>()->dests[i];
+    if (rd.numAllocatedRegs() == 0) continue; // ignore unused dests.
     if (rd.spilled()) continue;
     if (rs.spilled()) {
       emitReload(m_as, rs, rd, src->type());
-    } else if (rs.numAllocatedRegs() == 1 && rd.numAllocatedRegs() == 2) {
+      continue;
+    }
+    if (rs.numAllocatedRegs() == 0) {
+      assert(src->inst()->op() == DefConst);
+      m_as.emitImmReg(src->getValBits(), rd.reg(0));
+    }
+    if (rd.numAllocatedRegs() == 2 && rs.numAllocatedRegs() < 2) {
       // move a src known type to a dest register
       //         a.emitImmReg(args[i].imm().q(), dst);
       assert(src->type().isKnownDataType());
       m_as.emitImmReg(src->type().toDataType(), rd.reg(1));
-    } else if (rs.numAllocatedRegs() == 0) {
-      assert(rd.numAllocatedRegs() == 1 && src->inst()->op() == DefConst);
-      m_as.emitImmReg(src->getValBits(), rd.reg(0));
     }
   }
 }

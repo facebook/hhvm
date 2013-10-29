@@ -1945,9 +1945,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
                        false, false);
   if (RuntimeOption::EvalJitPGO) {
     if (transKind == TransProfile) {
-      JIT::RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
-      populateLiveContext(rContext);
-      m_profData->addTransProfile(*tp, rContext, pconds);
+      m_profData->addTransProfile(*tp, liveSpOff(), pconds);
     } else {
       m_profData->addTransNonProf(transKind, sk);
     }

@@ -349,12 +349,11 @@ RegionDescPtr selectHotRegion(Transl::TransID transId,
                               Transl::TranslatorX64* tx64);
 
 /*
- * Create a compilation region corresponding to a tracelet, using
+ * Create a compilation region corresponding to a tracelet created by
  * the old analyze() framework.
  */
-RegionDescPtr selectTraceletLegacy(const RegionContext&    rCtx,
+RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
                                    const Transl::Tracelet& tlet);
-
 
 /*
  * Checks whether the type predictions at the beginning of block

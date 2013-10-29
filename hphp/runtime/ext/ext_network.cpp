@@ -991,10 +991,10 @@ Variant f_http_response_code(int response_code /* = 0 */) {
 
 Array f_headers_list() {
   Transport *transport = g_context->getTransport();
+  Array ret = Array::Create();
   if (transport) {
     HeaderMap headers;
     transport->getResponseHeaders(headers);
-    Array ret;
     for (HeaderMap::const_iterator iter = headers.begin();
          iter != headers.end(); ++iter) {
       const vector<string> &values = iter->second;
@@ -1002,9 +1002,8 @@ Array f_headers_list() {
         ret.append(String(iter->first + ": " + values[i]));
       }
     }
-    return ret;
   }
-  return Array();
+  return ret;
 }
 
 bool f_headers_sent(VRefParam file /* = null */, VRefParam line /* = null */) {

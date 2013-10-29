@@ -41,7 +41,9 @@ namespace HPHP {
 static const char HTTP_RESPONSE_STATS_PREFIX[] = "http_response_";
 
 Transport::Transport()
-  : m_instructions(0), m_url(nullptr), m_postData(nullptr), m_postDataParsed(false),
+  : m_instructions(0), m_sleepTime(0), m_usleepTime(0),
+    m_nsleepTimeS(0), m_nsleepTimeN(0), m_url(nullptr),
+    m_postData(nullptr), m_postDataParsed(false),
     m_chunkedEncoding(false), m_headerSent(false),
     m_headerCallback(uninit_null()), m_headerCallbackDone(false),
     m_responseCode(-1), m_firstHeaderSet(false), m_firstHeaderLine(0),

@@ -88,6 +88,17 @@ public:
   const timespec &getWallTime() const { return m_wallTime;}
   const timespec &getCpuTime() const { return m_cpuTime;}
   const int64_t &getInstructions() const { return m_instructions;}
+  const int64_t &getSleepTime() const { return m_sleepTime; }
+  void incSleepTime(unsigned int seconds) { m_sleepTime += seconds; }
+  const int64_t &getuSleepTime() const { return m_usleepTime; }
+  void incuSleepTime(unsigned int useconds) { m_usleepTime += useconds; }
+  const int64_t &getnSleepTimeS() const { return m_nsleepTimeS; }
+  const int32_t &getnSleepTimeN() const { return m_nsleepTimeN; }
+  void incnSleepTime(unsigned long int seconds, unsigned int nseconds) {
+    m_nsleepTimeN += nseconds;
+    m_nsleepTimeS += seconds + (m_nsleepTimeN / 1000000000);
+    m_nsleepTimeN %= 1000000000;
+  }
 
   ///////////////////////////////////////////////////////////////////////////
   // Functions sub-classes have to implement.
@@ -366,6 +377,11 @@ protected:
   timespec m_cpuTime;
 
   int64_t m_instructions;
+
+  int64_t m_sleepTime;
+  int64_t m_usleepTime;
+  int64_t m_nsleepTimeS;
+  int32_t m_nsleepTimeN;
 
   // input
   char *m_url;

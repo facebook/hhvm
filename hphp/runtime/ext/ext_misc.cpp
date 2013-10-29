@@ -221,13 +221,48 @@ bool f_php_check_syntax(const String& filename, VRefParam error_message /* = nul
 
 int64_t f_sleep(int seconds) {
   IOStatusHelper io("sleep");
+  Transport *transport = g_context->getTransport();
+  if (transport) {
+    transport->incSleepTime(seconds);
+  }
   sleep(seconds);
   return 0;
 }
 
 void f_usleep(int micro_seconds) {
   IOStatusHelper io("usleep");
+  Transport *transport = g_context->getTransport();
+  if (transport) {
+    transport->incuSleepTime(micro_seconds);
+  }
   usleep(micro_seconds);
+}
+
+static void recordNanosleepTime(
+  const struct timespec &req,
+  const struct timespec *rem
+) {
+  Transport *transport = g_context->getTransport();
+  if (transport) {
+    int64_t req_s = req.tv_sec;
+    int32_t req_n = req.tv_nsec;
+    int64_t rem_s = 0;
+    int32_t rem_n = 0;
+
+    if (rem) {
+      rem_s = rem->tv_sec;
+      rem_n = rem->tv_nsec;
+    }
+
+    int32_t nanos = req_n - rem_n;
+    int64_t seconds = req_s - rem_s;
+    if (nanos < 0) {
+      nanos += 1000000000;
+      seconds--;
+    }
+
+    transport->incnSleepTime(seconds, nanos);
+  }
 }
 
 const StaticString
@@ -250,8 +285,11 @@ Variant f_time_nanosleep(int seconds, int nanoseconds) {
 
   IOStatusHelper io("nanosleep");
   if (!nanosleep(&req, &rem)) {
+    recordNanosleepTime(req, nullptr);
     return true;
   }
+
+  recordNanosleepTime(req, &rem);
   if (errno == EINTR) {
     return make_map_array(s_seconds, (int64_t)rem.tv_sec,
                        s_nanoseconds, (int64_t)rem.tv_nsec);
@@ -278,17 +316,22 @@ bool f_time_sleep_until(double timestamp) {
 
   IOStatusHelper io("nanosleep");
   while (nanosleep(&req, &rem)) {
+    recordNanosleepTime(req, &rem);
     if (errno != EINTR) return false;
     req.tv_sec = rem.tv_sec;
     req.tv_nsec = rem.tv_nsec;
   }
-
+  recordNanosleepTime(req, nullptr);
   return true;
 }
 
 String f_uniqid(const String& prefix /* = null_string */,
                 bool more_entropy /* = false */) {
   if (!more_entropy) {
+    Transport *transport = g_context->getTransport();
+    if (transport) {
+      transport->incuSleepTime(1);
+    }
     usleep(1);
   }
 

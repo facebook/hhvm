@@ -31,6 +31,7 @@ struct HeapProfileRequestHandler : public RequestHandler {
 
   virtual ~HeapProfileRequestHandler() {}
   virtual void handleRequest(Transport *transport);
+  virtual void abortRequest(Transport *transport);
 
 private:
   bool handleStartRequest(Transport *transport);

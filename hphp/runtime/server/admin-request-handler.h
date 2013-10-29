@@ -31,6 +31,7 @@ public:
   explicit AdminRequestHandler(int timeout);
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport);
+  virtual void abortRequest(Transport *transport);
 
 private:
   bool handleCheckRequest  (const std::string &cmd, Transport *transport);

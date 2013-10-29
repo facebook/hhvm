@@ -533,6 +533,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
   GetAccessLog().log(transport, nullptr);
 }
 
+void AdminRequestHandler::abortRequest(Transport *transport) {
+  GetAccessLog().onNewRequest();
+  transport->sendString("Service Unavailable", 503);
+  GetAccessLog().log(transport, nullptr);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // stats commands
 

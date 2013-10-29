@@ -37,6 +37,7 @@ public:
     : RequestHandler(timeout), m_factory(factory), m_reqHandler(timeout) {}
 
   virtual void handleRequest(Transport *transport);
+  virtual void abortRequest(Transport *transport);
 
 private:
   WarmupRequestHandlerFactoryPtr m_factory;

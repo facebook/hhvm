@@ -31,6 +31,10 @@ void WarmupRequestHandler::handleRequest(Transport *transport) {
   m_reqHandler.handleRequest(transport);
 }
 
+void WarmupRequestHandler::abortRequest(Transport *transport) {
+  m_reqHandler.abortRequest(transport);
+}
+
 std::unique_ptr<RequestHandler> WarmupRequestHandlerFactory::createHandler() {
   return make_unique<WarmupRequestHandler>(m_timeout, shared_from_this());
 }

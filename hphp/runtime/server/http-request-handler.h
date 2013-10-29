@@ -42,6 +42,7 @@ public:
 
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport);
+  virtual void abortRequest(Transport *transport);
 
   // for internal invoke of a special URL
   void disablePathTranslation() { m_pathTranslation = false;}

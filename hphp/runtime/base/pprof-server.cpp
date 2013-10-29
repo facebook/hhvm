@@ -105,6 +105,10 @@ void HeapProfileRequestHandler::handleRequest(Transport *transport) {
   }
 }
 
+void HeapProfileRequestHandler::abortRequest(Transport *transport) {
+  transport->sendString("Service Unavailable", 503);
+}
+
 // static
 void HeapProfileServer::waitForPProf() {
   std::unique_lock<std::mutex> lock(s_clientMutex);

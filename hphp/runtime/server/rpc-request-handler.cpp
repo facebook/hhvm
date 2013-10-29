@@ -184,6 +184,14 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   HttpProtocol::ClearRecord(ret, tmpfile);
 }
 
+void RPCRequestHandler::abortRequest(Transport *transport) {
+  HttpRequestHandler::GetAccessLog().onNewRequest();
+  const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
+  assert(vhost);
+  transport->sendString("Service Unavailable", 503);
+  HttpRequestHandler::GetAccessLog().log(transport, vhost);
+}
+
 const StaticString
   s_output("output"),
   s_return("return"),

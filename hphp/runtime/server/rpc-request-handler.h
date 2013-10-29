@@ -42,6 +42,7 @@ public:
 
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport);
+  virtual void abortRequest(Transport *transport);
 
   /**
    * Force a reset before the next request.

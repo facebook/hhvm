@@ -87,6 +87,12 @@ public:
    * Sub-class handles a request by implementing this function.
    */
   virtual void handleRequest(Transport *transport) = 0;
+  /**
+   * Sub-class handles a request by implementing this function. This is called
+   * when the server determines this request should not be processed (ie. due to
+   * timeout).
+   */
+  virtual void abortRequest(Transport *transport) = 0;
   int getDefaultTimeout() const { return m_timeout; }
 private:
   int m_timeout;

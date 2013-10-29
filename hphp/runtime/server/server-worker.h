@@ -91,7 +91,7 @@ protected:
     std::string errorMsg;
 
     if (abort) {
-      transport->sendString("Service Unavailable", 503);
+      m_handler->abortRequest(transport);
       return;
     }
 

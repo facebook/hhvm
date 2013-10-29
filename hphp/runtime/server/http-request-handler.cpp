@@ -300,6 +300,14 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   HttpProtocol::ClearRecord(ret, tmpfile);
 }
 
+void HttpRequestHandler::abortRequest(Transport *transport) {
+  GetAccessLog().onNewRequest();
+  const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
+  assert(vhost);
+  transport->sendString("Service Unavailable", 503);
+  GetAccessLog().log(transport, vhost);
+}
+
 bool HttpRequestHandler::executePHPRequest(Transport *transport,
                                            RequestURI &reqURI,
                                            SourceRootInfo &sourceRootInfo,

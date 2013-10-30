@@ -118,18 +118,26 @@ static const pcre_cache_entry* lookup_cached_pcre(const String& regex) {
   return 0;
 }
 
+ReadWriteMutex m_mutex;
+
 static const pcre_cache_entry*
 insert_cached_pcre(const String& regex, const pcre_cache_entry* ent) {
   assert(s_pcreCacheMap);
   auto pair = s_pcreCacheMap->insert(
     PCREEntry(makeStaticString(regex.get()), ent));
-  if (!pair.second) {
-    delete ent;
-    if (s_pcreCacheMap->size() < RuntimeOption::EvalPCRETableSize) {
-      return pair.first->second;
-    }
-    // if the AHA is too small, fail.
-    raise_error("PCRE cache full");
+  if (!pair.second &&
+      s_pcreCacheMap->size() >= RuntimeOption::EvalPCRETableSize) {
+    // Log this is situation
+    Logger::Info("PCRE cache will be re-initialized");
+
+    // Set lock on read
+    ReadLock lock(m_mutex);
+
+    // Run re-initialization for pcre cache
+    pcre_reinit();
+
+    // Try to insert into re-initialized storage
+    s_pcreCacheMap->insert(PCREEntry(makeStaticString(regex.get()), ent));
   }
   return ent;
 }

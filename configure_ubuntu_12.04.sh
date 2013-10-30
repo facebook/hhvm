@@ -64,14 +64,18 @@ fi
 # Leave this install till after the main parallel package install above
 # since it adds a non-12.04 package repo and we don't want to
 # pull EVERYTHING in, just the newer gcc compiler (and toolchain)
+GCC_VER=4.7
+if [ "x${TRAVIS}" != "x" ]; then
+  GCC_VER=4.8
+fi
 sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 sudo apt-get -y update
-sudo apt-get -y install gcc-4.7 g++-4.7
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.7 60 \
-                         --slave /usr/bin/g++ g++ /usr/bin/g++-4.7
+sudo apt-get -y install gcc-${GCC_VER} g++-${GCC_VER}
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_VER} 60 \
+                         --slave /usr/bin/g++ g++ /usr/bin/g++-${GCC_VER}
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 40 \
                          --slave /usr/bin/g++ g++ /usr/bin/g++-4.6
-sudo update-alternatives --set gcc /usr/bin/gcc-4.7
+sudo update-alternatives --set gcc /usr/bin/gcc-${GCC_VER}
 
 # libevent
 cd libevent

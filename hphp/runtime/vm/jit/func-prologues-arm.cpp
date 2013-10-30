@@ -114,7 +114,10 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
     emitRegGetsRegPlusImm(a, rVmSp, rVmFp, -cellsToBytes(numParams));
 
-    auto const& rClosure = rAsm2;
+    // This register needs to live a long time, across calls to helpers that may
+    // use both rAsm and rAsm2. So it can't be one of them. Fortunately, we're
+    // between blocks here, so no normal registers are live; just pick any.
+    auto const& rClosure = vixl::x0;
     a.    Ldr    (rClosure, rVmFp[AROFF(m_this)]);
 
     // Swap in the $this or late bound class

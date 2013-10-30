@@ -4354,9 +4354,14 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
       break;
 
     case OpSetL:
-    case OpBindL:
-      setImmLocType(0, topType(0));
+    case OpBindL: {
+      auto locType = m_tb->localType(localInputId(inst), DataTypeSpecific);
+      auto stackType = topType(0);
+      assert(IMPLIES(inst.op() == OpBindL, stackType.isBoxed()));
+      // SetL preserves reffiness of a local; BindL causes reffiness.
+      setImmLocType(0, locType.isBoxed() ? stackType.box() : stackType);
       break;
+    }
 
     case OpUnsetL:
       setImmLocType(0, Type::Uninit);

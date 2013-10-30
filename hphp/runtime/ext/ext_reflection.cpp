@@ -910,10 +910,12 @@ Array f_hphp_get_class_info(CVarRef name) {
 
     if (name.isObject()) {
       auto obj = name.toObject();
-      for (ArrayIter it(obj->getDynProps().get()); !it.end(); it.next()) {
-        Array info = Array::Create();
-        set_dyn_prop_info(info, it.first(), cls->name());
-        arr.set(it.first(), VarNR(info));
+      if (obj->hasDynProps()) {
+        for (ArrayIter it(obj->dynPropArray().get()); !it.end(); it.next()) {
+          Array info = Array::Create();
+          set_dyn_prop_info(info, it.first(), cls->name());
+          arr.set(it.first(), VarNR(info));
+        }
       }
     }
 

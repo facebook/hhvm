@@ -55,11 +55,21 @@ const StaticString
 ///////////////////////////////////////////////////////////////////////////////
 // constructor/destructor
 
+NEVER_INLINE
+static void freeDynPropArray(ObjectData* inst) {
+  auto& table = g_vmContext->dynPropTable;
+  auto it = table.find(inst);
+  assert(it != end(table));
+  it->second.destroy();
+  table.erase(it);
+}
+
 ObjectData::~ObjectData() {
   int& pmax = *os_max_id;
   if (o_id && o_id == pmax) {
     --pmax;
   }
+  if (UNLIKELY(getAttribute(HasDynPropArr))) freeDynPropArray(this);
 }
 
 HOT_FUNC
@@ -206,9 +216,20 @@ MutableArrayIter ObjectData::begin(Variant* key, Variant& val,
   return MutableArrayIter(arr, key, val);
 }
 
-void ObjectData::reserveProperties(int numDynamic /* = 0 */) {
-  if (o_properties.get()) return;
-  o_properties = Array::attach(HphpArray::MakeReserve(numDynamic));
+Array& ObjectData::dynPropArray() const {
+  assert(getAttribute(HasDynPropArr));
+  assert(g_vmContext->dynPropTable.count(this));
+  return g_vmContext->dynPropTable[this].arr();
+}
+
+Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
+  if (getAttribute(HasDynPropArr)) return dynPropArray();
+
+  assert(!g_vmContext->dynPropTable.count(this));
+  auto& arr = g_vmContext->dynPropTable[this].arr();
+  arr = Array::attach(HphpArray::MakeReserve(numDynamic));
+  setAttribute(HasDynPropArr);
+  return arr;
 }
 
 Variant* ObjectData::o_realProp(const String& propName, int flags,
@@ -231,7 +252,7 @@ Variant* ObjectData::o_realProp(const String& propName, int flags,
     if (!(flags & RealPropCreate)) {
       return nullptr;
     }
-    return &o_properties.lval(propName);
+    return &reserveProperties().lval(propName);
   }
 
   // ret is non-NULL if we reach here
@@ -379,9 +400,12 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   } while (cls);
 
   // Iterate over dynamic properties and insert {name --> prop} pairs.
-  if (!o_properties.empty()) {
-    for (ArrayIter it(o_properties.get()); !it.end(); it.next()) {
-      props.setWithRef(it.first(), it.secondRef(), true);
+  if (UNLIKELY(getAttribute(HasDynPropArr))) {
+    auto& dynProps = dynPropArray();
+    if (!dynProps.empty()) {
+      for (ArrayIter it(dynProps.get()); !it.end(); it.next()) {
+        props.setWithRef(it.first(), it.secondRef(), true);
+      }
     }
   }
 }
@@ -420,7 +444,12 @@ Array ObjectData::o_toArray() const {
 
 Array ObjectData::o_toIterArray(const String& context,
                                 bool getRef /* = false */) {
-  size_t size = m_cls->declPropNumAccessible() + o_properties.size();
+  Array* dynProps = nullptr;
+  size_t size = m_cls->declPropNumAccessible();
+  if (getAttribute(HasDynPropArr)) {
+    dynProps = &dynPropArray();
+    size += dynProps->size();
+  }
   Array retArray { Array::attach(HphpArray::MakeReserve(size)) };
 
   Class* ctx = nullptr;
@@ -454,19 +483,19 @@ Array ObjectData::o_toIterArray(const String& context,
   }
 
   // Now get dynamic properties.
-  if (o_properties.get()) {
-    ssize_t iter = o_properties.get()->iter_begin();
+  if (dynProps) {
+    ssize_t iter = dynProps->get()->iter_begin();
     while (iter != ArrayData::invalid_index) {
       TypedValue key;
-      o_properties.get()->nvGetKey(&key, iter);
-      iter = o_properties.get()->iter_advance(iter);
+      dynProps->get()->nvGetKey(&key, iter);
+      iter = dynProps->get()->iter_advance(iter);
 
       // You can get this if you cast an array to object. These
       // properties must be dynamic because you can't declare a
       // property with a non-string name.
       if (UNLIKELY(!IS_STRING_TYPE(key.m_type))) {
         assert(key.m_type == KindOfInt64);
-        TypedValue* val = o_properties.get()->nvGet(key.m_data.num);
+        TypedValue* val = dynProps->get()->nvGet(key.m_data.num);
         if (getRef) {
           if (val->m_type != KindOfRef) {
             tvBox(val);
@@ -479,7 +508,7 @@ Array ObjectData::o_toIterArray(const String& context,
       }
 
       StringData* strKey = key.m_data.pstr;
-      TypedValue* val = o_properties.get()->nvGet(strKey);
+      TypedValue* val = dynProps->get()->nvGet(strKey);
       if (getRef) {
         if (val->m_type != KindOfRef) {
           tvBox(val);
@@ -894,19 +923,18 @@ void ObjectData::operator delete(void* p) {
 
 Object ObjectData::FromArray(ArrayData* properties) {
   ObjectData* retval = ObjectData::newInstance(SystemLib::s_stdclassClass);
-  retval->reserveProperties(properties->size());
+  auto& dynArr = retval->reserveProperties(properties->size());
   for (ssize_t pos = properties->iter_begin(); pos != ArrayData::invalid_index;
        pos = properties->iter_advance(pos)) {
     TypedValue* value = properties->nvGetValueRef(pos);
     TypedValue key;
     properties->nvGetKey(&key, pos);
     if (key.m_type == KindOfInt64) {
-      retval->o_properties.set(key.m_data.num, tvAsCVarRef(value));
+      dynArr.set(key.m_data.num, tvAsCVarRef(value));
     } else {
       assert(IS_STRING_TYPE(key.m_type));
       StringData* strKey = key.m_data.pstr;
-      retval->o_properties.set(StrNR(strKey),
-        tvAsCVarRef(value), true /* isKey */);
+      dynArr.set(StrNR(strKey), tvAsCVarRef(value), true /* isKey */);
       decRefStr(strKey);
     }
   }
@@ -942,13 +970,13 @@ TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,
     assert(!visible && !accessible);
     // We could not find a visible declared property. We need to check
     // for a dynamic property with this name.
-    if (o_properties.get()) {
-      prop = o_properties.get()->nvGet(key);
+    if (UNLIKELY(getAttribute(HasDynPropArr))) {
+      prop = dynPropArray()->nvGet(key);
       if (prop) {
-        // o_properties.get()->nvGet() returned a non-declared property,
-        // we know that it is visible and accessible (since all
-        // dynamic properties are), and we know it is not unset
-        // (since unset dynamic properties don't appear in o_properties.get()).
+        // Returned a non-declared property, we know that it is
+        // visible and accessible (since all dynamic properties are),
+        // and we know it is not unset (since unset dynamic properties
+        // don't appear in the dynamic property array).
         visible = true;
         accessible = true;
       }
@@ -1046,7 +1074,9 @@ void ObjectData::propImpl(TypedValue*& retval, TypedValue& tvRef,
         raiseUndefProp(key);
       }
       if (define) {
-        retval = reinterpret_cast<TypedValue*>(&o_properties.lval(StrNR(key)));
+        retval = reinterpret_cast<TypedValue*>(
+          &reserveProperties().lval(StrNR(key))
+        );
       } else {
         retval = const_cast<TypedValue*>(
           reinterpret_cast<const TypedValue*>(&init_null_variant)
@@ -1156,9 +1186,11 @@ void ObjectData::setProp(Class* ctx,
     // the property name. Instead, call the appropriate
     // setters (set() or setRef()).
     if (UNLIKELY(bindingAssignment)) {
-      o_properties.setRef(StrNR(key), tvAsCVarRef(val), true /* isKey */);
+      reserveProperties().setRef(
+        StrNR(key), tvAsCVarRef(val), true /* isKey */);
     } else {
-      o_properties.set(StrNR(key), tvAsCVarRef(val), true /* isKey */);
+      reserveProperties().set(
+        StrNR(key), tvAsCVarRef(val), true /* isKey */);
     }
     return;
   }
@@ -1209,7 +1241,9 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
   } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
   } else if (!getAttribute(UseGet)) {
-    propVal = reinterpret_cast<TypedValue*>(&o_properties.lval(StrNR(key)));
+    propVal = reinterpret_cast<TypedValue*>(
+      &reserveProperties().lval(StrNR(key))
+    );
     // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_type = KindOfNull;
@@ -1220,7 +1254,9 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
     tvWriteUninit(&tvResult);
     invokeGet(&tvResult, key);
     SETOP_BODY(&tvResult, op, val);
-    propVal = reinterpret_cast<TypedValue*>(&o_properties.lval(StrNR(key)));
+    propVal = reinterpret_cast<TypedValue*>(
+      &reserveProperties().lval(StrNR(key))
+    );
     // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_data.num = tvResult.m_data.num;
@@ -1275,7 +1311,9 @@ void ObjectData::incDecPropImpl(TypedValue& tvRef, Class* ctx,
   } else if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
   } else if (!getAttribute(UseGet)) {
-    propVal = reinterpret_cast<TypedValue*>(&o_properties.lval(StrNR(key)));
+    propVal = reinterpret_cast<TypedValue*>(
+      &reserveProperties().lval(StrNR(key))
+    );
     // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_type = KindOfNull;
@@ -1286,7 +1324,9 @@ void ObjectData::incDecPropImpl(TypedValue& tvRef, Class* ctx,
     tvWriteUninit(&tvResult);
     invokeGet(&tvResult, key);
     IncDecBody<setResult>(op, &tvResult, &dest);
-    propVal = reinterpret_cast<TypedValue*>(&o_properties.lval(StrNR(key)));
+    propVal = reinterpret_cast<TypedValue*>(
+      &reserveProperties().lval(StrNR(key))
+    );
     // don't write propVal->m_aux because it holds data
     // owned by the HphpArray
     propVal->m_data.num = tvResult.m_data.num;
@@ -1327,9 +1367,8 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
       tvSetIgnoreRef(*null_variant.asTypedValue(), *propVal);
     } else {
       // Dynamic property.
-      assert(o_properties.get() != nullptr);
-      o_properties.remove(StrNR(key).asString(),
-                          true /* isString */);
+      dynPropArray().remove(StrNR(key).asString(),
+                            true /* isString */);
     }
   } else {
     assert(!accessible);
@@ -1473,11 +1512,13 @@ void ObjectData::cloneSet(ObjectData* clone) {
     tvRefcountedDecRef(&clonePropVec[i]);
     tvDupFlattenVars(&propVec()[i], &clonePropVec[i]);
   }
-  if (o_properties.get()) {
-    clone->reserveProperties(o_properties.size());
-    ssize_t iter = o_properties.get()->iter_begin();
+  if (UNLIKELY(getAttribute(HasDynPropArr))) {
+    auto& dynProps = dynPropArray();
+    auto& cloneProps = clone->reserveProperties(dynProps.size());
+
+    ssize_t iter = dynProps.get()->iter_begin();
     while (iter != ArrayData::invalid_index) {
-      auto props = static_cast<HphpArray*>(o_properties.get());
+      auto props = static_cast<HphpArray*>(dynProps.get());
       TypedValue key;
       props->nvGetKey(&key, iter);
       assert(tvIsString(&key));
@@ -1485,10 +1526,10 @@ void ObjectData::cloneSet(ObjectData* clone) {
       TypedValue* val = props->nvGet(strKey);
 
       auto const retval = reinterpret_cast<TypedValue*>(
-        &clone->o_properties.lval(strKey)
+        &cloneProps.lval(strKey)
       );
-      tvDupFlattenVars(val, retval, clone->o_properties.get());
-      iter = o_properties.get()->iter_advance(iter);
+      tvDupFlattenVars(val, retval, cloneProps.get());
+      iter = dynProps.get()->iter_advance(iter);
       decRefStr(strKey);
     }
   }

@@ -503,6 +503,8 @@ public:
                         string_data_hash, string_data_same> ConstInfoMap;
   ConstInfoMap m_constInfo;
 
+  std::unordered_map<const ObjectData*,ArrayNoDtor> dynPropTable;
+
   const HPHP::Func* lookupMethodCtx(const HPHP::Class* cls,
                                         const StringData* methodName,
                                         const HPHP::Class* pctx,

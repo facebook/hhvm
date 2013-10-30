@@ -57,6 +57,7 @@ class ObjectData {
     HasCallStatic = 0x0100, // defines __callStatic
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasClone      = 0x0400, // has custom clone logic
+    HasDynPropArr = 0x0800, // has a dynamic properties array
 
     // The bits in CollectionTypeAttrMask of o_attributes are reserved
     // to indicate the type of collection.
@@ -316,22 +317,40 @@ class ObjectData {
                     bool& visible, bool& accessible,
                     bool& unset);
 
- public:
-  bool hasDynProps() const { return o_properties.size(); }
-  Array getDynProps() const { return o_properties; }
-  void reserveProperties(int nProp);
+  /*
+   * Returns whether this object has any dynamic properties.
+   */
+  bool hasDynProps() const {
+    return getAttribute(HasDynPropArr) ? dynPropArray().size() : false;
+  }
+
+  /*
+   * Returns the dynamic properties array for this object.
+   *
+   * Note: you're generally not going to want to copy-construct the
+   * return value of this function.  If you want to make changes to
+   * the property array, we need to keep its ref count at 1.
+   *
+   * Pre: getAttribute(HasDynPropArr)
+   */
+  Array& dynPropArray() const;
+
+  /*
+   * Create the dynamic property array for this ObjectData if it
+   * doesn't already exist yet.
+   *
+   * Post: getAttribute(HasDynPropArr)
+   */
+  Array& reserveProperties(int nProp = 2);
 
   // heap profiling helpers
   void getChildren(std::vector<TypedValue*> &out) {
-    // statically declared properties
     Slot nProps = m_cls->numDeclProperties();
     for (Slot i = 0; i < nProps; ++i) {
       out.push_back(&propVec()[i]);
     }
-
-    // dynamic properties
-    if (auto props = o_properties.get()) {
-      props->getChildren(out);
+    if (UNLIKELY(getAttribute(HasDynPropArr))) {
+      dynPropArray()->getChildren(out);
     }
   }
 
@@ -443,10 +462,9 @@ class ObjectData {
   // Pointer to this object's class
   Class* m_cls;
   // Storage for dynamic properties
-  Array o_properties;
+  uintptr_t wastedSpace; // TODO
   // Numeric identifier of this object (used for var_dump())
   int o_id;
-
 } __attribute__((aligned(16)));
 
 typedef GlobalNameValueTableWrapper GlobalVariables;

@@ -494,6 +494,25 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * An Array wrapper that doesn't run a destructor unless you
+ * explicitly ask it to.
+ *
+ * This is used for the dynPropTable in ExecutionContext, so that at
+ * sweep time we don't run these destructors.
+ */
+struct ArrayNoDtor {
+  ArrayNoDtor() { new (&m_arr) Array(); }
+  ArrayNoDtor(ArrayNoDtor&& o) { new (&m_arr) Array(std::move(o.m_arr)); }
+  ~ArrayNoDtor() {}
+  Array& arr() { return m_arr; }
+  void destroy() { m_arr.~Array(); }
+private:
+  union { Array m_arr; };
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_ARRAY_H_

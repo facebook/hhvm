@@ -145,8 +145,12 @@ size_t MemoryProfile::getSizeOfArray(ArrayData *arr) {
 
 // static
 size_t MemoryProfile::getSizeOfObject(ObjectData *obj) {
-  auto const props = obj->o_properties.get();
-  return getSizeOfPtr(obj) + (props ? getSizeOfArray(props) : 0);
+  auto ret = getSizeOfPtr(obj);
+  if (UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr))) {
+    auto& props = obj->dynPropArray();
+    ret += getSizeOfArray(props.get());
+  }
+  return ret;
 }
 
 }

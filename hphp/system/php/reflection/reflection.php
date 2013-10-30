@@ -1530,7 +1530,8 @@ class ReflectionClass implements Reflector {
     $ret = array();
     foreach ($this->getProperties() as $prop) {
       if ($prop->isStatic()) {
-        $ret[$prop->name] = $prop;
+        $val = hphp_get_static_property($this->name, $prop->name, true);
+        $ret[$prop->name] = $val;
       }
     }
     return $ret;

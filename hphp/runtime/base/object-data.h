@@ -57,15 +57,16 @@ class ObjectData {
     HasCallStatic = 0x0100, // defines __callStatic
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasClone      = 0x0400, // has custom clone logic
-    // The top 3 bits of o_attributes are reserved to indicate the
-    // type of collection
-    CollectionTypeAttrMask = (7 << 13),
-    VectorAttrInit = (Collection::VectorType << 13),
-    MapAttrInit = (Collection::MapType << 13),
-    StableMapAttrInit = (Collection::StableMapType << 13),
-    SetAttrInit = (Collection::SetType << 13),
-    PairAttrInit = (Collection::PairType << 13),
-    FrozenVectorAttrInit = (Collection::FrozenVectorType << 13),
+
+    // The bits in CollectionTypeAttrMask of o_attributes are reserved
+    // to indicate the type of collection.
+    CollectionTypeAttrMask = 0xe000, // 7 << 13
+    VectorAttrInit         = (Collection::VectorType << 13),
+    MapAttrInit            = (Collection::MapType << 13),
+    StableMapAttrInit      = (Collection::StableMapType << 13),
+    SetAttrInit            = (Collection::SetType << 13),
+    PairAttrInit           = (Collection::PairType << 13),
+    FrozenVectorAttrInit   = (Collection::FrozenVectorType << 13),
   };
 
   enum {

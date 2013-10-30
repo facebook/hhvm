@@ -161,6 +161,8 @@ void PreClass::prettyPrint(std::ostream &out) const {
   } else if (m_hoistable == AlwaysHoistable) {
     out << " (always-hoistable)";
   }
+  if (m_attrs & AttrUnique)     out << " (unique)";
+  if (m_attrs & AttrPersistent) out << " (persistent)";
   if (m_id != -1) {
     out << " (ID " << m_id << ")";
   }
@@ -200,6 +202,8 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
     throw;
   }
 }
+
+void (*Class::MethodCreateHook)(Class* cls, MethodMap::Builder& builder);
 
 Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
   : m_preClass(PreClassPtr(preClass))
@@ -1435,6 +1439,12 @@ void Class::setMethods() {
     }
   }
 
+  if (Class::MethodCreateHook) {
+    Class::MethodCreateHook(this, builder);
+    // running MethodCreateHook may add methods to builder
+    m_traitsEndIdx = builder.size();
+  }
+
   // If class is not abstract, check that all abstract methods have been defined
   if (!(attrs() & (AttrTrait | AttrInterface | AttrAbstract))) {
     for (Slot i = 0; i < builder.size(); i++) {
@@ -1652,13 +1662,16 @@ void Class::setProperties() {
         // property.
         PropMap::Builder::iterator it2 = curPropMap.find(preProp->name());
         if (it2 != curPropMap.end()) {
-          assert((curPropMap[it2->second].m_attrs
-                 & (AttrPublic|AttrProtected|AttrPrivate)) == AttrProtected);
+          Prop& prop = curPropMap[it2->second];
+          assert((prop.m_attrs & (AttrPublic|AttrProtected|AttrPrivate)) ==
+                 AttrProtected);
+          prop.m_class = this;
+          prop.m_docComment = preProp->docComment();
           const TypedValue& tv = m_preClass->lookupProp(preProp->name())->val();
           TypedValueAux& tvaux = m_declPropInit[it2->second];
           tvaux.m_data = tv.m_data;
           tvaux.m_type = tv.m_type;
-          copyDeepInitAttr(preProp, &curPropMap[it2->second]);
+          copyDeepInitAttr(preProp, &prop);
           break;
         }
         // Append a new protected property.
@@ -1683,6 +1696,8 @@ void Class::setProperties() {
         PropMap::Builder::iterator it2 = curPropMap.find(preProp->name());
         if (it2 != curPropMap.end()) {
           Prop& prop = curPropMap[it2->second];
+          prop.m_class = this;
+          prop.m_docComment = preProp->docComment();
           if ((prop.m_attrs & (AttrPublic|AttrProtected|AttrPrivate))
               == AttrProtected) {
             // Weaken protected property to public.
@@ -1695,7 +1710,7 @@ void Class::setProperties() {
           TypedValueAux& tvaux = m_declPropInit[it2->second];
           tvaux.m_data = tv.m_data;
           tvaux.m_type = tv.m_type;
-          copyDeepInitAttr(preProp, &curPropMap[it2->second]);
+          copyDeepInitAttr(preProp, &prop);
           break;
         }
         // Append a new public property.
@@ -2102,7 +2117,9 @@ void Class::setInstanceBitsImpl() {
     bits |= c->m_instanceBits;
   };
   if (m_parent.get()) setBits(m_parent.get());
-  for (auto& di : declInterfaces()) setBits(di.get());
+
+  int numIfaces = m_interfaces.size();
+  for (int i = 0; i < numIfaces; i++) setBits(m_interfaces[i]);
 
   // XXX: this assert fails on the initFlag; oops.
   if (unsigned bit = InstanceBits::lookup(m_preClass->name())) {
@@ -2372,6 +2389,15 @@ bool Class::isCollectionClass() const {
   auto s = name();
   return Collection::stringToType(s->data(), s->size()) !=
          Collection::InvalidType;
+}
+
+RefData* Class::zGetSProp(Class* ctx, const StringData* sPropName,
+                          bool& visible, bool& accessible) const {
+  auto tv = getSProp(ctx, sPropName, visible, accessible);
+  if (tv->m_type != KindOfRef) {
+    tvBox(tv);
+  }
+  return tv->m_data.pref;
 }
 
 } // HPHP::VM

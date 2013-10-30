@@ -282,7 +282,7 @@ public:
     m_debugger = d;
     updateJit();
   }
-  static uint32_t debuggerReadOnlyOffset() {
+  static constexpr uint32_t debuggerReadOnlyOffset() {
     return offsetof(RequestInjectionData, m_debugger);
   }
   bool getDebuggerIntr() const { return m_debuggerIntr; }
@@ -436,14 +436,10 @@ class AccessFlags {
 public:
   enum Type {
     None = 0,
-
     Error = 1,
     CheckExist = 2,
     Key = 4,
-    NoHipHop = 8,
-
     Error_Key = Error | Key,
-    Error_NoHipHop = Error | NoHipHop,
   };
   static Type IsKey(bool s) { return s ? Key : None; }
   static Type IsError(bool e) { return e ? Error : None; }
@@ -507,6 +503,7 @@ namespace RDS {
  */
 typedef uint32_t FuncId;
 constexpr FuncId InvalidFuncId = FuncId(-1LL);
+typedef hphp_hash_set<FuncId> FuncIdSet;
 
 /*
  * Special types that are not relevant to the runtime as a whole.

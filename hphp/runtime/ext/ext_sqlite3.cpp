@@ -302,7 +302,7 @@ int64_t c_SQLite3::t_changes() {
   return sqlite3_changes(m_raw_db);
 }
 
-String c_SQLite3::t_escapestring(const String& sql) {
+String c_SQLite3::ti_escapestring(const String& sql) {
   if (!sql.empty()) {
     char *ret = sqlite3_mprintf("%q", sql.data());
     if (ret) {

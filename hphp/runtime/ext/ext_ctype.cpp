@@ -51,48 +51,51 @@ static bool ctype(CVarRef v, int (*iswhat)(int)) {
   return false;
 }
 
+// Use lambdas wrapping the ctype.h functions because of linker weirdness on
+// OS X Mavericks.
+
 bool f_ctype_alnum(CVarRef text) {
-  return ctype(text, isalnum);
+  return ctype(text, [] (int i) -> int { return isalnum(i); });
 }
 
 bool f_ctype_alpha(CVarRef text) {
-  return ctype(text, isalpha);
+  return ctype(text, [] (int i) -> int { return isalpha(i); });
 }
 
 bool f_ctype_cntrl(CVarRef text) {
-  return ctype(text, iscntrl);
+  return ctype(text, [] (int i) -> int { return iscntrl(i); });
 }
 
 bool f_ctype_digit(CVarRef text) {
-  return ctype(text, isdigit);
+  return ctype(text, [] (int i) -> int { return isdigit(i); });
 }
 
 bool f_ctype_graph(CVarRef text) {
-  return ctype(text, isgraph);
+  return ctype(text, [] (int i) -> int { return isgraph(i); });
 }
 
 bool f_ctype_lower(CVarRef text) {
-  return ctype(text, islower);
+  return ctype(text, [] (int i) -> int { return islower(i); });
 }
 
 bool f_ctype_print(CVarRef text) {
-  return ctype(text, isprint);
+  return ctype(text, [] (int i) -> int { return isprint(i); });
 }
 
 bool f_ctype_punct(CVarRef text) {
-  return ctype(text, ispunct);
+  return ctype(text, [] (int i) -> int { return ispunct(i); });
 }
 
 bool f_ctype_space(CVarRef text) {
-  return ctype(text, isspace);
+  return ctype(text, [] (int i) -> int { return isspace(i); });
 }
 
 bool f_ctype_upper(CVarRef text) {
-  return ctype(text, isupper);
+  return ctype(text, [] (int i) -> int { return isupper(i); });
 }
 
 bool f_ctype_xdigit(CVarRef text) {
-  return ctype(text, isxdigit);
+  return ctype(text, [] (int i) -> int { return isxdigit(i); });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -109,7 +109,7 @@ c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
 }
 
 void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
-  return BaseVector::t___construct(iterable);
+  BaseVector::construct(iterable);
 }
 
 void c_Vector::resize(int64_t sz, TypedValue* val) {
@@ -132,19 +132,6 @@ void c_Vector::resize(int64_t sz, TypedValue* val) {
       cellDup(*val, m_data[m_size]);
     }
   }
-}
-
-c_Vector* c_Vector::Clone(ObjectData* obj) {
-  auto thiz = static_cast<c_Vector*>(obj);
-  auto target = static_cast<c_Vector*>(obj->cloneImpl());
-  uint sz = thiz->m_size;
-  TypedValue* data;
-  target->m_capacity = target->m_size = sz;
-  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
-  for (int i = 0; i < sz; ++i) {
-    cellDup(thiz->m_data[i], data[i]);
-  }
-  return target;
 }
 
 Object c_Vector::t_add(CVarRef val) {
@@ -233,39 +220,45 @@ Object c_Vector::t_clear() {
 }
 
 bool c_Vector::t_isempty() {
-  return BaseVector::t_isempty();
+  return BaseVector::isempty();
 }
 
 int64_t c_Vector::t_count() {
-  return BaseVector::t_count();
+  return BaseVector::count();
 }
 
 Object c_Vector::t_items() {
-  return BaseVector::t_items();
+  return BaseVector::items();
 }
 
 Object c_Vector::t_keys() {
-  return BaseVector::t_keys();
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::keys(bv);
+  return obj;
 }
 
 Object c_Vector::t_values() {
-  return Object::attach(c_Vector::Clone(this));
+  return Object::attach(BaseVector::Clone<c_Vector>(this));
 }
 
 Object c_Vector::t_lazy() {
-  return SystemLib::AllocLazyKeyedIterableViewObject(this);
+  return BaseVector::lazy();
 }
 
 Object c_Vector::t_kvzip() {
-  return BaseVector::t_kvzip();
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::kvzip(bv);
+  return obj;
 }
 
 Variant c_Vector::t_at(CVarRef key) {
-  return BaseVector::t_at(key);
+  return BaseVector::at(key);
 }
 
 Variant c_Vector::t_get(CVarRef key) {
-  return BaseVector::t_get(key);
+  return BaseVector::get(key);
 }
 
 bool c_Vector::t_contains(CVarRef key) {
@@ -273,7 +266,7 @@ bool c_Vector::t_contains(CVarRef key) {
 }
 
 bool c_Vector::t_containskey(CVarRef key) {
-  return BaseVector::t_containskey(key);
+  return BaseVector::containskey(key);
 }
 
 Object c_Vector::t_removekey(CVarRef key) {
@@ -296,20 +289,15 @@ Object c_Vector::t_removekey(CVarRef key) {
 }
 
 Array c_Vector::t_toarray() {
-  return toArrayImpl();
+  return BaseVector::toarray();
 }
 
 Array c_Vector::t_tokeysarray() {
-  PackedArrayInit ai(m_size);
-  uint sz = m_size;
-  for (uint i = 0; i < sz; ++i) {
-    ai.append((int64_t)i);
-  }
-  return ai.toArray();
+  return BaseVector::tokeysarray();
 }
 
 Array c_Vector::t_tovaluesarray() {
-  return toArrayImpl();
+  return BaseVector::tovaluesarray();
 }
 
 void c_Vector::t_reverse() {
@@ -387,13 +375,7 @@ void c_Vector::t_splice(CVarRef offset, CVarRef len /* = null */,
 }
 
 int64_t c_Vector::t_linearsearch(CVarRef search_value) {
-  uint sz = m_size;
-  for (uint i = 0; i < sz; ++i) {
-    if (same(search_value, tvAsCVarRef(&m_data[i]))) {
-      return i;
-    }
-  }
-  return -1;
+  return BaseVector::linearsearch(search_value);
 }
 
 void c_Vector::t_shuffle() {
@@ -404,27 +386,42 @@ void c_Vector::t_shuffle() {
 }
 
 Object c_Vector::t_getiterator() {
-  return BaseVector::t_getiterator();
+  return BaseVector::getiterator();
 }
 
 Object c_Vector::t_map(CVarRef callback) {
-  return BaseVector::t_map(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::map(bv, callback);
+  return obj;
 }
 
 Object c_Vector::t_mapwithkey(CVarRef callback) {
-  return BaseVector::t_mapwithkey(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::mapwithkey(bv, callback);
+  return obj;
 }
 
 Object c_Vector::t_filter(CVarRef callback) {
-  return BaseVector::t_filter(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::filter(bv, callback);
+  return obj;
 }
 
 Object c_Vector::t_filterwithkey(CVarRef callback) {
-  return BaseVector::t_filterwithkey(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::filterwithkey(bv, callback);
+  return obj;
 }
 
 Object c_Vector::t_zip(CVarRef iterable) {
-  return BaseVector::t_zip(iterable);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_Vector);
+  BaseVector::zip(bv, iterable);
+  return obj;
 }
 
 Object c_Vector::t_set(CVarRef key, CVarRef value) {
@@ -493,73 +490,9 @@ Object c_Vector::ti_fromarray(CVarRef arr) {
   return ret;
 }
 
-Variant c_Vector::ti_slice(CVarRef vec, CVarRef offset,
-                           CVarRef len /* = null */) {
-  if (!vec.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "vec must be an instance of Vector"));
-    throw e;
-  }
-  ObjectData* obj = vec.getObjectData();
-  if (obj->getVMClass() != c_Vector::classof()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "vec must be an instance of Vector"));
-    throw e;
-  }
-  if (!offset.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter offset must be an integer"));
-    throw e;
-  }
-  if (!len.isNull() && !len.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter len must be null or an integer"));
-    throw e;
-  }
-  c_Vector* target;
-  Object ret = target = NEWOBJ(c_Vector)();
-  auto v = static_cast<c_Vector*>(obj);
-  int64_t sz = v->m_size;
-  int64_t startPos = offset.toInt64();
-  if (UNLIKELY(uint64_t(startPos) >= uint64_t(sz))) {
-    if (startPos >= 0) {
-      return ret;
-    }
-    startPos += sz;
-    if (startPos < 0) {
-      startPos = 0;
-    }
-  }
-  int64_t endPos;
-  if (len.isInteger()) {
-    int64_t intLen = len.toInt64();
-    if (LIKELY(intLen > 0)) {
-      endPos = startPos + intLen;
-      if (endPos > sz) {
-        endPos = sz;
-      }
-    } else {
-      if (intLen == 0) {
-        return ret;
-      }
-      endPos = sz + intLen;
-      if (endPos <= startPos) {
-        return ret;
-      }
-    }
-  } else {
-    endPos = sz;
-  }
-  assert(startPos < endPos);
-  uint targetSize = endPos - startPos;
-  TypedValue* data;
-  target->m_capacity = target->m_size = targetSize;
-  target->m_data = data =
-    (TypedValue*)smart_malloc(targetSize * sizeof(TypedValue));
-  for (uint i = 0; i < targetSize; ++i, ++startPos) {
-    cellDup(v->m_data[startPos], data[i]);
-  }
-  return ret;
+Object c_Vector::ti_slice(CVarRef vec, CVarRef offset,
+                          CVarRef len /* = null */) {
+  return BaseVector::slice<c_Vector>("Vector", vec, offset, len);
 }
 
 void c_Vector::throwOOB(int64_t key) {
@@ -670,24 +603,6 @@ void c_Vector::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throw e;
 }
 
-void c_Vector::Unserialize(ObjectData* obj,
-                           VariableUnserializer* uns,
-                           int64_t sz,
-                           char type) {
-  if (type != 'V') {
-    throw Exception("Vector does not support the '%c' serialization "
-                    "format", type);
-  }
-  auto vec = static_cast<c_Vector*>(obj);
-  vec->reserve(sz);
-  for (int64_t i = 0; i < sz; ++i) {
-    auto tv = &vec->m_data[vec->m_size];
-    tv->m_type = KindOfNull;
-    ++vec->m_size;
-    tvAsVariant(tv).unserialize(uns, Uns::Mode::ColValue);
-  }
-}
-
 c_VectorIterator::c_VectorIterator(Class* cls
     /*= c_VectorIterator::classof()*/) : ExtObjectData(cls) {
 }
@@ -737,70 +652,123 @@ void c_VectorIterator::t_rewind() {
 // ConstCollection
 
 bool c_FrozenVector::t_isempty() {
-  return BaseVector::t_isempty();
+  return BaseVector::isempty();
 }
 
 int64_t c_FrozenVector::t_count() {
-  return BaseVector::t_count();
+  return BaseVector::count();
 }
 
 Object c_FrozenVector::t_items() {
-  return BaseVector::t_items();
+  return BaseVector::items();
 }
 
 // ConstIndexAccess
 
 bool c_FrozenVector::t_containskey(CVarRef key) {
-  return BaseVector::t_containskey(key);
+  return BaseVector::containskey(key);
 }
 
 Variant c_FrozenVector::t_at(CVarRef key) {
-  return BaseVector::t_at(key);
+  return BaseVector::at(key);
 }
 
 Variant c_FrozenVector::t_get(CVarRef key) {
-  return BaseVector::t_get(key);
+  return BaseVector::get(key);
 }
 
 // KeyedIterable
 
 Object c_FrozenVector::t_getiterator() {
-  return BaseVector::t_getiterator();
+  return BaseVector::getiterator();
 }
 
 Object c_FrozenVector::t_map(CVarRef callback) {
-  return BaseVector::t_map(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::map(bv, callback);
+  return obj;
 }
 
 Object c_FrozenVector::t_mapwithkey(CVarRef callback) {
-  return BaseVector::t_mapwithkey(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::mapwithkey(bv, callback);
+  return obj;
 }
 
 Object c_FrozenVector::t_filter(CVarRef callback) {
-  return BaseVector::t_filter(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::filter(bv, callback);
+  return obj;
 }
 
 Object c_FrozenVector::t_filterwithkey(CVarRef callback) {
-  return BaseVector::t_filterwithkey(callback);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::filterwithkey(bv, callback);
+  return obj;
 }
 
 Object c_FrozenVector::t_zip(CVarRef iterable) {
-  return BaseVector::t_zip(iterable);
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::zip(bv, iterable);
+  return obj;
 }
 
 Object c_FrozenVector::t_kvzip() {
-  return BaseVector::t_kvzip();
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::kvzip(bv);
+  return obj;
 }
 
 Object c_FrozenVector::t_keys() {
-  return BaseVector::t_keys();
+  BaseVector* bv;
+  Object obj = bv = NEWOBJ(c_FrozenVector);
+  BaseVector::keys(bv);
+  return obj;
+}
+
+Object c_FrozenVector::ti_slice(CVarRef vec, CVarRef offset,
+                                CVarRef len /* = null */) {
+  return BaseVector::slice<c_FrozenVector>("FrozenVector", vec, offset, len);
 }
 
 // Others
 
 void c_FrozenVector::t___construct(CVarRef iterable /* = null_variant */) {
-  BaseVector::t___construct(iterable);
+  BaseVector::construct(iterable);
 }
+
+Object c_FrozenVector::t_lazy() {
+  return BaseVector::lazy();
+}
+
+Array c_FrozenVector::t_toarray() {
+  return BaseVector::toarray();
+}
+
+Array c_FrozenVector::t_tokeysarray() {
+  return BaseVector::tokeysarray();
+}
+
+Array c_FrozenVector::t_tovaluesarray() {
+  return BaseVector::tovaluesarray();
+}
+
+int64_t c_FrozenVector::t_linearsearch(CVarRef search_value) {
+  return BaseVector::linearsearch(search_value);
+}
+
+Object c_FrozenVector::t_values() {
+  return Object::attach(BaseVector::Clone<c_FrozenVector>(this));
+}
+
+
+// Non PHP methods.
 
 c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
 
@@ -3321,9 +3289,9 @@ void c_Set::init(CVarRef t) {
   for (; iter; ++iter) {
     Variant v = iter.second();
     if (v.isInteger()) {
-      update(v.toInt64());
+      add(v.toInt64());
     } else if (v.isString()) {
-      update(v.getStringData());
+      add(v.getStringData());
     } else {
       throwBadValueType();
     }
@@ -3495,10 +3463,10 @@ Object c_Set::t_filter(CVarRef callback) {
     }
     if (!ret.toBoolean()) continue;
     if (p.hasInt()) {
-      st->update(p.data.m_data.num);
+      st->add(p.data.m_data.num);
     } else {
       assert(p.hasStr());
-      st->update(p.data.m_data.pstr);
+      st->add(p.data.m_data.pstr);
     }
   }
   return obj;
@@ -3526,9 +3494,9 @@ Object c_Set::ti_fromitems(CVarRef iterable) {
   for (; iter; ++iter) {
     Variant v = iter.second();
     if (v.isInteger()) {
-      target->update(v.toInt64());
+      target->add(v.toInt64());
     } else if (v.isString()) {
-      target->update(v.getStringData());
+      target->add(v.getStringData());
     } else {
       throwBadValueType();
     }
@@ -3549,9 +3517,9 @@ Object c_Set::ti_fromarray(CVarRef arr) {
        pos = ad->iter_advance(pos)) {
     CVarRef v = ad->getValueRef(pos);
     if (v.isInteger()) {
-      st->update(v.toInt64());
+      st->add(v.toInt64());
     } else if (v.isString()) {
-      st->update(v.getStringData());
+      st->add(v.getStringData());
     } else {
       throwBadValueType();
     }
@@ -3601,16 +3569,6 @@ void c_Set::throwNoIndexAccess() {
   Object e(SystemLib::AllocRuntimeExceptionObject(
     "[] operator not supported for accessing elements of Sets"));
   throw e;
-}
-
-void c_Set::add(TypedValue* val) {
-  if (val->m_type == KindOfInt64) {
-    update(val->m_data.num);
-  } else if (IS_STRING_TYPE(val->m_type)) {
-    update(val->m_data.pstr);
-  } else {
-    throwBadValueType();
-  }
 }
 
 #define STRING_HASH(x)   (int32_t(x) | 0x80000000)
@@ -3725,7 +3683,7 @@ c_Set::Bucket* c_Set::findForNewInsert(size_t h0) const {
 #undef FIND_BODY
 #undef FIND_FOR_INSERT_BODY
 
-void c_Set::update(int64_t h) {
+void c_Set::add(int64_t h) {
   Bucket* p = findForInsert(h);
   assert(p);
   if (p->validValue()) {
@@ -3743,7 +3701,7 @@ void c_Set::update(int64_t h) {
   p->setInt(h);
 }
 
-void c_Set::update(StringData *key) {
+void c_Set::add(StringData *key) {
   strhash_t h = key->hash();
   Bucket* p = findForInsert(key->data(), key->size(), h);
   assert(p);
@@ -3760,6 +3718,16 @@ void c_Set::update(StringData *key) {
     }
   }
   p->setStr(key, h);
+}
+
+void c_Set::add(TypedValue* val) {
+  if (val->m_type == KindOfInt64) {
+    add(val->m_data.num);
+  } else if (IS_STRING_TYPE(val->m_type)) {
+    add(val->m_data.pstr);
+  } else {
+    throwBadValueType();
+  }
 }
 
 void c_Set::erase(Bucket* p) {
@@ -4483,6 +4451,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   assert(obj->isCollection());
   int64_t sz = obj->getCollectionSize();
   if (obj->getCollectionType() == Collection::VectorType ||
+      obj->getCollectionType() == Collection::FrozenVectorType ||
       obj->getCollectionType() == Collection::SetType ||
       obj->getCollectionType() == Collection::PairType) {
     serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
@@ -4995,6 +4964,9 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
       break;
     case Collection::PairType:
       c_Pair::Unserialize(obj, uns, sz, type);
+      break;
+    case Collection::FrozenVectorType:
+      c_FrozenVector::Unserialize(obj, uns, sz, type);
       break;
     default:
       assert(false);

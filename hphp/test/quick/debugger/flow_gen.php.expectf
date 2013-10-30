@@ -47,14 +47,6 @@ Break at foo() on line 24 of %s/flow_gen.php
   25   }
 
 step
-Break at Continuation::send()
-step
-Break at Continuation::send()
-step
-Break at Continuation::send()
-step
-Break at Continuation::send()
-step
 Break at genFoo() on line 11 of %s/flow_gen.php
   10 
   11*function genFoo($a) {
@@ -107,14 +99,6 @@ Break at foo() on line 24 of %s/flow_gen.php
   24*    $gen1->send($a);
   25   }
 
-step
-Break at Continuation::send()
-step
-Break at Continuation::send()
-step
-Break at Continuation::send()
-step
-Break at Continuation::send()
 step
 Break at genFoo() on line 11 of %s/flow_gen.php
   10 

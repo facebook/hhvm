@@ -74,6 +74,7 @@
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
 #include "hphp/compiler/parser/parser.h"
+#include "hphp/hhbbc/hhbbc.h"
 
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
@@ -103,6 +104,7 @@
 #include <iomanip>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 namespace HPHP {
 namespace Compiler {
@@ -1108,12 +1110,8 @@ void MetaInfoBuilder::add(int pos, Unit::MetaInfo::Kind kind,
   if (mVector) arg |= Unit::MetaInfo::VectorArg;
   Vec& info = m_metaMap[pos];
   int i = info.size();
-  if (kind == Unit::MetaInfo::Kind::NopOut) {
-    info.clear();
-  } else if (i == 1 && info[0].m_kind == Unit::MetaInfo::Kind::NopOut) {
-    return;
-  } else if (kind == Unit::MetaInfo::Kind::DataTypeInferred ||
-             kind == Unit::MetaInfo::Kind::DataTypePredicted) {
+  if (kind == Unit::MetaInfo::Kind::DataTypeInferred ||
+      kind == Unit::MetaInfo::Kind::DataTypePredicted) {
     // Put DataType first, because if applyInputMetaData saw Class
     // first, it would call recordRead which mark the input as
     // needing a guard before we saw the DataType
@@ -1688,6 +1686,9 @@ void EmitterVisitor::visit(FileScopePtr file) {
     TypedValue mainReturn;
     mainReturn.m_type = KindOfInvalid;
     bool notMergeOnly = false;
+
+    if (Option::UseHHBBC && SystemLib::s_inited) notMergeOnly = true;
+
     for (i = 0; i < nk; i++) {
       StatementPtr s = (*stmts)[i];
       switch (s->getKindOf()) {
@@ -1903,11 +1904,10 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     /* we dont support V in M-vectors, so leave it as an R in that
        case */
     assert(m_evalStack.get(m_evalStack.size() - 1) == StackSym::R);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
     if (ref) {
-      e.BoxR();
+      e.BoxRNop();
     } else {
-      e.UnboxR();
+      e.UnboxRNop();
     }
   }
 
@@ -2651,16 +2651,19 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           } else {
             assert(m_staticArrays.empty());
             ExpressionPtr ex = u->getExpression();
+            int capacityHint = -1;
             if (ex->getKindOf() == Expression::KindOfExpressionList) {
               ExpressionListPtr el(static_pointer_cast<ExpressionList>(ex));
               int capacity = el->getCount();
               if (capacity > 0) {
-                m_metaInfo.add(m_ue.bcPos(),
-                               Unit::MetaInfo::Kind::ArrayCapacity,
-                               false, 0, capacity);
+                capacityHint = capacity;
               }
             }
-            e.NewArray();
+            if (capacityHint != -1) {
+              e.NewArrayReserve(capacityHint);
+            } else {
+              e.NewArray();
+            }
             visit(ex);
           }
           return true;
@@ -2707,8 +2710,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           {
             FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
             e.Int(0);
-            m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
-                           false, 0, 0);
             e.FPassC(0);
           }
           e.FCall(1);
@@ -3101,8 +3102,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         if (el->getType() == '`') {
           emitConvertToCell(e);
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
-                         false, 0, 0);
           e.FPassC(0);
           delete fpi;
           e.FCall(1);
@@ -3240,9 +3239,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitConvertToCell(e);
           e.False();
           e.FCallBuiltin(2, 1, s_count);
-          m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
-                         false, 0, 0);
-          e.UnboxR();
+          e.UnboxRNop();
           return true;
         } else if (call->isCallToFunction("func_get_args") &&
                    m_curFunc->isGenerator()) {
@@ -3271,14 +3268,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             e.Abs();
             return true;
           }
-        } else if (call->isCompilerCallToFunction("hphp_continuation_done")) {
-          assert(params && params->getCount() == 1);
-          visit((*params)[0]);
-          emitConvertToCell(e);
-          assert(m_evalStack.size() == 1);
-          e.ContRetC();
-          e.Null();
-          return true;
         } else if ((call->isCallToFunction("class_exists") ||
                     call->isCallToFunction("interface_exists") ||
                     call->isCallToFunction("trait_exists")) && params &&
@@ -3805,6 +3794,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               } else {
                 not_implemented();
               }
+            } else if (key->is(Expression::KindOfUnaryOpExpression)) {
+              assert(key->isScalar());
+              tvKey = make_tv<KindOfNull>();
+              auto uoe = dynamic_pointer_cast<UnaryOpExpression>(key);
+              uoe->getScalarValue(tvAsVariant(&tvKey));
             } else {
               not_implemented();
             }
@@ -4582,13 +4576,11 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
       if (passByRefKind == PassByRefKind::AllowCell ||
           m_evalStack.get(m_evalStack.size() - 1) != StackSym::C) {
         emitVGet(e);
-        m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
-        e.FPassV(paramId);
+        e.FPassVNop(paramId);
         return;
       }
     } else {
       emitCGet(e);
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
       e.FPassC(paramId);
       return;
     }
@@ -5694,7 +5686,8 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
   const Location* sLoc = meth->getLocation().get();
   fe->setLocation(sLoc->line0, sLoc->line1);
-  fe->setDocComment(meth->getDocComment().c_str());
+  fe->setDocComment(
+    Option::GenerateDocComments ? meth->getDocComment().c_str() : "");
   fe->setReturnType(meth->retTypeAnnotation()->dataType());
   fe->setMaxStackCells(kNumActRecCells + 1);
   fe->setReturnTypeConstraint(
@@ -5782,12 +5775,15 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
   }
 
   const Location* sLoc = meth->getLocation().get();
+  StringData* methDoc = Option::GenerateDocComments ?
+    makeStaticString(meth->getDocComment()) : empty_string.get();
+
   fe->init(sLoc->line0,
            sLoc->line1,
            m_ue.bcPos(),
            buildMethodAttrs(meth, fe, top, allowOverride),
            top,
-           makeStaticString(meth->getDocComment()));
+           methDoc);
 }
 
 void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
@@ -5886,8 +5882,7 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   if (funcScope->isAbstract()) {
     std::ostringstream s;
     s << "Cannot call abstract method " << meth->getOriginalFullName() << "()";
-    emitMakeUnitFatal(e, s.str().c_str(),
-                      FatalKind::Runtime, true /* skipFrame */);
+    emitMakeUnitFatal(e, s.str().c_str(), FatalOp::RuntimeOmitFrame);
   }
 }
 
@@ -6052,9 +6047,7 @@ void EmitterVisitor::emitSetFuncGetArgs(Emitter& e) {
     Id local = m_curFunc->lookupVarId(s_continuationVarArgsLocal);
     emitVirtualLocal(local);
     e.FCallBuiltin(0, 0, s_func_get_args);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut,
-                   false, 0, 0);
-    e.UnboxR();
+    e.UnboxRNop();
     emitSet(e);
     e.PopC();
   }
@@ -6397,7 +6390,6 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
     for (int i = param; i < nParams; i++) {
       visit((*params)[i]);
       emitConvertToCell(e);
-      m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
       e.FPassC(i - param);
     }
   }
@@ -6664,7 +6656,8 @@ void EmitterVisitor::emitClass(Emitter& e,
   StringData* className = makeStaticString(cNode->getOriginalName());
   StringData* parentName =
     makeStaticString(cNode->getOriginalParent());
-  StringData* classDoc = makeStaticString(cNode->getDocComment());
+  StringData* classDoc = Option::GenerateDocComments ?
+    makeStaticString(cNode->getDocComment()) : empty_string.get();
   Attr attr = cNode->isInterface() ? AttrInterface :
               cNode->isTrait()     ? AttrTrait     :
               cNode->isAbstract()  ? AttrAbstract  :
@@ -6719,8 +6712,8 @@ void EmitterVisitor::emitClass(Emitter& e,
   if (hoistable != PreClass::AlwaysHoistable) {
     e.DefCls(pce->id());
   } else {
-    // To atatch the line number to for error reporting...
-    e.Nop();
+    // To attach the line number to for error reporting.
+    e.NopDefCls(pce->id());
   }
   e.setTempLocation(LocationPtr());
   for (int i = firstInterface; i < nInterfaces; ++i) {
@@ -6785,7 +6778,8 @@ void EmitterVisitor::emitClass(Emitter& e,
             : KindOfInvalid;
 
           StringData* propName = makeStaticString(var->getName());
-          StringData* propDoc = empty_string.get();
+          StringData* propDoc = Option::GenerateDocComments ?
+            makeStaticString(var->getDocComment()) : empty_string.get();
           TypedValue tvVal;
           // Some properties may need to be marked with the AttrDeepInit
           // attribute, while other properties should not be marked with
@@ -7162,7 +7156,6 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     emitVirtualLocal(oldLevelLoc);
     emitCGet(e);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
     e.FPassC(0);
   }
   e.FCall(1);
@@ -7179,7 +7172,6 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     emitVirtualLocal(oldLevelLoc);
     emitCGet(e);
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NopOut, false, 0, 0);
     e.FPassC(0);
   }
   e.FCall(1);
@@ -7189,11 +7181,10 @@ void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
 
 void EmitterVisitor::emitMakeUnitFatal(Emitter& e,
                                        const char* msg,
-                                       FatalKind k /* = FatalKind::Runtime */,
-                                       bool skipFrame /* = false */) {
+                                       FatalOp k) {
   const StringData* sd = makeStaticString(msg);
   e.String(sd);
-  e.Fatal(uint8_t(k), uint8_t(skipFrame));
+  e.Fatal(static_cast<uint8_t>(k));
 }
 
 void EmitterVisitor::addFunclet(Thunklet* body, Label* entry) {
@@ -7461,7 +7452,7 @@ static UnitEmitter* emitHHBCUnitEmitter(AnalysisResultPtr ar, FileScopePtr fsp,
     EmitterVisitor fev(*ue);
     Emitter emitter(ex.m_node, *ue, fev);
     FuncFinisher ff(&fev, emitter, ue->getMain());
-    auto kind = ex.m_parseFatal ? FatalKind::Parse : FatalKind::Runtime;
+    auto kind = ex.m_parseFatal ? FatalOp::Parse : FatalOp::Runtime;
     fev.emitMakeUnitFatal(emitter, ex.getMessage().c_str(), kind);
   }
   return ue;
@@ -7611,6 +7602,7 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
   }
 }
 
+StaticString s_construct("__construct");
 static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
                                      ssize_t numBuiltinClasses) {
   MD5 md5("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
@@ -7706,6 +7698,8 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         pce->addInterface(intf);
       }
     }
+
+    bool hasCtor = false;
     for (ssize_t j = 0; j < e.info->m_methodCount; ++j) {
       const HhbcExtMethodInfo* methodInfo = &(e.info->m_methods[j]);
       static const StringData* continuationCls =
@@ -7720,6 +7714,10 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
           mapGet(contMethods, methName, &cmeth)) {
         emitContinuationMethod(*ue, fe, cmeth, metaInfo);
       } else {
+        if (e.name->isame(s_construct.get())) {
+          hasCtor = true;
+        }
+
         // Build the function
         BuiltinFunction bcf =
           (BuiltinFunction)methodInfo->m_pGenericMethod;
@@ -7734,6 +7732,19 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       fe->finish(past, false);
       ue->recordFunction(fe);
     }
+    if (!hasCtor) {
+      static const StringData* methName = makeStaticString("86ctor");
+      FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
+      bool added UNUSED = pce->addMethod(fe);
+      assert(added);
+      fe->init(0, 0, ue->bcPos(), AttrPublic, false, empty_string.get());
+      ue->emitOp(OpNull);
+      ue->emitOp(OpRetC);
+      fe->setMaxStackCells(1);
+      fe->finish(ue->bcPos(), false);
+      ue->recordFunction(fe);
+    }
+
     {
       ClassInfo::ConstantVec cnsVec = e.ci->getConstantsVec();
       for (unsigned i = 0; i < cnsVec.size(); ++i) {
@@ -7861,12 +7872,13 @@ class UEQ : public Synchronizable {
 };
 static UEQ s_ueq;
 
-class EmitterWorker : public JobQueueWorker<FileScopeRawPtr, true, true> {
+class EmitterWorker
+  : public JobQueueWorker<FileScopeRawPtr, void*, true, true> {
  public:
   EmitterWorker() : m_ret(true) {}
   virtual void doJob(JobType job) {
     try {
-      AnalysisResultPtr ar = ((AnalysisResult*)m_opaque)->shared_from_this();
+      AnalysisResultPtr ar = ((AnalysisResult*)m_context)->shared_from_this();
       UnitEmitter* ue = emitHHBCVisitor(ar, job);
       if (Option::GenerateBinaryHHBC) {
         s_ueq.push(ue);
@@ -7887,11 +7899,10 @@ class EmitterWorker : public JobQueueWorker<FileScopeRawPtr, true, true> {
 
 static void addEmitterWorker(AnalysisResultPtr ar, StatementPtr sp,
                              void *data) {
-  ((JobQueueDispatcher<EmitterWorker::JobType,
-    EmitterWorker>*)data)->enqueue(sp->getFileScope());
+  ((JobQueueDispatcher<EmitterWorker>*)data)->enqueue(sp->getFileScope());
 }
 
-static void batchCommit(std::vector<UnitEmitter*>& ues) {
+static void batchCommit(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   assert(Option::GenerateBinaryHHBC);
   Repo& repo = Repo::get();
 
@@ -7901,10 +7912,8 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
   {
     RepoTxn txn(repo);
 
-    for (std::vector<UnitEmitter*>::const_iterator it = ues.begin();
-         it != ues.end(); ++it) {
-      UnitEmitter* ue = *it;
-      if (repo.insertUnit(ue, UnitOrigin::File, txn)) {
+    for (auto& ue : ues) {
+      if (repo.insertUnit(ue.get(), UnitOrigin::File, txn)) {
         err = true;
         break;
       }
@@ -7914,15 +7923,12 @@ static void batchCommit(std::vector<UnitEmitter*>& ues) {
     }
   }
 
-  // Clean up.
-  for (auto ue : ues) {
-    // Commit units individually if an error occurred during batch commit.
-    if (err) {
-      repo.commitUnit(ue, UnitOrigin::File);
+  // Commit units individually if an error occurred during batch commit.
+  if (err) {
+    for (auto& ue : ues) {
+      repo.commitUnit(ue.get(), UnitOrigin::File);
     }
-    delete ue;
   }
-  ues.clear();
 }
 
 static void commitLitstrs() {
@@ -7932,7 +7938,7 @@ static void commitLitstrs() {
   txn.commit();
 }
 
-/**
+/*
  * This is the entry point for offline bytecode generation.
  */
 void emitAllHHBC(AnalysisResultPtr ar) {
@@ -7953,11 +7959,13 @@ void emitAllHHBC(AnalysisResultPtr ar) {
     TypeConstraint tc;
   }
 
-  JobQueueDispatcher<EmitterWorker::JobType, EmitterWorker>
+  JobQueueDispatcher<EmitterWorker>
     dispatcher(threadCount, true, 0, false, ar.get());
 
   dispatcher.start();
   ar->visitFiles(addEmitterWorker, &dispatcher);
+
+  std::vector<std::unique_ptr<UnitEmitter>> ues;
 
   if (Option::GenerateBinaryHHBC) {
     // kBatchSize needs to strike a balance between reducing transaction commit
@@ -7966,7 +7974,6 @@ void emitAllHHBC(AnalysisResultPtr ar) {
     // (smaller batches have less to lose).  Empirical results indicate that a
     // value in the 2-10 range is reasonable.
     static const unsigned kBatchSize = 8;
-    std::vector<UnitEmitter*> ues;
 
     // Gather up units created by the worker threads and commit them in
     // batches.
@@ -7977,22 +7984,36 @@ void emitAllHHBC(AnalysisResultPtr ar) {
       // if it gets ahead of the workers.
       UnitEmitter* ue = s_ueq.tryPop(0, 100 * 1000 * 1000);
       if ((didPop = (ue != nullptr))) {
-        ues.push_back(ue);
+        ues.push_back(std::unique_ptr<UnitEmitter>{ue});
       }
-      if (ues.size() == kBatchSize
-          || (!didPop && inShutdown && ues.size() > 0)) {
-        batchCommit(ues);
+      if (!Option::UseHHBBC &&
+          (ues.size() == kBatchSize ||
+           (!didPop && inShutdown && ues.size() > 0))) {
+        batchCommit(std::move(ues));
       }
       if (!inShutdown) {
         inShutdown = dispatcher.pollEmpty();
       } else if (!didPop) {
-        assert(ues.size() == 0);
+        assert(Option::UseHHBBC || ues.size() == 0);
         break;
       }
     }
-    commitLitstrs();
+
+    if (!Option::UseHHBBC) commitLitstrs();
   } else {
     dispatcher.waitEmpty();
+  }
+
+  assert(Option::UseHHBBC || ues.empty());
+  if (Option::UseHHBBC) {
+    // TODO: drop all the AST structures to free up their memory?
+    // RuntimeOption::EvalJitEnableRenameFunction =
+    //   Option::JitEnableRenameFunction;
+    HHBBC::Options opts;
+    opts.InterceptableFunctions = Option::DynamicInvokeFunctions;
+    ues = HHBBC::whole_program(std::move(ues), opts);
+    batchCommit(std::move(ues));
+    commitLitstrs();
   }
 }
 
@@ -8035,7 +8056,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     }
     SCOPE_EXIT { SymbolTable::Purge(); };
 
-    UnitEmitter* ue = nullptr;
+    std::unique_ptr<UnitEmitter> ue;
     // Check if this file contains raw hip hop bytecode instead of php.
     // For now this is just dictated by file extension, and doesn't ever
     // commit to the repo.
@@ -8043,7 +8064,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       if (const char* dot = strrchr(filename, '.')) {
         const char hhbc_ext[] = "hhas";
         if (!strcmp(dot + 1, hhbc_ext)) {
-          ue = assemble_string(code, codeLen, filename, md5);
+          ue.reset(assemble_string(code, codeLen, filename, md5));
         }
       }
     }
@@ -8059,11 +8080,16 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       ar->setPhase(AnalysisResult::AnalyzeAll);
       fsp->analyzeProgram(ar);
 
-      ue = emitHHBCUnitEmitter(ar, fsp, md5);
+      ue.reset(emitHHBCUnitEmitter(ar, fsp, md5));
+      if (Option::UseHHBBC && SystemLib::s_inited) {
+        ue = HHBBC::single_unit(std::move(ue));
+      }
     }
-    Repo::get().commitUnit(ue, unitOrigin);
-    Unit* unit = ue->create();
-    delete ue;
+    Repo::get().commitUnit(ue.get(), unitOrigin);
+
+    auto const unit = ue->create();
+    ue.reset();
+
     if (unit->sn() == -1) {
       // the unit was not committed to the Repo, probably because
       // another thread did it first. Try to use the winner.

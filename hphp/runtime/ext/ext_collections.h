@@ -84,10 +84,10 @@ class c_Vector : public BaseVector {
   Variant t___unset(Variant name);
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
-  static Variant ti_slice(CVarRef vec, CVarRef offset,
-                          CVarRef len = uninit_null());
-  static Variant t_slice(CVarRef vec, CVarRef offset,
-                         CVarRef len = uninit_null()) {
+  static Object ti_slice(CVarRef vec, CVarRef offset,
+                         CVarRef len = uninit_null());
+  static Object t_slice(CVarRef vec, CVarRef offset,
+                        CVarRef len = uninit_null()) {
     return ti_slice(vec, offset, len);
   }
 
@@ -117,11 +117,17 @@ class c_Vector : public BaseVector {
   void sort(int sort_flags, bool ascending);
   bool usort(CVarRef cmp_function);
 
-  static c_Vector* Clone(ObjectData* obj);
+  static c_Vector* Clone(ObjectData* obj) {
+    return BaseVector::Clone<c_Vector>(obj);
+  }
+
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
+
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
-                          int64_t sz, char type);
+                          int64_t sz, char type) {
+    BaseVector::Unserialize("Vector", obj, uns, sz, type);
+  }
 
   static uint sizeOffset() { return offsetof(c_Vector, m_size); }
   static uint dataOffset() { return offsetof(c_Vector, m_data); }
@@ -197,12 +203,29 @@ public:
 
   // Others
   void t___construct(CVarRef iterable = null_variant);
+  Object t_lazy();
+  Array t_toarray();
+  Array t_tokeysarray();
+  Array t_tovaluesarray();
+  int64_t t_linearsearch(CVarRef search_value);
+  Object t_values();
+
+
+  static Object ti_slice(CVarRef vec, CVarRef offset,
+                         CVarRef len = uninit_null());
+
+  static c_FrozenVector* Clone(ObjectData* obj) {
+    return BaseVector::Clone<c_FrozenVector>(obj);
+  }
+
+  // Magic methods
   String t___tostring();
   Variant t___get(Variant name);
   Variant t___set(Variant name, Variant value);
   bool t___isset(Variant name);
   Variant t___unset(Variant name);
 
+  // Materialization methods
   Object t_tovector();
   Object t_tofrozenvector();
   Object t_tomap();
@@ -212,6 +235,11 @@ public:
 public:
 
   explicit c_FrozenVector(Class* cls = c_FrozenVector::classof());
+
+  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
+                          int64_t sz, char type) {
+    BaseVector::Unserialize("FrozenVector", obj, uns, sz, type);
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -893,6 +921,9 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   void init(CVarRef t);
 
   void add(TypedValue* val);
+  void add(int64_t h);
+  void add(StringData* key);
+
   void remove(int64_t key) {
     ++m_version;
     erase(find(key));
@@ -1018,8 +1049,6 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   Bucket* findForInsert(const char* k, int len, strhash_t prehash) const;
   Bucket* findForNewInsert(size_t h0) const;
 
-  void update(int64_t h);
-  void update(StringData* key);
   void erase(Bucket* prev);
 
   void adjustCapacityImpl(int64_t sz);

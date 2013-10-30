@@ -47,6 +47,7 @@ class ArrayData {
     kMixedKind,   // HphpArray arbitrary int or string keys, maybe holes
     kSharedKind,  // SharedArray
     kNvtwKind,    // NameValueTableWrapper
+    kProxyKind,   // ProxyArray
     kNumKinds // insert new values before kNumKinds.
   };
 
@@ -199,6 +200,9 @@ public:
   bool isNameValueTableWrapper() const {
     return m_kind == kNvtwKind;
   }
+  bool isProxyArray() const {
+    return m_kind == kProxyKind;
+  }
 
   /*
    * Returns whether or not this array contains "vector-like" data.
@@ -283,9 +287,9 @@ public:
   ArrayData *setRef(int64_t k, CVarRef v, bool copy);
   ArrayData *setRef(StringData* k, CVarRef v, bool copy);
 
-  void zSet(int64_t k, RefData* r);
-  void zSet(StringData* k, RefData* r);
-  void zAppend(RefData* r);
+  ArrayData* zSet(int64_t k, RefData* r);
+  ArrayData* zSet(StringData* k, RefData* r);
+  ArrayData* zAppend(RefData* r);
 
   /**
    * The same as set(), but with the precondition that the key does
@@ -394,10 +398,9 @@ public:
   static bool Usort(ArrayData*, CVarRef cmp_function);
   static bool Uasort(ArrayData*, CVarRef cmp_function);
 
-  // TODO(#2941952)
-  static void ZSetInt(ArrayData* ad, int64_t k, RefData* v);
-  static void ZSetStr(ArrayData* ad, StringData* k, RefData* v);
-  static void ZAppend(ArrayData* ad, RefData* v);
+  static ArrayData* ZSetInt(ArrayData* ad, int64_t k, RefData* v);
+  static ArrayData* ZSetStr(ArrayData* ad, StringData* k, RefData* v);
+  static ArrayData* ZAppend(ArrayData* ad, RefData* v);
 
   /**
    * Make a copy of myself.
@@ -626,9 +629,9 @@ struct ArrayFunctions {
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);
   APCVariant* (*getSharedVariant[NK])(const ArrayData*);
-  void (*zSetInt[NK])(ArrayData*, int64_t k, RefData* v);
-  void (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
-  void (*zAppend[NK])(ArrayData*, RefData* v);
+  ArrayData* (*zSetInt[NK])(ArrayData*, int64_t k, RefData* v);
+  ArrayData* (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
+  ArrayData* (*zAppend[NK])(ArrayData*, RefData* v);
 };
 
 extern const ArrayFunctions g_array_funcs;

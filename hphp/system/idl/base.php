@@ -1165,7 +1165,7 @@ function phpnet_get_function_info($name, $clsname = 'function') {
   if (preg_match('#<div class="refsect1 parameters"[^>]*>(.*?)'.
                  '<div class="refsect1 #s', $doc, $m)) {
     $desc = $m[1];
-    if (preg_match_all('#<span class="term"><em><code class="parameter">(.*?)</code>#s', $desc, $m)) {
+    if (preg_match_all('#<span class="term">\s*<em><code class="parameter">(.*?)</code>#s', $desc, $m)) {
       foreach ($m[1] as $param) {
         $ret['param_names'][] = phpnet_clean($param);
       }
@@ -1210,6 +1210,10 @@ function phpnet_get_class_info($name) {
     $ret['desc'] = phpnet_clean($m[1]);
   }
 
+  if (preg_match('#"modifier">extends</span>.*?class="classname">(.*?)#s', $doc, $m)) {
+    $ret['parent'] = phpnet_clean($m[1]);
+  }
+
   if (preg_match_all('#<var class="varname">(.*?)</var>#s', $doc, $m)) {
     foreach ($m[1] as $prop) {
       $ret['props'][]  = phpnet_clean($prop);
@@ -1241,7 +1245,7 @@ function phpnet_get_class_desc($name) {
 function phpnet_get_extension_functions($name) {
   $doc = @file_get_contents("http://www.php.net/manual/en/ref.$name.php");
   if ($doc === false) {
-    return false;
+    return array();
   }
 
   preg_match_all('#<li><a href="function\..*?\.php">(.*?)</a>.*?</li>#',
@@ -1252,7 +1256,7 @@ function phpnet_get_extension_functions($name) {
 function phpnet_get_extension_constants($name) {
   $doc = @file_get_contents("http://www.php.net/manual/en/$name.constants.php");
   if ($doc === false) {
-    return false;
+    return array();
   }
 
   preg_match_all('#<code>(.*?)</code>#', $doc, $m);
@@ -1262,7 +1266,7 @@ function phpnet_get_extension_constants($name) {
 function phpnet_get_extension_classes($name) {
   $doc = @file_get_contents("http://www.php.net/manual/en/book.$name.php");
   if ($doc === false) {
-    return false;
+    return array();
   }
 
   preg_match_all('#<a href="class.[^"]*.php">(.*?)</a>#', $doc, $m);

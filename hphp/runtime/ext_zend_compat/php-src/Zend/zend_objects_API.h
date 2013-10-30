@@ -40,6 +40,7 @@ typedef struct _zend_object_store_bucket {
       zend_objects_store_clone_t clone;
       const zend_object_handlers *handlers;
       zend_uint refcount;
+      gc_root_buffer *buffered;
     } obj;
     struct {
       int next;

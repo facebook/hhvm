@@ -39,7 +39,7 @@
 
   wtf:
     String "unknown property"
-    Fatal 0 0
+    Fatal Runtime
   }
 
   .method [public] 86sinit(&$props) {

@@ -22,6 +22,10 @@
 #ifndef ZEND_OBJECT_HANDLERS_H
 #define ZEND_OBJECT_HANDLERS_H
 
+union _zend_function;
+struct _zend_property_info;
+struct _zend_literal;
+
 /* The following rule applies to read_property() and read_dimension() implementations:
    If you return a zval which is not otherwise referenced by the extension or the engine's
    symbol table, its reference count should be 0.
@@ -142,8 +146,40 @@ struct _zend_object_handlers {
 
 extern ZEND_API zend_object_handlers std_object_handlers;
 
-ZEND_API inline int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC) {
-  return FAILURE;
-}
+#define zend_get_function_root_class(fbc) \
+  ((fbc)->common.prototype ? (fbc)->common.prototype->common.scope : (fbc)->common.scope)
+
+BEGIN_EXTERN_C()
+ZEND_API union _zend_function *zend_std_get_static_method(zend_class_entry *ce, const char *function_name_strval, int function_name_strlen, const struct _zend_literal *key TSRMLS_DC);
+ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *property_name, int property_name_len, zend_bool silent, const struct _zend_literal *key TSRMLS_DC);
+ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, const char *property_name, int property_name_len, const struct _zend_literal *key TSRMLS_DC);
+ZEND_API union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC);
+ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC);
+ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC);
+ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC);
+ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC);
+ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, const struct _zend_literal *key TSRMLS_DC);
+ZEND_API void rebuild_object_properties(zend_object *zobj);
+
+
+#define IS_ZEND_STD_OBJECT(z)  (Z_TYPE(z) == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))
+#define HAS_CLASS_ENTRY(z) (Z_OBJ_HT(z)->get_class_entry != NULL)
+
+ZEND_API int zend_check_private(union _zend_function *fbc, zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC);
+
+ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
+
+ZEND_API int zend_check_property_access(zend_object *zobj, const char *prop_info_name, int prop_info_name_len TSRMLS_DC);
+
+ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS);
+END_EXTERN_C()
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

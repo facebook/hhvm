@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -71,16 +72,21 @@ bool AsioExternalThreadEventQueue::tryReceiveSome() {
 }
 
 /**
- * Receive at least one finished event. Block if necessary.
+ * Receive at least one finished event, or until waketime (a steady_clock time)
+ * is reached.
+ *
+ * Returns true if events were received; if utime is passed as zero, no timeout
+ * is set and this method is guaranteed to return true.
  */
-void AsioExternalThreadEventQueue::receiveSome() {
+bool AsioExternalThreadEventQueue::receiveSomeUntil(
+    std::chrono::time_point<std::chrono::steady_clock> waketime) {
   assert(!m_received);
 
   // try receive external thread events without grabbing lock
   m_received = m_queue.exchange(nullptr);
   if (m_received) {
     assert(m_received != K_CONSUMER_WAITING);
-    return;
+    return true;
   }
 
   // no external thread events received, synchronization needed
@@ -90,7 +96,24 @@ void AsioExternalThreadEventQueue::receiveSome() {
   if (m_queue.compare_exchange_strong(m_received, K_CONSUMER_WAITING)) {
     // wait for transition from WAITING to non-empty
     do {
-      m_queueCondition.wait(lock);
+      std::cv_status status = m_queueCondition.wait_until(lock, waketime);
+
+      if (status == std::cv_status::timeout) {
+        // We timed out without receiving events.  Unflag ourselves as
+        // waiting.
+        m_received = m_queue.exchange(nullptr);
+        assert(m_received);
+
+        // If we were still waiting on an event, reset our state and return;
+        // otherwise, a send() must have completed, so run with the received
+        // event even if timeout occurred.
+        if (m_received == K_CONSUMER_WAITING) {
+          m_received = nullptr;
+          return false;
+        } else {
+          return true;
+        }
+      }
     } while (m_queue.load() == K_CONSUMER_WAITING);
   } else  {
     // external thread transitioned from empty to non-empty while grabbing lock
@@ -99,6 +122,16 @@ void AsioExternalThreadEventQueue::receiveSome() {
   m_received = m_queue.exchange(nullptr);
   assert(m_received);
   assert(m_received != K_CONSUMER_WAITING);
+
+  return true;
+}
+
+/**
+ * Receive at least one finished event.
+ */
+void AsioExternalThreadEventQueue::receiveSome() {
+  bool received UNUSED = receiveSomeUntil(AsioSession::getLatestWakeTime());
+  assert(received);
 }
 
 /**

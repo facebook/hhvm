@@ -193,14 +193,14 @@ FileCachePtr Package::getFileCache() {
 ///////////////////////////////////////////////////////////////////////////////
 
 class ParserWorker :
-    public JobQueueWorker<std::pair<const char *,bool>, true, true> {
+    public JobQueueWorker<std::pair<const char *,bool>, Package*, true, true> {
 public:
   bool m_ret;
   ParserWorker() : m_ret(true) {}
   virtual void doJob(JobType job) {
     bool ret;
     try {
-      Package *package = (Package*)m_opaque;
+      Package *package = m_context;
       ret = package->parseImpl(job.first);
     } catch (Exception &e) {
       Logger::Error("%s", e.getMessage().c_str());
@@ -222,8 +222,7 @@ void Package::addSourceFile(const char *fileName, bool check /* = false */) {
     Lock lock(m_mutex);
     bool inserted = m_filesToParse.insert(Util::canonicalize(fileName)).second;
     if (inserted && m_dispatcher) {
-      ((JobQueueDispatcher<ParserWorker::JobType,
-        ParserWorker>*)m_dispatcher)->enqueue(
+      ((JobQueueDispatcher<ParserWorker>*)m_dispatcher)->enqueue(
           std::make_pair(m_files.add(fileName), check));
     }
   }
@@ -240,7 +239,7 @@ bool Package::parse(bool check) {
   }
   if (threadCount <= 0) threadCount = 1;
 
-  JobQueueDispatcher<ParserWorker::JobType, ParserWorker>
+  JobQueueDispatcher<ParserWorker>
     dispatcher(threadCount, true, 0, false, this);
 
   m_dispatcher = &dispatcher;

@@ -1,5 +1,5 @@
 <?php
-function foo() {
+function foo($a) {
   $sc = new SoapClient(null,
                        array('location' =>
                              "http://fizzle/does-not-exist.php",
@@ -9,5 +9,6 @@ function foo() {
   } catch (Exception $e) {
     echo "Caught exception\n";
   }
+  var_dump((string)strtoupper($a));
 }
-foo();
+foo("bar");

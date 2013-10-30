@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/x64-util.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/ringbuffer.h"
@@ -139,7 +138,9 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func,
   emitRB(a, Trace::RBTypeFuncExit, func->fullName()->data());
   if (emitSavedRIPReturn) {
     a. ret();
-    translator_not_reached(a);
+    if (debug) {
+      a.ud2();
+    }
     return 0;
   }
   return sizeof(ActRec) + cellsToBytes(nLocalCells-1);
@@ -257,7 +258,11 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
 
   // TODO(2796856): we should record an OpServiceRequest pseudo-bytecode here.
 
-  translator_not_reached(as);
+  if (debug) {
+    // not reached
+    as.ud2();
+  }
+
   if (!persist) {
     /*
      * Recycled stubs need to be uniformly sized. Make space for the

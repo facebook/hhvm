@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/region-hot-trace.h"
 
 namespace HPHP { namespace JIT {
 
@@ -45,10 +46,6 @@ extern RegionDescPtr selectTracelet(const RegionContext&, int inlineDepth);
 extern RegionDescPtr selectHotBlock(TransID transId,
                                     const ProfData* profData,
                                     const TransCFG& cfg);
-extern RegionDescPtr selectHotTrace(TransID triggerId,
-                                    const ProfData* profData,
-                                    TransCFG& cfg,
-                                    TransIDSet& selectedSet);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -152,7 +149,7 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
 
 void RegionDesc::Block::addPredicted(SrcKey sk, TypePred pred) {
   FTRACE(2, "Block::addPredicted({}, {})\n", showShort(sk), show(pred));
-  assert(pred.type.subtypeOf(Type::StackElem));
+  assert(pred.type <= Type::StackElem);
   assert(contains(sk));
   m_typePreds.insert(std::make_pair(sk, pred));
 }
@@ -469,6 +466,31 @@ RegionDescPtr selectHotRegion(TransID transId,
   }
 
   return region;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+static bool postCondMismatch(const RegionDesc::TypePred& postCond,
+                             const RegionDesc::TypePred& preCond) {
+  return postCond.location == preCond.location &&
+         preCond.type.not(postCond.type);
+}
+
+bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
+                          const PostConditions& prevPostConds) {
+  const auto& preConds = block->typePreds();
+  for (const auto& it : preConds) {
+    for (const auto& post : prevPostConds) {
+      const RegionDesc::TypePred& preCond = it.second;
+      if (postCondMismatch(post, preCond)) {
+        FTRACE(6, "preCondsAreSatisfied: postcondition check failed!\n"
+               "  postcondition was {}, precondition was {}\n",
+               show(post), show(preCond));
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////

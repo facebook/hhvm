@@ -1194,25 +1194,25 @@
         },
         {
             "name": "array_diff",
-            "desc": "Compares array1 against array2 and returns the difference.",
+            "desc": "Compares container1 against container2 and returns the difference.",
             "flags": [
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
             "return": {
                 "type": "Variant",
-                "desc": "Returns an array containing all the entries from array1 that are not present in any of the other arrays."
+                "desc": "Returns an array containing all the entries from container1 that are not present in any of the other containers."
             },
             "args": [
                 {
-                    "name": "array1",
+                    "name": "container1",
                     "type": "Variant",
-                    "desc": "The array to compare from"
+                    "desc": "The container to compare from"
                 },
                 {
-                    "name": "array2",
+                    "name": "container2",
                     "type": "Variant",
-                    "desc": "An array to compare against"
+                    "desc": "A container to compare against"
                 }
             ]
         },
@@ -1359,25 +1359,25 @@
         },
         {
             "name": "array_diff_key",
-            "desc": "Compares the keys from array1 against the keys from array2 and returns the difference. This function is like array_diff() except the comparison is done on the keys instead of the values.",
+            "desc": "Compares the keys from container1 against the keys from container2 and returns the difference. This function is like array_diff() except the comparison is done on the keys instead of the values.",
             "flags": [
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
             "return": {
                 "type": "Variant",
-                "desc": "Returns an array containing all the entries from array1 whose keys are not present in any of the other arrays."
+                "desc": "Returns an array containing all the entries from container1 whose keys are not present in any of the other containers."
             },
             "args": [
                 {
-                    "name": "array1",
+                    "name": "container1",
                     "type": "Variant",
-                    "desc": "The array to compare from"
+                    "desc": "The container to compare from"
                 },
                 {
-                    "name": "array2",
+                    "name": "container2",
                     "type": "Variant",
-                    "desc": "An array to compare against"
+                    "desc": "A container to compare against"
                 }
             ]
         },
@@ -1411,25 +1411,25 @@
         },
         {
             "name": "array_intersect",
-            "desc": "array_intersect() returns an array containing all the values of array1 that are present in all the arguments. Note that keys are preserved.",
+            "desc": "array_intersect() returns an array containing all the values of container1 that are present in all the arguments. Note that keys are preserved.",
             "flags": [
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
             "return": {
                 "type": "Variant",
-                "desc": "Returns an array containing all of the values in array1 whose values exist in all of the parameters."
+                "desc": "Returns an array containing all of the values in container1 whose values exist in all of the parameters."
             },
             "args": [
                 {
-                    "name": "array1",
+                    "name": "container1",
                     "type": "Variant",
-                    "desc": "The array with master values to check."
+                    "desc": "The container with master values to check."
                 },
                 {
-                    "name": "array2",
+                    "name": "container2",
                     "type": "Variant",
-                    "desc": "An array to compare values against."
+                    "desc": "A container to compare values against."
                 }
             ]
         },
@@ -1575,25 +1575,25 @@
         },
         {
             "name": "array_intersect_key",
-            "desc": "array_intersect_key() returns an array containing all the entries of array1 which have keys that are present in all the arguments.",
+            "desc": "array_intersect_key() returns an array containing all the entries of container1 which have keys that are present in all the arguments.",
             "flags": [
                 "VariableArguments",
                 "FunctionIsFoldable"
             ],
             "return": {
                 "type": "Variant",
-                "desc": "Returns an associative array containing all the entries of array1 which have keys that are present in all arguments."
+                "desc": "Returns an array containing all the entries of container1 which have keys that are present in all arguments."
             },
             "args": [
                 {
-                    "name": "array1",
+                    "name": "container1",
                     "type": "Variant",
-                    "desc": "The array with master keys to check."
+                    "desc": "The container with master keys to check."
                 },
                 {
-                    "name": "array2",
+                    "name": "container2",
                     "type": "Variant",
-                    "desc": "An array to compare keys against."
+                    "desc": "A container to compare keys against."
                 }
             ]
         },

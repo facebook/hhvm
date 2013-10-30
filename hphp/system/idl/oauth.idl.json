@@ -182,7 +182,7 @@
     ],
     "classes": [
         {
-            "name": "OAuth",
+            "name": "oauth",
             "desc": "The OAuth extension provides a simple interface to interact with data providers using the OAuth HTTP specification to protect private resources.",
             "flags": [
                 "ZendCompat"
@@ -713,7 +713,7 @@
             ]
         },
         {
-            "name": "OAuthProvider",
+            "name": "oauthprovider",
             "desc": "Manages an OAuth provider class.\n\nSee also an external in-depth tutorial titled Writing an OAuth Provider Service, which takes a hands-on approach to providing this service. There are also OAuth provider examples within the OAuth extensions sources.",
             "flags": [
                 "ZendCompat"
@@ -1026,7 +1026,7 @@
             ]
         },
         {
-            "name": "OAuthException",
+            "name": "oauthexception",
             "desc": "This exception is thrown when exceptional errors occur while using the OAuth extension and contains useful debugging information.",
             "flags": [
                 "ZendCompat"

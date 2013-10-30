@@ -81,6 +81,14 @@ class FailedIRGen : public std::runtime_error {
   {}
 };
 
+class FailedTraceGen : public std::runtime_error {
+ public:
+  FailedTraceGen(const char* file, int line, const char* why)
+    : std::runtime_error(folly::format("FailedTraceGen @ {}:{} - {}",
+                                       file, line, why).str())
+  {}
+};
+
 class FailedCodeGen : public std::runtime_error {
  public:
   const char*    file;
@@ -107,6 +115,10 @@ class FailedCodeGen : public std::runtime_error {
   throw FailedIRGen(__FILE__, __LINE__, instr);     \
 } while(0)
 #define PUNT(instr) SPUNT(#instr)
+#define TRACE_PUNT(why) do { \
+  throw FailedTraceGen(__FILE__, __LINE__, why); \
+} while(0)
+
 
 //////////////////////////////////////////////////////////////////////
 
@@ -126,6 +138,10 @@ class FailedCodeGen : public std::runtime_error {
  *     DUnbox(N) single dst has unboxed type of src N
  *     DBox(N)   single dst has boxed type of src N
  *     DParam    single dst has type of the instruction's type parameter
+ *     DLdRef    single dst has type of the instruction's type parameter, with
+ *               any specialization removed
+ *     DThis     single dst has type Obj<ctx>, where ctx is the
+ *               current context class
  *     DArith    single dst has a type based on arithmetic type rules
  *     DMulti    multiple dests. type and number depend on instruction
  *     DSetElem  single dst is a subset of CountedStr|Nullptr depending on
@@ -356,8 +372,8 @@ O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),               NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
 O(LdElem,                      D(Cell), S(PtrToCell) S(Int),      E|Mem|Refs) \
-O(LdRef,                        DParam, S(BoxedCell),                     NF) \
-O(LdThis,                       D(Obj), S(FramePtr),                       C) \
+O(LdRef,                        DLdRef, S(BoxedCell),                     NF) \
+O(LdThis,                        DThis, S(FramePtr),                       C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
 O(LdConst,                      DParam, NA,                                C) \
 O(DefConst,                     DParam, NA,                                C) \
@@ -391,7 +407,7 @@ O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),       C|E|N|Er) \
 O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),    C|E|N|Er) \
 O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr),   E|N|Refs|Er) \
 O(LdObjInvoke,                 D(Func), S(Cls),                           NF) \
-O(LdGblAddrDef,            D(PtrToGen), S(Str),                      E|N|CRc) \
+O(LdGblAddrDef,            D(PtrToGen), S(Str),                          E|N) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                            N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
 O(LdArrFuncCtx,                     ND, S(Arr) \
@@ -526,6 +542,7 @@ O(InterpOneCF,               D(StkPtr), S(FramePtr) S(StkPtr),                \
                                                            T|E|N|Mem|Refs|Er) \
 O(Spill,                       DofS(0), SUnk,                            Mem) \
 O(Reload,                      DofS(0), SUnk,                            Mem) \
+O(Shuffle,                          ND, SUnk,                            Mem) \
 O(CreateContFunc,               D(Obj), NA,                          E|N|PRc) \
 O(CreateContMeth,               D(Obj), S(Ctx),                      E|N|PRc) \
 O(ContEnter,                        ND, S(FramePtr)                           \
@@ -768,10 +785,11 @@ O(EmptyElem,                   D(Bool), C(TCA)                                \
                                           S(Cell)                             \
                                           S(PtrToCell),      E|N|Mem|Refs|Er) \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),         E|Mem) \
-O(TypeProfileFunc,                  ND, S(Gen),                          E|N) \
+O(TypeProfileFunc,                  ND, S(Gen) S(Func),                  E|N) \
 O(IncStatGrouped,                   ND, CStr CStr C(Int),            E|N|Mem) \
 O(RBTrace,                          ND, NA,                              E|N) \
 O(IncTransCounter,                  ND, NA,                                E) \
+O(IncProfCounter,                   ND, NA,                                E) \
 O(ArrayIdx,                    D(Cell), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \

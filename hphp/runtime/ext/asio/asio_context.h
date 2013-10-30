@@ -29,6 +29,7 @@ namespace HPHP {
 FORWARD_DECLARE_CLASS(WaitableWaitHandle);
 FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
 FORWARD_DECLARE_CLASS(RescheduleWaitHandle);
+FORWARD_DECLARE_CLASS(SleepWaitHandle);
 FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
 
 typedef uint8_t context_idx_t;
@@ -46,8 +47,20 @@ class AsioContext {
 
     void schedule(c_AsyncFunctionWaitHandle* wait_handle);
     void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority);
-    uint32_t registerExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle);
-    void unregisterExternalThreadEvent(uint32_t ete_idx);
+
+    template <class TWaitHandle>
+    uint32_t registerTo(smart::vector<TWaitHandle*>& vec, TWaitHandle* wh);
+
+    template <class TWaitHandle>
+    void unregisterFrom(smart::vector<TWaitHandle*>& vec, uint32_t ev_idx);
+
+    smart::vector<c_SleepWaitHandle*>& getSleepEvents() {
+      return m_sleepEvents;
+    };
+    smart::vector<c_ExternalThreadEventWaitHandle*>& getExternalThreadEvents() {
+      return m_externalThreadEvents;
+    };
+
     void runUntil(c_WaitableWaitHandle* wait_handle);
 
     static const uint32_t QUEUE_DEFAULT       = 0;
@@ -62,7 +75,7 @@ class AsioContext {
     c_AsyncFunctionWaitHandle* m_current;
 
     // queue of AsyncFunctionWaitHandles ready for immediate execution
-    smart::queue<c_AsyncFunctionWaitHandle*> m_runnableQueue;
+    smart::vector<c_AsyncFunctionWaitHandle*> m_runnableQueue;
 
     // queue of RescheduleWaitHandles scheduled in default mode
     reschedule_priority_queue_t m_priorityQueueDefault;
@@ -70,11 +83,14 @@ class AsioContext {
     // queue of RescheduleWaitHandles scheduled to be run once there is no pending I/O
     reschedule_priority_queue_t m_priorityQueueNoPendingIO;
 
-    // list of all pending ExternalThreadEventWaitHandles
+    // pending wait handles
+    smart::vector<c_SleepWaitHandle*> m_sleepEvents;
     smart::vector<c_ExternalThreadEventWaitHandle*> m_externalThreadEvents;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#include "hphp/runtime/ext/asio/asio_context-inl.h"
 
 #endif // incl_HPHP_EXT_ASIO_CONTEXT_H_

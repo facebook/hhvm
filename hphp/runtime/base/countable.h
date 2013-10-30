@@ -26,17 +26,19 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * RefCount type for m_count field in refcounted objects
+ */
+typedef int32_t RefCount;
+
+/*
  * This bit flags a reference count as "static".  If a reference count
  * is static, it means we should never increment or decrement it: the
  * object lives across requests and may be accessed by multiple
  * threads.
  */
-const int32_t RefCountStaticValue = (1 << 30);
+constexpr size_t RefCountStaticBitPos = 30;
+constexpr RefCount RefCountStaticValue = (1 << RefCountStaticBitPos);
 
-/*
- * RefCount type for m_count field in refcounted objects
- */
-typedef int32_t RefCount;
 
 /*
  * Used for assertions.  Real count values should always be less than

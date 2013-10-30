@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 
 namespace HPHP { namespace JIT { namespace NativeCalls {
 

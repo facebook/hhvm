@@ -240,6 +240,7 @@
                     "name": "escapestring",
                     "desc": "Returns a string that has been properly escaped for safe inclusion in an SQL statement.",
                     "flags": [
+                      "IsStatic"
                     ],
                     "return": {
                         "type": "String",

@@ -227,6 +227,7 @@ bool RuntimeOption::SafeFileAccess = false;
 std::vector<std::string> RuntimeOption::AllowedDirectories;
 std::set<std::string> RuntimeOption::AllowedFiles;
 hphp_string_imap<std::string> RuntimeOption::StaticFileExtensions;
+hphp_string_imap<std::string> RuntimeOption::PhpFileExtensions;
 std::set<std::string> RuntimeOption::ForbiddenFileExtensions;
 std::set<std::string> RuntimeOption::StaticFileGenerators;
 FilesMatchPtrVec RuntimeOption::FilesMatches;
@@ -398,7 +399,7 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultWarmupRequests = debug ? 1 : 11;
-static const int kDefaultJitPGOThreshold = debug ? 2 : 1000;
+static const int kDefaultJitPGOThreshold = debug ? 2 : 100;
 #define F(type, name, def) \
   type RuntimeOption::Eval ## name = type(def);
 EVALFLAGS();
@@ -980,6 +981,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
         FilesMatches.push_back(FilesMatchPtr(new FilesMatch(hdf)));
       }
     }
+  }
+  {
+    Hdf phpfile = config["PhpFile"];
+    phpfile["Extensions"].get(PhpFileExtensions);
   }
   {
     Hdf admin = config["AdminServer"];

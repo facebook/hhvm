@@ -347,13 +347,15 @@ private:
  * when we decide to drop stack/caches.
  */
 template<typename TJob,
+         typename TContext = void*,
          bool countActive = false,
          bool waitable = false,
          class Policy = detail::NoDropCachePolicy>
 class JobQueueWorker {
 public:
   typedef TJob JobType;
-  typedef JobQueue<TJob,waitable,Policy> QueueType;
+  typedef TContext ContextType;
+  typedef JobQueue<TJob, waitable, Policy> QueueType;
   typedef Policy DropCachePolicy;
 
   static const bool Waitable = waitable;
@@ -362,7 +364,7 @@ public:
    * Default constructor.
    */
   JobQueueWorker()
-      : m_func(nullptr), m_opaque(nullptr), m_stopped(false), m_queue(nullptr) {
+      : m_func(nullptr), m_context(), m_stopped(false), m_queue(nullptr) {
   }
 
   virtual ~JobQueueWorker() {
@@ -372,12 +374,12 @@ public:
    * Two-phase object creation for easier derivation and for JobQueueDispatcher
    * to easily create a vector of workers.
    */
-  void create(int id, QueueType* queue, void *func, void *opaque) {
+  void create(int id, QueueType* queue, void *func, ContextType context) {
     assert(queue);
     m_id = id;
     m_queue = queue;
     m_func = func;
-    m_opaque = opaque;
+    m_context = context;
   }
 
   /**
@@ -432,7 +434,7 @@ public:
 protected:
   int m_id;
   void *m_func;
-  void *m_opaque;
+  ContextType m_context;
   bool m_stopped;
 
 private:
@@ -444,18 +446,19 @@ private:
 /**
  * Driver class to push through the whole thing.
  */
-template<class TJob, class TWorker>
+template<class TWorker>
 class JobQueueDispatcher {
 public:
   /**
    * Constructor.
    */
   JobQueueDispatcher(int threadCount, bool threadRoundRobin,
-                     int dropCacheTimeout, bool dropStack, void *opaque,
+                     int dropCacheTimeout, bool dropStack,
+                     typename TWorker::ContextType context,
                      int lifoSwitchThreshold = INT_MAX,
                      int maxJobQueuingMs = -1, int numPriorities = 1,
                      int groups = 1)
-      : m_stopped(true), m_id(0), m_opaque(opaque),
+      : m_stopped(true), m_id(0), m_context(context),
         m_maxThreadCount(threadCount),
         m_queue(threadCount, threadRoundRobin, dropCacheTimeout, dropStack,
                 lifoSwitchThreshold, maxJobQueuingMs, numPriorities, groups),
@@ -530,7 +533,7 @@ public:
   /**
    * Enqueue a new job.
    */
-  void enqueue(TJob job, int priority = 0) {
+  void enqueue(typename TWorker::JobType job, int priority = 0) {
     m_queue.enqueue(job, priority);
     // Spin up another worker thread if appropriate
     int target = getTargetNumWorkers();
@@ -622,9 +625,9 @@ public:
 private:
   bool m_stopped;
   int m_id;
-  void *m_opaque;
+  typename TWorker::ContextType m_context;
   int m_maxThreadCount;
-  JobQueue<TJob,
+  JobQueue<typename TWorker::JobType,
            TWorker::Waitable,
            typename TWorker::DropCachePolicy> m_queue;
 
@@ -640,7 +643,7 @@ private:
     m_workers.insert(worker);
     m_funcs.insert(func);
     int id = m_id++;
-    worker->create(id, &m_queue, func, m_opaque);
+    worker->create(id, &m_queue, func, m_context);
 
     if (start) {
       func->start();

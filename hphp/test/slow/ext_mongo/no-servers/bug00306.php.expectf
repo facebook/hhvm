@@ -1,0 +1,7 @@
+MongoId::__set_state(array(
+  '$id' => '4f06e55e44670ab92b000000',
+))
+object(MongoId)#2 (1) {
+  ["$id"]=>
+  string(24) "4f06e55e44670ab92b000000"
+}

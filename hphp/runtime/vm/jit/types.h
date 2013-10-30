@@ -41,6 +41,7 @@ struct ctca_identity_hash {
 
 typedef uint32_t               TransID;
 typedef hphp_hash_set<TransID> TransIDSet;
+typedef std::vector<TransID>   TransIDVec;
 
 const TransID InvalidID = -1LL;
 

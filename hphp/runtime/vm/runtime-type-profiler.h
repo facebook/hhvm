@@ -37,7 +37,18 @@ void initTypeProfileStructure();
 /*
  * Record an observation of (func, paramIndex, type of value)
  */
-void profileOneArgument(TypedValue value, int paramIndex, const Func* func);
+void profileOneArgument(TypedValue value, int32_t paramIndex, const Func* func);
+
+/*
+ * Record observation of all types passed to a function.
+ */
+void profileAllArguments(ActRec* ar);
+
+/*
+ * Return an array containing function's type profile, where counts
+ * are expressed as a percentage of total observations.
+ */
+Array getPercentParamInfoArray(const Func* func);
 
 /*
  * Format the type profile as JSON and write it to disk at

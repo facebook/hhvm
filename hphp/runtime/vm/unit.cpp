@@ -504,7 +504,7 @@ bool Unit::parseFatal(const StringData*& msg, int& line) const {
   pc += sizeof(Id) + 2;
 
   auto kind_char = *pc;
-  return kind_char == uint8_t(FatalKind::Parse);
+  return kind_char == static_cast<uint8_t>(FatalOp::Parse);
 }
 
 class FrameRestore {
@@ -1569,19 +1569,23 @@ int Unit::getLineNumber(Offset pc) const {
   return -1;
 }
 
-// Sets sLoc to the source location of the first source location
-// entry that contains pc in its range of source locations.
-// Returns
-bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
-  auto sourceLocTable = this->getSourceLocTable();
+bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc) {
   SourceLocEntry key(pc, sLoc);
-  auto it = upper_bound(sourceLocTable.begin(), sourceLocTable.end(), key);
-  if (it != sourceLocTable.end()) {
+  auto it = std::upper_bound(table.begin(), table.end(), key);
+  if (it != table.end()) {
     assert(pc < it->pastOffset());
     sLoc = it->val();
     return true;
   }
   return false;
+}
+
+// Sets sLoc to the source location of the first source location
+// entry that contains pc in its range of source locations.
+// Returns
+bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
+  auto sourceLocTable = getSourceLocTable();
+  return HPHP::getSourceLoc(sourceLocTable, pc, sLoc);
 }
 
 bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
@@ -1695,9 +1699,6 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
             out << " i" << argKind << arg << ":pc=" << sd->data();
             break;
           }
-          case Unit::MetaInfo::Kind::NopOut:
-            out << " Nop";
-            break;
           case Unit::MetaInfo::Kind::GuardedThis:
             out << " GuardedThis";
             break;
@@ -1706,9 +1707,6 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
             break;
           case Unit::MetaInfo::Kind::NoSurprise:
             out << " NoSurprise";
-            break;
-          case Unit::MetaInfo::Kind::ArrayCapacity:
-            out << " capacity=" << info.m_data;
             break;
           case Unit::MetaInfo::Kind::NonRefCounted:
             out << " :nrc=" << info.m_data;
@@ -2250,15 +2248,16 @@ Id UnitEmitter::mergeLitstr(const StringData* litstr) {
   return mergeUnitLitstr(litstr);
 }
 
-Id UnitEmitter::mergeArray(ArrayData* a, const StringData* key /* = NULL */) {
+Id UnitEmitter::mergeArray(const ArrayData* a,
+                           const StringData* key /* = NULL */) {
   if (key == nullptr) {
-    String s = f_serialize(a);
+    String s = f_serialize(Variant(const_cast<ArrayData*>(a)));
     key = makeStaticString(s.get());
   }
 
   ArrayIdMap::const_iterator it = m_array2id.find(key);
   if (it == m_array2id.end()) {
-    a = ArrayData::GetScalarArray(a, key);
+    a = ArrayData::GetScalarArray(const_cast<ArrayData*>(a), key);
 
     Id id = m_arrays.size();
     ArrayVecElm ave = {key, a};
@@ -2268,6 +2267,19 @@ Id UnitEmitter::mergeArray(ArrayData* a, const StringData* key /* = NULL */) {
   } else {
     return it->second;
   }
+}
+
+const StringData* UnitEmitter::lookupLitstr(Id id) const {
+  if (isGlobalLitstrId(id)) {
+    return LitstrTable::get().lookupLitstrId(decodeGlobalLitstrId(id));
+  }
+  assert(id < m_litstrs.size());
+  return m_litstrs[id];
+}
+
+const ArrayData* UnitEmitter::lookupArray(Id id) const {
+  assert(id < m_arrays.size());
+  return m_arrays[id].array;
 }
 
 FuncEmitter* UnitEmitter::getMain() {
@@ -2422,13 +2434,13 @@ static LineTable createLineTable(
   return lines;
 }
 
-static SourceLocTable createSourceLocTable(
-    std::vector<std::pair<Offset,SourceLoc> >& srcLoc,
-    Offset bclen) {
+SourceLocTable UnitEmitter::createSourceLocTable() const {
   SourceLocTable locations;
-  for (size_t i = 0; i < srcLoc.size(); ++i) {
-    Offset endOff = i < srcLoc.size() - 1 ? srcLoc[i + 1].first : bclen;
-    locations.push_back(SourceLocEntry(endOff, srcLoc[i].second));
+  for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
+    Offset endOff = i < m_sourceLocTab.size() - 1
+      ? m_sourceLocTab[i + 1].first
+      : m_bclen;
+    locations.push_back(SourceLocEntry(endOff, m_sourceLocTab[i].second));
   }
   return locations;
 }
@@ -2670,7 +2682,7 @@ Unit* UnitEmitter::create() {
   }
   assert(ix == mi->m_mergeablesSize);
   mi->mergeableObj(ix) = (void*)UnitMergeKindDone;
-  u->m_sourceLocTable = createSourceLocTable(m_sourceLocTab, m_bclen);
+  u->m_sourceLocTable = createSourceLocTable();
   if (m_lineTable.size() == 0) {
     u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
   } else {

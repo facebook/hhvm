@@ -1,502 +1,488 @@
-PHPUnit 3.8-g0a354ee by Sebastian Bergmann.
-
-Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/assetic/phpunit.xml.dist
-
-The Xdebug extension is not loaded. No code coverage will be generated.
-
-
-Starting test 'Assetic\Test\Asset\AssetCacheTest::testLoadFromCache'.
+Assetic\Test\Asset\AssetCacheTest::testLoadFromCache
 .
-Starting test 'Assetic\Test\Asset\AssetCacheTest::testLoadToCache'.
+Assetic\Test\Asset\AssetCacheTest::testLoadToCache
 .
-Starting test 'Assetic\Test\Asset\AssetCacheTest::testDumpFromCache'.
+Assetic\Test\Asset\AssetCacheTest::testDumpFromCache
 .
-Starting test 'Assetic\Test\Asset\AssetCacheTest::testDumpToCache'.
+Assetic\Test\Asset\AssetCacheTest::testDumpToCache
 .
-Starting test 'Assetic\Test\Asset\AssetCacheTest::testEnsureFilter'.
+Assetic\Test\Asset\AssetCacheTest::testEnsureFilter
 .
-Starting test 'Assetic\Test\Asset\AssetCacheTest::testGetFilters'.
+Assetic\Test\Asset\AssetCacheTest::testGetFilters
 .
-Starting test 'Assetic\Test\Asset\AssetCacheTest::testGetContent'.
+Assetic\Test\Asset\AssetCacheTest::testGetContent
 .
-Starting test 'Assetic\Test\Asset\AssetCacheTest::testSetContent'.
+Assetic\Test\Asset\AssetCacheTest::testSetContent
 .
-Starting test 'Assetic\Test\Asset\AssetCacheTest::testGetSourceRoot'.
+Assetic\Test\Asset\AssetCacheTest::testGetSourceRoot
 .
-Starting test 'Assetic\Test\Asset\AssetCacheTest::testGetSourcePath'.
+Assetic\Test\Asset\AssetCacheTest::testGetSourcePath
 .
-Starting test 'Assetic\Test\Asset\AssetCacheTest::testGetLastModified'.
+Assetic\Test\Asset\AssetCacheTest::testGetLastModified
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testInterface'.
+Assetic\Test\Asset\AssetCollectionTest::testInterface
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testLoadFilter'.
+Assetic\Test\Asset\AssetCollectionTest::testLoadFilter
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testDumpFilter'.
+Assetic\Test\Asset\AssetCollectionTest::testDumpFilter
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testNestedCollectionLoad'.
+Assetic\Test\Asset\AssetCollectionTest::testNestedCollectionLoad
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testMixedIteration'.
+Assetic\Test\Asset\AssetCollectionTest::testMixedIteration
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testLoadDedupBySourceUrl'.
+Assetic\Test\Asset\AssetCollectionTest::testLoadDedupBySourceUrl
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testLoadDedupByStrictEquality'.
+Assetic\Test\Asset\AssetCollectionTest::testLoadDedupByStrictEquality
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testDumpDedupBySourceUrl'.
+Assetic\Test\Asset\AssetCollectionTest::testDumpDedupBySourceUrl
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testDumpDedupByStrictEquality'.
+Assetic\Test\Asset\AssetCollectionTest::testDumpDedupByStrictEquality
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testIterationFilters'.
+Assetic\Test\Asset\AssetCollectionTest::testIterationFilters
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testSetContent'.
+Assetic\Test\Asset\AssetCollectionTest::testSetContent
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #0 (array(1, 2, 3), 3)'.
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #0 
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #1 (array(5, 4, 3), 5)'.
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #1 
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #2 (array(3, 8, 5), 8)'.
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #2 
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #3 (array(3, 8, NULL), 8)'.
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModified with data set #3 
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testGetLastModifiedWithValues'.
+Assetic\Test\Asset\AssetCollectionTest::testGetLastModifiedWithValues
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testRecursiveIteration'.
+Assetic\Test\Asset\AssetCollectionTest::testRecursiveIteration
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testRecursiveDeduplication'.
+Assetic\Test\Asset\AssetCollectionTest::testRecursiveDeduplication
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testIteration'.
+Assetic\Test\Asset\AssetCollectionTest::testIteration
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testBasenameCollision'.
+Assetic\Test\Asset\AssetCollectionTest::testBasenameCollision
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testTargetNameGeneration'.
+Assetic\Test\Asset\AssetCollectionTest::testTargetNameGeneration
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testEmptyMtime'.
+Assetic\Test\Asset\AssetCollectionTest::testEmptyMtime
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testLeafManipulation'.
+Assetic\Test\Asset\AssetCollectionTest::testLeafManipulation
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testRemoveLeaf'.
+Assetic\Test\Asset\AssetCollectionTest::testRemoveLeaf
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testRemoveRecursiveLeaf'.
+Assetic\Test\Asset\AssetCollectionTest::testRemoveRecursiveLeaf
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testRemoveInvalidLeaf'.
+Assetic\Test\Asset\AssetCollectionTest::testRemoveInvalidLeaf
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testReplaceLeaf'.
+Assetic\Test\Asset\AssetCollectionTest::testReplaceLeaf
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testReplaceRecursiveLeaf'.
+Assetic\Test\Asset\AssetCollectionTest::testReplaceRecursiveLeaf
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testReplaceInvalidLeaf'.
+Assetic\Test\Asset\AssetCollectionTest::testReplaceInvalidLeaf
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testClone'.
+Assetic\Test\Asset\AssetCollectionTest::testClone
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testNewFilterOnCloneDoesNotPropagateToPrototype'.
+Assetic\Test\Asset\AssetCollectionTest::testNewFilterOnCloneDoesNotPropagateToPrototype
 .
-Starting test 'Assetic\Test\Asset\AssetCollectionTest::testClearingFiltersWorksAfterCollectionHasBeenIterated'.
+Assetic\Test\Asset\AssetCollectionTest::testClearingFiltersWorksAfterCollectionHasBeenIterated
 .
-Starting test 'Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #0 ('getContent', 'asdf')'.
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #0 
 .
-Starting test 'Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #1 ('getSourceRoot', 'asdf')'.
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #1 
 .
-Starting test 'Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #2 ('getSourcePath', 'asdf')'.
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #2 
 .
-Starting test 'Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #3 ('getTargetPath', 'asdf')'.
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #3 
 .
-Starting test 'Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #4 ('getLastModified', 123)'.
+Assetic\Test\Asset\AssetReferenceTest::testMethods with data set #4 
 .
-Starting test 'Assetic\Test\Asset\AssetReferenceTest::testLazyFilters'.
+Assetic\Test\Asset\AssetReferenceTest::testLazyFilters
 .
-Starting test 'Assetic\Test\Asset\AssetReferenceTest::testFilterFlush'.
+Assetic\Test\Asset\AssetReferenceTest::testFilterFlush
 .
-Starting test 'Assetic\Test\Asset\AssetReferenceTest::testSetContent'.
+Assetic\Test\Asset\AssetReferenceTest::testSetContent
 .
-Starting test 'Assetic\Test\Asset\AssetReferenceTest::testLoad'.
+Assetic\Test\Asset\AssetReferenceTest::testLoad
 .
-Starting test 'Assetic\Test\Asset\AssetReferenceTest::testDump'.
+Assetic\Test\Asset\AssetReferenceTest::testDump
 .
-Starting test 'Assetic\Test\Asset\FileAssetTest::testInterface'.
+Assetic\Test\Asset\FileAssetTest::testInterface
 .
-Starting test 'Assetic\Test\Asset\FileAssetTest::testLazyLoading'.
+Assetic\Test\Asset\FileAssetTest::testLazyLoading
 .
-Starting test 'Assetic\Test\Asset\FileAssetTest::testGetLastModifiedType'.
+Assetic\Test\Asset\FileAssetTest::testGetLastModifiedType
 .
-Starting test 'Assetic\Test\Asset\FileAssetTest::testGetLastModifiedTypeFileNotFound'.
+Assetic\Test\Asset\FileAssetTest::testGetLastModifiedTypeFileNotFound
 .
-Starting test 'Assetic\Test\Asset\FileAssetTest::testGetLastModifiedValue'.
+Assetic\Test\Asset\FileAssetTest::testGetLastModifiedValue
 .
-Starting test 'Assetic\Test\Asset\FileAssetTest::testDefaultBaseAndPath'.
+Assetic\Test\Asset\FileAssetTest::testDefaultBaseAndPath
 .
-Starting test 'Assetic\Test\Asset\FileAssetTest::testPathGuessing'.
+Assetic\Test\Asset\FileAssetTest::testPathGuessing
 .
-Starting test 'Assetic\Test\Asset\FileAssetTest::testInvalidBase'.
+Assetic\Test\Asset\FileAssetTest::testInvalidBase
 .
-Starting test 'Assetic\Test\Asset\GlobAssetTest::testInterface'.
+Assetic\Test\Asset\GlobAssetTest::testInterface
 .
-Starting test 'Assetic\Test\Asset\GlobAssetTest::testIteration'.
-.  63 / 354 ( 17%)
-
-Starting test 'Assetic\Test\Asset\GlobAssetTest::testRecursiveIteration'.
+Assetic\Test\Asset\GlobAssetTest::testIteration
 .
-Starting test 'Assetic\Test\Asset\GlobAssetTest::testGetLastModifiedType'.
+Assetic\Test\Asset\GlobAssetTest::testRecursiveIteration
 .
-Starting test 'Assetic\Test\Asset\GlobAssetTest::testGetLastModifiedValue'.
+Assetic\Test\Asset\GlobAssetTest::testGetLastModifiedType
 .
-Starting test 'Assetic\Test\Asset\GlobAssetTest::testLoad'.
+Assetic\Test\Asset\GlobAssetTest::testGetLastModifiedValue
 .
-Starting test 'Assetic\Test\Asset\GlobAssetTest::testDump'.
+Assetic\Test\Asset\GlobAssetTest::testLoad
 .
-Starting test 'Assetic\Test\Asset\HttpAssetTest::testGetLastModified'.
-SlowTimer [5001ms] at curl: http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js
-F
-Starting test 'Assetic\Test\Asset\HttpAssetTest::testProtocolRelativeUrl'.
-E
-Starting test 'Assetic\Test\Asset\HttpAssetTest::testMalformedUrl'.
+Assetic\Test\Asset\GlobAssetTest::testDump
 .
-Starting test 'Assetic\Test\Asset\HttpAssetTest::testInvalidUrl'.
-.
-Starting test 'Assetic\Test\Asset\HttpAssetTest::testSourceMetadata'.
-.
-Starting test 'Assetic\Test\Asset\StringAssetTest::testInterface'.
-.
-Starting test 'Assetic\Test\Asset\StringAssetTest::testLoadAppliesFilters'.
-.
-Starting test 'Assetic\Test\Asset\StringAssetTest::testAutomaticLoad'.
-.
-Starting test 'Assetic\Test\Asset\StringAssetTest::testGetFilters'.
-.
-Starting test 'Assetic\Test\Asset\StringAssetTest::testLoadAppliesAdditionalFilter'.
-.
-Starting test 'Assetic\Test\Asset\StringAssetTest::testDumpAppliesAdditionalFilter'.
-.
-Starting test 'Assetic\Test\Asset\StringAssetTest::testLastModified'.
-.
-Starting test 'Assetic\Test\Asset\StringAssetTest::testGetContentNullUnlessLoaded'.
-.
-Starting test 'Assetic\Test\AssetManagerTest::testGetAsset'.
-.
-Starting test 'Assetic\Test\AssetManagerTest::testGetInvalidAsset'.
-.
-Starting test 'Assetic\Test\AssetManagerTest::testHas'.
-.
-Starting test 'Assetic\Test\AssetManagerTest::testInvalidName'.
-.
-Starting test 'Assetic\Test\AssetManagerTest::testClear'.
-.
-Starting test 'Assetic\Test\AssetWriterTest::testWriteManagerAssets'.
-.
-Starting test 'Assetic\Test\AssetWriterTest::testWriteAssetWithVars'.
-.
-Starting test 'Assetic\Test\AssetWriterTest::testAssetWithInputVars'.
-.
-Starting test 'Assetic\Test\Cache\ApcCacheTest::testCache'.
-.
-Starting test 'Assetic\Test\Cache\ArrayCacheTest::testCache'.
-.
-Starting test 'Assetic\Test\Cache\ConfigCacheTest::testCache'.
-.
-Starting test 'Assetic\Test\Cache\ConfigCacheTest::testTimestamp'.
-.
-Starting test 'Assetic\Test\Cache\ConfigCacheTest::testInvalidValue'.
-.
-Starting test 'Assetic\Test\Cache\ConfigCacheTest::testInvalidTimestamp'.
-.
-Starting test 'Assetic\Test\Cache\ConfigCacheTest::testHas'.
-.
-Starting test 'Assetic\Test\Cache\ExpiringCacheTest::testHasExpired'.
-.
-Starting test 'Assetic\Test\Cache\ExpiringCacheTest::testHasNotExpired'.
-.
-Starting test 'Assetic\Test\Cache\ExpiringCacheTest::testSetLifetime'.
-.
-Starting test 'Assetic\Test\Cache\ExpiringCacheTest::testRemove'.
-.
-Starting test 'Assetic\Test\Cache\ExpiringCacheTest::testGet'.
-.
-Starting test 'Assetic\Test\Cache\FilesystemCacheTest::testCache'.
-.
-Starting test 'Assetic\Test\Cache\FilesystemCacheTest::testSetCreatesDir'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testReference'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testGlob'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testAbsolutePath'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testFilters'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testOptionalFilter'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testOutputPattern'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testOutput'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testMixture'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testDebug'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testCombine'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testImage'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testFilterFunction'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testVariables'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testMultipleSameVariableValues'.
-.
-Starting test 'Assetic\Test\Extension\Twig\AsseticExtensionTest::testUnclosedTag'.
-.
-Starting test 'Assetic\Test\Extension\Twig\TwigFormulaLoaderTest::testMixture'.
-.
-Starting test 'Assetic\Test\Extension\Twig\TwigFormulaLoaderTest::testFunction'.
-.
-Starting test 'Assetic\Test\Extension\Twig\TwigFormulaLoaderTest::testUnclosedTag'.
-.
-Starting test 'Assetic\Test\Extension\Twig\TwigResourceTest::testInvalidTemplateNameGetContent'.
-.
-Starting test 'Assetic\Test\Extension\Twig\TwigResourceTest::testInvalidTemplateNameIsFresh'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testNoAssetManagerReference'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testNoAssetManagerNotReference'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testNoFilterManager'.
-. 126 / 354 ( 35%)
-
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testCreateAssetReference'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #0 ('http://example.com/foo.css')'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #1 ('https://example.com/foo.css')'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #2 ('//example.com/foo.css')'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testCreateFileAsset'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testCreateGlobAsset'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testCreateGlobAssetAndLoadFiles'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testCreateGlobAssetAndExcludeDirectories'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testCreateAssetCollection'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testFilter'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testInvalidFilter'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testOptionalInvalidFilter'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testIncludingOptionalFilter'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testWorkers'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testWorkerReturn'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testNestedFormula'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testGetLastModified'.
-.
-Starting test 'Assetic\Test\Factory\AssetFactoryTest::testGetLastModifiedCollection'.
-.
-Starting test 'Assetic\Test\Factory\LazyAssetManagerTest::testGetFromLoader'.
-.
-Starting test 'Assetic\Test\Factory\LazyAssetManagerTest::testGetResources'.
-.
-Starting test 'Assetic\Test\Factory\LazyAssetManagerTest::testGetResourcesEmpty'.
-.
-Starting test 'Assetic\Test\Factory\LazyAssetManagerTest::testSetFormula'.
-.
-Starting test 'Assetic\Test\Factory\LazyAssetManagerTest::testIsDebug'.
-.
-Starting test 'Assetic\Test\Factory\LazyAssetManagerTest::testGetLastModified'.
-.
-Starting test 'Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testNotDebug'.
-.
-Starting test 'Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testNotDebugCached'.
-.
-Starting test 'Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testDebugCached'.
-.
-Starting test 'Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testDebugCachedStale'.
-.
-Starting test 'Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #0 ('assetic_javascripts', '"js/core.js"', 'asdf', array(array(array('js/core.js'), array(), array(false, 'js/*.js', 'asdf'))))'.
-.
-Starting test 'Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #1 ('assetic_javascripts', '\'js/core.js\'', 'asdf', array(array(array('js/core.js'), array(), array(false, 'js/*.js', 'asdf'))))'.
-.
-Starting test 'Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #2 ('assetic_javascripts', 'array(\'js/core.js\')', 'asdf', array(array(array('js/core.js'), array(), array(false, 'js/*.js', 'asdf'))))'.
-.
-Starting test 'Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #3 ('assetic_javascripts', 'array("js/core.js")', 'asdf', array(array(array('js/core.js'), array(), array(false, 'js/*.js', 'asdf'))))'.
-.
-Starting test 'Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #4 ('assetic_image', '"images/logo.gif"', 'asdf', array(array(array('images/logo.gif'), array(), array(false, 'images/*', 'asdf'))))'.
-.
-Starting test 'Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testComplexFormula'.
-.
-Starting test 'Assetic\Test\Factory\Resource\CoalescingDirectoryResourceTest::shouldFilterFiles'.
-.
-Starting test 'Assetic\Test\Factory\Resource\DirectoryResourceTest::testIsFresh'.
-.
-Starting test 'Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #0 (NULL)'.
-.
-Starting test 'Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #1 ('/\\.php$/')'.
-.
-Starting test 'Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #2 ('/\\.foo$/')'.
-.
-Starting test 'Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #0 (NULL, false)'.
-.
-Starting test 'Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #1 ('/\\.php$/', false)'.
-.
-Starting test 'Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #2 ('/\\.foo$/', true)'.
-.
-Starting test 'Assetic\Test\Factory\Resource\DirectoryResourceTest::testRecursiveIteration'.
-.
-Starting test 'Assetic\Test\Factory\Resource\DirectoryResourceTest::testTrailingSlash with data set #0 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/assetic/tests/Assetic/Test/Factory/Resource')'.
-.
-Starting test 'Assetic\Test\Factory\Resource\DirectoryResourceTest::testTrailingSlash with data set #1 ('/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/assetic/tests/Assetic/Test/Factory/Resource/')'.
-.
-Starting test 'Assetic\Test\Factory\Resource\DirectoryResourceTest::testInvalidDirectory'.
-.
-Starting test 'Assetic\Test\Factory\Resource\DirectoryResourceTest::testFollowSymlinks'.
-.
-Starting test 'Assetic\Test\Factory\Resource\FileResourceTest::testIsFresh'.
-.
-Starting test 'Assetic\Test\Factory\Resource\FileResourceTest::testGetContent'.
-.
-Starting test 'Assetic\Test\Factory\Resource\FileResourceTest::testIsFreshOnInvalidPath'.
-.
-Starting test 'Assetic\Test\Factory\Resource\FileResourceTest::testGetContentOnInvalidPath'.
-.
-Starting test 'Assetic\Test\Factory\Worker\CacheBustingWorkerTest::shouldApplyHash'.
-.
-Starting test 'Assetic\Test\Factory\Worker\CacheBustingWorkerTest::shouldApplyConsistentHash'.
-.
-Starting test 'Assetic\Test\Factory\Worker\CacheBustingWorkerTest::shouldNotReapplyHash'.
-.
-Starting test 'Assetic\Test\Factory\Worker\EnsureFilterWorkerTest::testMatch'.
-.
-Starting test 'Assetic\Test\Factory\Worker\EnsureFilterWorkerTest::testNonMatch'.
-.
-Starting test 'Assetic\Test\Filter\BaseProcessFilterTest::testInterface'.
-.
-Starting test 'Assetic\Test\Filter\CallablesFilterTest::testInterface'.
-.
-Starting test 'Assetic\Test\Filter\CallablesFilterTest::testLoader'.
-.
-Starting test 'Assetic\Test\Filter\CallablesFilterTest::testDumper'.
-.
-Starting test 'Assetic\Test\Filter\CallablesFilterTest::testDependencyExtractor'.
-.
-Starting test 'Assetic\Test\Filter\CoffeeScriptFilterTest::testFilterLoad'.
+Assetic\Test\Asset\HttpAssetTest::testGetLastModified
 S
-Starting test 'Assetic\Test\Filter\CoffeeScriptFilterTest::testBare'.
-S 189 / 354 ( 53%)
-
-Starting test 'Assetic\Test\Filter\CompassFilterTest::testFilterLoadWithScss'.
+Assetic\Test\Asset\HttpAssetTest::testProtocolRelativeUrl
 S
-Starting test 'Assetic\Test\Filter\CompassFilterTest::testFilterLoadWithSass'.
-S
-Starting test 'Assetic\Test\Filter\CompassFilterTest::testCompassMixin'.
-S
-Starting test 'Assetic\Test\Filter\CssEmbedFilterTest::testCssEmbedDataUri'.
-S
-Starting test 'Assetic\Test\Filter\CssEmbedFilterTest::testCssEmbedMhtml'.
-S
-Starting test 'Assetic\Test\Filter\CssImportFilterTest::testImport with data set #0 (Assetic\Filter\CssImportFilter, Assetic\Filter\CssRewriteFilter)'.
-E
-Starting test 'Assetic\Test\Filter\CssImportFilterTest::testImport with data set #1 (Assetic\Filter\CssRewriteFilter, Assetic\Filter\CssImportFilter)'.
-E
-Starting test 'Assetic\Test\Filter\CssImportFilterTest::testNonCssImport'.
-E
-Starting test 'Assetic\Test\Filter\CssMinFilterTest::testRelativeSourceUrlImportImports'.
+Assetic\Test\Asset\HttpAssetTest::testMalformedUrl
 .
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #0 ('body { background: url(%s); }', 'css/body.css', 'css/build/main.css', '../images/bg.gif', '../../images/bg.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #1 ('body { background: url("%s"); }', 'css/body.css', 'css/build/main.css', '../images/bg.gif', '../../images/bg.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #2 ('body { background: url(\'%s\'); }', 'css/body.css', 'css/build/main.css', '../images/bg.gif', '../../images/bg.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #3 ('body { background: url(\'%s\'); }', 'css/body.css', 'css/build/main.css', 'data:image/png;base64,abcdef=', 'data:image/png;base64,abcdef=')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #4 ('body { background: url(\'%s\'); }', 'css/body.css', 'css/build/main.css', '../images/bg-data:.gif', '../../images/bg-data:.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #5 ('@import "%s";', 'css/imports.css', 'css/build/main.css', 'import.css', '../import.css')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #6 ('@import url(%s);', 'css/imports.css', 'css/build/main.css', 'import.css', '../import.css')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #7 ('@import url("%s");', 'css/imports.css', 'css/build/main.css', 'import.css', '../import.css')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #8 ('@import url(\'%s\');', 'css/imports.css', 'css/build/main.css', 'import.css', '../import.css')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #9 ('body { background: url(%s); }', 'css/body/bg.css', 'css/build/main.css', '../../images/bg.gif', '../../images/bg.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #10 ('body { background: url(%s); }', 'css/body.css', 'main.css', '../images/bg.gif', 'images/bg.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #11 ('body { background: url(%s); }', 'body.css', 'css/main.css', 'images/bg.gif', '../images/bg.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #12 ('body { background: url(%s); }', 'source/css/body.css', 'output/build/main.css', '../images/bg.gif', '../../source/images/bg.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #13 ('body { background: url(%s); }', 'css/body.css', 'css/build/main.css', '//example.com/images/bg.gif', '//example.com/images/bg.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #14 ('body { background: url(%s); }', 'css/body.css', 'css/build/main.css', 'http://foo.com/bar.gif', 'http://foo.com/bar.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #15 ('body { background: url(%s); }', 'css/body.css', 'css/build/main.css', '/images/foo.gif', '/images/foo.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #16 ('body { background: url(%s); }', 'css/body.css', 'css/build/main.css', 'http://foo.com/images/foo.gif', 'http://foo.com/images/foo.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #17 ('.fix { filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\'%s\'); }', 'css/ie.css', 'css/build/ie.css', '../images/fix.png', '../../images/fix.png')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #0 ('body { background: url(%s); background: url(%s); }', 'css/body.css', 'css/build/main.css', '../images/bg.gif', '../images/bg2.gif', '../../images/bg.gif', '../../images/bg2.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #1 ('body { background: url(%s);
-background: url(%s); }', 'css/body.css', 'css/build/main.css', '../images/bg.gif', '../images/bg2.gif', '../../images/bg.gif', '../../images/bg2.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #2 ('@import "%s"; @import "%s";', 'css/imports.css', 'css/build/main.css', 'import.css', 'import2.css', '../import.css', '../import2.css')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #3 ('@import "%s";
-@import "%s";', 'css/imports.css', 'css/build/main.css', 'import.css', 'import2.css', '../import.css', '../import2.css')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #4 ('@import "%s"; body { background: url(%s); }', 'css/body.css', 'css/build/main.css', 'import.css', '../images/bg2.gif', '../import.css', '../../images/bg2.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #5 ('@import "%s";
-body { background: url(%s); }', 'css/body.css', 'css/build/main.css', 'import.css', '../images/bg2.gif', '../import.css', '../../images/bg2.gif')'.
-E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testNoTargetPath'.
+Assetic\Test\Asset\HttpAssetTest::testInvalidUrl
 .
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testExternalSource'.
+Assetic\Test\Asset\HttpAssetTest::testSourceMetadata
+.
+Assetic\Test\Asset\StringAssetTest::testInterface
+.
+Assetic\Test\Asset\StringAssetTest::testLoadAppliesFilters
+.
+Assetic\Test\Asset\StringAssetTest::testAutomaticLoad
+.
+Assetic\Test\Asset\StringAssetTest::testGetFilters
+.
+Assetic\Test\Asset\StringAssetTest::testLoadAppliesAdditionalFilter
+.
+Assetic\Test\Asset\StringAssetTest::testDumpAppliesAdditionalFilter
+.
+Assetic\Test\Asset\StringAssetTest::testLastModified
+.
+Assetic\Test\Asset\StringAssetTest::testGetContentNullUnlessLoaded
+.
+Assetic\Test\AssetManagerTest::testGetAsset
+.
+Assetic\Test\AssetManagerTest::testGetInvalidAsset
+.
+Assetic\Test\AssetManagerTest::testHas
+.
+Assetic\Test\AssetManagerTest::testInvalidName
+.
+Assetic\Test\AssetManagerTest::testClear
+.
+Assetic\Test\AssetWriterTest::testWriteManagerAssets
+.
+Assetic\Test\AssetWriterTest::testWriteAssetWithVars
+.
+Assetic\Test\AssetWriterTest::testAssetWithInputVars
+.
+Assetic\Test\Cache\ApcCacheTest::testCache
+.
+Assetic\Test\Cache\ArrayCacheTest::testCache
+.
+Assetic\Test\Cache\ConfigCacheTest::testCache
+.
+Assetic\Test\Cache\ConfigCacheTest::testTimestamp
+.
+Assetic\Test\Cache\ConfigCacheTest::testInvalidValue
+.
+Assetic\Test\Cache\ConfigCacheTest::testInvalidTimestamp
+.
+Assetic\Test\Cache\ConfigCacheTest::testHas
+.
+Assetic\Test\Cache\ExpiringCacheTest::testHasExpired
+.
+Assetic\Test\Cache\ExpiringCacheTest::testHasNotExpired
+.
+Assetic\Test\Cache\ExpiringCacheTest::testSetLifetime
+.
+Assetic\Test\Cache\ExpiringCacheTest::testRemove
+.
+Assetic\Test\Cache\ExpiringCacheTest::testGet
+.
+Assetic\Test\Cache\FilesystemCacheTest::testCache
+.
+Assetic\Test\Cache\FilesystemCacheTest::testSetCreatesDir
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testReference
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testGlob
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testAbsolutePath
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testFilters
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testOptionalFilter
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testOutputPattern
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testOutput
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testMixture
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testDebug
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testCombine
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testImage
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testFilterFunction
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testVariables
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testMultipleSameVariableValues
+.
+Assetic\Test\Extension\Twig\AsseticExtensionTest::testUnclosedTag
+.
+Assetic\Test\Extension\Twig\TwigFormulaLoaderTest::testMixture
+.
+Assetic\Test\Extension\Twig\TwigFormulaLoaderTest::testFunction
+.
+Assetic\Test\Extension\Twig\TwigFormulaLoaderTest::testUnclosedTag
+.
+Assetic\Test\Extension\Twig\TwigResourceTest::testInvalidTemplateNameGetContent
+.
+Assetic\Test\Extension\Twig\TwigResourceTest::testInvalidTemplateNameIsFresh
+.
+Assetic\Test\Factory\AssetFactoryTest::testNoAssetManagerReference
+.
+Assetic\Test\Factory\AssetFactoryTest::testNoAssetManagerNotReference
+.
+Assetic\Test\Factory\AssetFactoryTest::testNoFilterManager
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateAssetReference
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #0 
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #1 
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateHttpAsset with data set #2 
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateFileAsset
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateGlobAsset
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateGlobAssetAndLoadFiles
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateGlobAssetAndExcludeDirectories
+.
+Assetic\Test\Factory\AssetFactoryTest::testCreateAssetCollection
+.
+Assetic\Test\Factory\AssetFactoryTest::testFilter
+.
+Assetic\Test\Factory\AssetFactoryTest::testInvalidFilter
+.
+Assetic\Test\Factory\AssetFactoryTest::testOptionalInvalidFilter
+.
+Assetic\Test\Factory\AssetFactoryTest::testIncludingOptionalFilter
+.
+Assetic\Test\Factory\AssetFactoryTest::testWorkers
+.
+Assetic\Test\Factory\AssetFactoryTest::testWorkerReturn
+.
+Assetic\Test\Factory\AssetFactoryTest::testNestedFormula
+.
+Assetic\Test\Factory\AssetFactoryTest::testGetLastModified
+.
+Assetic\Test\Factory\AssetFactoryTest::testGetLastModifiedCollection
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testGetFromLoader
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testGetResources
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testGetResourcesEmpty
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testSetFormula
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testIsDebug
+.
+Assetic\Test\Factory\LazyAssetManagerTest::testGetLastModified
+.
+Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testNotDebug
+.
+Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testNotDebugCached
+.
+Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testDebugCached
+.
+Assetic\Test\Factory\Loader\CachedFormulaLoaderTest::testDebugCachedStale
+.
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #0 
+.
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #1 
+.
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #2 
+.
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #3 
+.
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testInput with data set #4 
+.
+Assetic\Test\Factory\Loader\FunctionCallsFormulaLoaderTest::testComplexFormula
+.
+Assetic\Test\Factory\Resource\CoalescingDirectoryResourceTest::shouldFilterFiles
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testIsFresh
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #0 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #1 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testGetContent with data set #2 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #0 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #1 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testIteration with data set #2 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testRecursiveIteration
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testTrailingSlash with data set #0 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testTrailingSlash with data set #1 
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testInvalidDirectory
+.
+Assetic\Test\Factory\Resource\DirectoryResourceTest::testFollowSymlinks
+.
+Assetic\Test\Factory\Resource\FileResourceTest::testIsFresh
+.
+Assetic\Test\Factory\Resource\FileResourceTest::testGetContent
+.
+Assetic\Test\Factory\Resource\FileResourceTest::testIsFreshOnInvalidPath
+.
+Assetic\Test\Factory\Resource\FileResourceTest::testGetContentOnInvalidPath
+.
+Assetic\Test\Factory\Worker\CacheBustingWorkerTest::shouldApplyHash
+.
+Assetic\Test\Factory\Worker\CacheBustingWorkerTest::shouldApplyConsistentHash
+.
+Assetic\Test\Factory\Worker\CacheBustingWorkerTest::shouldNotReapplyHash
+.
+Assetic\Test\Factory\Worker\EnsureFilterWorkerTest::testMatch
+.
+Assetic\Test\Factory\Worker\EnsureFilterWorkerTest::testNonMatch
+.
+Assetic\Test\Filter\BaseProcessFilterTest::testInterface
+.
+Assetic\Test\Filter\CallablesFilterTest::testInterface
+.
+Assetic\Test\Filter\CallablesFilterTest::testLoader
+.
+Assetic\Test\Filter\CallablesFilterTest::testDumper
+.
+Assetic\Test\Filter\CallablesFilterTest::testDependencyExtractor
+.
+Assetic\Test\Filter\CoffeeScriptFilterTest::testFilterLoad
+S
+Assetic\Test\Filter\CoffeeScriptFilterTest::testBare
+S
+Assetic\Test\Filter\CompassFilterTest::testFilterLoadWithScss
+S
+Assetic\Test\Filter\CompassFilterTest::testFilterLoadWithSass
+S
+Assetic\Test\Filter\CompassFilterTest::testCompassMixin
+S
+Assetic\Test\Filter\CssEmbedFilterTest::testCssEmbedDataUri
+S
+Assetic\Test\Filter\CssEmbedFilterTest::testCssEmbedMhtml
+S
+Assetic\Test\Filter\CssImportFilterTest::testImport with data set #0 
 E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testEmptySrcAttributeSelector'.
+Assetic\Test\Filter\CssImportFilterTest::testImport with data set #1 
 E
-Starting test 'Assetic\Test\Filter\CssRewriteFilterTest::testEmptyUrl'.
+Assetic\Test\Filter\CssImportFilterTest::testNonCssImport
 E
-Starting test 'Assetic\Test\Filter\DartFilterTest::testFilterLoad'.
-S
-Starting test 'Assetic\Test\Filter\EmberPrecompileFilterTest::testEmberPrecompile'.
-S
-Starting test 'Assetic\Test\Filter\FilterCollectionTest::testInterface'.
+Assetic\Test\Filter\CssMinFilterTest::testRelativeSourceUrlImportImports
 .
-Starting test 'Assetic\Test\Filter\FilterCollectionTest::testEnsure'.
-.
-Starting test 'Assetic\Test\Filter\FilterCollectionTest::testAll'.
-.
-Starting test 'Assetic\Test\Filter\FilterCollectionTest::testEmptyAll'.
-.
-Starting test 'Assetic\Test\Filter\FilterCollectionTest::testCountable'.
-.
-Starting test 'Assetic\Test\Filter\GoogleClosure\CompilerApiFilterTest::testRoundTrip'.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #0 
 E
-Starting test 'Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testCompile'.
-S
-Starting test 'Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testCompileEcma5'.
-S
-Starting test 'Assetic\Test\Filter\GssFilterTest::testCompile'.
-S
-Starting test 'Assetic\Test\Filter\HandlebarsFilterTest::testHandlebars'.
-S
-Starting test 'Assetic\Test\Filter\HandlebarsFilterTest::testSimpleHandlebars'.
-S
-Starting test 'Assetic\Test\Filter\HandlebarsFilterTest::testMinimizeHandlebars'.
-S
-Starting test 'Assetic\Test\Filter\JSMinFilterTest::testRelativeSourceUrlImportImports'.
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #1 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #2 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #3 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #4 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #5 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #6 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #7 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #8 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #9 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #10 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #11 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #12 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #13 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #14 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #15 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #16 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #17 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #0 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #1 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #2 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #3 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #4 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #5 
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testNoTargetPath
 .
-Starting test 'Assetic\Test\Filter\JSMinPlusFilterTest::testRelativeSourceUrlImportImports'.
-.
-Starting test 'Assetic\Test\Filter\JpegoptimFilterTest::testFilter'.
+Assetic\Test\Filter\CssRewriteFilterTest::testExternalSource
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testEmptySrcAttributeSelector
+E
+Assetic\Test\Filter\CssRewriteFilterTest::testEmptyUrl
+E
+Assetic\Test\Filter\DartFilterTest::testFilterLoad
 S
-Starting test 'Assetic\Test\Filter\JpegtranFilterTest::testFilter'.
+Assetic\Test\Filter\EmberPrecompileFilterTest::testEmberPrecompile
+S
+Assetic\Test\Filter\FilterCollectionTest::testInterface
+.
+Assetic\Test\Filter\FilterCollectionTest::testEnsure
+.
+Assetic\Test\Filter\FilterCollectionTest::testAll
+.
+Assetic\Test\Filter\FilterCollectionTest::testEmptyAll
+.
+Assetic\Test\Filter\FilterCollectionTest::testCountable
+.
+Assetic\Test\Filter\GoogleClosure\CompilerApiFilterTest::testRoundTrip
+E
+Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testCompile
+S
+Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testCompileEcma5
+S
+Assetic\Test\Filter\GssFilterTest::testCompile
+S
+Assetic\Test\Filter\HandlebarsFilterTest::testHandlebars
+S
+Assetic\Test\Filter\HandlebarsFilterTest::testSimpleHandlebars
+S
+Assetic\Test\Filter\HandlebarsFilterTest::testMinimizeHandlebars
+S
+Assetic\Test\Filter\JSMinFilterTest::testRelativeSourceUrlImportImports
+.
+Assetic\Test\Filter\JSMinPlusFilterTest::testRelativeSourceUrlImportImports
+.
+Assetic\Test\Filter\JpegoptimFilterTest::testFilter
+S
+Assetic\Test\Filter\JpegtranFilterTest::testFilter
 HipHop Fatal error: Class undefined: finfo in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/assetic/tests/Assetic/Test/Filter/FilterTestCase.php on line 21

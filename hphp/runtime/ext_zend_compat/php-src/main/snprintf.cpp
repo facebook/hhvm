@@ -40,6 +40,8 @@
 #define LCONV_DECIMAL_POINT '.'
 #endif
 
+#include "hphp/runtime/base/zend-strtod.h"
+
 /*
  * Copyright (c) 2002, 2006 Todd C. Miller <Todd.Miller@courtesan.com>
  *

@@ -27,7 +27,7 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
@@ -241,6 +241,7 @@ private:
 
 private:
   void invalidateSrcKey(SrcKey sk);
+  void invalidateFuncProfSrcKeys(const Func* func);
 
 public:
   FixupMap& fixupMap() { return m_fixupMap; }
@@ -378,7 +379,6 @@ public:
 private:
   virtual bool addDbgGuards(const Unit* unit);
   virtual bool addDbgGuard(const Func* func, Offset offset);
-  void addDbgGuardImpl(SrcKey sk, SrcRec& sr);
 
 };
 

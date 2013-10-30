@@ -96,14 +96,14 @@ struct TraceBuilder {
   void setThisAvailable() { m_state.setThisAvailable(); }
 
   bool shouldConstrainGuards() const;
-  void constrainGuard(IRInstruction* inst, TypeConstraint tc);
-  SSATmp* constrainValue(SSATmp* const val, TypeConstraint tc);
-  void constrainLocal(uint32_t id, TypeConstraint tc,
+  bool constrainGuard(IRInstruction* inst, TypeConstraint tc);
+  bool constrainValue(SSATmp* const val, TypeConstraint tc);
+  bool constrainLocal(uint32_t id, TypeConstraint tc,
                       const std::string& why);
-  void constrainLocal(uint32_t id, SSATmp* valSrc, TypeConstraint tc,
+  bool constrainLocal(uint32_t id, SSATmp* valSrc, TypeConstraint tc,
                       const std::string& why);
-  void constrainStack(int32_t offset, TypeConstraint tc);
-  void constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
+  bool constrainStack(int32_t offset, TypeConstraint tc);
+  bool constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
 
   Type localType(uint32_t id, TypeConstraint tc);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
@@ -203,21 +203,31 @@ struct TraceBuilder {
     m_curTrace->back()->setHint(h);
   }
 
+ private:
+  template<typename T> struct BranchImpl;
+ public:
   /*
-   * cond() generates if-then-else blocks within a trace.  The caller
-   * supplies lambdas to create the branch, next-body, and taken-body.
-   * The next and taken lambdas must return one SSATmp* value; cond() returns
-   * the SSATmp for the merged value.
+   * cond() generates if-then-else blocks within a trace.  The caller supplies
+   * lambdas to create the branch, next-body, and taken-body.  The next and
+   * taken lambdas must return one SSATmp* value; cond() returns the SSATmp for
+   * the merged value.
+   *
+   * If branch returns void, next must take zero arguments. If branch returns
+   * SSATmp*, next must take one SSATmp* argument. This allows branch to return
+   * an SSATmp* that is only defined in the next branch, without letting it
+   * escape into the caller's scope (most commonly used with things like
+   * LdMem).
    */
   template <class Branch, class Next, class Taken>
-  SSATmp* cond(const Func* func, Branch branch, Next next, Taken taken) {
-    Block* taken_block = m_unit.defBlock(func);
-    Block* done_block = m_unit.defBlock(func);
+  SSATmp* cond(Branch branch, Next next, Taken taken) {
+    Block* taken_block = m_unit.defBlock();
+    Block* done_block = m_unit.defBlock();
     IRInstruction* label = m_unit.defLabel(1, m_state.marker());
     done_block->push_back(label);
     DisableCseGuard guard(*this);
-    branch(taken_block);
-    SSATmp* v1 = next();
+
+    typedef decltype(branch(taken_block)) T;
+    SSATmp* v1 = BranchImpl<T>::go(branch, taken_block, next);
     gen(Jmp, done_block, v1);
     appendBlock(taken_block);
     SSATmp* v2 = taken();
@@ -234,9 +244,9 @@ struct TraceBuilder {
    * iff the branch emitted in the branch lambda is taken.
    */
   template <class Branch, class Taken>
-  void ifThen(const Func* func, Branch branch, Taken taken) {
-    Block* taken_block = m_unit.defBlock(func);
-    Block* done_block = m_unit.defBlock(func);
+  void ifThen(Branch branch, Taken taken) {
+    Block* taken_block = m_unit.defBlock();
+    Block* done_block = m_unit.defBlock();
     DisableCseGuard guard(*this);
     branch(taken_block);
     assert(!m_curTrace->back()->next());
@@ -254,8 +264,8 @@ struct TraceBuilder {
    * taken.
    */
   template <class Branch, class Next>
-  void ifElse(const Func* func, Branch branch, Next next) {
-    Block* done_block = m_unit.defBlock(func);
+  void ifElse(Branch branch, Next next) {
+    Block* done_block = m_unit.defBlock();
     DisableCseGuard guard(*this);
     branch(done_block);
     next();
@@ -268,9 +278,7 @@ struct TraceBuilder {
    * a cold path, which always exits the tracelet without control flow
    * rejoining the main line.
    */
-  Block* makeExit() {
-    return m_unit.addExit(curFunc());
-  }
+  Block* makeExit() { return m_unit.addExit(); }
 
   /*
    * Get all typed locations in current translation.
@@ -347,6 +355,25 @@ private:
 
   GuardConstraints m_guardConstraints;
 
+};
+
+/*
+ * BranchImpl is used by TraceBuilder::cond to support branch and next lambdas
+ * with different signatures. See cond for details.
+ */
+template<> struct TraceBuilder::BranchImpl<void> {
+  template<typename Branch, typename Next>
+  static SSATmp* go(Branch branch, Block* taken, Next next) {
+    branch(taken);
+    return next();
+  }
+};
+
+template<> struct TraceBuilder::BranchImpl<SSATmp*> {
+  template<typename Branch, typename Next>
+  static SSATmp* go(Branch branch, Block* taken, Next next) {
+    return next(branch(taken));
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -48,22 +48,22 @@ int typeNeededRegs(Type t) {
   if (t.maybe(Type::Nullptr)) {
     return typeNeededRegs(t - Type::Nullptr);
   }
-  if (t.subtypeOf(Type::Ctx) || t.isPtr()) {
+  if (t <= Type::Ctx || t.isPtr()) {
     // Ctx and PtrTo* may be statically unknown but always need just 1 register.
     return 1;
   }
-  if (t.subtypeOf(Type::FuncCtx)) {
+  if (t <= Type::FuncCtx) {
     // 2 registers regardless of union status: 1 for the Func* and 1
     // for the {Obj|Cctx}, differentiated by the low bit.
     return 2;
   }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
-    assert(IMPLIES(t.subtypeOf(Type::Gen), t.isKnownDataType()));
+    assert(IMPLIES(t <= Type::Gen, t.isKnownDataType()));
     return 1;
   }
 
-  assert(t.subtypeOf(Type::Gen));
+  assert(t <= Type::Gen);
   return t.needsReg() ? 2 : 1;
 }
 }
@@ -104,7 +104,7 @@ const StringData* SSATmp::getValStr() const {
 const ArrayData* SSATmp::getValArr() const {
   assert(isConst());
   // TODO: Task #2124292, Reintroduce StaticArr
-  assert(m_inst->typeParam().subtypeOf(Type::Arr));
+  assert(m_inst->typeParam() <= Type::Arr);
   return m_inst->extra<ConstData>()->as<const ArrayData*>();
 }
 

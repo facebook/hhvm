@@ -32,20 +32,6 @@ TRACE_SET_MOD(runtime);
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-// TODO(#2322864): this is a hack until we can get rid of the "Xhp"
-// psuedo-type.
-const StaticString s_xhp("Xhp");
-bool blacklistedName(const StringData* sd) {
-  if (!sd) return false;
-  return sd->isame(s_xhp.get());
-}
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
 TypeConstraint::TypeMap TypeConstraint::s_typeNamesToTypes;
 
 //////////////////////////////////////////////////////////////////////
@@ -106,9 +92,6 @@ void TypeConstraint::init() {
            "Only nullable and soft extended type hints are implemented");
   }
 
-  if (isExtended() && blacklistedName(m_typeName)) {
-    m_typeName = nullptr;
-  }
   if (m_typeName == nullptr) {
     m_type.dt = KindOfInvalid;
     m_type.metatype = MetaType::Precise;

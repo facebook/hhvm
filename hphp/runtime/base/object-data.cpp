@@ -379,7 +379,7 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   // Iterate over dynamic properties and insert {name --> prop} pairs.
   if (!o_properties.empty()) {
     for (ArrayIter it(o_properties.get()); !it.end(); it.next()) {
-      props.setWithRef(it.first(), it.secondRef());
+      props.setWithRef(it.first(), it.secondRef(), true);
     }
   }
 }
@@ -761,6 +761,8 @@ ObjectData* ObjectData::clone() {
         return c_Set::Clone(this);
       } else if (m_cls == c_Pair::classof()) {
         return c_Pair::Clone(this);
+      } else if (m_cls == c_FrozenVector::classof()) {
+        return c_FrozenVector::Clone(this);
       }
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);
@@ -1500,6 +1502,16 @@ ObjectData* ObjectData::cloneImpl() {
     tvRefcountedDecRef(&tv);
   }
   return o.detach();
+}
+
+RefData* ObjectData::zGetProp(Class* ctx, const StringData* key,
+                              bool& visible, bool& accessible,
+                              bool& unset) {
+  auto tv = getProp(ctx, key, visible, accessible, unset);
+  if (tv->m_type != KindOfRef) {
+    tvBox(tv);
+  }
+  return tv->m_data.pref;
 }
 
 } // HPHP

@@ -191,7 +191,7 @@ namespace detail {
   X(KindOfResource,     ResourceData*);
   X(KindOfRef,          RefData*);
   X(KindOfString,       StringData*);
-  X(KindOfStaticString, StringData*);
+  X(KindOfStaticString, const StringData*);
 
 #undef X
 

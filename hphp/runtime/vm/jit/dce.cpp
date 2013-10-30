@@ -115,7 +115,7 @@ typedef StateVector<SSATmp, uint32_t> UseCounts;
 typedef smart::list<const IRInstruction*> WorkList;
 
 void removeDeadInstructions(IRTrace* trace, const DceState& state) {
-  auto &blocks = trace->blocks();
+  auto& blocks = trace->blocks();
   for (auto it = blocks.begin(), end = blocks.end(); it != end;) {
     auto cur = it; ++it;
     Block* block = *cur;
@@ -143,10 +143,9 @@ bool isUnguardedLoad(IRInstruction* inst) {
           (opc == Unbox && type == Type::Cell));
 }
 
-// removeUnreachable erases unreachable blocks from trace, and returns
+// removeUnreachable erases unreachable blocks from unit, and returns
 // a sorted list of the remaining blocks.
-BlockList removeUnreachable(IRTrace* trace, IRUnit& unit) {
-  assert(trace == unit.main());
+BlockList removeUnreachable(IRUnit& unit) {
   FTRACE(5, "RemoveUnreachable:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "RemoveUnreachable:^^^^^^^^^^^^^^^^^^^^\n"); };
 
@@ -217,9 +216,12 @@ initInstructions(const BlockList& blocks, DceState& state) {
       }
       if (RuntimeOption::EvalHHIREnableRefCountOpt && inst.op() == DecRefNZ) {
         auto* srcInst = inst.src(0)->inst();
-        Opcode srcOpc = srcInst->op();
-        if (srcOpc != DefConst) {
-          assert(srcInst->op() == IncRef);
+        while (srcInst->isPassthrough() && !srcInst->is(IncRef)) {
+          srcInst = srcInst->getPassthroughValue()->inst();
+        }
+
+        if (!srcInst->is(DefConst)) {
+          assert(srcInst->is(IncRef));
           assert(state[srcInst].isDead()); // IncRef isn't essential so it
                                            // should be dead here
           state[srcInst].setDecRefNZed();
@@ -237,21 +239,19 @@ initInstructions(const BlockList& blocks, DceState& state) {
 //    cannot be eliminated.
 // 3) Eliminates IncRef-DecRef pairs who value is used only by the DecRef and
 //    whose type does not run a destructor with side effects.
-void optimizeRefCount(IRTrace* trace, IRTrace* main, DceState& state,
-                      UseCounts& uses) {
-  assert(trace && main->isMain());
+void optimizeRefCount(IRUnit& unit, DceState& state, UseCounts& uses) {
   WorkList decrefs;
-  forEachInst(trace->blocks(), [&](IRInstruction* inst) {
+  forEachTraceInst(unit, [&](IRInstruction* inst) {
     if (inst->op() == IncRef && !state[inst].countConsumedAny()) {
       // This assert is often hit when an instruction should have a
       // consumesReferences flag but doesn't.
       auto& s = state[inst];
       always_assert_log(inst->src(0)->type().notCounted() || s.decRefNZed(),
       [&]{
-        return folly::format("\n{} has state {} in trace:\n{}{}\n",
-               inst->toString(), s.toString(), main->toString(),
-               trace == main ? "" : trace->toString()).str();
-      });
+        return folly::format("\n{} has state {} in unit {}\n",
+                             inst->toString(), s.toString(),
+                             unit.toString()).str();
+        });
       inst->setOpcode(Mov);
       s.setDead();
     }
@@ -373,7 +373,7 @@ void sinkIncRefs(IRTrace* trace, IRUnit& unit, DceState& state) {
         assert(state[inst].countConsumed());
       }
     }
-    if (inst->op() == DecRefNZ) {
+    if (inst->op() == DecRefNZ && !state[inst].isDead()) {
       IRInstruction* srcInst = inst->src(0)->inst();
       if (state[srcInst].isDead()) {
         state[inst].setDead();
@@ -401,7 +401,7 @@ void sinkIncRefs(IRTrace* trace, IRUnit& unit, DceState& state) {
  * of a DefInlineFP.  In this case we can kill both, which may allow
  * removing a SpillFrame as well.
  */
-void optimizeActRecs(IRTrace* trace, DceState& state, IRUnit& unit,
+void optimizeActRecs(std::list<Block*>& blocks, DceState& state, IRUnit& unit,
                      UseCounts& uses) {
   FTRACE(5, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
@@ -409,7 +409,7 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRUnit& unit,
   bool killedFrames = false;
 
   smart::map<SSATmp*, Offset> retFixupMap;
-  forEachInst(trace->blocks(), [&](IRInstruction* inst) {
+  forEachInst(blocks, [&](IRInstruction* inst) {
     if (!state[inst].isDead()) return;
     switch (inst->op()) {
     // We don't need to generate stores to a frame if it can be
@@ -428,8 +428,7 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRUnit& unit,
       {
         auto const frameInst = inst->src(1)->inst();
         auto const reason = inst->src(2);
-        if (frameInst->op() == DefInlineFP &&
-            reason->type().subtypeOf(Type::Func)) {
+        if (frameInst->op() == DefInlineFP && reason->type() <= Type::Func) {
             FTRACE(5, "Marking SpillFrame for {}\n", frameInst->id());
           state[frameInst].incWeakUse();
         }
@@ -513,7 +512,7 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRUnit& unit,
    * that were weak uses may need modifications now that their frame
    * is going away.
    */
-  forEachInst(trace->blocks(), [&](IRInstruction* inst) {
+  forEachInst(blocks, [&](IRInstruction* inst) {
     switch (inst->op()) {
     case DefInlineSP:
       {
@@ -528,7 +527,8 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRUnit& unit,
       }
       break;
 
-    case StLoc: case InlineReturn:
+    case StLoc:
+    case InlineReturn:
       {
         auto const fp = inst->src(0);
         if (fp->inst()->op() == PassFP) {
@@ -540,33 +540,33 @@ void optimizeActRecs(IRTrace* trace, DceState& state, IRUnit& unit,
       }
       break;
 
-      /*
-       * When we unroll the stack during an exception the unwinder relies on
-       * m_soff whenever it encounters an ActRec to properly restore the
-       * PC once the frame has been destroyed.  When we elide a frame from the
-       * stack we also update the PC pushed in any ActRec's pushed by a Call
-       * so that they reflect the frame that they logically fall inside of.
-       */
-      case Call:
-        {
-          auto const arInst = inst->src(0)->inst();
-          if (arInst->op() == SpillFrame) {
-            auto const fp = arInst->src(1);
-            if (fp->inst()->op() == PassFP) {
-              auto fpInst = fp->inst();
-              while (fpInst->src(0)->inst()->op() == PassFP) {
-                fpInst = fpInst->src(0)->inst();
-              }
-              assert(retFixupMap.find(fpInst->dst()) != retFixupMap.end());
-              FTRACE(5, "{} ({}) repairing\n",
-                     opcodeName(inst->op()),
-                     inst->id());
-              Offset retBCOff = retFixupMap[fpInst->dst()];
-              inst->setSrc(1, unit.cns(retBCOff));
+    /*
+     * When we unroll the stack during an exception the unwinder relies on
+     * m_soff whenever it encounters an ActRec to properly restore the
+     * PC once the frame has been destroyed.  When we elide a frame from the
+     * stack we also update the PC pushed in any ActRec's pushed by a Call
+     * so that they reflect the frame that they logically fall inside of.
+     */
+    case Call:
+      {
+        auto const arInst = inst->src(0)->inst();
+        if (arInst->op() == SpillFrame) {
+          auto const fp = arInst->src(1);
+          if (fp->inst()->op() == PassFP) {
+            auto fpInst = fp->inst();
+            while (fpInst->src(0)->inst()->op() == PassFP) {
+              fpInst = fpInst->src(0)->inst();
             }
+            assert(retFixupMap.find(fpInst->dst()) != retFixupMap.end());
+            FTRACE(5, "{} ({}) repairing\n",
+                   opcodeName(inst->op()),
+                   inst->id());
+            Offset retBCOff = retFixupMap[fpInst->dst()];
+            inst->setSrc(1, unit.cns(retBCOff));
           }
         }
-        break;
+      }
+      break;
 
     case DefInlineFP:
       FTRACE(5, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
@@ -635,7 +635,6 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
 // Publicly exported functions:
 
 void eliminateDeadCode(IRUnit& unit) {
-  auto trace = unit.main();
   auto removeEmptyExitTraces = [&] {
     unit.exits().remove_if([](IRTrace* exit) {
       return exit->blocks().empty();
@@ -643,7 +642,7 @@ void eliminateDeadCode(IRUnit& unit) {
   };
 
   // kill unreachable code and remove any traces that are now empty
-  BlockList blocks = removeUnreachable(trace, unit);
+  BlockList blocks = removeUnreachable(unit);
   removeEmptyExitTraces();
 
   // Ensure that main trace doesn't unconditionally jump to an exit
@@ -681,7 +680,8 @@ void eliminateDeadCode(IRUnit& unit) {
 
       // If inst consumes this source, find the true source instruction and
       // mark it as consumed if it's an IncRef.
-      if (RuntimeOption::EvalHHIREnableRefCountOpt && inst->consumesReference(i)) {
+      if (RuntimeOption::EvalHHIREnableRefCountOpt &&
+          inst->consumesReference(i)) {
         consumeIncRef(inst, src, state);
       }
     }
@@ -689,25 +689,22 @@ void eliminateDeadCode(IRUnit& unit) {
 
   // Optimize IncRefs and DecRefs.
   if (RuntimeOption::EvalHHIREnableRefCountOpt) {
-    forEachTrace(unit, [&](IRTrace* t) {
-      optimizeRefCount(t, unit.main(), state, uses);
-    });
+    optimizeRefCount(unit, state, uses);
 
     if (RuntimeOption::EvalHHIREnableSinking) {
       // Sink IncRefs consumed off trace.
-      sinkIncRefs(trace, unit, state);
+      sinkIncRefs(unit.main(), unit, state);
     }
   }
 
   // Optimize unused inlined activation records.  It's not necessary
   // to look at non-main traces for this.
-  optimizeActRecs(trace, state, unit, uses);
+  optimizeActRecs(unit.main()->blocks(), state, unit, uses);
 
   // now remove instructions whose id == DEAD
-  removeDeadInstructions(trace, state);
-  for (IRTrace* exit : unit.exits()) {
-    removeDeadInstructions(exit, state);
-  }
+  forEachTrace(unit, [&](IRTrace* t) {
+    removeDeadInstructions(t, state);
+  });
 
   // and remove empty exit traces
   removeEmptyExitTraces();

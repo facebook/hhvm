@@ -219,6 +219,7 @@ public:
   static std::vector<std::string> AllowedDirectories;
   static std::set<std::string> AllowedFiles;
   static hphp_string_imap<std::string> StaticFileExtensions;
+  static hphp_string_imap<std::string> PhpFileExtensions;
   static std::set<std::string> ForbiddenFileExtensions;
   static std::set<std::string> StaticFileGenerators;
   static FilesMatchPtrVec FilesMatches;
@@ -365,7 +366,7 @@ public:
   F(bool, PerfPidMap,                  true)                            \
   F(bool, KeepPerfPidMap,              false)                           \
   F(bool, RuntimeTypeProfile,          false)                           \
-  F(int32_t, RuntimeTypeProfileLoggingFreq,  -1)                        \
+  F(int32_t, RuntimeTypeProfileLoggingFreq,  0)                         \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      64 << 20)                        \
   F(bool, ProfileBC,                   false)                           \

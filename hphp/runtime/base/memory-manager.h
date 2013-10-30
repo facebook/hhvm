@@ -357,12 +357,6 @@ private:
   std::array<FreeList,kNumSizes> m_sizeUntrackedFree;
   SweepNode m_sweep;   // oversize smart_malloc'd blocks
   SweepNode m_strings; // in-place node is head of circular list
-  int64_t m_usage;     // how many bytes are currently being used
-  /* Note that m_stats.usage duplicates the information in m_usage,
-   * but that it is updated less frequently than m_usage. Also,
-   * m_usage is used only to check that allocations do not exceed
-   * the memory limit. m_stats.usage is visible via extension functions.
-   */
   MemoryUsageStats m_stats;
   std::vector<char*> m_slabs;
 

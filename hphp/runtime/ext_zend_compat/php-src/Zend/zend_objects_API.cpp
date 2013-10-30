@@ -22,10 +22,11 @@
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_variables.h"
+// has to be before zend_API since that defines getThis()
+#include "hphp/runtime/ext_zend_compat/hhvm/ZendRequestLocal.h"
 #include "zend_API.h"
 #include "zend_objects_API.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendRequestLocal.h"
 
 #define ZEND_DEBUG_OBJECTS 0
 

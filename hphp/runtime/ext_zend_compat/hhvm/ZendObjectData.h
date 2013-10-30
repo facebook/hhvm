@@ -20,18 +20,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend_hphp_class_to_class_entry.h"
-
-/* Tons of declarations so we can make call create_object. Including those
- * headers will pull in the world, and this file needs to be included from
- * infotab */
-typedef unsigned int zend_object_handle;
-typedef unsigned int zend_uint;
-struct _zend_object_handlers;
-typedef struct _zend_object_handlers zend_object_handlers;
-typedef struct _zend_object_value {
-  zend_object_handle handle;
-  const zend_object_handlers *handlers;
-} zend_object_value;
+#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

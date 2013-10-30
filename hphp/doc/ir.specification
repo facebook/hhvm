@@ -1652,13 +1652,25 @@ D:StkPtr InterpOneCF<T, bcOff, numPopped, numPushed> S0:FramePtr S1:StkPtr
 
 
 D:T = Spill S0:T
-
-  Stores S0 to a spill location specified by the destination.  The
-  destination temporary will not have registers allocated to it.
-
 D:T = Reload S0:T
 
-  Loads from a spilled temporary S0, and stores the result in D.
+  Spill stores from S0's registers into the spill location assigned to D.
+  Reload loads from S0's spill slot into D's assigned registers.
+
+  Spill and Reload are SSA copies, equivalent to Mov.  The destination
+  will be the same value and type as the source.  Like all operations
+  in SSA, the definition of the source must dominate the operation.
+
+Shuffle<d...> S...
+
+  Shuffle takes N source variables and N destination operands, and performs
+  a parallel copy from the source's currently assigned location to the
+  destination locations.  Destinations may be registers or spill slots.
+  Sources may be registers, spill slots, or constants.  Mem-Mem copies are
+  not supported. Each destination must be unique.  Shuffle is not an SSA
+  operation; destination registers are assigned at multiple positions in
+  the code, and may hold different variables at different positions.
+
 
 16. Continuations & Closures
 
@@ -1757,8 +1769,7 @@ StContArKey S0:FramePtr S1:Cell
   S1 is the new value.
 
 
-
-17. Debugging and instrumentation
+17. Debugging, instrumentation, and profiling
 
 
 IncStat S0:ConstInt S1:ConstInt S2:ConstBool
@@ -1771,6 +1782,10 @@ IncStat S0:ConstInt S1:ConstInt S2:ConstBool
 IncStatGrouped S0:ConstStr S1:ConstStr S2:ConstInt
 
   Adds the value S2 to the counter named S1, in the category S0.
+
+IncProfCounter<TransID>
+
+  Increment the profiling counter associated with translation TransID.
 
 DbgAssertRefCount S0:{Counted|StaticStr|StaticArr}
 

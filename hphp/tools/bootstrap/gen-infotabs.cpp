@@ -39,9 +39,8 @@ void write_zend_func_stub(std::ofstream& cpp, PhpFunc func,
   cpp << folly::format(R"(
 }} // End namespace
 void {0}{1}{2}(
-    HPHP::ActRec* ar,
-    HPHP::RefData* return_value,
-    HPHP::RefData* this_ptr);
+  int, HPHP::RefData*, HPHP::RefData**, HPHP::RefData*, int
+);
 namespace HPHP {{
 TypedValue* {3}{1}{2}(ActRec* ar) {{
   return zend_wrap_func(ar, {0}{1}{2}, {4}, {5});
@@ -102,7 +101,7 @@ int main(int argc, const char* argv[]) {
     }
     for (auto const& func : klass.methods()) {
       if (func.flags() & ZendCompat) {
-        write_zend_func_stub(cpp, func, klass.lowerName());
+        write_zend_func_stub(cpp, func, klass.name());
       } else {
         cpp << "TypedValue* tg_" << func.getUniqueName()
             << "(ActRec* ar);\n";
@@ -155,7 +154,7 @@ int main(int argc, const char* argv[]) {
 
       auto name = method.getUniqueName();
       if (method.flags() & ZendCompat) {
-        name = klass.lowerName() + "_" + method.name();
+        name = klass.name() + "_" + method.name();
       }
       cpp << "{ \"" << method.name() << "\", tg_" << name << " }";
     }

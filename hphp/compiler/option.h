@@ -238,10 +238,7 @@ public:
    * Optimizations
    */
   static int InvokeFewArgsCount;
-  static bool InvokeWithSpecificArgs;
-  static bool FlattenInvoke;
   static int InlineFunctionThreshold;
-  static bool UseVirtualDispatch;
   static bool EliminateDeadCode;
   static bool CopyProp;
   static bool LocalCopyProp;
@@ -252,13 +249,12 @@ public:
   /**
    * Output options
    */
-  static bool GenerateCppLibCode;
-  static bool GenerateSourceInfo;
   static bool GenerateDocComments;
   static bool ControlFlow;
   static bool VariableCoalescing;
   static bool DumpAst;
   static bool WholeProgram;
+  static bool UseHHBBC;  // see hhbbc/README
   static bool RecordErrors;
   static std::string DocJson; // filename to dump doc JSON to
 

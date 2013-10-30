@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/trace-builder.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
@@ -35,26 +35,6 @@ namespace JIT{
 using namespace Transl::reg;
 
 TRACE_SET_MOD(hhir);
-
-int RegisterInfo::numAllocatedRegs() const {
-  // Return the number of register slots that actually have an allocated
-  // register or spill slot.  We may not have allocated a full numNeededRegs()
-  // worth of registers in some cases (if the value of this tmp wasn't used).
-  // We rely on InvalidReg (-1) never being equal to a spill slot number.
-  int i = 0;
-  while (i < kMaxNumRegs && m_regs[i] != InvalidReg) {
-    ++i;
-  }
-  return i;
-}
-
-RegSet RegisterInfo::regs() const {
-  RegSet regs;
-  for (int i = 0, n = numAllocatedRegs(); i < n; ++i) {
-    if (hasReg(i)) regs.add(reg(i));
-  }
-  return regs;
-}
 
 struct LinearScan : private boost::noncopyable {
   static const int NumRegs = kNumRegs;
@@ -164,12 +144,22 @@ private:
   RegState* getReg(RegState* reg);
   PhysReg::Type getRegType(const SSATmp *tmp, int locIdx) const;
   bool crossNativeCall(const SSATmp* tmp) const;
+  RegAllocInfo computeRegs() const;
+  void resolveJmpCopies();
 
-  template<typename Inner, int DumpVal=4>
-  void dumpIR(const Inner* in, const char* msg) {
-    if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhir, DumpVal)) {
+  void dumpIR(const SSATmp* tmp, const char* msg) {
+    if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhir, kExtraLevel)) {
       std::ostringstream str;
-      print(str, in, &m_allocInfo, &m_lifetime);
+      print(str, tmp, &m_allocInfo[tmp], &m_lifetime);
+      HPHP::Trace::traceRelease("--- %s: %s\n", msg, str.str().c_str());
+    }
+  }
+
+  void dumpIR(const IRInstruction* inst, const char* msg) {
+    if (HPHP::Trace::moduleEnabled(HPHP::Trace::hhir, kExtraLevel)) {
+      auto regs = computeRegs();
+      std::ostringstream str;
+      print(str, inst, &regs, &m_lifetime);
       HPHP::Trace::traceRelease("--- %s: %s\n", msg, str.str().c_str());
     }
   }
@@ -209,7 +199,8 @@ private:
   typedef smart::vector<IRInstruction*> JmpList;
   StateVector<SSATmp, JmpList> m_jmps;
 
-  RegAllocInfo m_allocInfo; // final allocation for each SSATmp
+  // final allocation for each SSATmp
+  StateVector<SSATmp, PhysLoc> m_allocInfo;
 
   // SSATmps requiring 2 64-bit registers that are eligible for
   // allocation to a single XMM register
@@ -250,6 +241,17 @@ static SSATmp* canonicalize(SSATmp* tmp) {
   }
 }
 
+RegAllocInfo LinearScan::computeRegs() const {
+  RegAllocInfo regs(m_unit);
+  for (auto b : m_blocks) {
+    for (auto& i : *b) {
+      for (auto  s : i.srcs()) regs[i][s] = m_allocInfo[s];
+      for (auto& d : i.dsts()) regs[i][d] = m_allocInfo[d];
+    }
+  }
+  return regs;
+}
+
 void LinearScan::StateSave::save(LinearScan* ls) {
   std::copy(ls->m_regs, ls->m_regs + NumRegs, m_regs);
 }
@@ -286,7 +288,7 @@ LinearScan::LinearScan(IRUnit& unit)
   , m_linear(m_lifetime.linear)
   , m_uses(m_lifetime.uses)
   , m_jmps(unit, JmpList())
-  , m_allocInfo(unit)
+  , m_allocInfo(unit, PhysLoc())
   , m_fullXMMCandidates(unit.numTmps())
 {
   m_exitIds.reserve(unit.exits().size());
@@ -370,7 +372,7 @@ PhysReg::Type LinearScan::getRegType(const SSATmp* tmp, int locIdx) const {
 
 void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
   IRInstruction* inst = &*it;
-  dumpIR<IRInstruction, kExtraLevel>(inst, "allocating to instruction");
+  dumpIR(inst, "allocating to instruction");
 
   // Reload all source operands if necessary.
   // Mark registers as unpinned.
@@ -421,7 +423,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
       }
       // Remember this reload tmp in case we can reuse it in later blocks.
       m_slots[slotId].latestReload = reloadTmp;
-      dumpIR<IRInstruction, kExtraLevel>(reload, "created reload");
+      dumpIR(reload, "created reload");
     }
   }
 
@@ -631,16 +633,14 @@ class SpillLocManager {
   /*
    * Allocates a new spill location.
    */
-  SpillInfo allocSpillLoc() {
-    return SpillInfo(m_nextSpillLoc++);
+  uint32_t allocSpillLoc() {
+    return m_nextSpillLoc++;
   }
 
   void alignTo16Bytes() {
-    SpillInfo spillLoc(m_nextSpillLoc);
-    if (spillLoc.offset() % 16 != 0) {
-      spillLoc = SpillInfo(++m_nextSpillLoc);
+    if (PhysLoc::offset(m_nextSpillLoc) % 16 != 0) {
+      m_nextSpillLoc++;
     }
-    assert(spillLoc.offset() % 16 == 0);
   }
 
   uint32_t getNumSpillLocs() const {
@@ -682,29 +682,24 @@ uint32_t LinearScan::assignSpillLoc() {
       if (inst.op() == Spill) {
         SSATmp* dst = inst.dst();
         SSATmp* src = inst.src(0);
+        TRACE(3, "[counter] 1 spill a tmp that %s native\n",
+              crossNativeCall(dst) ? "spans" : "does not span");
         for (int locIndex = 0;
              locIndex < src->numNeededRegs();
              ++locIndex) {
-          if (!crossNativeCall(dst)) {
-            TRACE(3, "[counter] 1 spill a tmp that does not span native\n");
-          } else {
-            TRACE(3, "[counter] 1 spill a tmp that spans native\n");
-          }
 
           // SSATmps with 2 regs are aligned to 16 bytes because they may be
           // allocated to XMM registers, either before or after being reloaded
           if (src->numNeededRegs() == 2 && locIndex == 0) {
             spillLocManager.alignTo16Bytes();
           }
-          SpillInfo spillLoc = spillLocManager.allocSpillLoc();
-          m_allocInfo[dst].setSpillInfo(locIndex, spillLoc);
+          auto spillLoc = spillLocManager.allocSpillLoc();
+          m_allocInfo[dst].setSlot(locIndex, spillLoc);
 
           if (m_allocInfo[src].isFullXMM()) {
             // Allocate the next, consecutive spill slot for this SSATmp too
-            assert(locIndex == 0);
-            assert(spillLoc.offset() % 16 == 0);
             spillLoc = spillLocManager.allocSpillLoc();
-            m_allocInfo[dst].setSpillInfo(locIndex + 1, spillLoc);
+            m_allocInfo[dst].setSlot(1, spillLoc);
             break;
           }
         }
@@ -874,8 +869,9 @@ void LinearScan::computePreColoringHint() {
 // Given a label, dest index for that label, and register index, scan
 // the sources of all incoming Jmps to see if any have a register
 // allocated at the specified index.
-static RegNumber findLabelSrcReg(const RegAllocInfo& regs, IRInstruction* label,
-                                 unsigned dstIdx, uint32_t regIndex) {
+static RegNumber findLabelSrcReg(StateVector<SSATmp,PhysLoc>& regs,
+                                 IRInstruction* label, unsigned dstIdx,
+                                 uint32_t regIndex) {
   assert(label->op() == DefLabel);
   SSATmp* withReg = label->block()->findSrc(dstIdx, [&](SSATmp* src) {
     return regs[src].reg(regIndex) != InvalidReg &&
@@ -1075,7 +1071,32 @@ void LinearScan::findFullXMMCandidates() {
   m_fullXMMCandidates -= notCandidates;
 }
 
+// Insert a Shuffle just before each Jmp, to copy the Jmp's src values
+// to the target label's assigned destination registers.
+void LinearScan::resolveJmpCopies() {
+  for (auto b : m_blocks) {
+    if (!b->taken()) continue;
+    auto jmp = b->back();
+    auto n = jmp->numSrcs();
+    if (jmp->op() == Jmp && n > 0) {
+      auto srcs = jmp->srcs();
+      auto dests = new (m_unit.arena()) PhysLoc[n];
+      auto labelDests = jmp->taken()->front()->dsts();
+      for (unsigned i = 0; i < n; ++i) {
+        dests[i] = m_allocInfo[labelDests[i]];
+      }
+      auto shuffle = m_unit.gen(Shuffle, jmp->marker(),
+                                ShuffleData(dests, n, n),
+                                std::make_pair(n, &srcs[0]));
+      b->insert(b->iteratorTo(jmp), shuffle);
+    }
+  }
+}
+
 RegAllocInfo LinearScan::allocRegs() {
+  // Pre: Ensure there are no existing Shuffle instructions
+  assert(checkNoShuffles(m_unit));
+
   if (RuntimeOption::EvalHHIREnableCoalescing) {
     // <coalesce> doesn't need instruction numbering.
     coalesce();
@@ -1092,23 +1113,20 @@ RegAllocInfo LinearScan::allocRegs() {
 
   numberInstructions(m_blocks);
 
-  // Make sure rsp is 16-aligned.
   uint32_t numSpillLocs = assignSpillLoc();
-  if (numSpillLocs % 2) {
-    static_assert(NumPreAllocatedSpillLocs % 2 == 0, "");
-    ++numSpillLocs;
-  }
   if (numSpillLocs > (uint32_t)NumPreAllocatedSpillLocs) {
     PUNT(LinearScan_TooManySpills);
   }
 
   if (m_slots.size()) genSpillStats(numSpillLocs);
 
+  resolveJmpCopies();
+  auto regs = computeRegs();
   if (dumpIREnabled()) {
-    dumpTrace(kRegAllocLevel, m_unit, " after reg alloc ", &m_allocInfo,
+    dumpTrace(kRegAllocLevel, m_unit, " after reg alloc ", &regs,
               &m_lifetime, nullptr, nullptr);
   }
-  return m_allocInfo;
+  return regs;
 }
 
 void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
@@ -1155,7 +1173,7 @@ void LinearScan::allocRegsOneTrace(BlockList::iterator& blockIt,
     }
     for (auto it = block->begin(), end = block->end(); it != end; ++it) {
       allocRegToInstruction(it);
-      dumpIR<IRInstruction, kExtraLevel>(&*it, "allocated to instruction ");
+      dumpIR(&*it, "allocated to instruction ");
     }
     if (isMain) {
       assert(block->trace()->isMain());
@@ -1345,7 +1363,7 @@ LinearScan::RegState* LinearScan::popFreeReg(smart::list<RegState*>& freeList) {
 }
 
 void LinearScan::spill(SSATmp* tmp) {
-  dumpIR<SSATmp, kExtraLevel>(tmp, "spilling");
+  dumpIR(tmp, "spilling");
   // If we're spilling, we better actually have registers allocated.
   assert(m_allocInfo[tmp].numAllocatedRegs() > 0);
   assert(m_allocInfo[tmp].numAllocatedRegs() == tmp->numNeededRegs());

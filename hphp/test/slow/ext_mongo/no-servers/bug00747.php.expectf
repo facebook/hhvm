@@ -1,0 +1,22 @@
+- Found option 'w': 0
+
+- Found option 'w': 0
+
+- Found option 'w': 1
+
+- Found option 'w': '1-'
+
+- Found option 'w': 'fasdfads'
+
+- Found option 'w': 873253
+
+- Found option 'w': -1
+int(23)
+string(55) "The value of 'w' needs to be 0 or higher (or a string)."
+
+- Found option 'w': 'majority'
+
+- Found option 'w': 'allDCs'
+
+- Found option 'w': '3.141592654'
+

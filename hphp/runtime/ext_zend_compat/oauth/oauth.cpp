@@ -2918,7 +2918,6 @@ ZEND_END_ARG_INFO()
 
 /* }}} */
 
-#ifndef HHVM
 static zend_function_entry so_functions[] = { /* {{{ */
   SO_ME(__construct,      arginfo_oauth__construct,    ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
   SO_ME(setRSACertificate,  arginfo_oauth_setrsacertificate,  ZEND_ACC_PUBLIC)
@@ -2949,7 +2948,6 @@ static zend_function_entry so_functions[] = { /* {{{ */
   SO_ME(__destruct,      arginfo_oauth_noparams,      ZEND_ACC_PUBLIC)
   {NULL, NULL, NULL}
 };
-#endif
 /* }}} */
 
 #ifdef ZEND_ENGINE_2_4

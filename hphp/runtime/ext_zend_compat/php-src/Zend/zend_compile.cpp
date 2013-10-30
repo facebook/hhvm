@@ -22,6 +22,8 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_constants.h"
+// has to happen before zend_API since that defines getThis()
+#include "hphp/runtime/base/externals.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
 

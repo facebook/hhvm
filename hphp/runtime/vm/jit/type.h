@@ -649,10 +649,16 @@ struct TypeConstraint {
   /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric,
                                 Type type = Type::Gen)
     : category(cat)
+    , weak(false)
     , knownType(type)
   {}
 
   std::string toString() const;
+
+  TypeConstraint& setWeak(bool w = true) {
+    weak = w;
+    return *this;
+  }
 
   // category starts as DataTypeGeneric and is refined to more specific values
   // by consumers of the type.
@@ -663,6 +669,11 @@ struct TypeConstraint {
   // traces through an operation that unboxes or boxes an operand,
   // respectively.
   boost::optional<DataTypeCategory> innerCat;
+
+  // If weak is true, the consumer of the value being constrained doesn't
+  // actually want to constrain the guard (if found). Most often used to figure
+  // out if a type can be used without further constraining guards.
+  bool weak;
 
   // knownType represents an upper bound for the type of the guard, which is
   // known from static analysis or other guards that have been appropriately

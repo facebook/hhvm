@@ -919,8 +919,8 @@ bool PDOMySqlStatement::executer() {
     return false;
   }
 
-  my_ulonglong row_count = mysql_affected_rows(m_server);
-  if (row_count == (my_ulonglong)-1) {
+  my_ulonglong affected_count = mysql_affected_rows(m_server);
+  if (affected_count == (my_ulonglong)-1) {
     /* we either have a query that returned a result set or an error occured
        lets see if we have access to a result set */
     if (!m_conn->buffered()) {
@@ -937,6 +937,9 @@ bool PDOMySqlStatement::executer() {
     column_count = (int) mysql_num_fields(m_result);
     m_fields = mysql_fetch_fields(m_result);
 
+  }
+  else {
+    row_count = affected_count;
   }
 
   return true;

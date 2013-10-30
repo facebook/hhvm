@@ -1,0 +1,22 @@
+Program %s/simple_test.php loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+
+Program %s/simple_test.php exited normally.
+info main
+// defined on line 25 to 32 of %s/simple_test.php
+function main();
+Type profile:
+  ReturnValue:
+    NULL: 100.000000%
+
+info Foo::identity
+// defined on line 17 to 22 of %s/simple_test.php
+public function Foo::identity($param);
+Type profile:
+  ReturnValue:
+    integer: 66.666667%
+    string: 33.333333%
+  $param:
+    integer: 100.000000%
+
+quit

@@ -286,7 +286,7 @@ static_string:
   tv->m_type = KindOfStaticString;
 }
 
-StringData* tvCastToString(TypedValue* tv) {
+StringData* tvCastToString(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();

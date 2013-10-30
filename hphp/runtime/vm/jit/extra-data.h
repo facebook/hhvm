@@ -20,6 +20,7 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/phys-loc.h"
 
 namespace HPHP { namespace JIT {
 
@@ -263,15 +264,13 @@ struct ActRecInfo : IRExtraData {
 };
 
 /*
- * Function pointer and parameter index for type profiling usage
+ * Parameter index for type profiling.
  */
 struct TypeProfileData : IRExtraData {
-  explicit TypeProfileData(int32_t param, const Func* func) : param(param),
-                                                              func(func) {}
+  explicit TypeProfileData(int32_t param) : param(param) {}
   int32_t param;
-  const Func* func;
   std::string show() const {
-    return folly::to<std::string>(func->fullName()->data(), ",", param);
+    return folly::to<std::string>(param);
   }
 };
 
@@ -549,6 +548,22 @@ struct RBTraceData : IRExtraData {
   const StringData* msg;
 };
 
+/*
+ * ShuffleData holds an array of destination locations for a Shuffle,
+ * one per source, as well as a capacity field so we can track the
+ * available space to add more srcs and dsts without reallocating.
+ */
+struct ShuffleData : IRExtraData {
+  ShuffleData(PhysLoc* dests, uint32_t size, uint32_t cap)
+    : dests(dests), size(size), cap(cap)
+  {}
+  std::string show() const;
+public:
+  PhysLoc* dests; // array of up to [cap] PhysLocs
+  uint32_t size; // number of valid dests
+  uint32_t cap; // available slots for more dests & srcs
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -597,6 +612,7 @@ X(ReqBindJmp,                   BCOffset);
 X(ReqInterpret,                 BCOffset);
 X(ReqRetranslateOpt,            ReqRetransOptData);
 X(CheckCold,                    TransIDData);
+X(IncProfCounter,               TransIDData);
 X(CallArray,                    CallArrayData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);
@@ -639,6 +655,7 @@ X(CreateContMeth,               CreateContData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);
+X(Shuffle,                      ShuffleData);
 
 #undef X
 

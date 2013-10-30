@@ -417,9 +417,7 @@ TypedValue* ldGblAddrHelper(StringData* name) {
 
 HOT_FUNC_VM
 TypedValue* ldGblAddrDefHelper(StringData* name) {
-  TypedValue* r = g_vmContext->m_globalVarEnv->lookupAdd(name);
-  decRefStr(name);
-  return r;
+  return g_vmContext->m_globalVarEnv->lookupAdd(name);
 }
 
 template <typename T>
@@ -840,6 +838,12 @@ void raiseMissingArgument(const char* name, int expected, int got) {
   } else {
     raise_warning(Strings::MISSING_ARGUMENTS, name, expected, got);
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+uintptr_t tlsBaseNoInline() {
+  return tlsBase();
 }
 
 //////////////////////////////////////////////////////////////////////

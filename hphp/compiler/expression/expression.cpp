@@ -71,7 +71,6 @@ ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
     rep->clearContext(AssignmentRHS);
     rep = el;
   }
-  if (isChildOfYield()) rep->setChildOfYield();
   if (rep->is(KindOfSimpleVariable) && !is(KindOfSimpleVariable)) {
     static_pointer_cast<SimpleVariable>(rep)->setAlwaysStash();
   }

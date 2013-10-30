@@ -1,265 +1,2241 @@
-PHPUnit 3.7.27 by Sebastian Bergmann.
-
-Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/yii/tests/phpunit.xml
-
-
-Starting test 'CApplicationComponentTest::testInitialization'.
+CApplicationComponentTest::testInitialization
 .
-Starting test 'CBehaviorTest::testAttachBehavior'.
+CBehaviorTest::testAttachBehavior
 .
-Starting test 'CBehaviorTest::testDisableBehaviors'.
+CBehaviorTest::testDisableBehaviors
 .
-Starting test 'CBehaviorTest::testDisableBehaviorsAndModels'.
+CBehaviorTest::testDisableBehaviorsAndModels
 .
-Starting test 'CBehaviorTest::testDisableAndEnableBehaviorsAndModels'.
+CBehaviorTest::testDisableAndEnableBehaviorsAndModels
 .
-Starting test 'CBehaviorTest::testDuplicateEventHandlers'.
+CBehaviorTest::testDuplicateEventHandlers
 .
-Starting test 'CComponentTest::testHasProperty'.
+CComponentTest::testHasProperty
 .
-Starting test 'CComponentTest::testCanGetProperty'.
+CComponentTest::testCanGetProperty
 .
-Starting test 'CComponentTest::testCanSetProperty'.
+CComponentTest::testCanSetProperty
 .
-Starting test 'CComponentTest::testGetProperty'.
+CComponentTest::testGetProperty
 .
-Starting test 'CComponentTest::testSetProperty'.
+CComponentTest::testSetProperty
 .
-Starting test 'CComponentTest::testIsset'.
+CComponentTest::testIsset
 .
-Starting test 'CComponentTest::testUnset'.
+CComponentTest::testUnset
 .
-Starting test 'CComponentTest::testCallMethodFromBehavior'.
+CComponentTest::testCallMethodFromBehavior
 .
-Starting test 'CComponentTest::testHasEvent'.
+CComponentTest::testHasEvent
 .
-Starting test 'CComponentTest::testHasEventHandler'.
+CComponentTest::testHasEventHandler
 .
-Starting test 'CComponentTest::testGetEventHandlers'.
+CComponentTest::testGetEventHandlers
 .
-Starting test 'CComponentTest::testAttachEventHandler'.
+CComponentTest::testAttachEventHandler
 .
-Starting test 'CComponentTest::testDetachEventHandler'.
+CComponentTest::testDetachEventHandler
 .
-Starting test 'CComponentTest::testAttachDetachEventHandler'.
+CComponentTest::testAttachDetachEventHandler
 .
-Starting test 'CComponentTest::testRaiseEvent'.
+CComponentTest::testRaiseEvent
 .
-Starting test 'CComponentTest::testEventAccessor'.
+CComponentTest::testEventAccessor
 .
-Starting test 'CComponentTest::testStopEvent'.
+CComponentTest::testStopEvent
 .
-Starting test 'CComponentTest::testInvalidHandler1'.
+CComponentTest::testInvalidHandler1
 .
-Starting test 'CComponentTest::testInvalidHandler2'.
+CComponentTest::testInvalidHandler2
 .
-Starting test 'CComponentTest::testAttachingBehavior'.
+CComponentTest::testAttachingBehavior
 .
-Starting test 'CComponentTest::testDetachingBehavior'.
+CComponentTest::testDetachingBehavior
 .
-Starting test 'CComponentTest::testDetachingBehaviors'.
+CComponentTest::testDetachingBehaviors
 .
-Starting test 'CComponentTest::testEnablingBehavior'.
+CComponentTest::testEnablingBehavior
 .
-Starting test 'CComponentTest::testEnablingBehaviors'.
+CComponentTest::testEnablingBehaviors
 .
-Starting test 'CComponentTest::testAsa'.
+CComponentTest::testAsa
 .
-Starting test 'CComponentTest::testEvaluateExpression'.
+CComponentTest::testEvaluateExpression
 .
-Starting test 'CLogRouterTest::testRoutes'.
+CLogRouterTest::testRoutes
 .
-Starting test 'CLoggerTest::testLog'.
+CLoggerTest::testLog
 .
-Starting test 'CLoggerTest::testGetLogs'.
+CLoggerTest::testGetLogs
 .
-Starting test 'CModelTest::testValidate'.
+CModelTest::testValidate
 .
-Starting test 'CModelTest::testBeforeValidate'.
+CModelTest::testBeforeValidate
 .
-Starting test 'CModelTest::testIsAttributeRequired'.
+CModelTest::testIsAttributeRequired
 .
-Starting test 'CModelTest::testIsAttributeSafe'.
+CModelTest::testIsAttributeSafe
 .
-Starting test 'CModelTest::testGetSafeAttributeNames'.
+CModelTest::testGetSafeAttributeNames
 .
-Starting test 'CModelTest::testModifyValidators'.
+CModelTest::testModifyValidators
 .
-Starting test 'CModelTest::testErrors'.
+CModelTest::testErrors
 .
-Starting test 'CModelTest::testGetAttributes'.
+CModelTest::testGetAttributes
 .
-Starting test 'CModelTest::testUnsetAttributes'.
+CModelTest::testUnsetAttributes
 .
-Starting test 'CModelTest::testGeneratingAttributeLabel'.
+CModelTest::testGeneratingAttributeLabel
 .
-Starting test 'CModelTest::testErrorsForAllAttributes'.
+CModelTest::testErrorsForAllAttributes
 .
-Starting test 'CModelTest::testErrorsForSingleAttribute'.
+CModelTest::testErrorsForSingleAttribute
 .
-Starting test 'CModelTest::testAddingAnErrorToSpecifiedAttribute'.
+CModelTest::testAddingAnErrorToSpecifiedAttribute
 .
-Starting test 'CModelTest::testAddingAnErrorToASingleAttribute'.
+CModelTest::testAddingAnErrorToASingleAttribute
 .
-Starting test 'CModelTest::testAddingAnErrorToMultipleAttributes'.
+CModelTest::testAddingAnErrorToMultipleAttributes
 .
-Starting test 'CModelTest::testAddingMultipleErrorsToASingleAttribute'.
+CModelTest::testAddingMultipleErrorsToASingleAttribute
 .
-Starting test 'CModelTest::testAddingMultipleErrorsToMultipleAttributes'.
+CModelTest::testAddingMultipleErrorsToMultipleAttributes
 .
-Starting test 'CModelTest::testFirstErrorMessageForInvalidAttribute'.
+CModelTest::testFirstErrorMessageForInvalidAttribute
 .
-Starting test 'CModelTest::testNoErrorMessageForValidAttribute'.
+CModelTest::testNoErrorMessageForValidAttribute
 .
-Starting test 'CModelTest::testModelWithInvalidRules'.
+CModelTest::testModelWithInvalidRules
 .
-Starting test 'CModuleTest::testGetId'.
+CModuleTest::testGetId
 .
-Starting test 'CModuleTest::testSetId'.
+CModuleTest::testSetId
 .
-Starting test 'CModuleTest::testSetBasePath'.
+CModuleTest::testSetBasePath
 .
-Starting test 'CModuleTest::testGetBasePath'.
+CModuleTest::testGetBasePath
 .
-Starting test 'CModuleTest::testGetParams'.
+CModuleTest::testGetParams
 .
-Starting test 'CModuleTest::testSetParams'.
-.   61 / 1122 (  5%)
-
-Starting test 'CModuleTest::testGetModulePath'.
+CModuleTest::testSetParams
 .
-Starting test 'CModuleTest::testSetModulePath'.
+CModuleTest::testGetModulePath
 .
-Starting test 'CModuleTest::testGetParentModule'.
+CModuleTest::testSetModulePath
 .
-Starting test 'CModuleTest::testGetModule'.
+CModuleTest::testGetParentModule
 .
-Starting test 'CModuleTest::testGetModules'.
+CModuleTest::testGetModule
 .
-Starting test 'CModuleTest::testGetComponents'.
+CModuleTest::testGetModules
 .
-Starting test 'CModuleTest::testSetComponents'.
+CModuleTest::testGetComponents
 .
-Starting test 'CModuleTest::testSetComponentsViaConfig'.
+CModuleTest::testSetComponents
 .
-Starting test 'CModuleTest::testSetAliases'.
+CModuleTest::testSetComponentsViaConfig
 .
-Starting test 'CPropertyValueTest::testEnsureBoolean'.
+CModuleTest::testSetAliases
 .
-Starting test 'CPropertyValueTest::testEnsureString'.
+CPropertyValueTest::testEnsureBoolean
 .
-Starting test 'CPropertyValueTest::testEnsureInteger'.
+CPropertyValueTest::testEnsureString
 .
-Starting test 'CPropertyValueTest::testEnsureFloat'.
+CPropertyValueTest::testEnsureInteger
 .
-Starting test 'CPropertyValueTest::testEnsureArray'.
+CPropertyValueTest::testEnsureFloat
 .
-Starting test 'CPropertyValueTest::testEnsureObject'.
+CPropertyValueTest::testEnsureArray
 .
-Starting test 'CPropertyValueTest::testEnsureEnum'.
+CPropertyValueTest::testEnsureObject
 .
-Starting test 'CSecurityManagerTest::testValidationKey'.
+CPropertyValueTest::testEnsureEnum
 .
-Starting test 'CSecurityManagerTest::testEncryptionKey'.
+CSecurityManagerTest::testValidationKey
 .
-Starting test 'CSecurityManagerTest::testValidation'.
+CSecurityManagerTest::testEncryptionKey
 .
-Starting test 'CSecurityManagerTest::testValidateData'.
+CSecurityManagerTest::testValidation
 .
-Starting test 'CSecurityManagerTest::testEncryptData'.
+CSecurityManagerTest::testValidateData
 .
-Starting test 'CSecurityManagerTest::testComputeHMAC with data set #0 ('7638cbf5b66f451a5dab87fa26f45025fa661f82', 'data1', '123456', 'sha1')'.
+CSecurityManagerTest::testEncryptData
 .
-Starting test 'CSecurityManagerTest::testComputeHMAC with data set #1 ('7e9a30dd2e3c568499a0786ca776d29ee9fb00f6', 'data2', '123456', 'SHA1')'.
+CSecurityManagerTest::testComputeHMAC with data set #0 
 .
-Starting test 'CSecurityManagerTest::testComputeHMAC with data set #2 ('289beb389d31d327eb87fd8f102970d1', 'data1', '123456', 'md5')'.
+CSecurityManagerTest::testComputeHMAC with data set #1 
 .
-Starting test 'CSecurityManagerTest::testComputeHMAC with data set #3 ('4fb0dd0081ce2681f479d42ec8db5537', 'data2', '123456', 'MD5')'.
+CSecurityManagerTest::testComputeHMAC with data set #2 
 .
-Starting test 'CSecurityManagerTest::testGenerateRandomString'.
+CSecurityManagerTest::testComputeHMAC with data set #3 
 .
-Starting test 'CSecurityManagerTest::testGenerateRandomBytes'.
+CSecurityManagerTest::testGenerateRandomString
 .
-Starting test 'CSecurityManagerTest::testGenerateRandomStringCS'.
+CSecurityManagerTest::testGenerateRandomBytes
 .
-Starting test 'CSecurityManagerTest::testGenerateRandomBytesCS'.
+CSecurityManagerTest::testGenerateRandomStringCS
 .
-Starting test 'CStatePersisterTest::testLoadSave'.
+CSecurityManagerTest::testGenerateRandomBytesCS
 .
-Starting test 'CStatePersisterTest::testStateFile'.
+CStatePersisterTest::testLoadSave
 .
-Starting test 'CCacheDependencyTest::testReuseDependentData'.
+CStatePersisterTest::testStateFile
 .
-Starting test 'CDbCacheTest::testKeyPrefix'.
+CCacheDependencyTest::testReuseDependentData
 .
-Starting test 'CDbCacheTest::testGetAndSet'.
+CDbCacheTest::testKeyPrefix
 .
-Starting test 'CDbCacheTest::testMGet'.
+CDbCacheTest::testGetAndSet
 .
-Starting test 'CDbCacheTest::testArrayAccess'.
+CDbCacheTest::testMGet
 .
-Starting test 'CDbCacheTest::testExpire'.
+CDbCacheTest::testArrayAccess
 .
-Starting test 'CDbCacheTest::testUseDbConnection'.
+CDbCacheTest::testExpire
 .
-Starting test 'CDbCacheTest::testDependency'.
+CDbCacheTest::testUseDbConnection
 .
-Starting test 'CDbCacheTest::testAdd'.
+CDbCacheTest::testDependency
 .
-Starting test 'CDbCacheTest::testDelete'.
+CDbCacheTest::testAdd
 .
-Starting test 'CDbCacheTest::testFlush'.
+CDbCacheTest::testDelete
 .
-Starting test 'CDirectoryCacheDependencyTest::testDirectoryName'.
+CDbCacheTest::testFlush
 .
-Starting test 'CDirectoryCacheDependencyTest::testRecursiveLevel'.
+CDirectoryCacheDependencyTest::testDirectoryName
 .
-Starting test 'CDirectoryCacheDependencyTest::testHasChanged'.
+CDirectoryCacheDependencyTest::testRecursiveLevel
 .
-Starting test 'CFileCacheDependencyTest::testFileName'.
+CDirectoryCacheDependencyTest::testHasChanged
 .
-Starting test 'CFileCacheDependencyTest::testHasChanged'.
+CFileCacheDependencyTest::testFileName
 .
-Starting test 'CFileCacheTest::testPathMode'.
+CFileCacheDependencyTest::testHasChanged
 .
-Starting test 'CFileCacheTest::testFileMode'.
+CFileCacheTest::testPathMode
 .
-Starting test 'CFileCacheTest::testEmbedExpiry'.
+CFileCacheTest::testFileMode
 .
-Starting test 'CMemCacheTest::testMget'.
+CFileCacheTest::testEmbedExpiry
 F
-Starting test 'CMemCacheTest::testKeyPrefix'.
+CMemCacheTest::testMget
+F
+CMemCacheTest::testKeyPrefix
 .
-Starting test 'CMemCacheTest::testGetAndSet'.
+CMemCacheTest::testGetAndSet
 F
-Starting test 'CMemCacheTest::testArrayAccess'.
+CMemCacheTest::testArrayAccess
 F
-Starting test 'CMemCacheTest::testExpire2'.
+CMemCacheTest::testExpire2
 F
-Starting test 'CMemCacheTest::testDelete'.
+CMemCacheTest::testDelete
 .
-Starting test 'CMemCacheTest::testBigExpireValues'.
+CMemCacheTest::testBigExpireValues
 F
-Starting test 'CRedisCacheTest::testKeyPrefix'.
+CRedisCacheTest::testKeyPrefix
 S
-Starting test 'CRedisCacheTest::testGetAndSet'.
+CRedisCacheTest::testGetAndSet
 S
-Starting test 'CRedisCacheTest::testMGet'.
+CRedisCacheTest::testMGet
 S
-Starting test 'CRedisCacheTest::testArrayAccess'.
-S  122 / 1122 ( 10%)
-
-Starting test 'CRedisCacheTest::testExpire'.
+CRedisCacheTest::testArrayAccess
 S
-Starting test 'CRedisCacheTest::testAdd'.
+CRedisCacheTest::testExpire
 S
-Starting test 'CRedisCacheTest::testDelete'.
+CRedisCacheTest::testAdd
 S
-Starting test 'CRedisCacheTest::testFlush'.
+CRedisCacheTest::testDelete
 S
-Starting test 'CRedisCacheTest::testLargeData'.
+CRedisCacheTest::testFlush
 S
-Starting test 'CRedisCacheTest::testMultiByteGetAndSet'.
+CRedisCacheTest::testLargeData
 S
-Starting test 'MessageCommandTest::testEmptyArgs'.
-HipHop Fatal error: syntax error, unexpected $end
+CRedisCacheTest::testMultiByteGetAndSet
+S
+MessageCommandTest::testEmptyArgs
+.
+MessageCommandTest::testConfigFileNotExist
+.
+MessageCommandTest::testCreateTranslation
+.
+MessageCommandTest::testNothingNew
+.
+MessageCommandTest::testMerge
+F
+MessageCommandTest::testMultiplyTranslators
+F
+CAttributeCollectionTest::testCanGetProperty
+.
+CAttributeCollectionTest::testCanNotGetUndefinedProperty
+.
+CAttributeCollectionTest::testCanSetProperty
+.
+CAttributeCollectionTest::testCanNotSetPropertyIfReadOnly
+.
+CAttributeCollectionTest::testGetCaseSensitive
+.
+CAttributeCollectionTest::testSetCaseSensitive
+.
+CAttributeCollectionTest::testItemAt
+.
+CAttributeCollectionTest::testAdd
+.
+CAttributeCollectionTest::testRemove
+.
+CAttributeCollectionTest::testUnset
+.
+CAttributeCollectionTest::testIsset
+.
+CAttributeCollectionTest::testContains
+.
+CAttributeCollectionTest::testHasProperty
+.
+CAttributeCollectionTest::testMergeWithCaseSensitive
+.
+CAttributeCollectionTest::testMergeWithCaseInSensitive
+.
+CConfigurationTest::testLoadFromFile
+.
+CConfigurationTest::testSaveAsString
+.
+CConfigurationTest::testApplyTo
+.
+CConfigurationTest::testException
+.
+CConfigurationTest::testCreateComponent
+.
+CListTest::testConstruct
+.
+CListTest::testGetReadOnly
+.
+CListTest::testGetCount
+.
+CListTest::testAdd
+.
+CListTest::testInsertAt
+.
+CListTest::testCanNotInsertWhenReadOnly
+.
+CListTest::testRemove
+.
+CListTest::testRemoveAt
+.
+CListTest::testCanNotRemoveWhenReadOnly
+.
+CListTest::testClear
+.
+CListTest::testContains
+.
+CListTest::testIndexOf
+.
+CListTest::testCopyFrom
+.
+CListTest::testMergeWith
+.
+CListTest::testToArray
+.
+CListTest::testArrayRead
+.
+CListTest::testGetIterator
+.
+CListTest::testArrayMisc
+.
+CListTest::testOffsetSetAdd
+.
+CListTest::testOffsetSetReplace
+.
+CListTest::testOffsetUnset
+.
+CListTest::testIteratorCurrent
+.
+CMapTest::testConstruct
+.
+CMapTest::testGetReadOnly
+.
+CMapTest::testGetCount
+.
+CMapTest::testGetKeys
+.
+CMapTest::testAdd
+.
+CMapTest::testCanNotAddWhenReadOnly
+.
+CMapTest::testRemove
+.
+CMapTest::testCanNotRemoveWhenReadOnly
+.
+CMapTest::testClear
+.
+CMapTest::testContains
+.
+CMapTest::testCopyFrom
+.
+CMapTest::testMergeWith
+.
+CMapTest::testRecursiveMergeWithTraversable
+.
+CMapTest::testArrayRead
+.
+CMapTest::testArrayWrite
+.
+CMapTest::testArrayForeach
+.
+CMapTest::testArrayMisc
+.
+CMapTest::testToArray
+.
+CMapTest::testIteratorCurrent
+.
+CQueueTest::testConstruct
+.
+CQueueTest::testToArray
+.
+CQueueTest::testCopyFrom
+.
+CQueueTest::testCanNotCopyFromNonTraversableTypes
+.
+CQueueTest::testClear
+.
+CQueueTest::testContains
+.
+CQueueTest::testPeek
+.
+CQueueTest::testCanNotPeekAnEmptyQueue
+.
+CQueueTest::testDequeue
+.
+CQueueTest::testCanNotDequeueAnEmptyQueue
+.
+CQueueTest::testEnqueue
+.
+CQueueTest::testGetIterator
+.
+CQueueTest::testGetCount
+.
+CQueueTest::testCountable
+.
+CStackTest::testConstruct
+.
+CStackTest::testToArray
+.
+CStackTest::testCopyFrom
+.
+CStackTest::testCanNotCopyFromNonTraversableTypes
+.
+CStackTest::testClear
+.
+CStackTest::testContains
+.
+CStackTest::testPeek
+.
+CStackTest::testCanNotPeekAnEmptyStack
+.
+CStackTest::testPop
+.
+CStackTest::testCanNotPopAnEmptyStack
+.
+CStackTest::testPush
+.
+CStackTest::testGetIterator
+.
+CStackTest::testGetCount
+.
+CStackTest::testCount
+.
+CTypedListTest::testClassType
+.
+CTypedListTest::testInterfaceType
+.
+CTypedMapTest::testAddRightType
+.
+CTypedMapTest::testAddWrongType
+.
+CDbCommand2Test::testSelect
+.
+CDbCommand2Test::testDistinct
+.
+CDbCommand2Test::testFrom
+.
+CDbCommand2Test::testWhere
+.
+CDbCommand2Test::testAndWhere
+.
+CDbCommand2Test::testOrWhere
+.
+CDbCommand2Test::testJoin
+.
+CDbCommand2Test::testGroup
+.
+CDbCommand2Test::testHaving
+.
+CDbCommand2Test::testOrder
+.
+CDbCommand2Test::testLimit
+.
+CDbCommand2Test::testOffset
+.
+CDbCommand2Test::testUnion
+.
+CDbCommand2Test::testQuery
+.
+CDbCommand2Test::testArraySyntax
+.
+CDbCommand2Test::testEmptyArray
+.
+CDbCommandBuilderTest::testIssue1407_1
+S
+CDbCommandBuilderTest::testIssue1407_2
+S
+CDbCommandBuilderTest::testIssue1407_3
+S
+CDbCommandBuilderTest::testIssue1407_4
+S
+CDbCommandBuilderTest::testIssue1407_5
+S
+CDbCommandBuilderTest::testMultipleInsert
+S
+CDbCommandTest::testGetText
+.
+CDbCommandTest::testSetText
+.
+CDbCommandTest::testConnection
+.
+CDbCommandTest::testPrepare
+.
+CDbCommandTest::testCancel
+.
+CDbCommandTest::testExecute
+.
+CDbCommandTest::testQuery
+.
+CDbCommandTest::testBindParam
+.
+CDbCommandTest::testBindValue
+.
+CDbCommandTest::testQueryAll
+.
+CDbCommandTest::testQueryRow
+.
+CDbCommandTest::testQueryColumn
+.
+CDbCommandTest::testQueryScalar
+.
+CDbCommandTest::testFetchModeDefault
+.
+CDbCommandTest::testFetchModeObject
+.
+CDbCommandTest::testFetchModeClass
+.
+CDbConnectionTest::testAutoConnect
+.
+CDbConnectionTest::testInitialized
+.
+CDbConnectionTest::testActive
+F
+CDbConnectionTest::testCreateCommand
+.
+CDbConnectionTest::testLastInsertID
+.
+CDbConnectionTest::testQuoteValue
+.
+CDbConnectionTest::testColumnNameCase
+.
+CDbConnectionTest::testNullConversion
+.
+CDbDataReaderTest::testRead
+.
+CDbDataReaderTest::testReadColumn
+.
+CDbDataReaderTest::testReadObject
+.
+CDbDataReaderTest::testReadAll
+.
+CDbDataReaderTest::testClose
+.
+CDbDataReaderTest::testRowCount
+.
+CDbDataReaderTest::testColumnCount
+.
+CDbDataReaderTest::testForeach
+.
+CDbDataReaderTest::testFetchMode
+.
+CDbDataReaderTest::testBindColumn
+F
+CDbTransactionTest::testBeginTransaction
+.
+CDbTransactionTest::testCommit
+.
+CActiveRecord2Test::testModel
+S
+CActiveRecord2Test::testFind
+S
+CActiveRecord2Test::testInsert
+S
+CActiveRecord2Test::testUpdate
+S
+CActiveRecord2Test::testDelete
+S
+CActiveRecord2Test::testRefresh
+S
+CActiveRecord2Test::testEquals
+S
+CActiveRecord2Test::testValidation
+S
+CActiveRecord2Test::testCompositeKey
+S
+CActiveRecord2Test::testDefault
+S
+CActiveRecord2Test::testPublicAttribute
+S
+CActiveRecord2Test::testLazyRelation
+S
+CActiveRecord2Test::testEagerRelation
+S
+CActiveRecord2Test::testLazyRecursiveRelation
+S
+CActiveRecord2Test::testEagerRecursiveRelation
+S
+CActiveRecord2Test::testRelationWithCondition
+S
+CActiveRecord2Test::testSelfManyMany
+S
+CActiveRecord2Test::testRelationalCount
+S
+CActiveRecord2Test::testEmptyFinding
+S
+CActiveRecord2Test::testIssue2122
+S
+CActiveRecord2Test::testEmptyModel
+S
+CActiveRecordEventWrappersTest::testBeforeFind
+.
+CActiveRecordEventWrappersTest::testBeforeFindStatSelect
+E
+CActiveRecordEventWrappersTest::testBeforeFindCriteriaModification with data set #0 
+.
+CActiveRecordEventWrappersTest::testBeforeFindCriteriaModification with data set #1 
+.
+CActiveRecordEventWrappersTest::testBeforeFindCriteriaModification with data set #2 
+.
+CActiveRecordEventWrappersTest::testBeforeFindRelationalEager
+.
+CActiveRecordEventWrappersTest::testBeforeFindRelationalEagerCriteriaModification with data set #0 
+.
+CActiveRecordEventWrappersTest::testBeforeFindRelationalEagerCriteriaModification with data set #1 
+.
+CActiveRecordEventWrappersTest::testBeforeFindRelationalEagerCriteriaModification with data set #2 
+.
+CActiveRecordEventWrappersTest::testBeforeFindRelationalEagerCriteriaModification with data set #3 
+.
+CActiveRecordEventWrappersTest::testBeforeFindRelationalEagerCriteriaModification with data set #4 
+.
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazy
+E
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazyCriteriaModification with data set #0 
+E
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazyCriteriaModification with data set #1 
+E
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazyCriteriaModification with data set #2 
+E
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazyCriteriaModification with data set #3 
+E
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazyCriteriaModification with data set #4 
+E
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazyCriteriaModification with data set #5 
+E
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazyCriteriaScopes with data set #0 
+E
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazyCriteriaScopes with data set #1 
+E
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazyCriteriaScopes with data set #2 
+E
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazyCriteriaScopes with data set #3 
+E
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazyCriteriaScopes with data set #4 
+E
+CActiveRecordEventWrappersTest::testBeforeFindRelationalLazyCriteriaScopes with data set #5 
+E
+CActiveRecordEventWrappersTest::testAfterFind
+.
+CActiveRecordEventWrappersTest::testAfterFindRelational
+.
+CActiveRecordEventWrappersTest::testIssue591
+E
+CActiveRecordTest::testModel
+.
+CActiveRecordTest::testFind
+.
+CActiveRecordTest::testInsert
+.
+CActiveRecordTest::testUpdate
+.
+CActiveRecordTest::testSaveCounters
+.
+CActiveRecordTest::testDelete
+.
+CActiveRecordTest::testRefresh
+.
+CActiveRecordTest::testEquals
+E
+CActiveRecordTest::testValidation
+.
+CActiveRecordTest::testCompositeKey
+.
+CActiveRecordTest::testDefault
+.
+CActiveRecordTest::testPublicAttribute
+.
+CActiveRecordTest::testLazyRelation
+E
+CActiveRecordTest::testEagerRelation2
+.
+CActiveRecordTest::testEagerRelation
+.
+CActiveRecordTest::testLazyRecursiveRelation
+E
+CActiveRecordTest::testEagerRecursiveRelation
+.
+CActiveRecordTest::testRelationWithCondition
+.
+CActiveRecordTest::testRelationWithColumnAlias
+.
+CActiveRecordTest::testRelationalWithoutFK
+.
+CActiveRecordTest::testRelationWithNewRecord
+E
+CActiveRecordTest::testRelationWithDynamicCondition
+.
+CActiveRecordTest::testEagerTogetherRelation
+.
+CActiveRecordTest::testRelationalCount
+.
+CActiveRecordTest::testRelationalStat
+E
+CActiveRecordTest::testLazyLoadingWithConditions
+E
+CActiveRecordTest::testDuplicateLazyLoadingBug
+.
+CActiveRecordTest::testTogether
+.
+CActiveRecordTest::testTogetherWithOption
+.
+CActiveRecordTest::testCountByAttributes
+.
+CActiveRecordTest::testScopes
+.
+CActiveRecordTest::testScopeWithRelations
+E
+CActiveRecordTest::testResetScope
+.
+CActiveRecordTest::testJoinWithoutSelect
+.
+CActiveRecordTest::testHasManyThroughEager
+E
+CActiveRecordTest::testHasManyThroughLazy
+E
+CActiveRecordTest::testMergingWith
+.
+CActiveRecordTest::testIssue206
+.
+CActiveRecordTest::testCountIsSubStringOfFieldName
+.
+CActiveRecordTest::testLazyFindCondition
+.
+CActiveRecordTest::testIssue1070
+E
+CActiveRecordTest::testIssue507
+.
+CActiveRecordTest::testCountWithHaving
+.
+CActiveRecordTest::testCountWithHavingRelational
+.
+CActiveRecordTest::testFindBySinglePkByArrayWithMixedKeys
+.
+CActiveRecordTest::testHasManyThroughHasManyWithCustomSelect
+E
+CActiveRecordTest::testLazyLoadThroughRelationWithCondition
+E
+CActiveRecordTest::testThroughBelongsToLazy
+.
+CActiveRecordTest::testThroughBelongsEager
+.
+CActiveRecordTest::testNamespacedTableName
+.
+CDbCriteriaTest::testAddCondition
+.
+CDbCriteriaTest::testAddInCondition
+.
+CDbCriteriaTest::testAddNotInCondition
+.
+CDbCriteriaTest::testAddSearchCondition
+.
+CDbCriteriaTest::testAddColumnCondition
+.
+CDbCriteriaTest::testCompare
+.
+CDbCriteriaTest::testMergeWith
+.
+CDbCriteriaTest::testMergeWithPositionalPlaceholders
+.
+CDbCriteriaTest::testAddBetweenCondition
+.
+CDbCriteriaTest::testToArray
+.
+CDbCriteriaTest::testSerialize
+.
+CDbCriteriaTest::testSerializeAutomaticallyGeneratedParams
+.
+CDbCriteriaTest::testWakeupWhenSqlContainingFieldsAreArraysWithSpecifiedParams
+.
+CMssqlTest::testSchema
+S
+CMssqlTest::testTable
+S
+CMssqlTest::testColumn
+S
+CMssqlTest::testCommandBuilder
+S
+CMssqlTest::testTransactions
+S
+CMssqlTest::testColumnComments
+S
+CMssqlTest::testARLastInsertId
+S
+CMssqlTest::testResetSequence
+S
+CMysql2Test::testCreateTable
+S
+CMysql2Test::testRenameTable
+S
+CMysql2Test::testDropTable
+S
+CMysql2Test::testAddColumn
+S
+CMysql2Test::testAlterColumn
+S
+CMysql2Test::testRenameColumn
+S
+CMysql2Test::testDropColumn
+S
+CMysql2Test::testAddForeignKey
+S
+CMysql2Test::testDropForeignKey
+S
+CMysql2Test::testCreateIndex
+S
+CMysql2Test::testDropIndex
+S
+CMysql2Test::testAddPrimaryKey
+S
+CMysqlTest::testSchema
+S
+CMysqlTest::testTable
+S
+CMysqlTest::testColumn
+S
+CMysqlTest::testCommandBuilder
+S
+CMysqlTest::testResetSequence
+S
+CMysqlTest::testColumnComments
+S
+COciTest::testSchema
+S
+COciTest::testTable
+S
+COciTest::testColumn
+S
+COciTest::testCommandBuilder
+S
+COciTest::testResetSequence
+S
+COciTest::testColumnComments
+S
+COciTest::testMultipleInsert
+S
+CPostgres2Test::testCreateTable
+S
+CPostgres2Test::testCreateTableBig
+S
+CPostgres2Test::testRenameTable
+S
+CPostgres2Test::testDropTable
+S
+CPostgres2Test::testAddColumn
+S
+CPostgres2Test::testAlterColumn
+S
+CPostgres2Test::testRenameColumn
+S
+CPostgres2Test::testDropColumn
+S
+CPostgres2Test::testAddForeignKey
+S
+CPostgres2Test::testDropForeignKey
+S
+CPostgres2Test::testCreateIndex
+S
+CPostgres2Test::testDropIndex
+S
+CPostgresTest::testSchema
+S
+CPostgresTest::testTable
+S
+CPostgresTest::testColumn
+S
+CPostgresTest::testCommandBuilder
+S
+CPostgresTest::testResetSequence
+S
+CPostgresTest::testColumnComments
+S
+CSqliteTest::testSchema
+.
+CSqliteTest::testTable
+.
+CSqliteTest::testColumn
+.
+CSqliteTest::testCommandBuilder
+.
+CSqliteTest::testResetSequence
+.
+CSqliteTest::testCheckIntegrity1
+.
+CSqliteTest::testCheckIntegrity2
+.
+CSqliteTest::testCheckIntegrity3
+.
+CSqliteTest::testRenameTable
+.
+CSqliteTest::testMultipleInsert
+.
+CDateFormatterTest::testWeekInMonth
+.
+CDateFormatterTest::testStringIntegerDate
+.
+CDateFormatterTest::testStrToTimeDate
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #0 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #1 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #2 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #3 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #4 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #5 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #6 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #7 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #8 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #9 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #10 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #11 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #12 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #13 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #14 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #15 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #16 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #17 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #18 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #19 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #20 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #21 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #22 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #23 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #24 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #25 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #26 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #27 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #28 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #29 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #30 
+.
+CDateFormatterTest::testFormatWeekInMonth with data set #31 
+.
+CLocaleTest::testRequiredDataExistence
+.
+CLocaleTest::testGetLocaleDisplayName with data set #0 
+.
+CLocaleTest::testGetLocaleDisplayName with data set #1 
+.
+CLocaleTest::testGetLocaleDisplayName with data set #2 
+.
+CLocaleTest::testGetLocaleDisplayName with data set #3 
+.
+CLocaleTest::testGetLocaleDisplayName with data set #4 
+.
+CLocaleTest::testGetLocaleDisplayName with data set #5 
+.
+CLocaleTest::testGetLocaleDisplayName with data set #6 
+.
+CLocaleTest::testGetLocaleDisplayName with data set #7 
+.
+CLocaleTest::testGetLocaleDisplayName with data set #8 
+.
+CLocaleTest::testGetLocaleDisplayName with data set #9 
+.
+CLocaleTest::testGetLocaleDisplayName with data set #10 
+.
+CLocaleTest::testGetLocaleDisplayName with data set #11 
+.
+CLocaleTest::testGetLanguage with data set #0 
+.
+CLocaleTest::testGetLanguage with data set #1 
+.
+CLocaleTest::testGetLanguage with data set #2 
+.
+CLocaleTest::testGetLanguage with data set #3 
+.
+CLocaleTest::testGetLanguage with data set #4 
+.
+CLocaleTest::testGetLanguage with data set #5 
+.
+CLocaleTest::testGetLanguage with data set #6 
+.
+CLocaleTest::testGetLanguage with data set #7 
+.
+CLocaleTest::testGetLanguage with data set #8 
+.
+CLocaleTest::testGetLanguage with data set #9 
+.
+CLocaleTest::testGetLanguage with data set #10 
+.
+CLocaleTest::testGetLanguage with data set #11 
+.
+CLocaleTest::testGetLanguage with data set #12 
+.
+CLocaleTest::testGetLanguage with data set #13 
+.
+CLocaleTest::testGetLanguage with data set #14 
+.
+CLocaleTest::testGetLanguage with data set #15 
+.
+CLocaleTest::testGetLanguage with data set #16 
+.
+CLocaleTest::testGetLanguage with data set #17 
+.
+CLocaleTest::testGetLanguage with data set #18 
+.
+CLocaleTest::testGetLanguage with data set #19 
+.
+CLocaleTest::testGetLanguage with data set #20 
+.
+CLocaleTest::testGetLanguage with data set #21 
+.
+CLocaleTest::testGetLanguage with data set #22 
+.
+CLocaleTest::testGetLanguage with data set #23 
+.
+CLocaleTest::testGetLanguage with data set #24 
+.
+CLocaleTest::testGetLanguage with data set #25 
+.
+CLocaleTest::testGetLanguage with data set #26 
+.
+CLocaleTest::testGetLanguage with data set #27 
+.
+CLocaleTest::testGetLanguage with data set #28 
+.
+CLocaleTest::testGetLanguage with data set #29 
+.
+CLocaleTest::testGetLanguage with data set #30 
+.
+CLocaleTest::testGetLanguage with data set #31 
+.
+CLocaleTest::testGetLanguage with data set #32 
+.
+CLocaleTest::testGetLanguage with data set #33 
+.
+CLocaleTest::testGetScript with data set #0 
+.
+CLocaleTest::testGetScript with data set #1 
+.
+CLocaleTest::testGetScript with data set #2 
+.
+CLocaleTest::testGetScript with data set #3 
+.
+CLocaleTest::testGetScript with data set #4 
+.
+CLocaleTest::testGetScript with data set #5 
+.
+CLocaleTest::testGetScript with data set #6 
+.
+CLocaleTest::testGetScript with data set #7 
+.
+CLocaleTest::testGetScript with data set #8 
+.
+CLocaleTest::testGetScript with data set #9 
+.
+CLocaleTest::testGetScript with data set #10 
+.
+CLocaleTest::testGetScript with data set #11 
+.
+CLocaleTest::testGetScript with data set #12 
+.
+CLocaleTest::testGetScript with data set #13 
+.
+CLocaleTest::testGetScript with data set #14 
+.
+CLocaleTest::testGetScript with data set #15 
+.
+CLocaleTest::testGetScript with data set #16 
+.
+CLocaleTest::testGetScript with data set #17 
+.
+CLocaleTest::testGetScript with data set #18 
+.
+CLocaleTest::testGetScript with data set #19 
+.
+CLocaleTest::testGetScript with data set #20 
+.
+CLocaleTest::testGetScript with data set #21 
+.
+CLocaleTest::testGetScript with data set #22 
+.
+CLocaleTest::testGetScript with data set #23 
+.
+CLocaleTest::testGetTerritory with data set #0 
+.
+CLocaleTest::testGetTerritory with data set #1 
+.
+CLocaleTest::testGetTerritory with data set #2 
+.
+CLocaleTest::testGetTerritory with data set #3 
+.
+CLocaleTest::testGetTerritory with data set #4 
+.
+CLocaleTest::testGetTerritory with data set #5 
+.
+CLocaleTest::testGetTerritory with data set #6 
+.
+CLocaleTest::testGetTerritory with data set #7 
+.
+CLocaleTest::testGetTerritory with data set #8 
+.
+CLocaleTest::testGetTerritory with data set #9 
+.
+CLocaleTest::testGetTerritory with data set #10 
+.
+CLocaleTest::testGetTerritory with data set #11 
+.
+CLocaleTest::testGetTerritory with data set #12 
+.
+CLocaleTest::testGetTerritory with data set #13 
+.
+CLocaleTest::testGetTerritory with data set #14 
+.
+CLocaleTest::testGetTerritory with data set #15 
+.
+CLocaleTest::testGetTerritory with data set #16 
+.
+CLocaleTest::testGetTerritory with data set #17 
+.
+CLocaleTest::testGetTerritory with data set #18 
+.
+CLocaleTest::testGetTerritory with data set #19 
+.
+CLocaleTest::testGetTerritory with data set #20 
+.
+CLocaleTest::testGetTerritory with data set #21 
+.
+CLocaleTest::testGetTerritory with data set #22 
+.
+CLocaleTest::testGetTerritory with data set #23 
+.
+CLocaleTest::testGetTerritory with data set #24 
+.
+CLocaleTest::testGetTerritory with data set #25 
+.
+CLocaleTest::testGetTerritory with data set #26 
+.
+CLocaleTest::testGetTerritory with data set #27 
+.
+CLocaleTest::testGetTerritory with data set #28 
+.
+CNumberFormatterTest::testFormatCurrency
+.
+CNumberFormatterTest::testFormatDecimal
+.
+CNumberFormatterTest::testFormatPercentage
+.
+CPhpMessageSourceTest::testExtensionTranslation
+.
+CPhpMessageSourceTest::testModuleTranslation
+.
+YiiTTest::testSimple
+.
+YiiTTest::testSimpleSameLanguage
+.
+YiiTTest::testSimplePlaceholders
+.
+YiiTTest::testSimplePlaceholdersSameLanguage
+.
+YiiTTest::testPlural
+.
+YiiTTest::testPluralPlaceholders
+.
+YiiTTest::testPluralMoreVariants
+.
+YiiTTest::testPluralLessVariants
+.
+YiiTTest::testPluralSameLanguage
+.
+YiiTTest::testPluralPlaceholdersSameLanguage
+.
+YiiTTest::testChoice
+.
+YiiTTest::testChoiceSameLanguage
+.
+YiiTTest::testChoicePlaceholders
+.
+YiiTTest::testChoicePlaceholdersSameLanguage
+.
+CGettextPoFileTest::testLoad
+.
+CDateTimeParserTest::testAllPatterns
+.
+CDateTimeParserTest::testParseDefaults
+.
+CDateTimeParserTest::testShortMonthTitle
+.
+CDateTimeParserTest::testMonthTitle
+.
+CDateTimeParserTest::testLocaleShortMonthTitle
+.
+CDateTimeParserTest::testLocaleMonthTitle
+.
+CDateTimeParserTest::testFailing
+.
+CFileHelperTest::testGetMimeTypeByExtension
+.
+CFileHelperTest::testCopyDirectory_subDir_modeShoudBe0775
+.
+CFileHelperTest::testCopyDirectory_subDir_modeShoudBe0777
+.
+CFileHelperTest::testRemoveDirectory
+.
+CFileHelperTest::testFindFiles_absolutePaths
+.
+CFileHelperTest::testFindFiles_relativePaths
+.
+CFileHelperTest::testCreateDirectory
+.
+CFormatterTest::testSizeFormat
+.
+CFormatterTest::testSizeFormatTranslation with data set #0 
+.
+CFormatterTest::testSizeFormatTranslation with data set #1 
+.
+CFormatterTest::testSizeFormatTranslation with data set #2 
+.
+CFormatterTest::testSizeFormatTranslation with data set #3 
+.
+CFormatterTest::testSizeFormatTranslation with data set #4 
+.
+CFormatterTest::testSizeFormatTranslation with data set #5 
+.
+CFormatterTest::testSizeFormatTranslation with data set #6 
+.
+CFormatterTest::testFormatNtext with data set #0 
+.
+CFormatterTest::testFormatNtext with data set #1 
+.
+CFormatterTest::testFormatNtext with data set #2 
+.
+CFormatterTest::testFormatNtext with data set #3 
+.
+CLocalizedFormatterTest::testBooleanFormat
+.
+CBooleanValidatorTest::testValidationUsingCustomFalseTrueValues
+.
+CBooleanValidatorTest::testValidateAndAllowEmpty
+.
+CBooleanValidatorTest::testValidationUsingStrict
+.
+CBooleanValidatorTest::testValidateArrayValue
+.
+CCompareValidatorTest::testValidationErrorsWithEquals
+.
+CCompareValidatorTest::testValidationErrorsWithNotEquals
+.
+CCompareValidatorTest::testValidationErrorsWitGreaterThan
+.
+CCompareValidatorTest::testValidationErrorsWitGreaterThanOrEqual
+.
+CCompareValidatorTest::testValidationErrorsWitLessThan
+.
+CCompareValidatorTest::testValidationErrorsWitLessThanOrEqual
+.
+CCompareValidatorTest::testClientValidateAttributeThrowsExcpetion
+.
+CCompareValidatorTest::testValidateThrowsExcpetionforBadOperator
+.
+CCompareValidatorTest::testOverrideCompareValue
+.
+CDateValidatorTest::testAllowEmptyOption
+.
+CDateValidatorTest::testFormatOption
+.
+CDateValidatorTest::testTimestampOption
+.
+CDefaultValueValidatorTest::testDefaultValueIsSetWhenSetOnEmptyIsTrue
+.
+CDefaultValueValidatorTest::testDefaultValueIsSetWhenSetOnEmptyIsFalse
+.
+CEmailValidatorTest::testEmpty
+.
+CEmailValidatorTest::testNumericEmail
+.
+CEmailValidatorTest::testIDNUrl with data set #0 
+.
+CEmailValidatorTest::testIDNUrl with data set #1 
+.
+CEmailValidatorTest::testIDNUrl with data set #2 
+.
+CEmailValidatorTest::testIDNUrl with data set #3 
+.
+CEmailValidatorTest::testIDNUrl with data set #4 
+.
+CEmailValidatorTest::testIDNUrl with data set #5 
+.
+CEmailValidatorTest::testIDNUrl with data set #6 
+.
+CEmailValidatorTest::testIDNUrl with data set #7 
+.
+CEmailValidatorTest::testIDNUrl with data set #8 
+.
+CEmailValidatorTest::testIDNUrl with data set #9 
+.
+CEmailValidatorTest::testIDNUrl with data set #10 
+.
+CEmailValidatorTest::testIDNUrl with data set #11 
+.
+CEmailValidatorTest::testIDNUrl with data set #12 
+.
+CEmailValidatorTest::testIDNUrl with data set #13 
+.
+CEmailValidatorTest::testIDNUrl with data set #14 
+.
+CEmailValidatorTest::testIDNUrl with data set #15 
+.
+CEmailValidatorTest::testIDNUrl with data set #16 
+.
+CEmailValidatorTest::testIDNUrl with data set #17 
+.
+CEmailValidatorTest::testIDNUrl with data set #18 
+.
+CEmailValidatorTest::testIDNUrl with data set #19 
+.
+CEmailValidatorTest::testArrayValue
+.
+CExistValidatorTest::testValidate
+.
+CExistValidatorTest::testValidateCaseSensitive
+.
+CExistValidatorTest::testValidateWithCriteria
+.
+CExistValidatorTest::testArrayValue
+.
+CFileValidatorTest::testSizeToBytes with data set #0 
+.
+CFileValidatorTest::testSizeToBytes with data set #1 
+.
+CFileValidatorTest::testSizeToBytes with data set #2 
+.
+CFileValidatorTest::testSizeToBytes with data set #3 
+.
+CFileValidatorTest::testSizeToBytes with data set #4 
+.
+CFileValidatorTest::testSizeToBytes with data set #5 
+.
+CFileValidatorTest::testSizeToBytes with data set #6 
+.
+CFileValidatorTest::testSizeToBytes with data set #7 
+.
+CFileValidatorTest::testSizeToBytes with data set #8 
+.
+CFileValidatorTest::testSizeToBytes with data set #9 
+.
+CFileValidatorTest::testSizeToBytes with data set #10 
+.
+CFileValidatorTest::testSizeToBytes with data set #11 
+.
+CFileValidatorTest::testSizeToBytes with data set #12 
+.
+CFileValidatorTest::testSizeToBytes with data set #13 
+.
+CFileValidatorTest::testSizeToBytes with data set #14 
+.
+CFileValidatorTest::testSizeToBytes with data set #15 
+.
+CFileValidatorTest::testValidate
+.
+CFileValidatorTest::testValidateNoFile
+.
+CNumberValidatorTest::testIssue1669 with data set #0 
+.
+CNumberValidatorTest::testIssue1669 with data set #1 
+.
+CNumberValidatorTest::testIssue1669 with data set #2 
+.
+CNumberValidatorTest::testIssue1669 with data set #3 
+.
+CNumberValidatorTest::testIssue1669 with data set #4 
+.
+CNumberValidatorTest::testIssue1669 with data set #5 
+.
+CNumberValidatorTest::testIssue1669 with data set #6 
+.
+CNumberValidatorTest::testIssue1669 with data set #7 
+.
+CNumberValidatorTest::testIssue1669 with data set #8 
+.
+CNumberValidatorTest::testIssue1669 with data set #9 
+.
+CNumberValidatorTest::testIssue1669 with data set #10 
+.
+CNumberValidatorTest::testIssue1669 with data set #11 
+.
+CNumberValidatorTest::testIssue1669 with data set #12 
+.
+CNumberValidatorTest::testIssue1669 with data set #13 
+.
+CRangeValidatorTest::testEmpty
+.
+CRangeValidatorTest::testZeroString
+.
+CRangeValidatorTest::testZeroNumber
+.
+CRequiredValidatorTest::testEmpty
+.
+CRequiredValidatorTest::testSpaces
+.
+CRequiredValidatorTest::testEmptyWithSpaces
+.
+CStringValidatorTest::testMin
+.
+CStringValidatorTest::testMax
+.
+CStringValidatorTest::testIs
+.
+CTypeValidatorTest::testInteger
+.
+CTypeValidatorTest::testIntegerStrict
+.
+CTypeValidatorTest::testFloat
+.
+CTypeValidatorTest::testFloatStrict
+.
+CTypeValidatorTest::testString
+.
+CTypeValidatorTest::testArray
+.
+CTypeValidatorTest::testDate
+.
+CTypeValidatorTest::testTime
+.
+CTypeValidatorTest::testDateTime
+.
+CUniqueValidatorTest::testValidate
+.
+CUniqueValidatorTest::testValidateCaseSensitive
+.
+CUniqueValidatorTest::testValidateWithCriteria
+.
+CUniqueValidatorTest::testArrayValue
+.
+CUrlValidatorTest::testEmpty
+.
+CUrlValidatorTest::testArbitraryUrl
+.
+CUrlValidatorTest::testIDNUrl with data set #0 
+.
+CUrlValidatorTest::testIDNUrl with data set #1 
+.
+CUrlValidatorTest::testIDNUrl with data set #2 
+.
+CUrlValidatorTest::testIDNUrl with data set #3 
+.
+CUrlValidatorTest::testIDNUrl with data set #4 
+.
+CUrlValidatorTest::testIDNUrl with data set #5 
+.
+CUrlValidatorTest::testIDNUrl with data set #6 
+.
+CUrlValidatorTest::testIDNUrl with data set #7 
+.
+CUrlValidatorTest::testIDNUrl with data set #8 
+.
+CUrlValidatorTest::testIDNUrl with data set #9 
+.
+CUrlValidatorTest::testIDNUrl with data set #10 
+.
+CUrlValidatorTest::testIDNUrl with data set #11 
+.
+CUrlValidatorTest::testIDNUrl with data set #12 
+.
+CUrlValidatorTest::testIDNUrl with data set #13 
+.
+CUrlValidatorTest::testIDNUrl with data set #14 
+.
+CUrlValidatorTest::testIDNUrl with data set #15 
+.
+CUrlValidatorTest::testIDNUrl with data set #16 
+.
+CUrlValidatorTest::testIDNUrl with data set #17 
+.
+CUrlValidatorTest::testIDNUrl with data set #18 
+.
+CUrlValidatorTest::testIDNUrl with data set #19 
+.
+CUrlValidatorTest::testValidSchemes with data set #0 
+.
+CUrlValidatorTest::testValidSchemes with data set #1 
+.
+CUrlValidatorTest::testValidSchemes with data set #2 
+.
+CUrlValidatorTest::testValidSchemes with data set #3 
+.
+CUrlValidatorTest::testValidSchemes with data set #4 
+.
+CUrlValidatorTest::testValidSchemes with data set #5 
+.
+CUrlValidatorTest::testValidSchemes with data set #6 
+.
+CUrlValidatorTest::testValidSchemes with data set #7 
+.
+CUrlValidatorTest::testValidSchemes with data set #8 
+.
+CUrlValidatorTest::testValidSchemes with data set #9 
+.
+CUrlValidatorTest::testValidSchemes with data set #10 
+.
+CUrlValidatorTest::testValidSchemes with data set #11 
+.
+CUrlValidatorTest::testDefaultScheme with data set #0 
+.
+CUrlValidatorTest::testDefaultScheme with data set #1 
+.
+CUrlValidatorTest::testDefaultScheme with data set #2 
+.
+CUrlValidatorTest::testDefaultScheme with data set #3 
+.
+CUrlValidatorTest::testDefaultScheme with data set #4 
+.
+CUrlValidatorTest::testDefaultScheme with data set #5 
+.
+CUrlValidatorTest::testDefaultScheme with data set #6 
+.
+CUrlValidatorTest::testDefaultScheme with data set #7 
+.
+CUrlValidatorTest::testDefaultScheme with data set #8 
+.
+CUrlValidatorTest::testDefaultScheme with data set #9 
+.
+CUrlValidatorTest::testDefaultScheme with data set #10 
+.
+CUrlValidatorTest::testDefaultScheme with data set #11 
+.
+CUrlValidatorTest::testAllowEmpty with data set #0 
+.
+CUrlValidatorTest::testAllowEmpty with data set #1 
+.
+CUrlValidatorTest::testAllowEmpty with data set #2 
+.
+CUrlValidatorTest::testAllowEmpty with data set #3 
+.
+CUrlValidatorTest::testAllowEmpty with data set #4 
+.
+CUrlValidatorTest::testAllowEmpty with data set #5 
+.
+CUrlValidatorTest::testAllowEmpty with data set #6 
+.
+CUrlValidatorTest::testAllowEmpty with data set #7 
+.
+CUrlValidatorTest::testAllowEmpty with data set #8 
+.
+CUrlValidatorTest::testAllowEmpty with data set #9 
+.
+CUrlValidatorTest::testAllowEmpty with data set #10 
+.
+CUrlValidatorTest::testAllowEmpty with data set #11 
+.
+CUrlValidatorTest::testAllowEmpty with data set #12 
+.
+CUrlValidatorTest::testAllowEmpty with data set #13 
+.
+CUrlValidatorTest::testAllowEmpty with data set #14 
+.
+CUrlValidatorTest::testAllowEmpty with data set #15 
+.
+CUrlValidatorTest::testAllowEmpty with data set #16 
+.
+CUrlValidatorTest::testAllowEmpty with data set #17 
+.
+CUrlValidatorTest::testArrayValue
+.
+CValidatorTest::test
+.
+CValidatorTest::testScenarios
+.
+CActiveDataProviderTest::testCountCriteria
+.
+CArrayDataProviderTest::testGetData
+.
+CArrayDataProviderTest::testGetSortedData
+.
+CArrayDataProviderTest::testGetSortedDataByInnerArrayField
+.
+CArrayDataProviderTest::testCaseSensitiveSort
+.
+CArrayDataProviderTest::testCaseInsensitiveSort
+.
+CAssetManagerTest::testBasePath
+.
+CAssetManagerTest::testBaseUrl
+.
+CAssetManagerTest::testPublishFile
+.
+CClientScriptTest::testGetCoreScriptUrl
+.
+CClientScriptTest::testGetPackageBaseUrl with data set #0 
+.
+CClientScriptTest::testGetPackageBaseUrl with data set #1 
+.
+CClientScriptTest::testRegisterCoreScript with data set #0 
+.
+CClientScriptTest::testRegisterCoreScript with data set #1 
+.
+CClientScriptTest::testRegisterCoreScript with data set #2 
+.
+CClientScriptTest::testRegisterPackage with data set #0 
+.
+CClientScriptTest::testRegisterPackage with data set #1 
+.
+CClientScriptTest::testRegisterPackage with data set #2 
+.
+CClientScriptTest::testRegisterScriptFile with data set #0 
+.
+CClientScriptTest::testRegisterScriptFile with data set #1 
+.
+CClientScriptTest::testRegisterScriptFile with data set #2 
+.
+CClientScriptTest::testRegisterScriptFileWithHtmlOptions with data set #0 
+.
+CClientScriptTest::testRegisterScript with data set #0 
+.
+CClientScriptTest::testRegisterScript with data set #1 
+.
+CClientScriptTest::testRegisterScriptWithHtmlOptions with data set #0 
+.
+CClientScriptTest::testRegisterCss with data set #0 
+.
+CClientScriptTest::testRegisterCss with data set #1 
+.
+CClientScriptTest::testRegisterMetaTag with data set #0 
+.
+CClientScriptTest::testRegisterMetaTag with data set #1 
+.
+CClientScriptTest::testRegisterDuplicatingMetaTag
+.
+CClientScriptTest::testRenderScriptFiles with data set #0 
+.
+CClientScriptTest::testRenderScriptFiles with data set #1 
+.
+CClientScriptTest::testRenderScriptFiles with data set #2 
+.
+CClientScriptTest::testRenderScriptFiles with data set #3 
+.
+CClientScriptTest::testRenderScriptFiles with data set #4 
+.
+CClientScriptTest::testRenderScriptFiles with data set #5 
+.
+CClientScriptTest::testRenderScripts with data set #0 
+.
+CClientScriptTest::testRenderScripts with data set #1 
+.
+CClientScriptTest::testRenderScripts with data set #2 
+.
+CClientScriptTest::testRenderScripts with data set #3 
+.
+CClientScriptTest::testRenderScripts with data set #4 
+.
+CClientScriptTest::testRenderScripts with data set #5 
+.
+CClientScriptTest::testRenderScripts with data set #6 
+.
+CClientScriptTest::testRenderScripts with data set #7 
+.
+CClientScriptTest::testRenderScriptsBatch with data set #0 
+.
+CClientScriptTest::testRenderScriptsBatch with data set #1 
+.
+CControllerTest::testDefaultProperties
+.
+CControllerTest::testRunAction
+.
+CControllerTest::testActionParams
+.
+CControllerTest::testActionParamsInvalid
+.
+CCookieCollectionTest::testConstructorCookieBuilding
+.
+CCookieCollectionTest::testAdd
+E
+CCookieCollectionTest::testRemove
+E
+CCookieCollectionTest::testGetRequest
+.
+CDataProviderIteratorTest::testIterator with data set #0 
+.
+CDataProviderIteratorTest::testIterator with data set #1 
+.
+CDataProviderIteratorTest::testIterator with data set #2 
+.
+CDataProviderIteratorTest::testIterator with data set #3 
+.
+CDataProviderIteratorTest::testInitWithDisabledPagination with data set #0 
+.
+CDataProviderIteratorTest::testInitWithDisabledPagination with data set #1 
+.
+CDataProviderIteratorTest::testInitWithDisabledPagination with data set #2 
+.
+CDataProviderIteratorTest::testInitWithDisabledPagination with data set #3 
+.
+CHttpCookieTest::testConfigure
+.
+CHttpCookieTest::test__ToString
+.
+CHttpRequestTest::testParseAcceptHeader with data set #0 
+.
+CHttpRequestTest::testParseAcceptHeader with data set #1 
+.
+CHttpRequestTest::testParseAcceptHeader with data set #2 
+.
+CHttpRequestTest::testParseAcceptHeader with data set #3 
+.
+CHttpRequestTest::testParseAcceptHeader with data set #4 
+.
+CHttpRequestTest::testParseAcceptHeader with data set #5 
+.
+CHttpRequestTest::testCompareAcceptTypes with data set #0 
+.
+CHttpRequestTest::testCompareAcceptTypes with data set #1 
+.
+CHttpRequestTest::testCompareAcceptTypes with data set #2 
+.
+CHttpRequestTest::testCompareAcceptTypes with data set #3 
+.
+CHttpRequestTest::testCompareAcceptTypes with data set #4 
+.
+CHttpSessionTest::testSetGet
+E
+CSortTest::testGetDirectionsWithDots
+.
+CSortTest::testGetDirectionsWithArrays
+.
+CSqlDataProviderTest::testFetchKeysWithDbCommandSpecifiedAndPdoFetchObjEnabled
+.
+CUploadedFileTest::testGetInstanceByName
+.
+CUploadedFileTest::testGetInstancesByName
+.
+CUploadedFileTest::testGetInstanceByNestedName
+.
+CUploadedFileTest::testGetInstancesByNamePartOfOtherName
+.
+CUrlManagerTest::testParseUrlWithPathFormat
+.
+CUrlManagerTest::testcreateUrlWithPathFormat
+.
+CUrlManagerTest::testParseUrlWithGetFormat
+.
+CUrlManagerTest::testCreateUrlWithGetFormat
+.
+CUrlManagerTest::testDefaultParams
+.
+CUrlManagerTest::testVerb
+.
+CUrlManagerTest::testParsingOnly
+.
+CUrlRuleTest::testParseUrlMatchValue
+.
+CDbAuthManagerTest::testcreateAuthItem
+S
+CDbAuthManagerTest::testGetAuthItem
+S
+CDbAuthManagerTest::testRemoveAuthItem
+S
+CDbAuthManagerTest::testChangeItemName
+S
+CDbAuthManagerTest::testAddItemChild
+S
+CDbAuthManagerTest::testAddItemChild2
+S
+CDbAuthManagerTest::testRemoveItemChild
+S
+CDbAuthManagerTest::testGetItemChildren
+S
+CDbAuthManagerTest::testAssign
+S
+CDbAuthManagerTest::testRevoke
+S
+CDbAuthManagerTest::testGetAuthAssignments
+S
+CDbAuthManagerTest::testGetAuthItems
+S
+CDbAuthManagerTest::testClearAll
+S
+CDbAuthManagerTest::testClearAuthAssignments
+S
+CDbAuthManagerTest::testDetectLoop
+S
+CDbAuthManagerTest::testExecuteBizRule
+S
+CDbAuthManagerTest::testCheckAccess
+S
+CPhpAuthManagerTest::testSaveLoad
+.
+CPhpAuthManagerTest::testcreateAuthItem
+.
+CPhpAuthManagerTest::testGetAuthItem
+.
+CPhpAuthManagerTest::testRemoveAuthItem
+.
+CPhpAuthManagerTest::testChangeItemName
+.
+CPhpAuthManagerTest::testAddItemChild
+.
+CPhpAuthManagerTest::testAddItemChild2
+.
+CPhpAuthManagerTest::testRemoveItemChild
+.
+CPhpAuthManagerTest::testGetItemChildren
+.
+CPhpAuthManagerTest::testAssign
+.
+CPhpAuthManagerTest::testRevoke
+.
+CPhpAuthManagerTest::testGetAuthAssignments
+.
+CPhpAuthManagerTest::testGetAuthItems
+.
+CPhpAuthManagerTest::testClearAll
+.
+CPhpAuthManagerTest::testClearAuthAssignments
+.
+CPhpAuthManagerTest::testDetectLoop
+.
+CPhpAuthManagerTest::testExecuteBizRule
+.
+CPhpAuthManagerTest::testCheckAccess
+.
+CWebUserTest::testLoginLogout with data set #0 
+E
+CWebUserTest::testLoginLogout with data set #1 
+E
+CWebUserTest::testCheckAccess
+E
+CHtmlTest::testEncodeArray with data set #0 
+.
+CHtmlTest::testEncodeArray with data set #1 
+.
+CHtmlTest::testEncodeArray with data set #2 
+.
+CHtmlTest::testAjax with data set #0 
+.
+CHtmlTest::testAjax with data set #1 
+.
+CHtmlTest::testAjax with data set #2 
+.
+CHtmlTest::testAjax with data set #3 
+.
+CHtmlTest::testAjax with data set #4 
+.
+CHtmlTest::testAjax with data set #5 
+.
+CHtmlTest::testAjax with data set #6 
+.
+CHtmlTest::testActiveCheckbox with data set #0 
+.
+CHtmlTest::testActiveCheckbox with data set #1 
+.
+CHtmlTest::testBeginForm with data set #0 
+.
+CHtmlTest::testBeginForm with data set #1 
+.
+CHtmlTest::testBeginForm with data set #2 
+.
+CHtmlTest::testTextArea with data set #0 
+.
+CHtmlTest::testTextArea with data set #1 
+.
+CHtmlTest::testTextArea with data set #2 
+.
+CHtmlTest::testOpenTag with data set #0 
+.
+CHtmlTest::testOpenTag with data set #1 
+.
+CHtmlTest::testOpenTag with data set #2 
+.
+CHtmlTest::testOpenTag with data set #3 
+.
+CHtmlTest::testOpenTag with data set #4 
+.
+CHtmlTest::testOpenTag with data set #5 
+.
+CHtmlTest::testCloseTag with data set #0 
+.
+CHtmlTest::testCloseTag with data set #1 
+.
+CHtmlTest::testCloseTag with data set #2 
+.
+CHtmlTest::testCloseTag with data set #3 
+.
+CHtmlTest::testCdata with data set #0 
+.
+CHtmlTest::testCdata with data set #1 
+.
+CHtmlTest::testMetaTag with data set #0 
+.
+CHtmlTest::testMetaTag with data set #1 
+.
+CHtmlTest::testMetaTag with data set #2 
+.
+CHtmlTest::testMetaTag with data set #3 
+.
+CHtmlTest::testMetaTag with data set #4 
+.
+CHtmlTest::testLinkTag with data set #0 
+.
+CHtmlTest::testLinkTag with data set #1 
+.
+CHtmlTest::testLinkTag with data set #2 
+.
+CHtmlTest::testLinkTag with data set #3 
+.
+CHtmlTest::testLinkTag with data set #4 
+.
+CHtmlTest::testLinkTag with data set #5 
+.
+CHtmlTest::testLinkTag with data set #6 
+.
+CHtmlTest::testCss with data set #0 
+.
+CHtmlTest::testCss with data set #1 
+.
+CHtmlTest::testCssFile with data set #0 
+.
+CHtmlTest::testCssFile with data set #1 
+.
+CHtmlTest::testScript with data set #0 
+.
+CHtmlTest::testScript with data set #1 
+.
+CHtmlTest::testScriptWithHtmlOptions with data set #0 
+.
+CHtmlTest::testScriptWithHtmlOptions with data set #1 
+.
+CHtmlTest::testScriptFile with data set #0 
+.
+CHtmlTest::testScriptFile with data set #1 
+.
+CHtmlTest::testScriptFileWithHtmlOptions with data set #0 
+.
+CHtmlTest::testScriptFileWithHtmlOptions with data set #1 
+.
+CHtmlTest::testScriptFileWithHtmlOptions with data set #2 
+.
+CHtmlTest::testEndForm
+.
+CHtmlTest::testActiveId
+.
+CHtmlTest::testActiveName
+.
+CHtmlTest::testGetIdByName with data set #0 
+.
+CHtmlTest::testGetIdByName with data set #1 
+.
+CHtmlTest::testGetIdByName with data set #2 
+.
+CHtmlTest::testGetIdByName with data set #3 
+.
+CHtmlTest::testGetIdByName with data set #4 
+.
+CHtmlTest::testResolveName
+.
+CHtmlTest::testResolveValue
+.
+CHtmlTest::testValue with data set #0 
+.
+CHtmlTest::testValue with data set #1 
+.
+CHtmlTest::testValue with data set #2 
+.
+CHtmlTest::testValue with data set #3 
+.
+CHtmlTest::testValue with data set #4 
+.
+CHtmlTest::testValue with data set #5 
+.
+CHtmlTest::testValue with data set #6 
+.
+CHtmlTest::testValue with data set #7 
+.
+CHtmlTest::testValue with data set #8 
+.
+CHtmlTest::testValue with data set #9 
+.
+CHtmlTest::testValue with data set #10 
+.
+CHtmlTest::testValue with data set #11 
+.
+CHtmlTest::testValue with data set #12 
+.
+CHtmlTest::testValue with data set #13 
+.
+CHtmlTest::testValue with data set #14 
+.
+CHtmlTest::testValue with data set #15 
+.
+CHtmlTest::testValue with data set #16 
+.
+CHtmlTest::testValue with data set #17 
+.
+CHtmlTest::testValue with data set #18 
+.
+CHtmlTest::testValue with data set #19 
+.
+CHtmlTest::testValue with data set #20 
+.
+CHtmlTest::testValue with data set #21 
+.
+CHtmlTest::testValue with data set #22 
+.
+CHtmlTest::testValue with data set #23 
+.
+CHtmlTest::testValue with data set #24 
+.
+CHtmlTest::testValue with data set #25 
+.
+CHtmlTest::testValue with data set #26 
+.
+CHtmlTest::testValue with data set #27 
+.
+CHtmlTest::testValue with data set #28 
+.
+CHtmlTest::testValue with data set #29 
+.
+CHtmlTest::testValue with data set #30 
+.
+CHtmlTest::testValue with data set #31 
+.
+CHtmlTest::testValue with data set #32 
+.
+CHtmlTest::testValue with data set #33 
+.
+CHtmlTest::testValue with data set #34 
+.
+CHtmlTest::testValue with data set #35 
+.
+CHtmlTest::testValue with data set #36 
+.
+CHtmlTest::testValue with data set #37 
+.
+CHtmlTest::testValue with data set #38 
+.
+CHtmlTest::testPageStateField with data set #0 
+.
+CHtmlTest::testPageStateField with data set #1 
+.
+CHtmlTest::testEncode with data set #0 
+.
+CHtmlTest::testEncode with data set #1 
+.
+CHtmlTest::testDecode with data set #0 
+.
+CHtmlTest::testDecode with data set #1 
+.
+CHtmlTest::testRefresh with data set #0 
+.
+CHtmlTest::testRefresh with data set #1 
+.
+CHtmlTest::testStatefulForm with data set #0 
+.
+CHtmlTest::testStatefulForm with data set #1 
+.
+CHtmlTest::testMailto with data set #0 
+.
+CHtmlTest::testMailto with data set #1 
+.
+CHtmlTest::testMailto with data set #2 
+.
+CHtmlTest::testImage with data set #0 
+.
+CHtmlTest::testImage with data set #1 
+.
+CHtmlTest::testActiveLabel with data set #0 
+.
+CHtmlTest::testActiveLabel with data set #1 
+.
+CHtmlTest::testActiveLabel with data set #2 
+.
+CHtmlTest::testActiveLabel with data set #3 
+.
+CHtmlTest::testActiveLabel with data set #4 
+.
+CHtmlTest::testActiveLabel with data set #5 
+.
+CHtmlTest::testActiveLabel with data set #6 
+.
+CHtmlTest::testActiveLabel with data set #7 
+.
+CHtmlTest::testActiveLabel with data set #8 
+.
+CHtmlTest::testActiveLabelEx with data set #0 
+.
+CHtmlTest::testActiveLabelEx with data set #1 
+.
+CHtmlTest::testActiveLabelEx with data set #2 
+.
+CHtmlTest::testActiveLabelEx with data set #3 
+.
+CHtmlTest::testActiveLabelEx with data set #4 
+.
+CHtmlTest::testActiveLabelEx with data set #5 
+.
+CHtmlTest::testActiveLabelEx with data set #6 
+.
+CHtmlTest::testActiveLabelEx with data set #7 
+.
+CHtmlTest::testActiveTextField with data set #0 
+.
+CHtmlTest::testActiveTextField with data set #1 
+.
+CHtmlTest::testActiveTextField with data set #2 
+.
+CHtmlTest::testActiveTextField with data set #3 
+.
+CHtmlTest::testActiveUrlField with data set #0 
+.
+CHtmlTest::testActiveUrlField with data set #1 
+.
+CHtmlTest::testActiveUrlField with data set #2 
+.
+CHtmlTest::testActiveUrlField with data set #3 
+.
+CHtmlTest::testButton with data set #0 
+.
+CHtmlTest::testButton with data set #1 
+.
+CHtmlTest::testButton with data set #2 
+.
+CHtmlTest::testButton with data set #3 
+.
+CHtmlTest::testButton with data set #4 
+.
+CHtmlTest::testHtmlButton with data set #0 
+.
+CHtmlTest::testHtmlButton with data set #1 
+.
+CHtmlTest::testHtmlButton with data set #2 
+.
+CHtmlTest::testHtmlButton with data set #3 
+.
+CHtmlTest::testHtmlButton with data set #4 
+.
+CHtmlTest::testSubmitButton with data set #0 
+.
+CHtmlTest::testSubmitButton with data set #1 
+.
+CHtmlTest::testResetButton with data set #0 
+.
+CHtmlTest::testResetButton with data set #1 
+.
+CHtmlTest::testImageButton with data set #0 
+.
+CHtmlTest::testImageButton with data set #1 
+.
+CHtmlTest::testImageButton with data set #2 
+.
+CHtmlTest::testLinkButton with data set #0 
+.
+CHtmlTest::testLinkButton with data set #1 
+.
+CHtmlTest::testLinkButton with data set #2 
+.
+CHtmlTest::testAjaxCallbacks
+.
+CJSONTest::testEncodeSingleAR
+.
+CJSONTest::testEncodeMultipleARs
+.
+CJSONTest::testEncodeSimple
+.
+CJSONTest::testEncodeArray
+.
+CJSONTest::testDecode
+.
+CJavaScriptExpressionTest::testToString
+.
+CJavaScriptTest::testLegacyEncode
+.
+CJavaScriptTest::testLegacyEncodeSafe
+.
+CJavaScriptTest::testEncode
+.
+CWsdlGeneratorTest::testGenerateWsdl
+.
+CWsdlGeneratorTest::testGenerateHtmlDocumentation
+.
+CAutoCompleteTest::testCallbackEncoding
+.
+CMaskedTextFieldTest::testCallbackEncoding
+.
+CMultiFileUploadTest::testCallbackEncoding
+.
+CStarRatingTest::testCallbackEncoding
+.
+CTimestampBehaviorTest::testCreateAttribute
+.
+CTimestampBehaviorTest::testUpdateAttribute
+.
+CGridViewTest::testCallbackEncoding
+.
+CListViewTest::testCallbackEncoding
+.
+CButtonColumnTest::testCallbackEncoding
+.
+CJuiButtonTest::testCallbackEncoding
+.
+Tests: 1120, Assertions: 9591, Failures: 10, Errors: 33, Skipped: 107.

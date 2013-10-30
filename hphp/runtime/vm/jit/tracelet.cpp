@@ -30,6 +30,8 @@ Tracelet::Tracelet() :
 Tracelet::~Tracelet() { }
 
 NormalizedInstruction* Tracelet::newNormalizedInstruction() {
+  // Note: we're relying on the () here to zero-initialize the arg
+  // union, etc.
   NormalizedInstruction* ni = new NormalizedInstruction();
   m_instrs.push_back(ni);
   return ni;

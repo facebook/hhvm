@@ -21,6 +21,7 @@
 #include <map>
 #include <stack>
 #include <vector>
+#include <functional>
 #include <tr1/unordered_map>
 #include <cstdlib>
 #include <memory>
@@ -190,7 +191,10 @@ public:
 };
 
 template <class T>
-class queue : public std::queue<T, deque<T> > {};
+class queue : public std::queue<T, deque<T>> {};
+
+template <class T, class Compare = std::less<T>>
+class priority_queue : public std::priority_queue<T, vector<T>, Compare> {};
 
 template <class T,
           class U,

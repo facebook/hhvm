@@ -78,7 +78,10 @@ foreach ($classes as $class) {
   $arr = array(
     'name' => $class,
     'desc' => idx($info, 'desc'),
-    'flags' => array(),
+    'flags' => array(
+      'ZendCompat',
+    ),
+    'parent' => idx($info, 'parent'),
     'funcs' => array()
   );
 

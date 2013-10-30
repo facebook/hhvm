@@ -110,6 +110,8 @@ public:
   // implementing Server
   virtual void start();
   virtual void waitForEnd();
+  virtual void waitForJobs();
+  virtual void closePort();
   virtual void stop();
   virtual int getActiveWorker() {
     return m_dispatcher.getActiveWorker();
@@ -187,7 +189,7 @@ private:
                           const std::string& key_file,
                           const std::string& cert_file);
 
-  JobQueueDispatcher<LibEventJobPtr, LibEventWorker> m_dispatcher;
+  JobQueueDispatcher<LibEventWorker> m_dispatcher;
   AsyncFunc<LibEventServer> m_dispatcherThread;
 
   PendingResponseQueue m_responseQueue;

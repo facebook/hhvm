@@ -99,6 +99,7 @@ const StaticString
   s__GET("_GET"),
   s__POST("_POST"),
   s__REQUEST("_REQUEST"),
+  s__SESSION("_SESSION"),
   s__ENV("_ENV"),
   s__COOKIE("_COOKIE"),
   s_HTTP_RAW_POST_DATA("HTTP_RAW_POST_DATA"),
@@ -127,6 +128,17 @@ const StaticString
   s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
   s_THREAD_TYPE("THREAD_TYPE");
 
+static auto const s_arraysToClear = {
+  s__SERVER,
+  s__GET,
+  s__POST,
+  s__FILES,
+  s__REQUEST,
+  s__SESSION,
+  s__ENV,
+  s__COOKIE,
+};
+
 /**
  * PHP has "EGPCS" processing order of these global variables, and this
  * order is important in preparing $_REQUEST that needs to know which to
@@ -135,8 +147,15 @@ const StaticString
 void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const RequestURI &r,
                                           const SourceRootInfo &sri) {
-  GlobalVariables *g = get_global_variables();
   const VirtualHost *vhost = VirtualHost::GetCurrent();
+
+  GlobalVariables* g = get_global_variables();
+  Variant emptyArr(HphpArray::GetStaticEmptyArray());
+  for (auto& key : s_arraysToClear) {
+    g->remove(key.get(), false);
+    g->set(key.get(), emptyArr, false);
+  }
+  g->set(s_HTTP_RAW_POST_DATA, empty_string, false);
 
   Variant& server = g->getRef(s__SERVER);
   server.set(s_REQUEST_START_TIME, time(nullptr));

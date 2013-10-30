@@ -658,6 +658,10 @@ class Assembler {
     return cb_.frontier();
   }
 
+  bool isFrontierAligned(size_t align) const {
+    return cb_.isFrontierAligned(align);
+  }
+
   // Instruction set functions.
 
   // Branch / Jump instructions.
@@ -1290,6 +1294,9 @@ class Assembler {
 
   // Emit 64 bits of data into the instruction stream.
   inline void dc64(uint64_t data) { EmitData(&data, sizeof(data)); }
+
+  template<typename T>
+  inline void dc64(T* data) { dc64(reinterpret_cast<uint64_t>(data)); }
 
   // Copy a string into the instruction stream, including the terminating NUL
   // character. The instruction pointer (pc_) is then aligned correctly for

@@ -68,7 +68,10 @@ struct RegionDesc {
   std::vector<BlockPtr> blocks;
 };
 
-typedef std::shared_ptr<RegionDesc> RegionDescPtr;
+typedef std::shared_ptr<RegionDesc>                      RegionDescPtr;
+typedef std::vector<RegionDescPtr>                       RegionVec;
+typedef hphp_hash_set<RegionDescPtr,
+                      smart_pointer_hash<RegionDescPtr>> RegionSet;
 
 /*
  * Specification of an HHBC-visible location that can have a type
@@ -351,6 +354,22 @@ RegionDescPtr selectHotRegion(Transl::TransID transId,
  */
 RegionDescPtr selectTraceletLegacy(const RegionContext&    rCtx,
                                    const Transl::Tracelet& tlet);
+
+
+/*
+ * Checks whether the type predictions at the beginning of block
+ * satisfy the post-conditions in prevPostConds.
+ */
+bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
+                          const PostConditions& prevPostConds);
+
+/*
+ * Creates regions covering all existing profile translations for
+ * func, and returns them in the regions vector.
+ */
+void regionizeFunc(const Func*            func,
+                   Transl::TranslatorX64* tx64,
+                   RegionVec&             regions);
 
 /*
  * Debug stringification for various things.

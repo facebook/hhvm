@@ -1,0 +1,1 @@
+HipHop Fatal error: Cannot access protected property B::$x in %s/test/quick/prop-access-error2.php on line 13

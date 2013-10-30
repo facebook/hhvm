@@ -237,6 +237,7 @@ void raise_message(ErrorConstants::ErrorModes mode, std::string &msg) {
       raise_warning(msg);
       break;
     case ErrorConstants::ErrorModes::NOTICE:
+    case ErrorConstants::ErrorModes::PHP_DEPRECATED:
       raise_notice(msg);
       break;
     default:

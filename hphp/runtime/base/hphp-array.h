@@ -158,6 +158,10 @@ public:
   static ArrayData* SetInt(ArrayData*, int64_t k, CVarRef v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, CVarRef v, bool copy);
 
+  static ArrayData* ZSetInt(ArrayData*, int64_t k, RefData* v);
+  static ArrayData* ZSetStr(ArrayData*, StringData* k, RefData* v);
+  static ArrayData* ZAppend(ArrayData* ad, RefData* v);
+
   // implements ArrayData
   static ArrayData* SetRefInt(ArrayData* ad, int64_t k, CVarRef v,
                               bool copy);
@@ -398,6 +402,9 @@ private:
   template <class K> ArrayData* update(K k, CVarRef data);
   template <class K> ArrayData* updateRef(K k, CVarRef data);
 
+  template <class K> ArrayData* zSetImpl(K k, RefData* data);
+  ArrayData* zAppendImpl(RefData* data);
+
   void adjustFullPos(ssize_t pos);
   void erase(ssize_t pos);
 
@@ -419,6 +426,9 @@ private:
   HphpArray* initLval(TypedValue& tv, Variant*& ret);
   HphpArray* initWithRef(TypedValue& tv, CVarRef v);
   HphpArray* moveVal(TypedValue& tv, TypedValue v);
+
+  ArrayData* zInitVal(TypedValue& tv, RefData* v);
+  ArrayData* zSetVal(TypedValue& tv, RefData* v);
 
   /*
    * grow() increases the hash table size and the number of slots for

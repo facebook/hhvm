@@ -31,7 +31,7 @@ namespace HPHP { namespace JIT {
  * perform a depth-first postorder walk
  */
 template <class Visitor>
-void postorderWalk(Visitor visitor, unsigned num_blocks, Block* head);
+void postorderWalk(const IRUnit&, Visitor visitor);
 
 /*
  * Return an iterator into an rpo-sorted BlockList for a given Block.
@@ -125,7 +125,7 @@ namespace detail {
       if (m_visited.test(block->id())) return;
       m_visited.set(block->id());
       Block* taken = block->taken();
-      if (taken && taken->trace()->isMain() != block->trace()->isMain()) {
+      if (taken && !cold(block) && cold(taken)) {
         walk(taken);
         taken = nullptr;
       }
@@ -133,7 +133,8 @@ namespace detail {
       if (taken) walk(taken);
       m_visitor(block);
     }
-
+  private:
+    static bool cold(Block* b) { return b->hint() == Block::Hint::Unlikely; }
   private:
     boost::dynamic_bitset<> m_visited;
     Visitor &m_visitor;
@@ -144,9 +145,9 @@ namespace detail {
  * perform a depth-first postorder walk
  */
 template <class Visitor>
-void postorderWalk(Visitor visitor, unsigned num_blocks, Block* head) {
-  detail::PostorderSort<Visitor> ps(visitor, num_blocks);
-  ps.walk(head);
+void postorderWalk(const IRUnit& unit, Visitor visitor) {
+  detail::PostorderSort<Visitor> ps(visitor, unit.numBlocks());
+  ps.walk(unit.entry());
 }
 
 inline

@@ -39,6 +39,13 @@ PHPAPI int php_raw_url_decode(char *str, int len); /* return value: length of de
 PHPAPI char *php_url_encode(char const *s, int len, int *new_length);
 PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length);
 
+PHP_FUNCTION(parse_url);
+PHP_FUNCTION(urlencode);
+PHP_FUNCTION(urldecode);
+PHP_FUNCTION(rawurlencode);
+PHP_FUNCTION(rawurldecode);
+PHP_FUNCTION(get_headers);
+
 #define PHP_URL_SCHEME 0
 #define PHP_URL_HOST 1
 #define PHP_URL_PORT 2
@@ -52,3 +59,10 @@ PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length);
 #define PHP_QUERY_RFC3986 2
 
 #endif /* URL_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */

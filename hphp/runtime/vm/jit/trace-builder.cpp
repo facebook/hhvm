@@ -35,7 +35,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   : m_unit(unit)
   , m_simplifier(*this)
   , m_state(unit, initialSpOffsetFromFp, func)
-  , m_curTrace(m_unit.makeMain(func, initialBcOffset)->trace())
+  , m_curTrace(m_unit.makeMain(initialBcOffset)->trace())
   , m_curBlock(nullptr)
   , m_enableSimplification(false)
   , m_inReoptimize(false)
@@ -124,7 +124,7 @@ void TraceBuilder::appendInstruction(IRInstruction* inst) {
     IRInstruction* prev = block->back();
     if (prev->isBlockEnd()) {
       // start a new block
-      Block* next = m_unit.defBlock(m_state.func());
+      Block* next = m_unit.defBlock();
       m_curTrace->push_back(next);
       if (!prev->isTerminal()) {
         // new block is reachable from old block so link it.
@@ -184,7 +184,7 @@ SSATmp* TraceBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
 
   auto const prevType = localType(locId, DataTypeSpecific);
 
-  if (prevType.subtypeOf(typeParam)) {
+  if (prevType <= typeParam) {
     return inst->src(0);
   } else {
     //
@@ -217,31 +217,17 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   auto const typeParam = inst->typeParam();
 
   if (prevType.not(typeParam)) {
-    /* Task #2553746
-     * This is triggering for a case where the tracked state says the local is
-     * InitNull but the AssertLoc says it's Str. */
-    static auto const error =
-      makeStaticString("Internal error: static analysis was "
-                       "wrong about a local variable's type.");
-    auto* errorInst = m_unit.gen(RaiseError, inst->marker(), cns(error));
-    inst->become(m_unit, errorInst);
+    TRACE_PUNT("Invalid AssertLoc");
+  }
 
-    // It's not a disaster to generate this in unreachable code for
-    // now. t2590033.
-    if (false) {
-      assert_log(false,  [&]{
-          return folly::format("\npreOptimizeAssertLoc: prevType: {} "
-                               "typeParam: {}\nin instr: {}\nin trace: {}\n",
-                               prevType.toString(),
-                               typeParam.toString(),
-                               inst->toString(),
-                               m_unit.main()->toString()).str();
-        });
-    }
-  } else if (shouldElideAssertType(prevType, typeParam, nullptr)) {
-    // The type we're asserting is worse than the last known type.
+  if (shouldElideAssertType(prevType, typeParam, nullptr)) {
     return inst->src(0);
   }
+
+  if (filterAssertType(inst, prevType)) {
+    constrainLocal(locId, categoryForType(prevType), "AssertLoc");
+  }
+
   return nullptr;
 }
 
@@ -279,8 +265,12 @@ SSATmp* TraceBuilder::preOptimizeDecRef(IRInstruction* inst) {
    * available.  I.e. by the time they get to the DecRef we won't see
    * it in isValueAvailable anymore and won't convert to DecRefNZ.
    */
-  auto const srcInst = inst->src(0)->inst();
-  if (srcInst->op() == IncRef) {
+  auto srcInst = inst->src(0)->inst();
+  while (srcInst->isPassthrough() && !srcInst->is(IncRef)) {
+    srcInst = srcInst->getPassthroughValue()->inst();
+  }
+
+  if (srcInst->is(IncRef)) {
     if (m_state.isValueAvailable(srcInst->src(0))) {
       inst->setOpcode(DecRefNZ);
     }
@@ -631,47 +621,66 @@ bool TraceBuilder::shouldConstrainGuards() const {
     !inReoptimize();
 }
 
-void TraceBuilder::constrainGuard(IRInstruction* inst,
+/*
+ * Returns true iff a guard to constrain was found, and tc was more specific
+ * than the guard's existing constraint. Note that this doesn't necessarily
+ * mean that the guard was constrained: tc.weak might be true.
+ */
+bool TraceBuilder::constrainGuard(IRInstruction* inst,
                                   TypeConstraint tc) {
-  if (!shouldConstrainGuards()) return;
+  if (!shouldConstrainGuards()) return false;
 
   auto& guard = m_guardConstraints[inst];
+  auto changed = false;
 
   if (tc.innerCat) {
     // If the constraint is for the inner type and is better than what guard
     // has, update it.
     auto cat = tc.innerCat.get();
-    if (guard.innerCat && guard.innerCat >= cat) return;
-    FTRACE(1, "constraining inner type of {}: {} -> {}\n",
-           *inst, guard.innerCat ? guard.innerCat.get() : DataTypeGeneric, cat);
-    guard.innerCat = cat;
-    return;
+    if (guard.innerCat && guard.innerCat >= cat) return false;
+    if (!tc.weak) {
+      FTRACE(1, "constraining inner type of {}: {} -> {}\n",
+             *inst, guard.innerCat ? guard.innerCat.get() : DataTypeGeneric,
+             cat);
+      guard.innerCat = cat;
+    }
+    return true;
   }
 
   if (tc.category > guard.category) {
-    FTRACE(1, "constraining {}: {} -> {}\n",
-           *inst, guard.category, tc.category);
-    guard.category = tc.category;
+    if (!tc.weak) {
+      FTRACE(1, "constraining {}: {} -> {}\n",
+             *inst, guard.category, tc.category);
+      guard.category = tc.category;
+    }
+    changed = true;
   }
+
+  assert(tc.knownType.maybe(guard.knownType));
   if (tc.knownType < guard.knownType) {
+    // We don't check tc.weak here because knownType is supposed to be
+    // statically known type information.
     FTRACE(1, "refining knownType of {}: {} -> {}\n",
            *inst, guard.knownType, tc.knownType);
     guard.knownType = tc.knownType;
   }
+
+  return changed;
 }
 
 /**
  * Trace back to the guard that provided the type of val, if
  * any. Constrain it so its type will not be relaxed beyond the given
- * DataTypeCategory. Always returns val, for convenience.
+ * DataTypeCategory. Returns true iff one or more guard instructions
+ * were constrained.
  */
-SSATmp* TraceBuilder::constrainValue(SSATmp* const val,
-                                     TypeConstraint tc) {
-  if (!shouldConstrainGuards()) return val;
+bool TraceBuilder::constrainValue(SSATmp* const val,
+                                  TypeConstraint tc) {
+  if (!shouldConstrainGuards()) return false;
 
   if (!val) {
     FTRACE(1, "constrainValue(nullptr, {}), bailing\n", tc);
-    return nullptr;
+    return false;
   }
 
   FTRACE(1, "constrainValue({}, {})\n", *val->inst(), tc);
@@ -686,74 +695,75 @@ SSATmp* TraceBuilder::constrainValue(SSATmp* const val,
     if (!source) {
       // val was newly created in this trace. Nothing to constrain.
       FTRACE(2, "  - valSrc is null, bailing\n");
-      return val;
+      return false;
     }
 
     // If valSrc is a FramePtr, it represents the frame the value was
     // originally loaded from. Look for the guard for this local.
     if (source->isA(Type::FramePtr)) {
-      constrainLocal(inst->extra<LocalId>()->locId, source, tc,
-                     "constrainValue");
-      return val;
+      return constrainLocal(inst->extra<LocalId>()->locId, source, tc,
+                            "constrainValue");
     }
 
     // Otherwise, keep chasing down the source of val.
-    constrainValue(source, tc);
+    return constrainValue(source, tc);
   } else if (inst->is(LdStack, LdStackAddr)) {
-    constrainStack(inst->src(0), inst->extra<StackOffset>()->offset, tc);
+    return constrainStack(inst->src(0), inst->extra<StackOffset>()->offset,
+                          tc);
   } else if (inst->is(CheckType, AssertType)) {
     // If the dest type of the instruction fits the constraint we want, we can
     // stop here without constraining any further. Otherwise, continue through
     // to the source.
-    if (inst->is(CheckType)) constrainGuard(inst, tc);
+    auto changed = false;
+    if (inst->is(CheckType)) changed = constrainGuard(inst, tc) || changed;
 
     auto dstType = inst->typeParam();
     if (!typeFitsConstraint(dstType, tc.category)) {
-      constrainValue(inst->src(0), tc);
+      changed = constrainValue(inst->src(0), tc) || changed;
     }
+    return changed;
   } else if (inst->is(StRef, StRefNT, Box, BoxPtr)) {
     // If our caller cares about the inner type, propagate that through.
     // Otherwise we're done.
     if (tc.innerCat) {
       auto src = inst->src(inst->is(StRef, StRefNT) ? 1 : 0);
       tc.innerCat.reset();
-      constrainValue(src, tc);
+      return constrainValue(src, tc);
     }
+    return false;
   } else if (inst->is(LdRef, Unbox, UnboxPtr)) {
     // Pass through to the source of the box, remembering that we care about
     // the inner type of the box.
     assert(!tc.innerCat);
     tc.innerCat = tc.category;
-    constrainValue(inst->src(0), tc);
+    return constrainValue(inst->src(0), tc);
   } else if (inst->isPassthrough()) {
-    constrainValue(inst->getPassthroughValue(), tc);
+    return constrainValue(inst->getPassthroughValue(), tc);
   } else {
     // Any instructions not special cased above produce a new value, so
     // there's no guard for us to constrain.
     FTRACE(2, "  - value is new in this trace, bailing\n");
+    return false;
   }
   // TODO(t2598894): Should be able to do something with LdMem<T> here
-
-  return val;
 }
 
-void TraceBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
+bool TraceBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
                                   const std::string& why) {
-  constrainLocal(locId, localValueSource(locId), tc, why);
+  return constrainLocal(locId, localValueSource(locId), tc, why);
 }
 
-void TraceBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
+bool TraceBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
                                   TypeConstraint tc,
                                   const std::string& why) {
-  if (!shouldConstrainGuards()) return;
+  if (!shouldConstrainGuards()) return false;
 
   FTRACE(1, "constrainLocal({}, {}, {}, {})\n",
          locId, valSrc ? valSrc->inst()->toString() : "null", tc, why);
 
-  if (!valSrc) return;
+  if (!valSrc) return false;
   if (!valSrc->isA(Type::FramePtr)) {
-    constrainValue(valSrc, tc);
-    return;
+    return constrainValue(valSrc, tc);
   }
 
   // When valSrc is a FramePtr, that means we loaded the value the local had
@@ -768,26 +778,26 @@ void TraceBuilder::constrainLocal(uint32_t locId, SSATmp* valSrc,
       // trying to apply, we can stop here. This can happen if we assert a
       // more general type than what we already know. Otherwise we need to
       // keep tracing back to the guard.
-      if (typeFitsConstraint(guard->typeParam(), tc.category)) return;
+      if (typeFitsConstraint(guard->typeParam(), tc.category)) return false;
       guard = guardForLocal(locId, guard->src(0));
     } else {
       assert(guard->is(GuardLoc, AssertLoc));
       FTRACE(2, "    - found guard to constrain\n");
-      constrainGuard(guard, tc);
-      return;
+      return constrainGuard(guard, tc);
     }
   }
 
   FTRACE(2, "    - no guard to constrain\n");
+  return false;
 }
 
-void TraceBuilder::constrainStack(int32_t idx, TypeConstraint tc) {
-  constrainStack(sp(), idx, tc);
+bool TraceBuilder::constrainStack(int32_t idx, TypeConstraint tc) {
+  return constrainStack(sp(), idx, tc);
 }
 
-void TraceBuilder::constrainStack(SSATmp* sp, int32_t idx,
+bool TraceBuilder::constrainStack(SSATmp* sp, int32_t idx,
                                   TypeConstraint tc) {
-  if (!shouldConstrainGuards()) return;
+  if (!shouldConstrainGuards()) return false;
 
   FTRACE(1, "constrainStack({}, {}, {})\n", *sp->inst(), idx, tc);
   assert(sp->isA(Type::StkPtr));
@@ -799,11 +809,11 @@ void TraceBuilder::constrainStack(SSATmp* sp, int32_t idx,
   auto stackInfo = getStackValue(sp, idx);
   if (stackInfo.value) {
     FTRACE(1, "  - value = {}\n", *stackInfo.value->inst());
-    constrainValue(stackInfo.value, tc);
+    return constrainValue(stackInfo.value, tc);
   } else {
     auto typeSrc = stackInfo.typeSrc;
     FTRACE(1, "  - typeSrc = {}\n", *typeSrc);
-    if (typeSrc->is(GuardStk, CheckStk)) constrainGuard(typeSrc, tc);
+    return typeSrc->is(GuardStk, CheckStk) && constrainGuard(typeSrc, tc);
   }
 }
 

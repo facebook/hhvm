@@ -1,10 +1,5 @@
 *.[oad]
 *.hhbc
-/bin*-g
-/bin*-O
-/bin/*.so
-/bin/hphp_options
-/bin/systemlib.php
 .mkdir
 hphp.log
 
@@ -54,10 +49,6 @@ hphp.log
 
 /hphp/ffi/java/classes
 /hphp/ffi/java/hphp_ffi_java.h
-
-# Ignore all makefiles generated for fbcode's third-party repo
-/bin/*.mk
-!/bin/run.mk
 
 CMakeFiles
 CMakeCache.txt

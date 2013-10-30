@@ -1,5 +1,5 @@
 auto_sources(IDL_SRCS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
-foreach (zext calendar ftp gettext oauth yaml)
+foreach (zext calendar ftp gettext mongo oauth yaml)
 	list(REMOVE_ITEM IDL_SRCS "${HPHP_HOME}/hphp/system/idl/${zext}.idl.json")
 endforeach ()
 
@@ -33,9 +33,9 @@ endforeach()
 
 add_custom_target(systemlib
                   DEPENDS "php.txt" ${SYSTEMLIB_SRCS}
-                  COMMAND "INSTALL_DIR=${HPHP_HOME}/bin"
+                  COMMAND "INSTALL_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
                           "FBCODE_DIR=${HPHP_HOME}"
                           "${HPHP_HOME}/hphp/runtime/ext_hhvm/make_systemlib.sh"
-                          "--install_dir=${HPHP_HOME}/bin" "--fbcode_dir=${HPHP_HOME}"
+                          "--install_dir=${CMAKE_CURRENT_SOURCE_DIR}" "--fbcode_dir=${HPHP_HOME}"
                           "${SYSTEMLIB_SRCS_STR}"
                   COMMENT "Generating systemlib.php")

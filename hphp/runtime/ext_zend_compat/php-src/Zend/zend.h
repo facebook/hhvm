@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -22,10 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/tv-helpers.h"
-#include "hphp/runtime/vm/bytecode.h"
+#define ZEND_VERSION "2.5.0"
 
 #define ZEND_ENGINE_2
 
@@ -37,7 +34,34 @@
 #define END_EXTERN_C()
 #endif
 
+/*
+ * general definitions
+ */
+
+#ifdef ZEND_WIN32
+# include "zend_config.w32.h"
+# define ZEND_PATHS_SEPARATOR    ';'
+#elif defined(NETWARE)
+# include <zend_config.h>
+# define ZEND_PATHS_SEPARATOR    ';'
+#elif defined(__riscos__)
+# include <zend_config.h>
+# define ZEND_PATHS_SEPARATOR    ';'
+#else
+# include <zend_config.h>
+# define ZEND_PATHS_SEPARATOR    ':'
+#endif
+
+#ifdef ZEND_WIN32
+/* Only use this macro if you know for sure that all of the switches values
+   are covered by its case statements */
+#define EMPTY_SWITCH_DEFAULT_CASE() \
+      default:        \
+        __assume(0);    \
+        break;
+#else
 #define EMPTY_SWITCH_DEFAULT_CASE()
+#endif
 
 /* all HAVE_XXX test have to be after the include of zend_config above */
 
@@ -55,7 +79,7 @@
 # include <dlfcn.h>
 #endif
 
-#if defined(HAVE_LIBDL)
+#if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
 
 # ifndef RTLD_LAZY
 #  define RTLD_LAZY 1    /* Solaris 1, FreeBSD's (2.1.7.1 and older) */
@@ -188,6 +212,21 @@ char *alloca ();
 # define free_alloca(p, use_heap)  efree(p)
 #endif
 
+#if ZEND_DEBUG
+#define ZEND_FILE_LINE_D        const char *__zend_filename, const uint __zend_lineno
+#define ZEND_FILE_LINE_DC        , ZEND_FILE_LINE_D
+#define ZEND_FILE_LINE_ORIG_D      const char *__zend_orig_filename, const uint __zend_orig_lineno
+#define ZEND_FILE_LINE_ORIG_DC      , ZEND_FILE_LINE_ORIG_D
+#define ZEND_FILE_LINE_RELAY_C      __zend_filename, __zend_lineno
+#define ZEND_FILE_LINE_RELAY_CC      , ZEND_FILE_LINE_RELAY_C
+#define ZEND_FILE_LINE_C        __FILE__, __LINE__
+#define ZEND_FILE_LINE_CC        , ZEND_FILE_LINE_C
+#define ZEND_FILE_LINE_EMPTY_C      NULL, 0
+#define ZEND_FILE_LINE_EMPTY_CC      , ZEND_FILE_LINE_EMPTY_C
+#define ZEND_FILE_LINE_ORIG_RELAY_C    __zend_orig_filename, __zend_orig_lineno
+#define ZEND_FILE_LINE_ORIG_RELAY_CC  , ZEND_FILE_LINE_ORIG_RELAY_C
+#define ZEND_ASSERT(c)          assert(c)
+#else
 #define ZEND_FILE_LINE_D
 #define ZEND_FILE_LINE_DC
 #define ZEND_FILE_LINE_ORIG_D
@@ -201,8 +240,13 @@ char *alloca ();
 #define ZEND_FILE_LINE_ORIG_RELAY_C
 #define ZEND_FILE_LINE_ORIG_RELAY_CC
 #define ZEND_ASSERT(c)
+#endif  /* ZEND_DEBUG */
 
+#ifdef ZTS
+#define ZTS_V 1
+#else
 #define ZTS_V 0
+#endif
 
 #include "zend_errors.h"
 #include "zend_alloc.h"
@@ -224,10 +268,10 @@ char *alloca ();
 
 #if SIZEOF_LONG == 4
 #define MAX_LENGTH_OF_LONG 11
-const char long_min_digits[] = "2147483648";
+static const char long_min_digits[] = "2147483648";
 #elif SIZEOF_LONG == 8
 #define MAX_LENGTH_OF_LONG 20
-const char long_min_digits[] = "9223372036854775808";
+static const char long_min_digits[] = "9223372036854775808";
 #else
 #error "Unknown SIZEOF_LONG"
 #endif
@@ -240,9 +284,11 @@ typedef enum {
 } ZEND_RESULT_CODE;
 
 #include "zend_hash.h"
+#include "zend_ts_hash.h"
+#include "zend_llist.h"
 
-#define INTERNAL_FUNCTION_PARAMETERS HPHP::ActRec* ar, zval* return_value, zval* this_ptr
-#define INTERNAL_FUNCTION_PARAM_PASSTHRU ar, return_value, this_ptr
+#define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, zval **return_value_ptr, zval *this_ptr, int return_value_used TSRMLS_DC
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, return_value_ptr, this_ptr, return_value_used TSRMLS_CC
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));
@@ -253,19 +299,16 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 /*
  * zval
  */
-
-#include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
-
 typedef struct _zend_class_entry zend_class_entry;
 
-struct _zend_class_entry {
-  const char *name;
-  zend_uint name_length;
-  HPHP::Class *hphp_class;
-  zend_object_value (*create_object)(zend_class_entry *class_type);
-};
+typedef struct _zend_guard {
+  zend_bool in_get;
+  zend_bool in_set;
+  zend_bool in_unset;
+  zend_bool in_isset;
+  zend_bool dummy; /* sizeof(zend_guard) must not be equal to sizeof(void*) */
+} zend_guard;
 
-// typedef struct HPHP::ObjectData zend_object;
 typedef struct _zend_object {
   zend_class_entry *ce;
   HashTable *properties;
@@ -275,7 +318,24 @@ typedef struct _zend_object {
 
 #include "zend_object_handlers.h"
 
-typedef union HPHP::Value zvalue_value;
+typedef union _zvalue_value {
+  long lval;          /* long value */
+  double dval;        /* double value */
+  struct {
+    char *val;
+    int len;
+  } str;
+  HashTable *ht;        /* hash table value */
+  zend_object_value obj;
+} zvalue_value;
+
+struct _zval_struct {
+  /* Variable information */
+  zvalue_value value;    /* value */
+  zend_uint refcount__gc;
+  zend_uchar type;  /* active type */
+  zend_uchar is_ref__gc;
+};
 
 #define Z_REFCOUNT_PP(ppz)    Z_REFCOUNT_P(*(ppz))
 #define Z_SET_REFCOUNT_PP(ppz, rc)  Z_SET_REFCOUNT_P(*(ppz), rc)
@@ -333,45 +393,220 @@ typedef union HPHP::Value zvalue_value;
 # define UNEXPECTED(condition) (condition)
 #endif
 
-using HPHP::KindOfRefCountThreshold;
-zend_always_inline zend_bool zval_isref_p(zval* pz) {
-  return pz->zIsRef();
-}
-
-zend_always_inline zend_uint zval_refcount_p(zval* pz) {
+static zend_always_inline zend_uint zval_refcount_p(zval* pz) {
+#ifdef HHVM
   return pz->zRefcount();
+#else
+  return pz->refcount__gc;
+#endif
 }
 
-zend_always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) {
+static zend_always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) {
+#ifdef HHVM
   pz->zSetRefcount(rc);
   return rc;
+#else
+  return pz->refcount__gc = rc;
+#endif
 }
 
-zend_always_inline zend_uint zval_addref_p(zval* pz) {
+static zend_always_inline zend_uint zval_addref_p(zval* pz) {
+#ifdef HHVM
   pz->zAddRef();
   return pz->zRefcount();
+#else
+  return ++pz->refcount__gc;
+#endif
 }
 
-zend_always_inline zend_uint zval_delref_p(zval* pz) {
+static zend_always_inline zend_uint zval_delref_p(zval* pz) {
+#ifdef HHVM
   pz->zDelRef();
   return pz->zRefcount();
+#else
+  return --pz->refcount__gc;
+#endif
 }
 
-zend_always_inline zend_bool zval_set_isref_p(zval* pz) {
+static zend_always_inline zend_bool zval_isref_p(zval* pz) {
+#ifdef HHVM
+  return pz->zIsRef();
+#else
+  return pz->is_ref__gc;
+#endif
+}
+
+static zend_always_inline zend_bool zval_set_isref_p(zval* pz) {
+#ifdef HHVM
   pz->zSetIsRef();
   return true;
+#else
+  return pz->is_ref__gc = 1;
+#endif
 }
 
-zend_always_inline zend_bool zval_unset_isref_p(zval* pz) {
+static zend_always_inline zend_bool zval_unset_isref_p(zval* pz) {
+#ifdef HHVM
   pz->zUnsetIsRef();
   return false;
+#else
+  return pz->is_ref__gc = 0;
+#endif
 }
 
-zend_always_inline zend_bool zval_set_isref_to_p(zval* pz, zend_bool isref) {
+static zend_always_inline zend_bool zval_set_isref_to_p(zval* pz, zend_bool isref) {
+#ifdef HHVM
   return isref ? zval_set_isref_p(pz) : zval_unset_isref_p(pz);
+#else
+  return pz->is_ref__gc = isref;
+#endif
 }
+
+/* excpt.h on Digital Unix 4.0 defines function_table */
+#undef function_table
+
+/* A lot of stuff needs shifiting around in order to include zend_compile.h here */
+union _zend_function;
+
+#include "zend_iterators.h"
+
+struct _zend_serialize_data;
+struct _zend_unserialize_data;
+
+typedef struct _zend_serialize_data zend_serialize_data;
+typedef struct _zend_unserialize_data zend_unserialize_data;
+
+struct _zend_trait_method_reference {
+  const char* method_name;
+  unsigned int mname_len;
+  
+  zend_class_entry *ce;
+  
+  const char* class_name;
+  unsigned int cname_len;
+};
+typedef struct _zend_trait_method_reference  zend_trait_method_reference;
+
+struct _zend_trait_precedence {
+  zend_trait_method_reference *trait_method;
+  
+  zend_class_entry** exclude_from_classes;
+};
+typedef struct _zend_trait_precedence zend_trait_precedence;
+
+struct _zend_trait_alias {
+  zend_trait_method_reference *trait_method;
+  
+  /**
+  * name for method to be added
+  */
+  const char* alias;
+  unsigned int alias_len;
+  
+  /**
+  * modifiers to be set on trait method
+  */
+  zend_uint modifiers;
+};
+typedef struct _zend_trait_alias zend_trait_alias;
+
+struct _zend_class_entry {
+#ifdef HHVM
+  HPHP::Class *hphp_class;
+#endif
+  char type;
+  const char *name;
+  zend_uint name_length;
+  struct _zend_class_entry *parent;
+  int refcount;
+  zend_uint ce_flags;
+
+#ifndef HHVM
+  HashTable function_table;
+  HashTable properties_info;
+#endif
+  zval **default_properties_table;
+  zval **default_static_members_table;
+  zval **static_members_table;
+#ifndef HHVM
+  HashTable constants_table;
+#endif
+  int default_properties_count;
+  int default_static_members_count;
+
+  union _zend_function *constructor;
+  union _zend_function *destructor;
+  union _zend_function *clone;
+  union _zend_function *__get;
+  union _zend_function *__set;
+  union _zend_function *__unset;
+  union _zend_function *__isset;
+  union _zend_function *__call;
+  union _zend_function *__callstatic;
+  union _zend_function *__tostring;
+  union _zend_function *serialize_func;
+  union _zend_function *unserialize_func;
+
+  zend_class_iterator_funcs iterator_funcs;
+
+  /* handlers */
+  zend_object_value (*create_object)(zend_class_entry *class_type TSRMLS_DC);
+  zend_object_iterator *(*get_iterator)(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
+  int (*interface_gets_implemented)(zend_class_entry *iface, zend_class_entry *class_type TSRMLS_DC); /* a class implements this interface */
+  union _zend_function *(*get_static_method)(zend_class_entry *ce, char* method, int method_len TSRMLS_DC);
+
+  /* serializer callbacks */
+  int (*serialize)(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
+  int (*unserialize)(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
+
+  zend_class_entry **interfaces;
+  zend_uint num_interfaces;
+  
+  zend_class_entry **traits;
+  zend_uint num_traits;
+  zend_trait_alias **trait_aliases;
+  zend_trait_precedence **trait_precedences;
+
+  union {
+    struct {
+      const char *filename;
+      zend_uint line_start;
+      zend_uint line_end;
+      const char *doc_comment;
+      zend_uint doc_comment_len;
+    } user;
+    struct {
+      const struct _zend_function_entry *builtin_functions;
+      struct _zend_module_entry *module;
+    } internal;
+  } info;
+};
 
 #include "zend_stream.h"
+typedef struct _zend_utility_functions {
+  void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
+  int (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
+  int (*write_function)(const char *str, uint str_length);
+  FILE *(*fopen_function)(const char *filename, char **opened_path TSRMLS_DC);
+  void (*message_handler)(long message, const void *data TSRMLS_DC);
+  void (*block_interruptions)(void);
+  void (*unblock_interruptions)(void);
+  int (*get_configuration_directive)(const char *name, uint name_length, zval *contents);
+  void (*ticks_function)(int ticks);
+  void (*on_timeout)(int seconds TSRMLS_DC);
+  int (*stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
+  int (*vspprintf_function)(char **pbuf, size_t max_len, const char *format, va_list ap);
+  char *(*getenv_function)(char *name, size_t name_len TSRMLS_DC);
+  char *(*resolve_path_function)(const char *filename, int filename_len TSRMLS_DC);
+} zend_utility_functions;
+
+typedef struct _zend_utility_values {
+  char *import_use_extension;
+  uint import_use_extension_length;
+  zend_bool html_errors;
+} zend_utility_values;
+
+typedef int (*zend_write_func_t)(const char *str, uint str_length);
 
 #undef MIN
 #undef MAX
@@ -386,6 +621,7 @@ zend_always_inline zend_bool zval_set_isref_to_p(zval* pz, zend_bool isref) {
 
 /* data types */
 /* All data types <= IS_BOOL have their constructor/destructors skipped */
+#ifdef HHVM
 #define IS_NULL            HPHP::KindOfNull
 #define IS_LONG            HPHP::KindOfInt64
 #define IS_DOUBLE          HPHP::KindOfDouble
@@ -394,11 +630,100 @@ zend_always_inline zend_bool zval_set_isref_to_p(zval* pz, zend_bool isref) {
 #define IS_OBJECT          HPHP::KindOfObject
 #define IS_STRING          HPHP::KindOfString
 #define IS_RESOURCE        HPHP::KindOfResource
-#define IS_CONSTANT        8
+#else
+#define IS_NULL    0
+#define IS_LONG    1
+#define IS_DOUBLE  2
+#define IS_BOOL    3
+#define IS_ARRAY  4
+#define IS_OBJECT  5
+#define IS_STRING  6
+#define IS_RESOURCE  7
+#endif
+#define IS_CONSTANT  8
 #define IS_CONSTANT_ARRAY  9
-#define IS_CALLABLE        10
+#define IS_CALLABLE  10
 
+/* Ugly hack to support constants as static array indices */
+#define IS_CONSTANT_TYPE_MASK    0x00f
+#define IS_CONSTANT_UNQUALIFIED    0x010
+#define IS_CONSTANT_INDEX      0x080
+#define IS_LEXICAL_VAR        0x020
+#define IS_LEXICAL_REF        0x040
+#define IS_CONSTANT_IN_NAMESPACE  0x100
+
+/* overloaded elements data types */
+#define OE_IS_ARRAY    (1<<0)
+#define OE_IS_OBJECT  (1<<1)
+#define OE_IS_METHOD  (1<<2)
+
+int zend_startup(zend_utility_functions *utility_functions, char **extensions TSRMLS_DC);
+void zend_shutdown(TSRMLS_D);
+void zend_register_standard_ini_entries(TSRMLS_D);
+void zend_post_startup(TSRMLS_D);
+void zend_set_utility_values(zend_utility_values *utility_values);
+
+BEGIN_EXTERN_C()
+ZEND_API void _zend_bailout(char *filename, uint lineno);
+END_EXTERN_C()
+
+#define zend_bailout()    _zend_bailout(__FILE__, __LINE__)
+
+#ifdef HAVE_SIGSETJMP
+#  define SETJMP(a) sigsetjmp(a, 0)
+#  define LONGJMP(a,b) siglongjmp(a, b)
+#  define JMP_BUF sigjmp_buf
+#else
+#  define SETJMP(a) setjmp(a)
+#  define LONGJMP(a,b) longjmp(a, b)
+#  define JMP_BUF jmp_buf
+#endif
+
+#define zend_try                        \
+  {                              \
+    JMP_BUF *__orig_bailout = EG(bailout);          \
+    JMP_BUF __bailout;                    \
+                                \
+    EG(bailout) = &__bailout;                \
+    if (SETJMP(__bailout)==0) {
+#define zend_catch                        \
+    } else {                        \
+      EG(bailout) = __orig_bailout;
+#define zend_end_try()                      \
+    }                            \
+    EG(bailout) = __orig_bailout;              \
+  }
+#define zend_first_try    EG(bailout)=NULL;  zend_try
+
+BEGIN_EXTERN_C()
+ZEND_API char *get_zend_version(void);
 ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy);
+ZEND_API int zend_print_zval(zval *expr, int indent);
+ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent);
+ZEND_API void zend_print_zval_r(zval *expr, int indent TSRMLS_DC);
+ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC);
+ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC);
+ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+END_EXTERN_C()
+
+void zend_activate(TSRMLS_D);
+void zend_deactivate(TSRMLS_D);
+void zend_call_destructors(TSRMLS_D);
+void zend_activate_modules(TSRMLS_D);
+void zend_deactivate_modules(TSRMLS_D);
+void zend_post_deactivate_modules(TSRMLS_D);
+
+#if ZEND_DEBUG
+#define Z_DBG(expr)    (expr)
+#else
+#define  Z_DBG(expr)
+#endif
+
+BEGIN_EXTERN_C()
+ZEND_API void free_estring(char **str_p);
+END_EXTERN_C()
+
+/* FIXME: Check if we can save if (ptr) too */
 
 #define STR_FREE(ptr) if (ptr && !IS_INTERNED(ptr)) { efree(ptr); }
 #define STR_FREE_REL(ptr) if (ptr && !IS_INTERNED(ptr)) { efree_rel(ptr); }
@@ -408,53 +733,125 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 #define STR_REALLOC(ptr, size) \
       ptr = (char *) erealloc(ptr, size);
 
+/* output support */
+#define ZEND_WRITE(str, str_len)    zend_write((str), (str_len))
+#define ZEND_WRITE_EX(str, str_len)    write_func((str), (str_len))
+#define ZEND_PUTS(str)          zend_write((str), strlen((str)))
+#define ZEND_PUTS_EX(str)        write_func((str), strlen((str)))
+#define ZEND_PUTC(c)          zend_write(&(c), 1), (c)
+
 BEGIN_EXTERN_C()
+extern ZEND_API int (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
+extern ZEND_API zend_write_func_t zend_write;
+extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path TSRMLS_DC);
+extern ZEND_API void (*zend_block_interruptions)(void);
+extern ZEND_API void (*zend_unblock_interruptions)(void);
+extern ZEND_API void (*zend_ticks_function)(int ticks);
+extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
+extern ZEND_API void (*zend_on_timeout)(int seconds TSRMLS_DC);
+extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
+extern int (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
+extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len TSRMLS_DC);
+extern ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
 
-ZEND_API void zend_error(int type, const char *format, ...);
+ZEND_API void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
+void zenderror(const char *error);
+
+/* The following #define is used for code duality in PHP for Engine 1 & 2 */
+#define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def
 extern ZEND_API zend_class_entry *zend_standard_class_def;
+extern ZEND_API zend_utility_values zend_uv;
+#ifndef HHVM
+extern ZEND_API zval zval_used_for_init;
+#endif
 
 END_EXTERN_C()
 
-#define INIT_PZVAL(z)     \
+#define ZEND_UV(name) (zend_uv.name)
+
+#ifndef ZEND_SIGNALS
+#define HANDLE_BLOCK_INTERRUPTIONS()    if (zend_block_interruptions) { zend_block_interruptions(); }
+#define HANDLE_UNBLOCK_INTERRUPTIONS()    if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
+#else
+#include "zend_signal.h"
+
+#define HANDLE_BLOCK_INTERRUPTIONS()    ZEND_SIGNAL_BLOCK_INTERRUPUTIONS()
+#define HANDLE_UNBLOCK_INTERRUPTIONS()    ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
+#endif
+
+BEGIN_EXTERN_C()
+ZEND_API void zend_message_dispatcher(long message, const void *data TSRMLS_DC);
+
+ZEND_API int zend_get_configuration_directive(const char *name, uint name_length, zval *contents);
+END_EXTERN_C()
+
+/* Messages for applications of Zend */
+#define ZMSG_FAILED_INCLUDE_FOPEN    1L
+#define ZMSG_FAILED_REQUIRE_FOPEN    2L
+#define ZMSG_FAILED_HIGHLIGHT_FOPEN    3L
+#define ZMSG_MEMORY_LEAK_DETECTED    4L
+#define ZMSG_MEMORY_LEAK_REPEATED    5L
+#define ZMSG_LOG_SCRIPT_NAME      6L
+#define ZMSG_MEMORY_LEAKS_GRAND_TOTAL  7L
+
+#ifdef HHVM
+#define INIT_PZVAL(z)    \
   Z_SET_REFCOUNT_P(z, 1); \
   Z_UNSET_ISREF_P(z);
+#else
+#define INIT_PZVAL(z)    \
+  (z)->refcount__gc = 1;  \
+  (z)->is_ref__gc = 0;
+#endif
 
+#ifdef HHVM
 #define INIT_ZVAL(z) ((z).zInit());
+#else
+#define INIT_ZVAL(z) z = zval_used_for_init;
+#endif
 
-#define ALLOC_INIT_ZVAL(zp) \
-  ALLOC_ZVAL(zp); \
+#define ALLOC_INIT_ZVAL(zp)            \
+  ALLOC_ZVAL(zp);    \
   INIT_ZVAL(*zp);
 
-#define MAKE_STD_ZVAL(zv) \
+#define MAKE_STD_ZVAL(zv)         \
   ALLOC_ZVAL(zv); \
   INIT_PZVAL(zv);
 
-#define PZVAL_IS_REF(z) Z_ISREF_P(z)
+#define PZVAL_IS_REF(z)    Z_ISREF_P(z)
 
+#ifdef HHVM
 #define ZVAL_COPY_VALUE(z, v) \
   do { \
     (z)->tv()->m_data.num = (v)->tv()->m_data.num; \
     (z)->tv()->m_type = (v)->tv()->m_type; \
   } while (0)
+#else
+#define ZVAL_COPY_VALUE(z, v)          \
+  do {                    \
+    (z)->value = (v)->value;        \
+    Z_TYPE_P(z) = Z_TYPE_P(v);        \
+  } while (0)
+#endif
 
-#define INIT_PZVAL_COPY(z, v) \
-  do { \
-    ZVAL_COPY_VALUE(z, v); \
-    Z_SET_REFCOUNT_P(z, 1); \
-    Z_UNSET_ISREF_P(z); \
+#define INIT_PZVAL_COPY(z, v)          \
+  do {                    \
+    ZVAL_COPY_VALUE(z, v);          \
+    Z_SET_REFCOUNT_P(z, 1);          \
+    Z_UNSET_ISREF_P(z);            \
   } while (0)
 
-#define SEPARATE_ZVAL(ppzv) \
-  do { \
-    if (Z_REFCOUNT_PP((ppzv)) > 1) { \
-      zval *new_zv; \
-      Z_DELREF_PP(ppzv); \
-      ALLOC_ZVAL(new_zv); \
-      INIT_PZVAL_COPY(new_zv, *(ppzv)); \
-      *(ppzv) = new_zv; \
-      zval_copy_ctor(new_zv); \
-    } \
+#define SEPARATE_ZVAL(ppzv)            \
+  do {                    \
+    if (Z_REFCOUNT_PP((ppzv)) > 1) {    \
+      zval *new_zv;            \
+      Z_DELREF_PP(ppzv);          \
+      ALLOC_ZVAL(new_zv);          \
+      INIT_PZVAL_COPY(new_zv, *(ppzv));  \
+      *(ppzv) = new_zv;          \
+      zval_copy_ctor(new_zv);        \
+    }                    \
   } while (0)
 
 #define SEPARATE_ZVAL_IF_NOT_REF(ppzv)    \
@@ -477,7 +874,7 @@ END_EXTERN_C()
     FREE_ZVAL(pzv);            \
   }                    \
   INIT_PZVAL(&(zv));
-
+  
 #define MAKE_COPY_ZVAL(ppzv, pzv)   \
   INIT_PZVAL_COPY(pzv, *(ppzv));  \
   zval_copy_ctor((pzv));
@@ -497,7 +894,52 @@ END_EXTERN_C()
   Z_SET_REFCOUNT_PP(ppzv_dest, refcount);    \
 }
 
+#define SEPARATE_ARG_IF_REF(varptr) \
+  if (PZVAL_IS_REF(varptr)) { \
+    zval *original_var = varptr; \
+    ALLOC_ZVAL(varptr); \
+    INIT_PZVAL_COPY(varptr, original_var); \
+    zval_copy_ctor(varptr); \
+  } else { \
+    Z_ADDREF_P(varptr); \
+  }
+
+#define READY_TO_DESTROY(zv) \
+  (Z_REFCOUNT_P(zv) == 1 && \
+   (Z_TYPE_P(zv) != IS_OBJECT || \
+    zend_objects_store_get_refcount(zv TSRMLS_CC) == 1))
+
+#define ZEND_MAX_RESERVED_RESOURCES  4
+
+#include "zend_gc.h"
 #include "zend_operators.h"
 #include "zend_variables.h"
 
+typedef enum {
+  EH_NORMAL = 0,
+  EH_SUPPRESS,
+  EH_THROW
+} zend_error_handling_t;
+
+typedef struct {
+  zend_error_handling_t  handling;
+  zend_class_entry       *exception;
+  zval                   *user_handler;
+} zend_error_handling;
+
+ZEND_API void zend_save_error_handling(zend_error_handling *current TSRMLS_DC);
+ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, zend_class_entry *exception_class, zend_error_handling *current TSRMLS_DC);
+ZEND_API void zend_restore_error_handling(zend_error_handling *saved TSRMLS_DC);
+
+#define DEBUG_BACKTRACE_PROVIDE_OBJECT (1<<0)
+#define DEBUG_BACKTRACE_IGNORE_ARGS    (1<<1)
+
 #endif /* ZEND_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

@@ -2,27 +2,34 @@
 
 // Test the KeyedIterable interface.
 
+function printFv($fv) {
+  var_dump(get_class($fv));
+  foreach ($fv as $e) {
+    var_dump($e);
+  }
+}
+
 function foo(KeyedIterable $fv) {
   echo "\nmap...\n";
-  var_dump($fv->map(function ($v) { return 2 * $v; }));
+  printFv($fv->map(function ($v) { return 2 * $v; }));
 
   echo "\nmapWithKey...\n";
-  var_dump($fv->mapWithKey(function ($k, $v) { return Pair {$k, $v}; }));
+  printFv($fv->mapWithKey(function ($k, $v) { return Pair {$k, $v}; }));
 
   echo "\nfilter...\n";
-  var_dump($fv->filter(function ($v) { return $v <= 1; }));
+  printFv($fv->filter(function ($v) { return $v <= 1; }));
 
   echo "\nfilterWithKey...\n";
-  var_dump($fv->filterWithKey(function ($k, $v) { return $k + $v <= 3; }));
+  printFv($fv->filterWithKey(function ($k, $v) { return $k + $v <= 3; }));
 
   echo "\nzip...\n";
-  var_dump($fv->zip(Vector {4, 5}));
+  printFv($fv->zip(Vector {4, 5}));
 
   echo "\nkvzip...\n";
-  var_dump($fv->kvzip());
+  printFv($fv->kvzip());
 
   echo "\nkeys...\n";
-  var_dump($fv->keys());
+  printFv($fv->keys());
 
   echo "\ngetIterator...\n";
   $it = $fv->getIterator();

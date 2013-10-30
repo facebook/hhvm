@@ -1,4 +1,4 @@
-/*
+/* 
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
@@ -36,3 +36,11 @@ ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC);
 END_EXTERN_C()
 
 #endif /* ZEND_OBJECTS_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

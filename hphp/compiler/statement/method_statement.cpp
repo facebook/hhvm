@@ -220,8 +220,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
           "Access type for interface method %s::%s() must be omitted",
           classScope->getOriginalName().c_str(), getOriginalName().c_str());
       }
-      // FIXME: WholeProgram check is temporary (t3044335)
-      if (!Option::WholeProgram && m_modifiers->isAsync()) {
+      if (m_modifiers->isAsync()) {
         m_modifiers->parseTimeFatal(
           Compiler::InvalidAttribute,
           Strings::ASYNC_WITHOUT_BODY,
@@ -254,8 +253,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
                        classScope->getOriginalName().c_str(),
                        getOriginalName().c_str());
       }
-      // FIXME: WholeProgram check is temporary (t3044335)
-      if (!Option::WholeProgram && m_modifiers->isAsync()) {
+      if (m_modifiers->isAsync()) {
         m_modifiers->parseTimeFatal(
           Compiler::InvalidAttribute,
           Strings::ASYNC_WITHOUT_BODY,

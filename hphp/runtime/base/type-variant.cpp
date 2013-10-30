@@ -204,6 +204,16 @@ Variant::Variant(RefData *r) {
   m_type = KindOfRef;
   if (r) {
     m_data.pref = r;
+    r->incRefCount();
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
+Variant::Variant(RefData *r, NoInc) {
+  m_type = KindOfRef;
+  if (r) {
+    m_data.pref = r;
   } else {
     m_type = KindOfNull;
   }
@@ -798,8 +808,7 @@ static void raise_bad_offset_notice() {
     case KindOfNull:                                                    \
       break;                                                            \
     default:                                                            \
-      if ((flags & AccessFlags::Error) &&                               \
-          !(flags & AccessFlags::NoHipHop)) {                           \
+      if (flags & AccessFlags::Error) {                                 \
         raise_bad_offset_notice();                                      \
       }                                                                 \
       break;                                                            \
@@ -826,7 +835,7 @@ Variant Variant::rvalAtHelper(int64_t offset, ACCESSPARAMS_IMPL) const {
   case KindOfNull:
     break;
   default:
-    if ((flags & AccessFlags::Error) && !(flags & AccessFlags::NoHipHop)) {
+    if (flags & AccessFlags::Error) {
       raise_bad_offset_notice();
     }
     break;
@@ -867,7 +876,7 @@ Variant Variant::rvalAt(const String& offset, ACCESSPARAMS_IMPL) const {
   case KindOfNull:
     break;
   default:
-    if ((flags & AccessFlags::Error) && !(flags & AccessFlags::NoHipHop)) {
+    if (flags & AccessFlags::Error) {
       raise_bad_offset_notice();
     }
     break;
@@ -932,7 +941,7 @@ Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
   case KindOfNull:
     break;
   default:
-    if ((flags & AccessFlags::Error) && !(flags & AccessFlags::NoHipHop)) {
+    if (flags & AccessFlags::Error) {
       raise_bad_offset_notice();
     }
     break;
@@ -964,7 +973,7 @@ CVarRef Variant::rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
   case KindOfNull:
     break;
   default:
-    if ((flags & AccessFlags::Error) && !(flags & AccessFlags::NoHipHop)) {
+    if (flags & AccessFlags::Error) {
       raise_bad_offset_notice();
     }
     break;

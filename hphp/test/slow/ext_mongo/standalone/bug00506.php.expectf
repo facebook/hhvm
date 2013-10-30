@@ -1,0 +1,13 @@
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+HipHop Notice: %s
+array(3) {
+  ["password"]=>
+  int(34534)
+  ["username"]=>
+  string(7) "derickr"
+  ["connect"]=>
+  bool(false)
+}

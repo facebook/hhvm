@@ -1,416 +1,408 @@
-PHPUnit 3.7.27-4-g1ded007 by Sebastian Bergmann.
-
-Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/laravel/phpunit.xml
-
-
-Starting test 'AuthDatabaseReminderRepositoryTest::testCreateInsertsNewRecordIntoTable'.
+AuthDatabaseReminderRepositoryTest::testCreateInsertsNewRecordIntoTable
 .
-Starting test 'AuthDatabaseReminderRepositoryTest::testExistReturnsFalseIfNoRowFoundForUser'.
+AuthDatabaseReminderRepositoryTest::testExistReturnsFalseIfNoRowFoundForUser
 .
-Starting test 'AuthDatabaseReminderRepositoryTest::testExistReturnsFalseIfRecordIsExpired'.
+AuthDatabaseReminderRepositoryTest::testExistReturnsFalseIfRecordIsExpired
 .
-Starting test 'AuthDatabaseReminderRepositoryTest::testExistReturnsTrueIfValidRecordExists'.
+AuthDatabaseReminderRepositoryTest::testExistReturnsTrueIfValidRecordExists
 .
-Starting test 'AuthDatabaseReminderRepositoryTest::testDeleteMethodDeletesByToken'.
+AuthDatabaseReminderRepositoryTest::testDeleteMethodDeletesByToken
 .
-Starting test 'AuthDatabaseUserProviderTest::testRetrieveByIDReturnsUserWhenUserIsFound'.
+AuthDatabaseUserProviderTest::testRetrieveByIDReturnsUserWhenUserIsFound
 .
-Starting test 'AuthDatabaseUserProviderTest::testRetrieveByIDReturnsNullWhenUserIsNotFound'.
+AuthDatabaseUserProviderTest::testRetrieveByIDReturnsNullWhenUserIsNotFound
 .
-Starting test 'AuthDatabaseUserProviderTest::testRetrieveByCredentialsReturnsUserWhenUserIsFound'.
+AuthDatabaseUserProviderTest::testRetrieveByCredentialsReturnsUserWhenUserIsFound
 .
-Starting test 'AuthDatabaseUserProviderTest::testRetrieveByCredentialsReturnsNullWhenUserIsFound'.
+AuthDatabaseUserProviderTest::testRetrieveByCredentialsReturnsNullWhenUserIsFound
 .
-Starting test 'AuthDatabaseUserProviderTest::testCredentialValidation'.
+AuthDatabaseUserProviderTest::testCredentialValidation
 .
-Starting test 'AuthEloquentUserProviderTest::testRetrieveByIDReturnsUser'.
+AuthEloquentUserProviderTest::testRetrieveByIDReturnsUser
 .
-Starting test 'AuthEloquentUserProviderTest::testRetrieveByCredentialsReturnsUser'.
+AuthEloquentUserProviderTest::testRetrieveByCredentialsReturnsUser
 .
-Starting test 'AuthEloquentUserProviderTest::testCredentialValidation'.
+AuthEloquentUserProviderTest::testCredentialValidation
 .
-Starting test 'AuthEloquentUserProviderTest::testModelsCanBeCreated'.
+AuthEloquentUserProviderTest::testModelsCanBeCreated
 .
-Starting test 'AuthGuardTest::testBasicReturnsNullOnValidAttempt'.
+AuthGuardTest::testBasicReturnsNullOnValidAttempt
 .
-Starting test 'AuthGuardTest::testBasicReturnsNullWhenAlreadyLoggedIn'.
+AuthGuardTest::testBasicReturnsNullWhenAlreadyLoggedIn
 .
-Starting test 'AuthGuardTest::testBasicReturnsResponseOnFailure'.
+AuthGuardTest::testBasicReturnsResponseOnFailure
 .
-Starting test 'AuthGuardTest::testAttemptCallsRetrieveByCredentials'.
+AuthGuardTest::testAttemptCallsRetrieveByCredentials
 .
-Starting test 'AuthGuardTest::testAttemptReturnsUserInterface'.
+AuthGuardTest::testAttemptReturnsUserInterface
 .
-Starting test 'AuthGuardTest::testAttemptReturnsFalseIfUserNotGiven'.
+AuthGuardTest::testAttemptReturnsFalseIfUserNotGiven
 .
-Starting test 'AuthGuardTest::testLoginStoresIdentifierInSession'.
+AuthGuardTest::testLoginStoresIdentifierInSession
 .
-Starting test 'AuthGuardTest::testLoginFiresLoginEvent'.
+AuthGuardTest::testLoginFiresLoginEvent
 .
-Starting test 'AuthGuardTest::testIsAuthedReturnsTrueWhenUserIsNotNull'.
+AuthGuardTest::testIsAuthedReturnsTrueWhenUserIsNotNull
 .
-Starting test 'AuthGuardTest::testIsAuthedReturnsFalseWhenUserIsNull'.
+AuthGuardTest::testIsAuthedReturnsFalseWhenUserIsNull
 .
-Starting test 'AuthGuardTest::testUserMethodReturnsCachedUser'.
+AuthGuardTest::testUserMethodReturnsCachedUser
 .
-Starting test 'AuthGuardTest::testNullIsReturnedForUserIfNoUserFound'.
+AuthGuardTest::testNullIsReturnedForUserIfNoUserFound
 .
-Starting test 'AuthGuardTest::testUserIsSetToRetrievedUser'.
+AuthGuardTest::testUserIsSetToRetrievedUser
 .
-Starting test 'AuthGuardTest::testLogoutRemovesSessionTokenAndRememberMeCookie'.
+AuthGuardTest::testLogoutRemovesSessionTokenAndRememberMeCookie
 .
-Starting test 'AuthGuardTest::testLogoutFiresLogoutEvent'.
+AuthGuardTest::testLogoutFiresLogoutEvent
 .
-Starting test 'AuthGuardTest::testLoginMethodQueuesCookieWhenRemembering'.
+AuthGuardTest::testLoginMethodQueuesCookieWhenRemembering
 .
-Starting test 'AuthGuardTest::testLoginUsingIdStoresInSessionAndLogsInWithUser'.
+AuthGuardTest::testLoginUsingIdStoresInSessionAndLogsInWithUser
 .
-Starting test 'AuthGuardTest::testUserUsesRememberCookieIfItExists'.
+AuthGuardTest::testUserUsesRememberCookieIfItExists
 .
-Starting test 'AuthPasswordBrokerTest::testIfUserIsNotFoundErrorRedirectIsReturned'.
+AuthPasswordBrokerTest::testIfUserIsNotFoundErrorRedirectIsReturned
 .
-Starting test 'AuthPasswordBrokerTest::testGetUserThrowsExceptionIfUserDoesntImplementRemindable'.
+AuthPasswordBrokerTest::testGetUserThrowsExceptionIfUserDoesntImplementRemindable
 .
-Starting test 'AuthPasswordBrokerTest::testUserIsRetrievedByCredentials'.
+AuthPasswordBrokerTest::testUserIsRetrievedByCredentials
 .
-Starting test 'AuthPasswordBrokerTest::testBrokerCreatesReminderAndRedirectsWithoutError'.
+AuthPasswordBrokerTest::testBrokerCreatesReminderAndRedirectsWithoutError
 .
-Starting test 'AuthPasswordBrokerTest::testMailerIsCalledWithProperViewTokenAndCallback'.
+AuthPasswordBrokerTest::testMailerIsCalledWithProperViewTokenAndCallback
 .
-Starting test 'AuthPasswordBrokerTest::testRedirectIsReturnedByResetWhenUserCredentialsInvalid'.
+AuthPasswordBrokerTest::testRedirectIsReturnedByResetWhenUserCredentialsInvalid
 .
-Starting test 'AuthPasswordBrokerTest::testRedirectReturnedByRemindWhenPasswordsDontMatch'.
+AuthPasswordBrokerTest::testRedirectReturnedByRemindWhenPasswordsDontMatch
 .
-Starting test 'AuthPasswordBrokerTest::testRedirectReturnedByRemindWhenPasswordNotSet'.
+AuthPasswordBrokerTest::testRedirectReturnedByRemindWhenPasswordNotSet
 .
-Starting test 'AuthPasswordBrokerTest::testRedirectReturnedByRemindWhenPasswordsLessThanSixCharacters'.
+AuthPasswordBrokerTest::testRedirectReturnedByRemindWhenPasswordsLessThanSixCharacters
 .
-Starting test 'AuthPasswordBrokerTest::testRedirectReturnedByRemindWhenRecordDoesntExistInTable'.
+AuthPasswordBrokerTest::testRedirectReturnedByRemindWhenRecordDoesntExistInTable
 .
-Starting test 'AuthPasswordBrokerTest::testResetRemovesRecordOnReminderTableAndCallsCallback'.
+AuthPasswordBrokerTest::testResetRemovesRecordOnReminderTableAndCallsCallback
 .
-Starting test 'CacheApcStoreTest::testGetReturnsNullWhenNotFound'.
+CacheApcStoreTest::testGetReturnsNullWhenNotFound
 .
-Starting test 'CacheApcStoreTest::testAPCValueIsReturned'.
+CacheApcStoreTest::testAPCValueIsReturned
 .
-Starting test 'CacheApcStoreTest::testSetMethodProperlyCallsAPC'.
+CacheApcStoreTest::testSetMethodProperlyCallsAPC
 .
-Starting test 'CacheApcStoreTest::testIncrementMethodProperlyCallsAPC'.
+CacheApcStoreTest::testIncrementMethodProperlyCallsAPC
 .
-Starting test 'CacheApcStoreTest::testDecrementMethodProperlyCallsAPC'.
+CacheApcStoreTest::testDecrementMethodProperlyCallsAPC
 .
-Starting test 'CacheApcStoreTest::testStoreItemForeverProperlyCallsAPC'.
+CacheApcStoreTest::testStoreItemForeverProperlyCallsAPC
 .
-Starting test 'CacheApcStoreTest::testForgetMethodProperlyCallsAPC'.
+CacheApcStoreTest::testForgetMethodProperlyCallsAPC
 .
-Starting test 'CacheArrayStoreTest::testItemsCanBeSetAndRetrieved'.
+CacheArrayStoreTest::testItemsCanBeSetAndRetrieved
 .
-Starting test 'CacheArrayStoreTest::testStoreItemForeverProperlyStoresInArray'.
+CacheArrayStoreTest::testStoreItemForeverProperlyStoresInArray
 .
-Starting test 'CacheArrayStoreTest::testValuesCanBeIncremented'.
+CacheArrayStoreTest::testValuesCanBeIncremented
 .
-Starting test 'CacheArrayStoreTest::testValuesCanBeDecremented'.
+CacheArrayStoreTest::testValuesCanBeDecremented
 .
-Starting test 'CacheArrayStoreTest::testItemsCanBeRemoved'.
+CacheArrayStoreTest::testItemsCanBeRemoved
 .
-Starting test 'CacheArrayStoreTest::testItemsCanBeFlushed'.
+CacheArrayStoreTest::testItemsCanBeFlushed
 .
-Starting test 'CacheDatabaseStoreTest::testNullIsReturnedWhenItemNotFound'.
+CacheDatabaseStoreTest::testNullIsReturnedWhenItemNotFound
 .
-Starting test 'CacheDatabaseStoreTest::testNullIsReturnedAndItemDeletedWhenItemIsExpired'.
+CacheDatabaseStoreTest::testNullIsReturnedAndItemDeletedWhenItemIsExpired
 .
-Starting test 'CacheDatabaseStoreTest::testDecryptedValueIsReturnedWhenItemIsValid'.
+CacheDatabaseStoreTest::testDecryptedValueIsReturnedWhenItemIsValid
 .
-Starting test 'CacheDatabaseStoreTest::testEncryptedValueIsInsertedWhenNoExceptionsAreThrown'.
+CacheDatabaseStoreTest::testEncryptedValueIsInsertedWhenNoExceptionsAreThrown
 .
-Starting test 'CacheDatabaseStoreTest::testEncryptedValueIsUpdatedWhenInsertThrowsException'.
+CacheDatabaseStoreTest::testEncryptedValueIsUpdatedWhenInsertThrowsException
 .
-Starting test 'CacheDatabaseStoreTest::testForeverCallsStoreItemWithReallyLongTime'.
+CacheDatabaseStoreTest::testForeverCallsStoreItemWithReallyLongTime
 .
-Starting test 'CacheDatabaseStoreTest::testItemsMayBeRemovedFromCache'.
-.  63 / 929 (  6%)
-
-Starting test 'CacheDatabaseStoreTest::testItemsMayBeFlushedFromCache'.
+CacheDatabaseStoreTest::testItemsMayBeRemovedFromCache
 .
-Starting test 'CacheFileStoreTest::testNullIsReturnedIfFileDoesntExist'.
+CacheDatabaseStoreTest::testItemsMayBeFlushedFromCache
 .
-Starting test 'CacheFileStoreTest::testPutCreatesMissingDirectories'.
+CacheFileStoreTest::testNullIsReturnedIfFileDoesntExist
 .
-Starting test 'CacheFileStoreTest::testExpiredItemsReturnNull'.
+CacheFileStoreTest::testPutCreatesMissingDirectories
 .
-Starting test 'CacheFileStoreTest::testValidItemReturnsContents'.
+CacheFileStoreTest::testExpiredItemsReturnNull
 .
-Starting test 'CacheFileStoreTest::testStoreItemProperlyStoresValues'.
+CacheFileStoreTest::testValidItemReturnsContents
 .
-Starting test 'CacheFileStoreTest::testForeversAreStoredWithHighTimestamp'.
+CacheFileStoreTest::testStoreItemProperlyStoresValues
 .
-Starting test 'CacheFileStoreTest::testRemoveDeletesFile'.
+CacheFileStoreTest::testForeversAreStoredWithHighTimestamp
 .
-Starting test 'CacheFileStoreTest::testFlushCleansDirectory'.
+CacheFileStoreTest::testRemoveDeletesFile
 .
-Starting test 'CacheMemcachedConnectorTest::testServersAreAddedCorrectly'.
+CacheFileStoreTest::testFlushCleansDirectory
 .
-Starting test 'CacheMemcachedConnectorTest::testExceptionThrownOnBadConnection'.
+CacheMemcachedConnectorTest::testServersAreAddedCorrectly
 .
-Starting test 'CacheMemcachedStoreTest::testGetReturnsNullWhenNotFound'.
+CacheMemcachedConnectorTest::testExceptionThrownOnBadConnection
+.
+CacheMemcachedStoreTest::testGetReturnsNullWhenNotFound
 E
-Starting test 'CacheMemcachedStoreTest::testMemcacheValueIsReturned'.
+CacheMemcachedStoreTest::testMemcacheValueIsReturned
 E
-Starting test 'CacheMemcachedStoreTest::testSetMethodProperlyCallsMemcache'.
+CacheMemcachedStoreTest::testSetMethodProperlyCallsMemcache
 E
-Starting test 'CacheMemcachedStoreTest::testIncrementMethodProperlyCallsMemcache'.
+CacheMemcachedStoreTest::testIncrementMethodProperlyCallsMemcache
 E
-Starting test 'CacheMemcachedStoreTest::testDecrementMethodProperlyCallsMemcache'.
+CacheMemcachedStoreTest::testDecrementMethodProperlyCallsMemcache
 E
-Starting test 'CacheMemcachedStoreTest::testStoreItemForeverProperlyCallsMemcached'.
+CacheMemcachedStoreTest::testStoreItemForeverProperlyCallsMemcached
 E
-Starting test 'CacheMemcachedStoreTest::testForgetMethodProperlyCallsMemcache'.
+CacheMemcachedStoreTest::testForgetMethodProperlyCallsMemcache
 E
-Starting test 'CacheRedisStoreTest::testGetReturnsNullWhenNotFound'.
+CacheRedisStoreTest::testGetReturnsNullWhenNotFound
 .
-Starting test 'CacheRedisStoreTest::testRedisValueIsReturned'.
+CacheRedisStoreTest::testRedisValueIsReturned
 .
-Starting test 'CacheRedisStoreTest::testRedisValueIsReturnedForNumerics'.
+CacheRedisStoreTest::testRedisValueIsReturnedForNumerics
 .
-Starting test 'CacheRedisStoreTest::testSetMethodProperlyCallsRedis'.
+CacheRedisStoreTest::testSetMethodProperlyCallsRedis
 .
-Starting test 'CacheRedisStoreTest::testSetMethodProperlyCallsRedisForNumerics'.
+CacheRedisStoreTest::testSetMethodProperlyCallsRedisForNumerics
 .
-Starting test 'CacheRedisStoreTest::testIncrementMethodProperlyCallsRedis'.
+CacheRedisStoreTest::testIncrementMethodProperlyCallsRedis
 .
-Starting test 'CacheRedisStoreTest::testDecrementMethodProperlyCallsRedis'.
+CacheRedisStoreTest::testDecrementMethodProperlyCallsRedis
 .
-Starting test 'CacheRedisStoreTest::testStoreItemForeverProperlyCallsRedis'.
+CacheRedisStoreTest::testStoreItemForeverProperlyCallsRedis
 .
-Starting test 'CacheRedisStoreTest::testForgetMethodProperlyCallsRedis'.
+CacheRedisStoreTest::testForgetMethodProperlyCallsRedis
 .
-Starting test 'CacheRepositoryTest::testGetReturnsValueFromCache'.
+CacheRepositoryTest::testGetReturnsValueFromCache
 .
-Starting test 'CacheRepositoryTest::testDefaultValueIsReturned'.
+CacheRepositoryTest::testDefaultValueIsReturned
 .
-Starting test 'CacheRepositoryTest::testSettingDefaultCacheTime'.
+CacheRepositoryTest::testSettingDefaultCacheTime
 .
-Starting test 'CacheRepositoryTest::testHasMethod'.
+CacheRepositoryTest::testHasMethod
 .
-Starting test 'CacheRepositoryTest::testRememberMethodCallsPutAndReturnsDefault'.
+CacheRepositoryTest::testRememberMethodCallsPutAndReturnsDefault
 .
-Starting test 'CacheRepositoryTest::testRememberForeverMethodCallsForeverAndReturnsDefault'.
+CacheRepositoryTest::testRememberForeverMethodCallsForeverAndReturnsDefault
 .
-Starting test 'ConfigFileLoaderTest::testEmptyArrayIsReturnedOnNullPath'.
+ConfigFileLoaderTest::testEmptyArrayIsReturnedOnNullPath
 .
-Starting test 'ConfigFileLoaderTest::testBasicArrayIsReturned'.
+ConfigFileLoaderTest::testBasicArrayIsReturned
 .
-Starting test 'ConfigFileLoaderTest::testEnvironmentArrayIsMerged'.
+ConfigFileLoaderTest::testEnvironmentArrayIsMerged
 .
-Starting test 'ConfigFileLoaderTest::testGroupExistsReturnsTrueWhenTheGroupExists'.
+ConfigFileLoaderTest::testGroupExistsReturnsTrueWhenTheGroupExists
 .
-Starting test 'ConfigFileLoaderTest::testGroupExistsReturnsTrueWhenNamespaceGroupExists'.
+ConfigFileLoaderTest::testGroupExistsReturnsTrueWhenNamespaceGroupExists
 .
-Starting test 'ConfigFileLoaderTest::testGroupExistsReturnsFalseWhenNamespaceHintDoesntExists'.
+ConfigFileLoaderTest::testGroupExistsReturnsFalseWhenNamespaceHintDoesntExists
 .
-Starting test 'ConfigFileLoaderTest::testGroupExistsReturnsFalseWhenNamespaceGroupDoesntExists'.
+ConfigFileLoaderTest::testGroupExistsReturnsFalseWhenNamespaceGroupDoesntExists
 .
-Starting test 'ConfigFileLoaderTest::testCascadingPackagesProperlyLoadsFiles'.
+ConfigFileLoaderTest::testCascadingPackagesProperlyLoadsFiles
 .
-Starting test 'ConfigRepositoryTest::testHasGroupIndicatesIfConfigGroupExists'.
+ConfigRepositoryTest::testHasGroupIndicatesIfConfigGroupExists
 .
-Starting test 'ConfigRepositoryTest::testHasOnTrueReturnsTrue'.
+ConfigRepositoryTest::testHasOnTrueReturnsTrue
 .
-Starting test 'ConfigRepositoryTest::testGetReturnsBasicItems'.
+ConfigRepositoryTest::testGetReturnsBasicItems
 .
-Starting test 'ConfigRepositoryTest::testEntireArrayCanBeReturned'.
+ConfigRepositoryTest::testEntireArrayCanBeReturned
 .
-Starting test 'ConfigRepositoryTest::testLoaderGetsCalledCorrectForNamespaces'.
+ConfigRepositoryTest::testLoaderGetsCalledCorrectForNamespaces
 .
-Starting test 'ConfigRepositoryTest::testNamespacedAccessedAndPostNamespaceLoadEventIsFired'.
+ConfigRepositoryTest::testNamespacedAccessedAndPostNamespaceLoadEventIsFired
 .
-Starting test 'ConfigRepositoryTest::testLoaderUsesNamespaceAsGroupWhenUsingPackagesAndGroupDoesntExist'.
+ConfigRepositoryTest::testLoaderUsesNamespaceAsGroupWhenUsingPackagesAndGroupDoesntExist
 .
-Starting test 'ConfigRepositoryTest::testItemsCanBeSet'.
+ConfigRepositoryTest::testItemsCanBeSet
 .
-Starting test 'ConfigRepositoryTest::testPackageRegistersNamespaceAndSetsUpAfterLoadCallback'.
+ConfigRepositoryTest::testPackageRegistersNamespaceAndSetsUpAfterLoadCallback
 .
-Starting test 'ConsoleApplicationTest::testAddSetsLaravelInstance'.
+ConsoleApplicationTest::testAddSetsLaravelInstance
 .
-Starting test 'ConsoleApplicationTest::testLaravelNotSetOnSymfonyCommands'.
+ConsoleApplicationTest::testLaravelNotSetOnSymfonyCommands
 .
-Starting test 'ConsoleApplicationTest::testResolveAddsCommandViaApplicationResolution'.
+ConsoleApplicationTest::testResolveAddsCommandViaApplicationResolution
 .
-Starting test 'ConsoleApplicationTest::testResolveCommandsCallsResolveForAllCommandsItsGiven'.
+ConsoleApplicationTest::testResolveCommandsCallsResolveForAllCommandsItsGiven
 .
-Starting test 'ConsoleApplicationTest::testResolveCommandsCallsResolveForAllCommandsItsGivenViaArray'.
+ConsoleApplicationTest::testResolveCommandsCallsResolveForAllCommandsItsGivenViaArray
 .
-Starting test 'ContainerContainerTest::testClosureResolution'.
+ContainerContainerTest::testClosureResolution
 .
-Starting test 'ContainerContainerTest::testBindIfDoesntRegisterIfServiceAlreadyRegistered'.
+ContainerContainerTest::testBindIfDoesntRegisterIfServiceAlreadyRegistered
 .
-Starting test 'ContainerContainerTest::testSharedClosureResolution'.
+ContainerContainerTest::testSharedClosureResolution
 .
-Starting test 'ContainerContainerTest::testAutoConcreteResolution'.
+ContainerContainerTest::testAutoConcreteResolution
 .
-Starting test 'ContainerContainerTest::testSharedConcreteResolution'.
+ContainerContainerTest::testSharedConcreteResolution
 .
-Starting test 'ContainerContainerTest::testAbstractToConcreteResolution'.
+ContainerContainerTest::testAbstractToConcreteResolution
 .
-Starting test 'ContainerContainerTest::testNestedDependencyResolution'.
+ContainerContainerTest::testNestedDependencyResolution
 .
-Starting test 'ContainerContainerTest::testContainerIsPassedToResolvers'.
-. 126 / 929 ( 13%)
-
-Starting test 'ContainerContainerTest::testArrayAccess'.
+ContainerContainerTest::testContainerIsPassedToResolvers
 .
-Starting test 'ContainerContainerTest::testAliases'.
+ContainerContainerTest::testArrayAccess
 .
-Starting test 'ContainerContainerTest::testShareMethod'.
+ContainerContainerTest::testAliases
 .
-Starting test 'ContainerContainerTest::testBindingsCanBeOverridden'.
+ContainerContainerTest::testShareMethod
 .
-Starting test 'ContainerContainerTest::testExtendedBindings'.
+ContainerContainerTest::testBindingsCanBeOverridden
 .
-Starting test 'ContainerContainerTest::testMultipleExtends'.
+ContainerContainerTest::testExtendedBindings
 .
-Starting test 'ContainerContainerTest::testParametersCanBePassedThroughToClosure'.
+ContainerContainerTest::testMultipleExtends
 .
-Starting test 'ContainerContainerTest::testResolutionOfDefaultParameters'.
+ContainerContainerTest::testParametersCanBePassedThroughToClosure
 .
-Starting test 'ContainerContainerTest::testResolvingCallbacksAreCalled'.
+ContainerContainerTest::testResolutionOfDefaultParameters
 .
-Starting test 'CookieTest::testCookiesAreCreatedWithProperOptions'.
+ContainerContainerTest::testResolvingCallbacksAreCalled
 .
-Starting test 'CookieTest::testCookiesAreCreatedWithProperOptionsUsingDefaultPathAndDomain'.
+CookieTest::testCookiesAreCreatedWithProperOptions
 .
-Starting test 'CookieTest::testCookiesAreProperlyParsed'.
+CookieTest::testCookiesAreCreatedWithProperOptionsUsingDefaultPathAndDomain
 .
-Starting test 'DatabaseConnectionFactoryTest::testMakeCallsCreateConnection'.
+CookieTest::testCookiesAreProperlyParsed
 .
-Starting test 'DatabaseConnectionFactoryTest::testMakeCanCallTheContainer'.
+DatabaseConnectionFactoryTest::testMakeCallsCreateConnection
 .
-Starting test 'DatabaseConnectionFactoryTest::testProperInstancesAreReturnedForProperDrivers'.
+DatabaseConnectionFactoryTest::testMakeCanCallTheContainer
 .
-Starting test 'DatabaseConnectionFactoryTest::testIfDriverIsntSetExceptionIsThrown'.
+DatabaseConnectionFactoryTest::testProperInstancesAreReturnedForProperDrivers
 .
-Starting test 'DatabaseConnectionFactoryTest::testExceptionIsThrownOnUnsupportedDriver'.
+DatabaseConnectionFactoryTest::testIfDriverIsntSetExceptionIsThrown
 .
-Starting test 'DatabaseConnectionTest::testSettingDefaultCallsGetDefaultGrammar'.
+DatabaseConnectionFactoryTest::testExceptionIsThrownOnUnsupportedDriver
 .
-Starting test 'DatabaseConnectionTest::testSettingDefaultCallsGetDefaultPostProcessor'.
+DatabaseConnectionTest::testSettingDefaultCallsGetDefaultGrammar
 .
-Starting test 'DatabaseConnectionTest::testSelectOneCallsSelectAndReturnsSingleResult'.
+DatabaseConnectionTest::testSettingDefaultCallsGetDefaultPostProcessor
 .
-Starting test 'DatabaseConnectionTest::testSelectProperlyCallsPDO'.
+DatabaseConnectionTest::testSelectOneCallsSelectAndReturnsSingleResult
+.
+DatabaseConnectionTest::testSelectProperlyCallsPDO
 E
-Starting test 'DatabaseConnectionTest::testInsertCallsTheStatementMethod'.
+DatabaseConnectionTest::testInsertCallsTheStatementMethod
 .
-Starting test 'DatabaseConnectionTest::testUpdateCallsTheAffectingStatementMethod'.
+DatabaseConnectionTest::testUpdateCallsTheAffectingStatementMethod
 .
-Starting test 'DatabaseConnectionTest::testDeleteCallsTheAffectingStatementMethod'.
+DatabaseConnectionTest::testDeleteCallsTheAffectingStatementMethod
 .
-Starting test 'DatabaseConnectionTest::testStatementProperlyCallsPDO'.
+DatabaseConnectionTest::testStatementProperlyCallsPDO
 E
-Starting test 'DatabaseConnectionTest::testAffectingStatementProperlyCallsPDO'.
+DatabaseConnectionTest::testAffectingStatementProperlyCallsPDO
 E
-Starting test 'DatabaseConnectionTest::testTransactionMethodRunsSuccessfully'.
+DatabaseConnectionTest::testTransactionMethodRunsSuccessfully
 .
-Starting test 'DatabaseConnectionTest::testTransactionMethodRollsbackAndThrows'.
+DatabaseConnectionTest::testTransactionMethodRollsbackAndThrows
 .
-Starting test 'DatabaseConnectionTest::testFromCreatesNewQueryBuilder'.
+DatabaseConnectionTest::testFromCreatesNewQueryBuilder
 .
-Starting test 'DatabaseConnectionTest::testPrepareBindings'.
+DatabaseConnectionTest::testPrepareBindings
 .
-Starting test 'DatabaseConnectionTest::testLogQueryFiresEventsIfSet'.
+DatabaseConnectionTest::testLogQueryFiresEventsIfSet
 .
-Starting test 'DatabaseConnectionTest::testPretendOnlyLogsQueries'.
+DatabaseConnectionTest::testPretendOnlyLogsQueries
 .
-Starting test 'DatabaseConnectionTest::testSchemaBuilderCanBeCreated'.
+DatabaseConnectionTest::testSchemaBuilderCanBeCreated
 .
-Starting test 'DatabaseConnectionTest::testResolvingPaginatorThroughClosure'.
+DatabaseConnectionTest::testResolvingPaginatorThroughClosure
 .
-Starting test 'DatabaseConnectionTest::testResolvingCacheThroughClosure'.
+DatabaseConnectionTest::testResolvingCacheThroughClosure
 .
-Starting test 'DatabaseConnectorTest::testOptionResolution'.
+DatabaseConnectorTest::testOptionResolution
 .
-Starting test 'DatabaseConnectorTest::testMySqlConnectCallsCreateConnectionWithProperArguments with data set #0 ('mysql:host=foo;dbname=bar', array('foo', 'bar', 'utf8_unicode_ci', 'utf8'))'.
+DatabaseConnectorTest::testMySqlConnectCallsCreateConnectionWithProperArguments with data set #0 
 .
-Starting test 'DatabaseConnectorTest::testMySqlConnectCallsCreateConnectionWithProperArguments with data set #1 ('mysql:host=foo;dbname=bar;port=111', array('foo', 'bar', 111, 'utf8_unicode_ci', 'utf8'))'.
+DatabaseConnectorTest::testMySqlConnectCallsCreateConnectionWithProperArguments with data set #1 
 .
-Starting test 'DatabaseConnectorTest::testMySqlConnectCallsCreateConnectionWithProperArguments with data set #2 ('mysql:host=foo;dbname=bar;port=111;unix_socket=baz', array('foo', 'bar', 111, 'baz', 'utf8_unicode_ci', 'utf8'))'.
+DatabaseConnectorTest::testMySqlConnectCallsCreateConnectionWithProperArguments with data set #2 
 .
-Starting test 'DatabaseConnectorTest::testPostgresConnectCallsCreateConnectionWithProperArguments'.
+DatabaseConnectorTest::testPostgresConnectCallsCreateConnectionWithProperArguments
 .
-Starting test 'DatabaseConnectorTest::testPostgresSearchPathIsSet'.
+DatabaseConnectorTest::testPostgresSearchPathIsSet
 .
-Starting test 'DatabaseConnectorTest::testSQLiteMemoryDatabasesMayBeConnectedTo'.
+DatabaseConnectorTest::testSQLiteMemoryDatabasesMayBeConnectedTo
 .
-Starting test 'DatabaseConnectorTest::testSQLiteFileDatabasesMayBeConnectedTo'.
+DatabaseConnectorTest::testSQLiteFileDatabasesMayBeConnectedTo
 .
-Starting test 'DatabaseConnectorTest::testSqlServerConnectCallsCreateConnectionWithProperArguments'.
+DatabaseConnectorTest::testSqlServerConnectCallsCreateConnectionWithProperArguments
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testModelsAreProperlyHydrated'.
+DatabaseEloquentBelongsToManyTest::testModelsAreProperlyHydrated
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testTimestampsCanBeRetrievedProperly'.
+DatabaseEloquentBelongsToManyTest::testTimestampsCanBeRetrievedProperly
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testModelsAreProperlyMatchedToParents'.
+DatabaseEloquentBelongsToManyTest::testModelsAreProperlyMatchedToParents
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testRelationIsProperlyInitialized'.
+DatabaseEloquentBelongsToManyTest::testRelationIsProperlyInitialized
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testEagerConstraintsAreProperlyAdded'.
+DatabaseEloquentBelongsToManyTest::testEagerConstraintsAreProperlyAdded
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testAttachInsertsPivotTableRecord'.
+DatabaseEloquentBelongsToManyTest::testAttachInsertsPivotTableRecord
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testAttachMultipleInsertsPivotTableRecord'.
+DatabaseEloquentBelongsToManyTest::testAttachMultipleInsertsPivotTableRecord
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testAttachInsertsPivotTableRecordWithTimestampsWhenNecessary'.
+DatabaseEloquentBelongsToManyTest::testAttachInsertsPivotTableRecordWithTimestampsWhenNecessary
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testDetachRemovesPivotTableRecord'.
+DatabaseEloquentBelongsToManyTest::testDetachRemovesPivotTableRecord
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testDetachMethodClearsAllPivotRecordsWhenNoIDsAreGiven'.
+DatabaseEloquentBelongsToManyTest::testDetachMethodClearsAllPivotRecordsWhenNoIDsAreGiven
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testCreateMethodCreatesNewModelAndInsertsAttachmentRecord'.
+DatabaseEloquentBelongsToManyTest::testCreateMethodCreatesNewModelAndInsertsAttachmentRecord
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testSyncMethodSyncsIntermediateTableWithGivenArray with data set #0 (array(2, 3, 4))'.
+DatabaseEloquentBelongsToManyTest::testSyncMethodSyncsIntermediateTableWithGivenArray with data set #0 
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testSyncMethodSyncsIntermediateTableWithGivenArray with data set #1 (array('2', '3', '4'))'.
+DatabaseEloquentBelongsToManyTest::testSyncMethodSyncsIntermediateTableWithGivenArray with data set #1 
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testSyncMethodSyncsIntermediateTableWithGivenArrayAndAttributes'.
+DatabaseEloquentBelongsToManyTest::testSyncMethodSyncsIntermediateTableWithGivenArrayAndAttributes
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testTouchMethodSyncsTimestamps'.
+DatabaseEloquentBelongsToManyTest::testTouchMethodSyncsTimestamps
 .
-Starting test 'DatabaseEloquentBelongsToManyTest::testTouchIfTouching'.
+DatabaseEloquentBelongsToManyTest::testTouchIfTouching
 .
-Starting test 'DatabaseEloquentBelongsToTest::testUpdateMethodRetrievesModelAndUpdates'.
+DatabaseEloquentBelongsToTest::testUpdateMethodRetrievesModelAndUpdates
 .
-Starting test 'DatabaseEloquentBelongsToTest::testEagerConstraintsAreProperlyAdded'.
+DatabaseEloquentBelongsToTest::testEagerConstraintsAreProperlyAdded
 .
-Starting test 'DatabaseEloquentBelongsToTest::testRelationIsProperlyInitialized'.
-. 189 / 929 ( 20%)
-
-Starting test 'DatabaseEloquentBelongsToTest::testModelsAreProperlyMatchedToParents'.
+DatabaseEloquentBelongsToTest::testRelationIsProperlyInitialized
 .
-Starting test 'DatabaseEloquentBelongsToTest::testAssociateMethodSetsForeignKeyOnModel'.
+DatabaseEloquentBelongsToTest::testModelsAreProperlyMatchedToParents
 .
-Starting test 'DatabaseEloquentBuilderTest::testFindMethod'.
+DatabaseEloquentBelongsToTest::testAssociateMethodSetsForeignKeyOnModel
 .
-Starting test 'DatabaseEloquentBuilderTest::testFirstMethod'.
+DatabaseEloquentBuilderTest::testFindMethod
 .
-Starting test 'DatabaseEloquentBuilderTest::testGetMethodLoadsModelsAndHydratesEagerRelations'.
+DatabaseEloquentBuilderTest::testFirstMethod
 .
-Starting test 'DatabaseEloquentBuilderTest::testGetMethodDoesntHydrateEagerRelationsWhenNoResultsAreReturned'.
+DatabaseEloquentBuilderTest::testGetMethodLoadsModelsAndHydratesEagerRelations
 .
-Starting test 'DatabaseEloquentBuilderTest::testWithDeletedProperlyRemovesDeletedClause'.
+DatabaseEloquentBuilderTest::testGetMethodDoesntHydrateEagerRelationsWhenNoResultsAreReturned
 .
-Starting test 'DatabaseEloquentBuilderTest::testPaginateMethod'.
+DatabaseEloquentBuilderTest::testWithDeletedProperlyRemovesDeletedClause
 .
-Starting test 'DatabaseEloquentBuilderTest::testPaginateMethodWithGroupedQuery'.
+DatabaseEloquentBuilderTest::testPaginateMethod
 .
-Starting test 'DatabaseEloquentBuilderTest::testGetModelsProperlyHydratesModels'.
+DatabaseEloquentBuilderTest::testPaginateMethodWithGroupedQuery
 .
-Starting test 'DatabaseEloquentBuilderTest::testEagerLoadRelationsLoadTopLevelRelationships'.
+DatabaseEloquentBuilderTest::testGetModelsProperlyHydratesModels
+.
+DatabaseEloquentBuilderTest::testEagerLoadRelationsLoadTopLevelRelationships
 F
-Starting test 'DatabaseEloquentBuilderTest::testRelationshipEagerLoadProcess'.
+DatabaseEloquentBuilderTest::testRelationshipEagerLoadProcess
 .
-Starting test 'DatabaseEloquentBuilderTest::testGetRelationProperlySetsNestedRelationships'.
+DatabaseEloquentBuilderTest::testGetRelationProperlySetsNestedRelationships
 .
-Starting test 'DatabaseEloquentBuilderTest::testEagerLoadParsingSetsProperRelationships'.
+DatabaseEloquentBuilderTest::testEagerLoadParsingSetsProperRelationships
 .
-Starting test 'DatabaseEloquentBuilderTest::testQueryPassThru'.
+DatabaseEloquentBuilderTest::testQueryPassThru
 hhvm: hphp/runtime/base/tv-helpers.cpp:69: bool HPHP::cellIsPlausible(HPHP::Cell): Assertion `false' failed.

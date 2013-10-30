@@ -976,6 +976,13 @@ HphpArray* HphpArray::initVal(TypedValue& tv, CVarRef v) {
 }
 
 ALWAYS_INLINE
+ArrayData* HphpArray::zInitVal(TypedValue& tv, RefData* v) {
+  tv.m_type = KindOfRef;
+  tv.m_data.pref = v;
+  return this;
+}
+
+ALWAYS_INLINE
 HphpArray* HphpArray::initRef(TypedValue& tv, CVarRef v) {
   tvAsUninitializedVariant(&tv).constructRefHelper(v);
   return this;
@@ -1004,6 +1011,16 @@ HphpArray* HphpArray::initWithRef(TypedValue& tv, CVarRef v) {
 ALWAYS_INLINE
 HphpArray* HphpArray::setVal(TypedValue& tv, CVarRef v) {
   tvAsVariant(&tv).assignValHelper(v);
+  return this;
+}
+
+ALWAYS_INLINE
+ArrayData* HphpArray::zSetVal(TypedValue& tv, RefData* v) {
+  // Dec ref the old value
+  tvRefcountedDecRef(tv);
+  // Store the RefData but do not increment the refcount
+  tv.m_type = KindOfRef;
+  tv.m_data.pref = v;
   return this;
 }
 
@@ -1354,6 +1371,31 @@ ArrayData* HphpArray::updateRef(K k, CVarRef data) {
   return initRef(p.tv, data);
 }
 
+template <class K> INLINE_SINGLE_CALLER
+ArrayData* HphpArray::zSetImpl(K k, RefData* data) {
+  auto p = insert(k);
+  if (p.found) {
+    return zSetVal(p.tv, data);
+  }
+  return zInitVal(p.tv, data);
+}
+
+INLINE_SINGLE_CALLER
+ArrayData* HphpArray::zAppendImpl(RefData* data) {
+  if (UNLIKELY(m_nextKI < 0)) {
+    raise_warning("Cannot add element to the array as the next element is "
+                  "already occupied");
+    return this;
+  }
+  int64_t ki = m_nextKI;
+  auto ei = findForNewInsert(ki);
+  assert(!validPos(*ei));
+  auto& e = allocElm(ei);
+  e.setIntKey(ki);
+  m_nextKI = ki + 1;
+  return zInitVal(e.data, data);
+}
+
 ArrayData* HphpArray::LvalIntPacked(ArrayData* ad, int64_t k, Variant*& ret,
                                     bool copy) {
   auto a = asPacked(ad);
@@ -1570,6 +1612,36 @@ HphpArray::AddStr(ArrayData* ad, StringData* k, CVarRef v, bool copy) {
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
   return a->addVal(k, v);
+}
+
+ArrayData*
+HphpArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
+  auto a = asHphpArray(ad);
+  if (a->isPacked()) {
+    a->packedToMixed();
+  }
+  a = a->resizeIfNeeded();
+  return a->zSetImpl(k, v);
+}
+
+ArrayData*
+HphpArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
+  auto a = asHphpArray(ad);
+  if (a->isPacked()) {
+    a->packedToMixed();
+  }
+  a = a->resizeIfNeeded();
+  return a->zSetImpl(k, v);
+}
+
+ArrayData*
+HphpArray::ZAppend(ArrayData* ad, RefData* v) {
+  auto a = asHphpArray(ad);
+  if (a->isPacked()) {
+    a->packedToMixed();
+  }
+  a = a->resizeIfNeeded();
+  return a->zAppendImpl(v);
 }
 
 //=============================================================================

@@ -33,32 +33,121 @@ void throwOOB(int64_t key);
 
 class BaseVector : public ExtObjectData {
 
-public:
-  // These are the methods visible from PHP land. BaseVector "implements"
-  // the ConstVector interface by implementing the three interfaces below.
+protected:
 
   // ConstCollection
-  bool t_isempty();
-  int64_t t_count();
-  Object t_items();
+  bool isempty();
+  int64_t count();
+  Object items();
 
   // ConstIndexAccess
-  bool t_containskey(CVarRef key);
-  Variant t_at(CVarRef key);
-  Variant t_get(CVarRef key);
+  bool containskey(CVarRef key);
+  Variant at(CVarRef key);
+  Variant get(CVarRef key);
 
   // KeyedIterable
-  Object t_getiterator();
-  Object t_map(CVarRef callback);
-  Object t_mapwithkey(CVarRef callback);
-  Object t_filter(CVarRef callback);
-  Object t_filterwithkey(CVarRef callback);
-  Object t_zip(CVarRef iterable);
-  Object t_kvzip();
-  Object t_keys();
+  Object getiterator();
+  void map(BaseVector* bvec, CVarRef callback);
+  void mapwithkey(BaseVector* bvec, CVarRef callback);
+  void filter(BaseVector* bvec, CVarRef callback);
+  void filterwithkey(BaseVector* bvec, CVarRef callback);
+  void zip(BaseVector* bvec, CVarRef iterable);
+  void kvzip(BaseVector* bvec);
+  void keys(BaseVector* bvec);
 
   // Others
-  void t___construct(CVarRef iterable = null_variant);
+  void construct(CVarRef iterable = null_variant);
+  Object lazy();
+  Array toarray();
+  Array tokeysarray();
+  Array tovaluesarray();
+  int64_t linearsearch(CVarRef search_value);
+
+  template<typename T>
+  static Object slice(const char* vecType, CVarRef vec, CVarRef offset,
+                      CVarRef len = uninit_null()) {
+
+    std::string notVecMsg = std::string("vec must be an instance of ") +
+                            std::string(vecType);
+
+    if (!vec.isObject()) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(notVecMsg));
+      throw e;
+    }
+    ObjectData* obj = vec.getObjectData();
+    if (obj->getVMClass() != T::classof()) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(notVecMsg));
+      throw e;
+    }
+    if (!offset.isInteger()) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Parameter offset must be an integer"));
+      throw e;
+    }
+    if (!len.isNull() && !len.isInteger()) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Parameter len must be null or an integer"));
+      throw e;
+    }
+    T* target;
+    Object ret = target = NEWOBJ(T)();
+    auto v = static_cast<T*>(obj);
+    int64_t sz = v->m_size;
+    int64_t startPos = offset.toInt64();
+    if (UNLIKELY(uint64_t(startPos) >= uint64_t(sz))) {
+      if (startPos >= 0) {
+        return ret;
+      }
+      startPos += sz;
+      if (startPos < 0) {
+        startPos = 0;
+      }
+    }
+    int64_t endPos;
+    if (len.isInteger()) {
+      int64_t intLen = len.toInt64();
+      if (LIKELY(intLen > 0)) {
+        endPos = startPos + intLen;
+        if (endPos > sz) {
+          endPos = sz;
+        }
+      } else {
+        if (intLen == 0) {
+          return ret;
+        }
+        endPos = sz + intLen;
+        if (endPos <= startPos) {
+          return ret;
+        }
+      }
+    } else {
+      endPos = sz;
+    }
+    assert(startPos < endPos);
+    uint targetSize = endPos - startPos;
+    TypedValue* data;
+    target->m_capacity = target->m_size = targetSize;
+    target->m_data = data =
+      (TypedValue*)smart_malloc(targetSize * sizeof(TypedValue));
+    for (uint i = 0; i < targetSize; ++i, ++startPos) {
+      cellDup(v->m_data[startPos], data[i]);
+    }
+    return ret;
+  }
+
+  template<typename T>
+  static T* Clone(ObjectData* obj) {
+    auto thiz = static_cast<T*>(obj);
+    auto target = static_cast<T*>(obj->cloneImpl());
+    uint sz = thiz->m_size;
+    TypedValue* data;
+    target->m_capacity = target->m_size = sz;
+    target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
+    for (int i = 0; i < sz; ++i) {
+      cellDup(thiz->m_data[i], data[i]);
+    }
+    return target;
+  }
 
 public:
 
@@ -137,6 +226,9 @@ protected:
   void grow();
 
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+
+  static void Unserialize(const char* vectorType, ObjectData* obj,
+                          VariableUnserializer* uns, int64_t sz, char type);
 
   // Properties
   uint m_size;

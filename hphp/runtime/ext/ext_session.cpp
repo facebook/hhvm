@@ -1231,7 +1231,7 @@ new_session:
 
   /* Unconditionally destroy existing arrays -- possible dirty data */
   GlobalVariables *g = get_global_variables();
-  g->add(s__SESSION, Array::Create(), false);
+  g->set(s__SESSION, Array::Create(), false);
 
   PS(invalid_session_id) = false;
   String value;

@@ -287,6 +287,20 @@ inline bool memberCodeImmIsInt(MemberCode mc) {
   return mc == MEI;
 }
 
+enum class MCodeImm { None, Int, String, Local };
+inline MCodeImm memberCodeImmType(MemberCode mc) {
+  if (!memberCodeHasImm(mc))     return MCodeImm::None;
+  if (memberCodeImmIsLoc(mc))    return MCodeImm::Local;
+  if (memberCodeImmIsString(mc)) return MCodeImm::String;
+  if (memberCodeImmIsInt(mc))    return MCodeImm::Int;
+  not_reached();
+}
+
+
+inline int mcodeStackVals(MemberCode mc) {
+  return !memberCodeHasImm(mc) && mc != MW ? 1 : 0;
+}
+
 // Returns string representation of `mc'.  (Pointer to internal static
 // data, does not need to be freed.)
 const char* memberCodeString(MemberCode mc);
@@ -307,20 +321,35 @@ enum IncDecOp {
   IncDec_invalid
 };
 
+// NB: right now hphp/hhbbc/abstract-interp.cpp depends on this enum
+// being in order from smaller types to larger ones.
 #define ASSERTT_OPS                             \
   ASSERTT_OP(Uninit)                            \
   ASSERTT_OP(InitNull)                          \
-  ASSERTT_OP(Int)                               \
-  ASSERTT_OP(Dbl)                               \
-  ASSERTT_OP(Res)                               \
   ASSERTT_OP(Null)                              \
+  ASSERTT_OP(Int)                               \
+  ASSERTT_OP(OptInt)                            \
+  ASSERTT_OP(Dbl)                               \
+  ASSERTT_OP(OptDbl)                            \
+  ASSERTT_OP(Res)                               \
+  ASSERTT_OP(OptRes)                            \
   ASSERTT_OP(Bool)                              \
+  ASSERTT_OP(OptBool)                           \
+  ASSERTT_OP(SStr)                              \
+  ASSERTT_OP(OptSStr)                           \
   ASSERTT_OP(Str)                               \
+  ASSERTT_OP(OptStr)                            \
+  ASSERTT_OP(SArr)                              \
+  ASSERTT_OP(OptSArr)                           \
   ASSERTT_OP(Arr)                               \
+  ASSERTT_OP(OptArr)                            \
   ASSERTT_OP(Obj)                               \
+  ASSERTT_OP(OptObj)                            \
   ASSERTT_OP(InitUnc)                           \
   ASSERTT_OP(Unc)                               \
-  ASSERTT_OP(InitCell)
+  ASSERTT_OP(InitCell)                          \
+  ASSERTT_OP(Cell)                              \
+  ASSERTT_OP(Ref)
 
 enum class AssertTOp : uint8_t {
 #define ASSERTT_OP(op) op,
@@ -334,7 +363,16 @@ enum IterKind {
   KindOfCIter = 2,
 };
 
-enum class FatalKind : uint8_t { Parse = 0, Runtime };
+#define FATAL_OPS                               \
+  FATAL_OP(Runtime)                             \
+  FATAL_OP(Parse)                               \
+  FATAL_OP(RuntimeOmitFrame)
+
+enum class FatalOp : uint8_t {
+#define FATAL_OP(x) x,
+  FATAL_OPS
+#undef FATAL_OP
+};
 
 // Each of the setop ops maps to a binary bytecode op. We have reasons
 // for using distinct bitwise representations, though. This macro records
@@ -363,6 +401,8 @@ enum SetOpOp {
 #define OPCODES \
   O(LowInvalid,      NA,               NOV,             NOV,        NF) \
   O(Nop,             NA,               NOV,             NOV,        NF) \
+  O(BreakTraceHint,  NA,               NOV,             NOV,        NF) \
+  O(PopA,            NA,               ONE(AV),         NOV,        NF) \
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
   O(PopV,            NA,               ONE(VV),         NOV,        NF) \
   O(PopR,            NA,               ONE(RV),         NOV,        NF) \
@@ -370,7 +410,9 @@ enum SetOpOp {
   O(Box,             NA,               ONE(CV),         ONE(VV),    NF) \
   O(Unbox,           NA,               ONE(VV),         ONE(CV),    NF) \
   O(BoxR,            NA,               ONE(RV),         ONE(VV),    NF) \
+  O(BoxRNop,         NA,               ONE(RV),         ONE(VV),    NF) \
   O(UnboxR,          NA,               ONE(RV),         ONE(CV),    NF) \
+  O(UnboxRNop,       NA,               ONE(RV),         ONE(CV),    NF) \
   O(Null,            NA,               NOV,             ONE(CV),    NF) \
   O(NullUninit,      NA,               NOV,             ONE(UV),    NF) \
   O(True,            NA,               NOV,             ONE(CV),    NF) \
@@ -380,6 +422,7 @@ enum SetOpOp {
   O(String,          ONE(SA),          NOV,             ONE(CV),    NF) \
   O(Array,           ONE(AA),          NOV,             ONE(CV),    NF) \
   O(NewArray,        NA,               NOV,             ONE(CV),    NF) \
+  O(NewArrayReserve, ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(NewPackedArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(AddElemC,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(AddElemV,        NA,               THREE(VV,CV,CV), ONE(CV),    NF) \
@@ -429,7 +472,7 @@ enum SetOpOp {
   O(Print,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Clone,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Exit,            NA,               ONE(CV),         ONE(CV),    NF) \
-  O(Fatal,           TWO(OA,OA),       ONE(CV),         NOV,        CF_TF) \
+  O(Fatal,           ONE(OA),          ONE(CV),         NOV,        CF_TF) \
   O(Jmp,             ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpZ,            ONE(BA),          ONE(CV),         NOV,        CF) \
   O(JmpNZ,           ONE(BA),          ONE(CV),         NOV,        CF) \
@@ -482,6 +525,8 @@ enum SetOpOp {
   O(IsObjectL,       ONE(LA),          NOV,             ONE(CV),    NF) \
   O(AssertTL,        TWO(LA,OA),       NOV,             NOV,        NF) \
   O(AssertTStk,      TWO(IVA,OA),      NOV,             NOV,        NF) \
+  O(AssertObjL,      THREE(LA,IVA,SA), NOV,             NOV,        NF) \
+  O(AssertObjStk,    THREE(IVA,IVA,SA),NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(SetN,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -527,6 +572,7 @@ enum SetOpOp {
   O(FPassCW,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassCE,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassV,          ONE(IVA),         ONE(VV),         ONE(FV),    FF) \
+  O(FPassVNop,       ONE(IVA),         ONE(VV),         ONE(FV),    FF) \
   O(FPassR,          ONE(IVA),         ONE(RV),         ONE(FV),    FF) \
   O(FPassL,          TWO(IVA,LA),      NOV,             ONE(FV),    FF) \
   O(FPassN,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
@@ -563,6 +609,7 @@ enum SetOpOp {
   O(Eval,            NA,               ONE(CV),         ONE(CV),    CF) \
   O(DefFunc,         ONE(IVA),         NOV,             NOV,        NF) \
   O(DefCls,          ONE(IVA),         NOV,             NOV,        NF) \
+  O(NopDefCls,       ONE(IVA),         NOV,             NOV,        NF) \
   O(DefCns,          ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(DefTypeAlias,    ONE(IVA),         NOV,             NOV,        NF) \
   O(This,            NA,               NOV,             ONE(CV),    NF) \
@@ -818,6 +865,7 @@ void encodeToVector(std::vector<uchar>& vec, T val) {
 void staticStreamer(const TypedValue* tv, std::stringstream& out);
 
 std::string instrToString(const Op* it, const Unit* u = nullptr);
+void staticArrayStreamer(ArrayData*, std::ostream&);
 const char* opcodeToName(Op op);
 
 // returns a pointer to the location within the bytecode containing the jump
@@ -948,7 +996,7 @@ inline bool isSwitch(Opcode op) {
 }
 
 template<typename L>
-void foreachSwitchTarget(Op* op, L func) {
+void foreachSwitchTarget(const Op* op, L func) {
   assert(isSwitch(*op));
   bool isStr = readData<Op>(op) == OpSSwitch;
   int32_t size = readData<int32_t>(op);

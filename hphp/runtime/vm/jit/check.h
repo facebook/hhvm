@@ -39,6 +39,12 @@ bool checkCfg(const IRUnit&);
 bool checkTmpsSpanningCalls(const IRUnit&);
 
 /*
+ * Make sure there's no shuffle instructions. (called right before register
+ * allocation.
+ */
+bool checkNoShuffles(const IRUnit&);
+
+/*
  * Check register and spill slot assignments; registers and spill slots must
  * contain the correct SSATmp value at every point of use.
  */

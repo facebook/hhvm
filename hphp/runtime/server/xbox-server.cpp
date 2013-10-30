@@ -113,7 +113,7 @@ static IMPLEMENT_THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
 ///////////////////////////////////////////////////////////////////////////////
 
 struct XboxWorker
-  : JobQueueWorker<XboxTransport*,true,false,JobQueueDropVMStack>
+  : JobQueueWorker<XboxTransport*,Server*,true,false,JobQueueDropVMStack>
 {
   virtual void doJob(XboxTransport *job) {
     try {
@@ -157,7 +157,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static JobQueueDispatcher<XboxTransport*, XboxWorker> *s_dispatcher;
+static JobQueueDispatcher<XboxWorker> *s_dispatcher;
 static Mutex s_dispatchMutex;
 
 void XboxServer::Restart() {
@@ -166,7 +166,7 @@ void XboxServer::Restart() {
   if (RuntimeOption::XboxServerThreadCount > 0) {
     {
       Lock l(s_dispatchMutex);
-      s_dispatcher = new JobQueueDispatcher<XboxTransport*, XboxWorker>
+      s_dispatcher = new JobQueueDispatcher<XboxWorker>
         (RuntimeOption::XboxServerThreadCount,
          RuntimeOption::ServerThreadRoundRobin,
          RuntimeOption::ServerThreadDropCacheTimeoutSeconds,

@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
-#include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-trace.h"
 
@@ -61,31 +61,31 @@ static std::string constToString(Type t, const ConstData* c) {
     } else {
       os << "Array(" << arr << ")";
     }
-  } else if (t.isNull() || t.subtypeOf(Type::Nullptr)) {
+  } else if (t.isNull() || t <= Type::Nullptr) {
     os << t.toString();
-  } else if (t.subtypeOf(Type::Func)) {
+  } else if (t <= Type::Func) {
     auto func = c->as<const Func*>();
     os << "Func(" << (func ? func->fullName()->data() : "0") << ")";
-  } else if (t.subtypeOf(Type::Cls)) {
+  } else if (t <= Type::Cls) {
     auto cls = c->as<const Class*>();
     os << "Cls(" << (cls ? cls->name()->data() : "0") << ")";
-  } else if (t.subtypeOf(Type::Cctx)) {
+  } else if (t <= Type::Cctx) {
     auto cls = reinterpret_cast<const Class*>(c->as<uintptr_t>() - 1);
     os << "Cctx(" << (cls ? cls->name()->data() : "0") << ")";
-  } else if (t.subtypeOf(Type::NamedEntity)) {
+  } else if (t <= Type::NamedEntity) {
     auto ne = c->as<const NamedEntity*>();
     os << "NamedEntity(" << ne << ")";
-  } else if (t.subtypeOf(Type::TCA)) {
+  } else if (t <= Type::TCA) {
     TCA tca = c->as<TCA>();
     auto name = getNativeFunctionName(tca);
     SCOPE_EXIT { free(name); };
     os << folly::format("TCA: {}({})", tca,
       boost::trim_copy(std::string(name)));
-  } else if (t.subtypeOf(Type::None)) {
+  } else if (t <= Type::None) {
     os << "None:" << c->as<int64_t>();
   } else if (t.isPtr()) {
     os << folly::format("{}({:#x})", t.toString(), c->as<uint64_t>());
-  } else if (t.subtypeOf(Type::RDSHandle)) {
+  } else if (t <= Type::RDSHandle) {
     os << folly::format("RDS::Handle({:#x})", c->as<int64_t>());
   } else {
     not_reached();
@@ -137,6 +137,11 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
      << color(ANSI_COLOR_END);
 }
 
+const PhysLoc* loc(const RegAllocInfo* regs,
+                   const IRInstruction* inst, const SSATmp* t) {
+  return regs ? &(*regs)[inst][t] : nullptr;
+}
+
 void printDst(std::ostream& os, const IRInstruction* inst,
               const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
   if (inst->numDsts() == 0) return;
@@ -144,7 +149,7 @@ void printDst(std::ostream& os, const IRInstruction* inst,
   const char* sep = "";
   for (const SSATmp& dst : inst->dsts()) {
     os << punc(sep);
-    print(os, &dst, regs, lifetime, true);
+    print(os, &dst, loc(regs, inst, &dst), lifetime, true);
     sep = ", ";
   }
   os << punc(" = ");
@@ -158,7 +163,7 @@ void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
         lifetime->uses[src].lastUse == lifetime->linear[inst]) {
       ostream << "~";
     }
-    print(ostream, src, regs, lifetime);
+    print(ostream, src, loc(regs, inst, src), lifetime);
   } else {
     ostream << color(ANSI_COLOR_RED)
             << "!!!NULL @ " << i
@@ -230,7 +235,44 @@ void print(const IRInstruction* inst) {
   std::cerr << std::endl;
 }
 
-void print(std::ostream& os, const SSATmp* tmp, const RegAllocInfo* regs,
+std::ostream& operator<<(std::ostream& os, const PhysLoc& loc) {
+  auto sz = loc.numAllocatedRegs();
+  if (!sz) return os;
+  os << '(';
+  auto delim = "";
+  for (int i = 0; i < sz; ++i) {
+    if (!loc.spilled()) {
+      PhysReg reg = loc.reg(i);
+      auto name = reg.type() == PhysReg::GP ? reg::regname(Reg64(reg)) :
+                  reg::regname(RegXMM(reg));
+      os << delim << name;
+    } else {
+      os << delim << "spill[" << loc.slot(i) << "]";
+    }
+    delim = ",";
+  }
+  os << ')';
+  return os;
+}
+
+void printPhysLoc(std::ostream& os, const PhysLoc& loc) {
+  if (loc.numAllocatedRegs() > 0) {
+    os << color(ANSI_COLOR_BROWN) << loc << color(ANSI_COLOR_END);
+  }
+}
+
+std::string ShuffleData::show() const {
+  std::ostringstream os;
+  auto delim = "";
+  for (unsigned i = 0; i < size; ++i) {
+    os << delim;
+    printPhysLoc(os, dests[i]);
+    delim = ",";
+  }
+  return os.str();
+}
+
+void print(std::ostream& os, const SSATmp* tmp, const PhysLoc* loc,
            const LifetimeInfo* lifetime, bool printLastUse) {
   if (tmp->inst()->op() == DefConst) {
     os << constToString(tmp->inst()->typeParam(),
@@ -245,28 +287,8 @@ void print(std::ostream& os, const SSATmp* tmp, const RegAllocInfo* regs,
        << "@" << lifetime->uses[tmp].lastUse << "#" << lifetime->uses[tmp].count
        << color(ANSI_COLOR_END);
   }
-  if (regs) {
-    const RegisterInfo& info = (*regs)[tmp];
-    if (info.spilled() || info.numAllocatedRegs() > 0) {
-      os << color(ANSI_COLOR_BROWN) << '(';
-      if (!info.spilled()) {
-        for (int i = 0, sz = info.numAllocatedRegs(); i < sz; ++i) {
-          if (i != 0) os << ",";
-          PhysReg reg = info.reg(i);
-          if (reg.type() == PhysReg::GP) {
-            os << reg::regname(Reg64(reg));
-          } else {
-            os << reg::regname(RegXMM(reg));
-          }
-        }
-      } else {
-        for (int i = 0, sz = tmp->numNeededRegs(); i < sz; ++i) {
-          if (i != 0) os << ",";
-          os << info.spillInfo(i);
-        }
-      }
-      os << ')' << color(ANSI_COLOR_END);
-    }
+  if (loc) {
+    printPhysLoc(os, *loc);
   }
   os << punc(":")
      << color(ANSI_COLOR_GREEN)
@@ -284,9 +306,21 @@ void print(const IRTrace* trace) {
   print(std::cout, trace->unit(), trace);
 }
 
+std::string Block::toString() const {
+  std::ostringstream out;
+  print(out, this);
+  return out.str();
+}
+
 std::string IRTrace::toString() const {
   std::ostringstream out;
   print(out, unit(), this, nullptr);
+  return out.str();
+}
+
+std::string IRUnit::toString() const {
+  std::ostringstream out;
+  print(out, *this);
   return out.str();
 }
 
@@ -355,130 +389,138 @@ static void disasmRange(std::ostream& os, TCA begin, TCA end) {
 
 }
 
-void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
+void print(std::ostream& os, const Block* block,
            const RegAllocInfo* regs, const LifetimeInfo* lifetime,
            const AsmInfo* asmInfo, const GuardConstraints* guards) {
   BCMarker curMarker;
-  for (Block* block : blocks(unit, trace, asmInfo)) {
-    if (!block->isMain()) {
-      os << "\n" << color(ANSI_COLOR_GREEN)
-         << "    -------  Exit Trace  -------"
-         << color(ANSI_COLOR_END) << '\n';
-      curMarker = BCMarker();
-    }
 
-    TcaRange blockRange = asmInfo ? asmInfo->asmRanges[block] :
-                          TcaRange(nullptr, nullptr);
+  if (!block->isMain()) {
+    os << "\n" << color(ANSI_COLOR_GREEN)
+       << "    -------  Exit Trace  -------"
+       << color(ANSI_COLOR_END) << '\n';
+    curMarker = BCMarker();
+  }
 
-    os << '\n' << std::string(kIndent - 3, ' ');
-    printLabel(os, block);
-    os << punc(":") << "\n";
+  TcaRange blockRange = asmInfo ? asmInfo->asmRanges[block] :
+    TcaRange(nullptr, nullptr);
 
-    const char* markerEndl = "";
-    for (auto it = block->begin(); it != block->end();) {
-      auto& inst = *it; ++it;
+  os << '\n' << std::string(kIndent - 3, ' ');
+  printLabel(os, block);
+  os << punc(":") << "\n";
 
-      if (inst.marker() != curMarker) {
-        std::ostringstream mStr;
-        auto const& newMarker = inst.marker();
-        auto func = newMarker.func;
-        if (!func) {
-          os << color(ANSI_COLOR_BLUE)
-             << std::string(kIndent, ' ')
-             << "--- invalid marker"
-             << color(ANSI_COLOR_END)
-             << '\n';
-        } else {
-          if (func != curMarker.func) {
-            func->prettyPrint(mStr);
-          }
-          mStr << std::string(kIndent, ' ')
-               << newMarker.show()
-               << '\n';
+  const char* markerEndl = "";
+  for (auto it = block->begin(); it != block->end();) {
+    auto& inst = *it; ++it;
 
-          auto bcOffset = newMarker.bcOff;
-          func->unit()->prettyPrint(
-            mStr, Unit::PrintOpts()
-                       .range(bcOffset, bcOffset+1)
-                       .noLineNumbers()
-                       .noFuncs()
-                       .indent(0));
-          std::vector<std::string> vec;
-          folly::split('\n', mStr.str(), vec);
-          os << markerEndl;
-          markerEndl = "\n";
-          for (auto& s : vec) {
-            if (s.empty()) continue;
-            os << color(ANSI_COLOR_BLUE) << s << color(ANSI_COLOR_END) << '\n';
-          }
+    if (inst.marker() != curMarker) {
+      std::ostringstream mStr;
+      auto const& newMarker = inst.marker();
+      auto func = newMarker.func;
+      if (!func) {
+        os << color(ANSI_COLOR_BLUE)
+           << std::string(kIndent, ' ')
+           << "--- invalid marker"
+           << color(ANSI_COLOR_END)
+           << '\n';
+      } else {
+        if (func != curMarker.func) {
+          func->prettyPrint(mStr);
         }
+        mStr << std::string(kIndent, ' ')
+             << newMarker.show()
+             << '\n';
 
-        curMarker = newMarker;
+        auto bcOffset = newMarker.bcOff;
+        func->unit()->prettyPrint(
+          mStr, Unit::PrintOpts()
+          .range(bcOffset, bcOffset+1)
+          .noLineNumbers()
+          .noFuncs()
+          .indent(0));
+        std::vector<std::string> vec;
+        folly::split('\n', mStr.str(), vec);
+        os << markerEndl;
+        markerEndl = "\n";
+        for (auto& s : vec) {
+          if (s.empty()) continue;
+          os << color(ANSI_COLOR_BLUE) << s << color(ANSI_COLOR_END) << '\n';
+        }
       }
 
-      if (inst.op() == DefLabel) {
-        // print phi pseudo-instructions
-        for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
-          os << std::string(kIndent +
-                            folly::format("({}) ", inst.id()).str().size(),
-                            ' ');
-          JIT::print(os, inst.dst(i), regs, lifetime, false);
-          os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
-             << color(ANSI_COLOR_END);
-          bool first = true;
-          inst.block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
+      curMarker = newMarker;
+    }
+
+    if (inst.op() == DefLabel) {
+      // print phi pseudo-instructions
+      for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
+        os << std::string(kIndent +
+                          folly::format("({}) ", inst.id()).str().size(),
+                          ' ');
+        auto dst = inst.dst(i);
+        JIT::print(os, dst, loc(regs, &inst, dst), lifetime, false);
+        os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
+           << color(ANSI_COLOR_END);
+        bool first = true;
+        inst.block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
             if (!first) os << punc(", ");
             first = false;
             printSrc(os, jmp, i, regs, lifetime);
             os << punc("@");
             printLabel(os, jmp->block());
           });
-          os << '\n';
-        }
-      }
-
-      os << std::string(kIndent, ' ');
-      JIT::print(os, &inst, regs, lifetime, guards);
-      os << '\n';
-
-      if (asmInfo) {
-        TcaRange instRange = asmInfo->instRanges[inst];
-        if (!instRange.empty()) {
-          disasmRange(os, instRange.begin(), instRange.end());
-          os << '\n';
-          assert(instRange.end() >= blockRange.start() &&
-                 instRange.end() <= blockRange.end());
-          blockRange = TcaRange(instRange.end(), blockRange.end());
-        }
-      }
-    }
-
-    if (asmInfo) {
-      // print code associated with this block that isn't tied to any
-      // instruction.  This includes code after the last isntruction (e.g.
-      // jmp to next block), and AStubs code.
-      if (!blockRange.empty()) {
-        os << std::string(kIndent, ' ') << punc("A:") << "\n";
-        disasmRange(os, blockRange.start(), blockRange.end());
-      }
-      auto astubRange = asmInfo->astubRanges[block];
-      if (!astubRange.empty()) {
-        os << std::string(kIndent, ' ') << punc("AStubs:") << "\n";
-        disasmRange(os, astubRange.start(), astubRange.end());
-      }
-      if (!blockRange.empty() || !astubRange.empty()) {
         os << '\n';
       }
     }
 
-    os << std::string(kIndent - 2, ' ');
-    if (auto next = block->next()) {
-      os << punc("-> ");
-      printLabel(os, next);
-      os << '\n';
-    } else {
-      os << "no fallthrough\n";
+    os << std::string(kIndent, ' ');
+    JIT::print(os, &inst, regs, lifetime, guards);
+    os << '\n';
+
+    if (asmInfo) {
+      TcaRange instRange = asmInfo->instRanges[inst];
+      if (!instRange.empty()) {
+        disasmRange(os, instRange.begin(), instRange.end());
+        os << '\n';
+        assert(instRange.end() >= blockRange.start() &&
+               instRange.end() <= blockRange.end());
+        blockRange = TcaRange(instRange.end(), blockRange.end());
+      }
     }
+  }
+
+  if (asmInfo) {
+    // print code associated with this block that isn't tied to any
+    // instruction.  This includes code after the last isntruction (e.g.
+    // jmp to next block), and AStubs code.
+    if (!blockRange.empty()) {
+      os << std::string(kIndent, ' ') << punc("A:") << "\n";
+      disasmRange(os, blockRange.start(), blockRange.end());
+    }
+    auto astubRange = asmInfo->astubRanges[block];
+    if (!astubRange.empty()) {
+      os << std::string(kIndent, ' ') << punc("AStubs:") << "\n";
+      disasmRange(os, astubRange.start(), astubRange.end());
+    }
+    if (!blockRange.empty() || !astubRange.empty()) {
+      os << '\n';
+    }
+  }
+
+  os << std::string(kIndent - 2, ' ');
+  if (auto next = block->next()) {
+    os << punc("-> ");
+    printLabel(os, next);
+    os << '\n';
+  } else {
+    os << "no fallthrough\n";
+  }
+}
+
+void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
+           const RegAllocInfo* regs, const LifetimeInfo* lifetime,
+           const AsmInfo* asmInfo, const GuardConstraints* guards) {
+  for (Block* block : blocks(unit, trace, asmInfo)) {
+    print(os, block, regs, lifetime, asmInfo, guards);
   }
 }
 

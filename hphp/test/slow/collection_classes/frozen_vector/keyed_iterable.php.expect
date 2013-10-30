@@ -1,105 +1,81 @@
 
 map...
-object(Vector)#4 (3) {
-  [0]=>
-  int(2)
-  [1]=>
-  int(4)
-  [2]=>
-  int(6)
-}
+string(12) "FrozenVector"
+int(2)
+int(4)
+int(6)
 
 mapWithKey...
-object(Vector)#5 (3) {
-  [0]=>
-  object(Pair)#6 (2) {
-    [0]=>
-    int(0)
-    [1]=>
-    int(1)
-  }
-  [1]=>
-  object(Pair)#7 (2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-  [2]=>
-  object(Pair)#8 (2) {
-    [0]=>
-    int(2)
-    [1]=>
-    int(3)
-  }
-}
-
-filter...
-object(Vector)#9 (1) {
-  [0]=>
-  int(1)
-}
-
-filterWithKey...
-object(Vector)#10 (2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-}
-
-zip...
-object(Vector)#11 (2) {
-  [0]=>
-  object(Pair)#12 (2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(4)
-  }
-  [1]=>
-  object(Pair)#13 (2) {
-    [0]=>
-    int(2)
-    [1]=>
-    int(5)
-  }
-}
-
-kvzip...
-object(Vector)#13 (3) {
-  [0]=>
-  object(Pair)#14 (2) {
-    [0]=>
-    int(0)
-    [1]=>
-    int(1)
-  }
-  [1]=>
-  object(Pair)#15 (2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-  [2]=>
-  object(Pair)#16 (2) {
-    [0]=>
-    int(2)
-    [1]=>
-    int(3)
-  }
-}
-
-keys...
-object(Vector)#16 (3) {
+string(12) "FrozenVector"
+object(Pair)#6 (2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
-  [2]=>
+}
+object(Pair)#7 (2) {
+  [0]=>
+  int(1)
+  [1]=>
   int(2)
 }
+object(Pair)#8 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+
+filter...
+string(12) "FrozenVector"
+int(1)
+
+filterWithKey...
+string(12) "FrozenVector"
+int(1)
+int(2)
+
+zip...
+string(12) "FrozenVector"
+object(Pair)#12 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(4)
+}
+object(Pair)#13 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(5)
+}
+
+kvzip...
+string(12) "FrozenVector"
+object(Pair)#14 (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(Pair)#15 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(Pair)#16 (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+
+keys...
+string(12) "FrozenVector"
+int(0)
+int(1)
+int(2)
 
 getIterator...
 k = int(0)

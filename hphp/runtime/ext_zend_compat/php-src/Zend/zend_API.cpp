@@ -20,15 +20,25 @@
 
 /* $Id$ */
 
-#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_API.h"
+// has to be before zend_API since that defines getThis()
+#include "hphp/runtime/ext/ext_function.h"
+#include "zend_API.h"
 #include "zend_constants.h"
 
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend_hphp_class_to_class_entry.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/ZendExecutionStack.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/ZendObjectData.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+
+ZEND_API const char *zend_get_type_by_const(int type) {
+  return HPHP::getDataTypeString((HPHP::DataType)type)->data();
+}
 
 ZEND_API const char *zend_zval_type_name(const zval *arg) {
-  return HPHP::getDataTypeString(Z_TYPE_P(arg))->data();
+	return zend_get_type_by_const(Z_TYPE_P(arg));
 }
 
 ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC) {
@@ -464,6 +474,8 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
   zval ****varargs = NULL;
   int *n_varargs = NULL;
 
+  HPHP::Transl::VMRegAnchor _;
+
   for (spec_walk = type_spec; *spec_walk; spec_walk++) {
     c = *spec_walk;
     switch (c) {
@@ -560,10 +572,8 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
       if (num_varargs > 0) {
         int iv = 0;
-        HPHP::TypedValue *top = HPHP::vmfp() - (i + 1);
-        // zPrepArgs should take care of this for us
-        assert(top->m_type == HPHP::KindOfRef);
-        zval **p = &top->m_data.pref;
+        auto tmp = ZendExecutionStack::getArg(i);
+        zval **p = &tmp;
 
         *n_varargs = num_varargs;
 
@@ -583,9 +593,8 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
       }
     }
 
-    HPHP::TypedValue *top = HPHP::vmfp() - (i + 1);
-    assert(top->m_type == HPHP::KindOfRef);
-    arg = &top->m_data.pref;
+    auto tmp = ZendExecutionStack::getArg(i);
+    arg = &tmp;
 
     if (zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
       /* clean up varargs array if it was used */
@@ -613,6 +622,19 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
       get_active_function_name(TSRMLS_C), __num_args); \
     return FAILURE; \
   }\
+}
+
+ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, const char *type_spec, ...) {
+	va_list va;
+	int retval;
+
+	RETURN_IF_ZERO_ARGS(num_args, type_spec, flags & ZEND_PARSE_PARAMS_QUIET);
+
+	va_start(va, type_spec);
+	retval = zend_parse_va_args(num_args, type_spec, &va, flags TSRMLS_CC);
+	va_end(va);
+
+	return retval;
 }
 
 ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, const char *type_spec, ...) {
@@ -1070,72 +1092,104 @@ ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **cal
   return zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, NULL, NULL TSRMLS_CC);
 }
 
-ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC) {
-  zval ***params_array;
-  zend_uint i;
-  int ex_retval;
-  zval *local_retval_ptr = NULL;
-
-  if (param_count) {
-    params_array = (zval ***) emalloc(sizeof(zval **)*param_count);
-    for (i=0; i<param_count; i++) {
-      params_array[i] = &params[i];
-    }
-  } else {
-    params_array = NULL;
-  }
-  ex_retval = call_user_function_ex(function_table, object_pp, function_name, &local_retval_ptr, param_count, params_array, 1, NULL TSRMLS_CC);
-  if (local_retval_ptr) {
-    COPY_PZVAL_TO_ZVAL(*retval_ptr, local_retval_ptr);
-  } else {
-    INIT_ZVAL(*retval_ptr);
-  }
-  if (params_array) {
-    efree(params_array);
-  }
-  return ex_retval;
-}
-
-ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC) {
-  assert(object_pp == nullptr);
-
-  // mostly from vm_call_user_func
-  HPHP::ObjectData* obj = nullptr;
-  HPHP::Class* cls = nullptr;
-  HPHP::Transl::CallerFrame cf;
-  HPHP::StringData* invName = nullptr;
-  const HPHP::Func* f = vm_decode_function(
-    tvAsCVarRef(function_name->tv()), cf(), false, obj, cls, invName
-  );
-  if (f == nullptr) {
+ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, char **callable_name, char **error TSRMLS_DC) /* {{{ */
+{
+  if (!zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, fcc, error TSRMLS_CC)) {
     return FAILURE;
   }
 
-  HPHP::PackedArrayInit ad_params(param_count);
-  for (int i = 0; i < param_count; i++) {
-    HPHP::Variant v;
-    v.asTypedValue()->m_type = HPHP::KindOfRef;
-    v.asTypedValue()->m_data.pref = *params[i];
-    v.asTypedValue()->m_data.pref->incRefCount();
-    if (f->byRef(i)) {
-      ad_params.appendWithRef(v);
-    } else {
-      ad_params.append(v);
-    }
-  }
-  HPHP::TypedValue retval;
-  g_vmContext->invokeFunc(
-    &retval, f, ad_params.toArray(), obj, cls,
-    nullptr, invName, HPHP::ExecutionContext::InvokeCuf
-  );
-  if (retval.m_type == HPHP::KindOfUninit) {
-    return FAILURE;
-  }
+  fci->size = sizeof(*fci);
+  fci->object_ptr = fcc->object_ptr;
+  fci->function_name = callable;
+  fci->retval_ptr_ptr = NULL;
+  fci->param_count = 0;
+  fci->params = NULL;
+  fci->no_separation = 1;
+  fci->symbol_table = NULL;
 
-  MAKE_STD_ZVAL(*retval_ptr_ptr);
-  HPHP::tvDup(retval, *(*retval_ptr_ptr)->tv());
   return SUCCESS;
 }
+/* }}} */
+
+ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem) /* {{{ */
+{
+	if (fci->params) {
+		if (free_mem) {
+			efree(fci->params);
+			fci->params = NULL;
+		}
+	}
+	fci->param_count = 0;
+}
+/* }}} */
+
+ZEND_API void zend_fcall_info_args_save(zend_fcall_info *fci, int *param_count, zval ****params) /* {{{ */
+{
+	*param_count = fci->param_count;
+	*params = fci->params;
+	fci->param_count = 0;
+	fci->params = NULL;
+}
+/* }}} */
+
+ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count, zval ***params) /* {{{ */
+{
+	zend_fcall_info_args_clear(fci, 1);
+	fci->param_count = param_count;
+	fci->params = params;
+}
+/* }}} */
+
+ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC) /* {{{ */
+{
+	HashPosition pos;
+	zval **arg, ***params;
+
+	zend_fcall_info_args_clear(fci, !args);
+
+	if (!args) {
+		return SUCCESS;
+	}
+
+	if (Z_TYPE_P(args) != IS_ARRAY) {
+		return FAILURE;
+	}
+
+	fci->param_count = zend_hash_num_elements(Z_ARRVAL_P(args));
+	fci->params = params = (zval ***) erealloc(fci->params, fci->param_count * sizeof(zval **));
+
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(args), (void **) &arg, &pos) == SUCCESS) {
+		*params++ = arg;
+		zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+
+ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval **retval_ptr_ptr, zval *args TSRMLS_DC) /* {{{ */
+{
+  zval *retval, ***org_params = NULL;
+  int result, org_count = 0;
+
+  fci->retval_ptr_ptr = retval_ptr_ptr ? retval_ptr_ptr : &retval;
+  if (args) {
+    zend_fcall_info_args_save(fci, &org_count, &org_params);
+    zend_fcall_info_args(fci, args TSRMLS_CC);
+  }
+  result = zend_call_function(fci, fcc TSRMLS_CC);
+
+  if (!retval_ptr_ptr && retval) {
+    zval_ptr_dtor(&retval);
+  }
+  if (args) {
+    zend_fcall_info_args_restore(fci, org_count, org_params);
+  }
+  return result;
+}
+/* }}} */
 
 ZEND_API int _array_init(zval *arg, uint size ZEND_FILE_LINE_DC) {
   ALLOC_HASHTABLE(Z_ARRVAL_P(arg));
@@ -1286,11 +1340,139 @@ ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *nam
 }
 /* }}} */
 
+ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value TSRMLS_DC) /* {{{ */
+{
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_declare_class_constant_null(zend_class_entry *ce, const char *name, size_t name_length TSRMLS_DC) /* {{{ */
+{
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_declare_class_constant_long(zend_class_entry *ce, const char *name, size_t name_length, long value TSRMLS_DC) /* {{{ */
+{
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_declare_class_constant_bool(zend_class_entry *ce, const char *name, size_t name_length, zend_bool value TSRMLS_DC) /* {{{ */
+{
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_declare_class_constant_double(zend_class_entry *ce, const char *name, size_t name_length, double value TSRMLS_DC) /* {{{ */
+{
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_declare_class_constant_stringl(zend_class_entry *ce, const char *name, size_t name_length, const char *value, size_t value_length TSRMLS_DC) /* {{{ */
+{
+  return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_declare_class_constant_string(zend_class_entry *ce, const char *name, size_t name_length, const char *value TSRMLS_DC) /* {{{ */
+{
+	return zend_declare_class_constant_stringl(ce, name, name_length, value, strlen(value) TSRMLS_CC);
+}
+/* }}} */
+
+
 ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, const char *name, int name_length, zval *value TSRMLS_DC) {
   HPHP::String key(name, name_length, HPHP::CopyString);
   HPHP::String context(scope->name);
   Z_OBJVAL_P(object)->o_set(key, tvAsVariant(value->tv()), context);
 }
+
+ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *name, int name_length, zval *value TSRMLS_DC) {
+  auto cls = scope->hphp_class;
+  HPHP::String sname(name, name_length, HPHP::CopyString);
+  bool visible, accessible;
+  auto tv = cls->getSProp(cls, sname.get(), visible, accessible);
+  if (!tv) {
+    return FAILURE;
+  }
+  tvSetZval(value, tv);
+  return SUCCESS;
+}
+
+ZEND_API int zend_update_static_property_null(zend_class_entry *scope, const char *name, int name_length TSRMLS_DC) /* {{{ */
+{
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	Z_UNSET_ISREF_P(tmp);
+	Z_SET_REFCOUNT_P(tmp, 0);
+	ZVAL_NULL(tmp);
+	return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
+}
+/* }}} */
+
+ZEND_API int zend_update_static_property_bool(zend_class_entry *scope, const char *name, int name_length, long value TSRMLS_DC) /* {{{ */
+{
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	Z_UNSET_ISREF_P(tmp);
+	Z_SET_REFCOUNT_P(tmp, 0);
+	ZVAL_BOOL(tmp, value);
+	return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
+}
+/* }}} */
+
+ZEND_API int zend_update_static_property_long(zend_class_entry *scope, const char *name, int name_length, long value TSRMLS_DC) /* {{{ */
+{
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	Z_UNSET_ISREF_P(tmp);
+	Z_SET_REFCOUNT_P(tmp, 0);
+	ZVAL_LONG(tmp, value);
+	return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
+}
+/* }}} */
+
+ZEND_API int zend_update_static_property_double(zend_class_entry *scope, const char *name, int name_length, double value TSRMLS_DC) /* {{{ */
+{
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	Z_UNSET_ISREF_P(tmp);
+	Z_SET_REFCOUNT_P(tmp, 0);
+	ZVAL_DOUBLE(tmp, value);
+	return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
+}
+/* }}} */
+
+ZEND_API int zend_update_static_property_string(zend_class_entry *scope, const char *name, int name_length, const char *value TSRMLS_DC) /* {{{ */
+{
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	Z_UNSET_ISREF_P(tmp);
+	Z_SET_REFCOUNT_P(tmp, 0);
+	ZVAL_STRING(tmp, value, 1);
+	return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
+}
+/* }}} */
+
+ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, const char *name, int name_length, const char *value, int value_len TSRMLS_DC) /* {{{ */
+{
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	Z_UNSET_ISREF_P(tmp);
+	Z_SET_REFCOUNT_P(tmp, 0);
+	ZVAL_STRINGL(tmp, value, value_len, 1);
+	return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
+}
+/* }}} */
+
 
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_class_entry TSRMLS_DC) {
   auto cls = orig_class_entry->hphp_class;
@@ -1298,6 +1480,10 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
   auto ce = zend_hphp_class_to_class_entry(cls);
   ce->create_object = orig_class_entry->create_object;
   return ce;
+}
+
+ZEND_API void zend_class_implements(zend_class_entry *class_entry TSRMLS_DC, int num_interfaces, ...) {
+  // Done by the IDL
 }
 
 ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type) {
@@ -1312,12 +1498,37 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
   // Why is there no ZVAL_OBJVAL?
   Z_OBJVAL_P(arg) = new_ZendObjectData_Instance(class_type->hphp_class);
   Z_TYPE_P(arg) = IS_OBJECT;
+  // Zend doesn't have this, but I think we need it or else new objects have a
+  // refcount of 0
+  Z_ADDREF_P(arg);
   return SUCCESS;
 }
 
 ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, int name_length, zend_bool silent TSRMLS_DC) {
-  not_implemented();
-  return nullptr;
+  HPHP::String prop_name(name, name_length, HPHP::CopyString);
+  HPHP::String scope_name(scope->name, scope->name_length, HPHP::CopyString);
+  HPHP::Class* ctx = nullptr;
+  if (!scope_name.empty()) {
+    ctx = HPHP::Unit::lookupClass(scope_name.get());
+  }
+
+  bool visible, accessible, unset;
+  auto ret = Z_OBJVAL_P(object)->zGetProp(ctx, prop_name.get(), visible, accessible, unset);
+  if (!accessible || unset) {
+    return nullptr;
+  }
+  return ret;
+}
+
+ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, int name_length, zend_bool silent TSRMLS_DC) {
+  auto cls = scope->hphp_class;
+  HPHP::String sname(name, name_length, HPHP::CopyString);
+  bool visible, accessible;
+  auto ret = cls->zGetSProp(cls, sname.get(), visible, accessible);
+  if (!accessible || !visible) {
+    return nullptr;
+  }
+  return ret;
 }
 
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC) {

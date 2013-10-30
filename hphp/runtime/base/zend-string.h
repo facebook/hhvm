@@ -118,13 +118,22 @@ char *string_to_case(const char *s, int len, int (*tocase)(int));
 char *string_to_case_first(const char *s, int len, int (*tocase)(int));
 char *string_to_case_words(const char *s, int len, int (*tocase)(int));
 
-#define string_to_upper(s,len)        string_to_case((s), (len), toupper)
-#define string_to_upper_first(s, len) string_to_case_first((s), (len), toupper)
-#define string_to_upper_words(s, len) string_to_case_words((s), (len), toupper)
+// Use lambdas wrapping the ctype.h functions because of linker weirdness on
+// OS X Mavericks.
 
-#define string_to_lower(s,len)        string_to_case((s), (len), tolower)
-#define string_to_lower_first(s, len) string_to_case_first((s), (len), tolower)
-#define string_to_lower_words(s, len) string_to_case_words((s), (len), tolower)
+#define string_to_upper(s,len)        \
+  string_to_case((s), (len), [] (int i) -> int { return toupper(i); })
+#define string_to_upper_first(s, len) \
+  string_to_case_first((s), (len), [] (int i) -> int { return toupper(i); })
+#define string_to_upper_words(s, len) \
+  string_to_case_words((s), (len), [] (int i) -> int { return toupper(i); })
+
+#define string_to_lower(s,len)        \
+  string_to_case((s), (len), [] (int i) -> int { return tolower(i); })
+#define string_to_lower_first(s, len) \
+  string_to_case_first((s), (len), [] (int i) -> int { return tolower(i); })
+#define string_to_lower_words(s, len) \
+  string_to_case_words((s), (len), [] (int i) -> int { return tolower(i); })
 
 
 /**

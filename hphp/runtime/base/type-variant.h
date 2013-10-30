@@ -93,6 +93,7 @@ class Variant : private TypedValue {
   explicit Variant(NullInit) { m_type = KindOfNull; }
   enum class NoInit {};
   explicit Variant(NoInit) {}
+  enum NoInc { noInc = 0 };
 
   void destruct();
   static void destructData(RefData* num, DataType t);
@@ -138,6 +139,7 @@ class Variant : private TypedValue {
   /* implicit */ Variant(ObjectData *v);
   /* implicit */ Variant(ResourceData *v);
   /* implicit */ Variant(RefData *r);
+  /* implicit */ Variant(RefData *r, NoInc);
 
   // for static strings only
   explicit Variant(const StringData *v);
@@ -1368,8 +1370,9 @@ inline const Variant Array::operator[](CVarRef key) const {
   return rvalAt(key);
 }
 
-inline void Array::setWithRef(CVarRef k, CVarRef v) {
-  lvalAt(k, AccessFlags::Key).setWithRef(v);
+inline void Array::setWithRef(CVarRef k, CVarRef v,
+                              bool isKey /* = false */) {
+  lvalAt(k, isKey ? AccessFlags::Key : AccessFlags::None).setWithRef(v);
 }
 
 inline Variant uninit_null() {

@@ -1,0 +1,24 @@
+array(3) {
+  [0]=>
+  string(4) "test"
+  [1]=>
+  string(3) "foo"
+  [2]=>
+  string(3) "bar"
+}
+array(3) {
+  ["test"]=>
+  string(4) "test"
+  ["foo"]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(3) "bar"
+}
+array(3) {
+  ["foo"]=>
+  string(4) "test"
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(3) "bar"
+}

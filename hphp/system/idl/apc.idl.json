@@ -72,6 +72,34 @@
             ]
         },
         {
+            "name": "apc_store_as_primed_do_not_use",
+            "desc": "Simlar to apc_store() but TTL is always 0 and there is TTL cap applied. Do not use in prod, use cachearchiver instead.",
+            "flags": [
+                "AllowIntercept"
+            ],
+            "return": {
+                "type": "Boolean",
+                "desc": "Returns TRUE on success or FALSE on failure."
+            },
+            "args": [
+                {
+                    "name": "key",
+                    "type": "String",
+                    "desc": "Store the variable using this name. keys are cache-unique, so storing a second value with the same key will overwrite the original value."
+                },
+                {
+                    "name": "var",
+                    "type": "Variant",
+                    "desc": "The variable to store"
+                },
+                {
+                    "name": "cache_id",
+                    "type": "Int64",
+                    "value": "0"
+                }
+            ]
+        },
+        {
             "name": "apc_fetch",
             "desc": "Fetchs a stored variable from the cache.",
             "flags": [

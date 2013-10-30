@@ -16,22 +16,37 @@
 */
 #include "hphp/runtime/ext/asio/asio_context.h"
 
+#include <thread>
+
 #include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/timer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
   template<class TWaitHandle>
-  void exitContextQueue(context_idx_t ctx_idx, smart::queue<TWaitHandle*> &queue) {
+  void exitContextQueue(context_idx_t ctx_idx,
+                        smart::queue<TWaitHandle*> &queue) {
     while (!queue.empty()) {
       auto wait_handle = queue.front();
       queue.pop();
       wait_handle->exitContext(ctx_idx);
       decRefObj(wait_handle);
+    }
+  }
+
+  template<bool decRef, class TWaitHandle>
+  void exitContextVector(context_idx_t ctx_idx,
+                         smart::vector<TWaitHandle*> &vector) {
+    while (!vector.empty()) {
+      auto wait_handle = vector.back();
+      vector.pop_back();
+      wait_handle->exitContext(ctx_idx);
+      if (decRef) decRefObj(wait_handle);
     }
   }
 }
@@ -40,25 +55,21 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx) == this);
   assert(!m_current);
 
-  exitContextQueue(ctx_idx, m_runnableQueue);
+  exitContextVector<true>(ctx_idx, m_runnableQueue);
 
   for (auto it : m_priorityQueueDefault) {
     exitContextQueue(ctx_idx, it.second);
   }
-
   for (auto it : m_priorityQueueNoPendingIO) {
     exitContextQueue(ctx_idx, it.second);
   }
 
-  while (!m_externalThreadEvents.empty()) {
-    auto ete_wh = m_externalThreadEvents.back();
-    m_externalThreadEvents.pop_back();
-    ete_wh->exitContext(ctx_idx);
-  }
+  exitContextVector<false>(ctx_idx, m_sleepEvents);
+  exitContextVector<false>(ctx_idx, m_externalThreadEvents);
 }
 
 void AsioContext::schedule(c_AsyncFunctionWaitHandle* wait_handle) {
-  m_runnableQueue.push(wait_handle);
+  m_runnableQueue.push_back(wait_handle);
   wait_handle->incRefCount();
 }
 
@@ -75,47 +86,37 @@ void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, 
   wait_handle->incRefCount();
 }
 
-uint32_t AsioContext::registerExternalThreadEvent(c_ExternalThreadEventWaitHandle* wait_handle) {
-  m_externalThreadEvents.push_back(wait_handle);
-  return m_externalThreadEvents.size() - 1;
-}
-
-void AsioContext::unregisterExternalThreadEvent(uint32_t ete_idx) {
-  assert(ete_idx < m_externalThreadEvents.size());
-  if (ete_idx != m_externalThreadEvents.size() - 1) {
-    m_externalThreadEvents[ete_idx] = m_externalThreadEvents.back();
-    m_externalThreadEvents[ete_idx]->setIndex(ete_idx);
-  }
-  m_externalThreadEvents.pop_back();
-}
-
 void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   assert(!m_current);
   assert(wait_handle);
   assert(wait_handle->getContext() == this);
 
-  auto session = AsioSession::Get();
   uint8_t check_ete_counter = 0;
+  auto session = AsioSession::Get();
+  auto ete_queue = session->getExternalThreadEventQueue();
+  auto& sleep_queue = session->getSleepEventQueue();
 
   if (!session->hasAbruptInterruptException()) {
     session->initAbruptInterruptException();
   }
 
   while (!wait_handle->isFinished()) {
-    // process ready external thread events once per 256 other events
-    // (when 8-bit check_ete_counter overflows)
+    // Process ready external thread and sleep events once per 256 other events
+    // (when 8-bit check_ete_counter overflows).
     if (!++check_ete_counter) {
-      // queue may contain received unprocessed events from failed runUntil()
-      auto queue = session->getExternalThreadEventQueue();
-      if (UNLIKELY(queue->hasReceived()) || queue->tryReceiveSome()) {
-        queue->processAllReceived();
+      // Process any sleep handles that have completed their sleep.
+      session->processSleepEvents();
+
+      // Queue may contain received unprocessed events from failed runUntil().
+      if (UNLIKELY(ete_queue->hasReceived()) || ete_queue->tryReceiveSome()) {
+        ete_queue->processAllReceived();
       }
     }
 
-    // run queue of ready continuations once
+    // Run queue of ready continuations once.
     if (!m_runnableQueue.empty()) {
-      auto current = m_runnableQueue.front();
-      m_runnableQueue.pop();
+      auto current = m_runnableQueue.back();
+      m_runnableQueue.pop_back();
       m_current = current;
       auto exit_guard = folly::makeGuard([&] {
         m_current = nullptr;
@@ -126,25 +127,51 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
       continue;
     }
 
-    // run default priority queue once
+    // Run default priority queue once.
     if (runSingle(m_priorityQueueDefault)) {
       continue;
     }
 
-    // pending external thread events? wait for at least one to become ready
-    if (!m_externalThreadEvents.empty()) {
-      // queue may contain received unprocessed events from failed runUntil()
-      auto queue = session->getExternalThreadEventQueue();
-      if (LIKELY(!queue->hasReceived())) {
-        // all your wait time are belong to us
-        queue->receiveSome();
-      }
-
-      queue->processAllReceived();
+    // Continue if any sleep handles can be processed now.
+    if (session->processSleepEvents()) {
       continue;
     }
 
-    // run no-pending-io priority queue once
+    // Wait for pending external thread events...
+    if (!m_externalThreadEvents.empty()) {
+      // ...but only until the next sleeper (from any context) finishes.
+      AsioSession::TimePoint waketime;
+      if (sleep_queue.empty()) {
+        waketime = AsioSession::getLatestWakeTime();
+      } else {
+        waketime = sleep_queue.top()->getWakeTime();
+      }
+
+      // Wait if necessary.
+      if (LIKELY(!ete_queue->hasReceived())) {
+        ete_queue->receiveSomeUntil(waketime);
+      }
+
+      if (ete_queue->hasReceived()) {
+        // Either we didn't have to wait, or we waited but no sleeper timed us
+        // out, so just handle the ETEs.
+        ete_queue->processAllReceived();
+      } else {
+        // No received events means the next-to-wake sleeper timed us out.
+        session->processSleepEvents();
+      }
+      continue;
+    }
+
+    // If we're here, then the only things left are sleepers.  Wait for one to
+    // be ready (in any context).
+    if (!m_sleepEvents.empty()) {
+      std::this_thread::sleep_until(sleep_queue.top()->getWakeTime());
+      session->processSleepEvents();
+      continue;
+    }
+
+    // Run no-pending-io priority queue once.
     if (runSingle(m_priorityQueueNoPendingIO)) {
       continue;
     }

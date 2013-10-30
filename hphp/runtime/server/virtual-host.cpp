@@ -118,6 +118,12 @@ void VirtualHost::initRuntimeOption(Hdf overwrite) {
   m_runtimeOption.requestTimeoutSeconds = requestTimeoutSeconds;
   m_runtimeOption.maxPostSize = maxPostSize;
   m_runtimeOption.uploadMaxFileSize = uploadMaxFileSize;
+
+  m_documentRoot = RuntimeOption::SourceRoot + m_pathTranslation;
+  if (!m_documentRoot.empty() &&
+      m_documentRoot[m_documentRoot.length() - 1] == '/') {
+    m_documentRoot = m_documentRoot.substr(0, m_documentRoot.length() - 1);
+  }
 }
 
 void VirtualHost::addAllowedDirectories(const std::vector<std::string>& dirs) {
@@ -150,7 +156,6 @@ void VirtualHost::init(Hdf vh) {
   const char *pattern = vh["Pattern"].get("");
   const char *pathTranslation = vh["PathTranslation"].get("");
   Hdf overwrite = vh["overwrite"];
-  initRuntimeOption(overwrite);
 
   if (prefix) m_prefix = prefix;
   if (pattern) {
@@ -166,13 +171,9 @@ void VirtualHost::init(Hdf vh) {
       m_pathTranslation += '/';
     }
   }
-  m_disabled = vh["Disabled"].getBool(false);
+  initRuntimeOption(overwrite);
 
-  m_documentRoot = RuntimeOption::SourceRoot + m_pathTranslation;
-  if (!m_documentRoot.empty() &&
-      m_documentRoot[m_documentRoot.length() - 1] == '/') {
-    m_documentRoot = m_documentRoot.substr(0, m_documentRoot.length() - 1);
-  }
+  m_disabled = vh["Disabled"].getBool(false);
 
   Hdf rewriteRules = vh["RewriteRules"];
   for (Hdf hdf = rewriteRules.firstChild(); hdf.exists(); hdf = hdf.next()) {

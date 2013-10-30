@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/debug/gdb-jit.h"
+
 /* __jit_debug_regiser_code() needs to be defined in a separate file
  * from the one it is called from. Otherwise gcc notices that it is empty,
  * and optimizes away the call. This prevents gdb from trapping updates to

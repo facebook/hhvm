@@ -48,6 +48,9 @@ Object f_asio_get_running();
  *       GenVectorWaitHandle      - wait handle representing an Vector of WHs
  *       SetResultToRefWaitHandle - wait handle that sets result to reference
  *     RescheduleWaitHandle       - wait handle that reschedules execution
+ *     SessionScopedWaitHandle    - wait handle with session-managed execution
+ *       SleepWaitHandle          - wait handle that finishes after a timeout
+ *       ExternalThreadEventWaitHandle  - thread-powered asynchronous execution
  *
  * A wait handle can be either synchronously joined (waited for the operation
  * to finish) or passed in various contexts as a dependency and waited for
@@ -512,6 +515,71 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// class SessionScopedWaitHandle
+
+/**
+ * A wait handle whose execution transcends context-scope.
+ */
+FORWARD_DECLARE_CLASS(SessionScopedWaitHandle);
+class c_SessionScopedWaitHandle : public c_WaitableWaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(SessionScopedWaitHandle)
+
+  // need to implement
+  public: c_SessionScopedWaitHandle(Class* cls = c_SessionScopedWaitHandle::classof());
+  public: ~c_SessionScopedWaitHandle();
+  public: void t___construct();
+
+ public:
+  void enterContext(context_idx_t ctx_idx);
+  void exitContext(context_idx_t ctx_idx);
+
+ protected:
+  virtual void registerToContext() = 0;
+  virtual void unregisterFromContext() = 0;
+
+  static const int8_t STATE_WAITING = 3;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class SleepWaitHandle
+
+/**
+ * A wait handle that sleeps until a give time passes.
+ */
+FORWARD_DECLARE_CLASS(SleepWaitHandle);
+class c_SleepWaitHandle : public c_SessionScopedWaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(SleepWaitHandle);
+
+  // need to implement
+  public: c_SleepWaitHandle(Class* cls = c_SleepWaitHandle::classof());
+  public: ~c_SleepWaitHandle();
+  public: void t___construct();
+  public: static Object ti_create(int64_t usecs);
+
+ public:
+  void process();
+  String getName();
+  AsioSession::TimePoint getWakeTime() const { return m_waketime; };
+
+  void setIndex(uint32_t ev_idx) {
+    assert(getState() == STATE_WAITING);
+    m_index = ev_idx;
+  }
+
+ protected:
+  void registerToContext();
+  void unregisterFromContext();
+
+ private:
+  void initialize(int64_t usecs);
+
+  AsioSession::TimePoint m_waketime;
+  uint32_t m_index;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 // class ExternalThreadEventWaitHandle
 
 /**
@@ -521,7 +589,8 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
  */
 class AsioExternalThreadEvent;
 FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
-class c_ExternalThreadEventWaitHandle : public c_WaitableWaitHandle, public Sweepable {
+class c_ExternalThreadEventWaitHandle
+  : public c_SessionScopedWaitHandle, public Sweepable {
  public:
   DECLARE_CLASS(ExternalThreadEventWaitHandle)
 
@@ -551,8 +620,10 @@ class c_ExternalThreadEventWaitHandle : public c_WaitableWaitHandle, public Swee
   void abandon(bool sweeping);
   void process();
   String getName();
-  void enterContext(context_idx_t ctx_idx);
-  void exitContext(context_idx_t ctx_idx);
+
+ protected:
+  void registerToContext();
+  void unregisterFromContext();
 
  private:
   void initialize(AsioExternalThreadEvent* event, ObjectData* priv_data);

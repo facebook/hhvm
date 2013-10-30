@@ -139,7 +139,7 @@ RegionDescPtr RegionFormer::go() {
   uint32_t numJmps = 0;
   for (auto const& lt : m_ctx.liveTypes) {
     auto t = lt.type;
-    if (t.subtypeOf(Type::Cls)) {
+    if (t <= Type::Cls) {
       m_ht.assertTypeStack(lt.location.stackOffset(), t);
       m_curBlock->addPredicted(m_sk, RegionDesc::TypePred{lt.location, t});
     } else {
@@ -276,7 +276,14 @@ bool RegionFormer::prepareInstruction() {
   };
 
   for (auto const& ii : inputInfos) m_inst.inputs.push_back(newDynLoc(ii));
-  readMetaData(m_metaHand, m_inst, m_ht);
+  try {
+    readMetaData(m_metaHand, m_inst, m_ht);
+  } catch (const FailedTraceGen& exn) {
+    FTRACE(1, "failed to apply metadata for {}: {}\n",
+           m_inst, exn.what());
+    return false;
+  }
+
 
   // Check all the inputs for unknown values.
   assert(inputInfos.size() == m_inst.inputs.size());

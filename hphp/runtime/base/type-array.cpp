@@ -168,7 +168,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
         }
       }
       if (found == match) {
-        ret.setWithRef(key, value);
+        ret.setWithRef(key, value, true);
       }
     }
     return ret;
@@ -256,7 +256,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
     }
 
     if (found == match) {
-      ret.setWithRef(iter.first(), iter.secondRef());
+      ret.setWithRef(iter.first(), iter.secondRef(), true);
     }
   }
   return ret;
@@ -863,7 +863,7 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
     if (renumber) {
       sorted.appendWithRef(m_px->getValueRef(pos));
     } else {
-      sorted.setWithRef(m_px->getKey(pos), m_px->getValueRef(pos));
+      sorted.setWithRef(m_px->getKey(pos), m_px->getValueRef(pos), true);
     }
   }
   operator=(sorted);

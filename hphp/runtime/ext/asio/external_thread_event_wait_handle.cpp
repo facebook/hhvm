@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio_external_thread_event.h"
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
+#include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
 #include "hphp/system/systemlib.h"
 
@@ -29,7 +30,7 @@ namespace {
 }
 
 c_ExternalThreadEventWaitHandle::c_ExternalThreadEventWaitHandle(Class *cb)
-    : c_WaitableWaitHandle(cb) {
+  : c_SessionScopedWaitHandle(cb) {
 }
 
 c_ExternalThreadEventWaitHandle::~c_ExternalThreadEventWaitHandle() {
@@ -72,7 +73,7 @@ void c_ExternalThreadEventWaitHandle::initialize(AsioExternalThreadEvent* event,
 
   setState(STATE_WAITING);
   if (isInContext()) {
-    m_index = getContext()->registerExternalThreadEvent(this);
+    registerToContext();
   }
 }
 
@@ -94,7 +95,7 @@ void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
   assert(getCount() == 1 || sweeping);
 
   if (isInContext()) {
-    getContext()->unregisterExternalThreadEvent(m_index);
+    unregisterFromContext();
   }
 
   // clean up
@@ -105,7 +106,7 @@ void c_ExternalThreadEventWaitHandle::process() {
   assert(getState() == STATE_WAITING);
 
   if (isInContext()) {
-    getContext()->unregisterExternalThreadEvent(m_index);
+    unregisterFromContext();
   }
 
   // clean up once event is processed
@@ -131,46 +132,14 @@ String c_ExternalThreadEventWaitHandle::getName() {
   return s_externalThreadEvent;
 }
 
-void c_ExternalThreadEventWaitHandle::enterContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-
-  // stop before corrupting unioned data
-  if (isFinished()) {
-    return;
-  }
-
-  // already in the more specific context?
-  if (LIKELY(getContextIdx() >= ctx_idx)) {
-    return;
-  }
-
-  assert(getState() == STATE_WAITING);
-
-  if (isInContext()) {
-    getContext()->unregisterExternalThreadEvent(m_index);
-  }
-
-  setContextIdx(ctx_idx);
-  m_index = getContext()->registerExternalThreadEvent(this);
+void c_ExternalThreadEventWaitHandle::registerToContext() {
+  AsioContext *ctx = getContext();
+  m_index = ctx->registerTo(ctx->getExternalThreadEvents(), this);
 }
 
-void c_ExternalThreadEventWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-  assert(getContextIdx() == ctx_idx);
-  assert(getState() == STATE_WAITING);
-
-  // move us to the parent context
-  setContextIdx(getContextIdx() - 1);
-
-  // re-register if still in a context
-  if (isInContext()) {
-    getContext()->registerExternalThreadEvent(this);
-  }
-
-  // recursively move all wait handles blocked by us
-  for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
-    pwh->exitContextBlocked(ctx_idx);
-  }
+void c_ExternalThreadEventWaitHandle::unregisterFromContext() {
+  AsioContext *ctx = getContext();
+  ctx->unregisterFrom(ctx->getExternalThreadEvents(), m_index);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

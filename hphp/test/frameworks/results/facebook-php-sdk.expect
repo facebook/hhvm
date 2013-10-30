@@ -1,237 +1,231 @@
-PHPUnit 3.7.27 by Sebastian Bergmann.
-
-
-Starting test 'PHPSDKTestCase::testConstructor'.
+PHPSDKTestCase::testConstructor
 .
-Starting test 'PHPSDKTestCase::testConstructorWithFileUpload'.
+PHPSDKTestCase::testConstructorWithFileUpload
 .
-Starting test 'PHPSDKTestCase::testSetAppId'.
+PHPSDKTestCase::testSetAppId
 .
-Starting test 'PHPSDKTestCase::testSetAPISecret'.
+PHPSDKTestCase::testSetAPISecret
 .
-Starting test 'PHPSDKTestCase::testSetAPPSecret'.
+PHPSDKTestCase::testSetAPPSecret
 .
-Starting test 'PHPSDKTestCase::testSetAccessToken'.
+PHPSDKTestCase::testSetAccessToken
 .
-Starting test 'PHPSDKTestCase::testSetFileUploadSupport'.
+PHPSDKTestCase::testSetFileUploadSupport
 .
-Starting test 'PHPSDKTestCase::testGetCurrentURL'.
+PHPSDKTestCase::testGetCurrentURL
 .
-Starting test 'PHPSDKTestCase::testGetLoginURL'.
+PHPSDKTestCase::testGetLoginURL
 .
-Starting test 'PHPSDKTestCase::testGetLoginURLWithExtraParams'.
+PHPSDKTestCase::testGetLoginURLWithExtraParams
 .
-Starting test 'PHPSDKTestCase::testGetLoginURLWithScopeParamsAsArray'.
+PHPSDKTestCase::testGetLoginURLWithScopeParamsAsArray
 .
-Starting test 'PHPSDKTestCase::testGetCodeWithValidCSRFState'.
+PHPSDKTestCase::testGetCodeWithValidCSRFState
 .
-Starting test 'PHPSDKTestCase::testGetCodeWithInvalidCSRFState'.
+PHPSDKTestCase::testGetCodeWithInvalidCSRFState
 .
-Starting test 'PHPSDKTestCase::testGetCodeWithMissingCSRFState'.
+PHPSDKTestCase::testGetCodeWithMissingCSRFState
 .
-Starting test 'PHPSDKTestCase::testGetUserFromSignedRequest'.
+PHPSDKTestCase::testGetUserFromSignedRequest
 .
-Starting test 'PHPSDKTestCase::testSignedRequestRewrite'.
+PHPSDKTestCase::testSignedRequestRewrite
 .
-Starting test 'PHPSDKTestCase::testGetSignedRequestFromCookie'.
+PHPSDKTestCase::testGetSignedRequestFromCookie
 .
-Starting test 'PHPSDKTestCase::testGetSignedRequestWithIncorrectSignature'.
+PHPSDKTestCase::testGetSignedRequestWithIncorrectSignature
 .
-Starting test 'PHPSDKTestCase::testNonUserAccessToken'.
+PHPSDKTestCase::testNonUserAccessToken
 .
-Starting test 'PHPSDKTestCase::testMissingMetadataCookie'.
+PHPSDKTestCase::testMissingMetadataCookie
 .
-Starting test 'PHPSDKTestCase::testEmptyMetadataCookie'.
+PHPSDKTestCase::testEmptyMetadataCookie
 .
-Starting test 'PHPSDKTestCase::testMetadataCookie'.
+PHPSDKTestCase::testMetadataCookie
 .
-Starting test 'PHPSDKTestCase::testQuotedMetadataCookie'.
+PHPSDKTestCase::testQuotedMetadataCookie
 .
-Starting test 'PHPSDKTestCase::testAPIForLoggedOutUsers'.
+PHPSDKTestCase::testAPIForLoggedOutUsers
 .
-Starting test 'PHPSDKTestCase::testAPIWithBogusAccessToken'.
+PHPSDKTestCase::testAPIWithBogusAccessToken
 .
-Starting test 'PHPSDKTestCase::testAPIGraphPublicData'.
+PHPSDKTestCase::testAPIGraphPublicData
 .
-Starting test 'PHPSDKTestCase::testGraphAPIWithBogusAccessToken'.
+PHPSDKTestCase::testGraphAPIWithBogusAccessToken
 .
-Starting test 'PHPSDKTestCase::testGraphAPIWithExpiredAccessToken'.
+PHPSDKTestCase::testGraphAPIWithExpiredAccessToken
 .
-Starting test 'PHPSDKTestCase::testGraphAPIOAuthSpecError'.
+PHPSDKTestCase::testGraphAPIOAuthSpecError
 .
-Starting test 'PHPSDKTestCase::testGraphAPIMethodOAuthSpecError'.
+PHPSDKTestCase::testGraphAPIMethodOAuthSpecError
 .
-Starting test 'PHPSDKTestCase::testCurlFailure'.
+PHPSDKTestCase::testCurlFailure
 .
-Starting test 'PHPSDKTestCase::testGraphAPIWithOnlyParams'.
+PHPSDKTestCase::testGraphAPIWithOnlyParams
 .
-Starting test 'PHPSDKTestCase::testLoginURLDefaults'.
+PHPSDKTestCase::testLoginURLDefaults
 .
-Starting test 'PHPSDKTestCase::testLoginURLDefaultsDropStateQueryParam'.
+PHPSDKTestCase::testLoginURLDefaultsDropStateQueryParam
 .
-Starting test 'PHPSDKTestCase::testLoginURLDefaultsDropCodeQueryParam'.
+PHPSDKTestCase::testLoginURLDefaultsDropCodeQueryParam
 .
-Starting test 'PHPSDKTestCase::testLoginURLDefaultsDropSignedRequestParamButNotOthers'.
+PHPSDKTestCase::testLoginURLDefaultsDropSignedRequestParamButNotOthers
 .
-Starting test 'PHPSDKTestCase::testLoginURLCustomNext'.
+PHPSDKTestCase::testLoginURLCustomNext
 .
-Starting test 'PHPSDKTestCase::testLogoutURLDefaults'.
+PHPSDKTestCase::testLogoutURLDefaults
 .
-Starting test 'PHPSDKTestCase::testLoginStatusURLDefaults'.
+PHPSDKTestCase::testLoginStatusURLDefaults
 .
-Starting test 'PHPSDKTestCase::testLoginStatusURLCustom'.
+PHPSDKTestCase::testLoginStatusURLCustom
 .
-Starting test 'PHPSDKTestCase::testNonDefaultPort'.
+PHPSDKTestCase::testNonDefaultPort
 .
-Starting test 'PHPSDKTestCase::testSecureCurrentUrl'.
+PHPSDKTestCase::testSecureCurrentUrl
 .
-Starting test 'PHPSDKTestCase::testSecureCurrentUrlWithNonDefaultPort'.
+PHPSDKTestCase::testSecureCurrentUrlWithNonDefaultPort
 .
-Starting test 'PHPSDKTestCase::testBase64UrlEncode'.
+PHPSDKTestCase::testBase64UrlEncode
 .
-Starting test 'PHPSDKTestCase::testSignedToken'.
+PHPSDKTestCase::testSignedToken
 .
-Starting test 'PHPSDKTestCase::testNonTossedSignedtoken'.
+PHPSDKTestCase::testNonTossedSignedtoken
 .
-Starting test 'PHPSDKTestCase::testSignedRequestWithEmptyValue'.
+PHPSDKTestCase::testSignedRequestWithEmptyValue
 .
-Starting test 'PHPSDKTestCase::testSignedRequestWithWrongAlgo'.
+PHPSDKTestCase::testSignedRequestWithWrongAlgo
 .
-Starting test 'PHPSDKTestCase::testMakeAndParse'.
+PHPSDKTestCase::testMakeAndParse
 .
-Starting test 'PHPSDKTestCase::testMakeSignedRequestExpectsArray'.
+PHPSDKTestCase::testMakeSignedRequestExpectsArray
 .
-Starting test 'PHPSDKTestCase::testBundledCACert'.
+PHPSDKTestCase::testBundledCACert
 .
-Starting test 'PHPSDKTestCase::testVideoUpload'.
+PHPSDKTestCase::testVideoUpload
 .
-Starting test 'PHPSDKTestCase::testVideoUploadGraph'.
+PHPSDKTestCase::testVideoUploadGraph
 .
-Starting test 'PHPSDKTestCase::testGetUserAndAccessTokenFromSession'.
+PHPSDKTestCase::testGetUserAndAccessTokenFromSession
 .
-Starting test 'PHPSDKTestCase::testGetUserAndAccessTokenFromSignedRequestNotSession'.
+PHPSDKTestCase::testGetUserAndAccessTokenFromSignedRequestNotSession
 .
-Starting test 'PHPSDKTestCase::testGetUserWithoutCodeOrSignedRequestOrSession'.
+PHPSDKTestCase::testGetUserWithoutCodeOrSignedRequestOrSession
 .
-Starting test 'PHPSDKTestCase::testGetAccessTokenUsingCodeInJsSdkCookie'.
+PHPSDKTestCase::testGetAccessTokenUsingCodeInJsSdkCookie
 .
-Starting test 'PHPSDKTestCase::testSignedRequestWithoutAuthClearsData'.
+PHPSDKTestCase::testSignedRequestWithoutAuthClearsData
 .
-Starting test 'PHPSDKTestCase::testInvalidCodeInSignedRequestWillClearData'.
+PHPSDKTestCase::testInvalidCodeInSignedRequestWillClearData
 .
-Starting test 'PHPSDKTestCase::testInvalidCodeWillClearData'.
+PHPSDKTestCase::testInvalidCodeWillClearData
 .
-Starting test 'PHPSDKTestCase::testValidCodeToToken'.
+PHPSDKTestCase::testValidCodeToToken
 .
-Starting test 'PHPSDKTestCase::testSignedRequestWithoutAuthClearsDataInAvailData'.
+PHPSDKTestCase::testSignedRequestWithoutAuthClearsDataInAvailData
 .
-Starting test 'PHPSDKTestCase::testFailedToGetUserFromAccessTokenClearsData'.
-.  63 / 115 ( 54%)
-
-Starting test 'PHPSDKTestCase::testUserFromAccessTokenIsStored'.
+PHPSDKTestCase::testFailedToGetUserFromAccessTokenClearsData
 .
-Starting test 'PHPSDKTestCase::testUserFromAccessTokenPullsID'.
+PHPSDKTestCase::testUserFromAccessTokenIsStored
 .
-Starting test 'PHPSDKTestCase::testUserFromAccessTokenResetsOnApiException'.
+PHPSDKTestCase::testUserFromAccessTokenPullsID
 .
-Starting test 'PHPSDKTestCase::testEmptyCodeReturnsFalse'.
+PHPSDKTestCase::testUserFromAccessTokenResetsOnApiException
 .
-Starting test 'PHPSDKTestCase::testNullRedirectURIUsesCurrentURL'.
+PHPSDKTestCase::testEmptyCodeReturnsFalse
 .
-Starting test 'PHPSDKTestCase::testNullRedirectURIAllowsEmptyStringForCookie'.
+PHPSDKTestCase::testNullRedirectURIUsesCurrentURL
 .
-Starting test 'PHPSDKTestCase::testAPIExceptionDuringCodeExchangeIsIgnored'.
+PHPSDKTestCase::testNullRedirectURIAllowsEmptyStringForCookie
 .
-Starting test 'PHPSDKTestCase::testEmptyResponseInCodeExchangeIsIgnored'.
+PHPSDKTestCase::testAPIExceptionDuringCodeExchangeIsIgnored
 .
-Starting test 'PHPSDKTestCase::testExistingStateRestoredInConstructor'.
+PHPSDKTestCase::testEmptyResponseInCodeExchangeIsIgnored
 .
-Starting test 'PHPSDKTestCase::testMissingAccessTokenInCodeExchangeIsIgnored'.
+PHPSDKTestCase::testExistingStateRestoredInConstructor
 .
-Starting test 'PHPSDKTestCase::testExceptionConstructorWithErrorCode'.
+PHPSDKTestCase::testMissingAccessTokenInCodeExchangeIsIgnored
 .
-Starting test 'PHPSDKTestCase::testExceptionTypeFalse'.
+PHPSDKTestCase::testExceptionConstructorWithErrorCode
 .
-Starting test 'PHPSDKTestCase::testExceptionTypeMixedDraft00'.
+PHPSDKTestCase::testExceptionTypeFalse
 .
-Starting test 'PHPSDKTestCase::testExceptionTypeDraft00'.
+PHPSDKTestCase::testExceptionTypeMixedDraft00
 .
-Starting test 'PHPSDKTestCase::testExceptionTypeDraft10'.
+PHPSDKTestCase::testExceptionTypeDraft00
 .
-Starting test 'PHPSDKTestCase::testExceptionTypeDefault'.
+PHPSDKTestCase::testExceptionTypeDraft10
 .
-Starting test 'PHPSDKTestCase::testExceptionToString'.
+PHPSDKTestCase::testExceptionTypeDefault
 .
-Starting test 'PHPSDKTestCase::testDestroyClearsCookie'.
+PHPSDKTestCase::testExceptionToString
 .
-Starting test 'PHPSDKTestCase::testAuthExpireSessionDestroysSession'.
+PHPSDKTestCase::testDestroyClearsCookie
 .
-Starting test 'PHPSDKTestCase::testLowercaseAuthRevokeAuthDestroysSession'.
+PHPSDKTestCase::testAuthExpireSessionDestroysSession
 .
-Starting test 'PHPSDKTestCase::testErrorCodeFromRestAPIThrowsException'.
+PHPSDKTestCase::testLowercaseAuthRevokeAuthDestroysSession
 .
-Starting test 'PHPSDKTestCase::testJsonEncodeOfNonStringParams'.
+PHPSDKTestCase::testErrorCodeFromRestAPIThrowsException
 .
-Starting test 'PHPSDKTestCase::testSessionBackedFacebook'.
+PHPSDKTestCase::testJsonEncodeOfNonStringParams
 .
-Starting test 'PHPSDKTestCase::testSessionBackedFacebookIgnoresUnsupportedKey'.
+PHPSDKTestCase::testSessionBackedFacebook
 .
-Starting test 'PHPSDKTestCase::testClearSessionBackedFacebook'.
+PHPSDKTestCase::testSessionBackedFacebookIgnoresUnsupportedKey
 .
-Starting test 'PHPSDKTestCase::testSessionBackedFacebookIgnoresUnsupportedKeyInClear'.
+PHPSDKTestCase::testClearSessionBackedFacebook
 .
-Starting test 'PHPSDKTestCase::testClearAllSessionBackedFacebook'.
+PHPSDKTestCase::testSessionBackedFacebookIgnoresUnsupportedKeyInClear
 .
-Starting test 'PHPSDKTestCase::testSharedSessionBackedFacebook'.
+PHPSDKTestCase::testClearAllSessionBackedFacebook
 .
-Starting test 'PHPSDKTestCase::testSharedSessionBackedFacebookIgnoresUnsupportedKey'.
+PHPSDKTestCase::testSharedSessionBackedFacebook
 .
-Starting test 'PHPSDKTestCase::testSharedClearSessionBackedFacebook'.
+PHPSDKTestCase::testSharedSessionBackedFacebookIgnoresUnsupportedKey
 .
-Starting test 'PHPSDKTestCase::testSharedSessionBackedFacebookIgnoresUnsupportedKeyInClear'.
+PHPSDKTestCase::testSharedClearSessionBackedFacebook
 .
-Starting test 'PHPSDKTestCase::testSharedClearAllSessionBackedFacebook'.
+PHPSDKTestCase::testSharedSessionBackedFacebookIgnoresUnsupportedKeyInClear
 .
-Starting test 'PHPSDKTestCase::testSharedSessionBackedFacebookIsRestored'.
+PHPSDKTestCase::testSharedClearAllSessionBackedFacebook
 .
-Starting test 'PHPSDKTestCase::testSharedSessionBackedFacebookIsNotRestoredWhenCorrupt'.
+PHPSDKTestCase::testSharedSessionBackedFacebookIsRestored
 .
-Starting test 'PHPSDKTestCase::testHttpHost'.
+PHPSDKTestCase::testSharedSessionBackedFacebookIsNotRestoredWhenCorrupt
 .
-Starting test 'PHPSDKTestCase::testHttpProtocol'.
+PHPSDKTestCase::testHttpHost
 .
-Starting test 'PHPSDKTestCase::testHttpHostForwarded'.
+PHPSDKTestCase::testHttpProtocol
 .
-Starting test 'PHPSDKTestCase::testHttpProtocolForwarded'.
+PHPSDKTestCase::testHttpHostForwarded
 .
-Starting test 'PHPSDKTestCase::testHttpProtocolForwardedSecure'.
+PHPSDKTestCase::testHttpProtocolForwarded
 .
-Starting test 'PHPSDKTestCase::testEndsWith with data set #0 ('', '', true)'.
+PHPSDKTestCase::testHttpProtocolForwardedSecure
 .
-Starting test 'PHPSDKTestCase::testEndsWith with data set #1 ('', 'a', false)'.
+PHPSDKTestCase::testEndsWith with data set #0 
 .
-Starting test 'PHPSDKTestCase::testEndsWith with data set #2 ('a', '', true)'.
+PHPSDKTestCase::testEndsWith with data set #1 
 .
-Starting test 'PHPSDKTestCase::testEndsWith with data set #3 ('a', 'b', false)'.
+PHPSDKTestCase::testEndsWith with data set #2 
 .
-Starting test 'PHPSDKTestCase::testEndsWith with data set #4 ('a', 'a', true)'.
+PHPSDKTestCase::testEndsWith with data set #3 
 .
-Starting test 'PHPSDKTestCase::testEndsWith with data set #5 ('aa', 'a', true)'.
+PHPSDKTestCase::testEndsWith with data set #4 
 .
-Starting test 'PHPSDKTestCase::testEndsWith with data set #6 ('ab', 'a', false)'.
+PHPSDKTestCase::testEndsWith with data set #5 
 .
-Starting test 'PHPSDKTestCase::testEndsWith with data set #7 ('ba', 'a', true)'.
+PHPSDKTestCase::testEndsWith with data set #6 
 .
-Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #0 ('fbrell.com', 'fbrell.com', true)'.
+PHPSDKTestCase::testEndsWith with data set #7 
 .
-Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #1 ('foo.fbrell.com', 'fbrell.com', true)'.
+PHPSDKTestCase::testIsAllowedDomain with data set #0 
 .
-Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #2 ('foofbrell.com', 'fbrell.com', false)'.
+PHPSDKTestCase::testIsAllowedDomain with data set #1 
 .
-Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #3 ('evil.com', 'fbrell.com', false)'.
+PHPSDKTestCase::testIsAllowedDomain with data set #2 
 .
-Starting test 'PHPSDKTestCase::testIsAllowedDomain with data set #4 ('foo.fbrell.com', 'bar.fbrell.com', false)'.
+PHPSDKTestCase::testIsAllowedDomain with data set #3 
 .
-
-Time: 16.33 seconds, Memory: 7.13Mb
+PHPSDKTestCase::testIsAllowedDomain with data set #4 
+.
 OK (115 tests, 217 assertions)

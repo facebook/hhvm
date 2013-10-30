@@ -1644,6 +1644,14 @@
             "value": 1
         },
         {
+            "name": "FILE_TEXT",
+            "value": 0
+        },
+        {
+            "name": "FILE_BINARY",
+            "value": 0
+        },
+        {
             "name": "FNM_CASEFOLD",
             "value": 16
         },

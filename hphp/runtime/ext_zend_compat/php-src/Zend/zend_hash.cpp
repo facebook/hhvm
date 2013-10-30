@@ -1,62 +1,105 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.00 of the Zend license,     |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.zend.com/license/2_00.txt.                                |
+   | If you did not receive a copy of the Zend license and are unable to  |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@zend.com so we can mail you a copy immediately.              |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   +----------------------------------------------------------------------+
+*/
+
+/* $Id$ */
+
 #include "zend.h"
 #include "zend_hash.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_qsort.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zval-helpers.h"
+#include "hphp/runtime/ext_hhvm/ext_zend_compat.h"
 #include "hphp/util/safesort.h"
+#include "hphp/util/assertions.h"
 
 ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
   if (nKeyLength <= 0) {
     return FAILURE;
   }
   assert(arKey[nKeyLength - 1] == '\0');
-  HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
 
-  if ((flag & HASH_ADD) && ht->exists(key.get())) {
+  if ((flag & HASH_ADD) && zend_hash_exists(ht, arKey, nKeyLength)) {
     return FAILURE;
   }
-  /*
-   * TODO(#2941952): we should eventually be handling the fact that
-   * zSet() operation could return a new HashTable, but currently this
-   * is not possible.
-   */
+  HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
   ht->zSet(key.get(), (*(zval**)pData));
   return SUCCESS;
 }
 
 ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
-  return _zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, flag);
+  return _zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
 }
 
 ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) {
   if (flag & HASH_NEXT_INSERT) {
-    // TODO(#2941952)
     ht->zAppend(*(zval**)pData);
     return SUCCESS;
   }
 
-  if (flag & HASH_ADD && ht->exists(h)) {
+  if (flag & HASH_ADD && zend_hash_index_exists(ht, h)) {
     return FAILURE;
   }
 
-  /*
-   * TODO(#2941952)
-   */
   ht->zSet(h, (*(zval**)pData));
   return SUCCESS;
 }
 
+ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func_args_t apply_func, int num_args, ...) {
+	va_list args;
+	zend_hash_key hash_key;
+
+  for (HPHP::ArrayIter it(ht); it; ++it) {
+		int result;
+		va_start(args, num_args);
+    if (it.first().isInteger()) {
+      hash_key.arKey = "";
+      hash_key.nKeyLength = 0;
+      hash_key.h = it.first().asInt64Val();
+    } else {
+      assert(it.first().isString());
+      hash_key.arKey = it.first().asCStrRef().data();
+      hash_key.nKeyLength = it.first().asCStrRef().size() + 1;
+      hash_key.h = 0;
+    }
+    zval* data = it.zSecond();
+		result = apply_func(&data, num_args, args, &hash_key);
+
+		if (result & ZEND_HASH_APPLY_REMOVE) {
+      not_implemented();
+		}
+		if (result & ZEND_HASH_APPLY_STOP) {
+			va_end(args);
+			break;
+		}
+		va_end(args);
+	}
+}
+
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag) {
-  HPHP::raise_error("zend_hash_del_key_or_index unimplemented");
-#if 0
   if (nKeyLength == 0) {
-    // TODO(#2941952)
     ht->remove(h, false);
   } else {
     assert(arKey[nKeyLength - 1] == '\0');
     HPHP::String key(arKey, nKeyLength - 1, HPHP::CopyString);
-    // TODO(#2941952)
     ht->remove(key.get(), false);
   }
-#endif
   return SUCCESS;
 }
 
@@ -88,9 +131,7 @@ ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLen
   if (!val) {
     return FAILURE;
   }
-  if (val->m_type != HPHP::KindOfRef) {
-    HPHP::tvBox(val);
-  }
+  HPHP::zBoxAndProxy(val);
   auto p = (zval***)pData;
   *p = &val->m_data.pref;
   return SUCCESS;
@@ -105,12 +146,18 @@ ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData) {
   if (!val) {
     return FAILURE;
   }
-  if (val->m_type != HPHP::KindOfRef) {
-    HPHP::tvBox(val);
-  }
+  HPHP::zBoxAndProxy(val);
   auto p = (zval***)pData;
   *p = &val->m_data.pref;
   return SUCCESS;
+}
+
+ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, uint nKeyLength)
+{
+  assert(arKey[nKeyLength - 1] == '\0');
+  return ht->exists(
+    HPHP::StrNR(HPHP::String(arKey, nKeyLength - 1, HPHP::CopyString).get())
+  );
 }
 
 ZEND_API ulong zend_hash_next_free_element(const HashTable *ht) {
@@ -195,9 +242,7 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
   if (!val) {
     return FAILURE;
   }
-  if (val->m_type != HPHP::KindOfRef) {
-    HPHP::tvBox(val);
-  }
+  HPHP::zBoxAndProxy(val);
   auto p = (zval***)pData;
   *p = &val->m_data.pref;
   return SUCCESS;
@@ -212,20 +257,16 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 }
 
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC) {
-  // TODO(#2941952): We can't really implement this correctly right
-  // now.
-  HPHP::raise_error("_zend_hash_merge unimplemented");
-#if 0
-  auto const newArray = target->plus(source);
-  decRefArr(newArray);
+  target->plus(source);
   for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
     auto tv = (HPHP::TypedValue*)it.secondRef().asTypedValue();
-    if (tv->m_type != HPHP::KindOfRef) {
-      HPHP::tvBox(tv);
-    }
+    HPHP::zBoxAndProxy(tv);
     pCopyConstructor((void*)(&tv->m_data.pref));
   }
-#endif
+}
+
+ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h) {
+  return ht->exists(h);
 }
 
 ZEND_API int zend_hash_num_elements(const HashTable *ht) {
@@ -233,25 +274,17 @@ ZEND_API int zend_hash_num_elements(const HashTable *ht) {
 }
 
 ZEND_API void zend_hash_clean(HashTable *ht) {
-  HPHP::raise_error("zend_hash_clean unimplemented");
-#if 0
   for (HPHP::ArrayIter it(ht); !it.end(); it.next()) {
-    // TODO(#2941952)
-    // This can't assume that the ht pointer isn't reseated
     ht->remove(it.secondRef(), false);
   }
-#endif
 }
 
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size) {
-  HPHP::raise_error("zend_hash_copy unimplemented");
-#if 0
-  target->merge(source, false);
+  target->merge(source);
   for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
     const void *tv = it.secondRef().asTypedValue();
     pCopyConstructor(const_cast<void*>(tv));
   }
-#endif
 }
 
 ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength)
@@ -265,4 +298,13 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
   // TODO figure out how to use compar
   ht->ksort(0, true);
   return SUCCESS;
+}
+
+ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC) {
+  ht->incRefCount();
+  return SUCCESS;
+}
+
+ZEND_API void zend_hash_destroy(HashTable *ht) {
+  decRefArr(ht);
 }

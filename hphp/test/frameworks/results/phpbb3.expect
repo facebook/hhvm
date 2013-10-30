@@ -1,91 +1,86 @@
-PHPUnit 3.7.24 by Sebastian Bergmann.
-
-Configuration read from /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpbb3/phpunit.xml.dist
-
-
-Starting test 'phpbb_acp_board_select_auth_method_test::test_select_auth_method with data set #0 ('acp_board_valid', '<option value="acp_board_valid" selected="selected">Acp_board_valid</option>')'.
+phpbb_acp_board_select_auth_method_test::test_select_auth_method with data set #0 
 .
-Starting test 'phpbb_acp_board_select_auth_method_test::test_select_auth_method with data set #1 ('acp_board_invalid', '<option value="acp_board_valid">Acp_board_valid</option>')'.
+phpbb_acp_board_select_auth_method_test::test_select_auth_method with data set #1 
 .
-Starting test 'phpbb_auth_provider_apache_test::test_init'.
+phpbb_auth_provider_apache_test::test_init
 S
-Starting test 'phpbb_auth_provider_apache_test::test_login'.
+phpbb_auth_provider_apache_test::test_login
 S
-Starting test 'phpbb_auth_provider_apache_test::test_autologin'.
+phpbb_auth_provider_apache_test::test_autologin
 S
-Starting test 'phpbb_auth_provider_apache_test::test_validate_session'.
+phpbb_auth_provider_apache_test::test_validate_session
 S
-Starting test 'phpbb_auth_provider_db_test::test_login'.
+phpbb_auth_provider_db_test::test_login
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_retrieveAccessToken with data set #0 (OAuth\OAuth2\Token\StdOAuth2Token, NULL)'.
+phpbb_auth_provider_oauth_token_storage_test::test_retrieveAccessToken with data set #0 
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_retrieveAccessToken with data set #1 (NULL, 'OAuth\\Common\\Storage\\Exception\\TokenNotFoundException')'.
+phpbb_auth_provider_oauth_token_storage_test::test_retrieveAccessToken with data set #1 
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_retrieveAccessToken_from_db'.
+phpbb_auth_provider_oauth_token_storage_test::test_retrieveAccessToken_from_db
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_retrieve_access_token_by_session with data set #0 (OAuth\OAuth2\Token\StdOAuth2Token, NULL)'.
+phpbb_auth_provider_oauth_token_storage_test::test_retrieve_access_token_by_session with data set #0 
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_retrieve_access_token_by_session with data set #1 (NULL, 'OAuth\\Common\\Storage\\Exception\\TokenNotFoundException')'.
+phpbb_auth_provider_oauth_token_storage_test::test_retrieve_access_token_by_session with data set #1 
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_retrieve_access_token_by_session_from_db'.
+phpbb_auth_provider_oauth_token_storage_test::test_retrieve_access_token_by_session_from_db
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_storeAccessToken'.
+phpbb_auth_provider_oauth_token_storage_test::test_storeAccessToken
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_hasAccessToken with data set #0 (NULL, false)'.
+phpbb_auth_provider_oauth_token_storage_test::test_hasAccessToken with data set #0 
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_hasAccessToken with data set #1 (OAuth\OAuth2\Token\StdOAuth2Token, true)'.
+phpbb_auth_provider_oauth_token_storage_test::test_hasAccessToken with data set #1 
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_has_access_token_by_session with data set #0 (NULL, false)'.
+phpbb_auth_provider_oauth_token_storage_test::test_has_access_token_by_session with data set #0 
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_has_access_token_by_session with data set #1 (OAuth\OAuth2\Token\StdOAuth2Token, true)'.
+phpbb_auth_provider_oauth_token_storage_test::test_has_access_token_by_session with data set #1 
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_clearToken'.
+phpbb_auth_provider_oauth_token_storage_test::test_clearToken
 S
-Starting test 'phpbb_auth_provider_oauth_token_storage_test::test_set_user_id'.
+phpbb_auth_provider_oauth_token_storage_test::test_set_user_id
 S
-Starting test 'phpbb_avatar_manager_test::test_get_all_drivers'.
+phpbb_avatar_manager_test::test_get_all_drivers
 .
-Starting test 'phpbb_avatar_manager_test::test_get_enabled_drivers'.
+phpbb_avatar_manager_test::test_get_enabled_drivers
 .
-Starting test 'phpbb_avatar_manager_test::test_get_driver_enabled with data set #0 ('avatar.driver.foobar', 'avatar.driver.foobar')'.
+phpbb_avatar_manager_test::test_get_driver_enabled with data set #0 
 .
-Starting test 'phpbb_avatar_manager_test::test_get_driver_enabled with data set #1 ('avatar.driver.foo_wrong', NULL)'.
+phpbb_avatar_manager_test::test_get_driver_enabled with data set #1 
 .
-Starting test 'phpbb_avatar_manager_test::test_get_driver_enabled with data set #2 ('avatar.driver.local', NULL)'.
+phpbb_avatar_manager_test::test_get_driver_enabled with data set #2 
 .
-Starting test 'phpbb_avatar_manager_test::test_get_driver_enabled with data set #3 (3, NULL)'.
+phpbb_avatar_manager_test::test_get_driver_enabled with data set #3 
 .
-Starting test 'phpbb_avatar_manager_test::test_get_driver_enabled with data set #4 (1, NULL)'.
+phpbb_avatar_manager_test::test_get_driver_enabled with data set #4 
 .
-Starting test 'phpbb_avatar_manager_test::test_get_driver_enabled with data set #5 (2, NULL)'.
+phpbb_avatar_manager_test::test_get_driver_enabled with data set #5 
 .
-Starting test 'phpbb_avatar_manager_test::test_get_driver_all with data set #0 ('avatar.driver.foobar', 'avatar.driver.foobar')'.
+phpbb_avatar_manager_test::test_get_driver_all with data set #0 
 .
-Starting test 'phpbb_avatar_manager_test::test_get_driver_all with data set #1 ('avatar.driver.foo_wrong', NULL)'.
+phpbb_avatar_manager_test::test_get_driver_all with data set #1 
 .
-Starting test 'phpbb_avatar_manager_test::test_get_driver_all with data set #2 ('avatar.driver.local', 'avatar.driver.local')'.
+phpbb_avatar_manager_test::test_get_driver_all with data set #2 
 .
-Starting test 'phpbb_avatar_manager_test::test_get_driver_all with data set #3 (3, 'avatar.driver.local')'.
+phpbb_avatar_manager_test::test_get_driver_all with data set #3 
 .
-Starting test 'phpbb_avatar_manager_test::test_get_driver_all with data set #4 (1, 'avatar.driver.upload')'.
+phpbb_avatar_manager_test::test_get_driver_all with data set #4 
 .
-Starting test 'phpbb_avatar_manager_test::test_get_driver_all with data set #5 (2, 'avatar.driver.remote')'.
+phpbb_avatar_manager_test::test_get_driver_all with data set #5 
 .
-Starting test 'phpbb_avatar_manager_test::test_get_avatar_settings'.
+phpbb_avatar_manager_test::test_get_avatar_settings
 .
-Starting test 'phpbb_avatar_manager_test::test_clean_row with data set #0 (array('', '', '', ''), array('', '', '', ''))'.
+phpbb_avatar_manager_test::test_clean_row with data set #0 
 .
-Starting test 'phpbb_avatar_manager_test::test_clean_row with data set #1 (array('', '', '', ''), array('', '', '', ''))'.
+phpbb_avatar_manager_test::test_clean_row with data set #1 
 .
-Starting test 'phpbb_avatar_manager_test::test_clean_row with data set #2 (array(), array('', '', '', ''))'.
+phpbb_avatar_manager_test::test_clean_row with data set #2 
 .
-Starting test 'phpbb_avatar_manager_test::test_clean_row with data set #3 (array('', '', '', ''), array('', '', '', ''))'.
+phpbb_avatar_manager_test::test_clean_row with data set #3 
 .
-Starting test 'phpbb_avatar_manager_test::test_clean_driver_name'.
+phpbb_avatar_manager_test::test_clean_driver_name
 .
-Starting test 'phpbb_avatar_manager_test::test_prepare_driver_name'.
+phpbb_avatar_manager_test::test_prepare_driver_name
 .
-Starting test 'phpbb_avatar_manager_test::test_localize_errors'.
+phpbb_avatar_manager_test::test_localize_errors
 .
-Starting test 'phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #0 ('Test default bbcodes: simple bold', '[b]bold[/b]', '[b:]bold[/b:]')'.
+phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #0 
 HipHop Fatal error: preg_replace is not going to be supported: Modifier /e must be used with the form f("<replacement string>") or f("<replacement string>"); in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpbb3/phpBB/includes/message_parser.php on line 70

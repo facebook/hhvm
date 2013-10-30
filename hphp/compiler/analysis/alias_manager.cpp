@@ -2108,7 +2108,6 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
   }
 
   cs->clearVisited();
-  cs->clearChildOfYield();
 
   StatementPtr s = dpc(Statement, cs);
   if (s) {
@@ -2398,9 +2397,6 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         // currently disable inlining for scopes with closure
         // expressions. TODO: revisit this later
         m_inlineAsExpr = false;
-        break;
-      case Expression::KindOfYieldExpression:
-        spc(YieldExpression, e)->getValueExpression()->setChildOfYield();
         break;
       case Expression::KindOfUnaryOpExpression:
         if (Option::EnableEval > Option::NoEval && spc(UnaryOpExpression, e)->

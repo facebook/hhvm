@@ -13,8 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/compiler/analysis/file_scope.h"
+
+#include <sys/stat.h>
+#include "folly/ScopeGuard.h"
+
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -23,7 +26,6 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include <sys/stat.h>
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
@@ -321,66 +323,73 @@ bool FileScope::insertClassUtil(AnalysisResultPtr ar,
 
 void FileScope::analyzeIncludesHelper(AnalysisResultPtr ar) {
   m_includeState = 1;
-  if (m_pseudoMain) {
-    StatementList &stmts = *getStmt();
-    bool hoistOnly = false;
-    for (int i = 0, n = stmts.getCount(); i < n; i++) {
-      StatementPtr s = stmts[i];
-      if (!s) continue;
-      if (s->is(Statement::KindOfClassStatement) ||
-          s->is(Statement::KindOfInterfaceStatement)) {
+  SCOPE_EXIT { m_includeState = 2; };
 
-        ClassScopeRawPtr cls(
-          static_pointer_cast<InterfaceStatement>(s)->getClassScope());
-        if (hoistOnly) {
-          const string &parent = cls->getOriginalParent();
-          if (cls->getBases().size() > (parent.empty() ? 0 : 1)) {
-            continue;
-          }
-          if (!parent.empty()) {
-            ClassScopeRawPtr c = ar->findClass(parent);
-            if (!c || (c->isVolatile() &&
-                       !resolveClass(c) && !checkClass(parent))) {
-              continue;
-            }
-          }
+  if (!m_pseudoMain) return;
+
+  StatementList &stmts = *getStmt();
+  bool hoistOnly = false;
+
+  for (int i = 0, n = stmts.getCount(); i < n; i++) {
+    StatementPtr s = stmts[i];
+    if (!s) continue;
+
+    if (s->is(Statement::KindOfClassStatement) ||
+        s->is(Statement::KindOfInterfaceStatement)) {
+      ClassScopeRawPtr cls(
+        static_pointer_cast<InterfaceStatement>(s)->getClassScope());
+      if (hoistOnly) {
+        const string &parent = cls->getOriginalParent();
+        if (cls->getBases().size() > (parent.empty() ? 0 : 1)) {
+          continue;
         }
-        if (cls->isVolatile()) {
-          insertClassUtil(ar, cls, true);
-        }
-        continue;
-      }
-      if (s->is(Statement::KindOfFunctionStatement)) {
-        FunctionScopeRawPtr func(
-          static_pointer_cast<FunctionStatement>(s)->getFunctionScope());
-        if (func->isVolatile()) m_providedDefs.insert(func);
-        continue;
-      }
-      if (!hoistOnly && s->is(Statement::KindOfExpStatement)) {
-        ExpressionRawPtr exp(
-          static_pointer_cast<ExpStatement>(s)->getExpression());
-        if (exp && exp->is(Expression::KindOfIncludeExpression)) {
-          FileScopeRawPtr fs(
-            static_pointer_cast<IncludeExpression>(exp)->getIncludedFile(ar));
-          if (fs && fs->m_includeState != 1) {
-            if (!fs->m_includeState) {
-              if (m_module && fs->m_privateInclude) {
-                BOOST_FOREACH(BlockScopeRawPtr bs, m_providedDefs) {
-                  fs->m_providedDefs.insert(bs);
-                }
-              }
-              fs->analyzeIncludesHelper(ar);
-            }
-            BOOST_FOREACH(BlockScopeRawPtr bs, fs->m_providedDefs) {
-              m_providedDefs.insert(bs);
-            }
+        if (!parent.empty()) {
+          ClassScopeRawPtr c = ar->findClass(parent);
+          if (!c || (c->isVolatile() &&
+                     !resolveClass(c) && !checkClass(parent))) {
             continue;
           }
         }
       }
-      hoistOnly = true;
+      if (cls->isVolatile()) {
+        insertClassUtil(ar, cls, true);
+      }
+      continue;
     }
+
+    if (s->is(Statement::KindOfFunctionStatement)) {
+      FunctionScopeRawPtr func(
+        static_pointer_cast<FunctionStatement>(s)->getFunctionScope());
+      if (func->isVolatile()) m_providedDefs.insert(func);
+      continue;
+    }
+
+    if (!hoistOnly && s->is(Statement::KindOfExpStatement)) {
+      ExpressionRawPtr exp(
+        static_pointer_cast<ExpStatement>(s)->getExpression());
+      if (exp && exp->is(Expression::KindOfIncludeExpression)) {
+        FileScopeRawPtr fs(
+          static_pointer_cast<IncludeExpression>(exp)->getIncludedFile(ar));
+        if (fs && fs->m_includeState != 1) {
+          if (!fs->m_includeState) {
+            if (m_module && fs->m_privateInclude) {
+              BOOST_FOREACH(BlockScopeRawPtr bs, m_providedDefs) {
+                fs->m_providedDefs.insert(bs);
+              }
+            }
+            fs->analyzeIncludesHelper(ar);
+          }
+          BOOST_FOREACH(BlockScopeRawPtr bs, fs->m_providedDefs) {
+            m_providedDefs.insert(bs);
+          }
+          continue;
+        }
+      }
+    }
+
+    hoistOnly = true;
   }
+
   m_includeState = 2;
 }
 
@@ -390,11 +399,9 @@ void FileScope::analyzeIncludes(AnalysisResultPtr ar) {
   }
 }
 
-
 void FileScope::visit(AnalysisResultPtr ar,
                       void (*cb)(AnalysisResultPtr, StatementPtr, void*),
-                      void *data)
-{
+                      void *data) {
   if (m_pseudoMain) {
     cb(ar, m_pseudoMain->getStmt(), data);
   }

@@ -1,0 +1,25 @@
+VALID IDs
+string(24) "abcdef123456abcdef123456"
+object(MongoId)#%d (1) {
+  ["$id"]=>
+  string(24) "abcdef123456abcdef123456"
+}
+object(MongoId)#%d (1) {
+  ["$id"]=>
+  string(24) "%s"
+}
+object(MongoId)#%d (1) {
+  ["$id"]=>
+  string(24) "%s"
+}
+INVALID IDs:
+string(24) "klsdjfklsdjfklsdjfklsdjf"
+string(31) "ID must be valid hex characters"
+int(18)
+string(25) "abcdef123456abcdef123456 "
+string(17) "Invalid object ID"
+int(19)
+object(stdClass)#%d (0) {
+}
+string(17) "Invalid object ID"
+int(19)

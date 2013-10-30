@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_global.h"
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
+#include "hphp/runtime/base/hphp-system.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,6 +31,7 @@ void CmdGlobal::sendImpl(DebuggerThriftBuffer &thrift) {
 void CmdGlobal::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_globals);
+  if (m_version == 1) m_version = 2;
 }
 
 void CmdGlobal::help(DebuggerClient &client) {
@@ -62,13 +64,22 @@ void CmdGlobal::onClient(DebuggerClient &client) {
   if (cmd->m_globals.empty()) {
     client.info("(no global variable was found)");
   } else {
-    m_globals = cmd->m_globals;
-    CmdVariable::PrintVariables(client, cmd->m_globals, true, text);
+    CmdVariable::PrintVariables(client, cmd->m_globals, -1,
+        text, cmd->m_version);
   }
 }
 
 bool CmdGlobal::onServer(DebuggerProxy &proxy) {
   m_globals = CmdVariable::GetGlobalVariables();
+  if (m_version == 2) {
+    // Remove the values before sending to client.
+    ArrayInit ret(m_globals->size());
+    Variant v;
+    for (ArrayIter iter(m_globals); iter; ++iter) {
+      ret.add(iter.first().toString(), v);
+    }
+    m_globals = ret.toArray();
+  }
   return proxy.sendToClient(this);
 }
 

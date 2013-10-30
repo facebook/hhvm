@@ -33,6 +33,19 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
+bool filterAssertType(IRInstruction* inst, Type oldType) {
+  auto const newType = inst->typeParam();
+  auto const intersect = oldType & newType;
+
+  if (intersect != newType) {
+    // The asserted type had some members that aren't in the input type. Assert
+    // only what they have in common.
+    inst->setTypeParam(intersect);
+    return true;
+  }
+  return false;
+}
+
 StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   FTRACE(5, "getStackValue: idx = {}, {}\n", index, sp->inst()->toString());
   assert(sp->isA(Type::StkPtr));
@@ -126,9 +139,6 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     for (int i = 0; i < numSpillSrcs; ++i) {
       SSATmp* tmp = inst->src(i + 2);
       if (index == numPushed) {
-        if (tmp->inst()->op() == IncRef) {
-          tmp = tmp->inst()->src(0);
-        }
         if (!tmp->isA(Type::None)) {
           return StackValueInfo { tmp };
         }
@@ -163,8 +173,8 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
       if (index < 2)  return getStackValue(prevSp, index);
       break;
     case Op::UnpackCont:
-      if (index == 0) return StackValueInfo { inst, Type::Cell };
-      if (index == 1) return StackValueInfo { inst, Type::Int };
+      if (index == 0) return StackValueInfo { inst, Type::Int };
+      if (index == 1) return StackValueInfo { inst, Type::Cell };
       break;
     case Op::FPushCufSafe:
       if (index == kNumActRecCells) return StackValueInfo { inst, Type::Bool };
@@ -552,7 +562,7 @@ SSATmp* Simplifier::simplifyCheckType(IRInstruction* inst) {
   auto const oldType = src->type();
   auto const newType = inst->typeParam();
 
-  if (inst->is(CheckType) && newType >= oldType) {
+  if (newType >= oldType) {
     /*
      * The type of the src is the same or more refined than type, so the guard
      * is unnecessary.
@@ -586,10 +596,26 @@ SSATmp* Simplifier::simplifyAssertType(IRInstruction* inst) {
   auto const oldType = src->type();
   auto const newType = inst->typeParam();
 
+  if (oldType.not(newType)) {
+    // We got external information (probably from static analysis) that
+    // conflicts with what we've built up so far. There's no reasonable way to
+    // continue here: we can't properly fatal the request because we can't make
+    // a catch trace or spill stack, we can't punt on just this instruction
+    // because we might not be in the initial translation phase, and we can't
+    // just plow on forward since we'll probably generate malformed IR. Since
+    // this case is very rare, just punt on the whole trace so it gets
+    // interpreted.
+    TRACE_PUNT("Invalid AssertType");
+  }
+
   if (m_tb.shouldElideAssertType(oldType, newType, src)) {
     return src;
   }
-  return simplifyCheckType(inst);
+
+  if (filterAssertType(inst, oldType)) {
+    m_tb.constrainValue(src, categoryForType(src->type()));
+  }
+  return nullptr;
 }
 
 SSATmp* Simplifier::simplifyCheckStk(IRInstruction* inst) {
@@ -1426,7 +1452,7 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   }
 
   // The src type is a subtype of the tested type; the result must be true.
-  if (srcType.subtypeOf(type)) {
+  if (srcType <= type) {
     return cns(trueSense);
   }
 
@@ -1892,7 +1918,7 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyCastStk(IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CastStk>()->offset);
-  if (info.knownType.subtypeOf(inst->typeParam())) {
+  if (info.knownType <= inst->typeParam()) {
     // No need to cast---the type was as good or better.
     inst->convertToNop();
   }
@@ -1902,7 +1928,7 @@ SSATmp* Simplifier::simplifyCastStk(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyCoerceStk(IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CoerceStk>()->offset);
-  if (info.knownType.subtypeOf(inst->typeParam())) {
+  if (info.knownType <= inst->typeParam()) {
     // No need to cast---the type was as good or better.
     inst->convertToNop();
   }
@@ -1914,11 +1940,20 @@ SSATmp* Simplifier::simplifyAssertStk(IRInstruction* inst) {
   auto const newType = inst->typeParam();
   auto const info = getStackValue(inst->src(0), idx);
   auto const oldType = info.knownType;
-  if (oldType == Type::None) return nullptr;
+  always_assert(oldType <= Type::StackElem);
+
+  if (oldType.not(newType)) {
+    TRACE_PUNT("Invalid AssertStk");
+  }
 
   if (m_tb.shouldElideAssertType(oldType, newType, info.value)) {
     return inst->src(0);
   }
+
+  if (filterAssertType(inst, oldType)) {
+    m_tb.constrainStack(idx, categoryForType(oldType));
+  }
+
   return nullptr;
 }
 
@@ -1999,7 +2034,7 @@ SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
 SSATmp* Simplifier::simplifyAssertNonNull(IRInstruction* inst) {
   auto t = inst->typeParam();
   assert(t.maybe(Type::Nullptr));
-  if (t.subtypeOf(Type::Nullptr)) {
+  if (t <= Type::Nullptr) {
     return inst->src(0);
   }
   return nullptr;

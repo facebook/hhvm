@@ -36,7 +36,6 @@ struct CodeGenerator {
       , m_astubs(stubsCode)
       , m_tx64(tx64)
       , m_state(state)
-      , m_regs(state.regs)
       , m_curInst(nullptr)
     {
     }
@@ -58,14 +57,20 @@ struct CodeGenerator {
 
   const Func* curFunc() { return m_curInst->marker().func; }
 
-  void emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
-                             vixl::Register dstReg,
-                             vixl::Register srcReg,
-                             int64_t imm);
   template<class Loc, class JmpFn>
   void emitTypeTest(Type type, Loc typeSrc, Loc dataSrc, JmpFn doJcc);
 
   Address cgInst(IRInstruction* inst);
+
+  const PhysLoc curOpd(const SSATmp* t) const {
+    return m_state.regs[m_curInst][t];
+  }
+  const PhysLoc curOpd(const SSATmp& t) const {
+    return curOpd(&t);
+  }
+  const RegAllocInfo::RegMap& curOpds() const {
+    return m_state.regs[m_curInst];
+  }
 
   void cgInterpOneCommon(IRInstruction* inst);
 
@@ -80,7 +85,6 @@ struct CodeGenerator {
   vixl::MacroAssembler        m_astubs;
   TranslatorX64*              m_tx64;
   CodegenState&               m_state;
-  const RegAllocInfo&         m_regs;
   IRInstruction*              m_curInst;
 };
 

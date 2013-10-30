@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/ext_hhvm/ext_zend_compat.h"
+#include "hphp/runtime/base/proxy-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,13 +23,24 @@ namespace HPHP {
 // TODO zPrepArgs needs to be updated so take care of
 // boxing varargs
 void zPrepArgs(ActRec* ar) {
-  int32_t numArgs = ar->numArgs();
+  // If you call a function with too few params, zend_parse_parameters will
+  // reject it, but we don't want this function boxing random slots from the
+  // stack
+  int32_t numArgs = std::min(ar->numArgs(), ar->m_func->numParams());
   TypedValue* args = (TypedValue*)ar - 1;
   for (int32_t i = 0; i < numArgs; ++i) {
     TypedValue* arg = args-i;
-    if (arg->m_type != KindOfRef) {
-      tvBox(arg);
-    }
+    zBoxAndProxy(arg);
+  }
+}
+
+void zBoxAndProxy(TypedValue* arg) {
+  if (arg->m_type != KindOfRef) {
+    tvBox(arg);
+  }
+  auto inner = arg->m_data.pref->tv();
+  if (inner->m_type == KindOfArray) {
+    inner->m_data.parr = ProxyArray::Make(inner->m_data.parr);
   }
 }
 

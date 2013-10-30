@@ -96,7 +96,7 @@ struct ConcurrentTableSharedStore {
   int size() const { return m_vars.size(); }
   bool get(const String& key, Variant &value);
   bool store(const String& key, CVarRef val, int64_t ttl,
-                     bool overwrite = true);
+                     bool overwrite = true, bool limit_ttl = true);
   int64_t inc(const String& key, int64_t step, bool &found);
   bool cas(const String& key, int64_t old, int64_t val);
   bool exists(const String& key);

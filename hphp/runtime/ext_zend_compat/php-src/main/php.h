@@ -33,6 +33,7 @@
 #include "php_version.h"
 #include "zend.h"
 #include "zend_qsort.h"
+#include "php_compat.h"
 
 #include "zend_API.h"
 
@@ -91,6 +92,10 @@
 
 #if HAVE_ALLOCA_H
 #include <alloca.h>
+#endif
+
+#if HAVE_BUILD_DEFS_H
+#include <build-defs.h>
 #endif
 
 /*
@@ -177,6 +182,7 @@ typedef unsigned int socklen_t;
 
 #include "zend_hash.h"
 #include "zend_alloc.h"
+#include "zend_stack.h"
 
 #if STDC_HEADERS
 # include <string.h>
@@ -226,6 +232,9 @@ char *strerror(int);
 #define PHP_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_MALLOC
 #define PHP_ATTRIBUTE_FORMAT ZEND_ATTRIBUTE_FORMAT
 
+BEGIN_EXTERN_C()
+#include "snprintf.h"
+END_EXTERN_C()
 #include "spprintf.h"
 
 #define EXEC_INPUT_BUF 4096
@@ -278,8 +287,14 @@ int cfgparse(void);
 END_EXTERN_C()
 
 #define php_error zend_error
+#define error_handling_t zend_error_handling_t
 
 BEGIN_EXTERN_C()
+static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class TSRMLS_DC)
+{
+  zend_replace_error_handling(error_handling, exception_class, NULL TSRMLS_CC);
+}
+static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling() {}
 
 PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
 
@@ -290,13 +305,8 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 #endif
 
 /* PHPAPI void php_error(int type, const char *format, ...); */
-PHPAPI void inline php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...) {
-  va_list ap;
-  va_start(ap, format);
-  HPHP::raise_message(static_cast<HPHP::ErrorConstants::ErrorModes>(type), format, ap);
-  va_end(ap);
-};
-
+PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...)
+  PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 3, PHP_ATTR_FMT_OFFSET + 4);
 PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, int type, const char *format, ...)
   PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 4, PHP_ATTR_FMT_OFFSET + 5);
 PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, const char *param2, int type, const char *format, ...)
@@ -374,16 +384,21 @@ END_EXTERN_C()
 #define PHP_MINFO_FUNCTION    ZEND_MODULE_INFO_D
 #define PHP_GINIT_FUNCTION    ZEND_GINIT_FUNCTION
 #define PHP_GSHUTDOWN_FUNCTION  ZEND_GSHUTDOWN_FUNCTION
-
+ 
 #define PHP_MODULE_GLOBALS    ZEND_MODULE_GLOBALS
 
 
 /* Output support */
+#include "main/php_output.h"
+
+
 #include "php_streams.h"
+#include "php_memory_streams.h"
+#include "fopen_wrappers.h"
+
 
 /* Virtual current working directory support */
 #include "tsrm_virtual_cwd.h"
-#include "fopen_wrappers.h"
 
 #include "zend_constants.h"
 
@@ -430,3 +445,12 @@ END_EXTERN_C()
 #endif /* !XtOffsetOf */
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

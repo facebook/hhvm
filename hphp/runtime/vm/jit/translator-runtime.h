@@ -175,6 +175,11 @@ int shuffleArgsForMagicCall(ActRec* ar);
 
 void raiseMissingArgument(const char* name, int expected, int got);
 
+/*
+ * Just calls tlsBase, but not inlined, so it can be called from the TC.
+ */
+uintptr_t tlsBaseNoInline();
+
 }}
 
 #endif

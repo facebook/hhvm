@@ -59,7 +59,8 @@ struct EvalStack {
     }
     SSATmp* tmp = m_vector.back();
     m_vector.pop_back();
-    return m_tb.constrainValue(tmp, tc);
+    m_tb.constrainValue(tmp, tc);
+    return tmp;
   }
 
   SSATmp* top(TypeConstraint tc, uint32_t offset = 0) const {
@@ -67,7 +68,8 @@ struct EvalStack {
       return nullptr;
     }
     uint32_t index = m_vector.size() - 1 - offset;
-    return m_tb.constrainValue(m_vector[index], tc);
+    m_tb.constrainValue(m_vector[index], tc);
+    return m_vector[index];
   }
 
   void replace(uint32_t offset, SSATmp* tmp) {
@@ -145,10 +147,11 @@ struct HhbcTranslator {
   void checkTypeStack(uint32_t idx, Type type, Offset dest);
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
   void overrideTypeLocal(uint32_t localIndex, Type type);
-  void assertTypeLocation(const RegionDesc::Location& loc, Type type);
-  void checkTypeLocation(const RegionDesc::Location& loc, Type type,
+  void assertType(const RegionDesc::Location& loc, Type type);
+  void checkType(const RegionDesc::Location& loc, Type type,
                          Offset dest);
   void assertString(const RegionDesc::Location& loc, const StringData* sd);
+  void assertClass(const RegionDesc::Location& loc, const Class* cls);
 
   RuntimeType rttFromLocation(const Location& loc);
 
@@ -184,7 +187,7 @@ struct HhbcTranslator {
   void emitBareThis(int notice);
   void emitInitThisLoc(int32_t id);
   void emitArray(int arrayId);
-  void emitNewArray(int capacity);
+  void emitNewArrayReserve(int capacity);
   void emitNewPackedArray(int n);
   void emitNewCol(int capacity);
 
@@ -216,29 +219,26 @@ struct HhbcTranslator {
   void emitFalse();
   void emitCGetL(int32_t id);
   void emitCGetL2(int32_t id);
-  void emitCGetS(const StringData* propName,
-                 Type resultType, bool isInferedType);
-  void emitCGetG(const StringData* name, Type resultType,
-                 bool isInferedType);
+  void emitCGetS();
+  void emitCGetG();
   void emitMInstr(const NormalizedInstruction& ni);
   void emitVGetL(int32_t id);
-  void emitVGetS(const StringData* propName);
-  void emitVGetG(const StringData* name);
+  void emitVGetS();
+  void emitVGetG();
   void emitSetL(int32_t id);
-  void emitSetS(const StringData* propName);
-  void emitSetG(const StringData* gblName);
+  void emitSetS();
+  void emitSetG();
   void emitBindL(int32_t id);
-  void emitBindS(const StringData* propName);
-  void emitBindG(const StringData* gblName);
+  void emitBindS();
+  void emitBindG();
   void emitUnsetL(int32_t id);
   void emitUnsetN();
-  void emitUnsetG(const StringData* gblName);
   void emitIssetL(int32_t id);
-  void emitIssetS(const StringData* propName);
-  void emitIssetG(const StringData* gblName);
+  void emitIssetS();
+  void emitIssetG();
   void emitEmptyL(int32_t id);
-  void emitEmptyS(const StringData* propName);
-  void emitEmptyG(const StringData* gblName);
+  void emitEmptyS();
+  void emitEmptyG();
   // The subOpc param can be one of either
   // Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor
   void emitSetOpL(Opcode subOpc, uint32_t id);
@@ -247,6 +247,7 @@ struct HhbcTranslator {
   // PreInc, PostInc, PreDec, PostDec
   void emitIncDecL(bool pre, bool inc, uint32_t id);
   void emitIncDecS(bool pre, bool inc);
+  void emitPopA();
   void emitPopC();
   void emitPopV();
   void emitPopR();
@@ -267,8 +268,7 @@ struct HhbcTranslator {
   void emitFPassR();
   void emitFPassV();
   void emitFPushCufIter(int32_t numParams, int32_t itId);
-  void emitFPushCufOp(Op op, Class* cls, StringData* invName,
-                      const Func* func, int numArgs);
+  void emitFPushCufOp(Op op, int numArgs);
   void emitFPushActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
                        const StringData* invName = nullptr);
   void emitFPushFuncCommon(const Func* func,
@@ -287,11 +287,8 @@ struct HhbcTranslator {
                            int32_t methodNameStrId,
                            int32_t clssNamedEntityPairId);
   void emitFPushObjMethodD(int32_t numParams,
-                           int32_t methodNameStrId,
-                           const Class* baseClass);
-  void emitFPushClsMethodF(int32_t             numParams,
-                           const Class*      cls,
-                           const StringData* methName);
+                           int32_t methodNameStrId);
+  void emitFPushClsMethodF(int32_t numParams);
   void emitFPushCtorD(int32_t numParams, int32_t classNameStrId);
   void emitFPushCtor(int32_t numParams);
   void emitFPushCtorCommon(SSATmp* cls,
@@ -309,8 +306,8 @@ struct HhbcTranslator {
   void emitClsCnsD(int32_t cnsNameStrId, int32_t clsNameStrId, Type outPred);
   void emitClsCns(int32_t cnsNameStrId);
   void emitAKExists();
-  void emitAGetC(const StringData* clsName);
-  void emitAGetL(int localId, const StringData* clsName);
+  void emitAGetC();
+  void emitAGetL(int localId);
   void emitIsNullL(int id);
   void emitIsNullC();
   void emitIsArrayL(int id);
@@ -346,8 +343,10 @@ struct HhbcTranslator {
   // miscelaneous ops
   void emitFloor();
   void emitCeil();
-  void emitAssertTL(int32_t id, AssertTOp op);
-  void emitAssertTStk(int32_t offset, AssertTOp op);
+  void emitAssertTL(int32_t id, AssertTOp);
+  void emitAssertTStk(int32_t offset, AssertTOp);
+  void emitAssertObjL(int32_t id, bool exact, Id);
+  void emitAssertObjStk(int32_t offset, bool exact, Id);
 
   // binary arithmetic ops
   void emitAdd();
@@ -369,9 +368,9 @@ struct HhbcTranslator {
   void emitNot();
   void emitNativeImpl();
 
-  void emitClassExists(const StringData* clsName);
-  void emitInterfaceExists(const StringData* ifaceName);
-  void emitTraitExists(const StringData* traitName);
+  void emitClassExists();
+  void emitInterfaceExists();
+  void emitTraitExists();
 
   void emitStaticLocInit(uint32_t varId, uint32_t litStrId);
   void emitStaticLoc(uint32_t varId, uint32_t litStrId);
@@ -453,6 +452,7 @@ struct HhbcTranslator {
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force = false);
   void emitIncTransCounter();
+  void emitIncProfCounter(Transl::TransID transId);
   void emitCheckCold(Transl::TransID transId);
   void emitRB(Trace::RingBufferType t, SrcKey sk);
   void emitRB(Trace::RingBufferType t, std::string msg) {
@@ -687,49 +687,37 @@ private:
   /*
    * Emit helpers.
    */
-  template<class CheckSupportedFun, class EmitLdAddrFun>
-  void emitCGet(const StringData* name,
-                Type resultType,
-                bool isInferedType,
-                bool exitOnFailure,
-                CheckSupportedFun checkSupported,
-                EmitLdAddrFun emitLdAddr);
-  void emitVGetMem(SSATmp* addr);
-  template<class CheckSupportedFun, class EmitLdAddrFun>
-  void emitVGet(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
   void emitBindMem(SSATmp* ptr, SSATmp* src);
-  template<class CheckSupportedFun, class EmitLdAddrFun>
-  void emitBind(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
-  void emitSetMem(SSATmp* ptr, SSATmp* src);
-  template<class CheckSupportedFun, class EmitLdAddrFun>
-  void emitSet(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
-  template<class CheckSupportedFun, class EmitLdAddrFun>
-  void emitIsset(const StringData* name, CheckSupportedFun, EmitLdAddrFun);
   void emitEmptyMem(SSATmp* ptr);
-  template<class CheckSupportedFun, class EmitLdAddrFun>
-  void emitEmpty(const StringData* name,
-                 CheckSupportedFun checkSupported,
-                 EmitLdAddrFun emitLdAddr);
   void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Block* exit);
-  bool checkSupportedClsProp(const StringData* propName,
-                             Type resultType,
-                             int stkIndex);
-  bool checkSupportedGblName(const StringData* gblName,
-                             HPHP::JIT::Type resultType,
-                             int stkIndex);
   void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
                             bool& checkForInt);
-  SSATmp* emitLdClsPropAddrOrExit(const StringData* propName, Block* block);
-  SSATmp* emitLdClsPropAddr(const StringData* propName) {
-    return emitLdClsPropAddrOrExit(propName, nullptr);
-  }
   SSATmp* emitLdClsPropAddrCached(const StringData* propName,
                                   Block* block);
-  SSATmp* getStrName(const StringData* propName = nullptr);
-  SSATmp* emitLdGblAddrDef(const StringData* gblName = nullptr);
-  SSATmp* emitLdGblAddr(const StringData* gblName, Block* block);
+  Type assertObjType(const StringData*);
+
+  /*
+   * Helpers for (CGet|VGet|Bind|Set|Isset|Empty)(G|S)
+   */
+  SSATmp* checkSupportedName(uint32_t stackIdx);
+  void destroyName(SSATmp* name);
+  typedef SSATmp* (HhbcTranslator::*EmitLdAddrFn)(Block*, SSATmp* name);
+  typedef SSATmp* (HhbcTranslator::*EmitLdAddrFnNoBlock)(SSATmp* name);
+  void emitCGet(uint32_t stackIdx, bool exitOnFailure, EmitLdAddrFn);
+  void emitVGet(uint32_t stackIdx, EmitLdAddrFnNoBlock);
+  void emitBind(uint32_t stackIdx, EmitLdAddrFnNoBlock);
+  void emitSet(uint32_t stackIdx, EmitLdAddrFnNoBlock);
+  void emitIsset(uint32_t stackIdx, EmitLdAddrFn);
+  void emitEmpty(uint32_t stackOff, EmitLdAddrFn);
+  SSATmp* emitLdGblAddr(Block* block, SSATmp* name);
+  SSATmp* emitLdGblAddrDef(SSATmp* name);
+  SSATmp* emitLdClsPropAddr(SSATmp* name) {
+    return emitLdClsPropAddrOrExit(nullptr, name);
+  }
+  SSATmp* emitLdClsPropAddrOrExit(Block* block, SSATmp* name);
+
   void emitUnboxRAux();
-  void emitAGet(SSATmp* src, const StringData* clsName);
+  void emitAGet(SSATmp* src);
   void emitRetFromInlined(Type type);
   SSATmp* emitDecRefLocalsInline(SSATmp* retVal);
   void emitRet(Type type, bool freeInline);

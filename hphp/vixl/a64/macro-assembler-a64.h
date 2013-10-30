@@ -122,6 +122,11 @@ class MacroAssembler : public Assembler {
   // Move macros.
   void Mov(const Register& rd, uint64_t imm);
   void Mov(const Register& rd, const Operand& operand);
+  template<typename T>
+  void Mov(const Register& rd, T* imm) {
+    static_assert(sizeof(T*) == sizeof(uint64_t), "");
+    Mov(rd, reinterpret_cast<uint64_t>(imm));
+  }
   void Mvn(const Register& rd, uint64_t imm) {
     Mov(rd, ~imm);
   };

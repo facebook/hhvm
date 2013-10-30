@@ -124,7 +124,7 @@ constexpr PhysReg InvalidReg;
  */
 struct RegSet {
   explicit RegSet() : m_bits(0) {}
-  explicit RegSet(PhysReg pr) : m_bits(1 << int(pr)) {}
+  explicit RegSet(PhysReg pr) : m_bits(uint64_t(1) << int(pr)) {}
 
   // Union
   RegSet operator|(const RegSet& rhs) const {

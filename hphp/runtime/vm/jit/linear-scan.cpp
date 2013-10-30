@@ -362,7 +362,9 @@ PhysReg::Type LinearScan::getRegType(const SSATmp* tmp, int locIdx) const {
     // Note that there are no callee-saved SIMD registers in the x64
     // ABI.  So, if tmp crosses native calls and there are 2 free GP
     // callee-saved registers, then allocate tmp to GP registers.
-    if (crossNativeCall(tmp) && m_freeCalleeSaved[PhysReg::GP].size() >= 2) {
+    if (RuntimeOption::EvalHHIREnableCalleeSavedOpt &&
+        crossNativeCall(tmp) &&
+        m_freeCalleeSaved[PhysReg::GP].size() >= 2) {
       return PhysReg::GP;
     }
     return PhysReg::SIMD;
@@ -1361,7 +1363,7 @@ void LinearScan::spill(SSATmp* tmp) {
   dumpIR(tmp, "spilling");
   // If we're spilling, we better actually have registers allocated.
   assert(m_allocInfo[tmp].numAllocated() > 0);
-  assert(m_allocInfo[tmp].numAllocated() == tmp->numWords());
+  assert(m_allocInfo[tmp].numWords() == tmp->numWords());
 
   // Free the registers used by <tmp>.
   // Need call freeReg and modify <m_allocatedRegs>.

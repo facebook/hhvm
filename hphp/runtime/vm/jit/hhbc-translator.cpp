@@ -3411,10 +3411,23 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
     }
   }
   assert(clsName);
+
   // We can only burn in the Class* if it's unique or in the
   // inheritance hierarchy of our context. It's ok if the class isn't
   // defined yet - all paths below are tolerant of a null constraint.
   if (!classIsUniqueOrCtxParent(knownConstraint)) knownConstraint = nullptr;
+
+  /*
+   * If the local is a specialized object type, we can avoid emitting
+   * runtime checks if we know the thing would pass.  If we don't
+   * know, we still have to emit them because locType might be a
+   * subtype of its specialized object type.
+   */
+  if (locType.strictSubtypeOf(Type::Obj)) {
+    auto const cls = locType.getClass();
+    if (knownConstraint && cls->classof(knownConstraint)) return;
+    if (cls->name()->isame(clsName)) return;
+  }
 
   InstanceBits::init();
   bool haveBit = InstanceBits::lookup(clsName) != 0;

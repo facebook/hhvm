@@ -1731,6 +1731,39 @@ static void unserializeProp(VariableUnserializer *uns,
   t->unserialize(uns);
 }
 
+/*
+ * For namespaced collections, returns an "alternate" name, which is a
+ * collection name with or without the namespace qualifier, depending on
+ * what's passed.
+ * If no alternate name is found, returns nullptr.
+ */
+static const StringData* getAlternateName(const StringData* clsName) {
+  typedef hphp_hash_map<const StringData*, const StringData*,
+                        string_data_hash, string_data_isame> ClsNameMap;
+
+  auto getAltMap = [] {
+    typedef std::pair<StaticString, StaticString> SStringPair;
+
+    static ClsNameMap m;
+
+    static std::vector<SStringPair> mappings {
+      std::make_pair(StaticString("Vector"), StaticString("HH\\Vector"))
+    };
+
+    for (const auto& p : mappings) {
+      m[p.first.get()] = p.second.get();
+      m[p.second.get()] = p.first.get();
+    }
+
+    return &m;
+  };
+
+  static const ClsNameMap* altMap = getAltMap();
+
+  auto it = altMap->find(clsName);
+  return it != altMap->end() ? it->second : nullptr;
+}
+
 void Variant::unserialize(VariableUnserializer *uns,
                           Uns::Mode mode /* = Uns::Mode::Value */) {
 
@@ -1876,17 +1909,32 @@ void Variant::unserialize(VariableUnserializer *uns,
       }
 
       Class* cls = Unit::loadClass(clsName.get());
+
+      // If we can't load the class, try an alternate name.
+      // This is so we can tolerate stale data while the migration of
+      // collections takes place.
+      const StringData* altName;
+      if (!cls) {
+        altName = getAlternateName(clsName.get());
+        if (altName) cls = Unit::loadClass(altName);
+      }
+
       Object obj;
       if (RuntimeOption::UnserializationWhitelistCheck &&
           !uns->isWhitelistedClass(clsName)) {
-        const char* err_msg =
-          "The object being unserialized with class name '%s' "
-          "is not in the given whitelist. "
-          "See http://fburl.com/SafeSerializable for more detail";
-        if (RuntimeOption::UnserializationWhitelistCheckWarningOnly) {
-          raise_warning(err_msg, clsName.c_str());
-        } else {
-          raise_error(err_msg, clsName.c_str());
+
+        if (!altName) altName = getAlternateName(clsName.get());
+
+        if (!altName || !uns->isWhitelistedClass(String(altName))) {
+          const char* err_msg =
+            "The object being unserialized with class name '%s' "
+            "is not in the given whitelist. "
+            "See http://fburl.com/SafeSerializable for more detail";
+          if (RuntimeOption::UnserializationWhitelistCheckWarningOnly) {
+            raise_warning(err_msg, clsName.c_str());
+          } else {
+            raise_error(err_msg, clsName.c_str());
+          }
         }
       }
       if (cls) {

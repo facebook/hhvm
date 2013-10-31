@@ -3757,6 +3757,8 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
     int arg = info.m_arg & Unit::MetaInfo::VectorArg ?
       base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
     auto updateType = [&]{
+      /* don't update input rtt for Legacy mode */
+      if (metaMode == MetaMode::Legacy) return;
       auto& input = *inst.inputs[arg];
       input.rtt = hhbcTrans.rttFromLocation(stackFilter(input.location));
     };

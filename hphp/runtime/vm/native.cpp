@@ -134,8 +134,8 @@ bool coerceFCallArgs(TypedValue* args,
                      int32_t numArgs, int32_t numNonDefault,
                      const Func* func) {
   assert(numArgs == func->numParams());
-  bool zendParamMode = func->info() &&
-                       func->info()->attribute & ClassInfo::ZendParamMode;
+  bool zendParamMode = func->methInfo() &&
+                       func->methInfo()->attribute & ClassInfo::ZendParamMode;
 
   for (int32_t i = 0; (i < numNonDefault) && (i < numArgs); i++) {
     const Func::ParamInfo& pi = func->params()[i];

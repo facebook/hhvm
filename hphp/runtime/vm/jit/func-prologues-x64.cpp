@@ -280,7 +280,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   Fixup fixup(funcBody.offset() - func->base(), frameCells);
 
   // Emit warnings for any missing arguments
-  if (!func->info() && !(func->attrs() & AttrNative)) {
+  if (!func->isCPPBuiltin()) {
     for (int i = nPassed; i < numParams; ++i) {
       if (paramInfo[i].funcletOff() == InvalidAbsoluteOffset) {
         a.  emitImmReg((intptr_t)func->name()->data(), argNumToRegName[0]);

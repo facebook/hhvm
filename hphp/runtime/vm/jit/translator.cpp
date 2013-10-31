@@ -3076,7 +3076,7 @@ bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
     FTRACE(1, "analyzeCallee: target func not known\n");
     return false;
   }
-  if (target->info()) {
+  if (target->isCPPBuiltin()) {
     FTRACE(1, "analyzeCallee: target func is a builtin\n");
     return false;
   }

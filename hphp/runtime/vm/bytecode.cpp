@@ -779,7 +779,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
     os << ">";
   }
 
-  assert(!func->info() || func->numIterators() == 0);
+  assert(!func->methInfo() || func->numIterators() == 0);
   if (func->numIterators() > 0) {
     os << "|";
     Iter* it = &((Iter*)&tv[1])[-1];
@@ -1465,8 +1465,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
   // cppext functions/methods have their own logic for raising
   // warnings for missing arguments, so we only need to do this work
   // for non-cppext functions/methods
-  if (raiseMissingArgumentWarnings && !func->info() &&
-      !(func->attrs() & AttrNative)) {
+  if (raiseMissingArgumentWarnings && !func->isCPPBuiltin()) {
     // need to sync m_pc to pc for backtraces/re-entry
     SYNC();
     const Func::ParamInfoVec& paramInfo = func->params();
@@ -2423,7 +2422,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
     ar->setThis(nullptr);
   }
   Func* func = unit->getMain(cls);
-  assert(!func->info());
+  assert(!func->isCPPBuiltin());
   assert(!func->isGenerator());
   ar->m_func = func;
   ar->initNumArgs(0);
@@ -5830,7 +5829,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassCW(PC& pc) {
     TRACE(1, "FPassCW: function %s(%d) param %d is by reference, "
           "raising a strict warning (attr:0x%x)\n",
           func->name()->data(), func->numParams(), paramId,
-          func->info() ? func->info()->attribute : 0);
+          func->methInfo() ? func->methInfo()->attribute : 0);
     raise_strict_warning("Only variables should be passed by reference");
   }
 }
@@ -5841,7 +5840,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassCE(PC& pc) {
     TRACE(1, "FPassCE: function %s(%d) param %d is by reference, "
           "throwing a fatal error (attr:0x%x)\n",
           func->name()->data(), func->numParams(), paramId,
-          func->info() ? func->info()->attribute : 0);
+          func->methInfo() ? func->methInfo()->attribute : 0);
     raise_error("Cannot pass parameter %d by reference", paramId+1);
   }
 }

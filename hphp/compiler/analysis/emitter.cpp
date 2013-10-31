@@ -1884,8 +1884,8 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
   }
   bool voidReturn = false;
   if (builtinFunc) {
-    ref = (builtinFunc->info()->attribute & ClassInfo::IsReference) != 0;
-    voidReturn = builtinFunc->info()->returnType == KindOfNull;
+    ref = (builtinFunc->methInfo()->attribute & ClassInfo::IsReference) != 0;
+    voidReturn = builtinFunc->methInfo()->returnType == KindOfNull;
   } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
     if (!(fn->getActualType()) && !fn->getFuncScope()->isNative()) {
@@ -1916,7 +1916,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     m_evalStack.setNotRef();
   } else if (!ref) {
     DataType dt = builtinFunc ?
-      builtinFunc->info()->returnType :
+      builtinFunc->methInfo()->returnType :
       getPredictedDataType(fn);
 
     if (dt != KindOfUnknown) {
@@ -6421,9 +6421,9 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
     }
   }
   Func* f = Unit::lookupFunc(makeStaticString(name));
-  if (!f || !f->info() || f->numParams() > kMaxBuiltinArgs) return nullptr;
+  if (!f || !f->methInfo() || f->numParams() > kMaxBuiltinArgs) return nullptr;
 
-  const ClassInfo::MethodInfo* info = f->info();
+  const ClassInfo::MethodInfo* info = f->methInfo();
   if (info->attribute & (ClassInfo::NeedsActRec |
                          ClassInfo::VariableArguments |
                          ClassInfo::RefVariableArguments |
@@ -6435,7 +6435,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   if (info->returnType == KindOfDouble) return nullptr;
 
   for (int i = 0; i < f->numParams(); i++) {
-    const ClassInfo::ParameterInfo* pi = f->info()->parameters[i];
+    const ClassInfo::ParameterInfo* pi = f->methInfo()->parameters[i];
     if (pi->argType == KindOfDouble) return nullptr;
 
     if (i >= numParams) {
@@ -6543,7 +6543,8 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
       emitBuiltinCallArg(e, (*params)[i], i, byRef);
     }
     for (; i < fcallBuiltin->numParams(); i++) {
-      const ClassInfo::ParameterInfo* pi = fcallBuiltin->info()->parameters[i];
+      const ClassInfo::ParameterInfo* pi =
+        fcallBuiltin->methInfo()->parameters[i];
       Variant v = unserialize_from_string(
         String(pi->value, pi->valueLen, CopyString));
       emitBuiltinDefaultArg(e, v, pi->argType, i);

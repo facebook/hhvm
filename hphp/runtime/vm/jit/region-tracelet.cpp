@@ -346,7 +346,7 @@ bool RegionFormer::tryInline() {
   }
 
   auto callee = m_inst.funcd;
-  if (!callee || callee->info()) {
+  if (!callee || callee->isCPPBuiltin()) {
     return refuse("don't know callee or callee is builtin");
   }
 

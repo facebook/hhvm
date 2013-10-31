@@ -94,7 +94,7 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
       if (fault.m_faultType == Fault::Type::UserException) {
         frameinfo.set(s_exception, fault.m_userException);
       }
-    } else if (!ar->m_func->info() &&
+    } else if (!ar->m_func->isCPPBuiltin() &&
                !ar->m_func->isGenerator()) {
       // TODO (#1131400) This is wrong for builtins
       frameinfo.set(s_return, tvAsCVarRef(g_vmContext->m_stack.topTV()));

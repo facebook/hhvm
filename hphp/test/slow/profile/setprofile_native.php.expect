@@ -1,0 +1,101 @@
+fb_setprofile_callback1 event=exit
+x=fb_setprofile_callback1 event=enter
+bool(false)
+fb_setprofile_callback1 event=exit
+starting call to hash_algos
+fb_setprofile_callback1 event=enter
+fb_setprofile_callback1 event=exit
+algos=fb_setprofile_callback1 event=enter
+array(44) {
+  [0]=>
+  string(7) "adler32"
+  [1]=>
+  string(5) "crc32"
+  [2]=>
+  string(6) "crc32b"
+  [3]=>
+  string(6) "fnv132"
+  [4]=>
+  string(6) "fnv164"
+  [5]=>
+  string(7) "fnv1a32"
+  [6]=>
+  string(7) "fnv1a64"
+  [7]=>
+  string(4) "gost"
+  [8]=>
+  string(10) "haval128,3"
+  [9]=>
+  string(10) "haval128,4"
+  [10]=>
+  string(10) "haval128,5"
+  [11]=>
+  string(10) "haval160,3"
+  [12]=>
+  string(10) "haval160,4"
+  [13]=>
+  string(10) "haval160,5"
+  [14]=>
+  string(10) "haval192,3"
+  [15]=>
+  string(10) "haval192,4"
+  [16]=>
+  string(10) "haval192,5"
+  [17]=>
+  string(10) "haval224,3"
+  [18]=>
+  string(10) "haval224,4"
+  [19]=>
+  string(10) "haval224,5"
+  [20]=>
+  string(10) "haval256,3"
+  [21]=>
+  string(10) "haval256,4"
+  [22]=>
+  string(10) "haval256,5"
+  [23]=>
+  string(3) "md2"
+  [24]=>
+  string(3) "md4"
+  [25]=>
+  string(3) "md5"
+  [26]=>
+  string(9) "ripemd128"
+  [27]=>
+  string(9) "ripemd160"
+  [28]=>
+  string(9) "ripemd256"
+  [29]=>
+  string(9) "ripemd320"
+  [30]=>
+  string(4) "sha1"
+  [31]=>
+  string(6) "sha224"
+  [32]=>
+  string(6) "sha256"
+  [33]=>
+  string(6) "sha384"
+  [34]=>
+  string(6) "sha512"
+  [35]=>
+  string(6) "snefru"
+  [36]=>
+  string(10) "tiger128,3"
+  [37]=>
+  string(13) "tiger128,3-fb"
+  [38]=>
+  string(10) "tiger128,4"
+  [39]=>
+  string(10) "tiger160,3"
+  [40]=>
+  string(10) "tiger160,4"
+  [41]=>
+  string(10) "tiger192,3"
+  [42]=>
+  string(10) "tiger192,4"
+  [43]=>
+  string(9) "whirlpool"
+}
+fb_setprofile_callback1 event=exit
+DONE!
+fb_setprofile_callback1 event=exit

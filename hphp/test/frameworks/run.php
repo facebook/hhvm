@@ -307,11 +307,22 @@ class Frameworks {
           Map {
             'install_root' => __DIR__."/frameworks/Slim",
             'git_path' => "https://github.com/codeguy/Slim.git",
-            'git_commit' => "2e540cc392644b9b5cdcc57e5576db5a92ca2149",
+            'git_commit' => "3dec4f9ee2e9c204a9f334afd72abc174c1b792e",
             'test_search_roots' =>
               Vector {
                 __DIR__."/frameworks/Slim/tests",
               },
+            /*
+            'pull_requests' =>
+            Vector {
+              Map {
+                'pull_dir' => __DIR__."/frameworks/Slim",
+                'pull_repository' => "https://github.com/elgenie/Slim",
+                'git_commit' => "1beca31c1f0b0a7bb7747d9367fb07c07e190a8d",
+                'type' => 'pull',
+              },
+            },
+            */
           },
         /*'wordpress' =>
           Map {

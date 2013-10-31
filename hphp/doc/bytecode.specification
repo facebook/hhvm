@@ -1629,7 +1629,7 @@ BindS    [C A V]  ->  [V]
 
   Bind static property. This instruction first checks if class $2 has an
   accessible static property named (string)$3. If it doesn't, this instruction
-  throws a fatal error. Otherwise, this instrution binds the static property
+  throws a fatal error. Otherwise, this instruction binds the static property
   to $1, and pushes $1 onto the stack.
 
 UnsetL <local variable id>    []  ->  []
@@ -1679,7 +1679,7 @@ FPushFuncD <num params> <litstr id>    []  ->  []
 
 FPushFuncU <num params> <litstr id> <litstr fallback> []  ->  []
 
-  FPI push function unqualified. Identical to FPushFuncD except first trys to
+  FPI push function unqualified. Identical to FPushFuncD except first tries to
   lookup the function named %2 and if it isn't defined calls the function named
   %3.
 
@@ -3555,7 +3555,7 @@ CIterFree <iterator id>    []  ->  []
 IterBreak <iter-vec> <rel offset>   []  ->  []
 
   Iterator break.  Frees vectors in %1 in left to right order then transfers
-  control to the locaton specified by %2.  Surprise checks are performed
+  control to the location specified by %2.  Surprise checks are performed
   before iterators are freed so that in the event of an exception iterators
   are not double freed.  Note that as with normal jumps surprise checks will
   only be performed if %2 is negative.
@@ -4581,4 +4581,3 @@ endFor2:
 
 IterNext 1 startFor1 $v1
 endFor1:
-

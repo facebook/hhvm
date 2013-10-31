@@ -111,7 +111,6 @@ protected:
   unsigned m_invokeFewArgsDecision : 1;
   unsigned m_dynamicInvoke : 1;
   unsigned m_transformed : 1;
-  unsigned m_no_volatile_check : 1;
 
   int m_safe;
   ExpressionPtr m_safeDef;

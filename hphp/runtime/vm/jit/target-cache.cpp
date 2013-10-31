@@ -127,12 +127,7 @@ const Class* ClassCache::lookup(RDS::Handle handle, StringData* name) {
     const NamedEntity *ne = Unit::GetNamedEntity(name);
     Class *c = Unit::lookupClass(ne);
     if (UNLIKELY(!c)) {
-      String normName = normalizeNS(name);
-      if (normName) {
-        return lookup(handle, normName.get());
-      } else {
-        c = Unit::loadMissingClass(ne, name);
-      }
+      c = Unit::loadMissingClass(ne, name);
       if (UNLIKELY(!c)) {
         raise_error(Strings::UNKNOWN_CLASS, name->data());
       }

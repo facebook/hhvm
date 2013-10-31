@@ -81,6 +81,16 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
   return mem;
 }
 
+static bool needsNSNormalization(const StringData* name) {
+  return name->data()[0] == '\\' && name->data()[1] != '\\';
+}
+
+static String normalizeNS(const StringData* name) {
+  assert(needsNSNormalization(name));
+  assert(name->data()[name->size()] == 0);
+  return String(name->data() + 1, name->size() - 1, CopyString);
+}
+
 Mutex Unit::s_classesMutex;
 /*
  * We hold onto references to elements of this map. If we use a different
@@ -114,12 +124,20 @@ static void initializeNamedDataMap() {
 }
 
 NamedEntity* Unit::GetNamedEntity(const StringData* str,
-                                  bool allowCreate /*=true*/) {
+                                  bool allowCreate /*= true*/,
+                                  String* normalizedStr /*= nullptr*/) {
   if (UNLIKELY(!s_namedDataMap)) {
     initializeNamedDataMap();
   }
   NamedEntityMap::iterator it = s_namedDataMap->find(str);
   if (LIKELY(it != s_namedDataMap->end())) return &it->second;
+  if (needsNSNormalization(str)) {
+    auto normStr = normalizeNS(str);
+    if (normalizedStr) {
+      *normalizedStr = normStr;
+    }
+    return GetNamedEntity(normStr.get(), allowCreate, normalizedStr);
+  }
   if (LIKELY(allowCreate)) { return getNamedEntityHelper(str); }
   return nullptr;
 }
@@ -795,16 +813,6 @@ Class* Unit::loadClass(const NamedEntity* ne,
     return cls;
   }
   VMRegAnchor _;
-
-  String normName = normalizeNS(name);
-  if (normName) {
-    name = normName.get();
-    ne = GetNamedEntity(name);
-    if ((cls = ne->getCachedClass()) != nullptr) {
-      return cls;
-    }
-  }
-
   AutoloadHandler::s_instance->invokeHandler(
     StrNR(const_cast<StringData*>(name)));
   return Unit::lookupClass(ne);
@@ -821,16 +829,6 @@ Class* Unit::getClass(const NamedEntity* ne,
                       const StringData *name, bool tryAutoload) {
   Class *cls = lookupClass(ne);
   if (UNLIKELY(!cls)) {
-
-    String normName = normalizeNS(name);
-    if (normName) {
-      name = normName.get();
-      ne = GetNamedEntity(name);
-      if ((cls = lookupClass(ne)) != nullptr) {
-        return cls;
-      }
-    }
-
     if (tryAutoload) {
       return loadMissingClass(ne, name);
     }
@@ -1004,11 +1002,8 @@ TypedValue* Unit::loadCns(const StringData* cnsName) {
   TypedValue* tv = lookupCns(cnsName);
   if (LIKELY(tv != nullptr)) return tv;
 
-  String normName = normalizeNS(cnsName);
-  if (normName) {
-    cnsName = normName.get();
-    tv = lookupCns(cnsName);
-    if (tv != nullptr) return tv;
+  if (needsNSNormalization(cnsName)) {
+    return loadCns(normalizeNS(cnsName).get());
   }
 
   if (!AutoloadHandler::s_instance->autoloadConstant(
@@ -1746,15 +1741,6 @@ Func* Unit::lookupFunc(const StringData* funcName) {
 Func* Unit::loadFunc(const NamedEntity* ne, const StringData* funcName) {
   Func* func = ne->getCachedFunc();
   if (LIKELY(func != nullptr)) return func;
-
-  String normName = normalizeNS(funcName);
-  if (normName) {
-    funcName = normName.get();
-    ne = GetNamedEntity(funcName);
-    func = ne->getCachedFunc();
-    if (func) return func;
-  }
-
   if (AutoloadHandler::s_instance->autoloadFunc(
         const_cast<StringData*>(funcName))) {
     func = ne->getCachedFunc();
@@ -1762,8 +1748,13 @@ Func* Unit::loadFunc(const NamedEntity* ne, const StringData* funcName) {
   return func;
 }
 
-Func* Unit::loadFunc(const StringData* funcName) {
-  return loadFunc(GetNamedEntity(funcName), funcName);
+Func* Unit::loadFunc(const StringData* name) {
+  String normStr;
+  auto ne = GetNamedEntity(name, true, &normStr);
+  if (normStr) {
+    name = normStr.get();
+  }
+  return loadFunc(ne, name);
 }
 
 //=============================================================================

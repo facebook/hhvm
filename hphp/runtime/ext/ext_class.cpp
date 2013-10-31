@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/ext/util.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/util/util.h"
 
@@ -74,7 +73,7 @@ bool f_class_alias(const String& original,
                    bool autoload /* = true */) {
   auto const origClass =
     autoload ? Unit::loadClass(original.get())
-             : lookup_class(original.get());
+             : Unit::lookupClass(original.get());
   if (!origClass) {
     raise_warning("Class %s not found", original->data());
     return false;
@@ -277,7 +276,7 @@ Variant f_get_parent_class(CVarRef object /* = null_variant */) {
     return false;
   }
 
-  const Class* cls = lookup_class(class_name.toString().get());
+  const Class* cls = Unit::lookupClass(class_name.toString().get());
   if (cls) {
     auto& parentClass = *(const String*)(&cls->parentRef());
     if (!parentClass.empty()) {
@@ -296,7 +295,7 @@ static bool is_a_impl(CVarRef class_or_object, const String& class_name,
   const Class* cls = get_cls(class_or_object);
   if (!cls) return false;
   if (cls->attrs() & AttrTrait) return false;
-  const Class* other = lookup_class(class_name.get());
+  const Class* other = Unit::lookupClass(class_name.get());
   if (!other) return false;
   if (other->attrs() & AttrTrait) return false;
   if (other == cls) return !subclass_only;
@@ -340,7 +339,7 @@ Variant f_property_exists(CVarRef class_or_object, const String& property) {
     return Variant(Variant::NullInit());
   }
 
-  Class* cls = lookup_class(get_classname(class_or_object).get());
+  Class* cls = Unit::lookupClass(get_classname(class_or_object).get());
   if (!cls) {
     return false;
   }

@@ -800,7 +800,6 @@ const Func* lookupUnknownFunc(const StringData* name) {
 Class* lookupKnownClass(Class** cache, const StringData* clsName) {
   Class* cls = *cache;
   assert(!cls); // the caller should already have checked
-  assert(clsName->data()[0] != '\\'); // namespace names should be done earlier
 
   AutoloadHandler::s_instance->invokeHandler(
     StrNR(const_cast<StringData*>(clsName)));

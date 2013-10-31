@@ -3895,13 +3895,6 @@ bool VMExecutionContext::iopInstanceOfHelper(const StringData* str1, Cell* c2) {
   if (LIKELY(rhs && rhs->getCachedClass() != nullptr)) {
     return cellInstanceOf(c2, rhs);
   }
-  auto normName = normalizeNS(str1);
-  if (normName) {
-    rhs = Unit::GetNamedEntity(normName.get(), false);
-    if (LIKELY(rhs && rhs->getCachedClass() != nullptr)) {
-      return cellInstanceOf(c2, rhs);
-    }
-  }
   return false;
 }
 

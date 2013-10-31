@@ -457,7 +457,8 @@ struct Unit {
   MD5 md5() const { return m_md5; }
 
   static NamedEntity* GetNamedEntity(const StringData *str,
-                                     bool allowCreate = true) FLATTEN;
+                                     bool allowCreate = true,
+                                     String* normStr = nullptr) FLATTEN;
 
   static size_t GetNamedEntityTableSize();
   static Array getUserFunctions();
@@ -584,14 +585,24 @@ struct Unit {
                           const StringData *name);
 
   static Class *loadClass(const StringData *name) {
-    return loadClass(GetNamedEntity(name), name);
+    String normStr;
+    auto ne = GetNamedEntity(name, true, &normStr);
+    if (normStr) {
+      name = normStr.get();
+    }
+    return loadClass(ne, name);
   }
 
   static Class *loadMissingClass(const NamedEntity *ne,
                                  const StringData *name);
 
   static Class* getClass(const StringData* name, bool tryAutoload) {
-    return getClass(GetNamedEntity(name), name, tryAutoload);
+    String normStr;
+    auto ne = GetNamedEntity(name, true, &normStr);
+    if (normStr) {
+      name = normStr.get();
+    }
+    return getClass(ne, name, tryAutoload);
   }
 
   static Class* getClass(const NamedEntity *ne, const StringData *name,
@@ -1180,20 +1191,6 @@ public:
   Class* front() const;
   Class* popFront();
 };
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * If name starts with '\\', returns a new String with the leading
- * slash stripped. Otherwise returns a null string.
- */
-inline String normalizeNS(const StringData* name) {
-  assert(name->data()[name->size()] == 0);
-  if (name->data()[0] == '\\') {
-    return String(name->data() + 1);
-  }
-  return null_string;
-}
 
 //////////////////////////////////////////////////////////////////////
 

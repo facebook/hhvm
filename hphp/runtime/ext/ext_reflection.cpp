@@ -26,7 +26,6 @@
 #include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/parser/parser.h"
-#include "hphp/runtime/ext/util.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -1011,7 +1010,7 @@ void f_hphp_set_property(CObjRef obj, const String& cls, const String& prop,
 
 Variant f_hphp_get_static_property(const String& cls, const String& prop, bool force) {
   StringData* sd = cls.get();
-  Class* class_ = lookup_class(sd);
+  Class* class_ = Unit::lookupClass(sd);
   if (!class_) {
     raise_error("Non-existent class %s", sd->data());
   }
@@ -1035,7 +1034,7 @@ Variant f_hphp_get_static_property(const String& cls, const String& prop, bool f
 void f_hphp_set_static_property(const String& cls, const String& prop, CVarRef value,
                                 bool force) {
   StringData* sd = cls.get();
-  Class* class_ = lookup_class(sd);
+  Class* class_ = Unit::lookupClass(sd);
   if (!class_) {
     raise_error("Non-existent class %s", sd->data());
   }

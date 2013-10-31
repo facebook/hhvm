@@ -1224,7 +1224,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
     if (debug) {
       // Debugging code: cede the write lease half the time.
       if (RuntimeOption::EvalJitStressLease) {
-        if (d.depthOne() == 1 && (rand() % 2) == 0) {
+        if (d.depthOne() && (rand() % 2) == 0) {
           s_writeLease.gremlinLock();
         }
       }

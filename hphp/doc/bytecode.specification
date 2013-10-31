@@ -3720,7 +3720,7 @@ TraitExists        [C C]  ->  [C:Bool]
 VerifyParamType <parameter id>    []  ->  []
 
   Verify parameter type. Functions and methods can optionally specify the
-  types of arguments they will accept. These type constraints are memorized
+  types of arguments they will accept. These type constraints are memoized
   into each function's FPI structure.
 
   VerifyParamTypes checks the specified parameter against the enclosing

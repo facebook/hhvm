@@ -539,6 +539,38 @@ Cell lookupCnsHelper(const TypedValue* tv,
   not_reached();
 }
 
+void lookupClsMethodHelper(Class* cls,
+                           StringData* meth,
+                           ActRec* ar,
+                           ActRec* fp) {
+  try {
+    using namespace MethodLookup;
+    const Func* f;
+    ObjectData* obj = fp->hasThis() ? fp->getThis() : nullptr;
+    Class* ctx = fp->m_func->cls();
+    LookupResult res =
+      g_vmContext->lookupClsMethod(f, cls, meth, obj, ctx, true);
+    if (res == LookupResult::MethodFoundNoThis ||
+        res == LookupResult::MagicCallStaticFound) {
+      ar->setClass(cls);
+    } else {
+      assert(obj);
+      assert(res == LookupResult::MethodFoundWithThis ||
+             res == LookupResult::MagicCallFound);
+      obj->incRefCount();
+      ar->setThis(obj);
+    }
+    ar->m_func = f;
+    if (res == LookupResult::MagicCallFound ||
+        res == LookupResult::MagicCallStaticFound) {
+      ar->setInvName(meth);
+      meth->incRefCount();
+    }
+  } catch (...) {
+    *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(meth);
+  }
+}
+
 Cell lookupCnsUHelper(const TypedValue* tv,
                       StringData* nm,
                       StringData* fallback) {

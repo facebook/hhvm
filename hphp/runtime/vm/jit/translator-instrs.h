@@ -100,6 +100,7 @@
   CASE(FPushFuncD) \
   CASE(FPushFuncU) \
   CASE(FPushFunc) \
+  CASE(FPushClsMethod) \
   CASE(FPushClsMethodD) \
   CASE(FPushClsMethodF) \
   CASE(FPushObjMethodD) \

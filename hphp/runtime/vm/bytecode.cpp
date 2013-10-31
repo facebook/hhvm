@@ -1102,7 +1102,7 @@ VMExecutionContext::lookupClsMethod(const Func*& f,
       f = cls->lookupMethod(s___callStatic.get());
       if (!f) {
         if (raise) {
-          // Throw a fatal errpr
+          // Throw a fatal error
           lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, true);
         }
         return LookupResult::MethodNotFound;
@@ -5554,7 +5554,7 @@ void VMExecutionContext::pushClsMethodImpl(Class* cls,
     if (!forwarding) {
       ar->setClass(cls);
     } else {
-      /* Propogate the current late bound class if there is one, */
+      /* Propagate the current late bound class if there is one, */
       /* otherwise use the class given by this instruction's input */
       if (m_fp->hasThis()) {
         cls = m_fp->getThis()->getVMClass();

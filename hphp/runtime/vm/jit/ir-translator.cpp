@@ -868,6 +868,11 @@ IRTranslator::translateFPushFunc(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translateFPushClsMethod(const NormalizedInstruction& i) {
+  HHIR_EMIT(FPushClsMethod, i.imm[0].u_IVA);
+}
+
+void
 IRTranslator::translateFPushClsMethodD(const NormalizedInstruction& i) {
   HHIR_EMIT(FPushClsMethodD,
             i.imm[0].u_IVA, // num params

@@ -189,6 +189,8 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
                            {{SSA, 0}}},
+    {LookupClsMethod,    lookupClsMethodHelper, DNone, SSync,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {LdArrFuncCtx,       loadArrayFunctionContext, DNone, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {LdArrFPushCuf,      fpushCufHelperArray, DNone, SSync,

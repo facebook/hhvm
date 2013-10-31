@@ -2503,6 +2503,59 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
   }
 }
 
+void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
+  auto const catchBlock = makeCatch();
+  auto const clsVal  = popA();
+  auto const methVal = popC();
+
+  if (!methVal->isString() || !clsVal->isA(Type::Cls)) {
+    PUNT(FPushClsMethod-unknownType);
+  }
+
+  if (methVal->isConst() &&
+      clsVal->inst()->op() == LdClsCctx) {
+    /*
+     * Optimize FPushClsMethod when the method is a known static
+     * string and the input class is the context.  The common bytecode
+     * pattern here is LateBoundCls ; FPushClsMethod.
+     *
+     * This logic feels like it belongs in the simplifier, but the
+     * generated code for this case is pretty different, since we
+     * don't need the pre-live ActRec trick.
+     */
+    using namespace MethodLookup;
+    auto const cls = curClass();
+    const Func* func;
+    auto res =
+      g_vmContext->lookupClsMethod(func,
+                                   cls,
+                                   methVal->getValStr(),
+                                   nullptr,
+                                   cls,
+                                   false);
+    if (res == LookupResult::MethodFoundNoThis) {
+      auto const funcTmp = gen(LdClsMethod, clsVal, cns(func->methodSlot()));
+      emitFPushActRec(funcTmp, clsVal, numParams, nullptr);
+      return;
+    }
+  }
+
+  emitFPushActRec(m_tb->genDefNull(),
+                  m_tb->genDefInitNull(),
+                  numParams,
+                  nullptr);
+  auto const actRec = spillStack();
+
+  /*
+   * Similar to FPushFunc/FPushObjMethod, we have an incomplete ActRec
+   * on the stack and must handle that properly if we throw.
+   */
+  updateMarker();
+
+  gen(LookupClsMethod, catchBlock, clsVal, methVal, actRec, m_tb->fp());
+  gen(DecRef, methVal);
+}
+
 void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
   Block* exitBlock = makeExitSlow();
 

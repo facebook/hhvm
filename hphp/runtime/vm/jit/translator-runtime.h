@@ -158,6 +158,10 @@ Cell lookupCnsHelper(const TypedValue* tv,
 Cell lookupCnsUHelper(const TypedValue* tv,
                       StringData* nm,
                       StringData* fallback);
+void lookupClsMethodHelper(Class* cls,
+                           StringData* meth,
+                           ActRec* ar,
+                           ActRec* fp);
 
 void checkFrame(ActRec* fp, Cell* sp, bool checkLocals);
 void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip);

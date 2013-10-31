@@ -937,6 +937,13 @@ D:Func = LdClsMethod S0:Cls S1:ConstInt
   Load a Func* off of the class method table for S0, at offset S1 (in
   method slots).
 
+LookupClsMethod S0:Cls S1:Str S2:StkPtr S3:FramePtr
+
+  Store a pointer to a class method into an activation record. S0
+  points to the class, S1 is the method name, S2 points to the
+  activation record, and S3 is a pointer to the current frame (used to
+  get the context).  May throw or fatal if method is not accessible.
+
 D:PtrToGen = LdPropAddr S0:Obj S1:ConstInt
 
   Load the address of the object property for S0 at offset S1 (in

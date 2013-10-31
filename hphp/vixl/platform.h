@@ -27,17 +27,21 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
+#include "hphp/util/assertions.h"
+
 // Define platform specific functionalities.
 
 namespace vixl {
-#ifdef USE_SIMULATOR
-// Currently we assume running the simulator implies running on x86 hardware.
-inline void HostBreakpoint() { asm("int3"); }
-#else
 inline void HostBreakpoint() {
+#if defined(__x86_64__)
+  asm("int3");
+#elif defined(__AARCH64EL__)
   // TODO: Implement HostBreakpoint on a64.
-}
+  not_implemented();
+#else
+# error How do you set a host breakpoint on your architecture?
 #endif
+}
 }  // namespace vixl
 
 #endif

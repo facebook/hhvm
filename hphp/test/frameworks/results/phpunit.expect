@@ -1,9 +1,780 @@
+Issue74Test::testCreateAndThrowNewExceptionInProcessIsolation
+E
+OverrideTestCase::testCase
+.
+BankAccountWithCustomExtensionTest::testBalanceIsInitiallyZero
+.
+BankAccountWithCustomExtensionTest::testBalanceCannotBecomeNegative
+.
+BankAccountWithCustomExtensionTest::testBalanceCannotBecomeNegative2
+.
+TwoTest::testSomething
+.
+RequirementsTest::testOne
+.
+RequirementsTest::testTwo
+.
+RequirementsTest::testThree
+.
+RequirementsTest::testFour
+.
+RequirementsTest::testFive
+.
+RequirementsTest::testSix
+.
+RequirementsTest::testSeven
+.
+RequirementsTest::testEight
+.
+RequirementsTest::testNine
+S
+RequirementsTest::testTen
+S
+RequirementsTest::testAllPossibleRequirements
+S
+RequirementsTest::testExistingFunction
+.
+RequirementsTest::testExistingExtension
+.
+RequirementsTest::testAlwaysSkip
+S
+RequirementsTest::testAlwaysSkip2
+S
+Framework_TestFailureTest::testToString
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "expected"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "actual"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "default"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_NONE"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_DEPTH"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "prefixed JSON_ERROR_DEPTH"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_STATE_MISMatch"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_CTRL_CHAR"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_SYNTAX"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_UTF8`"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "Invalid error indicator"
+.
+Framework_Constraint_JsonMatchesTest::testEvaluate with data set "valid JSON"
+.
+Framework_Constraint_JsonMatchesTest::testEvaluate with data set "error syntax"
+.
+Framework_Constraint_JsonMatchesTest::testEvaluate with data set "error UTF-8"
+.
+Framework_Constraint_JsonMatchesTest::testEvaluate with data set "invalid JSON in class instantiation"
+.
+Framework_Constraint_JsonMatchesTest::testToString
+.
+Util_XMLTest::testAssertValidKeysValidKeys
+.
+Util_XMLTest::testAssertValidKeysValidKeysEmpty
+.
+Util_XMLTest::testAssertValidKeysDefaultValuesA
+.
+Util_XMLTest::testAssertValidKeysDefaultValuesB
+.
+Util_XMLTest::testAssertValidKeysInvalidKey
+.
+Util_XMLTest::testAssertValidKeysInvalidKeys
+.
+Util_XMLTest::testConvertAssertSelect
+.
+Util_XMLTest::testConvertAssertSelectElt
+.
+Util_XMLTest::testConvertAssertClass
+.
+Util_XMLTest::testConvertAssertId
+.
+Util_XMLTest::testConvertAssertAttribute
+.
+Util_XMLTest::testConvertAssertAttributeSpaces
+.
+Util_XMLTest::testConvertAssertAttributeMultipleSpaces
+.
+Util_XMLTest::testConvertAssertSelectEltClass
+.
+Util_XMLTest::testConvertAssertSelectEltId
+.
+Util_XMLTest::testConvertAssertSelectEltAttrEqual
+.
+Util_XMLTest::testConvertAssertSelectEltMultiAttrEqual
+.
+Util_XMLTest::testConvertAssertSelectEltAttrHasOne
+.
+Util_XMLTest::testConvertAssertSelectEltAttrContains
+.
+Util_XMLTest::testConvertAssertSelectEltChild
+.
+Util_XMLTest::testConvertAssertSelectEltDescendant
+.
+Util_XMLTest::testConvertAssertSelectContent
+.
+Util_XMLTest::testConvertAssertSelectTrue
+.
+Util_XMLTest::testConvertAssertSelectFalse
+.
+Util_XMLTest::testConvertAssertNumber
+.
+Util_XMLTest::testConvertAssertRange
+.
+Util_XMLTest::testPrepareStringEscapesChars
+.
+OutputTestCase::testExpectOutputStringFooActualFoo
+.
+OutputTestCase::testExpectOutputStringFooActualBar
+F
+OutputTestCase::testExpectOutputRegexFooActualFoo
+.
+OutputTestCase::testExpectOutputRegexFooActualBar
+F
+Framework_ComparatorTest::testGetInstance with data set #0 
+.
+Framework_ComparatorTest::testGetInstance with data set #1 
+.
+Framework_ComparatorTest::testGetInstance with data set #2 
+.
+Framework_ComparatorTest::testGetInstance with data set #3 
+.
+Framework_ComparatorTest::testGetInstance with data set #4 
+.
+Framework_ComparatorTest::testGetInstance with data set #5 
+.
+Framework_ComparatorTest::testGetInstance with data set #6 
+.
+Framework_ComparatorTest::testGetInstance with data set #7 
+.
+Framework_ComparatorTest::testGetInstance with data set #8 
+.
+Framework_ComparatorTest::testGetInstance with data set #9 
+.
+Framework_ComparatorTest::testGetInstance with data set #10 
+.
+Framework_ComparatorTest::testGetInstance with data set #11 
+.
+Framework_ComparatorTest::testGetInstance with data set #12 
+.
+Framework_ComparatorTest::testGetInstance with data set #13 
+.
+Framework_ComparatorTest::testGetInstance with data set #14 
+.
+Framework_ComparatorTest::testGetInstance with data set #15 
+.
+Framework_ComparatorTest::testGetInstance with data set #16 
+.
+Framework_ComparatorTest::testGetInstance with data set #17 
+.
+Framework_ComparatorTest::testGetInstance with data set #18 
+.
+Framework_ComparatorTest::testGetInstance with data set #19 
+S
+PHPUnit_Util_Test::getProvidedData
+S
+PHPUnit_Util_Test::getProvidedData
+.
+Framework_ComparatorTest::testGetInstance with data set #20 
+.
+Framework_ComparatorTest::testGetInstance with data set #21 
+.
+Framework_ComparatorTest::testGetInstance with data set #22 
+.
+Framework_ComparatorTest::testGetInstance with data set #23 
+.
+Framework_ComparatorTest::testGetInstance with data set #24 
+.
+Framework_ComparatorTest::testGetInstance with data set #25 
+.
+Framework_ComparatorTest::testGetInstance with data set #26 
+.
+Framework_ComparatorTest::testGetInstance with data set #27 
+.
+Framework_ComparatorTest::testGetInstance with data set #28 
+.
+Framework_ComparatorTest::testGetInstance with data set #29 
+.
+Framework_ComparatorTest::testGetInstance with data set #30 
+.
+Framework_ComparatorTest::testGetInstance with data set #31 
+.
+Framework_ComparatorTest::testGetInstance with data set #32 
+.
+Framework_ComparatorTest::testGetInstance with data set #33 
+.
+Framework_ComparatorTest::testGetInstance with data set #34 
+.
+Framework_ComparatorTest::testGetInstance with data set #35 
+.
+Framework_ComparatorTest::testGetInstance with data set #36 
+.
+Framework_ComparatorTest::testRegister
+.
+Framework_ComparatorTest::testUnregister
+.
+FatalTest::testFatalError
+HipHop Fatal error: Undefined function: non_existing_function in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpunit/Tests/_files/FatalTest.php on line 11
+
+Issue578Test::testNoticesDoublePrintStackTrace
+.
+Issue578Test::testWarningsDoublePrintStackTrace
+.
+Issue578Test::testUnexpectedExceptionsPrintsCorrectly
+E
+Runner_BaseTestRunnerTest::testInvokeNonStaticSuite
+.
+ThrowExceptionTestCase::test
+E
+ExceptionInAssertPreConditionsTest::testSomething
+E
+Issue581Test::testExportingObjectsDoesNotBreakWindowsLineFeeds
+F
+ExceptionInSetUpTest::testSomething
+E
+Issue523Test::testAttributeEquals
+.
+ExceptionTest::testOne
+F
+ExceptionTest::testTwo
+F
+ExceptionTest::testThree
+F
+ExceptionTest::testFour
+F
+ExceptionTest::testFive
+F
+ExceptionTest::testSix
+F
+ExceptionTest::testSeven
+F
+ExceptionTest::testEight
+F
+ExceptionTest::testNine
+F
+ExceptionTest::testSingleLine
+F
+ExceptionTest::testUnknownConstants
+F
+MultiDependencyTest::testOne
+.
+MultiDependencyTest::testTwo
+.
+MultiDependencyTest::testThree
+.
 Framework_Assert_FunctionsTest::testLogicalAnd
 .
 Framework_Assert_FunctionsTest::testLogicalOr
 .
 Framework_Assert_FunctionsTest::testLogicalXor
 .
+IncompleteTest::testIncomplete
+I
+NothingTest::testNothing
+.
+Framework_TestImplementorTest::testSuccessfulRun
+.
+Util_ConfigurationTest::testExceptionIsThrownForNotExistingConfigurationFile
+.
+Util_ConfigurationTest::testFilterConfigurationIsReadCorrectly
+.
+Util_ConfigurationTest::testGroupConfigurationIsReadCorrectly
+.
+Util_ConfigurationTest::testListenerConfigurationIsReadCorrectly
+.
+Util_ConfigurationTest::testLoggingConfigurationIsReadCorrectly
+.
+Util_ConfigurationTest::testPHPConfigurationIsReadCorrectly
+.
+Util_ConfigurationTest::testPHPConfigurationIsHandledCorrectly
+.
+Util_ConfigurationTest::testPHPUnitConfigurationIsReadCorrectly
+.
+Util_ConfigurationTest::testSeleniumBrowserConfigurationIsReadCorrectly
+.
+Util_ConfigurationTest::testXincludeInConfiguration
+UNKNOWN STATUS
+Issue503Test::testCompareDifferentLineEndings
+F
+Issue1021Test::testSomething with data set #0 
+.
+Issue1021Test::testSomethingElse
+.
+OneTest::testSomething
+.
+ConcreteWithMyCustomExtensionTest::testTwo
+.
+ConcreteWithMyCustomExtensionTest::testOne
+.
+DataProviderTest::testAdd with data set #0 
+.
+DataProviderTest::testAdd with data set #1 
+.
+DataProviderTest::testAdd with data set #2 
+F
+DataProviderTest::testAdd with data set #3 
+.
+Util_TypeTest::testExport with data set #0 
+.
+Util_TypeTest::testExport with data set #1 
+.
+Util_TypeTest::testExport with data set #2 
+.
+Util_TypeTest::testExport with data set #3 
+.
+Util_TypeTest::testExport with data set #4 
+.
+Util_TypeTest::testExport with data set #5 
+.
+Util_TypeTest::testExport with data set #6 
+.
+Util_TypeTest::testExport with data set #7 
+.
+Util_TypeTest::testExport with data set #8 
+.
+Util_TypeTest::testExport with data set #9 
+.
+Util_TypeTest::testExport with data set #10 
+.
+Util_TypeTest::testExport with data set #11 
+.
+Util_TypeTest::testExport with data set #12 
+.
+Util_TypeTest::testExport with data set #13 
+.
+Util_TypeTest::testExport with data set #14 
+.
+Util_TypeTest::testShortenedExport with data set #0 
+.
+Util_TypeTest::testShortenedExport with data set #1 
+.
+Util_TypeTest::testShortenedExport with data set #2 
+.
+Util_TypeTest::testShortenedExport with data set #3 
+.
+Util_TypeTest::testShortenedExport with data set #4 
+.
+Util_TypeTest::testShortenedExport with data set #5 
+.
+Util_TypeTest::testShortenedExport with data set #6 
+.
+Util_TypeTest::testShortenedExport with data set #7 
+.
+Util_TypeTest::testShortenedExport with data set #8 
+.
+Util_TypeTest::testShortenedExport with data set #9 
+.
+Util_TypeTest::testShortenedExport with data set #10 
+.
+Util_TypeTest::testNonBinaryStringExport with data set #0 
+.
+Util_TypeTest::testNonBinaryStringExport with data set #1 
+.
+Util_TypeTest::testNonBinaryStringExport with data set #2 
+.
+NoArgTestCaseTest::testNothing
+.
+ExceptionStackTest::testPrintingChildException
+E
+ExceptionStackTest::testNestedExceptions
+E
+FailureTest::testAssertArrayEqualsArray
+F
+FailureTest::testAssertIntegerEqualsInteger
+F
+FailureTest::testAssertObjectEqualsObject
+F
+FailureTest::testAssertNullEqualsString
+F
+FailureTest::testAssertStringEqualsString
+F
+FailureTest::testAssertTextEqualsText
+F
+FailureTest::testAssertStringMatchesFormat
+F
+FailureTest::testAssertNumericEqualsNumeric
+F
+FailureTest::testAssertTextSameText
+F
+FailureTest::testAssertObjectSameObject
+F
+FailureTest::testAssertObjectSameNull
+F
+FailureTest::testAssertFloatSameFloat
+F
+FailureTest::testAssertStringMatchesFormatFile
+F
+Issue445Test::testOutputWithExpectationBefore
+.
+Issue445Test::testOutputWithExpectationAfter
+.
+Issue445Test::testNotMatchingOutput
+F
+My\Space\ExceptionNamespaceTest::testConstants
+F
+My\Space\ExceptionNamespaceTest::testUnknownConstants
+F
+Framework_SuiteTest::testAddTestSuite
+.
+Framework_SuiteTest::testInheritedTests
+.
+Framework_SuiteTest::testNoTestCases
+.
+Framework_SuiteTest::testNoTestCaseClass
+.
+Framework_SuiteTest::testNotExistingTestCase
+.
+Framework_SuiteTest::testNotPublicTestCase
+.
+Framework_SuiteTest::testNotVoidTestCase
+.
+Framework_SuiteTest::testOneTestCase
+.
+Framework_SuiteTest::testShadowedTests
+.
+StackTest::testPush
+.
+StackTest::testPop
+.
+ThrowNoExceptionTestCase::test
+.
+Issue433Test::testOutputWithExpectationBefore
+.
+Issue433Test::testOutputWithExpectationAfter
+.
+Issue433Test::testNotMatchingOutput
+F
+ChangeCurrentWorkingDirectoryTest::testSomethingThatChangesTheCwd
+.
+NotPublicTestCase::testPublic
+.
+ExceptionInTest::testSomething
+E
+Issue244Test::testWorks
+.
+Issue244Test::testFails
+F
+Issue244Test::testFailsTooIfExpectationIsANumber
+F
+Issue244Test::testFailsTooIfExceptionCodeIsANumber
+F
+InheritedTestCase::test2
+.
+InheritedTestCase::testCase
+.
+Framework_ConstraintTest::testConstraintArrayHasKey
+.
+Framework_ConstraintTest::testConstraintArrayHasKey2
+.
+Framework_ConstraintTest::testConstraintArrayNotHasKey
+.
+Framework_ConstraintTest::testConstraintArrayNotHasKey2
+.
+Framework_ConstraintTest::testConstraintFileExists
+.
+Framework_ConstraintTest::testConstraintFileExists2
+.
+Framework_ConstraintTest::testConstraintFileNotExists
+.
+Framework_ConstraintTest::testConstraintFileNotExists2
+.
+Framework_ConstraintTest::testConstraintGreaterThan
+.
+Framework_ConstraintTest::testConstraintGreaterThan2
+.
+Framework_ConstraintTest::testConstraintNotGreaterThan
+.
+Framework_ConstraintTest::testConstraintNotGreaterThan2
+.
+Framework_ConstraintTest::testConstraintGreaterThanOrEqual
+.
+Framework_ConstraintTest::testConstraintGreaterThanOrEqual2
+.
+Framework_ConstraintTest::testConstraintNotGreaterThanOrEqual
+.
+Framework_ConstraintTest::testConstraintNotGreaterThanOrEqual2
+.
+Framework_ConstraintTest::testConstraintIsAnything
+.
+Framework_ConstraintTest::testConstraintNotIsAnything
+.
+Framework_ConstraintTest::testConstraintIsEqual
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #0 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #1 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #2 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #3 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #4 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #5 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #6 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #7 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #8 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #9 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #10 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #11 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #12 
+.
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #13 
+F
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #14 
+.
+Framework_ConstraintTest::testConstraintIsNotEqual
+.
+Framework_ConstraintTest::testConstraintIsNotEqual2
+.
+Framework_ConstraintTest::testConstraintIsIdentical
+.
+Framework_ConstraintTest::testConstraintIsIdentical2
+.
+Framework_ConstraintTest::testConstraintIsIdentical3
+.
+Framework_ConstraintTest::testConstraintIsNotIdentical
+.
+Framework_ConstraintTest::testConstraintIsNotIdentical2
+.
+Framework_ConstraintTest::testConstraintIsNotIdentical3
+.
+Framework_ConstraintTest::testConstraintIsInstanceOf
+.
+Framework_ConstraintTest::testConstraintIsInstanceOf2
+.
+Framework_ConstraintTest::testConstraintIsNotInstanceOf
+.
+Framework_ConstraintTest::testConstraintIsNotInstanceOf2
+.
+Framework_ConstraintTest::testConstraintIsType
+.
+Framework_ConstraintTest::testConstraintIsType2
+.
+Framework_ConstraintTest::testConstraintIsNotType
+.
+Framework_ConstraintTest::testConstraintIsNotType2
+.
+Framework_ConstraintTest::testConstraintIsNull
+.
+Framework_ConstraintTest::testConstraintIsNull2
+.
+Framework_ConstraintTest::testConstraintIsNotNull
+.
+Framework_ConstraintTest::testConstraintIsNotNull2
+.
+Framework_ConstraintTest::testConstraintLessThan
+.
+Framework_ConstraintTest::testConstraintLessThan2
+.
+Framework_ConstraintTest::testConstraintNotLessThan
+.
+Framework_ConstraintTest::testConstraintNotLessThan2
+.
+Framework_ConstraintTest::testConstraintLessThanOrEqual
+.
+Framework_ConstraintTest::testConstraintCallback
+.
+Framework_ConstraintTest::testConstraintCallbackFailure
+.
+Framework_ConstraintTest::testConstraintCallbackInvalidFunctionArgument
+.
+Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithEmptyArray
+.
+Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithBadArray
+.
+Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithObject
+.
+Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithClassname
+.
+Framework_ConstraintTest::testConstraintLessThanOrEqual2
+.
+Framework_ConstraintTest::testConstraintNotLessThanOrEqual
+.
+Framework_ConstraintTest::testConstraintNotLessThanOrEqual2
+.
+Framework_ConstraintTest::testConstraintClassHasAttribute
+.
+Framework_ConstraintTest::testConstraintClassHasAttribute2
+.
+Framework_ConstraintTest::testConstraintClassNotHasAttribute
+.
+Framework_ConstraintTest::testConstraintClassNotHasAttribute2
+.
+Framework_ConstraintTest::testConstraintClassHasStaticAttribute
+.
+Framework_ConstraintTest::testConstraintClassHasStaticAttribute2
+.
+Framework_ConstraintTest::testConstraintClassNotHasStaticAttribute
+.
+Framework_ConstraintTest::testConstraintClassNotHasStaticAttribute2
+.
+Framework_ConstraintTest::testConstraintObjectHasAttribute
+.
+Framework_ConstraintTest::testConstraintObjectHasAttribute2
+.
+Framework_ConstraintTest::testConstraintObjectNotHasAttribute
+.
+Framework_ConstraintTest::testConstraintObjectNotHasAttribute2
+.
+Framework_ConstraintTest::testConstraintPCREMatch
+.
+Framework_ConstraintTest::testConstraintPCREMatch2
+.
+Framework_ConstraintTest::testConstraintPCRENotMatch
+.
+Framework_ConstraintTest::testConstraintPCRENotMatch2
+.
+Framework_ConstraintTest::testConstraintStringMatches
+.
+Framework_ConstraintTest::testConstraintStringMatches2
+.
+Framework_ConstraintTest::testConstraintStringMatches3
+.
+Framework_ConstraintTest::testConstraintStringMatches4
+.
+Framework_ConstraintTest::testConstraintStringMatches5
+.
+Framework_ConstraintTest::testConstraintStringMatches6
+.
+Framework_ConstraintTest::testConstraintStringStartsWith
+.
+Framework_ConstraintTest::testConstraintStringStartsWith2
+.
+Framework_ConstraintTest::testConstraintStringStartsNotWith
+.
+Framework_ConstraintTest::testConstraintStringStartsNotWith2
+.
+Framework_ConstraintTest::testConstraintStringContains
+.
+Framework_ConstraintTest::testConstraintStringContains2
+.
+Framework_ConstraintTest::testConstraintStringNotContains
+.
+Framework_ConstraintTest::testConstraintStringNotContains2
+.
+Framework_ConstraintTest::testConstraintStringEndsWith
+.
+Framework_ConstraintTest::testConstraintStringEndsWith2
+.
+Framework_ConstraintTest::testConstraintStringEndsNotWith
+.
+Framework_ConstraintTest::testConstraintStringEndsNotWith2
+.
+Framework_ConstraintTest::testConstraintArrayContains
+.
+Framework_ConstraintTest::testConstraintArrayContains2
+.
+Framework_ConstraintTest::testConstraintArrayNotContains
+.
+Framework_ConstraintTest::testConstraintArrayNotContains2
+.
+Framework_ConstraintTest::testConstraintSplObjectStorageContains
+.
+Framework_ConstraintTest::testConstraintSplObjectStorageContains2
+.
+Framework_ConstraintTest::testAttributeEqualTo
+.
+Framework_ConstraintTest::testAttributeEqualTo2
+.
+Framework_ConstraintTest::testAttributeNotEqualTo
+.
+Framework_ConstraintTest::testAttributeNotEqualTo2
+.
+Framework_ConstraintTest::testConstraintIsEmpty
+.
+Framework_ConstraintTest::testConstraintIsEmpty2
+.
+Framework_ConstraintTest::testConstraintCountWithAnArray
+.
+Framework_ConstraintTest::testConstraintCountWithAnIteratorWhichDoesNotImplementCountable
+.
+Framework_ConstraintTest::testConstraintCountWithAnObjectImplementingCountable
+.
+Framework_ConstraintTest::testConstraintCountFailing
+.
+Framework_ConstraintTest::testConstraintNotCountFailing
+.
+Framework_ConstraintTest::testConstraintSameSizeWithAnArray
+.
+Framework_ConstraintTest::testConstraintSameSizeWithAnIteratorWhichDoesNotImplementCountable
+.
+Framework_ConstraintTest::testConstraintSameSizeWithAnObjectImplementingCountable
+.
+Framework_ConstraintTest::testConstraintSameSizeFailing
+.
+Framework_ConstraintTest::testConstraintNotSameSizeFailing
+.
+DependencyFailureTest::testOne
+F
+Issue498Test::shouldBeTrue with data set #0 
+.
+Issue498Test::shouldBeTrue with data set #1 
+.
+ExceptionInAssertPostConditionsTest::testSomething
+E
+Util_TestDox_NamePrettifierTest::testTitleHasSensibleDefaults
+.
+Util_TestDox_NamePrettifierTest::testCaterForUserDefinedSuffix
+.
+Util_TestDox_NamePrettifierTest::testCaterForUserDefinedPrefix
+.
+Util_TestDox_NamePrettifierTest::testTestNameIsConvertedToASentence
+.
+Util_TestDox_NamePrettifierTest::testTestNameIsNotGroupedWhenNotInSequence
+.
+ConcreteTest::testTwo
+.
+ConcreteTest::testOne
+.
+Issue765Test::testDependee
+.
+Util_DiffTest::testComparisonErrorMessage
+.
+Util_DiffTest::testComparisonErrorMessage_toArray
+.
+Util_DiffTest::testComparisonErrorStartSame
+.
+Util_DiffTest::testComparisonErrorStartSame_toArray
+.
+Util_DiffTest::testComparisonErrorEndSame
+.
+Util_DiffTest::testComparisonErrorEndSame_toArray
+.
+Util_DiffTest::testComparisonErrorStartAndEndSame
+.
+Util_DiffTest::testComparisonErrorStartAndEndSame_toArray
+.
+Util_DiffTest::testComparisonErrorStartSameComplete
+.
+Util_DiffTest::testComparisonErrorStartSameComplete_toArray
+.
+Util_DiffTest::testComparisonErrorEndSameComplete
+.
+Util_DiffTest::testComparisonErrorEndSameComplete_toArray
+.
+Util_DiffTest::testComparisonErrorOverlapingMatches
+.
+Util_DiffTest::testComparisonErrorOverlapingMatches_toArray
+.
+Util_DiffTest::testComparisonErrorOverlapingMatches2
+.
+Util_DiffTest::testComparisonErrorOverlapingMatches2_toArray
+.
+ExceptionInTearDownTest::testSomething
+E
 Framework_AssertTest::testFail
 .
 Framework_AssertTest::testAssertSplObjectStorageContainsObject
@@ -1134,674 +1905,31 @@ Framework_AssertTest::testAssertJsonFileNotEqualsJsonFile
 .
 Framework_AssertTest::testAssertJsonFileEqualsJsonFile
 .
-Framework_ComparatorTest::testGetInstance with data set #0 
+Issue322Test::testOne
 .
-Framework_ComparatorTest::testGetInstance with data set #1 
-.
-Framework_ComparatorTest::testGetInstance with data set #2 
-.
-Framework_ComparatorTest::testGetInstance with data set #3 
-.
-Framework_ComparatorTest::testGetInstance with data set #4 
-.
-Framework_ComparatorTest::testGetInstance with data set #5 
-.
-Framework_ComparatorTest::testGetInstance with data set #6 
-.
-Framework_ComparatorTest::testGetInstance with data set #7 
-.
-Framework_ComparatorTest::testGetInstance with data set #8 
-.
-Framework_ComparatorTest::testGetInstance with data set #9 
-.
-Framework_ComparatorTest::testGetInstance with data set #10 
-.
-Framework_ComparatorTest::testGetInstance with data set #11 
-.
-Framework_ComparatorTest::testGetInstance with data set #12 
-.
-Framework_ComparatorTest::testGetInstance with data set #13 
-.
-Framework_ComparatorTest::testGetInstance with data set #14 
-.
-Framework_ComparatorTest::testGetInstance with data set #15 
-.
-Framework_ComparatorTest::testGetInstance with data set #16 
-.
-Framework_ComparatorTest::testGetInstance with data set #17 
-.
-Framework_ComparatorTest::testGetInstance with data set #18 
-.
-Framework_ComparatorTest::testGetInstance with data set #19 
-S
-PHPUnit_Util_Test::getProvidedData
-S
-PHPUnit_Util_Test::getProvidedData
-.
-Framework_ComparatorTest::testGetInstance with data set #20 
-.
-Framework_ComparatorTest::testGetInstance with data set #21 
-.
-Framework_ComparatorTest::testGetInstance with data set #22 
-.
-Framework_ComparatorTest::testGetInstance with data set #23 
-.
-Framework_ComparatorTest::testGetInstance with data set #24 
-.
-Framework_ComparatorTest::testGetInstance with data set #25 
-.
-Framework_ComparatorTest::testGetInstance with data set #26 
-.
-Framework_ComparatorTest::testGetInstance with data set #27 
-.
-Framework_ComparatorTest::testGetInstance with data set #28 
-.
-Framework_ComparatorTest::testGetInstance with data set #29 
-.
-Framework_ComparatorTest::testGetInstance with data set #30 
-.
-Framework_ComparatorTest::testGetInstance with data set #31 
-.
-Framework_ComparatorTest::testGetInstance with data set #32 
-.
-Framework_ComparatorTest::testGetInstance with data set #33 
-.
-Framework_ComparatorTest::testGetInstance with data set #34 
-.
-Framework_ComparatorTest::testGetInstance with data set #35 
-.
-Framework_ComparatorTest::testGetInstance with data set #36 
-.
-Framework_ComparatorTest::testRegister
-.
-Framework_ComparatorTest::testUnregister
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "expected"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "actual"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "default"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_NONE"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_DEPTH"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "prefixed JSON_ERROR_DEPTH"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_STATE_MISMatch"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_CTRL_CHAR"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_SYNTAX"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_UTF8`"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "Invalid error indicator"
-.
-Framework_Constraint_JsonMatchesTest::testEvaluate with data set "valid JSON"
-.
-Framework_Constraint_JsonMatchesTest::testEvaluate with data set "error syntax"
-.
-Framework_Constraint_JsonMatchesTest::testEvaluate with data set "error UTF-8"
-.
-Framework_Constraint_JsonMatchesTest::testEvaluate with data set "invalid JSON in class instantiation"
-.
-Framework_Constraint_JsonMatchesTest::testToString
-.
-Framework_ConstraintTest::testConstraintArrayHasKey
-.
-Framework_ConstraintTest::testConstraintArrayHasKey2
-.
-Framework_ConstraintTest::testConstraintArrayNotHasKey
-.
-Framework_ConstraintTest::testConstraintArrayNotHasKey2
-.
-Framework_ConstraintTest::testConstraintFileExists
-.
-Framework_ConstraintTest::testConstraintFileExists2
-.
-Framework_ConstraintTest::testConstraintFileNotExists
-.
-Framework_ConstraintTest::testConstraintFileNotExists2
-.
-Framework_ConstraintTest::testConstraintGreaterThan
-.
-Framework_ConstraintTest::testConstraintGreaterThan2
-.
-Framework_ConstraintTest::testConstraintNotGreaterThan
-.
-Framework_ConstraintTest::testConstraintNotGreaterThan2
-.
-Framework_ConstraintTest::testConstraintGreaterThanOrEqual
-.
-Framework_ConstraintTest::testConstraintGreaterThanOrEqual2
-.
-Framework_ConstraintTest::testConstraintNotGreaterThanOrEqual
-.
-Framework_ConstraintTest::testConstraintNotGreaterThanOrEqual2
-.
-Framework_ConstraintTest::testConstraintIsAnything
-.
-Framework_ConstraintTest::testConstraintNotIsAnything
-.
-Framework_ConstraintTest::testConstraintIsEqual
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #0 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #1 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #2 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #3 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #4 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #5 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #6 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #7 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #8 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #9 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #10 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #11 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #12 
-.
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #13 
-F
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #14 
-.
-Framework_ConstraintTest::testConstraintIsNotEqual
-.
-Framework_ConstraintTest::testConstraintIsNotEqual2
-.
-Framework_ConstraintTest::testConstraintIsIdentical
-.
-Framework_ConstraintTest::testConstraintIsIdentical2
-.
-Framework_ConstraintTest::testConstraintIsIdentical3
-.
-Framework_ConstraintTest::testConstraintIsNotIdentical
-.
-Framework_ConstraintTest::testConstraintIsNotIdentical2
-.
-Framework_ConstraintTest::testConstraintIsNotIdentical3
-.
-Framework_ConstraintTest::testConstraintIsInstanceOf
-.
-Framework_ConstraintTest::testConstraintIsInstanceOf2
-.
-Framework_ConstraintTest::testConstraintIsNotInstanceOf
-.
-Framework_ConstraintTest::testConstraintIsNotInstanceOf2
-.
-Framework_ConstraintTest::testConstraintIsType
-.
-Framework_ConstraintTest::testConstraintIsType2
-.
-Framework_ConstraintTest::testConstraintIsNotType
-.
-Framework_ConstraintTest::testConstraintIsNotType2
-.
-Framework_ConstraintTest::testConstraintIsNull
-.
-Framework_ConstraintTest::testConstraintIsNull2
-.
-Framework_ConstraintTest::testConstraintIsNotNull
-.
-Framework_ConstraintTest::testConstraintIsNotNull2
-.
-Framework_ConstraintTest::testConstraintLessThan
-.
-Framework_ConstraintTest::testConstraintLessThan2
-.
-Framework_ConstraintTest::testConstraintNotLessThan
-.
-Framework_ConstraintTest::testConstraintNotLessThan2
-.
-Framework_ConstraintTest::testConstraintLessThanOrEqual
-.
-Framework_ConstraintTest::testConstraintCallback
-.
-Framework_ConstraintTest::testConstraintCallbackFailure
-.
-Framework_ConstraintTest::testConstraintCallbackInvalidFunctionArgument
-.
-Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithEmptyArray
-.
-Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithBadArray
-.
-Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithObject
-.
-Framework_ConstraintTest::testConstraintCallbackInvalidArrayArgumentWithClassname
-.
-Framework_ConstraintTest::testConstraintLessThanOrEqual2
-.
-Framework_ConstraintTest::testConstraintNotLessThanOrEqual
-.
-Framework_ConstraintTest::testConstraintNotLessThanOrEqual2
-.
-Framework_ConstraintTest::testConstraintClassHasAttribute
-.
-Framework_ConstraintTest::testConstraintClassHasAttribute2
-.
-Framework_ConstraintTest::testConstraintClassNotHasAttribute
-.
-Framework_ConstraintTest::testConstraintClassNotHasAttribute2
-.
-Framework_ConstraintTest::testConstraintClassHasStaticAttribute
-.
-Framework_ConstraintTest::testConstraintClassHasStaticAttribute2
-.
-Framework_ConstraintTest::testConstraintClassNotHasStaticAttribute
-.
-Framework_ConstraintTest::testConstraintClassNotHasStaticAttribute2
-.
-Framework_ConstraintTest::testConstraintObjectHasAttribute
-.
-Framework_ConstraintTest::testConstraintObjectHasAttribute2
-.
-Framework_ConstraintTest::testConstraintObjectNotHasAttribute
-.
-Framework_ConstraintTest::testConstraintObjectNotHasAttribute2
-.
-Framework_ConstraintTest::testConstraintPCREMatch
-.
-Framework_ConstraintTest::testConstraintPCREMatch2
-.
-Framework_ConstraintTest::testConstraintPCRENotMatch
-.
-Framework_ConstraintTest::testConstraintPCRENotMatch2
-.
-Framework_ConstraintTest::testConstraintStringMatches
-.
-Framework_ConstraintTest::testConstraintStringMatches2
-.
-Framework_ConstraintTest::testConstraintStringMatches3
-.
-Framework_ConstraintTest::testConstraintStringMatches4
-.
-Framework_ConstraintTest::testConstraintStringMatches5
-.
-Framework_ConstraintTest::testConstraintStringMatches6
-.
-Framework_ConstraintTest::testConstraintStringStartsWith
-.
-Framework_ConstraintTest::testConstraintStringStartsWith2
-.
-Framework_ConstraintTest::testConstraintStringStartsNotWith
-.
-Framework_ConstraintTest::testConstraintStringStartsNotWith2
-.
-Framework_ConstraintTest::testConstraintStringContains
-.
-Framework_ConstraintTest::testConstraintStringContains2
-.
-Framework_ConstraintTest::testConstraintStringNotContains
-.
-Framework_ConstraintTest::testConstraintStringNotContains2
-.
-Framework_ConstraintTest::testConstraintStringEndsWith
-.
-Framework_ConstraintTest::testConstraintStringEndsWith2
-.
-Framework_ConstraintTest::testConstraintStringEndsNotWith
-.
-Framework_ConstraintTest::testConstraintStringEndsNotWith2
-.
-Framework_ConstraintTest::testConstraintArrayContains
-.
-Framework_ConstraintTest::testConstraintArrayContains2
-.
-Framework_ConstraintTest::testConstraintArrayNotContains
-.
-Framework_ConstraintTest::testConstraintArrayNotContains2
-.
-Framework_ConstraintTest::testConstraintSplObjectStorageContains
-.
-Framework_ConstraintTest::testConstraintSplObjectStorageContains2
-.
-Framework_ConstraintTest::testAttributeEqualTo
-.
-Framework_ConstraintTest::testAttributeEqualTo2
-.
-Framework_ConstraintTest::testAttributeNotEqualTo
-.
-Framework_ConstraintTest::testAttributeNotEqualTo2
-.
-Framework_ConstraintTest::testConstraintIsEmpty
-.
-Framework_ConstraintTest::testConstraintIsEmpty2
-.
-Framework_ConstraintTest::testConstraintCountWithAnArray
-.
-Framework_ConstraintTest::testConstraintCountWithAnIteratorWhichDoesNotImplementCountable
-.
-Framework_ConstraintTest::testConstraintCountWithAnObjectImplementingCountable
-.
-Framework_ConstraintTest::testConstraintCountFailing
-.
-Framework_ConstraintTest::testConstraintNotCountFailing
-.
-Framework_ConstraintTest::testConstraintSameSizeWithAnArray
-.
-Framework_ConstraintTest::testConstraintSameSizeWithAnIteratorWhichDoesNotImplementCountable
-.
-Framework_ConstraintTest::testConstraintSameSizeWithAnObjectImplementingCountable
-.
-Framework_ConstraintTest::testConstraintSameSizeFailing
-.
-Framework_ConstraintTest::testConstraintNotSameSizeFailing
-.
-Framework_SuiteTest::testAddTestSuite
-.
-Framework_SuiteTest::testInheritedTests
-.
-Framework_SuiteTest::testNoTestCases
-.
-Framework_SuiteTest::testNoTestCaseClass
-.
-Framework_SuiteTest::testNotExistingTestCase
-.
-Framework_SuiteTest::testNotPublicTestCase
-.
-Framework_SuiteTest::testNotVoidTestCase
-.
-Framework_SuiteTest::testOneTestCase
-.
-Framework_SuiteTest::testShadowedTests
-.
-Framework_TestCaseTest::testCaseToString
-.
-Framework_TestCaseTest::testSuccess
-.
-Framework_TestCaseTest::testFailure
-.
-Framework_TestCaseTest::testError
-.
-Framework_TestCaseTest::testExceptionInSetUp
-.
-Framework_TestCaseTest::testExceptionInAssertPreConditions
-.
-Framework_TestCaseTest::testExceptionInTest
-.
-Framework_TestCaseTest::testExceptionInAssertPostConditions
-.
-Framework_TestCaseTest::testExceptionInTearDown
-.
-Framework_TestCaseTest::testNoArgTestCasePasses
-.
-Framework_TestCaseTest::testWasRun
-.
-Framework_TestCaseTest::testException
-.
-Framework_TestCaseTest::testNoException
-.
-Framework_TestCaseTest::testWrongException
-.
-Framework_TestCaseTest::testGlobalsBackupPre
-.
-Framework_TestCaseTest::testGlobalsBackupPost
-.
-Framework_TestCaseTest::testStaticAttributesBackupPre
-.
-Framework_TestCaseTest::testStaticAttributesBackupPost
-F
-Framework_TestCaseTest::testExpectOutputStringFooActualFoo
-.
-Framework_TestCaseTest::testExpectOutputStringFooActualBar
-.
-Framework_TestCaseTest::testExpectOutputRegexFooActualFoo
-.
-Framework_TestCaseTest::testExpectOutputRegexFooActualBar
-.
-Framework_TestCaseTest::testSkipsIfRequiresHigherVersionOfPHPUnit
-.
-Framework_TestCaseTest::testSkipsIfRequiresHigherVersionOfPHP
-.
-Framework_TestCaseTest::testSkipsIfRequiresNonExistingFunction
-.
-Framework_TestCaseTest::testSkipsIfRequiresNonExistingExtension
-.
-Framework_TestCaseTest::testSkipsProvidesMessagesForAllSkippingReasons
-.
-Framework_TestCaseTest::testRequiringAnExistingFunctionDoesNotSkip
-.
-Framework_TestCaseTest::testRequiringAnExistingExtensionDoesNotSkip
-.
-Framework_TestCaseTest::testCurrentWorkingDirectoryIsRestored
-.
-Framework_TestFailureTest::testToString
-.
-Framework_TestImplementorTest::testSuccessfulRun
-.
-Framework_TestListenerTest::testError
-.
-Framework_TestListenerTest::testFailure
-.
-Framework_TestListenerTest::testStartStop
-.
-Extensions_RepeatedTestTest::testRepeatedOnce
-.
-Extensions_RepeatedTestTest::testRepeatedMoreThanOnce
-.
-Extensions_RepeatedTestTest::testRepeatedZero
-.
-Extensions_RepeatedTestTest::testRepeatedNegative
-.
-Runner_BaseTestRunnerTest::testInvokeNonStaticSuite
+Issue322Test::testTwo
 .
 Util_ClassTest::testGetObjectAttributeCanHandleDynamicVariables
 E
-Util_ConfigurationTest::testExceptionIsThrownForNotExistingConfigurationFile
+BankAccountTest::testBalanceIsInitiallyZero
 .
-Util_ConfigurationTest::testFilterConfigurationIsReadCorrectly
+BankAccountTest::testBalanceCannotBecomeNegative
 .
-Util_ConfigurationTest::testGroupConfigurationIsReadCorrectly
+BankAccountTest::testBalanceCannotBecomeNegative2
 .
-Util_ConfigurationTest::testListenerConfigurationIsReadCorrectly
+TemplateMethodsTest::setUpBeforeClass
+S
+TemplateMethodsTest::setUp
+S
+TemplateMethodsTest::onNotSuccessfulTest
+F
+TemplateMethodsTest::assertPreConditions
+F
+OneTestCase::testCase
 .
-Util_ConfigurationTest::testLoggingConfigurationIsReadCorrectly
+DependencySuccessTest::testOne
 .
-Util_ConfigurationTest::testPHPConfigurationIsReadCorrectly
+DependencySuccessTest::testTwo
 .
-Util_ConfigurationTest::testPHPConfigurationIsHandledCorrectly
+DependencySuccessTest::testThree
 .
-Util_ConfigurationTest::testPHPUnitConfigurationIsReadCorrectly
-.
-Util_ConfigurationTest::testSeleniumBrowserConfigurationIsReadCorrectly
-.
-Util_ConfigurationTest::testXincludeInConfiguration
-.
-Util_DiffTest::testComparisonErrorMessage
-.
-Util_DiffTest::testComparisonErrorMessage_toArray
-.
-Util_DiffTest::testComparisonErrorStartSame
-.
-Util_DiffTest::testComparisonErrorStartSame_toArray
-.
-Util_DiffTest::testComparisonErrorEndSame
-.
-Util_DiffTest::testComparisonErrorEndSame_toArray
-.
-Util_DiffTest::testComparisonErrorStartAndEndSame
-.
-Util_DiffTest::testComparisonErrorStartAndEndSame_toArray
-.
-Util_DiffTest::testComparisonErrorStartSameComplete
-.
-Util_DiffTest::testComparisonErrorStartSameComplete_toArray
-.
-Util_DiffTest::testComparisonErrorEndSameComplete
-.
-Util_DiffTest::testComparisonErrorEndSameComplete_toArray
-.
-Util_DiffTest::testComparisonErrorOverlapingMatches
-.
-Util_DiffTest::testComparisonErrorOverlapingMatches_toArray
-.
-Util_DiffTest::testComparisonErrorOverlapingMatches2
-.
-Util_DiffTest::testComparisonErrorOverlapingMatches2_toArray
-.
-Util_TestDox_NamePrettifierTest::testTitleHasSensibleDefaults
-.
-Util_TestDox_NamePrettifierTest::testCaterForUserDefinedSuffix
-.
-Util_TestDox_NamePrettifierTest::testCaterForUserDefinedPrefix
-.
-Util_TestDox_NamePrettifierTest::testTestNameIsConvertedToASentence
-.
-Util_TestDox_NamePrettifierTest::testTestNameIsNotGroupedWhenNotInSequence
-.
-Util_TestTest::testGetExpectedException
-.
-Util_TestTest::testGetRequirements with data set #0 
-.
-Util_TestTest::testGetRequirements with data set #1 
-.
-Util_TestTest::testGetRequirements with data set #2 
-.
-Util_TestTest::testGetRequirements with data set #3 
-.
-Util_TestTest::testGetRequirements with data set #4 
-.
-Util_TestTest::testGetRequirements with data set #5 
-.
-Util_TestTest::testGetRequirements with data set #6 
-.
-Util_TestTest::testGetRequirements with data set #7 
-.
-Util_TestTest::testGetRequirements with data set #8 
-.
-Util_TestTest::testGetRequirements with data set #9 
-.
-Util_TestTest::testGetRequirements with data set #10 
-.
-Util_TestTest::testGetRequirementsMergesClassAndMethodDocBlocks
-.
-Util_TestTest::testGetProvidedDataRegEx
-.
-Util_TestTest::testParseAnnotation
-.
-Util_TestTest::testParseAnnotationThatIsOnlyOneLine
-.
-Util_TypeTest::testExport with data set #0 
-.
-Util_TypeTest::testExport with data set #1 
-.
-Util_TypeTest::testExport with data set #2 
-.
-Util_TypeTest::testExport with data set #3 
-.
-Util_TypeTest::testExport with data set #4 
-.
-Util_TypeTest::testExport with data set #5 
-.
-Util_TypeTest::testExport with data set #6 
-.
-Util_TypeTest::testExport with data set #7 
-.
-Util_TypeTest::testExport with data set #8 
-.
-Util_TypeTest::testExport with data set #9 
-.
-Util_TypeTest::testExport with data set #10 
-.
-Util_TypeTest::testExport with data set #11 
-.
-Util_TypeTest::testExport with data set #12 
-.
-Util_TypeTest::testExport with data set #13 
-.
-Util_TypeTest::testExport with data set #14 
-.
-Util_TypeTest::testShortenedExport with data set #0 
-.
-Util_TypeTest::testShortenedExport with data set #1 
-.
-Util_TypeTest::testShortenedExport with data set #2 
-.
-Util_TypeTest::testShortenedExport with data set #3 
-.
-Util_TypeTest::testShortenedExport with data set #4 
-.
-Util_TypeTest::testShortenedExport with data set #5 
-.
-Util_TypeTest::testShortenedExport with data set #6 
-.
-Util_TypeTest::testShortenedExport with data set #7 
-.
-Util_TypeTest::testShortenedExport with data set #8 
-.
-Util_TypeTest::testShortenedExport with data set #9 
-.
-Util_TypeTest::testShortenedExport with data set #10 
-.
-Util_TypeTest::testNonBinaryStringExport with data set #0 
-.
-Util_TypeTest::testNonBinaryStringExport with data set #1 
-.
-Util_TypeTest::testNonBinaryStringExport with data set #2 
-.
-Util_XMLTest::testAssertValidKeysValidKeys
-.
-Util_XMLTest::testAssertValidKeysValidKeysEmpty
-.
-Util_XMLTest::testAssertValidKeysDefaultValuesA
-.
-Util_XMLTest::testAssertValidKeysDefaultValuesB
-.
-Util_XMLTest::testAssertValidKeysInvalidKey
-.
-Util_XMLTest::testAssertValidKeysInvalidKeys
-.
-Util_XMLTest::testConvertAssertSelect
-.
-Util_XMLTest::testConvertAssertSelectElt
-.
-Util_XMLTest::testConvertAssertClass
-.
-Util_XMLTest::testConvertAssertId
-.
-Util_XMLTest::testConvertAssertAttribute
-.
-Util_XMLTest::testConvertAssertAttributeSpaces
-.
-Util_XMLTest::testConvertAssertAttributeMultipleSpaces
-.
-Util_XMLTest::testConvertAssertSelectEltClass
-.
-Util_XMLTest::testConvertAssertSelectEltId
-.
-Util_XMLTest::testConvertAssertSelectEltAttrEqual
-.
-Util_XMLTest::testConvertAssertSelectEltMultiAttrEqual
-.
-Util_XMLTest::testConvertAssertSelectEltAttrHasOne
-.
-Util_XMLTest::testConvertAssertSelectEltAttrContains
-.
-Util_XMLTest::testConvertAssertSelectEltChild
-.
-Util_XMLTest::testConvertAssertSelectEltDescendant
-.
-Util_XMLTest::testConvertAssertSelectContent
-.
-Util_XMLTest::testConvertAssertSelectTrue
-.
-Util_XMLTest::testConvertAssertSelectFalse
-.
-Util_XMLTest::testConvertAssertNumber
-.
-Util_XMLTest::testConvertAssertRange
-.
-Util_XMLTest::testPrepareStringEscapesChars
-.
-Tests: 960, Assertions: 1545, Failures: 48, Errors: 3.

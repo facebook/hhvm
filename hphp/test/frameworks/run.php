@@ -61,13 +61,6 @@
 $FBCODE_ROOT = __DIR__.'/../../..';
 include_once $FBCODE_ROOT.'/hphp/tools/command_line_lib.php';
 
-type Result = int;
-class TestResult {
-  const Result FATAL = 10;
-  const Result ERRORS = 11;
-  const Result CLEAN = 12;
-}
-
 type Color = string;
 class Colors {
   const Color GREEN = "\033[1;32m";
@@ -149,7 +142,7 @@ class PHPUnitPatterns {
   "/[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\"|#)[^\"|^\(|^\n]+(\")?)?/";
 
   static string $pear_test_name_pattern =
- "/Starting test '([\-_a-zA-Z0-9\/]*\.phpt)/";
+ "/[\-_a-zA-Z0-9\/]*\.phpt/";
 
   // Matches:
   //    E
@@ -171,7 +164,7 @@ class PHPUnitPatterns {
   static string $stop_parsing_pattern =
           "/^Time: \d+(\.\d+)? (seconds|ms|minutes|hours), Memory: \d+(\.\d+)/";
 
-  static string $tests_ok_pattern = "/OK \(\d+ tests, \d+ assertions\)/";
+  static string $tests_ok_pattern = "/OK \(\d+ test[s]?, \d+ assertion[s]?\)/";
   static string $tests_failure_pattern = "/Tests: \d+, Assertions: \d+.*[.]/";
 
   static string $header_pattern =
@@ -180,6 +173,8 @@ class PHPUnitPatterns {
   static string $config_file_pattern = "/Configuration read from/";
 
   static string $xdebug_pattern = "/The Xdebug extension is not loaded./";
+
+  static string $test_file_pattern = "/.*\.phpt|.*Test\.php|.*test\.php/";
 }
 
 class Frameworks {
@@ -229,57 +224,94 @@ class Frameworks {
             'install_root' => __DIR__."/frameworks/assetic",
             'git_path' => "https://github.com/kriswallsmith/assetic.git",
             'git_commit' => "e0646fa52937c4e5ce61ce089ada28c509b01b40",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/assetic/tests/Assetic/Test",
+              },
           },
         'paris' =>
           Map {
             'install_root' => __DIR__."/frameworks/paris",
             'git_path' => "https://github.com/j4mie/paris.git",
             'git_commit' => "b60d0857d10dec757427b336c427c1f13b6a5e48",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/paris/test",
+              },
           },
         'idiorm' =>
           Map {
             'install_root' => __DIR__."/frameworks/idiorm",
             'git_path' => "https://github.com/j4mie/idiorm.git",
             'git_commit' => "3be516b440734811b58bb9d0b458a4109b49af71",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/idiorm/test",
+              },
           },
         'symfony' =>
           Map {
             'install_root' => __DIR__."/frameworks/symfony",
             'git_path' => "https://github.com/symfony/symfony.git",
             'git_commit' => "98c0d38a440e91adeb0ac12928174046596cd8e1",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/symfony/src/Symfony/Bridge/*/Tests",
+                __DIR__."/frameworks/symfony/src/Symfony/Component/*/Tests/",
+                __DIR__."/frameworks/symfony/src/Symfony/Component/*/*/Tests/",
+              },
           },
         'codeigniter' =>
           Map {
             'install_root' => __DIR__."/frameworks/CodeIgniter",
             'git_path' => "https://github.com/EllisLab/CodeIgniter.git",
             'git_commit' => "57ba100129c2807153d88dc4e1d423f6e6c8a9a6",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/CodeIgniter/tests/codeigniter/core",
+                __DIR__."/frameworks/CodeIgniter/tests/codeigniter/helpers",
+                __DIR__."/frameworks/CodeIgniter/tests/codeigniter/libraries",
+              },
           },
         'laravel' =>
           Map {
             'install_root' => __DIR__."/frameworks/laravel",
             'git_path' => "https://github.com/laravel/framework.git",
             'git_commit' => "6ea8d8b5b3c921e9fe02bfafa44d2601d206ed6e",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/laravel/tests",
+              },
           },
         'zf2' =>
           Map {
             'install_root' => __DIR__."/frameworks/zf2",
             'git_path' => "https://github.com/zendframework/zf2.git",
             'git_commit' => "3bd643acb98a5f6a9e5abd45785171f6685b4a3c",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/zf2/tests/ZendTest",
+              },
           },
         'yii' =>
           Map {
             'install_root' => __DIR__."/frameworks/yii",
             'git_path' => "https://github.com/yiisoft/yii.git",
             'git_commit' => "d36b1f58ded2deacd4c5562c5205871db76bde5d",
-            'test_path' => __DIR__."/frameworks/yii/tests",
-            'test_run_command' => get_hhvm_build()." ".__DIR__.
-                                  "/vendor/bin/phpunit --debug .",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/yii/tests",
+              },
           },
         'slim' =>
           Map {
             'install_root' => __DIR__."/frameworks/Slim",
             'git_path' => "https://github.com/codeguy/Slim.git",
             'git_commit' => "2e540cc392644b9b5cdcc57e5576db5a92ca2149",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/Slim/tests",
+              },
           },
         /*'wordpress' =>
           Map {
@@ -293,12 +325,20 @@ class Frameworks {
             'install_root' => __DIR__."/frameworks/composer",
             'git_path' => "https://github.com/composer/composer.git",
             'git_commit' => "7defc95e4b9eded1156386b269a9d7d28fa73710",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/composer/tests/Composer",
+              },
           },
         'doctrine2' =>
           Map {
             'install_root' => __DIR__."/frameworks/doctrine2",
             'git_path' => "https://github.com/doctrine/doctrine2.git",
             'git_commit' => "bd7c7ebaf353f038fae2f828802ecda823190759",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/doctrine2/tests/Doctrine/Tests/ORM",
+              },
             'pull_requests' =>
               Vector {
                 Map {
@@ -315,12 +355,20 @@ class Frameworks {
             'install_root' => __DIR__."/frameworks/Twig",
             'git_path' => "https://github.com/fabpot/Twig.git",
             'git_commit' => "d827c601e3afea6535fede5e39c9f91c12fc2e66",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/Twig/test/Twig",
+              },
           },
         'joomla' =>
           Map {
             'install_root' => __DIR__."/frameworks/joomla-framework",
             'git_path' => "https://github.com/joomla/joomla-framework.git",
             'git_commit' => "4669cd3b123e768f55545acb284bee666ce778c4",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/joomla-framework/src/Joomla/*/Tests",
+              },
           },
         'magento2' =>
           Map {
@@ -328,18 +376,30 @@ class Frameworks {
             'git_path' => "https://github.com/magento/magento2.git",
             'git_commit' => "a15ecb31976feb4ecb62f85257ff6b606fbdbc00",
             'test_path' => __DIR__."/frameworks/magento2/dev/tests/unit",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/magento2/dev/tests/unit/testsuite",
+              },
           },
         'phpmyadmin' =>
           Map {
             'install_root' => __DIR__."/frameworks/phpmyadmin",
             'git_path' => "https://github.com/phpmyadmin/phpmyadmin.git",
             'git_commit' => "6706fc1f9a7e8893cbe2672e9f26b30b3c49da52",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/phpmyadmin/test",
+              },
           },
         'phpbb3' =>
           Map {
             'install_root' => __DIR__."/frameworks/phpbb3",
             'git_path' => "https://github.com/phpbb/phpbb3.git",
             'git_commit' => "80b21e8049a138d07553288029abf66700da9a5c",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/phpbb3/tests",
+              },
           },
         'pear' =>
           Map {
@@ -348,7 +408,11 @@ class Frameworks {
             'git_commit' => "9efe6005fd7a16c56773248d6878deec93481d39",
             'test_path' => __DIR__."/frameworks/pear-core",
             'test_run_command' => get_hhvm_build()." ".__DIR__.
-                                  "/vendor/bin/phpunit --debug tests",
+                                  "/vendor/bin/phpunit --debug",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/pear-core/tests",
+              },
             'pull_requests' =>
               Vector {
                 Map {
@@ -369,6 +433,10 @@ class Frameworks {
             'test_path' => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
             'test_run_command' => get_hhvm_build()." phpunit.php --debug ".
                                   "--exclude-group=Database",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/mediawiki-core/tests/phpunit",
+              },
           },
         /*'typo3' =>
           Map {
@@ -385,6 +453,13 @@ class Frameworks {
             'install_root' => __DIR__."/frameworks/drupal",
             'git_path' => "https://github.com/drupal/drupal.git",
             'git_commit' => "adaf8355074ba3e142f61e10f1790382db5defb9",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/drupal/tests",
+                __DIR__."/frameworks/drupal/modules/*/tests/*",
+                __DIR__."/frameworks/drupal/../modules/*/tests/*",
+                __DIR__."/frameworks/drupal/../sites/*/modules/*/tests/*",
+              },
           },
         /*
         'twitteroauth' =>
@@ -418,8 +493,11 @@ class Frameworks {
             'test_path' => __DIR__."/frameworks/facebook-php-sdk",
             'test_run_command' => get_hhvm_build()." ".__DIR__.
                                   "/vendor/bin/phpunit --debug ".
-                                  "--bootstrap tests/bootstrap.php ".
-                                  "tests/tests.php",
+                                  "--bootstrap tests/bootstrap.php",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/facebook-php-sdk/tests",
+              },
           },
         'phpunit' =>
           Map {
@@ -429,8 +507,361 @@ class Frameworks {
             'test_path' => __DIR__."/frameworks/phpunit",
             'test_run_command' => get_hhvm_build()." ".__DIR__.
                                   "/frameworks/phpunit/phpunit.php --debug",
+            'test_search_roots' =>
+              Vector {
+                __DIR__."/frameworks/phpunit/Tests/Framework",
+                __DIR__."/frameworks/phpunit/Tests/Extensions",
+                __DIR__."/frameworks/phpunit/Tests/Regression",
+                __DIR__."/frameworks/phpunit/Tests/Runner",
+                __DIR__."/frameworks/phpunit/Tests/TextUI",
+                __DIR__."/frameworks/phpunit/Tests/Util",
+              },
           },
       };
+  }
+}
+
+class Framework {
+  public string $name;
+
+  public string $out_file;
+  public string $expect_file;
+  public string $diff_file;
+  public string $errors_file;
+  public string $fatals_file;
+  public string $stats_file;
+
+  public string $test_path;
+  public string $install_root;
+  public string $test_command;
+
+  public string $test_name_pattern;
+
+  public Vector $test_search_roots;
+
+  public function __construct(string $name) {
+    $this->name = $name;
+
+    $this->set_install_root();
+    $this->set_test_command();
+    $this->set_test_pattern();
+    $this->set_test_search_roots();
+  }
+
+  public function prepare_output_files(string $path): void {
+    if (!(file_exists($path))) {
+      mkdir($path, 0755, true);
+    }
+    $this->out_file = $path."/".$this->name.".out";
+    $this->expect_file = $path."/".$this->name.".expect";
+    $this->diff_file = $path."/".$this->name.".diff";
+    $this->errors_file = $path."/".$this->name.".errors";
+    $this->fatals_file = $path."/".$this->name.".fatals";
+    $this->stats_file = $path."/".$this->name.".stats";
+  }
+
+  public function set_test_search_roots(): void {
+    $this->test_search_roots =
+                  Frameworks::$framework_info[$this->name]['test_search_roots'];
+  }
+  public function set_test_command(): void {
+    if (Frameworks::$framework_info[$this->name]
+        ->contains('test_run_command')) {
+      $this->test_command =
+                   Frameworks::$framework_info[$this->name]['test_run_command'];
+    } else {
+      $this->test_command = get_hhvm_build()." ".__DIR__.
+                            "/vendor/bin/phpunit --debug";
+    }
+    $this->test_command .= " %test%";
+    $this->test_command .= " 2>&1";
+  }
+
+  public function set_test_path() {
+    // 2 possibilities, phpunit.xml and phpunit.xml.dist for configuration
+    $phpunit_config_files = Set {'phpunit.xml', 'phpunit.xml.dist'};
+
+    $test_path = null;
+    if (Frameworks::$framework_info[$this->name]->contains('test_path')) {
+      $this->test_path = Frameworks::$framework_info[$this->name]['test_path'];
+    } else {
+      $phpunit_config_file_loc = null;
+      $phpunit_config_file_loc = find_any_file_recursive($phpunit_config_files,
+                                                         $this->install_root,
+                                                         true);
+      // The test path will be where the phpunit config file is located since
+      // that file contains the test directory name. If no config file, error.
+      $this->test_path = $phpunit_config_file_loc !== null
+                       ? $phpunit_config_file_loc
+                       : error("No phpunit test directory found for ".
+                               $this->name);
+      verbose("Using phpunit xml file in: $phpunit_config_file_loc\n",
+              Options::$verbose);
+    }
+  }
+
+  public function set_test_pattern() {
+    // Test name pattern can be different depending on the framework,
+    // although most follow the default.
+    if ($this->name === "pear") {
+      $this->test_name_pattern = PHPUnitPatterns::$pear_test_name_pattern;
+    } else {
+       $this->test_name_pattern = PHPUnitPatterns::$test_name_pattern;
+    }
+  }
+
+  public function set_install_root() {
+    $this->install_root =
+                       Frameworks::$framework_info[$this->name]['install_root'];
+  }
+
+  // We may have to special case frameworks that don't use
+  // phpunit for their testing (e.g. ThinkUp)
+  public function get_pass_percentage(): mixed {
+    if (filesize($this->stats_file) === 0) {
+      return "Fatal";
+    }
+
+    $num_tests = 0;
+    $num_errors_failures = 0;
+
+    // clean pattern represents: OK (364 tests, 590 assertions)
+    // error pattern represents: Tests: 364, Assertions: 585, Errors: 5.
+    $match = array();
+    $handle = fopen($this->stats_file, "r");
+    if ($handle) {
+      while (($line = fgets($handle)) !== false) {
+        if (preg_match(PHPUnitPatterns::$tests_ok_pattern,
+                       $line, $match) === 1) {
+          // We have ths pattern: OK (364 tests, 590 assertions)
+          // We want the first match of digits
+          preg_match("/[0-9]+(?= )/", $line, $match);
+          $num_tests += (int) $match[0];
+        } else if (preg_match(PHPUnitPatterns::$tests_failure_pattern,
+                       $line, $match) === 1) {
+          // We have this pattern: Tests: 364, Assertions: 585, Errors: 5.
+          // Break out each type into an array
+          $results_arr = str_getcsv($match[0]);
+          // Start with a default map of values for the pattern to make
+          // the parsing for the math simpler.
+          $parsed_results = Map {"Tests" => 0, "Errors" => 0, "Failures" => 0,
+                                 "Skipped" => 0, "Incomplete" => 0 };
+          foreach ($results_arr as $result) {
+            // Strip spaces, then look for the : separator
+            $res_arr = split(":", str_replace(" ", "", $result));
+            // Remove any possible periods.
+            $parsed_results[$res_arr[0]] =
+                          (int)(str_replace(".", "", $res_arr[1]));
+          }
+          // Removed skipped tests
+          $num_tests +=
+            (float)($parsed_results["Tests"] - $parsed_results["Skipped"]);
+          $num_errors_failures +=
+            (float)($parsed_results["Errors"] + $parsed_results["Failures"] +
+            $parsed_results["Incomplete"]);
+        } else if ($line === "FATAL") {
+          // If we fatal on a test or test file, just assume 1 test that has
+          // failed.
+          $num_tests += 1;
+          $num_errors_failures += 1;
+        }
+      }
+    } else {
+      // If we cannot open the stats file, return Fatal
+      return "Fatal";
+    }
+
+    $pct = round(($num_tests - $num_errors_failures) / $num_tests, 4) * 100;
+
+    verbose(strtoupper($this->name).
+            " TEST COMPLETE with pass percentage of: ".$pct."\n\n",
+            Options::$verbose);
+    verbose("Stats File: ".$this->stats_file."\n", Options::$verbose);
+    verbose("..........\n\n", Options::$verbose);
+
+    return $pct;
+  }
+
+  // This function should only be called once for framework (assuming you don't
+  // delete the framework from your repo). The proxy could make things a bit
+  // adventurous, so we will see how this works out after some time to test it
+  // out
+  public function install(): void {
+    verbose("Installing ".$this->name.
+            ". You will see white dots during install.....\n",
+            !Options::$csv_only);
+
+    /*******************************
+     *       GIT CHECKOUT
+     ******************************/
+
+    // Get the source from GitHub
+    verbose("Retrieving framework ".$this->name."....\n", Options::$verbose);
+    $git_command = "git clone";
+    $git_command .= " ".Frameworks::$framework_info[$this->name]['git_path'];
+    $git_command .= " ".$this->install_root;
+    // "frameworks" directory will be created automatically on first git clone
+    // of a framework.
+    $git_ret = run_install($git_command, __DIR__, ProxyInformation::$proxies);
+    if ($git_ret !== 0) {
+      Options::$csv_only ? error()
+                         : error("Could not download framework ".
+                                 $this->name."!\n");
+    }
+    // Checkout out our baseline test code via SHA
+    $git_command = "git checkout";
+    $git_command .= " ".
+                    Frameworks::$framework_info[$this->name]['git_commit'];
+    $git_ret = run_install($git_command, $this->install_root,
+                           ProxyInformation::$proxies);
+    if ($git_ret !== 0) {
+      remove_dir_recursive($this->install_root);
+      Options::$csv_only ? error()
+                         : error("Could not checkout baseline code for ".
+                                 $this->name."! Removing framework!\n");
+    }
+
+    /******************************
+     *       MEDIAWIKI SPECIFIC
+     ******************************/
+    // Need to have an empty LocalSettings.php file for testing to work.
+    if ($this->name === "mediawiki") {
+      verbose("Adding LocalSettings.php file to Mediawiki test dir.\n",
+              Options::$verbose);
+      $touch_command = "touch ".$this->install_root."/LocalSettings.php";
+      exec($touch_command);
+    }
+
+    /*******************************
+     *       FW DEPENDENCIES
+     ******************************/
+
+    $composer_json_path = find_any_file_recursive(Set {"composer.json"},
+                                                  $this->install_root, true);
+    verbose("composer.json found in: $composer_json_path\n", Options::$verbose);
+    // Check to see if composer dependencies are necessary to run the test
+    if ($composer_json_path !== null) {
+      verbose("Retrieving dependencies for framework ".$this->name.".....\n",
+              Options::$verbose);
+      // Use the timeout to avoid curl SlowTimer timeouts and problems
+      $dependencies_install_cmd = get_hhvm_build()." ".
+                                  "-v ResourceLimit.SocketDefaultTimeout=30 ".
+                                  __DIR__.
+                                  "/composer.phar install --dev";
+      $install_ret = run_install($dependencies_install_cmd, $composer_json_path,
+                                 ProxyInformation::$proxies);
+      // If provided the option at the command line, try Zend if we are not
+      // successful with hhvm. For example, I know hhvm had trouble
+      // downloading dependencies for Symfony, but Zend worked.
+      //
+      // FIX: Should we try to install a vanilla zend binary here instead of
+      // relying on user to specify a path? Should we try to determine if zend
+      // is already installed via a $PATH variable?
+      if (Options::$zend_path !== null && $install_ret !== 0) {
+         verbose("HHVM didn't work for downloading dependencies for ".
+                 $this->name." Trying Zend.\n", !Options::$csv_only);
+        $dependencies_install_cmd = Options::$zend_path." ".__DIR__.
+                                          "/composer.phar install --dev";
+        $install_ret = run_install($dependencies_install_cmd,
+                                   $composer_json_path,
+                                   ProxyInformation::$proxies);
+      }
+
+      if ($install_ret !== 0) {
+        // Let's just really make sure the dependencies didn't get installed
+        // by checking the vendor directories to see if they are empty.
+        $fw_vendor_dir = find_any_file_recursive(Set {"vendor"},
+                                                 $this->install_root,
+                                                 false);
+        if ($fw_vendor_dir !== null) {
+          // If there is no content in the directories under vendor, then we
+          // did not get the dependencies.
+          if (any_dir_empty_one_level($fw_vendor_dir)) {
+            remove_dir_recursive($this->install_root);
+            Options::$csv_only ? error()
+                               : error("Couldn't download dependencies for ".
+                                       $this->name." Removing framework. ".
+                                       "You can try the --zend option.\n");
+          }
+        } else { // No vendor directory. Dependencies could not have been gotten
+          remove_dir_recursive($this->install_root);
+          Options::$csv_only ? error()
+                             : error("Couldn't download dependencies for ".
+                                     $this->name." Removing framework. ".
+                                     "You can try the --zend option.\n");
+        }
+      }
+    }
+
+    /*******************************
+     *  OTHER PULL REQUESTS
+     ******************************/
+    if (Frameworks::$framework_info[$this->name]
+                    ->containsKey("pull_requests")) {
+      verbose("Merging some upstream pull requests for ".$this->name."\n",
+              Options::$verbose);
+      $pull_requests = Frameworks::$framework_info[$this->name]
+                                                  ["pull_requests"];
+      foreach ($pull_requests as $pr) {
+        $dir = $pr["pull_dir"];
+        $rep = $pr["pull_repository"];
+        $gc = $pr["git_commit"];
+        $type = $pr["type"];
+        $move_from_dir = null;
+        chdir($dir);
+        $git_command = "";
+        verbose("Pulling code from ".$rep. " and branch/commit ".$gc."\n",
+                Options::$verbose);
+        if ($type === "pull") {
+          $git_command = "git pull --no-edit ".$rep." ".$gc;
+        } else if ($type === "submodulemove") {
+          $git_command = "git submodule add -b ".$gc." ".$rep;
+          $move_from_dir = $pr["move_from_dir"];
+        }
+        verbose("Pull request command: ".$git_command."\n", Options::$verbose);
+        $git_ret = run_install($git_command, $dir,
+                               ProxyInformation::$proxies);
+        if ($git_ret !== 0) {
+          remove_dir_recursive($framework->install_root);
+          Options::$csv_only ? error()
+                             : error("Could not get pull request code for ".
+                                     $this->name."!".
+                                     " Removing framework!\n");
+        }
+        if ($move_from_dir !== null) {
+          $mv_command = "mv ".$move_from_dir."/* ".$dir;
+          verbose("Move command: ".$mv_command."\n", Options::$verbose);
+          exec($mv_command);
+          verbose("After move, removing: ".$move_from_dir."\n",
+                  Options::$verbose);
+          remove_dir_recursive($move_from_dir);
+        }
+        chdir(__DIR__);
+      }
+    }
+  }
+}
+
+class Options {
+  public static int $timeout;
+  public static bool $verbose;
+  public static bool $csv_only;
+  public static bool $csv_header;
+  public static bool $force_redownload;
+  public static bool $generate_new_expect_file;
+  public static string $zend_path;
+
+  public static function init(int $timeout, bool $verbose, bool $csv_only,
+                              bool $csv_header, bool $force_redownload,
+                              bool $generate_new_expect_file,
+                              ?string $zend_path): void {
+    self::$timeout = $timeout;
+    self::$verbose = $verbose;
+    self::$csv_only = $csv_only;
+    self::$csv_header = $csv_header;
+    self::$force_redownload = $force_redownload;
+    self::$generate_new_expect_file = $generate_new_expect_file;
+    self::$zend_path = $zend_path;
   }
 }
 
@@ -440,12 +871,12 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
   // HACK: Yes, this next bit of "removeKey" code is hacky, maybe even clowny.
   // We can fix the command_line_lib.php to maybe make things a bit better.
 
-  // It is possible that the $tests vector came in here with a combiniation
+  // It is possible that the $frameworks vector came in here with a combiniation
   // of command line options (e.g., verbose and timeout) that should be
   // removed before running the tests. Remeber all these option values are
   // already set in $options. They are just artificats of $argv right now.
-  // Although, there is a failsafe when checking if the test exists that would
-  // weed command line opts out too.
+  // Although, there is a failsafe when checking if the framework exists that
+  // would weed command line opts out too.
   $verbose = false;
   $csv_only = false;
   $csv_header = false;
@@ -461,7 +892,7 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
   else if ($options->containsKey('csv')) {
     $csv_only = true;
     // $tests[0] may not even be "summary", but it doesn't matter, we are
-    // just trying to make the count right for $tests
+    // just trying to make the count right for $frameworks
     $frameworks->removeKey(0);
   }
   else if ($options->containsKey('verbose')) {
@@ -474,8 +905,8 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
     $frameworks->removeKey(0);
   }
 
-  verbose("Script running....Be patient as some tests take a while with a ".
-          "debug build of HHVM\n", $verbose);
+  verbose("Script running....Be patient as some frameworks take a while with ".
+          "a debug build of HHVM\n", $verbose);
 
   if (ProxyInformation::is_proxy_required()) {
     verbose("Looks like proxy may be required. Setting to default FB proxy ".
@@ -483,10 +914,10 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
          "if necessary.\n", $verbose);
   }
 
-  $timeout = 60; // seconds to any individual test for any framework
+  $timeout = 60; // seconds to run any individual test for any framework
   if ($options->containsKey('timeout')) {
     $timeout = (int) $options['timeout'];
-    // Remove timeout option and its value from the $tests vector
+    // Remove timeout option and its value from the $frameworks vector
     $frameworks->removeKey(0);
     $frameworks->removeKey(0);
   }
@@ -513,42 +944,42 @@ function prepare(OptionInfoMap $options, Vector $frameworks): void {
     $frameworks->removeKey(0);
   }
 
-  get_unit_testing_infra_dependencies($csv_only);
+  Options::init($timeout, $verbose, $csv_only, $csv_header, $force_redownload,
+                $generate_new_expect_file, $zend_path);
+
+  get_unit_testing_infra_dependencies();
 
   if ($options->containsKey('all')) {
     $frameworks->removeKey(0);
-    // At this point, $tests should be empty if we are in --all mode.
+    // At this point, $frameworks should be empty if we are in --all mode.
     if (!($frameworks->isEmpty())) {
-      error("Do not specify both --all and tests to run at the same time.\n");
+      error("Do not specify both --all and individual frameworks to run at ".
+            "same time.\n");
     }
-    // Running all tests
-    run_test_suites(Frameworks::$framework_info->keys(), $timeout, $verbose,
-              $csv_only, $csv_header, $force_redownload,
-              $generate_new_expect_file, $zend_path);
+    // Test all frameworks
+    test_frameworks(Frameworks::$framework_info->keys());
   } else if ($options->contains('allexcept')) {
     // Run all the frameworks, but the ones we listed.
     $frun = Vector::fromItems(array_diff(Frameworks::$framework_info->keys(),
                               $frameworks));
-    run_test_suites($frun, $timeout, $verbose, $csv_only, $csv_header,
-                    $force_redownload, $generate_new_expect_file, $zend_path);
+    test_frameworks($frun);
   } else if (count($frameworks) > 0) {
     // Frameworks specified at the command line. At this point, $frameworks
-    // should only have tests to be run
-    run_test_suites($frameworks, $timeout, $verbose, $csv_only, $csv_header,
-                    $force_redownload, $generate_new_expect_file, $zend_path);
+    // should only have frameworks to be run
+    test_frameworks($frameworks);
   } else {
-    error("Specify tests to run, use --all or use --allexcept");
+    error("Specify frameworks to run, use --all or use --allexcept");
   }
 }
 
-function get_unit_testing_infra_dependencies(bool $csv_only): void {
+function get_unit_testing_infra_dependencies(): void {
   // Install composer.phar
   if (!(file_exists(__DIR__."/composer.phar"))) {
-    verbose("Getting composer.phar....\n", !$csv_only);
+    verbose("Getting composer.phar....\n", !Options::$csv_only);
     $comp_url = "http://getcomposer.org/composer.phar";
     $get_composer_command = "wget ".$comp_url." -P ".__DIR__." 2>&1";
     $ret = run_install($get_composer_command, __DIR__,
-                       ProxyInformation::$proxies, $csv_only);
+                       ProxyInformation::$proxies);
     if ($ret !== 0) {
       error("Could not download composer. Script stopping\n");
     }
@@ -558,14 +989,14 @@ function get_unit_testing_infra_dependencies(bool $csv_only): void {
   $phpunit_binary = __DIR__."/vendor/bin/phpunit";
   if (!(file_exists($phpunit_binary))) {
     verbose("\nDownloading PHPUnit in order to run tests. There may be an ".
-            "output delay while the download begins.\n", !$csv_only);
+            "output delay while the download begins.\n", !Options::$csv_only);
     // Use the timeout to avoid curl SlowTimer timeouts and problems
     $phpunit_install_command = get_hhvm_build()." ".
                                "-v ResourceLimit.SocketDefaultTimeout=30 ".
                                __DIR__.
                                "/composer.phar install --dev --verbose 2>&1";
     $ret = run_install($phpunit_install_command, __DIR__,
-                       ProxyInformation::$proxies, $csv_only);
+                       ProxyInformation::$proxies);
     if ($ret !== 0) {
       error("Could not install PHPUnit. Script stopping\n");
     }
@@ -573,160 +1004,9 @@ function get_unit_testing_infra_dependencies(bool $csv_only): void {
 
 }
 
-// This function should only be called once for a framework (assuming you don't
-// delete the framework from your repo). The proxy could make things a bit
-// adventurous, so we will see how this works out after some time to test it
-// out
-function install_framework(string $name, bool $verbose, bool $csv_only,
-                           ?string $zend_path): void {
-  verbose("Installing $name. You will see white dots during install.....\n",
-          !$csv_only);
-  $install_root = Frameworks::$framework_info[$name]['install_root'];
-
-  /*******************************
-   *       GIT CHECKOUT
-   ******************************/
-
-  // Get the source from GitHub
-  verbose("Retrieving framework $name.....\n", $verbose);
-  $git_command = "git clone";
-  $git_command .= " ".Frameworks::$framework_info[$name]['git_path'];
-  $git_command .= " ".$install_root;
-  // "frameworks" directory will be created automatically on the first git clone
-  // of a framework.
-  $git_ret = run_install($git_command, __DIR__, ProxyInformation::$proxies,
-                         $csv_only);
-  if ($git_ret !== 0) {
-    $csv_only ? error() : error("Could not download framework $name!\n");
-  }
-  // Checkout out our baseline test code via SHA
-  $git_command = "git checkout";
-  $git_command .= " ".Frameworks::$framework_info[$name]['git_commit'];
-  $git_ret = run_install($git_command, $install_root,
-                         ProxyInformation::$proxies, $csv_only);
-  if ($git_ret !== 0) {
-    remove_dir_recursive($install_root);
-    $csv_only ? error()
-              : error("Could not checkout baseline code for ".$name."!".
-                      " Removing framework!\n");
-  }
-
-  /******************************
-   *       MEDIAWIKI SPECIFIC
-   ******************************/
-  // Need to have an empty LocalSettings.php file for testing to work.
-  if ($name === "mediawiki") {
-    verbose("Adding LocalSettings.php file to Mediawiki test dir.\n", $verbose);
-    $touch_command = "touch ".$install_root."/LocalSettings.php";
-    exec($touch_command);
-  }
-
-  /*******************************
-   *       FW DEPENDENCIES
-   ******************************/
-
-  $composer_json_path = find_any_file_recursive(Set {"composer.json"},
-                                                $install_root, true);
-  verbose("composer.json found in: $composer_json_path\n", $verbose);
-  // Check to see if composer dependencies are necessary to run the test
-  if ($composer_json_path !== null) {
-    verbose("Retrieving dependencies for framework $name......\n", $verbose);
-    // Use the timeout to avoid curl SlowTimer timeouts and problems
-    $dependencies_install_cmd = get_hhvm_build()." ".
-                                "-v ResourceLimit.SocketDefaultTimeout=30 ".
-                                __DIR__.
-                                "/composer.phar install --dev";
-    $install_ret = run_install($dependencies_install_cmd, $composer_json_path,
-                               ProxyInformation::$proxies, $csv_only);
-    // If provided the option at the command line, try Zend if we are not
-    // successful with hhvm. For example, I know hhvm had trouble
-    // downloading dependencies for Symfony, but Zend worked.
-    //
-    // FIX: Should we try to install a vanilla zend binary here instead of
-    // relying on user to specify a path? Should we try to determine if zend
-    // is already installed via a $PATH variable?
-    if ($zend_path !== null && $install_ret !== 0) {
-       verbose("HHVM didn't work for downloading dependencies for $name. ".
-               "Trying Zend.\n", !$csv_only);
-      $dependencies_install_cmd = $zend_path." ".__DIR__.
-                                        "/composer.phar install --dev";
-      $install_ret = run_install($dependencies_install_cmd, $composer_json_path,
-                                 ProxyInformation::$proxies, $csv_only);
-    }
-
-    if ($install_ret !== 0) {
-      // Let's just really make sure the dependencies didn't get installed
-      // by checking the vendor directories to see if they are empty.
-      $fw_vendor_dir = find_any_file_recursive(Set {"vendor"},
-                                               $install_root,
-                                               false);
-      if ($fw_vendor_dir !== null) {
-        // If there is no content in the directories under vendor, then we
-        // did not get the dependencies.
-        if (any_dir_empty_one_level($fw_vendor_dir)) {
-          remove_dir_recursive($install_root);
-          $csv_only ? error()
-                    : error("Couldn't download dependencies for $name!".
-                            " Removing framework. You can try the --zend".
-                            " option.\n");
-        }
-      } else { // No vendor directory. Dependencies could not have been gotten.
-        remove_dir_recursive($install_root);
-        $csv_only ? error()
-                  : error("Couldn't download dependencies for $name!".
-                          " Removing framework. You can try the --zend".
-                          " option.\n");
-      }
-    }
-  }
-
-  /*******************************
-   *  OTHER PULL REQUESTS
-   ******************************/
-  if (Frameworks::$framework_info[$name]->containsKey("pull_requests")) {
-    verbose("Merging some upstream pull requests for ".$name."\n", $verbose);
-    $pull_requests = Frameworks::$framework_info[$name]["pull_requests"];
-    foreach ($pull_requests as $pr) {
-      $dir = $pr["pull_dir"];
-      $rep = $pr["pull_repository"];
-      $gc = $pr["git_commit"];
-      $type = $pr["type"];
-      $move_from_dir = null;
-      chdir($dir);
-      $git_command = "";
-      verbose("Pulling code from ".$rep. " and branch/commit ".$gc."\n",
-              $verbose);
-      if ($type === "pull") {
-        $git_command = "git pull --no-edit ".$rep." ".$gc;
-      } else if ($type === "submodulemove") {
-        $git_command = "git submodule add -b ".$gc." ".$rep;
-        $move_from_dir = $pr["move_from_dir"];
-      }
-      verbose("Pull request command: ".$git_command."\n", $verbose);
-      $git_ret = run_install($git_command, $dir,
-                             ProxyInformation::$proxies, $csv_only);
-      if ($git_ret !== 0) {
-        remove_dir_recursive($install_root);
-        $csv_only ? error()
-                  : error("Could not get pull request code for ".$name."!".
-                          " Removing framework!\n");
-      }
-      if ($move_from_dir !== null) {
-        $mv_command = "mv ".$move_from_dir."/* ".$dir;
-        verbose("Move command: ".$mv_command."\n", $verbose);
-        exec($mv_command);
-        verbose("After move, removing: ".$move_from_dir."\n", $verbose);
-        remove_dir_recursive($move_from_dir);
-      }
-      chdir(__DIR__);
-    }
-  }
-}
-
 // This will run processes that will get the test infra dependencies
 // (e.g. PHPUnit), frameworks and framework dependencies.
-function run_install(string $proc, string $path, ?Map $env,
-                     bool $csv_only): ?int
+function run_install(string $proc, string $path, ?Map $env): ?int
 {
   $descriptorspec = array(
     0 => array("pipe", "r"),
@@ -745,7 +1025,7 @@ function run_install(string $proc, string $path, ?Map $env,
     $start_time = microtime(true);
     while (fgets($pipes[1])) {
       if ((microtime(true) - $start_time) > 1) {
-        verbose(".", !$csv_only);
+        verbose(".", !Options::$csv_only);
         $start_time = microtime(true);
       }
     }
@@ -756,23 +1036,30 @@ function run_install(string $proc, string $path, ?Map $env,
   return null;
 }
 
-function run_test_suites(Vector $frameworks, int $timeout, bool $verbose,
-                         bool $csv_only, bool $csv_header,
-                         bool $force_redownload, bool $generate_new_expect_file,
-                         ?string $zend_path): void {
+function test_frameworks(Vector $frameworks): void {
   $results_root = __DIR__."/results";
-  $temp_summary_file = tempnam("/tmp", "oss-fw-test-summary");
-  $frameworks_to_run = Vector {};
+  $summary_file = tempnam("/tmp", "oss-fw-test-summary");
+  $frameworks_to_test = Vector {};
   foreach ($frameworks as $framework) {
     $name = trim(strtolower($framework));
     if (Frameworks::$framework_info->containsKey($name)) {
-      $frameworks_to_run[] = $name;
+      $framework = new Framework($name);
+      $framework->prepare_output_files($results_root);
+      $frameworks_to_test[] = $framework;
     }
   }
 
-  if (count($frameworks_to_run) > 0) {
-    verbose("Beginning the unit tests.....\n", !$csv_only);
-    $num_threads = min(count($frameworks_to_run), num_cpus() + 1);
+  if (count($frameworks_to_test) > 0) {
+    verbose("Beginning the unit tests.....\n", !Options::$csv_only);
+    $num_threads = min(count($frameworks_to_test), num_cpus() + 1);
+
+    // Create some framework buckets proportional to the number of threads
+    $framework_buckets = array();
+    $i = 0;
+    foreach ($frameworks_to_test as $framework) {
+      $framework_buckets[$i][] = $framework;
+      $i = ($i + 1) % $num_threads;
+    }
 
     $children = Vector {};
     for ($i = 0; $i < $num_threads; $i++) {
@@ -782,10 +1069,9 @@ function run_test_suites(Vector $frameworks, int $timeout, bool $verbose,
       } else if ($pid) {
         $children[] = $pid;
       } else {
-        exit(run_single_test_suite($frameworks_to_run[$i], $temp_summary_file,
-                                   $timeout, $verbose, $csv_only,
-                                   $force_redownload, $generate_new_expect_file,
-                                   $zend_path));
+        foreach ($framework_buckets[$i] as $framework) {
+          exit(test_framework($framework, $summary_file));
+        }
       }
     }
 
@@ -808,7 +1094,7 @@ function run_test_suites(Vector $frameworks, int $timeout, bool $verbose,
         (___)__.|_____
 THUMBSUP
 ."\n";
-     verbose($msg, !$csv_only);
+     verbose($msg, !Options::$csv_only);
     } else {
       $msg = "\nAll tests did not run as expected.\n\n".<<<THUMBSDOWN
         ______
@@ -820,41 +1106,39 @@ THUMBSUP
            (_((
 THUMBSDOWN
 ."\n";
-      verbose($msg, !$csv_only);
+      verbose($msg, !Options::$csv_only);
       // Print the diffs
-      if (!$csv_only) {
-        foreach($frameworks as $fw_name) {
-          $fn = $results_root."/".$fw_name.".diff";
+      if (!Options::$csv_only) {
+        foreach($frameworks_to_test as $framework) {
+          $diff = $framework->diff_file;
           // The file may not exist or the file may not have anything in it
           // since there is no diff (i.e., all tests for that particular
           // framework ran as expected). Either way, don't print anything
           // out for those cases.
-          if (file_exists($fn) && ($contents = file_get_contents($fn)) !== "") {
-            print PHP_EOL."********* ".strtoupper($fw_name).
+          if (file_exists($diff) &&
+             ($contents = file_get_contents($diff)) !== "") {
+            print PHP_EOL."********* ".strtoupper($framework->name).
                   " **********".PHP_EOL;
             print $contents;
-            print "To run tests for ".strtoupper($fw_name).
+            print "To run tests for ".strtoupper($framework->name).
                   " use this command: \n";
-            $dir = Frameworks::$framework_info[$fw_name]->
-                   containsKey("test_path")
-                   ? Frameworks::$framework_info[$fw_name]["test_path"]
-                   : Frameworks::$framework_info[$fw_name]['install_root'];
+            $dir = $framework->test_path;
             $command = "cd ".$dir." && ";
-            $command .= prepare_framework_test_run_command($fw_name, $timeout);
+            $command .= $framework->test_command;
             print $command." [TEST NAME]".PHP_EOL;
           }
         }
       }
     }
 
-    if (file_exists($temp_summary_file)
-        && ($contents = file_get_contents($temp_summary_file)) !== "") {
-      $file_data = file_get_contents($temp_summary_file);
+    if (file_exists($summary_file)
+        && ($contents = file_get_contents($summary_file)) !== "") {
+      $file_data = file_get_contents($summary_file);
       $decoded_results = json_decode($file_data, true);
       ksort($decoded_results);
 
-      if ($csv_only) {
-        if ($csv_header) {
+      if (Options::$csv_only) {
+        if (Options::$csv_header) {
           $print_str = str_pad("date,", 20);
           foreach ($decoded_results as $key => $value) {
             $print_str .= str_pad($key.",", 20);
@@ -865,7 +1149,7 @@ THUMBSDOWN
           $print_str .= PHP_EOL;
           print $print_str;
         }
-        $print_str = str_pad(date("Y-m-d").",", 20);
+        $print_str = str_pad(date("Y/m/d-G:i:s").",", 20);
         foreach ($decoded_results as $key => $value) {
           $print_str .= str_pad($value.",", 20);
         }
@@ -882,81 +1166,65 @@ THUMBSDOWN
         }
       }
     } else {
-      verbose("\nNO SUMMARY INFO AVAILABLE!\n", !$csv_only);
+      verbose("\nNO SUMMARY INFO AVAILABLE!\n", !Options::$csv_only);
     }
   } else {
     error("No frameworks to test!");
   }
 }
 
-function run_single_test_suite(string $fw_name, string $summary_file,
-                               int $timeout, bool $verbose, bool $csv_only,
-                               bool $force_redownload,
-                               bool $generate_new_expect_file,
-                               ?string $zend_path): ?int {
+function test_framework(Framework $framework, string $summary_file): ?int {
+
+  $ret_val = 0;
 
   /***********************************
    *  Make sure we have the framework
    *  installed.
    **********************************/
-  $install_root = Frameworks::$framework_info[$fw_name]['install_root'];
-  $git_head_file = Frameworks::$framework_info[$fw_name]['install_root'].
-                   "/.git/HEAD";
-  if (!(file_exists($install_root))) {
-    install_framework($fw_name, $verbose, $csv_only, $zend_path);
-  } else if ($force_redownload) {
-    verbose("Forced redownloading of $fw_name...", !$csv_only);
-    remove_dir_recursive($install_root);
-    install_framework($fw_name, $verbose, $csv_only, $zend_path);
+  $git_head_file =$framework->install_root."/.git/HEAD";
+  if (!(file_exists($framework->install_root))) {
+    $framework->install();
+  } else if (Options::$force_redownload) {
+    verbose("Forced redownloading of ".$framework->name."...",
+            !Options::$csv_only);
+    remove_dir_recursive($framework->install_root);
+    $framework->install();
   // The commit hash has changed and we need to redownload
   } else if (trim(file_get_contents($git_head_file)) !==
-             Frameworks::$framework_info[$fw_name]['git_commit']) {
+             Frameworks::$framework_info[$framework->name]['git_commit']) {
     verbose("Redownloading $fw_name because git commit has changed...",
-            !$csv_only);
-    remove_dir_recursive($install_root);
-    install_framework($fw_name, $verbose, $csv_only, $zend_path);
+            !Options::$csv_only);
+    remove_dir_recursive($framework->install_root);
+    $framework->install();
   }
 
   /***********************************
    *  Initial preparation
    **********************************/
-  $run_command = prepare_framework_test_run_command($fw_name);
-  $test_path = get_test_path($fw_name, $install_root, $verbose);
 
-  verbose("Running test for $fw_name\n", $verbose);
-  verbose("Command: $run_command\n", $verbose);
-  verbose("Test Path: $test_path\n", $verbose);
-
-  $results_root = __DIR__."/results";
-  if (!(file_exists($results_root))) {
-    mkdir($results_root, 0755, true);
-  }
+  $framework->set_test_path();
+  verbose("Running test suite for ".$framework->name."\n", Options::$verbose);
+  verbose("Test Path: ".$framework->test_path."\n", Options::$verbose);
 
 
-  $results_file = $results_root."/".$fw_name.".out";
-  $expect_file = $results_root."/".$fw_name.".expect";
-  $diff_file = $results_root."/".$fw_name.".diff";
-  $errors_file = $results_root."/".$fw_name.".errors";
+  // Get rid of any old data, except the expect file, of course.
+  unlink($framework->out_file);
+  unlink($framework->diff_file);
+  unlink($framework->errors_file);
+  unlink($framework->stats_file);
+  unlink($framework->fatals_file);
 
-  $pipes = null;
-  $tn_matches = array();
-  $match = null;
-  $line = null;
-  $status = null;
-  $tests_and_results = "";
-  $error_information = "";
-  $diff_information = "";
-  $ret_val = 0;
-  $just_errors = false;
-  $started_tests = false;
-  $final_stats = "";
-  $fatal = false;
 
-  // Test name pattern can be different depending on the framework,
-  // although most follow the default.
-  $test_name_pattern = PHPUnitPatterns::$test_name_pattern;
-  if ($fw_name == "pear") {
-    $test_name_pattern = PHPUnitPatterns::$pear_test_name_pattern;
+  /******************************
+   *       YII SPECIFIC
+   ******************************/
+  if ($framework->name === "yii") {
+    $files = glob($framework->install_root.
+                  "/tests/assets/*/CAssetManagerTest.php");
+    foreach ($files as $file) {
+      verbose("Removing $file\n", Options::$verbose);
+      unlink($file);
+    }
   }
 
   /***********************************
@@ -965,22 +1233,20 @@ function run_single_test_suite(string $fw_name, string $summary_file,
    * file?
    **********************************/
   $compare_tests = null;
-  if (file_exists($expect_file)) {
-    if ($generate_new_expect_file) {
-      unlink($expect_file);
-      verbose("Resetting the expect file for ".$fw_name.". ".
-              "Establishing new baseline with gray dots...\n", !$csv_only);
+  if (file_exists($framework->expect_file)) {
+    if (Options::$generate_new_expect_file) {
+      unlink($framework->expect_file);
+      verbose("Resetting the expect file for ".$framework->name.". ".
+              "Establishing new baseline with gray dots...\n",
+              !Options::$csv_only);
     } else {
       // Color codes would have already been stripped out. Don't need those.
-      $compare_tests = get_fw_tests_to_run(
-        $expect_file,
-        $test_name_pattern,
-        PHPUnitPatterns::$status_code_pattern,
-        PHPUnitPatterns::$stop_parsing_pattern
-      );
-      verbose(Colors::YELLOW . $fw_name . Colors::NONE . ": running. ".
+      $compare_tests = get_comparing_tests($framework,
+                                        PHPUnitPatterns::$status_code_pattern,
+                                        PHPUnitPatterns::$stop_parsing_pattern);
+      verbose(Colors::YELLOW . $framework->name . Colors::NONE . ": running. ".
               "Comparing against ".count($compare_tests)." tests\n",
-              !$csv_only);
+              !Options::$csv_only);
       $run_msg = "Comparing test suite with previous run. ";
       $run_msg .= Colors::GREEN."Green . (dot) ".Colors::NONE;
       $run_msg .= "means test result same as previous. ";
@@ -994,28 +1260,129 @@ function run_single_test_suite(string $fw_name, string $summary_file,
       $run_msg .= "A ".Colors::LIGHTBLUE." light blue F ".Colors::NONE;
       $run_msg .= "means we are having trouble accessing the tests from the ";
       $run_msg .= "expected run and can't get a proper status".PHP_EOL;
-      verbose($run_msg, $verbose);
+      verbose($run_msg, Options::$verbose);
     }
   } else {
-    verbose("First time running test suite for $fw_name. ".
-            "Establishing baseline with gray dots...\n", !$csv_only);
+    verbose("First time running test suite for ".$framework->name.
+            ". Establishing baseline with gray dots...\n", !Options::$csv_only);
   }
 
-  /******************************
-   *       YII SPECIFIC
-   ******************************/
-  if ($fw_name === "yii") {
-    $files = glob($install_root."/tests/assets/*/CAssetManagerTest.php");
-    foreach ($files as $file) {
-      verbose("Removing $file\n", $verbose);
-      unlink($file);
-    }
+  $fw_tests_set = Set {};
+  foreach($framework->test_search_roots as $root) {
+    $fw_tests_set = find_all_files(PHPUnitPatterns::$test_file_pattern,
+                             $framework->test_path,
+                             $framework->test_path."/vendor");
+    $fw_tests_set->addAll(find_all_files_containing_text(
+                    "extends PHPUnit_Framework_TestCase",
+                    $framework->test_path, $framework->test_path."/vendor"));
+    // Namespaced case
+    $fw_tests_set->addAll(find_all_files_containing_text(
+                    "extends \\PHPUnit_Framework_TestCase",
+                    $framework->test_path, $framework->test_path."/vendor"));
+    // Sometimes a test file extends a class that extends PHPUnit_....
+    // Then we have to look at method names.
+    $fw_tests_set->addAll(find_all_files_containing_text(
+                    "public function test",
+                    $framework->test_path, $framework->test_path."/vendor"));
   }
+  // All will be unique at this point given the Set above
+  $fw_tests = $fw_tests_set->toVector();
+
+  verbose("Found ".count($fw_tests)." files that contain tests for ".
+          $framework->name."...\n", !Options::$csv_only);
 
   /*************************************
    * Run the test suite
    ************************************/
-  chdir($test_path);
+  chdir($framework->test_path);
+
+  if (count($fw_tests) > 0) {
+    $num_threads = min(count($fw_tests), num_cpus() + 1);
+
+    // Create some test buckets proportional to the number of threads
+    $test_buckets = array();
+    $i = 0;
+    foreach ($fw_tests as $test) {
+      $test_buckets[$i][] = $test;
+      $i = ($i + 1) % $num_threads;
+    }
+
+    $children = Vector {};
+    for ($i = 0; $i < $num_threads; $i++) {
+      $pid = pcntl_fork();
+      if ($pid === -1) {
+        error('Issues creating threads for tests');
+      } else if ($pid) {
+        $children[] = $pid;
+      } else {
+          exit(run_test_bucket($framework, $test_buckets[$i], $compare_tests));
+      }
+    }
+  }
+
+  $ret_val = 0;
+  $status = -1;
+  foreach($children as $child) {
+    pcntl_waitpid($child, $status);
+    $ret_val = pcntl_wexitstatus($status);
+  }
+
+  /****************************************
+  * Test suite complete. Create results for
+  * the framework that just ran.
+  ****************************************/
+  $pct = $framework->get_pass_percentage();
+  $encoded_result = json_encode(array($framework->name => $pct));
+  if (!(file_exists($summary_file))) {
+    file_put_contents($summary_file, $encoded_result);
+  } else {
+    $file_data = file_get_contents($summary_file);
+    $decoded_results = json_decode($file_data, true);
+    $decoded_results[$framework->name] = $pct;
+    file_put_contents($summary_file, json_encode($decoded_results));
+  }
+
+  // If the first baseline run, make both the same. Otherwise, see if we have
+  // a diff file. If not, then all is good. If not, thumbs down because there
+  // was a difference between what we ran and what we expected.
+  if (!file_exists($framework->expect_file)) {
+    copy($framework->out_file, $framework->expect_file);
+  } else if (filesize($framework->diff_file) > 0) {
+    $ret_val = -1;
+  }
+
+  chdir(__DIR__);
+
+  return $ret_val;
+}
+
+function run_test_bucket(Framework $framework, array $test_bucket,
+                         ?Map $compare_tests): int {
+  $result = 0;
+  foreach($test_bucket as $test) {
+    $result = run_single_test($framework, $test, $compare_tests);
+  }
+  return $result;
+}
+
+function run_single_test(Framework $framework, string $test,
+                         ?Map $compare_tests): int {
+  $ret_val = 0;
+
+  $pipes = null;
+  $tn_matches = array();
+  $match = null;
+  $line = null;
+  $status = null;
+  $test_information = "";
+  $error_information = "";
+  $fatal_information = "";
+  $diff_information = "";
+  $stat_information = "";
+  $just_errors = false;
+  $started_tests = false;
+  $fatal = false;
+  $results = null;
 
   $descriptorspec = array(
     0 => array("pipe", "r"),
@@ -1023,15 +1390,21 @@ function run_single_test_suite(string $fw_name, string $summary_file,
     2 => array("pipe", "w"),
   );
 
+  $test_command = str_replace("%test%", $test,
+                                         $framework->test_command);
+  verbose("Command: ".$test_command."\n", Options::$verbose);
+
   // $_ENV will passed in by default if the environment var is null
-  $process = proc_open($run_command, $descriptorspec, $pipes, $test_path, null);
+  $process = proc_open($test_command, $descriptorspec, $pipes,
+                       $framework->test_path, null);
+
   if (is_resource($process)) {
     fclose($pipes[0]);
     $r = array($pipes[1]);
     $w = null;
     $e = null;
     while (!(feof($pipes[1]))) {
-     if (stream_select($r, $w, $e, $timeout) === false) {
+     if (stream_select($r, $w, $e, Options::$timeout) === false) {
         $error_information .= "TEST TIMEOUT OCCURRED.";
         $error_information .= " Last line read was: ".$line;
         break;
@@ -1064,16 +1437,16 @@ function run_single_test_suite(string $fw_name, string $summary_file,
         // all of them with final stats
         if (preg_match(PHPUnitPatterns::$tests_ok_pattern, $line) === 1 ||
             preg_match(PHPUnitPatterns::$tests_failure_pattern, $line) === 1) {
-          $final_stats = $line;
+          $stat_information = $test.PHP_EOL.$line;
         }
         $error_information .= $line;
         continue;
       }
       if (!$just_errors &&
-          preg_match($test_name_pattern, $line, $tn_matches) === 1) {
+          preg_match($framework->test_name_pattern, $line, $tn_matches) === 1) {
         $started_tests = true;
         $match = $tn_matches[0];
-        $tests_and_results .= $match.PHP_EOL;
+        $test_information .= $match.PHP_EOL;
         do {
           $status = fgets($pipes[1]);
           $status = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
@@ -1082,12 +1455,11 @@ function run_single_test_suite(string $fw_name, string $summary_file,
               strpos($status, "hhvm:") !== false) {
             // We have hit a fatal or some nasty assert. Escape now and try to
             // get the results written.
-            $error_information .= $status;
-            $tests_and_results .= $status;
+            $test_information .= $status.PHP_EOL;
+            $fatal_information .= $match.PHP_EOL.$status.PHP_EOL;
+            $stat_information = "Fatal".PHP_EOL;
             $fatal = true;
             break 2;
-          } else if (strpos($status, "hhvm:") !== false) {
-            $error_information .= $status;
           }
         } while (!feof($pipes[1]) &&
                  preg_match(PHPUnitPatterns::$status_code_pattern,
@@ -1096,33 +1468,33 @@ function run_single_test_suite(string $fw_name, string $summary_file,
         // printed to console (and is only printed in debug mode)
         if ($status === "") {
           $status = "UNKNOWN STATUS";
-          $error_information .= $status;
+          $fatal_information .= $match.PHP_EOL.$status.PHP_EOL;
         } else {
           // In case we had "F 252 / 364 (69 %)" or ".HipHop Warning"
           $status = $status[0];
         }
-        $tests_and_results .= $status.PHP_EOL;
+        $test_information .= $status.PHP_EOL;
         if ($compare_tests !== null && $compare_tests->containsKey($match)) {
           if ($status === $compare_tests[$match]) {
             // FIX: posix_isatty(STDOUT) was always returning false, even though
             // can print in color. Check this out later.
-            verbose(Colors::GREEN.".".Colors::NONE, !$csv_only);
+            verbose(Colors::GREEN.".".Colors::NONE, !Options::$csv_only);
           } else {
             // We are different than we expected
             // Red if we go from pass to something else
             if ($compare_tests[$match] === '.') {
-              verbose(Colors::RED."F".Colors::NONE, !$csv_only);
+              verbose(Colors::RED."F".Colors::NONE, !Options::$csv_only);
             // Green if we go from something else to pass
             } else if ($status === '.') {
-              verbose(Colors::GREEN."F".Colors::NONE, !$csv_only);
+              verbose(Colors::GREEN."F".Colors::NONE, !Options::$csv_only);
             // Blue if we go from something "faily" to something "faily"
             // e.g., E to I or F
             } else {
-              verbose(Colors::BLUE."F".Colors::NONE, !$csv_only);
+              verbose(Colors::BLUE."F".Colors::NONE, !Options::$csv_only);
             }
-            verbose(PHP_EOL."Different status in ".$fw_name." for test ".
-                    $match." was ".$compare_tests[$match]. " and now is ".
-                    $status.PHP_EOL, !$csv_only);
+            verbose(PHP_EOL."Different status in ".$framework->name.
+                    " for test ".$match." was ".$compare_tests[$match].
+                     " and now is ".$status.PHP_EOL, !Options::$csv_only);
             $diff_information .= "----------------------".PHP_EOL;
             $diff_information .= $match.PHP_EOL.PHP_EOL;
             $diff_information .= "EXPECTED: ".$compare_tests[$match].PHP_EOL;
@@ -1135,14 +1507,14 @@ function run_single_test_suite(string $fw_name, string $summary_file,
           // before, but we are having an issue getting to the actual tests
           // (e.g., yii is one test suite that has behaved this way).
           if ($compare_tests !== null) {
-            verbose(Colors::LIGHTBLUE."F".Colors::NONE, !$csv_only);
+            verbose(Colors::LIGHTBLUE."F".Colors::NONE, !Options::$csv_only);
             verbose(PHP_EOL."Different status in ".$fw_name." for test ".
                     $match.". Having problem loading test ".$match.PHP_EOL,
-                    !$csv_only);
+                    !Options::$csv_only);
             $diff_information .= "----------------------".PHP_EOL;
             $diff_information .= "Problem loading: ".$match.PHP_EOL.PHP_EOL;
           } else {
-            verbose(Colors::GRAY.".".Colors::NONE, !$csv_only);
+            verbose(Colors::GRAY.".".Colors::NONE, !Options::$csv_only);
           }
         }
       } else if (!$started_tests) {
@@ -1150,107 +1522,45 @@ function run_single_test_suite(string $fw_name, string $summary_file,
         // found, assume we have error information.
         // If we get here, we have gotten through all the PHPUnit header
         // information, but we haven't started the tests yet.
-        $error_information .= $line;
+        $fatal_information .= $line;
+        $fatal = true;
       }
     }
 
-    // If we get here and haven't started any tests yet, let's assume that
-    // we have fataled and make the results and expect file be that actual
-    // error information.
-    if (!$started_tests) {
-      $tests_and_results .= $error_information;
-      $fatal = true;
-    }
     // Remove final stat line from error string
     if (!$fatal) {
       $error_information = substr($error_information, 0,
                                   strrpos(rtrim($error_information), PHP_EOL));
     }
-    // Add the final stats here that we saved above due to the possibility
-    // of tests outputting stat like strings throughout the one. We only
-    // wanted the last one (the real one) in the output.
-    $tests_and_results .= $final_stats;
 
     fclose($pipes[1]);
     fclose($pipes[2]);
+
     if (proc_close($process) === -1) {
       $ret_val = -1;
     }
 
-    file_put_contents($results_file, $tests_and_results);
-    file_put_contents($errors_file, $error_information);
-    file_put_contents($diff_file, $diff_information);
-
-   /****************************************
-    * Test complete. Create results for
-    * the framework that just ran.
-    ****************************************/
-    $pct = get_framework_pass_percentage($fw_name, $results_file, $verbose);
-    $encoded_result = json_encode(array($fw_name => $pct));
-    if (!(file_exists($summary_file))) {
-      file_put_contents($summary_file, $encoded_result);
-    } else {
-      $file_data = file_get_contents($summary_file);
-      $decoded_results = json_decode($file_data, true);
-      $decoded_results[$fw_name] = $pct;
-      file_put_contents($summary_file, json_encode($decoded_results));
-    }
-
-    // If the first baseline run, make both the same. Otherwise, compare
-    // the expect and results file to see if they are the same. If they are
-    // then all is good. If not, thumbs down.
-    if (!file_exists($expect_file)) {
-      copy($results_file, $expect_file);
-    } else if (file_get_contents($results_file) !==
-               file_get_contents($expect_file)) {
-      $ret_val = -1;
-    }
+    file_put_contents($framework->out_file, $test_information, FILE_APPEND);
+    file_put_contents($framework->errors_file, $error_information, FILE_APPEND);
+    file_put_contents($framework->diff_file, $diff_information, FILE_APPEND);
+    file_put_contents($framework->stats_file, $stat_information, FILE_APPEND);
+    file_put_contents($framework->fatals_file, $fatal_information, FILE_APPEND);
 
   } else {
-    $csv_only ? error()
-              : error("Could not open process to run test for framework ".
-                      $fw_name);
+    Options::$csv_only ? error()
+                       : error("Could not open process to run test ".$test.
+                               " for framework ".$fw_name);
   }
-  chdir(__DIR__);
+
   return $ret_val;
 }
 
-function prepare_framework_test_run_command(string $fw_name): string {
-  if (Frameworks::$framework_info[$fw_name]
-      ->contains('test_run_command')) {
-    $run_command = Frameworks::$framework_info[$fw_name]['test_run_command'];
-  } else {
-    $run_command = get_hhvm_build()." ".__DIR__."/vendor/bin/phpunit --debug";
-  }
-  $run_command .= " 2>&1";
-  return $run_command;
-}
 
-function get_test_path(string $fw_name, string $install_root, bool $verbose) {
-  // 2 possibilities, phpunit.xml and phpunit.xml.dist for configuration
-  $phpunit_config_files = Set {'phpunit.xml', 'phpunit.xml.dist'};
 
-  $test_path = null;
-  if (Frameworks::$framework_info[$fw_name]->contains('test_path')) {
-    $test_path = Frameworks::$framework_info[$fw_name]['test_path'];
-  } else {
-    $phpunit_config_file_loc = null;
-    $phpunit_config_file_loc = find_any_file_recursive($phpunit_config_files,
-                                                       $install_root, true);
-    // The test path will be where the phpunit config file is located since
-    // that file contains the test directory name. If no config file, error.
-    $test_path = $phpunit_config_file_loc !== null
-               ? $phpunit_config_file_loc
-               : error("No phpunit test directory found for $fw_name");
-    verbose("Using phpunit xml file in: $phpunit_config_file_loc\n", $verbose);
-  }
-  return $test_path;
-}
-
-function get_fw_tests_to_run(string $expect_file, string $test_name_pattern,
+function get_comparing_tests(Framework $framework,
                              string $status_code_pattern,
                              string $stop_parsing_pattern): ?Map {
-  $file = fopen($expect_file, "r");
+  $file = fopen($framework->expect_file, "r");
 
   $matches = array();
   $line = null;
@@ -1261,7 +1571,7 @@ function get_fw_tests_to_run(string $expect_file, string $test_name_pattern,
     if (preg_match($stop_parsing_pattern, $line, $matches) === 1) {
       break;
     }
-    if (preg_match($test_name_pattern, $line, $matches) === 1) {
+    if (preg_match($framework->test_name_pattern, $line, $matches) === 1) {
       do {
         // Get the next line for the expected status for that test
         $status = fgets($file);
@@ -1276,82 +1586,6 @@ function get_fw_tests_to_run(string $expect_file, string $test_name_pattern,
     return null;
   }
   return $tests;
-}
-
-// We may have to special case frameworks that don't use
-// phpunit for their testing (e.g. ThinkUp)
-function get_framework_pass_percentage(string $name,
-                                       string $results_file,
-                                       bool $verbose): mixed {
-  // Get the last line of the results file which will give us the surface
-  // area necessary to get the final stats.
-  $file = escapeshellarg($results_file);
-  // If we can't get results surface area, assume FATAL.
-  if (($lines = `tail -n 1 $file`) === "") {
-    return "Fatal";
-  }
-
-  // clean pattern represents: OK (364 tests, 590 assertions)
-  // error pattern represents: Tests: 364, Assertions: 585, Errors: 5.
-  $possible_patterns =
-      Map {TestResult::CLEAN => PHPUnitPatterns::$tests_ok_pattern,
-           TestResult::ERRORS => PHPUnitPatterns::$tests_failure_pattern};
-
-  $test_result = TestResult::FATAL;
-  $match = array();
-  foreach ($possible_patterns as $result => $pattern) {
-    if (preg_match($pattern, $lines, $match) === 1) {
-      $test_result = $result;
-      break;
-    }
-  }
-
-  $pct = "";
-  switch ($test_result) {
-    case TestResult::CLEAN:
-      $pct = "100";
-      break;
-    // Get the total number of tests and the number of failures, errors, etc.
-    case TestResult::ERRORS:
-      // We have this pattern: Tests: 364, Assertions: 585, Errors: 5.
-      // Break out each type into an array
-      $results_arr = str_getcsv($match[0]);
-      // Start with a default map of values for the pattern to make
-      // the parsing for the math simpler.
-      $parsed_results = Map {"Tests" => 0, "Errors" => 0, "Failures" => 0,
-                             "Skipped" => 0, "Incomplete" => 0 };
-      foreach ($results_arr as $result) {
-        // Strip spaces, then look for the : separator
-        $res_arr = split(":", str_replace(" ", "", $result));
-        // Remove any possible periods.
-        $parsed_results[$res_arr[0]] =
-                      (int)(str_replace(".", "", $res_arr[1]));
-      }
-      // Removed skipped tests
-      $total_tests_for_calc =
-        (float)($parsed_results["Tests"] - $parsed_results["Skipped"]);
-      $total_errors_for_calc =
-        (float)($parsed_results["Errors"] + $parsed_results["Failures"] +
-        $parsed_results["Incomplete"]);
-      $pct = ($total_tests_for_calc - $total_errors_for_calc)
-            / $total_tests_for_calc;
-      $pct = round($pct, 4);
-      $pct *= 100; // for percentage
-      break;
-    case TestResult::FATAL:
-      $pct = "Fatal";
-      break;
-    default:
-      $pct = "Unknown";
-      break;
-  }
-
-  verbose(strtoupper($name).
-          " TEST COMPLETE with pass percentage of: $pct\n\n", $verbose);
-  verbose("Results File: $results_file\n", $verbose);
-  verbose("..........\n\n", $verbose);
-
-  return $pct;
 }
 
 function help(): void {
@@ -1555,7 +1789,6 @@ function any_dir_empty_one_level(string $dir): bool {
 // and sorted by the full path including file name.
 function find_any_file_recursive(Set $filenames, string $root_dir,
                                  bool $just_path_to_file): ?string {
-
   $dit = new RecursiveDirectoryIterator($root_dir,
                                         RecursiveDirectoryIterator::SKIP_DOTS);
   $rit = new RecursiveIteratorIterator($dit);
@@ -1570,6 +1803,41 @@ function find_any_file_recursive(Set $filenames, string $root_dir,
   }
 
   return null;
+}
+
+function find_all_files(string $pattern, string $root_dir,
+                        string $exclude = null): Set {
+  $files = Set {};
+  $dit = new RecursiveDirectoryIterator($root_dir,
+                                        RecursiveDirectoryIterator::SKIP_DOTS);
+  $rit = new RecursiveIteratorIterator($dit);
+  $sit = new SortedIterator($rit);
+  foreach ($sit as $fileinfo) {
+    if (preg_match($pattern, $fileinfo->getFileName()) === 1 &&
+        strpos($fileinfo->getPathName(), $exclude) === false) {
+      $files[] = $fileinfo->getPathName();
+    }
+  }
+
+  return $files;
+}
+
+function find_all_files_containing_text(string $text,
+                                        string $root_dir,
+                                        string $exclude = null): Set {
+  $files = Set {};
+  $dit = new RecursiveDirectoryIterator($root_dir,
+                                        RecursiveDirectoryIterator::SKIP_DOTS);
+  $rit = new RecursiveIteratorIterator($dit);
+  $sit = new SortedIterator($rit);
+  foreach ($sit as $fileinfo) {
+    if (strpos(file_get_contents($fileinfo->getPathName()), $text) !== false &&
+        strpos($fileinfo->getPathName(), $exclude) === false) {
+      $files[] = $fileinfo->getPathName();
+    }
+  }
+
+  return $files;
 }
 
 function get_hhvm_build(bool $with_jit = true): string {

@@ -569,6 +569,7 @@ public:
   void emitAGet(Emitter& e);
   void emitCGetL2(Emitter& e);
   void emitCGetL3(Emitter& e);
+  void emitPushL(Emitter& e);
   void emitCGet(Emitter& e);
   void emitVGet(Emitter& e);
   void emitIsset(Emitter& e);

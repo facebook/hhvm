@@ -4318,6 +4318,13 @@ void EmitterVisitor::emitCGetL3(Emitter& e) {
   e.CGetL3(localIdx);
 }
 
+void EmitterVisitor::emitPushL(Emitter& e) {
+  assert(m_evalStack.size() >= 1);
+  auto const idx = m_evalStack.size() - 1;
+  assert(StackSym::GetSymFlavor(m_evalStack.get(idx)) == StackSym::L);
+  e.PushL(m_evalStack.getLoc(idx));
+}
+
 void EmitterVisitor::emitAGet(Emitter& e) {
   if (checkIfStackEmpty("AGet*")) return;
 
@@ -4441,18 +4448,18 @@ Id EmitterVisitor::emitSetUnnamedL(Emitter& e) {
   return tempLocal;
 }
 
-void EmitterVisitor::emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start) {
+void EmitterVisitor::emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal,
+                                             Offset start) {
   assert(tempLocal >= 0);
   assert(start != InvalidAbsoluteOffset);
-  emitVirtualLocal(tempLocal);
-  emitCGet(e);
   newFaultRegion(start, m_ue.bcPos(), new UnsetUnnamedLocalThunklet(tempLocal));
   emitVirtualLocal(tempLocal);
-  emitUnset(e);
+  emitPushL(e);
   m_curFunc->freeUnnamedLocal(tempLocal);
 }
 
-EmitterVisitor::PassByRefKind EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
+EmitterVisitor::PassByRefKind
+EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
   auto permissiveKind = PassByRefKind::AllowCell;
 
   // The PassByRefKind of a list assignment expression is determined
@@ -7560,8 +7567,7 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
           ue.emitOp(OpContRaise);
           // intentional fallthrough to push the exception on the stack
         case METH_SEND:
-          ue.emitOp(OpCGetL); ue.emitIVA(0);
-          ue.emitOp(OpUnsetL); ue.emitIVA(0);
+          ue.emitOp(OpPushL); ue.emitIVA(0);
           break;
         default:
           not_reached();

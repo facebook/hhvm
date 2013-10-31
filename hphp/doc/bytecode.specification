@@ -1282,6 +1282,12 @@ CGetL3 <local variable id>    [<F2>:<T2> <F1>:<T1>]  ->  [C <F2>:<T1> <F1>:<T1>]
   warning, pushes null onto the stack, then pushes $2 onto the stack, and then
   pushes $1 onto the stack.
 
+PushL <local variable id>    []  ->  [C]
+
+  Teleport local value to eval stack. The local variable given by %1 must be
+  defined and must not contain a reference. This instruction pushes the local's
+  value on the stack, then unsets it, equivalent to the behavior of UnsetL.
+
 CGetN    [C]  ->  [C]
 
   Get local as cell. This instruction first computes x = (string)$1. Next, this

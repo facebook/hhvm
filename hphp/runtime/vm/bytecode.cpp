@@ -4362,6 +4362,18 @@ OPTBLD_INLINE void VMExecutionContext::iopCGetL3(PC& pc) {
   cgetl_body(m_fp, fr, to, local);
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopPushL(PC& pc) {
+  NEXT();
+  DECODE_LA(local);
+  TypedValue* locVal = frame_local(m_fp, local);
+  assert(locVal->m_type != KindOfUninit);
+  assert(locVal->m_type != KindOfRef);
+
+  TypedValue* dest = m_stack.allocTV();
+  *dest = *locVal;
+  locVal->m_type = KindOfUninit;
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopCGetN(PC& pc) {
   NEXT();
   StringData* name;

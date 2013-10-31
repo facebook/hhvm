@@ -285,6 +285,11 @@ IRTranslator::translateCGetL(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translatePushL(const NormalizedInstruction& ni) {
+  HHIR_EMIT(PushL, ni.imm[0].u_LA);
+}
+
+void
 IRTranslator::translateCGetL2(const NormalizedInstruction& ni) {
   HHIR_EMIT(CGetL2, ni.imm[0].u_LA);
 }

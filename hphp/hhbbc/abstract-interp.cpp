@@ -626,6 +626,10 @@ struct InterpStepper : boost::static_visitor<void> {
     push(locAsCell(op.loc1));
   }
 
+  void operator()(const bc::PushL& op) {
+    impl(bc::CGetL { op.loc1 }, bc::UnsetL { op.loc1 });
+  }
+
   void operator()(const bc::CGetL2& op) {
     // Can't constprop yet because of no INS_1 support in bc.h
     if (!locCouldBeUninit(op.loc1)) nothrow();

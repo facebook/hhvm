@@ -76,6 +76,7 @@
   CASE(AGetC) \
   CASE(AGetL) \
   CASE(CGetL) \
+  CASE(PushL) \
   CASE(CGetL2) \
   CASE(CGetS) \
   CASE(CGetM) \

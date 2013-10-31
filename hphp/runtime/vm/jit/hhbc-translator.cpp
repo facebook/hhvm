@@ -795,6 +795,13 @@ void HhbcTranslator::emitCGetL(int32_t id) {
   pushIncRef(ldLocInnerWarn(id, exit, DataTypeCountnessInit));
 }
 
+void HhbcTranslator::emitPushL(uint32_t id) {
+  assertTypeLocal(id, Type::InitCell);
+  auto* locVal = ldLoc(id, DataTypeGeneric);
+  push(locVal);
+  gen(StLoc, LocalId(id), m_tb->fp(), m_tb->genDefUninit());
+}
+
 void HhbcTranslator::emitCGetL2(int32_t id) {
   auto exitBlock = makeExit();
   auto catchBlock = makeCatch();

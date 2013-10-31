@@ -1030,6 +1030,7 @@ static const struct {
   { OpCGetL,       {Local,            Stack1,       OutCInputL,        1 }},
   { OpCGetL2,      {Stack1|Local,     StackIns1,    OutCInputL,        1 }},
   { OpCGetL3,      {StackTop2|Local,  StackIns2,    OutCInputL,        1 }},
+  { OpPushL,       {Local,            Stack1|Local, OutCInputL,        1 }},
   { OpCGetN,       {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpCGetS,       {StackTop2,        Stack1,       OutPred,          -1 }},
@@ -2215,7 +2216,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                op == OpVGetM || op == OpFPassM ||
                                op == OpStaticLocInit || op == OpInitThisLoc ||
                                op == OpSetL || op == OpBindL ||
-                               op == OpUnsetL ||
+                               op == OpPushL || op == OpUnsetL ||
                                op == OpIterInit || op == OpIterInitK ||
                                op == OpMIterInit || op == OpMIterInitK ||
                                op == OpWIterInit || op == OpWIterInitK ||
@@ -2237,7 +2238,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           ni->outLocal = incDecLoc;
           continue; // Doesn't mutate a loc's types for int. Carry on.
         }
-        if (op == OpUnsetL) {
+        if (op == OpUnsetL || op == OpPushL) {
           assert(ni->inputs.size() == 1);
           DynLocation* inLoc = ni->inputs[0];
           assert(inLoc->location.isLocal());
@@ -2798,6 +2799,10 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
     case OpCGetL:
       return DataTypeCountnessInit;
 
+    case OpPushL:
+    case OpContEnter:
+      return DataTypeGeneric;
+
     case OpRetC:
     case OpRetV:
       return DataTypeCountness;
@@ -2883,6 +2888,7 @@ Translator::getOperandConstraintType(NormalizedInstruction* instr,
   DataTypeCategory dtCategory = getOperandConstraintCategory(instr,
                                                              opndIdx,
                                                              specType);
+  FTRACE(4, "got constraint {} for {}\n", dtCategory, *instr);
   switch (dtCategory) {
     case DataTypeGeneric:       return GuardType(KindOfAny);
     case DataTypeCountness:     return specType.getCountness();
@@ -2902,6 +2908,9 @@ void Translator::constrainOperandType(GuardType&             relxType,
 
   GuardType consType = getOperandConstraintType(instr, opndIdx, specType);
   if (consType.isMoreRefinedThan(relxType)) {
+    FTRACE(3, "constraining from {}({}) to {}({})\n",
+           relxType.getOuterType(), relxType.getInnerType(),
+           consType.getOuterType(), consType.getInnerType());
     relxType = consType;
   }
 }
@@ -2919,6 +2928,7 @@ void Translator::constrainDep(const DynLocation* loc,
                               GuardType& relxType) {
   if (relxType.isEqual(specType)) return; // can't contrain it any further
 
+  FTRACE(3, "\nconstraining dep {}\n", loc->pretty());
   for (NormalizedInstruction* instr = firstInstr; instr; instr = instr->next) {
     if (instr->noOp) continue;
     auto opc = instr->op();
@@ -2931,7 +2941,10 @@ void Translator::constrainDep(const DynLocation* loc,
         // If the instruction's input doesn't propagate to its output,
         // then we're done.  Otherwise, we need to constrain relxType
         // based on the uses of the output.
-        if (!outputDependsOnInput(opc)) continue;
+        if (!outputDependsOnInput(opc)) {
+          FTRACE(4, "output doesn't propagate to input; stopping\n");
+          continue;
+        }
 
         bool outputIsStackInput = false;
         const DynLocation* outStack = instr->outStack;
@@ -2973,10 +2986,16 @@ void Translator::constrainDep(const DynLocation* loc,
             // case, don't further constrain the stack output,
             // otherwise the Pop* would make it a DataTypeCountness.
             if (opc != OpSetL || !relxType.isGeneric()) {
+              FTRACE(3, "constraining outStack dep {}\n", outStack->pretty());
               constrainDep(outStack, instr->next, specType, relxType);
             }
           }
-          if (outLocal && !outLocal->rtt.isVagueValue()) {
+
+          // PushL has a local output that doesn't depend on the input
+          // type but its stack output does, so we special case it here.
+          if (outLocal && !outLocal->rtt.isVagueValue() &&
+              opc != OpPushL) {
+            FTRACE(3, "constraining outLocal dep {}\n", outLocal->pretty());
             constrainDep(outLocal, instr->next, specType, relxType);
           }
         }
@@ -2994,6 +3013,7 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
 
   // Initialize type maps.  Relaxed types start off very relaxed, and then
   // they may get more specific depending on how the instructions use them.
+  FTRACE(3, "starting relaxDeps\n");
   DepMap& deps = tctxt.m_dependencies;
   for (auto depIt = deps.begin(); depIt != deps.end(); depIt++) {
     DynLocation*       loc = depIt->second;
@@ -3011,6 +3031,7 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
 
   // For each dependency, if we found a more relaxed type for it, use
   // such type.
+  FTRACE(3, "applying relaxed deps\n");
   for (auto& kv : locRelxTypeMap) {
     DynLocation* loc = kv.first;
     const GuardType& relxType = kv.second;
@@ -3023,6 +3044,7 @@ void Translator::relaxDeps(Tracelet& tclet, TraceletContext& tctxt) {
     assert(deps[loc->location] == loc);
     deps[loc->location]->rtt = relxType.getRuntimeType();
   }
+  FTRACE(3, "relaxDeps finished\n");
 }
 
 bool callDestroysLocals(const NormalizedInstruction& inst,

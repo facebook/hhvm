@@ -219,6 +219,7 @@ struct HhbcTranslator {
   void emitTrue();
   void emitFalse();
   void emitCGetL(int32_t id);
+  void emitPushL(uint32_t id);
   void emitCGetL2(int32_t id);
   void emitCGetS();
   void emitCGetG();

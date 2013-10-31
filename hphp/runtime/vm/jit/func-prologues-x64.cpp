@@ -207,7 +207,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     a.  storeq(rAsm, rVmFp[AROFF(m_func)]);
 
     // Copy in all the use vars
-    int baseUVOffset = sizeof(ObjectData) + func->cls()->builtinPropSize();
+    int baseUVOffset = sizeof(ObjectData) + func->cls()->builtinODTailSize();
     for (int i = 0; i < numUseVars + 1; i++) {
       int spOffset = -cellsToBytes(i+1);
 

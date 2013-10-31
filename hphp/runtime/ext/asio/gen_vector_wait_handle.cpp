@@ -38,13 +38,6 @@ namespace {
   }
 }
 
-c_GenVectorWaitHandle::c_GenVectorWaitHandle(Class* cb)
-    : c_BlockableWaitHandle(cb), m_exception() {
-}
-
-c_GenVectorWaitHandle::~c_GenVectorWaitHandle() {
-}
-
 void c_GenVectorWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use GenVectorWaitHandle::create() instead of constructor"));

@@ -38,13 +38,6 @@ namespace {
   }
 }
 
-c_GenMapWaitHandle::c_GenMapWaitHandle(Class* cb)
-    : c_BlockableWaitHandle(cb), m_exception() {
-}
-
-c_GenMapWaitHandle::~c_GenMapWaitHandle() {
-}
-
 void c_GenMapWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use GenMapWaitHandle::create() instead of constructor"));

@@ -2,8 +2,10 @@ DateTimeZone
 HipHop Warning: DateTimeZone::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
 object(DateTimeZone)#1 (0) {
 }
-string(24) "O:12:"DateTimeZone":0:{}"
-object(DateTimeZone)#2 (0) {
+string(97) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:12:"DateTimeZone";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(12) "DateTimeZone"
 }
 array(7) {
   [0]=>
@@ -28,10 +30,10 @@ object(A_DateTimeZone)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(39) "O:14:"A_DateTimeZone":1:{s:4:"___x";N;}"
-object(A_DateTimeZone)#4 (1) {
-  ["___x"]=>
-  NULL
+string(99) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:14:"A_DateTimeZone";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(14) "A_DateTimeZone"
 }
 array(7) {
   [0]=>

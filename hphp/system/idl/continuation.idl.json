@@ -36,7 +36,8 @@
             "name": "Continuation",
             "flags": [
                 "IsFinal",
-                "NoDefaultSweep"
+                "NoDefaultSweep",
+                "CppCustomDelete"
             ],
             "ifaces": [
                 "HH\\Iterator",

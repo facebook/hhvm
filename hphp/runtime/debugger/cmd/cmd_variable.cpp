@@ -254,7 +254,10 @@ static c_WaitableWaitHandle *objToWaitableWaitHandle(Object o) {
 }
 
 static c_AsyncFunctionWaitHandle *objToContinuationWaitHandle(Object o) {
-  return dynamic_cast<c_AsyncFunctionWaitHandle*>(o.get());
+  if (o->instanceof(c_AsyncFunctionWaitHandle::classof())) {
+    return static_cast<c_AsyncFunctionWaitHandle*>(o.get());
+  }
+  return nullptr;
 }
 
 static

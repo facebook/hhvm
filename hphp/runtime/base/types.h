@@ -85,7 +85,7 @@ const size_t FAST_REFCOUNT_OFFSET = 12;
  * All native collection class have their m_size field at the same
  * offset in the object.
  */
-const size_t FAST_COLLECTION_SIZE_OFFSET = 36;
+const size_t FAST_COLLECTION_SIZE_OFFSET = 20;
 
 /**
  * These are underlying data structures for the above complex data types. Since

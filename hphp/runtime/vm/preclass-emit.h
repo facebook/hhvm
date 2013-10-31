@@ -23,6 +23,17 @@
 
 namespace HPHP {
 
+/*
+ * Information about an extension subclass of ObjectData.
+ */
+struct BuiltinObjExtents {
+  // Total sizeof(c_Foo).
+  size_t totalSizeBytes;
+
+  // The offset of the ObjectData subobject in c_Foo.
+  ptrdiff_t odOffsetBytes;
+};
+
 class PreClassEmitter {
  public:
   typedef std::vector<FuncEmitter*> MethodVec;
@@ -167,7 +178,8 @@ class PreClassEmitter {
 
   void setBuiltinClassInfo(const ClassInfo* info,
                            BuiltinCtorFunction ctorFunc,
-                           int sz);
+                           BuiltinDtorFunction dtorFunc,
+                           BuiltinObjExtents extents);
 
   PreClass* create(Unit& unit) const;
 
@@ -191,8 +203,10 @@ class PreClassEmitter {
   const StringData* m_docComment;
   Id m_id;
   PreClass::Hoistable m_hoistable;
-  BuiltinCtorFunction m_instanceCtor;
-  int m_builtinPropSize;
+  BuiltinCtorFunction m_instanceCtor{nullptr};
+  BuiltinDtorFunction m_instanceDtor{nullptr};
+  uint32_t m_builtinObjSize{0};
+  int32_t  m_builtinODOffset{0};
 
   std::vector<const StringData*> m_interfaces;
   std::vector<const StringData*> m_usedTraits;

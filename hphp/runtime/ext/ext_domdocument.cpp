@@ -1919,16 +1919,6 @@ static PropertyAccessorMap domnode_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMNode::c_DOMNode(Class* cb) :
-    ExtObjectDataFlags<ObjectData::UseGet|
-                       ObjectData::UseSet|
-                       ObjectData::UseIsset|
-                       ObjectData::HasClone>(cb), m_node(nullptr) {
-}
-
-c_DOMNode::~c_DOMNode() {
-}
-
 void c_DOMNode::t___construct() {
 }
 
@@ -2482,12 +2472,6 @@ static PropertyAccessorMap domattr_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMAttr::c_DOMAttr(Class* cb) : c_DOMNode(cb) {
-}
-
-c_DOMAttr::~c_DOMAttr() {
-}
-
 void c_DOMAttr::t___construct(const String& name,
                               const String& value /* = null_string */) {
   int name_valid = xmlValidateName((xmlChar *)name.data(), 0);
@@ -2559,13 +2543,6 @@ static PropertyAccessorMap domcharacterdata_properties_map
 ((PropertyAccessor*)domcharacterdata_properties, &domnode_properties_map);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMCharacterData::c_DOMCharacterData(Class* cb) :
-    c_DOMNode(cb) {
-}
-
-c_DOMCharacterData::~c_DOMCharacterData() {
-}
 
 void c_DOMCharacterData::t___construct() {
 }
@@ -2718,13 +2695,6 @@ String c_DOMCharacterData::t_substringdata(int64_t offset, int64_t count) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMComment::c_DOMComment(Class* cb) :
-    c_DOMCharacterData(cb) {
-}
-
-c_DOMComment::~c_DOMComment() {
-}
-
 void c_DOMComment::t___construct(const String& value /* = null_string */) {
   m_node = xmlNewComment((xmlChar *)value.data());
   if (!m_node) {
@@ -2767,12 +2737,6 @@ static PropertyAccessorMap domtext_properties_map
 ((PropertyAccessor*)domtext_properties, &domcharacterdata_properties_map);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMText::c_DOMText(Class* cb) : c_DOMCharacterData(cb) {
-}
-
-c_DOMText::~c_DOMText() {
-}
 
 void c_DOMText::t___construct(const String& value /* = 'null_string' */) {
   m_node = xmlNewText((xmlChar *)value.data());
@@ -2837,13 +2801,6 @@ Variant c_DOMText::t_splittext(int64_t offset) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMCDATASection::c_DOMCDATASection(Class* cb) :
-    c_DOMText(cb) {
-}
-
-c_DOMCDATASection::~c_DOMCDATASection() {
-}
 
 void c_DOMCDATASection::t___construct(const String& value) {
   m_node = xmlNewCDataBlock(NULL, (xmlChar *)value.data(), value.size());
@@ -3619,13 +3576,6 @@ Variant c_DOMDocument::t_xinclude(int64_t options /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMDocumentFragment::c_DOMDocumentFragment(Class* cb) :
-  c_DOMNode(cb) {
-}
-
-c_DOMDocumentFragment::~c_DOMDocumentFragment() {
-}
-
 void c_DOMDocumentFragment::t___construct() {
   m_node = xmlNewDocFragment(NULL);
   if (!m_node) {
@@ -3739,13 +3689,6 @@ static PropertyAccessorMap domdocumenttype_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMDocumentType::c_DOMDocumentType(Class* cb) :
-  c_DOMNode(cb) {
-}
-
-c_DOMDocumentType::~c_DOMDocumentType() {
-}
-
 void c_DOMDocumentType::t___construct() {
 }
 
@@ -3792,12 +3735,6 @@ static PropertyAccessorMap domelement_properties_map
 ((PropertyAccessor*)domelement_properties, &domnode_properties_map);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMElement::c_DOMElement(Class* cb) : c_DOMNode(cb) {
-}
-
-c_DOMElement::~c_DOMElement() {
-}
 
 void c_DOMElement::t___construct(const String& name,
                                  const String& value /* = null_string */,
@@ -4448,12 +4385,6 @@ static PropertyAccessorMap domentity_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMEntity::c_DOMEntity(Class* cb) : c_DOMNode(cb) {
-}
-
-c_DOMEntity::~c_DOMEntity() {
-}
-
 void c_DOMEntity::t___construct() {
 }
 
@@ -4471,13 +4402,6 @@ bool c_DOMEntity::t___isset(Variant name) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMEntityReference::c_DOMEntityReference(Class* cb) :
-  c_DOMNode(cb) {
-}
-
-c_DOMEntityReference::~c_DOMEntityReference() {
-}
 
 void c_DOMEntityReference::t___construct(const String& name) {
   int name_valid = xmlValidateName((xmlChar *)name.data(), 0);
@@ -4530,13 +4454,6 @@ static PropertyAccessorMap domnotation_properties_map
 ((PropertyAccessor*)domnotation_properties);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMNotation::c_DOMNotation(Class* cb) :
-  c_DOMNode(cb) {
-}
-
-c_DOMNotation::~c_DOMNotation() {
-}
 
 void c_DOMNotation::t___construct() {
 }
@@ -4660,14 +4577,6 @@ static PropertyAccessorMap domnamednodemap_properties_map
 ((PropertyAccessor*)domnamednodemap_properties);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMNamedNodeMap::c_DOMNamedNodeMap(Class* cb) :
-  ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|
-    ObjectData::UseIsset>(cb) {
-}
-
-c_DOMNamedNodeMap::~c_DOMNamedNodeMap() {
-}
 
 void c_DOMNamedNodeMap::t___construct() {
 }
@@ -4854,14 +4763,6 @@ static PropertyAccessorMap domnodelist_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_DOMNodeList::c_DOMNodeList(Class* cb) :
-  ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet|
-    ObjectData::UseIsset>(cb) {
-}
-
-c_DOMNodeList::~c_DOMNodeList() {
-}
-
 void c_DOMNodeList::t___construct() {
 }
 
@@ -4934,13 +4835,6 @@ Variant c_DOMNodeList::t_getiterator() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_DOMImplementation::c_DOMImplementation(Class* cb)
-  : ExtObjectData(cb) {
-}
-
-c_DOMImplementation::~c_DOMImplementation() {
-}
 
 void c_DOMImplementation::t___construct() {
 }

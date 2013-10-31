@@ -39,9 +39,6 @@ c_AsyncFunctionWaitHandle::c_AsyncFunctionWaitHandle(Class* cb)
       m_depth(0) {
 }
 
-c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
-}
-
 void c_AsyncFunctionWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use $continuation->getWaitHandle() instead of constructor"));

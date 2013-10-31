@@ -60,9 +60,32 @@ void emitCtorHelper(const fbstring& className, std::ostream& out) {
     R"(
 ObjectData* new_{0:s}_Instance(HPHP::Class* cls) {{
   size_t nProps = cls->numDeclProperties();
-  size_t builtinPropSize = sizeof(c_{0:s}) - sizeof(ObjectData);
-  size_t size = ObjectData::sizeForNProps(nProps) + builtinPropSize;
+  size_t builtinObjSize = sizeof(c_{0:s}) - sizeof(ObjectData);
+  size_t size = ObjectData::sizeForNProps(nProps) + builtinObjSize;
   return new (MM().objMallocLogged(size)) c_{0:s}(cls);
+}})",
+    className) << "\n\n";
+}
+
+void emitDtorHelper(const fbstring& className, std::ostream& out) {
+  out << folly::format(
+    R"(
+void delete_{0:s}(ObjectData* obj, const Class* cls) {{
+  auto const ptr = static_cast<c_{0:s}*>(obj);
+  ptr->~c_{0:s}();
+
+  auto const nProps = cls->numDeclProperties();
+  auto const propVec = reinterpret_cast<TypedValue*>(ptr + 1);
+  for (auto i = Slot{{0}}; i < nProps; ++i) {{
+    tvRefcountedDecRef(&propVec[i]);
+  }}
+
+  auto const builtinSz = sizeof(c_{0:s}) - sizeof(ObjectData);
+  auto const size = ObjectData::sizeForNProps(nProps) + builtinSz;
+  if (LIKELY(size <= kMaxSmartSize)) {{
+    return MM().smartFreeSizeLogged(ptr, size);
+  }}
+  return MM().smartFreeSizeBigLogged(ptr, size);
 }})",
     className) << "\n\n";
 }
@@ -104,7 +127,7 @@ void emitRemappedFuncDecl(const PhpFunc& func,
     if (!isFirstParam) {
       out << ", ";
     }
-    out << "ObjectData* this_";
+    out << "c_" << func.className() << "* this_";
     isFirstParam = false;
   }
 
@@ -471,14 +494,14 @@ void emitSlowPathHelper(const PhpFunc& func, const fbstring& prefix,
   out << "void " << prefix << func.getUniqueName()
       << "(TypedValue* rv, ActRec* ar, int32_t count";
   if (func.usesThis()) {
-    out << ", ObjectData* this_";
+    out << ", c_" << func.className() << "* this_";
   }
   out << ") __attribute__((noinline,cold));\n";
 
   out << "void " << prefix << func.getUniqueName()
       << "(TypedValue* rv, ActRec* ar, int32_t count";
   if (func.usesThis()) {
-    out << ", ObjectData* this_";
+    out << ", c_" << func.className() << "* this_";
   }
   out << ") {\n";
 
@@ -551,6 +574,9 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
 
     if (!(klass.flags() & IsCppAbstract)) {
       emitCtorHelper(klass.name(), cpp);
+      if (!(klass.flags() & CppCustomDelete)) {
+        emitDtorHelper(klass.name(), cpp);
+      }
     }
     if (klass.flags() & NoDefaultSweep) {
       cpp << "IMPLEMENT_CLASS_NO_SWEEP(" << klass.name() << ");\n";
@@ -586,8 +612,11 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
   cpp << in << "TypedValue* args UNUSED = ((TypedValue*)ar) - 1;\n";
 
   if (func.usesThis()) {
+    auto cklass = "c_" + func.className();
     cpp << in
-        << "ObjectData* this_ = (ar->hasThis() ? ar->getThis() : nullptr);\n";
+        << cklass << "* this_ = (ar->hasThis() ? "
+        << "static_cast<" << cklass << "*>(ar->getThis()) : "
+        << " nullptr);\n";
     cpp << in << "if (this_) {\n";
     in -= 2;
   }

@@ -135,10 +135,17 @@ void PreClass::Const::prettyPrint(std::ostream& out) const {
 PreClass::PreClass(Unit* unit, int line1, int line2, Offset o,
                    const StringData* n, Attr attrs, const StringData* parent,
                    const StringData* docComment, Id id, Hoistable hoistable)
-    : m_unit(unit), m_line1(line1), m_line2(line2), m_offset(o), m_id(id),
-      m_builtinPropSize(0), m_attrs(attrs), m_hoistable(hoistable),
-      m_name(n), m_parent(parent), m_docComment(docComment),
-      m_instanceCtor(nullptr) {
+  : m_unit(unit)
+  , m_line1(line1)
+  , m_line2(line2)
+  , m_offset(o)
+  , m_id(id)
+  , m_attrs(attrs)
+  , m_hoistable(hoistable)
+  , m_name(n)
+  , m_parent(parent)
+  , m_docComment(docComment)
+{
   m_namedEntity = Unit::GetNamedEntity(n);
 }
 
@@ -189,7 +196,7 @@ void PreClass::prettyPrint(std::ostream &out) const {
 //=============================================================================
 // Class.
 
-static_assert(sizeof(Class) == 400, "Change this only on purpose");
+static_assert(sizeof(Class) == 408, "Change this only on purpose");
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
@@ -212,13 +219,11 @@ Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
   , m_traitsBeginIdx(0)
   , m_traitsEndIdx(0)
   , m_clsInfo(nullptr)
-  , m_builtinPropSize(0)
   , m_classVecLen(classVecLen)
   , m_cachedClass(RDS::kInvalidHandle)
   , m_propDataCache(RDS::kInvalidHandle)
   , m_propSDataCache(RDS::kInvalidHandle)
   , m_nonScalarConstantCache(RDS::kInvalidHandle)
-  , m_instanceCtor(nullptr)
   , m_nextClass(nullptr)
 {
   setParent();
@@ -928,16 +933,23 @@ void Class::setParent() {
       }
     }
   }
+
   // Cache m_preClass->attrs()
   m_attrCopy = m_preClass->attrs();
+
   // Handle stuff specific to cppext classes
   if (m_preClass->instanceCtor()) {
     m_instanceCtor = m_preClass->instanceCtor();
-    m_builtinPropSize = m_preClass->builtinPropSize();
+    m_instanceDtor = m_preClass->instanceDtor();
+    m_builtinODTailSize = m_preClass->builtinObjSize() -
+      m_preClass->builtinODOffset();
     m_clsInfo = ClassInfo::FindSystemClassInterfaceOrTrait(nameRef());
   } else if (m_parent.get()) {
     m_instanceCtor = m_parent->m_instanceCtor;
-    m_builtinPropSize = m_parent->m_builtinPropSize;
+    m_instanceDtor = m_parent->m_instanceDtor;
+    m_builtinODTailSize = m_parent->m_builtinODTailSize;
+    // XXX: should this be copying over the clsInfo also?  Might be
+    // broken...
   }
 }
 
@@ -2284,8 +2296,7 @@ void Class::getClassInfo(ClassInfoVM* ci) {
 
 size_t Class::declPropOffset(Slot index) const {
   assert(index >= 0);
-  return sizeof(ObjectData) + m_builtinPropSize
-    + index * sizeof(TypedValue);
+  return sizeof(ObjectData) + m_builtinODTailSize + index * sizeof(TypedValue);
 }
 
 Class::PropInitVec::~PropInitVec() {
@@ -2380,7 +2391,7 @@ void Class::getChildren(std::vector<TypedValue*>& out) {
 
 // True if a CPP extension class has opted into serialization.
 bool Class::isCppSerializable() const {
-  assert(builtinPropSize() > 0); // Only call this on CPP classes
+  assert(instanceCtor()); // Only call this on CPP classes
   return clsInfo() &&
     (clsInfo()->getAttribute() & ClassInfo::IsCppSerializable);
 }

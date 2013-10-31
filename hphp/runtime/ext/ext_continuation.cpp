@@ -37,7 +37,17 @@ Object f_hphp_create_continuation(const String& clsname,
                                           const String& origFuncName,
                                           CArrRef args /* = null_array */) {
   throw_fatal("Invalid call hphp_create_continuation");
-  return NULL;
+  return nullptr;
+}
+
+void delete_Continuation(ObjectData* od, const Class*) {
+  auto const cont = static_cast<c_Continuation*>(od);
+  auto const size = cont->getObjectSize();
+  cont->~c_Continuation();
+  if (LIKELY(size <= kMaxSmartSize)) {
+    return MM().smartFreeSizeLogged(cont, size);
+  }
+  MM().smartFreeSizeBigLogged(cont, size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,6 +74,8 @@ c_Continuation::~c_Continuation() {
     frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
   }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 void c_Continuation::t___construct() {}
 
@@ -230,12 +242,12 @@ namespace {
 }
 
 void c_Continuation::call_next() {
-  const HPHP::Func* func = m_cls->lookupMethod(s_next.get());
+  const HPHP::Func* func = getVMClass()->lookupMethod(s_next.get());
   g_vmContext->invokeContFunc(func, this);
 }
 
 void c_Continuation::call_send(Cell& v) {
-  const HPHP::Func* func = m_cls->lookupMethod(s_send.get());
+  const HPHP::Func* func = getVMClass()->lookupMethod(s_send.get());
   g_vmContext->invokeContFunc(func, this, &v);
 }
 
@@ -243,7 +255,7 @@ void c_Continuation::call_raise(ObjectData* e) {
   assert(e);
   assert(e->instanceof(SystemLib::s_ExceptionClass));
 
-  const HPHP::Func* func = m_cls->lookupMethod(s_raise.get());
+  auto const func = getVMClass()->lookupMethod(s_raise.get());
 
   Cell arg;
   arg.m_type = KindOfObject;

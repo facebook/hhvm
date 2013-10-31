@@ -25,15 +25,6 @@ namespace {
   StaticString s_staticResult("<static-result>");
 }
 
-c_StaticResultWaitHandle::c_StaticResultWaitHandle(Class* cb)
-    : c_StaticWaitHandle(cb) {
-  setState(STATE_SUCCEEDED);
-}
-
-c_StaticResultWaitHandle::~c_StaticResultWaitHandle() {
-  tvRefcountedDecRefCell(&m_resultOrException);
-}
-
 void c_StaticResultWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use StaticResultWaitHandle::create() instead of constructor"));

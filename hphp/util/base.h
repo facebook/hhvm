@@ -423,16 +423,6 @@ cloneMembers(Container& c) {
   }
 }
 
-// invoke operator delete on the contents of a container.
-template<typename Container>
-void
-destroyMembers(Container& c) {
-  for (typename Container::iterator i = c.begin();
-       i != c.end(); ++i) {
-    delete *i;
-  }
-}
-
 template<typename Container>
 void
 destroyMapValues(Container& c) {

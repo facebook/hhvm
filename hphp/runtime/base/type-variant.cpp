@@ -1915,7 +1915,7 @@ void Variant::unserialize(VariableUnserializer *uns,
         // Only unserialize CPP extension types which can actually
         // support it. Otherwise, we risk creating a CPP object
         // without having it intialized completely.
-        if ((cls->builtinPropSize() > 0) && !cls->isCppSerializable()) {
+        if (cls->instanceCtor() && !cls->isCppSerializable()) {
           obj = ObjectData::newInstance(
             SystemLib::s___PHP_Unserializable_ClassClass);
           obj->o_set(s_PHP_Unserializable_Class_Name, clsName);

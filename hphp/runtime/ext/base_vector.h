@@ -222,7 +222,7 @@ protected:
   // We don't want anybody instantiating the class, hence the protected
   // constructor/destructor.
   explicit BaseVector(Class* cls);
-  virtual ~BaseVector();
+  ~BaseVector();
   void grow();
 
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;

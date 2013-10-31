@@ -28,16 +28,6 @@ namespace {
   StaticString s_setResultToRef("<set-result-to-ref>");
 }
 
-c_SetResultToRefWaitHandle::c_SetResultToRefWaitHandle(Class* cb)
-    : c_BlockableWaitHandle(cb), m_child(), m_ref() {
-}
-
-c_SetResultToRefWaitHandle::~c_SetResultToRefWaitHandle() {
-  if (m_ref) {
-    decRefRef(m_ref);
-  }
-}
-
 void c_SetResultToRefWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use SetResultToRefWaitHandle::create() instead of constructor"));

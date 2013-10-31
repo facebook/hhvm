@@ -62,21 +62,23 @@ class c_WaitHandle : public ExtObjectData {
  public:
   DECLARE_CLASS_NO_SWEEP(WaitHandle)
 
-  // need to implement
-  public: c_WaitHandle(Class* cls = c_WaitHandle::classof());
-  public: ~c_WaitHandle();
-  public: void t___construct();
-  public: static void ti_setonjoincallback(CVarRef callback);
-  public: Object t_getwaithandle();
-  public: void t_import();
-  public: Variant t_join();
-  public: bool t_isfinished();
-  public: bool t_issucceeded();
-  public: bool t_isfailed();
-  public: int64_t t_getid();
-  public: String t_getname();
-  public: Object t_getexceptioniffailed();
+  explicit c_WaitHandle(Class* cls = c_WaitHandle::classof())
+    : ExtObjectData(cls)
+    , m_resultOrException(make_tv<KindOfNull>())
+  {}
+  ~c_WaitHandle() {}
 
+  void t___construct();
+  static void ti_setonjoincallback(CVarRef callback);
+  Object t_getwaithandle();
+  void t_import();
+  Variant t_join();
+  bool t_isfinished();
+  bool t_issucceeded();
+  bool t_isfailed();
+  int64_t t_getid();
+  String t_getname();
+  Object t_getexceptioniffailed();
 
  public:
   static c_WaitHandle* fromCell(Cell* cell) {
@@ -121,11 +123,12 @@ class c_StaticWaitHandle : public c_WaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(StaticWaitHandle)
 
-  // need to implement
-  public: c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::classof());
-  public: ~c_StaticWaitHandle();
-  public: void t___construct();
+  explicit c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::classof())
+    : c_WaitHandle(cls)
+  {}
+  ~c_StaticWaitHandle() {}
 
+  void t___construct();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,11 +142,18 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(StaticResultWaitHandle)
 
-  // need to implement
-  public: c_StaticResultWaitHandle(Class* cls = c_StaticResultWaitHandle::classof());
-  public: ~c_StaticResultWaitHandle();
-  public: void t___construct();
-  public: static Object ti_create(CVarRef result);
+  explicit c_StaticResultWaitHandle(Class* cls =
+      c_StaticResultWaitHandle::classof())
+    : c_StaticWaitHandle(cls)
+  {
+    setState(STATE_SUCCEEDED);
+  }
+  ~c_StaticResultWaitHandle() {
+    tvRefcountedDecRefCell(&m_resultOrException);
+  }
+
+  void t___construct();
+  static Object ti_create(CVarRef result);
 
  public:
   static p_StaticResultWaitHandle Create(const Cell& result);
@@ -161,11 +171,18 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(StaticExceptionWaitHandle)
 
-  // need to implement
-  public: c_StaticExceptionWaitHandle(Class* cls = c_StaticExceptionWaitHandle::classof());
-  public: ~c_StaticExceptionWaitHandle();
-  public: void t___construct();
-  public: static Object ti_create(CObjRef exception);
+  explicit c_StaticExceptionWaitHandle(Class* cls =
+      c_StaticExceptionWaitHandle::classof())
+    : c_StaticWaitHandle(cls)
+  {
+    setState(STATE_FAILED);
+  }
+  ~c_StaticExceptionWaitHandle() {
+    tvRefcountedDecRefCell(&m_resultOrException);
+  }
+
+  void t___construct();
+  static Object ti_create(CObjRef exception);
 
  public:
   static p_StaticExceptionWaitHandle Create(ObjectData* exception);
@@ -187,15 +204,14 @@ class c_WaitableWaitHandle : public c_WaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(WaitableWaitHandle)
 
-  // need to implement
-  public: c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::classof());
-  public: ~c_WaitableWaitHandle();
-  public: void t___construct();
-  public: int t_getcontextidx();
-  public: Object t_getcreator();
-  public: Array t_getparents();
-  public: Array t_getdependencystack();
+  explicit c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::classof());
+  ~c_WaitableWaitHandle();
 
+  void t___construct();
+  int t_getcontextidx();
+  Object t_getcreator();
+  Array t_getparents();
+  Array t_getdependencystack();
 
  public:
   AsioContext* getContext() {
@@ -242,11 +258,14 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(BlockableWaitHandle)
 
-  // need to implement
-  public: c_BlockableWaitHandle(Class* cls = c_BlockableWaitHandle::classof());
-  public: ~c_BlockableWaitHandle();
-  public: void t___construct();
+  explicit c_BlockableWaitHandle(Class* cls =
+      c_BlockableWaitHandle::classof())
+    : c_WaitableWaitHandle(cls)
+    , m_nextParent(nullptr)
+  {}
+  ~c_BlockableWaitHandle() {}
 
+  void t___construct();
 
  public:
   c_BlockableWaitHandle* getNextParent();
@@ -282,16 +301,16 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(AsyncFunctionWaitHandle)
 
-  // need to implement
-  public: c_AsyncFunctionWaitHandle(Class* cls = c_AsyncFunctionWaitHandle::classof());
-  public: ~c_AsyncFunctionWaitHandle();
-  public: void t___construct();
-  public: static void ti_setoncreatecallback(CVarRef callback);
-  public: static void ti_setonawaitcallback(CVarRef callback);
-  public: static void ti_setonsuccesscallback(CVarRef callback);
-  public: static void ti_setonfailcallback(CVarRef callback);
-  public: Object t_getprivdata();
-  public: void t_setprivdata(CObjRef data);
+  explicit c_AsyncFunctionWaitHandle(
+    Class* cls = c_AsyncFunctionWaitHandle::classof());
+  ~c_AsyncFunctionWaitHandle() {}
+  void t___construct();
+  static void ti_setoncreatecallback(CVarRef callback);
+  static void ti_setonawaitcallback(CVarRef callback);
+  static void ti_setonsuccesscallback(CVarRef callback);
+  static void ti_setonfailcallback(CVarRef callback);
+  Object t_getprivdata();
+  void t_setprivdata(CObjRef data);
 
  public:
   static void Create(c_Continuation* continuation);
@@ -337,12 +356,14 @@ class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(GenArrayWaitHandle)
 
-  // need to implement
-  public: c_GenArrayWaitHandle(Class* cls = c_GenArrayWaitHandle::classof());
-  public: ~c_GenArrayWaitHandle();
-  public: void t___construct();
-  public: static void ti_setoncreatecallback(CVarRef callback);
-  public: static Object ti_create(CArrRef dependencies);
+  explicit c_GenArrayWaitHandle(Class* cls = c_GenArrayWaitHandle::classof())
+    : c_BlockableWaitHandle(cls)
+  {}
+  ~c_GenArrayWaitHandle() {}
+
+  void t___construct();
+  static void ti_setoncreatecallback(CVarRef callback);
+  static Object ti_create(CArrRef dependencies);
 
 
  public:
@@ -377,12 +398,14 @@ class c_GenMapWaitHandle : public c_BlockableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(GenMapWaitHandle)
 
-  // need to implement
-  public: c_GenMapWaitHandle(Class* cls = c_GenMapWaitHandle::classof());
-  public: ~c_GenMapWaitHandle();
-  public: void t___construct();
-  public: static void ti_setoncreatecallback(CVarRef callback);
-  public: static Object ti_create(CVarRef dependencies);
+  explicit c_GenMapWaitHandle(Class* cls = c_GenMapWaitHandle::classof())
+    : c_BlockableWaitHandle(cls)
+  {}
+  ~c_GenMapWaitHandle() {}
+
+  void t___construct();
+  static void ti_setoncreatecallback(CVarRef callback);
+  static Object ti_create(CVarRef dependencies);
 
  public:
   String getName();
@@ -416,12 +439,14 @@ class c_GenVectorWaitHandle : public c_BlockableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(GenVectorWaitHandle)
 
-  // need to implement
-  public: c_GenVectorWaitHandle(Class* cls = c_GenVectorWaitHandle::classof());
-  public: ~c_GenVectorWaitHandle();
-  public: void t___construct();
-  public: static void ti_setoncreatecallback(CVarRef callback);
-  public: static Object ti_create(CVarRef dependencies);
+  explicit c_GenVectorWaitHandle(Class* cls = c_GenVectorWaitHandle::classof())
+    : c_BlockableWaitHandle(cls)
+  {}
+  ~c_GenVectorWaitHandle() {}
+
+  void t___construct();
+  static void ti_setoncreatecallback(CVarRef callback);
+  static Object ti_create(CVarRef dependencies);
 
  public:
   String getName();
@@ -452,12 +477,18 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(SetResultToRefWaitHandle)
 
-  // need to implement
-  public: c_SetResultToRefWaitHandle(Class* cls = c_SetResultToRefWaitHandle::classof());
-  public: ~c_SetResultToRefWaitHandle();
-  public: void t___construct();
-  public: static void ti_setoncreatecallback(CVarRef callback);
-  public: static Object ti_create(CObjRef wait_handle, VRefParam ref);
+  explicit c_SetResultToRefWaitHandle(Class* cls =
+      c_SetResultToRefWaitHandle::classof())
+    : c_BlockableWaitHandle(cls)
+    , m_child()
+    , m_ref()
+  {}
+  ~c_SetResultToRefWaitHandle() {
+    if (m_ref) decRefRef(m_ref);
+  }
+  void t___construct();
+  static void ti_setoncreatecallback(CVarRef callback);
+  static Object ti_create(CObjRef wait_handle, VRefParam ref);
 
 
  public:
@@ -494,11 +525,14 @@ class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(RescheduleWaitHandle)
 
-  // need to implement
-  public: c_RescheduleWaitHandle(Class* cls = c_RescheduleWaitHandle::classof());
-  public: ~c_RescheduleWaitHandle();
-  public: void t___construct();
-  public: static Object ti_create(int64_t queue, int priority);
+  explicit c_RescheduleWaitHandle(Class* cls =
+      c_RescheduleWaitHandle::classof())
+    : c_WaitableWaitHandle(cls)
+  {}
+  ~c_RescheduleWaitHandle() {}
+
+  void t___construct();
+  static Object ti_create(int64_t queue, int priority);
 
  public:
   void run();
@@ -526,10 +560,13 @@ class c_SessionScopedWaitHandle : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(SessionScopedWaitHandle)
 
-  // need to implement
-  public: c_SessionScopedWaitHandle(Class* cls = c_SessionScopedWaitHandle::classof());
-  public: ~c_SessionScopedWaitHandle();
-  public: void t___construct();
+  explicit c_SessionScopedWaitHandle(Class* cls =
+      c_SessionScopedWaitHandle::classof())
+    : c_WaitableWaitHandle(cls)
+  {}
+  ~c_SessionScopedWaitHandle() {}
+
+  void t___construct();
 
  public:
   void enterContext(context_idx_t ctx_idx);
@@ -553,11 +590,12 @@ class c_SleepWaitHandle : public c_SessionScopedWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(SleepWaitHandle);
 
-  // need to implement
-  public: c_SleepWaitHandle(Class* cls = c_SleepWaitHandle::classof());
-  public: ~c_SleepWaitHandle();
-  public: void t___construct();
-  public: static Object ti_create(int64_t usecs);
+  explicit c_SleepWaitHandle(Class* cls = c_SleepWaitHandle::classof())
+    : c_SessionScopedWaitHandle(cls)
+  {}
+  ~c_SleepWaitHandle() {}
+  void t___construct();
+  static Object ti_create(int64_t usecs);
 
  public:
   void process();
@@ -595,10 +633,13 @@ class c_ExternalThreadEventWaitHandle
  public:
   DECLARE_CLASS(ExternalThreadEventWaitHandle)
 
-  // need to implement
-  public: c_ExternalThreadEventWaitHandle(Class* cls = c_ExternalThreadEventWaitHandle::classof());
-  public: ~c_ExternalThreadEventWaitHandle();
-  public: void t___construct();
+  explicit c_ExternalThreadEventWaitHandle(Class* cls =
+      c_ExternalThreadEventWaitHandle::classof())
+    : c_SessionScopedWaitHandle(cls)
+  {}
+  ~c_ExternalThreadEventWaitHandle() {}
+
+  void t___construct();
 
  public:
   static c_ExternalThreadEventWaitHandle* Create(AsioExternalThreadEvent* event,

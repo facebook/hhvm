@@ -32,6 +32,7 @@ namespace HPHP { namespace IDL {
 
 enum FuncFlags {
   ZendParamMode                 = (1 <<  0),
+  CppCustomDelete               = (1 <<  1),
   IsAbstract                    = (1 <<  4),
   IsFinal                       = (1 <<  5),
   IsPublic                      = (1 <<  6),

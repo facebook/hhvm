@@ -3739,7 +3739,7 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
     if (cls->pinitVec().size() == 0) {
       // Fast case: copy from a known address in the Class
       ArgGroup args = ArgGroup(curOpds())
-        .addr(dstReg, sizeof(ObjectData) + cls->builtinPropSize())
+        .addr(dstReg, sizeof(ObjectData) + cls->builtinODTailSize())
         .imm(int64_t(&cls->declPropInit()[0]))
         .imm(cellsToBytes(nProps));
       cgCallHelper(m_as,
@@ -3756,7 +3756,7 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
       m_as.loadq(rPropData[Class::PropInitVec::dataOff()], rPropData);
       if (!cls->hasDeepInitProps()) {
         ArgGroup args = ArgGroup(curOpds())
-          .addr(dstReg, sizeof(ObjectData) + cls->builtinPropSize())
+          .addr(dstReg, sizeof(ObjectData) + cls->builtinODTailSize())
           .reg(rPropData)
           .imm(cellsToBytes(nProps));
         cgCallHelper(m_as,
@@ -3766,7 +3766,7 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
                      args);
       } else {
         ArgGroup args = ArgGroup(curOpds())
-          .addr(dstReg, sizeof(ObjectData) + cls->builtinPropSize())
+          .addr(dstReg, sizeof(ObjectData) + cls->builtinODTailSize())
           .reg(rPropData)
           .imm(nProps);
         cgCallHelper(m_as,

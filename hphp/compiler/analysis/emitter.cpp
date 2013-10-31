@@ -7697,7 +7697,12 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
                                                   PreClass::AlwaysHoistable);
     pce->init(0, 0, ue->bcPos(), AttrUnique|AttrPersistent, parentName,
               nullptr);
-    pce->setBuiltinClassInfo(e.ci, e.info->m_instanceCtor, e.info->m_sizeof);
+    pce->setBuiltinClassInfo(
+      e.ci,
+      e.info->m_instanceCtor,
+      e.info->m_instanceDtor,
+      BuiltinObjExtents { e.info->m_totalSize, e.info->m_objectDataOffset }
+    );
     {
       ClassInfo::InterfaceVec intfVec = e.ci->getInterfacesVec();
       for (unsigned i = 0; i < intfVec.size(); ++i) {

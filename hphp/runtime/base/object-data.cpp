@@ -36,8 +36,8 @@
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-// statics
+
+//////////////////////////////////////////////////////////////////////
 
 // current maximum object identifier
 IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(int, ObjectData::os_max_id);
@@ -52,25 +52,9 @@ const StaticString
   s___callStatic("__callStatic"),
   s_serialize("serialize");
 
-///////////////////////////////////////////////////////////////////////////////
-// constructor/destructor
+static_assert(sizeof(ObjectData) == 32, "Change this only on purpose");
 
-NEVER_INLINE
-static void freeDynPropArray(ObjectData* inst) {
-  auto& table = g_vmContext->dynPropTable;
-  auto it = table.find(inst);
-  assert(it != end(table));
-  it->second.destroy();
-  table.erase(it);
-}
-
-ObjectData::~ObjectData() {
-  int& pmax = *os_max_id;
-  if (o_id && o_id == pmax) {
-    --pmax;
-  }
-  if (UNLIKELY(getAttribute(HasDynPropArr))) freeDynPropArray(this);
-}
+//////////////////////////////////////////////////////////////////////
 
 HOT_FUNC
 bool ObjectData::destruct() {
@@ -145,6 +129,7 @@ bool ObjectData::o_toBooleanImpl() const noexcept {
   always_assert(false);
   return false;
 }
+
 int64_t ObjectData::o_toInt64Impl() const noexcept {
   // SimpleXMLElement is the only class that has proper custom int casting.
   // If others are added in future, just turn this assert into an if and
@@ -152,6 +137,7 @@ int64_t ObjectData::o_toInt64Impl() const noexcept {
   assert(instanceof(c_SimpleXMLElement::classof()));
   return c_SimpleXMLElement::ToInt64(this);
 }
+
 double ObjectData::o_toDoubleImpl() const noexcept {
   // SimpleXMLElement is the only non-collection class that has custom
   // double casting. If others are added in future, just turn this assert
@@ -637,7 +623,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     }
     // Only serialize CPP extension type instances which can actually
     // be deserialized.
-    if ((builtinPropSize() > 0) && !getVMClass()->isCppSerializable()) {
+    if (getAttribute(IsCppBuiltin) && !getVMClass()->isCppSerializable()) {
       Object placeholder = ObjectData::newInstance(
         SystemLib::s___PHP_Unserializable_ClassClass);
       placeholder->o_set(s_PHP_Unserializable_Class_Name, o_getClassName());
@@ -674,7 +660,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     }
     // Don't try to serialize a CPP extension class which doesn't
     // support serialization. Just send the class name instead.
-    if ((builtinPropSize() > 0) && !getVMClass()->isCppSerializable()) {
+    if (getAttribute(IsCppBuiltin) && !getVMClass()->isCppSerializable()) {
       serializer->write(o_getClassName());
       return;
     }
@@ -858,10 +844,11 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
 }
 
 TypedValue* ObjectData::propVec() {
-  uintptr_t ret = (uintptr_t)this + sizeof(ObjectData) + builtinPropSize();
-  // TODO(#1432007): some builtins still do not have TypedValue-aligned sizes.
-  assert(ret % sizeof(TypedValue) == builtinPropSize() % sizeof(TypedValue));
-  return (TypedValue*) ret;
+  auto const ret = reinterpret_cast<uintptr_t>(this + 1);
+  if (UNLIKELY(getAttribute(IsCppBuiltin))) {
+    return reinterpret_cast<TypedValue*>(ret + m_cls->builtinODTailSize());
+  }
+  return reinterpret_cast<TypedValue*>(ret);
 }
 
 const TypedValue* ObjectData::propVec() const {
@@ -902,23 +889,49 @@ ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
     ObjectData(cls, NoInit::noinit);
 }
 
-void ObjectData::operator delete(void* p) {
-  ObjectData* this_ = (ObjectData*)p;
-  Class* cls = this_->getVMClass();
-  size_t nProps = cls->numDeclProperties();
-  size_t builtinPropSize = cls->builtinPropSize();
-  TypedValue* propVec = (TypedValue*)((uintptr_t)this_ + sizeof(ObjectData) +
-                                      builtinPropSize);
-  for (unsigned i = 0; i < nProps; ++i) {
-    TypedValue* prop = &propVec[i];
+NEVER_INLINE
+static void freeDynPropArray(ObjectData* inst) {
+  auto& table = g_vmContext->dynPropTable;
+  auto it = table.find(inst);
+  assert(it != end(table));
+  it->second.destroy();
+  table.erase(it);
+}
+
+ObjectData::~ObjectData() {
+  int& pmax = *os_max_id;
+  if (o_id && o_id == pmax) {
+    --pmax;
+  }
+  if (UNLIKELY(getAttribute(HasDynPropArr))) freeDynPropArray(this);
+}
+
+void ObjectData::DeleteObject(ObjectData* objectData) {
+  auto const cls = objectData->getVMClass();
+
+  if (UNLIKELY(objectData->getAttribute(IsCppBuiltin))) {
+    return cls->instanceDtor()(objectData, cls);
+  }
+
+  assert(!cls->preClass()->builtinObjSize());
+  assert(!cls->preClass()->builtinODOffset());
+  objectData->~ObjectData();
+
+  // ObjectData subobject is logically destructed now---don't access
+  // objectData->foo for anything.
+
+  auto const nProps = size_t{cls->numDeclProperties()};
+  auto prop = reinterpret_cast<TypedValue*>(objectData + 1);
+  auto const stop = prop + nProps;
+  for (; prop != stop; ++prop) {
     tvRefcountedDecRef(prop);
   }
 
-  auto const size = sizeForNProps(nProps) + builtinPropSize;
+  auto const size = sizeForNProps(nProps);
   if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSizeLogged(this_, size);
+    return MM().smartFreeSizeLogged(objectData, size);
   }
-  MM().smartFreeSizeBigLogged(this_, size);
+  MM().smartFreeSizeBigLogged(objectData, size);
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {
@@ -1505,10 +1518,9 @@ bool ObjectData::hasToString() {
 }
 
 void ObjectData::cloneSet(ObjectData* clone) {
-  Slot nProps = m_cls->numDeclProperties();
-  TypedValue* clonePropVec = (TypedValue*)((uintptr_t)clone +
-                               sizeof(ObjectData) + builtinPropSize());
-  for (Slot i = 0; i < nProps; i++) {
+  auto const nProps = m_cls->numDeclProperties();
+  auto const clonePropVec = clone->propVec();
+  for (auto i = Slot{0}; i < nProps; i++) {
     tvRefcountedDecRef(&clonePropVec[i]);
     tvDupFlattenVars(&propVec()[i], &clonePropVec[i]);
   }

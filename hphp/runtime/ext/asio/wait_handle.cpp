@@ -22,13 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_WaitHandle::c_WaitHandle(Class* cb)
-    : ExtObjectData(cb), m_resultOrException(make_tv<KindOfNull>()) {
-}
-
-c_WaitHandle::~c_WaitHandle() {
-}
-
 void c_WaitHandle::t___construct() {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
 }

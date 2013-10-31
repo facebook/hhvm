@@ -86,7 +86,7 @@ class c_UConverter : public ExtObjectData {
 
   // need to implement
   public: c_UConverter(Class* cls = c_UConverter::classof());
-  public: ~c_UConverter();
+  ~c_UConverter() {}
   public: void t___construct(const String& toEncoding = "utf-8",
                              const String& fromEncoding = "utf-8");
   public: Variant t___destruct();

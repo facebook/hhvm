@@ -133,7 +133,7 @@ class ObjectDataPrinter:
             self.end = end
             if self.cur != self.end:
                 addr = val.address.cast(gdb.lookup_type('char').pointer())
-                addr = addr + val.type.sizeof + cls['m_builtinPropSize']
+                addr = addr + val.type.sizeof + cls['m_builtinODTailSize']
                 self.addr = addr.cast(gdb.lookup_type('HPHP::TypedValue').pointer())
 
         def __iter__(self):

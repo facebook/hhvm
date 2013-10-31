@@ -74,13 +74,6 @@ const int64_t q_DateTimeZone$$PER_COUNTRY = 4096;
 ///////////////////////////////////////////////////////////////////////////////
 // methods
 
-c_DateTime::c_DateTime(Class* cb)
-  : ExtObjectDataFlags<ObjectData::HasClone>(cb) {
-}
-
-c_DateTime::~c_DateTime() {
-}
-
 Object c_DateTime::t_add(CObjRef interval) {
   m_dt->add(c_DateInterval::unwrap(interval));
   return this;
@@ -191,13 +184,6 @@ c_DateTime* c_DateTime::Clone(ObjectData* obj) {
   return dt;
 }
 
-c_DateTimeZone::c_DateTimeZone(Class* cb) :
-    ExtObjectDataFlags<ObjectData::HasClone>(cb) {
-}
-
-c_DateTimeZone::~c_DateTimeZone() {
-}
-
 void c_DateTimeZone::t___construct(const String& timezone) {
   m_tz = NEWOBJ(TimeZone)(timezone);
   if (!m_tz->isValid()) {
@@ -238,15 +224,6 @@ c_DateTimeZone* c_DateTimeZone::Clone(ObjectData* obj) {
   c_DateTimeZone* dtz = static_cast<c_DateTimeZone*>(obj->cloneImpl());
   dtz->m_tz = static_cast<c_DateTimeZone*>(obj)->m_tz->cloneTimeZone();
   return dtz;
-}
-
-c_DateInterval::c_DateInterval(Class* cb)
-  : ExtObjectDataFlags<ObjectData::UseGet|
-                       ObjectData::UseSet|
-                       ObjectData::HasClone>(cb) {
-}
-
-c_DateInterval::~c_DateInterval() {
 }
 
 void c_DateInterval::t___construct(const String& interval_spec) {

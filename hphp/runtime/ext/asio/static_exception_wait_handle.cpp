@@ -25,15 +25,6 @@ namespace {
   StaticString s_staticException("<static-exception>");
 }
 
-c_StaticExceptionWaitHandle::c_StaticExceptionWaitHandle(Class* cb)
-    : c_StaticWaitHandle(cb) {
-  setState(STATE_FAILED);
-}
-
-c_StaticExceptionWaitHandle::~c_StaticExceptionWaitHandle() {
-  tvRefcountedDecRefCell(&m_resultOrException);
-}
-
 void c_StaticExceptionWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use StaticExceptionWaitHandle::create() instead of constructor"));

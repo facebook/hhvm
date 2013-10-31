@@ -26,8 +26,8 @@ c_ZendObjectData::c_ZendObjectData(Class* cls) : ObjectData(cls) {}
 
 ObjectData* new_ZendObjectData_Instance(Class* cls) {
   size_t nProps = cls->numDeclProperties();
-  size_t builtinPropSize = sizeof(c_ZendObjectData) - sizeof(ObjectData);
-  size_t size = ObjectData::sizeForNProps(nProps) + builtinPropSize;
+  size_t builtinObjSize = sizeof(c_ZendObjectData) - sizeof(ObjectData);
+  size_t size = ObjectData::sizeForNProps(nProps) + builtinObjSize;
   auto obj = new (MM().objMallocLogged(size)) c_ZendObjectData(cls);
 
   zend_class_entry* ce = zend_hphp_class_to_class_entry(cls);
@@ -64,6 +64,29 @@ ObjectData* new_ZendObjectData_Instance(Class* cls) {
   }
 
   return obj;
+}
+
+void delete_ZendObjectData(ObjectData* objData, const Class* cls) {
+  auto const zobj = static_cast<c_ZendObjectData*>(objData);
+  /*
+   * TODO: ~c_ZendObjectData should probably run extension-provided
+   * deallocation functions.
+   */
+  zobj->~c_ZendObjectData();
+
+  auto const nProps = cls->numDeclProperties();
+  auto prop = reinterpret_cast<TypedValue*>(zobj + 1);
+  auto const stop = prop + nProps;
+  for (; prop != stop; ++prop) {
+    tvRefcountedDecRef(prop);
+  }
+
+  auto const builtinSz = sizeof(c_ZendObjectData) - sizeof(ObjectData);
+  auto const size = ObjectData::sizeForNProps(nProps) + builtinSz;
+  if (LIKELY(size <= kMaxSmartSize)) {
+    return MM().smartFreeSizeLogged(zobj, size);
+  }
+  return MM().smartFreeSizeBigLogged(zobj, size);
 }
 
 }

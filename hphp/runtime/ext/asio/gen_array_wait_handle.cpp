@@ -37,13 +37,6 @@ namespace {
   }
 }
 
-c_GenArrayWaitHandle::c_GenArrayWaitHandle(Class* cb)
-    : c_BlockableWaitHandle(cb), m_exception() {
-}
-
-c_GenArrayWaitHandle::~c_GenArrayWaitHandle() {
-}
-
 void c_GenArrayWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use GenArrayWaitHandle::create() instead of constructor"));

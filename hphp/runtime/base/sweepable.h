@@ -48,7 +48,6 @@ public:
 
 public:
   Sweepable();
-  virtual ~Sweepable();
 
   /*
    * There is no default behavior. Make sure this function frees all
@@ -71,6 +70,9 @@ public:
    * sweep() called at the next SweepAll.
    */
   void unregister();
+
+protected:
+  ~Sweepable();
 
 private:
   Node m_sweepNode;

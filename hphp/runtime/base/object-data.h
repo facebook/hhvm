@@ -41,9 +41,6 @@ class Class;
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps);
 
-/**
- * Base class of all PHP objects and PHP resources.
- */
 class ObjectData {
  public:
   enum Attribute {
@@ -58,6 +55,7 @@ class ObjectData {
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasClone      = 0x0400, // has custom clone logic
     HasDynPropArr = 0x0800, // has a dynamic properties array
+    IsCppBuiltin  = 0x1000, // has custom C++ subclass
 
     // The bits in CollectionTypeAttrMask of o_attributes are reserved
     // to indicate the type of collection.
@@ -81,9 +79,21 @@ class ObjectData {
 
  public:
   explicit ObjectData(Class* cls)
-    : o_attribute(0)
+    : m_cls(cls)
+    , o_attribute(0)
     , m_count(0)
-    , m_cls(cls) {
+  {
+    assert(uintptr_t(this) % sizeof(TypedValue) == 0);
+    o_id = ++(*os_max_id);
+    instanceInit(cls);
+  }
+
+ protected:
+  explicit ObjectData(Class* cls, int16_t flags)
+    : m_cls(cls)
+    , o_attribute(flags)
+    , m_count(0)
+  {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
     o_id = ++(*os_max_id);
     instanceInit(cls);
@@ -92,9 +102,10 @@ class ObjectData {
  private:
   enum class NoInit { noinit };
   explicit ObjectData(Class* cls, NoInit)
-    : o_attribute(0)
+    : m_cls(cls)
+    , o_attribute(0)
     , m_count(0)
-    , m_cls(cls) {
+  {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
     o_id = ++(*os_max_id);
   }
@@ -108,7 +119,9 @@ class ObjectData {
   bool isStatic() const { return false; }
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
 
-  virtual ~ObjectData();
+ protected:
+  ~ObjectData();
+ public:
 
   // Call newInstance() to instantiate a PHP object
   static ObjectData* newInstance(Class* cls) {
@@ -173,13 +186,11 @@ class ObjectData {
   }
 
  public:
-  void operator delete(void* p);
+  static void DeleteObject(ObjectData* p);
 
   void release() {
     assert(!hasMultipleRefs());
-    if (LIKELY(destruct())) {
-      delete this;
-    }
+    if (LIKELY(destruct())) DeleteObject(this);
   }
 
   Class* getVMClass() const {
@@ -379,9 +390,6 @@ class ObjectData {
 
   //============================================================================
   // Properties.
- public:
-  int builtinPropSize() const { return m_cls->builtinPropSize(); }
-
  private:
   void initDynProps(int numDynamic = 0);
   Slot declPropInd(TypedValue* prop) const;
@@ -437,32 +445,26 @@ class ObjectData {
   static void raiseAbstractClassError(Class* cls);
   void raiseUndefProp(const StringData* name);
 
- private:
+private:
+  friend struct MemoryProfile;
   static void compileTimeAssertions() {
     static_assert(offsetof(ObjectData, m_count) == FAST_REFCOUNT_OFFSET, "");
   }
 
-  friend struct MemoryProfile;
-
-  //============================================================================
-  // ObjectData fields
-
- private:
-  // Various per-instance flags
+private:
+  Class* m_cls;
   mutable int16_t o_attribute;
- protected:
+
   // 16 bits of memory that can be reused by subclasses
+protected:
   union {
     uint16_t u16;
     uint8_t u8[2];
   } o_subclassData;
-  // Counter to keep track of the number of references to this object
-  // (i.e. the object's "refcount")
+
+private:
   mutable RefCount m_count;
-  // Pointer to this object's class
-  Class* m_cls;
-  // Storage for dynamic properties
-  uintptr_t wastedSpace; // TODO
+
   // Numeric identifier of this object (used for var_dump())
   int o_id;
 } __attribute__((aligned(16)));
@@ -519,20 +521,20 @@ inline ObjectData* instanceFromTv(TypedValue* tv) {
   return tv->m_data.pobj;
 }
 
-class ExtObjectData : public ObjectData {
- public:
-  explicit ExtObjectData(HPHP::Class* cls) : ObjectData(cls) {
-    assert(!m_cls->callsCustomInstanceInit());
+template<int16_t Flags>
+struct ExtObjectDataFlags : ObjectData {
+  explicit ExtObjectDataFlags(HPHP::Class* cb)
+    : ObjectData(cb, Flags | ObjectData::IsCppBuiltin)
+  {
+    assert(!getVMClass()->callsCustomInstanceInit());
   }
+
+protected:
+  ~ExtObjectDataFlags() {}
 };
 
-template <int flags> class ExtObjectDataFlags : public ExtObjectData {
- public:
-  explicit ExtObjectDataFlags(HPHP::Class* cb) : ExtObjectData(cb) {
-    ObjectData::setAttributes(flags);
-  }
-};
+using ExtObjectData = ExtObjectDataFlags<ObjectData::IsCppBuiltin>;
 
-} // HPHP
+}
 
 #endif

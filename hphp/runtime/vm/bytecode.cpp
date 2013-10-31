@@ -2157,7 +2157,7 @@ MethodInfoVM::~MethodInfoVM() {
 }
 
 ClassInfoVM::~ClassInfoVM() {
-  destroyMembers(m_methodsVec);
+  for (auto& m : m_methodsVec) delete m;
   destroyMapValues(m_properties);
   destroyMapValues(m_constants);
 }
@@ -6768,7 +6768,9 @@ OPTBLD_INLINE void VMExecutionContext::iopCreateCl(PC& pc) {
 
 static inline c_Continuation* createCont(const Func* origFunc,
                                          const Func* genFunc) {
-  auto const cont = c_Continuation::alloc(origFunc, genFunc);
+  auto const cont = static_cast<c_Continuation*>(
+    c_Continuation::alloc(origFunc, genFunc)
+  );
   cont->incRefCount();
   cont->setNoDestruct();
 

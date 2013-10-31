@@ -34,23 +34,9 @@ Object f_hphp_create_continuation(const String& clsname, const String& funcname,
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation
 
-class c_Continuation : public ExtObjectDataFlags<ObjectData::HasClone> {
- public:
+struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   DECLARE_CLASS_NO_ALLOCATION(Continuation)
-  void operator delete(void* p) {
-    c_Continuation* this_ = (c_Continuation*)p;
-    auto const size = this_->getObjectSize();
-    if (LIKELY(size <= kMaxSmartSize)) {
-      MM().smartFreeSizeLogged(this_, size);
-      return;
-    }
-    MM().smartFreeSizeBigLogged(this_, size);
-  }
 
-  explicit c_Continuation(Class* cls = c_Continuation::classof());
-  ~c_Continuation();
-
-public:
   static constexpr uint startedOffset() {
     return offsetof(c_Continuation, o_subclassData);
   }
@@ -88,7 +74,7 @@ public:
 
   static c_Continuation* Clone(ObjectData* obj);
 
-  static c_Continuation* alloc(const Func* origFunc, const Func* genFunc) {
+  static ObjectData* alloc(const Func* origFunc, const Func* genFunc) {
     assert(origFunc);
     assert(genFunc);
 
@@ -113,7 +99,6 @@ public:
     return arOffset;
   }
 
-public:
   void call_next();
   void call_send(Cell& v);
   void call_raise(ObjectData* e);
@@ -142,6 +127,9 @@ public:
   Offset getNextExecutionOffset() const;
 
 private:
+  explicit c_Continuation(Class* cls = c_Continuation::classof());
+  ~c_Continuation();
+
   size_t getObjectSize() {
     return (char*)(m_arPtr + 1) - (char*)this;
   }

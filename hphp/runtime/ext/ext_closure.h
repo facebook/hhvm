@@ -65,7 +65,7 @@ public:
   TypedValue* getUseVars() { return propVec(); }
   TypedValue* getStaticVar(Slot s) { return propVec() + s; }
   int32_t getNumUseVars() const {
-    return m_cls->numDeclProperties() - m_func->numStaticLocals();
+    return getVMClass()->numDeclProperties() - m_func->numStaticLocals();
   }
 
   static size_t funcOffset() { return offsetof(c_Closure, m_func); }

@@ -59,7 +59,8 @@ typedef hphp_hash_map<
   string_data_isame
 > UserAttributeMap;
 
-typedef ObjectData*(*BuiltinCtorFunction)(Class*);
+using BuiltinCtorFunction = ObjectData* (*)(Class*);
+using BuiltinDtorFunction = void (*)(ObjectData*, const Class*);
 
 /*
  * A PreClass represents the source-level definition of a php class,
@@ -314,8 +315,21 @@ class PreClass : public AtomicCountable {
     return &m_properties[s];
   }
 
+  /*
+   * Extension builtin classes have custom creation and destruction
+   * routines.
+   */
   BuiltinCtorFunction instanceCtor() const { return m_instanceCtor; }
-  int builtinPropSize() const { return m_builtinPropSize; }
+  BuiltinDtorFunction instanceDtor() const { return m_instanceDtor; }
+
+  /*
+   * For a builtin class c_Foo, the builtinObjSize is the size of the
+   * object excluding ObjectData (sizeof(c_Foo) - sizeof(ObjectData)),
+   * and builtinODOffset is the offset of the ObjectData subobject in
+   * c_Foo.
+   */
+  uint32_t builtinObjSize() const { return m_builtinObjSize; }
+  int32_t builtinODOffset() const { return m_builtinODOffset; }
 
   void prettyPrint(std::ostream& out) const;
 
@@ -337,13 +351,14 @@ private:
   int m_line2;
   Offset m_offset;
   Id m_id;
-  int m_builtinPropSize;
+  uint32_t m_builtinObjSize{0};
+  int32_t m_builtinODOffset{0};
   Attr m_attrs;
   Hoistable m_hoistable;
   const StringData* m_name;
   const StringData* m_parent;
   const StringData* m_docComment;
-  BuiltinCtorFunction m_instanceCtor;
+  BuiltinCtorFunction m_instanceCtor = nullptr;
   InterfaceVec m_interfaces;
   UsedTraitVec m_usedTraits;
   TraitPrecRuleVec m_traitPrecRules;
@@ -352,6 +367,7 @@ private:
   MethodMap m_methods;
   PropMap m_properties;
   ConstMap m_constants;
+  BuiltinDtorFunction m_instanceDtor = nullptr;
 };
 
 typedef AtomicSmartPtr<PreClass> PreClassPtr;
@@ -588,8 +604,21 @@ struct Class : AtomicCountable {
   // ObjectData attributes, to be set during instance initialization.
   int getODAttrs() const { return m_ODAttrs; }
 
-  int builtinPropSize() const { return m_builtinPropSize; }
+  /*
+   * Custom initialization and destruction routines for builtin
+   * classes.
+   */
   BuiltinCtorFunction instanceCtor() const { return m_instanceCtor; }
+  BuiltinDtorFunction instanceDtor() const { return m_instanceDtor; }
+
+  /*
+   * This value is the pointer adjustment from an ObjectData* to get
+   * to the property vector, for a builtin class.  I.e., it's the
+   * number of bytes of subclass data following the ObjectData
+   * subobject.
+   */
+  int32_t builtinODTailSize() const { return m_builtinODTailSize; }
+
   bool isCppSerializable() const;
   bool isCollectionClass() const;
 
@@ -852,14 +881,15 @@ private:
   unsigned m_attrCopy : 28;               // cache of m_preClass->attrs().
   int32_t m_ODAttrs;
 
-  int32_t m_builtinPropSize;
+  uint32_t m_builtinODTailSize{0};
   int32_t m_declPropNumAccessible;
   unsigned m_classVecLen;
   mutable RDS::Link<Class*> m_cachedClass; // can this be const Class*?
   mutable RDS::Link<PropInitVec*> m_propDataCache;
   mutable RDS::Link<TypedValue*> m_propSDataCache;
   mutable RDS::Link<Array> m_nonScalarConstantCache;
-  BuiltinCtorFunction m_instanceCtor;
+  BuiltinCtorFunction m_instanceCtor{nullptr};
+  BuiltinDtorFunction m_instanceDtor{nullptr};
   ConstMap m_constants;
 
   /*

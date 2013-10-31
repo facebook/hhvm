@@ -32,13 +32,6 @@ const int64_t q_RescheduleWaitHandle$$QUEUE_DEFAULT =
 const int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO =
   AsioContext::QUEUE_NO_PENDING_IO;
 
-c_RescheduleWaitHandle::c_RescheduleWaitHandle(Class *cb)
-    : c_WaitableWaitHandle(cb) {
-}
-
-c_RescheduleWaitHandle::~c_RescheduleWaitHandle() {
-}
-
 void c_RescheduleWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use RescheduleWaitHandle::create() instead of constructor"));

@@ -28,13 +28,6 @@ namespace {
   StaticString s_sleep("<sleep>");
 }
 
-c_SleepWaitHandle::c_SleepWaitHandle(Class *cb)
-  : c_SessionScopedWaitHandle(cb) {
-}
-
-c_SleepWaitHandle::~c_SleepWaitHandle() {
-}
-
 void c_SleepWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use SleepWaitHandle::create() instead of constructor"));

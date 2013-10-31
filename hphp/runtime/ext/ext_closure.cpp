@@ -58,7 +58,7 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
    * Copy the use vars to instance variables, and initialize any
    * instance properties that are for static locals to KindOfUninit.
    */
-  auto const numDeclProperties = m_cls->numDeclProperties();
+  auto const numDeclProperties = getVMClass()->numDeclProperties();
   assert(numDeclProperties - numArgs == m_func->numStaticLocals());
   TypedValue* beforeCurUseVar = sp + numArgs;
   TypedValue* curProperty = propVec();

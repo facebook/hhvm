@@ -46,8 +46,11 @@ class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
   DECLARE_CLASS_NO_SWEEP(DateTime)
 
   // need to implement
-  public: c_DateTime(Class* cls = c_DateTime::classof());
-  public: ~c_DateTime();
+  c_DateTime(Class* cls = c_DateTime::classof())
+    : ExtObjectDataFlags(cls)
+  {}
+  ~c_DateTime() {}
+
   public: Object t_add(CObjRef interval);
   public: void t___construct(const String& time = "now",
                              CObjRef timezone = null_object);
@@ -113,8 +116,11 @@ class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
   DECLARE_CLASS_NO_SWEEP(DateTimeZone)
 
   // need to implement
-  public: c_DateTimeZone(Class* cls = c_DateTimeZone::classof());
-  public: ~c_DateTimeZone();
+  c_DateTimeZone(Class* cls = c_DateTimeZone::classof())
+    : ExtObjectDataFlags(cls)
+  {}
+  ~c_DateTimeZone() {}
+
   public: void t___construct(const String& timezone);
   public: Array t_getlocation();
   public: String t_getname();
@@ -156,8 +162,11 @@ class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|
   DECLARE_CLASS_NO_SWEEP(DateInterval)
 
   // need to implement
-  public: c_DateInterval(Class* cls = c_DateInterval::classof());
-  public: ~c_DateInterval();
+  c_DateInterval(Class* cls = c_DateInterval::classof())
+    : ExtObjectDataFlags(cls)
+  {}
+  ~c_DateInterval() {}
+
   public: void t___construct(const String& interval_spec);
   public: Variant t___get(Variant member);
   public: Variant t___set(Variant member, Variant value);

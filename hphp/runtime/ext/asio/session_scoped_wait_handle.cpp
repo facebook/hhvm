@@ -23,13 +23,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SessionScopedWaitHandle::c_SessionScopedWaitHandle(Class *cb)
-  : c_WaitableWaitHandle(cb) {
-}
-
-c_SessionScopedWaitHandle::~c_SessionScopedWaitHandle() {
-}
-
 void c_SessionScopedWaitHandle::t___construct() {
   throw NotSupportedException(__func__, "Cannot construct abstract class");
 }

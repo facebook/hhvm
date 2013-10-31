@@ -146,8 +146,11 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|
   DECLARE_CLASS_NO_SWEEP(DOMNode)
 
   // need to implement
-  public: c_DOMNode(Class* cls = c_DOMNode::classof());
-  public: ~c_DOMNode();
+  c_DOMNode(Class* cls = c_DOMNode::classof())
+    : ExtObjectDataFlags(cls)
+    , m_node(nullptr)
+  {}
+  ~c_DOMNode() {}
   public: void t___construct();
   public: Variant t_appendchild(CObjRef newnode);
   public: Variant t_clonenode(bool deep = false);
@@ -192,8 +195,10 @@ class c_DOMAttr : public c_DOMNode {
   DECLARE_CLASS_NO_SWEEP(DOMAttr)
 
   // need to implement
-  public: c_DOMAttr(Class* cls = c_DOMAttr::classof());
-  public: ~c_DOMAttr();
+  c_DOMAttr(Class* cls = c_DOMAttr::classof())
+    : c_DOMNode(cls)
+  {}
+  ~c_DOMAttr() {}
   public: void t___construct(
     const String& name, const String& value = null_string);
   public: bool t_isid();
@@ -214,8 +219,11 @@ class c_DOMCharacterData : public c_DOMNode {
   DECLARE_CLASS_NO_SWEEP(DOMCharacterData)
 
   // need to implement
-  public: c_DOMCharacterData(Class* cls = c_DOMCharacterData::classof());
-  public: ~c_DOMCharacterData();
+  c_DOMCharacterData(Class* cls = c_DOMCharacterData::classof())
+    : c_DOMNode(cls)
+  {}
+  ~c_DOMCharacterData() {}
+
   public: void t___construct();
   public: bool t_appenddata(const String& arg);
   public: bool t_deletedata(int64_t offset, int64_t count);
@@ -239,8 +247,10 @@ class c_DOMComment : public c_DOMCharacterData {
   DECLARE_CLASS_NO_SWEEP(DOMComment)
 
   // need to implement
-  public: c_DOMComment(Class* cls = c_DOMComment::classof());
-  public: ~c_DOMComment();
+  c_DOMComment(Class* cls = c_DOMComment::classof())
+    : c_DOMCharacterData(cls)
+  {}
+  ~c_DOMComment() {}
   public: void t___construct(const String& value = null_string);
 
 
@@ -256,8 +266,11 @@ class c_DOMText : public c_DOMCharacterData {
   DECLARE_CLASS_NO_SWEEP(DOMText)
 
   // need to implement
-  public: c_DOMText(Class* cls = c_DOMText::classof());
-  public: ~c_DOMText();
+  c_DOMText(Class* cls = c_DOMText::classof())
+    : c_DOMCharacterData(cls)
+  {}
+  ~c_DOMText() {}
+
   public: void t___construct(const String& value = null_string);
   public: bool t_iswhitespaceinelementcontent();
   public: Variant t_splittext(int64_t offset);
@@ -277,9 +290,10 @@ class c_DOMCDATASection : public c_DOMText {
  public:
   DECLARE_CLASS_NO_SWEEP(DOMCDATASection)
 
-  // need to implement
-  public: c_DOMCDATASection(Class* cls = c_DOMCDATASection::classof());
-  public: ~c_DOMCDATASection();
+  c_DOMCDATASection(Class* cls = c_DOMCDATASection::classof())
+    : c_DOMText(cls)
+  {}
+  ~c_DOMCDATASection() {}
   public: void t___construct(const String& value);
 
 
@@ -295,8 +309,9 @@ class c_DOMDocument : public c_DOMNode, public Sweepable {
   DECLARE_CLASS(DOMDocument)
 
   // need to implement
-  public: c_DOMDocument(Class* cls = c_DOMDocument::classof());
-  public: ~c_DOMDocument();
+  c_DOMDocument(Class* cls = c_DOMDocument::classof());
+  ~c_DOMDocument();
+
   public: void t___construct(
     const String& version = null_string, const String& encoding = null_string);
   public: Variant t_createattribute(const String& name);
@@ -365,8 +380,11 @@ class c_DOMDocumentFragment : public c_DOMNode {
   DECLARE_CLASS_NO_SWEEP(DOMDocumentFragment)
 
   // need to implement
-  public: c_DOMDocumentFragment(Class* cls = c_DOMDocumentFragment::classof());
-  public: ~c_DOMDocumentFragment();
+  c_DOMDocumentFragment(Class* cls = c_DOMDocumentFragment::classof())
+    : c_DOMNode(cls)
+  {}
+  ~c_DOMDocumentFragment() {}
+
   public: void t___construct();
   public: bool t_appendxml(const String& data);
 
@@ -383,8 +401,10 @@ class c_DOMDocumentType : public c_DOMNode {
   DECLARE_CLASS_NO_SWEEP(DOMDocumentType)
 
   // need to implement
-  public: c_DOMDocumentType(Class* cls = c_DOMDocumentType::classof());
-  public: ~c_DOMDocumentType();
+  c_DOMDocumentType(Class* cls = c_DOMDocumentType::classof())
+    : c_DOMNode(cls)
+  {}
+  ~c_DOMDocumentType() {}
   public: void t___construct();
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
@@ -402,9 +422,10 @@ class c_DOMElement : public c_DOMNode {
  public:
   DECLARE_CLASS_NO_SWEEP(DOMElement)
 
-  // need to implement
-  public: c_DOMElement(Class* cls = c_DOMElement::classof());
-  public: ~c_DOMElement();
+  c_DOMElement(Class* cls = c_DOMElement::classof())
+    : c_DOMNode(cls)
+  {}
+  ~c_DOMElement() {}
   public: void t___construct(
     const String& name, const String& value = null_string,
     const String& namespaceuri = null_string);
@@ -449,9 +470,10 @@ class c_DOMEntity : public c_DOMNode {
  public:
   DECLARE_CLASS_NO_SWEEP(DOMEntity)
 
-  // need to implement
-  public: c_DOMEntity(Class* cls = c_DOMEntity::classof());
-  public: ~c_DOMEntity();
+  c_DOMEntity(Class* cls = c_DOMEntity::classof())
+    : c_DOMNode(cls)
+  {}
+  ~c_DOMEntity() {}
   public: void t___construct();
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
@@ -470,8 +492,10 @@ class c_DOMEntityReference : public c_DOMNode {
   DECLARE_CLASS_NO_SWEEP(DOMEntityReference)
 
   // need to implement
-  public: c_DOMEntityReference(Class* cls = c_DOMEntityReference::classof());
-  public: ~c_DOMEntityReference();
+  c_DOMEntityReference(Class* cls = c_DOMEntityReference::classof())
+    : c_DOMNode(cls)
+  {}
+  ~c_DOMEntityReference() {}
   public: void t___construct(const String& name);
 
 
@@ -487,8 +511,10 @@ class c_DOMNotation : public c_DOMNode {
   DECLARE_CLASS_NO_SWEEP(DOMNotation)
 
   // need to implement
-  public: c_DOMNotation(Class* cls = c_DOMNotation::classof());
-  public: ~c_DOMNotation();
+  c_DOMNotation(Class* cls = c_DOMNotation::classof())
+    : c_DOMNode(cls)
+  {}
+  ~c_DOMNotation() {}
   public: void t___construct();
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);
@@ -528,8 +554,8 @@ class c_DOMNodeIterator : public ExtObjectData, public Sweepable {
   DECLARE_CLASS(DOMNodeIterator)
 
   // need to implement
-  public: c_DOMNodeIterator(Class* cls = c_DOMNodeIterator::classof());
-  public: ~c_DOMNodeIterator();
+  c_DOMNodeIterator(Class* cls = c_DOMNodeIterator::classof());
+  ~c_DOMNodeIterator();
   public: void t___construct();
   public: Variant t_current();
   public: Variant t_key();
@@ -562,8 +588,10 @@ class c_DOMNamedNodeMap
   DECLARE_CLASS_NO_SWEEP(DOMNamedNodeMap)
 
   // need to implement
-  public: c_DOMNamedNodeMap(Class* cls = c_DOMNamedNodeMap::classof());
-  public: ~c_DOMNamedNodeMap();
+  c_DOMNamedNodeMap(Class* cls = c_DOMNamedNodeMap::classof())
+    : ExtObjectDataFlags(cls)
+  {}
+  ~c_DOMNamedNodeMap() {}
   public: void t___construct();
   public: Variant t_getnameditem(const String& name);
   public: Variant t_getnameditemns(
@@ -590,8 +618,10 @@ class c_DOMNodeList
   DECLARE_CLASS_NO_SWEEP(DOMNodeList)
 
   // need to implement
-  public: c_DOMNodeList(Class* cls = c_DOMNodeList::classof());
-  public: ~c_DOMNodeList();
+  c_DOMNodeList(Class* cls = c_DOMNodeList::classof())
+    : ExtObjectDataFlags(cls)
+  {}
+  ~c_DOMNodeList() {}
   public: void t___construct();
   public: Variant t_item(int64_t index);
   public: Variant t___get(Variant name);
@@ -612,8 +642,11 @@ class c_DOMImplementation : public ExtObjectData {
   DECLARE_CLASS_NO_SWEEP(DOMImplementation)
 
   // need to implement
-  public: c_DOMImplementation(Class* cls = c_DOMImplementation::classof());
-  public: ~c_DOMImplementation();
+  c_DOMImplementation(Class* cls = c_DOMImplementation::classof())
+    : ExtObjectData(cls)
+  {}
+  ~c_DOMImplementation() {}
+
   public: void t___construct();
   public: Variant t_createdocument(
     const String& namespaceuri = null_string,
@@ -640,8 +673,8 @@ class c_DOMXPath
   DECLARE_CLASS(DOMXPath)
 
   // need to implement
-  public: c_DOMXPath(Class* cls = c_DOMXPath::classof());
-  public: ~c_DOMXPath();
+  c_DOMXPath(Class* cls = c_DOMXPath::classof());
+  ~c_DOMXPath();
   public: void t___construct(CVarRef doc);
   public: Variant t_evaluate(const String& expr, CObjRef context = null_object);
   public: Variant t_query(const String& expr, CObjRef context = null_object);

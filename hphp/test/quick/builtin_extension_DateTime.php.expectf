@@ -1,8 +1,10 @@
 DateTime
 object(DateTime)#1 (0) {
 }
-string(19) "O:8:"DateTime":0:{}"
-object(DateTime)#2 (0) {
+string(92) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:8:"DateTime";}"
+object(__PHP_Unserializable_Class)#2 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(8) "DateTime"
 }
 array(16) {
   [0]=>
@@ -44,10 +46,10 @@ object(A_DateTime)#3 (1) {
   ["___x"]=>
   NULL
 }
-string(35) "O:10:"A_DateTime":1:{s:4:"___x";N;}"
-object(A_DateTime)#4 (1) {
-  ["___x"]=>
-  NULL
+string(95) "O:26:"__PHP_Unserializable_Class":1:{s:31:"__PHP_Unserializable_Class_Name";s:10:"A_DateTime";}"
+object(__PHP_Unserializable_Class)#4 (1) {
+  ["__PHP_Unserializable_Class_Name"]=>
+  string(10) "A_DateTime"
 }
 array(17) {
   [0]=>

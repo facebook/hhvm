@@ -163,6 +163,17 @@ int main(int argc, const char* argv[]) {
 
   cpp << "const long long hhbc_ext_class_count = " << classes.size() << ";\n";
 
+  auto instance_dtor_name = [&] (const PhpClass& klass) {
+    return (klass.flags() & ZendCompat)
+      ? "delete_ZendObjectData"
+      : folly::to<std::string>("delete_", klass.name());
+  };
+
+  for (auto& klass : classes) {
+    cpp << "extern void " << instance_dtor_name(klass)
+        << "(ObjectData*, const Class*);\n";
+  }
+
   cpp << "const HhbcExtClassInfo hhbc_ext_classes[] = {\n  ";
   first = true;
   for (auto const& klass : classes) {
@@ -171,9 +182,12 @@ int main(int argc, const char* argv[]) {
     }
     first = false;
 
-    auto ctor = (classesWithCtors.count(klass.name()) > 0
+    auto ctor = classesWithCtors.count(klass.name()) > 0
                  ? fbstring("new_") + klass.name() + "_Instance"
-                 : fbstring("nullptr"));
+                 : fbstring("nullptr");
+    auto dtor = classesWithCtors.count(klass.name()) > 0
+                 ? instance_dtor_name(klass)
+                 : fbstring{"nullptr"};
 
     auto cpp_name = klass.name();
     if (klass.flags() & ZendCompat) {
@@ -181,11 +195,17 @@ int main(int argc, const char* argv[]) {
       ctor = "new_ZendObjectData_Instance";
     }
 
-    cpp << "{ \"" << klass.name() << "\", " << ctor
-        << ", sizeof(c_" << cpp_name << ')'
+    auto const c_cpp_name = "c_" + cpp_name;
+    cpp << "{ \"" << klass.name() << "\", " << ctor << "," << dtor
+        << ", sizeof(" << c_cpp_name << ')'
+        << ", intptr_t("
+               "static_cast<ObjectData*>("
+                 "reinterpret_cast<" << c_cpp_name << "*>(0x100)"
+               ")"
+             ") - 0x100"
         << ", hhbc_ext_method_count_" << klass.name()
         << ", hhbc_ext_methods_" << klass.name()
-        << ", &c_" << cpp_name << "::classof() }";
+        << ", &" << c_cpp_name << "::classof() }";
   }
   cpp << "\n};\n\n";
   cpp << "} // namespace HPHP\n";

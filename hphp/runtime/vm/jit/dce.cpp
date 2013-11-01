@@ -18,11 +18,12 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/opt.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
-#include "hphp/runtime/vm/jit/mutation.h"
 
 namespace HPHP {
 namespace JIT {
@@ -806,7 +807,10 @@ void eliminateDeadCode(IRUnit& unit) {
   if (RuntimeOption::EvalHHIRValidateRefCount) {
     BlockMap opt;
     getRefDeltas(unit, opt);
-    always_assert(validateDeltas(orig, opt));
+    if (!validateDeltas(orig, opt)) {
+      dumpTrace(1, unit, "after RefCount optimization");
+      always_assert(0);
+    }
   }
 
   // and remove empty exit traces

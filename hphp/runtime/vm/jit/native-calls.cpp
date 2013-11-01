@@ -175,7 +175,7 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {AddNewElem,         &HphpArray::AddNewElemC, DSSA, SNone,
                            {{SSA, 0}, {TV, 1}}},
-    {ArrayAdd,           array_add, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+    {ArrayAdd,           arrayAdd, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
     {Box,                boxValue, DSSA, SNone, {{TV, 0}}},
     {NewArray,           HphpArray::MakeReserve, DSSA, SNone, {{SSA, 0}}},
     {NewPackedArray,     HphpArray::MakePacked, DSSA, SNone,

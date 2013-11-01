@@ -543,6 +543,7 @@ void HhbcTranslator::emitNewPackedArray(int numArgs) {
 }
 
 void HhbcTranslator::emitArrayAdd() {
+  auto catchBlock = makeCatch();
   Type type1 = topC(0)->type();
   Type type2 = topC(1)->type();
   if (!type1.isArray() || !type2.isArray()) {
@@ -557,7 +558,7 @@ void HhbcTranslator::emitArrayAdd() {
   SSATmp* tr = popC();
   SSATmp* tl = popC();
   // The ArrayAdd helper decrefs its args, so don't decref pop'ed values.
-  push(gen(ArrayAdd, tl, tr));
+  push(gen(ArrayAdd, catchBlock, tl, tr));
 }
 
 void HhbcTranslator::emitAddElemC() {
@@ -910,11 +911,31 @@ static bool areBinaryArithTypesSupported(Opcode opc, Type t1, Type t2) {
 }
 
 void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
+  /*
+   * Handle array addition first because we don't want to bother with
+   * boxed locals.
+   */
+  if (subOpc == Add &&
+      (m_tb->localType(id, DataTypeSpecific) <= Type::Arr) &&
+      topC()->isA(Type::Arr)) {
+    /*
+     * ArrayAdd decrefs its sources and returns a new array with
+     * refcount == 1. That covers the local, so incref once more for
+     * the stack.
+     */
+    auto const catchBlock = makeCatch();
+    auto const loc    = ldLoc(id, DataTypeSpecific);
+    auto const val    = popC();
+    auto const result = gen(ArrayAdd, catchBlock, loc, val);
+    gen(StLoc, LocalId(id), m_tb->fp(), result);
+    pushIncRef(result);
+    return;
+  }
+
   auto const exitBlock  = makeExit();
   auto const catchBlock = makeCatch();
   auto const loc        = ldLocInnerWarn(id, exitBlock, DataTypeSpecific,
                                          catchBlock);
-
   if (subOpc == ConcatCellCell) {
     /*
      * The concat helpers incref their results, which will be consumed by

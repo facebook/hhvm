@@ -95,7 +95,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   return arrayRefShuffle<false>(ad, retval, nullptr);
 }
 
-ArrayData* array_add(ArrayData* a1, ArrayData* a2) {
+ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
   if (!a2->empty()) {
     if (a1->empty()) {
       // We consume refs on a2 and also produce references, so there's

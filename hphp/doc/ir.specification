@@ -1667,6 +1667,11 @@ D:StkPtr InterpOneCF<T, bcOff, numPopped, numPushed> S0:FramePtr S1:StkPtr
 
   Similar to InterpOne, but for instructions that may modify vmpc.
 
+D:Bool = ThingExists<class|interface|trait> S0:Str
+
+  Returns a bool indicating whether the class, interface, or trait
+  named by S0 exists.  Invokes autoload if it doesn't exist.
+
 
 15. Register allocation
 

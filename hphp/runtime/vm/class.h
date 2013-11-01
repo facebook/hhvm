@@ -896,6 +896,8 @@ inline bool isNormalClass(const Class* cls ) {
   return !(cls->attrs() & (AttrTrait | AttrInterface));
 }
 
+enum class ClassKind { Class, Interface, Trait };
+
 /*
  * Returns whether a class is persistent *and* has a persistent RDS
  * handle.  You probably mean this instead of cls->isPersistent(),

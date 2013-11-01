@@ -964,18 +964,34 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
   PUNT(SetOpL);
 }
 
+void HhbcTranslator::classExistsImpl(ClassKind kind) {
+  auto const catchTrace = makeCatch();
+  auto const tAutoload  = topC(0);
+  auto const tCls       = topC(1);
+
+  if (!tCls->isA(Type::Str) ||
+      !tAutoload->isConst() ||
+      !tAutoload->isA(Type::Bool) ||
+      !tAutoload->getValBool()) {
+    return emitInterpOne(Type::Bool, 2);
+  }
+
+  auto const exists =
+    gen(ThingExists, catchTrace, ClassKindData { kind }, tCls);
+  popC(); popC(); push(exists);
+  gen(DecRef, tCls);
+}
+
 void HhbcTranslator::emitClassExists() {
-  // If this is ever implemented, make sure InterfaceExists and
-  // TraitExists are updated appropriately.
-  emitInterpOne(Type::Bool, 2);
+  classExistsImpl(ClassKind::Class);
 }
 
 void HhbcTranslator::emitInterfaceExists() {
-  emitClassExists();
+  classExistsImpl(ClassKind::Interface);
 }
 
 void HhbcTranslator::emitTraitExists() {
-  emitClassExists();
+  classExistsImpl(ClassKind::Trait);
 }
 
 void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {

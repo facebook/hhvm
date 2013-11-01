@@ -283,6 +283,7 @@ O(ConvResToStr,                 D(Str), S(Res),                         N|Er) \
 O(ConvCellToStr,                D(Str), S(Cell),                        N|Er) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
+O(ThingExists,                 D(Bool), S(Str),                  N|E|Er|Refs) \
 O(InstanceOf,                  D(Bool), S(Cls) S(Cls),                   C|N) \
 O(InstanceOfIface,             D(Bool), S(Cls) CStr,                     C|N) \
 O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \

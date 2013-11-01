@@ -738,6 +738,7 @@ private:
   SSATmp* staticTVCns(const TypedValue*);
   void emitJmpSurpriseCheck();
   void emitRetSurpriseCheck(SSATmp* retVal);
+  void classExistsImpl(ClassKind);
 
   Type interpOutputType(const NormalizedInstruction&,
                         folly::Optional<Type>&) const;

@@ -5177,6 +5177,33 @@ void CodeGenerator::cgLdClsCachedSafe(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::cgThingExists(IRInstruction* inst) {
+  auto const dst = inst->dst();
+  auto& a = m_as;
+
+  auto const attrs = [&] {
+    switch (inst->extra<ThingExists>()->kind) {
+    case ClassKind::Class:      return AttrNone;
+    case ClassKind::Interface:  return AttrInterface;
+    case ClassKind::Trait:      return AttrTrait;
+    }
+    not_reached();
+  }();
+
+  using Fn = bool (*)(const StringData*, bool, Attr);
+  Fn f = Unit::classExists;
+  cgCallHelper(
+    a,
+    CppCall(f),
+    callDest(dst),
+    SyncOptions::kSyncPoint,
+    ArgGroup(curOpds())
+      .ssa(inst->src(0))
+      .imm(true)
+      .imm(attrs)
+  );
+}
+
 void CodeGenerator::cgLdCls(IRInstruction* inst) {
   SSATmp* dst       = inst->dst();
   SSATmp* className = inst->src(0);

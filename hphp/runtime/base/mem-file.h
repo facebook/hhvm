@@ -53,12 +53,11 @@ public:
   void unzip();
 
 protected:
-  std::string m_name;   // name of the memory file
-  const char *m_data;   // points at m_malloc_data or into static cache
+  std::string m_name; // name of the memory file
+  char *m_data;       // data of the memory file
   int64_t m_len;        // length of the memory file
   int64_t m_cursor;     // m_data's read position
-  bool m_malloced;      // whether to free m_malloc_data on delete
-  char* m_malloc_data;  // the malloced data, if any
+  bool m_malloced;    // whether to free m_data on delete
 
   bool closeImpl();
 };

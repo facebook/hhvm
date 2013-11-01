@@ -27,22 +27,17 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 MemFile::MemFile()
-  : File(false), m_data(nullptr), m_len(-1), m_cursor(0), m_malloced(false),
-    m_malloc_data(nullptr) {
+  : File(false), m_data(nullptr), m_len(-1), m_cursor(0), m_malloced(false) {
   m_isLocal = true;
 }
 
 MemFile::MemFile(const char *data, int64_t len)
-  : File(false), m_data(nullptr), m_len(len), m_cursor(0), m_malloced(true),
-    m_malloc_data(nullptr) {
-
-  char* m_malloc_data = (char*) malloc(len + 1);
-  if (m_malloc_data && len) {
-    memcpy(m_malloc_data, data, len);
+  : File(false), m_data(nullptr), m_len(len), m_cursor(0), m_malloced(true) {
+  m_data = (char*)malloc(len + 1);
+  if (m_data && len) {
+    memcpy(m_data, data, len);
   }
-  m_malloc_data[len] = '\0';
-
-  m_data = m_malloc_data;
+  m_data[len] = '\0';
   m_isLocal = true;
 }
 
@@ -64,27 +59,32 @@ bool MemFile::open(const String& filename, const String& mode) {
   }
   int len = INT_MIN;
   bool compressed = false;
-  const char *data =
+  char *data =
     StaticContentCache::TheFileCache->read(filename.c_str(), len, compressed);
-
-  assert(len >= 0);
-
-  if (compressed) {
-    assert(RuntimeOption::EnableOnDemandUncompress);
-    data = gzdecode(data, len);
-    if (data == nullptr) {
-      throw FatalErrorException("cannot unzip compressed data");
+  // -1: PHP file; -2: directory
+  if (len != INT_MIN && len != -1 && len != -2) {
+    assert(len >= 0);
+    if (compressed) {
+      assert(RuntimeOption::EnableOnDemandUncompress);
+      data = gzdecode(data, len);
+      if (data == nullptr) {
+        throw FatalErrorException("cannot unzip compressed data");
+      }
+      m_data = data;
+      m_malloced = true;
+      m_len = len;
+      return true;
     }
+    m_name = (std::string) filename;
     m_data = data;
-    m_malloced = true;
     m_len = len;
     return true;
   }
-
-  m_name = (std::string) filename;
-  m_data = data;
-  m_len = len;
-  return true;
+  if (len != INT_MIN) {
+    Logger::Error("Cannot open a PHP file or a directory as MemFile: %s",
+                  filename.c_str());
+  }
+  return false;
 }
 
 bool MemFile::close() {
@@ -94,9 +94,8 @@ bool MemFile::close() {
 bool MemFile::closeImpl() {
   s_file_data->m_pcloseRet = 0;
   m_closed = true;
-  if (m_malloced && m_malloc_data) {
-    free(m_malloc_data);
-    m_malloc_data = nullptr;
+  if (m_malloced && m_data) {
+    free(m_data);
     m_data = nullptr;
   }
   File::closeImpl();

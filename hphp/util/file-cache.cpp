@@ -135,8 +135,7 @@ bool FileCache::exists(const char *name,
   return exists(GetRelativePath(name).c_str());
 }
 
-const char *FileCache::read(const char *name, int &len,
-                            bool &compressed) const {
+char *FileCache::read(const char *name, int &len, bool &compressed) const {
   if (!name || !*name) {
     return nullptr;
   }
@@ -153,7 +152,8 @@ const char *FileCache::read(const char *name, int &len,
   compressed = data_compressed;
   len = data_len;
 
-  return data;
+  // Yep, throwing away const here (for now) for API compatibility.
+  return (char*) data;
 }
 
 int64_t FileCache::fileSize(const char *name, bool isRelative) const {

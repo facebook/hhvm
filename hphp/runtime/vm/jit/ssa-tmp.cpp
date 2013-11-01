@@ -33,7 +33,7 @@ bool SSATmp::isConst() const {
 }
 
 namespace {
-int typeNeededRegs(Type t) {
+int typeNeededWords(Type t) {
   assert(!t.equals(Type::Bottom));
 
   if (t.subtypeOfAny(Type::None, Type::Null, Type::ActRec, Type::RetAddr,
@@ -46,7 +46,7 @@ int typeNeededRegs(Type t) {
     return 0;
   }
   if (t.maybe(Type::Nullptr)) {
-    return typeNeededRegs(t - Type::Nullptr);
+    return typeNeededWords(t - Type::Nullptr);
   }
   if (t <= Type::Ctx || t.isPtr()) {
     // Ctx and PtrTo* may be statically unknown but always need just 1 register.
@@ -68,8 +68,8 @@ int typeNeededRegs(Type t) {
 }
 }
 
-int SSATmp::numNeededRegs() const {
-  return typeNeededRegs(type());
+int SSATmp::numWords() const {
+  return typeNeededWords(type());
 }
 
 bool SSATmp::getValBool() const {

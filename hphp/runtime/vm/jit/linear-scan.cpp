@@ -269,7 +269,7 @@ void LinearScan::StateSave::restore(LinearScan* ls) {
     if (reg->isReserved()) continue;
     if (reg->isAllocated()) {
       SSATmp* tmp = reg->m_ssaTmp;
-      for (int r = 0; r < ls->m_allocInfo[tmp].numAllocatedRegs(); r++) {
+      for (int r = 0; r < ls->m_allocInfo[tmp].numAllocated(); r++) {
         if (ls->m_allocInfo[tmp].reg(r) == PhysReg(i)) {
           ls->assignRegToTmp(reg, tmp, r);
         }
@@ -441,7 +441,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
       inst->setSrc(i, tmp);
     }
     if (!needsReloading[i]) {
-      for (int i = 0, n = m_allocInfo[tmp].numAllocatedRegs(); i < n; ++i) {
+      for (int i = 0, n = m_allocInfo[tmp].numAllocated(); i < n; ++i) {
         m_regs[int(m_allocInfo[tmp].reg(i))].m_pinned = true;
       }
     }
@@ -469,7 +469,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
       // reloadTmp and tmp share the same type.  Since it was spilled, it
       // must be using its entire needed-count of registers.
       assert(reloadTmp->type() == tmp->type());
-      for (int locIndex = 0; locIndex < tmp->numNeededRegs();) {
+      for (int locIndex = 0; locIndex < tmp->numWords();) {
         locIndex += allocRegToTmp(reloadTmp, locIndex);
       }
       // Remember this reload tmp in case we can reuse it in later blocks.
@@ -490,7 +490,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
   if (dsts.empty()) return;
 
   for (SSATmp& dst : dsts) {
-    for (int numAllocated = 0, n = dst.numNeededRegs(); numAllocated < n; ) {
+    for (int numAllocated = 0, n = dst.numWords(); numAllocated < n; ) {
       auto reg = forceAlloc(dst);
       if (reg != InvalidReg) {
         assignRegToTmp(&m_regs[(int)reg], &dst, 0);
@@ -607,7 +607,7 @@ int LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
 void LinearScan::assignRegToTmp(RegState* reg, SSATmp* ssaTmp, uint32_t index) {
   reg->m_ssaTmp = ssaTmp;
   // mark inst as using this register
-  if (ssaTmp->numNeededRegs() == 2 && reg->type() == PhysReg::XMM) {
+  if (ssaTmp->numWords() == 2 && reg->type() == PhysReg::XMM) {
     assert(index == 0);
     m_allocInfo[ssaTmp].setRegFullXMM(reg->m_reg);
   } else {
@@ -687,12 +687,12 @@ uint32_t LinearScan::assignSpillLoc() {
         TRACE(3, "[counter] 1 spill a tmp that %s native\n",
               crossNativeCall(dst) ? "spans" : "does not span");
         for (int locIndex = 0;
-             locIndex < src->numNeededRegs();
+             locIndex < src->numWords();
              ++locIndex) {
 
           // SSATmps with 2 regs are aligned to 16 bytes because they may be
           // allocated to XMM registers, either before or after being reloaded
-          if (src->numNeededRegs() == 2 && locIndex == 0) {
+          if (src->numWords() == 2 && locIndex == 0) {
             spillLocManager.alignTo16Bytes();
           }
           auto spillLoc = spillLocManager.allocSpillLoc();
@@ -709,7 +709,7 @@ uint32_t LinearScan::assignSpillLoc() {
       if (inst.op() == Reload) {
         SSATmp* src = inst.src(0);
         for (int locIndex = 0;
-             locIndex < src->numNeededRegs();
+             locIndex < src->numWords();
              ++locIndex) {
           TRACE(3, "[counter] reload\n");
         }
@@ -1056,14 +1056,14 @@ void LinearScan::findFullXMMCandidates() {
   for (auto* block : m_blocks) {
     for (auto& inst : *block) {
       for (SSATmp& tmp : inst.dsts()) {
-        if (tmp.numNeededRegs() == 2 && inst.isLoad() &&
+        if (tmp.numWords() == 2 && inst.isLoad() &&
             !inst.isControlFlow()) {
           m_fullXMMCandidates[tmp.id()] = true;
         }
       }
       int idx = 0;
       for (SSATmp* tmp : inst.srcs()) {
-        if (tmp->numNeededRegs() == 2 && !inst.storesCell(idx)) {
+        if (tmp->numWords() == 2 && !inst.storesCell(idx)) {
           notCandidates[tmp->id()] = true;
         }
         idx++;
@@ -1367,8 +1367,8 @@ LinearScan::RegState* LinearScan::popFreeReg(smart::list<RegState*>& freeList) {
 void LinearScan::spill(SSATmp* tmp) {
   dumpIR(tmp, "spilling");
   // If we're spilling, we better actually have registers allocated.
-  assert(m_allocInfo[tmp].numAllocatedRegs() > 0);
-  assert(m_allocInfo[tmp].numAllocatedRegs() == tmp->numNeededRegs());
+  assert(m_allocInfo[tmp].numAllocated() > 0);
+  assert(m_allocInfo[tmp].numAllocated() == tmp->numWords());
 
   // Free the registers used by <tmp>.
   // Need call freeReg and modify <m_allocatedRegs>.

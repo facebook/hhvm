@@ -66,11 +66,17 @@ public:
   }
 
   /*
-   * The number of regs actually allocated to this SSATmp.  This might
-   * end up fewer than numNeededRegs if the SSATmp isn't really
-   * being used.
+   * The number of registers or spill slots actually allocated.  This might
+   * end up fewer than SSATmp::numWords if the SSATmp isn't used, is
+   * a constant, or if we allocated a full XMM register to a 2-word tmp.
    */
-  int numAllocatedRegs() const;
+  int numAllocated() const;
+
+  /*
+   * Number of words held by this PhysLoc.  If isFullXMM() is true this returns
+   * 2, otherwise it returns numAllocated().
+   */
+  int numWords() const;
 
   /*
    * Access to allocated registers.

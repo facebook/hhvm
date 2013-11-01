@@ -139,7 +139,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val)
     m_kind = Kind::Imm;
     return;
   }
-  if (val || tmp->numNeededRegs() > 1) {
+  if (val || tmp->numWords() > 1) {
     auto reg = loc.reg(val ? 0 : 1);
     assert(reg != InvalidReg);
     m_imm = 0;
@@ -2759,31 +2759,27 @@ void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
 }
 
 void emitSpill(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
-  assert(s.numAllocatedRegs() == d.numAllocatedRegs() ||
-         (s.isFullXMM() && d.numAllocatedRegs() == 2));
-  for (int i = 0, n = s.numAllocatedRegs(); i < n; ++i) {
-    auto r = s.reg(i);
-    auto offset = d.offset(i);
-    if (s.isFullXMM()) {
-      as.movdqa(r, reg::rsp[offset]);
-    } else {
+  assert(s.numWords() == d.numWords());
+  assert(!s.spilled() && d.spilled());
+  if (s.isFullXMM()) {
+    as.movdqa(s.reg(0), reg::rsp[d.offset(0)]);
+  } else {
+    for (int i = 0, n = s.numAllocated(); i < n; ++i) {
       // store the whole register even if it holds a bool or DataType
-      emitStoreReg(as, r, reg::rsp[offset]);
+      emitStoreReg(as, s.reg(i), reg::rsp[d.offset(i)]);
     }
   }
 }
 
 void emitReload(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
-  assert(s.numAllocatedRegs() == d.numAllocatedRegs() ||
-         (s.numAllocatedRegs() == 2 && d.isFullXMM()));
-  for (int i = 0, n = d.numAllocatedRegs(); i < n; ++i) {
-    auto r = d.reg(i);
-    auto offset = s.offset(i);
-    if (d.isFullXMM()) {
-      as.movdqa(reg::rsp[offset], r);
-    } else {
+  assert(s.numWords() == d.numWords());
+  assert(s.spilled() && !d.spilled());
+  if (d.isFullXMM()) {
+    as.movdqa(reg::rsp[s.offset(0)], d.reg(0));
+  } else {
+    for (int i = 0, n = d.numAllocated(); i < n; ++i) {
       // load the whole register even if it holds a bool or DataType
-      emitLoadReg(as, reg::rsp[offset], r);
+      emitLoadReg(as, reg::rsp[s.offset(i)], d.reg(i));
     }
   }
 }
@@ -2791,14 +2787,14 @@ void emitReload(Asm& as, const PhysLoc& s, const PhysLoc& d, Type t) {
 void CodeGenerator::cgSpill(IRInstruction* inst) {
   SSATmp* dst   = inst->dst();
   SSATmp* src   = inst->src(0);
-  assert(dst->numNeededRegs() == src->numNeededRegs());
+  assert(dst->numWords() == src->numWords());
   emitSpill(m_as, curOpd(src), curOpd(dst), src->type());
 }
 
 void CodeGenerator::cgReload(IRInstruction* inst) {
   SSATmp* dst   = inst->dst();
   SSATmp* src   = inst->src(0);
-  assert(dst->numNeededRegs() == src->numNeededRegs());
+  assert(dst->numWords() == src->numWords());
   emitReload(m_as, curOpd(src), curOpd(dst), src->type());
 }
 
@@ -2815,7 +2811,7 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     auto src = inst->src(i);
     auto& rs = curOpd(src);
     auto& rd = inst->extra<Shuffle>()->dests[i];
-    if (rd.numAllocatedRegs() == 0) continue; // ignore unused dests.
+    if (rd.numAllocated() == 0) continue; // ignore unused dests.
     if (rd.spilled()) {
       emitSpill(m_as, rs, rd, src->type());
     } else if (!rs.spilled()) {
@@ -2843,17 +2839,17 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     auto src = inst->src(i);
     auto& rs = curOpd(src);
     auto& rd = inst->extra<Shuffle>()->dests[i];
-    if (rd.numAllocatedRegs() == 0) continue; // ignore unused dests.
+    if (rd.numAllocated() == 0) continue; // ignore unused dests.
     if (rd.spilled()) continue;
     if (rs.spilled()) {
       emitReload(m_as, rs, rd, src->type());
       continue;
     }
-    if (rs.numAllocatedRegs() == 0) {
+    if (rs.numAllocated() == 0) {
       assert(src->inst()->op() == DefConst);
       m_as.emitImmReg(src->getValBits(), rd.reg(0));
     }
-    if (rd.numAllocatedRegs() == 2 && rs.numAllocatedRegs() < 2) {
+    if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
       // move a src known type to a dest register
       //         a.emitImmReg(args[i].imm().q(), dst);
       assert(src->type().isKnownDataType());

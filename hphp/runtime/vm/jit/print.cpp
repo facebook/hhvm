@@ -239,7 +239,7 @@ void print(const IRInstruction* inst) {
 }
 
 std::ostream& operator<<(std::ostream& os, const PhysLoc& loc) {
-  auto sz = loc.numAllocatedRegs();
+  auto sz = loc.numAllocated();
   if (!sz) return os;
   os << '(';
   auto delim = "";
@@ -259,7 +259,7 @@ std::ostream& operator<<(std::ostream& os, const PhysLoc& loc) {
 }
 
 void printPhysLoc(std::ostream& os, const PhysLoc& loc) {
-  if (loc.numAllocatedRegs() > 0) {
+  if (loc.numAllocated() > 0) {
     os << color(ANSI_COLOR_BROWN) << loc << color(ANSI_COLOR_END);
   }
 }

@@ -311,16 +311,16 @@ bool checkShuffle(const IRInstruction& inst, const RegAllocInfo& regs) {
   for (uint32_t i = 0; i < n; ++i) {
     DEBUG_ONLY auto& rs = regs[inst][inst.src(i)];
     DEBUG_ONLY auto& rd = inst.extra<Shuffle>()->dests[i];
-    if (rd.numAllocatedRegs() == 0) continue; // dest was unused; ignore.
+    if (rd.numAllocated() == 0) continue; // dest was unused; ignore.
     // rs could have less assigned registers/slots than rd, in these cases:
     // - when rs is empty, because the source is a constant.
     // - when rd needs 2 and rs needs 0 or 1, and the source is either constant
     //   or hasKnownType() without being constant, and the dest type is more
     //   general than the src type due to a control-flow join.
-    assert(rs.numAllocatedRegs() <= rd.numAllocatedRegs());
+    assert(rs.numAllocated() <= rd.numAllocated());
     assert(!rs.spilled() || !rd.spilled());
     assert(rs.isFullXMM() == rd.isFullXMM());
-    for (int j = 0; j < rd.numAllocatedRegs(); ++j) {
+    for (int j = 0; j < rd.numAllocated(); ++j) {
       if (rd.spilled()) {
         assert(!destSlots.test(rd.slot(j)));
         destSlots.set(rd.slot(j));
@@ -352,11 +352,9 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
           // hack - ignore rbx and rbp
           continue;
         }
-        DEBUG_ONLY auto allocated = rs.numAllocatedRegs();
-        DEBUG_ONLY auto needed = src->inst()->op() == DefConst ? 0 :
-                                 src->numNeededRegs();
-        assert(allocated == needed ||
-               (needed == 2 && allocated == 1 && rs.isFullXMM()));
+        assert(rs.numWords() == src->numWords() ||
+               (src->inst()->op() == DefConst && rs.numWords() == 0));
+        DEBUG_ONLY auto allocated = rs.numAllocated();
         if (allocated == 2) {
           if (rs.spilled()) {
             assert(rs.slot(0) != rs.slot(1));
@@ -364,12 +362,12 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
             assert(rs.reg(0) != rs.reg(1));
           }
         }
-        for (unsigned i = 0, n = rs.numAllocatedRegs(); i < n; ++i) {
+        for (unsigned i = 0, n = rs.numAllocated(); i < n; ++i) {
           assert(state.tmp(rs, i) == src);
         }
       }
       auto update = [&](SSATmp* tmp, const PhysLoc& loc) {
-        for (unsigned i = 0, n = loc.numAllocatedRegs(); i < n; ++i) {
+        for (unsigned i = 0, n = loc.numAllocated(); i < n; ++i) {
           state.tmp(loc, i) = tmp;
         }
       };

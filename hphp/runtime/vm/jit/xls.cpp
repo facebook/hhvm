@@ -447,13 +447,13 @@ void XLS::buildIntervals() {
         if (!live[d]) {
           // dest is not live; give it a register anyway.
           assert(dest->empty());
-          auto n = d.numNeededRegs();
+          auto n = d.numWords();
           if (n == 0) continue;
           if (force(inst, d)) continue;
           if (!allocUnusedDest(inst)) continue;
           dest->add(closedRange(dpos, dpos));
           dest->tmp = &d;
-          dest->need = d.numNeededRegs();
+          dest->need = d.numWords();
         } else {
           // adjust start pos for live intervals defined by this instruction
           assert(dest->tmp == &d);
@@ -475,14 +475,14 @@ void XLS::buildIntervals() {
       size_t src_need = 0;
       for (auto s : inst.srcs()) {
         if (s->inst()->op() == DefConst) continue;
-        auto n = s->numNeededRegs();
+        auto n = s->numWords();
         if (n == 0) continue;
         if (force(inst, *s)) continue;
         auto src = &m_intervals[s];
         src->add(closedRange(blockRange.start, spos));
         src->addUse(spos);
         src->tmp = s;
-        src->need = s->numNeededRegs();
+        src->need = s->numWords();
         src_need += src->need;
         live.add(s);
       }
@@ -542,7 +542,6 @@ void XLS::assign(Interval* ivl, RegPair r) {
     assert(r.second != r.first);
     ivl->info.setReg(PhysReg(r.second), 1);
   }
-  assert(ivl->info.numAllocatedRegs() == ivl->need);
 }
 
 // initialize the positions array with maximal use positions.
@@ -663,7 +662,6 @@ void XLS::allocBlocked(Interval* current) {
   spillActive(current);
   spillInactive(current);
   m_active.push_back(current);
-  assert(current->info.numAllocatedRegs() == current->need);
 }
 
 // return true if r1 and r2 have any registers in common
@@ -807,9 +805,7 @@ void XLS::walkIntervals() {
     m_pending.pop_back();
     update(current->start());
     allocOne(current);
-    assert(current->handled());
-    assert(current->info.spilled() ||
-           current->info.numAllocatedRegs() == current->need);
+    assert(current->handled() && current->info.numWords() == current->need);
   }
   if (dumpIREnabled()) {
     if (m_numSplits) dumpIntervals();

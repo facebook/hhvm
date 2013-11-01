@@ -32,14 +32,7 @@ const Object Object::s_nullObject = Object();
 
 HOT_FUNC
 Object::~Object() {
-  if (LIKELY(m_px != 0)) {
-    if (UNLIKELY(m_px->decRefCount() == 0)) {
-      m_px->destruct();
-      if (LIKELY(m_px->getCount() == 0)) {
-        delete m_px;
-      }
-    }
-  }
+  // force it out of line
 }
 
 ArrayIter Object::begin(const String& context /* = null_string */) const {

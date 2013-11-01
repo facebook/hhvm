@@ -175,13 +175,10 @@ class ObjectData {
   void operator delete(void* p);
 
   void release() {
-    assert(getCount() == 0);
-    destruct();
-    if (UNLIKELY(getCount() != 0)) {
-      // Object was resurrected.
-      return;
+    assert(!hasMultipleRefs());
+    if (LIKELY(destruct())) {
+      delete this;
     }
-    delete this;
   }
 
   Class* getVMClass() const {
@@ -262,7 +259,7 @@ class ObjectData {
   double o_toDoubleImpl() const noexcept;
   Array o_toArray() const;
 
-  void destruct();
+  bool destruct();
 
   Array o_toIterArray(const String& context, bool getRef = false);
 
@@ -450,8 +447,6 @@ class ObjectData {
   int o_id;
 
 } __attribute__((aligned(16)));
-
-template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
 
 typedef GlobalNameValueTableWrapper GlobalVariables;
 

@@ -202,11 +202,6 @@ typedef std::map<std::string, ResourceMap> ResourceMapMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Suppress the default implementation of the SmartPtr destructor so that
-// derived classes (ex. HPHP::Resource) can manually handle decReffing the
-// ResourceData.
-template<> inline SmartPtr<ResourceData>::~SmartPtr() {}
-
 ALWAYS_INLINE bool decRefRes(ResourceData* res) {
   return res->decRefAndRelease();
 }

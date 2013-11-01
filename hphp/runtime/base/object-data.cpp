@@ -63,7 +63,7 @@ ObjectData::~ObjectData() {
 }
 
 HOT_FUNC
-void ObjectData::destruct() {
+bool ObjectData::destruct() {
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     g_vmContext->m_liveBCObjs.erase(this);
   }
@@ -76,11 +76,12 @@ void ObjectData::destruct() {
       // case.
       auto& faults = g_vmContext->m_faults;
       if (!faults.empty()) {
-        if (faults.back().m_faultType == Fault::Type::CppException) return;
+        if (faults.back().m_faultType == Fault::Type::CppException) return true;
       }
       // We raise the refcount around the call to __destruct(). This is to
       // prevent the refcount from going to zero when the destructor returns.
       CountableHelper h(this);
+      RefCount c = this->getCount();
       TypedValue retval;
       tvWriteNull(&retval);
       try {
@@ -91,8 +92,10 @@ void ObjectData::destruct() {
         handle_destructor_exception();
       }
       tvRefcountedDecRef(&retval);
+      return c == this->getCount();
     }
   }
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

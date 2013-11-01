@@ -27,11 +27,7 @@ namespace HPHP {
 const Resource Resource::s_nullResource = Resource();
 
 Resource::~Resource() {
-  if (LIKELY(m_px != 0)) {
-    if (UNLIKELY(m_px->decRefCount() == 0)) {
-      delete m_px;
-    }
-  }
+  // force it out of line
 }
 
 Array Resource::toArray() const {

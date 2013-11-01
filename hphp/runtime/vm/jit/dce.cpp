@@ -246,12 +246,14 @@ void optimizeRefCount(IRUnit& unit, DceState& state, UseCounts& uses) {
       // This assert is often hit when an instruction should have a
       // consumesReferences flag but doesn't.
       auto& s = state[inst];
-      always_assert_log(inst->src(0)->type().notCounted() || s.decRefNZed(),
-      [&]{
-        return folly::format("\n{} has state {} in unit {}\n",
-                             inst->toString(), s.toString(),
-                             unit.toString()).str();
-        });
+      always_assert_log(
+        inst->src(0)->type().notCounted() || s.decRefNZed(),
+        [&] {
+          return folly::format("\n{} has state {} in unit {}\n",
+                               inst->toString(), s.toString(),
+                               unit.toString()).str();
+        }
+      );
       inst->setOpcode(Mov);
       s.setDead();
     }

@@ -42,6 +42,7 @@
   CASE(NewArrayReserve) \
   CASE(NewPackedArray) \
   CASE(NewCol) \
+  CASE(Clone) \
   CASE(Nop) \
   CASE(AddElemC) \
   CASE(AddNewElemC) \

@@ -600,6 +600,14 @@ void HhbcTranslator::emitNewCol(int type, int size) {
   push(gen(NewCol, cns(type), cns(size)));
 }
 
+void HhbcTranslator::emitClone() {
+  if (!topC()->isA(Type::Obj)) PUNT(Clone-NonObj);
+  auto const catchTrace = makeCatch();
+  auto const obj        = popC();
+  push(gen(Clone, catchTrace, obj));
+  gen(DecRef, obj);
+}
+
 void HhbcTranslator::emitColAddElemC() {
   if (!topC(2)->isA(Type::Obj)) {
     return emitInterpOne(Type::Obj, 3);

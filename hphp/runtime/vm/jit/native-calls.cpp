@@ -178,6 +178,8 @@ static CallMap s_callMap {
     {ArrayAdd,           arrayAdd, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
     {Box,                boxValue, DSSA, SNone, {{TV, 0}}},
     {NewArray,           HphpArray::MakeReserve, DSSA, SNone, {{SSA, 0}}},
+    {Clone,              method(&ObjectData::clone), DSSA, SSync,
+                           {{SSA, 0}}},
     {NewPackedArray,     HphpArray::MakePacked, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
     {NewCol,             newColHelper, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},

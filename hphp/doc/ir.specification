@@ -1080,6 +1080,14 @@ D:Arr = NewPackedArray S0:ConstInt S1:StkPtr
   given by S1.  Note that this instruction assumes it can take the
   values from the stack without increfing them.
 
+D:Obj = NewCol S0:ConstInt S1:ConstInt
+
+  Create a new collection, with type S0 and size S1.
+
+D:Obj = Clone S0:Obj
+
+  Allocate an object by cloning S0.
+
 
 9. Call & Return
 

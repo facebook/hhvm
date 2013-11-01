@@ -1174,6 +1174,10 @@ IRTranslator::translateNewCol(const NormalizedInstruction& i) {
   HHIR_EMIT(NewCol, i.imm[0].u_IVA, i.imm[1].u_IVA);
 }
 
+void IRTranslator::translateClone(const NormalizedInstruction&) {
+  HHIR_EMIT(Clone);
+}
+
 void
 IRTranslator::translateColAddNewElemC(const NormalizedInstruction& i) {
   HHIR_EMIT(ColAddNewElemC);

@@ -446,6 +446,7 @@ O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
 O(NewPackedArray,               D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
 O(NewCol,                       D(Obj), C(Int) C(Int),                 N|PRc) \
+O(Clone,                        D(Obj), S(Obj),              N|E|PRc|Refs|Er) \
 O(LdRaw,                        DParam, SUnk,                             NF) \
 O(FreeActRec,              D(FramePtr), S(FramePtr),                     Mem) \
 /*    name                      dstinfo srcinfo                      flags */ \

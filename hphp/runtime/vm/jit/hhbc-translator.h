@@ -190,6 +190,7 @@ struct HhbcTranslator {
   void emitNewArrayReserve(int capacity);
   void emitNewPackedArray(int n);
   void emitNewCol(int capacity);
+  void emitClone();
 
   void emitArrayAdd();
   void emitAddElemC();

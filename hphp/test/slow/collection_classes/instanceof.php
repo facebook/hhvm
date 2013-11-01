@@ -1,4 +1,4 @@
-<?php
+<?hh
 $vector = Vector {};
 $map = Map {};
 $smap = StableMap {};

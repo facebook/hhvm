@@ -11,7 +11,7 @@
  * implementation.
  *
  */
-class SplFixedArray implements Iterator, ArrayAccess, Countable {
+class SplFixedArray implements \HH\Iterator, ArrayAccess, Countable {
 
   protected $data = array();
 

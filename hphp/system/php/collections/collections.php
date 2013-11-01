@@ -320,7 +320,7 @@ trait LazyKeyedIterable {
   }
 }
 
-class LazyMapIterator implements Iterator {
+class LazyMapIterator implements \HH\Iterator {
   private $it;
   private $fn;
 
@@ -450,7 +450,7 @@ class LazyMapWithKeyIterable implements KeyedIterable {
   }
 }
 
-class LazyFilterIterator implements Iterator {
+class LazyFilterIterator implements \HH\Iterator {
   private $it;
   private $fn;
 
@@ -611,7 +611,7 @@ class LazyFilterWithKeyIterable implements KeyedIterable {
   }
 }
 
-class LazyZipIterator implements Iterator {
+class LazyZipIterator implements \HH\Iterator {
   private $it1;
   private $it2;
 
@@ -705,7 +705,7 @@ class LazyZipKeyedIterable implements KeyedIterable {
   }
 }
 
-class LazyKeysIterator implements Iterator {
+class LazyKeysIterator implements \HH\Iterator {
   private $it;
 
   public function __construct($it) {
@@ -744,7 +744,7 @@ class LazyKeysIterable implements Iterable {
   }
 }
 
-class LazyValuesIterator implements Iterator {
+class LazyValuesIterator implements \HH\Iterator {
   private $it;
 
   public function __construct($it) {
@@ -783,7 +783,7 @@ class LazyValuesIterable implements Iterable {
   }
 }
 
-class LazyKVZipIterator implements Iterator {
+class LazyKVZipIterator implements \HH\Iterator {
   private $it;
 
   public function __construct($it) {

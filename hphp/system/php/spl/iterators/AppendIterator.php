@@ -32,7 +32,7 @@ class AppendIterator implements OuterIterator {
    *
    * @return     mixed   No value is returned.
    */
-  function append(Iterator $it) {
+  function append(\Iterator $it) {
     $this->iterators->append($it);
   }
 

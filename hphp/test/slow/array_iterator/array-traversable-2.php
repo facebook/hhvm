@@ -1,4 +1,4 @@
-<?hh
+<?php
 
 interface IFoo {
 }

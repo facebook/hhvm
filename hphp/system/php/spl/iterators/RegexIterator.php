@@ -77,7 +77,7 @@ class RegexIterator extends FilterIterator
    *                         - RegexIterator::REPLACE: none.
    *                         - RegexIterator::SPLIT: See preg_split().
    */
-  public function __construct(Iterator $iterator, $regex, $mode = self::MATCH,
+  public function __construct(\Iterator $iterator, $regex, $mode = self::MATCH,
                               $flags = 0, $preg_flags = 0) {
     parent::__construct($iterator);
 

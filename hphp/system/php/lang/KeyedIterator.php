@@ -1,4 +1,3 @@
 <?php
 
-interface KeyedIterator extends Iterator, KeyedTraversable {
-}
+interface KeyedIterator extends \HH\Iterator, KeyedTraversable {}

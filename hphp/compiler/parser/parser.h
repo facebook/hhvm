@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_COMPILER_PARSER_H_
 #define incl_HPHP_COMPILER_PARSER_H_
 
+#include <functional>
+
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/parser/parser.h"
 #include "hphp/compiler/construct.h"
@@ -369,11 +371,57 @@ private:
     SeenNamespaceStatement,
     InsideNamespace,
   };
+
+  /*
+   * An AliasTable maps aliases to names.
+   * We use it instead a regular map because it lazily imports a bunch of
+   * names into the current namespace when appropriate.
+   */
+  class AliasTable {
+  public:
+
+    struct AliasEntry {
+      std::string alias;
+      std::string name;
+    };
+
+    AliasTable(const std::vector<AliasEntry>& autoAliases,
+               std::function<bool ()> autoOracle);
+
+    std::string getName(std::string alias);
+    bool isAliased(std::string alias);
+    bool isAutoImported(std::string alias);
+    void map(std::string alias, std::string name);
+    void clear();
+
+  private:
+
+    struct NameEntry {
+      std::string name;
+      bool isAuto; // Is the name automatically-imported?
+    };
+
+    hphp_string_imap<NameEntry> m_aliases;
+    // These get imported every time we enter a new namespace.
+    std::vector<AliasEntry> m_autoAliases;
+    // Returns true if stuff should be auto-imported.
+    std::function<bool ()> m_autoOracle;
+    // Have we already auto-imported names for the current namespace?
+    // This is useful because auto-imports are done lazily.
+    bool m_alreadyImported;
+
+    void setFalseOracle();
+    void addAutoImports();
+  };
+
   NamespaceState m_nsState;
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
-  hphp_string_imap<std::string> m_aliases;
+  AliasTable m_aliasTable;
+
   void registerAlias(std::string name);
+  bool isAutoAliasOn();
+  std::vector<AliasTable::AliasEntry> getAutoAliasedClasses();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

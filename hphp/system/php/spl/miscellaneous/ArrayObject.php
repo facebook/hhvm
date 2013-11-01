@@ -7,8 +7,9 @@
  * This class allows objects to work as arrays.
  *
  */
-class ArrayObject implements IteratorAggregate, Traversable, ArrayAccess,
+class ArrayObject implements KeyedIterable, ArrayAccess,
                              Serializable, Countable {
+  use StrictKeyedIterable;
 
   const integer STD_PROP_LIST = 1;
   const integer ARRAY_AS_PROPS = 2;
@@ -464,4 +465,56 @@ class ArrayObject implements IteratorAggregate, Traversable, ArrayAccess,
     return $this->flags & self::ARRAY_AS_PROPS;
   }
 
+  public function map($callback) {
+    $res = new ArrayObject();
+    foreach ($this as $k => $v) {
+      $res[$k] = $callback($v);
+    }
+    return $res;
+  }
+  public function mapWithKey($callback) {
+    $res = new ArrayObject();
+    foreach ($this as $k => $v) {
+      $res[$k] = $callback($k, $v);
+    }
+    return $res;
+  }
+  public function filter($callback) {
+    $res = new ArrayObject();
+    foreach ($this as $k => $v) {
+      if ($callback($v)) $res[$k] = $v;
+    }
+    return $res;
+  }
+  public function filterWithKey($callback) {
+    $res = new ArrayObject();
+    foreach ($this as $k => $v) {
+      if ($callback($k, $v)) $res[$k] = $v;
+    }
+    return $res;
+  }
+  public function zip($iterable) {
+    $res = new ArrayObject();
+    $it = $iterable->getIterator();
+    foreach ($this as $k => $v) {
+      if (!$it->valid()) break;
+      $res[$k] = Pair {$v, $it->current()};
+      $it->next();
+    }
+    return $res;
+  }
+  public function keys() {
+    $res = new ArrayObject();
+    foreach ($this as $k => $_) {
+      $res[] = $k;
+    }
+    return $res;
+  }
+  public function kvzip() {
+    $res = new ArrayObject();
+    foreach ($this as $k => $v) {
+      $res[] = Pair {$k, $v};
+    }
+    return $res;
+  }
 }

@@ -8,8 +8,7 @@
  * contents of filesystem directories.
  *
  */
-class DirectoryIterator extends SplFileInfo
-  implements Traversable, SeekableIterator {
+class DirectoryIterator extends SplFileInfo implements SeekableIterator {
 
   private $dir;
   private $dirName;

@@ -39,7 +39,7 @@
                 "NoDefaultSweep"
             ],
             "ifaces": [
-                "Iterator",
+                "HH\\Iterator",
                 "Awaitable"
             ],
             "footer": "",

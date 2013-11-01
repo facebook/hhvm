@@ -10,7 +10,7 @@
  *
  */
 class SplObjectStorage
-  implements Iterator, Countable, Serializable, ArrayAccess {
+  implements \HH\Iterator, Countable, Serializable, ArrayAccess {
 
   private $storage = array();
 

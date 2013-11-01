@@ -5,8 +5,8 @@ hphp/system/php/lang/stdClass.php
 hphp/system/php/lang/pinitSentinel.php
 hphp/system/php/lang/resource.php
 
-hphp/system/php/lang/Traversable.php
-hphp/system/php/lang/Iterator.php
+hphp/system/php/lang/Traversable.ns.php
+hphp/system/php/lang/Iterator.ns.php
 hphp/system/php/lang/IteratorAggregate.php
 hphp/system/php/lang/KeyedIterator.php
 hphp/system/php/lang/KeyedIterable.php

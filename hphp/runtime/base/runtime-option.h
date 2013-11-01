@@ -386,6 +386,7 @@ public:
   F(bool, JitStressLease,              false)                           \
   F(bool, JitKeepDbgFiles,             false)                           \
   F(bool, JitEnableRenameFunction,     false)                           \
+  F(bool, JitUseVtuneAPI,              false)                           \
                                                                         \
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, ThreadingJit,                false)                           \

@@ -57,7 +57,7 @@ class FileCache {
   bool fileExists(const char *name, bool isRelative = true) const;
   bool dirExists(const char *name, bool isRelative = true) const;
   bool exists(const char *name, bool isRelative = true) const;
-  char *read(const char *name, int &len, bool &compressed) const;
+  const char *read(const char *name, int &len, bool &compressed) const;
   int64_t fileSize(const char *name, bool isRelative) const;
   void dump() const;
 

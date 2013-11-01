@@ -829,25 +829,25 @@ Variant mysql_makevalue(const String& data, MYSQL_FIELD *mysql_field) {
 
 Variant mysql_makevalue(const String& data, enum_field_types field_type) {
   if (field_type == MYSQL_TYPE_NULL) {
-	return uninit_null();
+    return uninit_null();
   }
   else if (mysqlExtension::TypedResults) {
-	switch (field_type) {
-	case MYSQL_TYPE_DECIMAL:
-	case MYSQL_TYPE_TINY:
-	case MYSQL_TYPE_SHORT:
-	case MYSQL_TYPE_LONG:
-	case MYSQL_TYPE_LONGLONG:
-	case MYSQL_TYPE_INT24:
-	case MYSQL_TYPE_YEAR:
-	  return data.toInt64();
-	case MYSQL_TYPE_FLOAT:
-	case MYSQL_TYPE_DOUBLE:
-	  //case MYSQL_TYPE_NEWDECIMAL:
-	  return data.toDouble();
-	default:
-	  break;
-	}
+    switch (field_type) {
+    case MYSQL_TYPE_DECIMAL:
+    case MYSQL_TYPE_TINY:
+    case MYSQL_TYPE_SHORT:
+    case MYSQL_TYPE_LONG:
+    case MYSQL_TYPE_LONGLONG:
+    case MYSQL_TYPE_INT24:
+    case MYSQL_TYPE_YEAR:
+      return data.toInt64();
+    case MYSQL_TYPE_FLOAT:
+    case MYSQL_TYPE_DOUBLE:
+      //case MYSQL_TYPE_NEWDECIMAL:
+      return data.toDouble();
+    default:
+      break;
+    }
   }
   return data;
 }

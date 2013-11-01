@@ -631,6 +631,8 @@ class Framework {
   // phpunit for their testing (e.g. ThinkUp)
   public function get_pass_percentage(): mixed {
     if (filesize($this->stats_file) === 0) {
+      verbose("Stats File: ".$this->stats_file."has no content. Returning ".
+              "fatal\n", Options::$verbose);
       return "Fatal";
     }
 
@@ -680,16 +682,19 @@ class Framework {
       }
     } else {
       // If we cannot open the stats file, return Fatal
-      return "Fatal";
+      $pct = "Fatal";
     }
 
-    $pct = round(($num_tests - $num_errors_failures) / $num_tests, 4) * 100;
+    if ($num_tests > 0) {
+      $pct = round(($num_tests - $num_errors_failures) / $num_tests, 4) * 100;
+    } else {
+      $pct = "Fatal";
+    }
 
     verbose(strtoupper($this->name).
-            " TEST COMPLETE with pass percentage of: ".$pct."\n\n",
+            " TEST COMPLETE with pass percentage of: ".$pct."\n",
             Options::$verbose);
     verbose("Stats File: ".$this->stats_file."\n", Options::$verbose);
-    verbose("..........\n\n", Options::$verbose);
 
     return $pct;
   }
@@ -905,7 +910,7 @@ class Framework {
     // The commit hash has changed and we need to redownload
     } else if (trim(file_get_contents($git_head_file)) !==
                Frameworks::$framework_info[$this->name]['git_commit']) {
-      verbose("Redownloading $fw_name because git commit has changed...",
+      verbose("Redownloading ".$this->name." because git commit has changed...",
               !Options::$csv_only);
       remove_dir_recursive($this->install_root);
       return false;
@@ -1072,6 +1077,12 @@ function prepare(Vector $framework_names): void {
     error("Specify frameworks to run, use --all or use --allexcept");
   }
 
+  // So it is easier to keep tabs on our progress when running ps or something.
+  // Since I get all the tests of a framework by foreaching over the frameworks
+  // vector, and then append those tests to a tests vector and then foreach the
+  // test vector to bucketize them, this will allow us to basically run the
+  // framework tests alphabetically.
+  sort($framework_names);
   $frameworks = Vector {};
   foreach ($framework_names as $name) {
     $name = trim(strtolower($name));
@@ -1659,7 +1670,7 @@ function run_single_test(Framework $framework, string $test): int {
   } else {
     Options::$csv_only ? error()
                        : error("Could not open process to run test ".$test.
-                               " for framework ".$fw_name);
+                               " for framework ".$framework->name);
   }
   chdir(__DIR__);
   return $ret_val;

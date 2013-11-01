@@ -746,6 +746,7 @@ users can use the same machine serving their own source files.
     SlowQueryThreshold = 1000  # in ms, log slow queries as errors
     KillOnTimeout = false
     Socket =                   # Default location to look for mysql.sock
+    TypedResults = true
   }
 
 - KillOnTimeout
@@ -753,6 +754,11 @@ users can use the same machine serving their own source files.
 When a query takes long time to execute on server, client has a chance to
 kill it to avoid extra server cost by turning on KillOnTimeout.
 
+- TypedResults
+
+Zend returns strings and NULL only for MySQL results, not integers or floats.
+We return ints (and, sometimes, actual doubles). This behavior can be
+disabled by setting TypedResults to false.
 
 = HTTP Monitoring
 

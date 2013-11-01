@@ -184,7 +184,13 @@ int emulate_zend(int argc, char** argv){
   // NULL-terminate the argument array.
   newargv_array[newargv.size()] = NULL;
 
-  return execute_program(newargv.size(), newargv_array);
+  auto ret = execute_program(newargv.size(), newargv_array);
+
+  if (ini_fd != -1) {
+    unlink(ini_path);
+  }
+
+  return ret;
 }
 
 }

@@ -627,7 +627,7 @@ class c_ExternalThreadEventWaitHandle
 
  private:
   void initialize(AsioExternalThreadEvent* event, ObjectData* priv_data);
-  void destroyEvent();
+  void destroyEvent(bool sweeping = false);
 
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
   AsioExternalThreadEvent* m_event;

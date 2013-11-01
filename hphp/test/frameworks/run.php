@@ -466,10 +466,10 @@ class Frameworks {
             'git_commit' => "adaf8355074ba3e142f61e10f1790382db5defb9",
             'test_search_roots' =>
               Vector {
-                __DIR__."/frameworks/drupal/tests",
-                __DIR__."/frameworks/drupal/modules/*/tests/*",
-                __DIR__."/frameworks/drupal/../modules/*/tests/*",
-                __DIR__."/frameworks/drupal/../sites/*/modules/*/tests/*",
+                __DIR__."/frameworks/drupal/core/tests",
+                __DIR__."/frameworks/drupal/core/modules/*/tests/*",
+                __DIR__."/frameworks/drupal/core/../modules/*/tests/*",
+                __DIR__."/frameworks/drupal/core/../sites/*/modules/*/tests/*",
               },
           },
         /*
@@ -549,6 +549,7 @@ class Framework {
   public string $test_name_pattern;
 
   public Vector $test_search_roots;
+  public ?Map $current_test_statuses = null;
 
   public function __construct(string $name) {
     $this->name = $name;
@@ -698,6 +699,10 @@ class Framework {
   // adventurous, so we will see how this works out after some time to test it
   // out
   public function install(): void {
+    if ($this->isInstalled()) {
+      verbose($this->name." already installed.\n", Options::$verbose);
+      return;
+    }
     verbose("Installing ".$this->name.
             ". You will see white dots during install.....\n",
             !Options::$csv_only);
@@ -851,6 +856,62 @@ class Framework {
       }
     }
   }
+
+  public function prepare_current_test_statuses(string $status_code_pattern,
+                                        string $stop_parsing_pattern): void {
+    $file = fopen($this->expect_file, "r");
+
+    $matches = array();
+    $line = null;
+    $tests = Map {};
+
+    while (!feof($file)) {
+      $line = fgets($file);
+      if (preg_match($stop_parsing_pattern, $line, $matches) === 1) {
+        break;
+      }
+      if (preg_match($this->test_name_pattern, $line, $matches) === 1) {
+        do {
+          // Get the next line for the expected status for that test
+          $status = fgets($file);
+        } while (!feof($file) &&
+                 preg_match($status_code_pattern, $status) === 0);
+        // The second match will be the test name from the "Starting test..."
+        // match string
+        $tests[$matches[0]] = $status[0];
+      }
+    }
+    if ($tests->isEmpty()) {
+      $this->current_test_statuses = null;
+    } else {
+      $this->current_test_statuses = $tests;
+    }
+
+  }
+
+  private function isInstalled(): bool {
+    /****************************************
+     *  See if framework is already installed
+     *  installed.
+     ***************************************/
+    $git_head_file =$this->install_root."/.git/HEAD";
+    if (!(file_exists($this->install_root))) {
+      return false;
+    } else if (Options::$force_redownload) {
+      verbose("Forced redownloading of ".$this->name."...",
+              !Options::$csv_only);
+      remove_dir_recursive($this->install_root);
+      return false;
+    // The commit hash has changed and we need to redownload
+    } else if (trim(file_get_contents($git_head_file)) !==
+               Frameworks::$framework_info[$this->name]['git_commit']) {
+      verbose("Redownloading $fw_name because git commit has changed...",
+              !Options::$csv_only);
+      remove_dir_recursive($this->install_root);
+      return false;
+    }
+    return true;
+  }
 }
 
 class Options {
@@ -861,11 +922,14 @@ class Options {
   public static bool $force_redownload;
   public static bool $generate_new_expect_file;
   public static string $zend_path;
+  public static bool $all;
+  public static bool $allexcept;
 
-  public static function init(int $timeout, bool $verbose, bool $csv_only,
-                              bool $csv_header, bool $force_redownload,
-                              bool $generate_new_expect_file,
-                              ?string $zend_path): void {
+  private static function init(int $timeout, bool $verbose, bool $csv_only,
+                               bool $csv_header, bool $force_redownload,
+                               bool $generate_new_expect_file,
+                               ?string $zend_path, bool $all,
+                               bool $allexcept): void {
     self::$timeout = $timeout;
     self::$verbose = $verbose;
     self::$csv_only = $csv_only;
@@ -873,114 +937,193 @@ class Options {
     self::$force_redownload = $force_redownload;
     self::$generate_new_expect_file = $generate_new_expect_file;
     self::$zend_path = $zend_path;
+    self::$all = $all;
+    self::$allexcept = $allexcept;
+  }
+
+  public static function parse(OptionInfoMap $options, array $argv): Vector {
+    // Don't use $argv[0] which just contains the program to run
+    $framework_names = Vector::fromArray(array_slice($argv, 1));
+
+    // HACK: Yes, this next bit of "removeKey" code is hacky, maybe even clowny.
+    // We can fix the command_line_lib.php to maybe make things a bit better.
+
+    // It is possible that the $framework_names vector has a combiniation
+    // of command line options (e.g., verbose and timeout) that should be
+    // removed before running the tests. Remeber all these option values are
+    // already set in $options. They are just artificats of $argv right now.
+    // Although, there is a failsafe when checking if the framework exists that
+    // would weed command line opts out too.
+    $verbose = false;
+    $csv_only = false;
+    $csv_header = false;
+    $all = false;
+    $allexcept = false;
+
+    // Can't run all the framework tests and "all but" at the same time
+    if ($options->containsKey('all') && $options->containsKey('allexcept')) {
+      error("Cannot use --all and --allexcept together");
+    } else if ($options->containsKey('all')) {
+      $all = true;
+      $framework_names->removeKey(0);
+    } else if ($options->containsKey('allexcept')) {
+      $allexcept = true;
+      $framework_names->removeKey(0);
+    }
+
+    // Can't be both summary and verbose. Summary trumps.
+    if ($options->containsKey('csv') && $options->containsKey('verbose')) {
+      error("Cannot be --csv and --verbose together");
+    }
+    else if ($options->containsKey('csv')) {
+      $csv_only = true;
+      // $tests[0] may not even be "summary", but it doesn't matter, we are
+      // just trying to make the count right for $frameworks
+      $framework_names->removeKey(0);
+    }
+    else if ($options->containsKey('verbose')) {
+      $verbose = true;
+      $framework_names->removeKey(0);
+    }
+
+    if ($options->contains('csvheader')) {
+      $csv_header = true;
+      $framework_names->removeKey(0);
+    }
+
+    verbose("Script running...Be patient as some frameworks take a while with ".
+            "a debug build of HHVM\n", $verbose);
+
+    if (ProxyInformation::is_proxy_required()) {
+      verbose("Looks like proxy may be required. Setting to default FB proxy ".
+           "values. Please change Map in ProxyInformation to correct values, ".
+           "if necessary.\n", $verbose);
+    }
+
+    $timeout = 60; // seconds to run any individual test for any framework
+    if ($options->containsKey('timeout')) {
+      $timeout = (int) $options['timeout'];
+      // Remove timeout option and its value from the $framework_names vector
+      $framework_names->removeKey(0);
+      $framework_names->removeKey(0);
+    }
+
+    $zend_path = null;
+    if ($options->containsKey('zend')) {
+      verbose ("Will try Zend if necessary. If Zend doesn't work, the script ".
+           "will still continue; the particular framework on which Zend ".
+           "was attempted may not be available though.\n", $verbose);
+      $zend_path = $options['zend'];
+      $framework_names->removeKey(0);
+      $framework_names->removeKey(0);
+    }
+
+    $force_redownload = false;
+    if ($options->containsKey('redownload')) {
+      $force_redownload = true;
+      $framework_names->removeKey(0);
+    }
+
+    $generate_new_expect_file = false;
+    if ($options->containsKey('record')) {
+      $generate_new_expect_file = true;
+      $framework_names->removeKey(0);
+    }
+
+    self::init($timeout, $verbose, $csv_only, $csv_header, $force_redownload,
+               $generate_new_expect_file, $zend_path, $all, $allexcept);
+
+    // This will return just the name of the frameworks passed in, if any left
+    // (e.g. --all may have been passed, in which case the Vector will be
+    // empty)
+    return $framework_names;
   }
 }
 
-function prepare(OptionInfoMap $options, Vector $frameworks): void {
+class SingleTest {
+  public Framework $framework;
+  public string $path;
+
+  public function __construct(Framework $f, string $p) {
+    $this->framework = $f;
+    $this->path = $p;
+  }
+}
+
+function prepare(Vector $framework_names): void {
   Frameworks::init();
-
-  // HACK: Yes, this next bit of "removeKey" code is hacky, maybe even clowny.
-  // We can fix the command_line_lib.php to maybe make things a bit better.
-
-  // It is possible that the $frameworks vector came in here with a combiniation
-  // of command line options (e.g., verbose and timeout) that should be
-  // removed before running the tests. Remeber all these option values are
-  // already set in $options. They are just artificats of $argv right now.
-  // Although, there is a failsafe when checking if the framework exists that
-  // would weed command line opts out too.
-  $verbose = false;
-  $csv_only = false;
-  $csv_header = false;
-
-  // Can't run all the framework tests and "all but" at the same time
-  if ($options->containsKey('all') && $options->containsKey('allexcept')) {
-    error("Cannot use --all and --allexcept together");
-  }
-  // Can't be both summary and verbose. Summary trumps.
-  if ($options->containsKey('csv') && $options->containsKey('verbose')) {
-    error("Cannot be --csv and --verbose together");
-  }
-  else if ($options->containsKey('csv')) {
-    $csv_only = true;
-    // $tests[0] may not even be "summary", but it doesn't matter, we are
-    // just trying to make the count right for $frameworks
-    $frameworks->removeKey(0);
-  }
-  else if ($options->containsKey('verbose')) {
-    $verbose = true;
-    $frameworks->removeKey(0);
-  }
-
-  if ($options->contains('csvheader')) {
-    $csv_header = true;
-    $frameworks->removeKey(0);
-  }
-
-  verbose("Script running....Be patient as some frameworks take a while with ".
-          "a debug build of HHVM\n", $verbose);
-
-  if (ProxyInformation::is_proxy_required()) {
-    verbose("Looks like proxy may be required. Setting to default FB proxy ".
-         "values. Please change Map in ProxyInformation to correct values, ".
-         "if necessary.\n", $verbose);
-  }
-
-  $timeout = 60; // seconds to run any individual test for any framework
-  if ($options->containsKey('timeout')) {
-    $timeout = (int) $options['timeout'];
-    // Remove timeout option and its value from the $frameworks vector
-    $frameworks->removeKey(0);
-    $frameworks->removeKey(0);
-  }
-
-  $zend_path = null;
-  if ($options->containsKey('zend')) {
-    verbose ("Will try Zend if necessary. If Zend doesn't work, the script ".
-         "will still continue running; the particular framework on which Zend ".
-         "was attempted may not be available though.\n", $verbose);
-    $zend_path = $options['zend'];
-    $frameworks->removeKey(0);
-    $frameworks->removeKey(0);
-  }
-
-  $force_redownload = false;
-  if ($options->containsKey('redownload')) {
-    $force_redownload = true;
-    $frameworks->removeKey(0);
-  }
-
-  $generate_new_expect_file = false;
-  if ($options->containsKey('record')) {
-    $generate_new_expect_file = true;
-    $frameworks->removeKey(0);
-  }
-
-  Options::init($timeout, $verbose, $csv_only, $csv_header, $force_redownload,
-                $generate_new_expect_file, $zend_path);
-
   get_unit_testing_infra_dependencies();
+  $results_root = __DIR__."/results";
 
-  if ($options->containsKey('all')) {
-    $frameworks->removeKey(0);
-    // At this point, $frameworks should be empty if we are in --all mode.
-    if (!($frameworks->isEmpty())) {
+  if (Options::$all) {
+    // At this point, $framework_names should be empty if we are in --all mode.
+    if (!($framework_names->isEmpty())) {
       error("Do not specify both --all and individual frameworks to run at ".
             "same time.\n");
     }
     // Test all frameworks
-    test_frameworks(Frameworks::$framework_info->keys());
-  } else if ($options->contains('allexcept')) {
+    $framework_names = Frameworks::$framework_info->keys();
+  } else if (Options::$allexcept) {
     // Run all the frameworks, but the ones we listed.
-    $frun = Vector::fromItems(array_diff(Frameworks::$framework_info->keys(),
-                              $frameworks));
-    test_frameworks($frun);
-  } else if (count($frameworks) > 0) {
-    // Frameworks specified at the command line. At this point, $frameworks
-    // should only have frameworks to be run
-    test_frameworks($frameworks);
-  } else {
+    $framework_names = Vector::fromItems(
+                                array_diff(Frameworks::$framework_info->keys(),
+                                           $framework_names));
+  } else if (count($framework_names) === 0) {
     error("Specify frameworks to run, use --all or use --allexcept");
   }
+
+  $frameworks = Vector {};
+  foreach ($framework_names as $name) {
+    $name = trim(strtolower($name));
+    if (Frameworks::$framework_info->containsKey($name)) {
+      $framework = new Framework($name);
+      $framework->prepare_output_files($results_root);
+      $frameworks[] = $framework;
+    }
+  }
+  if (count($frameworks) === 0) {
+    error("There were no matching frameworks to run");
+  }
+  /************************
+   * Install the frameworks
+   ************************/
+  $num_threads = min(count($frameworks), num_cpus() + 1);
+
+  // Create some framework buckets proportional to the number of threads
+  $framework_buckets = array();
+  $i = 0;
+  foreach ($frameworks as $framework) {
+    $framework_buckets[$i][] = $framework;
+    $i = ($i + 1) % $num_threads;
+  }
+
+  $children = Vector {};
+  for ($i = 0; $i < $num_threads; $i++) {
+    $pid = pcntl_fork();
+    if ($pid === -1) {
+      error('Issues creating threads for tests');
+    } else if ($pid) {
+      $children[] = $pid;
+    } else {
+      exit(run_install_bucket($framework_buckets[$i]));
+    }
+  }
+
+  $status = -1;
+  foreach($children as $child) {
+    pcntl_waitpid($child, $status);
+    pcntl_wexitstatus($status);
+  }
+
+  return $frameworks;
+}
+
+function run_install_bucket(array $bucket): int {
+  $ret = 0;
+  foreach ($bucket as $framework) {
+    $framework->install();
+  }
+  return $ret;
 }
 
 function get_unit_testing_infra_dependencies(): void {
@@ -1047,337 +1190,289 @@ function run_install(string $proc, string $path, ?Map $env): ?int
   return null;
 }
 
-function test_frameworks(Vector $frameworks): void {
-  $results_root = __DIR__."/results";
+function run_tests(Vector $frameworks): void {
+  if (count($frameworks) === 0) {
+    error("No frameworks available on which to run tests");
+  }
+
+  /***********************************
+   *  Initial preparation
+   **********************************/
   $summary_file = tempnam("/tmp", "oss-fw-test-summary");
-  $frameworks_to_test = Vector {};
-  foreach ($frameworks as $framework) {
-    $name = trim(strtolower($framework));
-    if (Frameworks::$framework_info->containsKey($name)) {
-      $framework = new Framework($name);
-      $framework->prepare_output_files($results_root);
-      $frameworks_to_test[] = $framework;
+  $all_tests = Vector{};
+  foreach($frameworks as $framework) {
+    $framework->set_test_path();
+    // Get rid of any old data, except the expect file, of course.
+    unlink($framework->out_file);
+    unlink($framework->diff_file);
+    unlink($framework->errors_file);
+    unlink($framework->stats_file);
+    unlink($framework->fatals_file);
+    /***********************************
+     * Have we run the tests before?
+     * Are we generating a new expect
+     * file?
+    **********************************/
+    if (file_exists($framework->expect_file)) {
+      if (Options::$generate_new_expect_file) {
+        unlink($framework->expect_file);
+        verbose("Resetting the expect file for ".$framework->name.". ".
+                "Establishing new baseline with gray dots...\n",
+                !Options::$csv_only);
+      } else {
+        $framework->prepare_current_test_statuses(
+                                        PHPUnitPatterns::$status_code_pattern,
+                                        PHPUnitPatterns::$stop_parsing_pattern);
+        verbose(Colors::YELLOW.$framework->name.Colors::NONE.": running. ".
+                "Comparing against ".count($framework->current_test_statuses).
+                " tests\n", !Options::$csv_only);
+        $run_msg = "Comparing test suite with previous run. ";
+        $run_msg .= Colors::GREEN."Green . (dot) ".Colors::NONE;
+        $run_msg .= "means test result same as previous. ";
+        $run_msg .= "A ".Colors::GREEN." green F ".Colors::NONE;
+        $run_msg .= "means we have gone from fail to pass. ";
+        $run_msg .= "A ".Colors::RED." red F ".Colors::NONE;
+        $run_msg .= "means we have gone from pass to fail. ";
+        $run_msg .= "A ".Colors::BLUE." blue F ".Colors::NONE;
+        $run_msg .= "means we have gone from one type of fail to another type ";
+        $run_msg .= "of fail (e.g., F to E, or I to F). ";
+        $run_msg .= "A ".Colors::LIGHTBLUE." light blue F ".Colors::NONE;
+        $run_msg .= "means we are having trouble accessing the tests from the ";
+        $run_msg .= "expected run and can't get a proper status".PHP_EOL;
+        verbose($run_msg, Options::$verbose);
+      }
+    } else {
+      verbose("First time running test suite for ".$framework->name.
+              ". Establishing baseline with gray dots...\n",
+              !Options::$csv_only);
+    }
+
+
+
+    /******************************
+     *       YII SPECIFIC
+     ******************************/
+    if ($framework->name === "yii") {
+      $files = glob($framework->install_root.
+                    "/tests/assets/*/CAssetManagerTest.php");
+      foreach ($files as $file) {
+        verbose("Removing $file\n", Options::$verbose);
+        unlink($file);
+      }
+    }
+
+    // Handle wildcards
+    $search_dirs = array();
+    foreach($framework->test_search_roots as $root) {
+      if (strpos($root, "*") !== false || strpos($root, "..") !== false) {
+        $globdirs = glob($root, GLOB_ONLYDIR);
+        $search_dirs = array_merge($search_dirs, $globdirs);
+      } else {
+        $search_dirs[] = $root;
+      }
+    }
+
+    $fw_tests = Set{};
+    foreach($search_dirs as $root) {
+      $fw_tests->addAll(find_all_files(PHPUnitPatterns::$test_file_pattern,
+                                 $root, $framework->test_path."/vendor"));
+      $fw_tests->addAll(find_all_files_containing_text(
+                        "extends PHPUnit_Framework_TestCase", $root,
+                        $framework->test_path."/vendor"));
+      // Namespaced case
+      $fw_tests->addAll(find_all_files_containing_text(
+                        "extends \\PHPUnit_Framework_TestCase", $root,
+                        $framework->test_path."/vendor"));
+      // Sometimes a test file extends a class that extends PHPUnit_....
+      // Then we have to look at method names.
+      $fw_tests->addAll(find_all_files_containing_text("public function test",
+                       $root, $framework->test_path."/vendor"));
+    }
+    verbose("Found ".count($fw_tests)." files that contain tests for ".
+            $framework->name."...\n", !Options::$csv_only);
+
+    // All tests will be unique at this point given the Set above
+    foreach($fw_tests as $test) {
+      /**************
+       * ZF2 Specific
+       **************/
+      // These are the two current tests out of ALL tests of ANY framework
+      // that seem to be causing deadlock. Removing for now.
+      if (strpos($test, "ZendTest/Code/Generator/PropertyGeneratorTest.php") ===
+         false &&
+         strpos($test, "ZendTest/Code/Generator/ValueGeneratorTest.php") ===
+         false) {
+        $st = new SingleTest($framework, $test);
+        $all_tests->add($st);
+      }
     }
   }
 
-  if (count($frameworks_to_test) > 0) {
-    verbose("Beginning the unit tests.....\n", !Options::$csv_only);
-    $num_threads = min(count($frameworks_to_test), num_cpus() + 1);
 
-    // Create some framework buckets proportional to the number of threads
-    $framework_buckets = array();
-    $i = 0;
-    foreach ($frameworks_to_test as $framework) {
-      $framework_buckets[$i][] = $framework;
-      $i = ($i + 1) % $num_threads;
-    }
+  /*************************************
+   * Run the test suite
+   ************************************/
+  verbose("Beginning the unit tests.....\n", !Options::$csv_only);
+  if (count($all_tests) === 0) {
+    error("No tests found to run");
+  }
 
-    $children = Vector {};
-    for ($i = 0; $i < $num_threads; $i++) {
-      $pid = pcntl_fork();
-      if ($pid === -1) {
-        error('Issues creating threads for tests');
-      } else if ($pid) {
-        $children[] = $pid;
-      } else {
-        foreach ($framework_buckets[$i] as $framework) {
-          exit(test_framework($framework, $summary_file));
-        }
-      }
-    }
+  $num_threads = min(count($all_tests), num_cpus() + 1);
 
-    $thread_ret_val = 0;
-    $status = -1;
-    foreach($children as $child) {
-      pcntl_waitpid($child, $status);
-      $thread_ret_val |= pcntl_wexitstatus($status);
-    }
+  // Create some test buckets proportional to the number of threads
+  $test_buckets = array();
+  $i = 0;
+  foreach ($all_tests as $test) {
+    $test_buckets[$i][] = $test;
+    $i = ($i + 1) % $num_threads;
+  }
 
-    if ($thread_ret_val === 0) {
-      $msg = "\nAll tests ran as expected.\n\n".<<<THUMBSUP
-            _
-           /(|
-          (  :
-         __\  \  _____
-       (____)  -|
-      (____)|   |
-       (____).__|
-        (___)__.|_____
-THUMBSUP
-."\n";
-     verbose($msg, !Options::$csv_only);
+  $children = Vector {};
+  for ($i = 0; $i < $num_threads; $i++) {
+    $pid = pcntl_fork();
+    if ($pid === -1) {
+      error('Issues creating threads for tests');
+     } else if ($pid) {
+       $children[] = $pid;
+     } else {
+       exit(run_test_bucket($test_buckets[$i]));
+     }
+  }
+
+  $thread_ret_val = 0;
+  $status = -1;
+  foreach($children as $child) {
+    pcntl_waitpid($child, $status);
+    $thread_ret_val |= pcntl_wexitstatus($status);
+  }
+
+  /****************************************
+  * All tests complete. Create results for
+  * the framework that just ran.
+  ****************************************/
+  $ret_val = 0;
+  $diff_frameworks = Vector {};
+  foreach ($frameworks as $framework) {
+    $pct = $framework->get_pass_percentage();
+    $encoded_result = json_encode(array($framework->name => $pct));
+    if (!(file_exists($summary_file))) {
+      file_put_contents($summary_file, $encoded_result);
     } else {
-      $msg = "\nAll tests did not run as expected.\n\n".<<<THUMBSDOWN
-        ______
-       (( ____ \-
-       (( _____
-       ((_____
-       ((____   ----
-            /  /
-           (_((
-THUMBSDOWN
-."\n";
-      verbose($msg, !Options::$csv_only);
-      // Print the diffs
-      if (!Options::$csv_only) {
-        foreach($frameworks_to_test as $framework) {
-          $diff = $framework->diff_file;
-          // The file may not exist or the file may not have anything in it
-          // since there is no diff (i.e., all tests for that particular
-          // framework ran as expected). Either way, don't print anything
-          // out for those cases.
-          if (file_exists($diff) &&
-             ($contents = file_get_contents($diff)) !== "") {
-            print PHP_EOL."********* ".strtoupper($framework->name).
-                  " **********".PHP_EOL;
-            print $contents;
-            print "To run tests for ".strtoupper($framework->name).
-                  " use this command: \n";
-            $dir = $framework->test_path;
-            $command = "cd ".$dir." && ";
-            $command .= $framework->test_command;
-            print $command." [TEST NAME]".PHP_EOL;
-          }
-        }
-      }
-    }
-
-    if (file_exists($summary_file)
-        && ($contents = file_get_contents($summary_file)) !== "") {
       $file_data = file_get_contents($summary_file);
       $decoded_results = json_decode($file_data, true);
-      ksort($decoded_results);
+      $decoded_results[$framework->name] = $pct;
+      file_put_contents($summary_file, json_encode($decoded_results));
+    }
 
-      if (Options::$csv_only) {
-        if (Options::$csv_header) {
-          $print_str = str_pad("date,", 20);
-          foreach ($decoded_results as $key => $value) {
-            $print_str .= str_pad($key.",", 20);
-          }
-          // Get rid of the the last spaces and comma
-          $print_str = rtrim($print_str);
-          $print_str = rtrim($print_str, ",");
-          $print_str .= PHP_EOL;
-          print $print_str;
+    // If the first baseline run, make both the same. Otherwise, see if we have
+    // a diff file. If not, then all is good. If not, thumbs down because there
+    // was a difference between what we ran and what we expected.
+    if (!file_exists($framework->expect_file)) {
+      copy($framework->out_file, $framework->expect_file);
+    } else if (filesize($framework->diff_file) > 0) {
+      $diff_frameworks[] = $framework;
+      $ret_val = -1;
+    }
+  }
+
+  if ($ret_val === 0) {
+    $msg = "\nAll tests ran as expected.\n\n".<<<THUMBSUP
+          _
+         /(|
+        (  :
+       __\  \  _____
+     (____)  -|
+    (____)|   |
+     (____).__|
+      (___)__.|_____
+THUMBSUP
+."\n";
+   verbose($msg, !Options::$csv_only);
+  } else {
+    $msg = "\nAll tests did not run as expected.\n\n".<<<THUMBSDOWN
+      ______
+     (( ____ \-
+     (( _____
+     ((_____
+     ((____   ----
+          /  /
+         (_((
+THUMBSDOWN
+."\n";
+    verbose($msg, !Options::$csv_only);
+    // Print the diffs
+    if (!Options::$csv_only) {
+      foreach($diff_frameworks as $framework) {
+        $diff = $framework->diff_file;
+        // The file may not exist or the file may not have anything in it
+        // since there is no diff (i.e., all tests for that particular
+        // framework ran as expected). Either way, don't print anything
+        // out for those cases.
+        if (file_exists($diff) &&
+           ($contents = file_get_contents($diff)) !== "") {
+          print PHP_EOL."********* ".strtoupper($framework->name).
+                " **********".PHP_EOL;
+          print $contents;
+          print "To run tests for ".strtoupper($framework->name).
+                " use this command: \n";
+          $dir = $framework->test_path;
+          $command = "cd ".$dir." && ";
+          $command .= $framework->test_command;
+          print $command." [TEST NAME]".PHP_EOL;
         }
-        $print_str = str_pad(date("Y/m/d-G:i:s").",", 20);
+      }
+    }
+  }
+
+  if (file_exists($summary_file)
+      && ($contents = file_get_contents($summary_file)) !== "") {
+    $file_data = file_get_contents($summary_file);
+    $decoded_results = json_decode($file_data, true);
+    ksort($decoded_results);
+
+    if (Options::$csv_only) {
+      if (Options::$csv_header) {
+        $print_str = str_pad("date,", 20);
         foreach ($decoded_results as $key => $value) {
-          $print_str .= str_pad($value.",", 20);
+          $print_str .= str_pad($key.",", 20);
         }
         // Get rid of the the last spaces and comma
         $print_str = rtrim($print_str);
         $print_str = rtrim($print_str, ",");
         $print_str .= PHP_EOL;
         print $print_str;
-      } else {
-        print "\nALL TESTS COMPLETE!\n";
-        print "SUMMARY:\n";
-        foreach ($decoded_results as $key => $value) {
-          print $key."=".$value.PHP_EOL;
-        }
       }
+      $print_str = str_pad(date("Y/m/d-G:i:s").",", 20);
+      foreach ($decoded_results as $key => $value) {
+        $print_str .= str_pad($value.",", 20);
+      }
+      // Get rid of the the last spaces and comma
+      $print_str = rtrim($print_str);
+      $print_str = rtrim($print_str, ",");
+      $print_str .= PHP_EOL;
+      print $print_str;
     } else {
+      print "\nALL TESTS COMPLETE!\n";
+      print "SUMMARY:\n";
+      foreach ($decoded_results as $key => $value) {
+        print $key."=".$value.PHP_EOL;
+      }
+    }
+  } else {
       verbose("\nNO SUMMARY INFO AVAILABLE!\n", !Options::$csv_only);
-    }
-  } else {
-    error("No frameworks to test!");
   }
 }
 
-function test_framework(Framework $framework, string $summary_file): ?int {
-
-  $ret_val = 0;
-
-  /***********************************
-   *  Make sure we have the framework
-   *  installed.
-   **********************************/
-  $git_head_file =$framework->install_root."/.git/HEAD";
-  if (!(file_exists($framework->install_root))) {
-    $framework->install();
-  } else if (Options::$force_redownload) {
-    verbose("Forced redownloading of ".$framework->name."...",
-            !Options::$csv_only);
-    remove_dir_recursive($framework->install_root);
-    $framework->install();
-  // The commit hash has changed and we need to redownload
-  } else if (trim(file_get_contents($git_head_file)) !==
-             Frameworks::$framework_info[$framework->name]['git_commit']) {
-    verbose("Redownloading $fw_name because git commit has changed...",
-            !Options::$csv_only);
-    remove_dir_recursive($framework->install_root);
-    $framework->install();
-  }
-
-  /***********************************
-   *  Initial preparation
-   **********************************/
-
-  $framework->set_test_path();
-  verbose("Running test suite for ".$framework->name."\n", Options::$verbose);
-  verbose("Test Path: ".$framework->test_path."\n", Options::$verbose);
-
-
-  // Get rid of any old data, except the expect file, of course.
-  unlink($framework->out_file);
-  unlink($framework->diff_file);
-  unlink($framework->errors_file);
-  unlink($framework->stats_file);
-  unlink($framework->fatals_file);
-
-
-  /******************************
-   *       YII SPECIFIC
-   ******************************/
-  if ($framework->name === "yii") {
-    $files = glob($framework->install_root.
-                  "/tests/assets/*/CAssetManagerTest.php");
-    foreach ($files as $file) {
-      verbose("Removing $file\n", Options::$verbose);
-      unlink($file);
-    }
-  }
-
-  /***********************************
-   * Have we run the tests before?
-   * Are we generating a new expect
-   * file?
-   **********************************/
-  $compare_tests = null;
-  if (file_exists($framework->expect_file)) {
-    if (Options::$generate_new_expect_file) {
-      unlink($framework->expect_file);
-      verbose("Resetting the expect file for ".$framework->name.". ".
-              "Establishing new baseline with gray dots...\n",
-              !Options::$csv_only);
-    } else {
-      // Color codes would have already been stripped out. Don't need those.
-      $compare_tests = get_comparing_tests($framework,
-                                        PHPUnitPatterns::$status_code_pattern,
-                                        PHPUnitPatterns::$stop_parsing_pattern);
-      verbose(Colors::YELLOW . $framework->name . Colors::NONE . ": running. ".
-              "Comparing against ".count($compare_tests)." tests\n",
-              !Options::$csv_only);
-      $run_msg = "Comparing test suite with previous run. ";
-      $run_msg .= Colors::GREEN."Green . (dot) ".Colors::NONE;
-      $run_msg .= "means test result same as previous. ";
-      $run_msg .= "A ".Colors::GREEN." green F ".Colors::NONE;
-      $run_msg .= "means we have gone from fail to pass. ";
-      $run_msg .= "A ".Colors::RED." red F ".Colors::NONE;
-      $run_msg .= "means we have gone from pass to fail. ";
-      $run_msg .= "A ".Colors::BLUE." blue F ".Colors::NONE;
-      $run_msg .= "means we have gone from one type of fail to another type ";
-      $run_msg .= "of fail (e.g., F to E, or I to F). ";
-      $run_msg .= "A ".Colors::LIGHTBLUE." light blue F ".Colors::NONE;
-      $run_msg .= "means we are having trouble accessing the tests from the ";
-      $run_msg .= "expected run and can't get a proper status".PHP_EOL;
-      verbose($run_msg, Options::$verbose);
-    }
-  } else {
-    verbose("First time running test suite for ".$framework->name.
-            ". Establishing baseline with gray dots...\n", !Options::$csv_only);
-  }
-
-  $fw_tests_set = Set {};
-  foreach($framework->test_search_roots as $root) {
-    $fw_tests_set = find_all_files(PHPUnitPatterns::$test_file_pattern,
-                             $framework->test_path,
-                             $framework->test_path."/vendor");
-    $fw_tests_set->addAll(find_all_files_containing_text(
-                    "extends PHPUnit_Framework_TestCase",
-                    $framework->test_path, $framework->test_path."/vendor"));
-    // Namespaced case
-    $fw_tests_set->addAll(find_all_files_containing_text(
-                    "extends \\PHPUnit_Framework_TestCase",
-                    $framework->test_path, $framework->test_path."/vendor"));
-    // Sometimes a test file extends a class that extends PHPUnit_....
-    // Then we have to look at method names.
-    $fw_tests_set->addAll(find_all_files_containing_text(
-                    "public function test",
-                    $framework->test_path, $framework->test_path."/vendor"));
-  }
-  // All will be unique at this point given the Set above
-  $fw_tests = $fw_tests_set->toVector();
-
-  verbose("Found ".count($fw_tests)." files that contain tests for ".
-          $framework->name."...\n", !Options::$csv_only);
-
-  /*************************************
-   * Run the test suite
-   ************************************/
-  chdir($framework->test_path);
-
-  if (count($fw_tests) > 0) {
-    $num_threads = min(count($fw_tests), num_cpus() + 1);
-
-    // Create some test buckets proportional to the number of threads
-    $test_buckets = array();
-    $i = 0;
-    foreach ($fw_tests as $test) {
-      $test_buckets[$i][] = $test;
-      $i = ($i + 1) % $num_threads;
-    }
-
-    $children = Vector {};
-    for ($i = 0; $i < $num_threads; $i++) {
-      $pid = pcntl_fork();
-      if ($pid === -1) {
-        error('Issues creating threads for tests');
-      } else if ($pid) {
-        $children[] = $pid;
-      } else {
-          exit(run_test_bucket($framework, $test_buckets[$i], $compare_tests));
-      }
-    }
-  }
-
-  $ret_val = 0;
-  $status = -1;
-  foreach($children as $child) {
-    pcntl_waitpid($child, $status);
-    $ret_val = pcntl_wexitstatus($status);
-  }
-
-  /****************************************
-  * Test suite complete. Create results for
-  * the framework that just ran.
-  ****************************************/
-  $pct = $framework->get_pass_percentage();
-  $encoded_result = json_encode(array($framework->name => $pct));
-  if (!(file_exists($summary_file))) {
-    file_put_contents($summary_file, $encoded_result);
-  } else {
-    $file_data = file_get_contents($summary_file);
-    $decoded_results = json_decode($file_data, true);
-    $decoded_results[$framework->name] = $pct;
-    file_put_contents($summary_file, json_encode($decoded_results));
-  }
-
-  // If the first baseline run, make both the same. Otherwise, see if we have
-  // a diff file. If not, then all is good. If not, thumbs down because there
-  // was a difference between what we ran and what we expected.
-  if (!file_exists($framework->expect_file)) {
-    copy($framework->out_file, $framework->expect_file);
-  } else if (filesize($framework->diff_file) > 0) {
-    $ret_val = -1;
-  }
-
-  chdir(__DIR__);
-
-  return $ret_val;
-}
-
-function run_test_bucket(Framework $framework, array $test_bucket,
-                         ?Map $compare_tests): int {
+function run_test_bucket(array $test_bucket): int {
   $result = 0;
   foreach($test_bucket as $test) {
-    $result = run_single_test($framework, $test, $compare_tests);
+    $result = run_single_test($test->framework, $test->path);
   }
   return $result;
 }
 
-function run_single_test(Framework $framework, string $test,
-                         ?Map $compare_tests): int {
+function run_single_test(Framework $framework, string $test): int {
+  chdir($framework->test_path);
   $ret_val = 0;
 
   $pipes = null;
@@ -1485,15 +1580,16 @@ function run_single_test(Framework $framework, string $test,
           $status = $status[0];
         }
         $test_information .= $status.PHP_EOL;
-        if ($compare_tests !== null && $compare_tests->containsKey($match)) {
-          if ($status === $compare_tests[$match]) {
+        if ($framework->current_test_statuses !== null &&
+            $framework->current_test_statuses->containsKey($match)) {
+          if ($status === $framework->current_test_statuses[$match]) {
             // FIX: posix_isatty(STDOUT) was always returning false, even though
             // can print in color. Check this out later.
             verbose(Colors::GREEN.".".Colors::NONE, !Options::$csv_only);
           } else {
             // We are different than we expected
             // Red if we go from pass to something else
-            if ($compare_tests[$match] === '.') {
+            if ($framework->current_test_statuses[$match] === '.') {
               verbose(Colors::RED."F".Colors::NONE, !Options::$csv_only);
             // Green if we go from something else to pass
             } else if ($status === '.') {
@@ -1504,11 +1600,14 @@ function run_single_test(Framework $framework, string $test,
               verbose(Colors::BLUE."F".Colors::NONE, !Options::$csv_only);
             }
             verbose(PHP_EOL."Different status in ".$framework->name.
-                    " for test ".$match." was ".$compare_tests[$match].
-                     " and now is ".$status.PHP_EOL, !Options::$csv_only);
+                    " for test ".$match." was ".
+                    $framework->current_test_statuses[$match].
+                    " and now is ".$status.PHP_EOL, !Options::$csv_only);
             $diff_information .= "----------------------".PHP_EOL;
             $diff_information .= $match.PHP_EOL.PHP_EOL;
-            $diff_information .= "EXPECTED: ".$compare_tests[$match].PHP_EOL;
+            $diff_information .= "EXPECTED: ".
+                                 $framework->current_test_statuses[$match].
+                                 PHP_EOL;
             $diff_information .= ">>>>>>>".PHP_EOL;
             $diff_information .= "ACTUAL: ".$status.PHP_EOL.PHP_EOL;
           }
@@ -1517,10 +1616,10 @@ function run_single_test(Framework $framework, string $test,
           // because we are establishing a baseline. OR we have run the tests
           // before, but we are having an issue getting to the actual tests
           // (e.g., yii is one test suite that has behaved this way).
-          if ($compare_tests !== null) {
+          if ($framework->current_test_statuses !== null) {
             verbose(Colors::LIGHTBLUE."F".Colors::NONE, !Options::$csv_only);
-            verbose(PHP_EOL."Different status in ".$fw_name." for test ".
-                    $match.". Having problem loading test ".$match.PHP_EOL,
+            verbose(PHP_EOL."Different status in ".$framework->name." for ".
+                    "test ".$match.PHP_EOL,
                     !Options::$csv_only);
             $diff_information .= "----------------------".PHP_EOL;
             $diff_information .= "Problem loading: ".$match.PHP_EOL.PHP_EOL;
@@ -1562,42 +1661,11 @@ function run_single_test(Framework $framework, string $test,
                        : error("Could not open process to run test ".$test.
                                " for framework ".$fw_name);
   }
-
+  chdir(__DIR__);
   return $ret_val;
 }
 
 
-
-function get_comparing_tests(Framework $framework,
-                             string $status_code_pattern,
-                             string $stop_parsing_pattern): ?Map {
-  $file = fopen($framework->expect_file, "r");
-
-  $matches = array();
-  $line = null;
-  $tests = Map {};
-
-  while (!feof($file)) {
-    $line = fgets($file);
-    if (preg_match($stop_parsing_pattern, $line, $matches) === 1) {
-      break;
-    }
-    if (preg_match($framework->test_name_pattern, $line, $matches) === 1) {
-      do {
-        // Get the next line for the expected status for that test
-        $status = fgets($file);
-      } while (!feof($file) &&
-               preg_match($status_code_pattern, $status) === 0);
-      // The second match will be the test name only from the "Starting test..."
-      // match string
-      $tests[$matches[0]] = $status[0];
-    }
-  }
-  if ($tests->isEmpty()) {
-    return null;
-  }
-  return $tests;
-}
 
 function help(): void {
   $intro = <<<INTRO
@@ -1889,9 +1957,10 @@ function main(array $argv): void {
   if ($options->containsKey('help')) {
     return help();
   }
-  // Don't send $argv[0] which just contains the program to run
   // Parse other possible options out in run()
-  prepare($options, Vector::fromArray(array_slice($argv, 1)));
+  $framework_names = Options::parse($options, $argv);
+  $frameworks = prepare($framework_names);
+  run_tests($frameworks);
 }
 
 main($argv);

@@ -1,0 +1,22 @@
+#
+# Test removing tracelet guards that things are KindOfRef
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function main() {
+  VGetL $x
+  PopV
+  BreakTraceHint
+
+  AssertTL $x Ref
+  CGetL $x
+  PopC
+  Int 1
+  RetC
+}

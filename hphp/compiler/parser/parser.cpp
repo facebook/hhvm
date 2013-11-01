@@ -1010,7 +1010,8 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
 void Parser::onClassStart(int type, Token &name) {
   const Type::TypePtrMap& typeHintTypes =
     Type::GetTypeHintTypes(m_scanner.isHHSyntaxEnabled());
-  if (name.text() == "self" || name.text() == "parent" ||
+  if (0 == strcasecmp("self", name.text().c_str()) ||
+      0 == strcasecmp("parent", name.text().c_str()) ||
       typeHintTypes.find(name.text()) != typeHintTypes.end()) {
     PARSE_ERROR("Cannot use '%s' as class name as it is reserved",
                 name.text().c_str());

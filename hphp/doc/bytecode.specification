@@ -596,9 +596,8 @@ available at that given point in the bytecode. Likewise, the flavor descriptor
 of each slot on the evaluation stack must be compatible with the instruction's
 inputs' flavor descriptors.
 
-3) The evaluation stack must be empty at the beginning and end of each
-try region. The evaluation stack must also be empty at any offset
-listed as a catch entry point.
+3) The evaluation stack must be empty at any offset listed as a catch
+entry point.
 
 4) If a given instruction is not the target of a forward branch and it follows
 a Jmp, Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, NativeImpl, or
@@ -800,6 +799,7 @@ Nop    []  ->  []
 
   No operation. This instruction does nothing.
 
+PopA    [A]  ->  []
 PopC    [C]  ->  []
 PopV    [V]  ->  []
 PopR    [R]  ->  []
@@ -827,6 +827,10 @@ BoxR    [R:<T>]  ->  [V:<T>]
   If $1 is a cell at run time, this instruction creates a new ref, sets the new
   ref to point at a copy of cell $1, and pushes the ref onto the stack.
 
+BoxRNop   [R:<T>]  ->  [C:<T>]
+
+  Box, no op.  $1 must be statically known to be boxed.
+
 UnboxR    [R:<T>]  ->  [C:<T>]
 
   Unbox. If $1 is a cell at run time, this instruction does nothing.
@@ -834,6 +838,10 @@ UnboxR    [R:<T>]  ->  [C:<T>]
   If $1 is a ref at run time, this instruction creates a copy of the cell that
   ref $1 points to, and pushes the cell onto the stack.
 
+UnboxRNop   [R:<T>]  ->  [C:<T>]
+
+  UnboxR, no op.  $1 must be statically known to be unboxed.  This
+  instruction pushes $1 on the stack as a cell.
 
 2. Literal and constant instructions
 ------------------------------------
@@ -859,6 +867,12 @@ Array <scalar array id>              []  ->  [C:Arr]
 NewArray    []  ->  [C:Arr]
 
   New array. Creates a new empty array and pushes it onto the stack.
+
+NewArrayReserve <capacity hint>    []  ->  [C:Arr]
+
+  New array, with capacity hint.  Creates a new array and pushes it
+  onto the stack.  The implementation may make use of the hint in %1
+  to pre-size the array.
 
 NewPackedArray <num elems>    [C..C]  ->  [C]
 
@@ -964,7 +978,7 @@ Concat    [C C]  ->  [C:Str]
 
   Concatenation (.). Pushes ((string)$2 . (string)$1) on the stack.
 
-Abs    [C] -> [C]
+Abs    [C] -> [C:Int|Dbl|Bool]
 
   Absolute value.  Computes the absolute value of $1 and pushes the result onto
   the stack.
@@ -1220,7 +1234,7 @@ SSwitch <litstr id/offset vector>    [C]  ->  []
   to $1. If one is found, control will be transferred to the location specified
   by the offset corresponding to that string. If a matching string is not
   found, control is transferred to the location specified by the final element
-  in the vector.
+  in the vector, which must have a litstr id of -1.
 
 RetC    [C]  ->  []
 RetV    [V]  ->  []
@@ -1753,16 +1767,17 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
   passed (given by %1) and a reference to the FPI structure for the constructor
   for class x.
 
-DecodeCufIter <iterator id> [C] -> [C]
-  This instruction looks up $1 as a callable, and writes enough information
-  to iterator %1 for FPushCufIter to be able to push an actrec, as if it had
-  been given the callable.
-  If the function is successfully decoded, pushes true, otherwise, pushes
-  false, and sets up iter to call a function that does nothing, and returns
-  Null. No warning is raised.
+DecodeCufIter <iterator id>    [C]  ->  []
 
-FPushCufIter <num params> <iterator id> [] -> []
-  FPI push the result of a previous DecodeCufIter. No warning is raised.
+  This instruction looks up $1 as a callable, and writes enough
+  information to iterator %1 for FPushCufIter to be able to push an
+  actrec, as if it had been given the callable.  If the function is
+  not successfully decoded, sets up iter to call a function that does
+  nothing and returns Null.  No warning is raised.
+
+FPushCufIter <num params> <iterator id>   []  ->  []
+
+  FPI push the result of a previous DecodeCufIter.  No warning is raised.
 
 FPushCuf <num params>     [C]   ->  []
 FPushCufF <num params>    [C]   ->  []
@@ -1772,7 +1787,7 @@ FPushCufF <num params>    [C]   ->  []
   warning, and push an entry representing a function which does nothing, takes
   no argument, and returns null.
 
-FPushCufSafe <num params> [C C] ->  [C C]
+FPushCufSafe <num params> [C C] ->  [C C:Bool]
 
   FPI push call user function. This instruction pops $1 and $2, then pushes
   $1 back onto the stack. It then looks up $2 as a callable, and pushes a
@@ -1808,6 +1823,11 @@ FPassV <param id>    [V]  ->  [F]
   FPI pass parameter. If parameter %1 is pass by value, this instruction will
   unbox $1 and push it onto the stack as a cell. If parameter %1 is pass by
   reference, this instruction will push $1 onto the stack as a ref.
+
+FPassVNop <param id> [V]  ->  [F]
+
+  FPI pass parameter, no op.  Parameter %1 must be statically known to be
+  pass by reference.  This instruction pushes $1 onto the stack as a ref.
 
 FPassR <param id>    [R]  ->  [F]
 
@@ -3370,9 +3390,10 @@ WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
 
   For the non-W* flavors of these instructions, the locals are stored to
   with the same semantics as SetL (non-binding assignment).  The W* flavors
-  of these instructions do a binding assignment if the rhs (key or value)
-  was a reference, or if not they unset the old value of the local and then
-  do a non-binding assignment.
+  of these instructions do a binding assignment to %3 if the rhs was a
+  reference, or if not they unset the old value of the local and then do a
+  non-binding assignment.  The W* flavors still do a non-binding assignment
+  to %4.
 
   The logical value is computed differently depending on the iterator type
   that is initialized in %1:
@@ -3609,6 +3630,14 @@ DefCls <class id>    []  ->  []
   already bound, this instruction does nothing. If another class is already
   bound to the associated name, this instruction throws a fatal error.
 
+NopDefCls <class id>  []  ->  []
+
+  For always-hoistable classes (which are automatically defined when the
+  unit is loaded).  This instruction is used as a marker for the location
+  in a pseudo-main where a DefCls would've existed, but doesn't need to be.
+  (It is used as a place to raise errors from if the class fails to
+  define.)
+
 DefCns <litstr id>    [C]  ->  [C]
 
   Define constant. If there is already a global constant named %1, raises a
@@ -3751,30 +3780,57 @@ ArrayIdx    [C C C] -> [C]
   if found. Otherwise, $1 is pushed onto the stack. A fatal error will be
   thrown if $3 is not an array.
 
-AssertTL   <local id>     <op>
-AssertTStk <stack offset> <op>
+AssertTL   <local id>     <op>   []  ->  []
+AssertTStk <stack offset> <op>   []  ->  []
 
-  These opcodes are currently only supplied for debugging purposes.  They
-  instruct the runtime that the value in the specified local or stack offset
-  must have a particular type.  The type sub-opcodes are not currently
-  specified, as they are particular to the implementation.
+  These opcodes may be used to communicate the results of ahead of
+  time static analysis to the runtime.  They indicate that the value
+  in the specified local or stack offset must be statically known to
+  have a particular type.  The sub opcodes shoud be used to indicate
+  the type, in an unspecified way.
+
+AssertObjL    <local id>     <exact> <class name>   []  ->  []
+AssertObjStk  <stack offset> <exact> <class name>   []  ->  []
+
+  These opcodes may be used to communicate the results of ahead of
+  time static analysis to the runtime.  They indicate that the value
+  in the specified local or stack offset must be statically known to
+  be an object of a particular class or interface type, or an object
+  that is a non-strict subtype of a particular class or interface
+  type.
+
+  %3 is a litstr id of a class or interface name.  If %2 is 1, the
+  type is asserted to be exactly an object of the class with the name
+  %3.  Otherwise, the type is asserted to be some non-strict subtype
+  of the specified class or interface.
+
+BreakTraceHint   []  ->  []
+
+  This opcode has no effects, but is a hint that code immediately
+  following it is probably not worth including in the same compilation
+  unit as the code in front of it.  In HHVM, this is used to tell the
+  JIT to break a Tracelet when it sees this opcode.
 
 14. Continuation creation and execution
 ---------------------------------------
 
 CreateCont <function name>    []  ->  [C]
 
-  Creates a Continuation object and pushes it on the stack. The Continuation
-  will capture all defined local variables in the current function. The
-  Continuation will store a reference to the function named by the string
-  immediate to be used as its body.
+  Creates a Continuation object and pushes it on the stack.  The
+  Continuation will capture all defined local variables in the current
+  function, and marks them uninitialized on the current frame.  The
+  Continuation will store a reference to the function named by the
+  string immediate to be used as its body.
 
 CreateAsync <function name> <label id> <number of iterators>   [C]  ->  [C]
 
-  Analogy of CreateCont for async functions. Creates a Continuation object,
-  updates its label with <label id> immediate and stores a value from the stack
-  to its m_value field. Unlike CreateCont, it also copies the first
-  <number of iterators> iterators into the continuation frame.
+  Analogy of CreateCont for async functions.  Creates a Continuation
+  object, updates its label with <label id> immediate and stores a
+  value from the stack to its m_value field.  Like CreateCont, it
+  captures defined local variables in the current function, and marks
+  them uninitialized on the current frame.  Unlike CreateCont, it also
+  copies the first <number of iterators> iterators into the
+  continuation frame.
 
 ContEnter [C]  ->  []
 
@@ -3801,7 +3857,7 @@ ContSuspendK  <label id>    [C C]  ->  []
   to <label id>. Transfer control flow to the caller of the continuation body,
   which must be a non-static method of the Continuation class.
 
-UnpackCont    []  ->  [C:Int C]
+UnpackCont    []  ->  [C C:Int]
 
   Unpack continuation. Unpacks variables from the Continuation object in local
   0 into the containing environment. The stack will contain the current label of

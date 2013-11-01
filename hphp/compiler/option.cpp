@@ -142,6 +142,7 @@ bool Option::VariableCoalescing = false;
 bool Option::ArrayAccessIdempotent = false;
 bool Option::DumpAst = false;
 bool Option::WholeProgram = true;
+bool Option::UseHHBBC = getenv("HHVM_HHBBC");
 bool Option::RecordErrors = true;
 std::string Option::DocJson;
 
@@ -295,6 +296,7 @@ void Option::Load(Hdf &config) {
   ArrayAccessIdempotent    = config["ArrayAccessIdempotent"].getBool(false);
   DumpAst                  = config["DumpAst"].getBool(false);
   WholeProgram             = config["WholeProgram"].getBool(true);
+  UseHHBBC                 = config["UseHHBBC"].getBool(UseHHBBC);
 
   // Temporary, during file-cache migration.
   FileCache::UseNewCache   = config["UseNewCache"].getBool(false);

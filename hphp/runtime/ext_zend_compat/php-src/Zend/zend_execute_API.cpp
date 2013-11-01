@@ -37,6 +37,9 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+namespace HPHP {
+  void zBoxAndProxy(TypedValue* arg);
+}
 
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = { 0, NULL, NULL, NULL, NULL, 0, NULL, NULL, 0 };
@@ -154,9 +157,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
     return FAILURE;
   }
 
-  if (retval.m_type != HPHP::KindOfRef) {
-    tvBox(&retval);
-  }
+  HPHP::zBoxAndProxy(&retval);
   *fci->retval_ptr_ptr = retval.m_data.pref;
   return SUCCESS;
 }

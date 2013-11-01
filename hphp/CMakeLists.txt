@@ -39,6 +39,7 @@ add_subdirectory(parser)
 add_subdirectory(zend)
 add_subdirectory(util)
 
+add_subdirectory(hhbbc)
 add_subdirectory(compiler)
 add_subdirectory(runtime)
 add_subdirectory(runtime/ext_hhvm)

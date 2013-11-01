@@ -136,12 +136,18 @@ class Simulator : public DecoderVisitor {
     float s;
   };
 
+  // When an exception is thrown through simulated code, call this hook.
+  typedef void(*ExceptionHook)(Simulator*);
+  void set_exception_hook(ExceptionHook hook) {
+    exception_hook_ = hook;
+  }
+
   // Run the simulator.
   virtual void Run();
   void RunFrom(Instruction* first);
 
   // Simulation helpers.
-  inline Instruction* pc() { return pc_; }
+  inline Instruction* pc() const { return pc_; }
   inline void set_pc(Instruction* new_pc) {
     pc_ = new_pc;
     pc_modified_ = true;
@@ -509,6 +515,9 @@ class Simulator : public DecoderVisitor {
 
   // Instruction statistics instrumentation.
   Instrument* instrumentation_;
+
+  // Hook to handle exceptions being thrown through simulated code.
+  ExceptionHook exception_hook_ = nullptr;
 
   // General purpose registers. Register 31 is the stack pointer.
   SimRegister registers_[kNumberOfRegisters];

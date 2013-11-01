@@ -876,7 +876,8 @@
                     "desc": "The MongoDB aggregation framework provides a means to calculate aggregated values without having to use MapReduce. While MapReduce is powerful, it is often more difficult than necessary for many simple aggregation tasks, such as totaling or averaging field values.\n\nThis method accepts either a variable amount of pipeline operators, or a single array of operators constituting the pipeline.",
                     "flags": [
                         "ZendCompat",
-                        "NeedsActRec"
+                        "NeedsActRec",
+                        "VariableArguments"
                     ],
                     "return": {
                         "type": "Variant",
@@ -892,11 +893,6 @@
                             "name": "op",
                             "type": "Variant",
                             "desc": "The second pipeline operator."
-                        },
-                        {
-                            "name": "...",
-                            "type": "Variant",
-                            "desc": "Additional pipeline operators."
                         }
                     ]
                 },

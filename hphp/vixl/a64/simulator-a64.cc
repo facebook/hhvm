@@ -2113,30 +2113,37 @@ void Simulator::DoHostCall(Instruction* instr) {
 
   intptr_t result;
 
-  switch (argc) {
-    case 0:
-      result = reinterpret_cast<Native0Ptr>(xreg(16))();
-      break;
-    case 1:
-      result = reinterpret_cast<Native1Ptr>(xreg(16))(xreg(0));
-      break;
-    case 2:
-      result = reinterpret_cast<Native2Ptr>(xreg(16))(xreg(0), xreg(1));
-      break;
-    case 3:
-      result = reinterpret_cast<Native3Ptr>(xreg(16))(
+  try {
+    switch (argc) {
+      case 0:
+        result = reinterpret_cast<Native0Ptr>(xreg(16))();
+        break;
+      case 1:
+        result = reinterpret_cast<Native1Ptr>(xreg(16))(xreg(0));
+        break;
+      case 2:
+        result = reinterpret_cast<Native2Ptr>(xreg(16))(xreg(0), xreg(1));
+        break;
+      case 3:
+        result = reinterpret_cast<Native3Ptr>(xreg(16))(
         xreg(0), xreg(1), xreg(2));
-      break;
-    case 4:
-      result = reinterpret_cast<Native4Ptr>(xreg(16))(
-        xreg(0), xreg(1), xreg(2), xreg(3));
-      break;
-    case 5:
-      result = reinterpret_cast<Native5Ptr>(xreg(16))(
-        xreg(0), xreg(1), xreg(2), xreg(3), xreg(4));
-      break;
-    default:
-      not_reached();
+        break;
+      case 4:
+        result = reinterpret_cast<Native4Ptr>(xreg(16))(
+          xreg(0), xreg(1), xreg(2), xreg(3));
+        break;
+      case 5:
+        result = reinterpret_cast<Native5Ptr>(xreg(16))(
+          xreg(0), xreg(1), xreg(2), xreg(3), xreg(4));
+        break;
+      default:
+        not_reached();
+    }
+  } catch (...) {
+    if (exception_hook_) {
+      exception_hook_(this);
+    }
+    throw;
   }
 
   // Trash all caller-saved registers

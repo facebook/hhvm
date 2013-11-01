@@ -320,7 +320,6 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   auto& mainCode = tx64->mainCode;
   auto& stubsCode = tx64->stubsCode;
   Asm a { mainCode };
-  Asm astubs { stubsCode };
   TCA start = mainCode.frontier();
   if (dvs.size() == 1) {
     a.   cmp_imm32_disp_reg32(dvs[0].first,

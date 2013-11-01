@@ -14,6 +14,7 @@ set(HHVM_LINK_LIBRARIES
     hphp_parser
     hphp_zend
     hphp_util
+    hphp_hhbbc
     vixl neo
     ${HHVM_ANCHOR_SYMS})
 

@@ -161,6 +161,7 @@ public:
   void recordIndirectFixup(CodeAddress frontier, int dwordsPushed);
   void fixup(VMExecutionContext* ec) const;
   void fixupWork(VMExecutionContext* ec, ActRec* rbp) const;
+  void fixupWorkSimulated(VMExecutionContext* ec) const;
   void processPendingFixups();
   void clearPendingFixups() { m_pendingFixups.clear(); }
   bool pendingFixupsEmpty() const { return m_pendingFixups.empty(); }

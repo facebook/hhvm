@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/php-stream-wrapper.h"
 #include "hphp/runtime/base/http-stream-wrapper.h"
 #include "hphp/runtime/base/data-stream-wrapper.h"
+#include "hphp/runtime/base/glob-stream-wrapper.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include <set>
@@ -211,6 +212,7 @@ static FileStreamWrapper s_file_stream_wrapper;
 static PhpStreamWrapper  s_php_stream_wrapper;
 static HttpStreamWrapper s_http_stream_wrapper;
 static DataStreamWrapper s_data_stream_wrapper;
+static GlobStreamWrapper s_glob_stream_wrapper;
 
 void RegisterCoreWrappers() {
   s_file_stream_wrapper.registerAs("file");
@@ -218,6 +220,7 @@ void RegisterCoreWrappers() {
   s_http_stream_wrapper.registerAs("http");
   s_http_stream_wrapper.registerAs("https");
   s_data_stream_wrapper.registerAs("data");
+  s_glob_stream_wrapper.registerAs("glob");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

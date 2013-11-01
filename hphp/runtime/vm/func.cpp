@@ -360,16 +360,7 @@ bool Func::checkIterScope(Offset o, Id iterId, bool& itRef) const {
 
 const EHEnt* Func::findEH(Offset o) const {
   assert(o >= base() && o < past());
-  const EHEnt* eh = nullptr;
-  unsigned int i;
-
-  const EHEntVec& ehtab = shared()->m_ehtab;
-  for (i = 0; i < ehtab.size(); i++) {
-    if (ehtab[i].m_base <= o && o < ehtab[i].m_past) {
-      eh = &ehtab[i];
-    }
-  }
-  return eh;
+  return HPHP::findEH(shared()->m_ehtab, o);
 }
 
 const FPIEnt* Func::findFPI(Offset o) const {
@@ -536,9 +527,10 @@ void Func::prettyPrint(std::ostream& out) const {
   }
 
   const EHEntVec& ehtab = shared()->m_ehtab;
-  for (EHEntVec::const_iterator it = ehtab.begin(); it != ehtab.end(); ++it) {
+  size_t ehId = 0;
+  for (auto it = ehtab.begin(); it != ehtab.end(); ++it, ++ehId) {
     bool catcher = it->m_type == EHEnt::Type::Catch;
-    out << " EH " << (catcher ? "Catch" : "Fault") << " for " <<
+    out << " EH " << ehId << " " << (catcher ? "Catch" : "Fault") << " for " <<
       it->m_base << ":" << it->m_past;
     if (it->m_parentIndex != -1) {
       out << " outer EH " << it->m_parentIndex;

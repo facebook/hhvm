@@ -544,7 +544,13 @@ TranslatorX64::getCallArrayPrologue(Func* func) {
     if (!writer) return nullptr;
     tca = func->getFuncBody();
     if (tca != uniqueStubs.funcBodyHelperThunk) return tca;
-    tca = JIT::X64::emitCallArrayPrologue(func, dvs);
+    if (JIT::arch() == JIT::Arch::X64) {
+      tca = JIT::X64::emitCallArrayPrologue(func, dvs);
+    } else if (JIT::arch() == JIT::Arch::ARM) {
+      tca = JIT::ARM::emitCallArrayPrologue(func, dvs);
+    } else {
+      not_implemented();
+    }
     func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base());
@@ -1168,6 +1174,20 @@ TranslatorX64::enterTC(TCA start, void* data) {
         decoder.AppendVisitor(&disasm);
       }
       vixl::Simulator sim(&decoder, std::cout);
+      sim.set_exception_hook(
+        [] (vixl::Simulator* s) {
+          if (tl_regState == VMRegState::DIRTY) {
+            // This is a pseudo-copy of the logic in sync_regstate.
+
+            ActRec fakeAr;
+            fakeAr.m_savedRbp = s->xreg(JIT::ARM::rVmFp.code());
+            fakeAr.m_savedRip = reinterpret_cast<uint64_t>(s->pc());
+
+            tx64->fixupMap().fixupWork(g_vmContext, &fakeAr);
+            tl_regState = VMRegState::CLEAN;
+          }
+        }
+      );
 
       g_vmContext->m_activeSims.push_back(&sim);
       SCOPE_EXIT { g_vmContext->m_activeSims.pop_back(); };
@@ -1847,8 +1867,16 @@ TranslatorX64::translateWork(const TranslArgs& args) {
         // function entry.  We lazily create the tracelet here in this
         // case.
         if (m_mode == TransOptimize) {
-          m_mode = TransLive;
-          tp = analyze(sk);
+          if (sk.getFuncId() == liveFunc()->getFuncId() &&
+              liveUnit()->contains(vmpc()) &&
+              sk.offset() == liveUnit()->offsetOf(vmpc())) {
+            m_mode = TransLive;
+            tp = analyze(sk);
+          } else {
+            m_mode = TransInterp;
+            traceFree();
+            break;
+          }
         }
         FTRACE(1, "trying translateTracelet\n");
         assertCleanState();

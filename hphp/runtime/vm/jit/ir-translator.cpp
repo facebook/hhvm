@@ -306,6 +306,10 @@ IRTranslator::translateAssignToLocalOp(const NormalizedInstruction& ni) {
   }
 }
 
+void IRTranslator::translatePopA(const NormalizedInstruction&) {
+  HHIR_EMIT(PopA);
+}
+
 void
 IRTranslator::translatePopC(const NormalizedInstruction& i) {
   HHIR_EMIT(PopC);
@@ -332,6 +336,12 @@ IRTranslator::translateUnboxR(const NormalizedInstruction& i) {
   }
 }
 
+void IRTranslator::translateUnboxRNop(const NormalizedInstruction& i) {
+  TRACE(1, "HHIR: translateUnboxR: output inferred to be Cell\n");
+  assert(i.noOp);
+  m_hhbcTrans.assertTypeStack(0, JIT::Type::Cell);
+}
+
 void
 IRTranslator::translateBoxR(const NormalizedInstruction& i) {
   if (i.noOp) {
@@ -341,6 +351,11 @@ IRTranslator::translateBoxR(const NormalizedInstruction& i) {
   } else {
     HHIR_UNIMPLEMENTED(BoxR);
   }
+}
+
+void IRTranslator::translateBoxRNop(const NormalizedInstruction& i) {
+  assert(i.noOp);
+  m_hhbcTrans.assertTypeStack(0, JIT::Type::BoxedCell);
 }
 
 void
@@ -385,7 +400,12 @@ IRTranslator::translateArray(const NormalizedInstruction& i) {
 
 void
 IRTranslator::translateNewArray(const NormalizedInstruction& i) {
-  HHIR_EMIT(NewArray, i.imm[0].u_IVA);
+  HHIR_EMIT(NewArrayReserve, 0);
+}
+
+void
+IRTranslator::translateNewArrayReserve(const NormalizedInstruction& i) {
+  HHIR_EMIT(NewArrayReserve, i.imm[0].u_IVA);
 }
 
 void
@@ -414,6 +434,17 @@ void IRTranslator::translateAssertTL(const NormalizedInstruction& i) {
 
 void IRTranslator::translateAssertTStk(const NormalizedInstruction& i) {
   HHIR_EMIT(AssertTStk, i.imm[0].u_IVA, static_cast<AssertTOp>(i.imm[1].u_OA));
+}
+
+void IRTranslator::translateAssertObjL(const NormalizedInstruction& i) {
+  HHIR_EMIT(AssertObjL, i.imm[0].u_LA, i.imm[1].u_IVA, i.imm[2].u_SA);
+}
+
+void IRTranslator::translateAssertObjStk(const NormalizedInstruction& i) {
+  HHIR_EMIT(AssertObjStk, i.imm[0].u_IVA, i.imm[1].u_IVA, i.imm[2].u_SA);
+}
+
+void IRTranslator::translateBreakTraceHint(const NormalizedInstruction&) {
 }
 
 void
@@ -824,6 +855,8 @@ void IRTranslator::translateDefCls(const NormalizedInstruction& i) {
   HHIR_EMIT(DefCls, cid, i.source.offset());
 }
 
+void IRTranslator::translateNopDefCls(const NormalizedInstruction&) {}
+
 void IRTranslator::translateDefFunc(const NormalizedInstruction& i) {
   int fid = i.imm[0].u_IVA;
   HHIR_EMIT(DefFunc, fid);
@@ -916,6 +949,10 @@ IRTranslator::translateFPassV(const NormalizedInstruction& i) {
     return;
   }
   HHIR_EMIT(FPassV);
+}
+
+void IRTranslator::translateFPassVNop(const NormalizedInstruction& i) {
+  assert(i.noOp);
 }
 
 void

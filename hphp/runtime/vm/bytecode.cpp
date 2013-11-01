@@ -3325,6 +3325,11 @@ OPTBLD_INLINE void VMExecutionContext::iopNop(PC& pc) {
   NEXT();
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopPopA(PC& pc) {
+  NEXT();
+  m_stack.popA();
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopPopC(PC& pc) {
   NEXT();
   m_stack.popC();
@@ -3367,11 +3372,21 @@ OPTBLD_INLINE void VMExecutionContext::iopBoxR(PC& pc) {
   }
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopBoxRNop(PC& pc) {
+  NEXT();
+  assert(refIsPlausible(*m_stack.topTV()));
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopUnboxR(PC& pc) {
   NEXT();
   if (m_stack.topTV()->m_type == KindOfRef) {
     m_stack.unbox();
   }
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopUnboxRNop(PC& pc) {
+  NEXT();
+  assert(cellIsPlausible(*m_stack.topTV()));
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopNull(PC& pc) {
@@ -3433,8 +3448,13 @@ OPTBLD_INLINE void VMExecutionContext::iopArray(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopNewArray(PC& pc) {
   NEXT();
-  auto arr = HphpArray::MakeReserve(HphpArray::SmallSize);
-  m_stack.pushArrayNoRc(arr);
+  m_stack.pushArrayNoRc(HphpArray::MakeReserve(HphpArray::SmallSize));
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopNewArrayReserve(PC& pc) {
+  NEXT();
+  DECODE_IVA(capacity);
+  m_stack.pushArrayNoRc(HphpArray::MakeReserve(capacity));
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopNewPackedArray(PC& pc) {
@@ -4638,25 +4658,90 @@ IOP_TYPE_CHECK_INSTR(true,   Bool, is_bool)
 
 OPTBLD_INLINE static void implAssertT(TypedValue* tv, AssertTOp op) {
   switch (op) {
-  case AssertTOp::Uninit:   assert(tv->m_type == KindOfUninit);   break;
-  case AssertTOp::InitNull: assert(tv->m_type == KindOfNull);     break;
-  case AssertTOp::Int:      assert(tv->m_type == KindOfInt64);    break;
-  case AssertTOp::Dbl:      assert(tv->m_type == KindOfDouble);   break;
-  case AssertTOp::Res:      assert(tv->m_type == KindOfResource); break;
-  case AssertTOp::Null:     assert(IS_NULL_TYPE(tv->m_type));     break;
-  case AssertTOp::Bool:     assert(tv->m_type == KindOfBoolean);  break;
-  case AssertTOp::Str:      assert(IS_STRING_TYPE(tv->m_type));   break;
-  case AssertTOp::Arr:      assert(tv->m_type == KindOfArray);    break;
-  case AssertTOp::Obj:      assert(tv->m_type == KindOfObject);   break;
-
-  case AssertTOp::InitUnc:  assert(tv->m_type != KindOfUninit);
+  case AssertTOp::Uninit:
+    assert(tv->m_type == KindOfUninit);
+    break;
+  case AssertTOp::InitNull:
+    assert(tv->m_type == KindOfNull);
+    break;
+  case AssertTOp::Null:
+    assert(IS_NULL_TYPE(tv->m_type));
+    break;
+  case AssertTOp::Int:
+    assert(tv->m_type == KindOfInt64);
+    break;
+  case AssertTOp::OptInt:
+    assert(tv->m_type == KindOfNull || tv->m_type == KindOfInt64);
+    break;
+  case AssertTOp::Dbl:
+    assert(tv->m_type == KindOfDouble);
+    break;
+  case AssertTOp::OptDbl:
+    assert(tv->m_type == KindOfNull || tv->m_type == KindOfDouble);
+    break;
+  case AssertTOp::Bool:
+    assert(tv->m_type == KindOfBoolean);
+    break;
+  case AssertTOp::OptBool:
+    assert(tv->m_type == KindOfNull || tv->m_type == KindOfBoolean);
+    break;
+  case AssertTOp::Res:
+    assert(tv->m_type == KindOfResource);
+    break;
+  case AssertTOp::OptRes:
+    assert(tv->m_type == KindOfNull || tv->m_type == KindOfResource);
+    break;
+  case AssertTOp::SStr:
+    assert(IS_STRING_TYPE(tv->m_type) && tv->m_data.pstr->isStatic());
+    break;
+  case AssertTOp::OptSStr:
+    assert(tv->m_type == KindOfNull ||
+           (IS_STRING_TYPE(tv->m_type) && tv->m_data.pstr->isStatic()));
+    break;
+  case AssertTOp::Str:
+    assert(IS_STRING_TYPE(tv->m_type));
+    break;
+  case AssertTOp::OptStr:
+    assert(tv->m_type == KindOfNull || IS_STRING_TYPE(tv->m_type));
+    break;
+  case AssertTOp::SArr:
+    assert(tv->m_type == KindOfArray && tv->m_data.parr->isStatic());
+    break;
+  case AssertTOp::OptSArr:
+    assert(tv->m_type == KindOfNull ||
+           (tv->m_type == KindOfArray && tv->m_data.parr->isStatic()));
+    break;
+  case AssertTOp::Arr:
+    assert(tv->m_type == KindOfArray);
+    break;
+  case AssertTOp::OptArr:
+    assert(tv->m_type == KindOfNull || tv->m_type == KindOfArray);
+    break;
+  case AssertTOp::Obj:
+    assert(tv->m_type == KindOfObject);
+    break;
+  case AssertTOp::OptObj:
+    assert(tv->m_type == KindOfNull || tv->m_type == KindOfObject);
+    break;
+  case AssertTOp::InitUnc:
+    assert(tv->m_type != KindOfUninit);
     /* fallthrough */
-  case AssertTOp::Unc:      assert(!IS_REFCOUNTED_TYPE(tv->m_type) ||
+  case AssertTOp::Unc:
+    assert(
+      !IS_REFCOUNTED_TYPE(tv->m_type) ||
       (tv->m_type == KindOfString && tv->m_data.pstr->isStatic()) ||
-      (tv->m_type == KindOfArray  && tv->m_data.parr->isStatic())); break;
-
-  case AssertTOp::InitCell: assert(tv->m_type != KindOfUninit &&
-                                   tv->m_type != KindOfRef);      break;
+      (tv->m_type == KindOfArray  && tv->m_data.parr->isStatic())
+    );
+    break;
+  case AssertTOp::InitCell:
+    assert(tv->m_type != KindOfUninit && tv->m_type != KindOfRef);
+    break;
+  case AssertTOp::Cell:
+    assert(tv->m_type != KindOfRef);
+    break;
+  case AssertTOp::Ref:
+    assert(tv->m_type == KindOfRef);
+    break;
   }
 }
 
@@ -4672,6 +4757,41 @@ OPTBLD_INLINE void VMExecutionContext::iopAssertTStk(PC& pc) {
   DECODE_IVA(stkSlot);
   DECODE_OA(op);
   implAssertT(m_stack.indTV(stkSlot), static_cast<AssertTOp>(op));
+}
+
+OPTBLD_INLINE static void implAssertObj(TypedValue* tv,
+                                        bool exact,
+                                        const StringData* str) {
+  DEBUG_ONLY auto const cls = Unit::lookupClass(str);
+  assert(cls && "asserted class was not defined at AssertObj{L,Stk}");
+  assert(tv->m_type == KindOfObject);
+  if (exact) {
+    assert(tv->m_data.pobj->getVMClass() == cls);
+  } else {
+    assert(tv->m_data.pobj->getVMClass()->classof(cls));
+  }
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopAssertObjL(PC& pc) {
+  NEXT();
+  DECODE_LA(localId);
+  DECODE_IVA(exact);
+  DECODE(Id, strId);
+  auto const str = m_fp->m_func->unit()->lookupLitstrId(strId);
+  implAssertObj(frame_local(m_fp, localId), exact, str);
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopAssertObjStk(PC& pc) {
+  NEXT();
+  DECODE_IVA(stkSlot);
+  DECODE_IVA(exact);
+  DECODE(Id, strId);
+  auto const str = m_fp->m_func->unit()->lookupLitstrId(strId);
+  implAssertObj(m_stack.indTV(stkSlot), exact, str);
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopBreakTraceHint(PC& pc) {
+  NEXT();
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopEmptyL(PC& pc) {
@@ -5691,14 +5811,10 @@ static inline ActRec* arFromInstr(TypedValue* sp, const Op* pc) {
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopFPassC(PC& pc) {
-#ifdef DEBUG
-  ActRec* ar = arFromInstr(m_stack.top(), (Op*)pc);
-#endif
+  DEBUG_ONLY auto const ar = arFromInstr(m_stack.top(), (Op*)pc);
   NEXT();
   DECODE_IVA(paramId);
-#ifdef DEBUG
   assert(paramId < ar->numArgs());
-#endif
 }
 
 #define FPASSC_CHECKED_PRELUDE                                                \
@@ -5741,6 +5857,14 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassV(PC& pc) {
   if (!func->byRef(paramId)) {
     m_stack.unbox();
   }
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopFPassVNop(PC& pc) {
+  DEBUG_ONLY auto const ar = arFromInstr(m_stack.top(), (Op*)pc);
+  NEXT();
+  DECODE_IVA(paramId);
+  assert(paramId < ar->numArgs());
+  assert(ar->m_func->byRef(paramId));
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopFPassR(PC& pc) {
@@ -6406,6 +6530,11 @@ OPTBLD_INLINE void VMExecutionContext::iopDefCls(PC& pc) {
   DECODE_IVA(cid);
   PreClass* c = m_fp->m_func->unit()->lookupPreClassId(cid);
   Unit::defClass(c);
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopNopDefCls(PC& pc) {
+  NEXT();
+  DECODE_IVA(cid);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopDefTypeAlias(PC& pc) {

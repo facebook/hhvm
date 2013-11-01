@@ -187,7 +187,7 @@ struct HhbcTranslator {
   void emitBareThis(int notice);
   void emitInitThisLoc(int32_t id);
   void emitArray(int arrayId);
-  void emitNewArray(int capacity);
+  void emitNewArrayReserve(int capacity);
   void emitNewPackedArray(int n);
   void emitNewCol(int capacity);
 
@@ -247,6 +247,7 @@ struct HhbcTranslator {
   // PreInc, PostInc, PreDec, PostDec
   void emitIncDecL(bool pre, bool inc, uint32_t id);
   void emitIncDecS(bool pre, bool inc);
+  void emitPopA();
   void emitPopC();
   void emitPopV();
   void emitPopR();
@@ -342,8 +343,10 @@ struct HhbcTranslator {
   // miscelaneous ops
   void emitFloor();
   void emitCeil();
-  void emitAssertTL(int32_t id, AssertTOp op);
-  void emitAssertTStk(int32_t offset, AssertTOp op);
+  void emitAssertTL(int32_t id, AssertTOp);
+  void emitAssertTStk(int32_t offset, AssertTOp);
+  void emitAssertObjL(int32_t id, bool exact, Id);
+  void emitAssertObjStk(int32_t offset, bool exact, Id);
 
   // binary arithmetic ops
   void emitAdd();
@@ -691,6 +694,7 @@ private:
                             bool& checkForInt);
   SSATmp* emitLdClsPropAddrCached(const StringData* propName,
                                   Block* block);
+  Type assertObjType(const StringData*);
 
   /*
    * Helpers for (CGet|VGet|Bind|Set|Isset|Empty)(G|S)

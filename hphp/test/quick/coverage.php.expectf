@@ -4,7 +4,7 @@ Enabled
 Done enabling
 array(1) {
   ["%s"]=>
-  array(27) {
+  array(%d) {
     [4]=>
     int(4)
     [5]=>
@@ -18,9 +18,7 @@ array(1) {
     [13]=>
     int(3)
     [15]=>
-    int(1)
-    [16]=>
-    int(3)
+    int(1)%A
     [17]=>
     int(8)
     [18]=>

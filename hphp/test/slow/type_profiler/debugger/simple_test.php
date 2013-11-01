@@ -25,6 +25,7 @@ class Foo {
 function main() {
   $a = new Foo();
   $a->identity(232);
+  $a->identity(42);
   $a->identity(0);
   add(1,1);
   add(0,0);

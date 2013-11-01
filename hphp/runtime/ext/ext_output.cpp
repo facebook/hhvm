@@ -129,6 +129,11 @@ const StaticString
   s_process_cpu("process-cpu"),
   s_process_inst("process-inst");
 
+const StaticString
+  s_process_sleep_time("process-sleep-time"),
+  s_process_usleep_time("process-usleep-time"),
+  s_process_nsleep_time("process-nanosleep-time");
+
 Variant f_hphp_get_timers(bool get_as_float /* = true */) {
   Transport *transport = g_context->getTransport();
   if (transport == NULL) {
@@ -139,8 +144,12 @@ Variant f_hphp_get_timers(bool get_as_float /* = true */) {
   const timespec &tsWall = transport->getWallTime();
   const timespec &tsCpu = transport->getCpuTime();
   const int64_t &instStart = transport->getInstructions();
+  const int64_t &usleep_time = transport->getuSleepTime();
+  const int64_t &sleep_time = transport->getSleepTime();
+  const int64_t &nsleep_time_s = transport->getnSleepTimeS();
+  const int32_t &nsleep_time_n = transport->getnSleepTimeN();
 
-  ArrayInit ret(4);
+  ArrayInit ret(7);
   if (get_as_float) {
     ret.set(s_queue,        ts_float(tsQueue));
     ret.set(s_process_wall, ts_float(tsWall));
@@ -151,6 +160,10 @@ Variant f_hphp_get_timers(bool get_as_float /* = true */) {
     ret.set(s_process_cpu,  ts_microtime(tsCpu));
   }
   ret.set(s_process_inst, instStart);
+  ret.set(s_process_sleep_time, sleep_time);
+  ret.set(s_process_usleep_time, (double)usleep_time/1000000);
+  ret.set(s_process_nsleep_time, nsleep_time_s +
+          (double)nsleep_time_n / 1000000000);
   return ret.create();
 }
 

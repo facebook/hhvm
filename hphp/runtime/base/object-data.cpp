@@ -761,6 +761,8 @@ ObjectData* ObjectData::clone() {
         return c_Set::Clone(this);
       } else if (m_cls == c_Pair::classof()) {
         return c_Pair::Clone(this);
+      } else if (m_cls == c_FrozenVector::classof()) {
+        return c_FrozenVector::Clone(this);
       }
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);

@@ -21,11 +21,15 @@
  */
 
 #define INSTRS \
+  CASE(BreakTraceHint) \
+  CASE(PopA) \
   CASE(PopC) \
   CASE(PopV) \
   CASE(PopR) \
   CASE(UnboxR) \
   CASE(BoxR) \
+  CASE(UnboxRNop) \
+  CASE(BoxRNop) \
   CASE(Null) \
   CASE(NullUninit) \
   CASE(True) \
@@ -35,6 +39,7 @@
   CASE(String) \
   CASE(Array) \
   CASE(NewArray) \
+  CASE(NewArrayReserve) \
   CASE(NewPackedArray) \
   CASE(NewCol) \
   CASE(Nop) \
@@ -105,6 +110,8 @@
   CASE(FPassM) \
   CASE(FPassS) \
   CASE(FPassG) \
+  CASE(FPassV) \
+  CASE(FPassVNop) \
   CASE(This) \
   CASE(BareThis) \
   CASE(CheckThis) \
@@ -129,6 +136,7 @@
   CASE(MIterNext) \
   CASE(MIterNextK) \
   CASE(DefCls) \
+  CASE(NopDefCls) \
   CASE(DefFunc) \
   CASE(Self) \
   CASE(Parent) \
@@ -166,7 +174,6 @@
   CASE(IterFree) \
   CASE(MIterFree) \
   CASE(IterBreak) \
-  CASE(FPassV) \
   CASE(UnsetN) \
   CASE(DecodeCufIter) \
   CASE(Shl) \
@@ -176,6 +183,8 @@
   CASE(Ceil) \
   CASE(AssertTL) \
   CASE(AssertTStk) \
+  CASE(AssertObjL) \
+  CASE(AssertObjStk) \
   /* */
 
   // These are instruction-like functions which cover more than one

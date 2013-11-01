@@ -317,7 +317,6 @@ struct Unit {
       None,
       String,
       Class,
-      NopOut,
 
       /*
        * Marks types that are proven to be a particular type by static
@@ -334,7 +333,6 @@ struct Unit {
       GuardedThis,
       GuardedCls,
       NoSurprise,
-      ArrayCapacity,
 
       /*
        * Information about the known class of a property base in the
@@ -438,6 +436,9 @@ struct Unit {
   }
   Offset offsetOf(const Op* op) const {
     return offsetOf(reinterpret_cast<const Opcode*>(op));
+  }
+  bool contains(const Opcode* op) const {
+    return op >= m_bc && op <= m_bc + m_bclen;
   }
 
   const StringData* filepath() const {
@@ -764,6 +765,8 @@ private:
   mutable PseudoMainCacheMap *m_pseudoMainCache;
 };
 
+bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
+
 class UnitEmitter {
   friend class UnitRepoProxy;
   friend class ::HPHP::Compiler::Peephole;
@@ -776,10 +779,11 @@ class UnitEmitter {
   void setRepoId(int repoId) { m_repoId = repoId; }
   int64_t sn() const { return m_sn; }
   void setSn(int64_t sn) { m_sn = sn; }
+  const uchar* bc() const { return m_bc; }
   Offset bcPos() const { return (Offset)m_bclen; }
   void setBc(const uchar* bc, size_t bclen);
   void setBcMeta(const uchar* bc_meta, size_t bc_meta_len);
-  const StringData* getFilepath() { return m_filepath; }
+  const StringData* getFilepath() const { return m_filepath; }
   void setFilepath(const StringData* filepath) { m_filepath = filepath; }
   void setMainReturn(const TypedValue* v) { m_mainReturn = *v; }
   void setMergeOnly(bool b) { m_mergeOnly = b; }
@@ -787,7 +791,9 @@ class UnitEmitter {
   Id addTypeAlias(const TypeAlias& td);
   Id mergeLitstr(const StringData* litstr);
   Id mergeUnitLitstr(const StringData* litstr);
-  Id mergeArray(ArrayData* a, const StringData* key=nullptr);
+  Id mergeArray(const ArrayData* a, const StringData* key=nullptr);
+  const StringData* lookupLitstr(Id id) const;
+  const ArrayData* lookupArray(Id id) const;
   FuncEmitter* getMain();
   void initMain(int line1, int line2);
   FuncEmitter* newFuncEmitter(const StringData* n);
@@ -796,6 +802,12 @@ class UnitEmitter {
   PreClassEmitter* newPreClassEmitter(const StringData* n,
                                       PreClass::Hoistable hoistable);
   PreClassEmitter* pce(Id preClassId) { return m_pceVec[preClassId]; }
+  const PreClassEmitter* pce(Id preClassId) const {
+    return m_pceVec[preClassId];
+  }
+  size_t numPreClasses() const { return m_pceVec.size(); }
+  const std::vector<FuncEmitter*>& fevec() const { return m_fes; }
+  const std::vector<TypeAlias>& typeAliases() const { return m_typeAliases; }
 
   /*
    * Record source location information for the last chunk of bytecode
@@ -803,6 +815,11 @@ class UnitEmitter {
    * same source line will be collapsed as this is created.
    */
   void recordSourceLocation(const Location *sLoc, Offset start);
+
+  /*
+   * Return the SrcLocTable for this unit.
+   */
+  SourceLocTable createSourceLocTable() const;
 
   /*
    * Adds a new FuncEmitter to the unit.  You can only do this once

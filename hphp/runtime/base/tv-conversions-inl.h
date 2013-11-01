@@ -58,6 +58,13 @@ inline int64_t cellToInt(Cell cell) {
   not_reached();
 }
 
+inline double cellToDouble(Cell cell) {
+  Cell tmp;
+  cellDup(cell, tmp);
+  tvCastToDoubleInPlace(&tmp);
+  return tmp.m_data.dbl;
+}
+
 inline TypedNum stringToNumeric(const StringData* sd) {
   int64_t ival;
   double dval;

@@ -598,6 +598,9 @@ public:
   void setReturnTypeConstraint(const StringData* retTypeConstraint) {
     m_retTypeConstraint = retTypeConstraint;
   }
+  const StringData* returnTypeConstraint() const {
+    return m_retTypeConstraint;
+  }
 
   Id allocIterator();
   void freeIterator(Id id);
@@ -608,6 +611,9 @@ public:
   void freeUnnamedLocal(Id id);
   Id numLocals() const { return m_numLocals; }
   void setNumLocals(Id numLocals);
+  const Func::NamedLocalsMap::Builder& localNameMap() const {
+    return m_localNames;
+  }
 
   void setMaxStackCells(int cells) { m_maxStackCells = cells; }
   void addStaticVar(Func::SVInfo svInfo);
@@ -636,7 +642,7 @@ public:
   Attr attrs() const { return m_attrs; }
 
   void setTop(bool top) { m_top = top; }
-  bool top() { return m_top; }
+  bool top() const { return m_top; }
 
   bool isPseudoMain() const { return m_name->empty(); }
 
@@ -665,6 +671,12 @@ public:
   bool isAsync() const { return m_isAsync; }
 
   void addUserAttribute(const StringData* name, TypedValue tv);
+  void setUserAttributes(UserAttributeMap map) {
+    m_userAttributes = std::move(map);
+  }
+  const UserAttributeMap& getUserAttributes() const {
+    return m_userAttributes;
+  }
   int parseNativeAttributes(Attr &attrs) const;
 
   void commit(RepoTxn& txn) const;
@@ -678,14 +690,23 @@ public:
   void setOriginalFilename(const StringData* name) {
     m_originalFilename = name;
   }
+  const StringData* originalFilename() const { return m_originalFilename; }
 
   void setReturnType(DataType dt) { m_returnType = dt; }
   void setDocComment(const char *dc) {
     m_docComment = makeStaticString(dc);
   }
+  const StringData* getDocComment() const {
+    return m_docComment;
+  }
+
   void setLocation(int l1, int l2) {
     m_line1 = l1;
     m_line2 = l2;
+  }
+
+  std::pair<int,int> getLocation() const {
+    return std::make_pair(m_line1, m_line2);
   }
 
 private:
@@ -774,6 +795,24 @@ public:
 FRP_OPS
 #undef FRP_OP
 };
+
+//////////////////////////////////////////////////////////////////////
+
+template<class EHEntVec>
+const EHEnt* findEH(const EHEntVec& ehtab, Offset o) {
+  uint32_t i;
+  uint32_t sz = ehtab.size();
+
+  const EHEnt* eh = nullptr;
+  for (i = 0; i < sz; i++) {
+    if (ehtab[i].m_base <= o && o < ehtab[i].m_past) {
+      eh = &ehtab[i];
+    }
+  }
+  return eh;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }
 

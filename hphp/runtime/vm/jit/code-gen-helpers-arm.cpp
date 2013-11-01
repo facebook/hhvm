@@ -27,7 +27,7 @@ void emitStoreRetIntoActRec(vixl::MacroAssembler& a) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCall(vixl::MacroAssembler& a, CppCall call) {
+TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
   if (call.isDirect()) {
     a. Mov  (rHostCallReg, reinterpret_cast<intptr_t>(call.getAddress()));
   } else {
@@ -37,8 +37,17 @@ void emitCall(vixl::MacroAssembler& a, CppCall call) {
 
   using namespace vixl;
   a.   Push    (x30, x29);
+  auto fixupAddr = a.frontier();
   a.   HostCall(5);
   a.   Pop     (x29, x30);
+
+  // Note that the fixup address for a HostCall is directly *before* the
+  // HostCall, not after as in the native case. This is because, in simulation
+  // mode we look at the simulator's PC at the time the fixup is invoked, and it
+  // will still be pointing to the HostCall; it's not advanced past it until the
+  // host call returns. In the native case, by contrast, we'll be looking at
+  // return addresses, which point after the call.
+  return fixupAddr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -71,15 +80,15 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
   astubs.  Mov  (argReg(0), rVmFp);
   void (*helper)(const ActRec*) = functionEnterHelper;
 
-  emitCall(astubs, CppCall(helper));
+  auto fixupAddr = emitCall(astubs, CppCall(helper));
   if (inTracelet) {
-    fixupMap.recordSyncPoint(stubsCode.frontier(),
+    fixupMap.recordSyncPoint(fixupAddr,
                              fixup.m_pcOffset, fixup.m_spOffset);
   } else {
     // If we're being called while generating a func prologue, we
     // have to record the fixup directly in the fixup map instead of
     // going through the pending fixup path like normal.
-    fixupMap.recordFixup(stubsCode.frontier(), fixup);
+    fixupMap.recordFixup(fixupAddr, fixup);
   }
   emitSmashableJump(stubsCode, mainCode.frontier(), CC_None);
 }
@@ -96,6 +105,44 @@ void emitTransCounterInc(vixl::MacroAssembler& a) {
   a.   Ldr   (rAsm2, rAsm[0]);
   a.   Add   (rAsm2, rAsm2, 1);
   a.   Str   (rAsm2, rAsm[0]);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitIncRefKnownType(vixl::MacroAssembler& a,
+                         const vixl::Register& dataReg,
+                         const size_t disp) {
+  vixl::Label dontCount;
+
+  // Read the inner object.
+  a.   Ldr   (rAsm, dataReg[disp + TVOFF(m_data)]);
+  // Check the count for staticness.
+  static_assert(sizeof(RefCount) == 4, "");
+  auto const& rCount = rAsm.W();
+  a.   Ldr   (rCount, rAsm[FAST_REFCOUNT_OFFSET]);
+  // Careful: tbnz can only test a single bit, so you pass a bit position
+  // instead of a full-blown immediate. 0 = lsb, 63 = msb.
+  a.   Tbnz  (rCount.X(), RefCountStaticBitPos, &dontCount);
+  // Increment and store count.
+  a.   Add   (rCount, rCount, 1);
+  a.   Str   (rCount, rAsm[FAST_REFCOUNT_OFFSET]);
+
+  a.   bind  (&dontCount);
+}
+
+void emitIncRefGeneric(vixl::MacroAssembler& a,
+                       const vixl::Register& dataReg,
+                       const size_t disp) {
+  vixl::Label dontCount;
+
+  // Read the type; bail if it's not refcounted.
+  a.   Ldrb  (rAsm.W(), dataReg[disp + TVOFF(m_type)]);
+  a.   Cmp   (rAsm.W(), KindOfRefCountThreshold);
+  a.   B     (&dontCount, vixl::le);
+
+  emitIncRefKnownType(a, dataReg, disp);
+
+  a.   bind  (&dontCount);
 }
 
 }}}

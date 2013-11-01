@@ -371,7 +371,8 @@ private:
                           InputInfos& ii);
   void handleAssertionEffects(Tracelet&,
                               const NormalizedInstruction&,
-                              TraceletContext&);
+                              TraceletContext&,
+                              int currentStackOffset);
   void getOutputs(Tracelet& t,
                   NormalizedInstruction* ni,
                   int& currentStackOffset,
@@ -628,6 +629,7 @@ opcodeControlFlowInfo(const Op instr) {
     case OpEval:
     case OpNativeImpl:
     case OpContHandle:
+    case OpBreakTraceHint:
       return ControlFlowInfo::BreaksBB;
     case OpFCall:
     case OpFCallArray:

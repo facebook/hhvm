@@ -1001,6 +1001,17 @@ function run_single_test_suite(string $fw_name, string $summary_file,
             "Establishing baseline with gray dots...\n", !$csv_only);
   }
 
+  /******************************
+   *       YII SPECIFIC
+   ******************************/
+  if ($fw_name === "yii") {
+    $files = glob($install_root."/tests/assets/*/CAssetManagerTest.php");
+    foreach ($files as $file) {
+      verbose("Removing $file\n", $verbose);
+      unlink($file);
+    }
+  }
+
   /*************************************
    * Run the test suite
    ************************************/

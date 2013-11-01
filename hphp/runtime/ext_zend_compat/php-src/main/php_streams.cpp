@@ -41,7 +41,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int
     // Why is there no ZVAL_ARRAY?
     MAKE_STD_ZVAL(stream->wrapperdata);
     Z_TYPE_P(stream->wrapperdata) = IS_ARRAY;
-    Z_ARRVAL_P(stream->wrapperdata) = urlFile->getWrapperMetaData().detach();
+    Z_ARRVAL_P(stream->wrapperdata) = HPHP::ProxyArray::Make(
+      urlFile->getWrapperMetaData().detach()
+    );
   } else {
     stream->wrapperdata = nullptr;
   }

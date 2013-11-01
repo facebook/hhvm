@@ -1040,7 +1040,102 @@
                   },
                   "args": [
                   ]
-             }
+             },
+             {
+                 "name": "values",
+                 "flags": [
+                 ],
+                 "desc": "Returns a clone of this FrozenVector.",
+                 "return": {
+                     "type": "Object"
+                 },
+                 "args": [
+                 ]
+             },
+             {
+                 "name": "lazy",
+                 "flags": [
+                 ],
+                 "desc": "Returns a lazy iterable view of this FrozenVector.",
+                 "return": {
+                     "type": "Object"
+                 },
+                 "args": [
+                 ]
+             },
+             {
+                 "name": "toArray",
+                  "flags": [
+                  ],
+                  "desc": "Returns an array built from the values from this FrozenVector.",
+                  "return": {
+                      "type": "VariantMap"
+                  },
+                  "args": [
+                  ]
+             },
+             {
+                  "name": "toKeysArray",
+                  "flags": [
+                  ],
+                  "desc": "Returns an array built from the keys from this FrozenVector.",
+                  "return": {
+                      "type": "VariantMap"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "toValuesArray",
+                  "flags": [
+                  ],
+                  "desc": "Returns an array built from the values from this FrozenVector.",
+                  "return": {
+                      "type": "VariantMap"
+                  },
+                  "args": [
+                  ]
+              },
+              {
+                  "name": "linearSearch",
+                  "flags": [
+                  ],
+                  "desc": "Returns index of the specified value if it is present, -1 otherwise.",
+                  "return": {
+                      "type": "Int64"
+                  },
+                  "args": [
+                      {
+                          "name": "search_value",
+                          "type": "Variant"
+                      }
+                  ]
+              },
+              {
+                  "name": "slice",
+                  "flags": [
+                      "IsStatic"
+                  ],
+                  "desc": "Returns a FrozenVector built from the specified slice of values from the specified FrozenVector.",
+                  "return": {
+                      "type": "Object"
+                  },
+                  "args": [
+                      {
+                          "name": "vec",
+                          "type": "Variant"
+                      },
+                      {
+                          "name": "offset",
+                          "type": "Variant"
+                      },
+                      {
+                          "name": "len",
+                          "type": "Variant",
+                          "value": "null"
+                      }
+                  ]
+              }
             ]
         },
         {

@@ -1198,6 +1198,11 @@ bool AutoloadHandler::autoloadType(const String& name) {
  */
 bool AutoloadHandler::invokeHandler(const String& className,
                                     bool forceSplStack /* = false */) {
+
+  if (className.empty()) {
+    return false;
+  }
+
   if (!m_map.isNull()) {
     ClassExistsChecker ce;
     Result res = loadFromMap(className, s_class, true, ce);

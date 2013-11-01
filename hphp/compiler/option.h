@@ -254,6 +254,7 @@ public:
   static bool VariableCoalescing;
   static bool DumpAst;
   static bool WholeProgram;
+  static bool UseHHBBC;  // see hhbbc/README
   static bool RecordErrors;
   static std::string DocJson; // filename to dump doc JSON to
 

@@ -37,9 +37,8 @@
 #include "zend_strtod.h"
 #include "zend_multiply.h"
 
-#if 0&&HAVE_BCMATH
-#include "ext/bcmath/libbcmath/src/bcmath.h"
-#endif
+#include "hphp/runtime/base/zend-strtod.h"
+#include "hphp/runtime/base/proxy-array.h"
 
 #define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
@@ -470,27 +469,32 @@ public:
       m_tv->m_data.parr = a;
     }
   }
-  /* implicit */ operator HPHP::ArrayData*() {
+  /* implicit */ operator HashTable*() {
     cowCheck();
-    return m_tv->m_data.parr;
+    return getHashTable();
   }
-  HPHP::ArrayData& operator*() {
+  HashTable& operator*() {
     cowCheck();
-    return *m_tv->m_data.parr;
+    return *getHashTable();
   }
-
-  HPHP::ArrayData* operator->() {
+  HashTable* operator->() {
     cowCheck();
-    return m_tv->m_data.parr;
+    return getHashTable();
   }
-  HPHP::ArrayData* operator&() {
+  HashTable* operator&() {
     throw HPHP::NotImplementedException(
       "Taking the address of the result of Z_ARRVAL is not "
       "supported at present");
   }
-  ZArrVal& operator=(HPHP::ArrayData* a) {
+  ZArrVal& operator=(HashTable* a) {
     m_tv->m_data.parr = a;
     return *this;
+  }
+private:
+  HashTable* getHashTable() {
+    auto ret = m_tv->m_data.parr;
+    assert(ret->isProxyArray());
+    return ret;
   }
 };
 

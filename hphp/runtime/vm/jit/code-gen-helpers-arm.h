@@ -31,8 +31,9 @@ void emitStoreRetIntoActRec(vixl::MacroAssembler& a);
 /*
  * All calls should go through here, because they need to be implemented
  * differently depending on whether we're simulating ARM or running native.
+ * Returns the address at which to record a fixup, if you need to.
  */
-void emitCall(vixl::MacroAssembler& a, CppCall call);
+Transl::TCA emitCall(vixl::MacroAssembler& a, CppCall call);
 
 /*
  * Swaps two registers. Uses XOR swap, so will not touch memory, flags, or any
@@ -54,6 +55,21 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
 void emitTransCounterInc(vixl::MacroAssembler& a);
 
 /*
+ * Emits an incref after checking only the static bit, not the type.
+ */
+void emitIncRefKnownType(vixl::MacroAssembler& a,
+                         const vixl::Register& dataReg,
+                         size_t disp);
+/*
+ * The most generic form of incref. Given a register+offset indicating a pointer
+ * to a TypedValue, it checks the type for refcounted-ness and the inner
+ * object's count for static-ness before doing the incref.
+ */
+void emitIncRefGeneric(vixl::MacroAssembler& a,
+                       const vixl::Register& data,
+                       size_t disp);
+
+/*
  * Enables access to objects with the __thread storage class. See the
  * explanatory comment in code-gen-helpers-x64.h for how thread-local storage
  * works.
@@ -67,6 +83,7 @@ inline void emitTLSLoad(vixl::MacroAssembler& a,
   a.   Mov  (rHostCallReg, Transl::tlsBaseNoInline);
   a.   Push (x30, x29);
   a.   HostCall(0);
+  // tlsBaseNoInline doesn't need a sync point
   a.   Pop  (x29, x30);
 
   a.   Add  (rReturnReg, rReturnReg,
@@ -77,7 +94,13 @@ inline void emitTLSLoad(vixl::MacroAssembler& a,
 
 
 #else
-#  error not implemented yet
+template<typename T>
+inline void emitTLSLoad(vixl::MacroAssembler& a,
+                        const ThreadLocalNoCheck<T>& datum,
+                        const vixl::Register& destReg) {
+  // ARM-simulation mode isn't supported yet if FAST_TLS is off.
+  not_implemented();
+}
 #endif // USE_GCC_FAST_TLS
 
 }}}

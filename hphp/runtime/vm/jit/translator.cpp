@@ -914,6 +914,7 @@ static const struct {
   /*** 1. Basic instructions ***/
 
   { OpNop,         {None,             None,         OutNone,           0 }},
+  { OpPopA,        {Stack1,           None,         OutNone,          -1 }},
   { OpPopC,        {Stack1|
                     DontGuardStack1,  None,         OutNone,          -1 }},
   { OpPopV,        {Stack1|
@@ -926,7 +927,9 @@ static const struct {
   { OpBox,         {Stack1,           Stack1,       OutVInput,         0 }},
   { OpUnbox,       {Stack1,           Stack1,       OutCInput,         0 }},
   { OpBoxR,        {Stack1,           Stack1,       OutVInput,         0 }},
+  { OpBoxRNop,     {None,             None,         OutNone,           0 }},
   { OpUnboxR,      {Stack1,           Stack1,       OutCInput,         0 }},
+  { OpUnboxRNop,   {None,             None,         OutNone,           0 }},
 
   /*** 2. Literal and constant instructions ***/
 
@@ -939,6 +942,7 @@ static const struct {
   { OpString,      {None,             Stack1,       OutStringImm,      1 }},
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
+  { OpNewArrayReserve, {None,         Stack1,       OutArray,          1 }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray,         -2 }},
   { OpAddElemV,    {StackTop3,        Stack1,       OutArray,         -2 }},
@@ -1139,6 +1143,7 @@ static const struct {
   { OpFPassC,      {FuncdRef,         None,         OutSameAsInput,    0 }},
   { OpFPassCW,     {FuncdRef,         None,         OutSameAsInput,    0 }},
   { OpFPassCE,     {FuncdRef,         None,         OutSameAsInput,    0 }},
+  { OpFPassVNop,   {None,             None,         OutNone,           0 }},
   { OpFPassV,      {Stack1|FuncdRef,  Stack1,       OutUnknown,        0 }},
   { OpFPassR,      {Stack1|FuncdRef,  Stack1,       OutFInputR,        0 }},
   { OpFPassL,      {Local|FuncdRef,   Stack1,       OutFInputL,        1 }},
@@ -1192,6 +1197,7 @@ static const struct {
   { OpDefFunc,     {None,             None,         OutNone,           0 }},
   { OpDefTypeAlias,{None,             None,         OutNone,           0 }},
   { OpDefCls,      {None,             None,         OutNone,           0 }},
+  { OpNopDefCls,   {None,             None,         OutNone,           0 }},
   { OpDefCns,      {Stack1,           Stack1,       OutBoolean,        0 }},
 
   /*** 13. Miscellaneous instructions ***/
@@ -1224,6 +1230,9 @@ static const struct {
   { OpCeil,        {Stack1,           Stack1,       OutDouble,         0 }},
   { OpAssertTL,    {None,             None,         OutNone,           0 }},
   { OpAssertTStk,  {None,             None,         OutNone,           0 }},
+  { OpAssertObjL,  {None,             None,         OutNone,           0 }},
+  { OpAssertObjStk,{None,             None,         OutNone,           0 }},
+  { OpBreakTraceHint,{None,           None,         OutNone,           0 }},
 
   /*** 14. Continuation instructions ***/
 
@@ -1413,28 +1422,104 @@ void preInputApplyMetaData(Unit::MetaHandle metaHand,
   }
 }
 
-static bool isTypeAssert(const NormalizedInstruction* ni) {
-  return ni->op() == Op::AssertTL || ni->op() == Op::AssertTStk;
+static bool isTypeAssert(Op op) {
+  return op == Op::AssertTL || op == Op::AssertTStk ||
+         op == Op::AssertObjL || op == Op::AssertObjStk;
+}
+
+static bool isAlwaysNop(Op op) {
+  if (isTypeAssert(op)) return true;
+  switch (op) {
+  case Op::UnboxRNop:
+  case Op::BoxRNop:
+  case Op::FPassVNop:
+  case Op::FPassC:
+    return true;
+  default:
+    return false;
+  }
 }
 
 void Translator::handleAssertionEffects(Tracelet& t,
                                         const NormalizedInstruction& ni,
-                                        TraceletContext& tas) {
-  assert(isTypeAssert(&ni));
+                                        TraceletContext& tas,
+                                        int currentStackOffset) {
+  assert(isTypeAssert(ni.op()));
 
-  auto const aop = static_cast<AssertTOp>(ni.imm[1].u_OA);
-  auto const dt = [&]() -> folly::Optional<DataType> {
-    switch (aop) {
-    case AssertTOp::Uninit:   return KindOfUninit;
-    case AssertTOp::InitNull: return KindOfNull;
-    case AssertTOp::Int:      return KindOfInt64;
-    case AssertTOp::Dbl:      return KindOfDouble;
-    case AssertTOp::Res:      return KindOfResource;
+  auto const loc = [&] {
+    switch (ni.op()) {
+    case Op::AssertTL:
+    case Op::AssertObjL:
+      return Location(Location::Local, ni.imm[0].u_LA);
+    case Op::AssertTStk:
+    case Op::AssertObjStk:
+      return Location(Location::Stack,
+                      currentStackOffset - 1 - ni.imm[0].u_IVA);
+    default:
+      not_reached();
+    }
+  }();
+  if (loc.isInvalid()) return;
+
+  auto const rt = [&]() -> folly::Optional<RuntimeType> {
+    if (ni.op() == Op::AssertObjStk || ni.op() == Op::AssertObjL) {
+      /*
+       * Even though the class must be defined at the point of the
+       * AssertObj, we might not have defined it yet in this tracelet,
+       * or it might not be unique.  For now just restrict this to
+       * unique classes (we could also check parent of current
+       * context).
+       *
+       * There's nothing we can do with the 'exact' bit right now.
+       */
+      auto const cls = Unit::lookupUniqueClass(
+        ni.m_unit->lookupLitstrId(ni.imm[2].u_SA)
+      );
+      if (cls && (cls->attrs() & AttrUnique)) {
+        return RuntimeType{KindOfObject, KindOfNone, cls};
+      }
+      return folly::none;
+    }
+
+    switch (static_cast<AssertTOp>(ni.imm[1].u_OA)) {
+    case AssertTOp::Uninit:   return RuntimeType{KindOfUninit};
+    case AssertTOp::InitNull: return RuntimeType{KindOfNull};
+    case AssertTOp::Int:      return RuntimeType{KindOfInt64};
+    case AssertTOp::Dbl:      return RuntimeType{KindOfDouble};
+    case AssertTOp::Res:      return RuntimeType{KindOfResource};
     case AssertTOp::Null:     return folly::none;
-    case AssertTOp::Bool:     return KindOfBoolean;
-    case AssertTOp::Str:      return KindOfString;
-    case AssertTOp::Arr:      return KindOfArray;
-    case AssertTOp::Obj:      return KindOfObject;
+    case AssertTOp::Bool:     return RuntimeType{KindOfBoolean};
+    case AssertTOp::SStr:     return RuntimeType{KindOfString};
+    case AssertTOp::Str:      return RuntimeType{KindOfString};
+    case AssertTOp::SArr:     return RuntimeType{KindOfArray};
+    case AssertTOp::Arr:      return RuntimeType{KindOfArray};
+    case AssertTOp::Obj:      return RuntimeType{KindOfObject};
+
+    // We can turn these into information in hhbc-translator but can't
+    // really remove guards, since it can be more than one DataType,
+    // so don't do anything here.
+    case AssertTOp::OptInt:
+    case AssertTOp::OptDbl:
+    case AssertTOp::OptRes:
+    case AssertTOp::OptBool:
+    case AssertTOp::OptSStr:
+    case AssertTOp::OptStr:
+    case AssertTOp::OptSArr:
+    case AssertTOp::OptArr:
+    case AssertTOp::OptObj:
+      return folly::none;
+
+    case AssertTOp::Ref:
+      // We should be able to use this to avoid the outer-type guards
+      // on KindOfRefs, but for now we don't because of complications
+      // with communicating the predicted inner type to
+      // hhbc-translator.
+      return folly::none;
+
+    // There's really not much we can do with a Cell assertion at
+    // translation time, right now.
+    case AssertTOp::Cell:
+      return folly::none;
 
     // Since these don't correspond to data types, there's not much we
     // can do in the current situation.
@@ -1448,18 +1533,9 @@ void Translator::handleAssertionEffects(Tracelet& t,
     }
     not_reached();
   }();
-  if (!dt) return;
+  if (!rt) return;
 
-  auto const loc = [&] {
-    switch (ni.op()) {
-    case Op::AssertTL:    return Location(Location::Local, ni.imm[0].u_LA);
-    case Op::AssertTStk:  return Location(Location::Stack, ni.imm[0].u_IVA);
-    default:
-      not_reached();
-    }
-  }();
-  if (loc.isInvalid()) return;
-  auto const dl = t.newDynLocation(loc, *dt);
+  auto const dl = t.newDynLocation(loc, *rt);
 
   // No need for m_resolvedDeps---because we're in the bytecode stream
   // we don't need to tell hhbc-translator about it out of band.
@@ -1476,13 +1552,23 @@ void Translator::handleAssertionEffects(Tracelet& t,
        *
        * Punt this opcode to end the trace.
        */
+      FTRACE(1, "punting for {}\n", loc.pretty());
       punt();
     }
-    // Otherwise, we may have more information than is in the
-    // AssertTStk.
-    return;
+
+    auto const isSpecializedObj =
+      rt->outerType() == KindOfObject && rt->valueClass();
+    if (!isSpecializedObj || curVal->rtt.valueClass()) {
+      // Otherwise, we may have more information in the curVal
+      // RuntimeType than would come from the AssertT if we were
+      // tracking a literal value or something.
+      FTRACE(1, "assertion leaving curVal alone {}\n", curVal->pretty());
+      return;
+    }
   }
-  FTRACE(1, "assertion effects {} -> {}\n", dl->pretty());
+  FTRACE(1, "assertion effects {} -> {}\n",
+    curVal ? curVal->pretty() : std::string{},
+    dl->pretty());
   curVal = dl;
 }
 
@@ -1490,14 +1576,15 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
                                     NormalizedInstruction* ni,
                                     TraceletContext& tas,
                                     InputInfos &inputInfos) {
+  if (isAlwaysNop(ni->op())) {
+    ni->noOp = true;
+    return true;
+  }
+
   if (!metaHand.findMeta(ni->unit(), ni->offset())) return false;
 
   Unit::MetaInfo info;
   if (!metaHand.nextArg(info)) return false;
-  if (info.m_kind == Unit::MetaInfo::Kind::NopOut) {
-    ni->noOp = true;
-    return true;
-  }
 
   /*
    * We need to adjust the indexes in MetaInfo::m_arg if this
@@ -1536,9 +1623,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         break;
       case Unit::MetaInfo::Kind::GuardedCls:
         ni->guardedCls = true;
-        break;
-      case Unit::MetaInfo::Kind::ArrayCapacity:
-        ni->imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
         // In TransProfile mode, disable type predictions to avoid side exits.
@@ -1682,11 +1766,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         }
         break;
       }
-
-      case Unit::MetaInfo::Kind::NopOut:
-        // NopOut should always be the first and only annotation
-        // and was handled above.
-        not_reached();
 
       case Unit::MetaInfo::Kind::GuardedThis:
       case Unit::MetaInfo::Kind::NonRefCounted:
@@ -3298,7 +3377,9 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     // Translation could fail entirely (because of an unknown opcode), or
     // encounter an input that cannot be computed.
     try {
-      if (isTypeAssert(ni)) handleAssertionEffects(t, *ni, tas);
+      if (isTypeAssert(ni->op())) {
+        handleAssertionEffects(t, *ni, tas, stackFrameOffset);
+      }
       preInputApplyMetaData(metaHand, ni);
       InputInfos inputInfos;
       getInputsImpl(
@@ -3504,7 +3585,7 @@ breakBB:
     // thats only useful in the following tracelet.
     if (isLiteral(ni->op()) ||
         isThisSelfOrParent(ni->op()) ||
-        isTypeAssert(ni)) {
+        isTypeAssert(ni->op())) {
       ni = ni->prev;
       continue;
     }
@@ -3628,14 +3709,15 @@ const char* Translator::translateResultName(TranslateResult r) {
  */
 void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
                   HhbcTranslator& hhbcTrans, MetaMode metaMode /* = Normal */) {
+  if (isAlwaysNop(inst.op())) {
+    inst.noOp = true;
+    return;
+  }
+
   if (!handle.findMeta(inst.unit(), inst.offset())) return;
 
   Unit::MetaInfo info;
   if (!handle.nextArg(info)) return;
-  if (info.m_kind == Unit::MetaInfo::Kind::NopOut) {
-    inst.noOp = true;
-    return;
-  }
 
   /*
    * We need to adjust the indexes in MetaInfo::m_arg if this instruction takes
@@ -3685,9 +3767,6 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         break;
       case Unit::MetaInfo::Kind::GuardedCls:
         inst.guardedCls = true;
-        break;
-      case Unit::MetaInfo::Kind::ArrayCapacity:
-        inst.imm[0].u_IVA = info.m_data;
         break;
       case Unit::MetaInfo::Kind::DataTypePredicted: {
         // When we're translating a Tracelet from Translator::analyze(), the
@@ -3771,10 +3850,6 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
         }
         break;
       }
-      case Unit::MetaInfo::Kind::NopOut:
-        // NopOut should always be the first and only annotation
-        // and was handled above.
-        not_reached();
 
       case Unit::MetaInfo::Kind::GuardedThis:
       case Unit::MetaInfo::Kind::NonRefCounted:

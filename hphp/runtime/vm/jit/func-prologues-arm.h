@@ -55,6 +55,8 @@ inline void funcPrologueSmashGuard(Transl::TCA prologue, const Func* func) {
 
 //////////////////////////////////////////////////////////////////////
 
+Transl::TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs);
+
 SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
                         Func* func, bool funcIsMagic, int nPassed,
                         Transl::TCA& start, Transl::TCA& aStart);

@@ -32,27 +32,15 @@ TRACE_SET_MOD(hhir);
 
 namespace {
 
-Block* findMainExitBlock(IRUnit& unit) {
-  auto const back = unit.main()->back();
+BlockList findMainExitBlocks(IRUnit& unit) {
+  BlockList blocks;
 
-  /*
-   * We require the invariant that the main trace exit comes last in
-   * the main trace block list.  Right now this is always the case,
-   * but this assertion is here in case we want to make changes that
-   * affect this ordering.  (If we do want to change it, we could use
-   * something like the assert below to find the main exit.)
-   */
-  if (debug) {
-    auto const sorted = rpoSortCfg(unit);
-    auto it = sorted.rbegin();
-    while (it != sorted.rend() && !(*it)->isMain()) {
-      ++it;
+  for (Block* b: unit.main()->blocks()) {
+    if (b->isExit()) {
+      blocks.push_back(b);
     }
-    assert(it != sorted.rend());
-    assert(*it == back && "jumpopts invariant violated");
   }
-
-  return back;
+  return blocks;
 }
 
 /*
@@ -112,43 +100,46 @@ void optimizeCondTraceExit(IRUnit& unit) {
   FTRACE(5, "CondExit:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "CondExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
-  auto const mainExit = findMainExitBlock(unit);
-  if (!isNormalExit(mainExit)) return;
+  auto const mainExitBlocks = findMainExitBlocks(unit);
+  for (Block* mainExit : mainExitBlocks) {
+    if (!isNormalExit(mainExit)) continue;
 
-  auto const& mainPreds = mainExit->preds();
-  if (mainPreds.size() != 1) return;
+    auto const& mainPreds = mainExit->preds();
+    if (mainPreds.size() != 1) continue;
 
-  auto const jccBlock = mainPreds.front().from();
-  if (!jccCanBeDirectExit(jccBlock->back()->op())) return;
-  FTRACE(5, "previous block ends with jccCanBeDirectExit ({})\n",
-         opcodeName(jccBlock->back()->op()));
+    auto const jccBlock = mainPreds.front().from();
+    if (!jccCanBeDirectExit(jccBlock->back()->op())) return;
+    FTRACE(5, "previous block ends with jccCanBeDirectExit ({})\n",
+           opcodeName(jccBlock->back()->op()));
 
-  auto const jccInst = jccBlock->back();
-  auto const jccExitTrace = jccInst->taken();
-  if (!isNormalExit(jccExitTrace)) return;
-  FTRACE(5, "exit trace is side-effect free\n");
+    auto const jccInst = jccBlock->back();
+    auto jccExitBlock = jccInst->taken();
+    if (jccExitBlock == mainExit) jccExitBlock = jccBlock->next();
+    if (!isNormalExit(jccExitBlock)) continue;
+    FTRACE(5, "exit trace is side-effect free\n");
 
-  auto it = mainExit->backIter();
-  auto& reqBindJmp = *(it--);
-  auto& syncAbi = *it;
-  assert(syncAbi.op() == SyncABIRegs);
+    auto it = mainExit->backIter();
+    auto& reqBindJmp = *(it--);
+    auto& syncAbi = *it;
+    assert(syncAbi.op() == SyncABIRegs);
 
-  auto const newOpcode = jmpToReqBindJmp(jccBlock->back()->op());
-  ReqBindJccData data;
-  data.taken = jccExitTrace->back()->extra<ReqBindJmp>()->offset;
-  data.notTaken = reqBindJmp.extra<ReqBindJmp>()->offset;
+    auto const newOpcode = jmpToReqBindJmp(jccBlock->back()->op());
+    ReqBindJccData data;
+    data.taken = jccExitBlock->back()->extra<ReqBindJmp>()->offset;
+    data.notTaken = reqBindJmp.extra<ReqBindJmp>()->offset;
 
-  FTRACE(5, "replacing {} with {}\n", jccInst->id(), opcodeName(newOpcode));
-  unit.replace(
-    &reqBindJmp,
-    newOpcode,
-    data,
-    std::make_pair(jccInst->numSrcs(), jccInst->srcs().begin())
-  );
+    FTRACE(5, "replacing {} with {}\n", jccInst->id(), opcodeName(newOpcode));
+    unit.replace(
+      &reqBindJmp,
+      newOpcode,
+      data,
+      std::make_pair(jccInst->numSrcs(), jccInst->srcs().begin())
+    );
 
-  syncAbi.setMarker(jccInst->marker());
-  reqBindJmp.setMarker(jccInst->marker());
-  jccInst->convertToNop();
+    syncAbi.setMarker(jccInst->marker());
+    reqBindJmp.setMarker(jccInst->marker());
+    jccInst->convertToNop();
+  }
 }
 
 /*

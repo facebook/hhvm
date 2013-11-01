@@ -610,7 +610,7 @@ bool pushesActRec(Op opcode) {
   }
 }
 
-static void staticArrayStreamer(ArrayData* ad, std::stringstream& out) {
+void staticArrayStreamer(ArrayData* ad, std::ostream& out) {
   out << "array(";
   if (!ad->empty()) {
     bool comma = false;

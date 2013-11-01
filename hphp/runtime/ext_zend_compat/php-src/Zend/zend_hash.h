@@ -25,6 +25,9 @@
 #include <sys/types.h>
 #include "zend.h"
 
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/proxy-array.h"
+
 #define HASH_KEY_IS_STRING 1
 #define HASH_KEY_IS_LONG 2
 #define HASH_KEY_NON_EXISTENT 3

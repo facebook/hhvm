@@ -1,0 +1,187 @@
+HHBBC: HipHop Bytecode to Bytecode Compiler
+===========================================
+
+Overview
+--------
+
+This directory contains a rough, work-in-progress bytecode optimizer
+for HHBC.  It's not close to production-ready (if you're wondering
+whether you should try to use it, the answer is no).
+
+This is a short document to hopefully give an overview that makes it
+easier to understand the code.
+
+Right now this is optionally hooked into the hphpc emitter code in
+compiler/analysis/emitter, and uses UnitEmitters as both input and
+output.  The HHBBC::single_unit entry point takes one UnitEmitter and
+produces a hopefully better one.  The HHBBC::whole_program entry point
+takes a set of UnitEmitters and returns a new set.
+
+At some later point we may add a main() function for HHBBC, so it can
+run as a standalone program that operates on an already-compiled hhbc
+repo.
+
+HHBBC Entry Points
+------------------
+
+The main entry points to this module are currently exported in
+hhbbc.h.  Modules outside of hphp/hhbbc should not include any of its
+other headers.
+
+The first thing either entry point does is parse UnitEmitters into an
+internal representation for HHBC programs.  The representation is in
+bc.h and representation.h, and the code that converts UnitEmitters
+into this representation is in parse.cpp.
+
+Then, each of these does some sort of analysis and optimization
+(described more below).
+
+Finally, they send the modified representation to emit.cpp to generate
+new UnitEmitters that can be used to either serialize to a bytecode
+repo or produce a runtime Unit.
+
+Representation
+--------------
+
+The representation of PHP programs is in bc.h and representation.h.
+Data that corresponds to metadata about the program is in the php
+namespace, while the structs that represent each HHBC instruction are
+in the bc namespace.  There's analagous php::Foo structures to most of
+the FooEmitter structures from the runtime, but the metadata contains
+mostly pointers or other things instead of raw offsets into an array
+of serialized bytecode.
+
+In the current state of things, during analysis passes, the program
+representation should be considered immutable.  This simplifies
+parallelization/locking.  Information about the program that is
+derived from the analysis or that needs more efficient structures for
+querying (e.g. hashtables by name) is stored on the side in the Index
+structure (more later).
+
+Each php::Func is analyzed at parse time into a "factored" control
+flow graph.  The function is divided into basic blocks at boundaries
+described in parse.cpp, and the blocks are linked together
+accordingly.  The "factored" part of it is that we don't stop a block
+on any instruction that could raise an exception.  HHBC opcodes,
+generally speaking, can raise exceptions---but often if you know the
+types of their arguments or function locals you can rule out this
+possibility.
+
+Each php::Block in the graph has a vector of Bytecode objects.  The
+Bytecode class is essentially a sum type of all the bc::Foo
+structures, which are generated from the opcode table.
+
+Index and res:: Handles
+-----------------------
+
+As mentioned above, the php::Foo structures don't contain derived
+information that is a result of analysis, and also may not always have
+the information in an efficiently-queryable form.
+
+Instead, on the side there is an Index structure that an answer
+questions like function or class lookups, or information that isn't
+present in php::Func like the inferred return type of a function.
+
+One major functionality of the index is to 'resolve' names into
+abstract tokens that represent known information about that name.  The
+resolved versions of things have types in the res namespace,
+e.g. res::Class or res::Func.  A res::Func may know as little as the
+name of the function, or it may be able to provide information like
+the inferred return type of the function.  Queries on resolved objects
+go through other apis on the Index.
+
+When the Index is queried for information about a resolved object, it
+records dependency information about what it was queried for.  This is
+used in whole program mode.
+
+Whole Program Mode
+------------------
+
+The algorithm in whole program mode works by continually running
+analysis passes to refine information stored in the Index.
+
+The basic idea behind the algorithm is this:
+
+  - Start with a list of all functions in the program.
+
+  - Run an analysis pass in parallel on each function in the list.
+    Thread safety model here: none of the analysis is allowed to do
+    anything except query the Index (internally thread safe) or read
+    the php metadata/Bytecode (unchanging, safe to read concurrently)
+    in order to produce its results.
+
+  - Clear the list.
+
+  - Single threaded: if we learned more useful information for any
+    function than was previously in the index, add that information to
+    the Index, and add any function that tried to ask for that
+    information back to the list.  Since only one thread is updating
+    the Index in this step we don't need to lock it.
+
+  - Repeat starting from the second step if the list is non-empty.
+
+  - Run a final analysis pass in parallel with the Index now at a
+    fixed-point, and send each analysis pass through the optimizer.
+    The optimization functions are only allowed to modify the contents
+    of the php::Blocks for the function they are asked to optimize, so
+    no one needs to lock these accesses.
+
+What makes this sound is that the information in the Index is never
+allowed to be incorrect---it just might not be as useful as it could
+be.  This means that no analysis pass should ever deduce a new fact
+that is incorrect.  Each piece of information in the Index must also
+start conservative, and become more refined upon additional iterations.
+
+It bears repeating: this is a prototype.  Currently the only piece of
+data that refines is inferred function return types.  The algorithm
+will probably have to schedule classes-at-a-time instead of just
+functions as we add real information about classes to the Index.
+
+Type Inference
+--------------
+
+Local analysis of a function is done as a data-flow analysis on the
+types of locals and eval stack locations.  The code for this is in
+abstract-interp.cpp, which contains a block-at-a-time abstract
+interpreter for HHBC, and functions that drive it either to do
+analysis or optimization.  The same abstract interpreter that
+implements the analysis is also used to perform some optimizations.
+
+Type inference on HHBC is treated as an iterative forward dataflow
+problem.  Because of the presence of dynamic calls, we assume that
+anything could call the function, so the input states are initialized
+quite conservatively.
+
+The algorithm is fairly standard after that, except for handling of
+factored exit edges.  Here is an overview (the code is in
+analyze_func):
+
+  - A work list of blocks is initialized with the entry blocks.
+    (Functions may have multiple entries because of DV initializers.)
+
+  - Until the work list is non-empty, pull a block off the list, and
+    run the abstract interpreter on it:
+
+     - If the abstract interpreter encounters an instruction that
+       could potentially throw an exception, it propagates the current
+       state from before the instruction across all the factored exit
+       edges for the block.
+
+     - If it encounters an instruction that could take a branch, it
+       propagates the state after the branching instruction across the
+       branch's taken edge.
+
+     - If the block could fallthrough, the abstract interpreter
+       propagates the state after the last instruction across the
+       fallthrough edge.
+
+     - Add any blocks that had their input states changed back to the
+       list and repeat.
+
+The type system used here is designed to match closely to the type
+system we use at JIT time, and makes distinctions useful for HHVM
+(e.g. whether a value is potentially reference counted or not).  It
+also contains constant values, which allows the same analysis to
+perform constant propagation, and determine some unreachable blocks.
+Some details and an unmaintainable ascii-art diagram are available in
+type-system.h.

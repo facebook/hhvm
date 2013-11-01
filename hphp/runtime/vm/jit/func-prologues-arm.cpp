@@ -2,6 +2,7 @@
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
+#include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
@@ -106,8 +107,58 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   a.    Mov    (rVmFp, rStashedAR);
 
   auto numLocals = numParams;
+
   if (func->isClosureBody()) {
-    not_implemented();
+    int numUseVars = func->cls()->numDeclProperties() -
+                     func->numStaticLocals();
+
+    emitRegGetsRegPlusImm(a, rVmSp, rVmFp, -cellsToBytes(numParams));
+
+    auto const& rClosure = rAsm2;
+    a.    Ldr    (rClosure, rVmFp[AROFF(m_this)]);
+
+    // Swap in the $this or late bound class
+    a.    Ldr    (rAsm, rClosure[c_Closure::ctxOffset()]);
+    a.    Str    (rAsm, rVmFp[AROFF(m_this)]);
+
+    if (!(func->attrs() & AttrStatic)) {
+      vixl::Label notRealThis;
+      // This means "test bit 0" -- the LSB.
+      a.  Tbz    (rAsm, 0, &notRealThis);
+      // Clear the low bit
+      a.  Orr    (rAsm, rAsm, ~1ULL);
+      emitIncRefKnownType(a, rAsm, 0);
+      a.  bind   (&notRealThis);
+    }
+
+    // Put in the correct context
+    a.    Ldr    (rAsm, rClosure[c_Closure::funcOffset()]);
+    a.    Str    (rAsm, rVmFp[AROFF(m_func)]);
+
+    // Copy in all the use vars
+    int baseUVOffset = sizeof(ObjectData) + func->cls()->builtinPropSize();
+    for (auto i = 0; i < numUseVars + 1; i++) {
+      auto spOffset = -cellsToBytes(i + 1);
+      if (i == 0) {
+        // The closure is the first local.
+        // We don't incref because it used to be $this
+        // and now it is a local, so they cancel out
+        a.Mov    (rAsm, KindOfObject);
+        a.Strb   (rAsm.W(), rVmSp[spOffset + TVOFF(m_type)]);
+        a.Str    (rClosure, rVmSp[spOffset + TVOFF(m_data)]);
+        continue;
+      }
+
+      auto uvOffset = baseUVOffset + cellsToBytes(i - 1);
+
+      a.  Ldr    (rAsm, rClosure[uvOffset + TVOFF(m_data)]);
+      a.  Str    (rAsm, rVmSp[spOffset + TVOFF(m_data)]);
+      a.  Ldrb   (rAsm.W(), rClosure[uvOffset + TVOFF(m_type)]);
+      a.  Strb   (rAsm.W(), rVmSp[spOffset + TVOFF(m_type)]);
+      emitIncRefGeneric(a, rVmSp, spOffset);
+    }
+
+    numLocals += numUseVars + 1;
   }
 
   auto numUninitLocals = func->numLocals() - numLocals;
@@ -165,8 +216,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
         a.  Mov  (argReg(0), func->name()->data());
         a.  Mov  (argReg(1), numParams);
         a.  Mov  (argReg(2), i);
-        emitCall(a, CppCall(Transl::raiseMissingArgument));
-        tx64->fixupMap().recordFixup(a.frontier(), fixup);
+        auto fixupAddr = emitCall(a, CppCall(Transl::raiseMissingArgument));
+        tx64->fixupMap().recordFixup(fixupAddr, fixup);
         break;
       }
     }
@@ -193,6 +244,21 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 } // anonymous namespace
 
 //////////////////////////////////////////////////////////////////////
+
+TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
+  auto& mainCode = tx64->mainCode;
+  auto& stubsCode = tx64->stubsCode;
+  vixl::MacroAssembler a { mainCode };
+  vixl::MacroAssembler astubs { stubsCode };
+  TCA start = mainCode.frontier();
+  a.   Ldr   (rAsm.W(), rVmFp[AROFF(m_numArgsAndCtorFlag)]);
+  for (auto i = 0; i < dvs.size(); ++i) {
+    a. Cmp   (rAsm.W(), dvs[i].first);
+    emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second));
+  }
+  emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
+  return start;
+}
 
 SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
                         Func* func, bool funcIsMagic, int nPassed,
@@ -231,10 +297,10 @@ SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
     assert(func->numParams() == 2);
     // Special __call prologue
     a.   Mov   (argReg(0), rStashedAR);
-    emitCall(a, CppCall(Transl::shuffleArgsForMagicCall));
+    auto fixupAddr = emitCall(a, CppCall(Transl::shuffleArgsForMagicCall));
     if (memory_profiling) {
       tx64->fixupMap().recordFixup(
-        a.frontier(),
+        fixupAddr,
         Fixup(skFuncBody.offset() - func->base(), func->numSlotsInFrame())
       );
     }

@@ -27,6 +27,7 @@ namespace HPHP {
  */
 bool cellToBool(Cell);
 int64_t cellToInt(Cell);
+double cellToDouble(double);
 
 /*
  * Convert a string to a TypedNum following php semantics, allowing

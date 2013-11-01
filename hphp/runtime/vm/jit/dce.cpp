@@ -652,10 +652,10 @@ void updateCounts(Block* b, TmpDelta& delta) {
   for (auto& inst: *b) {
     Opcode op = inst.op();
     if (op == IncRef || op == DecRef || op == DecRefNZ) {
-      SSATmp* src = origSrc(inst);
-      if (src->type().notCounted()) {
+      if (inst.src(0)->type().notCounted()) {
         continue;
       }
+      SSATmp* src = origSrc(inst);
       if (op == IncRef) {
         delta[src]++;
       } else if (op == DecRef || op == DecRefNZ) {

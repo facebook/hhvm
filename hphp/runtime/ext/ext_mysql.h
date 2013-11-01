@@ -65,6 +65,7 @@ public:
   static int MaxRetryOpenOnFail;
   static int MaxRetryQueryOnFail;
   static std::string Socket;
+  static bool TypedResults;
 
   virtual void moduleLoad(Hdf config) {
     Hdf mysql = config["MySQL"];
@@ -80,6 +81,7 @@ public:
     MaxRetryOpenOnFail = mysql["MaxRetryOpenOnFail"].getInt32(1);
     MaxRetryQueryOnFail = mysql["MaxRetryQueryOnFail"].getInt32(1);
     Socket = mysql["Socket"].getString();
+    TypedResults = mysql["TypedResults"].getBool(true);
   }
 };
 

@@ -49,6 +49,7 @@ bool mysqlExtension::KillOnTimeout = false;
 int mysqlExtension::MaxRetryOpenOnFail = 1;
 int mysqlExtension::MaxRetryQueryOnFail = 1;
 std::string mysqlExtension::Socket = "";
+bool mysqlExtension::TypedResults = true;
 
 mysqlExtension s_mysql_extension;
 
@@ -820,30 +821,33 @@ Variant f_mysql_affected_rows(CVarRef link_identifier /* = uninit_null() */) {
 // query functions
 
 // Zend returns strings and NULL only, not integers or floats.  We
-// return ints (and, sometimes, actual doubles). TODO: make this
-// consistent or a runtime parameter or something.
+// return ints (and, sometimes, actual doubles). This behavior can be
+// disabled with MySQL { TypedResults = false } runtime option.
 Variant mysql_makevalue(const String& data, MYSQL_FIELD *mysql_field) {
   return mysql_makevalue(data, mysql_field->type);
 }
 
 Variant mysql_makevalue(const String& data, enum_field_types field_type) {
-  switch (field_type) {
-  case MYSQL_TYPE_DECIMAL:
-  case MYSQL_TYPE_TINY:
-  case MYSQL_TYPE_SHORT:
-  case MYSQL_TYPE_LONG:
-  case MYSQL_TYPE_LONGLONG:
-  case MYSQL_TYPE_INT24:
-  case MYSQL_TYPE_YEAR:
-    return data.toInt64();
-  case MYSQL_TYPE_FLOAT:
-  case MYSQL_TYPE_DOUBLE:
-    //case MYSQL_TYPE_NEWDECIMAL:
-    return data.toDouble();
-  case MYSQL_TYPE_NULL:
-    return uninit_null();
-  default:
-    break;
+  if (field_type == MYSQL_TYPE_NULL) {
+	return uninit_null();
+  }
+  else if (mysqlExtension::TypedResults) {
+	switch (field_type) {
+	case MYSQL_TYPE_DECIMAL:
+	case MYSQL_TYPE_TINY:
+	case MYSQL_TYPE_SHORT:
+	case MYSQL_TYPE_LONG:
+	case MYSQL_TYPE_LONGLONG:
+	case MYSQL_TYPE_INT24:
+	case MYSQL_TYPE_YEAR:
+	  return data.toInt64();
+	case MYSQL_TYPE_FLOAT:
+	case MYSQL_TYPE_DOUBLE:
+	  //case MYSQL_TYPE_NEWDECIMAL:
+	  return data.toDouble();
+	default:
+	  break;
+	}
   }
   return data;
 }

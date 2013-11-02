@@ -1171,6 +1171,11 @@ class SingleTest {
         }
         if (preg_match(PHPUnitPatterns::$stop_parsing_pattern, $line) === 1) {
           // Get rid of the next blank line after this
+          if (stream_select($r, $w, $e, Options::$timeout) === false) {
+            $error_information .= "TEST TIMEOUT OCCURRED.";
+            $error_information .= " Last line read was: ".$line;
+            break;
+          }
           fgets($pipes[1]);
           $just_errors = true;
           continue;
@@ -1197,6 +1202,11 @@ class SingleTest {
           $match = $tn_matches[0];
           $test_information .= $match.PHP_EOL;
           do {
+            if (stream_select($r, $w, $e, Options::$timeout) === false) {
+              $error_information .= "TEST TIMEOUT OCCURRED.";
+              $error_information .= " Last line read was: ".$line;
+              break 2;
+            }
             $status = fgets($pipes[1]);
             $status = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
                                    "", $status);

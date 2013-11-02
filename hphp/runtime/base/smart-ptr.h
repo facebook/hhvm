@@ -184,13 +184,16 @@ struct AtomicSmartPtr {
   /**
    * Assignments.
    */
+
   AtomicSmartPtr& operator=(const AtomicSmartPtr<T>& src) {
     return operator=(src.m_px);
   }
+
   template<class Y>
   AtomicSmartPtr& operator=(const AtomicSmartPtr<Y>& src) {
     return operator=(src.get());
   }
+
   AtomicSmartPtr& operator=(T* px) {
     if (m_px != px) {
       if (m_px && m_px->decAtomicCount() == 0) {
@@ -203,6 +206,7 @@ struct AtomicSmartPtr {
     }
     return *this;
   }
+
   template<class Y>
   AtomicSmartPtr& operator=(Y* px) {
     T* npx = dynamic_cast<T*>(px);
@@ -222,7 +226,6 @@ struct AtomicSmartPtr {
    * Magic delegation.
    */
   T* operator->() const {
-    if (!m_px) throw_null_pointer_exception();
     return m_px;
   }
 
@@ -239,11 +242,13 @@ struct AtomicSmartPtr {
   void reset() {
     operator=((T*)nullptr);
   }
+
 protected:
   void overwrite_unsafe(T* ptr) {
     assert(!m_px);
     m_px = ptr;
   }
+
 private:
   T* m_px;
 };

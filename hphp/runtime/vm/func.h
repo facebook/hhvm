@@ -438,7 +438,7 @@ struct Func {
   }
 
 public: // Offset accessors for the translator.
-#define X(f) static size_t f##Off() { return offsetof(Func, m_##f); }
+#define X(f) static ptrdiff_t f##Off() { return offsetof(Func, m_##f); }
   X(attrs);
   X(unit);
   X(cls);

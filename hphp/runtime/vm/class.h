@@ -710,6 +710,7 @@ struct Class : AtomicCountable {
   unsigned classVecLen() const {
     return m_classVecLen;
   }
+  const Class* const* classVec() const { return m_classVec; }
   static size_t preClassOff() { return offsetof(Class, m_preClass); }
   static size_t classVecOff() { return offsetof(Class, m_classVec); }
   static size_t classVecLenOff() { return offsetof(Class, m_classVecLen); }

@@ -70,15 +70,22 @@ public:
 IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
 
 static Mutex s_mutex;
-typedef StringIMap<vector<char*> > RegisteredFlagsMap;
+
+/*
+ * The bool indicates whether fb_intercept has ever been called
+ * on a function with this name.
+ * The vector contains a list of maybeIntercepted flags for functions
+ * with this name.
+ */
+typedef StringIMap<std::pair<bool,vector<char*>>> RegisteredFlagsMap;
 
 static RegisteredFlagsMap s_registered_flags;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void flag_maybe_interrupted(vector<char*> &flags) {
-  for (int i = flags.size() - 1; i >= 0; i--) {
-    *flags[i] = 1;
+static void flag_maybe_intercepted(vector<char*> &flags) {
+  for (auto flag : flags) {
+    *flag = 1;
   }
 }
 
@@ -107,23 +114,23 @@ bool register_intercept(const String& name, CVarRef callback, CVarRef data) {
 
   Lock lock(s_mutex);
   if (name.empty()) {
-    for (RegisteredFlagsMap::iterator iter =
-           s_registered_flags.begin();
-         iter != s_registered_flags.end(); ++iter) {
-      flag_maybe_interrupted(iter->second);
+    for (auto& entry : s_registered_flags) {
+      flag_maybe_intercepted(entry.second.second);
     }
   } else {
-    RegisteredFlagsMap::iterator iter =
-      s_registered_flags.find(name);
-    if (iter != s_registered_flags.end()) {
-      flag_maybe_interrupted(iter->second);
+    StringData* sd = name.get();
+    if (!sd->isStatic()) {
+      sd = makeStaticString(sd);
     }
+    auto &entry = s_registered_flags[StrNR(sd)];
+    entry.first = true;
+    flag_maybe_intercepted(entry.second);
   }
 
   return true;
 }
 
-Variant *get_enabled_intercept_handler(const String& name) {
+static Variant *get_enabled_intercept_handler(const String& name) {
   Variant *handler = nullptr;
   StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
   StringIMap<Variant>::iterator iter = handlers.find(name);
@@ -148,16 +155,18 @@ Variant *get_intercept_handler(const String& name, char* flag) {
       if (!sd->isStatic()) {
         sd = makeStaticString(sd);
       }
-      s_registered_flags[StrNR(sd)].push_back(flag);
-      *flag = 0;
+      auto &entry = s_registered_flags[StrNR(sd)];
+      entry.second.push_back(flag);
+      *flag = entry.first;
     }
+    if (!*flag) return nullptr;
   }
 
   Variant *handler = get_enabled_intercept_handler(name);
   if (handler == nullptr) {
     return nullptr;
   }
-  *flag = 1;
+  assert(*flag);
   return handler;
 }
 
@@ -166,7 +175,7 @@ void unregister_intercept_flag(const String& name, char *flag) {
   RegisteredFlagsMap::iterator iter =
     s_registered_flags.find(name);
   if (iter != s_registered_flags.end()) {
-    vector<char*> &flags = iter->second;
+    vector<char*> &flags = iter->second.second;
     for (int i = flags.size(); i--; ) {
       if (flag == flags[i]) {
         flags.erase(flags.begin() + i);

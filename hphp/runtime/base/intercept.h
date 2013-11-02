@@ -38,12 +38,6 @@ bool register_intercept(const String& name, CVarRef callback, CVarRef data);
 Variant *get_intercept_handler(const String& name, char* flag);
 
 /**
- * Check to see if it is actually intercepted for current request,
- * when we already know its flag is set
- */
-Variant *get_enabled_intercept_handler(const String& name);
-
-/**
  * Call intercept handler with original parameters.
  */
 bool handle_intercept(CVarRef handler, const String& name, CArrRef params,

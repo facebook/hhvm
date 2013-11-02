@@ -568,6 +568,7 @@ void lookupClsMethodHelper(Class* cls,
     }
   } catch (...) {
     *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(meth);
+    throw;
   }
 }
 

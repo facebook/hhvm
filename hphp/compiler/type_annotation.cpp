@@ -123,9 +123,10 @@ void TypeAnnotation::functionTypeName(std::string &name) const {
 }
 
 // xhp names are mangled so we get them back to their original definition
+// @see the mangling in ScannerToken::xhpLabel
 void TypeAnnotation::xhpTypeName(std::string &name) const {
   // remove prefix if any
-  if (m_name.compare(0, sizeof("xhp_xhp__") - 1, "xhp_xhp__") == 0) {
+  if (m_name.compare(0, sizeof("xhp_") - 1, "xhp_") == 0) {
     name += std::string(m_name).replace(0, sizeof("xhp_") - 1, ":");
   } else {
     name += m_name;

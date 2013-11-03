@@ -81,7 +81,8 @@ enum FlavorDesc {
 
 enum InstrFlags {
   NF = 0x0, // No flags
-  TF = 0x1, // Next instruction is not reachable via fall through or return
+  TF = 0x1, // Next instruction is not reachable via fall through or the
+            //   callee returning control
   CF = 0x2, // Control flow instruction (branch, call, return, throw, etc)
   FF = 0x4, // Instruction uses current FPI
   CF_TF = (CF | TF),
@@ -632,8 +633,8 @@ enum SetOpOp {
   O(CreateAsync,     THREE(SA,IVA,IVA),ONE(CV),         ONE(CV),    NF) \
   O(ContEnter,       NA,               ONE(CV),         NOV,        CF) \
   O(UnpackCont,      NA,               NOV,             TWO(CV,CV), NF) \
-  O(ContSuspend,     ONE(IVA),         ONE(CV),         NOV,        CF) \
-  O(ContSuspendK,    ONE(IVA),         TWO(CV,CV),      NOV,        CF) \
+  O(ContSuspend,     ONE(IVA),         ONE(CV),         NOV,        CF_TF) \
+  O(ContSuspendK,    ONE(IVA),         TWO(CV,CV),      NOV,        CF_TF) \
   O(ContRetC,        NA,               ONE(CV),         NOV,        CF_TF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
   O(ContRaise,       NA,               NOV,             NOV,        NF) \

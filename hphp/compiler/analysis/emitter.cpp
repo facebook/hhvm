@@ -2583,6 +2583,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
 
       case Statement::KindOfGotoStatement: {
+        // TODO Task# 3124417: This should free the appropriate iterator
+        // variables if the goto exits the scope of one or more foreach
+        // loops.
         GotoStatementPtr g(static_pointer_cast<GotoStatement>(node));
         StringData* nName = makeStaticString(g->label());
         e.Jmp(m_gotoLabels[nName]);
@@ -3995,8 +3998,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
 
         // emit return label for raise()
-        assert(m_evalStack.size() == 0);
-        e.Null();
         m_yieldLabels[exceptLabel].set(e);
 
         // throw received exception on the stack
@@ -4004,7 +4005,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         e.Throw();
 
         // emit return label for next()/send()
-        e.Null();
         m_yieldLabels[normalLabel].set(e);
 
         // continue with the received result on the stack

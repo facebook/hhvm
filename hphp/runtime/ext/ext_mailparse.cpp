@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/ext_process.h"
 #include "hphp/runtime/ext/mailparse/mime.h"
 #include "hphp/runtime/ext/mailparse/rfc822.h"
+#include "hphp/runtime/base/zend-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,22 +86,24 @@ bool php_mail(const String& to, const String& subject, const String& message,
   return (!ret);
 }
 
-const StaticString zero(LITSTR_INIT("\0"));
+const StaticString
+  s_zero(LITSTR_INIT("\0")),
+  s_space(" ");
 
 bool f_mail(const String& to, const String& subject, const String& message,
             const String& additional_headers /* = null_string */,
             const String& additional_parameters /* = null_string */) {
   // replace \0 with spaces
-  String to2 = to.replace(zero, " ");
-  String subject2 = subject.replace(zero, " ");
-  String message2 = message.replace(zero, " ");
+  String to2 = string_replace(to, s_zero, s_space);
+  String subject2 = string_replace(subject, s_zero, s_space);
+  String message2 = string_replace(message, s_zero, s_space);
   String headers2;
   if (!additional_headers.empty()) {
-    headers2 = additional_headers.replace(zero, " ");
+    headers2 = string_replace(additional_headers, s_zero, s_space);
   }
   String params2;
   if (!additional_parameters.empty()) {
-    params2 = additional_parameters.replace(zero, " ");
+    params2 = string_replace(additional_parameters, s_zero, s_space);
   }
 
   to2 = php_trim(to2);

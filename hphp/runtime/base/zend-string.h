@@ -163,12 +163,49 @@ const char *string_memnstr(const char *haystack, const char *needle,
 /**
  * Replace specified substring or search string with specified replacement.
  */
-char *string_replace(const char *s, int &len, int start, int length,
-                     const char *replacement, int len_repl);
-char *string_replace(const char *input, int &len,
-                     const char *search, int len_search,
-                     const char *replacement, int len_replace,
-                     int &count, bool case_sensitive);
+String string_replace(const char *s, int len, int start, int length,
+                      const char *replacement, int len_repl);
+String string_replace(const char *input, int len,
+                      const char *search, int len_search,
+                      const char *replacement, int len_replace,
+                      int &count, bool case_sensitive);
+
+/**
+ * Replace a substr with another and return replaced one. Note, read
+ * http://www.php.net/substr about meanings of negative start or length.
+ *
+ * The form that takes a "count" reference will still replace all occurrences
+ * and return total replaced count in the out parameter. It does NOT mean
+ * it will replace at most that many occurrences, so count's input value
+ * is never checked.
+ */
+inline String string_replace(const String& str, int start, int length,
+                             const String& repl) {
+  return string_replace(str.data(), str.size(), start, length,
+                        repl.data(), repl.size());
+}
+
+inline String string_replace(const String& str, const String& search,
+                             const String& replacement,
+                             int &count, bool caseSensitive) {
+  count = 0;
+  if (!search.empty() && !str.empty()) {
+    auto ret = string_replace(str.data(), str.size(),
+                              search.data(), search.size(),
+                              replacement.data(), replacement.size(),
+                              count, caseSensitive);
+    if (!ret.isNull()) {
+      return ret;
+    }
+  }
+  return str;
+}
+
+inline String string_replace(const String& str, const String& search,
+                             const String& replacement) {
+  int count;
+  return string_replace(str, search, replacement, count, true);
+}
 
 /**
  * Reverse, repeat or shuffle a string.
@@ -253,9 +290,8 @@ char *string_metaphone(const char *input, int word_len, long max_phonemes,
  */
 char *string_convert_cyrillic_string(const char *input, int length,
                                      char from, char to);
-char *string_convert_hebrew_string(const char *str, int &str_len,
-                                   int max_chars_per_line,
-                                   int convert_newlines);
+String string_convert_hebrew_string(const String& str, int max_chars_per_line,
+                                    int convert_newlines);
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers

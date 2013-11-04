@@ -515,16 +515,17 @@ const char *string_memnstr(const char *haystack, const char *needle,
   return nullptr;
 }
 
-char *string_replace(const char *s, int &len, int start, int length,
-                     const char *replacement, int len_repl) {
+HOT_FUNC
+String string_replace(const char *s, int len, int start, int length,
+                      const char *replacement, int len_repl) {
   assert(s);
   assert(replacement);
   if (!string_substr_check(len, start, length, false)) {
-    len = 0;
-    return string_duplicate("", 0);
+    return empty_string;
   }
 
-  char *ret = (char *)malloc(len + len_repl - length + 1);
+  String retString(len + len_repl - length, ReserveString);
+  char *ret = retString.bufferSlice().ptr;
 
   int ret_len = 0;
   if (start) {
@@ -540,24 +541,22 @@ char *string_replace(const char *s, int &len, int start, int length,
     memcpy(ret + ret_len, s + start + length, len);
     ret_len += len;
   }
-
-  len = ret_len;
-  ret[ret_len] = '\0';
-  return ret;
+  return retString.setSize(ret_len);
 }
 
-char *string_replace(const char *input, int &len,
-                     const char *search, int len_search,
-                     const char *replacement, int len_replace,
-                     int &count, bool case_sensitive) {
+HOT_FUNC
+String string_replace(const char *input, int len,
+                      const char *search, int len_search,
+                      const char *replacement, int len_replace,
+                      int &count, bool case_sensitive) {
   assert(input);
   assert(search && len_search);
 
   if (len == 0) {
-    return nullptr;
+    return String();
   }
 
-  std::vector<int> founds;
+  smart::vector<int> founds;
   founds.reserve(16);
   if (len_search == 1) {
     for (int pos = string_find(input, len, *search, 0, case_sensitive);
@@ -578,10 +577,11 @@ char *string_replace(const char *input, int &len,
 
   count = founds.size();
   if (count == 0) {
-    return nullptr; // not found
+    return String(); // not found
   }
 
-  char *ret = (char *)malloc(len + (len_replace - len_search) * count + 1);
+  String retString(len + (len_replace - len_search) * count, ReserveString);
+  char *ret = retString.bufferSlice().ptr;
   char *p = ret;
   int pos = 0; // last position in input that hasn't been copied over yet
   int n;
@@ -607,10 +607,7 @@ char *string_replace(const char *input, int &len,
     memcpy(p, input, n);
     p += n;
   }
-  *p = '\0';
-
-  len = p - ret;
-  return ret;
+  return retString.setSize(p - ret);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2996,10 +2993,12 @@ char *string_convert_cyrillic_string(const char *input, int length,
  * Converts Logical Hebrew text (Hebrew Windows style) to Visual text
  * Cheers/complaints/flames - Zeev Suraski <zeev@php.net>
  */
-char *string_convert_hebrew_string(const char *str, int &str_len,
-                                   int max_chars_per_line,
-                                   int convert_newlines) {
-  assert(str);
+String string_convert_hebrew_string(const String& inStr,
+                                    int max_chars_per_line,
+                                    int convert_newlines) {
+  assert(!inStr.empty());
+  auto str = inStr.data();
+  auto str_len = inStr.size();
   const char *tmp;
   char *heb_str, *broken_str;
   char *target;
@@ -3007,14 +3006,11 @@ char *string_convert_hebrew_string(const char *str, int &str_len,
   long max_chars=0;
   int begin, end, char_count, orig_begin;
 
-  if (str_len == 0) {
-    return nullptr;
-  }
-
   tmp = str;
   block_start=block_end=0;
 
-  heb_str = (char *) malloc(str_len + 1);
+  heb_str = (char *) smart_malloc(str_len + 1);
+  SCOPE_EXIT { smart_free(heb_str); };
   target = heb_str+str_len;
   *target = 0;
   target--;
@@ -3078,8 +3074,8 @@ char *string_convert_hebrew_string(const char *str, int &str_len,
     block_start=block_end+1;
   } while (block_end < str_len-1);
 
-
-  broken_str = (char *) malloc(str_len+1);
+  String brokenStr(str_len, ReserveString);
+  broken_str = brokenStr.bufferSlice().ptr;
   begin=end=str_len-1;
   target = broken_str;
 
@@ -3137,18 +3133,16 @@ char *string_convert_hebrew_string(const char *str, int &str_len,
     begin--;
     end=begin;
   }
-  free((void*)heb_str);
 
   if (convert_newlines) {
     int count;
-    char *ret = string_replace(broken_str, str_len, "\n", strlen("\n"),
-                               "<br />\n", strlen("<br />\n"), count, true);
-    if (ret) {
-      free(broken_str);
+    auto ret = string_replace(broken_str, str_len, "\n", strlen("\n"),
+                              "<br />\n", strlen("<br />\n"), count, true);
+    if (!ret.isNull()) {
       return ret;
     }
   }
-  return broken_str;
+  return brokenStr.setSize(str_len);
 }
 
 #if defined(__APPLE__)

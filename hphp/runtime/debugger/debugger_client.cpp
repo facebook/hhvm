@@ -1449,7 +1449,7 @@ void DebuggerClient::tutorial(const char *text) {
   TRACE(2, "DebuggerClient::tutorial\n");
   if (m_tutorial < 0) return;
 
-  String ret = String(text).replace("\t", "    ");
+  String ret = string_replace(String(text), "\t", "    ");
   ret = f_wordwrap(ret, LineWidth - 4, "\n", true);
   Array lines = StringUtil::Explode(ret, "\n").toArray();
 

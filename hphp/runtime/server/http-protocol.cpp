@@ -129,7 +129,10 @@ const StaticString
   s_REMOTE_HOST("REMOTE_HOST"),
   s_REMOTE_PORT("REMOTE_PORT"),
   s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
-  s_THREAD_TYPE("THREAD_TYPE");
+  s_THREAD_TYPE("THREAD_TYPE"),
+  s_dash("-"),
+  s_underscore("_"),
+  s_HTTP_("HTTP_");
 
 static auto const s_arraysToClear = {
   s__SERVER,
@@ -330,7 +333,8 @@ void HttpProtocol::CopyHeaderVariables(Variant& server,
          ++iter) {
       const vector<string> &values = iter->second;
       for (unsigned int i = 0; i < values.size(); i++) {
-        String key = f_strtoupper(iter->first).replace("-", "_");
+        String key = string_replace(f_strtoupper(iter->first), s_dash,
+                                    s_underscore);
         server.set(key, String(values[i]));
       }
     }
@@ -341,8 +345,9 @@ void HttpProtocol::CopyHeaderVariables(Variant& server,
   for (auto const& header : headers) {
     auto const& key = header.first;
     auto const& values = header.second;
-    auto normalizedKey = String("HTTP_") + f_strtoupper(key).replace("-", "_");
-
+    auto normalizedKey = s_HTTP_ +
+                         string_replace(f_strtoupper(key), s_dash,
+                                        s_underscore);
 
     // Detect suspicious headers.  We are about to modify header names for
     // the SERVER variable.  This means that it is possible to deliberately

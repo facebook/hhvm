@@ -224,33 +224,6 @@ int String::rfind(const String& s, int pos /* = 0 */,
                       s.data(), s.size(), pos, caseSensitive);
 }
 
-String String::replace(int start, int length, const String& replacement) const {
-  int len = size();
-  char *ret = string_replace(data(), len, start, length, replacement.data(),
-                             replacement.size());
-  return String(ret, len, AttachString);
-}
-
-String String::replace(const String& search, const String& replacement) const {
-  int count;
-  return replace(search, replacement, count, true);
-}
-
-String String::replace(const String& search, const String& replacement,
-                       int &count, bool caseSensitive) const {
-  count = 0;
-  if (!search.empty() && !empty()) {
-    int len = m_px->size();
-    char *ret = string_replace(m_px->data(), len, search.data(), search.size(),
-                               replacement.data(), replacement.size(), count,
-                               caseSensitive);
-    if (ret) {
-      return String(ret, len, AttachString);
-    }
-  }
-  return *this;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions: cannot inline these due to dependencies
 

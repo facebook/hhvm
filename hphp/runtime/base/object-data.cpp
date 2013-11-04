@@ -1146,9 +1146,10 @@ void ObjectData::setProp(Class* ctx,
       raise_error("Cannot access protected property");
     }
     // Fall through to the last case below
-  } else if (UNLIKELY(!*key->data())) {
-    throw_invalid_property_name(StrNR(key));
   } else if (!getAttribute(UseSet)) {
+    if (UNLIKELY(!*key->data())) {
+      throw_invalid_property_name(StrNR(key));
+    }
     // when seting a dynamic property, do not write
     // directly to the TypedValue in the HphpArray, since
     // its m_aux field is used to store the string hash of
@@ -1330,16 +1331,18 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
       o_properties.remove(StrNR(key).asString(),
                           true /* isString */);
     }
-  } else if (UNLIKELY(!*key->data())) {
-    throw_invalid_property_name(StrNR(key));
   } else {
     assert(!accessible);
-    if (getAttribute(UseUnset)) {
+    if (!getAttribute(UseUnset)) {
+      if (UNLIKELY(!*key->data())) {
+        throw_invalid_property_name(StrNR(key));
+      } else if (visible) {
+        raise_error("Cannot unset inaccessible property");
+      }
+    } else {
       TypedValue ignored;
       invokeUnset(&ignored, key);
       tvRefcountedDecRef(&ignored);
-    } else if (visible) {
-      raise_error("Cannot unset inaccessible property");
     }
   }
 }

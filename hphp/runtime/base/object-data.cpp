@@ -1471,7 +1471,7 @@ void ObjectData::cloneSet(ObjectData* clone) {
                                sizeof(ObjectData) + builtinPropSize());
   for (Slot i = 0; i < nProps; i++) {
     tvRefcountedDecRef(&clonePropVec[i]);
-    tvDupFlattenVars(&propVec()[i], &clonePropVec[i], nullptr);
+    tvDupFlattenVars(&propVec()[i], &clonePropVec[i]);
   }
   if (o_properties.get()) {
     clone->reserveProperties(o_properties.size());

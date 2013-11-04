@@ -388,7 +388,6 @@ public:
   F(bool, JitEnableRenameFunction,     false)                           \
                                                                         \
   F(bool, JitDisabledByHphpd,          false)                           \
-  F(bool, ThreadingJit,                false)                           \
   F(bool, JitTransCounters,            false)                           \
   F(bool, HHIRGenericDtorHelper,       true)                            \
   F(bool, HHIRCse,                     true)                            \

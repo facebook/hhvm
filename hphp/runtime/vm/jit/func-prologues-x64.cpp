@@ -110,6 +110,10 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
 // be the optimal point in certain benchmarks. #microoptimization
 constexpr auto kLocalsToInitializeInline = 9;
 
+// Maximum number of default-value parameter initializations to
+// unroll. Beyond this, a loop is generated.
+constexpr auto kMaxParamsInitUnroll = 5;
+
 SrcKey emitPrologueWork(Func* func, int nPassed) {
   using Transl::Location;
   using namespace reg;
@@ -151,16 +155,23 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     }
     TRACE(1, "Only have %d of %d args; getting dvFunclet\n",
           nPassed, numParams);
-    a.  emitImmReg(nPassed, rax);
-    // do { *(--rVmSp) = NULL; nPassed++; } while (nPassed < numParams);
-    // This should be an unusual case, so optimize for code density
-    // rather than execution speed; i.e., don't unroll the loop.
-    TCA loopTop = a.frontier();
-    a.  sub_imm32_reg64(sizeof(Cell), rVmSp);
-    a.  incl(eax);
-    emitStoreUninitNull(a, 0, rVmSp);
-    a.  cmp_imm32_reg32(numParams, rax);
-    a.  jcc8(CC_L, loopTop);
+    if (numParams - nPassed <= kMaxParamsInitUnroll) {
+      for (int i = nPassed; i < numParams; i++) {
+        int offset = (nPassed - i - 1) * sizeof(Cell);
+        emitStoreTVType(a, KindOfUninit, rVmSp[offset + TVOFF(m_type)]);
+      }
+    } else {
+      a.  emitImmReg(nPassed, rax);
+      // do { *(--rVmSp) = NULL; nPassed++; } while (nPassed < numParams);
+      // This should be an unusual case, so optimize for code density
+      // rather than execution speed; i.e., don't unroll the loop.
+      TCA loopTop = a.frontier();
+      a.  sub_imm32_reg64(sizeof(Cell), rVmSp);
+      a.  incl(eax);
+      emitStoreUninitNull(a, 0, rVmSp);
+      a.  cmp_imm32_reg32(numParams, rax);
+      a.  jcc8(CC_L, loopTop);
+    }
   }
 
   // Entry point for numParams == nPassed is here.

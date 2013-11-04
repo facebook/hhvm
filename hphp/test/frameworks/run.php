@@ -1955,6 +1955,8 @@ function get_hhvm_build(bool $with_jit = true): string {
   $repo_loc = tempnam('/tmp', 'framework-test');
   $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
   $build .= $repo_args;
+  $build .= " --config ".__DIR__."/../config.hdf";
+  $build .= " -v Server.IniFile=".__DIR__."/php.ini";
   if ($with_jit) {
     $build .= " -v Eval.Jit=true";
   }

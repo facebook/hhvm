@@ -16,11 +16,31 @@
 */
 
 #include "hphp/runtime/ext/ext_datetime.h"
+#include "hphp/runtime/base/ini-setting.h"
 
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(date);
+static class DateExtension : public Extension {
+ public:
+  DateExtension() : Extension("date") { }
+  void moduleInit() {
+    auto callback = [](const HPHP::String& value, void *p) -> bool {
+      assert(p == nullptr);
+      if (value.empty()) {
+        return false;
+      }
+      return f_date_default_timezone_set(value);
+    };
+    IniSetting::Bind(
+      "date.timezone", 
+      g_context->getDefaultTimeZone().c_str(), 
+      callback, 
+      nullptr
+    );
+  }
+} s_date_extension;
+
 ///////////////////////////////////////////////////////////////////////////////
 // constants
 

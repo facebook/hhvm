@@ -175,6 +175,8 @@ Variant f_i18n_loc_get_error_code();
 
 Variant f_hphp_array_idx(CVarRef key, CVarRef search, CVarRef def);
 
+Array ArrayObject_toArray(const ObjectData* obj);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

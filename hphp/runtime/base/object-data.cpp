@@ -50,7 +50,18 @@ const StaticString
   s_offsetGet("offsetGet"),
   s___call("__call"),
   s___callStatic("__callStatic"),
-  s_serialize("serialize");
+  s_serialize("serialize"),
+  s_storage("storage");
+
+static Array ArrayObject_toArray(const ObjectData* obj) {
+  bool visible, accessible, unset;
+  auto prop = obj->getProp(
+    SystemLib::s_ArrayObjectClass, s_storage.get(),
+    visible, accessible, unset
+  );
+  assert(visible && accessible && !unset);
+  return tvAsCVarRef(prop).toArray();
+}
 
 static_assert(sizeof(ObjectData) == 32, "Change this only on purpose");
 
@@ -232,7 +243,7 @@ Variant* ObjectData::o_realProp(const String& propName, int flags,
   }
 
   bool visible, accessible, unset;
-  TypedValue* ret = getProp(ctx, propName.get(), visible, accessible, unset);
+  auto ret = getProp(ctx, propName.get(), visible, accessible, unset);
   if (!ret) {
     // Property is not declared, and not dynamically created yet.
     if (!(flags & RealPropCreate)) {
@@ -421,6 +432,8 @@ Array ObjectData::o_toArray() const {
     // assert into an if and add cases.
     assert(instanceof(c_SimpleXMLElement::classof()));
     return c_SimpleXMLElement::ToArray(this);
+  } else if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
+    return ArrayObject_toArray(this);
   } else {
     Array ret(ArrayData::Create());
     o_getArray(ret, false);
@@ -453,7 +466,7 @@ Array ObjectData::o_toIterArray(const String& context,
     for (size_t i = 0; i < numProps; ++i) {
       auto key = const_cast<StringData*>(props[i].name());
       bool visible, accessible, unset;
-      TypedValue* val = getProp(ctx, key, visible, accessible, unset);
+      auto val = getProp(ctx, key, visible, accessible, unset);
       if (accessible && val->m_type != KindOfUninit && !unset) {
         if (getRef) {
           if (val->m_type != KindOfRef) {
@@ -998,6 +1011,14 @@ TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,
   return prop;
 }
 
+const TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,
+                                      bool& visible, bool& accessible,
+                                      bool& unset) const {
+  return const_cast<ObjectData*>(this)->getProp(
+    ctx, key, visible, accessible, unset
+  );
+}
+
 void ObjectData::invokeSet(TypedValue* retval, const StringData* key,
                            TypedValue* val) {
   AttributeClearer a(UseSet, this);
@@ -1042,7 +1063,7 @@ void ObjectData::propImpl(TypedValue*& retval, TypedValue& tvRef,
                           Class* ctx,
                           const StringData* key) {
   bool visible, accessible, unset;
-  TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
+  auto propVal = getProp(ctx, key, visible, accessible, unset);
 
   if (visible) {
     if (accessible) {
@@ -1121,7 +1142,7 @@ void ObjectData::propWD(TypedValue*& retval, TypedValue& tvRef,
 
 bool ObjectData::propIsset(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
-  TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
+  auto propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible && !unset) {
     return !tvIsNull(tvToCell(propVal));
   }
@@ -1137,7 +1158,7 @@ bool ObjectData::propIsset(Class* ctx, const StringData* key) {
 
 bool ObjectData::propEmpty(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
-  TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
+  auto propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible && !unset) {
     return !cellToBool(*tvToCell(propVal));
   }
@@ -1165,7 +1186,7 @@ void ObjectData::setProp(Class* ctx,
                          TypedValue* val,
                          bool bindingAssignment /* = false */) {
   bool visible, accessible, unset;
-  TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
+  auto propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
     assert(propVal);
     if (unset && getAttribute(UseSet)) {
@@ -1219,7 +1240,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
                                   unsigned char op, const StringData* key,
                                   Cell* val) {
   bool visible, accessible, unset;
-  TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
+  auto propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
     assert(propVal);
     if (unset && getAttribute(UseGet)) {
@@ -1293,7 +1314,7 @@ void ObjectData::incDecPropImpl(TypedValue& tvRef, Class* ctx,
                                 unsigned char op, const StringData* key,
                                 TypedValue& dest) {
   bool visible, accessible, unset;
-  TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
+  auto propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
     assert(propVal);
     if (unset && getAttribute(UseGet)) {
@@ -1372,7 +1393,7 @@ void ObjectData::incDecProp<true>(TypedValue& tvRef, Class* ctx,
 
 void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
-  TypedValue* propVal = getProp(ctx, key, visible, accessible, unset);
+  auto propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible) {
     Slot propInd = declPropInd(propVal);
     if (propInd != kInvalidSlot) {

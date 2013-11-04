@@ -401,6 +401,8 @@ class ObjectData {
  public:
   TypedValue* getProp(Class* ctx, const StringData* key, bool& visible,
                       bool& accessible, bool& unset);
+  const TypedValue* getProp(Class* ctx, const StringData* key, bool& visible,
+                            bool& accessible, bool& unset) const;
  private:
   template <bool warn, bool define>
   void propImpl(TypedValue*& retval, TypedValue& tvRef, Class* ctx,

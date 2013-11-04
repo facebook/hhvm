@@ -1948,6 +1948,5 @@ Variant f_hphp_array_idx(CVarRef key, CVarRef search, CVarRef def) {
   return def;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 }

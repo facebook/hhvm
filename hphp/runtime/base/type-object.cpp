@@ -73,6 +73,14 @@ bool Object::equal(CObjRef v2) const {
   if (m_px->isCollection()) {
     return collectionEquals(m_px, v2.get());
   }
+  if (UNLIKELY(m_px->instanceof(SystemLib::s_ArrayObjectClass))) {
+    // Compare the whole object, not just the array representation
+    Array ar1(ArrayData::Create());
+    Array ar2(ArrayData::Create());
+    m_px->o_getArray(ar1, false);
+    v2->o_getArray(ar2, false);
+    return ar1->equal(ar2.get(), false);
+  }
   return toArray().equal(v2.toArray());
 }
 

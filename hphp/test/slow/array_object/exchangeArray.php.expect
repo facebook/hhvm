@@ -7,13 +7,7 @@ Array
 )
 ArrayObject Object
 (
-    [storage:ArrayObject:private] => Array
-        (
-            [0] => Amsterdam
-            [1] => Paris
-            [2] => London
-        )
-
-    [flags:ArrayObject:private] => 0
-    [iteratorClass:ArrayObject:private] => ArrayIterator
+    [0] => Amsterdam
+    [1] => Paris
+    [2] => London
 )

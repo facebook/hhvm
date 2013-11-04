@@ -491,9 +491,11 @@ struct Class : AtomicCountable {
   Avail avail(Class *&parent, bool tryAutoload = false) const;
 
   /*
-   * classof() determines if this represents a non-strict subtype of cls.
+   * classof() determines if this represents a non-strict subtype of
+   * cls. Returns uint64_t instead of bool because it's called directly from
+   * the TC.
    */
-  bool classof(const Class* cls) const {
+  uint64_t classof(const Class* cls) const {
     /*
       If cls is an interface, we can simply check to see if cls is in
       this->m_interfaces.  Otherwise, if this is not an interface, the classVec

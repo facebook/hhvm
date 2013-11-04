@@ -127,8 +127,6 @@ void raise_error_sd(const StringData* sd);
 
 RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val);
 
-bool instanceOfHelper(const Class* objClass, const Class* testClass);
-
 int64_t ak_exist_string(ArrayData* arr, StringData* key);
 int64_t ak_exist_int(ArrayData* arr, int64_t key);
 int64_t ak_exist_string_obj(ObjectData* obj, StringData* key);

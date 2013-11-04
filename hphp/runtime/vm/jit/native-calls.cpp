@@ -328,7 +328,7 @@ static CallMap s_callMap {
                  {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
 
     /* instanceof checks */
-    {InstanceOf, instanceOfHelper, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
+    {InstanceOf, method(&Class::classof), DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
     {InstanceOfIface, method(&Class::ifaceofDirect), DSSA,
                       SNone, {{SSA, 0}, {SSA, 1}}},
 

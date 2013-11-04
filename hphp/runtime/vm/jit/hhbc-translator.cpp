@@ -3515,15 +3515,9 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
       : gen(LdClsCachedSafe, ssaClassName);
 
   push(
-    haveBit ? gen(InstanceOfBitmask,
-                        objClass,
-                        ssaClassName) :
-    isUnique && isNormalClass ? gen(ExtendsClass,
-                                          objClass,
-                                          checkClass) :
-    gen(InstanceOf,
-              objClass,
-              checkClass)
+      haveBit ? gen(InstanceOfBitmask, objClass, ssaClassName)
+    : isUnique && isNormalClass ? gen(ExtendsClass, objClass, checkClass)
+    : gen(InstanceOf, objClass, checkClass)
   );
   gen(DecRef, src);
 }

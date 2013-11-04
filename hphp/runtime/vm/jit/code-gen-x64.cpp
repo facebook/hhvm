@@ -369,7 +369,6 @@ CALL_OPCODE(StableMapIsset)
 CALL_OPCODE(IssetElem)
 CALL_OPCODE(EmptyElem)
 
-CALL_OPCODE(InstanceOf)
 CALL_OPCODE(InstanceOfIface)
 
 CALL_OPCODE(SurpriseHook)
@@ -2046,6 +2045,31 @@ void CodeGenerator::cgSideExitJmpNInstanceOfBitmask(IRInstruction* inst) {
   emitBindSideExit(m_mainCode, m_stubsCode,
                    opToConditionCode(inst->op()),
                    sk);
+}
+
+void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
+  auto const testClass = inst->src(1);
+  auto testReg = curOpd(testClass).reg();
+  auto destReg = curOpd(inst->dst()).reg();
+
+  if (destReg == InvalidReg) return;
+
+  if (testClass->isConst()) {
+    // Don't need to do the null check when the class is const.
+    assert(testClass->getValClass());
+    cgCallNative(m_as, inst);
+    return;
+  }
+
+  m_as.testq  (testReg, testReg);
+  ifThenElse(m_as, CC_NZ,
+    [&] {
+      cgCallNative(m_as, inst);
+    },
+    [&] {
+      m_as.xorl (r32(destReg), r32(destReg));
+    }
+  );
 }
 
 /*

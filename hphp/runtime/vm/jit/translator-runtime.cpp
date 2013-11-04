@@ -328,12 +328,6 @@ RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
   return refData;
 }
 
-HOT_FUNC_VM
-bool instanceOfHelper(const Class* objClass,
-                      const Class* testClass) {
-  return testClass && objClass->classof(testClass);
-}
-
 ALWAYS_INLINE
 static int64_t ak_exist_string_impl(ArrayData* arr, StringData* key) {
   int64_t n;

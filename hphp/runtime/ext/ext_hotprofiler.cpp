@@ -819,7 +819,8 @@ class TraceWalker {
     for (auto& r : m_recursion) delete[] r.first;
   }
 
-  void walk(TraceIterator begin, TraceIterator end, Stats& stats) {
+  void walk(TraceIterator begin, TraceIterator end, TraceIterator final,
+            Stats& stats) {
     if (begin == end) return;
     m_recursion.push_back(std::make_pair(nullptr, 0));
     // Trim exit traces off the front of the log. These may be due to
@@ -849,12 +850,18 @@ class TraceWalker {
       }
       ++current;
     }
+    // Close the dangling stack with the last entry. This
+    // under-represents any functions still on the stack.
     --current;
     while (m_stack.size() > 1) {
       popFrame(current, stats);
     }
+    // Close main() with the final data from when profiling was turned
+    // off. This ensures main() represents the entire run, even if we
+    // run out of log space.
     if (!m_stack.empty()) {
-      incStats(m_stack.back().trace->symbol, current, m_stack.back(), stats);
+      assert(strcmp(m_stack.back().trace->symbol, "main()") == 0);
+      incStats(m_stack.back().trace->symbol, final, m_stack.back(), stats);
     }
     if (m_badArcCount > 0) {
       stats["(trace has mismatched calls and returns)"].count = m_badArcCount;
@@ -1107,7 +1114,7 @@ class TraceProfiler : public Profiler {
 
   virtual void endAllFrames() {
     if (m_traceBuffer && m_nextTraceEntry < m_traceBufferSize - 1) {
-      endFrame(nullptr);
+      collectStats(nullptr, true, m_finalEntry);
       m_traceBufferFilled = true;
     }
   }
@@ -1152,15 +1159,17 @@ class TraceProfiler : public Profiler {
   }
 
   template<class TraceIterator, class Stats>
-  void walkTrace(TraceIterator begin, TraceIterator end, Stats& stats) {
+  void walkTrace(TraceIterator begin, TraceIterator end, TraceIterator final,
+                 Stats& stats) {
     TraceWalker<TraceIterator, Stats> walker;
-    walker.walk(begin, end, stats);
+    walker.walk(begin, end, final, stats);
   }
 
   virtual void writeStats(Array &ret) {
     TraceData my_begin;
     collectStats(my_begin);
-    walkTrace(m_traceBuffer, m_traceBuffer + m_nextTraceEntry, m_stats);
+    walkTrace(m_traceBuffer, m_traceBuffer + m_nextTraceEntry, &m_finalEntry,
+              m_stats);
     if (m_overflowCalls) {
       m_stats["(trace buffer terminated)"].count += m_overflowCalls/2;
     }
@@ -1183,6 +1192,7 @@ class TraceProfiler : public Profiler {
   }
 
   TraceEntry* m_traceBuffer;
+  TraceEntry m_finalEntry;
   int m_traceBufferSize;
   int m_nextTraceEntry;
   bool m_traceBufferFilled;

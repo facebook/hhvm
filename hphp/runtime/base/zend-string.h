@@ -98,11 +98,6 @@ inline int string_strncasecmp(const char *s1, int len1,
   }
   return (len < len1 ? len : len1) - (len < len2 ? len : len2);
 }
-/**
- * Concatenate two into one.
- */
-char *string_concat(const char *s1, int len1, const char *s2, int len2,
-                    int &len);
 
 /**
  * Compare strings.
@@ -134,17 +129,6 @@ char *string_to_case_words(const char *s, int len, int (*tocase)(int));
   string_to_case_first((s), (len), [] (int i) -> int { return tolower(i); })
 #define string_to_lower_words(s, len) \
   string_to_case_words((s), (len), [] (int i) -> int { return tolower(i); })
-
-
-/**
- * Trim a string by removing characters in the specified charlist.
- *
- *   mode 1 : trim left
- *   mode 2 : trim right
- *   mode 3 : trim left and right
- */
-char *string_trim(const char *s, int &len,
-                  const char *charlist, int charlistlen, int mode);
 
 /**
  * Pad a string with pad_string to pad_length. "len" is

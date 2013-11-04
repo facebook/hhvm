@@ -160,21 +160,6 @@ int string_copy(char *dst, const char *src, int siz) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-char *string_concat(const char *s1, int len1, const char *s2, int len2,
-                    int &len) {
-  len = len1 + len2;
-  char *buf = (char *)malloc(len + 1);
-  if (buf == nullptr) {
-    throw FatalErrorException(0, "malloc failed: %d", len);
-  }
-  memcpy(buf, s1, len1);
-  memcpy(buf + len1, s2, len2);
-  buf[len] = 0;
-  return buf;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // comparisons
 
 int string_ncmp(const char *s1, const char *s2, int len) {
@@ -339,41 +324,6 @@ char *string_to_case_words(const char *s, int len, int (*tocase)(int)) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-char *string_trim(const char *s, int &len,
-                  const char *charlist, int charlistlen, int mode) {
-  assert(s);
-  char mask[256];
-  string_charmask(charlist, charlistlen, mask);
-
-  int trimmed = 0;
-  if (mode & 1) {
-    for (int i = 0; i < len; i++) {
-      if (mask[(unsigned char)s[i]]) {
-        trimmed++;
-      } else {
-        break;
-      }
-    }
-    len -= trimmed;
-    s += trimmed;
-  }
-  if (mode & 2) {
-    for (int i = len - 1; i >= 0; i--) {
-      if (mask[(unsigned char)s[i]]) {
-        len--;
-        trimmed++;
-      } else {
-        break;
-      }
-    }
-  }
-
-  if (trimmed == 0) {
-    return nullptr;
-  }
-  return string_duplicate(s, len);
-}
 
 #define STR_PAD_LEFT            0
 #define STR_PAD_RIGHT           1

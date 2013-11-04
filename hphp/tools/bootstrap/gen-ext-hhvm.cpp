@@ -521,8 +521,25 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
 
   auto idlIt = g_mangleMap.find(demangled);
   if (idlIt == g_mangleMap.end()) {
-    // A symbol that doesn't correspond to anything in the IDL.
-    return;
+    fbstring munged = demangled;
+    fbstring target = "HPHP::String";
+    size_t pos = 0;
+    while (true) {
+      pos = munged.find(target, pos);
+      if (pos == fbstring::npos) break;
+      pos += target.size();
+      if (pos >= munged.size() ||
+          munged[pos] == ' ') {
+        continue;
+      }
+      munged.replace(pos, 0, " const&");
+    }
+
+    idlIt = g_mangleMap.find(munged);
+    if (idlIt == g_mangleMap.end()) {
+      // A symbol that doesn't correspond to anything in the IDL.
+      return;
+    }
   }
 
   auto& func = *idlIt->second;

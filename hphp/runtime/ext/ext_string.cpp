@@ -338,11 +338,11 @@ String f_strrev(const String& str) {
   return ret;
 }
 
-String f_strtolower(const String& str) {
+String f_strtolower(String str) {
   return stringForEachFast(str, tolower);
 }
 
-String f_strtoupper(const String& str) {
+String f_strtoupper(String str) {
   return stringForEachFast(str, toupper);
 }
 
@@ -365,15 +365,15 @@ String stringToCaseFirst(const String& str, OpTo tocase, OpIs iscase) {
   return ret;
 }
 
-String f_ucfirst(const String& str) {
+String f_ucfirst(String str) {
   return stringToCaseFirst(str, toupper, isupper);
 }
 
-String f_lcfirst(const String& str) {
+String f_lcfirst(String str) {
   return stringToCaseFirst(str, tolower, islower);
 }
 
-String f_ucwords(const String& str) {
+String f_ucwords(String str) {
   char last = ' ';
   return stringForEachFast(str, [&] (char c) {
     char ret = isspace(last) ? toupper(c) : c;
@@ -416,19 +416,19 @@ String stringTrim(const String& str, const String& charlist) {
   return str.substr(start, end - start + 1);
 }
 
-String f_trim(const String& str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+String f_trim(String str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<true,true>(str, charlist);
 }
 
-String f_ltrim(const String& str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+String f_ltrim(String str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<true,false>(str, charlist);
 }
 
-String f_rtrim(const String& str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+String f_rtrim(String str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<false,true>(str, charlist);
 }
 
-String f_chop(const String& str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+String f_chop(String str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<false,true>(str, charlist);
 }
 

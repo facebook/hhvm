@@ -165,10 +165,6 @@ ArrayData* convCellToArrHelper(TypedValue tv) {
   return tv.m_data.parr;
 }
 
-int64_t convArrToBoolHelper(const ArrayData* a) {
-  return a->size() != 0;
-}
-
 int64_t convArrToDblHelper(ArrayData* a) {
   return reinterpretDblAsInt(a->empty() ? 0 : 1);
 }
@@ -409,6 +405,11 @@ HOT_FUNC_VM
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
+
+int32_t arrayVsize(ArrayData* ad) {
+  return ad->vsize();
+}
+
 
 HOT_FUNC_VM
 TypedValue* ldGblAddrHelper(StringData* name) {

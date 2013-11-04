@@ -103,7 +103,6 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2);
  * complicated to inline
  */
 ArrayData* convCellToArrHelper(TypedValue tv);
-int64_t convArrToBoolHelper(const ArrayData* a);
 int64_t convArrToDblHelper(ArrayData* a);
 int64_t convStrToDblHelper(const StringData* s);
 int64_t convCellToDblHelper(TypedValue tv);
@@ -138,6 +137,8 @@ int64_t ak_exist_int_obj(ObjectData* obj, int64_t key);
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
+
+int32_t arrayVsize(ArrayData*);
 
 TypedValue* ldGblAddrHelper(StringData* name);
 TypedValue* ldGblAddrDefHelper(StringData* name);

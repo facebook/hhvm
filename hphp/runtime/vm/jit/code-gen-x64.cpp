@@ -262,7 +262,6 @@ CALL_OPCODE(ConvObjToArr);
 CALL_OPCODE(ConvStrToArr);
 CALL_OPCODE(ConvCellToArr);
 
-CALL_OPCODE(ConvArrToBool);
 CALL_OPCODE(ConvStrToBool);
 CALL_OPCODE(ConvCellToBool);
 
@@ -2199,6 +2198,36 @@ void CodeGenerator::cgConvIntToBool(IRInstruction* inst) {
     m_as.test_reg64_reg64(srcReg, srcReg);
     m_as.setne(rbyte(dstReg));
     m_as.movzbl(rbyte(dstReg), r32(dstReg));
+  }
+}
+
+void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
+  auto* dst   = inst->dst();
+  auto dstReg = curOpd(dst).reg();
+  assert(dstReg != InvalidReg);
+  auto* src   = inst->src(0);
+  auto srcReg = curOpd(src).reg();
+
+  if (srcReg == InvalidReg) {
+    // Should have been simplified away
+    CG_PUNT(ConvArrToBool_no_src);
+  } else {
+    // This is a handwritten copy of ArrayData::size().
+    m_as.    cmpl  (0, srcReg[ArrayData::offsetofSize()]);
+    unlikelyIfBlock(
+      CC_L,
+      [&] (Asm& as) {
+        cgCallHelper(
+          as,
+          CppCall(arrayVsize),
+          callDest(dst),
+          SyncOptions::kNoSyncPoint,
+          ArgGroup(curOpds()).ssa(src)
+        );
+        as.  testl (r32(dstReg), r32(dstReg));
+      }
+    );
+    m_as.    setcc (CC_NZ, rbyte(dstReg));
   }
 }
 
@@ -4427,9 +4456,9 @@ void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   auto arrReg = curOpd(arr).reg();
   auto idx = inst->src(1);
   if (idx->isConst()) {
-    m_as.cmpl(idx->getValInt(), arrReg[ArrayData::sizeOff()]);
+    m_as.cmpl(idx->getValInt(), arrReg[ArrayData::offsetofSize()]);
   } else {
-    m_as.cmpl(r32(curOpd(idx).reg()), arrReg[ArrayData::sizeOff()]);
+    m_as.cmpl(r32(curOpd(idx).reg()), arrReg[ArrayData::offsetofSize()]);
   }
   emitFwdJcc(CC_BE, label);
 }

@@ -296,9 +296,7 @@ HphpArray* HphpArray::CopyMixed(const HphpArray& other, AllocationMode mode) {
   auto const data      = reinterpret_cast<Elm*>(ad + 1);
   auto const hash      = reinterpret_cast<int32_t*>(data + cap);
 
-  ad->m_hash = static_cast<int32_t*>(
-    memcpy(hash, other.m_hash, (mask + 1) * sizeof *hash)
-  );
+  ad->m_hash = copyHash(hash, other.m_hash, mask + 1);
 
   // Copy the elements and bump up refcounts as needed.
   auto const elms = other.data();
@@ -883,7 +881,7 @@ ssize_t HphpArray::findForRemove(int64_t ki, bool updateNext) {
   );
 }
 
-NEVER_INLINE ssize_t
+ssize_t
 HphpArray::findForRemove(const StringData* s, strhash_t prehash) {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
@@ -897,19 +895,6 @@ HphpArray::findForRemove(const StringData* s, strhash_t prehash) {
         e.setIntKey(0);
       }
     );
-}
-
-NEVER_INLINE int32_t*
-HphpArray::findForNewInsertLoop(int32_t* table, size_t h0, size_t mask) {
-  /* Quadratic probe. */
-  for (size_t i = 1, probe = h0;; ++i) {
-    assert(i <= mask);
-    probe += i;
-    assert(probe == h0 + ((i + i * i) / 2));
-    auto ei = &table[probe & mask];
-    ssize_t pos = *ei;
-    if (!validPos(pos)) return ei;
-  }
 }
 
 bool HphpArray::ExistsIntPacked(const ArrayData* ad, int64_t k) {
@@ -1090,7 +1075,8 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
   ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
   ad->m_maskAndLoad     = uint64_t{oldSize} << 32 | mask;
   ad->m_nextKI          = old->m_nextKI;
-  ad->m_hash            = reinterpret_cast<int32_t*>(ad->data() + cap);
+  auto table            = reinterpret_cast<int32_t*>(ad->data() + cap);
+  ad->m_hash            = table;
 
   // Migrate all strong iterators to the new array.
   auto si = oldStrongIters;
@@ -1099,11 +1085,9 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
     si = si->getNext();
   }
 
-  // Copy the old element array, and initialize the hashtable to all
-  // empty.
-  assert(HphpArray::Empty == -1);
-  memcpy(ad->data(), old->data(), oldUsed * sizeof(Elm));
-  memset(ad->m_hash, 0xffU, (mask + 1) * sizeof *ad->m_hash);
+  // Copy the old element array, and initialize the hashtable to all empty.
+  copyElms(ad->data(), old->data(), oldUsed);
+  ad->initHash(ad->m_hash, mask + 1);
 
   // TODO(#2942020): findForNewInsert will reload m_hash and
   // m_tableMask each time through the loop.  A naive attempt to keep
@@ -1111,10 +1095,11 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
   // stack.  We can probably do better ...
   auto iter = ad->data();
   auto const stop = iter + oldUsed;
+  assert(mask == ad->m_tableMask);
   for (uint32_t i = 0; iter != stop; ++iter, ++i) {
     auto& e = *iter;
     if (isTombstone(e.data.m_type)) continue;
-    *ad->findForNewInsert(e.hasIntKey() ? e.ikey : e.hash()) = i;
+    *ad->findForNewInsert(table, mask, e.hasIntKey() ? e.ikey : e.hash()) = i;
   }
 
   old->m_used = -uint32_t{1};
@@ -1167,7 +1152,7 @@ HphpArray* HphpArray::GrowPacked(HphpArray* old) {
 
   // Steal the old array payload.
   old->m_used = -uint32_t{1};
-  memcpy(ad->data(), old->data(), oldUsed * sizeof(Elm));
+  copyElms(ad->data(), old->data(), oldUsed);
 
   // TODO(#2926276): it would be good to refactor callers to expect
   // our refcount to start at 1.
@@ -1226,8 +1211,11 @@ void HphpArray::compact(bool renumber /* = false */) {
     m_nextKI = 0;
   }
   auto elms = data();
-  size_t tableSize = computeTableSize(m_tableMask);
-  initHash(tableSize);
+  auto mask = m_tableMask;
+  size_t tableSize = mask + 1;
+  auto table = m_hash;
+  initHash(table, tableSize);
+  m_hLoad = 0;
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
     while (isTombstone(elms[frPos].data.m_type)) {
       assert(frPos + 1 < m_used);
@@ -1240,7 +1228,8 @@ void HphpArray::compact(bool renumber /* = false */) {
     if (renumber && !toE.hasStrKey()) {
       toE.ikey = m_nextKI++;
     }
-    auto ie = findForNewInsert(toE.hasIntKey() ? toE.ikey : toE.hash());
+    auto ie = findForNewInsert(table, mask,
+                               toE.hasIntKey() ? toE.ikey : toE.hash());
     *ie = toPos;
   }
   m_used = m_size;
@@ -1928,19 +1917,19 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
   auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + cap);
   ad->m_hash      = hash;
-
-  assert(Empty == -1);
-  memset(hash, 0xffu, (mask + 1) * sizeof *hash);
+  ad->initHash(hash, mask + 1);
 
   auto dstElm = data;
   auto srcElm = src->data();
   auto const srcStop = src->data() + oldUsed;
   uint32_t i = 0;
   if (oldPacked) {
+    auto table = ad->m_hash;
+    auto mask = ad->m_tableMask;
     for (; srcElm != srcStop; ++srcElm, ++i) {
       tvDupFlattenVars(&srcElm->data, &dstElm->data, src);
       dstElm->setIntKey(i);
-      *ad->findForNewInsert(i) = i;
+      *ad->findForNewInsert(table, mask, i) = i;
       ++dstElm;
     }
     assert(ad->m_pos == oldPosUnsigned);
@@ -1961,6 +1950,8 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
       mPos.key = nullptr;
     }
     // Copy the elements
+    auto table = ad->m_hash;
+    auto mask = ad->m_tableMask;
     for (; srcElm != srcStop; ++srcElm) {
       if (isTombstone(srcElm->data.m_type)) continue;
       tvDupFlattenVars(&srcElm->data, &dstElm->data, src);
@@ -1972,7 +1963,7 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
         srcElm->key->incRefCount();
         dstElm->setStrKey(srcElm->key, hash);
       }
-      *ad->findForNewInsert(hash) = i;
+      *ad->findForNewInsert(table, mask, hash) = i;
       ++dstElm;
       ++i;
     }

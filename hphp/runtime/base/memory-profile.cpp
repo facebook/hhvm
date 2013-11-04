@@ -132,12 +132,10 @@ size_t MemoryProfile::getSizeOfArray(ArrayData *arr) {
   if (arr->isHphpArray()) {
     // calculate extra size
     HphpArray *ha = static_cast<HphpArray *>(arr);
-    size_t tableSize = HphpArray::computeTableSize(ha->m_tableMask);
+    size_t hashSize = ha->hashSize();
     size_t maxElms = HphpArray::computeMaxElms(ha->m_tableMask);
     if (maxElms > HphpArray::SmallSize) {
-      size_t hashSize = tableSize * sizeof(int32_t);
-      size_t dataSize = maxElms * sizeof(HphpArray::Elm);
-      size += dataSize + hashSize;
+      size += maxElms * sizeof(HphpArray::Elm) + hashSize * sizeof(int32_t);
     }
   }
   return size;

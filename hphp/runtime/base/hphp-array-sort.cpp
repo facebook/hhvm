@@ -124,8 +124,8 @@ done:
  */
 void HphpArray::postSort(bool resetKeys) {
   assert(m_size > 0);
-  size_t tableSize = computeTableSize(m_tableMask);
-  initHash(tableSize);
+  initHash(m_hash, hashSize());
+  m_hLoad = 0;
   if (resetKeys) {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data()[pos];
@@ -135,9 +135,13 @@ void HphpArray::postSort(bool resetKeys) {
     }
     m_nextKI = m_size;
   } else {
+    auto table = m_hash;
+    auto mask = m_tableMask;
+    auto data = this->data();
     for (uint32_t pos = 0; pos < m_used; ++pos) {
-      auto& e = data()[pos];
-      auto ei = findForNewInsert(e.hasIntKey() ? e.ikey : e.hash());
+      auto& e = data[pos];
+      auto ei = findForNewInsert(table, mask,
+                                 e.hasIntKey() ? e.ikey : e.hash());
       *ei = pos;
     }
   }

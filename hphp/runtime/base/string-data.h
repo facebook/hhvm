@@ -20,7 +20,7 @@
 #include "hphp/util/slice.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/alloc.h"
-#include "hphp/util/word-same.h"
+#include "hphp/util/word-mem.h"
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/countable.h"

@@ -13,11 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_WORD_SAME_H_
-#define incl_HPHP_WORD_SAME_H_
+#ifndef incl_HPHP_WORD_MEM_H_
+#define incl_HPHP_WORD_MEM_H_
 
 #include "folly/Portability.h"
-
 #include "hphp/util/util.h"
 
 namespace HPHP {
@@ -62,6 +61,36 @@ bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {
 }
 
 #endif
+
+/*
+ * Like memcpy, but copies numT POD values 8 bytes at a time.
+ * The actual number of bytes copied must be a multiple of 8.
+ */
+template<class T>
+T* wordcpy(T* to, const T* from, size_t numT) {
+  assert((numT * sizeof(T)) % 8 == 0);
+  size_t numWords = numT * sizeof(T) / 8;
+  auto d = (int64_t*)to;
+  auto s = (int64_t*)from;
+  do {
+    *d++ = *s++;
+  } while (--numWords);
+  return to;
+}
+
+/*
+ * like Memset, but operates on words at a time.
+ */
+template<class T>
+T* wordfill(T* ptr, T value, size_t numT) {
+  assert((numT * sizeof(T)) % 8 == 0);
+  auto numWords = numT * sizeof(T) / 8;
+  auto d = (int64_t*)ptr;
+  do {
+    *d++ = (int64_t)value;
+  } while (--numWords);
+  return ptr;
+}
 
 //////////////////////////////////////////////////////////////////////
 

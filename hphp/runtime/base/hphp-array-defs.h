@@ -24,20 +24,34 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline void HphpArray::initHash(size_t tableSize) {
-  assert(HphpArray::Empty == -1);
-  memset(m_hash, 0xffU, tableSize * sizeof(*m_hash));
-  m_hLoad = 0;
+inline void HphpArray::initHash(int32_t* hash, size_t tableSize) {
+  wordfill(hash, Empty, tableSize);
+}
+
+inline int32_t*
+HphpArray::copyHash(int32_t* to, const int32_t* from, size_t count) {
+  return wordcpy(to, from, count);
+}
+
+inline HphpArray::Elm*
+HphpArray::copyElms(Elm* to, const Elm* from, size_t count) {
+  return wordcpy(to, from, count);
+}
+
+ALWAYS_INLINE int32_t*
+HphpArray::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
+  assert(!isPacked());
+  for (size_t i = 1, probe = h0;; ++i) {
+    auto ei = &table[probe & mask];
+    if (!validPos(*ei)) return ei;
+    probe += i;
+    assert(i <= mask && probe == h0 + ((i + i * i) / 2));
+  }
 }
 
 ALWAYS_INLINE
 int32_t* HphpArray::findForNewInsert(size_t h0) const {
-  assert(!isPacked());
-  size_t mask = m_tableMask;
-  auto table = m_hash;
-  auto ei = &table[h0 & mask];
-  return !validPos(*ei) ? ei :
-         findForNewInsertLoop(table, h0, mask);
+  return findForNewInsert(m_hash, m_tableMask, h0);
 }
 
 inline bool HphpArray::isTombstone(ssize_t pos) const {
@@ -165,8 +179,8 @@ inline bool HphpArray::validPos(int32_t pos) {
   static_assert(Empty == -1, "");
 }
 
-inline size_t HphpArray::computeTableSize(uint32_t tableMask) {
-  return size_t(tableMask) + size_t(1U);
+inline size_t HphpArray::hashSize() const {
+  return m_tableMask + 1;
 }
 
 inline size_t HphpArray::computeMaxElms(uint32_t tableMask) {
@@ -174,8 +188,8 @@ inline size_t HphpArray::computeMaxElms(uint32_t tableMask) {
 }
 
 inline size_t HphpArray::computeDataSize(uint32_t tableMask) {
-  return computeTableSize(tableMask) * sizeof(int32_t) +
-    computeMaxElms(tableMask) * sizeof(Elm);
+  return (tableMask + 1) * sizeof(int32_t) +
+         computeMaxElms(tableMask) * sizeof(Elm);
 }
 
 inline void ArrayData::moveStrongIterators(ArrayData* dest, ArrayData* src) {

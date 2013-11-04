@@ -303,7 +303,7 @@ public:
 
   static bool validPos(ssize_t pos);
   static bool validPos(int32_t pos);
-  static size_t computeTableSize(uint32_t tableMask);
+  size_t hashSize() const;
   static size_t computeMaxElms(uint32_t tableMask);
   static size_t computeDataSize(uint32_t tableMask);
 
@@ -340,7 +340,9 @@ private:
   ~HphpArray() = delete;
 
 private:
-  void initHash(size_t tableSize);
+  static void initHash(int32_t* table, size_t tableSize);
+  static int32_t* copyHash(int32_t* to, const int32_t* from, size_t tableSize);
+  static Elm* copyElms(Elm* to, const Elm* from, size_t count);
 
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
@@ -399,8 +401,7 @@ private:
    * put the array into a bad state; use with caution.
    */
   int32_t* findForNewInsert(size_t h0) const;
-  static int32_t* findForNewInsertLoop(int32_t* table, size_t h0,
-                                       size_t mask);
+  int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
 
   bool nextInsert(CVarRef data);
   ArrayData* nextInsertRef(CVarRef data);

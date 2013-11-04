@@ -45,14 +45,6 @@ bool f_hphp_service_thread_stopped(int timeout) {
   return ServiceThread::GetThisThread()->waitForStopped(timeout);
 }
 
-bool f_hphp_thread_is_warmup_enabled() {
-  return true;
-}
-
-void f_hphp_thread_set_warmup_enabled() {
-  raise_warning("hphp_thread_set_warmup_enabled is deprecated");
-}
-
 int64_t f_hphp_get_thread_id() {
   return  (unsigned long)Process::GetThreadId();
 }

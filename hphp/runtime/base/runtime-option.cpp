@@ -408,9 +408,9 @@ std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
 size_t RuntimeOption::VMTranslAHotSize   =   4 << 20;
-size_t RuntimeOption::VMTranslASize      = 508 << 20;
-size_t RuntimeOption::VMTranslAProfSize  = 512 << 20;
-size_t RuntimeOption::VMTranslAStubsSize = 512 << 20;
+size_t RuntimeOption::VMTranslASize      =  60 << 20;
+size_t RuntimeOption::VMTranslAProfSize  =  64 << 20;
+size_t RuntimeOption::VMTranslAStubsSize =  64 << 20;
 size_t RuntimeOption::VMTranslGDataSize  = RuntimeOption::VMTranslASize >> 2;
 
 std::string RuntimeOption::RepoLocalMode;

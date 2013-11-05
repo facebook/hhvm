@@ -147,6 +147,7 @@ struct MethodCache {
   const Func* m_value;
 };
 
+template<bool fatal>
 void methodCacheSlowPath(MethodCache* mce,
                          ActRec* ar,
                          StringData* name,

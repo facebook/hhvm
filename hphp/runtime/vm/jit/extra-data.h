@@ -412,6 +412,18 @@ struct LdFuncCachedData : IRExtraData {
   const StringData* name;
 };
 
+struct LdObjMethodData : IRExtraData {
+  explicit LdObjMethodData(bool fatal)
+    : fatal(fatal)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(fatal ? "fatal" : "warn");
+  }
+
+  bool fatal;
+};
+
 struct LdFuncCachedUData : IRExtraData {
   explicit LdFuncCachedUData(const StringData* name,
                              const StringData* fallback)
@@ -636,6 +648,7 @@ X(LdStaticLocCached,            StaticLocName);
 X(LdFuncCached,                 LdFuncCachedData);
 X(LdFuncCachedSafe,             LdFuncCachedData);
 X(LdFuncCachedU,                LdFuncCachedUData);
+X(LdObjMethod,                  LdObjMethodData);
 X(ReqBindJmpGt,                 ReqBindJccData);
 X(ReqBindJmpGte,                ReqBindJccData);
 X(ReqBindJmpLt,                 ReqBindJccData);

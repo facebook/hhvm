@@ -2548,8 +2548,11 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
                m_as.storeq(m_rScratch, actRecReg[AROFF(m_func)]);
              },
              [&] { // else call slow path helper
+               auto methodCacheHelper = inst->extra<LdObjMethodData>()->fatal ?
+                 methodCacheSlowPath<true> :
+                 methodCacheSlowPath<false>;
                cgCallHelper(m_as,
-                            CppCall(methodCacheSlowPath),
+                            CppCall(methodCacheHelper),
                             kVoidDest,
                             SyncOptions::kSyncPoint,
                             ArgGroup(curOpds()).addr(rVmTl, handle)

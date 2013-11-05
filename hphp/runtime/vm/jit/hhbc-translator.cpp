@@ -2049,9 +2049,43 @@ void HhbcTranslator::emitFPushCufUnknown(Op op, int32_t numParams) {
   if (!topC()->type().subtypeOfAny(Type::Arr, Type::Str)) {
     PUNT(emitFPushCufUnknown);
   }
-
   auto const catchBlock = makeCatch();
   auto const callable   = popC();
+
+  do {
+    if (!callable->isA(Type::Arr)) break;
+
+    auto callableInst = callable->inst();
+    if (callableInst->op() != NewPackedArray) break;
+
+    auto callableSize = callableInst->src(0);
+    if (!callableSize->isConst() ||
+        callableSize->getValInt() != 2) {
+      break;
+    }
+
+    auto arrStack = callableInst->src(1)->inst();
+    if (arrStack->op() != SpillStack ||
+        arrStack->numSrcs() < 4) {
+      break;
+    }
+
+    auto method = arrStack->src(2);
+    auto object = arrStack->src(3);
+    if (!method->isConst() ||
+        strstr(method->getValStr()->data(), "::") != nullptr ||
+        !object->isA(Type::Obj)) {
+      break;
+    }
+
+    emitFPushObjMethodCommon(gen(IncRef, object),
+                             method->getValStr(),
+                             numParams,
+                             false /* shouldFatal */);
+    gen(DecRef, callable);
+    return;
+  } while (0);
+
   emitFPushActRec(
     m_tb->genDefNull(),
     m_tb->genDefInitNull(),
@@ -2399,12 +2433,11 @@ void HhbcTranslator::emitFPushFuncArr(int32_t numParams) {
   gen(DecRef, arr);
 }
 
-void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
-                                         int32_t methodNameStrId) {
-  SSATmp* obj = popC();
+void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
+                                              const StringData* methodName,
+                                              int32_t numParams,
+                                              bool shouldFatal) {
   SSATmp* objOrCls = obj;
-  if (!obj->isA(Type::Obj)) PUNT(FPushObjMethodD-nonObj);
-
   const Class* baseClass = nullptr;
   if (obj->type().isSpecialized() &&
       !m_tb->constrainValue(obj, TypeConstraint(DataTypeSpecialized,
@@ -2414,7 +2447,6 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
     baseClass = obj->type().getClass();
   }
 
-  const StringData* methodName = lookupStringId(methodNameStrId);
   bool magicCall = false;
   const Func* func = HPHP::Transl::lookupImmutableMethod(baseClass,
                                                          methodName,
@@ -2489,10 +2521,19 @@ void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
     updateMarker();
 
     gen(LdObjMethod,
-              objCls,
-              cns(methodName),
-              actRec);
+        LdObjMethodData(shouldFatal),
+        objCls,
+        cns(methodName),
+        actRec);
   }
+}
+
+void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
+                                         int32_t methodNameStrId) {
+  SSATmp* obj = popC();
+  if (!obj->isA(Type::Obj)) PUNT(FPushObjMethodD-nonObj);
+  const StringData* methodName = lookupStringId(methodNameStrId);
+  emitFPushObjMethodCommon(obj, methodName, numParams, true /* shouldFatal */);
 }
 
 SSATmp* HhbcTranslator::genClsMethodCtx(const Func* callee, const Class* cls) {

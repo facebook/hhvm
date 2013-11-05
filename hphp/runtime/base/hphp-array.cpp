@@ -707,25 +707,18 @@ ssize_t HphpArray::findImpl(size_t h0, Hit hit) const {
   // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto.  Test carefully.
   size_t tableMask = m_tableMask;
-  size_t probeIndex = h0 & tableMask;
   auto* elms = data();
   auto* hashtable = m_hash;
-  ssize_t pos = hashtable[probeIndex];
-  if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
-    return pos;
-  }
-  for (size_t i = 1;; ++i) {
-    assert(i <= tableMask);
-    probeIndex = (probeIndex + i) & tableMask;
-    assert(probeIndex == ((h0 + (i + i*i) / 2) & tableMask));
-    pos = hashtable[probeIndex];
+  for (size_t probeIndex = h0, i = 1;; ++i) {
+    ssize_t pos = hashtable[probeIndex & tableMask];
     if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
       return pos;
     }
+    probeIndex += i;
+    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
   }
 }
 
-NEVER_INLINE
 ssize_t HphpArray::find(int64_t ki) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
@@ -734,7 +727,6 @@ ssize_t HphpArray::find(int64_t ki) const {
   });
 }
 
-NEVER_INLINE
 ssize_t HphpArray::find(const StringData* s, strhash_t prehash) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
@@ -761,19 +753,9 @@ int32_t* HphpArray::findForInsertImpl(size_t h0, Hit hit) const {
   auto* elms = data();
   auto* hashtable = m_hash;
   int32_t* ret = nullptr;
-  size_t probeIndex = h0 & tableMask;
-  auto* ei = &hashtable[probeIndex];
-  ssize_t pos = *ei;
-  if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
-    return ei;
-  }
-  if (!validPos(pos)) ret = ei;
-  for (size_t i = 1;; ++i) {
-    assert(i <= tableMask);
-    probeIndex = (probeIndex + i) & tableMask;
-    assert(probeIndex == ((h0 + (i + i*i) / 2) & tableMask));
-    ei = &hashtable[probeIndex];
-    pos = *ei;
+  for (size_t probeIndex = h0, i = 1;; ++i) {
+    auto ei = &hashtable[probeIndex & tableMask];
+    ssize_t pos = *ei;
     if (validPos(pos)) {
       if (hit(elms[pos])) {
         return ei;
@@ -784,6 +766,8 @@ int32_t* HphpArray::findForInsertImpl(size_t h0, Hit hit) const {
         return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
       }
     }
+    probeIndex += i;
+    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
   }
 }
 

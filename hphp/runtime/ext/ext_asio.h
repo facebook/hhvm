@@ -303,6 +303,7 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   bool isRunning() { return getState() == STATE_RUNNING; }
   String getFileName();
   int getLineNumber();
+  const ActRec* getActRec();
 
  protected:
   void onUnblocked();

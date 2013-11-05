@@ -378,5 +378,9 @@ int c_AsyncFunctionWaitHandle::getLineNumber() {
   return unit->getLineNumber(m_continuation->getNextExecutionOffset());
 }
 
+const ActRec* c_AsyncFunctionWaitHandle::getActRec() {
+  return m_continuation->m_arPtr;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

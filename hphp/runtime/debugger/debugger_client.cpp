@@ -2025,15 +2025,20 @@ void DebuggerClient::addWatch(const char *fmt, const std::string &php) {
 void DebuggerClient::setStackTrace(CArrRef stacktrace, bool isAsync) {
   TRACE(2, "DebuggerClient::setStackTrace\n");
   m_stacktrace = stacktrace;
+  //when we set a new stack we need to reset the frame position
+  //if we go from regular to async or vice-versa since the lengths
+  //aren't necessairly the same
+  if (m_stacktraceAsync != isAsync) {
+    m_frame = 0;
+    const char* direction = isAsync ? "sync->async" : "async->sync";
+    info("switching stack contexts (%s) resetting stack state", direction);
+  }
   m_stacktraceAsync = isAsync;
 }
 
 void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   TRACE(2, "DebuggerClient::moveToFrame\n");
-  if (m_stacktraceAsync && display) {
-    error("Unable to move along the async stack at this time, sorry!");
-    return;
-  }
+
   m_frame = index;
   if (m_frame >= m_stacktrace.size()) {
     m_frame = m_stacktrace.size() - 1;

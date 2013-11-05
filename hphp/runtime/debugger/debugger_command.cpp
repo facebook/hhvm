@@ -132,6 +132,8 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     case KindOfThread   :  cmd = DebuggerCommandPtr(new CmdThread   ()); break;
     case KindOfUp       :  cmd = DebuggerCommandPtr(new CmdUp       ()); break;
     case KindOfVariable :  cmd = DebuggerCommandPtr(new CmdVariable ()); break;
+    case KindOfVariableAsync :
+      cmd = DebuggerCommandPtr(new CmdVariable (KindOfVariableAsync)); break;
     case KindOfWhere    :  cmd = DebuggerCommandPtr(new CmdWhere    ()); break;
     case KindOfWhereAsync:
       cmd = DebuggerCommandPtr(new CmdWhere(KindOfWhereAsync)); break;

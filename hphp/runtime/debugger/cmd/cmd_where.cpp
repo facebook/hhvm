@@ -203,7 +203,7 @@ void addContinuationLocation(Array& frameData,
 // id, as well as the pseudo-frames for context breaks at explicit
 // joins. Later we'll add more, like file and line, hopefully function
 // args, wait handle status, etc.
-Array createAsyncStacktrace() {
+static Array createAsyncStacktrace() {
   Array trace;
   auto currentWaitHandle = f_asio_get_running();
   if (currentWaitHandle.isNull()) return trace;

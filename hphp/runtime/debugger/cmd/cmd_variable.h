@@ -31,7 +31,8 @@ public:
                               int frame, const String& text, int version);
 
 public:
-  CmdVariable() : DebuggerCommand(KindOfVariable) {
+
+  explicit CmdVariable(Type type = KindOfVariable) : DebuggerCommand(type) {
     m_frame = 0;
     m_version = 1;
     m_global = false;

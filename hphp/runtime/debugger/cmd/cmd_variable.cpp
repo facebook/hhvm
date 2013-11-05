@@ -13,9 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
+
 #include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/debugger/cmd/cmd_where.h"
+#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/ext_continuation.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,7 +83,8 @@ void CmdVariable::help(DebuggerClient &client) {
 }
 
 void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
-  CmdVariable cmd;
+  CmdVariable cmd(client.isStackTraceAsync()
+                  ? KindOfVariableAsync : KindOfVariable);
   auto charCount = client.getDebuggerClientShortPrintCharCount();
   cmd.m_frame = client.getFrame();
   CmdVariablePtr rcmd = client.xend<CmdVariable>(&cmd);
@@ -141,7 +146,8 @@ void CmdVariable::PrintVariables(DebuggerClient &client, CArrRef variables,
     if (version == 2) {
       // Using the new protocol, so variables contain only names.
       // Fetch the value separately.
-      CmdVariable cmd;
+      CmdVariable cmd(client.isStackTraceAsync()
+        ? KindOfVariableAsync : KindOfVariable);
       cmd.m_frame = frame;
       cmd.m_variables = null_array;
       cmd.m_varName = name;
@@ -219,7 +225,12 @@ void CmdVariable::onClient(DebuggerClient &client) {
     return;
   }
 
+  if (client.isStackTraceAsync()) {
+    m_type = KindOfVariableAsync;
+  }
+
   m_frame = client.getFrame();
+
   CmdVariablePtr cmd = client.xend<CmdVariable>(this);
   if (cmd->m_variables.empty()) {
     client.info("(no variable was defined)");
@@ -237,14 +248,72 @@ Array CmdVariable::GetGlobalVariables() {
   return ret;
 }
 
+static c_WaitableWaitHandle *objToWaitableWaitHandle(Object o) {
+  assert(o->instanceof(c_WaitableWaitHandle::classof()));
+  return static_cast<c_WaitableWaitHandle*>(o.get());
+}
+
+static c_AsyncFunctionWaitHandle *objToContinuationWaitHandle(Object o) {
+  return dynamic_cast<c_AsyncFunctionWaitHandle*>(o.get());
+}
+
+static
+c_AsyncFunctionWaitHandle *getWaitHandleAtAsyncStackPosition(int position) {
+  auto top = f_asio_get_running();
+
+  if (top.isNull()) {
+    return nullptr;
+  }
+
+  if (position == 0) {
+    return objToContinuationWaitHandle(top);
+  }
+
+  Array depStack =
+    objToWaitableWaitHandle(top)->t_getdependencystack();
+
+  return objToContinuationWaitHandle(depStack[position].toObject());
+}
+
+static Array getVariables(const ActRec *fp) {
+  if (fp->hasVarEnv()) {
+    return fp->m_varEnv->getDefinedVariables();
+  } else {
+    const Func *func = fp->m_func;
+    auto numLocals = func->numNamedLocals();
+    ArrayInit ret(numLocals);
+    for (Id id = 0; id < numLocals; ++id) {
+      TypedValue* ptv = frame_local(fp, id);
+      if (ptv->m_type == KindOfUninit) {
+        continue;
+      }
+      Variant name(func->localVarName(id));
+      ret.add(name, tvAsVariant(ptv));
+    }
+    return ret.toArray();
+  }
+}
+
 bool CmdVariable::onServer(DebuggerProxy &proxy) {
-  if (m_frame < 0) {
+  if (m_type == KindOfVariableAsync) {
+    //we only do variable inspection on continuation wait handles
+    auto frame = getWaitHandleAtAsyncStackPosition(m_frame);
+
+    if (frame != nullptr) {
+      auto fp = frame->getActRec();
+      if (fp != nullptr) {
+        m_variables = getVariables(fp);
+      }
+    }
+  }
+  else if (m_frame < 0) {
     m_variables = g_vmContext->m_globalVarEnv->getDefinedVariables();
     m_global = true;
   } else {
     m_variables = g_vmContext->getLocalDefinedVariables(m_frame);
     m_global = g_vmContext->getVarEnv(m_frame) == g_vmContext->m_globalVarEnv;
   }
+
   if (m_global) {
     m_variables.remove(s_GLOBALS);
   }
@@ -280,6 +349,7 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
       m_variables = ret.toArray();
     }
   }
+
   return proxy.sendToClient(this);
 }
 

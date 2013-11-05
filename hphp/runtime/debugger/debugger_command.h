@@ -64,6 +64,7 @@ public:
     KindOfThread              = 20,
     KindOfUp                  = 21,
     KindOfVariable            = 22,
+    KindOfVariableAsync       = 222,
     KindOfWhere               = 23,
     KindOfWhereAsync          = 223,
     KindOfExtended            = 24,

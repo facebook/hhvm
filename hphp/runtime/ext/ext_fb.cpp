@@ -1024,6 +1024,8 @@ bool f_fb_intercept(const String& name, CVarRef handler,
   return register_intercept(name, handler, data);
 }
 
+const StaticString s_extract("extract");
+
 bool f_fb_rename_function(const String& orig_func_name, const String& new_func_name) {
   if (orig_func_name.empty() || new_func_name.empty() ||
       orig_func_name->isame(new_func_name.get())) {
@@ -1035,6 +1037,13 @@ bool f_fb_rename_function(const String& orig_func_name, const String& new_func_n
     raise_warning("fb_rename_function(%s, %s) failed: %s does not exists!",
                   orig_func_name.data(), new_func_name.data(),
                   orig_func_name.data());
+    return false;
+  }
+
+  if (new_func_name->isame(s_extract.get())) {
+    raise_warning(
+        "fb_rename_function(%s, %s) failed: rename to extract not allowed!",
+        orig_func_name.data(), new_func_name.data());
     return false;
   }
 

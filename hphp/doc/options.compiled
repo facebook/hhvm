@@ -278,15 +278,6 @@ used for PHP responses in case no other charset has been set explicitly.
 
     APC {
       EnableApc = true
-      UseSharedMemory = false
-      SharedMemorySize = 1024  # in MB
-
-- UseSharedMemory
-
-When off, APC will use regular process memory for faster access, but only
-limited to single process. Shared memory model allows sharing between two or
-more processes, but it has SharedMemorySize as upper limit.
-
       PrimeLibrary = filename
       LoadThread = 2
       CompletionKeys {

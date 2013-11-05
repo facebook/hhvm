@@ -2869,12 +2869,6 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
           }
         }
       }
-      /* Input of SetM only needs a countness guard, for the cases
-       * for the cases when the base is a String or an Object. In these
-       * cases, we may need to incref/decref the input. */
-      if (opndIdx == 0) {
-        return DataTypeCountness;
-      }
       return DataTypeSpecific;
 
     default:

@@ -68,9 +68,31 @@ class ReflectionParameter implements Reflector {
    */
   public function __construct($func, $param) {
     if ($func && $param) {
-      $params = $func->getParameters();
-      $this->info = $params[$param]->info;
-      $this->name = $this->info['name'];
+      if (is_string($func)) {
+        $double_colon = strpos($func, "::");
+        if ($double_colon === false) {
+          $params = (new ReflectionFunction($func))->getParameters();
+        } else {
+          $class = substr($func, 0, $double_colon);
+          $method = substr($func, $double_colon + 2);
+          $params = (new ReflectionMethod($class, $method))->getParameters();
+        }
+      } else if (is_array($func)) {
+        $params = (new ReflectionMethod($func[0], $func[1]))->getParameters();
+      } else {
+        throw new Exception(
+          "Invalid function, expected string, got ".gettype($func)
+        );
+      }
+
+      foreach ($params as $p) {
+        if ($p->name == $param) {
+          $this->info = $p->info;
+          $this->name = $p->name;
+          return;
+        }
+      }
+      throw new Exception("No param named $param found");
     }
   }
 

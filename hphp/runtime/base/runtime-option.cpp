@@ -337,7 +337,7 @@ bool RuntimeOption::EnableObjDestructCall = false;
 bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableInstructionCounts = false;
-bool RuntimeOption::CheckSymLink = false;
+bool RuntimeOption::CheckSymLink = true;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableFinallyStatement = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
@@ -1111,7 +1111,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 
     EnableObjDestructCall = eval["EnableObjDestructCall"].getBool(false);
     MaxUserFunctionId = eval["MaxUserFunctionId"].getInt32(2 * 65536);
-    CheckSymLink = eval["CheckSymLink"].getBool(false);
+    CheckSymLink = eval["CheckSymLink"].getBool(true);
 
     EnableAlternative = eval["EnableAlternative"].getInt32(0);
 

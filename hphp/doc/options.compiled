@@ -703,6 +703,8 @@ users can use the same machine serving their own source files.
 = HPHPi Settings
 
   Eval {
+    CheckSymLink = true
+
     EnableHipHopSyntax = false
     EnableHipHopExperimentalSyntax = false
 
@@ -735,6 +737,14 @@ users can use the same machine serving their own source files.
     RecordCodeCoverage = false
     CodeCoverageOutputFile =
   }
+
+- CheckSymLink
+
+Determines whether or not to follow symlinks (and, from a performance
+standpoint, make the associated realpath() calls needed) when resolving
+includes/requires and loading code. This is enabled by default for parity with
+the reference implementation. If not needed for a particular application and/or
+configuration, disable this when tuning.
 
 = MySQL
 

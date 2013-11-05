@@ -3047,7 +3047,16 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
   Op* fpushPc = (Op*)unit->at(fpi->m_fpushOff);
   auto const op = *fpushPc;
 
-  if (op == OpFPushFunc)  return true;
+  if (op == OpFPushFunc) {
+    // If the call has any arguments, the FPushFunc will be in a different
+    // tracelet -- the tracelet will break on every FPass* because the reffiness
+    // of the callee isn't knowable. So we have to say the call destroys locals,
+    // to be conservative. If there aren't any arguments, then it can't destroy
+    // locals -- even if the call is to extract(), there's no argument, so it
+    // won't do anything.
+    auto const numArgs = inst.imm[0].u_IVA;
+    return (numArgs != 0);
+  }
   if (op == OpFPushFuncD) return checkTaintId(getImm(fpushPc, 1).u_SA);
   if (op == OpFPushFuncU) {
     return checkTaintId(getImm(fpushPc, 1).u_SA) ||

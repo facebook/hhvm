@@ -338,8 +338,8 @@ inline ArrayData* ArrayData::escalate() const {
   return g_array_funcs.escalate[m_kind](this);
 }
 
-inline ArrayData* ArrayData::plus(const ArrayData* elms) {
-  return g_array_funcs.plus[m_kind](this, elms);
+inline ArrayData* ArrayData::plusEq(const ArrayData* elms) {
+  return g_array_funcs.plusEq[m_kind](this, elms);
 }
 
 inline ArrayData* ArrayData::merge(const ArrayData* elms) {

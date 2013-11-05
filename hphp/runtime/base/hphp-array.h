@@ -203,7 +203,7 @@ public:
   static ArrayData* AppendRefPacked(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendWithRefPacked(ArrayData*, CVarRef v, bool copy);
-  static ArrayData* Plus(ArrayData*, const ArrayData* elems);
+  static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* PopPacked(ArrayData*, Variant& value);
@@ -347,7 +347,8 @@ private:
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
-  static ArrayData* ArrayPlusGeneric(HphpArray*, const ArrayData*);
+  static ArrayData* ArrayPlusEqGeneric(ArrayData*,
+    HphpArray*, const ArrayData*, size_t);
   static ArrayData* ArrayMergeGeneric(HphpArray*, const ArrayData*);
 
   // convert in-place from kPackedKind to kMixedKind: fill in keys & hashtable

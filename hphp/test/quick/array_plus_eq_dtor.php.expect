@@ -1,0 +1,11 @@
+array(3) {
+  [0]=>
+  object(dtor)#1 (0) {
+  }
+  [1]=>
+  int(5)
+  [2]=>
+  int(6)
+}
+dtor
+done

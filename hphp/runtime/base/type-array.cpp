@@ -278,7 +278,10 @@ Array &Array::plusImpl(ArrayData *data) {
     if (m_px->empty()) {
       ArrayBase::operator=(data);
     } else if (m_px != data) {
-      ArrayBase::operator=(Array::attach(m_px->plus(data)));
+      auto const escalated = m_px->plusEq(data);
+      if (escalated != m_px) {
+        ArrayBase::operator=(Array::attach(escalated));
+      }
     }
   }
   return *this;

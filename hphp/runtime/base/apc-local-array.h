@@ -92,7 +92,7 @@ public:
   static ArrayData* Append(ArrayData* a, CVarRef v, bool copy);
   static ArrayData* AppendRef(ArrayData*, CVarRef v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, CVarRef v, bool copy);
-  static ArrayData* Plus(ArrayData*, const ArrayData *elems);
+  static ArrayData* PlusEq(ArrayData*, const ArrayData *elems);
   static ArrayData* Merge(ArrayData*, const ArrayData *elems);
   static ArrayData* Prepend(ArrayData*, CVarRef v, bool copy);
 

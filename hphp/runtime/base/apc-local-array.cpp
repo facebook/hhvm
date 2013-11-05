@@ -188,14 +188,12 @@ APCLocalArray::AppendWithRef(ArrayData* ad, CVarRef v, bool copy) {
   return releaseIfCopied(escalated, escalated->appendWithRef(v, false));
 }
 
-ArrayData* APCLocalArray::Plus(ArrayData* ad, const ArrayData *elems) {
-  // XXX: this could be more efficient.
+ArrayData* APCLocalArray::PlusEq(ArrayData* ad, const ArrayData *elems) {
   Array escalated = Escalate(ad);
-  return escalated->plus(elems);
+  return (escalated += const_cast<ArrayData*>(elems)).detach();
 }
 
 ArrayData* APCLocalArray::Merge(ArrayData* ad, const ArrayData *elems) {
-  // XXX: this could be more efficient.
   Array escalated = Escalate(ad);
   return escalated->merge(elems);
 }

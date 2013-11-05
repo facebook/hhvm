@@ -1994,11 +1994,19 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
 }
 
 ATTRIBUTE_COLD NEVER_INLINE
-ArrayData* HphpArray::ArrayPlusGeneric(HphpArray* ret,
-                                       const ArrayData* elems) {
+ArrayData* HphpArray::ArrayPlusEqGeneric(ArrayData* ad,
+                                         HphpArray* ret,
+                                         const ArrayData* elems,
+                                         size_t neededSize) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     CVarRef value = it.secondRef();
+
+    if (UNLIKELY(ret->isFull())) {
+      assert(ret == ad);
+      ret = CopyReserve(asHphpArray(ad), neededSize);
+    }
+
     auto tv = key.asTypedValue();
     auto p = tv->m_type == KindOfInt64
       ? ret->insert(tv->m_data.num)
@@ -2011,11 +2019,16 @@ ArrayData* HphpArray::ArrayPlusGeneric(HphpArray* ret,
   return ret;
 }
 
-ArrayData* HphpArray::Plus(ArrayData* ad, const ArrayData* elems) {
-  auto const ret = CopyReserve(asHphpArray(ad), ad->size() + elems->size());
+ArrayData* HphpArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
+  auto const neededSize = ad->size() + elems->size();
+
+  auto ret =
+    ad->hasMultipleRefs() ? CopyReserve(asHphpArray(ad), neededSize) :
+    ad->isPacked()        ? asPacked(ad)->packedToMixed() :
+    asMixed(ad);
 
   if (UNLIKELY(elems->m_kind != kMixedKind)) {
-    return ArrayPlusGeneric(ret, elems);
+    return ArrayPlusEqGeneric(ad, ret, elems, neededSize);
   }
 
   auto const rhs = asMixed(elems);
@@ -2024,6 +2037,11 @@ ArrayData* HphpArray::Plus(ArrayData* ad, const ArrayData* elems) {
   auto const srcStop = rhs->data() + rhs->m_used;
   for (; srcElem != srcStop; ++srcElem) {
     if (isTombstone(srcElem->data.m_type)) continue;
+
+    if (UNLIKELY(ret->isFull())) {
+      assert(ret == ad);
+      ret = CopyReserve(ret, neededSize);
+    }
 
     auto const hash = srcElem->hash();
     if (srcElem->hasStrKey()) {

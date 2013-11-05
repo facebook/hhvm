@@ -257,7 +257,7 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 }
 
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC) {
-  target->plus(source);
+  target->plusEq(source); // XXX: can this COW?
   for (HPHP::ArrayIter it(source); !it.end(); it.next()) {
     auto tv = (HPHP::TypedValue*)it.secondRef().asTypedValue();
     HPHP::zBoxAndProxy(tv);

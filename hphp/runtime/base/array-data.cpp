@@ -271,11 +271,11 @@ extern const ArrayFunctions g_array_funcs = {
     &APCLocalArray::AppendRef,
     &NameValueTableWrapper::AppendRef,
     &ProxyArray::AppendRef },
-  // plus
-  { &HphpArray::Plus, &HphpArray::Plus,
-    &APCLocalArray::Plus,
-    &NameValueTableWrapper::Plus,
-    &ProxyArray::Plus },
+  // plusEq
+  { &HphpArray::PlusEq, &HphpArray::PlusEq,
+    &APCLocalArray::PlusEq,
+    &NameValueTableWrapper::PlusEq,
+    &ProxyArray::PlusEq },
   // merge
   { &HphpArray::Merge, &HphpArray::Merge,
     &APCLocalArray::Merge,

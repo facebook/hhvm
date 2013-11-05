@@ -429,19 +429,21 @@ public:
   ArrayData* appendWithRef(CVarRef v, bool copy);
 
   /*
-   * Implements array appending and merging.
+   * PHP array +=.
    *
-   * Returns a new array that is a copy of this combined with elems in
-   * the appropriate manner.  Copies the array even if *this has
-   * enough space.
-   *
-   * The returned array has already been incref'd.
-   *
-   * NB. the merge() function does *not* exactly implement
-   * array_merge.  The key renumbering step currently must be
-   * performed by the caller.
+   * Performs array addition, mutating the this array.  It may return
+   * a new array the array needed to grow, or if it needed to COW---in
+   * this case the new returned array will already have a reference
+   * count of 1.  Otherwise returns `elems' without manipulating its
+   * reference count.
    */
-  ArrayData* plus(const ArrayData* elems);
+  ArrayData* plusEq(const ArrayData* elems);
+
+  /*
+   * PHP array_merge.
+   *
+   * This function always produces a new array with reference count 1.
+   */
   ArrayData* merge(const ArrayData* elems);
 
   /**
@@ -619,7 +621,7 @@ struct ArrayFunctions {
   ArrayData* (*append[NK])(ArrayData*, CVarRef v, bool copy);
   ArrayData* (*appendRef[NK])(ArrayData*, CVarRef v, bool copy);
   ArrayData* (*appendWithRef[NK])(ArrayData*, CVarRef v, bool copy);
-  ArrayData* (*plus[NK])(ArrayData*, const ArrayData* elems);
+  ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);

@@ -104,11 +104,12 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
       return a2;
     }
     if (a1 != a2) {
-      auto const escalated = a1->plus(a2);
-      assert(escalated != a1 && escalated != a2);
-      decRefArr(a2);
-      decRefArr(a1);
-      return escalated;
+      auto const escalated = a1->plusEq(a2);
+      if (escalated != a1) {
+        decRefArr(a2);
+        decRefArr(a1);
+        return escalated;
+      }
     }
   }
   decRefArr(a2);

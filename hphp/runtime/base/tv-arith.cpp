@@ -19,6 +19,8 @@
 #include <limits>
 #include <algorithm>
 
+#include "folly/ScopeGuard.h"
+
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-conversions.h"
 
@@ -89,7 +91,9 @@ struct Add {
   Cell operator()(int64_t a, int64_t b) const { return num(a + b); }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
-    return a1->plus(a2);
+    a1->incRefCount(); // force COW
+    SCOPE_EXIT { a1->decRefCount(); };
+    return a1->plusEq(a2);
   }
 };
 
@@ -214,7 +218,7 @@ struct AddEq {
       ad2->incRefCount();
       return ad2;
     }
-    return ad1->plus(ad2);
+    return ad1->plusEq(ad2);
   }
 };
 

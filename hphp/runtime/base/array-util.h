@@ -113,11 +113,6 @@ public:
   static Variant ChangeKeyCase(CArrRef input, bool lower);
 
   /**
-   * Return array with key <-> value flipped.
-   */
-  static Variant Flip(CArrRef input);
-
-  /**
    * Return input as a new array with the order of the entries reversed.
    */
   static Variant Reverse(CArrRef input, bool preserve_keys = false);

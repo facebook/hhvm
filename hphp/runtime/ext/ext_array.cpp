@@ -200,7 +200,16 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
 
 Variant f_array_flip(CVarRef trans) {
   getCheckedArrayRet(trans, false);
-  return ArrayUtil::Flip(arr_trans);
+  ArrayInit ret(arr_trans.size());
+  for (ArrayIter iter(arr_trans); iter; ++iter) {
+    CVarRef value(iter.secondRef());
+    if (value.isString() || value.isInteger()) {
+      ret.set(value, iter.first());
+    } else {
+      raise_warning("Can only flip STRING and INTEGER values!");
+    }
+  }
+  return ret.toVariant();
 }
 
 bool f_array_key_exists(CVarRef key, CVarRef search) {

@@ -469,19 +469,6 @@ Variant ArrayUtil::ChangeKeyCase(CArrRef input, bool lower) {
   return ret;
 }
 
-Variant ArrayUtil::Flip(CArrRef input) {
-  Array ret = Array::Create();
-  for (ArrayIter iter(input); iter; ++iter) {
-    CVarRef value(iter.secondRef());
-    if (value.isString() || value.isInteger()) {
-      ret.set(value, iter.first());
-    } else {
-      raise_warning("Can only flip STRING and INTEGER values!");
-    }
-  }
-  return ret;
-}
-
 Variant ArrayUtil::Reverse(CArrRef input, bool preserve_keys /* = false */) {
   if (input.empty()) {
     return input;

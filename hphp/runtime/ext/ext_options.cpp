@@ -764,6 +764,8 @@ int64_t f_memory_get_usage(bool real_usage /* = false */) {
   int64_t ret = real_usage ? stats.usage : stats.alloc;
   ret -= request_arena().slackEstimate() +
          varenv_arena().slackEstimate();
+  // TODO(#3137377)
+  ret = std::max(ret, 0L);
   return ret;
 }
 

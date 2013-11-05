@@ -223,6 +223,17 @@ static void set_instance_prop_info(Array &ret, const Class::Prop* prop) {
   }
 }
 
+static void set_dyn_prop_info(
+    Array &ret,
+    const Variant& name,
+    const StringData* className) {
+  ret.set(s_name, name);
+  set_attrs(ret, get_modifiers(AttrPublic, false) & ~0x66);
+  ret.set(s_class, VarNR(className));
+  set_doc_comment(ret, empty_string.get());
+  ret.set(s_type, false_varNR);
+}
+
 static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
   ret.set(s_name, VarNR(prop->m_name));
   set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
@@ -902,6 +913,15 @@ Array f_hphp_get_class_info(CVarRef name) {
       }
       set_static_prop_info(info, &prop);
       arr.set(*(String*)(&prop.m_name), VarNR(info));
+    }
+
+    if (name.isObject()) {
+      auto obj = name.toObject();
+      for (ArrayIter it(obj->getDynProps().get()); !it.end(); it.next()) {
+        Array info = Array::Create();
+        set_dyn_prop_info(info, it.first(), cls->name());
+        arr.set(it.first(), VarNR(info));
+      }
     }
 
     ret.set(s_properties, VarNR(arr));

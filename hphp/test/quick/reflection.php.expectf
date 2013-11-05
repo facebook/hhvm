@@ -11,7 +11,7 @@ int(13)
 int(20)
 
 --- getFileName("f") ---
-string(%d) "%s"
+string(%d) "%s/test/quick/reflection.php"
 
 --- getName("f") ---
 string(1) "f"
@@ -200,7 +200,7 @@ int(126)
 int(142)
 
 --- getFileName() ---
-string(%d) "%s"
+string(%d) "%s/test/quick/reflection.php"
 
 --- getInterfaceNames() ---
 array(4) {
@@ -227,10 +227,12 @@ int(0)
 string(1) "B"
 
 --- getParentClass() ---
-object(ReflectionClass)#23 (2) {
+object(ReflectionClass)#23 (3) {
   ["name"]=>
   string(1) "A"
   ["info":"ReflectionClass":private]=>
+  NULL
+  ["obj":"ReflectionClass":private]=>
   NULL
 }
 

@@ -318,6 +318,7 @@ class ObjectData {
 
  public:
   bool hasDynProps() const { return o_properties.size(); }
+  Array getDynProps() const { return o_properties; }
   void reserveProperties(int nProp);
 
   // heap profiling helpers

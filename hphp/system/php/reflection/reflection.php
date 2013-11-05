@@ -406,7 +406,7 @@ class ReflectionParameter implements Reflector {
    *                     it is not or NULL on failure.
    */
   public function isCallable() {
-    return $this->info['type_hint'] === 'callable';
+    return $this->getTypeText() === 'callable';
   }
 
   private static function collectAttributes(&$attrs, $class, $function_name,

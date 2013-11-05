@@ -1034,15 +1034,15 @@ bool f_fb_rename_function(const String& orig_func_name, const String& new_func_n
   }
 
   if (!function_exists(orig_func_name)) {
-    raise_warning("fb_rename_function(%s, %s) failed: %s does not exists!",
+    raise_warning("fb_rename_function(%s, %s) failed: %s does not exist!",
                   orig_func_name.data(), new_func_name.data(),
                   orig_func_name.data());
     return false;
   }
 
-  if (new_func_name->isame(s_extract.get())) {
+  if (orig_func_name->isame(s_extract.get())) {
     raise_warning(
-        "fb_rename_function(%s, %s) failed: rename to extract not allowed!",
+        "fb_rename_function(%s, %s) failed: rename of extract not allowed!",
         orig_func_name.data(), new_func_name.data());
     return false;
   }

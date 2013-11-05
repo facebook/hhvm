@@ -4479,10 +4479,21 @@ void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   assert(arr->type().getArrayKind() == ArrayData::kPackedKind);
   auto arrReg = curOpd(arr).reg();
   auto idx = inst->src(1);
+
   if (idx->isConst()) {
-    m_as.cmpl(idx->getValInt(), arrReg[ArrayData::offsetofSize()]);
+    auto const val = idx->getValInt();
+    if ((uint64_t)val >= 0xffffffffull) {
+      // The check will always fail.
+      emitFwdJmp(m_as, label, m_state);
+      return;
+    }
+
+    m_as.cmpl  (val, arrReg[ArrayData::offsetofSize()]);
   } else {
-    m_as.cmpl(r32(curOpd(idx).reg()), arrReg[ArrayData::offsetofSize()]);
+    // ArrayData::m_size is a uint32_t but we need to do a 64-bit comparison
+    // since idx is KindOfInt64.
+    m_as.loadl (arrReg[ArrayData::offsetofSize()], r32(m_rScratch));
+    m_as.cmpq  (curOpd(idx).reg(), m_rScratch);
   }
   emitFwdJcc(CC_BE, label);
 }

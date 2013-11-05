@@ -432,6 +432,8 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
 
   case ExitOnVarEnv: return simplifyExitOnVarEnv(inst);
 
+  case CheckPackedArrayBounds: return simplifyCheckPackedArrayBounds(inst);
+
   default:
     return nullptr;
   }
@@ -2037,6 +2039,19 @@ SSATmp* Simplifier::simplifyAssertNonNull(IRInstruction* inst) {
   if (t <= Type::Nullptr) {
     return inst->src(0);
   }
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyCheckPackedArrayBounds(IRInstruction* inst) {
+  auto* idx = inst->src(1);
+  if (idx->isConst()) {
+    if ((uint64_t)idx->getValInt() >= 0xffffffffull) {
+      // ArrayData can't hold more than 2^32 - 1 elements, so this is always
+      // going to fail.
+      inst->convertToJmp();
+    }
+  }
+
   return nullptr;
 }
 

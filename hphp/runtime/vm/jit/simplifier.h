@@ -150,6 +150,8 @@ private:
   SSATmp* simplifyShift(SSATmp* src1, SSATmp* src2, Oper op);
   template<class Oper> SSATmp* simplifyRoundCommon(IRInstruction*, Oper);
 
+  SSATmp* simplifyCheckPackedArrayBounds(IRInstruction*);
+
 private: // tracebuilder forwarders
   template<class... Args> SSATmp* cns(Args&&...);
   template<class... Args> SSATmp* gen(Opcode op, Args&&...);

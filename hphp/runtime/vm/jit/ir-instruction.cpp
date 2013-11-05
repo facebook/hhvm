@@ -341,6 +341,7 @@ void IRInstruction::convertToJmp() {
   m_numDsts = 0;
   m_srcs = nullptr;
   m_dst = nullptr;
+  m_extra = nullptr;
   // Instructions in the simplifier don't have blocks yet.
   if (block()) block()->setNext(nullptr);
 }

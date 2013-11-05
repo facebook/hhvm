@@ -907,14 +907,8 @@ RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
     for (unsigned i = 0, n = srcInst->numDsts(); i < n; ++i) {
       if (srcInst->dst(i) == tmp) {
         auto reg = findLabelSrcReg(m_allocInfo, srcInst, i, regIndex);
-        // Until we handle loops, it's a bug to try and allocate a
-        // register to a DefLabel's dest before all of its incoming
-        // Jmps have had their srcs allocated, unless the incoming
-        // block is unreachable.
-        const DEBUG_ONLY bool unreachable =
-          std::find(m_blocks.begin(), m_blocks.end(),
-                    srcInst->block()) == m_blocks.end();
-        always_assert(reg != reg::noreg || unreachable);
+        // It's ok for reg to be reg::noreg here if all the incoming values are
+        // constant.
         return reg;
       }
     }

@@ -151,7 +151,7 @@ class PHPUnitPatterns {
   //    .HipHop Warning
   // That last example happened in Magento
   static string $status_code_pattern =
-  "/^[\.SFEI]$|^[\.SFEI](HipHop)?|^[\.SFEI][ \t]*[0-9]* \/ [0-9]* \([ 0-9]*%\)/";
+  "/^[\.SFEI]$|^[\.SFEI](HipHop)|^[\.SFEI][ \t]*[0-9]* \/ [0-9]* \([ 0-9]*%\)/";
 
   // Get rid of codes like ^[[31;31m that may get output to the results file.
   // 0x1B is the hex code for the escape sequence ^[
@@ -175,6 +175,16 @@ class PHPUnitPatterns {
   static string $xdebug_pattern = "/The Xdebug extension is not loaded./";
 
   static string $test_file_pattern = "/.*\.phpt|.*Test\.php|.*test\.php/";
+
+  static string $tests_ok_skipped_inc_pattern =
+               "/OK, but incomplete or skipped tests!/";
+  static string $num_errors_failures_pattern =
+               "/There (was|were) \d+ (failure|error)[s]?\:/";
+  static string $num_skips_inc_pattern =
+               "/There (was|were) \d+ (skipped|incomplete) test[s]?\:/";
+  static string $failures_header_pattern = "/FAILURES!/";
+  static string $no_tests_executed_pattern = "/No tests executed!/";
+
 }
 
 class Frameworks {
@@ -203,7 +213,7 @@ class Frameworks {
     //               be redownloading the framework since the SHA is different
     //               than what we expect. Use a submodule/move technique.
     // IF WE HAVE A BLACKLIST FOR FLAKEY TESTS THAT PASS OR FAIL DEPENDING ON
-    // THE POSITION OF THE MOON (OR AN UKNOWN BUG IN HHVM), THESE ARE THE
+    // THE POSITION OF THE MOON (OR AN UNKNOWN BUG IN HHVM), THESE ARE THE
     // CANDIDATES:
     //
     // Joomla    - Joomla\Crypt\Tests\PasswordSimpleTest::testCreate
@@ -935,14 +945,9 @@ class Framework {
         break;
       }
       if (preg_match($this->test_name_pattern, $line, $matches) === 1) {
-        do {
-          // Get the next line for the expected status for that test
-          $status = fgets($file);
-        } while (!feof($file) &&
-                 preg_match($status_code_pattern, $status) === 0);
-        // The second match will be the test name from the "Starting test..."
-        // match string
-        $tests[$matches[0]] = $status[0];
+        // Get the next line for the expected status for that test
+        $status = rtrim(fgets($file), PHP_EOL);
+        $tests[$matches[0]] = $status;
       }
     }
     if ($tests->isEmpty()) {
@@ -1103,9 +1108,18 @@ class Framework {
   }
 }
 
-class SingleTest {
+class SingleTestFile {
   public Framework $framework;
   public string $name;
+
+  private string $test_information = "";
+  private string $error_information = "";
+  private string $fatal_information = "";
+  private string $diff_information = "";
+  private string $stat_information = "";
+
+  private array $pipes = null;
+  private resource $process = null;
 
   public function __construct(Framework $f, string $p) {
     $this->framework = $f;
@@ -1115,21 +1129,259 @@ class SingleTest {
   public function run(): int {
     chdir($this->framework->test_path);
     $ret_val = 0;
+    $line = "";
+    $post_test = false;
+    $pretest_data = true;
 
-    $pipes = null;
+    if ($this->initialize()) {
+      while (!(feof($this->pipes[1]))) {
+        $line = $this->getLine();
+        if ($line === null) { break; }
+        if ($this->isBlankLine($line)) {
+          continue;
+        }
+        // e.g. PHPUnit 3.7.28 by Sebastian Bergmann.
+        // Even if there are three lines of prologue, this will keep
+        // continuing before we call analyzeTest
+        if ($this->isPrologue($line)) {
+          $pretest_data = false;
+          continue;
+        }
+        // e.g. HipHop Warning: HipHop currently does not support circular
+        // reference collection
+        // e.g. No headers testing
+        // e.g. Please install runkit and enable runkit.internal_override!
+        if ($pretest_data) {
+          if ($this->isPreTestWarning($line)) {
+            $this->error_information .= "PRETEST WARNING FOR ".
+                                        $this->name.PHP_EOL.$line.PHP_EOL;
+          }
+          continue;
+        }
+        if ($this->isStop($line)) {
+          $post_test = true;
+          continue;
+        }
+        // If we have finished the tests, then we are just printing any error
+        // info and getting the final stats
+        if ($post_test) {
+          $this->printPostTestInfo($line);
+        } else if (!$pretest_data) {
+          // We have gotten through through the prologue and any blank lines
+          // and we should be at tests now.
+          if (!$this->analyzeTest($line)) {
+            break;
+          }
+        }
+      }
+
+      $ret_val = $this->finalize();
+      $this->outputData();
+
+    } else {
+      Options::$csv_only ? error()
+                         : error("Could not open process to run test ".
+                                 $this->name." for framework ".
+                                 $this->framework->name);
+    }
+
+    chdir(__DIR__);
+    return $ret_val;
+  }
+
+  private function getLine(): ?string {
+    if (feof($this->pipes[1])) {
+      return null;
+    }
+    if (!$this->checkReadStream()) {
+      $this->error_information .= "TEST TIMEOUT OCCURRED.".PHP_EOL;
+      $this->error_information .= " Last line read was: ".$line.PHP_EOL.
+                                   PHP_EOL;
+      return null;
+    }
+    $line = rtrim(fgets($this->pipes[1]), PHP_EOL);
+    if ($line === false) {return null;}
+    $line = remove_color_codes($line);
+    return $line;
+  }
+
+  private function analyzeTest(string $line): bool {
     $tn_matches = array();
     $match = null;
-    $line = null;
     $status = null;
-    $test_information = "";
-    $error_information = "";
-    $fatal_information = "";
-    $diff_information = "";
-    $stat_information = "";
-    $just_errors = false;
-    $started_test = false;
-    $fatal = false;
-    $results = null;
+    if (preg_match($this->framework->test_name_pattern, $line,
+                   $tn_matches) === 1) {
+      $match = rtrim($tn_matches[0], PHP_EOL);
+      $this->test_information .= $match.PHP_EOL;
+      do {
+        $status = $this->getLine();
+        if ($status === null || $this->checkForFatals($status)) {
+          // We have hit a fatal or some nasty assert. Escape now and try to
+          // get the results written.
+          $status = $status === null ? "UNKNOWN STATUS" : $status;
+          $this->test_information .= $status.PHP_EOL;
+          $this->fatal_information .= $match.PHP_EOL.$status.PHP_EOL;
+          $this->stat_information = $match.PHP_EOL."Fatal".PHP_EOL;
+          return false;
+        }
+      } while (!feof($this->pipes[1]) &&
+               preg_match(PHPUnitPatterns::$status_code_pattern,
+                          $status) === 0);
+      if ($status !== false) {
+        $this->processStatus($status, $match);
+      }
+    } else if ($this->checkForWarnings($line)) {
+      // We have a warning after the tests have supposedly started
+      // but we really don't have a test to examine.
+      // e.g.
+      // PHPUnit 3.7.28 by Sebastian Bergmann.
+      // The Xdebug extension is not loaded. No code coverage will be generated.
+      // HipHop Notice: Use of undefined constant DRIZZLE_CON_NONE
+      $this->error_information .= PHP_EOL.$line.PHP_EOL.PHP_EOL;
+      return true;
+    } else if ($this->checkForFatals($line)) {
+      // We have a fatal after the tests have supposedly started
+      // but we really don't have a test to examine.
+      // e.g.
+      // PHPUnit 3.7.28 by Sebastian Bergmann.
+      // The Xdebug extension is not loaded. No code coverage will be generated.
+      // HipHop Fatal error: Undefined function: mysqli_report
+      $this->fatal_information .= PHP_EOL.$line.PHP_EOL.PHP_EOL;
+      return false;
+    } else {
+      // This was something totally unexpected.
+      return false;
+    }
+    return true;
+  }
+
+  private function isPreTestWarning(string $line): void {
+    if ($this->checkForWarnings($line)) {
+      return true;
+    }
+    return false;
+  }
+
+  private function processStatus(string $status, string $match): void {
+    // Could be due to a fatal in optimized mode where reasoning is not
+    // printed to console (and is only printed in debug mode)
+    if ($status === "") {
+      $status = "UNKNOWN STATUS";
+      $this->fatal_information .= $match.PHP_EOL.$status.PHP_EOL.PHP_EOL;
+    } else {
+      // In case we had "F 252 / 364 (69 %)" or ".HipHop Warning"
+      $status = $status[0];
+    }
+    $this->test_information .= $status.PHP_EOL;
+    if ($this->framework->current_test_statuses !== null &&
+        $this->framework->current_test_statuses->containsKey($match)) {
+      if ($status === $this->framework->current_test_statuses[$match]) {
+        // FIX: posix_isatty(STDOUT) was always returning false, even
+        // though can print in color. Check this out later.
+        verbose(Colors::GREEN.".".Colors::NONE, !Options::$csv_only);
+      } else {
+        // We are different than we expected
+        // Red if we go from pass to something else
+        if ($this->framework->current_test_statuses[$match] === '.') {
+          verbose(Colors::RED."F".Colors::NONE, !Options::$csv_only);
+        // Green if we go from something else to pass
+        } else if ($status === '.') {
+          verbose(Colors::GREEN."F".Colors::NONE, !Options::$csv_only);
+        // Blue if we go from something "faily" to something "faily"
+        // e.g., E to I or F
+        } else {
+          verbose(Colors::BLUE."F".Colors::NONE, !Options::$csv_only);
+        }
+        verbose(PHP_EOL."Different status in ".$this->framework->name.
+                " for test ".$match." was ".
+                $this->framework->current_test_statuses[$match].
+                " and now is ".$status.PHP_EOL, !Options::$csv_only);
+        $this->diff_information .= "----------------------".PHP_EOL;
+        $this->diff_information .= $match.PHP_EOL.PHP_EOL;
+        $this->diff_information .= "EXPECTED: ".
+                             $this->framework->
+                             current_test_statuses[$match].
+                             PHP_EOL;
+        $this->diff_information .= ">>>>>>>".PHP_EOL;
+        $this->diff_information .= "ACTUAL: ".$status.PHP_EOL.PHP_EOL;
+      }
+    } else {
+      // This is either the first time we run the unit tests, and all pass
+      // because we are establishing a baseline. OR we have run the tests
+      // before, but we are having an issue getting to the actual tests
+      // (e.g., yii is one test suite that has behaved this way).
+      if ($this->framework->current_test_statuses !== null) {
+        verbose(Colors::LIGHTBLUE."F".Colors::NONE, !Options::$csv_only);
+        verbose(PHP_EOL."Different status in ".$this->framework->name.
+                " for test ".$match.PHP_EOL,!Options::$csv_only);
+        $this->diff_information .= "----------------------".PHP_EOL;
+        $this->diff_information .= "Problem loading: ".$match.PHP_EOL.PHP_EOL;
+      } else {
+        verbose(Colors::GRAY.".".Colors::NONE, !Options::$csv_only);
+      }
+    }
+  }
+
+  private function printPostTestInfo(string $line): void {
+    while ($line !== null) {
+      if (preg_match(PHPUnitPatterns::$tests_ok_skipped_inc_pattern,
+                     $line) !== 1 &&
+          preg_match(PHPUnitPatterns::$num_errors_failures_pattern,
+                     $line) !== 1 &&
+          preg_match(PHPUnitPatterns::$failures_header_pattern,
+                     $line) !== 1 &&
+          preg_match(PHPUnitPatterns::$no_tests_executed_pattern,
+                     $line) !== 1 &&
+          preg_match(PHPUnitPatterns::$num_skips_inc_pattern,
+                     $line) !==1 ) {
+        $this->error_information .= $line.PHP_EOL;
+      }
+      $line = $this->getLine();
+    }
+    // The last non-null line would have been the real stat information for
+    // pass percentage purposes. Take that out of the error string and put in
+    // the stat information string instead. Other stat like information may be
+    // in the error string as they are part of the test errors (PHPUnit does
+    // this).
+    $this->error_information = rtrim($this->error_information, PHP_EOL);
+    $pieces = explode(PHP_EOL, $this->error_information);
+    $this->stat_information = $this->name.PHP_EOL;
+    $this->stat_information .= array_pop($pieces).PHP_EOL;
+    // There were no errors, just final stats if $pieces is empty
+    if (count($pieces) > 0) {
+      $this->error_information = implode(PHP_EOL, $pieces).PHP_EOL;
+    } else {
+      $this->error_information = "";
+    }
+  }
+
+  private function isStop(string $line) {
+    if (preg_match(PHPUnitPatterns::$stop_parsing_pattern, $line) === 1) {
+      return true;
+    }
+    return false;
+  }
+
+  private function isPrologue(string $line) {
+    if (preg_match(PHPUnitPatterns::$header_pattern, $line) === 1 ||
+        preg_match(PHPUnitPatterns::$config_file_pattern, $line) === 1 ||
+        preg_match(PHPUnitPatterns::$xdebug_pattern, $line) === 1) {
+      return true;
+    }
+    return false;
+  }
+
+  private function isBlankLine(string $line): bool {
+    if ($line === "" || $line === PHP_EOL) {
+      return true;
+    }
+    return false;
+  }
+
+  private function initialize(): bool {
+    $test_command = str_replace("%test%", $this->name,
+                                 $this->framework->test_command);
+    verbose("Command: ".$test_command."\n", Options::$verbose);
 
     $descriptorspec = array(
       0 => array("pipe", "r"),
@@ -1137,191 +1389,69 @@ class SingleTest {
       2 => array("pipe", "w"),
     );
 
-    $test_command = str_replace("%test%", $this->name,
-                                $this->framework->test_command);
-    verbose("Command: ".$test_command."\n", Options::$verbose);
-
     // $_ENV will passed in by default if the environment var is null
-    $process = proc_open($test_command, $descriptorspec, $pipes,
-                         $this->framework->test_path, null);
+    $this->process = proc_open($test_command, $descriptorspec, $this->pipes,
+                               $this->framework->test_path, null);
 
-    if (is_resource($process)) {
-      fclose($pipes[0]);
-      $r = array($pipes[1]);
-      $w = null;
-      $e = null;
-      while (!(feof($pipes[1]))) {
-       if (stream_select($r, $w, $e, Options::$timeout) === false) {
-          $error_information .= "TEST TIMEOUT OCCURRED.";
-          $error_information .= " Last line read was: ".$line;
-          break;
-        }
-        $line = fgets($pipes[1]);
-        $line = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
-                             "", $line);
-        // We want blank lines, but only when we are printing out the raw
-        // error information
-        if (!$just_errors && ($line === "" || $line === PHP_EOL)) {
-          continue;
-        }
-        if (preg_match(PHPUnitPatterns::$header_pattern, $line) === 1 ||
-            preg_match(PHPUnitPatterns::$config_file_pattern, $line) === 1 ||
-            preg_match(PHPUnitPatterns::$xdebug_pattern, $line) === 1) {
-              continue;
-        }
-        if (preg_match(PHPUnitPatterns::$stop_parsing_pattern, $line) === 1) {
-          // Get rid of the next blank line after this
-          if (stream_select($r, $w, $e, Options::$timeout) === false) {
-            $error_information .= "TEST TIMEOUT OCCURRED.";
-            $error_information .= " Last line read was: ".$line;
-            break;
-          }
-          fgets($pipes[1]);
-          $just_errors = true;
-          continue;
-        }
-        // If we have finished the tests, then we are just printing any error
-        // info and getting the final stats
-        if ($just_errors) {
-          // The last line will generally be the stats. However, error info can
-          // have stats looking lines (matching these patterns) as part of them.
-          // PHPUnit is notorious for this. But, the last line will overwrite
-          // all of them with final stats
-          if (preg_match(PHPUnitPatterns::$tests_ok_pattern, $line) === 1 ||
-              preg_match(PHPUnitPatterns::$tests_failure_pattern,
-                         $line) === 1) {
-            $stat_information = $this->name.PHP_EOL.$line;
-          }
-          $error_information .= $line;
-          continue;
-        }
-        if (!$just_errors &&
-            preg_match($this->framework->test_name_pattern, $line,
-                       $tn_matches) === 1) {
-          $started_test = true;
-          $match = $tn_matches[0];
-          $test_information .= $match.PHP_EOL;
-          do {
-            if (stream_select($r, $w, $e, Options::$timeout) === false) {
-              $error_information .= "TEST TIMEOUT OCCURRED.";
-              $error_information .= " Last line read was: ".$line;
-              break 2;
-            }
-            $status = fgets($pipes[1]);
-            $status = preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
-                                   "", $status);
-            if (strpos($status, 'HipHop Fatal') !== false ||
-                strpos($status, "hhvm:") !== false) {
-              // We have hit a fatal or some nasty assert. Escape now and try to
-              // get the results written.
-              $test_information .= $status.PHP_EOL;
-              $fatal_information .= $match.PHP_EOL.$status.PHP_EOL;
-              $stat_information = "Fatal".PHP_EOL;
-              $fatal = true;
-              break 2;
-            }
-          } while (!feof($pipes[1]) &&
-                   preg_match(PHPUnitPatterns::$status_code_pattern,
-                              $status) === 0);
-          // Could be due to a fatal in optimized mode where reasoning is not
-          // printed to console (and is only printed in debug mode)
-          if ($status === "") {
-            $status = "UNKNOWN STATUS";
-            $fatal_information .= $match.PHP_EOL.$status.PHP_EOL;
-          } else {
-            // In case we had "F 252 / 364 (69 %)" or ".HipHop Warning"
-            $status = $status[0];
-          }
-          $test_information .= $status.PHP_EOL;
-          if ($this->framework->current_test_statuses !== null &&
-              $this->framework->current_test_statuses->containsKey($match)) {
-            if ($status === $this->framework->current_test_statuses[$match]) {
-              // FIX: posix_isatty(STDOUT) was always returning false, even
-              // though can print in color. Check this out later.
-              verbose(Colors::GREEN.".".Colors::NONE, !Options::$csv_only);
-            } else {
-              // We are different than we expected
-              // Red if we go from pass to something else
-              if ($this->framework->current_test_statuses[$match] === '.') {
-                verbose(Colors::RED."F".Colors::NONE, !Options::$csv_only);
-              // Green if we go from something else to pass
-              } else if ($status === '.') {
-                verbose(Colors::GREEN."F".Colors::NONE, !Options::$csv_only);
-              // Blue if we go from something "faily" to something "faily"
-              // e.g., E to I or F
-              } else {
-                verbose(Colors::BLUE."F".Colors::NONE, !Options::$csv_only);
-              }
-              verbose(PHP_EOL."Different status in ".$this->framework->name.
-                      " for test ".$match." was ".
-                      $this->framework->current_test_statuses[$match].
-                      " and now is ".$status.PHP_EOL, !Options::$csv_only);
-              $diff_information .= "----------------------".PHP_EOL;
-              $diff_information .= $match.PHP_EOL.PHP_EOL;
-              $diff_information .= "EXPECTED: ".
-                                   $this->framework->
-                                   current_test_statuses[$match].
-                                   PHP_EOL;
-              $diff_information .= ">>>>>>>".PHP_EOL;
-              $diff_information .= "ACTUAL: ".$status.PHP_EOL.PHP_EOL;
-            }
-          } else {
-            // This is either the first time we run the unit tests, and all pass
-            // because we are establishing a baseline. OR we have run the tests
-            // before, but we are having an issue getting to the actual tests
-            // (e.g., yii is one test suite that has behaved this way).
-            if ($this->framework->current_test_statuses !== null) {
-              verbose(Colors::LIGHTBLUE."F".Colors::NONE, !Options::$csv_only);
-              verbose(PHP_EOL."Different status in ".$this->framework->name.
-                      " for test ".$match.PHP_EOL,!Options::$csv_only);
-              $diff_information .= "----------------------".PHP_EOL;
-              $diff_information .= "Problem loading: ".$match.PHP_EOL.PHP_EOL;
-            } else {
-              verbose(Colors::GRAY.".".Colors::NONE, !Options::$csv_only);
-            }
-          }
-        } else if (!$started_test) {
-          // If we have fataled before the test was run or test statuses were
-          // found, assume we have error information.
-          // If we get here, we have gotten through all the PHPUnit header
-          // information, but we haven't started the test yet.
-          $fatal_information .= $line;
-          $fatal = true;
-        }
-      }
+    return is_resource($this->process);
+  }
 
-      // Remove final stat line from error string
-      if (!$fatal) {
-        $error_information = substr($error_information, 0,
-                                    strrpos(rtrim($error_information),
-                                            PHP_EOL));
-      }
+  private function finalize(): int {
+    fclose($this->pipes[0]);
+    fclose($this->pipes[1]);
+    fclose($this->pipes[2]);
 
-      fclose($pipes[1]);
-      fclose($pipes[2]);
-
-      if (proc_close($process) === -1) {
-        $ret_val = -1;
-      }
-
-      file_put_contents($this->framework->out_file, $test_information,
-                        FILE_APPEND);
-      file_put_contents($this->framework->errors_file, $error_information,
-                        FILE_APPEND);
-      file_put_contents($this->framework->diff_file, $diff_information,
-                        FILE_APPEND);
-      file_put_contents($this->framework->stats_file, $stat_information,
-                        FILE_APPEND);
-      file_put_contents($this->framework->fatals_file, $fatal_information,
-                        FILE_APPEND);
-
-    } else {
-      Options::$csv_only ? error()
-                         : error("Could not open process to run test ".$test.
-                                 " for framework ".$this->framework->name);
+    if (proc_close($this->process) === -1) {
+      return -1;
     }
-    chdir(__DIR__);
-    return $ret_val;
+
+    return 0;
+  }
+
+  private function checkReadStream(): bool {
+    $r = array($this->pipes[1]);
+    $w = null;
+    $e = null;
+    if (stream_select($r, $w, $e, Options::$timeout) === false) {
+      return false;
+    }
+    return true;
+  }
+
+  private function outputData(): void {
+    file_put_contents($this->framework->out_file, $this->test_information,
+                      FILE_APPEND);
+    file_put_contents($this->framework->errors_file, $this->error_information,
+                      FILE_APPEND);
+    file_put_contents($this->framework->diff_file, $this->diff_information,
+                      FILE_APPEND);
+    file_put_contents($this->framework->stats_file, $this->stat_information,
+                      FILE_APPEND);
+    file_put_contents($this->framework->fatals_file, $this->fatal_information,
+                      FILE_APPEND);
+
+  }
+
+  private function checkForFatals(string $status): bool {
+    if (strpos($status, 'HipHop Fatal') !== false ||
+        strpos($status, 'HHVM Fatal') !== false ||
+        strpos($status, 'hhvm Fatal') !== false ||
+        strpos($status, "hhvm") !== false) {
+      return true;
+    }
+    return false;
+  }
+
+  private function checkForWarnings(string $line): bool {
+    if (strpos($line, 'HipHop Warning') !== false ||
+        strpos($line, 'HHVM Warning') !== false ||
+        strpos($line, 'hhvm Warning') !== false ||
+        strpos($line, 'HipHop Notice') !== false ||
+        strpos($line, 'HHVM Notice') !== false ||
+        strpos($line, 'hhvm notice') !== false) {
+      return true;
+    }
+    return false;
   }
 }
 
@@ -1468,7 +1598,7 @@ function run_tests(Vector $frameworks): void {
          false &&
          strpos($test, "ZendTest/Code/Generator/ValueGeneratorTest.php") ===
          false) {
-        $st = new SingleTest($framework, $test);
+        $st = new SingleTestFile($framework, $test);
         $all_tests->add($st);
       }
     }
@@ -1972,6 +2102,11 @@ function verbose(string $msg, bool $verbose): void {
   if ($verbose) {
     print $msg;
   }
+}
+
+function remove_color_codes(string $line): string {
+  return preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
+                      "", $line);
 }
 
 function main(array $argv): void {

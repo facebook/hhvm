@@ -87,7 +87,7 @@ PHPSDKTestCase::testSecureCurrentUrlWithNonDefaultPort
 PHPSDKTestCase::testBase64UrlEncode
 .
 PHPSDKTestCase::testSignedToken
-.
+F
 PHPSDKTestCase::testNonTossedSignedtoken
 .
 PHPSDKTestCase::testSignedRequestWithEmptyValue

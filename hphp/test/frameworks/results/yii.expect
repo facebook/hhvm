@@ -1,198 +1,164 @@
-CDbTransactionTest::testBeginTransaction
+CDbConnectionTest::testAutoConnect
 .
-CDbTransactionTest::testCommit
+CDbConnectionTest::testInitialized
 .
-CActiveDataProviderTest::testCountCriteria
-.
-CJuiButtonTest::testCallbackEncoding
-E
-CNumberValidatorTest::testIssue1669 with data set #0 
-.
-CNumberValidatorTest::testIssue1669 with data set #1 
-.
-CNumberValidatorTest::testIssue1669 with data set #2 
-.
-CNumberValidatorTest::testIssue1669 with data set #3 
-.
-CNumberValidatorTest::testIssue1669 with data set #4 
-.
-CNumberValidatorTest::testIssue1669 with data set #5 
-.
-CNumberValidatorTest::testIssue1669 with data set #6 
-.
-CNumberValidatorTest::testIssue1669 with data set #7 
-.
-CNumberValidatorTest::testIssue1669 with data set #8 
-.
-CNumberValidatorTest::testIssue1669 with data set #9 
-.
-CNumberValidatorTest::testIssue1669 with data set #10 
-.
-CNumberValidatorTest::testIssue1669 with data set #11 
-.
-CNumberValidatorTest::testIssue1669 with data set #12 
-.
-CNumberValidatorTest::testIssue1669 with data set #13 
-.
-CClientScriptTest::testGetCoreScriptUrl
-.
-CClientScriptTest::testGetPackageBaseUrl with data set #0 
-.
-CClientScriptTest::testGetPackageBaseUrl with data set #1 
-.
-CClientScriptTest::testRegisterCoreScript with data set #0 
+CDbConnectionTest::testActive
 F
-CClientScriptTest::testRegisterCoreScript with data set #1 
+CDbConnectionTest::testCreateCommand
 .
-CClientScriptTest::testRegisterCoreScript with data set #2 
+CDbConnectionTest::testLastInsertID
 .
-CClientScriptTest::testRegisterPackage with data set #0 
-F
-CClientScriptTest::testRegisterPackage with data set #1 
+CDbConnectionTest::testQuoteValue
 .
-CClientScriptTest::testRegisterPackage with data set #2 
+CDbConnectionTest::testColumnNameCase
 .
-CClientScriptTest::testRegisterScriptFile with data set #0 
+CDbConnectionTest::testNullConversion
 .
-CClientScriptTest::testRegisterScriptFile with data set #1 
-.
-CClientScriptTest::testRegisterScriptFile with data set #2 
-.
-CClientScriptTest::testRegisterScriptFileWithHtmlOptions with data set #0 
-.
-CClientScriptTest::testRegisterScript with data set #0 
-.
-CClientScriptTest::testRegisterScript with data set #1 
-.
-CClientScriptTest::testRegisterScriptWithHtmlOptions with data set #0 
-.
-CClientScriptTest::testRegisterCss with data set #0 
-.
-CClientScriptTest::testRegisterCss with data set #1 
-.
-CClientScriptTest::testRegisterMetaTag with data set #0 
-.
-CClientScriptTest::testRegisterMetaTag with data set #1 
-.
-CClientScriptTest::testRegisterDuplicatingMetaTag
-.
-CClientScriptTest::testRenderScriptFiles with data set #0 
-.
-CClientScriptTest::testRenderScriptFiles with data set #1 
-.
-CClientScriptTest::testRenderScriptFiles with data set #2 
-.
-CClientScriptTest::testRenderScriptFiles with data set #3 
-.
-CClientScriptTest::testRenderScriptFiles with data set #4 
-.
-CClientScriptTest::testRenderScriptFiles with data set #5 
-.
-CClientScriptTest::testRenderScripts with data set #0 
-.
-CClientScriptTest::testRenderScripts with data set #1 
-.
-CClientScriptTest::testRenderScripts with data set #2 
-.
-CClientScriptTest::testRenderScripts with data set #3 
-.
-CClientScriptTest::testRenderScripts with data set #4 
-.
-CClientScriptTest::testRenderScripts with data set #5 
-.
-CClientScriptTest::testRenderScripts with data set #6 
-.
-CClientScriptTest::testRenderScripts with data set #7 
-.
-CClientScriptTest::testRenderScriptsBatch with data set #0 
-.
-CClientScriptTest::testRenderScriptsBatch with data set #1 
-.
-CPostgresTest::testSchema
+CDbAuthManagerTest::testcreateAuthItem
 S
-CPostgresTest::testTable
+CDbAuthManagerTest::testGetAuthItem
 S
-CPostgresTest::testColumn
+CDbAuthManagerTest::testRemoveAuthItem
 S
-CPostgresTest::testCommandBuilder
+CDbAuthManagerTest::testChangeItemName
 S
-CPostgresTest::testResetSequence
+CDbAuthManagerTest::testAddItemChild
 S
-CPostgresTest::testColumnComments
+CDbAuthManagerTest::testAddItemChild2
 S
-CAssetManagerTest::testBasePath
-E
-CAssetManagerTest::testBaseUrl
-E
-CAssetManagerTest::testPublishFile
-E
-CHttpSessionTest::testSetGet
-E
-CDateValidatorTest::testAllowEmptyOption
+CDbAuthManagerTest::testRemoveItemChild
+S
+CDbAuthManagerTest::testGetItemChildren
+S
+CDbAuthManagerTest::testAssign
+S
+CDbAuthManagerTest::testRevoke
+S
+CDbAuthManagerTest::testGetAuthAssignments
+S
+CDbAuthManagerTest::testGetAuthItems
+S
+CDbAuthManagerTest::testClearAll
+S
+CDbAuthManagerTest::testClearAuthAssignments
+S
+CDbAuthManagerTest::testDetectLoop
+S
+CDbAuthManagerTest::testExecuteBizRule
+S
+CDbAuthManagerTest::testCheckAccess
+S
+CMysqlTest::testSchema
+S
+CMysqlTest::testTable
+S
+CMysqlTest::testColumn
+S
+CMysqlTest::testCommandBuilder
+S
+CMysqlTest::testResetSequence
+S
+CMysqlTest::testColumnComments
+S
+CDbCommand2Test::testSelect
 .
-CDateValidatorTest::testFormatOption
+CDbCommand2Test::testDistinct
 .
-CDateValidatorTest::testTimestampOption
+CDbCommand2Test::testFrom
 .
-CDefaultValueValidatorTest::testDefaultValueIsSetWhenSetOnEmptyIsTrue
+CDbCommand2Test::testWhere
 .
-CDefaultValueValidatorTest::testDefaultValueIsSetWhenSetOnEmptyIsFalse
+CDbCommand2Test::testAndWhere
 .
-CBehaviorTest::testAttachBehavior
+CDbCommand2Test::testOrWhere
 .
-CBehaviorTest::testDisableBehaviors
+CDbCommand2Test::testJoin
 .
-CBehaviorTest::testDisableBehaviorsAndModels
+CDbCommand2Test::testGroup
 .
-CBehaviorTest::testDisableAndEnableBehaviorsAndModels
+CDbCommand2Test::testHaving
 .
-CBehaviorTest::testDuplicateEventHandlers
+CDbCommand2Test::testOrder
 .
-CPhpMessageSourceTest::testExtensionTranslation
+CDbCommand2Test::testLimit
 .
-CPhpMessageSourceTest::testModuleTranslation
+CDbCommand2Test::testOffset
 .
-CExistValidatorTest::testValidate
+CDbCommand2Test::testUnion
 .
-CExistValidatorTest::testValidateCaseSensitive
+CDbCommand2Test::testQuery
 .
-CExistValidatorTest::testValidateWithCriteria
+CDbCommand2Test::testArraySyntax
 .
-CExistValidatorTest::testArrayValue
+CDbCommand2Test::testEmptyArray
 .
+CActiveRecord2Test::testModel
+S
+CActiveRecord2Test::testFind
+S
+CActiveRecord2Test::testInsert
+S
+CActiveRecord2Test::testUpdate
+S
+CActiveRecord2Test::testDelete
+S
+CActiveRecord2Test::testRefresh
+S
+CActiveRecord2Test::testEquals
+S
+CActiveRecord2Test::testValidation
+S
+CActiveRecord2Test::testCompositeKey
+S
+CActiveRecord2Test::testDefault
+S
+CActiveRecord2Test::testPublicAttribute
+S
+CActiveRecord2Test::testLazyRelation
+S
+CActiveRecord2Test::testEagerRelation
+S
+CActiveRecord2Test::testLazyRecursiveRelation
+S
+CActiveRecord2Test::testEagerRecursiveRelation
+S
+CActiveRecord2Test::testRelationWithCondition
+S
+CActiveRecord2Test::testSelfManyMany
+S
+CActiveRecord2Test::testRelationalCount
+S
+CActiveRecord2Test::testEmptyFinding
+S
+CActiveRecord2Test::testIssue2122
+S
+CActiveRecord2Test::testEmptyModel
+S
 CLogRouterTest::testRoutes
 E
-CDbCommandTest::testGetText
+CTypedListTest::testClassType
 .
-CDbCommandTest::testSetText
+CTypedListTest::testInterfaceType
 .
-CDbCommandTest::testConnection
+CSqliteTest::testSchema
 .
-CDbCommandTest::testPrepare
+CSqliteTest::testTable
 .
-CDbCommandTest::testCancel
+CSqliteTest::testColumn
 .
-CDbCommandTest::testExecute
+CSqliteTest::testCommandBuilder
 .
-CDbCommandTest::testQuery
+CSqliteTest::testResetSequence
 .
-CDbCommandTest::testBindParam
+CSqliteTest::testCheckIntegrity1
 .
-CDbCommandTest::testBindValue
+CSqliteTest::testCheckIntegrity2
 .
-CDbCommandTest::testQueryAll
+CSqliteTest::testCheckIntegrity3
 .
-CDbCommandTest::testQueryRow
+CSqliteTest::testRenameTable
 .
-CDbCommandTest::testQueryColumn
-.
-CDbCommandTest::testQueryScalar
-.
-CDbCommandTest::testFetchModeDefault
-.
-CDbCommandTest::testFetchModeObject
-.
-CDbCommandTest::testFetchModeClass
+CSqliteTest::testMultipleInsert
 .
 CMssqlTest::testSchema
 S
@@ -210,56 +176,144 @@ CMssqlTest::testARLastInsertId
 S
 CMssqlTest::testResetSequence
 S
-CMapTest::testConstruct
+CDateValidatorTest::testAllowEmptyOption
 .
-CMapTest::testGetReadOnly
+CDateValidatorTest::testFormatOption
 .
-CMapTest::testGetCount
+CDateValidatorTest::testTimestampOption
 .
-CMapTest::testGetKeys
+CTypeValidatorTest::testInteger
 .
-CMapTest::testAdd
+CTypeValidatorTest::testIntegerStrict
 .
-CMapTest::testCanNotAddWhenReadOnly
+CTypeValidatorTest::testFloat
 .
-CMapTest::testRemove
+CTypeValidatorTest::testFloatStrict
 .
-CMapTest::testCanNotRemoveWhenReadOnly
+CTypeValidatorTest::testString
 .
-CMapTest::testClear
+CTypeValidatorTest::testArray
 .
-CMapTest::testContains
+CTypeValidatorTest::testDate
 .
-CMapTest::testCopyFrom
+CTypeValidatorTest::testTime
 .
-CMapTest::testMergeWith
+CTypeValidatorTest::testDateTime
 .
-CMapTest::testRecursiveMergeWithTraversable
+CDataProviderIteratorTest::testIterator with data set #0 
 .
-CMapTest::testArrayRead
+CDataProviderIteratorTest::testIterator with data set #1 
 .
-CMapTest::testArrayWrite
+CDataProviderIteratorTest::testIterator with data set #2 
 .
-CMapTest::testArrayForeach
+CDataProviderIteratorTest::testIterator with data set #3 
 .
-CMapTest::testArrayMisc
+CDataProviderIteratorTest::testInitWithDisabledPagination with data set #0 
 .
-CMapTest::testToArray
+CDataProviderIteratorTest::testInitWithDisabledPagination with data set #1 
 .
-CMapTest::testIteratorCurrent
+CDataProviderIteratorTest::testInitWithDisabledPagination with data set #2 
 .
-CStatePersisterTest::testLoadSave
+CDataProviderIteratorTest::testInitWithDisabledPagination with data set #3 
+.
+CSqlDataProviderTest::testFetchKeysWithDbCommandSpecifiedAndPdoFetchObjEnabled
+.
+CComponentTest::testHasProperty
+.
+CComponentTest::testCanGetProperty
+.
+CComponentTest::testCanSetProperty
+.
+CComponentTest::testGetProperty
+.
+CComponentTest::testSetProperty
+.
+CComponentTest::testIsset
+.
+CComponentTest::testUnset
+.
+CComponentTest::testCallMethodFromBehavior
+.
+CComponentTest::testHasEvent
+.
+CComponentTest::testHasEventHandler
+.
+CComponentTest::testGetEventHandlers
+.
+CComponentTest::testAttachEventHandler
+.
+CComponentTest::testDetachEventHandler
+.
+CComponentTest::testAttachDetachEventHandler
+.
+CComponentTest::testRaiseEvent
+.
+CComponentTest::testEventAccessor
+.
+CComponentTest::testStopEvent
+.
+CComponentTest::testInvalidHandler1
+.
+CComponentTest::testInvalidHandler2
+.
+CComponentTest::testAttachingBehavior
+.
+CComponentTest::testDetachingBehavior
+.
+CComponentTest::testDetachingBehaviors
+.
+CComponentTest::testEnablingBehavior
+.
+CComponentTest::testEnablingBehaviors
+.
+CComponentTest::testAsa
+.
+CComponentTest::testEvaluateExpression
+.
+CFormatterTest::testSizeFormat
+.
+CFormatterTest::testSizeFormatTranslation with data set #0 
+.
+CFormatterTest::testSizeFormatTranslation with data set #1 
+.
+CFormatterTest::testSizeFormatTranslation with data set #2 
+.
+CFormatterTest::testSizeFormatTranslation with data set #3 
+.
+CFormatterTest::testSizeFormatTranslation with data set #4 
+.
+CFormatterTest::testSizeFormatTranslation with data set #5 
+.
+CFormatterTest::testSizeFormatTranslation with data set #6 
+.
+CFormatterTest::testFormatNtext with data set #0 
+.
+CFormatterTest::testFormatNtext with data set #1 
+.
+CFormatterTest::testFormatNtext with data set #2 
+.
+CFormatterTest::testFormatNtext with data set #3 
+.
+CUrlManagerTest::testParseUrlWithPathFormat
 E
-CStatePersisterTest::testStateFile
+CUrlManagerTest::testcreateUrlWithPathFormat
 E
-CControllerTest::testDefaultProperties
+CUrlManagerTest::testParseUrlWithGetFormat
 E
-CControllerTest::testRunAction
+CUrlManagerTest::testCreateUrlWithGetFormat
 E
-CControllerTest::testActionParams
+CUrlManagerTest::testDefaultParams
 E
-CControllerTest::testActionParamsInvalid
+CUrlManagerTest::testVerb
 E
+CUrlManagerTest::testParsingOnly
+E
+CRequiredValidatorTest::testEmpty
+.
+CRequiredValidatorTest::testSpaces
+.
+CRequiredValidatorTest::testEmptyWithSpaces
+.
 CUrlValidatorTest::testEmpty
 .
 CUrlValidatorTest::testArbitraryUrl
@@ -390,38 +444,154 @@ CUrlValidatorTest::testAllowEmpty with data set #17
 .
 CUrlValidatorTest::testArrayValue
 .
-CJSONTest::testEncodeSingleAR
+CValidatorTest::test
 .
-CJSONTest::testEncodeMultipleARs
+CValidatorTest::testScenarios
 .
-CJSONTest::testEncodeSimple
+CPostgresTest::testSchema
+S
+CPostgresTest::testTable
+S
+CPostgresTest::testColumn
+S
+CPostgresTest::testCommandBuilder
+S
+CPostgresTest::testResetSequence
+S
+CPostgresTest::testColumnComments
+S
+CCompareValidatorTest::testValidationErrorsWithEquals
 .
-CJSONTest::testEncodeArray
+CCompareValidatorTest::testValidationErrorsWithNotEquals
 .
-CJSONTest::testDecode
+CCompareValidatorTest::testValidationErrorsWitGreaterThan
 .
-CApplicationComponentTest::testInitialization
+CCompareValidatorTest::testValidationErrorsWitGreaterThanOrEqual
 .
-CLocalizedFormatterTest::testBooleanFormat
+CCompareValidatorTest::testValidationErrorsWitLessThan
 .
-CRangeValidatorTest::testEmpty
+CCompareValidatorTest::testValidationErrorsWitLessThanOrEqual
 .
-CRangeValidatorTest::testZeroString
+CCompareValidatorTest::testClientValidateAttributeThrowsExcpetion
 .
-CRangeValidatorTest::testZeroNumber
+CCompareValidatorTest::testValidateThrowsExcpetionforBadOperator
 .
-CStarRatingTest::testCallbackEncoding
-E
-CUploadedFileTest::testGetInstanceByName
+CCompareValidatorTest::testOverrideCompareValue
 .
-CUploadedFileTest::testGetInstancesByName
+CQueueTest::testConstruct
 .
-CUploadedFileTest::testGetInstanceByNestedName
+CQueueTest::testToArray
 .
-CUploadedFileTest::testGetInstancesByNamePartOfOtherName
+CQueueTest::testCopyFrom
 .
-CMultiFileUploadTest::testCallbackEncoding
-E
+CQueueTest::testCanNotCopyFromNonTraversableTypes
+.
+CQueueTest::testClear
+.
+CQueueTest::testContains
+.
+CQueueTest::testPeek
+.
+CQueueTest::testCanNotPeekAnEmptyQueue
+.
+CQueueTest::testDequeue
+.
+CQueueTest::testCanNotDequeueAnEmptyQueue
+.
+CQueueTest::testEnqueue
+.
+CQueueTest::testGetIterator
+.
+CQueueTest::testGetCount
+.
+CQueueTest::testCountable
+.
+CMapTest::testConstruct
+.
+CMapTest::testGetReadOnly
+.
+CMapTest::testGetCount
+.
+CMapTest::testGetKeys
+.
+CMapTest::testAdd
+.
+CMapTest::testCanNotAddWhenReadOnly
+.
+CMapTest::testRemove
+.
+CMapTest::testCanNotRemoveWhenReadOnly
+.
+CMapTest::testClear
+.
+CMapTest::testContains
+.
+CMapTest::testCopyFrom
+.
+CMapTest::testMergeWith
+.
+CMapTest::testRecursiveMergeWithTraversable
+.
+CMapTest::testArrayRead
+.
+CMapTest::testArrayWrite
+.
+CMapTest::testArrayForeach
+.
+CMapTest::testArrayMisc
+.
+CMapTest::testToArray
+.
+CMapTest::testIteratorCurrent
+.
+CDbCommandBuilderTest::testIssue1407_1
+S
+CDbCommandBuilderTest::testIssue1407_2
+S
+CDbCommandBuilderTest::testIssue1407_3
+S
+CDbCommandBuilderTest::testIssue1407_4
+S
+CDbCommandBuilderTest::testIssue1407_5
+S
+CDbCommandBuilderTest::testMultipleInsert
+S
+CPhpMessageSourceTest::testExtensionTranslation
+.
+CPhpMessageSourceTest::testModuleTranslation
+.
+MessageCommandTest::testEmptyArgs
+.
+MessageCommandTest::testConfigFileNotExist
+.
+MessageCommandTest::testCreateTranslation
+.
+MessageCommandTest::testNothingNew
+.
+MessageCommandTest::testMerge
+F
+CHttpRequestTest::testParseAcceptHeader with data set #0 
+.
+CHttpRequestTest::testParseAcceptHeader with data set #1 
+.
+CHttpRequestTest::testParseAcceptHeader with data set #2 
+.
+CHttpRequestTest::testParseAcceptHeader with data set #3 
+.
+CHttpRequestTest::testParseAcceptHeader with data set #4 
+.
+CHttpRequestTest::testParseAcceptHeader with data set #5 
+.
+CHttpRequestTest::testCompareAcceptTypes with data set #0 
+.
+CHttpRequestTest::testCompareAcceptTypes with data set #1 
+.
+CHttpRequestTest::testCompareAcceptTypes with data set #2 
+.
+CHttpRequestTest::testCompareAcceptTypes with data set #3 
+.
+CHttpRequestTest::testCompareAcceptTypes with data set #4 
+.
 CActiveRecordEventWrappersTest::testBeforeFind
 .
 CActiveRecordEventWrappersTest::testBeforeFindStatSelect
@@ -476,8 +646,6 @@ CActiveRecordEventWrappersTest::testAfterFindRelational
 .
 CActiveRecordEventWrappersTest::testIssue591
 E
-CCacheDependencyTest::testReuseDependentData
-.
 CPropertyValueTest::testEnsureBoolean
 .
 CPropertyValueTest::testEnsureString
@@ -492,221 +660,103 @@ CPropertyValueTest::testEnsureObject
 .
 CPropertyValueTest::testEnsureEnum
 .
-CDataProviderIteratorTest::testIterator with data set #0 
+CActiveDataProviderTest::testCountCriteria
 .
-CDataProviderIteratorTest::testIterator with data set #1 
-.
-CDataProviderIteratorTest::testIterator with data set #2 
-.
-CDataProviderIteratorTest::testIterator with data set #3 
-.
-CDataProviderIteratorTest::testInitWithDisabledPagination with data set #0 
-.
-CDataProviderIteratorTest::testInitWithDisabledPagination with data set #1 
-.
-CDataProviderIteratorTest::testInitWithDisabledPagination with data set #2 
-.
-CDataProviderIteratorTest::testInitWithDisabledPagination with data set #3 
-.
-CUrlManagerTest::testParseUrlWithPathFormat
+CSecurityManagerTest::testValidationKey
 E
-CUrlManagerTest::testcreateUrlWithPathFormat
+CSecurityManagerTest::testEncryptionKey
 E
-CUrlManagerTest::testParseUrlWithGetFormat
+CSecurityManagerTest::testValidation
 E
-CUrlManagerTest::testCreateUrlWithGetFormat
+CSecurityManagerTest::testValidateData
 E
-CUrlManagerTest::testDefaultParams
+CSecurityManagerTest::testEncryptData
 E
-CUrlManagerTest::testVerb
+CSecurityManagerTest::testComputeHMAC with data set #0 
 E
-CUrlManagerTest::testParsingOnly
+CSecurityManagerTest::testComputeHMAC with data set #1 
 E
-CDbCriteriaTest::testAddCondition
+CSecurityManagerTest::testComputeHMAC with data set #2 
+E
+CSecurityManagerTest::testComputeHMAC with data set #3 
+E
+CSecurityManagerTest::testGenerateRandomString
+E
+CSecurityManagerTest::testGenerateRandomBytes
+E
+CSecurityManagerTest::testGenerateRandomStringCS
+E
+CSecurityManagerTest::testGenerateRandomBytesCS
+E
+CDateFormatterTest::testWeekInMonth
 .
-CDbCriteriaTest::testAddInCondition
+CDateFormatterTest::testStringIntegerDate
 .
-CDbCriteriaTest::testAddNotInCondition
+CDateFormatterTest::testStrToTimeDate
 .
-CDbCriteriaTest::testAddSearchCondition
+CDateFormatterTest::testFormatWeekInMonth with data set #0 
 .
-CDbCriteriaTest::testAddColumnCondition
+CDateFormatterTest::testFormatWeekInMonth with data set #1 
 .
-CDbCriteriaTest::testCompare
+CDateFormatterTest::testFormatWeekInMonth with data set #2 
 .
-CDbCriteriaTest::testMergeWith
+CDateFormatterTest::testFormatWeekInMonth with data set #3 
 .
-CDbCriteriaTest::testMergeWithPositionalPlaceholders
+CDateFormatterTest::testFormatWeekInMonth with data set #4 
 .
-CDbCriteriaTest::testAddBetweenCondition
+CDateFormatterTest::testFormatWeekInMonth with data set #5 
 .
-CDbCriteriaTest::testToArray
+CDateFormatterTest::testFormatWeekInMonth with data set #6 
 .
-CDbCriteriaTest::testSerialize
+CDateFormatterTest::testFormatWeekInMonth with data set #7 
 .
-CDbCriteriaTest::testSerializeAutomaticallyGeneratedParams
+CDateFormatterTest::testFormatWeekInMonth with data set #8 
 .
-CDbCriteriaTest::testWakeupWhenSqlContainingFieldsAreArraysWithSpecifiedParams
+CDateFormatterTest::testFormatWeekInMonth with data set #9 
 .
-CGettextPoFileTest::testLoad
+CDateFormatterTest::testFormatWeekInMonth with data set #10 
 .
-CStackTest::testConstruct
+CDateFormatterTest::testFormatWeekInMonth with data set #11 
 .
-CStackTest::testToArray
+CDateFormatterTest::testFormatWeekInMonth with data set #12 
 .
-CStackTest::testCopyFrom
+CDateFormatterTest::testFormatWeekInMonth with data set #13 
 .
-CStackTest::testCanNotCopyFromNonTraversableTypes
+CDateFormatterTest::testFormatWeekInMonth with data set #14 
 .
-CStackTest::testClear
+CDateFormatterTest::testFormatWeekInMonth with data set #15 
 .
-CStackTest::testContains
+CDateFormatterTest::testFormatWeekInMonth with data set #16 
 .
-CStackTest::testPeek
+CDateFormatterTest::testFormatWeekInMonth with data set #17 
 .
-CStackTest::testCanNotPeekAnEmptyStack
+CDateFormatterTest::testFormatWeekInMonth with data set #18 
 .
-CStackTest::testPop
+CDateFormatterTest::testFormatWeekInMonth with data set #19 
 .
-CStackTest::testCanNotPopAnEmptyStack
+CDateFormatterTest::testFormatWeekInMonth with data set #20 
 .
-CStackTest::testPush
+CDateFormatterTest::testFormatWeekInMonth with data set #21 
 .
-CStackTest::testGetIterator
+CDateFormatterTest::testFormatWeekInMonth with data set #22 
 .
-CStackTest::testGetCount
+CDateFormatterTest::testFormatWeekInMonth with data set #23 
 .
-CStackTest::testCount
+CDateFormatterTest::testFormatWeekInMonth with data set #24 
 .
-CTypedMapTest::testAddRightType
+CDateFormatterTest::testFormatWeekInMonth with data set #25 
 .
-CTypedMapTest::testAddWrongType
+CDateFormatterTest::testFormatWeekInMonth with data set #26 
 .
-CAttributeCollectionTest::testCanGetProperty
+CDateFormatterTest::testFormatWeekInMonth with data set #27 
 .
-CAttributeCollectionTest::testCanNotGetUndefinedProperty
+CDateFormatterTest::testFormatWeekInMonth with data set #28 
 .
-CAttributeCollectionTest::testCanSetProperty
+CDateFormatterTest::testFormatWeekInMonth with data set #29 
 .
-CAttributeCollectionTest::testCanNotSetPropertyIfReadOnly
+CDateFormatterTest::testFormatWeekInMonth with data set #30 
 .
-CAttributeCollectionTest::testGetCaseSensitive
-.
-CAttributeCollectionTest::testSetCaseSensitive
-.
-CAttributeCollectionTest::testItemAt
-.
-CAttributeCollectionTest::testAdd
-.
-CAttributeCollectionTest::testRemove
-.
-CAttributeCollectionTest::testUnset
-.
-CAttributeCollectionTest::testIsset
-.
-CAttributeCollectionTest::testContains
-.
-CAttributeCollectionTest::testHasProperty
-.
-CAttributeCollectionTest::testMergeWithCaseSensitive
-.
-CAttributeCollectionTest::testMergeWithCaseInSensitive
-.
-CDateTimeParserTest::testAllPatterns
-.
-CDateTimeParserTest::testParseDefaults
-.
-CDateTimeParserTest::testShortMonthTitle
-.
-CDateTimeParserTest::testMonthTitle
-.
-CDateTimeParserTest::testLocaleShortMonthTitle
-.
-CDateTimeParserTest::testLocaleMonthTitle
-.
-CDateTimeParserTest::testFailing
-.
-CActiveRecord2Test::testModel
-S
-CActiveRecord2Test::testFind
-S
-CActiveRecord2Test::testInsert
-S
-CActiveRecord2Test::testUpdate
-S
-CActiveRecord2Test::testDelete
-S
-CActiveRecord2Test::testRefresh
-S
-CActiveRecord2Test::testEquals
-S
-CActiveRecord2Test::testValidation
-S
-CActiveRecord2Test::testCompositeKey
-S
-CActiveRecord2Test::testDefault
-S
-CActiveRecord2Test::testPublicAttribute
-S
-CActiveRecord2Test::testLazyRelation
-S
-CActiveRecord2Test::testEagerRelation
-S
-CActiveRecord2Test::testLazyRecursiveRelation
-S
-CActiveRecord2Test::testEagerRecursiveRelation
-S
-CActiveRecord2Test::testRelationWithCondition
-S
-CActiveRecord2Test::testSelfManyMany
-S
-CActiveRecord2Test::testRelationalCount
-S
-CActiveRecord2Test::testEmptyFinding
-S
-CActiveRecord2Test::testIssue2122
-S
-CActiveRecord2Test::testEmptyModel
-S
-MessageCommandTest::testEmptyArgs
-.
-MessageCommandTest::testConfigFileNotExist
-.
-MessageCommandTest::testCreateTranslation
-.
-MessageCommandTest::testNothingNew
-.
-MessageCommandTest::testMerge
-F
-MessageCommandTest::testMultiplyTranslators
-F
-CMysql2Test::testCreateTable
-S
-CMysql2Test::testRenameTable
-S
-CMysql2Test::testDropTable
-S
-CMysql2Test::testAddColumn
-S
-CMysql2Test::testAlterColumn
-S
-CMysql2Test::testRenameColumn
-S
-CMysql2Test::testDropColumn
-S
-CMysql2Test::testAddForeignKey
-S
-CMysql2Test::testDropForeignKey
-S
-CMysql2Test::testCreateIndex
-S
-CMysql2Test::testDropIndex
-S
-CMysql2Test::testAddPrimaryKey
-S
-CHttpCookieTest::testConfigure
-.
-CHttpCookieTest::test__ToString
+CDateFormatterTest::testFormatWeekInMonth with data set #31 
 .
 YiiTTest::testSimple
 E
@@ -736,42 +786,48 @@ YiiTTest::testChoicePlaceholders
 E
 YiiTTest::testChoicePlaceholdersSameLanguage
 E
-CPhpAuthManagerTest::testSaveLoad
+COciTest::testSchema
+S
+COciTest::testTable
+S
+COciTest::testColumn
+S
+COciTest::testCommandBuilder
+S
+COciTest::testResetSequence
+S
+COciTest::testColumnComments
+S
+COciTest::testMultipleInsert
+S
+CMysql2Test::testCreateTable
+S
+CMysql2Test::testRenameTable
+S
+CMysql2Test::testDropTable
+S
+CMysql2Test::testAddColumn
+S
+CMysql2Test::testAlterColumn
+S
+CMysql2Test::testRenameColumn
+S
+CMysql2Test::testDropColumn
+S
+CMysql2Test::testAddForeignKey
+S
+CMysql2Test::testDropForeignKey
+S
+CMysql2Test::testCreateIndex
+S
+CMysql2Test::testDropIndex
+S
+CMysql2Test::testAddPrimaryKey
+S
+CLocalizedFormatterTest::testBooleanFormat
 .
-CPhpAuthManagerTest::testcreateAuthItem
-.
-CPhpAuthManagerTest::testGetAuthItem
-.
-CPhpAuthManagerTest::testRemoveAuthItem
-.
-CPhpAuthManagerTest::testChangeItemName
-.
-CPhpAuthManagerTest::testAddItemChild
-.
-CPhpAuthManagerTest::testAddItemChild2
-.
-CPhpAuthManagerTest::testRemoveItemChild
-.
-CPhpAuthManagerTest::testGetItemChildren
-.
-CPhpAuthManagerTest::testAssign
-.
-CPhpAuthManagerTest::testRevoke
-.
-CPhpAuthManagerTest::testGetAuthAssignments
-.
-CPhpAuthManagerTest::testGetAuthItems
-.
-CPhpAuthManagerTest::testClearAll
-.
-CPhpAuthManagerTest::testClearAuthAssignments
-.
-CPhpAuthManagerTest::testDetectLoop
-.
-CPhpAuthManagerTest::testExecuteBizRule
-.
-CPhpAuthManagerTest::testCheckAccess
-.
+CMultiFileUploadTest::testCallbackEncoding
+UNKNOWN STATUS
 CEmailValidatorTest::testEmpty
 .
 CEmailValidatorTest::testNumericEmail
@@ -818,136 +874,84 @@ CEmailValidatorTest::testIDNUrl with data set #19
 .
 CEmailValidatorTest::testArrayValue
 .
-CValidatorTest::test
+CHttpSessionTest::testSetGet
+E
+CHttpCookieTest::testConfigure
 .
-CValidatorTest::testScenarios
+CHttpCookieTest::test__ToString
 .
-CPostgres2Test::testCreateTable
-S
-CPostgres2Test::testCreateTableBig
-S
-CPostgres2Test::testRenameTable
-S
-CPostgres2Test::testDropTable
-S
-CPostgres2Test::testAddColumn
-S
-CPostgres2Test::testAlterColumn
-S
-CPostgres2Test::testRenameColumn
-S
-CPostgres2Test::testDropColumn
-S
-CPostgres2Test::testAddForeignKey
-S
-CPostgres2Test::testDropForeignKey
-S
-CPostgres2Test::testCreateIndex
-S
-CPostgres2Test::testDropIndex
-S
-CMemCacheTest::testMget
-E
-CMemCacheTest::testKeyPrefix
-E
-CMemCacheTest::testGetAndSet
-E
-CMemCacheTest::testArrayAccess
-E
-CMemCacheTest::testExpire2
-E
-CMemCacheTest::testDelete
-E
-CMemCacheTest::testBigExpireValues
-E
-CNumberFormatterTest::testFormatCurrency
+CFileCacheDependencyTest::testFileName
 .
-CNumberFormatterTest::testFormatDecimal
+CFileCacheDependencyTest::testHasChanged
 .
-CNumberFormatterTest::testFormatPercentage
+CModuleTest::testGetId
 .
-CTypedListTest::testClassType
+CModuleTest::testSetId
 .
-CTypedListTest::testInterfaceType
+CModuleTest::testSetBasePath
 .
-CUrlRuleTest::testParseUrlMatchValue
-E
+CModuleTest::testGetBasePath
+.
+CModuleTest::testGetParams
+.
+CModuleTest::testSetParams
+.
+CModuleTest::testGetModulePath
+.
+CModuleTest::testSetModulePath
+.
+CModuleTest::testGetParentModule
+.
+CModuleTest::testGetModule
+.
+CModuleTest::testGetModules
+.
+CModuleTest::testGetComponents
+.
+CModuleTest::testSetComponents
+.
+CModuleTest::testSetComponentsViaConfig
+.
+CModuleTest::testSetAliases
+.
 CJavaScriptTest::testLegacyEncode
 .
 CJavaScriptTest::testLegacyEncodeSafe
 .
 CJavaScriptTest::testEncode
 .
-CTimestampBehaviorTest::testCreateAttribute
-.
-CTimestampBehaviorTest::testUpdateAttribute
-.
-CBooleanValidatorTest::testValidationUsingCustomFalseTrueValues
-.
-CBooleanValidatorTest::testValidateAndAllowEmpty
-.
-CBooleanValidatorTest::testValidationUsingStrict
-.
-CBooleanValidatorTest::testValidateArrayValue
-.
-CDbCommandBuilderTest::testIssue1407_1
-S
-CDbCommandBuilderTest::testIssue1407_2
-S
-CDbCommandBuilderTest::testIssue1407_3
-S
-CDbCommandBuilderTest::testIssue1407_4
-S
-CDbCommandBuilderTest::testIssue1407_5
-S
-CDbCommandBuilderTest::testMultipleInsert
-S
-CStringValidatorTest::testMin
-E
-CStringValidatorTest::testMax
-E
-CStringValidatorTest::testIs
-E
 CMaskedTextFieldTest::testCallbackEncoding
+UNKNOWN STATUS
+CDateTimeParserTest::testAllPatterns
+.
+CDateTimeParserTest::testParseDefaults
+.
+CDateTimeParserTest::testShortMonthTitle
+.
+CDateTimeParserTest::testMonthTitle
+.
+CDateTimeParserTest::testLocaleShortMonthTitle
+.
+CDateTimeParserTest::testLocaleMonthTitle
+.
+CDateTimeParserTest::testFailing
+.
+CGridViewTest::testCallbackEncoding
 E
-CDbConnectionTest::testAutoConnect
+CConfigurationTest::testLoadFromFile
 .
-CDbConnectionTest::testInitialized
+CConfigurationTest::testSaveAsString
 .
-CDbConnectionTest::testActive
-F
-CDbConnectionTest::testCreateCommand
+CConfigurationTest::testApplyTo
 .
-CDbConnectionTest::testLastInsertID
+CConfigurationTest::testException
 .
-CDbConnectionTest::testQuoteValue
+CConfigurationTest::testCreateComponent
 .
-CDbConnectionTest::testColumnNameCase
-.
-CDbConnectionTest::testNullConversion
-.
-CHttpRequestTest::testParseAcceptHeader with data set #0 
-.
-CHttpRequestTest::testParseAcceptHeader with data set #1 
-.
-CHttpRequestTest::testParseAcceptHeader with data set #2 
-.
-CHttpRequestTest::testParseAcceptHeader with data set #3 
-.
-CHttpRequestTest::testParseAcceptHeader with data set #4 
-.
-CHttpRequestTest::testParseAcceptHeader with data set #5 
-.
-CHttpRequestTest::testCompareAcceptTypes with data set #0 
-.
-CHttpRequestTest::testCompareAcceptTypes with data set #1 
-.
-CHttpRequestTest::testCompareAcceptTypes with data set #2 
-.
-CHttpRequestTest::testCompareAcceptTypes with data set #3 
-.
-CHttpRequestTest::testCompareAcceptTypes with data set #4 
-.
+CStatePersisterTest::testLoadSave
+E
+CStatePersisterTest::testStateFile
+E
 CHtmlTest::testEncodeArray with data set #0 
 .
 CHtmlTest::testEncodeArray with data set #1 
@@ -1278,127 +1282,27 @@ CHtmlTest::testLinkButton with data set #2
 .
 CHtmlTest::testAjaxCallbacks
 .
-CWsdlGeneratorTest::testGenerateWsdl
+CBooleanValidatorTest::testValidationUsingCustomFalseTrueValues
+.
+CBooleanValidatorTest::testValidateAndAllowEmpty
+.
+CBooleanValidatorTest::testValidationUsingStrict
+.
+CBooleanValidatorTest::testValidateArrayValue
+.
+CControllerTest::testDefaultProperties
 E
-CWsdlGeneratorTest::testGenerateHtmlDocumentation
+CControllerTest::testRunAction
 E
-CSqlDataProviderTest::testFetchKeysWithDbCommandSpecifiedAndPdoFetchObjEnabled
-.
-CUniqueValidatorTest::testValidate
-.
-CUniqueValidatorTest::testValidateCaseSensitive
-.
-CUniqueValidatorTest::testValidateWithCriteria
-.
-CUniqueValidatorTest::testArrayValue
-.
-CDbAuthManagerTest::testcreateAuthItem
-S
-CDbAuthManagerTest::testGetAuthItem
-S
-CDbAuthManagerTest::testRemoveAuthItem
-S
-CDbAuthManagerTest::testChangeItemName
-S
-CDbAuthManagerTest::testAddItemChild
-S
-CDbAuthManagerTest::testAddItemChild2
-S
-CDbAuthManagerTest::testRemoveItemChild
-S
-CDbAuthManagerTest::testGetItemChildren
-S
-CDbAuthManagerTest::testAssign
-S
-CDbAuthManagerTest::testRevoke
-S
-CDbAuthManagerTest::testGetAuthAssignments
-S
-CDbAuthManagerTest::testGetAuthItems
-S
-CDbAuthManagerTest::testClearAll
-S
-CDbAuthManagerTest::testClearAuthAssignments
-S
-CDbAuthManagerTest::testDetectLoop
-S
-CDbAuthManagerTest::testExecuteBizRule
-S
-CDbAuthManagerTest::testCheckAccess
-S
-CButtonColumnTest::testCallbackEncoding
+CControllerTest::testActionParams
 E
-COciTest::testSchema
-S
-COciTest::testTable
-S
-COciTest::testColumn
-S
-COciTest::testCommandBuilder
-S
-COciTest::testResetSequence
-S
-COciTest::testColumnComments
-S
-COciTest::testMultipleInsert
-S
-CSqliteTest::testSchema
-.
-CSqliteTest::testTable
-.
-CSqliteTest::testColumn
-.
-CSqliteTest::testCommandBuilder
-.
-CSqliteTest::testResetSequence
-.
-CSqliteTest::testCheckIntegrity1
-.
-CSqliteTest::testCheckIntegrity2
-.
-CSqliteTest::testCheckIntegrity3
-.
-CSqliteTest::testRenameTable
-.
-CSqliteTest::testMultipleInsert
-.
-CDbCacheTest::testKeyPrefix
+CControllerTest::testActionParamsInvalid
 E
-CDbCacheTest::testGetAndSet
-E
-CDbCacheTest::testMGet
-E
-CDbCacheTest::testArrayAccess
-E
-CDbCacheTest::testExpire
-E
-CDbCacheTest::testUseDbConnection
-E
-CDbCacheTest::testDependency
-E
-CDbCacheTest::testAdd
-E
-CDbCacheTest::testDelete
-E
-CDbCacheTest::testFlush
-E
-CCompareValidatorTest::testValidationErrorsWithEquals
+CNumberFormatterTest::testFormatCurrency
 .
-CCompareValidatorTest::testValidationErrorsWithNotEquals
+CNumberFormatterTest::testFormatDecimal
 .
-CCompareValidatorTest::testValidationErrorsWitGreaterThan
-.
-CCompareValidatorTest::testValidationErrorsWitGreaterThanOrEqual
-.
-CCompareValidatorTest::testValidationErrorsWitLessThan
-.
-CCompareValidatorTest::testValidationErrorsWitLessThanOrEqual
-.
-CCompareValidatorTest::testClientValidateAttributeThrowsExcpetion
-.
-CCompareValidatorTest::testValidateThrowsExcpetionforBadOperator
-.
-CCompareValidatorTest::testOverrideCompareValue
+CNumberFormatterTest::testFormatPercentage
 .
 CFileValidatorTest::testSizeToBytes with data set #0 
 .
@@ -1436,101 +1340,137 @@ CFileValidatorTest::testValidate
 E
 CFileValidatorTest::testValidateNoFile
 E
-CMysqlTest::testSchema
-S
-CMysqlTest::testTable
-S
-CMysqlTest::testColumn
-S
-CMysqlTest::testCommandBuilder
-S
-CMysqlTest::testResetSequence
-S
-CMysqlTest::testColumnComments
-S
-CDbCommand2Test::testSelect
-.
-CDbCommand2Test::testDistinct
-.
-CDbCommand2Test::testFrom
-.
-CDbCommand2Test::testWhere
-.
-CDbCommand2Test::testAndWhere
-.
-CDbCommand2Test::testOrWhere
-.
-CDbCommand2Test::testJoin
-.
-CDbCommand2Test::testGroup
-.
-CDbCommand2Test::testHaving
-.
-CDbCommand2Test::testOrder
-.
-CDbCommand2Test::testLimit
-.
-CDbCommand2Test::testOffset
-.
-CDbCommand2Test::testUnion
-.
-CDbCommand2Test::testQuery
-.
-CDbCommand2Test::testArraySyntax
-.
-CDbCommand2Test::testEmptyArray
-.
-CGridViewTest::testCallbackEncoding
+CButtonColumnTest::testCallbackEncoding
 E
-CFormatterTest::testSizeFormat
-.
-CFormatterTest::testSizeFormatTranslation with data set #0 
-.
-CFormatterTest::testSizeFormatTranslation with data set #1 
-.
-CFormatterTest::testSizeFormatTranslation with data set #2 
-.
-CFormatterTest::testSizeFormatTranslation with data set #3 
-.
-CFormatterTest::testSizeFormatTranslation with data set #4 
-.
-CFormatterTest::testSizeFormatTranslation with data set #5 
-.
-CFormatterTest::testSizeFormatTranslation with data set #6 
-.
-CFormatterTest::testFormatNtext with data set #0 
-.
-CFormatterTest::testFormatNtext with data set #1 
-.
-CFormatterTest::testFormatNtext with data set #2 
-.
-CFormatterTest::testFormatNtext with data set #3 
-.
-CSecurityManagerTest::testValidationKey
+CFileCacheTest::testPathMode
 E
-CSecurityManagerTest::testEncryptionKey
+CFileCacheTest::testFileMode
 E
-CSecurityManagerTest::testValidation
+CFileCacheTest::testEmbedExpiry
 E
-CSecurityManagerTest::testValidateData
+CWebUserTest::testLoginLogout with data set #0 
 E
-CSecurityManagerTest::testEncryptData
+CWebUserTest::testLoginLogout with data set #1 
 E
-CSecurityManagerTest::testComputeHMAC with data set #0 
+CWebUserTest::testCheckAccess
 E
-CSecurityManagerTest::testComputeHMAC with data set #1 
+CDbCacheTest::testKeyPrefix
 E
-CSecurityManagerTest::testComputeHMAC with data set #2 
+CDbCacheTest::testGetAndSet
 E
-CSecurityManagerTest::testComputeHMAC with data set #3 
+CDbCacheTest::testMGet
 E
-CSecurityManagerTest::testGenerateRandomString
+CDbCacheTest::testArrayAccess
 E
-CSecurityManagerTest::testGenerateRandomBytes
+CDbCacheTest::testExpire
 E
-CSecurityManagerTest::testGenerateRandomStringCS
+CDbCacheTest::testUseDbConnection
 E
-CSecurityManagerTest::testGenerateRandomBytesCS
+CDbCacheTest::testDependency
+E
+CDbCacheTest::testAdd
+E
+CDbCacheTest::testDelete
+E
+CDbCacheTest::testFlush
+E
+CStackTest::testConstruct
+.
+CStackTest::testToArray
+.
+CStackTest::testCopyFrom
+.
+CStackTest::testCanNotCopyFromNonTraversableTypes
+.
+CStackTest::testClear
+.
+CStackTest::testContains
+.
+CStackTest::testPeek
+.
+CStackTest::testCanNotPeekAnEmptyStack
+.
+CStackTest::testPop
+.
+CStackTest::testCanNotPopAnEmptyStack
+.
+CStackTest::testPush
+.
+CStackTest::testGetIterator
+.
+CStackTest::testGetCount
+.
+CStackTest::testCount
+.
+CUniqueValidatorTest::testValidate
+.
+CUniqueValidatorTest::testValidateCaseSensitive
+.
+CUniqueValidatorTest::testValidateWithCriteria
+.
+CUniqueValidatorTest::testArrayValue
+.
+CRangeValidatorTest::testEmpty
+.
+CRangeValidatorTest::testZeroString
+.
+CRangeValidatorTest::testZeroNumber
+.
+CModelTest::testValidate
+.
+CModelTest::testBeforeValidate
+.
+CModelTest::testIsAttributeRequired
+.
+CModelTest::testIsAttributeSafe
+.
+CModelTest::testGetSafeAttributeNames
+.
+CModelTest::testModifyValidators
+.
+CModelTest::testErrors
+.
+CModelTest::testGetAttributes
+.
+CModelTest::testUnsetAttributes
+.
+CModelTest::testGeneratingAttributeLabel
+.
+CModelTest::testErrorsForAllAttributes
+.
+CModelTest::testErrorsForSingleAttribute
+.
+CModelTest::testAddingAnErrorToSpecifiedAttribute
+.
+CModelTest::testAddingAnErrorToASingleAttribute
+.
+CModelTest::testAddingAnErrorToMultipleAttributes
+.
+CModelTest::testAddingMultipleErrorsToASingleAttribute
+.
+CModelTest::testAddingMultipleErrorsToMultipleAttributes
+.
+CModelTest::testFirstErrorMessageForInvalidAttribute
+.
+CModelTest::testNoErrorMessageForValidAttribute
+.
+CModelTest::testModelWithInvalidRules
+.
+CFileHelperTest::testGetMimeTypeByExtension
+.
+CFileHelperTest::testCopyDirectory_subDir_modeShoudBe0775
+.
+CFileHelperTest::testCopyDirectory_subDir_modeShoudBe0777
+.
+CFileHelperTest::testRemoveDirectory
+.
+CFileHelperTest::testFindFiles_absolutePaths
+.
+CFileHelperTest::testFindFiles_relativePaths
+.
+CFileHelperTest::testCreateDirectory
+.
+CListViewTest::testCallbackEncoding
 E
 CCookieCollectionTest::testConstructorCookieBuilding
 E
@@ -1540,119 +1480,81 @@ CCookieCollectionTest::testRemove
 E
 CCookieCollectionTest::testGetRequest
 E
-CQueueTest::testConstruct
+CUploadedFileTest::testGetInstanceByName
 .
-CQueueTest::testToArray
+CUploadedFileTest::testGetInstancesByName
 .
-CQueueTest::testCopyFrom
+CUploadedFileTest::testGetInstanceByNestedName
 .
-CQueueTest::testCanNotCopyFromNonTraversableTypes
+CUploadedFileTest::testGetInstancesByNamePartOfOtherName
 .
-CQueueTest::testClear
+CPostgres2Test::testCreateTable
+S
+CPostgres2Test::testCreateTableBig
+S
+CPostgres2Test::testRenameTable
+S
+CPostgres2Test::testDropTable
+S
+CPostgres2Test::testAddColumn
+S
+CPostgres2Test::testAlterColumn
+S
+CPostgres2Test::testRenameColumn
+S
+CPostgres2Test::testDropColumn
+S
+CPostgres2Test::testAddForeignKey
+S
+CPostgres2Test::testDropForeignKey
+S
+CPostgres2Test::testCreateIndex
+S
+CPostgres2Test::testDropIndex
+S
+CJuiButtonTest::testCallbackEncoding
+E
+CJavaScriptExpressionTest::testToString
 .
-CQueueTest::testContains
+CAttributeCollectionTest::testCanGetProperty
 .
-CQueueTest::testPeek
+CAttributeCollectionTest::testCanNotGetUndefinedProperty
 .
-CQueueTest::testCanNotPeekAnEmptyQueue
+CAttributeCollectionTest::testCanSetProperty
 .
-CQueueTest::testDequeue
+CAttributeCollectionTest::testCanNotSetPropertyIfReadOnly
 .
-CQueueTest::testCanNotDequeueAnEmptyQueue
+CAttributeCollectionTest::testGetCaseSensitive
 .
-CQueueTest::testEnqueue
+CAttributeCollectionTest::testSetCaseSensitive
 .
-CQueueTest::testGetIterator
+CAttributeCollectionTest::testItemAt
 .
-CQueueTest::testGetCount
+CAttributeCollectionTest::testAdd
 .
-CQueueTest::testCountable
+CAttributeCollectionTest::testRemove
 .
-CFileCacheDependencyTest::testFileName
+CAttributeCollectionTest::testUnset
 .
-CFileCacheDependencyTest::testHasChanged
+CAttributeCollectionTest::testIsset
 .
-CComponentTest::testHasProperty
+CAttributeCollectionTest::testContains
 .
-CComponentTest::testCanGetProperty
+CAttributeCollectionTest::testHasProperty
 .
-CComponentTest::testCanSetProperty
+CAttributeCollectionTest::testMergeWithCaseSensitive
 .
-CComponentTest::testGetProperty
+CAttributeCollectionTest::testMergeWithCaseInSensitive
 .
-CComponentTest::testSetProperty
+CAutoCompleteTest::testCallbackEncoding
+E
+CSortTest::testGetDirectionsWithDots
 .
-CComponentTest::testIsset
+CSortTest::testGetDirectionsWithArrays
 .
-CComponentTest::testUnset
+CDefaultValueValidatorTest::testDefaultValueIsSetWhenSetOnEmptyIsTrue
 .
-CComponentTest::testCallMethodFromBehavior
-.
-CComponentTest::testHasEvent
-.
-CComponentTest::testHasEventHandler
-.
-CComponentTest::testGetEventHandlers
-.
-CComponentTest::testAttachEventHandler
-.
-CComponentTest::testDetachEventHandler
-.
-CComponentTest::testAttachDetachEventHandler
-.
-CComponentTest::testRaiseEvent
-.
-CComponentTest::testEventAccessor
-.
-CComponentTest::testStopEvent
-.
-CComponentTest::testInvalidHandler1
-.
-CComponentTest::testInvalidHandler2
-.
-CComponentTest::testAttachingBehavior
-.
-CComponentTest::testDetachingBehavior
-.
-CComponentTest::testDetachingBehaviors
-.
-CComponentTest::testEnablingBehavior
-.
-CComponentTest::testEnablingBehaviors
-.
-CComponentTest::testAsa
-.
-CComponentTest::testEvaluateExpression
-.
-CModuleTest::testGetId
-.
-CModuleTest::testSetId
-.
-CModuleTest::testSetBasePath
-.
-CModuleTest::testGetBasePath
-.
-CModuleTest::testGetParams
-.
-CModuleTest::testSetParams
-.
-CModuleTest::testGetModulePath
-.
-CModuleTest::testSetModulePath
-.
-CModuleTest::testGetParentModule
-.
-CModuleTest::testGetModule
-.
-CModuleTest::testGetModules
-.
-CModuleTest::testGetComponents
-.
-CModuleTest::testSetComponents
-.
-CModuleTest::testSetComponentsViaConfig
-.
-CModuleTest::testSetAliases
+CDefaultValueValidatorTest::testDefaultValueIsSetWhenSetOnEmptyIsFalse
 .
 CLocaleTest::testRequiredDataExistence
 E
@@ -1854,8 +1756,226 @@ CLocaleTest::testGetTerritory with data set #27
 E
 CLocaleTest::testGetTerritory with data set #28 
 E
-PHPUnit_Framework_TestSuite::createTest
-UNKNOWN STATUS
+CPhpAuthManagerTest::testSaveLoad
+.
+CPhpAuthManagerTest::testcreateAuthItem
+.
+CPhpAuthManagerTest::testGetAuthItem
+.
+CPhpAuthManagerTest::testRemoveAuthItem
+.
+CPhpAuthManagerTest::testChangeItemName
+.
+CPhpAuthManagerTest::testAddItemChild
+.
+CPhpAuthManagerTest::testAddItemChild2
+.
+CPhpAuthManagerTest::testRemoveItemChild
+.
+CPhpAuthManagerTest::testGetItemChildren
+.
+CPhpAuthManagerTest::testAssign
+.
+CPhpAuthManagerTest::testRevoke
+.
+CPhpAuthManagerTest::testGetAuthAssignments
+.
+CPhpAuthManagerTest::testGetAuthItems
+.
+CPhpAuthManagerTest::testClearAll
+.
+CPhpAuthManagerTest::testClearAuthAssignments
+.
+CPhpAuthManagerTest::testDetectLoop
+.
+CPhpAuthManagerTest::testExecuteBizRule
+.
+CPhpAuthManagerTest::testCheckAccess
+.
+CArrayDataProviderTest::testGetData
+.
+CArrayDataProviderTest::testGetSortedData
+.
+CArrayDataProviderTest::testGetSortedDataByInnerArrayField
+.
+CArrayDataProviderTest::testCaseSensitiveSort
+.
+CArrayDataProviderTest::testCaseInsensitiveSort
+.
+CUrlRuleTest::testParseUrlMatchValue
+E
+CClientScriptTest::testGetCoreScriptUrl
+.
+CClientScriptTest::testGetPackageBaseUrl with data set #0 
+.
+CClientScriptTest::testGetPackageBaseUrl with data set #1 
+.
+CClientScriptTest::testRegisterCoreScript with data set #0 
+F
+CClientScriptTest::testRegisterCoreScript with data set #1 
+.
+CClientScriptTest::testRegisterCoreScript with data set #2 
+.
+CClientScriptTest::testRegisterPackage with data set #0 
+F
+CClientScriptTest::testRegisterPackage with data set #1 
+.
+CClientScriptTest::testRegisterPackage with data set #2 
+.
+CClientScriptTest::testRegisterScriptFile with data set #0 
+.
+CClientScriptTest::testRegisterScriptFile with data set #1 
+.
+CClientScriptTest::testRegisterScriptFile with data set #2 
+.
+CClientScriptTest::testRegisterScriptFileWithHtmlOptions with data set #0 
+.
+CClientScriptTest::testRegisterScript with data set #0 
+.
+CClientScriptTest::testRegisterScript with data set #1 
+.
+CClientScriptTest::testRegisterScriptWithHtmlOptions with data set #0 
+.
+CClientScriptTest::testRegisterCss with data set #0 
+.
+CClientScriptTest::testRegisterCss with data set #1 
+.
+CClientScriptTest::testRegisterMetaTag with data set #0 
+.
+CClientScriptTest::testRegisterMetaTag with data set #1 
+.
+CClientScriptTest::testRegisterDuplicatingMetaTag
+.
+CClientScriptTest::testRenderScriptFiles with data set #0 
+.
+CClientScriptTest::testRenderScriptFiles with data set #1 
+.
+CClientScriptTest::testRenderScriptFiles with data set #2 
+.
+CClientScriptTest::testRenderScriptFiles with data set #3 
+.
+CClientScriptTest::testRenderScriptFiles with data set #4 
+.
+CClientScriptTest::testRenderScriptFiles with data set #5 
+.
+CClientScriptTest::testRenderScripts with data set #0 
+.
+CClientScriptTest::testRenderScripts with data set #1 
+.
+CClientScriptTest::testRenderScripts with data set #2 
+.
+CClientScriptTest::testRenderScripts with data set #3 
+.
+CClientScriptTest::testRenderScripts with data set #4 
+.
+CClientScriptTest::testRenderScripts with data set #5 
+.
+CClientScriptTest::testRenderScripts with data set #6 
+.
+CClientScriptTest::testRenderScripts with data set #7 
+.
+CClientScriptTest::testRenderScriptsBatch with data set #0 
+.
+CClientScriptTest::testRenderScriptsBatch with data set #1 
+.
+CListTest::testConstruct
+.
+CListTest::testGetReadOnly
+.
+CListTest::testGetCount
+.
+CListTest::testAdd
+.
+CListTest::testInsertAt
+.
+CListTest::testCanNotInsertWhenReadOnly
+.
+CListTest::testRemove
+.
+CListTest::testRemoveAt
+.
+CListTest::testCanNotRemoveWhenReadOnly
+.
+CListTest::testClear
+.
+CListTest::testContains
+.
+CListTest::testIndexOf
+.
+CListTest::testCopyFrom
+.
+CListTest::testMergeWith
+.
+CListTest::testToArray
+.
+CListTest::testArrayRead
+.
+CListTest::testGetIterator
+.
+CListTest::testArrayMisc
+.
+CListTest::testOffsetSetAdd
+.
+CListTest::testOffsetSetReplace
+.
+CListTest::testOffsetUnset
+.
+CListTest::testIteratorCurrent
+.
+CLoggerTest::testLog
+.
+CLoggerTest::testGetLogs
+.
+CDbTransactionTest::testBeginTransaction
+.
+CDbTransactionTest::testCommit
+.
+CStringValidatorTest::testMin
+E
+CStringValidatorTest::testMax
+E
+CStringValidatorTest::testIs
+E
+CRedisCacheTest::testKeyPrefix
+S
+CRedisCacheTest::testGetAndSet
+S
+CRedisCacheTest::testMGet
+S
+CRedisCacheTest::testArrayAccess
+S
+CRedisCacheTest::testExpire
+S
+CRedisCacheTest::testAdd
+S
+CRedisCacheTest::testDelete
+S
+CRedisCacheTest::testFlush
+S
+CRedisCacheTest::testLargeData
+S
+CRedisCacheTest::testMultiByteGetAndSet
+S
+CDbDataReaderTest::testRead
+.
+CDbDataReaderTest::testReadColumn
+.
+CDbDataReaderTest::testReadObject
+.
+CDbDataReaderTest::testReadAll
+.
+CDbDataReaderTest::testClose
+.
+CDbDataReaderTest::testRowCount
+.
+CDbDataReaderTest::testColumnCount
+.
+CDbDataReaderTest::testForeach
+.
+CDbDataReaderTest::testFetchMode
+.
+CDbDataReaderTest::testBindColumn
+F
 CActiveRecordTest::testModel
 .
 CActiveRecordTest::testFind
@@ -1956,281 +2076,147 @@ CActiveRecordTest::testThroughBelongsEager
 .
 CActiveRecordTest::testNamespacedTableName
 E
-CDateFormatterTest::testWeekInMonth
+CJSONTest::testEncodeSingleAR
 .
-CDateFormatterTest::testStringIntegerDate
+CJSONTest::testEncodeMultipleARs
 .
-CDateFormatterTest::testStrToTimeDate
+CJSONTest::testEncodeSimple
 .
-CDateFormatterTest::testFormatWeekInMonth with data set #0 
+CJSONTest::testEncodeArray
 .
-CDateFormatterTest::testFormatWeekInMonth with data set #1 
+CJSONTest::testDecode
 .
-CDateFormatterTest::testFormatWeekInMonth with data set #2 
+CExistValidatorTest::testValidate
 .
-CDateFormatterTest::testFormatWeekInMonth with data set #3 
+CExistValidatorTest::testValidateCaseSensitive
 .
-CDateFormatterTest::testFormatWeekInMonth with data set #4 
+CExistValidatorTest::testValidateWithCriteria
 .
-CDateFormatterTest::testFormatWeekInMonth with data set #5 
+CExistValidatorTest::testArrayValue
 .
-CDateFormatterTest::testFormatWeekInMonth with data set #6 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #7 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #8 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #9 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #10 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #11 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #12 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #13 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #14 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #15 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #16 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #17 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #18 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #19 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #20 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #21 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #22 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #23 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #24 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #25 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #26 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #27 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #28 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #29 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #30 
-.
-CDateFormatterTest::testFormatWeekInMonth with data set #31 
-.
-CLoggerTest::testLog
-.
-CLoggerTest::testGetLogs
-.
-CSortTest::testGetDirectionsWithDots
-.
-CSortTest::testGetDirectionsWithArrays
-.
-CWebUserTest::testLoginLogout with data set #0 
+CAssetManagerTest::testBasePath
 E
-CWebUserTest::testLoginLogout with data set #1 
+CAssetManagerTest::testBaseUrl
 E
-CWebUserTest::testCheckAccess
+CAssetManagerTest::testPublishFile
 E
-CConfigurationTest::testLoadFromFile
+CGettextPoFileTest::testLoad
 .
-CConfigurationTest::testSaveAsString
+CDbCriteriaTest::testAddCondition
 .
-CConfigurationTest::testApplyTo
+CDbCriteriaTest::testAddInCondition
 .
-CConfigurationTest::testException
+CDbCriteriaTest::testAddNotInCondition
 .
-CConfigurationTest::testCreateComponent
+CDbCriteriaTest::testAddSearchCondition
 .
-CModelTest::testValidate
+CDbCriteriaTest::testAddColumnCondition
 .
-CModelTest::testBeforeValidate
+CDbCriteriaTest::testCompare
 .
-CModelTest::testIsAttributeRequired
+CDbCriteriaTest::testMergeWith
 .
-CModelTest::testIsAttributeSafe
+CDbCriteriaTest::testMergeWithPositionalPlaceholders
 .
-CModelTest::testGetSafeAttributeNames
+CDbCriteriaTest::testAddBetweenCondition
 .
-CModelTest::testModifyValidators
+CDbCriteriaTest::testToArray
 .
-CModelTest::testErrors
+CDbCriteriaTest::testSerialize
 .
-CModelTest::testGetAttributes
+CDbCriteriaTest::testSerializeAutomaticallyGeneratedParams
 .
-CModelTest::testUnsetAttributes
+CDbCriteriaTest::testWakeupWhenSqlContainingFieldsAreArraysWithSpecifiedParams
 .
-CModelTest::testGeneratingAttributeLabel
+CDbCommandTest::testGetText
 .
-CModelTest::testErrorsForAllAttributes
+CDbCommandTest::testSetText
 .
-CModelTest::testErrorsForSingleAttribute
+CDbCommandTest::testConnection
 .
-CModelTest::testAddingAnErrorToSpecifiedAttribute
+CDbCommandTest::testPrepare
 .
-CModelTest::testAddingAnErrorToASingleAttribute
+CDbCommandTest::testCancel
 .
-CModelTest::testAddingAnErrorToMultipleAttributes
+CDbCommandTest::testExecute
 .
-CModelTest::testAddingMultipleErrorsToASingleAttribute
+CDbCommandTest::testQuery
 .
-CModelTest::testAddingMultipleErrorsToMultipleAttributes
+CDbCommandTest::testBindParam
 .
-CModelTest::testFirstErrorMessageForInvalidAttribute
+CDbCommandTest::testBindValue
 .
-CModelTest::testNoErrorMessageForValidAttribute
+CDbCommandTest::testQueryAll
 .
-CModelTest::testModelWithInvalidRules
+CDbCommandTest::testQueryRow
 .
-CDbDataReaderTest::testRead
+CDbCommandTest::testQueryColumn
 .
-CDbDataReaderTest::testReadColumn
+CDbCommandTest::testQueryScalar
 .
-CDbDataReaderTest::testReadObject
+CDbCommandTest::testFetchModeDefault
 .
-CDbDataReaderTest::testReadAll
+CDbCommandTest::testFetchModeObject
 .
-CDbDataReaderTest::testClose
+CDbCommandTest::testFetchModeClass
 .
-CDbDataReaderTest::testRowCount
-.
-CDbDataReaderTest::testColumnCount
-.
-CDbDataReaderTest::testForeach
-.
-CDbDataReaderTest::testFetchMode
-.
-CDbDataReaderTest::testBindColumn
-F
-CFileHelperTest::testGetMimeTypeByExtension
-.
-CFileHelperTest::testCopyDirectory_subDir_modeShoudBe0775
-.
-CFileHelperTest::testCopyDirectory_subDir_modeShoudBe0777
-.
-CFileHelperTest::testRemoveDirectory
-.
-CFileHelperTest::testFindFiles_absolutePaths
-.
-CFileHelperTest::testFindFiles_relativePaths
-.
-CFileHelperTest::testCreateDirectory
-.
-CFileCacheTest::testPathMode
+CMemCacheTest::testMget
 E
-CFileCacheTest::testFileMode
+CMemCacheTest::testKeyPrefix
 E
-CFileCacheTest::testEmbedExpiry
+CMemCacheTest::testGetAndSet
 E
-CAutoCompleteTest::testCallbackEncoding
+CMemCacheTest::testArrayAccess
 E
-CListViewTest::testCallbackEncoding
+CMemCacheTest::testExpire2
 E
-CListTest::testConstruct
+CMemCacheTest::testDelete
+E
+CMemCacheTest::testBigExpireValues
+E
+CCacheDependencyTest::testReuseDependentData
 .
-CListTest::testGetReadOnly
+CWsdlGeneratorTest::testGenerateWsdl
+E
+CWsdlGeneratorTest::testGenerateHtmlDocumentation
+E
+CNumberValidatorTest::testIssue1669 with data set #0 
 .
-CListTest::testGetCount
+CNumberValidatorTest::testIssue1669 with data set #1 
 .
-CListTest::testAdd
+CNumberValidatorTest::testIssue1669 with data set #2 
 .
-CListTest::testInsertAt
+CNumberValidatorTest::testIssue1669 with data set #3 
 .
-CListTest::testCanNotInsertWhenReadOnly
+CNumberValidatorTest::testIssue1669 with data set #4 
 .
-CListTest::testRemove
+CNumberValidatorTest::testIssue1669 with data set #5 
 .
-CListTest::testRemoveAt
+CNumberValidatorTest::testIssue1669 with data set #6 
 .
-CListTest::testCanNotRemoveWhenReadOnly
+CNumberValidatorTest::testIssue1669 with data set #7 
 .
-CListTest::testClear
+CNumberValidatorTest::testIssue1669 with data set #8 
 .
-CListTest::testContains
+CNumberValidatorTest::testIssue1669 with data set #9 
 .
-CListTest::testIndexOf
+CNumberValidatorTest::testIssue1669 with data set #10 
 .
-CListTest::testCopyFrom
+CNumberValidatorTest::testIssue1669 with data set #11 
 .
-CListTest::testMergeWith
+CNumberValidatorTest::testIssue1669 with data set #12 
 .
-CListTest::testToArray
+CNumberValidatorTest::testIssue1669 with data set #13 
 .
-CListTest::testArrayRead
+CBehaviorTest::testAttachBehavior
 .
-CListTest::testGetIterator
+CBehaviorTest::testDisableBehaviors
 .
-CListTest::testArrayMisc
+CBehaviorTest::testDisableBehaviorsAndModels
 .
-CListTest::testOffsetSetAdd
+CBehaviorTest::testDisableAndEnableBehaviorsAndModels
 .
-CListTest::testOffsetSetReplace
+CBehaviorTest::testDuplicateEventHandlers
 .
-CListTest::testOffsetUnset
+CApplicationComponentTest::testInitialization
 .
-CListTest::testIteratorCurrent
-.
-CTypeValidatorTest::testInteger
-.
-CTypeValidatorTest::testIntegerStrict
-.
-CTypeValidatorTest::testFloat
-.
-CTypeValidatorTest::testFloatStrict
-.
-CTypeValidatorTest::testString
-.
-CTypeValidatorTest::testArray
-.
-CTypeValidatorTest::testDate
-.
-CTypeValidatorTest::testTime
-.
-CTypeValidatorTest::testDateTime
-.
-CRequiredValidatorTest::testEmpty
-.
-CRequiredValidatorTest::testSpaces
-.
-CRequiredValidatorTest::testEmptyWithSpaces
-.
-CJavaScriptExpressionTest::testToString
-.
-CArrayDataProviderTest::testGetData
-.
-CArrayDataProviderTest::testGetSortedData
-.
-CArrayDataProviderTest::testGetSortedDataByInnerArrayField
-.
-CArrayDataProviderTest::testCaseSensitiveSort
-.
-CArrayDataProviderTest::testCaseInsensitiveSort
-.
-CRedisCacheTest::testKeyPrefix
-S
-CRedisCacheTest::testGetAndSet
-S
-CRedisCacheTest::testMGet
-S
-CRedisCacheTest::testArrayAccess
-S
-CRedisCacheTest::testExpire
-S
-CRedisCacheTest::testAdd
-S
-CRedisCacheTest::testDelete
-S
-CRedisCacheTest::testFlush
-S
-CRedisCacheTest::testLargeData
-S
-CRedisCacheTest::testMultiByteGetAndSet
-S

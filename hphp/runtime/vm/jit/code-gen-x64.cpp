@@ -5019,12 +5019,12 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
     if (false) { // typecheck
       UNUSED TypedValue* fake_fp = nullptr;
       UNUSED TypedValue* fake_sp = nullptr;
-      const UNUSED Func* f = StaticMethodCache::lookupIR(
+      const UNUSED Func* f = StaticMethodCache::lookup(
         ch, ne, cls, method, fake_fp, fake_sp);
     }
     // can raise an error if class is undefined
     cgCallHelper(a,
-                 CppCall(StaticMethodCache::lookupIR),
+                 CppCall(StaticMethodCache::lookup),
                  callDest(funcDestReg),
                  SyncOptions::kSyncPoint,
                  ArgGroup(curOpds()).imm(ch)      // Handle ch
@@ -5037,7 +5037,7 @@ void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
     // recordInstrCall is done in cgCallHelper
     a.testq(funcDestReg, funcDestReg);
     a.loadq(rVmTl[ch + offsetof_cls], classDestReg);
-    // if StaticMethodCache::lookupIR() returned NULL, jmp to label
+    // if StaticMethodCache::lookup() returned NULL, jmp to label
     emitFwdJcc(a, CC_Z, label);
   });
 }
@@ -5139,7 +5139,7 @@ void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
     const Func* (*lookup)(RDS::Handle, const Class*,
       const StringData*, TypedValue*) =
-        StaticMethodFCache::lookupIR;
+        StaticMethodFCache::lookup;
     // preserve destCtxReg across the call since it wouldn't be otherwise
     RegSet toSave = m_state.liveRegs[inst] | RegSet(destCtxReg);
     cgCallHelper(a,
@@ -5197,7 +5197,7 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   auto const ch = SPropCache::alloc(makeStaticString(sd));
 
   auto dstReg = curOpd(dst).reg();
-  // Cls is live in the slow path call to lookupIR, so we have to be
+  // Cls is live in the slow path call to lookup, so we have to be
   // careful not to clobber it before the branch to slow path. So
   // use the scratch register as a temporary destination if cls is
   // assigned the same register as the dst register.

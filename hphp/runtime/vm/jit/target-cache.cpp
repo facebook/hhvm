@@ -478,10 +478,10 @@ RDS::Handle StaticMethodFCache::alloc(const StringData* clsName,
 }
 
 const Func*
-StaticMethodCache::lookupIR(RDS::Handle handle, const NamedEntity *ne,
-                            const StringData* clsName,
-                            const StringData* methName, TypedValue* vmfp,
-                            TypedValue* vmsp) {
+StaticMethodCache::lookup(RDS::Handle handle, const NamedEntity *ne,
+                          const StringData* clsName,
+                          const StringData* methName, TypedValue* vmfp,
+                          TypedValue* vmsp) {
   StaticMethodCache* thiz = static_cast<StaticMethodCache*>
     (handleToPtr(handle));
   Stats::inc(Stats::TgtCache_StaticMethodMiss);
@@ -521,63 +521,8 @@ StaticMethodCache::lookupIR(RDS::Handle handle, const NamedEntity *ne,
 }
 
 const Func*
-StaticMethodCache::lookup(RDS::Handle handle, const NamedEntity *ne,
-                          const StringData* clsName,
-                          const StringData* methName) {
-  StaticMethodCache* thiz = static_cast<StaticMethodCache*>
-    (handleToPtr(handle));
-  Stats::inc(Stats::TgtCache_StaticMethodMiss);
-  Stats::inc(Stats::TgtCache_StaticMethodHit, -1);
-  TRACE(1, "miss %s :: %s caller %p\n",
-        clsName->data(), methName->data(), __builtin_return_address(0));
-  Transl::VMRegAnchor _; // needed for lookupClsMethod.
-
-  ActRec* ar = reinterpret_cast<ActRec*>(vmsp() - kNumActRecCells);
-  const Func* f;
-  VMExecutionContext* ec = g_vmContext;
-  const Class* cls = Unit::loadClass(ne, clsName);
-  if (UNLIKELY(!cls)) {
-    raise_error(Strings::UNKNOWN_CLASS, clsName->data());
-  }
-  LookupResult res = ec->lookupClsMethod(f, cls, methName,
-                                         nullptr, // there may be an active this,
-                                               // but we can just fall through
-                                               // in that case.
-                                         arGetContextClass(ec->getFP()),
-                                         false /*raise*/);
-  if (LIKELY(res == LookupResult::MethodFoundNoThis &&
-             !f->isAbstract() &&
-             f->isStatic())) {
-    f->validate();
-    TRACE(1, "fill %s :: %s -> %p\n", clsName->data(),
-          methName->data(), f);
-    // Do the | here instead of on every call.
-    thiz->m_cls = (Class*)(uintptr_t(cls) | 1);
-    thiz->m_func = f;
-    ar->setClass(const_cast<Class*>(cls));
-    return f;
-  }
-  assert(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
-  // We've already sync'ed regs; this is some hard case, we might as well
-  // just let the interpreter handle this entirely.
-  assert(toOp(*vmpc()) == OpFPushClsMethodD);
-  Stats::inc(Stats::Instr_InterpOneFPushClsMethodD);
-  Stats::inc(Stats::Instr_TC, -1);
-  ec->opFPushClsMethodD();
-  // Return whatever func the instruction produced; if nothing was
-  // possible we'll either have fataled or thrown.
-  assert(ar->m_func);
-  ar->m_func->validate();
-  // Don't update the cache; this case was too scary to memoize.
-  TRACE(1, "unfillable miss %s :: %s -> %p\n", clsName->data(),
-        methName->data(), ar->m_func);
-  // Indicate to the caller that there is no work to do.
-  return nullptr;
-}
-
-const Func*
-StaticMethodFCache::lookupIR(RDS::Handle handle, const Class* cls,
-                             const StringData* methName, TypedValue* vmfp) {
+StaticMethodFCache::lookup(RDS::Handle handle, const Class* cls,
+                           const StringData* methName, TypedValue* vmfp) {
   assert(cls);
   StaticMethodFCache* thiz = static_cast<StaticMethodFCache*>
     (handleToPtr(handle));

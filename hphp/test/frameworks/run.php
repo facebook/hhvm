@@ -1136,7 +1136,10 @@ class SingleTestFile {
     if ($this->initialize()) {
       while (!(feof($this->pipes[1]))) {
         $line = $this->getLine();
-        if ($line === null) { break; }
+        if ($line === null) {
+          $ret_val = -1;
+          break;
+        }
         if ($this->isBlankLine($line)) {
           continue;
         }
@@ -1175,7 +1178,7 @@ class SingleTestFile {
         }
       }
 
-      $ret_val = $this->finalize();
+      $this->finalize();
       $this->outputData();
 
     } else {
@@ -1194,9 +1197,9 @@ class SingleTestFile {
       return null;
     }
     if (!$this->checkReadStream()) {
-      $this->error_information .= "TEST TIMEOUT OCCURRED.".PHP_EOL;
-      $this->error_information .= " Last line read was: ".$line.PHP_EOL.
+      $this->error_information .= "TEST TIMEOUT OCCURRED on test: ".$this->name.
                                    PHP_EOL;
+      verbose($this->error_information, !Options::$csv_only);
       return null;
     }
     $line = rtrim(fgets($this->pipes[1]), PHP_EOL);
@@ -1208,7 +1211,7 @@ class SingleTestFile {
   private function analyzeTest(string $line): bool {
     $tn_matches = array();
     $match = null;
-    $status = null;
+    $status = "";
     if (preg_match($this->framework->test_name_pattern, $line,
                    $tn_matches) === 1) {
       $match = rtrim($tn_matches[0], PHP_EOL);
@@ -1412,7 +1415,10 @@ class SingleTestFile {
     $r = array($this->pipes[1]);
     $w = null;
     $e = null;
-    if (stream_select($r, $w, $e, Options::$timeout) === false) {
+    $s = stream_select($r, $w, $e, Options::$timeout);
+    // If stream_select returns 0, then there is no more data or we have
+    // timed out. If it returns false, then something else bad happened.
+    if ($s === 0 || $s === false) {
       return false;
     }
     return true;
@@ -1534,6 +1540,8 @@ function fork_buckets(Traversable $data, Callable $callback): int {
     pcntl_waitpid($child, $status);
     $thread_ret_val |= pcntl_wexitstatus($status);
   }
+
+  return $thread_ret_val;
 }
 
 function run_install_bucket(array $bucket): int {
@@ -1614,9 +1622,12 @@ function run_tests(Vector $frameworks): void {
   }
 
   $ret_val = 0;
-
-  fork_buckets($all_tests,
-               function($bucket) {return run_test_bucket($bucket);});
+  $ret_val = fork_buckets(
+    $all_tests,
+    function($bucket) {
+      return run_test_bucket($bucket);
+    }
+  );
 
   /****************************************
   * All tests complete. Create results for

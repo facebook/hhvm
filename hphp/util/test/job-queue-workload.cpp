@@ -21,11 +21,21 @@
 #include <string>
 #include <thread>
 
+#include "folly/Random.h"
+
 #include <gtest/gtest.h>
 
 namespace HPHP {
 
 DEFINE_string(workload_input, "", "input file for request latency.");
+DEFINE_int32(time_padding_high, 0,
+             "max num of ticks to add to each request's latency "
+             "for those that are selected.");
+DEFINE_int32(time_padding_low, 0,
+             "min num of ticks to add to each request's latency "
+             "for those that are selected.");
+DEFINE_int32(time_padding_percent, 0,
+             "percent of time request is selected for padding");
 
 class Tickable {
  public:
@@ -42,6 +52,7 @@ class TickingClock {
   }
 
   void tick() {
+    std::lock_guard<std::mutex> lk(m_mutex);
     ++m_ticks;
     for (auto x : m_tickables) {
       x->tick();
@@ -49,12 +60,18 @@ class TickingClock {
   }
 
   void registerTickable(Tickable* tickable) {
+    std::lock_guard<std::mutex> lk(m_mutex);
     m_tickables.push_back(tickable);
+  }
+
+  int now() const {
+    return m_ticks.load();
   }
 
   std::atomic<int> m_ticks;
 
  private:
+  std::mutex m_mutex;
   std::vector<Tickable*> m_tickables;
 };
 
@@ -67,8 +84,14 @@ class TickRequest {
     ABORTED
   };
 
-  explicit TickRequest(int duration) : m_duration(duration),
-                                       m_state(State::IN_QUEUE) {}
+  TickRequest(int duration, TickingClock* clock)
+    : m_duration(duration),
+      m_startQueuingTimeStamp(clock->now()),
+      m_startProcessingTimeStamp(-1),
+      m_finishProcessingTimeStamp(-1),
+      m_state(State::IN_QUEUE),
+      m_clock(clock) {
+  }
 
   int duration() const {
     return m_duration;
@@ -82,7 +105,11 @@ class TickRequest {
   void setState(State state) {
     std::lock_guard<std::mutex> lk(m_mutex);
     m_state = state;
+    if (m_state == State::PROCESSING) {
+      m_startProcessingTimeStamp = m_clock->now();
+    }
     if (isFinishedNoLock()) {
+      m_finishProcessingTimeStamp = m_clock->now();
       m_cv.notify_all();
     }
   }
@@ -100,7 +127,20 @@ class TickRequest {
     m_cv.wait(lk);
   }
 
+  int getQueuingTime() {
+    CHECK(!inFlight());
+    return m_startProcessingTimeStamp - m_startQueuingTimeStamp;
+  }
+
+  int getWallTime() {
+    CHECK(!inFlight());
+    return m_finishProcessingTimeStamp - m_startQueuingTimeStamp;
+  }
+
   const int m_duration;
+  int m_startQueuingTimeStamp;
+  int m_startProcessingTimeStamp;
+  int m_finishProcessingTimeStamp;
 
  private:
   bool isFinishedNoLock() const {
@@ -109,23 +149,69 @@ class TickRequest {
   std::mutex m_mutex;
   std::condition_variable m_cv;
   State m_state;
+  TickingClock* m_clock;
 };
 typedef std::shared_ptr<TickRequest> TickRequestPtr;
 
 class TickRequestFactory {
  public:
-  TickRequestFactory() {}
+  explicit TickRequestFactory(TickingClock* clock) : m_clock(clock) {}
 
   TickRequestPtr newRequest(int duration) {
-    auto request = std::make_shared<TickRequest>(duration);
+    auto request = std::make_shared<TickRequest>(duration, m_clock);
     m_requests.push_back(request);
     return request;
   }
 
+  struct Stats {
+    int max;
+    int p99_99;
+    int p99_9;
+    int p99;
+    int p95;
+    int p75;
+    int p50;
+    int p5;
+    int mean;
+  };
+
+  template <class Getter>
+  Stats getStats(Getter getter) {
+    vector<int> metrics;
+    metrics.reserve(m_requests.size());
+    for(auto r : m_requests) {
+      metrics.push_back(getter(r));
+    }
+    std::sort(metrics.begin(), metrics.end());
+
+    Stats stats;
+    stats.max = *metrics.rbegin();
+    stats.p99_99 = metrics[static_cast<int>(0.9999 * (metrics.size() - 1))];
+    stats.p99_9 = metrics[static_cast<int>(0.999 * (metrics.size() - 1))];
+    stats.p99 = metrics[static_cast<int>(0.99 * (metrics.size() - 1))];
+    stats.p95 = metrics[static_cast<int>(0.95 * (metrics.size() - 1))];
+    stats.p75 = metrics[static_cast<int>(0.75 * (metrics.size() - 1))];
+    stats.p50 = metrics[static_cast<int>(0.50 * (metrics.size() - 1))];
+    stats.p5 = metrics[static_cast<int>(0.05 * (metrics.size() - 1))];
+    stats.mean = std::accumulate(metrics.begin(), metrics.end(), 0) /
+      metrics.size();
+
+    return stats;
+  }
+
+  Stats getQueuingStats() {
+    return getStats([=](TickRequestPtr r) { return r->getQueuingTime();});
+  }
+
+  Stats getWallTimeStats() {
+    return getStats([=](TickRequestPtr r) { return r->getWallTime();});
+  }
+
   std::vector<TickRequestPtr> m_requests;
+  TickingClock* m_clock;
 };
 
-class TickWorker : public JobQueueWorker<TickRequestPtr, TickingClock*, false,
+class TickWorker : public JobQueueWorker<TickRequestPtr, TickingClock*, true,
                                          true>,
                    public Tickable {
  public:
@@ -170,13 +256,46 @@ class TickWorker : public JobQueueWorker<TickRequestPtr, TickingClock*, false,
   TickRequestPtr m_job;
 };
 
-class JobQueueTest : public testing::Test {
+class JobQueueStatsCollector : public Tickable {
  public:
+  explicit JobQueueStatsCollector(JobQueueDispatcher<TickWorker>* dispatcher)
+      : m_dispatcher(dispatcher),
+        m_maxLoad(0),
+        m_maxQueued(0) {
+  }
+
+  void tick() {
+    m_maxQueued = std::max(m_maxQueued, m_dispatcher->getQueuedJobs());
+    m_maxLoad = std::max(m_maxLoad, m_dispatcher->getActiveWorker());
+  }
+
+  JobQueueDispatcher<TickWorker>* m_dispatcher;
+  int m_maxLoad;
+  int m_maxQueued;
+};
+
+class JobQueueTest : public testing::Test {
+ protected:
+
   virtual void SetUp() {
     m_clock.reset(new TickingClock());
     m_dispatcher.reset(
       new JobQueueDispatcher<TickWorker>(180, false, 0, true, m_clock.get()));
-    m_factory.reset(new TickRequestFactory());
+    m_factory.reset(new TickRequestFactory(m_clock.get()));
+  }
+
+  void loadRequestFromFile(std::vector<int>* latencies) {
+    std::string line;
+    std::ifstream fin(FLAGS_workload_input.c_str());
+    while (std::getline(fin, line)) {
+      int padding = 0;
+      if (std::rand() % 100 < FLAGS_time_padding_percent) {
+        padding = FLAGS_time_padding_low +
+          std::rand() % (FLAGS_time_padding_high - FLAGS_time_padding_low);
+      }
+      latencies->push_back(folly::to<int>(line) + padding);
+    }
+    LOG(INFO) << "Loaded " << latencies->size() << " lines.";
   }
 
   std::unique_ptr<TickingClock> m_clock;
@@ -201,14 +320,13 @@ TEST_F(JobQueueTest, ClockTest) {
 TEST_F(JobQueueTest, SanityTest) {
   m_dispatcher->enqueue(m_factory->newRequest(3));
   m_dispatcher->enqueue(m_factory->newRequest(1));
-  EXPECT_EQ(2, m_dispatcher->getQueuedJobs());
+  ASSERT_EQ(2, m_dispatcher->getQueuedJobs());
   m_dispatcher->start();
   m_clock->tick();
   EXPECT_TRUE(m_factory->m_requests[0]->inFlight());
-  m_clock->tick();
-  m_clock->tick();
-  EXPECT_TRUE(m_factory->m_requests[0]->inFlight());
-  m_factory->m_requests[1]->waitUntilDone();
+  while (m_factory->m_requests[1]->inFlight()) {
+    m_clock->tick();
+  }
   EXPECT_FALSE(m_factory->m_requests[1]->inFlight());
   m_clock->tick();
   m_clock->tick();
@@ -222,17 +340,22 @@ TEST_F(JobQueueTest, WorkloadTest) {
     LOG(INFO) << "skipped.";
     return;
   }
-  std::vector<int> latencies;
-  std::string line;
-  std::ifstream fin(FLAGS_workload_input.c_str());
-  while (std::getline(fin, line)) {
-    latencies.push_back(folly::to<int>(line));
-  }
-  LOG(INFO) << "Loaded " << latencies.size() << " lines.";
-  for (auto l : latencies) {
-    m_dispatcher->enqueue(m_factory->newRequest(l));
-  }
+
+  vector<int> latencies;
+  loadRequestFromFile(&latencies);
+  int rps = 150;
   m_dispatcher->start();
+  JobQueueStatsCollector stats(m_dispatcher.get());
+  m_clock->registerTickable(&stats);
+
+  for (auto request : latencies) {
+    do {
+      m_clock->tick();
+    } while (std::rand() % 1000 > rps);
+
+    m_dispatcher->enqueue(m_factory->newRequest(request));
+  }
+
   while (!m_dispatcher->pollEmpty()) {
     m_clock->tick();
   }
@@ -242,8 +365,24 @@ TEST_F(JobQueueTest, WorkloadTest) {
       m_clock->tick();
     }
   }
+
+  auto queueStats = m_factory->getQueuingStats();
+  auto wallStats = m_factory->getWallTimeStats();
+
   LOG(INFO) << "Processed " << latencies.size() << " requests in "
             << m_clock->m_ticks.load() << " ticks";
+  LOG(INFO) << "max load: " << stats.m_maxLoad
+            << " max queued: " << stats.m_maxQueued;
+  LOG(INFO) << "max queuing time: " << queueStats.max
+            << " max wall time: " << wallStats.max;
+  LOG(INFO) << "p99 queuing time: " << queueStats.p99
+            << " p99 wall time: " << wallStats.p99;
+  LOG(INFO) << "p95 queuing time: " << queueStats.p95
+            << " p95 wall time: " << wallStats.p95;
+  LOG(INFO) << "p50 queuing time: " << queueStats.p50
+            << " p50 wall time: " << wallStats.p50;
+  LOG(INFO) << "avg queuing time: " << queueStats.mean
+            << " avg wall time: " << wallStats.mean;
 }
 
 } // namespace HPHP
@@ -251,5 +390,6 @@ TEST_F(JobQueueTest, WorkloadTest) {
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   google::ParseCommandLineFlags(&argc, &argv, false);
+  std::srand(folly::randomNumberSeed());
   return RUN_ALL_TESTS();
 }

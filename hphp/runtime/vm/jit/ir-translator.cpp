@@ -1028,12 +1028,11 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
   if (callee->attrs() & AttrMayUseVV) {
     return refuse("may use dynamic environment");
   }
-  if (!(callee->attrs() & AttrHot) && (caller->attrs() & AttrHot)) {
-    return refuse("inlining cold func into hot func");
-  }
 
   ////////////
 
+  bool hotCallingCold = !(callee->attrs() & AttrHot) &&
+                         (caller->attrs() & AttrHot);
   uint64_t cost = 0;
   int inlineDepth = 0;
   Op op = OpLowInvalid;
@@ -1078,6 +1077,11 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
 
     if (cost > RuntimeOption::EvalHHIRInliningMaxCost) {
       return refuse("too expensive");
+    }
+
+    if (cost > RuntimeOption::EvalHHIRAlwaysInlineMaxCost &&
+        hotCallingCold) {
+      return refuse("inlining sizeable cold func into hot func");
     }
 
     if (Transl::opcodeBreaksBB(op)) {

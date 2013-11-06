@@ -28,6 +28,7 @@ list(REMOVE_ITEM files
 	${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracerTest.cpp
 	${FOLLY_DIR}/experimental/io/AsyncIO.cpp
 	${FOLLY_DIR}/experimental/io/HugePageUtil.cpp
+	${FOLLY_DIR}/experimental/io/IOBufQueue.cpp
 	${FOLLY_DIR}/experimental/symbolizer/SymbolizerTest.cpp
 	${FOLLY_DIR}/experimental/symbolizer/ElfUtil.cpp
     )

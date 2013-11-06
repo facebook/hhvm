@@ -563,11 +563,11 @@ JGoogleEmbedMapsTest::testUseSensor
 JGoogleEmbedMapsTest::testUseSync
 .
 JImageFilterBrightnessTest::testExecute
-HipHop Fatal error: php_image_filter_brightness is not going to be supported: gdImageBrightness does not exists in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Image/Filter/Brightness.php on line 40
+HipHop Fatal error: php_image_filter_brightness is not going to be supported: gdImageBrightness does not exists in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Image/Filter/Brightness.php on line 40
 JImageFilterContrastTest::testExecute
-HipHop Fatal error: php_image_filter_contrast is not going to be supported: gdImageContrast does not exists in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Image/Filter/Contrast.php on line 40
+HipHop Fatal error: php_image_filter_contrast is not going to be supported: gdImageContrast does not exists in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Image/Filter/Contrast.php on line 40
 JImageFilterEdgedetectTest::testExecute
-HipHop Fatal error: php_image_filter_edgedetect is not going to be supported: gdImageEdgeDetectQuick does not exists in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Image/Filter/Edgedetect.php on line 32
+HipHop Fatal error: php_image_filter_edgedetect is not going to be supported: gdImageEdgeDetectQuick does not exists in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Image/Filter/Edgedetect.php on line 32
 JImageFilterTest::testConstructor
 .
 JImageFilterTest::testConstructorInvalidArgument
@@ -787,7 +787,7 @@ Joomla\Application\Tests\ColorProcessorTest::testProcessReplace
 Joomla\Application\Tests\ColorProcessorTest::testStripColors
 .
 Joomla\Archive\Tests\ArchiveTest::testExtractZip
-HipHop Fatal error: Not implemented is not implemented yet. in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Archive/Zip.php on line 279
+HipHop Fatal error: Not implemented is not implemented yet. in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Archive/Zip.php on line 279
 Joomla\Archive\Tests\Bzip2Test::testExtract
 S
 Joomla\Archive\Tests\Bzip2Test::testExtractWithStreams
@@ -809,7 +809,7 @@ Joomla\Archive\Tests\TarTest::testIsSupported
 Joomla\Archive\Tests\ZipTest::testCreate
 I
 Joomla\Archive\Tests\ZipTest::testExtractNative
-HipHop Fatal error: Not implemented is not implemented yet. in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Archive/Zip.php on line 279
+HipHop Fatal error: Not implemented is not implemented yet. in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Archive/Zip.php on line 279
 Joomla\Cache\Tests\ApcTest::testClear
 S
 Joomla\Cache\Tests\ApcTest::testExists
@@ -1065,7 +1065,7 @@ Joomla\Controller\Tests\BaseTest::testUnserialise
 Joomla\Controller\Tests\BaseTest::testUnserialise_exception
 .
 Joomla\Controller\Tests\BaseTest::test__construct
-.
+E
 Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #0 
 .
 Joomla\Crypt\Tests\Cipher3DESTest::testDecrypt with data set #1 
@@ -1354,14 +1354,6 @@ Joomla\Data\Tests\DataSetTest::test_foreach
 .
 Joomla\Data\Tests\DataSetTest::test_initialise
 .
-Joomla\Database\Tests\DatabaseFactoryTest::testGetExporter
-.
-Joomla\Database\Tests\DatabaseFactoryTest::testGetImporter
-.
-Joomla\Database\Tests\DatabaseFactoryTest::testGetInstance
-.
-Joomla\Database\Tests\DatabaseFactoryTest::testGetQuery
-.
 Joomla\Database\Tests\DatabaseQueryElementTest::testAppend with data set "array-element"
 .
 Joomla\Database\Tests\DatabaseQueryElementTest::testAppend with data set "non-array-element"
@@ -1638,78 +1630,6 @@ Joomla\Database\Tests\DriverPostgresqlTest::testUpdateObject
 S
 Joomla\Database\Tests\DriverPostgresqlTest::test__destruct
 S
-Joomla\Database\Tests\DriverSqliteTest::testConnected
-I
-Joomla\Database\Tests\DriverSqliteTest::testDropTable
-.
-Joomla\Database\Tests\DriverSqliteTest::testEscape with data set #0 
-.
-Joomla\Database\Tests\DriverSqliteTest::testEscape with data set #1 
-.
-Joomla\Database\Tests\DriverSqliteTest::testEscape with data set #2 
-.
-Joomla\Database\Tests\DriverSqliteTest::testExecute
-.
-Joomla\Database\Tests\DriverSqliteTest::testGetAffectedRows
-.
-Joomla\Database\Tests\DriverSqliteTest::testGetExporter
-I
-Joomla\Database\Tests\DriverSqliteTest::testGetImporter
-I
-Joomla\Database\Tests\DriverSqliteTest::testGetNumRows
-.
-Joomla\Database\Tests\DriverSqliteTest::testGetTableColumns
-.
-Joomla\Database\Tests\DriverSqliteTest::testGetTableCreate
-.
-Joomla\Database\Tests\DriverSqliteTest::testGetTableKeys
-.
-Joomla\Database\Tests\DriverSqliteTest::testGetTableList
-.
-Joomla\Database\Tests\DriverSqliteTest::testGetVersion
-.
-Joomla\Database\Tests\DriverSqliteTest::testInsertObject
-I
-Joomla\Database\Tests\DriverSqliteTest::testInsertid
-I
-Joomla\Database\Tests\DriverSqliteTest::testIsSupported
-.
-Joomla\Database\Tests\DriverSqliteTest::testLoadAssoc
-.
-Joomla\Database\Tests\DriverSqliteTest::testLoadAssocList
-.
-Joomla\Database\Tests\DriverSqliteTest::testLoadColumn
-.
-Joomla\Database\Tests\DriverSqliteTest::testLoadObject
-.
-Joomla\Database\Tests\DriverSqliteTest::testLoadObjectList
-.
-Joomla\Database\Tests\DriverSqliteTest::testLoadResult
-.
-Joomla\Database\Tests\DriverSqliteTest::testLoadRow
-.
-Joomla\Database\Tests\DriverSqliteTest::testLoadRowList
-.
-Joomla\Database\Tests\DriverSqliteTest::testLockTable
-.
-Joomla\Database\Tests\DriverSqliteTest::testRenameTable
-.
-Joomla\Database\Tests\DriverSqliteTest::testSelect
-I
-Joomla\Database\Tests\DriverSqliteTest::testSetUTF
-I
-Joomla\Database\Tests\DriverSqliteTest::testTransactionCommit
-.
-Joomla\Database\Tests\DriverSqliteTest::testTransactionRollback with data set #0 
-.
-Joomla\Database\Tests\DriverSqliteTest::testTransactionRollback with data set #1 
-.
-Joomla\Database\Tests\DriverSqliteTest::testUnlockTables
-.
-Joomla\Database\Tests\DriverSqliteTest::testUpdateObject
-I
-Joomla\Database\Tests\DriverSqliteTest::test__destruct
-I
 Joomla\Database\Tests\DriverSqlsrvTest::testConnected
 S
 Joomla\Database\Tests\DriverSqlsrvTest::testDropTable
@@ -1770,62 +1690,6 @@ Joomla\Database\Tests\DriverSqlsrvTest::testUpdateObject
 S
 Joomla\Database\Tests\DriverSqlsrvTest::test__destruct
 S
-Joomla\Database\Tests\DriverTest::testGetConnection
-.
-Joomla\Database\Tests\DriverTest::testGetConnectors
-.
-Joomla\Database\Tests\DriverTest::testGetCount
-.
-Joomla\Database\Tests\DriverTest::testGetDatabase
-.
-Joomla\Database\Tests\DriverTest::testGetDateFormat
-.
-Joomla\Database\Tests\DriverTest::testGetInstance
-I
-Joomla\Database\Tests\DriverTest::testGetMinimum
-.
-Joomla\Database\Tests\DriverTest::testGetNullDate
-.
-Joomla\Database\Tests\DriverTest::testGetPrefix
-.
-Joomla\Database\Tests\DriverTest::testIsMinimumVersion
-.
-Joomla\Database\Tests\DriverTest::testLog
-.
-Joomla\Database\Tests\DriverTest::testQuote
-.
-Joomla\Database\Tests\DriverTest::testQuoteBooleanFalse
-.
-Joomla\Database\Tests\DriverTest::testQuoteBooleanTrue
-.
-Joomla\Database\Tests\DriverTest::testQuoteFloat
-.
-Joomla\Database\Tests\DriverTest::testQuoteInteger
-.
-Joomla\Database\Tests\DriverTest::testQuoteName
-.
-Joomla\Database\Tests\DriverTest::testQuoteNull
-.
-Joomla\Database\Tests\DriverTest::testReplacePrefix
-.
-Joomla\Database\Tests\DriverTest::testSetDebug
-.
-Joomla\Database\Tests\DriverTest::testSetQuery
-.
-Joomla\Database\Tests\DriverTest::testSplitSql
-.
-Joomla\Database\Tests\DriverTest::testTruncateTable
-.
-Joomla\Database\Tests\DriverTest::test__callQuote
-.
-Joomla\Database\Tests\DriverTest::test__callQuoteName
-.
-Joomla\Database\Tests\DriverTest::test__callUnknown
-.
-Joomla\Database\Tests\DriverTest::test__construct
-I
-Joomla\Database\Tests\DriverTest::test__destruct
-I
 Joomla\Database\Tests\ExporterMySqlTest::testAsXml
 .
 Joomla\Database\Tests\ExporterMySqlTest::testBuildXml
@@ -4392,8 +4256,6 @@ Joomla\Form\Tests\JFormFieldIntegerTest::testGetInput
 .
 Joomla\Form\Tests\JFormFieldIntegerTest::testGetOptions
 F
-Joomla\Form\Tests\JFormFieldLanguageTest::testGetInput
-I
 Joomla\Form\Tests\JFormFieldListTest::testGetInput
 .
 Joomla\Form\Tests\JFormFieldPasswordTest::testGetInput
@@ -4401,8 +4263,6 @@ Joomla\Form\Tests\JFormFieldPasswordTest::testGetInput
 Joomla\Form\Tests\JFormFieldRadioTest::testGetInput
 .
 Joomla\Form\Tests\JFormFieldRadioTest::testGetOptions
-.
-Joomla\Form\Tests\JFormFieldSQLTest::testGetInput
 .
 Joomla\Form\Tests\JFormFieldSpacerTest::testGetInput
 .
@@ -5411,9 +5271,9 @@ Joomla\Github\Tests\ZenTest::testGet
 Joomla\Github\Tests\ZenTest::testGetFailure
 .
 Joomla\Google\Tests\DataPlusActivitiesTest::testAuth
-HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
+HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
 Joomla\Google\Tests\GoogleTest::test__GetData
-HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
+HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
 Joomla\Google\Tests\JGoogleAuthOauth2Test::testAuth
 E
 Joomla\Google\Tests\JGoogleAuthOauth2Test::testGetOption
@@ -5427,21 +5287,21 @@ E
 Joomla\Google\Tests\JGoogleAuthOauth2Test::testSetOption
 .
 Joomla\Google\Tests\JGoogleDataAdsenseTest::testAuth
-HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
+HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
 Joomla\Google\Tests\JGoogleDataCalendarTest::testAuth
-HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
+HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
 Joomla\Google\Tests\JGoogleDataPicasaAlbumTest::testAuth
-HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
+HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
 Joomla\Google\Tests\JGoogleDataPicasaPhotoTest::testAuth
-HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
+HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
 Joomla\Google\Tests\JGoogleDataPicasaTest::testAuth
-HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
+HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
 Joomla\Google\Tests\JGoogleDataPlusCommentsTest::testAuth
-HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
+HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
 Joomla\Google\Tests\JGoogleDataPlusPeopleTest::testAuth
-HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
+HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
 Joomla\Google\Tests\JGoogleDataPlusTest::test__GetPeople
-HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
+HipHop Fatal error: Class undefined: Joomla\Google\Auth\Oauth2 in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/joomla-framework/src/Joomla/Google/Tests/case/GoogleTestCase.php on line 69
 Joomla\Google\Tests\JGoogleEmbedAnalyticsTest::testAddCall
 .
 Joomla\Google\Tests\JGoogleEmbedAnalyticsTest::testAddCustomVar
@@ -7633,16 +7493,6 @@ LogTest::testFindLoggersByPriority
 LogTest::testFindLoggersByPriorityAndCategory
 .
 LogTest::testSetInstance
-.
-LoggerDatabaseTest::testAddEntry01
-.
-LoggerDatabaseTest::testAddEntry02
-.
-LoggerDatabaseTest::testConnect01
-.
-LoggerDatabaseTest::testConnect02
-.
-LoggerDatabaseTest::testConstructor01
 .
 PatcherTest::testAdd with data set #0 
 .

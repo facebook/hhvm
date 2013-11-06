@@ -4,6 +4,14 @@ apc_add("ts", "TestString");
 apc_add("ta", array("a" => 1, "b" => 2));
 apc_add("ts", "NewValue");
 apc_add("ta", array("newelement"));
+apc_add(array("a" => 1, "b" => 2, "f" => "facebook"));
+apc_add(array(
+              "a" => array("b" => 1,
+              "c" => array("d", "e")),
+              "f" => array(1,2,3),
+              "h" => "hello",
+));
+
 if (apc_fetch("ts") !== "TestString") {
   echo "no1\n";
 }
@@ -16,6 +24,12 @@ if (apc_fetch("ts") !== "TestString") {
 }
 if (apc_fetch("ta") !== array("a" => 1, "b" => 2)) {
   echo "no4\n";
+}
+if (apc_fetch("a") !== 1) {
+  echo "no19\n";
+}
+if (apc_fetch("f") !== "facebook") {
+  echo "no20\n";
 }
 
 apc_add("texp", "TestString", 1);

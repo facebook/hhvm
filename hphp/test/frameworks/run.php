@@ -677,6 +677,8 @@ class Framework {
   public ?Map $current_test_statuses = null;
   public Set $tests = null;
 
+  public bool $success;
+
   public function __construct(string $name) {
     $this->name = $name;
     $this->setInstallRoot();
@@ -1023,6 +1025,8 @@ class Framework {
     $this->setTestPattern();
     $this->setTestSearchRoots();
     $this->setTestPath();
+    // Assume framework testing is successful until otherwise proven
+    $this->success = true;
   }
 
   public function isInstalled(): bool {
@@ -1141,12 +1145,10 @@ class SingleTestFile {
     $line = "";
     $post_test = false;
     $pretest_data = true;
-
     if ($this->initialize()) {
       while (!(feof($this->pipes[1]))) {
         $line = $this->getLine();
         if ($line === null) {
-          $ret_val = -1;
           break;
         }
         if ($this->isBlankLine($line)) {
@@ -1187,7 +1189,7 @@ class SingleTestFile {
         }
       }
 
-      $this->finalize();
+      $ret_val = $this->finalize();
       $this->outputData();
 
     } else {
@@ -1202,17 +1204,29 @@ class SingleTestFile {
   }
 
   private function getLine(): ?string {
-    if (feof($this->pipes[1])) {
-      return null;
+    $line = null;
+    $s = true;
+    // fgets was not working. stream_select seemed ok, but fgets seems to block
+    // anyway if only a certain amount of data is available without a newline.
+    // Use an fread(), character by character approach.
+    while (!feof($this->pipes[1]) && ($s = $this->checkReadStream())) {
+      $line .= fgetc($this->pipes[1]);
+      if(strstr($line, PHP_EOL) || $line === "") {
+        break;
+      }
     }
-    if (!$this->checkReadStream()) {
+    // We didn't get any chars because checkReadStream failed (timeout)
+    if ($s === false) {
       $this->error_information .= "TEST TIMEOUT OCCURRED on test: ".$this->name.
                                    PHP_EOL;
       verbose($this->error_information, !Options::$csv_only);
       return null;
     }
-    $line = rtrim(fgets($this->pipes[1]), PHP_EOL);
-    if ($line === false) {return null;}
+    // Maybe it was the end of the file
+    if ($line == null) {
+      return null;
+    }
+    $line = rtrim($line, PHP_EOL);
     $line = remove_color_codes($line);
     return $line;
   }
@@ -1293,6 +1307,7 @@ class SingleTestFile {
         verbose(Colors::GREEN.".".Colors::NONE, !Options::$csv_only);
       } else {
         // We are different than we expected
+        $this->framework->success = false;
         // Red if we go from pass to something else
         if ($this->framework->current_test_statuses[$match] === '.') {
           verbose(Colors::RED."F".Colors::NONE, !Options::$csv_only);
@@ -1323,6 +1338,7 @@ class SingleTestFile {
       // before, but we are having an issue getting to the actual tests
       // (e.g., yii is one test suite that has behaved this way).
       if ($this->framework->current_test_statuses !== null) {
+        $this->framework->success = false;
         verbose(Colors::LIGHTBLUE."F".Colors::NONE, !Options::$csv_only);
         verbose(PHP_EOL."Different status in ".$this->framework->name.
                 " for test ".$match.PHP_EOL,!Options::$csv_only);
@@ -1631,7 +1647,6 @@ function run_tests(Vector $frameworks): void {
     }
   }
 
-
   /*************************************
    * Run the test suite
    ************************************/
@@ -1640,8 +1655,7 @@ function run_tests(Vector $frameworks): void {
     error("No tests found to run");
   }
 
-  $ret_val = 0;
-  $ret_val = fork_buckets(
+  fork_buckets(
     $all_tests,
     function($bucket) {
       return run_test_bucket($bucket);
@@ -1673,11 +1687,11 @@ function run_tests(Vector $frameworks): void {
       copy($framework->out_file, $framework->expect_file);
     } else if (filesize($framework->diff_file) > 0) {
       $diff_frameworks[] = $framework;
-      $ret_val = -1;
+      $framework->success = false;
     }
   }
 
-  if ($ret_val === 0) {
+  if ($framework->success) {
     $msg = "\nAll tests ran as expected.\n\n".<<<THUMBSUP
           _
          /(|

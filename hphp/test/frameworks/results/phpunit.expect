@@ -1,11 +1,13 @@
-Runner_BaseTestRunnerTest::testInvokeNonStaticSuite
-.
 OneTest::testSomething
 .
-Issue1021Test::testSomething with data set #0 
+Runner_BaseTestRunnerTest::testInvokeNonStaticSuite
+.
+Issue1021Test::testSomething with data set #0
 .
 Issue1021Test::testSomethingElse
 .
+Util_ClassTest::testGetObjectAttributeCanHandleDynamicVariables
+E
 Framework_TestImplementorTest::testSuccessfulRun
 .
 Framework_Constraint_JsonMatchesTest::testEvaluate with data set "valid JSON"
@@ -40,67 +42,65 @@ Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonErro
 .
 Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "Invalid error indicator"
 .
-Util_ClassTest::testGetObjectAttributeCanHandleDynamicVariables
-E
 Issue503Test::testCompareDifferentLineEndings
 F
-Util_TypeTest::testExport with data set #0 
+Util_TypeTest::testExport with data set #0
 .
-Util_TypeTest::testExport with data set #1 
+Util_TypeTest::testExport with data set #1
 .
-Util_TypeTest::testExport with data set #2 
+Util_TypeTest::testExport with data set #2
 .
-Util_TypeTest::testExport with data set #3 
+Util_TypeTest::testExport with data set #3
 .
-Util_TypeTest::testExport with data set #4 
+Util_TypeTest::testExport with data set #4
 .
-Util_TypeTest::testExport with data set #5 
+Util_TypeTest::testExport with data set #5
 .
-Util_TypeTest::testExport with data set #6 
+Util_TypeTest::testExport with data set #6
 .
-Util_TypeTest::testExport with data set #7 
+Util_TypeTest::testExport with data set #7
 .
-Util_TypeTest::testExport with data set #8 
+Util_TypeTest::testExport with data set #8
 .
-Util_TypeTest::testExport with data set #9 
+Util_TypeTest::testExport with data set #9
 .
-Util_TypeTest::testExport with data set #10 
+Util_TypeTest::testExport with data set #10
 .
-Util_TypeTest::testExport with data set #11 
+Util_TypeTest::testExport with data set #11
 .
-Util_TypeTest::testExport with data set #12 
+Util_TypeTest::testExport with data set #12
 .
-Util_TypeTest::testExport with data set #13 
+Util_TypeTest::testExport with data set #13
 .
-Util_TypeTest::testExport with data set #14 
+Util_TypeTest::testExport with data set #14
 .
-Util_TypeTest::testShortenedExport with data set #0 
+Util_TypeTest::testShortenedExport with data set #0
 .
-Util_TypeTest::testShortenedExport with data set #1 
+Util_TypeTest::testShortenedExport with data set #1
 .
-Util_TypeTest::testShortenedExport with data set #2 
+Util_TypeTest::testShortenedExport with data set #2
 .
-Util_TypeTest::testShortenedExport with data set #3 
+Util_TypeTest::testShortenedExport with data set #3
 .
-Util_TypeTest::testShortenedExport with data set #4 
+Util_TypeTest::testShortenedExport with data set #4
 .
-Util_TypeTest::testShortenedExport with data set #5 
+Util_TypeTest::testShortenedExport with data set #5
 .
-Util_TypeTest::testShortenedExport with data set #6 
+Util_TypeTest::testShortenedExport with data set #6
 .
-Util_TypeTest::testShortenedExport with data set #7 
+Util_TypeTest::testShortenedExport with data set #7
 .
-Util_TypeTest::testShortenedExport with data set #8 
+Util_TypeTest::testShortenedExport with data set #8
 .
-Util_TypeTest::testShortenedExport with data set #9 
+Util_TypeTest::testShortenedExport with data set #9
 .
-Util_TypeTest::testShortenedExport with data set #10 
+Util_TypeTest::testShortenedExport with data set #10
 .
-Util_TypeTest::testNonBinaryStringExport with data set #0 
+Util_TypeTest::testNonBinaryStringExport with data set #0
 .
-Util_TypeTest::testNonBinaryStringExport with data set #1 
+Util_TypeTest::testNonBinaryStringExport with data set #1
 .
-Util_TypeTest::testNonBinaryStringExport with data set #2 
+Util_TypeTest::testNonBinaryStringExport with data set #2
 .
 Issue445Test::testOutputWithExpectationBefore
 .
@@ -108,79 +108,79 @@ Issue445Test::testOutputWithExpectationAfter
 .
 Issue445Test::testNotMatchingOutput
 F
-Framework_ComparatorTest::testGetInstance with data set #0 
+Framework_ComparatorTest::testGetInstance with data set #0
 .
-Framework_ComparatorTest::testGetInstance with data set #1 
+Framework_ComparatorTest::testGetInstance with data set #1
 .
-Framework_ComparatorTest::testGetInstance with data set #2 
+Framework_ComparatorTest::testGetInstance with data set #2
 .
-Framework_ComparatorTest::testGetInstance with data set #3 
+Framework_ComparatorTest::testGetInstance with data set #3
 .
-Framework_ComparatorTest::testGetInstance with data set #4 
+Framework_ComparatorTest::testGetInstance with data set #4
 .
-Framework_ComparatorTest::testGetInstance with data set #5 
+Framework_ComparatorTest::testGetInstance with data set #5
 .
-Framework_ComparatorTest::testGetInstance with data set #6 
+Framework_ComparatorTest::testGetInstance with data set #6
 .
-Framework_ComparatorTest::testGetInstance with data set #7 
+Framework_ComparatorTest::testGetInstance with data set #7
 .
-Framework_ComparatorTest::testGetInstance with data set #8 
+Framework_ComparatorTest::testGetInstance with data set #8
 .
-Framework_ComparatorTest::testGetInstance with data set #9 
+Framework_ComparatorTest::testGetInstance with data set #9
 .
-Framework_ComparatorTest::testGetInstance with data set #10 
+Framework_ComparatorTest::testGetInstance with data set #10
 .
-Framework_ComparatorTest::testGetInstance with data set #11 
+Framework_ComparatorTest::testGetInstance with data set #11
 .
-Framework_ComparatorTest::testGetInstance with data set #12 
+Framework_ComparatorTest::testGetInstance with data set #12
 .
-Framework_ComparatorTest::testGetInstance with data set #13 
+Framework_ComparatorTest::testGetInstance with data set #13
 .
-Framework_ComparatorTest::testGetInstance with data set #14 
+Framework_ComparatorTest::testGetInstance with data set #14
 .
-Framework_ComparatorTest::testGetInstance with data set #15 
+Framework_ComparatorTest::testGetInstance with data set #15
 .
-Framework_ComparatorTest::testGetInstance with data set #16 
+Framework_ComparatorTest::testGetInstance with data set #16
 .
-Framework_ComparatorTest::testGetInstance with data set #17 
+Framework_ComparatorTest::testGetInstance with data set #17
 .
-Framework_ComparatorTest::testGetInstance with data set #18 
+Framework_ComparatorTest::testGetInstance with data set #18
 .
-Framework_ComparatorTest::testGetInstance with data set #19 
+Framework_ComparatorTest::testGetInstance with data set #19
 .
-Framework_ComparatorTest::testGetInstance with data set #20 
+Framework_ComparatorTest::testGetInstance with data set #20
 .
-Framework_ComparatorTest::testGetInstance with data set #21 
+Framework_ComparatorTest::testGetInstance with data set #21
 .
-Framework_ComparatorTest::testGetInstance with data set #22 
+Framework_ComparatorTest::testGetInstance with data set #22
 .
-Framework_ComparatorTest::testGetInstance with data set #23 
+Framework_ComparatorTest::testGetInstance with data set #23
 .
-Framework_ComparatorTest::testGetInstance with data set #24 
+Framework_ComparatorTest::testGetInstance with data set #24
 .
-Framework_ComparatorTest::testGetInstance with data set #25 
+Framework_ComparatorTest::testGetInstance with data set #25
 .
-Framework_ComparatorTest::testGetInstance with data set #26 
+Framework_ComparatorTest::testGetInstance with data set #26
 .
-Framework_ComparatorTest::testGetInstance with data set #27 
+Framework_ComparatorTest::testGetInstance with data set #27
 .
-Framework_ComparatorTest::testGetInstance with data set #28 
+Framework_ComparatorTest::testGetInstance with data set #28
 .
-Framework_ComparatorTest::testGetInstance with data set #29 
+Framework_ComparatorTest::testGetInstance with data set #29
 .
-Framework_ComparatorTest::testGetInstance with data set #30 
+Framework_ComparatorTest::testGetInstance with data set #30
 .
-Framework_ComparatorTest::testGetInstance with data set #31 
+Framework_ComparatorTest::testGetInstance with data set #31
 .
-Framework_ComparatorTest::testGetInstance with data set #32 
+Framework_ComparatorTest::testGetInstance with data set #32
 .
-Framework_ComparatorTest::testGetInstance with data set #33 
+Framework_ComparatorTest::testGetInstance with data set #33
 .
-Framework_ComparatorTest::testGetInstance with data set #34 
+Framework_ComparatorTest::testGetInstance with data set #34
 .
-Framework_ComparatorTest::testGetInstance with data set #35 
+Framework_ComparatorTest::testGetInstance with data set #35
 .
-Framework_ComparatorTest::testGetInstance with data set #36 
+Framework_ComparatorTest::testGetInstance with data set #36
 .
 Framework_ComparatorTest::testRegister
 .
@@ -189,6 +189,14 @@ Framework_ComparatorTest::testUnregister
 Issue74Test::testCreateAndThrowNewExceptionInProcessIsolation
 E
 TwoTest::testSomething
+.
+Issue433Test::testOutputWithExpectationBefore
+.
+Issue433Test::testOutputWithExpectationAfter
+.
+Issue433Test::testNotMatchingOutput
+F
+Framework_TestFailureTest::testToString
 .
 Util_TestDox_NamePrettifierTest::testTitleHasSensibleDefaults
 .
@@ -200,18 +208,28 @@ Util_TestDox_NamePrettifierTest::testTestNameIsConvertedToASentence
 .
 Util_TestDox_NamePrettifierTest::testTestNameIsNotGroupedWhenNotInSequence
 .
-Framework_TestFailureTest::testToString
+Issue498Test::shouldBeTrue with data set #0
 .
-Issue498Test::shouldBeTrue with data set #0 
+Issue498Test::shouldBeTrue with data set #1
 .
-Issue498Test::shouldBeTrue with data set #1 
+Framework_SuiteTest::testAddTestSuite
 .
-Issue433Test::testOutputWithExpectationBefore
+Framework_SuiteTest::testInheritedTests
 .
-Issue433Test::testOutputWithExpectationAfter
+Framework_SuiteTest::testNoTestCases
 .
-Issue433Test::testNotMatchingOutput
-F
+Framework_SuiteTest::testNoTestCaseClass
+.
+Framework_SuiteTest::testNotExistingTestCase
+.
+Framework_SuiteTest::testNotPublicTestCase
+.
+Util_TestDox_NamePrettifierTest::testCaterForUserDefinedPrefix
+.
+Util_TestDox_NamePrettifierTest::testTestNameIsConvertedToASentence
+.
+Util_TestDox_NamePrettifierTest::testTestNameIsNotGroupedWhenNotInSequence
+.
 Util_DiffTest::testComparisonErrorMessage
 .
 Util_DiffTest::testComparisonErrorMessage_toArray
@@ -244,24 +262,6 @@ Util_DiffTest::testComparisonErrorOverlapingMatches2
 .
 Util_DiffTest::testComparisonErrorOverlapingMatches2_toArray
 .
-Framework_SuiteTest::testAddTestSuite
-.
-Framework_SuiteTest::testInheritedTests
-.
-Framework_SuiteTest::testNoTestCases
-.
-Framework_SuiteTest::testNoTestCaseClass
-.
-Framework_SuiteTest::testNotExistingTestCase
-.
-Framework_SuiteTest::testNotPublicTestCase
-.
-Framework_SuiteTest::testNotVoidTestCase
-.
-Framework_SuiteTest::testOneTestCase
-.
-Framework_SuiteTest::testShadowedTests
-.
 Issue244Test::testWorks
 .
 Issue244Test::testFails
@@ -270,6 +270,20 @@ Issue244Test::testFailsTooIfExpectationIsANumber
 F
 Issue244Test::testFailsTooIfExceptionCodeIsANumber
 F
+Issue523Test::testAttributeEquals
+.
+Issue578Test::testNoticesDoublePrintStackTrace
+.
+Issue578Test::testWarningsDoublePrintStackTrace
+.
+Issue578Test::testUnexpectedExceptionsPrintsCorrectly
+E
+Framework_Assert_FunctionsTest::testLogicalAnd
+.
+Framework_Assert_FunctionsTest::testLogicalOr
+.
+Framework_Assert_FunctionsTest::testLogicalXor
+.
 Framework_AssertTest::testFail
 .
 Framework_AssertTest::testAssertSplObjectStorageContainsObject
@@ -334,597 +348,597 @@ Framework_AssertTest::testAssertArrayContainsOnlyStdClass
 .
 Framework_AssertTest::testAssertArrayNotContainsOnlyStdClass
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #0 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #0
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #1 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #1
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #2 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #2
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #3 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #3
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #4 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #4
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #5 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #5
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #6 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #6
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #7 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #7
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #8 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #8
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #9 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #9
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #10 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #10
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #11 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #11
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #12 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #12
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #13 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #13
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #14 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #14
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #15 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #15
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #16 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #16
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #17 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #17
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #18 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #18
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #19 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #19
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #20 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #20
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #21 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #21
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #22 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #22
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #23 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #23
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #24 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #24
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #25 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #25
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #26 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #26
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #27 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #27
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #28 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #28
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #29 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #29
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #30 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #30
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #31 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #31
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #32 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #32
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #33 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #33
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #34 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #34
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #35 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #35
 .
-Framework_AssertTest::testAssertEqualsSucceeds with data set #36 
+Framework_AssertTest::testAssertEqualsSucceeds with data set #36
 .
-Framework_AssertTest::testAssertEqualsFails with data set #0 
+Framework_AssertTest::testAssertEqualsFails with data set #0
 .
-Framework_AssertTest::testAssertEqualsFails with data set #1 
+Framework_AssertTest::testAssertEqualsFails with data set #1
 .
-Framework_AssertTest::testAssertEqualsFails with data set #2 
+Framework_AssertTest::testAssertEqualsFails with data set #2
 .
-Framework_AssertTest::testAssertEqualsFails with data set #3 
+Framework_AssertTest::testAssertEqualsFails with data set #3
 .
-Framework_AssertTest::testAssertEqualsFails with data set #4 
+Framework_AssertTest::testAssertEqualsFails with data set #4
 .
-Framework_AssertTest::testAssertEqualsFails with data set #5 
+Framework_AssertTest::testAssertEqualsFails with data set #5
 .
-Framework_AssertTest::testAssertEqualsFails with data set #6 
+Framework_AssertTest::testAssertEqualsFails with data set #6
 .
-Framework_AssertTest::testAssertEqualsFails with data set #7 
+Framework_AssertTest::testAssertEqualsFails with data set #7
 .
-Framework_AssertTest::testAssertEqualsFails with data set #8 
+Framework_AssertTest::testAssertEqualsFails with data set #8
 .
-Framework_AssertTest::testAssertEqualsFails with data set #9 
+Framework_AssertTest::testAssertEqualsFails with data set #9
 .
-Framework_AssertTest::testAssertEqualsFails with data set #10 
+Framework_AssertTest::testAssertEqualsFails with data set #10
 .
-Framework_AssertTest::testAssertEqualsFails with data set #11 
+Framework_AssertTest::testAssertEqualsFails with data set #11
 .
-Framework_AssertTest::testAssertEqualsFails with data set #12 
+Framework_AssertTest::testAssertEqualsFails with data set #12
 .
-Framework_AssertTest::testAssertEqualsFails with data set #13 
+Framework_AssertTest::testAssertEqualsFails with data set #13
 .
-Framework_AssertTest::testAssertEqualsFails with data set #14 
+Framework_AssertTest::testAssertEqualsFails with data set #14
 .
-Framework_AssertTest::testAssertEqualsFails with data set #15 
+Framework_AssertTest::testAssertEqualsFails with data set #15
 .
-Framework_AssertTest::testAssertEqualsFails with data set #16 
+Framework_AssertTest::testAssertEqualsFails with data set #16
 .
-Framework_AssertTest::testAssertEqualsFails with data set #17 
+Framework_AssertTest::testAssertEqualsFails with data set #17
 .
-Framework_AssertTest::testAssertEqualsFails with data set #18 
+Framework_AssertTest::testAssertEqualsFails with data set #18
 .
-Framework_AssertTest::testAssertEqualsFails with data set #19 
+Framework_AssertTest::testAssertEqualsFails with data set #19
 .
-Framework_AssertTest::testAssertEqualsFails with data set #20 
+Framework_AssertTest::testAssertEqualsFails with data set #20
 .
-Framework_AssertTest::testAssertEqualsFails with data set #21 
+Framework_AssertTest::testAssertEqualsFails with data set #21
 .
-Framework_AssertTest::testAssertEqualsFails with data set #22 
+Framework_AssertTest::testAssertEqualsFails with data set #22
 .
-Framework_AssertTest::testAssertEqualsFails with data set #23 
+Framework_AssertTest::testAssertEqualsFails with data set #23
 .
-Framework_AssertTest::testAssertEqualsFails with data set #24 
+Framework_AssertTest::testAssertEqualsFails with data set #24
 .
-Framework_AssertTest::testAssertEqualsFails with data set #25 
+Framework_AssertTest::testAssertEqualsFails with data set #25
 .
-Framework_AssertTest::testAssertEqualsFails with data set #26 
+Framework_AssertTest::testAssertEqualsFails with data set #26
 .
-Framework_AssertTest::testAssertEqualsFails with data set #27 
+Framework_AssertTest::testAssertEqualsFails with data set #27
 .
-Framework_AssertTest::testAssertEqualsFails with data set #28 
+Framework_AssertTest::testAssertEqualsFails with data set #28
 .
-Framework_AssertTest::testAssertEqualsFails with data set #29 
+Framework_AssertTest::testAssertEqualsFails with data set #29
 .
-Framework_AssertTest::testAssertEqualsFails with data set #30 
+Framework_AssertTest::testAssertEqualsFails with data set #30
 .
-Framework_AssertTest::testAssertEqualsFails with data set #31 
+Framework_AssertTest::testAssertEqualsFails with data set #31
 .
-Framework_AssertTest::testAssertEqualsFails with data set #32 
+Framework_AssertTest::testAssertEqualsFails with data set #32
 .
-Framework_AssertTest::testAssertEqualsFails with data set #33 
+Framework_AssertTest::testAssertEqualsFails with data set #33
 .
-Framework_AssertTest::testAssertEqualsFails with data set #34 
+Framework_AssertTest::testAssertEqualsFails with data set #34
 .
-Framework_AssertTest::testAssertEqualsFails with data set #35 
+Framework_AssertTest::testAssertEqualsFails with data set #35
 .
-Framework_AssertTest::testAssertEqualsFails with data set #36 
+Framework_AssertTest::testAssertEqualsFails with data set #36
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #0 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #0
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #1 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #1
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #2 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #2
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #3 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #3
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #4 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #4
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #5 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #5
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #6 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #6
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #7 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #7
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #8 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #8
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #9 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #9
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #10 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #10
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #11 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #11
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #12 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #12
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #13 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #13
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #14 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #14
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #15 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #15
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #16 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #16
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #17 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #17
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #18 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #18
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #19 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #19
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #20 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #20
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #21 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #21
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #22 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #22
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #23 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #23
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #24 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #24
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #25 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #25
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #26 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #26
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #27 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #27
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #28 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #28
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #29 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #29
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #30 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #30
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #31 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #31
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #32 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #32
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #33 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #33
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #34 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #34
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #35 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #35
 .
-Framework_AssertTest::testAssertNotEqualsSucceeds with data set #36 
+Framework_AssertTest::testAssertNotEqualsSucceeds with data set #36
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #0 
+Framework_AssertTest::testAssertNotEqualsFails with data set #0
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #1 
+Framework_AssertTest::testAssertNotEqualsFails with data set #1
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #2 
+Framework_AssertTest::testAssertNotEqualsFails with data set #2
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #3 
+Framework_AssertTest::testAssertNotEqualsFails with data set #3
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #4 
+Framework_AssertTest::testAssertNotEqualsFails with data set #4
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #5 
+Framework_AssertTest::testAssertNotEqualsFails with data set #5
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #6 
+Framework_AssertTest::testAssertNotEqualsFails with data set #6
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #7 
+Framework_AssertTest::testAssertNotEqualsFails with data set #7
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #8 
+Framework_AssertTest::testAssertNotEqualsFails with data set #8
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #9 
+Framework_AssertTest::testAssertNotEqualsFails with data set #9
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #10 
+Framework_AssertTest::testAssertNotEqualsFails with data set #10
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #11 
+Framework_AssertTest::testAssertNotEqualsFails with data set #11
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #12 
+Framework_AssertTest::testAssertNotEqualsFails with data set #12
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #13 
+Framework_AssertTest::testAssertNotEqualsFails with data set #13
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #14 
+Framework_AssertTest::testAssertNotEqualsFails with data set #14
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #15 
+Framework_AssertTest::testAssertNotEqualsFails with data set #15
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #16 
+Framework_AssertTest::testAssertNotEqualsFails with data set #16
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #17 
+Framework_AssertTest::testAssertNotEqualsFails with data set #17
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #18 
+Framework_AssertTest::testAssertNotEqualsFails with data set #18
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #19 
+Framework_AssertTest::testAssertNotEqualsFails with data set #19
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #20 
+Framework_AssertTest::testAssertNotEqualsFails with data set #20
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #21 
+Framework_AssertTest::testAssertNotEqualsFails with data set #21
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #22 
+Framework_AssertTest::testAssertNotEqualsFails with data set #22
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #23 
+Framework_AssertTest::testAssertNotEqualsFails with data set #23
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #24 
+Framework_AssertTest::testAssertNotEqualsFails with data set #24
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #25 
+Framework_AssertTest::testAssertNotEqualsFails with data set #25
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #26 
+Framework_AssertTest::testAssertNotEqualsFails with data set #26
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #27 
+Framework_AssertTest::testAssertNotEqualsFails with data set #27
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #28 
+Framework_AssertTest::testAssertNotEqualsFails with data set #28
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #29 
+Framework_AssertTest::testAssertNotEqualsFails with data set #29
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #30 
+Framework_AssertTest::testAssertNotEqualsFails with data set #30
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #31 
+Framework_AssertTest::testAssertNotEqualsFails with data set #31
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #32 
+Framework_AssertTest::testAssertNotEqualsFails with data set #32
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #33 
+Framework_AssertTest::testAssertNotEqualsFails with data set #33
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #34 
+Framework_AssertTest::testAssertNotEqualsFails with data set #34
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #35 
+Framework_AssertTest::testAssertNotEqualsFails with data set #35
 .
-Framework_AssertTest::testAssertNotEqualsFails with data set #36 
+Framework_AssertTest::testAssertNotEqualsFails with data set #36
 .
-Framework_AssertTest::testAssertSameSucceeds with data set #0 
+Framework_AssertTest::testAssertSameSucceeds with data set #0
 .
-Framework_AssertTest::testAssertSameSucceeds with data set #1 
+Framework_AssertTest::testAssertSameSucceeds with data set #1
 .
-Framework_AssertTest::testAssertSameSucceeds with data set #2 
+Framework_AssertTest::testAssertSameSucceeds with data set #2
 .
-Framework_AssertTest::testAssertSameSucceeds with data set #3 
+Framework_AssertTest::testAssertSameSucceeds with data set #3
 .
-Framework_AssertTest::testAssertSameSucceeds with data set #4 
+Framework_AssertTest::testAssertSameSucceeds with data set #4
 .
-Framework_AssertTest::testAssertSameSucceeds with data set #5 
+Framework_AssertTest::testAssertSameSucceeds with data set #5
 .
-Framework_AssertTest::testAssertSameSucceeds with data set #6 
+Framework_AssertTest::testAssertSameSucceeds with data set #6
 .
-Framework_AssertTest::testAssertSameSucceeds with data set #7 
+Framework_AssertTest::testAssertSameSucceeds with data set #7
 .
-Framework_AssertTest::testAssertSameSucceeds with data set #8 
+Framework_AssertTest::testAssertSameSucceeds with data set #8
 .
-Framework_AssertTest::testAssertSameSucceeds with data set #9 
+Framework_AssertTest::testAssertSameSucceeds with data set #9
 .
-Framework_AssertTest::testAssertSameSucceeds with data set #10 
+Framework_AssertTest::testAssertSameSucceeds with data set #10
 .
-Framework_AssertTest::testAssertSameSucceeds with data set #11 
+Framework_AssertTest::testAssertSameSucceeds with data set #11
 .
-Framework_AssertTest::testAssertSameFails with data set #0 
+Framework_AssertTest::testAssertSameFails with data set #0
 .
-Framework_AssertTest::testAssertSameFails with data set #1 
+Framework_AssertTest::testAssertSameFails with data set #1
 .
-Framework_AssertTest::testAssertSameFails with data set #2 
+Framework_AssertTest::testAssertSameFails with data set #2
 .
-Framework_AssertTest::testAssertSameFails with data set #3 
+Framework_AssertTest::testAssertSameFails with data set #3
 .
-Framework_AssertTest::testAssertSameFails with data set #4 
+Framework_AssertTest::testAssertSameFails with data set #4
 .
-Framework_AssertTest::testAssertSameFails with data set #5 
+Framework_AssertTest::testAssertSameFails with data set #5
 .
-Framework_AssertTest::testAssertSameFails with data set #6 
+Framework_AssertTest::testAssertSameFails with data set #6
 .
-Framework_AssertTest::testAssertSameFails with data set #7 
+Framework_AssertTest::testAssertSameFails with data set #7
 .
-Framework_AssertTest::testAssertSameFails with data set #8 
+Framework_AssertTest::testAssertSameFails with data set #8
 .
-Framework_AssertTest::testAssertSameFails with data set #9 
+Framework_AssertTest::testAssertSameFails with data set #9
 .
-Framework_AssertTest::testAssertSameFails with data set #10 
+Framework_AssertTest::testAssertSameFails with data set #10
 .
-Framework_AssertTest::testAssertSameFails with data set #11 
+Framework_AssertTest::testAssertSameFails with data set #11
 .
-Framework_AssertTest::testAssertSameFails with data set #12 
+Framework_AssertTest::testAssertSameFails with data set #12
 .
-Framework_AssertTest::testAssertSameFails with data set #13 
+Framework_AssertTest::testAssertSameFails with data set #13
 .
-Framework_AssertTest::testAssertSameFails with data set #14 
+Framework_AssertTest::testAssertSameFails with data set #14
 .
-Framework_AssertTest::testAssertSameFails with data set #15 
+Framework_AssertTest::testAssertSameFails with data set #15
 .
-Framework_AssertTest::testAssertSameFails with data set #16 
+Framework_AssertTest::testAssertSameFails with data set #16
 .
-Framework_AssertTest::testAssertSameFails with data set #17 
+Framework_AssertTest::testAssertSameFails with data set #17
 .
-Framework_AssertTest::testAssertSameFails with data set #18 
+Framework_AssertTest::testAssertSameFails with data set #18
 .
-Framework_AssertTest::testAssertSameFails with data set #19 
+Framework_AssertTest::testAssertSameFails with data set #19
 .
-Framework_AssertTest::testAssertSameFails with data set #20 
+Framework_AssertTest::testAssertSameFails with data set #20
 .
-Framework_AssertTest::testAssertSameFails with data set #21 
+Framework_AssertTest::testAssertSameFails with data set #21
 .
-Framework_AssertTest::testAssertSameFails with data set #22 
+Framework_AssertTest::testAssertSameFails with data set #22
 .
-Framework_AssertTest::testAssertSameFails with data set #23 
+Framework_AssertTest::testAssertSameFails with data set #23
 .
-Framework_AssertTest::testAssertSameFails with data set #24 
+Framework_AssertTest::testAssertSameFails with data set #24
 .
-Framework_AssertTest::testAssertSameFails with data set #25 
+Framework_AssertTest::testAssertSameFails with data set #25
 .
-Framework_AssertTest::testAssertSameFails with data set #26 
+Framework_AssertTest::testAssertSameFails with data set #26
 .
-Framework_AssertTest::testAssertSameFails with data set #27 
+Framework_AssertTest::testAssertSameFails with data set #27
 .
-Framework_AssertTest::testAssertSameFails with data set #28 
+Framework_AssertTest::testAssertSameFails with data set #28
 .
-Framework_AssertTest::testAssertSameFails with data set #29 
+Framework_AssertTest::testAssertSameFails with data set #29
 .
-Framework_AssertTest::testAssertSameFails with data set #30 
+Framework_AssertTest::testAssertSameFails with data set #30
 .
-Framework_AssertTest::testAssertSameFails with data set #31 
+Framework_AssertTest::testAssertSameFails with data set #31
 .
-Framework_AssertTest::testAssertSameFails with data set #32 
+Framework_AssertTest::testAssertSameFails with data set #32
 .
-Framework_AssertTest::testAssertSameFails with data set #33 
+Framework_AssertTest::testAssertSameFails with data set #33
 .
-Framework_AssertTest::testAssertSameFails with data set #34 
+Framework_AssertTest::testAssertSameFails with data set #34
 .
-Framework_AssertTest::testAssertSameFails with data set #35 
+Framework_AssertTest::testAssertSameFails with data set #35
 .
-Framework_AssertTest::testAssertSameFails with data set #36 
+Framework_AssertTest::testAssertSameFails with data set #36
 .
-Framework_AssertTest::testAssertSameFails with data set #37 
+Framework_AssertTest::testAssertSameFails with data set #37
 .
-Framework_AssertTest::testAssertSameFails with data set #38 
+Framework_AssertTest::testAssertSameFails with data set #38
 .
-Framework_AssertTest::testAssertSameFails with data set #39 
+Framework_AssertTest::testAssertSameFails with data set #39
 .
-Framework_AssertTest::testAssertSameFails with data set #40 
+Framework_AssertTest::testAssertSameFails with data set #40
 .
-Framework_AssertTest::testAssertSameFails with data set #41 
+Framework_AssertTest::testAssertSameFails with data set #41
 .
-Framework_AssertTest::testAssertSameFails with data set #42 
+Framework_AssertTest::testAssertSameFails with data set #42
 .
-Framework_AssertTest::testAssertSameFails with data set #43 
+Framework_AssertTest::testAssertSameFails with data set #43
 .
-Framework_AssertTest::testAssertSameFails with data set #44 
+Framework_AssertTest::testAssertSameFails with data set #44
 .
-Framework_AssertTest::testAssertSameFails with data set #45 
+Framework_AssertTest::testAssertSameFails with data set #45
 .
-Framework_AssertTest::testAssertSameFails with data set #46 
+Framework_AssertTest::testAssertSameFails with data set #46
 .
-Framework_AssertTest::testAssertSameFails with data set #47 
+Framework_AssertTest::testAssertSameFails with data set #47
 .
-Framework_AssertTest::testAssertSameFails with data set #48 
+Framework_AssertTest::testAssertSameFails with data set #48
 .
-Framework_AssertTest::testAssertSameFails with data set #49 
+Framework_AssertTest::testAssertSameFails with data set #49
 .
-Framework_AssertTest::testAssertSameFails with data set #50 
+Framework_AssertTest::testAssertSameFails with data set #50
 .
-Framework_AssertTest::testAssertSameFails with data set #51 
+Framework_AssertTest::testAssertSameFails with data set #51
 .
-Framework_AssertTest::testAssertSameFails with data set #52 
+Framework_AssertTest::testAssertSameFails with data set #52
 .
-Framework_AssertTest::testAssertSameFails with data set #53 
+Framework_AssertTest::testAssertSameFails with data set #53
 .
-Framework_AssertTest::testAssertSameFails with data set #54 
+Framework_AssertTest::testAssertSameFails with data set #54
 .
-Framework_AssertTest::testAssertSameFails with data set #55 
+Framework_AssertTest::testAssertSameFails with data set #55
 .
-Framework_AssertTest::testAssertSameFails with data set #56 
+Framework_AssertTest::testAssertSameFails with data set #56
 .
-Framework_AssertTest::testAssertSameFails with data set #57 
+Framework_AssertTest::testAssertSameFails with data set #57
 .
-Framework_AssertTest::testAssertSameFails with data set #58 
+Framework_AssertTest::testAssertSameFails with data set #58
 .
-Framework_AssertTest::testAssertSameFails with data set #59 
+Framework_AssertTest::testAssertSameFails with data set #59
 .
-Framework_AssertTest::testAssertSameFails with data set #60 
+Framework_AssertTest::testAssertSameFails with data set #60
 .
-Framework_AssertTest::testAssertSameFails with data set #61 
+Framework_AssertTest::testAssertSameFails with data set #61
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #0 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #0
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #1 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #1
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #2 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #2
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #3 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #3
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #4 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #4
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #5 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #5
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #6 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #6
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #7 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #7
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #8 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #8
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #9 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #9
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #10 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #10
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #11 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #11
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #12 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #12
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #13 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #13
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #14 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #14
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #15 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #15
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #16 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #16
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #17 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #17
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #18 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #18
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #19 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #19
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #20 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #20
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #21 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #21
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #22 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #22
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #23 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #23
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #24 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #24
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #25 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #25
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #26 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #26
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #27 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #27
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #28 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #28
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #29 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #29
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #30 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #30
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #31 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #31
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #32 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #32
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #33 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #33
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #34 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #34
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #35 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #35
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #36 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #36
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #37 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #37
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #38 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #38
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #39 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #39
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #40 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #40
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #41 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #41
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #42 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #42
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #43 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #43
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #44 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #44
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #45 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #45
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #46 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #46
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #47 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #47
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #48 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #48
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #49 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #49
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #50 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #50
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #51 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #51
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #52 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #52
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #53 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #53
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #54 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #54
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #55 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #55
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #56 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #56
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #57 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #57
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #58 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #58
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #59 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #59
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #60 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #60
 .
-Framework_AssertTest::testAssertNotSameSucceeds with data set #61 
+Framework_AssertTest::testAssertNotSameSucceeds with data set #61
 .
-Framework_AssertTest::testAssertNotSameFails with data set #0 
+Framework_AssertTest::testAssertNotSameFails with data set #0
 .
-Framework_AssertTest::testAssertNotSameFails with data set #1 
+Framework_AssertTest::testAssertNotSameFails with data set #1
 .
-Framework_AssertTest::testAssertNotSameFails with data set #2 
+Framework_AssertTest::testAssertNotSameFails with data set #2
 .
-Framework_AssertTest::testAssertNotSameFails with data set #3 
+Framework_AssertTest::testAssertNotSameFails with data set #3
 .
-Framework_AssertTest::testAssertNotSameFails with data set #4 
+Framework_AssertTest::testAssertNotSameFails with data set #4
 .
-Framework_AssertTest::testAssertNotSameFails with data set #5 
+Framework_AssertTest::testAssertNotSameFails with data set #5
 .
-Framework_AssertTest::testAssertNotSameFails with data set #6 
+Framework_AssertTest::testAssertNotSameFails with data set #6
 .
-Framework_AssertTest::testAssertNotSameFails with data set #7 
+Framework_AssertTest::testAssertNotSameFails with data set #7
 .
-Framework_AssertTest::testAssertNotSameFails with data set #8 
+Framework_AssertTest::testAssertNotSameFails with data set #8
 .
-Framework_AssertTest::testAssertNotSameFails with data set #9 
+Framework_AssertTest::testAssertNotSameFails with data set #9
 .
-Framework_AssertTest::testAssertNotSameFails with data set #10 
+Framework_AssertTest::testAssertNotSameFails with data set #10
 .
-Framework_AssertTest::testAssertNotSameFails with data set #11 
+Framework_AssertTest::testAssertNotSameFails with data set #11
 .
 Framework_AssertTest::testAssertXmlFileEqualsXmlFile
 .
@@ -1404,20 +1418,6 @@ Framework_AssertTest::testAssertJsonFileNotEqualsJsonFile
 .
 Framework_AssertTest::testAssertJsonFileEqualsJsonFile
 .
-Framework_Assert_FunctionsTest::testLogicalAnd
-.
-Framework_Assert_FunctionsTest::testLogicalOr
-.
-Framework_Assert_FunctionsTest::testLogicalXor
-.
-Issue523Test::testAttributeEquals
-.
-Issue578Test::testNoticesDoublePrintStackTrace
-.
-Issue578Test::testWarningsDoublePrintStackTrace
-.
-Issue578Test::testUnexpectedExceptionsPrintsCorrectly
-E
 Issue581Test::testExportingObjectsDoesNotBreakWindowsLineFeeds
 F
 Issue765Test::testDependee
@@ -1499,7 +1499,7 @@ Util_ConfigurationTest::testPHPUnitConfigurationIsReadCorrectly
 Util_ConfigurationTest::testSeleniumBrowserConfigurationIsReadCorrectly
 .
 Util_ConfigurationTest::testXincludeInConfiguration
-hhvm: hphp/util/rank.cpp:57: void HPHP::checkRank(HPHP::Rank): Assertion `false' failed.
+UNKNOWN STATUS
 Framework_ConstraintTest::testConstraintArrayHasKey
 .
 Framework_ConstraintTest::testConstraintArrayHasKey2
@@ -1538,35 +1538,35 @@ Framework_ConstraintTest::testConstraintNotIsAnything
 .
 Framework_ConstraintTest::testConstraintIsEqual
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #0 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #0
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #1 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #1
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #2 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #2
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #3 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #3
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #4 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #4
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #5 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #5
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #6 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #6
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #7 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #7
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #8 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #8
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #9 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #9
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #10 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #10
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #11 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #11
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #12 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #12
 .
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #13 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #13
 F
-Framework_ConstraintTest::testConstraintIsEqual2 with data set #14 
+Framework_ConstraintTest::testConstraintIsEqual2 with data set #14
 .
 Framework_ConstraintTest::testConstraintIsNotEqual
 .

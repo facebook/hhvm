@@ -1268,8 +1268,10 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     Func *func = const_cast<Func*>(calleeFrame->m_func);
     int nArgs = req->m_nArgs;
     bool isImmutable = req->m_isImmutable;
+    TRACE(2, "enterTC: bindCall %s, ActRec %p\n",
+          func->fullName()->data(), calleeFrame);
     TCA dest = getFuncPrologue(func, nArgs);
-    TRACE(2, "enterTC: bindCall %s -> %p\n", func->name()->data(), dest);
+    TRACE(2, "enterTC: bindCall -> %p\n", dest);
     if (!isImmutable) {
       // We dont know we're calling the right function, so adjust
       // dest to point to the dynamic check of ar->m_func.

@@ -133,14 +133,10 @@ void retypeDests(IRInstruction* inst) {
   assertOperandTypes(inst);
 }
 
-void reflowTypes(Block* const changed, const BlockList& blocks) {
-  assert(isRPOSorted(blocks));
-
-  auto it = rpoIteratorTo(blocks, changed);
-  assert(it != blocks.end());
-  for (; it != blocks.end(); ++it) {
-    FTRACE(5, "reflowTypes: visiting block {}\n", (*it)->id());
-    for (auto& inst : **it) retypeDests(&inst);
+void reflowTypes(IRUnit& unit) {
+  for (auto* block : rpoSortCfg(unit)) {
+    FTRACE(5, "reflowTypes: visiting block {}\n", block->id());
+    for (auto& inst : *block) retypeDests(&inst);
   }
 }
 

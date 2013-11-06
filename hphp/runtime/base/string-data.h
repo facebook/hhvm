@@ -502,6 +502,20 @@ struct string_data_isame;
 
 }
 
+namespace folly {
+template<> struct FormatValue<HPHP::StringData> {
+  explicit FormatValue(const HPHP::StringData& str) : m_val(str) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    format_value::formatString(m_val.data(), arg, cb);
+  }
+
+ private:
+  const HPHP::StringData& m_val;
+};
+}
+
 #include "hphp/runtime/base/string-data-inl.h"
 
 #endif

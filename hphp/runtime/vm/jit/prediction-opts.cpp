@@ -172,8 +172,7 @@ void optimizePredictions(IRUnit& unit) {
   }
 
   if (needsReflow) {
-    auto& cfg = sortedBlocks();
-    reflowTypes(cfg.front(), cfg);
+    reflowTypes(unit);
   }
 }
 

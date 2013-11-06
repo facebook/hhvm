@@ -322,7 +322,7 @@ private:
   SSATmp*   optimizeInst(IRInstruction* inst, CloneFlag doclone);
 
 private:
-  static void appendInstruction(IRInstruction* inst, Block* block);
+  void      appendInstruction(IRInstruction* inst, Block* block);
   void      appendInstruction(IRInstruction* inst);
   void      appendBlock(Block* block);
   enum      CloneInstMode { kCloneInst, kUseInst };

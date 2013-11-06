@@ -130,6 +130,7 @@ void TraceBuilder::appendInstruction(IRInstruction* inst) {
       if (!prev->isTerminal()) {
         // new block is reachable from old block so link it.
         block->setNext(next);
+        next->setHint(block->hint());
       }
       block = next;
     }
@@ -235,8 +236,7 @@ SSATmp* TraceBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
 
 SSATmp* TraceBuilder::preOptimizeLdThis(IRInstruction* inst) {
   if (m_state.thisAvailable()) {
-    auto fpInst = inst->src(0)->inst();
-    while (!fpInst->is(DefInlineFP, DefFP)) fpInst = fpInst->src(0)->inst();
+    auto fpInst = frameRoot(inst->src(0)->inst());
 
     if (fpInst->is(DefInlineFP)) {
       if (!m_state.frameSpansCall()) { // check that we haven't nuked the SSATmp
@@ -390,14 +390,6 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
 
   FTRACE(1, "{}{}\n", indent(), inst->toString());
 
-  // turn off ActRec optimization for instructions that will require a frame
-  if (m_state.needsFPAnchor(inst)) {
-    m_state.setHasFPAnchor();
-    always_assert(m_state.fp() != nullptr);
-    gen(InlineFPAnchor, m_state.fp());
-    FTRACE(2, "Anchor for: {}\n", inst->toString());
-  }
-
   // First pass of tracebuilder optimizations try to replace an
   // instruction based on tracked state before we do anything else.
   // May mutate the IRInstruction in place (and return nullptr) or
@@ -517,13 +509,6 @@ void TraceBuilder::reoptimize() {
       auto *inst = &instructions.front();
       instructions.pop_front();
       m_state.setMarker(inst->marker());
-
-      // last attempt to elide ActRecs, if we still need the InlineFPAnchor
-      // it will be added back to the trace when we re-add instructions that
-      // rely on it
-      if (inst->op() == InlineFPAnchor) {
-        continue;
-      }
 
       // merging state looks at the current marker, and optimizeWork
       // below may create new instructions. Use the marker from this

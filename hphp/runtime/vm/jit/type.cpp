@@ -593,7 +593,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
   IR_TYPES
 #undef IRT
 
-#define D(type)   return Type::type;
+#define D(type)   return type;
 #define DofS(n)   return inst->src(n)->type();
 #define DUnbox(n) return inst->src(n)->type().unbox();
 #define DBox(n)   return boxType(inst->src(n)->type());

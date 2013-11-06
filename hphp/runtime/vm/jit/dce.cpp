@@ -38,9 +38,9 @@ struct DceFlags {
     , m_weakUseCount(0)
   {}
 
-  bool isDead()                const { return m_state == DEAD; }
-  void setDead()                  { m_state = DEAD; }
-  void setLive()                  { m_state = LIVE; }
+  bool isDead() const { return m_state == DEAD; }
+  void setDead()      { m_state = DEAD; }
+  void setLive()      { m_state = LIVE; }
 
   /*
    * "Weak" uses are used in optimizeActRecs.
@@ -76,15 +76,15 @@ private:
     DEAD = 0,
     LIVE,
   };
-  uint8_t m_state:3;
-  static constexpr uint8_t kMaxWeakUseCount = 15;
-  uint8_t m_weakUseCount:4;
+  uint8_t m_state:1;
+  static constexpr uint8_t kMaxWeakUseCount = 0x7f;
+  uint8_t m_weakUseCount:7;
 };
 static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 
 // DCE state indexed by instr->id().
 typedef StateVector<IRInstruction, DceFlags> DceState;
-typedef StateVector<SSATmp, uint32_t> UseCounts;
+typedef smart::hash_map<SSATmp*, uint32_t> UseCounts;
 typedef smart::list<const IRInstruction*> WorkList;
 
 void removeDeadInstructions(IRTrace* trace, const DceState& state) {
@@ -130,50 +130,26 @@ BlockList prepareBlocks(IRUnit& unit) {
     // if this is a load that does not generate a guard, then get rid
     // of its label so that its not an essential control-flow
     // instruction
-    if (isUnguardedLoad(inst)) {
+    if (isUnguardedLoad(inst) && inst->taken()) {
       // LdStack and LdLoc instructions that produce generic types
       // and LdStack instruction that produce Cell types will not
       // generate guards, so remove the label from this instruction so
       // that it's no longer an essential control-flow instruction
+      ITRACE(4, "removing taken branch of unguarded load {}\n",
+             *inst);
       inst->setTaken(nullptr);
     }
   });
 
-  // 2. get a list of reachable blocks by sorting them, and erase any
-  //    blocks that are unreachable.
-  bool needsReflow = false;
-  BlockList blocks = rpoSortCfg(unit);
-  StateVector<Block, bool> reachable(unit, false);
-  for (Block* b : blocks) reachable[b] = true;
-  for (Block* b : blocks) {
-    b->forEachPred([&](Block *p) {
-      if (!reachable[p]) {
-        // remove edges from unreachable block to reachable block.
-        if (!p->empty()) p->back().setTaken(nullptr);
-        p->setNext(nullptr);
-      }
-    });
-  }
-  forEachTrace(unit, [&](IRTrace* t) {
-    for (auto bit = t->begin(); bit != t->end();) {
-      if (reachable[*bit]) {
-        ++bit;
-        continue;
-      }
-      FTRACE(5, "erasing block {}\n", (*bit)->id());
-      if ((*bit)->taken() && (*bit)->back().op() == Jmp) {
-        needsReflow = true;
-      }
-      bit = t->erase(bit);
-    }
-  });
+  // 2. erase unreachable blocks and get an rpo sorted list of what remains.
+  bool needsReflow = removeUnreachable(unit);
 
-  // 3. if we removed any whole blocks that ended in Jmp
-  //    instructions, reflow all types in case they change the
-  //    incoming types of DefLabel instructions.
-  if (needsReflow) reflowTypes(blocks.front(), blocks);
+  // 3. if we removed any whole blocks that ended in Jmp instructions, reflow
+  //    all types in case they change the incoming types of DefLabel
+  //    instructions.
+  if (needsReflow) reflowTypes(unit);
 
-  return blocks;
+  return rpoSortCfg(unit);
 }
 
 WorkList
@@ -198,184 +174,262 @@ initInstructions(const BlockList& blocks, DceState& state) {
  * of a DefInlineFP.  In this case we can kill both, which may allow
  * removing a SpillFrame as well.
  */
-void optimizeActRecs(std::list<Block*>& blocks, DceState& state, IRUnit& unit,
-                     UseCounts& uses) {
-  FTRACE(5, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
-  SCOPE_EXIT { FTRACE(5, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
+void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
+                     const UseCounts& uses) {
+  FTRACE(3, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
+  if (do_assert) {
+    for (UNUSED auto const& pair : uses) {
+      assert(pair.first->isA(Type::FramePtr));
+      assert(pair.first->inst()->is(DefInlineFP));
+    }
+  }
+
+  SCOPE_EXIT { FTRACE(3, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
+  using Trace::Indent;
+  Indent _i;
 
   bool killedFrames = false;
 
-  smart::map<SSATmp*, Offset> retFixupMap;
+  smart::hash_map<SSATmp*, Offset> retFixupMap;
   forEachInst(blocks, [&](IRInstruction* inst) {
-    if (!state[inst].isDead()) return;
+    if (state[inst].isDead()) return;
+
     switch (inst->op()) {
-    // We don't need to generate stores to a frame if it can be
-    // eliminated.
-    case StLoc:
-      {
-        auto const frameInst = inst->src(0)->inst();
+      // We don't need to generate stores to a frame if it can be eliminated.
+      case StLoc: {
+        auto const frameInst = frameRoot(inst->src(0)->inst());
         if (frameInst->op() == DefInlineFP) {
-          FTRACE(5, "Marking StLoc for {}\n", frameInst->id());
+          ITRACE(4, "{} weak use of {}\n", *inst, *frameInst->dst());
           state[frameInst].incWeakUse();
         }
+        break;
       }
-      break;
 
-    case SpillFrame:
-      {
-        auto const frameInst = inst->src(1)->inst();
-        auto const reason = inst->src(2);
-        if (frameInst->op() == DefInlineFP && reason->type() <= Type::Func) {
-            FTRACE(5, "Marking SpillFrame for {}\n", frameInst->id());
-          state[frameInst].incWeakUse();
-        }
-      }
-      break;
-
-    case ReDefSP:
-    case DefInlineSP:
-      {
-        auto const frameInst = inst->src(0)->inst();
+      case PassFP: {
+        auto frameInst = frameRoot(inst->src(0)->inst());
         if (frameInst->op() == DefInlineFP) {
-          FTRACE(5, "Marking DefSP for {}\n", frameInst->id());
+          ITRACE(4, "{} weak use of {}\n", *inst, *frameInst->dst());
           state[frameInst].incWeakUse();
         }
+        break;
       }
-      break;
 
-    case InlineReturn:
-      {
-        auto frameUses = uses[inst->src(0)];
-        auto srcInst = inst->src(0)->inst();
-        if (srcInst->op() == DefInlineFP) {
-          auto weakUses = state[srcInst].weakUseCount();
-          // We haven't counted this InlineReturn as a weak use yet,
-          // which is where this '1' comes from.
-          if (frameUses - weakUses == 1) {
-            FTRACE(5, "killing frame {}\n", srcInst->id());
-            killedFrames = true;
-            auto const stkInst = srcInst->src(0)->inst();
+      /* DefInlineFP counts as two weak uses of its containing frame, one for
+       * the DefInlineFP itself and one for the SpillFrame used here. We wait
+       * until this instruction to mark the SpillFrame's use as weak so a
+       * normal Call will prevent frames from being elided. */
+      case DefInlineFP: {
+        auto outerFrame = frameRoot(inst->src(2)->inst());
+        if (outerFrame->is(DefInlineFP)) {
+          ITRACE(4, "{} weak use of {}\n", *inst, *outerFrame->dst());
+          state[outerFrame].incWeakUse();
 
-            Offset retBCOff = srcInst->extra<DefInlineFP>()->retBCOff;
-            retFixupMap[srcInst->dst()] = retBCOff;
-            unit.replace(srcInst, PassFP, srcInst->src(2));
-            if (stkInst->op() == SpillFrame) {
-              unit.replace(stkInst, PassSP, stkInst->src(0));
-            }
-          }
+          auto DEBUG_ONLY spillFrame = findSpillFrame(inst->src(0));
+          assert(spillFrame->src(1) == outerFrame->dst());
+          ITRACE(4, "{} weak use of {}\n", *spillFrame, *outerFrame->dst());
+          state[outerFrame].incWeakUse();
         }
+        break;
       }
-      break;
 
-    case PassFP:
-      {
-        auto frameInst = inst->src(0)->inst();
+      case ReDefSP:
+      case DefInlineSP: {
+        auto const frameInst = frameRoot(inst->src(1)->inst());
         if (frameInst->op() == DefInlineFP) {
-          FTRACE(5, "Marking PassFP for {}\n", frameInst->id());
+          ITRACE(4, "{} weak use of {}\n", *inst, *frameInst->dst());
           state[frameInst].incWeakUse();
         }
+        break;
       }
-      break;
 
-    case DefInlineFP:
-      {
-        auto outerInst = inst->src(2)->inst();
-        if (outerInst->op() == DefInlineFP) {
-          FTRACE(5, "Marking DefInlineFP for {}\n", outerInst->id());
-          state[outerInst].incWeakUse();
-        }
-      }
-      break;
+      case InlineReturn: {
+        auto* frameInst = frameRoot(inst->src(0)->inst());
+        assert(frameInst->is(DefInlineFP));
+        auto frameUses = mapGet(uses, frameInst->dst(), 0);
+        auto* spillInst = findSpillFrame(frameInst->src(0));
 
-    default:
-      {
-        for (uint32_t i = 0; i < inst->numSrcs(); i++) {
-          auto src = inst->src(i);
-          if (src->inst()->op() == DefInlineFP) {
-            FTRACE(5, "not killing frame {} b/c: {}\n", src->inst()->id(),
-                   inst->toString());
-          }
+        auto weakUses = state[frameInst].weakUseCount();
+        // We haven't counted this InlineReturn as a weak use yet,
+        // which is where this '1' comes from.
+        if (frameUses - weakUses == 1) {
+          ITRACE(4, "killing frame {}\n", *frameInst);
+          killedFrames = true;
+
+          Offset retBCOff = frameInst->extra<DefInlineFP>()->retBCOff;
+          retFixupMap[frameInst->dst()] = retBCOff;
+          ITRACE(4, "replacing {} and {} with PassFP/PassSP, removing {}\n",
+                 *frameInst, *spillInst, *inst);
+          unit.replace(frameInst, PassFP, frameInst->src(2));
+          unit.replace(spillInst, PassSP, spillInst->src(0));
+          inst->convertToNop();
+        } else {
+          ITRACE(3, "not killing frame {}, weak/strong {}/{}\n",
+                 *frameInst, weakUses, frameUses);
         }
+        break;
       }
-      break;
+
+      default: {
+        break;
+      }
     }
   });
 
   if (!killedFrames) return;
 
   /*
-   * The first time through, we've counted up weak uses of the frame
-   * and then finally marked it dead.  The instructions in between
-   * that were weak uses may need modifications now that their frame
-   * is going away.
+   * The first time through, we've counted up weak uses of the frame and then
+   * finally marked it dead.  The instructions in between that were weak uses
+   * may need modifications now that their frame is going away.
+   *
+   * frameDepths is used to keep track of the current maximum distance the
+   * stack could be from the enclosing frame pointer. This is used to update
+   * the BCMarkers of instructions that may be sensitive to having their
+   * enclosing frame elided.
    */
-  forEachInst(blocks, [&](IRInstruction* inst) {
-    switch (inst->op()) {
-    case DefInlineSP:
-      {
-        auto const fp = inst->src(0);
-        if (fp->inst()->op() == PassFP) {
-          FTRACE(5, "{} ({}) masking\n",
-                 opcodeName(inst->op()),
-                 inst->id());
-          unit.replace(inst, PassSP, inst->src(1));
+  smart::hash_map<Block*, uint32_t> frameDepths;
+  auto depth = [](const Func* func) {
+    return func->numSlotsInFrame() + func->maxStackCells();
+  };
+  frameDepths[blocks.front()] = 0;
+
+  // We limit the total stack depth during inlining, so this is the deepest
+  // we'll ever have to worry about.
+  auto* outerFunc = blocks.front()->front().marker().func;
+  auto const maxDepth = depth(outerFunc) + kStackCheckLeafPadding;
+
+  ITRACE(3, "Killed some frames. Iterating over blocks for fixups.\n");
+  for (auto* block : blocks) {
+    ITRACE(5, "Visiting block {}\n", block->id());
+    Indent _i;
+    assert(frameDepths.count(block));
+    auto curDepth = frameDepths[block];
+    frameDepths.erase(block);
+    ITRACE(5, "loaded depth {}\n", curDepth);
+
+    for (auto& inst : *block) {
+      switch (inst.op()) {
+        case DefInlineFP: {
+          auto* spillInst = findSpillFrame(inst.src(0));
+          assert(spillInst);
+          curDepth += depth(spillInst->marker().func);
+          ITRACE(4, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
+                 inst, state[inst].weakUseCount(), mapGet(uses, inst.dst(), 0));
+          break;
+        }
+
+        case InlineReturn: {
+          auto* fpInst = frameRoot(inst.src(0)->inst());
+          assert(fpInst->is(DefInlineFP));
+          auto* spillInst = findSpillFrame(fpInst->src(0));
+          assert(spillInst);
+          curDepth -= depth(spillInst->marker().func);
+          assert(findPassFP(inst.src(0)->inst()) == nullptr &&
+                 "Eliminated DefInlineFP but left its InlineReturn");
+          break;
+        }
+
+        case DefInlineSP: {
+          if (auto const fp = findPassFP(inst.src(1)->inst())) {
+            ITRACE(4, "replacing {} with PassSP\n", inst);
+            unit.replace(&inst, PassSP, inst.src(0));
+            break;
+          }
+          break;
+        }
+
+        case StLoc: {
+          if (auto const fp = findPassFP(inst.src(0)->inst())) {
+            ITRACE(4, "marking {} as dead\n", inst);
+            state[inst].setDead();
+          }
+          break;
+        }
+
+        /*
+         * DecRef* are special: they're the only instructions that can reenter
+         * but not throw. This means it's safe to elide their inlined frame, as
+         * long as we adjust their markers to a depth that is guaranteed to not
+         * stomp on the caller's frame if it reenters.
+         */
+        case DecRef:
+        case DecRefLoc:
+        case DecRefStack:
+        case DecRefMem: {
+          auto& spOff = inst.marker().spOff;
+          auto newDepth = maxDepth - curDepth;
+          assert(spOff <= newDepth);
+          ITRACE(4, "adjusting marker spOff for {} from {} to {}\n",
+                 inst, spOff, newDepth);
+          spOff = newDepth;
+          break;
+        }
+
+        case ReDefSP: {
+          // The first real frame enclosing this ReDefSP may have changed, so
+          // update its frameOffset.
+          auto* fpInst = frameRoot(inst.src(1)->inst());
+          auto* realFp = fpInst->dst();
+          int32_t offset = 0;
+          auto const& extra = *inst.extra<ReDefSP>();
+          ITRACE(4, "calculating new offset for {}\n", inst);
+          Indent _i;
+
+          for (unsigned i = 0; i < extra.nFrames; ++i) {
+            auto& frame = extra.frames[i];
+            ITRACE(4, "adding {} for {}\n", frame.spOff, *frame.fp);
+            offset += frame.spOff;
+            if (frame.fp == realFp) break;
+            assert(i < extra.nFrames - 1);
+          }
+          ITRACE(4, "final offset: {}\n", offset);
+          inst.extra<ReDefSP>()->spOffset = offset;
+          break;
+        }
+
+        /*
+         * When we unroll the stack during an exception the unwinder relies on
+         * m_soff whenever it encounters an ActRec to properly restore the PC
+         * once the frame has been destroyed.  When we elide a frame from the
+         * stack we also update the PC pushed in any ActRec's pushed by a Call
+         * so that they reflect the frame that they logically fall inside of.
+         */
+        case Call: {
+          auto const arInst = findSpillFrame(inst.src(0));
+          if (arInst && arInst->is(SpillFrame)) {
+            if (auto fpInst = findPassFP(arInst->src(1)->inst())) {
+              not_reached(); // TODO t3203284
+              assert(retFixupMap.count(fpInst->dst()));
+              ITRACE(4, "{} repairing\n", inst);
+              Offset retBCOff = retFixupMap[fpInst->dst()];
+              inst.setSrc(1, unit.cns(retBCOff));
+            }
+          }
+          break;
+        }
+
+        default: {
           break;
         }
       }
-      break;
-
-    case StLoc:
-    case InlineReturn:
-      {
-        auto const fp = inst->src(0);
-        if (fp->inst()->op() == PassFP) {
-          FTRACE(5, "{} ({}) setDead\n",
-                 opcodeName(inst->op()),
-                 inst->id());
-          state[inst].setDead();
-        }
-      }
-      break;
-
-    /*
-     * When we unroll the stack during an exception the unwinder relies on
-     * m_soff whenever it encounters an ActRec to properly restore the
-     * PC once the frame has been destroyed.  When we elide a frame from the
-     * stack we also update the PC pushed in any ActRec's pushed by a Call
-     * so that they reflect the frame that they logically fall inside of.
-     */
-    case Call:
-      {
-        auto const arInst = inst->src(0)->inst();
-        if (arInst->op() == SpillFrame) {
-          auto const fp = arInst->src(1);
-          if (fp->inst()->op() == PassFP) {
-            auto fpInst = fp->inst();
-            while (fpInst->src(0)->inst()->op() == PassFP) {
-              fpInst = fpInst->src(0)->inst();
-            }
-            assert(retFixupMap.find(fpInst->dst()) != retFixupMap.end());
-            FTRACE(5, "{} ({}) repairing\n",
-                   opcodeName(inst->op()),
-                   inst->id());
-            Offset retBCOff = retFixupMap[fpInst->dst()];
-            inst->setSrc(1, unit.cns(retBCOff));
-          }
-        }
-      }
-      break;
-
-    case DefInlineFP:
-      FTRACE(5, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
-             inst->id(),
-             state[inst].weakUseCount(),
-             uses[inst->dst()]);
-      break;
-
-    default:
-      break;
     }
-  });
+
+    ITRACE(5, "finishing block B{} with depth {}\n", block->id(), curDepth);
+    if (auto* taken = block->taken()) {
+      if (!frameDepths.count(taken)) {
+        frameDepths[taken] = curDepth;
+      } else {
+        assert(frameDepths[taken] == curDepth);
+      }
+    }
+    if (auto* next = block->next()) {
+      if (!frameDepths.count(next)) {
+        frameDepths[next] = curDepth;
+      } else {
+        assert(frameDepths[next] == curDepth);
+      }
+    }
+  }
 }
 
 } // anonymous namespace
@@ -393,15 +447,11 @@ void eliminateDeadCode(IRUnit& unit) {
   BlockList blocks = prepareBlocks(unit);
   removeEmptyExitTraces();
 
-  // Ensure that main trace doesn't unconditionally jump to an exit
-  // trace.  This invariant is needed by the ref-counting optimization.
-  eliminateUnconditionalJump(unit);
-
   // mark the essential instructions and add them to the initial
   // work list; this will also mark reachable exit traces. All
   // other instructions marked dead.
   DceState state(unit, DceFlags());
-  UseCounts uses(unit, 0);
+  UseCounts uses;
   WorkList wl = initInstructions(blocks, state);
 
   // process the worklist
@@ -415,12 +465,14 @@ void eliminateDeadCode(IRUnit& unit) {
         continue;
       }
 
-      if (srcInst->op() == DefInlineFP) {
-        FTRACE(5, "adding use to frame {} b/c: {}\n", srcInst->id(),
-               inst->toString());
+      if (src->isA(Type::FramePtr) && !srcInst->is(LdRaw, LdContActRec)) {
+        auto* root = frameRoot(srcInst);
+        if (root->is(DefInlineFP)) {
+          FTRACE(4, "adding use to {} from {}\n", *src, *inst);
+          ++uses[root->dst()];
+        }
       }
 
-      uses[src]++;
       if (state[srcInst].isDead()) {
         state[srcInst].setLive();
         wl.push_back(srcInst);
@@ -428,9 +480,10 @@ void eliminateDeadCode(IRUnit& unit) {
     }
   }
 
-  // Optimize unused inlined activation records.  It's not necessary
-  // to look at non-main traces for this.
-  optimizeActRecs(unit.main()->blocks(), state, unit, uses);
+  if (RuntimeOption::EvalHHIRInlineFrameOpts) {
+    // Optimize unused inlined activation records.
+    optimizeActRecs(blocks, state, unit, uses);
+  }
 
   // now remove instructions whose id == DEAD
   forEachTrace(unit, [&](IRTrace* t) {

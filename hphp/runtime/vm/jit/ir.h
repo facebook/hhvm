@@ -223,8 +223,8 @@ O(GuardRefs,                        ND, S(Func)                               \
 O(AssertLoc,               D(FramePtr), S(FramePtr),                       E) \
 O(OverrideLocVal,                   ND, S(FramePtr) S(Gen),                E) \
 O(BeginCatch,                       ND, NA,                            E|Mem) \
-O(EndCatch,                         ND, S(StkPtr),                   E|Mem|T) \
-O(TryEndCatch,                      ND, S(StkPtr),                     E|Mem) \
+O(EndCatch,                         ND, S(FramePtr) S(StkPtr),       E|Mem|T) \
+O(TryEndCatch,                      ND, S(FramePtr) S(StkPtr),         E|Mem) \
 O(LdUnwinderValue,              DParam, NA,                              PRc) \
 O(DeleteUnwinderException,          ND, NA,                          N|E|Mem) \
 O(Add,                          DArith, S(Int,Dbl) S(Int,Dbl),             C) \
@@ -247,9 +247,9 @@ O(Shr,                          D(Int), S(Int) S(Int),                     C) \
 O(ConvBoolToArr,                D(Arr), S(Bool),                     C|N|PRc) \
 O(ConvDblToArr,                 D(Arr), S(Dbl),                      C|N|PRc) \
 O(ConvIntToArr,                 D(Arr), S(Int),                      C|N|PRc) \
-O(ConvObjToArr,                 D(Arr), S(Obj),                  N|PRc|CRc|K) \
+O(ConvObjToArr,                 D(Arr), S(Obj),               Er|N|PRc|CRc|K) \
 O(ConvStrToArr,                 D(Arr), S(Str),                    N|PRc|CRc) \
-O(ConvCellToArr,                D(Arr), S(Cell),                 N|PRc|CRc|K) \
+O(ConvCellToArr,                D(Arr), S(Cell),              Er|N|PRc|CRc|K) \
                                                                               \
 O(ConvArrToBool,               D(Bool), S(Arr),                            N) \
 O(ConvDblToBool,               D(Bool), S(Dbl),                            C) \
@@ -364,13 +364,14 @@ O(CheckInit,                        ND, S(Gen),                           NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
 O(CheckCold,                        ND, NA,                                E) \
 O(CheckNullptr,                     ND, S(CountedStr,Nullptr),         E|CRc) \
+O(CheckNonNull,  DSubtract(0, Nullptr), S(Nullptr,Func),                  NF) \
 O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
 O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                     E) \
 O(CheckPackedArrayElemNull,    D(Bool), S(Arr) S(Int),                     E) \
 O(VectorHasFrozenCopy,              ND, S(Obj),                           NF) \
 O(VectorDoCow,                      ND, S(Obj),                          N|E) \
-O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr),             P) \
+O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func),        P) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
 O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
@@ -410,15 +411,16 @@ O(LookupClsMethod,                  ND, S(Cls)                                \
                                           S(Str)                              \
                                           S(StkPtr)                           \
                                           S(FramePtr),            N|E|Er|Mem) \
-O(LdClsMethodCache,         D(FuncCls), C(Str)                                \
-                                          C(Str)                              \
-                                          C(NamedEntity)                      \
-                                          S(FramePtr)                         \
-                                          S(StkPtr),         N|E|Refs|Er|Mem) \
-O(LdClsMethodFCache,        D(FuncCtx), C(Cls)                                \
-                                          CStr                                \
-                                          S(Obj,Cls,Ctx)                      \
+O(LdClsMethodCacheFunc,D(Func|Nullptr), NA,                               NF) \
+O(LdClsMethodCacheCls,         D(Cctx), NA,                               NF) \
+O(LookupClsMethodCache,D(Func|Nullptr), C(NamedEntity)                        \
+                                          S(FramePtr),       N|E|Refs|Er|Mem) \
+O(LdClsMethodFCacheFunc,                                                      \
+                       D(Func|Nullptr), NA,                               NF) \
+O(LookupClsMethodFCache,                                                      \
+                       D(Func|Nullptr), C(Cls)                                \
                                           S(FramePtr),                N|E|Er) \
+O(GetCtxFwdCallDyn,             D(Ctx), S(Ctx),                          PRc) \
 O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                C|PRc) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
@@ -525,12 +527,11 @@ O(InlineReturn,                     ND, S(FramePtr),                       E) \
 O(DefFP,                   D(FramePtr), NA,                                E) \
 O(DefSP,                     D(StkPtr), S(FramePtr),                       E) \
 O(DefInlineSP,               D(StkPtr), S(StkPtr) S(FramePtr),             E) \
-O(ReDefSP,                   D(StkPtr), S(FramePtr) S(StkPtr),            NF) \
+O(ReDefSP,                   D(StkPtr), S(StkPtr) S(FramePtr),            NF) \
 O(PassSP,                    D(StkPtr), S(StkPtr),                         P) \
 O(PassFP,                  D(FramePtr), S(FramePtr),                       P) \
-O(InlineFPAnchor,                   ND, S(FramePtr),                       E) \
 O(StashGeneratorSP,                 ND, S(FramePtr) S(StkPtr),         E|Mem) \
-O(ReDefGeneratorSP,          D(StkPtr), S(FramePtr) S(StkPtr),         E|Mem) \
+O(ReDefGeneratorSP,          D(StkPtr), S(StkPtr) S(FramePtr),         E|Mem) \
 O(VerifyParamCls,                   ND, S(Cls)                                \
                                           S(Cls)                              \
                                           C(Int)                              \

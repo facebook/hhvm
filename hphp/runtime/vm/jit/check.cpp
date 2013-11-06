@@ -90,6 +90,8 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
  * 9. If this block is a catch block, it must have at most one predecessor
  *    and the trace containing it must contain exactly this block.
+ * 10.Every instruction with the MayRaiseError flag must have a catch trace
+ *    attached to it.
  */
 bool checkBlock(Block* b) {
   auto it = b->begin();
@@ -118,6 +120,11 @@ bool checkBlock(Block* b) {
     // Invariant #8
     assert(inst.marker().valid());
     assert(inst.block() == b);
+    // Invariant #10
+    assert_log(IMPLIES(inst.mayRaiseError() && b->trace()->isMain() &&
+                       !inst.is(CoerceStk), // CoerceStk is special: t3213636
+                       inst.taken() && inst.taken()->isCatch()),
+               [&]{ return inst.toString(); });
   }
 
   // Invariant #5

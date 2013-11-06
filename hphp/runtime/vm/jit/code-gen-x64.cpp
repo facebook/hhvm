@@ -244,7 +244,6 @@ NOOP_OPCODE(AssertStkVal)
 NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
 NOOP_OPCODE(ExceptionBarrier)
-NOOP_OPCODE(InlineFPAnchor)
 NOOP_OPCODE(TakeStack)
 
 CALL_OPCODE(AddElemStrKey)
@@ -587,6 +586,17 @@ void CodeGenerator::cgPassFP(IRInstruction* inst) {
 
 void CodeGenerator::cgPassSP(IRInstruction* inst) {
   cgMov(inst);
+}
+
+void CodeGenerator::cgCheckNonNull(IRInstruction* inst) {
+  auto srcReg = curOpd(inst->src(0)).reg();
+  auto dstReg = curOpd(inst->dst()).reg();
+  auto taken  = inst->taken();
+  assert(taken);
+
+  m_as.testq (srcReg, srcReg);
+  emitFwdJcc(CC_Z, taken);
+  if (dstReg != InvalidReg) emitMovRegReg(m_as, srcReg, dstReg);
 }
 
 void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
@@ -2859,7 +2869,7 @@ void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDefInlineSP(IRInstruction* inst) {
-  auto fp  = curOpd(inst->src(0)).reg();
+  auto fp  = curOpd(inst->src(1)).reg();
   auto dst = curOpd(inst->dst()).reg();
   auto off = -inst->extra<StackOffset>()->offset * sizeof(Cell);
   emitLea(m_as, fp[off], dst);
@@ -2870,9 +2880,9 @@ void CodeGenerator::cgReDefSP(IRInstruction* inst) {
   // non-generator frames) when we don't track rVmSp independently
   // from rVmFp.  In generator frames we'll have to track offsets from
   // a DefGeneratorSP or something similar.
-  auto fp  = curOpd(inst->src(0)).reg();
+  auto fp  = curOpd(inst->src(1)).reg();
   auto dst = curOpd(inst->dst()).reg();
-  auto off = -inst->extra<ReDefSP>()->offset * sizeof(Cell);
+  auto off = -inst->extra<ReDefSP>()->spOffset * sizeof(Cell);
   emitLea(m_as, fp[off], dst);
 }
 
@@ -2886,7 +2896,7 @@ void CodeGenerator::cgStashGeneratorSP(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReDefGeneratorSP(IRInstruction* inst) {
-  auto fpReg = curOpd(inst->src(0)).reg();
+  auto fpReg = curOpd(inst->src(1)).reg();
   auto dstReg = curOpd(inst->dst()).reg();
 
   ssize_t stashLoc = CONTOFF(m_stashedSP) - c_Continuation::getArOffset();
@@ -5088,59 +5098,62 @@ void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
   m_as.loadq(dstReg[methOff], dstReg);
 }
 
-void CodeGenerator::cgLdClsMethodCache(IRInstruction* inst) {
+void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {
   SSATmp* dst        = inst->dst();
-  SSATmp* className  = inst->src(0);
-  SSATmp* methodName = inst->src(1);
-  SSATmp* baseClass  = inst->src(2);
-  SSATmp* fp         = inst->src(3);
-  SSATmp* sp         = inst->src(4);
-  Block*  label      = inst->taken();
+  SSATmp* baseClass  = inst->src(0);
+  SSATmp* fp         = inst->src(1);
 
-  // Stats::emitInc(a, Stats::TgtCache_StaticMethodHit);
-  auto const cls = className->getValStr();
-  auto const method = methodName->getValStr();
+  auto const& extra = *inst->extra<ClsMethodData>();
+  auto const cls = extra.clsName;
+  auto const method = extra.methodName;
   auto const ne = baseClass->getValNamedEntity();
   auto const ch = StaticMethodCache::alloc(cls,
-                                                method,
-                                                getContextName(curClass()));
+                                           method,
+                                           getContextName(curClass()));
   auto funcDestReg  = curOpd(dst).reg(0);
-  auto classDestReg = curOpd(dst).reg(1);
-  auto offsetof_func = offsetof(StaticMethodCache, m_func);
-  auto offsetof_cls  = offsetof(StaticMethodCache, m_cls);
 
-  assert(funcDestReg != InvalidReg && classDestReg != InvalidReg);
-  // Attempt to retrieve the func* and class* from cache
-  m_as.loadq(rVmTl[ch + offsetof_func], funcDestReg);
-  m_as.loadq(rVmTl[ch + offsetof_cls], classDestReg);
-  m_as.testq(funcDestReg, funcDestReg);
-  // May have retrieved a NULL from the cache
-  // handle case where method is not entered in the cache
-  unlikelyIfBlock(CC_E, [&] (Asm& a) {
-    if (false) { // typecheck
-      UNUSED TypedValue* fake_fp = nullptr;
-      UNUSED TypedValue* fake_sp = nullptr;
-      const UNUSED Func* f = StaticMethodCache::lookup(
-        ch, ne, cls, method, fake_fp, fake_sp);
-    }
-    // can raise an error if class is undefined
-    cgCallHelper(a,
-                 CppCall(StaticMethodCache::lookup),
-                 callDest(funcDestReg),
-                 SyncOptions::kSyncPoint,
-                 ArgGroup(curOpds()).imm(ch)      // Handle ch
-                           .immPtr(ne)            // NamedEntity* np.second
-                           .immPtr(cls)           // className
-                           .immPtr(method)        // methodName
-                           .reg(curOpd(fp).reg()) // frame pointer
-                           .reg(curOpd(sp).reg()) // stack pointer
-    );
-    // recordInstrCall is done in cgCallHelper
-    a.testq(funcDestReg, funcDestReg);
-    a.loadq(rVmTl[ch + offsetof_cls], classDestReg);
-    // if StaticMethodCache::lookup() returned NULL, jmp to label
-    emitFwdJcc(a, CC_Z, label);
-  });
+  if (false) { // typecheck
+    UNUSED TypedValue* fake_fp = nullptr;
+    UNUSED TypedValue* fake_sp = nullptr;
+    const UNUSED Func* f = StaticMethodCache::lookup(
+      ch, ne, cls, method, fake_fp);
+  }
+
+  // can raise an error if class is undefined
+  cgCallHelper(m_as,
+               CppCall(StaticMethodCache::lookup),
+               callDest(funcDestReg),
+               SyncOptions::kSyncPoint,
+               ArgGroup(curOpds()).imm(ch)       // Handle ch
+                          .immPtr(ne)            // NamedEntity* np.second
+                          .immPtr(cls)           // className
+                          .immPtr(method)        // methodName
+                          .reg(curOpd(fp).reg()) // frame pointer
+              );
+}
+
+void CodeGenerator::cgLdClsMethodCacheCommon(IRInstruction* inst, Offset off) {
+  auto dst = inst->dst();
+  auto dstReg = curOpd(dst).reg();
+  if (dstReg == InvalidReg) return;
+
+  auto const& extra = *inst->extra<ClsMethodData>();
+  auto const clsName = extra.clsName;
+  auto const methodName = extra.methodName;
+  auto const ch = StaticMethodCache::alloc(clsName, methodName,
+                                           getContextName(curClass()));
+  if (dstReg != InvalidReg) {
+    m_as.loadq(rVmTl[ch + off], dstReg);
+  }
+}
+
+void CodeGenerator::cgLdClsMethodCacheFunc(IRInstruction* inst) {
+  cgLdClsMethodCacheCommon(inst, offsetof(StaticMethodCache, m_func));
+
+}
+
+void CodeGenerator::cgLdClsMethodCacheCls(IRInstruction* inst) {
+  cgLdClsMethodCacheCommon(inst, offsetof(StaticMethodCache, m_cls));
 }
 
 /**
@@ -5166,31 +5179,6 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(PhysReg ctxReg,
  * time, and that is determined dynamically by looking up into the
  * StaticMethodFCache.
  */
-void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
-                                                 PhysReg      thisReg,
-                                                 RDS::Handle& ch) {
-  Label NonStaticCall, End;
-
-  // thisReg is holding $this. Should we pass it to the callee?
-  m_as.cmpl(1,
-            rVmTl[ch + offsetof(StaticMethodFCache, m_static)]);
-  m_as.jcc8(CC_NE, NonStaticCall);
-  // If calling a static method...
-  {
-    // Load (this->m_cls | 0x1) into destCtxReg
-    m_as.loadq(thisReg[ObjectData::getVMClassOffset()], destCtxReg);
-    m_as.orq(1, destCtxReg);
-    m_as.jmp8(End);
-  }
-  // Else: calling non-static method
-  {
-    asm_label(m_as, NonStaticCall);
-    emitMovRegReg(m_as, thisReg, destCtxReg);
-    emitIncRef(m_as, destCtxReg);
-  }
-  asm_label(m_as, End);
-}
-
 void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
   PhysReg destCtxReg = curOpd(inst->dst()).reg(0);
   SSATmp*  srcCtxTmp = inst->src(0);
@@ -5214,68 +5202,98 @@ void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
   asm_label(m_as, End);
 }
 
-void CodeGenerator::cgLdClsMethodFCache(IRInstruction* inst) {
+void CodeGenerator::cgLdClsMethodFCacheFunc(IRInstruction* inst) {
+  auto const& extra     = *inst->extra<ClsMethodData>();
+  auto const clsName    = extra.clsName;
+  auto const methodName = extra.methodName;
+  auto const dstReg     = curOpd(inst->dst()).reg();
+
+  auto const ch = StaticMethodFCache::alloc(
+    clsName, methodName, getContextName(curClass())
+  );
+  if (dstReg != InvalidReg) {
+    m_as.loadq(rVmTl[ch], dstReg);
+  }
+}
+
+void CodeGenerator::cgLookupClsMethodFCache(IRInstruction* inst) {
   auto const funcDestReg = curOpd(inst->dst()).reg(0);
-  auto const destCtxReg  = curOpd(inst->dst()).reg(1);
   auto const cls         = inst->src(0)->getValClass();
-  auto const methName    = inst->src(1)->getValStr();
-  auto const srcCtxTmp   = inst->src(2);
-  auto const fp          = inst->src(3);
-  auto const srcCtxReg   = curOpd(srcCtxTmp).reg(0);
-  auto const exitLabel   = inst->taken();
+  auto const& extra      = *inst->extra<ClsMethodData>();
+  auto const methName    = extra.methodName;
+  auto const fp          = inst->src(1);
   auto const clsName     = cls->name();
 
   auto ch = StaticMethodFCache::alloc(
     clsName, methName, getContextName(curClass())
   );
 
-  assert(funcDestReg != InvalidReg && destCtxReg != InvalidReg);
-  emitMovRegReg(m_as, srcCtxReg, destCtxReg);
-  m_as.loadq(rVmTl[ch], funcDestReg);
-  m_as.testq(funcDestReg, funcDestReg);
+  const Func* (*lookup)(
+    RDS::Handle, const Class*, const StringData*, TypedValue*) =
+    StaticMethodFCache::lookup;
+  cgCallHelper(m_as,
+               CppCall((TCA)lookup),
+               callDest(funcDestReg),
+               SyncOptions::kSyncPoint,
+               ArgGroup(curOpds())
+                         .imm(ch)
+                         .immPtr(cls)
+                         .immPtr(methName)
+                         .reg(curOpd(fp).reg()));
+}
+
+void CodeGenerator::emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
+                                                 PhysReg      thisReg,
+                                                 RDS::Handle ch) {
+  Label NonStaticCall, End;
+
+  // thisReg is holding $this. Should we pass it to the callee?
+  m_as.cmpl(1,
+            rVmTl[ch + offsetof(StaticMethodFCache, m_static)]);
+  m_as.jcc8(CC_NE, NonStaticCall);
+  // If calling a static method...
+  {
+    // Load (this->m_cls | 0x1) into destCtxReg
+    m_as.loadq(thisReg[ObjectData::getVMClassOffset()], destCtxReg);
+    m_as.orq(1, destCtxReg);
+    m_as.jmp8(End);
+  }
+  // Else: calling non-static method
+  {
+    asm_label(m_as, NonStaticCall);
+    emitMovRegReg(m_as, thisReg, destCtxReg);
+    emitIncRef(m_as, destCtxReg);
+  }
+  asm_label(m_as, End);
+}
+
+void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
+  auto srcCtxTmp  = inst->src(0);
+  auto destCtxReg = curOpd(inst->dst()).reg();
 
   Label End;
 
-  // Handle case where method is not entered in the cache
-  unlikelyIfBlock(CC_E, [&] (Asm& a) {
-    const Func* (*lookup)(RDS::Handle, const Class*,
-      const StringData*, TypedValue*) =
-        StaticMethodFCache::lookup;
-    // preserve destCtxReg across the call since it wouldn't be otherwise
-    RegSet toSave = m_state.liveRegs[inst] | RegSet(destCtxReg);
-    cgCallHelper(a,
-                 CppCall((TCA)lookup),
-                 callDest(funcDestReg),
-                 SyncOptions::kSyncPoint,
-                 ArgGroup(curOpds())
-                           .imm(ch)
-                           .immPtr(cls)
-                           .immPtr(methName)
-                           .reg(curOpd(fp).reg()),
-                 toSave);
-    // If entry found in RDS, jump back to m_as.  Otherwise, bail to
-    // exit label
-    a.testq(funcDestReg, funcDestReg);
-    emitFwdJcc(a, CC_Z, exitLabel);
-  });
-
-  auto t = srcCtxTmp->type();
-  assert(!t.equals(Type::Cls));
+  emitMovRegReg(m_as, curOpd(srcCtxTmp).reg(), destCtxReg);
+  auto const t = srcCtxTmp->type();
   if (t <= Type::Cctx) {
-    return; // done: destCtxReg already has srcCtxReg
+    // Nothing to do. Forward the context as is.
+    return;
   } else if (t <= Type::Obj) {
-    // unconditionally run code produced by emitGetCtxFwdCallWithThisDyn below
-    // break
-  } else if (t <= Type::Ctx) {
-    // dynamically check if we have a This pointer and
-    // call emitGetCtxFwdCallWithThisDyn below
+    // We definitely have $this, so always run code emitted by
+    // emitGetCtxFwdCallWithThisDyn
+  } else {
+    assert(t <= Type::Ctx);
+    // dynamically check if we have a This pointer and call
+    // emitGetCtxFwdCallWithThisDyn below
     m_as.testb(1, rbyte(destCtxReg));
     m_as.jcc8(CC_NZ, End);
-  } else {
-    not_reached();
   }
 
   // If we have a 'this' pointer ...
+  auto const& extra = *inst->extra<ClsMethodData>();
+  auto const ch = StaticMethodFCache::alloc(
+    extra.clsName, extra.methodName, getContextName(curClass())
+  );
   emitGetCtxFwdCallWithThisDyn(destCtxReg, destCtxReg, ch);
 
   asm_label(m_as, End);
@@ -5288,6 +5306,7 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   SSATmp* clsName  = inst->src(2);
   SSATmp* cxt      = inst->src(3);
   Block* target    = inst->taken();
+  if (target && target->isCatch()) target = nullptr;
 
   const StringData* propNameString = propName->getValStr();
   const StringData* clsNameString  = clsName->getValStr();

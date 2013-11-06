@@ -92,7 +92,8 @@ bool splitCriticalEdges(IRUnit& unit) {
 }
 
 bool removeUnreachable(IRUnit& unit) {
-  FTRACE(2, "removing unreachable blocks\n");
+  ITRACE(2, "removing unreachable blocks\n");
+  Trace::Indent _i;
 
   auto modified = false;
   IdSet<Block> visited;
@@ -115,18 +116,19 @@ bool removeUnreachable(IRUnit& unit) {
   }
 
   // Erase any blocks not found above.
-  auto* trace = unit.main();
-  auto& blocks = trace->blocks();
-  for (auto it = blocks.begin(); it != blocks.end(); ) {
-    auto* b = *it;
-    if (!visited[b]) {
-      FTRACE(3, "removing unreachable B{}\n", b->id());
-      it = trace->erase(it);
-      modified = true;
-    } else {
-      ++it;
+  forEachTrace(unit, [&](IRTrace* trace) {
+    auto& blocks = trace->blocks();
+    for (auto it = blocks.begin(); it != blocks.end(); ) {
+      auto* b = *it;
+      if (!visited[b]) {
+        ITRACE(3, "removing unreachable B{}\n", b->id());
+        it = trace->erase(it);
+        modified = true;
+      } else {
+        ++it;
+      }
     }
-  }
+  });
 
   return modified;
 }

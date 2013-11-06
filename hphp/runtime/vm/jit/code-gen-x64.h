@@ -267,7 +267,7 @@ private:
 
   void emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
                                     PhysReg      thisReg,
-                                    RDS::Handle& ch);
+                                    RDS::Handle ch);
 
   void cgJcc(IRInstruction* inst);          // helper
   void cgReqBindJcc(IRInstruction* inst);   // helper
@@ -358,6 +358,7 @@ private:
 
   void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int64_t adjustment);
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
+  void cgLdClsMethodCacheCommon(IRInstruction* inst, Offset offset);
 
   /*
    * Generate an if-block that branches around some unlikely code, handling

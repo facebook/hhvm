@@ -44,7 +44,6 @@ FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func)
   , m_spOffset(initialSpOffset)
   , m_thisAvailable(false)
   , m_frameSpansCall(false)
-  , m_hasFPAnchor(false)
   , m_locals(func->numLocals())
   , m_enableCse(false)
   , m_snapshots()
@@ -66,8 +65,6 @@ void FrameState::update(const IRInstruction* inst) {
   switch (opc) {
   case DefInlineFP:    trackDefInlineFP(inst);  break;
   case InlineReturn:   trackInlineReturn(inst); break;
-
-  case InlineFPAnchor: m_hasFPAnchor = true;  break;
 
   case Call:
     m_spValue = inst->dst();
@@ -103,7 +100,7 @@ void FrameState::update(const IRInstruction* inst) {
 
   case ReDefSP:
     m_spValue = inst->dst();
-    m_spOffset = inst->extra<ReDefSP>()->offset;
+    m_spOffset = inst->extra<ReDefSP>()->spOffset;
     break;
 
   case DefInlineSP:
@@ -309,6 +306,18 @@ void FrameState::refineLocalValues(LocalStateHook& hook,
   }
 }
 
+void FrameState::forEachFrame(FrameFunc body) const {
+  body(m_fpValue, m_spOffset);
+
+  // We push each new frame onto the end of m_inlineSavedStates, so walk it
+  // backwards to go from inner frames to outer frames.
+  for (auto it = m_inlineSavedStates.rbegin();
+       it != m_inlineSavedStates.rend(); ++it) {
+    auto const& state = *it;
+    body(state.fpValue, state.spOffset);
+  }
+}
+
 template<typename L>
 void FrameState::walkAllInlinedLocals(L body, bool skipThisFrame) const {
   auto doBody = [&](const LocalVec& locals, unsigned inlineIdx) {
@@ -409,7 +418,6 @@ FrameState::Snapshot FrameState::createSnapshot() const {
   state.locals = m_locals;
   state.curMarker = m_marker;
   state.frameSpansCall = m_frameSpansCall;
-  state.needsFPAnchor = m_hasFPAnchor;
   assert(state.curMarker.valid());
   return state;
 }
@@ -437,7 +445,6 @@ void FrameState::load(Snapshot& state) {
   m_thisAvailable = state.thisAvailable;
   m_locals = std::move(state.locals);
   m_marker = state.curMarker;
-  m_hasFPAnchor = state.needsFPAnchor;
   m_frameSpansCall = m_frameSpansCall || state.frameSpansCall;
 
   // If spValue is null, we merged two different but equivalent values. We
@@ -524,7 +531,6 @@ void FrameState::trackDefInlineFP(const IRInstruction* inst) {
   m_thisAvailable   = target->cls() != nullptr && !target->isStatic();
   m_curFunc         = target;
   m_frameSpansCall  = false;
-  m_hasFPAnchor     = false;
 
   m_locals.clear();
   m_locals.resize(target->numLocals());
@@ -535,11 +541,6 @@ void FrameState::trackInlineReturn(const IRInstruction* inst) {
   assert(m_inlineSavedStates.back().inlineSavedStates.empty());
   load(m_inlineSavedStates.back());
   m_inlineSavedStates.pop_back();
-}
-
-bool FrameState::needsFPAnchor(IRInstruction* inst) const {
-  return m_inlineSavedStates.size() && !m_hasFPAnchor &&
-    (inst->isNative() || inst->mayRaiseError());
 }
 
 CSEHash* FrameState::cseHashTable(const IRInstruction* inst) {
@@ -578,7 +579,6 @@ void FrameState::clear() {
   clearCse();
   clearLocals(*this);
   m_frameSpansCall = false;
-  m_hasFPAnchor = false;
   m_spValue = m_fpValue = nullptr;
   m_spOffset = 0;
   m_thisAvailable = false;

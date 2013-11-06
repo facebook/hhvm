@@ -650,8 +650,7 @@ RDS::Handle StaticMethodFCache::alloc(const StringData* clsName,
 const Func*
 StaticMethodCache::lookup(RDS::Handle handle, const NamedEntity *ne,
                           const StringData* clsName,
-                          const StringData* methName, TypedValue* vmfp,
-                          TypedValue* vmsp) {
+                          const StringData* methName, TypedValue* vmfp) {
   StaticMethodCache* thiz = static_cast<StaticMethodCache*>
     (handleToPtr(handle));
   Stats::inc(Stats::TgtCache_StaticMethodMiss);
@@ -659,7 +658,6 @@ StaticMethodCache::lookup(RDS::Handle handle, const NamedEntity *ne,
   TRACE(1, "miss %s :: %s caller %p\n",
         clsName->data(), methName->data(), __builtin_return_address(0));
 
-  ActRec* ar = reinterpret_cast<ActRec*>(vmsp - kNumActRecCells);
   const Func* f;
   VMExecutionContext* ec = g_vmContext;
   const Class* cls = Unit::loadClass(ne, clsName);
@@ -667,9 +665,9 @@ StaticMethodCache::lookup(RDS::Handle handle, const NamedEntity *ne,
     raise_error(Strings::UNKNOWN_CLASS, clsName->data());
   }
   LookupResult res = ec->lookupClsMethod(f, cls, methName,
-                                         nullptr, // there may be an active this,
-                                               // but we can just fall through
-                                               // in that case.
+                                         nullptr, // there may be an active
+                                                  // this, but we can just fall
+                                                  // through in that case.
                                          arGetContextClass((ActRec*)vmfp),
                                          false /*raise*/);
   if (LIKELY(res == LookupResult::MethodFoundNoThis &&
@@ -681,7 +679,6 @@ StaticMethodCache::lookup(RDS::Handle handle, const NamedEntity *ne,
     // Do the | here instead of on every call.
     thiz->m_cls = (Class*)(uintptr_t(cls) | 1);
     thiz->m_func = f;
-    ar->setClass(const_cast<Class*>(cls));
     return f;
   }
   assert(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
@@ -707,16 +704,15 @@ StaticMethodFCache::lookup(RDS::Handle handle, const Class* cls,
                                          false /*raise*/);
   assert(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
   if (LIKELY(res == LookupResult::MethodFoundNoThis && !f->isAbstract())) {
-    // We called lookupClsMethod with a NULL this and got back a
-    // method that may or may not be static. This implies that
-    // lookupClsMethod, given the same class and the same method name,
-    // will never return MagicCall*Found or MethodNotFound. It will
-    // always return the same f and if we do give it a this it will
-    // return MethodFoundWithThis iff (this->instanceof(cls) &&
+    // We called lookupClsMethod with a NULL this and got back a method that
+    // may or may not be static. This implies that lookupClsMethod, given the
+    // same class and the same method name, will never return MagicCall*Found
+    // or MethodNotFound. It will always return the same f and if we do give it
+    // a this it will return MethodFoundWithThis iff (this->instanceof(cls) &&
     // !f->isStatic()). this->instanceof(cls) is always true for
     // FPushClsMethodF because it is only used for self:: and parent::
-    // calls. So, if we store f and its staticness we can handle calls
-    // with and without this completely in assembly.
+    // calls. So, if we store f and its staticness we can handle calls with and
+    // without this completely in assembly.
     f->validate();
     thiz->m_func = f;
     thiz->m_static = f->isStatic();

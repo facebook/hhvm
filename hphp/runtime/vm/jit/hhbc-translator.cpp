@@ -274,8 +274,8 @@ size_t HhbcTranslator::spOffset() const {
  *
  *           = InlineReturn fp2
  *
- * [ sp5  = ReDefGeneratorSP<spansCall> fp0 sp1     ]
- * [ sp5  = ReDefSP<returnOffset,spansCall> fp0 sp1 ]
+ * [ sp5  = ReDefGeneratorSP<spansCall> sp1 fp0     ]
+ * [ sp5  = ReDefSP<frameOffset,spOffset,spansCall> sp1 fp0 ]
  *
  * The rest of the code then depends on sp5, and not any of the StkPtr
  * tree going through the callee body.  The sp5 tmp has the same view
@@ -338,9 +338,12 @@ void HhbcTranslator::beginInlining(unsigned numParams,
   data.retBCOff = returnBcOffset;
   data.retSPOff = prevSPOff;
 
-  auto const calleeFP = gen(DefInlineFP, data, calleeSP, prevSP, m_tb->fp());
-
+  // Push state and update the marker before emitting any instructions so
+  // they're all given markers in the callee.
   m_bcStateStack.emplace_back(target->base(), target);
+  updateMarker();
+
+  auto const calleeFP = gen(DefInlineFP, data, calleeSP, prevSP, m_tb->fp());
   gen(DefInlineSP, StackOffset(target->numLocals()), m_tb->sp(), m_tb->fp());
 
   profileFunctionEntry("Inline");
@@ -356,8 +359,6 @@ void HhbcTranslator::beginInlining(unsigned numParams,
      */
     gen(StLoc, LocalId(i), calleeFP, m_tb->genDefUninit());
   }
-
-  updateMarker();
 
   m_fpiActiveStack.push(std::move(m_fpiStack.top()));
   m_fpiStack.pop();
@@ -428,10 +429,8 @@ void HhbcTranslator::profileFailedInlShape(const std::string& str) {
 void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
   if (isInlining()) assert(!lastBcOff);
 
-  if (newOff != bcOff()) {
-    m_bcStateStack.back().bcOff = newOff;
-    updateMarker();
-  }
+  m_bcStateStack.back().bcOff = newOff;
+  updateMarker();
   m_lastBcOff = lastBcOff;
 }
 
@@ -661,7 +660,7 @@ void HhbcTranslator::emitCnsCommon(uint32_t id,
       if (error) {
         result = gen(LookupCnsE, cnsNameTmp);
       } else {
-        result = gen(LookupCns, cnsNameTmp);
+        result = gen(LookupCns, makeCatch(), cnsNameTmp);
       }
     } else {
       result = staticTVCns(tv);
@@ -2083,7 +2082,7 @@ void HhbcTranslator::emitFPushCufUnknown(Op op, int32_t numParams) {
     PUNT(emitFPushCufUnknown);
   }
 
-  auto const callable   = popC();
+  auto const callable = popC();
 
   do {
     if (!callable->isA(Type::Arr)) break;
@@ -2115,7 +2114,8 @@ void HhbcTranslator::emitFPushCufUnknown(Op op, int32_t numParams) {
     emitFPushObjMethodCommon(object,
                              method->getValStr(),
                              numParams,
-                             false /* shouldFatal */);
+                             false /* shouldFatal */,
+                             callable);
     gen(DecRef, callable);
     return;
   } while (0);
@@ -2466,7 +2466,8 @@ void HhbcTranslator::emitFPushFuncArr(int32_t numParams) {
 void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
                                               const StringData* methodName,
                                               int32_t numParams,
-                                              bool shouldFatal) {
+                                              bool shouldFatal,
+                                              SSATmp* extraSpill) {
   SSATmp* objOrCls = obj;
   const Class* baseClass = nullptr;
   if (obj->type().isSpecialized() &&
@@ -2539,6 +2540,10 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
                     numParams,
                     magicCall ? methodName : nullptr);
   } else {
+    spillStack();
+    std::vector<SSATmp*> spill;
+    if (extraSpill) spill.push_back(extraSpill);
+    auto catchBlock = makeCatch(spill);
     emitFPushActRec(m_tb->genDefNull(),
                     obj,
                     numParams,
@@ -2552,6 +2557,7 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
 
     gen(LdObjMethod,
         LdObjMethodData(shouldFatal),
+        catchBlock,
         objCls,
         cns(methodName),
         actRec);
@@ -2579,7 +2585,7 @@ SSATmp* HhbcTranslator::genClsMethodCtx(const Func* callee, const Class* cls) {
   if (!mightNotBeStatic) {
     // static function: ctx is just the Class*. LdCls will simplify to a
     // DefConst or LdClsCached.
-    return gen(LdCls, cns(cls->name()), cns(curClass()));
+    return gen(LdCls, makeCatch(), cns(cls->name()), cns(curClass()));
   }
   if (m_tb->thisAvailable()) {
     // might not be a static call and $this is available, so we know it's
@@ -2615,14 +2621,29 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
                     numParams,
                     func && magicCall ? methodName : nullptr);
   } else {
-    // lookup static method & class in the RDS
-    SSATmp* stack = spillStack();
-    auto exit = makeExitSlow();
-    SSATmp* funcClassTmp = gen(LdClsMethodCache, exit, cns(className),
-                               cns(methodName), cns(np.second), m_tb->fp(),
-                               stack);
-    emitFPushActRec(funcClassTmp,
-                    m_tb->genDefInitNull(),
+    auto slowExit = makeExitSlow();
+    auto const data = ClsMethodData{className, methodName};
+
+    // Look up the Func* in the targetcache. If it's not there, try the slow
+    // path. If that fails, slow exit.
+    auto func = m_tb->cond(
+      [&](Block* taken) {
+        return gen(CheckNonNull, taken, gen(LdClsMethodCacheFunc, data));
+      },
+      [&](SSATmp* func) { // next
+        return func;
+      },
+      [&] { // taken
+        m_tb->hint(Block::Hint::Unlikely);
+        auto result = gen(LookupClsMethodCache, makeCatch(), data,
+                          cns(np.second), m_tb->fp());
+        return gen(CheckNonNull, slowExit, result);
+      }
+    );
+    auto clsCtx = gen(LdClsMethodCacheCls, data);
+
+    emitFPushActRec(func,
+                    clsCtx,
                     numParams,
                     nullptr);
   }
@@ -2707,13 +2728,25 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
                     (magicCall ? methName : nullptr));
 
   } else {
-    SSATmp* funcCtxTmp = gen(LdClsMethodFCache, exitBlock,
-                                   cns(cls),
-                                   cns(methName),
-                                   curCtxTmp,
-                                   m_tb->fp());
-    emitFPushActRec(funcCtxTmp,
-                    m_tb->genDefInitNull(),
+    auto const data = ClsMethodData{cls->name(), methName};
+    auto func = m_tb->cond(
+      [&](Block* taken) {
+        return gen(CheckNonNull, taken, gen(LdClsMethodFCacheFunc, data));
+      },
+      [&](SSATmp* func) { // next
+        return func;
+      },
+      [&] { // taken
+        m_tb->hint(Block::Hint::Unlikely);
+        auto result = gen(LookupClsMethodFCache, makeCatch(), data,
+                          cns(cls), m_tb->fp());
+        return gen(CheckNonNull, exitBlock, result);
+      }
+    );
+    auto ctx = gen(GetCtxFwdCallDyn, data, curCtxTmp);
+
+    emitFPushActRec(func,
+                    ctx,
                     numParams,
                     (magicCall ? methName : nullptr));
   }
@@ -2802,6 +2835,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
               m_tb->sp());
         } else {
           gen(CastStk,
+              makeCatch(),
               Type(pi.builtinType()),
               StackOffset(numArgs - i - 1),
               m_tb->sp());
@@ -2826,7 +2860,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
         args[i + 2] = top(Type(pi.builtinType()),
                           numArgs - i - 1);
         break;
-      case KindOfDouble: assert(false);
+      case KindOfDouble: not_reached();
       default:
         args[i + 2] = ldStackAddr(numArgs - i - 1, DataTypeSpecific);
         break;
@@ -2842,6 +2876,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
     CallBuiltin,
     retType,
     CallData(destroyLocals),
+    makeCatch(),
     std::make_pair(argsSize, (SSATmp**)&args)
   );
 
@@ -2877,14 +2912,21 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   m_bcStateStack.pop_back();
   m_fpiActiveStack.pop();
 
+  updateMarker();
   // See the comment in beginInlining about generator frames.
   if (curFunc()->isGenerator()) {
     gen(ReDefGeneratorSP,
         ReDefGeneratorSPData(m_tb->inlinedFrameSpansCall()),
-        m_tb->fp(), m_tb->sp());
+        m_tb->sp(), m_tb->fp());
   } else {
-    gen(ReDefSP,ReDefSPData(m_tb->spOffset(), m_tb->inlinedFrameSpansCall()),
-        m_tb->fp(), m_tb->sp());
+    smart::vector<ReDefSPData::Frame> frames;
+    m_tb->state().forEachFrame([&frames](SSATmp* fp, int32_t off) {
+      frames.emplace_back(frameRoot(fp->inst())->dst(), off);
+    });
+    gen(ReDefSP, ReDefSPData(frames.size(), frames.data(),
+                             m_tb->spOffset(),
+                             m_tb->inlinedFrameSpansCall()),
+        m_tb->sp(), m_tb->fp());
   }
 
   /*
@@ -2899,8 +2941,6 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc()->fullName()->data());
   push(useRet);
-
-  updateMarker();
 }
 
 SSATmp* HhbcTranslator::emitDecRefLocalsInline(SSATmp* retVal) {
@@ -3618,6 +3658,7 @@ void HhbcTranslator::emitCastArray() {
   // the optimizer and becomes eligible for removal if it does not
   // escape the trace.
 
+  auto catchBlock = makeCatch();
   SSATmp* src = popC();
   Type fromType = src->type();
   if (fromType.isArray()) {
@@ -3633,9 +3674,9 @@ void HhbcTranslator::emitCastArray() {
   } else if (fromType.isString()) {
     push(gen(ConvStrToArr, src));
   } else if (fromType.isObj()) {
-    push(gen(ConvObjToArr, src));
+    push(gen(ConvObjToArr, catchBlock, src));
   } else {
-    push(gen(ConvCellToArr, src));
+    push(gen(ConvCellToArr, catchBlock, src));
   }
 }
 
@@ -3750,6 +3791,8 @@ SSATmp* HhbcTranslator::emitLdClsPropAddrCached(const StringData* propName,
 }
 
 SSATmp* HhbcTranslator::emitLdClsPropAddrOrExit(Block* block, SSATmp* name) {
+  if (!block) block = makeCatch();
+
   auto top = m_evalStack.top(DataTypeGeneric);
   assert(top->isA(Type::Cls));
 
@@ -3758,8 +3801,6 @@ SSATmp* HhbcTranslator::emitLdClsPropAddrOrExit(Block* block, SSATmp* name) {
   if (canUseSPropCache(top, knownName, curClass())) {
     return emitLdClsPropAddrCached(knownName, block);
   }
-
-  if (!block) block = makeCatch();
 
   SSATmp* clsTmp = popA();
   SSATmp* addr = gen(LdClsPropAddr,
@@ -3955,8 +3996,9 @@ void HhbcTranslator::emitFloor() {
     PUNT(Floor);
   }
 
+  auto catchBlock = makeCatch();
   auto val    = popC();
-  auto dblVal = gen(ConvCellToDbl, val);
+  auto dblVal = gen(ConvCellToDbl, catchBlock, val);
   gen(DecRef, val);
   push(gen(Floor, dblVal));
 }
@@ -3967,8 +4009,9 @@ void HhbcTranslator::emitCeil() {
     PUNT(Ceil);
   }
 
+  auto catchBlock = makeCatch();
   auto val = popC();
-  auto dblVal = gen(ConvCellToDbl, val);
+  auto dblVal = gen(ConvCellToDbl, catchBlock, val);
   gen(DecRef, val);
   push(gen(Ceil, dblVal));
 }
@@ -4269,11 +4312,13 @@ void HhbcTranslator::emitXor() {
 }
 
 void HhbcTranslator::emitShl() {
+  auto catch1 = makeCatch();
+  auto catch2 = makeCatch();
   auto shiftAmount = popC();
   auto lhs         = popC();
 
-  auto lhsInt         = gen(ConvCellToInt, lhs);
-  auto shiftAmountInt = gen(ConvCellToInt, shiftAmount);
+  auto lhsInt         = gen(ConvCellToInt, catch1, lhs);
+  auto shiftAmountInt = gen(ConvCellToInt, catch2, shiftAmount);
 
   push(gen(Shl, lhsInt, shiftAmountInt));
   gen(DecRef, lhs);
@@ -4281,11 +4326,13 @@ void HhbcTranslator::emitShl() {
 }
 
 void HhbcTranslator::emitShr() {
+  auto catch1 = makeCatch();
+  auto catch2 = makeCatch();
   auto shiftAmount = popC();
   auto lhs         = popC();
 
-  auto lhsInt         = gen(ConvCellToInt, lhs);
-  auto shiftAmountInt = gen(ConvCellToInt, shiftAmount);
+  auto lhsInt         = gen(ConvCellToInt, catch1, lhs);
+  auto shiftAmountInt = gen(ConvCellToInt, catch2, shiftAmount);
 
   push(gen(Shr, lhsInt, shiftAmountInt));
   gen(DecRef, lhs);
@@ -4620,7 +4667,8 @@ void HhbcTranslator::emitInterpOne(Type outType, int popped, int pushed,
   idata.opcode = op;
 
   auto const changesPC = opcodeChangesPC(idata.opcode);
-  gen(changesPC ? InterpOneCF : InterpOne, outType, idata, sp, m_tb->fp());
+  gen(changesPC ? InterpOneCF : InterpOne, outType,
+      makeCatch(), idata, sp, m_tb->fp());
   assert(m_stackDeficit == 0);
 
   if (changesPC) m_hasExit = true;
@@ -4877,7 +4925,7 @@ Block* HhbcTranslator::makeCatch(std::vector<SSATmp*> spillVals) {
   gen(BeginCatch);
   for (auto* val : peekSpillValues()) spillVals.push_back(val);
   auto sp = emitSpillStack(m_tb->sp(), spillVals);
-  gen(EndCatch, sp);
+  gen(EndCatch, m_tb->fp(), sp);
 
   assert(exit->trace()->blocks().size() == 1);
   return exit;

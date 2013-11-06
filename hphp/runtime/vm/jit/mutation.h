@@ -66,16 +66,13 @@ void moveToBlock(Block::iterator first,
                  Block* dst);
 
 /*
- * Given a block where some SSATmps have changed type, walk the
- * sub-cfg reachable from that block and recompute the types of any
- * tmps that depend on it.
+ * Walk the cfg of the given unit, recomputing output types of all instructions
+ * from their inputs.
  *
  * The new types of any changed SSATmps must be related to their old
  * types.
- *
- * Pre: isRPOSorted(blocks)
  */
-void reflowTypes(Block*, const BlockList& blocks);
+void reflowTypes(IRUnit&);
 
 /*
  * Recomputes the output type of each of inst's dests.

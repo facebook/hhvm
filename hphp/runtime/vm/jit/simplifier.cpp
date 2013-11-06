@@ -58,7 +58,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
 
   case ReDefGeneratorSP: {
     auto const extra = inst->extra<ReDefGeneratorSP>();
-    auto info = getStackValue(inst->src(1), index);
+    auto info = getStackValue(inst->src(0), index);
     if (extra->spansCall) info.spansCall = true;
     return info;
   }
@@ -68,7 +68,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
 
   case ReDefSP: {
     auto const extra = inst->extra<ReDefSP>();
-    auto info = getStackValue(inst->src(1), index);
+    auto info = getStackValue(inst->src(0), index);
     if (extra->spansCall) info.spansCall = true;
     return info;
   }
@@ -248,7 +248,7 @@ static void copyPropSrc(IRInstruction* inst, int index) {
   auto tmp     = inst->src(index);
   auto srcInst = tmp->inst();
 
-  if (srcInst->is(Mov)) {
+  if (srcInst->is(Mov, PassSP, PassFP)) {
     inst->setSrc(index, srcInst->src(0));
   }
 }
@@ -313,8 +313,7 @@ IRInstruction* findSpillFrame(SSATmp* sp) {
   auto inst = sp->inst();
   while (!inst->is(SpillFrame)) {
     assert(inst->dst()->isA(Type::StkPtr));
-    assert(!inst->is(RetAdjustStack, GenericRetDecRefs,
-                     ReDefSP, ReDefGeneratorSP));
+    assert(!inst->is(RetAdjustStack, GenericRetDecRefs));
     if (inst->is(DefSP)) return nullptr;
 
     // M-instr support opcodes have the previous sp in varying sources.
@@ -323,6 +322,26 @@ IRInstruction* findSpillFrame(SSATmp* sp) {
   }
 
   return inst;
+}
+
+IRInstruction* findPassFP(IRInstruction* fpInst) {
+  while (!fpInst->is(DefFP, DefInlineFP, PassFP)) {
+    assert(fpInst->dst()->isA(Type::FramePtr));
+    fpInst = fpInst->src(0)->inst();
+  }
+  return fpInst->is(PassFP) ? fpInst : nullptr;
+}
+
+const IRInstruction* frameRoot(const IRInstruction* fpInst) {
+  return frameRoot(const_cast<IRInstruction*>(fpInst));
+}
+
+IRInstruction* frameRoot(IRInstruction* fpInst) {
+  while (!fpInst->is(DefFP, DefInlineFP)) {
+    assert(fpInst->dst()->isA(Type::FramePtr));
+    fpInst = fpInst->src(0)->inst();
+  }
+  return fpInst;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2106,9 +2125,7 @@ SSATmp* Simplifier::simplifyDecRefStack(IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyAssertNonNull(IRInstruction* inst) {
-  auto t = inst->typeParam();
-  assert(t.maybe(Type::Nullptr));
-  if (t <= Type::Nullptr) {
+  if (inst->src(0)->type().not(Type::Nullptr)) {
     return inst->src(0);
   }
   return nullptr;

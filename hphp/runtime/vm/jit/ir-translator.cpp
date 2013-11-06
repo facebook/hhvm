@@ -1028,22 +1028,37 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
   if (callee->attrs() & AttrMayUseVV) {
     return refuse("may use dynamic environment");
   }
+  if (callee->numSlotsInFrame() + callee->maxStackCells() >=
+      kStackCheckLeafPadding) {
+    return refuse("function stack depth too deep");
+  }
 
   ////////////
 
+  assert(!iter.finished() && "shouldIRInline given empty region");
   bool hotCallingCold = !(callee->attrs() & AttrHot) &&
                          (caller->attrs() & AttrHot);
   uint64_t cost = 0;
   int inlineDepth = 0;
   Op op = OpLowInvalid;
-  const Func* func = nullptr;
+  smart::vector<const Func*> funcs;
+  const Func* func = callee;
+  funcs.push_back(func);
 
   for (; !iter.finished(); iter.advance()) {
     // If func has changed after an FCall, we've started an inlined call. This
     // will have to change when we support inlining recursive calls.
-    if (func && func != iter.sk().func()) {
+    if (func != iter.sk().func()) {
       assert(isRet(op) || op == OpFCall);
       if (op == OpFCall) {
+        funcs.push_back(iter.sk().func());
+        int totalDepth = 0;
+        for (auto* f : funcs) {
+          totalDepth += f->numSlotsInFrame() + f->maxStackCells();
+        }
+        if (totalDepth >= kStackCheckLeafPadding) {
+          return refuse("stack too deep after nested inlining");
+        }
         ++inlineDepth;
       }
     }
@@ -1055,6 +1070,7 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
     if (isRet(op)) {
       if (inlineDepth > 0) {
         --inlineDepth;
+        funcs.pop_back();
         continue;
       } else {
         assert(inlineDepth == 0);

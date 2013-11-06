@@ -94,8 +94,6 @@ struct FrameState : private LocalStateHook {
   bool frameSpansCall() const { return m_frameSpansCall; }
   BCMarker marker() const { return m_marker; }
   void setMarker(BCMarker m) { m_marker = m; }
-  bool needsFPAnchor(IRInstruction*) const;
-  void setHasFPAnchor() { m_hasFPAnchor = true; }
   bool enableCse() const { return m_enableCse; }
   void setEnableCse(bool e) { m_enableCse = e; }
   unsigned inlineDepth() const { return m_inlineSavedStates.size(); }
@@ -103,6 +101,11 @@ struct FrameState : private LocalStateHook {
   Type localType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
   SSATmp* localValueSource(uint32_t id) const;
+
+  typedef std::function<void(SSATmp*, int32_t)> FrameFunc;
+  // Call func for all enclosing frames, starting with the current one and
+  // proceeding upward through callers.
+  void forEachFrame(FrameFunc func) const;
 
   typedef std::function<void(uint32_t, SSATmp*)> LocalFunc;
   // Call func with all tracked locals, including callers if this is an inlined
@@ -152,7 +155,6 @@ struct FrameState : private LocalStateHook {
     bool thisAvailable;
     smart::vector<LocalState> locals;
     bool frameSpansCall;
-    bool needsFPAnchor;
     BCMarker curMarker;
     smart::vector<Snapshot> inlineSavedStates;
 
@@ -164,7 +166,6 @@ struct FrameState : private LocalStateHook {
         thisAvailable == b.thisAvailable &&
         locals == b.locals &&
         frameSpansCall == b.frameSpansCall &&
-        needsFPAnchor == b.needsFPAnchor &&
         curMarker == b.curMarker &&
         inlineSavedStates == b.inlineSavedStates;
     }
@@ -232,13 +233,6 @@ struct FrameState : private LocalStateHook {
    * definition of the current frame pointer.
    */
   bool m_frameSpansCall;
-
-  /*
-   * m_hasFPAnchor is a (hopefully) temporary hack to work around the fact that
-   * many instructions that can use the frame pointer by raising an error don't
-   * take m_fpValue as a source.
-   */
-  bool m_hasFPAnchor;
 
   /*
    * m_locals tracks the current types and values of locals.

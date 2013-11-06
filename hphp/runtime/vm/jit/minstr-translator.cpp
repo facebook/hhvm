@@ -446,9 +446,9 @@ void HhbcTranslator::MInstrTranslator::emitMTrace() {
   }
   shape << '>';
   gen(IncStatGrouped,
-           cns(makeStaticString("vector instructions")),
-           cns(makeStaticString(shape.str())),
-           cns(1));
+      cns(makeStaticString("vector instructions")),
+      cns(makeStaticString(shape.str())),
+      cns(1));
 }
 
 // Build a map from (stack) input index to stack index.
@@ -823,10 +823,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseS() {
   const int kClassIdx = m_ni.inputs.size() - 1;
   SSATmp* key = getKey();
   SSATmp* clsRef = getInput(kClassIdx, DataTypeGeneric /* will be a Cls */);
-  m_base = gen(LdClsPropAddr,
-                    clsRef,
-                    key,
-                    CTX());
+  m_base = gen(LdClsPropAddr, makeCatch(), clsRef, key, CTX());
 }
 
 void HhbcTranslator::MInstrTranslator::emitBaseOp() {
@@ -1026,7 +1023,7 @@ void HhbcTranslator::MInstrTranslator::emitPropSpecialized(const MInstrAttr mia,
       [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
         m_tb.hint(Block::Hint::Unlikely);
         if (doWarn) {
-          gen(WarnNonObjProp);
+          gen(WarnNonObjProp, makeCatch());
         }
         if (doDefine) {
           /*
@@ -1221,7 +1218,7 @@ void HhbcTranslator::MInstrTranslator::emitElemArray(SSATmp* key, bool warn) {
 
   typedef TypedValue* (*OpFunc)(ArrayData*, TypedValue*);
   BUILD_OPTAB(keyType, checkForInt, warn);
-  m_base = gen(ElemArray, cns((TCA)opFunc), m_base, key);
+  m_base = gen(ElemArray, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -1630,7 +1627,7 @@ void HhbcTranslator::MInstrTranslator::emitUnsetProp() {
 
   typedef void (*OpFunc)(Class*, TypedValue*, TypedValue);
   BUILD_OPTAB(m_base->isA(Type::Obj));
-  gen(UnsetProp, cns((TCA)opFunc), CTX(), m_base, key);
+  gen(UnsetProp, makeCatch(), cns((TCA)opFunc), CTX(), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -1708,7 +1705,7 @@ void HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
   typedef TypedValue (*OpFunc)(ArrayData*, TypedValue*);
   BUILD_OPTAB(keyType, checkForInt);
   assert(m_base->isA(Type::Arr));
-  m_result = gen(ArrayGet, cns((TCA)opFunc), m_base, key);
+  m_result = gen(ArrayGet, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
 
@@ -1726,7 +1723,8 @@ StringData* stringGetI(StringData* str, uint64_t x) {
 
 void HhbcTranslator::MInstrTranslator::emitStringGet(SSATmp* key) {
   assert(key->isA(Type::Int));
-  m_result = gen(StringGet, cns((TCA)MInstrHelpers::stringGetI), m_base, key);
+  m_result = gen(StringGet, makeCatch(),
+                 cns((TCA)MInstrHelpers::stringGetI), m_base, key);
 }
 
 void HhbcTranslator::MInstrTranslator::emitVectorGet(SSATmp* key) {
@@ -2609,9 +2607,8 @@ void HhbcTranslator::MInstrTranslator::emitUnsetElem() {
   Type baseType = m_base->type().strip();
   constrainBase(DataTypeSpecific);
   if (baseType <= Type::Str) {
-    m_ht.exceptionBarrier();
-    gen(RaiseError,
-             cns(makeStaticString(Strings::CANT_UNSET_STRING)));
+    gen(RaiseError, makeCatch(),
+        cns(makeStaticString(Strings::CANT_UNSET_STRING)));
     return;
   }
   if (baseType.not(Type::Arr | Type::Obj)) {
@@ -2661,7 +2658,9 @@ void HhbcTranslator::MInstrTranslator::emitBindNewElem() {
 void HhbcTranslator::MInstrTranslator::emitMPost() {
   SSATmp* catchSp = nullptr;
   if (m_failedSetBlock) {
-    catchSp = m_failedSetBlock->trace()->back()->back().src(0);
+    auto* endCatch = &m_failedSetBlock->trace()->back()->back();
+    assert(endCatch->is(EndCatch, TryEndCatch));
+    catchSp = endCatch->src(1);
     assert(catchSp->isA(Type::StkPtr));
   }
 

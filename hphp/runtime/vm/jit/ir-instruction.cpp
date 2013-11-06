@@ -166,6 +166,14 @@ bool IRInstruction::mayModifyRefs() const {
 }
 
 bool IRInstruction::mayRaiseError() const {
+  if (!opcodeHasFlags(op(), MayRaiseError)) return false;
+
+  // Some instructions only throw if they do not have a non-catch label.
+  if (is(LdClsPropAddrCached, LdClsPropAddr) &&
+      taken() && !taken()->isCatch()) {
+    return false;
+  }
+
   return opcodeHasFlags(op(), MayRaiseError) || mayReenterHelper();
 }
 
@@ -302,7 +310,6 @@ bool IRInstruction::modifiesStack() const {
 
 SSATmp* IRInstruction::modifiedStkPtr() const {
   assert(modifiesStack());
-  assert(MInstrEffects::supported(this));
   SSATmp* sp = dst(hasMainDst() ? 1 : 0);
   assert(sp->isA(Type::StkPtr));
   return sp;
@@ -489,7 +496,10 @@ bool BCMarker::valid() const {
   return
     func != nullptr &&
     bcOff >= func->base() && bcOff < func->past() &&
-    spOff <= func->numSlotsInFrame() + func->maxStackCells();
+    (RuntimeOption::EvalHHIREnableGenTimeInlining ||
+     spOff <= func->numSlotsInFrame() + func->maxStackCells());
+  // When inlining is on, we may modify markers to weird values in case reentry
+  // happens.
 }
 
 }}

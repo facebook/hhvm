@@ -128,11 +128,15 @@ void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
 void printLabel(std::ostream& os, const Block* block) {
   os << color(ANSI_COLOR_MAGENTA);
   os << "B" << block->id();
-  switch (block->hint()) {
-  case Block::Hint::Unlikely:    os << "<Unlikely>"; break;
-  case Block::Hint::Likely:      os << "<Likely>"; break;
-  default:
-    break;
+  if (block->isCatch()) {
+    os << "<Catch>";
+  } else {
+    switch (block->hint()) {
+      case Block::Hint::Unlikely:    os << "<Unlikely>"; break;
+      case Block::Hint::Likely:      os << "<Likely>"; break;
+      default:
+        break;
+    }
   }
   os << color(ANSI_COLOR_END);
 }

@@ -401,6 +401,7 @@ public:
   F(uint32_t, HHIRAlwaysInlineMaxCost, 10)                              \
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 3)                          \
+  F(bool, HHIRInlineFrameOpts,         false)                           \
   F(bool, HHIRGenerateAsserts,         debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
   F(bool, HHIRDeadCodeElim,            true)                            \

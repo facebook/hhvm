@@ -172,6 +172,28 @@ struct FuncData : IRExtraData {
   const Func* func;
 };
 
+struct ClsMethodData : IRExtraData {
+  ClsMethodData(const StringData* cls, const StringData* method)
+    : clsName(cls)
+    , methodName(method)
+  {}
+
+  std::string show() const {
+    return folly::format("{}::{}", *clsName, *methodName).str();
+  }
+
+  bool cseEquals(const ClsMethodData& b) const {
+    // Strings are static so we can use pointer equality
+    return clsName == b.clsName && methodName == b.methodName;
+  }
+  size_t cseHash() const {
+    return hash_int64_pair((uintptr_t)clsName, (uintptr_t)methodName);
+  }
+
+  const StringData* clsName;
+  const StringData* methodName;
+};
+
 struct FPushCufData : IRExtraData {
   FPushCufData(uint32_t a, int32_t id)
     : args(a), iterId(id)
@@ -584,18 +606,47 @@ struct ReDefGeneratorSPData : IRExtraData {
 };
 
 /*
- * StackOffset to adjust stack pointer by and boolean indicating whether or
- * not the stack pointer in src1 used for analysis spans a function call.
+ * StackOffset to adjust stack pointer by and boolean indicating whether or not
+ * the stack pointer in src1 used for analysis spans a function call.
+ *
+ * Also contains a list of frame pointers and stack offsets for all enclosing
+ * frames. This is used during optimizations to recalculate offsets from the
+ * frame pointer when one or more enclosing frames have been elided.
  */
 struct ReDefSPData : IRExtraData {
-  explicit ReDefSPData(int32_t off, bool spans = false) : offset(off),
-                                                          spansCall(spans) {}
+  struct Frame {
+    explicit Frame(const SSATmp* fp = nullptr, int32_t spOff = 0)
+      : fp(fp)
+      , spOff(spOff)
+    {}
 
-  std::string show() const {
-    return folly::to<std::string>(offset, ',', spansCall);
+    const SSATmp* fp;
+    int32_t spOff;
+  };
+
+  explicit ReDefSPData(uint32_t nFrames, Frame* frames, int32_t off, bool spans)
+    : frames(frames)
+    , nFrames(nFrames)
+    , spOffset(off)
+    , spansCall(spans)
+  {}
+
+  ReDefSPData* clone(Arena& arena) const {
+    auto* r = new (arena) ReDefSPData(nFrames, frames, spOffset, spansCall);
+    r->frames = new (arena) Frame[nFrames];
+    std::copy(frames, frames + nFrames, r->frames);
+    return r;
   }
 
-  int32_t offset;
+  std::string show() const {
+    return folly::format("spOff:{}{}", spOffset,
+                         spansCall ? ", spans call" : "").str();
+  }
+
+  Frame* frames;
+  uint32_t nFrames;
+
+  int32_t spOffset;
   bool spansCall;
 };
 
@@ -709,6 +760,12 @@ X(CallBuiltin,                  CallData);
 X(CallArray,                    CallArrayData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);
+X(LookupClsMethodCache,         ClsMethodData);
+X(LdClsMethodCacheFunc,         ClsMethodData);
+X(LdClsMethodCacheCls,          ClsMethodData);
+X(LdClsMethodFCacheFunc,        ClsMethodData);
+X(LookupClsMethodFCache,        ClsMethodData);
+X(GetCtxFwdCallDyn,             ClsMethodData);
 X(LdStaticLocCached,            StaticLocName);
 X(LdFuncCached,                 LdFuncCachedData);
 X(LdFuncCachedSafe,             LdFuncCachedData);

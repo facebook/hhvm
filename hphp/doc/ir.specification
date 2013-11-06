@@ -460,7 +460,11 @@ GuardRefs S0:FuncPtr S1:Int S2:Int S3:Int S4:Int S5:Int
   If any of the checks fail, make a fallback jump.  (Jump to a service
   request that will chain to a retranslation of this tracelet.)
 
-D:CountedStr = AssertNonNull S0:{Nullptr|CountedStr}
+D:{Func} = CheckNonNull S0:{Nullptr|Func} -> B
+
+  If the value in S0 is Nullptr, branch to block B.
+
+D:{CountedStr|Func} = AssertNonNull S0:{Nullptr|CountedStr|Func}
 
   Returns S0, with Nullptr removed from its type. This instruction currently
   supports a very limited range of types but can be expanded if needed.
@@ -916,16 +920,27 @@ D:T = LookupClsCns<T,className,constName>
   it is not defined.  This instruction may raise an undefined constant
   error if autoload cannot define the constant.
 
-D:FuncCtx = LdClsMethodFCache S0:ConstStr S1:ConstStr
-                              S2:{Obj|Cls|Ctx} S3:FramePtr L:Label
+D:{Func|Nullptr} = LdClsMethodFCacheFunc<clsName, methodName>
 
-  Loads from the MethodFCache a pointer to the callee function and the
-  context (ActRec's m_this/m_cls slot) into D.  S0 and S1 hold the
-  names of the callee's class and method, respectively.  S2 is the
-  current context.  This instruction loads the corresponding entry in
-  the MethodFCache if needed.  In case the given method is not found,
-  control is transferred to label L.  The current frame pointer is
-  passed in S3.
+  Loads the target cache entry for a forwarding call to
+  clsName::methodName. May be Nullptr, if the method does not exist or the
+  cache hasn't been filled yet.
+
+D:{Func|Nullptr} =
+LookupClsMethodFCache<clsName, methodName> S0:ConstCls S1:FramePtr
+
+  Lookup clsName::methodName in the forwarding class method cache. S0 should be
+  the Class named by clsName and S1 should be the current vm frame pointer. May
+  return Nullptr if lookup fails using a subset of the required lookup paths,
+  indicating that a more complete lookup path should be taken. May throw if the
+  method does not exist.
+
+D:Ctx = GetCtxFwdCallDyn<clsName, methodName> S0:Ctx
+
+  If S0 is a Cctx, return S0. If S0 is an object, check if clsName::methodName
+  is a static method. If it is, return S0's class as a Ctx pointer. If not,
+  return S0. If S0 is a Ctx, dynamically check if it is an object or Cctx at
+  runtime and perform the operations described above.
 
 D:Ctx = GetCtxFwdCall S0:Ctx S1:Func
 
@@ -933,17 +948,27 @@ D:Ctx = GetCtxFwdCall S0:Ctx S1:Func
   class. If S0 is an object and S1 is not static, this opcode increfs
   S0 and returns it. If S0 is a Cctx, this opcode returns S0.
 
-D:FuncCls = LdClsMethodCache S0:ConstStr S1:ConstStr S2:ConstNamedEntity*
-                             S3:FramePtr S4:StkPtr
+D:{Func|Nullptr} = LdClsMethodCacheFunc<clsName, methodName>
 
-  Lookup a function and class in the class method targetcache.  The
-  sources to this instruction are:
+  Loads the target cache entry for the method clsName::methodName. The result
+  may be Nullptr, if the method does not exist or the cache hasn't been filled
+  yet.
 
-    S0 - class name
-    S1 - method name
-    S2 - the NamedEntity* for the class
-    S3 - the current frame pointer
-    S4 - the current stack pointer
+D:Cctx = LdClsMethodCacheCls<clsName, methodName>
+
+  Loads the target cache class context entry for a call to clsName::methodName
+  from the current context. This instruction must only be used when the value
+  is known to not be empty.
+
+D:{Func|Nullptr} =
+LookupClsMethodCache<clsName, methodName> S0:ConstNamedEntity*  S1:FramePtr
+
+  Lookup a function in the class method targetcache. The class name and method
+  name are clsName and methodName, respectively. S0 is the NamedEntity* for the
+  class, and S1 is the current vm frame pointer. Returns Nullptr if the method
+  cannot be found using a subset of the required lookup paths, indicating that
+  a more complete lookup path should be taken. May throw if the method does not
+  exist.
 
 D:Func = LdClsMethod S0:Cls S1:ConstInt
 
@@ -1479,12 +1504,12 @@ D:StkPtr = DefSP<stackOff> S0:StkPtr
   This instruction is used at the beginning of tracelets to represent
   the state of the stack on entry and does not emit code.
 
-D:StkPtr = ReDefSP<offset,spansCall> S0:FramePtr S1:StkPtr
+D:StkPtr = ReDefSP<offset,spansCall> S0:StkPtr S1:FramePtr
 
-  Re-define a stack in terms of a frame pointer S0 and an offset,
+  Re-define a stack in terms of a frame pointer S1 and an offset,
   putting the resulting pointer in D.  The resulting stack is assumed
   to give the same view as S1, which is a previous stack pointer.
-  (I.e. for getStackValue we just chain to S1.)  The S1 stack pointer is
+  (I.e. for getStackValue we just chain to S1.)  The S0 stack pointer is
   only used for analysis.
 
   This instruction is used when entering or "returning" from an
@@ -1511,9 +1536,9 @@ D:StkPtr = StashGeneratorSP<offset> S0:FramePtr S1:StkPtr
 
   TODO(#2288359): this shouldn't be needed.
 
-D:StkPtr = ReDefGeneratorSP<offset,spansCall> S0:FramePtr S1:StkPtr
+D:StkPtr = ReDefGeneratorSP<offset,spansCall> S0:StkPtr S1:FramePtr
 
-  Restore a generator stack pointer.  See StashGeneratorSP.  The S1 stack
+  Restore a generator stack pointer.  See StashGeneratorSP.  The S0 stack
   pointer refers to the stack pointer before inlining, it is used for stack
   value analysis but never used outside of analysis (see ReDefSP).  The
   spansCall boolean value indicates that the inlined frame spanned a function
@@ -2248,12 +2273,12 @@ BeginCatch
   Marks the beginning of a catch region. Exact behavior is implementation and
   architecture specific.
 
-EndCatch S0:StkPtr
+EndCatch S0:FramePtr S1:StkPtr
 
   Marks the end of a catch region and returns control to the unwinder. Exact
   behavior is implementation and architecture specific.
 
-TryEndCatch S0:StkPtr
+TryEndCatch S0:FramePtr S1:StkPtr
 
   Marks a potential end of a catch region and might return control to the
   unwinder. Exact behavior is implementation and architecture specific.

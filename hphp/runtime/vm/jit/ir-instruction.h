@@ -313,9 +313,8 @@ struct IRInstruction {
     assert(marker.valid());
     m_marker = marker;
   }
-  const BCMarker& marker() const {
-    return m_marker;
-  }
+  const BCMarker& marker() const { return m_marker; }
+  BCMarker& marker()             { return m_marker; }
 
   std::string toString() const;
 

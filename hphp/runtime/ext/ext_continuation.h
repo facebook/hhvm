@@ -116,6 +116,7 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
   }
 
   static ptrdiff_t getContOffset(const Func* genFunc) {
+    assert(genFunc->isGenerator());
     return sizeof(Iter) * genFunc->numIterators() +
            sizeof(TypedValue) * genFunc->numLocals() +
            sizeof(ActRec);

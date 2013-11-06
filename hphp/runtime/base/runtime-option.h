@@ -512,6 +512,7 @@ public:
   static int HHProfServerThreads;
   static int HHProfServerTimeoutSeconds;
   static bool HHProfServerProfileClientMode;
+  static bool HHProfServerAllocationProfile;
   static int HHProfServerFilterMinAllocPerReq;
   static int HHProfServerFilterMinBytesPerReq;
 

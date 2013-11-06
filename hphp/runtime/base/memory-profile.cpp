@@ -88,9 +88,14 @@ void MemoryProfile::logDeallocationImpl(void *ptr) {
   const auto &it = m_livePointers.find(ptr);
   if (it == m_livePointers.end()) return;
 
-  const Allocation &alloc = it->second;
-  m_dump.removeAlloc(alloc.m_size, alloc.m_trace);
+  if (!RuntimeOption::HHProfServerAllocationProfile) {
+    const Allocation &alloc = it->second;
+    m_dump.removeAlloc(alloc.m_size, alloc.m_trace);
+  }
 
+  // Even if we are doing an allocation profile, this list is only used for
+  // providing information about reachable pointers so we still want to remove
+  // deallocated userland structures from the list.
   m_livePointers.erase(it);
 }
 

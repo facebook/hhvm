@@ -459,6 +459,7 @@ int RuntimeOption::HHProfServerPort = 4327;
 int RuntimeOption::HHProfServerThreads = 2;
 int RuntimeOption::HHProfServerTimeoutSeconds = 30;
 bool RuntimeOption::HHProfServerProfileClientMode = true;
+bool RuntimeOption::HHProfServerAllocationProfile = false;
 int RuntimeOption::HHProfServerFilterMinAllocPerReq = 2;
 int RuntimeOption::HHProfServerFilterMinBytesPerReq = 128;
 
@@ -1270,7 +1271,9 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     HHProfServerTimeoutSeconds =
       hhprofServer["TimeoutSeconds"].getInt64(30);
     HHProfServerProfileClientMode =
-      hhprofServer["ProfileClientMode"].getBool();
+      hhprofServer["ProfileClientMode"].getBool(true);
+    HHProfServerAllocationProfile =
+      hhprofServer["AllocationProfile"].getBool(false);
 
     // HHProfServer.Filter.*
     Hdf hhprofFilter = hhprofServer["Filter"];

@@ -1119,6 +1119,34 @@ class Framework {
     $this->install_root = Frameworks::$framework_info[$this->name]
                                                      ['install_root'];
   }
+
+  public static function sort(string $file): bool {
+    $results = StableMap {};
+    $handle = fopen($file, "r");
+    if ($handle) {
+      while (!feof($handle)) {
+        // trim out newline since StableMap doesn't like them in its keys
+        $test = rtrim(fgets($handle), PHP_EOL);
+        $status = rtrim(fgets($handle), PHP_EOL);
+        $results[$test] = $status;
+      }
+      if (!ksort($results)) { return false; }
+      fclose($handle);
+      $contents = "";
+      foreach ($results as $test => $status) {
+        $contents .= $test.PHP_EOL;
+        $contents .= $status.PHP_EOL;
+      }
+      $contents = remove_last_newline($contents);
+      if (file_put_contents($file, $contents) === false) { return false; }
+      return true;
+    }
+    return false;
+  }
+
+  public static function removeFinalNewline(string $file): void {
+    file_put_contents($file, remove_last_newline(file_get_contents($file)));
+  }
 }
 
 class SingleTestFile {
@@ -1669,6 +1697,14 @@ function run_tests(Vector $frameworks): void {
 
   $diff_frameworks = Vector {};
   foreach ($frameworks as $framework) {
+    // Remove any final newlines from files. Given the split nature of how the
+    // tests run and output to the file, we may have an extra newline.
+    // Removing it, makes processing easier later.
+    Framework::removeFinalNewline($framework->out_file);
+    Framework::removeFinalNewline($framework->diff_file);
+    Framework::removeFinalNewline($framework->errors_file);
+    Framework::removeFinalNewline($framework->fatals_file);
+    Framework::removeFinalNewline($framework->stats_file);
     $pct = $framework->getPassPercentage();
     $encoded_result = json_encode(array($framework->name => $pct));
     if (!(file_exists($summary_file))) {
@@ -1685,6 +1721,7 @@ function run_tests(Vector $frameworks): void {
     // was a difference between what we ran and what we expected.
     if (!file_exists($framework->expect_file)) {
       copy($framework->out_file, $framework->expect_file);
+      Framework::sort($framework->expect_file);
     } else if (filesize($framework->diff_file) > 0) {
       $diff_frameworks[] = $framework;
       $framework->success = false;
@@ -2168,6 +2205,11 @@ function verbose(string $msg, bool $verbose): void {
 function remove_color_codes(string $line): string {
   return preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
                       "", $line);
+}
+
+function remove_last_newline(string $text): string {
+  $s = substr($text, -1);
+  return $s === PHP_EOL ? substr($text, 0, -1) : $text;
 }
 
 function main(array $argv): void {

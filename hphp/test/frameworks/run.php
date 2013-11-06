@@ -313,26 +313,17 @@ class Frameworks {
                 __DIR__."/frameworks/yii/tests",
               },
           },
+        // Using a branch from https://github.com/codeguy/Slim to access an
+        // upstream hash_hmac fix
         'slim' =>
           Map {
             'install_root' => __DIR__."/frameworks/Slim",
-            'git_path' => "https://github.com/codeguy/Slim.git",
-            'git_commit' => "3dec4f9ee2e9c204a9f334afd72abc174c1b792e",
+            'git_path' => "https://github.com/elgenie/Slim.git",
+            'git_commit' => "1beca31c1f0b0a7bb7747d9367fb07c07e190a8d",
             'test_search_roots' =>
               Vector {
                 __DIR__."/frameworks/Slim/tests",
               },
-            /*
-            'pull_requests' =>
-            Vector {
-              Map {
-                'pull_dir' => __DIR__."/frameworks/Slim",
-                'pull_repository' => "https://github.com/elgenie/Slim",
-                'git_commit' => "1beca31c1f0b0a7bb7747d9367fb07c07e190a8d",
-                'type' => 'pull',
-              },
-            },
-            */
           },
         /*'wordpress' =>
           Map {
@@ -360,6 +351,8 @@ class Frameworks {
               Vector {
                 __DIR__."/frameworks/doctrine2/tests/Doctrine/Tests/ORM",
               },
+            // This pull request is a vendor pull that does not affect the
+            // primary git sha above
             'pull_requests' =>
               Vector {
                 Map {
@@ -524,7 +517,7 @@ class Frameworks {
           Map {
             'install_root' => __DIR__."/frameworks/phpunit",
             'git_path' => "https://github.com/sebastianbergmann/phpunit.git",
-            'git_commit' => "0ce13a8c9ff41d9c0d69ebd216bcc66b5f047246",
+            'git_commit' => "236f65cc97d6beaa8fcb8a27b19bd278f3912677",
             'test_path' => __DIR__."/frameworks/phpunit",
             'test_run_command' => get_hhvm_build()." ".__DIR__.
                                   "/frameworks/phpunit/phpunit.php --debug",
@@ -536,6 +529,10 @@ class Frameworks {
                 __DIR__."/frameworks/phpunit/Tests/Runner",
                 __DIR__."/frameworks/phpunit/Tests/TextUI",
                 __DIR__."/frameworks/phpunit/Tests/Util",
+              },
+            'env_vars' =>
+              Map {
+                'PHP_BINARY' => get_hhvm_build(false, true)
               },
           },
       };
@@ -672,6 +669,7 @@ class Framework {
   public string $test_path;
   public string $install_root;
   public string $test_command;
+  public Map $env_vars;
 
   public string $test_name_pattern;
   public Vector $test_search_roots;
@@ -700,7 +698,7 @@ class Framework {
   // phpunit for their testing (e.g. ThinkUp)
   public function getPassPercentage(): mixed {
     if (filesize($this->stats_file) === 0) {
-      verbose("Stats File: ".$this->stats_file."has no content. Returning ".
+      verbose("Stats File: ".$this->stats_file." has no content. Returning ".
               "fatal\n", Options::$verbose);
       return "Fatal";
     }
@@ -912,7 +910,7 @@ class Framework {
         $git_ret = run_install($git_command, $dir,
                                ProxyInformation::$proxies);
         if ($git_ret !== 0) {
-          remove_dir_recursive($framework->install_root);
+          remove_dir_recursive($this->install_root);
           Options::$csv_only ? error()
                              : error("Could not get pull request code for ".
                                      $this->name."!".
@@ -1020,6 +1018,7 @@ class Framework {
   }
 
   public function setTestConfiguration() {
+    $this->setEnvironmentVariables();
     $this->setTestCommand();
     $this->setTestPattern();
     $this->setTestSearchRoots();
@@ -1100,6 +1099,16 @@ class Framework {
     }
     $this->test_command .= " %test%";
     $this->test_command .= " 2>&1";
+  }
+
+  private function setEnvironmentVariables(): void {
+    if (Frameworks::$framework_info[$this->name]->contains('env_vars')) {
+      $this->env_vars = Map {};
+      $ev = Frameworks::$framework_info[$this->name]['env_vars'];
+      foreach ($ev as $var => $val) {
+        $this->env_vars[$var] = $val;
+      }
+    }
   }
 
   private function setInstallRoot() {
@@ -1382,7 +1391,13 @@ class SingleTestFile {
   }
 
   private function initialize(): bool {
-    $test_command = str_replace("%test%", $this->name,
+    $test_command = "";
+    if ($this->framework->env_vars !== null) {
+      foreach($this->framework->env_vars as $var => $val) {
+        $test_command .= "export ".$var."=\"".$val."\" && ";
+      }
+    }
+    $test_command .= str_replace("%test%", $this->name,
                                  $this->framework->test_command);
     verbose("Command: ".$test_command."\n", Options::$verbose);
 
@@ -1392,6 +1407,10 @@ class SingleTestFile {
       2 => array("pipe", "w"),
     );
 
+    $env = $_ENV;
+    if ($this->framework->env_vars !== null) {
+      $env = array_merge($env, $this->framework->env_vars->toArray());
+    }
     // $_ENV will passed in by default if the environment var is null
     $this->process = proc_open($test_command, $descriptorspec, $this->pipes,
                                $this->framework->test_path, null);
@@ -2080,28 +2099,45 @@ function find_all_files_containing_text(string $text,
   return $files;
 }
 
-function get_hhvm_build(bool $with_jit = true): string {
+function get_hhvm_build(bool $with_jit = true, bool $use_php = false): string {
   $fbcode_root_dir = __DIR__.'/../../..';
+  $oss_root_dir = __DIR__.'../..';
   $build = "";
   // See if we are using an internal development build
   if ((file_exists($fbcode_root_dir."/_bin"))) {
     $build .= $fbcode_root_dir;
-    $build .= "/_bin/hphp/hhvm/hhvm -v Eval.EnableZendCompat=true";
-  } else if (command_exists("hhvm")) {
-  // Maybe we are in OSS land trying this script
-    $build .= "hhvm";
+    if (!$use_php) {
+      $build .= "/_bin/hphp/hhvm/hhvm -v Eval.EnableZendCompat=true";
+    } else {
+      $build .= "/_bin/hphp/hhvm/php";
+    }
+  } else if (file_exists($oss_root_dir."/".
+                         idx($_ENV, 'FBMAKE_BIN_ROOT', '_bin'))) {
+    // Maybe we are in OSS land trying this script
+    $build .= $oss_root_dir."/".idx($_ENV, 'FBMAKE_BIN_ROOT', '_bin');
+    if (!$use_php) {
+      $build .= "/hhvm -v Eval.EnableZendCompat=true";
+    } else {
+      $build .= "/php";
+    }
   } else {
     error("HHVM build doesn't exist. Did you build yet?");
   }
-  $repo_loc = tempnam('/tmp', 'framework-test');
-  $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
-  $build .= $repo_args;
-  $build .= " --config ".__DIR__."/../config.hdf";
-  $build .= " -v Server.IniFile=".__DIR__."/php.ini";
+  if (!$use_php) {
+    $repo_loc = tempnam('/tmp', 'framework-test');
+    $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
+    $build .= $repo_args;
+    $build .= " --config ".__DIR__."/../config.hdf";
+    $build .= " -v Server.IniFile=".__DIR__."/php.ini";
+  }
   if ($with_jit) {
     $build .= " -v Eval.Jit=true";
   }
   return $build;
+}
+
+function idx(array $array, mixed $key, mixed $default = null): mixed {
+  return isset($array[$key]) ? $array[$key] : $default;
 }
 
 function command_exists(string $cmd): bool {

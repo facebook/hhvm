@@ -1,15 +1,13 @@
-OneTest::testSomething
-.
 Runner_BaseTestRunnerTest::testInvokeNonStaticSuite
 .
-Util_ClassTest::testGetObjectAttributeCanHandleDynamicVariables
-E
+OneTest::testSomething
+.
 Issue1021Test::testSomething with data set #0 
 .
 Issue1021Test::testSomethingElse
 .
-Issue503Test::testCompareDifferentLineEndings
-F
+Framework_TestImplementorTest::testSuccessfulRun
+.
 Framework_Constraint_JsonMatchesTest::testEvaluate with data set "valid JSON"
 .
 Framework_Constraint_JsonMatchesTest::testEvaluate with data set "error syntax"
@@ -20,8 +18,32 @@ Framework_Constraint_JsonMatchesTest::testEvaluate with data set "invalid JSON i
 .
 Framework_Constraint_JsonMatchesTest::testToString
 .
-Framework_TestImplementorTest::testSuccessfulRun
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "expected"
 .
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "actual"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "default"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_NONE"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_DEPTH"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "prefixed JSON_ERROR_DEPTH"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_STATE_MISMatch"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_CTRL_CHAR"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_SYNTAX"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_UTF8`"
+.
+Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "Invalid error indicator"
+.
+Util_ClassTest::testGetObjectAttributeCanHandleDynamicVariables
+E
+Issue503Test::testCompareDifferentLineEndings
+F
 Util_TypeTest::testExport with data set #0 
 .
 Util_TypeTest::testExport with data set #1 
@@ -79,28 +101,6 @@ Util_TypeTest::testNonBinaryStringExport with data set #0
 Util_TypeTest::testNonBinaryStringExport with data set #1 
 .
 Util_TypeTest::testNonBinaryStringExport with data set #2 
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "expected"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "actual"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testTranslatTypeToPrefix with data set "default"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_NONE"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_DEPTH"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "prefixed JSON_ERROR_DEPTH"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_STATE_MISMatch"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_CTRL_CHAR"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_SYNTAX"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "JSON_ERROR_UTF8`"
-.
-Framework_Constraint_JsonMatches_ErrorMessageProviderTest::testDetermineJsonError with data set "Invalid error indicator"
 .
 Issue445Test::testOutputWithExpectationBefore
 .
@@ -190,8 +190,6 @@ Issue74Test::testCreateAndThrowNewExceptionInProcessIsolation
 E
 TwoTest::testSomething
 .
-Framework_TestFailureTest::testToString
-.
 Util_TestDox_NamePrettifierTest::testTitleHasSensibleDefaults
 .
 Util_TestDox_NamePrettifierTest::testCaterForUserDefinedSuffix
@@ -202,34 +200,18 @@ Util_TestDox_NamePrettifierTest::testTestNameIsConvertedToASentence
 .
 Util_TestDox_NamePrettifierTest::testTestNameIsNotGroupedWhenNotInSequence
 .
+Framework_TestFailureTest::testToString
+.
+Issue498Test::shouldBeTrue with data set #0 
+.
+Issue498Test::shouldBeTrue with data set #1 
+.
 Issue433Test::testOutputWithExpectationBefore
 .
 Issue433Test::testOutputWithExpectationAfter
 .
 Issue433Test::testNotMatchingOutput
 F
-Issue498Test::shouldBeTrue with data set #0 
-.
-Issue498Test::shouldBeTrue with data set #1 
-.
-Framework_SuiteTest::testAddTestSuite
-.
-Framework_SuiteTest::testInheritedTests
-.
-Framework_SuiteTest::testNoTestCases
-.
-Framework_SuiteTest::testNoTestCaseClass
-.
-Framework_SuiteTest::testNotExistingTestCase
-.
-Framework_SuiteTest::testNotPublicTestCase
-.
-Framework_SuiteTest::testNotVoidTestCase
-.
-Framework_SuiteTest::testOneTestCase
-.
-Framework_SuiteTest::testShadowedTests
-.
 Util_DiffTest::testComparisonErrorMessage
 .
 Util_DiffTest::testComparisonErrorMessage_toArray
@@ -262,6 +244,24 @@ Util_DiffTest::testComparisonErrorOverlapingMatches2
 .
 Util_DiffTest::testComparisonErrorOverlapingMatches2_toArray
 .
+Framework_SuiteTest::testAddTestSuite
+.
+Framework_SuiteTest::testInheritedTests
+.
+Framework_SuiteTest::testNoTestCases
+.
+Framework_SuiteTest::testNoTestCaseClass
+.
+Framework_SuiteTest::testNotExistingTestCase
+.
+Framework_SuiteTest::testNotPublicTestCase
+.
+Framework_SuiteTest::testNotVoidTestCase
+.
+Framework_SuiteTest::testOneTestCase
+.
+Framework_SuiteTest::testShadowedTests
+.
 Issue244Test::testWorks
 .
 Issue244Test::testFails
@@ -292,14 +292,18 @@ Framework_AssertTest::testAssertArrayHasStringKey
 .
 Framework_AssertTest::testAssertArrayNotHasStringKey
 .
+Framework_AssertTest::testAssertArrayHasKeyAcceptsArrayObjectValue
+.
+Framework_AssertTest::testAssertArrayHasKeyProperlyFailsWithArrayObjectValue
+.
 Framework_AssertTest::testAssertArrayHasKeyAcceptsArrayAccessValue
-F
+.
 Framework_AssertTest::testAssertArrayHasKeyProperlyFailsWithArrayAccessValue
 .
 Framework_AssertTest::testAssertArrayNotHasKeyAcceptsArrayAccessValue
 .
 Framework_AssertTest::testAssertArrayNotHasKeyPropertlyFailsWithArrayAccessValue
-F
+.
 Framework_AssertTest::testAssertContainsThrowsException
 .
 Framework_AssertTest::testAssertIteratorContainsObject
@@ -1406,10 +1410,6 @@ Framework_Assert_FunctionsTest::testLogicalOr
 .
 Framework_Assert_FunctionsTest::testLogicalXor
 .
-Issue322Test::testOne
-.
-Issue322Test::testTwo
-.
 Issue523Test::testAttributeEquals
 .
 Issue578Test::testNoticesDoublePrintStackTrace
@@ -1418,6 +1418,10 @@ Issue578Test::testWarningsDoublePrintStackTrace
 .
 Issue578Test::testUnexpectedExceptionsPrintsCorrectly
 E
+Issue581Test::testExportingObjectsDoesNotBreakWindowsLineFeeds
+F
+Issue765Test::testDependee
+.
 Util_XMLTest::testAssertValidKeysValidKeys
 .
 Util_XMLTest::testAssertValidKeysValidKeysEmpty
@@ -1472,8 +1476,10 @@ Util_XMLTest::testConvertAssertRange
 .
 Util_XMLTest::testPrepareStringEscapesChars
 .
-Issue581Test::testExportingObjectsDoesNotBreakWindowsLineFeeds
-F
+Issue322Test::testOne
+.
+Issue322Test::testTwo
+.
 Util_ConfigurationTest::testExceptionIsThrownForNotExistingConfigurationFile
 .
 Util_ConfigurationTest::testFilterConfigurationIsReadCorrectly
@@ -1494,8 +1500,6 @@ Util_ConfigurationTest::testSeleniumBrowserConfigurationIsReadCorrectly
 .
 Util_ConfigurationTest::testXincludeInConfiguration
 hhvm: hphp/util/rank.cpp:57: void HPHP::checkRank(HPHP::Rank): Assertion `false' failed.
-Issue765Test::testDependee
-.
 Framework_ConstraintTest::testConstraintArrayHasKey
 .
 Framework_ConstraintTest::testConstraintArrayHasKey2

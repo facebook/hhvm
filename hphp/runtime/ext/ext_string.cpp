@@ -1058,9 +1058,25 @@ Variant f_stripos(const String& haystack, CVarRef needle, int offset /* = 0 */) 
   return false;
 }
 
-Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
+static bool is_valid_strrpos_args(
+    const String& haystack,
+    CVarRef needle,
+    int offset) {
+  if (haystack.size() == 0) {
+    return false;
+  }
+  if (needle.isString() && needle.toString().size() == 0) {
+    return false;
+  }
   if (offset < -haystack.size() || offset > haystack.size()) {
     raise_warning("Offset is greater than the length of haystack string");
+    return false;
+  }
+  return true;
+}
+
+Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
+  if (!is_valid_strrpos_args(haystack, needle, offset)) {
     return false;
   }
   int pos;
@@ -1074,8 +1090,7 @@ Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) 
 }
 
 Variant f_strripos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
-  if (offset < -haystack.size() || offset > haystack.size()) {
-    raise_warning("Offset is greater than the length of haystack string");
+  if (!is_valid_strrpos_args(haystack, needle, offset)) {
     return false;
   }
   int pos;

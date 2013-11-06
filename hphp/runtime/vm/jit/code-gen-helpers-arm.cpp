@@ -50,6 +50,18 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
   return fixupAddr;
 }
 
+TCA emitCall(vixl::MacroAssembler& a, TCA call) {
+  a. Mov  (rHostCallReg, reinterpret_cast<intptr_t>(call));
+
+  using namespace vixl;
+  a.   Push    (x30, x29);
+  a.   Blr     (rHostCallReg);
+  auto fixupAddr = a.frontier();
+  a.   Pop     (x29, x30);
+
+  return fixupAddr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void emitXorSwap(vixl::MacroAssembler& a,
@@ -78,9 +90,8 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
   emitSmashableJump(mainCode, stubsCode.frontier(), CC_NZ);
 
   astubs.  Mov  (argReg(0), rVmFp);
-  void (*helper)(const ActRec*) = functionEnterHelper;
 
-  auto fixupAddr = emitCall(astubs, CppCall(helper));
+  auto fixupAddr = emitCall(astubs, tx64->uniqueStubs.functionEnterHelper);
   if (inTracelet) {
     fixupMap.recordSyncPoint(fixupAddr,
                              fixup.m_pcOffset, fixup.m_spOffset);

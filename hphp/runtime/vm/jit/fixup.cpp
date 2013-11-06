@@ -111,18 +111,36 @@ void
 FixupMap::fixupWorkSimulated(VMExecutionContext* ec) const {
   TRACE(1, "fixup(begin):\n");
 
+  auto isVMFrame = [] (ActRec* ar, const vixl::Simulator* sim) {
+    // If this assert is failing, you may have forgotten a sync point somewhere
+    assert(ar);
+    bool ret =
+      uintptr_t(ar) - Util::s_stackLimit >= Util::s_stackSize &&
+      !sim->is_on_stack(ar);
+    assert(!ret ||
+           (ar >= g_vmContext->m_stack.getStackLowAddress() &&
+            ar < g_vmContext->m_stack.getStackHighAddress()) ||
+           ar->m_func->isGenerator());
+    return ret;
+  };
+
   // For each nested simulator (corresponding to nested VM invocations), look at
   // its PC to find a potential fixup key.
   //
-  // No callstack walking is necessary, because only innermost (i.e. most
-  // nested) call frames within the TC can be sources of calls into C++ by
-  // definition, and the simulator's PC and FP always indicate the innermost
-  // frame when you're in C++.
+  // Callstack walking is necessary, because we may get called from a
+  // uniqueStub.
   for (int i = ec->m_activeSims.size() - 1; i >= 0; --i) {
     auto const* sim = ec->m_activeSims[i];
     auto* rbp = reinterpret_cast<ActRec*>(sim->xreg(JIT::ARM::rVmFp.code()));
     auto tca = reinterpret_cast<TCA>(sim->pc());
     TRACE(2, "considering frame %p, %p\n", rbp, tca);
+
+    while (rbp && !isVMFrame(rbp, sim)) {
+      tca = reinterpret_cast<TCA>(rbp->m_savedRip);
+      rbp = reinterpret_cast<ActRec*>(rbp->m_savedRbp);
+    }
+
+    if (!rbp) continue;
 
     auto* ent = m_fixups.find(tca);
     if (!ent) {

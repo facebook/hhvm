@@ -402,9 +402,8 @@ const size_t kExpectedPerTrampolineSize = 11;
 const size_t kMaxNumTrampolines = kTrampolinesBlockSize /
   kExpectedPerTrampolineSize;
 
-TCA fcallHelper(ActRec* ar);
-TCA funcBodyHelper(ActRec* ar);
-void functionEnterHelper(const ActRec* ar);
+TCA fcallHelper(ActRec* ar, void* sp);
+TCA funcBodyHelper(ActRec* ar, void* sp);
 int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 
 // These could be static but are used in hopt/codegen.cpp

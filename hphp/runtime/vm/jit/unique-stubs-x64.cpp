@@ -459,19 +459,20 @@ asm_label(a, noCallee);
 //////////////////////////////////////////////////////////////////////
 
 void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
-  TCA (*helper)(ActRec*) = &fcallHelper;
+  TCA (*helper)(ActRec*, void*) = &fcallHelper;
   Asm a { tx64->stubsCode };
 
   moveToAlign(tx64->stubsCode);
   uniqueStubs.fcallHelperThunk = a.frontier();
 
-  Label popAndXchg;
+  Label popAndXchg, skip;
 
   // fcallHelper is used for prologues, and (in the case of
   // closures) for dispatch to the function body. In the first
   // case, there's a call, in the second, there's a jmp.
   // We can differentiate by comparing r15 and rVmFp
   a.    movq   (rStashedAR, argNumToRegName[0]);
+  a.    movq   (rVmSp, argNumToRegName[1]);
   a.    cmpq   (rStashedAR, rVmFp);
   a.    jne8   (popAndXchg);
   emitCall(a, CppCall(helper));
@@ -492,11 +493,22 @@ asm_label(a, popAndXchg);
   // is entered where rbp is *below* the new actrec, and is missing
   // a number of c++ frames. The new actrec is linked onto the c++
   // frames, however, so switch it into rbp in case fcallHelper throws.
+  a.    pop    (rStashedAR[AROFF(m_savedRip)]);
   a.    xchgq  (rStashedAR, rVmFp);
-  a.    pop    (rVmFp[AROFF(m_savedRip)]);
   emitCall(a, CppCall(helper));
-  a.    push   (rVmFp[AROFF(m_savedRip)]);
+  a.    testq  (rax, rax);
+  a.    js8    (skip);
   a.    xchgq  (rStashedAR, rVmFp);
+  a.    push   (rStashedAR[AROFF(m_savedRip)]);
+  a.    jmp    (rax);
+  a.    ud2    ();
+
+asm_label(a, skip);
+  emitGetGContext(a, rdi);
+  a.    neg    (rax);
+  a.    loadq  (rdi[offsetof(VMExecutionContext, m_fp)], rVmFp);
+  a.    loadq  (rdi[offsetof(VMExecutionContext, m_stack) +
+                    Stack::topOfStackOffset()], rVmSp);
   a.    jmp    (rax);
   a.    ud2    ();
 
@@ -504,7 +516,7 @@ asm_label(a, popAndXchg);
 }
 
 void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
-  TCA (*helper)(ActRec*) = &funcBodyHelper;
+  TCA (*helper)(ActRec*,void*) = &funcBodyHelper;
   Asm a { tx64->stubsCode };
 
   moveToAlign(tx64->stubsCode);
@@ -513,11 +525,52 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
   // This helper is called via a direct jump from the TC (from
   // fcallArrayHelper). So the stack parity is already correct.
   a.    movq   (rVmFp, argNumToRegName[0]);
+  a.    movq   (rVmSp, argNumToRegName[1]);
   emitCall(a, CppCall(helper));
   a.    jmp    (rax);
   a.    ud2    ();
 
   uniqueStubs.add("funcBodyHelperThunk", uniqueStubs.funcBodyHelperThunk);
+}
+
+void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
+  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionEnter;
+  Asm a { tx64->stubsCode };
+
+  moveToAlign(tx64->stubsCode);
+  uniqueStubs.functionEnterHelper = a.frontier();
+
+  Label skip;
+
+  PhysReg ar = argNumToRegName[0];
+
+  a.   push    (rVmFp);
+  a.   movq    (rsp, rVmFp);
+  a.   push    (ar[AROFF(m_savedRip)]);
+  a.   push    (ar[AROFF(m_savedRbp)]);
+  a.   movq    (EventHook::NormalFunc, argNumToRegName[1]);
+  emitCall(a, CppCall(helper));
+  a.   testb   (al, al);
+  a.   je8     (skip);
+  a.   addq    (16, rsp);
+  a.   pop     (rVmFp);
+  a.   ret     ();
+asm_label(a, skip);
+// The event hook has already cleaned up the stack/actrec
+// so that we're ready to continue from the original call
+// site.
+// Just need to grab the fp/rip from the original frame,
+// and sync rVmSp to the execution-context's copy.
+  a.   pop     (rVmFp);
+  a.   pop     (rsi);
+  a.   addq    (16, rsp); // drop our call frame
+  emitGetGContext(a, rax);
+  a.   loadq   (rax[offsetof(VMExecutionContext, m_stack) +
+                    Stack::topOfStackOffset()], rVmSp);
+  a.   jmp     (rsi);
+  a.   ud2     ();
+
+  uniqueStubs.add("functionEnterHelper", uniqueStubs.functionEnterHelper);
 }
 
 }
@@ -539,6 +592,7 @@ UniqueStubs emitUniqueStubs() {
     emitFCallArrayHelper,
     emitFCallHelperThunk,
     emitFuncBodyHelperThunk,
+    emitFunctionEnterHelper,
   };
   for (auto& f : functions) f(us);
   return us;

@@ -15,11 +15,11 @@
 */
 
 #include "hphp/util/data-block.h"
+#include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
-
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
@@ -134,13 +134,14 @@ void emitFCallArrayHelper(UniqueStubs& us) {
 }
 
 void emitFCallHelperThunk(UniqueStubs& us) {
-  TCA (*helper)(ActRec*) = &fcallHelper;
+  TCA (*helper)(ActRec*, void*) = &fcallHelper;
   MacroAssembler a { tx64->stubsCode };
 
   us.fcallHelperThunk = a.frontier();
-  vixl::Label popAndXchg;
+  vixl::Label popAndXchg, jmpRet;
 
   a.   Mov   (argReg(0), rStashedAR);
+  a.   Mov   (argReg(1), rVmSp);
   a.   Cmp   (rVmFp, rStashedAR);
   a.   B     (&popAndXchg, vixl::ne);
   emitCall(a, CppCall(helper));
@@ -148,32 +149,74 @@ void emitFCallHelperThunk(UniqueStubs& us) {
 
   a.   bind  (&popAndXchg);
   emitXorSwap(a, rStashedAR, rVmFp);
-  // Pop return address into ActRec.
-  a.   Ldr   (rAsm, vixl::sp[0]);
-  a.   Str   (rAsm, rVmFp[AROFF(m_savedRip)]);
+  // Put return address into ActRec.
+  a.   Str   (rLinkReg, rVmFp[AROFF(m_savedRip)]);
   emitCall(a, CppCall(helper));
-  // Put return address back on stack.
-  a.   Ldr   (rAsm, rVmFp[AROFF(m_savedRip)]);
-  a.   Str   (rAsm, vixl::sp[0]);
+  // Put return address back in the link register.
+  a.   Ldr   (rLinkReg, rVmFp[AROFF(m_savedRip)]);
   emitXorSwap(a, rStashedAR, rVmFp);
+  a.   Cmp   (rReturnReg, 0);
+  a.   B     (&jmpRet, vixl::gt);
+  a.   Neg   (rReturnReg, rReturnReg);
+  a.   Ldr   (rVmFp, rGContextReg[offsetof(VMExecutionContext, m_fp)]);
+  a.   Ldr   (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
+                                  Stack::topOfStackOffset()]);
+
+  a.   bind  (&jmpRet);
+
   a.   Br    (rReturnReg);
 
   us.add("fcallHelperThunk", us.fcallHelperThunk);
 }
 
 void emitFuncBodyHelperThunk(UniqueStubs& us) {
-  TCA (*helper)(ActRec*) = &funcBodyHelper;
+  TCA (*helper)(ActRec*, void*) = &funcBodyHelper;
   MacroAssembler a { tx64->stubsCode };
 
   us.funcBodyHelperThunk = a.frontier();
   a.   Mov   (argReg(0), rVmFp);
+  a.   Mov   (argReg(1), rVmSp);
   a.   Mov   (rHostCallReg, reinterpret_cast<intptr_t>(helper));
   a.   Push  (rLinkReg, rVmFp);
-  a.   HostCall(1);
+  a.   HostCall(2);
   a.   Pop   (rVmFp, rLinkReg);
   a.   Br    (rReturnReg);
 
   us.add("funcBodyHelperThunk", us.funcBodyHelperThunk);
+}
+
+void emitFunctionEnterHelper(UniqueStubs& us) {
+  bool (*helper)(const ActRec*, int) = &EventHook::onFunctionEnter;
+  MacroAssembler a { tx64->stubsCode };
+
+  us.functionEnterHelper = a.frontier();
+
+  vixl::Label skip;
+
+  auto ar = argReg(0);
+
+  a.   Push    (rLinkReg, rVmFp);
+  a.   Mov     (rVmFp, vixl::sp);
+  a.   Ldp     (rAsm2, rAsm, ar[AROFF(m_savedRbp)]);
+  static_assert(AROFF(m_savedRbp) + 8 == AROFF(m_savedRip),
+                "m_savedRbp must precede m_savedRip");
+  a.   Push    (rAsm, rAsm2);
+  a.   Mov     (argReg(1), EventHook::NormalFunc);
+  a.   Mov     (rHostCallReg, reinterpret_cast<intptr_t>(helper));
+  a.   HostCall(2);
+  a.   Cbz     (rReturnReg, &skip);
+  a.   Mov     (vixl::sp, rVmFp);
+  a.   Pop     (rVmFp, rLinkReg);
+  a.   Ret     (rLinkReg);
+
+  a.   bind    (&skip);
+
+  a.   Pop     (rVmFp, rLinkReg, rAsm, rAsm2);
+  a.   Ldr     (rVmSp, rGContextReg[offsetof(VMExecutionContext, m_stack) +
+                                    Stack::topOfStackOffset()]);
+  a.   Br      (rLinkReg);
+
+  us.add("functionEnterHelper", us.functionEnterHelper);
 }
 
 } // anonymous namespace
@@ -193,6 +236,7 @@ UniqueStubs emitUniqueStubs() {
     emitFCallArrayHelper,
     emitFCallHelperThunk,
     emitFuncBodyHelperThunk,
+    emitFunctionEnterHelper,
   };
   for (auto& f : functions) f(us);
   return us;

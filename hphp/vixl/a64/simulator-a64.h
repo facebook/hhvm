@@ -396,6 +396,10 @@ class Simulator : public DecoderVisitor {
     }
   }
 
+  bool is_on_stack(void* ptr) const {
+    return uint64_t((byte*)ptr - stack_) < (uint64_t)stack_size_;
+  }
+
  protected:
   // Simulation helpers ------------------------------------
   bool ConditionPassed(Condition cond) {

@@ -24,46 +24,9 @@
 namespace HPHP {
 namespace Transl {
 
-/*
- * reserve the VM stack pointer within this translation unit
- *
- * Note that for rbp we use a local register asm
- * variable. But for rbx, we need to update it, and
- * local register asm vars are saved and restored just
- * like any other local. So I put this function in its own
- * file to avoid impacting the rest of translator-x64.cpp
- */
-#if defined(__x86_64__) && !defined(__clang__)
-register Cell* sp asm("rbx");
-#else
-// TODO(#2056140): we have to decide regalloc conventions for ARM
-Cell* sp;
-#endif
-
-namespace {
-
-inline Cell* hardwareStackPtr() {
-  if (RuntimeOption::EvalSimulateARM) {
-    return reinterpret_cast<Cell*>(
-      g_vmContext->m_activeSims.back()->xreg(JIT::ARM::rVmSp.code())
-    );
-  }
-  return sp;
-}
-
-inline void setHardwareStackPtr(Cell* newSp) {
-  if (RuntimeOption::EvalSimulateARM) {
-    g_vmContext->m_activeSims.back()->set_xreg(JIT::ARM::rVmSp.code(), newSp);
-    return;
-  }
-  sp = newSp;
-}
-
-}
-
-static void setupAfterPrologue(ActRec* fp) {
+static void setupAfterPrologue(ActRec* fp, void* sp) {
   g_vmContext->m_fp = fp;
-  g_vmContext->m_stack.top() = hardwareStackPtr();
+  g_vmContext->m_stack.top() = (Cell*)sp;
   int nargs = fp->numArgs();
   int nparams = fp->m_func->numParams();
   Offset firstDVInitializer = InvalidAbsoluteOffset;
@@ -84,7 +47,7 @@ static void setupAfterPrologue(ActRec* fp) {
   }
 }
 
-TCA fcallHelper(ActRec* ar) {
+TCA fcallHelper(ActRec* ar, void* sp) {
   try {
     TCA tca =
       tx64->getFuncPrologue((Func*)ar->m_func, ar->numArgs(), ar);
@@ -106,16 +69,11 @@ TCA fcallHelper(ActRec* ar) {
       }
       // We've been asked to skip the function body
       // (fb_intercept). frame, stack and pc have
-      // already been fixed - so just ensure that
-      // we setup the registers, and return as
-      // if from the call to ar
-      DECLARE_FRAME_POINTER(framePtr);
-      framePtr->m_savedRip = rip;
-      framePtr->m_savedRbp = (uint64_t)g_vmContext->m_fp;
-      setHardwareStackPtr(g_vmContext->m_stack.top());
-      return nullptr;
+      // already been fixed - flag that with a negative
+      // return address.
+      return (TCA)-rip;
     }
-    setupAfterPrologue(ar);
+    setupAfterPrologue(ar, sp);
     assert(ar == g_vmContext->m_fp);
     return Translator::Get()->uniqueStubs.resumeHelper;
   } catch (...) {
@@ -141,8 +99,8 @@ TCA fcallHelper(ActRec* ar) {
  * This is used to generate an entry point for the entry
  * to a function, after the prologue has run.
  */
-TCA funcBodyHelper(ActRec* fp) {
-  setupAfterPrologue(fp);
+TCA funcBodyHelper(ActRec* fp, void* sp) {
+  setupAfterPrologue(fp, sp);
   tl_regState = VMRegState::CLEAN;
   Func* func = const_cast<Func*>(fp->m_func);
 
@@ -153,22 +111,6 @@ TCA funcBodyHelper(ActRec* fp) {
   }
   tl_regState = VMRegState::DIRTY;
   return tca;
-}
-
-void functionEnterHelper(const ActRec* ar) {
-  DECLARE_FRAME_POINTER(framePtr);
-
-  uint64_t savedRip = ar->m_savedRip;
-  uint64_t savedRbp = ar->m_savedRbp;
-  if (LIKELY(EventHook::onFunctionEnter(ar, EventHook::NormalFunc))) return;
-  /* We need to skip the function.
-     FunctionEnter already cleaned up ar, and pushed the return value,
-     so all we need to do is return to where ar would have returned to,
-     with rbp set to ar's outer frame.
-  */
-  framePtr->m_savedRip = savedRip;
-  framePtr->m_savedRbp = savedRbp;
-  setHardwareStackPtr(g_vmContext->m_stack.top());
 }
 
 HOT_FUNC_VM

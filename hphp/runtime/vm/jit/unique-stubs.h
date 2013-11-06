@@ -140,6 +140,12 @@ struct UniqueStubs {
   TCA funcBodyHelperThunk;
 
   /*
+   * Calls EventHook::onFunctionEnter, and handles the case where it requests
+   * that we skip the function.
+   */
+  TCA functionEnterHelper;
+
+  /*
    * Utility for logging stubs addresses during startup and registering the gdb
    * symbols. It's often useful to know where they were when debugging.
    */

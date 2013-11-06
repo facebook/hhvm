@@ -343,11 +343,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
   a.  jnz  (stubsCode.frontier());
 
   astubs.  movq  (rVmFp, argNumToRegName[0]);
-  if (false) { // typecheck
-    const ActRec* ar = nullptr;
-    functionEnterHelper(ar);
-  }
-  emitCall(astubs, (TCA)&functionEnterHelper);
+  emitCall(astubs, tx64->uniqueStubs.functionEnterHelper);
   if (inTracelet) {
     fixupMap.recordSyncPoint(stubsCode.frontier(),
                              fixup.m_pcOffset, fixup.m_spOffset);

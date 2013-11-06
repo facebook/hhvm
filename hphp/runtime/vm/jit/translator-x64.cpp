@@ -1940,10 +1940,6 @@ TranslatorX64::translateWork(const TranslArgs& args) {
   m_fixupMap.processPendingFixups();
   processPendingCatchTraces();
 
-  addTranslation(TransRec(sk, sk.unit()->md5(), transKind, tp.get(), start,
-                          mainCode.frontier() - start, stubStart,
-                          stubsCode.frontier() - stubStart,
-                          m_bcMap));
   TransRec tr(sk, sk.unit()->md5(), transKind, tp.get(), start,
               mainCode.frontier() - start, stubStart,
               stubsCode.frontier() - stubStart,

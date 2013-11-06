@@ -1454,7 +1454,7 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
       Str      |  Str
       Arr      |  Arr
       Obj      |  Obj
-
+      Scalar   | Int or Dbl or Str or Bool
 
   If $1 is of type t, this instruction pushes true onto the stack,
   otherwise it pushes false.
@@ -1464,18 +1464,20 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
   Is type. This instruction first loads a type into t and a value into x as
   given by the following table:
 
-    operand        t      x
-    -----------+------+-------
-      Null     | Null |  true
-      Bool     | Bool | false
-      Int      |  Int | false
-      Dbl      |  Dbl | false
-      Str      |  Str | false
-      Arr      |  Arr | false
-      Obj      |  Obj | false
+    operand        t                           x
+    -----------+----------------------------+-------
+      Null     | Null                       |  true
+      Bool     | Bool                       | false
+      Int      |  Int                       | false
+      Dbl      |  Dbl                       | false
+      Str      |  Str                       | false
+      Arr      |  Arr                       | false
+      Obj      |  Obj                       | false
+      Scalar   |  Int or Dbl or Str or Bool | false
 
   If the local variable given by %1 is defined, this pushes true onto the stack
-  if the local variable is of type t, otherwise it pushes false.
+  if the local variable is of type t, otherwise it pushes false. If the local
+  is of kind reference, then the inner value is used to determine the type.
 
   If the local variable given by %1 is not defined, this instruction raises a
   warning and pushes x onto the stack.

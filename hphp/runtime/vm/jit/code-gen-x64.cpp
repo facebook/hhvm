@@ -1986,6 +1986,33 @@ void CodeGenerator::cgIsType(IRInstruction* inst) {
   cgIsTypeCommon(inst, false);
 }
 
+void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
+  auto const src = inst->src(0);
+  auto const dst = inst->dst();
+  PhysReg typeReg = curOpd(src).reg(1);
+  PhysReg dstReg = curOpd(dst).reg(0);
+
+  /* static asserts for KindOfBoolean <= scalar type <= KindOfString */
+  static_assert(KindOfUninit < KindOfBoolean, "fix checks for IsScalar");
+  static_assert(KindOfNull < KindOfBoolean, "fix checks for IsScalar");
+  static_assert(KindOfInt64 > KindOfBoolean, "fix checks for IsScalar");
+  static_assert(KindOfDouble > KindOfBoolean, "fix checks for IsScalar");
+  static_assert(KindOfStaticString > KindOfBoolean, "fix checks for IsScalar");
+  static_assert(KindOfString > KindOfBoolean, "fix checks for IsScalar");
+
+  static_assert(KindOfInt64 < KindOfString, "fix checks for IsScalar");
+  static_assert(KindOfDouble < KindOfString, "fix checks for IsScalar");
+  static_assert(KindOfStaticString < KindOfString, "fix checks for IsScalar");
+  static_assert(KindOfArray > KindOfString, "fix checks for IsScalar");
+  static_assert(KindOfObject > KindOfString, "fix checks for IsScalar");
+  static_assert(KindOfResource > KindOfString, "fix checks for IsScalar");
+
+  m_as.   lea(typeReg[-KindOfBoolean], dstReg);
+  m_as.   subl(KindOfString - KindOfBoolean + 1, r32(dstReg));
+  m_as.   sbbl(r32(dstReg), r32(dstReg));
+  m_as.   neg(dstReg);
+}
+
 void CodeGenerator::cgIsNType(IRInstruction* inst) {
   cgIsTypeCommon(inst, true);
 }

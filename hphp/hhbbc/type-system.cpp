@@ -346,8 +346,8 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Str:  return TStr;
   case IsTypeOp::Arr:  return TArr;
   case IsTypeOp::Obj:  return TObj;
+  default: not_reached();
   }
-  not_reached();
 }
 
 DObj dobj_of(Type t) {

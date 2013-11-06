@@ -820,6 +820,7 @@ static inline DataType typeOpToDataType(IsTypeOp op) {
   case IsTypeOp::Str:   return KindOfString;
   case IsTypeOp::Arr:   return KindOfArray;
   case IsTypeOp::Obj:   return KindOfObject;
+  case IsTypeOp::Scalar: not_reached();
   }
   not_reached();
 }
@@ -827,14 +828,24 @@ static inline DataType typeOpToDataType(IsTypeOp op) {
 void
 IRTranslator::translateCheckTypeLOp(const NormalizedInstruction& ni) {
   auto const locId = ni.imm[0].u_LA;
-  auto const op    = ni.imm[1].u_OA;
-  HHIR_EMIT(IsTypeL, locId, typeOpToDataType(static_cast<IsTypeOp>(op)));
+  auto const op    = static_cast<IsTypeOp>(ni.imm[1].u_OA);
+  if (op == IsTypeOp::Scalar) {
+    HHIR_EMIT(IsScalarL, locId);
+  } else {
+    DataType t = typeOpToDataType(op);
+    HHIR_EMIT(IsTypeL, locId, t);
+  }
 }
 
 void
 IRTranslator::translateCheckTypeCOp(const NormalizedInstruction& ni) {
-  auto const op = ni.imm[0].u_OA;
-  HHIR_EMIT(IsTypeC, typeOpToDataType(static_cast<IsTypeOp>(op)));
+  auto const op = static_cast<IsTypeOp>(ni.imm[0].u_OA);
+  if (op == IsTypeOp::Scalar) {
+    HHIR_EMIT(IsScalarC);
+  } else {
+    DataType t = typeOpToDataType(op);
+    HHIR_EMIT(IsTypeC, t);
+  }
 }
 
 void

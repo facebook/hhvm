@@ -330,7 +330,8 @@ enum IncDecOp {
   IS_TYPE_OP(Dbl)                               \
   IS_TYPE_OP(Str)                               \
   IS_TYPE_OP(Arr)                               \
-  IS_TYPE_OP(Obj)
+  IS_TYPE_OP(Obj)                               \
+  IS_TYPE_OP(Scalar)                            \
 
 enum class IsTypeOp : uint8_t {
 #define IS_TYPE_OP(op) op,

@@ -315,6 +315,8 @@ struct HhbcTranslator {
   void emitAKExists();
   void emitAGetC();
   void emitAGetL(int localId);
+  void emitIsScalarL(int id);
+  void emitIsScalarC();
   void emitVerifyParamType(int32_t paramId);
   void emitInstanceOfD(int classNameStrId);
   void emitInstanceOf();

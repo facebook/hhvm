@@ -1868,6 +1868,17 @@ void HhbcTranslator::emitIsTypeL(uint32_t id, DataType t) {
   push(gen(IsType, Type(t), ldLocInnerWarn(id, exit, DataTypeSpecific)));
 }
 
+void HhbcTranslator::emitIsScalarL(int id) {
+  SSATmp* src = ldLocInner(id, makeExit(), DataTypeSpecific);
+  push(gen(IsScalarType, src));
+}
+
+void HhbcTranslator::emitIsScalarC() {
+  SSATmp* src = popC();
+  push(gen(IsScalarType, src));
+  gen(DecRef, src);
+}
+
 void HhbcTranslator::emitPopA() { popA(); }
 
 void HhbcTranslator::emitPopC() {

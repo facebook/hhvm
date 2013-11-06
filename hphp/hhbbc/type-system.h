@@ -290,8 +290,10 @@ folly::Optional<Cell> tv(Type t);
 /*
  * Get the type in our typesystem that corresponds to an hhbc
  * IsTypeOp.
+ *
+ * Pre: op != IsTypeOp::Scalar
  */
-Type type_of_istype(IsTypeOp);
+Type type_of_istype(IsTypeOp op);
 
 /*
  * Return the DObj structure for a strict subtype of TObj.

@@ -1069,7 +1069,8 @@ static const struct {
   { OpEmptyG,      {Stack1,           Stack1,       OutBoolean,        0 }},
   { OpEmptyS,      {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpEmptyM,      {MVector,          Stack1,       OutBoolean,        1 }},
-  { OpIsTypeC,     {Stack1,           Stack1,       OutBoolean,        0 }},
+  { OpIsTypeC,     {Stack1|
+                    DontGuardStack1,  Stack1,       OutBoolean,        0 }},
   { OpIsTypeL,     {Local,            Stack1,       OutBoolean,        1 }},
 
   /*** 7. Mutator instructions ***/

@@ -336,16 +336,15 @@ folly::Optional<Cell> tv(Type t) {
 }
 
 Type type_of_istype(IsTypeOp op) {
-  // Note: this isn't done using a macro expansion because no type
-  // corresponding to IsScalar is in our type system yet.
   switch (op) {
-  case IsTypeOp::Null: return TNull;
-  case IsTypeOp::Bool: return TBool;
-  case IsTypeOp::Int:  return TInt;
-  case IsTypeOp::Dbl:  return TDbl;
-  case IsTypeOp::Str:  return TStr;
-  case IsTypeOp::Arr:  return TArr;
-  case IsTypeOp::Obj:  return TObj;
+  case IsTypeOp::Null:   return TNull;
+  case IsTypeOp::Bool:   return TBool;
+  case IsTypeOp::Int:    return TInt;
+  case IsTypeOp::Dbl:    return TDbl;
+  case IsTypeOp::Str:    return TStr;
+  case IsTypeOp::Arr:    return TArr;
+  case IsTypeOp::Obj:    return TObj;
+  case IsTypeOp::Scalar: always_assert(0);
   }
   not_reached();
 }

@@ -267,13 +267,8 @@ Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
 Unit* compile_string(const char* s,
                      size_t sz,
                      const char* fname /* = nullptr */) {
-  MD5 md5;
-  int out_len;
-
-  char* md5str = string_md5(s, sz, false, out_len);
-  md5 = MD5(md5str);
-  free(md5str);
-
+  auto md5string = string_md5(s, sz);
+  MD5 md5(md5string.c_str());
   Unit* u = Repo::get().loadUnit(fname ? fname : "", md5);
   if (u != nullptr) {
     return u;

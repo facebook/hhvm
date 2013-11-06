@@ -205,7 +205,7 @@ char *string_crypt(const char *key, const char *salt) {
 
 //////////////////////////////////////////////////////////////////////
 
-char *string_bin2hex(const char *input, int &len) {
+char *string_bin2hex(const char *input, int len, char* result) {
   static char hexconvtab[] = "0123456789abcdef";
 
   assert(input);
@@ -214,8 +214,6 @@ char *string_bin2hex(const char *input, int &len) {
   }
 
   int i, j;
-  char *result = (char *)malloc((len << 1) + 1);
-
   for (i = j = 0; i < len; i++) {
     result[j++] = hexconvtab[(unsigned char)input[i] >> 4];
     result[j++] = hexconvtab[(unsigned char)input[i] & 15];
@@ -223,6 +221,15 @@ char *string_bin2hex(const char *input, int &len) {
   result[j] = '\0';
   len = j;
   return result;
+}
+
+char *string_bin2hex(const char *input, int &len) {
+  if (!len) return nullptr;
+  int inLen = len;
+  int outLen = inLen * 2;
+  char* result = (char*)malloc(outLen + 1);
+  len = outLen;
+  return string_bin2hex(input, inLen, result);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -135,11 +135,8 @@ void Scanner::computeMd5() {
   char *ptr = (char*)malloc(length);
   m_stream->read(ptr, length);
   m_stream->seekg(startpos, std::ios::beg);
-  int out_len;
-  char *md5str = string_md5(ptr, length, false, out_len);
+  m_md5 = string_md5(ptr, length);
   free(ptr);
-  m_md5 = string(md5str, out_len);
-  free(md5str);
 }
 
 Scanner::~Scanner() {

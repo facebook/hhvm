@@ -310,34 +310,25 @@ String FileRepository::translateFileName(StringData *file) {
 
 string FileRepository::unitMd5(const string& fileMd5) {
   // Incorporate relevant options into the unit md5 (there will be more)
-  char* md5str;
-  int md5len;
   std::ostringstream opts;
   string t = fileMd5 + '\0'
     + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
     + (RuntimeOption::EnableEmitSwitch ? '1' : '0')
     + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
     + (RuntimeOption::EvalAllowHhas ? '1' : '0');
-  md5str = string_md5(t.c_str(), t.size(), false, md5len);
-  string s = string(md5str, md5len);
-  free(md5str);
-  return s;
+  return string_md5(t.c_str(), t.size());
 }
 
 void FileRepository::setFileInfo(const StringData *name,
                                  const string& md5,
                                  FileInfo &fileInfo,
                                  bool fromRepo) {
-  int md5len;
-  char* md5str;
   // Incorporate the path into the md5 that is used as the key for file
   // repository lookups.  This assures that even if two PHP files have
   // identical content, separate units exist for them (so that
   // Unit::filepath() and Unit::dirpath() work correctly).
   string s = md5 + '\0' + name->data();
-  md5str = string_md5(s.c_str(), s.size(), false, md5len);
-  fileInfo.m_md5 = string(md5str, md5len);
-  free(md5str);
+  fileInfo.m_md5 = string_md5(s.c_str(), s.size());
 
   if (fromRepo) {
     fileInfo.m_unitMd5 = md5;
@@ -389,7 +380,8 @@ bool FileRepository::readActualFile(const StringData *name,
 
 void FileRepository::computeMd5(const StringData *name, FileInfo& fileInfo) {
   if (md5Enabled()) {
-    string md5 = StringUtil::MD5(fileInfo.m_inputString).c_str();
+    auto& input = fileInfo.m_inputString;
+    string md5 = string_md5(input.data(), input.size());
     setFileInfo(name, md5, fileInfo, false);
   }
 }

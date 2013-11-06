@@ -824,6 +824,9 @@ O(ArrayIdx,                    D(Cell), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str)                          \
                                           S(Cell),          E|N|PRc|Refs|Mem) \
+O(GenericIdx,                  D(Cell), S(Cell)                               \
+                                          S(Cell)                             \
+                                          S(Cell),       E|N|PRc|Refs|Mem|Er) \
 O(DbgAssertRefCount,                ND, S(Counted,StaticStr,StaticArr),  N|E) \
 O(DbgAssertPtr,                     ND, S(PtrToGen),                     N|E) \
 O(DbgAssertType,                    ND, S(Cell),                           E) \

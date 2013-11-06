@@ -390,10 +390,24 @@ TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
+const StaticString s_idx("idx");
+
+TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
+  static auto func = Unit::loadFunc(s_idx.get());
+  assert(func != nullptr);
+  Array args = PackedArrayInit(3)
+                         .append(tvAsVariant(&obj))
+                         .append(tvAsVariant(&key))
+                         .append(tvAsVariant(&def))
+                         .toArray();
+  TypedValue ret;
+  g_vmContext->invokeFunc(&ret, func, args);
+  return ret;
+}
+
 int32_t arrayVsize(ArrayData* ad) {
   return ad->vsize();
 }
-
 
 TypedValue* ldGblAddrHelper(StringData* name) {
   return g_vmContext->m_globalVarEnv->lookup(name);

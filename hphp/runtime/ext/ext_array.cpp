@@ -1969,7 +1969,7 @@ Variant f_i18n_loc_get_error_code() {
   return s_collator->getErrorCode();
 }
 
-Variant f_hphp_array_idx(CVarRef key, CVarRef search, CVarRef def) {
+Variant f_hphp_array_idx(CVarRef search, CVarRef key, CVarRef def) {
   if (!key.isNull()) {
     if (LIKELY(search.isArray())) {
       ArrayData *arr = search.getArrayData();

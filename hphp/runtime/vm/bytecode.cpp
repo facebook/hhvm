@@ -29,6 +29,8 @@
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/base/class-info.h"
@@ -4947,18 +4949,31 @@ OPTBLD_INLINE void VMExecutionContext::iopAKExists(PC& pc) {
   key->m_type = KindOfBoolean;
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopIdx(PC& pc) {
+  NEXT();
+  TypedValue* def = m_stack.topTV();
+  TypedValue* key = m_stack.indTV(1);
+  TypedValue* arr = m_stack.indTV(2);
+
+  TypedValue result = genericIdx(*arr, *key, *def);
+  m_stack.popTV();
+  m_stack.popTV();
+  tvRefcountedDecRef(arr);
+  *arr = result;
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopArrayIdx(PC& pc) {
   NEXT();
   TypedValue* def = m_stack.topTV();
-  TypedValue* arr = m_stack.indTV(1);
-  TypedValue* key = m_stack.indTV(2);
+  TypedValue* key = m_stack.indTV(1);
+  TypedValue* arr = m_stack.indTV(2);
 
-  Variant result = f_hphp_array_idx(tvAsCVarRef(key),
-                                    tvAsCVarRef(arr),
+  Variant result = f_hphp_array_idx(tvAsCVarRef(arr),
+                                    tvAsCVarRef(key),
                                     tvAsCVarRef(def));
   m_stack.popTV();
   m_stack.popTV();
-  tvAsVariant(key) = result;
+  tvAsVariant(arr) = result;
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopSetL(PC& pc) {

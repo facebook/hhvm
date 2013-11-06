@@ -473,6 +473,8 @@ struct HhbcTranslator {
     emitRB(t, makeStaticString(msg));
   }
   void emitRB(Trace::RingBufferType t, const StringData* msg);
+  void emitIdx();
+  void emitIdxCommon(Opcode opc, Block* catchBlock = nullptr);
   void emitArrayIdx();
 
 private:

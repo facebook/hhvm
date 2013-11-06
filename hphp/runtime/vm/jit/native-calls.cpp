@@ -227,6 +227,8 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {ArrayIdx,           fssa(0), DTV, SSync,
                            {{SSA, 1}, {SSA, 2}, {TV, 3}}},
+    {GenericIdx,         genericIdx, DTV, SSync,
+                          {{TV, 0}, {TV, 1}, {TV, 2}}},
     {LdGblAddrDef,       ldGblAddrDefHelper, DSSA, SNone,
                            {{SSA, 0}}},
 

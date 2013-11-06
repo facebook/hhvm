@@ -3230,7 +3230,24 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             emitConvertToCell(e);
             visit((*params)[1]);
             emitConvertToCell(e);
+            call->changeToBytecode();
             e.AKExists();
+            return true;
+          }
+        } else if (call->isCallToFunction("idx") && call->isOptimizable()) {
+          if (params && (params->getCount() == 2 || params->getCount() == 3)) {
+            visit((*params)[0]);
+            emitConvertToCell(e);
+            visit((*params)[1]);
+            emitConvertToCell(e);
+            if (params->getCount() == 2) {
+              e.Null();
+            } else {
+              visit((*params)[2]);
+              emitConvertToCell(e);
+            }
+            call->changeToBytecode();
+            e.Idx();
             return true;
           }
         } else if (call->isCallToFunction("hphp_array_idx")) {
@@ -3241,6 +3258,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             emitConvertToCell(e);
             visit((*params)[2]);
             emitConvertToCell(e);
+            call->changeToBytecode();
             e.ArrayIdx();
             return true;
           }
@@ -3248,6 +3266,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (params && params->getCount() == 1) {
             visit((*params)[0]);
             emitConvertToCell(e);
+            call->changeToBytecode();
             e.Strlen();
             return true;
           }
@@ -3255,6 +3274,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (params && params->getCount() == 1) {
             visit((*params)[0]);
             emitConvertToCell(e);
+            call->changeToBytecode();
             e.Floor();
             return true;
           }
@@ -3262,6 +3282,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (params && params->getCount() == 1) {
             visit((*params)[0]);
             emitConvertToCell(e);
+            call->changeToBytecode();
             e.Ceil();
             return true;
           }
@@ -3269,6 +3290,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (params && params->getCount() == 1) {
             visit((*params)[0]);
             emitConvertToCell(e);
+            call->changeToBytecode();
             e.Sqrt();
             return true;
           }
@@ -3308,11 +3330,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             return true;
           }
 
+          emitVirtualLocal(m_curFunc->lookupVarId(s_continuationVarArgsLocal));
+          emitConvertToCell(e);
           visit((*params)[0]);
           emitConvertToCell(e);
           e.CastInt();
-          emitVirtualLocal(m_curFunc->lookupVarId(s_continuationVarArgsLocal));
-          emitConvertToCell(e);
           e.False();
           e.ArrayIdx();
           return true;
@@ -3340,6 +3362,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (params && params->getCount() == 1) {
             visit((*params)[0]);
             emitConvertToCell(e);
+            call->changeToBytecode();
             e.Abs();
             return true;
           }
@@ -4547,6 +4570,15 @@ EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
     ListAssignmentPtr la(static_pointer_cast<ListAssignment>(exp));
     exp = la->getArray();
     permissiveKind = PassByRefKind::WarnOnCell;
+  }
+
+  // this only happens for calls that have been morphed into bytecode
+  // e.g. idx(), abs(), strlen(), etc..
+  // It is to allow the following code to work
+  // function f(&$arg) {...}
+  // f(idx($array, 'key')); <- this fails otherwise
+  if (exp->allowCellByRef()) {
+    return PassByRefKind::AllowCell;
   }
 
   switch (exp->getKindOf()) {

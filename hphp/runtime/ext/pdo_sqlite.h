@@ -19,6 +19,7 @@
 #define incl_HPHP_PDO_SQLITE_H_
 
 #include "hphp/runtime/ext/pdo_driver.h"
+#include "hphp/runtime/ext/ext_sqlite3.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,6 +29,47 @@ public:
   PDOSqlite();
 
   virtual PDOConnection *createConnectionObject();
+};
+
+struct PDOSqliteError {
+  const char *file;
+  int line;
+  unsigned int errcode;
+  char *errmsg;
+};
+
+class PDOSqliteConnection : public PDOConnection {
+public:
+  PDOSqliteConnection();
+  virtual ~PDOSqliteConnection();
+  virtual bool create(CArrRef options);
+
+  int handleError(const char *file, int line, PDOStatement *stmt = nullptr);
+
+  virtual bool support(SupportedMethod method);
+  virtual bool closer();
+  virtual bool preparer(const String& sql,
+                        sp_PDOStatement* stmt,
+                        CVarRef options);
+  virtual int64_t doer(const String& sql);
+  virtual bool quoter(const String& input,
+                      String& quoted,
+                      PDOParamType paramtype);
+  virtual bool begin();
+  virtual bool commit();
+  virtual bool rollback();
+  virtual bool setAttribute(int64_t attr, CVarRef value);
+  virtual String lastId(const char *name);
+  virtual bool fetchErr(PDOStatement *stmt, Array &info);
+  virtual int getAttribute(int64_t attr, Variant &value);
+  virtual void persistentShutdown();
+
+  bool createFunction(const String& name, CVarRef callback, int argcount);
+
+private:
+  sqlite3 *m_db;
+  PDOSqliteError m_einfo;
+  c_SQLite3::UserDefinedFuncPtrVec m_udfs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

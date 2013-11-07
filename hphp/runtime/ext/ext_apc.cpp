@@ -1371,6 +1371,8 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
     break;
   case 'o':
   case 'O':
+  case 'V':
+  case 'K':
     {
       buf.append(type);
       buf.append(sep);
@@ -1390,9 +1392,11 @@ void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
       buf.append(sep2);
       sep2 = uns->readChar(); // '{'
       buf.append(sep2);
-      for (int64_t i = 0; i < size; i++) {
-        reserialize(uns, buf); // property name
-        reserialize(uns, buf); // property value
+      // 'V' type is a series with values only, while all other
+      // types are series with keys and values
+      int64_t i = type == 'V' ? size : size * 2;
+      while (i--) {
+        reserialize(uns, buf);
       }
       sep2 = uns->readChar(); // '}'
       buf.append(sep2);

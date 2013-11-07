@@ -1741,6 +1741,10 @@ static const StringData* getAlternateName(const StringData* clsName) {
 void Variant::unserialize(VariableUnserializer *uns,
                           Uns::Mode mode /* = Uns::Mode::Value */) {
 
+  // NOTE: If you make changes to how serialization and unserialization work,
+  // make sure to update the reserialize() method in "runtime/ext/ext_apc.cpp"
+  // and to update test_apc_reserialize() in "test/ext/test_ext_apc.cpp".
+
   char type, sep;
   type = uns->readChar();
   sep = uns->readChar();

@@ -39,18 +39,28 @@ constexpr auto kJcc8Len = 3;
 
 namespace {
 
-void emitStackCheck(int funcDepth, Offset pc) {
+void emitStackCheck(X64Assembler& a, int funcDepth, Offset pc) {
   using namespace reg;
-  Asm a { tx64->mainCode };
   funcDepth += kStackCheckPadding * sizeof(Cell);
 
   uint64_t stackMask = cellsToBytes(RuntimeOption::EvalVMStackElms) - 1;
-  a.    mov_reg64_reg64(rVmSp, rAsm); // copy to destroy
-  a.    and_imm64_reg64(stackMask, rAsm);
-  a.    sub_imm64_reg64(funcDepth + Stack::sSurprisePageSize, rAsm);
-  // Unlikely branch to failure.
-  a.    jl(tx64->uniqueStubs.stackOverflowHelper);
-  // Success.
+  a.    movq   (rVmSp, rAsm);  // copy to destroy
+  a.    andq   (stackMask, rAsm);
+  a.    subq   (funcDepth + Stack::sSurprisePageSize, rAsm);
+  a.    jl     (tx64->uniqueStubs.stackOverflowHelper);
+}
+
+/*
+ * This will omit overflow checks if it is a leaf function that can't
+ * use more than kStackCheckLeafPadding cells.
+ */
+void maybeEmitStackCheck(X64Assembler& a, const Func* func) {
+  auto const needStackCheck =
+    !(func->attrs() & AttrPhpLeafFn) ||
+    func->maxStackCells() >= kStackCheckLeafPadding;
+  if (needStackCheck) {
+    emitStackCheck(a, cellsToBytes(func->maxStackCells()), func->base());
+  }
 }
 
 TCA emitFuncGuard(X64Assembler& a, const Func* func) {
@@ -134,6 +144,10 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     a.movq(counterAddr, rAsm);
     a.decq(rAsm[0]);
   }
+
+  // Note: you're not allowed to use rVmSp around here for anything in
+  // the nPassed == numParams case, because it might be junk if we
+  // came from emitMagicFuncPrologue.
 
   if (nPassed > numParams) {
     // Too many args; a weird case, so just callout. Stash ar
@@ -348,88 +362,114 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   return start;
 }
 
-SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
-                        Func* func, bool funcIsMagic, int nPassed,
-                        TCA& start, TCA& aStart) {
-  Asm a { mainCode };
+SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start) {
+  assert(!func->isMagic());
+  Asm a { tx64->mainCode };
 
-  // Guard: we're in the right callee. This happens in magicStart for
-  // magic callees.
-  if (!funcIsMagic) {
-    start = aStart = emitFuncGuard(a, func);
+  start = emitFuncGuard(a, func);
+  if (RuntimeOption::EvalJitTransCounters) emitTransCounterInc(a);
+  a.    pop    (rStashedAR[AROFF(m_savedRip)]);
+  maybeEmitStackCheck(a, func);
+  return emitPrologueWork(func, nPassed);
+}
+
+SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
+  assert(func->isMagic());
+  assert(func->numParams() == 2);
+  using namespace reg;
+  using MkPacked = HphpArray* (*)(uint32_t, const TypedValue*);
+
+  Asm a { tx64->mainCode };
+  Label not_magic_call;
+  auto const rInvName = r13;
+  assert(!kSpecialCrossTraceRegs.contains(r13));
+
+  auto skFuncBody = SrcKey {};
+  auto callFixup  = TCA { nullptr };
+
+  /*
+   * If nPassed is not 2, we need to generate a non-magic prologue
+   * that can be used if there is no invName on the ActRec.
+   * (I.e. someone called __call directly.)  In the case where nPassed
+   * is 2, whether it's magic or not the prologue we generate at the
+   * end will work.
+   *
+   * This is placed in a ahead of the actual prologue entry point, but
+   * only because emitPrologueWork can't easily go to astubs right now.
+   */
+  if (nPassed != 2) {
+    asm_label(a, not_magic_call);
+    skFuncBody = emitPrologueWork(func, nPassed);
+    // There is a REQ_BIND_JMP at the end of emitPrologueWork.
   }
 
-  emitRB(a, Trace::RBTypeFuncPrologueTry, func->fullName()->data());
+  // Main prologue entry point is here.
+  start = emitFuncGuard(a, func);
+  if (RuntimeOption::EvalJitTransCounters) emitTransCounterInc(a);
+  a.    pop    (rStashedAR[AROFF(m_savedRip)]);
+  maybeEmitStackCheck(a, func);
 
-  // NB: We have most of the register file to play with, since we know
-  // we're between BB's. So, we hardcode some registers here rather
-  // than using the scratch allocator.
-  TRACE(2, "funcPrologue: user function: %s\n", func->name()->data());
-
-  // Add a counter for the translation if requested
-  if (RuntimeOption::EvalJitTransCounters) {
-    emitTransCounterInc(a);
+  /*
+   * Detect if this was actually a magic call (i.e. the ActRec has an
+   * invName), and shuffle the magic call arguments into a packed
+   * array.
+   *
+   * If it's not a magic call, we jump backward to a normal function
+   * prologue (see above) for nPassed.  Except if nPassed is 2, we'll
+   * be jumping over the magic call shuffle, to the prologue for 2
+   * args below.
+   */
+  a.    loadq  (rStashedAR[AROFF(m_invName)], rInvName);
+  a.    testb  (1, rbyte(rInvName));
+  if (nPassed == 2) {
+    a.  jz8    (not_magic_call);
+  } else {
+    not_magic_call.jccAuto(a, CC_Z);
+  }
+  a.    decq   (rInvName);
+  a.    storeq (0, rStashedAR[AROFF(m_varEnv)]);
+  if (nPassed != 0) { // for zero args, we use the empty array
+    a.  movq   (rStashedAR, argNumToRegName[0]);
+    a.  subq   (rVmSp, argNumToRegName[0]);
+    a.  shrq   (0x4, argNumToRegName[0]);
+    a.  movq   (rVmSp, argNumToRegName[1]);
+    emitCall(a, reinterpret_cast<CodeAddress>(MkPacked{HphpArray::MakePacked}));
+    callFixup = a.frontier();
+  }
+  if (nPassed != 2) {
+    a.  storel (2, rStashedAR[AROFF(m_numArgsAndCtorFlag)]);
+  }
+  if (debug) { // "assertion": the emitPrologueWork path fixes up rVmSp.
+    a.  movq   (0, rVmSp);
   }
 
-  if (!funcIsMagic) {
-    emitPopRetIntoActRec(a);
-    // entry point for magic methods comes later
-    emitRB(a, Trace::RBTypeFuncEntry, func->fullName()->data());
+  // Magic calls expect two arguments---first the name of the called
+  // function, and then a packed array of the arguments to the
+  // function.  These are where these two TV's will be.
+  auto const strTV   = rStashedAR - cellsToBytes(1);
+  auto const arrayTV = rStashedAR - cellsToBytes(2);
 
-    /*
-     * Guard: we have stack enough stack space to complete this
-     * function.  We omit overflow checks if it is a leaf function
-     * that can't use more than kStackCheckLeafPadding cells.
-     */
-    auto const needStackCheck =
-      !(func->attrs() & AttrPhpLeafFn) ||
-      func->maxStackCells() >= kStackCheckLeafPadding;
-    if (needStackCheck) {
-      emitStackCheck(cellsToBytes(func->maxStackCells()), func->base());
-    }
+  // Store the two arguments for the magic call.
+  emitStoreTVType(a, KindOfString, strTV[TVOFF(m_type)]);
+  a.    storeq (rInvName, strTV[TVOFF(m_data)]);
+  emitStoreTVType(a, KindOfArray, arrayTV[TVOFF(m_type)]);
+  if (nPassed == 0) {
+    a.  storeq (HphpArray::GetStaticEmptyArray(), arrayTV[TVOFF(m_data)]);
+  } else {
+    a.  storeq (rax, arrayTV[TVOFF(m_data)]);
   }
 
-  SrcKey skFuncBody = emitPrologueWork(func, nPassed);
+  // Every magic call prologue has a case for nPassed == 2, because
+  // this is how it works when the call is actually magic.
+  if (nPassed == 2) asm_label(a, not_magic_call);
+  auto const skFor2Args = emitPrologueWork(func, 2);
+  if (nPassed == 2) skFuncBody = skFor2Args;
 
-  if (funcIsMagic) {
-    // entry points for magic methods is here
-    TCA magicStart = emitFuncGuard(a, func);
-    emitPopRetIntoActRec(a);
-    emitRB(a, Trace::RBTypeFuncEntry, func->fullName()->data());
-    // Guard: we have stack enough stack space to complete this function.
-    emitStackCheck(cellsToBytes(func->maxStackCells()), func->base());
-    assert(func->numParams() == 2);
-    // Special __call prologue
-    a.  mov_reg64_reg64(rStashedAR, argNumToRegName[0]);
-    emitCall(a, TCA(Transl::shuffleArgsForMagicCall));
-    if (memory_profiling) {
-      tx64->fixupMap().recordFixup(
-        a.frontier(),
-        Fixup(skFuncBody.offset() - func->base(), func->numSlotsInFrame())
-      );
-    }
-    // if shuffleArgs returns 0, that means this was not a magic call
-    // and we should proceed to a prologue specialized for nPassed;
-    // otherwise, proceed to a prologue specialized for nPassed==numParams (2).
-    if (nPassed == 2) {
-      a.jmp(start);
-    } else {
-      a.test_reg64_reg64(reg::rax, reg::rax);
-      // z ==> not a magic call, go to prologue for nPassed
-      if (deltaFits(start - (a.frontier() + kJcc8Len), sz::byte)) {
-        a.jcc8(CC_Z, start);
-      } else {
-        a.jcc(CC_Z, start);
-      }
-      // this was a magic call
-      // nPassed == 2
-      // Fix up hardware stack pointer
-      nPassed = 2;
-      emitLea(a, rStashedAR[-cellsToBytes(nPassed)], rVmSp);
-      // Optimization TODO: Reuse the prologue for args == 2
-      emitPrologueWork(func, nPassed);
-    }
-    start = magicStart;
+  if (memory_profiling && callFixup) {
+    tx64->fixupMap().recordFixup(
+      a.frontier(),
+      Fixup { skFuncBody.offset() - func->base(), func->numSlotsInFrame() }
+    );
   }
 
   return skFuncBody;

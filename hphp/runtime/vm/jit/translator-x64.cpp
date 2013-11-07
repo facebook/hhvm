@@ -654,7 +654,7 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   int numParams = func->numParams();
   int paramIndex = nPassed <= numParams ? nPassed : numParams + 1;
 
-  bool funcIsMagic = func->isMagic();
+  bool const funcIsMagic = func->isMagic();
 
   // Do a quick test before grabbing the write lease
   TCA prologue;
@@ -717,18 +717,19 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   TCA start     = aStart;
   TCA stubStart = stubsCode.frontier();
 
-  SrcKey skFuncBody;
-  if (JIT::arch() == JIT::Arch::X64) {
-    skFuncBody = JIT::X64::emitFuncPrologue(
-      mainCode, stubsCode, func, funcIsMagic, nPassed, start, aStart
-    );
-  } else if (JIT::arch() == JIT::Arch::ARM) {
-    skFuncBody = JIT::ARM::emitFuncPrologue(
-      mainCode, stubsCode, func, funcIsMagic, nPassed, start, aStart
-    );
-  } else {
-    not_implemented();
-  }
+  auto const skFuncBody = [&] {
+    switch (JIT::arch()) {
+    case JIT::Arch::X64:
+      return funcIsMagic
+        ? JIT::X64::emitMagicFuncPrologue(func, nPassed, start)
+        : JIT::X64::emitFuncPrologue(func, nPassed, start);
+    case JIT::Arch::ARM:
+      return JIT::ARM::emitFuncPrologue(
+        mainCode, stubsCode, func, funcIsMagic, nPassed, start, aStart
+      );
+    }
+    not_reached();
+  }();
 
   assert(JIT::funcPrologueHasGuard(start, func));
   TRACE(2, "funcPrologue tx64 %p %s(%d) setting prologue %p\n",

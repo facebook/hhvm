@@ -200,6 +200,7 @@ struct DispReg {
   }
 
   MemoryRef operator*() const;
+  MemoryRef operator[](intptr_t) const;
 
   DispReg operator+(intptr_t x) const {
     return DispReg(base, disp + x);
@@ -225,6 +226,7 @@ struct IndexedDispReg {
   }
 
   IndexedMemoryRef operator*() const;
+  IndexedMemoryRef operator[](intptr_t disp) const;
 
   IndexedDispReg operator+(intptr_t disp) const {
     auto ret = *this;
@@ -249,6 +251,7 @@ struct DispRIP {
   explicit DispRIP(intptr_t disp) : disp(disp) {}
 
   RIPRelativeRef operator*() const;
+  RIPRelativeRef operator[](intptr_t x) const;
 
   DispRIP operator+(intptr_t x) const {
     return DispRIP(disp + x);
@@ -283,12 +286,24 @@ inline IndexedMemoryRef IndexedDispReg::operator*() const {
   return IndexedMemoryRef(*this);
 }
 
+inline IndexedMemoryRef IndexedDispReg::operator[](intptr_t x) const {
+  return *(*this + x);
+}
+
 inline MemoryRef DispReg::operator*() const {
   return MemoryRef(*this);
 }
 
+inline MemoryRef DispReg::operator[](intptr_t x) const {
+  return *(*this + x);
+}
+
 inline RIPRelativeRef DispRIP::operator*() const {
   return RIPRelativeRef(*this);
+}
+
+inline RIPRelativeRef DispRIP::operator[](intptr_t x) const {
+  return *(*this + x);
 }
 
 inline DispReg operator+(Reg64 r, intptr_t d) { return DispReg(r, d); }

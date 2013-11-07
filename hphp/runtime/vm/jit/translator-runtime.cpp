@@ -33,8 +33,6 @@ TRACE_SET_MOD(runtime);
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_staticPrefix("86static_");
-const StaticString s___call("__call");
-const StaticString s___callStatic("__callStatic");
 
 // Defined here so it can be inlined below.
 RefData* lookupStaticFromClosure(ObjectData* closure,
@@ -838,50 +836,6 @@ ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
 }
 
 //////////////////////////////////////////////////////////////////////
-
-void setArgInActRec(ActRec* ar, int argNum, uint64_t datum, DataType t) {
-  TypedValue* tv =
-    (TypedValue*)(uintptr_t(ar) - (argNum+1) * sizeof(TypedValue));
-  tv->m_data.num = datum;
-  tv->m_type = t;
-}
-
-int shuffleArgsForMagicCall(ActRec* ar) {
-  if (!ar->hasInvName()) {
-    return 0;
-  }
-  const Func* f UNUSED = ar->m_func;
-  f->validate();
-  assert(f->name()->isame(s___call.get())
-         || f->name()->isame(s___callStatic.get()));
-  assert(f->numParams() == 2);
-  TRACE(1, "shuffleArgsForMagicCall: ar %p\n", ar);
-  assert(ar->hasInvName());
-  StringData* invName = ar->getInvName();
-  assert(invName);
-  ar->setVarEnv(nullptr);
-  int nargs = ar->numArgs();
-
-  // We need to make an array containing all the arguments passed by the
-  // caller and put it where the second argument is
-  PackedArrayInit aInit(nargs);
-  for (int i = 0; i < nargs; ++i) {
-    auto const tv = reinterpret_cast<TypedValue*>(
-      uintptr_t(ar) - (i+1) * sizeof(TypedValue)
-    );
-    aInit.append(tvAsCVarRef(tv));
-    tvRefcountedDecRef(tv);
-  }
-
-  // Put invName in the slot for first argument
-  setArgInActRec(ar, 0, uint64_t(invName), BitwiseKindOfString);
-  // Put argArray in the slot for second argument
-  auto const argArray = aInit.toArray().detach();
-  setArgInActRec(ar, 1, uint64_t(argArray), KindOfArray);
-  // Fix up ActRec's numArgs
-  ar->initNumArgs(2);
-  return 1;
-}
 
 /*
  * The standard VMRegAnchor treatment won't work for some cases called

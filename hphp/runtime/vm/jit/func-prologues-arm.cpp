@@ -244,6 +244,57 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   return funcBody;
 }
 
+//////////////////////////////////////////////////////////////////////
+// ARM-only prologue runtime helpers
+
+void setArgInActRec(ActRec* ar, int argNum, uint64_t datum, DataType t) {
+  TypedValue* tv =
+    (TypedValue*)(uintptr_t(ar) - (argNum+1) * sizeof(TypedValue));
+  tv->m_data.num = datum;
+  tv->m_type = t;
+}
+
+const StaticString s_call("__call");
+const StaticString s_callStatic("__callStatic");
+
+int shuffleArgsForMagicCall(ActRec* ar) {
+  if (!ar->hasInvName()) {
+    return 0;
+  }
+  const Func* f UNUSED = ar->m_func;
+  f->validate();
+  assert(f->name()->isame(s_call.get())
+         || f->name()->isame(s_callStatic.get()));
+  assert(f->numParams() == 2);
+  assert(ar->hasInvName());
+  StringData* invName = ar->getInvName();
+  assert(invName);
+  ar->setVarEnv(nullptr);
+  int nargs = ar->numArgs();
+
+  // We need to make an array containing all the arguments passed by the
+  // caller and put it where the second argument is
+  PackedArrayInit aInit(nargs);
+  for (int i = 0; i < nargs; ++i) {
+    auto const tv = reinterpret_cast<TypedValue*>(
+      uintptr_t(ar) - (i+1) * sizeof(TypedValue)
+    );
+    aInit.append(tvAsCVarRef(tv));
+    tvRefcountedDecRef(tv);
+  }
+
+  // Put invName in the slot for first argument
+  setArgInActRec(ar, 0, uint64_t(invName), KindOfString);
+  // Put argArray in the slot for second argument
+  auto const argArray = aInit.toArray().detach();
+  setArgInActRec(ar, 1, uint64_t(argArray), KindOfArray);
+  // Fix up ActRec's numArgs
+  ar->initNumArgs(2);
+  return 1;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 } // anonymous namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -300,7 +351,7 @@ SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
     assert(func->numParams() == 2);
     // Special __call prologue
     a.   Mov   (argReg(0), rStashedAR);
-    auto fixupAddr = emitCall(a, CppCall(Transl::shuffleArgsForMagicCall));
+    auto fixupAddr = emitCall(a, CppCall(shuffleArgsForMagicCall));
     if (memory_profiling) {
       tx64->fixupMap().recordFixup(
         fixupAddr,

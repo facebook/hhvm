@@ -1626,18 +1626,7 @@ TranslatorX64::emitNativeTrampoline(TCA helperAddr) {
     Stats::helperNames[index].store(name, std::memory_order_release);
   }
 
-  /*
-   * For stubs that take arguments in rAsm, we need to make sure
-   * we're not damaging its contents here.  (If !jmpDeltaFits, the jmp
-   * opcode will need to movabs the address into rAsm before
-   * jumping.)
-   */
-  auto DEBUG_ONLY stubUsingRScratch = [&](TCA tca) {
-    return tca == uniqueStubs.dtorGenericStubRegs;
-  };
   Asm a { trampolinesCode };
-
-  assert(IMPLIES(stubUsingRScratch(helperAddr), a.jmpDeltaFits(helperAddr)));
   a.    jmp    (helperAddr);
   a.    ud2    ();
 

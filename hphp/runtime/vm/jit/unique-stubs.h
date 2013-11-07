@@ -80,17 +80,6 @@ struct UniqueStubs {
   TCA dtorStubs[kDestrTableSize];
 
   /*
-   * Generic destructor stub for PtrToGen types.
-   *
-   * The irPopRHelper takes the pointer to the value to decref in
-   * rVmSp, and is intended for generic PopR instructions.  The normal
-   * dtorGenericStub takes the pointer to the value to dec ref in the
-   * first argument register.
-   */
-  TCA irPopRHelper;
-  TCA dtorGenericStub;
-
-  /*
    * Generic destructor stub for in-registered Gen or Cell types.
    *
    * FIXME: currently dead code after tx64->hhir.  We need to look at

@@ -218,51 +218,6 @@ void emitDtorStubs(UniqueStubs& uniqueStubs) {
   uniqueStubs.dtorStubs[typeToDestrIndex(KindOfRef)]           = refDtor;
 }
 
-void emitGenericDecRefHelpers(UniqueStubs& uniqueStubs) {
-  Label release;
-
-  Asm a { tx64->mainCode };
-  moveToAlign(tx64->mainCode, kNonFallthroughAlign);
-
-  // dtorGenericStub just takes a pointer to the TypedValue in rdi.
-  uniqueStubs.irPopRHelper = a.frontier();
-  // popR: Move top-of-stack pointer to rdi
-  emitMovRegReg(a, rVmSp, rdi);
-  // fall through
-  uniqueStubs.dtorGenericStub = a.frontier();
-  emitLoadTVType(a, rdi[TVOFF(m_type)], r32(rAsm));
-  a.    loadq  (rdi[TVOFF(m_data)], rdi);
-  // Fall through to the regs stub.
-
-  /*
-   * Custom calling convention: m_type goes in rAsm, m_data in
-   * rdi.  We don't ever store program locations in rAsm, so the
-   * caller didn't need to spill anything.  The assembler sometimes
-   * uses rAsm, but we know the stub won't need to and it makes it
-   * possible to share the code for both decref helpers.
-   */
-  uniqueStubs.dtorGenericStubRegs = a.frontier();
-  a.    cmpl   (1, rdi[FAST_REFCOUNT_OFFSET]);
-  jccBlock<CC_L>(a, [&] {
-    release.jcc8(a, CC_Z);
-    a.  decl   (rdi[FAST_REFCOUNT_OFFSET]);
-  });
-  a.    ret    ();
-
-asm_label(a, release);
-  {
-    PhysRegSaver prs(a, kGPCallerSaved - RegSet(rdi));
-    callDestructor(a, rAsm, rax);
-    tx64->fixupMap().recordIndirectFixup(
-      a.frontier(),
-      prs.rspTotalAdjustmentRegs()
-    );
-  }
-  a.    ret    ();
-
-  uniqueStubs.add("genericDtors", uniqueStubs.irPopRHelper);
-}
-
 void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   Label doRelease;
   Label release;
@@ -586,7 +541,6 @@ UniqueStubs emitUniqueStubs() {
     emitStackOverflowHelper,
     emitDefClsHelper,
     emitDtorStubs,
-    emitGenericDecRefHelpers,
     emitFreeLocalsHelpers,
     emitFuncPrologueRedispatch,
     emitFCallArrayHelper,

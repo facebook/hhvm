@@ -3367,41 +3367,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
 
   // Emit check for ref-counted type
   Address patchTypeCheck = cgCheckRefCountedType(baseReg, offset);
-  if (exit == nullptr && RuntimeOption::EvalHHIRGenericDtorHelper) {
-    {
-      // This PhysRegSaverStub saves rdi redundantly if
-      // !liveRegs[m_curInst].contains(rdi), but its
-      // necessary to maintain stack alignment. We can do better
-      // by making the helpers adjust the stack for us in the cold
-      // path, which calls the destructor.
-      PhysRegSaverStub regSaver(m_as, RegSet(rdi));
 
-      /*
-       * rVmSp is ok here because this is part of the special
-       * ABI to irPopRHelper.  We're not using a secret dependency
-       * on the frame or stack---we're only going to use that ABI if
-       * we happen to have that register allocated for baseReg.
-       */
-      if (offset == 0 && baseReg == rVmSp) {
-        // Decref'ing top of vm stack, very likely a popR
-        emitCall(m_as, m_tx64->uniqueStubs.irPopRHelper);
-      } else {
-        if (baseReg == rsp) {
-          // Because we just pushed %rdi, %rsp is 8 bytes below where
-          // offset is expecting it to be.
-          offset += sizeof(int64_t);
-        }
-        m_as.lea(baseReg[offset], rdi);
-        emitCall(m_as, m_tx64->uniqueStubs.dtorGenericStub);
-      }
-      recordSyncPoint(m_as);
-    }
-    if (patchTypeCheck) {
-      m_as.patchJcc8(patchTypeCheck, m_as.frontier());
-    }
-    return;
-  }
-  // Load m_data into the scratch reg
   m_as.loadq(baseReg[offset + TVOFF(m_data)], scratchReg);
 
   // Emit check for RefCountStaticValue and the actual DecRef

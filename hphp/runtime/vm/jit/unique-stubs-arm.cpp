@@ -97,15 +97,6 @@ void emitDefClsHelper(UniqueStubs& us) {
 void emitDtorStubs(UniqueStubs& us) {
 }
 
-void emitGenericDecRefHelpers(UniqueStubs& us) {
-  MacroAssembler a { tx64->mainCode };
-
-  us.irPopRHelper = a.frontier();
-  a.   Brk   (0);
-
-  us.add("genericDtors", us.irPopRHelper);
-}
-
 void emitFreeLocalsHelpers(UniqueStubs& us) {
   MacroAssembler a { tx64->mainCode };
 
@@ -230,7 +221,6 @@ UniqueStubs emitUniqueStubs() {
     emitStackOverflowHelper,
     emitDefClsHelper,
     emitDtorStubs,
-    emitGenericDecRefHelpers,
     emitFreeLocalsHelpers,
     emitFuncPrologueRedispatch,
     emitFCallArrayHelper,

@@ -47,9 +47,12 @@ IMPLEMENT_REQUEST_LOCAL(FileData, s_file_data);
 const int File::USE_INCLUDE_PATH = 1;
 
 String File::TranslatePathKeepRelative(const String& filename) {
-  String canonicalized(Util::canonicalize(filename.data(),
-                                          filename.size()), AttachString);
-
+  String canonicalized(
+    Util::canonicalize(
+      filename.data(),
+      strlen(filename.data()) // canonicalize asserts that we don't have nulls
+    ),
+    AttachString);
   if (RuntimeOption::SafeFileAccess) {
     const vector<string> &allowedDirectories =
       VirtualHost::GetAllowedDirectories();
@@ -96,8 +99,12 @@ String File::TranslatePath(const String& filename) {
 }
 
 String File::TranslatePathWithFileCache(const String& filename) {
-  String canonicalized(Util::canonicalize(filename.data(),
-                                          filename.size()), AttachString);
+  String canonicalized(
+    Util::canonicalize(
+      filename.data(),
+      strlen(filename.data()) // canonicalize asserts that we don't have nulls
+    ),
+    AttachString);
   String translated = TranslatePath(canonicalized);
   if (!translated.empty() && access(translated.data(), F_OK) < 0 &&
       StaticContentCache::TheFileCache) {

@@ -1,0 +1,9 @@
+*** Testing finfo_set_flags() : basic functionality ***
+bool(true)
+bool(true)
+HipHop Warning: %s
+bool(false)
+bool(true)
+HipHop Warning: %s
+bool(false)
+===DONE===

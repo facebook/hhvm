@@ -36,6 +36,8 @@ hphp.log
 /hphp/runtime/ext/*.ext_hhvm.h
 /hphp/runtime/ext/*/*.ext_hhvm.cpp
 /hphp/runtime/ext/*/*.ext_hhvm.h
+/hphp/runtime/ext/*/*/*.ext_hhvm.h
+/hphp/runtime/ext/*/*/*.ext_hhvm.cpp
 /hphp/runtime/ext_zend_compat/*/*.ext_hhvm.cpp
 /hphp/runtime/ext_zend_compat/*/*.ext_hhvm.h
 /hphp/runtime/ext_zend_compat/*/*/*.ext_hhvm.cpp

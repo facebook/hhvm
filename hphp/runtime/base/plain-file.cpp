@@ -88,6 +88,7 @@ bool PlainFile::open(const String& filename, const String& mode) {
   m_stream = f;
   m_fd = fileno(f);
   m_buffer = (char *)malloc(BUFSIZ);
+  m_name = static_cast<std::string>(filename);
   if (m_buffer)
     setbuffer(f, m_buffer, BUFSIZ);
   return true;

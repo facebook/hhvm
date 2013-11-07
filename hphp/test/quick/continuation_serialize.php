@@ -1,13 +1,21 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+async function static_result_create($result) {
+  return $result;
+}
+
+async function static_exception_create($exception) {
+  throw $exception;
+}
+
 function main() {
   // Make new wait handles with valid values.
-  $srwh = StaticResultWaitHandle::create(42);
+  $srwh = static_result_create(42);
   $r = $srwh->join();
   var_dump($r); // Shows 42 correctly.
 
-  $sewh = StaticExceptionWaitHandle::create(new Exception("Hi!"));
+  $sewh = static_exception_create(new Exception("Hi!"));
   try {
     $r = $sewh->join();
   } catch (Exception $e) {

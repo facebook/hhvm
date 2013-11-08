@@ -65,7 +65,7 @@ typedef ObjectData*(*BuiltinCtorFunction)(Class*);
  * A PreClass represents the source-level definition of a php class,
  * interface, or trait.  Includes things like the names of the parent
  * class (if any), and the names of any interfaces implemented or
- * traits used.  Also contains metadata about properites and methods
+ * traits used.  Also contains metadata about properties and methods
  * of the class.
  *
  * This is separate from an actual Class because in different requests

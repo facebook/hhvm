@@ -1623,7 +1623,7 @@ class ReflectionClass implements Reflector {
     $ret = array();
     foreach ($this->getProperties() as $prop) {
       if ($prop->isDefault()) {
-        $ret[$prop->name] = $prop;
+        $ret[$prop->name] = $prop->info['defaultValue'];
       }
     }
     return $ret;

@@ -61,6 +61,7 @@ const StaticString
   s_nullable("nullable"),
   s_msg("msg"),
   s_default("default"),
+  s_defaultValue("defaultValue"),
   s_defaultText("defaultText"),
   s_params("params"),
   s_final("final"),
@@ -211,8 +212,12 @@ static void set_property_info(Array &ret, ClassInfo::PropertyInfo *info,
 }
 
 
-static void set_instance_prop_info(Array &ret, const Class::Prop* prop) {
+static void set_instance_prop_info(Array& ret,
+                                   const Class::Prop* prop,
+                                   const Variant& default_val) {
   ret.set(s_name, VarNR(prop->m_name));
+  ret.set(s_default, true_varNR);
+  ret.set(s_defaultValue, default_val);
   set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
   ret.set(s_class, VarNR(prop->m_class->name()));
   set_doc_comment(ret, prop->m_docComment);
@@ -236,6 +241,8 @@ static void set_dyn_prop_info(
 
 static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
   ret.set(s_name, VarNR(prop->m_name));
+  ret.set(s_default, true_varNR);
+  ret.set(s_defaultValue, tvAsCVarRef(&prop->m_val));
   set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
   ret.set(s_class, VarNR(prop->m_class->name()));
   set_doc_comment(ret, prop->m_docComment);
@@ -657,10 +664,8 @@ static Array get_class_info(const ClassInfo *cls) {
   // interfaces
   {
     Array arr = Array::Create();
-    const ClassInfo::InterfaceVec &interfaces = cls->getInterfacesVec();
-    for (ClassInfo::InterfaceVec::const_iterator iter = interfaces.begin();
-         iter != interfaces.end(); ++iter) {
-      arr.set(*iter, 1);
+    for (auto const& inter : cls->getInterfacesVec()) {
+      arr.set(inter, 1);
     }
     ret.set(s_interfaces, VarNR(arr));
   }
@@ -668,10 +673,8 @@ static Array get_class_info(const ClassInfo *cls) {
   // traits
   {
     Array arr = Array::Create();
-    const ClassInfo::TraitVec &traits = cls->getTraitsVec();
-    for (ClassInfo::TraitVec::const_iterator iter = traits.begin();
-         iter != traits.end(); ++iter) {
-      arr.set(*iter, 1);
+    for (auto const& trait : cls->getTraitsVec()) {
+      arr.set(trait, 1);
     }
     ret.set(s_traits, VarNR(arr));
   }
@@ -679,10 +682,8 @@ static Array get_class_info(const ClassInfo *cls) {
   // trait aliases
   {
     Array arr = Array::Create();
-    const ClassInfo::TraitAliasVec &aliases = cls->getTraitAliasesVec();
-    for (ClassInfo::TraitAliasVec::const_iterator iter = aliases.begin();
-         iter != aliases.end(); ++iter) {
-      arr.set(iter->first, iter->second);
+    for (auto const& alias : cls->getTraitAliasesVec()) {
+      arr.set(alias.first, alias.second);
     }
     ret.set(s_trait_aliases, VarNR(arr));
   }
@@ -714,13 +715,10 @@ static Array get_class_info(const ClassInfo *cls) {
   // methods
   {
     Array arr = Array::Create();
-    const ClassInfo::MethodVec &methods = cls->getMethodsVec();
-    for (ClassInfo::MethodVec::const_iterator iter = methods.begin();
-         iter != methods.end(); ++iter) {
-      ClassInfo::MethodInfo *m = *iter;
+    for (auto const& meth : cls->getMethodsVec()) {
       Array info = Array::Create();
-      set_method_info(info, m, cls);
-      arr.set(f_strtolower(m->name), info);
+      set_method_info(info, meth, cls);
+      arr.set(f_strtolower(meth->name), info);
     }
     ret.set(s_methods, VarNR(arr));
   }
@@ -729,12 +727,11 @@ static Array get_class_info(const ClassInfo *cls) {
   {
     Array arr = Array::Create();
     Array arrPriv = Array::Create();
-    const ClassInfo::PropertyVec &properties = cls->getPropertiesVec();
-    for (ClassInfo::PropertyVec::const_iterator iter = properties.begin();
-         iter != properties.end(); ++iter) {
-      ClassInfo::PropertyInfo *prop = *iter;
+    for (auto const& prop : cls->getPropertiesVec()) {
       Array info = Array::Create();
+      info.add(s_default, true_varNR);
       set_property_info(info, prop, cls);
+
       if (prop->attribute & ClassInfo::IsPrivate) {
         assert(prop->owner == cls);
         arrPriv.set(prop->name, info);
@@ -749,11 +746,8 @@ static Array get_class_info(const ClassInfo *cls) {
   // constants
   {
     Array arr = Array::Create();
-    const ClassInfo::ConstantVec &constants = cls->getConstantsVec();
-    for (ClassInfo::ConstantVec::const_iterator iter = constants.begin();
-         iter != constants.end(); ++iter) {
-      ClassInfo::ConstantInfo *info = *iter;
-      arr.set(info->name, info->getValue());
+    for (auto const& cons : cls->getConstantsVec()) {
+      arr.set(cons->name, cons->getValue());
     }
     ret.set(s_constants, VarNR(arr));
   }
@@ -767,11 +761,8 @@ static Array get_class_info(const ClassInfo *cls) {
   // user attributes
   {
     Array arr = Array::Create();
-    const ClassInfo::UserAttributeVec &userAttrs = cls->getUserAttributeVec();
-    for (ClassInfo::UserAttributeVec::const_iterator iter = userAttrs.begin();
-         iter != userAttrs.end(); ++iter) {
-      ClassInfo::UserAttributeInfo *info = *iter;
-      arr.set(info->name, info->getValue());
+    for (auto const& user_attr : cls->getUserAttributeVec()) {
+      arr.set(user_attr->name, user_attr->getValue());
     }
     ret.set(s_attributes, VarNR(arr));
   }
@@ -882,19 +873,21 @@ Array f_hphp_get_class_info(CVarRef name) {
     Array arrPriv = Array::Create();
 
     const Class::Prop* properties = cls->declProperties();
+    auto const& propInitVec = cls->declPropInit();
     const size_t nProps = cls->numDeclProperties();
 
     for (Slot i = 0; i < nProps; ++i) {
       const Class::Prop& prop = properties[i];
       Array info = Array::Create();
+      auto const& default_val = tvAsCVarRef(&propInitVec[i]);
       if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
         if (prop.m_class == cls) {
-          set_instance_prop_info(info, &prop);
+          set_instance_prop_info(info, &prop, default_val);
           arrPriv.set(*(String*)(&prop.m_name), VarNR(info));
         }
         continue;
       }
-      set_instance_prop_info(info, &prop);
+      set_instance_prop_info(info, &prop, default_val);
       arr.set(*(String*)(&prop.m_name), VarNR(info));
     }
 
@@ -902,7 +895,7 @@ Array f_hphp_get_class_info(CVarRef name) {
     const size_t nSProps = cls->numStaticProperties();
 
     for (Slot i = 0; i < nSProps; ++i) {
-      const Class::SProp& prop = staticProperties[i];
+      auto const& prop = staticProperties[i];
       Array info = Array::Create();
       if ((prop.m_attrs & AttrPrivate) == AttrPrivate) {
         if (prop.m_class == cls) {

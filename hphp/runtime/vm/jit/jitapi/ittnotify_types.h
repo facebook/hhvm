@@ -1,7 +1,7 @@
 /*
   BSD LICENSE
 
-  Copyright (c) 2005-2012 Intel Corporation. All rights reserved.
+  Copyright (c) 2005-2013 Intel Corporation. All rights reserved.
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without

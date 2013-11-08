@@ -13,6 +13,7 @@ function bar(xhp_prefixed_class $arg): xhp_prefixed_class {
 }
 
 function reflect($name) {
+  echo '==== ', $name, ' ====', "\n";
   $rf = new ReflectionFunction($name);
   var_dump($rf->getReturnTypeText());
   $params = $rf->getParameters();

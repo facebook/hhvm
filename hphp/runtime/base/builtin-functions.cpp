@@ -596,7 +596,12 @@ ssize_t check_request_surprise(ThreadInfo *info) {
 }
 
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
-                                int level /* = 0 */) {
+                                int level /* = 0 */,
+                                TypedValue *rv /* = nullptr */) {
+  if (rv != nullptr) {
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
   if (level == 2 || RuntimeOption::ThrowMissingArguments) {
     if (expected == 1) {
       raise_error(Strings::MISSING_ARGUMENT, fn, got);
@@ -612,7 +617,12 @@ void throw_missing_arguments_nr(const char *fn, int expected, int got,
   }
 }
 
-void throw_toomany_arguments_nr(const char *fn, int num, int level /* = 0 */) {
+void throw_toomany_arguments_nr(const char *fn, int num, int level /* = 0 */,
+                                TypedValue *rv /* = nullptr */) {
+  if (rv != nullptr) {
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
   if (level == 2 || RuntimeOption::ThrowTooManyArguments) {
     raise_error("Too many arguments for %s(), expected %d", fn, num);
   } else if (level == 1 || RuntimeOption::WarnTooManyArguments) {
@@ -621,7 +631,12 @@ void throw_toomany_arguments_nr(const char *fn, int num, int level /* = 0 */) {
 }
 
 void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
-                              int level /* = 0 */) {
+                              int level /* = 0 */,
+                              TypedValue *rv /* = nullptr */) {
+  if (rv != nullptr) {
+    rv->m_data.num = 0LL;
+    rv->m_type = KindOfNull;
+  }
   if (cmin >= 0 && count < cmin) {
     throw_missing_arguments_nr(fn, cmin, count, level);
     return;

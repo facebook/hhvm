@@ -222,12 +222,14 @@ inline size_t getContainerSize(CVarRef v) {
  *   - When level is 0, it's from user funcs that turn missing arg in warnings
  */
 void throw_missing_arguments_nr(const char *fn, int expected, int got,
-                                int level = 0)
+                                int level = 0, TypedValue *rv = nullptr)
   __attribute__((cold));
-void throw_toomany_arguments_nr(const char *fn, int num, int level = 0)
+void throw_toomany_arguments_nr(const char *fn, int num, int level = 0,
+                                TypedValue *rv = nullptr)
   __attribute__((cold));
 void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
-                              int level = 0) __attribute__((cold));
+                              int level = 0, TypedValue *rv = nullptr)
+  __attribute__((cold));
 
 /**
  * Handler for exceptions thrown from user functions that we don't

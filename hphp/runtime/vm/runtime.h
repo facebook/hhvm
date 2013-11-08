@@ -146,6 +146,16 @@ frame_free_locals_inl(ActRec* fp, int numLocals) {
 }
 
 void ALWAYS_INLINE
+frame_free_inl(ActRec* fp) { // For frames with no locals
+  assert(0 == fp->m_func->numLocals());
+  assert(!fp->hasInvName());
+  assert(fp->m_varEnv == nullptr);
+  assert(fp->hasThis());
+  decRefObj(fp->getThis());
+  EventHook::FunctionExit(fp);
+}
+
+void ALWAYS_INLINE
 frame_free_locals_unwind(ActRec* fp, int numLocals) {
   frame_free_locals_inl_no_hook<true>(fp, numLocals);
   EventHook::FunctionExit(fp);

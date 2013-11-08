@@ -381,22 +381,26 @@ void emitExtCall(const PhpFunc& func, std::ostream& out, const char* ind) {
   } else if (returnKindOf == KindOfString) {
     out << ind << "rv->m_type = KindOfString;\n";
     call_suffix = (fbstring(";\n") + ind +
-                   "if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;\n");
+                   "if (UNLIKELY(rv->m_data.num == 0LL)) "
+                   "rv->m_type = KindOfNull;\n");
   } else if (returnKindOf == KindOfArray) {
     out << ind << "rv->m_type = KindOfArray;\n";
     call_suffix = (fbstring(";\n") + ind +
-                   "if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;\n");
+                   "if (UNLIKELY(rv->m_data.num == 0LL)) "
+                   "rv->m_type = KindOfNull;\n");
   } else if (returnKindOf == KindOfObject) {
     out << ind << "rv->m_type = KindOfObject;\n";
     call_suffix = (fbstring(";\n") + ind +
-                   "if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;\n");
+                   "if (UNLIKELY(rv->m_data.num == 0LL)) "
+                   "rv->m_type = KindOfNull;\n");
   } else if (returnKindOf == KindOfResource) {
     out << ind << "rv->m_type = KindOfResource;\n";
     call_suffix = (fbstring(";\n") + ind +
-                   "if (rv->m_data.num == 0LL) rv->m_type = KindOfNull;\n");
+                   "if (UNLIKELY(rv->m_data.num == 0LL)) "
+                   "rv->m_type = KindOfNull;\n");
   } else {
     call_suffix = (fbstring(";\n") + ind +
-                   "if (rv->m_type == KindOfUninit) "
+                   "if (UNLIKELY(rv->m_type == KindOfUninit)) "
                    "rv->m_type = KindOfNull;\n");
   }
 
@@ -483,7 +487,6 @@ void emitCasts(const PhpFunc& func, std::ostream& out, const char* ind) {
   }
 }
 
-
 /*
  * Emits the fg1_ helper, which assumes that the arg count is acceptable, but at
  * least one typecheck has failed. It will cast arguments to the appropriate
@@ -515,7 +518,6 @@ void emitSlowPathHelper(const PhpFunc& func, const fbstring& prefix,
 
   out << "}\n\n";
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Top level
@@ -617,7 +619,7 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
         << cklass << "* this_ = (ar->hasThis() ? "
         << "static_cast<" << cklass << "*>(ar->getThis()) : "
         << " nullptr);\n";
-    cpp << in << "if (this_) {\n";
+    cpp << in << "if (LIKELY(this_ != nullptr)) {\n";
     in -= 2;
   }
 
@@ -625,18 +627,18 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
   bool needArgMiscountClause = false;
   if (func.isVarArgs()) {
     if (func.minNumParams() > 0) {
-      cpp << in << "if (count >= " << func.minNumParams() << ") {\n";
+      cpp << in << "if (LIKELY(count >= " << func.minNumParams() << ")) {\n";
       needArgMiscountClause = true;
       in -= 2;
     }
   } else {
     if (func.minNumParams() == func.numParams()) {
-      cpp << in << "if (count == " << func.minNumParams() << ") {\n";
+      cpp << in << "if (LIKELY(count == " << func.minNumParams() << ")) {\n";
     } else if (func.minNumParams() == 0) {
-      cpp << in << "if (count <= " << func.numParams() << ") {\n";
+      cpp << in << "if (LIKELY(count <= " << func.numParams() << ")) {\n";
     } else {
-      cpp << in << "if (count >= " << func.minNumParams()
-          << " && count <= "<< func.numParams() << ") {\n";
+      cpp << in << "if (LIKELY(count >= " << func.minNumParams()
+          << " && count <= "<< func.numParams() << ")) {\n";
     }
     needArgMiscountClause = true;
     in -= 2;
@@ -644,14 +646,19 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
 
   // Count is OK. Check arg types
   if (func.numTypeChecks() > 0) {
-    cpp << in << "if (";
+    cpp << in << "if (LIKELY(";
     emitTypechecks(func, cpp, in);
-    cpp << ") {\n";
+    cpp << ")) {\n";
     in -= 2;
   }
 
   // Call the f_ function via the fh_ alias
   emitExtCall(func, cpp, in);
+  if (needArgMiscountClause && (func.numParams() == 0) && func.usesThis()) {
+    cpp << in << "frame_free_inl(ar);\n";
+    cpp << in << "ar->m_r = *rv;\n";
+    cpp << in << "return &ar->m_r;\n";
+  }
 
   // Deal with type mismatches: punt to fg1_
   if (func.numTypeChecks() > 0) {
@@ -669,19 +676,17 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
     cpp << in + 2 << "} else {\n";
     if (func.isVarArgs()) {
       cpp << in << "throw_missing_arguments_nr(\"" << func.getPrettyName()
-          << "\", " << func.minNumParams() << ", count, 1);\n";
+          << "\", " << func.minNumParams() << ", count, 1, rv);\n";
     } else {
       if (func.minNumParams() == 0) {
         cpp << in << "throw_toomany_arguments_nr(\"" << func.getPrettyName()
-            << "\", " << func.numParams() << ", 1);\n";
+            << "\", " << func.numParams() << ", 1, rv);\n";
       } else {
         cpp << in << "throw_wrong_arguments_nr(\"" << func.getPrettyName()
             << "\", count, " << func.minNumParams() << ", "
-            << func.numParams() << ", 1);\n";
+            << func.numParams() << ", 1, rv);\n";
       }
     }
-    cpp << in << "rv->m_data.num = 0LL;\n";
-    cpp << in << "rv->m_type = KindOfNull;\n";
     in += 2;
     cpp << in << "}\n";
   }
@@ -698,7 +703,7 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
   auto frameFree =
     func.usesThis() ? "frame_free_locals_inl" : "frame_free_locals_no_this_inl";
   cpp << in << frameFree << "(ar, " << numLocals << ");\n";
-  cpp << in << "memcpy(&ar->m_r, rv, sizeof(TypedValue));\n";
+  cpp << in << "ar->m_r = *rv;\n";
   cpp << in << "return &ar->m_r;\n";
   cpp << "}\n\n";
 }

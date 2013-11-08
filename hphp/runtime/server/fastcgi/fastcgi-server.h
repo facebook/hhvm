@@ -132,8 +132,6 @@ public:
   }
   virtual void start() override;
   virtual void waitForEnd() override;
-  virtual void waitForJobs() override { always_assert(false); }
-  virtual void closePort() override { always_assert(false); }
   virtual void stop() override;
   virtual int getActiveWorker() override {
     return m_dispatcher.getActiveWorker();

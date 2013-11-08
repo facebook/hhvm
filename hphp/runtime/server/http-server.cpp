@@ -284,15 +284,14 @@ void HttpServer::run() {
     if (m_stopReason) {
       Logger::Warning("Server stopping with reason: %s\n", m_stopReason);
     }
+    removePid();
     Logger::Info("page server stopped");
   }
 
   onServerShutdown(); // dangling server already started here
   time_t t0 = time(0);
   if (RuntimeOption::ServerPort) {
-    m_pageServer->waitForJobs();
-    removePid();
-    m_pageServer->closePort();
+    m_pageServer->stop();
   }
   time_t t1 = time(0);
   if (!m_danglings.empty() && RuntimeOption::ServerDanglingWait > 0) {
@@ -472,31 +471,14 @@ bool HttpServer::startServer(bool pageServer) {
 
       HttpClient http;
       string url = "http://";
-      if (!RuntimeOption::ServerIP.empty()) {
-        url += RuntimeOption::ServerIP;
-      } else {
-        url += "localhost";
-      }
+      url += RuntimeOption::ServerIP;
       url += ":";
       url += lexical_cast<string>(RuntimeOption::AdminServerPort);
       url += "/stop";
-      if (!RuntimeOption::AdminPasswords.empty()) {
-        for (auto it = RuntimeOption::AdminPasswords.begin();
-             it != RuntimeOption::AdminPasswords.end();
-             ++it) {
-          string passUrl = url + "?auth=" + *it;
-          StringBuffer response;
-          http.get(passUrl.c_str(), response);
-          sleep(1);
-        }
-      } else {
-        if (!RuntimeOption::AdminPassword.empty()) {
-          url += "?auth=" + RuntimeOption::AdminPassword;
-        }
-        StringBuffer response;
-        http.get(url.c_str(), response);
-        sleep(1);
-      }
+      StringBuffer response;
+      http.get(url.c_str(), response);
+
+      sleep(1);
     }
   }
 

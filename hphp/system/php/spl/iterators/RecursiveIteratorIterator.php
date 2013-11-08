@@ -45,7 +45,7 @@ class RecursiveIteratorIterator implements OuterIterator {
    *
    * @return     mixed   No value is returned.
    */
-  public function __construct($iterator,
+  public function __construct(\Traversable $iterator,
                               $mode = RecursiveIteratorIterator::LEAVES_ONLY,
                               $flags = 0) {
     if ($iterator && ($iterator instanceof IteratorAggregate)) {

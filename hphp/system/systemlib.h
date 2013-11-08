@@ -51,6 +51,7 @@ namespace Eval {
   x(Continuation)                               \
   x(Serializable)                               \
   x(ArrayAccess)                                \
+  x(ArrayObject)                                \
   x(Iterator)                                   \
   x(IteratorAggregate)                          \
   x(JsonSerializable)                           \

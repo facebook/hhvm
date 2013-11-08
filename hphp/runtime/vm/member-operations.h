@@ -28,6 +28,8 @@
 
 namespace HPHP {
 
+const StaticString s_storage("storage");
+
 class InvalidSetMException : public std::runtime_error {
  public:
   InvalidSetMException()
@@ -425,12 +427,20 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
                                TypedValue* key) {
   TypedValue scratch;
   initScratchKey<keyType>(scratch, key);
-  if (LIKELY(base->m_data.pobj->isCollection())) {
+  auto obj = base->m_data.pobj;
+
+  if (LIKELY(obj->isCollection())) {
     if (reffy) {
       raise_error("Collection elements cannot be taken by reference");
       return nullptr;
     }
-    return collectionGet(base->m_data.pobj, key);
+    return collectionGet(obj, key);
+  } else if (obj->getVMClass() == SystemLib::s_ArrayObjectClass) {
+    auto storage = obj->o_realProp(s_storage, 0,
+                                   SystemLib::s_ArrayObjectClass->nameRef());
+    // ArrayObject should have the 'storage' property...
+    assert(storage != nullptr);
+    return ElemDArray<false /* warn */, keyType>(storage->asTypedValue(), key);
   }
   return objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(*key));
 }

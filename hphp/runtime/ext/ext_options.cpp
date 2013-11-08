@@ -1087,8 +1087,10 @@ void f_gc_disable() {
 }
 
 int64_t f_gc_collect_cycles() {
-  raise_warning("HipHop currently does not support circular reference "
-                "collection");
+  if (RuntimeOption::EnableHipHopSyntax) {
+    raise_warning("HipHop currently does not support circular reference "
+                  "collection");
+  }
   return 0;
 }
 

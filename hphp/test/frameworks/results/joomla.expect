@@ -196,10 +196,6 @@ FormatYamlTest::testStringToObject
 .
 ImageTest::testConstructor
 E
-ImageTest::testResize
-E
-ImageTest::testResizeTransparent
-UNKNOWN STATUS
 ImageTest::testloadFile
 E
 ImageTest::testloadFileBmp
@@ -209,7 +205,7 @@ E
 ImageTest::testloadFilePng
 E
 ImageTest::testloadFileWithInvalidFile
-F
+UNKNOWN STATUS
 JApplicationWebClientTest::testDetectBrowser with data set #0 
 .
 JApplicationWebClientTest::testDetectBrowser with data set #1 
@@ -4451,7 +4447,7 @@ F
 Joomla\Form\Tests\JFormTest::testFindGroup
 F
 Joomla\Form\Tests\JFormTest::testGetErrors
-E
+.
 Joomla\Form\Tests\JFormTest::testGetField
 E
 Joomla\Form\Tests\JFormTest::testGetFieldAttribute

@@ -2327,7 +2327,7 @@ Mage_Core_Model_Locale_ValidatorTest::testIsValid with data set "case2"
 Mage_Core_Model_Locale_ValidatorTest::testIsValidDataProvider
 .
 Mage_Core_Model_LoggerTest::testAddStoreLog
-E
+.
 Mage_Core_Model_LoggerTest::testAddStreamLog with data set #0 
 E
 Mage_Core_Model_LoggerTest::testAddStreamLog with data set #1 
@@ -2335,7 +2335,7 @@ E
 Mage_Core_Model_LoggerTest::testAddStreamLog with data set #2 
 .
 Mage_Core_Model_LoggerTest::testInitForStore
-E
+.
 Mage_Core_Model_LoggerTest::testLog
 .
 Mage_Core_Model_LoggerTest::testLogComplex
@@ -3775,9 +3775,9 @@ Mage_Install_Model_EntryPoint_UpgradeTest::testProcessRequest with data set "rei
 Mage_Install_Model_EntryPoint_UpgradeTest::testProcessRequest with data set "reindex required"
 .
 Mage_Install_Model_Installer_ConfigTest::testReplaceTmpEncryptKey
-.
+E
 Mage_Install_Model_Installer_ConfigTest::testReplaceTmpInstallDate
-.
+E
 Mage_Install_Model_Installer_Db_Mysql4Test::testSupportEngine with data set #0 
 .
 Mage_Install_Model_Installer_Db_Mysql4Test::testSupportEngine with data set #1 
@@ -7351,7 +7351,7 @@ Tools_View_Generator_ThemeDeploymentTest::testConstructorException with data set
 Tools_View_Generator_ThemeDeploymentTest::testRun
 .
 Tools_View_Generator_ThemeDeploymentTest::testRunInDryRun
-.
+E
 Tools_View_Generator_ThemeDeploymentTest::testRunWithCasedExtension
 .
 Tools_View_Generator_ThemeDeploymentTest::testRunWithUnknownExtension

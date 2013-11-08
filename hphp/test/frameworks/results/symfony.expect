@@ -4927,7 +4927,7 @@ Symfony\Component\Finder\Tests\ExpressionTest::testTypeGuesser with data set #2
 Symfony\Component\Finder\Tests\ExpressionTest::testTypeGuesser with data set #3 
 .
 Symfony\Component\Finder\Tests\FinderTest::testAccessDeniedException with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testAccessDeniedException with data set #2 
 F
 Symfony\Component\Finder\Tests\FinderTest::testAdapterSelection
@@ -4937,21 +4937,21 @@ Symfony\Component\Finder\Tests\FinderTest::testAdaptersChaining
 Symfony\Component\Finder\Tests\FinderTest::testAdaptersOrdering
 .
 Symfony\Component\Finder\Tests\FinderTest::testAppendDoesNotRequireIn with data set #1 
-.
+E
 Symfony\Component\Finder\Tests\FinderTest::testAppendDoesNotRequireIn with data set #2 
-.
+E
 Symfony\Component\Finder\Tests\FinderTest::testAppendReturnsAFinder with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testAppendReturnsAFinder with data set #2 
 .
 Symfony\Component\Finder\Tests\FinderTest::testAppendWithAFinder with data set #1 
-.
+E
 Symfony\Component\Finder\Tests\FinderTest::testAppendWithAFinder with data set #2 
-.
+E
 Symfony\Component\Finder\Tests\FinderTest::testAppendWithAnArray with data set #1 
-.
+E
 Symfony\Component\Finder\Tests\FinderTest::testAppendWithAnArray with data set #2 
-.
+E
 Symfony\Component\Finder\Tests\FinderTest::testContains with data set #0 
 .
 Symfony\Component\Finder\Tests\FinderTest::testContains with data set #1 
@@ -5025,17 +5025,17 @@ Symfony\Component\Finder\Tests\FinderTest::testFiles with data set #1
 Symfony\Component\Finder\Tests\FinderTest::testFiles with data set #2 
 .
 Symfony\Component\Finder\Tests\FinderTest::testFilter with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testFilter with data set #2 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testFollowLinks with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testFollowLinks with data set #2 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testGetIterator with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testGetIterator with data set #2 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testIgnoreDotFiles with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testIgnoreDotFiles with data set #2 
@@ -5045,13 +5045,13 @@ Symfony\Component\Finder\Tests\FinderTest::testIgnoreVCS with data set #1
 Symfony\Component\Finder\Tests\FinderTest::testIgnoreVCS with data set #2 
 .
 Symfony\Component\Finder\Tests\FinderTest::testIgnoredAccessDeniedException with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testIgnoredAccessDeniedException with data set #2 
-E
+F
 Symfony\Component\Finder\Tests\FinderTest::testIn with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testIn with data set #2 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testInWithGlob with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testInWithGlob with data set #2 
@@ -5065,11 +5065,11 @@ Symfony\Component\Finder\Tests\FinderTest::testIteratorKeys with data set #1
 Symfony\Component\Finder\Tests\FinderTest::testIteratorKeys with data set #2 
 .
 Symfony\Component\Finder\Tests\FinderTest::testMultipleLocations with data set #1 
-.
+E
 Symfony\Component\Finder\Tests\FinderTest::testMultipleLocations with data set #2 
-.
+E
 Symfony\Component\Finder\Tests\FinderTest::testMultipleLocationsWithSubDirectories
-.
+E
 Symfony\Component\Finder\Tests\FinderTest::testName with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testName with data set #2 
@@ -5117,41 +5117,41 @@ Symfony\Component\Finder\Tests\FinderTest::testRegexName with data set #2
 Symfony\Component\Finder\Tests\FinderTest::testRegexName with data set #3 
 .
 Symfony\Component\Finder\Tests\FinderTest::testRelativePath with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testRelativePath with data set #2 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testRelativePathname with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testRelativePathname with data set #2 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testSize with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testSize with data set #2 
 .
 Symfony\Component\Finder\Tests\FinderTest::testSort with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testSort with data set #2 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testSortByAccessedTime with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testSortByAccessedTime with data set #2 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testSortByChangedTime with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testSortByChangedTime with data set #2 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testSortByModifiedTime with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testSortByModifiedTime with data set #2 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testSortByName with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testSortByName with data set #2 
 .
 Symfony\Component\Finder\Tests\FinderTest::testSortByType with data set #1 
-.
+F
 Symfony\Component\Finder\Tests\FinderTest::testSortByType with data set #2 
-.
+F
 Symfony\Component\Finder\Tests\GlobTest::testGlobToRegex with data set #0 
 .
 Symfony\Component\Finder\Tests\GlobTest::testGlobToRegex with data set #1 

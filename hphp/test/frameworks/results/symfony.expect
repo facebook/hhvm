@@ -1,5 +1,3 @@
-.
-
 Symfony\Bridge\Doctrine\Tests\ContainerAwareEventManagerTest::testDispatchEvent
 .
 Symfony\Bridge\Doctrine\Tests\ContainerAwareEventManagerTest::testRemoveEventListener
@@ -945,9 +943,9 @@ Symfony\Bridge\Twig\Tests\TwigEngineTest::testExistsWithTemplateWithSyntaxErrors
 Symfony\Component\BrowserKit\Tests\ClientTest::testBack
 .
 Symfony\Component\BrowserKit\Tests\ClientTest::testClick
-E
+.
 Symfony\Component\BrowserKit\Tests\ClientTest::testClickForm
-E
+.
 Symfony\Component\BrowserKit\Tests\ClientTest::testFollowRedirect
 .
 Symfony\Component\BrowserKit\Tests\ClientTest::testFollowRedirectWithCookies
@@ -995,9 +993,9 @@ Symfony\Component\BrowserKit\Tests\ClientTest::testRestart
 Symfony\Component\BrowserKit\Tests\ClientTest::testSetServerParameter
 .
 Symfony\Component\BrowserKit\Tests\ClientTest::testSubmit
-E
+.
 Symfony\Component\BrowserKit\Tests\ClientTest::testSubmitPreserveAuth
-E
+.
 Symfony\Component\BrowserKit\Tests\CookieJarTest::testAll
 .
 Symfony\Component\BrowserKit\Tests\CookieJarTest::testAllValues with data set #0 
@@ -2116,14 +2114,6 @@ Symfony\Component\Console\Tests\Formatter\OutputFormatterStyleTest::testForegrou
 .
 Symfony\Component\Console\Tests\Formatter\OutputFormatterStyleTest::testOptions
 .
-Symfony\Component\Console\Tests\Helper\DialogHelperTest::testAsk
-.
-Symfony\Component\Console\Tests\Helper\DialogHelperTest::testAskHiddenResponse
-UNKNOWN STATUSSymfony\Component\Console\Tests\Output\ConsoleOutputTest::testConstructor
-Symfony\Component\Console\Tests\Helper\DialogHelperTest::testAskWithAutocomplete
-S
-Symfony\Component\Console\Tests\Helper\DialogHelperTest::testSelect
-.
 Symfony\Component\Console\Tests\Helper\FormatterHelperTest::testFormatBlock
 .
 Symfony\Component\Console\Tests\Helper\FormatterHelperTest::testFormatBlockLGEscaping
@@ -2497,6 +2487,8 @@ Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data se
 Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data set #8 
 .
 Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data set #9 
+.
+Symfony\Component\Console\Tests\Output\ConsoleOutputTest::testConstructor
 .
 Symfony\Component\Console\Tests\Output\NullOutputTest::testConstructor
 .
@@ -4935,7 +4927,7 @@ Symfony\Component\Finder\Tests\ExpressionTest::testTypeGuesser with data set #2
 Symfony\Component\Finder\Tests\ExpressionTest::testTypeGuesser with data set #3 
 .
 Symfony\Component\Finder\Tests\FinderTest::testAccessDeniedException with data set #1 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testAccessDeniedException with data set #2 
 F
 Symfony\Component\Finder\Tests\FinderTest::testAdapterSelection
@@ -5053,9 +5045,9 @@ Symfony\Component\Finder\Tests\FinderTest::testIgnoreVCS with data set #1
 Symfony\Component\Finder\Tests\FinderTest::testIgnoreVCS with data set #2 
 .
 Symfony\Component\Finder\Tests\FinderTest::testIgnoredAccessDeniedException with data set #1 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testIgnoredAccessDeniedException with data set #2 
-F
+E
 Symfony\Component\Finder\Tests\FinderTest::testIn with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testIn with data set #2 
@@ -5077,7 +5069,7 @@ Symfony\Component\Finder\Tests\FinderTest::testMultipleLocations with data set #
 Symfony\Component\Finder\Tests\FinderTest::testMultipleLocations with data set #2 
 .
 Symfony\Component\Finder\Tests\FinderTest::testMultipleLocationsWithSubDirectories
-E
+.
 Symfony\Component\Finder\Tests\FinderTest::testName with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testName with data set #2 
@@ -5239,6 +5231,32 @@ Symfony\Component\Finder\Tests\Iterator\FilenameFilterIteratorTest::testAccept w
 Symfony\Component\Finder\Tests\Iterator\FilenameFilterIteratorTest::testAccept with data set #5 
 .
 Symfony\Component\Finder\Tests\Iterator\FilterIteratorTest::testFilterFilesystemIterators
+F
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #0 
+.
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #1 
+.
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #10 
+.
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #11 
+.
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #12 
+.
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #2 
+.
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #3 
+.
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #4 
+.
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #5 
+.
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #6 
+.
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #7 
+.
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #8 
+.
+Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #9 
 .
 Symfony\Component\Finder\Tests\Iterator\PathFilterIteratorTest::testFilter with data set #0 
 F
@@ -10118,6 +10136,72 @@ Symfony\Component\Form\Tests\FormBuilderTest::testRemoveAndGetForm
 .
 Symfony\Component\Form\Tests\FormBuilderTest::testRemoveUnknown
 .
+Symfony\Component\Form\Tests\FormConfigTest::testGetRequestHandlerCreatesNativeRequestHandlerIfNotSet
+.
+Symfony\Component\Form\Tests\FormConfigTest::testGetRequestHandlerReusesNativeRequestHandlerInstance
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #0 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #1 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #10 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #11 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #12 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #13 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #14 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #15 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #16 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #17 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #18 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #19 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #2 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #20 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #21 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #22 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #23 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #24 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #3 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #4 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #5 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #6 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #7 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #8 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #9 
+.
+Symfony\Component\Form\Tests\FormConfigTest::testSetMethodAllowsDelete
+.
+Symfony\Component\Form\Tests\FormConfigTest::testSetMethodAllowsGet
+.
+Symfony\Component\Form\Tests\FormConfigTest::testSetMethodAllowsPatch
+.
+Symfony\Component\Form\Tests\FormConfigTest::testSetMethodAllowsPost
+.
+Symfony\Component\Form\Tests\FormConfigTest::testSetMethodAllowsPut
+.
+Symfony\Component\Form\Tests\FormConfigTest::testSetMethodDoesNotAllowOtherValues
+.
 Symfony\Component\Form\Tests\FormFactoryBuilderTest::testAddType
 .
 Symfony\Component\Form\Tests\FormFactoryBuilderTest::testAddTypeGuesser
@@ -10279,6 +10363,162 @@ Symfony\Component\Form\Tests\NativeRequestHandlerTest::testSubmitIfNameInRequest
 Symfony\Component\Form\Tests\ResolvedFormTypeTest::testCreateBuilder
 .
 Symfony\Component\Form\Tests\ResolvedFormTypeTest::testCreateView
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testAlwaysDisabledIfParentDisabled
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testCreateView
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testCreateViewWithExplicitParent
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testCreateViewWithParent
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testDataIsInitializedFromSubmit
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testDataIsInitializedToConfiguredValue
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testDisabled
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testEmptyDataCreatedBeforeTransforming
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testEmptyDataFromClosure
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testEmptyIfEmptyArray
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testEmptyIfEmptyCountable
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testEmptyIfEmptyString
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testEmptyIfEmptyTraversable
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testEmptyIfNull
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testFalseIsConvertedToNull
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testFormCanHaveEmptyName
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testFormCannotHaveEmptyNameNotInRootLevel
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testFormInheritsParentData
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testGetDataRequiresParentToBeSetIfInheritData
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testGetErrorsAsString
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testGetNormDataRequiresParentToBeSetIfInheritData
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testGetPropertyPathDefaultsToIndexedNameIfDataClassOfFirstParentWithoutInheritDataIsNull
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testGetPropertyPathDefaultsToIndexedNameIfParentDataClassIsNull
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testGetPropertyPathDefaultsToNameIfFirstParentWithoutInheritDataHasDataClass
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testGetPropertyPathDefaultsToNameIfParentHasDataClass
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testGetPropertyPathReturnsConfiguredPath
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testGetRootReturnsRootOfParent
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testGetRootReturnsSelfIfNoParent
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testGetViewDataRequiresParentToBeSetIfInheritData
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testHandleRequestForwardsToRequestHandler
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testHasErrors
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testHasNoErrors
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testInheritDataDisallowsSetData
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testInitializeFailsIfParent
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testInitializeSetsDefaultData
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testNeverRequiredIfParentNotRequired
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testNotDisabled
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testNotEmptyIfFilledCountable
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testNotEmptyIfFilledTraversable
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testNotEmptyIfText
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testNotRequired
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testNotSubmitted
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testNotSynchronizedIfModelReverseTransformationFailed
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testNotSynchronizedIfViewReverseTransformationFailed
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testNotValidIfErrors
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testNotValidIfNotSubmitted
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testPostSubmitDataIsNullIfInheritData
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testRequired
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetDataCannotInvokeItself
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetDataClonesObjectIfNotByReference
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetDataConvertsNullToStringIfNoTransformer
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetDataConvertsScalarToStringIfNoTransformer
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetDataConvertsScalarToStringIfOnlyModelTransformer
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetDataDoesNotCloneObjectIfByReference
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetDataExecutesModelTransformersInReverseOrder
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetDataExecutesTransformationChain
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetDataExecutesViewTransformersInOrder
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetDataIsIgnoredIfDataIsLocked
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetDataThrowsExceptionIfAlreadySubmitted
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetNullParentWorksWithEmptyName
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSetParentThrowsExceptionIfAlreadySubmitted
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSubmitConvertsEmptyToNullIfNoTransformer
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSubmitExecutesModelTransformersInOrder
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSubmitExecutesTransformationChain
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSubmitExecutesViewTransformersInReverseOrder
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSubmitIsIgnoredIfDisabled
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSubmitIsNeverFiredIfInheritData
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSubmitResetsErrors
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSubmitThrowsExceptionIfAlreadySubmitted
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSubmitted
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSubmittingWrongDataIsIgnored
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSynchronizedAfterSubmission
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testSynchronizedByDefault
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testValidIfSubmitted
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testValidIfSubmittedAndDisabled
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testViewDataMayBeArrayAccessIfDataClassIsNull
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testViewDataMustBeObjectIfDataClassIsSet
+.
+Symfony\Component\Form\Tests\SimpleFormTest::testViewDataMustNotBeObjectIfDataClassIsNull
 .
 Symfony\Component\Form\Tests\Util\OrderedHashMapTest::testCount
 .
@@ -11236,6 +11476,22 @@ Symfony\Component\HttpFoundation\Tests\ResponseTest::testSettersAreChainable
 .
 Symfony\Component\HttpFoundation\Tests\ResponseTest::testToString
 .
+Symfony\Component\HttpFoundation\Tests\ServerBagTest::testHttpBasicAuthWithPhpCgi
+.
+Symfony\Component\HttpFoundation\Tests\ServerBagTest::testHttpBasicAuthWithPhpCgiEmptyPassword
+.
+Symfony\Component\HttpFoundation\Tests\ServerBagTest::testHttpBasicAuthWithPhpCgiRedirect
+.
+Symfony\Component\HttpFoundation\Tests\ServerBagTest::testHttpDigestAuthWithPhpCgi
+.
+Symfony\Component\HttpFoundation\Tests\ServerBagTest::testHttpDigestAuthWithPhpCgiRedirect
+.
+Symfony\Component\HttpFoundation\Tests\ServerBagTest::testHttpPasswordIsOptional
+.
+Symfony\Component\HttpFoundation\Tests\ServerBagTest::testOAuthBearerAuth
+.
+Symfony\Component\HttpFoundation\Tests\ServerBagTest::testShouldExtractHeadersFromServerArray
+.
 Symfony\Component\HttpFoundation\Tests\Session\Attribute\AttributeBagTest::testAll
 .
 Symfony\Component\HttpFoundation\Tests\Session\Attribute\AttributeBagTest::testClear
@@ -12151,7 +12407,7 @@ Symfony\Component\HttpKernel\Tests\HttpCache\HttpCacheTest::testValidatesCachedR
 Symfony\Component\HttpKernel\Tests\HttpCache\HttpCacheTest::testValidatesCachedResponsesWithLastModifiedAndNoFreshnessInformation
 .
 Symfony\Component\HttpKernel\Tests\HttpCache\HttpCacheTest::testValidatesPrivateResponsesCachedOnTheClient
-.
+F
 Symfony\Component\HttpKernel\Tests\HttpCache\HttpCacheTest::testXForwarderForHeaderForForwardedRequests with data set #0 
 .
 Symfony\Component\HttpKernel\Tests\HttpCache\HttpCacheTest::testXForwarderForHeaderForForwardedRequests with data set #1 
@@ -12173,7 +12429,7 @@ Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testFindsAStoredEntryWit
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testInvalidatesMetaAndEntityStoreEntriesWithInvalidate
 .
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testLocking
-.
+F
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testOverwritesNonVaryingResponseWithStore
 .
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testReadsAnEmptyArrayWithReadWhenNothingCachedAtKey
@@ -12189,7 +12445,7 @@ Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testSetsTheXContentDiges
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testStoresACacheEntry
 .
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testStoresMultipleResponsesForEachVaryCombination
-.
+E
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testSucceedsQuietlyWhenInvalidateCalledWithNoMatchingEntries
 .
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testUnlockFileThatDoesExist
@@ -13858,6 +14114,16 @@ Symfony\Component\Intl\Tests\DateFormatter\Verification\IntlDateFormatterTest::t
 S
 Symfony\Component\Intl\Tests\DateFormatter\Verification\IntlDateFormatterTest::testSetTimeZoneId with data set #7 
 S
+Symfony\Component\Intl\Tests\Globals\IntlGlobalsTest::testGetErrorName with data set #0 
+.
+Symfony\Component\Intl\Tests\Globals\IntlGlobalsTest::testGetErrorName with data set #1 
+.
+Symfony\Component\Intl\Tests\Globals\IntlGlobalsTest::testGetErrorName with data set #2 
+.
+Symfony\Component\Intl\Tests\Globals\IntlGlobalsTest::testGetErrorName with data set #3 
+.
+Symfony\Component\Intl\Tests\Globals\IntlGlobalsTest::testGetErrorName with data set #4 
+.
 Symfony\Component\Intl\Tests\Globals\Verification\IntlGlobalsTest::testGetErrorName with data set #0 
 S
 Symfony\Component\Intl\Tests\Globals\Verification\IntlGlobalsTest::testGetErrorName with data set #1 
@@ -14945,348 +15211,6 @@ Symfony\Component\Process\Tests\ProcessUtilsTest::testEscapeArgument with data s
 Symfony\Component\Process\Tests\ProcessUtilsTest::testEscapeArgument with data set #2 
 .
 Symfony\Component\Process\Tests\ProcessUtilsTest::testEscapeArgument with data set #3 
-F
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testCallbackIsExecutedForOutput
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testCallbacksAreExecutedWithStart
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testChainedCommandsOutput with data set #0 
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testChainedCommandsOutput with data set #1 
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testCheckTimeoutOnStartedProcess
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testExitCodeCommandFailed
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testExitCodeIsAvailableAfterSignal
-S
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testExitCodeText
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testGetErrorOutput
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testGetExitCode
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testGetExitCodeIsNullOnStart
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testGetExitCodeIsNullOnWhenStartingAgain
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testGetIncrementalErrorOutput
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testGetIncrementalOutput
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testGetOutput
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testGetPid
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testGetPidIsNullAfterRun
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testGetPidIsNullBeforeStart
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testIdleTimeout
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testIdleTimeoutNotExceededWhenOutputIsSent
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testIsNotSuccessful
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testIsSuccessful
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testIsSuccessfulOnlyAfterTerminated
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testNegativeTimeoutFromConstructor
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testNegativeTimeoutFromSetter
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testNullTimeout
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testPhpDeadlock
-S
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessIsNotSignaled
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessIsSignaledIfStopped
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #0 
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #1 
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #2 
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #3 
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #4 
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #5 
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #6 
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #7 
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #8 
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #9 
-F
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessResponses with data set #0 
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessThrowsExceptionWhenExternallySignaled
-S
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessWithTermSignal
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessWithoutTermSignal
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessWithoutTermSignalIsNotSignaled
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testRestart
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testRunProcessWithTimeout
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testSignal
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testSignalProcessNotRunning
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testSignalWithWrongIntSignal
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testSignalWithWrongNonIntSignal
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testStartAfterATimeout
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testStartIsNonBlocking
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testStatus
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testStop
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testStopWithTimeoutIsActuallyWorking
-S
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testTTYCommand
-.
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testUpdateStatus
-F
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testCallbackIsExecutedForOutput
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testCallbacksAreExecutedWithStart
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testChainedCommandsOutput with data set #0 
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testChainedCommandsOutput with data set #1 
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testCheckTimeoutOnStartedProcess
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testExitCodeCommandFailed
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testExitCodeIsAvailableAfterSignal
-S
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testExitCodeText
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testGetErrorOutput
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testGetExitCode
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testGetExitCodeIsNullOnStart
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testGetExitCodeIsNullOnWhenStartingAgain
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testGetIncrementalErrorOutput
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testGetIncrementalOutput
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testGetOutput
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testGetPid
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testGetPidIsNullAfterRun
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testGetPidIsNullBeforeStart
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testIdleTimeout
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testIdleTimeoutNotExceededWhenOutputIsSent
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testIsNotSuccessful
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testIsSuccessful
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testIsSuccessfulOnlyAfterTerminated
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testNegativeTimeoutFromConstructor
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testNegativeTimeoutFromSetter
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testNullTimeout
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testPhpDeadlock
-S
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessIsNotSignaled
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessIsSignaledIfStopped
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #0 
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #1 
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #2 
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #3 
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #4 
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #5 
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #6 
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #7 
-F
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #8 
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #9 
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessResponses with data set #0 
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessThrowsExceptionWhenExternallySignaled
-S
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessWithTermSignal
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessWithoutTermSignal
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessWithoutTermSignalIsNotSignaled
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testRestart
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testRunProcessWithTimeout
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testSignal
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testSignalProcessNotRunning
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testSignalWithWrongIntSignal
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testSignalWithWrongNonIntSignal
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testStartAfterATimeout
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testStartIsNonBlocking
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testStatus
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testStop
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testStopWithTimeoutIsActuallyWorking
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testTTYCommand
-.
-Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testUpdateStatus
-F
-Symfony\Component\Process\Tests\SimpleProcessTest::testCallbackIsExecutedForOutput
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testCallbacksAreExecutedWithStart
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testChainedCommandsOutput with data set #0 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testChainedCommandsOutput with data set #1 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testCheckTimeoutOnStartedProcess
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testExitCodeCommandFailed
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testExitCodeIsAvailableAfterSignal
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testExitCodeText
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testGetErrorOutput
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testGetExitCode
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testGetExitCodeIsNullOnStart
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testGetExitCodeIsNullOnWhenStartingAgain
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testGetIncrementalErrorOutput
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testGetIncrementalOutput
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testGetOutput
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testGetPid
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testGetPidIsNullAfterRun
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testGetPidIsNullBeforeStart
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testIdleTimeout
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testIdleTimeoutNotExceededWhenOutputIsSent
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testIsNotSuccessful
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testIsSuccessful
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testIsSuccessfulOnlyAfterTerminated
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testNegativeTimeoutFromConstructor
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testNegativeTimeoutFromSetter
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testNullTimeout
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testPhpDeadlock
-S
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessIsNotSignaled
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessIsSignaledIfStopped
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #0 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #1 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #2 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #3 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #4 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #5 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #6 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #7 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #8 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #9 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessResponses with data set #0 
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessThrowsExceptionWhenExternallySignaled
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessWithTermSignal
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessWithoutTermSignal
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testProcessWithoutTermSignalIsNotSignaled
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testRestart
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testRunProcessWithTimeout
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testSignal
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testSignalProcessNotRunning
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testSignalWithWrongIntSignal
-F
-Symfony\Component\Process\Tests\SimpleProcessTest::testSignalWithWrongNonIntSignal
-F
-Symfony\Component\Process\Tests\SimpleProcessTest::testStartAfterATimeout
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testStartIsNonBlocking
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testStatus
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testStop
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testStopWithTimeoutIsActuallyWorking
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testTTYCommand
-.
-Symfony\Component\Process\Tests\SimpleProcessTest::testUpdateStatus
 F
 Symfony\Component\PropertyAccess\Tests\PropertyAccessorArrayObjectTest::testGetValueReadsArrayAccess
 .
@@ -16426,6 +16350,18 @@ Symfony\Component\Security\Acl\Tests\Domain\PermissionGrantingStrategyTest::test
 .
 Symfony\Component\Security\Acl\Tests\Domain\PermissionGrantingStrategyTest::testIsGrantedStrategies with data set #9 
 .
+Symfony\Component\Security\Acl\Tests\Domain\RoleSecurityIdentityTest::testConstructor
+.
+Symfony\Component\Security\Acl\Tests\Domain\RoleSecurityIdentityTest::testConstructorWithRoleInstance
+.
+Symfony\Component\Security\Acl\Tests\Domain\RoleSecurityIdentityTest::testEquals with data set #0 
+.
+Symfony\Component\Security\Acl\Tests\Domain\RoleSecurityIdentityTest::testEquals with data set #1 
+.
+Symfony\Component\Security\Acl\Tests\Domain\RoleSecurityIdentityTest::testEquals with data set #2 
+.
+Symfony\Component\Security\Acl\Tests\Domain\RoleSecurityIdentityTest::testEquals with data set #3 
+.
 Symfony\Component\Security\Acl\Tests\Domain\SecurityIdentityRetrievalStrategyTest::testGetSecurityIdentities with data set #0 
 .
 Symfony\Component\Security\Acl\Tests\Domain\SecurityIdentityRetrievalStrategyTest::testGetSecurityIdentities with data set #1 
@@ -17513,7 +17449,7 @@ Symfony\Component\Stopwatch\Tests\StopwatchTest::testSection
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testStart
 .
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testStop
-.
+F
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testStopWithoutStart
 .
 Symfony\Component\Templating\Tests\DelegatingEngineTest::testExists
@@ -17601,6 +17537,8 @@ Symfony\Component\Templating\Tests\PhpEngineTest::testRenderParameter
 Symfony\Component\Templating\Tests\PhpEngineTest::testUnsetHelper
 .
 Symfony\Component\Templating\Tests\Storage\FileStorageTest::testGetContent
+.
+Symfony\Component\Templating\Tests\Storage\StorageTest::testMagicToString
 .
 Symfony\Component\Templating\Tests\Storage\StringStorageTest::testGetContent
 .

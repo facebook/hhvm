@@ -255,6 +255,17 @@ class Frameworks {
                 __DIR__."/frameworks/symfony/src/Symfony/Component/*/Tests/",
                 __DIR__."/frameworks/symfony/src/Symfony/Component/*/*/Tests/",
               },
+            'blacklist' =>
+              Set {
+                __DIR__."/frameworks/symfony/src/Symfony/Component/Console".
+                "/Tests/Helper/DialogHelperTest.php",
+                __DIR__."/frameworks/symfony/src/Symfony/Component/Process".
+                "/Tests/SigchildDisabledProcessTest.php",
+                __DIR__."/frameworks/symfony/src/Symfony/Component/Process".
+                "/Tests/SigchildEnabledProcessTest.php",
+                __DIR__."/frameworks/symfony/src/Symfony/Component/Process".
+                "/Tests/SimpleProcessTest.php",
+              },
           },
         'codeigniter' =>
           Map {
@@ -286,6 +297,11 @@ class Frameworks {
             'test_search_roots' =>
               Vector {
                 __DIR__."/frameworks/zf2/tests/ZendTest",
+              },
+            'blacklist' =>
+              Set {
+                __DIR__."/frameworks/zf2/tests/ZendTest/Code/Generator".
+                "/ParameterGeneratorTest.php",
               },
           },
         'yii' =>
@@ -399,6 +415,10 @@ class Frameworks {
               Vector {
                 __DIR__."/frameworks/phpbb3/tests",
               },
+            'blacklist' =>
+              Set {
+                __DIR__."/frameworks/phpbb3/tests/lint_test.php",
+              },
           },
         'pear' =>
           Map {
@@ -422,6 +442,14 @@ class Frameworks {
                   'move_from_dir' => __DIR__.
                                      "/frameworks/pear-core/Console_Getopt",
                  },
+              },
+            // This may just be an exclude from the findTests actually. Need
+            // to check this out a bit. Not sure this is a real test, but
+            // rather a helper that is called by other tests; in which case,
+            // this is a no-op blacklist item
+            'blacklist' =>
+              Set {
+                __DIR__."/frameworks/pear-core/tests/System/find_test.php",
               },
           },
         'mediawiki' =>
@@ -518,6 +546,10 @@ class Frameworks {
             'env_vars' =>
               Map {
                 'PHP_BINARY' => get_hhvm_build(false, true)
+              },
+            'blacklist' =>
+              Set {
+                __DIR__."/frameworks/phpunit/Tests/Util/ConfigurationTest.php",
               },
           },
       };
@@ -667,6 +699,7 @@ class Framework {
 
   public ?Map $current_test_statuses = null;
   public Set $tests = null;
+  public Set $blacklist = null;
 
   public bool $success;
 
@@ -978,8 +1011,12 @@ class Framework {
                                             "public function test",
                                             $root, $this->test_path."/vendor"));
     }
+    // Get rid of the blacklisted items
+    $this->tests->difference($this->blacklist);
     verbose("Found ".count($this->tests)." files that contain tests for ".
             $this->name."...\n", !Options::$csv_only);
+    verbose(count($this->blacklist)." files were blacklisted ".
+            $this->name."...\n", Options::$verbose);
   }
 
   public function clean(): void {
@@ -1016,6 +1053,7 @@ class Framework {
     $this->setTestPattern();
     $this->setTestSearchRoots();
     $this->setTestPath();
+    $this->getBlacklistedTests();
     // Assume framework testing is successful until otherwise proven
     $this->success = true;
   }
@@ -1044,6 +1082,11 @@ class Framework {
     return true;
   }
 
+  private function getBlacklistedTests() {
+    if (Frameworks::$framework_info[$this->name]->contains('blacklist')) {
+      $this->blacklist = Frameworks::$framework_info[$this->name]['blacklist'];;
+    }
+  }
 
   private function setTestPath() {
     // 2 possibilities, phpunit.xml and phpunit.xml.dist for configuration
@@ -1271,7 +1314,7 @@ class SingleTestFile {
           // We have hit a fatal or some nasty assert. Escape now and try to
           // get the results written.
           $status = $status === null ? "UNKNOWN STATUS" : $status;
-          $this->test_information .= $f ? "Fatal".PHP_EOL : $status;
+          $this->test_information .= $f ? "Fatal".PHP_EOL : $status.PHP_EOL;
           $this->fatal_information .= $match.PHP_EOL.$status.PHP_EOL;
           $this->stat_information = $match.PHP_EOL."Fatal".PHP_EOL;
           return false;

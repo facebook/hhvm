@@ -1933,7 +1933,7 @@ Mage_Core_Model_Design_FileResolution_Strategy_Fallback_CachingProxyTest::testDe
 Mage_Core_Model_Design_FileResolution_Strategy_Fallback_CachingProxyTest::testProxyMethods with data set "getFile"
 .
 Mage_Core_Model_Design_FileResolution_Strategy_Fallback_CachingProxyTest::testProxyMethods with data set "getLocaleFile"
-E
+.
 Mage_Core_Model_Design_FileResolution_Strategy_Fallback_CachingProxyTest::testProxyMethods with data set "getViewFile"
 .
 Mage_Core_Model_Design_FileResolution_Strategy_Fallback_CachingProxyTest::testSetViewFilePathToMap
@@ -2329,13 +2329,13 @@ Mage_Core_Model_Locale_ValidatorTest::testIsValidDataProvider
 Mage_Core_Model_LoggerTest::testAddStoreLog
 .
 Mage_Core_Model_LoggerTest::testAddStreamLog with data set #0 
-.
+E
 Mage_Core_Model_LoggerTest::testAddStreamLog with data set #1 
-.
+E
 Mage_Core_Model_LoggerTest::testAddStreamLog with data set #2 
 .
 Mage_Core_Model_LoggerTest::testInitForStore
-.
+E
 Mage_Core_Model_LoggerTest::testLog
 .
 Mage_Core_Model_LoggerTest::testLogComplex
@@ -3775,9 +3775,9 @@ Mage_Install_Model_EntryPoint_UpgradeTest::testProcessRequest with data set "rei
 Mage_Install_Model_EntryPoint_UpgradeTest::testProcessRequest with data set "reindex required"
 .
 Mage_Install_Model_Installer_ConfigTest::testReplaceTmpEncryptKey
-E
-Mage_Install_Model_Installer_ConfigTest::testReplaceTmpInstallDate
 .
+Mage_Install_Model_Installer_ConfigTest::testReplaceTmpInstallDate
+E
 Mage_Install_Model_Installer_Db_Mysql4Test::testSupportEngine with data set #0 
 .
 Mage_Install_Model_Installer_Db_Mysql4Test::testSupportEngine with data set #1 

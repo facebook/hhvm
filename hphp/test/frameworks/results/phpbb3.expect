@@ -1432,8 +1432,6 @@ phpbb_groupposition_teampage_test::test_move_teampage with data set #7
 S
 phpbb_groupposition_teampage_test::test_move_teampage with data set #8 
 S
-phpbb_lint_test::test_lint
-UNKNOWN STATUS
 phpbb_lock_db_test::test_double_lock
 S
 phpbb_lock_db_test::test_double_unlock
@@ -2465,13 +2463,7 @@ phpbb_template_template_events_test::test_event with data set #0
 phpbb_template_template_events_test::test_event with data set #1 
 .
 phpbb_template_template_events_test::test_event with data set #2 
-.
-phpbb_template_template_events_test::test_event with data set #3 
-.
-phpbb_template_template_events_test::test_event with data set #4 
-.
-phpbb_template_template_events_test::test_event with data set #5 
-.
+Fatal
 phpbb_template_template_includecss_test::test_includecss_compilation
 .
 phpbb_template_template_includejs_test::test_includejs_compilation with data set #0 

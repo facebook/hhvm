@@ -2,6 +2,8 @@
 *.repo
 *.tmp
 *.errors
+*.fatals
+*.stats
 /frameworks/composer.phar
 /frameworks/composer.lock
 /frameworks/vendor

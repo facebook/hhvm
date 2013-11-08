@@ -159,7 +159,7 @@ void c_Continuation::dupContVar(const StringData* name, TypedValue* src) {
   Id destId = fp->m_func->lookupVarId(name);
   if (destId != kInvalidId) {
     // Copy the value of the local to the cont object.
-    tvDupFlattenVars(src, frame_local(fp, destId), nullptr);
+    tvDupFlattenVars(src, frame_local(fp, destId));
   } else {
     if (!fp->hasVarEnv()) {
       // This VarEnv may potentially outlive the most recently stack-allocated

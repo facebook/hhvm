@@ -264,7 +264,7 @@ void RegionDesc::Block::checkMetadata() const {
 
 //////////////////////////////////////////////////////////////////////
 
-RegionDescPtr selectTraceletLegacy(const RegionContext&    rCtx,
+RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
                                    const Transl::Tracelet& tlet) {
   typedef RegionDesc::Block Block;
 
@@ -280,13 +280,13 @@ RegionDescPtr selectTraceletLegacy(const RegionContext&    rCtx,
       std::make_shared<Block>(func, start.offset(), 0, spOff));
     curBlock = region->blocks.back().get();
   };
-  newBlock(tlet.func(), sk, rCtx.spOffset);
+  newBlock(tlet.func(), sk, initSpOffset);
 
   for (auto ni = tlet.m_instrStream.first; ni; ni = ni->next) {
     assert(sk == ni->source);
     assert(ni->unit() == unit);
 
-    Offset curSpOffset = rCtx.spOffset + ni->stackOffset;
+    Offset curSpOffset = initSpOffset + ni->stackOffset;
 
     curBlock->addInstruction();
     if ((curBlock->length() == 1 && ni->funcd != nullptr) ||
@@ -363,7 +363,7 @@ RegionDescPtr selectTraceletLegacy(const RegionContext&    rCtx,
     switch (dep.first.space) {
       case Transl::Location::Stack: {
         uint32_t offsetFromSp = uint32_t(-dep.first.offset - 1);
-        uint32_t offsetFromFp = rCtx.spOffset - offsetFromSp;
+        uint32_t offsetFromFp = initSpOffset - offsetFromSp;
         addPred(R::Location::Stack{offsetFromSp, offsetFromFp});
         break;
       }
@@ -405,7 +405,8 @@ RegionDescPtr selectRegion(const RegionContext& context,
         case RegionMode::Method:   return selectMethod(context);
         case RegionMode::Tracelet: return selectTracelet(context, 0);
         case RegionMode::Legacy:
-                 always_assert(t); return selectTraceletLegacy(context, *t);
+                 always_assert(t); return selectTraceletLegacy(context.spOffset,
+                                                               *t);
         case RegionMode::HotBlock:
         case RegionMode::HotTrace: always_assert(0 &&
                                                  "unsupported region mode");

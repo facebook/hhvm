@@ -16,15 +16,16 @@
 #ifndef incl_HPHP_RUNTIME_BASE_MEMORY_SMART_CONTAINERS_H_
 #define incl_HPHP_RUNTIME_BASE_MEMORY_SMART_CONTAINERS_H_
 
-#include <deque>
-#include <queue>
-#include <map>
-#include <stack>
-#include <vector>
-#include <functional>
-#include <tr1/unordered_map>
 #include <cstdlib>
+#include <deque>
+#include <functional>
+#include <map>
 #include <memory>
+#include <queue>
+#include <stack>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include <boost/container/flat_map.hpp>
 
@@ -140,6 +141,49 @@ static_assert(
 );
 #endif
 
+template <class Key, class T, class Compare = std::less<Key>>
+using map = std::map<Key, T, Compare, Allocator<std::pair<const Key,T>>>;
+
+template <class Key, class T, class Compare = std::less<Key>>
+using multimap = std::multimap<Key,T,Compare,Allocator<std::pair<const Key,T>>>;
+
+template <class T, class Compare = std::less<T>>
+using set = std::set<T, Compare, Allocator<T>>;
+
+template <class T, class Compare = std::less<T>>
+using multiset = std::set<T, Compare, Allocator<T>>;
+
+template <class T>
+using deque = std::deque<T,Allocator<T>>;
+
+template <class T>
+using vector = std::vector<T,Allocator<T>>;
+
+template <class T, class Container = deque<T>>
+using stack = std::stack<T, Container>;
+
+template <class T>
+using list = std::list<T,Allocator<T>>;
+
+template <class T>
+using queue = std::queue<T, deque<T>>;
+
+template <class T, class Compare = std::less<T>>
+using priority_queue = std::priority_queue<T, vector<T>, Compare>;
+
+template<class K, class V, class Pred = std::less<K>>
+using flat_map = boost::container::flat_map<K,V,Pred,Allocator<std::pair<K,V>>>;
+
+template<class K, class V, class Pred = std::less<K>>
+using flat_multimap =
+  boost::container::flat_multimap<K,V,Pred,Allocator<std::pair<K,V>>>;
+
+template<class K, class Pred = std::less<K>>
+using flat_set = boost::container::flat_set<K, Pred, Allocator<K>>;
+
+template<class K, class Pref = std::less<K>>
+using flat_multiset = boost::container::flat_multiset<K, Pref, Allocator<K>>;
+
 /*
  * We are deriving from the std::collection classes to get
  * smart::collection classes that use smart allocation. To avoid the
@@ -157,55 +201,32 @@ static_assert(
  * aliases.
  */
 
-template <class Key, class T, class Compare = std::less<Key>>
-class map : public std::map<
-  Key, T, Compare,
-  Allocator<std::pair<const Key,T>>
-> {};
-
-template <class T, class Compare = std::less<T>>
-class set : public std::set<
-  T, Compare, Allocator<T>
-> {};
-
-template <class T>
-class deque : public std::deque<T,Allocator<T>> {};
-
-template <class T>
-class vector : public std::vector<T,Allocator<T>> {
-  typedef std::vector<T,Allocator<T>> Base;
-public:
-  template<class... A>
-  explicit vector(A&&... args) : Base(std::forward<A>(args)...) {}
+template <class T,
+          class U,
+          class V = hphp_hash<T>,
+          class W = std::equal_to<T>>
+struct hash_map : std::unordered_map<
+  T, U, V, W,
+  Allocator<std::pair<T,U>>
+> {
+  hash_map()
+    : std::unordered_map<
+        T, U, V, W,
+        Allocator<std::pair<T,U>>
+      >(0)
+  {}
 };
-
-template <class T, class Container = deque<T>>
-class stack : public std::stack<T, Container> {};
-
-template <class T>
-class list : public std::list<T,Allocator<T>> {
-  typedef std::list<T,Allocator<T>> Base;
-public:
-  template<class... A>
-  explicit list(A&&... args) : Base(std::forward<A>(args)...) {}
-};
-
-template <class T>
-class queue : public std::queue<T, deque<T>> {};
-
-template <class T, class Compare = std::less<T>>
-class priority_queue : public std::priority_queue<T, vector<T>, Compare> {};
 
 template <class T,
           class U,
           class V = hphp_hash<T>,
           class W = std::equal_to<T>>
-struct hash_map : std::tr1::unordered_map<
+struct hash_multimap : std::unordered_multimap<
   T, U, V, W,
   Allocator<std::pair<T,U>>
 > {
-  hash_map()
-    : std::tr1::unordered_map<
+  hash_multimap()
+    : std::unordered_multimap<
         T, U, V, W,
         Allocator<std::pair<T,U>>
       >(0)
@@ -215,30 +236,11 @@ struct hash_map : std::tr1::unordered_map<
 template <class T,
           class V = hphp_hash<T>,
           class W = std::equal_to<T>>
-struct hash_set : std::tr1::unordered_set<T,V,W,Allocator<T> > {
+struct hash_set : std::unordered_set<T,V,W,Allocator<T> > {
   hash_set()
-    : std::tr1::unordered_set<T,V,W,Allocator<T>>(0)
+    : std::unordered_set<T,V,W,Allocator<T>>(0)
   {}
 };
-
-template<class K,
-         class V,
-         class Pred = std::less<K>>
-struct flat_map
-  : boost::container::flat_map<K,V,Pred,Allocator<std::pair<K,V>>>
-{};
-
-template<class K, class Pred = std::less<K>>
-struct flat_set
-  : boost::container::flat_set<K, Pred, Allocator<K>>
-{};
-
-template<class K,
-         class V,
-         class Pred = std::less<K>>
-struct flat_multimap
-  : boost::container::flat_multimap<K,V,Pred,Allocator<std::pair<K,V>>>
-{};
 
 //////////////////////////////////////////////////////////////////////
 

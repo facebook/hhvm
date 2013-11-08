@@ -824,7 +824,7 @@ HphpArray::InsertPos HphpArray::insert(int64_t k) {
 
 HphpArray::InsertPos HphpArray::insert(StringData* k) {
   assert(!isFull());
-  strhash_t h = k->hash();
+  auto const h = k->hash();
   auto ei = findForInsert(k, h);
   if (validPos(*ei)) {
     return InsertPos(true, data()[*ei].data);
@@ -2002,9 +2002,9 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
   return ad;
 }
 
-ArrayData* HphpArray::Plus(ArrayData* ad, const ArrayData* elems) {
-  auto const ret = CopyReserve(asHphpArray(ad), ad->size() + elems->size());
-
+ATTRIBUTE_COLD NEVER_INLINE
+ArrayData* HphpArray::ArrayPlusGeneric(HphpArray* ret,
+                                       const ArrayData* elems) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     CVarRef value = it.secondRef();
@@ -2020,9 +2020,43 @@ ArrayData* HphpArray::Plus(ArrayData* ad, const ArrayData* elems) {
   return ret;
 }
 
-ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems) {
+ArrayData* HphpArray::Plus(ArrayData* ad, const ArrayData* elems) {
   auto const ret = CopyReserve(asHphpArray(ad), ad->size() + elems->size());
 
+  if (UNLIKELY(elems->m_kind != kMixedKind)) {
+    return ArrayPlusGeneric(ret, elems);
+  }
+
+  auto const rhs = asMixed(elems);
+
+  auto srcElem = rhs->data();
+  auto const srcStop = rhs->data() + rhs->m_used;
+  for (; srcElem != srcStop; ++srcElem) {
+    if (isTombstone(srcElem->data.m_type)) continue;
+
+    auto const hash = srcElem->hash();
+    if (srcElem->hasStrKey()) {
+      auto const ei = ret->findForInsert(srcElem->key, hash);
+      if (ret->validPos(*ei)) continue;
+      auto& e = ret->allocElm(ei);
+      e.setStrKey(srcElem->key, hash);
+      ret->initWithRef(e.data, tvAsCVarRef(&srcElem->data));
+      continue;
+    }
+
+    auto const ei = ret->findForInsert(srcElem->ikey);
+    if (validPos(*ei)) continue;
+    auto& e = ret->allocElm(ei);
+    e.setIntKey(srcElem->ikey);
+    ret->initWithRef(e.data, tvAsCVarRef(&srcElem->data));
+  }
+
+  return ret;
+}
+
+ATTRIBUTE_COLD NEVER_INLINE
+ArrayData* HphpArray::ArrayMergeGeneric(HphpArray* ret,
+                                        const ArrayData* elems) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     CVarRef value = it.secondRef();
@@ -2035,12 +2069,46 @@ ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems) {
       p->setWithRef(value);
     }
   }
+  return ret;
+}
+
+ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems) {
+  auto const ret = CopyReserve(asHphpArray(ad), ad->size() + elems->size());
+
+  if (elems->m_kind == kMixedKind) {
+    auto const rhs = asMixed(elems);
+    auto srcElem = rhs->data();
+    auto const srcStop = rhs->data() + rhs->m_used;
+    for (; srcElem != srcStop; ++srcElem) {
+      if (isTombstone(srcElem->data.m_type)) continue;
+
+      if (srcElem->hasIntKey()) {
+        ret->nextInsertWithRef(tvAsCVarRef(&srcElem->data));
+      } else {
+        Variant* p;
+        ret->addLvalImpl(srcElem->key, p);
+        p->setWithRef(tvAsCVarRef(&srcElem->data));
+      }
+    }
+    return ret;
+  }
+
+  if (UNLIKELY(elems->m_kind != kPackedKind)) {
+    return ArrayMergeGeneric(ret, elems);
+  }
+
+  auto const rhs = asPacked(elems);
+  auto srcElem = rhs->data();
+  auto const srcStop = rhs->data() + rhs->m_used;
+  for (; srcElem != srcStop; ++srcElem) {
+    assert(!isTombstone(srcElem->data.m_type));
+    ret->nextInsertWithRef(tvAsCVarRef(&srcElem->data));
+  }
+  return ret;
 
   // Note: currently caller is responsible for calling renumber after
   // this.  Should refactor so we handle it (we already know things
   // about the array).
-
-  return ret;
 }
 
 ArrayData* HphpArray::PopPacked(ArrayData* ad, Variant& value) {

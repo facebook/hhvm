@@ -509,6 +509,10 @@ public:
     return offsetof(ArrayData, m_kind);
   }
 
+  static constexpr size_t offsetofSize() {
+    return offsetof(ArrayData, m_size);
+  }
+
   static const char* kindToString(ArrayKind kind);
 
  private:
@@ -559,11 +563,6 @@ protected:
     uint64_t m_posAndCount;   // be careful, m_pos is signed
   };
   FullPos* m_strongIterators; // head of linked list
-
-public: // for the JIT
-  static uint32_t getKindOff() {
-    return (uintptr_t)&((ArrayData*)0)->m_kind;
-  }
 
 public: // for heap profiler
   void getChildren(std::vector<TypedValue *> &out);
@@ -638,8 +637,7 @@ extern const ArrayFunctions g_array_funcs;
 
 ALWAYS_INLINE
 void decRefArr(ArrayData* arr) {
-  assert(!MemoryManager::sweeping());
-  if (arr->decRefCount() == 0) arr->release();
+  arr->decRefAndRelease();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

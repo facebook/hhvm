@@ -1229,7 +1229,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
     if (debug) {
       // Debugging code: cede the write lease half the time.
       if (RuntimeOption::EvalJitStressLease) {
-        if (d.depthOne() == 1 && (rand() % 2) == 0) {
+        if (d.depthOne() && (rand() % 2) == 0) {
           s_writeLease.gremlinLock();
         }
       }
@@ -1954,9 +1954,7 @@ TranslatorX64::translateWork(const TranslArgs& args) {
                        false, false);
   if (RuntimeOption::EvalJitPGO) {
     if (transKind == TransProfile) {
-      JIT::RegionContext rContext { sk.func(), sk.offset(), liveSpOff() };
-      populateLiveContext(rContext);
-      m_profData->addTransProfile(*tp, rContext, pconds);
+      m_profData->addTransProfile(*tp, liveSpOff(), pconds);
     } else {
       m_profData->addTransNonProf(transKind, sk);
     }
@@ -2116,7 +2114,8 @@ void TranslatorX64::traceCodeGen() {
   optimize(unit, ht.traceBuilder());
   finishPass(" after optimizing ", kOptLevel);
 
-  RegAllocInfo regs = allocRegsForUnit(unit);
+  auto regs = RuntimeOption::EvalHHIRXls ? allocateRegs(unit) :
+              allocRegsForUnit(unit);
   assert(checkRegisters(unit, regs)); // calls checkCfg internally.
 
   recordBCInstr(OpTraceletGuard, mainCode, mainCode.frontier());

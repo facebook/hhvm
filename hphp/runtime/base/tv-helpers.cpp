@@ -48,11 +48,11 @@ bool cellIsPlausible(const Cell cell) {
     break;
   case KindOfString:
     assertPtr(cell.m_data.pstr);
-    assert(is_refcount_realistic(cell.m_data.pstr->getCount()));
+    assert_refcount_realistic(cell.m_data.pstr->getCount());
     break;
   case KindOfArray:
     assertPtr(cell.m_data.parr);
-    assert(is_refcount_realistic(cell.m_data.parr->getCount()));
+    assert_refcount_realistic(cell.m_data.parr->getCount());
     break;
   case KindOfObject:
     assertPtr(cell.m_data.pobj);
@@ -75,7 +75,7 @@ bool tvIsPlausible(TypedValue tv) {
   if (tv.m_type == KindOfRef) {
     assert(tv.m_data.pref);
     assert(uintptr_t(tv.m_data.pref) % sizeof(void*) == 0);
-    assert(is_refcount_realistic(tv.m_data.pref->getRealCount()));
+    assert_refcount_realistic(tv.m_data.pref->getRealCount());
     tv = *tv.m_data.pref->tv();
   }
   return cellIsPlausible(tv);

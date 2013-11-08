@@ -557,11 +557,27 @@ struct ShuffleData : IRExtraData {
   ShuffleData(PhysLoc* dests, uint32_t size, uint32_t cap)
     : dests(dests), size(size), cap(cap)
   {}
+
   std::string show() const;
-public:
+
   PhysLoc* dests; // array of up to [cap] PhysLocs
   uint32_t size; // number of valid dests
   uint32_t cap; // available slots for more dests & srcs
+};
+
+struct ClassKindData : IRExtraData {
+  explicit ClassKindData(ClassKind kind) : kind(kind) {}
+
+  std::string show() const {
+    switch (kind) {
+    case ClassKind::Class:     return "cls";
+    case ClassKind::Interface: return "interface";
+    case ClassKind::Trait:     return "trait";
+    }
+    not_reached();
+  }
+
+  ClassKind kind;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -656,6 +672,7 @@ X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);
 X(Shuffle,                      ShuffleData);
+X(ThingExists,                  ClassKindData);
 
 #undef X
 

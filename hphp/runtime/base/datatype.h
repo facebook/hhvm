@@ -307,6 +307,18 @@ template<> struct FormatValue<HPHP::DataTypeCategory> {
  private:
   HPHP::DataTypeCategory m_val;
 };
+
+template<> struct FormatValue<HPHP::DataType> {
+  explicit FormatValue(HPHP::DataType dt) : m_dt(dt) {}
+
+  template<typename C>
+  void format(FormatArg& arg, C& cb) const {
+    format_value::formatString(tname(m_dt), arg, cb);
+  }
+
+ private:
+  HPHP::DataType m_dt;
+};
 }
 
 #endif // incl_HPHP_DATATYPE_H_

@@ -102,12 +102,16 @@ SimpleFunctionCall::SimpleFunctionCall
  const std::string &name, bool hadBackslash, ExpressionListPtr params,
  ExpressionPtr cls)
   : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(SimpleFunctionCall),
-                 ExpressionPtr(), name, hadBackslash, params, cls),
-    m_type(FunType::Unknown), m_dynamicConstant(false),
-    m_builtinFunction(false), m_fromCompiler(false),
-    m_dynamicInvoke(false), m_transformed(false), m_no_volatile_check(false),
-    m_safe(0), m_extra(nullptr) {
-
+                 ExpressionPtr(), name, hadBackslash, params, cls)
+  , m_type(FunType::Unknown)
+  , m_dynamicConstant(false)
+  , m_builtinFunction(false)
+  , m_fromCompiler(false)
+  , m_dynamicInvoke(false)
+  , m_transformed(false)
+  , m_safe(0)
+  , m_extra(nullptr)
+{
   if (!m_class && m_className.empty()) {
     m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
       Option::DynamicInvokeFunctions.end();
@@ -438,7 +442,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
             }
             case FunType::FBCallUserFuncSafe:
             case FunType::FunctionExists:
-              if (!m_no_volatile_check) {
+              {
                 FunctionScopePtr func = ar->findFunction(Util::toLower(symbol));
                 if (func && func->isUserFunction()) {
                   func->setVolatile();
@@ -447,7 +451,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
               }
             case FunType::InterfaceExists:
             case FunType::ClassExists:
-              if (!m_no_volatile_check) {
+              {
                 ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
                 if (cls && cls->isUserClass()) {
                   cls->setVolatile();
@@ -957,7 +961,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
                 }
                 break;
               }
-              if (!m_no_volatile_check && func->isUserFunction()) {
+              if (func->isUserFunction()) {
                 func->setVolatile();
               }
               if (!func->isVolatile() && m_type == FunType::FunctionExists) {
@@ -972,7 +976,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             for (ClassScopePtrVec::const_iterator it = classes.begin();
                  it != classes.end(); ++it) {
               ClassScopePtr cls = *it;
-              if (!m_no_volatile_check && cls->isUserClass()) {
+              if (cls->isUserClass()) {
                 cls->setVolatile();
               }
               if (cls->isInterface()) {
@@ -996,7 +1000,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             for (ClassScopePtrVec::const_iterator it = classes.begin();
                  it != classes.end(); ++it) {
               ClassScopePtr cls = *it;
-              if (!m_no_volatile_check && cls->isUserClass()) {
+              if (cls->isUserClass()) {
                 cls->setVolatile();
               }
               if (!cls->isInterface() && !cls->isTrait()) {

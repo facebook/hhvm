@@ -201,7 +201,7 @@ public:
   int                     prologueArgs(TransID id)    const;
 
   TransID                 addTransProfile(const Tracelet&       tracelet,
-                                          const RegionContext&  rCtx,
+                                          Offset                initSpOffset,
                                           const PostConditions& pconds);
   TransID                 addTransNonProf(TransKind kind,
                                           const SrcKey& sk);

@@ -103,14 +103,6 @@ Variant f_constant(const String& name) {
   const char *data = name.data();
   int len = name.length();
 
-  // slice off starting backslash
-  bool hadInitialBackslash = false;
-  if (len > 0 && data[0] == '\\') {
-    data += 1;
-    len -= 1;
-    hadInitialBackslash = true;
-  }
-
   char *colon;
   if ((colon = (char*)memchr(data, ':', len)) && colon[1] == ':') {
     // class constant
@@ -126,13 +118,7 @@ Variant f_constant(const String& name) {
     }
     raise_warning("Couldn't find constant %s", data);
   } else {
-    TypedValue* cns;
-    if (hadInitialBackslash) {
-      String s(data, len, CopyString);
-      cns = Unit::loadCns(s.get());
-    } else {
-      cns = Unit::loadCns(name.get());
-    }
+    auto cns = Unit::loadCns(name.get());
     if (cns) return tvAsVariant(cns);
   }
 
@@ -152,14 +138,6 @@ bool f_defined(const String& name, bool autoload /* = true */) {
   const char *data = name.data();
   int len = name.length();
 
-  // slice off starting backslash
-  bool hadInitialBackslash = false;
-  if (len > 0 && data[0] == '\\') {
-    data += 1;
-    len -= 1;
-    hadInitialBackslash = true;
-  }
-
   char *colon;
   if ((colon = (char*)memchr(data, ':', len)) && colon[1] == ':') {
     // class constant
@@ -173,12 +151,7 @@ bool f_defined(const String& name, bool autoload /* = true */) {
     return false;
   } else {
     auto* cb = autoload ? Unit::loadCns : Unit::lookupCns;
-    if (hadInitialBackslash) {
-      String s(data, len, CopyString);
-      return cb(s.get());
-    } else {
-      return cb(name.get());
-    }
+    return cb(name.get());
   }
 }
 

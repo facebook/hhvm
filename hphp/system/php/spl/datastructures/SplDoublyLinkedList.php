@@ -15,7 +15,7 @@ class _SplDoublyLinkedListNode {
  *
  */
 class SplDoublyLinkedList
-  implements Iterator, ArrayAccess, Countable, Serializable {
+  implements \HH\Iterator, ArrayAccess, Countable, Serializable {
 
   const IT_MODE_LIFO = 2;
   const IT_MODE_FIFO = 0;

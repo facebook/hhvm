@@ -158,7 +158,7 @@ inline ActRec* regAnchorFPForArgs() {
   // Like regAnchorFP, but only account for FCallBuiltin
   VMExecutionContext* context = g_vmContext;
   ActRec* cur = context->getFP();
-  if (cur && cur->m_func->info()) {
+  if (cur && cur->m_func->isCPPBuiltin()) {
     cur = context->getPrevVMState(cur);
   }
   return cur;

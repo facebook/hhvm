@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/pprof-server.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/util/shared-memory-allocator.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/server/http-server.h"

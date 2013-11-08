@@ -76,11 +76,11 @@ public:
   }
 
   /*
-   * The maximum number of registers this SSATmp may need allocated.
+   * The maximum number of words this SSATmp may need allocated.
    * This is based on the type of the temporary (some types never have
    * regs, some have two, etc).
    */
-  int               numNeededRegs() const;
+  int numWords() const;
 
 private:
   friend class IRUnit;

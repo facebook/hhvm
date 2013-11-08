@@ -140,6 +140,8 @@ class FailedCodeGen : public std::runtime_error {
  *     DParam    single dst has type of the instruction's type parameter
  *     DLdRef    single dst has type of the instruction's type parameter, with
  *               any specialization removed
+ *     DAllocObj single dst has a type of a newly allocated object; may be a
+ *               specialized object type if the class is known
  *     DThis     single dst has type Obj<ctx>, where ctx is the
  *               current context class
  *     DArith    single dst has a type based on arithmetic type rules
@@ -169,7 +171,7 @@ class FailedCodeGen : public std::runtime_error {
  *
  * flags:
  *
- *   See doc/ir.specification for the meaning of these flag various.
+ *   See doc/ir.specification for the meaning of these flags.
  *
  *   The flags in this opcode table supply default values for the
  *   querying functions in IRInstruction---those functions involve
@@ -281,6 +283,7 @@ O(ConvResToStr,                 D(Str), S(Res),                         N|Er) \
 O(ConvCellToStr,                D(Str), S(Cell),                        N|Er) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
+O(ThingExists,                 D(Bool), S(Str),                  N|E|Er|Refs) \
 O(InstanceOf,                  D(Bool), S(Cls) S(Cls),                   C|N) \
 O(InstanceOfIface,             D(Bool), S(Cls) CStr,                     C|N) \
 O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \
@@ -352,12 +355,15 @@ O(ExitOnVarEnv,                     ND, S(FramePtr),                       E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                     N|E) \
 O(RaiseError,                       ND, S(Str),            E|N|Mem|Refs|T|Er) \
 O(RaiseWarning,                     ND, S(Str),              E|N|Mem|Refs|Er) \
+O(RaiseArrayIndexNotice,            ND, S(Int),                 E|N|Mem|Refs) \
 O(CheckInit,                        ND, S(Gen),                           NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),               NF) \
 O(CheckCold,                        ND, NA,                                E) \
 O(CheckNullptr,                     ND, S(CountedStr,Nullptr),            NF) \
 O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
+O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                     E) \
+O(CheckPackedArrayElemNull,    D(Bool), S(Arr) S(Int),                     E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr),            NF) \
 O(Unbox,                     DUnbox(0), S(Gen),                           NF) \
 O(Box,                         DBox(0), S(Init),             E|N|Mem|CRc|PRc) \
@@ -372,6 +378,7 @@ O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
 O(LdMem,                        DParam, S(PtrToGen) C(Int),               NF) \
 O(LdProp,                       DParam, S(Obj) C(Int),                    NF) \
 O(LdElem,                      D(Cell), S(PtrToCell) S(Int),      E|Mem|Refs) \
+O(LdPackedArrayElem,            D(Gen), S(Arr) S(Int),            E|Mem|Refs) \
 O(LdRef,                        DLdRef, S(BoxedCell),                     NF) \
 O(LdThis,                        DThis, S(FramePtr),                       C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
@@ -391,6 +398,10 @@ O(LdCns,                        DParam, CStr,                             NF) \
 O(LookupCns,                    DParam, CStr,                E|Refs|Er|N|Mem) \
 O(LookupCnsE,                   DParam, CStr,                E|Refs|Er|N|Mem) \
 O(LookupCnsU,                   DParam, CStr CStr,           E|Refs|Er|N|Mem) \
+O(LookupClsMethod,                  ND, S(Cls)                                \
+                                          S(Str)                              \
+                                          S(StkPtr)                           \
+                                          S(FramePtr),            N|E|Er|Mem) \
 O(LdClsMethodCache,         D(FuncCls), C(Str)                                \
                                           C(Str)                              \
                                           C(NamedEntity)                      \
@@ -410,9 +421,15 @@ O(LdObjInvoke,                 D(Func), S(Cls),                           NF) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                          E|N) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                            N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
-O(LdArrFuncCtx,                     ND, S(Arr) \
-                                        S(StkPtr) \
-                                        S(FramePtr),               N|Refs|Er) \
+O(LdArrFuncCtx,                     ND, S(Arr)                                \
+                                          S(StkPtr)                           \
+                                          S(FramePtr),           E|N|Refs|Er) \
+O(LdArrFPushCuf,                    ND, S(Arr)                                \
+                                          S(StkPtr)                           \
+                                          S(FramePtr),           E|N|Refs|Er) \
+O(LdStrFPushCuf,                    ND, S(Str)                                \
+                                          S(StkPtr)                           \
+                                          S(FramePtr),           E|N|Refs|Er) \
 O(LdFunc,                      D(Func), S(Str),              E|N|CRc|Refs|Er) \
 O(LdFuncCached,                D(Func), NA,                    N|C|E|Refs|Er) \
 O(LdFuncCachedU,               D(Func), NA,                    N|C|E|Refs|Er) \
@@ -424,8 +441,8 @@ O(LdSwitchDblIndex,             D(Int), S(Dbl) S(Int) S(Int),              N) \
 O(LdSwitchStrIndex,             D(Int), S(Str) S(Int) S(Int),          CRc|N) \
 O(LdSwitchObjIndex,             D(Int), S(Obj) S(Int) S(Int),       CRc|N|Er) \
 O(JmpSwitchDest,                    ND, S(Int),                          T|E) \
-O(AllocObj,                     D(Obj), S(Cls),                            N) \
-O(AllocObjFast,                 D(Obj), NA,                                N) \
+O(AllocObj,                  DAllocObj, S(Cls),                            N) \
+O(AllocObjFast,              DAllocObj, NA,                                N) \
 O(LdClsCtor,                   D(Func), S(Cls),                       C|Er|N) \
 O(StClosureFunc,                    ND, S(Obj),                            E) \
 O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \
@@ -433,6 +450,7 @@ O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
 O(NewPackedArray,               D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
 O(NewCol,                       D(Obj), C(Int) C(Int),                 N|PRc) \
+O(Clone,                        D(Obj), S(Obj),              N|E|PRc|Refs|Er) \
 O(LdRaw,                        DParam, SUnk,                             NF) \
 O(FreeActRec,              D(FramePtr), S(FramePtr),                     Mem) \
 /*    name                      dstinfo srcinfo                      flags */ \

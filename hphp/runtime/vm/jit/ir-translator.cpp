@@ -285,6 +285,11 @@ IRTranslator::translateCGetL(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translatePushL(const NormalizedInstruction& ni) {
+  HHIR_EMIT(PushL, ni.imm[0].u_LA);
+}
+
+void
 IRTranslator::translateCGetL2(const NormalizedInstruction& ni) {
   HHIR_EMIT(CGetL2, ni.imm[0].u_LA);
 }
@@ -868,6 +873,11 @@ IRTranslator::translateFPushFunc(const NormalizedInstruction& i) {
 }
 
 void
+IRTranslator::translateFPushClsMethod(const NormalizedInstruction& i) {
+  HHIR_EMIT(FPushClsMethod, i.imm[0].u_IVA);
+}
+
+void
 IRTranslator::translateFPushClsMethodD(const NormalizedInstruction& i) {
   HHIR_EMIT(FPushClsMethodD,
             i.imm[0].u_IVA, // num params
@@ -1018,12 +1028,11 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
   if (callee->attrs() & AttrMayUseVV) {
     return refuse("may use dynamic environment");
   }
-  if (!(callee->attrs() & AttrHot) && (caller->attrs() & AttrHot)) {
-    return refuse("inlining cold func into hot func");
-  }
 
   ////////////
 
+  bool hotCallingCold = !(callee->attrs() & AttrHot) &&
+                         (caller->attrs() & AttrHot);
   uint64_t cost = 0;
   int inlineDepth = 0;
   Op op = OpLowInvalid;
@@ -1068,6 +1077,11 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
 
     if (cost > RuntimeOption::EvalHHIRInliningMaxCost) {
       return refuse("too expensive");
+    }
+
+    if (cost > RuntimeOption::EvalHHIRAlwaysInlineMaxCost &&
+        hotCallingCold) {
+      return refuse("inlining sizeable cold func into hot func");
     }
 
     if (Transl::opcodeBreaksBB(op)) {
@@ -1167,6 +1181,10 @@ IRTranslator::translateNewPackedArray(const NormalizedInstruction& i) {
 void
 IRTranslator::translateNewCol(const NormalizedInstruction& i) {
   HHIR_EMIT(NewCol, i.imm[0].u_IVA, i.imm[1].u_IVA);
+}
+
+void IRTranslator::translateClone(const NormalizedInstruction&) {
+  HHIR_EMIT(Clone);
 }
 
 void

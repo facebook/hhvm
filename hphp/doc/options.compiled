@@ -278,15 +278,6 @@ used for PHP responses in case no other charset has been set explicitly.
 
     APC {
       EnableApc = true
-      UseSharedMemory = false
-      SharedMemorySize = 1024  # in MB
-
-- UseSharedMemory
-
-When off, APC will use regular process memory for faster access, but only
-limited to single process. Shared memory model allows sharing between two or
-more processes, but it has SharedMemorySize as upper limit.
-
       PrimeLibrary = filename
       LoadThread = 2
       CompletionKeys {
@@ -703,6 +694,8 @@ users can use the same machine serving their own source files.
 = HPHPi Settings
 
   Eval {
+    CheckSymLink = true
+
     EnableHipHopSyntax = false
     EnableHipHopExperimentalSyntax = false
 
@@ -736,6 +729,14 @@ users can use the same machine serving their own source files.
     CodeCoverageOutputFile =
   }
 
+- CheckSymLink
+
+Determines whether or not to follow symlinks (and, from a performance
+standpoint, make the associated realpath() calls needed) when resolving
+includes/requires and loading code. This is enabled by default for parity with
+the reference implementation. If not needed for a particular application and/or
+configuration, disable this when tuning.
+
 = MySQL
 
   MySQL {
@@ -746,6 +747,7 @@ users can use the same machine serving their own source files.
     SlowQueryThreshold = 1000  # in ms, log slow queries as errors
     KillOnTimeout = false
     Socket =                   # Default location to look for mysql.sock
+    TypedResults = true
   }
 
 - KillOnTimeout
@@ -753,6 +755,11 @@ users can use the same machine serving their own source files.
 When a query takes long time to execute on server, client has a chance to
 kill it to avoid extra server cost by turning on KillOnTimeout.
 
+- TypedResults
+
+Zend returns strings and NULL only for MySQL results, not integers or floats.
+HHVM return ints (and, sometimes, actual doubles). This behavior can be
+disabled by setting TypedResults to false.
 
 = HTTP Monitoring
 

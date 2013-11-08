@@ -24,7 +24,7 @@ abstract class FilterIterator extends IteratorIterator {
    *
    * @return     mixed   The FilterIterator.
    */
-  public function __construct(Iterator $it) {
+  public function __construct(\Iterator $it) {
     $this->it = $it;
   }
 

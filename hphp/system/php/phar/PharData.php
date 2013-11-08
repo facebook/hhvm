@@ -93,7 +93,7 @@ class PharData extends Phar {
    *                     array mapping internal path of file to the full path
    *                     of the file on the filesystem.
    */
-  public function buildFromIterator(Iterator $iter, string $base_directory) {
+  public function buildFromIterator(\Iterator $iter, string $base_directory) {
     throw new Exception('Not implemented yet');
   }
 

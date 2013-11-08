@@ -62,7 +62,7 @@ public:
    */
   static Variant Explode(const String& input, const String& delimiter,
                          int limit = 0x7FFFFFFF);
-  static String  Implode(CArrRef items, const String& delim); // == Join()
+  static String  Implode(CVarRef items, const String& delim); // == Join()
   static Variant Split(const String& str, int split_length = 1);
   static Variant ChunkSplit(
     const String& body, int chunklen = 76,

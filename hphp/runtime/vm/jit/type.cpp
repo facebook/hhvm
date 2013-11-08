@@ -33,6 +33,70 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
+#define IRT(name, ...) const Type Type::name(Type::k##name);
+IR_TYPES
+#undef IRT
+
+std::string Type::toString() const {
+  // Try to find an exact match to a predefined type
+# define IRT(name, ...) if (*this == name) return #name;
+  IR_TYPES
+# undef IRT
+
+  if (isBoxed()) {
+    return folly::to<std::string>("Boxed", innerType().toString());
+  }
+  if (isPtr()) {
+    return folly::to<std::string>("PtrTo", deref().toString());
+  }
+
+  auto t = *this;
+  std::vector<std::string> parts;
+  if (isSpecialized()) {
+    if (canSpecializeClass()) {
+      assert(m_class);
+      parts.push_back(folly::to<std::string>(Type(m_bits & kAnyObj).toString(),
+                                             '<', m_class->name()->data(),
+                                             '>'));
+      t -= AnyObj;
+    } else if (canSpecializeArrayKind()) {
+      assert(hasArrayKind());
+      parts.push_back(
+        folly::to<std::string>(Type(m_bits & kAnyArr).toString(), '<',
+                               ArrayData::kindToString(m_arrayKind), '>'));
+      t -= AnyArr;
+    } else {
+      not_reached();
+    }
+  }
+
+  // Concat all of the primitive types in the custom union type
+# define IRT(name, ...) if (name <= t) parts.push_back(#name);
+  IRT_PRIMITIVE
+# undef IRT
+    assert(!parts.empty());
+  if (parts.size() == 1) {
+    return parts.front();
+  }
+  return folly::format("{{{}}}", folly::join('|', parts)).str();
+}
+
+std::string Type::debugString(Type t) {
+  return t.toString();
+}
+
+Type Type::fromString(const std::string& str) {
+  static hphp_string_map<Type> types;
+  static bool init = false;
+  if (UNLIKELY(!init)) {
+#   define IRT(name, ...) types[#name] = name;
+    IR_TYPES
+#   undef IRT
+    init = true;
+  }
+  return mapGet(types, str, Type::None);
+}
+
 bool Type::checkValid() const {
   if (m_extra) {
     assert((!(m_bits & kAnyObj) || !(m_bits & kAnyArr)) &&
@@ -494,6 +558,18 @@ Type thisReturn(const IRInstruction* inst) {
   return Type::Obj.specialize(func->cls());
 }
 
+Type allocObjReturn(const IRInstruction* inst) {
+  if (inst->op() == AllocObjFast) {
+    return Type::Obj.specialize(inst->extra<AllocObjFast>()->cls);
+  }
+  if (inst->op() == AllocObj) {
+    return inst->src(0)->isConst()
+      ? Type::Obj.specialize(inst->src(0)->getValClass())
+      : Type::Obj;
+  }
+  always_assert(0);
+}
+
 }
 
 Type boxType(Type t) {
@@ -522,6 +598,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DUnbox(n) return inst->src(n)->type().unbox();
 #define DBox(n)   return boxType(inst->src(n)->type());
 #define DParam    return inst->typeParam();
+#define DAllocObj return allocObjReturn(inst);
 #define DLdRef    return ldRefReturn(inst);
 #define DThis     return thisReturn(inst);
 #define DMulti    return Type::None;
@@ -549,6 +626,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DUnbox
 #undef DBox
 #undef DParam
+#undef DAllocObj
 #undef DLdRef
 #undef DThis
 #undef DMulti
@@ -727,6 +805,7 @@ void assertOperandTypes(const IRInstruction* inst) {
                              "invalid src num");
 #define DParam      requireTypeParam();
 #define DLdRef      requireTypeParam();
+#define DAllocObj
 #define DThis
 #define DArith      checkDst(inst->typeParam() == Type::None, \
                              "DArith should have no type parameter");
@@ -761,6 +840,7 @@ void assertOperandTypes(const IRInstruction* inst) {
 #undef DBox
 #undef DofS
 #undef DParam
+#undef DAllocObj
 #undef DLdRef
 #undef DThis
 #undef DArith

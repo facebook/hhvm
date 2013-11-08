@@ -63,9 +63,8 @@ ObjectData::~ObjectData() {
 }
 
 HOT_FUNC
-void ObjectData::destruct() {
+bool ObjectData::destruct() {
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
-    assert(RuntimeOption::EnableObjDestructCall);
     g_vmContext->m_liveBCObjs.erase(this);
   }
   if (!noDestruct()) {
@@ -77,11 +76,12 @@ void ObjectData::destruct() {
       // case.
       auto& faults = g_vmContext->m_faults;
       if (!faults.empty()) {
-        if (faults.back().m_faultType == Fault::Type::CppException) return;
+        if (faults.back().m_faultType == Fault::Type::CppException) return true;
       }
       // We raise the refcount around the call to __destruct(). This is to
       // prevent the refcount from going to zero when the destructor returns.
       CountableHelper h(this);
+      RefCount c = this->getCount();
       TypedValue retval;
       tvWriteNull(&retval);
       try {
@@ -92,8 +92,10 @@ void ObjectData::destruct() {
         handle_destructor_exception();
       }
       tvRefcountedDecRef(&retval);
+      return c == this->getCount();
     }
   }
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1144,9 +1146,10 @@ void ObjectData::setProp(Class* ctx,
       raise_error("Cannot access protected property");
     }
     // Fall through to the last case below
-  } else if (UNLIKELY(!*key->data())) {
-    throw_invalid_property_name(StrNR(key));
   } else if (!getAttribute(UseSet)) {
+    if (UNLIKELY(!*key->data())) {
+      throw_invalid_property_name(StrNR(key));
+    }
     // when seting a dynamic property, do not write
     // directly to the TypedValue in the HphpArray, since
     // its m_aux field is used to store the string hash of
@@ -1328,16 +1331,18 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
       o_properties.remove(StrNR(key).asString(),
                           true /* isString */);
     }
-  } else if (UNLIKELY(!*key->data())) {
-    throw_invalid_property_name(StrNR(key));
   } else {
     assert(!accessible);
-    if (getAttribute(UseUnset)) {
+    if (!getAttribute(UseUnset)) {
+      if (UNLIKELY(!*key->data())) {
+        throw_invalid_property_name(StrNR(key));
+      } else if (visible) {
+        raise_error("Cannot unset inaccessible property");
+      }
+    } else {
       TypedValue ignored;
       invokeUnset(&ignored, key);
       tvRefcountedDecRef(&ignored);
-    } else if (visible) {
-      raise_error("Cannot unset inaccessible property");
     }
   }
 }
@@ -1466,7 +1471,7 @@ void ObjectData::cloneSet(ObjectData* clone) {
                                sizeof(ObjectData) + builtinPropSize());
   for (Slot i = 0; i < nProps; i++) {
     tvRefcountedDecRef(&clonePropVec[i]);
-    tvDupFlattenVars(&propVec()[i], &clonePropVec[i], nullptr);
+    tvDupFlattenVars(&propVec()[i], &clonePropVec[i]);
   }
   if (o_properties.get()) {
     clone->reserveProperties(o_properties.size());

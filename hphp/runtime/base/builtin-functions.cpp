@@ -67,7 +67,7 @@ const StaticString
   s_constant("constant"),
   s_type("type"),
   s_failure("failure"),
-  s_Traversable("Traversable"),
+  s_HH_Traversable("HH\\Traversable"),
   s_KeyedTraversable("KeyedTraversable"),
   s_Indexish("Indexish"),
   s_XHPChild("XHPChild");
@@ -842,7 +842,7 @@ String concat4(const String& s1, const String& s2, const String& s3,
 }
 
 bool interface_supports_array(const StringData* s) {
-  return (s->isame(s_Traversable.get()) ||
+  return (s->isame(s_HH_Traversable.get()) ||
           s->isame(s_KeyedTraversable.get()) ||
           s->isame(s_Indexish.get()) ||
           s->isame(s_XHPChild.get()));
@@ -850,7 +850,7 @@ bool interface_supports_array(const StringData* s) {
 
 bool interface_supports_array(const std::string& n) {
   const char* s = n.c_str();
-  return ((n.size() == 11 && !strcasecmp(s, "Traversable")) ||
+  return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
           (n.size() == 16 && !strcasecmp(s, "KeyedTraversable")) ||
           (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
           (n.size() == 8 && !strcasecmp(s, "XHPChild")));

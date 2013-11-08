@@ -1,0 +1,5 @@
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+HipHop Fatal error: Argument 1 passed to trav() must be an instance of Traversable, array given in %s on line 8

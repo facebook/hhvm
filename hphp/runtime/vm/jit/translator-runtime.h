@@ -54,24 +54,33 @@ static_assert(sizeof(MInstrState) - sizeof(uintptr_t) // return address
 
 /* Helper functions for translated code */
 
-/**
+/*
  * Only use in case of extreme shadiness.
  *
- * There are a few cases in the JIT where we allocate a pre-live ActRec on
- * the stack, call updateMarker() and then a CPP helper
- * (methodCacheSlowPath, loadArrayFunctionContext) to fill the ActRec with
- * te function that it needs to call. In the case that the helper throws an
- * exception, the unwinder sees a strange stack marker that has moved while
- * the bytecode offset remains unchanged and believes it has decref work to
- * do; we need the unwinder to ignore the half-built ActRec allocated on
- * the stack when building its back-trace and certainly to avoid attempting
- * to decref its contents. We achieve this by overwriting the ActRec cells
- * with null TypeValues.
+ * There are a few cases in the JIT where we allocate a pre-live
+ * ActRec on the stack, and then call a helper that may re-enter the
+ * VM (e.g. for autoload) to do the rest of the work filling it out.
+ * Examples are methodCacheSlowPath or loadArrayFunctionContext.
  *
- * A TypedValue* is returned here to allow the CPP helper to write whatever
- * it needs to be decref'd into those eval cells, to ensure that the
- * unwinder leaves state the same as it was before the call into FPush
- * bytecode that started this whole stack trace.
+ * In these situations, we set up a "strange marker" by calling
+ * updateMarker() before the instruction is done (but after the
+ * pre-live ActRec is pushed).  This marker will have a lower SP than
+ * the start of the instruction, but the PC will still point at the
+ * instruction.  This is done so that if we need to re-enter from the
+ * C++ helper we don't clobber the pre-live ActRec.
+ *
+ * However, if we throw, the unwinder won't think we're in the FPI
+ * region yet.  So in the case that the helper throws an exception,
+ * the unwinder will believe it has to decref three normal stack slots
+ * (where the pre-live ActRec is).  We need the unwinder to ignore the
+ * half-built ActRec allocated on the stack and certainly to avoid
+ * attempting to decref its contents.  We achieve this by overwriting
+ * the ActRec cells with nulls.
+ *
+ * A TypedValue* is also returned here to allow the CPP helper to
+ * write whatever it needs to be decref'd into one of the eval cells,
+ * to ensure that the unwinder leaves state the same as it was before
+ * the call into FPush bytecode that threw.
  */
 inline TypedValue* arPreliveOverwriteCells(ActRec *preLiveAR) {
   auto actRecCell = reinterpret_cast<TypedValue*>(preLiveAR);
@@ -88,13 +97,12 @@ void setNewElem(TypedValue* base, Cell val);
 void setNewElemArray(TypedValue* base, Cell val);
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis);
 RefData* boxValue(TypedValue tv);
-ArrayData* array_add(ArrayData* a1, ArrayData* a2);
+ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2);
 
 /* Helper functions for conversion instructions that are too
  * complicated to inline
  */
 ArrayData* convCellToArrHelper(TypedValue tv);
-int64_t convArrToBoolHelper(const ArrayData* a);
 int64_t convArrToDblHelper(ArrayData* a);
 int64_t convStrToDblHelper(const StringData* s);
 int64_t convCellToDblHelper(TypedValue tv);
@@ -119,8 +127,6 @@ void raise_error_sd(const StringData* sd);
 
 RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val);
 
-bool instanceOfHelper(const Class* objClass, const Class* testClass);
-
 int64_t ak_exist_string(ArrayData* arr, StringData* key);
 int64_t ak_exist_int(ArrayData* arr, int64_t key);
 int64_t ak_exist_string_obj(ObjectData* obj, StringData* key);
@@ -129,6 +135,8 @@ int64_t ak_exist_int_obj(ObjectData* obj, int64_t key);
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
+
+int32_t arrayVsize(ArrayData*);
 
 TypedValue* ldGblAddrHelper(StringData* name);
 TypedValue* ldGblAddrDefHelper(StringData* name);
@@ -149,11 +157,17 @@ Cell lookupCnsHelper(const TypedValue* tv,
 Cell lookupCnsUHelper(const TypedValue* tv,
                       StringData* nm,
                       StringData* fallback);
+void lookupClsMethodHelper(Class* cls,
+                           StringData* meth,
+                           ActRec* ar,
+                           ActRec* fp);
 
 void checkFrame(ActRec* fp, Cell* sp, bool checkLocals);
 void traceCallback(ActRec* fp, Cell* sp, int64_t pcOff, void* rip);
 
-void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp);
+void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
+void fpushCufHelperArray(ArrayData*, ActRec* preLiveAR, ActRec* fp);
+void fpushCufHelperString(StringData*, ActRec* preLiveAR, ActRec* fp);
 
 const Func* lookupUnknownFunc(const StringData*);
 

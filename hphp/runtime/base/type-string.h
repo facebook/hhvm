@@ -274,20 +274,6 @@ public:
   int rfind(const String& s, int pos = 0, bool caseSensitive = true) const;
 
   /**
-   * Replace a substr with another and return replaced one. Note, read
-   * http://www.php.net/substr about meanings of negative start or length.
-   *
-   * The form that takes a "count" reference will still replace all occurrences
-   * and return total replaced count in the out parameter. It does NOT mean
-   * it will replace at most that many occurrences, so count's input value
-   * is never checked.
-   */
-  String replace(int start, int length, const String& replacement) const;
-  String replace(const String& search, const String& replacement) const;
-  String replace(const String& search, const String& replacement, int &count,
-                 bool caseSensitive) const;
-
-  /**
    * Operators
    */
   String &operator =  (StringData *data);

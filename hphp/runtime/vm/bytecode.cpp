@@ -685,13 +685,13 @@ static std::string toStringElm(const TypedValue* tv) {
     }
     break;
   case KindOfArray:
-    assert(tv->m_data.parr->getCount() > 0);
+    assert_refcount_realistic_nz(tv->m_data.parr->getCount());
     os << tv->m_data.parr
        << "c(" << tv->m_data.parr->getCount() << ")"
        << ":Array";
      break;
   case KindOfObject:
-    assert(tv->m_data.pobj->getCount() > 0);
+    assert_refcount_realistic_nz(tv->m_data.pobj->getCount());
     os << tv->m_data.pobj
        << "c(" << tv->m_data.pobj->getCount() << ")"
        << ":Object("
@@ -699,7 +699,7 @@ static std::string toStringElm(const TypedValue* tv) {
        << ")";
     break;
   case KindOfResource:
-    assert(tv->m_data.pres->getCount() > 0);
+    assert_refcount_realistic_nz(tv->m_data.pres->getCount());
     os << tv->m_data.pres
        << "c(" << tv->m_data.pres->getCount() << ")"
        << ":Resource("
@@ -779,7 +779,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
     os << ">";
   }
 
-  assert(!func->info() || func->numIterators() == 0);
+  assert(!func->methInfo() || func->numIterators() == 0);
   if (func->numIterators() > 0) {
     os << "|";
     Iter* it = &((Iter*)&tv[1])[-1];
@@ -1102,7 +1102,7 @@ VMExecutionContext::lookupClsMethod(const Func*& f,
       f = cls->lookupMethod(s___callStatic.get());
       if (!f) {
         if (raise) {
-          // Throw a fatal errpr
+          // Throw a fatal error
           lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, true);
         }
         return LookupResult::MethodNotFound;
@@ -1465,8 +1465,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
   // cppext functions/methods have their own logic for raising
   // warnings for missing arguments, so we only need to do this work
   // for non-cppext functions/methods
-  if (raiseMissingArgumentWarnings && !func->info() &&
-      !(func->attrs() & AttrNative)) {
+  if (raiseMissingArgumentWarnings && !func->isCPPBuiltin()) {
     // need to sync m_pc to pc for backtraces/re-entry
     SYNC();
     const Func::ParamInfoVec& paramInfo = func->params();
@@ -2423,7 +2422,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
     ar->setThis(nullptr);
   }
   Func* func = unit->getMain(cls);
-  assert(!func->info());
+  assert(!func->isCPPBuiltin());
   assert(!func->isGenerator());
   ar->m_func = func;
   ar->initNumArgs(0);
@@ -3647,7 +3646,7 @@ OPTBLD_INLINE void VMExecutionContext::iopConcat(PC& pc) {
     cellAsVariant(*c2) = concat(cellAsVariant(*c2).toString(),
                                 cellAsCVarRef(*c1).toString());
   }
-  assert(c2->m_data.pstr->getCount() > 0);
+  assert_refcount_realistic_nz(c2->m_data.pstr->getCount());
   m_stack.popC();
 }
 
@@ -3895,13 +3894,6 @@ bool VMExecutionContext::iopInstanceOfHelper(const StringData* str1, Cell* c2) {
   // table without a Class* so we need to check if it's there.
   if (LIKELY(rhs && rhs->getCachedClass() != nullptr)) {
     return cellInstanceOf(c2, rhs);
-  }
-  auto normName = normalizeNS(str1);
-  if (normName) {
-    rhs = Unit::GetNamedEntity(normName.get(), false);
-    if (LIKELY(rhs && rhs->getCachedClass() != nullptr)) {
-      return cellInstanceOf(c2, rhs);
-    }
   }
   return false;
 }
@@ -4368,6 +4360,18 @@ OPTBLD_INLINE void VMExecutionContext::iopCGetL3(PC& pc) {
   Cell* to = oldSubTop;
   TypedValue* fr = frame_local(m_fp, local);
   cgetl_body(m_fp, fr, to, local);
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopPushL(PC& pc) {
+  NEXT();
+  DECODE_LA(local);
+  TypedValue* locVal = frame_local(m_fp, local);
+  assert(locVal->m_type != KindOfUninit);
+  assert(locVal->m_type != KindOfRef);
+
+  TypedValue* dest = m_stack.allocTV();
+  *dest = *locVal;
+  locVal->m_type = KindOfUninit;
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopCGetN(PC& pc) {
@@ -5554,7 +5558,7 @@ void VMExecutionContext::pushClsMethodImpl(Class* cls,
     if (!forwarding) {
       ar->setClass(cls);
     } else {
-      /* Propogate the current late bound class if there is one, */
+      /* Propagate the current late bound class if there is one, */
       /* otherwise use the class given by this instruction's input */
       if (m_fp->hasThis()) {
         cls = m_fp->getThis()->getVMClass();
@@ -5830,7 +5834,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassCW(PC& pc) {
     TRACE(1, "FPassCW: function %s(%d) param %d is by reference, "
           "raising a strict warning (attr:0x%x)\n",
           func->name()->data(), func->numParams(), paramId,
-          func->info() ? func->info()->attribute : 0);
+          func->methInfo() ? func->methInfo()->attribute : 0);
     raise_strict_warning("Only variables should be passed by reference");
   }
 }
@@ -5841,7 +5845,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFPassCE(PC& pc) {
     TRACE(1, "FPassCE: function %s(%d) param %d is by reference, "
           "throwing a fatal error (attr:0x%x)\n",
           func->name()->data(), func->numParams(), paramId,
-          func->info() ? func->info()->attribute : 0);
+          func->methInfo() ? func->methInfo()->attribute : 0);
     raise_error("Cannot pass parameter %d by reference", paramId+1);
   }
 }

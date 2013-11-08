@@ -235,23 +235,23 @@ public:
   /**
    * Called by scanner rules.
    */
-  bool shortTags() const { return m_type & AllowShortTags;}
-  bool aspTags() const { return m_type & AllowAspTags;}
-  bool full() const { return m_type & ReturnAllTokens;}
+  bool shortTags() const { return (m_type & AllowShortTags) == AllowShortTags;}
+  bool aspTags() const { return (m_type & AllowAspTags) == AllowAspTags;}
+  bool full() const { return (m_type & ReturnAllTokens) == ReturnAllTokens;}
   int lastToken() const { return m_lastToken;}
   void setToken(const char *rawText, int rawLeng, int type = -1) {
     m_token->setText(rawText, rawLeng);
     incLoc(rawText, rawLeng, type);
   }
   void stepPos(const char *rawText, int rawLeng, int type = -1) {
-    if (m_type & ReturnAllTokens) {
+    if (shortTags()) {
       m_token->setText(rawText, rawLeng);
     }
     incLoc(rawText, rawLeng, type);
   }
   void setToken(const char *rawText, int rawLeng,
                 const char *ytext, int yleng, int type = -1) {
-    if (m_type & ReturnAllTokens) {
+    if (full()) {
       m_token->setText(rawText, rawLeng);
     } else {
       m_token->setText(ytext, yleng);
@@ -307,11 +307,11 @@ public:
   }
 
   bool isXHPSyntaxEnabled() const {
-    return (m_type & AllowXHPSyntax) || m_isHHFile;
+    return ((m_type & AllowXHPSyntax) == AllowXHPSyntax) || m_isHHFile;
   }
 
   bool isHHSyntaxEnabled() const {
-    return (m_type & AllowHipHopSyntax) || m_isHHFile;
+    return ((m_type & AllowHipHopSyntax) == AllowHipHopSyntax) || m_isHHFile;
   }
 
   int getLookaheadLtDepth() {

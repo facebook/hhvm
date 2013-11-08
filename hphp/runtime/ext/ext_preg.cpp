@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/ext/ext_mb.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-local.h"
 
@@ -61,6 +62,11 @@ Variant f_preg_replace(CVarRef pattern, CVarRef replacement, CVarRef subject,
 Variant f_preg_replace_callback(CVarRef pattern, CVarRef callback,
                                 CVarRef subject, int limit /* = -1 */,
                                 VRefParam count /* = null */) {
+  if (!f_is_callable(callback)) {
+    raise_warning("Not a valid callback function %s",
+        callback.toString().data());
+    return empty_string;
+  }
   return preg_replace_impl(pattern, callback, subject, limit, count, true);
 }
 

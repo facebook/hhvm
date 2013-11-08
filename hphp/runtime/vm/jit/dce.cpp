@@ -18,11 +18,12 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/opt.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
-#include "hphp/runtime/vm/jit/mutation.h"
 
 namespace HPHP {
 namespace JIT {
@@ -246,12 +247,14 @@ void optimizeRefCount(IRUnit& unit, DceState& state, UseCounts& uses) {
       // This assert is often hit when an instruction should have a
       // consumesReferences flag but doesn't.
       auto& s = state[inst];
-      always_assert_log(inst->src(0)->type().notCounted() || s.decRefNZed(),
-      [&]{
-        return folly::format("\n{} has state {} in unit {}\n",
-                             inst->toString(), s.toString(),
-                             unit.toString()).str();
-        });
+      always_assert_log(
+        inst->src(0)->type().notCounted() || s.decRefNZed(),
+        [&] {
+          return folly::format("\n{} has state {} in unit {}\n",
+                               inst->toString(), s.toString(),
+                               unit.toString()).str();
+        }
+      );
       inst->setOpcode(Mov);
       s.setDead();
     }
@@ -630,6 +633,95 @@ void consumeIncRef(const IRInstruction* consumer, const SSATmp* src,
   }
 }
 
+typedef smart::hash_map<SSATmp*, double> TmpDelta;
+typedef smart::hash_map<Block*, TmpDelta> BlockMap;
+
+SSATmp* origSrc(IRInstruction& inst) {
+  SSATmp* src = inst.src(0);
+  while (src->inst()->isPassthrough()) {
+    src = src->inst()->getPassthroughValue();
+  }
+  return src;
+}
+
+/*
+ * Simulate the effect of block b on refcounts of
+ * SSATmps.
+ */
+void updateCounts(Block* b, TmpDelta& delta) {
+  for (auto& inst: *b) {
+    Opcode op = inst.op();
+    if (op == IncRef || op == DecRef || op == DecRefNZ) {
+      if (inst.src(0)->type().notCounted()) {
+        continue;
+      }
+      SSATmp* src = origSrc(inst);
+      if (op == IncRef) {
+        delta[src]++;
+      } else if (op == DecRef || op == DecRefNZ) {
+        delta[src]--;
+      }
+    }
+  }
+}
+
+/*
+ * Populate each block in BlockMap with a map of the refcount
+ * delta for each SSATmp. Ideally, we want to maintain the map
+ * for every path through the trace. However, to avoid the
+ * exponential cost, we use a linear-time approximation here
+ * using an idea similar to Random Interpretation
+ * (Gulwani and Necula, POPL 2003). The logic for phi-nodes in
+ * the approximiation considers each predecessor equally likely,
+ * and uses the average as the incoming ref-count for the phi-node.
+ */
+void getRefDeltas(IRUnit& unit, BlockMap& map) {
+  auto blocks = rpoSortCfg(unit);
+  for (auto* block : blocks) {
+    TmpDelta& delta = map[block];
+    int numPreds = block->numPreds();
+    block->forEachPred([&](Block* from) {
+      TmpDelta& predMap = map[from];
+      for (auto it = predMap.begin(), end = predMap.end(); it != end; ) {
+        SSATmp* src = it->first;
+        delta[src] += it->second / numPreds;
+        ++it;
+      }
+    });
+    updateCounts(block, delta);
+  }
+}
+
+const double deltaThreshold = 1E-15;
+
+/*
+ * Validate that orig and opt have the same ref-count deltas
+ * for SSATmps in each exit block.
+ */
+bool validateDeltas(BlockMap& orig, BlockMap& opt) {
+  for (auto it = opt.begin(), end = opt.end(); it != end; ++it) {
+    if (!it->first->isExit()) {
+      continue;
+    }
+    TmpDelta& deltaOpt = it->second;
+    TmpDelta& deltaOrig = orig[it->first];
+    for (auto it2 = deltaOpt.begin(), end2 = deltaOpt.end(); it2 != end2;
+           it2++) {
+      SSATmp* src = it2->first;
+      double delta = deltaOrig[src];
+      if (fabs(delta - it2->second) > deltaThreshold) {
+        FTRACE(1, "refcount mismatch in {}: orig: {} opt: {}, block {}\n",
+                   src->toString().c_str(),
+                   deltaOrig[src],
+                   it2->second,
+                   it->first->id());
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 } // anonymous namespace
 
 // Publicly exported functions:
@@ -687,6 +779,12 @@ void eliminateDeadCode(IRUnit& unit) {
     }
   }
 
+  BlockMap orig;
+
+  if (RuntimeOption::EvalHHIRValidateRefCount) {
+    getRefDeltas(unit, orig);
+  }
+
   // Optimize IncRefs and DecRefs.
   if (RuntimeOption::EvalHHIREnableRefCountOpt) {
     optimizeRefCount(unit, state, uses);
@@ -705,6 +803,15 @@ void eliminateDeadCode(IRUnit& unit) {
   forEachTrace(unit, [&](IRTrace* t) {
     removeDeadInstructions(t, state);
   });
+
+  if (RuntimeOption::EvalHHIRValidateRefCount) {
+    BlockMap opt;
+    getRefDeltas(unit, opt);
+    if (!validateDeltas(orig, opt)) {
+      dumpTrace(1, unit, "after RefCount optimization");
+      always_assert(0);
+    }
+  }
 
   // and remove empty exit traces
   removeEmptyExitTraces();

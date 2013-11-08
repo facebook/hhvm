@@ -114,18 +114,20 @@ void emitIncRefKnownType(vixl::MacroAssembler& a,
                          const size_t disp) {
   vixl::Label dontCount;
 
+  auto const& rAddr = rAsm;
+  auto const& rCount = rAsm2.W();
+
   // Read the inner object.
-  a.   Ldr   (rAsm, dataReg[disp + TVOFF(m_data)]);
+  a.   Ldr   (rAddr, dataReg[disp + TVOFF(m_data)]);
   // Check the count for staticness.
   static_assert(sizeof(RefCount) == 4, "");
-  auto const& rCount = rAsm.W();
-  a.   Ldr   (rCount, rAsm[FAST_REFCOUNT_OFFSET]);
+  a.   Ldr   (rCount, rAddr[FAST_REFCOUNT_OFFSET]);
   // Careful: tbnz can only test a single bit, so you pass a bit position
   // instead of a full-blown immediate. 0 = lsb, 63 = msb.
   a.   Tbnz  (rCount.X(), RefCountStaticBitPos, &dontCount);
   // Increment and store count.
   a.   Add   (rCount, rCount, 1);
-  a.   Str   (rCount, rAsm[FAST_REFCOUNT_OFFSET]);
+  a.   Str   (rCount, rAddr[FAST_REFCOUNT_OFFSET]);
 
   a.   bind  (&dontCount);
 }

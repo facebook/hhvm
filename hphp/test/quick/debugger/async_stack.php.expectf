@@ -34,6 +34,7 @@ w
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
 (no async stacktrace to display)
 c
 In genBar
@@ -47,6 +48,7 @@ Breakpoint 4 reached at genBar() on line 24 of %s/async_stack.php
   25   return $a + 2;
 
 w
+switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:24
 #1  genBar ()
@@ -57,6 +59,7 @@ w
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
 #0  genBar [%d]
 #1  <gen-array> [%d]
 #2  genFoo [%d]
@@ -70,6 +73,7 @@ Breakpoint 4 reached at genBar() on line 24 of %s/async_stack.php
   25   return $a + 2;
 
 w
+switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:24
 #1  genBar ()
@@ -80,6 +84,7 @@ w
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
 #0  genBar [%d]
 #1  <gen-array> [%d]
 #2  genFoo [%d]
@@ -93,6 +98,7 @@ Breakpoint 3 reached at gen2() on line 15 of %s/async_stack.php
   16   error_log('Finished in gen2');
 
 w
+switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:15
 #1  gen2 ()
@@ -103,6 +109,7 @@ w
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
 #0  gen2 [%d]
 #1  <gen-array> [%d]
 #2  genFoo [%d]
@@ -117,6 +124,7 @@ Breakpoint 1 reached at gen1() on line 8 of %s/async_stack.php
    9   return $a + 1;
 
 w
+switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:8
 #1  gen1 (45)
@@ -129,6 +137,7 @@ w
     at %s/async_stack.php:50
 w a
 Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
 #0  gen2 [%d]
 #1  <gen-array> [%d]
 #2  genFoo [%d]
@@ -141,6 +150,7 @@ Breakpoint 1 reached at gen1() on line 8 of %s/async_stack.php
    9   return $a + 1;
 
 w
+switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:8
 #1  gen1 ()
@@ -155,6 +165,7 @@ w
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
 #0  gen1 [%d]
 #1  <<join>>
 #2  gen2 [%d]

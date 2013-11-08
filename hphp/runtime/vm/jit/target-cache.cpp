@@ -127,12 +127,7 @@ const Class* ClassCache::lookup(RDS::Handle handle, StringData* name) {
     const NamedEntity *ne = Unit::GetNamedEntity(name);
     Class *c = Unit::lookupClass(ne);
     if (UNLIKELY(!c)) {
-      String normName = normalizeNS(name);
-      if (normName) {
-        return lookup(handle, normName.get());
-      } else {
-        c = Unit::loadMissingClass(ne, name);
-      }
+      c = Unit::loadMissingClass(ne, name);
       if (UNLIKELY(!c)) {
         raise_error(Strings::UNKNOWN_CLASS, name->data());
       }
@@ -151,40 +146,104 @@ const Class* ClassCache::lookup(RDS::Handle handle, StringData* name) {
 //=============================================================================
 // MethodCache
 
-/*
- * We have a call site for an object method, which previously invoked
- * func, but this call has a different Class (cls).  See if we can
- * figure out the correct Func to call.
- */
-static inline const Func* wouldCall(const Class* cls, const Func* prev) {
-  if (LIKELY(cls->numMethods() > prev->methodSlot())) {
-    const Func* cand = cls->methods()[prev->methodSlot()];
-    /* If this class has the same func at the same method slot
-       we're good to go. No need to recheck permissions,
-       since we already checked them first time around */
-    if (LIKELY(cand == prev)) return cand;
-    if (prev->attrs() & AttrPrivate) {
-      /* If the previously called function was private, then
-         the context class must be prev->cls() - so its
-         definitely accessible. So if this derives from
-         prev->cls() its the function that would be picked.
-         Note that we can only get here if there is a same
-         named function deeper in the class hierarchy */
-      if (cls->classof(prev->cls())) return prev;
+ATTRIBUTE_COLD NEVER_INLINE __attribute__((noreturn))
+static void methodCacheFatal(Class* cls, StringData* name, Class* ctx) {
+  g_vmContext->lookupMethodCtx(
+    cls,
+    name,
+    ctx,
+    MethodLookup::CallType::ObjMethod,
+    true /* raise error */
+  );
+  not_reached();
+}
+
+HOT_FUNC_VM NEVER_INLINE
+static void methodCacheSlowerPath(MethodCache* mce,
+                                  ActRec* ar,
+                                  StringData* name,
+                                  Class* cls) {
+  try {
+    auto const ctx = reinterpret_cast<ActRec*>(ar->m_savedRbp)->m_func->cls();
+    auto func = g_vmContext->lookupMethodCtx(
+      cls,
+      name,
+      ctx,
+      MethodLookup::CallType::ObjMethod,
+      false /* raise error */
+    );
+
+    if (UNLIKELY(!func)) {
+      func = cls->lookupMethod(s_call.get());
+      if (UNLIKELY(!func)) return methodCacheFatal(cls, name, ctx);
+      ar->setInvName(name);
+      assert(!(func->attrs() & AttrStatic));
+      ar->m_func   = func;
+      mce->m_key   = reinterpret_cast<uintptr_t>(cls) | 0x1u;
+      mce->m_value = func;
+      return;
     }
-    if (cand->name() == prev->name()) {
-      /*
-       * We have the same name - so its probably the right function.
-       * If its not public, check that both funcs were originally
-       * defined in the same base class.
-       */
-      if ((cand->attrs() & AttrPublic) ||
-          cand->baseCls() == prev->baseCls()) {
-        return cand;
-      }
+
+    bool const isStatic = func->attrs() & AttrStatic;
+    mce->m_key   = reinterpret_cast<uintptr_t>(cls) | uintptr_t{isStatic} << 1;
+    mce->m_value = func;
+    ar->m_func   = func;
+
+    if (UNLIKELY(isStatic && !func->isClosureBody())) {
+      auto const obj = ar->getThis();
+      if (debug) ar->setThis(nullptr); // suppress assert
+      ar->setClass(cls);
+      decRefObj(obj);
     }
+  } catch (...) {
+    auto const obj = ar->getThis();
+    *arPreliveOverwriteCells(ar) = make_tv<KindOfObject>(obj);
+    throw;
   }
-  return nullptr;
+}
+
+HOT_FUNC_VM NEVER_INLINE
+static void methodCacheMagicOrStatic(MethodCache* mce,
+                                     ActRec* ar,
+                                     StringData* name,
+                                     Class* cls,
+                                     uintptr_t mceKey,
+                                     const Func* mceValue) {
+  auto const storedClass = reinterpret_cast<Class*>(mceKey & ~0x3u);
+  if (storedClass != cls) {
+    return methodCacheSlowerPath(mce, ar, name, cls);
+  }
+
+  ar->m_func = mceValue;
+
+  auto const isMagic = mceKey & 0x1u;
+  if (UNLIKELY(isMagic)) {
+    ar->setInvName(name);
+    assert(!(mceKey & 0x2u));
+    return;
+  }
+
+  assert(mceKey & 0x2u);
+  if (LIKELY(!mceValue->isClosureBody())) {
+    auto const obj = ar->getThis();
+    if (debug) ar->setThis(nullptr); // suppress assert in setClass
+    ar->setClass(cls);
+    decRefObj(obj);
+  }
+}
+
+HOT_FUNC_VM NEVER_INLINE
+static void staticPublicSlowPath(MethodCache* mce,
+                                 ActRec* ar,
+                                 Class* cls,
+                                 const Func* cand) {
+  mce->m_key = reinterpret_cast<uintptr_t>(cls) | 0x2u;
+  if (LIKELY(!cand->isClosureBody())) {
+    auto const obj = ar->getThis();
+    if (debug) ar->setThis(nullptr); // suppress assert in setClass
+    ar->setClass(cls);
+    decRefObj(obj);
+  }
 }
 
 HOT_FUNC_VM
@@ -195,75 +254,120 @@ void methodCacheSlowPath(MethodCache* mce,
   assert(ar->hasThis());
   assert(ar->getThis()->getVMClass() == cls);
   assert(IMPLIES(mce->m_key, mce->m_value));
+  assert(name->isStatic());
+  assert(mce->m_key != reinterpret_cast<uintptr_t>(cls));
 
-  try {
-    bool isMagicCall = mce->m_key & 0x1u;
-    bool isStatic;
-    const Func* func;
+  auto const mceKey   = mce->m_key;
+  auto const mceValue = mce->m_value;
 
-    auto* storedClass = reinterpret_cast<Class*>(mce->m_key & ~0x3u);
-    if (storedClass == cls) {
-      isStatic = mce->m_key & 0x2u;
-      func = mce->m_value;
-    } else {
-      if (LIKELY(storedClass != nullptr &&
-                 ((func = wouldCall(cls, mce->m_value)) != nullptr) &&
-                 !isMagicCall)) {
-        Stats::inc(Stats::TgtCache_MethodHit, func != nullptr);
-        isMagicCall = false;
-      } else {
-        Class* ctx = arGetContextClass((ActRec*)ar->m_savedRbp);
-        Stats::inc(Stats::TgtCache_MethodMiss);
-        TRACE(2, "MethodCache: miss class %p name %s!\n", cls, name->data());
-        auto const& objMethod = MethodLookup::CallType::ObjMethod;
-        func = g_vmContext->lookupMethodCtx(cls, name, ctx, objMethod, false);
-        if (UNLIKELY(!func)) {
-          isMagicCall = true;
-          func = cls->lookupMethod(s_call.get());
-          if (UNLIKELY(!func)) {
-            // Do it again, but raise the error this time.
-            (void) g_vmContext->lookupMethodCtx(cls, name, ctx, objMethod,
-                                                true);
-            NOT_REACHED();
-          }
-        } else {
-          isMagicCall = false;
-        }
-      }
-
-      isStatic = func->attrs() & AttrStatic;
-
-      mce->m_key = uintptr_t(cls) | (uintptr_t(isStatic) << 1) |
-        uintptr_t(isMagicCall);
-      mce->m_value = func;
-    }
-
-    assert(func);
-    func->validate();
-    ar->m_func = func;
-
-    if (UNLIKELY(isStatic && !func->isClosureBody())) {
-      decRefObj(ar->getThis());
-      if (debug) ar->setThis(nullptr); // suppress assert in setClass
-      ar->setClass(cls);
-    }
-
-    assert(!ar->hasVarEnv() && !ar->hasInvName());
-    if (UNLIKELY(isMagicCall)) {
-      ar->setInvName(name);
-      assert(name->isStatic()); // No incRef needed.
-    }
-  } catch (...) {
-    // This is extreme shadiness. See the comments of
-    // arPreliveOverwriteCells() for more info on how this code gets the
-    // unwinder to restore the pre-FPushObjMethodD state, including decref
-    // of the ar->getThis() object.
-    ObjectData* arThis = ar->getThis();
-    auto firstActRecCell = arPreliveOverwriteCells(ar);
-    firstActRecCell->m_type = KindOfObject;
-    firstActRecCell->m_data.pobj = arThis;
-    throw;
+  if (UNLIKELY(!mceKey)) {
+    return methodCacheSlowerPath(mce, ar, name, cls);
   }
+  if (UNLIKELY(mceKey & 0x3)) {
+    return methodCacheMagicOrStatic(mce, ar, name, cls, mceKey, mceValue);
+  }
+  assert(!(mceValue->attrs() & AttrStatic));
+
+  // Note: if you manually CSE mceValue->methodSlot() here, gcc 4.8
+  // will strangely generate two loads instead of one.
+  if (UNLIKELY(cls->numMethods() <= mceValue->methodSlot())) {
+    return methodCacheSlowerPath(mce, ar, name, cls);
+  }
+  auto const cand = cls->methods()[mceValue->methodSlot()];
+
+  /*
+   * If this class has the same func at the same method slot we're
+   * good to go.  No need to recheck permissions, since we already
+   * checked them first time around.
+   *
+   * This case occurs when the current target class `cls' and the
+   * class we saw last time in mceKey have some shared ancestor that
+   * defines the method, but neither overrode the method.
+   */
+  if (LIKELY(cand == mceValue)) {
+    ar->m_func = cand;
+    mce->m_key = reinterpret_cast<uintptr_t>(cls);
+    return;
+  }
+
+  /*
+   * If the previously called function (mceValue) was private, then
+   * the current context class must be mceValue->cls(), since we
+   * called it last time.  So if the new class in `cls' derives from
+   * mceValue->cls(), its the same function that would be picked.
+   * Note that we can only get this case if there is a same-named
+   * (private or not) function deeper in the class hierarchy.
+   *
+   * In this case, we can do a fast subtype check using the classVec,
+   * because we know oldCls can't be an interface (because we observed
+   * an instance of it last time).
+   */
+  if (UNLIKELY(mceValue->attrs() & AttrPrivate)) {
+    auto const oldCls = mceValue->cls();
+    assert(!(oldCls->attrs() & AttrInterface));
+    if (cls->classVecLen() >= oldCls->classVecLen() &&
+        cls->classVec()[oldCls->classVecLen() - 1] == oldCls) {
+      // cls <: oldCls -- choose the same function as last time.
+      ar->m_func = mceValue;
+      mce->m_key = reinterpret_cast<uintptr_t>(cls);
+      return;
+    }
+  }
+
+  /*
+   * If the candidate has the same name, its probably the right
+   * function.  Try to prove it.
+   *
+   * We can use the invoked name `name' to compare with cand, but note
+   * that function names are case insensitive, so it's not necessarily
+   * true that mceValue->name() == name bitwise.
+   */
+  assert(mceValue->name()->isame(name));
+  if (LIKELY(cand->name() == name)) {
+    if (LIKELY(cand->attrs() & AttrPublic)) {
+      /*
+       * If the candidate function is public, then it has to be the
+       * right function.  There can be no other function with this
+       * name on `cls', and we already ruled out the case where
+       * dispatch should've gone to a private function with the same
+       * name, above.
+       *
+       * The normal case here is an overridden public method.  But this
+       * case can also occur on unrelated classes that happen to have
+       * a same-named function at the same method slot, which means we
+       * still have to check whether the new function is static.
+       * Bummer.
+       */
+      ar->m_func   = cand;
+      mce->m_value = cand;
+      if (UNLIKELY(cand->attrs() & AttrStatic)) {
+        return staticPublicSlowPath(mce, ar, cls, cand);
+      }
+      mce->m_key = reinterpret_cast<uintptr_t>(cls);
+      return;
+    }
+
+    /*
+     * If the candidate function and the old function are originally
+     * declared on the same class, then we have mceKey and `cls' as
+     * related class types, and they are inheriting this (non-public)
+     * function from some shared ancestor, but have different
+     * implementations (since we already know mceValue != cand).
+     *
+     * Since the current context class could call it last time, we can
+     * call the new implementation too.  We also know the new function
+     * can't be static, because the last one wasn't.
+     */
+    if (LIKELY(cand->baseCls() == mceValue->baseCls())) {
+      assert(!(cand->attrs() & AttrStatic));
+      ar->m_func   = cand;
+      mce->m_value = cand;
+      mce->m_key   = reinterpret_cast<uintptr_t>(cls);
+      return;
+    }
+  }
+
+  return methodCacheSlowerPath(mce, ar, name, cls);
 }
 
 //=============================================================================
@@ -374,10 +478,10 @@ RDS::Handle StaticMethodFCache::alloc(const StringData* clsName,
 }
 
 const Func*
-StaticMethodCache::lookupIR(RDS::Handle handle, const NamedEntity *ne,
-                            const StringData* clsName,
-                            const StringData* methName, TypedValue* vmfp,
-                            TypedValue* vmsp) {
+StaticMethodCache::lookup(RDS::Handle handle, const NamedEntity *ne,
+                          const StringData* clsName,
+                          const StringData* methName, TypedValue* vmfp,
+                          TypedValue* vmsp) {
   StaticMethodCache* thiz = static_cast<StaticMethodCache*>
     (handleToPtr(handle));
   Stats::inc(Stats::TgtCache_StaticMethodMiss);
@@ -417,63 +521,8 @@ StaticMethodCache::lookupIR(RDS::Handle handle, const NamedEntity *ne,
 }
 
 const Func*
-StaticMethodCache::lookup(RDS::Handle handle, const NamedEntity *ne,
-                          const StringData* clsName,
-                          const StringData* methName) {
-  StaticMethodCache* thiz = static_cast<StaticMethodCache*>
-    (handleToPtr(handle));
-  Stats::inc(Stats::TgtCache_StaticMethodMiss);
-  Stats::inc(Stats::TgtCache_StaticMethodHit, -1);
-  TRACE(1, "miss %s :: %s caller %p\n",
-        clsName->data(), methName->data(), __builtin_return_address(0));
-  Transl::VMRegAnchor _; // needed for lookupClsMethod.
-
-  ActRec* ar = reinterpret_cast<ActRec*>(vmsp() - kNumActRecCells);
-  const Func* f;
-  VMExecutionContext* ec = g_vmContext;
-  const Class* cls = Unit::loadClass(ne, clsName);
-  if (UNLIKELY(!cls)) {
-    raise_error(Strings::UNKNOWN_CLASS, clsName->data());
-  }
-  LookupResult res = ec->lookupClsMethod(f, cls, methName,
-                                         nullptr, // there may be an active this,
-                                               // but we can just fall through
-                                               // in that case.
-                                         arGetContextClass(ec->getFP()),
-                                         false /*raise*/);
-  if (LIKELY(res == LookupResult::MethodFoundNoThis &&
-             !f->isAbstract() &&
-             f->isStatic())) {
-    f->validate();
-    TRACE(1, "fill %s :: %s -> %p\n", clsName->data(),
-          methName->data(), f);
-    // Do the | here instead of on every call.
-    thiz->m_cls = (Class*)(uintptr_t(cls) | 1);
-    thiz->m_func = f;
-    ar->setClass(const_cast<Class*>(cls));
-    return f;
-  }
-  assert(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
-  // We've already sync'ed regs; this is some hard case, we might as well
-  // just let the interpreter handle this entirely.
-  assert(toOp(*vmpc()) == OpFPushClsMethodD);
-  Stats::inc(Stats::Instr_InterpOneFPushClsMethodD);
-  Stats::inc(Stats::Instr_TC, -1);
-  ec->opFPushClsMethodD();
-  // Return whatever func the instruction produced; if nothing was
-  // possible we'll either have fataled or thrown.
-  assert(ar->m_func);
-  ar->m_func->validate();
-  // Don't update the cache; this case was too scary to memoize.
-  TRACE(1, "unfillable miss %s :: %s -> %p\n", clsName->data(),
-        methName->data(), ar->m_func);
-  // Indicate to the caller that there is no work to do.
-  return nullptr;
-}
-
-const Func*
-StaticMethodFCache::lookupIR(RDS::Handle handle, const Class* cls,
-                             const StringData* methName, TypedValue* vmfp) {
+StaticMethodFCache::lookup(RDS::Handle handle, const Class* cls,
+                           const StringData* methName, TypedValue* vmfp) {
   assert(cls);
   StaticMethodFCache* thiz = static_cast<StaticMethodFCache*>
     (handleToPtr(handle));

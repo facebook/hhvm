@@ -260,7 +260,10 @@ struct ElmUCompare {
   typedef typename AccessorT::ElmT ElmT;
   AccessorT acc;
   const CallCtx* ctx;
-  ElmUCompare() : warned(false) {}
+
+  // only warn with HH syntax enabled
+  ElmUCompare() : warned(!RuntimeOption::EnableHipHopSyntax) {}
+
   bool operator()(ElmT left, ElmT right) const {
     Variant ret;
     {

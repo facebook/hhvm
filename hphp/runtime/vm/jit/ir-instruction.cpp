@@ -176,6 +176,7 @@ bool IRInstruction::isLoad() const {
     case LdMem:
     case LdProp:
     case LdElem:
+    case LdPackedArrayElem:
     case LdRef:
     case LdThis:
     case LdStaticLocCached:
@@ -340,6 +341,7 @@ void IRInstruction::convertToJmp() {
   m_numDsts = 0;
   m_srcs = nullptr;
   m_dst = nullptr;
+  m_extra = nullptr;
   // Instructions in the simplifier don't have blocks yet.
   if (block()) block()->setNext(nullptr);
 }
@@ -367,6 +369,29 @@ void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
   m_srcs = new (arena) SSATmp*[m_numSrcs];
   std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
   setTaken(other->taken());
+}
+
+void IRInstruction::addCopy(IRUnit& unit, SSATmp* src, const PhysLoc& dest) {
+  assert(op() == Shuffle);
+  auto data = extra<Shuffle>();
+  auto n = numSrcs();
+  assert(n == data->size && n <= data->cap);
+  if (n == data->cap) {
+    auto cap = data->cap * 2;
+    auto srcs = new (unit.arena()) SSATmp*[cap];
+    auto dests = new (unit.arena()) PhysLoc[cap];
+    for (unsigned i = 0; i < n; i++) {
+      srcs[i] = m_srcs[i];
+      dests[i] = data->dests[i];
+    }
+    m_srcs = srcs;
+    data->dests = dests;
+    data->cap = cap;
+  }
+  m_numSrcs = n + 1;
+  m_srcs[n] = src;
+  data->size = n + 1;
+  data->dests[n] = dest;
 }
 
 SSATmp* IRInstruction::src(uint32_t i) const {

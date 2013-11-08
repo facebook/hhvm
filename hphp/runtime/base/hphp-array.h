@@ -69,7 +69,15 @@ public:
       ikey = k;
       data.hash() = 0;
     }
+
+    static constexpr size_t dataOff() {
+      return offsetof(Elm, data);
+    }
   };
+
+  static constexpr size_t dataOff() {
+    return sizeof(HphpArray);
+  }
 
   /*
    * Allocate a new, empty, request-local HphpArray in packed mode,
@@ -337,6 +345,8 @@ private:
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
+  static ArrayData* ArrayPlusGeneric(HphpArray*, const ArrayData*);
+  static ArrayData* ArrayMergeGeneric(HphpArray*, const ArrayData*);
 
   // convert in-place from kPackedKind to kMixedKind: fill in keys & hashtable
   HphpArray* packedToMixed();

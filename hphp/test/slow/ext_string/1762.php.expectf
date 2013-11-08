@@ -20,5 +20,5 @@ HipHop Warning: Invalid argument: format: 100 in %s/test/slow/ext_string/1762.ph
 bool(false)
 HipHop Warning: Invalid argument: 2nd argument: (not array) in %s/test/slow/ext_string/1762.php on line 14
 bool(false)
-HipHop Warning: Invalid operand type was used: arguments need at least one array in %s/test/slow/ext_string/1762.php on line 15
+HipHop Warning: Invalid operand type was used: %s in %s/test/slow/ext_string/1762.php on line 15
 NULL

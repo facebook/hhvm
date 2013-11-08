@@ -106,185 +106,185 @@ const int64_t k_CM_BZIP2 = 12;
 // class ZipArchive
 
 static bool HHVM_METHOD(ZipArchive, addEmptyDir, const String& dirname) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::addEmptyDir");
 }
 
 static bool HHVM_METHOD(ZipArchive, addFile, const String& filename,
                         const String& localname, int64_t start,
                         int64_t length) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::addFile");
 }
 
 static bool HHVM_METHOD(ZipArchive, addFromString, const String& localname,
                         const String& contents) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::addFromString");
 }
 
 static bool HHVM_METHOD(ZipArchive, addGlob, const String& pattern,
                         int64_t flags, CArrRef options) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::addGlob");
 }
 
 static bool HHVM_METHOD(ZipArchive, addPattern, const String& pattern,
                         const String& path, CArrRef options) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::addPattern");
 }
 
 static bool HHVM_METHOD(ZipArchive, close) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::close");
 }
 
 static bool HHVM_METHOD(ZipArchive, deleteIndex, int64_t index) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::deleteIndex");
 }
 
 static bool HHVM_METHOD(ZipArchive, deleteName, const String& name) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::deleteName");
 }
 
 static bool HHVM_METHOD(ZipArchive, extractTo, const String& destination,
                         CVarRef entries) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::extractTo");
 }
 
 static String HHVM_METHOD(ZipArchive, getArchiveComment, int64_t flags) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::getArchiveComment");
 }
 
 static String HHVM_METHOD(ZipArchive, getCommentIndex, int64_t index,
                           int64_t flags) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::getCommentIndex");
 }
 
 static String HHVM_METHOD(ZipArchive, getCommentName, const String& name,
                           int64_t flags) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::getCommentName");
 }
 
 static String HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
                           int64_t length, int64_t flags) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::getFromIndex");
 }
 
 static String HHVM_METHOD(ZipArchive, getFromName, const String& name,
                           int64_t length, int64_t flags) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::getFromName");
 }
 
 static String HHVM_METHOD(ZipArchive, getNameIndex, int64_t index,
                           int64_t flags) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::getNameIndex");
 }
 
 static String HHVM_METHOD(ZipArchive, getStatusString) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::getStatusString");
 }
 
 static Resource HHVM_METHOD(ZipArchive, getStream, const String& name) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::getStream");
 }
 
 static int64_t HHVM_METHOD(ZipArchive, locateName, const String& name,
                            int64_t flags) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::locateName");
 }
 
 static Variant HHVM_METHOD(ZipArchive, open, const String& filename,
                            int64_t flags) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::open");
 }
 
 static bool HHVM_METHOD(ZipArchive, renameIndex, int64_t index,
                         const String& newname) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::renameIndex");
 }
 
 static bool HHVM_METHOD(ZipArchive, renameName, const String& name,
                         const String& newname) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::renameName");
 }
 
 static bool HHVM_METHOD(ZipArchive, setArchiveComment, const String& comment) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::setArchiveComment");
 }
 
 static bool HHVM_METHOD(ZipArchive, setCommentIndex, int64_t index,
                         const String& comment) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::setCommentIndex");
 }
 
 static bool HHVM_METHOD(ZipArchive, setCommentName, const String& name,
                         const String& comment) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::setCommentName");
 }
 
 static Array HHVM_METHOD(ZipArchive, statIndex, int64_t index, int64_t flags) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::statIndex");
 }
 
 static Array HHVM_METHOD(ZipArchive, statName, const String& name,
                          int64_t flags) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::statName");
 }
 
 static bool HHVM_METHOD(ZipArchive, unchangeAll) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::unchangeAll");
 }
 
 static bool HHVM_METHOD(ZipArchive, unchangeArchive) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::unchangeArchive");
 }
 
 static bool HHVM_METHOD(ZipArchive, unchangeIndex, int64_t index) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::unchangeIndex");
 }
 
 static bool HHVM_METHOD(ZipArchive, unchangeName, const String& name) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("ZipArchive::unchangeName");
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // functions
 
 static void HHVM_FUNCTION(zip_close, CResRef zip) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("zip_close");
 }
 
 static bool HHVM_FUNCTION(zip_entry_close, CResRef zip_entry) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("zip_entry_close");
 }
 
 static int64_t HHVM_FUNCTION(zip_entry_compressedsize, CResRef zip_entry) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("zip_entry_compressedsize");
 }
 
 static String HHVM_FUNCTION(zip_entry_compressionmethod, CResRef zip_entry) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("zip_entry_compressionmethod");
 }
 
 static int64_t HHVM_FUNCTION(zip_entry_filesize, CResRef zip_entry) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("zip_entry_filesize");
 }
 
 static String HHVM_FUNCTION(zip_entry_name, CResRef zip_entry) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("zip_entry_name");
 }
 
 static bool HHVM_FUNCTION(zip_entry_open, CResRef zip, CResRef zip_entry,
                           const String& mode) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("zip_entry_open");
 }
 
 static String HHVM_FUNCTION(zip_entry_read, CResRef zip_entry, int64_t length) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("zip_entry_read");
 }
 
 static Resource HHVM_FUNCTION(zip_open, const String& filename) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("zip_open");
 }
 
 static Resource HHVM_FUNCTION(zip_read, CResRef zip) {
-  throw NotImplementedException("Not implemented");
+  throw NotImplementedException("zip_read");
 }
 
 //////////////////////////////////////////////////////////////////////////////

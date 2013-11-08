@@ -35,7 +35,7 @@ class _SplPriorityQueueHeap extends SplMaxHeap {
  * prioritized queue, implemented using a max heap.
  *
  */
-class SplPriorityQueue implements Iterator, Countable {
+class SplPriorityQueue implements \HH\Iterator, Countable {
 
   const EXTR_DATA = 1;
   const EXTR_PRIORITY = 2;

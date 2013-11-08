@@ -1884,8 +1884,8 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
   }
   bool voidReturn = false;
   if (builtinFunc) {
-    ref = (builtinFunc->info()->attribute & ClassInfo::IsReference) != 0;
-    voidReturn = builtinFunc->info()->returnType == KindOfNull;
+    ref = (builtinFunc->methInfo()->attribute & ClassInfo::IsReference) != 0;
+    voidReturn = builtinFunc->methInfo()->returnType == KindOfNull;
   } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
     if (!(fn->getActualType()) && !fn->getFuncScope()->isNative()) {
@@ -1916,7 +1916,7 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     m_evalStack.setNotRef();
   } else if (!ref) {
     DataType dt = builtinFunc ?
-      builtinFunc->info()->returnType :
+      builtinFunc->methInfo()->returnType :
       getPredictedDataType(fn);
 
     if (dt != KindOfUnknown) {
@@ -2583,6 +2583,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
 
       case Statement::KindOfGotoStatement: {
+        // TODO Task# 3124417: This should free the appropriate iterator
+        // variables if the goto exits the scope of one or more foreach
+        // loops.
         GotoStatementPtr g(static_pointer_cast<GotoStatement>(node));
         StringData* nName = makeStaticString(g->label());
         e.Jmp(m_gotoLabels[nName]);
@@ -3995,8 +3998,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
 
         // emit return label for raise()
-        assert(m_evalStack.size() == 0);
-        e.Null();
         m_yieldLabels[exceptLabel].set(e);
 
         // throw received exception on the stack
@@ -4004,7 +4005,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         e.Throw();
 
         // emit return label for next()/send()
-        e.Null();
         m_yieldLabels[normalLabel].set(e);
 
         // continue with the received result on the stack
@@ -4318,6 +4318,13 @@ void EmitterVisitor::emitCGetL3(Emitter& e) {
   e.CGetL3(localIdx);
 }
 
+void EmitterVisitor::emitPushL(Emitter& e) {
+  assert(m_evalStack.size() >= 1);
+  auto const idx = m_evalStack.size() - 1;
+  assert(StackSym::GetSymFlavor(m_evalStack.get(idx)) == StackSym::L);
+  e.PushL(m_evalStack.getLoc(idx));
+}
+
 void EmitterVisitor::emitAGet(Emitter& e) {
   if (checkIfStackEmpty("AGet*")) return;
 
@@ -4441,18 +4448,18 @@ Id EmitterVisitor::emitSetUnnamedL(Emitter& e) {
   return tempLocal;
 }
 
-void EmitterVisitor::emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start) {
+void EmitterVisitor::emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal,
+                                             Offset start) {
   assert(tempLocal >= 0);
   assert(start != InvalidAbsoluteOffset);
-  emitVirtualLocal(tempLocal);
-  emitCGet(e);
   newFaultRegion(start, m_ue.bcPos(), new UnsetUnnamedLocalThunklet(tempLocal));
   emitVirtualLocal(tempLocal);
-  emitUnset(e);
+  emitPushL(e);
   m_curFunc->freeUnnamedLocal(tempLocal);
 }
 
-EmitterVisitor::PassByRefKind EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
+EmitterVisitor::PassByRefKind
+EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
   auto permissiveKind = PassByRefKind::AllowCell;
 
   // The PassByRefKind of a list assignment expression is determined
@@ -6421,9 +6428,9 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
     }
   }
   Func* f = Unit::lookupFunc(makeStaticString(name));
-  if (!f || !f->info() || f->numParams() > kMaxBuiltinArgs) return nullptr;
+  if (!f || !f->methInfo() || f->numParams() > kMaxBuiltinArgs) return nullptr;
 
-  const ClassInfo::MethodInfo* info = f->info();
+  const ClassInfo::MethodInfo* info = f->methInfo();
   if (info->attribute & (ClassInfo::NeedsActRec |
                          ClassInfo::VariableArguments |
                          ClassInfo::RefVariableArguments |
@@ -6435,7 +6442,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   if (info->returnType == KindOfDouble) return nullptr;
 
   for (int i = 0; i < f->numParams(); i++) {
-    const ClassInfo::ParameterInfo* pi = f->info()->parameters[i];
+    const ClassInfo::ParameterInfo* pi = f->methInfo()->parameters[i];
     if (pi->argType == KindOfDouble) return nullptr;
 
     if (i >= numParams) {
@@ -6543,7 +6550,8 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
       emitBuiltinCallArg(e, (*params)[i], i, byRef);
     }
     for (; i < fcallBuiltin->numParams(); i++) {
-      const ClassInfo::ParameterInfo* pi = fcallBuiltin->info()->parameters[i];
+      const ClassInfo::ParameterInfo* pi =
+        fcallBuiltin->methInfo()->parameters[i];
       Variant v = unserialize_from_string(
         String(pi->value, pi->valueLen, CopyString));
       emitBuiltinDefaultArg(e, v, pi->argType, i);
@@ -7559,8 +7567,7 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
           ue.emitOp(OpContRaise);
           // intentional fallthrough to push the exception on the stack
         case METH_SEND:
-          ue.emitOp(OpCGetL); ue.emitIVA(0);
-          ue.emitOp(OpUnsetL); ue.emitIVA(0);
+          ue.emitOp(OpPushL); ue.emitIVA(0);
           break;
         default:
           not_reached();

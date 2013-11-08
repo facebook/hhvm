@@ -8,7 +8,7 @@
  * Can be used to iterate through recursive iterators.
  *
  */
-class RecursiveIteratorIterator implements OuterIterator, Traversable {
+class RecursiveIteratorIterator implements OuterIterator {
 
   const LEAVES_ONLY = 0;
   const SELF_FIRST = 1;

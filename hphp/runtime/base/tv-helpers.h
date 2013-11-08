@@ -454,18 +454,37 @@ inline bool tvIsStronglyBound(const TypedValue* tv) {
   return (tv->m_type == KindOfRef && tv->m_data.pref->isReferenced());
 }
 
+template<class Fun>
+void tvDupFlattenImpl(const TypedValue* fr, TypedValue* to, Fun shouldFlatten) {
+  tvCopy(*fr, *to);
+  auto type = fr->m_type;
+  if (!IS_REFCOUNTED_TYPE(type)) return;
+  if (type != KindOfRef) {
+    tvIncRef(to);
+    return;
+  }
+  auto ref = fr->m_data.pref;
+  if (shouldFlatten(ref)) {
+    cellDup(*ref->tv(), *to);
+    return;
+  }
+  tvIncRefNotShared(to);
+}
+
+// Assumes 'fr' is live and 'to' is dead, and does not mutate to->m_aux
+inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to) {
+  tvDupFlattenImpl(fr, to, [&](RefData* ref) {
+    return !ref->isReferenced();
+  });
+}
+
 // Assumes 'fr' is live and 'to' is dead, and does not mutate to->m_aux
 inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
                              const ArrayData* container) {
-  if (LIKELY(fr->m_type != KindOfRef)) {
-    cellDup(*fr, *to);
-  } else if (!fr->m_data.pref->isReferenced() &&
-             (!container || fr->m_data.pref->tv()->m_data.parr != container)) {
-    fr = fr->m_data.pref->tv();
-    cellDup(*fr, *to);
-  } else {
-    refDup(*fr, *to);
-  }
+  assert(container);
+  tvDupFlattenImpl(fr, to, [&](RefData* ref) {
+    return !ref->isReferenced() && container != ref->tv()->m_data.parr;
+  });
 }
 
 inline bool tvIsNull(const TypedValue* tv) {

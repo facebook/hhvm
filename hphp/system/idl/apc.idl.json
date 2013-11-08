@@ -10,19 +10,20 @@
                 "AllowIntercept"
             ],
             "return": {
-                "type": "Boolean",
-                "desc": "Returns TRUE on success or FALSE on failure."
+                "type": "Variant",
+                "desc": "Returns TRUE on success or FALSE on failure and an array with error keys if passed an array."
             },
             "args": [
                 {
-                    "name": "key",
-                    "type": "String",
-                    "desc": "Store the variable using this name. keys are cache-unique, so attempting to use apc_add() to store data with a key that already exists will not overwrite the existing data, and will instead return FALSE. (This is the only difference between apc_add() and apc_store().)"
+                    "name": "key_or_array",
+                    "type": "Variant",
+                    "desc": "Store the variable using this name. Can also be an array of key-value pairs to insert into the cache. Keys are cache-unique, so attempting to use apc_add() to store data with a key that already exists will not overwrite the existing data, and will instead return FALSE. (This is the only difference between apc_add() and apc_store().)"
                 },
                 {
                     "name": "var",
                     "type": "Variant",
-                    "desc": "The variable to store"
+                    "value": "null_variant",
+                    "desc": "The variable to store. Defaults to null for the case where an array of key-value pairs is passed."
                 },
                 {
                     "name": "ttl",
@@ -44,19 +45,20 @@
                 "AllowIntercept"
             ],
             "return": {
-                "type": "Boolean",
-                "desc": "Returns TRUE on success or FALSE on failure."
+                "type": "Variant",
+                "desc": "Returns TRUE on success, FALSE on failure and an array with error keys if passed an array."
             },
             "args": [
                 {
-                    "name": "key",
-                    "type": "String",
-                    "desc": "Store the variable using this name. keys are cache-unique, so storing a second value with the same key will overwrite the original value."
+                    "name": "key_or_array",
+                    "type": "Variant",
+                    "desc": "Store the variable using this name. Can also be an array of key-value pairs to insert into the cache. Keys are cache-unique, so storing a second value with the same key will overwrite the original value."
                 },
                 {
                     "name": "var",
                     "type": "Variant",
-                    "desc": "The variable to store"
+                    "value": "null_variant",
+                    "desc": "The variable to store. Defaults to null for the case where an array of key-value pairs is passed."
                 },
                 {
                     "name": "ttl",

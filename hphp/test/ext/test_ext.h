@@ -19,7 +19,9 @@
 #ifndef incl_EXT_LIST_TEST_EXT_H_
 #define incl_EXT_LIST_TEST_EXT_H_
 
+#ifdef HAVE_CUSTOM_LIBEVENT
 #include "hphp/test/ext/test_ext_curl.h"
+#endif
 #include "hphp/test/ext/test_ext_memcached.h"
 #include "hphp/test/ext/test_ext_mysql.h"
 #include "hphp/test/ext/test_ext_server.h"

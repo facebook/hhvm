@@ -303,11 +303,11 @@ RegionDescPtr ProfData::transRegion(TransID id) const {
 }
 
 TransID ProfData::addTransProfile(const Tracelet&       tracelet,
-                                  const RegionContext&  rCtx,
+                                  Offset                initSpOffset,
                                   const PostConditions& pconds) {
   TransID transId   = m_numTrans++;
   Offset  lastBcOff = tracelet.m_instrStream.last->source.offset();
-  auto       region = selectTraceletLegacy(rCtx, tracelet);
+  auto       region = selectTraceletLegacy(initSpOffset, tracelet);
 
   assert(region);
   DEBUG_ONLY size_t nBlocks = region->blocks.size();

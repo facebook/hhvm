@@ -77,17 +77,19 @@ void c_ExternalThreadEventWaitHandle::initialize(AsioExternalThreadEvent* event,
   }
 }
 
-void c_ExternalThreadEventWaitHandle::destroyEvent() {
+void c_ExternalThreadEventWaitHandle::destroyEvent(bool sweeping /*= false */) {
   // destroy event and its private data
   m_event->release();
   m_event = nullptr;
-  m_privData = nullptr;
 
   // unregister from sweep()
   unregister();
 
-  // drop ownership by pending event (see initialize())
-  decRefObj(this);
+  if (LIKELY(!sweeping)) {
+    m_privData = nullptr;
+    // drop ownership by pending event (see initialize())
+    decRefObj(this);
+  }
 }
 
 void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
@@ -99,7 +101,7 @@ void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
   }
 
   // clean up
-  destroyEvent();
+  destroyEvent(sweeping);
 }
 
 void c_ExternalThreadEventWaitHandle::process() {

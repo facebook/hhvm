@@ -47,31 +47,6 @@
             ]
         },
         {
-            "name": "hphp_thread_is_warmup_enabled",
-            "desc": "Whether current thread is warmed up with some PHP document.",
-            "flags": [
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "TRUE if warmed up already, FALSE otherwise."
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "hphp_thread_set_warmup_enabled",
-            "desc": "Enables warmup document.",
-            "flags": [
-                "HipHopSpecific"
-            ],
-            "return": {
-                "type": null
-            },
-            "args": [
-            ]
-        },
-        {
             "name": "hphp_get_thread_id",
             "desc": "Gets current thread's ID.",
             "flags": [

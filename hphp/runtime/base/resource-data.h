@@ -52,7 +52,7 @@ class ResourceData {
   void operator delete(void* p) { ::operator delete(p); }
 
   void release() {
-    assert(getCount() == 0);
+    assert(!hasMultipleRefs());
     delete this;
   }
 
@@ -202,13 +202,8 @@ typedef std::map<std::string, ResourceMap> ResourceMapMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Suppress the default implementation of the SmartPtr destructor so that
-// derived classes (ex. HPHP::Resource) can manually handle decReffing the
-// ResourceData.
-template<> inline SmartPtr<ResourceData>::~SmartPtr() {}
-
-ALWAYS_INLINE void decRefRes(ResourceData* res) {
-  if (res->decRefCount() == 0) res->release();
+ALWAYS_INLINE bool decRefRes(ResourceData* res) {
+  return res->decRefAndRelease();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

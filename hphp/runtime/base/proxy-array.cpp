@@ -248,7 +248,8 @@ void ProxyArray::OnSetEvalScalar(ArrayData* ad) {
 }
 
 ArrayData* ProxyArray::Escalate(const ArrayData* ad) {
-  return innerArr(ad)->escalateForSort();
+  auto r = innerArr(ad)->escalate();
+  return reseatable(const_cast<ArrayData*>(ad), r);
 }
 
 ssize_t ProxyArray::IterBegin(const ArrayData* ad) {

@@ -42,6 +42,7 @@
   CASE(NewArrayReserve) \
   CASE(NewPackedArray) \
   CASE(NewCol) \
+  CASE(Clone) \
   CASE(Nop) \
   CASE(AddElemC) \
   CASE(AddNewElemC) \
@@ -75,6 +76,7 @@
   CASE(AGetC) \
   CASE(AGetL) \
   CASE(CGetL) \
+  CASE(PushL) \
   CASE(CGetL2) \
   CASE(CGetS) \
   CASE(CGetM) \
@@ -100,6 +102,7 @@
   CASE(FPushFuncD) \
   CASE(FPushFuncU) \
   CASE(FPushFunc) \
+  CASE(FPushClsMethod) \
   CASE(FPushClsMethodD) \
   CASE(FPushClsMethodF) \
   CASE(FPushObjMethodD) \

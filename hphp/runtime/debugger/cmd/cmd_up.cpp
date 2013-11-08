@@ -55,7 +55,12 @@ void CmdUp::onClient(DebuggerClient &client) {
   if (client.argCount() > 1) {
     help(client);
   } else {
-    CmdWhere().fetchStackTrace(client);
+    if (client.isStackTraceAsync()) {
+      CmdWhere(KindOfWhereAsync).fetchStackTrace(client);
+    } else {
+      CmdWhere().fetchStackTrace(client);
+    }
+
     client.moveToFrame(client.getFrame() + ParseNumber(client));
   }
 }

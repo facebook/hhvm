@@ -151,7 +151,8 @@ StatementListPtr Parser::ParseString(const String& input, AnalysisResultPtr ar,
 Parser::Parser(Scanner &scanner, const char *fileName,
                AnalysisResultPtr ar, int fileSize /* = 0 */)
     : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false),
-      m_closureGenerator(false), m_nsState(SeenNothing) {
+      m_closureGenerator(false), m_nsState(SeenNothing),
+      m_aliasTable(getAutoAliasedClasses(), [&] { return isAutoAliasOn(); }) {
   string md5str = Eval::FileRepository::unitMd5(scanner.getMd5());
   MD5 md5 = MD5(md5str.c_str());
 
@@ -1776,6 +1777,86 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
 ///////////////////////////////////////////////////////////////////////////////
 // namespace support
 
+//////////////////// AliasTable /////////////////////
+
+Parser::AliasTable::AliasTable(const std::vector<AliasEntry>& autoAliases,
+                               std::function<bool ()> autoOracle) :
+  m_autoAliases(autoAliases), m_autoOracle(autoOracle),
+  m_alreadyImported(false) {
+
+  if (!m_autoOracle) {
+    setFalseOracle();
+  }
+}
+
+void Parser::AliasTable::setFalseOracle() {
+  m_autoOracle = [] () { return false; };
+}
+
+/*
+ * Add the auto-imports to the map.
+ * This is called by all the other operations, so the auto-import occurs
+ * on-demand.
+ */
+void Parser::AliasTable::addAutoImports() {
+  if (!m_alreadyImported && m_autoOracle()) {
+    m_alreadyImported = true;
+
+    for (auto entry : m_autoAliases) {
+      m_aliases[entry.alias] = (NameEntry){entry.name, true};
+    }
+  }
+}
+
+std::string Parser::AliasTable::getName(std::string alias) {
+  addAutoImports();
+  auto it = m_aliases.find(alias);
+  return (m_aliases.end() == it) ? "" : it->second.name;
+}
+
+bool Parser::AliasTable::isAliased(std::string alias) {
+  addAutoImports();
+  return m_aliases.find(alias) != m_aliases.end();
+}
+
+bool Parser::AliasTable::isAutoImported(std::string alias) {
+  addAutoImports();
+  auto it = m_aliases.find(alias);
+  return it != m_aliases.end() && it->second.isAuto;
+}
+
+void Parser::AliasTable::map(std::string alias, std::string name) {
+  addAutoImports();
+  m_aliases[alias] = (NameEntry){name, false};
+}
+
+/*
+ * To be called when we enter a fresh namespace.
+ */
+void Parser::AliasTable::clear() {
+  m_aliases.clear();
+  m_alreadyImported = false;
+}
+
+//////////////////////////////////////////////////////
+
+
+/*
+ * We auto-alias classes on HH mode and only if we're in the global namespace.
+ */
+bool Parser::isAutoAliasOn() {
+  return m_scanner.isHHSyntaxEnabled() && ("" == m_namespace);
+}
+
+std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
+  std::vector<AliasTable::AliasEntry> aliases;
+  aliases.push_back(
+    (AliasTable::AliasEntry){"Traversable", "HH\\Traversable"});
+  aliases.push_back(
+    (AliasTable::AliasEntry){"Iterator", "HH\\Iterator"});
+  return aliases;
+}
+
 void Parser::nns(int token) {
   if (m_nsState == SeenNamespaceStatement && token != ';') {
     error("No code may exist outside of namespace {}: %s",
@@ -1801,10 +1882,9 @@ void Parser::onNamespaceStart(const std::string &ns,
 
   m_nsState = InsideNamespace;
   m_nsFileScope = file_scope;
-  m_aliases.clear();
   pushComment();
-
   m_namespace = ns;
+  m_aliasTable.clear();
 }
 
 void Parser::onNamespaceEnd() {
@@ -1821,12 +1901,17 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
       key = ns.substr(pos + 1);
     }
   }
-  if (m_aliases.find(key) != m_aliases.end() && m_aliases[key] != ns) {
+
+  // It's not an error if the alias already exists but is auto-imported.
+  // In that case, it gets replaced.
+  if (m_aliasTable.isAliased(key) && !m_aliasTable.isAutoImported(key) &&
+      m_aliasTable.getName(key) != ns) {
     error("Cannot use %s as %s because the name is already in use: %s",
           ns.c_str(), key.c_str(), getMessage().c_str());
     return;
   }
-  m_aliases[key] = ns;
+
+  m_aliasTable.map(key, ns);
 }
 
 std::string Parser::nsDecl(const std::string &name) {
@@ -1843,15 +1928,16 @@ std::string Parser::resolve(const std::string &ns, bool cls) {
     alias = ns.substr(0, pos);
   }
 
-  hphp_string_imap<std::string>::const_iterator iter = m_aliases.find(alias);
-  if (iter != m_aliases.end()) {
+  if (m_aliasTable.isAliased(alias)) {
+    auto name = m_aliasTable.getName(alias);
+
     // Was it a namespace alias?
     if (pos != string::npos) {
-      return iter->second + ns.substr(pos);
+      return name + ns.substr(pos);
     }
     // Only classes can appear directly in "use" statements
     if (cls) {
-      return iter->second;
+      return name;
     }
   }
 
@@ -1916,7 +2002,7 @@ void Parser::registerAlias(std::string name) {
   size_t pos = name.rfind(NAMESPACE_SEP);
   if (pos != string::npos) {
     string key = name.substr(pos + 1);
-    m_aliases[key] = name;
+    m_aliasTable.map(key, name);
   }
 }
 

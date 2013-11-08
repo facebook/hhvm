@@ -764,6 +764,8 @@ int64_t f_memory_get_usage(bool real_usage /* = false */) {
   int64_t ret = real_usage ? stats.usage : stats.alloc;
   ret -= request_arena().slackEstimate() +
          varenv_arena().slackEstimate();
+  // TODO(#3137377)
+  ret = std::max(ret, (int64_t) 0);
   return ret;
 }
 
@@ -1072,13 +1074,16 @@ bool f_gc_enabled() {
 }
 
 void f_gc_enable() {
-  raise_warning("HipHop currently does not support circular reference "
-                "collection");
+  if (RuntimeOption::EnableHipHopSyntax) {
+    raise_warning("HipHop currently does not support circular reference "
+                  "collection");
+  }
 }
 
 void f_gc_disable() {
-  raise_warning("HipHop currently does not support circular reference "
-                "collection");
+  // we could raise a warning here, but gc_disable can be considered
+  // "successful" in that there's (still) no official GC after it's
+  // called ; and previous callers of gc_enable have already been warned.
 }
 
 int64_t f_gc_collect_cycles() {

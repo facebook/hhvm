@@ -202,6 +202,7 @@ struct Func {
 
   bool isPseudoMain() const { return m_name->empty(); }
   bool isBuiltin() const { return m_attrs & AttrBuiltin; }
+  bool isCPPBuiltin() const { return m_shared->m_builtinFuncPtr; }
   bool skipFrame() const { return m_attrs & AttrSkipFrame; }
   bool isMethod() const {
     return !isPseudoMain() && (bool)cls();
@@ -356,7 +357,7 @@ struct Func {
   bool isAsync() const { return shared()->m_isAsync; }
   bool hasStaticLocals() const { return !shared()->m_staticVars.empty(); }
   int numStaticLocals() const { return shared()->m_staticVars.size(); }
-  const ClassInfo::MethodInfo* info() const { return shared()->m_info; }
+  const ClassInfo::MethodInfo* methInfo() const { return shared()->m_info; }
   bool isAllowOverride() const { return m_attrs & AttrAllowOverride; }
 
   const BuiltinFunction& nativeFuncPtr() const {
@@ -437,7 +438,7 @@ struct Func {
   }
 
 public: // Offset accessors for the translator.
-#define X(f) static size_t f##Off() { return offsetof(Func, m_##f); }
+#define X(f) static ptrdiff_t f##Off() { return offsetof(Func, m_##f); }
   X(attrs);
   X(unit);
   X(cls);

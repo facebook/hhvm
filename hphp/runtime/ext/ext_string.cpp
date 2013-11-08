@@ -270,8 +270,12 @@ Variant f_hex2bin(const String& str) {
   return ret.detach();
 }
 
+const StaticString
+  s_nl("\n"),
+  s_br("<br />\n");
+
 String f_nl2br(const String& str) {
-  return str.replace("\n", "<br />\n");
+  return string_replace(str, s_nl, s_br);
 }
 
 String f_quotemeta(const String& str) {
@@ -338,11 +342,11 @@ String f_strrev(const String& str) {
   return ret;
 }
 
-String f_strtolower(const String& str) {
+String f_strtolower(String str) {
   return stringForEachFast(str, tolower);
 }
 
-String f_strtoupper(const String& str) {
+String f_strtoupper(String str) {
   return stringForEachFast(str, toupper);
 }
 
@@ -365,15 +369,15 @@ String stringToCaseFirst(const String& str, OpTo tocase, OpIs iscase) {
   return ret;
 }
 
-String f_ucfirst(const String& str) {
+String f_ucfirst(String str) {
   return stringToCaseFirst(str, toupper, isupper);
 }
 
-String f_lcfirst(const String& str) {
+String f_lcfirst(String str) {
   return stringToCaseFirst(str, tolower, islower);
 }
 
-String f_ucwords(const String& str) {
+String f_ucwords(String str) {
   char last = ' ';
   return stringForEachFast(str, [&] (char c) {
     char ret = isspace(last) ? toupper(c) : c;
@@ -416,19 +420,19 @@ String stringTrim(const String& str, const String& charlist) {
   return str.substr(start, end - start + 1);
 }
 
-String f_trim(const String& str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+String f_trim(String str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<true,true>(str, charlist);
 }
 
-String f_ltrim(const String& str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+String f_ltrim(String str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<true,false>(str, charlist);
 }
 
-String f_rtrim(const String& str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+String f_rtrim(String str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<false,true>(str, charlist);
 }
 
-String f_chop(const String& str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+String f_chop(String str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<false,true>(str, charlist);
 }
 
@@ -439,14 +443,14 @@ Variant f_explode(const String& delimiter, const String& str, int limit /* = 0x7
 String f_implode(CVarRef arg1, CVarRef arg2 /* = null_variant */) {
   Array items;
   String delim;
-  if (arg1.is(KindOfArray)) {
-    items = arg1.toArray();
+  if (isContainer(arg1)) {
+    items = arg1;
     delim = arg2.toString();
-  } else if (arg2.is(KindOfArray)) {
-    items = arg2.toArray();
+  } else if (isContainer(arg2)) {
+    items = arg2;
     delim = arg1.toString();
   } else {
-    throw_bad_type_exception("arguments need at least one array");
+    throw_bad_type_exception("expected a container as one of the arguments");
     return String();
   }
   return StringUtil::Implode(items, delim);
@@ -529,8 +533,9 @@ Variant f_strtok(const String& str, CVarRef token /* = null_variant */) {
   return ret;
 }
 
-static Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
-                           int &count, bool caseSensitive) {
+HOT_FUNC static
+Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
+                    int &count, bool caseSensitive) {
   if (search.is(KindOfArray)) {
     String ret = subject;
 
@@ -540,13 +545,13 @@ static Variant str_replace(CVarRef search, CVarRef replace, const String& subjec
       ArrayIter replIter(replArr);
       for (ArrayIter iter(searchArr); iter; ++iter) {
         if (replIter) {
-          ret = ret.replace(iter.second().toString(),
-                            replIter.second().toString(),
-                            count, caseSensitive);
+          ret = string_replace(ret, iter.second().toString(),
+                               replIter.second().toString(),
+                               count, caseSensitive);
           ++replIter;
         } else {
-          ret = ret.replace(iter.second().toString(),
-                            "", count, caseSensitive);
+          ret = string_replace(ret, iter.second().toString(),
+                               "", count, caseSensitive);
         }
       }
       return ret;
@@ -554,7 +559,8 @@ static Variant str_replace(CVarRef search, CVarRef replace, const String& subjec
 
     String repl = replace.toString();
     for (ArrayIter iter(searchArr); iter; ++iter) {
-      ret = ret.replace(iter.second().toString(), repl, count, caseSensitive);
+      ret = string_replace(ret, iter.second().toString(), repl, count,
+                           caseSensitive);
     }
     return ret;
   }
@@ -562,10 +568,11 @@ static Variant str_replace(CVarRef search, CVarRef replace, const String& subjec
   if (replace.is(KindOfArray)) {
     raise_notice("Array to string conversion");
   }
-  return subject.replace(search.toString(), replace.toString(), count,
-                         caseSensitive);
+  return string_replace(subject, search.toString(), replace.toString(), count,
+                        caseSensitive);
 }
 
+HOT_FUNC
 static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                            int &count, bool caseSensitive) {
   if (subject.is(KindOfArray)) {
@@ -587,6 +594,7 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                      caseSensitive);
 }
 
+HOT_FUNC
 Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                       VRefParam count /* = null */) {
   int nCount = 0;
@@ -627,7 +635,8 @@ Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
       throw_invalid_argument("start and length as arrays not implemented");
       return str;
     }
-    return str.toString().replace(start.toInt32(), length.toInt32(), repl);
+    return string_replace(str.toString(), start.toInt32(), length.toInt32(),
+                          repl);
   }
 
   Array ret;
@@ -644,12 +653,13 @@ Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
          ++iter, ++startIter, ++lengthIter) {
       int nStart = startIter.second().toInt32();
       int nLength = lengthIter.second().toInt32();
-      String repl("");
+      String repl = empty_string;
       if (replIter) {
         repl = replIter.second().toString();
         ++replIter;
       }
-      ret.append(iter.second().toString().replace(nStart, nLength, repl));
+      auto s2 = string_replace(iter.second().toString(), nStart, nLength, repl);
+      ret.append(s2);
     }
   } else {
     String repl = replacement.toString();
@@ -657,7 +667,8 @@ Variant f_substr_replace(CVarRef str, CVarRef replacement, CVarRef start,
          ++iter, ++startIter, ++lengthIter) {
       int nStart = startIter.second().toInt32();
       int nLength = lengthIter.second().toInt32();
-      ret.append(iter.second().toString().replace(nStart, nLength, repl));
+      auto s2 = string_replace(iter.second().toString(), nStart, nLength, repl);
+      ret.append(s2);
     }
   }
   return ret;
@@ -1047,9 +1058,25 @@ Variant f_stripos(const String& haystack, CVarRef needle, int offset /* = 0 */) 
   return false;
 }
 
-Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
+static bool is_valid_strrpos_args(
+    const String& haystack,
+    CVarRef needle,
+    int offset) {
+  if (haystack.size() == 0) {
+    return false;
+  }
+  if (needle.isString() && needle.toString().size() == 0) {
+    return false;
+  }
   if (offset < -haystack.size() || offset > haystack.size()) {
     raise_warning("Offset is greater than the length of haystack string");
+    return false;
+  }
+  return true;
+}
+
+Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
+  if (!is_valid_strrpos_args(haystack, needle, offset)) {
     return false;
   }
   int pos;
@@ -1063,8 +1090,7 @@ Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) 
 }
 
 Variant f_strripos(const String& haystack, CVarRef needle, int offset /* = 0 */) {
-  if (offset < -haystack.size() || offset > haystack.size()) {
-    raise_warning("Offset is greater than the length of haystack string");
+  if (!is_valid_strrpos_args(haystack, needle, offset)) {
     return false;
   }
   int pos;
@@ -1669,18 +1695,12 @@ Array f_get_html_translation_table(int table /* = 0 */, int quote_style /* = k_E
 
 String f_hebrev(const String& hebrew_text, int max_chars_per_line /* = 0 */) {
   if (hebrew_text.empty()) return hebrew_text;
-  int len = hebrew_text.size();
-  char *ret = string_convert_hebrew_string(hebrew_text.data(), len,
-                                           max_chars_per_line, false);
-  return String(ret, len, AttachString);
+  return string_convert_hebrew_string(hebrew_text, max_chars_per_line, false);
 }
 
 String f_hebrevc(const String& hebrew_text, int max_chars_per_line /* = 0 */) {
   if (hebrew_text.empty()) return hebrew_text;
-  int len = hebrew_text.size();
-  char *ret = string_convert_hebrew_string(hebrew_text.data(), len,
-                                           max_chars_per_line, true);
-  return String(ret, len, AttachString);
+  return string_convert_hebrew_string(hebrew_text, max_chars_per_line, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

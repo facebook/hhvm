@@ -841,9 +841,7 @@ IMPLEMENT_THREAD_LOCAL_NO_CHECK(PersistentObjectStore, g_persistentObjects);
 
 void PersistentObjectStore::removeObject(ResourceData *data) {
   if (data) {
-    if (data->decRefCount() == 0) {
-      data->release();
-    } else {
+    if (!decRefRes(data)) {
       SweepableResourceData *sw = dynamic_cast<SweepableResourceData*>(data);
       if (sw) {
         sw->decPersistent();

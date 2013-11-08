@@ -987,8 +987,9 @@ inline void SetNewElemArray(TypedValue* base, Cell* value) {
   ArrayData* a2 = a->append(cellAsCVarRef(*value), copy);
   if (a2 != a) {
     a2->incRefCount();
-    base->m_data.parr->decRefCount();
+    auto old = base->m_data.parr;
     base->m_data.parr = a2;
+    old->decRefAndRelease();
   }
 }
 
@@ -1474,9 +1475,10 @@ inline void UnsetElemArray(TypedValue* base, TypedValue* key) {
   }
   if (a2 != a) {
     a2->incRefCount();
-    base->m_data.parr->decRefCount();
+    auto old = base->m_data.parr;
     base->m_data.parr = a2;
-  }
+    old->decRefAndRelease();
+ }
 }
 
 /**

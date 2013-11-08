@@ -36,88 +36,136 @@ typedef int32_t RefCount;
  * object lives across requests and may be accessed by multiple
  * threads.
  */
-constexpr size_t RefCountStaticBitPos = 30;
-constexpr RefCount RefCountStaticValue = (1 << RefCountStaticBitPos);
+constexpr size_t RefCountStaticBitPos = 31;
+const int32_t RefCountStaticValue = INT_MIN;
+const int8_t RefCountStaticValueHighByte = RefCountStaticValue / (1 << 24);
+const int32_t RefCountMaxRealistic = (1 << 30) - 1;
 
+static_assert((uint32_t)RefCountStaticValue == (1uL << RefCountStaticBitPos),
+              "Check RefCountStaticValue and RefCountStaticBitPos");
 
 /*
- * Used for assertions.  Real count values should always be less than
- * or equal to RefCountStaticValue, and asserting this will also catch
+ * Real count values should always be less than or equal to
+ * RefCountMaxRealistic, and asserting this will also catch
  * common malloc freed-memory patterns (e.g. 0x5a5a5a5a and smart
  * allocator's 0x6a6a6a6a).
  */
-inline DEBUG_ONLY bool is_refcount_realistic(int32_t count) {
-  return count <= RefCountStaticValue && count >= 0;
+inline void assert_refcount_realistic(int32_t count) {
+  assert(count == RefCountStaticValue ||
+         (uint32_t)count <= (uint32_t)RefCountMaxRealistic);
 }
+
+/*
+ * As above, but additionally check for non-zero
+ */
+inline void assert_refcount_realistic_nz(int32_t count) {
+  assert(count == RefCountStaticValue ||
+         (uint32_t)count - 1 < (uint32_t)RefCountMaxRealistic);
+}
+
+/*
+ * Check that the refcount is realistic, and not the static flag
+ */
+inline void assert_refcount_realistic_ns(int32_t count) {
+  assert((uint32_t)count <= (uint32_t)RefCountMaxRealistic);
+}
+
+/*
+ * As above, but additionally check for greater-than-zero
+ */
+inline void assert_refcount_realistic_ns_nz(int32_t count) {
+  assert((uint32_t)count - 1 < (uint32_t)RefCountMaxRealistic);
+}
+
+#define DECREF_AND_RELEASE_MAYBE_STATIC(thiz, action) do {              \
+    assert(!MemoryManager::sweeping());                                 \
+    assert_refcount_realistic_nz(thiz->m_count);                        \
+    if (thiz->m_count == 1) {                                           \
+      action;                                                           \
+    } else if (thiz->m_count > 1) {                                     \
+      --thiz->m_count;                                                  \
+    }                                                                   \
+  } while (false)
 
 /**
  * Ref-counted types have a m_count field at FAST_REFCOUNT_OFFSET
  * and define counting methods with these macros.
  */
-#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC           \
-  RefCount getCount() const {                           \
-    assert(is_refcount_realistic(m_count));             \
-    return m_count;                                     \
-  }                                                     \
-                                                        \
-  bool isRefCounted() const {                           \
-    assert(is_refcount_realistic(m_count));             \
-    return m_count != RefCountStaticValue;              \
-  }                                                     \
-                                                        \
-  bool hasMultipleRefs() const {                        \
-    assert(is_refcount_realistic(m_count));             \
-    return (uint32_t)m_count > 1;                       \
-  }                                                     \
-                                                        \
-  void incRefCount() const {                            \
-    assert(!MemoryManager::sweeping());                 \
-    assert(is_refcount_realistic(m_count));             \
-    if (isRefCounted()) { ++m_count; }                  \
-  }                                                     \
-                                                        \
-  RefCount decRefCount() const {                        \
-    assert(!MemoryManager::sweeping());                 \
-    assert(m_count > 0);                                \
-    assert(is_refcount_realistic(m_count));             \
-    return isRefCounted() ? --m_count : m_count;        \
+#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                           \
+  RefCount getCount() const {                                           \
+    assert_refcount_realistic(m_count);                                 \
+    return m_count;                                                     \
+  }                                                                     \
+                                                                        \
+  bool isRefCounted() const {                                           \
+    assert_refcount_realistic(m_count);                                 \
+    return !((uint32_t)m_count & (uint32_t)RefCountStaticValue);        \
+  }                                                                     \
+                                                                        \
+  bool hasMultipleRefs() const {                                        \
+    assert_refcount_realistic(m_count);                                 \
+    return (uint32_t)m_count > 1;                                       \
+  }                                                                     \
+                                                                        \
+  void incRefCount() const {                                            \
+    assert(!MemoryManager::sweeping());                                 \
+    assert_refcount_realistic(m_count);                                 \
+    if (isRefCounted()) { ++m_count; }                                  \
+  }                                                                     \
+                                                                        \
+  RefCount decRefCount() const {                                        \
+    assert(!MemoryManager::sweeping());                                 \
+    assert_refcount_realistic_nz(m_count);                              \
+    return isRefCounted() ? --m_count : m_count;                        \
+  }                                                                     \
+                                                                        \
+  ALWAYS_INLINE void decRefAndRelease() {                               \
+    DECREF_AND_RELEASE_MAYBE_STATIC(this, release());                   \
   }
 
 #define IMPLEMENT_COUNTABLE_METHODS             \
   void setStatic() const {                      \
-    assert(is_refcount_realistic(m_count));     \
+    assert_refcount_realistic(m_count);         \
     m_count = RefCountStaticValue;              \
   }                                             \
   bool isStatic() const {                       \
-    assert(is_refcount_realistic(m_count));     \
-    return m_count == RefCountStaticValue;      \
+    return !isRefCounted();                     \
   }                                             \
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
-#define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC \
-  RefCount getCount() const {                   \
-    assert(is_refcount_realistic(m_count));     \
-    return m_count;                             \
-  }                                             \
-                                                \
-  bool isRefCounted() const { return true; }    \
-                                                \
-  bool hasMultipleRefs() const {                \
-    assert(m_count >= 0);                       \
-    assert(is_refcount_realistic(m_count));     \
-    return m_count > 1;                         \
-  }                                             \
-                                                \
-  void incRefCount() const {                    \
-    assert(!MemoryManager::sweeping());         \
-    assert(is_refcount_realistic(m_count));     \
-    ++m_count;                                  \
-  }                                             \
-                                                \
-  RefCount decRefCount() const {                \
-    assert(m_count > 0);                        \
-    assert(is_refcount_realistic(m_count));     \
-    return --m_count;                           \
+#define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC         \
+  RefCount getCount() const {                           \
+    assert_refcount_realistic_ns(m_count);              \
+    return m_count;                                     \
+  }                                                     \
+                                                        \
+  bool isRefCounted() const { return true; }            \
+                                                        \
+  bool hasMultipleRefs() const {                        \
+    assert_refcount_realistic_ns(m_count);              \
+    return m_count > 1;                                 \
+  }                                                     \
+                                                        \
+  void incRefCount() const {                            \
+    assert(!MemoryManager::sweeping());                 \
+    assert_refcount_realistic_ns(m_count);              \
+    ++m_count;                                          \
+  }                                                     \
+                                                        \
+  RefCount decRefCount() const {                        \
+    assert(!MemoryManager::sweeping());                 \
+    assert_refcount_realistic_ns_nz(m_count);           \
+    return --m_count;                                   \
+  }                                                     \
+                                                        \
+  ALWAYS_INLINE bool decRefAndRelease() {               \
+    assert(!MemoryManager::sweeping());                 \
+    assert_refcount_realistic_ns_nz(m_count);           \
+    if (!--m_count) {                                   \
+      release();                                        \
+      return true;                                      \
+    }                                                   \
+    return false;                                       \
   }
 
 class ObjectData;

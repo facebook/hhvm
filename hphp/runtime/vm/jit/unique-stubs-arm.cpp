@@ -116,7 +116,7 @@ void emitFreeLocalsHelpers(UniqueStubs& us) {
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& us) {
-  MacroAssembler a { tx64->stubsCode };
+  MacroAssembler a { tx64->mainCode };
 
   us.funcPrologueRedispatch = a.frontier();
   a.   Brk   (0);

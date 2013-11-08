@@ -303,6 +303,7 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   bool isRunning() { return getState() == STATE_RUNNING; }
   String getFileName();
   int getLineNumber();
+  const ActRec* getActRec();
 
  protected:
   void onUnblocked();
@@ -627,7 +628,7 @@ class c_ExternalThreadEventWaitHandle
 
  private:
   void initialize(AsioExternalThreadEvent* event, ObjectData* priv_data);
-  void destroyEvent();
+  void destroyEvent(bool sweeping = false);
 
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
   AsioExternalThreadEvent* m_event;

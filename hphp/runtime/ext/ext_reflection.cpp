@@ -26,7 +26,6 @@
 #include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/parser/parser.h"
-#include "hphp/runtime/ext/util.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -224,6 +223,17 @@ static void set_instance_prop_info(Array &ret, const Class::Prop* prop) {
   }
 }
 
+static void set_dyn_prop_info(
+    Array &ret,
+    const Variant& name,
+    const StringData* className) {
+  ret.set(s_name, name);
+  set_attrs(ret, get_modifiers(AttrPublic, false) & ~0x66);
+  ret.set(s_class, VarNR(className));
+  set_doc_comment(ret, empty_string.get());
+  ret.set(s_type, false_varNR);
+}
+
 static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
   ret.set(s_name, VarNR(prop->m_name));
   set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
@@ -410,8 +420,8 @@ static void set_function_info(Array &ret, const Func* func) {
   }
   if (func->isBuiltin()) {
     ret.set(s_internal, true_varNR);
-    if (func->info() &&
-        func->info()->attribute & ClassInfo::HipHopSpecific) {
+    if (func->methInfo() &&
+        func->methInfo()->attribute & ClassInfo::HipHopSpecific) {
       ret.set(s_hphp,     true_varNR);
     }
   }
@@ -905,6 +915,15 @@ Array f_hphp_get_class_info(CVarRef name) {
       arr.set(*(String*)(&prop.m_name), VarNR(info));
     }
 
+    if (name.isObject()) {
+      auto obj = name.toObject();
+      for (ArrayIter it(obj->getDynProps().get()); !it.end(); it.next()) {
+        Array info = Array::Create();
+        set_dyn_prop_info(info, it.first(), cls->name());
+        arr.set(it.first(), VarNR(info));
+      }
+    }
+
     ret.set(s_properties, VarNR(arr));
     ret.set(s_private_properties, VarNR(arrPriv));
   }
@@ -1011,7 +1030,7 @@ void f_hphp_set_property(CObjRef obj, const String& cls, const String& prop,
 
 Variant f_hphp_get_static_property(const String& cls, const String& prop, bool force) {
   StringData* sd = cls.get();
-  Class* class_ = lookup_class(sd);
+  Class* class_ = Unit::lookupClass(sd);
   if (!class_) {
     raise_error("Non-existent class %s", sd->data());
   }
@@ -1035,7 +1054,7 @@ Variant f_hphp_get_static_property(const String& cls, const String& prop, bool f
 void f_hphp_set_static_property(const String& cls, const String& prop, CVarRef value,
                                 bool force) {
   StringData* sd = cls.get();
-  Class* class_ = lookup_class(sd);
+  Class* class_ = Unit::lookupClass(sd);
   if (!class_) {
     raise_error("Non-existent class %s", sd->data());
   }

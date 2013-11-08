@@ -97,10 +97,10 @@ HttpServer::HttpServer()
     m_pageServer->enableSSL(RuntimeOption::SSLPort);
   }
 
-  m_adminServer = ServerFactoryRegistry::createServer
-    (RuntimeOption::ServerType,
-     RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
+  ServerOptions admin_options
+    (RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
      RuntimeOption::AdminThreadCount);
+  m_adminServer = serverFactory->createServer(admin_options);
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
     RuntimeOption::RequestTimeoutSeconds);
 

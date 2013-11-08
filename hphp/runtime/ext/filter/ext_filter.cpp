@@ -212,11 +212,11 @@ static bool filter_var(Variant& ret, CVarRef variable, int64_t filter,
 
   int64_t flags;
   Variant option_array;
-  if (options.isInteger()) {
-    flags = options.toInt64();
-  } else {
+  if (options.isArray()) {
     flags = options[s_flags].toInt64();
     option_array = options[s_options];
+  } else {
+    flags = options.toInt64();
   }
 
   FAIL_IF(variable.isObject() && !variable.getObjectData()->hasToString());

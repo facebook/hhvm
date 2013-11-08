@@ -273,6 +273,11 @@ public:
   IRTrace* main() const          { return m_main; }
   uint32_t bcOff() const         { return m_bcOff; }
 
+  // Overloads useful for StateVector and IdSet
+  uint32_t numIds(const SSATmp*) const { return numTmps(); }
+  uint32_t numIds(const Block*) const { return numBlocks(); }
+  uint32_t numIds(const IRInstruction*) const { return numInsts(); }
+
   typedef std::list<IRTrace*> ExitList;
   ExitList& exits() { return m_exits; }
   const ExitList& exits() const { return m_exits; }

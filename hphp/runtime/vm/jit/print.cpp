@@ -93,6 +93,43 @@ static std::string constToString(Type t, const ConstData* c) {
   return os.str();
 }
 
+const PhysLoc* loc(const RegAllocInfo* regs,
+                   const IRInstruction* inst, const SSATmp* t) {
+  return regs ? &(*regs)[inst][t] : nullptr;
+}
+
+void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
+              const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
+  SSATmp* src = inst->src(i);
+  if (src != nullptr) {
+    if (lifetime && lifetime->linear[inst] != 0 && !src->isConst() &&
+        lifetime->uses[src].lastUse == lifetime->linear[inst]) {
+      ostream << "~";
+    }
+    print(ostream, src, loc(regs, inst, src), lifetime);
+  } else {
+    ostream << color(ANSI_COLOR_RED)
+            << "!!!NULL @ " << i
+            << color(ANSI_COLOR_END)
+            ;
+  }
+}
+
+void printLabel(std::ostream& os, const Block* block) {
+  os << color(ANSI_COLOR_MAGENTA);
+  os << "B" << block->id();
+  switch (block->hint()) {
+  case Block::Hint::Unlikely:    os << "<Unlikely>"; break;
+  case Block::Hint::Likely:      os << "<Likely>"; break;
+  default:
+    break;
+  }
+  os << color(ANSI_COLOR_END);
+}
+} // namespace
+
+//////////////////////////////////////////////////////////////////////
+
 void printOpcode(std::ostream& os, const IRInstruction* inst,
                  const GuardConstraints* guards) {
   os << color(ANSI_COLOR_CYAN)
@@ -137,41 +174,6 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
      << color(ANSI_COLOR_END);
 }
 
-const PhysLoc* loc(const RegAllocInfo* regs,
-                   const IRInstruction* inst, const SSATmp* t) {
-  return regs ? &(*regs)[inst][t] : nullptr;
-}
-
-void printDst(std::ostream& os, const IRInstruction* inst,
-              const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
-  if (inst->numDsts() == 0) return;
-
-  const char* sep = "";
-  for (const SSATmp& dst : inst->dsts()) {
-    os << punc(sep);
-    print(os, &dst, loc(regs, inst, &dst), lifetime, true);
-    sep = ", ";
-  }
-  os << punc(" = ");
-}
-
-void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
-              const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
-  SSATmp* src = inst->src(i);
-  if (src != nullptr) {
-    if (lifetime && lifetime->linear[inst] != 0 && !src->isConst() &&
-        lifetime->uses[src].lastUse == lifetime->linear[inst]) {
-      ostream << "~";
-    }
-    print(ostream, src, loc(regs, inst, src), lifetime);
-  } else {
-    ostream << color(ANSI_COLOR_RED)
-            << "!!!NULL @ " << i
-            << color(ANSI_COLOR_END)
-            ;
-  }
-}
-
 void printSrcs(std::ostream& os, const IRInstruction* inst,
                const RegAllocInfo* regs,
                const LifetimeInfo* lifetime) {
@@ -192,20 +194,15 @@ void printSrcs(std::ostream& os, const IRInstruction* inst,
   }
 }
 
-void printLabel(std::ostream& os, const Block* block) {
-  os << color(ANSI_COLOR_MAGENTA);
-  os << "B" << block->id();
-  switch (block->hint()) {
-  case Block::Hint::Unlikely:    os << "<Unlikely>"; break;
-  case Block::Hint::Likely:      os << "<Likely>"; break;
-  default:
-    break;
+void printDsts(std::ostream& os, const IRInstruction* inst,
+               const RegAllocInfo* regs, const LifetimeInfo* lifetime) {
+  const char* sep = "";
+  for (const SSATmp& dst : inst->dsts()) {
+    os << punc(sep);
+    print(os, &dst, loc(regs, inst, &dst), lifetime, true);
+    sep = ", ";
   }
-  os << color(ANSI_COLOR_END);
 }
-} // namespace
-
-//////////////////////////////////////////////////////////////////////
 
 void print(std::ostream& ostream, const IRInstruction* inst,
            const RegAllocInfo* regs, const LifetimeInfo* lifetime,
@@ -220,14 +217,20 @@ void print(std::ostream& ostream, const IRInstruction* inst,
     }
     ostream << color(ANSI_COLOR_END);
   }
-  printDst(ostream, inst, regs, lifetime);
-  printOpcode(ostream, inst, guards);
-  printSrcs(ostream, inst, regs, lifetime);
-
+  printInstr(ostream, inst, regs, lifetime);
   if (Block* taken = inst->taken()) {
     ostream << punc(" -> ");
     printLabel(ostream, taken);
   }
+}
+
+void printInstr(std::ostream& ostream, const IRInstruction* inst,
+                const RegAllocInfo* regs, const LifetimeInfo* lifetime,
+                const GuardConstraints* guards) {
+  printDsts(ostream, inst, regs, lifetime);
+  if (inst->numDsts()) ostream << punc(" = ");
+  printOpcode(ostream, inst, guards);
+  printSrcs(ostream, inst, regs, lifetime);
 }
 
 void print(const IRInstruction* inst) {
@@ -236,7 +239,7 @@ void print(const IRInstruction* inst) {
 }
 
 std::ostream& operator<<(std::ostream& os, const PhysLoc& loc) {
-  auto sz = loc.numAllocatedRegs();
+  auto sz = loc.numAllocated();
   if (!sz) return os;
   os << '(';
   auto delim = "";
@@ -256,7 +259,7 @@ std::ostream& operator<<(std::ostream& os, const PhysLoc& loc) {
 }
 
 void printPhysLoc(std::ostream& os, const PhysLoc& loc) {
-  if (loc.numAllocatedRegs() > 0) {
+  if (loc.numAllocated() > 0) {
     os << color(ANSI_COLOR_BROWN) << loc << color(ANSI_COLOR_END);
   }
 }

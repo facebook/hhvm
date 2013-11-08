@@ -608,12 +608,13 @@ void FrameState::updateLocalRefValues(SSATmp* oldRef, SSATmp* newRef) {
 }
 
 /**
- * This method changes any boxed local into a BoxedCell type.
+ * This method changes any boxed local into a BoxedInitCell type. It's safe to
+ * assume they're init because you can never have a reference to uninit.
  */
 void FrameState::dropLocalRefsInnerTypes() {
   auto dropTypes = [] (smart::vector<LocalState>& locals) {
     for (auto& loc : locals) {
-      if (loc.type.isBoxed()) loc.type = Type::BoxedCell;
+      if (loc.type.isBoxed()) loc.type = Type::BoxedInitCell;
     }
   };
   dropTypes(m_locals);

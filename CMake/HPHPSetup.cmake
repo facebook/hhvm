@@ -1,9 +1,9 @@
 include(Options)
 
 if (APPLE)
-	set(HHVM_ANCHOR_SYMS -Wl,-u,_register_libevent_server)
+	set(HHVM_ANCHOR_SYMS -Wl,-u,_register_libevent_server,_register_fastcgi_server)
 else()
-	set(HHVM_ANCHOR_SYMS -Wl,-uregister_libevent_server)
+	set(HHVM_ANCHOR_SYMS -Wl,-uregister_libevent_server,-uregister_fastcgi_server)
 endif()
 
 set(HHVM_LINK_LIBRARIES
@@ -15,6 +15,8 @@ set(HHVM_LINK_LIBRARIES
     hphp_zend
     hphp_util
     hphp_hhbbc
+    hphp_thrift
+    hphp_proxygen
     vixl neo
     ${HHVM_ANCHOR_SYMS})
 

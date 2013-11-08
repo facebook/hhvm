@@ -443,8 +443,11 @@ bool Func::byRef(int32_t arg) const {
 
 bool Func::mustBeRef(int32_t arg) const {
   if (byRef(arg)) {
-    return arg < m_numParams || !(m_attrs & AttrVariadicByRef) ||
-      !info() || !(info()->attribute & ClassInfo::MixedVariableArguments);
+    return
+      arg < m_numParams ||
+      !(m_attrs & AttrVariadicByRef) ||
+      !methInfo() ||
+      !(methInfo()->attribute & ClassInfo::MixedVariableArguments);
   }
   return false;
 }
@@ -568,9 +571,9 @@ void Func::prettyPrint(std::ostream& out) const {
 
 void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
   assert(mi);
-  if (info() != nullptr) {
+  if (methInfo() != nullptr) {
     // Very large operator=() invocation.
-    *mi = *info();
+    *mi = *methInfo();
     // Deep copy the vectors of mi-owned pointers.
     cloneMembers(mi->parameters);
     cloneMembers(mi->staticVariables);

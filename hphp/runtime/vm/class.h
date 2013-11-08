@@ -491,9 +491,11 @@ struct Class : AtomicCountable {
   Avail avail(Class *&parent, bool tryAutoload = false) const;
 
   /*
-   * classof() determines if this represents a non-strict subtype of cls.
+   * classof() determines if this represents a non-strict subtype of
+   * cls. Returns uint64_t instead of bool because it's called directly from
+   * the TC.
    */
-  bool classof(const Class* cls) const {
+  uint64_t classof(const Class* cls) const {
     /*
       If cls is an interface, we can simply check to see if cls is in
       this->m_interfaces.  Otherwise, if this is not an interface, the classVec
@@ -710,6 +712,7 @@ struct Class : AtomicCountable {
   unsigned classVecLen() const {
     return m_classVecLen;
   }
+  const Class* const* classVec() const { return m_classVec; }
   static size_t preClassOff() { return offsetof(Class, m_preClass); }
   static size_t classVecOff() { return offsetof(Class, m_classVec); }
   static size_t classVecLenOff() { return offsetof(Class, m_classVecLen); }
@@ -895,6 +898,8 @@ inline bool isInterface(const Class* cls) {
 inline bool isNormalClass(const Class* cls ) {
   return !(cls->attrs() & (AttrTrait | AttrInterface));
 }
+
+enum class ClassKind { Class, Interface, Trait };
 
 /*
  * Returns whether a class is persistent *and* has a persistent RDS

@@ -428,6 +428,7 @@ private:
   void switchMachine(DMachineInfoPtr machine);
   SmartPtr<Socket> connectLocal();
   bool connectRemote(const std::string &host, int port);
+  bool tryConnect(const std::string &host, int port, bool clearmachines);
 
   enum EventLoopKind {
     TopLevel, // The top-level event loop, called from run().

@@ -67,9 +67,7 @@ public:
   }
 
   ~SmartPtr() {
-    if (m_px && m_px->decRefCount() == 0) {
-      m_px->release();
-    }
+    decRefPtr(m_px);
   }
 
   /**
@@ -97,16 +95,16 @@ public:
     auto goner = m_px;
     m_px = src.m_px;
     src.m_px = nullptr;
-    if (goner && !goner->decRefCount()) goner->release();
+    decRefPtr(goner);
     return *this;
   }
   SmartPtr& operator=(T* px) {
-    // Incidentally works with self-assignment because incRefCount is
+    // Works with self-assignment because incRefCount is
     // called before decRefCount.
     if (px) px->incRefCount();
     auto goner = m_px;
     m_px = px;
-    if (goner && !goner->decRefCount()) goner->release();
+    decRefPtr(goner);
     return *this;
   }
 
@@ -143,6 +141,9 @@ protected:
   T* m_px;  // raw pointer
 
 private:
+  static ALWAYS_INLINE void decRefPtr(T* ptr) {
+    if (ptr) ptr->decRefAndRelease();
+  }
   static void compileTimeAssertions() {
     static_assert(offsetof(SmartPtr, m_px) == kExpectedMPxOffset, "");
   }
@@ -183,13 +184,16 @@ struct AtomicSmartPtr {
   /**
    * Assignments.
    */
+
   AtomicSmartPtr& operator=(const AtomicSmartPtr<T>& src) {
     return operator=(src.m_px);
   }
+
   template<class Y>
   AtomicSmartPtr& operator=(const AtomicSmartPtr<Y>& src) {
     return operator=(src.get());
   }
+
   AtomicSmartPtr& operator=(T* px) {
     if (m_px != px) {
       if (m_px && m_px->decAtomicCount() == 0) {
@@ -202,6 +206,7 @@ struct AtomicSmartPtr {
     }
     return *this;
   }
+
   template<class Y>
   AtomicSmartPtr& operator=(Y* px) {
     T* npx = dynamic_cast<T*>(px);
@@ -221,7 +226,6 @@ struct AtomicSmartPtr {
    * Magic delegation.
    */
   T* operator->() const {
-    if (!m_px) throw_null_pointer_exception();
     return m_px;
   }
 
@@ -238,11 +242,13 @@ struct AtomicSmartPtr {
   void reset() {
     operator=((T*)nullptr);
   }
+
 protected:
   void overwrite_unsafe(T* ptr) {
     assert(!m_px);
     m_px = ptr;
   }
+
 private:
   T* m_px;
 };

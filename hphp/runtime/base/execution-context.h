@@ -502,12 +502,6 @@ public:
   typedef hphp_hash_map<const StringData*, ClassInfo::ConstantInfo*,
                         string_data_hash, string_data_same> ConstInfoMap;
   ConstInfoMap m_constInfo;
-  typedef hphp_hash_map<const HPHP::Class*, HPHP::Class::PropInitVec*,
-                        pointer_hash<HPHP::Class> > PropDataMap;
-  PropDataMap m_propData;
-  typedef hphp_hash_map<const HPHP::Class*, HphpArray*,
-                        pointer_hash<HPHP::Class> > SPropDataMap;
-  SPropDataMap m_sPropData;
 
   const HPHP::Func* lookupMethodCtx(const HPHP::Class* cls,
                                         const StringData* methodName,

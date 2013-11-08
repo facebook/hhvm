@@ -37,6 +37,17 @@ namespace sz {
 typedef uint8_t* Address;
 typedef uint8_t* CodeAddress;
 
+#define BLOCK_EMISSION_ASSERT(canEmitCheck)                                   \
+  always_assert_log(canEmitCheck,                                             \
+    [] { return                                                               \
+      "Data block emission failed. This almost certainly means the TC is "    \
+      "full. If this is the case, increasing Eval.JitASize, "                 \
+      "Eval.JitAStubsSize and Eval.JitGlobalDataSize in the configuration "   \
+      "file when running this script or application should fix this "         \
+      "problem.";                                                             \
+    }                                                                         \
+  )
+
 /**
  * DataBlock is a simple bump-allocating wrapper around a chunk of memory.
  */
@@ -118,28 +129,28 @@ struct DataBlock {
   }
 
   void byte(const uint8_t byte) {
-    always_assert(canEmit(sz::byte));
+    BLOCK_EMISSION_ASSERT(canEmit(sz::byte));
     *m_frontier = byte;
     m_frontier += sz::byte;
   }
   void word(const uint16_t word) {
-    always_assert(canEmit(sz::word));
+    BLOCK_EMISSION_ASSERT(canEmit(sz::word));
     *(uint16_t*)m_frontier = word;
     m_frontier += sz::word;
   }
   void dword(const uint32_t dword) {
-    always_assert(canEmit(sz::dword));
+    BLOCK_EMISSION_ASSERT(canEmit(sz::dword));
     *(uint32_t*)m_frontier = dword;
     m_frontier += sz::dword;
   }
   void qword(const uint64_t qword) {
-    always_assert(canEmit(sz::qword));
+    BLOCK_EMISSION_ASSERT(canEmit(sz::qword));
     *(uint64_t*)m_frontier = qword;
     m_frontier += sz::qword;
   }
 
   void bytes(size_t n, const uint8_t *bs) {
-    always_assert(canEmit(n));
+    BLOCK_EMISSION_ASSERT(canEmit(n));
     if (n <= 8) {
       // If it is a modest number of bytes, try executing in one machine
       // store. This allows control-flow edges, including nop, to be

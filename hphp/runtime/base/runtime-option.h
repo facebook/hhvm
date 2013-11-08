@@ -389,7 +389,6 @@ public:
   F(bool, JitUseVtuneAPI,              false)                           \
                                                                         \
   F(bool, JitDisabledByHphpd,          false)                           \
-  F(bool, ThreadingJit,                false)                           \
   F(bool, JitTransCounters,            false)                           \
   F(bool, HHIRGenericDtorHelper,       true)                            \
   F(bool, HHIRCse,                     true)                            \
@@ -399,26 +398,30 @@ public:
   F(bool, HHIRExtraOptPass,            true)                            \
   F(uint32_t, HHIRNumFreeRegs,         -1)                              \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
-  F(uint32_t, HHIRInliningMaxCost,     7)                               \
+  F(uint32_t, HHIRInliningMaxCost,     13)                              \
+  F(uint32_t, HHIRAlwaysInlineMaxCost, 10)                              \
   F(uint32_t, HHIRInliningMaxDepth,    4)                               \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 3)                          \
-  F(bool, HHIREnableCalleeSavedOpt,    true)                            \
-  F(bool, HHIREnablePreColoring,       true)                            \
-  F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIREnableRefCountOpt,       true)                            \
   F(bool, HHIREnableSinking,           true)                            \
-  F(bool, HHIRAllocXMMRegs,            true)                            \
   F(bool, HHIRGenerateAsserts,         debug)                           \
   F(bool, HHIRDirectExit,              true)                            \
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
+  /* Register allocation flags */                                       \
+  F(bool, HHIRXls,                     false)                           \
+  F(bool, HHIREnableCalleeSavedOpt,    true)                            \
+  F(bool, HHIREnablePreColoring,       true)                            \
+  F(bool, HHIREnableCoalescing,        true)                            \
+  F(bool, HHIRAllocXMMRegs,            true)                            \
   /* Region compiler flags */                                           \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
   F(bool,     JitPGO,                  false)                           \
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
   F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
   F(bool,     JitPGOUsePostConditions, true)                            \
+  F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \
   F(bool, HHBCRelaxGuards,             hhbcRelaxGuardsDefault())        \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
@@ -439,7 +442,10 @@ public:
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
   F(bool, SimulateARM,                 false)                           \
-  /* */                                                                 \
+  F(bool, DecRefUsePlainDecl,          true)                            \
+  F(bool, DecRefUsePlainDeclWithDestroy,true)                           \
+  F(bool, DecRefUseScratch,            false)                           \
+  /* */
 
 #define F(type, name, unused) \
   static type Eval ## name;
@@ -484,6 +490,7 @@ public:
   static bool EnableDebuggerPrompt;
   static bool EnableDebuggerServer;
   static bool EnableDebuggerUsageLog;
+  static bool DebuggerDisableIPv6;
   static int DebuggerServerPort;
   static int DebuggerDefaultRpcPort;
   static std::string DebuggerDefaultRpcAuth;
@@ -507,6 +514,7 @@ public:
   static int HHProfServerThreads;
   static int HHProfServerTimeoutSeconds;
   static bool HHProfServerProfileClientMode;
+  static bool HHProfServerAllocationProfile;
   static int HHProfServerFilterMinAllocPerReq;
   static int HHProfServerFilterMinBytesPerReq;
 

@@ -321,7 +321,7 @@ void unwindBuiltinFrame() {
   auto& stack = g_vmContext->getStack();
   auto& fp = g_vmContext->m_fp;
 
-  assert(fp->m_func->info());
+  assert(fp->m_func->methInfo());
   assert(fp->m_func->name()->isame(s_hphpd_break.get()) ||
          fp->m_func->name()->isame(s_fb_enable_code_coverage.get()));
 

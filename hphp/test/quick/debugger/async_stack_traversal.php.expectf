@@ -1,0 +1,76 @@
+Program %s/async_stack_traversal.php loaded. Type '[r]un' or '[c]ontinue' to go.
+b async_stack_traversal.php:7
+Breakpoint 1 set on line 7 of async_stack_traversal.php
+But wont break until file async_stack_traversal.php has been loaded.
+r
+int(43)
+Breakpoint 1 reached at gen1() on line 7 of %s/async_stack_traversal.php
+   6   await RescheduleWaitHandle::Create(1, 1);
+   7*  return $a + 1;
+   8 }
+
+wa
+Fetching async stacktrace...
+switching stack contexts (sync->async) resetting stack state
+#0  gen1 [%d]
+#1  <<join>>
+#2  gen2 [%d]
+#3  <gen-array> [%d]
+#4  genFoo [%d]
+    at %s/async_stack_traversal.php:32
+#5  <<join>>
+v
+$a = 45
+$v1 = "v1-gen1"
+u
+#1  <<join>>
+v
+(no variable was defined)
+u
+#2  gen2 [%d]
+v
+$a = 45
+$v1 = "v1-gen2"
+d
+#1  <<join>>
+d
+#0  gen1 [%d]
+v
+$a = 45
+$v1 = "v1-gen1"
+c
+Breakpoint 1 reached at gen1() on line 7 of %s/async_stack_traversal.php
+   6   await RescheduleWaitHandle::Create(1, 1);
+   7*  return $a + 1;
+   8 }
+
+v
+$a = 46
+$v1 = "v1-gen1"
+wa
+Fetching async stacktrace...
+#0  gen1 [%d]
+#1  <<join>>
+#2  gen2 [%d]
+#3  <gen-array> [%d]
+#4  genFoo [%d]
+    at %s/async_stack_traversal.php:32
+#5  <<join>>
+v
+$a = 46
+$v1 = "v1-gen1"
+u
+#1  <<join>>
+u
+#2  gen2 [%d]
+v
+$a = 46
+$v1 = "v1-gen2"
+d
+#1  <<join>>
+d
+#0  gen1 [%d]
+v
+$a = 46
+$v1 = "v1-gen1"
+quit

@@ -27,11 +27,11 @@ class IteratorIterator implements OuterIterator {
    *
    * @return     mixed   No value is returned.
    */
-  public function __construct(Traversable $iterator) {
+  public function __construct($iterator) {
     if ($iterator instanceof IteratorAggregate) {
       $iterator = $iterator->getIterator();
     }
-    if ($iterator instanceof Iterator) {
+    if ($iterator instanceof \Iterator) {
       $this->iterator = $iterator;
     } else {
       throw new Exception(

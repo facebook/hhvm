@@ -337,7 +337,7 @@ bool RuntimeOption::EnableObjDestructCall = false;
 bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableInstructionCounts = false;
-bool RuntimeOption::CheckSymLink = false;
+bool RuntimeOption::CheckSymLink = true;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableFinallyStatement = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
@@ -408,9 +408,9 @@ std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
 size_t RuntimeOption::VMTranslAHotSize   =   4 << 20;
-size_t RuntimeOption::VMTranslASize      = 508 << 20;
-size_t RuntimeOption::VMTranslAProfSize  = 512 << 20;
-size_t RuntimeOption::VMTranslAStubsSize = 512 << 20;
+size_t RuntimeOption::VMTranslASize      =  60 << 20;
+size_t RuntimeOption::VMTranslAProfSize  =  64 << 20;
+size_t RuntimeOption::VMTranslAStubsSize =  64 << 20;
 size_t RuntimeOption::VMTranslGDataSize  = RuntimeOption::VMTranslASize >> 2;
 
 std::string RuntimeOption::RepoLocalMode;
@@ -438,6 +438,7 @@ bool RuntimeOption::EnableDebuggerColor = true;
 bool RuntimeOption::EnableDebuggerPrompt = true;
 bool RuntimeOption::EnableDebuggerServer = false;
 bool RuntimeOption::EnableDebuggerUsageLog = false;
+bool RuntimeOption::DebuggerDisableIPv6 = false;
 int RuntimeOption::DebuggerServerPort = 8089;
 int RuntimeOption::DebuggerDefaultRpcPort = 8083;
 std::string RuntimeOption::DebuggerDefaultRpcAuth;
@@ -458,6 +459,7 @@ int RuntimeOption::HHProfServerPort = 4327;
 int RuntimeOption::HHProfServerThreads = 2;
 int RuntimeOption::HHProfServerTimeoutSeconds = 30;
 bool RuntimeOption::HHProfServerProfileClientMode = true;
+bool RuntimeOption::HHProfServerAllocationProfile = false;
 int RuntimeOption::HHProfServerFilterMinAllocPerReq = 2;
 int RuntimeOption::HHProfServerFilterMinBytesPerReq = 128;
 
@@ -1110,7 +1112,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
 
     EnableObjDestructCall = eval["EnableObjDestructCall"].getBool(false);
     MaxUserFunctionId = eval["MaxUserFunctionId"].getInt32(2 * 65536);
-    CheckSymLink = eval["CheckSymLink"].getBool(false);
+    CheckSymLink = eval["CheckSymLink"].getBool(true);
 
     EnableAlternative = eval["EnableAlternative"].getInt32(0);
 
@@ -1168,6 +1170,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
       EnableDebuggerServer = debugger["EnableDebuggerServer"].getBool();
       EnableDebuggerUsageLog = debugger["EnableDebuggerUsageLog"].getBool();
       DebuggerServerPort = debugger["Port"].getUInt16(8089);
+      DebuggerDisableIPv6 = debugger["DisableIPv6"].getBool(false);
       DebuggerDefaultSandboxPath = debugger["DefaultSandboxPath"].getString();
       DebuggerStartupDocument = debugger["StartupDocument"].getString();
       DebuggerSignalTimeout = debugger["SignalTimeout"].getInt32(1);
@@ -1268,7 +1271,9 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     HHProfServerTimeoutSeconds =
       hhprofServer["TimeoutSeconds"].getInt64(30);
     HHProfServerProfileClientMode =
-      hhprofServer["ProfileClientMode"].getBool();
+      hhprofServer["ProfileClientMode"].getBool(true);
+    HHProfServerAllocationProfile =
+      hhprofServer["AllocationProfile"].getBool(false);
 
     // HHProfServer.Filter.*
     Hdf hhprofFilter = hhprofServer["Filter"];

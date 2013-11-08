@@ -2956,7 +2956,7 @@
         {
             "name": "SetIterator",
             "ifaces": [
-                "Iterator"
+                "HH\\Iterator"
             ],
             "desc": "An iterator implementation for iterating over a Set.",
             "flags": [

@@ -87,13 +87,10 @@ struct StaticMethodCache {
   static RDS::Handle alloc(const StringData* cls,
                       const StringData* meth,
                       const char* ctxName);
-  static const Func* lookupIR(RDS::Handle chand,
-                              const NamedEntity* ne, const StringData* cls,
-                              const StringData* meth, TypedValue* vmfp,
-                              TypedValue* vmsp);
   static const Func* lookup(RDS::Handle chand,
                             const NamedEntity* ne, const StringData* cls,
-                            const StringData* meth);
+                            const StringData* meth, TypedValue* vmfp,
+                            TypedValue* vmsp);
 };
 
 struct StaticMethodFCache {
@@ -103,8 +100,8 @@ struct StaticMethodFCache {
   static RDS::Handle alloc(const StringData* cls,
                       const StringData* meth,
                       const char* ctxName);
-  static const Func* lookupIR(RDS::Handle chand, const Class* cls,
-                              const StringData* meth, TypedValue* vmfp);
+  static const Func* lookup(RDS::Handle chand, const Class* cls,
+                            const StringData* meth, TypedValue* vmfp);
 };
 
 //////////////////////////////////////////////////////////////////////

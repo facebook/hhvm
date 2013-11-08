@@ -46,70 +46,6 @@ namespace HPHP {  namespace JIT {
 
 using namespace HPHP::Transl;
 
-#define IRT(name, ...) const Type Type::name(Type::k##name);
-IR_TYPES
-#undef IRT
-
-std::string Type::toString() const {
-  // Try to find an exact match to a predefined type
-# define IRT(name, ...) if (*this == name) return #name;
-  IR_TYPES
-# undef IRT
-
-  if (isBoxed()) {
-    return folly::to<std::string>("Boxed", innerType().toString());
-  }
-  if (isPtr()) {
-    return folly::to<std::string>("PtrTo", deref().toString());
-  }
-
-  auto t = *this;
-  std::vector<std::string> parts;
-  if (isSpecialized()) {
-    if (canSpecializeClass()) {
-      assert(m_class);
-      parts.push_back(folly::to<std::string>(Type(m_bits & kAnyObj).toString(),
-                                             '<', m_class->name()->data(),
-                                             '>'));
-      t -= AnyObj;
-    } else if (canSpecializeArrayKind()) {
-      assert(hasArrayKind());
-      parts.push_back(
-        folly::to<std::string>(Type(m_bits & kAnyArr).toString(), '<',
-                               ArrayData::kindToString(m_arrayKind), '>'));
-      t -= AnyArr;
-    } else {
-      not_reached();
-    }
-  }
-
-  // Concat all of the primitive types in the custom union type
-# define IRT(name, ...) if (name <= t) parts.push_back(#name);
-  IRT_PRIMITIVE
-# undef IRT
-    assert(!parts.empty());
-  if (parts.size() == 1) {
-    return parts.front();
-  }
-  return folly::format("{{{}}}", folly::join('|', parts)).str();
-}
-
-std::string Type::debugString(Type t) {
-  return t.toString();
-}
-
-Type Type::fromString(const std::string& str) {
-  static hphp_string_map<Type> types;
-  static bool init = false;
-  if (UNLIKELY(!init)) {
-#   define IRT(name, ...) types[#name] = name;
-    IR_TYPES
-#   undef IRT
-    init = true;
-  }
-  return mapGet(types, str, Type::None);
-}
-
 TRACE_SET_MOD(hhir);
 
 namespace {
@@ -136,6 +72,7 @@ namespace {
 #define DUnbox(n) HasDest
 #define DBox(n)   HasDest
 #define DParam    HasDest
+#define DAllocObj HasDest
 #define DLdRef    HasDest
 #define DThis     HasDest
 #define DArith    HasDest
@@ -181,6 +118,7 @@ struct {
 #undef DUnbox
 #undef DBox
 #undef DParam
+#undef DAllocObj
 #undef DLdRef
 #undef DThis
 #undef DArith

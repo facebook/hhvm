@@ -1,1365 +1,1388 @@
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/bug16077.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/bug16077.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/bug18656.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/bug18656.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/bugPHP14744.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/bugPHP14744.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/pear1.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/pear1.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/pear2.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/pear2.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/test_isError.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/test_isError.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/test_isError_failed.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR/test_isError_failed.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_addfunction_basic.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_addfunction_basic.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_addfunction_mirror.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_addfunction_mirror.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_addmirror.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_addmirror.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_getport.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_getport.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_getssl.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_getssl.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_parse_basic.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_parse_basic.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_parse_basic_compatibility.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_parse_basic_compatibility.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_parse_validatepackage.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_parse_validatepackage.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_resetfunctions.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_resetfunctions.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_resetfunctions_basic.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_resetfunctions_basic.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_resetfunctions_mirror.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_resetfunctions_mirror.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_resetfunctions_rest.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_resetfunctions_rest.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_setalias.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_setalias.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_setname.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_setname.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_setport.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_setport.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_setssl.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_setssl.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_setsummary.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_setsummary.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_setvalidationpackage.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Channelfile/test_setvalidationpackage.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command/test_factory.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command/test_factory.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command/test_getFrontendObject.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command/test_getFrontendObject.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command/test_registerCommands.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command/test_registerCommands.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command/test_registerCommands_remoteinstall.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command/test_registerCommands_remoteinstall.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command/test_registerCommands_standard.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command/test_registerCommands_standard.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command/test_setFrontendClass.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command/test_setFrontendClass.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Auth/login/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Auth/login/test.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Auth/logout/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Auth/logout/test.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-add/test.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-add/test_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-add/test_remotefile.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-alias/test.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-alias/test_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-delete/test.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-delete/test_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-discover/test.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-discover/test_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-info/test_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-info/test_file.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-info/test_file_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-info/test_installed.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-info/test_remotefile.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-info/test_remotefilefail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-update/test_localfile.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-update/test_remotechannel.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-update/test_remotechannel_invalid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-update/test_remotechannel_uptodate.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-update/test_remotefile.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/list-channels/test.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/update-channels/test.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-create/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-add/test.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-create/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-add/test_fail.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-create/test_windows.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-get/bug18581.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-add/test_remotefile.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-get/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-alias/test.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-get/test_default_channel.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-alias/test_fail.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-get/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-delete/test.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-get/test_opt.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-delete/test_fail.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-help/test.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-set/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-discover/test.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-set/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-discover/test_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-info/test_fail.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-set/test_setchannelval.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-info/test_file.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-set/test_setchannelval_defaultch.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-info/test_file_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-info/test_installed.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-info/test_remotefile.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-show/test.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-show/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-info/test_remotefilefail.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/bundle/test_simple.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_bug3550.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_bug3671.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_bug5513.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_bug5810.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_complex_rest.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_dependsonpecl.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-update/test_localfile.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_extinstall.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-update/test_remotechannel.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-update/test_remotechannel_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-update/test_remotechannel_uptodate.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/channel-update/test_remotefile.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/list-channels/test.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Channels/update-channels/test.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-create/test.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_installgroup.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-create/test_fail.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-create/test_windows.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_simple.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-get/bug18581.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-get/test.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-get/test_default_channel.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/uninstall/test_uninstallSOAP.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-get/test_fail.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-get/test_opt.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-help/test.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade-all/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-set/test.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade-all/test_bug5683.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-set/test_fail.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-set/test_setchannelval.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-set/test_setchannelval_defaultch.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-show/test.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade/test_bug16046.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Config/config-show/test_fail.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/bundle/test_simple.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade/test_bug17986.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_bug3550.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade/test_bug4060.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_bug3671.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade/test_bug5683.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_bug5513.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade/test_bug5683_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_bug5810.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade/test_bug6931.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_complex_rest.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Mirror/download-all/test_normal_alpha_rest.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_dependsonpecl.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_extinstall.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Mirror/download-all/test_normal_channel_rest.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_installgroup.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Mirror/download-all/test_normal_rest.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/install/test_simple.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/convert/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/uninstall/test_uninstallSOAP.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/convert/test_bug11703.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade-all/test.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/convert/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade-all/test_bug5683.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/makerpm/test_makerpm_passthru.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade/test_bug16046.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade/test_bug17986.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade/test_bug4060.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade/test_bug5683.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade/test_bug5683_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Install/upgrade/test_bug6931.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Mirror/download-all/test_normal_alpha_rest.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Mirror/download-all/test_normal_channel_rest.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Mirror/download-all/test_normal_rest.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/convert/test.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/convert/test_bug11703.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/convert/test_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/makerpm/test_makerpm_passthru.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package-dependencies/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package-dependencies/test_fail.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package-dependencies/test_v1.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package-dependencies/test_v1.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package-dependencies/test_v2.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package-dependencies/test_v2.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package-validate/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package-validate/test.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package-validate/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package-validate/test_fail.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_bug11318.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_bug11318.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_fail.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_fail_multiple.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_fail_multiple.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_v1.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_v1.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_v2.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_v2.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_v2_v1_multiple.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_v2_v1_multiple.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_warning.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Package/package/test_warning.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Pickle/pickle/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Pickle/pickle/test.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/info/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/info/test_fail.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/info/test_usesroletask.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/info/test_usesroletask.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list-files/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list-files/test_fail.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list-files/test_installed.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list-files/test_notinstalled.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_allchannels.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_default_channel.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_fail_list-files.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_installed.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_normal.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_notinstalled.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_opt.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_notinstalled.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_eq.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_ge.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_gt.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_le.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_lt.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_ne.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_versiontoolow.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_rel_eq.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_rel_ge.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_rel_gt.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_rel_le.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_rel_lt.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_rel_ne.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/clear-cache/test.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/download/test_abstractpackage.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list-files/test_installed.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/download/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list-files/test_notinstalled.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/download/test_url.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_allchannels.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/list-all/test_bug4072.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/list-all/test_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/list-all/test_rest.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/list-all/test_rest_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_default_channel.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/list-upgrades/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_fail.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/remote-info/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_fail_list-files.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/remote-info/test_installed.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_installed.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_normal.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/remote-info/test_rest.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_notinstalled.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/remote-info/test_rest_deprecated.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/list/test_opt.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_notinstalled.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/remote-list/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_eq.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/remote-list/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_ge.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_gt.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/search/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_le.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_lt.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/search/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_rel_ne.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_analyzeSourceCode.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_fail_versiontoolow.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_rel_eq.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_rel_ge.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_bug5717.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_rel_gt.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_rel_le.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_rel_lt.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_buildProvidesArray.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Registry/shell-test/test_rel_ne.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_downloadHttp.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/clear-cache/test.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/download/test_abstractpackage.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/download/test_fail.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/download/test_url.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/list-all/test_bug4072.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/list-all/test_fail.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/list-all/test_rest.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/list-all/test_rest_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/list-upgrades/test.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/remote-info/test_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/remote-info/test_installed.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/remote-info/test_rest.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/remote-info/test_rest_deprecated.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/remote-list/test.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/remote-list/test_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/search/test.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Command_Remote/search/test_fail.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_analyzeSourceCode.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_bug5717.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_buildProvidesArray.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_downloadHttp.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_emptypackagexml.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_emptypackagexml.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_invalidpackageversion.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_invalidpackageversion.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_invalidpackagexml.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_invalidpackagexml.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_invalidxml.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_invalidxml.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml1.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml1.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml2.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml2.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml3.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml3.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml4.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml4.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml5.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml5.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml6.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml6.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml7.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml7.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_validpackagexml1.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_validpackagexml1.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_validpackagexml2.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_validpackagexml2.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_validpackagexml3.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_validpackagexml3.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_validpackagexml4.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Common/test_infoFromString_validpackagexml4.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_arrayMergeRecursive.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_arrayMergeRecursive.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_definedBy.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_definedBy.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_deleteChannel.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_deleteChannel.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getDefaultChannel.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getDefaultChannel.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getDocs.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getDocs.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getFTP.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getFTP.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getGroup.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getGroup.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getGroupKeys.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getGroupKeys.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getGroups.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getGroups.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getKeys.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getKeys.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getLayers.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getLayers.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getPrompt.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getPrompt.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getREST.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getREST.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getRegistry.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getRegistry.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getSetValues.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getSetValues.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getType.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_getType.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_isDefined.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_isDefined.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_isDefinedLayer.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_isDefinedLayer.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_mergeConfigFile.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_mergeConfigFile.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_readConfigFile.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_readConfigFile.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_readFTPConfigFile.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_readFTPConfigFile.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_readFTPConfigFile_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_readFTPConfigFile_fail.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_remove.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_remove.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_removeLayer.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_removeLayer.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setChannels.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setChannels.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setInstallRoot.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setInstallRoot.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setInstallRoot_win.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setInstallRoot_win.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setRegistry.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setRegistry.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_set_defaultchannel_alias.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setget.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setget_channelvalues.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setget_setvalues.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_singleton.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_writeConfigFile.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkArchDependency_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkArchDependency_valid.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_set_defaultchannel_alias.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkExtensionDependency_exclude.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkExtensionDependency_max.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkExtensionDependency_min.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkExtensionDependency_notloaded.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkOSDependency_misc_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkOSDependency_misc_valid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkOSDependency_unix_conflicts.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkOSDependency_unix_valid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkOSDependency_windows_conflicts.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkOSDependency_windows_valid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPHPDependency_exclude.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPHPDependency_max.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPHPDependency_min.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPHPDependency_valid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_exclude.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_exclude_downloaded.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_max.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_max_downloaded.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_min.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_min_downloaded.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_recommended.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_recommended_downloaded.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_url.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setget.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_url_invalid.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setget_channelvalues.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_ext_inmemory.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_setget_setvalues.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_ext_inmemory_and_downloaded.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_singleton.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_ext_notinmemory.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Config/test_writeConfigFile.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPearinstallerDependency_exclude.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkArchDependency_fail.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPearinstallerDependency_max.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPearinstallerDependency_min.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPearinstallerDependency_valid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_validatePackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_assertDepsDB.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_assertDepsDB_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_dependsOn.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_getDependencies.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_getDependentPackageDependencies.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_getDependentPackages.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_installPackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_rebuildDB.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_setConfig.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_singleton.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_uninstallPackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_bug4285.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkArchDependency_valid.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_bug7219.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkExtensionDependency_exclude.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkExtensionDependency_max.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkExtensionDependency_min.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkExtensionDependency_notloaded.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkOSDependency_misc_fail.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkOSDependency_misc_valid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkOSDependency_unix_conflicts.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkOSDependency_unix_valid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkOSDependency_windows_conflicts.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkOSDependency_windows_valid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPHPDependency_exclude.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPHPDependency_max.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_abstractpackage_channelneedsupdating.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPHPDependency_min.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPHPDependency_valid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_exclude.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_exclude_downloaded.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_max.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_abstractpackage_rest.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_max_downloaded.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_min.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_alreadyinstalled.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_min_downloaded.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_recommended.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_recommended_downloaded.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexabstractpackage.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_url.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexabstractpackage_alphapostfix.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_PEAR_url_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_ext_inmemory.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_ext_inmemory_and_downloaded.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPackageDependency_ext_notinmemory.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_force.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPearinstallerDependency_exclude.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_ignore-errors.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_ignore-errorssoft.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_nodeps.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_onlyreqdeps.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPearinstallerDependency_max.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_optional.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocaltgz.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexremotetgz.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_extremecomplexity.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_simplelocalpackage.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPearinstallerDependency_min.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_simplelocaltar.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_simplelocaltgz.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_sortPackagesForInstall.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_sortPackagesForInstall_recursion1.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_sortPackagesForInstall_recursion2.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_upgrade_pear_to_pecl.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_abstractpackage.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_checkPearinstallerDependency_valid.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_abstractpackage_discover.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Dependency2/test_validatePackage.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_abstractpackage_offline.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_assertDepsDB.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_downloadurl.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_downloadurl_offline.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_assertDepsDB_fail.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage1.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage3.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage4.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage5.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage6.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage_discover.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invaliddownloadurl.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidpackagexml.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_packagexml.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_packagexml_offline.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_mergeDependencies_basic_required_uri.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_removeDuplicates.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Error/pear_error.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Error/pear_error2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Error/pear_error3.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Error/pear_error4.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrorMessage/test_basic.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrorMessage/test_basic_params.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrorMessage/test_basic_params_withtemplate.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrorMessage/test_basic_template.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrorMessageTemplate/test_normal.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrorMessageTemplate/test_normal_hascode.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrors/test_none.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrors/test_normal.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_basic.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_context_setcontext.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_contextcallback_constructor.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_contextcallback_singleton.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_msgcallback_constructor.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_msgcallback_setMsgCallback.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_msgcallback_singleton.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_params.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_params_compat.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopcallback/test_returns_die.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopcallback/test_returns_ignore.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopcallback/test_returns_log.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopcallback/test_returns_nothing.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopcallback/test_returns_push.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_staticPop_works.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_valid_basic.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_valid_context_setcontext.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_valid_contextcallback_singleton.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_valid_msgcallback_setMsgCallback.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_valid_msgcallback_singleton.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_valid_params.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/staticGetErrors/test_merge.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/staticGetErrors/test_merge_sortfunc.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/staticGetErrors/test_none.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/staticGetErrors/test_normal.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/staticHasErrors/test_bug7931.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context_createfunction.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context_createfunction_staticPush.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context_eval.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context_eval_staticPush.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context_staticPush.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_createfunction.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_createfunction_staticPush.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_eval.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_eval_staticPush.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_staticPush.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context_createfunction.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context_createfunction_staticPush.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context_eval.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context_eval_staticPush.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context_staticPush.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context_createfunction.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context_createfunction_staticPush.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context_eval.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context_eval_staticPush.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context_staticPush.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_invalid_singleton.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_valid_singleton.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_bug13691.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_bug14702.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_bug17350.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_bug18362.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_bug9841.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_binary.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_dependsOn.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_bundle.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_getDependencies.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_cfgrole.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_getDependentPackageDependencies.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_cfgrole_register_only.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_cfgrole_upgrade.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_depinstalled.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_force.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_forceoffline.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_ignore-errors.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_ignore-errorssoft.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_nodeps.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage_force.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage_ignore-errors.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage_ignore-errorssoft.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage_nodeps.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_multiple2.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage2.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage_BC.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_getDependentPackages.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage_ftp.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_installPackage.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage_installroot.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_rebuildDB.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage_packagingroot.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage_register-only.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_subpackage.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_subpackage_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_setConfig.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_sortPackagesForUninstall.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_sortPackagesForUninstall_SOAPpackage.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_sortPackagesForUninstall_recursion1.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_sortPackagesForUninstall_recursion2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_complex_params_invalid1.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_complex_params_invalid2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_complex_params_ok.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_optionaldep.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_simple.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_simple_params_invalid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_simple_params_ok.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_simplelocalpackage_ftp.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_singleton.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_bug3808.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_complexlocalpackage2.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_pear_to_pecl.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_simplelocalpackage.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_simplelocalpackage2.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_simplelocalpackage2_notinstalled.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_simplelocalpackage_notinstalled.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_subpackage.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_factory.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_getBaseinstallRoles.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_getInstallableRoles.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_getPhpRoles.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_getValidRoles.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_initializeConfig.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_registerRoles.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role_Common/test_processInstallation.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/Parser/test_basicparse.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/Parser/test_invalidxmlparse.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_addConfigureoption.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_addConfigureoption_invalid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_analyzeSourceCode.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_basicparse.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_bug5717.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_dependencies.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_dependencies_invalid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_dependsOn.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_invalidfilerole.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_maintainers.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_maintainers_invalid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setDate.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setDate_invalid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setDescription.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setDescription_invalid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setLicense.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setLicense_invalid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setNotes.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setNotes_invalid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setPackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setState.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setState_invalid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setSummary.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setSummary_invalid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setVersion.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setVersion_invalid.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_emptypackagexml.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage1.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage3.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage4.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage5.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage6.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage7.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_validpackagexml1.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_validpackagexml2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_validpackagexml3.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_validpackagexml4.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addArchDep.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addCompatiblePackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addConfigureOption.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addConflictingPackageDepWithChannel.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addConflictingPackageDepWithURI.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addExtensionDep.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addExtensionInstallCondition.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addFile.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addGroupExtensionDep.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addGroupPackageDepWithChannel.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addGroupPackageDepWithURI.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addOsDep.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addPackageDepWithChannel.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addPackageDepWithURI.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addSubpackageDepWithChannel.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addSubpackageDepWithURI.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_analyzePHPFiles.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_analyzeSourceCode.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_dependsOn.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_file.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_flattenFilelist.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_flattenFilelist2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_fromArray_invalid_version.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_getDeps.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_getFileContents.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_getFilelist.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_getInstallationFilelist.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_getTask.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_installBinary_linux.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_DependencyDB/test_uninstallPackage.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_installBinary_win.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_bug4285.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_bug7219.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_abstractpackage_channelneedsupdating.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_abstractpackage_rest.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_alreadyinstalled.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexabstractpackage.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexabstractpackage_alphapostfix.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_force.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_ignore-errors.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_ignore-errorssoft.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_nodeps.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_onlyreqdeps.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocalpackage_optional.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexlocaltgz.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_complexremotetgz.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_extremecomplexity.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_simplelocalpackage.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_simplelocaltar.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_download_simplelocaltgz.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_sortPackagesForInstall.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_sortPackagesForInstall_recursion1.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_sortPackagesForInstall_recursion2.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader/test_upgrade_pear_to_pecl.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_abstractpackage.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_abstractpackage_discover.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_abstractpackage_offline.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_downloadurl.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_downloadurl_offline.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage1.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage2.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage3.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage4.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage5.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage6.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage_discover.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invaliddownloadurl.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidpackagexml.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_packagexml.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_packagexml_offline.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_mergeDependencies_basic_required_uri.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Downloader_Package/test_removeDuplicates.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Error/pear_error.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Error/pear_error2.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Error/pear_error3.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Error/pear_error4.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrorMessage/test_basic.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrorMessage/test_basic_params.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrorMessage/test_basic_params_withtemplate.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrorMessage/test_basic_template.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrorMessageTemplate/test_normal.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrorMessageTemplate/test_normal_hascode.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrors/test_none.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/getErrors/test_normal.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_basic.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_context_setcontext.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_contextcallback_constructor.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_contextcallback_singleton.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_msgcallback_constructor.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_msgcallback_setMsgCallback.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_msgcallback_singleton.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_params.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpop/test_valid_params_compat.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopcallback/test_returns_die.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopcallback/test_returns_ignore.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopcallback/test_returns_log.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopcallback/test_returns_nothing.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopcallback/test_returns_push.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_staticPop_works.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_valid_basic.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_valid_context_setcontext.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_valid_contextcallback_singleton.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_valid_msgcallback_setMsgCallback.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_valid_msgcallback_singleton.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/pushpopstatic/test_valid_params.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/staticGetErrors/test_merge.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/staticGetErrors/test_merge_sortfunc.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/staticGetErrors/test_none.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/staticGetErrors/test_normal.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/staticHasErrors/test_bug7931.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context_createfunction.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context_createfunction_staticPush.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context_eval.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context_eval_staticPush.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_global_context_staticPush.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_createfunction.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_createfunction_staticPush.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_eval.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_eval_staticPush.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_infunction_context_staticPush.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context_createfunction.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context_createfunction_staticPush.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context_eval.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context_eval_staticPush.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_inmethod_context_staticPush.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context_createfunction.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context_createfunction_staticPush.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context_eval.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context_eval_staticPush.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_instaticmethod_context_staticPush.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_invalid_singleton.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_ErrorStack/test_valid_singleton.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_bug13691.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_bug14702.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_bug17350.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_bug18362.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_bug9841.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_binary.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_isCompatible.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_isEquivalent.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_isExtension.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_maintainers.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_packagetype.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setArchInstallCondition.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setChannel.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setDate.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setDescription.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setExtends.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setFileAttribute.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setLicense.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setNotes.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setOsInstallCondition.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setPackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setPearinstallerDep.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setPhpDep.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setPhpInstallCondition.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setState.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setSummary.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setTime.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setURI.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setVersion.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_subpackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_usesrole.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_usestask.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toPackageFile/test_barebones.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toPackageFile/test_barebones_packaging.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toPackageFile/test_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toPackageFile/test_theworks.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toPackageFile/test_theworks_packaging.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toTgz/test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_bundle.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toTgz/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_cfgrole.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test1.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_cfgrole_register_only.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_2leads.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_cfgrole_upgrade.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_extension.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_extension1.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_filelist1.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_depinstalled.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_multipledeps.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_force.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_nodeps.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_forceoffline.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_nolead.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_ignore-errors.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_otherleads.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_ignore-errorssoft.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_singledeps.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage2_nodeps.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toXml/test_barebones.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toXml/test_barebones_packaging.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toXml/test_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toXml/test_theworks.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toXml/test_theworks_packaging.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_barebones.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage_force.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_barebones_packaging.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage_ignore-errors.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_bundle.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage_ignore-errorssoft.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_extbinrelease1.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_complexlocalpackage_nodeps.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_extbinrelease2.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_multiple2.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_extsrcrelease1.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_extsrcrelease2.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage2.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_fail.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage_BC.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_phprelease1.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_phprelease2.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_bundle.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_dual_packagexml.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_dual_packagexml_fail.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_extbin.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_extsrc.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_fail.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_php.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_analyzeSourceCode_bug18218.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_analyzeSourceCode_test1.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_analyzeSourceCode_test2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_analyzeSourceCode_test3.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_analyzeSourceCode_test4.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_analyzeSourceCode_test5.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_bug10733.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_bug5717.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_bug7539.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_bug8622.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_compatible.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents_bundle.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents_has_fileroot.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_emptytime.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_extbinrelease.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_extsrcrelease.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_filelist.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_group_deps.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_individual_deps.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_installconditions.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_maintainersoutoforder1.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_maintainersoutoforder2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_multiple_installas.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nochanneloruri.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nocontents.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nodate.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nodependencies.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nodescription.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nolead.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nolicense.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_noname.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nonotes.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_norelease.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nostability.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nostability2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nostability3.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nosummary.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_noversion.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_noversion2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_noversion3.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_optional_deps.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_phprelease.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_required_deps.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_fail.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_fail_bug10938.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_fail_multiple.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_v1.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_v2.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_v2_v1_multiple.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_warning.phpt
-F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_addpackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_checkFilemap.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_deletePackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_listPackages.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_packageExists.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_packageInfo.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_updatePackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_addChannel.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_addPackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_addPackage2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_channelExists.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_channelInfo.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_channelName.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_checkFilemap.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_deleteChannel.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_deletePackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_deletePackage_pfv2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getChannel.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getChannelValidator.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getChannels.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getInstalledGroup.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getPackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getPackage_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getPackage_pfv2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_hasWriteAccess.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage_ftp.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_isAlias.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_listAllPackages.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_listChannels.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_listPackages.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_packageExists.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_packageInfo.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_parsePackageName.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_parsePackageName_fail.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_parsedPackageNameToString.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_updateChannel.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_updatePackage.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_updatePackage2.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/bug10286.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage_installroot.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/bug16057.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/bug_12793.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092cookie.phpt
-S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092get.phpt
-S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092post.phpt
-S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092post_raw1.phpt
-S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092post_raw2.phpt
-S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092stdin.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092upload.phpt
-S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug9971.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/bug17744.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validGroupName.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validPackageName.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validVersion.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_date.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_packagename.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_stability.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_state.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_time.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_version_devel.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionbasic.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionbasic_alpha.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionbasic_beta.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionbasic_stable.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionextends_alpha.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionextends_beta.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionextends_stable.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/bug14041-windows.phpt
-S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/bug14041.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/bug4095.phpt
-.
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/find_test.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage_packagingroot.phpt
 F
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_cat.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_simplelocalpackage_register-only.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_subpackage.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_install_subpackage_fail.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_mkdir.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_sortPackagesForUninstall.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_mktemp.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_sortPackagesForUninstall_SOAPpackage.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_sortPackagesForUninstall_recursion1.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_online.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_sortPackagesForUninstall_recursion2.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_complex_params_invalid1.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_complex_params_invalid2.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_complex_params_ok.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_optionaldep.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_simple.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_simple_params_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_simple_params_ok.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_uninstall_simplelocalpackage_ftp.phpt
 S
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_parseArgs_array.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_bug3808.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_complexlocalpackage2.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_pear_to_pecl.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_simplelocalpackage.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_simplelocalpackage2.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_simplelocalpackage2_notinstalled.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_simplelocalpackage_notinstalled.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer/test_upgrade_subpackage.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_factory.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_parseArgs_quoted.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_getBaseinstallRoles.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_rm.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_getInstallableRoles.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_getPhpRoles.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_which.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_getValidRoles.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_initializeConfig.phpt
 .
-Starting test '/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/pear_autoloader.phpt
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role/test_registerRoles.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Installer_Role_Common/test_processInstallation.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/Parser/test_basicparse.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/Parser/test_invalidxmlparse.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_addConfigureoption.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_addConfigureoption_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_analyzeSourceCode.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_basicparse.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_bug5717.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_dependencies.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_dependencies_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_dependsOn.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_invalidfilerole.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_maintainers.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_maintainers_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setDate.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setDate_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setDescription.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setDescription_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setLicense.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setLicense_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setNotes.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setNotes_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setPackage.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setState.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setState_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setSummary.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setSummary_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setVersion.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_setVersion_invalid.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_emptypackagexml.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage1.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage2.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage3.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage4.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage5.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage6.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_partiallyemptypackage7.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_validpackagexml1.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_validpackagexml2.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_validpackagexml3.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v1/test_validate_validpackagexml4.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addArchDep.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addCompatiblePackage.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addConfigureOption.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addConflictingPackageDepWithChannel.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addConflictingPackageDepWithURI.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addExtensionDep.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addExtensionInstallCondition.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addFile.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addGroupExtensionDep.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addGroupPackageDepWithChannel.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addGroupPackageDepWithURI.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addOsDep.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addPackageDepWithChannel.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addPackageDepWithURI.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addSubpackageDepWithChannel.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_addSubpackageDepWithURI.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_analyzePHPFiles.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_analyzeSourceCode.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_dependsOn.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_file.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_flattenFilelist.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_flattenFilelist2.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_fromArray_invalid_version.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_getDeps.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_getFileContents.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_getFilelist.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_getInstallationFilelist.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_getTask.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_installBinary_linux.phpt
 S
-Tests: 719, Assertions: 719, Failures: 174, Skipped: 24.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_installBinary_win.phpt
+S
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_isCompatible.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_isEquivalent.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_isExtension.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_maintainers.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_packagetype.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setArchInstallCondition.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setChannel.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setDate.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setDescription.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setExtends.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setFileAttribute.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setLicense.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setNotes.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setOsInstallCondition.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setPackage.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setPearinstallerDep.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setPhpDep.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setPhpInstallCondition.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setState.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setSummary.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setTime.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setURI.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_setVersion.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_subpackage.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_usesrole.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile/v2/test_usestask.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toPackageFile/test_barebones.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toPackageFile/test_barebones_packaging.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toPackageFile/test_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toPackageFile/test_theworks.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toPackageFile/test_theworks_packaging.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toTgz/test.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toTgz/test_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test1.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_2leads.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_extension.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_extension1.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_filelist1.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_multipledeps.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_nodeps.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_nolead.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_otherleads.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toV2/test_singledeps.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toXml/test_barebones.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toXml/test_barebones_packaging.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toXml/test_fail.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toXml/test_theworks.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v1/toXml/test_theworks_packaging.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_barebones.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_barebones_packaging.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_bundle.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_extbinrelease1.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_extbinrelease2.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_extsrcrelease1.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_extsrcrelease2.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_phprelease1.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toPackageFile/test_phprelease2.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_bundle.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_dual_packagexml.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_dual_packagexml_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_extbin.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_extsrc.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_Generator_v2/toTgz2/test_php.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_analyzeSourceCode_bug18218.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_analyzeSourceCode_test1.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_analyzeSourceCode_test2.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_analyzeSourceCode_test3.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_analyzeSourceCode_test4.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_analyzeSourceCode_test5.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_bug10733.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_bug5717.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_bug7539.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_bug8622.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_compatible.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents_bundle.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents_has_fileroot.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_emptytime.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_extbinrelease.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_extsrcrelease.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_filelist.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_group_deps.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_individual_deps.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_installconditions.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_maintainersoutoforder1.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_maintainersoutoforder2.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_multiple_installas.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nochanneloruri.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nocontents.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nodate.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nodependencies.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nodescription.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nolead.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nolicense.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_noname.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nonotes.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_norelease.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nostability.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nostability2.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nostability3.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_nosummary.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_noversion.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_noversion2.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_noversion3.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_optional_deps.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_phprelease.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_required_deps.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_fail.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_fail_bug10938.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_fail_multiple.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_v1.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_v2.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_v2_v1_multiple.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Packager/test_warning.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_addpackage.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_checkFilemap.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_deletePackage.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_listPackages.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_packageExists.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_packageInfo.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_0/test_updatePackage.phpt
+S
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_addChannel.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_addPackage.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_addPackage2.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_channelExists.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_channelInfo.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_channelName.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_checkFilemap.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_deleteChannel.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_deletePackage.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_deletePackage_pfv2.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getChannel.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getChannelValidator.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getChannels.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getInstalledGroup.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getPackage.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getPackage_fail.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_getPackage_pfv2.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_hasWriteAccess.phpt
+S
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_isAlias.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_listAllPackages.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_listChannels.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_listPackages.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_packageExists.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_packageInfo.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_parsePackageName.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_parsePackageName_fail.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_parsedPackageNameToString.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_updateChannel.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_updatePackage.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Registry/api1_1/test_updatePackage2.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/bug10286.phpt
+F
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/bug16057.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/bug_12793.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092cookie.phpt
+S
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092get.phpt
+S
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092post.phpt
+S
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092post_raw1.phpt
+S
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092post_raw2.phpt
+S
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092stdin.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug10092upload.phpt
+S
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_RunTest/test_bug9971.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/bug17744.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validGroupName.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validPackageName.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validVersion.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_date.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_packagename.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_stability.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_state.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_time.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_version_devel.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionbasic.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionbasic_alpha.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionbasic_beta.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionbasic_stable.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionextends_alpha.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionextends_beta.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/PEAR_Validate/test_validate_versionextends_stable.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/bug14041-windows.phpt
+S
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/bug14041.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/bug4095.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/find_test.phpt
+UNKNOWN STATUS
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_cat.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_mkdir.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_mktemp.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_online.phpt
+S
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_parseArgs_array.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_parseArgs_quoted.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_rm.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/System/test_which.phpt
+.
+/data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests/pear_autoloader.phpt
+S
+0.phpt
+F
+0_alldeps.phpt
+.
+0_force.phpt
+F
+0_forcesoft.phpt
+F
+0_ignore-errors.phpt
+F
+0_ignore-errorssoft.phpt
+F
+0_installed.phpt
+F
+0_nodeps.phpt
+F
+0_nodepssoft.phpt
+.
+0_onlyreqdeps.phpt
+F
+0_onlyreqdeps_installed.phpt
+.
+0_soft.phpt
+F

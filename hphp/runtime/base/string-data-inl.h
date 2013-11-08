@@ -94,7 +94,7 @@ inline void StringData::destruct() {
 
 inline void StringData::setRefCount(RefCount n) { m_count = n; }
 inline bool StringData::isStatic() const {
-  return m_count == RefCountStaticValue;
+  return !isRefCounted();
 }
 
 inline APCVariant* StringData::getSharedVariant() const {
@@ -205,7 +205,7 @@ inline bool StringData::isImmutable() const {
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE void decRefStr(StringData* s) {
-  if (s->decRefCount() == 0) s->release();
+  s->decRefAndRelease();
 }
 
 struct string_data_hash {

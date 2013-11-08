@@ -57,15 +57,16 @@ class ObjectData {
     HasCallStatic = 0x0100, // defines __callStatic
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasClone      = 0x0400, // has custom clone logic
-    // The top 3 bits of o_attributes are reserved to indicate the
-    // type of collection
-    CollectionTypeAttrMask = (7 << 13),
-    VectorAttrInit = (Collection::VectorType << 13),
-    MapAttrInit = (Collection::MapType << 13),
-    StableMapAttrInit = (Collection::StableMapType << 13),
-    SetAttrInit = (Collection::SetType << 13),
-    PairAttrInit = (Collection::PairType << 13),
-    FrozenVectorAttrInit = (Collection::FrozenVectorType << 13),
+
+    // The bits in CollectionTypeAttrMask of o_attributes are reserved
+    // to indicate the type of collection.
+    CollectionTypeAttrMask = 0xe000, // 7 << 13
+    VectorAttrInit         = (Collection::VectorType << 13),
+    MapAttrInit            = (Collection::MapType << 13),
+    StableMapAttrInit      = (Collection::StableMapType << 13),
+    SetAttrInit            = (Collection::SetType << 13),
+    PairAttrInit           = (Collection::PairType << 13),
+    FrozenVectorAttrInit   = (Collection::FrozenVectorType << 13),
   };
 
   enum {
@@ -174,13 +175,10 @@ class ObjectData {
   void operator delete(void* p);
 
   void release() {
-    assert(getCount() == 0);
-    destruct();
-    if (UNLIKELY(getCount() != 0)) {
-      // Object was resurrected.
-      return;
+    assert(!hasMultipleRefs());
+    if (LIKELY(destruct())) {
+      delete this;
     }
-    delete this;
   }
 
   Class* getVMClass() const {
@@ -261,7 +259,7 @@ class ObjectData {
   double o_toDoubleImpl() const noexcept;
   Array o_toArray() const;
 
-  void destruct();
+  bool destruct();
 
   Array o_toIterArray(const String& context, bool getRef = false);
 
@@ -320,6 +318,7 @@ class ObjectData {
 
  public:
   bool hasDynProps() const { return o_properties.size(); }
+  Array getDynProps() const { return o_properties; }
   void reserveProperties(int nProp);
 
   // heap profiling helpers
@@ -450,8 +449,6 @@ class ObjectData {
 
 } __attribute__((aligned(16)));
 
-template<> inline SmartPtr<ObjectData>::~SmartPtr() {}
-
 typedef GlobalNameValueTableWrapper GlobalVariables;
 
 inline
@@ -493,7 +490,7 @@ private:
 };
 
 ALWAYS_INLINE void decRefObj(ObjectData* obj) {
-  if (obj->decRefCount() == 0) obj->release();
+  obj->decRefAndRelease();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

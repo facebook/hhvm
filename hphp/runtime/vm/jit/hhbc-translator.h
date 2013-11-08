@@ -190,6 +190,7 @@ struct HhbcTranslator {
   void emitNewArrayReserve(int capacity);
   void emitNewPackedArray(int n);
   void emitNewCol(int capacity);
+  void emitClone();
 
   void emitArrayAdd();
   void emitAddElemC();
@@ -218,6 +219,7 @@ struct HhbcTranslator {
   void emitTrue();
   void emitFalse();
   void emitCGetL(int32_t id);
+  void emitPushL(uint32_t id);
   void emitCGetL2(int32_t id);
   void emitCGetS();
   void emitCGetG();
@@ -268,7 +270,8 @@ struct HhbcTranslator {
   void emitFPassR();
   void emitFPassV();
   void emitFPushCufIter(int32_t numParams, int32_t itId);
-  void emitFPushCufOp(Op op, int numArgs);
+  void emitFPushCufOp(Op op, int32_t numArgs);
+  void emitFPushCufUnknown(Op op, int32_t numArgs);
   void emitFPushActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
                        const StringData* invName = nullptr);
   void emitFPushFuncCommon(const Func* func,
@@ -283,6 +286,7 @@ struct HhbcTranslator {
   void emitFPushFuncObj(int32_t numParams);
   void emitFPushFuncArr(int32_t numParams);
   SSATmp* genClsMethodCtx(const Func* callee, const Class* cls);
+  void emitFPushClsMethod(int32_t numParams);
   void emitFPushClsMethodD(int32_t numParams,
                            int32_t methodNameStrId,
                            int32_t clssNamedEntityPairId);
@@ -516,6 +520,8 @@ private:
     void emitArraySet(SSATmp* key, SSATmp* value);
     void emitArrayGet(SSATmp* key);
     void emitArrayIsset();
+    void emitPackedArrayGet(SSATmp* key);
+    void emitPackedArrayIsset();
     void emitStringGet(SSATmp* key);
     void emitStringIsset();
     void emitVectorSet(SSATmp* key, SSATmp* value);
@@ -598,6 +604,8 @@ private:
       None,
       // simple opcode on Array
       Array,
+      // simple opcode on Packed Array
+      PackedArray,
       // simple opcode on String
       String,
       // simple opcode on Vector* (c_Vector*)
@@ -736,6 +744,7 @@ private:
   SSATmp* staticTVCns(const TypedValue*);
   void emitJmpSurpriseCheck();
   void emitRetSurpriseCheck(SSATmp* retVal);
+  void classExistsImpl(ClassKind);
 
   Type interpOutputType(const NormalizedInstruction&,
                         folly::Optional<Type>&) const;
@@ -884,6 +893,7 @@ private:
                          TypeConstraint constraint,
                          Block* catchBlock = nullptr);
 public:
+  SSATmp* pushStLoc(uint32_t id, Block* exit, SSATmp* newVal);
   SSATmp* stLoc(uint32_t id, Block* exit, SSATmp* newVal);
   SSATmp* stLocNRC(uint32_t id, Block* exit, SSATmp* newVal);
   SSATmp* stLocImpl(uint32_t id, Block*, SSATmp* newVal, bool doRefCount);

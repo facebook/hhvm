@@ -143,14 +143,18 @@ void emitGetGContext(Asm& as, PhysReg dest) {
 }
 
 // IfCountNotStatic --
-//   Emits if (%reg->_count != RefCountStaticValue) { ... }.
+//   Emits if (%reg->_count < 0) { ... }.
+//   This depends on RefCountStaticValue being the only valid
+//   negative refCount.
 //   May short-circuit this check if the type is known to be
 //   static already.
 struct IfCountNotStatic {
   typedef CondBlock<FAST_REFCOUNT_OFFSET,
-                    RefCountStaticValue,
-                    CC_Z,
-                    hphp_field_type(RefData, m_count)> NonStaticCondBlock;
+                    0,
+                    CC_S,
+                    int32_t> NonStaticCondBlock;
+  static_assert(RefCountStaticValue < 0,
+                "RefCountStaticValue must be negative");
   NonStaticCondBlock *m_cb; // might be null
   IfCountNotStatic(Asm& as,
                    PhysReg reg,
@@ -215,7 +219,10 @@ void emitAssertFlagsNonNegative(Asm& as) {
 
 void emitAssertRefCount(Asm& as, PhysReg base) {
   as.cmpl(HPHP::RefCountStaticValue, base[FAST_REFCOUNT_OFFSET]);
-  ifThen(as, CC_NBE, [&] { as.ud2(); });
+  ifThen(as, CC_NE, [&] {
+      as.cmpl(HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]);
+      ifThen(as, CC_NBE, [&] { as.ud2(); });
+    });
 }
 
 // Logical register move: ensures the value in src will be in dest
@@ -355,6 +362,8 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
 
 void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
   assert(s0 != s1);
+  assert(!s0.isXMM() || s1 == InvalidReg); // never 2 XMMs
+  assert(!d0.isXMM() || d1 == InvalidReg); // never 2 XMMs
   if (d0 == s1 && d1 != InvalidReg) {
     assert(d0 != d1);
     if (d1 == s0) {
@@ -363,6 +372,12 @@ void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
       as.   movq (s1, d1); // save s1 first; d1 != s0
       as.   movq (s0, d0);
     }
+  } else if (d0.isXMM() && s0.isGP() && s1.isGP()) {
+    // move 2 gpr to 1 xmm
+    assert(d0 != rCgXMM0); // xmm0 is reserved for scratch
+    as.   mov_reg64_xmm(s0, d0);
+    as.   mov_reg64_xmm(s1, rCgXMM0);
+    as.   unpcklpd(rCgXMM0, d0); // s1 -> d0[1]
   } else {
     if (d0 != InvalidReg) emitMovRegReg(as, s0, d0); // d0 != s1
     if (d1 != InvalidReg) emitMovRegReg(as, s1, d1);

@@ -937,6 +937,13 @@ D:Func = LdClsMethod S0:Cls S1:ConstInt
   Load a Func* off of the class method table for S0, at offset S1 (in
   method slots).
 
+LookupClsMethod S0:Cls S1:Str S2:StkPtr S3:FramePtr
+
+  Store a pointer to a class method into an activation record. S0
+  points to the class, S1 is the method name, S2 points to the
+  activation record, and S3 is a pointer to the current frame (used to
+  get the context).  May throw or fatal if method is not accessible.
+
 D:PtrToGen = LdPropAddr S0:Obj S1:ConstInt
 
   Load the address of the object property for S0 at offset S1 (in
@@ -984,6 +991,19 @@ D:Func = LdObjInvoke S0:Cls -> B
 
   Try to load a cached non-static __invoke Func from the Class in S0,
   or branch to block B if it is not present.
+
+LdArrFuncCtx S0:Arr S1:StkPtr S2:FramePtr
+
+  Try to load an array as a function context.  This is for use
+  translating FPushFunc when the callee is an array.  This instruction
+  attempts to populate a partially created ActRec pointed to by S1.
+
+LdArrFPushCuf S0:Arr S1:StkPtr S2:FramePtr
+LdStrFPushCuf S0:Str S1:StkPtr S2:FramePtr
+
+  Try to resolve a method target for FPushCuf when the callee is an
+  Arr or Str, respectively.  These instructions mutate a partially
+  created ActRec pointed to by S1.
 
 D:Cls = LdObjClass S0:Obj
 
@@ -1059,6 +1079,14 @@ D:Arr = NewPackedArray S0:ConstInt S1:StkPtr
   Allocate a new array by taking the top S0 elements off the stack
   given by S1.  Note that this instruction assumes it can take the
   values from the stack without increfing them.
+
+D:Obj = NewCol S0:ConstInt S1:ConstInt
+
+  Create a new collection, with type S0 and size S1.
+
+D:Obj = Clone S0:Obj
+
+  Allocate an object by cloning S0.
 
 
 9. Call & Return
@@ -1646,6 +1674,11 @@ D:StkPtr InterpOne<T, bcOff, numPopped, numPushed> S0:FramePtr S1:StkPtr
 D:StkPtr InterpOneCF<T, bcOff, numPopped, numPushed> S0:FramePtr S1:StkPtr
 
   Similar to InterpOne, but for instructions that may modify vmpc.
+
+D:Bool = ThingExists<class|interface|trait> S0:Str
+
+  Returns a bool indicating whether the class, interface, or trait
+  named by S0 exists.  Invokes autoload if it doesn't exist.
 
 
 15. Register allocation

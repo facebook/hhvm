@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_APC_LOCAL_ARRAY_H_
 #define incl_HPHP_APC_LOCAL_ARRAY_H_
 
-#include "hphp/util/shared-memory-allocator.h"
 #include "hphp/runtime/base/apc-variant.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/complex-types.h"

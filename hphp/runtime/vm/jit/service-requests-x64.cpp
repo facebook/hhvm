@@ -104,7 +104,7 @@ int32_t emitNativeImpl(CodeBlock& mainCode, const Func* func,
    * contains only a single opcode (NativeImpl), and there are no
    * non-argument locals.
    */
-  assert(func->numIterators() == 0 && func->isBuiltin());
+  assert(func->numIterators() == 0 && func->methInfo());
   assert(func->numLocals() == func->numParams());
   assert(toOp(*func->getEntry()) == OpNativeImpl);
   assert(instrLen((Op*)func->getEntry()) == func->past() - func->base());
@@ -175,7 +175,7 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& stubsCode,
 }
 
 bool isNativeImplCall(const Func* funcd, int numArgs) {
-  return funcd && funcd->info() && numArgs == funcd->numParams();
+  return funcd && funcd->methInfo() && numArgs == funcd->numParams();
 }
 
 } // anonymous namespace

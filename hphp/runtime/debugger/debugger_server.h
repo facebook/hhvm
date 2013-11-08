@@ -49,7 +49,7 @@ private:
 
   AsyncFunc<DebuggerServer> m_serverThread;
   bool m_stopped;
-  SmartPtr<Socket> m_sock;
+  std::vector<SmartPtr<Socket>> m_socks;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

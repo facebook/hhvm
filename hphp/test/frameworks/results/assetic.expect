@@ -495,7 +495,7 @@ Assetic\Test\Filter\JSMinPlusFilterTest::testRelativeSourceUrlImportImports
 Assetic\Test\Filter\JpegoptimFilterTest::testFilter
 S
 Assetic\Test\Filter\JpegtranFilterTest::testFilter
-Fatal
+FATAL
 Assetic\Test\Filter\LessFilterTest::testCompressImport
 S
 Assetic\Test\Filter\LessFilterTest::testFilterLoad

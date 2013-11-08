@@ -196,6 +196,10 @@ FormatYamlTest::testStringToObject
 .
 ImageTest::testConstructor
 E
+ImageTest::testResize
+E
+ImageTest::testResizeTransparent
+UNKNOWN STATUS
 ImageTest::testloadFile
 E
 ImageTest::testloadFileBmp
@@ -205,7 +209,7 @@ E
 ImageTest::testloadFilePng
 E
 ImageTest::testloadFileWithInvalidFile
-UNKNOWN STATUS
+F
 JApplicationWebClientTest::testDetectBrowser with data set #0 
 .
 JApplicationWebClientTest::testDetectBrowser with data set #1 
@@ -573,11 +577,11 @@ JGoogleEmbedMapsTest::testUseSensor
 JGoogleEmbedMapsTest::testUseSync
 .
 JImageFilterBrightnessTest::testExecute
-Fatal
+FATAL
 JImageFilterContrastTest::testExecute
-Fatal
+FATAL
 JImageFilterEdgedetectTest::testExecute
-Fatal
+FATAL
 JImageFilterTest::testConstructor
 .
 JImageFilterTest::testConstructorInvalidArgument
@@ -797,7 +801,7 @@ Joomla\Application\Tests\ColorProcessorTest::testProcessReplace
 Joomla\Application\Tests\ColorProcessorTest::testStripColors
 .
 Joomla\Archive\Tests\ArchiveTest::testExtractZip
-Fatal
+FATAL
 Joomla\Archive\Tests\Bzip2Test::testExtract
 S
 Joomla\Archive\Tests\Bzip2Test::testExtractWithStreams
@@ -819,7 +823,7 @@ Joomla\Archive\Tests\TarTest::testIsSupported
 Joomla\Archive\Tests\ZipTest::testCreate
 I
 Joomla\Archive\Tests\ZipTest::testExtractNative
-Fatal
+FATAL
 Joomla\Cache\Tests\ApcTest::testClear
 S
 Joomla\Cache\Tests\ApcTest::testExists
@@ -4447,7 +4451,7 @@ F
 Joomla\Form\Tests\JFormTest::testFindGroup
 F
 Joomla\Form\Tests\JFormTest::testGetErrors
-.
+E
 Joomla\Form\Tests\JFormTest::testGetField
 E
 Joomla\Form\Tests\JFormTest::testGetFieldAttribute
@@ -5281,9 +5285,9 @@ Joomla\Github\Tests\ZenTest::testGet
 Joomla\Github\Tests\ZenTest::testGetFailure
 .
 Joomla\Google\Tests\DataPlusActivitiesTest::testAuth
-Fatal
+FATAL
 Joomla\Google\Tests\GoogleTest::test__GetData
-Fatal
+FATAL
 Joomla\Google\Tests\JGoogleAuthOauth2Test::testAuth
 E
 Joomla\Google\Tests\JGoogleAuthOauth2Test::testGetOption
@@ -5297,21 +5301,21 @@ E
 Joomla\Google\Tests\JGoogleAuthOauth2Test::testSetOption
 .
 Joomla\Google\Tests\JGoogleDataAdsenseTest::testAuth
-Fatal
+FATAL
 Joomla\Google\Tests\JGoogleDataCalendarTest::testAuth
-Fatal
+FATAL
 Joomla\Google\Tests\JGoogleDataPicasaAlbumTest::testAuth
-Fatal
+FATAL
 Joomla\Google\Tests\JGoogleDataPicasaPhotoTest::testAuth
-Fatal
+FATAL
 Joomla\Google\Tests\JGoogleDataPicasaTest::testAuth
-Fatal
+FATAL
 Joomla\Google\Tests\JGoogleDataPlusCommentsTest::testAuth
-Fatal
+FATAL
 Joomla\Google\Tests\JGoogleDataPlusPeopleTest::testAuth
-Fatal
+FATAL
 Joomla\Google\Tests\JGoogleDataPlusTest::test__GetPeople
-Fatal
+FATAL
 Joomla\Google\Tests\JGoogleEmbedAnalyticsTest::testAddCall
 .
 Joomla\Google\Tests\JGoogleEmbedAnalyticsTest::testAddCustomVar

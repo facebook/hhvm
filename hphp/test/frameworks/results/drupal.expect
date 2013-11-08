@@ -1573,7 +1573,7 @@ Drupal\views\Tests\Plugin\field\CounterTest::testSimpleCounter with data set #2
 Drupal\views\Tests\ViewExecutableUnitTest::testBuildThemeFunctions
 .
 Drupal\views\Tests\ViewsDataHelperTest::testFetchFields
-Fatal
+FATAL
 Drupal\views\Tests\ViewsTest::testGetView
 .
 Drupal\views_ui\Tests\Form\Ajax\RearrangeFilterTest::testStaticMethods

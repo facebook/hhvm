@@ -53,25 +53,25 @@ Symfony\Bridge\Doctrine\Tests\ExpressionLanguage\DoctrineParserCacheTest::testFe
 Symfony\Bridge\Doctrine\Tests\ExpressionLanguage\DoctrineParserCacheTest::testSave
 .
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\GenericEntityChoiceListTest::testEntitiesMustHaveAToStringMethod
-Fatal
+FATAL
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\LoadedEntityChoiceListCompositeIdTest::testGetChoices
-Fatal
+FATAL
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\LoadedEntityChoiceListSingleIntIdTest::testGetChoices
-Fatal
+FATAL
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\LoadedEntityChoiceListSingleStringIdTest::testGetChoices
-Fatal
+FATAL
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\UnloadedEntityChoiceListCompositeIdTest::testGetIndicesForValuesIgnoresNonExistingValues
-Fatal
+FATAL
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\UnloadedEntityChoiceListCompositeIdWithQueryBuilderTest::testGetIndicesForValuesIgnoresNonExistingValues
-Fatal
+FATAL
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\UnloadedEntityChoiceListSingleIntIdTest::testGetIndicesForValuesIgnoresNonExistingValues
-Fatal
+FATAL
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\UnloadedEntityChoiceListSingleIntIdWithQueryBuilderTest::testGetIndicesForValuesIgnoresNonExistingValues
-Fatal
+FATAL
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\UnloadedEntityChoiceListSingleStringIdTest::testGetIndicesForValuesIgnoresNonExistingValues
-Fatal
+FATAL
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\UnloadedEntityChoiceListSingleStringIdWithQueryBuilderTest::testGetIndicesForValuesIgnoresNonExistingValues
-Fatal
+FATAL
 Symfony\Bridge\Doctrine\Tests\Form\DoctrineOrmTypeGuesserTest::testRequiredGuesser with data set #0 
 .
 Symfony\Bridge\Doctrine\Tests\Form\DoctrineOrmTypeGuesserTest::testRequiredGuesser with data set #1 
@@ -85,7 +85,7 @@ Symfony\Bridge\Doctrine\Tests\Form\DoctrineOrmTypeGuesserTest::testRequiredGuess
 Symfony\Bridge\Doctrine\Tests\Form\DoctrineOrmTypeGuesserTest::testRequiredGuesser with data set #5 
 .
 Symfony\Bridge\Doctrine\Tests\Form\Type\EntityTypeTest::testClassOptionIsRequired
-Fatal
+FATAL
 Symfony\Bridge\Doctrine\Tests\HttpFoundation\DbalSessionHandlerTest::testConstruct
 .
 Symfony\Bridge\Doctrine\Tests\Logger\DbalLoggerTest::testLog with data set #0 
@@ -101,9 +101,9 @@ Symfony\Bridge\Doctrine\Tests\Logger\DbalLoggerTest::testLogNonUtf8
 Symfony\Bridge\Doctrine\Tests\Logger\DbalLoggerTest::testLogUTF8LongString
 .
 Symfony\Bridge\Doctrine\Tests\Security\User\EntityUserProviderTest::testRefreshUserGetsUserByPrimaryKey
-Fatal
+FATAL
 Symfony\Bridge\Doctrine\Tests\Validator\Constraints\UniqueValidatorTest::testValidateUniqueness
-Fatal
+FATAL
 Symfony\Bridge\Monolog\Tests\Handler\ConsoleHandlerTest::testConstructor
 .
 Symfony\Bridge\Monolog\Tests\Handler\ConsoleHandlerTest::testGetFormatter
@@ -1433,7 +1433,7 @@ Symfony\Component\Config\Tests\Definition\Builder\NodeBuilderTest::testAddingANe
 Symfony\Component\Config\Tests\Definition\Builder\NodeBuilderTest::testNodeTypesAreNotCaseSensitive
 .
 Symfony\Component\Config\Tests\Definition\Builder\NodeBuilderTest::testNumericNodeCreation
-Fatal
+FATAL
 Symfony\Component\Config\Tests\Definition\Builder\NodeBuilderTest::testOverridingAnExistingNodeType
 .
 Symfony\Component\Config\Tests\Definition\Builder\NodeBuilderTest::testThrowsAnExceptionWhenTheNodeClassIsNotFound
@@ -5231,7 +5231,7 @@ Symfony\Component\Finder\Tests\Iterator\FilenameFilterIteratorTest::testAccept w
 Symfony\Component\Finder\Tests\Iterator\FilenameFilterIteratorTest::testAccept with data set #5 
 .
 Symfony\Component\Finder\Tests\Iterator\FilterIteratorTest::testFilterFilesystemIterators
-F
+.
 Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #0 
 .
 Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #1 
@@ -12407,7 +12407,7 @@ Symfony\Component\HttpKernel\Tests\HttpCache\HttpCacheTest::testValidatesCachedR
 Symfony\Component\HttpKernel\Tests\HttpCache\HttpCacheTest::testValidatesCachedResponsesWithLastModifiedAndNoFreshnessInformation
 .
 Symfony\Component\HttpKernel\Tests\HttpCache\HttpCacheTest::testValidatesPrivateResponsesCachedOnTheClient
-F
+.
 Symfony\Component\HttpKernel\Tests\HttpCache\HttpCacheTest::testXForwarderForHeaderForForwardedRequests with data set #0 
 .
 Symfony\Component\HttpKernel\Tests\HttpCache\HttpCacheTest::testXForwarderForHeaderForForwardedRequests with data set #1 
@@ -12429,7 +12429,7 @@ Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testFindsAStoredEntryWit
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testInvalidatesMetaAndEntityStoreEntriesWithInvalidate
 .
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testLocking
-F
+.
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testOverwritesNonVaryingResponseWithStore
 .
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testReadsAnEmptyArrayWithReadWhenNothingCachedAtKey
@@ -12445,7 +12445,7 @@ Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testSetsTheXContentDiges
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testStoresACacheEntry
 .
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testStoresMultipleResponsesForEachVaryCombination
-E
+.
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testSucceedsQuietlyWhenInvalidateCalledWithNoMatchingEntries
 .
 Symfony\Component\HttpKernel\Tests\HttpCache\StoreTest::testUnlockFileThatDoesExist
@@ -15715,7 +15715,7 @@ Symfony\Component\Routing\Tests\CompiledRouteTest::testAccessors
 Symfony\Component\Routing\Tests\Generator\Dumper\PhpGeneratorDumperTest::testDumpWithRoutes
 .
 Symfony\Component\Routing\Tests\Generator\Dumper\PhpGeneratorDumperTest::testDumpWithoutRoutes
-Fatal
+FATAL
 Symfony\Component\Routing\Tests\Generator\UrlGeneratorTest::testAbsoluteSecureUrlWithNonStandardPort
 .
 Symfony\Component\Routing\Tests\Generator\UrlGeneratorTest::testAbsoluteSecureUrlWithPort443
@@ -16187,9 +16187,9 @@ Symfony\Component\Routing\Tests\RouterTest::testSetOptionsWithUnsupportedOptions
 Symfony\Component\Routing\Tests\RouterTest::testThatRouteCollectionIsLoaded
 .
 Symfony\Component\Security\Acl\Tests\Dbal\AclProviderTest::testFindAclThrowsExceptionWhenNoAclExists
-Fatal
+FATAL
 Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testCreateAclThrowsExceptionWhenAclAlreadyExists
-Fatal
+FATAL
 Symfony\Component\Security\Acl\Tests\Domain\AclTest::testConstructor
 .
 Symfony\Component\Security\Acl\Tests\Domain\AclTest::testDeleteAce with data set #0 
@@ -17449,7 +17449,7 @@ Symfony\Component\Stopwatch\Tests\StopwatchTest::testSection
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testStart
 .
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testStop
-F
+.
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testStopWithoutStart
 .
 Symfony\Component\Templating\Tests\DelegatingEngineTest::testExists

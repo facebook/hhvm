@@ -72,6 +72,17 @@ class Colors {
   const Color NONE = "\033[0m";
 }
 
+type Status = string;
+class Statuses {
+  const Status FATAL = "FATAL";
+  const Status UNKNOWN = "UNKNOWN STATUS";
+  const Status PASS = ".";
+  const Status FAIL = "F";
+  const Status ERROR = "E";
+  const Status INCOMPLETE = "I";
+  const Status SKIP = "S";
+}
+
 class SortedIterator extends SplHeap {
   public function __construct(Iterator $iterator) {
     foreach ($iterator as $item) {
@@ -184,6 +195,13 @@ class PHPUnitPatterns {
                "/There (was|were) \d+ (skipped|incomplete) test[s]?\:/";
   static string $failures_header_pattern = "/FAILURES!/";
   static string $no_tests_executed_pattern = "/No tests executed!/";
+
+  static string $hhvm_warning_pattern =
+                                     "/^(HipHop|HHVM|hhvm) (Warning|Notice)/";
+  static string $hhvm_fatal_pattern = "/(^(HipHop|HHVM|hhvm) Fatal)|(^hhvm)/";
+
+  static string $test_method_name_pattern =
+                "/public function test|\@test/";
 
 }
 
@@ -302,6 +320,10 @@ class Frameworks {
               Set {
                 __DIR__."/frameworks/zf2/tests/ZendTest/Code/Generator".
                 "/ParameterGeneratorTest.php",
+                __DIR__."/frameworks/zf2/tests/ZendTest/Code/Generator".
+                "/PropertyGeneratorTest.php",
+                __DIR__."/frameworks/zf2/tests/ZendTest/Code/Generator".
+                "/ValueGeneratorTest.php"
               },
           },
         'yii' =>
@@ -698,7 +720,7 @@ class Framework {
   public Vector $test_search_roots;
 
   public ?Map $current_test_statuses = null;
-  public Set $tests = null;
+  public Set $test_files = null;
   public Set $blacklist = null;
 
   public bool $success;
@@ -726,7 +748,7 @@ class Framework {
     if (filesize($this->stats_file) === 0) {
       verbose("Stats File: ".$this->stats_file." has no content. Returning ".
               "fatal\n", Options::$verbose);
-      return "Fatal";
+      return Statuses::FATAL;
     }
 
     $num_tests = 0;
@@ -766,22 +788,30 @@ class Framework {
           $num_errors_failures +=
             (float)($parsed_results["Errors"] + $parsed_results["Failures"] +
             $parsed_results["Incomplete"]);
-        } else if ($line === "FATAL") {
+        } else if ($line === Statuses::FATAL || $line === Statuses::UNKNOWN) {
           // If we fatal on a test or test file, just assume 1 test that has
           // failed.
           $num_tests += 1;
           $num_errors_failures += 1;
         }
       }
+      // Count blacklisted tests as failures
+      if($this->blacklist !== null) {
+        foreach ($this->blacklist as $file) {
+          $c = $this->countIndividualTests($file);
+          $num_tests += $c;
+          $num_errors_failures += $c;
+        }
+      }
     } else {
       // If we cannot open the stats file, return Fatal
-      $pct = "Fatal";
+      $pct = Statuses::FATAL;
     }
 
     if ($num_tests > 0) {
       $pct = round(($num_tests - $num_errors_failures) / $num_tests, 4) * 100;
     } else {
-      $pct = "Fatal";
+      $pct = Statuses::FATAL;
     }
 
     verbose(strtoupper($this->name).
@@ -956,7 +986,7 @@ class Framework {
   }
 
   public function prepareCurrentTestStatuses(string $status_code_pattern,
-                                        string $stop_parsing_pattern): void {
+                                           string $stop_parsing_pattern): void {
     $file = fopen($this->expect_file, "r");
 
     $matches = array();
@@ -982,7 +1012,7 @@ class Framework {
 
   }
 
-  public function findTests() {
+  public function findTestFiles() {
      // Handle wildcards
     $search_dirs = array();
     foreach($this->test_search_roots as $root) {
@@ -994,29 +1024,47 @@ class Framework {
       }
     }
 
-    $this->tests = Set{};
+    $this->test_files = Set{};
     foreach($search_dirs as $root) {
-      $this->tests->addAll(find_all_files(PHPUnitPatterns::$test_file_pattern,
-                           $root, $this->test_path."/vendor"));
-      $this->tests->addAll(find_all_files_containing_text(
+      $this->test_files->addAll(
+                         find_all_files(PHPUnitPatterns::$test_file_pattern,
+                                        $root, $this->test_path."/vendor"));
+      $this->test_files->addAll(find_all_files_containing_text(
                            "extends PHPUnit_Framework_TestCase", $root,
                            $this->test_path."/vendor"));
       // Namespaced case
-      $this->tests->addAll(find_all_files_containing_text(
+      $this->test_files->addAll(find_all_files_containing_text(
                            "extends \\PHPUnit_Framework_TestCase", $root,
                            $this->test_path."/vendor"));
       // Sometimes a test file extends a class that extends PHPUnit_....
       // Then we have to look at method names.
-      $this->tests->addAll(find_all_files_containing_text(
+      $this->test_files->addAll(find_all_files_containing_text(
                                             "public function test",
                                             $root, $this->test_path."/vendor"));
+      $this->test_files->addAll(find_all_files_containing_text(
+                                            "@test", $root,
+                                            $this->test_path."/vendor"));
     }
-    // Get rid of the blacklisted items
-    $this->tests->difference($this->blacklist);
-    verbose("Found ".count($this->tests)." files that contain tests for ".
+
+    // Get rid of the blacklisted items, so we don't test them
+    $this->test_files->difference($this->blacklist);
+    verbose("Found ".count($this->test_files)." files that contain tests for ".
             $this->name."...\n", !Options::$csv_only);
     verbose(count($this->blacklist)." files were blacklisted ".
             $this->name."...\n", Options::$verbose);
+  }
+
+  // Right now this is just an estimate since one test can
+  // have a bunch of different data sets sent to it via
+  // a data provider, making one test really into n tests.
+  private function countIndividualTests(string $testfile): int {
+    if (strpos($testfile, ".phpt") !== false) {
+      return 1;
+    }
+    $contents = file_get_contents($testfile);
+    $matches = null;
+    return preg_match_all(PHPUnitPatterns::$test_method_name_pattern,
+                          $contents, $matches);
   }
 
   public function clean(): void {
@@ -1313,10 +1361,11 @@ class SingleTestFile {
         if ($status === null || ($f = $this->checkForFatals($status))) {
           // We have hit a fatal or some nasty assert. Escape now and try to
           // get the results written.
-          $status = $status === null ? "UNKNOWN STATUS" : $status;
-          $this->test_information .= $f ? "Fatal".PHP_EOL : $status.PHP_EOL;
+          $status = $status === null ? Statuses::UNKNOWN : $status;
+          $this->test_information .= $f ? Statuses::FATAL.PHP_EOL
+                                        : $status.PHP_EOL;
           $this->fatal_information .= $match.PHP_EOL.$status.PHP_EOL;
-          $this->stat_information = $match.PHP_EOL."Fatal".PHP_EOL;
+          $this->stat_information = $match.PHP_EOL.Statuses::FATAL.PHP_EOL;
           return false;
         }
       } while (!feof($this->pipes[1]) &&
@@ -1363,9 +1412,9 @@ class SingleTestFile {
     // Could be due to a fatal in optimized mode where reasoning is not
     // printed to console (and is only printed in debug mode)
     if ($status === "") {
-      $status = "UNKNOWN STATUS";
+      $status = Statuses::UNKNOWN;
       $this->fatal_information .= $match.PHP_EOL.$status.PHP_EOL.PHP_EOL;
-    } else if ($status !== "Fatal" && $status !== "UNKNOWN STATUS") {
+    } else if ($status !== Statuses::FATAL && $status !== Statuses::UNKNOWN) {
       // In case we had "F 252 / 364 (69 %)" or ".HipHop Warning"
       $status = $status[0];
     }
@@ -1375,20 +1424,22 @@ class SingleTestFile {
       if ($status === $this->framework->current_test_statuses[$match]) {
         // FIX: posix_isatty(STDOUT) was always returning false, even
         // though can print in color. Check this out later.
-        verbose(Colors::GREEN.".".Colors::NONE, !Options::$csv_only);
+        verbose(Colors::GREEN.Statuses::PASS.Colors::NONE, !Options::$csv_only);
       } else {
         // We are different than we expected
         $this->framework->success = false;
         // Red if we go from pass to something else
         if ($this->framework->current_test_statuses[$match] === '.') {
-          verbose(Colors::RED."F".Colors::NONE, !Options::$csv_only);
+          verbose(Colors::RED.Statuses::FAIL.Colors::NONE, !Options::$csv_only);
         // Green if we go from something else to pass
         } else if ($status === '.') {
-          verbose(Colors::GREEN."F".Colors::NONE, !Options::$csv_only);
+          verbose(Colors::GREEN.Statuses::FAIL.Colors::NONE,
+                  !Options::$csv_only);
         // Blue if we go from something "faily" to something "faily"
         // e.g., E to I or F
         } else {
-          verbose(Colors::BLUE."F".Colors::NONE, !Options::$csv_only);
+          verbose(Colors::BLUE.Statuses::FAIL.Colors::NONE,
+                  !Options::$csv_only);
         }
         verbose(PHP_EOL."Different status in ".$this->framework->name.
                 " for test ".$match." was ".
@@ -1410,13 +1461,15 @@ class SingleTestFile {
       // (e.g., yii is one test suite that has behaved this way).
       if ($this->framework->current_test_statuses !== null) {
         $this->framework->success = false;
-        verbose(Colors::LIGHTBLUE."F".Colors::NONE, !Options::$csv_only);
+        verbose(Colors::LIGHTBLUE.Statuses::FAIL.Colors::NONE,
+                !Options::$csv_only);
         verbose(PHP_EOL."Different status in ".$this->framework->name.
                 " for test ".$match.PHP_EOL,!Options::$csv_only);
         $this->diff_information .= "----------------------".PHP_EOL;
-        $this->diff_information .= "Problem loading: ".$match.PHP_EOL.PHP_EOL;
+        $this->diff_information .= "Maybe haven't see this test before: ".
+                                   $match.PHP_EOL.PHP_EOL;
       } else {
-        verbose(Colors::GRAY.".".Colors::NONE, !Options::$csv_only);
+        verbose(Colors::GRAY.Statuses::PASS.Colors::NONE, !Options::$csv_only);
       }
     }
   }
@@ -1533,35 +1586,27 @@ class SingleTestFile {
 
   private function outputData(): void {
     file_put_contents($this->framework->out_file, $this->test_information,
-                      FILE_APPEND);
+                      FILE_APPEND | LOCK_EX);
     file_put_contents($this->framework->errors_file, $this->error_information,
-                      FILE_APPEND);
+                      FILE_APPEND | LOCK_EX);
     file_put_contents($this->framework->diff_file, $this->diff_information,
-                      FILE_APPEND);
+                      FILE_APPEND | LOCK_EX);
     file_put_contents($this->framework->stats_file, $this->stat_information,
-                      FILE_APPEND);
+                      FILE_APPEND | LOCK_EX);
     file_put_contents($this->framework->fatals_file, $this->fatal_information,
-                      FILE_APPEND);
+                      FILE_APPEND | LOCK_EX);
 
   }
 
-  private function checkForFatals(string $status): bool {
-    if (strpos($status, 'HipHop Fatal') !== false ||
-        strpos($status, 'HHVM Fatal') !== false ||
-        strpos($status, 'hhvm Fatal') !== false ||
-        strpos($status, "hhvm") !== false) {
+  private function checkForFatals(string $line): bool {
+    if (preg_match(PHPUnitPatterns::$hhvm_fatal_pattern, $line) === 1) {
       return true;
     }
     return false;
   }
 
   private function checkForWarnings(string $line): bool {
-    if (strpos($line, 'HipHop Warning') !== false ||
-        strpos($line, 'HHVM Warning') !== false ||
-        strpos($line, 'hhvm Warning') !== false ||
-        strpos($line, 'HipHop Notice') !== false ||
-        strpos($line, 'HHVM Notice') !== false ||
-        strpos($line, 'hhvm notice') !== false) {
+    if (preg_match(PHPUnitPatterns::$hhvm_warning_pattern, $line) === 1) {
       return true;
     }
     return false;
@@ -1702,21 +1747,11 @@ function run_tests(Vector $frameworks): void {
               " with gray dots...\n", !Options::$csv_only);
     }
 
-    // Get the set of uniquie tests
-    $framework->findTests();
-    foreach($framework->tests as $test) {
-      /**************
-       * ZF2 Specific
-       **************/
-      // These are the two current tests out of ALL tests of ANY framework
-      // that seem to be causing deadlock. Removing for now.
-      if (strpos($test, "ZendTest/Code/Generator/PropertyGeneratorTest.php") ===
-         false &&
-         strpos($test, "ZendTest/Code/Generator/ValueGeneratorTest.php") ===
-         false) {
-        $st = new SingleTestFile($framework, $test);
-        $all_tests->add($st);
-      }
+    // Get the set of uniquie test files
+    $framework->findTestFiles();
+    foreach($framework->test_files as $test_file) {
+      $st = new SingleTestFile($framework, $test_file);
+      $all_tests->add($st);
     }
   }
 
@@ -1739,9 +1774,12 @@ function run_tests(Vector $frameworks): void {
   * All tests complete. Create results for
   * the framework that just ran.
   ****************************************/
-
+  $all_tests_success = true;
   $diff_frameworks = Vector {};
   foreach ($frameworks as $framework) {
+    if (!$framework->success) {
+      $all_tests_success = false;
+    }
     $pct = $framework->getPassPercentage();
     $encoded_result = json_encode(array($framework->name => $pct));
     if (!(file_exists($summary_file))) {
@@ -1761,11 +1799,10 @@ function run_tests(Vector $frameworks): void {
       Framework::sort($framework->expect_file);
     } else if (filesize($framework->diff_file) > 0) {
       $diff_frameworks[] = $framework;
-      $framework->success = false;
     }
   }
 
-  if ($framework->success) {
+  if ($all_tests_success) {
     $msg = "\nAll tests ran as expected.\n\n".<<<THUMBSUP
           _
          /(|

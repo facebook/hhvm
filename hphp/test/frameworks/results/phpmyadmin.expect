@@ -1,7 +1,7 @@
 Advisor_Test::testAdvisorBytime
 .
 Advisor_Test::testAdvisorTimespanFormat
-Fatal
+FATAL
 Advisor_Test::testEscape with data set #0 
 .
 Advisor_Test::testEscape with data set #1 
@@ -39,11 +39,11 @@ Environment_Test::testPhpVersion
 Environment_Test::testSession
 I
 Image_JPEG_Inline_Test::testGetInfo
-Fatal
+FATAL
 Image_JPEG_Link_Test::testGetInfo
-Fatal
+FATAL
 Image_PNG_Inline_Test::testGetInfo
-Fatal
+FATAL
 ImportCsv_Test::testDoImport
 .
 ImportCsv_Test::testDoImportNotAnalysis
@@ -67,9 +67,9 @@ ImportMediawiki_Test::testDoImport
 ImportMediawiki_Test::testGetProperties
 .
 ImportOds_Test::testGetProperties
-Fatal
+FATAL
 ImportShp_Test::testGetProperties
-Fatal
+FATAL
 ImportSql_Test::testDoImport
 .
 ImportXml_Test::testDoImport
@@ -93,7 +93,7 @@ NodeFactory_Test::testFileError
 NodeFactory_Test::testGroupContainer
 .
 Node_Column_Container_Test::testConstructor
-Fatal
+FATAL
 Node_Column_Test::testConstructor
 .
 Node_DatabaseChildTest::testGetHtmlForControlButtons
@@ -101,23 +101,23 @@ Node_DatabaseChildTest::testGetHtmlForControlButtons
 Node_Database_Test::testConstructor
 E
 Node_Event_Container_Test::testConstructor
-Fatal
+FATAL
 Node_Event_Test::testConstructor
 .
 Node_Function_Container_Test::testConstructor
-Fatal
+FATAL
 Node_Function_Test::testConstructor
 .
 Node_Index_Container_Test::testConstructor
-Fatal
+FATAL
 Node_Index_Test::testConstructor
 .
 Node_Procedure_Container_Test::testConstructor
-Fatal
+FATAL
 Node_Procedure_Test::testConstructor
 .
 Node_Table_Container_Test::testConstructor
-Fatal
+FATAL
 Node_Table_Test::testConstructor
 E
 Node_Table_Test::testIcon with data set #0 
@@ -159,11 +159,11 @@ Node_Test::testRealParent
 Node_Test::testRemoveNode
 .
 Node_Trigger_Container_Test::testConstructor
-Fatal
+FATAL
 Node_Trigger_Test::testConstructor
 .
 Node_View_Container_Test::testConstructor
-Fatal
+FATAL
 Node_View_Test::testConstructor
 .
 PMA_Array_Test::testPMA_arrayMergeRecursive
@@ -191,7 +191,7 @@ E
 PMA_AuthenticationConfig_Test::testAuthSetUser
 .
 PMA_AuthenticationCookie_Test::testAuth
-Fatal
+FATAL
 PMA_AuthenticationHttp_Test::testAuth
 S
 PMA_AuthenticationHttp_Test::testAuthCheck with data set #0 
@@ -205,7 +205,7 @@ PMA_AuthenticationHttp_Test::testAuthCheck with data set #3
 PMA_AuthenticationHttp_Test::testAuthCheck with data set #4 
 .
 PMA_AuthenticationHttp_Test::testAuthFails
-Fatal
+FATAL
 PMA_AuthenticationHttp_Test::testAuthSetUser
 .
 PMA_AuthenticationSignon_Test::testAuth
@@ -213,7 +213,7 @@ S
 PMA_AuthenticationSignon_Test::testAuthCheck
 E
 PMA_AuthenticationSignon_Test::testAuthFails
-Fatal
+FATAL
 PMA_AuthenticationSignon_Test::testAuthSetUser
 .
 PMA_Bookmark_Test::testPMA_Bookmark_delete
@@ -259,7 +259,7 @@ PMA_CheckPageValidity_Test::testGotoWhitelistEncodedPage
 PMA_CheckPageValidity_Test::testGotoWhitelistPage
 .
 PMA_CheckParameters_Test::testCheckParameterMissing
-Fatal
+FATAL
 PMA_ConfigFile_Test::testConfigFileConstructor
 .
 PMA_ConfigFile_Test::testConfigFileGet
@@ -313,7 +313,7 @@ PMA_ConfigFile_Test::testSetPersistKeys
 PMA_ConfigFile_Test::testUpdateWithGlobalConfig
 .
 PMA_ConfigGenerator_Test::testGetConfigFile
-Fatal
+FATAL
 PMA_ConfigTest::testCheckClient with data set #0 
 .
 PMA_ConfigTest::testCheckClient with data set #1 
@@ -423,7 +423,7 @@ PMA_ConfigTest::testSetCookie
 PMA_ConfigTest::testSetUserValue
 .
 PMA_Config_Functions_Test::testPMALang
-Fatal
+FATAL
 PMA_ContainsNonPrintableAsciiTest::testContainsNonPrintableAscii with data set #0 
 .
 PMA_ContainsNonPrintableAsciiTest::testContainsNonPrintableAscii with data set #1 
@@ -473,7 +473,7 @@ PMA_DBI_Test::testFetch
 PMA_DBI_Test::testFormatError with data set #0 
 .
 PMA_DBI_Test::testFormatError with data set #1 
-Fatal
+FATAL
 PMA_DBI_Test::testQuery
 .
 PMA_DBI_Test::testSystemSchema with data set #0 
@@ -541,7 +541,7 @@ PMA_DisplayExport_Test::testPMAGetHtmlForExportOptions
 PMA_DisplayExport_Test::testPMAGetHtmlForHiddenInput
 .
 PMA_DisplayResults_Test::testSetDisplayModeCase1 with data set #0 
-Fatal
+FATAL
 PMA_EVN_GetDataFromRequest_Test::testgetDataFromRequest_empty with data set #0 
 .
 PMA_EVN_GetDataFromRequest_Test::testgetDataFromRequest_empty with data set #1 
@@ -635,11 +635,11 @@ PMA_Eps_Relation_Schema_Test::testSetPageNumbere
 PMA_Error_Handler_Test::testGetDispErrorsForDisplayFalse with data set #0 
 .
 PMA_Error_Handler_Test::testGetDispErrorsForDisplayFalse with data set #1 
-Fatal
+FATAL
 PMA_Error_Test::testGetBacktraceDisplay
 .
 PMA_Error_Test::testGetDisplay
-Fatal
+FATAL
 PMA_Error_Test::testGetHash
 .
 PMA_Error_Test::testSetBacktrace
@@ -721,7 +721,7 @@ PMA_ExportCodegen_Test::testExportDBFooter
 PMA_ExportCodegen_Test::testExportDBHeader
 .
 PMA_ExportCodegen_Test::testExportData
-Fatal
+FATAL
 PMA_ExportCodegen_Test::testExportFooter
 .
 PMA_ExportCodegen_Test::testExportHeader
@@ -737,7 +737,7 @@ PMA_ExportCsv_Test::testExportDBFooter
 PMA_ExportCsv_Test::testExportDBHeader
 .
 PMA_ExportCsv_Test::testExportData
-Fatal
+FATAL
 PMA_ExportCsv_Test::testExportFooter
 .
 PMA_ExportCsv_Test::testExportHeader
@@ -759,7 +759,7 @@ PMA_ExportHtmlword_Test::testExportFooter
 PMA_ExportHtmlword_Test::testExportHeader
 .
 PMA_ExportHtmlword_Test::testGetTableDef
-Fatal
+FATAL
 PMA_ExportHtmlword_Test::testGetTableDefStandIn
 .
 PMA_ExportHtmlword_Test::testSetProperties
@@ -771,7 +771,7 @@ PMA_ExportJson_Test::testExportDBFooter
 PMA_ExportJson_Test::testExportDBHeader
 .
 PMA_ExportJson_Test::testExportData
-Fatal
+FATAL
 PMA_ExportJson_Test::testExportFooter
 .
 PMA_ExportJson_Test::testExportHeader
@@ -779,7 +779,7 @@ PMA_ExportJson_Test::testExportHeader
 PMA_ExportJson_Test::testSetProperties
 .
 PMA_ExportLatex_Test::testExportHeader
-Fatal
+FATAL
 PMA_ExportLatex_Test::testSetProperties
 .
 PMA_ExportMediawiki_Test::testExportDBCreate
@@ -793,7 +793,7 @@ PMA_ExportMediawiki_Test::testExportFooter
 PMA_ExportMediawiki_Test::testExportHeader
 .
 PMA_ExportMediawiki_Test::testExportStructure
-Fatal
+FATAL
 PMA_ExportMediawiki_Test::testSetProperties
 .
 PMA_ExportOds_Test::testExportDBCreate
@@ -819,7 +819,7 @@ PMA_ExportOdt_Test::testExportDBFooter
 PMA_ExportOdt_Test::testExportDBHeader
 .
 PMA_ExportOdt_Test::testExportData
-Fatal
+FATAL
 PMA_ExportOdt_Test::testExportFooter
 .
 PMA_ExportOdt_Test::testExportHeader
@@ -827,7 +827,7 @@ PMA_ExportOdt_Test::testExportHeader
 PMA_ExportOdt_Test::testSetProperties
 .
 PMA_ExportPdf_Test::testExportHeader
-Fatal
+FATAL
 PMA_ExportPdf_Test::testSetProperties
 .
 PMA_ExportPhparray_Test::testExportDBCreate
@@ -853,7 +853,7 @@ PMA_ExportPluginProperties_Test::testSetGetMimeType
 PMA_ExportPluginProperties_Test::testSetGetOptionsText
 .
 PMA_ExportSql_Test::testExportRoutines
-Fatal
+FATAL
 PMA_ExportSql_Test::testSetProperties
 E
 PMA_ExportSql_Test::testSetPropertiesWithDrizzle
@@ -865,7 +865,7 @@ PMA_ExportTexytext_Test::testExportDBFooter
 PMA_ExportTexytext_Test::testExportDBHeader
 .
 PMA_ExportTexytext_Test::testExportData
-Fatal
+FATAL
 PMA_ExportTexytext_Test::testExportFooter
 .
 PMA_ExportTexytext_Test::testExportHeader
@@ -895,7 +895,7 @@ PMA_ExportYaml_Test::testExportDBFooter
 PMA_ExportYaml_Test::testExportDBHeader
 .
 PMA_ExportYaml_Test::testExportData
-Fatal
+FATAL
 PMA_ExportYaml_Test::testExportFooter
 .
 PMA_ExportYaml_Test::testExportHeader
@@ -967,7 +967,7 @@ PMA_File_Test::testContent with data set #0
 PMA_File_Test::testContent with data set #1 
 .
 PMA_File_Test::testContent with data set #2 
-Fatal
+FATAL
 PMA_File_Test::testMIME with data set #0 
 .
 PMA_File_Test::testMIME with data set #1 
@@ -979,7 +979,7 @@ PMA_Footer_Test::testAjax
 PMA_Footer_Test::testDisable
 .
 PMA_Footer_Test::testDisplay
-Fatal
+FATAL
 PMA_Footer_Test::testGetDebugMessage
 .
 PMA_Footer_Test::testGetScripts
@@ -991,9 +991,9 @@ PMA_Footer_Test::testGetSelfLinkWithImage
 PMA_FormDisplay_Test::testFormDisplayContructor
 .
 PMA_FormDisplay_Test::testRegisterForm
-Fatal
+FATAL
 PMA_FormDisplay_Tpl_Test::testDisplayFormTop
-Fatal
+FATAL
 PMA_Form_Test::testContructor
 .
 PMA_Form_Test::testGetOptionType
@@ -1445,7 +1445,7 @@ PMA_Index_Test::testConstructor
 PMA_Index_Test::testGetIndexChoices
 .
 PMA_Index_Test::testIsUniquer
-Fatal
+FATAL
 PMA_InsertEditTest::testAnalyzeTableColumnsArray
 .
 PMA_InsertEditTest::testAnalyzeWhereClause
@@ -1683,7 +1683,7 @@ PMA_Kanji_Encoding_Test::testCheckEncoding with data set #0
 PMA_Kanji_Encoding_Test::testCheckEncoding with data set #1 
 .
 PMA_Kanji_Encoding_Test::testEncodingForm
-Fatal
+FATAL
 PMA_Kanji_Encoding_Test::testFileConv
 .
 PMA_Kanji_Encoding_Test::testStrConv
@@ -2693,7 +2693,7 @@ PMA_ServerVariables_Test::testPMAGetHtmlForServerVariablesItems
 PMA_SetupIndex_Test::testPMAMessagesShowHTML
 .
 PMA_SetupIndex_Test::testPMAVersionCheckCase1
-Fatal
+FATAL
 PMA_SetupIndex_Test::testPMAmessagesBegin
 .
 PMA_SetupIndex_Test::testPMAmessagesEnd
@@ -2703,7 +2703,7 @@ PMA_SetupIndex_Test::testPMAmessagesSet
 PMA_ShowDocu_Test::testShowDocu
 .
 PMA_ShowMessage_Test::testShowMessageNotAjax
-Fatal
+FATAL
 PMA_ShowPHPDocu_Test::testShowPHPDocu
 .
 PMA_SqlQueryForm_Test::testPMAGetHtmlForSqlQueryForm
@@ -3061,7 +3061,7 @@ PMA_TRI_GetQueryFromRequest_Test::testgetQueryFromRequest with data set #3
 PMA_TableProperty_Test::testConstructor
 .
 PMA_TableProperty_Test::testFormatCs
-Fatal
+FATAL
 PMA_TableProperty_Test::testGetDotNetObjectType with data set #0 
 .
 PMA_TableProperty_Test::testGetDotNetObjectType with data set #1 
@@ -3129,7 +3129,7 @@ PMA_TableProperty_Test::testIsUnique with data set #3
 PMA_TableProperty_Test::testIsUnique with data set #4 
 .
 PMA_TableReplaceSearchTest::testGetReplacePreview
-Fatal
+FATAL
 PMA_TableSearch_Test::testBuildSqlQueryw
 .
 PMA_TableSearch_Test::testConstruct
@@ -3207,7 +3207,7 @@ PMA_TblChartTest::testPMAGetHtmlForTableChartDisplay
 PMA_TblColumnsDefinitionFormTest::testGetFormsParameters
 .
 PMA_TblColumnsDefinitionFormTest::testGetHtmlForTableConfigurations
-Fatal
+FATAL
 PMA_TblGisVisualizaionTest::testPMAGetHtmlForColumn
 .
 PMA_TblGisVisualizaionTest::testPMAGetHtmlForGisVisualization
@@ -3357,7 +3357,7 @@ PMA_Tracker_Test::testEnabled
 PMA_Tracker_Test::testInit
 .
 PMA_Tracker_Test::testIsActive
-Fatal
+FATAL
 PMA_Transformation_Test::testGetMime
 .
 PMA_Transformation_Test::testGetOptions with data set #0 
@@ -3567,7 +3567,7 @@ PMA_Types_MySQL_Test::testGetUnknownTypeDescription
 PMA_UnsupportedDatatypes_Test::testNotSupportedDataTypes
 .
 PMA_User_Preferences_Test::testLoadUserprefs
-Fatal
+FATAL
 PMA_User_Preferences_Test::testUserPrefPageInit
 .
 PMA_User_Schema_Test::testSetActionAndProcessUserChoice
@@ -3627,7 +3627,7 @@ PMA_WarnMissingExtension_Test::testMissingExtensionFatalWithExtra
 PMA_WhichCrlf_Test::testWhichCrlf
 .
 PMA_ZipExtension_Test::testGetZipContents with data set #0 
-Fatal
+FATAL
 PMA_Zip_Test::testAddFile
 .
 PMA_Zip_Test::testFile
@@ -3715,11 +3715,11 @@ Text_Plain_External_Test::testGetMIMEType
 Text_Plain_External_Test::testGetName
 .
 Text_Plain_Formatted_Test::testGetInfo
-Fatal
+FATAL
 Text_Plain_Imagelink_Test::testGetInfo
-Fatal
+FATAL
 Text_Plain_Link_Test::testGetInfo
-Fatal
+FATAL
 Text_Plain_Longtoipv4_Test::testApplyTransformation
 .
 Text_Plain_Longtoipv4_Test::testGetInfo
@@ -3731,7 +3731,7 @@ Text_Plain_Longtoipv4_Test::testGetMIMEType
 Text_Plain_Longtoipv4_Test::testGetName
 .
 Text_Plain_Sql_Test::testGetInfo
-Fatal
+FATAL
 Text_Plain_Substring_Test::testApplyTransformation
 E
 Text_Plain_Substring_Test::testGetInfo

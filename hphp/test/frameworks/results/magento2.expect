@@ -743,7 +743,7 @@ Mage_Backend_Model_Menu_Builder_Command_UpdateTest::testExecuteFillsEmptyItemWit
 Mage_Backend_Model_Menu_Builder_Command_UpdateTest::testExecuteRewritesDataInFilledItem
 .
 Mage_Backend_Model_Menu_ConfigTest::testGetMenuConfigurationFiles
-Fatal
+FATAL
 Mage_Backend_Model_Menu_Director_DomTest::testCommandLogging
 .
 Mage_Backend_Model_Menu_Director_DomTest::testCommandWithValidBuilder
@@ -2327,7 +2327,7 @@ Mage_Core_Model_Locale_ValidatorTest::testIsValid with data set "case2"
 Mage_Core_Model_Locale_ValidatorTest::testIsValidDataProvider
 .
 Mage_Core_Model_LoggerTest::testAddStoreLog
-.
+E
 Mage_Core_Model_LoggerTest::testAddStreamLog with data set #0 
 E
 Mage_Core_Model_LoggerTest::testAddStreamLog with data set #1 
@@ -3777,7 +3777,7 @@ Mage_Install_Model_EntryPoint_UpgradeTest::testProcessRequest with data set "rei
 Mage_Install_Model_Installer_ConfigTest::testReplaceTmpEncryptKey
 .
 Mage_Install_Model_Installer_ConfigTest::testReplaceTmpInstallDate
-E
+.
 Mage_Install_Model_Installer_Db_Mysql4Test::testSupportEngine with data set #0 
 .
 Mage_Install_Model_Installer_Db_Mysql4Test::testSupportEngine with data set #1 
@@ -4869,7 +4869,7 @@ Mage_Webapi_Model_Resource_Acl_UserTest::testGetUniqueFields
 Mage_Webapi_Model_Rest_Oauth_ServerTest::testAuthenticateTwoLegged
 .
 Mage_Webapi_Model_Soap_AutoDiscoverTest::testGenerate with data set "Method with simple parameters"
-Fatal
+FATAL
 Mage_Webapi_Model_Soap_FaultTest::testGetSoapFaultMessage with data set #0 
 .
 Mage_Webapi_Model_Soap_FaultTest::testGetSoapFaultMessage with data set #1 
@@ -4939,7 +4939,7 @@ Mage_Webapi_Model_Soap_ServerTest::testGetEndpointUri
 Mage_Webapi_Model_Soap_ServerTest::testWebapiSoapFault
 .
 Mage_Webapi_Model_Soap_Wsdl_ComplexTypeStrategy_ConfigBasedTest::testAddComplexTypeSimpleParameters with data set "simple parameters"
-Fatal
+FATAL
 Mage_Webapi_Model_Soap_Wsdl_ComplexTypeStrategy_ConfigBasedTest::testCheckTypeName
 .
 Mage_Webapi_Model_Soap_Wsdl_FactoryTest::testCreate
@@ -5247,7 +5247,7 @@ Mage_Webhook_Model_Webapi_User_FactoryTest::testCreateUser
 Mage_Webhook_Model_Webapi_User_FactoryTest::testCreateUserAndRoleException
 .
 Mage_Webhook_Model_Webapi_User_FactoryTest::testInitVirtualResourceMapping
-Fatal
+FATAL
 Mage_Webhook_Service_SubscriptionV1Test::testActivate
 .
 Mage_Webhook_Service_SubscriptionV1Test::testActivateException
@@ -7293,7 +7293,7 @@ Tools_Migration_Acl_Menu_GeneratorTest::testParseMenuFiles
 Tools_Migration_Acl_Menu_GeneratorTest::testParseMenuNode
 .
 Tools_Migration_Acl_Menu_GeneratorTest::testSaveMenuFiles
-Fatal
+FATAL
 Tools_Migration_Acl_Menu_GeneratorTest::testUpdateMenuAttributes
 .
 Tools_Migration_System_Configuration_GeneratorTest::testCreateConfigurationGeneratesConfiguration
@@ -7349,7 +7349,7 @@ Tools_View_Generator_ThemeDeploymentTest::testConstructorException with data set
 Tools_View_Generator_ThemeDeploymentTest::testConstructorException with data set "no permitted config"
 .
 Tools_View_Generator_ThemeDeploymentTest::testRun
-F
+.
 Tools_View_Generator_ThemeDeploymentTest::testRunInDryRun
 .
 Tools_View_Generator_ThemeDeploymentTest::testRunWithCasedExtension

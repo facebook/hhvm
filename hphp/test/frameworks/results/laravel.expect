@@ -289,7 +289,7 @@ DatabaseConnectionFactoryTest::testProperInstancesAreReturnedForProperDrivers
 DatabaseConnectionTest::testSelectOneCallsSelectAndReturnsSingleResult
 .
 DatabaseConnectionTest::testSelectProperlyCallsPDO
-Fatal
+FATAL
 DatabaseConnectionTest::testSettingDefaultCallsGetDefaultGrammar
 .
 DatabaseConnectionTest::testSettingDefaultCallsGetDefaultPostProcessor
@@ -743,7 +743,7 @@ DatabasePostgresSchemaGrammarTest::testDropUnique
 DatabasePostgresSchemaGrammarTest::testRenameTable
 .
 DatabaseProcessorTest::testInsertGetIdProcessing
-Fatal
+FATAL
 DatabaseQueryBuilderTest::testAddingSelects
 .
 DatabaseQueryBuilderTest::testAggregateFunctions

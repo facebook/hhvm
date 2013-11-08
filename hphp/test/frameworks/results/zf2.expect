@@ -4129,7 +4129,7 @@ ZendTest\Cache\Storage\Adapter\FilesystemTest::testIncrementItemsResturnsKeyValu
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testIncrementItemsReturnsEmptyArrayIfNonWritable
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testIterator
-Fatal
+FATAL
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testKeyCapabilities
 .
 ZendTest\Cache\Storage\Adapter\FilesystemTest::testNormalizeCacheDir
@@ -5621,7 +5621,7 @@ ZendTest\Code\Generator\ClassGeneratorTest::testCreateFromArrayWithDocBlockInsta
 ZendTest\Code\Generator\ClassGeneratorTest::testExtendedClassAccessors
 .
 ZendTest\Code\Generator\ClassGeneratorTest::testExtendedClassProperies
-E
+.
 ZendTest\Code\Generator\ClassGeneratorTest::testHasMethod
 .
 ZendTest\Code\Generator\ClassGeneratorTest::testHasProperty
@@ -8923,7 +8923,7 @@ ZendTest\Dom\QueryTest::testResultShouldIndicateNumberOfFoundNodes
 ZendTest\Dom\QueryTest::testShouldAllowSettingDocument
 .
 ZendTest\Dom\QueryTest::testXpathPhpFunctionsShouldBeDisableByDefault
-Fatal
+FATAL
 ZendTest\Escaper\EscaperTest::testCssEscapingConvertsSpecialChars
 .
 ZendTest\Escaper\EscaperTest::testCssEscapingEscapesOwaspRecommendedRanges
@@ -11857,7 +11857,7 @@ ZendTest\File\ClassFileLocatorTest::testConstructorThrowsInvalidArgumentExceptio
 ZendTest\File\ClassFileLocatorTest::testConstructorThrowsInvalidArgumentExceptionForNonDirectoryIteratorArgument
 .
 ZendTest\File\ClassFileLocatorTest::testIterationShouldReturnOnlyPhpFiles
-Fatal
+FATAL
 ZendTest\File\Transfer\Adapter\AbstractTest::testAdapterShouldAllowAddingFilterInstance
 .
 ZendTest\File\Transfer\Adapter\AbstractTest::testAdapterShouldAllowAddingFilterViaPluginManager
@@ -12265,7 +12265,7 @@ E
 ZendTest\Filter\Compress\TarTest::testTarToString
 E
 ZendTest\Filter\Compress\ZipTest::testBasicUsage
-Fatal
+FATAL
 ZendTest\Filter\DateTimeFormatterTest::testAcceptDateTimeValue
 .
 ZendTest\Filter\DateTimeFormatterTest::testDateTimeFormatted
@@ -13471,7 +13471,7 @@ ZendTest\Form\FormTest::testFactoryCanSetPreferFormInputFilterFlag
 ZendTest\Form\FormTest::testFieldsetValidationGroupStillPreparedWhenEmptyData
 .
 ZendTest\Form\FormTest::testFileInputFilterNotOverwritten
-Fatal
+FATAL
 ZendTest\Form\FormTest::testFormAsFieldsetWillBindValuesToObject
 .
 ZendTest\Form\FormTest::testFormValidationCanHandleNonConsecutiveKeysOfCollectionInData
@@ -18259,7 +18259,7 @@ ZendTest\Http\ResponseTest::testToStringGzip
 ZendTest\Http\ResponseTest::testUnknownCode
 .
 ZendTest\I18n\Translator\Loader\GettextTest::testLoaderFailsToLoadMissingFile
-Fatal
+FATAL
 ZendTest\I18n\Translator\Loader\IniTest::testLoaderFailsToLoadBadSyntax
 .
 ZendTest\I18n\Translator\Loader\IniTest::testLoaderFailsToLoadMissingFile
@@ -18277,7 +18277,7 @@ ZendTest\I18n\Translator\Loader\IniTest::testLoaderReturnsValidTextDomainWithFil
 ZendTest\I18n\Translator\Loader\IniTest::testLoaderReturnsValidTextDomainWithSimpleSyntax
 .
 ZendTest\I18n\Translator\Loader\PhpArrayTest::testLoaderFailsToLoadMissingFile
-Fatal
+FATAL
 ZendTest\I18n\Translator\Plural\RuleTest::testCompleteRules with data set #0 
 .
 ZendTest\I18n\Translator\Plural\RuleTest::testCompleteRules with data set #1 
@@ -18381,9 +18381,9 @@ ZendTest\I18n\Translator\TranslatorAwareTraitTest::testSetTranslatorTextDomain
 ZendTest\I18n\Translator\TranslatorServiceFactoryTest::testCreateServiceWithNoTranslatorKeyDefined
 .
 ZendTest\I18n\Translator\TranslatorTest::testFactoryCreatesTranslator
-Fatal
+FATAL
 ZendTest\I18n\Validator\FloatTest::testBasic with data set #0 
-Fatal
+FATAL
 ZendTest\I18n\Validator\IbanTest::testBasic with data set #0 
 .
 ZendTest\I18n\Validator\IbanTest::testBasic with data set #1 
@@ -18531,7 +18531,7 @@ ZendTest\I18n\Validator\IbanTest::testSepaNotSupportedCountryCode
 ZendTest\I18n\Validator\IbanTest::testSettingAndGettingCountryCode
 .
 ZendTest\I18n\Validator\IntTest::testBasic with data set #0 
-Fatal
+FATAL
 ZendTest\I18n\Validator\PostCodeTest::testBasic with data set #0 
 E
 ZendTest\I18n\Validator\PostCodeTest::testBasic with data set #1 
@@ -20467,7 +20467,7 @@ ZendTest\Loader\ClassMapAutoloaderTest::testValidMapFileNotReturningMapRaisesInv
 ZendTest\Loader\ModuleAutoloaderTest\ManagerTest::testCanAutoloadModule
 .
 ZendTest\Loader\ModuleAutoloaderTest\ManagerTest::testCanAutoloadPharModules
-Fatal
+FATAL
 ZendTest\Loader\ModuleAutoloaderTest\ManagerTest::testCanAutoloadSubModule
 .
 ZendTest\Loader\ModuleAutoloaderTest\ManagerTest::testCanRegisterPathsFromConstructor
@@ -21619,7 +21619,7 @@ ZendTest\Mail\Storage\MboxFolderTest::testLoadConfig
 ZendTest\Mail\Storage\MboxFolderTest::testLoadFailure
 .
 ZendTest\Mail\Storage\MboxFolderTest::testLoadOk
-S
+.
 ZendTest\Mail\Storage\MboxFolderTest::testLoadUnkownFolder
 .
 ZendTest\Mail\Storage\MboxFolderTest::testLocalName
@@ -21641,11 +21641,11 @@ ZendTest\Mail\Storage\MboxFolderTest::testUnknownFolder
 ZendTest\Mail\Storage\MboxMessageOldTest::testFetchHeader
 .
 ZendTest\Mail\Storage\MboxMessageOldTest::testFetchMessageBody
-S
+.
 ZendTest\Mail\Storage\MboxMessageOldTest::testFetchMessageHeader
-S
+.
 ZendTest\Mail\Storage\MboxMessageOldTest::testShortMbox
-S
+.
 ZendTest\Mail\Storage\MboxTest::testCapa
 .
 ZendTest\Mail\Storage\MboxTest::testClose
@@ -22143,7 +22143,7 @@ ZendTest\Math\BigInteger\BigIntegerTest::testFactoryUnknownAdapterRaisesServiceM
 ZendTest\Math\BigInteger\BigIntegerTest::testFactoryUsesDefaultAdapter
 .
 ZendTest\Math\RandTest::testAltGeneratorIsRandomWithCorrectLength
-Fatal
+FATAL
 ZendTest\Math\RandTest::testGetString
 .
 ZendTest\Math\RandTest::testGetStringBase64
@@ -22261,7 +22261,7 @@ ZendTest\Mime\PartTest::testContentEncoding
 ZendTest\Mime\PartTest::testHeaders
 .
 ZendTest\Mime\PartTest::testStreamEncoding
-Fatal
+FATAL
 ZendTest\ModuleManager\Listener\AutoloaderListenerTest::testAutoloadersRegisteredByAutoloaderListener
 .
 ZendTest\ModuleManager\Listener\AutoloaderListenerTest::testAutoloadersRegisteredIfModuleDoesNotInheritAutoloaderProviderInterfaceButDefinesGetAutoloaderConfigMethod
@@ -22335,7 +22335,7 @@ ZendTest\ModuleManager\Listener\ModuleLoaderListenerTest::testModuleLoaderListen
 ZendTest\ModuleManager\Listener\ModuleLoaderListenerTest::testModuleLoaderListenerFunctionsAsAggregateListenerHasCache
 .
 ZendTest\ModuleManager\Listener\ModuleResolverListenerTest::testModuleResolverListenerCanResolveModuleClasses
-Fatal
+FATAL
 ZendTest\ModuleManager\Listener\OnBootstrapListenerTest::testOnBootstrapMethodCalledByOnBootstrapListener
 .
 ZendTest\ModuleManager\Listener\ServiceListenerTest::testInvalidReturnFromModuleDoesNothing
@@ -25451,7 +25451,7 @@ ZendTest\ServiceManager\ServiceManagerTest::testGet
 ZendTest\ServiceManager\ServiceManagerTest::testGetDoesNotThrowExceptionOnEmptyArray
 .
 ZendTest\ServiceManager\ServiceManagerTest::testGetGlobIteratorServiceWorksProperly
-Fatal
+FATAL
 ZendTest\ServiceManager\ServiceManagerTest::testGetServiceThrowsExceptionOnAliasWithNoSetService
 .
 ZendTest\ServiceManager\ServiceManagerTest::testGetServiceThrowsExceptionOnMultipleAliasesWithNoSetService
@@ -26715,7 +26715,7 @@ ZendTest\Soap\AutoDiscoverTest::testChangingWsdlUriAfterGenerationIsPossible wit
 ZendTest\Soap\AutoDiscoverTest::testClassMap
 .
 ZendTest\Soap\AutoDiscoverTest::testComplexTypesThatAreUsedMultipleTimesAreRecoginzedOnce
-E
+.
 ZendTest\Soap\AutoDiscoverTest::testDocumentNodes
 .
 ZendTest\Soap\AutoDiscoverTest::testGetDiscoveryStrategy
@@ -26733,9 +26733,9 @@ ZendTest\Soap\AutoDiscoverTest::testNoReturnIsOneWayCallInAddFunction
 ZendTest\Soap\AutoDiscoverTest::testNoReturnIsOneWayCallInSetClass
 .
 ZendTest\Soap\AutoDiscoverTest::testRecursiveWsdlDependencies
-E
+.
 ZendTest\Soap\AutoDiscoverTest::testReturnSameArrayOfObjectsResponseOnDifferentMethodsWhenArrayComplex
-E
+.
 ZendTest\Soap\AutoDiscoverTest::testReturnSameArrayOfObjectsResponseOnDifferentMethodsWhenArraySequence
 .
 ZendTest\Soap\AutoDiscoverTest::testSetClass
@@ -26789,7 +26789,7 @@ E
 ZendTest\Soap\ClientTest::testGetOptions
 .
 ZendTest\Soap\ClientTest::testGetTypes
-E
+.
 ZendTest\Soap\ClientTest::testInitSoapClientObjectException with data set #0 
 .
 ZendTest\Soap\ClientTest::testInitSoapClientObjectException with data set #1 
@@ -26845,7 +26845,7 @@ ZendTest\Soap\ServerTest::testGetFunctionsWithClassAttached
 ZendTest\Soap\ServerTest::testGetFunctionsWithObjectAttached
 .
 ZendTest\Soap\ServerTest::testGetLastRequest
-Fatal
+FATAL
 ZendTest\Soap\ServerTest::testGetOptions
 .
 ZendTest\Soap\ServerTest::testGetPersistence
@@ -26961,7 +26961,7 @@ ZendTest\Soap\WsdlTest::testAddSoapBinding with data set #0
 ZendTest\Soap\WsdlTest::testAddSoapBinding with data set #1 
 .
 ZendTest\Soap\WsdlTest::testAddSoapOperation with data set #0 
-Fatal
+FATAL
 ZendTest\Soap\WsdlTest::testConstructor
 F
 ZendTest\Soap\WsdlTest::testObjectConstructionWithDifferentURI with data set #0 
@@ -26999,27 +26999,27 @@ ZendTest\Soap\WsdlTestHelper::testDocumentNodes
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testAddComplexTypeOfNonExistingClassThrowsException
 .
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testAddingSingularThenArrayTypeIsRecognizedCorretly
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testAddingTypesMultipleTimesIsSavedOnlyOnce
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testArrayOfComplexNestedObjectsIsCoveredByStrategyAndAddsAllTypesRecursivly
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testArrayOfComplexObjects
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testArrayOfObjectWithObject
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testArrayOfSimpleObject
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testDocumentNodes
 .
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testNestingObjectsDeepMakesNoSenseThrowingException
 .
 ZendTest\Soap\Wsdl\ArrayOfTypeComplexStrategyTest::testThatOverridingStrategyIsReset
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeSequenceStrategyTest::testAddComplexTypeArrayOfObject
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeSequenceStrategyTest::testAddComplexTypeObject
-E
+.
 ZendTest\Soap\Wsdl\ArrayOfTypeSequenceStrategyTest::testAddComplexTypeOfNonExistingClassThrowsException
 .
 ZendTest\Soap\Wsdl\ArrayOfTypeSequenceStrategyTest::testDocumentNodes
@@ -27063,7 +27063,7 @@ ZendTest\Soap\Wsdl\ComplexTypeStrategy\CompositeStrategyTest::testGetDefaultStra
 ZendTest\Soap\Wsdl\DefaultComplexTypeTest::testDocumentNodes
 .
 ZendTest\Soap\Wsdl\DefaultComplexTypeTest::testOnlyPublicPropertiesAreDiscoveredByStrategy
-E
+.
 ZendTest\Stdlib\ArrayObjectTest::testAppend
 .
 ZendTest\Stdlib\ArrayObjectTest::testArrayAsProps
@@ -32557,7 +32557,7 @@ ZendTest\View\Helper\Navigation\NavigationTest::testInjectingContainer
 ZendTest\View\Helper\Navigation\NavigationTest::testInjectingTranslator
 E
 ZendTest\View\Helper\Navigation\NavigationTest::testMagicToStringShouldNotThrowException
-Fatal
+FATAL
 ZendTest\View\Helper\Navigation\NavigationTest::testMultipleNavigationsAndOneMenuDisplayedTwoTimes
 .
 ZendTest\View\Helper\Navigation\NavigationTest::testServiceManagerIsUsedToRetrieveContainer

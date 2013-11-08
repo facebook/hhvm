@@ -25,7 +25,7 @@ export HPHP_HOME=`/bin/pwd`
 # install apt-fast to speedup later dependency installation
 sudo add-apt-repository -y ppa:apt-fast/stable
 sudo apt-get update
-sudo apt-get install apt-fast
+sudo apt-get -y install apt-fast
 
 # install the actual dependencies
 sudo apt-fast -y update

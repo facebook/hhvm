@@ -221,6 +221,12 @@ struct string_data_same {
   }
 };
 
+struct string_data_eq_same {
+  bool operator()(const StringData* a, const StringData* b) const {
+    return a == b || a->same(b);
+  }
+};
+
 struct string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
     assert(s1 && s2);

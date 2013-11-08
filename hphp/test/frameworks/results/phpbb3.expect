@@ -83,7 +83,7 @@ phpbb_avatar_manager_test::test_localize_errors
 phpbb_avatar_manager_test::test_prepare_driver_name
 .
 phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #0 
-HipHop Fatal error: $this is null
+Fatal
 phpbb_build_hidden_fields_for_query_params_test::test_build_hidden_fields_for_query_params with data set #0 
 .
 phpbb_build_hidden_fields_for_query_params_test::test_build_hidden_fields_for_query_params with data set #1 
@@ -121,7 +121,7 @@ S
 phpbb_cache_null_driver_test::test_purge
 S
 phpbb_class_loader_test::test_resolve_cached
-HipHop Fatal error: Undefined interface: phpbb\cache\driver\driver_interface in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpbb3/tests/mock/cache.php on line 10
+Fatal
 phpbb_class_loader_test::test_resolve_path
 .
 phpbb_compress_test::test_compress_tar with data set #0 
@@ -1255,7 +1255,7 @@ phpbb_functions_validate_num_test::test_validate_num
 phpbb_functions_validate_password_test::test_validate_password with data set #0 
 .
 phpbb_functions_validate_password_test::test_validate_password with data set #1 
-HipHop Fatal error: Undefined function: phpbb_pcre_utf8_support in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpbb3/phpBB/includes/functions_user.php on line 1669
+Fatal
 phpbb_functions_validate_string_test::test_validate_string
 .
 phpbb_get_formatted_filesize_test::test_get_formatted_filesize with data set #0 
@@ -1619,7 +1619,7 @@ phpbb_password_complexity_test::test_password_complexity_positive with data set 
 phpbb_password_complexity_test::test_password_complexity_positive with data set #5 
 .
 phpbb_password_complexity_test::test_password_complexity_positive with data set #6 
-HipHop Fatal error: Undefined function: phpbb_pcre_utf8_support in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpbb3/phpBB/includes/functions_user.php on line 1669
+Fatal
 phpbb_path_helper_web_root_path_test::test_basic_update_web_root_path with data set #0 
 .
 phpbb_path_helper_web_root_path_test::test_basic_update_web_root_path with data set #1 
@@ -2475,7 +2475,7 @@ phpbb_template_template_events_test::test_event with data set #5
 phpbb_template_template_includecss_test::test_includecss_compilation
 .
 phpbb_template_template_includejs_test::test_includejs_compilation with data set #0 
-HipHop Fatal error: Class undefined: \phpbb\template\twig\node\expression\binary\equalequal in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpbb3/phpBB/vendor/twig/twig/lib/Twig/ExpressionParser.php on line 52
+Fatal
 phpbb_template_template_inheritance_test::test_template with data set #0 
 .
 phpbb_template_template_inheritance_test::test_template with data set #1 
@@ -2483,7 +2483,7 @@ phpbb_template_template_inheritance_test::test_template with data set #1
 phpbb_template_template_inheritance_test::test_template with data set #2 
 .
 phpbb_template_template_parser_test::test_set_filenames
-HipHop Fatal error: Class undefined: \phpbb\template\twig\node\expression\binary\equalequal in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpbb3/phpBB/vendor/twig/twig/lib/Twig/ExpressionParser.php on line 52
+Fatal
 phpbb_template_template_test::test_invalid_handle
 .
 phpbb_template_template_test::test_missing_file
@@ -2493,7 +2493,7 @@ phpbb_template_template_test::test_template with data set #0
 phpbb_template_template_test::test_template with data set #1 
 .
 phpbb_template_template_test::test_template with data set #2 
-HipHop Fatal error: Class undefined: \phpbb\template\twig\node\expression\binary\equalequal in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpbb3/phpBB/vendor/twig/twig/lib/Twig/ExpressionParser.php on line 52
+Fatal
 phpbb_tests_tree_nestedset_forum_add_remove_test::test_delete with data set #0 
 S
 phpbb_tests_tree_nestedset_forum_add_remove_test::test_delete with data set #1 
@@ -3769,9 +3769,9 @@ S
 phpbb_update_rows_avoiding_duplicates_test::test_update with data set #3 
 S
 phpbb_url_bbcode_test::test_url with data set #0 
-HipHop Fatal error: $this is null
+Fatal
 phpbb_user_lang_test::test_user_lang_sprintf
-HipHop Fatal error: Undefined function: phpbb\phpbb_get_plural_form in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/phpbb3/phpBB/phpbb/user.php on line 485
+Fatal
 phpbb_user_loader_test::test_load_get
 S
 phpbb_user_loader_test::test_load_get_unloaded

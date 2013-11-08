@@ -1,3 +1,5 @@
+.
+
 Symfony\Bridge\Doctrine\Tests\ContainerAwareEventManagerTest::testDispatchEvent
 .
 Symfony\Bridge\Doctrine\Tests\ContainerAwareEventManagerTest::testRemoveEventListener
@@ -53,25 +55,25 @@ Symfony\Bridge\Doctrine\Tests\ExpressionLanguage\DoctrineParserCacheTest::testFe
 Symfony\Bridge\Doctrine\Tests\ExpressionLanguage\DoctrineParserCacheTest::testSave
 .
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\GenericEntityChoiceListTest::testEntitiesMustHaveAToStringMethod
-HipHop Fatal error: Declaration of Doctrine\DBAL\Driver\PDOConnection::prepare() must be compatible with that of Doctrine\DBAL\Driver\Connection::prepare() in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php on line 30
+Fatal
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\LoadedEntityChoiceListCompositeIdTest::testGetChoices
-HipHop Fatal error: Declaration of Doctrine\DBAL\Driver\PDOConnection::prepare() must be compatible with that of Doctrine\DBAL\Driver\Connection::prepare() in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php on line 30
+Fatal
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\LoadedEntityChoiceListSingleIntIdTest::testGetChoices
-HipHop Fatal error: Declaration of Doctrine\DBAL\Driver\PDOConnection::prepare() must be compatible with that of Doctrine\DBAL\Driver\Connection::prepare() in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php on line 30
+Fatal
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\LoadedEntityChoiceListSingleStringIdTest::testGetChoices
-HipHop Fatal error: Declaration of Doctrine\DBAL\Driver\PDOConnection::prepare() must be compatible with that of Doctrine\DBAL\Driver\Connection::prepare() in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php on line 30
+Fatal
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\UnloadedEntityChoiceListCompositeIdTest::testGetIndicesForValuesIgnoresNonExistingValues
-HipHop Fatal error: Declaration of Doctrine\DBAL\Driver\PDOConnection::prepare() must be compatible with that of Doctrine\DBAL\Driver\Connection::prepare() in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php on line 30
+Fatal
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\UnloadedEntityChoiceListCompositeIdWithQueryBuilderTest::testGetIndicesForValuesIgnoresNonExistingValues
-HipHop Fatal error: Declaration of Doctrine\DBAL\Driver\PDOConnection::prepare() must be compatible with that of Doctrine\DBAL\Driver\Connection::prepare() in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php on line 30
+Fatal
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\UnloadedEntityChoiceListSingleIntIdTest::testGetIndicesForValuesIgnoresNonExistingValues
-HipHop Fatal error: Declaration of Doctrine\DBAL\Driver\PDOConnection::prepare() must be compatible with that of Doctrine\DBAL\Driver\Connection::prepare() in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php on line 30
+Fatal
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\UnloadedEntityChoiceListSingleIntIdWithQueryBuilderTest::testGetIndicesForValuesIgnoresNonExistingValues
-HipHop Fatal error: Declaration of Doctrine\DBAL\Driver\PDOConnection::prepare() must be compatible with that of Doctrine\DBAL\Driver\Connection::prepare() in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php on line 30
+Fatal
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\UnloadedEntityChoiceListSingleStringIdTest::testGetIndicesForValuesIgnoresNonExistingValues
-HipHop Fatal error: Declaration of Doctrine\DBAL\Driver\PDOConnection::prepare() must be compatible with that of Doctrine\DBAL\Driver\Connection::prepare() in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php on line 30
+Fatal
 Symfony\Bridge\Doctrine\Tests\Form\ChoiceList\UnloadedEntityChoiceListSingleStringIdWithQueryBuilderTest::testGetIndicesForValuesIgnoresNonExistingValues
-HipHop Fatal error: Declaration of Doctrine\DBAL\Driver\PDOConnection::prepare() must be compatible with that of Doctrine\DBAL\Driver\Connection::prepare() in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php on line 30
+Fatal
 Symfony\Bridge\Doctrine\Tests\Form\DoctrineOrmTypeGuesserTest::testRequiredGuesser with data set #0 
 .
 Symfony\Bridge\Doctrine\Tests\Form\DoctrineOrmTypeGuesserTest::testRequiredGuesser with data set #1 
@@ -85,7 +87,7 @@ Symfony\Bridge\Doctrine\Tests\Form\DoctrineOrmTypeGuesserTest::testRequiredGuess
 Symfony\Bridge\Doctrine\Tests\Form\DoctrineOrmTypeGuesserTest::testRequiredGuesser with data set #5 
 .
 Symfony\Bridge\Doctrine\Tests\Form\Type\EntityTypeTest::testClassOptionIsRequired
-HipHop Fatal error: Declaration of Doctrine\DBAL\Driver\PDOConnection::prepare() must be compatible with that of Doctrine\DBAL\Driver\Connection::prepare() in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOConnection.php on line 30
+Fatal
 Symfony\Bridge\Doctrine\Tests\HttpFoundation\DbalSessionHandlerTest::testConstruct
 .
 Symfony\Bridge\Doctrine\Tests\Logger\DbalLoggerTest::testLog with data set #0 
@@ -100,32 +102,10 @@ Symfony\Bridge\Doctrine\Tests\Logger\DbalLoggerTest::testLogNonUtf8
 .
 Symfony\Bridge\Doctrine\Tests\Logger\DbalLoggerTest::testLogUTF8LongString
 .
-Symfony\Bridge\Doctrine\Tests\Security\User\EntityUserProviderTest::testRefreshInvalidUser
-E
 Symfony\Bridge\Doctrine\Tests\Security\User\EntityUserProviderTest::testRefreshUserGetsUserByPrimaryKey
-E
-Symfony\Bridge\Doctrine\Tests\Security\User\EntityUserProviderTest::testRefreshUserRequiresId
-.
-Symfony\Bridge\Doctrine\Tests\Security\User\EntityUserProviderTest::testSupportProxy
-E
-Symfony\Bridge\Doctrine\Tests\Validator\Constraints\UniqueValidatorTest::testAssociatedCompositeEntity
-E
-Symfony\Bridge\Doctrine\Tests\Validator\Constraints\UniqueValidatorTest::testAssociatedEntity
-E
-Symfony\Bridge\Doctrine\Tests\Validator\Constraints\UniqueValidatorTest::testValidateCustomErrorPath
-E
+Fatal
 Symfony\Bridge\Doctrine\Tests\Validator\Constraints\UniqueValidatorTest::testValidateUniqueness
-E
-Symfony\Bridge\Doctrine\Tests\Validator\Constraints\UniqueValidatorTest::testValidateUniquenessAfterConsideringMultipleQueryResults
-E
-Symfony\Bridge\Doctrine\Tests\Validator\Constraints\UniqueValidatorTest::testValidateUniquenessUsingCustomRepositoryMethod
-.
-Symfony\Bridge\Doctrine\Tests\Validator\Constraints\UniqueValidatorTest::testValidateUniquenessWithIgnoreNull
-E
-Symfony\Bridge\Doctrine\Tests\Validator\Constraints\UniqueValidatorTest::testValidateUniquenessWithNull
-E
-Symfony\Bridge\Doctrine\Tests\Validator\Constraints\UniqueValidatorTest::testValidateUniquenessWithUnrewoundArray
-.
+Fatal
 Symfony\Bridge\Monolog\Tests\Handler\ConsoleHandlerTest::testConstructor
 .
 Symfony\Bridge\Monolog\Tests\Handler\ConsoleHandlerTest::testGetFormatter
@@ -185,7 +165,7 @@ Symfony\Bridge\Propel1\Tests\Form\ChoiceList\ModelChoiceListTest::testGroupBySup
 Symfony\Bridge\Propel1\Tests\Form\ChoiceList\ModelChoiceListTest::testNestedChoices
 .
 Symfony\Bridge\Propel1\Tests\Form\ChoiceList\ModelChoiceListTest::testReadOnlyIsValidChoice
-.
+E
 Symfony\Bridge\Propel1\Tests\Form\DataTransformer\CollectionToArrayTransformerTest::testReverseTransformThrowsExceptionIfNotArray
 .
 Symfony\Bridge\Propel1\Tests\Form\DataTransformer\CollectionToArrayTransformerTest::testReverseTransformWithData
@@ -247,7 +227,7 @@ Symfony\Bridge\Propel1\Tests\Form\Type\TranslationCollectionTypeTest::testNotPre
 Symfony\Bridge\Propel1\Tests\Form\Type\TranslationCollectionTypeTest::testTranslationsAdded
 .
 Symfony\Bridge\ProxyManager\LazyProxy\Tests\ContainerBuilderTest::testCreateProxyServiceWithRuntimeInstantiator
-E
+.
 Symfony\Bridge\ProxyManager\LazyProxy\Tests\Dumper\PhpDumperTest::testDumpContainerWithProxyService
 .
 Symfony\Bridge\ProxyManager\LazyProxy\Tests\Dumper\PhpDumperTest::testDumpContainerWithProxyServiceWillShareProxies
@@ -965,9 +945,9 @@ Symfony\Bridge\Twig\Tests\TwigEngineTest::testExistsWithTemplateWithSyntaxErrors
 Symfony\Component\BrowserKit\Tests\ClientTest::testBack
 .
 Symfony\Component\BrowserKit\Tests\ClientTest::testClick
-.
+E
 Symfony\Component\BrowserKit\Tests\ClientTest::testClickForm
-.
+E
 Symfony\Component\BrowserKit\Tests\ClientTest::testFollowRedirect
 .
 Symfony\Component\BrowserKit\Tests\ClientTest::testFollowRedirectWithCookies
@@ -1015,9 +995,9 @@ Symfony\Component\BrowserKit\Tests\ClientTest::testRestart
 Symfony\Component\BrowserKit\Tests\ClientTest::testSetServerParameter
 .
 Symfony\Component\BrowserKit\Tests\ClientTest::testSubmit
-.
+E
 Symfony\Component\BrowserKit\Tests\ClientTest::testSubmitPreserveAuth
-.
+E
 Symfony\Component\BrowserKit\Tests\CookieJarTest::testAll
 .
 Symfony\Component\BrowserKit\Tests\CookieJarTest::testAllValues with data set #0 
@@ -1455,7 +1435,7 @@ Symfony\Component\Config\Tests\Definition\Builder\NodeBuilderTest::testAddingANe
 Symfony\Component\Config\Tests\Definition\Builder\NodeBuilderTest::testNodeTypesAreNotCaseSensitive
 .
 Symfony\Component\Config\Tests\Definition\Builder\NodeBuilderTest::testNumericNodeCreation
-HipHop Fatal error: Class undefined: Symfony\Component\Config\Tests\Definition\Builder\NodeBuilder in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/src/Symfony/Component/Config/Tests/Definition/Builder/NodeBuilderTest.php on line 82
+Fatal
 Symfony\Component\Config\Tests\Definition\Builder\NodeBuilderTest::testOverridingAnExistingNodeType
 .
 Symfony\Component\Config\Tests\Definition\Builder\NodeBuilderTest::testThrowsAnExceptionWhenTheNodeClassIsNotFound
@@ -2139,7 +2119,7 @@ Symfony\Component\Console\Tests\Formatter\OutputFormatterStyleTest::testOptions
 Symfony\Component\Console\Tests\Helper\DialogHelperTest::testAsk
 .
 Symfony\Component\Console\Tests\Helper\DialogHelperTest::testAskHiddenResponse
-UNKNOWN STATUS
+UNKNOWN STATUSSymfony\Component\Console\Tests\Output\ConsoleOutputTest::testConstructor
 Symfony\Component\Console\Tests\Helper\DialogHelperTest::testAskWithAutocomplete
 S
 Symfony\Component\Console\Tests\Helper\DialogHelperTest::testSelect
@@ -2517,8 +2497,6 @@ Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data se
 Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data set #8 
 .
 Symfony\Component\Console\Tests\Input\StringInputTest::testTokenize with data set #9 
-.
-Symfony\Component\Console\Tests\Output\ConsoleOutputTest::testConstructor
 .
 Symfony\Component\Console\Tests\Output\NullOutputTest::testConstructor
 .
@@ -4967,21 +4945,21 @@ Symfony\Component\Finder\Tests\FinderTest::testAdaptersChaining
 Symfony\Component\Finder\Tests\FinderTest::testAdaptersOrdering
 .
 Symfony\Component\Finder\Tests\FinderTest::testAppendDoesNotRequireIn with data set #1 
-E
+.
 Symfony\Component\Finder\Tests\FinderTest::testAppendDoesNotRequireIn with data set #2 
-E
+.
 Symfony\Component\Finder\Tests\FinderTest::testAppendReturnsAFinder with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testAppendReturnsAFinder with data set #2 
 .
 Symfony\Component\Finder\Tests\FinderTest::testAppendWithAFinder with data set #1 
-E
+.
 Symfony\Component\Finder\Tests\FinderTest::testAppendWithAFinder with data set #2 
-E
+.
 Symfony\Component\Finder\Tests\FinderTest::testAppendWithAnArray with data set #1 
-E
+.
 Symfony\Component\Finder\Tests\FinderTest::testAppendWithAnArray with data set #2 
-E
+.
 Symfony\Component\Finder\Tests\FinderTest::testContains with data set #0 
 .
 Symfony\Component\Finder\Tests\FinderTest::testContains with data set #1 
@@ -5055,21 +5033,21 @@ Symfony\Component\Finder\Tests\FinderTest::testFiles with data set #1
 Symfony\Component\Finder\Tests\FinderTest::testFiles with data set #2 
 .
 Symfony\Component\Finder\Tests\FinderTest::testFilter with data set #1 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testFilter with data set #2 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testFollowLinks with data set #1 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testFollowLinks with data set #2 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testGetIterator with data set #1 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testGetIterator with data set #2 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testIgnoreDotFiles with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testIgnoreDotFiles with data set #2 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testIgnoreVCS with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testIgnoreVCS with data set #2 
@@ -5079,9 +5057,9 @@ F
 Symfony\Component\Finder\Tests\FinderTest::testIgnoredAccessDeniedException with data set #2 
 F
 Symfony\Component\Finder\Tests\FinderTest::testIn with data set #1 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testIn with data set #2 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testInWithGlob with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testInWithGlob with data set #2 
@@ -5095,9 +5073,9 @@ Symfony\Component\Finder\Tests\FinderTest::testIteratorKeys with data set #1
 Symfony\Component\Finder\Tests\FinderTest::testIteratorKeys with data set #2 
 .
 Symfony\Component\Finder\Tests\FinderTest::testMultipleLocations with data set #1 
-E
+.
 Symfony\Component\Finder\Tests\FinderTest::testMultipleLocations with data set #2 
-E
+.
 Symfony\Component\Finder\Tests\FinderTest::testMultipleLocationsWithSubDirectories
 E
 Symfony\Component\Finder\Tests\FinderTest::testName with data set #1 
@@ -5147,13 +5125,13 @@ Symfony\Component\Finder\Tests\FinderTest::testRegexName with data set #2
 Symfony\Component\Finder\Tests\FinderTest::testRegexName with data set #3 
 .
 Symfony\Component\Finder\Tests\FinderTest::testRelativePath with data set #1 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testRelativePath with data set #2 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testRelativePathname with data set #1 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testRelativePathname with data set #2 
-F
+.
 Symfony\Component\Finder\Tests\FinderTest::testSize with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testSize with data set #2 
@@ -5165,15 +5143,15 @@ Symfony\Component\Finder\Tests\FinderTest::testSort with data set #2
 Symfony\Component\Finder\Tests\FinderTest::testSortByAccessedTime with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testSortByAccessedTime with data set #2 
-E
+.
 Symfony\Component\Finder\Tests\FinderTest::testSortByChangedTime with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testSortByChangedTime with data set #2 
-E
+.
 Symfony\Component\Finder\Tests\FinderTest::testSortByModifiedTime with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testSortByModifiedTime with data set #2 
-E
+.
 Symfony\Component\Finder\Tests\FinderTest::testSortByName with data set #1 
 .
 Symfony\Component\Finder\Tests\FinderTest::testSortByName with data set #2 
@@ -5261,32 +5239,6 @@ Symfony\Component\Finder\Tests\Iterator\FilenameFilterIteratorTest::testAccept w
 Symfony\Component\Finder\Tests\Iterator\FilenameFilterIteratorTest::testAccept with data set #5 
 .
 Symfony\Component\Finder\Tests\Iterator\FilterIteratorTest::testFilterFilesystemIterators
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #0 
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #1 
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #10 
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #11 
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #12 
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #2 
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #3 
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #4 
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #5 
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #6 
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #7 
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #8 
-.
-Symfony\Component\Finder\Tests\Iterator\MultiplePcreFilterIteratorTest::testIsRegex with data set #9 
 .
 Symfony\Component\Finder\Tests\Iterator\PathFilterIteratorTest::testFilter with data set #0 
 F
@@ -10166,72 +10118,6 @@ Symfony\Component\Form\Tests\FormBuilderTest::testRemoveAndGetForm
 .
 Symfony\Component\Form\Tests\FormBuilderTest::testRemoveUnknown
 .
-Symfony\Component\Form\Tests\FormConfigTest::testGetRequestHandlerCreatesNativeRequestHandlerIfNotSet
-.
-Symfony\Component\Form\Tests\FormConfigTest::testGetRequestHandlerReusesNativeRequestHandlerInstance
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #0 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #1 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #10 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #11 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #12 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #13 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #14 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #15 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #16 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #17 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #18 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #19 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #2 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #20 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #21 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #22 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #23 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #24 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #3 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #4 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #5 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #6 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #7 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #8 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testNameAcceptsOnlyNamesValidAsIdsInHtml4 with data set #9 
-.
-Symfony\Component\Form\Tests\FormConfigTest::testSetMethodAllowsDelete
-.
-Symfony\Component\Form\Tests\FormConfigTest::testSetMethodAllowsGet
-.
-Symfony\Component\Form\Tests\FormConfigTest::testSetMethodAllowsPatch
-.
-Symfony\Component\Form\Tests\FormConfigTest::testSetMethodAllowsPost
-.
-Symfony\Component\Form\Tests\FormConfigTest::testSetMethodAllowsPut
-.
-Symfony\Component\Form\Tests\FormConfigTest::testSetMethodDoesNotAllowOtherValues
-.
 Symfony\Component\Form\Tests\FormFactoryBuilderTest::testAddType
 .
 Symfony\Component\Form\Tests\FormFactoryBuilderTest::testAddTypeGuesser
@@ -10393,162 +10279,6 @@ Symfony\Component\Form\Tests\NativeRequestHandlerTest::testSubmitIfNameInRequest
 Symfony\Component\Form\Tests\ResolvedFormTypeTest::testCreateBuilder
 .
 Symfony\Component\Form\Tests\ResolvedFormTypeTest::testCreateView
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testAlwaysDisabledIfParentDisabled
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testCreateView
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testCreateViewWithExplicitParent
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testCreateViewWithParent
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testDataIsInitializedFromSubmit
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testDataIsInitializedToConfiguredValue
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testDisabled
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testEmptyDataCreatedBeforeTransforming
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testEmptyDataFromClosure
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testEmptyIfEmptyArray
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testEmptyIfEmptyCountable
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testEmptyIfEmptyString
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testEmptyIfEmptyTraversable
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testEmptyIfNull
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testFalseIsConvertedToNull
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testFormCanHaveEmptyName
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testFormCannotHaveEmptyNameNotInRootLevel
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testFormInheritsParentData
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testGetDataRequiresParentToBeSetIfInheritData
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testGetErrorsAsString
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testGetNormDataRequiresParentToBeSetIfInheritData
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testGetPropertyPathDefaultsToIndexedNameIfDataClassOfFirstParentWithoutInheritDataIsNull
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testGetPropertyPathDefaultsToIndexedNameIfParentDataClassIsNull
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testGetPropertyPathDefaultsToNameIfFirstParentWithoutInheritDataHasDataClass
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testGetPropertyPathDefaultsToNameIfParentHasDataClass
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testGetPropertyPathReturnsConfiguredPath
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testGetRootReturnsRootOfParent
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testGetRootReturnsSelfIfNoParent
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testGetViewDataRequiresParentToBeSetIfInheritData
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testHandleRequestForwardsToRequestHandler
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testHasErrors
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testHasNoErrors
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testInheritDataDisallowsSetData
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testInitializeFailsIfParent
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testInitializeSetsDefaultData
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testNeverRequiredIfParentNotRequired
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testNotDisabled
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testNotEmptyIfFilledCountable
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testNotEmptyIfFilledTraversable
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testNotEmptyIfText
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testNotRequired
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testNotSubmitted
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testNotSynchronizedIfModelReverseTransformationFailed
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testNotSynchronizedIfViewReverseTransformationFailed
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testNotValidIfErrors
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testNotValidIfNotSubmitted
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testPostSubmitDataIsNullIfInheritData
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testRequired
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetDataCannotInvokeItself
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetDataClonesObjectIfNotByReference
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetDataConvertsNullToStringIfNoTransformer
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetDataConvertsScalarToStringIfNoTransformer
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetDataConvertsScalarToStringIfOnlyModelTransformer
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetDataDoesNotCloneObjectIfByReference
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetDataExecutesModelTransformersInReverseOrder
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetDataExecutesTransformationChain
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetDataExecutesViewTransformersInOrder
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetDataIsIgnoredIfDataIsLocked
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetDataThrowsExceptionIfAlreadySubmitted
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetNullParentWorksWithEmptyName
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSetParentThrowsExceptionIfAlreadySubmitted
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSubmitConvertsEmptyToNullIfNoTransformer
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSubmitExecutesModelTransformersInOrder
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSubmitExecutesTransformationChain
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSubmitExecutesViewTransformersInReverseOrder
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSubmitIsIgnoredIfDisabled
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSubmitIsNeverFiredIfInheritData
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSubmitResetsErrors
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSubmitThrowsExceptionIfAlreadySubmitted
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSubmitted
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSubmittingWrongDataIsIgnored
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSynchronizedAfterSubmission
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testSynchronizedByDefault
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testValidIfSubmitted
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testValidIfSubmittedAndDisabled
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testViewDataMayBeArrayAccessIfDataClassIsNull
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testViewDataMustBeObjectIfDataClassIsSet
-.
-Symfony\Component\Form\Tests\SimpleFormTest::testViewDataMustNotBeObjectIfDataClassIsNull
 .
 Symfony\Component\Form\Tests\Util\OrderedHashMapTest::testCount
 .
@@ -11506,22 +11236,6 @@ Symfony\Component\HttpFoundation\Tests\ResponseTest::testSettersAreChainable
 .
 Symfony\Component\HttpFoundation\Tests\ResponseTest::testToString
 .
-Symfony\Component\HttpFoundation\Tests\ServerBagTest::testHttpBasicAuthWithPhpCgi
-.
-Symfony\Component\HttpFoundation\Tests\ServerBagTest::testHttpBasicAuthWithPhpCgiEmptyPassword
-.
-Symfony\Component\HttpFoundation\Tests\ServerBagTest::testHttpBasicAuthWithPhpCgiRedirect
-.
-Symfony\Component\HttpFoundation\Tests\ServerBagTest::testHttpDigestAuthWithPhpCgi
-.
-Symfony\Component\HttpFoundation\Tests\ServerBagTest::testHttpDigestAuthWithPhpCgiRedirect
-.
-Symfony\Component\HttpFoundation\Tests\ServerBagTest::testHttpPasswordIsOptional
-.
-Symfony\Component\HttpFoundation\Tests\ServerBagTest::testOAuthBearerAuth
-.
-Symfony\Component\HttpFoundation\Tests\ServerBagTest::testShouldExtractHeadersFromServerArray
-.
 Symfony\Component\HttpFoundation\Tests\Session\Attribute\AttributeBagTest::testAll
 .
 Symfony\Component\HttpFoundation\Tests\Session\Attribute\AttributeBagTest::testClear
@@ -11817,67 +11531,67 @@ Symfony\Component\HttpFoundation\Tests\Session\SessionTest::testSetName
 Symfony\Component\HttpFoundation\Tests\Session\SessionTest::testStart
 .
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcacheSessionHandlerTest::testCloseSession
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcacheSessionHandlerTest::testDestroySession
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcacheSessionHandlerTest::testGcSession
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcacheSessionHandlerTest::testGetConnection
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcacheSessionHandlerTest::testOpenSession
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcacheSessionHandlerTest::testReadSession
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcacheSessionHandlerTest::testSupportedOptions with data set #0 
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcacheSessionHandlerTest::testSupportedOptions with data set #1 
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcacheSessionHandlerTest::testSupportedOptions with data set #2 
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcacheSessionHandlerTest::testSupportedOptions with data set #3 
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcacheSessionHandlerTest::testWriteSession
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcachedSessionHandlerTest::testCloseSession
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcachedSessionHandlerTest::testDestroySession
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcachedSessionHandlerTest::testGcSession
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcachedSessionHandlerTest::testGetConnection
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcachedSessionHandlerTest::testOpenSession
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcachedSessionHandlerTest::testReadSession
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcachedSessionHandlerTest::testSupportedOptions with data set #0 
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcachedSessionHandlerTest::testSupportedOptions with data set #1 
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcachedSessionHandlerTest::testSupportedOptions with data set #2 
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcachedSessionHandlerTest::testSupportedOptions with data set #3 
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MemcachedSessionHandlerTest::testWriteSession
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MongoDbSessionHandlerTest::testCloseMethodAlwaysReturnTrue
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MongoDbSessionHandlerTest::testConstructorShouldThrowExceptionForInvalidMongo
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MongoDbSessionHandlerTest::testConstructorShouldThrowExceptionForMissingOptions
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MongoDbSessionHandlerTest::testDestroy
 E
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MongoDbSessionHandlerTest::testGc
 E
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MongoDbSessionHandlerTest::testGetConnection
-E
+F
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MongoDbSessionHandlerTest::testOpenMethodAlwaysReturnTrue
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MongoDbSessionHandlerTest::testReplaceSessionData
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\MongoDbSessionHandlerTest::testWrite
-E
+.
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\NativeFileSessionHandlerTest::testConstruct
 E
 Symfony\Component\HttpFoundation\Tests\Session\Storage\Handler\NativeFileSessionHandlerTest::testConstructDefault
@@ -14144,16 +13858,6 @@ Symfony\Component\Intl\Tests\DateFormatter\Verification\IntlDateFormatterTest::t
 S
 Symfony\Component\Intl\Tests\DateFormatter\Verification\IntlDateFormatterTest::testSetTimeZoneId with data set #7 
 S
-Symfony\Component\Intl\Tests\Globals\IntlGlobalsTest::testGetErrorName with data set #0 
-.
-Symfony\Component\Intl\Tests\Globals\IntlGlobalsTest::testGetErrorName with data set #1 
-.
-Symfony\Component\Intl\Tests\Globals\IntlGlobalsTest::testGetErrorName with data set #2 
-.
-Symfony\Component\Intl\Tests\Globals\IntlGlobalsTest::testGetErrorName with data set #3 
-.
-Symfony\Component\Intl\Tests\Globals\IntlGlobalsTest::testGetErrorName with data set #4 
-.
 Symfony\Component\Intl\Tests\Globals\Verification\IntlGlobalsTest::testGetErrorName with data set #0 
 S
 Symfony\Component\Intl\Tests\Globals\Verification\IntlGlobalsTest::testGetErrorName with data set #1 
@@ -15315,11 +15019,11 @@ Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes wi
 Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #6 
 .
 Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #7 
-F
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #8 
-F
-Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #9 
 .
+Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #8 
+.
+Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessPipes with data set #9 
+F
 Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessResponses with data set #0 
 .
 Symfony\Component\Process\Tests\SigchildDisabledProcessTest::testProcessThrowsExceptionWhenExternallySignaled
@@ -15429,7 +15133,7 @@ Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes wit
 Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #6 
 .
 Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #7 
-.
+F
 Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #8 
 .
 Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessPipes with data set #9 
@@ -15445,7 +15149,7 @@ Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessWithoutTe
 Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testProcessWithoutTermSignalIsNotSignaled
 .
 Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testRestart
-F
+.
 Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testRunProcessWithTimeout
 .
 Symfony\Component\Process\Tests\SigchildEnabledProcessTest::testSignal
@@ -15479,7 +15183,7 @@ Symfony\Component\Process\Tests\SimpleProcessTest::testChainedCommandsOutput wit
 Symfony\Component\Process\Tests\SimpleProcessTest::testChainedCommandsOutput with data set #1 
 .
 Symfony\Component\Process\Tests\SimpleProcessTest::testCheckTimeoutOnStartedProcess
-E
+.
 Symfony\Component\Process\Tests\SimpleProcessTest::testExitCodeCommandFailed
 .
 Symfony\Component\Process\Tests\SimpleProcessTest::testExitCodeIsAvailableAfterSignal
@@ -15543,7 +15247,7 @@ Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data se
 Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #6 
 .
 Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #7 
-F
+.
 Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #8 
 .
 Symfony\Component\Process\Tests\SimpleProcessTest::testProcessPipes with data set #9 
@@ -15561,7 +15265,7 @@ Symfony\Component\Process\Tests\SimpleProcessTest::testProcessWithoutTermSignalI
 Symfony\Component\Process\Tests\SimpleProcessTest::testRestart
 .
 Symfony\Component\Process\Tests\SimpleProcessTest::testRunProcessWithTimeout
-F
+.
 Symfony\Component\Process\Tests\SimpleProcessTest::testSignal
 .
 Symfony\Component\Process\Tests\SimpleProcessTest::testSignalProcessNotRunning
@@ -16087,7 +15791,7 @@ Symfony\Component\Routing\Tests\CompiledRouteTest::testAccessors
 Symfony\Component\Routing\Tests\Generator\Dumper\PhpGeneratorDumperTest::testDumpWithRoutes
 .
 Symfony\Component\Routing\Tests\Generator\Dumper\PhpGeneratorDumperTest::testDumpWithoutRoutes
-HipHop Fatal error: Class undefined: WithoutRoutesUrlGenerator in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/symfony/src/Symfony/Component/Routing/Tests/Generator/Dumper/PhpGeneratorDumperTest.php on line 86
+Fatal
 Symfony\Component\Routing\Tests\Generator\UrlGeneratorTest::testAbsoluteSecureUrlWithNonStandardPort
 .
 Symfony\Component\Routing\Tests\Generator\UrlGeneratorTest::testAbsoluteSecureUrlWithPort443
@@ -16558,50 +16262,10 @@ Symfony\Component\Routing\Tests\RouterTest::testSetOptionsWithUnsupportedOptions
 .
 Symfony\Component\Routing\Tests\RouterTest::testThatRouteCollectionIsLoaded
 .
-Symfony\Component\Security\Acl\Tests\Dbal\AclProviderTest::testFindAcl
-E
-Symfony\Component\Security\Acl\Tests\Dbal\AclProviderTest::testFindAclCachesAclInMemory
-E
 Symfony\Component\Security\Acl\Tests\Dbal\AclProviderTest::testFindAclThrowsExceptionWhenNoAclExists
-E
-Symfony\Component\Security\Acl\Tests\Dbal\AclProviderTest::testFindAcls
-E
-Symfony\Component\Security\Acl\Tests\Dbal\AclProviderTest::testFindAclsThrowsExceptionUnlessAnACLIsFoundForEveryOID
-E
-Symfony\Component\Security\Acl\Tests\Dbal\AclProviderTest::testFindAclsWithDifferentTypes
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testCreateAcl
-E
+Fatal
 Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testCreateAclThrowsExceptionWhenAclAlreadyExists
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testDeleteAcl
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testDeleteAclDeletesChildren
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testFindAclsAddsPropertyListener
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testFindAclsAddsPropertyListenerOnlyOnce
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testFindAclsAddsPropertyListenerToParentAcls
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testPropertyChangedDoesNotTrackUnmanagedAcls
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testPropertyChangedTracksChangesToAceProperties
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testPropertyChangedTracksChangesToAclProperties
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testUpdateAcl
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testUpdateAclDoesNotAcceptUntrackedAcls
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testUpdateAclThrowsExceptionOnConcurrentModificationOfSharedProperties
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testUpdateAclUpdatesChildAclsCorrectly
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testUpdateAclWorksForChangingTheParentAcl
-E
-Symfony\Component\Security\Acl\Tests\Dbal\MutableAclProviderTest::testUpdateDoesNothingWhenThereAreNoChanges
-E
+Fatal
 Symfony\Component\Security\Acl\Tests\Domain\AclTest::testConstructor
 .
 Symfony\Component\Security\Acl\Tests\Domain\AclTest::testDeleteAce with data set #0 
@@ -16761,18 +16425,6 @@ Symfony\Component\Security\Acl\Tests\Domain\PermissionGrantingStrategyTest::test
 Symfony\Component\Security\Acl\Tests\Domain\PermissionGrantingStrategyTest::testIsGrantedStrategies with data set #8 
 .
 Symfony\Component\Security\Acl\Tests\Domain\PermissionGrantingStrategyTest::testIsGrantedStrategies with data set #9 
-.
-Symfony\Component\Security\Acl\Tests\Domain\RoleSecurityIdentityTest::testConstructor
-.
-Symfony\Component\Security\Acl\Tests\Domain\RoleSecurityIdentityTest::testConstructorWithRoleInstance
-.
-Symfony\Component\Security\Acl\Tests\Domain\RoleSecurityIdentityTest::testEquals with data set #0 
-.
-Symfony\Component\Security\Acl\Tests\Domain\RoleSecurityIdentityTest::testEquals with data set #1 
-.
-Symfony\Component\Security\Acl\Tests\Domain\RoleSecurityIdentityTest::testEquals with data set #2 
-.
-Symfony\Component\Security\Acl\Tests\Domain\RoleSecurityIdentityTest::testEquals with data set #3 
 .
 Symfony\Component\Security\Acl\Tests\Domain\SecurityIdentityRetrievalStrategyTest::testGetSecurityIdentities with data set #0 
 .
@@ -17821,11 +17473,11 @@ Symfony\Component\Serializer\Tests\SerializerTest::testSerializeNoNormalizer
 Symfony\Component\Serializer\Tests\SerializerTest::testSerializeScalar
 .
 Symfony\Component\Stopwatch\Tests\StopwatchEventTest::testDuration
-F
+.
 Symfony\Component\Stopwatch\Tests\StopwatchEventTest::testEndTime
-F
+.
 Symfony\Component\Stopwatch\Tests\StopwatchEventTest::testEnsureStopped
-F
+.
 Symfony\Component\Stopwatch\Tests\StopwatchEventTest::testGetCategory
 .
 Symfony\Component\Stopwatch\Tests\StopwatchEventTest::testGetOrigin
@@ -17841,7 +17493,7 @@ Symfony\Component\Stopwatch\Tests\StopwatchEventTest::testIsStarted
 Symfony\Component\Stopwatch\Tests\StopwatchEventTest::testLap
 .
 Symfony\Component\Stopwatch\Tests\StopwatchEventTest::testStartTime
-F
+.
 Symfony\Component\Stopwatch\Tests\StopwatchEventTest::testStopWithoutStart
 .
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testIsNotStarted
@@ -17851,7 +17503,7 @@ Symfony\Component\Stopwatch\Tests\StopwatchTest::testIsNotStartedEvent
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testIsStarted
 .
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testLap
-F
+.
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testReopenANewSectionShouldThrowAnException
 .
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testReopenASection
@@ -17861,7 +17513,7 @@ Symfony\Component\Stopwatch\Tests\StopwatchTest::testSection
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testStart
 .
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testStop
-F
+.
 Symfony\Component\Stopwatch\Tests\StopwatchTest::testStopWithoutStart
 .
 Symfony\Component\Templating\Tests\DelegatingEngineTest::testExists
@@ -17949,8 +17601,6 @@ Symfony\Component\Templating\Tests\PhpEngineTest::testRenderParameter
 Symfony\Component\Templating\Tests\PhpEngineTest::testUnsetHelper
 .
 Symfony\Component\Templating\Tests\Storage\FileStorageTest::testGetContent
-.
-Symfony\Component\Templating\Tests\Storage\StorageTest::testMagicToString
 .
 Symfony\Component\Templating\Tests\Storage\StringStorageTest::testGetContent
 .

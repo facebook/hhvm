@@ -1,3 +1,5 @@
+.
+
 ArticleTest::testGetOrSetOnNewProperty
 .
 ArticleTest::testImplementsCallMagic
@@ -761,91 +763,91 @@ DatabaseMysqlBaseTest::testAddIdentifierQuotes with data set #9
 DatabaseMysqlBaseTest::testMediaWikiTestCaseParentSetupCalled
 .
 DatabaseSQLTest::testBuildConcat with data set #0 
-.
+E
 DatabaseSQLTest::testBuildConcat with data set #1 
-.
+E
 DatabaseSQLTest::testBuildLike with data set #0 
-.
+E
 DatabaseSQLTest::testBuildLike with data set #1 
-.
+E
 DatabaseSQLTest::testBuildLike with data set #2 
-.
+E
 DatabaseSQLTest::testBuildLike with data set #3 
-.
+E
 DatabaseSQLTest::testConditional with data set #0 
-.
+E
 DatabaseSQLTest::testConditional with data set #1 
-.
+E
 DatabaseSQLTest::testConditional with data set #2 
-.
+E
 DatabaseSQLTest::testDelete with data set #0 
-.
+E
 DatabaseSQLTest::testDelete with data set #1 
-.
+E
 DatabaseSQLTest::testDeleteJoin with data set #0 
-.
+E
 DatabaseSQLTest::testDeleteJoin with data set #1 
-.
+E
 DatabaseSQLTest::testDropNonExistingTable
-.
+E
 DatabaseSQLTest::testDropTable
-.
+E
 DatabaseSQLTest::testInsert with data set #0 
-.
+E
 DatabaseSQLTest::testInsert with data set #1 
-.
+E
 DatabaseSQLTest::testInsert with data set #2 
-.
+E
 DatabaseSQLTest::testInsertSelect with data set #0 
-.
+E
 DatabaseSQLTest::testInsertSelect with data set #1 
-.
+E
 DatabaseSQLTest::testInsertSelect with data set #2 
-.
+E
 DatabaseSQLTest::testMediaWikiTestCaseParentSetupCalled
-.
+E
 DatabaseSQLTest::testNativeReplace with data set #0 
-.
+E
 DatabaseSQLTest::testReplace with data set #0 
-.
+E
 DatabaseSQLTest::testReplace with data set #1 
-.
+E
 DatabaseSQLTest::testReplace with data set #2 
-.
+E
 DatabaseSQLTest::testReplace with data set #3 
-.
+E
 DatabaseSQLTest::testReplace with data set #4 
-.
+E
 DatabaseSQLTest::testSelect with data set #0 
-.
+E
 DatabaseSQLTest::testSelect with data set #1 
-.
+E
 DatabaseSQLTest::testSelect with data set #2 
-.
+E
 DatabaseSQLTest::testSelect with data set #3 
-.
+E
 DatabaseSQLTest::testSelect with data set #4 
-.
+E
 DatabaseSQLTest::testSelect with data set #5 
-.
+E
 DatabaseSQLTest::testTransactionCommit
-.
+E
 DatabaseSQLTest::testTransactionRollback
-.
+E
 DatabaseSQLTest::testUnionQueries with data set #0 
-.
+E
 DatabaseSQLTest::testUnionQueries with data set #1 
-.
+E
 DatabaseSQLTest::testUnionQueries with data set #2 
-.
+E
 DatabaseSQLTest::testUpdate with data set #0 
-.
+E
 DatabaseSQLTest::testUpdate with data set #1 
-.
+E
 DatabaseSQLTest::testUpdate with data set #2 
-.
+E
 DatabaseSQLTest::testUpsert with data set #0 
-.
+E
 DiffHistoryBlobTest::testMediaWikiTestCaseParentSetupCalled
 S
 DiffHistoryBlobTest::testXdiffAdler32 with data set #0 
@@ -915,7 +917,7 @@ ExifTest::testMediaWikiTestCaseParentSetupCalled
 ExifTest::testUnicodeUserComment
 .
 ExportDemoTest::testExportDemo
-UNKNOWN STATUS
+UNKNOWN STATUSMessageTest::testExists
 ExternalStoreTest::testExternalFetchFromURL
 .
 ExternalStoreTest::testMediaWikiTestCaseParentSetupCalled
@@ -1453,7 +1455,7 @@ GlobalTest::testCgiToArray with data set #9
 GlobalTest::testClientAcceptsGzipTest
 .
 GlobalTest::testDebugFunctionTest
-F
+.
 GlobalTest::testExpandIRI
 .
 GlobalTest::testFallbackMbstringFunctions
@@ -6216,26 +6218,6 @@ MediaWikiSiteTest::testSetLinkPath
 .
 MediaWikiSiteTest::testSetPath
 .
-MessageTest::testDeliciouslyManyParams
-.
-MessageTest::testExists
-.
-MessageTest::testInContentLanguageDisabled
-.
-MessageTest::testInContentLanguageEnabled
-.
-MessageTest::testInLanguage
-.
-MessageTest::testInLanguageThrows
-.
-MessageTest::testKey
-.
-MessageTest::testMediaWikiTestCaseParentSetupCalled
-.
-MessageTest::testMessageParamSubstitution
-.
-MessageTest::testMessageParams
-.
 OutputPageTest::testHandheld
 .
 OutputPageTest::testMediaWikiTestCaseParentSetupCalled
@@ -7615,11 +7597,11 @@ SiteListTest::testIsEmpty with data set #2
 SiteListTest::testMediaWikiTestCaseParentSetupCalled
 .
 SiteListTest::testSerialization with data set #0 
-E
+.
 SiteListTest::testSerialization with data set #1 
-E
+.
 SiteListTest::testSerialization with data set #2 
-E
+.
 SiteTest::testAddInterwikiId with data set #0 
 .
 SiteTest::testAddInterwikiId with data set #1 

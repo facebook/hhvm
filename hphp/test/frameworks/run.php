@@ -142,7 +142,7 @@ class PHPUnitPatterns {
   "/[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\"|#)[^\"|^\(|^\n]+(\")?)?/";
 
   static string $pear_test_name_pattern =
- "/[\-_a-zA-Z0-9\/]*\.phpt/";
+ "/[\-_a-zA-Z0-9\.\/]*\.phpt/";
 
   // Matches:
   //    E
@@ -203,8 +203,8 @@ class Frameworks {
     // In order to get frameworks to work correctly, may need to grab more code
     // via some sort of pull request:
     //
-    //  - pull:      The code we need is in a that doesn't affect the primary
-    //               branch or SHA (e.g., 'vendor') and we can just do
+    //  - pull:      The code we need is in a dir that doesn't affect the
+    //               primary branch or SHA (e.g., 'vendor') and we can just do
     //               a 'git pull' since any branch or HEAD change doesn't matter
     //  - submodule: The code we are adding may be in the root framework dir
     //               so that can affect the framework branch or SHA. If we
@@ -212,21 +212,6 @@ class Frameworks {
     //               HAVE TO BE THE CASE). And, if that happens, we will always
     //               be redownloading the framework since the SHA is different
     //               than what we expect. Use a submodule/move technique.
-    // IF WE HAVE A BLACKLIST FOR FLAKEY TESTS THAT PASS OR FAIL DEPENDING ON
-    // THE POSITION OF THE MOON (OR AN UNKNOWN BUG IN HHVM), THESE ARE THE
-    // CANDIDATES:
-    //
-    // Joomla    - Joomla\Crypt\Tests\PasswordSimpleTest::testCreate
-    //           - Joomla\Crypt\Tests\PasswordSimpleTest::testVerify
-    // Slim      - SlimHttpUtilTest::
-    //     testSetCookieHeaderWithNameAndValueAndDomainAndPathAndExpiresAsString
-    // Symfony   - Symfony\Component\BrowserKit\Tests\ClientTest::testClick
-    //           - Symfony\Component\BrowserKit\Tests\ClientTest::testClickForm
-    //           - Symfony\Component\BrowserKit\Tests\ClientTest::testSubmit
-    //           - Symfony\Component\BrowserKit\Tests\ClientTest::
-    //                                                 testSubmitPreserveAuth
-    //           - Symfony\Component\DomCrawler\Tests\CrawlerTest::*
-    //
     self::$framework_info =
       Map {
         'assetic' =>
@@ -537,6 +522,12 @@ class Frameworks {
           },
       };
   }
+
+  public static function getSortedFrameworkNames(): Vector {
+    $keys = self::$framework_info->keys();
+    sort($keys);
+    return $keys;
+  }
 }
 
 class Options {
@@ -609,7 +600,7 @@ class Options {
            "if necessary.\n", $verbose);
     }
 
-    $timeout = 60; // seconds to run any individual test for any framework
+    $timeout = 90; // seconds to run any individual test for any framework
     if ($options->containsKey('timeout')) {
       $timeout = (int) $options['timeout'];
       // Remove timeout option and its value from the $framework_names vector
@@ -1127,8 +1118,10 @@ class Framework {
       while (!feof($handle)) {
         // trim out newline since StableMap doesn't like them in its keys
         $test = rtrim(fgets($handle), PHP_EOL);
-        $status = rtrim(fgets($handle), PHP_EOL);
-        $results[$test] = $status;
+        if ($test !== "") {
+          $status = rtrim(fgets($handle), PHP_EOL);
+          $results[$test] = $status;
+        }
       }
       if (!ksort($results)) { return false; }
       fclose($handle);
@@ -1137,15 +1130,10 @@ class Framework {
         $contents .= $test.PHP_EOL;
         $contents .= $status.PHP_EOL;
       }
-      $contents = remove_last_newline($contents);
       if (file_put_contents($file, $contents) === false) { return false; }
       return true;
     }
     return false;
-  }
-
-  public static function removeFinalNewline(string $file): void {
-    file_put_contents($file, remove_last_newline(file_get_contents($file)));
   }
 }
 
@@ -1245,7 +1233,9 @@ class SingleTestFile {
     }
     // We didn't get any chars because checkReadStream failed (timeout)
     if ($s === false) {
-      $this->error_information .= "TEST TIMEOUT OCCURRED on test: ".$this->name.
+      $this->error_information .= "TEST TIMEOUT OCCURRED on test: ".
+                                   remove_string_from_text($this->name,
+                                                           __DIR__, null).
                                    PHP_EOL;
       verbose($this->error_information, !Options::$csv_only);
       return null;
@@ -1265,15 +1255,23 @@ class SingleTestFile {
     $status = "";
     if (preg_match($this->framework->test_name_pattern, $line,
                    $tn_matches) === 1) {
+      // Test names can have all characters before and including __DIR__
+      // removed, so that specific user info is not added
       $match = rtrim($tn_matches[0], PHP_EOL);
+      $match = remove_string_from_text($match, __DIR__, null);
       $this->test_information .= $match.PHP_EOL;
       do {
         $status = $this->getLine();
-        if ($status === null || $this->checkForFatals($status)) {
+        // No user specific information in status. Replace with empty string
+        if ($status !== null) {
+          $status = remove_string_from_text($status, __DIR__, "");
+        }
+        $f = false;
+        if ($status === null || ($f = $this->checkForFatals($status))) {
           // We have hit a fatal or some nasty assert. Escape now and try to
           // get the results written.
           $status = $status === null ? "UNKNOWN STATUS" : $status;
-          $this->test_information .= $status.PHP_EOL;
+          $this->test_information .= $f ? "Fatal".PHP_EOL : $status;
           $this->fatal_information .= $match.PHP_EOL.$status.PHP_EOL;
           $this->stat_information = $match.PHP_EOL."Fatal".PHP_EOL;
           return false;
@@ -1291,6 +1289,7 @@ class SingleTestFile {
       // PHPUnit 3.7.28 by Sebastian Bergmann.
       // The Xdebug extension is not loaded. No code coverage will be generated.
       // HipHop Notice: Use of undefined constant DRIZZLE_CON_NONE
+      $line = remove_string_from_text($line, __DIR__, "");
       $this->error_information .= PHP_EOL.$line.PHP_EOL.PHP_EOL;
       return true;
     } else if ($this->checkForFatals($line)) {
@@ -1300,6 +1299,7 @@ class SingleTestFile {
       // PHPUnit 3.7.28 by Sebastian Bergmann.
       // The Xdebug extension is not loaded. No code coverage will be generated.
       // HipHop Fatal error: Undefined function: mysqli_report
+      $line = remove_string_from_text($line, __DIR__, "");
       $this->fatal_information .= PHP_EOL.$line.PHP_EOL.PHP_EOL;
       return false;
     } else {
@@ -1322,7 +1322,7 @@ class SingleTestFile {
     if ($status === "") {
       $status = "UNKNOWN STATUS";
       $this->fatal_information .= $match.PHP_EOL.$status.PHP_EOL.PHP_EOL;
-    } else {
+    } else if ($status !== "Fatal" && $status !== "UNKNOWN STATUS") {
       // In case we had "F 252 / 364 (69 %)" or ".HipHop Warning"
       $status = $status[0];
     }
@@ -1380,6 +1380,7 @@ class SingleTestFile {
 
   private function printPostTestInfo(string $line): void {
     while ($line !== null) {
+      $line = remove_string_from_text($line, __DIR__, "");
       if (preg_match(PHPUnitPatterns::$tests_ok_skipped_inc_pattern,
                      $line) !== 1 &&
           preg_match(PHPUnitPatterns::$num_errors_failures_pattern,
@@ -1543,7 +1544,7 @@ function prepare(Vector $framework_names): void {
                                 array_diff(Frameworks::$framework_info->keys(),
                                            $framework_names));
   } else if (count($framework_names) === 0) {
-    error("Specify frameworks to run, use --all or use --allexcept");
+    error(usage());
   }
 
   // So it is easier to keep tabs on our progress when running ps or something.
@@ -1561,8 +1562,9 @@ function prepare(Vector $framework_names): void {
       $frameworks[] = $framework;
     }
   }
+
   if (count($frameworks) === 0) {
-    error("There were no matching frameworks to run");
+    error(usage());
   }
 
   /************************
@@ -1697,14 +1699,6 @@ function run_tests(Vector $frameworks): void {
 
   $diff_frameworks = Vector {};
   foreach ($frameworks as $framework) {
-    // Remove any final newlines from files. Given the split nature of how the
-    // tests run and output to the file, we may have an extra newline.
-    // Removing it, makes processing easier later.
-    Framework::removeFinalNewline($framework->out_file);
-    Framework::removeFinalNewline($framework->diff_file);
-    Framework::removeFinalNewline($framework->errors_file);
-    Framework::removeFinalNewline($framework->fatals_file);
-    Framework::removeFinalNewline($framework->stats_file);
     $pct = $framework->getPassPercentage();
     $encoded_result = json_encode(array($framework->name => $pct));
     if (!(file_exists($summary_file))) {
@@ -1987,6 +1981,13 @@ EXAMPLES;
 
 }
 
+function usage(): string {
+  $msg = "Specify frameworks to run, use --all or use --allexcept. ";
+  $msg .= "Available frameworks are: ";
+  $msg .= implode(" ", Frameworks::getSortedFrameworkNames());
+  return $msg;
+}
+
 function oss_test_option_map(): OptionInfoMap {
   return Map {
     'help'                => Pair {'h', "Print help message"},
@@ -2207,9 +2208,26 @@ function remove_color_codes(string $line): string {
                       "", $line);
 }
 
-function remove_last_newline(string $text): string {
-  $s = substr($text, -1);
-  return $s === PHP_EOL ? substr($text, 0, -1) : $text;
+/*****
+  e.g., remove_string_from_text($dir, __DIR__, null);
+
+  /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/pear-core/tests
+  /PEAR_Command_Channels/channel-update/test_remotefile.phpt
+
+  becomes
+
+  frameworks/pear-core/tests//PEAR_Command_Channels/
+  channel-update/test_remotefile.phpt
+
+****/
+function remove_string_from_text(string $text, string $str,
+                                 ?string $replace = null): string {
+  if (($pos = strpos($text, $str)) !== false) {
+    return $replace === null
+           ? substr($text, $pos + strlen(__DIR__) + 1)
+           : substr_replace($text, $replace, $pos, strlen(__DIR__) + 1);
+  }
+  return $text;
 }
 
 function main(array $argv): void {

@@ -495,7 +495,7 @@ Assetic\Test\Filter\JSMinPlusFilterTest::testRelativeSourceUrlImportImports
 Assetic\Test\Filter\JpegoptimFilterTest::testFilter
 S
 Assetic\Test\Filter\JpegtranFilterTest::testFilter
-HipHop Fatal error: Class undefined: finfo in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/assetic/tests/Assetic/Test/Filter/FilterTestCase.php on line 21
+Fatal
 Assetic\Test\Filter\LessFilterTest::testCompressImport
 S
 Assetic\Test\Filter\LessFilterTest::testFilterLoad

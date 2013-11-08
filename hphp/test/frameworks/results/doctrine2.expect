@@ -4053,7 +4053,7 @@ Doctrine\Tests\ORM\Tools\SchemaValidatorTest::testRoutingModelSet
 Doctrine\Tests\ORM\Tools\SchemaValidatorTest::testValidOneToOneAsIdentifierSchema
 .
 Doctrine\Tests\ORM\Tools\SetupTest::testDirectoryAutoload
-HipHop Fatal error: File not found: /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/doctrine2/tests/Doctrine/Tests/ORM/Tools/../../../../../lib/vendor/doctrine-common/lib/Doctrine/Common/ClassLoader.php in /data/users/eletuchy/fbcode/hphp/test/frameworks/frameworks/doctrine2/lib/Doctrine/ORM/Tools/Setup.php on line 47
+Fatal
 Doctrine\Tests\ORM\UnitOfWorkTest::testCascadedIdentityColumnInsert
 .
 Doctrine\Tests\ORM\UnitOfWorkTest::testChangeTrackingNotify

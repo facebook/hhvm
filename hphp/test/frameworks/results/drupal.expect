@@ -1573,7 +1573,7 @@ Drupal\views\Tests\Plugin\field\CounterTest::testSimpleCounter with data set #2
 Drupal\views\Tests\ViewExecutableUnitTest::testBuildThemeFunctions
 .
 Drupal\views\Tests\ViewsDataHelperTest::testFetchFields
-HipHop Fatal error: Undefined function: Drupal\views\Tests\t in /data/users/joelm/fbcode/hphp/test/frameworks/frameworks/drupal/core/modules/views/lib/Drupal/views/Tests/ViewTestData.php on line 214
+Fatal
 Drupal\views\Tests\ViewsTest::testGetView
 .
 Drupal\views_ui\Tests\Form\Ajax\RearrangeFilterTest::testStaticMethods

@@ -558,19 +558,19 @@
         },
         {
             "name": "array_push",
-            "desc": "array_push() treats array as a stack, and pushes the passed variables onto the end of array. The length of array increases by the number of variables pushed. Has the same effect as:\n\nrepeated for each var. If you use array_push() to add one element to the array it's better to use $array[] = because in that way there is no overhead of calling a function. array_push() will raise a warning if the first argument is not an array. This differs from the $var[] behaviour where a new array is created.",
+            "desc": "array_push() treats array as a stack, and pushes the passed variables onto the end. The length of array increases by the number of variables pushed. Has the same effect as \"$array[] = $var;\" repeated for each var. If you use array_push() to add one element to the array it's better to use $array[] = because in that way there is no overhead of calling a function. array_push() will raise a warning if the first argument is not a suitable container. This differs from the $var[] behaviour where a new array is created.",
             "flags": [
                 "VariableArguments"
             ],
             "return": {
                 "type": "Variant",
-                "desc": "Returns the new number of elements in the array."
+                "desc": "Returns the new number of elements in the container."
             },
             "args": [
                 {
                     "name": "array",
                     "type": "Variant",
-                    "desc": "The input array.",
+                    "desc": "The input array or collection.",
                     "ref": true
                 },
                 {

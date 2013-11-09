@@ -487,24 +487,53 @@ Variant f_array_product(CVarRef array) {
   }
 }
 
-Variant f_array_push(int _argc, VRefParam array, CVarRef var, CArrRef _argv /* = null_array */) {
-  auto const array_cell = array.wrapped().asCell();
-  if (UNLIKELY(array_cell->m_type != KindOfArray)) {
-    throw_bad_array_exception();
-    return uninit_null();
+Variant f_array_push(int _argc, VRefParam container,
+                     CVarRef var, CArrRef _argv /* = null_array */) {
+
+  if (LIKELY(container->isArray())) {
+    auto const array_cell = container.wrapped().asCell();
+    assert(array_cell->m_type == KindOfArray);
+
+    /*
+     * Important note: this *must* cast the parr in the inner cell to
+     * the Array&---we can't copy it to the stack or anything because we
+     * might escalate.
+     */
+    Array& arr_array = *reinterpret_cast<Array*>(&array_cell->m_data.parr);
+    arr_array.append(var);
+    for (ArrayIter iter(_argv); iter; ++iter) {
+      arr_array.append(iter.second());
+    }
+    return arr_array.size();
   }
 
-  /*
-   * Important note: this *must* cast the parr in the inner cell to
-   * the Array&---we can't copy it to the stack or anything because we
-   * might escalate.
-   */
-  Array& arr_array = *reinterpret_cast<Array*>(&array_cell->m_data.parr);
-  arr_array.append(var);
-  for (ArrayIter iter(_argv); iter; ++iter) {
-    arr_array.append(iter.second());
+  if (container.isObject()) {
+    ObjectData* obj = container.getObjectData();
+    auto collection_type = obj->getCollectionType();
+    if (collection_type == Collection::VectorType) {
+      c_Vector* vec = static_cast<c_Vector*>(obj);
+      vec->reserve(vec->size() + _argc + 1);
+      vec->t_add(var);
+      for (ArrayIter iter(_argv); iter; ++iter) {
+        vec->t_add(iter.second());
+      }
+      return vec->size();
+    } else if (collection_type == Collection::SetType) {
+      c_Set* set = static_cast<c_Set*>(obj);
+      set->reserve(set->size() + _argc + 1);
+      set->t_add(var);
+      for (ArrayIter iter(_argv); iter; ++iter) {
+        set->t_add(iter.second());
+      }
+      return set->size();
+    }
+    // other collection types are unsupported:
+    //  - mapping collections require a key
+    //  - frozen collections don't allow insertion
   }
-  return arr_array.size();
+
+  throw_bad_array_exception();
+  return uninit_null();
 }
 
 Variant f_array_rand(CVarRef input, int num_req /* = 1 */) {

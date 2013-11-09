@@ -77,7 +77,8 @@ Variant f_array_replace(int _argc, CVarRef array1, CArrRef _argv = null_array);
 Variant f_array_pad(CVarRef input, int pad_size, CVarRef pad_value);
 Variant f_array_pop(VRefParam array);
 Variant f_array_product(CVarRef array);
-Variant f_array_push(int _argc, VRefParam array, CVarRef var, CArrRef _argv = null_array);
+Variant f_array_push(int _argc, VRefParam container, CVarRef var,
+                     CArrRef _argv = null_array);
 
 Variant f_array_rand(CVarRef input, int num_req = 1);
 Variant f_array_reduce(CVarRef input, CVarRef callback,

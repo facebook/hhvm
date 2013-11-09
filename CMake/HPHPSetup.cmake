@@ -1,8 +1,9 @@
 include(Options)
 
 if (APPLE)
-	set(HHVM_ANCHOR_SYMS -Wl,-u,_register_libevent_server,_register_fastcgi_server)
+	set(HHVM_ANCHOR_SYMS -Wl,-u,_register_libevent_server)
 else()
+	set(ENABLE_FASTCGI 1)
 	set(HHVM_ANCHOR_SYMS -Wl,-uregister_libevent_server,-uregister_fastcgi_server)
 endif()
 
@@ -15,10 +16,13 @@ set(HHVM_LINK_LIBRARIES
     hphp_zend
     hphp_util
     hphp_hhbbc
-    hphp_thrift
-    hphp_proxygen
     vixl neo
     ${HHVM_ANCHOR_SYMS})
+
+if(ENABLE_FASTCGI)
+	LIST(APPEND HHVM_LINK_LIBRARIES hphp_thrift)
+	LIST(APPEND HHVM_LINK_LIBRARIES hphp_proxygen)
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
@@ -107,6 +111,10 @@ if(APPLE)
 	# Enable weak linking
 	add_definitions(-DMACOSX_DEPLOYMENT_TARGET=10.6)
 endif()
+
+if(ENABLE_FASTCGI)
+	add_definitions(-DENABLE_FASTCGI=1)
+endif ()
 
 # enable the OSS options if we have any
 add_definitions(-DHPHP_OSS=1)

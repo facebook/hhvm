@@ -25,6 +25,14 @@ foreach (file ${CXX_SOURCES})
 	endif()
 endforeach(file ${CXX_SOURCES})
 
+if(NOT ENABLE_FASTCGI)
+	foreach (file ${CXX_SOURCES})
+		if (${file} MATCHES "/fastcgi/")
+			list(REMOVE_ITEM CXX_SOURCES ${file})
+		endif()
+	endforeach(file ${CXX_SOURCES})
+endif()
+
 if(NOT HAVE_CUSTOM_LIBEVENT)
 	# Not working with off-the-shelf libevent
 	list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/server/server-name-indication.cpp")

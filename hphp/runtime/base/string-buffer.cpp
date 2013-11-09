@@ -147,12 +147,13 @@ char* StringBuffer::appendCursor(int size) {
 
 void StringBuffer::append(int n) {
   char buf[12];
-  int is_negative;
   int len;
   const StringData *sd = String::GetIntegerStringData(n);
   char *p;
   if (!sd) {
-    p = conv_10(n, &is_negative, buf + 12, &len);
+    auto sl = conv_10(n, buf + 12);
+    p = const_cast<char*>(sl.ptr);
+    len = sl.len;
   } else {
     p = (char *)sd->data();
     len = sd->size();
@@ -162,12 +163,13 @@ void StringBuffer::append(int n) {
 
 void StringBuffer::append(int64_t n) {
   char buf[21];
-  int is_negative;
   int len;
   const StringData *sd = String::GetIntegerStringData(n);
   char *p;
   if (!sd) {
-    p = conv_10(n, &is_negative, buf + 21, &len);
+    auto sl = conv_10(n, buf + 21);
+    p = const_cast<char*>(sl.ptr);
+    len = sl.len;
   } else {
     p = (char *)sd->data();
     len = sd->size();

@@ -140,15 +140,9 @@ concat_ss(StringData* v1, StringData* v2) {
  */
 StringData*
 concat_is(int64_t v1, StringData* v2) {
-  int len1;
   char intbuf[21];
-  char* intstart;
   // Convert the int to a string
-  {
-    int is_negative;
-    intstart = conv_10(v1, &is_negative, intbuf + sizeof(intbuf), &len1);
-  }
-  StringSlice s1(intstart, len1);
+  auto const s1 = conv_10(v1, intbuf + sizeof(intbuf));
   StringSlice s2 = v2->slice();
   StringData* ret = StringData::Make(s1, s2);
   ret->incRefCount();
@@ -161,16 +155,10 @@ concat_is(int64_t v1, StringData* v2) {
  */
 StringData*
 concat_si(StringData* v1, int64_t v2) {
-  int len2;
   char intbuf[21];
-  char* intstart;
   // Convert the int to a string
-  {
-    int is_negative;
-    intstart = conv_10(v2, &is_negative, intbuf + sizeof(intbuf), &len2);
-  }
+  auto const s2 = conv_10(v2, intbuf + sizeof(intbuf));
   StringSlice s1 = v1->slice();
-  StringSlice s2(intstart, len2);
   StringData* ret = StringData::Make(s1, s2);
   ret->incRefCount();
   decRefStr(v1);

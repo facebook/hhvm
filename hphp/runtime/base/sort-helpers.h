@@ -38,7 +38,6 @@ struct IntElmCompare {
     if (sort_flags == SORT_REGULAR || sort_flags == SORT_NUMERIC) {
       return ascending ? (iLeft < iRight) : (iLeft > iRight);
     }
-    int isNegative;
     char bufLeft[21];
     char bufRight[21];
     const char* sLeft;
@@ -52,7 +51,9 @@ struct IntElmCompare {
       lenLeft = sdLeft->size();
     } else {
       bufLeft[20] = '\0';
-      sLeft = conv_10(iLeft, &isNegative, &bufLeft[20], &lenLeft);
+      auto sl = conv_10(iLeft, &bufLeft[20]);
+      sLeft = sl.ptr;
+      lenLeft = sl.len;
     }
     const StringData* sdRight = String::GetIntegerStringData(iRight);
     if (sdRight) {
@@ -60,7 +61,9 @@ struct IntElmCompare {
       lenRight = sdRight->size();
     } else {
       bufRight[20] = '\0';
-      sRight = conv_10(iRight, &isNegative, &bufRight[20], &lenRight);
+      auto sl = conv_10(iRight, &bufRight[20]);
+      sRight = sl.ptr;
+      lenRight = sl.len;
     }
     if (sort_flags == SORT_STRING) {
       return ascending ?

@@ -41,13 +41,9 @@ String::IntegerStringDataMap String::integer_string_data_map;
 
 static const StringData* convert_integer_helper(int64_t n) {
   char tmpbuf[21];
-  char *p;
-  int is_negative;
-  int len;
-
   tmpbuf[20] = '\0';
-  p = conv_10(n, &is_negative, &tmpbuf[20], &len);
-  return makeStaticString(p);
+  auto sl = conv_10(n, &tmpbuf[20]);
+  return makeStaticString(sl.ptr, sl.len);
 }
 
 void String::PreConvertInteger(int64_t n) {
@@ -90,13 +86,10 @@ String::~String() {}
 
 StringData* buildStringData(int n) {
   char tmpbuf[12];
-  char* p;
-  int is_negative;
-  int len;
 
   tmpbuf[11] = '\0';
-  p = conv_10(n, &is_negative, &tmpbuf[11], &len);
-  return StringData::Make(p, len, CopyString);
+  auto sl = conv_10(n, &tmpbuf[11]);
+  return StringData::Make(sl, CopyString);
 }
 
 String::String(int n) {
@@ -112,13 +105,10 @@ String::String(int n) {
 
 StringData* buildStringData(int64_t n) {
   char tmpbuf[21];
-  char* p;
-  int is_negative;
-  int len;
 
   tmpbuf[20] = '\0';
-  p = conv_10(n, &is_negative, &tmpbuf[20], &len);
-  return StringData::Make(p, len, CopyString);
+  auto const sl = conv_10(n, &tmpbuf[20]);
+  return StringData::Make(sl, CopyString);
 }
 
 HOT_FUNC

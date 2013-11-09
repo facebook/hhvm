@@ -221,5 +221,15 @@ int init_closure(ActRec* ar, TypedValue* sp);
 
 void defClsHelper(PreClass*);
 
+bool interface_supports_array(const StringData* s);
+bool interface_supports_string(const StringData* s);
+bool interface_supports_int(const StringData* s);
+bool interface_supports_double(const StringData* s);
+
+bool interface_supports_array(std::string const&);
+bool interface_supports_string(std::string const&);
+bool interface_supports_int(std::string const&);
+bool interface_supports_double(std::string const&);
+
 }
 #endif

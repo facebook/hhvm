@@ -24,7 +24,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
 

@@ -32,6 +32,7 @@
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/statement/loop_statement.h"
 #include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/vm/runtime.h"
 
 using namespace HPHP;
 

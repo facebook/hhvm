@@ -286,6 +286,10 @@ O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
 O(ThingExists,                 D(Bool), S(Str),                  N|E|Er|Refs) \
 O(InstanceOf,                  D(Bool), S(Cls) S(Cls),                   C|N) \
 O(InstanceOfIface,             D(Bool), S(Cls) CStr,                     C|N) \
+O(InterfaceSupportsArr,        D(Bool), S(Str),                          C|N) \
+O(InterfaceSupportsStr,        D(Bool), S(Str),                          C|N) \
+O(InterfaceSupportsInt,        D(Bool), S(Str),                          C|N) \
+O(InterfaceSupportsDbl,        D(Bool), S(Str),                          C|N) \
 O(IsTypeMem,                   D(Bool), S(PtrToGen),                      NA) \
 O(IsNTypeMem,                  D(Bool), S(PtrToGen),                      NA) \
 /*    name                      dstinfo srcinfo                      flags */ \
@@ -393,6 +397,8 @@ O(LdClsCachedSafe,              D(Cls), CStr,                              C) \
 O(LdClsCtx,                     D(Cls), S(Ctx),                            C) \
 O(LdClsCctx,                    D(Cls), S(Cctx),                           C) \
 O(LdClsCns,                     DParam, NA,                               NF) \
+O(LookupClsRDSHandle,     D(RDSHandle), S(Str),                          C|N) \
+O(DerefClsRDSHandle,            D(Cls), S(RDSHandle),                     NF) \
 O(LookupClsCns,                 DParam, NA,                  E|Refs|Er|N|Mem) \
 O(LdCns,                        DParam, CStr,                             NF) \
 O(LookupCns,                    DParam, CStr,                E|Refs|Er|N|Mem) \

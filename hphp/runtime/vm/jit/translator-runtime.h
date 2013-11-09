@@ -189,6 +189,8 @@ int shuffleArgsForMagicCall(ActRec* ar);
 
 void raiseMissingArgument(const char* name, int expected, int got);
 
+RDS::Handle lookupClsRDSHandle(const StringData* name);
+
 /*
  * Just calls tlsBase, but not inlined, so it can be called from the TC.
  */

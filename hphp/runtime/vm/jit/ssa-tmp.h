@@ -60,6 +60,7 @@ public:
   const Func*        getValFunc() const;
   const Class*       getValClass() const;
   const NamedEntity* getValNamedEntity() const;
+  RDS::Handle        getValRDSHandle() const;
   uintptr_t          getValBits() const;
   Variant            getValVariant() const;
   TCA                getValTCA() const;

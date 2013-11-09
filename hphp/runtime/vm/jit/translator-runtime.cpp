@@ -963,6 +963,10 @@ void raiseMissingArgument(const char* name, int expected, int got) {
   }
 }
 
+RDS::Handle lookupClsRDSHandle(const StringData* name) {
+  return Unit::GetNamedEntity(name)->getClassHandle();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 uintptr_t tlsBaseNoInline() {

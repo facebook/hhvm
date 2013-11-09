@@ -593,7 +593,7 @@ D:Bool = OpNSame S0:Gen S1:Gen
   Perform comparisons with PHP semantics on S0 and S1, and put the
   result in D.
 
-D:Bool = InstanceOf S0:Cls S1:Cls
+D:Bool = InstanceOf S0:Cls S1:{Cls|Nullptr}
 
   Sets D based on whether S0 is a descendant of the class, interface,
   or trait in S1.  (Note that this is always false for a trait).  S1
@@ -617,6 +617,13 @@ D:Bool = NInstanceOfBitmask S0:Cls S1:ConstStr
   A fast-path for instanceof checks.  Sets D based on whether S0 is a
   descendant of the class named by S1, where S1 must have a bit
   allocated for it in the fast instance check bitvector (see class.h).
+
+D:Bool = InterfaceSupportsArr S0:Str
+D:Bool = InterfaceSupportsStr S0:Str
+D:Bool = InterfaceSupportsInt S0:Str
+D:Bool = InterfaceSupportsDbl S0:Str
+
+  Returns whether t instanceof S0 returns true when t is of the given type.
 
 D:Bool =  IsType<T> S0:Cell
 D:Bool = IsNType<T> S0:Cell
@@ -883,6 +890,14 @@ D:T = LdClsCns<T,className,constName> [ -> B ]
   The result may be uninitialized if the class is not defined.  Note
   that no decref of the result is necessary because class constants
   will always be static.
+
+D:RDSHandle = LookupClsRDSHandle S0:Str
+
+  Look up the cached-class RDS handle for a given class name.
+
+D:{Cls|nullptr} = DerefClsRDSHandle S0:RDSHandle
+
+  Dereference an RDS handle that points to a cached class slot.
 
 D:T = LookupCns<T,constName>
 D:T = LookupCnsE<T,constName>

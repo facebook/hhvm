@@ -1218,6 +1218,11 @@ IRTranslator::translateInstanceOfD(const NormalizedInstruction& i) {
   HHIR_EMIT(InstanceOfD, (i.imm[0].u_SA));
 }
 
+void
+IRTranslator::translateInstanceOf(const NormalizedInstruction& i) {
+  HHIR_EMIT(InstanceOf);
+}
+
 /*
  * This function returns the offset of instruction i's branch target.
  * This is normally the offset corresponding to the branch being

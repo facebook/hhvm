@@ -69,6 +69,8 @@ auto constexpr TV       = ArgType::TV;
 auto constexpr MemberKeyS  = ArgType::MemberKeyS;
 auto constexpr MemberKeyIS = ArgType::MemberKeyIS;
 
+using IFaceSupportFn = bool (*)(const StringData*);
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -189,6 +191,7 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
                            {{SSA, 0}}},
+    {LookupClsRDSHandle, lookupClsRDSHandle, DSSA, SNone, {{SSA, 0}}},
     {LookupClsMethod,    lookupClsMethodHelper, DNone, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {LdArrFuncCtx,       loadArrayFunctionContext, DNone, SSync,
@@ -331,6 +334,14 @@ static CallMap s_callMap {
     {InstanceOf, method(&Class::classof), DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
     {InstanceOfIface, method(&Class::ifaceofDirect), DSSA,
                       SNone, {{SSA, 0}, {SSA, 1}}},
+    {InterfaceSupportsArr, IFaceSupportFn{interface_supports_array},
+                             DSSA, SNone, {{SSA, 0}}},
+    {InterfaceSupportsStr, IFaceSupportFn{interface_supports_string},
+                             DSSA, SNone, {{SSA, 0}}},
+    {InterfaceSupportsInt, IFaceSupportFn{interface_supports_int},
+                             DSSA, SNone, {{SSA, 0}}},
+    {InterfaceSupportsDbl, IFaceSupportFn{interface_supports_double},
+                             DSSA, SNone, {{SSA, 0}}},
 
     /* debug assert helpers */
     {DbgAssertPtr, assertTv, DNone, SNone, {{SSA, 0}}},

@@ -66,7 +66,7 @@
 #include "hphp/compiler/analysis/live_dict.h"
 #include "hphp/compiler/analysis/ref_dict.h"
 
-#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/parser/location.h"

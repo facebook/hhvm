@@ -126,6 +126,12 @@ const NamedEntity* SSATmp::getValNamedEntity() const {
   return m_inst->extra<ConstData>()->as<const NamedEntity*>();
 }
 
+RDS::Handle SSATmp::getValRDSHandle() const {
+  assert(isConst());
+  assert(m_inst->typeParam().equals(Type::RDSHandle));
+  return m_inst->extra<ConstData>()->as<RDS::Handle>();
+}
+
 uintptr_t SSATmp::getValBits() const {
   assert(isConst());
   return m_inst->extra<ConstData>()->as<uintptr_t>();

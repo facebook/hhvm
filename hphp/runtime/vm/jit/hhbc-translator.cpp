@@ -3570,6 +3570,42 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
   gen(DecRef, src);
 }
 
+void HhbcTranslator::emitInstanceOf() {
+  auto const t1 = popC();
+  auto const t2 = popC(); // t2 instanceof t1
+
+  if (t1->isA(Type::Obj) && t2->isA(Type::Obj)) {
+    auto const c2 = gen(LdObjClass, t2);
+    auto const c1 = gen(LdObjClass, t1);
+    push(gen(InstanceOf, c2, c1));
+    gen(DecRef, t2);
+    gen(DecRef, t1);
+    return;
+  }
+
+  if (!t1->isA(Type::Str)) PUNT(InstanceOf-NotStr);
+
+  if (t2->isA(Type::Obj)) {
+    auto const rds = gen(LookupClsRDSHandle, t1);
+    auto const c1  = gen(DerefClsRDSHandle, rds);
+    auto const c2  = gen(LdObjClass, t2);
+    push(gen(InstanceOf, c2, c1));
+    gen(DecRef, t2);
+    gen(DecRef, t1);
+    return;
+  }
+
+  push(
+    t2->isA(Type::Arr) ? gen(InterfaceSupportsArr, t1) :
+    t2->isA(Type::Int) ? gen(InterfaceSupportsInt, t1) :
+    t2->isA(Type::Str) ? gen(InterfaceSupportsStr, t1) :
+    t2->isA(Type::Dbl) ? gen(InterfaceSupportsDbl, t1) :
+    cns(false)
+  );
+  gen(DecRef, t2);
+  gen(DecRef, t1);
+}
+
 void HhbcTranslator::emitCastArray() {
   // Turns the castArray BC operation into a type specialized
   // IR operation. The IR operation might end up being simplified

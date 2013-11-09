@@ -124,6 +124,7 @@
   CASE(FCallBuiltin) \
   CASE(VerifyParamType) \
   CASE(InstanceOfD) \
+  CASE(InstanceOf) \
   CASE(StaticLocInit) \
   CASE(StaticLoc) \
   CASE(IterInit) \

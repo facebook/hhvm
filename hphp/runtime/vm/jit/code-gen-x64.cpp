@@ -297,6 +297,7 @@ CALL_OPCODE(Clone)
 CALL_OPCODE(AllocObj)
 CALL_OPCODE(LdClsCtor)
 CALL_OPCODE(LookupClsMethod)
+CALL_OPCODE(LookupClsRDSHandle)
 CALL_OPCODE(LdArrFuncCtx)
 CALL_OPCODE(LdArrFPushCuf)
 CALL_OPCODE(LdStrFPushCuf)
@@ -370,6 +371,10 @@ CALL_OPCODE(IssetElem)
 CALL_OPCODE(EmptyElem)
 
 CALL_OPCODE(InstanceOfIface)
+CALL_OPCODE(InterfaceSupportsArr)
+CALL_OPCODE(InterfaceSupportsStr)
+CALL_OPCODE(InterfaceSupportsInt)
+CALL_OPCODE(InterfaceSupportsDbl)
 
 CALL_OPCODE(SurpriseHook)
 
@@ -2051,23 +2056,24 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
   auto const testClass = inst->src(1);
   auto testReg = curOpd(testClass).reg();
   auto destReg = curOpd(inst->dst()).reg();
+  auto& a = m_as;
 
   if (destReg == InvalidReg) return;
 
   if (testClass->isConst()) {
     // Don't need to do the null check when the class is const.
     assert(testClass->getValClass());
-    cgCallNative(m_as, inst);
+    cgCallNative(a, inst);
     return;
   }
 
-  m_as.testq  (testReg, testReg);
-  ifThenElse(m_as, CC_NZ,
+  a.     testq   (testReg, testReg);
+  ifThenElse(a, CC_NZ,
     [&] {
-      cgCallNative(m_as, inst);
+      cgCallNative(a, inst);
     },
     [&] {
-      m_as.xorl (r32(destReg), r32(destReg));
+      a. xorl    (r32(destReg), r32(destReg));
     }
   );
 }
@@ -5276,6 +5282,19 @@ void CodeGenerator::cgLdClsCachedSafe(IRInstruction* inst) {
   cgLdClsCachedCommon(inst);
   if (Block* taken = inst->taken()) {
     emitFwdJcc(CC_Z, taken);
+  }
+}
+
+void CodeGenerator::cgDerefClsRDSHandle(IRInstruction* inst) {
+  auto const dreg = curOpd(inst->dst()).reg();
+  auto const ch   = inst->src(0);
+  auto& a = m_as;
+
+  if (dreg == InvalidReg) return;
+  if (ch->isConst()) {
+    a.    loadq  (rVmTl[ch->getValRDSHandle()], dreg);
+  } else {
+    a.    loadq  (rVmTl[curOpd(ch).reg()], dreg);
   }
 }
 

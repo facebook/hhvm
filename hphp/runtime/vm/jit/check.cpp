@@ -69,8 +69,8 @@ void RegState::merge(const RegState& other) {
 
 // Return the number of parameters required for this block
 DEBUG_ONLY static int numBlockParams(Block* b) {
-  return b->empty() || b->front()->op() != DefLabel ? 0 :
-         b->front()->numDsts();
+  return b->empty() || b->front().op() != DefLabel ? 0 :
+         b->front().numDsts();
 }
 
 /*
@@ -108,7 +108,7 @@ bool checkBlock(Block* b) {
 
   // Invariants #2, #4
   if (it == end) return true;
-  if (b->back()->isBlockEnd()) --end;
+  if (b->back().isBlockEnd()) --end;
   for (DEBUG_ONLY IRInstruction& inst : folly::makeRange(it, end)) {
     assert(inst.op() != DefLabel);
     assert(inst.op() != BeginCatch);
@@ -121,19 +121,19 @@ bool checkBlock(Block* b) {
   }
 
   // Invariant #5
-  assert(IMPLIES(b->back()->isTerminal(), !b->next()));
+  assert(IMPLIES(b->back().isTerminal(), !b->next()));
 
   // Invariant #7
   if (b->taken()) {
     // only Jmp can branch to a join block expecting values.
-    DEBUG_ONLY IRInstruction* branch = b->back();
+    DEBUG_ONLY IRInstruction* branch = &b->back();
     DEBUG_ONLY auto numArgs = branch->op() == Jmp ? branch->numSrcs() : 0;
     assert(numBlockParams(b->taken()) == numArgs);
   }
 
   // Invariant #6
-  if (b->front()->op() == DefLabel) {
-    for (int i = 0; i < b->front()->numDsts(); ++i) {
+  if (b->front().op() == DefLabel) {
+    for (int i = 0; i < b->front().numDsts(); ++i) {
       auto const traceBlocks = b->trace()->blocks();
       b->forEachSrc(i, [&](IRInstruction* inst, SSATmp*) {
         assert(std::find(traceBlocks.begin(), traceBlocks.end(),
@@ -158,7 +158,7 @@ const Edge* takenEdge(IRInstruction* inst) {
 }
 
 const Edge* takenEdge(Block* b) {
-  return takenEdge(b->back());
+  return takenEdge(&b->back());
 }
 
 const Edge* nextEdge(Block* b) {

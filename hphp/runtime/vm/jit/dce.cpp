@@ -177,7 +177,7 @@ BlockList removeUnreachable(IRUnit& unit) {
     b->forEachPred([&](Block *p) {
       if (!reachable[p]) {
         // remove edges from unreachable block to reachable block.
-        if (!p->empty()) p->back()->setTaken(nullptr);
+        if (!p->empty()) p->back().setTaken(nullptr);
         p->setNext(nullptr);
       }
     });
@@ -189,7 +189,7 @@ BlockList removeUnreachable(IRUnit& unit) {
         continue;
       }
       FTRACE(5, "erasing block {}\n", (*bit)->id());
-      if ((*bit)->taken() && (*bit)->back()->op() == Jmp) {
+      if ((*bit)->taken() && (*bit)->back().op() == Jmp) {
         needsReflow = true;
       }
       bit = t->erase(bit);
@@ -317,7 +317,7 @@ void optimizeRefCount(IRUnit& unit, DceState& state, UseCounts& uses) {
 void sinkIncRefs(IRTrace* trace, IRUnit& unit, DceState& state) {
   assert(trace->isMain());
 
-  assert(trace->back()->back()->op() != Jmp);
+  assert(trace->back()->back().op() != Jmp);
 
   auto copyPropTrace = [] (IRTrace* trace) {
     forEachInst(trace->blocks(), copyProp);

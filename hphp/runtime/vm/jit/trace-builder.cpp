@@ -121,7 +121,7 @@ void TraceBuilder::appendInstruction(IRInstruction* inst) {
 
   Block* block = m_curTrace->back();
   if (!block->empty()) {
-    IRInstruction* prev = block->back();
+    IRInstruction* prev = &block->back();
     if (prev->isBlockEnd()) {
       // start a new block
       Block* next = m_unit.defBlock();
@@ -590,7 +590,7 @@ void TraceBuilder::reoptimize() {
         // Generate a mov(tmp->dst) to get result into dst. If we get here then
         // assume the last instruction in the block isn't a guard. If it was,
         // we would have to insert the mov on the fall-through edge.
-        assert(block->empty() || !block->back()->isBlockEnd());
+        assert(block->empty() || !block->back().isBlockEnd());
         IRInstruction* mov = m_unit.mov(dst, tmp, inst->marker());
         appendInstruction(mov, block);
         m_state.update(mov);
@@ -607,7 +607,7 @@ void TraceBuilder::reoptimize() {
       assert(*it == block);
       m_curTrace->unlink(it);
     } else {
-      if (block->back()->isTerminal()) {
+      if (block->back().isTerminal()) {
         // Could have converted a conditional branch to Jmp; clear next.
         block->setNext(nullptr);
       }

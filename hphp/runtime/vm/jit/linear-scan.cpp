@@ -753,7 +753,7 @@ void LinearScan::collectInfo(BlockList::iterator it, IRTrace* trace) {
         if (inst.isNative()) m_natives.push_back(&inst);
       }
 
-      IRInstruction* jmp = block->back();
+      IRInstruction* jmp = &block->back();
       if (jmp->op() == Jmp && jmp->numSrcs() != 0) {
         for (SSATmp* src : jmp->srcs()) {
           m_jmps[src].push_back(jmp);
@@ -920,7 +920,7 @@ RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
   // same procedure as above.
   for (unsigned ji = 0, jn = jmps.size(); ji < jn; ++ji) {
     IRInstruction* jmp = jmps[ji];
-    IRInstruction* label = jmp->taken()->front();
+    IRInstruction* label = &jmp->taken()->front();
 
     // Figure out which src of the Jmp is tmp
     for (unsigned si = 0, sn = jmp->numSrcs(); si < sn; ++si) {
@@ -1022,7 +1022,7 @@ void LinearScan::genSpillStats(int numSpillLocs) {
   static StringData* spillSpace = makeStaticString("SpillSpace");
 
   auto entry = m_unit.entry(); // entry block
-  auto const marker = entry->front()->marker();
+  auto const marker = entry->front().marker();
   auto addStat = [&](const StringData* key, int value) {
     entry->prepend(m_unit.gen(IncStatGrouped, marker,
                               cns(spillStats), cns(key), cns(value)));
@@ -1072,12 +1072,12 @@ void LinearScan::findFullXMMCandidates() {
 void LinearScan::resolveJmpCopies() {
   for (auto b : m_blocks) {
     if (!b->taken()) continue;
-    auto jmp = b->back();
+    auto jmp = &b->back();
     auto n = jmp->numSrcs();
     if (jmp->op() == Jmp && n > 0) {
       auto srcs = jmp->srcs();
       auto dests = new (m_unit.arena()) PhysLoc[n];
-      auto labelDests = jmp->taken()->front()->dsts();
+      auto labelDests = jmp->taken()->front().dsts();
       for (unsigned i = 0; i < n; ++i) {
         dests[i] = m_allocInfo[labelDests[i]];
       }

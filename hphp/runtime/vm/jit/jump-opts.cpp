@@ -108,11 +108,11 @@ void optimizeCondTraceExit(IRUnit& unit) {
     if (mainPreds.size() != 1) continue;
 
     auto const jccBlock = mainPreds.front().from();
-    if (!jccCanBeDirectExit(jccBlock->back()->op())) return;
+    if (!jccCanBeDirectExit(jccBlock->back().op())) return;
     FTRACE(5, "previous block ends with jccCanBeDirectExit ({})\n",
-           opcodeName(jccBlock->back()->op()));
+           opcodeName(jccBlock->back().op()));
 
-    auto const jccInst = jccBlock->back();
+    auto const jccInst = &jccBlock->back();
     auto jccExitBlock = jccInst->taken();
     if (jccExitBlock == mainExit) jccExitBlock = jccBlock->next();
     if (!isNormalExit(jccExitBlock)) continue;
@@ -123,9 +123,9 @@ void optimizeCondTraceExit(IRUnit& unit) {
     auto& syncAbi = *it;
     assert(syncAbi.op() == SyncABIRegs);
 
-    auto const newOpcode = jmpToReqBindJmp(jccBlock->back()->op());
+    auto const newOpcode = jmpToReqBindJmp(jccBlock->back().op());
     ReqBindJccData data;
-    data.taken = jccExitBlock->back()->extra<ReqBindJmp>()->offset;
+    data.taken = jccExitBlock->back().extra<ReqBindJmp>()->offset;
     data.notTaken = reqBindJmp.extra<ReqBindJmp>()->offset;
 
     FTRACE(5, "replacing {} with {}\n", jccInst->id(), opcodeName(newOpcode));
@@ -171,7 +171,7 @@ void optimizeSideExitChecks(IRUnit& unit) {
     data.checkedSlot = isStack
       ? inst->extra<CheckStk>()->offset
       : inst->extra<CheckLoc>()->locId;
-    data.taken = exitBlock->back()->extra<ReqBindJmp>()->offset;
+    data.taken = exitBlock->back().extra<ReqBindJmp>()->offset;
 
     auto const block = inst->block();
     block->insert(block->iteratorTo(inst),

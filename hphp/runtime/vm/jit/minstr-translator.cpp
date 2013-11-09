@@ -2665,7 +2665,7 @@ void HhbcTranslator::MInstrTranslator::emitBindNewElem() {
 void HhbcTranslator::MInstrTranslator::emitMPost() {
   SSATmp* catchSp = nullptr;
   if (m_failedSetBlock) {
-    catchSp = m_failedSetBlock->trace()->back()->back()->src(0);
+    catchSp = m_failedSetBlock->trace()->back()->back().src(0);
     assert(catchSp->isA(Type::StkPtr));
   }
 

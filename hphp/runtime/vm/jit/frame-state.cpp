@@ -256,9 +256,9 @@ void FrameState::startBlock(Block* block) {
 }
 
 void FrameState::finishBlock(Block* block) {
-  assert(block->back()->isTerminal() == !block->next());
+  assert(block->back().isTerminal() == !block->next());
 
-  if (!block->back()->isTerminal()) {
+  if (!block->back().isTerminal()) {
     save(block->next());
   }
 }

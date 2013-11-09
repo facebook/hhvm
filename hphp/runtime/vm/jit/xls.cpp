@@ -349,11 +349,11 @@ Block* splitCriticalEdge(IRUnit& unit, Block* pred, Block* succ) {
   assert(pred->taken() == succ || pred->next() == succ);
   Block* middle = unit.defBlock();
   if (pred->taken() == succ) {
-    pred->back()->setTaken(middle);
+    pred->back().setTaken(middle);
   } else {
     pred->setNext(middle);
   }
-  auto& marker = succ->front()->marker();
+  auto& marker = succ->front().marker();
   middle->prepend(unit.gen(Jmp, marker, succ));
   middle->setHint(succ->hint());
   pred->trace()->push_back(middle);
@@ -372,7 +372,7 @@ void XLS::prepareBlocks() {
     b->forEachPred([&](Block* p) {
       if (!visited[p]) {
         p->setNext(nullptr);
-        if (!p->empty()) p->back()->setTaken(nullptr);
+        if (!p->empty()) p->back().setTaken(nullptr);
         modified = true;
       }
       numPreds++;
@@ -842,7 +842,7 @@ void XLS::insertCopy(Block* b, Block::iterator pos, IRInstruction* &shuffle,
     auto cap = 1;
     auto dests = new (m_unit.arena()) PhysLoc[cap];
     dests[0] = rd;
-    auto& marker = pos != b->end() ? pos->marker() : b->back()->marker();
+    auto& marker = pos != b->end() ? pos->marker() : b->back().marker();
     shuffle = m_unit.gen(Shuffle, marker, ShuffleData(dests, 1, cap), src);
     b->insert(pos, shuffle);
   }
@@ -1093,7 +1093,7 @@ void XLS::print(const char* caption) {
           });
         });
       }
-      if (&i == b->front()) {
+      if (&i == &b->front()) {
         str << folly::format(" B{: <2}", b->id());
       } else {
         str << "    ";
@@ -1109,7 +1109,7 @@ void XLS::print(const char* caption) {
         str << " => ";
         JIT::printDsts(str, &i, &m_regs, nullptr);
       }
-      if (&i == b->back()) {
+      if (&i == &b->back()) {
         if (auto next = b->next()) {
           str << folly::format(" next->B{}", next->id());
         }

@@ -6257,7 +6257,7 @@ void genCodeImpl(CodeBlock& mainCode,
 
     // If the block ends with a Jmp and the next block is going to be
     // its target, we don't need to actually emit it.
-    IRInstruction* last = block->back();
+    IRInstruction* last = &block->back();
     state.noTerminalJmp = last->op() == Jmp && nextBlock == last->taken();
 
     if (state.asmInfo) {

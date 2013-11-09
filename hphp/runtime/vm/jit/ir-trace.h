@@ -94,7 +94,7 @@ inline IRTrace::iterator IRTrace::erase(iterator it) {
   assert(b->preds().empty());
   it = m_blocks.erase(it);
   b->setTrace(nullptr);
-  if (!b->empty()) b->back()->setTaken(nullptr);
+  if (!b->empty()) b->back().setTaken(nullptr);
   b->setNext(nullptr);
   return it;
 }

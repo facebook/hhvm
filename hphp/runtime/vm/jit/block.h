@@ -37,6 +37,8 @@ namespace HPHP { namespace JIT {
 struct Block : boost::noncopyable {
   typedef InstructionList::iterator iterator;
   typedef InstructionList::const_iterator const_iterator;
+  typedef InstructionList::reference reference;
+  typedef InstructionList::const_reference const_reference;
 
   // Execution frequency hint; codegen will put Unlikely blocks in astubs.
   enum class Hint { Neither, Likely, Unlikely };
@@ -69,19 +71,13 @@ struct Block : boost::noncopyable {
   // Returns whether this block starts with BeginCatch
   bool isCatch() const;
 
-  // return the last instruction in the block
-  IRInstruction* back() const;
-
-  // return the first instruction in the block.
-  IRInstruction* front() const;
-
   // return the fallthrough block.  Should be nullptr if the last
   // instruction is a Terminal.
   Block* next() const { return m_next.to(); }
   void setNext(Block* b) { m_next.setTo(b); }
 
   // return the target block if the last instruction is a branch.
-  Block* taken() const { return empty() ? nullptr : back()->taken(); }
+  Block* taken() const { return empty() ? nullptr : back().taken(); }
 
   // return the postorder number of this block. (updated each time
   // sortBlocks() is called.
@@ -139,6 +135,14 @@ struct Block : boost::noncopyable {
   void push_back(IRInstruction* inst);
   template <class Predicate> void remove_if(Predicate p);
 
+  // return the first instruction in the block.
+  reference front();
+  const_reference front() const;
+
+  // return the last instruction in the block
+  reference back();
+  const_reference back() const;
+
   friend const Edge* nextEdge(Block*); // only for validation
 
   std::string toString() const;
@@ -146,7 +150,7 @@ struct Block : boost::noncopyable {
  private:
   InstructionList m_instrs; // instructions in this block
   IRTrace* m_trace;         // owner of this block.
-  Edge m_next;              // fall-through path; null if back()->isTerminal().
+  Edge m_next;              // fall-through path; null if back().isTerminal().
   const unsigned m_id;      // unit-assigned unique id of this block
   unsigned m_postid;        // postorder number of this block
   EdgeList m_preds;         // Edges that point to this block
@@ -155,15 +159,20 @@ struct Block : boost::noncopyable {
 
 typedef smart::vector<Block*> BlockList;
 
-inline IRInstruction* Block::back() const {
+inline Block::reference Block::front() {
   assert(!m_instrs.empty());
-  auto it = m_instrs.end();
-  return const_cast<IRInstruction*>(&*(--it));
+  return m_instrs.front();
+}
+inline Block::const_reference Block::front() const {
+  return const_cast<Block*>(this)->front();
 }
 
-inline IRInstruction* Block::front() const {
+inline Block::reference Block::back() {
   assert(!m_instrs.empty());
-  return const_cast<IRInstruction*>(&*m_instrs.begin());
+  return m_instrs.back();
+}
+inline Block::const_reference Block::back() const {
+  return const_cast<Block*>(this)->back();
 }
 
 inline Block::iterator Block::prepend(IRInstruction* inst) {
@@ -209,7 +218,7 @@ inline Block* Block::updatePreds(Edge* edge, Block* new_to) {
 template<typename L> inline
 void Block::forEachSrc(unsigned i, L body) {
   for (Edge& e : m_preds) {
-    IRInstruction* jmp = e.from()->back();
+    auto jmp = &e.from()->back();
     assert(jmp->op() == Jmp && jmp->taken() == this);
     body(jmp, jmp->src(i));
   }
@@ -218,7 +227,7 @@ void Block::forEachSrc(unsigned i, L body) {
 template<typename L> inline
 SSATmp* Block::findSrc(unsigned i, L body) {
   for (Edge& e : m_preds) {
-    SSATmp* src = e.from()->back()->src(i);
+    SSATmp* src = e.from()->back().src(i);
     if (body(src)) return src;
   }
   return nullptr;

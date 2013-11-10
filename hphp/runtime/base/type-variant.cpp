@@ -1721,7 +1721,11 @@ static const StringData* getAlternateName(const StringData* clsName) {
     static ClsNameMap m;
 
     static std::vector<SStringPair> mappings {
-      std::make_pair(StaticString("Vector"), StaticString("HH\\Vector"))
+      std::make_pair(StaticString("Vector"), StaticString("HH\\Vector")),
+      std::make_pair(StaticString("Map"), StaticString("HH\\Map")),
+      std::make_pair(StaticString("StableMap"), StaticString("HH\\StableMap")),
+      std::make_pair(StaticString("Set"), StaticString("HH\\Set")),
+      std::make_pair(StaticString("Pair"), StaticString("HH\\Pair"))
     };
 
     for (const auto& p : mappings) {

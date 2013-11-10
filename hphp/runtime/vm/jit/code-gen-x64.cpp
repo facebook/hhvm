@@ -904,25 +904,28 @@ CallDest CodeGenerator::callDest2(SSATmp* ssa) const {
   return { DestType::SSA2, curOpd(ssa).reg(0), curOpd(ssa).reg(1) };
 }
 
-void CodeGenerator::cgCallHelper(Asm& a,
-                                 const CppCall& call,
-                                 const CallDest& dstInfo,
-                                 SyncOptions sync,
-                                 ArgGroup& args) {
-  cgCallHelper(a, call, dstInfo, sync, args, m_state.liveRegs[m_curInst]);
+CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
+                                           const CppCall& call,
+                                           const CallDest& dstInfo,
+                                           SyncOptions sync,
+                                           ArgGroup& args) {
+  return cgCallHelper(a, call, dstInfo, sync, args,
+    m_state.liveRegs[m_curInst]);
 }
 
-void CodeGenerator::cgCallHelper(Asm& a,
-                                 const CppCall& call,
-                                 const CallDest& dstInfo,
-                                 SyncOptions sync,
-                                 ArgGroup& args,
-                                 RegSet toSave) {
+CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
+                                           const CppCall& call,
+                                           const CallDest& dstInfo,
+                                           SyncOptions sync,
+                                           ArgGroup& args,
+                                           RegSet toSave) {
   assert(m_curInst->isNative());
 
   auto const destType = dstInfo.type;
   auto const dstReg0  = dstInfo.reg0;
   auto const dstReg1  = dstInfo.reg1;
+
+  CallHelperInfo ret;
 
   // Save the caller-saved registers that are live across this
   // instruction. The number of regs to save and the number of args
@@ -939,7 +942,11 @@ void CodeGenerator::cgCallHelper(Asm& a,
   regSaver.bytesPushed(shuffleArgs(a, args));
 
   // do the call; may use a trampoline
+  if (sync == SyncOptions::kSmashableAndSyncPoint) {
+    prepareForSmash(a.code(), kCallLen);
+  }
   emitCall(a, call);
+  ret.returnAddress = a.frontier();
   if (memory_profiling || sync != SyncOptions::kNoSyncPoint) {
     // if we are profiling the heap, we always need to sync because
     // regs need to be correct during smart allocations no matter
@@ -968,23 +975,23 @@ void CodeGenerator::cgCallHelper(Asm& a,
       if (kTypeShiftBits > 0) a.shrq(kTypeShiftBits, rtyp);
       shuffle2(a, rval, rtyp, dstReg0, dstReg1);
     }
-    return;
+    break;
   case DestType::SSA:
     // copy the single-register result to dstReg0
     assert(dstReg1 == InvalidReg);
     if (dstReg0 != InvalidReg) emitMovRegReg(a, reg::rax, dstReg0);
-    return;
+    break;
   case DestType::SSA2:
     // copy both values into dest registers
     assert(dstReg0 != InvalidReg && dstReg1 != InvalidReg);
     shuffle2(a, reg::rax, reg::rdx, dstReg0, dstReg1);
-    return;
+    break;
   case DestType::None:
     // void return type, no registers have values
     assert(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
-    return;
+    break;
   }
-  not_reached();
+  return ret;
 }
 
 void CodeGenerator::cgMov(IRInstruction* inst) {
@@ -2544,30 +2551,71 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   auto name      = inst->src(1);
   auto actRec    = inst->src(2);
   auto actRecReg = curOpd(actRec).reg();
-  auto const handle = RDS::alloc<MethodCache,sizeof(MethodCache)>().handle();
+  auto& a = m_as;
 
-  // preload handle->m_value
-  m_as.loadq(rVmTl[handle + offsetof(MethodCache, m_value)],
-             m_rScratch);
-  m_as.cmpq (rVmTl[handle + offsetof(MethodCache, m_key)],
-             clsReg);
-  ifThenElse(CC_E, // if handle->key == cls
-             [&] { // then actReg->m_func = handle->value
-               m_as.storeq(m_rScratch, actRecReg[AROFF(m_func)]);
-             },
-             [&] { // else call slow path helper
-               auto methodCacheHelper = inst->extra<LdObjMethodData>()->fatal ?
-                 methodCacheSlowPath<true> :
-                 methodCacheSlowPath<false>;
-               cgCallHelper(m_as,
-                            CppCall(methodCacheHelper),
-                            kVoidDest,
-                            SyncOptions::kSyncPoint,
-                            ArgGroup(curOpds()).addr(rVmTl, handle)
-                                               .ssa(actRec)
-                                               .ssa(name)
-                                               .ssa(cls));
-             });
+  auto const handle = RDS::alloc<MethodCache,sizeof(MethodCache)>().handle();
+  auto pdata        = new MethodCachePrimeData; // TODO(#3206095): leaking this
+
+  auto methodCacheHelper = inst->extra<LdObjMethodData>()->fatal ?
+    pmethodCacheMissPath<true> :
+    pmethodCacheMissPath<false>;
+
+  Label slow_path;
+  Label done;
+
+  constexpr int kMovLen = 10;
+
+  // Inline cache: we "prime" the cache across requests by smashing
+  // this immediate to hold a Func* in the upper 32 bits, and a Class*
+  // in the lower 32 bits.  (If both are low-malloced pointers can
+  // fit.)  See pmethodCacheMissPath.
+  prepareForSmash(a.code(), kMovLen);
+  auto const smashImmAddr = a.frontier();
+  a.    movq   (0x8000000000000000u, rAsm);
+  assert(a.frontier() - smashImmAddr == kMovLen);
+
+  /*
+   * For the first time through, set the cache to hold the pointer to
+   * the MethodCachePrimeData, so pmethodCacheMissPath can use that
+   * information to know how to smash things.
+   *
+   * We set the low bit for two reasons: the Class* will never be a
+   * valid Class*, so we'll always miss the inline check before it's
+   * smashed, and pmethodCacheMissPath can tell it's not been smashed
+   * yet and is therefore a valid MethodCachePrimeData*.
+   */
+  *reinterpret_cast<uintptr_t*>(smashImmAddr + 2) =
+    reinterpret_cast<uintptr_t>(pdata) | 1;
+
+  a.    movq   (rAsm, m_rScratch);
+  a.    andl   (r32(rAsm), r32(rAsm));  // zero the top 32 bits
+  a.    cmpq   (rAsm, clsReg);
+  a.    jne8   (slow_path);
+  a.    shrq   (32, m_rScratch);
+  a.    storeq (m_rScratch, actRecReg[AROFF(m_func)]);
+  a.    jmp8   (done);
+asm_label(a, slow_path);
+  auto const info = cgCallHelper(
+    a,
+    CppCall(methodCacheHelper),
+    kVoidDest,
+    SyncOptions::kSmashableAndSyncPoint,
+    ArgGroup(curOpds()).addr(rVmTl, handle)
+                       .ssa(actRec)
+                       .ssa(name)
+                       .ssa(cls)
+                       /*
+                        * The scratch reg contains the prime data
+                        * before we've smashed the call to
+                        * methodCacheSlowPath.  After, it contains the
+                        * primed Class/Func pair.
+                        */
+                       .reg(m_rScratch)
+  );
+asm_label(a, done);
+
+  pdata->smashImmAddr  = smashImmAddr;
+  pdata->retAddr       = info.returnAddress;
 }
 
 void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
@@ -4671,6 +4719,7 @@ void CodeGenerator::recordSyncPoint(Asm& as,
     stackOff -= 1;
     break;
   case SyncOptions::kSyncPoint:
+  case SyncOptions::kSmashableAndSyncPoint:
     break;
   case SyncOptions::kNoSyncPoint:
     // we can get here if we are memory profiling, since we override the

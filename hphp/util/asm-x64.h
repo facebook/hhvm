@@ -769,6 +769,8 @@ class X64Assembler : private boost::noncopyable {
 public:
   explicit X64Assembler(CodeBlock& cb) : codeBlock(cb) {}
 
+  CodeBlock& code() const { return codeBlock; }
+
   CodeAddress base() const {
     return codeBlock.base();
   }

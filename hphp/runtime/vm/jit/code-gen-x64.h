@@ -58,6 +58,12 @@ enum class SyncOptions {
   kNoSyncPoint,
   kSyncPoint,
   kSyncPointAdjustOne,
+  kSmashableAndSyncPoint,
+};
+
+// Returned information from cgCallHelper
+struct CallHelperInfo {
+  TCA returnAddress;
 };
 
 // Information about where code was generated, for pretty-printing.
@@ -166,18 +172,18 @@ private:
   CallDest callDest2(SSATmp* dst) const;
 
   // Main call helper:
-  void cgCallHelper(Asm& a,
-                    const CppCall& call,
-                    const CallDest& dstInfo,
-                    SyncOptions sync,
-                    ArgGroup& args,
-                    RegSet toSave);
+  CallHelperInfo cgCallHelper(Asm& a,
+                              const CppCall& call,
+                              const CallDest& dstInfo,
+                              SyncOptions sync,
+                              ArgGroup& args,
+                              RegSet toSave);
   // Overload to make the toSave RegSet optional:
-  void cgCallHelper(Asm& a,
-                    const CppCall& call,
-                    const CallDest& dstInfo,
-                    SyncOptions sync,
-                    ArgGroup& args);
+  CallHelperInfo cgCallHelper(Asm& a,
+                              const CppCall& call,
+                              const CallDest& dstInfo,
+                              SyncOptions sync,
+                              ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
   template<class MemRef>

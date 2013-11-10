@@ -516,7 +516,6 @@ void TranslatorX64::protectCode() {
   mprotect(tx64->hotCode.base(),
            tx64->stubsCode.base() - tx64->hotCode.base() +
            tx64->stubsCode.capacity(), PROT_READ | PROT_EXEC);
-
 }
 
 void TranslatorX64::unprotectCode() {

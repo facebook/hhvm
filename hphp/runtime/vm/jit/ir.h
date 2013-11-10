@@ -393,7 +393,7 @@ O(LdCtx,                        D(Ctx), S(FramePtr),                       C) \
 O(LdCctx,                      D(Cctx), S(FramePtr),                       C) \
 O(LdCls,                        D(Cls), S(Str) C(Cls),     C|E|N|Refs|Er|Mem) \
 O(LdClsCached,                  D(Cls), CStr,              C|E|N|Refs|Er|Mem) \
-O(LdClsCachedSafe,              D(Cls), CStr,                              C) \
+O(LdClsCachedSafe,              D(Cls), CStr,                             NF) \
 O(LdClsCtx,                     D(Cls), S(Ctx),                            C) \
 O(LdClsCctx,                    D(Cls), S(Cctx),                           C) \
 O(LdClsCns,                     DParam, NA,                               NF) \

@@ -159,7 +159,14 @@ static void methodCacheFatal(Class* cls, StringData* name, Class* ctx) {
   not_reached();
 }
 
-template<bool fatal>
+HOT_FUNC_VM NEVER_INLINE
+static void methodCacheNullFunc(ActRec* ar, StringData* name) {
+  raise_warning("Invalid argument: function: method '%s' not found",
+                name->data());
+  ar->m_func = SystemLib::s_nullFunc;
+}
+
+template<bool Fatal>
 HOT_FUNC_VM NEVER_INLINE
 static void methodCacheSlowerPath(MethodCache* mce,
                                   ActRec* ar,
@@ -178,10 +185,8 @@ static void methodCacheSlowerPath(MethodCache* mce,
     if (UNLIKELY(!func)) {
       func = cls->lookupMethod(s_call.get());
       if (UNLIKELY(!func)) {
-        if (fatal) return methodCacheFatal(cls, name, ctx);
-        raise_warning("Invalid argument: function: method '%s' not found",
-                      name->data());
-        func = SystemLib::s_nullFunc;
+        if (Fatal) return methodCacheFatal(cls, name, ctx);
+        return methodCacheNullFunc(ar, name);
       }
       ar->setInvName(name);
       assert(!(func->attrs() & AttrStatic));
@@ -209,7 +214,7 @@ static void methodCacheSlowerPath(MethodCache* mce,
   }
 }
 
-template<bool fatal>
+template<bool Fatal>
 HOT_FUNC_VM NEVER_INLINE
 static void methodCacheMagicOrStatic(MethodCache* mce,
                                      ActRec* ar,
@@ -219,7 +224,7 @@ static void methodCacheMagicOrStatic(MethodCache* mce,
                                      const Func* mceValue) {
   auto const storedClass = reinterpret_cast<Class*>(mceKey & ~0x3u);
   if (storedClass != cls) {
-    return methodCacheSlowerPath<fatal>(mce, ar, name, cls);
+    return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
   }
 
   ar->m_func = mceValue;
@@ -240,7 +245,7 @@ static void methodCacheMagicOrStatic(MethodCache* mce,
   }
 }
 
-template<bool fatal>
+template<bool Fatal>
 HOT_FUNC_VM NEVER_INLINE
 static void staticPublicSlowPath(MethodCache* mce,
                                  ActRec* ar,
@@ -255,7 +260,7 @@ static void staticPublicSlowPath(MethodCache* mce,
   }
 }
 
-template<bool fatal>
+template<bool Fatal>
 HOT_FUNC_VM
 void methodCacheSlowPath(MethodCache* mce,
                          ActRec* ar,
@@ -271,17 +276,18 @@ void methodCacheSlowPath(MethodCache* mce,
   auto const mceValue = mce->m_value;
 
   if (UNLIKELY(!mceKey)) {
-    return methodCacheSlowerPath<fatal>(mce, ar, name, cls);
+    return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
   }
   if (UNLIKELY(mceKey & 0x3)) {
-    return methodCacheMagicOrStatic<fatal>(mce, ar, name, cls, mceKey, mceValue);
+    return methodCacheMagicOrStatic<Fatal>(mce, ar, name, cls,
+      mceKey, mceValue);
   }
   assert(!(mceValue->attrs() & AttrStatic));
 
   // Note: if you manually CSE mceValue->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
   if (UNLIKELY(cls->numMethods() <= mceValue->methodSlot())) {
-    return methodCacheSlowerPath<fatal>(mce, ar, name, cls);
+    return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
   }
   auto const cand = cls->methods()[mceValue->methodSlot()];
 
@@ -351,7 +357,7 @@ void methodCacheSlowPath(MethodCache* mce,
       ar->m_func   = cand;
       mce->m_value = cand;
       if (UNLIKELY(cand->attrs() & AttrStatic)) {
-        return staticPublicSlowPath<fatal>(mce, ar, cls, cand);
+        return staticPublicSlowPath<Fatal>(mce, ar, cls, cand);
       }
       mce->m_key = reinterpret_cast<uintptr_t>(cls);
       return;
@@ -377,7 +383,7 @@ void methodCacheSlowPath(MethodCache* mce,
     }
   }
 
-  return methodCacheSlowerPath<fatal>(mce, ar, name, cls);
+  return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
 }
 
 template

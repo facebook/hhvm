@@ -941,6 +941,8 @@ Cell VMExecutionContext::lookupClsCns(const StringData* cls,
 //   | ctx derived from baseClass | yes    | yes       | no      |
 //   +----------------------------+--------+-----------+---------+
 
+const StaticString s_construct("__construct");
+
 const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
                                                 const StringData* methodName,
                                                 const Class* ctx,
@@ -955,9 +957,7 @@ const Func* VMExecutionContext::lookupMethodCtx(const Class* cls,
     assert(methodName != nullptr);
     method = cls->lookupMethod(methodName);
     while (!method) {
-      static StringData* sd__construct
-        = makeStaticString("__construct");
-      if (UNLIKELY(methodName == sd__construct)) {
+      if (UNLIKELY(methodName == s_construct.get())) {
         // We were looking up __construct and failed to find it. Fall back
         // to old-style constructor: same as class name.
         method = cls->getCtor();

@@ -22,7 +22,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-HOT_FUNC
 APCArray* APCArray::Create(ArrayData* arr,
                                        bool unserializeObj,
                                        bool &shouldCache) {
@@ -55,7 +54,6 @@ APCArray* APCArray::Create(ArrayData* arr,
   return ret;
 }
 
-HOT_FUNC
 void APCArray::Destroy(APCArray* map) {
   Bucket* buckets = map->buckets();
   for (int i = 0; i < map->m.m_num; i++) {
@@ -65,7 +63,6 @@ void APCArray::Destroy(APCArray* map) {
   free(map);
 }
 
-HOT_FUNC
 void APCArray::add(int pos, APCVariant *key, APCVariant *val) {
   // NOTE: no check on duplication because we assume the original array has no
   // duplication
@@ -81,7 +78,6 @@ void APCArray::add(int pos, APCVariant *key, APCVariant *val) {
   hp = pos;
 }
 
-HOT_FUNC
 int APCArray::indexOf(const StringData* key) {
   strhash_t h = key->hash();
   int bucket = hash()[h & m.m_capacity_mask];
@@ -96,7 +92,6 @@ int APCArray::indexOf(const StringData* key) {
   return -1;
 }
 
-HOT_FUNC
 int APCArray::indexOf(int64_t key) {
   int bucket = hash()[key & m.m_capacity_mask];
   Bucket* b = buckets();

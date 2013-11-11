@@ -21,7 +21,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayInit
 
-HOT_FUNC
 ArrayInit::ArrayInit(size_t n)
 #ifdef DEBUG
   : m_addCount(0)
@@ -36,7 +35,6 @@ ArrayInit::ArrayInit(size_t n)
   }
 }
 
-HOT_FUNC
 ArrayInit::ArrayInit(size_t n, MapInit)
   : m_data(HphpArray::MakeReserve(n))
 #ifdef DEBUG

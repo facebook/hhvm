@@ -1073,32 +1073,31 @@ static inline TypedValue* elemImpl(TypedValue* base, TypedValue keyVal,
   }
 }
 
-#define HELPER_TABLE(m)                                       \
-  /* name        hot        keyType         attrs  */         \
-  m(elemC,     ,            KeyType::Any,   None)             \
-  m(elemCD,    ,            KeyType::Any,   Define)           \
-  m(elemCDR,   ,            KeyType::Any,   DefineReffy)      \
-  m(elemCU,    ,            KeyType::Any,   Unset)            \
-  m(elemCW,    ,            KeyType::Any,   Warn)             \
-  m(elemCWD,   ,            KeyType::Any,   WarnDefine)       \
-  m(elemCWDR,  ,            KeyType::Any,   WarnDefineReffy)  \
-  m(elemI,     ,            KeyType::Int,   None)             \
-  m(elemID,    HOT_FUNC_VM, KeyType::Int,   Define)           \
-  m(elemIDR,   ,            KeyType::Int,   DefineReffy)      \
-  m(elemIU,    ,            KeyType::Int,   Unset)            \
-  m(elemIW,    ,            KeyType::Int,   Warn)             \
-  m(elemIWD,   ,            KeyType::Int,   WarnDefine)       \
-  m(elemIWDR,  ,            KeyType::Int,   WarnDefineReffy)  \
-  m(elemS,     HOT_FUNC_VM, KeyType::Str,   None)             \
-  m(elemSD,    HOT_FUNC_VM, KeyType::Str,   Define)           \
-  m(elemSDR,   ,            KeyType::Str,   DefineReffy)      \
-  m(elemSU,    ,            KeyType::Str,   Unset)            \
-  m(elemSW,    HOT_FUNC_VM, KeyType::Str,   Warn)             \
-  m(elemSWD,   ,            KeyType::Str,   WarnDefine)       \
-  m(elemSWDR,  ,            KeyType::Str,   WarnDefineReffy)
+#define HELPER_TABLE(m)                          \
+  /* name      keyType         attrs  */         \
+  m(elemC,     KeyType::Any,   None)             \
+  m(elemCD,    KeyType::Any,   Define)           \
+  m(elemCDR,   KeyType::Any,   DefineReffy)      \
+  m(elemCU,    KeyType::Any,   Unset)            \
+  m(elemCW,    KeyType::Any,   Warn)             \
+  m(elemCWD,   KeyType::Any,   WarnDefine)       \
+  m(elemCWDR,  KeyType::Any,   WarnDefineReffy)  \
+  m(elemI,     KeyType::Int,   None)             \
+  m(elemID,    KeyType::Int,   Define)           \
+  m(elemIDR,   KeyType::Int,   DefineReffy)      \
+  m(elemIU,    KeyType::Int,   Unset)            \
+  m(elemIW,    KeyType::Int,   Warn)             \
+  m(elemIWD,   KeyType::Int,   WarnDefine)       \
+  m(elemIWDR,  KeyType::Int,   WarnDefineReffy)  \
+  m(elemS,     KeyType::Str,   None)             \
+  m(elemSD,    KeyType::Str,   Define)           \
+  m(elemSDR,   KeyType::Str,   DefineReffy)      \
+  m(elemSU,    KeyType::Str,   Unset)            \
+  m(elemSW,    KeyType::Str,   Warn)             \
+  m(elemSWD,   KeyType::Str,   WarnDefine)       \
+  m(elemSWDR,  KeyType::Str,   WarnDefineReffy)
 
-#define ELEM(nm, hot, keyType, attrs)                                   \
-hot                                                                     \
+#define ELEM(nm, keyType, attrs)                                        \
 TypedValue* nm(TypedValue* base, TypedValue key, MInstrState* mis) {    \
   return elemImpl<keyType, WDRU(attrs)>(base, key, mis);                \
 }
@@ -1145,7 +1144,7 @@ void HhbcTranslator::MInstrTranslator::emitElem() {
   }
 
   typedef TypedValue* (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
-  BUILD_OPTAB_HOT(getKeyType(key), mia);
+  BUILD_OPTAB(getKeyType(key), mia);
   if (define || unset) {
     m_base = genStk(define ? ElemDX : ElemUX, makeCatch(),
                     cns((TCA)opFunc), m_base, key, genMisPtr());
@@ -1312,18 +1311,17 @@ static inline TypedValue cGetPropImpl(Class* ctx, TypedValue* base,
   return *result;
 }
 
-#define HELPER_TABLE(m)                                \
-  /* name           hot        keyType       isObj */  \
-  m(cGetPropC,    ,            KeyType::Any, false)    \
-  m(cGetPropCO,   ,            KeyType::Any,  true)    \
-  m(cGetPropS,    ,            KeyType::Str, false)    \
-  m(cGetPropSO,   HOT_FUNC_VM, KeyType::Str,  true)
+#define HELPER_TABLE(m)                   \
+  /* name         keyType       isObj */  \
+  m(cGetPropC,    KeyType::Any, false)    \
+  m(cGetPropCO,   KeyType::Any,  true)    \
+  m(cGetPropS,    KeyType::Str, false)    \
+  m(cGetPropSO,   KeyType::Str,  true)
 
-#define PROP(nm, hot, ...)                                              \
-hot                                                                     \
-TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,             \
-                     MInstrState* mis) {                                \
-  return cGetPropImpl<__VA_ARGS__>(ctx, base, key, mis);                \
+#define PROP(nm, ...)                                              \
+TypedValue nm(Class* ctx, TypedValue* base, TypedValue key,        \
+                     MInstrState* mis) {                           \
+  return cGetPropImpl<__VA_ARGS__>(ctx, base, key, mis);           \
 }
 namespace MInstrHelpers {
 HELPER_TABLE(PROP)
@@ -1347,7 +1345,7 @@ void HhbcTranslator::MInstrTranslator::emitCGetProp() {
   typedef TypedValue (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
   SSATmp* key = getKey();
   auto keyType = getKeyTypeNoInt(key);
-  BUILD_OPTAB_HOT(keyType, m_base->isA(Type::Obj));
+  BUILD_OPTAB(keyType, m_base->isA(Type::Obj));
   m_result = gen(CGetProp, makeCatch(),
                  cns((TCA)opFunc), CTX(), m_base, key, genMisPtr());
 }
@@ -1368,18 +1366,17 @@ static inline RefData* vGetPropImpl(Class* ctx, TypedValue* base,
   return ref;
 }
 
-#define HELPER_TABLE(m)                             \
-  /* name          hot        keyType       isObj */\
-  m(vGetPropC,   ,            KeyType::Any, false)  \
-  m(vGetPropCO,  ,            KeyType::Any,  true)  \
-  m(vGetPropS,   ,            KeyType::Str, false)  \
-  m(vGetPropSO,  HOT_FUNC_VM, KeyType::Str,  true)
+#define HELPER_TABLE(m)                \
+  /* name        keyType       isObj */\
+  m(vGetPropC,   KeyType::Any, false)  \
+  m(vGetPropCO,  KeyType::Any,  true)  \
+  m(vGetPropS,   KeyType::Str, false)  \
+  m(vGetPropSO,  KeyType::Str,  true)
 
-#define PROP(nm, hot, ...)                                              \
-hot                                                                     \
-RefData* nm(Class* ctx, TypedValue* base, TypedValue key,               \
-                     MInstrState* mis) {                                \
-  return vGetPropImpl<__VA_ARGS__>(ctx, base, key, mis);                \
+#define PROP(nm, ...)                                              \
+RefData* nm(Class* ctx, TypedValue* base, TypedValue key,          \
+                     MInstrState* mis) {                           \
+  return vGetPropImpl<__VA_ARGS__>(ctx, base, key, mis);           \
 }
 namespace MInstrHelpers {
 HELPER_TABLE(PROP)
@@ -1389,7 +1386,7 @@ HELPER_TABLE(PROP)
 void HhbcTranslator::MInstrTranslator::emitVGetProp() {
   SSATmp* key = getKey();
   typedef RefData* (*OpFunc)(Class*, TypedValue*, TypedValue, MInstrState*);
-  BUILD_OPTAB_HOT(getKeyTypeNoInt(key), m_base->isA(Type::Obj));
+  BUILD_OPTAB(getKeyTypeNoInt(key), m_base->isA(Type::Obj));
   m_result = genStk(VGetProp, makeCatch(), cns((TCA)opFunc), CTX(),
                     m_base, key, genMisPtr());
 }
@@ -1684,14 +1681,13 @@ static inline TypedValue arrayGetImpl(
   return arrayGetNotFound(key);
 }
 
-#define HELPER_TABLE(m)                                 \
-  /* name        hot          keyType     checkForInt */\
-  m(arrayGetS,   HOT_FUNC_VM, KeyType::Str,   false)    \
-  m(arrayGetSi,  HOT_FUNC_VM, KeyType::Str,    true)    \
-  m(arrayGetI,   HOT_FUNC_VM, KeyType::Int,   false)
+#define HELPER_TABLE(m)                    \
+  /* name        keyType     checkForInt */\
+  m(arrayGetS,   KeyType::Str,   false)    \
+  m(arrayGetSi,  KeyType::Str,    true)    \
+  m(arrayGetI,   KeyType::Int,   false)
 
-#define ELEM(nm, hot, keyType, checkForInt)                             \
-hot                                                                     \
+#define ELEM(nm, keyType, checkForInt)                                  \
 TypedValue nm(ArrayData* a, TypedValue* key) {                          \
   return arrayGetImpl<keyType, checkForInt>(a, keyAsRaw<keyType>(key)); \
 }
@@ -1706,7 +1702,7 @@ void HhbcTranslator::MInstrTranslator::emitArrayGet(SSATmp* key) {
   m_ht.checkStrictlyInteger(key, keyType, checkForInt);
 
   typedef TypedValue (*OpFunc)(ArrayData*, TypedValue*);
-  BUILD_OPTAB_HOT(keyType, checkForInt);
+  BUILD_OPTAB(keyType, checkForInt);
   assert(m_base->isA(Type::Arr));
   m_result = gen(ArrayGet, cns((TCA)opFunc), m_base, key);
 }
@@ -1772,13 +1768,12 @@ static inline TypedValue mapGetImpl(
   return *ret;
 }
 
-#define HELPER_TABLE(m)                     \
-  /* name        hot        keyType  */     \
-  m(mapGetS,   HOT_FUNC_VM, KeyType::Str)   \
-  m(mapGetI,   HOT_FUNC_VM, KeyType::Int)
+#define HELPER_TABLE(m)        \
+  /* name      keyType  */     \
+  m(mapGetS,   KeyType::Str)   \
+  m(mapGetI,   KeyType::Int)
 
-#define ELEM(nm, hot, keyType)                              \
-hot                                                         \
+#define ELEM(nm, keyType)                             \
 TypedValue nm(c_Map* map, TypedValue* key) {          \
   return mapGetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
 }
@@ -1792,7 +1787,7 @@ void HhbcTranslator::MInstrTranslator::emitMapGet(SSATmp* key) {
   KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*);
-  BUILD_OPTAB_HOT(keyType);
+  BUILD_OPTAB(keyType);
   SSATmp* value = gen(MapGet, makeCatch(),
                       cns((TCA)opFunc), m_base, key);
   m_result = gen(IncRef, value);
@@ -1806,13 +1801,12 @@ static inline TypedValue stableMapGetImpl(
   return *ret;
 }
 
-#define HELPER_TABLE(m)                           \
-  /* name             hot         keyType  */     \
-  m(stableMapGetS,   HOT_FUNC_VM, KeyType::Str)   \
-  m(stableMapGetI,   HOT_FUNC_VM, KeyType::Int)
+#define HELPER_TABLE(m)              \
+  /* name            keyType  */     \
+  m(stableMapGetS,   KeyType::Str)   \
+  m(stableMapGetI,   KeyType::Int)
 
-#define ELEM(nm, hot, keyType)                                   \
-hot                                                              \
+#define ELEM(nm, keyType)                                        \
 TypedValue nm(c_StableMap* map, TypedValue* key) {               \
   return stableMapGetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
 }
@@ -1826,7 +1820,7 @@ void HhbcTranslator::MInstrTranslator::emitStableMapGet(SSATmp* key) {
   KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
   typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*);
-  BUILD_OPTAB_HOT(keyType);
+  BUILD_OPTAB(keyType);
   SSATmp* value = gen(StableMapGet, makeCatch(),
                       cns((TCA)opFunc), m_base, key);
   m_result = gen(IncRef, value);
@@ -1847,14 +1841,13 @@ static inline TypedValue cGetElemImpl(TypedValue* base, TypedValue keyVal,
   return *result;
 }
 
-#define HELPER_TABLE(m)                                 \
-  /* name         hot         key  */                   \
-  m(cGetElemC,  ,            KeyType::Any)              \
-  m(cGetElemI,  ,            KeyType::Int)              \
-  m(cGetElemS,  HOT_FUNC_VM, KeyType::Str)
+#define HELPER_TABLE(m)                    \
+  /* name       key  */                    \
+  m(cGetElemC,  KeyType::Any)              \
+  m(cGetElemI,  KeyType::Int)              \
+  m(cGetElemS,  KeyType::Str)
 
-#define ELEM(nm, hot, ...)                                              \
-hot                                                                     \
+#define ELEM(nm, ...)                                                   \
 TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) {     \
   return cGetElemImpl<__VA_ARGS__>(base, key, mis);                     \
 }
@@ -1891,7 +1884,7 @@ void HhbcTranslator::MInstrTranslator::emitCGetElem() {
     break;
   case SimpleOp::None:
     typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
-    BUILD_OPTAB_HOT(getKeyType(key));
+    BUILD_OPTAB(getKeyType(key));
     m_result = gen(CGetElem, makeCatch(), cns((TCA)opFunc),
                    m_base, key, genMisPtr());
     break;
@@ -1949,19 +1942,18 @@ static inline bool issetEmptyElemImpl(TypedValue* base, TypedValue keyVal,
     mis->tvScratch, mis->tvRef, base, key);
 }
 
-#define HELPER_TABLE(m)                              \
-  /* name          hot         keyType     isEmpty */\
-  m(issetElemC,   ,            KeyType::Any, false)  \
-  m(issetElemCE,  ,            KeyType::Any,  true)  \
-  m(issetElemI,   HOT_FUNC_VM, KeyType::Int, false)  \
-  m(issetElemIE,  ,            KeyType::Int,  true)  \
-  m(issetElemS,   HOT_FUNC_VM, KeyType::Str, false)  \
-  m(issetElemSE,  ,            KeyType::Str,  true)
+#define HELPER_TABLE(m)                 \
+  /* name         keyType     isEmpty */\
+  m(issetElemC,   KeyType::Any, false)  \
+  m(issetElemCE,  KeyType::Any,  true)  \
+  m(issetElemI,   KeyType::Int, false)  \
+  m(issetElemIE,  KeyType::Int,  true)  \
+  m(issetElemS,   KeyType::Str, false)  \
+  m(issetElemSE,  KeyType::Str,  true)
 
-#define ISSET(nm, hot, ...)                                             \
-hot                                                                     \
-uint64_t nm(TypedValue* base, TypedValue key, MInstrState* mis) {       \
-  return issetEmptyElemImpl<__VA_ARGS__>(base, key, mis);               \
+#define ISSET(nm, ...)                                             \
+uint64_t nm(TypedValue* base, TypedValue key, MInstrState* mis) {  \
+  return issetEmptyElemImpl<__VA_ARGS__>(base, key, mis);          \
 }
 namespace MInstrHelpers {
 HELPER_TABLE(ISSET)
@@ -1972,7 +1964,7 @@ void HhbcTranslator::MInstrTranslator::emitIssetEmptyElem(bool isEmpty) {
   SSATmp* key = getKey();
 
   typedef uint64_t (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
-  BUILD_OPTAB_HOT(getKeyType(key), isEmpty);
+  BUILD_OPTAB(getKeyType(key), isEmpty);
   m_result = gen(isEmpty ? EmptyElem : IssetElem, makeCatch(),
                  cns((TCA)opFunc), m_base, key, genMisPtr());
 }
@@ -2075,13 +2067,12 @@ static inline uint64_t mapIssetImpl(
   return result ? !tvIsNull(result) : false;
 }
 
-#define HELPER_TABLE(m)                       \
-  /* name        hot        keyType  */       \
-  m(mapIssetS,   HOT_FUNC_VM, KeyType::Str)   \
-  m(mapIssetI,   HOT_FUNC_VM, KeyType::Int)
+#define HELPER_TABLE(m)          \
+  /* name        keyType  */     \
+  m(mapIssetS,   KeyType::Str)   \
+  m(mapIssetI,   KeyType::Int)
 
-#define ELEM(nm, hot, keyType)                               \
-hot                                                          \
+#define ELEM(nm, keyType)                                    \
 uint64_t nm(c_Map* map, TypedValue* key) {                   \
   return mapIssetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
 }
@@ -2096,7 +2087,7 @@ void HhbcTranslator::MInstrTranslator::emitMapIsset() {
   KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*);
-  BUILD_OPTAB_HOT(keyType);
+  BUILD_OPTAB(keyType);
   m_result = gen(MapIsset, cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
@@ -2108,13 +2099,12 @@ static inline uint64_t stableMapIssetImpl(
   return result ? !tvIsNull(result) : false;
 }
 
-#define HELPER_TABLE(m)                             \
-  /* name              hot          keyType  */     \
-  m(stableMapIssetS,   HOT_FUNC_VM, KeyType::Str)   \
-  m(stableMapIssetI,   HOT_FUNC_VM, KeyType::Int)
+#define HELPER_TABLE(m)                \
+  /* name              keyType  */     \
+  m(stableMapIssetS,   KeyType::Str)   \
+  m(stableMapIssetI,   KeyType::Int)
 
-#define ELEM(nm, hot, keyType)                                     \
-hot                                                                \
+#define ELEM(nm, keyType)                                          \
 uint64_t nm(c_StableMap* map, TypedValue* key) {                   \
   return stableMapIssetImpl<keyType>(map, keyAsRaw<keyType>(key)); \
 }
@@ -2129,7 +2119,7 @@ void HhbcTranslator::MInstrTranslator::emitStableMapIsset() {
   KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
   typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*);
-  BUILD_OPTAB_HOT(keyType);
+  BUILD_OPTAB(keyType);
   m_result = gen(StableMapIsset, cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE
@@ -2193,17 +2183,16 @@ static inline typename ShuffleReturn<setRef>::return_type arraySetImpl(
   return arrayRefShuffle<setRef>(a, ret, setRef ? ref->tv() : nullptr);
 }
 
-#define HELPER_TABLE(m)                                                 \
-  /* name        hot          keyType        checkForInt setRef */      \
-  m(arraySetS,   HOT_FUNC_VM, KeyType::Str,   false,     false)         \
-  m(arraySetSi,  HOT_FUNC_VM, KeyType::Str,    true,     false)         \
-  m(arraySetI,   HOT_FUNC_VM, KeyType::Int,   false,     false)         \
-  m(arraySetSR,  ,            KeyType::Str,   false,      true)         \
-  m(arraySetSiR, ,            KeyType::Str,    true,      true)         \
-  m(arraySetIR,  ,            KeyType::Int,   false,      true)
+#define HELPER_TABLE(m)                                    \
+  /* name        keyType        checkForInt setRef */      \
+  m(arraySetS,   KeyType::Str,   false,     false)         \
+  m(arraySetSi,  KeyType::Str,    true,     false)         \
+  m(arraySetI,   KeyType::Int,   false,     false)         \
+  m(arraySetSR,  KeyType::Str,   false,      true)         \
+  m(arraySetSiR, KeyType::Str,    true,      true)         \
+  m(arraySetIR,  KeyType::Int,   false,      true)
 
-#define ELEM(nm, hot, keyType, checkForInt, setRef)                     \
-hot                                                                     \
+#define ELEM(nm, keyType, checkForInt, setRef)                          \
 typename ShuffleReturn<setRef>::return_type                             \
 nm(ArrayData* a, TypedValue* key, TypedValue value, RefData* ref) {     \
   return arraySetImpl<keyType, checkForInt, setRef>(                    \
@@ -2226,7 +2215,7 @@ void HhbcTranslator::MInstrTranslator::emitArraySet(SSATmp* key,
   const DynLocation& base = *m_ni.inputs[m_mii.valCount()];
   bool setRef = base.outerType() == KindOfRef;
   typedef ArrayData* (*OpFunc)(ArrayData*, TypedValue*, TypedValue, RefData*);
-  BUILD_OPTAB_HOT(keyType, checkForInt, setRef);
+  BUILD_OPTAB(keyType, checkForInt, setRef);
 
   // No catch trace below because the helper can't throw. It may reenter to
   // call destructors so it has a sync point in nativecalls.cpp, but exceptions
@@ -2354,13 +2343,12 @@ static inline void mapSetImpl(
   map->set(key, &value);
 }
 
-#define HELPER_TABLE(m)                     \
-  /* name        hot        keyType  */     \
-  m(mapSetS,   HOT_FUNC_VM, KeyType::Str)   \
-  m(mapSetI,   HOT_FUNC_VM, KeyType::Int)
+#define HELPER_TABLE(m)        \
+  /* name      keyType  */     \
+  m(mapSetS,   KeyType::Str)   \
+  m(mapSetI,   KeyType::Int)
 
-#define ELEM(nm, hot, keyType)                                  \
-hot                                                             \
+#define ELEM(nm, keyType)                                       \
 void nm(c_Map* map, TypedValue* key, Cell value) {              \
   mapSetImpl<keyType>(map, keyAsRaw<keyType>(key), value);      \
 }
@@ -2375,7 +2363,7 @@ void HhbcTranslator::MInstrTranslator::emitMapSet(
   KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
   typedef TypedValue (*OpFunc)(c_Map*, TypedValue*, TypedValue*);
-  BUILD_OPTAB_HOT(keyType);
+  BUILD_OPTAB(keyType);
   gen(MapSet, makeCatch(), cns((TCA)opFunc), m_base, key, value);
   m_result = value;
 }
@@ -2389,13 +2377,12 @@ static inline void stableMapSetImpl(
   map->set(key, &value);
 }
 
-#define HELPER_TABLE(m)                           \
-  /* name            hot          keyType  */     \
-  m(stableMapSetS,   HOT_FUNC_VM, KeyType::Str)   \
-  m(stableMapSetI,   HOT_FUNC_VM, KeyType::Int)
+#define HELPER_TABLE(m)              \
+  /* name            keyType  */     \
+  m(stableMapSetS,   KeyType::Str)   \
+  m(stableMapSetI,   KeyType::Int)
 
-#define ELEM(nm, hot, keyType)                                      \
-hot                                                                 \
+#define ELEM(nm, keyType)                                           \
 void nm(c_StableMap* map, TypedValue* key, Cell value) {            \
   stableMapSetImpl<keyType>(map, keyAsRaw<keyType>(key), value);    \
 }
@@ -2410,7 +2397,7 @@ void HhbcTranslator::MInstrTranslator::emitStableMapSet(
   KeyType keyType = key->isA(Type::Int) ? KeyType::Int : KeyType::Str;
 
   typedef TypedValue (*OpFunc)(c_StableMap*, TypedValue*, TypedValue*);
-  BUILD_OPTAB_HOT(keyType);
+  BUILD_OPTAB(keyType);
   gen(StableMapSet, makeCatch(), cns((TCA)opFunc), m_base, key, value);
   m_result = value;
 }
@@ -2423,16 +2410,15 @@ static inline StringData* setElemImpl(TypedValue* base, TypedValue keyVal,
   return HPHP::SetElem<false, keyType>(base, key, &val);
 }
 
-#define HELPER_TABLE(m)                                 \
-  /* name         hot        keyType    */              \
-  m(setElemC,   ,            KeyType::Any)              \
-  m(setElemI,   ,            KeyType::Int)              \
-  m(setElemS,   HOT_FUNC_VM, KeyType::Str)
+#define HELPER_TABLE(m)                    \
+  /* name       keyType    */              \
+  m(setElemC,   KeyType::Any)              \
+  m(setElemI,   KeyType::Int)              \
+  m(setElemS,   KeyType::Str)
 
-#define ELEM(nm, hot, ...)                                              \
-hot                                                                     \
-StringData* nm(TypedValue* base, TypedValue key, Cell val) {            \
-  return setElemImpl<__VA_ARGS__>(base, key, val);                      \
+#define ELEM(nm, ...)                                              \
+StringData* nm(TypedValue* base, TypedValue key, Cell val) {       \
+  return setElemImpl<__VA_ARGS__>(base, key, val);                 \
 }
 namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
@@ -2468,7 +2454,7 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
   case SimpleOp::None:
     // Emit the appropriate helper call.
     typedef StringData* (*OpFunc)(TypedValue*, TypedValue, Cell);
-    BUILD_OPTAB_HOT(getKeyType(key));
+    BUILD_OPTAB(getKeyType(key));
     constrainBase(DataTypeSpecific);
     SSATmp* result = genStk(SetElem, makeCatchSet(), cns((TCA)opFunc),
                             m_base, key, value);
@@ -2591,16 +2577,15 @@ static inline void unsetElemImpl(TypedValue* base, TypedValue keyVal) {
   HPHP::UnsetElem<keyType>(base, key);
 }
 
-#define HELPER_TABLE(m)                              \
-  /* name           hot       keyType */             \
-  m(unsetElemC,   ,            KeyType::Any)         \
-  m(unsetElemI,   ,            KeyType::Int)         \
-  m(unsetElemS,   HOT_FUNC_VM, KeyType::Str)
+#define HELPER_TABLE(m)                 \
+  /* name         keyType */            \
+  m(unsetElemC,   KeyType::Any)         \
+  m(unsetElemI,   KeyType::Int)         \
+  m(unsetElemS,   KeyType::Str)
 
-#define ELEM(nm, hot, ...)                                      \
-hot                                                             \
-void nm(TypedValue* base, TypedValue key) {                     \
-  unsetElemImpl<__VA_ARGS__>(base, key);                        \
+#define ELEM(nm, ...)                                      \
+void nm(TypedValue* base, TypedValue key) {                \
+  unsetElemImpl<__VA_ARGS__>(base, key);                   \
 }
 namespace MInstrHelpers {
 HELPER_TABLE(ELEM)
@@ -2624,7 +2609,7 @@ void HhbcTranslator::MInstrTranslator::emitUnsetElem() {
   }
 
   typedef void (*OpFunc)(TypedValue*, TypedValue);
-  BUILD_OPTAB_HOT(getKeyType(key));
+  BUILD_OPTAB(getKeyType(key));
   genStk(UnsetElem, makeCatch(), cns((TCA)opFunc), m_base, key);
 }
 #undef HELPER_TABLE

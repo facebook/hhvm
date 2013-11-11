@@ -87,11 +87,8 @@ inline unsigned buildBitmask(T c, Args... args) {
     assert(*dest == nullptr);                                   \
     *dest = (OpFunc)MInstrHelpers::nm;                          \
   } while (false);
-#define FILL_ROW_HOT(nm, hot, ...) FILL_ROW(nm, __VA_ARGS__)
 
 #define BUILD_OPTAB(...) BUILD_OPTAB_ARG(HELPER_TABLE(FILL_ROW), __VA_ARGS__)
-#define BUILD_OPTAB_HOT(...)                            \
-  BUILD_OPTAB_ARG(HELPER_TABLE(FILL_ROW_HOT), __VA_ARGS__)
 #define BUILD_OPTAB_ARG(FILL_TABLE, ...)                                \
   static OpFunc* optab = nullptr;                                       \
   if (!optab) {                                                         \

@@ -203,7 +203,6 @@ Variant f_array_flip(CVarRef trans) {
   return ArrayUtil::Flip(arr_trans);
 }
 
-HOT_FUNC
 bool f_array_key_exists(CVarRef key, CVarRef search) {
   const ArrayData *ad;
 

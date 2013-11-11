@@ -37,7 +37,7 @@ int bstrcasecmp(const char* left, size_t leftSize,
   size_t minSize = leftSize < rightSize ? leftSize : rightSize;
   for (size_t i = 0; i < minSize; ++i) {
     ssize_t ret = chrcasecmp(left[i], right[i]);
-    if (ret) return ret; 
+    if (ret) return ret;
   }
   return (leftSize > rightSize) - (leftSize < rightSize);
 }
@@ -52,7 +52,6 @@ char* bstrcasechr(const char* haystack, char needle, size_t haystackSize) {
   return nullptr;
 }
 
-HOT_FUNC
 char* bstrcasestr(const char* haystack, size_t haystackSize,
                   const char* needle, size_t needleSize) {
   if (needleSize > haystackSize) {

@@ -168,7 +168,7 @@ HphpArray* mallocArray(uint32_t cap, uint32_t mask) {
 //=============================================================================
 // Construction
 
-HOT_FUNC_VM NEVER_INLINE
+NEVER_INLINE
 HphpArray* HphpArray::MakeReserve(uint32_t capacity) {
   auto const cmret = computeCapAndMask(capacity);
   auto const cap   = cmret.first;
@@ -194,7 +194,6 @@ HphpArray* HphpArray::MakeReserve(uint32_t capacity) {
   return ad;
 }
 
-HOT_FUNC_VM
 HphpArray* HphpArray::MakePacked(uint32_t size, const TypedValue* values) {
   assert(size > 0);
 
@@ -398,7 +397,7 @@ HphpArray* HphpArray::copyMixedAndResizeIfNeededSlow() const {
 //=============================================================================
 // Destruction
 
-HOT_FUNC_VM NEVER_INLINE
+NEVER_INLINE
 void HphpArray::ReleasePacked(ArrayData* in) {
   auto const ad = asPacked(in);
 
@@ -422,7 +421,7 @@ void HphpArray::ReleasePacked(ArrayData* in) {
   MM().objFreeLogged(ad, computeAllocBytes(cap, mask));
 }
 
-HOT_FUNC_VM NEVER_INLINE
+NEVER_INLINE
 void HphpArray::Release(ArrayData* in) {
   auto const ad = asMixed(in);
 
@@ -451,7 +450,7 @@ void HphpArray::Release(ArrayData* in) {
 //=============================================================================
 // State transitions
 
-NEVER_INLINE HOT_FUNC_VM
+NEVER_INLINE
 HphpArray* HphpArray::packedToMixed() {
   assert(isPacked());
 

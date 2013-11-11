@@ -63,12 +63,6 @@ namespace HPHP { namespace Util {
 #define INLINE_SINGLE_CALLER ALWAYS_INLINE
 #define UNUSED             __attribute__((__unused__))
 #define FLATTEN            __attribute__((__flatten__))
-#ifndef __APPLE__
-# define HOT_FUNC          __attribute__((__section__(".text.hot.builtin")))
-#else
-// TODO: Figure out a way to link hot functions first on OSX with gobjdump
-# define HOT_FUNC
-#endif
 #define EXTERNALLY_VISIBLE __attribute__((__externally_visible__))
 
 #ifdef DEBUG
@@ -76,8 +70,6 @@ namespace HPHP { namespace Util {
 #else
 # define DEBUG_ONLY UNUSED
 #endif
-
-#define HOT_FUNC_VM HOT_FUNC
 
 /*
  * We need to keep some unreferenced functions from being removed by

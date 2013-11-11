@@ -163,7 +163,7 @@ ALWAYS_INLINE void StringData::enlist() {
   next->prev = head.next = &payload.node;
 }
 
-HOT_FUNC NEVER_INLINE
+NEVER_INLINE
 StringData* StringData::MakeSVSlowPath(APCVariant* shared, uint32_t len) {
   auto const data       = shared->stringData();
   auto const hash       = shared->rawStringData()->m_hash & STRHASH_MASK;
@@ -233,7 +233,6 @@ StringData* StringData::Make(APCVariant* shared) {
   return ret;
 }
 
-HOT_FUNC
 Variant APCVariant::toLocal() {
   switch (m_type) {
   case KindOfBoolean:
@@ -357,7 +356,6 @@ APCVariant::~APCVariant() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-HOT_FUNC
 int APCVariant::getIndex(const StringData* key) {
   assert(is(KindOfArray));
   if (isPacked()) return -1;
@@ -382,7 +380,6 @@ Variant APCVariant::getKey(ssize_t pos) const {
   return m_data.array->getKeyIndex(pos)->toLocal();
 }
 
-HOT_FUNC
 APCVariant* APCVariant::getValue(ssize_t pos) const {
   assert(is(KindOfArray));
   if (isPacked()) {

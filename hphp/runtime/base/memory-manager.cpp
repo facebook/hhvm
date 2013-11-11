@@ -464,14 +464,12 @@ void MemoryManager::smartFreeBig(SweepNode* n) {
 
 // smart_malloc api entry points, with support for malloc/free corner cases.
 
-HOT_FUNC
 void* smart_malloc(size_t nbytes) {
   auto& mm = MM();
   auto const size = mm.debugAddExtra(std::max(nbytes, size_t(1)));
   return mm.debugPostAllocate(mm.smartMalloc(size), 0, 0);
 }
 
-HOT_FUNC
 void* smart_calloc(size_t count, size_t nbytes) {
   auto& mm = MM();
   auto const totalBytes = std::max<size_t>(count * nbytes, 1);
@@ -484,7 +482,6 @@ void* smart_calloc(size_t count, size_t nbytes) {
   );
 }
 
-HOT_FUNC
 void* smart_realloc(void* ptr, size_t nbytes) {
   auto& mm = MM();
   if (!ptr) return smart_malloc(nbytes);
@@ -495,7 +492,6 @@ void* smart_realloc(void* ptr, size_t nbytes) {
   return mm.smartRealloc(ptr, nbytes);
 }
 
-HOT_FUNC
 void smart_free(void* ptr) {
   if (!ptr) return;
   auto& mm = MM();

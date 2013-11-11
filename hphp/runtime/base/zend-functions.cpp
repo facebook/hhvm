@@ -29,7 +29,6 @@ static const char long_min_digits[] = "9223372036854775808";
 
 ///////////////////////////////////////////////////////////////////////////////
 
-HOT_FUNC
 StringSlice conv_10(int64_t num, char* buf_end) {
   auto p = buf_end;
   uint64_t magnitude;

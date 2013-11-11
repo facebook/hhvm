@@ -515,7 +515,6 @@ const char *string_memnstr(const char *haystack, const char *needle,
   return nullptr;
 }
 
-HOT_FUNC
 String string_replace(const char *s, int len, int start, int length,
                       const char *replacement, int len_repl) {
   assert(s);
@@ -544,7 +543,6 @@ String string_replace(const char *s, int len, int start, int length,
   return retString.setSize(ret_len);
 }
 
-HOT_FUNC
 String string_replace(const char *input, int len,
                       const char *search, int len_search,
                       const char *replacement, int len_replace,

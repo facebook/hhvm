@@ -1566,18 +1566,18 @@ void CodeGenerator::cgNot(IRInstruction* inst) {
 // Comparison Operators
 ///////////////////////////////////////////////////////////////////////////////
 
-#define DISPATCHER(name)                                                \
-  HOT_FUNC_VM int64_t ccmp_ ## name (StringData* a1, StringData* a2)      \
-  { return name(a1, a2); }                                              \
-  HOT_FUNC_VM int64_t ccmp_ ## name (StringData* a1, int64_t a2)            \
-  { return name(a1, a2); }                                              \
-  HOT_FUNC_VM int64_t ccmp_ ## name (StringData* a1, ObjectData* a2)      \
-  { return name(a1, Object(a2)); }                                      \
-  HOT_FUNC_VM int64_t ccmp_ ## name (ObjectData* a1, ObjectData* a2)      \
-  { return name(Object(a1), Object(a2)); }                              \
-  HOT_FUNC_VM int64_t ccmp_ ## name (ObjectData* a1, int64_t a2)            \
-  { return name(Object(a1), a2); }                                      \
-  HOT_FUNC_VM int64_t ccmp_ ## name (ArrayData* a1, ArrayData* a2)        \
+#define DISPATCHER(name)\
+  int64_t ccmp_ ## name (StringData* a1, StringData* a2)\
+  { return name(a1, a2); }\
+  int64_t ccmp_ ## name (StringData* a1, int64_t a2)\
+  { return name(a1, a2); }\
+  int64_t ccmp_ ## name (StringData* a1, ObjectData* a2)\
+  { return name(a1, Object(a2)); }\
+  int64_t ccmp_ ## name (ObjectData* a1, ObjectData* a2)\
+  { return name(Object(a1), Object(a2)); }\
+  int64_t ccmp_ ## name (ObjectData* a1, int64_t a2)\
+  { return name(Object(a1), a2); }\
+  int64_t ccmp_ ## name (ArrayData* a1, ArrayData* a2)\
   { return name(Array(a1), Array(a2)); }
 
 DISPATCHER(same)

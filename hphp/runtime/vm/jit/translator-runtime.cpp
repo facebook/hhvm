@@ -116,11 +116,11 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
   return a1;
 }
 
-HOT_FUNC_VM void setNewElem(TypedValue* base, Cell val) {
+void setNewElem(TypedValue* base, Cell val) {
   SetNewElem<false>(base, &val);
 }
 
-HOT_FUNC_VM void setNewElemArray(TypedValue* base, Cell val) {
+void setNewElemArray(TypedValue* base, Cell val) {
   SetNewElemArray(base, &val);
 }
 
@@ -131,7 +131,7 @@ void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
   }
 }
 
-HOT_FUNC_VM RefData* boxValue(TypedValue tv) {
+RefData* boxValue(TypedValue tv) {
   return RefData::Make(tv);
 }
 
@@ -273,7 +273,6 @@ void VerifyParamTypeCallable(TypedValue value, int param) {
   }
 }
 
-HOT_FUNC_VM
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,
                          int param,
@@ -338,18 +337,15 @@ static int64_t ak_exist_string_impl(ArrayData* arr, StringData* key) {
   return arr->exists(key);
 }
 
-HOT_FUNC_VM
 int64_t ak_exist_string(ArrayData* arr, StringData* key) {
   return ak_exist_string_impl(arr, key);
 }
 
-HOT_FUNC_VM
 int64_t ak_exist_int(ArrayData* arr, int64_t key) {
   bool res = arr->exists(key);
   return res;
 }
 
-HOT_FUNC_VM
 int64_t ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
     return collectionOffsetContains(obj, key);
@@ -359,7 +355,6 @@ int64_t ak_exist_string_obj(ObjectData* obj, StringData* key) {
   return res;
 }
 
-HOT_FUNC_VM
 int64_t ak_exist_int_obj(ObjectData* obj, int64_t key) {
   if (obj->isCollection()) {
     return collectionOffsetContains(obj, key);
@@ -383,12 +378,10 @@ TypedValue& getDefaultIfNullCell(TypedValue* tv, TypedValue& def) {
   return *ret;
 }
 
-HOT_FUNC_VM
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
-HOT_FUNC_VM
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   int64_t i;
   return UNLIKELY(key->isStrictlyInteger(i)) ?
@@ -396,7 +389,6 @@ TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
          getDefaultIfNullCell(a->nvGet(key), def);
 }
 
-HOT_FUNC_VM
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
@@ -406,12 +398,10 @@ int32_t arrayVsize(ArrayData* ad) {
 }
 
 
-HOT_FUNC_VM
 TypedValue* ldGblAddrHelper(StringData* name) {
   return g_vmContext->m_globalVarEnv->lookup(name);
 }
 
-HOT_FUNC_VM
 TypedValue* ldGblAddrDefHelper(StringData* name) {
   return g_vmContext->m_globalVarEnv->lookupAdd(name);
 }

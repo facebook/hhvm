@@ -306,7 +306,7 @@ void raiseArrayIndexNotice(const int64_t index) {
   raise_notice("Undefined index: %" PRId64, index);
 }
 
-HOT_FUNC int64_t modHelper(int64_t left, int64_t right) {
+int64_t modHelper(int64_t left, int64_t right) {
   // We already dealt with divide-by-zero up in hhbctranslator.
   assert(right != 0);
   return left % right;

@@ -46,7 +46,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(ExecutionContext, g_context);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 
 int64_t VMExecutionContext::s_threadIdxCounter = 0;
 Mutex VMExecutionContext::s_threadIdxLock;

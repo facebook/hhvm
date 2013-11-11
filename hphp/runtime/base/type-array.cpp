@@ -62,7 +62,6 @@ Array &Array::operator=(ArrayData *data) {
   return *this;
 }
 
-HOT_FUNC
 Array &Array::operator=(CArrRef arr) {
   ArrayBase::operator=(arr.m_px);
   return *this;
@@ -269,7 +268,6 @@ Array &Array::merge(CArrRef arr) {
   return mergeImpl(arr.m_px);
 }
 
-HOT_FUNC
 Array &Array::plusImpl(ArrayData *data) {
   if (m_px == nullptr || data == nullptr) {
     throw BadArrayMergeException();
@@ -287,7 +285,6 @@ Array &Array::plusImpl(ArrayData *data) {
   return *this;
 }
 
-HOT_FUNC
 Array &Array::mergeImpl(ArrayData *data) {
   if (m_px == nullptr || data == nullptr) {
     throw BadArrayMergeException();
@@ -393,7 +390,6 @@ bool Array::more(CVarRef v2) const {
 ///////////////////////////////////////////////////////////////////////////////
 // iterator
 
-HOT_FUNC
 ArrayIter Array::begin(const String& context /* = null_string */) const {
   return ArrayIter(m_px);
 }

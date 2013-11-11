@@ -13,13 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <string.h>
 #include "hphp/util/hash.h"
 #include "hphp/util/util.h"
+#include <string.h>
 
 namespace HPHP {
 
-HOT_FUNC
 strhash_t hash_string_i(const char *arKey, int nKeyLength) {
   return hash_string_i_inline(arKey, nKeyLength);
 }

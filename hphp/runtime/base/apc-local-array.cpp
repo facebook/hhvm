@@ -25,7 +25,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-HOT_FUNC
 CVarRef APCLocalArray::getValueRef(ssize_t pos) const {
   APCVariant *sv = m_arr->getValue(pos);
   DataType t = sv->getType();
@@ -66,7 +65,6 @@ ALWAYS_INLINE APCLocalArray::~APCLocalArray() {
   m_arr->decRef();
 }
 
-HOT_FUNC
 void APCLocalArray::Release(ArrayData* ad) {
   auto const smap = asSharedArray(ad);
   smap->~APCLocalArray();

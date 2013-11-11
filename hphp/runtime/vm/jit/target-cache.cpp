@@ -159,7 +159,7 @@ static void methodCacheFatal(Class* cls, StringData* name, Class* ctx) {
   not_reached();
 }
 
-HOT_FUNC_VM NEVER_INLINE
+NEVER_INLINE
 static void methodCacheNullFunc(ActRec* ar, StringData* name) {
   raise_warning("Invalid argument: function: method '%s' not found",
                 name->data());
@@ -167,7 +167,7 @@ static void methodCacheNullFunc(ActRec* ar, StringData* name) {
 }
 
 template<bool Fatal>
-HOT_FUNC_VM NEVER_INLINE
+NEVER_INLINE
 static void methodCacheSlowerPath(MethodCache* mce,
                                   ActRec* ar,
                                   StringData* name,
@@ -215,7 +215,7 @@ static void methodCacheSlowerPath(MethodCache* mce,
 }
 
 template<bool Fatal>
-HOT_FUNC_VM NEVER_INLINE
+NEVER_INLINE
 static void methodCacheMagicOrStatic(MethodCache* mce,
                                      ActRec* ar,
                                      StringData* name,
@@ -246,7 +246,7 @@ static void methodCacheMagicOrStatic(MethodCache* mce,
 }
 
 template<bool Fatal>
-HOT_FUNC_VM NEVER_INLINE
+NEVER_INLINE
 static void staticPublicSlowPath(MethodCache* mce,
                                  ActRec* ar,
                                  Class* cls,
@@ -261,7 +261,6 @@ static void staticPublicSlowPath(MethodCache* mce,
 }
 
 template<bool Fatal>
-HOT_FUNC_VM
 void methodCacheSlowPath(MethodCache* mce,
                          ActRec* ar,
                          StringData* name,

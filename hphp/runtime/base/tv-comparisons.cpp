@@ -468,16 +468,10 @@ bool tvSame(TypedValue tv1, TypedValue tv2) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * XXX: HOT_FUNC selections are basically whatever random choices were
- * in the old code ... we should probably re-evaluate this.
- */
-
 bool cellEqual(Cell cell, bool val) {
   return cellRelOp(Eq(), cell, val);
 }
 
-HOT_FUNC
 bool cellEqual(Cell cell, int64_t val) {
   return cellRelOp(Eq(), cell, val);
 }
@@ -506,7 +500,6 @@ bool cellEqual(Cell c1, Cell c2) {
   return cellRelOp(Eq(), c1, c2);
 }
 
-HOT_FUNC
 bool tvEqual(TypedValue tv1, TypedValue tv2) {
   return tvRelOp(Eq(), tv1, tv2);
 }
@@ -543,7 +536,6 @@ bool cellLess(Cell c1, Cell c2) {
   return cellRelOp(Lt(), c1, c2);
 }
 
-HOT_FUNC
 bool tvLess(TypedValue tv1, TypedValue tv2) {
   return tvRelOp(Lt(), tv1, tv2);
 }
@@ -552,7 +544,6 @@ bool cellGreater(Cell cell, bool val) {
   return cellRelOp(Gt(), cell, val);
 }
 
-//NB: was HOT_FUNC in old code ... dunno if this makes sense anymore.
 bool cellGreater(Cell cell, int64_t val) {
   return cellRelOp(Gt(), cell, val);
 }

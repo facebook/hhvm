@@ -113,7 +113,6 @@ TCA funcBodyHelper(ActRec* fp, void* sp) {
   return tca;
 }
 
-HOT_FUNC_VM
 int64_t decodeCufIterHelper(Iter* it, TypedValue func) {
   DECLARE_FRAME_POINTER(framePtr);
 

@@ -33,7 +33,7 @@ static std::set<ThreadInfo*> s_thread_infos;
 
 __thread char* ThreadInfo::t_stackbase = 0;
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(ThreadInfo, ThreadInfo::s_threadInfo);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
 
 ThreadInfo::ThreadInfo()
     : m_stacklimit(0), m_executing(Idling) {

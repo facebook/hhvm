@@ -350,12 +350,10 @@ bool ArrayData::IsValidKey(CVarRef k) {
 
 // constructors/destructors
 
-HOT_FUNC
 ArrayData *ArrayData::Create() {
   return ArrayInit((ssize_t)0).create();
 }
 
-HOT_FUNC
 ArrayData *ArrayData::Create(CVarRef value) {
   ArrayInit init(1);
   init.set(value);

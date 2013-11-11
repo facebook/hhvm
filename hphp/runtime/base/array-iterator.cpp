@@ -40,12 +40,10 @@ const StaticString
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayIter
 
-HOT_FUNC
 ArrayIter::ArrayIter(const ArrayData* data) {
   arrInit(data);
 }
 
-HOT_FUNC
 ArrayIter::ArrayIter(CArrRef array) {
   arrInit(array.get());
 }
@@ -88,7 +86,6 @@ ArrayIter::ArrayIter(const ArrayIter& iter) {
   }
 }
 
-HOT_FUNC
 void ArrayIter::arrInit(const ArrayData* arr) {
   setArrayData(arr);
   if (arr) {
@@ -177,7 +174,6 @@ void ArrayIter::cellInit(const Cell& c) {
   }
 }
 
-HOT_FUNC
 void ArrayIter::destruct() {
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
@@ -337,7 +333,6 @@ Variant ArrayIter::firstHelper(bool keyishMode /* = false */) {
   }
 }
 
-HOT_FUNC
 Variant ArrayIter::second() {
   if (LIKELY(hasArrayData())) {
     assert(m_pos != ArrayData::invalid_index);
@@ -391,7 +386,6 @@ Variant ArrayIter::second() {
   }
 }
 
-HOT_FUNC
 CVarRef ArrayIter::secondRef() {
   if (!hasArrayData()) {
     throw FatalErrorException("taking reference on iterator objects");
@@ -403,7 +397,6 @@ CVarRef ArrayIter::secondRef() {
   return ad->getValueRef(m_pos);
 }
 
-HOT_FUNC
 CVarRef ArrayIter::secondRefPlus() {
   if (LIKELY(hasArrayData())) {
     assert(m_pos != ArrayData::invalid_index);
@@ -864,24 +857,21 @@ void Iter::cfree() {
  * iterators.
  */
 template<class Coll, class Style>
-HOT_FUNC static
-void iterValue(ArrayIter* iter, TypedValue* out) {
+static void iterValue(ArrayIter* iter, TypedValue* out) {
   Variant val = iter->iterValue<Coll>(Style());
   assert(val.getRawType() != KindOfRef);
   cellDup(*val.asTypedValue(), *out);
 }
 
 template<class Coll, class Style>
-HOT_FUNC static
-void iterKey(ArrayIter* iter, TypedValue* out) {
+static void iterKey(ArrayIter* iter, TypedValue* out) {
   Variant key = iter->iterKey<Coll>(Style());
   cellDup(*key.asTypedValue(), *out);
 }
 
 template<class Coll, class Style>
-HOT_FUNC static
-int64_t iterInit(Iter* dest, Coll* coll,
-                 TypedValue* valOut, TypedValue* keyOut) {
+static int64_t iterInit(Iter* dest, Coll* coll,
+                        TypedValue* valOut, TypedValue* keyOut) {
   int64_t size = coll->size();
   if (UNLIKELY(size == 0)) {
     decRefObj(coll);
@@ -905,7 +895,7 @@ int64_t iterInit(Iter* dest, Coll* coll,
 }
 
 template<class Coll, class Style>
-HOT_FUNC static
+static
 int64_t iterNext(ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut) {
   if (!iter->iterNext<Coll>(Style())) {
     iter->~ArrayIter();
@@ -1017,7 +1007,6 @@ int64_t new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
   return 0LL;
 }
 
-HOT_FUNC
 int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
   valOut = tvToCell(valOut);
@@ -1051,7 +1040,6 @@ cold:
 }
 
 template <bool withRef>
-HOT_FUNC
 int64_t new_iter_array_key(Iter* dest, ArrayData* ad,
                            TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
@@ -1118,7 +1106,6 @@ class FreeObj {
  * If exceptions are thrown, new_iter_object_any takes care of decRefing the
  * object.
  */
-HOT_FUNC
 static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
                                    TypedValue* valOut, TypedValue* keyOut) {
   valOut = tvToCell(valOut);
@@ -1189,7 +1176,6 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
   return 1LL;
 }
 
-HOT_FUNC
 int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator or Object\n",
@@ -1271,7 +1257,6 @@ int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 }
 
 template <bool withRef>
-HOT_FUNC
 static int64_t iter_next_collection(
     Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
@@ -1306,7 +1291,6 @@ static int64_t iter_next_collection(
   }
 }
 
-HOT_FUNC
 int64_t iter_next(Iter* iter, TypedValue* valOut) {
   TRACE(2, "iter_next: I %p\n", iter);
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
@@ -1348,7 +1332,6 @@ cold:
 }
 
 template <bool withRef>
-HOT_FUNC
 int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iter_next_key: I %p\n", iter);
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
@@ -1409,7 +1392,6 @@ template int64_t iter_next_key<true>(Iter* dest,
 ///////////////////////////////////////////////////////////////////////////////
 // MIter functions
 
-HOT_FUNC
 int64_t new_miter_array_key(Iter* dest, RefData* v1,
                            TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, v1);
@@ -1432,7 +1414,6 @@ int64_t new_miter_array_key(Iter* dest, RefData* v1,
   return 1LL;
 }
 
-HOT_FUNC
 int64_t new_miter_object(Iter* dest, RefData* ref, Class* ctx,
                       TypedValue* valOut, TypedValue* keyOut) {
   ObjectData *obj = ref->tv()->m_data.pobj;
@@ -1474,7 +1455,6 @@ int64_t new_miter_other(Iter* dest, RefData* data) {
   return 0LL;
 }
 
-HOT_FUNC
 int64_t miter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "miter_next_key: I %p\n", iter);
   MArrayIter& marr = iter->marr();

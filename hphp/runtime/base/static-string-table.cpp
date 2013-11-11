@@ -211,7 +211,6 @@ StringData* makeStaticString(const char* str) {
   return makeStaticString(str, strlen(str));
 }
 
-HOT_FUNC
 StringData* makeStaticString(char c) {
   // TODO(#2880477): should this be inlined?
   return precomputed_chars[(uint8_t)c];

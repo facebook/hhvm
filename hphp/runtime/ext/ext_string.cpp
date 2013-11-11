@@ -533,7 +533,7 @@ Variant f_strtok(const String& str, CVarRef token /* = null_variant */) {
   return ret;
 }
 
-HOT_FUNC static
+static
 Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
                     int &count, bool caseSensitive) {
   if (search.is(KindOfArray)) {
@@ -572,7 +572,6 @@ Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
                         caseSensitive);
 }
 
-HOT_FUNC
 static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                            int &count, bool caseSensitive) {
   if (subject.is(KindOfArray)) {
@@ -594,7 +593,6 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                      caseSensitive);
 }
 
-HOT_FUNC
 Variant f_str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                       VRefParam count /* = null */) {
   int nCount = 0;

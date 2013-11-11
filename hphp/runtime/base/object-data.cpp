@@ -40,7 +40,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 // current maximum object identifier
-IMPLEMENT_THREAD_LOCAL_NO_CHECK_HOT(int, ObjectData::os_max_id);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(int, ObjectData::os_max_id);
 
 int ObjectData::GetMaxId() {
   return *(ObjectData::os_max_id.getCheck());
@@ -66,7 +66,6 @@ static_assert(sizeof(ObjectData) == 32, "Change this only on purpose");
 
 //////////////////////////////////////////////////////////////////////
 
-HOT_FUNC
 bool ObjectData::destruct() {
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall)) {
     g_vmContext->m_liveBCObjs.erase(this);
@@ -109,7 +108,6 @@ const String& ObjectData::o_getClassName() const {
   return *(const String*)(&m_cls->preClass()->nameRef());
 }
 
-HOT_FUNC
 bool ObjectData::o_instanceof(const String& s) const {
   Class* cls = Unit::lookupClass(s.get());
   if (!cls) return false;
@@ -347,7 +345,6 @@ Variant ObjectData::o_setRef(const String& propName, CVarRef v,
   return o_setImpl<RefResult>(propName, ref(v), context);
 }
 
-HOT_FUNC
 void ObjectData::o_setArray(CArrRef properties) {
   for (ArrayIter iter(properties); iter; ++iter) {
     String k = iter.first().toString();
@@ -890,7 +887,6 @@ ObjectData* ObjectData::callCustomInstanceInit() {
   return this;
 }
 
-HOT_FUNC_VM
 ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
   return new (MM().smartMallocSizeLogged(size))
     ObjectData(cls, NoInit::noinit);

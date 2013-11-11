@@ -30,7 +30,6 @@ const Object Object::s_nullObject = Object();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-HOT_FUNC
 Object::~Object() {
   // force it out of line
 }

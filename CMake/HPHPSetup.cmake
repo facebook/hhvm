@@ -1,6 +1,14 @@
 include(Options)
 
-if (APPLE)
+# Do this until cmake has a define for ARMv8
+INCLUDE(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __AARCH64EL__
+#error Not ARMv8  
+#endif
+int main() { return 0; }" IS_AARCH64)
+
+if (APPLE OR IS_AARCH64)
 	set(HHVM_ANCHOR_SYMS -Wl,-u,_register_libevent_server)
 else()
 	set(ENABLE_FASTCGI 1)

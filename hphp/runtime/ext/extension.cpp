@@ -204,6 +204,9 @@ Array Extension::GetLoadedExtensions() {
   Array ret = Array::Create();
   for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
        iter != s_registered_extensions->end(); ++iter) {
+    if (iter->second->m_name == s_apc && !apcExtension::Enable) {
+      continue;
+    }
     ret.append(iter->second->m_name);
   }
   return ret;

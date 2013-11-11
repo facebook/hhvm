@@ -50,8 +50,7 @@ const StaticString
   s_offsetGet("offsetGet"),
   s___call("__call"),
   s___callStatic("__callStatic"),
-  s_serialize("serialize"),
-  s_storage("storage");
+  s_serialize("serialize");
 
 static Array ArrayObject_toArray(const ObjectData* obj) {
   bool visible, accessible, unset;

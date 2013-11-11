@@ -45,6 +45,11 @@
 
 #define PCRE_CACHE_SIZE 4096
 
+/* Only defined in pcre >= 8.32 */
+#ifndef PCRE_STUDY_JIT_COMPILE
+# define PCRE_STUDY_JIT_COMPILE 0
+#endif
+
 enum {
   PHP_PCRE_NO_ERROR = 0,
   PHP_PCRE_INTERNAL_ERROR,
@@ -258,7 +263,7 @@ pcre_get_compiled_regex_cache(const String& regex) {
      a warning if we encounter an unknown modifier. */
   int coptions = 0;
   int poptions = 0;
-  int do_study = false;
+  bool do_study = false;
   while (*pp != 0) {
     switch (*pp++) {
       /* Perl compatible options */
@@ -307,8 +312,8 @@ pcre_get_compiled_regex_cache(const String& regex) {
   /* If study option was specified, study the pattern and
      store the result in extra for passing to pcre_exec. */
   pcre_extra *extra = nullptr;
-  if (do_study) {
-    int soptions = 0;
+  if (do_study || PCRE_STUDY_JIT_COMPILE) {
+    int soptions = PCRE_STUDY_JIT_COMPILE;
     extra = pcre_study(re, soptions, &error);
     if (extra) {
       extra->flags |= PCRE_EXTRA_MATCH_LIMIT |

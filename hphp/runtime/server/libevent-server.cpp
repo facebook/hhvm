@@ -170,12 +170,11 @@ int LibEventServer::getAcceptSocket() {
                                           m_port, RuntimeOption::ServerBacklog);
   if (ret < 0) {
     if (errno == EADDRINUSE && m_takeover_agent) {
-      m_accept_sock = m_takeover_agent->takeover();
-      if (m_accept_sock < 0) {
+      ret = m_takeover_agent->takeover();
+      if (ret < 0) {
         return -1;
       }
-      if (useExistingFd(m_server, m_accept_sock, false /* no listen */) != 0) {
-        m_accept_sock = -1;
+      if (useExistingFd(m_server, ret, false /* no listen */) != 0) {
         return -1;
       }
     } else {

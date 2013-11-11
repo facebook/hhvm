@@ -165,78 +165,6 @@ concat_si(StringData* v1, int64_t v2) {
   return ret;
 }
 
-int64_t eq_null_str(StringData* v1) {
-  int64_t retval = v1->empty();
-  decRefStr(v1);
-  return retval;
-}
-
-int64_t eq_bool_str(int64_t v1, StringData* v2) {
-  // The truth table for v2->toBoolean() ? v1 : !v1
-  //   looks like:
-  //      \ v2:0 | v2:1
-  // v1:0 |   1  |   0
-  // v1:1 |   0  |   1
-  //
-  // which is nothing but nxor.
-  int64_t v2i = int64_t(v2->toBoolean());
-  assert(v2i == 0ll || v2i == 1ll);
-  assert(v1  == 0ll || v1  == 1ll);
-  int64_t retval = (v2i ^ v1) ^ 1;
-  assert(retval == 0ll || retval == 1ll);
-  decRefStr(v2);
-  return retval;
-}
-
-int64_t eq_int_str(int64_t v1, StringData* v2) {
-  int64_t lval; double dval;
-  DataType ret = is_numeric_string(v2->data(), v2->size(), &lval, &dval, 1);
-  decRefStr(v2);
-  if (ret == KindOfInt64) {
-    return v1 == lval;
-  } else if (ret == KindOfDouble) {
-    return (double)v1 == dval;
-  } else {
-    return v1 == 0;
-  }
-}
-
-int64_t eq_str_str(StringData* v1, StringData* v2) {
-  int64_t retval = v1->equal(v2);
-  decRefStr(v2);
-  decRefStr(v1);
-  return retval;
-}
-
-int64_t same_str_str(StringData* v1, StringData* v2) {
-  int64_t retval = v1 == v2 || v1->same(v2);
-  decRefStr(v2);
-  decRefStr(v1);
-  return retval;
-}
-
-int64_t str0_to_bool(StringData* sd) {
-  int64_t retval = sd->toBoolean();
-  return retval;
-}
-
-int64_t str_to_bool(StringData* sd) {
-  int64_t retval = str0_to_bool(sd);
-  decRefStr(sd);
-  return retval;
-}
-
-int64_t arr0_to_bool(ArrayData* ad) {
-  return ad->size() != 0;
-}
-
-int64_t arr_to_bool(ArrayData* ad) {
-  assert(Transl::Translator::Get()->stateIsDirty());
-  int64_t retval = arr0_to_bool(ad);
-  decRefArr(ad);
-  return retval;
-}
-
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
                    const char* fname) {
   return g_hphp_compiler_parse(s, sz, md5, fname);
@@ -304,12 +232,6 @@ void raiseWarning(const StringData* sd) {
 
 void raiseArrayIndexNotice(const int64_t index) {
   raise_notice("Undefined index: %" PRId64, index);
-}
-
-int64_t modHelper(int64_t left, int64_t right) {
-  // We already dealt with divide-by-zero up in hhbctranslator.
-  assert(right != 0);
-  return left % right;
 }
 
 void defClsHelper(PreClass* preClass) {

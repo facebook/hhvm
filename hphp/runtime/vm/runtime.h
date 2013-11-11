@@ -36,25 +36,12 @@ StringData* concat_is(int64_t v1, StringData* v2);
 StringData* concat_si(StringData* v1, int64_t v2);
 StringData* concat_ss(StringData* v1, StringData* v2);
 
-int64_t eq_null_str(StringData* v1);
-int64_t eq_bool_str(int64_t v1, StringData* v2);
-int64_t eq_int_str(int64_t v1, StringData* v2);
-int64_t eq_str_str(StringData* v1, StringData* v2);
-
-int64_t same_str_str(StringData* v1, StringData* v2);
-
-int64_t str0_to_bool(StringData* sd);
-int64_t str_to_bool(StringData* sd);
-int64_t arr0_to_bool(ArrayData* ad);
-int64_t arr_to_bool(ArrayData* ad);
-
 void print_string(StringData* s);
 void print_int(int64_t i);
 void print_boolean(bool val);
 
 void raiseWarning(const StringData* sd);
 void raiseArrayIndexNotice(int64_t index);
-int64_t modHelper(int64_t left, int64_t right);
 
 inline Iter*
 frame_iter(const ActRec* fp, int i) {

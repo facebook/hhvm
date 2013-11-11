@@ -41,8 +41,8 @@ class TextUtil {
   // Returns str with any instances of ch trimmed from the right end.
   static std::string StripTrailing(const std::string& str, char ch);
 
-  // Split "/foo/bar/x" into "/foo", "/foo/bar", "/foo/bar/x".
-  // path must start with "/".
+  // Split "/foo/bar/x" into "/foo", "/foo/bar".
+  // Also splits "foo/bar/x" into "foo", "foo/bar".
   static std::vector<std::string> MakePathList(const std::string& path);
 };
 

@@ -1282,6 +1282,7 @@ class SingleTestFile {
 
   private array $pipes = null;
   private resource $process = null;
+  private string $actual_test_command = "";
 
   public function __construct(Framework $f, string $p) {
     $this->framework = $f;
@@ -1318,6 +1319,8 @@ class SingleTestFile {
           if ($this->checkForWarnings($line)) {
             $this->error_information .= "PRETEST WARNING FOR ".
                                         $this->name.PHP_EOL.$line.PHP_EOL;
+            $this->error_information .= $this->getTestRunStr("RUN TEST FILE: ").
+                                        PHP_EOL;
           }
           continue;
         }
@@ -1348,7 +1351,9 @@ class SingleTestFile {
             // The Xdebug extension is not loaded. No code coverage will be gen
             // HipHop Notice: Use of undefined constant DRIZZLE_CON_NONE
             $line = remove_string_from_text($line, __DIR__, "");
-            $this->error_information .= PHP_EOL.$line.PHP_EOL.PHP_EOL;
+            $this->error_information .= PHP_EOL.$line.PHP_EOL;
+            $this->error_information .= $this->getTestRunStr("RUN TEST FILE: ").
+                                        PHP_EOL.PHP_EOL;
             continue;
           } else if ($this->checkForFatals($line)) {
             // We have a fatal after the tests have supposedly started
@@ -1360,6 +1365,8 @@ class SingleTestFile {
             $line = remove_string_from_text($line, __DIR__, "");
             $this->fatal_information .= PHP_EOL.$this->name.
               PHP_EOL.$line.PHP_EOL.PHP_EOL;
+            $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
+                                        PHP_EOL.PHP_EOL;
             break;
           }
         }
@@ -1391,17 +1398,23 @@ class SingleTestFile {
       }
       if ($status === null) {
         $status = Statuses::UNKNOWN;
-        $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL;
+        $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL;
+        $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
+                                    PHP_EOL.PHP_EOL;
         $this->stat_information = $test.PHP_EOL.$status.PHP_EOL;
         $continue_testing = false;
         break;
       } else if ($status === Statuses::TIMEOUT) {
-        $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL;
+        $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL;
+        $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
+                                    PHP_EOL.PHP_EOL;
         $this->stat_information = $test.PHP_EOL.$status.PHP_EOL;
         $continue_testing = false;
         break;
       } else if ($this->checkForFatals($status)) {
         $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL;
+        $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
+                                    PHP_EOL.PHP_EOL;
         $status = Statuses::FATAL;
         $continue_testing = false;
         break;
@@ -1409,6 +1422,8 @@ class SingleTestFile {
         // Warnings are special. We may get one or more warnings, but then
         // a real test status will come afterwards.
         $this->error_information .= PHP_EOL.$status.PHP_EOL.PHP_EOL;
+        $this->error_information .= $this->getTestRunStr("RUN TEST FILE: ").
+                                    PHP_EOL.PHP_EOL;
         continue;
       }
     } while (!feof($this->pipes[1]) &&
@@ -1459,6 +1474,8 @@ class SingleTestFile {
                 " and now is ".$status.PHP_EOL, !Options::$csv_only);
         $this->diff_information .= "----------------------".PHP_EOL;
         $this->diff_information .= $test.PHP_EOL.PHP_EOL;
+        $this->diff_information .= $this->getTestRunStr("RUN TEST FILE: ").
+                                   PHP_EOL.PHP_EOL;
         $this->diff_information .= "EXPECTED: ".
                              $this->framework->
                              current_test_statuses[$test].
@@ -1479,6 +1496,8 @@ class SingleTestFile {
         $this->diff_information .= "----------------------".PHP_EOL;
         $this->diff_information .= "Maybe haven't see this test before: ".
                                    $test.PHP_EOL.PHP_EOL;
+        $this->diff_information .= $this->getTestRunStr("RUN TEST FILE: ").
+                                   PHP_EOL.PHP_EOL;
       } else {
         verbose(Colors::GRAY.Statuses::PASS.Colors::NONE, !Options::$csv_only);
       }
@@ -1514,6 +1533,11 @@ class SingleTestFile {
           preg_match(PHPUnitPatterns::$num_skips_inc_pattern,
                      $line) !==1 ) {
         $this->error_information .= $line.PHP_EOL;
+        if (preg_match($this->framework->test_name_pattern, $line) === 1) {
+          $this->error_information .= PHP_EOL.
+                                      $this->getTestRunStr("RUN TEST FILE: ").
+                                      PHP_EOL.PHP_EOL;
+        }
       }
       $line = $this->getLine();
     }
@@ -1558,15 +1582,14 @@ class SingleTestFile {
   }
 
   private function initialize(): bool {
-    $test_command = "";
     if ($this->framework->env_vars !== null) {
       foreach($this->framework->env_vars as $var => $val) {
-        $test_command .= "export ".$var."=\"".$val."\" && ";
+        $this->actual_test_command .= "export ".$var."=\"".$val."\" && ";
       }
     }
-    $test_command .= str_replace("%test%", $this->name,
-                                 $this->framework->test_command);
-    verbose("Command: ".$test_command."\n", Options::$verbose);
+    $this->actual_test_command .= str_replace("%test%", $this->name,
+                                  $this->framework->test_command);
+    verbose("Command: ".$this->actual_test_command."\n", Options::$verbose);
 
     $descriptorspec = array(
       0 => array("pipe", "r"),
@@ -1580,8 +1603,8 @@ class SingleTestFile {
     if ($this->framework->env_vars !== null) {
       $env = array_merge($env, $this->framework->env_vars->toArray());
     }
-    $this->process = proc_open($test_command, $descriptorspec, $this->pipes,
-                               $this->framework->test_path, $env);
+    $this->process = proc_open($this->actual_test_command, $descriptorspec,
+                               $this->pipes, $this->framework->test_path, $env);
 
     return is_resource($this->process);
   }
@@ -1637,6 +1660,14 @@ class SingleTestFile {
       return true;
     }
     return false;
+  }
+
+  private function getTestRunStr(string $prologue = "",
+                                 string $epilogue = ""): string {
+    $test_run =  $prologue;
+    $test_run .= " cd ".$this->framework->test_path." && ";
+    $test_run .= $this->actual_test_command;
+    return $test_run;
   }
 }
 
@@ -1935,12 +1966,6 @@ function print_diffs(Framework $framework): void {
     print PHP_EOL."********* ".strtoupper($framework->name).
           " **********".PHP_EOL;
     print $contents;
-    print "To run tests for ".strtoupper($framework->name).
-          " use this command: \n";
-    $dir = $framework->test_path;
-    $command = "cd ".$dir." && ";
-    $command .= $framework->test_command;
-    print $command." [TEST NAME]".PHP_EOL;
   }
 }
 
@@ -1973,10 +1998,15 @@ function print_summary_information(string $summary_file): void {
       $print_str .= PHP_EOL;
       print $print_str;
     } else {
-      print "\nALL TESTS COMPLETE!\n";
-      print "SUMMARY:\n";
+      print PHP_EOL."ALL TESTS COMPLETE!".PHP_EOL;
+      print "SUMMARY:".PHP_EOL;
       foreach ($decoded_results as $key => $value) {
         print $key."=".$value.PHP_EOL;
+      print PHP_EOL;
+      print "To run differing tests (if they exist), see above for the".PHP_EOL;
+      print "commands or the results/.diff file. To run erroring or".PHP_EOL;
+      print "fataling tests see results/.errors and results/.fatals".PHP_EOL;
+      print "files, respectively".PHP_EOL;
       }
     }
   } else {

@@ -380,11 +380,19 @@ abstract class Framework {
         !$info->containsKey("test_file_search_roots")) {
       throw new Exception("Provide install, git and test file search info");
     }
-    // Set all possible Framework information
+
+    // Set Framework information for install
     $this->setInstallRoot($info->get("install_root"));
     $this->setGitPath($info->get("git_path"));
     $this->setGitCommit($info->get("git_commit"));
     $this->setTestFileSearchRoots($info->get("test_file_search_roots"));
+
+    // Install if not already installed
+    if (!$this->isInstalled()) {
+      $this->install();
+    }
+
+    // Set all possible other framework information
     $this->setBlacklist($info->get("blacklist"));
     $this->setPullRequests($info->get("pull_requests"));
     $this->setEnvVars($info->get("env_vars"));
@@ -604,11 +612,7 @@ abstract class Framework {
   // delete the framework from your repo). The proxy could make things a bit
   // adventurous, so we will see how this works out after some time to test it
   // out
-  public function install(): void {
-    if ($this->isInstalled()) {
-      verbose($this->name." already installed.\n", Options::$verbose);
-      return;
-    }
+  private function install(): void {
     verbose("Installing ".$this->name.
             ". You will see white dots during install.....\n",
             !Options::$csv_only);
@@ -830,7 +834,7 @@ abstract class Framework {
     }
   }
 
-  public function isInstalled(): bool {
+  private function isInstalled(): bool {
     /****************************************
      *  See if framework is already installed
      *  installed.
@@ -1678,12 +1682,6 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
     error(usage());
   }
 
-  /************************
-   * Install the frameworks
-   ************************/
-  fork_buckets($frameworks,
-              function($bucket) {return run_install_bucket($bucket);});
-
   return $frameworks;
 }
 
@@ -1718,16 +1716,6 @@ function fork_buckets(Traversable $data, Callable $callback): int {
   }
 
   return $thread_ret_val;
-}
-
-function run_install_bucket(array $bucket): int {
-  $ret = 0;
-  foreach ($bucket as $framework) {
-    if (!$framework->isInstalled()) {
-      $framework->install();
-    }
-  }
-  return $ret;
 }
 
 function run_tests(Vector $frameworks): void {

@@ -581,6 +581,7 @@ static Object pdo_stmt_instantiate(sp_PDOConnection dbh, const String& clsname,
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
                                const String& clsname, CVarRef ctor_args) {
+  object->o_set("queryString", stmt->query_string);
   if (clsname.empty()) {
     return;
   }
@@ -588,7 +589,6 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
   if (!cls) {
     return;
   }
-  object->o_set("queryString", stmt->query_string);
   TypedValue ret;
   ObjectData* inst = object.get();
   g_vmContext->invokeFunc(&ret, cls->getCtor(), ctor_args.toArray(), inst);

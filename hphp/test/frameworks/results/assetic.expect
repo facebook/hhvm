@@ -151,13 +151,13 @@ Assetic\Test\Asset\GlobAssetTest::testLoad
 Assetic\Test\Asset\GlobAssetTest::testRecursiveIteration
 .
 Assetic\Test\Asset\HttpAssetTest::testGetLastModified
-F
+.
 Assetic\Test\Asset\HttpAssetTest::testInvalidUrl
 .
 Assetic\Test\Asset\HttpAssetTest::testMalformedUrl
 .
 Assetic\Test\Asset\HttpAssetTest::testProtocolRelativeUrl
-E
+.
 Assetic\Test\Asset\HttpAssetTest::testSourceMetadata
 .
 Assetic\Test\Asset\StringAssetTest::testAutomaticLoad

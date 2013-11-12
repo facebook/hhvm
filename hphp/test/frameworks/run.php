@@ -358,7 +358,6 @@ abstract class Framework {
   public ?Map $current_test_statuses = null;
   public Set $test_files = null;
   public Map $env_vars;
-  public bool $success;
 
 
   private string $install_root;
@@ -393,8 +392,6 @@ abstract class Framework {
     $this->setTestNamePattern($info->get("test_name_pattern"));
     $this->setTestFilePattern($info->get("test_file_pattern"));
     $this->setTestCommand($info->get("test_command"));
-    // Assume framework testing is successful until otherwise proven
-    $this->success = true;
   }
 
   abstract protected function getInfo(): Map;
@@ -1455,8 +1452,6 @@ class SingleTestFile {
         // though can print in color. Check this out later.
         verbose(Colors::GREEN.Statuses::PASS.Colors::NONE, !Options::$csv_only);
       } else {
-        // We are different than we expected
-        $this->framework->success = false;
         // Red if we go from pass to something else
         if ($this->framework->current_test_statuses[$test] === '.') {
           verbose(Colors::RED.Statuses::FAIL.Colors::NONE, !Options::$csv_only);
@@ -1489,7 +1484,6 @@ class SingleTestFile {
       // before, but we are having an issue getting to the actual tests
       // (e.g., yii is one test suite that has behaved this way).
       if ($this->framework->current_test_statuses !== null) {
-        $this->framework->success = false;
         verbose(Colors::LIGHTBLUE.Statuses::FAIL.Colors::NONE,
                 !Options::$csv_only);
         verbose(PHP_EOL."Different status in ".$this->framework->name.
@@ -1593,12 +1587,13 @@ class SingleTestFile {
     );
 
     $env = $_ENV;
+    // Use the proxies in case the test needs access to the outside world
+    $env = array_merge($env, ProxyInformation::$proxies->toArray());
     if ($this->framework->env_vars !== null) {
       $env = array_merge($env, $this->framework->env_vars->toArray());
     }
-    // $_ENV will passed in by default if the environment var is null
     $this->process = proc_open($test_command, $descriptorspec, $this->pipes,
-                               $this->framework->test_path, null);
+                               $this->framework->test_path, $env);
 
     return is_resource($this->process);
   }
@@ -1820,9 +1815,6 @@ function run_tests(Vector $frameworks): void {
   $all_tests_success = true;
   $diff_frameworks = Vector {};
   foreach ($frameworks as $framework) {
-    if (!$framework->success) {
-      $all_tests_success = false;
-    }
     $pct = $framework->getPassPercentage();
     $encoded_result = json_encode(array($framework->name => $pct));
     if (!(file_exists($summary_file))) {
@@ -1840,7 +1832,12 @@ function run_tests(Vector $frameworks): void {
     if (!file_exists($framework->expect_file)) {
       copy($framework->out_file, $framework->expect_file);
       Framework::sortFile($framework->expect_file);
-    } else if (filesize($framework->diff_file) > 0) {
+    } else if (file_get_contents($framework->expect_file) !==
+               file_get_contents($framework->out_file)) {
+      $all_tests_success = false;
+    }
+
+    if (filesize($framework->diff_file) > 0) {
       $diff_frameworks[] = $framework;
     }
   }

@@ -25,19 +25,21 @@ static class DateExtension : public Extension {
  public:
   DateExtension() : Extension("date") { }
   void moduleInit() {
-    auto callback = [](const HPHP::String& value, void *p) -> bool {
-      assert(p == nullptr);
-      if (value.empty()) {
-        return false;
-      }
-      return f_date_default_timezone_set(value);
-    };
     IniSetting::Bind(
-      "date.timezone", 
-      g_context->getDefaultTimeZone().c_str(), 
-      callback, 
+      "date.timezone",
+      g_context->getDefaultTimeZone().c_str(),
+      dateTimezoneIniCallback,
       nullptr
     );
+  }
+
+ private:
+  static bool dateTimezoneIniCallback(const HPHP::String& value, void *p) {
+    assert(p == nullptr);
+    if (value.empty()) {
+      return false;
+    }
+    return f_date_default_timezone_set(value);
   }
 } s_date_extension;
 

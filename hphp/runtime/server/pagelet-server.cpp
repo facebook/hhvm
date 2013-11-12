@@ -35,207 +35,244 @@ using std::deque;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class PageletTransport : public Transport, public Synchronizable {
-public:
-  PageletTransport(const String& url, CArrRef headers, const String& postData,
-                   const String& remoteHost, const set<string> &rfc1867UploadedFiles,
-                   CArrRef files, int timeoutSeconds)
-      : m_refCount(0),
-        m_timeoutSeconds(timeoutSeconds),
-        m_done(false),
-        m_code(0) {
+PageletTransport::PageletTransport(
+    const String& url, CArrRef headers, const String& postData,
+    const String& remoteHost, const set<string> &rfc1867UploadedFiles,
+    CArrRef files, int timeoutSeconds)
+    : m_refCount(0),
+      m_timeoutSeconds(timeoutSeconds),
+      m_done(false),
+      m_code(0),
+      m_event(nullptr) {
 
-    Timer::GetMonotonicTime(m_queueTime);
-    m_threadType = ThreadType::PageletThread;
+  Timer::GetMonotonicTime(m_queueTime);
+  m_threadType = ThreadType::PageletThread;
 
-    m_url.append(url.data(), url.size());
-    m_remoteHost.append(remoteHost.data(), remoteHost.size());
+  m_url.append(url.data(), url.size());
+  m_remoteHost.append(remoteHost.data(), remoteHost.size());
 
-    for (ArrayIter iter(headers); iter; ++iter) {
-      Variant key = iter.first();
-      String header = iter.second();
-      if (key.isString() && !key.toString().empty()) {
-        m_requestHeaders[key.toString().data()].push_back(header.data());
+  for (ArrayIter iter(headers); iter; ++iter) {
+    Variant key = iter.first();
+    String header = iter.second();
+    if (key.isString() && !key.toString().empty()) {
+      m_requestHeaders[key.toString().data()].push_back(header.data());
+    } else {
+      int pos = header.find(": ");
+      if (pos >= 0) {
+        string name = header.substr(0, pos).data();
+        string value = header.substr(pos + 2).data();
+        m_requestHeaders[name].push_back(value);
       } else {
-        int pos = header.find(": ");
-        if (pos >= 0) {
-          string name = header.substr(0, pos).data();
-          string value = header.substr(pos + 2).data();
-          m_requestHeaders[name].push_back(value);
-        } else {
-          Logger::Error("throwing away bad header: %s", header.data());
-        }
+        Logger::Error("throwing away bad header: %s", header.data());
       }
     }
-
-    if (postData.empty()) {
-      m_get = true;
-    } else {
-      m_get = false;
-      m_postData.append(postData.data(), postData.size());
-    }
-
-    disableCompression(); // so we don't have to decompress during sendImpl()
-    m_rfc1867UploadedFiles = rfc1867UploadedFiles;
-    m_files = (std::string) f_serialize(files);
   }
 
-  /**
-   * Implementing Transport...
-   */
-  virtual const char *getUrl() {
-    return m_url.c_str();
+  if (postData.empty()) {
+    m_get = true;
+  } else {
+    m_get = false;
+    m_postData.append(postData.data(), postData.size());
   }
-  virtual const char *getRemoteHost() {
-    return m_remoteHost.c_str();
+
+  disableCompression(); // so we don't have to decompress during sendImpl()
+  m_rfc1867UploadedFiles = rfc1867UploadedFiles;
+  m_files = (std::string) f_serialize(files);
+}
+
+const char *PageletTransport::getUrl() {
+  return m_url.c_str();
+}
+
+const char *PageletTransport::getRemoteHost() {
+  return m_remoteHost.c_str();
+}
+
+uint16_t PageletTransport::getRemotePort() {
+  return 0;
+}
+
+const void *PageletTransport::getPostData(int &size) {
+  size = m_postData.size();
+  return m_postData.data();
+}
+
+Transport::Method PageletTransport::getMethod() {
+  return m_get ? Transport::Method::GET : Transport::Method::POST;
+}
+
+std::string PageletTransport::getHeader(const char *name) {
+  assert(name && *name);
+  HeaderMap::const_iterator iter = m_requestHeaders.find(name);
+  if (iter != m_requestHeaders.end()) {
+    return iter->second[0];
   }
-  virtual uint16_t getRemotePort() {
-    return 0;
+  return "";
+}
+
+void PageletTransport::getHeaders(HeaderMap &headers) {
+  headers = m_requestHeaders;
+}
+
+void PageletTransport::addHeaderImpl(const char *name, const char *value) {
+  assert(name && *name);
+  assert(value);
+  m_responseHeaders[name].push_back(value);
+}
+
+void PageletTransport::removeHeaderImpl(const char *name) {
+  assert(name && *name);
+  m_responseHeaders.erase(name);
+}
+
+void PageletTransport::sendImpl(const void *data, int size, int code,
+                      bool chunked) {
+  m_response.append((const char*)data, size);
+  if (code) {
+    m_code = code;
   }
-  virtual const void *getPostData(int &size) {
-    size = m_postData.size();
-    return m_postData.data();
+}
+
+void PageletTransport::onSendEndImpl() {
+  Lock lock(this);
+  m_done = true;
+  if (m_event) {
+    m_event->finish();
   }
-  virtual Method getMethod() {
-    return m_get ? Transport::Method::GET : Transport::Method::POST;
+  notify();
+}
+
+bool PageletTransport::isUploadedFile(const String& filename) {
+  return m_rfc1867UploadedFiles.find(filename.c_str()) !=
+         m_rfc1867UploadedFiles.end();
+}
+
+bool PageletTransport::moveUploadedFile(const String& filename,
+    const String& destination) {
+  if (!isUploadedFile(filename.c_str())) {
+    Logger::Error("%s is not an uploaded file.", filename.c_str());
+    return false;
   }
-  virtual std::string getHeader(const char *name) {
-    assert(name && *name);
-    HeaderMap::const_iterator iter = m_requestHeaders.find(name);
-    if (iter != m_requestHeaders.end()) {
-      return iter->second[0];
-    }
-    return "";
+  return moveUploadedFileHelper(filename, destination);
+}
+
+bool PageletTransport::getFiles(string &files) {
+  files = m_files;
+  return true;
+}
+
+bool PageletTransport::isDone() {
+  return m_done;
+}
+
+void PageletTransport::addToPipeline(const string &s) {
+  Lock lock(this);
+  m_pipeline.push_back(s);
+  if (m_event) {
+    m_event->finish();
+    m_event = nullptr;
   }
-  virtual void getHeaders(HeaderMap &headers) {
-    headers = m_requestHeaders;
-  }
-  virtual void addHeaderImpl(const char *name, const char *value) {
-    assert(name && *name);
-    assert(value);
-    m_responseHeaders[name].push_back(value);
-  }
-  virtual void removeHeaderImpl(const char *name) {
-    assert(name && *name);
-    m_responseHeaders.erase(name);
-  }
-  virtual void sendImpl(const void *data, int size, int code,
-                        bool chunked) {
-    m_response.append((const char*)data, size);
-    if (code) {
-      m_code = code;
-    }
-  }
-  virtual void onSendEndImpl() {
+  notify();
+}
+
+bool PageletTransport::isPipelineEmpty() {
+  Lock lock(this);
+  return m_pipeline.empty();
+}
+
+bool PageletTransport::getResults(
+  Array &results,
+  PageletServerTaskEvent* next_event
+) {
+  {
     Lock lock(this);
-    m_done = true;
-    notify();
-  }
-  virtual bool isUploadedFile(const String& filename) {
-    return m_rfc1867UploadedFiles.find(filename.c_str()) !=
-           m_rfc1867UploadedFiles.end();
-  }
-  virtual bool moveUploadedFile(const String& filename, const String& destination) {
-    if (!isUploadedFile(filename.c_str())) {
-      Logger::Error("%s is not an uploaded file.", filename.c_str());
+    assert(m_done || !m_pipeline.empty());
+    while (!m_pipeline.empty()) {
+      string &str = m_pipeline.front();
+      String response(str.c_str(), str.size(), CopyString);
+      results.append(response);
+      m_pipeline.pop_front();
+    }
+    if (m_done) {
+      String response(m_response.c_str(), m_response.size(), CopyString);
+      results.append(response);
+      return true;
+    } else {
+      m_event = next_event;
+      m_event->setJob(this);
       return false;
     }
-    return moveUploadedFileHelper(filename, destination);
   }
-  virtual bool getFiles(string &files) {
-    files = m_files;
-    return true;
-  }
+}
 
-  // task interface
-  bool isDone() {
-    return m_done;
-  }
-
-  void addToPipeline(const string &s) {
+String PageletTransport::getResults(
+  Array &headers,
+  int &code,
+  int64_t timeout_ms
+) {
+  {
     Lock lock(this);
-    m_pipeline.push_back(s);
-    notify();
-  }
-
-  bool isPipelineEmpty() {
-    Lock lock(this);
-    return m_pipeline.empty();
-  }
-
-  String getResults(Array &headers, int &code, int64_t timeout_ms) {
-    {
-      Lock lock(this);
-      while (!m_done && m_pipeline.empty()) {
-        if (timeout_ms > 0) {
-          long seconds = timeout_ms / 1000;
-          long long nanosecs = (timeout_ms % 1000) * 1000000;
-          if (!wait(seconds, nanosecs)) {
-            code = -1;
-            return "";
-          }
-        } else {
-          wait();
+    while (!m_done && m_pipeline.empty()) {
+      if (timeout_ms > 0) {
+        long seconds = timeout_ms / 1000;
+        long long nanosecs = (timeout_ms % 1000) * 1000000;
+        if (!wait(seconds, nanosecs)) {
+          code = -1;
+          return "";
         }
-      }
-
-      if (!m_pipeline.empty()) {
-        // intermediate results do not have headers and code
-        string ret = m_pipeline.front();
-        m_pipeline.pop_front();
-        code = 0;
-        return ret;
+      } else {
+        wait();
       }
     }
 
-    String response(m_response.c_str(), m_response.size(), CopyString);
-    headers = Array::Create();
-    for (HeaderMap::const_iterator iter = m_responseHeaders.begin();
-         iter != m_responseHeaders.end(); ++iter) {
-      for (unsigned int i = 0; i < iter->second.size(); i++) {
-        StringBuffer sb;
-        sb.append(iter->first);
-        sb.append(": ");
-        sb.append(iter->second[i]);
-        headers.append(sb.detach());
-      }
-    }
-    code = m_code;
-    return response;
-  }
-
-  // ref counting
-  void incRefCount() {
-    ++m_refCount;
-  }
-  void decRefCount() {
-    assert(m_refCount.load() > 0);
-    if (--m_refCount == 0) {
-      delete this;
+    if (!m_pipeline.empty()) {
+      // intermediate results do not have headers and code
+      string ret = m_pipeline.front();
+      m_pipeline.pop_front();
+      code = 0;
+      return ret;
     }
   }
 
-  const timespec& getStartTimer() const { return m_queueTime; }
-  int getTimeoutSeconds() const { return m_timeoutSeconds; }
-private:
-  std::atomic<int> m_refCount;
-  int m_timeoutSeconds;
+  String response(m_response.c_str(), m_response.size(), CopyString);
+  headers = Array::Create();
+  for (HeaderMap::const_iterator iter = m_responseHeaders.begin();
+       iter != m_responseHeaders.end(); ++iter) {
+    for (unsigned int i = 0; i < iter->second.size(); i++) {
+      StringBuffer sb;
+      sb.append(iter->first);
+      sb.append(": ");
+      sb.append(iter->second[i]);
+      headers.append(sb.detach());
+    }
+  }
+  code = m_code;
+  return response;
+}
 
-  string m_url;
-  HeaderMap m_requestHeaders;
-  bool m_get;
-  string m_postData;
-  string m_remoteHost;
+// ref counting
+void PageletTransport::incRefCount() {
+  ++m_refCount;
+}
 
-  bool m_done;
-  HeaderMap m_responseHeaders;
-  string m_response;
-  int m_code;
+void PageletTransport::decRefCount() {
+  assert(m_refCount.load() > 0);
+  if (--m_refCount == 0) {
+    delete this;
+  }
+}
 
-  deque<string> m_pipeline; // the intermediate pagelet results
-  set<string> m_rfc1867UploadedFiles;
-  string m_files; // serialized to use as $_FILES
-};
+const timespec& PageletTransport::getStartTimer() const {
+  return m_queueTime;
+}
+
+int PageletTransport::getTimeoutSeconds() const {
+  return m_timeoutSeconds;
+}
+
+void PageletTransport::setAsioEvent(PageletServerTaskEvent *event) {
+  m_event = event;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -337,11 +374,14 @@ void PageletServer::Stop() {
   }
 }
 
-Resource PageletServer::TaskStart(const String& url, CArrRef headers,
-                                  const String& remote_host,
-                                  const String& post_data /* = null_string */,
-                                  CArrRef files /* = null_array */,
-                                  int timeoutSeconds /* = -1 */) {
+Resource PageletServer::TaskStart(
+  const String& url, CArrRef headers,
+  const String& remote_host,
+  const String& post_data /* = null_string */,
+  CArrRef files /* = null_array */,
+  int timeoutSeconds /* = -1 */,
+  PageletServerTaskEvent *event /* = nullptr*/
+) {
   static auto pageletOverflowCounter =
     ServiceData::createTimeseries("pagelet_overflow",
                                   { ServiceData::StatsType::COUNT });
@@ -365,6 +405,12 @@ Resource PageletServer::TaskStart(const String& url, CArrRef headers,
   Lock l(s_dispatchMutex);
   if (s_dispatcher) {
     job->incRefCount(); // paired with worker's decRefCount()
+
+    if (event) {
+      job->setAsioEvent(event);
+      event->setJob(job);
+    }
+
     s_dispatcher->enqueue(job);
     return ret;
   }

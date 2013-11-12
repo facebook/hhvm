@@ -494,7 +494,7 @@ abstract class Framework {
   protected function setTestCommand(?string $test_command = null,
                                     bool $redirect = true): void {
     if ($test_command === null) {
-      $this->test_command = get_hhvm_build()." ".__DIR__.
+      $this->test_command = get_runtime_build()." ".__DIR__.
                             "/vendor/bin/phpunit --debug";
       $this->test_command .= " %test%";
     } else {
@@ -654,28 +654,12 @@ abstract class Framework {
       verbose("Retrieving dependencies for framework ".$this->name.".....\n",
               Options::$verbose);
       // Use the timeout to avoid curl SlowTimer timeouts and problems
-      $dependencies_install_cmd = get_hhvm_build()." ".
+      $dependencies_install_cmd = get_runtime_build()." ".
                                   "-v ResourceLimit.SocketDefaultTimeout=30 ".
                                   __DIR__.
                                   "/composer.phar install --dev";
       $install_ret = run_install($dependencies_install_cmd, $composer_json_path,
                                  ProxyInformation::$proxies);
-      // If provided the option at the command line, try Zend if we are not
-      // successful with hhvm. For example, I know hhvm had trouble
-      // downloading dependencies for Symfony, but Zend worked.
-      //
-      // FIX: Should we try to install a vanilla zend binary here instead of
-      // relying on user to specify a path? Should we try to determine if zend
-      // is already installed via a $PATH variable?
-      if (Options::$zend_path !== null && $install_ret !== 0) {
-         verbose("HHVM didn't work for downloading dependencies for ".
-                 $this->name." Trying Zend.\n", !Options::$csv_only);
-        $dependencies_install_cmd = Options::$zend_path." ".__DIR__.
-                                          "/composer.phar install --dev";
-        $install_ret = run_install($dependencies_install_cmd,
-                                   $composer_json_path,
-                                   ProxyInformation::$proxies);
-      }
 
       if ($install_ret !== 0) {
         // Let's just really make sure the dependencies didn't get installed
@@ -990,9 +974,9 @@ class FacebookPhpSdk extends Framework {
       "test_file_search_roots" => Set {
         __DIR__."/frameworks/facebook-php-sdk/tests",
       },
-      "test_command" => get_hhvm_build()." ".__DIR__.
+      "test_command" => get_runtime_build()." ".__DIR__.
                       "/vendor/bin/phpunit --debug ".
-                      "--bootstrap tests/bootstrap.php %test% 2>&1",
+                      "--bootstrap tests/bootstrap.php %test%",
       "test_path" => __DIR__."/frameworks/facebook-php-sdk",
     };
   }
@@ -1066,8 +1050,8 @@ class Mediawiki extends Framework {
         __DIR__."/frameworks/mediawiki-core/tests/phpunit",
       },
       "test_path" => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
-      "test_command" => get_hhvm_build()." phpunit.php --debug ".
-                      "--exclude-group=Database %test% 2>&1",
+      "test_command" => get_runtime_build()." phpunit.php --debug ".
+                      "--exclude-group=Database %test%",
     };
   }
 
@@ -1106,8 +1090,8 @@ class Pear extends Framework {
         __DIR__."/frameworks/pear-core/tests",
       },
       "test_path" => __DIR__."/frameworks/pear-core",
-      "test_command" => get_hhvm_build()." ".__DIR__.
-                            "/vendor/bin/phpunit --debug %test% 2>&1",
+      "test_command" => get_runtime_build()." ".__DIR__.
+                            "/vendor/bin/phpunit --debug %test%",
       "test_name_pattern" => PHPUnitPatterns::$pear_test_name_pattern,
       "test_file_pattern" => PHPUnitPatterns::$pear_test_file_pattern,
       "pull_requests" => Vector {
@@ -1170,9 +1154,9 @@ class PHPUnit extends Framework {
         __DIR__."/frameworks/phpunit/Tests/Util",
       },
       "test_path" => __DIR__."/frameworks/phpunit",
-      "test_command" => get_hhvm_build()." ".__DIR__.
-                       "/frameworks/phpunit/phpunit.php --debug %test% 2>&1",
-      "env_vars" => Map {'PHP_BINARY' => get_hhvm_build(false, true)},
+      "test_command" => get_runtime_build()." ".__DIR__.
+                       "/frameworks/phpunit/phpunit.php --debug %test%",
+      "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
       "blacklist" => Set {
         __DIR__."/frameworks/phpunit/Tests/Util/ConfigurationTest.php",
       }
@@ -1829,9 +1813,9 @@ function run_tests(Vector $frameworks): void {
     // If the first baseline run, make both the same. Otherwise, see if we have
     // a diff file. If not, then all is good. If not, thumbs down because there
     // was a difference between what we ran and what we expected.
+    Framework::sortFile($framework->out_file);
     if (!file_exists($framework->expect_file)) {
       copy($framework->out_file, $framework->expect_file);
-      Framework::sortFile($framework->expect_file);
     } else if (file_get_contents($framework->expect_file) !==
                file_get_contents($framework->out_file)) {
       $all_tests_success = false;
@@ -1907,7 +1891,7 @@ function get_unit_testing_infra_dependencies(): void {
     verbose("\nDownloading PHPUnit in order to run tests. There may be an ".
             "output delay while the download begins.\n", !Options::$csv_only);
     // Use the timeout to avoid curl SlowTimer timeouts and problems
-    $phpunit_install_command = get_hhvm_build()." ".
+    $phpunit_install_command = get_runtime_build()." ".
                                "-v ResourceLimit.SocketDefaultTimeout=30 ".
                                __DIR__.
                                "/composer.phar install --dev --verbose 2>&1";
@@ -2111,28 +2095,27 @@ function usage(): string {
 function oss_test_option_map(): OptionInfoMap {
   return Map {
     'help'                => Pair {'h', "Print help message"},
-    'all'                 => Pair {'a',  "Run tests of all frameworks. The ".
+    'all'                 => Pair {'a', "Run tests of all frameworks. The ".
                                         "frameworks to be run are hardcoded ".
                                         "in a Map in this code."},
     'allexcept'           => Pair {'e', "Run all tests of all frameworks ".
                                         "except for the ones listed. The ".
                                         "tests must be at the end of the ".
                                         "command argument list."},
-    'timeout:'            => Pair {'', "Optional - The maximum amount of ".
-                                        "time, in secs, to allow a individual".
-                                        "test to run. Default is 60 seconds."},
-    'verbose'             => Pair {'v', "Optional - For a lot of messages ".
-                                        "about what is going on."},
-    'zend:'               => Pair {'', "Optional - Try to use zend if ".
-                                        "retrieving dependencies with hhvm ".
-                                        "fails. Currently, zend must be ".
-                                        "installed and the path to the zend ".
-                                        "binary specified."},
-    'redownload'          => Pair {'', "Forces a redownload of the framework ".
+    'timeout:'            => Pair {'',  "The maximum amount of time, in secs, ".
+                                        "to allow a individual test to run.".
+                                        "Default is 60 seconds."},
+    'verbose'             => Pair {'v', "For a lot of messages about what is ".
+                                        "going on."},
+    'zend:'               => Pair {'',  "Use zend to run the tests ".
+                                        "Currently, zend must be installed ".
+                                        "and the path to the zend binary".
+                                        "specified."},
+    'redownload'          => Pair {'',  "Forces a redownload of the framework ".
                                         "code and dependencies."},
-    'record'              => Pair {'', "Forces a new expect file for the ".
+    'record'              => Pair {'',  "Forces a new expect file for the ".
                                         "framework test suite"},
-    'csv'                 => Pair {'', "Just create the machine readable ".
+    'csv'                 => Pair {'',  "Just create the machine readable ".
                                         "summary CSV for parsing and chart ".
                                         "display."},
     'csvheader'           => Pair {'',  "Add a header line for the summary ".
@@ -2271,39 +2254,51 @@ function find_all_files_containing_text(string $text,
   return $files;
 }
 
-function get_hhvm_build(bool $with_jit = true, bool $use_php = false): string {
-  $fbcode_root_dir = __DIR__.'/../../..';
-  $oss_root_dir = __DIR__.'../..';
+function get_runtime_build(bool $with_jit = true,
+                           bool $use_php = false): string {
   $build = "";
-  // See if we are using an internal development build
-  if ((file_exists($fbcode_root_dir."/_bin"))) {
-    $build .= $fbcode_root_dir;
-    if (!$use_php) {
-      $build .= "/_bin/hphp/hhvm/hhvm -v Eval.EnableZendCompat=true";
-    } else {
-      $build .= "/_bin/hphp/hhvm/php";
+
+  // FIX: Should we try to install a vanilla zend binary here instead of
+  // relying on user to specify a path? Should we try to determine if zend
+  // is already installed via a $PATH variable?
+  if (Options::$zend_path !== null) {
+    if (!file_exists(Options::$zend_path)) {
+      error("Zend build does not exists. Are you sure your path is right?");
     }
-  } else if (file_exists($oss_root_dir."/".
-                         idx($_ENV, 'FBMAKE_BIN_ROOT', '_bin'))) {
-    // Maybe we are in OSS land trying this script
-    $build .= $oss_root_dir."/".idx($_ENV, 'FBMAKE_BIN_ROOT', '_bin');
-    if (!$use_php) {
-      $build .= "/hhvm -v Eval.EnableZendCompat=true";
-    } else {
-      $build .= "/php";
-    }
+    $build = Options::$zend_path;
   } else {
-    error("HHVM build doesn't exist. Did you build yet?");
-  }
-  if (!$use_php) {
-    $repo_loc = tempnam('/tmp', 'framework-test');
-    $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
-    $build .= $repo_args;
-    $build .= " --config ".__DIR__."/config.hdf";
-    $build .= " -v Server.IniFile=".__DIR__."/php.ini";
-  }
-  if ($with_jit) {
-    $build .= " -v Eval.Jit=true";
+    $fbcode_root_dir = __DIR__.'/../../..';
+    $oss_root_dir = __DIR__.'../..';
+    // See if we are using an internal development build
+    if ((file_exists($fbcode_root_dir."/_bin"))) {
+      $build .= $fbcode_root_dir;
+      if (!$use_php) {
+        $build .= "/_bin/hphp/hhvm/hhvm -v Eval.EnableZendCompat=true";
+      } else {
+        $build .= "/_bin/hphp/hhvm/php";
+      }
+    } else if (file_exists($oss_root_dir."/".
+                           idx($_ENV, 'FBMAKE_BIN_ROOT', '_bin'))) {
+      // Maybe we are in OSS land trying this script
+      $build .= $oss_root_dir."/".idx($_ENV, 'FBMAKE_BIN_ROOT', '_bin');
+      if (!$use_php) {
+        $build .= "/hhvm -v Eval.EnableZendCompat=true";
+      } else {
+        $build .= "/php";
+      }
+    } else {
+      error("HHVM build doesn't exist. Did you build yet?");
+    }
+    if (!$use_php) {
+      $repo_loc = tempnam('/tmp', 'framework-test');
+      $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
+      $build .= $repo_args;
+      $build .= " --config ".__DIR__."/config.hdf";
+      $build .= " -v Server.IniFile=".__DIR__."/php.ini";
+    }
+    if ($with_jit) {
+      $build .= " -v Eval.Jit=true";
+    }
   }
   return $build;
 }

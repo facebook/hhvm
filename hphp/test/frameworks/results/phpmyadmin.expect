@@ -349,7 +349,7 @@ PMA_ConfigTest::testCheckCookiePath
 PMA_ConfigTest::testCheckGd2
 .
 PMA_ConfigTest::testCheckHTTP
-F
+.
 PMA_ConfigTest::testCheckOutputCompression
 .
 PMA_ConfigTest::testCheckPermissions
@@ -3579,7 +3579,7 @@ PMA_Util_Test::testCreateGISData
 PMA_Util_Test::testGetGISFunctions
 .
 PMA_Util_Test::testGetLatestVersion
-E
+.
 PMA_Util_Test::testPageSelector
 .
 PMA_Util_Test::testVersionToInt with data set #0 

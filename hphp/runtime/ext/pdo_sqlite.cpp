@@ -16,14 +16,46 @@
 */
 
 #include "hphp/runtime/ext/pdo_sqlite.h"
-#include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_stream.h"
-#include "hphp/runtime/ext/ext_sqlite3.h"
 #include <sqlite3.h>
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(pdo_sqlite);
 ///////////////////////////////////////////////////////////////////////////////
+
+struct PDOSqliteError {
+  const char *file;
+  int line;
+  unsigned int errcode;
+  char *errmsg;
+};
+
+class PDOSqliteConnection : public PDOConnection {
+public:
+  PDOSqliteConnection();
+  virtual ~PDOSqliteConnection();
+  virtual bool create(CArrRef options);
+
+  int handleError(const char *file, int line, PDOStatement *stmt = NULL);
+
+  virtual bool support(SupportedMethod method);
+  virtual bool closer();
+  virtual bool preparer(const String& sql, sp_PDOStatement *stmt, CVarRef options);
+  virtual int64_t doer(const String& sql);
+  virtual bool quoter(const String& input, String &quoted, PDOParamType paramtype);
+  virtual bool begin();
+  virtual bool commit();
+  virtual bool rollback();
+  virtual bool setAttribute(int64_t attr, CVarRef value);
+  virtual String lastId(const char *name);
+  virtual bool fetchErr(PDOStatement *stmt, Array &info);
+  virtual int getAttribute(int64_t attr, Variant &value);
+  virtual void persistentShutdown();
+
+private:
+  sqlite3 *m_db;
+  PDOSqliteError m_einfo;
+};
 
 class PDOSqliteStatement : public PDOStatement {
 public:
@@ -270,31 +302,6 @@ int PDOSqliteConnection::getAttribute(int64_t attr, Variant &value) {
 
 void PDOSqliteConnection::persistentShutdown() {
   // do nothing
-}
-
-// hidden in ext/ext_sqlite.cpp
-void php_sqlite3_callback_func(sqlite3_context* context, int argc,
-                               sqlite3_value** argv);
-
-bool PDOSqliteConnection::createFunction(const String& name,
-                                         CVarRef callback,
-                                         int argcount) {
-  if (!f_is_callable(callback)) {
-    raise_warning("function '%s' is not callable", callback.toString().data());
-    return false;
-  }
-
-  c_SQLite3::UserDefinedFuncPtr udf(new c_SQLite3::UserDefinedFunc());
-  auto stat = sqlite3_create_function(m_db, name.data(), argcount, SQLITE_UTF8,
-                                      udf.get(), php_sqlite3_callback_func,
-                                      nullptr, nullptr);
-  if (stat != SQLITE_OK) {
-    return false;
-  }
-  udf->func = callback;
-  udf->argc = argcount;
-  m_udfs.push_back(udf);
-  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -15,6 +15,15 @@ class RecursiveIteratorIterator implements OuterIterator {
   const CHILD_FIRST = 2;
   const CATCH_GET_CHILD = 16;
 
+  const STATE_NEXT = 10;
+  const STATE_TEST = 11;
+  const STATE_SELF = 12;
+  const STATE_CHILD = 13;
+  const STATE_START = 14;
+
+  const NEXT_COMPLETE = 10;
+  const NEXT_REPEAT = 11;
+
   private $iterators = array();
   private $originalIterator;
   private $mode;
@@ -57,7 +66,7 @@ class RecursiveIteratorIterator implements OuterIterator {
         "it is required"
       );
     }
-    $this->iterators[] = array($iterator, 0);
+    $this->iterators[] = array($iterator, self::STATE_START);
     $this->originalIterator = $iterator;
     $this->mode = (int) $mode;
     $this->flags = $flags;
@@ -117,81 +126,88 @@ class RecursiveIteratorIterator implements OuterIterator {
    * @return     mixed   No value is returned.
    */
   public function next() {
-    if ($this->isEmpty()) {
-      return;
+    while ($this->nextInnerImpl() === self::NEXT_REPEAT) {
+      /* loop */
     }
+  }
 
+  /* We maintain a stack of sub-iterators - each of which has a state.
+   *
+   * This walks the overall tree for one step, and updates the corresponding
+   * iterator states as needed (current iterator, parent iterator, child
+   * iterator).
+   *
+   * Returns self::NEXT_COMPLETE if that one step got us to the next position
+   *   (this changes depending on LEAVES_ONLY, SELF_FIRST, and CHILD_FIRST), or
+   *   SELF::NEXT_REPEAT if more steps are needed.
+   */
+  private function nextInnerImpl() {
     $it = $this->getInnerIterator();
-    $maxDepthReached =
-      ($this->maxDepth > -1 && $this->getDepth() >= $this->maxDepth);
-
-    if ($this->mode == self::SELF_FIRST) {
-      if ($this->callHasChildren() &&
-          !$this->getInnerIteratorFlag() &&
-          !$maxDepthReached) {
-        $this->setInnerIteratorFlag(1);
-        $newit = $this->callGetChildren();
-        $newit->rewind();
-        $this->iterators[] = array($newit, 0);
-        $this->beginChildren();
-      } else {
+    switch ($this->getInnerIteratorState()) {
+      case self::STATE_NEXT:
         $it->next();
-        $this->setInnerIteratorFlag(0);
-      }
-
-      if ($this->valid()) {
-        $this->nextElement();
-        return;
-      }
-      if (count($this->iterators) > 1) {
-        $this->endChildren();
-      }
-      array_pop($this->iterators);
-      return $this->next();
-    } else if ($this->mode == self::CHILD_FIRST ||
-               $this->mode == self::LEAVES_ONLY) {
-      if (!$it->valid()) {
-        if (count($this->iterators) > 1) {
-          $this->endChildren();
-        }
-        array_pop($this->iterators);
-        return $this->next();
-      } else if ($this->callHasChildren() && !$maxDepthReached) {
-        if (!$this->getInnerIteratorFlag()) {
-          $this->setInnerIteratorFlag(1);
-          $newit = $this->callGetChildren();
-          $newit->rewind();
-          $this->iterators[] = array($newit, 0);
-          $this->beginChildren();
-          if ($this->valid()) {
-            $this->nextElement();
-            return;
+        // fallthrough
+      case self::STATE_START:
+        if (!$it->valid()) {
+          if ($this->getDepth() > 0) {
+            $this->endChildren();
+            array_pop($this->iterators);
+            return self::NEXT_REPEAT;
           }
-          return $this->next();
+          return self::NEXT_COMPLETE;
+        }
+        $this->setInnerIteratorState(self::STATE_TEST);
+        return self::NEXT_REPEAT;
+      case self::STATE_TEST:
+        if ($this->callHasChildren()) {
+          if ($this->maxDepth == -1 || $this->maxDepth > $this->getDepth()) {
+            switch ($this->mode) {
+              case self::LEAVES_ONLY:
+              case self::CHILD_FIRST:
+                // We never look at SELF in LEAVES_ONLY
+                $this->setInnerIteratorState(self::STATE_CHILD);
+                return self::NEXT_REPEAT;
+              case self::SELF_FIRST:
+                $this->setInnerIteratorState(self::STATE_SELF);
+                return self::NEXT_REPEAT;
+            }
+          } else if ($this->mode == self::LEAVES_ONLY) {
+            // We're already at the recursion limit, and the current node isn't
+            // a leaf
+            $this->setInnerIteratorState(self::STATE_NEXT);
+            return self::NEXT_REPEAT;
+          }
+        }
+        $this->nextElement();
+        $this->setInnerIteratorState(self::STATE_NEXT);
+        return self::NEXT_COMPLETE;
+      case self::STATE_SELF:
+        $this->nextElement();
+        if ($this->mode == self::SELF_FIRST) {
+          $this->setInnerIteratorState(self::STATE_CHILD);
         } else {
-          // CHILD_FIRST: 0 - drill down; 1 - visit 2 - next
-          // LEAVES_ONLY: 0 - drill down; 1 - next
-          if ($this->mode == self::CHILD_FIRST &&
-              $this->getInnerIteratorFlag() == 1) {
-              $this->setInnerIteratorFlag(2);
-            $this->nextElement();
-            return;
-          }
+          $this->setInnerIteratorState(self::STATE_NEXT);
         }
-      }
-
-      $this->setInnerIteratorFlag(0);
-      $it->next();
-      if ($this->valid()) {
-        $this->nextElement();
-        return;
-      }
-      return $this->next();
-    } else {
-      $this->setInnerIteratorFlag(0);
-      $it->next();
-      $this->nextElement();
+        return self::NEXT_COMPLETE;
+      case self::STATE_CHILD:
+        $children = $this->callGetChildren();
+        if (!$children instanceof RecursiveIterator) {
+          throw new Error(
+            'Objects returned by RecursiveIterator::getChildren() must '.
+            'implement RecursiveIterator'
+          );
+        }
+        if ($this->mode == self::CHILD_FIRST) {
+          $this->setInnerIteratorState(self::STATE_SELF);
+        } else {
+          $this->setInnerIteratorState(self::STATE_NEXT);
+        }
+        $children->rewind();
+        $this->iterators[] = array($children, self::STATE_START);
+        $this->beginChildren();
+        return self::NEXT_REPEAT;
     }
+    invariant_violation("This should be unreachable.");
   }
 
   // This doc comment block generated by idl/sysdoc.php
@@ -203,23 +219,17 @@ class RecursiveIteratorIterator implements OuterIterator {
    * @return     mixed   No value is returned.
    */
   public function rewind() {
-    while (count($this->iterators) > 1) {
-      $this->endChildren();
+    while ($this->iterators) {
       array_pop($this->iterators);
+      $this->endChildren();
     }
 
     $it = $this->originalIterator;
-    $this->iterators = array(array($it, 0));
+    $this->iterators = array(array($it, self::STATE_START));
     $it->rewind();
     $this->beginIteration();
 
-    // Make sure the first entry is valid
-    if (!$this->valid()) {
-      $this->next();
-    }
-    else {
-      $this->nextElement();
-    }
+    $this->next();
   }
 
   // This doc comment block generated by idl/sysdoc.php
@@ -232,20 +242,15 @@ class RecursiveIteratorIterator implements OuterIterator {
    *                     FALSE
    */
   public function valid() {
-    if ($this->isEmpty()) {
-      $this->endIteration();
-      return false;
+    $depth = $this->getDepth();
+    while ($depth >= 0) {
+      if ($this->getSubIterator($depth)->valid()) {
+        return true;
+      }
+      $depth--;
     }
-
-    $it = $this->getInnerIterator();
-    if ($it->valid() &&
-        $this->callHasChildren() &&
-        ($this->mode == self::LEAVES_ONLY ||
-         ($this->mode == self::CHILD_FIRST &&
-          $this->getInnerIteratorFlag() == 0))) {
-      return false;
-    }
-    return $it->valid();
+    $this->endIteration();
+    return false;
   }
 
   /**
@@ -365,12 +370,12 @@ class RecursiveIteratorIterator implements OuterIterator {
     return count($this->iterators) == 0;
   }
 
-  private function getInnerIteratorFlag() {
+  private function getInnerIteratorState() {
     return $this->iterators[count($this->iterators)-1][1];
   }
 
-  private function setInnerIteratorFlag($flag) {
-    $this->iterators[count($this->iterators)-1][1] = $flag;
+  private function setInnerIteratorState($state) {
+    $this->iterators[count($this->iterators)-1][1] = $state;
   }
 
   /**

@@ -490,16 +490,11 @@ std::string Process::GetCPUModel() {
   uint32_t regs[4];
   do_cpuid(0, regs);
 
-  char cpu_vendor[13];
-  //uint32_t cpu_high = regs[0];
-  ((uint32_t *)&cpu_vendor)[0] = regs[1];
-  ((uint32_t *)&cpu_vendor)[1] = regs[3];
-  ((uint32_t *)&cpu_vendor)[2] = regs[2];
-  cpu_vendor[12] = '\0';
+  const int vendor_size = sizeof(regs[1])*3;
 
   uint32_t cpu_exthigh = 0;
-  if (strcmp(cpu_vendor, "GenuineIntel") == 0 ||
-      strcmp(cpu_vendor, "AuthenticAMD") == 0) {
+  if (memcmp(regs + 1, "GenuineIntel", vendor_size) == 0 ||
+      memcmp(regs + 1, "AuthenticAMD", vendor_size) == 0) {
     do_cpuid(0x80000000, regs);
     cpu_exthigh = regs[0];
   }

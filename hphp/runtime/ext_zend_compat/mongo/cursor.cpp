@@ -13,6 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
+#pragma GCC optimize "no-strict-aliasing"
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+
 #include <php.h>
 #include <zend_interfaces.h>
 #include <zend_exceptions.h>
@@ -67,7 +71,7 @@ static pthread_mutex_t cursor_mutex = PTHREAD_MUTEX_INITIALIZER;
 		zend_throw_exception(mongo_ce_ConnectionException, "the connection has been terminated, and this cursor is dead", 12 TSRMLS_CC); \
 		return; \
 	}
-	
+
 
 /* externs */
 extern zend_class_entry *mongo_ce_Id, *mongo_ce_MongoClient, *mongo_ce_DB;
@@ -1070,7 +1074,7 @@ int mongo_cursor__do_query(zval *this_ptr, zval *return_value TSRMLS_DC)
 			mongo_cursor_throw(cursor->connection, 14 TSRMLS_CC, "couldn't send query");
 		}
 		efree(buf.start);
-		
+
 		return mongo_util_cursor_failed(cursor TSRMLS_CC);
 	}
 

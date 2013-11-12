@@ -36,7 +36,10 @@ typedef struct {
   uint64_t passed;
   unsigned char passes:1;
   unsigned char length:7;
-  unsigned char buffer[64];
+  union {
+    unsigned char buffer[64];
+    uint64_t      buffer_u64[8];
+  };
 } PHP_TIGER_CTX;
 
 hash_tiger::hash_tiger(bool tiger3, int digest, bool invert /*= false */)
@@ -156,8 +159,7 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context) {
 
   if (context->length > 56) {
     memset(&context->buffer[context->length], 0, 64 - context->length);
-    tiger_compress(context->passes, ((uint64_t *) context->buffer),
-                   context->state);
+    tiger_compress(context->passes, context->buffer_u64, context->state);
     memset(context->buffer, 0, 56);
   } else {
     memset(&context->buffer[context->length], 0, 56 - context->length);
@@ -175,8 +177,7 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context) {
   context->buffer[62] = (unsigned char) ((context->passed >> 48) & 0xff);
   context->buffer[63] = (unsigned char) ((context->passed >> 56) & 0xff);
 #endif
-  tiger_compress(context->passes, ((uint64_t *) context->buffer),
-                 context->state);
+  tiger_compress(context->passes, context->buffer_u64, context->state);
 }
 
 void hash_tiger::hash_init(void *context_) {
@@ -203,18 +204,14 @@ void hash_tiger::hash_update(void *context_, const unsigned char *input,
     if (context->length) {
       i = 64 - context->length;
       memcpy(&context->buffer[context->length], input, i);
-      tiger_compress(context->passes,
-                     ((const uint64_t *) context->buffer),
-                     context->state);
+      tiger_compress(context->passes, context->buffer_u64, context->state);
       memset(context->buffer, 0, 64);
       context->passed += 512;
     }
 
     for (; i + 64 <= len; i += 64) {
       memcpy(context->buffer, &input[i], 64);
-      tiger_compress(context->passes,
-                     ((const uint64_t *) context->buffer),
-                     context->state);
+      tiger_compress(context->passes, context->buffer_u64, context->state);
       context->passed += 512;
     }
     memset(&context->buffer[r], 0, 64-r);

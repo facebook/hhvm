@@ -486,9 +486,9 @@ int fb_compact_unserialize_int64_from_buffer(
 
   } else if ((first & kInt20PrefixMsbMask) == kInt20PrefixMsb) {
     CHECK_ENOUGH(3, p, n);
-    char b[4];
-    memcpy(b, buf + p, 3);
-    uint32_t val = (uint32_t)ntohl(*reinterpret_cast<const uint32_t*>(b));
+    uint32_t b = 0;
+    memcpy(&b, buf + p, 3);
+    uint32_t val = ntohl(b);
     p += 3;
     out = (val >> 8) & kInt20Mask;
 
@@ -501,9 +501,9 @@ int fb_compact_unserialize_int64_from_buffer(
 
   } else if ((first & kInt54PrefixMsbMask) == kInt54PrefixMsb) {
     CHECK_ENOUGH(7, p, n);
-    char b[8];
-    memcpy(b, buf + p, 7);
-    uint64_t val = (uint64_t)ntohll(*reinterpret_cast<const uint64_t*>(b));
+    uint64_t b = 0;
+    memcpy(&b, buf + p, 7);
+    uint64_t val = ntohll(b);
     p += 7;
     out = (val >> 8) & kInt54Mask;
 

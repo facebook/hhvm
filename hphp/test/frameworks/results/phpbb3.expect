@@ -1432,6 +1432,8 @@ phpbb_groupposition_teampage_test::test_move_teampage with data set #7
 S
 phpbb_groupposition_teampage_test::test_move_teampage with data set #8 
 S
+phpbb_lint_test::test_lint
+TIMEOUT
 phpbb_lock_db_test::test_double_lock
 S
 phpbb_lock_db_test::test_double_unlock

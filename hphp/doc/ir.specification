@@ -1782,6 +1782,11 @@ ContArUpdateIdx S0:FramePtr S1:Int
   Updates the internal index of continuation with S1 if necessary,  i.e. if
   S1 is larger than the index. S0 is the pointer to the embedded ActRec.
 
+D:FramePtr LdContActRec S0:PtrToGen
+
+  Loads the Continuation object's ActRec, given a pointer to the
+  continuation object in S0.
+
 D:T LdContArRaw<T> S0:FramePtr S1:ConstInt
 
   Loads raw data from the Continuation object ActRec of which is S0.

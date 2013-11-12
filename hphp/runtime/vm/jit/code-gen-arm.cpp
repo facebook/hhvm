@@ -357,6 +357,7 @@ PUNT_OPCODE(ContSetRunning)
 PUNT_OPCODE(ContValid)
 PUNT_OPCODE(ContArIncKey)
 PUNT_OPCODE(ContArUpdateIdx)
+PUNT_OPCODE(LdContActRec)
 PUNT_OPCODE(StContArRaw)
 PUNT_OPCODE(LdContArValue)
 PUNT_OPCODE(StContArValue)
@@ -741,7 +742,7 @@ void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
   auto kind        = inst->src(1)->getValInt();
   auto const& slot = RawMemSlot::Get(RawMemSlot::Kind(kind));
 
-  auto off = slot.offset() - c_Continuation::getArOffset(curFunc());
+  auto off = slot.offset() - c_Continuation::getArOffset();
   switch (slot.size()) {
     case sz::byte:  m_as.  Ldrb  (destReg.W(), contArReg[off]); break;
     case sz::dword: m_as.  Ldr   (destReg.W(), contArReg[off]); break;

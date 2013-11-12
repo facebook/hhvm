@@ -359,7 +359,7 @@ int c_AsyncFunctionWaitHandle::getLineNumber() {
 }
 
 const ActRec* c_AsyncFunctionWaitHandle::getActRec() {
-  return m_continuation->m_arPtr;
+  return m_continuation->actRec();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

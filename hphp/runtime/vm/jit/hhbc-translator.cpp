@@ -1402,8 +1402,7 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
     ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
     (origFunc->lookupVarId(thisStr) == kInvalidId);
 
-  SSATmp* contAR = gen(
-    LdRaw, Type::PtrToGen, cont, cns(RawMemSlot::ContARPtr));
+  SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
   for (int i = 0; i < origFunc->numNamedLocals(); ++i) {
     assert(i == genFunc->lookupVarId(origFunc->localVarName(i)));
     // Copy the value of the local to the cont object and set the local to
@@ -1461,8 +1460,7 @@ void HhbcTranslator::emitCreateAsync(Id funNameStrId,
     ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
     (origFunc->lookupVarId(thisStr) == kInvalidId);
 
-  SSATmp* contAR = gen(
-    LdRaw, Type::PtrToGen, cont, cns(RawMemSlot::ContARPtr));
+  SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
   for (int i = 0; i < origFunc->numNamedLocals(); ++i) {
     assert(i == genFunc->lookupVarId(origFunc->localVarName(i)));
     // We must generate an AssertLoc because we don't have tracelet
@@ -1534,13 +1532,10 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
 
   assert(curClass());
   SSATmp* cont = gen(LdThis, m_tb->fp());
-  SSATmp* contAR = gen(
-    LdRaw, Type::FramePtr, cont, cns(RawMemSlot::ContARPtr)
-  );
+  SSATmp* contAR = gen(LdContActRec, Type::FramePtr, cont);
 
-  SSATmp* func = gen(LdARFuncPtr, contAR, cns(0));
   SSATmp* funcBody = gen(
-    LdRaw, Type::TCA, func, cns(RawMemSlot::ContEntry)
+    LdRaw, Type::TCA, cont, cns(RawMemSlot::ContEntry)
   );
 
   gen(

@@ -43,11 +43,12 @@ Object f_hphp_create_continuation(const String& clsname,
 void delete_Continuation(ObjectData* od, const Class*) {
   auto const cont = static_cast<c_Continuation*>(od);
   auto const size = cont->getObjectSize();
+  auto const base = cont->getMallocBase();
   cont->~c_Continuation();
   if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSizeLogged(cont, size);
+    return MM().smartFreeSizeLogged(base, size);
   }
-  MM().smartFreeSizeBigLogged(cont, size);
+  MM().smartFreeSizeBigLogged(base, size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -261,7 +262,7 @@ void c_Continuation::call_raise(ObjectData* e) {
 // Compute the bytecode offset at which execution will resume assuming
 // the given label.
 Offset c_Continuation::getExecutionOffset(int32_t label) const {
-  auto func = m_arPtr->m_func;
+  auto func = actRec()->m_func;
   PC funcBase = func->unit()->entry() + func->base();
   assert(toOp(*funcBase) == OpUnpackCont); // One byte
   PC switchOffset = funcBase + 1;

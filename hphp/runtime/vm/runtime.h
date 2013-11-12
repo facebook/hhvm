@@ -64,7 +64,7 @@ frame_local_inner(const ActRec* fp, int n) {
 
 inline c_Continuation*
 frame_continuation(const ActRec* fp) {
-  size_t arOffset = c_Continuation::getArOffset(fp->m_func);
+  auto arOffset = c_Continuation::getArOffset();
   ObjectData* obj = (ObjectData*)((char*)fp - arOffset);
   assert(obj->getVMClass() == c_Continuation::classof());
   return static_cast<c_Continuation*>(obj);

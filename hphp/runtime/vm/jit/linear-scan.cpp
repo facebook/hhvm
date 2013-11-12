@@ -405,10 +405,9 @@ PhysReg forceAlloc(SSATmp& dst) {
     return rVmSp;
   }
 
-  // LdRaw, loading a generator's embedded AR, is the only time we have a
+  // LdContActRec, loading a generator's AR, is the only time we have a
   // pointer to an AR that is not in rVmFp.
-  bool abnormalFramePtr = opc == LdRaw &&
-                          inst->src(1)->getValInt() == RawMemSlot::ContARPtr;
+  bool abnormalFramePtr = opc == LdContActRec;
 
   if (!abnormalFramePtr && dst.isA(Type::FramePtr)) {
     return rVmFp;

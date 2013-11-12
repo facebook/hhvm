@@ -22,6 +22,8 @@
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/system/systemlib.h"
 
+typedef unsigned char* TCA; // "Translation cache address."
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -74,29 +76,49 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
 
   static c_Continuation* Clone(ObjectData* obj);
 
+  /*
+   * The memory allocated by c_Continuation::alloc is laid out as follows:
+   *
+   *                +--------------------------+ high address
+   *                |  c_Continuation object   |
+   *                +--------------------------+
+   *                |         ActRec           |
+   *                +--------------------------+
+   *                |                          |
+   *                |  Function locals and     |
+   *                |  iterators               |
+   * malloc ptr ->  +--------------------------+ low address
+   *
+   * Given a c_Continuation object, the ActRec is just below
+   * the object in memory, followed by the functions locals
+   * and iterators.
+   *
+   */
   static ObjectData* alloc(const Func* origFunc, const Func* genFunc) {
     assert(origFunc);
     assert(genFunc);
 
-    size_t arOffset = getArOffset(genFunc);
-    size_t objectSize = arOffset + sizeof(ActRec);
-    auto const cont = new (MM().objMallocLogged(objectSize)) c_Continuation();
+    size_t contOffset = getContOffset(genFunc);
+    size_t objectSize = contOffset + sizeof(c_Continuation);
+    void* mem = MM().objMallocLogged(objectSize);
+    void* objMem = (char*)mem + contOffset;
+    auto const cont = new (objMem) c_Continuation();
     cont->m_origFunc = const_cast<Func*>(origFunc);
-    cont->m_arPtr = (ActRec*)(uintptr_t(cont) + arOffset);
-    memset((void*)((uintptr_t)cont + sizeof(c_Continuation)), 0,
-           arOffset - sizeof(c_Continuation));
+    memset(mem, 0, contOffset);
+    cont->m_entry = genFunc->getPrologue(0);
+    cont->m_size = objectSize;
     assert(cont->getObjectSize() == objectSize);
     return cont;
   }
 
-  static size_t getArOffset(const Func* genFunc) {
-    size_t arOffset =
-      sizeof(c_Continuation) +
-      sizeof(Iter) * genFunc->numIterators() +
-      sizeof(TypedValue) * genFunc->numLocals();
-    arOffset += sizeof(TypedValue) - 1;
-    arOffset &= ~(sizeof(TypedValue) - 1);
-    return arOffset;
+  static ptrdiff_t getArOffset() {
+    return -sizeof(ActRec);
+  }
+
+  static ptrdiff_t getContOffset(const Func* genFunc) {
+    return sizeof(Iter) * genFunc->numIterators() +
+           sizeof(TypedValue) * genFunc->numLocals() +
+           sizeof(ActRec);
   }
 
   void call_send(Cell& v);
@@ -129,8 +151,12 @@ private:
   explicit c_Continuation(Class* cls = c_Continuation::classof());
   ~c_Continuation();
 
+  void* getMallocBase() {
+    return (char*)(this + 1) - getObjectSize();
+  }
+
   size_t getObjectSize() {
-    return (char*)(m_arPtr + 1) - (char*)this;
+    return m_size;
   }
 
   void dupContVar(const StringData *name, TypedValue *src);
@@ -143,9 +169,11 @@ public:
   Variant m_key;
   Variant m_value;
   Func* m_origFunc;
+  int32_t m_size;
 
-  /* ActRec for continuation (does not live on stack) */
-  ActRec* m_arPtr;
+  /* TCA for function entry */
+  TCA m_entry;
+
   p_AsyncFunctionWaitHandle m_waitHandle;
 
   /* temporary storage used to save the SP when inlining into a continuation */
@@ -153,8 +181,8 @@ public:
 
   String& getCalledClass() { not_reached(); }
 
-  ActRec* actRec() {
-    return m_arPtr;
+  ActRec* actRec() const {
+    return (ActRec *)((char*)this + getArOffset());
   }
 };
 

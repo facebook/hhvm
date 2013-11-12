@@ -581,6 +581,7 @@ O(ContArIncKey,                     ND, S(FramePtr),                   E|Mem) \
 O(ContArUpdateIdx,                  ND, S(FramePtr) S(Int),            E|Mem) \
 O(LdWHState,                    D(Int), S(Obj),                           NF) \
 O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
+O(LdContActRec,                 DParam, S(Obj),                            C) \
 O(LdContArRaw,                  DParam, S(FramePtr) C(Int),               NF) \
 O(StContArRaw,                      ND, S(FramePtr) C(Int) S(Gen),     E|Mem) \
 O(LdContArValue,                DParam, S(FramePtr),                     PRc) \
@@ -1011,7 +1012,7 @@ class RawMemSlot {
  public:
 
   enum Kind {
-    ContLabel, ContIndex, ContARPtr, ContState,
+    ContLabel, ContIndex, ContState,
     StrLen, FuncNumParams, ContEntry, MisCtx, MaxKind
   };
 
@@ -1019,7 +1020,6 @@ class RawMemSlot {
     switch (k) {
       case ContLabel:       return GetContLabel();
       case ContIndex:       return GetContIndex();
-      case ContARPtr:       return GetContARPtr();
       case ContState:       return GetContState();
       case StrLen:          return GetStrLen();
       case FuncNumParams:   return GetFuncNumParams();
@@ -1046,10 +1046,6 @@ class RawMemSlot {
     static RawMemSlot m(CONTOFF(m_index), sz::qword, Type::Int);
     return m;
   }
-  static RawMemSlot& GetContARPtr() {
-    static RawMemSlot m(CONTOFF(m_arPtr), sz::qword, Type::StkPtr);
-    return m;
-  }
   static RawMemSlot& GetContState() {
     static RawMemSlot m(c_Continuation::stateOffset(),
       sz::byte, Type::Int);
@@ -1064,9 +1060,7 @@ class RawMemSlot {
     return m;
   }
   static RawMemSlot& GetContEntry() {
-    static RawMemSlot m(
-      Func::prologueTableOff(),
-      sz::qword, Type::TCA);
+    static RawMemSlot m(CONTOFF(m_entry), sz::qword, Type::TCA);
     return m;
   }
   static RawMemSlot& GetMisCtx() {

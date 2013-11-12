@@ -1,0 +1,5 @@
+Makefile
+config.h
+libzip.so
+zipconf.h
+

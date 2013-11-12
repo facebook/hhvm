@@ -527,7 +527,7 @@ function run_test($options, $test) {
   }
 
   fclose($pipes[0]);
-  $output .= stream_get_contents($pipes[1]);
+  $output .= trim(stream_get_contents($pipes[1]));
   file_put_contents("$test.out", $output);
   fclose($pipes[1]);
 
@@ -551,13 +551,15 @@ function run_test($options, $test) {
 
   if (file_exists("$test.expect")) {
     $diff_cmds = "--text -u";
-    exec("diff --text -u $test.expect $test.out > $test.diff 2>&1",
+    file_put_contents("$test.expect-trimmed",
+                      trim(file_get_contents("$test.expect")));
+    exec("diff --text -u $test.expect-trimmed $test.out > $test.diff 2>&1",
          $_, $status);
     // unix 0 == success
+    unlink("$test.expect-trimmed");
     return !$status;
-
   } else if (file_exists("$test.expectf")) {
-    $wanted_re = file_get_contents("$test.expectf");
+    $wanted_re = trim(file_get_contents("$test.expectf"));
 
     // do preg_quote, but miss out any %r delimited sections
     $temp = "";
@@ -633,7 +635,7 @@ function run_test($options, $test) {
     return preg_match("/^$wanted_re\$/s", $output);
 
   } else if (file_exists("$test.expectregex")) {
-    $wanted_re = file_get_contents("$test.expectregex");
+    $wanted_re = trim(file_get_contents("$test.expectregex"));
 
     # a poor man's aide for debugging
     shell_exec("diff --text -u $test.expectregex $test.out > $test.diff 2>&1");

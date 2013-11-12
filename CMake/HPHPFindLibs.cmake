@@ -133,6 +133,7 @@ include_directories("${HPHP_HOME}/hphp/third_party/libmbfl/filter")
 include_directories("${HPHP_HOME}/hphp/third_party/lz4")
 include_directories("${HPHP_HOME}/hphp/third_party/double-conversion/src")
 include_directories("${HPHP_HOME}/hphp/third_party/folly")
+include_directories("${HPHP_HOME}/hphp/third_party/libzip")
 
 # ICU
 find_package(ICU REQUIRED)
@@ -457,6 +458,7 @@ endif()
 	target_link_libraries(${target} lz4)
 	target_link_libraries(${target} double-conversion)
 	target_link_libraries(${target} folly)
+	target_link_libraries(${target} zip_static)
 
 	target_link_libraries(${target} afdt)
 	target_link_libraries(${target} mbfl)

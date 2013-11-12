@@ -6,6 +6,40 @@
  */
 class ZipArchive {
 
+  private resource $zipDir;
+
+  public function __get($name) {
+    switch ($name) {
+      case "status":
+        return $this->getProperty(0);
+      case "statusSys":
+        return $this->getProperty(1);
+      case "numFiles":
+        return $this->getProperty(2);
+      case "filename":
+        return $this->getProperty(3);
+      case "comment":
+        return $this->getProperty(4);
+    }
+    trigger_error("Undefined property: ZipArchive::\$$name");
+    return;
+  }
+
+  public function __isset($name) {
+    switch ($name) {
+      case "status":
+      case "statusSys":
+      case "numFiles":
+      case "filename":
+      case "comment":
+        return true;
+    }
+    return false;
+  }
+
+  <<__Native>>
+  private function getProperty(int $property): mixed;
+
   /**
    * Add a new directory
    *
@@ -31,9 +65,9 @@ class ZipArchive {
    */
   <<__Native>>
   function addFile(string $filename,
-                   string $localname = NULL,
-                   int $start,
-                   int $length): bool;
+                   string $localname = "",
+                   int $start = 0,
+                   int $length = 0): bool;
 
   /**
    * Add a file to a ZIP archive using its contents
@@ -59,7 +93,7 @@ class ZipArchive {
    */
   <<__Native>>
   function addGlob(string $pattern,
-                   int $flags,
+                   int $flags = 0,
                    array $options = array()): bool;
 
   /**
@@ -115,7 +149,7 @@ class ZipArchive {
    */
   <<__Native>>
   function extractTo(string $destination,
-                     mixed $entries): bool;
+                     mixed $entries = array()): bool;
 
   /**
    * Returns the Zip archive comment
@@ -126,7 +160,7 @@ class ZipArchive {
    * @return string - Returns the Zip archive comment.
    */
   <<__Native>>
-  function getArchiveComment(int $flags): string;
+  function getArchiveComment(int $flags = 0): mixed;
 
   /**
    * Returns the comment of an entry using the entry index
@@ -139,7 +173,7 @@ class ZipArchive {
    */
   <<__Native>>
   function getCommentIndex(int $index,
-                           int $flags): string;
+                           int $flags = 0): mixed;
 
   /**
    * Returns the comment of an entry using the entry name
@@ -152,7 +186,7 @@ class ZipArchive {
    */
   <<__Native>>
   function getCommentName(string $name,
-                          int $flags): string;
+                          int $flags = 0): mixed;
 
   /**
    * Returns the entry contents using its index
@@ -168,8 +202,8 @@ class ZipArchive {
    */
   <<__Native>>
   function getFromIndex(int $index,
-                        int $length,
-                        int $flags): string;
+                        int $length = 0,
+                        int $flags): mixed;
 
   /**
    * Returns the entry contents using its name
@@ -185,8 +219,8 @@ class ZipArchive {
    */
   <<__Native>>
   function getFromName(string $name,
-                       int $length,
-                       int $flags): string;
+                       int $length = 0,
+                       int $flags): mixed;
 
   /**
    * Returns the name of an entry using its index
@@ -199,7 +233,7 @@ class ZipArchive {
    */
   <<__Native>>
   function getNameIndex(int $index,
-                        int $flags): string;
+                        int $flags = 0): mixed;
 
   /**
    * Returns the status error message, system and/or zip messages
@@ -208,7 +242,7 @@ class ZipArchive {
    *   success.
    */
   <<__Native>>
-  function getStatusString(): string;
+  function getStatusString(): mixed;
 
   /**
    * Get a file handler to the entry defined by its name (read only).
@@ -218,7 +252,7 @@ class ZipArchive {
    * @return resource - Returns a file pointer (resource) on success.
    */
   <<__Native>>
-  function getStream(string $name): resource;
+  function getStream(string $name): mixed;
 
   /**
    * Returns the index of the entry in the archive
@@ -232,7 +266,7 @@ class ZipArchive {
    */
   <<__Native>>
   function locateName(string $name,
-                      int $flags): int;
+                      int $flags = 0): mixed;
 
   /**
    * Open a ZIP file archive
@@ -253,7 +287,7 @@ class ZipArchive {
    */
   <<__Native>>
   function open(string $filename,
-                int $flags): mixed;
+                int $flags = 0): mixed;
 
   /**
    * Renames an entry defined by its index
@@ -325,7 +359,7 @@ class ZipArchive {
    */
   <<__Native>>
   function statIndex(int $index,
-                     int $flags): array;
+                     int $flags = 0): mixed;
 
   /**
    * Get the details of an entry defined by its name.
@@ -341,7 +375,7 @@ class ZipArchive {
    */
   <<__Native>>
   function statName(string $name,
-                    int $flags): array;
+                    int $flags = 0): mixed;
 
   /**
    * Undo all changes done in the archive
@@ -389,7 +423,7 @@ class ZipArchive {
  * @return void -
  */
 <<__Native>>
-function zip_close(resource $zip): void;
+function zip_close(resource $zip): mixed;
 
 /**
  * Close a directory entry
@@ -410,7 +444,7 @@ function zip_entry_close(resource $zip_entry): bool;
  * @return int - The compressed size.
  */
 <<__Native>>
-function zip_entry_compressedsize(resource $zip_entry): int;
+function zip_entry_compressedsize(resource $zip_entry): mixed;
 
 /**
  * Retrieve the compression method of a directory entry
@@ -420,7 +454,7 @@ function zip_entry_compressedsize(resource $zip_entry): int;
  * @return string - The compression method.
  */
 <<__Native>>
-function zip_entry_compressionmethod(resource $zip_entry): string;
+function zip_entry_compressionmethod(resource $zip_entry): mixed;
 
 /**
  * Retrieve the actual file size of a directory entry
@@ -430,7 +464,7 @@ function zip_entry_compressionmethod(resource $zip_entry): string;
  * @return int - The size of the directory entry.
  */
 <<__Native>>
-function zip_entry_filesize(resource $zip_entry): int;
+function zip_entry_filesize(resource $zip_entry): mixed;
 
 /**
  * Retrieve the name of a directory entry
@@ -440,7 +474,7 @@ function zip_entry_filesize(resource $zip_entry): int;
  * @return string - The name of the directory entry.
  */
 <<__Native>>
-function zip_entry_name(resource $zip_entry): string;
+function zip_entry_name(resource $zip_entry): mixed;
 
 /**
  * Open a directory entry for reading
@@ -472,7 +506,7 @@ function zip_entry_open(resource $zip,
  */
 <<__Native>>
 function zip_entry_read(resource $zip_entry,
-                        int $length = 1024): string;
+                        int $length = 1024): mixed;
 
 /**
  * Open a ZIP file archive
@@ -484,7 +518,7 @@ function zip_entry_read(resource $zip_entry,
  *   does not exist or in case of other error.
  */
 <<__Native>>
-function zip_open(string $filename): resource;
+function zip_open(string $filename): mixed;
 
 /**
  * Read next entry in a ZIP file archive
@@ -496,5 +530,5 @@ function zip_open(string $filename): resource;
  *   entries to read, or an error code if an error occurred.
  */
 <<__Native>>
-function zip_read(resource $zip): resource;
+function zip_read(resource $zip): mixed;
 

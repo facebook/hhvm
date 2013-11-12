@@ -114,7 +114,6 @@ no_import = (
     '/ext/wddx',
     '/ext/xmlrpc',
     '/ext/xsl',
-    '/ext/zip',
     '/sapi',
 
     # conscious decision not to match these
@@ -317,6 +316,18 @@ norepo_tests = (
     '/tests/classes/constants_scope_001.php',
     '/tests/lang/static_variation_001.php',
     '/tests/lang/static_variation_002.php',
+    "/ext/zip/tests/bug64342_1.php",
+    "/ext/zip/tests/oo_namelocate.php",
+    "/ext/zip/tests/oo_setcomment.php",
+    "/ext/zip/tests/oo_addfile.php",
+    "/ext/zip/tests/oo_addemptydir.php",
+    "/ext/zip/tests/oo_getnameindex.php",
+    "/ext/zip/tests/bug53579.php",
+    "/ext/zip/tests/oo_getcomment.php",
+    "/ext/zip/tests/bug7658.php",
+    "/ext/zip/tests/oo_extract.php",
+    "/ext/zip/tests/oo_stream.php",
+    "/ext/zip/tests/oo_rename.php"
 )
 
 # Random other files that zend wants
@@ -583,10 +594,10 @@ def walk(filename, source_dir):
             exp = re.sub(r'(\r\n|\r|\n)', '\n', exp.strip())
 
             # PHP puts a newline in that we don't
-            exp = exp.replace('\n\nFatal error:', '\nFatal error:')
-            exp = exp.replace('\n\nCatchable fatal error:', '\nCatchable fatal error:')
-            exp = exp.replace('\n\nWarning:', '\nWarning:')
-            exp = exp.replace('\n\nNotice:', '\nNotice:')
+            exp = exp.replace('\nFatal error:', 'Fatal error:')
+            exp = exp.replace('\nCatchable fatal error:', 'Catchable fatal error:')
+            exp = exp.replace('\nWarning:', 'Warning:')
+            exp = exp.replace('\nNotice:', 'Notice:')
 
             match_rest_of_line = '%s'
             if key == 'EXPECTREGEX':
@@ -605,6 +616,10 @@ def walk(filename, source_dir):
 
     if sections.has_key('EXPECT'):
         exp = sections['EXPECT']
+
+        if '/ext/zip/tests/bug51353.php' in full_dest_filename:
+            exp = exp.replace('100000', '1000')
+
         # we use %a for error messages so always write expectf
         file(full_dest_filename+'.expectf', 'w').write(exp)
     elif sections.has_key('EXPECTREGEX'):
@@ -650,8 +665,10 @@ def walk(filename, source_dir):
                     '<?php\n$_ENV[%s] = %s;\n' % (boom[0], boom[1])
                 )
     if sections.has_key('CLEAN'):
-        if not test.strip().endswith('?>'):
+        if not re.search(r'<\?php.*\?>', test, re.DOTALL):
             test += '?>\n'
+        if not test.endswith('\n'):
+            test += '\n'
         test += sections['CLEAN']
 
     # If you put an exception in here, please send a pull request upstream to
@@ -784,6 +801,20 @@ def walk(filename, source_dir):
     if '/ext/ftp/tests/ftp_' in full_dest_filename:
         test = test.replace('localfile.txt',
             os.path.basename(full_dest_filename).replace('.php', '.txt'))
+    if '/ext/zip/tests/oo_getnameindex.php' in full_dest_filename:
+        test = test.replace('__tmp_oo_rename.zip', '__tmp_oo_rename2.zip')
+        test = test.replace('var_dump($zip->getNameIndex(3));',
+                            'var_dump($zip->getNameIndex(3));\n@unlink($file);')
+    if '/ext/zip/tests/oo_namelocate.php' in full_dest_filename:
+        test = test.replace('__tmp_oo_rename.zip', '__tmp_oo_rename3.zip')
+        test = test.replace('var_dump($zip->getNameIndex(3));',
+                            'var_dump($zip->getNameIndex(3));\n@unlink($file);')
+    if '/ext/zip/tests/oo_addemptydir.php' in full_dest_filename:
+        test = test.replace('__tmp_oo_addfile.zip', '__tmp_oo_addfile2.zip')
+    if '/ext/zip/tests/oo_addfile.php' in full_dest_filename:
+        test = test.replace('__tmp_oo_addfile.zip', '__tmp_oo_addfile3.zip')
+    if '/ext/zip/tests/bug51353.php' in full_dest_filename:
+        test = test.replace('100000', '1000')
     if '/Zend/tests/bug36759.php' in full_dest_filename:
         pseudomain = '$y = new Bar();\n$x = new Foo($y);\n'
         test = test.replace(pseudomain,

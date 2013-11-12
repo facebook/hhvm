@@ -81,7 +81,7 @@ TEST(TestMemFile, BadOpenModes) {
 
 TEST(TestMemFile, EmptyFileInCache) {
   StaticContentCache::TheFileCache = FileCachePtr(new FileCache());
-  StaticContentCache::TheFileCache->write("/no/content/entry", true);
+  StaticContentCache::TheFileCache->write("/no/content/entry");
 
   MemFile mf;
 

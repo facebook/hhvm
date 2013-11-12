@@ -215,7 +215,6 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
           compressed = false;
         }
         sendStaticContent(transport, data, len, 0, compressed, path, ext);
-        StaticContentCache::TheFileCache->adviseOutMemory();
         ServerStats::LogPage(path, 200);
         GetAccessLog().log(transport, vhost);
         return;

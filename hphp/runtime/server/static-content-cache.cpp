@@ -36,14 +36,8 @@ void StaticContentCache::load() {
 
   if (!RuntimeOption::FileCache.empty()) {
     TheFileCache = FileCachePtr(new FileCache());
-    int version =
-      TheFileCache->getVersion(RuntimeOption::FileCache.c_str());
-    if (RuntimeOption::EnableStaticContentMMap && version > 0) {
-      TheFileCache->loadMmap(RuntimeOption::FileCache.c_str(), version);
-    } else {
-      TheFileCache->load(RuntimeOption::FileCache.c_str(),
-                         RuntimeOption::EnableOnDemandUncompress, version);
-    }
+    TheFileCache->loadMmap(RuntimeOption::FileCache.c_str());
+
     Logger::Info("loaded file cache from %s",
                  RuntimeOption::FileCache.c_str());
     return;

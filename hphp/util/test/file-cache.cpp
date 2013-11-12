@@ -16,9 +16,6 @@
 
 #include "hphp/util/file-cache.h"
 
-// to be removed when the old cache compatibility code goes away.
-#include "hphp/util/cache/cache-manager.h"
-
 #include <gtest/gtest.h>
 
 namespace HPHP {
@@ -81,8 +78,8 @@ TEST_F(TestFileCache, WriteAndReadBack) {
 
   FileCache fc;
   fc.write("_unit_test_one_", data_fn);
-  fc.write("_unit_test_two_", false);
-  fc.write("/__invalid__/path/with/directories", true);
+  fc.write("_unit_test_two_");
+  fc.write("/__invalid__/path/with/directories");
 
   string temp_dir;
   ASSERT_TRUE(makeTempDir(&temp_dir));
@@ -94,15 +91,10 @@ TEST_F(TestFileCache, WriteAndReadBack) {
 
   fc.save(cache_fn.c_str());
 
-  // Sniff around the on-disk temp file.
-
-  FileCache ondisk;
-  EXPECT_EQ(ondisk.getVersion(cache_fn.c_str()), 2);
-
   // Read back into another cache.
 
   FileCache fc2;
-  fc2.loadMmap(cache_fn.c_str(), 1);
+  fc2.loadMmap(cache_fn.c_str());
 
   EXPECT_TRUE(fc2.fileExists("_unit_test_one_"));
 
@@ -174,7 +166,7 @@ TEST_F(TestFileCache, HighlyCompressibleData) {
   const char* read_data;
 
   FileCache fc3;
-  fc3.loadMmap(cache_fn.c_str(), 1);
+  fc3.loadMmap(cache_fn.c_str());
   fc3.dump();
 
   ASSERT_TRUE(fc3.fileExists(test_path.c_str()));

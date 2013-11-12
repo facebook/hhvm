@@ -54,7 +54,7 @@ string FileCache::GetRelativePath(const char *path) {
   return relative;
 }
 
-void FileCache::write(const char *name, bool addDirectories /* = true */) {
+void FileCache::write(const char *name) {
   assert(name && *name);
   assert(!exists(name));
 
@@ -81,24 +81,7 @@ void FileCache::save(const char *filename) {
   }
 }
 
-// Holdover from old cache.  To be removed.
-short FileCache::getVersion(const char *filename) {
-  assert(filename && *filename);
-  return 2;
-}
-
-// Holdover from old cache.  To be removed.
-void FileCache::load(const char *filename, bool onDemandUncompress,
-                     short version) {
-  assert(filename && *filename);
-  throw Exception("Non-mmap load not supported");
-}
-
-// Holdover from old cache.  To be removed.
-void FileCache::adviseOutMemory() {
-}
-
-void FileCache::loadMmap(const char *filename, short version) {
+void FileCache::loadMmap(const char *filename) {
   assert(filename && *filename);
 
   if (!cache_manager_->loadCache(filename)) {

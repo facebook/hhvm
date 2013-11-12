@@ -3007,23 +3007,6 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
   );
 }
 
-void CodeGenerator::cgReqInterpret(IRInstruction* inst) {
-  auto offset = inst->extra<ReqInterpret>()->offset;
-  auto destSk = SrcKey { curFunc(), offset };
-  auto const numInstrs = 1;
-
-  if (RuntimeOption::EnableInstructionCounts ||
-      HPHP::Trace::moduleEnabled(HPHP::Trace::stats, 3)) {
-    Stats::emitInc(m_mainCode,
-                   Stats::opcodeToIRPreStatCounter(
-                     Op(*curFunc()->unit()->at(destSk.offset()))),
-                   -1,
-                   true);
-  }
-
-  emitServiceReq(tx64->stubsCode, REQ_INTERPRET, offset, numInstrs);
-}
-
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto extra = inst->extra<ReqRetranslateOpt>();
 
@@ -5689,7 +5672,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   m_as.loadq(rax[offsetof(VMExecutionContext, m_stack) +
                  Stack::topOfStackOffset()], rVmSp);
 
-  emitServiceReq(tx64->mainCode, REQ_RESUME);
+  emitServiceReq(m_mainCode, REQ_RESUME);
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {

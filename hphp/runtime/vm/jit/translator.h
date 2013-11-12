@@ -586,8 +586,8 @@ public:
 };
 
 int getStackDelta(const NormalizedInstruction& ni);
-int64_t getStackPopped(const NormalizedInstruction&);
-int64_t getStackPushed(const NormalizedInstruction&);
+int64_t getStackPopped(PC pc);
+int64_t getStackPushed(PC pc);
 
 enum class ControlFlowInfo {
   None,

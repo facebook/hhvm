@@ -1303,35 +1303,35 @@ int64_t countOperands(uint64_t mask) {
 }
 }
 
-int64_t getStackPopped(const NormalizedInstruction& ni) {
-  switch (ni.op()) {
-    case OpFCall:        return ni.imm[0].u_IVA + kNumActRecCells;
+int64_t getStackPopped(PC pc) {
+  auto op = toOp(*pc);
+  switch (op) {
+    case OpFCall:        return getImm((Op*)pc, 0).u_IVA + kNumActRecCells;
     case OpFCallArray:   return kNumActRecCells + 1;
 
     case OpFCallBuiltin:
     case OpNewPackedArray:
-    case OpCreateCl:     return ni.imm[0].u_IVA;
+    case OpCreateCl:     return getImm((Op*)pc, 0).u_IVA;
 
     default:             break;
   }
 
-  uint64_t mask = getInstrInfo(ni.op()).in;
+  uint64_t mask = getInstrInfo(op).in;
   int64_t count = 0;
 
+  // All instructions with these properties are handled above
+  assert((mask & (StackN | BStackN)) == 0);
+
   if (mask & MVector) {
-    count += ni.immVec.numStackValues();
+    count += getImmVector((Op*)pc).numStackValues();
     mask &= ~MVector;
-  }
-  if (mask & (StackN | BStackN)) {
-    count += ni.imm[0].u_IVA;
-    mask &= ~(StackN | BStackN);
   }
 
   return count + countOperands(mask);
 }
 
-int64_t getStackPushed(const NormalizedInstruction& ni) {
-  return countOperands(getInstrInfo(ni.op()).out);
+int64_t getStackPushed(PC pc) {
+  return countOperands(getInstrInfo(toOp(*pc)).out);
 }
 
 int getStackDelta(const NormalizedInstruction& ni) {

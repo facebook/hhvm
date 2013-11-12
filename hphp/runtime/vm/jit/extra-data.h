@@ -637,7 +637,6 @@ X(LdStackAddr,                  StackOffset);
 X(DecRefStack,                  StackOffset);
 X(DefInlineFP,                  DefInlineFPData);
 X(ReqBindJmp,                   BCOffset);
-X(ReqInterpret,                 BCOffset);
 X(ReqRetranslateOpt,            ReqRetransOptData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);

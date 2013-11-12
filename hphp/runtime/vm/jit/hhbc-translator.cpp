@@ -4579,8 +4579,8 @@ void HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst) {
 void HhbcTranslator::emitInterpOne(const NormalizedInstruction& inst) {
   folly::Optional<Type> checkTypeType;
   auto stackType = interpOutputType(inst, checkTypeType);
-  auto popped = getStackPopped(inst);
-  auto pushed = getStackPushed(inst);
+  auto popped = getStackPopped(inst.pc());
+  auto pushed = getStackPushed(inst.pc());
   FTRACE(1, "emitting InterpOne for {}, result = {}, popped {}, pushed {}\n",
          inst.toString(), stackType.toString(), popped, pushed);
   emitInterpOne(stackType, popped, pushed);
@@ -4825,7 +4825,25 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
   gen(SyncABIRegs, m_tb->fp(), stack);
 
   if (flag == ExitFlag::Interp) {
-    gen(ReqInterpret, BCOffset(targetBcOff));
+    auto interpSk = SrcKey {curFunc(), targetBcOff};
+    auto pc = curUnit()->at(targetBcOff);
+    auto changesPC = opcodeChangesPC(toOp(*pc));
+    auto interpOp = changesPC ? InterpOneCF : InterpOne;
+
+    InterpOneData idata;
+    idata.bcOff = targetBcOff;
+    idata.cellsPopped = getStackPopped(pc);
+    idata.cellsPushed = getStackPushed(pc);
+    idata.opcode = toOp(*pc);
+
+    // Blindly using None as the output type here might seem bogus, but since
+    // this trace is about to end, it doesn't matter for downstream analysis.
+    gen(interpOp, Type::None, idata, m_tb->fp(), stack);
+
+    if (!changesPC) {
+      // If the op changes PC, InterpOneCF handles getting to the right place
+      gen(ReqBindJmp, BCOffset(interpSk.advanced().offset()));
+    }
     return exit;
   }
 

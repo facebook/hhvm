@@ -23,12 +23,6 @@
 // for specialized object tests to get some real VM::Class
 #include "hphp/system/systemlib.h"
 
-namespace std { namespace tr1 {
-  template<> struct hash<HPHP::JIT::Type> {
-    size_t operator()(HPHP::JIT::Type t) const { return t.hash(); }
-  };
-} }
-
 namespace HPHP {  namespace JIT {
 
 namespace {

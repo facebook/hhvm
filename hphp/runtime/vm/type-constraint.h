@@ -17,7 +17,7 @@
 #define incl_HPHP_TYPE_CONSTRAINT_H_
 
 #include <string>
-#include <tr1/functional>
+#include <functional>
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/util/case-insensitive.h"

@@ -54,7 +54,7 @@
 #include <memory>
 #include <deque>
 #include <exception>
-#include <tr1/functional>
+#include <functional>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
@@ -74,12 +74,11 @@
 #if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 4)) || \
   __INTEL_COMPILER || defined(__clang__)
 
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
+#include <unordered_map>
+#include <unordered_set>
 
-#define hphp_hash     std::tr1::hash
+#define hphp_hash     std::hash
 namespace std {
-namespace tr1 {
 template<>
 struct hash<const char*> {
   size_t operator()(const char *s) const {
@@ -87,19 +86,18 @@ struct hash<const char*> {
   }
 };
 }
-}
 
 namespace HPHP {
 template <class _T,class _U,
           class _V = hphp_hash<_T>,class _W = std::equal_to<_T> >
-struct hphp_hash_map : std::tr1::unordered_map<_T,_U,_V,_W> {
-  hphp_hash_map() : std::tr1::unordered_map<_T,_U,_V,_W>(0) {}
+struct hphp_hash_map : std::unordered_map<_T,_U,_V,_W> {
+  hphp_hash_map() : std::unordered_map<_T,_U,_V,_W>(0) {}
 };
 
 template <class _T,
           class _V = hphp_hash<_T>,class _W = std::equal_to<_T> >
-struct hphp_hash_set : std::tr1::unordered_set<_T,_V,_W> {
-  hphp_hash_set() : std::tr1::unordered_set<_T,_V,_W>(0) {}
+struct hphp_hash_set : std::unordered_set<_T,_V,_W> {
+  hphp_hash_set() : std::unordered_set<_T,_V,_W>(0) {}
 };
 }
 

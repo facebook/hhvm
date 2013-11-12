@@ -863,8 +863,11 @@ class ReflectionClass implements Reflector {
   }
 
   private static function fetch_recur($name) {
-    $key = serialize($name);
-    if (isset(self::$fetched[$key])) return self::$fetched[$key];
+    // Only cache for Classes since objects can change at runtime
+    if (is_string($name) && isset(self::$fetched[$name])) {
+      return self::$fetched[$name];
+    }
+
     $info = hphp_get_class_info($name);
     if (empty($info)) {
       throw new ReflectionException("Class $name does not exist");
@@ -894,7 +897,9 @@ class ReflectionClass implements Reflector {
       $info['interfaces'] += $p['interfaces'];
       $info['attributes_rec'] += $p['attributes_rec'];
     }
-    self::$fetched[$key] = $info;
+    if (is_string($name)) {
+      self::$fetched[$name] = $info;
+    }
     return $info;
   }
 

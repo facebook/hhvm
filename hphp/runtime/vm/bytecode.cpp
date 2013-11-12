@@ -1358,13 +1358,26 @@ void VMExecutionContext::shuffleMagicArgs(ActRec* ar) {
   ar->setNumArgs(2);
 }
 
+// This helper only does a stack overflow check for the native stack
+static inline void checkNativeStack() {
+  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
+  // Check whether func's maximum stack usage would overflow the stack.
+  // Both native and VM stack overflows are independently possible.
+  if (!stack_in_bounds(info)) {
+    TRACE(1, "Maximum stack depth exceeded.\n");
+    raise_error("Stack overflow");
+  }
+}
+
+// This helper does a stack overflow check on *both* the native stack
+// and the VM stack.
 static inline void checkStack(Stack& stk, const Func* f) {
   ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
   // Check whether func's maximum stack usage would overflow the stack.
   // Both native and VM stack overflows are independently possible.
   if (!stack_in_bounds(info) ||
       stk.wouldOverflow(f->maxStackCells() + kStackCheckPadding)) {
-    TRACE(1, "Maximum VM stack depth exceeded.\n");
+    TRACE(1, "Maximum stack depth exceeded.\n");
     raise_error("Stack overflow");
   }
 }
@@ -1663,7 +1676,12 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
 
   if (f->attrs() & AttrPhpLeafFn ||
       f->numParams() > kStackCheckReenterPadding - kNumActRecCells) {
+    // Check both the native stack and VM stack for overflow
     checkStack(m_stack, f);
+  } else {
+    // invokeFunc() must always check the native stack for overflow no
+    // matter what
+    checkNativeStack();
   }
 
   if (flags & InvokePseudoMain) {
@@ -1825,10 +1843,17 @@ void VMExecutionContext::invokeFuncFew(TypedValue* retval,
     thiz->incRefCount();
   }
   Cell* savedSP = m_stack.top();
+
   if (f->attrs() & AttrPhpLeafFn ||
       argc > kStackCheckReenterPadding - kNumActRecCells) {
+    // Check both the native stack and VM stack for overflow
     checkStack(m_stack, f);
+  } else {
+    // invokeFuncFew() must always check the native stack for overflow
+    // no matter what
+    checkNativeStack();
   }
+
   ActRec* ar = m_stack.allocA();
   ar->m_soff = 0;
   ar->m_savedRbp = 0;
@@ -1882,8 +1907,15 @@ void VMExecutionContext::invokeContFunc(const Func* f,
 
   Cell* savedSP = m_stack.top();
 
-  // no need to check stack due to ReenterPadding
   assert(kStackCheckReenterPadding - kNumActRecCells >= 1);
+  if (f->attrs() & AttrPhpLeafFn) {
+    // Check both the native stack and VM stack for overflow
+    checkStack(m_stack, f);
+  } else {
+    // invokeContFunc() must always check the native stack for overflow
+    // no matter what
+    checkNativeStack();
+  }
 
   ActRec* ar = m_stack.allocA();
   ar->m_savedRbp = 0;

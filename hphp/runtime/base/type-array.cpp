@@ -111,7 +111,7 @@ Array Array::diff(CVarRef array, bool by_key, bool by_value,
                   PFUNC_CMP value_cmp_function /* = NULL */,
                   const void *value_data /* = NULL */) const {
   if (!array.isArray()) {
-    throw_bad_array_exception();
+    throw_expected_array_exception();
     return Array();
   }
   return diffImpl(array.getArrayData(), by_key, by_value, false,
@@ -125,7 +125,7 @@ Array Array::intersect(CVarRef array, bool by_key, bool by_value,
                        PFUNC_CMP value_cmp_function /* = NULL */,
                        const void *value_data /* = NULL */) const {
   if (!array.isArray()) {
-    throw_bad_array_exception();
+    throw_expected_array_exception();
     return Array();
   }
   return diffImpl(array.getArrayData(), by_key, by_value, true,

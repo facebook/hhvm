@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_intl.h"
-#include "hphp/runtime/ext/ext_array.h" // for throw_bad_array_exception
+#include "hphp/runtime/base/builtin-functions.h" // throw_expected_*
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/intl-convert.h"
 #include "hphp/runtime/base/zend-collator.h"
@@ -144,7 +144,7 @@ void c_Collator::t___construct(const String& locale) {
 bool c_Collator::t_asort(VRefParam arr,
                          int64_t sort_flag /* = q_Collator$$SORT_REGULAR */) {
   if (!arr.isArray()) {
-    throw_bad_array_exception();
+    throw_expected_array_exception();
     return false;
   }
   if (!m_ucoll) {
@@ -442,7 +442,7 @@ bool c_Collator::t_sortwithsortkeys(VRefParam arr) {
 bool c_Collator::t_sort(VRefParam arr,
                         int64_t sort_flag /* = q_Collator$$SORT_REGULAR */) {
   if (!arr.isArray()) {
-    throw_bad_array_exception();
+    throw_expected_array_exception();
     return false;
   }
   if (!m_ucoll) {
@@ -874,4 +874,3 @@ Variant f_idn_to_utf8(const String& domain, int64_t options /* = 0 */,
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

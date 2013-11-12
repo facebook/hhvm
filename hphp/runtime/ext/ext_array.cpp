@@ -68,7 +68,7 @@ using HPHP::Transl::EagerCallerFrame;
 #define getCheckedArrayRet(input, fail)                           \
   auto const cell_##input = static_cast<CVarRef>(input).asCell(); \
   if (UNLIKELY(cell_##input->m_type != KindOfArray)) {            \
-    throw_bad_array_exception();                                  \
+    throw_expected_array_exception();                             \
     return fail;                                                  \
   }                                                               \
   ArrNR arrNR_##input(cell_##input->m_data.parr);                 \
@@ -296,7 +296,7 @@ static Variant map_func(CArrRef params, const void *data) {
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
   Array inputs;
   if (!arr1.isArray()) {
-    throw_bad_array_exception();
+    throw_expected_array_exception();
     return uninit_null();
   }
   inputs.append(arr1);
@@ -361,7 +361,7 @@ Variant f_array_merge(int _argc, CVarRef array1,
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant v = iter.second();
     if (!v.isArray()) {
-      throw_bad_array_exception();
+      throw_expected_array_exception();
       return uninit_null();
     }
     CArrRef arr_v = v.asCArrRef();
@@ -380,7 +380,7 @@ Variant f_array_merge_recursive(int _argc, CVarRef array1,
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant v = iter.second();
     if (!v.isArray()) {
-      throw_bad_array_exception();
+      throw_expected_array_exception();
       return uninit_null();
     }
     CArrRef arr_v = v.asCArrRef();
@@ -532,7 +532,7 @@ Variant f_array_push(int _argc, VRefParam container,
     //  - frozen collections don't allow insertion
   }
 
-  throw_bad_array_exception();
+  throw_expected_array_or_collection_exception();
   return uninit_null();
 }
 
@@ -666,7 +666,7 @@ static void walk_func(VRefParam value, CVarRef key, CVarRef userdata,
 bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
                             CVarRef userdata /* = null_variant */) {
   if (!input.isArray()) {
-    throw_bad_array_exception();
+    throw_expected_array_exception();
     return false;
   }
   CallCtx ctx;
@@ -683,7 +683,7 @@ bool f_array_walk_recursive(VRefParam input, CVarRef funcname,
 bool f_array_walk(VRefParam input, CVarRef funcname,
                   CVarRef userdata /* = null_variant */) {
   if (!input.isArray()) {
-    throw_bad_array_exception();
+    throw_expected_array_exception();
     return false;
   }
   CallCtx ctx;
@@ -733,7 +733,7 @@ static int php_count_recursive(CArrRef array) {
 
 bool f_shuffle(VRefParam array) {
   if (!array.isArray()) {
-    throw_bad_array_exception();
+    throw_expected_array_exception();
     return false;
   }
   array = ArrayUtil::Shuffle(array);
@@ -1735,7 +1735,7 @@ php_sort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
       return true;
     }
   }
-  throw_bad_array_exception();
+  throw_expected_array_or_collection_exception();
   return false;
 }
 
@@ -1763,7 +1763,7 @@ php_asort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
       return true;
     }
   }
-  throw_bad_array_exception();
+  throw_expected_array_or_collection_exception();
   return false;
 }
 
@@ -1783,7 +1783,7 @@ php_ksort(VRefParam array, int sort_flags, bool ascending) {
       return true;
     }
   }
-  throw_bad_array_exception();
+  throw_expected_array_or_collection_exception();
   return false;
 }
 
@@ -1840,7 +1840,7 @@ bool f_usort(VRefParam array, CVarRef cmp_function) {
       return vec->usort(cmp_function);
     }
   }
-  throw_bad_array_exception();
+  throw_expected_array_or_collection_exception();
   return false;
 }
 
@@ -1857,7 +1857,7 @@ bool f_uasort(VRefParam array, CVarRef cmp_function) {
       return smp->uasort(cmp_function);
     }
   }
-  throw_bad_array_exception();
+  throw_expected_array_or_collection_exception();
   return false;
 }
 
@@ -1874,7 +1874,7 @@ bool f_uksort(VRefParam array, CVarRef cmp_function) {
       return smp->uksort(cmp_function);
     }
   }
-  throw_bad_array_exception();
+  throw_expected_array_or_collection_exception();
   return false;
 }
 

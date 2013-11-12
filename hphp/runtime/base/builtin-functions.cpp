@@ -662,13 +662,22 @@ void throw_bad_type_exception(const char *fmt, ...) {
   raise_warning("Invalid operand type was used: %s", msg.c_str());
 }
 
-void throw_bad_array_exception() {
+void throw_expected_array_exception() {
   const char* fn = "(unknown)";
   ActRec *ar = g_vmContext->getStackFrame();
   if (ar) {
     fn = ar->m_func->name()->data();
   }
   throw_bad_type_exception("%s expects array(s)", fn);
+}
+
+void throw_expected_array_or_collection_exception() {
+  const char* fn = "(unknown)";
+  ActRec *ar = g_vmContext->getStackFrame();
+  if (ar) {
+    fn = ar->m_func->name()->data();
+  }
+  throw_bad_type_exception("%s expects array(s) and/or collection(s)", fn);
 }
 
 void throw_invalid_argument(const char *fmt, ...) {

@@ -246,7 +246,8 @@ void handle_destructor_exception(const char* situation = "Destructor");
  * warning and swallow the error.
  */
 void throw_bad_type_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
-void throw_bad_array_exception();
+void throw_expected_array_exception();
+void throw_expected_array_or_collection_exception();
 
 /**
  * If RuntimeOption::ThrowInvalidArguments is on, we are running in

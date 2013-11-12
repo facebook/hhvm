@@ -1,4 +1,4 @@
-HipHop Warning: Invalid operand type was used: %s expects array(s) in %s/test/slow/bad_function_calls/1716.php on line 5
+HipHop Warning: Invalid operand type was used: %s in %s/test/slow/bad_function_calls/1716.php on line 5
 array(1) {
   [0]=>
   NULL

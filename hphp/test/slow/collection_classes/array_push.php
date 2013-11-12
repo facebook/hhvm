@@ -22,3 +22,4 @@ function main() {
   array_push($sm, 'a');
 }
 main();
+echo "Done\n";

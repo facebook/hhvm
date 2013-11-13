@@ -7537,8 +7537,7 @@ typedef hphp_hash_map<const StringData*, ContinuationMethod,
                       string_data_hash, string_data_same> ContMethMap;
 
 static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
-                                   ContinuationMethod m,
-                                   MetaInfoBuilder& metaInfo) {
+                                   ContinuationMethod m) {
   static const StringData* valStr = makeStaticString("value");
   static const StringData* exnStr = makeStaticString("exception");
 
@@ -7619,8 +7618,6 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   UnitEmitter* ue = new UnitEmitter(md5);
   ue->setFilepath(makeStaticString(""));
   ue->addTrivialPseudoMain();
-
-  MetaInfoBuilder metaInfo;
 
   ContMethMap contMethods;
   contMethods[makeStaticString("next")] = METH_NEXT;
@@ -7727,7 +7724,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       pce->addMethod(fe);
       if (e.name->isame(continuationCls) &&
           mapGet(contMethods, methName, &cmeth)) {
-        emitContinuationMethod(*ue, fe, cmeth, metaInfo);
+        emitContinuationMethod(*ue, fe, cmeth);
       } else {
         if (e.name->isame(s_construct.get())) {
           hasCtor = true;
@@ -7808,6 +7805,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     }
   }
 
+  MetaInfoBuilder metaInfo;
   Peephole peephole(*ue, metaInfo);
   metaInfo.setForUnit(*ue);
 

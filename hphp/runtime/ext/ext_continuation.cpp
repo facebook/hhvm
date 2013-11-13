@@ -237,31 +237,31 @@ c_Continuation *c_Continuation::Clone(ObjectData* obj) {
 }
 
 namespace {
-  StaticString s_send("send");
-  StaticString s_raise("raise");
+  DEBUG_ONLY StaticString s_send("send");
+  DEBUG_ONLY StaticString s_raise("raise");
 }
 
 void c_Continuation::call_next() {
-  const HPHP::Func* func = getVMClass()->lookupMethod(s_next.get());
-  g_vmContext->invokeContFunc(func, this);
+  assert(SystemLib::s_continuationNextFunc ==
+         getVMClass()->lookupMethod(s_next.get()));
+  g_vmContext->invokeContFunc(SystemLib::s_continuationNextFunc, this);
 }
 
 void c_Continuation::call_send(Cell& v) {
-  const HPHP::Func* func = getVMClass()->lookupMethod(s_send.get());
-  g_vmContext->invokeContFunc(func, this, &v);
+  assert(SystemLib::s_continuationSendFunc ==
+         getVMClass()->lookupMethod(s_send.get()));
+  g_vmContext->invokeContFunc(SystemLib::s_continuationSendFunc, this, &v);
 }
 
 void c_Continuation::call_raise(ObjectData* e) {
+  assert(SystemLib::s_continuationRaiseFunc ==
+         getVMClass()->lookupMethod(s_raise.get()));
   assert(e);
   assert(e->instanceof(SystemLib::s_ExceptionClass));
-
-  auto const func = getVMClass()->lookupMethod(s_raise.get());
-
   Cell arg;
   arg.m_type = KindOfObject;
   arg.m_data.pobj = e;
-
-  g_vmContext->invokeContFunc(func, this, &arg);
+  g_vmContext->invokeContFunc(SystemLib::s_continuationRaiseFunc, this, &arg);
 }
 
 // Compute the bytecode offset at which execution will resume assuming

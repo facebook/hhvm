@@ -358,9 +358,6 @@ abstract class Framework {
   public ?Map $current_test_statuses = null;
   public Set $test_files = null;
   public Map $env_vars;
-  // Assume the framework unit tests will be run in parallel until otherwise
-  // proven
-  public bool $parallel = true;
 
   private string $install_root;
   private string $git_path;
@@ -370,7 +367,11 @@ abstract class Framework {
   private Vector $pull_requests;
 
   // $name is constructor promoted
-  protected function __construct(public string $name) {
+  // $parallel is constructor promoted
+  // Assume the framework unit tests will be run in parallel until otherwise
+  // proven
+  protected function __construct(public string $name,
+                                 public bool $parallel = true) {
 
     // Get framework information and set all needed properties. Beyond
     // the install root, git info and test search roots, the other
@@ -405,8 +406,6 @@ abstract class Framework {
     $this->setTestNamePattern($info->get("test_name_pattern"));
     $this->setTestFilePattern($info->get("test_file_pattern"));
     $this->setTestCommand($info->get("test_command"));
-
-    $this->parallel = true;
   }
 
   abstract protected function getInfo(): Map;
@@ -1093,8 +1092,8 @@ class Paris extends Framework {
 
 class Pear extends Framework {
   public function __construct(string $name) {
-    parent::__construct($name);
-    $this->parallel = false;
+    // Pear will currently run serially
+    parent::__construct($name, false);
   }
 
   protected function getInfo(): Map {

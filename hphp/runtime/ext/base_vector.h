@@ -140,6 +140,9 @@ protected:
     auto thiz = static_cast<T*>(obj);
     auto target = static_cast<T*>(obj->cloneImpl());
     uint sz = thiz->m_size;
+    if (!sz) {
+      return target;
+    }
     TypedValue* data;
     target->m_capacity = target->m_size = sz;
     target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));

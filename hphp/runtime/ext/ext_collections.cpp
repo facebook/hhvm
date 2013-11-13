@@ -535,6 +535,9 @@ Object c_Vector::ti_fromarray(CVarRef arr) {
   Object ret = target = NEWOBJ(c_Vector)();
   ArrayData* ad = arr.getArrayData();
   uint sz = ad->size();
+  if (!sz) {
+    return ret;
+  }
   target->m_capacity = target->m_size = sz;
   TypedValue* data;
   target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));

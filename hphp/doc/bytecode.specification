@@ -3913,6 +3913,14 @@ ContHandle    [C]  ->  []
   object. Marks the continuation as no longer running and finished and rethrows
   the exception on the top of the stack.
 
+AsyncAwait   [C]  ->  [C C:Bool]
+
+  Perform an await operation on a wait handle.  If $1 is not a subclass of
+  WaitHandle, raises a fatal error.  If $1 is not finished, this instruction
+  pushes $1, and pushes False.  Otherwise, if $1 succeeded, this instruction
+  pushes the result value from the WaitHandle, and then pushes true.  If $1
+  failed, this instruction throws the exception from the WaitHandle.
+
 Basic statement transformations
 -------------------------------
 

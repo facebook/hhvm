@@ -941,6 +941,13 @@ struct SinkPointAnalyzer : private LocalStateHook {
     while (valState.optDelta()) {
       ITRACE(3, "placing IncRef at id {}\n", sp.id);
       m_ret.points[value].insert(std::make_pair(valState.popRef(), sp));
+
+      // If the current instruction has a taken branch, we need to tell the
+      // propagated state that we used one of the pending IncRefs.
+      if (m_takenState && sp.id == m_ids.before(m_inst)) {
+        ITRACE(3, "updating taken state for {}\n", *value);
+        m_takenState->values[value].popRef();
+      }
     }
   }
 

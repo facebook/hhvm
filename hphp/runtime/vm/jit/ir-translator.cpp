@@ -627,6 +627,10 @@ void IRTranslator::translateCreateAsync(const NormalizedInstruction& i) {
   HHIR_EMIT(CreateAsync, i.imm[0].u_SA, i.imm[1].u_IVA, i.imm[2].u_IVA);
 }
 
+void IRTranslator::translateAsyncAwait(const NormalizedInstruction&) {
+  HHIR_EMIT(AsyncAwait);
+}
+
 void IRTranslator::translateContEnter(const NormalizedInstruction& i) {
   auto after = i.nextSk().offset();
 

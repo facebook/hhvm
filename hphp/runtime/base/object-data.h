@@ -50,6 +50,7 @@ class ObjectData {
     UseGet        = 0x0008, // __get()
     UseIsset      = 0x0010, // __isset()
     UseUnset      = 0x0020, // __unset()
+    IsWaitHandle  = 0x0040, // This is a c_WaitHandle or derived
     HasCall       = 0x0080, // defines __call
     HasCallStatic = 0x0100, // defines __callStatic
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
@@ -196,11 +197,6 @@ class ObjectData {
   Class* getVMClass() const {
     return m_cls;
   }
-  static size_t getVMClassOffset() {
-    // For assembly linkage.
-    return offsetof(ObjectData, m_cls);
-  }
-  static size_t attributeOff() { return offsetof(ObjectData, o_attribute); }
   bool instanceof(const Class* c) const {
     return m_cls->classof(c);
   }
@@ -446,6 +442,12 @@ class ObjectData {
   static void raiseObjToIntNotice(const char*);
   static void raiseAbstractClassError(Class* cls);
   void raiseUndefProp(const StringData* name);
+
+  static ptrdiff_t getVMClassOffset() { return offsetof(ObjectData, m_cls); }
+  static ptrdiff_t attributeOff() { return offsetof(ObjectData, o_attribute); }
+  static ptrdiff_t whStateOffset() {
+    return offsetof(ObjectData, o_subclassData.u8[0]);
+  }
 
 private:
   friend struct MemoryProfile;

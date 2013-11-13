@@ -34,6 +34,7 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/stats.h"
@@ -5725,6 +5726,34 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
                  Stack::topOfStackOffset()], rVmSp);
 
   emitServiceReq(m_mainCode, REQ_RESUME);
+}
+
+void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
+  auto const robj = curOpd(inst->src(0)).reg();
+  auto const rdst = curOpd(inst->dst()).reg();
+  auto& a = m_as;
+  if (rdst == InvalidReg) return;
+
+  static_assert(
+    ObjectData::IsWaitHandle < 0xff,
+    "we use byte instructions for IsWaitHandle"
+  );
+  a.   testb   (ObjectData::IsWaitHandle, robj[ObjectData::attributeOff()]);
+  a.   setnz   (rbyte(rdst));
+}
+
+void CodeGenerator::cgLdWHState(IRInstruction* inst) {
+  auto const robj = curOpd(inst->src(0)).reg();
+  auto const rdst = curOpd(inst->dst()).reg();
+  auto& a = m_as;
+
+  if (rdst == InvalidReg) return;
+  a.    loadzbl (robj[ObjectData::whStateOffset()], r32(rdst));
+}
+
+void CodeGenerator::cgLdWHResult(IRInstruction* inst) {
+  auto const robj = curOpd(inst->src(0)).reg();
+  cgLoad(inst->dst(), robj[c_WaitHandle::resultOffset()]);
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {

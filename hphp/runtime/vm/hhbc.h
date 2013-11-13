@@ -632,6 +632,7 @@ enum SetOpOp {
   O(CreateCl,        TWO(IVA,SA),      CVMANY,          ONE(CV),    NF) \
   O(CreateCont,      ONE(SA),          NOV,             ONE(CV),    NF) \
   O(CreateAsync,     THREE(SA,IVA,IVA),ONE(CV),         ONE(CV),    NF) \
+  O(AsyncAwait,      NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(ContEnter,       NA,               ONE(CV),         NOV,        CF) \
   O(UnpackCont,      NA,               NOV,             TWO(CV,CV), NF) \
   O(ContSuspend,     ONE(IVA),         ONE(CV),         NOV,        CF_TF) \

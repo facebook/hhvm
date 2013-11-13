@@ -282,6 +282,7 @@ O(ConvResToStr,                 D(Str), S(Res),                     N|PRc|Er) \
 O(ConvCellToStr,                D(Str), S(Cell),                    N|PRc|Er) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
+O(IsWaitHandle,                D(Bool), S(Obj),                            C) \
 O(ThingExists,                 D(Bool), S(Str),                  N|E|Er|Refs) \
 O(InstanceOf,                  D(Bool), S(Cls) S(Cls),                   C|N) \
 O(InstanceOfIface,             D(Bool), S(Cls) CStr,                     C|N) \
@@ -578,6 +579,8 @@ O(ContSetRunning,                   ND, S(Obj) C(Bool),                E|Mem) \
 O(ContValid,                   D(Bool), S(Obj),                            E) \
 O(ContArIncKey,                     ND, S(FramePtr),                   E|Mem) \
 O(ContArUpdateIdx,                  ND, S(FramePtr) S(Int),            E|Mem) \
+O(LdWHState,                    D(Int), S(Obj),                           NF) \
+O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdContArRaw,                  DParam, S(FramePtr) C(Int),               NF) \
 O(StContArRaw,                      ND, S(FramePtr) C(Int) S(Gen),     E|Mem) \
 O(LdContArValue,                DParam, S(FramePtr),                     PRc) \

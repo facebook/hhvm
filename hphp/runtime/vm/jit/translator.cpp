@@ -895,9 +895,11 @@ getDynLocType(const SrcKey startSk,
     case OutVInputL:
     case OutFInputL:
     case OutFInputR:
-    case OutFPushCufSafe: {
+    case OutAsyncAwait:
       return RuntimeType(KindOfAny);
-    }
+
+    case OutFPushCufSafe:
+      not_reached();
 
     case OutNone: not_reached();
   }
@@ -1245,6 +1247,7 @@ static const struct {
 
   { OpCreateCont,  {None,             Stack1|Local, OutObject,         1 }},
   { OpCreateAsync, {Stack1,           Stack1|Local, OutObject,         0 }},
+  { OpAsyncAwait,  {Stack1,           StackTop2,    OutAsyncAwait,     1 }},
   { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
   { OpUnpackCont,  {None,             StackTop2,    OutInt64,          2 }},
   { OpContSuspend, {Stack1,           None,         OutNone,          -1 }},
@@ -2091,6 +2094,7 @@ bool outputDependsOnInput(const Op instr) {
     case OutNone:
       return false;
 
+    case OutAsyncAwait:
     case OutFDesc:
     case OutSameAsInput:
     case OutCInput:
@@ -2420,6 +2424,17 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
             ni->outStack2 = dl;
           }
           continue;
+        }
+        if (ni->op() == OpAsyncAwait) {
+          // The second output of OpAsyncAwait is a bool.
+          if (opnd == Stack2) {
+            assert(ni->outStack == nullptr);
+            // let getDynLocType do it.
+          } else {
+            assert(ni->outStack2 == nullptr);
+            ni->outStack2 = t.newDynLocation(loc, KindOfBoolean);
+            continue;
+          }
         }
       } break;
       case StackIns1: {

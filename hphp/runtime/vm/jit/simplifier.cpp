@@ -184,6 +184,9 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     case Op::FPushCtorD:
       if (index == kNumActRecCells) return StackValueInfo { inst, Type::Obj };
       if (index == kNumActRecCells + 1) return getStackValue(prevSp, 0);
+    case Op::AsyncAwait:
+      if (index == 0) return StackValueInfo { inst, Type::Bool };
+      if (index == 1) return StackValueInfo { inst, Type::Cell };
       break;
 
     default:

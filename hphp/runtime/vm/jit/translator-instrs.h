@@ -151,6 +151,7 @@
   CASE(CreateCl) \
   CASE(CreateCont) \
   CASE(CreateAsync) \
+  CASE(AsyncAwait) \
   CASE(ContEnter) \
   CASE(UnpackCont) \
   CASE(ContSuspend) \

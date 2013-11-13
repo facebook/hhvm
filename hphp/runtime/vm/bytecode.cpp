@@ -62,6 +62,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -6956,6 +6957,23 @@ OPTBLD_INLINE void VMExecutionContext::iopCreateAsync(PC& pc) {
   TypedValue* ret = m_stack.allocTV();
   ret->m_type = KindOfObject;
   ret->m_data.pobj = cont;
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopAsyncAwait(PC& pc) {
+  NEXT();
+  auto const& c1 = *m_stack.topC();
+  if (c1.m_type != KindOfObject ||
+      !c1.m_data.pobj->instanceof(c_WaitHandle::classof())) {
+    raise_error("AsyncAwait on a non-WaitHandle");
+  }
+  auto const wh = static_cast<c_WaitHandle*>(c1.m_data.pobj);
+  if (wh->isSucceeded()) {
+    cellSet(wh->getResult(), *m_stack.topC());
+    m_stack.pushTrue();
+    return;
+  }
+  if (wh->isFailed()) throw Object(wh->getException());
+  m_stack.pushFalse();
 }
 
 static inline c_Continuation* this_continuation(const ActRec* fp) {

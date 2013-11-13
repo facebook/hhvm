@@ -4016,44 +4016,48 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         assert(m_evalStack.size() == 0);
 
         // evaluate expression passed to await
-        ExpressionPtr expr = await->getExpression();
-        visit(expr);
-        emitConvertToCell(e);
+        auto const expr    = await->getExpression();
+        auto const exprLoc = emitVisitAndSetUnnamedL(e, expr);
+
+        // If we know statically that it's a subtype of WaitHandle, we
+        // don't need to make a call.
+        bool const isKnownWaitHandle = [&] {
+          auto const ar = expr->getScope()->getContainingProgram();
+          auto const type = expr->getActualType();
+          return type && Type::SubType(ar, type,
+                           Type::GetType(Type::KindOfObject, "WaitHandle"));
+        }();
+
+        Label awaitNull;
+        Label skipSuspend;
 
         // if expr is null, just continue
-        Label awaitNull;
-        e.Dup();
-        e.IsNullC();
+        emitVirtualLocal(exprLoc);
+        emitIsNull(e);
         e.JmpNZ(awaitNull);
 
-        // if the type of expr is not WaitHandle (can be just Awaitable),
-        // call getWaitHandle() method.
-        AnalysisResultConstPtr ar = expr->getScope()->getContainingProgram();
-        TypePtr type = expr->getActualType();
-        if (!type || !Type::SubType(ar, type,
-                Type::GetType(Type::KindOfObject, "WaitHandle"))) {
+        emitVirtualLocal(exprLoc);
+        emitPushL(e);
+        if (!isKnownWaitHandle) {
           emitConstMethodCallNoParams(e, "getWaitHandle");
         }
         assert(m_evalStack.size() == 1);
 
-        // suspend if it is not finished
-        Label finished;
-        e.Dup();        // keep wait handle on the stack
-        emitConstMethodCallNoParams(e, "isFinished");
-        e.JmpNZ(finished);
+        // TODO(#3197024): if isKnownWaitHandle, we should put an
+        // AssertObjStk so the AsyncAwait type check can be avoided.
+        e.AsyncAwait();
+        e.JmpNZ(skipSuspend);
 
-        // the work is not yet finished, we had to suspend
+        // Suspend if it is not finished.
         int64_t normalLabel = 2 * await->label().id();
         int64_t exceptLabel = normalLabel - 1;
         if (m_curFunc->isGenerator()) {
           // suspend continuation
           e.ContSuspend(normalLabel);
-          e.Null();
           m_yieldLabels[exceptLabel].set(e);
           e.Throw();
-          e.Null();
         } else {
-          // create new continuation and return its wait handle
+          // Create new continuation and return its wait handle.
           auto meth = static_pointer_cast<MethodStatement>(
                         node->getFunctionScope()->getStmt());
           const StringData* nameStr =
@@ -4062,16 +4066,21 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           emitConstMethodCallNoParams(e, "getWaitHandle");
           e.RetC();
         }
-        // emit code to continue without suspend
-        finished.set(e);
-        emitConstMethodCallNoParams(e, "join");
-        assert(m_evalStack.size() == 1);
+
+        awaitNull.set(e);
+        // We know the unnamed local is Null, because we just tested
+        // it.  There's no need to unset it again---if it gets
+        // reallocated, it's ok that it's KindOfNull instead of
+        // KindOfUninit.
+        e.Null();
+
+        m_curFunc->freeUnnamedLocal(exprLoc);
 
         // resume here next time
         if (m_curFunc->isGenerator()) {
           m_yieldLabels[normalLabel].set(e);
         }
-        awaitNull.set(e);
+        skipSuspend.set(e);
         return true;
       }
     }
@@ -4441,8 +4450,9 @@ Id EmitterVisitor::emitSetUnnamedL(Emitter& e) {
   // HACK: emitVirtualLocal would pollute m_evalStack before visiting exp,
   //       YieldExpression won't be happy
   Id tempLocal = m_curFunc->allocUnnamedLocal();
-  e.getUnitEmitter().emitOp(OpSetL);
-  e.getUnitEmitter().emitIVA(tempLocal);
+  auto& ue = e.getUnitEmitter();
+  ue.emitOp(OpSetL);
+  ue.emitIVA(tempLocal);
 
   emitPop(e);
   return tempLocal;

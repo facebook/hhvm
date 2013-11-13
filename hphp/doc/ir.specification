@@ -626,6 +626,10 @@ D:Bool = IsNTypeMem<T> S0:PtrToGen
   IsTypeMem (IsNTypeMem) sets D to true iff the value referenced by S0
   is (not) of type T.
 
+D:Bool = IsWaitHandle S0:Obj
+
+  Sets D to true iff S0 is a subclass of WaitHandle.
+
 
 5. Branches
 
@@ -1792,18 +1796,34 @@ StContArRaw S0:FramePtr S1:ConstInt S2:??
   S2 is the value.
 
 D:Cell LdContArValue S0:FramePtr
+
   Loads 'value' from the Continuation object ActRec of which is S0.
 
 StContArValue S0:FramePtr S1:Cell
+
   Stores 'value' into the Continuation object ActRec of which is S0.
   S1 is the new value.
 
 D:Cell LdContArKey S0:FramePtr
+
   Loads 'key' from the Continuation object ActRec of which is S0.
 
 StContArKey S0:FramePtr S1:Cell
+
   Stores 'key' into the Continuation object ActRec of which is S0.
   S1 is the new value.
+
+D:Int = LdWHState S0:Obj
+
+  Loads the state of the WaitHandle in S0, which is a value from the
+  wait handle states in ext_asio.h.  This instruction has undefined
+  behavior if S0 is not a WaitHandle.
+
+D:Cell = LdWHResult S0:Obj
+
+  Loads the result of the WaitHandle in S0.  This instruction has
+  undefined behavior if S0 is not a WaitHandle, or if S0 is not
+  finished.
 
 
 17. Debugging, instrumentation, and profiling

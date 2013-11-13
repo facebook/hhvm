@@ -21,6 +21,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
+#include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/instance-bits.h"
@@ -1492,6 +1493,40 @@ void HhbcTranslator::emitCreateAsync(Id funNameStrId,
   push(cont);
 }
 
+void HhbcTranslator::emitAsyncAwait() {
+  auto const exitSlow   = makeExitSlow();
+  if (!topC()->isA(Type::Obj)) PUNT(AsyncAwait-NonObject);
+
+  auto const obj = popC();
+  auto const isWH = gen(IsWaitHandle, obj);
+  gen(JmpZero, exitSlow, isWH);
+
+  // cns() would ODR-use these
+  auto const kFailed    = c_WaitHandle::STATE_FAILED;
+  auto const kSucceeded = c_WaitHandle::STATE_SUCCEEDED;
+
+  auto const state = gen(LdWHState, obj);
+  gen(JmpEq, exitSlow, state, cns(kFailed));
+
+  auto const toPush = m_tb->cond(
+    [&] (Block* taken) {
+      gen(JmpEq, taken, state, cns(kSucceeded));
+    },
+    [&] { // Next: the wait handle isn't done.  We'll push false and
+          // the same WaitHandle object.
+      return obj;
+    },
+    [&] { // Taken: retrieve the result from the wait handle
+      auto const res = gen(LdWHResult, obj);
+      gen(IncRef, res);
+      gen(DecRef, obj);
+      return res;
+    }
+  );
+
+  push(toPush);
+  push(gen(Not, gen(ConvIntToBool, state)));
+}
 
 void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
   // make sure the value to be sent is on the actual stack
@@ -4381,6 +4416,7 @@ Type HhbcTranslator::interpOutputType(
     case OutStrlen:     return topType(0).isString() ? Type::Int : Type::Cell;
     case OutClassRef:   return Type::Cls;
     case OutFPushCufSafe: return Type::None;
+    case OutAsyncAwait:   return Type::None; // custom in getStackValue
 
     case OutNone:       return Type::None;
 

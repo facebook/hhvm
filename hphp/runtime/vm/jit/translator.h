@@ -723,6 +723,7 @@ enum OutTypeConstraints {
   OutClassRef,          // KindOfClass
   OutFPushCufSafe,      // FPushCufSafe pushes two values of different
                         // types and an ActRec
+  OutAsyncAwait,        // AwaitHandle pushes its input and then a bool
 
   OutNone,
 };

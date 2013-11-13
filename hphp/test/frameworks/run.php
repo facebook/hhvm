@@ -2157,8 +2157,8 @@ EXAMPLES;
 
 function usage(): string {
   $msg = "Specify frameworks to run, use --all or use --allexcept. ";
-  $msg .= "Available frameworks are: ";
-  $msg .= implode(" ", get_subclasses_of("Framework"));
+  $msg .= "Available frameworks are: ".PHP_EOL;
+  $msg .= implode(PHP_EOL, get_subclasses_of("Framework")->toArray());
   return $msg;
 }
 

@@ -1251,7 +1251,7 @@ class Twig extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/Twig",
       "git_path" => "https://github.com/fabpot/Twig.git",
-      "git_commit" => "d827c601e3afea6535fede5e39c9f91c12fc2e66",
+      "git_commit" => "2d012c4a4ae41cdf1682a10b3d567becc38a2d39",
       "test_file_search_roots" => Set {
          __DIR__."/frameworks/Twig/test/Twig",
       }

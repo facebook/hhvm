@@ -11,7 +11,7 @@ Twig_Test_EscapingTest::testHtmlAttributeEscapingConvertsSpecialChars
 Twig_Test_EscapingTest::testHtmlAttributeEscapingEscapesOwaspRecommendedRanges
 .
 Twig_Test_EscapingTest::testHtmlEscapingConvertsSpecialChars
-F
+.
 Twig_Test_EscapingTest::testJavascriptEscapingConvertsSpecialChars
 .
 Twig_Test_EscapingTest::testJavascriptEscapingEscapesOwaspRecommendedRanges
@@ -44,13 +44,13 @@ Twig_Tests_ErrorTest::testErrorWithArrayFilename
 .
 Twig_Tests_ErrorTest::testErrorWithObjectFilename
 .
-Twig_Tests_ErrorTest::testRenderWrapsExceptions
+Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLine with data set #0 
 .
-Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLineWhenMissing
+Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLine with data set #1 
 .
-Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLineWhenMissingWithInheritance
+Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLine with data set #2 
 .
-Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLineWhenMissingWithInheritanceAgain
+Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLine with data set #3 
 .
 Twig_Tests_ErrorTest::testTwigExceptionAddsFileAndLineWhenMissingWithInheritanceOnDisk
 .
@@ -85,6 +85,8 @@ Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #4
 Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #5 
 .
 Twig_Tests_ExpressionParserTest::testCanOnlyAssignToNames with data set #6 
+.
+Twig_Tests_ExpressionParserTest::testMacroCallDoesNotSupportNamedArguments
 .
 Twig_Tests_ExpressionParserTest::testMacroDefinitionDoesNotSupportNonConstantDefaultValues with data set #0 
 .
@@ -122,6 +124,8 @@ Twig_Tests_ExpressionParserTest::testUnknownFunction
 .
 Twig_Tests_ExpressionParserTest::testUnknownTest
 .
+Twig_Tests_Extension_CoreTest::testCustomEscaper
+.
 Twig_Tests_Extension_CoreTest::testRandomFunction with data set #0 
 .
 Twig_Tests_Extension_CoreTest::testRandomFunction with data set #1 
@@ -145,6 +149,8 @@ Twig_Tests_Extension_CoreTest::testRandomFunctionReturnsAsIs
 Twig_Tests_Extension_CoreTest::testRandomFunctionWithoutParameter
 .
 Twig_Tests_Extension_CoreTest::testReverseFilterOnNonUTF8String
+.
+Twig_Tests_Extension_CoreTest::testUnknownCustomEscaper
 .
 Twig_Tests_Extension_SandboxTest::testMacrosInASandbox
 .
@@ -298,7 +304,11 @@ Twig_Tests_IntegrationTest::testIntegration with data set #16
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #160 
 .
+Twig_Tests_IntegrationTest::testIntegration with data set #161 
+.
 Twig_Tests_IntegrationTest::testIntegration with data set #162 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #163 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #164 
 .
@@ -321,7 +331,7 @@ Twig_Tests_IntegrationTest::testIntegration with data set #171
 Twig_Tests_IntegrationTest::testIntegration with data set #172 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #173 
-.
+S
 Twig_Tests_IntegrationTest::testIntegration with data set #174 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #175 
@@ -385,6 +395,18 @@ Twig_Tests_IntegrationTest::testIntegration with data set #20
 Twig_Tests_IntegrationTest::testIntegration with data set #200 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #201 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #202 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #203 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #204 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #205 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #206 
+.
+Twig_Tests_IntegrationTest::testIntegration with data set #207 
 .
 Twig_Tests_IntegrationTest::testIntegration with data set #21 
 .
@@ -559,7 +581,7 @@ Twig_Tests_IntegrationTest::testIntegration with data set #98
 Twig_Tests_IntegrationTest::testIntegration with data set #99 
 .
 Twig_Tests_LexerTest::testBigNumbers
-F
+S
 Twig_Tests_LexerTest::testBracketsNesting
 .
 Twig_Tests_LexerTest::testLineDirective
@@ -677,7 +699,7 @@ Twig_Tests_Loader_FilesystemTest::testSecurity with data set #8
 Twig_Tests_Loader_FilesystemTest::testSecurity with data set #9 
 .
 Twig_Tests_NativeExtensionTest::testGetProperties
-E
+S
 Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #0 
 .
 Twig_Tests_NodeVisitor_OptimizerTest::testForOptimizer with data set #1 
@@ -769,15 +791,15 @@ Twig_Tests_Node_Expression_Binary_SubTest::testCompile with data set #0
 Twig_Tests_Node_Expression_Binary_SubTest::testConstructor
 .
 Twig_Tests_Node_Expression_CallTest::testGetArguments
-E
+.
 Twig_Tests_Node_Expression_CallTest::testGetArgumentsWhenArgumentIsDefinedTwice
 .
 Twig_Tests_Node_Expression_CallTest::testGetArgumentsWhenPositionalArgumentsAfterNamedArguments
 .
 Twig_Tests_Node_Expression_CallTest::testGetArgumentsWithWrongNamedArgumentName
-F
+.
 Twig_Tests_Node_Expression_CallTest::testGetArgumentsWithWrongNamedArgumentNames
-F
+.
 Twig_Tests_Node_Expression_ConditionalTest::testCompile with data set #0 
 .
 Twig_Tests_Node_Expression_ConditionalTest::testConstructor
@@ -833,8 +855,6 @@ Twig_Tests_Node_Expression_GetAttrTest::testCompile with data set #1
 Twig_Tests_Node_Expression_GetAttrTest::testCompile with data set #2 
 .
 Twig_Tests_Node_Expression_GetAttrTest::testConstructor
-.
-Twig_Tests_Node_Expression_MacroCallTest::testGetArgumentsWhenPositionalArgumentsAfterNamedArguments
 .
 Twig_Tests_Node_Expression_NameTest::testCompile with data set #0 
 .
@@ -969,14 +989,6 @@ Twig_Tests_ParserTest::testParseIsReentrant
 Twig_Tests_ParserTest::testSetMacroThrowsExceptionOnReservedMethods
 .
 Twig_Tests_ParserTest::testUnknownTag
-.
-Twig_Tests_TemplateTest::testCallMacroWhenArgumentIsDefinedTwice
-.
-Twig_Tests_TemplateTest::testCallMacroWithWrongNamedArgumentName
-.
-Twig_Tests_TemplateTest::testCallMacroWithWrongNamedArgumentNames
-.
-Twig_Tests_TemplateTest::testCallUnknownMacro
 .
 Twig_Tests_TemplateTest::testGetAttribute with data set #0 
 .

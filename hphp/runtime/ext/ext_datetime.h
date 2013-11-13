@@ -70,6 +70,8 @@ class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
   public: Object t_settimezone(CObjRef timezone);
   public: Object t_sub(CObjRef interval);
 
+  int64_t gettimestamp() const;
+
   // Helper for DateTime -> c_DateTime conversion
   public: static Object wrap(SmartResource<DateTime> dt) {
     c_DateTime *cdt = NEWOBJ(c_DateTime)();

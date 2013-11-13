@@ -1,6 +1,7 @@
 Next release
   - support date.timezone in ini files
   - implement fileinfo
+  - special comparisons for DateTime
 
 "Sausage" 14-Oct-2013
   - Direct invocation of callable arrays: $f = [$cls_or_instance, 'method']; $f()

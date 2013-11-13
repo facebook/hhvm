@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/ext/ext_datetime.h"
 
 namespace HPHP {
 
@@ -331,6 +332,10 @@ struct Eq {
       od2->o_getArray(ar2, false);
       return ar1->equal(ar2.get(), false);
     }
+    if (UNLIKELY(od1->instanceof(c_DateTime::classof()))) {
+      return static_cast<const c_DateTime*>(od1)->gettimestamp() ==
+             static_cast<const c_DateTime*>(od2)->gettimestamp();
+    }
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());
     return ar1->equal(ar2.get(), false);
@@ -364,6 +369,10 @@ struct Lt {
       throw_collection_compare_exception();
     }
     if (od1 == od2) return false;
+    if (UNLIKELY(od1->instanceof(c_DateTime::classof()))) {
+      return static_cast<const c_DateTime*>(od1)->gettimestamp() <
+             static_cast<const c_DateTime*>(od2)->gettimestamp();
+    }
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());
     return (*this)(ar1.get(), ar2.get());
@@ -400,6 +409,10 @@ struct Gt {
       throw_collection_compare_exception();
     }
     if (od1 == od2) return false;
+    if (UNLIKELY(od1->instanceof(c_DateTime::classof()))) {
+      return static_cast<const c_DateTime*>(od1)->gettimestamp() >
+             static_cast<const c_DateTime*>(od2)->gettimestamp();
+    }
     Array ar1(od1->o_toArray());
     Array ar2(od2->o_toArray());
     return (*this)(ar1.get(), ar2.get());

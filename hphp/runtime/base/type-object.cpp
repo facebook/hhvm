@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_datetime.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -80,16 +81,28 @@ bool Object::equal(CObjRef v2) const {
     v2->o_getArray(ar2, false);
     return ar1->equal(ar2.get(), false);
   }
+  if (UNLIKELY(m_px->instanceof(c_DateTime::classof()))) {
+    return getTyped<c_DateTime>()->gettimestamp() ==
+        v2.getTyped<c_DateTime>()->gettimestamp();
+  }
   return toArray().equal(v2.toArray());
 }
 
 bool Object::less(CObjRef v2) const {
   check_collection_compare(m_px, v2.get());
+  if (UNLIKELY(m_px->instanceof(c_DateTime::classof()))) {
+    return getTyped<c_DateTime>()->gettimestamp() <
+        v2.getTyped<c_DateTime>()->gettimestamp();
+  }
   return m_px != v2.m_px && toArray().less(v2.toArray());
 }
 
 bool Object::more(CObjRef v2) const {
   check_collection_compare(m_px, v2.get());
+  if (UNLIKELY(m_px->instanceof(c_DateTime::classof()))) {
+    return getTyped<c_DateTime>()->gettimestamp() >
+        v2.getTyped<c_DateTime>()->gettimestamp();
+  }
   return m_px != v2.m_px && toArray().more(v2.toArray());
 }
 

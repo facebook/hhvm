@@ -131,6 +131,10 @@ int64_t c_DateTime::t_getoffset() {
 }
 
 int64_t c_DateTime::t_gettimestamp() {
+  return gettimestamp();
+}
+
+int64_t c_DateTime::gettimestamp() const {
   bool err = false;
   return m_dt->toTimeStamp(err);
 }

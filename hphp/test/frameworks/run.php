@@ -153,6 +153,8 @@ class ProxyInformation {
           "HTTPS_PROXY" => "http://fwdproxy.any.facebook.com:8080",
           "HTTP_PROXY" => "http://fwdproxy.any.facebook.com:8080",
           "HTTP_PROXY_REQUEST_FULLURI" => "true",
+          "no_proxy" => "facebook.com,fbcdn.net",
+          "NO_PROXY" => "facebook.com,fbcdn.net",
         };
         return true;
     } else {
@@ -2052,12 +2054,12 @@ function print_summary_information(string $summary_file): void {
       print "SUMMARY:".PHP_EOL;
       foreach ($decoded_results as $key => $value) {
         print $key."=".$value.PHP_EOL;
+      }
       print PHP_EOL;
       print "To run differing tests (if they exist), see above for the".PHP_EOL;
       print "commands or the results/.diff file. To run erroring or".PHP_EOL;
       print "fataling tests see results/.errors and results/.fatals".PHP_EOL;
       print "files, respectively".PHP_EOL;
-      }
     }
   } else {
       verbose("\nNO SUMMARY INFO AVAILABLE!\n", !Options::$csv_only);

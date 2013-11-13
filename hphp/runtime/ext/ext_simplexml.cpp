@@ -1007,13 +1007,16 @@ int64_t c_SimpleXMLElement::t_count() {
 
 bool c_SimpleXMLElement::t_offsetexists(CVarRef index) {
   if (index.isInteger()) {
-    int64_t n = 0; int64_t nIndex = index.toInt64(); Variant var(this);
-    for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
-      if (n++ == nIndex) {
-        return true;
+    if (m_is_property || m_is_children) {
+      int64_t n = 0; int64_t nIndex = index.toInt64(); Variant var(this);
+      for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
+        if (n++ == nIndex) {
+          return true;
+        }
       }
     }
-    return false;
+
+    return index.toInt64() == 0;
   }
   return m_attributes.toArray().exists(index);
 }
@@ -1027,9 +1030,12 @@ Variant c_SimpleXMLElement::t_offsetget(CVarRef index) {
           return iter.second();
         }
       }
+    }
+
+    if (index.toInt64() == 0) {
       return this;
     }
-    return m_children[index];
+    return null_variant;
   }
   return m_attributes[index];
 }

@@ -1713,7 +1713,9 @@ StringData* stringGetI(StringData* str, uint64_t x) {
   if (LIKELY(x < str->size())) {
     return str->getChar(x);
   }
-  raise_warning("Out of bounds");
+  if (RuntimeOption::EnableHipHopSyntax) {
+    raise_warning("Out of bounds");
+  }
   return makeStaticString("");
 }
 }

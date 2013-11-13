@@ -994,12 +994,20 @@ int64_t c_SimpleXMLElement::t_count() {
   }
   if (m_is_property) {
     int64_t n = 0; Variant var(this);
-    for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
+    for (ArrayIter iter = var.begin(); iter; ++iter) {
       ++n;
     }
     return n;
   }
-  return m_children.toArray().size();
+  int64_t n = 0; Variant var(this);
+  for (ArrayIter iter = var.begin(); iter; ++iter) {
+    if (iter.second().isArray()) {
+      n += iter.second().toArray().size();
+    } else {
+      ++n;
+    }
+  }
+  return n;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

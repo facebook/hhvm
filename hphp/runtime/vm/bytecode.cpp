@@ -6516,6 +6516,14 @@ OPTBLD_INLINE void VMExecutionContext::iopEval(PC& pc) {
         line
       );
     }
+
+    // If eval() results parse error, we want to return false.
+    // So, we create code which returns false and execute it.
+    // XXX: If we can, We should do more elegant way.
+    String returnFalseCode = "<?php return false;";
+    unit = compileEvalString(returnFalseCode.get(), evalFilename.c_str());
+    m_stack.popC();
+    evalUnit(unit, pc, EventHook::Eval);
     return;
   }
   m_stack.popC();

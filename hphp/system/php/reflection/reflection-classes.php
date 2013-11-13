@@ -308,6 +308,9 @@ class ReflectionParameter implements Reflector {
    *                     FALSE
    */
   public function isDefaultValueAvailable() {
+    if (array_key_exists('internal', $this->info)) {
+      return false;
+    }
     return array_key_exists('default', $this->info);
   }
 
@@ -326,12 +329,13 @@ class ReflectionParameter implements Reflector {
     if (!$this->isOptional()) {
       throw new ReflectionException('Parameter is not optional');
     }
+    if (array_key_exists('internal', $this->info)) {
+      throw new ReflectionException(
+        'Cannot determine default value for internal functions'
+      );
+    }
     $defaultValue = $this->info['default'];
     if ($defaultValue instanceof stdclass) {
-      if (isset($defaultValue->class)) {
-        return hphp_get_class_constant($defaultValue->class,
-                                       $defaultValue->name);
-      }
       hphp_throw_fatal_error($defaultValue->msg);
     }
     return $defaultValue;

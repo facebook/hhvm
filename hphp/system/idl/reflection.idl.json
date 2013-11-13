@@ -59,27 +59,6 @@
             ]
         },
         {
-            "name": "hphp_get_class_constant",
-            "desc": "Internally used by ReflectionClass for getting a default parameters value.",
-            "flags": [
-                "HipHopSpecific",
-                "NoInjection"
-            ],
-            "return": {
-                "type": "Variant"
-            },
-            "args": [
-                {
-                    "name": "cls",
-                    "type": "Variant"
-                },
-                {
-                    "name": "name",
-                    "type": "Variant"
-                }
-            ]
-        },
-        {
             "name": "hphp_get_class_info",
             "desc": "Internally used by ReflectionClass for getting a class's information.",
             "flags": [

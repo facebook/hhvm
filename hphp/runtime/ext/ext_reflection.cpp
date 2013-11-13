@@ -342,6 +342,9 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
       param.set(s_name, p->name);
       param.set(s_type, p->type);
       param.set(s_function, info->name);
+      if (info->attribute & ClassInfo::IsSystem) {
+        param.set(s_internal, true_varNR);
+      }
 
       if (classname) {
         param.set(s_class, VarNR(*classname));
@@ -360,29 +363,14 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
 
       if (p->value && *p->value) {
         if (*p->value == '\x01') {
-          if ((defTextLen > 2) &&
-              !strcmp(defText + defTextLen - 2, "()")) {
-            const char *sep = strchr(defText, ':');
-            Object obj = SystemLib::AllocStdClassObject();
-            if (sep && sep[1] == ':') {
-              String cls = String(defText, sep - defText, CopyString);
-              String con = String(sep + 2, CopyString);
-              obj->o_set(s_class, cls);
-              obj->o_set(s_name, con);
-            } else {
-              obj->o_set(s_name, String(defText, defTextLen, CopyString));
-            }
-            param.set(s_default, Variant(obj));
+          Variant v;
+          if (resolveDefaultParameterConstant(defText, defTextLen, v)) {
+            param.set(s_default, v);
           } else {
-            Variant v;
-            if (resolveDefaultParameterConstant(defText, defTextLen, v)) {
-              param.set(s_default, v);
-            } else {
-              Object obj = SystemLib::AllocStdClassObject();
-              obj->o_set(s_msg, String("Unknown unserializable default value: ")
-                                   + defText);
-              param.set(s_default, Variant(obj));
-            }
+            Object obj = SystemLib::AllocStdClassObject();
+            obj->o_set(s_msg, String("Unknown unserializable default value: ")
+                                 + defText);
+            param.set(s_default, Variant(obj));
           }
         } else {
           param.set(s_default, unserialize_from_string(p->value));
@@ -457,6 +445,9 @@ static void set_function_info(Array &ret, const Func* func) {
       param.set(s_index, VarNR((int)i));
       VarNR name(func->localNames()[i]);
       param.set(s_name, name);
+      if (func->isBuiltin()) {
+        param.set(s_internal, true_varNR);
+      }
 
       auto const nonExtendedConstraint =
         fpi.typeConstraint().hasConstraint() &&
@@ -495,7 +486,32 @@ static void set_function_info(Array &ret, const Func* func) {
           param.set(s_default, v);
         }
         param.set(s_defaultText, VarNR(fpi.phpCode()));
+      } else if (auto mi = func->methInfo()) {
+        auto p = mi->parameters[i];
+        auto defText = p->valueText;
+        auto defTextLen = p->valueTextLen;
+        if (defText == nullptr) {
+          defText = "";
+          defTextLen = 0;
+        }
+        if (p->value && *p->value) {
+          if (*p->value == '\x01') {
+            Variant v;
+            if (resolveDefaultParameterConstant(defText, defTextLen, v)) {
+              param.set(s_default, v);
+            } else {
+              Object obj = SystemLib::AllocStdClassObject();
+              obj->o_set(s_msg, String("Unknown unserializable default value: ")
+                                   + defText);
+              param.set(s_default, Variant(obj));
+            }
+          } else {
+            param.set(s_default, unserialize_from_string(p->value));
+          }
+          param.set(s_defaultText, defText);
+        }
       }
+
       if (func->byRef(i)) {
         param.set(s_ref, true_varNR);
       }
@@ -769,13 +785,6 @@ Array f_hphp_get_closure_info(CVarRef closure) {
   }
 
   return mi;
-}
-
-Variant f_hphp_get_class_constant(CVarRef cls, CVarRef name) {
-  return cellAsCVarRef(
-    g_vmContext->lookupClsCns(cls.toString().get(),
-                              name.toString().get())
-  );
 }
 
 static Array get_class_info(const ClassInfo *cls) {

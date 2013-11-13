@@ -28,7 +28,6 @@ namespace HPHP {
 Array f_hphp_get_extension_info(const String& name);
 Array f_hphp_get_method_info(CVarRef cls, CVarRef name);
 Array f_hphp_get_closure_info(CVarRef closure);
-Variant f_hphp_get_class_constant(CVarRef cls, CVarRef name);
 Array f_hphp_get_class_info(CVarRef name);
 Array f_hphp_get_function_info(const String& name);
 Variant f_hphp_invoke(const String& name, CVarRef params);

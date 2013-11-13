@@ -1496,6 +1496,10 @@
             "value": 3
         },
         {
+            "name": "ENT_SUBSTITUTE",
+            "value": 8
+        },
+        {
             "name": "ENT_FB_UTF8",
             "value": 32768
         },

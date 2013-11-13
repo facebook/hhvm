@@ -1355,44 +1355,44 @@ Variant f_metaphone(const String& str, int phones /* = 0 */) {
   return false;
 }
 
-String f_html_entity_decode(const String& str, int quote_style /* = k_ENT_COMPAT */,
+String f_html_entity_decode(const String& str, int flags /* = k_ENT_COMPAT */,
                             const String& charset /* = "ISO-8859-1" */) {
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
-  return StringUtil::HtmlDecode(str, (StringUtil::QuoteStyle)quote_style,
+  return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
                                 scharset, true);
 }
 
-String f_htmlentities(const String& str, int quote_style /* = k_ENT_COMPAT */,
+String f_htmlentities(const String& str, int flags /* = k_ENT_COMPAT */,
                       const String& charset /* = "ISO-8859-1" */,
                       bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
-  return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
+  return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyle(flags),
                                 scharset, true);
 }
 
 String f_htmlspecialchars_decode(const String& str,
-                                 int quote_style /* = k_ENT_COMPAT */) {
-  return StringUtil::HtmlDecode(str, (StringUtil::QuoteStyle)quote_style,
+                                 int flags /* = k_ENT_COMPAT */) {
+  return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
                                 "UTF-8", false);
 }
 
-String f_htmlspecialchars(const String& str, int quote_style /* = k_ENT_COMPAT */,
+String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
                           const String& charset /* = "ISO-8859-1" */,
                           bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
-  return StringUtil::HtmlEncode(str, (StringUtil::QuoteStyle)quote_style,
+  return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyle(flags),
                                 scharset, false);
 }
 
-String f_fb_htmlspecialchars(const String& str, int quote_style /* = k_ENT_COMPAT */,
+String f_fb_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
                              const String& charset /* = "ISO-8859-1" */,
                              CArrRef extra /* = Array() */) {
-  return StringUtil::HtmlEncodeExtra(str, (StringUtil::QuoteStyle)quote_style,
+  return StringUtil::HtmlEncodeExtra(str, StringUtil::toQuoteStyle(flags),
                                      charset.data(), false, extra);
 }
 
@@ -1642,7 +1642,7 @@ const StaticString
   s_amp("&"),
   s_ampsemi("&amp;");
 
-Array f_get_html_translation_table(int table /* = 0 */, int quote_style /* = k_ENT_COMPAT */) {
+Array f_get_html_translation_table(int table /* = 0 */, int flags /* = k_ENT_COMPAT */) {
   static entity_charset charset = determine_charset(nullptr); // get default one
 
   assert(charset != entity_charset_enum::cs_unknown);
@@ -1678,7 +1678,7 @@ Array f_get_html_translation_table(int table /* = 0 */, int quote_style /* = k_E
   case HTML_SPECIALCHARS:
     for (int j = 0; basic_entities[j].charcode != 0; j++) {
       if (basic_entities[j].flags &&
-          (quote_style & basic_entities[j].flags) == 0)
+          (flags & basic_entities[j].flags) == 0)
         continue;
 
       ret.set(String::FromChar(basic_entities[j].charcode),

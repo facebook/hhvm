@@ -36,15 +36,38 @@ public:
     Both = 2
   };
 
+  #define QUOTE_STYLES    \
+    /* Use high values to avoid conflicts with currently unimplemented PHP ENT_
+     * constants and for possible future new constants in PHP */  \
+    QS(FBUtf8Only, 65536) \
+    QS(FBUtf8, 32768)     \
+    /* Order of the fields matters here if we're
+     * matching on what flags are set */  \
+    QS(Both, 3)   /* k_ENT_QUOTES:   escape both double and single quotes */  \
+    QS(Double, 2) /* k_ENT_COMPAT:   escape double quotes only */   \
+    QS(No, 0)     /* k_ENT_NOQUOTES: leave all quotes alone */  \
+
+  #define QS(STYLE, VAL) STYLE = (VAL),
   enum class QuoteStyle {
-    Double       = 2,  // k_ENT_COMPAT:   escape double quotes only
-    Both         = 3,  // k_ENT_QUOTES:   escape both double and single quotes
-    No           = 0,  // k_ENT_NOQUOTES: leave all quotes alone
-    // Use high values to avoid conflicts with currently unimplemented PHP ENT_
-    // constants and for possible future new constants in PHP
-    FBUtf8       = 32768,
-    FBUtf8Only   = 65536
+    QUOTE_STYLES
   };
+  #undef QS
+
+  static QuoteStyle toQuoteStyle(int64_t flags) {
+    auto is_set = [&](QuoteStyle qs) {
+      auto as_int = static_cast<int64_t>(qs);
+      return (as_int & flags) == as_int;
+    };
+
+    #define QS(STYLE, VAL)  \
+      if (is_set(QuoteStyle::STYLE)) { return QuoteStyle::STYLE; }
+
+    QUOTE_STYLES
+
+    #undef QS
+
+    not_reached();
+  }
 
 public:
   /**

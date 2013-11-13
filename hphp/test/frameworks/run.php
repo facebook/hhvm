@@ -358,7 +358,9 @@ abstract class Framework {
   public ?Map $current_test_statuses = null;
   public Set $test_files = null;
   public Map $env_vars;
-
+  // Assume the framework unit tests will be run in parallel until otherwise
+  // proven
+  public bool $parallel = true;
 
   private string $install_root;
   private string $git_path;
@@ -381,25 +383,30 @@ abstract class Framework {
       throw new Exception("Provide install, git and test file search info");
     }
 
-    // Set Framework information for install
+    // Set Framework information for install. These are the five necessary
+    // properties for a proper install, with pull_requests being optional.
     $this->setInstallRoot($info->get("install_root"));
     $this->setGitPath($info->get("git_path"));
     $this->setGitCommit($info->get("git_commit"));
     $this->setTestFileSearchRoots($info->get("test_file_search_roots"));
+    $this->setPullRequests($info->get("pull_requests"));
 
-    // Install if not already installed
+
+    // Install if not already installed using the properties set above.
     if (!$this->isInstalled()) {
       $this->install();
     }
 
-    // Set all possible other framework information
+    // Now that we have an install, we can safely set all possible
+    // other framework information
     $this->setBlacklist($info->get("blacklist"));
-    $this->setPullRequests($info->get("pull_requests"));
     $this->setEnvVars($info->get("env_vars"));
     $this->setTestPath($info->get("test_path"));
     $this->setTestNamePattern($info->get("test_name_pattern"));
     $this->setTestFilePattern($info->get("test_file_pattern"));
     $this->setTestCommand($info->get("test_command"));
+
+    $this->parallel = true;
   }
 
   abstract protected function getInfo(): Map;
@@ -504,9 +511,11 @@ abstract class Framework {
     if ($test_command === null) {
       $this->test_command = get_runtime_build()." ".__DIR__.
                             "/vendor/bin/phpunit --debug";
-      $this->test_command .= " %test%";
     } else {
-      $this->test_command = $test_command;
+      $this->test_command = $test_command." --debug";
+    }
+    if ($this->parallel) {
+      $this->test_command .= " %test%";
     }
     if ($redirect) {
       $this->test_command .= " 2>&1";
@@ -612,20 +621,25 @@ abstract class Framework {
   // delete the framework from your repo). The proxy could make things a bit
   // adventurous, so we will see how this works out after some time to test it
   // out
-  private function install(): void {
+  protected function install(): void {
     verbose("Installing ".$this->name.
             ". You will see white dots during install.....\n",
             !Options::$csv_only);
 
-    /*******************************
-     *       GIT CHECKOUT
-     ******************************/
+    $this->installCode();
+    $this->installDependencies();
+    if ($this->pull_requests != null) {
+      $this->installPullRequests();
+    }
+  }
 
-    // Get the source from GitHub
+  protected function installCode(): void {
+     // Get the source from GitHub
     verbose("Retrieving framework ".$this->name."....\n", Options::$verbose);
     $git_command = "git clone";
     $git_command .= " ".$this->git_path;
     $git_command .= " ".$this->install_root;
+
     // "frameworks" directory will be created automatically on first git clone
     // of a framework.
     $git_ret = run_install($git_command, __DIR__, ProxyInformation::$proxies);
@@ -645,11 +659,9 @@ abstract class Framework {
                          : error("Could not checkout baseline code for ".
                                  $this->name."! Removing framework!\n");
     }
+  }
 
-    /*******************************
-     *       FW DEPENDENCIES
-     ******************************/
-
+  protected function installDependencies(): void {
     $composer_json_path = find_any_file_recursive(Set {"composer.json"},
                                                   $this->install_root, true);
     verbose("composer.json found in: $composer_json_path\n", Options::$verbose);
@@ -690,49 +702,46 @@ abstract class Framework {
         }
       }
     }
+  }
 
-    /*******************************
-     *  OTHER PULL REQUESTS
-     ******************************/
-    if ($this->pull_requests != null) {
-      verbose("Merging some upstream pull requests for ".$this->name."\n",
+  protected function installPullRequests(): void {
+    verbose("Merging some upstream pull requests for ".$this->name."\n",
+            Options::$verbose);
+    foreach ($this->pull_requests as $pr) {
+      $dir = $pr["pull_dir"];
+      $rep = $pr["pull_repository"];
+      $gc = $pr["git_commit"];
+      $type = $pr["type"];
+      $move_from_dir = null;
+      chdir($dir);
+      $git_command = "";
+      verbose("Pulling code from ".$rep. " and branch/commit ".$gc."\n",
               Options::$verbose);
-      foreach ($this->pull_requests as $pr) {
-        $dir = $pr["pull_dir"];
-        $rep = $pr["pull_repository"];
-        $gc = $pr["git_commit"];
-        $type = $pr["type"];
-        $move_from_dir = null;
-        chdir($dir);
-        $git_command = "";
-        verbose("Pulling code from ".$rep. " and branch/commit ".$gc."\n",
-                Options::$verbose);
-        if ($type === "pull") {
-          $git_command = "git pull --no-edit ".$rep." ".$gc;
-        } else if ($type === "submodulemove") {
-          $git_command = "git submodule add -b ".$gc." ".$rep;
-          $move_from_dir = $pr["move_from_dir"];
-        }
-        verbose("Pull request command: ".$git_command."\n", Options::$verbose);
-        $git_ret = run_install($git_command, $dir,
-                               ProxyInformation::$proxies);
-        if ($git_ret !== 0) {
-          remove_dir_recursive($this->install_root);
-          Options::$csv_only ? error()
-                             : error("Could not get pull request code for ".
-                                     $this->name."!".
-                                     " Removing framework!\n");
-        }
-        if ($move_from_dir !== null) {
-          $mv_command = "mv ".$move_from_dir."/* ".$dir;
-          verbose("Move command: ".$mv_command."\n", Options::$verbose);
-          exec($mv_command);
-          verbose("After move, removing: ".$move_from_dir."\n",
-                  Options::$verbose);
-          remove_dir_recursive($move_from_dir);
-        }
-        chdir(__DIR__);
+      if ($type === "pull") {
+        $git_command = "git pull --no-edit ".$rep." ".$gc;
+      } else if ($type === "submodulemove") {
+        $git_command = "git submodule add -b ".$gc." ".$rep;
+        $move_from_dir = $pr["move_from_dir"];
       }
+      verbose("Pull request command: ".$git_command."\n", Options::$verbose);
+      $git_ret = run_install($git_command, $dir,
+                             ProxyInformation::$proxies);
+      if ($git_ret !== 0) {
+        remove_dir_recursive($this->install_root);
+        Options::$csv_only ? error()
+                           : error("Could not get pull request code for ".
+                                   $this->name."!".
+                                   " Removing framework!\n");
+      }
+      if ($move_from_dir !== null) {
+        $mv_command = "mv ".$move_from_dir."/* ".$dir;
+        verbose("Move command: ".$mv_command."\n", Options::$verbose);
+        exec($mv_command);
+        verbose("After move, removing: ".$move_from_dir."\n",
+                Options::$verbose);
+        remove_dir_recursive($move_from_dir);
+      }
+      chdir(__DIR__);
     }
   }
 
@@ -763,7 +772,7 @@ abstract class Framework {
 
   }
 
-  public function findTestFiles() {
+  public function findTestFiles(): void {
      // Handle wildcards
     $search_dirs = array();
     foreach($this->test_file_search_roots as $root) {
@@ -834,7 +843,7 @@ abstract class Framework {
     }
   }
 
-  private function isInstalled(): bool {
+  protected function isInstalled(): bool {
     /****************************************
      *  See if framework is already installed
      *  installed.
@@ -979,8 +988,7 @@ class FacebookPhpSdk extends Framework {
         __DIR__."/frameworks/facebook-php-sdk/tests",
       },
       "test_command" => get_runtime_build()." ".__DIR__.
-                      "/vendor/bin/phpunit --debug ".
-                      "--bootstrap tests/bootstrap.php %test%",
+                      "/vendor/bin/phpunit --bootstrap tests/bootstrap.php",
       "test_path" => __DIR__."/frameworks/facebook-php-sdk",
     };
   }
@@ -1054,15 +1062,15 @@ class Mediawiki extends Framework {
         __DIR__."/frameworks/mediawiki-core/tests/phpunit",
       },
       "test_path" => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
-      "test_command" => get_runtime_build()." phpunit.php --debug ".
-                      "--exclude-group=Database %test%",
+      "test_command" => get_runtime_build()." phpunit.php ".
+                        "--exclude-group=Database",
     };
   }
 
-  public function install(): void {
+  protected function install(): void {
     verbose("Adding LocalSettings.php file to Mediawiki test dir.\n",
             Options::$verbose);
-    $touch_command = "touch ".$this->install_root."/LocalSettings.php";
+    $touch_command = "touch ".$this->getInstallRoot()."/LocalSettings.php";
     exec($touch_command);
     parent::install();
   }
@@ -1084,7 +1092,11 @@ class Paris extends Framework {
 }
 
 class Pear extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
+  public function __construct(string $name) {
+    parent::__construct($name);
+    $this->parallel = false;
+  }
+
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/pear-core",
@@ -1094,8 +1106,6 @@ class Pear extends Framework {
         __DIR__."/frameworks/pear-core/tests",
       },
       "test_path" => __DIR__."/frameworks/pear-core",
-      "test_command" => get_runtime_build()." ".__DIR__.
-                            "/vendor/bin/phpunit --debug %test%",
       "test_name_pattern" => PHPUnitPatterns::$pear_test_name_pattern,
       "test_file_pattern" => PHPUnitPatterns::$pear_test_file_pattern,
       "pull_requests" => Vector {
@@ -1108,6 +1118,32 @@ class Pear extends Framework {
         },
       }
     };
+  }
+
+  protected function install(): void {
+    parent::install();
+    verbose("Creating a phpunit.xml for running the pear tests.\n",
+            Options::$verbose);
+    $phpunit_xml = <<<XML
+<phpunit>
+<testsuites>
+  <testsuite name="Pear">
+    <directory suffix=".phpt">tests</directory>
+  </testsuite>
+</testsuites>
+</phpunit>
+XML;
+    file_put_contents($this->getInstallRoot()."/phpunit.xml", $phpunit_xml);
+  }
+
+  protected function isInstalled(): bool {
+    if (file_exists($this->getInstallRoot())) {
+      if (!file_exists($this->getInstallRoot()."/phpunit.xml")) {
+        remove_dir_recursive($this->getInstallRoot());
+        return false;
+      }
+    }
+    return parent::isInstalled();
   }
 }
 
@@ -1159,7 +1195,7 @@ class PHPUnit extends Framework {
       },
       "test_path" => __DIR__."/frameworks/phpunit",
       "test_command" => get_runtime_build()." ".__DIR__.
-                       "/frameworks/phpunit/phpunit.php --debug %test%",
+                        "/frameworks/phpunit/phpunit.php",
       "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
       "blacklist" => Set {
         __DIR__."/frameworks/phpunit/Tests/Util/ConfigurationTest.php",
@@ -1270,8 +1306,10 @@ class Zf2 extends Framework {
   }
 }
 
-class SingleTestFile {
+class Runner {
   public Framework $framework;
+  // Name could be the name of the single test file for a given framework,
+  // or the actual framework name if we are running in serial, for example
   public string $name;
 
   private string $test_information = "";
@@ -1284,9 +1322,13 @@ class SingleTestFile {
   private resource $process = null;
   private string $actual_test_command = "";
 
-  public function __construct(Framework $f, string $p) {
+  public function __construct(Framework $f, string $p = "") {
     $this->framework = $f;
-    $this->name = $p;
+    if ($p === "") {
+      $this->name = $this->framework->name;
+    } else {
+      $this->name = $p;
+    }
   }
 
   public function run(): int {
@@ -1605,7 +1647,6 @@ class SingleTestFile {
     }
     $this->process = proc_open($this->actual_test_command, $descriptorspec,
                                $this->pipes, $this->framework->test_path, $env);
-
     return is_resource($this->process);
   }
 
@@ -1788,10 +1829,20 @@ function run_tests(Vector $frameworks): void {
               " with gray dots...\n", !Options::$csv_only);
     }
 
-    // Get the set of uniquie test files
-    $framework->findTestFiles();
-    foreach($framework->test_files as $test_file) {
-      $st = new SingleTestFile($framework, $test_file);
+    // If we are running the tests for the framework in parallel, then let's
+    // get all the test files for that framework and add each to our tests
+    // vector; otherwise, we are just going to add the framework to run
+    // serially and use its global phpunit test run command to run the entire
+    // suite.
+    if ($framework->parallel) {
+      // Get the set of uniquie test files
+      $framework->findTestFiles();
+      foreach($framework->test_files as $test_file) {
+        $st = new Runner($framework, $test_file);
+        $all_tests->add($st);
+      }
+    } else {
+      $st = new Runner($framework);
       $all_tests->add($st);
     }
   }
@@ -2138,7 +2189,7 @@ function oss_test_option_map(): OptionInfoMap {
                                         "display."},
     'csvheader'           => Pair {'',  "Add a header line for the summary ".
                                         "CSV which includes the framework ".
-                                        "names."}
+                                        "names."},
   };
 }
 

@@ -505,6 +505,10 @@ SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
   // need the instruction; the old stack is still accurate.
   if (!numSpillSrcs && spDeficit == 0) return sp;
 
+  // Don't elide spills of LdStack values right away, since they're
+  // useful for getStackValue
+  if (!m_tb.inReoptimize()) return nullptr;
+
   // If our value came from a LdStack on the same sp and offset,
   // we don't need to spill it.
   for (uint32_t i = 0, cellOff = 0; i < numSpillSrcs; i++) {

@@ -537,6 +537,11 @@ void HhbcTranslator::emitNewPackedArray(int numArgs) {
   // obtain a pointer to the topmost item; if over-flushing becomes
   // a problem then we should refactor the NewPackedArray opcode to
   // take its values directly as SSA operands.
+  //
+  // Before the spillStack() we touch all of the incoming stack
+  // arguments so that they are available to later optimizations via
+  // getStackValue().
+  for (int i = 0; i < numArgs; i++) topC(i);
   SSATmp* sp = spillStack();
   for (int i = 0; i < numArgs; i++) popC();
   push(gen(NewPackedArray, cns(numArgs), sp));
@@ -2110,6 +2115,48 @@ static const Func* findCuf(Op op,
   return f;
 }
 
+bool HhbcTranslator::emitFPushCufArray(SSATmp* callable, int32_t numParams) {
+  if (!callable->isA(Type::Arr)) return false;
+
+  auto callableInst = callable->inst();
+  if (!callableInst->is(NewPackedArray)) return false;
+
+  auto callableSize = callableInst->src(0);
+  if (!callableSize->isConst() ||
+      callableSize->getValInt() != 2) {
+    return false;
+  }
+
+  auto method = getStackValue(m_tb->sp(), 0).value;
+  auto object = getStackValue(m_tb->sp(), 1).value;
+  if (!method || !object) return false;
+
+  if (!method->isConst() ||
+      strstr(method->getValStr()->data(), "::") != nullptr) {
+    return false;
+  }
+
+  if (!object->isA(Type::Obj)) {
+    if (!object->type().equals(Type::Cell)) return false;
+    // This is probably an object, and we just haven't guarded on
+    // the type.  Do so now.
+    auto exit = makeExit();
+    object = gen(CheckType, Type::Obj, exit, object);
+    m_tb->constrainValue(object, DataTypeSpecific);
+  }
+
+  popC();
+
+  gen(IncRef, object);
+  emitFPushObjMethodCommon(object,
+                           method->getValStr(),
+                           numParams,
+                           false /* shouldFatal */,
+                           callable);
+  gen(DecRef, callable);
+  return true;
+}
+
 // FPushCuf when the callee is not known at compile time.
 void HhbcTranslator::emitFPushCufUnknown(Op op, int32_t numParams) {
   if (op != Op::FPushCuf) {
@@ -2124,43 +2171,11 @@ void HhbcTranslator::emitFPushCufUnknown(Op op, int32_t numParams) {
     PUNT(emitFPushCufUnknown);
   }
 
-  auto const callable = popC();
+  // Peek at the top of the stack before deciding to pop it.
+  auto const callable = topC();
+  if (emitFPushCufArray(callable, numParams)) return;
 
-  do {
-    if (!callable->isA(Type::Arr)) break;
-
-    auto callableInst = callable->inst();
-    if (callableInst->op() != NewPackedArray) break;
-
-    auto callableSize = callableInst->src(0);
-    if (!callableSize->isConst() ||
-        callableSize->getValInt() != 2) {
-      break;
-    }
-
-    auto arrStack = callableInst->src(1)->inst();
-    if (arrStack->op() != SpillStack ||
-        arrStack->numSrcs() < 4) {
-      break;
-    }
-
-    auto method = arrStack->src(2);
-    auto object = arrStack->src(3);
-    if (!method->isConst() ||
-        strstr(method->getValStr()->data(), "::") != nullptr ||
-        !object->isA(Type::Obj)) {
-      break;
-    }
-
-    gen(IncRef, object);
-    emitFPushObjMethodCommon(object,
-                             method->getValStr(),
-                             numParams,
-                             false /* shouldFatal */,
-                             callable);
-    gen(DecRef, callable);
-    return;
-  } while (0);
+  popC();
 
   emitFPushActRec(
     m_tb->genDefNull(),
@@ -2168,7 +2183,7 @@ void HhbcTranslator::emitFPushCufUnknown(Op op, int32_t numParams) {
     numParams,
     nullptr
   );
-  auto const actRec     = spillStack();
+  auto const actRec = spillStack();
 
   /*
    * This is a similar case to lookup for functions in FPushFunc or

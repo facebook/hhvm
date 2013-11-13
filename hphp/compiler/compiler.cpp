@@ -915,8 +915,6 @@ int runTarget(const CompilerOptions &po) {
     if (buf.empty()) return -1;
 
     cmd += buf;
-    cmd += " -vEval.Jit=0";
-    cmd += " -vEval.DumpBytecode=1";
     cmd += " -vRepo.Authoritative=true";
     cmd += " -vRepo.Local.Mode=r- -vRepo.Local.Path=";
   }

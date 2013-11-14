@@ -2628,6 +2628,31 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitTraceRet(m_as);
   }
+
+  // VMEntry functions are likely to return to the callToExit stub.
+  // However, this is a forced return address, which doesn't match the
+  // address in the hardware return address stack.  To avoid the
+  // branch misprediction in the ret instruction, we turn it into a
+  // direct jcc to callToExit.  In case the function was called from
+  // another JITed function, the ret path is taken.
+  if (curFunc()->attrs() & AttrVMEntry) {
+    Label retLabel;
+    TCA callToExitStub = m_tx64->uniqueStubs.callToExit;
+    m_as.movq(callToExitStub, m_rScratch);
+    m_as.cmpq(reg::rsp[0], m_rScratch);
+    m_as.jcc8(CC_NE, retLabel);
+    m_as.pop (m_rScratch);
+
+    // Task #3186286
+    // callToExit does a pop + indirect jump because it's normally
+    // reached from a ret.  However, in this code path we jump to
+    // callToExit, so we should be able do a ret here that is
+    // going to be predicted by the hardware return address stack.
+    // However, when we inlined the REQ_EXIT service request here and
+    // emitted a ret, the ret suffered branch mispredictions.
+    m_as.jmp (callToExitStub);
+    asm_label(m_as, retLabel);
+  }
   m_as.ret();
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     m_as.ud2();

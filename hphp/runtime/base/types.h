@@ -539,34 +539,39 @@ typedef hphp_hash_set<FuncId> FuncIdSet;
  * AttrSkipFrame is set to indicate that the frame should be ignored
  *   when searching for the context (eg array_map evaluates its
  *   callback in the context of its caller).
+ *
+ * AttrVMEntry is set on functions that are generally VM entry points.
+ *   This is not necessary for correctness; it simply allows better
+ *   code generation in the JIT.
  */
 enum Attr {
-  AttrNone      = 0,             // class  property  method  //
-  AttrReference = (1 << 0),      //                     X    //
-  AttrPublic    = (1 << 1),      //            X        X    //
-  AttrProtected = (1 << 2),      //            X        X    //
-  AttrPrivate   = (1 << 3),      //            X        X    //
-  AttrStatic    = (1 << 4),      //            X        X    //
-  AttrAbstract  = (1 << 5),      //    X                X    //
-  AttrFinal     = (1 << 6),      //    X                X    //
-  AttrInterface = (1 << 7),      //    X                     //
-  AttrPhpLeafFn = (1 << 7),      //                     X    //
-  AttrTrait     = (1 << 8),      //    X                X    //
-  AttrNoInjection = (1 << 9),    //                     X    //
-  AttrUnique    = (1 << 10),     //    X                X    //
+  AttrNone          = 0,         // class  property  method  //
+  AttrReference     = (1 <<  0), //                     X    //
+  AttrPublic        = (1 <<  1), //            X        X    //
+  AttrProtected     = (1 <<  2), //            X        X    //
+  AttrPrivate       = (1 <<  3), //            X        X    //
+  AttrStatic        = (1 <<  4), //            X        X    //
+  AttrAbstract      = (1 <<  5), //    X                X    //
+  AttrFinal         = (1 <<  6), //    X                X    //
+  AttrInterface     = (1 <<  7), //    X                     //
+  AttrPhpLeafFn     = (1 <<  7), //                     X    //
+  AttrTrait         = (1 <<  8), //    X                X    //
+  AttrNoInjection   = (1 <<  9), //                     X    //
+  AttrUnique        = (1 << 10), //    X                X    //
   AttrDynamicInvoke = (1 << 11), //                     X    //
   AttrNoExpandTrait = (1 << 12), //    X                     //
-  AttrNoOverride= (1 << 13),     //    X                X    //
-  AttrClone     = (1 << 14),     //                     X    //
+  AttrNoOverride    = (1 << 13), //    X                X    //
+  AttrClone         = (1 << 14), //                     X    //
   AttrVariadicByRef = (1 << 15), //                     X    //
-  AttrMayUseVV  = (1 << 16),     //                     X    //
-  AttrPersistent= (1 << 17),     //    X                X    //
-  AttrDeepInit = (1 << 18),      //            X             //
-  AttrHot = (1 << 19),           //                     X    //
-  AttrBuiltin = (1 << 20),       //                     X    //
+  AttrMayUseVV      = (1 << 16), //                     X    //
+  AttrPersistent    = (1 << 17), //    X                X    //
+  AttrDeepInit      = (1 << 18), //            X             //
+  AttrHot           = (1 << 19), //                     X    //
+  AttrBuiltin       = (1 << 20), //                     X    //
   AttrAllowOverride = (1 << 21), //                     X    //
-  AttrSkipFrame = (1 << 22),     //                     X    //
-  AttrNative = (1 << 23),        //                     X    //
+  AttrSkipFrame     = (1 << 22), //                     X    //
+  AttrNative        = (1 << 23), //                     X    //
+  AttrVMEntry       = (1 << 24), //                     X    //
 };
 
 inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

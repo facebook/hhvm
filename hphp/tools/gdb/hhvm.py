@@ -225,6 +225,14 @@ class ResourceDataPrinter:
     def to_string(self):
         return "Res #%d" % self.val['o_id']
 
+class ClassPrinter:
+    RECOGNIZE = '^HPHP::Class$'
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return "Class %s" % string_data_val(self.val['m_preClass']['m_px']['m_name'])
+
 printer_classes = [
     TypedValuePrinter,
     StringDataPrinter,
@@ -233,6 +241,7 @@ printer_classes = [
     SmartPtrPrinter,
     RefDataPrinter,
     ResourceDataPrinter,
+    ClassPrinter,
 ]
 type_printers = dict((re.compile(cls.RECOGNIZE), cls)
                      for cls in printer_classes)

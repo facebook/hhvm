@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP { namespace JIT {
 
@@ -186,6 +187,101 @@ std::string show(const Value& state) {
     state.fromLoad ? " - from load" : "").str();
 }
 
+/*
+ * Frame represents a call frame and is used to track references to the current
+ * $this pointer.
+ */
+struct Frame {
+  explicit Frame(SSATmp* main = nullptr, SSATmp* current = nullptr)
+    : mainThis(main)
+    , currentThis(current)
+  {}
+
+  /* The canonical form of $this. For the outermost frame of the trace, this
+   * will be nullptr if we haven't loaded $this yet, or a LdThis if we
+   * have. For inlined frames, this will be the canonical SSATmp* for the $this
+   * pointer given to the SpillFrame. */
+  SSATmp* mainThis;
+
+  /* Latest live temp holding $this. This is updated whenever we see a new
+   * LdThis in a frame, and it's set to nullptr after any instructions that
+   * kill all live temps (calls, mostly). */
+  SSATmp* currentThis;
+
+  bool operator==(const Frame b) const {
+    return mainThis == b.mainThis && currentThis == b.currentThis;
+  }
+};
+
+std::string show(const Frame frame) {
+  if (!frame.mainThis && !frame.currentThis) {
+    return "<no $this>";
+  }
+  std::string ret;
+  if (frame.mainThis) {
+    folly::toAppend("main this: ", frame.mainThis->toString(), &ret);
+  }
+  if (frame.currentThis) {
+    folly::toAppend("current this: ", frame.currentThis->toString(), &ret);
+  }
+  return ret;
+}
+
+/*
+ * FrameStack contains a Frame struct for all live and pre-live frames.
+ */
+struct FrameStack {
+  /* Push a possibly empty Frame representing a pre-live ActRec. We don't yet
+   * know if the call with be inlined or not. */
+  void pushPreLive(Frame f = Frame()) {
+    preLive.emplace_back(f);
+  }
+
+  /* Push a new frame representing a newly defined FramePtr for an inlined
+   * call. */
+  void pushInline(const IRInstruction* fpInst) {
+    assert(!preLive.empty());
+    assert(fpInst->is(DefInlineFP));
+    live[fpInst] = std::move(preLive.back());
+    preLive.pop_back();
+  }
+
+  /* Pop an inlined frame to represent an InlineReturn, forgetting what we know
+   * about its $this pointer. */
+  void popInline(const IRInstruction* fpInst) {
+    assert(frameRoot(fpInst) == fpInst);
+    assert(live.size() >= 2);
+    auto it = live.find(fpInst);
+    assert(it != live.end());
+
+    assert(dead.count(fpInst) == 0);
+    dead[fpInst] = std::move(it->second);
+    live.erase(it);
+  }
+
+  /* Pop a non-inlined frame. This is only called if a trace includes a RetC in
+   * the outermost function. */
+  void pop() {
+    assert(live.size() == 1);
+    live.erase(live.begin());
+  }
+
+  bool operator==(const FrameStack& b) const {
+    return live == b.live && preLive == b.preLive;
+  }
+
+  /* Map from the instruction defining the frame to a Frame object. */
+  smart::hash_map<const IRInstruction*, Frame> live;
+
+  /* Similar to live, but for frames that have been popped. We keep track of
+   * these because we often refer to a LdThis from an inlined function after
+   * it's returned. */
+  smart::hash_map<const IRInstruction*, Frame> dead;
+
+  /* Frames that have been pushed but not activated. */
+  smart::vector<Frame> preLive;
+};
+
 typedef smart::hash_map<SSATmp*, SSATmp*> CanonMap;
 
 /*
@@ -201,8 +297,8 @@ struct State {
    * instructions, like CheckType and AssertType. */
   CanonMap canon;
 
-  /* liveThis keeps track of live $this pointers in inlined frames. */
-  smart::vector<SSATmp*> liveThis;
+  /* frames keeps track of live $this pointers in call frames. */
+  FrameStack frames;
 };
 
 std::string show(const State& state) {
@@ -211,16 +307,24 @@ std::string show(const State& state) {
   for (auto const& val : state.values) {
     if (val.second.empty()) continue;
 
-    folly::toAppend(indent(), val.first->inst()->toString(), '\n', &ret);
-    Indent _i;
-    folly::toAppend(indent(), show(val.second), '\n', &ret);
+    folly::toAppend(indent(), show(val.second), " | ",
+                    val.first->inst()->toString(), '\n', &ret);
   }
 
-  if (!state.liveThis.empty()) {
-    folly::toAppend(indent(), "live $this pointers:\n", &ret);
+  if (!state.frames.live.empty()) {
+    folly::toAppend(indent(), "live frames (unordered):\n", &ret);
     Indent _i;
-    for (auto* this_ : state.liveThis) {
-      folly::toAppend(indent(), this_->toString(), '\n', &ret);
+    for (auto const& pair : state.frames.live) {
+      folly::toAppend(indent(), pair.first->toString(), ": ",
+                      show(pair.second), '\n', &ret);
+    }
+  }
+
+  if (!state.frames.preLive.empty()) {
+    folly::toAppend(indent(), "pre-live frames:\n", &ret);
+    Indent _i;
+    for (auto const& frame : state.frames.preLive) {
+      folly::toAppend(indent(), show(frame), '\n', &ret);
     }
   }
 
@@ -253,13 +357,21 @@ typedef smart::hash_map<const Block*, IncomingStateVec> SavedStates;
  * dominated by it.
  */
 struct SinkPoint {
-  SinkPoint(Point i, SSATmp* v)
+  SinkPoint(Point i, SSATmp* v, bool erase)
     : id(i)
+    , eraseOnly(erase)
     , value(v)
   {}
 
   /* The position of the sink point, from IdMap. */
   Point id;
+
+  /* In some very rare situations we may know that we want to insert a
+   * SinkPoint for a value without having a live SSATmp for that value. This
+   * means it's not safe to sink the IncRef to that point, but if the
+   * instruction immediately after the SinkPoint is a DecRef of the same value,
+   * it's safe to eliminate both instructions. */
+  bool eraseOnly;
 
   /* The current version of the value, if it has been through a passthrough
    * instruction. Keeping track of this allows us to sink an IncRef of a Cell
@@ -339,6 +451,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
   SinkPointsMap find() {
     assert(!m_blocks.empty());
+    auto& fpInst = m_blocks.front()->front();
+    assert(fpInst.is(DefFP));
+    m_state.frames.live[&fpInst] = Frame();
 
     for (auto* block : m_blocks) {
       ITRACE(3, "entering B{}\n", block->id());
@@ -436,10 +551,12 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
     // We start by building a map from values to their merged incoming state
     // and which blocks provide information about the value.
-    auto const& firstThis = states.front().state.liveThis;
+
+    auto const& firstFrames = states.front().state.frames;
     smart::hash_map<SSATmp*, IncomingValue> mergedValues;
     for (auto const& inState : states) {
-      assert(inState.state.liveThis == firstThis);
+      assert(inState.state.frames == firstFrames &&
+             "merging states with different FrameStacks is not supported");
 
       for (auto const& inPair : inState.state.values) {
         auto* value = inPair.first;
@@ -462,7 +579,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
     State retState;
     retState.canon = mergeCanons(states);
-    retState.liveThis = firstThis;
+    retState.frames = firstFrames;
 
     // Now, for each incoming value, insert it into the resulting state. If
     // there is a difference in a value's state between incoming branches,
@@ -487,7 +604,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
           ITRACE(3, "Inserting sink point on edge B{} -> B{}\n",
                  inBlock.from->id(), m_block->id());
           m_ret.points[pair.first].insert(std::make_pair(inState.popRef(),
-                                           SinkPoint(insertId, incVal)));
+                                           SinkPoint(insertId, incVal, false)));
         }
       }
 
@@ -702,25 +819,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // When leaving a trace, we need to account for all live references in
       // locals and $this pointers.
       consumeAllLocals();
-      consumeAllLiveThis();
+      consumeAllFrames();
     } else if (m_inst->is(GenericRetDecRefs)) {
       consumeAllLocals();
-    } else if (m_inst->is(SpillFrame) && m_inst->src(3)->isA(Type::Obj)) {
-      // When spilling an Object to a pre-live ActRec, we can reliably track
-      // the reference in the frame. This allows us to optimize away many
-      // refcounting operations on $this in inlined calls.
-      auto* this_ = m_inst->src(3);
-      ITRACE(3, "{} heading for $this in an ActRec; not consuming reference\n",
-             *this_);
-      Indent _i;
-
-      auto& valState = m_state.values[canonical(this_)];
-      if (valState.realCount == 0) {
-        assert(valState.fromLoad);
-        ++valState.realCount;
-      }
-      m_state.liveThis.push_back(canonical(this_));
-      ITRACE(3, " after: {}\n", show(valState));
     } else {
       // All other instructions take the generic path.
       consumeInputs();
@@ -730,15 +831,22 @@ struct SinkPointAnalyzer : private LocalStateHook {
     m_frameState.update(m_inst);
   }
 
-  void consumeAllLiveThis() {
-    if (!m_state.liveThis.empty()) {
-      ITRACE(3, "consuming all live $this pointers\n");
-      Indent _i;
-      for (auto* this_ : m_state.liveThis) {
-        consumeValue(this_);
-      }
-      m_state.liveThis.clear();
+  /* JIT::canonical() traces through passthrough instructions to get the root
+   * of a value. Since we're tracking the state of inlined frames in the trace,
+   * there are often cases where the root value for a LdThis is really a value
+   * up in some enclosing frame. */
+  SSATmp* canonical(SSATmp* value) {
+    auto* root = JIT::canonical(value);
+    auto* inst = root->inst();
+    if (!inst->is(LdThis)) return root;
+
+    auto* fpInst = frameRoot(inst->src(0)->inst());
+    auto it = m_state.frames.live.find(fpInst);
+    if (it == m_state.frames.live.end()) {
+      it = m_state.frames.dead.find(fpInst);
+      assert(it != m_state.frames.dead.end());
     }
+    return it->second.mainThis;
   }
 
   void consumeAllLocals() {
@@ -756,28 +864,66 @@ struct SinkPointAnalyzer : private LocalStateHook {
       auto* src = m_inst->src(0);
 
       if (src->type().notCounted()) return;
+      src = canonical(src);
 
-      auto const& valState = m_state.values[canonical(src)];
+      auto const& valState = m_state.values[src];
       // Record DecRefs that won't go to 0
       assert(IMPLIES(m_inst->is(DecRefNZ), valState.realCount > 1));
       if (valState.realCount > 1) {
         m_ret.decRefs[m_ids.before(m_inst)] = valState.realCount;
       }
+    } else if (m_inst->is(SpillFrame)) {
+      auto* this_ = m_inst->src(3);
+      if (this_->isA(Type::Obj)) {
+        m_state.frames.pushPreLive(Frame(canonical(this_), this_));
+        // When spilling an Object to a pre-live ActRec, we can reliably track
+        // the reference in the frame. This allows us to optimize away many
+        // refcounting operations on $this in inlined calls.
+        ITRACE(3, "{}({}) becoming $this in an ActRec; not consuming "
+               "reference\n",
+               *this_, *canonical(this_));
+        Indent _i;
 
-      // If we're decreffing $this in an inlined frame, remove it from our
-      // tracked $this pointers.
-      if (src->isA(Type::Obj) && m_frameState.inlineDepth() &&
-          isRet(m_inst->marker().sk().op()) && !m_state.liveThis.empty() &&
-          m_state.liveThis.back() == canonical(src)) {
-        ITRACE(3, "decreffing $this ptr: {}\n", *src);
-        m_state.liveThis.pop_back();
+        auto& valState = m_state.values[canonical(this_)];
+        if (valState.realCount == 0) {
+          assert(valState.fromLoad);
+          ++valState.realCount;
+        }
+        ITRACE(3, " after: {}\n", show(valState));
+        return;
       }
-    }
-
-    // Calls invalidate all live SSATmps, so make sure we resolve any live
-    // $this pointers before losing access to the value.
-    if (m_inst->is(Call, CallArray)) {
-      consumeAllLiveThis();
+      m_state.frames.pushPreLive();
+    } else if (m_inst->is(DefInlineFP)) {
+      m_state.frames.pushInline(m_inst);
+    } else if (m_inst->is(InlineReturn)) {
+      FTRACE(3, "{}", show(m_state));
+      m_state.frames.popInline(frameRoot(m_inst->src(0)->inst()));
+    } else if (m_inst->is(RetCtrl) && !m_frameState.func()->isGenerator()) {
+      m_state.frames.pop();
+    } else if (m_inst->is(Call, CallArray)) {
+      resolveAllFrames();
+      callPreLiveFrame();
+    } else if (m_inst->is(ContEnter)) {
+      resolveAllFrames();
+    } else if (m_inst->is(CallBuiltin) &&
+               !strcasecmp(m_inst->src(0)->getValFunc()->fullName()->data(),
+                           "get_defined_vars")) {
+      observeLocalRefs();
+    } else if (m_inst->is(InterpOne, InterpOneCF)) {
+      // InterpOne can push and pop ActRecs.
+      auto const op = m_inst->extra<InterpOneData>()->opcode;
+      if (Transl::getInstrInfo(op).type == Transl::InstrFlags::OutFDesc) {
+        m_state.frames.pushPreLive();
+      } else if (isFCallStar(op)) {
+        resolveAllFrames();
+        callPreLiveFrame();
+      } else if (op == OpContEnter) {
+        resolveAllFrames();
+      } else if (op == OpFCallBuiltin) {
+        // This isn't optimal, but InterpOne of FCallBuiltin is rare enough
+        // that it doesn't matter.
+        observeLocalRefs();
+      }
     }
 
     // SpillStack and Call may have some of their sources replaced with None,
@@ -814,12 +960,23 @@ struct SinkPointAnalyzer : private LocalStateHook {
           ITRACE(3, "consuming {} instead of src {} of None\n", *it->second, i);
           consumeValue(it->second);
         }
+      } else if (src->isA(Type::StkPtr) && src->inst()->is(SpillFrame) &&
+                 !m_inst->is(DefInlineFP, DefInlineSP,
+                             Call, CallArray, ContEnter)) {
+        // If the StkPtr being consumed points to a pre-live ActRec, observe
+        // its $this pointer since many of our helper functions decref it.
+        auto* this_ = src->inst()->src(3);
+        if (this_->isA(Type::Obj)) {
+          auto const sinkPoint = SinkPoint(m_ids.before(m_inst), this_, false);
+          this_ = canonical(this_);
+          observeValue(this_, m_state.values[this_], sinkPoint);
+        }
       }
 
       if (src->type().notCounted()) continue;
 
       auto& valState = m_state.values[canonical(src)];
-      const SinkPoint sp(m_ids.before(m_inst), src);
+      const SinkPoint sp(m_ids.before(m_inst), src, false);
       assert(IMPLIES(valState.optCount() == 0, valState.realCount == 0));
       if (m_inst->consumesReference(i)) {
         consumeValue(canonical(src), valState, sp);
@@ -850,6 +1007,56 @@ struct SinkPointAnalyzer : private LocalStateHook {
     return ret;
   }
 
+  /*
+   * Process a normal call to a prelive frame. Consume $this, if any, and pop
+   * the prelive frame.
+   */
+  void callPreLiveFrame() {
+    // If we have no prelive frames the FPush* was in a different trace.
+    if (m_state.frames.preLive.empty()) return;
+
+    auto& frame = m_state.frames.preLive.back();
+    if (frame.currentThis) {
+      consumeValue(frame.currentThis);
+    } else if (frame.mainThis) {
+      consumeValueEraseOnly(frame.mainThis);
+    }
+    m_state.frames.preLive.pop_back();
+  }
+
+  template<typename L>
+  void forEachFrame(L body) {
+    for (auto& pair : m_state.frames.live) body(pair.second);
+    for (auto& frame : m_state.frames.preLive) body(frame);
+  }
+
+  /*
+   * Call, CallArray, and ContEnter destroy all live values. They also might
+   * throw and we can't attach catch traces to them. Resolve the opt delta for
+   * any live $this pointers and forget the "current" this pointer so we don't
+   * reuse it after the call.
+   */
+  void resolveAllFrames() {
+    forEachFrame([this](Frame& f) {
+      if (f.currentThis) {
+        resolveValue(f.currentThis);
+        f.currentThis = nullptr;
+      } else if (f.mainThis) {
+        resolveValueEraseOnly(f.mainThis);
+      }
+    });
+  }
+
+  void consumeAllFrames() {
+    forEachFrame([this](Frame& f) {
+      if (f.currentThis) {
+        consumeValue(f.currentThis);
+      } else if (f.mainThis) {
+        consumeValueEraseOnly(f.mainThis);
+      }
+    });
+  }
+
   /* When an instruction consumes a reference to a value, two things in our
    * tracked state must be updated. We first ensure that the behavior of DecRef
    * and COW will not be affected by the difference between the real count and
@@ -858,18 +1065,20 @@ struct SinkPointAnalyzer : private LocalStateHook {
    * decremented to reflect the consumption of the reference. If there is no
    * reference to consume, this is either a bug in this analysis pass or the
    * incoming IR, so abort with a (hopefully) helpful error. */
-  void consumeValue(SSATmp* value) {
+  void consumeValueImpl(SSATmp* value, bool eraseOnly) {
     assert(value);
     if (value->type().notCounted()) return;
 
     auto* root = canonical(value);
     consumeValue(root, m_state.values[root],
-                 SinkPoint(m_ids.before(m_inst), value));
+                 SinkPoint(m_ids.before(m_inst), value, eraseOnly));
   }
+  void consumeValue(SSATmp* value)          { consumeValueImpl(value, false); }
+  void consumeValueEraseOnly(SSATmp* value) { consumeValueImpl(value, true); }
 
   void consumeValue(SSATmp* value, Value& valState, SinkPoint sinkPoint) {
     ITRACE(3, "consuming value {}\n", *value->inst());
-    assert(!value->inst()->isPassthrough());
+    assert(value == canonical(value));
     Indent _i;
 
     ITRACE(3, "before: {}\n", show(valState));
@@ -897,25 +1106,59 @@ struct SinkPointAnalyzer : private LocalStateHook {
     }
 
     always_assert(valState.optCount() >= 1 &&
-                  "Instruction has incoming value with optCount < 1");
+                  "Consuming value with optCount < 1");
 
-    // DecRef and COW both care about the same thing: is _count == 1 coming
-    // into the operation? Note that we're treating consumers and observers the
-    // same here, which is necessary until we have better alias analysis.
-    while ((valState.realCount == 1) != (valState.optCount() == 1)) {
-      m_ret.points[value].insert(std::make_pair(valState.popRef(), sinkPoint));
-      ITRACE(3, "placing IncRef at id {}\n", sinkPoint.id);
-
-      // If the current instruction has a taken branch, we need to tell the
-      // propagated state that we used one of the pending IncRefs.
-      if (m_takenState && sinkPoint.id == m_ids.before(m_inst)) {
-        ITRACE(3, "updating taken state for {}\n", *value);
-        m_takenState->values[value].popRef();
-      }
-    }
+    // Note that we're treating consumers and observers the same here, which is
+    // necessary until we have better alias analysis.
+    observeValue(value, valState, sinkPoint);
     --valState.realCount;
 
     ITRACE(3, " after: {}\n", show(valState));
+  }
+
+  /* DecRef and COW both care about the same thing: is _count == 1 coming into
+   * the operation? */
+  struct ConsumeObserver {
+    bool operator()(int count) { return count == 1; }
+  };
+  /* When deciding if something is a user-visible reference, we need to know if
+   * _count >= 2. */
+  struct RefObserver {
+    bool operator()(int count) { return count >= 2; }
+  };
+
+  template<typename T = ConsumeObserver>
+  void observeValue(SSATmp* value, Value& valState, SinkPoint sp,
+                    T pred = T()) {
+    while (pred(valState.realCount) != pred(valState.optCount())) {
+      placeSinkPoint(value, valState, sp);
+    }
+  }
+
+  void placeSinkPoint(SSATmp* value, Value& valState, SinkPoint sp) {
+    m_ret.points[value].insert(std::make_pair(valState.popRef(), sp));
+    ITRACE(3, "placing IncRef at id {}\n", sp.id);
+
+    // If the current instruction has a taken branch, we need to tell the
+    // propagated state that we used one of the pending IncRefs.
+    if (m_takenState && sp.id == m_ids.before(m_inst)) {
+      ITRACE(3, "updating taken state for {}\n", *value);
+      m_takenState->values[value].popRef();
+    }
+  }
+
+  void observeLocalRefs() {
+    // If any locals are RefDatas, the behavior of get_defined_vars can
+    // depend on whether or not the count is >= 2.
+    m_frameState.forEachLocal(
+      [&](uint32_t id, SSATmp* value) {
+        if (!value) return;
+
+        auto const sp = SinkPoint(m_ids.before(m_inst), value, false);
+        value = canonical(value);
+        observeValue(value, m_state.values[value], sp, RefObserver());
+      }
+    );
   }
 
   void consumeLocal(Point id) {
@@ -925,7 +1168,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
   }
 
   /* Completely resolve the delta between realCount and optCount. */
-  void resolveValue(SSATmp* const origVal) {
+  void resolveValueImpl(SSATmp* const origVal, bool eraseOnly) {
     assert(origVal);
 
     if (origVal->type().notCounted()) return;
@@ -937,19 +1180,13 @@ struct SinkPointAnalyzer : private LocalStateHook {
     auto& valState = m_state.values[value];
     if (!valState.optDelta()) return;
 
-    const SinkPoint sp(m_ids.before(m_inst), origVal);
+    const SinkPoint sp(m_ids.before(m_inst), origVal, eraseOnly);
     while (valState.optDelta()) {
-      ITRACE(3, "placing IncRef at id {}\n", sp.id);
-      m_ret.points[value].insert(std::make_pair(valState.popRef(), sp));
-
-      // If the current instruction has a taken branch, we need to tell the
-      // propagated state that we used one of the pending IncRefs.
-      if (m_takenState && sp.id == m_ids.before(m_inst)) {
-        ITRACE(3, "updating taken state for {}\n", *value);
-        m_takenState->values[value].popRef();
-      }
+      placeSinkPoint(value, valState, sp);
     }
   }
+  void resolveValue(SSATmp* val)          { resolveValueImpl(val, false); }
+  void resolveValueEraseOnly(SSATmp* val) { resolveValueImpl(val, true); }
 
   /* Remember that oldVal has been replace by newVal, either because of a
    * passthrough instruction or something from FrameState. */
@@ -965,6 +1202,19 @@ struct SinkPointAnalyzer : private LocalStateHook {
     if (m_inst->is(LdLoc)) {
       // LdLoc's output is the new value of the local we loaded, and this has
       // already been tracked in setLocalValue().
+      return;
+    } else if (m_inst->is(LdThis)) {
+      auto* fpInst = frameRoot(m_inst->src(0)->inst());
+      assert(m_state.frames.live.count(fpInst));
+      auto& frame = m_state.frames.live[fpInst];
+      frame.currentThis = m_inst->dst();
+      if (frame.mainThis == nullptr) {
+        // Nobody has tried to load $this in the current frame yet. Set it as
+        // the main $this for the frame and indicate that we're tracking a
+        // reference to it.
+        frame.mainThis = m_inst->dst();
+        m_state.values[frame.mainThis].realCount = 1;
+      }
       return;
     }
 
@@ -1021,7 +1271,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       auto& state = pair.first->second;
       if (m_inst->producesReference(i)) state.realCount = 1;
 
-      if (m_inst->is(LdMem, LdRef, LdStack, LdElem, LdProp, LdThis,
+      if (m_inst->is(LdMem, LdRef, LdStack, LdElem, LdProp,
                      LdPackedArrayElem, Unbox)) {
         state.fromLoad = true;
       }
@@ -1050,6 +1300,18 @@ struct SinkPointAnalyzer : private LocalStateHook {
       ++valState.realCount;
       if (m_inst->is(LdLoc)) valState.fromLoad = true;
       ITRACE(3, " after: {}\n", show(valState));
+    }
+  }
+
+  void refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {
+    if (oldVal->type().maybeCounted() && newVal->type().notCounted()) {
+      assert(newVal->inst()->is(CheckType));
+      assert(newVal->inst()->src(0) == oldVal);
+      // Similar to what we do when processing the CheckType directly, we
+      // "consume" the value on behalf of the CheckType.
+      auto& valState = m_state.values[canonical(oldVal)];
+      assert(valState.realCount >= 1 || valState.fromLoad);
+      if (valState.realCount) --valState.realCount;
     }
   }
 
@@ -1166,12 +1428,17 @@ bool validateDeltas(BlockMap& orig, BlockMap& opt) {
       SSATmp* src = it2->first;
       double delta = deltaOrig[src];
       if (fabs(delta - it2->second) > deltaThreshold) {
+        if (src->inst()->is(LdThis)) {
+          // The optimization does some nontrivial state tracking to keep track
+          // of $this pointers, so this is probably a false positive.
+          FTRACE(1, "possible ");
+        }
         FTRACE(1, "refcount mismatch in {}: orig: {} opt: {}, block {}\n",
-                   src->toString().c_str(),
+                   src->toString(),
                    deltaOrig[src],
                    it2->second,
                    it->first->id());
-        return false;
+        return src->inst()->is(LdThis);
       }
     }
   }
@@ -1201,10 +1468,11 @@ std::string show(const SinkPointsMap& sinkPoints, const IdMap& ids) {
         ret += folly::format("    {}\n", show(*thisIncs, ids)).str();
         lastIncs = thisIncs;
       }
-      ret += folly::format("      {} {} (using {})\n",
+      ret += folly::format("      {} {} (using {}){}\n",
                            (point.second.id % 2) ? "after " : "before",
                            *ids.inst(point.second.id),
-                           *point.second.value).str();
+                           *point.second.value,
+                           point.second.eraseOnly ? ", erase only" : "").str();
 
     }
     ret += '\n';
@@ -1244,7 +1512,9 @@ void sinkIncRefs(IRUnit& unit, const SinkPointsMap& info, const IdMap& ids) {
       ITRACE(3, "processing {}\n", show(incs, ids));
       Indent _i;
 
-      auto doSink = false;
+      // Eval.HHIRRefcountOptsAlwaysSink allows us to stress test the sinking
+      // logic.
+      auto doSink = RuntimeOption::EvalHHIRRefcountOptsAlwaysSink;
       if (it == end) {
         // There are no sink points for this IncRef. This can only happen if
         // the value started out as a maybeCounted type and was refined to a
@@ -1260,6 +1530,18 @@ void sinkIncRefs(IRUnit& unit, const SinkPointsMap& info, const IdMap& ids) {
       // bother sinking.
       for (; it != end; ++it) {
         auto const& sp = it->second;
+        if (sp.eraseOnly) {
+          // An "erase only" sink point means we've proven that it's safe to
+          // sink the IncRef to this point but we don't have access to the
+          // value, probably because the SSATmp was killed by a Call. For now
+          // we refuse to optimize this case, but it's possible to use this
+          // sink point as long as we've proven that doing so will eliminte the
+          // Inc/Dec pair.
+          ITRACE(2, "found erase-only SinkPoint; not optimizing\n");
+          doSink = false;
+          break;
+        }
+
         if (IdMap::isAfter(sp.id)) continue;
 
         auto canOptimize = [&](IRInstruction* inst) {
@@ -1282,12 +1564,12 @@ void sinkIncRefs(IRUnit& unit, const SinkPointsMap& info, const IdMap& ids) {
 
         if (canOptimize(ids.inst(sp.id))) {
           doSink = true;
-          break;
         }
       }
 
       if (!doSink) {
         ITRACE(3, "no optimizable sink points\n");
+        it = end;
         continue;
       }
 

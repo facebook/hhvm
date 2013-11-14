@@ -301,7 +301,7 @@ void FrameState::refineLocalValues(LocalStateHook& hook,
 
   for (unsigned i = 0, n = m_locals.size(); i < n; ++i) {
     if (m_locals[i].value == oldVal) {
-      hook.refineLocalValue(i, newVal);
+      hook.refineLocalValue(i, oldVal, newVal);
     }
   }
 }
@@ -615,11 +615,11 @@ void FrameState::setLocalValue(uint32_t id, SSATmp* value) {
   m_locals[id].unsafe = false;
 }
 
-void FrameState::refineLocalValue(uint32_t id, SSATmp* value) {
+void FrameState::refineLocalValue(uint32_t id, SSATmp* oldVal, SSATmp* newVal) {
   always_assert(id < m_locals.size());
   auto& local = m_locals[id];
-  local.value = value;
-  local.type = value->type();
+  local.value = newVal;
+  local.type = newVal->type();
 }
 
 void FrameState::refineLocalType(uint32_t id, Type type) {

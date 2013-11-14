@@ -1270,7 +1270,8 @@ class Yii extends Framework {
       "git_commit" => "d36b1f58ded2deacd4c5562c5205871db76bde5d",
       "test_file_search_roots" => Set {
         __DIR__."/frameworks/yii/tests",
-      }
+      },
+      "test_path" => __DIR__."/frameworks/yii/tests",
     };
   }
 

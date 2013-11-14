@@ -854,12 +854,16 @@ class ReflectionClass implements Reflector {
     }
   }
 
-  private function fetch($what) {
+  private function getInfo() {
     if (!$this->info) {
       $this->info = self::fetch_recur($this->obj ?: $this->name);
       $this->info['properties'] += $this->info['private_properties'];
     }
-    return $this->info[$what];
+    return $this->info;
+  }
+
+  private function fetch($what) {
+    return $this->getInfo()[$what];
   }
 
   private static function fetch_recur($name) {
@@ -904,10 +908,7 @@ class ReflectionClass implements Reflector {
   }
 
   private function check($what) {
-    if (!$this->info) {
-      $this->info = self::fetch_recur($this->name);
-    }
-    return isset($this->info[$what]);
+    return isset($this->getInfo()[$what]);
   }
 
   private function test($what, $name) {

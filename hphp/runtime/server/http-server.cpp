@@ -170,6 +170,7 @@ HttpServer::HttpServer()
   }
 }
 
+// Synchronously stop satellites and start danglings
 void HttpServer::onServerShutdown() {
   for (InitFiniNode *in = extra_server_exit; in; in = in->next) {
     in->func();
@@ -191,6 +192,7 @@ void HttpServer::onServerShutdown() {
   }
   if (RuntimeOption::AdminServerPort) {
     m_adminServer->stop();
+    m_adminServer->waitForEnd();
     Logger::Info("admin server stopped");
   }
 
@@ -314,9 +316,20 @@ void HttpServer::run() {
     m_serviceThreads[i]->waitForEnd();
   }
 
+  waitForServers();
   hphp_process_exit();
   m_watchDog.waitForEnd();
   Logger::Info("all servers stopped");
+}
+
+void HttpServer::waitForServers() {
+  if (RuntimeOption::ServerPort) {
+    m_pageServer->waitForEnd();
+  }
+  if (RuntimeOption::AdminServerPort) {
+    m_adminServer->waitForEnd();
+  }
+  // all other servers invoke waitForEnd on stop
 }
 
 static void exit_on_timeout(int sig) {

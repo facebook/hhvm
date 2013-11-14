@@ -714,6 +714,7 @@ abstract class Framework {
       $gc = $pr["git_commit"];
       $type = $pr["type"];
       $move_from_dir = null;
+      $dir_to_move = null;
       chdir($dir);
       $git_command = "";
       verbose("Pulling code from ".$rep. " and branch/commit ".$gc."\n",
@@ -723,6 +724,7 @@ abstract class Framework {
       } else if ($type === "submodulemove") {
         $git_command = "git submodule add -b ".$gc." ".$rep;
         $move_from_dir = $pr["move_from_dir"];
+        $dir_to_move = $pr["dir_to_move"];
       }
       verbose("Pull request command: ".$git_command."\n", Options::$verbose);
       $git_ret = run_install($git_command, $dir,
@@ -734,8 +736,8 @@ abstract class Framework {
                                    $this->name."!".
                                    " Removing framework!\n");
       }
-      if ($move_from_dir !== null) {
-        $mv_command = "mv ".$move_from_dir."/* ".$dir;
+      if ($dir_to_move !== null) {
+        $mv_command = "mv ".$dir_to_move." ".$dir;
         verbose("Move command: ".$mv_command."\n", Options::$verbose);
         exec($mv_command);
         verbose("After move, removing: ".$move_from_dir."\n",
@@ -1116,6 +1118,33 @@ class Pear extends Framework {
           'git_commit' => "trunk",
           'type' => 'submodulemove',
           'move_from_dir' => __DIR__."/frameworks/pear-core/Console_Getopt",
+          'dir_to_move' => __DIR__.
+                           "/frameworks/pear-core/Console_Getopt/Console",
+        },
+        Map {
+          'pull_dir' => __DIR__."/frameworks/pear-core",
+          'pull_repository' => "https://github.com/pear/XML_Util",
+          'git_commit' => "trunk",
+          'type' => 'submodulemove',
+          'move_from_dir' => __DIR__."/frameworks/pear-core/XML_Util",
+          'dir_to_move' => __DIR__."/frameworks/pear-core/XML_Util/XML",
+        },
+        Map {
+          'pull_dir' => __DIR__."/frameworks/pear-core",
+          'pull_repository' => "https://github.com/pear/Archive_Tar",
+          'git_commit' => "master",
+          'type' => 'submodulemove',
+          'move_from_dir' => __DIR__."/frameworks/pear-core/Archive_Tar",
+          'dir_to_move' => __DIR__."/frameworks/pear-core/Archive_Tar/Archive",
+        },
+        Map {
+          'pull_dir' => __DIR__."/frameworks/pear-core",
+          'pull_repository' => "https://github.com/pear/Structures_Graph",
+          'git_commit' => "trunk",
+          'type' => 'submodulemove',
+          'move_from_dir' => __DIR__."/frameworks/pear-core/Structures_Graph",
+          'dir_to_move' => __DIR__.
+                           "/frameworks/pear-core/Structures_Graph/Structures",
         },
       }
     };

@@ -1167,10 +1167,22 @@ XML;
   }
 
   protected function isInstalled(): bool {
+    $extra_files = Set {
+      $this->getInstallRoot()."/phpunit.xml",
+      $this->getInstallRoot()."/Console",
+      $this->getInstallRoot()."/XML",
+      $this->getInstallRoot()."/Structures",
+      $this->getInstallRoot()."/Archive",
+    };
+
     if (file_exists($this->getInstallRoot())) {
-      if (!file_exists($this->getInstallRoot()."/phpunit.xml")) {
-        remove_dir_recursive($this->getInstallRoot());
-        return false;
+      // Make sure all the pull requests that have been added along the way
+      // are there; otherwise we need a redownload.
+      foreach ($extra_files as $file) {
+        if (!file_exists($file)) {
+          remove_dir_recursive($this->getInstallRoot());
+          return false;
+        }
       }
     }
     return parent::isInstalled();

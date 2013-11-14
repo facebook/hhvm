@@ -387,10 +387,8 @@ HphpArray* HphpArray::copyMixedAndResizeIfNeededSlow() const {
   // For now I'm just making use of copyPacked to do it for me before
   // GrowPacked happens.
   auto const copy = copyMixed();
-  auto const ret  = Grow(copy);
-  assert(ret != copy);
-  assert(copy->getCount() == 0);
-  Release(copy);
+  auto const ret = copy->resize();
+  if (copy != ret) Release(copy);
   return ret;
 }
 

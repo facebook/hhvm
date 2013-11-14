@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_WORD_MEM_H_
 #define incl_HPHP_WORD_MEM_H_
 
+#include <limits>
 #include "folly/Portability.h"
 #include "hphp/util/util.h"
 
@@ -68,7 +69,8 @@ bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {
  */
 template<class T>
 T* wordcpy(T* to, const T* from, size_t numT) {
-  assert((numT * sizeof(T)) % 8 == 0);
+  assert(numT < std::numeric_limits<int64_t>::max() &&
+         (numT * sizeof(T)) % 8 == 0);
   size_t numWords = numT * sizeof(T) / 8;
   auto d = (int64_t*)to;
   auto s = (int64_t*)from;
@@ -83,7 +85,8 @@ T* wordcpy(T* to, const T* from, size_t numT) {
  */
 template<class T>
 T* wordfill(T* ptr, T value, size_t numT) {
-  assert((numT * sizeof(T)) % 8 == 0);
+  assert(numT < std::numeric_limits<int64_t>::max() &&
+         (numT * sizeof(T)) % 8 == 0);
   auto numWords = numT * sizeof(T) / 8;
   auto d = (int64_t*)ptr;
   do {

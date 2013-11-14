@@ -66,7 +66,7 @@ public:
     pe.config = config;
     pe.disabled = 1;
     pe.pinned = 0;
-    pe.exclude_kernel = 1;
+    pe.exclude_kernel = 0;
     pe.exclude_hv = 1;
     pe.read_format =
       PERF_FORMAT_TOTAL_TIME_ENABLED|PERF_FORMAT_TOTAL_TIME_RUNNING;

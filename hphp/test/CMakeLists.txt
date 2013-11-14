@@ -23,5 +23,5 @@ endif()
 
 add_executable(test ${CXX_SOURCES})
 target_link_libraries(test ${HHVM_LINK_LIBRARIES})
-embed_systemlib(test "${CMAKE_CURRENT_SOURCE_DIR}/test" ${HPHP_HOME}/hphp/system/systemlib.php)
+embed_all_systemlibs(test "${CMAKE_CURRENT_SOURCE_DIR}/test")
 add_dependencies(test systemlib)

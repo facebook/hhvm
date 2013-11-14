@@ -6536,6 +6536,7 @@ OPTBLD_INLINE void VMExecutionContext::iopEval(PC& pc) {
   const StringData* msg;
   int line = 0;
 
+  m_stack.popC();
   if (unit->parseFatal(msg, line)) {
     int errnum = static_cast<int>(ErrorConstants::ErrorModes::WARNING);
     if (errorNeedsLogging(errnum)) {
@@ -6548,9 +6549,10 @@ OPTBLD_INLINE void VMExecutionContext::iopEval(PC& pc) {
         line
       );
     }
+
+    m_stack.pushFalse();
     return;
   }
-  m_stack.popC();
   evalUnit(unit, pc, EventHook::Eval);
 }
 

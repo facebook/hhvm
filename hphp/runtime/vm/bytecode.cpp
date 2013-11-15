@@ -6548,6 +6548,10 @@ OPTBLD_INLINE void VMExecutionContext::iopEval(PC& pc) {
         line
       );
     }
+
+    // we call popC() to pop the string off the stack.
+    m_stack.popC();
+    m_stack.pushFalse();
     return;
   }
   m_stack.popC();

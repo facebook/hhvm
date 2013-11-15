@@ -72,8 +72,6 @@ Variant f_substr(const String& str, int start, int length = 0x7FFFFFFF);
 String f_str_pad(const String& input, int pad_length, const String& pad_string = " ",
                  int pad_type = k_STR_PAD_RIGHT);
 String f_str_repeat(const String& input, int multiplier);
-Variant f_wordwrap(const String& str, int width = 75, const String& wordbreak = "\n",
-                   bool cut = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 // encoding/decoding

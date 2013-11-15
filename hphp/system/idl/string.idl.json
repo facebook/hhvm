@@ -706,41 +706,6 @@
             ]
         },
         {
-            "name": "wordwrap",
-            "desc": "Wraps a string to a given number of characters using a string break character.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "Returns the given string wrapped at the specified column."
-            },
-            "args": [
-                {
-                    "name": "str",
-                    "type": "String",
-                    "desc": "The input string."
-                },
-                {
-                    "name": "width",
-                    "type": "Int32",
-                    "value": "75",
-                    "desc": "The column width."
-                },
-                {
-                    "name": "wordbreak",
-                    "type": "String",
-                    "value": "\"\\n\"",
-                    "desc": "The line is broken using the optional break parameter."
-                },
-                {
-                    "name": "cut",
-                    "type": "Boolean",
-                    "value": "false",
-                    "desc": "If the cut is set to TRUE, the string is always wrapped at or before the specified width. So if you have a word that is larger than the given width, it is broken apart. (See second example)."
-                }
-            ]
-        },
-        {
             "name": "html_entity_decode",
             "desc": "html_entity_decode() is the opposite of htmlentities() in that it converts all HTML entities to their applicable characters from string.",
             "flags": [

@@ -54,6 +54,17 @@ TRACE_SET_MOD(debugger);
 
 static boost::scoped_ptr<DebuggerClient> debugger_client;
 
+static String wordwrap(const String& str, int width /* = 75 */,
+                       const String& wordbreak /* = "\n" */,
+                       bool cut /* = false */) {
+  Array args = Array::Create();
+  args.append(str);
+  args.append(width);
+  args.append(wordbreak);
+  args.append(cut);
+  return vm_call_user_func("wordwrap", args);
+}
+
 static DebuggerClient& getStaticDebuggerClient() {
   TRACE(2, "DebuggerClient::getStaticDebuggerClient\n");
   /*
@@ -1353,8 +1364,8 @@ IMPLEMENT_COLOR_OUTPUT(error,    stderr,  ErrorColor);
 
 string DebuggerClient::wrap(const std::string &s) {
   TRACE(2, "DebuggerClient::wrap\n");
-  String ret = f_wordwrap(String(s.c_str(), s.size(), CopyString),
-                                    LineWidth - 4, "\n", true);
+  String ret = wordwrap(String(s.c_str(), s.size(), CopyString), LineWidth - 4,
+                        "\n", true);
   return string(ret.data(), ret.size());
 }
 
@@ -1412,8 +1423,8 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
       continue;
     }
 
-    cmd = f_wordwrap(cmd, left, "\n", true);
-    desc = f_wordwrap(desc, right, "\n", true);
+    cmd = wordwrap(cmd, left, "\n", true);
+    desc = wordwrap(desc, right, "\n", true);
     Array lines1 = StringUtil::Explode(cmd, "\n").toArray();
     Array lines2 = StringUtil::Explode(desc, "\n").toArray();
     for (int n = 0; n < lines1.size() || n < lines2.size(); n++) {
@@ -1450,7 +1461,7 @@ void DebuggerClient::tutorial(const char *text) {
   if (m_tutorial < 0) return;
 
   String ret = string_replace(String(text), "\t", "    ");
-  ret = f_wordwrap(ret, LineWidth - 4, "\n", true);
+  ret = wordwrap(ret, LineWidth - 4, "\n", true);
   Array lines = StringUtil::Explode(ret, "\n").toArray();
 
   StringBuffer sb;
@@ -2368,6 +2379,5 @@ void DebuggerClient::defineColors() {
   vim["Constant"]      = "WHITE";
   vim["LineNo"]        = "GRAY";
 }
-
 ///////////////////////////////////////////////////////////////////////////////
 }}

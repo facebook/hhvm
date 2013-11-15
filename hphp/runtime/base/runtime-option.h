@@ -427,6 +427,7 @@ public:
   F(bool, DumpTCAnchors,               false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTCHuge,                   hugePagesSoundNice())            \
+  F(bool, MapHotTextHuge,              hugePagesSoundNice())            \
   F(bool, MapTgtCacheHuge,             false)                           \
   F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)   \
   F(uint32_t, TCNumHugeHotMB,          16)                              \

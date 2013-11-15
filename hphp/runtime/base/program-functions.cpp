@@ -585,6 +585,40 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
 }
 
+extern "C" {
+void __attribute__((weak)) __hot_start();
+void __attribute__((weak)) __hot_end();
+}
+
+static void NEVER_INLINE AT_END_OF_TEXT __attribute__((optimize("2")))
+hugifyText(char* from, char* to) {
+#if FACEBOOK && !defined FOLLY_SANITIZE_ADDRESS && defined MADV_HUGEPAGE
+  size_t sz = to - from;
+  void* mem = malloc(sz);
+  memcpy(mem, from, sz);
+
+  // This maps out a portion of our executable
+  // We need to be very careful about what we do
+  // until we replace the original code
+  mmap(from, sz,
+       PROT_READ | PROT_WRITE | PROT_EXEC,
+       MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
+       -1, 0);
+  // This is in glibc, which isn't a problem, except for
+  // the trampoline code in .plt, which we dealt with
+  // in the linker script
+  madvise(from, sz, MADV_HUGEPAGE);
+  // Don't use memcpy because its probably one of the
+  // functions thats been mapped out.
+  // Needs the attribute((optimize("2")) to prevent
+  // g++ from turning this back into memcpy(!)
+  wordcpy((uint64_t*)from, (uint64_t*)mem, sz / sizeof(uint64_t));
+  mprotect(from, sz, PROT_READ | PROT_EXEC);
+  free(mem);
+  mlock(from, to - from);
+#endif
+}
+
 static void pagein_self(void) {
   unsigned long begin, end, inode, pgoff;
   char mapname[PATH_MAX];
@@ -618,9 +652,29 @@ static void pagein_self(void) {
         continue;
       }
 
-      if (mlock((void *)begin, end - begin) == 0) {
+      auto beginPtr = (char*)begin;
+      auto endPtr = (char*)end;
+      auto hotStart = (char*)__hot_start;
+      auto hotEnd = (char*)__hot_end;
+      const size_t hugeBytes = 2L * 1024 * 1024;
+
+      if (mlock(beginPtr, end - begin) == 0) {
+        if (RuntimeOption::EvalMapHotTextHuge &&
+            __hot_start &&
+            __hot_end &&
+            hugePagesSupported() &&
+            beginPtr <= hotStart &&
+            hotEnd <= endPtr) {
+
+          char* from = hotStart - ((intptr_t)hotStart & (hugeBytes - 1));
+          char* to = hotEnd + (hugeBytes - 1);
+          to -= (intptr_t)to & (hugeBytes - 1);
+          if (to < (void*)hugifyText) {
+            hugifyText(from, to);
+          }
+        }
         if (!RuntimeOption::LockCodeMemory) {
-          munlock((void *)begin, end - begin);
+          munlock(beginPtr, end - begin);
         }
       }
     }

@@ -16,8 +16,11 @@
 #ifndef incl_HPHP_MAPHUGE_H_
 #define incl_HPHP_MAPHUGE_H_
 
+#include <sys/types.h>
+
 namespace HPHP {
 void hintHuge(void* mem, size_t length);
+bool hugePagesSupported();
 }
 
 #endif

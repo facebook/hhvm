@@ -64,6 +64,11 @@ namespace HPHP { namespace Util {
 #define UNUSED             __attribute__((__unused__))
 #define FLATTEN            __attribute__((__flatten__))
 #define EXTERNALLY_VISIBLE __attribute__((__externally_visible__))
+#if FACEBOOK
+#define AT_END_OF_TEXT       __attribute__((__section__(".stub")))
+#else
+#define AT_END_OF_TEXT
+#endif
 
 #ifdef DEBUG
 # define DEBUG_ONLY /* nop */

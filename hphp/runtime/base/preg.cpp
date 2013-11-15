@@ -361,6 +361,49 @@ static int *create_offset_array(const pcre_cache_entry *pce,
   return (int *)smart_malloc(size_offsets * sizeof(int));
 }
 
+/*
+ * Build a mapping from subpattern numbers to their names. We will always
+ * allocate the table, even though there may be no named subpatterns. This
+ * avoids somewhat more complicated logic in the inner loops.
+ */
+static char** make_subpats_table(int num_subpats, const pcre_cache_entry* pce) {
+  pcre_extra* extra = pce->extra;
+  char **subpat_names = (char **)smart_calloc(num_subpats, sizeof(char *));
+  int name_cnt = 0, name_size, ni = 0;
+  char *name_table;
+  unsigned short name_idx;
+
+  int rc = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMECOUNT, &name_cnt);
+  if (rc < 0) {
+    raise_warning("Internal pcre_fullinfo() error %d", rc);
+    return nullptr;
+  }
+  if (name_cnt > 0) {
+    int rc1, rc2;
+    rc1 = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMETABLE, &name_table);
+    rc2 = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMEENTRYSIZE, &name_size);
+    rc = rc2 ? rc2 : rc1;
+    if (rc < 0) {
+      raise_warning("Internal pcre_fullinfo() error %d", rc);
+      return nullptr;
+    }
+
+    while (ni++ < name_cnt) {
+      name_idx = 0xff * (unsigned char)name_table[0] +
+                 (unsigned char)name_table[1];
+      subpat_names[name_idx] = name_table + 2;
+      if (is_numeric_string(subpat_names[name_idx],
+                            strlen(subpat_names[name_idx]),
+                            nullptr, nullptr, 0) != KindOfNull) {
+        raise_warning("Numeric named subpatterns are not allowed");
+        return nullptr;
+      }
+      name_table += name_size;
+    }
+  }
+  return subpat_names;
+}
+
 static pcre* pcre_get_compiled_regex(const String& regex, pcre_extra **extra,
                                      int *preg_options) {
   const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(regex);
@@ -558,42 +601,10 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
    * allocate the table, even though there may be no named subpatterns. This
    * avoids somewhat more complicated logic in the inner loops.
    */
-  char **subpat_names = (char **)smart_malloc(num_subpats * sizeof(char *));
+  char** subpat_names = make_subpats_table(num_subpats, pce);
   SmartFreeHelper subpatFreer(subpat_names);
-  memset(subpat_names, 0, sizeof(char *) * num_subpats);
-  {
-    int name_cnt = 0, name_size, ni = 0;
-    char *name_table;
-    unsigned short name_idx;
-
-    int rc = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMECOUNT, &name_cnt);
-    if (rc < 0) {
-      raise_warning("Internal pcre_fullinfo() error %d", rc);
-      return false;
-    }
-    if (name_cnt > 0) {
-      int rc1, rc2;
-      rc1 = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMETABLE, &name_table);
-      rc2 = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMEENTRYSIZE, &name_size);
-      rc = rc2 ? rc2 : rc1;
-      if (rc < 0) {
-        raise_warning("Internal pcre_fullinfo() error %d", rc);
-        return false;
-      }
-
-      while (ni++ < name_cnt) {
-        name_idx = 0xff * (unsigned char)name_table[0] +
-                   (unsigned char)name_table[1];
-        subpat_names[name_idx] = name_table + 2;
-        if (is_numeric_string(subpat_names[name_idx],
-                              strlen(subpat_names[name_idx]),
-                              nullptr, nullptr, 0) != KindOfNull) {
-          raise_warning("Numeric named subpatterns are not allowed");
-          return false;
-        }
-        name_table += name_size;
-      }
-    }
+  if (subpat_names == nullptr) {
+    return false;
   }
 
   /* Allocate match sets array and initialize the values. */
@@ -774,11 +785,17 @@ Variant preg_match_all(const String& pattern, const String& subject,
 ///////////////////////////////////////////////////////////////////////////////
 
 static String preg_do_repl_func(CVarRef function, const String& subject,
-                                int *offsets, int count) {
+                                int* offsets, char** subpat_names, int count) {
   Array subpats = Array::Create();
   for (int i = 0; i < count; i++) {
-    subpats.append(subject.substr(offsets[i<<1],
-                                  offsets[(i<<1)+1] - offsets[i<<1]));
+    auto off1 = offsets[i<<1];
+    auto off2 = offsets[(i<<1)+1];
+    auto sub = subject.substr(off1, off2 - off1);
+
+    if (subpat_names[i]) {
+      subpats.set(String(subpat_names[i]), sub);
+    }
+    subpats.append(sub);
   }
 
   Array args;
@@ -857,6 +874,13 @@ static String php_pcre_replace(const String& pattern, const String& subject,
     return false;
   }
 
+  int num_subpats = size_offsets / 3;
+  char** subpat_names = make_subpats_table(num_subpats, pce);
+  SmartFreeHelper subpatNamesFreer(subpat_names);
+  if (subpat_names == nullptr) {
+    return false;
+  }
+
   const char *replace = nullptr;
   const char *replace_end = nullptr;
   int replace_len = 0;
@@ -913,7 +937,8 @@ static String php_pcre_replace(const String& pattern, const String& subject,
         String eval_result;
         if (callable) {
           /* Use custom function to get replacement string and its length. */
-          eval_result = preg_do_repl_func(replace_var, subject, offsets, count);
+          eval_result = preg_do_repl_func(replace_var, subject, offsets,
+                                          subpat_names, count);
           new_len += eval_result.size();
         } else { /* do regular substitution */
           walk = replace;

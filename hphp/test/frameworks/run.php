@@ -65,6 +65,12 @@
  *                  be redownloading the framework since the SHA is different
  *                  than what we expect. Use a submodule/move technique.
  *
+ *   - Clowny tests that fail both Zend and HHVM (#WTFPear). We treat these
+ *     tests as no-ops with respect to calculation.
+ *
+ *   - Blacklist tests that are causing problems with this script running. E.g,
+ *     deadlocks
+ *
  * Future enhancements:
  *
  *   - Integreate the testing with our current "test/run" style infrastructure
@@ -102,6 +108,7 @@ class Statuses {
   const Status SKIP = "S";
   const Status TIMEOUT = "TIMEOUT";
   const Status BLACKLIST = "BLACKLIST";
+  const Status CLOWNY = "CLOWNY";
   const Status WARNING = "WARNING";
 }
 
@@ -209,8 +216,8 @@ class PHPUnitPatterns {
 
   static string $xdebug_pattern = "/The Xdebug extension is not loaded./";
 
-  static string $test_file_pattern = "/.*\.phpt|.*Test\.php|.*test\.php/";
-  static string $pear_test_file_pattern = "/.*\.phpt/";
+  static string $test_file_pattern = "/.*(\.phpt|Test\.php|test\.php)$/";
+  static string $pear_test_file_pattern = "/.*(\.phpt)$/";
 
   static string $tests_ok_skipped_inc_pattern =
                "/OK, but incomplete or skipped tests!/";
@@ -366,6 +373,7 @@ abstract class Framework {
   private string $git_commit;
   private Set $test_file_search_roots;
   private Set $blacklist;
+  private Set $clownylist;
   private Vector $pull_requests;
 
   // $name is constructor promoted
@@ -393,20 +401,25 @@ abstract class Framework {
     $this->setGitCommit($info->get("git_commit"));
     $this->setTestFileSearchRoots($info->get("test_file_search_roots"));
     $this->setPullRequests($info->get("pull_requests"));
-
+    $this->setBlacklist($info->get("blacklist"));
+    $this->setClownylist($info->get("clownylist"));
+    $this->setTestNamePattern($info->get("test_name_pattern"));
+    $this->setTestFilePattern($info->get("test_file_pattern"));
 
     // Install if not already installed using the properties set above.
     if (!$this->isInstalled()) {
+      // This will disable tests too upon install.
       $this->install();
+    } else {
+      // Even if we are found out to alreay be installed, still ensure that
+      // appropriate tests are disabled.
+      $this->disableTests();
     }
 
     // Now that we have an install, we can safely set all possible
     // other framework information
-    $this->setBlacklist($info->get("blacklist"));
     $this->setEnvVars($info->get("env_vars"));
     $this->setTestPath($info->get("test_path"));
-    $this->setTestNamePattern($info->get("test_name_pattern"));
-    $this->setTestFilePattern($info->get("test_file_pattern"));
     $this->setTestCommand($info->get("test_command"));
   }
 
@@ -438,6 +451,14 @@ abstract class Framework {
 
   private function getBlacklist(): ?Set {
     return $this->blacklist;
+  }
+
+  private function setClownylist(?Set $clownylist): void {
+    $this->clownylist = $clownylist;
+  }
+
+  private function getClownylist(): ?Set {
+    return $this->clownylist;
   }
 
   private function setPullRequests(?Vector $pull_requests): void {
@@ -592,6 +613,8 @@ abstract class Framework {
         }
       }
       // Count blacklisted tests as failures
+      // Note clownylisted tests do not count in the stats (they are essentially
+      // no-ops)
       if($this->blacklist !== null) {
         foreach ($this->blacklist as $file) {
           $c = $this->countIndividualTests($file);
@@ -632,6 +655,7 @@ abstract class Framework {
     if ($this->pull_requests != null) {
       $this->installPullRequests();
     }
+    $this->disableTests();
   }
 
   protected function installCode(): void {
@@ -660,6 +684,32 @@ abstract class Framework {
                          : error("Could not checkout baseline code for ".
                                  $this->name."! Removing framework!\n");
     }
+  }
+
+  private function disableTests(): void {
+    $this->blacklist = $this->disable($this->blacklist,
+                                      ".disabled.hhvm.blacklist");
+    $this->clownylist = $this->disable($this->clownylist,
+                                     ".disabled.hhvm.clownylist");
+    verbose(count($this->blacklist)." files were blacklisted (auto fail) ".
+            $this->name."...\n", Options::$verbose);
+    verbose(count($this->clownylist)." files were clownylisted (no-op/no run) ".
+            $this->name."...\n", Options::$verbose);
+  }
+
+  private function disable(?Set $tests, string $suffix): ?Set {
+    if ($tests === null) { return null; }
+    $updated_tests = Set {};
+    foreach ($tests as $t) {
+      // Check if we are already disabled first
+      if (!file_exists($t.$suffix)) {
+        if (!rename($t, $t.$suffix)) {
+          error("Could not disable ".$t. " in ".$this->name."!");
+        }
+      }
+      $updated_tests->add($t.$suffix);
+    }
+    return $updated_tests;
   }
 
   protected function installDependencies(): void {
@@ -788,33 +838,29 @@ abstract class Framework {
     }
 
     $this->test_files = Set{};
+    $exclude_str = ".disabled.hhvm";
     foreach($search_dirs as $root) {
       $this->test_files->addAll(
                          find_all_files($this->test_file_pattern,
-                                        $root, $this->test_path."/vendor"));
+                                        $root, $exclude_str));
       $this->test_files->addAll(find_all_files_containing_text(
                            "extends PHPUnit_Framework_TestCase", $root,
-                           $this->test_path."/vendor"));
+                           $exclude_str));
       // Namespaced case
       $this->test_files->addAll(find_all_files_containing_text(
                            "extends \\PHPUnit_Framework_TestCase", $root,
-                           $this->test_path."/vendor"));
+                           $exclude_str));
       // Sometimes a test file extends a class that extends PHPUnit_....
       // Then we have to look at method names.
       $this->test_files->addAll(find_all_files_containing_text(
-                                            "public function test",
-                                            $root, $this->test_path."/vendor"));
+                                            "public function test", $root,
+                                            $exclude_str));
       $this->test_files->addAll(find_all_files_containing_text(
-                                            "@test", $root,
-                                            $this->test_path."/vendor"));
+                                            "@test", $root, $exclude_str));
     }
 
-    // Get rid of the blacklisted items, so we don't test them
-    $this->test_files->difference($this->blacklist);
     verbose("Found ".count($this->test_files)." files that contain tests for ".
             $this->name."...\n", !Options::$csv_only);
-    verbose(count($this->blacklist)." files were blacklisted ".
-            $this->name."...\n", Options::$verbose);
   }
 
   // Right now this is just an estimate since one test can
@@ -1146,7 +1192,89 @@ class Pear extends Framework {
           'dir_to_move' => __DIR__.
                            "/frameworks/pear-core/Structures_Graph/Structures",
         },
-      }
+      },
+      "clownylist" => Set {
+        __DIR__."/frameworks/pear-core/tests/PEAR_Command/".
+        "test_registerCommands_standard.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Command_Config/".
+        "config-create/test.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Command_Config/".
+        "config-create/test_windows.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Command_Config/".
+        "config-help/test.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Command_Config/".
+        "config-show/test.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Command_Install/".
+        "upgrade/test_bug17986.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Command_Package/".
+        "convert/test_fail.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Config/".
+        "test_getGroupKeys.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Config/".
+        "test_getKeys.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
+        "test_download_abstractpackage_channelneedsupdating.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
+        "test_download_abstractpackage_rest.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
+        "test_download_alreadyinstalled.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
+        "test_download_complexabstractpackage.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
+        "test_download_complexabstractpackage_alphapostfix.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
+        "test_download_complexlocalpackage.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
+        "test_download_complexlocalpackage_onlyreqdeps.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
+        "test_download_complexlocalpackage_optional.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
+        "test_download_complexlocaltgz.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
+        "test_download_complexremotetgz.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader/".
+        "test_upgrade_pear_to_pecl.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
+        "test_initialize_abstractpackage_discover.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
+        "test_initialize_downloadurl.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
+        "test_initialize_invalidabstractpackage5.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
+        "test_initialize_invalidabstractpackage6.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
+        "test_initialize_invalidabstractpackage_discover.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
+        "test_initialize_invaliddownloadurl.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Downloader_Package/".
+        "test_mergeDependencies_basic_required_uri.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Installer/".
+        "test_install_complexlocalpackage.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Installer/".
+        "test_install_complexlocalpackage2.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Installer/".
+        "test_install_complexlocalpackage2_force.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Installer/".
+        "test_install_complexlocalpackage2_ignore-errors.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Installer/".
+        "test_install_complexlocalpackage2_ignore-errorssoft.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Installer/".
+        "test_upgrade_complexlocalpackage2.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Installer_Role/".
+        "test_getInstallableRoles.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_Installer_Role/".
+        "test_getValidRoles.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/".
+        "test_extbinrelease.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/".
+        "test_extsrcrelease.phpt",
+        __DIR__."/frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/".
+        "test_phprelease.phpt",
+        __DIR__."/frameworks/pear-core/tests/System/".
+        "find_test.phpt",
+        __DIR__."/frameworks/pear-core/tests/System/".
+        "test_which.phpt",
+      },
     };
   }
 
@@ -1469,12 +1597,12 @@ class Runner {
   }
 
   private function analyzeTest(string $test): bool {
+    verbose("Analyzing test: ".$test.PHP_EOL, Options::$verbose);
+    // If we hit a fatal or something, we will stop the overall test running
+    // for this particular test sequence
     $continue_testing = true;
-    // Test names should have all characters before and including __DIR__
-    // removed, so that specific user info is not added
-    $test = rtrim($test, PHP_EOL);
-    $test = remove_string_from_text($test, __DIR__, null);
-    $this->test_information .= $test.PHP_EOL;
+    // We have the test. Now just get the incoming data unitl we find some
+    // sort of status data
     do {
       $status = $this->getLine();
       if ($status !== null) {
@@ -1512,9 +1640,15 @@ class Runner {
         continue;
       }
     } while (!feof($this->pipes[1]) &&
-             preg_match(PHPUnitPatterns::$status_code_pattern,
-                        $status) === 0);
+           preg_match(PHPUnitPatterns::$status_code_pattern,
+                      $status) === 0);
+    // Test names should have all characters before and including __DIR__
+    // removed, so that specific user info is not added
+    $test = rtrim($test, PHP_EOL);
+    $test = remove_string_from_text($test, __DIR__, null);
+    $this->test_information .= $test.PHP_EOL;
     $this->processStatus($status, $test);
+
     return $continue_testing;
   }
 
@@ -1953,7 +2087,9 @@ THUMBSUP
 ."\n";
    verbose($msg, !Options::$csv_only);
   } else {
-    $msg = "\nAll tests did not run as expected.\n\n".<<<THUMBSDOWN
+    $msg = "\nAll tests did not run as expected. Either some statuses were ".
+           "different or the number of tests run didn't match the number of ".
+           "tests expected to run\n\n".<<<THUMBSDOWN
       ______
      (( ____ \-
      (( _____

@@ -1,2 +1,1 @@
-HipHop Warning: Argument 1 to t() must be of type ?X, int given in %s on line 4
-1
+HipHop Fatal error: Argument 1 passed to t() must be of type ?X, int given in %s on line 3

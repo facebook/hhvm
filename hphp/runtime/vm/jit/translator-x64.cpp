@@ -160,11 +160,8 @@ enum TransPerfCounter {
 static __thread int64_t s_perfCounters[tpc_num_counters];
 #define INC_TPC(n) ++s_perfCounters[tpc_ ## n];
 
-// nextTx64: Global shared state. The tx64 that should be used for
-// new requests going forward.
-TranslatorX64* volatile nextTx64;
-// tx64: Thread-local state. The tx64 we're using for the current request.
-__thread TranslatorX64* tx64;
+// The global TranslatorX64 object.
+TranslatorX64* tx64;
 
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = VMRegState::CLEAN;
@@ -629,8 +626,7 @@ bool
 TranslatorX64::checkCachedPrologue(const Func* func, int paramIdx,
                                    TCA& prologue) const {
   prologue = (TCA)func->getPrologue(paramIdx);
-  if (prologue != uniqueStubs.fcallHelperThunk &&
-      !s_replaceInFlight) {
+  if (prologue != uniqueStubs.fcallHelperThunk) {
     TRACE(1, "cached prologue %s(%d) -> cached %p\n",
           func->fullName()->data(), paramIdx, prologue);
     assert(isValidCodeAddress(prologue));
@@ -681,11 +677,9 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
     return tca;
   }
 
-  // If the translator is getting replaced out from under us, refuse to
-  // provide a prologue; we don't know whether this request is running on the
-  // old or new context.
   LeaseHolder writer(s_writeLease);
-  if (!writer || s_replaceInFlight) return nullptr;
+  if (!writer) return nullptr;
+
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
@@ -1036,7 +1030,7 @@ class FreeRequestStubTrigger : public Treadmill::WorkItem {
   }
   virtual void operator()() {
     TRACE(3, "FreeStubTrigger: Firing @ %p , stub %p\n", this, m_stub);
-    if (TranslatorX64::Get()->freeRequestStub(m_stub) != true) {
+    if (tx64->freeRequestStub(m_stub) != true) {
       // If we can't free the stub, enqueue again to retry.
       TRACE(3, "FreeStubTrigger: write lease failed, requeueing %p\n", m_stub);
       enqueue(new FreeRequestStubTrigger(m_stub));
@@ -2241,23 +2235,6 @@ void TranslatorX64::initUniqueStubs() {
   }
 }
 
-TranslatorX64*
-TranslatorX64::Get() {
-  /*
-   * Called from outrageously early, pre-main code, and will
-   * allocate the first translator space.
-   */
-  if (!nextTx64) {
-    nextTx64 = new TranslatorX64();
-    nextTx64->initUniqueStubs();
-  }
-  if (!tx64) {
-    tx64 = nextTx64;
-  }
-  assert(tx64);
-  return tx64;
-}
-
 void TranslatorX64::registerCatchTrace(CTCA ip, TCA trace) {
   FTRACE(1, "registerCatchTrace: afterCall: {} trace: {}\n", ip, trace);
   m_pendingCatchTraces.emplace_back(ip, trace);
@@ -2568,7 +2545,7 @@ bool TranslatorX64::dumpTC(bool ignoreLease) {
 
 // Returns true on success
 bool tc_dump(void) {
-  return TranslatorX64::Get() && TranslatorX64::Get()->dumpTC();
+  return tx64 && tx64->dumpTC();
 }
 
 // Returns true on success

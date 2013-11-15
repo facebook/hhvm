@@ -68,7 +68,7 @@ using HPHP::JIT::HhbcTranslator;
 TRACE_SET_MOD(trans)
 
 static __thread BiasedCoin *dbgTranslateCoin;
-Translator* transl;
+Translator* g_translator;
 Lease Translator::s_writeLease;
 
 struct TraceletContext {
@@ -3669,11 +3669,6 @@ Translator::Translator()
 Translator::~Translator() {
   delete m_profData;
   m_profData = nullptr;
-}
-
-Translator*
-Translator::Get() {
-  return TranslatorX64::Get();
 }
 
 bool

@@ -98,7 +98,7 @@ struct VMRegAnchor : private boost::noncopyable {
   VMRegAnchor() {
     Util::assert_native_stack_aligned();
     m_old = tl_regState;
-    Translator::Get()->sync();
+    g_translator->sync();
   }
   explicit VMRegAnchor(ActRec* ar) {
     // Some C++ entry points have an ActRec prepared from after a call

@@ -139,12 +139,12 @@ void Func::setFullName() {
 }
 
 void Func::resetPrologue(int numParams) {
-  auto const& stubs = Translator::Get()->uniqueStubs;
+  auto const& stubs = tx64->uniqueStubs;
   m_prologueTable[numParams] = stubs.fcallHelperThunk;
 }
 
 void Func::initPrologues(int numParams) {
-  auto const& stubs = Translator::Get()->uniqueStubs;
+  auto const& stubs = tx64->uniqueStubs;
 
   m_funcBody = stubs.funcBodyHelperThunk;
 
@@ -243,7 +243,7 @@ Func::~Func() {
   int numPrologues =
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
-  TranslatorX64::Get()->smashPrologueGuards((TCA *)m_prologueTable,
+  tx64->smashPrologueGuards((TCA *)m_prologueTable,
                                             numPrologues, this);
 #ifdef DEBUG
   validate();

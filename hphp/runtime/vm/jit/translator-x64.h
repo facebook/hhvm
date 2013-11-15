@@ -70,7 +70,7 @@ struct FreeStubList {
 };
 
 class TranslatorX64;
-extern __thread TranslatorX64* tx64;
+extern TranslatorX64* tx64;
 
 extern void* interpOneEntryPoints[];
 
@@ -157,7 +157,7 @@ private:
   // Data structures for HHIR-based translation
   uint64_t               m_numHHIRTrans;
 
-  virtual void traceCodeGen();
+  void traceCodeGen() override;
 
   FixupMap                   m_fixupMap;
   UnwindInfoHandle           m_unwindRegistrar;
@@ -277,7 +277,7 @@ public:
   void getPerfCounters(Array& ret);
 
 private:
-  virtual void syncWork();
+  void syncWork() override;
 
 public:
 
@@ -340,10 +340,9 @@ public:
   }
 
   TranslatorX64();
-  virtual ~TranslatorX64();
+  ~TranslatorX64();
 
   void initUniqueStubs();
-  static TranslatorX64* Get();
 
   // Called before entering a new PHP "world."
   void requestInit();
@@ -352,9 +351,9 @@ public:
   void requestExit();
 
   // Returns a string with cache usage information
-  virtual std::string getUsage();
-  virtual size_t getCodeSize();
-  virtual size_t getStubSize();
+  std::string getUsage();
+  size_t getCodeSize();
+  size_t getStubSize();
 
   // true iff calling thread is sole writer.
   static bool canWrite() {
@@ -376,10 +375,9 @@ public:
   void unprotectCode();
 
   int numTranslations(SrcKey sk) const;
-private:
-  virtual bool addDbgGuards(const Unit* unit);
-  virtual bool addDbgGuard(const Func* func, Offset offset);
 
+  bool addDbgGuards(const Unit* unit);
+  bool addDbgGuard(const Func* func, Offset offset);
 };
 
 const size_t kTrampolinesBlockSize = 8 << 12;

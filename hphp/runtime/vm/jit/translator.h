@@ -61,9 +61,8 @@ using JIT::ProfData;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
-class TranslatorX64;
-extern TranslatorX64* volatile nextTx64;
-extern __thread TranslatorX64* tx64;
+class Translator;
+extern Translator* g_translator;
 
 /*
  * DIRTY when the live register state is spread across the stack and m_fixup,
@@ -401,7 +400,6 @@ private:
                        bool specialize = false);
 
   virtual void syncWork() = 0;
-  virtual void invalidateSrcKey(SrcKey sk) = 0;
 
 protected:
   enum TranslateResult {
@@ -437,46 +435,15 @@ protected:
   SrcDB              m_srcDB;
 
   static Lease s_writeLease;
-  static volatile bool s_replaceInFlight;
 
 public:
 
   Translator();
   virtual ~Translator();
-  static Translator* Get();
-  static void advanceTranslator() {
-    tx64 = nextTx64;
-  }
-  static void clearTranslator() {
-    tx64 = nullptr;
-  }
   static Lease& WriteLease() {
     return s_writeLease;
   }
-  static bool ReplaceInFlight() {
-    return s_replaceInFlight;
-  }
   static RuntimeType outThisObjectType();
-
-  /*
-   * Interface between the arch-dependent translator and outside world.
-   */
-  virtual void requestInit() = 0;
-  virtual void requestExit() = 0;
-  virtual TCA getTranslatedCaller() const = 0;
-  virtual std::string getUsage() = 0;
-  virtual size_t getCodeSize() = 0;
-  virtual size_t getStubSize() = 0;
-  virtual bool dumpTC(bool ignoreLease = false) = 0;
-  virtual bool dumpTCCode(const char *filename) = 0;
-  virtual bool dumpTCData() = 0;
-  virtual void protectCode() = 0;
-  virtual void unprotectCode() = 0;
-  virtual bool isValidCodeAddress(TCA tca) const = 0;
-  virtual Debug::DebugInfo* getDebugInfo() = 0;
-  virtual void enterTCAtSrcKey(SrcKey& sk) = 0;
-  virtual void enterTCAtPrologue(ActRec* ar, TCA start) = 0;
-  virtual void enterTCAfterPrologue(TCA start) = 0;
 
   const TransDB& getTransDB() const {
     return m_transDB;
@@ -564,8 +531,6 @@ private:
 public:
   void clearDbgBL();
   bool addDbgBLPC(PC pc);
-  virtual bool addDbgGuards(const Unit* unit) = 0;
-  virtual bool addDbgGuard(const Func* func, Offset offset) = 0;
 
   ProfData* profData() const {
     return m_profData;

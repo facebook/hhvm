@@ -415,7 +415,7 @@ void HardwareCounter::getPerfEvents(Array& ret) {
     ret.set(m_counters[i]->m_desc, m_counters[i]->read());
   }
   if (m_pseudoEvents) {
-    TranslatorX64::Get()->getPerfCounters(ret);
+    tx64->getPerfCounters(ret);
   }
 }
 

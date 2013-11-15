@@ -28,7 +28,7 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func-inline.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/base/class-info.h"
@@ -105,6 +105,7 @@ using std::string;
 
 using Transl::VMRegAnchor;
 using Transl::EagerVMRegAnchor;
+using Transl::tx64;
 
 #if DEBUG
 #define OPTBLD_INLINE
@@ -169,11 +170,6 @@ const StaticString s_class("class");
 const StaticString s_object("object");
 const StaticString s_type("type");
 const StaticString s_include("include");
-
-static inline
-Transl::Translator* tx() {
-  return Transl::Translator::Get();
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1500,7 +1496,7 @@ bool VMExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc) {
 
 void VMExecutionContext::syncGdbState() {
   if (RuntimeOption::EvalJit && !RuntimeOption::EvalJitNoGdb) {
-    tx()->getDebugInfo()->debugSync();
+    tx64->getDebugInfo()->debugSync();
   }
 }
 
@@ -1512,7 +1508,7 @@ void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
     Transl::TCA start = enterFnAr->m_func->getPrologue(na);
-    tx()->enterTCAtPrologue(enterFnAr, start);
+    tx64->enterTCAtPrologue(enterFnAr, start);
   } else {
     if (prepareFuncEntry(enterFnAr, m_pc)) {
       enterVMWork(enterFnAr);
@@ -1532,10 +1528,10 @@ void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
     (void) m_fp->unit()->offsetOf(m_pc); /* assert */
     if (enterFnAr) {
       assert(start);
-      tx()->enterTCAfterPrologue(start);
+      tx64->enterTCAfterPrologue(start);
     } else {
       SrcKey sk(m_fp->func(), m_pc);
-      tx()->enterTCAtSrcKey(sk);
+      tx64->enterTCAtSrcKey(sk);
     }
   } else {
     dispatch();
@@ -1547,7 +1543,7 @@ void VMExecutionContext::enterVM(TypedValue* retval, ActRec* ar) {
   SCOPE_EXIT { assert(m_faults.size() == faultDepth); };
 
   m_firstAR = ar;
-  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx()->uniqueStubs.callToExit);
+  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx64->uniqueStubs.callToExit);
   assert(isReturnHelper(ar->m_savedRip));
 
   /*
@@ -2463,7 +2459,7 @@ bool VMExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   arSetSfp(ar, m_fp);
   ar->m_soff = uintptr_t(m_fp->m_func->unit()->offsetOf(pc) -
                          m_fp->m_func->base());
-  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx()->uniqueStubs.retHelper);
+  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx64->uniqueStubs.retHelper);
   assert(isReturnHelper(ar->m_savedRip));
   pushLocalsAndIterators(func);
   if (!m_fp->hasVarEnv()) {
@@ -2727,7 +2723,7 @@ void VMExecutionContext::enterDebuggerDummyEnv() {
   ar->setThis(nullptr);
   ar->m_soff = 0;
   ar->m_savedRbp = 0;
-  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx()->uniqueStubs.callToExit);
+  ar->m_savedRip = reinterpret_cast<uintptr_t>(tx64->uniqueStubs.callToExit);
   assert(isReturnHelper(ar->m_savedRip));
   m_fp = ar;
   m_pc = s_debuggerDummy->entry();
@@ -2763,7 +2759,7 @@ void VMExecutionContext::exitDebuggerDummyEnv() {
 // ActRec.
 bool VMExecutionContext::isReturnHelper(uintptr_t address) {
   auto tcAddr = reinterpret_cast<Transl::TCA>(address);
-  auto& u = tx()->uniqueStubs;
+  auto& u = tx64->uniqueStubs;
   return tcAddr == u.retHelper ||
          tcAddr == u.genRetHelper ||
          tcAddr == u.retInlHelper ||
@@ -2780,16 +2776,16 @@ void VMExecutionContext::preventReturnsToTC() {
     ActRec *ar = getFP();
     while (ar) {
       if (!isReturnHelper(ar->m_savedRip) &&
-          (tx()->isValidCodeAddress((Transl::TCA)ar->m_savedRip))) {
+          (tx64->isValidCodeAddress((Transl::TCA)ar->m_savedRip))) {
         TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
                  "func %s\n", ar, ar->m_savedRip,
                  ar->m_func->fullName()->data());
         if (ar->m_func->isGenerator()) {
           ar->m_savedRip =
-            reinterpret_cast<uintptr_t>(tx()->uniqueStubs.genRetHelper);
+            reinterpret_cast<uintptr_t>(tx64->uniqueStubs.genRetHelper);
         } else {
           ar->m_savedRip =
-            reinterpret_cast<uintptr_t>(tx()->uniqueStubs.retHelper);
+            reinterpret_cast<uintptr_t>(tx64->uniqueStubs.retHelper);
         }
         assert(isReturnHelper(ar->m_savedRip));
       }
@@ -6007,7 +6003,7 @@ void VMExecutionContext::iopFPassM(PC& pc) {
 bool VMExecutionContext::doFCall(ActRec* ar, PC& pc) {
   assert(getOuterVMFrame(ar) == m_fp);
   ar->m_savedRip =
-    reinterpret_cast<uintptr_t>(tx()->uniqueStubs.retHelper);
+    reinterpret_cast<uintptr_t>(tx64->uniqueStubs.retHelper);
   assert(isReturnHelper(ar->m_savedRip));
   TRACE(3, "FCall: pc %p func %p base %d\n", m_pc,
         m_fp->m_func->unit()->entry(),
@@ -6175,7 +6171,7 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
     assert(ar->m_savedRbp == (uint64_t)m_fp);
     assert(!ar->m_func->isGenerator());
     ar->m_savedRip =
-      reinterpret_cast<uintptr_t>(tx()->uniqueStubs.retHelper);
+      reinterpret_cast<uintptr_t>(tx64->uniqueStubs.retHelper);
     assert(isReturnHelper(ar->m_savedRip));
     TRACE(3, "FCallArray: pc %p func %p base %d\n", m_pc,
           m_fp->unit()->entry(),
@@ -6984,7 +6980,7 @@ void VMExecutionContext::iopContEnter(PC& pc) {
   contAR->m_soff = m_fp->m_func->unit()->offsetOf(pc)
     - (uintptr_t)m_fp->m_func->base();
   contAR->m_savedRip =
-    reinterpret_cast<uintptr_t>(tx()->uniqueStubs.genRetHelper);
+    reinterpret_cast<uintptr_t>(tx64->uniqueStubs.genRetHelper);
   assert(isReturnHelper(contAR->m_savedRip));
 
   m_fp = contAR;
@@ -7231,7 +7227,7 @@ void VMExecutionContext::PrintTCCallerInfo() {
   ActRec* fp = g_vmContext->getFP();
   Unit* u = fp->m_func->unit();
   fprintf(stderr, "Called from TC address %p\n",
-          tx()->getTranslatedCaller());
+          tx64->getTranslatedCaller());
   std::cerr << u->filepath()->data() << ':'
             << u->getLineNumber(u->offsetOf(g_vmContext->getPC())) << std::endl;
 }
@@ -7483,8 +7479,7 @@ void VMExecutionContext::requestInit() {
   EnvConstants::requestInit(new (request_arena()) EnvConstants());
   VarEnv::createGlobal();
   m_stack.requestInit();
-  Transl::Translator::advanceTranslator();
-  tx()->requestInit();
+  tx64->requestInit();
 
   if (UNLIKELY(RuntimeOption::EvalJitEnableRenameFunction)) {
     SystemLib::s_unit->merge();
@@ -7516,8 +7511,7 @@ void VMExecutionContext::requestExit() {
   MemoryProfile::finishProfiling();
 
   syncGdbState();
-  tx()->requestExit();
-  Transl::Translator::clearTranslator();
+  tx64->requestExit();
   m_stack.requestExit();
   profileRequestEnd();
   EventHook::Disable();

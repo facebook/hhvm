@@ -18,7 +18,7 @@
 #include "hphp/vixl/a64/simulator-a64.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/data-block.h"
 
@@ -184,7 +184,7 @@ void
 FixupMap::processPendingFixups() {
   for (uint i = 0; i < m_pendingFixups.size(); i++) {
     TCA tca = m_pendingFixups[i].m_tca;
-    assert(Translator::Get()->isValidCodeAddress(tca));
+    assert(tx64->isValidCodeAddress(tca));
     recordFixup(tca, m_pendingFixups[i].m_fixup);
   }
   m_pendingFixups.clear();

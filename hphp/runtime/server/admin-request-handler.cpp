@@ -33,7 +33,7 @@
 #include "hphp/runtime/ext/mysql_stats.h"
 #include "hphp/runtime/base/shared-store-stats.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/timer.h"
@@ -201,7 +201,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/vm-tcspace:      show space used by translator caches\n"
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
-        "/vm-tcreset:      throw away translations and start over\n"
         "/vm-namedentities:show size of the NamedEntityTable\n"
         ;
 #ifdef USE_TCMALLOC
@@ -607,7 +606,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     ServerPtr server = HttpServer::Server->getPageServer();
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
-    Transl::Translator* tx = Transl::Translator::Get();
+    auto* tx = Transl::tx64;
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
     appendStat("tc-size", tx->getCodeSize());
     appendStat("tc-stubsize", tx->getStubSize());
@@ -895,7 +894,7 @@ typedef std::map<int, PCInfo> InfoMap;
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
-    transport->sendString(Transl::Translator::Get()->getUsage());
+    transport->sendString(Transl::tx64->getUsage());
     return true;
   }
   if (cmd == "vm-namedentities") {
@@ -909,18 +908,6 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
       transport->sendString("Done");
     } else {
       transport->sendString("Error dumping the translation cache");
-    }
-    return true;
-  }
-  if (cmd == "vm-tcreset") {
-    int64_t start = Timer::GetCurrentTimeMicros();
-    if (Transl::Translator::Get()->replace()) {
-      string msg;
-      Util::string_printf(msg, "Done %" PRId64 " ms",
-                          (Timer::GetCurrentTimeMicros() - start) / 1000);
-      transport->sendString(msg);
-    } else {
-      transport->sendString("Failed");
     }
     return true;
   }

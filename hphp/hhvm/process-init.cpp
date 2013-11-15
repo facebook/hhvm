@@ -95,8 +95,9 @@ void ProcessInit() {
   // Install VM's ClassInfoHook
   ClassInfo::SetHook(&vm_class_info_hook);
 
-  // ensure that nextTx64 and tx64 are set
-  (void)Transl::Translator::Get();
+  // Create the global tx64 object
+  g_translator = tx64 = new TranslatorX64();
+  tx64->initUniqueStubs();
 
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the

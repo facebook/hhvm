@@ -275,7 +275,7 @@ void emitCall(Asm& a, TCA dest) {
   if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
     a.    call(dest);
   } else {
-    a.    call(TranslatorX64::Get()->getNativeTrampoline(dest));
+    a.    call(tx64->getNativeTrampoline(dest));
   }
 }
 

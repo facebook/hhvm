@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/ext_stream.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "mysql.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR

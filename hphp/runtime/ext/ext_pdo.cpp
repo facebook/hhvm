@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/ext_pdo.h"
 #include "hphp/runtime/ext/pdo_driver.h"
 #include "hphp/runtime/ext/pdo_mysql.h"
+#include "hphp/runtime/ext/pdo_sqlite.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_stream.h"
@@ -27,6 +28,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/macros.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -1485,8 +1487,11 @@ Variant c_PDO::t_quote(const String& str, int64_t paramtype /* = q_PDO$$PARAM_ST
 bool c_PDO::t_sqlitecreatefunction(const String& name,
                                    CVarRef callback,
                                    int64_t argcount /* = -1 */) {
-  raise_recoverable_error("PDO::sqliteCreateFunction not implemented");
-  return false;
+  auto conn = dynamic_cast<PDOSqliteConnection*>(m_dbh.get());
+  if (conn == nullptr) {
+    return false;
+  }
+  return conn->createFunction(name, callback, argcount);
 }
 
 bool c_PDO::t_sqlitecreateaggregate(const String& name,
@@ -2644,6 +2649,7 @@ void c_PDOStatement::t___construct() {
 }
 
 Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
+  SYNC_VM_REGS_SCOPED();
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
 
   if (!params.empty()) {
@@ -2718,6 +2724,7 @@ Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
 Variant c_PDOStatement::t_fetch(int64_t how /* = 0 */,
                                 int64_t orientation /* = q_PDO$$FETCH_ORI_NEXT */,
                                 int64_t offset /* = 0 */) {
+  SYNC_VM_REGS_SCOPED();
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
   if (!pdo_stmt_verify_mode(m_stmt, how, false)) {
     return false;

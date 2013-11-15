@@ -26,8 +26,8 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(sqlite3);
 ///////////////////////////////////////////////////////////////////////////////
 
-#define PHP_SQLITE3_ASSOC  1<<0
-#define PHP_SQLITE3_NUM    1<<1
+#define PHP_SQLITE3_ASSOC  (1<<0)
+#define PHP_SQLITE3_NUM    (1<<1)
 #define PHP_SQLITE3_BOTH   (PHP_SQLITE3_ASSOC|PHP_SQLITE3_NUM)
 
 const int64_t k_SQLITE3_ASSOC = PHP_SQLITE3_ASSOC;
@@ -129,8 +129,8 @@ static void sqlite3_do_callback(sqlite3_context *context, CVarRef callback,
   }
 }
 
-static void php_sqlite3_callback_func(sqlite3_context *context, int argc,
-                                      sqlite3_value **argv) {
+void php_sqlite3_callback_func(sqlite3_context *context, int argc,
+                               sqlite3_value **argv) {
   c_SQLite3::UserDefinedFunc *udf =
     (c_SQLite3::UserDefinedFunc*)sqlite3_user_data(context);
   sqlite3_do_callback(context, udf->func, argc, argv, false);

@@ -354,14 +354,9 @@ Array BaseVector::toArrayImpl() const {
   return ai.toArray();
 }
 
-void BaseVector::freeData() {
-  if (m_data) {
-    smart_free(m_data);
-    m_data = nullptr;
-  }
-}
-
 void BaseVector::grow() {
+  mutate();
+
   if (m_capacity) {
     m_capacity += m_capacity;
   } else {
@@ -375,6 +370,7 @@ void BaseVector::reserve(int64_t sz) {
 
   if (m_capacity < sz) {
     ++m_version;
+    mutate();
 
     m_capacity = sz;
     m_data =
@@ -383,15 +379,23 @@ void BaseVector::reserve(int64_t sz) {
 }
 
 BaseVector::BaseVector(Class* cls) : ExtObjectData(cls),
-    m_size(0), m_data(nullptr), m_capacity(0), m_version(0) {
+    m_size(0), m_data(nullptr), m_capacity(0),
+    m_version(0), m_frozenCopy(nullptr) {
 }
 
+/**
+ * Delegate the responsibility for freeing the buffer to the
+ * frozen copy, if it exists.
+ */
 BaseVector::~BaseVector() {
-  for (uint i = 0; i < m_size; ++i) {
-    tvRefcountedDecRef(&m_data[i]);
-  }
+  if (m_frozenCopy.isNull() && m_data) {
+    for (uint i = 0; i < m_size; ++i) {
+      tvRefcountedDecRef(&m_data[i]);
+    }
 
-  freeData();
+    smart_free(m_data);
+    m_data = nullptr;
+  }
 }
 
 void BaseVector::throwBadKeyType() {
@@ -411,6 +415,20 @@ void BaseVector::init(CVarRef t) {
     TypedValue* tv = cvarToCell(&v);
     add(tv);
   }
+}
+
+void BaseVector::cow() {
+  TypedValue* newData =
+      (TypedValue*)smart_malloc(m_capacity * sizeof(TypedValue));
+
+  assert(newData);
+
+  for (uint i = 0; i < m_size; i++) {
+    cellDup(m_data[i], newData[i]);
+  }
+
+  m_data = newData;
+  m_frozenCopy.reset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

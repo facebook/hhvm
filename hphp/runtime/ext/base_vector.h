@@ -166,10 +166,7 @@ public:
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
-  // Helpers
-
   Array toArrayImpl() const;
-  void reserve(int64_t sz);
   void init(CVarRef t);
 
   // Try to get the compiler to inline these.
@@ -189,18 +186,6 @@ public:
     return &m_data[key];
   }
 
-  void add(TypedValue* val) {
-    assert(val->m_type != KindOfRef);
-
-    ++m_version;
-    if (m_capacity <= m_size) {
-      grow();
-    }
-
-    cellDup(*val, m_data[m_size]);
-    ++m_size;
-  }
-
   bool contains(int64_t key) const {
     return ((uint64_t)key < (uint64_t)m_size);
   }
@@ -217,13 +202,47 @@ public:
     return (m_size != 0);
   }
 
+  void reserve(int64_t sz);
+
+  static size_t sizeOffset() { return offsetof(BaseVector, m_size); }
+  static size_t dataOffset() { return offsetof(BaseVector, m_data); }
+
+  static size_t frozenCopyOffset() {
+    return offsetof(BaseVector, m_frozenCopy);
+  }
+
 protected:
 
-  // We don't want anybody instantiating the class, hence the protected
-  // constructor/destructor.
   explicit BaseVector(Class* cls);
-  ~BaseVector();
+  /*virtual*/ ~BaseVector();
+
   void grow();
+
+  void add(TypedValue* val) {
+    assert(val->m_type != KindOfRef);
+
+    ++m_version;
+    mutate();
+    if (m_capacity <= m_size) {
+      grow();
+    }
+
+    cellDup(*val, m_data[m_size]);
+    ++m_size;
+  }
+
+  /**
+   * Should be called by any operation that mutates the vector, since
+   * we might need to to trigger COW.
+   */
+  void mutate() {
+    if (!m_frozenCopy.isNull()) cow();
+  }
+
+  /**
+   * Copy-On-Write the buffer and reset the frozen copy.
+   */
+  void cow();
 
   static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
 
@@ -235,12 +254,10 @@ protected:
   TypedValue* m_data;
   uint m_capacity;
   int32_t m_version;
+  // A pointer to a FrozenVector which with it shares the buffer.
+  Object m_frozenCopy;
 
 private:
-
-  void freeData();
-
-  friend class c_VectorIterator;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field
@@ -248,6 +265,13 @@ private:
     static_assert(
       offsetof(BaseVector, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
   }
+
+  // Friends
+
+  friend class c_VectorIterator;
+
+  friend void collectionReserve(ObjectData* obj, int64_t sz);
+  friend void collectionInitAppend(ObjectData* obj, TypedValue* val);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

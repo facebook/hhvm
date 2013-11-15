@@ -4600,6 +4600,44 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
   m_as.loadq(vecReg[c_Vector::dataOffset()], curOpd(inst->dst()).reg());
 }
 
+/**
+ * Given a vector, check if it has a frozen copy and jump to
+ * the taken branch if so.
+ */
+void CodeGenerator::cgVectorHasFrozenCopy(IRInstruction* inst) {
+  SSATmp* vec = inst->src(0);
+
+  assert(vec->type().strictSubtypeOf(Type::Obj) &&
+         vec->type().getClass() == c_Vector::classof());
+
+  auto vecReg = curOpd(vec).reg();
+
+  // Vector keeps a smart pointer to the frozen copy, so we need
+  // some advanced arithmetic to get the offset of the raw pointer.
+  uint rawPtrOffset = c_Vector::frozenCopyOffset() + kExpectedMPxOffset;
+
+  m_as.loadq(vecReg[rawPtrOffset], m_rScratch);
+  m_as.testq(m_rScratch, m_rScratch);
+  emitFwdJcc(CC_NZ, inst->taken());
+}
+
+/**
+ * Given the base of a vector object, pass it to a helper
+ * which is responsible for triggering COW.
+ */
+void CodeGenerator::cgVectorDoCow(IRInstruction* inst) {
+  SSATmp* vec = inst->src(0);
+
+  assert(vec->type().strictSubtypeOf(Type::Obj) &&
+         vec->type().getClass() == c_Vector::classof());
+
+  ArgGroup args(curOpds());
+  args.ssa(vec);
+
+  cgCallHelper(m_as, CppCall(triggerCow),
+               kVoidDest, SyncOptions::kSyncPoint, args);
+}
+
 void CodeGenerator::cgLdPairBase(IRInstruction* inst) {
   SSATmp* pair = inst->src(0);
   assert(pair->type().strictSubtypeOf(Type::Obj) &&

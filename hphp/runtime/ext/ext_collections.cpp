@@ -30,6 +30,48 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Default implementations for iterable and keyed iterable materialization
+ * methods.
+ */
+
+inline static Object toVectorDefaultImpl(ObjectData* obj) {
+  c_Vector* vec;
+  Object o = vec = NEWOBJ(c_Vector)();
+  vec->init(VarNR(obj));
+  return o;
+}
+
+inline static Object toSetDefaultImpl(ObjectData* obj) {
+  c_Set* st;
+  Object o = st = NEWOBJ(c_Set)();
+  st->init(VarNR(obj));
+  return o;
+}
+
+inline static Object toFrozenVectorDefaultImpl(ObjectData* obj) {
+  c_FrozenVector* fv;
+  Object o = fv = NEWOBJ(c_FrozenVector)();
+  fv->init(VarNR(obj));
+  return o;
+}
+
+inline static Object toMapDefaultImpl(ObjectData* obj) {
+  c_Map* mp;
+  Object o = mp = NEWOBJ(c_Map)();
+  mp->init(VarNR(obj));
+  return o;
+}
+
+inline static Object toStableMapDefaultImpl(ObjectData* obj) {
+  c_StableMap* smp;
+  Object o = smp = NEWOBJ(c_StableMap)();
+  smp->init(VarNR(obj));
+  return o;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 static void throwIntOOB(int64_t key, bool isVector = false) ATTRIBUTE_COLD
   ATTRIBUTE_NORETURN;
 
@@ -93,6 +135,11 @@ ArrayIter getArrayIterHelper(CVarRef v, size_t& sz) {
   throw e;
 }
 
+void triggerCow(c_Vector* vec) {
+  assert(!vec->m_frozenCopy.isNull()); // Should've been checked by the JIT.
+  vec->mutate();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
@@ -115,6 +162,8 @@ void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
 void c_Vector::resize(int64_t sz, TypedValue* val) {
   assert(val && val->m_type != KindOfRef);
   ++m_version;
+  mutate();
+
   assert(sz >= 0);
   uint requestedSize = (uint)sz;
   if (m_capacity < requestedSize) {
@@ -164,6 +213,7 @@ Object c_Vector::t_append(CVarRef val) {
 Variant c_Vector::t_pop() {
   ++m_version;
   if (m_size) {
+    mutate();
     --m_size;
     Variant ret = tvAsCVarRef(&m_data[m_size]);
     tvRefcountedDecRef(&m_data[m_size]);
@@ -208,6 +258,8 @@ void c_Vector::t_reserve(CVarRef sz) {
 
 Object c_Vector::t_clear() {
   ++m_version;
+  mutate();
+
   uint sz = m_size;
   for (int i = 0; i < sz; ++i) {
     tvRefcountedDecRef(&m_data[i]);
@@ -277,6 +329,7 @@ Object c_Vector::t_removekey(CVarRef key) {
   if (!contains(k)) {
     return this;
   }
+  mutate();
   uint64_t datum = m_data[k].m_data.num;
   DataType t = m_data[k].m_type;
   if (k+1 < m_size) {
@@ -302,6 +355,7 @@ Array c_Vector::t_tovaluesarray() {
 
 void c_Vector::t_reverse() {
   if (m_size <= 1) return;
+  mutate();
   TypedValue* start = m_data;
   TypedValue* end = m_data + m_size - 1;
   for (; start < end; ++start, --end) {
@@ -327,6 +381,7 @@ void c_Vector::t_splice(CVarRef offset, CVarRef len /* = null */,
       "Vector::splice does not support replacement parameter"));
     throw e;
   }
+  mutate();
   int64_t sz = m_size;
   int64_t startPos = offset.toInt64();
   if (UNLIKELY(uint64_t(startPos) >= uint64_t(sz))) {
@@ -379,6 +434,7 @@ int64_t c_Vector::t_linearsearch(CVarRef search_value) {
 }
 
 void c_Vector::t_shuffle() {
+  mutate();
   for (uint i = 1; i < m_size; ++i) {
     uint j = f_mt_rand(0, i);
     std::swap(m_data[i], m_data[j]);
@@ -559,6 +615,7 @@ c_Vector::SortFlavor c_Vector::preSort(const AccessorT& acc) {
   }
 
 void c_Vector::sort(int sort_flags, bool ascending) {
+  mutate();
   if (!m_size) {
     return;
   }
@@ -601,6 +658,39 @@ void c_Vector::OffsetUnset(ObjectData* obj, TypedValue* key) {
   Object e(SystemLib::AllocRuntimeExceptionObject(
     "Cannot unset an element of a Vector"));
   throw e;
+}
+
+void c_Vector::initFvFields(c_FrozenVector* fv) {
+  fv->m_data = m_data;
+  fv->m_size = m_size;
+  fv->m_capacity = m_capacity;
+  fv->m_version = m_version;
+}
+
+Object c_Vector::t_tovector() {
+  return toVectorDefaultImpl(this);
+}
+
+Object c_Vector::t_toset() {
+  return toSetDefaultImpl(this);
+}
+
+Object c_Vector::t_tofrozenvector() {
+    if (m_frozenCopy.isNull()) {
+      c_FrozenVector* fv = NEWOBJ(c_FrozenVector)();
+      initFvFields(fv);
+      m_frozenCopy = fv;
+    }
+
+    return m_frozenCopy;
+}
+
+Object c_Vector::t_tomap() {
+  return toMapDefaultImpl(this);
+}
+
+Object c_Vector::t_tostablemap() {
+  return toStableMapDefaultImpl(this);
 }
 
 c_VectorIterator::c_VectorIterator(Class* cls
@@ -4437,7 +4527,6 @@ COLLECTION_MAGIC_METHODS(FrozenVector)
     return o; \
   }
 
-KEYEDITERABLE_MATERIALIZE_METHODS(Vector)
 KEYEDITERABLE_MATERIALIZE_METHODS(Map)
 KEYEDITERABLE_MATERIALIZE_METHODS(StableMap)
 ITERABLE_MATERIALIZE_METHODS(Set)
@@ -4719,6 +4808,12 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
       assert(static_cast<c_Pair*>(obj)->isFullyConstructed());
       Object e(SystemLib::AllocRuntimeExceptionObject(
         "Cannot add an element to a Pair"));
+      throw e;
+      break;
+    }
+    case Collection::FrozenVectorType: {
+      Object e(SystemLib::AllocRuntimeExceptionObject(
+          "Cannot add an element to a FrozenVector"));
       throw e;
       break;
     }

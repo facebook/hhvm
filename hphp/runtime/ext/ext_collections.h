@@ -25,6 +25,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Called by the JIT on an emitVectorSet().
+ */
+void triggerCow(c_Vector* vec);
+
 ///////////////////////////////////////////////////////////////////////////////
 // class Vector
 
@@ -34,7 +39,9 @@ class c_Vector : public BaseVector {
   DECLARE_CLASS_NO_SWEEP(Vector)
 
  public:
+
   explicit c_Vector(Class* cls = c_Vector::classof());
+
   void t___construct(CVarRef iterable = null_variant);
   Object t_add(CVarRef val);
   Object t_addall(CVarRef val);
@@ -99,6 +106,7 @@ class c_Vector : public BaseVector {
       throwOOB(key);
       return;
     }
+    mutate();
     tvRefcountedIncRef(val);
     TypedValue* tv = &m_data[key];
     tvRefcountedDecRef(tv);
@@ -109,11 +117,6 @@ class c_Vector : public BaseVector {
 
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
- private:
-  template <typename AccessorT>
-  SortFlavor preSort(const AccessorT& acc);
-
- public:
   void sort(int sort_flags, bool ascending);
   bool usort(CVarRef cmp_function);
 
@@ -129,12 +132,18 @@ class c_Vector : public BaseVector {
     BaseVector::Unserialize("Vector", obj, uns, sz, type);
   }
 
-  static uint sizeOffset() { return offsetof(c_Vector, m_size); }
-  static uint dataOffset() { return offsetof(c_Vector, m_data); }
-
  private:
+  template <typename AccessorT>
+  SortFlavor preSort(const AccessorT& acc);
+
+  void initFvFields(c_FrozenVector* fv);
+
+  // Friends
 
   friend ObjectData* collectionDeepCopyVector(c_Vector* vec);
+  friend void collectionAppend(ObjectData* obj, TypedValue* val);
+  friend void triggerCow(c_Vector* vec);
+
   friend class c_Map;
   friend class c_StableMap;
   friend class c_Pair;
@@ -240,6 +249,8 @@ public:
                           int64_t sz, char type) {
     BaseVector::Unserialize("FrozenVector", obj, uns, sz, type);
   }
+
+  friend class c_Vector;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1273,6 +1284,8 @@ class c_PairIterator : public ExtObjectData {
 
   friend class c_Pair;
 };
+
+///////////////////////////////////////////////////////////////////////////////
 
 TypedValue* collectionGet(ObjectData* obj, TypedValue* key);
 void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val);

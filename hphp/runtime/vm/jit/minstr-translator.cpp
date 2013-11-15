@@ -2324,6 +2324,14 @@ void HhbcTranslator::MInstrTranslator::emitVectorSet(
   SSATmp* size = gen(LdVectorSize, m_base);
   gen(CheckBounds, makeCatch(), key, size);
 
+  m_tb.ifThen([&](Block* taken) {
+          gen(VectorHasFrozenCopy, taken, m_base);
+        },
+        [&] {
+          m_tb.hint(Block::Hint::Unlikely);
+          gen(VectorDoCow, m_base);
+        });
+
   SSATmp* increffed = gen(IncRef, value);
   SSATmp* vecBase = gen(LdVectorBase, m_base);
   SSATmp* oldVal;

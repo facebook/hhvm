@@ -261,7 +261,7 @@ VS(htmlentities($str), "A 'quote' is &lt;b&gt;bold&lt;/b&gt;");
 VS(htmlentities($str, ENT_QUOTES),
    "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;");
 
-VS(htmlentities("\xA0", ENT_COMPAT), "&nbsp;");
+VS(htmlentities("\xA0", ENT_COMPAT), "");
 VS(htmlentities("\xc2\xA0", ENT_COMPAT, ""), "&nbsp;");
 VS(htmlentities("\xc2\xA0", ENT_COMPAT, "UTF-8"), "&nbsp;");
 

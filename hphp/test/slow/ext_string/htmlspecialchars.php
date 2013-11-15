@@ -27,7 +27,7 @@ function test_htmlspecialchars() {
   VS(htmlspecialchars("<a href='test'>Test</a>", ENT_QUOTES),
      "&lt;a href=&#039;test&#039;&gt;Test&lt;/a&gt;");
 
-  VS(bin2hex(htmlspecialchars("\xA0", ENT_COMPAT)), "a0");
+  VS(bin2hex(htmlspecialchars("\xA0", ENT_COMPAT)), "");
   VS(bin2hex(htmlspecialchars("\xc2\xA0", ENT_COMPAT, "")), "c2a0");
   VS(bin2hex(htmlspecialchars("\xc2\xA0", ENT_COMPAT, "UTF-8")), "c2a0");
   $zfoo = "\0foo";

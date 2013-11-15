@@ -212,7 +212,7 @@ String StringUtil::HtmlEncode(const String& input, QuoteStyle quoteStyle,
                                  quoteStyle == QuoteStyle::Both,
                                  utf8, nbsp);
   if (!ret) {
-    raise_error("HtmlEncode called on too large input (%d)", len);
+    return empty_string;
   }
   return String(ret, len, AttachString);
 }

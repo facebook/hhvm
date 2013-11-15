@@ -476,7 +476,7 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
   }
   char *q = ret;
   for (const char *p = input, *end = input + len; p < end; p++) {
-    char c = *p;
+    unsigned char c = *p;
     switch (c) {
     case '"':
       if (encode_double_quote) {
@@ -501,33 +501,95 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
     case '&':
       *q++ = '&'; *q++ = 'a'; *q++ = 'm'; *q++ = 'p'; *q++ = ';';
       break;
-    case '\xc2':
-      if (nbsp && utf8 && *(p+1) == '\xa0') {
+    case static_cast<unsigned char>('\xc2'):
+      if (nbsp && utf8 && p != end && *(p+1) == '\xa0') {
         *q++ = '&'; *q++ = 'n'; *q++ = 'b'; *q++ = 's'; *q++ = 'p'; *q++ = ';';
         p++;
-      } else {
+        break;
+      }
+      // fallthrough
+    default: {
+      if (LIKELY(c < 0x80)) {
         *q++ = c;
+        break;
+      }
+
+      auto avail = end - p;
+      auto utf8_trail = [](unsigned char c) { return c >= 0x80 && c <= 0xbf; };
+
+      if (c < 0xc2) {
+        goto exit_error;
+      } else if (c < 0xe0) {
+        if (avail < 2 || !utf8_trail(*(p + 1))) {
+          goto exit_error;
+        }
+
+        uint16_t tc = ((c & 0x1f) << 6) | (p[1] & 0x3f);
+        if (tc < 0x80) {  // non-shortest form
+          goto exit_error;
+        }
+        memcpy(q, p, 2);
+        q += 2;
+        p++;
+      } else if (c < 0xf0) {
+        if (avail < 3) {
+          goto exit_error;
+        }
+        for (int i = 1; i < 3; ++i) {
+          if (!utf8_trail(*(p + i))) {
+            goto exit_error;
+          }
+        }
+
+        uint32_t tc = ((c & 0x0f) << 12) |
+                      ((*(p+1) & 0x3f) << 6) |
+                      (*(p+2) & 0x3f);
+        if (tc < 0x800) { // non-shortest form
+          goto exit_error;
+        } else if (tc >= 0xd800 && tc <= 0xdfff) { // surrogate
+          goto exit_error;
+        }
+        memcpy(q, p, 3);
+        q += 3;
+        p += 2;
+      } else if (c < 0xf5) {
+        if (avail < 4) {
+          goto exit_error;
+        }
+        for (int i = 1; i < 4; ++i) {
+          if (!utf8_trail(*(p + i))) {
+            goto exit_error;
+          }
+        }
+
+        uint32_t tc = ((c & 0x07) << 18) |
+                      ((*(p+1) & 0x3f) << 12) |
+                      ((*(p+2) & 0x3f) << 6) |
+                      (*(p+3) & 0x3f);
+        if (tc < 0x10000 || tc > 0x10ffff) {
+          // non-shortest form or outside range
+          goto exit_error;
+        }
+        memcpy(q, p, 4);
+        q += 4;
+        p += 3;
+      } else {
+        goto exit_error;
       }
       break;
-    case '\xa0':
-      if (nbsp && !utf8) {
-        *q++ = '&'; *q++ = 'n'; *q++ = 'b'; *q++ = 's'; *q++ = 'p'; *q++ = ';';
-      } else {
-        *q++ = c;
-      }
-      break;
-    default:
-      *q++ = c;
-      break;
+    }
     }
   }
   if (q - ret > INT_MAX) {
-    free(ret);
-    return nullptr;
+    goto exit_error;
   }
   *q = 0;
   len = q - ret;
   return ret;
+
+exit_error:
+  free(ret);
+  return nullptr;
 }
 
 char *string_html_encode_extra(const char *input, int &len,

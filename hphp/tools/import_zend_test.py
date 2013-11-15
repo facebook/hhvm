@@ -221,6 +221,9 @@ bad_tests = (
 
     # broken: t3036086
     '/Zend/tests/bug55007.php',
+
+    # flaky: t3201846
+    '/ext/standard/tests/file/fileowner_basic.php',
 )
 
 # Tests that work but not in repo mode

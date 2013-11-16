@@ -12,6 +12,14 @@
         {
             "name": "STDERR",
             "type": "Resource"
+        },
+        {
+            "name": "STREAM_URL_STAT_LINK",
+            "type": "Int64"
+        },
+        {
+            "name": "STREAM_URL_STAT_QUIET",
+            "type": "Int64"
         }
     ],
     "funcs": [

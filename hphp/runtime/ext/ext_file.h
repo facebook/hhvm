@@ -27,6 +27,8 @@ namespace HPHP {
 #define k_STDIN (BuiltinFiles::GetSTDIN())
 #define k_STDOUT (BuiltinFiles::GetSTDOUT())
 #define k_STDERR (BuiltinFiles::GetSTDERR())
+extern const int64_t k_STREAM_URL_STAT_LINK;
+extern const int64_t k_STREAM_URL_STAT_QUIET;
 
 ///////////////////////////////////////////////////////////////////////////////
 // file handle based file operations

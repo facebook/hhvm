@@ -186,6 +186,9 @@ Array stat_impl(struct stat *stat_sb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const int64_t k_STREAM_URL_STAT_LINK = 1;
+const int64_t k_STREAM_URL_STAT_QUIET = 2;
+
 Variant f_fopen(const String& filename, const String& mode,
                 bool use_include_path /* = false */,
                 CVarRef context /* = null */) {

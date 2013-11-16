@@ -6490,14 +6490,6 @@
             "value": 1
         },
         {
-            "name": "STREAM_URL_STAT_LINK",
-            "value": 1
-        },
-        {
-            "name": "STREAM_URL_STAT_QUIET",
-            "value": 2
-        },
-        {
             "name": "STREAM_USE_PATH",
             "value": 1
         },

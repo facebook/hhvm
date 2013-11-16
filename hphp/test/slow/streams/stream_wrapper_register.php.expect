@@ -1,0 +1,99 @@
+string(11) "__construct"
+array(0) {
+}
+string(11) "stream_open"
+array(4) {
+  [0]=>
+  string(7) "abc://b"
+  [1]=>
+  string(2) "rw"
+  [2]=>
+  int(0)
+  [3]=>
+  NULL
+}
+string(10) "stream_eof"
+array(0) {
+}
+string(10) "stream_eof"
+array(0) {
+}
+string(11) "stream_read"
+array(1) {
+  [0]=>
+  int(8192)
+}
+string(12) "stream_flush"
+array(0) {
+}
+string(11) "stream_lock"
+array(1) {
+  [0]=>
+  int(1)
+}
+string(11) "stream_seek"
+array(2) {
+  [0]=>
+  int(123)
+  [1]=>
+  int(0)
+}
+string(11) "stream_tell"
+array(0) {
+}
+string(15) "stream_truncate"
+array(1) {
+  [0]=>
+  int(456)
+}
+string(11) "stream_seek"
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+string(11) "stream_tell"
+array(0) {
+}
+string(12) "stream_write"
+array(1) {
+  [0]=>
+  string(3) "789"
+}
+string(12) "stream_write"
+array(1) {
+  [0]=>
+  string(2) "89"
+}
+string(12) "stream_write"
+array(1) {
+  [0]=>
+  string(1) "9"
+}
+string(11) "__construct"
+array(0) {
+}
+string(8) "url_stat"
+array(2) {
+  [0]=>
+  string(7) "abc://e"
+  [1]=>
+  int(0)
+}
+string(10) "__destruct"
+array(0) {
+}
+string(11) "__construct"
+array(0) {
+}
+string(8) "url_stat"
+array(2) {
+  [0]=>
+  string(7) "abc://f"
+  [1]=>
+  int(1)
+}
+string(10) "__destruct"
+array(0) {
+}

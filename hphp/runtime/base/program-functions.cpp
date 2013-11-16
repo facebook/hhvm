@@ -1021,6 +1021,12 @@ static int execute_program_impl(int argc, char** argv) {
       cout << desc << "\n";
       return -1;
     }
+    if (po.mode == "run" && po.config.empty()) {
+      auto default_config_file = getenv("HHVM_DEFAULT_SCRIPT_CONFIG");
+      if (default_config_file) {
+        po.config = default_config_file;
+      }
+    }
   } catch (error &e) {
     Logger::Error("Error in command line: %s", e.what());
     cout << desc << "\n";

@@ -287,7 +287,7 @@ inline strhash_t hash_string_i(const char *arKey) {
 //      or equal to -9223372036854775807.
 inline bool is_strictly_integer(const char* arKey, size_t nKeyLength,
                                 int64_t& res) {
-  if (nKeyLength == 0 || ((unsigned char)(arKey[0])) > '9')
+  if ((unsigned char)(arKey[0] - '-') > ('9' - '-'))
     return false;
   if (nKeyLength <= 19 ||
       (arKey[0] == '-' && nKeyLength == 20)) {

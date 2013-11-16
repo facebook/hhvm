@@ -33,7 +33,6 @@ using namespace HPHP;
 ExpressionList::ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                                ListKind kind)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ExpressionList)),
-    m_outputCount(-1),
     m_arrayElements(false), m_collectionType(0), m_kind(kind) {
 }
 
@@ -247,19 +246,6 @@ void ExpressionList::stripConcat() {
     }
     i++;
   }
-}
-
-void ExpressionList::setOutputCount(int count) {
-  assert(count >= 0 && count <= (int)m_exps.size());
-  m_outputCount = count;
-}
-
-int ExpressionList::getOutputCount() const {
-  return m_outputCount < 0 ? m_exps.size() : m_outputCount;
-}
-
-void ExpressionList::resetOutputCount() {
-  m_outputCount = -1;
 }
 
 void ExpressionList::markParam(int p, bool noRefWrapper) {

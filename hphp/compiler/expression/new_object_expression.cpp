@@ -122,7 +122,6 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
           if (getScope()->isFirstPass()) {
             Compiler::Error(Compiler::BadConstructorCall, self);
           }
-          m_params->setOutputCount(0);
         }
         m_params->inferAndCheck(ar, Type::Some, false);
       }

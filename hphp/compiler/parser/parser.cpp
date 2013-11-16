@@ -387,7 +387,7 @@ void Parser::onCallParam(Token &out, Token *params, Token &expr, bool ref) {
 }
 
 void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
-                    Token *cls, bool fromCompiler) {
+                    Token *cls) {
   ExpressionPtr clsExp;
   if (cls) {
     clsExp = cls->exp;
@@ -396,7 +396,6 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     out->exp = NEW_EXP(DynamicFunctionCall, name->exp,
                        dynamic_pointer_cast<ExpressionList>(params->exp),
                        clsExp);
-    assert(!fromCompiler);
   } else {
     const string &s = name.text();
     // strip out namespaces for func_get_args and friends check
@@ -416,9 +415,6 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
       (new RealSimpleFunctionCall
        (BlockScopePtr(), getLocation(), name->text(), name->num() & 2,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
-    if (fromCompiler) {
-      call->setFromCompiler();
-    }
     out->exp = call;
 
     call->onParse(m_ar, m_file);

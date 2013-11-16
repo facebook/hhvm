@@ -146,7 +146,6 @@ void ObjectMethodExpression::setInvokeParams(AnalysisResultPtr ar) {
   for (int i = 0; i < m_params->getCount(); i++) {
     (*m_params)[i]->inferAndCheck(ar, Type::Variant, false);
   }
-  m_params->resetOutputCount();
 }
 
 ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultConstPtr ar) {

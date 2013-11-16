@@ -106,7 +106,6 @@ SimpleFunctionCall::SimpleFunctionCall
   , m_type(FunType::Unknown)
   , m_dynamicConstant(false)
   , m_builtinFunction(false)
-  , m_fromCompiler(false)
   , m_dynamicInvoke(false)
   , m_transformed(false)
   , m_safe(0)
@@ -522,7 +521,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       markRefParams(m_funcScope, m_name, canInvokeFewArgs());
     }
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (!m_fromCompiler && m_type == FunType::Unknown &&
+    if (m_type == FunType::Unknown &&
         !m_class && !m_redeclared && !m_dynamicInvoke && !m_funcScope &&
         (m_className.empty() ||
          (m_classScope &&
@@ -606,10 +605,6 @@ void SimpleFunctionCall::updateVtFlags() {
 bool SimpleFunctionCall::isCallToFunction(const char *name) const {
   return !strcasecmp(getName().c_str(), name) &&
     !getClass() && getClassName().empty();
-}
-
-bool SimpleFunctionCall::isCompilerCallToFunction(const char *name) const {
-  return m_fromCompiler && isCallToFunction(name);
 }
 
 bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
@@ -1045,7 +1040,6 @@ ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultConstPtr ar) {
                                               ExpressionPtr(), T_ARRAY, true));
       return replaceValue(rep);
     }
-    m_params->resetOutputCount();
   }
   /*
     Dont do this for now. Need to take account of newly created

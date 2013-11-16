@@ -948,7 +948,7 @@ class Assetic extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/assetic",
       "git_path" => "https://github.com/kriswallsmith/assetic.git",
-      "git_commit" => "e0646fa52937c4e5ce61ce089ada28c509b01b40",
+      "git_commit" => "d4680d449a9da80fb82e17627270c91b93a0d46d",
       "test_file_search_roots" => Set {
         __DIR__."/frameworks/assetic/tests/Assetic/Test",
       }

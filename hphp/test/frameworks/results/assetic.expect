@@ -397,69 +397,69 @@ S
 Assetic\Test\Filter\CssEmbedFilterTest::testCssEmbedMhtml
 S
 Assetic\Test\Filter\CssImportFilterTest::testImport with data set #0 
-E
+.
 Assetic\Test\Filter\CssImportFilterTest::testImport with data set #1 
-E
+.
 Assetic\Test\Filter\CssImportFilterTest::testNonCssImport
-E
+.
 Assetic\Test\Filter\CssMinFilterTest::testRelativeSourceUrlImportImports
 .
 Assetic\Test\Filter\CssRewriteFilterTest::testEmptySrcAttributeSelector
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testEmptyUrl
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testExternalSource
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #0 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #1 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #2 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #3 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #4 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testMultipleUrls with data set #5 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testNoTargetPath
 .
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #0 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #1 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #10 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #11 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #12 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #13 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #14 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #15 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #16 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #17 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #2 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #3 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #4 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #5 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #6 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #7 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #8 
-E
+.
 Assetic\Test\Filter\CssRewriteFilterTest::testUrls with data set #9 
-E
+.
 Assetic\Test\Filter\DartFilterTest::testFilterLoad
 S
 Assetic\Test\Filter\EmberPrecompileFilterTest::testEmberPrecompile
@@ -480,6 +480,8 @@ Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testCompile
 S
 Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testCompileEcma5
 S
+Assetic\Test\Filter\GoogleClosure\CompilerJarFilterTest::testFlagFile
+S
 Assetic\Test\Filter\GssFilterTest::testCompile
 S
 Assetic\Test\Filter\HandlebarsFilterTest::testHandlebars
@@ -495,7 +497,7 @@ Assetic\Test\Filter\JSMinPlusFilterTest::testRelativeSourceUrlImportImports
 Assetic\Test\Filter\JpegoptimFilterTest::testFilter
 S
 Assetic\Test\Filter\JpegtranFilterTest::testFilter
-FATAL
+.
 Assetic\Test\Filter\LessFilterTest::testCompressImport
 S
 Assetic\Test\Filter\LessFilterTest::testFilterLoad
@@ -555,45 +557,45 @@ Assetic\Test\Filter\LessphpFilterTest::testFormatterCompressed
 Assetic\Test\Filter\LessphpFilterTest::testFormatterLessjs
 .
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #0 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #1 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #10 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #11 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #12 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #13 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #14 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #15 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #16 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #17 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #18 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #19 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #2 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #3 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #4 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #5 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #6 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #7 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #8 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testGetChildren with data set #9 
-E
+.
 Assetic\Test\Filter\LessphpFilterTest::testImport
 .
 Assetic\Test\Filter\LessphpFilterTest::testLoadPath
@@ -644,6 +646,8 @@ Assetic\Test\Filter\ScssphpFilterTest::testFilterLoad
 .
 Assetic\Test\Filter\ScssphpFilterTest::testImport
 .
+Assetic\Test\Filter\ScssphpFilterTest::testRegisterFunction
+.
 Assetic\Test\Filter\ScssphpFilterTest::testSetImportPath
 .
 Assetic\Test\Filter\SprocketsFilterTest::testFilterLoad
@@ -687,11 +691,19 @@ S
 Assetic\Test\Filter\Yui\JsCompressorFilterTest::testInterface
 .
 Assetic\Test\Util\CssUtilsTest::testExtractImports
-E
+.
 Assetic\Test\Util\CssUtilsTest::testFilterCommentless
 .
 Assetic\Test\Util\CssUtilsTest::testFilterUrls
-E
+.
+Assetic\Test\Util\LessUtilsTest::testExtractImports
+.
+Assetic\Test\Util\LessUtilsTest::testFilterCommentless
+.
+Assetic\Test\Util\LessUtilsTest::testFilterCommentlessLess
+.
+Assetic\Test\Util\LessUtilsTest::testFilterUrls
+.
 Assetic\Test\Util\TraversableStringTest::testArray
 .
 Assetic\Test\Util\TraversableStringTest::testString

@@ -124,23 +124,23 @@ done:
  */
 void HphpArray::postSort(bool resetKeys) {
   assert(m_size > 0);
-  initHash(m_hash, hashSize());
+  auto const ht = hashTab();
+  initHash(ht, hashSize());
   m_hLoad = 0;
   if (resetKeys) {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data()[pos];
       if (e.hasStrKey()) decRefStr(e.key);
       e.setIntKey(pos);
-      m_hash[pos] = pos;
+      ht[pos] = pos;
     }
     m_nextKI = m_size;
   } else {
-    auto table = m_hash;
     auto mask = m_tableMask;
     auto data = this->data();
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data[pos];
-      auto ei = findForNewInsert(table, mask,
+      auto ei = findForNewInsert(ht, mask,
                                  e.hasIntKey() ? e.ikey : e.hash());
       *ei = pos;
     }

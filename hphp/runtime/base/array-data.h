@@ -517,13 +517,16 @@ public:
 
   static const char* kindToString(ArrayKind kind);
 
- private:
+public: // for heap profiler
+  void getChildren(std::vector<TypedValue *> &out);
+
+private:
   void serializeImpl(VariableSerializer *serializer) const;
   static void compileTimeAssertions() {
     static_assert(offsetof(ArrayData, m_count) == FAST_REFCOUNT_OFFSET, "");
   }
 
- protected:
+protected:
   void freeStrongIterators();
   static void moveStrongIterators(ArrayData* dest, ArrayData* src);
   FullPos* strongIterators() const {
@@ -565,9 +568,6 @@ protected:
     uint64_t m_posAndCount;   // be careful, m_pos is signed
   };
   FullPos* m_strongIterators; // head of linked list
-
-public: // for heap profiler
-  void getChildren(std::vector<TypedValue *> &out);
 };
 
 /*

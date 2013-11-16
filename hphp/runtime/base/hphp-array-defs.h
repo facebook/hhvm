@@ -51,7 +51,7 @@ HphpArray::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
 
 ALWAYS_INLINE
 int32_t* HphpArray::findForNewInsert(size_t h0) const {
-  return findForNewInsert(m_hash, m_tableMask, h0);
+  return findForNewInsert(hashTab(), m_tableMask, h0);
 }
 
 inline bool HphpArray::isTombstone(ssize_t pos) const {

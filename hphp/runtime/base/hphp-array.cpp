@@ -92,7 +92,6 @@ struct HphpArray::EmptyArrayInitializer {
     ad->m_tableMask       = SmallHashSize - 1;
 
     ad->m_cap  = SmallSize;
-    ad->m_hash = nullptr;
 
     ad->setStatic();
 
@@ -295,7 +294,7 @@ HphpArray* HphpArray::CopyMixed(const HphpArray& other, AllocationMode mode) {
   auto const data      = reinterpret_cast<Elm*>(ad + 1);
   auto const hash      = reinterpret_cast<int32_t*>(data + cap);
 
-  ad->m_hash = copyHash(hash, other.m_hash, mask + 1);
+  copyHash(hash, other.hashTab(), mask + 1);
 
   // Copy the elements and bump up refcounts as needed.
   auto const elms = other.data();
@@ -460,7 +459,6 @@ HphpArray* HphpArray::packedToMixed() {
   m_kind   = kMixedKind;
   m_hLoad  = size;
   m_nextKI = size;
-  m_hash   = hash;
 
   uint32_t i = 0;
   for (; i < size; ++i) {
@@ -514,7 +512,6 @@ HphpArray* HphpArray::packedToMixed() {
  *   m_size == m_used
  *   m_nextKI = uninitialized
  *   m_hLoad = uninitialized
- *   m_hash = uninitialized
  *   Elm.key uninitialized
  *   Elm.hash uninitialized
  *   no KindOfInvalid tombstones
@@ -523,7 +520,7 @@ bool HphpArray::checkInvariants() const {
   static_assert(sizeof(Elm) == 24, "");
   static_assert(sizeof(ArrayData) == 3 * sizeof(uint64_t), "");
   static_assert(
-    sizeof(HphpArray) == sizeof(ArrayData) + 4 * sizeof(uint64_t),
+    sizeof(HphpArray) == sizeof(ArrayData) + 3 * sizeof(uint64_t),
     "Performance is sensitive to sizeof(HphpArray)."
     " Make sure you changed it with good reason and then update this assert."
   );
@@ -553,14 +550,13 @@ bool HphpArray::checkInvariants() const {
     assert(m_size == m_used);
     break;
   case kMixedKind: {
-    assert(m_hash);
     assert(m_hLoad >= m_size);
     size_t load = 0;
     return true;
     // The following loop is for debugging arrays only; it slows
     // things down too much for general use
     for (size_t i = 0; i <= m_tableMask; i++) {
-      load += m_hash[i] != Empty;
+      load += hashTab()[i] != Empty;
     }
     assert(m_hLoad == load);
     break;
@@ -708,7 +704,7 @@ ssize_t HphpArray::findImpl(size_t h0, Hit hit) const {
   // regressed when they were 32-bit types via auto.  Test carefully.
   size_t tableMask = m_tableMask;
   auto* elms = data();
-  auto* hashtable = m_hash;
+  auto* hashtable = hashTab();
   for (size_t probeIndex = h0, i = 1;; ++i) {
     ssize_t pos = hashtable[probeIndex & tableMask];
     if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
@@ -751,7 +747,7 @@ int32_t* HphpArray::findForInsertImpl(size_t h0, Hit hit) const {
   assert(m_hLoad <= computeMaxElms(m_tableMask));
   size_t tableMask = m_tableMask;
   auto* elms = data();
-  auto* hashtable = m_hash;
+  auto* hashtable = hashTab();
   int32_t* ret = nullptr;
   for (size_t probeIndex = h0, i = 1;; ++i) {
     auto ei = &hashtable[probeIndex & tableMask];
@@ -818,7 +814,7 @@ ssize_t HphpArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
   assert(m_hLoad <= computeMaxElms(m_tableMask));
   size_t mask = m_tableMask;
   auto* elms = data();
-  auto* hashtable = m_hash;
+  auto* hashtable = hashTab();
   for (size_t i = 1, probe = h0;; ++i) {
     auto* ei = &hashtable[probe & mask];
     ssize_t pos = *ei;
@@ -1057,7 +1053,6 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
   ad->m_maskAndLoad     = uint64_t{oldSize} << 32 | mask;
   ad->m_nextKI          = old->m_nextKI;
   auto table            = reinterpret_cast<int32_t*>(ad->data() + cap);
-  ad->m_hash            = table;
 
   // Migrate all strong iterators to the new array.
   auto si = oldStrongIters;
@@ -1068,12 +1063,8 @@ HphpArray* HphpArray::Grow(HphpArray* old) {
 
   // Copy the old element array, and initialize the hashtable to all empty.
   copyElms(ad->data(), old->data(), oldUsed);
-  ad->initHash(ad->m_hash, mask + 1);
+  ad->initHash(table, mask + 1);
 
-  // TODO(#2942020): findForNewInsert will reload m_hash and
-  // m_tableMask each time through the loop.  A naive attempt to keep
-  // them in temporaries just ends up spilling/filling things from the
-  // stack.  We can probably do better ...
   auto iter = ad->data();
   auto const stop = iter + oldUsed;
   assert(mask == ad->m_tableMask);
@@ -1194,7 +1185,7 @@ void HphpArray::compact(bool renumber /* = false */) {
   auto elms = data();
   auto mask = m_tableMask;
   size_t tableSize = mask + 1;
-  auto table = m_hash;
+  auto table = hashTab();
   initHash(table, tableSize);
   m_hLoad = 0;
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
@@ -1892,21 +1883,20 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
                             kMixedKind;
   ad->m_posAndCount     = uint64_t{1} << 32 | oldPosUnsigned;
   ad->m_strongIterators = nullptr;
+  ad->m_cap             = cap;
   ad->m_maskAndLoad     = uint64_t{oldSize} << 32 | mask;
   ad->m_nextKI          = oldNextKI;
 
-  auto const data = ad->data();
-  auto const hash = reinterpret_cast<int32_t*>(data + cap);
-  ad->m_hash      = hash;
-  ad->initHash(hash, mask + 1);
+  auto const data  = ad->data();
+  auto const table = reinterpret_cast<int32_t*>(data + cap);
+  ad->initHash(table, mask + 1);
 
   auto dstElm = data;
   auto srcElm = src->data();
   auto const srcStop = src->data() + oldUsed;
   uint32_t i = 0;
   if (oldPacked) {
-    auto table = ad->m_hash;
-    auto mask = ad->m_tableMask;
+    auto const mask = ad->m_tableMask;
     for (; srcElm != srcStop; ++srcElm, ++i) {
       tvDupFlattenVars(&srcElm->data, &dstElm->data, src);
       dstElm->setIntKey(i);
@@ -1931,8 +1921,7 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
       mPos.key = nullptr;
     }
     // Copy the elements
-    auto table = ad->m_hash;
-    auto mask = ad->m_tableMask;
+    auto const mask = ad->m_tableMask;
     for (; srcElm != srcStop; ++srcElm) {
       if (isTombstone(srcElm->data.m_type)) continue;
       tvDupFlattenVars(&srcElm->data, &dstElm->data, src);
@@ -1958,7 +1947,7 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
 
   // Set new used value (we've removed any tombstones).
   assert(i == dstElm - data);
-  ad->m_capAndUsed = static_cast<uint64_t>(i) << 32 | cap;
+  ad->m_used = i;
 
   assert(ad->m_kind == kMixedKind);
   assert(ad->m_allocMode == AllocationMode::smart);

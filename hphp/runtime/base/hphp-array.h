@@ -479,6 +479,14 @@ private:
     return const_cast<Elm*>(reinterpret_cast<Elm const*>(this + 1));
   }
 
+  int32_t* hashTab() const {
+    return const_cast<int32_t*>(
+      reinterpret_cast<int32_t const*>(
+        data() + m_cap
+      )
+    );
+  }
+
   bool isZombie() const { return m_used + 1 == 0; }
 
 private:
@@ -500,7 +508,6 @@ private:
     uint64_t m_maskAndLoad;
   };
   int64_t  m_nextKI;        // Next integer key to use for append.
-  int32_t* m_hash;          // Hash table.
 };
 
 extern std::aligned_storage<

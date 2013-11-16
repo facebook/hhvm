@@ -2516,6 +2516,13 @@ CVarRef VMExecutionContext::getEvaledArg(const StringData* val,
   return lv;
 }
 
+void VMExecutionContext::recordLastError(const Exception &e, int errnum) {
+  BaseExecutionContext::recordLastError(e, errnum);
+  m_lastErrorPath = getContainingFileName();
+  m_lastErrorLine = getLine();
+}
+
+
 /*
  * Helper for function entry, including pseudo-main entry.
  */

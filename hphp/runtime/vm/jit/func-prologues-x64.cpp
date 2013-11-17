@@ -90,24 +90,21 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
 
   TCA aStart DEBUG_ONLY = a.frontier();
   if (!deltaFits((intptr_t)func, sz::dword)) {
-    a.    load_reg64_disp_reg64(rStashedAR, AROFF(m_func), rax);
+    a.  loadq  (rStashedAR[AROFF(m_func)], rax);
     /*
       Although func doesnt fit in a signed 32-bit immediate, it may still
       fit in an unsigned one. Rather than deal with yet another case
       (which only happens when we disable jemalloc) just force it to
       be an 8-byte immediate, and patch it up afterwards.
     */
-    a.    mov_imm64_reg(0xdeadbeeffeedface, rdx);
+    a.  movq   (0xdeadbeeffeedface, rdx);
     assert(((uint64_t*)a.frontier())[-1] == 0xdeadbeeffeedface);
     ((uint64_t*)a.frontier())[-1] = uintptr_t(func);
-    a.    cmp_reg64_reg64(rax, rdx);
+    a.  cmpq   (rax, rdx);
   } else {
-    a.    cmp_imm32_disp_reg32(uint64_t(func), AROFF(m_func), rStashedAR);
+    a.  cmpq   (func, rStashedAR[AROFF(m_func)]);
   }
-
-  assert(tx64->uniqueStubs.funcPrologueRedispatch);
-
-  a.    jnz(tx64->uniqueStubs.funcPrologueRedispatch);
+  a.    jnz    (tx64->uniqueStubs.funcPrologueRedispatch);
 
   assert(funcPrologueToGuard(a.frontier(), func) == aStart);
   assert(funcPrologueHasGuard(a.frontier(), func));
@@ -155,7 +152,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     if (false) { // typecheck
       Transl::trimExtraArgs((ActRec*)nullptr);
     }
-    a.  mov_reg64_reg64(rStashedAR, argNumToRegName[0]);
+    a.    movq   (rStashedAR, argNumToRegName[0]);
     emitCall(a, TCA(Transl::trimExtraArgs));
     // We'll fix rVmSp below.
   } else if (nPassed < numParams) {
@@ -180,17 +177,17 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       // This should be an unusual case, so optimize for code density
       // rather than execution speed; i.e., don't unroll the loop.
       TCA loopTop = a.frontier();
-      a.  sub_imm32_reg64(sizeof(Cell), rVmSp);
-      a.  incl(eax);
+      a.    subq   (sizeof(Cell), rVmSp);
+      a.    incl   (eax);
       emitStoreUninitNull(a, 0, rVmSp);
-      a.  cmp_imm32_reg32(numParams, rax);
-      a.  jcc8(CC_L, loopTop);
+      a.    cmpl   (numParams, eax);
+      a.    jl8    (loopTop);
     }
   }
 
   // Entry point for numParams == nPassed is here.
   // Args are kosher. Frame linkage: set fp = ar.
-  a.    mov_reg64_reg64(rStashedAR, rVmFp);
+  a.    movq   (rStashedAR, rVmFp);
 
   int numLocals = numParams;
   if (func->isClosureBody()) {

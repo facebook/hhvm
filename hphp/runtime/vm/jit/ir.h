@@ -251,21 +251,21 @@ O(ConvObjToArr,                 D(Arr), S(Obj),                  N|PRc|CRc|K) \
 O(ConvStrToArr,                 D(Arr), S(Str),                    N|PRc|CRc) \
 O(ConvCellToArr,                D(Arr), S(Cell),                 N|PRc|CRc|K) \
                                                                               \
-O(ConvArrToBool,               D(Bool), S(Arr),                          C|N) \
+O(ConvArrToBool,               D(Bool), S(Arr),                            N) \
 O(ConvDblToBool,               D(Bool), S(Dbl),                            C) \
 O(ConvIntToBool,               D(Bool), S(Int),                            C) \
 O(ConvStrToBool,               D(Bool), S(Str),                            N) \
 O(ConvObjToBool,               D(Bool), S(Obj),                            N) \
 O(ConvCellToBool,              D(Bool), S(Cell),                           N) \
                                                                               \
-O(ConvArrToDbl,                 D(Dbl), S(Arr),                          C|N) \
+O(ConvArrToDbl,                 D(Dbl), S(Arr),                            N) \
 O(ConvBoolToDbl,                D(Dbl), S(Bool),                           C) \
 O(ConvIntToDbl,                 D(Dbl), S(Int),                            C) \
 O(ConvObjToDbl,                 D(Dbl), S(Obj),                         N|Er) \
 O(ConvStrToDbl,                 D(Dbl), S(Str),                            N) \
 O(ConvCellToDbl,                D(Dbl), S(Cell),                        N|Er) \
                                                                               \
-O(ConvArrToInt,                 D(Int), S(Arr),                          C|N) \
+O(ConvArrToInt,                 D(Int), S(Arr),                            N) \
 O(ConvBoolToInt,                D(Int), S(Bool),                           C) \
 O(ConvDblToInt,                 D(Int), S(Dbl),                            C) \
 O(ConvObjToInt,                 D(Int), S(Obj),                       N|Er|K) \
@@ -561,7 +561,7 @@ O(ConcatIntStr,                 D(Str), S(Int) S(Str),                 N|PRc) \
 O(ConcatStrInt,                 D(Str), S(Str) S(Int),             N|CRc|PRc) \
 O(ConcatCellCell,               D(Str), S(Cell) S(Cell),      N|CRc|PRc|Refs) \
 O(ArrayAdd,                     D(Arr), S(Arr) S(Arr),         N|Mem|CRc|PRc) \
-O(AKExists,                    D(Bool), S(Cell) S(Cell),                 C|N) \
+O(AKExists,                    D(Bool), S(Cell) S(Cell),                   N) \
 O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                              E|N|Mem|Refs|Er) \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
@@ -708,10 +708,10 @@ O_STK(ElemUX,              D(PtrToGen), C(TCA)                                \
                                           S(PtrToCell),MElem|E|N|Mem|Refs|Er) \
 O(ArrayGet,                    D(Cell), C(TCA)                                \
                                           S(Arr)                              \
-                                          S(Int,Str),    C|N|PRc|Refs|Mem|Er) \
+                                          S(Int,Str),      N|PRc|Refs|Mem|Er) \
 O(StringGet,              D(StaticStr), C(TCA)                                \
                                           S(Str)                              \
-                                          S(Int),        C|N|PRc|Refs|Mem|Er) \
+                                          S(Int),          N|PRc|Refs|Mem|Er) \
 O(MapGet,                      D(Cell), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int,Str),    E|N|PRc|Mem|Refs|Er) \
@@ -786,7 +786,7 @@ O_STK(BindNewElem,                  ND, S(PtrToGen)                           \
 O(ArrayIsset,                  D(Bool), C(TCA)                                \
                                           S(Arr)                              \
                                           S(Int,Str),        E|N|Mem|Refs|Er) \
-O(StringIsset,                 D(Bool), S(Str) S(Int),                     C) \
+O(StringIsset,                 D(Bool), S(Str) S(Int),                    NF) \
 O(VectorIsset,                 D(Bool), C(TCA)                                \
                                           S(Obj)                              \
                                           S(Int),            E|N|Mem|Refs)    \

@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP { namespace JIT {
 
@@ -486,8 +487,8 @@ void pmethodCacheMissPath(MethodCache* mce,
    * immediate that will cause it to always call out to
    * methodCacheSlowPath.
    */
-  auto fval = reinterpret_cast<uintptr_t>(mce->m_value);
-  auto cval = mce->m_key;
+  auto const fval = reinterpret_cast<uintptr_t>(mce->m_value);
+  auto const cval = mce->m_key;
   bool const cacheable =
     RuntimeOption::RepoAuthoritative &&
     cval && !(cval & 0x3) &&
@@ -506,6 +507,10 @@ void pmethodCacheMissPath(MethodCache* mce,
   // call to start doing real dispatch.
   smashCall(pdata->retAddr - X64::kCallLen,
             reinterpret_cast<TCA>(methodCacheSlowPath<Fatal>));
+
+  // Wait to free this until no request threads could be picking up
+  // the immediate.
+  Treadmill::deferredFree(pdata);
 }
 
 template

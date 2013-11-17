@@ -2556,7 +2556,9 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   auto& a = m_as;
 
   auto const handle = RDS::alloc<MethodCache,sizeof(MethodCache)>().handle();
-  auto pdata        = new MethodCachePrimeData; // TODO(#3206095): leaking this
+  auto pdata = static_cast<MethodCachePrimeData*>(
+    std::malloc(sizeof(MethodCachePrimeData))
+  );
 
   auto methodCacheHelper = inst->extra<LdObjMethodData>()->fatal ?
     pmethodCacheMissPath<true> :

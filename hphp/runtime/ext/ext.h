@@ -46,7 +46,6 @@
 #include "hphp/runtime/ext/ext_icu_ucnv.h"
 #include "hphp/runtime/ext/ext_icu_ucsdet.h"
 #include "hphp/runtime/ext/ext_icu_uspoof.h"
-#include "hphp/runtime/ext/ext_image.h"
 #include "hphp/runtime/ext/ext_imap.h"
 #include "hphp/runtime/ext/ext_intl.h"
 #include "hphp/runtime/ext/ext_ipc.h"
@@ -87,5 +86,6 @@
 #include "hphp/runtime/ext/ext_xmlreader.h"
 #include "hphp/runtime/ext/ext_xmlwriter.h"
 #include "hphp/runtime/ext/ext_zlib.h"
+#include "hphp/runtime/ext/gd/ext_image.h"
 
 #endif // incl_EXT_LIST_EXT_H_

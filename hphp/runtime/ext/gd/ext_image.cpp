@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_image.h"
+#include "hphp/runtime/ext/gd/ext_image.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -22,11 +22,11 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/min-max-macros.h"
 
-#include <gdfontt.h>  /* 1 Tiny font */
-#include <gdfonts.h>  /* 2 Small font */
-#include <gdfontmb.h> /* 3 Medium bold font */
-#include <gdfontl.h>  /* 4 Large font */
-#include <gdfontg.h>  /* 5 Giant font */
+#include "hphp/runtime/ext/gd/libgd/gdfontt.h"  /* 1 Tiny font */
+#include "hphp/runtime/ext/gd/libgd/gdfonts.h"  /* 2 Small font */
+#include "hphp/runtime/ext/gd/libgd/gdfontmb.h" /* 3 Medium bold font */
+#include "hphp/runtime/ext/gd/libgd/gdfontl.h"  /* 4 Large font */
+#include "hphp/runtime/ext/gd/libgd/gdfontg.h"  /* 5 Giant font */
 #include <zlib.h>
 
 // #define IM_MEMORY_CHECK

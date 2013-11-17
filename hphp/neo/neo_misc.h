@@ -93,7 +93,6 @@ int vsnprintf (char *str, size_t count, const char *fmt, va_list arg);
 #include <sys/types.h>
 
 typedef unsigned int UINT32;
-typedef int INT32;
 typedef unsigned short int UINT16;
 typedef short int INT16;
 typedef unsigned char UINT8;

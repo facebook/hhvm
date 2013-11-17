@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/zend-php-config.h"
-#include <gd.h>
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

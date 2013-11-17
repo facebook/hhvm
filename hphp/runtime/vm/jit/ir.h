@@ -439,9 +439,9 @@ O(LdStrFPushCuf,                    ND, S(Str)                                \
                                           S(StkPtr)                           \
                                           S(FramePtr),           E|N|Refs|Er) \
 O(LdFunc,                      D(Func), S(Str),              E|N|CRc|Refs|Er) \
-O(LdFuncCached,                D(Func), NA,                    N|C|E|Refs|Er) \
-O(LdFuncCachedU,               D(Func), NA,                    N|C|E|Refs|Er) \
-O(LdFuncCachedSafe,            D(Func), NA,                                C) \
+O(LdFuncCached,                D(Func), NA,                      N|E|Refs|Er) \
+O(LdFuncCachedU,               D(Func), NA,                      N|E|Refs|Er) \
+O(LdFuncCachedSafe,            D(Func), NA,                               NF) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr,FramePtr) C(Int),         C) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \
 O(LdSSwitchDestSlow,            D(TCA), S(Gen),                  E|N|Refs|Er) \

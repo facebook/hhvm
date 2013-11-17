@@ -35,6 +35,19 @@ class HphpArray : public ArrayData {
   static const uint LoadScale = 4;
 
 public:
+  /*
+   * Iterator helper for kPackedKind and kMixedKind.  You can use this
+   * to look at the values in the array, but not the keys unless you
+   * know it is kMixedKind.
+   *
+   * This can be used as an optimization vs. ArrayIter, which uses
+   * indirect calls in the loop.
+   *
+   * Note that this iterator class doesn't skip tombstones.  You have
+   * to do that yourself if you want it.
+   */
+  struct ValIter;
+
   struct Elm {
     /* The key is either a string pointer or an int value, and the _count
      * field in data is used to discriminate the key type. _count = 0 means

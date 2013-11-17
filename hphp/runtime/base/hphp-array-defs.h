@@ -200,7 +200,46 @@ inline void ArrayData::moveStrongIterators(ArrayData* dest, ArrayData* src) {
   src->m_strongIterators = 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+struct HphpArray::ValIter {
+  explicit ValIter(HphpArray* arr)
+    : m_arr(arr)
+    , m_iter(arr->data())
+    , m_stop(m_iter + arr->m_used)
+  {
+    assert(arr->m_kind == kMixedKind || arr->m_kind == kPackedKind);
+  }
+
+  explicit ValIter(HphpArray* arr, ssize_t start_pos)
+    : m_arr(arr)
+    , m_iter(arr->data() + start_pos)
+    , m_stop(arr->data() + arr->m_used)
+  {
+    assert(arr->m_kind == kMixedKind || arr->m_kind == kPackedKind);
+    assert(m_iter <= m_stop);
+  }
+
+  Elm* current() const { return m_iter; }
+  bool empty() const { return m_iter == m_stop; }
+
+  void advance() {
+    do {
+      ++m_iter;
+    } while (!empty() && HphpArray::isTombstone(m_iter->data.m_type));
+  }
+
+  ssize_t currentPos() const { return m_iter - m_arr->data(); }
+
+private:
+  HphpArray* m_arr;
+  Elm* m_iter;
+  Elm* const m_stop;
+};
+
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // incl_HPHP_HPHP_ARRAY_DEFS_H_

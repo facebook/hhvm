@@ -414,11 +414,11 @@ O(LdClsMethodCache,         D(FuncCls), C(Str)                                \
                                           C(Str)                              \
                                           C(NamedEntity)                      \
                                           S(FramePtr)                         \
-                                          S(StkPtr),       N|C|E|Refs|Er|Mem) \
+                                          S(StkPtr),         N|E|Refs|Er|Mem) \
 O(LdClsMethodFCache,        D(FuncCtx), C(Cls)                                \
                                           CStr                                \
                                           S(Obj,Cls,Ctx)                      \
-                                          S(FramePtr),              N|C|E|Er) \
+                                          S(FramePtr),                N|E|Er) \
 O(GetCtxFwdCall,                D(Ctx), S(Ctx) C(Func),                C|PRc) \
 O(LdClsMethod,                 D(Func), S(Cls) C(Int),                     C) \
 O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \

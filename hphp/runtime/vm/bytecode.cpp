@@ -6963,7 +6963,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAsyncAwait(PC& pc) {
   NEXT();
   auto const& c1 = *m_stack.topC();
   if (c1.m_type != KindOfObject ||
-      !c1.m_data.pobj->instanceof(c_WaitHandle::classof())) {
+      !c1.m_data.pobj->getAttribute(ObjectData::IsWaitHandle)) {
     raise_error("AsyncAwait on a non-WaitHandle");
   }
   auto const wh = static_cast<c_WaitHandle*>(c1.m_data.pobj);

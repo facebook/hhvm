@@ -84,7 +84,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   static c_WaitHandle* fromCell(Cell* cell) {
     return (
         cell->m_type == KindOfObject &&
-        cell->m_data.pobj->instanceof(classof())
+        cell->m_data.pobj->getAttribute(ObjectData::IsWaitHandle)
       ) ? static_cast<c_WaitHandle*>(cell->m_data.pobj) : nullptr;
   }
   bool isFinished() { return getState() <= STATE_FAILED; }

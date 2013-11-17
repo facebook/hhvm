@@ -489,6 +489,20 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
       ok &= checkString(pc, id);
       break;
     }
+    case VSA: { // vector of litstr ids
+      auto len = *(uint32_t*)pc;
+      if (len < 1 || len > HphpArray::MaxMakeSize) {
+        error("invalid length of immedate VSA vector %d at offset %d\n",
+              len, offset(pc));
+        return false;
+      }
+      for (int i = 0; i < len; i++) {
+        PC sa_pc = pc + (i + 1) * sizeof(int);
+        Id id = decodeId(&sa_pc);
+        ok &= checkString(pc, id);
+      }
+      break;
+    }
     case AA: { // static array id
       PC aa_pc = pc;
       Id id = decodeId(&aa_pc);
@@ -609,6 +623,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define CVMANY { },
   #define CVUMANY { },
   #define CMANY { },
+  #define SMANY { },
   #define ONE(a) { a },
   #define TWO(a,b) { b, a },
   #define THREE(a,b,c) { c, b, a },
@@ -628,6 +643,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef CVMANY
   #undef CVUMANY
   #undef CMANY
+  #undef SMANY
   #undef FOUR
   #undef THREE
   #undef TWO
@@ -669,6 +685,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     }
     return m_tmp_sig;
   case OpNewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)
+  case OpNewStructArray:  // ONE(VSA),     SMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
       m_tmp_sig[i] = CV;
     }
@@ -787,6 +804,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define NOV { },
   #define FMANY { },
   #define CMANY { },
+  #define SMANY { },
   #define ONE(a) { a },
   #define TWO(a,b) { a, b },
   #define THREE(a,b,c) { a, b, c },
@@ -806,6 +824,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #undef MMANY
   #undef FMANY
   #undef CMANY
+  #undef SMANY
   #undef INS_1
   #undef INS_2
   #undef FOUR

@@ -119,6 +119,7 @@ public:
 #define AA ArrayData*
 #define BA Label&
 #define OA unsigned char
+#define VSA std::vector<std::string>&
   OPCODES
 #undef O
 #undef NA
@@ -139,6 +140,7 @@ public:
 #undef AA
 #undef BA
 #undef OA
+#undef VSA
 private:
   ConstructPtr m_node;
   UnitEmitter& m_ue;

@@ -809,6 +809,19 @@ const StringData* read_litstr(AsmState& as) {
   return makeStaticString(strVal);
 }
 
+std::vector<std::string> read_strvector(AsmState& as) {
+  std::vector<std::string> ret;
+  as.in.skipSpaceTab();
+  as.in.expect('<');
+  std::string name;
+  while (as.in.skipSpaceTab(), as.in.readQuotedStr(name)) {
+    ret.push_back(name);
+  }
+  as.in.skipSpaceTab();
+  as.in.expectWs('>');
+  return ret;
+}
+
 ArrayData* read_litarray(AsmState& as) {
   as.in.skipSpaceTab();
   if (as.in.getc() != '@') {
@@ -1013,6 +1026,14 @@ OpcodeParserMap opcode_parsers;
     if (immIVA < 0) immIVA = imm;               \
   } while (0)
 
+#define IMM_VSA \
+  std::vector<std::string> vecImm = read_strvector(as);                 \
+  auto vecImmStackValues = vecImm.size();                               \
+  as.ue->emitInt32(vecImmStackValues);                                    \
+  for (size_t i = 0; i < vecImmStackValues; ++i) {                      \
+    as.ue->emitInt32(as.ue->mergeLitstr(String(vecImm[i]).get()));      \
+  }
+
 #define IMM_SA   as.ue->emitInt32(as.ue->mergeLitstr(read_litstr(as)))
 #define IMM_I64A as.ue->emitInt64(read_opcode_arg<int64_t>(as))
 #define IMM_DA   as.ue->emitDouble(read_opcode_arg<double>(as))
@@ -1100,6 +1121,7 @@ OpcodeParserMap opcode_parsers;
 #define NUM_POP_CVMANY immIVA /* number of arguments */
 #define NUM_POP_CVUMANY immIVA /* number of arguments */
 #define NUM_POP_CMANY immIVA /* number of arguments */
+#define NUM_POP_SMANY vecImmStackValues
 
 #define O(name, imm, pop, push, flags)                            \
   void parse_opcode_##name(AsmState& as) {                        \
@@ -1160,6 +1182,7 @@ OPCODES
 #undef IMM_OA
 #undef IMM_MA
 #undef IMM_AA
+#undef IMM_VSA
 
 #undef NUM_PUSH_NOV
 #undef NUM_PUSH_ONE
@@ -1180,6 +1203,7 @@ OPCODES
 #undef NUM_POP_CVMANY
 #undef NUM_POP_CVUMANY
 #undef NUM_POP_CMANY
+#undef NUM_POP_SMANY
 
 void initialize_opcode_map() {
 #define O(name, imm, pop, push, flags) \

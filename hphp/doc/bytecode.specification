@@ -878,8 +878,20 @@ NewPackedArray <num elems>    [C..C]  ->  [C]
 
   New array. Creates a new array from the top %1 cells on the stack,
   pops those cells, then pushes the new array onto the stack. Elements
-  are implicitly numbered from 0 to num elems - 1; $1 is at index 0,
-  $2 is at 1, and so on.  %1 must be greater than zero.
+  are pushed on the stack in array insertion order and are implicitly
+  numbered from 0 to %1 - 1.  $1 is at index %i - 1, $2 at %1-2, and
+  so on; $(%1) is at index 0.
+
+NewStructArray <litstr id vector>    [C..C]  ->  [C]
+
+  New array.  Creates a new array from the names given in %1 and values
+  from the stack.  The vector of litstr ids gives the element names,
+  one value for each name is popped from the stack.  Names are in array
+  insertion order, and values were pushed onto the stack in insertion
+  order, so are added to the array in reverse order (the topmost value
+  will become the last element in the array).  For example:
+
+    NewStructArray < "a" "b" >  [ 1 2 ]  ->  [ array("a"=>1, "b"=>2) ]
 
 AddElemC    [C C C]  ->  [C:Arr]
 

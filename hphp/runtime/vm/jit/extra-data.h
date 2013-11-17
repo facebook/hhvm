@@ -704,6 +704,12 @@ struct ClassKindData : IRExtraData {
   ClassKind kind;
 };
 
+struct NewStructData : IRExtraData {
+  uint32_t numKeys;
+  StringData** keys;
+  std::string show() const;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -807,6 +813,7 @@ X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);
 X(Shuffle,                      ShuffleData);
 X(ThingExists,                  ClassKindData);
+X(NewStructArray,               NewStructData);
 
 #undef X
 

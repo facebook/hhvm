@@ -1117,6 +1117,12 @@ D:Arr = NewPackedArray S0:ConstInt S1:StkPtr
   given by S1.  Note that this instruction assumes it can take the
   values from the stack without increfing them.
 
+D:Arr = NewStructArray<keys...> S0:StkPtr
+
+  Allocate a new key/value array, given N immediate keys and taking the top
+  N elements off the stack given by S0.  This instruction assumes it can take the
+  values from the stack without increfing them.
+
 D:Obj = NewCol S0:ConstInt S1:ConstInt
 
   Create a new collection, with type S0 and size S1.

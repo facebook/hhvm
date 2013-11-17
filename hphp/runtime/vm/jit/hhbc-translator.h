@@ -187,6 +187,7 @@ struct HhbcTranslator {
   void emitArray(int arrayId);
   void emitNewArrayReserve(int capacity);
   void emitNewPackedArray(int n);
+  void emitNewStructArray(uint32_t n, StringData** keys);
   void emitNewCol(int capacity);
   void emitClone();
 

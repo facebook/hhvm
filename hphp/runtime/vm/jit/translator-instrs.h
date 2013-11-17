@@ -41,6 +41,7 @@
   CASE(NewArray) \
   CASE(NewArrayReserve) \
   CASE(NewPackedArray) \
+  CASE(NewStructArray) \
   CASE(NewCol) \
   CASE(Clone) \
   CASE(Nop) \

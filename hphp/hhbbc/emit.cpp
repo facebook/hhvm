@@ -200,6 +200,14 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       for (size_t i = 0; i < immVec.size(); ++i) ue.emitByte(immVec[i]);
     };
 
+    auto emit_vsa = [&] (const std::vector<SString>& keys) {
+      auto n = keys.size();
+      ue.emitInt32(n);
+      for (size_t i = 0; i < n; ++i) {
+        ue.emitInt32(ue.mergeLitstr(keys[i]));
+      }
+    };
+
     auto emit_branch = [&] (const php::Block& target) {
       auto& info = blockInfo[target.id];
 
@@ -298,6 +306,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_AA(n)     ue.emitInt32(ue.mergeArray(data.arr##n));
 #define IMM_OA(n)     ue.emitByte(data.subop);
 #define IMM_BA(n)     emit_branch(*data.target);
+#define IMM_VSA(n)    emit_vsa(data.keys);
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -315,6 +324,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_R_MMANY    pop(1); pop(count_stack_elems(data.mvec));
 #define POP_V_MMANY    pop(1); pop(count_stack_elems(data.mvec));
 #define POP_CMANY      pop(data.arg##1);
+#define POP_SMANY      pop(data.keys.size());
 #define POP_FMANY      pop(data.arg##1);
 #define POP_CVMANY     pop(data.arg##1);
 #define POP_CVUMANY    pop(data.arg##1);
@@ -359,6 +369,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_AA
 #undef IMM_BA
 #undef IMM_OA
+#undef IMM_VSA
 
 #undef IMM_NA
 #undef IMM_ONE
@@ -372,6 +383,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef POP_THREE
 
 #undef POP_CMANY
+#undef POP_SMANY
 #undef POP_MMANY
 #undef POP_FMANY
 #undef POP_CVMANY

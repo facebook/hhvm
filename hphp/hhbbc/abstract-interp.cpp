@@ -326,6 +326,11 @@ struct InterpStepper : boost::static_visitor<void> {
     push(TArr);
   }
 
+  void operator()(const bc::NewStructArray& op) {
+    for (auto n = op.keys.size(); n > 0; n--) popC();
+    push(TArr);
+  }
+
   void operator()(const bc::AddElemC& op) {
     popC(); popC(); popC();
     push(TArr);

@@ -88,6 +88,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -303,6 +304,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define COUNT_CVMANY 0
 #define COUNT_CVUMANY 0
 #define COUNT_CMANY 0
+#define COUNT_SMANY 0
 
 #define ONE(t) \
   DEC_##t a1
@@ -326,6 +328,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define DEC_AA ArrayData*
 #define DEC_BA Label&
 #define DEC_OA uchar
+#define DEC_VSA std::vector<std::string>&
 
 #define POP_NOV
 #define POP_ONE(t) \
@@ -360,6 +363,8 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_CVUMANY POP_CVMANY
 #define POP_CMANY \
   getEmitterVisitor().popEvalStackMany(a1, StackSym::C)
+#define POP_SMANY \
+  getEmitterVisitor().popEvalStackMany(a1.size(), StackSym::C)
 
 #define POP_CV(i) getEmitterVisitor().popEvalStack(StackSym::C, i, curPos)
 #define POP_VV(i) getEmitterVisitor().popEvalStack(StackSym::V, i, curPos)
@@ -396,6 +401,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_LA_AA(i)
 #define POP_LA_BA(i)
 #define POP_LA_OA(i)
+#define POP_LA_VSA(i)
 
 #define POP_LA_LA(i) \
   getEmitterVisitor().popSymbolicLocal(opcode, i, curPos)
@@ -496,6 +502,18 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define IMPL1_SLA IMPL_SLA(a1)
 #define IMPL2_SLA IMPL_SLA(a2)
 #define IMPL3_SLA IMPL_SLA(a3)
+
+#define IMPL_VSA(var) do {                          \
+  auto n = var.size();                              \
+  getUnitEmitter().emitInt32(n);                    \
+  for (size_t i = 0; i < n; ++i) {                  \
+    IMPL_SA((HPHP::String(var[i])).get());          \
+  }                                                 \
+} while (0)
+#define IMPL1_VSA IMPL_VSA(a1)
+#define IMPL2_VSA IMPL_VSA(a2)
+#define IMPL3_VSA IMPL_VSA(a3)
+#define IMPL4_VSA IMPL_VSA(a4)
 
 #define IMPL_IVA(var) do { \
   getUnitEmitter().emitIVA(var); \
@@ -600,6 +618,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_CVMANY
 #undef POP_CVUMANY
 #undef POP_CMANY
+#undef POP_SMANY
 #undef POP_LA_ONE
 #undef POP_LA_TWO
 #undef POP_LA_THREE
@@ -1946,6 +1965,22 @@ void EmitterVisitor::visitKids(ConstructPtr c) {
   }
 }
 
+template<class Fun>
+bool checkKeys(ExpressionPtr init_expr, Fun fun) {
+  if (init_expr->getKindOf() != Expression::KindOfExpressionList) return false;
+  ExpressionListPtr el = static_pointer_cast<ExpressionList>(init_expr);
+  int n = el->getCount();
+  if (n < 1 || n > HphpArray::MaxMakeSize) return false;
+  for (int i = 0, n = el->getCount(); i < n; ++i) {
+    ExpressionPtr ex = (*el)[i];
+    if (ex->getKindOf() != Expression::KindOfArrayPairExpression) return false;
+    ArrayPairExpressionPtr ap = static_pointer_cast<ArrayPairExpression>(ex);
+    if (ap->isRef()) return false;
+    if (!fun(ap)) return false;
+  }
+  return true;
+}
+
 /*
  * isPackedInit() returns true if this expression list looks like an
  * array with no keys and no ref values; e.g. array(x,y,z).
@@ -1954,18 +1989,31 @@ void EmitterVisitor::visitKids(ConstructPtr c) {
  * HphpArray::SmallSize (12).
  */
 bool isPackedInit(ExpressionPtr init_expr, int* size) {
-  if (init_expr->getKindOf() != Expression::KindOfExpressionList) return false;
-  ExpressionListPtr el = static_pointer_cast<ExpressionList>(init_expr);
-  int n = el->getCount();
-  if (n < 1 || n > int(4 * HphpArray::SmallSize)) return false;
-  for (int i = 0, n = el->getCount(); i < n; ++i) {
-    ExpressionPtr ex = (*el)[i];
-    if (ex->getKindOf() != Expression::KindOfArrayPairExpression) return false;
-    ArrayPairExpressionPtr ap = static_pointer_cast<ArrayPairExpression>(ex);
-    if (ap->getName() != nullptr || ap->isRef()) return false;
-  }
-  *size = n;
-  return true;
+  *size = 0;
+  return checkKeys(init_expr, [&](ArrayPairExpressionPtr ap) {
+    if (ap->getName() != nullptr) return false;
+    (*size)++;
+    return true;
+  });
+}
+
+/*
+ * isStructInit() is like isPackedInit(), but returns true if the keys are
+ * all static strings with no duplicates.
+ */
+bool isStructInit(ExpressionPtr init_expr, std::vector<std::string>& keys) {
+  return checkKeys(init_expr, [&](ArrayPairExpressionPtr ap) {
+    auto key = ap->getName();
+    if (key == nullptr || !key->isLiteralString()) return false;
+    auto name = key->getLiteralString();
+    int64_t ival;
+    double dval;
+    auto kind = is_numeric_string(name.data(), name.size(), &ival, &dval, 0);
+    if (kind != KindOfNull) return false; // don't allow numeric keys
+    if (std::find(keys.begin(), keys.end(), name) != keys.end()) return false;
+    keys.push_back(name);
+    return true;
+  });
 }
 
 bool EmitterVisitor::visit(ConstructPtr node) {
@@ -2626,6 +2674,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
         if (op == T_ARRAY) {
           int num_elems;
+          std::vector<std::string> keys;
           if (u->isScalar()) {
             TypedValue tv;
             tvWriteUninit(&tv);
@@ -2644,6 +2693,16 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               emitConvertToCell(e);
             }
             e.NewPackedArray(num_elems);
+          } else if (isStructInit(u->getExpression(), keys)) {
+            ExpressionListPtr el =
+              static_pointer_cast<ExpressionList>(u->getExpression());
+            for (int i = 0, n = keys.size(); i < n; i++) {
+              ArrayPairExpressionPtr ap =
+                static_pointer_cast<ArrayPairExpression>((*el)[i]);
+              visit(ap->getValue());
+              emitConvertToCell(e);
+            }
+            e.NewStructArray(keys);
           } else {
             assert(m_staticArrays.empty());
             ExpressionPtr ex = u->getExpression();

@@ -150,6 +150,9 @@ int immSize(const Op* opcode, int idx) {
     } else if (itype == ILA) {
       prefixes = 1;
       vecElemSz = 2 * sizeof(uint32_t);
+    } else if (itype == VSA) {
+      prefixes = 1;
+      vecElemSz = sizeof(Id);
     } else {
       assert(itype == SLA);
       prefixes = 1;
@@ -165,7 +168,7 @@ int immSize(const Op* opcode, int idx) {
 
 bool immIsVector(Op opcode, int idx) {
   ArgType type = immType(opcode, idx);
-  return (type == MA || type == BLA || type == SLA || type == ILA);
+  return type == MA || type == BLA || type == SLA || type == ILA || type == VSA;
 }
 
 bool hasImmVector(Op opcode) {
@@ -273,6 +276,7 @@ Offset* instrJumpOffset(Op* instr) {
 #define LA 0
 #define IA 0
 #define OA 0
+#define VSA 0
 #define ONE(a) a
 #define TWO(a, b) (a + 2 * b)
 #define THREE(a, b, c) (a + 2 * b + 4 * c)
@@ -290,6 +294,7 @@ Offset* instrJumpOffset(Op* instr) {
 #undef IA
 #undef BA
 #undef OA
+#undef VSA
 #undef ONE
 #undef TWO
 #undef THREE
@@ -370,6 +375,7 @@ int instrNumPops(const Op* opcode) {
 #define CVMANY -3
 #define CVUMANY -3
 #define CMANY -3
+#define SMANY -1
 #define O(name, imm, pop, push, flags) pop,
     OPCODES
 #undef NOV
@@ -385,6 +391,7 @@ int instrNumPops(const Op* opcode) {
 #undef CVMANY
 #undef CVUMANY
 #undef CMANY
+#undef SMANY
 #undef O
   };
   int n = numberOfPops[uint8_t(*opcode)];
@@ -487,8 +494,8 @@ FlavorDesc minstrFlavor(const Op* op, uint32_t i, FlavorDesc top) {
 }
 
 FlavorDesc manyFlavor(const Op* op, uint32_t i, FlavorDesc flavor) {
-  if (i < getImm(op, 0).u_IVA) return flavor;
-  always_assert(0 && "Invalid stack index");
+  always_assert(i < uint32_t(instrNumPops(op)));
+  return flavor;
 }
 }
 
@@ -510,6 +517,7 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
 #define CVMANY return manyFlavor(op, idx, CVV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
 #define CMANY return manyFlavor(op, idx, CV);
+#define SMANY return manyFlavor(op, idx, CV);
 #define O(name, imm, pop, push, flags) case Op::name: pop
   switch (*op) {
     OPCODES
@@ -528,6 +536,7 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx) {
 #undef CVMANY
 #undef CVUMANY
 #undef CMANY
+#undef SMANY
 #undef O
 }
 
@@ -975,6 +984,15 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
     out << " " << *((Id*)it);                                 \
   }                                                           \
   it += sizeof(Id)
+#define H_VSA do {                                      \
+  int sz = readData<int32_t>(it);                       \
+  out << " <";                                          \
+  for (int i = 0; i < sz; ++i) {                        \
+    H_SA;                                               \
+  }                                                     \
+  out << " >";                                          \
+} while (false)
+
 #define O(name, imm, push, pop, flags)    \
   case Op##name: {                        \
     out << #name;                         \
@@ -1003,6 +1021,7 @@ OPCODES
 #undef H_OA
 #undef H_SA
 #undef H_AA
+#undef H_VSA
     default: assert(false);
   };
   return out.str();
@@ -1060,6 +1079,10 @@ ImmVector getImmVector(const Op* opcode) {
       void* vp = getImmPtr(opcode, k);
       return ImmVector::createFromStream(
         static_cast<const int32_t*>(vp));
+    } else if (t == VSA) {
+      const int32_t* vp = (int32_t*) getImmPtr(opcode, k);
+      return ImmVector(reinterpret_cast<const uint8_t*>(vp + 1),
+                       vp[0], vp[0]);
     }
   }
 

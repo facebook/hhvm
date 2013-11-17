@@ -3511,6 +3511,21 @@ OPTBLD_INLINE void VMExecutionContext::iopNewPackedArray(PC& pc) {
   m_stack.pushArrayNoRc(a);
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopNewStructArray(PC& pc) {
+  NEXT();
+  DECODE(uint32_t, n); // number of keys and elements
+  assert(n > 0 && n <= HphpArray::MaxMakeSize);
+  StringData* names[HphpArray::MaxMakeSize];
+  for (size_t i = 0; i < n; i++) {
+    DECODE_LITSTR(s);
+    names[i] = s;
+  }
+  // This constructor moves values, no inc/decref is necessary.
+  auto* a = HphpArray::MakeStruct(n, names, m_stack.topC());
+  m_stack.ndiscard(n);
+  m_stack.pushArrayNoRc(a);
+}
+
 OPTBLD_INLINE void VMExecutionContext::iopAddElemC(PC& pc) {
   NEXT();
   Cell* c1 = m_stack.topC();

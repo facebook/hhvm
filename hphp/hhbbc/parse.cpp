@@ -347,6 +347,15 @@ void populate_block(ParseUnitState& puState,
     return ret;
   };
 
+  auto decode_vsa = [&] {
+    auto n = decode<int32_t>(pc);
+    std::vector<SString> keys;
+    for (size_t i = 0; i < n; ++i) {
+      keys.push_back(ue.lookupLitstr(decode<int32_t>(pc)));
+    }
+    return keys;
+  };
+
   auto decode_switch = [&] (PC opPC) {
     SwitchTab ret;
     auto const vecLen = decode<int32_t>(pc);
@@ -420,6 +429,7 @@ void populate_block(ParseUnitState& puState,
                       auto target = findBlock(  \
                         opPC + decode<Offset>(pc) - ue.bc());
 #define IMM_OA(n)     auto subop = decode<uint8_t>(pc);
+#define IMM_VSA(n)    auto keys = decode_vsa();
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -499,6 +509,7 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_AA
 #undef IMM_BA
 #undef IMM_OA
+#undef IMM_VSA
 
 #undef IMM_NA
 #undef IMM_ONE

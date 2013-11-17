@@ -259,6 +259,16 @@ std::string show(const Bytecode& bc) {
     ret += ">";
   };
 
+  auto append_vsa = [&] (const std::vector<SString>& keys) {
+    ret += "<";
+    auto delim = "";
+    for (auto& s : keys) {
+      ret += delim + escaped_string(s);
+      delim = ",";
+    }
+    ret += ">";
+  };
+
   auto append_switch = [&] (const SwitchTab& tab) {
     ret += "<";
     for (auto& target : tab) {
@@ -333,6 +343,7 @@ std::string show(const Bytecode& bc) {
 #define IMM_AA(n)     ret += " " + array_string(data.arr##n);
 #define IMM_BA(n)     folly::toAppend(" <blk:", data.target->id, ">", &ret);
 #define IMM_OA(n)     ret += " "; append_subop(curOpcode, data.subop);
+#define IMM_VSA(n)    ret += " "; append_vsa(data.keys);
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)

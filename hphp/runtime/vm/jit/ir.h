@@ -459,6 +459,7 @@ O(StClosureArg,                     ND, S(Obj) S(Gen),                 CRc|E) \
 O(StClosureCtx,                     ND, S(Obj) S(Ctx,Nullptr),         CRc|E) \
 O(NewArray,                     D(Arr), C(Int),                        N|PRc) \
 O(NewPackedArray,               D(Arr), C(Int) S(StkPtr),    E|Mem|N|PRc|CRc) \
+O(NewStructArray,               D(Arr), S(StkPtr),           E|Mem|N|PRc|CRc) \
 O(NewCol,                       D(Obj), C(Int) C(Int),                 N|PRc) \
 O(Clone,                        D(Obj), S(Obj),              N|E|PRc|Refs|Er) \
 O(LdRaw,                        DParam, SUnk,                             NF) \

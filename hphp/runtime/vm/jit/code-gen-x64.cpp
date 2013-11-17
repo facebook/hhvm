@@ -6244,6 +6244,21 @@ void CodeGenerator::cgCIterFree(IRInstruction* inst) {
                ArgGroup(curOpds()).addr(fpReg, offset));
 }
 
+void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
+  auto data = inst->extra<NewStructData>();
+  StringData** table = m_tx64->allocData<StringData*>(sizeof(StringData*),
+                                                      data->numKeys);
+  memcpy(table, data->keys, data->numKeys * sizeof(*data->keys));
+  auto values = inst->src(0);
+  auto dst = inst->dst();
+  HphpArray* (*f)(uint32_t, StringData**, const TypedValue*) =
+    &HphpArray::MakeStruct;
+  cgCallHelper(m_as, CppCall(f), callDest(dst), SyncOptions::kNoSyncPoint,
+               ArgGroup(curOpds()).imm(data->numKeys)
+                                  .imm(uintptr_t(table))
+                                  .ssa(values));
+}
+
 void CodeGenerator::cgIncStat(IRInstruction *inst) {
   Stats::emitInc(m_mainCode,
                  Stats::StatCounter(inst->src(0)->getValInt()),

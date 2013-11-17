@@ -952,6 +952,7 @@ static const struct {
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
   { OpNewArrayReserve, {None,         Stack1,       OutArray,          1 }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
+  { OpNewStructArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray,         -2 }},
   { OpAddElemV,    {StackTop3,        Stack1,       OutArray,         -2 }},
   { OpAddNewElemC, {StackTop2,        Stack1,       OutArray,         -1 }},
@@ -1367,6 +1368,9 @@ int getStackDelta(const NormalizedInstruction& ni) {
     case OpNewPackedArray:
     case OpCreateCl:
       return 1 - ni.imm[0].u_IVA;
+
+    case OpNewStructArray:
+      return 1 - ni.immVec.numStackValues();
 
     default:
       break;
@@ -1981,7 +1985,8 @@ void getInputsImpl(SrcKey startSk,
     }
   }
   if (input & StackN) {
-    int numArgs = ni->imm[0].u_IVA;
+    int numArgs = ni->op() == OpNewPackedArray ? ni->imm[0].u_IVA :
+                  ni->immVec.numStackValues();
     SKTRACE(1, sk, "getInputs: stackN %d %d\n", currentStackOffset - 1,
             numArgs);
     for (int i = 0; i < numArgs; i++) {

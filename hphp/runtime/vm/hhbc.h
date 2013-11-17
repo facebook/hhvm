@@ -46,7 +46,8 @@ struct Unit;
   ARGTYPE(SA,     Id)            /* Static string ID */                   \
   ARGTYPE(AA,     Id)            /* Static array ID */                    \
   ARGTYPE(BA,     Offset)        /* Bytecode offset */                    \
-  ARGTYPE(OA,     unsigned char) /* Sub-opcode */
+  ARGTYPE(OA,     unsigned char) /* Sub-opcode */                         \
+  ARGTYPEVEC(VSA, Id)            /* Vector of static string IDs */
 
 enum ArgType {
 #define ARGTYPE(name, type) name,
@@ -425,6 +426,7 @@ enum SetOpOp {
   O(NewArray,        NA,               NOV,             ONE(CV),    NF) \
   O(NewArrayReserve, ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(NewPackedArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
+  O(NewStructArray,  ONE(VSA),         SMANY,           ONE(CV),    NF) \
   O(AddElemC,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(AddElemV,        NA,               THREE(VV,CV,CV), ONE(CV),    NF) \
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \

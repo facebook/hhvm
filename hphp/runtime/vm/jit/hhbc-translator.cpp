@@ -542,6 +542,21 @@ void HhbcTranslator::emitNewPackedArray(int numArgs) {
   push(gen(NewPackedArray, cns(numArgs), sp));
 }
 
+void HhbcTranslator::emitNewStructArray(uint32_t numArgs, StringData** keys) {
+  // The NewPackedArray opcode's helper needs array values passed to it
+  // via the stack.  We use spillStack() to flush the eval stack and
+  // obtain a pointer to the topmost item; if over-flushing becomes
+  // a problem then we should refactor the NewPackedArray opcode to
+  // take its values directly as SSA operands.
+  SSATmp* sp = spillStack();
+  for (int i = 0; i < numArgs; i++) popC();
+  NewStructData extra;
+  extra.numKeys = numArgs;
+  extra.keys = new (m_unit.arena()) StringData*[numArgs];
+  memcpy(extra.keys, keys, numArgs * sizeof(*keys));
+  push(gen(NewStructArray, extra, sp));
+}
+
 void HhbcTranslator::emitArrayAdd() {
   auto catchBlock = makeCatch();
   Type type1 = topC(0)->type();

@@ -107,6 +107,7 @@ namespace bc {
 #define IMM_TY_AA     SArray
 #define IMM_TY_BA     borrowed_ptr<php::Block>
 #define IMM_TY_OA     uint8_t
+#define IMM_TY_VSA    std::vector<SString>
 
 #define IMM_NAME_MA(n)     mvec
 #define IMM_NAME_BLA(n)    targets
@@ -121,6 +122,7 @@ namespace bc {
 #define IMM_NAME_AA(n)     arr##n
 #define IMM_NAME_BA(n)     target
 #define IMM_NAME_OA(n)     subop
+#define IMM_NAME_VSA(n)    keys
 
 #define IMM_EXTRA_MA
 #define IMM_EXTRA_BLA
@@ -135,6 +137,7 @@ namespace bc {
 #define IMM_EXTRA_AA
 #define IMM_EXTRA_BA       typedef std::true_type has_target_flag;
 #define IMM_EXTRA_OA
+#define IMM_EXTRA_VSA
 
 #define IMM_MEM(which, n)          IMM_TY_##which IMM_NAME_##which(n)
 #define IMM_MEM_NA
@@ -209,6 +212,12 @@ namespace bc {
                     Flavor popFlavor(uint32_t) const { not_reached(); }
 
 #define POP_CMANY   uint32_t numPop() const { return arg1; }  \
+                    Flavor popFlavor(uint32_t i) const {      \
+                      assert(i < numPop());                   \
+                      return Flavor::C;                       \
+                    }
+
+#define POP_SMANY   uint32_t numPop() const { return keys.size(); }  \
                     Flavor popFlavor(uint32_t i) const {      \
                       assert(i < numPop());                   \
                       return Flavor::C;                       \
@@ -299,6 +308,7 @@ OPCODES
 #undef POP_R_MMANY
 #undef POP_V_MMANY
 #undef POP_CMANY
+#undef POP_SMANY
 #undef POP_FMANY
 #undef POP_CVMANY
 #undef POP_CVUMANY
@@ -316,6 +326,7 @@ OPCODES
 #undef IMM_TY_AA
 #undef IMM_TY_BA
 #undef IMM_TY_OA
+#undef IMM_TY_VSA
 
 // These are deliberately not undefined, so they can be used in other
 // places.

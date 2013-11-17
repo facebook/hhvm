@@ -73,6 +73,11 @@ public:
     int32_t hash() const {
       return data.hash();
     }
+    void setStaticKey(StringData* k, strhash_t h) {
+      assert(k->isStatic());
+      key = k;
+      data.hash() = h | STRHASH_MSB;
+    }
     void setStrKey(StringData* k, strhash_t h) {
       key = k;
       data.hash() = h | STRHASH_MSB;
@@ -112,6 +117,13 @@ public:
    * Pre: size > 0
    */
   static HphpArray* MakePacked(uint32_t size, const TypedValue* values);
+
+  /*
+   * Like MakePacked, but given static strings, make a struct-like array.
+   * Also requires size > 0.
+   */
+  static HphpArray* MakeStruct(uint32_t size, StringData** keys,
+                               const TypedValue* values);
 
   /*
    * Return a pointer to the singleton static empty array.  This is
@@ -303,6 +315,7 @@ public:
   static const uint32_t SmallHashSize = 1 << MinLgTableSize;
   static const uint32_t SmallMask = SmallHashSize - 1;
   static const uint32_t SmallSize = SmallHashSize - SmallHashSize / LoadScale;
+  static const uint32_t MaxMakeSize = 4 * SmallSize;
 
   uint32_t iterLimit() const { return m_used; }
 

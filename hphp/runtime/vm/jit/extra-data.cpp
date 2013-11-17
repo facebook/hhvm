@@ -25,6 +25,18 @@ std::string LocalData::show() const {
                                 valSrc ? valSrc->toString() : "null");
 }
 
+std::string NewStructData::show() const {
+  std::ostringstream os;
+  auto delim = "";
+  for (uint32_t i = 0; i < numKeys; i++) {
+    os << delim << "\"" <<
+       Util::escapeStringForCPP(keys[i]->data(), keys[i]->size()) <<
+       "\"";
+    delim = ",";
+  }
+  return os.str();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {

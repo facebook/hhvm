@@ -232,6 +232,57 @@ HphpArray* HphpArray::MakePacked(uint32_t size, const TypedValue* values) {
   return ad;
 }
 
+HphpArray* HphpArray::MakeStruct(uint32_t size, StringData** keys,
+                                 const TypedValue* values) {
+  assert(size > 0);
+
+  auto const cmret = computeCapAndMask(size);
+  auto const cap   = cmret.first;
+  auto const mask  = cmret.second;
+  auto const ad    = smartAllocArray(cap, mask);
+
+  auto const shiftedSize = uint64_t{size} << 32;
+  ad->m_kindModeAndSize  = shiftedSize |
+                            static_cast<uint32_t>(AllocationMode::smart) << 8 |
+                            kMixedKind;
+  ad->m_posAndCount      = uint64_t{1} << 32;
+  ad->m_strongIterators  = nullptr;
+  ad->m_capAndUsed       = shiftedSize | cap;
+  ad->m_tableMask        = mask;
+  ad->m_nextKI           = 0;
+
+  auto const data = reinterpret_cast<Elm*>(ad + 1);
+  auto const hash = reinterpret_cast<int32_t*>(data + cap);
+  ad->initHash(hash, mask + 1);
+
+  // Append values by moving -- Caller assumes we update refcount.
+  // Values are in reverse order since they come from the stack, which
+  // grows down.
+  for (uint32_t i = 0; i < size; i++) {
+    assert(keys[i]->isStatic());
+    auto k = keys[i];
+    auto h = k->hash();
+    data[i].setStaticKey(k, h);
+    const auto& tv = values[size - i - 1];
+    data[i].data.m_data = tv.m_data;
+    data[i].data.m_type = tv.m_type;
+    auto ei = ad->findForNewInsert(h);
+    *ei = i;
+  }
+  ad->m_hLoad = size;
+
+  assert(ad->m_kind == kMixedKind);
+  assert(ad->m_allocMode == AllocationMode::smart);
+  assert(ad->m_size == size);
+  assert(ad->m_pos == 0);
+  assert(ad->m_count == 1);
+  assert(ad->m_cap == cap);
+  assert(ad->m_used == size);
+  assert(ad->m_nextKI == 0);
+  assert(ad->checkInvariants());
+  return ad;
+}
+
 // for internal use by nonSmartCopy() and copyPacked()
 ALWAYS_INLINE
 HphpArray* HphpArray::CopyPacked(const HphpArray& other, AllocationMode mode) {

@@ -629,8 +629,9 @@ Array f_hphp_get_method_info(CVarRef cls, CVarRef name) {
 }
 
 Array f_hphp_get_closure_info(CVarRef closure) {
-  Array mi = f_hphp_get_method_info(closure.toObject()->o_getClassName(),
-                                    s___invoke);
+  auto const asObj = closure.toObject();
+
+  Array mi = f_hphp_get_method_info(asObj->o_getClassName(), s___invoke);
   mi.set(s_name, s_closure_in_braces);
   mi.set(s_closureobj, closure);
   mi.set(s_closure, empty_string);
@@ -638,6 +639,17 @@ Array f_hphp_get_closure_info(CVarRef closure) {
   mi.remove(s_accessible);
   mi.remove(s_modifiers);
   mi.remove(s_class);
+
+  // grab the use variables and their values
+  auto const cls = get_cls(asObj);
+  Array static_vars = Array::Create();
+  for (Slot i = 0; i < cls->numDeclProperties(); ++i) {
+    auto const& prop = cls->declProperties()[i];
+    auto val = asObj.o_get(StrNR(prop.m_name), true /* error */,
+                           cls->nameRef());
+    static_vars.set(VarNR(prop.m_name), val);
+  }
+  mi.set(s_static_variables, static_vars);
 
   Array &params = mi.lvalAt(s_params).asArrRef();
   for (int i = 0; i < params.size(); i++) {

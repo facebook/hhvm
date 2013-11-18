@@ -90,7 +90,7 @@ class ObjectData {
   }
 
  protected:
-  explicit ObjectData(Class* cls, int16_t flags)
+  explicit ObjectData(Class* cls, uint16_t flags)
     : m_cls(cls)
     , o_attribute(flags)
     , m_count(0)
@@ -457,7 +457,7 @@ private:
 
 private:
   Class* m_cls;
-  mutable int16_t o_attribute;
+  mutable uint16_t o_attribute;
 
   // 16 bits of memory that can be reused by subclasses
 protected:
@@ -525,7 +525,7 @@ inline ObjectData* instanceFromTv(TypedValue* tv) {
   return tv->m_data.pobj;
 }
 
-template<int16_t Flags>
+template<uint16_t Flags>
 struct ExtObjectDataFlags : ObjectData {
   explicit ExtObjectDataFlags(HPHP::Class* cb)
     : ObjectData(cb, Flags | ObjectData::IsCppBuiltin)

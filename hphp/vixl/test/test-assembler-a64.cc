@@ -5024,7 +5024,7 @@ TEST(Assembler, fcvt_sd) {
     {2.0, 2.0f},
     {FLT_MAX, FLT_MAX},
     //  - The smallest normalized float.
-    {pow(2, -126), pow(2, -126)},
+    {pow(2, -126), static_cast<float>(pow(2, -126))},
     //  - Normal floats that need (ties-to-even) rounding.
     //    For normalized numbers:
     //         bit 29 (0x0000000020000000) is the lowest-order bit which will

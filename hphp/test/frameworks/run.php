@@ -963,7 +963,7 @@ class CodeIgniter extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/CodeIgniter",
       "git_path" => "https://github.com/EllisLab/CodeIgniter.git",
-      "git_commit" => "57ba100129c2807153d88dc4e1d423f6e6c8a9a6",
+      "git_commit" => "b6fbcbefc8e6e883773f8f5d447413c367da9aaa",
       "test_file_search_roots" => Set {
         __DIR__."/frameworks/CodeIgniter/tests/codeigniter/core",
         __DIR__."/frameworks/CodeIgniter/tests/codeigniter/helpers",

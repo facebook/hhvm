@@ -236,8 +236,7 @@ void MemoryManager::resetAllocator() {
   m_sweep.next = m_sweep.prev = &m_sweep;
 
   // zero out freelists
-  for (auto& i : m_sizeUntrackedFree) i.head = nullptr;
-  for (auto& i : m_sizeTrackedFree)   i.head = nullptr;
+  for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
 }
 
@@ -296,18 +295,9 @@ inline void* MemoryManager::smartMalloc(size_t nbytes) {
     return smartMallocBig(nbytes);
   }
 
-  nbytes = smartSizeClass(nbytes);
-  m_stats.usage += nbytes;
-
-  auto const idx = (nbytes - 1) >> kLgSizeQuantum;
-  assert(idx < kNumSizes && idx >= 0);
-  void* vp = m_sizeTrackedFree[idx].maybePop();
-  if (UNLIKELY(vp == nullptr)) {
-    return smartMallocSlab(nbytes);
-  }
-  FTRACE(1, "smartMalloc: {} -> {}\n", nbytes, vp);
-
-  return vp;
+  auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes));
+  ptr->padbytes = nbytes;
+  return ptr + 1;
 }
 
 inline void MemoryManager::smartFree(void* ptr) {
@@ -315,13 +305,7 @@ inline void MemoryManager::smartFree(void* ptr) {
   auto const n = static_cast<SweepNode*>(ptr) - 1;
   auto const padbytes = n->padbytes;
   if (LIKELY(padbytes <= kMaxSmartSize)) {
-    assert(memset(ptr, kSmartFreeFill, padbytes - sizeof(SmallNode)));
-    auto const idx = (padbytes - 1) >> kLgSizeQuantum;
-    assert(idx < kNumSizes && idx >= 0);
-    FTRACE(1, "smartFree: {}\n", ptr);
-    m_sizeTrackedFree[idx].push(ptr);
-    m_stats.usage -= padbytes;
-    return;
+    return smartFreeSize(static_cast<SmallNode*>(ptr) - 1, n->padbytes);
   }
   smartFreeBig(n);
 }

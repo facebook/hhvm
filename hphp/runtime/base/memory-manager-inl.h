@@ -180,7 +180,7 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
 
   unsigned i = (bytes - 1) >> kLgSizeQuantum;
   assert(i < kNumSizes);
-  void* p = m_sizeUntrackedFree[i].maybePop();
+  void* p = m_freelists[i].maybePop();
   if (UNLIKELY(p == nullptr)) {
     p = slabAlloc(debugAddExtra(MemoryManager::smartSizeClass(bytes)));
   }
@@ -197,7 +197,7 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
 
   unsigned i = (bytes - 1) >> kLgSizeQuantum;
   assert(i < kNumSizes);
-  m_sizeUntrackedFree[i].push(debugPreFree(ptr, bytes, bytes));
+  m_freelists[i].push(debugPreFree(ptr, bytes, bytes));
   m_stats.usage -= bytes;
 
   FTRACE(1, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);

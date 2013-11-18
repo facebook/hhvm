@@ -353,8 +353,7 @@ private:
 
   char* m_front;
   char* m_limit;
-  std::array<FreeList,kNumSizes> m_sizeTrackedFree;
-  std::array<FreeList,kNumSizes> m_sizeUntrackedFree;
+  std::array<FreeList,kNumSizes> m_freelists;
   SweepNode m_sweep;   // oversize smart_malloc'd blocks
   SweepNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;

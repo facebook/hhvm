@@ -385,7 +385,7 @@ public:
 };
 
 extern void throw_infinite_recursion_exception();
-extern void throw_call_non_object() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+extern void throw_call_non_object() ATTRIBUTE_NORETURN;
 
 inline void* stack_top_ptr() {
   DECLARE_STACK_POINTER(sp);
@@ -404,7 +404,7 @@ inline void check_recursion(ThreadInfo *&info) {
 }
 
 // implemented in runtime/base/builtin-functions.cpp
-extern ssize_t check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
+extern ssize_t check_request_surprise(ThreadInfo *info);
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p, const char *symbol);

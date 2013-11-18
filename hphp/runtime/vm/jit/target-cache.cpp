@@ -149,7 +149,7 @@ const Class* ClassCache::lookup(RDS::Handle handle, StringData* name) {
 // MethodCache
 
 
-ATTRIBUTE_COLD NEVER_INLINE __attribute__((noreturn))
+NEVER_INLINE __attribute__((noreturn))
 static void methodCacheFatal(ActRec* ar,
                              Class* cls,
                              StringData* name,

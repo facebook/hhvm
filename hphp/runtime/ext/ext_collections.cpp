@@ -72,7 +72,7 @@ inline static Object toStableMapDefaultImpl(ObjectData* obj) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void throwIntOOB(int64_t key, bool isVector = false) ATTRIBUTE_COLD
+static void throwIntOOB(int64_t key, bool isVector = false)
   ATTRIBUTE_NORETURN;
 
 void throwIntOOB(int64_t key, bool isVector /* = false */) {
@@ -91,7 +91,7 @@ void throwOOB(int64_t key) {
   throwIntOOB(key, true);
 }
 
-static void throwStrOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+static void throwStrOOB(StringData* key) ATTRIBUTE_NORETURN;
 
 void throwStrOOB(StringData* key) {
   const size_t maxDisplaySize = 100;

@@ -394,7 +394,7 @@ private:
   ssize_t findForRemove(int64_t ki, bool updateNext);
   ssize_t findForRemove(const StringData* k, strhash_t prehash);
 
-  ssize_t iter_advance_helper(ssize_t prev) const ATTRIBUTE_COLD;
+  ssize_t iter_advance_helper(ssize_t prev) const;
 
   /**
    * findForNewInsert() CANNOT be used unless the caller can guarantee that
@@ -447,15 +447,15 @@ private:
    * elements by a factor of 2. grow() rebuilds the hash table, but it
    * does not compact the elements.
    */
-  static HphpArray* Grow(HphpArray* old) ATTRIBUTE_COLD;
-  static HphpArray* GrowPacked(HphpArray* old) ATTRIBUTE_COLD;
+  static HphpArray* Grow(HphpArray* old);
+  static HphpArray* GrowPacked(HphpArray* old);
 
   /**
    * compact() does not change the hash table size or the number of slots
    * for elements. compact() rebuilds the hash table and compacts the
    * elements into the slots with lower addresses.
    */
-  void compact(bool renumber) ATTRIBUTE_COLD;
+  void compact(bool renumber);
 
   /*
    * resize() and resizeIfNeeded() will grow or compact the array as

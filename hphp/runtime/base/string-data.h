@@ -184,7 +184,7 @@ struct StringData {
    * StringData objects allocated with MakeStatic should be freed
    * using this function.
    */
-  void destructStatic() ATTRIBUTE_COLD;
+  void destructStatic();
 
   /*
    * Reference-counting related.

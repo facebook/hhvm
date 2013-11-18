@@ -335,7 +335,7 @@ public:
   EXCEPTION_COMMON_IMPL(RequestMemoryExceededException);
 };
 
-void throw_null_pointer_exception() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+void throw_null_pointer_exception() ATTRIBUTE_NORETURN;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

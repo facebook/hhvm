@@ -178,7 +178,7 @@ void ThreadLocal<T>::create() {
 
 template<typename T>
 struct ThreadLocalNoCheck {
-  T *getCheck() const ATTRIBUTE_COLD NEVER_INLINE;
+  T *getCheck() const NEVER_INLINE;
   T* getNoCheck() const {
     assert(m_node.m_p);
     return m_node.m_p;
@@ -237,7 +237,7 @@ class ThreadLocalSingleton {
 public:
   ThreadLocalSingleton() { s_inited = true; }
 
-  static T *getCheck() ATTRIBUTE_COLD NEVER_INLINE;
+  static T *getCheck() NEVER_INLINE;
 
   static T* getNoCheck() {
     assert(s_inited);
@@ -418,7 +418,7 @@ public:
     ThreadLocalCreateKey(&m_key, ThreadLocalOnThreadExit<T>);
   }
 
-  T *getCheck() const ATTRIBUTE_COLD NEVER_INLINE;
+  T *getCheck() const NEVER_INLINE;
 
   T* getNoCheck() const {
     T *obj = (T*)pthread_getspecific(m_key);
@@ -473,7 +473,7 @@ class ThreadLocalSingleton {
 public:
   ThreadLocalSingleton() { getKey(); }
 
-  static T *getCheck() ATTRIBUTE_COLD NEVER_INLINE;
+  static T *getCheck() NEVER_INLINE;
   static T* getNoCheck() {
     assert(s_inited);
     T *obj = (T*)pthread_getspecific(s_key);

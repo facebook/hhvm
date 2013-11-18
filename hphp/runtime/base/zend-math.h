@@ -172,7 +172,7 @@ void math_mt_srand(uint32_t seed);
 int64_t math_mt_rand(int64_t min = 0, int64_t max = RAND_MAX);
 double math_combined_lcg();
 int64_t math_generate_seed();
-void zend_get_rand_data() ATTRIBUTE_COLD;
+void zend_get_rand_data();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

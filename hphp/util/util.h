@@ -52,11 +52,6 @@ namespace HPHP { namespace Util {
 #  define ATTRIBUTE_PRINTF(a1,a2)
 # endif
 #endif
-#if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __ICC >= 1200 || __GNUC__ > 4
-# define ATTRIBUTE_COLD    __attribute__((__cold__))
-#else
-# define ATTRIBUTE_COLD
-#endif
 
 #define ALWAYS_INLINE      inline __attribute__((__always_inline__))
 #define NEVER_INLINE       __attribute__((__noinline__))

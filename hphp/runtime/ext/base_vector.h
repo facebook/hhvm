@@ -244,7 +244,7 @@ protected:
    */
   void cow();
 
-  static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
   static void Unserialize(const char* vectorType, ObjectData* obj,
                           VariableUnserializer* uns, int64_t sz, char type);

@@ -60,7 +60,7 @@ const StringData *String::ConvertInteger(int64_t n) {
   return sd;
 }
 
-static int precompute_integers() ATTRIBUTE_COLD;
+static int precompute_integers();
 static int precompute_integers() {
   String::converted_integers_raw =
     (StringData const **)calloc(NUM_CONVERTED_INTEGERS, sizeof(StringData*));

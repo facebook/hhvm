@@ -78,7 +78,7 @@ std::aligned_storage<
 >::type s_theEmptyArray;
 
 struct HphpArray::EmptyArrayInitializer {
-  EmptyArrayInitializer() ATTRIBUTE_COLD {
+  EmptyArrayInitializer() {
     void* vpEmpty = &s_theEmptyArray;
 
     auto const ad = static_cast<HphpArray*>(vpEmpty);
@@ -1963,7 +1963,7 @@ HphpArray* HphpArray::CopyReserve(const HphpArray* src,
   return ad;
 }
 
-ATTRIBUTE_COLD NEVER_INLINE
+NEVER_INLINE
 ArrayData* HphpArray::ArrayPlusEqGeneric(ArrayData* ad,
                                          HphpArray* ret,
                                          const ArrayData* elems,
@@ -2033,7 +2033,7 @@ ArrayData* HphpArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
   return ret;
 }
 
-ATTRIBUTE_COLD NEVER_INLINE
+NEVER_INLINE
 ArrayData* HphpArray::ArrayMergeGeneric(HphpArray* ret,
                                         const ArrayData* elems) {
   for (ArrayIter it(elems); !it.end(); it.next()) {

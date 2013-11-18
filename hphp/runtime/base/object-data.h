@@ -314,7 +314,7 @@ class ObjectData {
   Variant invokeToDebugDisplay();
   Variant invokeWakeup();
 
-  static int GetMaxId() ATTRIBUTE_COLD;
+  static int GetMaxId();
 
   /**
    * Used by the ext_zend_compat layer.

@@ -31,7 +31,7 @@ private:
   Array m_notes;
 };
 
-void get_server_note() ATTRIBUTE_COLD;
+void get_server_note();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

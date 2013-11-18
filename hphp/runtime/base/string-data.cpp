@@ -38,12 +38,12 @@ namespace HPHP {
 
 namespace {
 
-NEVER_INLINE void throw_string_too_large(uint32_t len) ATTRIBUTE_COLD;
+NEVER_INLINE void throw_string_too_large(uint32_t len);
 NEVER_INLINE void throw_string_too_large(uint32_t len) {
   throw InvalidArgumentException("len > 2^31-2", len);
 }
 
-NEVER_INLINE void throw_string_too_large2(size_t len) ATTRIBUTE_COLD;
+NEVER_INLINE void throw_string_too_large2(size_t len);
 NEVER_INLINE void throw_string_too_large2(size_t len) {
   throw FatalErrorException(0, "String length exceeded 2^31-2: %zu", len);
 }

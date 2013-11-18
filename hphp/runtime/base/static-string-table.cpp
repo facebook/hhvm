@@ -117,7 +117,7 @@ void create_string_data_map() {
                       config);
 }
 
-StringData** precompute_chars() ATTRIBUTE_COLD;
+StringData** precompute_chars();
 StringData** precompute_chars() {
   StringData** raw = new StringData*[256];
   for (int i = 0; i < 256; i++) {

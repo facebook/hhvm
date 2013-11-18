@@ -175,11 +175,11 @@ inline Variant throw_missing_file(const char *file) {
 }
 void throw_instance_method_fatal(const char *name);
 
-void throw_iterator_not_valid() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-void throw_collection_modified() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-void throw_collection_property_exception() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-void throw_collection_compare_exception() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-void throw_param_is_not_container() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+void throw_iterator_not_valid() ATTRIBUTE_NORETURN;
+void throw_collection_modified() ATTRIBUTE_NORETURN;
+void throw_collection_property_exception() ATTRIBUTE_NORETURN;
+void throw_collection_compare_exception() ATTRIBUTE_NORETURN;
+void throw_param_is_not_container() ATTRIBUTE_NORETURN;
 void check_collection_compare(ObjectData* obj);
 void check_collection_compare(ObjectData* obj1, ObjectData* obj2);
 void check_collection_cast_to_array();
@@ -265,12 +265,12 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop);
 /**
  * Exceptions injected code throws
  */
-void throw_infinite_recursion_exception() ATTRIBUTE_COLD;
-Exception* generate_request_timeout_exception() ATTRIBUTE_COLD;
-Exception* generate_memory_exceeded_exception() ATTRIBUTE_COLD;
-void throw_call_non_object() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+void throw_infinite_recursion_exception();
+Exception* generate_request_timeout_exception();
+Exception* generate_memory_exceeded_exception();
+void throw_call_non_object() ATTRIBUTE_NORETURN;
 void throw_call_non_object(const char *methodName)
-  ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  ATTRIBUTE_NORETURN;
 
 // unserializable default value arguments such as TimeStamp::Current()
 // are serialized as "\x01"

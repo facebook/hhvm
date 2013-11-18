@@ -64,7 +64,7 @@ class ExecutionContext;
 
 void pcre_init();
 void pcre_reinit();
-void hphp_process_init() ATTRIBUTE_COLD;
+void hphp_process_init();
 void hphp_session_init();
 
 ExecutionContext* hphp_context_init();
@@ -80,7 +80,7 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
 
 void hphp_thread_exit();
 void hphp_session_exit();
-void hphp_process_exit() ATTRIBUTE_COLD;
+void hphp_process_exit();
 std::string get_systemlib(std::string* hhas = nullptr,
                           const std::string &section = "systemlib",
                           const std::string &filename = "");

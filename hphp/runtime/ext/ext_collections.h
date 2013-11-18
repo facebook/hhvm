@@ -100,7 +100,7 @@ class c_Vector : public BaseVector {
     return ti_slice(vec, offset, len);
   }
 
-  static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 
   void set(int64_t key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
@@ -316,8 +316,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
 
-  static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-  static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
+  static void throwOOB(StringData* key) ATTRIBUTE_NORETURN;
 
   void init(CVarRef t);
 
@@ -543,7 +543,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
   Variant iter_key(ssize_t pos) const;
   TypedValue* iter_value(ssize_t pos) const;
 
-  static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
   friend ObjectData* collectionDeepCopyMap(c_Map* mp);
   friend class c_MapIterator;
@@ -646,8 +646,8 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
 
-  static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-  static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
+  static void throwOOB(StringData* key) ATTRIBUTE_NORETURN;
 
   void init(CVarRef t);
 
@@ -833,7 +833,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
   Variant iter_key(ssize_t pos) const;
   TypedValue* iter_value(ssize_t pos) const;
 
-  static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
   friend ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
   friend class c_StableMapIterator;
@@ -1006,9 +1006,9 @@ public:
 
   // Static methods
 
-  static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-  static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-  static void throwNoIndexAccess() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
+  static void throwOOB(StringData* key) ATTRIBUTE_NORETURN;
+  static void throwNoIndexAccess() ATTRIBUTE_NORETURN;
 
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
@@ -1291,7 +1291,7 @@ private:
   const TypedValue* iter_value(ssize_t pos) const;
   Variant iter_key(ssize_t pos) const { return uninit_null(); }
 
-  static void throwBadValueType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwBadValueType() ATTRIBUTE_NORETURN;
 
  private:
   // Internal state.
@@ -1441,7 +1441,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   bool t___isset(Variant name);
   Variant t___unset(Variant name);
 
-  static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 
   /**
    * Most methods that operate on Pairs can safely assume that all Pairs have
@@ -1501,7 +1501,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
   static uint dataOffset() { return offsetof(c_Pair, elm0); }
 
  private:
-  static void throwBadKeyType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
   uint m_size;
 
@@ -1620,7 +1620,7 @@ inline bool isOptimizableCollectionClass(const Class* klass) {
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
 
-void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 
 ///////////////////////////////////////////////////////////////////////////////
 

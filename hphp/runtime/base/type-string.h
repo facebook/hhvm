@@ -70,7 +70,7 @@ public:
   static bool HasConverted(int n) {
     return HasConverted((int64_t)n);
   }
-  static void PreConvertInteger(int64_t n) ATTRIBUTE_COLD;
+  static void PreConvertInteger(int64_t n);
 
   // create a string from a character
   static String FromChar(char ch) {
@@ -80,7 +80,7 @@ public:
     return makeStaticString(str);
   }
 
-  static const StringData *ConvertInteger(int64_t n) ATTRIBUTE_COLD;
+  static const StringData *ConvertInteger(int64_t n);
   static const StringData *GetIntegerStringData(int64_t n) {
     if (HasConverted(n)) {
       const StringData *sd = *(converted_integers + n);

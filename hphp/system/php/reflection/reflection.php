@@ -1884,11 +1884,7 @@ class ReflectionProperty implements Reflector {
    */
   public function __construct($cls, $name) {
     if ($cls && $name) {
-      if (!is_object($cls)) {
-        $cls = new ReflectionClass($cls);
-      } else {
-        $cls = new ReflectionClass(get_class($cls));
-      }
+      $cls = new ReflectionClass($cls);
       $prop = $cls->getProperty($name);
       if ($prop) {
         $this->info  = $prop->info;

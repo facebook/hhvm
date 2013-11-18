@@ -209,6 +209,7 @@ void IniSetting::Unbind(const char *name) {
 }
 
 const StaticString
+  s_allow_url_fopen("allow_url_fopen"),
   s_error_reporting("error_reporting"),
   s_memory_limit("memory_limit"),
   s_max_execution_time("max_execution_time"),
@@ -298,6 +299,10 @@ bool IniSetting::Get(const String& name, String &value) {
   }
   if (name == s_include_path) {
     value = g_context->getIncludePath();
+    return true;
+  }
+  if (name == s_allow_url_fopen) {
+    value = s_1;
     return true;
   }
 

@@ -147,7 +147,6 @@ void FastCGIConnection::onSessionError() {
 
 void FastCGIConnection::onSessionClose() {
   shutdownTransport();
-  m_readBuf.clear();
 }
 
 void FastCGIConnection::setMaxConns(int max_conns) {

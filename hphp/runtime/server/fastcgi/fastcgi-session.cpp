@@ -247,8 +247,6 @@ const FastCGISession::Version FastCGISession::k_version = 1;
 const size_t FastCGISession::k_writeGrowth = 256;
 
 size_t FastCGISession::onIngress(const IOBuf* chain) {
-  DCHECK(m_keepConn);
-
   size_t available = chain ? chain->computeChainDataLength() : 0;
   size_t avail = available;
 
@@ -267,9 +265,6 @@ size_t FastCGISession::onIngress(const IOBuf* chain) {
     if (m_phase == Phase::AT_RECORD_BODY_END) {
       if (parseRecordEnd(cursor, avail)) {
         m_phase = Phase::AT_RECORD_BEGIN;
-        if (!m_keepConn) {
-          handleClose();
-        }
       } else break;
     }
   }
@@ -483,6 +478,9 @@ void FastCGISession::handleAbortRequest() {
   }
   endTransaction(m_requestId);
   writeEndRequest(m_requestId, 1, ProtoStatus::REQUEST_COMPLETE);
+  if (!m_keepConn) {
+    handleClose();
+  }
 }
 
 void FastCGISession::handleStdIn(std::unique_ptr<IOBuf> chain) {
@@ -526,6 +524,9 @@ void FastCGISession::handleStdErr(RequestId request_id,
 void FastCGISession::handleComplete(RequestId request_id) {
   writeEndRequest(request_id, 0, ProtoStatus::REQUEST_COMPLETE);
   endTransaction(request_id);
+  if (!m_keepConn) {
+    handleClose();
+  }
 }
 
 const std::string FastCGISession::k_getValueMaxConnKey =

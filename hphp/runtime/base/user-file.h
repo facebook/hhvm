@@ -18,22 +18,25 @@
 #define HPHP_USER_FILE_H
 
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/user-fs-node.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class UserFile : public File {
+class UserFile : public File, public UserFSNode {
 public:
   DECLARE_RESOURCE_ALLOCATION(UserFile);
 
-  explicit UserFile(Class *cls, int options = 0,
-                    CVarRef context = uninit_null());
+  explicit UserFile(Class *cls, CVarRef context = uninit_null());
   virtual ~UserFile();
 
   // overriding ResourceData
   const String& o_getClassNameHook() const { return classnameof(); }
 
-  virtual bool open(const String& filename, const String& mode);
+  virtual bool open(const String& filename, const String& mode) {
+    return openImpl(filename, mode, 0);
+  }
+  bool openImpl(const String& filename, const String& mode, int options);
   virtual bool close();
   virtual int64_t readImpl(char *buffer, int64_t length);
   virtual int getc() {
@@ -65,19 +68,6 @@ private:
   int statImpl(const String& path, struct stat* stat_sb, int flags = 0);
 
 protected:
-  Class *m_cls;
-  int m_options;
-  Object m_obj;
-
-  Variant invoke(const Func *func, const String& name, CArrRef args,
-                 bool &success);
-  Variant invoke(const Func *func, const String& name, CArrRef args) {
-    bool success;
-    return invoke(func, name, args, success);
-  }
-
-  const Func* lookupMethod(const StringData* name);
-
   const Func* m_StreamOpen;
   const Func* m_StreamClose;
   const Func* m_StreamRead;
@@ -89,8 +79,6 @@ protected:
   const Func* m_StreamTruncate;
   const Func* m_StreamLock;
   const Func* m_UrlStat;
-
-  const Func* m_Call;
 
   bool m_opened;
 };

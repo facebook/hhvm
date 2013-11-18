@@ -1173,11 +1173,16 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
       errs++;
       goto out;
     }
-    HPHP::String d;
-    while (d = dir->read()) {
-      if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d.data())) < 0) {
+    HPHP::Variant d;
+    while (true) {
+      d = dir->read();
+      if (!d.toBoolean()) {
+        break;
+      }
+      HPHP::String s = d.toString();
+      if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, s.data())) < 0) {
         file_oomem(ms,
-        strlen(fn) + d.size() + 2);
+        strlen(fn) + s.size() + 2);
         errs++;
         dir->close();
         goto out;

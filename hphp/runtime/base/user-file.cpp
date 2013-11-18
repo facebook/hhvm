@@ -16,7 +16,8 @@
 
 #include "hphp/runtime/base/user-file.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
@@ -34,40 +35,24 @@ StaticString s_stream_flush("stream_flush");
 StaticString s_stream_truncate("stream_truncate");
 StaticString s_stream_lock("stream_lock");
 StaticString s_url_stat("url_stat");
-StaticString s_call("__call");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-UserFile::UserFile(Class *cls, int options /*= 0 */,
-                   CVarRef context /*= null */) :
-                   m_cls(cls), m_options(options), m_opened(false) {
-  Transl::VMRegAnchor _;
-  const Func *ctor;
-  if (MethodLookup::LookupResult::MethodFoundWithThis !=
-      g_vmContext->lookupCtorMethod(ctor, cls)) {
-    throw InvalidArgumentException(0, "Unable to call %s's constructor",
-                                   cls->name()->data());
-  }
-
-  m_obj = ObjectData::newInstance(cls);
-  m_obj.o_set("context", context);
-  Variant ret;
-  g_vmContext->invokeFuncFew(ret.asTypedValue(), ctor, m_obj.get());
-
-  m_StreamOpen  = lookupMethod(s_stream_open.get());
-  m_StreamClose = lookupMethod(s_stream_close.get());
-  m_StreamRead  = lookupMethod(s_stream_read.get());
-  m_StreamWrite = lookupMethod(s_stream_write.get());
-  m_StreamSeek  = lookupMethod(s_stream_seek.get());
-  m_StreamTell  = lookupMethod(s_stream_tell.get());
-  m_StreamEof   = lookupMethod(s_stream_eof.get());
-  m_StreamFlush = lookupMethod(s_stream_flush.get());
-  m_StreamTruncate = lookupMethod(s_stream_truncate.get());
-  m_StreamLock  = lookupMethod(s_stream_lock.get());
-  m_UrlStat     = lookupMethod(s_url_stat.get());
-
-  m_Call        = lookupMethod(s_call.get());
-  m_isLocal     = true;
+UserFile::UserFile(Class *cls, CVarRef context /*= null */) :
+                   UserFSNode(cls), m_opened(false) {
+  m_cls = cls;
+  m_StreamOpen  = lookupMethod(s_stream_open.get(), m_cls);
+  m_StreamClose = lookupMethod(s_stream_close.get(), m_cls);
+  m_StreamRead  = lookupMethod(s_stream_read.get(), m_cls);
+  m_StreamWrite = lookupMethod(s_stream_write.get(), m_cls);
+  m_StreamSeek  = lookupMethod(s_stream_seek.get(), m_cls);
+  m_StreamTell  = lookupMethod(s_stream_tell.get(), m_cls);
+  m_StreamEof   = lookupMethod(s_stream_eof.get(), m_cls);
+  m_StreamFlush = lookupMethod(s_stream_flush.get(), m_cls);
+  m_StreamTruncate = lookupMethod(s_stream_truncate.get(), m_cls);
+  m_StreamLock  = lookupMethod(s_stream_lock.get(), m_cls);
+  m_UrlStat     = lookupMethod(s_url_stat.get(), m_cls);
+  m_isLocal = true;
 }
 
 UserFile::~UserFile() {
@@ -80,87 +65,12 @@ void UserFile::sweep() {
   File::sweep();
 }
 
-const Func* UserFile::lookupMethod(const StringData* name) {
-  const Func *f = m_cls->lookupMethod(name);
-  if (!f) return nullptr;
-
-  if (f->attrs() & AttrStatic) {
-    throw InvalidArgumentException(0, "%s::%s() must not be declared static",
-                                   m_cls->name()->data(), name->data());
-  }
-  return f;
-}
+///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant UserFile::invoke(const Func *func, const String& name,
-                         CArrRef args, bool &success) {
-  Transl::VMRegAnchor _;
-
-  // Assume failure
-  success = false;
-
-  // Public method, no private ancestor, no need for further checks (common)
-  if (func &&
-      !(func->attrs() & (AttrPrivate|AttrProtected|AttrAbstract)) &&
-      !func->hasPrivateAncestor()) {
-    Variant ret;
-    g_vmContext->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
-    success = true;
-    return ret;
-  }
-
-  // No explicitly defined function, no __call() magic method
-  // Give up.
-  if (!func && !m_Call) {
-    return uninit_null();
-  }
-
-  HPHP::Transl::CallerFrame cf;
-  Class* ctx = arGetContextClass(cf());
-  switch(g_vmContext->lookupObjMethod(func, m_cls, name.get(), ctx)) {
-    case MethodLookup::LookupResult::MethodFoundWithThis:
-    {
-      Variant ret;
-      g_vmContext->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
-      success = true;
-      return ret;
-    }
-
-    case MethodLookup::LookupResult::MagicCallFound:
-    {
-      Variant ret;
-      g_vmContext->invokeFunc(ret.asTypedValue(), func,
-                              make_packed_array(name, args), m_obj.get());
-      success = true;
-      return ret;
-    }
-
-    case MethodLookup::LookupResult::MethodNotFound:
-      // There's a method somewhere in the heirarchy, but none
-      // which are accessible.
-      /* fallthrough */
-    case MethodLookup::LookupResult::MagicCallStaticFound:
-      // We're not calling staticly, so this result is unhelpful
-      // Also, it's never produced by lookupObjMethod, so it'll
-      // never happen, but we must handle all enums
-      return uninit_null();
-
-    case MethodLookup::LookupResult::MethodFoundNoThis:
-      // Should never happen (Attr::Static check in ctor)
-      assert(false);
-      raise_error("%s::%s() must not be declared static",
-                  m_cls->name()->data(), name.data());
-      return uninit_null();
-  }
-
-  NOT_REACHED();
-  return uninit_null();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-bool UserFile::open(const String& filename, const String& mode) {
+bool UserFile::openImpl(const String& filename, const String& mode,
+                        int options) {
   // bool stream_open($path, $mode, $options, &$opened_path)
   bool success = false;
   Variant opened_path;
@@ -170,10 +80,11 @@ bool UserFile::open(const String& filename, const String& mode) {
     PackedArrayInit(4)
       .append(filename)
       .append(mode)
-      .append(m_options)
+      .append(options)
       .appendRef(opened_path)
       .toArray(),
-    success
+    success,
+    m_cls
   );
   if (success && (ret.toBoolean() == true)) {
     m_opened = true;
@@ -191,7 +102,7 @@ bool UserFile::close() {
   flush();
 
   // void stream_close()
-  invoke(m_StreamClose, s_stream_close, Array::Create());
+  invoke(m_StreamClose, s_stream_close, Array::Create(), m_cls);
   return true;
 }
 
@@ -201,7 +112,7 @@ int64_t UserFile::readImpl(char *buffer, int64_t length) {
   // String stread_read($count)
   bool success = false;
   String str = invoke(m_StreamRead, s_stream_read,
-                      make_packed_array(length), success);
+                      make_packed_array(length), success, m_cls);
   if (!success) {
     raise_warning("%s::stream_read is not implemented",
                   m_cls->name()->data());
@@ -229,7 +140,8 @@ int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
       m_StreamWrite,
       s_stream_write,
       make_packed_array(String(buffer, length, CopyString)),
-      success
+      success,
+      m_cls
     ).toInt64();
     if (!success) {
       raise_warning("%s::stream_write is not implemented",
@@ -259,8 +171,10 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   assert(seekable());
   // bool stream_seek($offset, $whence)
   bool success = false;
-  bool sought  = invoke(m_StreamSeek, s_stream_seek,
-                        make_packed_array(offset, whence), success).toBoolean();
+  bool sought  = invoke(
+    m_StreamSeek, s_stream_seek, make_packed_array(offset, whence),
+    success, m_cls
+  ).toBoolean();
   if (!success) {
     always_assert("No seek method? But I found one earlier?");
   }
@@ -276,7 +190,8 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   }
 
   // int stream_tell()
-  Variant ret = invoke(m_StreamTell, s_stream_tell, Array::Create(), success);
+  Variant ret = invoke(m_StreamTell, s_stream_tell, Array::Create(), success,
+                       m_cls);
   if (!success) {
     raise_warning("%s::stream_tell is not implemented!", m_cls->name()->data());
     return false;
@@ -297,7 +212,8 @@ bool UserFile::eof() {
 
   // bool stream_eof()
   bool success = false;
-  Variant ret = invoke(m_StreamEof, s_stream_eof, Array::Create(), success);
+  Variant ret = invoke(m_StreamEof, s_stream_eof, Array::Create(), success,
+                       m_cls);
   if (!success) {
     return false;
   }
@@ -308,7 +224,7 @@ bool UserFile::flush() {
   // bool stream_flush()
   bool success = false;
   Variant ret = invoke(m_StreamFlush, s_stream_flush,
-                       Array::Create(), success);
+                       Array::Create(), success, m_cls);
   if (!success) {
     return false;
   }
@@ -319,7 +235,7 @@ bool UserFile::truncate(int64_t size) {
   // bool stream_truncate()
   bool success = false;
   Variant ret = invoke(m_StreamTruncate, s_stream_truncate,
-                       make_packed_array(size), success);
+                       make_packed_array(size), success, m_cls);
   if (!success) {
     return false;
   }
@@ -329,18 +245,18 @@ bool UserFile::truncate(int64_t size) {
 bool UserFile::lock(int operation, bool &wouldBlock) {
   int64_t op = 0;
   if (operation & LOCK_NB) {
-    op |= k_LOCK_NB;
+    op |= LOCK_NB;
   }
   switch (operation & ~LOCK_NB) {
-    case LOCK_SH: op |= k_LOCK_SH; break;
-    case LOCK_EX: op |= k_LOCK_EX; break;
-    case LOCK_UN: op |= k_LOCK_UN; break;
+    case LOCK_SH: op |= LOCK_SH; break;
+    case LOCK_EX: op |= LOCK_EX; break;
+    case LOCK_UN: op |= LOCK_UN; break;
   }
 
   // bool stream_lock(int $operation)
   bool success = false;
   Variant ret = invoke(m_StreamLock, s_stream_lock,
-                       make_packed_array(op), success);
+                       make_packed_array(op), success, m_cls);
   if (!success) {
     if (operation) {
       raise_warning("%s::stream_lock is not implemented!",
@@ -370,7 +286,7 @@ int UserFile::statImpl(const String& path, struct stat* stat_sb,
   // array url_stat ( string $path , int $flags )
   bool success = false;
   Variant ret = invoke(m_UrlStat, s_url_stat,
-                       make_packed_array(path, flags), success);
+                       make_packed_array(path, flags), success, m_cls);
   if (!ret.isArray()) {
     return -1;
   }
@@ -391,7 +307,7 @@ int UserFile::statImpl(const String& path, struct stat* stat_sb,
   return 0;
 }
 
-extern const int64_t k_STREAM_URL_STAT_LINK;
+extern const int64_t k_STREAM_URL_STAT_QUIET;
 int UserFile::access(const String& path, int mode) {
   struct stat buf;
   auto ret = statImpl(path, &buf, k_STREAM_URL_STAT_QUIET);

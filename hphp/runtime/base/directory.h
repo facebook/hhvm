@@ -28,7 +28,7 @@ namespace HPHP {
 class Directory : public SweepableResourceData {
 public:
   virtual void close() = 0;
-  virtual String read() = 0;
+  virtual Variant read() = 0;
   virtual void rewind() = 0;
   void sweep() FOLLY_OVERRIDE {
     close();
@@ -51,7 +51,7 @@ public:
   ~PlainDirectory();
 
   virtual void close();
-  virtual String read();
+  virtual Variant read();
   virtual void rewind();
   bool isValid() const;
 
@@ -66,7 +66,7 @@ public:
   explicit ArrayDirectory(CArrRef a) : m_it(a) {}
 
   virtual void close() {}
-  virtual String read();
+  virtual Variant read();
   virtual void rewind();
 
   void sweep() FOLLY_OVERRIDE {

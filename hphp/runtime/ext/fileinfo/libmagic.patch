@@ -137,12 +137,17 @@
  		}
 -		while (php_stream_readdir(dir, &d)) {
 -			if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d.d_name)) < 0) {
-+    HPHP::String d;
-+    while (d = dir->read()) {
-+      if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d.data())) < 0) {
++    HPHP::Variant d;
++    while (true) {
++      d = dir->read());
++      if (!d.toBoolean()) {
++        break;
++      }
++      HPHP::String s = d.toString();
++      if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, s.data())) < 0) {
  				file_oomem(ms,
 -				strlen(fn) + strlen(d.d_name) + 2);
-+        strlen(fn) + d.size() + 2);
++        strlen(fn) + s.size() + 2);
  				errs++;
 -				php_stream_closedir(dir);
 +        dir->close();

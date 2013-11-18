@@ -13,33 +13,37 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef HPHP_USER_STREAM_WRAPPER_H
-#define HPHP_USER_STREAM_WRAPPER_H
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/stream-wrapper.h"
-#include "hphp/runtime/base/user-file.h"
-#include "hphp/runtime/base/user-directory.h"
+#ifndef HPHP_USER_DIRECTORY_H
+#define HPHP_USER_DIRECTORY_H
+
+#include "hphp/runtime/base/directory.h"
+#include "hphp/runtime/base/user-fs-node.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-class UserStreamWrapper : public Stream::Wrapper {
- public:
-  UserStreamWrapper(const String& name, const String& clsname);
-  virtual File* open(const String& filename, const String& mode,
-                     int options, CVarRef context);
-  virtual int access(const String& path, int mode);
-  virtual int lstat(const String& path, struct stat* buf);
-  virtual int stat(const String& path, struct stat* buf);
-  virtual Directory* opendir(const String& path);
- private:
-  String m_name;
-  Class *m_cls;
+class UserDirectory : public Directory, public UserFSNode {
+public:
+  CLASSNAME_IS("UserDirectory")
+
+  explicit UserDirectory(Class* cls);
+  ~UserDirectory() {}
+  void sweep() FOLLY_OVERRIDE {
+    // Don't close like the parent, 'cause that's what zend does
+  }
+
+  bool open(const String& path);
+  virtual void close();
+  virtual Variant read();
+  virtual void rewind();
+
+private:
+  const Func* m_DirOpen;
+  const Func* m_DirClose;
+  const Func* m_DirRead;
+  const Func* m_DirRewind;
 };
 
-///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // HPHP_USER_STREAM_WRAPPER_H
+#endif // HPHP_USER_DIRECTORY_H

@@ -13,33 +13,37 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef HPHP_USER_STREAM_WRAPPER_H
-#define HPHP_USER_STREAM_WRAPPER_H
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/stream-wrapper.h"
-#include "hphp/runtime/base/user-file.h"
-#include "hphp/runtime/base/user-directory.h"
+#ifndef HPHP_USER_FS_NODE_H
+#define HPHP_USER_FS_NODE_H
+
+#include "hphp/runtime/base/directory.h"
+#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-class UserStreamWrapper : public Stream::Wrapper {
- public:
-  UserStreamWrapper(const String& name, const String& clsname);
-  virtual File* open(const String& filename, const String& mode,
-                     int options, CVarRef context);
-  virtual int access(const String& path, int mode);
-  virtual int lstat(const String& path, struct stat* buf);
-  virtual int stat(const String& path, struct stat* buf);
-  virtual Directory* opendir(const String& path);
- private:
-  String m_name;
-  Class *m_cls;
+class UserFSNode {
+public:
+  explicit UserFSNode(Class *cls, CVarRef context = uninit_null());
+
+protected:
+  Variant invoke(const Func *func, const String& name, CArrRef args,
+                 bool &success, Class* cls);
+  Variant invoke(const Func *func, const String& name, CArrRef args,
+                 Class* cls) {
+    bool success;
+    return invoke(func, name, args, success, cls);
+  }
+  const Func* lookupMethod(const StringData* name, Class* cls);
+
+protected:
+  const Func* m_Call;
+
+private:
+  Object m_obj;
 };
 
-///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // HPHP_USER_STREAM_WRAPPER_H
+#endif // HPHP_USER_FS_NODE_H

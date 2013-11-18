@@ -1414,11 +1414,7 @@ Variant f_readdir(CResRef dir_handle /* = null */) {
   if (!dir) {
     return false;
   }
-  String s = dir->read();
-  if (!s) {
-    return false;
-  }
-  return s;
+  return dir->read();
 }
 
 void f_rewinddir(CResRef dir_handle /* = null */) {
@@ -1448,12 +1444,13 @@ Variant f_scandir(const String& directory, bool descending /* = false */,
 
   std::vector<String> names;
   while (true) {
-    String name = dir->read();
-    if (!name) {
+    auto name = dir->read();
+    if (!name.toBoolean()) {
       break;
     }
-    names.push_back(name);
+    names.push_back(name.toString());
   }
+  dir->close();
 
   if (descending) {
     sort(names.begin(), names.end(), StringDescending);

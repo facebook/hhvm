@@ -33,9 +33,9 @@ UserStreamWrapper::UserStreamWrapper(const String& name,
 
 File* UserStreamWrapper::open(const String& filename, const String& mode,
                               int options, CVarRef context) {
-  auto file = NEWOBJ(UserFile)(m_cls, options, context);
+  auto file = NEWOBJ(UserFile)(m_cls, context);
   Resource wrapper(file);
-  auto ret = file->open(filename, mode);
+  auto ret = file->openImpl(filename, mode, options);
   if (!ret) {
     return nullptr;
   }
@@ -58,6 +58,18 @@ int UserStreamWrapper::stat(const String& path, struct stat* buf) {
   auto file = NEWOBJ(UserFile)(m_cls);
   Resource wrapper(file);
   return file->stat(path, buf);
+}
+
+Directory* UserStreamWrapper::opendir(const String& path) {
+  auto dir = NEWOBJ(UserDirectory)(m_cls);
+  Resource wrapper(dir);
+  auto ret = dir->open(path);
+  if (!ret) {
+    return nullptr;
+  }
+  DEBUG_ONLY auto tmp = wrapper.detach();
+  assert(tmp == dir);
+  return dir;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -41,12 +41,12 @@ void PlainDirectory::close() {
   }
 }
 
-String PlainDirectory::read() {
+Variant PlainDirectory::read() {
   struct dirent entry;
   struct dirent *result;
   int ret = readdir_r(m_dir, &entry, &result);
   if (ret != 0 || !result) {
-    return null_string;
+    return false;
   }
   return String(entry.d_name, CopyString);
 }
@@ -59,12 +59,12 @@ bool PlainDirectory::isValid() const {
   return m_dir;
 }
 
-String ArrayDirectory::read() {
+Variant ArrayDirectory::read() {
   if (!m_it) {
-    return null_string;
+    return false;
   }
 
-  String ret = m_it.second();
+  auto ret = m_it.second();
   ++m_it;
   return ret;
 }

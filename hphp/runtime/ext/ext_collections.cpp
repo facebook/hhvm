@@ -3283,49 +3283,241 @@ void c_StableMapIterator::t_rewind() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// BaseSet
 
-static const char emptySetSlot[sizeof(c_Set::Bucket)] = { 0 };
+// Public
 
-c_Set::c_Set(Class* cb) :
-    ExtObjectDataFlags<ObjectData::SetAttrInit|
-                       ObjectData::UseGet|
-                       ObjectData::UseSet|
-                       ObjectData::UseIsset|
-                       ObjectData::UseUnset|
-                       ObjectData::CallToImpl|
-                       ObjectData::HasClone>(cb),
-    m_size(0), m_load(0), m_nLastSlot(0), m_version(0) {
-  m_data = (Bucket*)emptySetSlot;
-}
-
-c_Set::~c_Set() {
-  deleteBuckets();
-  freeData();
-}
-
-void c_Set::freeData() {
-  if (m_data != (Bucket*)emptySetSlot) {
-    smart_free(m_data);
-  }
-  m_data = (Bucket*)emptySetSlot;
-}
-
-void c_Set::deleteBuckets() {
-  if (!m_size) return;
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (p.validValue()) {
-      tvRefcountedDecRef(&p.data);
+void BaseSet::init(CVarRef t) {
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(t, sz);
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    if (v.isInteger()) {
+      add(v.toInt64());
+    } else if (v.isString()) {
+      add(v.getStringData());
+    } else {
+      throwBadValueType();
     }
   }
 }
 
-void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
+void BaseSet::add(int64_t h) {
+  Bucket* p = findForInsert(h);
+  assert(p);
+  if (p->validValue()) {
+    return;
+  }
+  ++m_version;
+  ++m_size;
+  if (!p->tombstone()) {
+    if (UNLIKELY(++m_load >= computeMaxLoad())) {
+      adjustCapacity();
+      p = findForInsert(h);
+      assert(p);
+    }
+  }
+  p->setInt(h);
+}
+
+void BaseSet::add(StringData *key) {
+  strhash_t h = key->hash();
+  Bucket* p = findForInsert(key->data(), key->size(), h);
+  assert(p);
+  if (p->validValue()) {
+    return;
+  }
+  ++m_version;
+  ++m_size;
+  if (!p->tombstone()) {
+    if (UNLIKELY(++m_load >= computeMaxLoad())) {
+      adjustCapacity();
+      p = findForInsert(key->data(), key->size(), h);
+      assert(p);
+    }
+  }
+  p->setStr(key, h);
+}
+
+void BaseSet::throwOOB(int64_t val) {
+  throwIntOOB(val);
+}
+
+void BaseSet::throwOOB(StringData* val) {
+  throwStrOOB(val);
+}
+
+void BaseSet::throwNoIndexAccess() {
+  Object e(SystemLib::AllocRuntimeExceptionObject(
+    "[] operator not supported for accessing elements of Sets"));
+  throw e;
+}
+
+Array BaseSet::ToArray(const ObjectData* obj) {
+  check_collection_cast_to_array();
+  return static_cast<const BaseSet*>(obj)->toArrayImpl();
+}
+
+bool BaseSet::ToBool(const ObjectData* obj) {
+  return static_cast<const BaseSet*>(obj)->toBoolImpl();
+}
+
+TypedValue* BaseSet::OffsetGet(ObjectData* obj, TypedValue* key) {
+  BaseSet::throwNoIndexAccess();
+}
+
+void BaseSet::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
+  BaseSet::throwNoIndexAccess();
+}
+
+bool BaseSet::OffsetIsset(ObjectData* obj, TypedValue* key) {
+  BaseSet::throwNoIndexAccess();
+}
+
+bool BaseSet::OffsetEmpty(ObjectData* obj, TypedValue* key) {
+  BaseSet::throwNoIndexAccess();
+}
+
+bool BaseSet::OffsetContains(ObjectData* obj, TypedValue* key) {
+  BaseSet::throwNoIndexAccess();
+}
+
+void BaseSet::OffsetUnset(ObjectData* obj, TypedValue* key) {
+  BaseSet::throwNoIndexAccess();
+}
+
+bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto st1 = static_cast<const BaseSet*>(obj1);
+  auto st2 = static_cast<const BaseSet*>(obj2);
+  if (st1->m_size != st2->m_size) return false;
+  for (uint i = 0; i <= st1->m_nLastSlot; ++i) {
+    BaseSet::Bucket& p = st1->m_data[i];
+    if (p.validValue()) {
+      if (p.hasInt()) {
+        int64_t key = p.data.m_data.num;
+        if (!st2->find(key)) return false;
+      } else {
+        assert(p.hasStr());
+        StringData* key = p.data.m_data.pstr;
+        if (!st2->find(key->data(), key->size(), key->hash())) return false;
+      }
+    }
+  }
+  return true;
+}
+
+void BaseSet::Unserialize(const char* setType, ObjectData* obj,
+                          VariableUnserializer* uns, int64_t sz, char type) {
+  if (type != 'V') {
+    throw Exception("%s does not support the '%c' serialization "
+                    "format", setType, type);
+  }
+  auto st = static_cast<BaseSet*>(obj);
+  st->reserve(sz);
+  for (int64_t i = 0; i < sz; ++i) {
+    Variant k;
+    // When unserializing an element of a Set, we use Mode::ColKey for now.
+    // This will make the unserializer to reserve an id for the element
+    // but won't allow referencing the element via 'r' or 'R'.
+    k.unserialize(uns, Uns::Mode::ColKey);
+    Bucket* p;
+    if (k.isInteger()) {
+      auto h = k.toInt64();
+      p = st->findForInsert(h);
+      if (UNLIKELY(p->validValue())) continue;
+      p->setInt(h);
+    } else if (k.isString()) {
+      auto key = k.getStringData();
+      auto h = key->hash();
+      p = st->findForInsert(key->data(), key->size(), h);
+      if (UNLIKELY(p->validValue())) continue;
+      p->setStr(key, h);
+    } else {
+      throw Exception("%s values must be integers or strings", setType);
+    }
+    ++st->m_size;
+    ++st->m_load;
+  }
+}
+
+// Protected (PHP-accesible methods)
+
+void BaseSet::phpConstruct(CVarRef iterable /* = null_variant */) {
   if (iterable.isNull()) return;
   init(iterable);
 }
 
-Array c_Set::toArrayImpl() const {
+Object BaseSet::phpAddAll(CVarRef iterable) {
+  if (iterable.isNull()) return this;
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  for (; iter; ++iter) {
+    Variant v = iter.second();
+    TypedValue* tv = cvarToCell(&v);
+    add(tv);
+  }
+  return this;
+}
+
+bool BaseSet::phpContains(CVarRef key) {
+  DataType t = key.getType();
+  if (t == KindOfInt64) {
+    return contains(key.toInt64());
+  }
+  if (IS_STRING_TYPE(t)) {
+    return contains(key.getStringData());
+  }
+  throwBadValueType();
+  return false;
+}
+
+Object BaseSet::phpRemove(CVarRef key) {
+  DataType t = key.getType();
+  if (t == KindOfInt64) {
+    remove(key.toInt64());
+  } else if (IS_STRING_TYPE(t)) {
+    remove(key.getStringData());
+  } else {
+    throwBadValueType();
+  }
+  return this;
+}
+
+Array BaseSet::phpToValuesArray() {
+  PackedArrayInit ai(m_size);
+  for (uint i = 0; i <= m_nLastSlot; ++i) {
+    Bucket& p = m_data[i];
+    if (p.validValue()) {
+      ai.append(tvAsCVarRef(&p.data));
+    }
+  }
+  return ai.create();
+}
+
+Object BaseSet::phpGetIterator() {
+  c_SetIterator* it = NEWOBJ(c_SetIterator)();
+  it->m_obj = this;
+  it->m_pos = iter_begin();
+  it->m_version = getVersion();
+  return it;
+}
+
+const char BaseSet::emptySetSlot[sizeof(BaseSet::Bucket)] = {0};
+
+// Protected (Internal)
+
+BaseSet::BaseSet(Class* cls) : ExtObjectData(cls), m_size(0),
+    m_data((Bucket*)emptySetSlot), m_load(0), m_nLastSlot(0), m_version(0) {
+}
+
+BaseSet::~BaseSet() {
+  deleteBuckets();
+  freeData();
+}
+
+// Private
+
+Array BaseSet::toArrayImpl() const {
   ArrayInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
     Bucket& p = m_data[i];
@@ -3350,321 +3542,10 @@ Array c_Set::toArrayImpl() const {
   return arr;
 }
 
-c_Set* c_Set::Clone(ObjectData* obj) {
-  auto thiz = static_cast<c_Set*>(obj);
-  auto target = static_cast<c_Set*>(obj->cloneImpl());
-
-  if (!thiz->m_size) return target;
-
-  assert(thiz->m_nLastSlot != 0);
-  target->m_size = thiz->m_size;
-  target->m_load = thiz->m_load;
-  target->m_nLastSlot = thiz->m_nLastSlot;
-  target->m_data = (Bucket*)smart_malloc(thiz->numSlots() * sizeof(Bucket));
-  memcpy(target->m_data, thiz->m_data, thiz->numSlots() * sizeof(Bucket));
-
-  for (uint i = 0; i <= thiz->m_nLastSlot; ++i) {
-    Bucket& p = thiz->m_data[i];
-    if (p.validValue()) {
-      tvRefcountedIncRef(&p.data);
-    }
-  }
-
-  return target;
-}
-
-void c_Set::init(CVarRef t) {
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(t, sz);
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    if (v.isInteger()) {
-      add(v.toInt64());
-    } else if (v.isString()) {
-      add(v.getStringData());
-    } else {
-      throwBadValueType();
-    }
-  }
-}
-
-Object c_Set::t_add(CVarRef val) {
-  TypedValue* tv = cvarToCell(&val);
-  add(tv);
-  return this;
-}
-
-Object c_Set::t_addall(CVarRef iterable) {
-  if (iterable.isNull()) return this;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    add(tv);
-  }
-  return this;
-}
-
-Object c_Set::t_clear() {
-  deleteBuckets();
-  freeData();
-  m_size = 0;
-  m_load = 0;
-  m_nLastSlot = 0;
-  m_data = (Bucket*)emptySetSlot;
-  return this;
-}
-
-bool c_Set::t_isempty() {
-  return !toBoolImpl();
-}
-
-int64_t c_Set::t_count() {
-  return m_size;
-}
-
-Object c_Set::t_items() {
-  return SystemLib::AllocLazyIterableViewObject(this);
-}
-
-Object c_Set::t_values() {
-  c_Vector* vec;
-  Object o = vec = NEWOBJ(c_Vector)();
-  vec->init(VarNR(this));
-  return o;
-}
-
-Object c_Set::t_lazy() {
-  return SystemLib::AllocLazyIterableViewObject(this);
-}
-
-bool c_Set::t_contains(CVarRef key) {
-  DataType t = key.getType();
-  if (t == KindOfInt64) {
-    return contains(key.toInt64());
-  }
-  if (IS_STRING_TYPE(t)) {
-    return contains(key.getStringData());
-  }
-  throwBadValueType();
-  return false;
-}
-
-Object c_Set::t_remove(CVarRef key) {
-  DataType t = key.getType();
-  if (t == KindOfInt64) {
-    remove(key.toInt64());
-  } else if (IS_STRING_TYPE(t)) {
-    remove(key.getStringData());
-  } else {
-    throwBadValueType();
-  }
-  return this;
-}
-
-Array c_Set::t_toarray() {
-  return toArrayImpl();
-}
-
-Array c_Set::t_tokeysarray() {
-  return t_tovaluesarray();
-}
-
-Array c_Set::t_tovaluesarray() {
-  PackedArrayInit ai(m_size);
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (p.validValue()) {
-      ai.append(tvAsCVarRef(&p.data));
-    }
-  }
-  return ai.create();
-}
-
-Object c_Set::t_getiterator() {
-  c_SetIterator* it = NEWOBJ(c_SetIterator)();
-  it->m_obj = this;
-  it->m_pos = iter_begin();
-  it->m_version = getVersion();
-  return it;
-}
-
-Object c_Set::t_map(CVarRef callback) {
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
-    throw e;
-  }
-  c_Set* st;
-  Object obj = st = NEWOBJ(c_Set)();
-  if (!m_size) return obj;
-  assert(m_nLastSlot != 0);
-  st->m_size = m_size;
-  st->m_load = m_load;
-  st->m_nLastSlot = 0;
-  st->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
-  // We need to zero out the first slot in case an exception
-  // is thrown during the first iteration, because ~c_Set()
-  // will decRef all slots up to (and including) m_nLastSlot.
-  st->m_data[0].data.m_type = (DataType)0;
-  uint nLastSlot = m_nLastSlot;
-  for (uint i = 0; i <= nLastSlot; st->m_nLastSlot = i++) {
-    Bucket& p = m_data[i];
-    Bucket& np = st->m_data[i];
-    if (!p.validValue()) {
-      np.data.m_type = p.data.m_type;
-      continue;
-    }
-    TypedValue* tv = &np.data;
-    int32_t version = m_version;
-    g_vmContext->invokeFuncFew(tv, ctx, 1, &p.data);
-    if (UNLIKELY(version != m_version)) {
-      tvRefcountedDecRef(tv);
-      throw_collection_modified();
-    }
-    np.data.hash() = p.data.hash();
-  }
-  return obj;
-}
-
-Object c_Set::t_filter(CVarRef callback) {
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
-    throw e;
-  }
-  c_Set* st;
-  Object obj = st = NEWOBJ(c_Set)();
-  if (!m_size) return obj;
-  uint nLastSlot = m_nLastSlot;
-  for (uint i = 0; i <= nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
-    Variant ret;
-    int32_t version = m_version;
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
-    if (!ret.toBoolean()) continue;
-    if (p.hasInt()) {
-      st->add(p.data.m_data.num);
-    } else {
-      assert(p.hasStr());
-      st->add(p.data.m_data.pstr);
-    }
-  }
-  return obj;
-}
-
-Object c_Set::t_zip(CVarRef iterable) {
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  if (m_size && iter) {
-    // At present, Sets only support int values and string values,
-    // so if this Set is non empty and the iterable is non empty
-    // the zip operation will always fail
-    throwBadValueType();
-  }
-  Object obj = NEWOBJ(c_Set)();
-  return obj;
-}
-
-Object c_Set::ti_fromitems(CVarRef iterable) {
-  if (iterable.isNull()) return NEWOBJ(c_Set)();
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  c_Set* target;
-  Object ret = target = NEWOBJ(c_Set)();
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    if (v.isInteger()) {
-      target->add(v.toInt64());
-    } else if (v.isString()) {
-      target->add(v.getStringData());
-    } else {
-      throwBadValueType();
-    }
-  }
-  return ret;
-}
-
-Object c_Set::ti_fromarray(CVarRef arr) {
-  if (!arr.isArray()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter arr must be an array"));
-    throw e;
-  }
-  c_Set* st;
-  Object ret = st = NEWOBJ(c_Set)();
-  ArrayData* ad = arr.getArrayData();
-  for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
-       pos = ad->iter_advance(pos)) {
-    CVarRef v = ad->getValueRef(pos);
-    if (v.isInteger()) {
-      st->add(v.toInt64());
-    } else if (v.isString()) {
-      st->add(v.getStringData());
-    } else {
-      throwBadValueType();
-    }
-  }
-  return ret;
-}
-
-Object c_Set::t_difference(CVarRef iterable) {
-  if (iterable.isNull()) return this;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  for (; iter; ++iter) {
-    t_remove(iter.second());
-  }
-  return this;
-}
-
-Object c_Set::ti_fromarrays(int _argc,
-                            CArrRef _argv /* = null_array */) {
-  c_Set* st;
-  Object ret = st = NEWOBJ(c_Set)();
-  for (ArrayIter iter(_argv); iter; ++iter) {
-    Variant arr = iter.second();
-    if (!arr.isArray()) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Parameters must be arrays"));
-      throw e;
-    }
-    ArrayData* ad = arr.getArrayData();
-    for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
-         pos = ad->iter_advance(pos)) {
-      st->t_add(ad->getValueRef(pos));
-    }
-  }
-  return ret;
-}
-
-void c_Set::throwOOB(int64_t val) {
-  throwIntOOB(val);
-}
-
-void c_Set::throwOOB(StringData* val) {
-  throwStrOOB(val);
-}
-
-void c_Set::throwNoIndexAccess() {
-  Object e(SystemLib::AllocRuntimeExceptionObject(
-    "[] operator not supported for accessing elements of Sets"));
-  throw e;
-}
-
 #define STRING_HASH(x)   (int32_t(x) | 0x80000000)
 
 ALWAYS_INLINE
-bool hitString(const c_Set::Bucket* p, const char* k,
+bool hitString(const BaseSet::Bucket* p, const char* k,
                          int len, int32_t hash) {
   assert(p->validValue());
   if (p->hasInt()) return false;
@@ -3675,7 +3556,7 @@ bool hitString(const c_Set::Bucket* p, const char* k,
 }
 
 ALWAYS_INLINE
-bool hitInt(const c_Set::Bucket* p, int64_t ki) {
+bool hitInt(const BaseSet::Bucket* p, int64_t ki) {
   assert(p->validValue());
   return p->hasInt() && p->data.m_data.num == ki;
 }
@@ -3731,19 +3612,20 @@ bool hitInt(const c_Set::Bucket* p, int64_t ki) {
     } \
   }
 
-c_Set::Bucket* c_Set::find(int64_t h) const {
+BaseSet::Bucket* BaseSet::find(int64_t h) const {
   FIND_BODY(h, hitInt(p, h));
 }
 
-c_Set::Bucket* c_Set::find(const char* k, int len, strhash_t prehash) const {
+BaseSet::Bucket* BaseSet::find(const char* k, int len,
+    strhash_t prehash) const {
   FIND_BODY(prehash, hitString(p, k, len, STRING_HASH(prehash)));
 }
 
-c_Set::Bucket* c_Set::findForInsert(int64_t h) const {
+BaseSet::Bucket* BaseSet::findForInsert(int64_t h) const {
   FIND_FOR_INSERT_BODY(h, hitInt(p, h));
 }
 
-c_Set::Bucket* c_Set::findForInsert(const char* k, int len,
+BaseSet::Bucket* BaseSet::findForInsert(const char* k, int len,
                                     strhash_t prehash) const {
   FIND_FOR_INSERT_BODY(prehash, hitString(p, k, len, STRING_HASH(prehash)));
 }
@@ -3751,7 +3633,7 @@ c_Set::Bucket* c_Set::findForInsert(const char* k, int len,
 // findForNewInsert() is only safe to use if you know for sure that the
 // value is not already present in the Set.
 ALWAYS_INLINE
-c_Set::Bucket* c_Set::findForNewInsert(size_t h0) const {
+BaseSet::Bucket* BaseSet::findForNewInsert(size_t h0) const {
   size_t tableMask = m_nLastSlot;
   size_t probeIndex = h0 & tableMask;
   Bucket* p = fetchBucket(probeIndex);
@@ -3773,54 +3655,7 @@ c_Set::Bucket* c_Set::findForNewInsert(size_t h0) const {
 #undef FIND_BODY
 #undef FIND_FOR_INSERT_BODY
 
-void c_Set::add(int64_t h) {
-  Bucket* p = findForInsert(h);
-  assert(p);
-  if (p->validValue()) {
-    return;
-  }
-  ++m_version;
-  ++m_size;
-  if (!p->tombstone()) {
-    if (UNLIKELY(++m_load >= computeMaxLoad())) {
-      adjustCapacity();
-      p = findForInsert(h);
-      assert(p);
-    }
-  }
-  p->setInt(h);
-}
-
-void c_Set::add(StringData *key) {
-  strhash_t h = key->hash();
-  Bucket* p = findForInsert(key->data(), key->size(), h);
-  assert(p);
-  if (p->validValue()) {
-    return;
-  }
-  ++m_version;
-  ++m_size;
-  if (!p->tombstone()) {
-    if (UNLIKELY(++m_load >= computeMaxLoad())) {
-      adjustCapacity();
-      p = findForInsert(key->data(), key->size(), h);
-      assert(p);
-    }
-  }
-  p->setStr(key, h);
-}
-
-void c_Set::add(TypedValue* val) {
-  if (val->m_type == KindOfInt64) {
-    add(val->m_data.num);
-  } else if (IS_STRING_TYPE(val->m_type)) {
-    add(val->m_data.pstr);
-  } else {
-    throwBadValueType();
-  }
-}
-
-void c_Set::erase(Bucket* p) {
+void BaseSet::erase(Bucket* p) {
   if (!p) {
     return;
   }
@@ -3834,7 +3669,7 @@ void c_Set::erase(Bucket* p) {
   }
 }
 
-void c_Set::adjustCapacityImpl(int64_t sz) {
+void BaseSet::adjustCapacityImpl(int64_t sz) {
   ++m_version;
   if (sz < 2) {
     if (sz <= 0) return;
@@ -3862,7 +3697,17 @@ void c_Set::adjustCapacityImpl(int64_t sz) {
   smart_free(oldBuckets);
 }
 
-ssize_t c_Set::iter_next(ssize_t pos) const {
+void BaseSet::deleteBuckets() {
+  if (!m_size) return;
+  for (uint i = 0; i <= m_nLastSlot; ++i) {
+    Bucket& p = m_data[i];
+    if (p.validValue()) {
+      tvRefcountedDecRef(&p.data);
+    }
+  }
+}
+
+ssize_t BaseSet::iter_next(ssize_t pos) const {
   if (pos == 0) {
     return 0;
   }
@@ -3878,7 +3723,7 @@ ssize_t c_Set::iter_next(ssize_t pos) const {
   return 0;
 }
 
-ssize_t c_Set::iter_prev(ssize_t pos) const {
+ssize_t BaseSet::iter_prev(ssize_t pos) const {
   if (pos == 0) {
     return 0;
   }
@@ -3894,115 +3739,139 @@ ssize_t c_Set::iter_prev(ssize_t pos) const {
   return 0;
 }
 
-const TypedValue* c_Set::iter_value(ssize_t pos) const {
+const TypedValue* BaseSet::iter_value(ssize_t pos) const {
   assert(pos);
   Bucket* p = reinterpret_cast<Bucket*>(pos);
   return &p->data;
 }
 
-void c_Set::throwBadValueType() {
+void BaseSet::throwBadValueType() {
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(
     "Only integer values and string values may be used with Sets"));
   throw e;
 }
 
-void c_Set::Bucket::dump() {
-  if (!validValue()) {
-    printf("c_Set::Bucket: %s\n", (empty() ? "empty" : "tombstone"));
-    return;
+///////////////////////////////////////////////////////////////////////////////
+// Set
+
+c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
+
+  const uint attrs = ObjectData::SetAttrInit|
+                     ObjectData::UseGet|
+                     ObjectData::UseSet|
+                     ObjectData::UseIsset|
+                     ObjectData::UseUnset|
+                     ObjectData::CallToImpl|
+                     ObjectData::HasClone;
+
+  ObjectData::setAttributes(attrs);
+}
+
+void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
+  BaseSet::phpConstruct(iterable);
+}
+
+Object c_Set::t_add(CVarRef val) {
+  return BaseSet::phpAdd(val);
+}
+
+Object c_Set::t_addall(CVarRef iterable) {
+  return BaseSet::phpAddAll(iterable);
+}
+
+Object c_Set::t_clear() {
+  return BaseSet::phpClear();
+}
+
+bool c_Set::t_isempty() {
+  return BaseSet::phpIsEmpty();
+}
+
+int64_t c_Set::t_count() {
+  return BaseSet::phpCount();
+}
+
+Object c_Set::t_items() {
+  return BaseSet::phpItems();
+}
+
+Object c_Set::t_values() {
+  return BaseSet::phpValues<c_Vector>();
+}
+
+Object c_Set::t_lazy() {
+  return BaseSet::phpLazy();
+}
+
+bool c_Set::t_contains(CVarRef key) {
+  return BaseSet::phpContains(key);
+}
+
+Object c_Set::t_remove(CVarRef key) {
+  return BaseSet::phpRemove(key);
+}
+
+Array c_Set::t_toarray() {
+  return BaseSet::phpToArray();
+}
+
+Array c_Set::t_tokeysarray() {
+  return BaseSet::phpToKeysArray();
+}
+
+Array c_Set::t_tovaluesarray() {
+  return BaseSet::phpToValuesArray();
+}
+
+Object c_Set::t_getiterator() {
+  return BaseSet::phpGetIterator();
+}
+
+Object c_Set::t_map(CVarRef callback) {
+  return BaseSet::phpMap<c_Set>(callback);
+}
+
+Object c_Set::t_filter(CVarRef callback) {
+  return BaseSet::phpFilter<c_Set>(callback);
+}
+
+Object c_Set::t_zip(CVarRef iterable) {
+  return BaseSet::phpZip<c_Set>(iterable);
+}
+
+Object c_Set::t_difference(CVarRef iterable) {
+  if (iterable.isNull()) return this;
+  size_t sz;
+  ArrayIter iter = getArrayIterHelper(iterable, sz);
+  for (; iter; ++iter) {
+    phpRemove(iter.second());
   }
-  printf("c_Set::Bucket: %d\n", hash());
-  tvAsCVarRef(&data).dump();
+  return this;
 }
 
-Array c_Set::ToArray(const ObjectData* obj) {
-  check_collection_cast_to_array();
-  return static_cast<const c_Set*>(obj)->toArrayImpl();
+Object c_Set::ti_fromitems(CVarRef iterable) {
+  return BaseSet::phpFromItems<c_Set>(iterable);
 }
 
-bool c_Set::ToBool(const ObjectData* obj) {
-  return static_cast<const c_Set*>(obj)->toBoolImpl();
+Object c_Set::ti_fromarray(CVarRef arr) {
+  return BaseSet::phpFromArray<c_Set>(arr);
 }
 
-TypedValue* c_Set::OffsetGet(ObjectData* obj, TypedValue* key) {
-  c_Set::throwNoIndexAccess();
+Object c_Set::ti_fromarrays(int _argc, CArrRef _argv /* = null_array */) {
+  return BaseSet::phpFromArrays<c_Set>(_argc, _argv);
 }
 
-void c_Set::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
-  c_Set::throwNoIndexAccess();
+void c_Set::Unserialize(ObjectData* obj, VariableUnserializer* uns,
+                        int64_t sz, char type) {
+
+  BaseSet::Unserialize("Set", obj, uns, sz, type);
 }
 
-bool c_Set::OffsetIsset(ObjectData* obj, TypedValue* key) {
-  c_Set::throwNoIndexAccess();
+c_Set* c_Set::Clone(ObjectData* obj) {
+  return BaseSet::Clone<c_Set>(obj);
 }
 
-bool c_Set::OffsetEmpty(ObjectData* obj, TypedValue* key) {
-  c_Set::throwNoIndexAccess();
-}
-
-bool c_Set::OffsetContains(ObjectData* obj, TypedValue* key) {
-  c_Set::throwNoIndexAccess();
-}
-
-void c_Set::OffsetUnset(ObjectData* obj, TypedValue* key) {
-  c_Set::throwNoIndexAccess();
-}
-
-bool c_Set::Equals(const ObjectData* obj1, const ObjectData* obj2) {
-  auto st1 = static_cast<const c_Set*>(obj1);
-  auto st2 = static_cast<const c_Set*>(obj2);
-  if (st1->m_size != st2->m_size) return false;
-  for (uint i = 0; i <= st1->m_nLastSlot; ++i) {
-    c_Set::Bucket& p = st1->m_data[i];
-    if (p.validValue()) {
-      if (p.hasInt()) {
-        int64_t key = p.data.m_data.num;
-        if (!st2->find(key)) return false;
-      } else {
-        assert(p.hasStr());
-        StringData* key = p.data.m_data.pstr;
-        if (!st2->find(key->data(), key->size(), key->hash())) return false;
-      }
-    }
-  }
-  return true;
-}
-
-void c_Set::Unserialize(ObjectData* obj,
-                        VariableUnserializer* uns,
-                        int64_t sz,
-                        char type) {
-  if (type != 'V') {
-    throw Exception("Set does not support the '%c' serialization "
-                    "format", type);
-  }
-  auto st = static_cast<c_Set*>(obj);
-  st->reserve(sz);
-  for (int64_t i = 0; i < sz; ++i) {
-    Variant k;
-    // When unserializing an element of a Set, we use Mode::ColKey for now.
-    // This will make the unserializer to reserve an id for the element
-    // but won't allow referencing the element via 'r' or 'R'.
-    k.unserialize(uns, Uns::Mode::ColKey);
-    Bucket* p;
-    if (k.isInteger()) {
-      auto h = k.toInt64();
-      p = st->findForInsert(h);
-      if (UNLIKELY(p->validValue())) continue;
-      p->setInt(h);
-    } else if (k.isString()) {
-      auto key = k.getStringData();
-      auto h = key->hash();
-      p = st->findForInsert(key->data(), key->size(), h);
-      if (UNLIKELY(p->validValue())) continue;
-      p->setStr(key, h);
-    } else {
-      throw Exception("Set values must be integers or strings");
-    }
-    ++st->m_size;
-    ++st->m_load;
-  }
-}
+///////////////////////////////////////////////////////////////////////////////
 
 c_SetIterator::c_SetIterator(Class* cb) :
     ExtObjectData(cb) {
@@ -4015,7 +3884,7 @@ void c_SetIterator::t___construct() {
 }
 
 Variant c_SetIterator::t_current() {
-  c_Set* st = m_obj.get();
+  BaseSet* st = m_obj.get();
   if (UNLIKELY(m_version != st->getVersion())) {
     throw_collection_modified();
   }
@@ -4034,7 +3903,7 @@ bool c_SetIterator::t_valid() {
 }
 
 void c_SetIterator::t_next() {
-  c_Set* st = m_obj.get();
+  BaseSet* st = m_obj.get();
   if (UNLIKELY(m_version != st->getVersion())) {
     throw_collection_modified();
   }
@@ -4042,7 +3911,7 @@ void c_SetIterator::t_next() {
 }
 
 void c_SetIterator::t_rewind() {
-  c_Set* st = m_obj.get();
+  BaseSet* st = m_obj.get();
   if (UNLIKELY(m_version != st->getVersion())) {
     throw_collection_modified();
   }

@@ -29,6 +29,8 @@ namespace HPHP {
  * Called by the JIT on an emitVectorSet().
  */
 void triggerCow(c_Vector* vec);
+ArrayIter getArrayIterHelper(CVarRef v, size_t& sz);
+TypedValue* cvarToCell(const Variant* v);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Vector
@@ -874,64 +876,80 @@ class c_StableMapIterator : public ExtObjectData {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class Set
 
-FORWARD_DECLARE_CLASS(Set);
-class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
-                                        ObjectData::UseGet|
-                                        ObjectData::UseSet|
-                                        ObjectData::UseIsset|
-                                        ObjectData::UseUnset|
-                                        ObjectData::CallToImpl|
-                                        ObjectData::HasClone> {
- public:
-  DECLARE_CLASS_NO_SWEEP(Set)
+/**
+ * BaseSet is a hash-table implementation of the Set ADT. It doesn't represent
+ * any PHP-land class. That job is delegated to its child classes.
+ *
+ * BaseSet uses a power of two for the table size and quadratic probing to
+ * resolve hash collisions, similar to the Map class. See the comments
+ * in the Map class for more details on how the hash table works and how
+ * we decide when to grow or shrink the table.
+ */
+class BaseSet : public ExtObjectData {
 
- public:
+public:
+  // Inner types and constants.
+
   static const int32_t KindOfTombstone = -1;
+  static const char emptySetSlot[];
 
-  explicit c_Set(Class* cls = c_Set::classof());
-  ~c_Set();
-  void freeData();
-  void t___construct(CVarRef iterable = null_variant);
-  Object t_add(CVarRef val);
-  Object t_addall(CVarRef val);
-  Object t_clear();
-  bool t_isempty();
-  int64_t t_count();
-  Object t_items();
-  Object t_values();
-  Object t_lazy();
-  bool t_contains(CVarRef key);
-  Object t_remove(CVarRef key);
-  Array t_toarray();
-  Object t_tovector();
-  Object t_tofrozenvector();
-  Object t_toset();
-  Array t_tokeysarray();
-  Array t_tovaluesarray();
-  Object t_getiterator();
-  Object t_map(CVarRef callback);
-  Object t_filter(CVarRef callback);
-  Object t_zip(CVarRef iterable);
-  Object t_difference(CVarRef iterable);
-  String t___tostring();
-  Variant t___get(Variant name);
-  Variant t___set(Variant name, Variant value);
-  bool t___isset(Variant name);
-  Variant t___unset(Variant name);
-  static Object ti_fromitems(CVarRef iterable);
-  static Object ti_fromarray(CVarRef arr); // deprecated
-  static Object ti_fromarrays(int _argc,
-                              CArrRef _argv = null_array);
+  /**
+   * A hash-table bucket.
+   */
+  struct Bucket {
 
-  static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-  static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-  static void throwNoIndexAccess() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+    inline bool hasStr() const { return IS_STRING_TYPE(data.m_type); }
+    inline bool hasInt() const { return data.m_type == KindOfInt64; }
+
+    inline void setStr(StringData* k, strhash_t h) {
+      k->incRefCount();
+      data.m_data.pstr = k;
+      data.m_type = KindOfString;
+      data.hash() = int32_t(h) | 0x80000000;
+    }
+
+    inline void setInt(int64_t k) {
+      data.m_data.num = k;
+      data.m_type = KindOfInt64;
+      data.hash() = int32_t(k) | 0x80000000;
+    }
+
+    inline int32_t hash() const { return data.hash(); }
+    bool validValue() const { return (intptr_t(data.m_type) > 0); }
+    bool empty() const { return data.m_type == KindOfUninit; }
+    bool tombstone() const { return data.m_type == KindOfTombstone; }
+
+    void dump() {
+      if (!validValue()) {
+        printf("BaseSet::Bucket: %s\n", (empty() ? "empty" : "tombstone"));
+        return;
+      }
+      printf("BaseSet::Bucket: %d\n", hash());
+      tvAsCVarRef(&data).dump();
+    }
+
+    // Buckets are 16 bytes. We use m_aux for our own nefarious purposes.
+    // It is critical that when we return &data to clients, that they not
+    // read or write the m_aux field.
+    TypedValueAux data;
+  };
+
+public:
+  // API
 
   void init(CVarRef t);
 
-  void add(TypedValue* val);
+  void add(TypedValue* val) {
+    if (val->m_type == KindOfInt64) {
+      add(val->m_data.num);
+    } else if (IS_STRING_TYPE(val->m_type)) {
+      add(val->m_data.pstr);
+    } else {
+      throwBadValueType();
+    }
+  }
+
   void add(int64_t h);
   void add(StringData* key);
 
@@ -939,98 +957,289 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
     ++m_version;
     erase(find(key));
   }
+
   void remove(StringData* key) {
     ++m_version;
     erase(find(key->data(), key->size(), key->hash()));
   }
+
   bool contains(int64_t key) {
     return find(key);
   }
+
   bool contains(StringData* key) {
     return find(key->data(), key->size(), key->hash());
   }
+
   void reserve(int64_t sz) {
     if (int64_t(m_load) + sz - int64_t(m_size) >= computeMaxLoad()) {
       adjustCapacityImpl(sz);
     }
   }
-  int getVersion() const {
-    return m_version;
-  }
-  int64_t size() const {
-    return m_size;
-  }
-  Array toArrayImpl() const;
-  bool toBoolImpl() const {
-    return (m_size != 0);
+
+  int getVersion() const { return m_version; }
+  int64_t size() const { return m_size; }
+
+  template<typename TSet>
+  static TSet* Clone(ObjectData* obj) {
+    auto thiz = static_cast<TSet*>(obj);
+    auto target = static_cast<TSet*>(obj->cloneImpl());
+
+    if (!thiz->m_size) return target;
+
+    assert(thiz->m_nLastSlot != 0);
+    target->m_size = thiz->m_size;
+    target->m_load = thiz->m_load;
+    target->m_nLastSlot = thiz->m_nLastSlot;
+    target->m_data = (Bucket*)smart_malloc(thiz->numSlots() * sizeof(Bucket));
+    memcpy(target->m_data, thiz->m_data, thiz->numSlots() * sizeof(Bucket));
+
+    for (uint i = 0; i <= thiz->m_nLastSlot; ++i) {
+      Bucket& p = thiz->m_data[i];
+      if (p.validValue()) {
+        tvRefcountedIncRef(&p.data);
+      }
+    }
+
+    return target;
   }
 
-  static c_Set* Clone(ObjectData* obj);
+  // Static methods
+
+  static void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwOOB(StringData* key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+  static void throwNoIndexAccess() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
+
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
   static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, TypedValue* key);
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
+
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
-  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
-                          int64_t sz, char type);
 
-  static uint sizeOffset() { return offsetof(c_Set, m_size); }
+  static void Unserialize(const char* setType, ObjectData* obj,
+                          VariableUnserializer* uns, int64_t sz, char type);
 
-  struct Bucket {
-    /**
-     * Buckets are 16 bytes. We use m_aux for our own nefarious purposes.
-     * It is critical that when we return &data to clients, that they not
-     * read or write the m_aux field.
-     */
-    TypedValueAux data;
-    inline bool hasStr() const { return IS_STRING_TYPE(data.m_type); }
-    inline bool hasInt() const { return data.m_type == KindOfInt64; }
-    inline void setStr(StringData* k, strhash_t h) {
-      k->incRefCount();
-      data.m_data.pstr = k;
-      data.m_type = KindOfString;
-      data.hash() = int32_t(h) | 0x80000000;
-    }
-    inline void setInt(int64_t k) {
-      data.m_data.num = k;
-      data.m_type = KindOfInt64;
-      data.hash() = int32_t(k) | 0x80000000;
-    }
-    inline int32_t hash() const {
-      return data.hash();
-    }
-    bool validValue() const {
-      return (intptr_t(data.m_type) > 0);
-    }
-    bool empty() const {
-      return data.m_type == KindOfUninit;
-    }
-    bool tombstone() const {
-      return data.m_type == KindOfTombstone;
-    }
-    void dump();
-  };
+  static uint sizeOffset() { return offsetof(BaseSet, m_size); }
 
- private:
-  /**
-   * Set uses a power of two for the table size and quadratic probing to
-   * resolve hash collisions, similar to the Map class. See the comments
-   * in the Map class for more details on how the hashtable works and how
-   * we decide when to grow or shrink the table.
-   */
+protected:
+  // PHP-land methods exported by child classes.
 
-  uint m_size;
-  Bucket* m_data;
-  uint m_load;
-  uint m_nLastSlot;
-  int32_t m_version;
+  void    phpConstruct(CVarRef iterable = null_variant);
 
-  size_t numSlots() const {
-    return m_nLastSlot + 1;
+  Object  phpAdd(CVarRef val) {
+    TypedValue* tv = cvarToCell(&val);
+    add(tv);
+    return this;
+  }
+
+  Object  phpAddAll(CVarRef val);
+
+  Object  phpClear() {
+    deleteBuckets();
+    freeData();
+    m_size = 0;
+    m_load = 0;
+    m_nLastSlot = 0;
+    m_data = (Bucket*)emptySetSlot;
+    return this;
+  }
+
+  bool    phpIsEmpty() { return !toBoolImpl(); }
+  int64_t phpCount() { return m_size; }
+  Object  phpItems() { return SystemLib::AllocLazyIterableViewObject(this); }
+
+  template<typename TVector>
+  Object  phpValues() {
+    TVector* vec;
+    Object o = vec = NEWOBJ(TVector)();
+    vec->init(VarNR(this));
+    return o;
+  }
+
+  Object  phpLazy() { return SystemLib::AllocLazyIterableViewObject(this); }
+  bool    phpContains(CVarRef key);
+  Object  phpRemove(CVarRef key);
+  Array   phpToArray() { return toArrayImpl(); }
+  Array   phpToKeysArray() { return phpToValuesArray(); }
+  Array   phpToValuesArray();
+  Object  phpGetIterator();
+
+  template<typename TSet>
+  Object phpMap(CVarRef callback) {
+    CallCtx ctx;
+    vm_decode_function(callback, nullptr, false, ctx);
+    if (!ctx.func) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Parameter must be a valid callback"));
+      throw e;
+    }
+    TSet* st;
+    Object obj = st = NEWOBJ(TSet)();
+    if (!m_size) return obj;
+    assert(m_nLastSlot != 0);
+    st->m_size = m_size;
+    st->m_load = m_load;
+    st->m_nLastSlot = 0;
+    st->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
+    // We need to zero out the first slot in case an exception
+    // is thrown during the first iteration, because ~c_Set()
+    // will decRef all slots up to (and including) m_nLastSlot.
+    st->m_data[0].data.m_type = (DataType)0;
+    uint nLastSlot = m_nLastSlot;
+    for (uint i = 0; i <= nLastSlot; st->m_nLastSlot = i++) {
+      Bucket& p = m_data[i];
+      Bucket& np = st->m_data[i];
+      if (!p.validValue()) {
+        np.data.m_type = p.data.m_type;
+        continue;
+      }
+      TypedValue* tv = &np.data;
+      int32_t version = m_version;
+      g_vmContext->invokeFuncFew(tv, ctx, 1, &p.data);
+      if (UNLIKELY(version != m_version)) {
+        tvRefcountedDecRef(tv);
+        throw_collection_modified();
+      }
+      np.data.hash() = p.data.hash();
+    }
+    return obj;
+  }
+
+  template<typename TSet>
+  Object phpFilter(CVarRef callback) {
+    CallCtx ctx;
+    vm_decode_function(callback, nullptr, false, ctx);
+    if (!ctx.func) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Parameter must be a valid callback"));
+      throw e;
+    }
+    TSet* st;
+    Object obj = st = NEWOBJ(TSet)();
+    if (!m_size) return obj;
+    uint nLastSlot = m_nLastSlot;
+    for (uint i = 0; i <= nLastSlot; ++i) {
+      Bucket& p = m_data[i];
+      if (!p.validValue()) continue;
+      Variant ret;
+      int32_t version = m_version;
+      g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
+      if (UNLIKELY(version != m_version)) {
+        throw_collection_modified();
+      }
+      if (!ret.toBoolean()) continue;
+      if (p.hasInt()) {
+        st->add(p.data.m_data.num);
+      } else {
+        assert(p.hasStr());
+        st->add(p.data.m_data.pstr);
+      }
+    }
+    return obj;
+  }
+
+  template<typename TSet>
+  Object phpZip(CVarRef iterable) {
+    size_t sz;
+    ArrayIter iter = getArrayIterHelper(iterable, sz);
+    if (m_size && iter) {
+      // At present, BaseSets only support int values and string values,
+      // so if this BaseSet is non empty and the iterable is non empty
+      // the zip operation will always fail
+      throwBadValueType();
+    }
+    Object obj = NEWOBJ(TSet)();
+    return obj;
+  }
+
+  template<typename TSet>
+  static Object phpFromItems(CVarRef iterable) {
+    if (iterable.isNull()) return NEWOBJ(TSet)();
+    size_t sz;
+    ArrayIter iter = getArrayIterHelper(iterable, sz);
+    TSet* target;
+    Object ret = target = NEWOBJ(TSet)();
+    for (; iter; ++iter) {
+      Variant v = iter.second();
+      if (v.isInteger()) {
+        target->add(v.toInt64());
+      } else if (v.isString()) {
+        target->add(v.getStringData());
+      } else {
+        throwBadValueType();
+      }
+    }
+    return ret;
+  }
+
+  template<typename TSet>
+  static Object phpFromArray(CVarRef arr) {
+    if (!arr.isArray()) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Parameter arr must be an array"));
+      throw e;
+    }
+    TSet* st;
+    Object ret = st = NEWOBJ(TSet)();
+    ArrayData* ad = arr.getArrayData();
+    for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
+         pos = ad->iter_advance(pos)) {
+      CVarRef v = ad->getValueRef(pos);
+      if (v.isInteger()) {
+        st->add(v.toInt64());
+      } else if (v.isString()) {
+        st->add(v.getStringData());
+      } else {
+        throwBadValueType();
+      }
+    }
+    return ret;
+  }
+
+  template<typename TSet>
+  static Object phpFromArrays(int _argc, CArrRef _argv = null_array) {
+    TSet* st;
+    Object ret = st = NEWOBJ(TSet)();
+    for (ArrayIter iter(_argv); iter; ++iter) {
+      Variant arr = iter.second();
+      if (!arr.isArray()) {
+        Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+          "Parameters must be arrays"));
+        throw e;
+      }
+      ArrayData* ad = arr.getArrayData();
+      for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
+           pos = ad->iter_advance(pos)) {
+        st->phpAdd(ad->getValueRef(pos));
+      }
+    }
+    return ret;
+  }
+
+protected:
+  // BaseSet is an abstract class.
+
+  explicit BaseSet(Class* cls);
+  /* virtual */ ~BaseSet();
+
+private:
+  // Helpers
+
+  Array toArrayImpl() const;
+  bool toBoolImpl() const { return (m_size != 0); }
+  size_t numSlots() const { return m_nLastSlot + 1; }
+
+  void freeData() {
+    if (m_data != (Bucket*)emptySetSlot) {
+      smart_free(m_data);
+    }
+    m_data = (Bucket*)emptySetSlot;
   }
 
   // The maximum load factor is 75%.
@@ -1061,11 +1270,8 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   Bucket* findForNewInsert(size_t h0) const;
 
   void erase(Bucket* prev);
-
+  void adjustCapacity() { adjustCapacityImpl(m_size); }
   void adjustCapacityImpl(int64_t sz);
-  void adjustCapacity() {
-    adjustCapacityImpl(m_size);
-  }
 
   void deleteBuckets();
 
@@ -1079,12 +1285,22 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
     }
     return 0;
   }
+
   ssize_t iter_next(ssize_t prev) const;
   ssize_t iter_prev(ssize_t prev) const;
   const TypedValue* iter_value(ssize_t pos) const;
   Variant iter_key(ssize_t pos) const { return uninit_null(); }
 
   static void throwBadValueType() ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
+
+ private:
+  // Internal state.
+
+  uint m_size;
+  Bucket* m_data;
+  uint m_load;
+  uint m_nLastSlot;
+  int32_t m_version;
 
   friend ObjectData* collectionDeepCopySet(c_Set* st);
   friend class c_SetIterator;
@@ -1096,8 +1312,60 @@ class c_Set : public ExtObjectDataFlags<ObjectData::SetAttrInit|
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field
     // at the same offset.
-    static_assert(offsetof(c_Set, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
+    static_assert(offsetof(BaseSet, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
   }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class Set
+
+FORWARD_DECLARE_CLASS(Set);
+class c_Set : public BaseSet {
+
+ public:
+  DECLARE_CLASS_NO_SWEEP(Set)
+
+ public:
+  // PHP-land methods.
+
+  explicit c_Set(Class* cls = c_Set::classof());
+  void t___construct(CVarRef iterable = null_variant);
+  Object t_add(CVarRef val);
+  Object t_addall(CVarRef val);
+  Object t_clear();
+  bool t_isempty();
+  int64_t t_count();
+  Object t_items();
+  Object t_values();
+  Object t_lazy();
+  bool t_contains(CVarRef key);
+  Object t_remove(CVarRef key);
+  Array t_toarray();
+  Object t_tovector();
+  Object t_tofrozenvector();
+  Object t_toset();
+  Array t_tokeysarray();
+  Array t_tovaluesarray();
+  Object t_getiterator();
+  Object t_map(CVarRef callback);
+  Object t_filter(CVarRef callback);
+  Object t_zip(CVarRef iterable);
+  Object t_difference(CVarRef iterable);
+  String t___tostring();
+  Variant t___get(Variant name);
+  Variant t___set(Variant name, Variant value);
+  bool t___isset(Variant name);
+  Variant t___unset(Variant name);
+  static Object ti_fromitems(CVarRef iterable);
+  static Object ti_fromarray(CVarRef arr); // deprecated
+  static Object ti_fromarrays(int _argc, CArrRef _argv = null_array);
+
+ public:
+
+  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
+                          int64_t sz, char type);
+
+  static c_Set* Clone(ObjectData* obj);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1119,11 +1387,11 @@ class c_SetIterator : public ExtObjectData {
   void t_rewind();
 
  private:
-  SmartPtr<c_Set> m_obj;
+  SmartPtr<BaseSet> m_obj;
   ssize_t m_pos;
   int32_t m_version;
 
-  friend class c_Set;
+  friend class BaseSet;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1353,8 +1621,6 @@ inline bool isOptimizableCollectionClass(const Class* klass) {
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
 
 void throwOOB(int64_t key) ATTRIBUTE_COLD ATTRIBUTE_NORETURN;
-
-ArrayIter getArrayIterHelper(CVarRef v, size_t& sz);
 
 ///////////////////////////////////////////////////////////////////////////////
 

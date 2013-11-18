@@ -224,6 +224,9 @@ bad_tests = (
 
     # flaky: t3201846
     '/ext/standard/tests/file/fileowner_basic.php',
+
+    # flaky: t3212114
+    '/ext/standard/tests/file/file_get_contents_variation1.php',
 )
 
 # Tests that work but not in repo mode

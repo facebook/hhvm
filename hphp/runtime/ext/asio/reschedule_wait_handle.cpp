@@ -83,19 +83,7 @@ String c_RescheduleWaitHandle::getName() {
   return s_reschedule;
 }
 
-void c_RescheduleWaitHandle::enterContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-
-  // stop before corrupting unioned data
-  if (isFinished()) {
-    return;
-  }
-
-  // already in the more specific context?
-  if (LIKELY(getContextIdx() >= ctx_idx)) {
-    return;
-  }
-
+void c_RescheduleWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
   assert(getState() == STATE_SCHEDULED);
 
   setContextIdx(ctx_idx);

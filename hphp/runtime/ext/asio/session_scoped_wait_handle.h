@@ -42,10 +42,10 @@ class c_SessionScopedWaitHandle : public c_WaitableWaitHandle {
   void t___construct();
 
  public:
-  void enterContext(context_idx_t ctx_idx);
   void exitContext(context_idx_t ctx_idx);
 
  protected:
+  void enterContextImpl(context_idx_t ctx_idx);
   virtual void registerToContext() = 0;
   virtual void unregisterFromContext() = 0;
 

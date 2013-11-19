@@ -117,13 +117,19 @@ void c_GenMapWaitHandle::initialize(CObjRef exception, c_Map* deps, ssize_t iter
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;
-  try {
-    blockOn(child);
-  } catch (const Object& cycle_exception) {
-    putException(m_exception, cycle_exception.get());
-    m_iterPos = m_deps->iter_next(m_iterPos);
-    onUnblocked();
+
+  if (isInContext()) {
+    try {
+      child->enterContext(getContextIdx());
+    } catch (const Object& cycle_exception) {
+      putException(m_exception, cycle_exception.get());
+      m_iterPos = m_deps->iter_next(m_iterPos);
+      onUnblocked();
+      return;
+    }
   }
+
+  blockOn(child);
 }
 
 void c_GenMapWaitHandle::onUnblocked() {
@@ -145,6 +151,9 @@ void c_GenMapWaitHandle::onUnblocked() {
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       try {
+        if (isInContext()) {
+          child_wh->enterContext(getContextIdx());
+        }
         detectCycle(child_wh);
         blockOn(child_wh);
         return;
@@ -174,19 +183,7 @@ c_WaitableWaitHandle* c_GenMapWaitHandle::getChild() {
       m_deps->iter_value(m_iterPos)->m_data.pobj);
 }
 
-void c_GenMapWaitHandle::enterContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-
-  // stop before corrupting unioned data
-  if (isFinished()) {
-    return;
-  }
-
-  // already in the more specific context?
-  if (LIKELY(getContextIdx() >= ctx_idx)) {
-    return;
-  }
-
+void c_GenMapWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
   assert(getState() == STATE_BLOCKED);
 
   // recursively import current child

@@ -57,7 +57,7 @@ Object c_SetResultToRefWaitHandle::ti_create(CObjRef wait_handle, VRefParam ref)
     throw e;
   }
 
-  c_WaitHandle* wh = static_cast<c_WaitHandle*>(wait_handle.get());
+  auto wh = static_cast<c_WaitHandle*>(wait_handle.get());
 
   // succeeded? set result to ref and give back succeeded wait handle
   if (wh->isSucceeded()) {
@@ -72,7 +72,13 @@ Object c_SetResultToRefWaitHandle::ti_create(CObjRef wait_handle, VRefParam ref)
   }
 
   // it's still running so it must be WaitableWaitHandle
-  c_WaitableWaitHandle* child_wh = static_cast<c_WaitableWaitHandle*>(wh);
+  auto child = static_cast<c_WaitableWaitHandle*>(wh);
+
+  // import child into the current context, detect cross-context cycles
+  auto session = AsioSession::Get();
+  if (session->isInContext()) {
+    child->enterContext(session->getCurrentContextIdx());
+  }
 
   // make sure the reference is properly boxed so that we can store cell pointer
   if (UNLIKELY(var_or_cell->m_type != KindOfRef)) {
@@ -80,11 +86,10 @@ Object c_SetResultToRefWaitHandle::ti_create(CObjRef wait_handle, VRefParam ref)
   }
 
   p_SetResultToRefWaitHandle my_wh = NEWOBJ(c_SetResultToRefWaitHandle)();
-  my_wh->initialize(child_wh, var_or_cell->m_data.pref);
+  my_wh->initialize(child, var_or_cell->m_data.pref);
 
-  AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnSetResultToRefCreateCallback())) {
-    session->onSetResultToRefCreate(my_wh.get(), child_wh);
+    session->onSetResultToRefCreate(my_wh.get(), child);
   }
 
   return my_wh;
@@ -94,11 +99,7 @@ void c_SetResultToRefWaitHandle::initialize(c_WaitableWaitHandle* child, RefData
   m_child = child;
   m_ref = ref;
   m_ref->incRefCount();
-  try {
-    blockOn(child);
-  } catch (const Object& cycle_exception) {
-    markAsFailed(cycle_exception);
-  }
+  blockOn(child);
 }
 
 void c_SetResultToRefWaitHandle::onUnblocked() {
@@ -146,19 +147,7 @@ c_WaitableWaitHandle* c_SetResultToRefWaitHandle::getChild() {
   return m_child.get();
 }
 
-void c_SetResultToRefWaitHandle::enterContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-
-  // stop before corrupting unioned data
-  if (isFinished()) {
-    return;
-  }
-
-  // already in the more specific context?
-  if (LIKELY(getContextIdx() >= ctx_idx)) {
-    return;
-  }
-
+void c_SetResultToRefWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
   assert(getState() == STATE_BLOCKED);
 
   m_child->enterContext(ctx_idx);

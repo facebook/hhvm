@@ -15,48 +15,39 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/asio/session_scoped_wait_handle.h"
-
-#include "hphp/runtime/ext/asio/asio_context.h"
-#include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
-#include "hphp/system/systemlib.h"
+#ifndef incl_HPHP_EXT_ASIO_WAITABLE_WAIT_HANDLE_H_
+#error "This should only be included by waitable_wait_handle.h"
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void c_SessionScopedWaitHandle::t___construct() {
-  throw NotSupportedException(__func__, "Cannot construct abstract class");
-}
-
-void c_SessionScopedWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
-  assert(getState() == STATE_WAITING);
-
-  if (isInContext()) {
-    unregisterFromContext();
-  }
-
-  setContextIdx(ctx_idx);
-  registerToContext();
-}
-
-void c_SessionScopedWaitHandle::exitContext(context_idx_t ctx_idx) {
+inline void
+c_WaitableWaitHandle::enterContext(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx));
-  assert(getContextIdx() == ctx_idx);
-  assert(getState() == STATE_WAITING);
 
-  // Move us to the parent context.
-  setContextIdx(getContextIdx() - 1);
-
-  // Re-register if still in a context.
-  if (isInContext()) {
-    registerToContext();
+  // Already in a more specific context?
+  if (LIKELY(getContextIdx() >= ctx_idx)) {
+    return;
   }
 
-  // Recursively move all wait handles blocked by us.
-  for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
-    pwh->exitContextBlocked(ctx_idx);
-  }
+  // If this wait handle is being finished and there is a parent A that is being
+  // unblocked and a parent B that was not unblocked yet, it is possible that
+  // the parent A triggered an enterContext() that reaches us back thru the
+  // parent B. Fortunately, parent's context is always equal or smaller, so
+  // the condition above handles !isFinished() case.
+  assert(!isFinished());
+
+  enterContextImpl(ctx_idx);
+}
+
+inline c_BlockableWaitHandle*
+c_WaitableWaitHandle::addParent(c_BlockableWaitHandle* parent) {
+  assert(!isFinished());
+
+  auto prev = m_firstParent;
+  m_firstParent = parent;
+  return prev;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

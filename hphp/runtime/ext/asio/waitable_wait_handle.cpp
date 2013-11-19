@@ -86,12 +86,6 @@ Array c_WaitableWaitHandle::t_getparents() {
   return result;
 }
 
-c_BlockableWaitHandle* c_WaitableWaitHandle::addParent(c_BlockableWaitHandle* parent) {
-  c_BlockableWaitHandle* prev = m_firstParent;
-  m_firstParent = parent;
-  return prev;
-}
-
 void c_WaitableWaitHandle::setResult(const Cell& result) {
   assert(cellIsPlausible(result));
 

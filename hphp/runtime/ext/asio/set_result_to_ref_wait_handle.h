@@ -50,11 +50,11 @@ class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
 
  public:
   String getName();
-  void enterContext(context_idx_t ctx_idx);
 
  protected:
   void onUnblocked();
   c_WaitableWaitHandle* getChild();
+  void enterContextImpl(context_idx_t ctx_idx);
 
  private:
   void initialize(c_WaitableWaitHandle* wait_handle, RefData* ref);

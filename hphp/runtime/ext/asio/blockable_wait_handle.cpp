@@ -29,29 +29,6 @@ void c_BlockableWaitHandle::t___construct() {
   throw NotSupportedException(__func__, "WTF? This is an abstract class");
 }
 
-// throws on cycle
-void c_BlockableWaitHandle::blockOn(c_WaitableWaitHandle* child) {
-  setState(STATE_BLOCKED);
-  assert(getChild() == child);
-  assert(!isDescendantOf(child));
-
-  // make sure the child is going to do some work
-  // throws if cross-context cycle found
-  if (isInContext()) {
-    child->enterContext(getContextIdx());
-  }
-
-  // extend the linked list of parents
-  m_nextParent = child->addParent(this);
-
-  // increment ref count so that we won't deallocated before child calls back
-  incRefCount();
-}
-
-c_BlockableWaitHandle* c_BlockableWaitHandle::getNextParent() {
-  return m_nextParent;
-}
-
 c_BlockableWaitHandle* c_BlockableWaitHandle::unblock() {
   c_BlockableWaitHandle* next = m_nextParent;
 

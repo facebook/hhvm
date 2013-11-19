@@ -15,48 +15,27 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/asio/session_scoped_wait_handle.h"
-
-#include "hphp/runtime/ext/asio/asio_context.h"
-#include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
-#include "hphp/system/systemlib.h"
+#ifndef incl_HPHP_EXT_ASIO_BLOCKABLE_WAIT_HANDLE_H_
+#error "This should only be included by blockable_wait_handle.h"
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void c_SessionScopedWaitHandle::t___construct() {
-  throw NotSupportedException(__func__, "Cannot construct abstract class");
-}
+inline void
+c_BlockableWaitHandle::blockOn(c_WaitableWaitHandle* child) {
+  setState(STATE_BLOCKED);
 
-void c_SessionScopedWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
-  assert(getState() == STATE_WAITING);
+  assert(!child->isFinished());
+  assert(getChild() == child);
+  assert(getContextIdx() == child->getContextIdx());
+  assert(!isDescendantOf(child));
 
-  if (isInContext()) {
-    unregisterFromContext();
-  }
+  // Extend the linked list of parents.
+  m_nextParent = child->addParent(this);
 
-  setContextIdx(ctx_idx);
-  registerToContext();
-}
-
-void c_SessionScopedWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-  assert(getContextIdx() == ctx_idx);
-  assert(getState() == STATE_WAITING);
-
-  // Move us to the parent context.
-  setContextIdx(getContextIdx() - 1);
-
-  // Re-register if still in a context.
-  if (isInContext()) {
-    registerToContext();
-  }
-
-  // Recursively move all wait handles blocked by us.
-  for (auto pwh = getFirstParent(); pwh; pwh = pwh->getNextParent()) {
-    pwh->exitContextBlocked(ctx_idx);
-  }
+  // Increment ref count so that we won't disappear before child calls back.
+  incRefCount();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -84,6 +84,7 @@ void c_AsyncFunctionWaitHandle::ti_setonfailcallback(CVarRef callback) {
 
 void c_AsyncFunctionWaitHandle::Create(c_Continuation* continuation) {
   assert(continuation);
+  assert(continuation->m_label > 0);
   assert(continuation->m_waitHandle.isNull());
 
   AsioSession* session = AsioSession::Get();
@@ -94,16 +95,18 @@ void c_AsyncFunctionWaitHandle::Create(c_Continuation* continuation) {
     throw e;
   }
 
-  if (UNLIKELY(continuation->started())) {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      continuation->running()
-      ? "Encountered an attempt to start currently running continuation"
-      : "Encountered an attempt to start tainted continuation"));
-    throw e;
+  Cell* value = tvAssertCell(continuation->m_value.asTypedValue());
+  assert(dynamic_cast<c_WaitableWaitHandle*>(c_WaitHandle::fromCell(value)));
+  auto child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
+  assert(!child->isFinished());
+
+  // import child into the current context, detect cross-context cycles
+  if (session->isInContext()) {
+    child->enterContext(session->getCurrentContextIdx());
   }
 
   continuation->m_waitHandle = NEWOBJ(c_AsyncFunctionWaitHandle)();
-  continuation->m_waitHandle->initialize(continuation, depth + 1);
+  continuation->m_waitHandle->initialize(continuation, child, depth + 1);
 
   // needs to be called after continuation->m_waitHandle is set
   if (UNLIKELY(session->hasOnAsyncFunctionCreateCallback())) {
@@ -119,19 +122,15 @@ void c_AsyncFunctionWaitHandle::t_setprivdata(CObjRef data) {
   m_privData = data;
 }
 
-void c_AsyncFunctionWaitHandle::initialize(c_Continuation* continuation, uint16_t depth) {
-  assert(continuation->m_label > 0);
+void c_AsyncFunctionWaitHandle::initialize(c_Continuation* continuation,
+                                           c_WaitableWaitHandle* child,
+                                           uint16_t depth) {
   continuation->start();
 
-  Cell* value = tvAssertCell(continuation->m_value.asTypedValue());
-  assert(dynamic_cast<c_WaitableWaitHandle*>(c_WaitHandle::fromCell(value)));
-
   m_continuation = continuation;
-  m_child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
+  m_child = child;
   m_privData = nullptr;
   m_depth = depth;
-
-  assert(!m_child->isFinished());
   blockOn(m_child.get());
 }
 
@@ -170,6 +169,14 @@ void c_AsyncFunctionWaitHandle::run() {
     m_child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
     assert(!m_child->isFinished());
 
+    // import child into the current context, detect cross-context cycles
+    try {
+      m_child->enterContext(getContextIdx());
+    } catch (Object& e) {
+      m_continuation->call_raise(e.get());
+      goto retry;
+    }
+
     // detect cycles
     if (UNLIKELY(isDescendantOf(m_child.get()))) {
       Object e(createCycleException(m_child.get()));
@@ -186,7 +193,7 @@ void c_AsyncFunctionWaitHandle::run() {
     // set up dependency
     blockOn(m_child.get());
   } catch (const Object& exception) {
-    // process exception thrown by generator or blockOn cycle detection
+    // process exception thrown by the async function
     markAsFailed(exception);
   } catch (...) {
     // process C++ exception
@@ -261,19 +268,7 @@ c_WaitableWaitHandle* c_AsyncFunctionWaitHandle::getChild() {
   }
 }
 
-void c_AsyncFunctionWaitHandle::enterContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-
-  // stop before corrupting unioned data
-  if (isFinished()) {
-    return;
-  }
-
-  // already in the more specific context?
-  if (LIKELY(getContextIdx() >= ctx_idx)) {
-    return;
-  }
-
+void c_AsyncFunctionWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
   switch (getState()) {
     case STATE_BLOCKED:
       // enter child into new context recursively

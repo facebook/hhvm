@@ -48,11 +48,11 @@ class c_GenMapWaitHandle : public c_BlockableWaitHandle {
 
  public:
   String getName();
-  void enterContext(context_idx_t ctx_idx);
 
  protected:
   void onUnblocked();
   c_WaitableWaitHandle* getChild();
+  void enterContextImpl(context_idx_t ctx_idx);
 
  private:
   void initialize(CObjRef exception, c_Map* deps,

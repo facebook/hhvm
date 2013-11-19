@@ -53,7 +53,6 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   void run();
   uint16_t getDepth() { return m_depth; }
   String getName();
-  void enterContext(context_idx_t ctx_idx);
   void exitContext(context_idx_t ctx_idx);
   bool isRunning() { return getState() == STATE_RUNNING; }
   String getFileName();
@@ -63,9 +62,11 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
  protected:
   void onUnblocked();
   c_WaitableWaitHandle* getChild();
+  void enterContextImpl(context_idx_t ctx_idx);
 
  private:
-  void initialize(c_Continuation* continuation, uint16_t depth);
+  void initialize(c_Continuation* continuation, c_WaitableWaitHandle* child,
+                  uint16_t depth);
   void markAsSucceeded(const Cell& result);
   void markAsFailed(CObjRef exception);
 

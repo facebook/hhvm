@@ -45,7 +45,7 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   void t___construct();
 
  public:
-  c_BlockableWaitHandle* getNextParent();
+  c_BlockableWaitHandle* getNextParent() { return m_nextParent; }
   c_BlockableWaitHandle* unblock();
 
   void exitContextBlocked(context_idx_t ctx_idx);
@@ -65,5 +65,7 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#include "hphp/runtime/ext/asio/blockable_wait_handle-inl.h"
 
 #endif // incl_HPHP_EXT_ASIO_BLOCKABLE_WAIT_HANDLE_H_

@@ -48,6 +48,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   Array t_getdependencystack();
 
  public:
+  context_idx_t getContextIdx() { return o_subclassData.u8[1]; }
   AsioContext* getContext() {
     assert(isInContext());
     return AsioSession::Get()->getContext(getContextIdx());
@@ -55,14 +56,13 @@ class c_WaitableWaitHandle : public c_WaitHandle {
 
   c_BlockableWaitHandle* addParent(c_BlockableWaitHandle* parent);
 
-  virtual void enterContext(context_idx_t ctx_idx) = 0;
+  void enterContext(context_idx_t ctx_idx);
   void join();
 
  protected:
   void setResult(const Cell& result);
   void setException(ObjectData* exception);
 
-  context_idx_t getContextIdx() { return o_subclassData.u8[1]; }
   void setContextIdx(context_idx_t ctx_idx) { o_subclassData.u8[1] = ctx_idx; }
 
   bool isInContext() { return getContextIdx(); }
@@ -70,6 +70,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   c_BlockableWaitHandle* getFirstParent() { return m_firstParent; }
 
   virtual c_WaitableWaitHandle* getChild();
+  virtual void enterContextImpl(context_idx_t ctx_idx) = 0;
   bool isDescendantOf(c_WaitableWaitHandle* wait_handle) const;
 
   static const int8_t STATE_NEW       = 2;
@@ -81,5 +82,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#include "hphp/runtime/ext/asio/waitable_wait_handle-inl.h"
 
 #endif // incl_HPHP_EXT_ASIO_WAITABLE_WAIT_HANDLE_H_

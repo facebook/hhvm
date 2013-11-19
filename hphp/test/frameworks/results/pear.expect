@@ -185,13 +185,13 @@ frameworks/pear-core/tests/PEAR_Command_Package/package-dependencies/test_v2.php
 frameworks/pear-core/tests/PEAR_Command_Package/package-validate/test.phpt
 .
 frameworks/pear-core/tests/PEAR_Command_Package/package-validate/test_fail.phpt
-F
+.
 frameworks/pear-core/tests/PEAR_Command_Package/package/test_bug11318.phpt
 .
 frameworks/pear-core/tests/PEAR_Command_Package/package/test_fail.phpt
-F
+.
 frameworks/pear-core/tests/PEAR_Command_Package/package/test_fail_multiple.phpt
-F
+.
 frameworks/pear-core/tests/PEAR_Command_Package/package/test_v1.phpt
 .
 frameworks/pear-core/tests/PEAR_Command_Package/package/test_v2.phpt
@@ -203,7 +203,7 @@ frameworks/pear-core/tests/PEAR_Command_Package/package/test_warning.phpt
 frameworks/pear-core/tests/PEAR_Command_Pickle/pickle/test.phpt
 .
 frameworks/pear-core/tests/PEAR_Command_Registry/info/test_fail.phpt
-F
+.
 frameworks/pear-core/tests/PEAR_Command_Registry/info/test_installed1.0.phpt
 .
 frameworks/pear-core/tests/PEAR_Command_Registry/info/test_installed2.0.phpt
@@ -313,7 +313,7 @@ frameworks/pear-core/tests/PEAR_Common/test_infoFromString_invalidpackageversion
 frameworks/pear-core/tests/PEAR_Common/test_infoFromString_invalidpackagexml.phpt
 .
 frameworks/pear-core/tests/PEAR_Common/test_infoFromString_invalidxml.phpt
-F
+.
 frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml1.phpt
 .
 frameworks/pear-core/tests/PEAR_Common/test_infoFromString_partiallyemptypackagexml2.phpt
@@ -565,7 +565,7 @@ frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstra
 frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidabstractpackage4.phpt
 .
 frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_invalidpackagexml.phpt
-F
+.
 frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_packagexml.phpt
 .
 frameworks/pear-core/tests/PEAR_Downloader_Package/test_initialize_packagexml_offline.phpt
@@ -839,7 +839,7 @@ frameworks/pear-core/tests/PEAR_Installer_Role_Common/test_processInstallation.p
 frameworks/pear-core/tests/PEAR_PackageFile/v1/Parser/test_basicparse.phpt
 .
 frameworks/pear-core/tests/PEAR_PackageFile/v1/Parser/test_invalidxmlparse.phpt
-F
+.
 frameworks/pear-core/tests/PEAR_PackageFile/v1/test_addConfigureoption.phpt
 .
 frameworks/pear-core/tests/PEAR_PackageFile/v1/test_addConfigureoption_invalid.phpt
@@ -1128,8 +1128,6 @@ frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_bug8622.phpt
 .
 frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_compatible.phpt
 .
-frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents.phpt
-.
 frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents_bundle.phpt
 .
 frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_contents_has_fileroot.phpt
@@ -1189,11 +1187,11 @@ frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_optional_deps.phpt
 frameworks/pear-core/tests/PEAR_PackageFile_v2_Validator/test_required_deps.phpt
 .
 frameworks/pear-core/tests/PEAR_Packager/test_fail.phpt
-F
+.
 frameworks/pear-core/tests/PEAR_Packager/test_fail_bug10938.phpt
 .
 frameworks/pear-core/tests/PEAR_Packager/test_fail_multiple.phpt
-F
+.
 frameworks/pear-core/tests/PEAR_Packager/test_v1.phpt
 .
 frameworks/pear-core/tests/PEAR_Packager/test_v2.phpt

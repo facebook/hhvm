@@ -1176,11 +1176,11 @@ class Mediawiki extends Framework {
   }
 
   protected function install(): void {
+    parent::install();
     verbose("Adding LocalSettings.php file to Mediawiki test dir.\n",
             Options::$verbose);
     $touch_command = "touch ".$this->getInstallRoot()."/LocalSettings.php";
     exec($touch_command);
-    parent::install();
   }
 }
 

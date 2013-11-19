@@ -18,7 +18,8 @@ translate: translates a hex-encoded stacktrace.
 = -c, --config=FILE
 
 This reads in a configuration file to set options. FILE should be in HDF
-format.
+format. If no file is specified, the one in /etc/hhvm/config.hdf will be used
+if it exists.
 
 = -v, --config-value=STRING
 

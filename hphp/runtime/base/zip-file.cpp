@@ -25,6 +25,7 @@ namespace HPHP {
 ZipFile::ZipFile() : m_gzFile(nullptr) {
   m_innerFile = NEWOBJ(PlainFile)();
   m_isLocal = true;
+  m_eof = false;
 }
 
 ZipFile::~ZipFile() {
@@ -76,6 +77,15 @@ bool ZipFile::closeImpl() {
 int64_t ZipFile::readImpl(char *buffer, int64_t length) {
   assert(m_gzFile);
   int64_t nread = gzread(m_gzFile, buffer, length);
+  if (nread == 0 || gzeof(m_gzFile)) {
+    m_eof = true;
+  } else {
+    errno = 0;
+    gzerror(m_gzFile, &errno);
+    if (errno == 1) { // Z_STREAM_END = 1
+      m_eof = true;
+    }
+  }
   return (nread < 0) ? 0 : nread;
 }
 
@@ -86,22 +96,49 @@ int64_t ZipFile::writeImpl(const char *buffer, int64_t length) {
 
 bool ZipFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   assert(m_gzFile);
-  int64_t newoffset = gzseek(m_gzFile, offset, whence);
-  return (newoffset < 0) ? -1 : 0;
+
+  if (whence == SEEK_CUR) {
+    off_t result = gzseek(m_gzFile, 0, SEEK_CUR);
+    if (result != (off_t)-1) {
+      offset += result - (m_writepos - m_readpos + m_position);
+    }
+    if (offset > 0 && offset < m_writepos - m_readpos) {
+      m_readpos += offset;
+      m_position += offset;
+      return true;
+    }
+    offset += m_position;
+    whence = SEEK_SET;
+  }
+
+  // invalidate the current buffer
+  m_writepos = 0;
+  m_readpos = 0;
+  m_eof = false;
+  flush();
+  off_t result = gzseek(m_gzFile, offset, whence);
+  m_position = result;
+  return result != (off_t)-1;
 }
 
 int64_t ZipFile::tell() {
   assert(m_gzFile);
-  return gztell(m_gzFile);
+  return m_position;
 }
 
 bool ZipFile::eof() {
   assert(m_gzFile);
-  return gzeof(m_gzFile);
+  int64_t avail = m_writepos - m_readpos;
+  return avail > 0 ? false : m_eof;
 }
 
 bool ZipFile::rewind() {
   assert(m_gzFile);
+  seek(0);
+  m_writepos = 0;
+  m_readpos = 0;
+  m_position = 0;
+  m_eof = false;
   gzrewind(m_gzFile);
   return true;
 }

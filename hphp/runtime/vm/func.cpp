@@ -144,14 +144,22 @@ void Func::resetPrologue(int numParams) {
 }
 
 void Func::initPrologues(int numParams) {
-  auto const& stubs = tx64->uniqueStubs;
-
-  m_funcBody = stubs.funcBodyHelperThunk;
-
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numPrologues =
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
+
+  if (tx64 == nullptr) {
+    m_funcBody = nullptr;
+    for (int i = 0; i < numPrologues; i++) {
+      m_prologueTable[i] = nullptr;
+    }
+    return;
+  }
+
+  auto const& stubs = tx64->uniqueStubs;
+
+  m_funcBody = stubs.funcBodyHelperThunk;
 
   TRACE(2, "initPrologues func %p %d\n", this, numPrologues);
   for (int i = 0; i < numPrologues; i++) {
@@ -243,8 +251,10 @@ Func::~Func() {
   int numPrologues =
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
-  tx64->smashPrologueGuards((TCA *)m_prologueTable,
-                                            numPrologues, this);
+  if (tx64 != nullptr) {
+    tx64->smashPrologueGuards((TCA *)m_prologueTable,
+                              numPrologues, this);
+  }
 #ifdef DEBUG
   validate();
   m_magic = ~m_magic;

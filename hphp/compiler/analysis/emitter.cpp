@@ -3264,6 +3264,26 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.False();
           e.ArrayIdx();
           return true;
+        } else if (call->isCallToFunction("array_slice") &&
+                   !m_curFunc->isGenerator() &&
+                   params && params->getCount() == 2 &&
+                   !Option::JitEnableRenameFunction) {
+          ExpressionPtr p0 = (*params)[0];
+          ExpressionPtr p1 = (*params)[1];
+          Variant v1;
+          if (p0->getKindOf() == Expression::KindOfSimpleFunctionCall &&
+              p1->getScalarValue(v1) && v1.isInteger()) {
+            SimpleFunctionCallPtr innerCall(
+              static_pointer_cast<SimpleFunctionCall>(p0));
+            ExpressionListPtr innerParams = innerCall->getParams();
+            if (innerCall->isCallToFunction("func_get_args") &&
+                (!innerParams || innerParams->getCount() == 0)) {
+              params->removeElement(0);
+              emitFuncCall(e, innerCall, "hphp_func_slice_args", params);
+              return true;
+            }
+          }
+          // fall through
         } else if (call->isCallToFunction("abs")) {
           if (params && params->getCount() == 1) {
             visit((*params)[0]);
@@ -6468,10 +6488,14 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   return f;
 }
 
-void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node) {
+void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
+                                  const char* nameOverride,
+                                  ExpressionListPtr paramsOverride) {
   ExpressionPtr nameExp = node->getNameExp();
-  const std::string& nameStr = node->getOriginalName();
-  ExpressionListPtr params(node->getParams());
+  const std::string& nameStr = nameOverride ? nameOverride :
+                                              node->getOriginalName();
+  ExpressionListPtr params(paramsOverride ? paramsOverride :
+                                            node->getParams());
   int numParams = params ? params->getCount() : 0;
   Func* fcallBuiltin = nullptr;
   StringData* nLiteral = nullptr;

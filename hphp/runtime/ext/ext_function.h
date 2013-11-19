@@ -57,8 +57,13 @@ Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos);
  * parameters to help the implementation.
  */
 Variant f_func_get_args();
-Array hhvm_get_frame_args(const ActRec* ar);
+Array hhvm_get_frame_args(const ActRec* ar, int offset);
 Array func_get_args(int num_args, CArrRef params, CArrRef args);
+
+/**
+ * HipHop extension that allows requesting only a subset of function arguments.
+ */
+Variant f_hphp_func_slice_args(int offset);
 
 /**
  * HPHP actually inlines this function, so this is degenerated.

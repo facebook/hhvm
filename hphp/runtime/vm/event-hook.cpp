@@ -86,7 +86,7 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
 
   if (mode == ProfileEnter) {
     params.append(s_enter);
-    frameinfo.set(s_args, hhvm_get_frame_args(ar));
+    frameinfo.set(s_args, hhvm_get_frame_args(ar, 0));
   } else {
     params.append(s_exit);
     if (!g_vmContext->m_faults.empty()) {

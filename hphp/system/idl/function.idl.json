@@ -323,6 +323,24 @@
             ]
         },
         {
+            "name": "hphp_func_slice_args",
+            "desc": "For internal use only, used to merge array_slice() with func_get_args() while avoiding unnecessary copies and allocations. This should not be called directly.",
+            "flags": [
+            ],
+            "return": {
+                "type": "Variant",
+                "desc": "Returns an array in which each element is a copy of the request corresponding members of the current user-defined function's argument list.",
+                "predicted_type": 10
+            },
+            "args": [
+                {
+                    "name": "offset",
+                    "type": "Int32",
+                    "desc": "The offset into the function arguments at which to start."
+                }
+            ]
+        },
+        {
             "name": "func_num_args",
             "desc": "Gets the number of arguments passed to the function.\n\nThis function may be used in conjunction with func_get_arg() and func_get_args() to allow user-defined functions to accept variable-length argument lists.",
             "flags": [

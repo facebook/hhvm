@@ -329,18 +329,19 @@ Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos) {
   return false;
 }
 
-Array hhvm_get_frame_args(const ActRec* ar) {
+Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   if (ar == NULL) {
     return Array();
   }
   int numParams = ar->m_func->numParams();
   int numArgs = ar->numArgs();
 
-  PackedArrayInit retInit(numArgs);
+  PackedArrayInit retInit(std::max(numArgs - offset, 0));
   auto local = reinterpret_cast<TypedValue*>(
     uintptr_t(ar) - sizeof(TypedValue)
   );
-  for (int i = 0; i < numArgs; ++i) {
+  local -= offset;
+  for (int i = offset; i < numArgs; ++i) {
     if (i < numParams) {
       // This corresponds to one of the function's formal parameters, so it's
       // on the stack.
@@ -355,16 +356,20 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   return retInit.toArray();
 }
 
+#define FUNC_GET_ARGS_IMPL(offset) do {                                        \
+  EagerCallerFrame cf;                                                         \
+  ActRec* ar = cf.actRecForArgs();                                             \
+  if (ar && ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {             \
+    raise_warning(                                                             \
+      "func_get_args():  Called from the global scope - no function context"   \
+    );                                                                         \
+    return false;                                                              \
+  }                                                                            \
+  return hhvm_get_frame_args(ar, offset);                                      \
+} while(0)
+
 Variant f_func_get_args() {
-  EagerCallerFrame cf;
-  ActRec* ar = cf.actRecForArgs();
-  if (ar && ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
-    raise_warning(
-      "func_get_args():  Called from the global scope - no function context"
-    );
-    return false;
-  }
-  return hhvm_get_frame_args(ar);
+  FUNC_GET_ARGS_IMPL(0);
 }
 
 Array func_get_args(int num_args, CArrRef params, CArrRef args) {
@@ -385,6 +390,13 @@ Array func_get_args(int num_args, CArrRef params, CArrRef args) {
   assert(num_args > params.size());
   Array ret = Array(params).merge(derefArgs);
   return ret;
+}
+
+Variant f_hphp_func_slice_args(int offset) {
+  if (offset < 0) {
+    offset = 0;
+  }
+  FUNC_GET_ARGS_IMPL(offset);
 }
 
 int64_t f_func_num_args() {

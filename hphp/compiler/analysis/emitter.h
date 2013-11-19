@@ -676,7 +676,9 @@ public:
 
   bool emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr node);
   Func* canEmitBuiltinCall(const std::string& name, int numParams);
-  void emitFuncCall(Emitter& e, FunctionCallPtr node);
+  void emitFuncCall(Emitter& e, FunctionCallPtr node,
+                    const char* nameOverride = nullptr,
+                    ExpressionListPtr paramsOverride = nullptr);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
   void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                          bool byRef);

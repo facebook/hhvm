@@ -1026,7 +1026,8 @@
             "name": "DateTime",
             "desc": "Representation of date and time.",
             "flags": [
-                "NoDefaultSweep"
+                "NoDefaultSweep",
+                "IsCppSerializable"
             ],
             "footer": "\n private:\n  SmartObject<DateTime> m_dt;\n public:\n  virtual ObjectData *clone();",
             "funcs": [
@@ -1334,6 +1335,26 @@
                             "type": "Object",
                             "desc": "DateInterval object containing the time to subtract."
                         }
+                    ]
+                },
+                {
+                    "name": "__sleep",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "StringVec"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__wakeup",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
                     ]
                 }
             ],

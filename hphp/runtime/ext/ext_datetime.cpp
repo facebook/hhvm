@@ -188,6 +188,20 @@ Object c_DateTime::t_sub(CObjRef interval) {
   return this;
 }
 
+const StaticString
+  s_c("c"),
+  s__date_time("_date_time");
+
+Array c_DateTime::t___sleep() {
+  o_set(s__date_time, t_format(s_c));
+  return make_packed_array(s__date_time);
+}
+
+void c_DateTime::t___wakeup() {
+  t___construct(o_get(s__date_time));
+  unsetProp(getVMClass(), s__date_time.get());
+}
+
 c_DateTime* c_DateTime::Clone(ObjectData* obj) {
   c_DateTime* dt = static_cast<c_DateTime*>(obj->cloneImpl());
   dt->m_dt = static_cast<c_DateTime*>(obj)->m_dt->cloneDateTime();

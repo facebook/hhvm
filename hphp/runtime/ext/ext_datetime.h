@@ -69,6 +69,8 @@ class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
   public: Object t_settimestamp(int64_t unixtimestamp);
   public: Object t_settimezone(CObjRef timezone);
   public: Object t_sub(CObjRef interval);
+  public: void t___wakeup();
+  public: Array t___sleep();
 
   int64_t gettimestamp() const;
 

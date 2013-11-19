@@ -2392,8 +2392,13 @@ void Class::getChildren(std::vector<TypedValue*>& out) {
 // True if a CPP extension class has opted into serialization.
 bool Class::isCppSerializable() const {
   assert(instanceCtor()); // Only call this on CPP classes
-  return clsInfo() &&
-    (clsInfo()->getAttribute() & ClassInfo::IsCppSerializable);
+  auto info = clsInfo();
+  auto p = this;
+  while ((!info) && (p = p->parent())) {
+    info = p->clsInfo();
+  }
+  return info &&
+    (info->getAttribute() & ClassInfo::IsCppSerializable);
 }
 
 bool Class::isCollectionClass() const {

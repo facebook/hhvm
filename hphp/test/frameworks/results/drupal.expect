@@ -187,9 +187,9 @@ Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightProperty with data
 Drupal\Tests\Component\Utility\SortArrayTest::testSortByWeightProperty with data set #5 
 .
 Drupal\Tests\Component\Utility\StringTest::testCheckPlain with data set #0 
-F
+.
 Drupal\Tests\Component\Utility\StringTest::testCheckPlain with data set #1 
-F
+.
 Drupal\Tests\Component\Utility\StringTest::testCheckPlain with data set #2 
 .
 Drupal\Tests\Component\Utility\StringTest::testCheckPlain with data set #3 
@@ -991,9 +991,9 @@ Drupal\Tests\Core\Entity\EntityCreateAccessCheckTest::testAccess with data set #
 Drupal\Tests\Core\Entity\EntityCreateAccessCheckTest::testAppliesTo
 .
 Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #0 
-F
+.
 Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #1 
-F
+.
 Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #2 
 .
 Drupal\Tests\Core\Entity\EntityListControllerTest::testBuildRow with data set #3 

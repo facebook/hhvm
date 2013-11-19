@@ -32,12 +32,6 @@ Application_Octetstream_Hex_Test::testGetMIMEType
 .
 Application_Octetstream_Hex_Test::testGetName
 .
-Environment_Test::testMySQL
-S
-Environment_Test::testPhpVersion
-.
-Environment_Test::testSession
-I
 Image_JPEG_Inline_Test::testGetInfo
 FATAL
 Image_JPEG_Link_Test::testGetInfo
@@ -67,9 +61,11 @@ ImportMediawiki_Test::testDoImport
 ImportMediawiki_Test::testGetProperties
 .
 ImportOds_Test::testGetProperties
-FATAL
+UNKNOWN STATUS
+ImportShp_Test::testDoImport
+UNKNOWN STATUS
 ImportShp_Test::testGetProperties
-FATAL
+.
 ImportSql_Test::testDoImport
 .
 ImportXml_Test::testDoImport
@@ -826,8 +822,22 @@ PMA_ExportOdt_Test::testExportHeader
 .
 PMA_ExportOdt_Test::testSetProperties
 .
+PMA_ExportPdf_Test::testExportDBCreate
+.
+PMA_ExportPdf_Test::testExportDBFooter
+.
+PMA_ExportPdf_Test::testExportDBHeader
+.
+PMA_ExportPdf_Test::testExportData
+.
+PMA_ExportPdf_Test::testExportFooter
+.
 PMA_ExportPdf_Test::testExportHeader
-FATAL
+.
+PMA_ExportPdf_Test::testSetGetPdf
+.
+PMA_ExportPdf_Test::testSetGetPdfTitle
+.
 PMA_ExportPdf_Test::testSetProperties
 .
 PMA_ExportPhparray_Test::testExportDBCreate
@@ -962,12 +972,18 @@ PMA_FileReader_Test::testRead
 .
 PMA_FileReader_Test::testSeekto
 .
+PMA_File_Test::testBinaryContent with data set #0 
+.
+PMA_File_Test::testBinaryContent with data set #1 
+.
+PMA_File_Test::testBinaryContent with data set #2 
+.
 PMA_File_Test::testContent with data set #0 
 .
 PMA_File_Test::testContent with data set #1 
 .
 PMA_File_Test::testContent with data set #2 
-FATAL
+.
 PMA_File_Test::testMIME with data set #0 
 .
 PMA_File_Test::testMIME with data set #1 
@@ -1352,8 +1368,6 @@ PMA_GetRealSize_Test::testNull
 .
 PMA_GetRealSize_Test::testUnspecified
 .
-PMA_GetTableCount_Test::testTableCount
-UNKNOWN STATUS
 PMA_GetTitleForTarget_Test::testGetTitleForTarget with data set #0 
 .
 PMA_GetTitleForTarget_Test::testGetTitleForTarget with data set #1 
@@ -2702,8 +2716,6 @@ PMA_SetupIndex_Test::testPMAmessagesSet
 .
 PMA_ShowDocu_Test::testShowDocu
 .
-PMA_ShowMessage_Test::testShowMessageNotAjax
-FATAL
 PMA_ShowPHPDocu_Test::testShowPHPDocu
 .
 PMA_SqlQueryForm_Test::testPMAGetHtmlForSqlQueryForm
@@ -3627,7 +3639,9 @@ PMA_WarnMissingExtension_Test::testMissingExtensionFatalWithExtra
 PMA_WhichCrlf_Test::testWhichCrlf
 .
 PMA_ZipExtension_Test::testGetZipContents with data set #0 
-FATAL
+.
+PMA_ZipExtension_Test::testGetZipContents with data set #1 
+UNKNOWN STATUS
 PMA_Zip_Test::testAddFile
 .
 PMA_Zip_Test::testFile
@@ -3644,44 +3658,6 @@ ParsingTest::test_npgettext with data set #0
 .
 ParsingTest::test_npgettext with data set #1 
 .
-PmaSeleniumCreateDropDatabaseTest::testCreateDropDatabase
-UNKNOWN STATUS
-PmaSeleniumCreateRemoveUserTest::testCreateRemoveUser
-UNKNOWN STATUS
-PmaSeleniumDbEventsTest::testAddEvent
-UNKNOWN STATUS
-PmaSeleniumDbOperationsTest::testDbComment
-UNKNOWN STATUS
-PmaSeleniumDbProceduresTest::testAddProcedure
-UNKNOWN STATUS
-PmaSeleniumDbStructureTest::testTruncateTable
-UNKNOWN STATUS
-PmaSeleniumDbTriggersTest::testAddTrigger
-UNKNOWN STATUS
-PmaSeleniumExportTest::testServerImport with data set #0 
-UNKNOWN STATUS
-PmaSeleniumImportTest::testServerImport
-UNKNOWN STATUS
-PmaSeleniumLoginTest::testSuccessfulLogin
-UNKNOWN STATUS
-PmaSeleniumPrivilegesTest::testChangePassword
-UNKNOWN STATUS
-PmaSeleniumSettingsTest::testHideDatabase
-UNKNOWN STATUS
-PmaSeleniumTableBrowseTest::testSortRecords
-UNKNOWN STATUS
-PmaSeleniumTableCreateTest::testCreateTable
-UNKNOWN STATUS
-PmaSeleniumTableInsertTest::testAddData
-UNKNOWN STATUS
-PmaSeleniumTableOperationsTest::testChangeTableOrder
-UNKNOWN STATUS
-PmaSeleniumTableStructureTest::testAddColumn
-UNKNOWN STATUS
-PmaSeleniumTrackingTest::testTrackingData
-UNKNOWN STATUS
-PmaSeleniumXSSTest::testQueryTabWithNullValue
-UNKNOWN STATUS
 Text_Plain_Append_Test::testApplyTransformation
 .
 Text_Plain_Append_Test::testGetInfo

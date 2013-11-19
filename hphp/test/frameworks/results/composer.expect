@@ -1,5 +1,5 @@
 Composer\Repository\ArtifactRepositoryTest::testExtractsConfigsFromZipArchives
-E
+.
 Composer\Repository\FilesystemRepositoryTest::testCorruptedRepositoryFile
 .
 Composer\Repository\FilesystemRepositoryTest::testRepositoryRead
@@ -95,7 +95,7 @@ Composer\Test\Autoload\ClassMapGeneratorTest::testFindClassesThrowsWhenFileDoesN
 Composer\Test\CacheTest::testRemoveFilesWhenCacheIsTooLarge
 .
 Composer\Test\CacheTest::testRemoveOutdatedFiles
-.
+F
 Composer\Test\Command\InitCommandTest::testParseAuthorStringWithInvalidEmail
 .
 Composer\Test\Command\InitCommandTest::testParseEmptyAuthorString
@@ -403,7 +403,7 @@ Composer\Test\Downloader\PearPackageExtractorTest::testShouldExtractPackage_2_1
 Composer\Test\Downloader\PearPackageExtractorTest::testShouldPerformReplacements
 .
 Composer\Test\Downloader\ZipDownloaderTest::testErrorMessages
-E
+.
 Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherCanExecuteCliAndPhpInSameEventScriptStack
 .
 Composer\Test\EventDispatcher\EventDispatcherTest::testDispatcherCanExecuteSingleCommandLineScript with data set #0 
@@ -1469,9 +1469,9 @@ Composer\Test\Util\RemoteFilesystemTest::testCallbackGetNotifyProgress
 Composer\Test\Util\RemoteFilesystemTest::testCaptureAuthenticationParamsFromUrl
 F
 Composer\Test\Util\RemoteFilesystemTest::testCopy
-.
+E
 Composer\Test\Util\RemoteFilesystemTest::testGetContents
-.
+E
 Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrl
 .
 Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrlWithAuthorization

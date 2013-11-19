@@ -292,10 +292,6 @@ Doctrine\Tests\ORM\Functional\BasicFunctionalTest::testTextColumnSaveAndRetrieve
 .
 Doctrine\Tests\ORM\Functional\BasicFunctionalTest::testWrongAssociationInstance
 .
-Doctrine\Tests\ORM\Functional\ClassTableInheritanceTest2::testManyToManyToCTIHierarchy
-.
-Doctrine\Tests\ORM\Functional\ClassTableInheritanceTest2::testOneToOneAssocToBaseTypeBidirectional
-.
 Doctrine\Tests\ORM\Functional\ClassTableInheritanceTest::testBulkUpdateIssueDDC368
 .
 Doctrine\Tests\ORM\Functional\ClassTableInheritanceTest::testBulkUpdateNonScalarParameterDDC1341
@@ -563,7 +559,7 @@ Doctrine\Tests\ORM\Functional\IdentityMapTest::testCollectionValuedAssociationId
 Doctrine\Tests\ORM\Functional\IdentityMapTest::testCollectionValuedAssociationIdentityMapBehaviorWithRefreshQuery
 .
 Doctrine\Tests\ORM\Functional\IdentityMapTest::testReusedSplObjectHashDoesNotConfuseUnitOfWork
-E
+F
 Doctrine\Tests\ORM\Functional\IdentityMapTest::testSingleValuedAssociationIdentityMapBehaviorWithRefresh
 .
 Doctrine\Tests\ORM\Functional\IdentityMapTest::testSingleValuedAssociationIdentityMapBehaviorWithRefreshQuery
@@ -1321,8 +1317,6 @@ Doctrine\Tests\ORM\Functional\SingleTableInheritanceTest::testUpdateChildClassWi
 Doctrine\Tests\ORM\Functional\StandardEntityPersisterTest::testAcceptsForeignKeysAsCriteria
 .
 Doctrine\Tests\ORM\Functional\StandardEntityPersisterTest::testAddPersistRetrieve
-.
-Doctrine\Tests\ORM\Functional\Ticket\AdvancedAssociationTest::testIssue
 .
 Doctrine\Tests\ORM\Functional\Ticket\DDC1040Test::testReuseNamedEntityParameter
 .
@@ -2570,6 +2564,8 @@ Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testDiscriminatorColumnDefaults
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testDiscriminatorColumnDefinition
 .
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityCustomGenerator
+.
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityIndexes
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityListeners
@@ -2580,9 +2576,13 @@ Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityListenersOverride
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityOptions
 .
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntitySequence
+.
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityTableNameAndInheritance
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testEntityUniqueConstraints
+.
+Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testFieldMappings
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testFieldMappingsColumnNames
 .
@@ -2623,7 +2623,7 @@ Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testOwningOneToOneAssociation
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testSqlResultSetMapping
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testStringFieldMappings
-F
+.
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #0 
 .
 Doctrine\Tests\ORM\Mapping\XmlMappingDriverTest::testValidateXmlSchema with data set #1 
@@ -3841,9 +3841,9 @@ Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testParseTokensInEntityFile with d
 Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testParseTokensInEntityFile with data set #3 
 .
 Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testTraitPropertiesAndMethodsAreNotDuplicated
-F
+.
 Doctrine\Tests\ORM\Tools\EntityGeneratorTest::testTraitPropertiesAndMethodsAreNotDuplicatedInChildClasses
-F
+.
 Doctrine\Tests\ORM\Tools\Export\AnnotationClassMetadataExporterTest::testCascadeAllCollapsed
 S
 Doctrine\Tests\ORM\Tools\Export\AnnotationClassMetadataExporterTest::testCascadeIsExported

@@ -361,6 +361,7 @@ abstract class Framework {
   public string $fatals_file;
   public string $stats_file;
   public string $test_path;
+  public string $test_config_file = null;
   public string $test_command;
   public string $test_name_pattern;
   public string $test_file_pattern;
@@ -390,7 +391,7 @@ abstract class Framework {
     if (!$info->containsKey("install_root") ||
         !$info->containsKey("git_path") ||
         !$info->containsKey("git_commit") ||
-        !$info->containsKey("test_file_search_roots")) {
+        !$info->containsKey("test_path")) {
       throw new Exception("Provide install, git and test file search info");
     }
 
@@ -399,12 +400,13 @@ abstract class Framework {
     $this->setInstallRoot($info->get("install_root"));
     $this->setGitPath($info->get("git_path"));
     $this->setGitCommit($info->get("git_commit"));
-    $this->setTestFileSearchRoots($info->get("test_file_search_roots"));
     $this->setPullRequests($info->get("pull_requests"));
     $this->setBlacklist($info->get("blacklist"));
     $this->setClownylist($info->get("clownylist"));
     $this->setTestNamePattern($info->get("test_name_pattern"));
     $this->setTestFilePattern($info->get("test_file_pattern"));
+    $this->setTestPath($info->get("test_path"));
+    $this->setTestFileSearchRoots($info->get("test_file_search_roots"));
 
     // Install if not already installed using the properties set above.
     if (!$this->isInstalled()) {
@@ -419,7 +421,7 @@ abstract class Framework {
     // Now that we have an install, we can safely set all possible
     // other framework information
     $this->setEnvVars($info->get("env_vars"));
-    $this->setTestPath($info->get("test_path"));
+    $this->setTestConfigFile($info->get("test_config"));
     $this->setTestCommand($info->get("test_command"));
   }
 
@@ -441,7 +443,8 @@ abstract class Framework {
     $this->git_commit = $git_commit;
   }
 
-  protected function setTestFileSearchRoots(Set $test_file_search_roots): void {
+  protected function setTestFileSearchRoots(?Set $test_file_search_roots):
+                                            void {
     $this->test_file_search_roots = $test_file_search_roots;
   }
 
@@ -477,27 +480,34 @@ abstract class Framework {
     return $this->env_vars;
   }
 
-
-  private function setTestPath(?string $test_path = null): void {
-    if ($test_path === null) {
+  private function setTestConfigFile(?string $test_config_file = null): void {
+    if ($test_config_file == null) {
       // 2 possibilities, phpunit.xml and phpunit.xml.dist for configuration
       $phpunit_config_files = Set {'phpunit.xml', 'phpunit.xml.dist'};
 
-      $phpunit_config_file_loc = null;
-      $phpunit_config_file_loc = find_any_file_recursive($phpunit_config_files,
-                                                         $this->install_root,
-                                                         true);
-      // The test path will be where the phpunit config file is located since
-      // that file contains the test directory name. If no config file, error.
-      $this->test_path = $phpunit_config_file_loc !== null
-                       ? $phpunit_config_file_loc
-                       : error("No phpunit test directory found for ".
-                               $this->name);
-      verbose("Using phpunit xml file in: ".$phpunit_config_file_loc."\n",
-              Options::$verbose);
+      $this->test_config_file = find_first_file_recursive($phpunit_config_files,
+                                                        $this->test_path,
+                                                        false);
+
+      if ($this->test_config_file !== null) {
+        verbose("Using phpunit xml file in: ".$this->test_config_file."\n",
+                Options::$verbose);
+      } else {
+        verbose("No phpunit xml file found for: ".$this->name.". Make sure ".
+                "you set a test_file_search_roots directly in your getInfo.\n",
+                Options::$verbose);
+      }
     } else {
-      $this->test_path = $test_path;
+      $this->test_config_file = $test_config_file;
     }
+  }
+
+  protected function getTestConfigFile(): ?string {
+    return $this->test_config_file;
+  }
+
+  private function setTestPath(string $test_path): void {
+    $this->test_path = $test_path;
   }
 
   protected function getTestPath(): string {
@@ -626,7 +636,6 @@ abstract class Framework {
       // If we cannot open the stats file, return Fatal
       $pct = Statuses::FATAL;
     }
-
     if ($num_tests > 0) {
       $pct = round(($num_tests - $num_errors_failures) / $num_tests, 4) * 100;
     } else {
@@ -713,7 +722,7 @@ abstract class Framework {
   }
 
   protected function installDependencies(): void {
-    $composer_json_path = find_any_file_recursive(Set {"composer.json"},
+    $composer_json_path = find_first_file_recursive(Set {"composer.json"},
                                                   $this->install_root, true);
     verbose("composer.json found in: $composer_json_path\n", Options::$verbose);
     // Check to see if composer dependencies are necessary to run the test
@@ -731,7 +740,7 @@ abstract class Framework {
       if ($install_ret !== 0) {
         // Let's just really make sure the dependencies didn't get installed
         // by checking the vendor directories to see if they are empty.
-        $fw_vendor_dir = find_any_file_recursive(Set {"vendor"},
+        $fw_vendor_dir = find_first_file_recursive(Set {"vendor"},
                                                  $this->install_root,
                                                  false);
         if ($fw_vendor_dir !== null) {
@@ -826,7 +835,73 @@ abstract class Framework {
   }
 
   public function findTestFiles(): void {
-     // Handle wildcards
+    if ($this->test_config_file !== null) {
+      $this->findTestFilesWithConfigFile();
+    } else {
+      $this->findTestFilesWithBestEffort();
+    }
+    verbose("Found ".count($this->test_files)." files that contain tests for ".
+            $this->name."...\n", !Options::$csv_only);
+  }
+
+  private function findTestFilesWithConfigFile(): void {
+    $this->test_files = Set {};
+    $exclude_pattern = "/\.disabled\.hhvm/";
+    $exclude_dirs = Set {};
+    $config_xml = simplexml_load_file($this->test_config_file);
+    $pattern = "";
+    // Some framework phpunit.xml files do not have a <testsuites> element,
+    // just a <testsuite> element
+    $test_suite = $config_xml->testsuites->testsuite;
+    if ($test_suite->count() === 0) {
+      $test_suite = $config_xml->testsuite;
+    }
+    foreach ($test_suite as $suite) {
+      foreach($suite->exclude as $exclude) {
+        $exclude_dirs->add($this->test_path."/".$exclude);
+      }
+      foreach($suite->directory as $dir) {
+        $search_dirs = null;
+        // If config doesn't provide a test suffix, assume the default
+        if ($dir->attributes()->count() === 0) {
+          $pattern = $this->test_file_pattern;
+        } else {
+          $pattern = "/".$dir->attributes()->suffix."/";
+        }
+        $search_path = $this->test_path."/".$dir;
+        // Gotta make sure these dirs don't contain wildcards (Looking at you
+        // Symfony)
+        if (strpos($search_path, "*") !== false ||
+            strpos($search_path, "..") !== false) {
+          $search_dirs = glob($search_path, GLOB_ONLYDIR);
+        }
+        if ($search_dirs !== null) {
+          foreach($search_dirs as $sd) {
+            $this->test_files->addAll(find_all_files($pattern,
+                                                     $sd,
+                                                     $exclude_pattern,
+                                                     $exclude_dirs));
+          }
+        } else {
+          $this->test_files->addAll(find_all_files($pattern,
+                                                   $this->test_path."/".$dir,
+                                                   $exclude_pattern,
+                                                   $exclude_dirs));
+        }
+      }
+    }
+    // If for some reason we didn't find tests, try best effort
+    if ($this->test_files->count() === 0) {
+      $this->findTestFilesWithBestEffort();
+    }
+  }
+
+  private function findTestFilesWithBestEffort(): void {
+    if ($this->test_file_search_roots === null) {
+      return;
+    }
+
+    // Handle wildcards
     $search_dirs = array();
     foreach($this->test_file_search_roots as $root) {
       if (strpos($root, "*") !== false || strpos($root, "..") !== false) {
@@ -838,29 +913,29 @@ abstract class Framework {
     }
 
     $this->test_files = Set{};
-    $exclude_str = ".disabled.hhvm";
+    $exclude_pattern = "/\.disabled\.hhvm/";
+    $exclude_dirs = Set{};
     foreach($search_dirs as $root) {
       $this->test_files->addAll(
                          find_all_files($this->test_file_pattern,
-                                        $root, $exclude_str));
+                                        $root, $exclude_pattern,
+                                        $exclude_dirs));
       $this->test_files->addAll(find_all_files_containing_text(
-                           "extends PHPUnit_Framework_TestCase", $root,
-                           $exclude_str));
+                                "extends PHPUnit_Framework_TestCase", $root,
+                                $exclude_pattern, $exclude_dirs));
       // Namespaced case
       $this->test_files->addAll(find_all_files_containing_text(
-                           "extends \\PHPUnit_Framework_TestCase", $root,
-                           $exclude_str));
+                                "extends \\PHPUnit_Framework_TestCase", $root,
+                                 $exclude_pattern, $exclude_dirs));
       // Sometimes a test file extends a class that extends PHPUnit_....
       // Then we have to look at method names.
       $this->test_files->addAll(find_all_files_containing_text(
-                                            "public function test", $root,
-                                            $exclude_str));
+                                "public function test", $root, $exclude_pattern,
+                                $exclude_dirs));
       $this->test_files->addAll(find_all_files_containing_text(
-                                            "@test", $root, $exclude_str));
+                                "@test", $root, $exclude_pattern,
+                                $exclude_dirs));
     }
-
-    verbose("Found ".count($this->test_files)." files that contain tests for ".
-            $this->name."...\n", !Options::$csv_only);
   }
 
   // Right now this is just an estimate since one test can
@@ -945,13 +1020,19 @@ abstract class Framework {
 class Assetic extends Framework {
   public function __construct(string $name) { parent::__construct($name); }
   protected function getInfo(): Map {
+    // The clowny tests here is testCompassExtension. However, there are four
+    // tests in this file. So we will be discarding all of them. They all
+    // passed besides the clown one (which is marked as Incomplete in the test
+    // code ... stranged), so it doesn't inflate any positive stats.
     return Map {
       "install_root" => __DIR__."/frameworks/assetic",
       "git_path" => "https://github.com/kriswallsmith/assetic.git",
       "git_commit" => "d4680d449a9da80fb82e17627270c91b93a0d46d",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/assetic/tests/Assetic/Test",
-      }
+      "test_path" => __DIR__."/frameworks/assetic",
+      "clownylist" => Set {
+        __DIR__."/frameworks/assetic/tests/Assetic/Test/Filter/".
+        "ScssphpFilterTest.php",
+      },
     };
   }
 }
@@ -964,11 +1045,7 @@ class CodeIgniter extends Framework {
       "install_root" => __DIR__."/frameworks/CodeIgniter",
       "git_path" => "https://github.com/EllisLab/CodeIgniter.git",
       "git_commit" => "b6fbcbefc8e6e883773f8f5d447413c367da9aaa",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/CodeIgniter/tests/codeigniter/core",
-        __DIR__."/frameworks/CodeIgniter/tests/codeigniter/helpers",
-        __DIR__."/frameworks/CodeIgniter/tests/codeigniter/libraries",
-      }
+      "test_path" => __DIR__."/frameworks/CodeIgniter/tests",
     };
   }
 }
@@ -980,9 +1057,7 @@ class Composer extends Framework {
       "install_root" => __DIR__."/frameworks/composer",
       "git_path" => "https://github.com/composer/composer.git",
       "git_commit" => "7defc95e4b9eded1156386b269a9d7d28fa73710",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/composer/tests/Composer",
-      }
+      "test_path" => __DIR__."/frameworks/composer",
     };
   }
 }
@@ -994,9 +1069,7 @@ class Doctrine2 extends Framework {
       "install_root" => __DIR__."/frameworks/doctrine2",
       "git_path" => "https://github.com/doctrine/doctrine2.git",
       "git_commit" => "bd7c7ebaf353f038fae2f828802ecda823190759",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/doctrine2/tests/Doctrine/Tests/ORM",
-      },
+      "test_path" => __DIR__."/frameworks/doctrine2",
       "pull_requests" => Vector {
         Map {
           'pull_dir' => __DIR__."/frameworks/doctrine2/vendor/doctrine/dbal",
@@ -1016,12 +1089,7 @@ class Drupal extends Framework {
       "install_root" => __DIR__."/frameworks/drupal",
       "git_path" => "https://github.com/drupal/drupal.git",
       "git_commit" => "adaf8355074ba3e142f61e10f1790382db5defb9",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/drupal/core/tests",
-        __DIR__."/frameworks/drupal/core/modules/*/tests/*",
-        __DIR__."/frameworks/drupal/core/../modules/*/tests/*",
-        __DIR__."/frameworks/drupal/core/../sites/*/modules/*/tests/*",
-      }
+      "test_path" => __DIR__."/frameworks/drupal/core"
     };
   }
 }
@@ -1033,12 +1101,12 @@ class FacebookPhpSdk extends Framework {
       "install_root" => __DIR__."/frameworks/facebook-php-sdk",
       "git_path" => "https://github.com/facebook/facebook-php-sdk.git",
       "git_commit" => "16d696c138b82003177d0b4841a3e4652442e5b1",
+      "test_path" => __DIR__."/frameworks/facebook-php-sdk",
       "test_file_search_roots" => Set {
         __DIR__."/frameworks/facebook-php-sdk/tests",
       },
       "test_command" => get_runtime_build()." ".__DIR__.
                       "/vendor/bin/phpunit --bootstrap tests/bootstrap.php",
-      "test_path" => __DIR__."/frameworks/facebook-php-sdk",
     };
   }
 }
@@ -1050,9 +1118,7 @@ class Idiorm extends Framework {
       "install_root" => __DIR__."/frameworks/idiorm",
       "git_path" => "https://github.com/j4mie/idiorm.git",
       "git_commit" => "3be516b440734811b58bb9d0b458a4109b49af71",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/idiorm/test",
-      }
+      "test_path" => __DIR__."/frameworks/idiorm",
     };
   }
 }
@@ -1064,9 +1130,7 @@ class Joomla extends Framework {
       "install_root" => __DIR__."/frameworks/joomla-framework",
       "git_path" => "https://github.com/joomla/joomla-framework.git",
       "git_commit" => "4669cd3b123e768f55545acb284bee666ce778c4",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/joomla-framework/src/Joomla/*/Tests",
-      }
+      "test_path" => __DIR__."/frameworks/joomla-framework",
     };
   }
 }
@@ -1078,9 +1142,7 @@ class Laravel extends Framework {
       "install_root" => __DIR__."/frameworks/laravel",
       "git_path" => "https://github.com/laravel/framework.git",
       "git_commit" => "f85efd4d16837d8fcac11aeb5e7d0977d295fb6b",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/laravel/tests",
-      }
+      "test_path" => __DIR__."/frameworks/laravel",
     };
   }
 }
@@ -1092,9 +1154,6 @@ class Magento2 extends Framework {
       "install_root" => __DIR__."/frameworks/magento2",
       "git_path" => "https://github.com/magento/magento2.git",
       "git_commit" => "a15ecb31976feb4ecb62f85257ff6b606fbdbc00",
-      "test_file_search_roots" => Set {
-       __DIR__."/frameworks/magento2/dev/tests/unit/testsuite",
-      },
       "test_path" => __DIR__."/frameworks/magento2/dev/tests/unit",
     };
   }
@@ -1107,10 +1166,10 @@ class Mediawiki extends Framework {
       "install_root" => __DIR__."/frameworks/mediawiki-core",
       "git_path" => "https://github.com/wikimedia/mediawiki-core.git",
       "git_commit" => "8c5733c44977232ca42454ae7f1ae0fd01770b37",
+      "test_path" => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
       "test_file_search_roots" => Set {
         __DIR__."/frameworks/mediawiki-core/tests/phpunit",
       },
-      "test_path" => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
       "test_command" => get_runtime_build()." phpunit.php ".
                         "--exclude-group=Database",
     };
@@ -1133,9 +1192,7 @@ class Paris extends Framework {
       "install_root" => __DIR__."/frameworks/paris",
       "git_path" => "https://github.com/j4mie/paris.git",
       "git_commit" => "b60d0857d10dec757427b336c427c1f13b6a5e48",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/paris/test",
-      }
+      "test_path" => __DIR__."/frameworks/paris",
     };
   }
 }
@@ -1151,9 +1208,6 @@ class Pear extends Framework {
       "install_root" => __DIR__."/frameworks/pear-core",
       "git_path" => "https://github.com/pear/pear-core.git",
       "git_commit" => "9efe6005fd7a16c56773248d6878deec93481d39",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/pear-core/tests",
-      },
       "test_path" => __DIR__."/frameworks/pear-core",
       "test_name_pattern" => PHPUnitPatterns::$pear_test_name_pattern,
       "test_file_pattern" => PHPUnitPatterns::$pear_test_file_pattern,
@@ -1324,9 +1378,7 @@ class Phpbb3 extends Framework {
       "install_root" => __DIR__."/frameworks/phpbb3",
       "git_path" => "https://github.com/phpbb/phpbb3.git",
       "git_commit" => "80b21e8049a138d07553288029abf66700da9a5c",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/phpbb3/tests",
-      },
+      "test_path" => __DIR__."/frameworks/phpbb3",
       "blackslist" => Set {
         __DIR__."/frameworks/phpbb3/tests/lint_test.php",
       }
@@ -1341,28 +1393,21 @@ class PhpMyAdmin extends Framework {
       "install_root" => __DIR__."/frameworks/phpmyadmin",
       "git_path" => "https://github.com/phpmyadmin/phpmyadmin.git",
       "git_commit" => "6706fc1f9a7e8893cbe2672e9f26b30b3c49da52",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/phpmyadmin/test",
-      }
+      "test_path" => __DIR__."/frameworks/phpmyadmin",
     };
   }
 }
 
 class PHPUnit extends Framework {
-  public function __construct(string $name) { parent::__construct($name); }
+  public function __construct(string $name) {
+    parent::__construct($name);
+  }
+
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/phpunit",
       "git_path" => "https://github.com/sebastianbergmann/phpunit.git",
       "git_commit" => "236f65cc97d6beaa8fcb8a27b19bd278f3912677",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/phpunit/Tests/Framework",
-        __DIR__."/frameworks/phpunit/Tests/Extensions",
-        __DIR__."/frameworks/phpunit/Tests/Regression",
-        __DIR__."/frameworks/phpunit/Tests/Runner",
-        __DIR__."/frameworks/phpunit/Tests/TextUI",
-        __DIR__."/frameworks/phpunit/Tests/Util",
-      },
       "test_path" => __DIR__."/frameworks/phpunit",
       "test_command" => get_runtime_build()." ".__DIR__.
                         "/frameworks/phpunit/phpunit.php",
@@ -1383,9 +1428,7 @@ class Slim extends Framework {
       // upstream hash_hmac fix
       "git_path" => "https://github.com/elgenie/Slim.git",
       "git_commit" => "1beca31c1f0b0a7bb7747d9367fb07c07e190a8d",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/Slim/tests",
-      }
+      "test_path" => __DIR__."/frameworks/Slim",
     };
   }
 }
@@ -1397,11 +1440,7 @@ class Symfony extends Framework {
       "install_root" => __DIR__."/frameworks/symfony",
       "git_path" => "https://github.com/symfony/symfony.git",
       "git_commit" => "98c0d38a440e91adeb0ac12928174046596cd8e1",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/symfony/src/Symfony/Bridge/*/Tests",
-        __DIR__."/frameworks/symfony/src/Symfony/Component/*/Tests/",
-        __DIR__."/frameworks/symfony/src/Symfony/Component/*/*/Tests/",
-      },
+      "test_path" => __DIR__."/frameworks/symfony",
       "blacklist" => Set {
         __DIR__."/frameworks/symfony/src/Symfony/Component/Console".
         "/Tests/Helper/DialogHelperTest.php",
@@ -1423,9 +1462,7 @@ class Twig extends Framework {
       "install_root" => __DIR__."/frameworks/Twig",
       "git_path" => "https://github.com/fabpot/Twig.git",
       "git_commit" => "2d012c4a4ae41cdf1682a10b3d567becc38a2d39",
-      "test_file_search_roots" => Set {
-         __DIR__."/frameworks/Twig/test/Twig",
-      }
+      "test_path" => __DIR__."/frameworks/Twig",
     };
   }
 }
@@ -1437,10 +1474,10 @@ class Yii extends Framework {
       "install_root" => __DIR__."/frameworks/yii",
       "git_path" => "https://github.com/yiisoft/yii.git",
       "git_commit" => "d36b1f58ded2deacd4c5562c5205871db76bde5d",
+      "test_path" => __DIR__."/frameworks/yii/tests",
       "test_file_search_roots" => Set {
         __DIR__."/frameworks/yii/tests",
       },
-      "test_path" => __DIR__."/frameworks/yii/tests",
     };
   }
 
@@ -1462,9 +1499,7 @@ class Zf2 extends Framework {
       "install_root" => __DIR__."/frameworks/zf2",
       "git_path" => "https://github.com/zendframework/zf2.git",
       "git_commit" => "3bd643acb98a5f6a9e5abd45785171f6685b4a3c",
-      "test_file_search_roots" => Set {
-        __DIR__."/frameworks/zf2/tests/ZendTest",
-      },
+      "test_path" => __DIR__."/frameworks/zf2/tests",
       "blacklist" => Set {
         __DIR__."/frameworks/zf2/tests/ZendTest/Code/Generator".
         "/ParameterGeneratorTest.php",
@@ -1624,7 +1659,13 @@ class Runner {
         $this->stat_information = $test.PHP_EOL.$status.PHP_EOL;
         $continue_testing = false;
         break;
-      } else if ($this->checkForFatals($status)) {
+      } else if ($status === Statuses::INCOMPLETE) {
+        $this->error_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL;
+        $this->error_information .= $this->getTestRunStr("RUN TEST FILE: ").
+                                    PHP_EOL.PHP_EOL;
+        break;
+      }
+        else if ($this->checkForFatals($status)) {
         $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL;
         $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
                                     PHP_EOL.PHP_EOL;
@@ -1634,7 +1675,7 @@ class Runner {
       } else if ($this->checkForWarnings($status)) {
         // Warnings are special. We may get one or more warnings, but then
         // a real test status will come afterwards.
-        $this->error_information .= PHP_EOL.$status.PHP_EOL.PHP_EOL;
+        $this->error_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL;
         $this->error_information .= $this->getTestRunStr("RUN TEST FILE: ").
                                     PHP_EOL.PHP_EOL;
         continue;
@@ -2449,8 +2490,8 @@ function any_dir_empty_one_level(string $dir): bool {
 // Note: Wanted to use builtin SPL for this, but it seems like the order cannot
 // be guaranteed with their iterators. So found and used a sorted iterator class
 // and sorted by the full path including file name.
-function find_any_file_recursive(Set $filenames, string $root_dir,
-                                 bool $just_path_to_file): ?string {
+function find_first_file_recursive(Set $filenames, string $root_dir,
+                                   bool $just_path_to_file): ?string {
   $dit = new RecursiveDirectoryIterator($root_dir,
                                         RecursiveDirectoryIterator::SKIP_DOTS);
   $rit = new RecursiveIteratorIterator($dit);
@@ -2468,7 +2509,11 @@ function find_any_file_recursive(Set $filenames, string $root_dir,
 }
 
 function find_all_files(string $pattern, string $root_dir,
-                        string $exclude = null): Set {
+                        string $exclude_file_pattern,
+                        Set $exclude_dirs = null): ?Set {
+  if (!file_exists($root_dir)) {
+    return null;
+  }
   $files = Set {};
   $dit = new RecursiveDirectoryIterator($root_dir,
                                         RecursiveDirectoryIterator::SKIP_DOTS);
@@ -2476,7 +2521,8 @@ function find_all_files(string $pattern, string $root_dir,
   $sit = new SortedIterator($rit);
   foreach ($sit as $fileinfo) {
     if (preg_match($pattern, $fileinfo->getFileName()) === 1 &&
-        strpos($fileinfo->getPathName(), $exclude) === false) {
+        preg_match($exclude_file_pattern, $fileinfo->getFileName()) === 0 &&
+        !$exclude_dirs->contains(dirname($fileinfo->getPath()))) {
       $files[] = $fileinfo->getPathName();
     }
   }
@@ -2486,7 +2532,11 @@ function find_all_files(string $pattern, string $root_dir,
 
 function find_all_files_containing_text(string $text,
                                         string $root_dir,
-                                        string $exclude = null): Set {
+                                        string $exclude_file_pattern,
+                                        Set $exclude_dirs = null): ?Set {
+  if (!file_exists($root_dir)) {
+    return null;
+  }
   $files = Set {};
   $dit = new RecursiveDirectoryIterator($root_dir,
                                         RecursiveDirectoryIterator::SKIP_DOTS);
@@ -2494,7 +2544,8 @@ function find_all_files_containing_text(string $text,
   $sit = new SortedIterator($rit);
   foreach ($sit as $fileinfo) {
     if (strpos(file_get_contents($fileinfo->getPathName()), $text) !== false &&
-        strpos($fileinfo->getPathName(), $exclude) === false) {
+        preg_match($exclude_file_pattern, $fileinfo->getFileName()) === 0 &&
+        !$exclude_dirs->contains(dirname($fileinfo->getPath()))) {
       $files[] = $fileinfo->getPathName();
     }
   }

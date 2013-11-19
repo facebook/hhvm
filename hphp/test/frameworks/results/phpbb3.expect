@@ -2489,10 +2489,6 @@ phpbb_template_template_test::test_invalid_handle
 phpbb_template_template_test::test_missing_file
 .
 phpbb_template_template_test::test_template with data set #0 
-.
-phpbb_template_template_test::test_template with data set #1 
-.
-phpbb_template_template_test::test_template with data set #2 
 FATAL
 phpbb_tests_tree_nestedset_forum_add_remove_test::test_delete with data set #0 
 S

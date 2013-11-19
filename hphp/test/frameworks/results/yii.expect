@@ -595,7 +595,7 @@ CDbCacheTest::testGetAndSet
 CDbCacheTest::testKeyPrefix
 .
 CDbCacheTest::testMGet
-F
+.
 CDbCacheTest::testUseDbConnection
 .
 CDbCommand2Test::testAndWhere
@@ -747,7 +747,7 @@ CDefaultValueValidatorTest::testDefaultValueIsSetWhenSetOnEmptyIsTrue
 CDirectoryCacheDependencyTest::testDirectoryName
 .
 CDirectoryCacheDependencyTest::testHasChanged
-F
+.
 CDirectoryCacheDependencyTest::testRecursiveLevel
 .
 CEmailValidatorTest::testArrayValue
@@ -807,15 +807,27 @@ CExistValidatorTest::testValidateWithCriteria
 CFileCacheDependencyTest::testFileName
 .
 CFileCacheDependencyTest::testHasChanged
-F
+.
 CFileCacheTest::testEmbedExpiry
-F
+.
 CFileCacheTest::testFileMode
 .
 CFileCacheTest::testPathMode
 .
+CFileHelperTest::testCopyDirectory_subDir_modeShoudBe0775
+.
+CFileHelperTest::testCopyDirectory_subDir_modeShoudBe0777
+.
+CFileHelperTest::testCreateDirectory
+.
+CFileHelperTest::testFindFiles_absolutePaths
+.
+CFileHelperTest::testFindFiles_relativePaths
+.
 CFileHelperTest::testGetMimeTypeByExtension
-FATAL
+.
+CFileHelperTest::testRemoveDirectory
+.
 CFileValidatorTest::testSizeToBytes with data set #0 
 .
 CFileValidatorTest::testSizeToBytes with data set #1 

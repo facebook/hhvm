@@ -2331,11 +2331,11 @@ Mage_Core_Model_LoggerTest::testAddStoreLog
 Mage_Core_Model_LoggerTest::testAddStreamLog with data set #0 
 E
 Mage_Core_Model_LoggerTest::testAddStreamLog with data set #1 
-.
-Mage_Core_Model_LoggerTest::testAddStreamLog with data set #2 
-.
-Mage_Core_Model_LoggerTest::testInitForStore
 E
+Mage_Core_Model_LoggerTest::testAddStreamLog with data set #2 
+E
+Mage_Core_Model_LoggerTest::testInitForStore
+.
 Mage_Core_Model_LoggerTest::testLog
 .
 Mage_Core_Model_LoggerTest::testLogComplex
@@ -5416,58 +5416,8 @@ Magento_Cache_Backend_Decorator_DecoratorAbstractTest::testConstructorException 
 .
 Magento_Cache_Backend_Decorator_DecoratorAbstractTest::testConstructorException with data set "wrong_class"
 .
-Magento_Cache_Backend_MongoDbTest::testClean with data set "clean cache matching all tags 
-E
-Magento_Cache_Backend_MongoDbTest::testClean with data set "clean cache matching any tags 
-E
-Magento_Cache_Backend_MongoDbTest::testClean with data set "clean cache not matching tags 
-E
-Magento_Cache_Backend_MongoDbTest::testClean with data set "clean expired"
-E
-Magento_Cache_Backend_MongoDbTest::testCleanInvalidMode
-.
-Magento_Cache_Backend_MongoDbTest::testGetCapabilities
-.
-Magento_Cache_Backend_MongoDbTest::testGetFillingPercentage
-.
 Magento_Cache_Backend_MongoDbTest::testGetIds with data set "empty db"
-.
-Magento_Cache_Backend_MongoDbTest::testGetIds with data set "multiple records"
-.
-Magento_Cache_Backend_MongoDbTest::testGetIdsMatchingTags with data set "getIdsMatchingAnyTags
-.
-Magento_Cache_Backend_MongoDbTest::testGetIdsMatchingTags with data set "getIdsMatchingTags
-.
-Magento_Cache_Backend_MongoDbTest::testGetIdsMatchingTags with data set "getIdsNotMatchingTags
-.
-Magento_Cache_Backend_MongoDbTest::testGetIdsMatchingTagsNoInputTags
-.
-Magento_Cache_Backend_MongoDbTest::testGetMetadatas with data set "existing record"
-.
-Magento_Cache_Backend_MongoDbTest::testGetMetadatas with data set "non-existing record"
-.
-Magento_Cache_Backend_MongoDbTest::testGetMetadatas with data set "non-string id"
-.
-Magento_Cache_Backend_MongoDbTest::testGetTags with data set "multiple tags"
-E
-Magento_Cache_Backend_MongoDbTest::testGetTags with data set "no tags"
-E
-Magento_Cache_Backend_MongoDbTest::testLoad with data set "do not test validity"
-.
-Magento_Cache_Backend_MongoDbTest::testLoad with data set "test validity"
-.
-Magento_Cache_Backend_MongoDbTest::testLoadNoRecord
-.
-Magento_Cache_Backend_MongoDbTest::testRemove
-E
-Magento_Cache_Backend_MongoDbTest::testSave
-E
-Magento_Cache_Backend_MongoDbTest::testTest
-.
-Magento_Cache_Backend_MongoDbTest::testTestNotFound
-.
-Magento_Cache_Backend_MongoDbTest::testTouch
-E
+FATAL
 Magento_Cache_Frontend_Adapter_ZendTest::testCleanException with data set "cleaning mode "
 .
 Magento_Cache_Frontend_Adapter_ZendTest::testCleanException with data set "non-existing cleaning mode"
@@ -7349,7 +7299,7 @@ Tools_View_Generator_ThemeDeploymentTest::testConstructorException with data set
 Tools_View_Generator_ThemeDeploymentTest::testConstructorException with data set "no permitted config"
 .
 Tools_View_Generator_ThemeDeploymentTest::testRun
-.
+E
 Tools_View_Generator_ThemeDeploymentTest::testRunInDryRun
 .
 Tools_View_Generator_ThemeDeploymentTest::testRunWithCasedExtension

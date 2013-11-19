@@ -787,7 +787,7 @@ DatabasePostgresSchemaGrammarTest::testDropUnique
 DatabasePostgresSchemaGrammarTest::testRenameTable
 .
 DatabaseProcessorTest::testInsertGetIdProcessing
-FATAL
+.
 DatabaseQueryBuilderTest::testAddingSelects
 .
 DatabaseQueryBuilderTest::testAggregateFunctions

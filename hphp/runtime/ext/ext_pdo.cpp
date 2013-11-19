@@ -2645,7 +2645,6 @@ void c_PDOStatement::sweep() {
 }
 
 void c_PDOStatement::t___construct() {
-  raise_error("You should not create a PDOStatement manually");
 }
 
 Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {

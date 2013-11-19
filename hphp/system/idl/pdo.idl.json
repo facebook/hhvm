@@ -687,7 +687,6 @@
                 {
                     "name": "__construct",
                     "flags": [
-                        "IsProtected"
                     ],
                     "return": {
                         "type": null

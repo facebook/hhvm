@@ -32,7 +32,7 @@ static Variant HHVM_FUNCTION(finfo_open,
     const String& magic_file) {
   auto magic = magic_open(options);
   if (magic == nullptr) {
-    raise_warning("Invalid mode '%ld'.", options);
+    raise_warning("Invalid mode '%" PRId64 "'.", options);
     return false;
   }
 
@@ -59,7 +59,7 @@ static bool HHVM_FUNCTION(finfo_set_flags, CResRef finfo, int64_t options) {
   auto magic = finfo.getTyped<FileinfoResource>()->getMagic();
   if (magic_setflags(magic, options) == -1) {
     raise_warning(
-      "Failed to set option '%ld' %d:%s",
+      "Failed to set option '%" PRId64 "' %d:%s",
       options,
       magic_errno(magic),
       magic_error(magic)

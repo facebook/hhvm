@@ -5118,38 +5118,6 @@
             "value": ""
         },
         {
-            "name": "PHP_URL_FRAGMENT",
-            "value": 7
-        },
-        {
-            "name": "PHP_URL_HOST",
-            "value": 1
-        },
-        {
-            "name": "PHP_URL_PASS",
-            "value": 4
-        },
-        {
-            "name": "PHP_URL_PATH",
-            "value": 5
-        },
-        {
-            "name": "PHP_URL_PORT",
-            "value": 2
-        },
-        {
-            "name": "PHP_URL_QUERY",
-            "value": 6
-        },
-        {
-            "name": "PHP_URL_SCHEME",
-            "value": 0
-        },
-        {
-            "name": "PHP_URL_USER",
-            "value": 3
-        },
-        {
             "name": "PHP_VERSION",
             "value": "5.4.999-hiphop"
         },

@@ -27,6 +27,15 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+const int64_t k_PHP_URL_SCHEME = 0;
+const int64_t k_PHP_URL_HOST = 1;
+const int64_t k_PHP_URL_PORT = 2;
+const int64_t k_PHP_URL_USER = 3;
+const int64_t k_PHP_URL_PASS = 4;
+const int64_t k_PHP_URL_PATH = 5;
+const int64_t k_PHP_URL_QUERY = 6;
+const int64_t k_PHP_URL_FRAGMENT = 7;
+///////////////////////////////////////////////////////////////////////////////
 
 Variant f_base64_decode(const String& data, bool strict /* = false */) {
   String decoded = StringUtil::Base64Decode(data, strict);
@@ -228,15 +237,6 @@ const StaticString
     resource.name = NULL;                                               \
   }                                                                     \
 
-#define PHP_URL_SCHEME 0
-#define PHP_URL_HOST 1
-#define PHP_URL_PORT 2
-#define PHP_URL_USER 3
-#define PHP_URL_PASS 4
-#define PHP_URL_PATH 5
-#define PHP_URL_QUERY 6
-#define PHP_URL_FRAGMENT 7
-
 Variant f_parse_url(const String& url, int component /* = -1 */) {
   Url resource;
   if (!url_parse(resource, url.data(), url.size())) {
@@ -245,14 +245,14 @@ Variant f_parse_url(const String& url, int component /* = -1 */) {
 
   if (component > -1) {
     switch (component) {
-    case PHP_URL_SCHEME:   RETURN_COMPONENT(scheme);   break;
-    case PHP_URL_HOST:     RETURN_COMPONENT(host);     break;
-    case PHP_URL_USER:     RETURN_COMPONENT(user);     break;
-    case PHP_URL_PASS:     RETURN_COMPONENT(pass);     break;
-    case PHP_URL_PATH:     RETURN_COMPONENT(path);     break;
-    case PHP_URL_QUERY:    RETURN_COMPONENT(query);    break;
-    case PHP_URL_FRAGMENT: RETURN_COMPONENT(fragment); break;
-    case PHP_URL_PORT:
+    case k_PHP_URL_SCHEME:   RETURN_COMPONENT(scheme);   break;
+    case k_PHP_URL_HOST:     RETURN_COMPONENT(host);     break;
+    case k_PHP_URL_USER:     RETURN_COMPONENT(user);     break;
+    case k_PHP_URL_PASS:     RETURN_COMPONENT(pass);     break;
+    case k_PHP_URL_PATH:     RETURN_COMPONENT(path);     break;
+    case k_PHP_URL_QUERY:    RETURN_COMPONENT(query);    break;
+    case k_PHP_URL_FRAGMENT: RETURN_COMPONENT(fragment); break;
+    case k_PHP_URL_PORT:
       if (resource.port) {
         return resource.port;
       }

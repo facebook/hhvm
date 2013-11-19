@@ -18,6 +18,8 @@
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/ext/ext_preg.h"
+#include "hphp/runtime/ext/ext_url.h"
 
 namespace HPHP {
 
@@ -41,7 +43,11 @@ UrlFile::UrlFile(const char *method /* = "GET" */,
   m_isLocal = false;
 }
 
-bool UrlFile::open(const String& url, const String& mode) {
+const StaticString
+  s_remove_user_pass_pattern("#://[^@]+@#"),
+  s_remove_user_pass_replace("://");
+bool UrlFile::open(const String& input_url, const String& mode) {
+  String url = input_url;
   const char* modestr = mode.c_str();
   if (strchr(modestr, '+') || strchr(modestr, 'a') || strchr(modestr, 'w')) {
     std::string msg = "cannot open a url stream for write/append operation: ";
@@ -60,6 +66,18 @@ bool UrlFile::open(const String& url, const String& mode) {
       requestHeaders[string(iter.first().toString().data())].
         push_back(iter.second().toString().data());
     }
+  }
+
+  Variant user = f_parse_url(url, k_PHP_URL_USER);
+  if (user.isString()) {
+    Variant pass = f_parse_url(url, k_PHP_URL_PASS);
+    http.auth(user.toString().c_str(), pass.toString().c_str());
+    url = f_preg_replace(
+      s_remove_user_pass_pattern,
+      s_remove_user_pass_replace,
+      url,
+      1
+    );
   }
 
   int code;

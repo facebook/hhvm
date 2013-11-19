@@ -285,22 +285,15 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
   auto const givenType = describe_actual_type(tv);
 
   if (isExtended()) {
-    if (isSoft()) {
-      // Soft type hints raise warnings instead of recoverable
-      // errors by design, to ease migration.
-      raise_warning(
-        "Argument %d passed to %s must be of type %s, %s given",
-        paramNum + 1, fname.str().c_str(), fullName().c_str(), givenType);
-    } else if (isNullable()) {
-      // This error message is slightly different from the normal case
-      // (fullName() vs tn)
-      raise_recoverable_error(
-        "Argument %d passed to %s must be of type %s, %s given",
-        paramNum + 1, fname.str().c_str(), fullName().c_str(), givenType);
-    } else {
-      assert(false &&
-        "Only nullable and soft extended type hints are currently implemented");
-    }
+    // Extended type hints raise warnings instead of recoverable
+    // errors for now, to ease migration (we used to not check these
+    // at all at runtime).
+    assert(
+      (isSoft() || isNullable()) &&
+      "Only nullable and soft extended type hints are currently implemented");
+    raise_warning(
+      "Argument %d to %s must be of type %s, %s given",
+      paramNum + 1, fname.str().c_str(), fullName().c_str(), givenType);
   } else {
     raise_recoverable_error(
       "Argument %d passed to %s must be an instance of %s, %s given",

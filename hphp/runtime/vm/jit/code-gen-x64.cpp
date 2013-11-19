@@ -3687,6 +3687,41 @@ void CodeGenerator::cgStClosureCtx(IRInstruction* inst) {
   }
 }
 
+void CodeGenerator::emitInitObjProps(PhysReg dstReg,
+                                     const Class* cls,
+                                     size_t nProps) {
+  // If the object has a small number of properties, just emit stores
+  // inline.
+  if (nProps < 8) {
+    for (int i = 0; i < nProps; ++i) {
+      auto propOffset =
+        sizeof(ObjectData) + cls->builtinODTailSize() + sizeof(TypedValue) * i;
+      auto propDataOffset = propOffset + TVOFF(m_data);
+      auto propTypeOffset = propOffset + TVOFF(m_type);
+      if (!IS_NULL_TYPE(cls->declPropInit()[i].m_type)) {
+        m_as.storeq(cls->declPropInit()[i].m_data.num, dstReg[propDataOffset]);
+      }
+      m_as.storeb(cls->declPropInit()[i].m_type, dstReg[propTypeOffset]);
+    }
+    return;
+  }
+
+  // Use memcpy for large numbers of properties.
+  m_as.push(dstReg);
+  m_as.subq(8, reg::rsp);
+  ArgGroup args = ArgGroup(curOpds())
+    .addr(dstReg, sizeof(ObjectData) + cls->builtinODTailSize())
+    .imm(int64_t(&cls->declPropInit()[0]))
+    .imm(cellsToBytes(nProps));
+  cgCallHelper(m_as,
+               CppCall(memcpy),
+               kVoidDest,
+               SyncOptions::kNoSyncPoint,
+               args);
+  m_as.addq(8, reg::rsp);
+  m_as.pop(dstReg);
+}
+
 void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
   auto const cls    = inst->extra<AllocObjFast>()->cls;
   auto const dstReg = curOpd(inst->dst()).reg();
@@ -3754,22 +3789,15 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
   // Initialize the properties
   size_t nProps = cls->numDeclProperties();
   if (nProps > 0) {
-    m_as.push(dstReg);
-    m_as.subq(8, reg::rsp);
     if (cls->pinitVec().size() == 0) {
       // Fast case: copy from a known address in the Class
-      ArgGroup args = ArgGroup(curOpds())
-        .addr(dstReg, sizeof(ObjectData) + cls->builtinODTailSize())
-        .imm(int64_t(&cls->declPropInit()[0]))
-        .imm(cellsToBytes(nProps));
-      cgCallHelper(m_as,
-                   CppCall(memcpy),
-                   kVoidDest,
-                   SyncOptions::kNoSyncPoint,
-                   args);
+      emitInitObjProps(dstReg, cls, nProps);
     } else {
       // Slower case: we have to load the src address from the targetcache
       auto rPropData = m_rScratch;
+      // Save the destination register.
+      m_as.push(dstReg);
+      m_as.subq(8, reg::rsp);
       // Load the Class's propInitVec from the targetcache
       m_as.loadq(rVmTl[cls->propHandle()], rPropData);
       // propData holds the PropInitVec. We want &(*propData)[0]
@@ -3795,9 +3823,10 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
                      SyncOptions::kNoSyncPoint,
                      args);
       }
+      // Restore the destination register
+      m_as.addq(8, reg::rsp);
+      m_as.pop(dstReg);
     }
-    m_as.addq(8, reg::rsp);
-    m_as.pop(dstReg);
   }
   if (cls->callsCustomInstanceInit()) {
     // callCustomInstanceInit returns the instance in rax

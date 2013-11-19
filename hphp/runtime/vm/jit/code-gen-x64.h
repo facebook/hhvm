@@ -309,6 +309,7 @@ private:
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
   void emitInstanceBitmaskCheck(IRInstruction*);
   void emitTraceRet(Asm& as);
+  void emitInitObjProps(PhysReg dstReg, const Class* cls, size_t nProps);
 
   template <typename F>
   Address cgCheckStaticBitAndDecRef(Type type,

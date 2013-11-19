@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -229,8 +230,8 @@ void Extension::CompileSystemlib(const std::string &slib,
 void Extension::loadSystemlib() {
   std::string hhas, slib;
   if (m_dsoName.empty()) {
-    std::string section("systemlib.ext.");
-    section += m_name.data();
+    std::string section("ext.");
+    section += f_md5(m_name, false).substr(0, 12).data();
     slib = get_systemlib(&hhas, section);
   } else {
     slib = get_systemlib(&hhas, "systemlib", m_dsoName);

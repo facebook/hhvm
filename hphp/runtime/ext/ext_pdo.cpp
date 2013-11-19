@@ -1323,6 +1323,7 @@ Variant c_PDO::t_getattribute(int64_t attribute) {
 }
 
 Variant c_PDO::t_exec(const String& query) {
+  SYNC_VM_REGS_SCOPED();
   if (query.empty()) {
     pdo_raise_impl_error(m_dbh, nullptr, "HY000",
                          "trying to execute an empty query");
@@ -1408,6 +1409,7 @@ Array c_PDO::t_errorinfo() {
 }
 
 Variant c_PDO::t_query(const String& sql) {
+  SYNC_VM_REGS_SCOPED();
   assert(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;

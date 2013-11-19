@@ -72,16 +72,15 @@ VS($db->querysingle("SELECT * FROM foo", true), array("bar" => "ABC"));
 }
 
 // testing UDF
-// TODO(#2512701): broken under the JIT compiler
 {
-  //VERIFY($db->createfunction("tolower", "lower", 1));
-  //$res = $db->query("SELECT tolower(bar) FROM foo");
-  //VS($res->fetcharray(SQLITE3_NUM), array("abc"));
+  VERIFY($db->createfunction("tolower", "lower", 1));
+  $res = $db->query("SELECT tolower(bar) FROM foo");
+  VS($res->fetcharray(SQLITE3_NUM), array("abc"));
 }
 {
-  // VERIFY($db->createaggregate("sumlen", "sumlen_step", "sumlen_fini", 1));
-  // $res = $db->query("SELECT sumlen(bar) FROM foo");
-  // VS($res->fetcharray(SQLITE3_NUM), array(6));
+  VERIFY($db->createaggregate("sumlen", "sumlen_step", "sumlen_fini", 1));
+  $res = $db->query("SELECT sumlen(bar) FROM foo");
+  VS($res->fetcharray(SQLITE3_NUM), array(6));
 }
 
 $db->close();

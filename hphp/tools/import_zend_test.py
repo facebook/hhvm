@@ -136,7 +136,6 @@ bad_tests = (
     '/Zend/tests/objects_030.php',
     '/ext/standard/tests/strings/bug44242.php',
     '/ext/standard/tests/streams/bug64770.php',
-    '/ext/sqlite3/tests/sqlite3_29_createfunction.php',
 
     # line number is inconsistent on stack overflow
     '/Zend/tests/bug41633_3.php',

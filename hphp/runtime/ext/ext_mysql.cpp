@@ -26,6 +26,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/extended-logger.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/db-mysql.h"
 #include "folly/String.h"
@@ -930,6 +931,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
 
 static Variant php_mysql_do_query_general(const String& query, CVarRef link_id,
                                           bool use_store, bool async_mode) {
+  SYNC_VM_REGS_SCOPED();
   if (mysqlExtension::ReadOnly &&
       same(f_preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query), 0)) {
     raise_notice("runtime/ext_mysql: write query not executed [%s]",

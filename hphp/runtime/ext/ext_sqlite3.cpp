@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/ext_stream.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -238,6 +239,7 @@ bool c_SQLite3::t_close() {
 }
 
 bool c_SQLite3::t_exec(const String& sql) {
+  SYNC_VM_REGS_SCOPED();
   validate();
 
   char *errtext = NULL;
@@ -328,6 +330,7 @@ Variant c_SQLite3::t_prepare(const String& sql) {
 }
 
 Variant c_SQLite3::t_query(const String& sql) {
+  SYNC_VM_REGS_SCOPED();
   validate();
   if (!sql.empty()) {
     Variant stmt = t_prepare(sql);
@@ -339,6 +342,7 @@ Variant c_SQLite3::t_query(const String& sql) {
 }
 
 Variant c_SQLite3::t_querysingle(const String& sql, bool entire_row /* = false */) {
+  SYNC_VM_REGS_SCOPED();
   validate();
   if (!sql.empty()) {
     Variant stmt = t_prepare(sql);
@@ -529,6 +533,7 @@ bool c_SQLite3Stmt::t_bindvalue(CVarRef name, CVarRef parameter,
 }
 
 Variant c_SQLite3Stmt::t_execute() {
+  SYNC_VM_REGS_SCOPED();
   validate();
 
   for (unsigned int i = 0; i < m_bound_params.size(); i++) {
@@ -635,6 +640,7 @@ int64_t c_SQLite3Result::t_columntype(int64_t column) {
 }
 
 Variant c_SQLite3Result::t_fetcharray(int64_t mode /* = k_SQLITE3_BOTH */) {
+  SYNC_VM_REGS_SCOPED();
   validate();
 
   switch (sqlite3_step(m_stmt->m_raw_stmt)) {

@@ -134,6 +134,7 @@ void c_GenVectorWaitHandle::onUnblocked() {
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       try {
+        detectCycle(child_wh);
         blockOn(child_wh);
         return;
       } catch (const Object& cycle_exception) {

@@ -161,12 +161,20 @@ void c_AsyncFunctionWaitHandle::run() {
       return;
     }
 
+  retry:
     // save child
     Cell* value = tvAssertCell(m_continuation->m_value.asTypedValue());
     assert(dynamic_cast<c_WaitableWaitHandle*>(c_WaitHandle::fromCell(value)));
 
     m_child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
     assert(!m_child->isFinished());
+
+    // detect cycles
+    if (UNLIKELY(isDescendantOf(m_child.get()))) {
+      Object e(createCycleException(m_child.get()));
+      m_continuation->call_raise(e.get());
+      goto retry;
+    }
 
     // on await callback
     AsioSession* session = AsioSession::Get();

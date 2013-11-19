@@ -160,14 +160,15 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
   return nullptr;
 }
 
-bool c_WaitableWaitHandle::hasCycle(c_WaitableWaitHandle* start) {
-  assert(start);
+bool
+c_WaitableWaitHandle::isDescendantOf(c_WaitableWaitHandle* wait_handle) const {
+  assert(wait_handle);
 
-  while (start != this && start && !start->isFinished()) {
-    start = start->getChild();
+  while (wait_handle != this && wait_handle && !wait_handle->isFinished()) {
+    wait_handle = wait_handle->getChild();
   }
 
-  return start == this;
+  return wait_handle == this;
 }
 
 Array c_WaitableWaitHandle::t_getdependencystack() {

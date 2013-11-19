@@ -247,7 +247,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   c_BlockableWaitHandle* getFirstParent() { return m_firstParent; }
 
   virtual c_WaitableWaitHandle* getChild();
-  bool hasCycle(c_WaitableWaitHandle* start);
+  bool isDescendantOf(c_WaitableWaitHandle* wait_handle) const;
 
   static const int8_t STATE_NEW       = 2;
 
@@ -288,12 +288,12 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
   void blockOn(c_WaitableWaitHandle* child);
   virtual void onUnblocked() = 0;
   c_WaitableWaitHandle* getChild() = 0;
+  void detectCycle(c_WaitableWaitHandle* child) const;
+  ObjectData* createCycleException(c_WaitableWaitHandle* child) const;
 
   static const int8_t STATE_BLOCKED = 3;
 
  private:
-  void reportCycle(c_WaitableWaitHandle* start);
-
   c_BlockableWaitHandle* m_nextParent;
 };
 

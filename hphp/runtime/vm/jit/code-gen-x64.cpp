@@ -3610,10 +3610,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     assert(func->isConst());
   } else if (func->isConst()) {
     const Func* f = func->getValFunc();
-    m_as. mov_imm64_reg((uint64_t)f, m_rScratch);
-    m_as.store_reg64_disp_reg64(m_rScratch,
-                                spOffset + int(AROFF(m_func)),
-                                spReg);
+    m_as.storeq(f, spReg[spOffset + int(AROFF(m_func))]);
     if (func->isA(Type::FuncCtx)) {
       // Fill in m_cls if provided with both func* and class*
       CG_PUNT(cgAllocActRec);

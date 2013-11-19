@@ -187,8 +187,6 @@ void ProcessInit() {
 
 #undef INIT_SYSTEMLIB_CLASS_FIELD
 
-  SystemLib::s_continuationNextFunc =
-    SystemLib::s_ContinuationClass->lookupMethod(makeStaticString("next"));
   SystemLib::s_continuationSendFunc =
     SystemLib::s_ContinuationClass->lookupMethod(makeStaticString("send"));
   SystemLib::s_continuationRaiseFunc =

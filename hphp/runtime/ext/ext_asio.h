@@ -345,7 +345,7 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   void markAsFailed(CObjRef exception);
 
   p_Continuation m_continuation;
-  p_WaitHandle m_child;
+  p_WaitableWaitHandle m_child;
   Object m_privData;
   uint16_t m_depth;
 

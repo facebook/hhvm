@@ -99,7 +99,6 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     return arOffset;
   }
 
-  void call_next();
   void call_send(Cell& v);
   void call_raise(ObjectData* e);
 

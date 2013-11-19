@@ -241,12 +241,6 @@ namespace {
   DEBUG_ONLY StaticString s_raise("raise");
 }
 
-void c_Continuation::call_next() {
-  assert(SystemLib::s_continuationNextFunc ==
-         getVMClass()->lookupMethod(s_next.get()));
-  g_vmContext->invokeContFunc(SystemLib::s_continuationNextFunc, this);
-}
-
 void c_Continuation::call_send(Cell& v) {
   assert(SystemLib::s_continuationSendFunc ==
          getVMClass()->lookupMethod(s_send.get()));

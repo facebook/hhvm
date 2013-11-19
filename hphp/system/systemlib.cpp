@@ -38,7 +38,6 @@ HPHP::Unit* SystemLib::s_hhas_unit = nullptr;
 HPHP::Unit* SystemLib::s_nativeFuncUnit = nullptr;
 HPHP::Unit* SystemLib::s_nativeClassUnit = nullptr;
 HPHP::Func* SystemLib::s_nullFunc = nullptr;
-HPHP::Func* SystemLib::s_continuationNextFunc = nullptr;
 HPHP::Func* SystemLib::s_continuationSendFunc = nullptr;
 HPHP::Func* SystemLib::s_continuationRaiseFunc = nullptr;
 

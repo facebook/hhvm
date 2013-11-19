@@ -311,10 +311,10 @@ struct ActRec {
     return cls ? (char*)cls + 1 : nullptr;
   }
   static ObjectData* decodeThis(void* p) {
-    return uintptr_t(p) & 1 ? nullptr : (ObjectData*)p;
+    return (uintptr_t(p) & 1) ? nullptr : (ObjectData*)p;
   }
   static Class* decodeClass(void* p) {
-    return uintptr_t(p) & 1 ? (Class*)(uintptr_t(p)&~1LL) : nullptr;
+    return (uintptr_t(p) & 1) ? (Class*)(uintptr_t(p)&~1LL) : nullptr;
   }
 
   void setThisOrClass(void* objOrCls) {

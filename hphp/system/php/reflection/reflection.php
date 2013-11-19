@@ -712,6 +712,13 @@ class ReflectionFunctionAbstract {
     }
     return '';
   }
+
+  public function getClosureScopeClass() {
+    if (isset($this->info['closure_scope_class'])) {
+      return new ReflectionClass($this->info['closure_scope_class']);
+    }
+    return null;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

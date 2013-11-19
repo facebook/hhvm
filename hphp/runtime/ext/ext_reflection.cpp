@@ -90,7 +90,8 @@ const StaticString
   s_return_type("return_type"),
   s_type_hint("type_hint"),
   s_type_profiling("type_profiling"),
-  s_accessible("accessible");
+  s_accessible("accessible"),
+  s_closure_scope_class("closure_scope_class");
 
 static const Class* get_cls(CVarRef class_or_object) {
   Class* cls = nullptr;
@@ -650,6 +651,17 @@ Array f_hphp_get_closure_info(CVarRef closure) {
     static_vars.set(VarNR(prop.m_name), val);
   }
   mi.set(s_static_variables, static_vars);
+
+  auto clos = asObj.getTyped<c_Closure>();
+  auto this_or_class = clos->getThisOrClass();
+  if (auto const cls = ActRec::decodeClass(this_or_class)) {
+    mi.set(s_closure_scope_class, cls->nameRef());
+  } else if (auto const thiz = ActRec::decodeThis(this_or_class)) {
+    mi.set(s_closure_scope_class, thiz->o_getClassName());
+  } else {
+    assert(this_or_class == nullptr);
+    mi.set(s_closure_scope_class, this_or_class);
+  }
 
   Array &params = mi.lvalAt(s_params).asArrRef();
   for (int i = 0; i < params.size(); i++) {

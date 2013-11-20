@@ -231,6 +231,7 @@ Func::Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
   , m_numParams(0)
   , m_attrs(attrs)
   , m_funcId(InvalidFuncId)
+  , m_profCounter(0)
   , m_hasPrivateAncestor(false)
 {
   m_shared = new SharedData(preClass, preClass ? -1 : id,
@@ -303,6 +304,7 @@ Func* Func::clone(Class* cls) const {
     f->m_cls = cls;
     f->setFullName();
   }
+  f->m_profCounter = 0;
   return f;
 }
 
@@ -771,6 +773,14 @@ bool Func::shouldPGO() const {
 
   if (!RuntimeOption::EvalJitPGOHotOnly) return true;
   return attrs() & AttrHot;
+}
+
+void Func::incProfCounter() {
+  if (m_attrs & AttrHot) return;
+  __sync_fetch_and_add(&m_profCounter, 1);
+  if (m_profCounter >= RuntimeOption::EvalHotFuncThreshold) {
+    m_attrs = (Attr)(m_attrs | AttrHot);
+  }
 }
 
 //=============================================================================

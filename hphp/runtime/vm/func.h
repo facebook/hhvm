@@ -384,6 +384,7 @@ struct Func {
   }
 
   bool shouldPGO() const;
+  void incProfCounter();
 
   /**
    * Closure's __invoke()s have an extra pointer used to keep cloned versions
@@ -548,6 +549,7 @@ private:
   int m_numParams;
   Attr m_attrs;
   FuncId m_funcId;
+  uint32_t m_profCounter;        // profile counter used to detect hot functions
   bool m_hasPrivateAncestor : 1; // This flag indicates if any of this
                                  // Class's ancestors provide a
                                  // "private" implementation for this

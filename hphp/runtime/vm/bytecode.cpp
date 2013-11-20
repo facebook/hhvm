@@ -7358,6 +7358,7 @@ inline void VMExecutionContext::dispatchImpl(int numInstrs) {
             Trace::trace("dispatch: %d: %s\n", pcOff(),                 \
                          nametab[uint8_t(op)]));                        \
     if (profile && (op == OpRetC || op == OpRetV)) {                    \
+      const_cast<Func*>(liveFunc())->incProfCounter();                  \
       profileReturnValue(m_stack.top()->m_type);                        \
     }                                                                   \
     goto *optab[uint8_t(op)];                                           \

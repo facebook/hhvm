@@ -113,6 +113,12 @@ public:
 
   static bool IsVectorData(const ArrayData* ad);
 
+  ssize_t iterAdvanceImpl(ssize_t prev) const {
+    assert(prev >= 0 && prev < m_size);
+    ssize_t next = prev + 1;
+    return next < m_size ? next : invalid_index;
+  }
+
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterAdvance(const ArrayData*, ssize_t prev);

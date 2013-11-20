@@ -262,9 +262,7 @@ ssize_t APCLocalArray::IterEnd(const ArrayData* ad) {
 
 ssize_t APCLocalArray::IterAdvance(const ArrayData* ad, ssize_t prev) {
   auto a = asSharedArray(ad);
-  assert(prev >= 0 && prev < a->m_size);
-  ssize_t next = prev + 1;
-  return next < a->m_size ? next : invalid_index;
+  return a->iterAdvanceImpl(prev);
 }
 
 ssize_t APCLocalArray::IterRewind(const ArrayData* ad, ssize_t prev) {

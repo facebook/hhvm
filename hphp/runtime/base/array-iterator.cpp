@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/hphp-array.h"
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -921,17 +922,8 @@ int64_t iterNext(ArrayIter* iter, TypedValue* valOut, TypedValue* keyOut) {
  * iter_value_cell* will store a copy of the current value at the address
  * given by 'out'. iter_value_cell* will increment the refcount of the current
  * value if appropriate.
- *
- * This function has been split into hot and cold parts. The hot part has
- * been carefully crafted so that it's a leaf function (after all functions
- * it calls have been trivially inlined) that then tail calls a cold
- * version of itself (new_value_cell_cold). The hot part should cover the
- * common case, which occurs when the array parameter is an HphpArray.
- * If you make any changes to this function, please keep the hot/cold
- * splitting in mind, and disasemble the optimized version of the binary
- * to make sure the hot part is a good-looking leaf function; otherwise,
- * you're likely to get a performance regression.
  */
+
 template <bool typeArray, bool withRef>
 static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   DataType oldType = out->m_type;
@@ -1215,27 +1207,54 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
   }
 }
 
-/**
- * iter_next will advance the iterator to point to the next element.
- * If the iterator reaches the end, iter_next will free the iterator
- * and will decRef the array.
- * This function has been split into hot and cold parts. The hot part has
- * been carefully crafted so that it's a leaf function (after all functions
- * it calls have been trivially inlined) that then tail calls a cold
- * version of itself (iter_next_array_cold). The hot part should cover the
- * common case, which occurs when the array parameter is an HphpArray.
- * If you make any changes to this function, please keep the hot/cold
- * splitting in mind, and disasemble the optimized version of the binary
- * to make sure the hot part is a good-looking leaf function; otherwise,
- * you're likely to get a performance regression.
- */
+template <bool withRef>
+NEVER_INLINE
+static int64_t iter_next_collection(ArrayIter* ai,
+                                    TypedValue* valOut,
+                                    TypedValue* keyOut,
+                                    Collection::Type type) {
+  assert(!ai->hasArrayData());
+  assert(type != Collection::InvalidType);
+
+  switch (type) {
+  case Collection::VectorType:
+    return iterNext<c_Vector, ArrayIter::Versionable>(
+                              ai, valOut, keyOut);
+  case Collection::MapType:
+    return iterNext<c_Map, ArrayIter::VersionableSparse>(
+                              ai, valOut, keyOut);
+  case Collection::StableMapType:
+    return iterNext<c_StableMap, ArrayIter::VersionableSparse>(
+                              ai, valOut, keyOut);
+  case Collection::SetType:
+    return iterNext<c_Set, ArrayIter::VersionableSparse>(
+                              ai, valOut, keyOut);
+  case Collection::PairType:
+    return iterNext<c_Pair, ArrayIter::Fixed>(
+                              ai, valOut, keyOut);
+  case Collection::FrozenVectorType:
+    return iterNext<c_FrozenVector, ArrayIter::Fixed>(
+                              ai, valOut, keyOut);
+  case Collection::InvalidType:
+  case Collection::MaxNumTypes:
+    not_reached();
+  }
+  not_reached();
+}
+
 template <bool withRef>
 NEVER_INLINE
 int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
-  TRACE(2, "iter_next_cold: I %p\n", iter);
-  assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
-         iter->arr().getIterType() == ArrayIter::TypeIterator);
-  ArrayIter* ai = &iter->arr();
+  auto const ai = &iter->arr();
+  assert(ai->getIterType() == ArrayIter::TypeArray ||
+         ai->getIterType() == ArrayIter::TypeIterator);
+  if (UNLIKELY(!ai->hasArrayData())) {
+    auto const coll = ai->getObject()->getCollectionType();
+    if (UNLIKELY(coll != Collection::InvalidType)) {
+      return iter_next_collection<withRef>(ai, valOut, keyOut, coll);
+    }
+  }
+
   ai->next();
   if (ai->end()) {
     // The ArrayIter destructor will decRef the array
@@ -1256,61 +1275,92 @@ int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   return 1;
 }
 
-template <bool withRef>
-static int64_t iter_next_collection(
-    Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
-  assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
-         iter->arr().getIterType() == ArrayIter::TypeIterator);
-  TRACE(2, "iter_next_collection: I %p\n", iter);
-
-  ArrayIter* ai = &iter->arr();
-  Collection::Type type = (ai->hasArrayData()) ?
-                                Collection::InvalidType :
-                                ai->getObject()->getCollectionType();
-  switch (type) {
-    case Collection::VectorType:
-      return iterNext<c_Vector, ArrayIter::Versionable>(
-                                ai, valOut, keyOut);
-    case Collection::MapType:
-      return iterNext<c_Map, ArrayIter::VersionableSparse>(
-                                ai, valOut, keyOut);
-    case Collection::StableMapType:
-      return iterNext<c_StableMap, ArrayIter::VersionableSparse>(
-                                ai, valOut, keyOut);
-    case Collection::SetType:
-      return iterNext<c_Set, ArrayIter::VersionableSparse>(
-                                ai, valOut, keyOut);
-    case Collection::PairType:
-      return iterNext<c_Pair, ArrayIter::Fixed>(
-                                ai, valOut, keyOut);
-    case Collection::FrozenVectorType:
-      return iterNext<c_FrozenVector, ArrayIter::Fixed>(
-                                ai, valOut, keyOut);
-    default:
-      return iter_next_cold<withRef>(iter, valOut, keyOut);
+static NEVER_INLINE
+int64_t iter_next_free_arr(Iter* iter, HphpArray* arr) {
+  assert(arr->getCount() == 1);
+  if (arr->m_kind == ArrayData::kPackedKind) {
+    HphpArray::ReleasePacked(arr);
+  } else {
+    assert(arr->m_kind == ArrayData::kMixedKind);
+    HphpArray::Release(arr);
   }
+  if (debug) {
+    iter->arr().setIterType(ArrayIter::TypeUndefined);
+  }
+  return 0;
+}
+
+NEVER_INLINE
+static int64_t iter_next_free_apc_array(Iter* iter, APCLocalArray* arr) {
+  assert(arr->getCount() == 1);
+  APCLocalArray::Release(arr);
+  if (debug) {
+    iter->arr().setIterType(ArrayIter::TypeUndefined);
+  }
+  return 0;
+}
+
+NEVER_INLINE
+static int64_t iter_next_apc_array(Iter* iter,
+                                   TypedValue* valOut,
+                                   TypedValue* keyOut,
+                                   ArrayData* ad) {
+  assert(ad->kind() == ArrayData::kSharedKind);
+
+  auto const arrIter = &iter->arr();
+  auto const arr = static_cast<APCLocalArray*>(ad);
+  ssize_t const pos = arr->iterAdvanceImpl(arrIter->getPos());
+  if (UNLIKELY(pos == ArrayData::invalid_index)) {
+    if (UNLIKELY(arr->getCount() == 1)) {
+      return iter_next_free_apc_array(iter, arr);
+    }
+    arr->decRefCount();
+    if (debug) {
+      iter->arr().setIterType(ArrayIter::TypeUndefined);
+    }
+    return 0;
+  }
+  arrIter->setPos(pos);
+
+  const Variant& var = APCLocalArray::GetValueRef(arr, pos);
+  cellSet(*var.asCell(), *valOut);
+  if (LIKELY(!keyOut)) return 1;
+
+  Cell key;
+  APCLocalArray::NvGetKey(ad, &key, pos);
+  auto const keyType  = keyOut->m_type;
+  auto const keyDatum = keyOut->m_data.num;
+  cellDup(key, *keyOut);
+  tvRefcountedDecRefHelper(keyType, keyDatum);
+
+  return 1;
 }
 
 int64_t iter_next(Iter* iter, TypedValue* valOut) {
   TRACE(2, "iter_next: I %p\n", iter);
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
          iter->arr().getIterType() == ArrayIter::TypeIterator);
-  ArrayIter* arrIter = &iter->arr();
+  auto const arrIter = &iter->arr();
   valOut = tvToCell(valOut);
   if (UNLIKELY(!arrIter->hasArrayData())) {
     goto cold;
   }
+
   {
-    const ArrayData* ad = arrIter->getArrayData();
+    auto const ad = const_cast<ArrayData*>(arrIter->getArrayData());
     if (UNLIKELY(!ad->isHphpArray())) {
+      if (ad->isSharedArray()) {
+        return iter_next_apc_array(iter, valOut, nullptr, ad);
+      }
       goto cold;
     }
-    const HphpArray* arr = (HphpArray*)ad;
+    auto const arr = static_cast<HphpArray*>(ad);
+
     ssize_t pos = arrIter->getPos();
     do {
       if (size_t(++pos) >= size_t(arr->iterLimit())) {
         if (UNLIKELY(arr->getCount() == 1)) {
-          goto cold;
+          return iter_next_free_arr(iter, arr);
         }
         arr->decRefCount();
         if (debug) {
@@ -1318,7 +1368,8 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
         }
         return 0;
       }
-    } while (arr->isTombstone(pos));
+    } while (UNLIKELY(arr->isTombstone(pos)));
+
     if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
       goto cold;
     }
@@ -1327,8 +1378,9 @@ int64_t iter_next(Iter* iter, TypedValue* valOut) {
     arr->getArrayElm<false>(pos, valOut, nullptr);
     return 1;
   }
+
 cold:
-  return iter_next_collection<false>(iter, valOut, nullptr);
+  return iter_next_cold<false>(iter, valOut, nullptr);
 }
 
 template <bool withRef>
@@ -1336,7 +1388,7 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iter_next_key: I %p\n", iter);
   assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
          iter->arr().getIterType() == ArrayIter::TypeIterator);
-  ArrayIter* arrIter = &iter->arr();
+  auto const arrIter = &iter->arr();
   if (!withRef) {
     valOut = tvToCell(valOut);
     keyOut = tvToCell(keyOut);
@@ -1344,18 +1396,23 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   if (UNLIKELY(!arrIter->hasArrayData())) {
     goto cold;
   }
+
   {
-    const ArrayData* ad = arrIter->getArrayData();
+    auto const ad = const_cast<ArrayData*>(arrIter->getArrayData());
     if (UNLIKELY(!ad->isHphpArray())) {
+      if (ad->isSharedArray()) {
+        return iter_next_apc_array(iter, valOut, keyOut, ad);
+      }
       goto cold;
     }
-    const HphpArray* arr = (HphpArray*)ad;
+    auto const arr = static_cast<HphpArray*>(ad);
+
     ssize_t pos = arrIter->getPos();
     do {
       ++pos;
       if (size_t(pos) >= size_t(arr->iterLimit())) {
         if (UNLIKELY(arr->getCount() == 1)) {
-          goto cold;
+          return iter_next_free_arr(iter, arr);
         }
         arr->decRefCount();
         if (debug) {
@@ -1363,7 +1420,8 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
         }
         return 0;
       }
-    } while (arr->isTombstone(pos));
+    } while (UNLIKELY(arr->isTombstone(pos)));
+
     if (!withRef) {
       if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
         goto cold;
@@ -1378,8 +1436,9 @@ int64_t iter_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     arr->getArrayElm<withRef>(pos, valOut, keyOut);
     return 1;
   }
-  cold:
-  return iter_next_collection<withRef>(iter, valOut, keyOut);
+
+cold:
+  return iter_next_cold<withRef>(iter, valOut, keyOut);
 }
 
 template int64_t iter_next_key<false>(Iter* dest,

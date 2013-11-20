@@ -216,8 +216,12 @@ class PHPUnitPatterns {
 
   static string $xdebug_pattern = "/The Xdebug extension is not loaded./";
 
-  static string $test_file_pattern = "/.*(\.phpt|Test\.php|test\.php)$/";
+  // Paris and Idiorm have tests with ending digits (e.g. Test53.php)
+  static string $test_file_pattern =
+                "/.*(\.phpt|Test[\d]*\.php|test[\d]*\.php)$/";
   static string $pear_test_file_pattern = "/.*(\.phpt)$/";
+  static string $facebook_sdk_test_file_pattern = "/.*(tests\.php)$/";
+  static string $mediawiki_test_file_pattern = "/.*(\Test.*\.php)$/";
 
   static string $tests_ok_skipped_inc_pattern =
                "/OK, but incomplete or skipped tests!/";
@@ -610,6 +614,7 @@ abstract class Framework {
     $handle = fopen($this->stats_file, "r");
     if ($handle) {
       while (($line = fgets($handle)) !== false) {
+        $line = rtrim($line, PHP_EOL);
         if (preg_match(PHPUnitPatterns::$tests_ok_pattern,
                        $line, $match) === 1) {
           // We have ths pattern: OK (364 tests, 590 assertions)
@@ -642,6 +647,24 @@ abstract class Framework {
                    $line === Statuses::TIMEOUT) {
           $num_tests += 1;
           $num_errors_failures += 1;
+        } else if ($line === Statuses::SKIP) {
+          // If status is SKIP, then we just move on and don't count either way.
+        } else if (preg_match($this->test_file_pattern, $line) === 1) {
+          // Just skip over the test file names. They are in the stats file
+          // as context for the numbers
+        } else if ($line === $this->name) {
+          // For frameworks running in serial, just the framework name will
+          // be printed right now. i.e., Runner::$name will be the framework
+          // name. Like an actual test name, do nothing. See Pear:
+          //
+          // pear
+          // Tests: 678, Assertions: 678, Failures: 29, Skipped: 24.
+        }
+        else {
+          Options::$csv_only ? error()
+                             : error("The stats file for ".$this->name." is ".
+                                     "corrupt! It should only have test ".
+                                     "names and statuses in it.\n");
         }
       }
       // Count blacklisted tests as failures
@@ -1124,6 +1147,7 @@ class FacebookPhpSdk extends Framework {
       "git_path" => "https://github.com/facebook/facebook-php-sdk.git",
       "git_commit" => "16d696c138b82003177d0b4841a3e4652442e5b1",
       "test_path" => __DIR__."/frameworks/facebook-php-sdk",
+      "test_file_pattern" => PHPUnitPatterns::$facebook_sdk_test_file_pattern,
       "test_file_search_roots" => Set {
         __DIR__."/frameworks/facebook-php-sdk/tests",
       },
@@ -1192,6 +1216,7 @@ class Mediawiki extends Framework {
       "git_path" => "https://github.com/wikimedia/mediawiki-core.git",
       "git_commit" => "8c5733c44977232ca42454ae7f1ae0fd01770b37",
       "test_path" => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
+      "test_file_pattern" => PHPUnitPatterns::$mediawiki_test_file_pattern,
       "test_file_search_roots" => Set {
         __DIR__."/frameworks/mediawiki-core/tests/phpunit",
       },
@@ -1600,14 +1625,12 @@ class Runner {
           continue;
         }
         if ($this->isStop($line)) {
-          $post_test = true;
-          continue;
+          // If we have finished the tests, then we are just printing any error
+          // info and getting the final stats
+          $this->printPostTestInfo();
+          break;
         }
-        // If we have finished the tests, then we are just printing any error
-        // info and getting the final stats
-        if ($post_test) {
-          $this->printPostTestInfo($line);
-        } else if (!$pretest_data) {
+        if (!$pretest_data) {
           // We have gotten through the prologue and any blank lines
           // and we should be at tests now.
           $tn_matches = array();
@@ -1676,14 +1699,14 @@ class Runner {
         $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL;
         $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
                                     PHP_EOL.PHP_EOL;
-        $this->stat_information = $test.PHP_EOL.$status.PHP_EOL;
+        $this->stat_information = $this->name.PHP_EOL.$status.PHP_EOL;
         $continue_testing = false;
         break;
       } else if ($status === Statuses::TIMEOUT) {
         $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL;
         $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
                                     PHP_EOL.PHP_EOL;
-        $this->stat_information = $test.PHP_EOL.$status.PHP_EOL;
+        $this->stat_information = $this->name.PHP_EOL.$status.PHP_EOL;
         $continue_testing = false;
         break;
       } else if ($status === Statuses::INCOMPLETE) {
@@ -1697,6 +1720,7 @@ class Runner {
         $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
                                     PHP_EOL.PHP_EOL;
         $status = Statuses::FATAL;
+        $this->stat_information = $this->name.PHP_EOL.$status.PHP_EOL;
         $continue_testing = false;
         break;
       } else if ($this->checkForWarnings($status)) {
@@ -1806,38 +1830,58 @@ class Runner {
     return $line;
   }
 
-  private function printPostTestInfo(string $line): void {
-    while ($line !== null) {
-      $line = remove_string_from_text($line, __DIR__, "");
+  private function printPostTestInfo(): void {
+    // Don't print out any of the PHPUnit Patterns to the errors file, except
+    // for lines with stat numbers (or no tests executed, in which case we skip
+    // the test). Just print out pertinent error information
+    //
+    // There was 1 failure:  <---- Don't print
+    // 1) Assetic\Test\Asset\HttpAssetTest::testGetLastModified <---- print
+    // No tests executed! <----- print
+    $print_blanks = false; // Only print blanks after the first test is found
+    do
+    {
+      $line = $this->getLine();
       if (preg_match(PHPUnitPatterns::$tests_ok_skipped_inc_pattern,
                      $line) !== 1 &&
           preg_match(PHPUnitPatterns::$num_errors_failures_pattern,
                      $line) !== 1 &&
           preg_match(PHPUnitPatterns::$failures_header_pattern,
                      $line) !== 1 &&
-          preg_match(PHPUnitPatterns::$no_tests_executed_pattern,
-                     $line) !== 1 &&
           preg_match(PHPUnitPatterns::$num_skips_inc_pattern,
-                     $line) !==1 ) {
+                     $line) !== 1 &&
+          $line !== null) {
+        if ($line === "" && !$print_blanks) {
+          continue;
+        }
+        $line = remove_string_from_text($line, __DIR__, "");
         $this->error_information .= $line.PHP_EOL;
         if (preg_match($this->framework->test_name_pattern, $line) === 1) {
+          $print_blanks = true;
           $this->error_information .= PHP_EOL.
                                       $this->getTestRunStr("RUN TEST FILE: ").
                                       PHP_EOL.PHP_EOL;
         }
       }
-      $line = $this->getLine();
-    }
-    // The last non-null line would have been the real stat information for
-    // pass percentage purposes. Take that out of the error string and put in
-    // the stat information string instead. Other stat like information may be
-    // in the error string as they are part of the test errors (PHPUnit does
-    // this).
+    } while ($line !== null);
+
+    // The last non-null line in the error file would have been the real stat
+    // information for pass percentage purposes. Take that out of the error
+    // string and put in the stat information string instead. Other stat like
+    // information may be in the error string as they are part of the test
+    // errors (PHPUnit does this).
     $this->error_information = rtrim($this->error_information, PHP_EOL);
     $pieces = explode(PHP_EOL, $this->error_information);
     $this->stat_information = $this->name.PHP_EOL;
-    $this->stat_information .= array_pop($pieces).PHP_EOL;
-    // There were no errors, just final stats if $pieces is empty
+    $lastLine = array_pop($pieces);
+    // If no tests are executed, then mark as Statuses::SKIP
+    if (preg_match(PHPUnitPatterns::$no_tests_executed_pattern,
+                   $lastLine) === 1) {
+      $this->stat_information .= Statuses::SKIP.PHP_EOL;
+    } else {
+      $this->stat_information .= $lastLine.PHP_EOL;
+    }
+    // There were no errors, just final stats if $pieces is now empty
     if (count($pieces) > 0) {
       $this->error_information = implode(PHP_EOL, $pieces).PHP_EOL;
     } else {

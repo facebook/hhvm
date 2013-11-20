@@ -22,7 +22,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_ZendObjectData::c_ZendObjectData(Class* cls) : ObjectData(cls) {}
+c_ZendObjectData::c_ZendObjectData(Class* cls)
+  : ObjectData(cls, ObjectData::IsCppBuiltin) {
+  // TODO: #3235411 ZendObjectData fields collide with fields of Exception
+  // Work around the problem by using ObjectData::o_subclassData for handle
+  static_assert(sizeof(*this) == sizeof(ObjectData),
+                "must be true, or else ZOD fields overlap PHP fields");
+}
 
 ObjectData* new_ZendObjectData_Instance(Class* cls) {
   size_t nProps = cls->numDeclProperties();

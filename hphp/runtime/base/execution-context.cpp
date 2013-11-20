@@ -75,6 +75,7 @@ VMExecutionContext::VMExecutionContext() :
     m_lambdaCounter(0), m_nesting(0),
     m_breakPointFilter(nullptr), m_lastLocFilter(nullptr),
     m_dbgNoBreak(false), m_coverPrevLine(-1), m_coverPrevUnit(nullptr),
+    m_lastErrorPath(""), m_lastErrorLine(0),
     m_executingSetprofileCallback(false) {
 
   // Make sure any fields accessed from the TC are within a byte of

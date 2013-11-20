@@ -296,7 +296,7 @@ public:
                    bool skipFrame = false);
   bool callUserErrorHandler(const Exception &e, int errnum,
                             bool swallowExceptions);
-  void recordLastError(const Exception &e, int errnum = 0);
+  virtual void recordLastError(const Exception &e, int errnum = 0);
   bool onFatalError(const Exception &e); // returns handled
   bool onUnhandledException(Object e);
   ErrorState getErrorState() const { return m_errorState;}
@@ -641,6 +641,9 @@ public:
   bool doFCallArray(PC& pc);
   bool doFCallArrayTC(PC pc);
   CVarRef getEvaledArg(const StringData* val, const String& namespacedName);
+  virtual void recordLastError(const Exception &e, int errnum = 0);
+  String getLastErrorPath() const { return m_lastErrorPath;}
+  int getLastErrorLine() const { return m_lastErrorLine;}
 
 private:
   void enterVMWork(ActRec* enterFnAr);
@@ -659,6 +662,8 @@ private:
   int m_coverPrevLine;
   HPHP::Unit* m_coverPrevUnit;
   Array m_evaledArgs;
+  String m_lastErrorPath;
+  int m_lastErrorLine;
 public:
   void resetCoverageCounters();
   void shuffleMagicArgs(ActRec* ar);

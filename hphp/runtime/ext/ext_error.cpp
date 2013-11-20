@@ -125,8 +125,10 @@ Array f_error_get_last() {
   if (lastError.isNull()) {
     return (ArrayData *)NULL;
   }
-  return make_map_array(s_message, g_context->getLastError(),
-                     s_type, g_context->getLastErrorNumber());
+  return make_map_array(s_type, g_context->getLastErrorNumber(),
+                        s_message, g_context->getLastError(),
+                        s_file, g_context->getLastErrorPath(),
+                        s_line, g_context->getLastErrorLine());
 }
 
 bool f_error_log(const String& message, int message_type /* = 0 */,

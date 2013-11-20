@@ -21,7 +21,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_continuation.h"
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/instance-bits.h"

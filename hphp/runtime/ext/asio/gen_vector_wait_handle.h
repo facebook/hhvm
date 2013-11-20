@@ -15,33 +15,55 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_H_
-#define incl_HPHP_EXT_ASIO_H_
+#ifndef incl_HPHP_EXT_ASIO_GEN_VECTOR_WAIT_HANDLE_H_
+#define incl_HPHP_EXT_ASIO_GEN_VECTOR_WAIT_HANDLE_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
-#include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
-#include "hphp/runtime/ext/asio/reschedule_wait_handle.h"
-#include "hphp/runtime/ext/asio/session_scoped_wait_handle.h"
-#include "hphp/runtime/ext/asio/set_result_to_ref_wait_handle.h"
-#include "hphp/runtime/ext/asio/sleep_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_result_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_wait_handle.h"
-#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// class GenVectorWaitHandle
 
-int f_asio_get_current_context_idx();
-Object f_asio_get_running_in_context(int ctx_idx);
-Object f_asio_get_running();
+/**
+ * A wait handle that waits for a vector of wait handles. The wait handle
+ * finishes once all wait handles in the vector are finished. The result value
+ * preserves order of the original vector. If one of the wait handles failed,
+ * the exception is propagated by failure.
+ */
+FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
+FORWARD_DECLARE_CLASS(Vector);
+class c_GenVectorWaitHandle : public c_BlockableWaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(GenVectorWaitHandle)
+
+  explicit c_GenVectorWaitHandle(Class* cls = c_GenVectorWaitHandle::classof())
+    : c_BlockableWaitHandle(cls)
+  {}
+  ~c_GenVectorWaitHandle() {}
+
+  void t___construct();
+  static void ti_setoncreatecallback(CVarRef callback);
+  static Object ti_create(CVarRef dependencies);
+
+ public:
+  String getName();
+  void enterContext(context_idx_t ctx_idx);
+
+ protected:
+  void onUnblocked();
+  c_WaitableWaitHandle* getChild();
+
+ private:
+  void initialize(CObjRef exception, c_Vector* deps,
+                  int64_t iter_pos, c_WaitableWaitHandle* child);
+
+  Object m_exception;
+  p_Vector m_deps;
+  int64_t m_iterPos;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_ASIO_H_
+#endif // incl_HPHP_EXT_ASIO_GEN_VECTOR_WAIT_HANDLE_H_

@@ -15,9 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
+
 #include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {

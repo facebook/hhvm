@@ -15,33 +15,55 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_H_
-#define incl_HPHP_EXT_ASIO_H_
+#ifndef incl_HPHP_EXT_ASIO_BLOCKABLE_WAIT_HANDLE_H_
+#define incl_HPHP_EXT_ASIO_BLOCKABLE_WAIT_HANDLE_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
-#include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
-#include "hphp/runtime/ext/asio/reschedule_wait_handle.h"
-#include "hphp/runtime/ext/asio/session_scoped_wait_handle.h"
-#include "hphp/runtime/ext/asio/set_result_to_ref_wait_handle.h"
-#include "hphp/runtime/ext/asio/sleep_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_result_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// class BlockableWaitHandle
 
-int f_asio_get_current_context_idx();
-Object f_asio_get_running_in_context(int ctx_idx);
-Object f_asio_get_running();
+/**
+ * A blockable wait handle is a wait handle that can be blocked by a waitable
+ * wait handle it is waiting for. Once a wait handle blocking this wait handle
+ * is finished, a notification is received and the operation can be resumed.
+ */
+FORWARD_DECLARE_CLASS(BlockableWaitHandle);
+class c_BlockableWaitHandle : public c_WaitableWaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(BlockableWaitHandle)
+
+  explicit c_BlockableWaitHandle(Class* cls =
+      c_BlockableWaitHandle::classof())
+    : c_WaitableWaitHandle(cls)
+    , m_nextParent(nullptr)
+  {}
+  ~c_BlockableWaitHandle() {}
+
+  void t___construct();
+
+ public:
+  c_BlockableWaitHandle* getNextParent();
+  c_BlockableWaitHandle* unblock();
+
+  void exitContextBlocked(context_idx_t ctx_idx);
+
+ protected:
+  void blockOn(c_WaitableWaitHandle* child);
+  virtual void onUnblocked() = 0;
+  c_WaitableWaitHandle* getChild() = 0;
+  void detectCycle(c_WaitableWaitHandle* child) const;
+  ObjectData* createCycleException(c_WaitableWaitHandle* child) const;
+
+  static const int8_t STATE_BLOCKED = 3;
+
+ private:
+  c_BlockableWaitHandle* m_nextParent;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_ASIO_H_
+#endif // incl_HPHP_EXT_ASIO_BLOCKABLE_WAIT_HANDLE_H_

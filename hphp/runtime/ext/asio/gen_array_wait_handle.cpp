@@ -14,10 +14,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_asio.h"
+
+#include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
+
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include <hphp/runtime/ext/asio/static_exception_wait_handle.h>
+#include <hphp/runtime/ext/asio/static_result_wait_handle.h>
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/hphp-array-defs.h"

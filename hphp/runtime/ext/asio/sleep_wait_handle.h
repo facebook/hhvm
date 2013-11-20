@@ -15,14 +15,54 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/asio/static_wait_handle.h"
+#ifndef incl_HPHP_EXT_ASIO_SLEEP_WAIT_HANDLE_H_
+#define incl_HPHP_EXT_ASIO_SLEEP_WAIT_HANDLE_H_
+
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/asio/session_scoped_wait_handle.h"
+#include "hphp/runtime/ext/asio/asio_session.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// class SleepWaitHandle
 
-void c_StaticWaitHandle::t___construct() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
+/**
+ * A wait handle that sleeps until a give time passes.
+ */
+FORWARD_DECLARE_CLASS(SleepWaitHandle);
+class c_SleepWaitHandle : public c_SessionScopedWaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(SleepWaitHandle);
+
+  explicit c_SleepWaitHandle(Class* cls = c_SleepWaitHandle::classof())
+    : c_SessionScopedWaitHandle(cls)
+  {}
+  ~c_SleepWaitHandle() {}
+  void t___construct();
+  static Object ti_create(int64_t usecs);
+
+ public:
+  void process();
+  String getName();
+  AsioSession::TimePoint getWakeTime() const { return m_waketime; };
+
+  void setIndex(uint32_t ev_idx) {
+    assert(getState() == STATE_WAITING);
+    m_index = ev_idx;
+  }
+
+ protected:
+  void registerToContext();
+  void unregisterFromContext();
+
+ private:
+  void initialize(int64_t usecs);
+
+  AsioSession::TimePoint m_waketime;
+  uint32_t m_index;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif // incl_HPHP_EXT_ASIO_SLEEP_WAIT_HANDLE_H_

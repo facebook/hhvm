@@ -15,14 +15,43 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_EXT_ASIO_STATIC_EXCEPTION_WAIT_HANDLE_H_
+#define incl_HPHP_EXT_ASIO_STATIC_EXCEPTION_WAIT_HANDLE_H_
+
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// class StaticExceptionWaitHandle
 
-void c_StaticWaitHandle::t___construct() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
+/**
+ * A wait handle that is statically failed with an exception.
+ */
+FORWARD_DECLARE_CLASS(StaticExceptionWaitHandle);
+class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(StaticExceptionWaitHandle)
+
+  explicit c_StaticExceptionWaitHandle(Class* cls =
+      c_StaticExceptionWaitHandle::classof())
+    : c_StaticWaitHandle(cls)
+  {
+    setState(STATE_FAILED);
+  }
+  ~c_StaticExceptionWaitHandle() {
+    tvRefcountedDecRefCell(&m_resultOrException);
+  }
+
+  void t___construct();
+  static Object ti_create(CObjRef exception);
+
+ public:
+  static p_StaticExceptionWaitHandle Create(ObjectData* exception);
+  String getName();
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif // incl_HPHP_EXT_ASIO_STATIC_EXCEPTION_WAIT_HANDLE_H_

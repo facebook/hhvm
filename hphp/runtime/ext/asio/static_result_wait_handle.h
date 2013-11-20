@@ -15,14 +15,43 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_EXT_ASIO_STATIC_RESULT_WAIT_HANDLE_H_
+#define incl_HPHP_EXT_ASIO_STATIC_RESULT_WAIT_HANDLE_H_
+
+#include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// class StaticResultWaitHandle
 
-void c_StaticWaitHandle::t___construct() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
+/**
+ * A wait handle that is statically succeeded with a result.
+ */
+FORWARD_DECLARE_CLASS(StaticResultWaitHandle);
+class c_StaticResultWaitHandle : public c_StaticWaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(StaticResultWaitHandle)
+
+  explicit c_StaticResultWaitHandle(Class* cls =
+      c_StaticResultWaitHandle::classof())
+    : c_StaticWaitHandle(cls)
+  {
+    setState(STATE_SUCCEEDED);
+  }
+  ~c_StaticResultWaitHandle() {
+    tvRefcountedDecRefCell(&m_resultOrException);
+  }
+
+  void t___construct();
+  static Object ti_create(CVarRef result);
+
+ public:
+  static p_StaticResultWaitHandle Create(const Cell& result);
+  String getName();
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif // incl_HPHP_EXT_ASIO_STATIC_RESULT_WAIT_HANDLE_H_

@@ -15,7 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/static_result_wait_handle.h"
+
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {

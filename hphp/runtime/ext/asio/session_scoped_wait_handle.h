@@ -15,14 +15,44 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/asio/static_wait_handle.h"
+#ifndef incl_HPHP_EXT_ASIO_SESSION_SCOPED_WAIT_HANDLE_H_
+#define incl_HPHP_EXT_ASIO_SESSION_SCOPED_WAIT_HANDLE_H_
+
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// class SessionScopedWaitHandle
 
-void c_StaticWaitHandle::t___construct() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
+/**
+ * A wait handle whose execution transcends context-scope.
+ */
+FORWARD_DECLARE_CLASS(SessionScopedWaitHandle);
+class c_SessionScopedWaitHandle : public c_WaitableWaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(SessionScopedWaitHandle)
+
+  explicit c_SessionScopedWaitHandle(Class* cls =
+      c_SessionScopedWaitHandle::classof())
+    : c_WaitableWaitHandle(cls)
+  {}
+  ~c_SessionScopedWaitHandle() {}
+
+  void t___construct();
+
+ public:
+  void enterContext(context_idx_t ctx_idx);
+  void exitContext(context_idx_t ctx_idx);
+
+ protected:
+  virtual void registerToContext() = 0;
+  virtual void unregisterFromContext() = 0;
+
+  static const int8_t STATE_WAITING = 3;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif // incl_HPHP_EXT_ASIO_SESSION_SCOPED_WAIT_HANDLE_H_

@@ -18,9 +18,13 @@
 
 #include <thread>
 
-#include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio_external_thread_event_queue.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
+#include "hphp/runtime/ext/asio/sleep_wait_handle.h"
+#include "hphp/runtime/ext/asio/reschedule_wait_handle.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/timer.h"
 

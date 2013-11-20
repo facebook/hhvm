@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_continuation.h"
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
 #include "hphp/runtime/ext/ext_spl.h"

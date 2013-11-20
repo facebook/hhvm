@@ -15,33 +15,57 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_H_
-#define incl_HPHP_EXT_ASIO_H_
+#ifndef incl_HPHP_EXT_ASIO_SET_RESULT_TO_REF_WAIT_HANDLE_H_
+#define incl_HPHP_EXT_ASIO_SET_RESULT_TO_REF_WAIT_HANDLE_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/blockable_wait_handle.h"
-#include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
-#include "hphp/runtime/ext/asio/reschedule_wait_handle.h"
-#include "hphp/runtime/ext/asio/session_scoped_wait_handle.h"
-#include "hphp/runtime/ext/asio/set_result_to_ref_wait_handle.h"
-#include "hphp/runtime/ext/asio/sleep_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_result_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_wait_handle.h"
-#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// class SetResultToRefWaitHandle
 
-int f_asio_get_current_context_idx();
-Object f_asio_get_running_in_context(int ctx_idx);
-Object f_asio_get_running();
+/**
+ * A wait handle that waits for a given dependency and sets its result to
+ * a given reference once completed.
+ */
+FORWARD_DECLARE_CLASS(SetResultToRefWaitHandle);
+class c_SetResultToRefWaitHandle : public c_BlockableWaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(SetResultToRefWaitHandle)
+
+  explicit c_SetResultToRefWaitHandle(Class* cls =
+      c_SetResultToRefWaitHandle::classof())
+    : c_BlockableWaitHandle(cls)
+    , m_child()
+    , m_ref()
+  {}
+  ~c_SetResultToRefWaitHandle() {
+    if (m_ref) decRefRef(m_ref);
+  }
+  void t___construct();
+  static void ti_setoncreatecallback(CVarRef callback);
+  static Object ti_create(CObjRef wait_handle, VRefParam ref);
+
+
+ public:
+  String getName();
+  void enterContext(context_idx_t ctx_idx);
+
+ protected:
+  void onUnblocked();
+  c_WaitableWaitHandle* getChild();
+
+ private:
+  void initialize(c_WaitableWaitHandle* wait_handle, RefData* ref);
+  void markAsSucceeded(const Cell& result);
+  void markAsFailed(CObjRef exception);
+
+  p_WaitableWaitHandle m_child;
+  RefData* m_ref;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_ASIO_H_
+#endif // incl_HPHP_EXT_ASIO_SET_RESULT_TO_REF_WAIT_HANDLE_H_

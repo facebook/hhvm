@@ -15,33 +15,55 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_H_
-#define incl_HPHP_EXT_ASIO_H_
+#ifndef incl_HPHP_EXT_ASIO_RESCHEDULE_WAIT_HANDLE_H_
+#define incl_HPHP_EXT_ASIO_RESCHEDULE_WAIT_HANDLE_H_
 
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
-#include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
-#include "hphp/runtime/ext/asio/reschedule_wait_handle.h"
-#include "hphp/runtime/ext/asio/session_scoped_wait_handle.h"
-#include "hphp/runtime/ext/asio/set_result_to_ref_wait_handle.h"
-#include "hphp/runtime/ext/asio/sleep_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_result_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// class RescheduleWaitHandle
 
-int f_asio_get_current_context_idx();
-Object f_asio_get_running_in_context(int ctx_idx);
-Object f_asio_get_running();
+extern const int64_t q_RescheduleWaitHandle$$QUEUE_DEFAULT;
+extern const int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO;
+
+/**
+ * A wait handle that is enqueued into a given priority queue and once desired
+ * execution priority is eligible for execution, it succeeds with a null result.
+ *
+ * RescheduleWaitHandle is guaranteed to never finish immediately.
+ */
+FORWARD_DECLARE_CLASS(RescheduleWaitHandle);
+class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(RescheduleWaitHandle)
+
+  explicit c_RescheduleWaitHandle(Class* cls =
+      c_RescheduleWaitHandle::classof())
+    : c_WaitableWaitHandle(cls)
+  {}
+  ~c_RescheduleWaitHandle() {}
+
+  void t___construct();
+  static Object ti_create(int64_t queue, int priority);
+
+ public:
+  void run();
+  String getName();
+  void enterContext(context_idx_t ctx_idx);
+  void exitContext(context_idx_t ctx_idx);
+
+ private:
+  void initialize(uint32_t queue, uint32_t priority);
+
+  uint32_t m_queue;
+  uint32_t m_priority;
+
+  static const int8_t STATE_SCHEDULED = 3;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_ASIO_H_
+#endif // incl_HPHP_EXT_ASIO_RESCHEDULE_WAIT_HANDLE_H_

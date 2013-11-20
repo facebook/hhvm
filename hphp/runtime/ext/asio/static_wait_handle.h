@@ -15,14 +15,35 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/asio/static_wait_handle.h"
+#ifndef incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_
+#define incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_
+
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/asio/wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// class StaticWaitHandle
 
-void c_StaticWaitHandle::t___construct() {
-  throw NotSupportedException(__func__, "WTF? This is an abstract class");
-}
+/**
+ * A static wait handle is a wait handle that is statically finished. The result
+ * of the operation is always available and waiting for the wait handle finishes
+ * immediately.
+ */
+FORWARD_DECLARE_CLASS(StaticWaitHandle);
+class c_StaticWaitHandle : public c_WaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(StaticWaitHandle)
+
+  explicit c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::classof())
+    : c_WaitHandle(cls)
+  {}
+  ~c_StaticWaitHandle() {}
+
+  void t___construct();
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif // incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_

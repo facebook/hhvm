@@ -20,7 +20,7 @@
 
 #include <atomic>
 #include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

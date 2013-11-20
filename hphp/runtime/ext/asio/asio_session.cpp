@@ -16,7 +16,14 @@
 */
 
 #include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/runtime/ext/ext_asio.h"
+
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
+#include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
+#include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
+#include "hphp/runtime/ext/asio/set_result_to_ref_wait_handle.h"
+#include "hphp/runtime/ext/asio/sleep_wait_handle.h"
+#include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {

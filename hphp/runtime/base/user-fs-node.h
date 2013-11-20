@@ -29,16 +29,16 @@ public:
 
 protected:
   Variant invoke(const Func *func, const String& name, CArrRef args,
-                 bool &success, Class* cls);
-  Variant invoke(const Func *func, const String& name, CArrRef args,
-                 Class* cls) {
+                 bool &success);
+  Variant invoke(const Func *func, const String& name, CArrRef args) {
     bool success;
-    return invoke(func, name, args, success, cls);
+    return invoke(func, name, args, success);
   }
-  const Func* lookupMethod(const StringData* name, Class* cls);
+  const Func* lookupMethod(const StringData* name);
 
 protected:
   const Func* m_Call;
+  Class* m_cls;
 
 private:
   Object m_obj;

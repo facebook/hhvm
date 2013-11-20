@@ -40,18 +40,17 @@ StaticString s_url_stat("url_stat");
 
 UserFile::UserFile(Class *cls, CVarRef context /*= null */) :
                    UserFSNode(cls), m_opened(false) {
-  m_cls = cls;
-  m_StreamOpen  = lookupMethod(s_stream_open.get(), m_cls);
-  m_StreamClose = lookupMethod(s_stream_close.get(), m_cls);
-  m_StreamRead  = lookupMethod(s_stream_read.get(), m_cls);
-  m_StreamWrite = lookupMethod(s_stream_write.get(), m_cls);
-  m_StreamSeek  = lookupMethod(s_stream_seek.get(), m_cls);
-  m_StreamTell  = lookupMethod(s_stream_tell.get(), m_cls);
-  m_StreamEof   = lookupMethod(s_stream_eof.get(), m_cls);
-  m_StreamFlush = lookupMethod(s_stream_flush.get(), m_cls);
-  m_StreamTruncate = lookupMethod(s_stream_truncate.get(), m_cls);
-  m_StreamLock  = lookupMethod(s_stream_lock.get(), m_cls);
-  m_UrlStat     = lookupMethod(s_url_stat.get(), m_cls);
+  m_StreamOpen  = lookupMethod(s_stream_open.get());
+  m_StreamClose = lookupMethod(s_stream_close.get());
+  m_StreamRead  = lookupMethod(s_stream_read.get());
+  m_StreamWrite = lookupMethod(s_stream_write.get());
+  m_StreamSeek  = lookupMethod(s_stream_seek.get());
+  m_StreamTell  = lookupMethod(s_stream_tell.get());
+  m_StreamEof   = lookupMethod(s_stream_eof.get());
+  m_StreamFlush = lookupMethod(s_stream_flush.get());
+  m_StreamTruncate = lookupMethod(s_stream_truncate.get());
+  m_StreamLock  = lookupMethod(s_stream_lock.get());
+  m_UrlStat     = lookupMethod(s_url_stat.get());
   m_isLocal = true;
 }
 
@@ -83,8 +82,7 @@ bool UserFile::openImpl(const String& filename, const String& mode,
       .append(options)
       .appendRef(opened_path)
       .toArray(),
-    success,
-    m_cls
+    success
   );
   if (success && (ret.toBoolean() == true)) {
     m_opened = true;
@@ -102,7 +100,7 @@ bool UserFile::close() {
   flush();
 
   // void stream_close()
-  invoke(m_StreamClose, s_stream_close, Array::Create(), m_cls);
+  invoke(m_StreamClose, s_stream_close, Array::Create());
   return true;
 }
 
@@ -112,7 +110,7 @@ int64_t UserFile::readImpl(char *buffer, int64_t length) {
   // String stread_read($count)
   bool success = false;
   String str = invoke(m_StreamRead, s_stream_read,
-                      make_packed_array(length), success, m_cls);
+                      make_packed_array(length), success);
   if (!success) {
     raise_warning("%s::stream_read is not implemented",
                   m_cls->name()->data());
@@ -140,8 +138,7 @@ int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
       m_StreamWrite,
       s_stream_write,
       make_packed_array(String(buffer, length, CopyString)),
-      success,
-      m_cls
+      success
     ).toInt64();
     if (!success) {
       raise_warning("%s::stream_write is not implemented",
@@ -172,8 +169,7 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   // bool stream_seek($offset, $whence)
   bool success = false;
   bool sought  = invoke(
-    m_StreamSeek, s_stream_seek, make_packed_array(offset, whence),
-    success, m_cls
+    m_StreamSeek, s_stream_seek, make_packed_array(offset, whence), success
   ).toBoolean();
   if (!success) {
     always_assert("No seek method? But I found one earlier?");
@@ -190,8 +186,7 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   }
 
   // int stream_tell()
-  Variant ret = invoke(m_StreamTell, s_stream_tell, Array::Create(), success,
-                       m_cls);
+  Variant ret = invoke(m_StreamTell, s_stream_tell, Array::Create(), success);
   if (!success) {
     raise_warning("%s::stream_tell is not implemented!", m_cls->name()->data());
     return false;
@@ -212,8 +207,7 @@ bool UserFile::eof() {
 
   // bool stream_eof()
   bool success = false;
-  Variant ret = invoke(m_StreamEof, s_stream_eof, Array::Create(), success,
-                       m_cls);
+  Variant ret = invoke(m_StreamEof, s_stream_eof, Array::Create(), success);
   if (!success) {
     return false;
   }
@@ -224,7 +218,7 @@ bool UserFile::flush() {
   // bool stream_flush()
   bool success = false;
   Variant ret = invoke(m_StreamFlush, s_stream_flush,
-                       Array::Create(), success, m_cls);
+                       Array::Create(), success);
   if (!success) {
     return false;
   }
@@ -235,7 +229,7 @@ bool UserFile::truncate(int64_t size) {
   // bool stream_truncate()
   bool success = false;
   Variant ret = invoke(m_StreamTruncate, s_stream_truncate,
-                       make_packed_array(size), success, m_cls);
+                       make_packed_array(size), success);
   if (!success) {
     return false;
   }
@@ -256,7 +250,7 @@ bool UserFile::lock(int operation, bool &wouldBlock) {
   // bool stream_lock(int $operation)
   bool success = false;
   Variant ret = invoke(m_StreamLock, s_stream_lock,
-                       make_packed_array(op), success, m_cls);
+                       make_packed_array(op), success);
   if (!success) {
     if (operation) {
       raise_warning("%s::stream_lock is not implemented!",
@@ -286,7 +280,7 @@ int UserFile::statImpl(const String& path, struct stat* stat_sb,
   // array url_stat ( string $path , int $flags )
   bool success = false;
   Variant ret = invoke(m_UrlStat, s_url_stat,
-                       make_packed_array(path, flags), success, m_cls);
+                       make_packed_array(path, flags), success);
   if (!ret.isArray()) {
     return -1;
   }

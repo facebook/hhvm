@@ -25,22 +25,23 @@ StaticString s_call("__call");
 UserFSNode::UserFSNode(Class *cls, CVarRef context /*= null */) {
   Transl::VMRegAnchor _;
   const Func *ctor;
+  m_cls = cls;
   if (MethodLookup::LookupResult::MethodFoundWithThis !=
-      g_vmContext->lookupCtorMethod(ctor, cls)) {
+      g_vmContext->lookupCtorMethod(ctor, m_cls)) {
     throw InvalidArgumentException(0, "Unable to call %s's constructor",
-                                   cls->name()->data());
+                                   m_cls->name()->data());
   }
 
-  m_obj = ObjectData::newInstance(cls);
+  m_obj = ObjectData::newInstance(m_cls);
   m_obj.o_set("context", context);
   Variant ret;
   g_vmContext->invokeFuncFew(ret.asTypedValue(), ctor, m_obj.get());
 
-  m_Call = lookupMethod(s_call.get(), cls);
+  m_Call = lookupMethod(s_call.get());
 }
 
 Variant UserFSNode::invoke(const Func *func, const String& name,
-                           CArrRef args, bool &success, Class* cls) {
+                           CArrRef args, bool &success) {
   Transl::VMRegAnchor _;
 
   // Assume failure
@@ -64,7 +65,7 @@ Variant UserFSNode::invoke(const Func *func, const String& name,
 
   HPHP::Transl::CallerFrame cf;
   Class* ctx = arGetContextClass(cf());
-  switch(g_vmContext->lookupObjMethod(func, cls, name.get(), ctx)) {
+  switch(g_vmContext->lookupObjMethod(func, m_cls, name.get(), ctx)) {
     case MethodLookup::LookupResult::MethodFoundWithThis:
     {
       Variant ret;
@@ -96,7 +97,7 @@ Variant UserFSNode::invoke(const Func *func, const String& name,
       // Should never happen (Attr::Static check in ctor)
       assert(false);
       raise_error("%s::%s() must not be declared static",
-                  cls->name()->data(), name.data());
+                  m_cls->name()->data(), name.data());
       return uninit_null();
   }
 
@@ -104,13 +105,13 @@ Variant UserFSNode::invoke(const Func *func, const String& name,
   return uninit_null();
 }
 
-const Func* UserFSNode::lookupMethod(const StringData* name, Class* cls) {
-  const Func *f = cls->lookupMethod(name);
+const Func* UserFSNode::lookupMethod(const StringData* name) {
+  const Func *f = m_cls->lookupMethod(name);
   if (!f) return nullptr;
 
   if (f->attrs() & AttrStatic) {
     throw InvalidArgumentException(0, "%s::%s() must not be declared static",
-                                   cls->name()->data(), name->data());
+                                   m_cls->name()->data(), name->data());
   }
   return f;
 }

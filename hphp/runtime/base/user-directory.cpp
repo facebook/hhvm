@@ -29,18 +29,17 @@ const StaticString
 ///////////////////////////////////////////////////////////////////////////////
 
 UserDirectory::UserDirectory(Class* cls) : UserFSNode(cls) {
-  m_cls = cls;
-  m_DirOpen  = lookupMethod(s_dir_opendir.get(), m_cls);
-  m_DirClose = lookupMethod(s_dir_closedir.get(), m_cls);
-  m_DirRead  = lookupMethod(s_dir_readdir.get(), m_cls);
-  m_DirRewind  = lookupMethod(s_dir_rewinddir.get(), m_cls);
+  m_DirOpen  = lookupMethod(s_dir_opendir.get());
+  m_DirClose = lookupMethod(s_dir_closedir.get());
+  m_DirRead  = lookupMethod(s_dir_readdir.get());
+  m_DirRewind  = lookupMethod(s_dir_rewinddir.get());
 }
 
 bool UserDirectory::open(const String& path) {
   // bool dir_opendir ( string $path , int $options )
   bool success = false;
   Variant ret = invoke(m_DirOpen, s_dir_opendir,
-                       make_packed_array(path, 0), success, m_cls);
+                       make_packed_array(path, 0), success);
   if (success && (ret.toBoolean() == true)) {
     return true;
   }
@@ -50,14 +49,14 @@ bool UserDirectory::open(const String& path) {
 
 void UserDirectory::close() {
   // void dir_closedir()
-  invoke(m_DirClose, s_dir_closedir, Array::Create(), m_cls);
+  invoke(m_DirClose, s_dir_closedir, Array::Create());
 }
 
 Variant UserDirectory::read() {
   // String dir_readdir()
   bool success = false;
   auto ret = invoke(m_DirRead, s_dir_readdir,
-                      make_packed_array(), success, m_cls);
+                    make_packed_array(), success);
   if (!success) {
     raise_warning("%s::dir_readdir is not implemented",
                   m_cls->name()->data());
@@ -69,7 +68,7 @@ Variant UserDirectory::read() {
 void UserDirectory::rewind() {
   // String dir_rewinddir()
   bool success = false;
-  invoke(m_DirRewind, s_dir_rewinddir, make_packed_array(), success, m_cls);
+  invoke(m_DirRewind, s_dir_rewinddir, make_packed_array(), success);
   if (!success) {
     raise_warning("%s::dir_rewinddir is not implemented",
                   m_cls->name()->data());

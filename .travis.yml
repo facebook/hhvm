@@ -23,4 +23,5 @@ env:
 script: hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
 
 notifications:
+  email: false
   irc: "chat.freenode.net#hhvm"

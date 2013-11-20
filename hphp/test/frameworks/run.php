@@ -1433,7 +1433,11 @@ class Phpbb3 extends Framework {
       "test_path" => __DIR__."/frameworks/phpbb3",
       "blackslist" => Set {
         __DIR__."/frameworks/phpbb3/tests/lint_test.php",
-      }
+      },
+      "clownylist" => Set {
+        __DIR__."/frameworks/phpbb3/tests/".
+        "functions_acp/validate_range_test.php",
+      },
     };
   }
 }

@@ -320,7 +320,10 @@ bool IniSetting::Set(const String& name, const String& value) {
   if (iter != s_callbacks->end()) {
     return (*iter->second.callback)(value, iter->second.p);
   }
-  if (name == s_memory_limit) {
+  if (name == s_error_reporting) {
+    g_context->setErrorReportingLevel(value.toInt64());
+    return true;
+  } else if (name == s_memory_limit) {
     if (!value.empty()) {
       int64_t newInt = value.toInt64();
       char lastChar = value.charAt(value.size() - 1);
@@ -334,7 +337,7 @@ bool IniSetting::Set(const String& name, const String& value) {
       g_context->setRequestMemoryMaxBytes(newInt);
       return true;
     }
-  } else if (name == s_max_execution_time || name == s_maximum_execution_time){
+  } else if (name == s_max_execution_time || name == s_maximum_execution_time) {
     int64_t limit = value.toInt64();
     ThreadInfo::s_threadInfo.getNoCheck()->
       m_reqInjectionData.setTimeout(limit);

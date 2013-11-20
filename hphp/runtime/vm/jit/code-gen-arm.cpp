@@ -63,6 +63,9 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
            curFunc());                                            \
   }
 
+#define CG_PUNT(instr) \
+    cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff, curFunc())
+
 PUNT_OPCODE(CheckType)
 PUNT_OPCODE(AssertType)
 PUNT_OPCODE(CheckTypeMem)
@@ -503,12 +506,14 @@ void CodeGenerator::emitTypeTest(Type type, Loc typeSrc, Loc dataSrc,
     cc = CC_E;
   }
   doJcc(cc);
-  if (type.strictSubtypeOf(Type::Obj) || type.strictSubtypeOf(Type::Res)) {
+  if (type < Type::Obj) {
     assert(type.getClass()->attrs() & AttrFinal);
     m_as.   Ldr   (rAsm, dataSrc);
     m_as.   Ldr   (rAsm, rAsm[ObjectData::getVMClassOffset()]);
     m_as.   Cmp   (rAsm, reinterpret_cast<int64_t>(type.getClass()));
     doJcc(CC_E);
+  } else if (type < Type::Res) {
+    CG_PUNT(TypeTest-on-Resource);
   } else if (type <= Type::Arr && type.hasArrayKind()) {
     m_as.   Ldr   (rAsm, dataSrc);
     m_as.   Ldrb  (rAsm.W(), rAsm[ArrayData::offsetofKind()]);

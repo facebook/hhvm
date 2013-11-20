@@ -1868,12 +1868,15 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
     cc = CC_E;
   }
   doJcc(cc);
-  if (type.strictSubtypeOf(Type::Obj) || type.strictSubtypeOf(Type::Res)) {
+  if (type < Type::Obj) {
     // emit the specific class test
     assert(type.getClass()->attrs() & AttrFinal);
     auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
     m_as.cmpq(type.getClass(), reg[ObjectData::getVMClassOffset()]);
     doJcc(CC_E);
+  } else if (type < Type::Res) {
+    // No cls field in Resource
+    CG_PUNT(TypeTest-on-Resource);
   } else if (type <= Type::Arr && type.hasArrayKind()) {
     auto reg = getDataPtrEnregistered(m_as, dataSrc, m_rScratch);
     m_as.cmpb(type.getArrayKind(), reg[ArrayData::offsetofKind()]);
@@ -1886,8 +1889,7 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
   auto const src = inst->src(0);
 
   // punt if specialized object for now
-  if (inst->typeParam().strictSubtypeOf(Type::Obj) ||
-      inst->typeParam().strictSubtypeOf(Type::Res)) {
+  if (inst->typeParam() < Type::Obj || inst->typeParam() < Type::Res) {
     CG_PUNT(IsType-SpecializedUnsupported);
   }
 

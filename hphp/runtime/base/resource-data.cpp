@@ -27,7 +27,7 @@ namespace HPHP {
 // resources have a separate id space
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(int, ResourceData::os_max_resource_id);
 
-ResourceData::ResourceData() : m_count(0), m_cls(SystemLib::s_resourceClass) {
+ResourceData::ResourceData() : m_count(0) {
   assert(uintptr_t(this) % sizeof(TypedValue) == 0);
   int& pmax = *os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR

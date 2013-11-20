@@ -56,17 +56,6 @@ class ResourceData {
     delete this;
   }
 
-  Class* getVMClass() const {
-    return m_cls;
-  }
-
-  static size_t getVMClassOffset() {
-    // For assembly linkage.
-    size_t res = offsetof(ResourceData, m_cls);
-    assert(res == ObjectData::getVMClassOffset());
-    return res;
-  }
-
   int32_t o_getId() const { return o_id; }
   void o_setId(int id); // only for BuiltinFiles
   static int GetMaxResourceId();
@@ -103,11 +92,6 @@ class ResourceData {
   // Counter to keep track of the number of references to this resource
   // (i.e. the resource's "refcount")
   mutable RefCount m_count;
-  // Pointer to the __resource class; this field is needed (and must be at
-  // the same offset as ObjectData::m_cls) so that backup gc and other things
-  // that walk the SmartAllocator heaps can distinguish between objects and
-  // resources
-  Class* m_cls;
 } __attribute__((aligned(16)));
 
 /**

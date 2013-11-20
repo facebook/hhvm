@@ -1134,7 +1134,11 @@ class Drupal extends Framework {
       "install_root" => __DIR__."/frameworks/drupal",
       "git_path" => "https://github.com/drupal/drupal.git",
       "git_commit" => "adaf8355074ba3e142f61e10f1790382db5defb9",
-      "test_path" => __DIR__."/frameworks/drupal/core"
+      "test_path" => __DIR__."/frameworks/drupal/core",
+      "clownylist" => Set {
+        __DIR__."/frameworks/drupal/core/modules/views/tests/".
+        "Drupal/views/Tests/ViewsDataHelperTest.php",
+      },
     };
   }
 }

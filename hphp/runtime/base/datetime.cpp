@@ -282,7 +282,9 @@ void DateTime::fromTimeStamp(int64_t timestamp, bool utc /* = false */) {
   if (utc) {
     timelib_unixtime2gmt(t, (timelib_sll)m_timestamp);
   } else {
-    m_tz = TimeZone::Current();
+    if (!m_tz.get()) {
+      m_tz = TimeZone::Current();
+    }
     t->tz_info = m_tz->get();
     t->zone_type = TIMELIB_ZONETYPE_ID;
     timelib_unixtime2local(t, (timelib_sll)m_timestamp);

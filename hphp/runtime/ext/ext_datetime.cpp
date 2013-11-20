@@ -86,6 +86,10 @@ void c_DateTime::t___construct(const String& time /*= "now"*/,
   m_dt = NEWOBJ(DateTime)(TimeStamp::Current());
   if (!time.empty()) {
     m_dt->fromString(time, c_DateTimeZone::unwrap(timezone));
+  } else if (!timezone.isNull()) {
+    // We still have to tell the underlying DateTime the timezone incase they
+    // call setTimestamp or something else later
+    m_dt->setTimezone(c_DateTimeZone::unwrap(timezone));
   }
 }
 

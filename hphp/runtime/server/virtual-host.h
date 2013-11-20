@@ -55,6 +55,9 @@ public:
   bool match(const std::string &host) const;
   bool disabled() const { return m_disabled; }
 
+  // whether to apply rewrite rules before serving a static file that exists. 
+  bool staticfastpath() const { return m_staticfastpath; }
+
   // url rewrite rules
   bool rewriteURL(const String& host, String &url, bool &qsa, int &redirect) const;
 
@@ -101,6 +104,7 @@ private:
 
   void initRuntimeOption(Hdf overwrite);
   bool m_disabled;
+  bool m_staticfastpath; // whether to serve a file that exists before checking rewrite rules. default true.
   std::string m_name;
   std::string m_prefix;
   std::string m_pattern;

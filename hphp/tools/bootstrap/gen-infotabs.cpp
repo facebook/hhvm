@@ -163,14 +163,12 @@ int main(int argc, const char* argv[]) {
 
   cpp << "const long long hhbc_ext_class_count = " << classes.size() << ";\n";
 
-  auto instance_dtor_name = [&] (const PhpClass& klass) {
-    return (klass.flags() & ZendCompat)
-      ? "delete_ZendObjectData"
-      : folly::to<std::string>("delete_", klass.name());
-  };
+  cpp << "extern void "
+         "delete_ZendObjectData(ObjectData*, const Class*);\n";
 
   for (auto& klass : classes) {
-    cpp << "extern void " << instance_dtor_name(klass)
+    cpp << "extern void "
+        << folly::to<std::string>("delete_", klass.name())
         << "(ObjectData*, const Class*);\n";
   }
 
@@ -186,13 +184,14 @@ int main(int argc, const char* argv[]) {
                  ? fbstring("new_") + klass.name() + "_Instance"
                  : fbstring("nullptr");
     auto dtor = classesWithCtors.count(klass.name()) > 0
-                 ? instance_dtor_name(klass)
+                 ? folly::to<std::string>("delete_", klass.name())
                  : fbstring{"nullptr"};
 
     auto cpp_name = klass.name();
     if (klass.flags() & ZendCompat) {
       cpp_name = "ZendObjectData";
       ctor = "new_ZendObjectData_Instance";
+      dtor = "delete_ZendObjectData";
     }
 
     auto const c_cpp_name = "c_" + cpp_name;

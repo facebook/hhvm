@@ -362,7 +362,6 @@ abstract class Framework {
   public string $stats_file;
   public string $test_path;
   public string $test_config_file = null;
-  public string $test_command;
   public string $test_name_pattern;
   public string $test_file_pattern;
   public ?Map $current_test_statuses = null;
@@ -376,6 +375,8 @@ abstract class Framework {
   private Set $blacklist;
   private Set $clownylist;
   private Vector $pull_requests;
+  private Map $args_for_tests;
+  private string $test_command;
 
   // $name is constructor promoted
   // $parallel is constructor promoted
@@ -423,6 +424,7 @@ abstract class Framework {
     $this->setEnvVars($info->get("env_vars"));
     $this->setTestConfigFile($info->get("test_config"));
     $this->setTestCommand($info->get("test_command"));
+    $this->setArgsForTests($info->get("args_for_tests"));
   }
 
   abstract protected function getInfo(): Map;
@@ -554,8 +556,28 @@ abstract class Framework {
     }
   }
 
-  protected function getTestCommand(): string {
-    return $this->test_command;
+  public function getTestCommand(string $test): string {
+    $command = '';
+    if ($this->env_vars !== null) {
+      foreach($this->env_vars as $var => $val) {
+        $command .= "export ".$var."=\"".$val."\" && ";
+      }
+    }
+
+    $command .= str_replace("%test%", $test, $this->test_command);
+
+    if ($this->args_for_tests !== null) {
+      $args = $this->args_for_tests->get($test);
+      if ($args) {
+        $command = preg_replace('#/hhvm #', '/hhvm '.$args.' ', $command);
+      }
+    }
+
+    return $command;
+  }
+
+  private function setArgsForTests(?Map $args_for_tests): void {
+    $this->args_for_tests = $args_for_tests;
   }
 
   public function prepareOutputFiles(string $path): void {
@@ -1143,6 +1165,9 @@ class Laravel extends Framework {
       "git_path" => "https://github.com/laravel/framework.git",
       "git_commit" => "f85efd4d16837d8fcac11aeb5e7d0977d295fb6b",
       "test_path" => __DIR__."/frameworks/laravel",
+      "args_for_tests" => Map {
+        __DIR__."/frameworks/laravel/./tests/Auth/AuthGuardTest.php" => "-v JitEnableRenameFunction"
+      },
     };
   }
 }
@@ -1844,13 +1869,7 @@ class Runner {
   }
 
   private function initialize(): bool {
-    if ($this->framework->env_vars !== null) {
-      foreach($this->framework->env_vars as $var => $val) {
-        $this->actual_test_command .= "export ".$var."=\"".$val."\" && ";
-      }
-    }
-    $this->actual_test_command .= str_replace("%test%", $this->name,
-                                  $this->framework->test_command);
+    $this->actual_test_command = $this->framework->getTestCommand($this->name);
     verbose("Command: ".$this->actual_test_command."\n", Options::$verbose);
 
     $descriptorspec = array(
@@ -2574,7 +2593,7 @@ function get_runtime_build(bool $with_jit = true,
     if ((file_exists($fbcode_root_dir."/_bin"))) {
       $build .= $fbcode_root_dir;
       if (!$use_php) {
-        $build .= "/_bin/hphp/hhvm/hhvm -v Eval.EnableZendCompat=true";
+        $build .= "/_bin/hphp/hhvm/hhvm";
       } else {
         $build .= "/_bin/hphp/hhvm/php";
       }
@@ -2583,7 +2602,7 @@ function get_runtime_build(bool $with_jit = true,
       // Maybe we are in OSS land trying this script
       $build .= $oss_root_dir."/".idx($_ENV, 'FBMAKE_BIN_ROOT', '_bin');
       if (!$use_php) {
-        $build .= "/hhvm -v Eval.EnableZendCompat=true";
+        $build .= "/hhvm";
       } else {
         $build .= "/php";
       }

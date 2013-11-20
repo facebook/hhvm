@@ -83,9 +83,9 @@ VS($db->querysingle("SELECT * FROM foo", true), array("bar" => "ABC"));
   VS($res->fetcharray(SQLITE3_NUM), array(6));
 }
 
-$db->close();
-
 // Since minor version can change frequently, just test the major version
 VS($db->version()['versionString'][0], "3");
 VERIFY((int)$db->version()['versionNumber'] > (int)3000000);
+
+$db->close();
 unlink(":memory:test");

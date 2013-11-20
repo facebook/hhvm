@@ -637,12 +637,12 @@ abstract class Framework {
             $parsed_results[$res_arr[0]] =
                           (int)(str_replace(".", "", $res_arr[1]));
           }
-          // Removed skipped tests
+          // Removed skipped and incomplete tests
           $num_tests +=
-            (float)($parsed_results["Tests"] - $parsed_results["Skipped"]);
-          $num_errors_failures +=
-            (float)($parsed_results["Errors"] + $parsed_results["Failures"] +
+            (float)($parsed_results["Tests"] - $parsed_results["Skipped"] -
             $parsed_results["Incomplete"]);
+          $num_errors_failures +=
+            (float)($parsed_results["Errors"] + $parsed_results["Failures"]);
         } else if ($line === Statuses::FATAL || $line === Statuses::UNKNOWN ||
                    $line === Statuses::TIMEOUT) {
           $num_tests += 1;
@@ -1065,19 +1065,11 @@ abstract class Framework {
 class Assetic extends Framework {
   public function __construct(string $name) { parent::__construct($name); }
   protected function getInfo(): Map {
-    // The clowny tests here is testCompassExtension. However, there are four
-    // tests in this file. So we will be discarding all of them. They all
-    // passed besides the clown one (which is marked as Incomplete in the test
-    // code ... stranged), so it doesn't inflate any positive stats.
     return Map {
       "install_root" => __DIR__."/frameworks/assetic",
       "git_path" => "https://github.com/kriswallsmith/assetic.git",
       "git_commit" => "d4680d449a9da80fb82e17627270c91b93a0d46d",
       "test_path" => __DIR__."/frameworks/assetic",
-      "clownylist" => Set {
-        __DIR__."/frameworks/assetic/tests/Assetic/Test/Filter/".
-        "ScssphpFilterTest.php",
-      },
     };
   }
 }
@@ -1724,13 +1716,7 @@ class Runner {
         $this->stat_information = $this->name.PHP_EOL.$status.PHP_EOL;
         $continue_testing = false;
         break;
-      } else if ($status === Statuses::INCOMPLETE) {
-        $this->error_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL;
-        $this->error_information .= $this->getTestRunStr("RUN TEST FILE: ").
-                                    PHP_EOL.PHP_EOL;
-        break;
-      }
-        else if ($this->checkForFatals($status)) {
+      } else if ($this->checkForFatals($status)) {
         $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL;
         $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
                                     PHP_EOL.PHP_EOL;

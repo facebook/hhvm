@@ -640,6 +640,16 @@ Assetic\Test\Filter\Sass\ScssFilterTest::testLoadPath
 S
 Assetic\Test\Filter\Sass\ScssFilterTest::testSettingLoadPaths
 S
+Assetic\Test\Filter\ScssphpFilterTest::testCompassExtension
+I
+Assetic\Test\Filter\ScssphpFilterTest::testFilterLoad
+.
+Assetic\Test\Filter\ScssphpFilterTest::testImport
+.
+Assetic\Test\Filter\ScssphpFilterTest::testRegisterFunction
+.
+Assetic\Test\Filter\ScssphpFilterTest::testSetImportPath
+.
 Assetic\Test\Filter\SprocketsFilterTest::testFilterLoad
 S
 Assetic\Test\Filter\StylusFilterTest::testFilterLoad

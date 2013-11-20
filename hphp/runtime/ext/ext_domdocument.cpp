@@ -5036,7 +5036,8 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
             xmlNodePtr node = obj->nodesetval->nodeTab[j];
             /* not sure, if we need this... it's copied from xpath.c */
             if (node->type == XML_NAMESPACE_DECL) {
-              xmlNodePtr nsparent = (xmlNodePtr)node->_private;
+              // xmlNodePtr nsparent = (xmlNodePtr)node->_private;
+              xmlNodePtr nsparent = nullptr;
               xmlNsPtr curns = xmlNewNs(NULL, node->name, NULL);
               if (node->children) {
                 curns->prefix = xmlStrdup((xmlChar *)node->children);

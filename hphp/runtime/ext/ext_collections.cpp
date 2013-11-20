@@ -3872,6 +3872,87 @@ c_Set* c_Set::Clone(ObjectData* obj) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// FrozenSet
+
+void c_FrozenSet::t___construct(CVarRef iterable /* = null_variant */) {
+  BaseSet::phpConstruct(iterable);
+}
+
+bool c_FrozenSet::t_isempty() {
+  return BaseSet::phpIsEmpty();
+}
+
+int64_t c_FrozenSet::t_count() {
+  return BaseSet::phpCount();
+}
+
+Object c_FrozenSet::t_items() {
+  return BaseSet::phpItems();
+}
+
+Object c_FrozenSet::t_values() {
+  return BaseSet::phpValues<c_FrozenVector>();
+}
+
+Object c_FrozenSet::t_lazy() {
+  return BaseSet::phpLazy();
+}
+
+bool c_FrozenSet::t_contains(CVarRef key) {
+  return BaseSet::phpContains(key);
+}
+
+Array c_FrozenSet::t_toarray() {
+  return BaseSet::phpToArray();
+}
+
+Array c_FrozenSet::t_tokeysarray() {
+  return BaseSet::phpToKeysArray();
+}
+
+Array c_FrozenSet::t_tovaluesarray() {
+  return BaseSet::phpToValuesArray();
+}
+
+Object c_FrozenSet::t_getiterator() {
+  return BaseSet::phpGetIterator();
+}
+
+Object c_FrozenSet::t_map(CVarRef callback) {
+  return BaseSet::phpMap<c_FrozenSet>(callback);
+}
+
+Object c_FrozenSet::t_filter(CVarRef callback) {
+  return BaseSet::phpFilter<c_FrozenSet>(callback);
+}
+
+Object c_FrozenSet::t_zip(CVarRef iterable) {
+  return BaseSet::phpZip<c_FrozenSet>(iterable);
+}
+
+Object c_FrozenSet::ti_fromitems(CVarRef iterable) {
+  return BaseSet::phpFromItems<c_FrozenSet>(iterable);
+}
+
+Object c_FrozenSet::ti_fromarrays(int _argc, CArrRef _argv) {
+  return BaseSet::phpFromArrays<c_FrozenSet>(_argc, _argv);
+}
+
+c_FrozenSet::c_FrozenSet(Class* cls) : BaseSet(cls) {
+  // TODO: set collection flags once this becomes a real collection.
+}
+
+void c_FrozenSet::Unserialize(ObjectData* obj, VariableUnserializer* uns,
+    int64_t sz, char type) {
+  BaseSet::Unserialize("FrozenSet", obj, uns, sz, type);
+}
+
+c_FrozenSet* c_FrozenSet::Clone(ObjectData* obj) {
+  return BaseSet::Clone<c_FrozenSet>(obj);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 
 c_SetIterator::c_SetIterator(Class* cb) :
     ExtObjectData(cb) {
@@ -4353,11 +4434,12 @@ void c_PairIterator::t_rewind() {
   }
 
 COLLECTION_MAGIC_METHODS(Vector)
+COLLECTION_MAGIC_METHODS(FrozenVector)
 COLLECTION_MAGIC_METHODS(Map)
 COLLECTION_MAGIC_METHODS(StableMap)
 COLLECTION_MAGIC_METHODS(Set)
+COLLECTION_MAGIC_METHODS(FrozenSet)
 COLLECTION_MAGIC_METHODS(Pair)
-COLLECTION_MAGIC_METHODS(FrozenVector)
 
 #undef COLLECTION_MAGIC_METHODS
 
@@ -4399,6 +4481,7 @@ COLLECTION_MAGIC_METHODS(FrozenVector)
 KEYEDITERABLE_MATERIALIZE_METHODS(Map)
 KEYEDITERABLE_MATERIALIZE_METHODS(StableMap)
 ITERABLE_MATERIALIZE_METHODS(Set)
+ITERABLE_MATERIALIZE_METHODS(FrozenSet)
 KEYEDITERABLE_MATERIALIZE_METHODS(Pair)
 KEYEDITERABLE_MATERIALIZE_METHODS(FrozenVector)
 
@@ -4981,4 +5064,5 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }

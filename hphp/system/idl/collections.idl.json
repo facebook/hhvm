@@ -2954,6 +2954,329 @@
             ]
         },
         {
+            "name": "FrozenSet",
+            "ifaces": [
+                "ConstSet"
+            ],
+            "desc": "An unordered immutable set-style collection.",
+            "flags": [
+                "IsFinal",
+                "IsCppSerializable",
+                "NoDefaultSweep"
+            ],
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenSet built from the values produced by the specified Iterable.",
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "isEmpty",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the FrozenSet is empty, false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "count",
+                    "flags": [
+                    ],
+                    "desc": "Returns the number of values in the FrozenSet.",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "items",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable that produces the values from this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "values",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "lazy",
+                    "flags": [
+                    ],
+                    "desc": "Returns a lazy iterable view of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "contains",
+                    "flags": [
+                    ],
+                    "desc": "Returns true if the specified value is present in the FrozenSet, returns false otherwise.",
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "val",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "toArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this FrozenSet, array(val1 => val1, val2 => val2, ...). This maintains set-like semantics in array() land: O(1) membership test with `array_has_key($a['key'])` and iteration with `foreach($a as $member)`. Int-like strings end up with numerical array keys.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Vector built from the values of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+		            {
+                    "name": "toFrozenVector",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenVector built from the values of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a Set built from the values of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toKeysArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this FrozenSet.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toValuesArray",
+                    "flags": [
+                    ],
+                    "desc": "Returns an array built from the values from this FrozenSet.",
+                    "return": {
+                        "type": "VariantMap"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                    ],
+                    "desc": "Returns an iterator that points to beginning of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "map",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenSet of the values produced by applying the specified callback on each value from this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "filter",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenSet of all the values from this FrozenSet for which the specified callback returns true.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "callback",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "zip",
+                    "flags": [
+                    ],
+                    "desc": "Returns an Iterable produced by combining the specified Iterables pair-wise.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__toString",
+                    "return": {
+                        "type": "String"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__unset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromItems",
+                    "flags": [
+                        "IsStatic"
+                    ],
+                    "desc": "Returns a FrozenSet built from the values produced by the specified Iterable.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "iterable",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "fromArrays",
+                    "flags": [
+                        "IsStatic",
+                        "VariableArguments"
+                    ],
+                    "desc": "Returns a FrozenSet built from the values from the specified arrays.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
             "name": "SetIterator",
             "ifaces": [
                 "HH\\Iterator"

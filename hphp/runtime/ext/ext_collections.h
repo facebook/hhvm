@@ -1369,6 +1369,60 @@ class c_Set : public BaseSet {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// class FrozenSet
+
+FORWARD_DECLARE_CLASS(FrozenSet);
+class c_FrozenSet : public BaseSet {
+
+ public:
+  DECLARE_CLASS_NO_SWEEP(FrozenSet)
+
+ public:
+  // PHP-land methods.
+
+  void t___construct(CVarRef iterable = null_variant);
+
+  // API
+  bool t_isempty();
+  int64_t t_count();
+  Object t_items();
+  Object t_values();
+  Object t_lazy();
+  bool t_contains(CVarRef key);
+  Object t_getiterator();
+  Object t_map(CVarRef callback);
+  Object t_filter(CVarRef callback);
+  Object t_zip(CVarRef iterable);
+
+  // Materialization methods.
+  Array t_toarray();
+  Array t_tokeysarray();
+  Array t_tovaluesarray();
+  Object t_tovector();
+  Object t_tofrozenvector();
+  Object t_toset();
+
+  // Magic methods.
+  String t___tostring();
+  Variant t___get(Variant name);
+  Variant t___set(Variant name, Variant value);
+  bool t___isset(Variant name);
+  Variant t___unset(Variant name);
+
+  // Static methods.
+  static Object ti_fromitems(CVarRef iterable);
+  static Object ti_fromarrays(int _argc, CArrRef _argv = null_array);
+
+ public:
+  explicit c_FrozenSet(Class* cls = c_FrozenSet::classof());
+
+  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
+                          int64_t sz, char type);
+
+  static c_FrozenSet* Clone(ObjectData* obj);
+};
+
+///////////////////////////////////////////////////////////////////////////////
 // class SetIterator
 
 FORWARD_DECLARE_CLASS(SetIterator);

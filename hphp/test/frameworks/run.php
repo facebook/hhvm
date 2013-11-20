@@ -1194,7 +1194,8 @@ class Laravel extends Framework {
       "git_commit" => "f85efd4d16837d8fcac11aeb5e7d0977d295fb6b",
       "test_path" => __DIR__."/frameworks/laravel",
       "args_for_tests" => Map {
-        __DIR__."/frameworks/laravel/./tests/Auth/AuthGuardTest.php" => "-v JitEnableRenameFunction"
+        __DIR__."/frameworks/laravel/./tests/Auth/AuthGuardTest.php"
+        => "-v JitEnableRenameFunction"
       },
     };
   }
@@ -1226,6 +1227,12 @@ class Mediawiki extends Framework {
       },
       "test_command" => get_runtime_build()." phpunit.php ".
                         "--exclude-group=Database",
+      "clownylist" => Set {
+        __DIR__."/frameworks/mediawiki-core/tests/phpunit/".
+        "includes/HttpTest.php",
+        __DIR__."/frameworks/mediawiki-core/tests/phpunit/".
+        "includes/libs/CSSJanusTest.php",
+      },
     };
   }
 

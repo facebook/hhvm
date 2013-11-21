@@ -696,7 +696,7 @@ void emit_finish_func(const php::Func& func,
   fe.setIsGenerator(func.isGeneratorBody);
   fe.setIsGeneratorFromClosure(func.isGeneratorFromClosure);
   fe.setIsPairGenerator(func.isPairGenerator);
-  fe.setHasGeneratorAsBody(func.hasGeneratorAsBody);
+  fe.setGeneratorBodyName(func.generatorBodyName);
   fe.setIsAsync(func.isAsync);
 
   fe.finish(fe.ue().bcPos(), false /* load */);

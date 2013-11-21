@@ -720,8 +720,8 @@ Func::SharedData::SharedData(PreClass* preClass, Id id,
     m_info(nullptr), m_refBitPtr(0), m_builtinFuncPtr(nullptr),
     m_docComment(docComment), m_top(top), m_isClosureBody(false),
     m_isGenerator(false), m_isGeneratorFromClosure(false),
-    m_isPairGenerator(false), m_hasGeneratorAsBody(false),
-    m_isGenerated(false), m_isAsync(false), m_originalFilename(nullptr) {
+    m_isPairGenerator(false), m_isGenerated(false), m_isAsync(false),
+    m_generatorBodyName(nullptr), m_originalFilename(nullptr) {
 }
 
 Func::SharedData::~SharedData() {
@@ -732,11 +732,11 @@ void Func::SharedData::atomicRelease() {
   delete this;
 }
 
-const Func* Func::getGeneratorBody(const StringData* name) const {
+const Func* Func::getGeneratorBody() const {
   if (isNonClosureMethod()) {
-    return cls()->lookupMethod(name);
+    return cls()->lookupMethod(getGeneratorBodyName());
   } else {
-    return Unit::lookupFunc(name);
+    return Unit::lookupFunc(getGeneratorBodyName());
   }
 }
 
@@ -805,11 +805,11 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_isGenerator(false)
   , m_isGeneratorFromClosure(false)
   , m_isPairGenerator(false)
-  , m_hasGeneratorAsBody(false)
   , m_containsCalls(false)
   , m_isAsync(false)
   , m_info(nullptr)
   , m_builtinFuncPtr(nullptr)
+  , m_generatorBodyName(nullptr)
   , m_originalFilename(nullptr)
 {}
 
@@ -832,11 +832,11 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_isGenerator(false)
   , m_isGeneratorFromClosure(false)
   , m_isPairGenerator(false)
-  , m_hasGeneratorAsBody(false)
   , m_containsCalls(false)
   , m_isAsync(false)
   , m_info(nullptr)
   , m_builtinFuncPtr(nullptr)
+  , m_generatorBodyName(nullptr)
   , m_originalFilename(nullptr)
 {}
 
@@ -1156,10 +1156,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_isGenerator = m_isGenerator;
   f->shared()->m_isGeneratorFromClosure = m_isGeneratorFromClosure;
   f->shared()->m_isPairGenerator = m_isPairGenerator;
-  f->shared()->m_hasGeneratorAsBody = m_hasGeneratorAsBody;
   f->shared()->m_userAttributes = m_userAttributes;
   f->shared()->m_builtinFuncPtr = m_builtinFuncPtr;
   f->shared()->m_nativeFuncPtr = m_nativeFuncPtr;
+  f->shared()->m_generatorBodyName = m_generatorBodyName;
   f->shared()->m_retTypeConstraint = m_retTypeConstraint;
   f->shared()->m_originalFilename = m_originalFilename;
   f->shared()->m_isGenerated = isGenerated;
@@ -1267,7 +1267,6 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_isGenerator)
     (m_isGeneratorFromClosure)
     (m_isPairGenerator)
-    (m_hasGeneratorAsBody)
     (m_containsCalls)
     (m_isAsync)
 
@@ -1277,6 +1276,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_ehtab)
     (m_fpitab)
     (m_userAttributes)
+    (m_generatorBodyName)
     (m_retTypeConstraint)
     (m_originalFilename)
     ;

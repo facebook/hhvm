@@ -287,14 +287,6 @@ struct Func {
   bool isPairGenerator : 1;
 
   /*
-   * This is the "outer" function for a generator.  When compiling a
-   * generator, we generate two funtions---the "outer" one (with this
-   * bit set) allocates the continuation object and returns it.  The
-   * inner one will have isGeneratorBody set.
-   */
-  bool hasGeneratorAsBody : 1;
-
-  /*
    * This is an async function.  This flag is set on both the "inner"
    * and "outer" functions for a generator when it used async/await
    * instead of yield.
@@ -340,6 +332,14 @@ struct Func {
    * User attribute list.
    */
   UserAttributeMap userAttributes;
+
+  /*
+   * This is the name of "inner" function for a generator.  When compiling
+   * a generator, we generate two funtions.  The "outer" one stores (with
+   * this field set) allocates the continuation object and returns it.  The
+   * "inner" one named here will have isGeneratorBody set.
+   */
+  SString generatorBodyName;
 
   /*
    * User-visible return type specification as a string.  This is only

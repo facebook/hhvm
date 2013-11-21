@@ -632,8 +632,8 @@ enum SetOpOp {
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCl,        TWO(IVA,SA),      CVMANY,          ONE(CV),    NF) \
-  O(CreateCont,      ONE(SA),          NOV,             ONE(CV),    NF) \
-  O(CreateAsync,     THREE(SA,IVA,IVA),ONE(CV),         ONE(CV),    NF) \
+  O(CreateCont,      NA,               NOV,             ONE(CV),    NF) \
+  O(CreateAsync,     TWO(IVA,IVA),     ONE(CV),         ONE(CV),    NF) \
   O(AsyncAwait,      NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(ContEnter,       NA,               ONE(CV),         NOV,        CF) \
   O(UnpackCont,      NA,               NOV,             TWO(CV,CV), NF) \

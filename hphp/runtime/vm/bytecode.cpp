@@ -6935,10 +6935,9 @@ void VMExecutionContext::fillContinuationVars(ActRec* origFp,
 
 OPTBLD_INLINE void VMExecutionContext::iopCreateCont(PC& pc) {
   NEXT();
-  DECODE_LITSTR(genName);
 
   const Func* origFunc = m_fp->m_func;
-  const Func* genFunc = origFunc->getGeneratorBody(genName);
+  const Func* genFunc = origFunc->getGeneratorBody();
   assert(genFunc != nullptr);
 
   c_Continuation* cont = origFunc->isMethod()
@@ -6954,12 +6953,11 @@ OPTBLD_INLINE void VMExecutionContext::iopCreateCont(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopCreateAsync(PC& pc) {
   NEXT();
-  DECODE_LITSTR(genName);
   DECODE_IVA(label);
   DECODE_IVA(iters);
 
   const Func* origFunc = m_fp->m_func;
-  const Func* genFunc = origFunc->getGeneratorBody(genName);
+  const Func* genFunc = origFunc->getGeneratorBody();
   assert(genFunc != nullptr);
 
   c_Continuation* cont = origFunc->isMethod()

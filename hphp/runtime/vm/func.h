@@ -361,8 +361,11 @@ struct Func {
    * hook the parts up. If you know more and need it, there probably isn't a
    * technical reason not to.
    */
-  bool hasGeneratorAsBody() const { return shared()->m_hasGeneratorAsBody; }
-  const Func* getGeneratorBody(const StringData* name) const;
+  bool hasGeneratorAsBody() const { return shared()->m_generatorBodyName; }
+  const StringData* getGeneratorBodyName() const {
+    return shared()->m_generatorBodyName;
+  }
+  const Func* getGeneratorBody() const;
   /**
    * Was this generated specially by the compiler to aide the runtime?
    */
@@ -496,10 +499,10 @@ private:
     bool m_isGenerator : 1;
     bool m_isGeneratorFromClosure : 1;
     bool m_isPairGenerator : 1;
-    bool m_hasGeneratorAsBody : 1;
     bool m_isGenerated : 1;
     bool m_isAsync : 1;
     UserAttributeMap m_userAttributes;
+    const StringData* m_generatorBodyName;
     const StringData* m_retTypeConstraint;
     // per-func filepath for traits flattened during repo construction
     const StringData* m_originalFilename;
@@ -678,8 +681,11 @@ public:
   void setIsPairGenerator(bool b) { m_isPairGenerator = b; }
   bool isPairGenerator() const { return m_isPairGenerator; }
 
-  void setHasGeneratorAsBody(bool b) { m_hasGeneratorAsBody = b; }
-  bool hasGeneratorAsBody() const { return m_hasGeneratorAsBody; }
+  void setGeneratorBodyName(const StringData* name) {
+    m_generatorBodyName = name;
+  }
+  const StringData* getGeneratorBodyName() const { return m_generatorBodyName; }
+  bool hasGeneratorAsBody() const { return m_generatorBodyName; }
 
   void setContainsCalls() { m_containsCalls = true; }
 
@@ -763,7 +769,6 @@ private:
   bool m_isGenerator;
   bool m_isGeneratorFromClosure;
   bool m_isPairGenerator;
-  bool m_hasGeneratorAsBody;
   bool m_containsCalls;
   bool m_isAsync;
 
@@ -773,6 +778,7 @@ private:
   BuiltinFunction m_builtinFuncPtr;
   BuiltinFunction m_nativeFuncPtr;
 
+  const StringData* m_generatorBodyName;
   const StringData* m_originalFilename;
 };
 

@@ -441,8 +441,8 @@ struct HhbcTranslator {
   void emitVerifyParamType(uint32_t paramId);
 
   // continuations
-  void emitCreateCont(Id funNameStrId);
-  void emitCreateAsync(Id funNameStrId, int64_t labelId, int iters);
+  void emitCreateCont();
+  void emitCreateAsync(int64_t labelId, int iters);
   void emitAsyncAwait();
   void emitContEnter(int32_t returnBcOffset);
   void emitUnpackCont();

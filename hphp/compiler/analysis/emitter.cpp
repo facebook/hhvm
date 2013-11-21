@@ -4078,11 +4078,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.Throw();
         } else {
           // Create new continuation and return its wait handle.
-          auto meth = static_pointer_cast<MethodStatement>(
-                        node->getFunctionScope()->getStmt());
-          const StringData* nameStr =
-            makeStaticString(meth->getGeneratorName());
-          e.CreateAsync(nameStr, normalLabel, m_pendingIters.size());
+          e.CreateAsync(normalLabel, m_pendingIters.size());
           emitConstMethodCallNoParams(e, "getWaitHandle");
           e.RetC();
         }
@@ -5596,7 +5592,7 @@ void EmitterVisitor::emitPostponedMeths() {
     if (funcScope->isGenerator()) {
       // emit the outer 'create generator' function
       m_curFunc = fe;
-      fe->setHasGeneratorAsBody(true);
+      fe->setGeneratorBodyName(makeStaticString(meth->getGeneratorName()));
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitGeneratorCreate(meth);
 
@@ -5611,7 +5607,7 @@ void EmitterVisitor::emitPostponedMeths() {
     } else if (funcScope->isAsync()) {
       // emit the outer function (which creates continuation if blocked)
       m_curFunc = fe;
-      fe->setHasGeneratorAsBody(true);
+      fe->setGeneratorBodyName(makeStaticString(meth->getGeneratorName()));
       fe->setIsAsync(true);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitAsyncMethod(meth);
@@ -6041,14 +6037,7 @@ void EmitterVisitor::emitGeneratorCreate(MethodStatementPtr meth) {
   emitSetFuncGetArgs(e);
 
   // emit code to create generator object
-  const StringData* nameStr = makeStaticString(
-      meth->getGeneratorName());
-  e.CreateCont(nameStr);
-
-  if (meth->getFunctionScope()->isAsync()){
-    emitConstMethodCallNoParams(e, "getWaitHandle");
-  }
-
+  e.CreateCont();
   e.RetC();
 
   FuncFinisher ff(this, e, m_curFunc);

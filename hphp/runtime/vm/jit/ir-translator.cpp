@@ -628,11 +628,11 @@ void IRTranslator::translateDup(const NormalizedInstruction& ni) {
 }
 
 void IRTranslator::translateCreateCont(const NormalizedInstruction& i) {
-  HHIR_EMIT(CreateCont, i.imm[0].u_SA);
+  HHIR_EMIT(CreateCont);
 }
 
 void IRTranslator::translateCreateAsync(const NormalizedInstruction& i) {
-  HHIR_EMIT(CreateAsync, i.imm[0].u_SA, i.imm[1].u_IVA, i.imm[2].u_IVA);
+  HHIR_EMIT(CreateAsync, i.imm[0].u_IVA, i.imm[1].u_IVA);
 }
 
 void IRTranslator::translateAsyncAwait(const NormalizedInstruction&) {

@@ -231,7 +231,7 @@ bool check(const php::Func& f) {
   //if (f.isGeneratorFromClosure) assert(f.top);  // TODO_L dunno this too
   if (f.isGeneratorFromClosure) assert(f.isGeneratorBody);
   if (f.isAsync)                assert(f.isGeneratorBody ||
-                                       f.hasGeneratorAsBody);
+                                       f.generatorBodyName);
   if (f.isPairGenerator)        assert(f.isGeneratorBody);
 
   boost::dynamic_bitset<> seenId(f.nextBlockId);

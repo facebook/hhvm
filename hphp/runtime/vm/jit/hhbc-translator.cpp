@@ -1376,12 +1376,11 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
   gen(Jmp, makeExit(offset));
 }
 
-void HhbcTranslator::emitCreateCont(Id funNameStrId) {
+void HhbcTranslator::emitCreateCont() {
   gen(ExitOnVarEnv, makeExitSlow(), m_tb->fp());
 
-  auto const genName = lookupStringId(funNameStrId);
   auto const origFunc = curFunc();
-  auto const genFunc = origFunc->getGeneratorBody(genName);
+  auto const genFunc = origFunc->getGeneratorBody();
 
   auto const cont = origFunc->isMethod()
     ? gen(
@@ -1421,18 +1420,15 @@ void HhbcTranslator::emitCreateCont(Id funNameStrId) {
   push(cont);
 }
 
-void HhbcTranslator::emitCreateAsync(Id funNameStrId,
-                                     int64_t label,
-                                     int numIters) {
+void HhbcTranslator::emitCreateAsync(int64_t label, int numIters) {
   // For now, this code is just copied from emitCreateCont, only the label
   // and value of the created continuation is updated accordingly and
   // first numIters iterators are copied into the continuation frame.
   // It will change soon with the introduction of AsyncFunctionWaitHandle
   gen(ExitOnVarEnv, makeExitSlow(), m_tb->fp());
 
-  auto const genName = lookupStringId(funNameStrId);
   auto const origFunc = curFunc();
-  auto const genFunc = origFunc->getGeneratorBody(genName);
+  auto const genFunc = origFunc->getGeneratorBody();
 
   auto const cont = origFunc->isMethod()
     ? gen(

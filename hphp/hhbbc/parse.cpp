@@ -661,7 +661,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isGeneratorBody        = fe.isGenerator();
   ret->isGeneratorFromClosure = fe.isGeneratorFromClosure();
   ret->isPairGenerator        = fe.isPairGenerator();
-  ret->hasGeneratorAsBody     = fe.hasGeneratorAsBody();
+  ret->generatorBodyName      = fe.getGeneratorBodyName();
 
   ret->nextBlockId     = 0;
 

@@ -46,10 +46,13 @@ function bar($i) {
     $vec_2 = StableMap {};
     $vec_3 = Vector {};
     $vec_4 = Map {};
+    $vec_5 = FrozenVector {};
+
     $vfc_1 = Set {1};
     $vfc_2 = StableMap {'k' => 'v'};
     $vfc_3 = Vector {1};
     $vfc_4 = Map {'k' => 'v'};
+    $vfc_5 = FrozenVector {1};
   }
   var_dump((bool) $v1);
   var_dump((bool) $v2);
@@ -67,10 +70,12 @@ function bar($i) {
   var_dump((bool) $vec_2);
   var_dump((bool) $vec_3);
   var_dump((bool) $vec_4);
+  var_dump((bool) $vec_5);
   var_dump((bool) $vfc_1);
   var_dump((bool) $vfc_2);
   var_dump((bool) $vfc_3);
   var_dump((bool) $vfc_4);
+  var_dump((bool) $vfc_5);
 }
 
 bar(1);

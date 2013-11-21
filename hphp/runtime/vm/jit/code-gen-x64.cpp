@@ -2294,42 +2294,31 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   auto srcReg = curOpd(src).reg();
 
-  m_as.testw   (ObjectData::CallToImpl, srcReg[ObjectData::attributeOff()]);
+  m_as.testl   (ObjectData::CallToImpl, srcReg[ObjectData::attributeOff()]);
   unlikelyIfThenElse(
     CC_NZ,
     [&] (Asm& a) {
-      // Switch on the type of the srcReg object, with a case for each
-      // type of Collection with CallToImpl
-      Label endSwitch;
-      Label caseCollection;
-
-      // TODO(2918379): Find a cheaper way to check if an object is a
-      // native collection
-      a.cmpq(c_Vector::classof(), srcReg[ObjectData::getVMClassOffset()]);
-      a.je8(caseCollection);
-      a.cmpq(c_Map::classof(), srcReg[ObjectData::getVMClassOffset()]);
-      a.je8(caseCollection);
-      a.cmpq(c_StableMap::classof(), srcReg[ObjectData::getVMClassOffset()]);
-      a.je8(caseCollection);
-      a.cmpq(c_Set::classof(), srcReg[ObjectData::getVMClassOffset()]);
-      a.je8(caseCollection);
-
-      // default: object not collection
-      cgCallHelper(
+      a.testl(
+        ObjectData::CollectionTypeAttrMask,
+        srcReg[ObjectData::attributeOff()]
+      );
+      ifThenElse(
         a,
-        CppCall(getMethodPtr(&ObjectData::o_toBoolean)),
-        callDest(dst),
-        SyncOptions::kSyncPoint,
-        ArgGroup(curOpds())
-        .ssa(src));
-      a.jmp8(endSwitch);
-
-      asm_label(a, caseCollection);
-      a.cmpl(0, srcReg[sizeOff]);
-      a.setne(rbyte(dstReg)); // truthy iff size not zero
-      // fall through
-
-      asm_label(a, endSwitch);
+        CC_NZ,
+        [&] { // srcReg points to native collection
+          a.cmpl(0, srcReg[sizeOff]);
+          a.setne(rbyte(dstReg)); // truthy iff size not zero
+        },
+        [&] { // srcReg is not a native collection
+          cgCallHelper(
+            a,
+            CppCall(getMethodPtr(&ObjectData::o_toBoolean)),
+            callDest(dst),
+            SyncOptions::kSyncPoint,
+            ArgGroup(curOpds())
+            .ssa(src));
+        }
+      );
     }, [&] (Asm& a) {
       a.movb(1, rbyte(dstReg));
     });

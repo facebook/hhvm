@@ -42,6 +42,8 @@ namespace HPHP {
 // current maximum object identifier
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(int, ObjectData::os_max_id);
 
+TRACE_SET_MOD(runtime);
+
 int ObjectData::GetMaxId() {
   return *(ObjectData::os_max_id.getCheck());
 }
@@ -838,8 +840,6 @@ const StaticString
   s___sleep(LITSTR_INIT("__sleep")),
   s___toDebugDisplay(LITSTR_INIT("__toDebugDisplay")),
   s___wakeup(LITSTR_INIT("__wakeup"));
-
-TRACE_SET_MOD(runtime);
 
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps) {

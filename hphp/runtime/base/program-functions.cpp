@@ -585,10 +585,15 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
 }
 
+#ifdef __APPLE__
+const void* __hot_start = nullptr;
+const void* __hot_end = nullptr;
+#else
 extern "C" {
 void __attribute__((weak)) __hot_start();
 void __attribute__((weak)) __hot_end();
 }
+#endif
 
 static void NEVER_INLINE AT_END_OF_TEXT __attribute__((optimize("2")))
 hugifyText(char* from, char* to) {

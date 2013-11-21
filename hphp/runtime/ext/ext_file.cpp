@@ -198,6 +198,10 @@ Variant f_fopen(const String& filename, const String& mode,
     raise_warning("$context must be a valid Stream Context or NULL");
     return false;
   }
+  if (filename.empty()) {
+    raise_warning("Filename cannot be empty");
+    return false;
+  }
 
   return File::Open(filename, mode,
                     use_include_path ? File::USE_INCLUDE_PATH : 0,

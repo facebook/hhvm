@@ -1725,7 +1725,7 @@ Variant f_getimagesize(const String& filename,
 
 static Variant php_open_plain_file(const String& filename, const char *mode,
                                    FILE **fpp) {
-  Variant stream = f_fopen(filename, mode);
+  Variant stream = File::Open(filename, mode);
   if (same(stream, false)) {
     return false;
   }

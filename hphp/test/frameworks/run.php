@@ -1532,7 +1532,7 @@ class Yii extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/yii",
       "git_path" => "https://github.com/yiisoft/yii.git",
-      "git_commit" => "d36b1f58ded2deacd4c5562c5205871db76bde5d",
+      "git_commit" => "ba84eed1f53ff0369cba49796b1c79aa4b8c6285",
       "test_path" => __DIR__."/frameworks/yii/tests",
       "test_file_search_roots" => Set {
         __DIR__."/frameworks/yii/tests",

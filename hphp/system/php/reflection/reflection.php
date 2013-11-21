@@ -938,6 +938,24 @@ class ReflectionClass implements Reflector {
       if (isset($p['interface'])) {
         $info['interfaces'][$parent] = 1;
       } else {
+        // To match Zend, parent properties should come after
+        // child properties in ReflectionProperty order.
+        // First, clone the $info['properties'] array for foreach so we don't
+        // unset while foreaching over it.
+        $props = $info['properties'];
+        foreach ($props as $prop_name => $prop_info) {
+          // If the parent property already exists in the child properties, but
+          // the child isn't overriding a parent property, then move it to the
+          // end of the $info['properties'] array
+          if (array_key_exists($prop_name, $p['properties']) &&
+              $p['properties'][$prop_name]['class'] === $prop_info['class'])  {
+            unset($info['properties'][$prop_name]);
+            $info['properties'][$prop_name] = $prop_info;
+            // Won't use this anymore. Any leftovers will be appended later
+            unset($p['properties'][$prop_name]);
+          }
+        }
+        // Any left over parent properties get appended to the end
         $info['properties'] += $p['properties'];
       }
       $info['methods'] += $p['methods'];

@@ -1,0 +1,123 @@
+array(4) {
+  [0]=>
+  object(ReflectionProperty)#3 (4) {
+    ["info"]=>
+    array(9) {
+      ["name"]=>
+      string(3) "foo"
+      ["default"]=>
+      bool(true)
+      ["defaultValue"]=>
+      NULL
+      ["access"]=>
+      string(6) "public"
+      ["accessible"]=>
+      bool(true)
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string(1) "B"
+      ["doc"]=>
+      bool(false)
+      ["type"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(3) "foo"
+    ["class"]=>
+    string(1) "B"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  [1]=>
+  object(ReflectionProperty)#5 (4) {
+    ["info"]=>
+    array(9) {
+      ["name"]=>
+      string(3) "bar"
+      ["default"]=>
+      bool(true)
+      ["defaultValue"]=>
+      array(0) {
+      }
+      ["access"]=>
+      string(9) "protected"
+      ["accessible"]=>
+      bool(false)
+      ["modifiers"]=>
+      int(512)
+      ["class"]=>
+      string(1) "B"
+      ["doc"]=>
+      bool(false)
+      ["type"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(3) "bar"
+    ["class"]=>
+    string(1) "B"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  [2]=>
+  object(ReflectionProperty)#7 (4) {
+    ["info"]=>
+    array(9) {
+      ["name"]=>
+      string(9) "extension"
+      ["default"]=>
+      bool(true)
+      ["defaultValue"]=>
+      string(4) "html"
+      ["access"]=>
+      string(9) "protected"
+      ["accessible"]=>
+      bool(false)
+      ["modifiers"]=>
+      int(512)
+      ["class"]=>
+      string(1) "A"
+      ["doc"]=>
+      bool(false)
+      ["type"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(9) "extension"
+    ["class"]=>
+    string(1) "B"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  [3]=>
+  object(ReflectionProperty)#9 (4) {
+    ["info"]=>
+    array(9) {
+      ["name"]=>
+      string(5) "apple"
+      ["default"]=>
+      bool(true)
+      ["defaultValue"]=>
+      int(3)
+      ["access"]=>
+      string(9) "protected"
+      ["accessible"]=>
+      bool(false)
+      ["modifiers"]=>
+      int(512)
+      ["class"]=>
+      string(1) "A"
+      ["doc"]=>
+      bool(false)
+      ["type"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(5) "apple"
+    ["class"]=>
+    string(1) "B"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+}

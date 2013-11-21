@@ -1537,6 +1537,10 @@ class Yii extends Framework {
       "test_file_search_roots" => Set {
         __DIR__."/frameworks/yii/tests",
       },
+      "clownylist" => Set {
+        // Needs a local memcache server
+        __DIR__."/frameworks/yii/tests/framework/caching/CMemCacheTest.php",
+      },
     };
   }
 

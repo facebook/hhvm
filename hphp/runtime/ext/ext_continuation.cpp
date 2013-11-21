@@ -32,14 +32,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Object f_hphp_create_continuation(const String& clsname,
-                                          const String& funcname,
-                                          const String& origFuncName,
-                                          CArrRef args /* = null_array */) {
-  throw_fatal("Invalid call hphp_create_continuation");
-  return nullptr;
-}
-
 void delete_Continuation(ObjectData* od, const Class*) {
   auto const cont = static_cast<c_Continuation*>(od);
   auto const size = cont->getObjectSize();
@@ -58,8 +50,7 @@ c_Continuation::c_Continuation(Class* cb)
     , m_label(0)
     , m_index(-1LL)
     , m_key(-1LL)
-    , m_value(Variant::NullInit())
-    , m_origFunc(nullptr) {
+    , m_value(Variant::NullInit()) {
   o_subclassData.u16 = 0;
 }
 
@@ -147,8 +138,9 @@ void c_Continuation::t_raise(CVarRef v) {
 }
 
 String c_Continuation::t_getorigfuncname() {
-  auto const origName = m_origFunc->isClosureBody() ? s__closure_.get()
-                                                    : m_origFunc->name();
+  const Func* origFunc = actRec()->func()->getGeneratorOrigFunc();
+  auto const origName = origFunc->isClosureBody() ? s__closure_.get()
+                                                  : origFunc->name();
   assert(origName->isStatic());
   return String(const_cast<StringData*>(origName));
 }
@@ -218,15 +210,13 @@ void c_Continuation::copyContinuationVars(ActRec* fp) {
 
 c_Continuation *c_Continuation::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Continuation*>(obj);
-  const Func *origFunc = thiz->m_origFunc;
-  const Func *genFunc = thiz->actRec()->m_func;
+  auto fp = thiz->actRec();
 
-  ActRec *fp = g_vmContext->getFP();
-  c_Continuation* cont = origFunc->isMethod()
-    ? g_vmContext->createContMeth(origFunc, genFunc, fp->getThisOrClass())
-    : g_vmContext->createContFunc(origFunc, genFunc);
+  c_Continuation* cont = static_cast<c_Continuation*>(fp->getThisOrClass()
+    ? CreateMeth(fp->func(), fp->getThisOrClass())
+    : CreateFunc(fp->func()));
 
-  cont->copyContinuationVars(thiz->actRec());
+  cont->copyContinuationVars(fp);
 
   cont->o_subclassData.u16 = thiz->o_subclassData.u16;
   cont->m_label = thiz->m_label;

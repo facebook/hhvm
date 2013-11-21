@@ -2404,8 +2404,10 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
                            Offset base, Offset past,
                            const StringData* name, Attr attrs, bool top,
                            const StringData* docComment, int numParams,
+                           bool needsGeneratorOrigFunc,
                            bool needsNextClonedClosure) {
   Func* f = new (Func::allocFuncMem(name, numParams,
+                                    needsGeneratorOrigFunc,
                                     needsNextClonedClosure,
                                     !preClass))
     Func(unit, id, preClass, line1, line2, base, past, name,

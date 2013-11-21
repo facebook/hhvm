@@ -427,11 +427,6 @@ public:
   void requestInit();
   void requestExit();
 
-  static c_Continuation* createContFunc(const Func* origFunc,
-                                        const Func* genFunc);
-  static c_Continuation* createContMeth(const Func* origFunc,
-                                        const Func* genFunc,
-                                        void* objOrCls);
   static void fillContinuationVars(
     ActRec* origFp, const Func* origFunc, ActRec* genFp, const Func* genFunc);
   void pushLocalsAndIterators(const HPHP::Func* f, int nparams = 0);

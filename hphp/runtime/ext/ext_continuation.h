@@ -29,9 +29,6 @@ namespace HPHP {
 
 FORWARD_DECLARE_CLASS(Continuation);
 FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
-Object f_hphp_create_continuation(const String& clsname, const String& funcname,
-                                  const String& origFuncName,
-                                  CArrRef args = null_array);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation
@@ -76,6 +73,7 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
 
   static c_Continuation* Clone(ObjectData* obj);
 
+ private:
   /*
    * The memory allocated by c_Continuation::alloc is laid out as follows:
    *
@@ -94,20 +92,51 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
    * and iterators.
    *
    */
-  static ObjectData* alloc(const Func* origFunc, const Func* genFunc) {
-    assert(origFunc);
+  static c_Continuation* Alloc(const Func* genFunc) {
     assert(genFunc);
+    assert(genFunc->isGenerator());
 
     size_t contOffset = getContOffset(genFunc);
     size_t objectSize = contOffset + sizeof(c_Continuation);
     void* mem = MM().objMallocLogged(objectSize);
     void* objMem = (char*)mem + contOffset;
     auto const cont = new (objMem) c_Continuation();
-    cont->m_origFunc = const_cast<Func*>(origFunc);
     memset(mem, 0, contOffset);
     cont->m_entry = genFunc->getPrologue(0);
     cont->m_size = objectSize;
     assert(cont->getObjectSize() == objectSize);
+    return cont;
+  }
+
+  static c_Continuation* Create(const Func* genFunc) {
+    auto const cont = c_Continuation::Alloc(genFunc);
+    cont->incRefCount();
+    cont->setNoDestruct();
+
+    // The ActRec corresponding to the generator body lives as long as the
+    // object does. We set it up once, here, and then just change FP to point
+    // to it when we enter the generator body.
+    auto ar = cont->actRec();
+    ar->m_func = genFunc;
+    ar->initNumArgs(0);
+    ar->setVarEnv(nullptr);
+    return cont;
+  }
+
+ public:
+  static ObjectData* CreateFunc(const Func* genFunc) {
+    auto cont = Create(genFunc);
+    cont->actRec()->setThis(nullptr);
+    return cont;
+  }
+
+  static ObjectData* CreateMeth(const Func* genFunc, void* objOrCls) {
+    auto cont = Create(genFunc);
+    auto ar = cont->actRec();
+    ar->setThisOrClass(objOrCls);
+    if (ar->hasThis()) {
+      ar->getThis()->incRefCount();
+    }
     return cont;
   }
 
@@ -169,7 +198,6 @@ public:
   int64_t m_index;
   Variant m_key;
   Variant m_value;
-  Func* m_origFunc;
   int32_t m_size;
 
   /* TCA for function entry */

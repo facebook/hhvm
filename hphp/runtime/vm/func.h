@@ -363,6 +363,16 @@ struct Func {
     return shared()->m_generatorBodyName;
   }
   const Func* getGeneratorBody() const;
+
+  void setGeneratorOrigFunc(const Func* origFunc) {
+    assert(isGenerator());
+    ((const Func**)this)[-1] = origFunc;
+  }
+  const Func* getGeneratorOrigFunc() const {
+    assert(isGenerator());
+    return ((Func**)this)[-1];
+  }
+
   /**
    * Was this generated specially by the compiler to aide the runtime?
    */
@@ -394,11 +404,12 @@ struct Func {
    */
   Func*& nextClonedClosure() const {
     assert(isClosureBody() || isGeneratorFromClosure());
-    return ((Func**)this)[-1];
+    return ((Func**)this)[-1 - (int)isGenerator()];
   }
 
   static void* allocFuncMem(
     const StringData* name, int numParams,
+    bool needsGeneratorOrigFunc,
     bool needsNextClonedClosure,
     bool lowMem);
 

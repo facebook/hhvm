@@ -3,33 +3,6 @@
     "consts": [
     ],
     "funcs": [
-        {
-            "name": "hphp_create_continuation",
-            "return": {
-                "type": "Object"
-            },
-            "args": [
-                {
-                    "name": "clsname",
-                    "type": "String"
-                },
-                {
-                    "name": "funcname",
-                    "type": "String"
-                },
-                {
-                    "name": "origFuncName",
-                    "type": "String"
-                },
-                {
-                    "name": "args",
-                    "type": "VariantMap",
-                    "value": "null_array"
-                }
-            ],
-            "flags": [
-            ]
-        }
     ],
     "classes": [
         {

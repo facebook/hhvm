@@ -196,25 +196,41 @@ void Func::init(int numParams) {
 }
 
 void* Func::allocFuncMem(
-  const StringData* name, int numParams, bool needsNextClonedClosure,
+  const StringData* name, int numParams,
+  bool needsGeneratorOrigFunc,
+  bool needsNextClonedClosure,
   bool lowMem) {
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numExtraPrologues =
     maxNumPrologues > kNumFixedPrologues ?
     maxNumPrologues - kNumFixedPrologues :
     0;
-  size_t funcSize = sizeof(Func) + numExtraPrologues * sizeof(unsigned char*);
-  if (needsNextClonedClosure) {
-    funcSize += sizeof(Func*);
-  }
+  int numExtraFuncPtrs =
+    (int) needsGeneratorOrigFunc +
+    (int) needsNextClonedClosure;
+  size_t funcSize =
+    sizeof(Func) +
+    numExtraPrologues * sizeof(unsigned char*) +
+    numExtraFuncPtrs * sizeof(Func*);
+
   void* mem = lowMem ? Util::low_malloc(funcSize) : malloc(funcSize);
-  if (needsNextClonedClosure) {
-    // make room for nextClonedClosure to work
-    Func** startOfFunc = (Func**) mem;
-    *startOfFunc = nullptr;
-    return startOfFunc + 1;
-  }
-  return mem;
+
+  /**
+   * The Func object can have optional generatorOrigFunc and nextClonedClosure
+   * pointers to Func in front of the actual object. The layout is as follows:
+   *
+   *               +--------------------------------+ low address
+   *               |  nextClonedClosure (optional)  |
+   *               |  in closures and closure gens  |
+   *               +--------------------------------+
+   *               |  generatorOrigFunc (optional)  |
+   *               |  in generator bodies           |
+   *               +--------------------------------+ Func* address
+   *               |  Func object                   |
+   *               +--------------------------------+ high address
+   */
+  memset(mem, 0, numExtraFuncPtrs * sizeof(Func*));
+  return ((Func**) mem) + numExtraFuncPtrs;
 }
 
 Func::Func(Unit& unit, Id id, PreClass* preClass, int line1, int line2,
@@ -270,9 +286,10 @@ void Func::destroy(Func* func) {
   bool lowMem = !func->preClass() || func->m_cls;
   void* mem = func;
   if (func->isClosureBody() || func->isGeneratorFromClosure()) {
-    Func** startOfFunc = (Func**) mem;
-    mem = startOfFunc - 1; // move back by a pointer
-    if (Func* f = startOfFunc[-1]) {
+    Func** startOfFunc = ((Func**) mem) - 1; // move back by a pointer
+    if (func->isGenerator()) --startOfFunc;  // one more if in generator
+    mem = startOfFunc;
+    if (Func* f = *startOfFunc) {
       /*
        * cloned closures use the prolog array to hold
        * the per-clone post-prolog entry points.
@@ -295,6 +312,7 @@ Func* Func::clone(Class* cls) const {
   Func* f = new (allocFuncMem(
                    m_name,
                    m_numParams,
+                   isGenerator(),
                    isClosureBody() || isGeneratorFromClosure(),
                    cls || !preClass())) Func(*this);
 
@@ -733,14 +751,17 @@ void Func::SharedData::atomicRelease() {
 }
 
 const Func* Func::getGeneratorBody() const {
+  const Func* genFunc;
   if (isMethod() && !isClosureBody()) {
-    return cls()->lookupMethod(getGeneratorBodyName());
+    genFunc = cls()->lookupMethod(getGeneratorBodyName());
+  } else {
+    genFunc = Unit::lookupFunc(getGeneratorBodyName());
+    if (isMethod() && isClosureBody()) {
+      genFunc = genFunc->cloneAndSetClass(cls());
+    }
   }
 
-  const Func* genFunc = Unit::lookupFunc(getGeneratorBodyName());
-  if (isMethod() && isClosureBody()) {
-    genFunc = genFunc->cloneAndSetClass(cls());
-  }
+  const_cast<Func*>(genFunc)->setGeneratorOrigFunc(this);
   return genFunc;
 }
 
@@ -1127,6 +1148,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   Func* f = m_ue.newFunc(this, unit, m_id, preClass, m_line1, m_line2, m_base,
                          m_past, m_name, attrs, m_top, m_docComment,
                          m_params.size(),
+                         m_isGenerator,
                          m_isClosureBody | m_isGeneratorFromClosure);
 
   f->shared()->m_info = m_info;

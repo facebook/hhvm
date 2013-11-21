@@ -1385,12 +1385,12 @@ void HhbcTranslator::emitCreateCont() {
   auto const cont = origFunc->isMethod()
     ? gen(
         CreateContMeth,
-        CreateContData { origFunc, genFunc },
+        CreateContData { genFunc },
         gen(LdCtx, FuncData(curFunc()), m_tb->fp())
       )
     : gen(
         CreateContFunc,
-        CreateContData { origFunc, genFunc }
+        CreateContData { genFunc }
       );
 
   static auto const thisStr = makeStaticString("this");
@@ -1433,12 +1433,12 @@ void HhbcTranslator::emitCreateAsync(int64_t label, int numIters) {
   auto const cont = origFunc->isMethod()
     ? gen(
         CreateContMeth,
-        CreateContData { origFunc, genFunc },
+        CreateContData { genFunc },
         gen(LdCtx, FuncData(curFunc()), m_tb->fp())
       )
     : gen(
         CreateContFunc,
-        CreateContData { origFunc, genFunc }
+        CreateContData { genFunc }
       );
 
   // update label and value

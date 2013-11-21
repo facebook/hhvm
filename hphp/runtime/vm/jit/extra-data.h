@@ -578,16 +578,13 @@ struct InterpOneData : IRExtraData {
  * CreateCont{Func,Meth}.
  */
 struct CreateContData : IRExtraData {
-  CreateContData(const Func* origFunc, const Func* genFunc)
-    : origFunc(origFunc)
-    , genFunc(genFunc)
-  {}
+  explicit CreateContData(const Func* genFunc) : genFunc(genFunc) {}
 
   std::string show() const {
-    return folly::to<std::string>(origFunc->fullName()->data(), "()");
+    auto name = genFunc->getGeneratorOrigFunc()->fullName()->data();
+    return folly::to<std::string>(name, "()");
   }
 
-  const Func* origFunc;
   const Func* genFunc;
 };
 

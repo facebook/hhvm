@@ -6657,9 +6657,8 @@ static inline RefData* lookupStatic(StringData* name,
       frame_local(fp, func->numParams())->m_data.pobj, name, inited);
   }
   if (UNLIKELY(func->isGeneratorFromClosure())) {
-    auto const cont = frame_continuation(fp);
     return lookupStaticFromClosure(
-      frame_local(fp, cont->m_origFunc->numParams())->m_data.pobj,
+      frame_local(fp, func->getGeneratorOrigFunc()->numParams())->m_data.pobj,
       name,
       inited
     );
@@ -6822,46 +6821,6 @@ OPTBLD_INLINE void VMExecutionContext::iopCreateCl(PC& pc) {
   m_stack.pushObject(cl);
 }
 
-static inline c_Continuation* createCont(const Func* origFunc,
-                                         const Func* genFunc) {
-  auto const cont = static_cast<c_Continuation*>(
-    c_Continuation::alloc(origFunc, genFunc)
-  );
-  cont->incRefCount();
-  cont->setNoDestruct();
-
-  // The ActRec corresponding to the generator body lives as long as the object
-  // does. We set it up once, here, and then just change FP to point to it when
-  // we enter the generator body.
-  ActRec* ar = cont->actRec();
-  ar->m_func = genFunc;
-  ar->initNumArgs(0);
-  ar->setVarEnv(nullptr);
-
-  return cont;
-}
-
-c_Continuation*
-VMExecutionContext::createContFunc(const Func* origFunc,
-                                   const Func* genFunc) {
-  auto cont = createCont(origFunc, genFunc);
-  cont->actRec()->setThis(nullptr);
-  return cont;
-}
-
-c_Continuation*
-VMExecutionContext::createContMeth(const Func* origFunc,
-                                   const Func* genFunc,
-                                   void* objOrCls) {
-  auto cont = createCont(origFunc, genFunc);
-  auto ar = cont->actRec();
-  ar->setThisOrClass(objOrCls);
-  if (ar->hasThis()) {
-    ar->getThis()->incRefCount();
-  }
-  return cont;
-}
-
 static inline void setContVar(const Func* genFunc,
                               const StringData* name,
                               TypedValue* src,
@@ -6936,9 +6895,9 @@ OPTBLD_INLINE void VMExecutionContext::iopCreateCont(PC& pc) {
   const Func* genFunc = origFunc->getGeneratorBody();
   assert(genFunc != nullptr);
 
-  c_Continuation* cont = origFunc->isMethod()
-    ? createContMeth(origFunc, genFunc, m_fp->getThisOrClass())
-    : createContFunc(origFunc, genFunc);
+  c_Continuation* cont = static_cast<c_Continuation*>(origFunc->isMethod()
+    ? c_Continuation::CreateMeth(genFunc, m_fp->getThisOrClass())
+    : c_Continuation::CreateFunc(genFunc));
 
   fillContinuationVars(m_fp, origFunc, cont->actRec(), genFunc);
 
@@ -6956,9 +6915,9 @@ OPTBLD_INLINE void VMExecutionContext::iopCreateAsync(PC& pc) {
   const Func* genFunc = origFunc->getGeneratorBody();
   assert(genFunc != nullptr);
 
-  c_Continuation* cont = origFunc->isMethod()
-    ? createContMeth(origFunc, genFunc, m_fp->getThisOrClass())
-    : createContFunc(origFunc, genFunc);
+  c_Continuation* cont = static_cast<c_Continuation*>(origFunc->isMethod()
+    ? c_Continuation::CreateMeth(genFunc, m_fp->getThisOrClass())
+    : c_Continuation::CreateFunc(genFunc));
 
   // TODO: we should check that the value on top of the stack is indeed
   // a WaitHandle and fatal if not. Also, if it is a wait handle, assert

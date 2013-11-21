@@ -314,7 +314,7 @@ RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
   auto const closureLoc =
     LIKELY(func->isClosureBody())
       ? frame_local(fp, func->numParams())
-      : frame_local(fp, frame_continuation(fp)->m_origFunc->numParams());
+      : frame_local(fp, func->getGeneratorOrigFunc()->numParams());
 
   bool inited;
   auto const refData = lookupStaticFromClosure(

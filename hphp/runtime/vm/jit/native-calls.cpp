@@ -236,12 +236,10 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
     /* Continuation support helpers */
-    {CreateContFunc,     &VMExecutionContext::createContFunc, DSSA, SNone,
-                          { extra(&CreateContData::origFunc),
-                            extra(&CreateContData::genFunc) }},
-    {CreateContMeth,     &VMExecutionContext::createContMeth, DSSA, SNone,
-                          { extra(&CreateContData::origFunc),
-                            extra(&CreateContData::genFunc),
+    {CreateContFunc,     &c_Continuation::CreateFunc, DSSA, SNone,
+                          { extra(&CreateContData::genFunc) }},
+    {CreateContMeth,     &c_Continuation::CreateMeth, DSSA, SNone,
+                          { extra(&CreateContData::genFunc),
                             {SSA, 0} }},
 
     /* MInstrTranslator helpers */

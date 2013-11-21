@@ -101,7 +101,7 @@ void MemoryProfile::logDeallocationImpl(void *ptr) {
 
 // static
 size_t MemoryProfile::getSizeOfPtr(void *ptr) {
-  if (!memory_profiling) return 0;
+  if (!RuntimeOption::HHProfServerEnabled) return 0;
   const MemoryProfile &mp = *s_memory_profile;
 
   const auto &allocIt = mp.m_livePointers.find(ptr);
@@ -110,7 +110,7 @@ size_t MemoryProfile::getSizeOfPtr(void *ptr) {
 
 // static
 size_t MemoryProfile::getSizeOfTV(TypedValue *tv) {
-  if (!memory_profiling) return 0;
+  if (!RuntimeOption::HHProfServerEnabled) return 0;
 
   switch (tv->m_type) {
     case KindOfString:

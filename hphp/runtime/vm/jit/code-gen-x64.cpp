@@ -947,7 +947,7 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
   }
   emitCall(a, call);
   ret.returnAddress = a.frontier();
-  if (memory_profiling || sync != SyncOptions::kNoSyncPoint) {
+  if (RuntimeOption::HHProfServerEnabled || sync != SyncOptions::kNoSyncPoint) {
     // if we are profiling the heap, we always need to sync because
     // regs need to be correct during smart allocations no matter
     // what
@@ -4752,7 +4752,7 @@ void CodeGenerator::recordSyncPoint(Asm& as,
   case SyncOptions::kNoSyncPoint:
     // we can get here if we are memory profiling, since we override the
     // normal sync settings and sync anyway
-    assert(memory_profiling);
+    assert(RuntimeOption::HHProfServerEnabled);
   }
 
   Offset pcOff = m_curInst->marker().bcOff - m_curInst->marker().func->base();

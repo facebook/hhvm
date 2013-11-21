@@ -57,7 +57,7 @@ PhpFile::PhpFile(const string &fileName, const string &srcRoot,
 
 PhpFile::~PhpFile() {
   always_assert(getRef() == 0);
-  if (!memory_profiling && m_unit != nullptr) {
+  if (!RuntimeOption::HHProfServerEnabled && m_unit != nullptr) {
     // Deleting a Unit can grab a low-ranked lock and we're probably
     // at a high rank right now
     PendQ::defer(new DeferredDeleter<Unit>(m_unit));

@@ -462,7 +462,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   auto const skFor2Args = emitPrologueWork(func, 2);
   if (nPassed == 2) skFuncBody = skFor2Args;
 
-  if (memory_profiling && callFixup) {
+  if (RuntimeOption::HHProfServerEnabled && callFixup) {
     tx64->fixupMap().recordFixup(
       a.frontier(),
       Fixup { skFuncBody.offset() - func->base(), func->numSlotsInFrame() }

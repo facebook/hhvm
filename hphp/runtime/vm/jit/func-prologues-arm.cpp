@@ -352,7 +352,7 @@ SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
     // Special __call prologue
     a.   Mov   (argReg(0), rStashedAR);
     auto fixupAddr = emitCall(a, CppCall(shuffleArgsForMagicCall));
-    if (memory_profiling) {
+    if (RuntimeOption::HHProfServerEnabled) {
       tx64->fixupMap().recordFixup(
         fixupAddr,
         Fixup(skFuncBody.offset() - func->base(), func->numSlotsInFrame())

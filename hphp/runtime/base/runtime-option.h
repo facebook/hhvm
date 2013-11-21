@@ -509,6 +509,7 @@ public:
   static bool EnablePregErrorLog;
 
   // pprof/hhprof server options
+  static bool HHProfServerEnabled;
   static int HHProfServerPort;
   static int HHProfServerThreads;
   static int HHProfServerTimeoutSeconds;

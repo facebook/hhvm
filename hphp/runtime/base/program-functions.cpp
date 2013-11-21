@@ -736,7 +736,7 @@ static int start_server(const std::string &username) {
   // initialize the process
   HttpServer::Server = HttpServerPtr(new HttpServer());
 
-  if (memory_profiling) {
+  if (RuntimeOption::HHProfServerEnabled) {
     Logger::Info("Starting up profiling server");
     HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
   }

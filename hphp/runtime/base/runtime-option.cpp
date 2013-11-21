@@ -31,6 +31,7 @@
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/simple-counter.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/util.h"
 #include "hphp/util/network.h"
 #include "hphp/util/logger.h"
@@ -455,6 +456,7 @@ long RuntimeOption::PregBacktraceLimit = 1000000;
 long RuntimeOption::PregRecursionLimit = 100000;
 bool RuntimeOption::EnablePregErrorLog = true;
 
+bool RuntimeOption::HHProfServerEnabled = false;
 int RuntimeOption::HHProfServerPort = 4327;
 int RuntimeOption::HHProfServerThreads = 2;
 int RuntimeOption::HHProfServerTimeoutSeconds = 30;
@@ -1266,6 +1268,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   }
   {
     Hdf hhprofServer = config["HHProfServer"];
+    HHProfServerEnabled = hhprofServer["Enabled"].getBool(false);
     HHProfServerPort = hhprofServer["Port"].getInt16(4327);
     HHProfServerThreads = hhprofServer["Threads"].getInt16(2);
     HHProfServerTimeoutSeconds =

@@ -733,11 +733,15 @@ void Func::SharedData::atomicRelease() {
 }
 
 const Func* Func::getGeneratorBody() const {
-  if (isNonClosureMethod()) {
+  if (isMethod() && !isClosureBody()) {
     return cls()->lookupMethod(getGeneratorBodyName());
-  } else {
-    return Unit::lookupFunc(getGeneratorBodyName());
   }
+
+  const Func* genFunc = Unit::lookupFunc(getGeneratorBodyName());
+  if (isMethod() && isClosureBody()) {
+    genFunc = genFunc->cloneAndSetClass(cls());
+  }
+  return genFunc;
 }
 
 bool Func::isEntry(Offset offset) const {

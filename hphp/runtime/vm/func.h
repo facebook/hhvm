@@ -224,9 +224,6 @@ struct Func {
     PreClass* pcls = preClass();
     return pcls && (pcls->attrs() & AttrTrait);
   }
-  bool isNonClosureMethod() const {
-    return isMethod() && !isClosureBody();
-  }
   bool isPublic() const { return bool(m_attrs & AttrPublic); }
   bool isStatic() const { return bool(m_attrs & AttrStatic); }
   bool isAbstract() const { return bool(m_attrs & AttrAbstract); }

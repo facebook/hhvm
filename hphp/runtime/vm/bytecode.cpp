@@ -6853,10 +6853,6 @@ c_Continuation*
 VMExecutionContext::createContMeth(const Func* origFunc,
                                    const Func* genFunc,
                                    void* objOrCls) {
-  if (origFunc->isClosureBody()) {
-    genFunc = genFunc->cloneAndSetClass(origFunc->cls());
-  }
-
   auto cont = createCont(origFunc, genFunc);
   auto ar = cont->actRec();
   ar->setThisOrClass(objOrCls);

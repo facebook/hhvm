@@ -1173,6 +1173,32 @@ class Joomla extends Framework {
       "git_path" => "https://github.com/joomla/joomla-framework.git",
       "git_commit" => "4669cd3b123e768f55545acb284bee666ce778c4",
       "test_path" => __DIR__."/frameworks/joomla-framework",
+      "clownylist" => Set {
+        // These are subtests which need their own composer set and aren't run
+        // by their travis setup
+        __DIR__."/frameworks/joomla-framework/".
+          "src/Joomla/Google/Tests/JGoogleAuthOauth2Test.php",
+        __DIR__."/frameworks/joomla-framework/".
+          "src/Joomla/Google/Tests/JGoogleDataAdsenseTest.php",
+        __DIR__."/frameworks/joomla-framework/".
+          "src/Joomla/Google/Tests/JGoogleDataCalendarTest.php",
+        __DIR__."/frameworks/joomla-framework/".
+          "src/Joomla/Google/Tests/JGoogleDataPicasaAlbumTest.php",
+        __DIR__."/frameworks/joomla-framework/".
+          "src/Joomla/Google/Tests/JGoogleDataPicasaPhotoTest.php",
+        __DIR__."/frameworks/joomla-framework/".
+          "src/Joomla/Google/Tests/JGoogleDataPicasaTest.php",
+        __DIR__."/frameworks/joomla-framework/".
+          "src/Joomla/Google/Tests/JGoogleDataPlusActivitiesTest.php",
+        __DIR__."/frameworks/joomla-framework/".
+          "src/Joomla/Google/Tests/JGoogleDataPlusCommentsTest.php",
+        __DIR__."/frameworks/joomla-framework/".
+          "src/Joomla/Google/Tests/JGoogleDataPlusPeopleTest.php",
+        __DIR__."/frameworks/joomla-framework/".
+          "src/Joomla/Google/Tests/JGoogleDataPlusTest.php",
+        __DIR__."/frameworks/joomla-framework/".
+          "src/Joomla/Google/Tests/JGoogleTest.php",
+      },
     };
   }
 }

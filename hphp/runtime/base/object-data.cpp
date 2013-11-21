@@ -351,6 +351,9 @@ void ObjectData::o_setArray(CArrRef properties) {
     Class* ctx = nullptr;
     // If the key begins with a NUL, it's a private or protected property. Read
     // the class name from between the two NUL bytes.
+    //
+    // Note: if you change this, you need to change similar logic in
+    // apc-object.
     if (!k.empty() && k[0] == '\0') {
       int subLen = k.find('\0', 1) + 1;
       String cls = k.substr(1, subLen - 2);

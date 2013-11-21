@@ -21,32 +21,23 @@
 #include "hphp/runtime/base/apc-string.h"
 #include <cinttypes>
 
+#include "hphp/runtime/base/complex-types.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
 /*
  * Representation of an object stored in APC.
+ *
  * It may also have a serialized form in which case it will be represented by
  * an APCString instance with type KindOfObject.
+ *
  * MakeObject and Delete take care of isolating callers from that detail.
  */
 struct APCObject {
-  //
-  // APC object creation
-  //
-  static APCHandle* MakeShared(String data) {
-    APCHandle* handle = APCString::MakeShared(KindOfObject, data.get());
-    handle->mustCache();
-    return handle;
-  }
-  static APCHandle* MakeShared(ObjectData* data) {
-    APCObject* apcObj = new APCObject(data);
-    return apcObj->getHandle();
-  }
-
-  // Return an APCObject instance from a serialized version of the object.
-  // May return null
+  // Return an APCObject instance from a serialized version of the
+  // object.  May return null.
   static APCHandle* MakeAPCObject(APCHandle* obj, CVarRef value);
 
   // Return an instance of a PHP object from the given object handle
@@ -60,9 +51,7 @@ struct APCObject {
     return reinterpret_cast<APCObject*>(handle);
   }
 
-  APCHandle* getHandle() {
-    return &m_handle;
-  }
+  APCHandle* getHandle() { return &m_handle; }
 
   //
   // Stats API
@@ -71,26 +60,65 @@ struct APCObject {
   int32_t getSpaceUsage() const;
 
 private:
-  explicit APCObject(ObjectData* obj);
-  ~APCObject();
-
-  APCObject(const APCObject&) = delete;
-  APCObject& operator=(const APCObject&) = delete;
-
-  Object createObject() const;
-
   friend struct APCHandle;
 
-private:
+  /*
+   * Either a Class*, if it's persistent, or a static StringData*, if
+   * not.  Or also it can be nullptr.
+   */
+  struct ClassOrString {
+    explicit ClassOrString(std::nullptr_t)
+      : bits(0)
+    {}
+
+    explicit ClassOrString(const Class* ptr)
+      : bits(classHasPersistentRDS(ptr)
+          ? reinterpret_cast<uintptr_t>(ptr)
+          : reinterpret_cast<uintptr_t>(ptr->preClass()->name()) | 1)
+    {}
+
+    bool isNull() const { return bits == 0; }
+
+    const Class* cls() const {
+      return !(bits & 0x1) ? reinterpret_cast<const Class*>(bits) : nullptr;
+    }
+
+    const StringData* name() const {
+      return (bits & 0x1)
+        ? reinterpret_cast<const StringData*>(bits & ~0x1)
+        : nullptr;
+    }
+
+  private:
+    uintptr_t bits;
+  };
+
   struct Prop {
     StringData* name;
     APCHandle* val;
+    ClassOrString ctx;
   };
 
+private:
+  explicit APCObject(ObjectData* obj);
+  ~APCObject();
+  APCObject(const APCObject&) = delete;
+  APCObject& operator=(const APCObject&) = delete;
+
+private:
+  static APCHandle* MakeShared(String data) {
+    APCHandle* handle = APCString::MakeShared(KindOfObject, data.get());
+    handle->mustCache();
+    return handle;
+  }
+  static APCHandle* MakeShared(ObjectData* data);
+  Object createObject() const;
+
+private:
   APCHandle m_handle;
+  ClassOrString m_cls;
   Prop* m_props;
   int m_propCount;
-  StringData* const m_cls;  // static string
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -1451,7 +1451,7 @@ class PhpMyAdmin extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/phpmyadmin",
       "git_path" => "https://github.com/phpmyadmin/phpmyadmin.git",
-      "git_commit" => "6706fc1f9a7e8893cbe2672e9f26b30b3c49da52",
+      "git_commit" => "0ce072a3530694bcb0e2e0e3d91874bee6d9a6c4",
       "test_path" => __DIR__."/frameworks/phpmyadmin",
     };
   }

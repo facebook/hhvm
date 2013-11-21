@@ -20,37 +20,10 @@
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/ext/icu/icu.h"
 #include <unicode/coll.h> // icu
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-struct intl_error {
-  UErrorCode code;
-  String custom_error_message;
-  intl_error() : code(U_ZERO_ERROR) {}
-  void clear() {
-    code = U_ZERO_ERROR;
-    custom_error_message.reset();
-  }
-};
-
-class IntlError : public RequestEventHandler {
-public:
-  intl_error m_error;
-  IntlError() {
-    m_error.clear();
-  }
-  virtual void requestInit() {
-    m_error.clear();
-  }
-  virtual void requestShutdown() {
-    m_error.clear();
-  }
-};
-
-DECLARE_EXTERN_REQUEST_LOCAL(IntlError, s_intl_error);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 #define COLLATOR_SORT_REGULAR   0

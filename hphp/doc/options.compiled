@@ -373,6 +373,7 @@ These are experimental LFU settings.
       Prefix = prefix.
       Pattern = regex pattern
       PathTranslation = html
+      CheckExistenceBeforeRewrite = true
       ServerName =
       ServerVariables {
         name = value
@@ -419,6 +420,12 @@ These are experimental LFU settings.
       }
     }
   }
+
+- CheckExistenceBeforeRewrite
+
+With this setting, rewrite rules will not be applied for files that exist in
+the original path. This is the default behavior. Set this to false if one wants
+to block access to certain files (ex. .htaccess.)
 
 = Administration Server
 

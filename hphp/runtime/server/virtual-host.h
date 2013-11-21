@@ -55,6 +55,11 @@ public:
   bool match(const std::string &host) const;
   bool disabled() const { return m_disabled; }
 
+  // whether to check (and serve) files that exist before applying rewrite rules
+  bool checkExistenceBeforeRewrite() const {
+    return m_checkExistenceBeforeRewrite;
+  }
+
   // url rewrite rules
   bool rewriteURL(const String& host, String &url, bool &qsa, int &redirect) const;
 
@@ -101,6 +106,7 @@ private:
 
   void initRuntimeOption(Hdf overwrite);
   bool m_disabled;
+  bool m_checkExistenceBeforeRewrite;
   std::string m_name;
   std::string m_prefix;
   std::string m_pattern;

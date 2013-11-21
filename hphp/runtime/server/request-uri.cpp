@@ -69,12 +69,15 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
   m_rewritten = false;
 
   // Fast path for files that exist
-  String canon(Util::canonicalize(m_originalURL.c_str(), m_originalURL.size()),
-               AttachString);
-  if (virtualFileExists(vhost, sourceRoot, pathTranslation, canon)) {
-    m_rewrittenURL = canon;
-    m_resolvedURL = canon;
-    return true;
+  if (vhost->checkExistenceBeforeRewrite()) {
+    String canon(
+      Util::canonicalize(m_originalURL.c_str(), m_originalURL.size()),
+      AttachString);
+    if (virtualFileExists(vhost, sourceRoot, pathTranslation, canon)) {
+      m_rewrittenURL = canon;
+      m_resolvedURL = canon;
+      return true;
+    }
   }
 
   if (!rewriteURL(vhost, transport, pathTranslation, sourceRoot)) {

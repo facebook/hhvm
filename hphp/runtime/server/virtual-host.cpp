@@ -175,6 +175,9 @@ void VirtualHost::init(Hdf vh) {
 
   m_disabled = vh["Disabled"].getBool(false);
 
+  m_checkExistenceBeforeRewrite =
+    vh["CheckExistenceBeforeRewrite"].getBool(true);
+
   Hdf rewriteRules = vh["RewriteRules"];
   for (Hdf hdf = rewriteRules.firstChild(); hdf.exists(); hdf = hdf.next()) {
     RewriteRule dummy;

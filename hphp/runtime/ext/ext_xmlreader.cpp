@@ -167,7 +167,7 @@ bool c_XMLReader::t_xml(const String& source, const String& encoding /*= null_st
     String directory = g_context->getCwd();
     if (!directory.empty()) {
       if (directory[directory.size() - 1] != '/') {
-        directory += '/';
+        directory += "/";
       }
       uri = (char *) xmlCanonicPath((const xmlChar *) directory.c_str());
     }

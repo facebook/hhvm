@@ -691,7 +691,7 @@ static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
         xmlFree((char *) ctxt->directory);
       }
       if (directory[directory.size() - 1] != '/') {
-        directory += '/';
+        directory += "/";
       }
       ctxt->directory =
         (char*)xmlCanonicPath((const xmlChar*)directory.c_str());

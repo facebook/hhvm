@@ -120,7 +120,7 @@ public:
    */
   /* implicit */ String(StringData *data) : StringBase(data) { }
   /* implicit */ String(int     n);
-  /* implicit */ String(int64_t   n);
+  /* implicit */ String(int64_t n);
   /* implicit */ String(double  n);
   /* implicit */ String(litstr  s) {
     if (s) {
@@ -129,6 +129,7 @@ public:
     }
   }
   String(const String& str) : StringBase(str.m_px) { }
+  String(char) = delete;  // prevent unintentional promotion to int
 
   // Move ctor
   /* implicit */ String(String&& str) : StringBase(std::move(str)) {}

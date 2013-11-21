@@ -2646,9 +2646,6 @@ void c_PDOStatement::sweep() {
   // No resources allocated outside HHVM's control
 }
 
-void c_PDOStatement::t___construct() {
-}
-
 Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
   SYNC_VM_REGS_SCOPED();
   strcpy(m_stmt->error_code, PDO_ERR_NONE);

@@ -159,7 +159,6 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
   // need to implement
   public: c_PDOStatement(Class* cls = c_PDOStatement::classof());
   public: ~c_PDOStatement();
-  public: void t___construct();
   public: Variant t_execute(CArrRef params = null_array);
   public: Variant t_fetch(int64_t how = 0,
                           int64_t orientation = q_PDO$$FETCH_ORI_NEXT,

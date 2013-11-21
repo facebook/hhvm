@@ -519,6 +519,23 @@ void emitSlowPathHelper(const PhpFunc& func, const fbstring& prefix,
   out << "}\n\n";
 }
 
+/**
+ * Emits all the methods that are needed for class creation
+ * */
+static void emitClassCtorAndDtor(const PhpClass& klass, std::ostream& out) {
+  if (!(klass.flags() & IsCppAbstract)) {
+    emitCtorHelper(klass.name(), out);
+    if (!(klass.flags() & CppCustomDelete)) {
+      emitDtorHelper(klass.name(), out);
+    }
+  }
+  if (klass.flags() & NoDefaultSweep) {
+    out << "IMPLEMENT_CLASS_NO_SWEEP(" << klass.name() << ");\n";
+  } else {
+    out << "IMPLEMENT_CLASS(" << klass.name() << ");\n";
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Top level
 
@@ -569,22 +586,11 @@ void processSymbol(const fbstring& symbol, std::ostream& header,
 
   auto& func = *idlIt->second;
   bool isMethod = func.isMethod();
-
   auto classIt = g_classMap.find(func.className());
-  if (func.isCtor() && classIt != g_classMap.end()) {
+  if (classIt != g_classMap.end()) {
     auto& klass = *classIt->second;
-
-    if (!(klass.flags() & IsCppAbstract)) {
-      emitCtorHelper(klass.name(), cpp);
-      if (!(klass.flags() & CppCustomDelete)) {
-        emitDtorHelper(klass.name(), cpp);
-      }
-    }
-    if (klass.flags() & NoDefaultSweep) {
-      cpp << "IMPLEMENT_CLASS_NO_SWEEP(" << klass.name() << ");\n";
-    } else {
-      cpp << "IMPLEMENT_CLASS(" << klass.name() << ");\n";
-    }
+    emitClassCtorAndDtor(klass, cpp);
+    g_classMap.erase(classIt);
   }
 
   fbstring declPrefix = (isMethod ? "th_" : "fh_");

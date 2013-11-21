@@ -685,16 +685,6 @@
             "footer": "\n  public: sp_PDOStatement m_stmt;\n  public: Variant m_row;\n  public: int m_rowIndex;",
             "funcs": [
                 {
-                    "name": "__construct",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "execute",
                     "desc": "Execute the prepared statement. If the prepared statement included parameter markers, you must either: PDOStatement::bindParam() to bind PHP variables to the parameter markers: bound variables pass their value as input and receive the output value, if any, of their associated parameter markers",
                     "flags": [

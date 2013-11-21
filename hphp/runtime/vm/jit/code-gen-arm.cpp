@@ -805,8 +805,8 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
-  auto fpReg = x2a(curOpd(inst->src(0)).reg());
-  auto spReg = x2a(curOpd(inst->src(1)).reg());
+  auto spReg = x2a(curOpd(inst->src(0)).reg());
+  auto fpReg = x2a(curOpd(inst->src(1)).reg());
   auto pcOff = inst->extra<InterpOneData>()->bcOff;
 
   auto opc = *(curFunc()->unit()->at(pcOff));

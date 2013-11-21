@@ -669,7 +669,7 @@ void FrameState::updateLocalRefValue(uint32_t id, unsigned inlineIdx,
 void FrameState::dropLocalInnerType(uint32_t id, unsigned inlineIdx) {
   auto& local = locals(inlineIdx)[id];
   assert(local.type.isBoxed());
-  local.type = Type::BoxedCell;
+  local.type = Type::BoxedInitCell;
 }
 
 } }

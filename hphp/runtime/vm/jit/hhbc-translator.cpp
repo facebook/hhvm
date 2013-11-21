@@ -4502,6 +4502,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
     }
 
     case OpUnsetL:
+    case OpPushL:
       setImmLocType(0, Type::Uninit);
       break;
 

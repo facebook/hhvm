@@ -146,7 +146,21 @@ void raise_warning(const char *fmt, ...) {
                          "HipHop Warning: ");
 }
 
+/**
+ * Warnings are currently sampled. raise_debugging can help when
+ * migrating warnings to errors.
+ *
+ * In general, RaiseDebuggingFrequency should be kept at 1.
+ */
+static int64_t g_raise_debugging_counter = 0;
+
 void raise_debugging(const std::string &msg) {
+  if (RuntimeOption::RaiseDebuggingFrequency <= 0 ||
+      (g_raise_debugging_counter++) %
+      RuntimeOption::RaiseDebuggingFrequency != 0) {
+    return;
+  }
+
   g_context->handleError(msg,
                          static_cast<int>(ErrorConstants::ErrorModes::WARNING),
                          true,

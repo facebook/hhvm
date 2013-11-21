@@ -78,6 +78,7 @@ public:
   static bool AssertWarning;
   static int NoticeFrequency; // output 1 out of NoticeFrequency notices
   static int WarningFrequency;
+  static int RaiseDebuggingFrequency;
   static int64_t SerializationSizeLimit;
   static int64_t StringOffsetLimit;
 

@@ -94,7 +94,13 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
     }
     // Free extra args
     assert(fp->hasExtraArgs());
-    ExtraArgs::deallocate(fp);
+    ExtraArgs* ea = fp->getExtraArgs();
+    int numExtra = fp->numArgs() - fp->m_func->numParams();
+    if (unwinding) {
+      fp->initNumArgs(fp->m_func->numParams());
+      fp->setVarEnv(nullptr);
+    }
+    ExtraArgs::deallocate(ea, numExtra);
   }
   // Free locals
   for (int i = numLocals - 1; i >= 0; --i) {

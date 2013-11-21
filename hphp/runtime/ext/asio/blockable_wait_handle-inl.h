@@ -28,7 +28,7 @@ c_BlockableWaitHandle::blockOn(c_WaitableWaitHandle* child) {
 
   assert(!child->isFinished());
   assert(getChild() == child);
-  assert(getContextIdx() == child->getContextIdx());
+  assert(getContextIdx() <= child->getContextIdx());
   assert(!isDescendantOf(child));
 
   // Extend the linked list of parents.

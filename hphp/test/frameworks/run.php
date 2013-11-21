@@ -2264,6 +2264,7 @@ function get_unit_testing_infra_dependencies(): void {
 // (e.g. PHPUnit), frameworks and framework dependencies.
 function run_install(string $proc, string $path, ?Map $env): ?int
 {
+  verbose("Running: $proc\n", Options::$verbose);
   $descriptorspec = array(
     0 => array("pipe", "r"),
     1 => array("pipe", "w"),
@@ -2279,16 +2280,19 @@ function run_install(string $proc, string $path, ?Map $env): ?int
   if (is_resource($process)) {
     fclose($pipes[0]);
     $start_time = microtime(true);
-    while (fgets($pipes[1])) {
+    while ($line = fgets($pipes[1])) {
+      verbose("$line", Options::$verbose);
       if ((microtime(true) - $start_time) > 1) {
-        verbose(".", !Options::$csv_only);
+        verbose(".", !Options::$verbose && !Options::$csv_only);
         $start_time = microtime(true);
       }
     }
     fclose($pipes[1]);
     $ret = proc_close($process);
+    verbose("Returned status $ret\n", Options::$verbose);
     return $ret;
   }
+  verbose("Couldn't proc_open: $proc\n", Options::$verbose);
   return null;
 }
 

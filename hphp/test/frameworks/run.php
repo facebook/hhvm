@@ -426,7 +426,7 @@ abstract class Framework {
     // Now that we have an install, we can safely set all possible
     // other framework information
     $this->setEnvVars($info->get("env_vars"));
-    $this->setTestConfigFile($info->get("test_config"));
+    $this->setTestConfigFile($info->get("test_config_file"));
     $this->setTestCommand($info->get("test_command"));
     $this->setArgsForTests($info->get("args_for_tests"));
   }
@@ -551,6 +551,9 @@ abstract class Framework {
                             "/vendor/bin/phpunit --debug";
     } else {
       $this->test_command = $test_command." --debug";
+    }
+    if ($this->test_config_file !== null) {
+      $this->test_command .= " -c ".$this->test_config_file;
     }
     if ($this->parallel) {
       $this->test_command .= " %test%";
@@ -1479,6 +1482,8 @@ class PhpMyAdmin extends Framework {
       "git_path" => "https://github.com/phpmyadmin/phpmyadmin.git",
       "git_commit" => "0ce072a3530694bcb0e2e0e3d91874bee6d9a6c4",
       "test_path" => __DIR__."/frameworks/phpmyadmin",
+      "test_config_file" => __DIR__.
+                            "/frameworks/phpmyadmin/phpunit.xml.nocoverage",
     };
   }
 }

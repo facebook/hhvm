@@ -1218,7 +1218,7 @@ class Mediawiki extends Framework {
         __DIR__."/frameworks/mediawiki-core/tests/phpunit",
       },
       "test_command" => get_runtime_build()." phpunit.php ".
-                        "--exclude-group=Database",
+                        "--exclude-group=Database,Broken",
       "clownylist" => Set {
         __DIR__."/frameworks/mediawiki-core/tests/phpunit/".
         "includes/HttpTest.php",

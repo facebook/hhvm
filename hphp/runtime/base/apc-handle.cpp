@@ -115,8 +115,8 @@ StringCase:
       return APCArray::MakeShared();
 
     case KindOfObject:
-      return (unserializeObj) ? APCObject::MakeShared(source.getObjectData())
-                              : APCObject::MakeShared(apc_serialize(source));
+      return unserializeObj ? APCObject::Construct(source.getObjectData())
+                            : APCObject::MakeShared(apc_serialize(source));
 
     default:
       return nullptr;

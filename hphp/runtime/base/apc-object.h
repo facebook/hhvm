@@ -36,6 +36,11 @@ namespace HPHP {
  * MakeObject and Delete take care of isolating callers from that detail.
  */
 struct APCObject {
+  /*
+   * Create an APCObject from an ObjectData*; returns its APCHandle.
+   */
+  static APCHandle* Construct(ObjectData* data);
+
   // Return an APCObject instance from a serialized version of the
   // object.  May return null.
   static APCHandle* MakeAPCObject(APCHandle* obj, CVarRef value);
@@ -100,7 +105,7 @@ private:
   };
 
 private:
-  explicit APCObject(ObjectData* obj);
+  explicit APCObject(ObjectData*, uint32_t propCount);
   ~APCObject();
   APCObject(const APCObject&) = delete;
   APCObject& operator=(const APCObject&) = delete;
@@ -111,14 +116,19 @@ private:
     handle->mustCache();
     return handle;
   }
-  static APCHandle* MakeShared(ObjectData* data);
+
+private:
   Object createObject() const;
+
+  Prop* props() { return reinterpret_cast<Prop*>(this + 1); }
+  const Prop* props() const {
+    return const_cast<APCObject*>(this)->props();
+  }
 
 private:
   APCHandle m_handle;
   ClassOrString m_cls;
-  Prop* m_props;
-  int m_propCount;
+  uint32_t m_propCount;
 };
 
 //////////////////////////////////////////////////////////////////////

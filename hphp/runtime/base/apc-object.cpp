@@ -34,30 +34,32 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE
-APCObject::APCObject(ObjectData* obj)
+APCObject::APCObject(ObjectData* obj, uint32_t propCount)
   : m_handle(KindOfObject)
   , m_cls{obj->getVMClass()}
+  , m_propCount{propCount}
 {
+  m_handle.setIsObj();
+  m_handle.mustCache();
+}
+
+APCHandle* APCObject::Construct(ObjectData* objectData) {
   // This function assumes the object and object/array down the tree
   // have no internal references and do not implement the serializable
   // interface.
-  assert(!obj->instanceof(SystemLib::s_SerializableClass));
+  assert(!objectData->instanceof(SystemLib::s_SerializableClass));
 
-  m_handle.setIsObj();
-  m_handle.mustCache();
+  Array odProps;
+  objectData->o_getArray(odProps, false);
+  auto const propCount = odProps.size();
 
-  Array props;
-  obj->o_getArray(props, false);
-  m_propCount = 0;
-  if (props.empty()) {
-    m_props = nullptr;
-    return;
-  }
+  auto const apcObj = new (
+    std::malloc(sizeof(APCObject) + sizeof(Prop) * propCount)
+  ) APCObject(objectData, propCount);
+  if (!propCount) return apcObj->getHandle();
 
-  m_props = static_cast<Prop*>(malloc(sizeof(Prop) * props.size()));
-
-  for (ArrayIter it(props); !it.end(); it.next()) {
-    assert(m_propCount < props.size());
+  auto prop = apcObj->props();
+  for (ArrayIter it(odProps); !it.end(); it.next()) {
     Variant key(it.first());
     assert(key.isString());
     CVarRef value = it.secondRef();
@@ -67,47 +69,54 @@ APCObject::APCObject(ObjectData* obj)
     }
 
     const String& keySD = key.asCStrRef();
-    auto& prop = m_props[m_propCount];
 
     if (!keySD->empty() && *keySD->data() == '\0') {
       int32_t subLen = keySD.find('\0', 1) + 1;
       String cls = keySD.substr(1, subLen - 2);
       if (cls.size() == 1 && cls[0] == '*') {
         // Protected.
-        prop.ctx = ClassOrString{nullptr};
+        prop->ctx = ClassOrString{nullptr};
       } else {
         // Private.
-        prop.ctx = ClassOrString{Unit::lookupClass(cls.get())};
+        prop->ctx = ClassOrString{Unit::lookupClass(cls.get())};
       }
 
-      prop.name = makeStaticString(keySD.substr(subLen));
+      prop->name = makeStaticString(keySD.substr(subLen));
     } else {
-      prop.ctx = ClassOrString{nullptr};
-      prop.name = makeStaticString(keySD.get());
+      prop->ctx = ClassOrString{nullptr};
+      prop->name = makeStaticString(keySD.get());
     }
 
-    prop.val = val;
+    prop->val = val;
 
-    ++m_propCount;
+    ++prop;
   }
+  assert(prop == apcObj->props() + propCount);
+
+  return apcObj->getHandle();
 }
 
 ALWAYS_INLINE
 APCObject::~APCObject() {
-  if (!m_props) return;
-  for (int i = 0; i < m_propCount; i++) {
-    if (m_props[i].val) m_props[i].val->decRef();
-    assert(m_props[i].name->isStatic());
+  for (auto i = uint32_t{0}; i < m_propCount; ++i) {
+    if (props()[i].val) props()[i].val->decRef();
+    assert(props()[i].name->isStatic());
   }
-  free(m_props);
+}
+
+void APCObject::Delete(APCHandle* handle) {
+  if (!handle->getIsObj()) {
+    delete APCString::fromHandle(handle);
+    return;
+  }
+
+  auto const obj = fromHandle(handle);
+  obj->~APCObject();
+  // No need to run Prop destructors.
+  std::free(obj);
 }
 
 //////////////////////////////////////////////////////////////////////
-
-APCHandle* APCObject::MakeShared(ObjectData* data) {
-  auto const apcObj = new APCObject(data);
-  return apcObj->getHandle();
-}
 
 APCHandle* APCObject::MakeAPCObject(APCHandle* obj, CVarRef value) {
   if (!value.is(KindOfObject) || obj->getObjAttempted()) {
@@ -136,11 +145,6 @@ Variant APCObject::MakeObject(APCHandle* handle) {
   return apc_unserialize(serObj->data(), serObj->size());
 }
 
-void APCObject::Delete(APCHandle* handle) {
-  (handle->getIsObj()) ? delete APCObject::fromHandle(handle)
-                       : delete APCString::fromHandle(handle);
-}
-
 Object APCObject::createObject() const {
   Object obj;
 
@@ -158,26 +162,25 @@ Object APCObject::createObject() const {
   obj = ObjectData::newInstance(const_cast<Class*>(klass));
   obj.get()->clearNoDestruct();
 
-  if (auto prop = m_props) {
-    auto const propEnd = prop + m_propCount;
-    for (; prop != propEnd; ++prop) {
-      auto const key = prop->name;
+  auto prop = props();
+  auto const propEnd = prop + m_propCount;
+  for (; prop != propEnd; ++prop) {
+    auto const key = prop->name;
 
-      const Class* ctx = nullptr;
-      if (prop->ctx.isNull()) {
-        ctx = klass;
+    const Class* ctx = nullptr;
+    if (prop->ctx.isNull()) {
+      ctx = klass;
+    } else {
+      if (auto const cls = prop->ctx.cls()) {
+        ctx = prop->ctx.cls();
       } else {
-        if (auto const cls = prop->ctx.cls()) {
-          ctx = prop->ctx.cls();
-        } else {
-          ctx = Unit::lookupClass(prop->ctx.name());
-          if (!ctx) continue;
-        }
+        ctx = Unit::lookupClass(prop->ctx.name());
+        if (!ctx) continue;
       }
-
-      auto val = prop->val ? prop->val->toLocal() : null_variant;
-      obj->setProp(const_cast<Class*>(ctx), key, val.asTypedValue(), false);
     }
+
+    auto val = prop->val ? prop->val->toLocal() : null_variant;
+    obj->setProp(const_cast<Class*>(ctx), key, val.asTypedValue(), false);
   }
 
   obj->invokeWakeup();
@@ -192,15 +195,11 @@ void APCObject::getSizeStats(APCHandleStats* stats) const {
   stats->initStats();
   stats->dataTotalSize += sizeof(APCObject) + sizeof(Prop) * m_propCount;
 
-  for (int i = 0; i < m_propCount; i++) {
-    auto const sd = m_props[i].name;
-    if (!sd->isStatic()) {
-      stats->dataSize += sd->size();
-      stats->dataTotalSize += sizeof(StringData) + sd->size();
-    }
-    if (m_props[i].val) {
+  for (auto i = uint32_t{0}; i < m_propCount; ++i) {
+    assert(props()[i].name->isStatic());
+    if (props()[i].val) {
       APCHandleStats childStats;
-      m_props[i].val->getStats(&childStats);
+      props()[i].val->getStats(&childStats);
       stats->addChildStats(&childStats);
     }
   }
@@ -209,13 +208,9 @@ void APCObject::getSizeStats(APCHandleStats* stats) const {
 int32_t APCObject::getSpaceUsage() const {
   int32_t size = sizeof(APCObject) + sizeof(Prop) * m_propCount;
 
-  for (int i = 0; i < m_propCount; i++) {
-    auto const sd = m_props[i].name;
-    if (!sd->isStatic()) {
-      size += sizeof(StringData) + sd->size();
-    }
-    if (m_props[i].val) {
-      size += m_props[i].val->getSpaceUsage();
+  for (auto i = uint32_t{0}; i < m_propCount; ++i) {
+    if (props()[i].val) {
+      size += props()[i].val->getSpaceUsage();
     }
   }
   return size;

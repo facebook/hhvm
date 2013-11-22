@@ -1241,8 +1241,8 @@ class Mediawiki extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/mediawiki-core",
-      "git_path" => "https://github.com/wikimedia/mediawiki-core.git",
-      "git_commit" => "8c5733c44977232ca42454ae7f1ae0fd01770b37",
+      "git_path" => "https://github.com/ptarjan/mediawiki-core.git",
+      "git_commit" => "f20aae93e54705b2d1724afc75f0dc097cdda6fc",
       "test_path" => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
       "test_file_pattern" => PHPUnitPatterns::$mediawiki_test_file_pattern,
       "test_file_search_roots" => Set {

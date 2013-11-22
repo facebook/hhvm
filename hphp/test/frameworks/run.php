@@ -1519,6 +1519,14 @@ class Slim extends Framework {
       "git_path" => "https://github.com/elgenie/Slim.git",
       "git_commit" => "1beca31c1f0b0a7bb7747d9367fb07c07e190a8d",
       "test_path" => __DIR__."/frameworks/Slim",
+      "pull_requests" => Vector {
+        Map {
+          'pull_dir' => __DIR__."/frameworks/Slim",
+          'pull_repository' => "https://github.com/ptarjan/Slim",
+          'git_commit' => "e0fb710f06030d39fd15127e2bc380300ab0e2c2",
+          'type' => 'pull',
+        },
+      },
     };
   }
 }

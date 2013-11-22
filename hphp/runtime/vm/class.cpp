@@ -967,7 +967,15 @@ const StaticString
   s_toString("__toString"),
   s_construct("__construct"),
   s_destruct("__destruct"),
-  s_invoke("__invoke");
+  s_invoke("__invoke"),
+  s_sleep("__sleep"),
+  s_get("__get"),
+  s_set("__set"),
+  s_isset("__isset"),
+  s_unset("__unset"),
+  s_call("__call"),
+  s_callStatic("__callStatic"),
+  s_clone("__clone");
 
 void Class::setSpecial() {
   m_toString = lookupMethod(s_toString.get());
@@ -1477,23 +1485,14 @@ void Class::setMethods() {
 }
 
 void Class::setODAttributes() {
-  static StringData* sd__sleep = makeStaticString("__sleep");
-  static StringData* sd__get = makeStaticString("__get");
-  static StringData* sd__set = makeStaticString("__set");
-  static StringData* sd__isset = makeStaticString("__isset");
-  static StringData* sd__unset = makeStaticString("__unset");
-  static StringData* sd__call = makeStaticString("__call");
-  static StringData* sd__callStatic
-    = makeStaticString("__callStatic");
-
   m_ODAttrs = 0;
-  if (lookupMethod(sd__sleep     )) { m_ODAttrs |= ObjectData::HasSleep;      }
-  if (lookupMethod(sd__get       )) { m_ODAttrs |= ObjectData::UseGet;        }
-  if (lookupMethod(sd__set       )) { m_ODAttrs |= ObjectData::UseSet;        }
-  if (lookupMethod(sd__isset     )) { m_ODAttrs |= ObjectData::UseIsset;      }
-  if (lookupMethod(sd__unset     )) { m_ODAttrs |= ObjectData::UseUnset;      }
-  if (lookupMethod(sd__call      )) { m_ODAttrs |= ObjectData::HasCall;       }
-  if (lookupMethod(sd__callStatic)) { m_ODAttrs |= ObjectData::HasCallStatic; }
+  if (lookupMethod(s_sleep.get()     )) { m_ODAttrs |= ObjectData::HasSleep; }
+  if (lookupMethod(s_get.get()       )) { m_ODAttrs |= ObjectData::UseGet;   }
+  if (lookupMethod(s_set.get()       )) { m_ODAttrs |= ObjectData::UseSet;   }
+  if (lookupMethod(s_isset.get()     )) { m_ODAttrs |= ObjectData::UseIsset; }
+  if (lookupMethod(s_unset.get()     )) { m_ODAttrs |= ObjectData::UseUnset; }
+  if (lookupMethod(s_call.get()      )) { m_ODAttrs |= ObjectData::HasCall;  }
+  if (lookupMethod(s_clone.get()     )) { m_ODAttrs |= ObjectData::HasClone; }
 }
 
 void Class::setConstants() {

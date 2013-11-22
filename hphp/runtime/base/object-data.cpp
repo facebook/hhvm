@@ -50,9 +50,9 @@ int ObjectData::GetMaxId() {
 
 const StaticString
   s_offsetGet("offsetGet"),
-  s___call("__call"),
-  s___callStatic("__callStatic"),
-  s_serialize("serialize");
+  s_call("__call"),
+  s_serialize("serialize"),
+  s_clone("__clone");
 
 static Array ArrayObject_toArray(const ObjectData* obj) {
   bool visible, accessible, unset;
@@ -539,7 +539,7 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
   } else {
     // If this_ is non-null AND we could not find a method, try
     // looking up __call in cls's method table
-    ctx.func = ctx.cls->lookupMethod(s___call.get());
+    ctx.func = ctx.cls->lookupMethod(s_call.get());
 
     if (!ctx.func) {
       // Bail if we couldn't find the method or __call
@@ -1573,17 +1573,21 @@ void ObjectData::cloneSet(ObjectData* clone) {
 }
 
 ObjectData* ObjectData::cloneImpl() {
+  auto const hasCloneBit = getAttribute(HasClone);
+
   ObjectData* obj;
   Object o = obj = ObjectData::newInstance(m_cls);
   cloneSet(obj);
-  static StringData* sd__clone = makeStaticString("__clone");
-  const Func* method = obj->m_cls->lookupMethod(sd__clone);
-  if (method) {
-    TypedValue tv;
-    tvWriteNull(&tv);
-    g_vmContext->invokeFuncFew(&tv, method, obj);
-    tvRefcountedDecRef(&tv);
-  }
+
+  if (!hasCloneBit) return o.detach();
+
+  auto const method = obj->m_cls->lookupMethod(s_clone.get());
+  assert(method);
+  TypedValue tv;
+  tvWriteNull(&tv);
+  g_vmContext->invokeFuncFew(&tv, method, obj);
+  tvRefcountedDecRef(&tv);
+
   return o.detach();
 }
 

@@ -52,7 +52,7 @@ class ObjectData {
     UseUnset      = 0x0020, // __unset()
     IsWaitHandle  = 0x0040, // This is a c_WaitHandle or derived
     HasCall       = 0x0080, // defines __call
-    HasCallStatic = 0x0100, // defines __callStatic
+    HasClone      = 0x0100, // defines __clone as a php method
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasCppClone   = 0x0400, // has custom clone logic as a C++ builtin
     HasDynPropArr = 0x0800, // has a dynamic properties array

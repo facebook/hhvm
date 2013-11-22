@@ -83,7 +83,7 @@ $MAGIC_METHODS = array('__get' => 'ObjectData::UseGet',
                        '__isset' => 'ObjectData::UseIsset',
                        '__unset' => 'ObjectData::UseUnset',
                        '__call' => 'ObjectData::HasCall',
-                       '__callStatic' => 'ObjectData::HasCallStatic');
+                       '__clone' => 'ObjectData::HasClone');
 
 function get_idl_name($type, $null = '') {
   global $TYPENAMES;

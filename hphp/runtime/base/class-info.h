@@ -50,7 +50,6 @@ public:
     IsStatic               = (1 <<  9), //           x             x
     IsCppAbstract          = (1 << 10), //    x
     HasCall                = IsPublic,  //    x
-    HasCallStatic          = IsProtected,//   x
     AllowOverride          = IsPrivate, //                  x
     IsReference            = (1 << 11), //                  x      x     x
     IsConstructor          = (1 << 12), //                         x

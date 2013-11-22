@@ -1070,8 +1070,8 @@ class Assetic extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/assetic",
-      "git_path" => "https://github.com/kriswallsmith/assetic.git",
-      "git_commit" => "d4680d449a9da80fb82e17627270c91b93a0d46d",
+      "git_path" => "https://github.com/ptarjan/assetic.git",
+      'git_commit' => "0aada83090e28eff7a6a112f4e2d1a583f017242",
       "test_path" => __DIR__."/frameworks/assetic",
     };
   }

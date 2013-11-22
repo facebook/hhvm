@@ -593,6 +593,7 @@ O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
 O(CreateAFWHFunc,               D(Obj), C(Int) S(Obj),        E|Er|N|CRc|PRc) \
 O(CreateAFWHMeth,               D(Obj), S(Ctx) C(Int) S(Obj), E|Er|N|CRc|PRc) \
 O(CreateSRWH,                   D(Obj), S(Cell),                   N|CRc|PRc) \
+O(CreateSEWH,                   D(Obj), S(Obj),                    N|CRc|PRc) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr)                         \
                                           C(Int)                              \

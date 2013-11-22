@@ -460,6 +460,7 @@ struct HhbcTranslator {
   void emitAsyncAwait();
   void emitAsyncESuspend(int64_t labelId, int iters);
   void emitAsyncWrapResult();
+  void emitAsyncWrapException();
 
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force = false);

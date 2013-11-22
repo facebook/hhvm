@@ -64,6 +64,7 @@
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_result_wait_handle.h"
+#include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/runtime/base/stats.h"
@@ -7118,6 +7119,17 @@ OPTBLD_INLINE void VMExecutionContext::iopAsyncWrapResult(PC& pc) {
 
   auto const top = m_stack.topC();
   top->m_data.pobj = c_StaticResultWaitHandle::CreateFromVM(*top);
+  top->m_type = KindOfObject;
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopAsyncWrapException(PC& pc) {
+  NEXT();
+
+  auto const top = m_stack.topC();
+  auto const topObj = top->m_data.pobj;
+  assert(top->m_type == KindOfObject);
+  assert(topObj->instanceof(SystemLib::s_ExceptionClass));
+  top->m_data.pobj = c_StaticExceptionWaitHandle::CreateFromVM(topObj);
   top->m_type = KindOfObject;
 }
 

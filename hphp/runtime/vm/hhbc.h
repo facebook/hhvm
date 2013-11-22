@@ -648,6 +648,7 @@ enum SetOpOp {
   O(AsyncAwait,      NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(AsyncESuspend,   TWO(IVA,IVA),     ONE(CV),         ONE(CV),    NF) \
   O(AsyncWrapResult, NA,               ONE(CV),         ONE(CV),    NF) \
+  O(AsyncWrapException, NA,            ONE(CV),         ONE(CV),    NF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Abs,             NA,               ONE(CV),         ONE(CV),    NF) \

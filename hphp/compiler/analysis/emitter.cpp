@@ -5969,27 +5969,13 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
   r->m_catchLabels.push_back(std::pair<StringData*, Label*>(excLit, label));
 
   // catch block
-  emitCreateStaticWaitHandle(e, "StaticExceptionWaitHandle",
-                             [&](){ e.Catch(); });
+  e.Catch();
+  e.AsyncWrapException();
   e.RetC();
 
   FuncFinisher ff(this, e, m_curFunc);
 
   emitMethodDVInitializers(e, meth, topOfBody);
-}
-
-void EmitterVisitor::emitCreateStaticWaitHandle(Emitter& e, std::string cls,
-                                          std::function<void()> emitParam) {
-  StringData* createLit = makeStaticString("create");
-  StringData* clsLit = makeStaticString(cls);
-  {
-    FPIRegionRecorder fpi(this, m_ue, m_evalStack, m_ue.bcPos());
-    e.FPushClsMethodD(1, createLit, clsLit);
-    emitParam();
-    e.FPassC(0);
-  }
-  e.FCall(1);
-  emitConvertToCell(e);
 }
 
 std::pair<FuncEmitter*,bool>

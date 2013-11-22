@@ -692,6 +692,10 @@ void IRTranslator::translateAsyncWrapResult(const NormalizedInstruction& i) {
   HHIR_EMIT(AsyncWrapResult);
 }
 
+void IRTranslator::translateAsyncWrapException(const NormalizedInstruction& i) {
+  HHIR_EMIT(AsyncWrapException);
+}
+
 void IRTranslator::translateStrlen(const NormalizedInstruction& i) {
   HHIR_EMIT(Strlen);
 }

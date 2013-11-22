@@ -263,24 +263,6 @@
                     },
                     "args": [
                     ]
-                },
-                {
-                    "name": "create",
-                    "desc": "Create a wait handle that always fails with a given exception",
-                    "flags": [
-                        "IsStatic"
-                    ],
-                    "return": {
-                        "type": "Object",
-                        "desc": "A StaticExceptionWaitHandle representing given exception"
-                    },
-                    "args": [
-                        {
-                            "name": "exception",
-                            "type": "Object",
-                            "desc": "An exception wait handle will fail with"
-                        }
-                    ]
                 }
             ],
             "consts": [

@@ -164,6 +164,7 @@
   CASE(AsyncAwait) \
   CASE(AsyncESuspend) \
   CASE(AsyncWrapResult) \
+  CASE(AsyncWrapException) \
   CASE(Strlen) \
   CASE(IncStat) \
   CASE(ArrayIdx) \

@@ -3936,6 +3936,11 @@ AsyncWrapResult   [C]  ->  [C:Obj]
 
   Wraps $1 into a StaticResultWaitHandle object.
 
+AsyncWrapException   [C:Obj]  ->  [C:Obj]
+
+  Wraps $1 into a StaticExceptionWaitHandle object.  If $1 is not an Exception,
+  the behavior is undefined.
+
 Basic statement transformations
 -------------------------------
 

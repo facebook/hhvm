@@ -47,7 +47,8 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
   static Object ti_create(CObjRef exception);
 
  public:
-  static p_StaticExceptionWaitHandle Create(ObjectData* exception);
+  static c_StaticExceptionWaitHandle* Create(ObjectData* exception);
+  static ObjectData* CreateFromVM(ObjectData* exception);
   String getName();
 };
 

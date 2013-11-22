@@ -1268,6 +1268,8 @@ static const struct {
                    {Stack1,           Stack1|Local, OutObject,         0 }},
   { OpAsyncWrapResult,
                    {Stack1,           Stack1,       OutObject,         0 }},
+  { OpAsyncWrapException,
+                   {Stack1,           Stack1,       OutObject,         0 }},
 };
 
 static hphp_hash_map<Op, InstrInfo> instrInfo;

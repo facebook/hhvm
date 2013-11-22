@@ -449,6 +449,14 @@ void IRTranslator::translateAssertObjStk(const NormalizedInstruction& i) {
   HHIR_EMIT(AssertObjStk, i.imm[0].u_IVA, i.imm[1].u_IVA, i.imm[2].u_SA);
 }
 
+void IRTranslator::translatePredictTL(const NormalizedInstruction& i) {
+  HHIR_EMIT(PredictTL, i.imm[0].u_LA, static_cast<AssertTOp>(i.imm[1].u_OA));
+}
+
+void IRTranslator::translatePredictTStk(const NormalizedInstruction& i) {
+  HHIR_EMIT(PredictTStk, i.imm[0].u_IVA, static_cast<AssertTOp>(i.imm[1].u_OA));
+}
+
 void IRTranslator::translateBreakTraceHint(const NormalizedInstruction&) {
 }
 

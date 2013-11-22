@@ -189,6 +189,8 @@
   CASE(AssertTStk) \
   CASE(AssertObjL) \
   CASE(AssertObjStk) \
+  CASE(PredictTL) \
+  CASE(PredictTStk) \
   /* */
 
   // These are instruction-like functions which cover more than one

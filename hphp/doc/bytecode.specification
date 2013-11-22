@@ -3810,6 +3810,13 @@ AssertObjStk  <stack offset> <exact> <class name>   []  ->  []
   %3.  Otherwise, the type is asserted to be some non-strict subtype
   of the specified class or interface.
 
+PredictTL   <local id>     <op>   []  ->  []
+PredictTStk <stack offset> <op>   []  ->  []
+
+  These opcodes may be used to provide hints about the types of values at
+  runtime. Runtime behavior is implementation defined, although incorrect
+  predictions should not affect program correctness.
+
 BreakTraceHint   []  ->  []
 
   This opcode has no effects, but is a hint that code immediately

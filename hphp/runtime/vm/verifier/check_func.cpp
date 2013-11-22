@@ -509,6 +509,7 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
       switch (*instr) {
       default: assert(false && "Unexpected opcode with immType OA");
       case Op::AssertTL: case Op::AssertTStk:
+      case Op::PredictTL: case Op::PredictTStk:
 #define ASSERTT_OP(x)  if (op == static_cast<uint8_t>(AssertTOp::x)) break;
         ASSERTT_OPS
 #undef ASSERTT_OP

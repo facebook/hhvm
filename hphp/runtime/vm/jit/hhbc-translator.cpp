@@ -4069,6 +4069,24 @@ void HhbcTranslator::emitAssertTStk(int32_t offset, AssertTOp op) {
   }
 }
 
+void HhbcTranslator::emitPredictTL(int32_t id, AssertTOp op) {
+  if (auto const t = assertOpToType(op)) {
+    // Side exit to the next instruction to avoid redoing the failed
+    // prediction.
+    auto const nextBc = curSrcKey().advanced().offset();
+    checkTypeLocal(id, *t, nextBc);
+  }
+}
+
+void HhbcTranslator::emitPredictTStk(int32_t offset, AssertTOp op) {
+  if (auto const t = assertOpToType(op)) {
+    // Side exit to the next instruction to avoid redoing the failed
+    // prediction.
+    auto const nextBc = curSrcKey().advanced().offset();
+    checkTypeStack(offset, *t, nextBc);
+  }
+}
+
 Type HhbcTranslator::assertObjType(const StringData* name) {
   auto const cls = Unit::lookupUniqueClass(name);
   return classIsUniqueOrCtxParent(cls) ? Type::Obj.specialize(cls) : Type::Obj;

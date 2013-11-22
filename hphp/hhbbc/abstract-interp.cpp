@@ -282,6 +282,8 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::AssertTStk&)     {}
   void operator()(const bc::AssertObjL&)     {}
   void operator()(const bc::AssertObjStk&)   {}
+  void operator()(const bc::PredictTL&)      {}
+  void operator()(const bc::PredictTStk&)    {}
   void operator()(const bc::BreakTraceHint&) {}
 
   void operator()(const bc::Box&)     { throw_oom_only(); popC(); push(TRef); }

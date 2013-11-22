@@ -36,7 +36,7 @@ IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
 }
 
 Block* IRUnit::defBlock() {
-  FTRACE(2, "IRUnit defining B{}\n", m_nextBlockId + 1);
+  FTRACE(2, "IRUnit defining B{}\n", m_nextBlockId);
   return new (m_arena) Block(m_nextBlockId++);
 }
 

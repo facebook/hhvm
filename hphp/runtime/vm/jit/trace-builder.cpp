@@ -388,7 +388,7 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
   SCOPE_EXIT { if (debug) --instNest; };
   DEBUG_ONLY auto indent = [&] { return std::string(instNest * 2, ' '); };
 
-  FTRACE(1, "{}{}\n", indent(), inst->toString());
+  FTRACE(1, "optimizing {}{}\n", indent(), inst->toString());
 
   // First pass of tracebuilder optimizations try to replace an
   // instruction based on tracked state before we do anything else.

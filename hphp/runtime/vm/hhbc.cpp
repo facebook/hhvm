@@ -845,6 +845,7 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
             setopNames[immVal] : "?");                            \
     break;                                                        \
   case Op::AssertTL: case Op::AssertTStk:                         \
+  case Op::PredictTL: case Op::PredictTStk:                       \
     out << assertTName(immVal);                                   \
     break;                                                        \
   default:                                                        \

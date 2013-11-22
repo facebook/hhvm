@@ -529,6 +529,8 @@ enum SetOpOp {
   O(AssertTStk,      TWO(IVA,OA),      NOV,             NOV,        NF) \
   O(AssertObjL,      THREE(LA,IVA,SA), NOV,             NOV,        NF) \
   O(AssertObjStk,    THREE(IVA,IVA,SA),NOV,             NOV,        NF) \
+  O(PredictTL,       TWO(LA,OA),       NOV,             NOV,        NF) \
+  O(PredictTStk,     TWO(IVA,OA),      NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(SetN,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \

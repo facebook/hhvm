@@ -1241,6 +1241,8 @@ static const struct {
   { OpAssertTStk,  {None,             None,         OutNone,           0 }},
   { OpAssertObjL,  {None,             None,         OutNone,           0 }},
   { OpAssertObjStk,{None,             None,         OutNone,           0 }},
+  { OpPredictTL,   {None,             None,         OutNone,           0 }},
+  { OpPredictTStk, {None,             None,         OutNone,           0 }},
   { OpBreakTraceHint,{None,           None,         OutNone,           0 }},
 
   /*** 14. Continuation instructions ***/
@@ -1437,8 +1439,12 @@ static bool isTypeAssert(Op op) {
          op == Op::AssertObjL || op == Op::AssertObjStk;
 }
 
+static bool isTypePredict(Op op) {
+  return op == Op::PredictTL || op == Op::PredictTStk;
+}
+
 static bool isAlwaysNop(Op op) {
-  if (isTypeAssert(op)) return true;
+  if (isTypeAssert(op) || isTypePredict(op)) return true;
   switch (op) {
   case Op::UnboxRNop:
   case Op::BoxRNop:
@@ -1454,15 +1460,17 @@ void Translator::handleAssertionEffects(Tracelet& t,
                                         const NormalizedInstruction& ni,
                                         TraceletContext& tas,
                                         int currentStackOffset) {
-  assert(isTypeAssert(ni.op()));
+  assert(isTypeAssert(ni.op()) || isTypePredict(ni.op()));
 
   auto const loc = [&] {
     switch (ni.op()) {
     case Op::AssertTL:
     case Op::AssertObjL:
+    case Op::PredictTL:
       return Location(Location::Local, ni.imm[0].u_LA);
     case Op::AssertTStk:
     case Op::AssertObjStk:
+    case Op::PredictTStk:
       return Location(Location::Stack,
                       currentStackOffset - 1 - ni.imm[0].u_IVA);
     default:
@@ -3429,7 +3437,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     // Translation could fail entirely (because of an unknown opcode), or
     // encounter an input that cannot be computed.
     try {
-      if (isTypeAssert(ni->op())) {
+      if (isTypeAssert(ni->op()) || isTypePredict(ni->op())) {
         handleAssertionEffects(t, *ni, tas, stackFrameOffset);
       }
       preInputApplyMetaData(metaHand, ni);
@@ -3637,7 +3645,7 @@ breakBB:
     // thats only useful in the following tracelet.
     if (isLiteral(ni->op()) ||
         isThisSelfOrParent(ni->op()) ||
-        isTypeAssert(ni->op())) {
+        isTypeAssert(ni->op()) || isTypePredict(ni->op())) {
       ni = ni->prev;
       continue;
     }

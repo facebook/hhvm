@@ -24,7 +24,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE
 APCHandle *Variant::getAPCHandle() const {
   if (m_type == KindOfRef) {
     return m_data.pref->var()->getAPCHandle();

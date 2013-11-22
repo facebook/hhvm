@@ -4799,6 +4799,18 @@ OPTBLD_INLINE void VMExecutionContext::iopAssertTStk(PC& pc) {
   implAssertT(m_stack.indTV(stkSlot), static_cast<AssertTOp>(op));
 }
 
+OPTBLD_INLINE void VMExecutionContext::iopPredictTL(PC& pc) {
+  NEXT();
+  DECODE_LA(localId);
+  DECODE_OA(op);
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopPredictTStk(PC& pc) {
+  NEXT();
+  DECODE_IVA(stkSlot);
+  DECODE_OA(op);
+}
+
 OPTBLD_INLINE static void implAssertObj(TypedValue* tv,
                                         bool exact,
                                         const StringData* str) {

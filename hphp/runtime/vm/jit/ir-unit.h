@@ -165,6 +165,8 @@ struct IRTrace;
  * information.
  */
 class IRUnit {
+  TRACE_SET_MOD(hhir);
+
 public:
   IRUnit()
     : m_nextBlockId(0)
@@ -229,6 +231,7 @@ public:
     } else {
       newSSATmp(newInst);
     }
+    FTRACE(5, "cloned {}\n", *inst);
     return newInst;
   }
 

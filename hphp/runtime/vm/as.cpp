@@ -787,7 +787,7 @@ uint8_t read_AssertT_arg(AsmState& as) {
 #define ASSERTT_OP(x) if (str == #x) return static_cast<uint8_t>(AssertTOp::x);
   ASSERTT_OPS
 #undef ASSERTT_OP
-  as.error("unknown AssertT operand");
+  as.error("unknown AssertT/PredictT operand");
   NOT_REACHED();
 }
 
@@ -1022,7 +1022,9 @@ OpcodeParserMap opcode_parsers;
                    read_opcode_arg<int32_t>(as)))
 #define IMM_OA   as.ue->emitByte(                                       \
                     (thisOpcode == Op::AssertTL ||                      \
-                     thisOpcode == Op::AssertTStk) ? read_AssertT_arg(as) : \
+                     thisOpcode == Op::AssertTStk ||                    \
+                     thisOpcode == Op::PredictTL ||                     \
+                     thisOpcode == Op::PredictTStk) ? read_AssertT_arg(as) : \
                     thisOpcode == Op::Fatal ? read_Fatal_arg(as) :      \
                     uint8_t(read_opcode_arg<int32_t>(as)))
                      // TODO more subop names

@@ -353,6 +353,8 @@ struct HhbcTranslator {
   void emitAssertTStk(int32_t offset, AssertTOp);
   void emitAssertObjL(int32_t id, bool exact, Id);
   void emitAssertObjStk(int32_t offset, bool exact, Id);
+  void emitPredictTL(int32_t id, AssertTOp);
+  void emitPredictTStk(int32_t offset, AssertTOp);
 
   // binary arithmetic ops
   void emitAdd();

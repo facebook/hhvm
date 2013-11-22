@@ -598,7 +598,9 @@ Variant ObjectData::o_invoke_few_args(const String& s, int count,
   return ret;
 }
 
-StaticString s_zero("\0", 1);
+const StaticString
+  s_zero("\0", 1),
+  s_star("*");
 
 void ObjectData::serialize(VariableSerializer* serializer) const {
   if (UNLIKELY(serializer->incNestedLevel((void*)this, true))) {
@@ -704,8 +706,11 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
           String propName = name;
           Slot propInd = m_cls->getDeclPropIndex(m_cls, name.get(), accessible);
           if (accessible && propInd != kInvalidSlot) {
-            if (m_cls->declProperties()[propInd].m_attrs & AttrPrivate) {
+            auto attrs = m_cls->declProperties()[propInd].m_attrs;
+            if (attrs & AttrPrivate) {
               propName = concat4(s_zero, o_getClassName(), s_zero, name);
+            } else if (attrs & AttrProtected) {
+              propName = concat4(s_zero, s_star, s_zero, name);
             }
           }
           wanted.set(propName, const_cast<ObjectData*>(this)->

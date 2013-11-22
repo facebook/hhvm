@@ -2220,23 +2220,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Statement::KindOfReturnStatement: {
         ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(node));
 
-        // if returning from (outer) async function,
-        // wrap the result into StaticResultWaitHandle
-        if (m_curFunc->isAsync() && !m_curFunc->isGenerator()) {
-          if (visit(r->getRetExp())) {
-            emitConvertToCell(e);
-          } else {
-            e.Null();
-          }
-          Id tempLocal = emitSetUnnamedL(e);
-          Offset start = m_ue.bcPos();
-          emitFreePendingIters(e);
-          emitCreateStaticWaitHandle(e, "StaticResultWaitHandle",
-            [&]() { emitPushAndFreeUnnamedL(e, tempLocal, start); });
-          e.RetC();
-          return false;
-        }
-
         bool retV = false;
         if (visit(r->getRetExp())) {
           if (r->getRetExp()->getContext() & Expression::RefValue) {
@@ -2252,10 +2235,20 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.Null();
         }
 
+        assert(m_evalStack.size() == 1);
+
+        // continuations and resumed async functions
         if (m_curFunc->isGenerator()) {
           assert(!retV);
-          assert(m_evalStack.size() == 1);
           e.ContRetC();
+          return false;
+        }
+
+        // eagerly executed async functions
+        if (m_curFunc->isAsync()) {
+          assert(!retV);
+          e.AsyncWrapResult();
+          e.RetC();
           return false;
         }
 
@@ -5960,8 +5953,8 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
 
   // if the current position is reachable, emit code to return null
   if (currentPositionIsReachable()) {
-    emitCreateStaticWaitHandle(e, "StaticResultWaitHandle",
-                               [&](){ e.Null(); });
+    e.Null();
+    e.AsyncWrapResult();
     e.RetC();
   }
 

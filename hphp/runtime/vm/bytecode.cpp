@@ -63,6 +63,7 @@
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/static_result_wait_handle.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/runtime/base/stats.h"
@@ -7110,6 +7111,14 @@ OPTBLD_INLINE void VMExecutionContext::iopAsyncESuspend(PC& pc) {
   TypedValue* ret = m_stack.allocTV();
   ret->m_type = KindOfObject;
   ret->m_data.pobj = waitHandle;
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopAsyncWrapResult(PC& pc) {
+  NEXT();
+
+  auto const top = m_stack.topC();
+  top->m_data.pobj = c_StaticResultWaitHandle::CreateFromVM(*top);
+  top->m_type = KindOfObject;
 }
 
 template<class Op>

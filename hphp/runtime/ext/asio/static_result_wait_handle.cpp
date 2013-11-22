@@ -32,13 +32,16 @@ void c_StaticResultWaitHandle::t___construct() {
   throw e;
 }
 
-Object c_StaticResultWaitHandle::ti_create(CVarRef result) {
-  return Create(*result.asCell());
+c_StaticResultWaitHandle* c_StaticResultWaitHandle::Create(const Cell& result) {
+  c_StaticResultWaitHandle* wh = NEWOBJ(c_StaticResultWaitHandle)();
+  cellDup(result, wh->m_resultOrException);
+  return wh;
 }
 
-p_StaticResultWaitHandle c_StaticResultWaitHandle::Create(const Cell& result) {
-  p_StaticResultWaitHandle wh = NEWOBJ(c_StaticResultWaitHandle)();
-  cellDup(result, wh->m_resultOrException);
+ObjectData* c_StaticResultWaitHandle::CreateFromVM(const Cell result) {
+  c_StaticResultWaitHandle* wh = NEWOBJ(c_StaticResultWaitHandle)();
+  cellCopy(result, wh->m_resultOrException);
+  wh->incRefCount();
   return wh;
 }
 

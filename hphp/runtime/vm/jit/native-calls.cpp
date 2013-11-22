@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/static_result_wait_handle.h"
 
 namespace HPHP {  namespace JIT { namespace NativeCalls {
 
@@ -250,6 +251,8 @@ static CallMap s_callMap {
     {CreateAFWHMeth,     &c_AsyncFunctionWaitHandle::CreateMeth, DSSA, SSync,
                           { extra(&CreateContData::genFunc),
                             {SSA, 0}, {SSA, 1}, {SSA, 2} }},
+    {CreateSRWH,         &c_StaticResultWaitHandle::CreateFromVM, DSSA, SNone,
+                          { {TV, 0} }},
 
     /* MInstrTranslator helpers */
     {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}, {SSA, 2}}},

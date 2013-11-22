@@ -44,10 +44,10 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
   }
 
   void t___construct();
-  static Object ti_create(CVarRef result);
 
  public:
-  static p_StaticResultWaitHandle Create(const Cell& result);
+  static c_StaticResultWaitHandle* Create(const Cell& result);
+  static ObjectData* CreateFromVM(const Cell result);
   String getName();
 };
 

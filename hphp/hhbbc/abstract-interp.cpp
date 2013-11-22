@@ -1486,6 +1486,7 @@ struct InterpStepper : boost::static_visitor<void> {
     popC();
     push(TObj);
   }
+  void operator()(const bc::AsyncWrapResult&) { popC(); push(TObj); }
 
   void operator()(const bc::Strlen&) {
     auto const t1 = popC();

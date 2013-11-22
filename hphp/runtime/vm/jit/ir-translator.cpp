@@ -688,6 +688,10 @@ void IRTranslator::translateAsyncESuspend(const NormalizedInstruction& i) {
   HHIR_EMIT(AsyncESuspend, i.imm[0].u_IVA, i.imm[1].u_IVA);
 }
 
+void IRTranslator::translateAsyncWrapResult(const NormalizedInstruction& i) {
+  HHIR_EMIT(AsyncWrapResult);
+}
+
 void IRTranslator::translateStrlen(const NormalizedInstruction& i) {
   HHIR_EMIT(Strlen);
 }

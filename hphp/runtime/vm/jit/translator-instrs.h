@@ -163,6 +163,7 @@
   CASE(ContStopped) \
   CASE(AsyncAwait) \
   CASE(AsyncESuspend) \
+  CASE(AsyncWrapResult) \
   CASE(Strlen) \
   CASE(IncStat) \
   CASE(ArrayIdx) \

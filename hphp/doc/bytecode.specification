@@ -3932,6 +3932,10 @@ AsyncESuspend <label id> <number of iterators>   [C:Obj]  ->  [C:Obj]
   finished.  If the $1 is not a WaitHandle, or is a WaitHandle that is already
   finished, the behavior is undefined.
 
+AsyncWrapResult   [C]  ->  [C:Obj]
+
+  Wraps $1 into a StaticResultWaitHandle object.
+
 Basic statement transformations
 -------------------------------
 

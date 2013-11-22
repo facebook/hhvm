@@ -1675,6 +1675,10 @@ void HhbcTranslator::emitAsyncESuspend(int64_t label, int numIters) {
   push(waitHandle);
 }
 
+void HhbcTranslator::emitAsyncWrapResult() {
+  push(gen(CreateSRWH, popC()));
+}
+
 void HhbcTranslator::emitStrlen() {
   Type inType = topC()->type();
 

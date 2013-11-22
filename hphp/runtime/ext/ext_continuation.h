@@ -32,7 +32,7 @@ FORWARD_DECLARE_CLASS(Continuation);
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation
 
-struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
+struct c_Continuation : ExtObjectDataFlags<ObjectData::HasCppClone> {
   DECLARE_CLASS_NO_ALLOCATION(Continuation)
 
   static constexpr uint startedOffset() {

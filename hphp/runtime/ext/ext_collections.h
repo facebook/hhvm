@@ -265,7 +265,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection|
                                         ObjectData::UseIsset|
                                         ObjectData::UseUnset|
                                         ObjectData::CallToImpl|
-                                        ObjectData::HasClone> {
+                                        ObjectData::HasCppClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(Map)
 
@@ -595,7 +595,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::IsCollection|
                                               ObjectData::UseIsset|
                                               ObjectData::UseUnset|
                                               ObjectData::CallToImpl|
-                                              ObjectData::HasClone> {
+                                              ObjectData::HasCppClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(StableMap)
 
@@ -1453,7 +1453,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
                                          ObjectData::UseSet|
                                          ObjectData::UseIsset|
                                          ObjectData::UseUnset|
-                                         ObjectData::HasClone> {
+                                         ObjectData::HasCppClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(Pair)
 

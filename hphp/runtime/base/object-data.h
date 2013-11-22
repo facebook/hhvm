@@ -54,7 +54,7 @@ class ObjectData {
     HasCall       = 0x0080, // defines __call
     HasCallStatic = 0x0100, // defines __callStatic
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
-    HasClone      = 0x0400, // has custom clone logic
+    HasCppClone   = 0x0400, // has custom clone logic as a C++ builtin
     HasDynPropArr = 0x0800, // has a dynamic properties array
     IsCppBuiltin  = 0x1000, // has custom C++ subclass
     IsCollection  = 0x2000, // it's a collection (and the specific type is

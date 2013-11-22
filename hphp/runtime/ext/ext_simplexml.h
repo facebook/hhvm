@@ -46,7 +46,7 @@ class c_SimpleXMLElement :
                                 ObjectData::UseIsset|
                                 ObjectData::UseUnset|
                                 ObjectData::CallToImpl|
-                                ObjectData::HasClone>,
+                                ObjectData::HasCppClone>,
       public Sweepable {
  public:
   DECLARE_CLASS(SimpleXMLElement)

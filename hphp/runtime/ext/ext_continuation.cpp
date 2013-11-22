@@ -46,11 +46,12 @@ void delete_Continuation(ObjectData* od, const Class*) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Continuation::c_Continuation(Class* cb)
-    : ExtObjectDataFlags<ObjectData::HasClone>(cb)
-    , m_label(0)
-    , m_index(-1LL)
-    , m_key(-1LL)
-    , m_value(Variant::NullInit()) {
+  : ExtObjectDataFlags(cb)
+  , m_label(0)
+  , m_index(-1LL)
+  , m_key(-1LL)
+  , m_value(Variant::NullInit())
+{
   o_subclassData.u16 = 0;
 }
 

@@ -150,7 +150,7 @@ c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
               ObjectData::UseIsset |
               ObjectData::UseUnset |
               ObjectData::CallToImpl |
-              ObjectData::HasClone;
+              ObjectData::HasCppClone;
 
   ObjectData::setAttributes(flags);
   o_subclassData.u16 = Collection::VectorType;
@@ -881,15 +881,13 @@ c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
 
 static const char emptyMapSlot[sizeof(c_Map::Bucket)] = { 0 };
 
-c_Map::c_Map(Class* cb) :
-    ExtObjectDataFlags<ObjectData::IsCollection|
-                       ObjectData::UseGet|
-                       ObjectData::UseSet|
-                       ObjectData::UseIsset|
-                       ObjectData::UseUnset|
-                       ObjectData::CallToImpl|
-                       ObjectData::HasClone>(cb),
-    m_size(0), m_load(0), m_nLastSlot(0), m_version(0) {
+c_Map::c_Map(Class* cb)
+  : ExtObjectDataFlags(cb)
+  , m_size(0)
+  , m_load(0)
+  , m_nLastSlot(0)
+  , m_version(0)
+{
   m_data = (Bucket*)emptyMapSlot;
   o_subclassData.u16 = Collection::MapType;
 }
@@ -2031,15 +2029,12 @@ do {                                                                    \
 
 static const char emptyStableMapSlot[sizeof(c_StableMap::Bucket*)] = { 0 };
 
-c_StableMap::c_StableMap(Class* cb) :
-    ExtObjectDataFlags<ObjectData::IsCollection|
-                       ObjectData::UseGet|
-                       ObjectData::UseSet|
-                       ObjectData::UseIsset|
-                       ObjectData::UseUnset|
-                       ObjectData::CallToImpl|
-                       ObjectData::HasClone>(cb),
-    m_version(0), m_pListHead(nullptr), m_pListTail(nullptr) {
+c_StableMap::c_StableMap(Class* cb)
+  : ExtObjectDataFlags(cb)
+  , m_version(0)
+  , m_pListHead(nullptr)
+  , m_pListTail(nullptr)
+{
   m_size = 0;
   m_nTableSize = 0;
   m_nTableMask = 0;
@@ -3776,7 +3771,7 @@ c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
                      ObjectData::UseIsset|
                      ObjectData::UseUnset|
                      ObjectData::CallToImpl|
-                     ObjectData::HasClone;
+                     ObjectData::HasCppClone;
 
   ObjectData::setAttributes(attrs);
   o_subclassData.u16 = Collection::SetType;
@@ -4016,15 +4011,10 @@ void c_SetIterator::t_rewind() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Pair::c_Pair(Class* cb) :
-    ExtObjectDataFlags<ObjectData::IsCollection|
-                       ObjectData::UseGet|
-                       ObjectData::UseSet|
-                       ObjectData::UseIsset|
-                       ObjectData::UseUnset|
-                       ObjectData::HasClone>(cb),
-    m_size(0) {
-
+c_Pair::c_Pair(Class* cb)
+  : ExtObjectDataFlags(cb)
+  , m_size(0)
+{
   o_subclassData.u16 = Collection::PairType;
 }
 

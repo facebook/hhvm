@@ -340,16 +340,18 @@ Variant f_simplexml_load_file(const String& filename,
 ///////////////////////////////////////////////////////////////////////////////
 // SimpleXMLElement
 
-c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
-    ExtObjectDataFlags<ObjectData::UseGet|
-                       ObjectData::UseSet|
-                       ObjectData::UseIsset|
-                       ObjectData::UseUnset|
-                       ObjectData::CallToImpl|
-                       ObjectData::HasClone>(cb),
-      m_root(nullptr), m_node(nullptr), m_is_text(false), m_free_text(false),
-      m_is_attribute(false), m_is_children(false), m_is_property(false),
-      m_is_array(false), m_xpath(nullptr) {
+c_SimpleXMLElement::c_SimpleXMLElement(Class* cb)
+  : ExtObjectDataFlags(cb)
+  , m_root(nullptr)
+  , m_node(nullptr)
+  , m_is_text(false)
+  , m_free_text(false)
+  , m_is_attribute(false)
+  , m_is_children(false)
+  , m_is_property(false)
+  , m_is_array(false)
+  , m_xpath(nullptr)
+{
   m_children = Array::Create();
 }
 

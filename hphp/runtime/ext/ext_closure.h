@@ -32,12 +32,12 @@ namespace HPHP {
 // class Closure
 
 FORWARD_DECLARE_CLASS(Closure);
-class c_Closure : public ExtObjectDataFlags<ObjectData::HasClone> {
+class c_Closure : public ExtObjectDataFlags<ObjectData::HasCppClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(Closure)
 
   c_Closure(Class* cls = c_Closure::classof())
-    : ExtObjectDataFlags<ObjectData::HasClone>(cls)
+    : ExtObjectDataFlags(cls)
   {
     if (debug) {
       // m_func and m_thisOrClass must be initialized by init(), or the TC.

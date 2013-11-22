@@ -786,7 +786,7 @@ void ObjectData::dump() const {
 }
 
 ObjectData* ObjectData::clone() {
-  if (getAttribute(HasClone)) {
+  if (getAttribute(HasCppClone)) {
     if (isCollection()) {
       if (m_cls == c_Vector::classof()) {
         return c_Vector::Clone(this);

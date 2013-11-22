@@ -41,7 +41,7 @@ extern const StaticString q_DateTime$$RSS;
 extern const StaticString q_DateTime$$W3C;
 
 FORWARD_DECLARE_CLASS(DateTime);
-class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
+class c_DateTime : public ExtObjectDataFlags<ObjectData::HasCppClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(DateTime)
 
@@ -115,7 +115,7 @@ extern const int64_t q_DateTimeZone$$ALL_WITH_BC;
 extern const int64_t q_DateTimeZone$$PER_COUNTRY;
 
 FORWARD_DECLARE_CLASS(DateTimeZone);
-class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
+class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasCppClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(DateTimeZone)
 
@@ -161,7 +161,7 @@ class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
 FORWARD_DECLARE_CLASS(DateInterval);
 class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|
                                                  ObjectData::UseSet|
-                                                 ObjectData::HasClone> {
+                                                 ObjectData::HasCppClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(DateInterval)
 

@@ -6,7 +6,6 @@ function main() {
   $now = new DateTime(null, $tz);
   $tests = array(
     new DateTime('-1day', $tz),
-    new DateTime('now', $tz),
     new DateTime('+1day', $tz),
   );
 

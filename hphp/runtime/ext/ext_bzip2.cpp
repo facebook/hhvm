@@ -21,6 +21,7 @@
 #include "folly/String.h"
 
 namespace HPHP {
+IMPLEMENT_DEFAULT_EXTENSION(bz2);
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_bzclose(CResRef bz) {

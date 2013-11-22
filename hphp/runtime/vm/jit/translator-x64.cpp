@@ -1167,12 +1167,7 @@ TranslatorX64::enterTC(TCA start, void* data) {
         [] (vixl::Simulator* s) {
           if (tl_regState == VMRegState::DIRTY) {
             // This is a pseudo-copy of the logic in sync_regstate.
-
-            ActRec fakeAr;
-            fakeAr.m_savedRbp = s->xreg(JIT::ARM::rVmFp.code());
-            fakeAr.m_savedRip = reinterpret_cast<uint64_t>(s->pc());
-
-            tx64->fixupMap().fixupWork(g_vmContext, &fakeAr);
+            tx64->fixupMap().fixupWorkSimulated(g_vmContext);
             tl_regState = VMRegState::CLEAN;
           }
         }

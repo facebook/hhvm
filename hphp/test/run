@@ -139,6 +139,7 @@ function get_options($argv) {
     'args:' => 'a:',
     'log' => 'l',
     'failure-file:' => '',
+    'arm' => '',
   );
   $options = array();
   $files = array();
@@ -305,6 +306,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
     mode_cmd($options),
     '-vEval.EnableArgsInBacktraces=true',
     read_file(find_test_ext($test, 'opts')),
+    isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
     extra_args($options),
     '-vResourceLimit.CoreFileSize=0',
     '--file',

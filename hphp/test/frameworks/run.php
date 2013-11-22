@@ -1463,7 +1463,7 @@ class Phpbb3 extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/phpbb3",
       "git_path" => "https://github.com/JoelMarcey/phpbb.git",
-      "git_commit" => "3735483d61f70d6452ccf350767dbaf8c43c8340",
+      "git_commit" => "e0c8a81603a6e132c714adbdcb0a8762d01cbdfe",
       "test_path" => __DIR__."/frameworks/phpbb3",
       // This may work if we increase the timeout. Blacklist for now
       "blacklist" => Set {
@@ -2281,11 +2281,17 @@ function get_unit_testing_infra_dependencies(): void {
   }
 
   // QUICK HACK to make sure we get the latest phpunit binary from composer
-  if (filesize(__DIR__."/composer.json") < 273) {
+
+  if (file_get_contents(__DIR__."/composer.json.md5") !==
+      md5(__DIR__."/composer.json")) {
     verbose("\nUpdated composer.json found. Updating phpunit binary.\n",
             !Options::$csv_only);
-    remove_dir_recursive(__DIR__."/vendor");
+    if (file_exists(__DIR__."/vendor")) {
+      remove_dir_recursive(__DIR__."/vendor");
+    }
     unlink(__DIR__."/composer.lock");
+    file_put_contents(__DIR__."/composer.json.md5",
+                      md5(__DIR__."/composer.json"));
   }
 
   // Install phpunit from composer.json located in __DIR__

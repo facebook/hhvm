@@ -1462,7 +1462,7 @@ class Phpbb3 extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/phpbb3",
       "git_path" => "https://github.com/JoelMarcey/phpbb.git",
-      "git_commit" => "4561970e2fae956845ac0b742edfc67532987c4b",
+      "git_commit" => "0cf64395e30934c35354fc6676a16dc9758bebfc",
       "test_path" => __DIR__."/frameworks/phpbb3",
       // This may work if we increase the timeout. Blacklist for now
       "blacklist" => Set {

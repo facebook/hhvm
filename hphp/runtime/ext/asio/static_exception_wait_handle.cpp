@@ -22,10 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-  StaticString s_staticException("<static-exception>");
-}
-
 void c_StaticExceptionWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use StaticExceptionWaitHandle::create() instead of constructor"));
@@ -60,10 +56,6 @@ c_StaticExceptionWaitHandle::CreateFromVM(ObjectData* exception) {
   wait_handle->m_resultOrException.m_data.pobj = exception;
   wait_handle->incRefCount();
   return wait_handle;
-}
-
-String c_StaticExceptionWaitHandle::getName() {
-  return s_staticException;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -91,7 +91,6 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
     assert(isFailed());
     return m_resultOrException.m_data.pobj;
   }
-  virtual String getName() = 0;
 
   uint8_t getState() { return o_subclassData.u8[0]; }
   void setState(uint8_t state) { o_subclassData.u8[0] = state; }

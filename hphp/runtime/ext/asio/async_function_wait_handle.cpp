@@ -26,14 +26,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-  // max depth of continuation
-  const uint16_t MAX_DEPTH = 512;
-
-  StaticString s_continuationResult("<continuation-result>");
-  StaticString s_continuationException("<continuation-exception>");
-  StaticString s_continuation("Continuation");
-}
+// max depth of continuation
+const uint16_t MAX_DEPTH = 512;
 
 c_AsyncFunctionWaitHandle::c_AsyncFunctionWaitHandle(Class* cb)
     : c_BlockableWaitHandle(cb), m_continuation(), m_child(), m_privData(),
@@ -194,7 +188,8 @@ void c_AsyncFunctionWaitHandle::run() {
   retry:
     // save child
     Cell* value = tvAssertCell(m_continuation->m_value.asTypedValue());
-    assert(dynamic_cast<c_WaitableWaitHandle*>(c_WaitHandle::fromCell(value)));
+    assert(value->m_type == KindOfObject);
+    assert(value->m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
 
     m_child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
     assert(!m_child->isFinished());
@@ -266,12 +261,6 @@ void c_AsyncFunctionWaitHandle::markAsFailed(CObjRef exception) {
 
 String c_AsyncFunctionWaitHandle::getName() {
   switch (getState()) {
-    case STATE_SUCCEEDED:
-      return s_continuationResult;
-
-    case STATE_FAILED:
-      return s_continuationException;
-
     case STATE_BLOCKED:
     case STATE_SCHEDULED:
     case STATE_RUNNING:

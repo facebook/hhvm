@@ -22,10 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-  StaticString s_staticResult("<static-result>");
-}
-
 void c_StaticResultWaitHandle::t___construct() {
   Object e(SystemLib::AllocInvalidOperationExceptionObject(
         "Use StaticResultWaitHandle::create() instead of constructor"));
@@ -43,10 +39,6 @@ ObjectData* c_StaticResultWaitHandle::CreateFromVM(const Cell result) {
   cellCopy(result, wh->m_resultOrException);
   wh->incRefCount();
   return wh;
-}
-
-String c_StaticResultWaitHandle::getName() {
-  return s_staticResult;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

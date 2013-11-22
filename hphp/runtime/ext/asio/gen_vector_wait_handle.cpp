@@ -87,7 +87,7 @@ Object c_GenVectorWaitHandle::ti_create(CVarRef dependencies) {
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
-      assert(dynamic_cast<c_WaitableWaitHandle*>(child));
+      assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       p_GenVectorWaitHandle my_wh = NEWOBJ(c_GenVectorWaitHandle)();
@@ -139,7 +139,7 @@ void c_GenVectorWaitHandle::onUnblocked() {
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {
-      assert(dynamic_cast<c_WaitableWaitHandle*>(child));
+      assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       try {

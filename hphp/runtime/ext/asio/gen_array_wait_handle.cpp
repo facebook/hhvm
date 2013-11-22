@@ -175,7 +175,7 @@ void c_GenArrayWaitHandle::onUnblocked() {
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {
-      assert(dynamic_cast<c_WaitableWaitHandle*>(child));
+      assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       try {

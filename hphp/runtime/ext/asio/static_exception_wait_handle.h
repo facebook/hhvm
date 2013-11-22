@@ -49,7 +49,6 @@ class c_StaticExceptionWaitHandle : public c_StaticWaitHandle {
  public:
   static c_StaticExceptionWaitHandle* Create(ObjectData* exception);
   static ObjectData* CreateFromVM(ObjectData* exception);
-  String getName();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

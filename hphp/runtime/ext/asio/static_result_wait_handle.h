@@ -48,7 +48,6 @@ class c_StaticResultWaitHandle : public c_StaticWaitHandle {
  public:
   static c_StaticResultWaitHandle* Create(const Cell& result);
   static ObjectData* CreateFromVM(const Cell result);
-  String getName();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

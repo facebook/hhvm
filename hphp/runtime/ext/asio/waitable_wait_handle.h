@@ -58,6 +58,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
 
   void enterContext(context_idx_t ctx_idx);
   void join();
+  virtual String getName() = 0;
 
  protected:
   void setResult(const Cell& result);

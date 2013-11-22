@@ -108,9 +108,10 @@ protected:
   typedef uint8_t Version;
 
   enum Phase {
-    AT_RECORD_BEGIN = 0,
-    INSIDE_RECORD_BODY = 1,
-    AT_RECORD_BODY_END = 2
+    INVALID = 0,
+    AT_RECORD_BEGIN = 1,
+    INSIDE_RECORD_BODY = 2,
+    AT_RECORD_BODY_END = 3
   };
 
   enum RecordType : uint8_t {

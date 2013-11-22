@@ -140,9 +140,7 @@ void FastCGIConnection::onSessionEgress(std::unique_ptr<IOBuf> chain) {
 }
 
 void FastCGIConnection::onSessionError() {
-  CHECK(false); // This will print a nice stack-trace.
-                // FastCGI specification allows us to exit with a
-                // non-zero status in case o protocol-level errors.
+  onSessionClose();
 }
 
 void FastCGIConnection::onSessionClose() {

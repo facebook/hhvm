@@ -247,11 +247,16 @@ const FastCGISession::Version FastCGISession::k_version = 1;
 const size_t FastCGISession::k_writeGrowth = 256;
 
 size_t FastCGISession::onIngress(const IOBuf* chain) {
+  if (m_phase == Phase::INVALID) {
+    return 0;
+  }
+  DCHECK(m_keepConn);
+
   size_t available = chain ? chain->computeChainDataLength() : 0;
   size_t avail = available;
 
   Cursor cursor(chain);
-  while (true) {
+  while (m_phase != Phase::INVALID) {
     if (m_phase == Phase::AT_RECORD_BEGIN) {
       if (parseRecordBegin(cursor, avail)) {
         m_phase = Phase::INSIDE_RECORD_BODY;
@@ -300,7 +305,7 @@ bool FastCGISession::parseRecordBegin(Cursor& cursor, size_t& available) {
   Version version = cursor.readBE<Version>();
   if (version != k_version) {
     handleInvalidRecord();
-    return true;
+    return false;
   }
   m_recordType = static_cast<RecordType>(cursor.readBE<uint8_t>());
   m_requestId = cursor.readBE<typeof(m_requestId)>();
@@ -558,6 +563,7 @@ void FastCGISession::handleGetValueResult(const std::string& key) {
 
 void FastCGISession::handleInvalidRecord() {
   LOG(ERROR) << "FastCGI protocol: received an invalid record";
+  m_phase = Phase::INVALID;
   if (m_callback) {
     m_callback->onSessionError();
   }

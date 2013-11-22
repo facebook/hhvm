@@ -129,7 +129,7 @@ public:
     }
   }
   String(const String& str) : StringBase(str.m_px) { }
-  String(char) = delete;  // prevent unintentional promotion to int
+  /* implicit */ String(char) = delete; // prevent unintentional promotion
 
   // Move ctor
   /* implicit */ String(String&& str) : StringBase(std::move(str)) {}
@@ -301,9 +301,7 @@ public:
   String &operator &= (const String& v) = delete;
   String &operator ^= (const String& v) = delete;
   String  operator ~  () const = delete;
-  explicit operator std::string () const {
-    return std::string(c_str(), size());
-  }
+  explicit operator std::string () const { return toCppString(); }
   explicit operator bool() const {
     return m_px != nullptr;
   }
@@ -342,6 +340,7 @@ public:
   int64_t  toInt64  () const { return m_px ? m_px->toInt64  () : 0;}
   double toDouble () const { return m_px ? m_px->toDouble () : 0;}
   VarNR  toKey   () const;
+  std::string toCppString() const { return std::string(c_str(), size()); }
 
   /**
    * Comparisons

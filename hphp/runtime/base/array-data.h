@@ -504,8 +504,8 @@ public:
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad);
 
-  static ArrayData *GetScalarArray(ArrayData *arr,
-                                   const StringData *key = nullptr);
+  static ArrayData* GetScalarArray(ArrayData *arr);
+  static ArrayData* GetScalarArray(ArrayData *arr, const std::string& key);
 
   static constexpr size_t offsetofKind() {
     return offsetof(ArrayData, m_kind);

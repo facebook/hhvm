@@ -39,18 +39,16 @@ static_assert(
   "Performance is sensitive to sizeof(ArrayData)."
   " Make sure you changed it with good reason and then update this assert.");
 
-typedef tbb::concurrent_hash_map<const StringData *, ArrayData *,
-                                 StringDataHashCompare> ArrayDataMap;
+typedef tbb::concurrent_hash_map<std::string, ArrayData*> ArrayDataMap;
 static ArrayDataMap s_arrayDataMap;
 
-ArrayData *ArrayData::GetScalarArray(ArrayData *arr,
-                                     const StringData *key /* = nullptr */) {
-  if (!key) {
-    key = makeStaticString(f_serialize(arr).get());
-  } else {
-    assert(key->isStatic());
-    assert(key->same(f_serialize(arr).get()));
-  }
+ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
+  auto key = f_serialize(arr).toCppString();
+  return GetScalarArray(arr, key);
+}
+
+ArrayData *ArrayData::GetScalarArray(ArrayData *arr, const std::string& key) {
+  assert(key == f_serialize(arr).toCppString());
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
     ArrayData *ad = arr->nonSmartCopy();

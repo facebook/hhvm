@@ -1973,7 +1973,7 @@ void UnitRepoProxy::GetUnitLitstrsStmt
 
 void UnitRepoProxy::InsertUnitArrayStmt
                   ::insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
-                           const StringData* array) {
+                           const std::string& array) {
   if (!prepared()) {
     std::stringstream ssInsert;
     ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "UnitArray")
@@ -1983,7 +1983,7 @@ void UnitRepoProxy::InsertUnitArrayStmt
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
   query.bindId("@arrayId", arrayId);
-  query.bindStaticString("@array", array);
+  query.bindStdString("@array", array);
   query.exec();
 }
 
@@ -2003,10 +2003,9 @@ void UnitRepoProxy::GetUnitArraysStmt
     query.step();
     if (query.row()) {
       Id arrayId;        /**/ query.getId(0, arrayId);
-      StringData* array; /**/ query.getStaticString(1, array);
-      String s(array);
-      Variant v = unserialize_from_string(s);
-      Id id UNUSED = ue.mergeArray(v.asArrRef().get(), array);
+      std::string key;   /**/ query.getStdString(1, key);
+      Variant v = unserialize_from_buffer(key.data(), key.size());
+      Id id UNUSED = ue.mergeArray(v.asArrRef().get(), key);
       assert(id == arrayId);
     }
   } while (!query.done());
@@ -2239,25 +2238,23 @@ Id UnitEmitter::mergeLitstr(const StringData* litstr) {
   return mergeUnitLitstr(litstr);
 }
 
-Id UnitEmitter::mergeArray(const ArrayData* a,
-                           const StringData* key /* = NULL */) {
-  if (key == nullptr) {
-    String s = f_serialize(Variant(const_cast<ArrayData*>(a)));
-    key = makeStaticString(s.get());
-  }
+Id UnitEmitter::mergeArray(const ArrayData* a) {
+  Variant v(const_cast<ArrayData*>(a));
+  auto key = f_serialize(v).toCppString();
+  return mergeArray(a, key);
+}
 
+Id UnitEmitter::mergeArray(const ArrayData* a, const std::string& key) {
   ArrayIdMap::const_iterator it = m_array2id.find(key);
-  if (it == m_array2id.end()) {
-    a = ArrayData::GetScalarArray(const_cast<ArrayData*>(a), key);
-
-    Id id = m_arrays.size();
-    ArrayVecElm ave = {key, a};
-    m_arrays.push_back(ave);
-    m_array2id[key] = id;
-    return id;
-  } else {
+  if (it != m_array2id.end()) {
     return it->second;
   }
+  a = ArrayData::GetScalarArray(const_cast<ArrayData*>(a), key);
+  Id id = m_arrays.size();
+  ArrayVecElm ave = {key, a};
+  m_arrays.push_back(ave);
+  m_array2id[key] = id;
+  return id;
 }
 
 const StringData* UnitEmitter::lookupLitstr(Id id) const {

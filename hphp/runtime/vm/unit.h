@@ -802,7 +802,8 @@ class UnitEmitter {
   Id addTypeAlias(const TypeAlias& td);
   Id mergeLitstr(const StringData* litstr);
   Id mergeUnitLitstr(const StringData* litstr);
-  Id mergeArray(const ArrayData* a, const StringData* key=nullptr);
+  Id mergeArray(const ArrayData* a);
+  Id mergeArray(const ArrayData* a, const std::string& key);
   const StringData* lookupLitstr(Id id) const;
   const ArrayData* lookupArray(Id id) const;
   FuncEmitter* getMain();
@@ -912,13 +913,12 @@ class UnitEmitter {
                         string_data_hash, string_data_same> LitstrMap;
   LitstrMap m_litstr2id;
   std::vector<const StringData*> m_litstrs;
-  typedef hphp_hash_map<const StringData*, Id,
-                        string_data_hash, string_data_same> ArrayIdMap;
+  typedef hphp_hash_map<std::string, Id, string_hash> ArrayIdMap;
   ArrayIdMap m_array2id;
-  typedef struct {
-    const StringData* serialized;
+  struct ArrayVecElm {
+    std::string serialized;
     const ArrayData* array;
-  } ArrayVecElm;
+  };
   typedef std::vector<ArrayVecElm> ArrayVec;
   ArrayVec m_arrays;
   int m_nextFuncSn;
@@ -1048,7 +1048,7 @@ class UnitRepoProxy : public RepoProxy {
    public:
     InsertUnitArrayStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
-                const StringData* array);
+                const std::string& array);
   };
   class GetUnitArraysStmt : public RepoProxy::Stmt {
    public:

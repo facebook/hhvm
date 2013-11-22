@@ -66,6 +66,7 @@ const StaticString
   s_params("params"),
   s_final("final"),
   s_abstract("abstract"),
+  s_instantiable("instantiable"),
   s_internal("internal"),
   s_is_closure("is_closure"),
   s_is_generator("is_generator"),
@@ -860,6 +861,10 @@ Array f_hphp_get_class_info(CVarRef name) {
       ret.set(s_trait,     true_varNR);
     }
     ret.set(s_modifiers, VarNR(get_modifiers(cls->attrs(), true)));
+
+    if (cls->getCtor()->attrs() & AttrPublic) {
+      ret.set(s_instantiable, true_varNR);
+    }
   }
 
   // methods

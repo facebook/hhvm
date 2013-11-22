@@ -103,6 +103,10 @@ ObjectData* SystemLib::AllocDOMExceptionObject(CVarRef message, CVarRef code) {
   CREATE_AND_CONSTRUCT(DOMException, make_packed_array(message, code));
 }
 
+ObjectData* SystemLib::AllocReflectionExceptionObject(CVarRef message) {
+  CREATE_AND_CONSTRUCT(ReflectionException, make_packed_array(message));
+}
+
 ObjectData*
 SystemLib::AllocSoapFaultObject(CVarRef code,
                                 CVarRef message,

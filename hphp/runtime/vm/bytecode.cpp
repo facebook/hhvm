@@ -1149,9 +1149,15 @@ ObjectData* VMExecutionContext::createObject(StringData* clsName,
   Object o;
   o = newInstance(class_);
   if (init) {
+    auto ctor = class_->getCtor();
+    if (!(ctor->attrs() & AttrPublic)) {
+      std::string msg = "Access to non-public constructor of class ";
+      msg += class_->name()->data();
+      throw Object(SystemLib::AllocReflectionExceptionObject(msg));
+    }
     // call constructor
     TypedValue ret;
-    invokeFunc(&ret, class_->getCtor(), params, o.get());
+    invokeFunc(&ret, ctor, params, o.get());
     tvRefcountedDecRef(&ret);
   }
 

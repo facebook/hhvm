@@ -352,8 +352,10 @@ public:
 
   // Returns a string with cache usage information
   std::string getUsage();
-  size_t getCodeSize();
-  size_t getStubSize();
+  size_t getHotCodeSize() const;
+  size_t getCodeSize() const;
+  size_t getProfCodeSize() const;
+  size_t getStubSize() const;
 
   // true iff calling thread is sole writer.
   static bool canWrite() {

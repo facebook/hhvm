@@ -2374,11 +2374,19 @@ void TranslatorX64::recordGdbStub(const CodeBlock& cb,
   }
 }
 
-size_t TranslatorX64::getCodeSize() {
+size_t TranslatorX64::getHotCodeSize() const {
+  return hotCode.used();
+}
+
+size_t TranslatorX64::getCodeSize() const {
   return mainCode.used();
 }
 
-size_t TranslatorX64::getStubSize() {
+size_t TranslatorX64::getProfCodeSize() const {
+  return profCode.used();
+}
+
+size_t TranslatorX64::getStubSize() const {
   return stubsCode.used();
 }
 

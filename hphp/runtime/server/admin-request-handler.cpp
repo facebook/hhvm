@@ -608,12 +608,14 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("queued", server->getQueuedJobs());
     auto* tx = Transl::tx64;
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
+    appendStat("tc-hotsize", tx->getHotCodeSize());
     appendStat("tc-size", tx->getCodeSize());
+    appendStat("tc-profsize", tx->getProfCodeSize());
     appendStat("tc-stubsize", tx->getStubSize());
     appendStat("targetcache", RDS::usedBytes());
     appendStat("rds", RDS::usedBytes()); // TODO(#2966387): temp double logging
     appendStat("units", Eval::FileRepository::getLoadedFiles());
-    appendStat("Funcs", Func::nextFuncId());
+    appendStat("funcs", Func::nextFuncId());
     out << "}" << endl;
     transport->sendString(out.str());
     return true;

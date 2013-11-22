@@ -533,11 +533,12 @@ abstract class Framework {
     return $this->test_name_pattern;
   }
 
-  protected function setTestFilePattern(?string $test_file_pattern = null):
-                                        void {
+  protected function setTestFilePattern(
+    ?string $test_file_pattern = null
+  ): void {
     $this->test_file_pattern = $test_file_pattern === null
-                             ? PHPUnitPatterns::$test_file_pattern
-                             : $test_file_pattern;
+      ? PHPUnitPatterns::$test_file_pattern
+      : $test_file_pattern;
   }
 
   protected function getTestFilePattern(): string {
@@ -1511,20 +1512,15 @@ class Slim extends Framework {
   public function __construct(string $name) { parent::__construct($name); }
   protected function getInfo(): Map {
     return Map {
-      "install_root" => __DIR__."/frameworks/Slim",
+      'install_root' => __DIR__.'/frameworks/Slim',
       // Using a branch from https://github.com/codeguy/Slim to access an
       // upstream hash_hmac fix
-      "git_path" => "https://github.com/elgenie/Slim.git",
-      "git_commit" => "1beca31c1f0b0a7bb7747d9367fb07c07e190a8d",
-      "test_path" => __DIR__."/frameworks/Slim",
-      "pull_requests" => Vector {
-        Map {
-          'pull_dir' => __DIR__."/frameworks/Slim",
-          'pull_repository' => "https://github.com/ptarjan/Slim",
-          'git_commit' => "e0fb710f06030d39fd15127e2bc380300ab0e2c2",
-          'type' => 'pull',
-        },
-      },
+      'git_path' => 'https://github.com/elgenie/Slim.git',
+      'git_commit' => '1beca31c1f0b0a7bb7747d9367fb07c07e190a8d',
+      'test_path' => __DIR__.'/frameworks/Slim',
+      'test_command' => get_runtime_build()
+        .' -vServer.IniFile='.__DIR__.'/php_notice.ini'
+        .' '.__DIR__.'/vendor/bin/phpunit',
     };
   }
 }

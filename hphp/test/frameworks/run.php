@@ -2280,18 +2280,20 @@ function get_unit_testing_infra_dependencies(): void {
     }
   }
 
-  // QUICK HACK to make sure we get the latest phpunit binary from composer
-
-  if (file_get_contents(__DIR__."/composer.json.md5") !==
-      md5(__DIR__."/composer.json")) {
+  // Quick hack to make sure we get the latest phpunit binary from composer
+  $md5_file = __DIR__."/composer.json.md5";
+  $json_file = __DIR__."/composer.json";
+  $vendor_dir = __DIR__."/vendor";
+  $lock_file = __DIR__."/composer.lock";
+  if (!file_exists($md5_file) ||
+      file_get_contents($md5_file) !== md5($json_file)) {
     verbose("\nUpdated composer.json found. Updating phpunit binary.\n",
             !Options::$csv_only);
-    if (file_exists(__DIR__."/vendor")) {
-      remove_dir_recursive(__DIR__."/vendor");
+    if (file_exists($vendor_dir)) {
+      remove_dir_recursive($vendor_dir);
     }
-    unlink(__DIR__."/composer.lock");
-    file_put_contents(__DIR__."/composer.json.md5",
-                      md5(__DIR__."/composer.json"));
+    unlink($lock_file);
+    file_put_contents($md5_file, md5($json_file));
   }
 
   // Install phpunit from composer.json located in __DIR__

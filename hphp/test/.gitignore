@@ -4,6 +4,7 @@
 *.errors
 *.fatals
 *.stats
+/frameworks/composer.json.md5
 /frameworks/composer.phar
 /frameworks/composer.lock
 /frameworks/vendor

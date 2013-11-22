@@ -141,6 +141,12 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case CheckNullptr:
       return srcNo == 0;
 
+    case CreateAFWHFunc:
+      return srcNo == 1;
+
+    case CreateAFWHMeth:
+      return srcNo == 2;
+
     default:
       return true;
   }

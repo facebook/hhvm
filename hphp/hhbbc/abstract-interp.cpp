@@ -1459,7 +1459,6 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::CreateCont&)  { killLocals(); push(TObj); }
-  void operator()(const bc::CreateAsync&) { killLocals(); popC(); push(TObj); }
   void operator()(const bc::ContEnter&)   { popC(); }
   void operator()(const bc::UnpackCont&)  { readUnknownLocals();
                                             push(TInitCell); push(TInt); }
@@ -1481,6 +1480,11 @@ struct InterpStepper : boost::static_visitor<void> {
     popC();
     push(TCell);
     push(TBool);
+  }
+  void operator()(const bc::AsyncESuspend&) {
+    killLocals();
+    popC();
+    push(TObj);
   }
 
   void operator()(const bc::Strlen&) {

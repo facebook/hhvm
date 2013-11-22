@@ -575,7 +575,7 @@ struct InterpOneData : IRExtraData {
 
 /*
  * Information for creating continuation objects.
- * CreateCont{Func,Meth}.
+ * Create{Cont,AFWH}{Func,Meth}.
  */
 struct CreateContData : IRExtraData {
   explicit CreateContData(const Func* genFunc) : genFunc(genFunc) {}
@@ -800,6 +800,8 @@ X(TypeProfileFunc,              TypeProfileData);
 X(InterpOneCF,                  InterpOneData);
 X(CreateContFunc,               CreateContData);
 X(CreateContMeth,               CreateContData);
+X(CreateAFWHFunc,               CreateContData);
+X(CreateAFWHMeth,               CreateContData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);

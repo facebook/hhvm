@@ -580,8 +580,6 @@ O(ContSetRunning,                   ND, S(Obj) C(Bool),                E|Mem) \
 O(ContValid,                   D(Bool), S(Obj),                            E) \
 O(ContArIncKey,                     ND, S(FramePtr),                   E|Mem) \
 O(ContArUpdateIdx,                  ND, S(FramePtr) S(Int),            E|Mem) \
-O(LdWHState,                    D(Int), S(Obj),                           NF) \
-O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
 O(LdContActRec,                 DParam, S(Obj),                            C) \
 O(LdContArRaw,                  DParam, S(FramePtr) C(Int),               NF) \
 O(StContArRaw,                      ND, S(FramePtr) C(Int) S(Gen),     E|Mem) \
@@ -589,6 +587,11 @@ O(LdContArValue,                DParam, S(FramePtr),                     PRc) \
 O(StContArValue,                    ND, S(FramePtr) S(Cell),  E|Mem|CRc|Refs) \
 O(LdContArKey,                  DParam, S(FramePtr),                     PRc) \
 O(StContArKey,                      ND, S(FramePtr) S(Gen),   E|Mem|CRc|Refs) \
+O(LdWHState,                    D(Int), S(Obj),                           NF) \
+O(LdWHResult,                  D(Cell), S(Obj),                           NF) \
+O(LdAFWHActRec,                 DParam, S(Obj),                            C) \
+O(CreateAFWHFunc,               D(Obj), C(Int) S(Obj),        E|Er|N|CRc|PRc) \
+O(CreateAFWHMeth,               D(Obj), S(Ctx) C(Int) S(Obj), E|Er|N|CRc|PRc) \
 O(IterInit,                    D(Bool), S(Arr,Obj)                            \
                                           S(FramePtr)                         \
                                           C(Int)                              \

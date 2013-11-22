@@ -28,7 +28,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 FORWARD_DECLARE_CLASS(Continuation);
-FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Continuation
@@ -202,8 +201,6 @@ public:
 
   /* TCA for function entry */
   TCA m_entry;
-
-  p_AsyncFunctionWaitHandle m_waitHandle;
 
   /* temporary storage used to save the SP when inlining into a continuation */
   void* m_stashedSP;

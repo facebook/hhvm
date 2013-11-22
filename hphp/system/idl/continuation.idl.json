@@ -13,8 +13,7 @@
                 "CppCustomDelete"
             ],
             "ifaces": [
-                "HH\\Iterator",
-                "Awaitable"
+                "HH\\Iterator"
             ],
             "footer": "",
             "funcs": [
@@ -44,17 +43,6 @@
                         }
                     ],
                     "flags": [
-                    ]
-                },
-                {
-                    "name": "getWaitHandle",
-                    "desc": "Start asynchronous execution of this Continuation and return the wait handle",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
                     ]
                 },
                 {

@@ -1420,107 +1420,6 @@ void HhbcTranslator::emitCreateCont() {
   push(cont);
 }
 
-void HhbcTranslator::emitCreateAsync(int64_t label, int numIters) {
-  // For now, this code is just copied from emitCreateCont, only the label
-  // and value of the created continuation is updated accordingly and
-  // first numIters iterators are copied into the continuation frame.
-  // It will change soon with the introduction of AsyncFunctionWaitHandle
-  gen(ExitOnVarEnv, makeExitSlow(), m_tb->fp());
-
-  auto const origFunc = curFunc();
-  auto const genFunc = origFunc->getGeneratorBody();
-
-  auto const cont = origFunc->isMethod()
-    ? gen(
-        CreateContMeth,
-        CreateContData { genFunc },
-        gen(LdCtx, FuncData(curFunc()), m_tb->fp())
-      )
-    : gen(
-        CreateContFunc,
-        CreateContData { genFunc }
-      );
-
-  // update label and value
-  // TODO: we should check that the value on top of the stack is indeed
-  // a WaitHandle and fatal if not. Also, if it is a wait handle, assert
-  // that it is not finished.
-  gen(StRaw, cont, cns(RawMemSlot::ContLabel), cns(label));
-  gen(StProp, cont, cns(CONTOFF(m_value)), popC());
-
-  static auto const thisStr = makeStaticString("this");
-  Id thisId = kInvalidId;
-  const bool fillThis = origFunc->isMethod() &&
-    !origFunc->isStatic() &&
-    ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
-    (origFunc->lookupVarId(thisStr) == kInvalidId);
-
-  SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
-  for (int i = 0; i < origFunc->numNamedLocals(); ++i) {
-    assert(i == genFunc->lookupVarId(origFunc->localVarName(i)));
-    // We must generate an AssertLoc because we don't have tracelet
-    // guards on the object type in these outer generator functions.
-    gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
-    // Copy the value of the local to the cont object and set the
-    // local to uninit so that we don't need to change refcounts.
-    gen(StMem, contAR, cns(-cellsToBytes(i + 1)),
-        ldLoc(i, DataTypeGeneric));
-    gen(StLoc, LocalId(i), m_tb->fp(), m_tb->genDefUninit());
-  }
-
-  for (int i = 0; i < numIters; ++i) {
-    gen(IterCopy,
-        m_tb->fp(),
-        cns(origFunc->numLocals() * sizeof(TypedValue) + (i+1) * sizeof(Iter)),
-        contAR,
-        cns(genFunc->numLocals() * sizeof(TypedValue) + (i+1) * sizeof(Iter)));
-  }
-
-  if (fillThis) {
-    assert(thisId != kInvalidId);
-    auto const thisObj = gen(LdThis, m_tb->fp());
-    gen(IncRef, thisObj);
-    gen(StMem, contAR, cns(-cellsToBytes(thisId + 1)), thisObj);
-  }
-
-  push(cont);
-}
-
-void HhbcTranslator::emitAsyncAwait() {
-  auto const exitSlow   = makeExitSlow();
-  if (!topC()->isA(Type::Obj)) PUNT(AsyncAwait-NonObject);
-
-  auto const obj = popC();
-  auto const isWH = gen(IsWaitHandle, obj);
-  gen(JmpZero, exitSlow, isWH);
-
-  // cns() would ODR-use these
-  auto const kFailed    = c_WaitHandle::STATE_FAILED;
-  auto const kSucceeded = c_WaitHandle::STATE_SUCCEEDED;
-
-  auto const state = gen(LdWHState, obj);
-  gen(JmpEq, exitSlow, state, cns(kFailed));
-
-  auto const toPush = m_tb->cond(
-    [&] (Block* taken) {
-      gen(JmpEq, taken, state, cns(kSucceeded));
-    },
-    [&] { // Next: the wait handle isn't done.  We'll push false and
-          // the same WaitHandle object.
-      return obj;
-    },
-    [&] { // Taken: retrieve the result from the wait handle
-      auto const res = gen(LdWHResult, obj);
-      gen(IncRef, res);
-      gen(DecRef, obj);
-      return res;
-    }
-  );
-
-  push(toPush);
-  push(gen(Not, gen(ConvIntToBool, state)));
-}
-
 void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
   // make sure the value to be sent is on the actual stack
   spillStack();
@@ -1672,6 +1571,108 @@ void HhbcTranslator::emitContStopped() {
   SSATmp* cont = gen(LdThis, m_tb->fp());
 
   gen(ContSetRunning, cont, cns(false));
+}
+
+void HhbcTranslator::emitAsyncAwait() {
+  auto const exitSlow   = makeExitSlow();
+  if (!topC()->isA(Type::Obj)) PUNT(AsyncAwait-NonObject);
+
+  auto const obj = popC();
+  auto const isWH = gen(IsWaitHandle, obj);
+  gen(JmpZero, exitSlow, isWH);
+
+  // cns() would ODR-use these
+  auto const kFailed    = c_WaitHandle::STATE_FAILED;
+  auto const kSucceeded = c_WaitHandle::STATE_SUCCEEDED;
+
+  auto const state = gen(LdWHState, obj);
+  gen(JmpEq, exitSlow, state, cns(kFailed));
+
+  auto const toPush = m_tb->cond(
+    [&] (Block* taken) {
+      gen(JmpEq, taken, state, cns(kSucceeded));
+    },
+    [&] { // Next: the wait handle isn't done.  We'll push false and
+          // the same WaitHandle object.
+      return obj;
+    },
+    [&] { // Taken: retrieve the result from the wait handle
+      auto const res = gen(LdWHResult, obj);
+      gen(IncRef, res);
+      gen(DecRef, obj);
+      return res;
+    }
+  );
+
+  push(toPush);
+  push(gen(Not, gen(ConvIntToBool, state)));
+}
+
+void HhbcTranslator::emitAsyncESuspend(int64_t label, int numIters) {
+  auto const exitSlow = makeExitSlow();
+  auto const catchBlock = makeCatch();
+  auto const child = popC();
+  assert(child->isA(Type::Obj));
+
+  gen(ExitOnVarEnv, exitSlow, m_tb->fp());
+
+  auto const origFunc = curFunc();
+  auto const genFunc = origFunc->getGeneratorBody();
+
+  auto const waitHandle = origFunc->isMethod()
+    ? gen(
+        CreateAFWHMeth,
+        catchBlock,
+        CreateContData { genFunc },
+        gen(LdCtx, FuncData(curFunc()), m_tb->fp()),
+        cns(label),
+        child
+      )
+    : gen(
+        CreateAFWHFunc,
+        catchBlock,
+        CreateContData { genFunc },
+        cns(label),
+        child
+      );
+
+  static auto const thisStr = makeStaticString("this");
+  Id thisId = kInvalidId;
+  const bool fillThis = origFunc->isMethod() &&
+    !origFunc->isStatic() &&
+    ((thisId = genFunc->lookupVarId(thisStr)) != kInvalidId) &&
+    (origFunc->lookupVarId(thisStr) == kInvalidId);
+
+  SSATmp* asyncAR = gen(LdAFWHActRec, Type::PtrToGen, waitHandle);
+  for (int i = 0; i < origFunc->numNamedLocals(); ++i) {
+    assert(i == genFunc->lookupVarId(origFunc->localVarName(i)));
+    // We must generate an AssertLoc because we don't have tracelet
+    // guards on the object type in these outer generator functions.
+    gen(AssertLoc, Type::Gen, LocalId(i), m_tb->fp());
+    // Copy the value of the local to the async function wait handle
+    // object and set the local to uninit so that we don't need to
+    // change refcounts.
+    gen(StMem, asyncAR, cns(-cellsToBytes(i + 1)),
+        ldLoc(i, DataTypeGeneric));
+    gen(StLoc, LocalId(i), m_tb->fp(), m_tb->genDefUninit());
+  }
+
+  for (int i = 0; i < numIters; ++i) {
+    gen(IterCopy,
+        m_tb->fp(),
+        cns(origFunc->numLocals() * sizeof(TypedValue) + (i+1) * sizeof(Iter)),
+        asyncAR,
+        cns(genFunc->numLocals() * sizeof(TypedValue) + (i+1) * sizeof(Iter)));
+  }
+
+  if (fillThis) {
+    assert(thisId != kInvalidId);
+    auto const thisObj = gen(LdThis, m_tb->fp());
+    gen(IncRef, thisObj);
+    gen(StMem, asyncAR, cns(-cellsToBytes(thisId + 1)), thisObj);
+  }
+
+  push(waitHandle);
 }
 
 void HhbcTranslator::emitStrlen() {
@@ -4515,7 +4516,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
   };
 
   switch (inst.op()) {
-    case OpCreateCont: case OpCreateAsync: {
+    case OpCreateCont: case OpAsyncESuspend: {
       auto numLocals = curFunc()->numLocals();
       for (unsigned i = 0; i < numLocals; ++i) {
         setLocType(i, Type::Uninit);

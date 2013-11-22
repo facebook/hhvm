@@ -405,9 +405,9 @@ PhysReg forceAlloc(SSATmp& dst) {
     return rVmSp;
   }
 
-  // LdContActRec, loading a generator's AR, is the only time we have a
-  // pointer to an AR that is not in rVmFp.
-  bool abnormalFramePtr = opc == LdContActRec;
+  // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
+  // we have a pointer to an AR that is not in rVmFp.
+  bool abnormalFramePtr = opc == LdContActRec || opc == LdAFWHActRec;
 
   if (!abnormalFramePtr && dst.isA(Type::FramePtr)) {
     return rVmFp;

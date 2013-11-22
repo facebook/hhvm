@@ -442,8 +442,6 @@ struct HhbcTranslator {
 
   // continuations
   void emitCreateCont();
-  void emitCreateAsync(int64_t labelId, int iters);
-  void emitAsyncAwait();
   void emitContEnter(int32_t returnBcOffset);
   void emitUnpackCont();
   void emitContReturnControl();
@@ -457,6 +455,10 @@ struct HhbcTranslator {
   void emitContKey();
   void emitContCurrent();
   void emitContStopped();
+
+  // async functions
+  void emitAsyncAwait();
+  void emitAsyncESuspend(int64_t labelId, int iters);
 
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force = false);

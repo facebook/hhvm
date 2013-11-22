@@ -62,7 +62,9 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -6906,54 +6908,6 @@ OPTBLD_INLINE void VMExecutionContext::iopCreateCont(PC& pc) {
   ret->m_data.pobj = cont;
 }
 
-OPTBLD_INLINE void VMExecutionContext::iopCreateAsync(PC& pc) {
-  NEXT();
-  DECODE_IVA(label);
-  DECODE_IVA(iters);
-
-  const Func* origFunc = m_fp->m_func;
-  const Func* genFunc = origFunc->getGeneratorBody();
-  assert(genFunc != nullptr);
-
-  c_Continuation* cont = static_cast<c_Continuation*>(origFunc->isMethod()
-    ? c_Continuation::CreateMeth(genFunc, m_fp->getThisOrClass())
-    : c_Continuation::CreateFunc(genFunc));
-
-  // TODO: we should check that the value on top of the stack is indeed
-  // a WaitHandle and fatal if not. Also, if it is a wait handle, assert
-  // that it is not finished.
-  cont->t_update(label, tvAsCVarRef(m_stack.topTV()));
-  m_stack.popTV();
-
-  fillContinuationVars(m_fp, origFunc, cont->actRec(), genFunc);
-
-  // copy the state of all the iterators at once
-  memcpy(frame_iter(cont->actRec(), iters-1),
-         frame_iter(m_fp, iters-1),
-         iters * sizeof(Iter));
-
-  TypedValue* ret = m_stack.allocTV();
-  ret->m_type = KindOfObject;
-  ret->m_data.pobj = cont;
-}
-
-OPTBLD_INLINE void VMExecutionContext::iopAsyncAwait(PC& pc) {
-  NEXT();
-  auto const& c1 = *m_stack.topC();
-  if (c1.m_type != KindOfObject ||
-      !c1.m_data.pobj->getAttribute(ObjectData::IsWaitHandle)) {
-    raise_error("AsyncAwait on a non-WaitHandle");
-  }
-  auto const wh = static_cast<c_WaitHandle*>(c1.m_data.pobj);
-  if (wh->isSucceeded()) {
-    cellSet(wh->getResult(), *m_stack.topC());
-    m_stack.pushTrue();
-    return;
-  }
-  if (wh->isFailed()) throw Object(wh->getException());
-  m_stack.pushFalse();
-}
-
 static inline c_Continuation* this_continuation(const ActRec* fp) {
   ObjectData* obj = fp->getThis();
   assert(obj->instanceof(c_Continuation::classof()));
@@ -7104,6 +7058,58 @@ OPTBLD_INLINE void VMExecutionContext::iopContHandle(PC& pc) {
   m_stack.popC();
   assert(exn.asObjRef().instanceof(SystemLib::s_ExceptionClass));
   throw exn.asObjRef();
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopAsyncAwait(PC& pc) {
+  NEXT();
+  auto const& c1 = *m_stack.topC();
+  if (c1.m_type != KindOfObject ||
+      !c1.m_data.pobj->getAttribute(ObjectData::IsWaitHandle)) {
+    raise_error("AsyncAwait on a non-WaitHandle");
+  }
+  auto const wh = static_cast<c_WaitHandle*>(c1.m_data.pobj);
+  if (wh->isSucceeded()) {
+    cellSet(wh->getResult(), *m_stack.topC());
+    m_stack.pushTrue();
+    return;
+  }
+  if (wh->isFailed()) throw Object(wh->getException());
+  m_stack.pushFalse();
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopAsyncESuspend(PC& pc) {
+  NEXT();
+  DECODE_IVA(label);
+  DECODE_IVA(iters);
+
+  const Func* origFunc = m_fp->m_func;
+  const Func* genFunc = origFunc->getGeneratorBody();
+  assert(genFunc != nullptr);
+
+  Cell* value = m_stack.topC();
+  assert(value->m_type == KindOfObject);
+  assert(value->m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
+
+  auto child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
+  assert(!child->isFinished());
+
+  auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(origFunc->isMethod()
+    ? c_AsyncFunctionWaitHandle::CreateMeth(genFunc, m_fp->getThisOrClass(),
+                                            label, child)
+    : c_AsyncFunctionWaitHandle::CreateFunc(genFunc, label, child));
+
+  m_stack.discard();
+
+  fillContinuationVars(m_fp, origFunc, waitHandle->getActRec(), genFunc);
+
+  // copy the state of all the iterators at once
+  memcpy(frame_iter(waitHandle->getActRec(), iters-1),
+         frame_iter(m_fp, iters-1),
+         iters * sizeof(Iter));
+
+  TypedValue* ret = m_stack.allocTV();
+  ret->m_type = KindOfObject;
+  ret->m_data.pobj = waitHandle;
 }
 
 template<class Op>

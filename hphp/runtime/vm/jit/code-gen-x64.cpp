@@ -35,6 +35,7 @@
 #include "hphp/runtime/ext/ext_continuation.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
+#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/stats.h"
@@ -289,6 +290,8 @@ CALL_OPCODE(ConcatIntStr);
 CALL_OPCODE(TypeProfileFunc)
 CALL_OPCODE(CreateContFunc)
 CALL_OPCODE(CreateContMeth)
+CALL_OPCODE(CreateAFWHFunc)
+CALL_OPCODE(CreateAFWHMeth)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewPackedArray)
 CALL_OPCODE(NewCol)
@@ -5824,34 +5827,6 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   emitServiceReq(m_mainCode, REQ_RESUME);
 }
 
-void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
-  auto const robj = curOpd(inst->src(0)).reg();
-  auto const rdst = curOpd(inst->dst()).reg();
-  auto& a = m_as;
-  if (rdst == InvalidReg) return;
-
-  static_assert(
-    ObjectData::IsWaitHandle < 0xff,
-    "we use byte instructions for IsWaitHandle"
-  );
-  a.   testb   (ObjectData::IsWaitHandle, robj[ObjectData::attributeOff()]);
-  a.   setnz   (rbyte(rdst));
-}
-
-void CodeGenerator::cgLdWHState(IRInstruction* inst) {
-  auto const robj = curOpd(inst->src(0)).reg();
-  auto const rdst = curOpd(inst->dst()).reg();
-  auto& a = m_as;
-
-  if (rdst == InvalidReg) return;
-  a.    loadzbl (robj[ObjectData::whStateOffset()], r32(rdst));
-}
-
-void CodeGenerator::cgLdWHResult(IRInstruction* inst) {
-  auto const robj = curOpd(inst->src(0)).reg();
-  cgLoad(inst->dst(), robj[c_WaitHandle::resultOffset()]);
-}
-
 void CodeGenerator::cgContEnter(IRInstruction* inst) {
   auto contAR = inst->src(0);
   auto addr = inst->src(1);
@@ -6028,6 +6003,45 @@ void CodeGenerator::cgStContArKey(IRInstruction* inst) {
   const int64_t keyOff = CONTOFF(m_key);
   int64_t off = keyOff - c_Continuation::getArOffset();
   cgStore(contArReg[off], value, true);
+}
+
+void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
+  auto const robj = curOpd(inst->src(0)).reg();
+  auto const rdst = curOpd(inst->dst()).reg();
+  auto& a = m_as;
+  if (rdst == InvalidReg) return;
+
+  static_assert(
+    ObjectData::IsWaitHandle < 0xff,
+    "we use byte instructions for IsWaitHandle"
+  );
+  a.   testb   (ObjectData::IsWaitHandle, robj[ObjectData::attributeOff()]);
+  a.   setnz   (rbyte(rdst));
+}
+
+void CodeGenerator::cgLdWHState(IRInstruction* inst) {
+  auto const robj = curOpd(inst->src(0)).reg();
+  auto const rdst = curOpd(inst->dst()).reg();
+  auto& a = m_as;
+
+  if (rdst == InvalidReg) return;
+  a.    loadzbl (robj[ObjectData::whStateOffset()], r32(rdst));
+}
+
+void CodeGenerator::cgLdWHResult(IRInstruction* inst) {
+  auto const robj = curOpd(inst->src(0)).reg();
+  cgLoad(inst->dst(), robj[c_WaitHandle::resultOffset()]);
+}
+
+void CodeGenerator::cgLdAFWHActRec(IRInstruction* inst) {
+  auto const dest = curOpd(inst->dst()).reg();
+  auto const base = curOpd(inst->src(0)).reg();
+  auto asyncContOffset = c_AsyncFunctionWaitHandle::getContOffset();
+  auto contArOffset = c_Continuation::getArOffset();
+
+  if (dest == InvalidReg) return;
+  m_as.loadq (base[asyncContOffset], dest);
+  m_as.lea   (dest[contArOffset], dest);
 }
 
 void CodeGenerator::cgIterInit(IRInstruction* inst) {

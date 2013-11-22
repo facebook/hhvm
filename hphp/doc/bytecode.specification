@@ -3835,16 +3835,6 @@ CreateCont    []  ->  [C]
   Continuation will store a reference to the generator body function
   associated with the current function.
 
-CreateAsync <label id> <number of iterators>   [C]  ->  [C]
-
-  Analogy of CreateCont for async functions.  Creates a Continuation
-  object, updates its label with <label id> immediate and stores a
-  value from the stack to its m_value field.  Like CreateCont, it
-  captures defined local variables in the current function, and marks
-  them uninitialized on the current frame.  Unlike CreateCont, it also
-  copies the first <number of iterators> iterators into the
-  continuation frame.
-
 ContEnter [C]  ->  []
 
   This instruction may only appear in non-static methods of the Continuation
@@ -3920,6 +3910,9 @@ ContHandle    [C]  ->  []
   object. Marks the continuation as no longer running and finished and rethrows
   the exception on the top of the stack.
 
+15. Async functions
+-------------------
+
 AsyncAwait   [C]  ->  [C C:Bool]
 
   Perform an await operation on a wait handle.  If $1 is not a subclass of
@@ -3927,6 +3920,17 @@ AsyncAwait   [C]  ->  [C C:Bool]
   pushes $1, and pushes False.  Otherwise, if $1 succeeded, this instruction
   pushes the result value from the WaitHandle, and then pushes true.  If $1
   failed, this instruction throws the exception from the WaitHandle.
+
+AsyncESuspend <label id> <number of iterators>   [C:Obj]  ->  [C:Obj]
+
+  Suspends an eagerly executed async function into an AsyncFunctionWaitHandle
+  object.  The AsyncFunctionWaitHandle object will capture all defined local
+  variables and the first %2 iterators in the current eagerly executed async
+  function, and mark them uninitialized on the current frame.  The object will
+  store a reference to the associated resumable async function and a label %1
+  to be used to resume the execution once the WaitHandle object given by $1 is
+  finished.  If the $1 is not a WaitHandle, or is a WaitHandle that is already
+  finished, the behavior is undefined.
 
 Basic statement transformations
 -------------------------------

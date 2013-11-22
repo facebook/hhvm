@@ -89,14 +89,6 @@ void c_Continuation::t_update_key(int64_t label, CVarRef key, CVarRef value) {
   }
 }
 
-Object c_Continuation::t_getwaithandle() {
-  if (m_waitHandle.isNull()) {
-    c_AsyncFunctionWaitHandle::Create(this);
-    assert(!m_waitHandle.isNull());
-  }
-  return m_waitHandle;
-}
-
 int64_t c_Continuation::t_getlabel() {
   return m_label;
 }

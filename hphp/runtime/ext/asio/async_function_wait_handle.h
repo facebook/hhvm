@@ -49,15 +49,28 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   void t_setprivdata(CObjRef data);
 
  public:
-  static void Create(c_Continuation* continuation);
+  static ptrdiff_t getContOffset() {
+    // offset of m_continuation from the beginning of ObjectData
+    auto const objOffset = reinterpret_cast<uintptr_t>(static_cast<ObjectData*>(
+          reinterpret_cast<c_AsyncFunctionWaitHandle*>(0x100))) - 0x100;
+    return offsetof(c_AsyncFunctionWaitHandle, m_continuation) - objOffset;
+  }
+  static ObjectData* CreateFunc(const Func* genFunc,
+                                int32_t label,
+                                ObjectData* child);
+  static ObjectData* CreateMeth(const Func* genFunc,
+                                void* objOrCls,
+                                int32_t label,
+                                ObjectData* child);
   void run();
   uint16_t getDepth() { return m_depth; }
   String getName();
   void exitContext(context_idx_t ctx_idx);
   bool isRunning() { return getState() == STATE_RUNNING; }
   String getFileName();
+  Offset getNextExecutionOffset();
   int getLineNumber();
-  const ActRec* getActRec();
+  ActRec* getActRec();
 
  protected:
   void onUnblocked();
@@ -65,8 +78,8 @@ class c_AsyncFunctionWaitHandle : public c_BlockableWaitHandle {
   void enterContextImpl(context_idx_t ctx_idx);
 
  private:
-  void initialize(c_Continuation* continuation, c_WaitableWaitHandle* child,
-                  uint16_t depth);
+  void initialize(c_Continuation* continuation, int32_t label,
+                  c_WaitableWaitHandle* child);
   void markAsSucceeded(const Cell& result);
   void markAsFailed(CObjRef exception);
 

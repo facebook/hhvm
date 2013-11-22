@@ -633,8 +633,6 @@ enum SetOpOp {
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCl,        TWO(IVA,SA),      CVMANY,          ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    NF) \
-  O(CreateAsync,     TWO(IVA,IVA),     ONE(CV),         ONE(CV),    NF) \
-  O(AsyncAwait,      NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(ContEnter,       NA,               ONE(CV),         NOV,        CF) \
   O(UnpackCont,      NA,               NOV,             TWO(CV,CV), NF) \
   O(ContSuspend,     ONE(IVA),         ONE(CV),         NOV,        CF_TF) \
@@ -647,6 +645,8 @@ enum SetOpOp {
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
   O(ContStopped,     NA,               NOV,             NOV,        NF) \
   O(ContHandle,      NA,               ONE(CV),         NOV,        CF_TF) \
+  O(AsyncAwait,      NA,               ONE(CV),         TWO(CV,CV), NF) \
+  O(AsyncESuspend,   TWO(IVA,IVA),     ONE(CV),         ONE(CV),    NF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Abs,             NA,               ONE(CV),         ONE(CV),    NF) \

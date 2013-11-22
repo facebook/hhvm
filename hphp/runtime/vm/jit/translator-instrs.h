@@ -150,8 +150,6 @@
   CASE(Dup) \
   CASE(CreateCl) \
   CASE(CreateCont) \
-  CASE(CreateAsync) \
-  CASE(AsyncAwait) \
   CASE(ContEnter) \
   CASE(UnpackCont) \
   CASE(ContSuspend) \
@@ -163,6 +161,8 @@
   CASE(ContKey) \
   CASE(ContCurrent) \
   CASE(ContStopped) \
+  CASE(AsyncAwait) \
+  CASE(AsyncESuspend) \
   CASE(Strlen) \
   CASE(IncStat) \
   CASE(ArrayIdx) \

@@ -82,38 +82,6 @@ void c_AsyncFunctionWaitHandle::ti_setonfailcallback(CVarRef callback) {
   AsioSession::Get()->setOnAsyncFunctionFailCallback(callback.getObjectDataOrNull());
 }
 
-void c_AsyncFunctionWaitHandle::Create(c_Continuation* continuation) {
-  assert(continuation);
-  assert(continuation->m_label > 0);
-  assert(continuation->m_waitHandle.isNull());
-
-  AsioSession* session = AsioSession::Get();
-  uint16_t depth = session->getCurrentWaitHandleDepth();
-  if (UNLIKELY(depth >= MAX_DEPTH)) {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-        "Asio stack overflow"));
-    throw e;
-  }
-
-  Cell* value = tvAssertCell(continuation->m_value.asTypedValue());
-  assert(dynamic_cast<c_WaitableWaitHandle*>(c_WaitHandle::fromCell(value)));
-  auto child = static_cast<c_WaitableWaitHandle*>(value->m_data.pobj);
-  assert(!child->isFinished());
-
-  // import child into the current context, detect cross-context cycles
-  if (session->isInContext()) {
-    child->enterContext(session->getCurrentContextIdx());
-  }
-
-  continuation->m_waitHandle = NEWOBJ(c_AsyncFunctionWaitHandle)();
-  continuation->m_waitHandle->initialize(continuation, child, depth + 1);
-
-  // needs to be called after continuation->m_waitHandle is set
-  if (UNLIKELY(session->hasOnAsyncFunctionCreateCallback())) {
-    session->onAsyncFunctionCreate(continuation->m_waitHandle.get());
-  }
-}
-
 Object c_AsyncFunctionWaitHandle::t_getprivdata() {
   return m_privData;
 }
@@ -122,16 +90,78 @@ void c_AsyncFunctionWaitHandle::t_setprivdata(CObjRef data) {
   m_privData = data;
 }
 
+namespace {
+
+void checkCreateErrors(c_WaitableWaitHandle* child) {
+  AsioSession* session = AsioSession::Get();
+  if (UNLIKELY(session->getCurrentWaitHandleDepth() >= MAX_DEPTH)) {
+    Object e(SystemLib::AllocInvalidOperationExceptionObject(
+          "Asio stack overflow"));
+    throw e;
+  }
+
+  if (session->isInContext()) {
+    child->enterContext(session->getCurrentContextIdx());
+  }
+}
+
+}
+
+ObjectData*
+c_AsyncFunctionWaitHandle::CreateFunc(const Func* genFunc,
+                                      int32_t label,
+                                      ObjectData* child) {
+  assert(child->instanceof(c_WaitableWaitHandle::classof()));
+  auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
+  assert(!child_wh->isFinished());
+
+  checkCreateErrors(child_wh);
+
+  auto cont = c_Continuation::CreateFunc(genFunc);
+  auto wait_handle = NEWOBJ(c_AsyncFunctionWaitHandle)();
+  wait_handle->incRefCount();
+  wait_handle->initialize(static_cast<c_Continuation*>(cont), label, child_wh);
+  return wait_handle;
+}
+
+ObjectData*
+c_AsyncFunctionWaitHandle::CreateMeth(const Func* genFunc,
+                                      void* objOrCls,
+                                      int32_t label,
+                                      ObjectData* child) {
+  assert(child->instanceof(c_WaitableWaitHandle::classof()));
+  auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
+  assert(!child_wh->isFinished());
+
+  checkCreateErrors(child_wh);
+
+  auto cont = c_Continuation::CreateMeth(genFunc, objOrCls);
+  auto wait_handle = NEWOBJ(c_AsyncFunctionWaitHandle)();
+  wait_handle->incRefCount();
+  wait_handle->initialize(static_cast<c_Continuation*>(cont), label, child_wh);
+  return wait_handle;
+}
+
 void c_AsyncFunctionWaitHandle::initialize(c_Continuation* continuation,
-                                           c_WaitableWaitHandle* child,
-                                           uint16_t depth) {
+                                           int32_t label,
+                                           c_WaitableWaitHandle* child) {
+  auto session = AsioSession::Get();
+
+  continuation->m_label = label;
   continuation->start();
 
   m_continuation = continuation;
   m_child = child;
   m_privData = nullptr;
-  m_depth = depth;
+  m_depth = session->getCurrentWaitHandleDepth() + 1;
   blockOn(m_child.get());
+  decRefObj(continuation);
+  decRefObj(child);
+
+  // needs to be called with non-zero refcnt
+  if (UNLIKELY(session->hasOnAsyncFunctionCreateCallback())) {
+    session->onAsyncFunctionCreate(this);
+  }
 }
 
 void c_AsyncFunctionWaitHandle::run() {
@@ -347,6 +377,12 @@ String c_AsyncFunctionWaitHandle::getFileName() {
   return file;
 }
 
+// Get the next execution offset
+Offset c_AsyncFunctionWaitHandle::getNextExecutionOffset() {
+  if (m_continuation.isNull()) return InvalidAbsoluteOffset;
+  return m_continuation->getNextExecutionOffset();
+}
+
 // Get the line number on which execution will proceed when execution resumes.
 int c_AsyncFunctionWaitHandle::getLineNumber() {
   if (m_continuation.isNull()) return -1;
@@ -354,7 +390,7 @@ int c_AsyncFunctionWaitHandle::getLineNumber() {
   return unit->getLineNumber(m_continuation->getNextExecutionOffset());
 }
 
-const ActRec* c_AsyncFunctionWaitHandle::getActRec() {
+ActRec* c_AsyncFunctionWaitHandle::getActRec() {
   return m_continuation->actRec();
 }
 

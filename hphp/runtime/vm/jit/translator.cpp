@@ -1248,8 +1248,6 @@ static const struct {
   /*** 14. Continuation instructions ***/
 
   { OpCreateCont,  {None,             Stack1|Local, OutObject,         1 }},
-  { OpCreateAsync, {Stack1,           Stack1|Local, OutObject,         0 }},
-  { OpAsyncAwait,  {Stack1,           StackTop2,    OutAsyncAwait,     1 }},
   { OpContEnter,   {Stack1,           None,         OutNone,          -1 }},
   { OpUnpackCont,  {None,             StackTop2,    OutInt64,          2 }},
   { OpContSuspend, {Stack1,           None,         OutNone,          -1 }},
@@ -1262,6 +1260,12 @@ static const struct {
   { OpContCurrent, {None,             Stack1,       OutUnknown,        1 }},
   { OpContStopped, {None,             None,         OutNone,           0 }},
   { OpContHandle,  {Stack1,           None,         OutNone,          -1 }},
+
+  /*** 15. Async functions instructions ***/
+
+  { OpAsyncAwait,  {Stack1,           StackTop2,    OutAsyncAwait,     1 }},
+  { OpAsyncESuspend,
+                   {Stack1,           Stack1|Local, OutObject,         0 }},
 };
 
 static hphp_hash_map<Op, InstrInfo> instrInfo;
@@ -2218,7 +2222,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
           varEnvTaint = true;
           continue;
         }
-        if (op == OpCreateCont || op == OpCreateAsync) {
+        if (op == OpCreateCont || op == OpAsyncESuspend) {
           // CreateCont stores Uninit to all locals but NormalizedInstruction
           // doesn't have enough output fields, so we special case it in
           // analyze().
@@ -3551,7 +3555,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
         tas.recordWrite(o);
       }
     }
-    if (ni->op() == OpCreateCont || ni->op() == OpCreateAsync) {
+    if (ni->op() == OpCreateCont || ni->op() == OpAsyncESuspend) {
       // CreateCont stores Uninit to all locals but NormalizedInstruction
       // doesn't have enough output fields, so we special case it here.
       auto const numLocals = ni->func()->numLocals();

@@ -4078,8 +4078,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           e.Throw();
         } else {
           // Create new continuation and return its wait handle.
-          e.CreateAsync(normalLabel, m_pendingIters.size());
-          emitConstMethodCallNoParams(e, "getWaitHandle");
+          e.AsyncESuspend(normalLabel, m_pendingIters.size());
           e.RetC();
         }
 

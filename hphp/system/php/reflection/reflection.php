@@ -1539,6 +1539,13 @@ class ReflectionClass implements Reflector {
    */
   public function newInstance() {
     $args = func_get_args();
+    if ($args && null === $this->getConstructor()) {
+      // consistent with reference, but perhaps not particularly useful
+      throw new ReflectionException(
+        'Class '.$this->name.' lacks a constructor, so you cannot pass'
+        .' any constructor arguments'
+      );
+    }
     return hphp_create_object($this->name, $args);
   }
 
@@ -1556,6 +1563,13 @@ class ReflectionClass implements Reflector {
    * @return     mixed   Returns a new instance of the class.
    */
   public function newInstanceArgs($args) {
+    if ($args && null === $this->getConstructor()) {
+      // consistent with reference, but perhaps not particularly useful
+      throw new ReflectionException(
+        'Class '.$this->name.' lacks a constructor, so you cannot pass'
+        .' any constructor arguments'
+      );
+    }
     return hphp_create_object($this->name, array_values($args));
   }
 

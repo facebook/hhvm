@@ -1,0 +1,38 @@
+<?php
+
+class D {
+  // default constructor
+}
+
+class P {
+  public function __construct() {
+    echo __METHOD__, ' ', get_class($this), "\n";
+  }
+}
+class C extends P {
+  // inherited constructor
+}
+
+function reflect($class_name) {
+  $c = new $class_name('a', 1, 2);
+
+  $rc = new ReflectionClass($class_name);
+
+  try {
+    $c2 = $rc->newInstance('a', 1, 2);
+  } catch (Exception $e) {
+    echo get_class($e), ': ', $e->getMessage(), "\n";
+  }
+  try {
+    $c2 = $rc->newInstanceArgs(array('a', 1, 2));
+  } catch (Exception $e) {
+    echo get_class($e), ': ', $e->getMessage(), "\n";
+  }
+}
+
+function main() {
+  reflect('D');
+  reflect('C');
+  reflect('P');
+}
+main();

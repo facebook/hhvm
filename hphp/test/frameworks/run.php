@@ -827,7 +827,7 @@ abstract class Framework {
       verbose("Pulling code from ".$rep. " and branch/commit ".$gc."\n",
               Options::$verbose);
       if ($type === "pull") {
-        $git_command = "git pull --no-edit ".$rep." ".$gc;
+        $git_command = "git pull --no-rebase --no-edit ".$rep." ".$gc;
       } else if ($type === "submodulemove") {
         $git_command = "git submodule add -b ".$gc." ".$rep;
         $move_from_dir = $pr["move_from_dir"];
@@ -1116,8 +1116,8 @@ class Doctrine2 extends Framework {
           'pull_repository' => "https://github.com/javer/dbal",
           'git_commit' => "hhvm-pdo-implement-interfaces",
           'type' => 'pull',
-        }
-      }
+        },
+      },
     };
   }
 }
@@ -2330,6 +2330,7 @@ function run_install(string $proc, string $path, ?Map $env): ?int
         $start_time = microtime(true);
       }
     }
+    verbose(stream_get_contents($pipes[2]), Options::$verbose);
     fclose($pipes[1]);
     $ret = proc_close($process);
     verbose("Returned status $ret\n", Options::$verbose);

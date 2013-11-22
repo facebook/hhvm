@@ -1242,7 +1242,7 @@ class Mediawiki extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/mediawiki-core",
       "git_path" => "https://github.com/ptarjan/mediawiki-core.git",
-      "git_commit" => "f20aae93e54705b2d1724afc75f0dc097cdda6fc",
+      "git_commit" => "2a280fcfccfd48fe5bf9479ca02d986367fa33e9",
       "test_path" => __DIR__."/frameworks/mediawiki-core/tests/phpunit",
       "test_file_pattern" => PHPUnitPatterns::$mediawiki_test_file_pattern,
       "test_file_search_roots" => Set {

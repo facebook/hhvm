@@ -5643,7 +5643,7 @@ void EmitterVisitor::emitPostponedMeths() {
           folly::format("86static_{}", sv.name->data()).str());
         fe->pce()->addProperty(str, AttrPrivate, nullptr, nullptr,
                                &uninit, KindOfInvalid);
-        if (m_curFunc != fe) {
+        if (m_curFunc != fe && !fe->isAsync()) {
           // In the case of a generator (these func emitters will be
           // different), we need to propagate the information about
           // static locals from the generator implementation function

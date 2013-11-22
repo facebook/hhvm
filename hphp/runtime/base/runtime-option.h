@@ -337,6 +337,7 @@ public:
   static bool EnableFinallyStatement;
   static bool EnableArgsInBacktraces;
   static bool EnableZendCompat;
+  static bool TimeoutsUseWallTime;
 
   static int GetScannerType();
 

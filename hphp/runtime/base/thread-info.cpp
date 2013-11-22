@@ -145,7 +145,10 @@ void RequestInjectionData::setTimeout(int seconds) {
     sev.sigev_notify = SIGEV_SIGNAL;
     sev.sigev_signo = SIGVTALRM;
     sev.sigev_value.sival_ptr = this;
-    if (timer_create(CLOCK_REALTIME, &sev, &m_timer_id)) {
+    auto const& clockType =
+      RuntimeOption::TimeoutsUseWallTime ? CLOCK_REALTIME :
+                                           CLOCK_THREAD_CPUTIME_ID;
+    if (timer_create(clockType, &sev, &m_timer_id)) {
       raise_error("Failed to set timeout: %s", folly::errnoStr(errno).c_str());
     }
     m_hasTimer = true;

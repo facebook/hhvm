@@ -343,6 +343,7 @@ int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableFinallyStatement = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendCompat = false;
+bool RuntimeOption::TimeoutsUseWallTime = true;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -1105,6 +1106,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     EnableAspTags = eval["EnableAspTags"].getBool();
     EnableXHP = eval["EnableXHP"].getBool(false);
     EnableZendCompat = eval["EnableZendCompat"].getBool(false);
+    TimeoutsUseWallTime = eval["TimeoutsUseWallTime"].getBool(true);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true

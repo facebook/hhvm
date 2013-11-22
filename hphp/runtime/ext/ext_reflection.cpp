@@ -862,7 +862,10 @@ Array f_hphp_get_class_info(CVarRef name) {
     }
     ret.set(s_modifiers, VarNR(get_modifiers(cls->attrs(), true)));
 
-    if (cls->getCtor()->attrs() & AttrPublic) {
+    if (cls->getCtor()->attrs() & AttrPublic &&
+        !(cls->attrs() & AttrAbstract) &&
+        !(cls->attrs() & AttrInterface) &&
+        !(cls->attrs() & AttrTrait)) {
       ret.set(s_instantiable, true_varNR);
     }
   }

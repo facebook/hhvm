@@ -203,7 +203,7 @@ class ZipArchive {
   <<__Native>>
   function getFromIndex(int $index,
                         int $length = 0,
-                        int $flags): mixed;
+                        int $flags = 0): mixed;
 
   /**
    * Returns the entry contents using its name
@@ -220,7 +220,7 @@ class ZipArchive {
   <<__Native>>
   function getFromName(string $name,
                        int $length = 0,
-                       int $flags): mixed;
+                       int $flags = 0): mixed;
 
   /**
    * Returns the name of an entry using its index

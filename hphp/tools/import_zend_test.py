@@ -831,6 +831,12 @@ def walk(filename, source_dir):
         test = test.replace('__tmp_oo_addfile.zip', '__tmp_oo_addfile3.zip')
     if '/ext/zip/tests/bug51353.php' in full_dest_filename:
         test = test.replace('100000', '1000')
+    if '/ext/zip/tests/bug8700.php' in full_dest_filename:
+        test = test.replace('content_from', 'contents_from')
+        test = test.replace(
+            'if ($contents_from_idx != $contents_from_name)',
+            'if ($contents_from_idx != "=)" || $contents_from_name != "=)")'
+            )
     if '/Zend/tests/bug36759.php' in full_dest_filename:
         pseudomain = '$y = new Bar();\n$x = new Foo($y);\n'
         test = test.replace(pseudomain,

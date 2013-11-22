@@ -1463,7 +1463,7 @@ class Phpbb3 extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/phpbb3",
       "git_path" => "https://github.com/JoelMarcey/phpbb.git",
-      "git_commit" => "0cf64395e30934c35354fc6676a16dc9758bebfc",
+      "git_commit" => "3735483d61f70d6452ccf350767dbaf8c43c8340",
       "test_path" => __DIR__."/frameworks/phpbb3",
       // This may work if we increase the timeout. Blacklist for now
       "blacklist" => Set {
@@ -1530,9 +1530,10 @@ class Symfony extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/symfony",
-      "git_path" => "https://github.com/symfony/symfony.git",
-      "git_commit" => "98c0d38a440e91adeb0ac12928174046596cd8e1",
+      "git_path" => "https://github.com/JoelMarcey/symfony.git",
+      "git_commit" => "4016b4ed7f732211f6093d59913ff84e3cb1d729",
       "test_path" => __DIR__."/frameworks/symfony",
+      "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
       "blacklist" => Set {
         __DIR__."/frameworks/symfony/src/Symfony/Component/Console".
         "/Tests/Helper/DialogHelperTest.php",
@@ -1565,8 +1566,9 @@ class Yii extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/yii",
       "git_path" => "https://github.com/yiisoft/yii.git",
-      "git_commit" => "ba84eed1f53ff0369cba49796b1c79aa4b8c6285",
+      "git_commit" => "3deee8ee7d67122c21b5938109b37ba570caa761",
       "test_path" => __DIR__."/frameworks/yii/tests",
+      "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
       "test_file_search_roots" => Set {
         __DIR__."/frameworks/yii/tests",
       },
@@ -2276,6 +2278,14 @@ function get_unit_testing_infra_dependencies(): void {
     if ($ret !== 0) {
       error("Could not download composer. Script stopping\n");
     }
+  }
+
+  // QUICK HACK to make sure we get the latest phpunit binary from composer
+  if (filesize(__DIR__."/composer.json") < 273) {
+    verbose("\nUpdated composer.json found. Updating phpunit binary.\n",
+            !Options::$csv_only);
+    remove_dir_recursive(__DIR__."/vendor");
+    unlink(__DIR__."/composer.lock");
   }
 
   // Install phpunit from composer.json located in __DIR__

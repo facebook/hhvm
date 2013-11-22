@@ -1172,10 +1172,11 @@ class Joomla extends Framework {
   public function __construct(string $name) { parent::__construct($name); }
   protected function getInfo(): Map {
     return Map {
-      "install_root" => __DIR__."/frameworks/joomla-framework",
-      "git_path" => "https://github.com/joomla/joomla-framework.git",
-      "git_commit" => "4669cd3b123e768f55545acb284bee666ce778c4",
-      "test_path" => __DIR__."/frameworks/joomla-framework",
+      'install_root' => __DIR__.'/frameworks/joomla-framework',
+      // 'git_path' => 'https://github.com/joomla/joomla-framework.git',
+      'git_path' => 'https://github.com/elgenie/joomla-framework',
+      'git_commit' => 'f87645575d9f6be213bf34fda3ec5bcf0eeef7a0',
+      'test_path' => __DIR__.'/frameworks/joomla-framework',
       "clownylist" => Set {
         // These are subtests which need their own composer set and aren't run
         // by their travis setup

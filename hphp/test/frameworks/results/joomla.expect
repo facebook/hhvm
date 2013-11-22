@@ -77,7 +77,7 @@ S
 ArrayHelperTest::testSortObjects with data set "by casesensitive string ascending"
 S
 ArrayHelperTest::testSortObjects with data set "by casesensitive string descending"
-F
+.
 ArrayHelperTest::testSortObjects with data set "by casesensitive string,integer ascending"
 .
 ArrayHelperTest::testSortObjects with data set "by casesensitive string,integer ascending,descending"
@@ -93,7 +93,7 @@ ArrayHelperTest::testSortObjects with data set "by int defaults"
 ArrayHelperTest::testSortObjects with data set "by int descending"
 .
 ArrayHelperTest::testSortObjects with data set "by string ascending"
-F
+.
 ArrayHelperTest::testSortObjects with data set "by string descending"
 .
 ArrayHelperTest::testToInteger with data set "floating with default array"
@@ -1195,17 +1195,17 @@ Joomla\Crypt\Tests\CryptTest::testSetKey
 Joomla\Crypt\Tests\CryptTest::test__construct
 .
 Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "Blowfish"
-F
+.
 Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "Blowfish2"
-F
+.
 Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "Blowfish_5"
-F
+.
 Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "Joomla"
 .
 Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "MD5"
 .
 Joomla\Crypt\Tests\PasswordSimpleTest::testCreate with data set "default"
-F
+.
 Joomla\Crypt\Tests\PasswordSimpleTest::testCreateException with data set "Bogus"
 .
 Joomla\Crypt\Tests\PasswordSimpleTest::testGetDefaultType with data set "Joomla"
@@ -1219,7 +1219,7 @@ Joomla\Crypt\Tests\PasswordSimpleTest::testSetDefaultType with data set "Null"
 Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Blowfish Invalid:"
 .
 Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Blowfish Valid:"
-F
+.
 Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Joomla Invalid"
 .
 Joomla\Crypt\Tests\PasswordSimpleTest::testVerify with data set "Joomla Valid"
@@ -5438,38 +5438,6 @@ Joomla\Github\Tests\ZenTest::testGet
 .
 Joomla\Github\Tests\ZenTest::testGetFailure
 .
-Joomla\Google\Tests\DataPlusActivitiesTest::testAuth
-FATAL
-Joomla\Google\Tests\GoogleTest::test__GetData
-FATAL
-Joomla\Google\Tests\JGoogleAuthOauth2Test::testAuth
-E
-Joomla\Google\Tests\JGoogleAuthOauth2Test::testGetOption
-.
-Joomla\Google\Tests\JGoogleAuthOauth2Test::testGooglize
-E
-Joomla\Google\Tests\JGoogleAuthOauth2Test::testIsAuth
-.
-Joomla\Google\Tests\JGoogleAuthOauth2Test::testQuery
-E
-Joomla\Google\Tests\JGoogleAuthOauth2Test::testSetOption
-.
-Joomla\Google\Tests\JGoogleDataAdsenseTest::testAuth
-FATAL
-Joomla\Google\Tests\JGoogleDataCalendarTest::testAuth
-FATAL
-Joomla\Google\Tests\JGoogleDataPicasaAlbumTest::testAuth
-FATAL
-Joomla\Google\Tests\JGoogleDataPicasaPhotoTest::testAuth
-FATAL
-Joomla\Google\Tests\JGoogleDataPicasaTest::testAuth
-FATAL
-Joomla\Google\Tests\JGoogleDataPlusCommentsTest::testAuth
-FATAL
-Joomla\Google\Tests\JGoogleDataPlusPeopleTest::testAuth
-FATAL
-Joomla\Google\Tests\JGoogleDataPlusTest::test__GetPeople
-FATAL
 Joomla\Google\Tests\JGoogleEmbedAnalyticsTest::testAddCall
 .
 Joomla\Google\Tests\JGoogleEmbedAnalyticsTest::testAddCustomVar

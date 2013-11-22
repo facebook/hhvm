@@ -837,7 +837,7 @@ static bool _dom_document_relaxNG_validate(c_DOMDocument *domdoc,
 
   xmlRelaxNGSetParserErrors
     (parser, (xmlRelaxNGValidityErrorFunc) php_libxml_ctx_error,
-     (xmlRelaxNGValidityWarningFunc) php_libxml_ctx_error, parser);
+     (xmlRelaxNGValidityWarningFunc) php_libxml_ctx_error, nullptr);
   sptr = xmlRelaxNGParse(parser);
   xmlRelaxNGFreeParserCtxt(parser);
   if (!sptr) {
@@ -853,7 +853,7 @@ static bool _dom_document_relaxNG_validate(c_DOMDocument *domdoc,
   }
 
   xmlRelaxNGSetValidErrors(vptr, php_libxml_ctx_error,
-                           php_libxml_ctx_error, vptr);
+                           php_libxml_ctx_error, nullptr);
   is_valid = xmlRelaxNGValidateDoc(vptr, docp);
   xmlRelaxNGFree(sptr);
   xmlRelaxNGFreeValidCtxt(vptr);
@@ -896,7 +896,7 @@ static bool _dom_document_schema_validate(c_DOMDocument * domdoc,
 
   xmlSchemaSetParserErrors
     (parser, (xmlSchemaValidityErrorFunc) php_libxml_ctx_error,
-    (xmlSchemaValidityWarningFunc) php_libxml_ctx_error, parser);
+    (xmlSchemaValidityWarningFunc) php_libxml_ctx_error, nullptr);
   sptr = xmlSchemaParse(parser);
   xmlSchemaFreeParserCtxt(parser);
   if (!sptr) {
@@ -912,7 +912,7 @@ static bool _dom_document_schema_validate(c_DOMDocument * domdoc,
   }
 
   xmlSchemaSetValidErrors(vptr, php_libxml_ctx_error,
-                          php_libxml_ctx_error, vptr);
+                          php_libxml_ctx_error, nullptr);
   is_valid = xmlSchemaValidateDoc(vptr, docp);
   xmlSchemaFree(sptr);
   xmlSchemaFreeValidCtxt(vptr);

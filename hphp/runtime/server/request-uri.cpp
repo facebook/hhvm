@@ -68,14 +68,22 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
   m_originalURL = StringUtil::UrlDecode(m_originalURL, false);
   m_rewritten = false;
 
-  // Fast path for files that exist
+  // Fast path for files that exist unless VirtualHost option StaticFastPath is false, in
+  // which case rewrite rules are applied even if the original path points to an existing static file.
+
   String canon(Util::canonicalize(m_originalURL.c_str(), m_originalURL.size()),
                AttachString);
-  if (virtualFileExists(vhost, sourceRoot, pathTranslation, canon)) {
-    m_rewrittenURL = canon;
-    m_resolvedURL = canon;
-    return true;
+
+
+  if ( vhost->staticfastpath() )
+    {
+    if (virtualFileExists(vhost, sourceRoot, pathTranslation, canon)) {
+      m_rewrittenURL = canon;
+      m_resolvedURL = canon;
+      return true;
+    }
   }
+
 
   if (!rewriteURL(vhost, transport, pathTranslation, sourceRoot)) {
     // Redirection

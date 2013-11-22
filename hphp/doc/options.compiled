@@ -373,6 +373,13 @@ These are experimental LFU settings.
       Prefix = prefix.
       Pattern = regex pattern
       PathTranslation = html
+      
+      # by default, if a static file is present it is served before
+      # rewrite rules are applied. (e.g. when true, you can't write 
+      # a rule to hide .htaccess files). Set to false to force rewrite
+      # rules to be applied to all requests.
+ 
+      StaticFastPath = true
       ServerName =
       ServerVariables {
         name = value

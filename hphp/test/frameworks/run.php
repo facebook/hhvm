@@ -1599,8 +1599,8 @@ class Zf2 extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/zf2",
-      "git_path" => "https://github.com/zendframework/zf2.git",
-      "git_commit" => "3bd643acb98a5f6a9e5abd45785171f6685b4a3c",
+      "git_path" => "https://github.com/JoelMarcey/zf2.git",
+      "git_commit" => "b03b54c40fba11eb236e4ab710a1c55973633588",
       "test_path" => __DIR__."/frameworks/zf2/tests",
       "blacklist" => Set {
         __DIR__."/frameworks/zf2/tests/ZendTest/Code/Generator".

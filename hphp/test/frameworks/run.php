@@ -1461,15 +1461,12 @@ class Phpbb3 extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/phpbb3",
-      "git_path" => "https://github.com/phpbb/phpbb3.git",
-      "git_commit" => "80b21e8049a138d07553288029abf66700da9a5c",
+      "git_path" => "https://github.com/JoelMarcey/phpbb.git",
+      "git_commit" => "4561970e2fae956845ac0b742edfc67532987c4b",
       "test_path" => __DIR__."/frameworks/phpbb3",
-      "blackslist" => Set {
+      // This may work if we increase the timeout. Blacklist for now
+      "blacklist" => Set {
         __DIR__."/frameworks/phpbb3/tests/lint_test.php",
-      },
-      "clownylist" => Set {
-        __DIR__."/frameworks/phpbb3/tests/".
-        "functions_acp/validate_range_test.php",
       },
     };
   }

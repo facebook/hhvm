@@ -469,7 +469,7 @@
             ],
             "return": {
                 "type": "Boolean",
-                "desc": "Returns TRUE on success or FALSE on failure." 
+                "desc": "Returns TRUE on success or FALSE on failure."
             },
             "args": [
                 {
@@ -556,7 +556,7 @@
             "flags": [
             ],
             "return": {
-                "type": "String",
+                "type": "Variant",
                 "desc": "On success, the resolved absolute filename is returned. On failure, FALSE is returned."
             },
             "args": [

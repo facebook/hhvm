@@ -275,10 +275,14 @@ Array f_stream_get_transports() {
   return make_packed_array("tcp", "udp", "unix", "udg");
 }
 
-String f_stream_resolve_include_path(const String& filename,
+Variant f_stream_resolve_include_path(const String& filename,
                                      CResRef context /* = null_object */) {
   struct stat s;
-  return Eval::resolveVmInclude(filename.get(), "", &s);
+  String ret = Eval::resolveVmInclude(filename.get(), "", &s);
+  if (ret.isNull()) {
+    return false;
+  }
+  return ret;
 }
 
 Variant f_stream_select(VRefParam read, VRefParam write, VRefParam except,

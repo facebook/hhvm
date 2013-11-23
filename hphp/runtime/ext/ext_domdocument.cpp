@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/thread-init-fini.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -1204,6 +1205,26 @@ static String domClassname(xmlNodePtr obj) {
   }
 }
 
+// This is so that if you fetch a node via two different paths, you get the same
+// PHP-level object back
+typedef std::map<xmlNodePtr, c_DOMNode*> NodeMap;
+static IMPLEMENT_THREAD_LOCAL(NodeMap, s_nodeMap);
+static InitFiniNode init(
+  []{ s_nodeMap->clear(); },
+  InitFiniNode::When::ThreadInit
+);
+static void clearNodeMap(xmlNodePtr startNode) {
+  xmlNodePtr curNode;
+  for (curNode = startNode; curNode; curNode = curNode->next) {
+    auto it = s_nodeMap->find(curNode);
+    if (it != s_nodeMap->end()) {
+      decRefObj(it->second);
+      s_nodeMap->erase(it);
+    }
+    clearNodeMap(curNode->children);
+  }
+}
+
 static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
                                      bool owner = false) {
   String clsname = domClassname(obj);
@@ -1215,14 +1236,22 @@ static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
     assert(doc->m_classmap[clsname].isString()); // or const char * is not safe
     clsname = doc->m_classmap[clsname].toString();
   }
-  Object wrapper = create_object_only(clsname);
-  c_DOMNode *nodeobj = wrapper.getTyped<c_DOMNode>();
-  nodeobj->m_doc = doc;
-  nodeobj->m_node = obj;
-  if (owner && doc.get()) {
-    appendOrphan(*doc->m_orphans, obj);
+  auto it = s_nodeMap->find(obj);
+  if (it == s_nodeMap->end()) {
+    auto od = g_vmContext->createObjectOnly(clsname.get());
+    auto nodeobj = static_cast<c_DOMNode*>(od);
+    auto inserted = s_nodeMap->insert(std::make_pair(obj, nodeobj));
+    assert(inserted.second);
+    it = inserted.first;
+    // This will be decRefed when the document is freed
+    nodeobj->incRefCount();
+    nodeobj->m_doc = doc;
+    nodeobj->m_node = obj;
+    if (owner && doc.get()) {
+      appendOrphan(*doc->m_orphans, obj);
+    }
   }
-  return wrapper;
+  return it->second;
 }
 
 static Variant create_node_object(xmlNodePtr node, p_DOMDocument doc,
@@ -3004,13 +3033,18 @@ c_DOMDocument::c_DOMDocument(Class* cb) :
 }
 
 c_DOMDocument::~c_DOMDocument() {
+  for (auto& node : *m_orphans) {
+    clearNodeMap(node);
+  }
+  if (m_owner && m_node) {
+    xmlDocPtr doc = (xmlDocPtr)m_node;
+    clearNodeMap(xmlDocGetRootElement(doc));
+  }
   sweep();
 }
 
 void c_DOMDocument::sweep() {
-  for (XmlNodeSet::iterator iter = m_orphans->begin();
-       iter != m_orphans->end(); ++iter) {
-    xmlNodePtr node = *iter;
+  for (auto& node : *m_orphans) {
     xmlUnlinkNode(node);
     php_libxml_node_free(node);
   }

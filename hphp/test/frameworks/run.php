@@ -1109,7 +1109,7 @@ class Doctrine2 extends Framework {
     return Map {
       "install_root" => __DIR__."/frameworks/doctrine2",
       "git_path" => "https://github.com/doctrine/doctrine2.git",
-      "git_commit" => "bd7c7ebaf353f038fae2f828802ecda823190759",
+      "git_commit" => "75d7ac2783345803da1cc211735382f7a4c5d055",
       "test_path" => __DIR__."/frameworks/doctrine2",
       "pull_requests" => Vector {
         Map {

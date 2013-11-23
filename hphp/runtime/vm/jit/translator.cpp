@@ -1044,8 +1044,8 @@ static const struct {
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpCGetS,       {StackTop2,        Stack1,       OutPred,          -1 }},
   { OpCGetM,       {MVector,          Stack1,       OutPred,           1 }},
-  { OpVGetL,       {Local,            Stack1,       OutVInputL,        1 }},
-  { OpVGetN,       {Stack1,           Stack1,       OutVUnknown,       0 }},
+  { OpVGetL,       {Local,            Stack1|Local, OutVInputL,        1 }},
+  { OpVGetN,       {Stack1,           Stack1|Local, OutVUnknown,       0 }},
   // TODO: In pseudo-main, the VGetG instruction invalidates what we know
   // about the types of the locals because it could cause any one of the
   // local variables to become "boxed". We need to add logic to tracelet
@@ -2219,7 +2219,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
 
       case Local: {
         if (op == OpSetN || op == OpSetOpN || op == OpIncDecN ||
-            op == OpBindN || op == OpUnsetN) {
+            op == OpBindN || op == OpUnsetN || op == OpVGetN) {
           varEnvTaint = true;
           continue;
         }
@@ -2238,7 +2238,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                                op == OpIncDecL ||
                                op == OpVGetM || op == OpFPassM ||
                                op == OpStaticLocInit || op == OpInitThisLoc ||
-                               op == OpSetL || op == OpBindL ||
+                               op == OpSetL || op == OpBindL || op == OpVGetL ||
                                op == OpPushL || op == OpUnsetL ||
                                op == OpIterInit || op == OpIterInitK ||
                                op == OpMIterInit || op == OpMIterInitK ||

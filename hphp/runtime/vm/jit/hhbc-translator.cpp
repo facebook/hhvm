@@ -4591,9 +4591,10 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
       setImmLocType(0, locType.isBoxed() ? stackType.box() : stackType);
       break;
     }
+    case OpVGetL:
     case OpBindL: {
-      assert(IMPLIES(inst.op() == OpBindL, topType(0).isBoxed()));
-      setImmLocType(0, topType(0));
+      assert(pushedType.isBoxed());
+      setImmLocType(0, pushedType);
       break;
     }
 

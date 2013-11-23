@@ -253,6 +253,7 @@
             "name": "trigger_error",
             "desc": "Used to trigger a user error condition, it can be used by in conjunction with the built-in error handler, or with a user defined function that has been set as the new error handler (set_error_handler()).\n\nThis function is useful when you need to generate a particular response to an exception at runtime.",
             "flags": [
+                "NeedsActRec"
             ],
             "return": {
                 "type": "Boolean",

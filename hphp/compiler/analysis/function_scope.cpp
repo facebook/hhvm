@@ -847,11 +847,14 @@ bool FunctionScope::popReturnType() {
         m_prevReturn.reset();
         return false;
       }
-      if (!isFirstPass()) {
-        Logger::Verbose("Corrected function return type %s -> %s",
-                        m_prevReturn->toString().c_str(),
-                        m_returnType->toString().c_str());
-      }
+      Logger::Verbose("Corrected %s's return type %s -> %s",
+                      getFullName().c_str(),
+                      m_prevReturn->toString().c_str(),
+                      m_returnType->toString().c_str());
+    } else {
+      Logger::Verbose("Set %s's return type %s",
+                      getFullName().c_str(),
+                      m_returnType->toString().c_str());
     }
   } else if (!m_prevReturn) {
     return false;

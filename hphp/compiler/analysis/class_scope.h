@@ -173,6 +173,7 @@ public:
    * Get/set attributes.
    */
   void setSystem();
+  bool isSystem() const { return m_attribute & System; }
   void setAttribute(Attribute attr) { m_attribute |= attr;}
   void clearAttribute(Attribute attr) { m_attribute &= ~attr;}
   bool getAttribute(Attribute attr) const {

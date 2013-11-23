@@ -1445,7 +1445,7 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx) {
   int ret = AttrNone;
   if (ctx == AttrContext::Class || ctx == AttrContext::Func) {
     if (!SystemLib::s_inited) {
-      ret |= AttrUnique | AttrPersistent;
+      ret |= AttrUnique | AttrPersistent | AttrBuiltin;
     }
   }
   if (as.in.peek() != '[') return Attr(ret);

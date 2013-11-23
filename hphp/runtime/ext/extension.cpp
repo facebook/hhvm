@@ -234,7 +234,8 @@ void Extension::MergeSystemlib() {
 
 void Extension::CompileSystemlib(const std::string &slib,
                                  const std::string &name) {
-  Unit *unit = compile_string(slib.c_str(), slib.size(), name.c_str());
+  Unit *unit = compile_systemlib_string(slib.c_str(), slib.size(),
+                                        name.c_str());
   assert(unit);
   unit->merge();
   s_systemlib_units.push_back(unit);
@@ -248,17 +249,18 @@ void Extension::CompileSystemlib(const std::string &slib,
  * builtin extensions.  DSOs pull from the fixed "systemlib" label
  */
 void Extension::loadSystemlib(const std::string& name /*= "" */) {
-  std::string hhas, slib;
+  std::string hhas, slib, phpname("systemlib.php.");
+  std::string n = name.empty() ?
+    std::string(m_name.data(), m_name.size()) : name;
+  phpname += n;
   if (m_dsoName.empty() || !name.empty()) {
     std::string section("ext.");
-    section += f_md5(name.empty() ? m_name : name, false).substr(0, 12).data();
+    section += f_md5(n, false).substr(0, 12).data();
     slib = get_systemlib(&hhas, section);
   } else {
     slib = get_systemlib(&hhas, "systemlib", m_dsoName);
   }
   if (!slib.empty()) {
-    std::string phpname("systemlib.php.");
-    phpname += m_name.data();
     CompileSystemlib(slib, phpname);
   }
   if (!hhas.empty()) {

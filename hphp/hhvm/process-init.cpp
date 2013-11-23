@@ -131,8 +131,8 @@ void ProcessInit() {
   // process does not have debugger support, we'll clear it.
   SystemLib::s_source = slib;
 
-  SystemLib::s_unit = compile_string(slib.c_str(), slib.size(),
-                                     "systemlib.php");
+  SystemLib::s_unit = compile_systemlib_string(slib.c_str(), slib.size(),
+                                               "systemlib.php");
 
   const StringData* msg;
   int line;

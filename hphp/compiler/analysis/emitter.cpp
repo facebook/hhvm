@@ -6403,9 +6403,13 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
         attrs = attrs | AttrNoOverride;
       }
     }
+    if (funcScope->isSystem()) {
+      assert((attrs & AttrPersistent) || meth->getClassScope());
+      attrs = attrs | AttrBuiltin;
+    }
   } else if (!SystemLib::s_inited) {
     // we're building systemlib. everything is unique
-    attrs = attrs | AttrUnique | AttrPersistent;
+    attrs = attrs | AttrBuiltin | AttrUnique | AttrPersistent;
   }
 
   // For closures, the MethodStatement didn't have real attributes; enforce
@@ -6588,7 +6592,8 @@ void EmitterVisitor::bindUserAttributes(MethodStatementPtr meth,
 
 void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
                                     FuncEmitter *fe) {
-  if (SystemLib::s_inited) {
+  if (SystemLib::s_inited &&
+      !(Option::WholeProgram && meth->isSystem())) {
     throw IncludeTimeFatalException(meth,
           "Native functions/methods may only be defined in systemlib");
   }
@@ -6597,7 +6602,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   bool allowOverride = false;
   bindUserAttributes(meth, fe, allowOverride);
 
-  Attr attributes = AttrNative | AttrUnique | AttrPersistent;
+  Attr attributes = AttrBuiltin | AttrNative | AttrUnique | AttrPersistent;
   if (meth->isRef()) {
     attributes = attributes | AttrReference;
   }
@@ -7021,6 +7026,9 @@ void EmitterVisitor::emitPostponedCtors() {
     PostponedCtor& p = m_postponedCtors.front();
 
     Attr attrs = AttrPublic;
+    if (!SystemLib::s_inited || p.m_is->getClassScope()->isSystem()) {
+      attrs = attrs | AttrBuiltin;
+    }
     StringData* methDoc = empty_string.get();
     const Location* sLoc = p.m_is->getLocation().get();
     p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
@@ -7035,6 +7043,9 @@ void EmitterVisitor::emitPostponedCtors() {
 
 void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p, bool pinit) {
   Attr attrs = (Attr)(AttrPrivate | AttrStatic);
+  if (!SystemLib::s_inited || p.m_is->getClassScope()->isSystem()) {
+    attrs = attrs | AttrBuiltin;
+  }
   StringData* methDoc = empty_string.get();
   const Location* sLoc = p.m_is->getLocation().get();
   p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
@@ -7144,6 +7155,9 @@ void EmitterVisitor::emitPostponedCinits() {
     PostponedNonScalars& p = m_postponedCinits.front();
 
     Attr attrs = (Attr)(AttrPrivate | AttrStatic);
+    if (!SystemLib::s_inited || p.m_is->getClassScope()->isSystem()) {
+      attrs = attrs | AttrBuiltin;
+    }
     StringData* methDoc = empty_string.get();
     const Location* sLoc = p.m_is->getLocation().get();
     p.m_fe->init(sLoc->line0, sLoc->line1, m_ue.bcPos(), attrs, false, methDoc);
@@ -7609,6 +7623,10 @@ void EmitterVisitor::emitClass(Emitter& e,
         attr = attr | AttrPersistent;
       }
     }
+    if (cNode->isSystem()) {
+      assert(attr & AttrPersistent);
+      attr = attr | AttrBuiltin;
+    }
     if (!cNode->getAttribute(ClassScope::NotFinal)) {
       attr = attr | AttrNoOverride;
     }
@@ -7617,7 +7635,7 @@ void EmitterVisitor::emitClass(Emitter& e,
     }
   } else if (!SystemLib::s_inited) {
     // we're building systemlib. everything is unique
-    attr = attr | AttrUnique | AttrPersistent;
+    attr = attr | AttrBuiltin | AttrUnique | AttrPersistent;
   }
 
   const Location* sLoc = is->getLocation().get();
@@ -7626,7 +7644,7 @@ void EmitterVisitor::emitClass(Emitter& e,
   int nInterfaces = bases.size();
   PreClass::Hoistable hoistable = PreClass::NotHoistable;
   if (toplevel) {
-    if (SystemLib::s_inited) {
+    if (SystemLib::s_inited && !cNode->isSystem()) {
       if (nInterfaces > firstInterface || cNode->getUsedTraitNames().size()) {
         hoistable = PreClass::Mergeable;
       } else if (firstInterface &&
@@ -8457,14 +8475,14 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
   ue->setFilepath(makeStaticString(""));
   ue->addTrivialPseudoMain();
 
+  Attr attrs = AttrBuiltin | AttrUnique | AttrPersistent;
   /*
     Special function used by FPushCuf* when its argument
     is not callable.
   */
   StringData* name = makeStaticString("86null");
   FuncEmitter* fe = ue->newFuncEmitter(name);
-  fe->init(0, 0, ue->bcPos(), AttrUnique | AttrPersistent,
-           true, empty_string.get());
+  fe->init(0, 0, ue->bcPos(), attrs, true, empty_string.get());
   ue->emitOp(OpNull);
   ue->emitOp(OpRetC);
   fe->setMaxStackCells(1);
@@ -8493,7 +8511,7 @@ static Unit* emitHHBCNativeFuncUnit(const HhbcExtFuncInfo* builtinFuncs,
     fe->setBuiltinFunc(mi, bif, nif, base);
     ue->emitOp(OpNativeImpl);
     fe->setMaxStackCells(kNumActRecCells + 1);
-    fe->setAttrs(fe->attrs() | AttrUnique | AttrPersistent);
+    fe->setAttrs(fe->attrs() | attrs);
     fe->finish(ue->bcPos(), false);
     ue->recordFunction(fe);
   }
@@ -8519,7 +8537,7 @@ static void emitContinuationMethod(UnitEmitter& ue, FuncEmitter* fe,
   static const StringData* valStr = makeStaticString("value");
   static const StringData* exnStr = makeStaticString("exception");
 
-  Attr attrs = (Attr)(AttrPublic | AttrMayUseVV);
+  Attr attrs = (Attr)(AttrBuiltin | AttrPublic | AttrMayUseVV);
   if (m == METH_NEXT || m == METH_RAISE || m == METH_SEND) {
     attrs = attrs | AttrVMEntry;
   }
@@ -8672,8 +8690,8 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     StringData* parentName = makeStaticString(e.ci->getParentClass().get());
     PreClassEmitter* pce = ue->newPreClassEmitter(e.name,
                                                   PreClass::AlwaysHoistable);
-    pce->init(0, 0, ue->bcPos(), AttrUnique|AttrPersistent, parentName,
-              nullptr);
+    pce->init(0, 0, ue->bcPos(), AttrBuiltin|AttrUnique|AttrPersistent,
+              parentName, nullptr);
     pce->setBuiltinClassInfo(
       e.ci,
       e.info->m_instanceCtor,
@@ -8724,7 +8742,8 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
       bool added UNUSED = pce->addMethod(fe);
       assert(added);
-      fe->init(0, 0, ue->bcPos(), AttrPublic, false, empty_string.get());
+      fe->init(0, 0, ue->bcPos(), AttrBuiltin|AttrPublic,
+               false, empty_string.get());
       ue->emitOp(OpNull);
       ue->emitOp(OpRetC);
       fe->setMaxStackCells(1);
@@ -9072,11 +9091,20 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     }
 
     if (!ue) {
+      auto parseit = [=] (AnalysisResultPtr ar) {
+        Scanner scanner(code, codeLen,
+                        RuntimeOption::GetScannerType(), filename);
+        Parser parser(scanner, filename, ar, codeLen);
+        parser.parse();
+        return parser.getFileScope();
+      };
+
+      if (BuiltinSymbols::s_systemAr) {
+        parseit(BuiltinSymbols::s_systemAr)->setMd5(md5);
+      }
+
       AnalysisResultPtr ar(new AnalysisResult());
-      Scanner scanner(code, codeLen, RuntimeOption::GetScannerType(), filename);
-      Parser parser(scanner, filename, ar, codeLen);
-      parser.parse();
-      FileScopePtr fsp = parser.getFileScope();
+      FileScopePtr fsp = parseit(ar);
       fsp->setOuterScope(ar);
 
       ar->setPhase(AnalysisResult::AnalyzeAll);

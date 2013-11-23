@@ -893,9 +893,13 @@ void FuncEmitter::init(int line1, int line2, Offset base, Attr attrs, bool top,
   m_attrs = attrs;
   m_top = top;
   m_docComment = docComment;
-  if (!SystemLib::s_inited) {
-    m_attrs = m_attrs | AttrBuiltin;
-    if (!pce()) m_attrs = m_attrs | AttrSkipFrame;
+  if (!isPseudoMain()) {
+    if (!SystemLib::s_inited) {
+      assert(m_attrs & AttrBuiltin);
+    }
+    if ((m_attrs & AttrBuiltin) && !pce()) {
+      m_attrs = m_attrs | AttrSkipFrame;
+    }
   }
 }
 
@@ -1416,6 +1420,14 @@ void FuncRepoProxy::GetFuncsStmt
       assert(fe->sn() == funcSn);
       fe->setTop(top);
       fe->serdeMetaData(extraBlob);
+      if (!SystemLib::s_inited && !fe->isPseudoMain()) {
+        assert(fe->attrs() & AttrBuiltin);
+        if (preClassId < 0) {
+          assert(fe->attrs() & AttrPersistent);
+          assert(fe->attrs() & AttrUnique);
+          assert(fe->attrs() & AttrSkipFrame);
+        }
+      }
       fe->setEhTabIsSorted();
       fe->finish(fe->past(), true);
       ue.recordFunction(fe);

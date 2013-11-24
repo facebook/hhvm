@@ -1047,20 +1047,24 @@ static String php_pcre_replace(const String& pattern, const String& subject,
           }
           *walkbuf = '\0';
           if (eval) {
+            Transl::VMRegAnchor _;
             String prefixedCode = concat(concat(
                 "<?php return ", result + result_len), ";");
             Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
             Variant v;
             Func* func = unit->getMain();
-            g_vmContext->invokeFunc(v.asTypedValue(), func, null_array, nullptr,
-              nullptr, nullptr, nullptr, VMExecutionContext::InvokePseudoMain
-            );
+            g_vmContext->invokeFunc(v.asTypedValue(), func, null_array,
+                                    g_vmContext->getThis(),
+                                    g_vmContext->getContextClass(), nullptr,
+                                    nullptr,
+                                    VMExecutionContext::InvokePseudoMain);
             eval_result = v;
 
             memcpy(result + result_len, eval_result.data(), eval_result.size());
             result_len += eval_result.size();
           } else {
-            /* increment the result length by how much we've added to the string */
+            // increment the result length by how much we've added to the
+            // string
             result_len += walkbuf - (result + result_len);
           }
         }

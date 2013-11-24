@@ -2191,6 +2191,10 @@ class_method_call:
     T_DOUBLE_COLON
     variable_without_objects '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$3,$5,&$1);}
+  | static_class_name
+    T_DOUBLE_COLON
+    '{' expr '}' '('
+    function_call_parameter_list ')'   { _p->onCall($$,1,$4,$7,&$1);}
 ;
 
 variable_without_objects:

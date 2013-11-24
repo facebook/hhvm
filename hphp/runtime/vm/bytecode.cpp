@@ -1146,7 +1146,7 @@ LookupResult VMExecutionContext::lookupCtorMethod(const Func*& f,
 }
 
 ObjectData* VMExecutionContext::createObject(StringData* clsName,
-                                             CArrRef params,
+                                             CVarRef params,
                                              bool init /* = true */) {
   Class* class_ = Unit::loadClass(clsName);
   if (class_ == nullptr) {
@@ -1162,6 +1162,9 @@ ObjectData* VMExecutionContext::createObject(StringData* clsName,
       throw Object(SystemLib::AllocReflectionExceptionObject(msg));
     }
     // call constructor
+    if (!isContainerOrNull(params)) {
+      throw_param_is_not_container();
+    }
     TypedValue ret;
     invokeFunc(&ret, ctor, params, o.get());
     tvRefcountedDecRef(&ret);
@@ -1173,7 +1176,7 @@ ObjectData* VMExecutionContext::createObject(StringData* clsName,
 }
 
 ObjectData* VMExecutionContext::createObjectOnly(StringData* clsName) {
-  return createObject(clsName, null_array, false);
+  return createObject(clsName, init_null_variant, false);
 }
 
 ActRec* VMExecutionContext::getStackFrame() {
@@ -1652,7 +1655,7 @@ void VMExecutionContext::reenterVM(TypedValue* retval,
 
 void VMExecutionContext::invokeFunc(TypedValue* retval,
                                     const Func* f,
-                                    CArrRef params,
+                                    CVarRef args_,
                                     ObjectData* this_ /* = NULL */,
                                     Class* cls /* = NULL */,
                                     VarEnv* varEnv /* = NULL */,
@@ -1660,19 +1663,21 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
                                     InvokeFlags flags /* = InvokeNormal */) {
   assert(retval);
   assert(f);
-  // If this is a regular function, this_ and cls must be NULL
+  // If f is a regular function, this_ and cls must be NULL
   assert(f->preClass() || f->isPseudoMain() || (!this_ && !cls));
-  // If this is a method, either this_ or cls must be non-NULL
+  // If f is a method, either this_ or cls must be non-NULL
   assert(!f->preClass() || (this_ || cls));
-  // If this is a static method, this_ must be NULL
+  // If f is a static method, this_ must be NULL
   assert(!(f->attrs() & AttrStatic && !f->isClosureBody()) ||
          (!this_));
   // invName should only be non-NULL if we are calling __call or
   // __callStatic
   assert(!invName || f->name()->isame(s___call.get()) ||
          f->name()->isame(s___callStatic.get()));
-  // If a variable environment is being inherited then params must be empty
-  assert(!varEnv || params.empty());
+  const auto& args = *args_.asCell();
+  assert(isContainerOrNull(args));
+  // If we are inheriting a variable environment then args_ must be empty
+  assert(!varEnv || cellIsNull(&args) || !getContainerSize(args));
 
   VMRegAnchor _;
 
@@ -1694,7 +1699,8 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   }
 
   if (flags & InvokePseudoMain) {
-    assert(f->isPseudoMain() && !params.get());
+    assert(f->isPseudoMain());
+    assert(cellIsNull(&args) || !getContainerSize(args));
     Unit* toMerge = f->unit();
     toMerge->merge();
     if (toMerge->isMergeOnly()) {
@@ -1714,10 +1720,11 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   } else {
     ar->setThis(nullptr);
   }
+  auto numPassedArgs = cellIsNull(&args) ? 0 : getContainerSize(args);
   if (isMagicCall) {
     ar->initNumArgs(2);
   } else {
-    ar->initNumArgs(params.size());
+    ar->initNumArgs(numPassedArgs);
   }
   ar->setVarEnv(varEnv);
 
@@ -1732,27 +1739,35 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
   }
 #endif
 
-  ArrayData *arr = params.get();
   if (isMagicCall) {
     // Put the method name into the location of the first parameter. We
     // are transferring ownership, so no need to incRef/decRef here.
     m_stack.pushStringNoRc(invName);
     // Put array of arguments into the location of the second parameter
-    m_stack.pushArray(arr);
-  } else if (arr) {
+    if (args.m_type == KindOfArray && args.m_data.parr->isVectorData()) {
+      m_stack.pushArray(args.m_data.parr);
+    } else if (!numPassedArgs) {
+      m_stack.pushArrayNoRc(empty_array.get());
+    } else {
+      assert(!cellIsNull(args));
+      PackedArrayInit ai(numPassedArgs);
+      for (ArrayIter iter(args); iter; ++iter) {
+        ai.appendWithRef(iter.secondRefPlus());
+      }
+      m_stack.pushArray(ai.create());
+    }
+  } else if (!cellIsNull(&args)) {
     const int numParams = f->numParams();
-    const int numExtraArgs = arr->size() - numParams;
+    const int numExtraArgs = numPassedArgs - numParams;
     ExtraArgs* extraArgs = nullptr;
     if (numExtraArgs > 0 && (f->attrs() & AttrMayUseVV)) {
       extraArgs = ExtraArgs::allocateUninit(numExtraArgs);
       ar->setExtraArgs(extraArgs);
     }
     int paramId = 0;
-    for (ssize_t i = arr->iter_begin();
-         i != ArrayData::invalid_index;
-         i = arr->iter_advance(i), ++paramId) {
-      TypedValue *from = arr->nvGetValueRef(i);
-      TypedValue *to;
+    for (ArrayIter iter(args); iter; ++iter, ++paramId) {
+      const TypedValue* from = iter.secondRefPlus().asTypedValue();
+      TypedValue* to;
       if (LIKELY(paramId < numParams)) {
         to = m_stack.allocTV();
       } else {
@@ -1946,7 +1961,7 @@ void VMExecutionContext::invokeContFunc(const Func* f,
 
 void VMExecutionContext::invokeUnit(TypedValue* retval, Unit* unit) {
   Func* func = unit->getMain();
-  invokeFunc(retval, func, null_array, nullptr, nullptr,
+  invokeFunc(retval, func, init_null_variant, nullptr, nullptr,
              m_globalVarEnv, nullptr, InvokePseudoMain);
 }
 
@@ -2518,7 +2533,7 @@ CVarRef VMExecutionContext::getEvaledArg(const StringData* val,
   Variant v;
   // Default arg values are not currently allowed to depend on class context.
   g_vmContext->invokeFunc((TypedValue*)&v, unit->getMain(),
-                          null_array, nullptr, nullptr, nullptr, nullptr,
+                          init_null_variant, nullptr, nullptr, nullptr, nullptr,
                           InvokePseudoMain);
   Variant &lv = m_evaledArgs.lvalAt(key, AccessFlags::Key);
   lv = v;
@@ -2616,7 +2631,7 @@ const String& VMExecutionContext::createFunction(const String& args, const Strin
   //
   // We have to eval now to emulate this behavior.
   TypedValue retval;
-  invokeFunc(&retval, unit->getMain(), null_array,
+  invokeFunc(&retval, unit->getMain(), init_null_variant,
              nullptr, nullptr, nullptr, nullptr,
              InvokePseudoMain);
 
@@ -2687,7 +2702,7 @@ bool VMExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     // Invoke the given PHP, possibly specialized to match the type of the
     // current function on the stack, optionally passing a this pointer or
     // class used to execute the current function.
-    invokeFunc(retval, unit->getMain(functionClass), null_array,
+    invokeFunc(retval, unit->getMain(functionClass), init_null_variant,
                this_, frameClass, varEnv, nullptr, InvokePseudoMain);
     failed = false;
   } catch (FatalErrorException &e) {
@@ -4608,7 +4623,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetN(PC& pc) {
   if (tv == nullptr) {
     e = false;
   } else {
-    e = !tvIsNull(tvToCell(tv));
+    e = !cellIsNull(tvToCell(tv));
   }
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
@@ -4626,7 +4641,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetG(PC& pc) {
   if (tv == nullptr) {
     e = false;
   } else {
-    e = !tvIsNull(tvToCell(tv));
+    e = !cellIsNull(tvToCell(tv));
   }
   tvRefcountedDecRefCell(tv1);
   tv1->m_data.num = e;
@@ -4641,7 +4656,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetS(PC& pc) {
   if (!(visible && accessible)) {
     e = false;
   } else {
-    e = !tvIsNull(tvToCell(val));
+    e = !cellIsNull(tvToCell(val));
   }
   m_stack.popA();
   output->m_data.num = e;
@@ -6114,21 +6129,26 @@ OPTBLD_INLINE void VMExecutionContext::iopFCallBuiltin(PC& pc) {
   tvCopy(ret, *m_stack.allocTV());
 }
 
-bool VMExecutionContext::prepareArrayArgs(ActRec* ar, Array& arrayArgs) {
+bool VMExecutionContext::prepareArrayArgs(ActRec* ar, CVarRef arrayArgs) {
+  const auto& args = *arrayArgs.asCell();
+  assert(isContainer(args));
   if (UNLIKELY(ar->hasInvName())) {
     m_stack.pushStringNoRc(ar->getInvName());
-    if (UNLIKELY(!arrayArgs.get()->isVectorData())) {
-      arrayArgs = arrayArgs.values();
+    if (args.m_type == KindOfArray && args.m_data.parr->isVectorData()) {
+      m_stack.pushArray(args.m_data.parr);
+    } else {
+      PackedArrayInit ai(getContainerSize(args));
+      for (ArrayIter iter(args); iter; ++iter) {
+        ai.appendWithRef(iter.secondRefPlus());
+      }
+      m_stack.pushArray(ai.create());
     }
-    m_stack.pushArray(arrayArgs.get());
     ar->setVarEnv(0);
     ar->initNumArgs(2);
     return true;
   }
 
-  ArrayData* args = arrayArgs.get();
-
-  int nargs = args->size();
+  int nargs = getContainerSize(args);
   const Func* f = ar->m_func;
   int nparams = f->numParams();
   int extra = nargs - nparams;
@@ -6136,10 +6156,10 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar, Array& arrayArgs) {
     extra = 0;
     nparams = nargs;
   }
-  ssize_t pos = args->iter_begin();
+  ArrayIter iter(args);
   for (int i = 0; i < nparams; ++i) {
     TypedValue* from = const_cast<TypedValue*>(
-      args->getValueRef(pos).asTypedValue());
+      iter.secondRefPlus().asTypedValue());
     TypedValue* to = m_stack.allocTV();
     if (LIKELY(!f->byRef(i))) {
       cellDup(*tvToCell(from), *to);
@@ -6166,19 +6186,19 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar, Array& arrayArgs) {
       }
       cellDup(*tvToCell(from), *to);
     }
-    pos = args->iter_advance(pos);
+    ++iter;
   }
   if (extra && (ar->m_func->attrs() & AttrMayUseVV)) {
     ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
     for (int i = 0; i < extra; ++i) {
       TypedValue* to = extraArgs->getExtraArg(i);
-      const TypedValue* from = args->getValueRef(pos).asTypedValue();
+      const TypedValue* from = iter.secondRefPlus().asTypedValue();
       if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
         refDup(*from, *to);
       } else {
         cellDup(*tvToCell(from), *to);
       }
-      pos = args->iter_advance(pos);
+      ++iter;
     }
     ar->setExtraArgs(extraArgs);
     ar->initNumArgs(nargs);
@@ -6190,8 +6210,8 @@ bool VMExecutionContext::prepareArrayArgs(ActRec* ar, Array& arrayArgs) {
 }
 
 static void cleanupParamsAndActRec(Stack& stack,
-                            ActRec* ar,
-                            ExtraArgs* extraArgs) {
+                                   ActRec* ar,
+                                   ExtraArgs* extraArgs) {
   assert(stack.top() + (extraArgs ?
                         ar->m_func->numParams() :
                         ar->numArgs()) == (void*)ar);
@@ -6210,7 +6230,7 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
   assert(ar->numArgs() == 1);
 
   Cell* c1 = m_stack.topC();
-  if (skipCufOnInvalidParams && UNLIKELY(c1->m_type != KindOfArray)) {
+  if (skipCufOnInvalidParams && UNLIKELY(!isContainer(*c1))) {
     // task #1756122
     // this is what we /should/ do, but our code base depends
     // on the broken behavior of casting the second arg to an
@@ -6223,8 +6243,8 @@ bool VMExecutionContext::doFCallArray(PC& pc) {
 
   const Func* func = ar->m_func;
   {
-    Array args(LIKELY(c1->m_type == KindOfArray) ? c1->m_data.parr :
-               tvAsVariant(c1).toArray().get());
+    Variant args(isContainer(*c1) ? tvAsCVarRef(c1) :
+                 Variant(tvAsVariant(c1).toArray()));
     m_stack.popTV();
     checkStack(m_stack, func);
 

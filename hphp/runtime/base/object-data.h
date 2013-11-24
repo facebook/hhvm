@@ -296,7 +296,7 @@ class ObjectData {
   // invokeFuncFew(), and vm_decode_function(). We should remove these APIs
   // and migrate all callers to use invokeFunc(), invokeFuncFew(), and
   // vm_decode_function() instead.
-  Variant o_invoke(const String& s, CArrRef params, bool fatal = true);
+  Variant o_invoke(const String& s, CVarRef params, bool fatal = true);
   Variant o_invoke_few_args(const String& s, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
 

@@ -2032,7 +2032,7 @@ void HhbcTranslator::MInstrTranslator::emitStringIsset() {
 namespace MInstrHelpers {
 uint64_t vectorIsset(c_Vector* vec, int64_t index) {
   auto result = vec->get(index);
-  return result ? !tvIsNull(result) : false;
+  return result ? !cellIsNull(result) : false;
 }
 }
 
@@ -2048,7 +2048,7 @@ void HhbcTranslator::MInstrTranslator::emitVectorIsset() {
 namespace MInstrHelpers {
 uint64_t pairIsset(c_Pair* pair, int64_t index) {
   auto result = pair->get(index);
-  return result ? !tvIsNull(result) : false;
+  return result ? !cellIsNull(result) : false;
 }
 }
 
@@ -2065,7 +2065,7 @@ template<KeyType keyType>
 static inline uint64_t mapIssetImpl(
   c_Map* map, typename KeyTypeTraits<keyType>::rawType key) {
   auto result = map->get(key);
-  return result ? !tvIsNull(result) : false;
+  return result ? !cellIsNull(result) : false;
 }
 
 #define HELPER_TABLE(m)          \
@@ -2097,7 +2097,7 @@ template<KeyType keyType>
 static inline uint64_t stableMapIssetImpl(
   c_StableMap* map, typename KeyTypeTraits<keyType>::rawType key) {
   auto result = map->get(key);
-  return result ? !tvIsNull(result) : false;
+  return result ? !cellIsNull(result) : false;
 }
 
 #define HELPER_TABLE(m)                \

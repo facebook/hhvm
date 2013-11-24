@@ -1015,12 +1015,12 @@ Array f_hphp_get_function_info(const String& name) {
   return ret;
 }
 
-Variant f_hphp_invoke(const String& name, CArrRef params) {
+Variant f_hphp_invoke(const String& name, CVarRef params) {
   return invoke(name.data(), params);
 }
 
 Variant f_hphp_invoke_method(CVarRef obj, const String& cls, const String& name,
-                             CArrRef params) {
+                             CVarRef params) {
   if (!obj.isObject()) {
     return invoke_static_method(cls, name, params);
   }
@@ -1032,12 +1032,12 @@ bool f_hphp_instanceof(CObjRef obj, const String& name) {
   return obj.instanceof(name.data());
 }
 
-Object f_hphp_create_object(const String& name, CArrRef params) {
+Object f_hphp_create_object(const String& name, CVarRef params) {
   return g_vmContext->createObject(name.get(), params);
 }
 
 Object f_hphp_create_object_without_constructor(const String& name) {
-  return g_vmContext->createObject(name.get(), nullptr, false);
+  return g_vmContext->createObject(name.get(), init_null_variant, false);
 }
 
 Variant f_hphp_get_property(CObjRef obj, const String& cls, const String& prop) {

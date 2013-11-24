@@ -115,7 +115,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
   g_vmContext->invokeFunc(
     &retVal,
     func,
-    null_array,
+    init_null_variant,
     nullptr,
     nullptr,
     // Zend appears to share the variable environment with the assert()

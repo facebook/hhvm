@@ -130,7 +130,7 @@
                 },
                 {
                     "name": "params",
-                    "type": "VariantVec"
+                    "type": "Variant"
                 }
             ]
         },
@@ -159,7 +159,7 @@
                 },
                 {
                     "name": "params",
-                    "type": "VariantVec"
+                    "type": "Variant"
                 }
             ]
         },
@@ -201,7 +201,7 @@
                 },
                 {
                     "name": "params",
-                    "type": "VariantVec"
+                    "type": "Variant"
                 }
             ]
         },

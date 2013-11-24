@@ -554,10 +554,11 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
   return true;
 }
 
-Variant ObjectData::o_invoke(const String& s, CArrRef params,
+Variant ObjectData::o_invoke(const String& s, CVarRef params,
                              bool fatal /* = true */) {
   CallCtx ctx;
-  if (!decode_invoke(s, this, fatal, ctx)) {
+  if (!decode_invoke(s, this, fatal, ctx) ||
+      (!isContainer(params) && !params.isNull())) {
     return Variant(Variant::NullInit());
   }
   Variant ret;
@@ -1147,7 +1148,7 @@ bool ObjectData::propIsset(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
   auto propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible && !unset) {
-    return !tvIsNull(tvToCell(propVal));
+    return !cellIsNull(tvToCell(propVal));
   }
   if (!getAttribute(UseIsset)) {
     return false;

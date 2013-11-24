@@ -364,7 +364,7 @@
                 },
                 {
                     "name": "paramarr",
-                    "type": "VariantVec",
+                    "type": "Variant",
                     "desc": "An array of parameters."
                 }
             ]

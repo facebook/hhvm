@@ -500,7 +500,8 @@ inline void tvDupFlattenVars(const TypedValue* fr, TypedValue* to,
   });
 }
 
-inline bool tvIsNull(const TypedValue* tv) {
+inline bool cellIsNull(const Cell* tv) {
+  assert(cellIsPlausible(*tv));
   return IS_NULL_TYPE(tv->m_type);
 }
 

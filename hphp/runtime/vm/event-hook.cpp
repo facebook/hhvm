@@ -152,7 +152,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     // For static methods, give handler the name of called class
     called_on = Variant(const_cast<StringData*>(ar->getClass()->name()));
   }
-  Array intArgs =
+  Variant intArgs =
     PackedArrayInit(5)
       .append(ar->m_func->fullNameRef())
       .append(called_on)

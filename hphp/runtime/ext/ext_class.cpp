@@ -370,7 +370,7 @@ Variant f_get_object_vars(CObjRef object) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_call_user_method_array(const String& method_name, VRefParam obj,
-                                 CArrRef paramarr) {
+                                 CVarRef paramarr) {
   return obj.toObject()->o_invoke(method_name, paramarr);
 }
 

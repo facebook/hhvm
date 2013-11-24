@@ -90,7 +90,7 @@
                 },
                 {
                     "name": "params",
-                    "type": "VariantVec",
+                    "type": "Variant",
                     "desc": "The parameters to be passed to the function, as an indexed array."
                 }
             ]

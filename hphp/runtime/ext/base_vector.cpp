@@ -267,7 +267,7 @@ bool BaseVector::OffsetIsset(ObjectData* obj, TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? !tvIsNull(tvToCell(result)) : false;
+  return result ? !cellIsNull(tvToCell(result)) : false;
 }
 
 bool BaseVector::OffsetEmpty(ObjectData* obj, TypedValue* key) {

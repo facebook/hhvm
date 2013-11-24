@@ -14,8 +14,8 @@ function bar() {
   $a = new A();
   $a->bar(1, "str", array(1, 2, 3));
   hphp_invoke_method($a, "A", "bar", array(1, 2));
+  hphp_invoke_method($a, "A", "bar", StableMap {'a' => 1, 'b' => 2});
 }
-
 function foo() {
   call_user_func("bar");
 }

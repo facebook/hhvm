@@ -114,6 +114,9 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
 }
 
 String StringUtil::Implode(CVarRef items, const String& delim) {
+  if (!isContainer(items)) {
+    throw_param_is_not_container();
+  }
   int size = getContainerSize(items);
   if (size == 0) return "";
 

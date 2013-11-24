@@ -135,7 +135,7 @@ Variant f_call_user_func(int _argc, CVarRef function,
   return vm_call_user_func(function, _argv);
 }
 
-Variant f_call_user_func_array(CVarRef function, CArrRef params) {
+Variant f_call_user_func_array(CVarRef function, CVarRef params) {
   return vm_call_user_func(function, params);
 }
 

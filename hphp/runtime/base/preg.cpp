@@ -1053,7 +1053,7 @@ static String php_pcre_replace(const String& pattern, const String& subject,
             Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());
             Variant v;
             Func* func = unit->getMain();
-            g_vmContext->invokeFunc(v.asTypedValue(), func, null_array,
+            g_vmContext->invokeFunc(v.asTypedValue(), func, init_null_variant,
                                     g_vmContext->getThis(),
                                     g_vmContext->getContextClass(), nullptr,
                                     nullptr,

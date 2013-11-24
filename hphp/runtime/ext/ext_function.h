@@ -29,7 +29,7 @@ bool f_is_callable(CVarRef v, bool syntax = false,
                    VRefParam name = uninit_null());
 Variant f_call_user_func(
   int _argc, CVarRef function, CArrRef _argv = null_array);
-Variant f_call_user_func_array(CVarRef function, CArrRef params);
+Variant f_call_user_func_array(CVarRef function, CVarRef params);
 String f_call_user_func_serialized(const String& input);
 Variant f_call_user_func_array_rpc(
   const String& host, int port, const String& auth, int timeout,

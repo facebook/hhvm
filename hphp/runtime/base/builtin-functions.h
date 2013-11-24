@@ -135,23 +135,23 @@ vm_decode_function(CVarRef function,
 }
 
 ActRec* vm_get_previous_frame();
-Variant vm_call_user_func(CVarRef function, CArrRef params,
+Variant vm_call_user_func(CVarRef function, CVarRef params,
                           bool forwarding = false);
 
 /**
  * Invoking an arbitrary static method.
  */
 Variant invoke_static_method(const String& s, const String& method,
-                             CArrRef params, bool fatal = true);
+                             CVarRef params, bool fatal = true);
 
 /**
  * Fallback when a dynamic function call fails to find a user function
  * matching the name.  If no handlers are able to
  * invoke the function, throw an InvalidFunctionCallException.
  */
-Variant invoke_failed(const char *func, CArrRef params,
+Variant invoke_failed(const char *func,
                       bool fatal = true);
-Variant invoke_failed(CVarRef func, CArrRef params,
+Variant invoke_failed(CVarRef func,
                       bool fatal = true);
 
 Variant o_invoke_failed(const char *cls, const char *meth,
@@ -197,18 +197,23 @@ inline bool isContainer(CVarRef v) {
   return isContainer(*v.asCell());
 }
 
-inline size_t getContainerSize(const Cell& c) {
+inline bool isContainerOrNull(const Cell& c) {
   assert(cellIsPlausible(c));
+  return IS_NULL_TYPE(c.m_type) || c.m_type == KindOfArray ||
+         (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
+}
+
+inline bool isContainerOrNull(CVarRef v) {
+  return isContainerOrNull(*v.asCell());
+}
+
+inline size_t getContainerSize(const Cell& c) {
+  assert(isContainer(c));
   if (c.m_type == KindOfArray) {
     return c.m_data.parr->size();
   }
-  if (c.m_type == KindOfObject) {
-    auto o = c.m_data.pobj;
-    if (o->isCollection()) {
-      return o->getCollectionSize();
-    }
-  }
-  throw_param_is_not_container();
+  assert(c.m_type == KindOfObject && c.m_data.pobj->isCollection());
+  return c.m_data.pobj->getCollectionSize();
 }
 
 inline size_t getContainerSize(CVarRef v) {

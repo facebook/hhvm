@@ -520,7 +520,7 @@ public:
                                               const HPHP::Class* cls,
                                               bool raise = false);
   ObjectData* createObject(StringData* clsName,
-                           CArrRef params,
+                           CVarRef params,
                            bool init = true);
   ObjectData* createObjectOnly(StringData* clsName);
 
@@ -650,7 +650,7 @@ private:
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);
   bool prepareFuncEntry(ActRec* ar, PC& pc);
-  bool prepareArrayArgs(ActRec* ar, Array& arrayArgs);
+  bool prepareArrayArgs(ActRec* ar, CVarRef arrayArgs);
   void recordCodeCoverage(PC pc);
   bool isReturnHelper(uintptr_t address);
   void switchModeForDebugger();
@@ -670,7 +670,7 @@ public:
   };
   void invokeFunc(TypedValue* retval,
                   const HPHP::Func* f,
-                  CArrRef params,
+                  CVarRef args_ = init_null_variant,
                   ObjectData* this_ = nullptr,
                   HPHP::Class* class_ = nullptr,
                   VarEnv* varEnv = nullptr,
@@ -678,9 +678,9 @@ public:
                   InvokeFlags flags = InvokeNormal);
   void invokeFunc(TypedValue* retval,
                   const CallCtx& ctx,
-                  CArrRef params,
+                  CVarRef args_,
                   VarEnv* varEnv = nullptr) {
-    invokeFunc(retval, ctx.func, params, ctx.this_, ctx.cls, varEnv,
+    invokeFunc(retval, ctx.func, args_, ctx.this_, ctx.cls, varEnv,
                ctx.invName);
   }
   void invokeFuncCleanupHelper(TypedValue* retval,

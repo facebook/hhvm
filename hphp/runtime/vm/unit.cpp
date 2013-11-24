@@ -1434,7 +1434,7 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
                   // local scope.
                 }
               }
-              g_vmContext->invokeFunc(&ret, unit->getMain(), null_array,
+              g_vmContext->invokeFunc(&ret, unit->getMain(), init_null_variant,
                                       nullptr, nullptr, ve);
               tvRefcountedDecRef(&ret);
             } else {

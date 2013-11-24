@@ -1617,7 +1617,7 @@ inline bool IssetEmptyElemArray(TypedValue* base, TypedValue* key) {
   if (useEmpty) {
     return !cellToBool(*tvToCell(result));
   }
-  return !tvIsNull(tvToCell(result));
+  return !cellIsNull(tvToCell(result));
 }
 
 /**

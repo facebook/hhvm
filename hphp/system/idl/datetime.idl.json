@@ -94,7 +94,7 @@
             "flags": [
             ],
             "return": {
-                "type": "Object"
+                "type": "Variant"
             },
             "args": [
                 {

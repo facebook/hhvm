@@ -106,7 +106,7 @@ Object c_DateTime::ti_createfromformat(const String& format, const String& time,
   c_DateTime *datetime = NEWOBJ(c_DateTime);
   datetime->m_dt = NEWOBJ(DateTime);
   datetime->m_dt->fromString(time, c_DateTimeZone::unwrap(timezone),
-                             format.data());
+                             format.data(), false);
   return datetime;
 }
 
@@ -467,7 +467,7 @@ Variant f_strtotime(const String& input,
   }
 
   DateTime dt(timestamp);
-  if (!dt.fromString(input, SmartResource<TimeZone>())) {
+  if (!dt.fromString(input, SmartResource<TimeZone>(), nullptr, false)) {
     return false;
   }
   bool error;
@@ -555,11 +555,16 @@ Variant f_date_parse_from_format(const String& format, const String& date) {
   return ret;
 }
 
-Object f_date_create(const String& time /* = null_string */,
-                     CObjRef timezone /* = null_object */) {
+Variant f_date_create(const String& time /* = null_string */,
+                      CObjRef timezone /* = null_object */) {
   c_DateTime *cdt = NEWOBJ(c_DateTime)();
   Object ret(cdt);
-  cdt->t___construct(time, timezone);
+  // Don't set the time here because it will throw if it is bad
+  cdt->t___construct();
+  auto dt = c_DateTime::unwrap(ret);
+  if (!dt->fromString(time, c_DateTimeZone::unwrap(timezone), nullptr, false)) {
+    return false;
+  }
   return ret;
 }
 

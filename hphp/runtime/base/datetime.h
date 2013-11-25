@@ -276,7 +276,7 @@ public:
   Array toArray(ArrayFormat format) const;
   void fromTimeStamp(int64_t timestamp, bool utc = false);
   bool fromString(const String& input, SmartResource<TimeZone> tz,
-                  const char* format=nullptr);
+                  const char* format=nullptr, bool throw_on_error = true);
 
   // comparison
   SmartResource<DateInterval> diff(SmartResource<DateTime> datetime2,

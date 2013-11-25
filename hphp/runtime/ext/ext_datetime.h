@@ -252,8 +252,8 @@ Object f_date_add(CObjRef datetime, CObjRef interval);
 Object f_date_create_from_format(const String& format,
                                  const String& time,
                                  CObjRef timezone = null_object);
-Object f_date_create(const String& time = null_string,
-                     CObjRef timezone = null_object);
+Variant f_date_create(const String& time = null_string,
+                      CObjRef timezone = null_object);
 void f_date_date_set(CObjRef object, int year, int month, int day);
 Object f_date_diff(CObjRef datetime,
                    CObjRef datetime2,

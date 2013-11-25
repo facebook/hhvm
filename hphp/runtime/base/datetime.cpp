@@ -748,7 +748,8 @@ Array DateTime::toArray(ArrayFormat format) const {
 }
 
 bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
-                          const char* format /*=NUL*/) {
+                          const char* format /*=NUL*/,
+                          bool throw_on_error /*= true*/) {
   struct timelib_error_container *error;
   timelib_time *t;
   if (format) {
@@ -766,6 +767,21 @@ bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
   }
   int error1 = error->error_count;
   setLastErrors(error);
+  if (error1) {
+    timelib_time_dtor(t);
+    if (!throw_on_error) {
+      return false;
+    }
+    auto msg = folly::format(
+      "DateTime::__construct(): Failed to parse time string "
+      "({}) at position {} ({}): {}",
+      input.data(),
+      error->error_messages[0].position,
+      error->error_messages[0].character,
+      error->error_messages[0].message
+    ).str();
+    throw Object(SystemLib::AllocExceptionObject(msg));
+  }
 
   if (m_timestamp == -1) {
     fromTimeStamp(0);

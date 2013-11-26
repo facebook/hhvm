@@ -1720,8 +1720,8 @@ void HphpArray::erase(ssize_t pos) {
 ArrayData* HphpArray::RemoveIntPacked(ArrayData* ad, int64_t k, bool copy) {
   auto a = asPacked(ad);
   if (copy) a = a->copyPacked();
-  // todo t2606310: what is probability of (k == size-1)
   if (size_t(k) < a->m_size) {
+    // escalate to mixed for correctness; unset preserves m_nextKI
     a->packedToMixed();
     auto pos = a->findForRemove(k, false);
     if (validPos(pos)) a->erase(pos);

@@ -1,4 +1,4 @@
-<?hh
+<?php
 /**
 * A Compatibility library with PHP 5.5's simplified password hashing API.
 *
@@ -6,11 +6,11 @@
 * @license http://www.opensource.org/licenses/mit-license.html MIT License
 * @copyright 2012 The Authors
 *
-* Some changes by James Miller for integration with the HipHop VM
+* Some changes by James Miller <james@pocketrent.com> for integration with the HipHop VM
 */
 
 define('PASSWORD_BCRYPT', 1);
-define('PASSWORD_DEFAULT', PASSWORD_BCRYPT);
+define('PASSWORD_DEFAULT', 1);
 
 /**
 * Hash the password using the specified algorithm
@@ -21,7 +21,7 @@ define('PASSWORD_DEFAULT', PASSWORD_BCRYPT);
 *
 * @return string|false The hashed password, or false on error.
 */
-function password_hash(string $password, string $algo, array $options = array()) : mixed {
+function password_hash(string $password, int $algo, array $options = array()) : mixed {
 	if (!function_exists('crypt')) {
 		trigger_error("Crypt must be loaded for password_hash to function", E_USER_WARNING);
 		return null;
@@ -35,7 +35,7 @@ function password_hash(string $password, string $algo, array $options = array())
 		return null;
 	}
 	switch ($algo) {
-		case PASSWORD_BCRYPT:
+		case \PASSWORD_BCRYPT:
 			// Note that this is a C constant, but not exposed to PHP, so we don't define it here.
 			$cost = 10;
 			if (isset($options['cost'])) {

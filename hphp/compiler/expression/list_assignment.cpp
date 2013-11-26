@@ -274,6 +274,19 @@ TypePtr ListAssignment::inferTypes(AnalysisResultPtr ar, TypePtr type,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ListAssignment::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("ListAssignmentExpression", 3);
+  cg.printPropertyHeader("variables");
+  cg.printExpressionVector(m_variables);
+  cg.printPropertyHeader("expression");
+  m_array->outputCodeModel(cg);
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ListAssignment::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

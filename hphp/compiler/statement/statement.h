@@ -31,6 +31,7 @@
   virtual void analyzeProgram(AnalysisResultPtr ar);                    \
   virtual StatementPtr clone();                                         \
   virtual void inferTypes(AnalysisResultPtr ar);                        \
+  virtual void outputCodeModel(CodeGenerator &cg);                      \
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
 #define DECLARE_STATEMENT_VIRTUAL_FUNCTIONS                             \
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;                             \

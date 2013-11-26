@@ -89,6 +89,21 @@ void WhileStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void WhileStatement::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("WhileStatement", m_stmt != nullptr ? 3 : 2);
+  cg.printPropertyHeader("condition");
+  m_condition->outputCodeModel(cg);
+  if (m_stmt != nullptr) {
+    cg.printPropertyHeader("block");
+    cg.printAsBlock(m_stmt);
+  }
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void WhileStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

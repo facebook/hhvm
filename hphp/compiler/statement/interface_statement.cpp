@@ -26,6 +26,7 @@
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/util/util.h"
 #include "hphp/compiler/option.h"
+#include "hphp/compiler/code_model_enums.h"
 #include "hphp/compiler/parser/parser.h"
 
 using namespace HPHP;
@@ -250,6 +251,42 @@ StatementPtr InterfaceStatement::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 void InterfaceStatement::inferTypes(AnalysisResultPtr ar) {
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void InterfaceStatement::outputCodeModel(CodeGenerator &cg) {
+  auto numProps = 3;
+  if (m_attrList != nullptr) numProps++;
+  if (m_base != nullptr) numProps++;
+  if (m_stmt != nullptr) numProps++;
+  if (!m_docComment.empty()) numProps++;
+
+  cg.printObjectHeader("TypeStatement", numProps);
+  if (m_attrList != nullptr) {
+    cg.printPropertyHeader("attributes");
+    cg.printExpressionVector(m_attrList);
+  }
+  cg.printPropertyHeader("kind");
+  cg.printValue(PHP_INTERFACE);
+  cg.printPropertyHeader("name");
+  cg.printValue(m_originalName);
+  //TODO: type parameters (task 3262469)
+  if (m_base != nullptr) {
+    cg.printPropertyHeader("interfaces");
+    cg.printExpressionVector(m_base);
+  }
+  if (m_stmt != nullptr) {
+    cg.printPropertyHeader("block");
+    cg.printAsBlock(m_stmt);
+  }
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  if (!m_docComment.empty()) {
+    cg.printPropertyHeader("comments");
+    cg.printValue(m_docComment);
+  }
+  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

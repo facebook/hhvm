@@ -563,6 +563,51 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void MethodStatement::outputCodeModel(CodeGenerator &cg) {
+  auto numProps = 3;
+  if (m_attrList != nullptr) numProps++;
+  if (m_ref) numProps++;
+  if (m_params != nullptr) numProps++;
+  if (m_retTypeAnnotation != nullptr) numProps++;
+  if (m_stmt != nullptr) numProps++;
+  if (!m_docComment.empty()) numProps++;
+  cg.printObjectHeader("FunctionStatement", numProps);
+  if (m_attrList != nullptr) {
+    cg.printPropertyHeader("attributes");
+    cg.printExpressionVector(m_attrList);
+  }
+  cg.printPropertyHeader("modifiers");
+  m_modifiers->outputCodeModel(cg);
+  if (m_ref) {
+    cg.printPropertyHeader("returnsReference");
+    cg.printValue(m_ref);
+  }
+  cg.printPropertyHeader("name");
+  cg.printValue(m_originalName);
+  //TODO: type parameters (task 3262469)
+  if (m_params != nullptr) {
+    cg.printPropertyHeader("parameters");
+    cg.printExpressionVector(m_params);
+  }
+  if (m_retTypeAnnotation != nullptr) {
+    cg.printPropertyHeader("returnType");
+    m_retTypeAnnotation->outputCodeModel(cg);
+  }
+  if (m_stmt != nullptr) {
+    cg.printPropertyHeader("block");
+    cg.printAsBlock(m_stmt);
+  }
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  if (!m_docComment.empty()) {
+    cg.printPropertyHeader("comments");
+    cg.printValue(m_docComment);
+  }
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

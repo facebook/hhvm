@@ -132,6 +132,29 @@ TypePtr ModifierExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ModifierExpression::outputCodeModel(CodeGenerator &cg) {
+  cg.printf("V:6:\"Vector\":%d:{", (int)m_modifiers.size());
+  for (unsigned int i = 0; i < m_modifiers.size(); i++) {
+    cg.printObjectHeader("Modifier", 1);
+    cg.printPropertyHeader("name");
+    switch (m_modifiers[i]) {
+      case T_PUBLIC:    cg.printValue("public");    break;
+      case T_PROTECTED: cg.printValue("protected"); break;
+      case T_PRIVATE:   cg.printValue("private");   break;
+      case T_STATIC:    cg.printValue("static");    break;
+      case T_ABSTRACT:  cg.printValue("abstract");  break;
+      case T_FINAL:     cg.printValue("final");     break;
+      case T_ASYNC:     cg.printValue("async");     break;
+      default:
+        assert(false);
+    }
+    cg.printObjectFooter();
+  }
+  cg.printf("}");
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ModifierExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

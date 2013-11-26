@@ -34,6 +34,7 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
+CompileStringAST g_hphp_compiler_serialize_code_model_for;
 CompileStringFn g_hphp_compiler_parse;
 BuildNativeFuncUnitFn g_hphp_build_native_func_unit;
 BuildNativeClassUnitFn g_hphp_build_native_class_unit;

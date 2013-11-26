@@ -244,6 +244,11 @@ public:
                    ConstructPtr endBefore, ConstructPtr endAfter);
 
   /**
+   * Generates a serialized Code Model corresponding to this AST.
+   */
+  virtual void outputCodeModel(CodeGenerator &cg) = 0;
+
+  /**
    * Called when generating code.
    */
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) = 0;

@@ -153,6 +153,25 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void NewObjectExpression::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("NewObjectExpression", m_params == nullptr ? 2 : 3);
+  if (m_nameExp->is(Expression::KindOfScalarExpression)) {
+    cg.printPropertyHeader("className");
+  } else {
+    cg.printPropertyHeader("classExpression");
+  }
+  m_nameExp->outputCodeModel(cg);
+  if (m_params != nullptr) {
+    cg.printPropertyHeader("arguments");
+    cg.printExpressionVector(m_params);
+  }
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void NewObjectExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

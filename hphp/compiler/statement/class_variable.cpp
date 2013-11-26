@@ -280,6 +280,19 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ClassVariable::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("ClassVariableStatement", 3);
+  cg.printPropertyHeader("modifiers");
+  m_modifiers->outputCodeModel(cg);
+  cg.printPropertyHeader("expressions");
+  cg.printExpressionVector(m_declaration);
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ClassVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

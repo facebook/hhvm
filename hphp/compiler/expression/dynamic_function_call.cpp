@@ -114,6 +114,26 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void DynamicFunctionCall::outputCodeModel(CodeGenerator &cg) {
+  if (m_class || !m_className.empty()) {
+    cg.printObjectHeader("ClassMethodCallExpression", 4);
+    cg.printPropertyHeader("className");
+    StaticClassName::outputCodeModel(cg);
+    cg.printPropertyHeader("methodExpression");
+  } else {
+    cg.printObjectHeader("SimpleFunctionCallExpression", 3);
+    cg.printPropertyHeader("functionExpression");
+  }
+  m_nameExp->outputCodeModel(cg);
+  cg.printPropertyHeader("arguments");
+  cg.printExpressionVector(m_params);
+  cg.printPropertyHeader("location");
+  cg.printLocation(m_nameExp->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 void DynamicFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_class || !m_className.empty()) {

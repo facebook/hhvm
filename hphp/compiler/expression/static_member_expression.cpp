@@ -337,6 +337,22 @@ bool StaticMemberExpression::canonCompare(ExpressionPtr e) const {
   return m_className == s->m_className;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void StaticMemberExpression::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("ClassPropertyExpression", 2);
+  cg.printPropertyHeader("className");
+  StaticClassName::outputCodeModel(cg);
+  if (m_exp->is(Expression::KindOfScalarExpression)) {
+    cg.printPropertyHeader("propertyName");
+  } else {
+    cg.printPropertyHeader("propertyExpression");
+  }
+  m_exp->outputCodeModel(cg);
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions

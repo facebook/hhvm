@@ -136,6 +136,17 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void GlobalStatement::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("GlobalStatement", 2);
+  cg.printPropertyHeader("expressions");
+  m_exp->outputCodeModel(cg);
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void GlobalStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

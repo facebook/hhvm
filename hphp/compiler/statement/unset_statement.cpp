@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/unset_statement.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/block_statement.h"
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/expression/array_element_expression.h"
@@ -92,6 +92,17 @@ StatementPtr UnsetStatement::postOptimize(AnalysisResultConstPtr ar) {
 
 void UnsetStatement::inferTypes(AnalysisResultPtr ar) {
   m_exp->inferAndCheck(ar, Type::Variant, true);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void UnsetStatement::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("UnsetStatement", 2);
+  cg.printPropertyHeader("expressions");
+  cg.printExpressionVector(m_exp);
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

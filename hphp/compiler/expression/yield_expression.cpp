@@ -95,6 +95,21 @@ TypePtr YieldExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   return Type::Variant;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void YieldExpression::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("YieldExpression", m_keyExp != nullptr ? 3 : 2);
+  cg.printPropertyHeader("expression");
+  if (m_keyExp != nullptr) {
+    cg.printPropertyHeader("key");
+    m_keyExp->outputCodeModel(cg);
+  }
+  cg.printPropertyHeader("value");
+  m_valExp->outputCodeModel(cg);
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions

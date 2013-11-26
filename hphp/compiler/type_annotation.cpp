@@ -173,4 +173,47 @@ void TypeAnnotation::appendToTypeList(TypeAnnotationPtr typeList) {
   }
 }
 
+void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
+  TypeAnnotationPtr typeArgsElem = m_typeArgs;
+  auto numTypeArgs = 0;
+  while (typeArgsElem != nullptr) {
+    numTypeArgs++;
+    typeArgsElem = typeArgsElem->m_typeList;
+  }
+  typeArgsElem = m_typeArgs;
+
+  auto numProps = 1;
+  if (m_nullable) numProps++;
+  if (m_soft) numProps++;
+  if (m_function) numProps++;
+  if (numTypeArgs > 0) numProps++;
+  cg.printObjectHeader("TypeExpression", numProps);
+  cg.printPropertyHeader("name");
+  cg.printValue(m_tuple ? "tuple" : m_name);
+  if (m_nullable) {
+    cg.printPropertyHeader("isNullable");
+    cg.printValue(true);
+  }
+  if (m_soft) {
+    cg.printPropertyHeader("isSoft");
+    cg.printValue(true);
+  }
+  if (m_function) {
+    cg.printPropertyHeader("returnType");
+    typeArgsElem->outputCodeModel(cg);
+    typeArgsElem = typeArgsElem->m_typeList;
+    numTypeArgs--;
+  }
+  if (numTypeArgs > 0) {
+    cg.printPropertyHeader("typeArguments");
+    cg.printf("V:6:\"Vector\":%d:{", numTypeArgs);
+    while (typeArgsElem != nullptr) {
+      typeArgsElem->outputCodeModel(cg);
+      typeArgsElem = typeArgsElem->m_typeList;
+    }
+    printf("}");
+  }
+  cg.printObjectFooter();
+}
+
 }

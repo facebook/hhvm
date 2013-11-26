@@ -104,6 +104,28 @@ void TraitAliasStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void TraitAliasStatement::outputCodeModel(CodeGenerator &cg) {
+  auto propCount = 3;
+  auto traitName = m_traitName->getString();
+  if (!traitName.empty()) propCount++;
+  cg.printObjectHeader("TraitAliasStatement", propCount);
+  if (!traitName.empty()) {
+    cg.printPropertyHeader("traitName");
+    cg.printValue(traitName);
+  }
+  cg.printPropertyHeader("methodName1");
+  m_methodName->outputCodeModel(cg);
+  cg.printPropertyHeader("modifiers");
+  m_modifiers->outputCodeModel(cg);
+  cg.printPropertyHeader("methodName2");
+  m_newMethodName->outputCodeModel(cg);
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void TraitAliasStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

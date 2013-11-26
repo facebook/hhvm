@@ -8122,6 +8122,23 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   }
 }
 
+extern "C" {
+
+String hphp_compiler_serialize_code_model_for(String code, String prefix) {
+  AnalysisResultPtr ar(new AnalysisResult());
+  auto statements = Parser::ParseString(code, ar, nullptr, false);
+  if (statements != nullptr) {
+    std::ostringstream serialized;
+    CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel);
+    cg.setAstClassPrefix(prefix->data());
+    statements->outputCodeModel(cg);
+    std::string r(serialized.str().c_str(), serialized.str().length());
+    return r;
+  } else {
+    return "";
+  }
+}
+
 /**
  * This is the entry point from the runtime; i.e. online bytecode generation.
  * The 'filename' parameter may be NULL if there is no file associated with
@@ -8130,8 +8147,6 @@ void emitAllHHBC(AnalysisResultPtr ar) {
  * Before being actually used, hphp_compiler_parse must be called with
  * a NULL `code' parameter to do initialization.
  */
-
-extern "C" {
 
 Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
                           const char* filename) {

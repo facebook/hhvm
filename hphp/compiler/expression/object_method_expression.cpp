@@ -278,6 +278,28 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ObjectMethodExpression::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("ObjectMethodCallExpression(",
+      m_params == nullptr ? 3 : 4);
+  cg.printPropertyHeader("object");
+  m_object->outputCodeModel(cg);
+  if (m_nameExp->is(Expression::KindOfScalarExpression)) {
+    cg.printPropertyHeader("methodName");
+  } else {
+    cg.printPropertyHeader("methodExpression");
+  }
+  m_nameExp->outputCodeModel(cg);
+  if (m_params != nullptr) {
+    cg.printPropertyHeader("arguments");
+    cg.printExpressionVector(m_params);
+  }
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ObjectMethodExpression::outputPHP(CodeGenerator &cg,

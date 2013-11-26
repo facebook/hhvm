@@ -31,6 +31,7 @@
 #include "hphp/util/util.h"
 #include "hphp/compiler/statement/interface_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/code_model_enums.h"
 #include "hphp/compiler/option.h"
 #include <sstream>
 #include <algorithm>
@@ -209,6 +210,59 @@ void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 void ClassStatement::inferTypes(AnalysisResultPtr ar) {
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ClassStatement::outputCodeModel(CodeGenerator &cg) {
+  auto numProps = 4;
+  if (m_attrList != nullptr) numProps++;
+  if (m_type == T_ABSTRACT || m_type == T_FINAL) numProps++;
+  if (!m_parent.empty()) numProps++;
+  if (m_base != nullptr) numProps++;
+  if (m_stmt != nullptr) numProps++;
+  if (!m_docComment.empty()) numProps++;
+
+  cg.printObjectHeader("TypeStatement", numProps);
+  if (m_attrList != nullptr) {
+    cg.printPropertyHeader("attributes");
+    cg.printExpressionVector(m_attrList);
+  }
+  if (m_type == T_ABSTRACT) {
+    cg.printPropertyHeader("modifiers");
+    cg.printModifierVector("abstract");
+  } else if (m_type == T_FINAL) {
+    cg.printPropertyHeader("modifiers");
+    cg.printModifierVector("final");
+  }
+  cg.printPropertyHeader("kind");
+  if (m_type == T_TRAIT) {
+    cg.printValue(PHP_TRAIT);
+  } else {
+    cg.printValue(PHP_CLASS);
+  }
+  cg.printPropertyHeader("name");
+  cg.printValue(m_originalName);
+  //TODO: type parameters (task 3262469)
+  if (!m_parent.empty()) {
+    cg.printPropertyHeader("baseClass");
+    cg.printTypeExpression(m_originalParent);
+  }
+  if (m_base != nullptr) {
+    cg.printPropertyHeader("interfaces");
+    cg.printExpressionVector(m_base);
+  }
+  if (m_stmt != nullptr) {
+    cg.printPropertyHeader("block");
+    cg.printAsBlock(m_stmt);
+  }
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  if (!m_docComment.empty()) {
+    cg.printPropertyHeader("comments");
+    cg.printValue(m_docComment);
+  }
+  cg.printObjectFooter();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

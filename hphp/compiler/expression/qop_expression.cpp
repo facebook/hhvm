@@ -164,6 +164,28 @@ ExpressionPtr QOpExpression::unneededHelper() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void QOpExpression::outputCodeModel(CodeGenerator &cg) {
+  if (m_expYes == nullptr) {
+    cg.printObjectHeader("ValueIfNullExpression", 3);
+    cg.printPropertyHeader("expression");
+    m_condition->outputCodeModel(cg);
+    cg.printPropertyHeader("valueIfNull");
+  } else {
+    cg.printObjectHeader("ConditionalExpression(", 4);
+    cg.printPropertyHeader("condition");
+    m_condition->outputCodeModel(cg);
+    cg.printPropertyHeader("valueIfTrue");
+    m_expYes->outputCodeModel(cg);
+    cg.printPropertyHeader("valueIfFalse");
+  }
+  m_expNo->outputCodeModel(cg);
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void QOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

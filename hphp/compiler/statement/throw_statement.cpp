@@ -74,6 +74,17 @@ void ThrowStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ThrowStatement::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("ThrowStatement", 2);
+  cg.printPropertyHeader("expression");
+  m_exp->outputCodeModel(cg);
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ThrowStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

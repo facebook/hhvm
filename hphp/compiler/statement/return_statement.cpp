@@ -116,6 +116,20 @@ void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ReturnStatement::outputCodeModel(CodeGenerator &cg) {
+  auto nump = m_exp ? 2 : 1;
+  cg.printObjectHeader("ReturnStatement", nump);
+  if (m_exp) {
+    cg.printPropertyHeader("expression");
+    m_exp->outputCodeModel(cg);
+  }
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ReturnStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

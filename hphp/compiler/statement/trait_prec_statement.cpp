@@ -108,6 +108,21 @@ void TraitPrecStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void TraitPrecStatement::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("TraitInsteadStatement", 3);
+  cg.printPropertyHeader("traitName");
+  m_traitName->outputCodeModel(cg);
+  cg.printPropertyHeader("methodName");
+  m_methodName->outputCodeModel(cg);
+  cg.printPropertyHeader("otherTraitNames");
+  cg.printExpressionVector(m_otherTraitNames);
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void TraitPrecStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

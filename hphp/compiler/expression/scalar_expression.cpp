@@ -384,6 +384,45 @@ std::string ScalarExpression::getIdentifier() const {
   return "";
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void ScalarExpression::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("ScalarExpression", 2);
+  cg.printPropertyHeader("value");
+  switch (m_type) {
+    case T_CONSTANT_ENCAPSED_STRING:
+    case T_ENCAPSED_AND_WHITESPACE:
+    case T_STRING:
+    case T_NUM_STRING:
+      cg.printValue(m_value);
+      break;
+    case T_LNUMBER:
+    case T_COMPILER_HALT_OFFSET:
+      cg.printValue((int64_t)strtoll(m_value.c_str(), nullptr, 0));
+      break;
+    case T_LINE:
+      cg.printValue(String(m_translated).toInt64());
+      break;
+    case T_TRAIT_C:
+    case T_CLASS_C:
+    case T_NS_C:
+    case T_METHOD_C:
+    case T_FUNC_C:
+      cg.printValue(m_translated);
+      break;
+    case T_DNUMBER:
+      cg.printValue(String(m_value).toDouble());
+      break;
+    default:
+      assert(false);
+  }
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   switch (m_type) {
   case T_CONSTANT_ENCAPSED_STRING:

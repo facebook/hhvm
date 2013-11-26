@@ -135,6 +135,25 @@ void CatchStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void CatchStatement::outputCodeModel(CodeGenerator &cg) {
+  auto numProps = 3;
+  if (m_stmt != nullptr) numProps++;
+  cg.printObjectHeader("CatchStatement", numProps);
+  cg.printPropertyHeader("className");
+  cg.printValue(m_origClassName);
+  cg.printPropertyHeader("variableName");
+  cg.printValue(m_variable->getName());
+  if (m_stmt != nullptr) {
+    cg.printPropertyHeader("block");
+    cg.printAsBlock(m_stmt);
+  }
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void CatchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

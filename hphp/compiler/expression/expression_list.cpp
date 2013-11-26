@@ -465,6 +465,15 @@ bool ExpressionList::canonCompare(ExpressionPtr e) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ExpressionList::outputCodeModel(CodeGenerator &cg) {
+  for (unsigned int i = 0; i < m_exps.size(); i++) {
+    ExpressionPtr exp = m_exps[i];
+    cg.printExpression(exp, exp?exp->hasContext(RefParameter):false);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ExpressionList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

@@ -94,6 +94,19 @@ void BlockStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void BlockStatement::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("BlockStatement", m_stmts != nullptr ? 2 : 1);
+  if (m_stmts != nullptr) {
+    cg.printPropertyHeader("statements");
+    m_stmts->outputCodeModel(cg);
+  }
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void BlockStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

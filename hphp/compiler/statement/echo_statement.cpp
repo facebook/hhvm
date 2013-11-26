@@ -82,6 +82,17 @@ void EchoStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void EchoStatement::outputCodeModel(CodeGenerator &cg) {
+  cg.printObjectHeader("EchoStatement", 2);
+  cg.printPropertyHeader("expression");
+  m_exp->outputCodeModel(cg);
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void EchoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

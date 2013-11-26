@@ -121,6 +121,36 @@ void ForStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void ForStatement::outputCodeModel(CodeGenerator &cg) {
+  auto numProps = 1;
+  if (m_exp1 != nullptr) numProps++;
+  if (m_exp2 != nullptr) numProps++;
+  if (m_exp3 != nullptr) numProps++;
+  if (m_stmt != nullptr) numProps++;
+  cg.printObjectHeader("ForStatement", numProps);
+  if (m_exp1 != nullptr) {
+    cg.printPropertyHeader("expression1");
+    m_exp1->outputCodeModel(cg);
+  }
+  if (m_exp2 != nullptr) {
+    cg.printPropertyHeader("expression2");
+    m_exp2->outputCodeModel(cg);
+  }
+  if (m_exp3 != nullptr) {
+    cg.printPropertyHeader("expression3");
+    m_exp3->outputCodeModel(cg);
+  }
+  if (m_stmt != nullptr) {
+    cg.printPropertyHeader("block");
+    cg.printAsBlock(m_stmt);
+  }
+  cg.printPropertyHeader("location");
+  cg.printLocation(this->getLocation());
+  cg.printObjectFooter();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ForStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

@@ -284,6 +284,12 @@ TypePtr IncludeExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void IncludeExpression::outputCodeModel(CodeGenerator &cg) {
+  UnaryOpExpression::outputCodeModel(cg);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void IncludeExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {

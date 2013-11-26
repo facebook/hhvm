@@ -36,6 +36,7 @@
   virtual ExpressionPtr clone();                                        \
   virtual TypePtr inferTypes(AnalysisResultPtr ar, TypePtr type,        \
                              bool coerce);                              \
+  virtual void outputCodeModel(CodeGenerator &cg);                      \
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
 #define DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS                            \
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;                            \

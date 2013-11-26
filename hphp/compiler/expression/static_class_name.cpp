@@ -167,6 +167,20 @@ bool StaticClassName::checkPresent() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void StaticClassName::outputCodeModel(CodeGenerator &cg) {
+  if (isSelf()) {
+    cg.printf("self");
+  } else if (isParent()) {
+    cg.printf("parent");
+  } else if (isStatic()) {
+    cg.printf("static");
+  } else {
+    cg.printf("%s", m_origClassName.c_str());
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void StaticClassName::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_class) {
     m_class->outputPHP(cg, ar);

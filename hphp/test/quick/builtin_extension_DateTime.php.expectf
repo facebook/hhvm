@@ -1,7 +1,7 @@
 DateTime
 object(DateTime)#2 (0) {
 }
-string(70) "O:8:"DateTime":1:{s:10:"_date_time";s:25:"2012-06-23T11:00:00-07:00";}"
+string(70) "O:8:"DateTime":1:{s:10:"_date_time";s:25:"2012-06-23T11:00:00-%s";}"
 object(DateTime)#3 (0) {
 }
 array(18) {
@@ -48,7 +48,7 @@ object(A_DateTime)#5 (1) {
   ["___x"]=>
   NULL
 }
-string(73) "O:10:"A_DateTime":1:{s:10:"_date_time";s:25:"2012-06-23T11:00:00-07:00";}"
+string(73) "O:10:"A_DateTime":1:{s:10:"_date_time";s:25:"2012-06-23T11:00:00-%s";}"
 object(A_DateTime)#6 (1) {
   ["___x"]=>
   NULL

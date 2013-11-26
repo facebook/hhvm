@@ -681,7 +681,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   // Note: probably need to clear AttrLeaf here eventually.
   ret->attrs                  = fe.attrs();
   ret->userAttributes         = fe.getUserAttributes();
-  ret->userRetTypeConstraint  = fe.returnTypeConstraint();
+  ret->userRetTypeConstraint  = fe.returnUserType();
   ret->originalFilename       = fe.originalFilename();
 
   ret->top                    = fe.top();

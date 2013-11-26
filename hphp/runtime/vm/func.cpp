@@ -824,7 +824,8 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_activeUnnamedLocals(0)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
-  , m_retTypeConstraint(nullptr)
+  , m_retTypeConstraint(TypeConstraint())
+  , m_retUserType(nullptr)
   , m_ehTabSorted(false)
   , m_returnType(KindOfInvalid)
   , m_top(false)
@@ -851,7 +852,8 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_activeUnnamedLocals(0)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
-  , m_retTypeConstraint(nullptr)
+  , m_retTypeConstraint(TypeConstraint())
+  , m_retUserType(nullptr)
   , m_ehTabSorted(false)
   , m_returnType(KindOfInvalid)
   , m_top(false)
@@ -1189,6 +1191,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_nativeFuncPtr = m_nativeFuncPtr;
   f->shared()->m_generatorBodyName = m_generatorBodyName;
   f->shared()->m_retTypeConstraint = m_retTypeConstraint;
+  f->shared()->m_retUserType = m_retUserType;
   f->shared()->m_originalFilename = m_originalFilename;
   f->shared()->m_isGenerated = isGenerated;
   f->shared()->m_isAsync = m_isAsync;
@@ -1306,6 +1309,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_userAttributes)
     (m_generatorBodyName)
     (m_retTypeConstraint)
+    (m_retUserType)
     (m_originalFilename)
     ;
 }

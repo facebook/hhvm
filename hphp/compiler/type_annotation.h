@@ -107,6 +107,10 @@ public:
    */
   bool isMixed() const { return !m_name.compare("mixed"); }
 
+  bool isVoid() const { return !m_name.compare("void"); }
+
+  bool isThis() const { return !m_name.compare("this"); }
+
   /*
    * Returns whether this TypeAnnotation is "simple"---as described
    * above, this implies it has only one level of depth.  Both the

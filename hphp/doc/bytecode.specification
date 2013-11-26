@@ -664,10 +664,10 @@ Below is the complete list of verifiability rules. If the bytecode to be
 executed does not come from a trusted source, it is the responsibility of the
 bytecode execution engine to verify that these invariants hold.
 
-1) The depth of the evaluation stack at any given point in the bytecode must
+1) The depth of the evaluation stack at any given point in the bytecode must be
 the same for all possible control flow paths. The flavor descriptor of any
-given slot on the evaluation stack at any given point in the bytecode must the
-same for all possible control flow paths.
+given slot on the evaluation stack at any given point in the bytecode must be
+the same for all possible control flow paths.
 
 2) No instruction may consume more values from the evaluation stack than are
 available at that given point in the bytecode. Likewise, the flavor descriptor

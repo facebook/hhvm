@@ -55,22 +55,14 @@ struct Func {
 
     template<class SerDe>
     void serde(SerDe& sd) {
-      const StringData* tcName      = m_typeConstraint.typeName();
-      TypeConstraint::Flags tcFlags = m_typeConstraint.flags();
-
       sd(m_builtinType)
         (m_funcletOff)
         (m_defVal)
         (m_phpCode)
-        (tcName)
-        (tcFlags)
+        (m_typeConstraint)
         (m_userAttributes)
         (m_userType)
         ;
-
-      if (SerDe::deserializing) {
-        setTypeConstraint(TypeConstraint(tcName, tcFlags));
-      }
     }
 
     void setBuiltinType(DataType type) { m_builtinType = type; }
@@ -326,8 +318,12 @@ struct Func {
     return id < numNamedLocals() ? shared()->m_localNames[id] : 0;
   }
 
-  const StringData* returnTypeConstraint() const {
+  const TypeConstraint& returnTypeConstraint() const {
     return shared()->m_retTypeConstraint;
+  }
+
+  const StringData* returnUserType() const {
+    return shared()->m_retUserType;
   }
 
   const StringData* originalFilename() const {
@@ -511,7 +507,8 @@ private:
     bool m_isAsync : 1;
     UserAttributeMap m_userAttributes;
     const StringData* m_generatorBodyName;
-    const StringData* m_retTypeConstraint;
+    TypeConstraint m_retTypeConstraint;
+    const StringData* m_retUserType;
     // per-func filepath for traits flattened during repo construction
     const StringData* m_originalFilename;
     SharedData(PreClass* preClass, Id id, Offset base,
@@ -623,10 +620,21 @@ public:
   Id numParams() const { return m_params.size(); }
 
   void setReturnTypeConstraint(const StringData* retTypeConstraint) {
+    m_retTypeConstraint = TypeConstraint(
+      retTypeConstraint,
+      TypeConstraint::NoFlags);
+  }
+  void setReturnTypeConstraint(const TypeConstraint retTypeConstraint) {
     m_retTypeConstraint = retTypeConstraint;
   }
-  const StringData* returnTypeConstraint() const {
+  const TypeConstraint& returnTypeConstraint() const {
     return m_retTypeConstraint;
+  }
+  void setReturnUserType(const StringData* retUserType) {
+    m_retUserType = retUserType;
+  }
+  const StringData* returnUserType() const {
+    return m_retUserType;
   }
 
   Id allocIterator();
@@ -722,7 +730,9 @@ public:
   }
   const StringData* originalFilename() const { return m_originalFilename; }
 
-  void setReturnType(DataType dt) { m_returnType = dt; }
+  void setReturnType(DataType dt) {
+    m_returnType = dt;
+  }
   void setDocComment(const char *dc) {
     m_docComment = makeStaticString(dc);
   }
@@ -763,7 +773,8 @@ private:
   int m_maxStackCells;
   SVInfoVec m_staticVars;
 
-  const StringData* m_retTypeConstraint;
+  TypeConstraint m_retTypeConstraint;
+  const StringData* m_retUserType;
 
   EHEntVec m_ehtab;
   bool m_ehTabSorted;

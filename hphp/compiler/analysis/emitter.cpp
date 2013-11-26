@@ -6818,7 +6818,7 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     fillFuncEmitterParams(fe, meth->getParams());
 
     // copy declared return type (hack)
-    fe->setReturnTypeConstraint(
+    fe->setReturnUserType(
       makeStaticString(meth->getReturnTypeConstraint()));
   }
 

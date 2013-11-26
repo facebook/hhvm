@@ -435,7 +435,7 @@ static void set_function_info(Array &ret, const Func* func) {
       ret.set(s_hphp,     true_varNR);
     }
   }
-  set_return_type_constraint(ret, func->returnTypeConstraint());
+  set_return_type_constraint(ret, func->returnUserType());
 
   // doc comments
   set_doc_comment(ret, func->docComment());

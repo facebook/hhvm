@@ -323,6 +323,21 @@ enum IncDecOp {
   IncDec_invalid
 };
 
+#define IS_TYPE_OPS \
+  IS_TYPE_OP(IsNull) \
+  IS_TYPE_OP(IsBool) \
+  IS_TYPE_OP(IsInt) \
+  IS_TYPE_OP(IsDouble) \
+  IS_TYPE_OP(IsString) \
+  IS_TYPE_OP(IsArray) \
+  IS_TYPE_OP(IsObject) \
+
+enum IsTypeOp : uint8_t {
+#define IS_TYPE_OP(op) op,
+  IS_TYPE_OPS
+#undef IS_TYPE_OP
+};
+
 // NB: right now hphp/hhbbc/abstract-interp.cpp depends on this enum
 // being in order from smaller types to larger ones.
 #define ASSERTT_OPS                             \
@@ -513,20 +528,8 @@ enum SetOpOp {
   O(EmptyS,          NA,               TWO(AV,CV),      ONE(CV),    NF) \
   O(EmptyM,          ONE(MA),          MMANY,           ONE(CV),    NF) \
   /* NB: isTypePred depends on this ordering. */ \
-  O(IsNullC,         NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IsBoolC,         NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IsIntC,          NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IsDoubleC,       NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IsStringC,       NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IsArrayC,        NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IsObjectC,       NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IsNullL,         ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(IsBoolL,         ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(IsIntL,          ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(IsDoubleL,       ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(IsStringL,       ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(IsArrayL,        ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(IsObjectL,       ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(IsTypeC,         ONE(OA),          ONE(CV),         ONE(CV),    NF) \
+  O(IsTypeL,         TWO(OA,LA),       NOV,             ONE(CV),    NF) \
   O(AssertTL,        TWO(LA,OA),       NOV,             NOV,        NF) \
   O(AssertTStk,      TWO(IVA,OA),      NOV,             NOV,        NF) \
   O(AssertObjL,      THREE(LA,IVA,SA), NOV,             NOV,        NF) \
@@ -830,7 +833,7 @@ int immSize(const Op* opcode, int idx);
 bool immIsVector(Op opcode, int idx);
 bool hasImmVector(Op opcode);
 inline bool isTypePred(const Op op) {
-  return op >= OpIsNullC && op <= OpIsObjectL;
+  return op == OpIsTypeC || op == OpIsTypeL;
 }
 int instrLen(const Op* opcode);
 int numSuccs(const Op* opcode);

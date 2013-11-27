@@ -4699,44 +4699,59 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetM(PC& pc) {
   isSetEmptyM<false>(pc);
 }
 
-#define IOP_TYPE_CHECK_INSTR_L(checkInit, what, predicate)          \
-OPTBLD_INLINE void VMExecutionContext::iopIs ## what ## L(PC& pc) { \
-  NEXT();                                                           \
-  DECODE_LA(local);                                                 \
-  TypedValue* tv = frame_local(m_fp, local);                        \
-  if (checkInit && tv->m_type == KindOfUninit) {                    \
-    raise_undefined_local(m_fp, local);                             \
-  }                                                                 \
-  bool ret = predicate(tvAsCVarRef(tv));                            \
-  TypedValue* topTv = m_stack.allocTV();                            \
-  topTv->m_data.num = ret;                                          \
-  topTv->m_type = KindOfBoolean;                                    \
-}                                                                   \
-
-#define IOP_TYPE_CHECK_INSTR_C(checkInit, what, predicate)          \
-OPTBLD_INLINE void VMExecutionContext::iopIs ## what ## C(PC& pc) { \
-  NEXT();                                                           \
-  TypedValue* topTv = m_stack.topTV();                              \
-  assert(topTv->m_type != KindOfRef);                               \
-  bool ret = predicate(tvAsCVarRef(topTv));                         \
-  tvRefcountedDecRefCell(topTv);                                    \
-  topTv->m_data.num = ret;                                          \
-  topTv->m_type = KindOfBoolean;                                    \
+OPTBLD_INLINE void VMExecutionContext::iopIssetL(PC& pc) {
+  NEXT();
+  DECODE_LA(local);
+  TypedValue* tv = frame_local(m_fp, local);
+  bool ret = is_not_null(tvAsCVarRef(tv));
+  TypedValue* topTv = m_stack.allocTV();
+  topTv->m_data.num = ret;
+  topTv->m_type = KindOfBoolean;
 }
 
-#define IOP_TYPE_CHECK_INSTR(checkInit, what, predicate)          \
-  IOP_TYPE_CHECK_INSTR_L(checkInit, what, predicate)              \
-  IOP_TYPE_CHECK_INSTR_C(checkInit, what, predicate)              \
+OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, unsigned char op) {
+  switch (op) {
+     case IsNull:
+      return is_null(tvAsCVarRef(tv));
+    case IsBool:
+      return is_bool(tvAsCVarRef(tv));
+    case IsInt:
+      return is_int(tvAsCVarRef(tv));
+    case IsDouble:
+      return is_double(tvAsCVarRef(tv));
+    case IsArray:
+      return is_array(tvAsCVarRef(tv));
+    case IsObject:
+      return is_object(tvAsCVarRef(tv));
+    case IsString:
+      return is_string(tvAsCVarRef(tv));
+    default: not_reached();
+  }
+}
 
-IOP_TYPE_CHECK_INSTR_L(false, set, is_not_null)
-IOP_TYPE_CHECK_INSTR(true,   Null, is_null)
-IOP_TYPE_CHECK_INSTR(true,  Array, is_array)
-IOP_TYPE_CHECK_INSTR(true, String, is_string)
-IOP_TYPE_CHECK_INSTR(true, Object, is_object)
-IOP_TYPE_CHECK_INSTR(true,    Int, is_int)
-IOP_TYPE_CHECK_INSTR(true, Double, is_double)
-IOP_TYPE_CHECK_INSTR(true,   Bool, is_bool)
-#undef IOP_TYPE_CHECK_INSTR
+OPTBLD_INLINE void VMExecutionContext::iopIsTypeL(PC& pc) {
+  NEXT();
+  DECODE_OA(op);
+  DECODE_LA(local);
+  TypedValue* tv = frame_local(m_fp, local);
+  if (tv->m_type == KindOfUninit) {
+    raise_undefined_local(m_fp, local);
+  }
+  TypedValue* topTv = m_stack.allocTV();
+  topTv->m_data.num = isTypeHelper(tv, op);
+  topTv->m_type = KindOfBoolean;
+}
+
+OPTBLD_INLINE void VMExecutionContext::iopIsTypeC(PC& pc) {
+  NEXT();
+  DECODE_OA(op);
+  TypedValue* topTv = m_stack.topTV();
+  assert(topTv->m_type != KindOfRef);
+  bool ret = isTypeHelper(topTv, op);
+  tvRefcountedDecRefCell(topTv);
+  topTv->m_data.num = ret;
+  topTv->m_type = KindOfBoolean;
+}
 
 OPTBLD_INLINE static void implAssertT(TypedValue* tv, AssertTOp op) {
   switch (op) {

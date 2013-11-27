@@ -175,6 +175,7 @@
   CASE(LateBoundCls) \
   CASE(IssetS) \
   CASE(IssetG) \
+  CASE(IssetL) \
   CASE(EmptyS) \
   CASE(EmptyG) \
   CASE(VGetS) \
@@ -209,7 +210,8 @@
   CASE(AssignToLocalOp) \
   CASE(FPushCufOp) \
   CASE(FPassCOp) \
-  CASE(CheckTypeOp)
+  CASE(CheckTypeLOp) \
+  CASE(CheckTypeCOp)
 
 // PSEUDOINSTR_DISPATCH is a switch() fragment that routes opcodes to their
 // shared handlers, as per the PSEUDOINSTRS macro.
@@ -248,21 +250,9 @@
   case Op::FPushCufF:                             \
   case Op::FPushCufSafe:                          \
     func(FPushCufOp, i)                           \
-  case Op::IssetL:                                \
-  case Op::IsNullL:                               \
-  case Op::IsStringL:                             \
-  case Op::IsArrayL:                              \
-  case Op::IsIntL:                                \
-  case Op::IsObjectL:                             \
-  case Op::IsBoolL:                               \
-  case Op::IsDoubleL:                             \
-  case Op::IsNullC:                               \
-  case Op::IsStringC:                             \
-  case Op::IsArrayC:                              \
-  case Op::IsIntC:                                \
-  case Op::IsObjectC:                             \
-  case Op::IsBoolC:                               \
-  case Op::IsDoubleC:                             \
-    func(CheckTypeOp, i)
+  case Op::IsTypeL:                               \
+    func(CheckTypeLOp, i)                         \
+  case Op::IsTypeC:                               \
+    func(CheckTypeCOp, i)
 
 #endif

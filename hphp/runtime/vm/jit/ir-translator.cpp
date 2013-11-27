@@ -807,29 +807,34 @@ void IRTranslator::translateFPassG(const NormalizedInstruction& ni) {
 }
 
 void
-IRTranslator::translateCheckTypeOp(const NormalizedInstruction& ni) {
-  auto const op = ni.op();
-  auto const locId = ni.imm[0].u_LA;
+IRTranslator::translateIssetL(const NormalizedInstruction& ni) {
+  HHIR_EMIT(IssetL, ni.imm[0].u_LA);
+}
+
+static inline DataType typeOpToDataType(IsTypeOp op) {
   switch (op) {
-    case OpIssetL:    HHIR_EMIT(IssetL, locId);
-    case OpIsNullL:   HHIR_EMIT(IsNullL, locId);
-    case OpIsNullC:   HHIR_EMIT(IsNullC);
-    case OpIsStringL: HHIR_EMIT(IsStringL, locId);
-    case OpIsStringC: HHIR_EMIT(IsStringC);
-    case OpIsArrayL:  HHIR_EMIT(IsArrayL, locId);
-    case OpIsArrayC:  HHIR_EMIT(IsArrayC);
-    case OpIsIntL:    HHIR_EMIT(IsIntL, locId);
-    case OpIsIntC:    HHIR_EMIT(IsIntC);
-    case OpIsBoolL:   HHIR_EMIT(IsBoolL, locId);
-    case OpIsBoolC:   HHIR_EMIT(IsBoolC);
-    case OpIsDoubleL: HHIR_EMIT(IsDoubleL, locId);
-    case OpIsDoubleC: HHIR_EMIT(IsDoubleC);
-    case OpIsObjectL: HHIR_EMIT(IsObjectL, locId);
-    case OpIsObjectC: HHIR_EMIT(IsObjectC);
-    // Note: for IsObject*, we need to emit some kind of
-    // call to ObjectData::isResource or something.
-    default:          not_reached();
+    case IsNull:   return KindOfNull;
+    case IsInt:    return KindOfInt64;
+    case IsDouble: return KindOfDouble;
+    case IsBool:   return KindOfBoolean;
+    case IsString: return KindOfString;
+    case IsArray:  return KindOfArray;
+    case IsObject: return KindOfObject;
+    default: not_reached();
   }
+}
+
+void
+IRTranslator::translateCheckTypeLOp(const NormalizedInstruction& ni) {
+  auto const op = ni.imm[0].u_OA;
+  auto const locId = ni.imm[1].u_LA;
+  HHIR_EMIT(IsTypeL, locId, typeOpToDataType((IsTypeOp)op));
+}
+
+void
+IRTranslator::translateCheckTypeCOp(const NormalizedInstruction& ni) {
+  auto const op = ni.imm[0].u_OA;
+  HHIR_EMIT(IsTypeC, typeOpToDataType((IsTypeOp)op));
 }
 
 void

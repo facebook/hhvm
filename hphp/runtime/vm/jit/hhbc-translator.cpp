@@ -1849,33 +1849,18 @@ void HhbcTranslator::emitEmptyL(int32_t id) {
   push(gen(Not, gen(ConvCellToBool, ld)));
 }
 
-void HhbcTranslator::emitIsTypeC(Type t) {
+void HhbcTranslator::emitIsTypeC(DataType t) {
   SSATmp* src = popC();
-  push(gen(IsType, t, src));
+  push(gen(IsType, Type(t), src));
   gen(DecRef, src);
 }
 
-void HhbcTranslator::emitIsTypeL(Type t, int id) {
+void HhbcTranslator::emitIsTypeL(int id, DataType t) {
   auto exit = makeExit();
   // TODO(t2598894) We should use the specific type if it's available but not
   // require it.
-  push(gen(IsType, t, ldLocInnerWarn(id, exit, DataTypeSpecific)));
+  push(gen(IsType, Type(t), ldLocInnerWarn(id, exit, DataTypeSpecific)));
 }
-
-void HhbcTranslator::emitIsNullL(int id)   { emitIsTypeL(Type::Null, id);}
-void HhbcTranslator::emitIsArrayL(int id)  { emitIsTypeL(Type::Arr, id); }
-void HhbcTranslator::emitIsStringL(int id) { emitIsTypeL(Type::Str, id); }
-void HhbcTranslator::emitIsObjectL(int id) { emitIsTypeL(Type::Obj, id); }
-void HhbcTranslator::emitIsIntL(int id)    { emitIsTypeL(Type::Int, id); }
-void HhbcTranslator::emitIsBoolL(int id)   { emitIsTypeL(Type::Bool, id);}
-void HhbcTranslator::emitIsDoubleL(int id) { emitIsTypeL(Type::Dbl, id); }
-void HhbcTranslator::emitIsNullC()   { emitIsTypeC(Type::Null);}
-void HhbcTranslator::emitIsArrayC()  { emitIsTypeC(Type::Arr); }
-void HhbcTranslator::emitIsStringC() { emitIsTypeC(Type::Str); }
-void HhbcTranslator::emitIsObjectC() { emitIsTypeC(Type::Obj); }
-void HhbcTranslator::emitIsIntC()    { emitIsTypeC(Type::Int); }
-void HhbcTranslator::emitIsBoolC()   { emitIsTypeC(Type::Bool);}
-void HhbcTranslator::emitIsDoubleC() { emitIsTypeC(Type::Dbl); }
 
 void HhbcTranslator::emitPopA() { popA(); }
 

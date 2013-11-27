@@ -776,32 +776,22 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   template<class Op>
-  void isTypeLImpl(const Op& op, Type test) {
-    if (!locCouldBeUninit(op.loc1)) { nothrow(); constprop(); }
-    auto const loc = locAsCell(op.loc1);
-    isTypeImpl(loc, test);
+  void isTypeLImpl(const Op& op) {
+    if (!locCouldBeUninit(op.loc2)) { nothrow(); constprop(); }
+    auto const loc = locAsCell(op.loc2);
+    //FIXME: task: 3287686
+    isTypeImpl(loc, TNull);
   }
 
   template<class Op>
-  void isTypeCImpl(const Op& op, Type test) {
+  void isTypeCImpl(const Op& op) {
     nothrow();
-    isTypeImpl(popC(), test);
+    //FIXME: task: 3287686
+    isTypeImpl(popC(), TNull);
   }
 
-  void operator()(const bc::IsNullC& op)   { isTypeCImpl(op, TNull); }
-  void operator()(const bc::IsBoolC& op)   { isTypeCImpl(op, TBool); }
-  void operator()(const bc::IsIntC& op)    { isTypeCImpl(op, TInt); }
-  void operator()(const bc::IsDoubleC& op) { isTypeCImpl(op, TDbl); }
-  void operator()(const bc::IsStringC& op) { isTypeCImpl(op, TStr); }
-  void operator()(const bc::IsArrayC& op)  { isTypeCImpl(op, TArr); }
-  void operator()(const bc::IsObjectC& op) { isTypeCImpl(op, TObj); }
-  void operator()(const bc::IsNullL& op)   { isTypeLImpl(op, TNull); }
-  void operator()(const bc::IsBoolL& op)   { isTypeLImpl(op, TBool); }
-  void operator()(const bc::IsIntL& op)    { isTypeLImpl(op, TInt); }
-  void operator()(const bc::IsDoubleL& op) { isTypeLImpl(op, TDbl); }
-  void operator()(const bc::IsStringL& op) { isTypeLImpl(op, TStr); }
-  void operator()(const bc::IsArrayL& op)  { isTypeLImpl(op, TArr); }
-  void operator()(const bc::IsObjectL& op) { isTypeLImpl(op, TObj); }
+  void operator()(const bc::IsTypeC& op)   { isTypeCImpl(op); }
+  void operator()(const bc::IsTypeL& op)   { isTypeLImpl(op); }
 
   void operator()(const bc::InstanceOfD& op) {
     auto const t1 = popC();

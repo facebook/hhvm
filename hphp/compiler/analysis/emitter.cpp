@@ -4427,7 +4427,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         else if (call->isCallToFunction("is_"#what) &&                \
                  params && params->getCount() == 1) {                 \
           visit((*call->getParams())[0]);                             \
-          emitIs ## What(e);                                          \
+          emitIsType(e, Is ## What);                                  \
           return true;                                                \
         }
       TYPE_CHECK_INSTR(null, Null)
@@ -5150,7 +5150,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         // if expr is null, just continue
         emitVirtualLocal(exprLoc);
-        emitIsNull(e);
+        emitIsType(e, IsNull);
         e.JmpNZ(awaitNull);
 
         emitVirtualLocal(exprLoc);
@@ -5774,7 +5774,7 @@ void EmitterVisitor::emitIsset(Emitter& e) {
       // code is valid. Once the parser handles this correctly,
       // the R and C cases can go.
       case StackSym::R:  e.UnboxR(); // fall through
-      case StackSym::C:  e.IsNullC(); e.Not(); break;
+      case StackSym::C:  e.IsTypeC(IsNull); e.Not(); break;
       default: {
         unexpectedStackSym(sym, "emitIsset");
         break;
@@ -5787,32 +5787,22 @@ void EmitterVisitor::emitIsset(Emitter& e) {
   }
 }
 
-#define EMIT_TYPE_CHECK_INSTR(What)                     \
-void EmitterVisitor::emitIs ## What(Emitter& e) {       \
-  if (checkIfStackEmpty("Is"#What)) return;             \
-                                                        \
-  emitConvertToCellOrLoc(e);                            \
-  switch (char sym = m_evalStack.top()) {               \
-  case StackSym::L:                                     \
-    e.Is ## What ## L(                                  \
-      m_evalStack.getLoc(m_evalStack.size() - 1));      \
-    break;                                              \
-  case StackSym::C:                                     \
-    e.Is ## What ## C();                                \
-    break;                                              \
-  default:                                              \
-    unexpectedStackSym(sym, "emitIs" #What);            \
-  }                                                     \
-}
+void EmitterVisitor::emitIsType(Emitter& e, IsTypeOp op) {
+  if (checkIfStackEmpty("IsType")) return;
 
-EMIT_TYPE_CHECK_INSTR(Null);
-EMIT_TYPE_CHECK_INSTR(Bool);
-EMIT_TYPE_CHECK_INSTR(Int);
-EMIT_TYPE_CHECK_INSTR(Double);
-EMIT_TYPE_CHECK_INSTR(String);
-EMIT_TYPE_CHECK_INSTR(Array);
-EMIT_TYPE_CHECK_INSTR(Object);
-#undef EMIT_TYPE_CHECK_INSTR
+  emitConvertToCellOrLoc(e);
+  switch (char sym = m_evalStack.top()) {
+  case StackSym::L:
+    e.IsTypeL(
+      op, m_evalStack.getLoc(m_evalStack.size() - 1));
+    break;
+  case StackSym::C:
+    e.IsTypeC(op);
+    break;
+  default:
+    unexpectedStackSym(sym, "emitIsType");
+  }
+}
 
 void EmitterVisitor::emitEmpty(Emitter& e) {
   if (checkIfStackEmpty("Empty*")) return;

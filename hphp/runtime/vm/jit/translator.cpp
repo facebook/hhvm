@@ -1069,20 +1069,8 @@ static const struct {
   { OpEmptyG,      {Stack1,           Stack1,       OutBoolean,        0 }},
   { OpEmptyS,      {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpEmptyM,      {MVector,          Stack1,       OutBoolean,        1 }},
-  { OpIsNullC,     {Stack1,           Stack1,       OutBoolean,        0 }},
-  { OpIsBoolC,     {Stack1,           Stack1,       OutBoolean,        0 }},
-  { OpIsIntC,      {Stack1,           Stack1,       OutBoolean,        0 }},
-  { OpIsDoubleC,   {Stack1,           Stack1,       OutBoolean,        0 }},
-  { OpIsStringC,   {Stack1,           Stack1,       OutBoolean,        0 }},
-  { OpIsArrayC,    {Stack1,           Stack1,       OutBoolean,        0 }},
-  { OpIsObjectC,   {Stack1,           Stack1,       OutBoolean,        0 }},
-  { OpIsNullL,     {Local,            Stack1,       OutBoolean,        1 }},
-  { OpIsBoolL,     {Local,            Stack1,       OutBoolean,        1 }},
-  { OpIsIntL,      {Local,            Stack1,       OutBoolean,        1 }},
-  { OpIsDoubleL,   {Local,            Stack1,       OutBoolean,        1 }},
-  { OpIsStringL,   {Local,            Stack1,       OutBoolean,        1 }},
-  { OpIsArrayL,    {Local,            Stack1,       OutBoolean,        1 }},
-  { OpIsObjectL,   {Local,            Stack1,       OutBoolean,        1 }},
+  { OpIsTypeC,     {Stack1,           Stack1,       OutBoolean,        0 }},
+  { OpIsTypeL,     {Local,            Stack1,       OutBoolean,        1 }},
 
   /*** 7. Mutator instructions ***/
 
@@ -2019,6 +2007,9 @@ void getInputsImpl(SrcKey startSk,
       case OpFPassL:
         loc = ni->imm[1].u_IVA;
         break;
+      case OpIsTypeL:
+        loc = ni->imm[1].u_IVA;
+        break;
 
       default:
         loc = ni->imm[0].u_IVA;
@@ -2630,7 +2621,8 @@ void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
     const Unit* unit = ni->m_unit;
     src.advance(unit);
     Op next = toOp(*unit->at(src.offset()));
-    if (next == OpInstanceOfD || next == OpIsNullC) {
+    if (next == OpInstanceOfD
+          || (next == OpIsTypeC && ni->imm[0].u_OA == IsNull)) {
       ni->outStack->rtt = RuntimeType(KindOfObject);
     }
     return;

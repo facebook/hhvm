@@ -1440,50 +1440,38 @@ EmptyS    [C A]  ->  [C:Bool]
   pushes true, otherwise this instruction reads the static property into x and
   pushes !(x) onto the stack.
 
-IsNullC                          [C]  ->  [C:Bool]
-IsBoolC                          [C]  ->  [C:Bool]
-IsIntC                           [C]  ->  [C:Bool]
-IsDoubleC                        [C]  ->  [C:Bool]
-IsStringC                        [C]  ->  [C:Bool]
-IsArrayC                         [C]  ->  [C:Bool]
-IsObjectC                        [C]  ->  [C:Bool]
+IsTypeC  <op>                     [C]  ->  [C:Bool]
 
-  Is type. This instruction first loads a type into t as given by the following
-  table:
+  Is type. This instruction first loads a type into t based on the operand op,
+  as given by the following table:
 
-    instruction      t
-    -------------+------
-      IsNullC    | Null
-      IsBoolC    | Bool
-      IsIntC     |  Int
-      IsDoubleC  |  Dbl
-      IsStringC  |  Str
-      IsArrayC   |  Arr
-      IsObjectC  |  Obj
+    operand        t
+    -----------+------
+      IsNull   | Null
+      IsBool   | Bool
+      IsInt    |  Int
+      IsDouble |  Dbl
+      IsString |  Str
+      IsArray  |  Arr
+      IsObject |  Obj
 
   If $1 is of type t, this instruction pushes true onto the stack, otherwise it
   pushes false.
 
-IsNullL <local variable id>      []  ->  [C:Bool]
-IsBoolL <local variable id>      []  ->  [C:Bool]
-IsIntL <local variable id>       []  ->  [C:Bool]
-IsDoubleL <local variable id>    []  ->  [C:Bool]
-IsStringL <local variable id>    []  ->  [C:Bool]
-IsArrayL <local variable id>     []  ->  [C:Bool]
-IsObjectL <local variable id>    []  ->  [C:Bool]
+IsTypeL <op> <local variable id>     []  ->  [C:Bool]
 
   Is type. This instruction first loads a type into t and a value into x as
   given by the following table:
 
-    instruction      t       x
-    -------------+------+-------
-      IsNullL    | Null |  true
-      IsBoolL    | Bool | false
-      IsIntL     |  Int | false
-      IsDoubleL  |  Dbl | false
-      IsStringL  |  Str | false
-      IsArrayL   |  Arr | false
-      IsObjectL  |  Obj | false
+    operand        t      x
+    -----------+------+-------
+      IsNull   | Null |  true
+      IsBool   | Bool | false
+      IsInt    |  Int | false
+      IsDouble |  Dbl | false
+      IsString |  Str | false
+      IsArray  |  Arr | false
+      IsObject |  Obj | false
 
   If the local variable given by %1 is defined, this pushes true onto the stack
   if the local variable is of type t, otherwise it pushes false.

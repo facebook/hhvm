@@ -524,6 +524,12 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         error("invalid operation for AssertT*: %d\n", op);
         ok = false;
         break;
+      case Op::IsTypeC: case Op::IsTypeL:
+        if (op > IsObject) {
+          error("invalid operation for IsType*: %d\n", op);
+          ok = false;
+        }
+        break;
       case OpIncDecL: case OpIncDecN: case OpIncDecG: case OpIncDecS:
       case OpIncDecM:
         if (op >= IncDec_invalid) {

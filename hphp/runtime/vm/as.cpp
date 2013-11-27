@@ -800,6 +800,15 @@ uint8_t read_Fatal_arg(AsmState& as) {
   NOT_REACHED();
 }
 
+uint8_t read_IsType_arg(AsmState& as) {
+  auto const str = read_opcode_arg<std::string>(as);
+#define IS_TYPE_OP(x) if (str == #x) return static_cast<uint8_t>(x);
+  IS_TYPE_OPS
+#undef FATAL_OP
+  as.error("unknown IsType operand");
+  NOT_REACHED();
+}
+
 const StringData* read_litstr(AsmState& as) {
   as.in.skipSpaceTab();
   std::string strVal;
@@ -1047,6 +1056,8 @@ OpcodeParserMap opcode_parsers;
                      thisOpcode == Op::PredictTL ||                     \
                      thisOpcode == Op::PredictTStk) ? read_AssertT_arg(as) : \
                     thisOpcode == Op::Fatal ? read_Fatal_arg(as) :      \
+                    (thisOpcode == Op::IsTypeL ||                       \
+                     thisOpcode == Op::IsTypeC) ? read_IsType_arg(as) : \
                     uint8_t(read_opcode_arg<int32_t>(as)))
                      // TODO more subop names
 #define IMM_AA   as.ue->emitInt32(as.ue->mergeArray(read_litarray(as)))

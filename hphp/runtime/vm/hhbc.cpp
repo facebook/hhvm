@@ -789,6 +789,14 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   };
   static const int incdecNamesCount =
     (int)(sizeof(incdecNames)/sizeof(const char*));
+  // IsType names
+  static const char* isTypeNames[] = {
+#define IS_TYPE_OP(x) #x,
+    IS_TYPE_OPS
+#undef IS_TYPE_OP
+  };
+  static auto const isTypeNamesCount =
+    sizeof(isTypeNames)/sizeof(const char*);
   // SetOp names
   static const char* setopNames[] = {
 #define SETOP_OP(setOpOp, bcOp) #bcOp,
@@ -856,6 +864,10 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   case Op::AssertTL: case Op::AssertTStk:                         \
   case Op::PredictTL: case Op::PredictTStk:                       \
     out << assertTName(immVal);                                   \
+    break;                                                        \
+  case Op::IsTypeL: case Op::IsTypeC:                             \
+    out << ((immVal >= 0 && immVal < isTypeNamesCount) ?          \
+             isTypeNames[immVal] : "?");                          \
     break;                                                        \
   default:                                                        \
     out << immVal;                                                \

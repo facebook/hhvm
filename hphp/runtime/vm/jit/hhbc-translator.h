@@ -314,20 +314,6 @@ struct HhbcTranslator {
   void emitAKExists();
   void emitAGetC();
   void emitAGetL(int localId);
-  void emitIsNullL(int id);
-  void emitIsNullC();
-  void emitIsArrayL(int id);
-  void emitIsArrayC();
-  void emitIsStringL(int id);
-  void emitIsStringC();
-  void emitIsObjectL(int id);
-  void emitIsObjectC();
-  void emitIsIntL(int id);
-  void emitIsIntC();
-  void emitIsBoolL(int id);
-  void emitIsBoolC();
-  void emitIsDoubleL(int id);
-  void emitIsDoubleC();
   void emitVerifyParamType(int32_t paramId);
   void emitInstanceOfD(int classNameStrId);
   void emitInstanceOf();
@@ -476,6 +462,8 @@ struct HhbcTranslator {
   void emitIdx();
   void emitIdxCommon(Opcode opc, Block* catchBlock = nullptr);
   void emitArrayIdx();
+  void emitIsTypeC(DataType t);
+  void emitIsTypeL(int id, DataType t);
 
 private:
   /*
@@ -740,8 +728,6 @@ private:
   void emitRetFromInlined(Type type);
   SSATmp* emitDecRefLocalsInline(SSATmp* retVal);
   void emitRet(Type type, bool freeInline);
-  void emitIsTypeC(Type t);
-  void emitIsTypeL(Type t, int id);
   void emitCmp(Opcode opc);
   SSATmp* emitJmpCondHelper(int32_t offset, bool negate, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, SSATmp* src);

@@ -804,13 +804,7 @@ public:
   void emitCGet(Emitter& e);
   void emitVGet(Emitter& e);
   void emitIsset(Emitter& e);
-  void emitIsNull(Emitter& e);
-  void emitIsArray(Emitter& e);
-  void emitIsObject(Emitter& e);
-  void emitIsString(Emitter& e);
-  void emitIsInt(Emitter& e);
-  void emitIsDouble(Emitter& e);
-  void emitIsBool(Emitter& e);
+  void emitIsType(Emitter& e, IsTypeOp op);
   void emitEmpty(Emitter& e);
   void emitUnset(Emitter& e, ExpressionPtr exp = ExpressionPtr());
   void emitVisitAndUnset(Emitter& e, ExpressionPtr exp);

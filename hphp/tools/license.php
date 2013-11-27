@@ -16,6 +16,7 @@ $excluded = array(
   'runtime/base/compiler_id.h',
   'runtime/ext/bcmath/',
   'runtime/ext_zend_compat/',
+  'runtime/ext/fileinfo/libmagic/',
   'neo/',
   'util/cronoutils.h',
   'util/cronoutils.cpp',

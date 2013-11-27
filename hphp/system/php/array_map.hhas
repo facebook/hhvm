@@ -3,6 +3,7 @@
 
 # If we get here, a value was supplied for $res
 # so we bail out to the c++ implementation
+call_cpp_impl:
           FPushFuncD   1   "__builtin_array_map"
           FCallBuiltin 0 0 "func_get_args"
           UnboxR
@@ -17,10 +18,6 @@ no_args:  String "array_map() expects at least 2 parameters, 0 given"
 one_arg:  String "array_map() expects at least 2 parameters, 1 given"
           Jmp warning
 
-not_array_citer_free:
-          CIterFree 0
-not_array:String "array_map() expects parameter 2 to be array"
-          Jmp warning
 bad_func: String "array_map() expects parameter 1 to be a valid callback"
           Jmp warning
 warning:  Cns "E_USER_WARNING"
@@ -32,14 +29,14 @@ warning:  Cns "E_USER_WARNING"
 # but if we get here, there was only one array,
 # so we use the fast, php version
 
-one_array:IssetL $func
+one_array:
+          IsArrayL $arr
+          JmpZ call_cpp_impl
+          IssetL $func
           JmpZ ident
           CGetL $func
           DecodeCufIter 0 bad_func
 .try_fault kill_iter_0 {
-            IsArrayL $arr
-            JmpZ not_array_citer_free
-
             NewArray
             SetL $res
             PopC
@@ -59,9 +56,7 @@ endloop:  CIterFree 0
           CGetL $res
           RetC
 
-ident:    IsArrayL $arr
-          JmpZ not_array
-          CGetL $arr
+ident:    CGetL $arr
           RetC
 
 kill_iter_0:

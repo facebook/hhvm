@@ -288,40 +288,84 @@ warn:
   return uninit_null();
 }
 
-static Variant map_func(CArrRef params, const void *data) {
-  CallCtx* ctx = (CallCtx*)data;
-  if (ctx == NULL) {
-    if (params.size() == 1) {
-      return params[0];
-    }
-    return params;
-  }
-  Variant ret;
-  g_vmContext->invokeFunc((TypedValue*)&ret, ctx->func, params, ctx->this_,
-                          ctx->cls, nullptr, ctx->invName);
-  return ret;
-}
-
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
-  Array inputs;
-  if (!arr1.isArray()) {
-    throw_expected_array_exception();
-    return uninit_null();
-  }
-  inputs.append(arr1);
-  if (!_argv.empty()) {
-    inputs = inputs.merge(_argv);
-  }
   CallCtx ctx;
   ctx.func = NULL;
   if (!callback.isNull()) {
     EagerCallerFrame cf;
     vm_decode_function(callback, cf(), false, ctx);
   }
-  if (ctx.func == NULL) {
-    return ArrayUtil::Map(inputs, map_func, NULL);
+  const auto& cell_arr1 = *arr1.asCell();
+  if (UNLIKELY(!isContainer(cell_arr1))) {
+    raise_warning("array_map(): Argument #2 should be an array or collection");
+    return uninit_null();
   }
-  return ArrayUtil::Map(inputs, map_func, &ctx);
+  if (LIKELY(_argv.empty())) {
+    // Handle the common case where the caller passed two
+    // params (a callback and a container)
+    if (!ctx.func) {
+      if (cell_arr1.m_type == KindOfArray) {
+        return arr1;
+      } else {
+        return arr1.toArray();
+      }
+    }
+    Array ret = Array::Create();
+    for (ArrayIter iter(arr1); iter; ++iter) {
+      Variant result;
+      g_vmContext->invokeFuncFew((TypedValue*)&result, ctx, 1,
+                                 iter.secondRefPlus().asCell());
+      ret.add(iter.keyish(), result, true);
+    }
+    return ret;
+  }
+
+  // Handle the uncommon case where the caller passed a callback
+  // and two or more containers
+  ArrayIter* iters =
+    (ArrayIter*)smart_malloc(sizeof(ArrayIter) * (_argv.size() + 1));
+  size_t numIters = 0;
+  SCOPE_EXIT {
+    while (numIters--) iters[numIters].~ArrayIter();
+    smart_free(iters);
+  };
+  size_t maxLen = getContainerSize(cell_arr1);
+  (void) new (&iters[numIters]) ArrayIter(cell_arr1);
+  ++numIters;
+  for (ArrayIter it(_argv); it; ++it, ++numIters) {
+    const auto& c = *it.secondRefPlus().asCell();
+    if (UNLIKELY(!isContainer(c))) {
+      raise_warning("array_map(): Argument #%d should be an array or "
+                    "collection", (int)(numIters + 2));
+      (void) new (&iters[numIters]) ArrayIter(it.secondRefPlus().toArray());
+    } else {
+      (void) new (&iters[numIters]) ArrayIter(c);
+      size_t len = getContainerSize(c);
+      if (len > maxLen) maxLen = len;
+    }
+  }
+  Array ret = Array::Create();
+  for (size_t k = 0; k < maxLen; k++) {
+    Array params;
+    for (size_t i = 0; i < numIters; ++i) {
+      if (iters[i]) {
+        params.append(iters[i].secondRefPlus());
+        ++iters[i];
+      } else {
+        params.append(init_null_variant);
+      }
+    }
+    if (ctx.func) {
+      Variant result;
+      g_vmContext->invokeFunc((TypedValue*)&result,
+                              ctx.func, params, ctx.this_,
+                              ctx.cls, nullptr, ctx.invName);
+      ret.append(result);
+    } else {
+      ret.append(params);
+    }
+  }
+  return ret;
 }
 
 static void php_array_merge(Array &arr1, CArrRef arr2) {

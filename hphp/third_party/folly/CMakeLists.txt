@@ -1,7 +1,7 @@
 set(FOLLY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/folly")
 
 if (NOT EXISTS "${FOLLY_DIR}/Portability.h")
-	message(FATAL_ERROR "${FOLLY_DIR}/Portability.h missing, did you forget to run `git submodule init && git submodule update`?")
+	message(FATAL_ERROR "${FOLLY_DIR}/Portability.h missing, did you forget to run `git submodule update --init`?")
 endif()
 
 # Generated files from folly/build/generate_*.py

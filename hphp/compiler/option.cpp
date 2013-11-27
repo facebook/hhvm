@@ -118,7 +118,6 @@ bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
 bool Option::EnableXHP = false;
-bool Option::EnableFinallyStatement = false;
 int Option::ParserThreadCount = 0;
 
 int Option::GetScannerType() {
@@ -278,8 +277,6 @@ void Option::Load(Hdf &config) {
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();
   }
-
-  EnableFinallyStatement = config["EnableFinallyStatement"].getBool();
 
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);
   AllDynamic = config["AllDynamic"].getBool(true);

@@ -2530,8 +2530,10 @@ public:
   }
 private:
 
-  #define CONSTRUCT_PARAMS(from) \
+  #define CONSTRUCT_EXP(from) \
       (from)->getScope(), (from)->getLocation()
+  #define CONSTRUCT_STMT(from) \
+      (from)->getScope(), (from)->getLabelScope(), (from)->getLocation()
 
   AnalysisResultConstPtr m_ar;
   bool m_changed;
@@ -2604,7 +2606,7 @@ private:
 
     ExpressionListPtr el(
         new ExpressionList(
-          CONSTRUCT_PARAMS(target),
+          CONSTRUCT_EXP(target),
           ExpressionList::ListKindComma));
     if (target->isUnused()) {
       el->setUnused(true);
@@ -2948,7 +2950,7 @@ private:
         slistPtr->insertElement(
           ExpStatementPtr(
             new ExpStatement(
-              CONSTRUCT_PARAMS(slistPtr), assertion)),
+              CONSTRUCT_STMT(slistPtr), assertion)),
           idx);
       }
       break;
@@ -3029,12 +3031,12 @@ private:
                   } else {
                     ExpStatementPtr newExpStmt(
                       new ExpStatement(
-                        CONSTRUCT_PARAMS(branch),
+                        CONSTRUCT_STMT(branch),
                         after));
 
                     IfBranchStatementPtr newBranch(
                       new IfBranchStatement(
-                        CONSTRUCT_PARAMS(branch),
+                        CONSTRUCT_STMT(branch),
                         ExpressionPtr(), newExpStmt));
 
                     branches->addElement(newBranch);

@@ -119,7 +119,9 @@ void GraphBuilder::createExBlocks() {
   for (Range<Func::EHEntVec> i(m_func->ehtab()); !i.empty(); ) {
     const EHEnt& handler = i.popFront();
     createBlock(handler.m_base);
-    createBlock(handler.m_past);
+    if (handler.m_past != m_func->past()) {
+      createBlock(handler.m_past);
+    }
     if (handler.m_type == EHEnt::Type::Catch) {
       m_graph->exn_cap += handler.m_catches.size() - 1;
       for (Range<EHEnt::CatchVec> c(handler.m_catches); !c.empty(); ) {

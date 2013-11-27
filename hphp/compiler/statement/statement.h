@@ -18,15 +18,18 @@
 #define incl_HPHP_STATEMENT_H_
 
 #include "hphp/compiler/expression/expression.h"
+#include "hphp/compiler/analysis/label_scope.h"
+#include <string>
 
 #define STATEMENT_CONSTRUCTOR_BASE_PARAMETERS                           \
-  BlockScopePtr scope, LocationPtr loc, Statement::KindOf kindOf
+  BlockScopePtr scope, LabelScopePtr labelScope, LocationPtr loc, \
+  Statement::KindOf kindOf
 #define STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES                     \
-  scope, loc, kindOf
+  scope, labelScope, loc, kindOf
 #define STATEMENT_CONSTRUCTOR_PARAMETERS                                \
-  BlockScopePtr scope, LocationPtr loc
+  BlockScopePtr scope, LabelScopePtr labelScope, LocationPtr loc
 #define STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(kindOf)                  \
-  scope, loc, Statement::KindOf##kindOf
+  scope, labelScope, loc, Statement::KindOf##kindOf
 #define DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS                        \
   virtual void analyzeProgram(AnalysisResultPtr ar);                    \
   virtual StatementPtr clone();                                         \
@@ -39,12 +42,15 @@
   virtual int getKidCount() const;                                      \
   virtual void setNthKid(int n, ConstructPtr cp)
 #define NULL_STATEMENT()                                                \
-  BlockStatementPtr(new BlockStatement(getScope(), getLocation(),       \
+  BlockStatementPtr(new BlockStatement(getScope(),          \
+                                       getLabelScope(),     \
+                                       getLocation(),       \
                                        StatementListPtr()))
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 DECLARE_BOOST_TYPES(Statement);
+DECLARE_BOOST_TYPES(LabelScope);
 
 #define DECLARE_STATEMENT_TYPES(x)              \
     x(FunctionStatement),                       \
@@ -150,10 +156,14 @@ public:
 
   virtual int getRecursiveCount() const { return 1; }
 
+  LabelScopePtr getLabelScope() { return m_labelScope; }
+  void setLabelScope(LabelScopePtr labelScope) { m_labelScope = labelScope; }
+
 protected:
   KindOf m_kindOf;
   int m_silencerCountMax;
   int m_silencerCountCurrent;
+  LabelScopePtr m_labelScope;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -913,6 +913,9 @@ struct Parser : ParserBase {
     return ns;
   }
 
+  void onNewLabelScope(bool fresh) {}
+  void onScopeLabel(const Token& stmt, const Token& label) {}
+  void onCompleteLabelScope(bool fresh) {}
 
 
   /////////////////////////////////////////////////////////////////////////////

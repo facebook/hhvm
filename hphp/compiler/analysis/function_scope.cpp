@@ -354,6 +354,11 @@ bool FunctionScope::needsActRec() const {
   return res;
 }
 
+bool FunctionScope::needsFinallyLocals() const {
+  bool res = (m_attribute & FileScope::NeedsFinallyLocals);
+  return res;
+}
+
 bool FunctionScope::mayContainThis() {
   return inPseudoMain() || getContainingClass() ||
     (isClosure() && !m_modifiers->isStatic());

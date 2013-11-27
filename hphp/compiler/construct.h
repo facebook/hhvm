@@ -195,7 +195,8 @@ public:
   }
 
   template<typename T>
-  std::shared_ptr<T> Clone(std::shared_ptr<T> constr, BlockScopePtr scope) {
+  std::shared_ptr<T> Clone(std::shared_ptr<T> constr,
+                           BlockScopePtr scope) {
     if (constr) {
       constr = constr->clone();
       constr->resetScope(scope);

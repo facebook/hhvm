@@ -62,6 +62,7 @@ public:
     IsFoldable                = 0x1000,// function can be constant folded
     NeedsActRec               = 0x2000,// builtin function needs ActRec
     AllowOverride             = 0x4000,// allow override of systemlib or builtin
+    NeedsFinallyLocals        = 0x8000,
   };
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;

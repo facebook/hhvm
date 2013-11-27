@@ -100,6 +100,7 @@ void makeFatalMeth(FileScope& file,
                    int line,
                    Meth meth) {
   LocationPtr loc(new Location());
+  LabelScopePtr labelScope(new LabelScope());
   loc->file = file.getName().c_str();
   loc->first(line, 0);
   loc->last(line, 0);
@@ -110,8 +111,8 @@ void makeFatalMeth(FileScope& file,
     new SimpleFunctionCall(scope, loc, "throw_fatal", false, args,
       ExpressionPtr()));
   meth(e);
-  ExpStatementPtr exp(new ExpStatement(scope, loc, e));
-  StatementListPtr stmts(new StatementList(scope, loc));
+  ExpStatementPtr exp(new ExpStatement(scope, labelScope, loc, e));
+  StatementListPtr stmts(new StatementList(scope, labelScope, loc));
   stmts->addElement(exp);
 
   FunctionScopePtr fs = file.setTree(ar, stmts);
@@ -416,8 +417,11 @@ const string &FileScope::pseudoMainName() {
 
 FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
   StatementListPtr st = m_tree;
+  LabelScopePtr labelScope(new LabelScope());
   FunctionStatementPtr f
-    (new FunctionStatement(BlockScopePtr(), LocationPtr(),
+    (new FunctionStatement(BlockScopePtr(),
+                           labelScope,
+                           LocationPtr(),
                            ModifierExpressionPtr(),
                            false, pseudoMainName(),
                            ExpressionListPtr(), TypeAnnotationPtr(),

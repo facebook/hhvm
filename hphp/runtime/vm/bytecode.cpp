@@ -4352,7 +4352,7 @@ OPTBLD_INLINE void VMExecutionContext::iopRetV(PC& pc) {
 
 OPTBLD_INLINE void VMExecutionContext::iopUnwind(PC& pc) {
   assert(!m_faults.empty());
-  assert(m_faults.back().m_savedRaiseOffset != kInvalidOffset);
+  assert(m_faults.back().m_raiseOffset != kInvalidOffset);
   throw VMPrepareUnwind();
 }
 
@@ -6769,6 +6769,7 @@ OPTBLD_INLINE void VMExecutionContext::iopCatch(PC& pc) {
   assert(m_faults.size() > 0);
   Fault fault = m_faults.back();
   m_faults.pop_back();
+  assert(fault.m_raiseFrame == m_fp);
   assert(fault.m_faultType == Fault::Type::UserException);
   m_stack.pushObjectNoRc(fault.m_userException);
 }

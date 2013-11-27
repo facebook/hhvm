@@ -55,6 +55,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(StatementList);
+DECLARE_BOOST_TYPES(LabelScope);
 DECLARE_BOOST_TYPES(Location);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(BlockScope);
@@ -126,7 +127,6 @@ public:
   virtual bool parseImpl();
   bool parse();
   virtual void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3);
-  virtual bool enableFinallyStatement();
   IMPLEMENT_XHP_ATTRIBUTES;
 
   virtual void fatal(const Location* loc, const char* msg);
@@ -275,6 +275,36 @@ public:
   std::string nsDecl(const std::string &name);
   std::string resolve(const std::string &ns, bool cls);
 
+  /*
+   * Get the current label scope. A new label scope is demarcated by
+   * one of the following: a loop, a switch statement, a finally block,
+   * a try block or one of the constructs demarcating variables scopes
+   * (i.e. functions, closures, etc.)
+   * For every label scope, we keep track of the labels
+   * that are available inside it. This is required for supporting
+   * features such as try ... finally.
+   */
+  LabelScopePtr getLabelScope() const;
+
+  /*
+   * Called whenever a new label scope is entered. The fresh parameter
+   * indicates whether the scope is also a variable scope (i.e. a
+   * function, a closure, ...) or just a label scope (i.e. a loop body,
+   * a switch statement, a finally block, ...).
+   */
+  void onNewLabelScope(bool fresh);
+
+  /*
+   * Called whenever a new label is encountered.
+   */
+  void onScopeLabel(const Token& stmt, const Token& label);
+
+  /*
+   * Called whenever a label scope ends. The fresh parameter has the
+   * same meaning as for onNewLabelScope.
+   */
+  void onCompleteLabelScope(bool fresh);
+
   virtual void invalidateGoto(TStatementPtr stmt, GotoError error);
   virtual void invalidateLabel(TStatementPtr stmt);
 
@@ -309,6 +339,7 @@ private:
   FileScopePtr m_file;
   std::vector<std::string> m_comments; // for docComment stack
   std::vector<BlockScopePtrVec> m_scopes;
+  std::vector<LabelScopePtrVec> m_labelScopes;
   std::vector<FunctionContext> m_funcContexts;
   std::vector<std::vector<StatementPtr> > m_prependingStatements;
   std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;

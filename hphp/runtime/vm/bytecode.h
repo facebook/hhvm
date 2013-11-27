@@ -483,6 +483,9 @@ constexpr int kStackCheckReenterPadding = 9;
 constexpr int kStackCheckPadding = kStackCheckLeafPadding +
   kStackCheckReenterPadding;
 
+constexpr int kInvalidRaiseLevel = -1;
+constexpr int kInvalidNesting = -1;
+
 struct Fault {
   enum class Type : int16_t {
     UserException,
@@ -490,9 +493,10 @@ struct Fault {
   };
 
   explicit Fault()
-    : m_handledCount(0)
-    , m_savedRaiseOffset(kInvalidOffset)
-  {}
+    : m_raiseNesting(kInvalidNesting),
+      m_raiseFrame(nullptr),
+      m_raiseOffset(kInvalidOffset),
+      m_handledCount(0) {}
 
   union {
     ObjectData* m_userException;
@@ -500,15 +504,23 @@ struct Fault {
   };
   Type m_faultType;
 
-  // During unwinding, this tracks the number of nested EHEnt::Fault
-  // regions we've propagated through in a given frame.
-  int16_t m_handledCount;
-
-  // This is used when executing a fault handler to remember the
-  // location the exception was raised at.  We will need to resume
-  // throwing at the same location when it executes Unwind.  In all
-  // other situations this is set to kInvalidOffset.
-  Offset m_savedRaiseOffset;
+  // The VM nesting at the moment where the exception was thrown.
+  int m_raiseNesting;
+  // The frame where the exception was thrown.
+  ActRec* m_raiseFrame;
+  // The offset within the frame where the exception was thrown.
+  // This value is updated when a fault is updated when exception
+  // chaining takes place. In this case the raise offset of the newly
+  // thrown exception is set to the offset of the previously thrown
+  // exception. The offset is also updated when the exception
+  // propagates outside its current frame.
+  Offset m_raiseOffset;
+  // The number of EHs that were already examined for this exception.
+  // This is used to ensure that the same exception handler is not
+  // run twice for the same exception. The unwinder may be entered
+  // multuple times for the same fault as a result of calling Unwind.
+  // The field is used to skip through the EHs that were already run.
+  int m_handledCount;
 };
 
 // Interpreter evaluation stack.

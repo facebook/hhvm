@@ -149,12 +149,6 @@ static void on_constant(Parser *_p, Token &out, Token &name, Token &value) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void finally_statement(Parser *_p) {
-  if (!_p->enableFinallyStatement()) {
-    HPHP_PARSER_ERROR("Finally statement is not enabled", _p);
-  }
-}
-
 static void constant_ae(Parser *_p, Token &out, Token &value) {
   const std::string& valueStr = value.text();
   if (valueStr.size() < 3 || valueStr.size() > 5 ||
@@ -704,8 +698,12 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %%
 
 start:
-    { _p->initParseTree(); } top_statement_list { _p->popLabelInfo();
-                                                  _p->finiParseTree();}
+                                       { _p->onNewLabelScope(true);
+                                         _p->initParseTree();}
+    top_statement_list
+                                       { _p->popLabelInfo();
+                                         _p->finiParseTree();
+                                         _p->onCompleteLabelScope(true);}
 ;
 
 top_statement_list:
@@ -819,21 +817,29 @@ statement:
     new_elseif_list
     new_else_single
     T_ENDIF ';'                        { _p->onIf($$,$2,$4,$5,$6);}
-  | T_WHILE parenthesis_expr           { _p->pushLabelScope();}
+  | T_WHILE parenthesis_expr           { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
     while_statement                    { _p->popLabelScope();
-                                         _p->onWhile($$,$2,$4);}
+                                         _p->onWhile($$,$2,$4);
+                                         _p->onCompleteLabelScope(false);}
 
-  | T_DO                               { _p->pushLabelScope();}
+  | T_DO                               { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
     statement T_WHILE parenthesis_expr
     ';'                                { _p->popLabelScope();
-                                         _p->onDo($$,$3,$5);}
+                                         _p->onDo($$,$3,$5);
+                                         _p->onCompleteLabelScope(false);}
   | T_FOR '(' for_expr ';'
-    for_expr ';' for_expr ')'          { _p->pushLabelScope();}
+    for_expr ';' for_expr ')'          { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
     for_statement                      { _p->popLabelScope();
-                                         _p->onFor($$,$3,$5,$7,$10);}
-  | T_SWITCH parenthesis_expr          { _p->pushLabelScope();}
+                                         _p->onFor($$,$3,$5,$7,$10);
+                                         _p->onCompleteLabelScope(false);}
+  | T_SWITCH parenthesis_expr          { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
     switch_case_list                   { _p->popLabelScope();
-                                         _p->onSwitch($$,$2,$4);}
+                                         _p->onSwitch($$,$2,$4);
+                                         _p->onCompleteLabelScope(false);}
   | T_BREAK ';'                        { _p->onBreakContinue($$, true, NULL);}
   | T_BREAK expr ';'                   { _p->onBreakContinue($$, true, &$2);}
   | T_CONTINUE ';'                     { _p->onBreakContinue($$, false, NULL);}
@@ -849,27 +855,30 @@ statement:
   | T_INLINE_HTML                      { _p->onEcho($$, $1, 1);}
   | T_FOREACH '(' expr
     T_AS foreach_variable
-    foreach_optional_arg ')'           { _p->pushLabelScope();}
+    foreach_optional_arg ')'           { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
     foreach_statement                  { _p->popLabelScope();
-                                         _p->onForEach($$,$3,$5,$6,$9);}
+                                         _p->onForEach($$,$3,$5,$6,$9);
+                                         _p->onCompleteLabelScope(false);}
   | T_DECLARE '(' declare_list ')'
     declare_statement                  { _p->onBlock($$, $5); $$ = T_DECLARE;}
-  | T_TRY '{'
-    inner_statement_list '}'
+  | T_TRY
+    try_statement_list
     T_CATCH '('
     fully_qualified_class_name
     T_VARIABLE ')' '{'
     inner_statement_list '}'
-    additional_catches
-    optional_finally                   { _p->onTry($$,$3,$7,$8,$11,$13,$14);}
-  | T_TRY '{'
-    inner_statement_list '}'
-    finally                            { _p->onTry($$, $3, $5);}
+    additional_catches                 { _p->onCompleteLabelScope(false);}
+    optional_finally                   { _p->onTry($$,$2,$5,$6,$9,$11,$13);}
+  | T_TRY
+    try_statement_list
+    T_FINALLY                          { _p->onCompleteLabelScope(false);}
+    finally_statement_list             { _p->onTry($$, $2, $5);}
   | T_THROW expr ';'                   { _p->onThrow($$, $2);}
   | T_GOTO ident ';'                   { _p->onGoto($$, $2, true);
                                          _p->addGoto($2.text(),
                                                      _p->getLocation(),
-                                                     &$$); }
+                                                     &$$);}
   | expr ';'                           { _p->onExpStatement($$, $1);}
   | yield_expr ';'                     { _p->onExpStatement($$, $1);}
   | yield_assign_expr ';'              { _p->onExpStatement($$, $1);}
@@ -881,7 +890,13 @@ statement:
   | ident ':'                          { _p->onLabel($$, $1);
                                          _p->addLabel($1.text(),
                                                       _p->getLocation(),
-                                                      &$$); }
+                                                      &$$);
+                                         _p->onScopeLabel($$, $1);}
+;
+
+try_statement_list:
+   '{'                                 { _p->onNewLabelScope(false);}
+   inner_statement_list '}'            { $$ = $3;}
 ;
 
 additional_catches:
@@ -894,14 +909,16 @@ additional_catches:
   |                                    { $$.reset();}
 ;
 
-finally:
-    T_FINALLY '{'
-    inner_statement_list '}'           { _p->onFinally($$, $4);}
-                                       { finally_statement(_p);}
+finally_statement_list:
+    '{'                                { _p->onNewLabelScope(false);
+                                         _p->pushLabelScope();}
+    inner_statement_list '}'           { _p->popLabelScope();
+                                         _p->onFinally($$, $3);
+                                         _p->onCompleteLabelScope(false);}
 ;
 
 optional_finally:
-    finally
+    T_FINALLY finally_statement_list   { $$ = $2;}
   |                                    { $$.reset();}
 ;
 
@@ -917,33 +934,39 @@ function_loc:
 function_declaration_statement:
     function_loc
     is_reference hh_name_with_typevar  { $3.setText(_p->nsDecl($3.text()));
+                                         _p->onNewLabelScope(true);
                                          _p->onFunctionStart($3);
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
     function_body                      { _p->onFunction($$,nullptr,$8,$2,$3,$6,$9,nullptr);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();}
+                                         _p->popTypeScope();
+                                         _p->onCompleteLabelScope(true);}
   | non_empty_member_modifiers
     function_loc
     is_reference hh_name_with_typevar  { $4.setText(_p->nsDecl($4.text()));
+                                         _p->onNewLabelScope(true);
                                          _p->onFunctionStart($4);
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
     function_body                      { _p->onFunction($$,&$1,$9,$3,$4,$7,$10,nullptr);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();}
+                                         _p->popTypeScope();
+                                         _p->onCompleteLabelScope(true);}
   | non_empty_user_attributes
     method_modifiers function_loc
     is_reference hh_name_with_typevar  { $5.setText(_p->nsDecl($5.text()));
+                                         _p->onNewLabelScope(true);
                                          _p->onFunctionStart($5);
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     hh_opt_return_type
     function_body                      { _p->onFunction($$,&$2,$10,$4,$5,$8,$11,&$1);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();}
+                                         _p->popTypeScope();
+                                         _p->onCompleteLabelScope(true);}
 ;
 
 class_declaration_statement:
@@ -1283,25 +1306,29 @@ class_statement:
                                          ($$,NULL,$1,NULL);}
   | method_modifiers function_loc
     is_reference hh_name_with_typevar '('
-                                       { _p->onMethodStart($4, $1);
+                                       { _p->onNewLabelScope(true);
+                                         _p->onMethodStart($4, $1);
                                          _p->pushLabelInfo();}
     method_parameter_list ')'
     hh_opt_return_type
     method_body
                                        { _p->onMethod($$,$1,$9,$3,$4,$7,$10,nullptr);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();}
+                                         _p->popTypeScope();
+                                         _p->onCompleteLabelScope(true);}
   | non_empty_user_attributes
     method_modifiers function_loc
     is_reference hh_name_with_typevar '('
-                                       { _p->onMethodStart($5, $2);
+                                       { _p->onNewLabelScope(true);
+                                         _p->onMethodStart($5, $2);
                                          _p->pushLabelInfo();}
     method_parameter_list ')'
     hh_opt_return_type
     method_body
                                        { _p->onMethod($$,$2,$10,$4,$5,$8,$11,&$1);
                                          _p->popLabelInfo();
-                                         _p->popTypeScope();}
+                                         _p->popTypeScope();
+                                         _p->onCompleteLabelScope(true);}
   | T_XHP_ATTRIBUTE
     xhp_attribute_stmt ';'             { _p->xhpSetAttributes($2);}
   | T_XHP_CATEGORY
@@ -1616,23 +1643,29 @@ expr_no_variable:
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
   | function_loc
-    is_reference '('                   { Token t; _p->onClosureStart(t);
+    is_reference '('                   { Token t; 
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
                                          _p->pushLabelInfo();}
     parameter_list ')'
     hh_opt_return_type lexical_vars
     '{' inner_statement_list '}'       { Token u; u.reset();
                                          _p->finishStatement($10, $10); $10 = 1;
                                          _p->onClosure($$,0,u,$2,$5,$8,$10);
-                                         _p->popLabelInfo();}
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
   | non_empty_member_modifiers function_loc
-    is_reference '('                   { Token t; _p->onClosureStart(t);
+    is_reference '('                   { Token t; 
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
                                          _p->pushLabelInfo();}
     parameter_list ')'
     hh_opt_return_type lexical_vars
     '{' inner_statement_list '}'       { Token u; u.reset();
                                          _p->finishStatement($11, $11); $11 = 1;
                                          _p->onClosure($$,&$1,u,$3,$6,$9,$11);
-                                         _p->popLabelInfo();}
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
   | dim_expr                           { $$ = $1;}
 ;
 

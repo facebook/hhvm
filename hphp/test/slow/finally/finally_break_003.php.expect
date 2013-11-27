@@ -1,0 +1,23 @@
+begin outer loop a
+begin inner loop 11
+end inner loop 11
+begin inner loop 22
+break
+inner finally
+outer finally
+end outer loop
+begin outer loop b
+begin inner loop 11
+end inner loop 11
+begin inner loop 22
+break
+inner finally
+outer finally
+end outer loop
+begin outer loop c
+begin inner loop 11
+end inner loop 11
+begin inner loop 22
+break 2
+inner finally
+outer finally

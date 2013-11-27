@@ -220,13 +220,7 @@ bool FuncChecker::checkOffsets() {
   // check EH regions and targets
   for (Range<FixedVector<EHEnt> > i(m_func->ehtab()); !i.empty(); ) {
     const EHEnt& eh = i.popFront();
-    checkRegion("EH", eh.m_base, eh.m_past, "func body", base, funclets);
-    if (eh.m_type == EHEnt::Type::Catch) {
-      for (Range<vector<CatchEnt> > c(eh.m_catches); !c.empty(); ) {
-        ok &= checkOffset("catch", c.popFront().second, "func body", base,
-                          funclets);
-      }
-    } else {
+    if (eh.m_type == EHEnt::Type::Fault) {
       ok &= checkOffset("fault", eh.m_fault, "funclets", funclets, past);
     }
   }

@@ -340,7 +340,6 @@ bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableInstructionCounts = false;
 bool RuntimeOption::CheckSymLink = true;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
-bool RuntimeOption::EnableFinallyStatement = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::TimeoutsUseWallTime = true;
@@ -1119,8 +1118,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     CheckSymLink = eval["CheckSymLink"].getBool(true);
 
     EnableAlternative = eval["EnableAlternative"].getInt32(0);
-
-    EnableFinallyStatement = eval["EnableFinallyStatement"].getBool();
 
 #define get_double getDouble
 #define get_bool getBool

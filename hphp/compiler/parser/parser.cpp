@@ -100,13 +100,17 @@
 #endif
 
 #define NEW_EXP0(cls)                                           \
-  cls##Ptr(new cls(BlockScopePtr(), getLocation()))
+  cls##Ptr(new cls(BlockScopePtr(),                             \
+                   getLocation()))
 #define NEW_EXP(cls, e...)                                      \
-  cls##Ptr(new cls(BlockScopePtr(), getLocation(), ##e))
+  cls##Ptr(new cls(BlockScopePtr(),                             \
+                   getLocation(), ##e))
 #define NEW_STMT0(cls)                                          \
-  cls##Ptr(new cls(BlockScopePtr(), getLocation()))
+  cls##Ptr(new cls(BlockScopePtr(), getLabelScope(),            \
+                   getLocation()))
 #define NEW_STMT(cls, e...)                                     \
-  cls##Ptr(new cls(BlockScopePtr(), getLocation(), ##e))
+  cls##Ptr(new cls(BlockScopePtr(), getLabelScope(),            \
+                   getLocation(), ##e))
 
 #define PARSE_ERROR(fmt, args...)  HPHP_PARSER_ERROR(fmt, this, ##args)
 
@@ -213,10 +217,6 @@ string Parser::errString() {
   return m_error.empty() ? getMessage() : m_error;
 }
 
-bool Parser::enableFinallyStatement() {
-  return Option::EnableFinallyStatement;
-}
-
 void Parser::pushComment() {
   m_comments.push_back(m_scanner.detachDocComment());
 }
@@ -246,6 +246,39 @@ void Parser::completeScope(BlockScopePtr inner) {
   m_scopes.pop_back();
   if (m_scopes.size()) {
     m_scopes.back().push_back(inner);
+  }
+}
+
+LabelScopePtr Parser::getLabelScope() const {
+  DCHECK(!m_labelScopes.empty());
+  DCHECK(!m_labelScopes.back().empty());
+  DCHECK(m_labelScopes.back().back() != nullptr);
+  return m_labelScopes.back().back();
+}
+
+void Parser::onNewLabelScope(bool fresh) {
+  if (fresh) {
+    m_labelScopes.push_back(LabelScopePtrVec());
+  }
+  DCHECK(!m_labelScopes.empty());
+  LabelScopePtr labelScope(new LabelScope());
+  m_labelScopes.back().push_back(labelScope);
+}
+
+void Parser::onScopeLabel(const Token& stmt, const Token& label) {
+  DCHECK(!m_labelScopes.empty());
+  DCHECK(!m_labelScopes.back().empty());
+  for (auto& scope : m_labelScopes.back()) {
+    scope->addLabel(stmt.stmt, label.text());
+  }
+}
+
+void Parser::onCompleteLabelScope(bool fresh) {
+  assert(!m_labelScopes.empty());
+  assert(!m_labelScopes.back().empty());
+  m_labelScopes.back().pop_back();
+  if (fresh) {
+    m_labelScopes.pop_back();
   }
 }
 
@@ -911,7 +944,7 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
 
   StatementListPtr stmts = stmt->stmt || stmt->num() != 1 ?
     dynamic_pointer_cast<StatementList>(stmt->stmt)
-    : NEW_EXP0(StatementList);
+    : NEW_STMT0(StatementList);
 
   ExpressionListPtr old_params =
     dynamic_pointer_cast<ExpressionList>(params->exp);
@@ -1637,12 +1670,18 @@ void Parser::onTry(Token &out, Token &tryStmt, Token &className, Token &var,
   out->stmt = NEW_STMT(TryStatement, tryStmt->stmt,
                        dynamic_pointer_cast<StatementList>(stmtList),
                        finallyStmt->stmt);
+  if (tryStmt->stmt) {
+    out->stmt->setLabelScope(stmtList->getLabelScope());
+  }
 }
 
 void Parser::onTry(Token &out, Token &tryStmt, Token &finallyStmt) {
   out->stmt = NEW_STMT(TryStatement, tryStmt->stmt,
                        dynamic_pointer_cast<StatementList>(NEW_STMT0(StatementList)),
                        finallyStmt->stmt);
+  if (tryStmt->stmt) {
+    out->stmt->setLabelScope(tryStmt->stmt->getLabelScope());
+  }
 }
 
 void Parser::onCatch(Token &out, Token &catches, Token &className, Token &var,
@@ -1660,6 +1699,11 @@ void Parser::onCatch(Token &out, Token &catches, Token &className, Token &var,
 
 void Parser::onFinally(Token &out, Token &stmt) {
   out->stmt = NEW_STMT(FinallyStatement, stmt->stmt);
+  // TODO (#3271396) This can be greatly improved. In particular
+  // even when a finally block exists inside a function it is often
+  // the case that the unnamed locals state & ret are not needed.
+  // See task description for further details.
+  m_file->setAttribute(FileScope::NeedsFinallyLocals);
 }
 
 void Parser::onThrow(Token &out, Token &expr) {

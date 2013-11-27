@@ -222,7 +222,6 @@ public:
   static bool EnableShortTags;
   static bool EnableAspTags;
   static bool EnableXHP;
-  static bool EnableFinallyStatement;
   static int ParserThreadCount;
 
   static int GetScannerType();

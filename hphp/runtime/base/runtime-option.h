@@ -334,7 +334,6 @@ public:
   static bool EnableInstructionCounts;
   static bool CheckSymLink;
   static int MaxUserFunctionId;
-  static bool EnableFinallyStatement;
   static bool EnableArgsInBacktraces;
   static bool EnableZendCompat;
   static bool TimeoutsUseWallTime;

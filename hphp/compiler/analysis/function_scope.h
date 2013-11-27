@@ -226,6 +226,8 @@ public:
   bool allowOverride() const;
   void setAllowOverride();
 
+  bool needsFinallyLocals() const;
+
   /**
    * Whether this function is a runtime helper function
    */

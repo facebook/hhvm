@@ -262,7 +262,8 @@ bool StatementList::mergeConcatAssign() {
                                     var, exp1, T_CONCAT_EQUAL));
         }
         expStmt = ExpStatementPtr
-          (new ExpStatement(getScope(), getLocation(), exp));
+          (new ExpStatement(getScope(), getLabelScope(),
+                            getLocation(), exp));
 
         m_stmts[i - length] = expStmt;
         for (j = i - (length - 1); i > j; i--) removeElement(j);

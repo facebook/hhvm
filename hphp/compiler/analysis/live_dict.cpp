@@ -623,7 +623,8 @@ public:
       e->setLocation(sub->getLocation());
       e->setBlockScope(sub->getScope());
       ExpStatementPtr exp(
-          new ExpStatement(sub->getScope(), sub->getLocation(), e));
+          new ExpStatement(sub->getScope(), sub->getLabelScope(),
+                           sub->getLocation(), e));
       sl->insertElement(exp, ix);
     }
   }

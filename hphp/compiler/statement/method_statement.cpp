@@ -547,7 +547,8 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
                                Variant(Variant::NullInit()));
         ReturnStatementPtr returnStmt =
           ReturnStatementPtr(
-            new ReturnStatement(getScope(), getLocation(), constant));
+            new ReturnStatement(getScope(), getLabelScope(),
+                                getLocation(), constant));
         m_stmt->addElement(returnStmt);
       }
     }

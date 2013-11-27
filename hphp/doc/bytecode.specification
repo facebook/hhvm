@@ -1264,7 +1264,6 @@ Throw    [C]  ->  []
   Throw. Throws the object $1. If $1 is not an object that extends the
   Exception class, this instruction throws a fatal error.
 
-
 5. Get instructions
 -------------------
 

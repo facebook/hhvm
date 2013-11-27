@@ -258,7 +258,7 @@ static CallMap s_callMap {
                           { {TV, 0} }},
     {CreateSEWH,         &c_StaticExceptionWaitHandle::CreateFromVM,
                           DSSA, SNone,
-                          { {TV, 0} }},
+                          { {SSA, 0} }},
 
     /* MInstrTranslator helpers */
     {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}, {SSA, 2}}},

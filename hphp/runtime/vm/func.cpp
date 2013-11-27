@@ -299,6 +299,8 @@ void Func::destroy(Func* func) {
       f->initPrologues(f->m_numParams);
       Func::destroy(f);
     }
+  } else if (func->isGenerator()) {
+    mem = ((Func**)mem) - 1;
   }
   func->~Func();
   if (lowMem) {

@@ -182,6 +182,9 @@ void process_env_variables(Variant &variables) {
 }
 
 void process_ini_settings() {
+  if (RuntimeOption::IniFile.empty()) {
+    return;
+  }
   auto settings = f_parse_ini_file(String(RuntimeOption::IniFile));
   for (ArrayIter iter(settings); iter; ++iter) {
     IniSetting::Set(iter.first(), iter.second());

@@ -57,7 +57,6 @@ Variant f_array_combine(CVarRef keys, CVarRef values);
 Variant f_array_count_values(CVarRef input);
 Variant f_array_fill_keys(CVarRef keys, CVarRef value);
 Variant f_array_fill(int start_index, int num, CVarRef value);
-Variant f_array_filter(CVarRef input, CVarRef callback = null_variant);
 Variant f_array_flip(CVarRef trans);
 bool f_array_key_exists(CVarRef key, CVarRef search);
 bool f_key_exists(CVarRef key, CVarRef search);

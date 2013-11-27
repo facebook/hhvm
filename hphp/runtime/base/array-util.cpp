@@ -552,18 +552,6 @@ Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
   return ret;
 }
 
-Variant ArrayUtil::Filter(CArrRef input, PFUNC_FILTER filter /* = NULL */,
-                          const void *data /* = NULL */) {
-  Array ret = Array::Create();
-  for (ArrayIter iter(input); iter; ++iter) {
-    CVarRef value(iter.secondRef());
-    if (filter ? filter(Variant(value), data) : value.toBoolean()) {
-      ret.setWithRef(iter.first(), iter.secondRef(), true);
-    }
-  }
-  return ret;
-}
-
 Variant ArrayUtil::StringUnique(CArrRef input) {
   Array seenValues;
   Array ret = Array::Create();

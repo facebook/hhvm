@@ -177,27 +177,6 @@ Variant f_array_fill(int start_index, int num, CVarRef value) {
   return ArrayUtil::CreateArray(start_index, num, value);
 }
 
-static bool filter_func(CVarRef value, const void *data) {
-  CallCtx* ctx = (CallCtx*)data;
-  Variant ret;
-  g_vmContext->invokeFuncFew((TypedValue*)&ret, *ctx, 1, value.asCell() );
-  return ret.toBoolean();
-}
-Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
-  getCheckedArray(input);
-
-  if (callback.isNull()) {
-    return ArrayUtil::Filter(arr_input);
-  }
-  CallCtx ctx;
-  EagerCallerFrame cf;
-  vm_decode_function(callback, cf(), false, ctx);
-  if (ctx.func == NULL) {
-    return uninit_null();
-  }
-  return ArrayUtil::Filter(arr_input, filter_func, &ctx);
-}
-
 Variant f_array_flip(CVarRef trans) {
   getCheckedArrayRet(trans, false);
   ArrayInit ret(arr_trans.size());
@@ -268,7 +247,7 @@ Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
     if (LIKELY(!search_value.isInitialized())) {
       PackedArrayInit ai(getContainerSize(cell_input));
       for (; iter; ++iter) {
-        ai.append(iter.keyish());
+        ai.append(iter.first());
       }
       return ai.toArray();
     }
@@ -277,7 +256,7 @@ Variant f_array_keys(CVarRef input, CVarRef search_value /* = null_variant */,
     for (; iter; ++iter) {
       if ((strict && HPHP::same(iter.secondRefPlus(), search_value)) ||
           (!strict && HPHP::equal(iter.secondRefPlus(), search_value))) {
-        ai.append(iter.keyish());
+        ai.append(iter.first());
       }
     }
     return ai;
@@ -315,7 +294,7 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
       Variant result;
       g_vmContext->invokeFuncFew((TypedValue*)&result, ctx, 1,
                                  iter.secondRefPlus().asCell());
-      ret.add(iter.keyish(), result, true);
+      ret.add(iter.first(), result, true);
     }
     return ret;
   }
@@ -1054,7 +1033,7 @@ static void containerKeysToSetHelper(c_Set* st, CVarRef container) {
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = container.asCell()->m_type == KindOfArray;
   for (ArrayIter iter(container); iter; ++iter) {
-    auto key = iter.keyish();
+    auto key = iter.first();
     const auto& c = *const_cast<TypedValue*>(key.asCell());
     addToSetHelper(st, c, strTv, !isKey);
   }
@@ -1128,7 +1107,7 @@ Variant f_array_diff(int _argc, CVarRef container1, CVarRef container2,
     const auto& val = iter.secondRefPlus();
     const auto& c = *val.asCell();
     if (checkSetHelper(st, c, strTv, true)) continue;
-    ret.setWithRef(iter.keyish(), val, isKey);
+    ret.setWithRef(iter.first(), val, isKey);
   }
   return ret;
 }
@@ -1174,7 +1153,7 @@ Variant f_array_diff_key(int _argc, CVarRef container1, CVarRef container2,
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = c1.m_type == KindOfArray;
   for (ArrayIter iter(container1); iter; ++iter) {
-    auto key = iter.keyish();
+    auto key = iter.first();
     const auto& c = *key.asCell();
     if (checkSetHelper(st, c, strTv, !isKey)) continue;
     ret.setWithRef(key, iter.secondRefPlus(), isKey);
@@ -1384,7 +1363,7 @@ static void containerValuesIntersectHelper(c_Set* st,
     const auto& val = *iter.secondRefPlus().asCell();
     assert(val.m_type == KindOfInt64);
     if (val.m_data.num == count) {
-      st->add(iter.keyish().asCell());
+      st->add(iter.first().asCell());
     }
   }
 }
@@ -1400,7 +1379,7 @@ static void containerKeysIntersectHelper(c_Set* st,
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
   bool isKey = containers[0].m_type == KindOfArray;
   for (ArrayIter iter(tvAsCVarRef(&containers[0])); iter; ++iter) {
-    auto key = iter.keyish();
+    auto key = iter.first();
     const auto& c = *key.asCell();
     // For each key k in containers[0], we add the key/value pair (k, 1)
     // to the map. If a key (after various conversions) occurs more than
@@ -1411,7 +1390,7 @@ static void containerKeysIntersectHelper(c_Set* st,
   for (int pos = 1; pos < count; ++pos) {
     isKey = containers[pos].m_type == KindOfArray;
     for (ArrayIter iter(tvAsCVarRef(&containers[pos])); iter; ++iter) {
-      auto key = iter.keyish();
+      auto key = iter.first();
       const auto& c = *key.asCell();
       updateIntersectMapHelper(mp, c, pos, strTv, !isKey);
     }
@@ -1423,7 +1402,7 @@ static void containerKeysIntersectHelper(c_Set* st,
     const auto& val = *iter.secondRefPlus().asCell();
     assert(val.m_type == KindOfInt64);
     if (val.m_data.num == count) {
-      st->add(iter.keyish().asCell());
+      st->add(iter.first().asCell());
     }
   }
 }
@@ -1497,7 +1476,7 @@ Variant f_array_intersect(int _argc, CVarRef container1, CVarRef container2,
     const auto& val = iter.secondRefPlus();
     const auto& c = *val.asCell();
     if (!checkSetHelper(st, c, strTv, true)) continue;
-    ret.setWithRef(iter.keyish(), val, isKey);
+    ret.setWithRef(iter.first(), val, isKey);
   }
   return ret;
 }
@@ -1548,7 +1527,7 @@ Variant f_array_intersect_key(int _argc, CVarRef container1, CVarRef container2,
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = c1.m_type == KindOfArray;
   for (ArrayIter iter(container1); iter; ++iter) {
-    auto key = iter.keyish();
+    auto key = iter.first();
     const auto& c = *key.asCell();
     if (!checkSetHelper(st, c, strTv, !isKey)) continue;
     ret.setWithRef(key, iter.secondRefPlus(), isKey);

@@ -128,13 +128,6 @@ public:
   static Variant RandomKeys(CArrRef input, int num_req = 1);
 
   /**
-   * Filters elements from the array via the callback.
-   */
-  typedef bool (*PFUNC_FILTER)(CVarRef value, const void *data);
-  static Variant Filter(CArrRef input, PFUNC_FILTER filter = nullptr,
-                        const void *data = nullptr);
-
-  /**
    * Removes duplicate string values from array.
    */
   static Variant StringUnique(CArrRef input);

@@ -3739,6 +3739,12 @@ ssize_t BaseSet::iter_prev(ssize_t pos) const {
   return 0;
 }
 
+Variant BaseSet::iter_key(ssize_t pos) const {
+  assert(pos);
+  Bucket* p = reinterpret_cast<Bucket*>(pos);
+  return tvAsVariant(&p->data);
+}
+
 const TypedValue* BaseSet::iter_value(ssize_t pos) const {
   assert(pos);
   Bucket* p = reinterpret_cast<Bucket*>(pos);
@@ -3976,7 +3982,7 @@ Variant c_SetIterator::t_current() {
 }
 
 Variant c_SetIterator::t_key() {
-  return uninit_null();
+  return t_current();
 }
 
 bool c_SetIterator::t_valid() {

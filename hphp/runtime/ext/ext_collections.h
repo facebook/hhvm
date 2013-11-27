@@ -1289,7 +1289,7 @@ private:
   ssize_t iter_next(ssize_t prev) const;
   ssize_t iter_prev(ssize_t prev) const;
   const TypedValue* iter_value(ssize_t pos) const;
-  Variant iter_key(ssize_t pos) const { return uninit_null(); }
+  Variant iter_key(ssize_t pos) const;
 
   static void throwBadValueType() ATTRIBUTE_NORETURN;
 

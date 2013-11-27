@@ -55,6 +55,7 @@ const StaticString
   s_doc("doc"),
   s_modifiers("modifiers"),
   s_class("class"),
+  s_prototype("prototype"),
   s_ref("ref"),
   s_index("index"),
   s_type("type"),
@@ -548,6 +549,67 @@ static void set_type_profiling_info(Array& info, const Class* cls,
   }
 }
 
+static const ClassInfo* get_method_prototype_class(ClassInfo::MethodInfo *info,
+                                                   const ClassInfo *cls,
+                                                   bool lowestLevel) {
+  const ClassInfo *parentClassInfo = cls->getParentClassInfo();
+  if (parentClassInfo) {
+    const ClassInfo *result = get_method_prototype_class(info,
+                                                         parentClassInfo,
+                                                         false);
+    if (result) return result;
+  }
+  if (!lowestLevel) {
+    const ClassInfo::MethodMap& methods = cls->getMethods();
+    ClassInfo::MethodMap::const_iterator iter = methods.find(info->name);
+    if (iter != methods.end() &&
+      !(iter->second->attribute & ClassInfo::IsPrivate)) return cls;
+  }
+  return nullptr;
+}
+
+static const ClassInfo* get_prototype_class_from_interfaces(
+  ClassInfo::MethodInfo *info, const ClassInfo *cls, bool lowestLevel) {
+  // only looks at the interfaces if the method is public
+  if (!(info->attribute & ClassInfo::IsPublic)) return nullptr;
+
+  const ClassInfo::InterfaceVec &interfaces = cls->getInterfacesVec();
+  for (unsigned int i = 0; i < interfaces.size(); i++) {
+    const ClassInfo *interface = ClassInfo::FindInterface(interfaces[i]);
+    if (interface) {
+      const ClassInfo *result = get_prototype_class_from_interfaces(info,
+                                                                    interface,
+                                                                    false);
+      if (result) return result;
+    }
+  }
+  if (!lowestLevel) {
+    const ClassInfo::MethodMap& methods = cls->getMethods();
+    if (methods.find(info->name) != methods.end()) return cls;
+  }
+  return nullptr;
+}
+
+static void set_method_prototype_info(Array &ret, ClassInfo::MethodInfo *info,
+                                      const ClassInfo *cls) {
+  const ClassInfo *prototypeCls = get_method_prototype_class(info, cls, true);
+  if (prototypeCls) {
+    const ClassInfo *result = get_prototype_class_from_interfaces(info,
+                                                                  prototypeCls,
+                                                                  true);
+    if (result) prototypeCls = result;
+  }
+  if (!prototypeCls) {
+    prototypeCls = get_prototype_class_from_interfaces(info, cls, true);
+  }
+  if (prototypeCls) {
+    Array prototype = Array::Create();
+    prototype.set(s_class, VarNR(prototypeCls->getName()));
+    prototype.set(s_name, VarNR(info->name));
+    ret.set(s_prototype, prototype);
+  }
+}
+
 static void set_method_info(Array &ret, ClassInfo::MethodInfo *info,
                             const ClassInfo *cls) {
   ret.set(s_name, info->name);
@@ -559,6 +621,7 @@ static void set_method_info(Array &ret, ClassInfo::MethodInfo *info,
   ret.set(s_class, VarNR(cls->getName()));
   set_function_info(ret, info, &cls->getName());
   set_source_info(ret, info->file, info->line1, info->line2);
+  set_method_prototype_info(ret, info, cls);
 }
 
 static bool isConstructor(const Func* func) {
@@ -570,6 +633,37 @@ static bool isConstructor(const Func* func) {
   if ((pcls->attrs() | func->attrs()) & AttrTrait) return false;
   if (!strcasecmp("__construct", func->name()->data())) return true;
   return pcls->name()->isame(func->name());
+}
+
+static const Class* get_prototype_class_from_interfaces(const Class *cls,
+                                                        const Func *func) {
+  // only looks at the interfaces if the method is public
+  if (!func->isPublic()) return nullptr;
+  const Class::InterfaceMap& interfaces = cls->allInterfaces();
+  for (unsigned int i = 0, size = interfaces.size(); i < size; i++) {
+    const Class* iface = interfaces[i];
+    if (iface->preClass()->hasMethod(func->name())) return iface;
+  }
+  return nullptr;
+}
+
+static void set_method_prototype_info(Array &ret, const Func *func) {
+  const Class *prototypeCls = nullptr;
+  if (func->baseCls() != nullptr && func->baseCls() != func->cls()) {
+    prototypeCls = func->baseCls();
+    const Class *result = get_prototype_class_from_interfaces(
+                            prototypeCls, func);
+    if (result) prototypeCls = result;
+  } else if (func->isMethod()) {
+    // lookup the prototype in the interfaces
+    prototypeCls = get_prototype_class_from_interfaces(func->cls(), func);
+  }
+  if (prototypeCls) {
+    Array prototype = Array::Create();
+    prototype.set(s_class, VarNR(prototypeCls->nameRef()));
+    prototype.set(s_name, VarNR(func->nameRef()));
+    ret.set(s_prototype, prototype);
+  }
 }
 
 static void set_method_info(Array &ret, const Func* func) {
@@ -588,6 +682,7 @@ static void set_method_info(Array &ret, const Func* func) {
   set_function_info(ret, func);
   set_source_info(ret, func->unit()->filepath()->data(),
                   func->line1(), func->line2());
+  set_method_prototype_info(ret, func);
 }
 
 static Array get_method_info(const ClassInfo *cls, CVarRef name) {

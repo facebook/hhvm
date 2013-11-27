@@ -36,6 +36,14 @@
 
 namespace HPHP {
 
+/**
+ * These macros allow us to easily change the arguments to iop*() opcode
+ * implementations.
+ */
+#define IOP_ARGS        PC& pc
+#define IOP_PASS_ARGS   pc
+#define IOP_PASS(pc)    pc
+
 ALWAYS_INLINE
 void SETOP_BODY_CELL(Cell* lhs, unsigned char op, Cell* rhs) {
   assert(cellIsPlausible(*lhs));

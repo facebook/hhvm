@@ -470,10 +470,10 @@ private:
   void setHelperPost(unsigned ndiscard, Variant& tvRef,
                      Variant& tvRef2);
   template <bool isEmpty>
-  void isSetEmptyM(PC& pc);
+  void isSetEmptyM(IOP_ARGS);
 
-  template<class Op> void implCellBinOp(PC&, Op op);
-  template<class Op> void implCellBinOpBool(PC&, Op op);
+  template<class Op> void implCellBinOp(IOP_ARGS, Op op);
+  template<class Op> void implCellBinOpBool(IOP_ARGS, Op op);
   bool cellInstanceOf(TypedValue* c, const HPHP::NamedEntity* s);
   bool iopInstanceOfHelper(const StringData* s1, Cell* c2);
   bool initIterator(PC& pc, PC& origPc, Iter* it,
@@ -481,14 +481,14 @@ private:
   bool initIteratorM(PC& pc, PC& origPc, Iter* it,
                      Offset offset, Ref* r1, TypedValue* val, TypedValue* key);
   void jmpSurpriseCheck(Offset o);
-  template<Op op> void jmpOpImpl(PC& pc);
+  template<Op op> void jmpOpImpl(IOP_ARGS);
   template<class Op> void roundOpImpl(Op op);
 #define O(name, imm, pusph, pop, flags)                                       \
-  void iop##name(PC& pc);
+  void iop##name(IOP_ARGS);
 OPCODES
 #undef O
 
-  void classExistsImpl(PC& pc, Attr typeAttr);
+  void classExistsImpl(IOP_ARGS, Attr typeAttr);
   void fPushObjMethodImpl(
       Class* cls, StringData* name, ObjectData* obj, int numArgs);
   ActRec* fPushFuncImpl(const Func* func, int numArgs);

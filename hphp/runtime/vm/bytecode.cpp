@@ -1749,7 +1749,7 @@ void VMExecutionContext::invokeFunc(TypedValue* retval,
     } else if (!numPassedArgs) {
       m_stack.pushArrayNoRc(empty_array.get());
     } else {
-      assert(!cellIsNull(args));
+      assert(!cellIsNull(&args));
       PackedArrayInit ai(numPassedArgs);
       for (ArrayIter iter(args); iter; ++iter) {
         ai.appendWithRef(iter.secondRefPlus());

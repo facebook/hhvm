@@ -80,6 +80,7 @@ Socket::~Socket() {
 void Socket::sweep() {
   Socket::closeImpl();
   File::sweep();
+  Socket::operator delete(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

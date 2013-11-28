@@ -197,7 +197,9 @@ SSLSocket::~SSLSocket() {
 }
 
 void SSLSocket::sweep() {
-  closeImpl();
+  SSLSocket::closeImpl();
+  File::sweep();
+  SSLSocket::operator delete(this);
 }
 
 bool SSLSocket::onConnect() {

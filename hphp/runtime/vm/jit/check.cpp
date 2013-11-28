@@ -141,7 +141,7 @@ bool checkBlock(Block* b) {
   // Invariant #6
   if (b->front().op() == DefLabel) {
     for (int i = 0; i < b->front().numDsts(); ++i) {
-      auto const traceBlocks = b->trace()->blocks();
+      DEBUG_ONLY auto const& traceBlocks = b->trace()->blocks();
       b->forEachSrc(i, [&](IRInstruction* inst, SSATmp*) {
         assert(std::find(traceBlocks.begin(), traceBlocks.end(),
                          inst->block()) != traceBlocks.end());

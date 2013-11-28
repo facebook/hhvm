@@ -496,11 +496,10 @@ void TraceBuilder::reoptimize() {
   auto const idoms = findDominators(m_unit, sortedBlocks);
   m_state.clear();
 
-  auto blocks = std::move(m_curTrace->blocks());
-  assert(m_curTrace->blocks().empty());
-  while (!blocks.empty()) {
-    Block* block = blocks.front();
-    blocks.pop_front();
+  auto& traceBlocks = m_curTrace->blocks();
+  BlockList blocks(traceBlocks.begin(), traceBlocks.end());
+  traceBlocks.clear();
+  for (auto* block : blocks) {
     assert(block->trace() == m_curTrace);
     FTRACE(5, "Block: {}\n", block->id());
 
@@ -546,7 +545,7 @@ void TraceBuilder::reoptimize() {
     if (block->empty()) {
       // If all the instructions in the block were optimized away, remove it
       // from the trace.
-      auto it = m_curTrace->blocks().end();
+      auto it = traceBlocks.end();
       --it;
       assert(*it == block);
       m_curTrace->unlink(it);

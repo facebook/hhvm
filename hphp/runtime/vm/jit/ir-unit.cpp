@@ -62,7 +62,8 @@ Block* IRUnit::makeMain(uint32_t bcOff) {
   assert(!m_main);
   auto entry = defBlock();
   m_bcOff = bcOff;
-  m_main = new (m_arena) IRTrace(*this, entry);
+  // create main trace with an initial estimate for the block count.
+  m_main = new (m_arena) IRTrace(*this, entry, 8);
   return entry;
 }
 

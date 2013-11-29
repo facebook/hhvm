@@ -65,11 +65,11 @@ class apcExtension : public Extension {
 
 ///////////////////////////////////////////////////////////////////////////////
 Variant f_apc_add(CVarRef key_or_array, CVarRef var = null_variant,
-                    int64_t ttl = 0, int64_t cache_id = 0);
+                  int64_t ttl = 0, int64_t cache_id = 0);
 Variant f_apc_store(CVarRef key_or_array, CVarRef var = null_variant,
                     int64_t ttl = 0, int64_t cache_id = 0);
 bool f_apc_store_as_primed_do_not_use(const String& key, CVarRef var,
-  int64_t cache_id = 0);
+                                      int64_t cache_id = 0);
 
 Variant f_apc_fetch(CVarRef key, VRefParam success = uninit_null(),
                     int64_t cache_id = 0);

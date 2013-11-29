@@ -129,7 +129,7 @@ static apcExtension s_apc_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 Variant f_apc_store(CVarRef key_or_array, CVarRef var /* = null_variant */,
-    int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
+                    int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -137,34 +137,32 @@ Variant f_apc_store(CVarRef key_or_array, CVarRef var /* = null_variant */,
     return false;
   }
 
-  if (key_or_array.is(KindOfArray))
-  {
+  if (key_or_array.is(KindOfArray)) {
     Array valuesArr = key_or_array.toArray();
 
     // errors stores all keys corresponding to entries that could not be cached
     ArrayInit errors(valuesArr.size());
 
-    for (ArrayIter iter(valuesArr); iter; ++iter)
-    {
+    for (ArrayIter iter(valuesArr); iter; ++iter) {
       Variant key = iter.first();
       if (!key.isString()) {
-          throw_invalid_argument("apc key: (not a string)");
-          return false;
+        throw_invalid_argument("apc key: (not a string)");
+        return false;
       }
       Variant v = iter.second();
-      if (!(s_apc_store[cache_id].store(key.toString(), v, ttl)));
-          errors.set(key);
+      if (!(s_apc_store[cache_id].store(key.toString(), v, ttl))) {
+        errors.set(key);
+      }
     }
     return errors.create();
   }
 
   if (!key_or_array.isString()) {
-        throw_invalid_argument("apc key: (not a string)");
-        return false;
+    throw_invalid_argument("apc key: (not a string)");
+    return false;
   }
   String strKey = key_or_array.toString();
   return s_apc_store[cache_id].store(strKey, var, ttl);
-
 }
 
 /**
@@ -172,7 +170,7 @@ Variant f_apc_store(CVarRef key_or_array, CVarRef var /* = null_variant */,
  * Using this function is equivalent to adding your key to apc_prime.so.
  */
 bool f_apc_store_as_primed_do_not_use(const String& key, CVarRef var,
-    int64_t cache_id /* = 0 */) {
+                                      int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -184,7 +182,7 @@ bool f_apc_store_as_primed_do_not_use(const String& key, CVarRef var,
 }
 
 Variant f_apc_add(CVarRef key_or_array, CVarRef var /* = null_variant */,
-    int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
+                  int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
@@ -192,34 +190,32 @@ Variant f_apc_add(CVarRef key_or_array, CVarRef var /* = null_variant */,
     return false;
   }
 
-  if (key_or_array.is(KindOfArray))
-  {
+  if (key_or_array.is(KindOfArray)) {
     Array valuesArr = key_or_array.toArray();
 
     // errors stores all keys corresponding to entries that could not be cached
     ArrayInit errors(valuesArr.size());
 
-    for (ArrayIter iter(valuesArr); iter; ++iter)
-    {
+    for (ArrayIter iter(valuesArr); iter; ++iter) {
       Variant key = iter.first();
       if (!key.isString()) {
-          throw_invalid_argument("apc key: (not a string)");
-          return false;
+        throw_invalid_argument("apc key: (not a string)");
+        return false;
       }
       Variant v = iter.second();
-      if (!(s_apc_store[cache_id].store(key.toString(), v, ttl, false)))
-          errors.set(key);
+      if (!(s_apc_store[cache_id].store(key.toString(), v, ttl, false))) {
+        errors.set(key);
+      }
     }
     return errors.create();
   }
 
   if (!key_or_array.isString()) {
-      throw_invalid_argument("apc key: (not a string)");
-      return false;
+    throw_invalid_argument("apc key: (not a string)");
+    return false;
   }
   String strKey = key_or_array.toString();
   return s_apc_store[cache_id].store(strKey, var, ttl, false);
-
 }
 
 Variant f_apc_fetch(CVarRef key, VRefParam success /* = null */,

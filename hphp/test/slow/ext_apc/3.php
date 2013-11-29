@@ -13,7 +13,7 @@ apc_store("ts", "TestString");
 apc_store("ta", array("a" => 1, "b" => 2));
 apc_store("ts", "NewValue");
 apc_store("ta", array("newelement"));
-apc_store($complexMap);
+if (apc_store($complexMap) != array()) echo "no\n";
 
 if (apc_fetch("ts") !== "NewValue") echo "no\n";
 if (apc_fetch("ta") !== array("newelement")) echo "no\n";

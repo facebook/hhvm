@@ -1299,7 +1299,7 @@ public:
   explicit VarNR(StringData *v);
   explicit VarNR(const StringData *v) {
     assert(v && v->isStatic());
-    init(KindOfString);
+    init(KindOfStaticString);
     m_data.pstr = const_cast<StringData*>(v);
   }
   explicit VarNR(ArrayData *v);

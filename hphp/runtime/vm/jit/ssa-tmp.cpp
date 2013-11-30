@@ -140,28 +140,22 @@ uintptr_t SSATmp::getValBits() const {
 Variant SSATmp::getValVariant() const {
   switch (m_inst->typeParam().toDataType()) {
   case KindOfUninit:
-  case KindOfNull:
     return uninit_null();
+  case KindOfNull:
+    return init_null();
   case KindOfBoolean:
-    return m_inst->extra<ConstData>()->as<bool>();
+    return getValBool();
   case KindOfInt64:
-    return m_inst->extra<ConstData>()->as<int64_t>();
+    return getValInt();
   case KindOfDouble:
-    return m_inst->extra<ConstData>()->as<double>();
+    return getValDbl();
   case KindOfString:
   case KindOfStaticString:
-    return (litstr)m_inst->extra<ConstData>()
-        ->as<const StringData*>()->data();
+    return Variant(getValStr());
   case KindOfArray:
-    return Array(ArrayData::GetScalarArray(m_inst->extra<ConstData>()
-      ->as<ArrayData*>()));
-  case KindOfObject:
-    return m_inst->extra<ConstData>()->as<const Object*>();
-  case KindOfResource:
-    return m_inst->extra<ConstData>()->as<const Resource*>();
+    return const_cast<ArrayData*>(getValArr());
   default:
-    assert(false);
-    return uninit_null();
+    always_assert(false);
   }
 }
 

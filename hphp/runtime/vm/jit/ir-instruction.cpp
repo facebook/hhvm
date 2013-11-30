@@ -226,7 +226,6 @@ bool IRInstruction::isLoad() const {
     case VGetElem:
     case VGetElemStk:
     case ArrayIdx:
-    case GenericIdx:
       return true;
 
     default:

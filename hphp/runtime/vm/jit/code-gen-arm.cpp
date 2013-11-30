@@ -463,7 +463,6 @@ PUNT_OPCODE(RBTrace)
 PUNT_OPCODE(IncTransCounter)
 PUNT_OPCODE(IncProfCounter)
 PUNT_OPCODE(ArrayIdx)
-PUNT_OPCODE(GenericIdx)
 PUNT_OPCODE(DbgAssertRefCount)
 PUNT_OPCODE(DbgAssertType)
 

@@ -78,20 +78,6 @@ public:
   void setLocalThis(const std::string &name) { m_localThis = name; }
   bool isCallToFunction(const char *name) const;
   void resolveNSFallbackFunc(AnalysisResultConstPtr ar, FileScopePtr fs);
-
-  void setOptimizable() {
-    m_optimizable = true;
-  }
-  bool isOptimizable() const {
-    return m_optimizable;
-  }
-  void changeToBytecode() {
-    m_changedToBytecode = true;
-  }
-  virtual bool allowCellByRef() const override {
-    return m_changedToBytecode;
-  }
-
 protected:
   enum class FunType {
     Unknown,
@@ -122,8 +108,6 @@ protected:
   unsigned m_invokeFewArgsDecision : 1;
   unsigned m_dynamicInvoke : 1;
   unsigned m_transformed : 1;
-  unsigned m_changedToBytecode : 1; // true if it morphed into a bytecode
-  unsigned m_optimizable : 1; // true if it can be morphed into a bytecode
 
   int m_safe;
   ExpressionPtr m_safeDef;

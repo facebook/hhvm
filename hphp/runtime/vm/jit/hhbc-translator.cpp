@@ -1727,38 +1727,12 @@ void HhbcTranslator::emitIncStat(int32_t counter, int32_t value, bool force) {
   }
 }
 
-void HhbcTranslator::emitIdx() {
-  Type keyType = topC(1, DataTypeGeneric)->type();
-  SSATmp* base = topC(2, DataTypeGeneric);
-  Type baseType = base->type();
-
-  if (baseType <= Type::Arr &&
-      (keyType <= Type::Int || keyType <= Type::Str)) {
-    emitArrayIdx();
-  } else {
-    emitIdxCommon(GenericIdx, makeCatch());
-  }
-}
-
-// NOTE: #3233688 talks about making an idx fast path for collections and
-// that is where this function will be used and make more sense. It's only
-// called once now.
-void HhbcTranslator::emitIdxCommon(Opcode opc, Block* catchBlock) {
-  SSATmp* def = popC(DataTypeGeneric); // def is just pushed back on the stack
-  SSATmp* key = popC(DataTypeGeneric);
-  SSATmp* arr = popC(DataTypeGeneric);
-  push(gen(opc, catchBlock, arr, key, def));
-  gen(DecRef, arr);
-  gen(DecRef, key);
-  gen(DecRef, def);
-}
-
 void HhbcTranslator::emitArrayIdx() {
   // These types are just used to decide what to do; once we know what we're
   // actually doing we constrain the values with the popC()s later on in this
   // function.
-  Type keyType = topC(1, DataTypeGeneric)->type();
-  Type arrType = topC(2, DataTypeGeneric)->type();
+  Type arrType = topC(1, DataTypeGeneric)->type();
+  Type keyType = topC(2, DataTypeGeneric)->type();
 
   if (!(arrType <= Type::Arr)) {
     // raise fatal
@@ -1768,8 +1742,8 @@ void HhbcTranslator::emitArrayIdx() {
 
   if (keyType <= Type::Null) {
     SSATmp* def = popC(DataTypeGeneric); // def is just pushed back on the stack
-    SSATmp* key = popC();
     SSATmp* arr = popC();
+    SSATmp* key = popC();
 
     // if the key is null it will not be found so just return the default
     push(def);
@@ -1785,8 +1759,8 @@ void HhbcTranslator::emitArrayIdx() {
   SSATmp* def = popC(DataTypeGeneric); // a helper will decref it but the
                                        // translated code doesn't care about
                                        // the type
-  SSATmp* key = popC();
   SSATmp* arr = popC();
+  SSATmp* key = popC();
 
   KeyType arrayKeyType;
   bool checkForInt;

@@ -136,8 +136,6 @@ TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
-TypedValue genericIdx(TypedValue, TypedValue, TypedValue);
-
 int32_t arrayVsize(ArrayData*);
 
 TypedValue* ldGblAddrHelper(StringData* name);

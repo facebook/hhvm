@@ -704,10 +704,6 @@ void IRTranslator::translateIncStat(const NormalizedInstruction& i) {
   HHIR_EMIT(IncStat, i.imm[0].u_IVA, i.imm[1].u_IVA);
 }
 
-void IRTranslator::translateIdx(const NormalizedInstruction& i) {
-  HHIR_EMIT(Idx);
-}
-
 void IRTranslator::translateArrayIdx(const NormalizedInstruction& i) {
   HHIR_EMIT(ArrayIdx);
 }

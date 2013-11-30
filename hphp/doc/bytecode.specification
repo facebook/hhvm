@@ -3779,13 +3779,6 @@ CreateCl <num args> <class name>  [C|V..C|V]  ->  [C]
   defined at the point of the CreateCl opcode, or the behavior is
   undefined.
 
-Idx         [C C C] -> [C]
-
-  Checks if object in $3 contains key in $2 and pushes the result onto the stack
-  if found. Otherwise, $1 is pushed onto the stack. $3 must be an object that
-  supports array or indexed access (e.g. arrays, collections, implementations of
-  ArrayAccess).
-
 ArrayIdx    [C C C] -> [C]
 
   Checks if array in $3 contains key in $2 and pushes the result onto the stack

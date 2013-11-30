@@ -1517,11 +1517,6 @@ struct InterpStepper : boost::static_visitor<void> {
     return push(TInitUnc);
   }
 
-  void operator()(const bc::Idx&) {
-    popC(); popC(); popC();
-    push(TInitCell);
-  }
-
   void operator()(const bc::ArrayIdx&) {
     popC(); popC(); popC();
     push(TInitCell);

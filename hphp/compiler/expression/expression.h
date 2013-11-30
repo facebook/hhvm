@@ -350,10 +350,6 @@ public:
     return isNoRemove() && m_assertedType;
   }
 
-  virtual bool allowCellByRef() const {
-    return false;
-  }
-
   static ExpressionPtr MakeConstant(AnalysisResultConstPtr ar,
                                     BlockScopePtr scope,
                                     LocationPtr loc,

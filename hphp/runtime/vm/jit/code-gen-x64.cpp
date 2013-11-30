@@ -324,7 +324,6 @@ CALL_OPCODE(RaiseArrayIndexNotice)
 CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(ClosureStaticLocInit)
 CALL_OPCODE(ArrayIdx)
-CALL_OPCODE(GenericIdx)
 CALL_OPCODE(LdGblAddrDef)
 
 // Vector instruction helpers

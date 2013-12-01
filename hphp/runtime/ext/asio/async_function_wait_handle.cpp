@@ -179,13 +179,13 @@ void c_AsyncFunctionWaitHandle::run() {
           "Invariant violation: child neither succeeded nor failed");
     }
 
+  retry:
     // continuation finished, retrieve result from its m_value
     if (m_continuation->done()) {
       markAsSucceeded(*m_continuation->m_value.asCell());
       return;
     }
 
-  retry:
     // save child
     Cell* value = tvAssertCell(m_continuation->m_value.asTypedValue());
     assert(value->m_type == KindOfObject);

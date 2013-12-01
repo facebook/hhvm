@@ -173,7 +173,7 @@ bool f_i18n_loc_set_attribute(int64_t attr, int64_t val);
 bool f_i18n_loc_set_strength(int64_t strength);
 Variant f_i18n_loc_get_error_code();
 
-Variant f_hphp_array_idx(CVarRef key, CVarRef search, CVarRef def);
+Variant f_hphp_array_idx(CVarRef search, CVarRef key, CVarRef def);
 
 Array ArrayObject_toArray(const ObjectData* obj);
 

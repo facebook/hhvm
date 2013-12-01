@@ -1223,6 +1223,7 @@ static const struct {
   { OpCreateCl,    {BStackN,          Stack1,       OutObject,         1 }},
   { OpStrlen,      {Stack1,           Stack1,       OutStrlen,         0 }},
   { OpIncStat,     {None,             None,         OutNone,           0 }},
+  { OpIdx,         {StackTop3,        Stack1,       OutUnknown,       -2 }},
   { OpArrayIdx,    {StackTop3,        Stack1,       OutUnknown,       -2 }},
   { OpFloor,       {Stack1,           Stack1,       OutDouble,         0 }},
   { OpCeil,        {Stack1,           Stack1,       OutDouble,         0 }},
@@ -2871,6 +2872,7 @@ Translator::getOperandConstraintCategory(NormalizedInstruction* instr,
       // The stack input is teleported to the array
       return opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
 
+    case OpIdx:
     case OpArrayIdx:
       // The default value (w/ opndIdx 0) is simply passed to a helper,
       // which takes care of dec-refing it if needed

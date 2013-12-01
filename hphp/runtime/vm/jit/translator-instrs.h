@@ -168,6 +168,7 @@
   CASE(AsyncWrapException) \
   CASE(Strlen) \
   CASE(IncStat) \
+  CASE(Idx) \
   CASE(ArrayIdx) \
   CASE(FPushCufIter) \
   CASE(CIterFree) \

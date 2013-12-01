@@ -1949,14 +1949,14 @@
             },
             "args": [
                 {
-                    "name": "key",
-                    "type": "Variant",
-                    "desc": "Value to check."
-                },
-                {
                     "name": "search",
                     "type": "Variant",
                     "desc": "An array with keys to check."
+                },
+                {
+                    "name": "key",
+                    "type": "Variant",
+                    "desc": "Value to check."
                 },
                 {
                     "name": "def",

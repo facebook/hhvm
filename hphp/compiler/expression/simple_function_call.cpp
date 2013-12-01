@@ -108,6 +108,8 @@ SimpleFunctionCall::SimpleFunctionCall
   , m_builtinFunction(false)
   , m_dynamicInvoke(false)
   , m_transformed(false)
+  , m_changedToBytecode(false)
+  , m_optimizable(false)
   , m_safe(0)
   , m_extra(nullptr)
 {

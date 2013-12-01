@@ -62,6 +62,9 @@ String f_json_last_error_msg() {
 }
 
 String f_json_encode(CVarRef value, CVarRef options /* = 0 */) {
+
+  json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
+
   int64_t json_options = options.toInt64();
   if (options.isBoolean() && options.toBooleanVal()) {
     json_options = k_JSON_FB_LOOSE;

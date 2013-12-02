@@ -366,15 +366,15 @@ bool f_stream_is_local(CVarRef stream_or_url) {
 }
 
 
-bool f_stream_register_wrapper(const String& protocol, const String& classname) {
-  return f_stream_wrapper_register(protocol, classname);
+bool f_stream_register_wrapper(const String& protocol, const String& classname, const int flags) {
+  return f_stream_wrapper_register(protocol, classname, flags);
 }
 
-bool f_stream_wrapper_register(const String& protocol, const String& classname) {
+bool f_stream_wrapper_register(const String& protocol, const String& classname, const int flags) {
   std::unique_ptr<Stream::Wrapper> wrapper;
   try {
     wrapper = std::unique_ptr<Stream::Wrapper>(
-                   new UserStreamWrapper(protocol, classname));
+                   new UserStreamWrapper(protocol, classname, flags));
   } catch (const InvalidArgumentException& e) {
     raise_warning("%s", e.what());
     return false;

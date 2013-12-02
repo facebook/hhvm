@@ -3170,6 +3170,20 @@ bool shouldAnalyzeCallee(const NormalizedInstruction* fcall,
   // inline if there are any calls in order to prepare arguments.
   for (auto* ni = fcall->prev; ni; ni = ni->prev) {
     if (ni->source.offset() == fpi->m_fpushOff) {
+      if (ni->op() == OpFPushObjMethodD ||
+          ni->op() == OpFPushObjMethod) {
+        if (!ni->inputs[ni->op() == OpFPushObjMethod]->isObject()) {
+          /*
+           * In this case, we're going to throw or fatal when we
+           * execute the FPush*. But we have statically proven that
+           * if we get to the FCall, then target is the Func that will
+           * be called. So the FCall is unreachable - but unfortunately,
+           * various assumptions by the jit will be violated if we try
+           * to inline it. So just don't inline in that case.
+           */
+          return false;
+        }
+      }
       return true;
     }
     if (isFCallStar(ni->op()) || ni->op() == OpFCallBuiltin) {

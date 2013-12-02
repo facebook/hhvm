@@ -4251,7 +4251,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             e.AKExists();
             return true;
           }
-        } else if (call->isCallToFunction("idx") && call->isOptimizable()) {
+        } else if (call->isCallToFunction("idx") &&
+                   call->isOptimizable() &&
+                   !Option::JitEnableRenameFunction) {
           if (params && (params->getCount() == 2 || params->getCount() == 3)) {
             visit((*params)[0]);
             emitConvertToCell(e);

@@ -631,8 +631,8 @@ function run_test($options, $test) {
     shell_exec("diff --text -u $test.expectf $test.out > $test.diff 2>&1");
 
     // Normalize newlines
-    $wanted_re = preg_replace("/(\r\n?|\n)/", "\n", $wanted_re);
-    $output    = preg_replace("/(\r\n?|\n)/", "\n", $output);
+    $wanted_re = trim(preg_replace("/(\r\n?|\n)/", "\n", $wanted_re));
+    $output    = trim(preg_replace("/(\r\n?|\n)/", "\n", $output));
 
     return preg_match("/^$wanted_re\$/s", $output);
 

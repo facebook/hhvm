@@ -323,16 +323,16 @@ enum IncDecOp {
   IncDec_invalid
 };
 
-#define IS_TYPE_OPS \
-  IS_TYPE_OP(IsNull) \
-  IS_TYPE_OP(IsBool) \
-  IS_TYPE_OP(IsInt) \
-  IS_TYPE_OP(IsDouble) \
-  IS_TYPE_OP(IsString) \
-  IS_TYPE_OP(IsArray) \
-  IS_TYPE_OP(IsObject) \
+#define IS_TYPE_OPS                             \
+  IS_TYPE_OP(Null)                              \
+  IS_TYPE_OP(Bool)                              \
+  IS_TYPE_OP(Int)                               \
+  IS_TYPE_OP(Dbl)                               \
+  IS_TYPE_OP(Str)                               \
+  IS_TYPE_OP(Arr)                               \
+  IS_TYPE_OP(Obj)
 
-enum IsTypeOp : uint8_t {
+enum class IsTypeOp : uint8_t {
 #define IS_TYPE_OP(op) op,
   IS_TYPE_OPS
 #undef IS_TYPE_OP

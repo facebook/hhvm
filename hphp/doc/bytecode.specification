@@ -1442,21 +1442,22 @@ EmptyS    [C A]  ->  [C:Bool]
 
 IsTypeC  <op>                     [C]  ->  [C:Bool]
 
-  Is type. This instruction first loads a type into t based on the operand op,
-  as given by the following table:
+  Is type. This instruction first loads a type into t based on the operand
+  op, according to the following table:
 
     operand        t
     -----------+------
-      IsNull   | Null
-      IsBool   | Bool
-      IsInt    |  Int
-      IsDouble |  Dbl
-      IsString |  Str
-      IsArray  |  Arr
-      IsObject |  Obj
+      Null     | Null
+      Bool     | Bool
+      Int      |  Int
+      Dbl      |  Dbl
+      Str      |  Str
+      Arr      |  Arr
+      Obj      |  Obj
 
-  If $1 is of type t, this instruction pushes true onto the stack, otherwise it
-  pushes false.
+
+  If $1 is of type t, this instruction pushes true onto the stack,
+  otherwise it pushes false.
 
 IsTypeL <op> <local variable id>     []  ->  [C:Bool]
 
@@ -1465,13 +1466,13 @@ IsTypeL <op> <local variable id>     []  ->  [C:Bool]
 
     operand        t      x
     -----------+------+-------
-      IsNull   | Null |  true
-      IsBool   | Bool | false
-      IsInt    |  Int | false
-      IsDouble |  Dbl | false
-      IsString |  Str | false
-      IsArray  |  Arr | false
-      IsObject |  Obj | false
+      Null     | Null |  true
+      Bool     | Bool | false
+      Int      |  Int | false
+      Dbl      |  Dbl | false
+      Str      |  Str | false
+      Arr      |  Arr | false
+      Obj      |  Obj | false
 
   If the local variable given by %1 is defined, this pushes true onto the stack
   if the local variable is of type t, otherwise it pushes false.

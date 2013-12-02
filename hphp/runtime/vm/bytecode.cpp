@@ -4709,24 +4709,17 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetL(IOP_ARGS) {
   topTv->m_type = KindOfBoolean;
 }
 
-OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, unsigned char op) {
+OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
   switch (op) {
-     case IsNull:
-      return is_null(tvAsCVarRef(tv));
-    case IsBool:
-      return is_bool(tvAsCVarRef(tv));
-    case IsInt:
-      return is_int(tvAsCVarRef(tv));
-    case IsDouble:
-      return is_double(tvAsCVarRef(tv));
-    case IsArray:
-      return is_array(tvAsCVarRef(tv));
-    case IsObject:
-      return is_object(tvAsCVarRef(tv));
-    case IsString:
-      return is_string(tvAsCVarRef(tv));
-    default: not_reached();
+  case IsTypeOp::Null:  return is_null(tvAsCVarRef(tv));
+  case IsTypeOp::Bool:  return is_bool(tvAsCVarRef(tv));
+  case IsTypeOp::Int:   return is_int(tvAsCVarRef(tv));
+  case IsTypeOp::Dbl:   return is_double(tvAsCVarRef(tv));
+  case IsTypeOp::Arr:   return is_array(tvAsCVarRef(tv));
+  case IsTypeOp::Obj:   return is_object(tvAsCVarRef(tv));
+  case IsTypeOp::Str:   return is_string(tvAsCVarRef(tv));
   }
+  not_reached();
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopIsTypeL(IOP_ARGS) {
@@ -4738,7 +4731,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIsTypeL(IOP_ARGS) {
     raise_undefined_local(m_fp, local);
   }
   TypedValue* topTv = m_stack.allocTV();
-  topTv->m_data.num = isTypeHelper(tv, op);
+  topTv->m_data.num = isTypeHelper(tv, static_cast<IsTypeOp>(op));
   topTv->m_type = KindOfBoolean;
 }
 
@@ -4747,7 +4740,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIsTypeC(IOP_ARGS) {
   DECODE_OA(op);
   TypedValue* topTv = m_stack.topTV();
   assert(topTv->m_type != KindOfRef);
-  bool ret = isTypeHelper(topTv, op);
+  bool ret = isTypeHelper(topTv, static_cast<IsTypeOp>(op));
   tvRefcountedDecRefCell(topTv);
   topTv->m_data.num = ret;
   topTv->m_type = KindOfBoolean;

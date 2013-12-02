@@ -813,28 +813,28 @@ IRTranslator::translateIssetL(const NormalizedInstruction& ni) {
 
 static inline DataType typeOpToDataType(IsTypeOp op) {
   switch (op) {
-    case IsNull:   return KindOfNull;
-    case IsInt:    return KindOfInt64;
-    case IsDouble: return KindOfDouble;
-    case IsBool:   return KindOfBoolean;
-    case IsString: return KindOfString;
-    case IsArray:  return KindOfArray;
-    case IsObject: return KindOfObject;
-    default: not_reached();
+  case IsTypeOp::Null:  return KindOfNull;
+  case IsTypeOp::Int:   return KindOfInt64;
+  case IsTypeOp::Dbl:   return KindOfDouble;
+  case IsTypeOp::Bool:  return KindOfBoolean;
+  case IsTypeOp::Str:   return KindOfString;
+  case IsTypeOp::Arr:   return KindOfArray;
+  case IsTypeOp::Obj:   return KindOfObject;
   }
+  not_reached();
 }
 
 void
 IRTranslator::translateCheckTypeLOp(const NormalizedInstruction& ni) {
   auto const op = ni.imm[0].u_OA;
   auto const locId = ni.imm[1].u_LA;
-  HHIR_EMIT(IsTypeL, locId, typeOpToDataType((IsTypeOp)op));
+  HHIR_EMIT(IsTypeL, locId, typeOpToDataType(static_cast<IsTypeOp>(op)));
 }
 
 void
 IRTranslator::translateCheckTypeCOp(const NormalizedInstruction& ni) {
   auto const op = ni.imm[0].u_OA;
-  HHIR_EMIT(IsTypeC, typeOpToDataType((IsTypeOp)op));
+  HHIR_EMIT(IsTypeC, typeOpToDataType(static_cast<IsTypeOp>(op)));
 }
 
 void

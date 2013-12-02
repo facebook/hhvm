@@ -525,10 +525,11 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         ok = false;
         break;
       case Op::IsTypeC: case Op::IsTypeL:
-        if (op > IsObject) {
-          error("invalid operation for IsType*: %d\n", op);
-          ok = false;
-        }
+#define IS_TYPE_OP(x)  if (op == static_cast<uint8_t>(IsTypeOp::x)) break;
+        IS_TYPE_OPS
+#undef IS_TYPE_OP
+        error("invalid operation for IsType*: %d\n", op);
+        ok = false;
         break;
       case OpIncDecL: case OpIncDecN: case OpIncDecG: case OpIncDecS:
       case OpIncDecM:

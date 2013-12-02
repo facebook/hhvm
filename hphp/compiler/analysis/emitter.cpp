@@ -4425,24 +4425,26 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       TYPE_CONVERT_INSTR(str, String)
 #undef TYPE_CONVERT_INSTR
 
-#define TYPE_CHECK_INSTR(what, What)                                  \
-        else if (call->isCallToFunction("is_"#what) &&                \
-                 params && params->getCount() == 1) {                 \
-          visit((*call->getParams())[0]);                             \
-          emitIsType(e, Is ## What);                                  \
-          return true;                                                \
+#define TYPE_CHECK_INSTR(what, What)                    \
+        else if (call->isCallToFunction("is_"#what) &&  \
+                 params && params->getCount() == 1) {   \
+          visit((*call->getParams())[0]);               \
+          emitIsType(e, IsTypeOp::What);                \
+          return true;                                  \
         }
+
       TYPE_CHECK_INSTR(null, Null)
-      TYPE_CHECK_INSTR(object, Object)
-      TYPE_CHECK_INSTR(array, Array)
-      TYPE_CHECK_INSTR(string, String)
+      TYPE_CHECK_INSTR(object, Obj)
+      TYPE_CHECK_INSTR(array, Arr)
+      TYPE_CHECK_INSTR(string, Str)
       TYPE_CHECK_INSTR(int, Int)
       TYPE_CHECK_INSTR(integer, Int)
       TYPE_CHECK_INSTR(long, Int)
       TYPE_CHECK_INSTR(bool, Bool)
-      TYPE_CHECK_INSTR(double, Double)
-      TYPE_CHECK_INSTR(real, Double)
-      TYPE_CHECK_INSTR(float, Double)
+      TYPE_CHECK_INSTR(double, Dbl)
+      TYPE_CHECK_INSTR(real, Dbl)
+      TYPE_CHECK_INSTR(float, Dbl)
+
 #undef TYPE_CHECK_INSTR
         // fall through
       }
@@ -5152,7 +5154,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         // if expr is null, just continue
         emitVirtualLocal(exprLoc);
-        emitIsType(e, IsNull);
+        emitIsType(e, IsTypeOp::Null);
         e.JmpNZ(awaitNull);
 
         emitVirtualLocal(exprLoc);
@@ -5776,7 +5778,10 @@ void EmitterVisitor::emitIsset(Emitter& e) {
       // code is valid. Once the parser handles this correctly,
       // the R and C cases can go.
       case StackSym::R:  e.UnboxR(); // fall through
-      case StackSym::C:  e.IsTypeC(IsNull); e.Not(); break;
+      case StackSym::C:
+        e.IsTypeC(static_cast<uint8_t>(IsTypeOp::Null));
+        e.Not();
+        break;
       default: {
         unexpectedStackSym(sym, "emitIsset");
         break;
@@ -5796,10 +5801,12 @@ void EmitterVisitor::emitIsType(Emitter& e, IsTypeOp op) {
   switch (char sym = m_evalStack.top()) {
   case StackSym::L:
     e.IsTypeL(
-      op, m_evalStack.getLoc(m_evalStack.size() - 1));
+      static_cast<uint8_t>(op),
+      m_evalStack.getLoc(m_evalStack.size() - 1)
+    );
     break;
   case StackSym::C:
-    e.IsTypeC(op);
+    e.IsTypeC(static_cast<uint8_t>(op));
     break;
   default:
     unexpectedStackSym(sym, "emitIsType");

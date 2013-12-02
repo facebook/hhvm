@@ -2622,7 +2622,8 @@ void Translator::postAnalyze(NormalizedInstruction* ni, SrcKey& sk,
     src.advance(unit);
     Op next = toOp(*unit->at(src.offset()));
     if (next == OpInstanceOfD
-          || (next == OpIsTypeC && ni->imm[0].u_OA == IsNull)) {
+          || (next == OpIsTypeC &&
+              ni->imm[0].u_OA == static_cast<uint8_t>(IsTypeOp::Null))) {
       ni->outStack->rtt = RuntimeType(KindOfObject);
     }
     return;

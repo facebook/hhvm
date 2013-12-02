@@ -802,7 +802,7 @@ uint8_t read_Fatal_arg(AsmState& as) {
 
 uint8_t read_IsType_arg(AsmState& as) {
   auto const str = read_opcode_arg<std::string>(as);
-#define IS_TYPE_OP(x) if (str == #x) return static_cast<uint8_t>(x);
+#define IS_TYPE_OP(x) if (str == #x) return static_cast<uint8_t>(IsTypeOp::x);
   IS_TYPE_OPS
 #undef FATAL_OP
   as.error("unknown IsType operand");

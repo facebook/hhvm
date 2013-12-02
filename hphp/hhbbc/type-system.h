@@ -46,9 +46,9 @@ namespace HPHP { namespace HHBBC {
  *                 |     |    |
  *                Cls  Cell  Ref
  *                 |     |
- *               Cls=c   +--------+--------+-------+
+ *              Cls<=c   +--------+--------+-------+
  *                 |     |        |        |       |
- *              Cls<=c  Unc       |        |      Obj
+ *              Cls=c   Unc       |        |      Obj
  *                       |        |        |       |
  *                  +----+        |        |     Obj<=c
  *                 /     |        |        |       |

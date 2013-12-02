@@ -48,8 +48,7 @@ svn checkout http://google-glog.googlecode.com/svn/trunk/ google-glog --quiet &
 wget http://www.canonware.com/download/jemalloc/jemalloc-3.0.0.tar.bz2 --quiet &
 
 # init submodules
-git submodule init
-git submodule update
+git submodule update --init
 
 # wait until all background processes finished
 FAIL=0

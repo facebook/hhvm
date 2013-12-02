@@ -1174,15 +1174,6 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
    * the call.
    */
   if (i.calleeTrace) {
-    const FPIEnt *fpi = i.source.func()->findFPI(i.source.offset());
-    assert(fpi);
-    NormalizedInstruction* p = i.prev;
-    while (p->source.offset() != fpi->m_fpushOff ||
-           p->source.getFuncId() != i.source.getFuncId()) {
-      p = p->prev;
-    }
-    if (p->interp) i.calleeTrace->m_inliningFailed = true;
-
     if (!i.calleeTrace->m_inliningFailed) {
       assert(shouldIRInline(m_hhbcTrans.curFunc(), i.funcd, *i.calleeTrace));
 

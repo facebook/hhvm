@@ -454,11 +454,15 @@ void pmethodCacheMissPath(MethodCache* mce,
   LeaseHolder writer(Translator::WriteLease());
   if (!writer) return;
 
-  auto smashMov = [&] (TCA addr, uintptr_t value) {
+  auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
     always_assert(isSmashable(addr + 2, 8));
     assert(addr[0] == 0x49 && addr[1] == 0xba);
     auto const ptr = reinterpret_cast<uintptr_t*>(addr + 2);
+    if (!(*ptr & 1)) {
+      return false;
+    }
     *ptr = value;
+    return true;
   };
 
   /*
@@ -495,12 +499,14 @@ void pmethodCacheMissPath(MethodCache* mce,
     fval < std::numeric_limits<uint32_t>::max() &&
     cval < std::numeric_limits<uint32_t>::max();
 
+  uintptr_t imm = 0x2; /* not a Class, but clear low bit */
   if (cacheable) {
     assert(!(mce->m_value->attrs() & AttrStatic));
-    auto const imm = fval << 32 | mce->m_key;
-    smashMov(pdata->smashImmAddr, imm);
-  } else {
-    smashMov(pdata->smashImmAddr, 0x2 /* not a Class, but clear low bit */);
+    imm = fval << 32 | cval;
+  }
+  if (!smashMov(pdata->smashImmAddr, imm)) {
+    // someone beat us to it
+    return methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
   }
 
   // Regardless of whether the inline cache was populated, smash the

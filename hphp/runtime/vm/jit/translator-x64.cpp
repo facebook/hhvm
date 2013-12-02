@@ -2104,7 +2104,8 @@ TranslatorX64::TranslatorX64()
 
   auto ru = [=] (size_t sz) { return sz + (-sz & (kRoundUp - 1)); };
 
-  const size_t kAHotSize   = ru(RuntimeOption::VMTranslAHotSize);
+  const size_t kAHotSize   = ru(RuntimeOption::RepoAuthoritative ?
+                                RuntimeOption::VMTranslAHotSize : 0);
   const size_t kASize      = ru(RuntimeOption::VMTranslASize);
   const size_t kAProfSize  = ru(RuntimeOption::EvalJitPGO ?
                                 RuntimeOption::VMTranslAProfSize : 0);

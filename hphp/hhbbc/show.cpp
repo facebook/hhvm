@@ -326,6 +326,11 @@ std::string show(const Bytecode& bc) {
       switch (static_cast<FatalOp>(subop)) { FATAL_OPS }
 #     undef FATAL_OP
       break;
+    case Op::IsTypeL: case Op::IsTypeC:
+#     define IS_TYPE_OP(x) case IsTypeOp::x: ret += #x; break;
+      switch (static_cast<IsTypeOp>(subop)) { IS_TYPE_OPS }
+#     undef IS_TYPE_OP
+      break;
     default: always_assert(0 && "unknown opcode with subop"); break;
     }
   };

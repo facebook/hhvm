@@ -779,19 +779,17 @@ struct InterpStepper : boost::static_visitor<void> {
   void isTypeLImpl(const Op& op) {
     if (!locCouldBeUninit(op.loc2)) { nothrow(); constprop(); }
     auto const loc = locAsCell(op.loc2);
-    //FIXME: task: 3287686
-    isTypeImpl(loc, TNull);
+    isTypeImpl(loc, type_of_istype(static_cast<IsTypeOp>(op.subop)));
   }
 
   template<class Op>
   void isTypeCImpl(const Op& op) {
     nothrow();
-    //FIXME: task: 3287686
-    isTypeImpl(popC(), TNull);
+    isTypeImpl(popC(), type_of_istype(static_cast<IsTypeOp>(op.subop)));
   }
 
-  void operator()(const bc::IsTypeC& op)   { isTypeCImpl(op); }
-  void operator()(const bc::IsTypeL& op)   { isTypeLImpl(op); }
+  void operator()(const bc::IsTypeC& op) { isTypeCImpl(op); }
+  void operator()(const bc::IsTypeL& op) { isTypeLImpl(op); }
 
   void operator()(const bc::InstanceOfD& op) {
     auto const t1 = popC();

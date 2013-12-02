@@ -24,6 +24,7 @@ $excluded = array(
   'runtime/ext/quicklz.h',
   'runtime/ext/quicklz.inc',
   'facebook',
+  'submodules',
 
   // non-PHP licenses
   'compiler/parser/hphp.tab.cpp',

@@ -70,7 +70,7 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef smart::unique_ptr<CufIter>::type SmartCufIterPtr;
+typedef smart::unique_ptr<CufIter> SmartCufIterPtr;
 
 bool array_is_valid_callback(CArrRef arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {

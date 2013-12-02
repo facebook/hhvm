@@ -342,13 +342,13 @@ class AutoloadHandler : public RequestEventHandler {
   struct HandlerBundle {
     HandlerBundle() = delete;
     HandlerBundle(CVarRef handler,
-                  smart::unique_ptr<CufIter>::type& cufIter) :
+                  smart::unique_ptr<CufIter>& cufIter) :
       m_handler(handler) {
       m_cufIter = std::move(cufIter);
     }
 
     Variant m_handler; // used to respond to f_spl_autoload_functions
-    smart::unique_ptr<CufIter>::type m_cufIter; // used to invoke handlers
+    smart::unique_ptr<CufIter> m_cufIter; // used to invoke handlers
   };
 
   class CompareBundles {

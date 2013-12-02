@@ -69,7 +69,8 @@ bool classIsUniqueInterface(const Class* cls) {
 HhbcTranslator::HhbcTranslator(Offset startOffset,
                                uint32_t initialSpOffsetFromFp,
                                const Func* func)
-  : m_tb(new TraceBuilder(startOffset,
+  : m_unit(startOffset)
+  , m_tb(new TraceBuilder(startOffset,
                           initialSpOffsetFromFp,
                           m_unit,
                           func))

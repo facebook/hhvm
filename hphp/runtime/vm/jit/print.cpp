@@ -353,7 +353,7 @@ static BlockList blocks(const IRUnit& unit,
   smart::vector<Block*> blocks;
   blocks.assign(trace->blocks().begin(), trace->blocks().end());
   if (trace->isMain()) {
-    for (auto exit : unit.exits()) {
+    for (auto* exit : unit.exits()) {
       blocks.insert(blocks.end(), exit->blocks().begin(), exit->blocks().end());
     }
   }

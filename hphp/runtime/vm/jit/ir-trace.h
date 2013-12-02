@@ -79,55 +79,6 @@ private:
   Blocks m_blocks; // Blocks in main trace starting with entry
 };
 
-inline IRTrace::IRTrace(IRUnit& unit, Block* first, size_t cap)
-  : m_unit(unit)
-  , m_blocks(new (unit.arena()) Block*[cap], 0, cap) {
-  assert(cap >= kMinCap);
-  push_back(first);
-}
-
-inline IRTrace::iterator IRTrace::unlink(iterator blockIt) {
-  // Update any predecessors to point to the empty block's next block.
-  auto block = *blockIt;
-  assert(block->empty());
-  auto next = block->next();
-  for (auto it = block->preds().begin(); it != block->preds().end(); ) {
-    auto cur = it;
-    ++it;
-    cur->setTo(next);
-  }
-  return erase(blockIt);
-}
-
-inline IRTrace::iterator IRTrace::erase(iterator it) {
-  assert((*it)->preds().empty());
-  Block* b = *it;
-  b->setTrace(nullptr);
-  if (!b->empty()) b->back().setTaken(nullptr);
-  b->setNext(nullptr);
-  return m_blocks.erase(it);
-}
-
-inline void IRTrace::reserve(size_t cap) {
-  if (m_blocks.capacity() < cap) {
-    auto blocks = new (m_unit.arena()) Block*[cap];
-    std::copy(m_blocks.begin(), m_blocks.end(), blocks);
-    m_blocks = List<Block*>(blocks, m_blocks.len, cap);
-  }
-}
-
-inline Block* IRTrace::push_back(Block* b) {
-  b->setTrace(this);
-  auto len = m_blocks.size();
-  auto cap = m_blocks.capacity();
-  if (len == cap) {
-    static_assert(kMinCap / 2 > 0, "");
-    reserve(cap + cap / 2); // grow by 1.5x
-  }
-  m_blocks.push_back(b);
-  return b;
-}
-
 // defined here to avoid circular dependency
 inline bool Block::isMain() const {
   return m_trace->isMain();

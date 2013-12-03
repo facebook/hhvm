@@ -9237,9 +9237,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     SCOPE_EXIT { SymbolTable::Purge(); };
 
     std::unique_ptr<UnitEmitter> ue;
-    // Check if this file contains raw hip hop bytecode instead of php.
-    // For now this is just dictated by file extension, and doesn't ever
-    // commit to the repo.
+    // Check if this file contains raw hip hop bytecode instead of
+    // php.  This is dictated by a special file extension.
     if (RuntimeOption::EvalAllowHhas) {
       if (const char* dot = strrchr(filename, '.')) {
         const char hhbc_ext[] = "hhas";

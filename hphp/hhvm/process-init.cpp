@@ -147,6 +147,14 @@ void ProcessInit() {
   if (!hhas.empty()) {
     SystemLib::s_hhas_unit = compile_string(hhas.c_str(), hhas.size(),
                                             "systemlib.hhas");
+    if (SystemLib::s_hhas_unit->compileTimeFatal(msg, line)) {
+      Logger::Error("An error has been introduced in the hhas portion of "
+                    "systemlib.");
+      Logger::Error("Check all of your changes to hhas files in "
+                    "hphp/system/php");
+      Logger::Error("HipHop Parse Error: %s", msg->data());
+      _exit(1);
+    }
   }
 
   // Load the systemlib unit to build the Class objects

@@ -111,14 +111,14 @@ TCA emitUnaryStub(CodeBlock& cb, CppCall c) {
 //////////////////////////////////////////////////////////////////////
 
 void emitCallToExit(UniqueStubs& uniqueStubs) {
-  Asm a { tx64->stubsCode };
+  Asm a { tx64->mainCode };
 
   // Emit a byte of padding. This is a kind of hacky way to avoid
   // hitting an assert in recordGdbStub when we call it with stub - 1
   // as the start address.
   a.emitNop(1);
   auto const stub = emitServiceReq(
-    tx64->stubsCode,
+    tx64->mainCode,
     SRFlags::Align | SRFlags::JmpInsteadOfRet,
     REQ_EXIT
   );
@@ -139,8 +139,8 @@ void emitReturnHelpers(UniqueStubs& us) {
 }
 
 void emitResumeHelpers(UniqueStubs& uniqueStubs) {
-  Asm a { tx64->stubsCode };
-  moveToAlign(tx64->stubsCode);
+  Asm a { tx64->mainCode };
+  moveToAlign(tx64->mainCode);
 
   auto const fpOff = offsetof(VMExecutionContext, m_fp);
   auto const spOff = offsetof(VMExecutionContext, m_stack) +
@@ -152,13 +152,13 @@ void emitResumeHelpers(UniqueStubs& uniqueStubs) {
   emitGetGContext(a, rax);
   a.   loadq  (rax[fpOff], rVmFp);
   a.   loadq  (rax[spOff], rVmSp);
-  emitServiceReq(tx64->stubsCode, REQ_RESUME);
+  emitServiceReq(tx64->mainCode, REQ_RESUME);
 
   uniqueStubs.add("resumeHelpers", uniqueStubs.resumeHelper);
 }
 
 void emitDefClsHelper(UniqueStubs& uniqueStubs) {
-  Asm a { tx64->stubsCode };
+  Asm a { tx64->mainCode };
   uniqueStubs.defClsHelper = a.frontier();
 
   void (*helper)(PreClass*) = defClsHelper;
@@ -195,19 +195,19 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
 
 void emitDtorStubs(UniqueStubs& uniqueStubs) {
   auto const strDtor = uniqueStubs.add("dtorStr", emitUnaryStub(
-    tx64->stubsCode, CppCall(getMethodPtr(&StringData::release))
+    tx64->mainCode, CppCall(getMethodPtr(&StringData::release))
   ));
   auto const arrDtor = uniqueStubs.add("dtorArr", emitUnaryStub(
-    tx64->stubsCode, CppCall(getVTableOffset(&HphpArray::release))
+    tx64->mainCode, CppCall(getVTableOffset(&HphpArray::release))
   ));
   auto const objDtor = uniqueStubs.add("dtorObj", emitUnaryStub(
-    tx64->stubsCode, CppCall(getMethodPtr(&ObjectData::release))
+    tx64->mainCode, CppCall(getMethodPtr(&ObjectData::release))
   ));
   auto const resDtor = uniqueStubs.add("dtorRes", emitUnaryStub(
-    tx64->stubsCode, CppCall(getMethodPtr(&ResourceData::release))
+    tx64->mainCode, CppCall(getMethodPtr(&ResourceData::release))
   ));
   auto const refDtor = uniqueStubs.add("dtorRef", emitUnaryStub(
-    tx64->stubsCode, CppCall(getMethodPtr(&RefData::release))
+    tx64->mainCode, CppCall(getMethodPtr(&RefData::release))
   ));
 
   uniqueStubs.dtorStubs[0] = nullptr;
@@ -415,9 +415,9 @@ asm_label(a, noCallee);
 
 void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
   TCA (*helper)(ActRec*, void*) = &fcallHelper;
-  Asm a { tx64->stubsCode };
+  Asm a { tx64->mainCode };
 
-  moveToAlign(tx64->stubsCode);
+  moveToAlign(tx64->mainCode);
   uniqueStubs.fcallHelperThunk = a.frontier();
 
   Label popAndXchg, skip;
@@ -472,9 +472,9 @@ asm_label(a, skip);
 
 void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
   TCA (*helper)(ActRec*,void*) = &funcBodyHelper;
-  Asm a { tx64->stubsCode };
+  Asm a { tx64->mainCode };
 
-  moveToAlign(tx64->stubsCode);
+  moveToAlign(tx64->mainCode);
   uniqueStubs.funcBodyHelperThunk = a.frontier();
 
   // This helper is called via a direct jump from the TC (from
@@ -490,9 +490,9 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
 
 void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
   bool (*helper)(const ActRec*, int) = &EventHook::onFunctionEnter;
-  Asm a { tx64->stubsCode };
+  Asm a { tx64->mainCode };
 
-  moveToAlign(tx64->stubsCode);
+  moveToAlign(tx64->mainCode);
   uniqueStubs.functionEnterHelper = a.frontier();
 
   Label skip;

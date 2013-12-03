@@ -466,6 +466,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           return replaceValue(rep);
         }
         case '+':
+        case '.':
         case '*':
         case '&':
         case '|':
@@ -477,6 +478,9 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
               ExpressionPtr aExp = m_exp1;
               ExpressionPtr bExp = binOpExp->m_exp1;
               ExpressionPtr cExp = binOpExp->m_exp2;
+              if (aExp->isArray() || bExp->isArray() || cExp->isArray()) {
+                break;
+              }
               m_exp1 = binOpExp = Clone(binOpExp);
               m_exp2 = cExp;
               binOpExp->m_exp1 = aExp;

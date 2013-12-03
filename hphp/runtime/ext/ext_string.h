@@ -165,6 +165,10 @@ Variant f_strcspn(const String& str1, const String& str2, int start = 0,
 
 Variant f_strlen(CVarRef vstr);
 
+Array f_str_getcsv(const String& str,
+                   const String& delimiter = ",",
+                   const String& enclosure = "\"",
+                   const String& escape = "\\");
 Variant f_count_chars(const String& str, int64_t mode = 0);
 
 Variant f_str_word_count(const String& str, int64_t format = 0, const String& charlist = "");

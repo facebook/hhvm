@@ -1973,6 +1973,41 @@
             ]
         },
         {
+            "name": "str_getcsv",
+            "desc": "Parses a string input for fields in CSV format and returns an array containing the fields read.",
+            "flags": [
+            ],
+            "return": {
+              "type": "StringVec",
+              "desc": "Returns an indexed array containing the fields read."
+            },
+            "args": [
+                {
+                    "name": "input",
+                    "type": "String",
+                    "desc": "The string to parse."
+                },
+                {
+                    "name": "delimiter",
+                    "type": "String",
+                    "value": "\",\"",
+                    "desc": "Set the field delimiter (one character only)."
+                },
+                {
+                    "name": "enclosure",
+                    "type": "String",
+                    "value": "\"\\\"\"",
+                    "desc": "Set the field enclosure character (one character only)."
+                },
+                {
+                    "name": "escape",
+                    "type": "String",
+                    "value": "\"\\\\\"",
+                    "desc": "Set the escape character (one character only). Defaults as a backslash (\\)"
+                }
+            ]
+        },
+        {
             "name": "count_chars",
             "desc": "Counts the number of occurrences of every byte-value (0..255) in string and returns it in various ways.",
             "flags": [

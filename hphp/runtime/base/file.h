@@ -158,7 +158,7 @@ public:
    * Read one line of csv record.
    */
   Array readCSV(int64_t length = 0, char delimiter = ',', char enclosure = '"',
-                char escape = '\\');
+                char escape = '\\', const String* initial = nullptr);
 
   /**
    * Return the last error we know about

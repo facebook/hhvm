@@ -1093,6 +1093,27 @@ Variant f_strlen(CVarRef vstr) {
   }
 }
 
+Array f_str_getcsv(const String& str,
+                   const String& delimiter /* = "," */,
+                   const String& enclosure /* = "\"" */,
+                   const String& escape /* = "\\" */) {
+  if (str.empty()) {
+    return Array::Create(null_variant);
+  }
+
+  auto check_arg = [](const String& arg, char default_arg) {
+    return arg.size() > 0 ? arg[0] : default_arg;
+  };
+
+  char delimiter_char = check_arg(delimiter, ',');
+  char enclosure_char = check_arg(enclosure, '"');
+  char escape_char = check_arg(escape, '\\');
+
+  auto dummy = NEWOBJ(PlainFile)();
+  auto wrapper = Resource(dummy);
+  return dummy->readCSV(0, delimiter_char, enclosure_char, escape_char, &str);
+}
+
 Variant f_count_chars(const String& str, int64_t mode /* = 0 */) {
   int chars[256];
   memset((void*)chars, 0, sizeof(chars));

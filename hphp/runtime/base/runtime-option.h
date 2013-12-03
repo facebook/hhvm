@@ -442,7 +442,7 @@ public:
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
-  F(bool, SimulateARM,                 false)                           \
+  F(bool, SimulateARM,                 simulateARMDefault())            \
   F(bool, DecRefUsePlainDecl,          true)                            \
   F(bool, DecRefUsePlainDeclWithDestroy,true)                           \
   F(bool, DecRefUseScratch,            false)                           \

@@ -387,6 +387,14 @@ static inline bool hhbcRelaxGuardsDefault() {
   return !RuntimeOption::EvalHHIRRelaxGuards;
 }
 
+static inline bool simulateARMDefault() {
+#ifdef HHVM_SIMULATE_ARM_BY_DEFAULT
+  return true;
+#else
+  return false;
+#endif
+}
+
 static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }

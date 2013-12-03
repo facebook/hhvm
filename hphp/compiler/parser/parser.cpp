@@ -1897,11 +1897,11 @@ bool Parser::isAutoAliasOn() {
 }
 
 std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
-  std::vector<AliasTable::AliasEntry> aliases;
-  aliases.push_back(
-    (AliasTable::AliasEntry){"Traversable", "HH\\Traversable"});
-  aliases.push_back(
-    (AliasTable::AliasEntry){"Iterator", "HH\\Iterator"});
+  std::vector<AliasTable::AliasEntry> aliases {
+    (AliasTable::AliasEntry){"Traversable", "HH\\Traversable"},
+    (AliasTable::AliasEntry){"Iterator", "HH\\Iterator"},
+    (AliasTable::AliasEntry){"Collection", "HH\\Collection"}
+  };
   return aliases;
 }
 

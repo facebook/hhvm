@@ -1,5 +1,7 @@
 <?php
 
+namespace {
+
 interface ConstCollection extends Countable {
   public function isEmpty();
   public function count();
@@ -11,10 +13,18 @@ interface OutputCollection {
   public function addAll($iterable);
 }
 
-interface Collection extends ConstCollection,
-                             OutputCollection {
+}
+
+namespace HH {
+
+interface Collection extends \ConstCollection,
+                             \OutputCollection {
   public function clear();
 }
+
+}
+
+namespace {
 
 interface ConstSetAccess {
   public function contains($m);
@@ -58,7 +68,7 @@ interface ConstVector extends ConstCollection,
 }
 
 interface MutableVector extends ConstVector,
-                                Collection,
+                                \HH\Collection,
                                 IndexAccess {
 }
 
@@ -69,7 +79,7 @@ interface ConstMap extends ConstCollection,
 }
 
 interface MutableMap extends ConstMap,
-                             Collection,
+                             \HH\Collection,
                              MapAccess {
 }
 
@@ -79,7 +89,7 @@ interface ConstSet extends ConstCollection,
 }
 
 interface MutableSet extends ConstSet,
-                             Collection,
+                             \HH\Collection,
                              SetAccess {
 }
 
@@ -925,5 +935,7 @@ class LazyKeyedIterableView implements KeyedIterable {
   public function kvzip() {
     return new LazyKVZipIterable($this->iterable);
   }
+}
+
 }
 

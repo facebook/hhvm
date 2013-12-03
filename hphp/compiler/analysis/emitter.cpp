@@ -4859,65 +4859,15 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         if (!m_staticArrays.empty()) {
           ExpressionPtr val = ap->getValue();
 
-          // Value.
           TypedValue tvVal;
           initScalar(tvVal, val);
 
           if (key != nullptr) {
-            // Key.
             assert(key->isScalar());
-            TypedValue tvKey;
-            if (key->is(Expression::KindOfConstantExpression)) {
-              ConstantExpressionPtr c(
-                static_pointer_cast<ConstantExpression>(key));
-              if (c->isNull()) {
-                // PHP casts null keys to "".
-                tvKey.m_data.pstr = empty_string.get();
-                tvKey.m_type = KindOfString;
-              } else if (c->isBoolean()) {
-                // PHP casts bool keys to 0 or 1
-                tvKey.m_data.num = c->getBooleanValue() ? 1 : 0;
-                tvKey.m_type = KindOfInt64;
-              } else {
-                // Handle INF and NAN
-                assert(c->isDouble());
-                Variant v;
-                c->getScalarValue(v);
-                tvKey.m_data.num = v.toInt64();
-                tvKey.m_type = KindOfInt64;
-              }
-            } else if (key->is(Expression::KindOfScalarExpression)) {
-              ScalarExpressionPtr sval(
-                static_pointer_cast<ScalarExpression>(key));
-              const std::string* s;
-              int64_t i;
-              double d;
-              if (sval->getString(s)) {
-                StringData* sd = makeStaticString(*s);
-                int64_t n = 0;
-                if (sd->isStrictlyInteger(n)) {
-                  tvKey.m_data.num = n;
-                  tvKey.m_type = KindOfInt64;
-                } else {
-                  tvKey.m_data.pstr = sd;
-                  tvKey.m_type = KindOfString;
-                }
-              } else if (sval->getInt(i)) {
-                tvKey.m_data.num = i;
-                tvKey.m_type = KindOfInt64;
-              } else if (sval->getDouble(d)) {
-                tvKey.m_data.num = toInt64(d);
-                tvKey.m_type = KindOfInt64;
-              } else {
-                not_implemented();
-              }
-            } else if (key->is(Expression::KindOfUnaryOpExpression)) {
-              assert(key->isScalar());
-              tvKey = make_tv<KindOfNull>();
-              auto uoe = dynamic_pointer_cast<UnaryOpExpression>(key);
-              uoe->getScalarValue(tvAsVariant(&tvKey));
-            } else {
-              not_implemented();
+            TypedValue tvKey = make_tv<KindOfNull>();
+            if (!key->getScalarValue(tvAsVariant(&tvKey))) {
+              InvariantViolation("Expected scalar value for array key\n");
+              always_assert(0);
             }
             m_staticArrays.back().set(tvAsCVarRef(&tvKey),
                                       tvAsVariant(&tvVal));

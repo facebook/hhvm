@@ -228,6 +228,13 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
           getOriginalName().c_str()
         );
       }
+      if (getStmts()) {
+        getStmts()->parseTimeFatal(
+          Compiler::InvalidMethodDefinition,
+          "Interface method %s::%s() cannot contain body",
+          classScope->getOriginalName().c_str(),
+          getOriginalName().c_str());
+      }
     }
     if (m_modifiers->isAbstract()) {
       if (m_modifiers->isPrivate() || m_modifiers->isFinal() || isNative) {

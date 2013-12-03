@@ -776,3 +776,8 @@ bool TestCodeError::TestBadDefaultValueType() {
   VE(BadDefaultValueType, "<?php function f(int $i1 = array()) {}");
   return true;
 }
+
+bool TestCodeError::TestInvalidMethodDefinition() {
+  VE(InvalidMethodDefinition, "<?php interface I {public function f() {}}");
+  return true;
+}

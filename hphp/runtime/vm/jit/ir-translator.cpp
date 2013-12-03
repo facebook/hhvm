@@ -826,8 +826,8 @@ static inline DataType typeOpToDataType(IsTypeOp op) {
 
 void
 IRTranslator::translateCheckTypeLOp(const NormalizedInstruction& ni) {
-  auto const op = ni.imm[0].u_OA;
-  auto const locId = ni.imm[1].u_LA;
+  auto const locId = ni.imm[0].u_LA;
+  auto const op    = ni.imm[1].u_OA;
   HHIR_EMIT(IsTypeL, locId, typeOpToDataType(static_cast<IsTypeOp>(op)));
 }
 

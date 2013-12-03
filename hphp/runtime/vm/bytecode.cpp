@@ -4724,8 +4724,8 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
 
 OPTBLD_INLINE void VMExecutionContext::iopIsTypeL(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
   DECODE_LA(local);
+  DECODE_OA(op);
   TypedValue* tv = frame_local(m_fp, local);
   if (tv->m_type == KindOfUninit) {
     raise_undefined_local(m_fp, local);

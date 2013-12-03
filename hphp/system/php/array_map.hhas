@@ -30,7 +30,7 @@ warning:  Cns "E_USER_WARNING"
 # so we use the fast, php version
 
 one_array:
-          IsTypeL Arr $arr
+          IsTypeL $arr Arr
           JmpZ call_cpp_impl
           IssetL $func
           JmpZ ident

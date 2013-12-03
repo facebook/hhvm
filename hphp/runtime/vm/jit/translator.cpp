@@ -1996,8 +1996,8 @@ void getInputsImpl(SrcKey startSk,
     addMVectorInputs(*ni, currentStackOffset, inputs);
   }
   if (input & Local) {
-    // All instructions that take a Local have its index at their first
-    // immediate.
+    // (Almost) all instructions that take a Local have its index at
+    // their first immediate.
     int loc;
     auto insertAt = inputs.end();
     switch (ni->op()) {
@@ -2005,9 +2005,6 @@ void getInputsImpl(SrcKey startSk,
         insertAt = inputs.begin();
         // fallthrough
       case OpFPassL:
-        loc = ni->imm[1].u_IVA;
-        break;
-      case OpIsTypeL:
         loc = ni->imm[1].u_IVA;
         break;
 

@@ -5801,8 +5801,8 @@ void EmitterVisitor::emitIsType(Emitter& e, IsTypeOp op) {
   switch (char sym = m_evalStack.top()) {
   case StackSym::L:
     e.IsTypeL(
-      static_cast<uint8_t>(op),
-      m_evalStack.getLoc(m_evalStack.size() - 1)
+      m_evalStack.getLoc(m_evalStack.size() - 1),
+      static_cast<uint8_t>(op)
     );
     break;
   case StackSym::C:

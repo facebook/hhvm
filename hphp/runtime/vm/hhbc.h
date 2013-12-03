@@ -527,9 +527,8 @@ enum SetOpOp {
   O(EmptyG,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(EmptyS,          NA,               TWO(AV,CV),      ONE(CV),    NF) \
   O(EmptyM,          ONE(MA),          MMANY,           ONE(CV),    NF) \
-  /* NB: isTypePred depends on this ordering. */ \
   O(IsTypeC,         ONE(OA),          ONE(CV),         ONE(CV),    NF) \
-  O(IsTypeL,         TWO(OA,LA),       NOV,             ONE(CV),    NF) \
+  O(IsTypeL,         TWO(LA,OA),       NOV,             ONE(CV),    NF) \
   O(AssertTL,        TWO(LA,OA),       NOV,             NOV,        NF) \
   O(AssertTStk,      TWO(IVA,OA),      NOV,             NOV,        NF) \
   O(AssertObjL,      THREE(LA,IVA,SA), NOV,             NOV,        NF) \
@@ -832,9 +831,6 @@ ArgType immType(Op opcode, int idx);
 int immSize(const Op* opcode, int idx);
 bool immIsVector(Op opcode, int idx);
 bool hasImmVector(Op opcode);
-inline bool isTypePred(const Op op) {
-  return op == OpIsTypeC || op == OpIsTypeL;
-}
 int instrLen(const Op* opcode);
 int numSuccs(const Op* opcode);
 bool pushesActRec(Op opcode);

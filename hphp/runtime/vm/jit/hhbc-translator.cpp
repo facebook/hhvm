@@ -1855,7 +1855,7 @@ void HhbcTranslator::emitIsTypeC(DataType t) {
   gen(DecRef, src);
 }
 
-void HhbcTranslator::emitIsTypeL(int id, DataType t) {
+void HhbcTranslator::emitIsTypeL(uint32_t id, DataType t) {
   auto exit = makeExit();
   // TODO(t2598894) We should use the specific type if it's available but not
   // require it.

@@ -463,7 +463,7 @@ struct HhbcTranslator {
   void emitIdxCommon(Opcode opc, Block* catchBlock = nullptr);
   void emitArrayIdx();
   void emitIsTypeC(DataType t);
-  void emitIsTypeL(int id, DataType t);
+  void emitIsTypeL(uint32_t id, DataType t);
 
 private:
   /*

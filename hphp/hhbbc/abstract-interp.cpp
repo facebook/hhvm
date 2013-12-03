@@ -777,8 +777,8 @@ struct InterpStepper : boost::static_visitor<void> {
 
   template<class Op>
   void isTypeLImpl(const Op& op) {
-    if (!locCouldBeUninit(op.loc2)) { nothrow(); constprop(); }
-    auto const loc = locAsCell(op.loc2);
+    if (!locCouldBeUninit(op.loc1)) { nothrow(); constprop(); }
+    auto const loc = locAsCell(op.loc1);
     isTypeImpl(loc, type_of_istype(static_cast<IsTypeOp>(op.subop)));
   }
 

@@ -1,0 +1,43 @@
+# just testing istype opcodes
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function main() {
+  Int 1
+  IsTypeC Int
+  JmpNZ was_int
+
+  String "Bad\n"
+  Print
+  PopC
+
+was_int:
+  String "ok\n"
+  Print
+  PopC
+
+  Int 1
+  SetL $x
+  PopC
+
+  IsTypeL $x Int
+  JmpNZ was_int2
+
+  String "bad2\n"
+  Print
+  RetC
+
+was_int2:
+  String "ok\n"
+  Print
+  PopC
+
+  Int 1
+  RetC
+}

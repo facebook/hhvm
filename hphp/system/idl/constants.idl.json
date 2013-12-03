@@ -5004,6 +5004,14 @@
             "value": 16
         },
         {
+            "name": "PASSWORD_BCRYPT",
+            "value": 1
+        },
+        {
+            "name": "PASSWORD_DEFAULT",
+            "value": 1
+        },
+        {
             "name": "PATHINFO_BASENAME",
             "value": 2
         },

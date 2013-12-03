@@ -77,6 +77,7 @@ hphp/system/php/json/JsonSerializable.php
 hphp/system/php/lang/ErrorException.php
 hphp/system/php/misc/highlight.php
 hphp/system/php/misc/php_strip_whitespace.php
+hphp/system/php/password/password.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
 hphp/system/php/redis/RedisSessionModule.php

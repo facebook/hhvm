@@ -1790,7 +1790,7 @@ SSATmp* Simplifier::simplifyConvCellToStr(IRInstruction* inst) {
   if (srcType.isBool())   return gen(ConvBoolToStr, src);
   if (srcType.isNull())   return cns(makeStaticString(""));
   if (srcType.isArray())  {
-    gen(RaiseNotice,
+    gen(RaiseNotice, catchTrace,
         cns(makeStaticString("Array to string conversion")));
     return cns(makeStaticString("Array"));
   }

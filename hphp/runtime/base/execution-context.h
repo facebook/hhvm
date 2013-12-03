@@ -645,7 +645,7 @@ private:
   void enterVMPrologue(ActRec* enterFnAr);
   void enterVM(TypedValue* retval, ActRec* ar);
   void reenterVM(TypedValue* retval, ActRec* ar, TypedValue* savedSP);
-  void doFPushCuf(PC& pc, bool forward, bool safe);
+  void doFPushCuf(IOP_ARGS, bool forward, bool safe);
   template <bool forwarding>
   void pushClsMethodImpl(Class* cls, StringData* name,
                          ObjectData* obj, int numArgs);

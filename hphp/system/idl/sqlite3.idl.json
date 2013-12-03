@@ -283,7 +283,7 @@
                     "args": [
                         {
                             "name": "sql",
-                            "type": "String",
+                            "type": "Variant",
                             "desc": "The SQL query to execute."
                         }
                     ]
@@ -300,7 +300,7 @@
                     "args": [
                         {
                             "name": "sql",
-                            "type": "String",
+                            "type": "Variant",
                             "desc": "The SQL query to execute."
                         },
                         {

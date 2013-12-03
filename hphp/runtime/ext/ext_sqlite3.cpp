@@ -329,9 +329,14 @@ Variant c_SQLite3::t_prepare(const String& sql) {
   return false;
 }
 
-Variant c_SQLite3::t_query(const String& sql) {
+Variant c_SQLite3::t_query(const Variant& query) {
   SYNC_VM_REGS_SCOPED();
   validate();
+  if (query.isArray()) {
+    raise_warning("SQLite3::query() expects parameter 1 to be string, array given");
+    return false;
+  }
+  const String& sql = query.toCStrRef();
   if (!sql.empty()) {
     Variant stmt = t_prepare(sql);
     if (!same(stmt, false)) {
@@ -341,9 +346,14 @@ Variant c_SQLite3::t_query(const String& sql) {
   return false;
 }
 
-Variant c_SQLite3::t_querysingle(const String& sql, bool entire_row /* = false */) {
+Variant c_SQLite3::t_querysingle(const Variant& query, bool entire_row /* = false */) {
   SYNC_VM_REGS_SCOPED();
   validate();
+  if (query.isArray()) {
+    raise_warning("SQLite3::query() expects parameter 1 to be string, array given");
+    return false;
+  }
+  const String& sql = query.toCStrRef();
   if (!sql.empty()) {
     Variant stmt = t_prepare(sql);
     if (!same(stmt, false)) {

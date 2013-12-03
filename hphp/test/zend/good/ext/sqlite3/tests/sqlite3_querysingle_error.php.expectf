@@ -1,7 +1,6 @@
 Testing SQLite3 querySingle without parameters
 HipHop Warning: %s
 Testing SQLite3 querySingle with one array parameter
-HipHop Notice: Array to string conversion in %s on line %d
 HipHop Warning: %s
 Testing SQLite3 qeurySingle with empty string parameter
 bool(false)

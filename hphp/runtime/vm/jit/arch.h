@@ -13,32 +13,20 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_FUNC_PROLOGUES_H
-#define incl_HPHP_JIT_FUNC_PROLOGUES_H
+#ifndef incl_HPHP_JIT_ARCH_H
+#define incl_HPHP_JIT_ARCH_H
 
-#include "hphp/runtime/vm/jit/arch.h"
-#include "hphp/runtime/vm/jit/func-prologues-arm.h"
-#include "hphp/runtime/vm/jit/func-prologues-x64.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP { namespace JIT {
 
-inline bool funcPrologueHasGuard(Transl::TCA prologue, const Func* func) {
-  if (arch() == Arch::X64) {
-    return X64::funcPrologueHasGuard(prologue, func);
-  } else if (arch() == Arch::ARM) {
-    return ARM::funcPrologueHasGuard(prologue, func);
-  }
-  not_implemented();
-}
+enum class Arch {
+  X64,
+  ARM,
+};
 
-inline Transl::TCA funcPrologueToGuard(Transl::TCA prologue, const Func* func) {
-  if (arch() == Arch::X64) {
-    return X64::funcPrologueToGuard(prologue, func);
-  } else if (arch() == Arch::ARM) {
-    return ARM::funcPrologueToGuard(prologue, func);
-  }
-  not_implemented();
+inline Arch arch() {
+  return RuntimeOption::EvalSimulateARM ? Arch::ARM : Arch::X64;
 }
 
 }}

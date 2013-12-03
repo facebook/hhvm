@@ -21,6 +21,7 @@
 #include "hphp/vixl/a64/instructions-a64.h"
 
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/types.h"

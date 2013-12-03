@@ -71,6 +71,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/compiler/builtin_symbols.h"
 
@@ -136,6 +137,7 @@ const StaticString
   s_HPHP("HPHP"),
   s_HHVM("HHVM"),
   s_HHVM_JIT("HHVM_JIT"),
+  s_HHVM_ARCH("HHVM_ARCH"),
   s_REQUEST_START_TIME("REQUEST_START_TIME"),
   s_REQUEST_TIME("REQUEST_TIME"),
   s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
@@ -519,6 +521,14 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   env.set(s_HHVM, 1);
   if (RuntimeOption::EvalJit) {
     env.set(s_HHVM_JIT, 1);
+  }
+  switch (JIT::arch()) {
+  case JIT::Arch::X64:
+    env.set(s_HHVM_ARCH, "x64");
+    break;
+  case JIT::Arch::ARM:
+    env.set(s_HHVM_ARCH, "arm");
+    break;
   }
 
   process_cmd_arguments(argc, argv);

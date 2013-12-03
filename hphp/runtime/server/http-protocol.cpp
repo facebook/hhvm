@@ -30,6 +30,7 @@
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/vm/jit/arch.h"
 #include <boost/lexical_cast.hpp>
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
@@ -81,6 +82,7 @@ const StaticString
   s_HPHP("HPHP"),
   s_HHVM("HHVM"),
   s_HHVM_JIT("HHVM_JIT"),
+  s_HHVM_ARCH("HHVM_ARCH"),
   s_HPHP_SERVER("HPHP_SERVER"),
   s_HPHP_HOTPROFILER("HPHP_HOTPROFILER"),
   s_HTTP_HOST("HTTP_HOST"),
@@ -188,6 +190,14 @@ void HttpProtocol::PrepareEnv(Variant& env,
   env.set(s_HHVM, 1);
   if (RuntimeOption::EvalJit) {
     env.set(s_HHVM_JIT, 1);
+  }
+  switch (JIT::arch()) {
+  case JIT::Arch::X64:
+    env.set(s_HHVM_ARCH, "x64");
+    break;
+  case JIT::Arch::ARM:
+    env.set(s_HHVM_ARCH, "arm");
+    break;
   }
 
   bool isServer = RuntimeOption::ServerExecutionMode();

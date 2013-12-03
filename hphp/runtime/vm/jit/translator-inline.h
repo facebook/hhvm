@@ -55,19 +55,6 @@ inline Offset liveSpOff() {
   return fp - vmsp();
 }
 
-namespace JIT {
-
-enum class Arch {
-  X64,
-  ARM,
-};
-
-inline Arch arch() {
-  return RuntimeOption::EvalSimulateARM ? Arch::ARM : Arch::X64;
-}
-
-}
-
 namespace Transl {
 
 inline uintptr_t tlsBase() {

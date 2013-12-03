@@ -17,6 +17,7 @@
 #define incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_H_
 
 #include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/srckey.h"

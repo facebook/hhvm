@@ -17,6 +17,7 @@
 #define incl_HPHP_JIT_FUNC_PROLOGUES_X64_H
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/runtime/vm/jit/arch.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 #include "hphp/runtime/vm/jit/types.h"
 

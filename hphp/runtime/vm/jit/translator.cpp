@@ -1322,6 +1322,8 @@ int64_t getStackPopped(PC pc) {
     case OpNewPackedArray:
     case OpCreateCl:     return getImm((Op*)pc, 0).u_IVA;
 
+    case OpNewStructArray: return getImmVector((Op*)pc).size();
+
     default:             break;
   }
 

@@ -73,8 +73,6 @@ PUNT_OPCODE(CheckLoc)
 PUNT_OPCODE(CastStk)
 PUNT_OPCODE(CoerceStk)
 PUNT_OPCODE(CheckDefinedClsEq)
-PUNT_OPCODE(BeginCatch)
-PUNT_OPCODE(EndCatch)
 PUNT_OPCODE(TryEndCatch)
 PUNT_OPCODE(LdUnwinderValue)
 PUNT_OPCODE(DeleteUnwinderException)
@@ -703,6 +701,16 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
     m_stubsCode,
     SrcKey(curFunc(), inst->extra<ReqBindJmp>()->offset)
   );
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
+  m_as.  Brk  (0);
+}
+
+void CodeGenerator::cgEndCatch(IRInstruction* inst) {
+  m_as.  Brk  (0);
 }
 
 //////////////////////////////////////////////////////////////////////

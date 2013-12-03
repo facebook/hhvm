@@ -473,7 +473,7 @@ void CodeGenerator::printValue(int32_t value) {
 }
 
 void CodeGenerator::printValue(int64_t value) {
-  printf("i:%ld;", value);
+  printf("i:%" PRId64 ";", value);
 }
 
 void CodeGenerator::printValue(std::string value) {

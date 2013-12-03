@@ -466,7 +466,6 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           return replaceValue(rep);
         }
         case '+':
-        case '.':
         case '*':
         case '&':
         case '|':

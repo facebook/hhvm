@@ -305,7 +305,7 @@ private:
     void* maybePop();
     void push(void*);
 
-    Node* head;
+    Node* head = nullptr;
   };
 
   static constexpr unsigned kLgSizeQuantum = 4; // 16 bytes

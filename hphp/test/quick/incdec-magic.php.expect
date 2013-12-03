@@ -1,0 +1,8 @@
+string(11) "getter: asd"
+string(11) "getter: foo"
+object(Foo)#1 (2) {
+  ["foo"]=>
+  int(43)
+  ["asd"]=>
+  int(1)
+}

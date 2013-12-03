@@ -397,12 +397,12 @@ class ObjectData {
   template <bool warn, bool define>
   void propImpl(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
                 const StringData* key);
-  void invokeSet(TypedValue* retval, const StringData* key, TypedValue* val);
-  void invokeGet(TypedValue* retval, const StringData* key);
-  void invokeGetProp(TypedValue*& retval, TypedValue& tvRef,
+  bool invokeSet(TypedValue* retval, const StringData* key, TypedValue* val);
+  bool invokeGet(TypedValue* retval, const StringData* key);
+  bool invokeGetProp(TypedValue*& retval, TypedValue& tvRef,
                      const StringData* key);
-  void invokeIsset(TypedValue* retval, const StringData* key);
-  void invokeUnset(TypedValue* retval, const StringData* key);
+  bool invokeIsset(TypedValue* retval, const StringData* key);
+  bool invokeUnset(TypedValue* retval, const StringData* key);
   void getProp(const Class* klass, bool pubOnly, const PreClass::Prop* prop,
                Array& props, std::vector<bool>& inserted) const;
   void getProps(const Class* klass, bool pubOnly, const PreClass* pc,
@@ -480,44 +480,18 @@ CountableHelper::~CountableHelper() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Attribute helpers
-class AttributeSetter {
-public:
-  AttributeSetter(ObjectData::Attribute a, ObjectData* o) : m_a(a), m_o(o) {
-    o->setAttribute(a);
-  }
-  ~AttributeSetter() {
-    m_o->clearAttribute(m_a);
-  }
-private:
-  ObjectData::Attribute m_a;
-  ObjectData* m_o;
-};
-
-class AttributeClearer {
-public:
-  AttributeClearer(ObjectData::Attribute a, ObjectData* o) : m_a(a), m_o(o) {
-    o->clearAttribute(a);
-  }
-  ~AttributeClearer() {
-    m_o->setAttribute(m_a);
-  }
-private:
-  ObjectData::Attribute m_a;
-  ObjectData* m_o;
-};
 
 ALWAYS_INLINE void decRefObj(ObjectData* obj) {
   obj->decRefAndRelease();
 }
-
-///////////////////////////////////////////////////////////////////////////////
 
 inline ObjectData* instanceFromTv(TypedValue* tv) {
   assert(tv->m_type == KindOfObject);
   assert(dynamic_cast<ObjectData*>(tv->m_data.pobj));
   return tv->m_data.pobj;
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 template<uint16_t Flags>
 struct ExtObjectDataFlags : ObjectData {
@@ -532,6 +506,8 @@ protected:
 };
 
 using ExtObjectData = ExtObjectDataFlags<ObjectData::IsCppBuiltin>;
+
+///////////////////////////////////////////////////////////////////////////////
 
 }
 

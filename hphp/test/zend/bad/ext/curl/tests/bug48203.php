@@ -15,4 +15,5 @@ curl_close($ch);
 
 echo "Ok\n";
 
-?><?php @unlink(dirname(__FILE__) . '/bug48203.tmp'); ?>
+?>
+<?php @unlink(dirname(__FILE__) . '/bug48203.tmp'); ?>

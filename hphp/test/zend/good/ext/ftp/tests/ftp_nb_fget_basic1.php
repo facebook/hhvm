@@ -11,6 +11,7 @@ $handle = fopen($local_file, 'w');
 
 var_dump(ftp_nb_fget($ftp, $handle, 'fget.txt', FTP_ASCII, FTP_AUTORESUME));
 var_dump(file_get_contents($local_file));
-?><?php
+?>
+<?php
 @unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . "ftp_nb_fget_basic1.txt");
 ?>

@@ -25,7 +25,6 @@ object(Directory)#%d (2) {
   resource(%d) of type (Unknown)
 }
 
-Test read after closing the dir:
-HipHop Warning: %s
+Test read after closing the dir:HipHop Warning: %s
 bool(false)
 Done

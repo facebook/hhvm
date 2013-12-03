@@ -10,7 +10,7 @@ var_dump(posix_access($filename, POSIX_R_OK));
 var_dump(posix_access($filename, POSIX_W_OK));
 var_dump(posix_access($filename, POSIX_X_OK));
 ?>
-===DONE===?>
+===DONE===
 <?php
 $filename = dirname(__FILE__) . '/foo.test';
 chmod ($filename, 0700);

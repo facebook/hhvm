@@ -1,0 +1,42 @@
+*** Testing gmdate() : usage variation ***
+
+--DATE_ATOM Constant--
+string(25) "2008-08-08T08:08:08+00:00"
+string(%d) "%s"
+
+--DATE_COOKIE Constant--
+string(32) "Friday, 08-Aug-2008 08:08:08 GMT"
+string(%d) "%s"
+
+--DATE_RFC822 Constant--
+string(29) "Fri, 08 Aug 08 08:08:08 +0000"
+string(%d) "%s"
+
+--DATE_RFC850 Constant--
+string(30) "Friday, 08-Aug-08 08:08:08 GMT"
+string(%d) "%s"
+
+--DATE_RFC1036 Constant--
+string(29) "Fri, 08 Aug 08 08:08:08 +0000"
+string(%d) "%s"
+
+--DATE_RFC1123 Constant--
+string(31) "Fri, 08 Aug 2008 08:08:08 +0000"
+string(%d) "%s"
+
+--DATE_RFC2822 Constant--
+string(31) "Fri, 08 Aug 2008 08:08:08 +0000"
+string(%d) "%s"
+
+--DATE_RFC3339 Constant--
+string(25) "2008-08-08T08:08:08+00:00"
+string(%d) "%s"
+
+--DATE_RSS Constant--
+string(31) "Fri, 08 Aug 2008 08:08:08 +0000"
+string(%d) "%s"
+
+--DATE_W3C Constant--
+string(25) "2008-08-08T08:08:08+00:00"
+string(%d) "%s"
+===DONE===

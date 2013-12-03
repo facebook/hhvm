@@ -11,7 +11,7 @@ var_dump(
 	ldap_next_attribute($link, $entry)
 );
 ?>
-===DONE===?>
+===DONE===
 <?php
 include "connect.inc";
 

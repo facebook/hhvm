@@ -71,7 +71,8 @@ do {
 } while($handle1->nextRowset());
 
 $db->query("DROP TABLE test");
-?><?php
+?>
+<?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>

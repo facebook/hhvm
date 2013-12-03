@@ -168,7 +168,8 @@
 		printf("[038] No rows deleted, can't be true.\n");
 
 	print "done!";
-?><?php
+?>
+<?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>

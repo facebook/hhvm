@@ -74,7 +74,8 @@ foreach($char_formats as $char_format) {
 }
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation24.tmp";
 unlink($filename);

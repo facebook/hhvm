@@ -54,7 +54,8 @@ clearstatcache();
 unlink($sym_linkname);
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $dirname = dirname(__FILE__)."/symlink_link_linkinfo_is_link_basic2";
 rmdir($dirname);
 ?>

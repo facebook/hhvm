@@ -45,7 +45,7 @@ chmod($parent_dir_path, 0666); // restricting parent directory
 echo "\n-- After restricting parent directory --\n";
 var_dump(scandir($child_dir_path));
 ?>
-===DONE===?>
+===DONE===
 <?php
 $parent_dir_path = dirname(__FILE__) . "/scandir_variation5";
 $sub_dir_path = $parent_dir_path."/sub_dir";

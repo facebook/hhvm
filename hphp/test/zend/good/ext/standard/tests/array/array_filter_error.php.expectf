@@ -1,0 +1,8 @@
+*** Testing array_filter() : error conditions ***
+-- Testing array_filter() function with Zero arguments --HipHop Warning: %s
+NULL
+-- Testing array_filter() function with more than expected no. of arguments --HipHop Warning: %s
+NULL
+-- Testing array_filter() function with incorrect callback --HipHop Warning: %s
+NULL
+Done

@@ -52,6 +52,7 @@ mysql_close($link);
 var_dump(mysql_insert_id($link));
 
 print "done!";
-?><?php
+?>
+<?php
 require_once("clean_table.inc");
 ?>

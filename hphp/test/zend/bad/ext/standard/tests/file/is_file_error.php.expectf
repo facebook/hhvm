@@ -1,5 +1,4 @@
-*** Testing is_file() error conditions ***
-HipHop Warning: %s
+*** Testing is_file() error conditions ***HipHop Warning: %s
 NULL
 HipHop Warning: %s
 NULL

@@ -8,7 +8,7 @@ var_dump(
 	ldap_compare($link, "cn=userA,dc=my-domain,dc=com", "telephoneNumber", "yy-yy-yy-yy-yy")
 );
 ?>
-===DONE===?>
+===DONE===
 <?php
 include "connect.inc";
 

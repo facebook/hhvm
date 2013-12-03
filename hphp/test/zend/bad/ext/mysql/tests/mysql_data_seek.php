@@ -53,6 +53,7 @@ if (false !== ($tmp = mysql_data_seek($res, 1)))
 mysql_close($link);
 
 print "done!\n";
-?><?php
+?>
+<?php
 require_once("clean_table.inc");
 ?>

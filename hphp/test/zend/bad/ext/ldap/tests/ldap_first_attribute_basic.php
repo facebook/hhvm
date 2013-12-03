@@ -9,7 +9,7 @@ var_dump(
 	ldap_first_attribute($link, $entry)
 );
 ?>
-===DONE===?>
+===DONE===
 <?php
 include "connect.inc";
 

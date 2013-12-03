@@ -5,7 +5,8 @@ $dir = new DirectoryIterator($dirname);
 $expected = filegroup($dirname);
 $actual = $dir->getGroup();
 var_dump($expected == $actual);
-?><?php
+?>
+<?php
 $dirname = 'DirectoryIterator_getGroup_basic';
 rmdir($dirname);
 ?>

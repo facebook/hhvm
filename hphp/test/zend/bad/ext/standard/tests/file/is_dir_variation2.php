@@ -44,7 +44,8 @@ var_dump( is_dir($file_path."/is_dir_variation2_link.tmp") );
 clearstatcache();
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 if(file_exists($file_path."/is_dir_variation2_symlink")) {
   unlink($file_path."/is_dir_variation2_symlink");

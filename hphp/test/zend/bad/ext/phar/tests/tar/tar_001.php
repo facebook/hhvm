@@ -14,7 +14,7 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===?>
+===DONE===
 <?php
 @unlink(dirname(__FILE__) . '/tar_001.phar.tar');
 ?>

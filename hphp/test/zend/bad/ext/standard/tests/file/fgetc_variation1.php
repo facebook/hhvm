@@ -38,6 +38,7 @@ for(; $loop_counter < count($file_modes); $loop_counter++) {
   fclose($file_handle);
 }
 echo "Done\n";
-?><?php
+?>
+<?php
 unlink( dirname(__FILE__)."/fgetc_variation1.tmp");
 ?>

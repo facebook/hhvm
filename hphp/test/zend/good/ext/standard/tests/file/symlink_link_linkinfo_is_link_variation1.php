@@ -90,7 +90,8 @@ unlink($link_arr[0]);
 clearstatcache();
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $dirname = "$file_path/symlink_link_linkinfo_is_link_variation1";
 unlink("$dirname/symlink_link_linkinfo_is_link_variation1.tmp");

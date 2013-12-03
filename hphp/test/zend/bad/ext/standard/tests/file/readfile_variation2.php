@@ -49,7 +49,8 @@ var_dump($count);
 unlink($linkname);
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/readfile_variation2.tmp");
 ?>

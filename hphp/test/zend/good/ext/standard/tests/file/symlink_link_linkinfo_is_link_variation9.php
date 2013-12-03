@@ -79,7 +79,8 @@ else
 unlink($soft_link);
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $dirname = $file_path."/symlink_link_linkinfo_is_link_variation9";
 $filename = "$dirname/symlink_link_linkinfo_is_link_variation9.tmp";

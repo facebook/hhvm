@@ -33,7 +33,8 @@ for($mode = 0000; $mode <= 0777; $mode++) {
 }
 
 echo "*** Done ***\n";
-?><?php
+?>
+<?php
 chmod(dirname(__FILE__)."/006_variation1.tmp", 0777);
 chmod(dirname(__FILE__)."/006_variation1", 0777);
 unlink(dirname(__FILE__)."/006_variation1.tmp");

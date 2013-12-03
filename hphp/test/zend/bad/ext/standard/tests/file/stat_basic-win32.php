@@ -52,7 +52,8 @@ echo "*** Testing stat(): for the return value ***\n";
 var_dump( is_array( stat($filename) ) );
 
 echo "\n---Done---";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/stat_basic/stat_basic.tmp");
 rmdir("$file_path/stat_basic");

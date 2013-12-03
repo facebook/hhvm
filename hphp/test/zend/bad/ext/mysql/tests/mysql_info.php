@@ -56,6 +56,7 @@ if ($def_tmp !== $tmp) {
 // NOTE: no LOAD DATA INFILE test
 
 print "done!";
-?><?php
+?>
+<?php
 require_once("clean_table.inc");
 ?>

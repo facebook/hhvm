@@ -12,7 +12,8 @@ var_dump($fo->fputcsv(array('water', 'fruit'), ',,', '"'));
 unset($fo);
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $file = __DIR__ . '/SplFileObject_fputcsv_variation13.csv';
 unlink($file);
 ?>

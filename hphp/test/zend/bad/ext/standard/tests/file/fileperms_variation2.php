@@ -32,7 +32,8 @@ foreach( $filenames as $filename ) {
 fclose($file_handle);
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/fileperms_variation2.tmp");
 ?>

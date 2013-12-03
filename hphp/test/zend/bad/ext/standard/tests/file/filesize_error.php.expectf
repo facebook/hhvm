@@ -1,5 +1,4 @@
-*** Testing filesize(): error conditions ***
-HipHop Warning: %s
+*** Testing filesize(): error conditions ***HipHop Warning: %s
 bool(false)
 HipHop Warning: %s
 bool(false)

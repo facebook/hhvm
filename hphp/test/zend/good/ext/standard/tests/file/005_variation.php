@@ -143,7 +143,8 @@ rename($file_name2, "$file_path/005_variation_touch_new.tmp");
 stat_fn("$file_path/005_variation_touch_new.tmp");
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 if(file_exists($file_path."/005_variation_softlink.tmp")) {
   unlink($file_path."/005_variation_softlink.tmp");

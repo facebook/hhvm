@@ -53,7 +53,8 @@ var_dump( link($linkname, $linkname) );
 unlink($linkname);
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $dir = "$file_path/symlink_link_linkinfo_is_link_variation7";
 $filename = "$dir/symlink_link_linkinfo_is_link_variation7.tmp";

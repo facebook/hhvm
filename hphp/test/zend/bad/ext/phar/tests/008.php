@@ -9,4 +9,5 @@ include dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 } catch (Exception $e) {
 echo $e->getMessage();
 }
-?><?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+?>
+<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

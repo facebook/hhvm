@@ -7,7 +7,8 @@ $db->exec("CREATE TABLE test (bar INT NOT NULL, phase enum('please_select', 'I',
 foreach ($db->query('DESCRIBE test phase')->fetchAll(PDO::FETCH_ASSOC) as $row) {
 	print_r($row);
 }
-?><?php
+?>
+<?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');

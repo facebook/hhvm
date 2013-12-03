@@ -21,7 +21,8 @@ var_dump( fileinode($file_path."/fileinode_variation1_link.tmp") );  // expected
 clearstatcache();
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/fileinode_variation1_symlink.tmp");
 unlink($file_path."/fileinode_variation1_link.tmp");

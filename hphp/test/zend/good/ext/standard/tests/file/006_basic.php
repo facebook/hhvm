@@ -23,7 +23,8 @@ echo "\n";
 clearstatcache();
 
 echo "Done\n";
-?><?php
+?>
+<?php
 unlink(dirname(__FILE__)."/perm.tmp");
 rmdir(dirname(__FILE__)."/perm");
 ?>

@@ -26,7 +26,8 @@ for($size = filesize($filename); $size>=-1200; $size-=1200) {
 }
 
 echo "*** Done ***\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/filesize_variation3.tmp");
 ?>

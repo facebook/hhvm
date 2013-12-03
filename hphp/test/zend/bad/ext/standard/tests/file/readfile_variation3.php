@@ -34,7 +34,8 @@ echo "\n";
 var_dump($count);
 
 echo "Done\n";
-?><?php
+?>
+<?php
 unlink(dirname(__FILE__)."/readfile_variation3/readfile_variation3.tmp");
 rmdir(dirname(__FILE__)."/readfile_variation3");
 ?>

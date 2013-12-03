@@ -55,7 +55,7 @@ foreach($permission_values as $perm) {
 	$iterator++;
 }
 ?>
-===DONE===?>
+===DONE===
 <?php
 $dir_path = dirname(__FILE__) . "/readdir_variation5";
 rmdir($dir_path);

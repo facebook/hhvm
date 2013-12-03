@@ -46,7 +46,8 @@ var_dump(flock($fp));
 var_dump(flock($fp, "", $var, ""));
 
 echo "\n*** Done ***\n";
-?><?php
+?>
+<?php
 $file = dirname(__FILE__)."/flock.tmp";
 unlink($file);
 ?>

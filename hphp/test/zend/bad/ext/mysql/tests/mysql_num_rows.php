@@ -65,6 +65,7 @@ if ($res = mysql_unbuffered_query('SELECT id, label FROM test')) {
 
 mysql_close($link);
 print "done!";
-?><?php
+?>
+<?php
 require_once("clean_table.inc");
 ?>

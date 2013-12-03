@@ -53,7 +53,8 @@ foreach($modes as $mode) {
 }
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation51.tmp";
 if(file_exists($filename)) {

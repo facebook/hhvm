@@ -13,8 +13,8 @@ var_dump(class_uses(new fs));
 var_dump(class_uses('fs'));
 
 echo "\n--- testing autoload ---\n";
-var_dump(class_uses('non-existent'));
-var_dump(class_uses('non-existent2', false));
+var_dump(class_uses('non_existent'));
+var_dump(class_uses('non_existent2', false));
 
 
 function __autoload($classname) {

@@ -5,7 +5,8 @@ $fileInfo = new SplFileInfo($filename);
 $expected = fileowner($filename);
 $actual = $fileInfo->getOwner();
 var_dump($expected == $actual);
-?><?php
+?>
+<?php
 $filename = __DIR__ . "/SplFileInfo_getOwner_basic";
 unlink($filename);
 ?>

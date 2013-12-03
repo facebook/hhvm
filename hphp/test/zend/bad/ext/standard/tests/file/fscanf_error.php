@@ -50,7 +50,8 @@ foreach($invalid_formats as $format)  {
 }
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_error.tmp";
 unlink($filename);

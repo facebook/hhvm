@@ -1,10 +1,10 @@
 <?php
 
 /* Setup socket server */
-$server = stream_socket_server('tcp://127.0.0.1:31334');
+$server = stream_socket_server('tcp://127.0.0.1:31337');
 
 /* Connect to it */
-$client = fsockopen('tcp://127.0.0.1:31334');
+$client = fsockopen('tcp://127.0.0.1:31337');
 if (!$client) {
 	die("Unable to create socket");
 }

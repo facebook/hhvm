@@ -26,7 +26,8 @@
 		echo "done";
 	}
 	mysql_close($link);
-?><?php
+?>
+<?php
 require_once('connect.inc');
 
 if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket)) {
@@ -41,4 +42,4 @@ if (!mysql_query($link, 'DROP TABLE IF EXISTS test', $link)) {
 mysql_close($link);
 
 unlink('bug53649.data');
-?>
+?>

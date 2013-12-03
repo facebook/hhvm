@@ -38,7 +38,7 @@ $entry2["weirdAttribute"] = "weirdVal";
 
 var_dump(ldap_modify($link, "dc=my-domain,dc=com", $entry2));
 ?>
-===DONE===?>
+===DONE===
 <?php
 require "connect.inc";
 

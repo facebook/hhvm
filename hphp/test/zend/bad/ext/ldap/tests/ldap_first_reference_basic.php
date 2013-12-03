@@ -14,7 +14,7 @@ $refs = null;
 ldap_parse_reference($link, $ref, $refs);
 var_dump($refs);
 ?>
-===DONE===?>
+===DONE===
 <?php
 include "connect.inc";
 

@@ -29,7 +29,7 @@ foreach($sequences as $msg_no) {
 	}
 }
 ?>
-===DONE===?>
+===DONE===
 <?php
 require_once(dirname(__FILE__).'/clean.inc');
 ?>

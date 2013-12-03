@@ -33,7 +33,7 @@ var_dump( stream_filter_remove( $filter ) );
 fclose( $fp );
 
 ?>
-===DONE===?>
+===DONE===
 <?php
 
 $file = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'streamfilterTest.txt';

@@ -48,7 +48,8 @@ var_dump( linkinfo('') );  // empty string as linkname
 var_dump( linkinfo(false) );  // boolean false as linkname
 
 echo "Done\n";
-?><?php
+?>
+<?php
 unlink(dirname(__FILE__)."/symlink_link_linkinfo_is_link_error1.tmp");
 @unlink(dirname(__FILE__)."/symlink_link_linkinfo_is_link_link_error1.tmp");
 ?>

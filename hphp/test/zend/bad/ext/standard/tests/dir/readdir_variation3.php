@@ -40,7 +40,7 @@ delete_files($path_sub, 2);
 
 closedir($dir_handle);
 ?>
-===DONE===?>
+===DONE===
 <?php
 $path_top = dirname(__FILE__) . '/readdir_variation3';
 $path_sub = $path_top . '/sub_folder';

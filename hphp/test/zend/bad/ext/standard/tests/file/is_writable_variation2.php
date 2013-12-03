@@ -61,6 +61,7 @@ change_file_perms($file_path, 10, 0777, $name_prefix);
 delete_files($file_path, 10, $name_prefix);
 
 echo "Done\n";
-?><?php
+?>
+<?php
 rmdir(dirname(__FILE__)."/is_writable_variation2/");
 ?>

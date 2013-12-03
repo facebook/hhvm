@@ -15,7 +15,7 @@ var_dump(
 	$errcode, $dn, $errmsg, $refs
 );
 ?>
-===DONE===?>
+===DONE===
 <?php
 include "connect.inc";
 

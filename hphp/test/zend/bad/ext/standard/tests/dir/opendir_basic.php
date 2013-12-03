@@ -36,7 +36,7 @@ var_dump($dh1);
 closedir($dh2);
 var_dump($dh2);
 ?>
-===DONE===?>
+===DONE===
 <?php
 $file_path = dirname(__FILE__);
 rmdir("$file_path/level_one/level_two");

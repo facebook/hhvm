@@ -20,7 +20,7 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===?>
+===DONE===
 <?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
 ?>

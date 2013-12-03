@@ -21,7 +21,8 @@ var_dump( is_dir($subdirname) );
 var_dump( is_dir($dirname) );
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $dir_name = $file_path."/is_dir_variation1";
 rmdir($dir_name."/is_dir_variation1_sub");

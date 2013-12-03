@@ -1,0 +1,7 @@
+fd1 2010-03-14 03:00:00 EDT America/New_York - 2010-03-14 01:59:59 EST America/New_York = PT0H0M1S
+fd2 2010-03-14 04:30:00 EDT America/New_York - 2010-03-13 04:30:00 EST America/New_York = P1DT0H
+fd3 2010-03-14 03:30:00 EDT America/New_York - 2010-03-13 04:30:00 EST America/New_York = P0DT22H
+fd4 2010-03-14 01:30:00 EST America/New_York - 2010-03-13 04:30:00 EST America/New_York = P0DT21H
+fd5 2010-03-14 01:30:00 EST America/New_York - 2010-03-13 01:30:00 EST America/New_York = P1DT0H
+fd6 2010-03-14 03:30:00 EDT America/New_York - 2010-03-13 03:30:00 EST America/New_York = P1DT0H
+fd7 2010-03-14 03:30:00 EDT America/New_York - 2010-03-13 02:30:00 EST America/New_York = P1DT1H

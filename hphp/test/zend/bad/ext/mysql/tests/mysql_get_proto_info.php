@@ -17,6 +17,7 @@ if (NULL !== ($tmp = @mysql_get_proto_info('too many', 'arguments')))
 	printf("[005] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
 
 print "done!";
-?><?php
+?>
+<?php
 require_once("clean_table.inc");
 ?>

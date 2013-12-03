@@ -11,7 +11,7 @@ var_dump(
 	)
 );
 ?>
-===DONE===?>
+===DONE===
 <?php
 require "connect.inc";
 

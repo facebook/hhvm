@@ -1,3 +1,4 @@
+before yield
 Caught: exception 'RuntimeException' with message 'throw' in %s:%d
 Stack trace:
 #0 {main}

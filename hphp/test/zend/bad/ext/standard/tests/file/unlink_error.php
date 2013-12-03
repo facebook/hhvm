@@ -49,7 +49,8 @@ mkdir($dirname);
 var_dump( unlink($dirname) );  // expected: false as unlink() does not work on dir
 
 echo "Done\n";
-?><?php
+?>
+<?php
 unlink(dirname(__FILE__)."/unlink_error.tmp");
 rmdir(dirname(__FILE__)."/unlink_error");
 ?>

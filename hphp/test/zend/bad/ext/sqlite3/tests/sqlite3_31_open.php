@@ -7,4 +7,5 @@ try {
   var_dump($ex->getMessage());
 }
 
-?><?php @unlink(__DIR__ . '/db1.db'); ?>
+?>
+<?php @unlink(__DIR__ . '/db1.db'); ?>

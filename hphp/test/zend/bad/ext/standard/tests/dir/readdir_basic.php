@@ -43,7 +43,7 @@ foreach($a as $file) {
 delete_files($path, 3);
 closedir($dh);
 ?>
-===DONE===?>
+===DONE===
 <?php
 $path = dirname(__FILE__) . '/readdir_basic';
 rmdir($path);

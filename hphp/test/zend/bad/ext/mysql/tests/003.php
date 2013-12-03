@@ -43,6 +43,7 @@ while ($obj = mysql_fetch_object($res, 'class24')) {
 mysql_free_result($res);
 mysql_close($link);
 print "done!";
-?><?php
+?>
+<?php
 require_once("clean_table.inc");
 ?>

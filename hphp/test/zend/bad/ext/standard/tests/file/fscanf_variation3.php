@@ -68,7 +68,8 @@ foreach($int_formats as $int_format) {
 }
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation3.tmp";
 unlink($filename);

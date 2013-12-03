@@ -47,5 +47,4 @@ array (
      'mailbox' => 'UNEXPECTED_DATA_AFTER_ADDRESS',
      'host' => '.SYNTAX-ERROR.',
   )),
-)
-HipHop Notice: %s
+)HipHop Notice: %s

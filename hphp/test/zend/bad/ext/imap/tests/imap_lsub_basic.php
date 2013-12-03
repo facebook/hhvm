@@ -28,6 +28,7 @@ var_dump(is_array($z));
 var_dump($z[0]);
 
 imap_close($stream_id);
-?><?php 
+?>
+<?php 
 require_once('clean.inc');
 ?>

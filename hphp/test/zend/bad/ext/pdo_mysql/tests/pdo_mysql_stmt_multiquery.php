@@ -41,7 +41,8 @@
 	}
 
 	print "done!";
-?><?php
+?>
+<?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>

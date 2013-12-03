@@ -40,7 +40,7 @@ var_dump(imap_headers($imap_stream));
 
 imap_close($imap_stream);
 ?>
-===Done===?>
+===Done===
 <?php 
 require_once('clean.inc');
 ?>

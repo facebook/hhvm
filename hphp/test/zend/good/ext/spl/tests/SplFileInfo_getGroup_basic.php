@@ -5,7 +5,8 @@ $fileInfo = new SplFileInfo($filename);
 $expected = filegroup($filename);
 $actual = $fileInfo->getGroup();
 var_dump($expected == $actual);
-?><?php
+?>
+<?php
 $filename = __DIR__ . "/SplFileInfo_getGroup_basic";
 unlink($filename);
 ?>

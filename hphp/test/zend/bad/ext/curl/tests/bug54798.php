@@ -40,4 +40,5 @@ foreach($options_to_check as $option) {
 	checkForClosedFilePointer($host, constant($option), $option);
 }
 
-?><?php @unlink(dirname(__FILE__) . '/bug54798.tmp'); ?>
+?>
+<?php @unlink(dirname(__FILE__) . '/bug54798.tmp'); ?>

@@ -1,6 +1,7 @@
 <?php
 
 function gen() {
+    echo "before yield\n";
     try {
         yield;
     } catch (RuntimeException $e) {

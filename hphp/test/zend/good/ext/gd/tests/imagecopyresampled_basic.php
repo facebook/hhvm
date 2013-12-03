@@ -48,7 +48,8 @@ imagedestroy($image_sml);
  
 
 echo "Done\n"; 
-?><?php 
+?>
+<?php 
 	$dest_lge = dirname(realpath(__FILE__)) . '/imagelarge.png';
 	$dest_sml = dirname(realpath(__FILE__)) . '/imagesmall.png';
 	@unlink($dest_lge);

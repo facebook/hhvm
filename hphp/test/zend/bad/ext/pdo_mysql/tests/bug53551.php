@@ -29,7 +29,8 @@ var_dump($stmt->errorInfo());
 
 echo "\ndone\n";
 
-?><?php
+?>
+<?php
 include __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS bug53551');

@@ -46,7 +46,8 @@ foreach($src_dirs as $src_dir) {
 }
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/rename_variation_link.tmp");
 unlink($file_path."/rename_variation.tmp");

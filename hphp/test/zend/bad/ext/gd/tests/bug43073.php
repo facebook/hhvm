@@ -18,4 +18,5 @@ for ($angle = 0.0; $angle < 360.0; $angle += $delta_t) {
   $x    = $temp;
 }
 imagepng($g, "$cwd/bug43073.png");
-?><?php @unlink(dirname(__FILE__) . '/bug43073.png'); ?>
+?>
+<?php @unlink(dirname(__FILE__) . '/bug43073.png'); ?>

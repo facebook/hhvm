@@ -51,7 +51,7 @@ foreach($inputs as $input) {
 
 };
 ?>
-===DONE===?>
+===DONE===
 <?php
 require_once(dirname(__FILE__).'/clean.inc');
 ?>

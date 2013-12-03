@@ -83,7 +83,8 @@ if (false !== ($tmp = mysql_query("SELECT id FROM test", $link)))
 	printf("[011] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
 print "done!";
-?><?php
+?>
+<?php
 require_once('connect.inc');
 
 // connect + select_db

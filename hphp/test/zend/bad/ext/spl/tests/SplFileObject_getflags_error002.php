@@ -7,6 +7,7 @@ $fo->setFlags(SplFileObject::READ_CSV);
 
 $fo->getFlags('fake');
 
-?><?php
+?>
+<?php
 unlink('SplFileObject_getflags_error002.csv');
 ?>

@@ -60,7 +60,8 @@ unset($fp); //unset file handle
 var_dump( fwrite(@$fp,"data"));
 
 echo "Done\n";
-?><?php
+?>
+<?php
 $filename = dirname(__FILE__)."/fwrite_error.tmp";
 unlink( $filename );
 ?>

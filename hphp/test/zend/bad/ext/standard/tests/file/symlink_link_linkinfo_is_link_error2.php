@@ -51,6 +51,7 @@ var_dump( is_link(false) );  // boolean false as linkname
 var_dump( is_link($filename) );  // file given to is_link
 
 echo "Done\n";
-?><?php
+?>
+<?php
 unlink(dirname(__FILE__)."/symlink_link_linkinfo_is_link_error2.tmp");
 ?>

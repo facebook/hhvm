@@ -40,7 +40,8 @@ var_dump( $e->read() ); // with current handle
 // delete temporary files
 delete_files($dir_path, 3, "dir_variation4");
 echo "Done";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 $dir_path = $file_path."/dir_variation4";
 

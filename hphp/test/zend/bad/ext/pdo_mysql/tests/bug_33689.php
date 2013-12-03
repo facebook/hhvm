@@ -23,7 +23,8 @@ else
 	unset($tmp['pdo_type']);
 
 print_r($tmp);
-?><?php
+?>
+<?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>

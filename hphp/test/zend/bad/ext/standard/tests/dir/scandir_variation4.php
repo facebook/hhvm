@@ -55,7 +55,7 @@ var_dump(scandir('../../level_one'));
 @delete_files($level_one_dir_path, 2, 'level_one');
 @delete_files($level_two_dir_path, 2, 'level_two');
 ?>
-===DONE===?>
+===DONE===
 <?php
 $dir_path = dirname(__FILE__);
 rmdir("$dir_path/level_one/level_two");

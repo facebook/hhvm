@@ -21,7 +21,8 @@ var_dump( is_file($file_path."/is_file_variation2_link.tmp") );  // expected: tr
 clearstatcache();
 
 echo "\n*** Done ***";
-?><?php
+?>
+<?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/is_file_variation2_symlink.tmp");
 unlink($file_path."/is_file_variation2_link.tmp");

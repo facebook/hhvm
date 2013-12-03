@@ -38,7 +38,8 @@ if (1 === @$db->exec('CREATE DATABASE `crazy;dbname`')) {
     new PDO($dsn, $user, $pass);
 }
 echo 'done!';
-?><?php
+?>
+<?php
 require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 

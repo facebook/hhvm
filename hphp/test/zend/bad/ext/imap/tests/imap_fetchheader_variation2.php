@@ -102,7 +102,7 @@ foreach($inputs as $input) {
 
 fclose($fp);
 ?>
-===DONE===?>
+===DONE===
 <?php
 require_once(dirname(__FILE__).'/clean.inc');
 ?>

@@ -1,0 +1,9 @@
+tar-based phar "%star_004.phar.tar" does not have a signature
+bool(false)
+array(2) {
+  ["hash"]=>
+  string(32) "%s"
+  ["hash_type"]=>
+  string(3) "MD5"
+}
+===DONE===

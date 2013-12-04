@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://quickstart.samples/xsd"><SOAP-ENV:Body><ns1:update><symbol>MSFT</symbol><price>1000</price></ns1:update></SOAP-ENV:Body></SOAP-ENV:Envelope>
+ok

@@ -1,0 +1,6 @@
+log10 1 = float(%f)
+Pass
+log10 10 = float(%f)
+Pass
+log10 100 = float(%f)
+Pass

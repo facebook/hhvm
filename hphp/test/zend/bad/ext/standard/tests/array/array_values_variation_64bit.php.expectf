@@ -1,0 +1,37 @@
+*** Testing array_values() with resource type ***
+array(2) {
+  [0]=>
+  resource(%d) of type (stream)
+  [1]=>
+  resource(%d) of type (stream)
+}
+
+*** Testing array_values() with range checking ***
+array(7) {
+  [0]=>
+  int(2147483647)
+  [1]=>
+  int(2147483648)
+  [2]=>
+  int(-2147483647)
+  [3]=>
+  int(-2147483648)
+  [4]=>
+  int(0)
+  [5]=>
+  int(0)
+  [6]=>
+  int(-2147483649)
+}
+
+*** Testing array_values() on an array created on the fly ***
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+array(0) {
+}

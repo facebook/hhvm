@@ -313,6 +313,9 @@ function hhvm_cmd($options, $test, $test_run = null) {
     escapeshellarg($test_run),
     $use_automain ? escapeshellarg($test) : ''
   ));
+  if (file_exists($test.'.ini')) {
+    $cmd .= " -vServer.IniFile=$test.ini";
+  }
   $env = $_ENV;
   $in = find_test_ext($test, 'in');
   if ($in !== null) {

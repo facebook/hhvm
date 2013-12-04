@@ -1,0 +1,8 @@
+tanh .5  = float(%f)
+Pass
+tanh -0.5  = float(%f)
+Pass
+tanh 3  = float(%f)
+Pass
+tanh -3  = float(%f)
+Pass

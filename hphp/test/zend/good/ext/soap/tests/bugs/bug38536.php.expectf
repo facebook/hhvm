@@ -1,0 +1,10 @@
+stdClass Object
+(
+    [id] => 2
+    [address] => stdClass Object
+        (
+            [idClient] => 2
+            [address] => Test
+        )
+
+)

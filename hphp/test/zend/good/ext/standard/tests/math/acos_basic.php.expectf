@@ -1,0 +1,8 @@
+acos .5  = float(%f)
+Pass
+acos 0.86602540378444 = float(%f)
+Pass
+acos 1.0 = float(%f)
+Pass
+acos 0.0 = float(%f)
+Pass

@@ -1,0 +1,28 @@
+*** Testing open_basedir configuration [parse_ini_file] ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+*** Finished testing open_basedir configuration [parse_ini_file] ***

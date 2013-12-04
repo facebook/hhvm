@@ -1,0 +1,14 @@
+string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
+string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
+bool(true)
+string(51) "<?php echo "second stub\n"; __HALT_COMPILER(); ?>
+"
+bool(false)
+bool(true)
+string(51) "<?php echo "second stub\n"; __HALT_COMPILER(); ?>
+"
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+===DONE===

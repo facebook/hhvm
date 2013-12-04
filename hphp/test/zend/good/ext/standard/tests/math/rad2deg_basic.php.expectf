@@ -1,0 +1,8 @@
+rad2deg 0= float(%f)
+Pass
+rad2deg 1.570796327 = float(%f)
+Pass
+rad2deg 3.141592654  = float(%f)
+Pass
+rad2deg 6.283185307 = float(%f)
+Pass

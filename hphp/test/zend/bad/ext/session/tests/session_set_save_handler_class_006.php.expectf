@@ -1,0 +1,9 @@
+*** Testing session_set_save_handler() : using objects in close ***
+object(MySession7_Foo)#%d (%d) {
+  ["state"]=>
+  string(2) "ok"
+}
+object(MySession7_Foo)#%d (%d) {
+  ["state"]=>
+  string(2) "ok"
+}

@@ -1,0 +1,22 @@
+string(8) "japanese"
+string(6) "1 eq 1"
+bool(true)
+string(6) "1 eq 2"
+bool(true)
+string(10) "1 before 2"
+bool(false)
+string(9) "1 after 2"
+bool(false)
+string(6) "1 eq 3"
+bool(false)
+string(10) "1 before 3"
+bool(true)
+string(9) "1 after 3"
+bool(false)
+string(6) "3 eq 2"
+bool(false)
+string(10) "3 before 2"
+bool(false)
+string(9) "3 after 2"
+bool(true)
+==DONE==

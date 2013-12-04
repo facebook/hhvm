@@ -1,0 +1,12 @@
+sin 30 = float(%f)
+Pass
+sin 60 = float(%f)
+Pass
+sin 90 = float(%f)
+Pass
+sin 180 = float(%f)
+Pass
+sin 270 = float(%f)
+Pass
+sin 360 = float(%f)
+Pass

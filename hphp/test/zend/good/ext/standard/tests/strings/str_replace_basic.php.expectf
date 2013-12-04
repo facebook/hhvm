@@ -1,0 +1,12 @@
+*** Testing str_replace() on basic operations ***
+string(0) ""
+string(4) "tbst"
+string(0) ""
+int(0)
+string(1) "q"
+int(1)
+string(0) ""
+int(0)
+string(%d) "Resource id #%d"
+int(1)
+===DONE===

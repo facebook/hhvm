@@ -1,0 +1,7 @@
+unicode(%d) "%star_bz2U.phar"
+bool(true)
+unicode(9) "it worked"
+unicode(%d) "phar://%star_bz2U.phar/tar_004.php"
+bool(true)
+bool(true)
+===DONE===

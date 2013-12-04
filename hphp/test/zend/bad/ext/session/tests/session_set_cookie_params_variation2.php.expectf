@@ -1,0 +1,13 @@
+*** Testing session_set_cookie_params() : variation ***
+string(5) "/path"
+NULL
+string(4) "/foo"
+bool(true)
+string(4) "/foo"
+NULL
+string(5) "/blah"
+bool(true)
+string(5) "/blah"
+NULL
+string(5) "/guff"
+Done

@@ -1,0 +1,45 @@
+int(0)
+unicode(5) "a.php"
+bool(false)
+bool(false)
+int(1)
+unicode(1) "b"
+bool(true)
+bool(false)
+int(2)
+unicode(5) "b.php"
+bool(false)
+bool(false)
+int(3)
+unicode(5) "e.php"
+bool(false)
+bool(false)
+===MANUAL===
+MyDirectoryIterator::__construct
+MyDirectoryIterator::rewind
+MyDirectoryIterator::valid
+MyDirectoryIterator::current
+MyDirectoryIterator::key
+int(0)
+unicode(5) "a.php"
+MyDirectoryIterator::next
+MyDirectoryIterator::valid
+MyDirectoryIterator::current
+MyDirectoryIterator::key
+int(1)
+unicode(1) "b"
+MyDirectoryIterator::next
+MyDirectoryIterator::valid
+MyDirectoryIterator::current
+MyDirectoryIterator::key
+int(2)
+unicode(5) "b.php"
+MyDirectoryIterator::next
+MyDirectoryIterator::valid
+MyDirectoryIterator::current
+MyDirectoryIterator::key
+int(3)
+unicode(5) "e.php"
+MyDirectoryIterator::next
+MyDirectoryIterator::valid
+===DONE===

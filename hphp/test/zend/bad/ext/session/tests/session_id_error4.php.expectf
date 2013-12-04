@@ -1,0 +1,7 @@
+*** Testing session_id() : error functionality ***
+string(1) "0"
+string(0) ""
+bool(true)
+string(40) "%s"
+bool(true)
+Done

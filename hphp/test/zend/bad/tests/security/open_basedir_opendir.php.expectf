@@ -1,0 +1,34 @@
+*** Testing open_basedir configuration [opendir] ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+resource(%d) of type (stream)
+resource(%d) of type (stream)
+resource(%d) of type (stream)
+*** Finished testing open_basedir configuration [opendir] ***

@@ -1,0 +1,12 @@
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(12) "MyAutoLoader"
+    [1]=>
+    string(8) "autoLoad"
+  }
+}
+MyAutoLoader::autoLoad(TestClass)
+bool(false)
+===DONE===

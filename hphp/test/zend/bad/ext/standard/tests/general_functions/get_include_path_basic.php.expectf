@@ -1,0 +1,8 @@
+*** Testing get_include_path()
+string(1) "."
+PASSED
+
+Error cases:
+HipHop Warning: %s
+NULL
+===DONE===

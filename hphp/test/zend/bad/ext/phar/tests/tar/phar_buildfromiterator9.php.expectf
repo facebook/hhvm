@@ -1,0 +1,11 @@
+rewind
+valid
+current
+key
+next
+valid
+array(1) {
+  ["a"]=>
+  string(%d) "[stream]"
+}
+===DONE===

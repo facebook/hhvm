@@ -1,0 +1,18 @@
+HipHop Warning: %s
+HipHop Warning: %s
+bool(true)
+is_link
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+string(4) "link"
+string(3) "dir"
+bool(true)
+not found
+bool(false)
+dir
+bool(true)
+bool(false)
+===DONE===

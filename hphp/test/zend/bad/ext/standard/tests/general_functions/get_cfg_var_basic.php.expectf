@@ -1,0 +1,4 @@
+*** Test by calling method or function with its expected arguments ***
+string(1) "0"
+string(3) "php"
+string(5) "files"

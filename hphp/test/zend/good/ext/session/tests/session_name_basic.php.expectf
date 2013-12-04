@@ -1,0 +1,8 @@
+*** Testing session_name() : error functionality ***
+string(9) "PHPSESSID"
+string(9) "PHPSESSID"
+bool(true)
+string(4) "blah"
+bool(true)
+string(4) "blah"
+Done

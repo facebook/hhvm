@@ -1,0 +1,13 @@
+string(%d) "
+	none			1336317965.5 str
+	number			1,336,317,965.5
+	number integer	1,336,317,965
+	number currency	$1,336,317,965.50
+	number percent	133,631,796,550%
+	date			May %d, 2012
+	time			%d:%d:05 PM
+	spellout		one billion three hundred thirty-six million three hundred seventeen thousand nine hundred sixty-five point five
+	ordinal			1,336,317,966th
+	duration		371,199:26:06
+	"
+==DONE==

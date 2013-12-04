@@ -1,0 +1,10 @@
+*** Testing strip_tags() : obscure functionality ***
+-- Iteration 1 --
+string(12) "hello  world"
+-- Iteration 2 --
+string(12) "hello  world"
+-- Iteration 3 --
+string(12) "hello  world"
+-- Iteration 4 --
+string(12) "hello  world"
+Done

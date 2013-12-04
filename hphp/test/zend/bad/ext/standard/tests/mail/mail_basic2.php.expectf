@@ -1,0 +1,9 @@
+*** Testing mail() : basic functionality ***
+-- extra parameters --
+bool(true)
+%w1%wTo: user@company.com
+%w2%wSubject: Test Subject
+%w3%wKHeaders
+%w4%w
+%w5%wA Message
+===DONE===

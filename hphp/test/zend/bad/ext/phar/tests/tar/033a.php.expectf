@@ -1,0 +1,3 @@
+bool(false)
+Cannot modify permissions for file "a.php" in phar "%s033a.phar.tar", write operations are prohibited
+===DONE===

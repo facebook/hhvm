@@ -1,0 +1,8 @@
+<a href="?PHPSESSID=%s"/>
+<a href="?PHPSESSID=%s" />
+<a href="foo?PHPSESSID=%s"/>
+<a href="foo?PHPSESSID=%s" />
+<a href=foo/?PHPSESSID=%s>
+<a href=/?PHPSESSID=%s>
+<a href=?foo=bar/&PHPSESSID=%s>
+<a href="?foo=bar&PHPSESSID=%s"/>

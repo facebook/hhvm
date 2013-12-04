@@ -1,0 +1,27 @@
+*** Testing open_basedir configuration [is_executable] ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+*** Finished testing open_basedir configuration [is_executable] ***

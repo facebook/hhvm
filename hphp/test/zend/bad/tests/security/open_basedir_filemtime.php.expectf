@@ -1,0 +1,30 @@
+*** Testing open_basedir configuration [filemtime] ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+*** Finished testing open_basedir configuration [filemtime] ***

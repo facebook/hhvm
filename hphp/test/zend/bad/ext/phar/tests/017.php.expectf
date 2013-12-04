@@ -1,0 +1,4 @@
+string(%d) "%s017.phar.php"
+bool(true)
+HipHop Warning: %s
+phar url "phar://hio" is unknown in %s017.php on line %d

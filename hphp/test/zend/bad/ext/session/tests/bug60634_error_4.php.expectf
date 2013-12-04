@@ -1,0 +1,7 @@
+write: goodbye cruel world
+HipHop Fatal error: %s
+Stack trace:
+#0 [internal function]: write('%s', '')
+#1 {main}
+  thrown in %s on line %d
+close: goodbye cruel world

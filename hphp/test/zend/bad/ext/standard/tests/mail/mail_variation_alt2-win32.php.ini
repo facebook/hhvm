@@ -1,0 +1,1 @@
+max_execution_time = 120

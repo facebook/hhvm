@@ -1,0 +1,151 @@
+bool(false)
+stat
+array(26) {
+  [0]=>
+  int(12)
+  [1]=>
+  int(%d)
+  [2]=>
+  int(33206)
+  [3]=>
+  int(1)
+  [4]=>
+  int(0)
+  [5]=>
+  int(0)
+  [6]=>
+  int(%s)
+  [7]=>
+  int(2)
+  [8]=>
+  int(%d)
+  [9]=>
+  int(%d)
+  [10]=>
+  int(%d)
+  [11]=>
+  int(%s)
+  [12]=>
+  int(%s)
+  ["dev"]=>
+  int(12)
+  ["ino"]=>
+  int(%d)
+  ["mode"]=>
+  int(33206)
+  ["nlink"]=>
+  int(1)
+  ["uid"]=>
+  int(0)
+  ["gid"]=>
+  int(0)
+  ["rdev"]=>
+  int(%s)
+  ["size"]=>
+  int(2)
+  ["atime"]=>
+  int(%d)
+  ["mtime"]=>
+  int(%d)
+  ["ctime"]=>
+  int(%d)
+  ["blksize"]=>
+  int(%s)
+  ["blocks"]=>
+  int(%s)
+}
+lstat
+array(26) {
+  [0]=>
+  int(12)
+  [1]=>
+  int(%d)
+  [2]=>
+  int(33206)
+  [3]=>
+  int(1)
+  [4]=>
+  int(0)
+  [5]=>
+  int(0)
+  [6]=>
+  int(%s)
+  [7]=>
+  int(2)
+  [8]=>
+  int(%d)
+  [9]=>
+  int(%d)
+  [10]=>
+  int(%d)
+  [11]=>
+  int(%s)
+  [12]=>
+  int(%s)
+  ["dev"]=>
+  int(12)
+  ["ino"]=>
+  int(%d)
+  ["mode"]=>
+  int(33206)
+  ["nlink"]=>
+  int(1)
+  ["uid"]=>
+  int(0)
+  ["gid"]=>
+  int(0)
+  ["rdev"]=>
+  int(%s)
+  ["size"]=>
+  int(2)
+  ["atime"]=>
+  int(%d)
+  ["mtime"]=>
+  int(%d)
+  ["ctime"]=>
+  int(%d)
+  ["blksize"]=>
+  int(%s)
+  ["blocks"]=>
+  int(%s)
+}
+fileperms
+int(33206)
+fileinode
+int(%d)
+filesize
+int(2)
+fileowner
+int(0)
+filegroup
+int(0)
+filemtime
+int(%d)
+fileatime
+int(%d)
+filectime
+int(%d)
+filetype
+string(4) "file"
+is_writable
+bool(true)
+is_writeable
+bool(false)
+is_readable
+bool(true)
+is_executable
+bool(false)
+file_exists
+bool(true)
+is_dir
+bool(false)
+is_file
+bool(true)
+is_link
+bool(false)
+not found
+bool(false)
+not found 2
+HipHop Warning: %s
+bool(false)
+===DONE===

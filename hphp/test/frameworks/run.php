@@ -2673,7 +2673,7 @@ function get_runtime_build(bool $with_jit = true,
     $build = Options::$zend_path;
   } else {
     $fbcode_root_dir = __DIR__.'/../../..';
-    $oss_root_dir = __DIR__.'../..';
+    $oss_root_dir = __DIR__.'/../..';
     // See if we are using an internal development build
     if ((file_exists($fbcode_root_dir."/_bin"))) {
       $build .= $fbcode_root_dir;
@@ -2682,15 +2682,9 @@ function get_runtime_build(bool $with_jit = true,
       } else {
         $build .= "/_bin/hphp/hhvm/php";
       }
-    } else if (file_exists($oss_root_dir."/".
-                           idx($_ENV, 'FBMAKE_BIN_ROOT', '_bin'))) {
+    } else if (file_exists($oss_root_dir."/hhvm")) {
       // Maybe we are in OSS land trying this script
-      $build .= $oss_root_dir."/".idx($_ENV, 'FBMAKE_BIN_ROOT', '_bin');
-      if (!$use_php) {
-        $build .= "/hhvm";
-      } else {
-        $build .= "/php";
-      }
+      $build .= $oss_root_dir."/hhvm/hhvm";
     } else {
       error("HHVM build doesn't exist. Did you build yet?");
     }

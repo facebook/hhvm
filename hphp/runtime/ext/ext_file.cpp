@@ -213,6 +213,8 @@ Variant f_popen(const String& command, const String& mode) {
   Resource handle(file);
   bool ret = CHECK_ERROR(file->open(File::TranslateCommand(command), mode));
   if (!ret) {
+    raise_warning("popen(%s,%s): Invalid argument",
+                  command.data(), mode.data());
     return false;
   }
   return handle;

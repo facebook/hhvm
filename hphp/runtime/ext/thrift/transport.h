@@ -105,8 +105,6 @@ public:
   static StaticString s_ktype;
   static StaticString s_vtype;
   static StaticString s_etype;
-  static StaticString s_format;
-  static StaticString s_collection;
 
 public:
   Object protocol() { return p; }

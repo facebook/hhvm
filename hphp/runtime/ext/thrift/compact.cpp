@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/thrift/transport.h"
-#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_reflection.h"
 #include "hphp/runtime/ext/ext_thrift.h"
 
@@ -710,10 +709,10 @@ class CompactReader {
           return readMap(spec);
 
         case T_LIST:
-          return readList(spec);
+          return readList(spec, C_LIST_LIST);
 
         case T_SET:
-          return readSet(spec);
+          return readList(spec, C_LIST_SET);
 
         default:
           throw InvalidArgumentException("unknown TType", type);
@@ -824,14 +823,7 @@ class CompactReader {
         AccessFlags::Error).toArray();
       Array valueSpec = spec.rvalAt(PHPTransport::s_val,
         AccessFlags::Error).toArray();
-      String format = spec.rvalAt(PHPTransport::s_format,
-        AccessFlags::None).toString();
-      Variant ret;
-      if (format.equal(PHPTransport::s_collection)) {
-        ret = NEWOBJ(c_Map)();
-      } else {
-        ret = Array::Create();
-      }
+      Variant ret = Array::Create();
 
       for (uint32_t i = 0; i < size; i++) {
         Variant key = readField(keySpec, keyType);
@@ -843,59 +835,23 @@ class CompactReader {
       return ret;
     }
 
-    Variant readList(CArrRef spec) {
+    Variant readList(CArrRef spec, CListType listType) {
       TType valueType;
       uint32_t size;
       readListBegin(valueType, size);
 
       Array valueSpec = spec.rvalAt(PHPTransport::s_elem,
                                     AccessFlags::Error_Key).toArray();
-      String format = spec.rvalAt(PHPTransport::s_format,
-        AccessFlags::None).toString();
-      Variant ret;
-      if (format.equal(PHPTransport::s_collection)) {
-        ret = NEWOBJ(c_Vector)();
-      } else {
-        ret = Array::Create();
-      }
+      Variant ret = Array::Create();
 
       for (uint32_t i = 0; i < size; i++) {
         Variant value = readField(valueSpec, valueType);
-        ret.append(value);
-      }
-
-      readCollectionEnd();
-      return ret;
-    }
-
-    Variant readSet(CArrRef spec) {
-      TType valueType;
-      uint32_t size;
-      readListBegin(valueType, size);
-
-      Array valueSpec = spec.rvalAt(PHPTransport::s_elem,
-                                    AccessFlags::Error_Key).toArray();
-      String format = spec.rvalAt(PHPTransport::s_format,
-        AccessFlags::None).toString();
-      Variant ret;
-      if (format.equal(PHPTransport::s_collection)) {
-        p_Set set_ret = NEWOBJ(c_Set)();
-
-        for (uint32_t i = 0; i < size; i++) {
-          Variant value = readField(valueSpec, valueType);
-          set_ret->t_add(value);
-        }
-
-        ret = Variant(set_ret);
-      } else {
-        ret = Array::Create();
-
-        for (uint32_t i = 0; i < size; i++) {
-          Variant value = readField(valueSpec, valueType);
+        if (listType == C_LIST_LIST) {
+          ret.append(value);
+        } else {
           ret.set(value, true);
         }
       }
-
 
       readCollectionEnd();
       return ret;

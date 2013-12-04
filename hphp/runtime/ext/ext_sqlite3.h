@@ -61,8 +61,8 @@ class c_SQLite3 : public ExtObjectData {
   public: int64_t t_changes();
   public: static String ti_escapestring(const String& sql);
   public: Variant t_prepare(const String& sql);
-  public: Variant t_query(const Variant& sql);
-  public: Variant t_querysingle(const Variant& sql, bool entire_row = false);
+  public: Variant t_query(const String& sql);
+  public: Variant t_querysingle(const String& sql, bool entire_row = false);
   public: bool t_createfunction(const String& name, CVarRef callback, int64_t argcount = -1);
   public: bool t_createaggregate(const String& name, CVarRef step, CVarRef final, int64_t argcount = -1);
   public: bool t_openblob(const String& table, const String& column, int64_t rowid, const String& dbname = null_string);

@@ -275,6 +275,7 @@
                     "name": "query",
                     "desc": "Executes an SQL query, returning an SQLite3Result object if the query returns results.",
                     "flags": [
+                        "ZendParamMode"
                     ],
                     "return": {
                         "type": "Variant",
@@ -283,7 +284,7 @@
                     "args": [
                         {
                             "name": "sql",
-                            "type": "Variant",
+                            "type": "String",
                             "desc": "The SQL query to execute."
                         }
                     ]
@@ -292,6 +293,7 @@
                     "name": "querysingle",
                     "desc": "Executes a query and returns a single result.",
                     "flags": [
+                        "ZendParamMode"
                     ],
                     "return": {
                         "type": "Variant",
@@ -300,7 +302,7 @@
                     "args": [
                         {
                             "name": "sql",
-                            "type": "Variant",
+                            "type": "String",
                             "desc": "The SQL query to execute."
                         },
                         {

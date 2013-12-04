@@ -1343,8 +1343,8 @@ class Pear extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/pear-core",
-      "git_path" => "https://github.com/JoelMarcey/pear-core.git",
-      "git_commit" => "3db70130d98c4c2380794d68055024e48f746d5a",
+      "git_path" => "https://github.com/pear/pear-core.git",
+      "git_commit" => "e379594cef09079be131d2fbbb19b1c2256872c2",
       "test_path" => __DIR__."/frameworks/pear-core",
       "test_name_pattern" => PHPUnitPatterns::$pear_test_name_pattern,
       "test_file_pattern" => PHPUnitPatterns::$pear_test_file_pattern,

@@ -68,8 +68,8 @@ public:
   static void ShutdownModules();
   static bool ModulesInitialised();
 
-  // Look for "systemlib.ext.{m_name}" in the binary and compile/merge it
-  void loadSystemlib();
+  // Look for "ext.{namehash}" in the binary and compile/merge it
+  void loadSystemlib(const std::string& name = "");
 
   // Compile and merge an systemlib fragment
   static void CompileSystemlib(const std::string &slib,

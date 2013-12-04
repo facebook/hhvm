@@ -227,11 +227,18 @@ void Extension::CompileSystemlib(const std::string &slib,
   s_systemlib_units.push_back(unit);
 }
 
-void Extension::loadSystemlib() {
+/**
+ * Loads a named systemlib section from the main binary (or DSO)
+ * using the label "ext.{hash(name)}"
+ *
+ * If {name} is not passed, then {m_name} is assumed for
+ * builtin extensions.  DSOs pull from the fixed "systemlib" label
+ */
+void Extension::loadSystemlib(const std::string& name /*= "" */) {
   std::string hhas, slib;
-  if (m_dsoName.empty()) {
+  if (m_dsoName.empty() || !name.empty()) {
     std::string section("ext.");
-    section += f_md5(m_name, false).substr(0, 12).data();
+    section += f_md5(name.empty() ? m_name : name, false).substr(0, 12).data();
     slib = get_systemlib(&hhas, section);
   } else {
     slib = get_systemlib(&hhas, "systemlib", m_dsoName);

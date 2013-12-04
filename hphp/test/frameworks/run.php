@@ -1518,9 +1518,10 @@ class Phpbb3 extends Framework {
   protected function getInfo(): Map {
     return Map {
       "install_root" => __DIR__."/frameworks/phpbb3",
-      "git_path" => "https://github.com/JoelMarcey/phpbb.git",
-      "git_commit" => "e0c8a81603a6e132c714adbdcb0a8762d01cbdfe",
+      "git_path" => "https://github.com/phpbb/phpbb.git",
+      "git_commit" => "b474917ba3fbb26e50a7145fa904efec949f20ce",
       "test_path" => __DIR__."/frameworks/phpbb3",
+      "env_vars" => Map {'PHP_BINARY' => get_runtime_build(false, true)},
       // This may work if we increase the timeout. Blacklist for now
       "blacklist" => Set {
         __DIR__."/frameworks/phpbb3/tests/lint_test.php",

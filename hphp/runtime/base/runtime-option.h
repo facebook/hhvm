@@ -358,6 +358,12 @@ public:
     kEvalVMInitialGlobalTableSizeDefault)                               \
   F(bool, Jit,                         evalJitDefault())                \
   F(bool, JitRequireWriteLease,        false)                           \
+  F(uint64_t, JitAHotSize,             4 << 20)                         \
+  F(uint64_t, JitASize,                60 << 20)                        \
+  F(uint64_t, JitAMaxUsage,            maxUsageDef())                   \
+  F(uint64_t, JitAProfSize,            64 << 20)                        \
+  F(uint64_t, JitAStubsSize,           64 << 20)                        \
+  F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(bool, AllowHhas,                   false)                           \
   F(bool, CheckExtendedTypeHints,      true)                            \
   F(bool, JitNoGdb,                    true)                            \
@@ -456,13 +462,6 @@ public:
 
   static bool RecordCodeCoverage;
   static std::string CodeCoverageOutputFile;
-
-  // TranslatorX64 allocation options
-  static size_t VMTranslASize;
-  static size_t VMTranslAHotSize;
-  static size_t VMTranslAProfSize;
-  static size_t VMTranslAStubsSize;
-  static size_t VMTranslGDataSize;
 
   // Repo (hhvm bytecode repository) options
   static std::string RepoLocalMode;

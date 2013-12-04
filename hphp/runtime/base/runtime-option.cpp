@@ -409,6 +409,10 @@ const uint64_t kEvalVMStackElmsDefault =
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultWarmupRequests = debug ? 1 : 11;
 static const int kDefaultJitPGOThreshold = debug ? 2 : 100;
+static const size_t kJitGlobalDataDef = RuntimeOption::EvalJitASize >> 2;
+inline size_t maxUsageDef() {
+  return RuntimeOption::EvalJitASize;
+}
 #define F(type, name, def) \
   type RuntimeOption::Eval ## name = type(def);
 EVALFLAGS();
@@ -416,11 +420,6 @@ EVALFLAGS();
 std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
-size_t RuntimeOption::VMTranslAHotSize   =   4 << 20;
-size_t RuntimeOption::VMTranslASize      =  60 << 20;
-size_t RuntimeOption::VMTranslAProfSize  =  64 << 20;
-size_t RuntimeOption::VMTranslAStubsSize =  64 << 20;
-size_t RuntimeOption::VMTranslGDataSize  = RuntimeOption::VMTranslASize >> 2;
 
 std::string RuntimeOption::RepoLocalMode;
 std::string RuntimeOption::RepoLocalPath;
@@ -1166,11 +1165,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     }
     if (RecordCodeCoverage) CheckSymLink = true;
     CodeCoverageOutputFile = eval["CodeCoverageOutputFile"].getString();
-    VMTranslAHotSize = eval["JitAHotSize"].getUInt64(VMTranslAHotSize);
-    VMTranslAProfSize = eval["JitAProfSize"].getUInt64(VMTranslAProfSize);
-    VMTranslASize = eval["JitASize"].getUInt64(VMTranslASize);
-    VMTranslAStubsSize = eval["JitAStubsSize"].getUInt64(VMTranslAStubsSize);
-    VMTranslGDataSize = eval["JitGlobalDataSize"].getUInt64(VMTranslGDataSize);
     {
       Hdf debugger = eval["Debugger"];
       EnableDebugger = debugger["EnableDebugger"].getBool();

@@ -231,7 +231,7 @@ TCA TranslatorX64::retranslate(const TranslArgs& args) {
     return nullptr;
   }
   LeaseHolder writer(s_writeLease);
-  if (!writer) return nullptr;
+  if (!writer || !shouldTranslate()) return nullptr;
   if (!locked) {
     // Even though we knew above that we were going to skip
     // doing another translation, we wait until we get the
@@ -270,7 +270,7 @@ bool TranslatorX64::prologuesWereRegenerated(const Func* func) {
 
 TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
   LeaseHolder writer(s_writeLease);
-  if (!writer) return nullptr;
+  if (!writer || !shouldTranslate()) return nullptr;
   if (isDebuggerAttachedProcess()) return nullptr;
 
   TRACE(1, "retranslateOpt: transId = %u\n", transId);
@@ -417,6 +417,8 @@ static void populateLiveContext(JIT::RegionContext& ctx) {
 
 TCA
 TranslatorX64::createTranslation(const TranslArgs& args) {
+  if (!shouldTranslate()) return nullptr;
+
   /*
    * Try to become the writer. We delay this until we *know* we will have
    * a need to create new translations, instead of just trying to win the
@@ -678,7 +680,7 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   }
 
   LeaseHolder writer(s_writeLease);
-  if (!writer) return nullptr;
+  if (!writer || !shouldTranslate()) return nullptr;
 
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
@@ -1540,8 +1542,8 @@ interpOne##opcode(ActRec* ar, Cell* sp, Offset pcOff) {                 \
   VMExecutionContext* ec = g_vmContext;                                 \
   Stats::inc(Stats::Instr_InterpOne ## opcode);                         \
   if (Trace::moduleEnabled(Trace::interpOne, 1)) {                      \
-    static const StringData* cat = makeStaticString("interpOne"); \
-    static const StringData* name = makeStaticString(#opcode);    \
+    static const StringData* cat = makeStaticString("interpOne");       \
+    static const StringData* name = makeStaticString(#opcode);          \
     Stats::incStatGrouped(cat, name, 1);                                \
   }                                                                     \
   INC_TPC(interp_one)                                                   \
@@ -2106,12 +2108,12 @@ TranslatorX64::TranslatorX64()
   auto ru = [=] (size_t sz) { return sz + (-sz & (kRoundUp - 1)); };
 
   const size_t kAHotSize   = ru(RuntimeOption::RepoAuthoritative ?
-                                RuntimeOption::VMTranslAHotSize : 0);
-  const size_t kASize      = ru(RuntimeOption::VMTranslASize);
+                                RuntimeOption::EvalJitAHotSize : 0);
+  const size_t kASize      = ru(RuntimeOption::EvalJitASize);
   const size_t kAProfSize  = ru(RuntimeOption::EvalJitPGO ?
-                                RuntimeOption::VMTranslAProfSize : 0);
-  const size_t kAStubsSize = ru(RuntimeOption::VMTranslAStubsSize);
-  const size_t kGDataSize  = ru(RuntimeOption::VMTranslGDataSize);
+                                RuntimeOption::EvalJitAProfSize : 0);
+  const size_t kAStubsSize = ru(RuntimeOption::EvalJitAStubsSize);
+  const size_t kGDataSize  = ru(RuntimeOption::EvalJitGlobalDataSize);
   m_totalSize = kAHotSize + kASize + kAStubsSize + kAProfSize + kGDataSize;
 
   TRACE(1, "TranslatorX64@%p startup\n", this);

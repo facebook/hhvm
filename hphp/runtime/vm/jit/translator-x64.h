@@ -292,6 +292,9 @@ public:
   TranslateResult translateTracelet(Tracelet& t);
 
 private:
+  bool shouldTranslate() const {
+    return mainCode.used() < RuntimeOption::EvalJitAMaxUsage;
+  }
   TCA getTranslation(const TranslArgs& args);
   TCA createTranslation(const TranslArgs& args);
   TCA retranslate(const TranslArgs& args);

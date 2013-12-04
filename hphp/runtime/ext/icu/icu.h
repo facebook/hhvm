@@ -61,6 +61,8 @@ public:
     va_end(args);
   }
 
+  void clear() { m_error.clear(); }
+
   UErrorCode getErrorCode() const { return m_error.code; }
   const String getErrorMessage() const { return m_error.custom_error_message; }
 };
@@ -69,30 +71,39 @@ DECLARE_EXTERN_REQUEST_LOCAL(IntlError, s_intl_error);
 
 namespace Intl {
 
-class Converter : public RequestEventHandler {
+class RequestData : public RequestEventHandler {
  public:
-  void requestInit() override {
-    UErrorCode error = U_ZERO_ERROR;
-    m_utf8 = ucnv_open("utf-8", &error);
-    assert(U_SUCCESS(error));
-  }
+  void requestInit() override {}
 
   void requestShutdown() override {
-    ucnv_close(m_utf8);
+    if (m_utf8) {
+      ucnv_close(m_utf8);
+      m_utf8 = nullptr;
+    }
   }
 
-  UConverter* utf8() const { return m_utf8; }
+  UConverter* utf8() {
+    if (!m_utf8) {
+      UErrorCode error = U_ZERO_ERROR;
+      m_utf8 = ucnv_open("utf-8", &error);
+      assert(U_SUCCESS(error));
+    }
+    return m_utf8;
+  }
+
+  const std::string& defaultLocale() const { return m_defaultLocale; }
+  void setDefaultLocale(const std::string& loc) { m_defaultLocale = loc; }
 
  private:
-  UConverter *m_utf8;
+  UConverter *m_utf8 = nullptr;
+  std::string m_defaultLocale;
 };
 
-DECLARE_EXTERN_REQUEST_LOCAL(Converter, s_intl_converters);
+DECLARE_EXTERN_REQUEST_LOCAL(RequestData, s_intl_request);
 
-inline const String GetDefaultLocale() {
-  // TODO: Move this to Locale when we have it
-  return "en_US";
-}
+const String GetDefaultLocale();
+bool SetDefaultLocale(const String& locale);
+void BindDefaultLocale();
 
 // Common encoding conversions UTF8<->UTF16
 String u16(const char *u8, int32_t u8_len, UErrorCode &error);

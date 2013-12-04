@@ -1074,40 +1074,36 @@ protected:
   Object phpMap(CVarRef callback) {
     CallCtx ctx;
     vm_decode_function(callback, nullptr, false, ctx);
+
     if (!ctx.func) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Parameter must be a valid callback"));
       throw e;
     }
+
     TSet* st;
     Object obj = st = NEWOBJ(TSet)();
+
     if (!m_size) return obj;
     assert(m_nLastSlot != 0);
-    st->m_size = m_size;
-    st->m_load = m_load;
-    st->m_nLastSlot = 0;
-    st->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
-    // We need to zero out the first slot in case an exception
-    // is thrown during the first iteration, because ~c_Set()
-    // will decRef all slots up to (and including) m_nLastSlot.
-    st->m_data[0].data.m_type = (DataType)0;
+
     uint nLastSlot = m_nLastSlot;
-    for (uint i = 0; i <= nLastSlot; st->m_nLastSlot = i++) {
-      Bucket& p = m_data[i];
-      Bucket& np = st->m_data[i];
-      if (!p.validValue()) {
-        np.data.m_type = p.data.m_type;
-        continue;
-      }
-      TypedValue* tv = &np.data;
-      int32_t version = m_version;
-      g_vmContext->invokeFuncFew(tv, ctx, 1, &p.data);
-      if (UNLIKELY(version != m_version)) {
-        tvRefcountedDecRef(tv);
-        throw_collection_modified();
-      }
-      np.data.hash() = p.data.hash();
+    for (uint i = 0; i <= nLastSlot; i++) {
+
+      Bucket& curBucket = m_data[i];
+      if (!curBucket.validValue()) continue;
+
+      TypedValue tvCbRet;
+      int32_t pVer = m_version;
+      g_vmContext->invokeFuncFew(&tvCbRet, ctx, 1, &curBucket.data);
+
+      // Now that tvCbRet is live, make sure to decref even if we throw.
+      SCOPE_EXIT { tvRefcountedDecRef(&tvCbRet); };
+
+      if (UNLIKELY(m_version != pVer)) throw_collection_modified();
+      st->add(&tvCbRet);
     }
+
     return obj;
   }
 

@@ -57,16 +57,8 @@ class ObjectData {
     HasClone      = 0x0400, // has custom clone logic
     HasDynPropArr = 0x0800, // has a dynamic properties array
     IsCppBuiltin  = 0x1000, // has custom C++ subclass
-
-    // The bits in CollectionTypeAttrMask of o_attributes are reserved
-    // to indicate the type of collection.
-    CollectionTypeAttrMask = 0xe000, // 7 << 13
-    VectorAttrInit         = (Collection::VectorType << 13),
-    MapAttrInit            = (Collection::MapType << 13),
-    StableMapAttrInit      = (Collection::StableMapType << 13),
-    SetAttrInit            = (Collection::SetType << 13),
-    PairAttrInit           = (Collection::PairType << 13),
-    FrozenVectorAttrInit   = (Collection::FrozenVectorType << 13),
+    IsCollection  = 0x2000, // it's a collection (and the specific type is
+                            // stored in o_subclassData.u16)
   };
 
   enum {
@@ -202,12 +194,14 @@ class ObjectData {
   }
 
   bool isCollection() const {
-    return getCollectionType() != Collection::InvalidType;
+    return getAttribute(Attribute::IsCollection);
   }
+
   Collection::Type getCollectionType() const {
-    // Return the upper 3 bits of o_attribute
-    return (Collection::Type)((uint16_t)(o_attribute >> 13) & 7);
+    return isCollection() ? static_cast<Collection::Type>(o_subclassData.u16)
+                          : Collection::Type::InvalidType;
   }
+
   size_t getCollectionSize() const {
     return *(uint*)((char*)this + FAST_COLLECTION_SIZE_OFFSET);
   }

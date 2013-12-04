@@ -2303,7 +2303,7 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
     CC_NZ,
     [&] (Asm& a) {
       a.testl(
-        ObjectData::CollectionTypeAttrMask,
+        ObjectData::IsCollection,
         srcReg[ObjectData::attributeOff()]
       );
       ifThenElse(

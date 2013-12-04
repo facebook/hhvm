@@ -144,7 +144,7 @@ void triggerCow(c_Vector* vec) {
 
 c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
 
-  int flags = ObjectData::VectorAttrInit |
+  int flags = ObjectData::IsCollection |
               ObjectData::UseGet |
               ObjectData::UseSet |
               ObjectData::UseIsset |
@@ -153,6 +153,7 @@ c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
               ObjectData::HasClone;
 
   ObjectData::setAttributes(flags);
+  o_subclassData.u16 = Collection::VectorType;
 }
 
 void c_Vector::t___construct(CVarRef iterable /* = null_variant */) {
@@ -865,7 +866,7 @@ Object c_FrozenVector::t_values() {
 
 c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
 
-  int flags = ObjectData::FrozenVectorAttrInit |
+  int flags = ObjectData::IsCollection |
               ObjectData::UseGet |
               ObjectData::UseSet |
               ObjectData::UseIsset |
@@ -873,6 +874,7 @@ c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
               ObjectData::CallToImpl;
 
   ObjectData::setAttributes(flags);
+  o_subclassData.u16 = Collection::FrozenVectorType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -880,7 +882,7 @@ c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
 static const char emptyMapSlot[sizeof(c_Map::Bucket)] = { 0 };
 
 c_Map::c_Map(Class* cb) :
-    ExtObjectDataFlags<ObjectData::MapAttrInit|
+    ExtObjectDataFlags<ObjectData::IsCollection|
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
@@ -889,6 +891,7 @@ c_Map::c_Map(Class* cb) :
                        ObjectData::HasClone>(cb),
     m_size(0), m_load(0), m_nLastSlot(0), m_version(0) {
   m_data = (Bucket*)emptyMapSlot;
+  o_subclassData.u16 = Collection::MapType;
 }
 
 c_Map::~c_Map() {
@@ -2029,7 +2032,7 @@ do {                                                                    \
 static const char emptyStableMapSlot[sizeof(c_StableMap::Bucket*)] = { 0 };
 
 c_StableMap::c_StableMap(Class* cb) :
-    ExtObjectDataFlags<ObjectData::StableMapAttrInit|
+    ExtObjectDataFlags<ObjectData::IsCollection|
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
@@ -2041,6 +2044,8 @@ c_StableMap::c_StableMap(Class* cb) :
   m_nTableSize = 0;
   m_nTableMask = 0;
   m_arBuckets = (Bucket**)emptyStableMapSlot;
+
+  o_subclassData.u16 = Collection::StableMapType;
 }
 
 c_StableMap::~c_StableMap() {
@@ -3765,7 +3770,7 @@ void BaseSet::throwBadValueType() {
 
 c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
 
-  const uint attrs = ObjectData::SetAttrInit|
+  const uint attrs = ObjectData::IsCollection|
                      ObjectData::UseGet|
                      ObjectData::UseSet|
                      ObjectData::UseIsset|
@@ -3774,6 +3779,7 @@ c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
                      ObjectData::HasClone;
 
   ObjectData::setAttributes(attrs);
+  o_subclassData.u16 = Collection::SetType;
 }
 
 void c_Set::t___construct(CVarRef iterable /* = null_variant */) {
@@ -4011,13 +4017,15 @@ void c_SetIterator::t_rewind() {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Pair::c_Pair(Class* cb) :
-    ExtObjectDataFlags<ObjectData::PairAttrInit|
+    ExtObjectDataFlags<ObjectData::IsCollection|
                        ObjectData::UseGet|
                        ObjectData::UseSet|
                        ObjectData::UseIsset|
                        ObjectData::UseUnset|
                        ObjectData::HasClone>(cb),
     m_size(0) {
+
+  o_subclassData.u16 = Collection::PairType;
 }
 
 c_Pair::~c_Pair() {

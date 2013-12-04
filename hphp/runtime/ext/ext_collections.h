@@ -259,7 +259,7 @@ public:
 // class Map
 
 FORWARD_DECLARE_CLASS(Map);
-class c_Map : public ExtObjectDataFlags<ObjectData::MapAttrInit|
+class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection|
                                         ObjectData::UseGet|
                                         ObjectData::UseSet|
                                         ObjectData::UseIsset|
@@ -589,7 +589,7 @@ class c_MapIterator : public ExtObjectData {
 // class StableMap
 
 FORWARD_DECLARE_CLASS(StableMap);
-class c_StableMap : public ExtObjectDataFlags<ObjectData::StableMapAttrInit|
+class c_StableMap : public ExtObjectDataFlags<ObjectData::IsCollection|
                                               ObjectData::UseGet|
                                               ObjectData::UseSet|
                                               ObjectData::UseIsset|
@@ -1448,7 +1448,7 @@ class c_SetIterator : public ExtObjectData {
 // class Pair
 
 FORWARD_DECLARE_CLASS(Pair);
-class c_Pair : public ExtObjectDataFlags<ObjectData::PairAttrInit|
+class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
                                          ObjectData::UseGet|
                                          ObjectData::UseSet|
                                          ObjectData::UseIsset|

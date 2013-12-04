@@ -575,8 +575,8 @@ def mkdir_p(path):
 def walk(filename, source_dir):
     dest_filename = os.path.basename(filename)
 
-    cur_dir = os.path.dirname(__file__)
-    dest_subdir = os.path.join(cur_dir, '../test/zend/all', source_dir)
+    script_dir = os.path.dirname(__file__)
+    dest_subdir = os.path.join(script_dir, '../test/zend/all', source_dir)
     mkdir_p(dest_subdir)
     full_dest_filename = os.path.join(dest_subdir, dest_filename)
 
@@ -896,7 +896,9 @@ for root, dirs, files in os.walk(args.zend_path):
         if matches(args.only) and should_import(full_file):
             walk(full_file, root.replace(args.zend_path, ''))
 
-if not os.path.isdir('test/zend/all'):
+script_dir = os.path.dirname(__file__)
+all_dir = os.path.join(script_dir, '../test/zend/all')
+if not os.path.isdir(all_dir):
     print "No test/zend/all. Maybe no tests were imported?"
     sys.exit(0)
 else:
@@ -904,11 +906,11 @@ else:
 
 stdout = subprocess.Popen(
     [
-        'test/run',
+        os.path.join(script_dir, '../test/run'),
         '--fbmake',
         '-m',
         'interp',
-        'test/zend/all',
+        all_dir,
     ],
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT
@@ -972,7 +974,7 @@ for test in results:
             shutil.rmtree(f)
 
 # extra random files needed for tests...
-for root, dirs, files in os.walk('test/zend/all'):
+for root, dirs, files in os.walk(all_dir):
     for filename in files:
         filename = os.path.join(root, filename)
 
@@ -985,4 +987,4 @@ for root, dirs, files in os.walk('test/zend/all'):
                     shutil.copyfile(filename, dest)
 
 if not args.dirty:
-    shutil.rmtree('test/zend/all')
+    shutil.rmtree(all_dir)

@@ -65,6 +65,7 @@ void print(std::ostream& os, const Block* block,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr,
            BCMarker* curMarker = nullptr);
+void print(const Block* block);
 
 // Trace
 void print(std::ostream& ostream, const IRUnit&, const IRTrace*,

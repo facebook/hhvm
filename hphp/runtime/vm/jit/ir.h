@@ -337,19 +337,21 @@ O(ReqBindJmpInstanceOfBitmask,      ND, S(Cls) CStr,                     T|E) \
 O(ReqBindJmpNInstanceOfBitmask,     ND, S(Cls) CStr,                     T|E) \
 O(ReqBindJmpZero,                   ND, SNum,                            T|E) \
 O(ReqBindJmpNZero,                  ND, SNum,                            T|E) \
-O(SideExitJmpGt,                    ND, S(Gen) S(Gen),                     E) \
-O(SideExitJmpGte,                   ND, S(Gen) S(Gen),                     E) \
-O(SideExitJmpLt,                    ND, S(Gen) S(Gen),                     E) \
-O(SideExitJmpLte,                   ND, S(Gen) S(Gen),                     E) \
-O(SideExitJmpEq,                    ND, S(Gen) S(Gen),                     E) \
-O(SideExitJmpNeq,                   ND, S(Gen) S(Gen),                     E) \
-O(SideExitJmpSame,                  ND, S(Gen) S(Gen),                     E) \
-O(SideExitJmpNSame,                 ND, S(Gen) S(Gen),                     E) \
-O(SideExitJmpInstanceOfBitmask,     ND, S(Cls) CStr,                       E) \
-O(SideExitJmpNInstanceOfBitmask,    ND, S(Cls) CStr,                       E) \
-O(SideExitJmpZero,                  ND, SNum,                              E) \
-O(SideExitJmpNZero,                 ND, SNum,                              E) \
-O(SideExitGuardLoc,                 ND, S(FramePtr),                       E) \
+O(SideExitJmpGt,               D(None), S(Gen) S(Gen),                     E) \
+O(SideExitJmpGte,              D(None), S(Gen) S(Gen),                     E) \
+O(SideExitJmpLt,               D(None), S(Gen) S(Gen),                     E) \
+O(SideExitJmpLte,              D(None), S(Gen) S(Gen),                     E) \
+O(SideExitJmpEq,               D(None), S(Gen) S(Gen),                     E) \
+O(SideExitJmpNeq,              D(None), S(Gen) S(Gen),                     E) \
+O(SideExitJmpSame,             D(None), S(Gen) S(Gen),                     E) \
+O(SideExitJmpNSame,            D(None), S(Gen) S(Gen),                     E) \
+O(SideExitJmpInstanceOfBitmask,                                               \
+                               D(None), S(Cls) CStr,                       E) \
+O(SideExitJmpNInstanceOfBitmask,                                              \
+                               D(None), S(Cls) CStr,                       E) \
+O(SideExitJmpZero,             D(None), SNum,                              E) \
+O(SideExitJmpNZero,            D(None), SNum,                              E) \
+O(SideExitGuardLoc,        D(FramePtr), S(FramePtr),                       E) \
 O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \

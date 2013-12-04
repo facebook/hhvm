@@ -999,7 +999,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
       auto* inst = pair.first->inst();
       if (inst->is(LdStack) && inst->src(0) == sp) {
         auto const offset = inst->extra<LdStack>()->offset;
-        assert(!ret.count(offset));
         ret[offset] = inst->dst();
       }
     }

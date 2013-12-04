@@ -519,6 +519,11 @@ void print(std::ostream& os, const Block* block,
   }
 }
 
+void print(const Block* block) {
+  print(std::cerr, block);
+  std::cerr << std::endl;
+}
+
 void print(std::ostream& os, const IRUnit& unit, const IRTrace* trace,
            const RegAllocInfo* regs, const LifetimeInfo* lifetime,
            const AsmInfo* asmInfo, const GuardConstraints* guards) {

@@ -1429,7 +1429,7 @@ SideExitJmpNZero
   Test the condition based on the Jmp* op of similar name, and then
   emit a smashable jump to a REQ_BIND_SIDE_EXIT service request.
 
-SideExitGuardLoc<T,locId,takenOff> S0:FramePtr
+D:FramePtr = SideExitGuardLoc<T,locId,takenOff> S0:FramePtr
 
   Test the type of a local, and if it fails jump to a side exit
   service request.
@@ -1697,7 +1697,7 @@ D:Cell = ArrayIdx S0:ConstTCA S1:Arr S2:{Int,Str} S3:Cell
 D:Cell = GenericIdx S0:ConstTCA S1:Cell S2:Cell S3:Cell
 
   Checks if S1 contains the key S2, and returns the result if found.
-  Otherwise S3 is returned. S1 must support array or indexed access. 
+  Otherwise S3 is returned. S1 must support array or indexed access.
   If S1 does not support array or indexed access S3 is returned.
 
 D:Int LdSwitchDblIndex S0:Dbl S1:Int S2:Int

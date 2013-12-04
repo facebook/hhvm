@@ -142,9 +142,12 @@ static auto const s_arraysToClear = {
   s__POST,
   s__FILES,
   s__REQUEST,
-  s__SESSION,
   s__ENV,
   s__COOKIE,
+};
+
+static auto const s_arraysToUnset = {
+  s__SESSION,
 };
 
 /**
@@ -162,6 +165,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   for (auto& key : s_arraysToClear) {
     g->remove(key.get(), false);
     g->set(key.get(), emptyArr, false);
+  }
+  for (auto& key : s_arraysToUnset) {
+    g->remove(key.get(), false);
   }
   g->set(s_HTTP_RAW_POST_DATA, empty_string, false);
 

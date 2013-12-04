@@ -76,8 +76,10 @@ inline vixl::Register x2a(const Transl::Reg64& x64reg) {
   return it->second;
 }
 
+inline constexpr unsigned maxArgReg() { return 7; }
+
 inline vixl::Register argReg(unsigned index) {
-  assert(index <= 7);
+  assert(index <= maxArgReg());
   return vixl::Register::XRegFromCode(index);
 }
 

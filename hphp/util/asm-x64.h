@@ -765,7 +765,6 @@ struct Label;
 
 class X64Assembler : private boost::noncopyable {
   friend struct Label;
-  friend class CodeCursor;
 
 public:
   explicit X64Assembler(CodeBlock& cb) : codeBlock(cb) {}
@@ -2576,43 +2575,6 @@ inline void X64Assembler::call(Label& l) { l.call(*this); }
   inline void X64Assembler::j##nm##8(Label& l) { l.jcc8(*this, code); }
   CCS
 #undef CC
-
-//////////////////////////////////////////////////////////////////////
-
-/**
- * gcc-4.7 warns about use of uninitialized memory around the use of
- * a.code.frontier even though this is explicitly initialized at each point.
- */
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
-
-/*
- * RAII bookmark for scoped rewinding of frontier.
- */
-class CodeCursor : public UndoMarker {
-  public:
-  CodeCursor(CodeBlock& cb, CodeAddress newFrontier) :
-    UndoMarker(cb) {
-    cb.setFrontier(newFrontier);
-  }
-
-  explicit CodeCursor(X64Assembler& as, CodeAddress newFrontier)
-      : UndoMarker(as.codeBlock) {
-    as.codeBlock.setFrontier(newFrontier);
-  }
-
-  ~CodeCursor() {
-    undo();
-  }
-};
-
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
 
 //////////////////////////////////////////////////////////////////////
 

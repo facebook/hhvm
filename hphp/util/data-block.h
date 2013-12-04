@@ -239,6 +239,17 @@ class UndoMarker {
   }
 };
 
+/*
+ * RAII bookmark for scoped rewinding of frontier.
+ */
+class CodeCursor : public UndoMarker {
+ public:
+  CodeCursor(CodeBlock& cb, CodeAddress newFrontier) : UndoMarker(cb) {
+    cb.setFrontier(newFrontier);
+  }
+
+  ~CodeCursor() { undo(); }
+};
 }
 
 #endif

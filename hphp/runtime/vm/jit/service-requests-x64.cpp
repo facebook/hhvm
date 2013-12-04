@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 
+#include "folly/Optional.h"
+
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -29,7 +31,6 @@
 namespace HPHP { namespace JIT { namespace X64 {
 
 using Transl::ConditionCode;
-using Transl::CodeCursor;
 using Transl::TCA;
 
 TRACE_SET_MOD(servicereq);
@@ -58,7 +59,7 @@ void emitBindJ(CodeBlock& cb, CodeBlock& stubs,
 
   Asm a { cb };
   if (cb.base() == stubs.base()) {
-    CodeCursor cursor(a, toSmash);
+    CodeCursor cursor(cb, toSmash);
     emitJmpOrJcc(a, cc, sr);
   } else {
     emitJmpOrJcc(a, cc, sr);
@@ -192,9 +193,9 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   /*
    * Remember previous state of the code cache.
    */
-  boost::optional<CodeCursor> maybeCc = boost::none;
+  folly::Optional<CodeCursor> maybeCc = folly::none;
   if (start != as.frontier()) {
-    maybeCc = boost::in_place<CodeCursor>(boost::ref(as), start);
+    maybeCc.emplace(cb, start);
   }
 
   /* max space for moving to align, saving VM regs plus emitting args */

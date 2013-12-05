@@ -249,13 +249,13 @@ public:
 
   ~RequestInjectionData();
 
-  inline volatile ssize_t* getConditionFlags() {
+  inline std::atomic<ssize_t>* getConditionFlags() {
     assert(cflagsPtr);
     return cflagsPtr;
   }
 
-  ssize_t* cflagsPtr;  // this points to the real condition flags,
-                       // somewhere in the thread's targetcache
+  std::atomic<ssize_t>* cflagsPtr;  // this points to the real condition flags,
+                                    // somewhere in the thread's targetcache
 
  private:
 #ifndef __APPLE__

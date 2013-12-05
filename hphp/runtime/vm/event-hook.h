@@ -21,12 +21,14 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/base/rds.h"
 
+#include <atomic>
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
 inline bool checkConditionFlags() {
-  return atomic_acquire_load(&RDS::header()->conditionFlags);
+  return RDS::header()->conditionFlags.load(std::memory_order_acquire);
 }
 
 //////////////////////////////////////////////////////////////////////

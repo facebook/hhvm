@@ -794,6 +794,7 @@ PDOMySqlStatement::PDOMySqlStatement(PDOMySqlConnection *conn, MYSQL *server)
       m_num_params(0), m_params(NULL), m_in_null(NULL), m_in_length(NULL),
       m_bound_result(NULL), m_out_null(NULL), m_out_length(NULL),
       m_params_given(0), m_max_length(0) {
+  this->dbh = conn;
 }
 
 PDOMySqlStatement::~PDOMySqlStatement() {

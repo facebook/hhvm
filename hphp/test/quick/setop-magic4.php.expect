@@ -1,0 +1,6 @@
+string(4) "blah"
+object(Whatever)#1 (1) {
+  ["blah"]=>
+  int(13)
+}
+int(13)

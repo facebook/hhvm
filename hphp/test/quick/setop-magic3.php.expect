@@ -1,0 +1,10 @@
+string(11) "getter: asd"
+string(11) "getter: foo"
+Dtor
+object(Foo)#1 (2) {
+  ["foo"]=>
+  int(24)
+  ["asd"]=>
+  int(12)
+}
+Done

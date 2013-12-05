@@ -1042,6 +1042,11 @@ namespace {
  * property getters aren't going to recurse, we optimize for the case
  * where only a single getter is active.  If it recurses again, we
  * promote to a hash set to track all the information needed.
+ *
+ * The various invokeFoo functions are the entry points here.  They
+ * require that the appropriate ObjectData::Attribute has been checked
+ * first, and return false if they refused to run the magic method due
+ * to a recursion error.
  */
 
 struct PropAccessInfo {
@@ -1367,10 +1372,10 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
                                   Cell* val) {
   bool visible, accessible, unset;
   auto propVal = getProp(ctx, key, visible, accessible, unset);
+
   if (visible && accessible) {
-    assert(propVal);
     if (unset && getAttribute(UseGet)) {
-      TypedValue tvResult = make_tv<KindOfUninit>();
+      auto tvResult = make_tv<KindOfUninit>();
       if (invokeGet(&tvResult, key)) {
         SETOP_BODY(&tvResult, op, val);
         if (getAttribute(UseSet)) {
@@ -1379,11 +1384,9 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
           TypedValue ignored;
           if (invokeSet(&ignored, key, &tvRef)) {
             tvRefcountedDecRef(&ignored);
-            propVal = &tvRef;
-            return propVal;
-          } else {
-            tvRef.m_type = KindOfUninit;
+            return &tvRef;
           }
+          tvRef.m_type = KindOfUninit;
         }
         cellDup(*tvToCell(&tvResult), *propVal);
         return propVal;
@@ -1395,65 +1398,73 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
     return propVal;
   }
 
-  assert(!accessible);
-  if (visible) {
-    assert(propVal);
-    if (!getAttribute(UseGet) || !getAttribute(UseSet)) {
-      raise_error("Cannot access protected property");
-    }
-    // Fall through to the last case below
-  } else if (UNLIKELY(!*key->data())) {
-    throw_invalid_property_name(StrNR(key));
-  } else if (!getAttribute(UseGet)) {
-define_dynamic:
-    propVal = reinterpret_cast<TypedValue*>(
-      &reserveProperties().lval(StrNR(key))
-    );
-    // don't write propVal->m_aux because it holds data
-    // owned by the HphpArray
-    propVal->m_type = KindOfNull;
-    SETOP_BODY_CELL(propVal, op, val);
-    return propVal;
-  } else if (!getAttribute(UseSet)) {
+  if (UNLIKELY(!*key->data())) throw_invalid_property_name(StrNR(key));
+
+  auto const useSet = getAttribute(UseSet);
+  auto const useGet = getAttribute(UseGet);
+
+  if (useGet && !useSet) {
     auto tvResult = make_tv<KindOfNull>();
     // If invokeGet fails due to recursion, it leaves the KindOfNull.
     invokeGet(&tvResult, key);
+
+    // Note: the tvUnboxIfNeeded comes *after* the setop on purpose
+    // here, even though it comes before the IncDecOp in the analagous
+    // situation in incDecProp.  This is to match zend 5.5 behavior.
     SETOP_BODY(&tvResult, op, val);
+    tvUnboxIfNeeded(&tvResult);
+
+    if (visible) raise_error("Cannot access protected property");
     propVal = reinterpret_cast<TypedValue*>(
       &reserveProperties().lval(StrNR(key))
     );
-    // don't write propVal->m_aux because it holds data
-    // owned by the HphpArray
-    //
-    // TODO(#3322743): inspect whether this should be doing tvSet---it
-    // appears to leak the old reference.
-    propVal->m_data.num = tvResult.m_data.num;
-    propVal->m_type = tvResult.m_type;
+
+    // Normally this code path is defining a new dynamic property, but
+    // unlike the non-magic case below, we may have already created it
+    // under the recursion into invokeGet above, so we need to do a
+    // tvSet here.
+    tvSet(tvResult, *propVal);
     return propVal;
   }
 
-  assert(!accessible);
-  assert(getAttribute(UseGet) && getAttribute(UseSet));
-  if (!invokeGet(&tvRef, key)) {
-    goto define_dynamic;
+  if (useGet && useSet) {
+    if (invokeGet(&tvRef, key)) {
+      // Matching zend again: incDecProp does an unbox before the
+      // operation, but setop doesn't need to here.  (We'll unbox the
+      // value that gets passed to the magic setter, though, since
+      // __set functions can't take parameters by reference.)
+      SETOP_BODY(&tvRef, op, val);
+      TypedValue ignored;
+      if (invokeSet(&ignored, key, &tvRef)) {
+        tvRefcountedDecRef(&ignored);
+      }
+      return &tvRef;
+    }
   }
-  SETOP_BODY(&tvRef, op, val);
-  TypedValue ignored;
-  if (invokeSet(&ignored, key, &tvRef)) {
-    tvRefcountedDecRef(&ignored);
-  }
-  propVal = &tvRef;
+
+  if (visible) raise_error("Cannot access protected property");
+
+  // No visible/accessible property, and no applicable magic method:
+  // create a new dynamic property.  (We know this is a new property,
+  // or it would've hit the visible && accessible case above.)
+  propVal = reinterpret_cast<TypedValue*>(
+    &reserveProperties().lval(StrNR(key))
+  );
+  assert(propVal->m_type == KindOfNull); // cannot exist yet
+  SETOP_BODY_CELL(propVal, op, val);
   return propVal;
 }
 
 template <bool setResult>
-void ObjectData::incDecPropImpl(TypedValue& tvRef, Class* ctx,
-                                unsigned char op, const StringData* key,
-                                TypedValue& dest) {
+void ObjectData::incDecProp(TypedValue& tvRef,
+                            Class* ctx,
+                            unsigned char op,
+                            const StringData* key,
+                            TypedValue& dest) {
   bool visible, accessible, unset;
   auto propVal = getProp(ctx, key, visible, accessible, unset);
+
   if (visible && accessible) {
-    assert(propVal);
     auto tvResult = make_tv<KindOfUninit>();
     if (unset && getAttribute(UseGet) && invokeGet(&tvResult, key)) {
       IncDecBody<setResult>(op, &tvResult, &dest);
@@ -1464,76 +1475,72 @@ void ObjectData::incDecPropImpl(TypedValue& tvRef, Class* ctx,
       } else {
         memcpy(propVal, &tvResult, sizeof(TypedValue));
       }
-    } else {
-      IncDecBody<setResult>(op, propVal, &dest);
+      return;
     }
-    return;
-  }
 
-  assert(!accessible);
-  if (visible) {
-    assert(propVal);
-    if (!getAttribute(UseGet) || !getAttribute(UseSet)) {
-      raise_error("Cannot access protected property");
-    }
-    // Fall through to the last case below
-  } else if (UNLIKELY(!*key->data())) {
-    throw_invalid_property_name(StrNR(key));
-  } else if (!getAttribute(UseGet)) {
-define_dynamic:
-    propVal = reinterpret_cast<TypedValue*>(
-      &reserveProperties().lval(StrNR(key))
-    );
-    // don't write propVal->m_aux because it holds data
-    // owned by the HphpArray
-    propVal->m_type = KindOfNull;
     IncDecBody<setResult>(op, propVal, &dest);
     return;
-  } else if (!getAttribute(UseSet)) {
+  }
+
+  if (UNLIKELY(!*key->data())) throw_invalid_property_name(StrNR(key));
+
+  auto const useSet = getAttribute(UseSet);
+  auto const useGet = getAttribute(UseGet);
+
+  if (useGet && !useSet) {
     auto tvResult = make_tv<KindOfNull>();
-    // If invokeGet fails due to recursion, leave the KindOfNull in
-    // tvResult.
+    // If invokeGet fails due to recursion, it leaves the KindOfNull
+    // in tvResult.
     invokeGet(&tvResult, key);
+    tvUnboxIfNeeded(&tvResult);
     IncDecBody<setResult>(op, &tvResult, &dest);
+    if (visible) raise_error("Cannot access protected property");
     propVal = reinterpret_cast<TypedValue*>(
       &reserveProperties().lval(StrNR(key))
     );
-    // don't write propVal->m_aux because it holds data
-    // owned by the HphpArray
-    //
-    // TODO(#3322743): inspect whether this should be doing tvSet.  It
-    // appears to be leaking the reference.
-    propVal->m_data.num = tvResult.m_data.num;
-    propVal->m_type = tvResult.m_type;
+
+    // Normally this code path is defining a new dynamic property, but
+    // unlike the non-magic case below, we may have already created it
+    // under the recursion into invokeGet above, so we need to do a
+    // tvSet here.
+    tvSet(tvResult, *propVal);
     return;
   }
 
-  assert(!accessible);
-  assert(getAttribute(UseGet) && getAttribute(UseSet));
-  if (!invokeGet(&tvRef, key)) {
-    goto define_dynamic;
+  if (useGet && useSet) {
+    if (invokeGet(&tvRef, key)) {
+      tvUnboxIfNeeded(&tvRef);
+      IncDecBody<setResult>(op, &tvRef, &dest);
+      TypedValue ignored;
+      if (invokeSet(&ignored, key, &tvRef)) {
+        tvRefcountedDecRef(&ignored);
+      }
+      return;
+    }
   }
-  IncDecBody<setResult>(op, &tvRef, &dest);
-  TypedValue ignored;
-  if (invokeSet(&ignored, key, &tvRef)) {
-    tvRefcountedDecRef(&ignored);
-  }
-  propVal = &tvRef;
+
+  if (visible) raise_error("Cannot access protected property");
+
+  // No visible/accessible property, and no applicable magic method:
+  // create a new dynamic property.  (We know this is a new property,
+  // or it would've hit the visible && accessible case above.)
+  propVal = reinterpret_cast<TypedValue*>(
+    &reserveProperties().lval(StrNR(key))
+  );
+  assert(propVal->m_type == KindOfNull); // cannot exist yet
+  IncDecBody<setResult>(op, propVal, &dest);
 }
 
-template <>
-void ObjectData::incDecProp<false>(TypedValue& tvRef, Class* ctx,
-                                   unsigned char op, const StringData* key,
-                                   TypedValue& dest) {
-  incDecPropImpl<false>(tvRef, ctx, op, key, dest);
-}
-
-template <>
-void ObjectData::incDecProp<true>(TypedValue& tvRef, Class* ctx,
-                                  unsigned char op, const StringData* key,
-                                  TypedValue& dest) {
-  incDecPropImpl<true>(tvRef, ctx, op, key, dest);
-}
+template void ObjectData::incDecProp<true>(TypedValue&,
+                                           Class*,
+                                           unsigned char,
+                                           const StringData*,
+                                           TypedValue&);
+template void ObjectData::incDecProp<false>(TypedValue&,
+                                            Class*,
+                                            unsigned char,
+                                            const StringData*,
+                                            TypedValue&);
 
 void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;

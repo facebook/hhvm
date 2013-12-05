@@ -423,11 +423,6 @@ class ObjectData {
                bool bindingAssignment = false);
   TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, unsigned char op,
                         const StringData* key, Cell* val);
- private:
-  template <bool setResult>
-  void incDecPropImpl(TypedValue& tvRef, Class* ctx, unsigned char op,
-                      const StringData* key, TypedValue& dest);
- public:
   template <bool setResult>
   void incDecProp(TypedValue& tvRef, Class* ctx, unsigned char op,
                   const StringData* key, TypedValue& dest);

@@ -509,7 +509,9 @@ inline bool tvIsString(const TypedValue* tv) {
   return (tv->m_type & KindOfStringBit) != 0;
 }
 
-void tvUnboxIfNeeded(TypedValue* tv);
+inline void tvUnboxIfNeeded(TypedValue* tv) {
+  if (tv->m_type == KindOfRef) tvUnbox(tv);
+}
 
 /*
  * TypedValue conversions that update the tv in place (decrefing and

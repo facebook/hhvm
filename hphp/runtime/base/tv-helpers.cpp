@@ -96,12 +96,6 @@ bool tvDecRefWillRelease(TypedValue* tv) {
   return !tv->m_data.pstr->hasMultipleRefs();
 }
 
-void tvUnboxIfNeeded(TypedValue *tv) {
-  if (tv->m_type == KindOfRef) {
-    tvUnbox(tv);
-  }
-}
-
 void tvCastToBooleanInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);

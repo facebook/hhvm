@@ -87,6 +87,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     if (instrIsNonCallControlFlow(*pc) && !atLast) {
       markBlock(nextOff);
     }
+
     if (isSwitch(*pc)) {
       foreachSwitchTarget(pc, [&] (Offset delta) {
         markBlock(offset + delta);
@@ -139,17 +140,40 @@ struct ExnTreeInfo {
   std::map<const EHEnt*,borrowed_ptr<php::ExnNode>> ehMap;
 
   /*
-   * Fault funclets don't actually fall in the EHEnt region for their
-   * parent handlers in HHBC.  However, we want edges from the fault
-   * funclets to any enclosing catch blocks (or other enclosing
-   * funclet blocks).
+   * Fault funclets don't actually fall in the EHEnt region for all of
+   * their parent handlers in HHBC.  There may be EHEnt regions
+   * covering the fault funclet, but if an exception occurs in the
+   * funclet it can also propagate to any EH region from the code that
+   * entered the funclet.  We want factored exit edges from the fault
+   * funclets to any of these enclosing catch blocks (or other
+   * enclosing funclet blocks).
    *
-   * For each funclet head, this records the ExnNode that points to
-   * this funclet, which we will propagate to the whole funclet in
-   * find_fault_funclets.
+   * Moreover, funclet offsets can be entered from multiple protected
+   * regions, so we need to keep a map of all the possible regions
+   * that could have entered a given funclet, so we can add exit edges
+   * to all their parent EHEnt handlers.
    */
-  std::map<borrowed_ptr<php::Block>,borrowed_ptr<php::ExnNode>>
+  std::map<borrowed_ptr<php::Block>,std::vector<borrowed_ptr<php::ExnNode>>>
     funcletNodes;
+
+  /*
+   * Keep track of the start offsets for all fault funclets.  This is
+   * used to find the extents of each handler for find_fault_funclets.
+   * It is assumed that each fault funclet handler extends from its
+   * entry offset until the next fault funclet entry offset (or end of
+   * the function).
+   *
+   * This relies on the following bytecode invariants:
+   *
+   *   - All fault funclets come after the primary function body.
+   *
+   *   - Each fault funclet is a contiguous region of bytecode that
+   *     does not jump into other fault funclets or into the primary
+   *     function body.
+   *
+   *   - Nothing comes after the fault funclets.
+   */
+  std::set<Offset> faultFuncletStarts;
 };
 
 template<class FindBlock>
@@ -157,8 +181,7 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
                            php::Func& func,
                            FindBlock findBlock) {
   ExnTreeInfo ret;
-
-  uint32_t nextExnNode = 0;
+  auto nextExnNode = uint32_t{0};
 
   for (auto& eh : fe.ehtab()) {
     auto node = folly::make_unique<php::ExnNode>();
@@ -169,17 +192,8 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
     case EHEnt::Type::Fault:
       {
         auto const fault = findBlock(eh.m_fault);
-        assert(ret.funcletNodes[fault] == nullptr);
-        ret.funcletNodes[fault] = borrow(node);
-
-        /*
-         * We know the block for this offset starts a fault funclet,
-         * but we won't know its extents until we've built the cfg and
-         * can look at the control flow in the funclet.  Set the block
-         * type to Fault for now, but we won't propagate the value to
-         * the rest of the funclet blocks until find_fault_funclets.
-         */
-        fault->kind = php::Block::Kind::Fault;
+        ret.funcletNodes[fault].push_back(borrow(node));
+        ret.faultFuncletStarts.insert(eh.m_fault);
         node->info = php::FaultRegion { fault, eh.m_iterId, eh.m_itRef };
       }
       break;
@@ -188,7 +202,6 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
         auto treg = php::TryRegion {};
         for (auto& centry : eh.m_catches) {
           auto const catchBlk = findBlock(centry.second);
-          catchBlk->kind = php::Block::Kind::CatchEntry;
           treg.catches.emplace_back(
             fe.ue().lookupLitstr(centry.first),
             catchBlk
@@ -210,6 +223,8 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
       func.exnNodes.emplace_back(std::move(node));
     }
   }
+
+  ret.faultFuncletStarts.insert(fe.past());
 
   return ret;
 }
@@ -248,52 +263,54 @@ void add_factored_exits(php::Block& blk,
 }
 
 /*
- * Coming into this routine, we have set the block type to
- * Block::Kind::Fault on the head of each funclet, but it hasn't been
- * set on the rest of the funclet.  We also don't have factoredExits
- * from the funclet blocks to any enclosing catch handlers.
- *
- * Fault funclets may have internal control flow, but may not jump
- * into to other funclets or back into the main function body.  All
- * control flow paths through the funclet exit in blocks that end with
- * Unwind instructions.  This means if you propagate forward in RPO,
- * stopping when you see blocks that contain Unwind, the state will
- * get to the whole funclet.
- *
- * This routine propagates the block type and adds factored exits
- * along all control flow paths from the funclet head until reaching
- * an Unwind instruction.  If there were unreachable blocks in a fault
- * funclet, or if the funclet head is unreachable, they will not be
- * tagged.
+ * Locate all the basic blocks associated with fault funclets, and
+ * mark them as such.  Also, add factored exit edges for exceptional
+ * control flow through any parent protected regions of the region(s)
+ * that pointed at each fault handler.
  */
-void find_fault_funclets(ExnTreeInfo& tinfo, const php::Func& func) {
-  auto propagate = [&] (borrowed_ptr<php::Block> blk) {
-    if (blk->kind != php::Block::Kind::Fault) return;
+template<class BlockStarts, class FindBlock>
+void find_fault_funclets(ExnTreeInfo& tinfo,
+                         const php::Func& func,
+                         const BlockStarts& blockStarts,
+                         FindBlock findBlock) {
+  auto sectionId = uint32_t{1};
 
-    auto factoredIt = tinfo.funcletNodes.find(blk);
-    assert(factoredIt != end(tinfo.funcletNodes));
-    assert(blk->factoredExits.empty());
+  for (auto funcletStartIt = begin(tinfo.faultFuncletStarts);
+      boost::next(funcletStartIt) != end(tinfo.faultFuncletStarts);
+      ++funcletStartIt, ++sectionId) {
+    auto const nextFunclet = *boost::next(funcletStartIt);
 
-    // Propagate the exit edges to the containing fault/try handlers,
-    // if there were any.
-    add_factored_exits(*blk, factoredIt->second->parent);
+    auto offIt = blockStarts.find(*funcletStartIt);
+    assert(offIt != end(blockStarts));
 
-    // If this block ends with Unwind, don't propagate the fault
-    // funclet-ness to its successors.
-    if (ends_with_unwind(*blk)) return;
+    auto const firstBlk  = findBlock(*offIt);
+    auto const funcletIt = tinfo.funcletNodes.find(firstBlk);
+    assert(funcletIt != end(tinfo.funcletNodes));
+    assert(!funcletIt->second.empty());
 
-    // Propagate the state.  Fault funclets may have internal back
-    // edges but it's harmless to propagate this to an already-visited
-    // Block.
-    forEachNormalSuccessor(*blk, [&] (php::Block& b) {
-      b.kind = php::Block::Kind::Fault;
-      tinfo.funcletNodes[&b] = factoredIt->second;
-    });
-  };
+    do {
+      auto const blk = findBlock(*offIt);
+      blk->section   = static_cast<php::Block::Section>(sectionId);
 
-  // Iterate starting with the DV entries, in case a fault funclet is
-  // only reachable from a DV entry.
-  for (auto& blk : rpoSortAddDVs(func)) propagate(blk);
+      // Propagate the exit edges to the containing fault/try handlers,
+      // if there were any.
+      for (auto& node : funcletIt->second) {
+        add_factored_exits(*blk, node->parent);
+      }
+
+      // Fault funclets can have protected regions which may point to
+      // handlers that are also listed in parents of the EH-region that
+      // targets the funclet.  This means we might have duplicate
+      // factored exits now, so we need to remove them.
+      std::sort(begin(blk->factoredExits), end(blk->factoredExits));
+      blk->factoredExits.erase(
+        std::unique(begin(blk->factoredExits), end(blk->factoredExits)),
+        end(blk->factoredExits)
+      );
+
+      ++offIt;
+    } while (offIt != end(blockStarts) && *offIt < nextFunclet);
+  }
 }
 
 template<class T> T decode(PC& pc) {
@@ -533,7 +550,7 @@ void populate_block(ParseUnitState& puState,
    */
   if (blk.hhbcs.back().op == Op::Jmp) {
     blk.fallthrough = blk.hhbcs.back().Jmp.target;
-    blk.hhbcs.back() = bc::Nop{};
+    blk.hhbcs.back() = bc_with_loc(blk.hhbcs.back().srcLoc, bc::Nop{});
   }
 }
 
@@ -574,7 +591,7 @@ void build_cfg(ParseUnitState& puState,
     if (!ptr) {
       ptr               = folly::make_unique<php::Block>();
       ptr->id           = func.nextBlockId++;
-      ptr->kind         = php::Block::Kind::Normal;
+      ptr->section      = php::Block::Section::Main;
       ptr->exnNode      = nullptr;
     }
     return borrow(ptr);
@@ -600,7 +617,7 @@ void build_cfg(ParseUnitState& puState,
   }
 
   link_entry_points(func, fe, findBlock);
-  find_fault_funclets(exnTreeInfo, func);
+  find_fault_funclets(exnTreeInfo, func, blockStarts, findBlock);
 
   for (auto& kv : blockMap) {
     func.blocks.emplace_back(std::move(kv.second));

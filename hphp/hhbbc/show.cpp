@@ -93,7 +93,7 @@ namespace php {
 std::string show(const Block& block) {
   std::string ret;
 
-  if (block.kind == php::Block::Kind::Fault) {
+  if (block.section != php::Block::Section::Main) {
     folly::toAppend("(fault funclet)\n", &ret);
   }
 

@@ -62,11 +62,12 @@ struct EmitUnitState {
  *   - The "primary function body" must come first.  This is all blocks
  *     that aren't part of a fault funclet.
  *
- *   - Each funclet must have all of its block contiguous, with the
+ *   - Each funclet must have all of its blocks contiguous, with the
  *     entry block first.
  *
- *   - DV init entry points must fall through into each other, the final
- *     one makes a backward jump to the main entry point.
+ *   - DV init entry points must fall through into each other, the
+ *     final one makes a backward jump to the main entry point.
+ *     TODO(#3116551): relax this rule
  *
  *   - Main entry point must be the first block.
  */
@@ -78,19 +79,26 @@ std::vector<borrowed_ptr<php::Block>> order_blocks(const php::Func& f) {
     if (p.dvEntryPoint) sorted.push_back(p.dvEntryPoint);
   }
 
-  // The stable partition will keep the DV init entries after all
-  // other main code, and move fault funclets after all that.
-  std::stable_partition(
+  // The stable sort will keep the DV init entries after all other
+  // main code, and move fault funclets after all that.
+  std::stable_sort(
     begin(sorted), end(sorted),
-    [&] (borrowed_ptr<php::Block> b) {
-      return b->kind != php::Block::Kind::Fault;
+    [&] (borrowed_ptr<php::Block> a, borrowed_ptr<php::Block> b) {
+      using T = std::underlying_type<php::Block::Section>::type;
+      return static_cast<T>(a->section) < static_cast<T>(b->section);
     }
   );
 
   FTRACE(2, "      block order:{}\n",
     [&] {
       std::string ret;
-      for (auto& b : sorted) ret += " " + folly::to<std::string>(b->id);
+      for (auto& b : sorted) {
+        ret += " ";
+        if (b->section != php::Block::Section::Main) {
+          ret += "f";
+        }
+        ret += folly::to<std::string>(b->id);
+      }
       return ret;
     }()
   );

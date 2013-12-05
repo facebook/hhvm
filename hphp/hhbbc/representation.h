@@ -61,12 +61,16 @@ struct SrcInfo {
  */
 struct Block {
   /*
-   * Kind indicates whether a block is part of a fault funclet, or is
-   * a catch entry block.  The Fault kind is only set on reachable
-   * funclet blocks.
+   * Blocks in HHBC are each part of a bytecode "section".  The section
+   * is either the "primary function body", or a fault funclet.  We
+   * represent fault funclet sections with unique ids.
+   *
+   * Each section must be a contiguous region of bytecode, with the
+   * primary function body first.  These ids are tracked just to
+   * maintain this invariant at emit time.
    */
-  enum class Kind : uint32_t { Normal, CatchEntry, Fault };
-  Kind kind;
+  enum class Section : uint32_t { Main = 0 };
+  Section section;
 
   /*
    * Blocks have unique ids within a given function.
@@ -108,11 +112,11 @@ struct Block {
 /*
  * Exception regions.
  *
- * Each block in the main program body (i.e. excluding fault funclets)
- * can have a pointer to a node in the exception handler tree.  This
- * means they are in all the "exception regions" for each node in the
- * tree down to that node.  This information is used to construct
- * exception handling regions at emit time.
+ * Each block in the program body can have a pointer to a node in the
+ * exception handler tree.  This means they are in all the "exception
+ * regions" for each node in the tree down to that node.  This
+ * information is used to construct exception handling regions at emit
+ * time.
  *
  * There are two types of regions; TryRegions and FaultRegions.  These
  * correspond to the two types of regions described in
@@ -126,11 +130,12 @@ struct Block {
  * exists to get the EHEnts right.
  *
  * Note: blocks in fault funclets will have factored edges to the
- * blocks listed as handlers in any containing ExnNodes, since those
- * control flow paths are possible, but will have nullptr for their
- * exnNode pointers.  This is because the way HHBC metadata is
- * specified, the fault funclets must not actually appear in the
- * offset range for any containing exception regions.
+ * blocks listed as handlers in any ExnNode that contained the
+ * fault-protected region, since those control flow paths are
+ * possible.  Generally they will have nullptr for their exnNode
+ * pointers, however, although they may also have other EH-protected
+ * regions inside of them (this currently occurs in the case of
+ * php-level finally blocks cloned into fault funclets).
  */
 
 struct FaultRegion { borrowed_ptr<Block> faultEntry;

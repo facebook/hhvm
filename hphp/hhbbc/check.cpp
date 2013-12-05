@@ -41,23 +41,6 @@ bool checkBlock(const php::Block& b) {
     });
   }
 
-  for (DEBUG_ONLY auto& factored : b.factoredExits) {
-    assert(factored->kind == php::Block::Kind::CatchEntry ||
-           factored->kind == php::Block::Kind::Fault);
-  }
-
-  switch (b.kind) {
-  case php::Block::Kind::Fault:
-    // Fault funclets do not point to exception nodes, since their
-    // bytecode will not be in the protected offset range.
-    assert(b.exnNode == nullptr);
-    break;
-  case php::Block::Kind::CatchEntry:
-    break;
-  case php::Block::Kind::Normal:
-    break;
-  }
-
   // The factored exit list contains unique elements.
   std::set<borrowed_ptr<const php::Block>> exitSet;
   std::copy(begin(b.factoredExits), end(b.factoredExits),
@@ -121,7 +104,9 @@ void checkExnTreeBasic(boost::dynamic_bitset<>& seenIds,
                        borrowed_ptr<const ExnNode> node,
                        borrowed_ptr<const ExnNode> expectedParent) {
   // All exnNode ids must be unique.
-  seenIds.resize(node->id + 1);
+  if (seenIds.size() < node->id + 1) {
+    seenIds.resize(node->id + 1);
+  }
   assert(!seenIds[node->id]);
   seenIds[node->id] = true;
 
@@ -134,17 +119,21 @@ void checkExnTreeBasic(boost::dynamic_bitset<>& seenIds,
   }
 }
 
-void checkFaultEntryRec(const boost::dynamic_bitset<>& reachableSet,
+void checkFaultEntryRec(boost::dynamic_bitset<>& seenBlocks,
                         const php::Block& faultEntry,
                         const php::ExnNode& exnNode) {
-  // The fault entry must always have been marked as a Fault block,
-  // even if it wasn't reachable.
-  assert(faultEntry.kind == php::Block::Kind::Fault);
+  // Loops in fault funclets could cause us to revisit the same block,
+  // so we track the ones we've seen.
+  if (seenBlocks.size() < faultEntry.id + 1) {
+    seenBlocks.resize(faultEntry.id + 1);
+  }
+  if (seenBlocks[faultEntry.id]) return;
+  seenBlocks[faultEntry.id] = true;
 
-  // Sometimes even a fault funclet entry is completely unreachable.
-  // In this case the rest of the assertions do not apply.  (See
-  // find_fault_funclets in parse.cpp.)
-  if (!reachableSet[faultEntry.id]) return;
+  /*
+   * All funclets aren't in the main section.
+   */
+  assert(faultEntry.section != php::Block::Section::Main);
 
   /*
    * The fault blocks should all have factored exits to parent
@@ -167,28 +156,27 @@ void checkFaultEntryRec(const boost::dynamic_bitset<>& reachableSet,
     );
   }
 
-  if (ends_with_unwind(faultEntry)) return;
+  // Note: right now we're only asserting about normal successors, but
+  // there can be exception-only successors for catch blocks inside of
+  // fault funclets for finally handlers.  (Just going un-asserted for
+  // now.)
   forEachNormalSuccessor(faultEntry, [&] (const php::Block& succ) {
-    checkFaultEntryRec(reachableSet, succ, exnNode);
+    checkFaultEntryRec(seenBlocks, succ, exnNode);
   });
 }
 
-void checkExnTreeMore(const boost::dynamic_bitset<>& reachableSet,
-                      borrowed_ptr<const ExnNode> node) {
-  // All catch entries and fault entries have a few things to assert.
+void checkExnTreeMore(borrowed_ptr<const ExnNode> node) {
+  // Fault entries have a few things to assert.
   match<void>(
     node->info,
     [&] (const FaultRegion& fr) {
-      checkFaultEntryRec(reachableSet, *fr.faultEntry, *node);
+      boost::dynamic_bitset<> seenBlocks;
+      checkFaultEntryRec(seenBlocks, *fr.faultEntry, *node);
     },
-    [&] (const TryRegion& tr) {
-      for (DEBUG_ONLY auto& kv : tr.catches) {
-        assert(kv.second->kind == php::Block::Kind::CatchEntry);
-      }
-    }
+    [&] (const TryRegion& tr) {}
   );
 
-  for (auto& c : node->children) checkExnTreeMore(reachableSet, borrow(c));
+  for (auto& c : node->children) checkExnTreeMore(borrow(c));
 }
 
 bool checkExnTree(const php::Func& f) {
@@ -198,18 +186,9 @@ bool checkExnTree(const php::Func& f) {
   // ExnNode ids are contiguous.
   for (size_t i = 0; i < seenIds.size(); ++i) assert(seenIds[i] == true);
 
-  // Some of the assertions below only apply to reachable blocks.
-  //
-  // NB. this will claim blocks from internal control flow in a DV
-  // entry are unreachable.  The bytecode.spec basically bans control
-  // flow in a DV entry right now, but we may eventually want to lift
-  // that restriction.
-  boost::dynamic_bitset<> reachableBlocks(f.blocks.size());
-  for (auto& b : rpoSortAddDVs(f)) reachableBlocks[b->id] = true;
-
   // The following assertions come after the above, because if the
   // tree is totally clobbered it's easy for the wrong ones to fire.
-  for (auto& n : f.exnNodes) checkExnTreeMore(reachableBlocks, borrow(n));
+  for (auto& n : f.exnNodes) checkExnTreeMore(borrow(n));
   return true;
 }
 

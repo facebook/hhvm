@@ -86,7 +86,7 @@ FastCGIConnection::FastCGIConnection(
   : SocketConnection(std::move(sock), localAddr, peerAddr),
     m_server(server) {
   m_eventBase = m_server->getEventBaseManager()->getExistingEventBase();
-  DCHECK(m_eventBase != nullptr);
+  assert(m_eventBase != nullptr);
   m_sock->setReadCallback(this);
   m_session.setCallback(this);
 }
@@ -156,7 +156,7 @@ void FastCGIConnection::setMaxRequests(int max_requests) {
 }
 
 void FastCGIConnection::handleRequest(int transport_id) {
-  DCHECK(m_transports.count(transport_id));
+  assert(m_transports.count(transport_id));
   m_server->handleRequest(m_transports[transport_id]);
   m_transports.erase(transport_id);
 }

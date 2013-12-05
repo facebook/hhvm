@@ -31,7 +31,7 @@ Statement::Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS)
   : Construct(scope, loc),
     m_kindOf(kindOf),
     m_labelScope(labelScope) {
-  DCHECK(m_labelScope != nullptr);
+  assert(m_labelScope != nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

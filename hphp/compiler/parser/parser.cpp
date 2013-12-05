@@ -250,9 +250,9 @@ void Parser::completeScope(BlockScopePtr inner) {
 }
 
 LabelScopePtr Parser::getLabelScope() const {
-  DCHECK(!m_labelScopes.empty());
-  DCHECK(!m_labelScopes.back().empty());
-  DCHECK(m_labelScopes.back().back() != nullptr);
+  assert(!m_labelScopes.empty());
+  assert(!m_labelScopes.back().empty());
+  assert(m_labelScopes.back().back() != nullptr);
   return m_labelScopes.back().back();
 }
 
@@ -260,14 +260,14 @@ void Parser::onNewLabelScope(bool fresh) {
   if (fresh) {
     m_labelScopes.push_back(LabelScopePtrVec());
   }
-  DCHECK(!m_labelScopes.empty());
+  assert(!m_labelScopes.empty());
   LabelScopePtr labelScope(new LabelScope());
   m_labelScopes.back().push_back(labelScope);
 }
 
 void Parser::onScopeLabel(const Token& stmt, const Token& label) {
-  DCHECK(!m_labelScopes.empty());
-  DCHECK(!m_labelScopes.back().empty());
+  assert(!m_labelScopes.empty());
+  assert(!m_labelScopes.back().empty());
   for (auto& scope : m_labelScopes.back()) {
     scope->addLabel(stmt.stmt, label.text());
   }

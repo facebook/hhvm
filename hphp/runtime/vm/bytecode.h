@@ -526,7 +526,7 @@ struct Fault {
   // The number of EHs that were already examined for this exception.
   // This is used to ensure that the same exception handler is not
   // run twice for the same exception. The unwinder may be entered
-  // multuple times for the same fault as a result of calling Unwind.
+  // multiple times for the same fault as a result of calling Unwind.
   // The field is used to skip through the EHs that were already run.
   int m_handledCount;
 };

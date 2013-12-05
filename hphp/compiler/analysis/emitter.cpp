@@ -1126,7 +1126,7 @@ const int FinallyRouterEntry::Action::k_unsetState = -1;
 
 FinallyRouterEntry::Action::Action(FinallyRouter* router)
   : m_router(router), m_label(), m_state(k_unsetState) {
-  DCHECK(m_router != nullptr);
+  assert(m_router != nullptr);
 }
 
 FinallyRouterEntry::Action::~Action() {
@@ -1143,12 +1143,12 @@ bool FinallyRouterEntry::Action::isAllocated() {
 }
 
 void FinallyRouterEntry::Action::allocate() {
-  DCHECK(!isAllocated());
+  assert(!isAllocated());
   m_state = m_router->allocateState();
 }
 
 void FinallyRouterEntry::Action::release() {
-  DCHECK(isAllocated());
+  assert(isAllocated());
   m_router->releaseState(m_state);
   m_state = k_unsetState;
 }
@@ -1163,7 +1163,7 @@ FinallyRouterEntry::FinallyRouterEntry(FinallyRouter* router,
     m_iterId(-1),
     m_iterRef(false),
     m_parent(parent) {
-  DCHECK(m_router != nullptr);
+  assert(m_router != nullptr);
 }
 
 FinallyRouterEntry::~FinallyRouterEntry() {}
@@ -1191,7 +1191,7 @@ FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerReturn(
     }
     m_returnActions.insert(std::make_pair(sym, action));
   }
-  DCHECK(action != nullptr);
+  assert(action != nullptr);
   if (!action->isAllocated()) {
     action->allocate();
   }
@@ -1200,7 +1200,7 @@ FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerReturn(
     // emitted in the finally epilogue.
     m_finallyCases.insert(action);
   }
-  DCHECK(action->isAllocated());
+  assert(action->isAllocated());
   return action;
 }
 
@@ -1225,7 +1225,7 @@ FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerGoto(
     }
     m_gotoActions.insert(std::make_pair(name, action));
   }
-  DCHECK(action != nullptr);
+  assert(action != nullptr);
   if (alloc) {
     if (!action->isAllocated()) {
       action->allocate();
@@ -1234,7 +1234,7 @@ FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerGoto(
       m_finallyCases.insert(action);
     }
   }
-  DCHECK(!alloc || action->isAllocated());
+  assert(!alloc || action->isAllocated());
   return action;
 }
 
@@ -1266,9 +1266,9 @@ FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerBreak(
   }
   // Should never descend to the bottom of the hierarchy since
   // break is only allowed for loops.
-  DCHECK(m_parent != nullptr);
+  assert(m_parent != nullptr);
   ActionPtr action;
-  DCHECK(depth >= 1);
+  assert(depth >= 1);
   if (m_breakActions.count(depth)) {
     action = m_breakActions[depth];
   } else {
@@ -1289,7 +1289,7 @@ FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerBreak(
     }
     m_breakActions.insert(std::make_pair(depth, action));
   }
-  DCHECK(action != nullptr);
+  assert(action != nullptr);
   if (alloc) {
     if (!action->isAllocated()) {
       action->allocate();
@@ -1298,7 +1298,7 @@ FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerBreak(
       m_finallyCases.insert(action);
     }
   }
-  DCHECK(!alloc || action->isAllocated());
+  assert(!alloc || action->isAllocated());
   return action;
 }
 
@@ -1310,9 +1310,9 @@ FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerContinue(
     throw EmitterVisitor::IncludeTimeFatalException(s,
             "Continue jump is not allowed to leave a finally block");
   }
-  DCHECK(m_parent != nullptr);
+  assert(m_parent != nullptr);
   ActionPtr action;
-  DCHECK(depth >= 1);
+  assert(depth >= 1);
   if (m_continueActions.count(depth)) {
     action = m_continueActions[depth];
   } else {
@@ -1327,7 +1327,7 @@ FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerContinue(
     }
     m_continueActions.insert(std::make_pair(depth, action));
   }
-  DCHECK(action != nullptr);
+  assert(action != nullptr);
   if (alloc) {
     if (!action->isAllocated()) {
       action->allocate();
@@ -1336,7 +1336,7 @@ FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerContinue(
       m_finallyCases.insert(action);
     }
   }
-  DCHECK(!alloc || action->isAllocated());
+  assert(!alloc || action->isAllocated());
   return action;
 }
 
@@ -1362,11 +1362,11 @@ int FinallyRouterEntry::getCaseCount() {
 
 void FinallyRouterEntry::emitIterFree(Emitter& e, IterVec& iters) {
   for (auto& iter : iters) {
-    DCHECK(iter.id != -1);
+    assert(iter.id != -1);
     if (iter.kind == KindOfMIter) {
       e.MIterFree(iter.id);
     } else {
-      DCHECK(iter.kind == KindOfIter);
+      assert(iter.kind == KindOfIter);
       e.IterFree(iter.id);
     }
   }
@@ -1405,9 +1405,8 @@ void FinallyRouterEntry::emitReturnImpl(Emitter& e,
                                         char sym,
                                         IterVec& iters) {
   auto& visitor = e.getEmitterVisitor();
-  auto& evalStack = visitor.getEvalStack();
-  DCHECK(evalStack.size() == 1);
-  DCHECK(m_returnActions.count(sym));
+  assert(visitor.getEvalStack().size() == 1);
+  assert(m_returnActions.count(sym));
   auto& action = m_returnActions[sym];
   if (m_parent == nullptr) {
     // At the top of the hierarchy, no more finally blocks to run.
@@ -1416,7 +1415,7 @@ void FinallyRouterEntry::emitReturnImpl(Emitter& e,
     if (sym == StackSym::C) {
       e.RetC();
     } else {
-      DCHECK(sym == StackSym::V);
+      assert(sym == StackSym::V);
       e.RetV();
     }
   } else if (m_kind == EntryKind::TryFinallyEntry) {
@@ -1426,7 +1425,7 @@ void FinallyRouterEntry::emitReturnImpl(Emitter& e,
     Id retLocal = visitor.getRetLocal();
     // Set the unnamed "state" local to the appropriate identifier
     visitor.emitVirtualLocal(retLocal);
-    DCHECK(action->isAllocated());
+    assert(action->isAllocated());
     e.Int(action->m_state);
     e.SetL(stateLocal);
     e.PopC();
@@ -1445,14 +1444,14 @@ void FinallyRouterEntry::emitReturnImpl(Emitter& e,
       e.SetL(retLocal);
       e.PopC();
     } else {
-      DCHECK(sym == StackSym::V);
+      assert(sym == StackSym::V);
       visitor.popEvalStack(StackSym::V);
       visitor.emitVirtualLocal(retLocal);
       visitor.pushEvalStack(StackSym::V);
       e.BindL(retLocal);
       e.PopV();
     }
-    DCHECK(m_finallyCases.count(action));
+    assert(m_finallyCases.count(action));
     emitIterBreak(e, iters, m_finallyLabel);
   } else {
     if (m_kind == EntryKind::LoopEntry && m_iterId != -1) {
@@ -1474,8 +1473,8 @@ void FinallyRouterEntry::emitGoto(Emitter& e,
 void FinallyRouterEntry::emitGotoImpl(Emitter& e,
                                       StringData* name,
                                       IterVec& iters) {
-  DCHECK(m_kind != EntryKind::FinallyEntry);
-  DCHECK(m_gotoActions.count(name));
+  assert(m_kind != EntryKind::FinallyEntry);
+  assert(m_gotoActions.count(name));
   auto action = m_gotoActions[name];
   if (m_gotoLabels.count(name)) {
     // If only the destination label is within the statement
@@ -1488,11 +1487,11 @@ void FinallyRouterEntry::emitGotoImpl(Emitter& e,
     // Store appropriate value inside the state local.
     Id stateLocal = visitor.getStateLocal();
     visitor.emitVirtualLocal(stateLocal);
-    DCHECK(action->isAllocated());
+    assert(action->isAllocated());
     e.Int(action->m_state);
     e.SetL(stateLocal);
     e.PopC();
-    DCHECK(m_finallyCases.count(action));
+    assert(m_finallyCases.count(action));
     // Jump to the finally block and free any pending iterators on the
     // way.
     emitIterBreak(e, iters, m_finallyLabel);
@@ -1501,7 +1500,7 @@ void FinallyRouterEntry::emitGotoImpl(Emitter& e,
       iters.push_back(IterPair(m_iterRef ? KindOfMIter : KindOfIter,
                                m_iterId));
     }
-    DCHECK(m_parent != nullptr);
+    assert(m_parent != nullptr);
     m_parent->emitGotoImpl(e, name, iters);
   }
 }
@@ -1515,10 +1514,10 @@ void FinallyRouterEntry::emitBreak(Emitter& e,
 void FinallyRouterEntry::emitBreakImpl(Emitter& e,
                                        int depth,
                                        IterVec& iters) {
-  DCHECK(depth >= 1);
-  DCHECK(m_kind != EntryKind::FinallyEntry);
-  DCHECK(m_parent != nullptr);
-  DCHECK(m_breakActions.count(depth));
+  assert(depth >= 1);
+  assert(m_kind != EntryKind::FinallyEntry);
+  assert(m_parent != nullptr);
+  assert(m_breakActions.count(depth));
   auto action = m_breakActions[depth];
   if (m_kind == EntryKind::LoopEntry) {
     // Free iterator for the current loop whether or not
@@ -1539,10 +1538,10 @@ void FinallyRouterEntry::emitBreakImpl(Emitter& e,
   } else if (m_kind == EntryKind::TryFinallyEntry) {
     // Encountered a try block, need to run finally.
     auto& visitor = e.getEmitterVisitor();
-    DCHECK(m_breakActions.count(depth));
+    assert(m_breakActions.count(depth));
     Id stateLocal = visitor.getStateLocal();
     visitor.emitVirtualLocal(stateLocal);
-    DCHECK(action->isAllocated());
+    assert(action->isAllocated());
     e.Int(action->m_state);
     e.SetL(stateLocal);
     e.PopC();
@@ -1562,10 +1561,10 @@ void FinallyRouterEntry::emitContinue(Emitter& e,
 void FinallyRouterEntry::emitContinueImpl(Emitter& e,
                                           int depth,
                                           IterVec& iters) {
-  DCHECK(depth >= 1);
-  DCHECK(m_kind != EntryKind::FinallyEntry);
-  DCHECK(m_parent != nullptr);
-  DCHECK(m_continueActions.count(depth));
+  assert(depth >= 1);
+  assert(m_kind != EntryKind::FinallyEntry);
+  assert(m_parent != nullptr);
+  assert(m_continueActions.count(depth));
   auto action = m_continueActions[depth];
   if (m_kind == EntryKind::LoopEntry) {
     if (depth == 1) {
@@ -1584,10 +1583,10 @@ void FinallyRouterEntry::emitContinueImpl(Emitter& e,
   } else if (m_kind == EntryKind::TryFinallyEntry) {
     // Encountered a try block, need to run finally.
     auto& visitor = e.getEmitterVisitor();
-    DCHECK(m_continueActions.count(depth));
+    assert(m_continueActions.count(depth));
     Id stateLocal = visitor.getStateLocal();
     visitor.emitVirtualLocal(stateLocal);
-    DCHECK(action->isAllocated());
+    assert(action->isAllocated());
     e.Int(action->m_state);
     e.SetL(stateLocal);
     e.PopC();
@@ -1599,11 +1598,11 @@ void FinallyRouterEntry::emitContinueImpl(Emitter& e,
 }
 
 void FinallyRouterEntry::emitFinallySwitch(Emitter& e) {
-  DCHECK(m_router != nullptr);
-  DCHECK(m_kind == EntryKind::TryFinallyEntry);
-  DCHECK(m_finallyLabel.isSet());
+  assert(m_router != nullptr);
+  assert(m_kind == EntryKind::TryFinallyEntry);
+  assert(m_finallyLabel.isSet());
   int count = getCaseCount();
-  DCHECK(count >= 1);
+  assert(count >= 1);
   Label after;
   if (count == 1) {
     // No-op
@@ -1638,20 +1637,20 @@ void FinallyRouterEntry::emitFinallySwitch(Emitter& e) {
 void FinallyRouterEntry::emitCase(Emitter& e,
                                   std::vector<Label*>& cases,
                                   ActionPtr action) {
-  DCHECK(m_kind == EntryKind::TryFinallyEntry);
-  DCHECK(action != nullptr);
-  DCHECK(action->isAllocated());
-  DCHECK(m_finallyCases.count(action));
-  DCHECK(action->m_state < cases.size());
+  assert(m_kind == EntryKind::TryFinallyEntry);
+  assert(action != nullptr);
+  assert(action->isAllocated());
+  assert(m_finallyCases.count(action));
+  assert(action->m_state < cases.size());
   cases[action->m_state]->set(e);
 }
 
 void FinallyRouterEntry::emitReturnCase(Emitter& e,
                                         std::vector<Label*>& cases,
                                         char sym) {
-  DCHECK(m_kind == EntryKind::TryFinallyEntry);
-  DCHECK(m_parent != nullptr);
-  DCHECK(m_returnActions.count(sym));
+  assert(m_kind == EntryKind::TryFinallyEntry);
+  assert(m_parent != nullptr);
+  assert(m_returnActions.count(sym));
   auto& action = m_returnActions[sym];
   emitCase(e, cases, action);
   IterVec iters;
@@ -1663,9 +1662,8 @@ void FinallyRouterEntry::emitReturnCase(Emitter& e,
 void FinallyRouterEntry::emitReturnCaseImpl(Emitter& e,
                                             char sym,
                                             IterVec& iters) {
-  DCHECK(m_returnActions.count(sym));
-  auto& action = m_returnActions[sym];
-  DCHECK(action->isAllocated());
+  assert(m_returnActions.count(sym));
+  assert(m_returnActions[sym]->isAllocated());
   // Add pending iterator if applicable
   if (m_kind == EntryKind::LoopEntry && m_iterId != -1) {
     iters.push_back(IterPair(m_iterRef ? KindOfMIter : KindOfIter,
@@ -1681,7 +1679,7 @@ void FinallyRouterEntry::emitReturnCaseImpl(Emitter& e,
       e.CGetL(retLocal);
       e.RetC();
     } else {
-      DCHECK(sym == StackSym::V);
+      assert(sym == StackSym::V);
       e.VGetL(retLocal);
       e.RetV();
     }
@@ -1698,10 +1696,10 @@ void FinallyRouterEntry::emitReturnCaseImpl(Emitter& e,
 void FinallyRouterEntry::emitGotoCase(Emitter& e,
                                       std::vector<Label*>& cases,
                                       StringData* name) {
-  DCHECK(m_gotoActions.count(name));
+  assert(m_gotoActions.count(name));
   auto action = m_gotoActions[name];
   emitCase(e, cases, action);
-  DCHECK(m_parent != nullptr);
+  assert(m_parent != nullptr);
   IterVec iters;
   m_parent->emitGotoCaseImpl(e, name, iters);
 }
@@ -1709,7 +1707,7 @@ void FinallyRouterEntry::emitGotoCase(Emitter& e,
 void FinallyRouterEntry::emitGotoCaseImpl(Emitter& e,
                                           StringData* name,
                                           IterVec& iters) {
-  DCHECK(m_gotoActions.count(name));
+  assert(m_gotoActions.count(name));
   auto action = m_gotoActions[name];
   if (m_parent->m_gotoLabels.count(name)) {
     // If only there is the appropriate label inside the current entry
@@ -1734,7 +1732,7 @@ void FinallyRouterEntry::emitGotoCaseImpl(Emitter& e,
     }
     // We should never break out of a function, therefore there
     // should always be a parent
-    DCHECK(m_parent != nullptr);
+    assert(m_parent != nullptr);
     m_parent->emitGotoCaseImpl(e, name, iters);
   }
 }
@@ -1742,12 +1740,12 @@ void FinallyRouterEntry::emitGotoCaseImpl(Emitter& e,
 void FinallyRouterEntry::emitBreakCase(Emitter& e,
                                       std::vector<Label*>& cases,
                                       int depth) {
-  DCHECK(depth >= 1);
-  DCHECK(m_kind == EntryKind::TryFinallyEntry);
-  DCHECK(m_breakActions.count(depth));
+  assert(depth >= 1);
+  assert(m_kind == EntryKind::TryFinallyEntry);
+  assert(m_breakActions.count(depth));
   auto action = m_breakActions[depth];
   emitCase(e, cases, action);
-  DCHECK(m_parent != nullptr);
+  assert(m_parent != nullptr);
   IterVec iters;
   m_parent->emitBreakCaseImpl(e, depth, iters);
 }
@@ -1755,10 +1753,10 @@ void FinallyRouterEntry::emitBreakCase(Emitter& e,
 void FinallyRouterEntry::emitBreakCaseImpl(Emitter& e,
                                            int depth,
                                            IterVec& iters) {
-  DCHECK(depth >= 1);
-  DCHECK(m_kind != EntryKind::FinallyEntry);
-  DCHECK(m_parent != nullptr);
-  DCHECK(m_breakActions.count(depth));
+  assert(depth >= 1);
+  assert(m_kind != EntryKind::FinallyEntry);
+  assert(m_parent != nullptr);
+  assert(m_breakActions.count(depth));
   auto action = m_breakActions[depth];
   if (m_kind == EntryKind::LoopEntry) {
     // Whether or not this is the last loop to break out of, we
@@ -1796,12 +1794,12 @@ void FinallyRouterEntry::emitBreakCaseImpl(Emitter& e,
 void FinallyRouterEntry::emitContinueCase(Emitter& e,
                                           std::vector<Label*>& cases,
                                           int depth) {
-  DCHECK(depth >= 1);
-  DCHECK(m_kind == EntryKind::TryFinallyEntry);
-  DCHECK(m_continueActions.count(depth));
+  assert(depth >= 1);
+  assert(m_kind == EntryKind::TryFinallyEntry);
+  assert(m_continueActions.count(depth));
   auto action = m_continueActions[depth];
   emitCase(e, cases, action);
-  DCHECK(m_parent != nullptr);
+  assert(m_parent != nullptr);
   IterVec iters;
   m_parent->emitContinueCaseImpl(e, depth, iters);
 }
@@ -1809,9 +1807,9 @@ void FinallyRouterEntry::emitContinueCase(Emitter& e,
 void FinallyRouterEntry::emitContinueCaseImpl(Emitter& e,
                                               int depth,
                                               IterVec& iters) {
-  DCHECK(depth >= 1);
-  DCHECK(m_parent != nullptr);
-  DCHECK(m_kind != EntryKind::FinallyEntry);
+  assert(depth >= 1);
+  assert(m_parent != nullptr);
+  assert(m_kind != EntryKind::FinallyEntry);
   auto action = m_continueActions[depth];
   if (m_kind == EntryKind::LoopEntry) {
     if (depth == 1) {
@@ -1865,7 +1863,7 @@ int FinallyRouterEntry::getBreakContinueDepth() {
 
 void FinallyRouterEntry::emitBreakContinueCases(Emitter& e,
                                                 std::vector<Label*>& cases) {
-  DCHECK(m_kind == EntryKind::TryFinallyEntry);
+  assert(m_kind == EntryKind::TryFinallyEntry);
   int max_depth = getBreakContinueDepth();
   for (int i = 1; i <= max_depth; ++i) {
     if (m_breakActions.count(i) &&
@@ -1899,14 +1897,14 @@ void FinallyRouterEntry::emitGotoCases(Emitter& e,
 
 void FinallyRouterEntry::emitAllCases(Emitter& e,
                                       std::vector<Label*>& cases) {
-  DCHECK(m_kind == EntryKind::TryFinallyEntry);
+  assert(m_kind == EntryKind::TryFinallyEntry);
   emitReturnCases(e, cases);
   emitBreakContinueCases(e, cases);
   emitGotoCases(e, cases);
 }
 
 void FinallyRouterEntry::collectReturnCases(std::vector<Label*>& cases) {
-  DCHECK(m_kind == EntryKind::TryFinallyEntry);
+  assert(m_kind == EntryKind::TryFinallyEntry);
   for (auto& p : m_returnActions) {
     if (m_finallyCases.count(p.second)) {
       collectCase(cases, p.second);
@@ -1915,7 +1913,7 @@ void FinallyRouterEntry::collectReturnCases(std::vector<Label*>& cases) {
 }
 
 void FinallyRouterEntry::collectGotoCases(std::vector<Label*>& cases) {
-  DCHECK(m_kind == EntryKind::TryFinallyEntry);
+  assert(m_kind == EntryKind::TryFinallyEntry);
   for (auto& p : m_gotoActions) {
     if (m_finallyCases.count(p.second)) {
       collectCase(cases, p.second);
@@ -1925,7 +1923,7 @@ void FinallyRouterEntry::collectGotoCases(std::vector<Label*>& cases) {
 
 void FinallyRouterEntry::collectBreakContinueCases(
                            std::vector<Label*>& cases) {
-  DCHECK(m_kind == EntryKind::TryFinallyEntry);
+  assert(m_kind == EntryKind::TryFinallyEntry);
   int max_depth = getBreakContinueDepth();
   for (int i = 1; i <= max_depth; ++i) {
     if (m_breakActions.count(i) &&
@@ -1941,14 +1939,14 @@ void FinallyRouterEntry::collectBreakContinueCases(
 
 void FinallyRouterEntry::collectCase(std::vector<Label*>& cases,
                                      ActionPtr action) {
-  DCHECK(m_kind == EntryKind::TryFinallyEntry);
-  DCHECK(action != nullptr);
-  DCHECK(action->isAllocated());
+  assert(m_kind == EntryKind::TryFinallyEntry);
+  assert(action != nullptr);
+  assert(action->isAllocated());
   // NOTE: This is a completely arbitrary limitation that prevents
   // running out of memory in case action->m_state contained trash as
   // a result of e.g. memory corrupotion.
-  DCHECK(action->m_state < 1024 && action->m_state >= 0);
-  DCHECK(m_finallyCases.count(action));
+  assert(action->m_state < 1024 && action->m_state >= 0);
+  assert(m_finallyCases.count(action));
   while (cases.size() <= action->m_state) {
     cases.push_back(new Label());
   }
@@ -1956,7 +1954,7 @@ void FinallyRouterEntry::collectCase(std::vector<Label*>& cases,
 }
 
 void FinallyRouterEntry::collectAllCases(std::vector<Label*>& cases) {
-  DCHECK(m_kind == EntryKind::TryFinallyEntry);
+  assert(m_kind == EntryKind::TryFinallyEntry);
   collectReturnCases(cases);
   collectBreakContinueCases(cases);
   collectGotoCases(cases);
@@ -1969,7 +1967,7 @@ FinallyRouter::FinallyRouter() {}
 FinallyRouter::~FinallyRouter() {}
 
 FinallyRouterEntryPtr FinallyRouter::top() {
-  DCHECK(m_entries.size() > 0);
+  assert(m_entries.size() > 0);
   return m_entries.back();
 }
 
@@ -2025,16 +2023,16 @@ FinallyRouterEntryPtr FinallyRouter::create(StatementPtr s,
 }
 
 void FinallyRouter::enter(FinallyRouterEntryPtr entry) {
-  DCHECK(entry != nullptr);
-  DCHECK(entry->m_router == this);
+  assert(entry != nullptr);
+  assert(entry->m_router == this);
   m_entries.push_back(entry);
 }
 
 void FinallyRouter::leave(FinallyRouterEntryPtr entry) {
-  DCHECK(entry != nullptr);
-  DCHECK(m_entries.size() > 0);
-  DCHECK(m_entries.back() == entry);
-  DCHECK(m_entries.back()->m_router == this);
+  assert(entry != nullptr);
+  assert(m_entries.size() > 0);
+  assert(m_entries.back() == entry);
+  assert(m_entries.back()->m_router == this);
   m_entries.pop_back();
 }
 
@@ -2048,7 +2046,7 @@ int FinallyRouter::allocateState() {
 }
 
 void FinallyRouter::releaseState(int state) {
-  DCHECK(m_states.count(state));
+  assert(m_states.count(state));
   m_states.erase(state);
 }
 
@@ -2623,9 +2621,9 @@ void EmitterVisitor::assignLocalVariableIds(FunctionScopePtr fs) {
 }
 
 void EmitterVisitor::assignFinallyVariableIds() {
-  DCHECK(m_stateLocal < 0);
+  assert(m_stateLocal < 0);
   m_stateLocal = m_curFunc->allocUnnamedLocal();
-  DCHECK(m_retLocal < 0);
+  assert(m_retLocal < 0);
   m_retLocal = m_curFunc->allocUnnamedLocal();
 }
 
@@ -3259,7 +3257,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         // continuations and resumed async functions
         if (m_curFunc->isGenerator()) {
-          DCHECK(retSym == StackSym::C);
+          assert(retSym == StackSym::C);
           entry->emitIterFree(e);
           e.ContRetC();
           return false;
@@ -3267,7 +3265,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         // eagerly executed async functions
         if (m_curFunc->isAsync()) {
-          DCHECK(retSym == StackSym::C);
+          assert(retSym == StackSym::C);
           entry->emitIterFree(e);
           e.AsyncWrapResult();
           e.RetC();
@@ -8372,8 +8370,8 @@ void EmitterVisitor::copyOverExnHandlers(FuncEmitter* fe) {
     e.m_type = EHEnt::Type::Catch;
     e.m_base = eh->m_start;
     e.m_past = eh->m_end;
-    DCHECK(e.m_base != kInvalidOffset);
-    DCHECK(e.m_past != kInvalidOffset);
+    assert(e.m_base != kInvalidOffset);
+    assert(e.m_past != kInvalidOffset);
     e.m_iterId = -1;
     for (auto& c : eh->m_catchLabels) {
       Id id = m_ue.mergeLitstr(c.first);
@@ -8388,12 +8386,12 @@ void EmitterVisitor::copyOverExnHandlers(FuncEmitter* fe) {
     e.m_type = EHEnt::Type::Fault;
     e.m_base = fr->m_start;
     e.m_past = fr->m_end;
-    DCHECK(e.m_base != kInvalidOffset);
-    DCHECK(e.m_past != kInvalidOffset);
+    assert(e.m_base != kInvalidOffset);
+    assert(e.m_past != kInvalidOffset);
     e.m_iterId = fr->m_iterId;
     e.m_itRef = fr->m_iterKind == KindOfMIter;
     e.m_fault = fr->m_func->getAbsoluteOffset();
-    DCHECK(e.m_fault != kInvalidOffset);
+    assert(e.m_fault != kInvalidOffset);
     delete fr;
   }
   m_faultRegions.clear();

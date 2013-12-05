@@ -56,7 +56,7 @@ uint16_t FastCGITransport::getRemotePort() {
 }
 
 const void *FastCGITransport::getPostData(int &size) {
-  DCHECK(!m_readMore);
+  assert(!m_readMore);
   return getPostDataImpl(size, false);
 }
 

@@ -475,7 +475,7 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   String prefix(transport->isSSL() ? "https://" : "http://");
 
   // Need to append port
-  DCHECK(server.toCArrRef().exists(s_SERVER_PORT));
+  assert(server.toCArrRef().exists(s_SERVER_PORT));
   std::string serverPort = "80";
   if (server.toCArrRef().exists(s_SERVER_PORT)) {
     CHECK(server[s_SERVER_PORT].isInteger() ||
@@ -498,7 +498,7 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   }
   String hostName;
   if (server.toCArrRef().exists(s_SERVER_NAME)) {
-    DCHECK(server[s_SERVER_NAME].isString());
+    assert(server[s_SERVER_NAME].isString());
     hostName = server[s_SERVER_NAME].toCStrRef();
   }
   server.set(s_SCRIPT_URI,
@@ -545,8 +545,8 @@ void HttpProtocol::CopyPathInfo(Variant& server,
   if (r.pathInfo().empty()) {
     server.set(s_PATH_TRANSLATED, r.absolutePath());
   } else {
-    DCHECK(server.toCArrRef().exists(s_DOCUMENT_ROOT));
-    DCHECK(server[s_DOCUMENT_ROOT].isString());
+    assert(server.toCArrRef().exists(s_DOCUMENT_ROOT));
+    assert(server[s_DOCUMENT_ROOT].isString());
     server.set(s_PATH_TRANSLATED,
                String(server[s_DOCUMENT_ROOT].toCStrRef() +
                       r.pathInfo().data()));

@@ -612,11 +612,11 @@ public:
   }
   FinallyRouter& getFinallyRouter() { return m_finallyRouter; }
   Id getStateLocal() {
-    DCHECK(m_stateLocal >= 0);
+    assert(m_stateLocal >= 0);
     return m_stateLocal;
   }
   Id getRetLocal() {
-    DCHECK(m_retLocal >= 0);
+    assert(m_retLocal >= 0);
     return m_retLocal;
   }
 

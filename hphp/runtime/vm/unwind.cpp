@@ -234,7 +234,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
       nProp.get(),
       visible, accessible, unset
     );
-    DCHECK(visible && accessible && !unset);
+    assert(visible && accessible && !unset);
     if (top_tv->m_type != KindOfObject ||
         !top_tv->m_data.pobj->instanceof(
                                 SystemLib::s_ExceptionClass)) {
@@ -252,7 +252,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
 }
 
 bool chainFaults(Fault& fault) {
-  CHECK(!g_vmContext->m_faults.empty());
+  always_assert(!g_vmContext->m_faults.empty());
   auto& faults = g_vmContext->m_faults;
   faults.pop_back();
   if (faults.empty()) {
@@ -272,7 +272,7 @@ bool chainFaults(Fault& fault) {
   if (fault.m_faultType == Fault::Type::UserException &&
              fault.m_raiseNesting == prev.m_raiseNesting &&
              fault.m_raiseFrame == prev.m_raiseFrame) {
-    DCHECK(prev.m_faultType == Fault::Type::UserException);
+    assert(prev.m_faultType == Fault::Type::UserException);
     fault.m_raiseOffset = prev.m_raiseOffset;
     fault.m_handledCount = prev.m_handledCount;
     chainFaultObjects(fault.m_userException, prev.m_userException);
@@ -323,7 +323,7 @@ UnwindAction unwind(ActRec*& fp,
        * previous frame. In such a case, we fill in the fields with
        * the information from the current frame.
        */
-      CHECK(fault.m_raiseNesting == kInvalidNesting);
+      always_assert(fault.m_raiseNesting == kInvalidNesting);
       // Nesting is set to the current VM nesting.
       fault.m_raiseNesting = g_vmContext->m_nestedVMs.size();
       // Raise frame is set to the current frame
@@ -341,9 +341,9 @@ UnwindAction unwind(ActRec*& fp,
            fault.m_raiseOffset,
            implicit_cast<void*>(fp));
 
-    DCHECK(fault.m_raiseNesting != kInvalidNesting);
-    DCHECK(fault.m_raiseFrame != nullptr);
-    DCHECK(fault.m_raiseOffset != kInvalidOffset);
+    assert(fault.m_raiseNesting != kInvalidNesting);
+    assert(fault.m_raiseFrame != nullptr);
+    assert(fault.m_raiseOffset != kInvalidOffset);
 
     /*
      * If the handledCount is non-zero, we've already seen this fault once

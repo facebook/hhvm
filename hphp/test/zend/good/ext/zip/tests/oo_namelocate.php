@@ -30,4 +30,5 @@ var_dump($zip->locateName('eNtry2.txt', ZIPARCHIVE::FL_NOCASE));
 var_dump($zip->locateName('enTRy2d.txt', ZIPARCHIVE::FL_NOCASE|ZIPARCHIVE::FL_NODIR));
 $zip->close();
 
+@unlink($file);
 ?>

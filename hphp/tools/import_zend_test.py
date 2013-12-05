@@ -852,8 +852,7 @@ def walk(filename, source_dir):
                             'var_dump($zip->getNameIndex(3));\n@unlink($file);')
     if '/ext/zip/tests/oo_namelocate.php' in full_dest_filename:
         test = test.replace('__tmp_oo_rename.zip', '__tmp_oo_rename3.zip')
-        test = test.replace('var_dump($zip->getNameIndex(3));',
-                            'var_dump($zip->getNameIndex(3));\n@unlink($file);')
+        test = test.replace('?>', '@unlink($file);\n?>')
     if '/ext/zip/tests/oo_addemptydir.php' in full_dest_filename:
         test = test.replace('__tmp_oo_addfile.zip', '__tmp_oo_addfile2.zip')
     if '/ext/zip/tests/oo_addfile.php' in full_dest_filename:

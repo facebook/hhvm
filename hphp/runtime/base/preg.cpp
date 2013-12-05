@@ -845,9 +845,9 @@ static bool preg_get_backref(const char **str, int *backref) {
   return true;
 }
 
-static String php_pcre_replace(const String& pattern, const String& subject,
-                               CVarRef replace_var, bool callable,
-                               int limit, int *replace_count) {
+static Variant php_pcre_replace(const String& pattern, const String& subject,
+                                CVarRef replace_var, bool callable,
+                                int limit, int *replace_count) {
   const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
   if (pce == nullptr) {
     return false;
@@ -1145,20 +1145,33 @@ static String php_pcre_replace(const String& pattern, const String& subject,
   }
 }
 
-static String php_replace_in_subject(CVarRef regex, CVarRef replace,
-                                     String subject, int limit, bool callable,
-                                     int *replace_count) {
+static Variant php_replace_in_subject(CVarRef regex, CVarRef replace,
+                                      String subject, int limit, bool callable,
+                                      int *replace_count) {
   if (!regex.is(KindOfArray)) {
-    return php_pcre_replace(regex.toString(), subject, replace,
-                            callable, limit, replace_count);
+    Variant ret = php_pcre_replace(regex.toString(), subject, replace,
+                                   callable, limit, replace_count);
+
+    if (ret.isBoolean()) {
+      assert(!ret.toBoolean());
+      return null_variant;
+    }
+
+    return ret;
   }
 
   if (callable || !replace.is(KindOfArray)) {
     Array arr = regex.toArray();
     for (ArrayIter iterRegex(arr); iterRegex; ++iterRegex) {
       String regex_entry = iterRegex.second().toString();
-      subject = php_pcre_replace(regex_entry, subject, replace,
-                                 callable, limit, replace_count);
+      Variant ret = php_pcre_replace(regex_entry, subject, replace,
+                                     callable, limit, replace_count);
+      if (ret.isBoolean()) {
+        assert(!ret.toBoolean());
+        return null_variant;
+      }
+
+      subject = ret.asStrRef();
       if (subject.isNull()) {
         return subject;
       }
@@ -1177,8 +1190,15 @@ static String php_replace_in_subject(CVarRef regex, CVarRef replace,
       ++iterReplace;
     }
 
-    subject = php_pcre_replace(regex_entry, subject, replace_value,
-                               callable, limit, replace_count);
+    Variant ret = php_pcre_replace(regex_entry, subject, replace_value,
+                                   callable, limit, replace_count);
+
+    if (ret.isBoolean()) {
+      assert(!ret.toBoolean());
+      return null_variant;
+    }
+
+    subject = ret.asStrRef();
     if (subject.isNull()) {
       return subject;
     }
@@ -1187,8 +1207,8 @@ static String php_replace_in_subject(CVarRef regex, CVarRef replace,
 }
 
 Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
-                                 CVarRef subject, int limit, Variant &count,
-                                 bool is_callable) {
+                          CVarRef subject, int limit, Variant &count,
+                          bool is_callable) {
   if (!is_callable &&
       replacement.is(KindOfArray) && !pattern.is(KindOfArray)) {
     raise_warning("Parameter mismatch, pattern is a string while "
@@ -1198,10 +1218,15 @@ Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
 
   int replace_count = 0;
   if (!subject.is(KindOfArray)) {
-    String ret = php_replace_in_subject(pattern, replacement,
-                                        subject.toString(),
-                                        limit, is_callable, &replace_count);
-    count = replace_count;
+    Variant ret = php_replace_in_subject(pattern, replacement,
+                                         subject.toString(),
+                                         limit, is_callable, &replace_count);
+
+    if (ret.isString()) {
+      count = replace_count;
+      return ret.asStrRef();
+    }
+
     return ret;
   }
 
@@ -1209,10 +1234,11 @@ Variant preg_replace_impl(CVarRef pattern, CVarRef replacement,
   Array arrSubject = subject.toArray();
   for (ArrayIter iter(arrSubject); iter; ++iter) {
     String subject_entry = iter.second().toString();
-    String result = php_replace_in_subject(pattern, replacement, subject_entry,
-                                           limit, is_callable, &replace_count);
-    if (!result.isNull()) {
-      return_value.set(iter.first(), result);
+    Variant ret = php_replace_in_subject(pattern, replacement, subject_entry,
+                                         limit, is_callable, &replace_count);
+
+    if (ret.isString() && !ret.isNull()) {
+      return_value.set(iter.first(), ret.asStrRef());
     }
   }
   count = replace_count;

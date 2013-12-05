@@ -28,6 +28,11 @@ namespace Intl {
 
 IMPLEMENT_REQUEST_LOCAL(RequestData, s_intl_request);
 
+void IntlExtension::bindIniSettings() {
+  IniSetting::Bind("intl.default_locale", "",
+                   icu_on_update_default_locale, nullptr);
+}
+
 const String GetDefaultLocale() {
   String locale(s_intl_request->defaultLocale());
   if (locale.empty()) {
@@ -39,16 +44,6 @@ const String GetDefaultLocale() {
 bool SetDefaultLocale(const String& locale) {
   s_intl_request->setDefaultLocale(locale->data());
   return true;
-}
-
-static bool icu_on_update_default_locale(const String &value, void *p) {
-  s_intl_request->setDefaultLocale(value->data());
-  return true;
-}
-
-void BindDefaultLocale() {
-  IniSetting::Bind("intl.default_locale", "",
-                   icu_on_update_default_locale, nullptr);
 }
 
 String u16(const char *u8, int32_t u8_len, UErrorCode &error) {
@@ -90,6 +85,8 @@ String u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
 }
 
 } // namespace Intl
+
+Intl::IntlExtension s_intl_extension;
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

@@ -103,7 +103,6 @@ DECLARE_EXTERN_REQUEST_LOCAL(RequestData, s_intl_request);
 
 const String GetDefaultLocale();
 bool SetDefaultLocale(const String& locale);
-void BindDefaultLocale();
 
 // Common encoding conversions UTF8<->UTF16
 String u16(const char *u8, int32_t u8_len, UErrorCode &error);
@@ -114,6 +113,32 @@ String u8(const UChar *u16, int32_t u16_len, UErrorCode &error);
 inline String u8(const String &u16, UErrorCode &error) {
   return u8((const UChar *)u16.c_str(), u16.size() / sizeof(UChar), error);
 }
+
+class IntlExtension : public Extension {
+ public:
+  // Some apps/frameworks get confused by a claim that
+  // the intl extension is loaded, yet not all the classes exist
+  // Lie for now by using another name.  Change it when intl
+  // coverage is complete
+  IntlExtension() : Extension("intl.not-done") {}
+
+  void moduleInit() override {
+    bindIniSettings();
+    initLocale();
+    initNumberFormatter();
+  }
+
+ private:
+  static bool icu_on_update_default_locale(const String& value, void *p) {
+    s_intl_request->setDefaultLocale(value->data());
+    return true;
+  }
+
+  void bindIniSettings();
+  void initLocale();
+  void initNumberFormatter();
+};
+
 
 } // namespace Intl
 

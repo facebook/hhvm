@@ -643,56 +643,44 @@ static bool HHVM_STATIC_METHOD(Locale, setDefault, const String& locale) {
 //////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_Locale("Locale");
-class ICULocaleExtension : public Extension {
- public:
-  ICULocaleExtension() : Extension("icu_locale") {}
 
-  void moduleInit() override {
-    Intl::BindDefaultLocale();
-    bindMethods();
-    bindConstants();
-    loadSystemlib();
-  }
-
- private:
-  void bindMethods() {
-    HHVM_STATIC_ME(Locale, acceptFromHttp);
-    HHVM_STATIC_ME(Locale, canonicalize);
-    HHVM_STATIC_ME(Locale, composeLocale);
-    HHVM_STATIC_ME(Locale, getAllVariants);
-    HHVM_STATIC_ME(Locale, getDefault);
-    HHVM_STATIC_ME(Locale, getDisplayLanguage);
-    HHVM_STATIC_ME(Locale, getDisplayName);
-    HHVM_STATIC_ME(Locale, getDisplayRegion);
-    HHVM_STATIC_ME(Locale, getDisplayScript);
-    HHVM_STATIC_ME(Locale, getDisplayVariant);
-    HHVM_STATIC_ME(Locale, getKeywords);
-    HHVM_STATIC_ME(Locale, getPrimaryLanguage);
-    HHVM_STATIC_ME(Locale, getRegion);
-    HHVM_STATIC_ME(Locale, getScript);
-    HHVM_STATIC_ME(Locale, lookup);
-    HHVM_STATIC_ME(Locale, parseLocale);
-    HHVM_STATIC_ME(Locale, setDefault);
-  }
+void Intl::IntlExtension::initLocale() {
+  HHVM_STATIC_ME(Locale, acceptFromHttp);
+  HHVM_STATIC_ME(Locale, canonicalize);
+  HHVM_STATIC_ME(Locale, composeLocale);
+  HHVM_STATIC_ME(Locale, getAllVariants);
+  HHVM_STATIC_ME(Locale, getDefault);
+  HHVM_STATIC_ME(Locale, getDisplayLanguage);
+  HHVM_STATIC_ME(Locale, getDisplayName);
+  HHVM_STATIC_ME(Locale, getDisplayRegion);
+  HHVM_STATIC_ME(Locale, getDisplayScript);
+  HHVM_STATIC_ME(Locale, getDisplayVariant);
+  HHVM_STATIC_ME(Locale, getKeywords);
+  HHVM_STATIC_ME(Locale, getPrimaryLanguage);
+  HHVM_STATIC_ME(Locale, getRegion);
+  HHVM_STATIC_ME(Locale, getScript);
+  HHVM_STATIC_ME(Locale, lookup);
+  HHVM_STATIC_ME(Locale, parseLocale);
+  HHVM_STATIC_ME(Locale, setDefault);
 
 #define ULOC_CONST(nm,val) Native::registerClassConstant<KindOfStaticString>\
                                (s_Locale.get(), s_##nm.get(), s_##val.get())
 
-  void bindConstants() {
-    Native::registerClassConstant<KindOfNull>(s_Locale.get(),
-                                              s_DEFAULT_LOCALE.get());
-    ULOC_CONST(LANG_TAG,               LOC_LANG);
-    ULOC_CONST(EXTLANG_TAG,            LOC_EXTLANG);
-    ULOC_CONST(SCRIPT_TAG,             LOC_SCRIPT);
-    ULOC_CONST(REGION_TAG,             LOC_REGION);
-    ULOC_CONST(VARIANT_TAG,            LOC_VARIANT);
-    ULOC_CONST(GRANDFATHERED_LANG_TAG, GRANDFATHERED);
-    ULOC_CONST(PRIVATE_TAG,            LOC_PRIVATE);
-  }
+  Native::registerClassConstant<KindOfNull>(s_Locale.get(),
+                                            s_DEFAULT_LOCALE.get());
+  ULOC_CONST(LANG_TAG,               LOC_LANG);
+  ULOC_CONST(EXTLANG_TAG,            LOC_EXTLANG);
+  ULOC_CONST(SCRIPT_TAG,             LOC_SCRIPT);
+  ULOC_CONST(REGION_TAG,             LOC_REGION);
+  ULOC_CONST(VARIANT_TAG,            LOC_VARIANT);
+  ULOC_CONST(GRANDFATHERED_LANG_TAG, GRANDFATHERED);
+  ULOC_CONST(PRIVATE_TAG,            LOC_PRIVATE);
+
 
 #undef ULOC_CONST
 
-} s_icu_locale_extension;
+  loadSystemlib("icu_locale");
+}
 
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

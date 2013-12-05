@@ -23,14 +23,12 @@ namespace HPHP {
  */
 extern Extension s_zip_extension;
 extern Extension s_fileinfo_extension;
-extern Extension s_icu_num_fmt_extension;
-extern Extension s_icu_locale_extension;
+extern Extension s_intl_extension;
 
 const Extension *g_anchor_extensions[] = {
   &s_zip_extension,
   &s_fileinfo_extension,
-  &s_icu_num_fmt_extension,
-  &s_icu_locale_extension,
+  &s_intl_extension,
 };
 
 } // HPHP

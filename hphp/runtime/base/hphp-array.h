@@ -325,6 +325,7 @@ public:
   // Otherwise get the value cell (unboxing), and initialize keyOut.
   template <bool withRef>
   void getArrayElm(ssize_t pos, TypedValue* out, TypedValue* keyOut) const;
+  void getArrayElm(ssize_t pos, TypedValue* out) const;
   bool isTombstone(ssize_t pos) const;
 
   static bool validPos(ssize_t pos);

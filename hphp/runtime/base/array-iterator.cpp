@@ -77,6 +77,7 @@ ArrayIter::ArrayIter(const ArrayIter& iter) {
   m_pos = iter.m_pos;
   m_version = iter.m_version;
   m_itype = iter.m_itype;
+  m_nextHelperIdx = iter.m_nextHelperIdx;
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
     if (ad) const_cast<ArrayData*>(ad)->incRefCount();
@@ -102,29 +103,35 @@ void ArrayIter::VectorInit(ArrayIter* iter, ObjectData* obj) {
   iter->m_version = vec->getVersion();
   iter->m_pos = 0;
 }
+
 void ArrayIter::MapInit(ArrayIter* iter, ObjectData* obj) {
   auto mp = static_cast<c_Map*>(obj);
   iter->m_version = mp->getVersion();
   iter->m_pos = mp->iter_begin();
 }
+
 void ArrayIter::StableMapInit(ArrayIter* iter, ObjectData* obj) {
   auto smp = static_cast<c_StableMap*>(obj);
   iter->m_version = smp->getVersion();
   iter->m_pos = smp->iter_begin();
 }
+
 void ArrayIter::FrozenMapInit(ArrayIter* iter, ObjectData* obj) {
   auto smp = static_cast<c_FrozenMap*>(obj);
   iter->m_version = smp->getVersion();
   iter->m_pos = smp->iter_begin();
 }
+
 void ArrayIter::SetInit(ArrayIter* iter, ObjectData* obj) {
   auto st = static_cast<c_Set*>(obj);
   iter->m_version = st->getVersion();
   iter->m_pos = st->iter_begin();
 }
+
 void ArrayIter::PairInit(ArrayIter* iter, ObjectData* obj) {
   iter->m_pos = 0;
 }
+
 void ArrayIter::FrozenVectorInit(ArrayIter* iter, ObjectData* obj) {
   auto vec = static_cast<c_FrozenVector*>(obj);
   iter->m_version = vec->getVersion();
@@ -135,6 +142,24 @@ void ArrayIter::FrozenSetInit(ArrayIter* iter, ObjectData* obj) {
   iter->m_version = st->getVersion();
   iter->m_pos = st->iter_begin();
 }
+
+IterNextIndex ArrayIter::getNextHelperIdx(ObjectData* obj) {
+  Class* cls = obj->getVMClass();
+  if (cls == c_Vector::classof()) {
+    return IterNextIndex::Vector;
+  } else if (cls == c_Map::classof()) {
+    return IterNextIndex::Map;
+  } else if (cls == c_Set::classof()) {
+    return IterNextIndex::Set;
+  } else if (cls == c_FrozenVector::classof()) {
+    return IterNextIndex::FrozenVector;
+  } else if (cls == c_Pair::classof()) {
+    return IterNextIndex::Pair;
+  } else {
+    return IterNextIndex::Object;
+  }
+}
+
 void ArrayIter::IteratorObjInit(ArrayIter* iter, ObjectData* obj) {
   assert(obj->instanceof(SystemLib::s_IteratorClass));
   try {
@@ -207,6 +232,7 @@ ArrayIter& ArrayIter::operator=(const ArrayIter& iter) {
   m_pos = iter.m_pos;
   m_version = iter.m_version;
   m_itype = iter.m_itype;
+  m_nextHelperIdx = iter.m_nextHelperIdx;
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
     if (ad) const_cast<ArrayData*>(ad)->incRefCount();
@@ -224,6 +250,7 @@ ArrayIter& ArrayIter::operator=(ArrayIter&& iter) {
   m_pos = iter.m_pos;
   m_version = iter.m_version;
   m_itype = iter.m_itype;
+  m_nextHelperIdx = iter.m_nextHelperIdx;
   iter.m_data = nullptr;
   return *this;
 }
@@ -1574,6 +1601,285 @@ ArrayIter getContainerIter(CVarRef v, size_t& sz) {
     }
   }
   throw_param_is_not_container();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// IterNext/IterNextK helpers
+
+
+namespace {
+
+template <bool isPacked, bool key>
+ALWAYS_INLINE
+int64_t iterNextArrayGeneric(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
+  ArrayIter& iter = it->arr();
+  auto const arrData = const_cast<ArrayData*>(iter.getArrayData());
+  auto const arr = static_cast<HphpArray*>(arrData);
+  ssize_t pos = iter.getPos();
+
+  do {
+    if (size_t(++pos) >= size_t(arr->iterLimit())) {
+      if (UNLIKELY(arr->getCount() == 1)) {
+        return iter_next_free_arr(it, arr);
+      }
+      arr->decRefCount();
+      if (debug) {
+        iter.setIterType(ArrayIter::TypeUndefined);
+      }
+      return 0;
+    }
+  } while (!isPacked && UNLIKELY(arr->isTombstone(pos)));
+
+  if (UNLIKELY(tvDecRefWillCallHelper(valOut))) {
+    return iter_next_cold<false>(it, valOut, keyOut);
+  }
+  if (key && UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
+    return iter_next_cold<false>(it, valOut, keyOut);
+  }
+  tvDecRefOnly(valOut);
+  if (key) {
+    tvDecRefOnly(keyOut);
+  }
+  iter.setPos(pos);
+  if (key) {
+    arr->getArrayElm<false>(pos, valOut, keyOut);
+  } else {
+    arr->getArrayElm(pos, valOut);
+  }
+  return 1;
+}
+
+}
+
+int64_t iterNextArrayPacked(Iter* it, TypedValue* valOut) {
+  TRACE(2, "iterNextArrayPacked: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeArray &&
+         it->arr().hasArrayData() &&
+         it->arr().getArrayData()->isPacked());
+
+  return iterNextArrayGeneric<true, false>(it, valOut, nullptr);
+}
+
+int64_t iterNextKArrayPacked(Iter* it,
+                             TypedValue* valOut,
+                             TypedValue* keyOut) {
+  TRACE(2, "iterNextKArrayPacked: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeArray &&
+         it->arr().hasArrayData() &&
+         it->arr().getArrayData()->isPacked());
+
+  return iterNextArrayGeneric<true, true>(it, valOut, keyOut);
+}
+
+int64_t iterNextArrayMixed(Iter* it, TypedValue* valOut) {
+  TRACE(2, "iterNextArrayMixed: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeArray &&
+         it->arr().hasArrayData() &&
+         it->arr().getArrayData()->isHphpArray() &&
+         !it->arr().getArrayData()->isPacked());
+
+  return iterNextArrayGeneric<false, false>(it, valOut, nullptr);
+}
+
+int64_t iterNextKArrayMixed(Iter* it,
+                            TypedValue* valOut,
+                            TypedValue* keyOut) {
+  TRACE(2, "iterNextKArrayMixed: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeArray &&
+         it->arr().hasArrayData() &&
+         it->arr().getArrayData()->isHphpArray() &&
+         !it->arr().getArrayData()->isPacked());
+
+  return iterNextArrayGeneric<false, true>(it, valOut, keyOut);
+}
+
+int64_t iterNextArray(Iter* it, TypedValue* valOut) {
+  TRACE(2, "iterNextArray: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeArray &&
+         it->arr().hasArrayData() &&
+         !it->arr().getArrayData()->isHphpArray());
+
+  ArrayIter& iter = it->arr();
+  auto const ad = const_cast<ArrayData*>(iter.getArrayData());
+  if (ad->isSharedArray()) {
+    return iter_next_apc_array(it, valOut, nullptr, ad);
+  }
+  return iter_next_cold<false>(it, valOut, nullptr);
+}
+
+int64_t iterNextKArray(Iter* it,
+                       TypedValue* valOut,
+                       TypedValue* keyOut) {
+  TRACE(2, "iterNextKArray: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeArray &&
+         it->arr().hasArrayData() &&
+         !it->arr().getArrayData()->isHphpArray());
+
+  ArrayIter& iter = it->arr();
+  auto const ad = const_cast<ArrayData*>(iter.getArrayData());
+  if (ad->isSharedArray()) {
+    return iter_next_apc_array(it, valOut, keyOut, ad);
+  }
+  return iter_next_cold<false>(it, valOut, keyOut);
+}
+
+int64_t iterNextVector(Iter* it, TypedValue* valOut) {
+  TRACE(2, "iterNextVector: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
+         it->arr().hasCollection());
+
+  auto const iter = &it->arr();
+  return iterNext<c_Vector, ArrayIter::Versionable>(iter, valOut, nullptr);
+}
+
+int64_t iterNextKVector(Iter* it,
+                        TypedValue* valOut,
+                        TypedValue* keyOut) {
+  TRACE(2, "iterNextKVector: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
+         it->arr().hasCollection());
+
+  auto const iter = &it->arr();
+  return iterNext<c_Vector, ArrayIter::Versionable>(iter, valOut, keyOut);
+}
+
+int64_t iterNextFrozenVector(Iter* it, TypedValue* valOut) {
+  TRACE(2, "iterFrozenNextVector: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
+         it->arr().hasCollection());
+
+  auto const iter = &it->arr();
+  return iterNext<c_FrozenVector, ArrayIter::Fixed>(iter, valOut, nullptr);
+}
+
+int64_t iterNextKFrozenVector(Iter* it,
+                              TypedValue* valOut,
+                              TypedValue* keyOut) {
+  TRACE(2, "iterFrozenNextKVector: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
+         it->arr().hasCollection());
+
+  auto const iter = &it->arr();
+  return iterNext<c_FrozenVector, ArrayIter::Fixed>(iter, valOut, keyOut);
+}
+
+int64_t iterNextMap(Iter* it, TypedValue* valOut) {
+  TRACE(2, "iterNextMap: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
+         it->arr().hasCollection());
+
+  auto const iter = &it->arr();
+  return iterNext<c_Map, ArrayIter::VersionableSparse>(iter, valOut, nullptr);
+}
+
+int64_t iterNextKMap(Iter* it,
+                     TypedValue* valOut,
+                     TypedValue* keyOut) {
+  TRACE(2, "iterNextKMap: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
+         it->arr().hasCollection());
+
+  auto const iter = &it->arr();
+  return iterNext<c_Map, ArrayIter::VersionableSparse>(iter, valOut, keyOut);
+}
+
+int64_t iterNextSet(Iter* it, TypedValue* valOut) {
+  TRACE(2, "iterNextSet: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
+         it->arr().hasCollection());
+
+  auto const iter = &it->arr();
+  return iterNext<c_Set, ArrayIter::VersionableSparse>(iter, valOut, nullptr);
+}
+
+int64_t iterNextKSet(Iter* it,
+                     TypedValue* valOut,
+                     TypedValue* keyOut) {
+  TRACE(2, "iterNextKSet: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
+         it->arr().hasCollection());
+
+  auto const iter = &it->arr();
+  return iterNext<c_Set, ArrayIter::VersionableSparse>(iter, valOut, keyOut);
+}
+
+int64_t iterNextPair(Iter* it, TypedValue* valOut) {
+  TRACE(2, "iterNextPair: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
+         it->arr().hasCollection());
+
+  auto const iter = &it->arr();
+  return iterNext<c_Pair, ArrayIter::Fixed>(iter, valOut, nullptr);
+}
+
+int64_t iterNextKPair(Iter* it,
+                      TypedValue* valOut,
+                      TypedValue* keyOut) {
+  TRACE(2, "iterNextKPair: I %p\n", it);
+  assert(it->arr().getIterType() == ArrayIter::TypeIterator &&
+         it->arr().hasCollection());
+
+  auto const iter = &it->arr();
+  return iterNext<c_Pair, ArrayIter::Fixed>(iter, valOut, keyOut);
+}
+
+int64_t iterNextObject(Iter* it, TypedValue* valOut) {
+  TRACE(2, "iterNextObject: I %p\n", it);
+  return iter_next_cold<false>(it, valOut, nullptr);
+}
+
+int64_t iterNextKObject(Iter* it,
+                        TypedValue* valOut,
+                        TypedValue* keyOut) {
+  TRACE(2, "iterNextKObject: I %p\n", it);
+  return iter_next_cold<false>(it, valOut, keyOut);
+}
+
+const IterNextHelper g_iterNextHelpers[] = {
+  (IterNextHelper)&iterNextArrayPacked,
+  (IterNextHelper)&iterNextArrayMixed,
+  (IterNextHelper)&iterNextArray,
+  (IterNextHelper)&iterNextVector,
+  (IterNextHelper)&iterNextFrozenVector,
+  (IterNextHelper)&iterNextMap,
+  (IterNextHelper)&iterNextSet,
+  (IterNextHelper)&iterNextPair,
+  (IterNextHelper)&iterNextObject,
+};
+
+const IterNextKHelper g_iterNextKHelpers[] = {
+  (IterNextKHelper)&iterNextKArrayPacked,
+  (IterNextKHelper)&iterNextKArrayMixed,
+  (IterNextKHelper)&iterNextKArray,
+  (IterNextKHelper)&iterNextKVector,
+  (IterNextKHelper)&iterNextKFrozenVector,
+  (IterNextKHelper)&iterNextKMap,
+  (IterNextKHelper)&iterNextKSet,
+  (IterNextKHelper)&iterNextKPair,
+  (IterNextKHelper)&iterNextKObject,
+};
+
+int64_t iter_next_ind(Iter* iter, TypedValue* valOut) {
+  TRACE(2, "iter_next_ind: I %p\n", iter);
+  assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
+         iter->arr().getIterType() == ArrayIter::TypeIterator);
+  auto const arrIter = &iter->arr();
+  valOut = tvToCell(valOut);
+  IterNextHelper iterNext =
+      g_iterNextHelpers[static_cast<uint32_t>(arrIter->getHelperIndex())];
+  return iterNext(iter, valOut);
+}
+
+int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
+  TRACE(2, "iter_next_key_ind: I %p\n", iter);
+  assert(iter->arr().getIterType() == ArrayIter::TypeArray ||
+         iter->arr().getIterType() == ArrayIter::TypeIterator);
+  auto const arrIter = &iter->arr();
+  valOut = tvToCell(valOut);
+  keyOut = tvToCell(keyOut);
+  IterNextKHelper iterNextK =
+      g_iterNextKHelpers[static_cast<uint32_t>(arrIter->getHelperIndex())];
+  return iterNextK(iter, valOut, keyOut);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

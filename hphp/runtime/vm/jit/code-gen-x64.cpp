@@ -6254,7 +6254,7 @@ void CodeGenerator::cgIterNextCommon(IRInstruction* inst) {
     args.imm(0);
   }
   TCA helperAddr = isWNext ? (TCA)iter_next_key<true> :
-    isNextK ? (TCA)iter_next_key<false> : (TCA)iter_next;
+    isNextK ? (TCA)iter_next_key_ind : (TCA)iter_next_ind;
   cgCallHelper(m_as, CppCall(helperAddr), callDest(inst->dst()),
     SyncOptions::kSyncPoint, args);
 }

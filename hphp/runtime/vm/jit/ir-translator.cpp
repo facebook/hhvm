@@ -1042,6 +1042,10 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
   if (!RuntimeOption::EvalHHIREnableGenTimeInlining) {
     return false;
   }
+  if (arch() == Arch::ARM) {
+    // TODO(#3331014): hack until more ARM codegen is working.
+    return false;
+  }
 
   auto refuse = [&](const char* why) -> bool {
     FTRACE(1, "shouldIRInline: refusing {} <reason: {}> [NI = {}]\n",

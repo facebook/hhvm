@@ -2682,9 +2682,20 @@ function get_runtime_build(bool $with_jit = true,
       } else {
         $build .= "/_bin/hphp/hhvm/php";
       }
+    // Maybe we are in OSS land trying this script
     } else if (file_exists($oss_root_dir."/hhvm")) {
-      // Maybe we are in OSS land trying this script
-      $build .= $oss_root_dir."/hhvm/hhvm";
+      // Pear won't run correctly unless a 'php' executable exists.
+      // This may be a Pear thing, a PHPUnit running phpt thing, or
+      // or something else. Until we know for sure, let's just create
+      // a php symlink to hhvm
+      symlink($oss_root_dir."/hhvm/hhvm", $oss_root_dir."/hhvm/php");
+
+      $build .= $oss_root_dir."/hhvm";
+      if (!$use_php) {
+        $build .= "/hhvm";
+      } else {
+        $build .= "/php";
+      }
     } else {
       error("HHVM build doesn't exist. Did you build yet?");
     }

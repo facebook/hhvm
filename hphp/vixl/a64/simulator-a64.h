@@ -385,16 +385,6 @@ class Simulator : public DecoderVisitor {
       disasm_trace_ = value;
     }
   }
-  inline void set_instruction_stats(bool value) {
-    if (value != instruction_stats_) {
-      if (value) {
-        decoder_->AppendVisitor(instrumentation_);
-      } else {
-        decoder_->RemoveVisitor(instrumentation_);
-      }
-      instruction_stats_ = value;
-    }
-  }
 
   bool is_on_stack(void* ptr) const {
     return uint64_t((byte*)ptr - stack_) < (uint64_t)stack_size_;
@@ -589,9 +579,6 @@ class Simulator : public DecoderVisitor {
 
   // Indicates whether the disassembly trace is active.
   bool disasm_trace_;
-
-  // Indicates whether the instruction instrumentation is active.
-  bool instruction_stats_;
 };
 }  // namespace vixl
 

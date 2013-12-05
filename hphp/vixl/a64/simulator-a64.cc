@@ -82,9 +82,6 @@ Simulator::Simulator(Decoder* decoder, std::ostream& stream)
   print_disasm_ = new PrintDisassembler(stream_);
   coloured_trace_ = false;
   disasm_trace_ = false;
-
-  // Set the sample period to 10, as the VIXL examples and tests are short.
-  instrumentation_ = new Instrument("vixl_stats.csv", 10);
 }
 
 
@@ -113,9 +110,6 @@ Simulator::~Simulator() {
   // The decoder may outlive the simulator.
   decoder_->RemoveVisitor(print_disasm_);
   delete print_disasm_;
-
-  decoder_->RemoveVisitor(instrumentation_);
-  delete instrumentation_;
 }
 
 

@@ -893,12 +893,15 @@ for root, dirs, files in os.walk(args.zend_path):
             return False
 
         if matches(args.only) and should_import(full_file):
-            walk(full_file, root.replace(args.zend_path, ''))
+            walk(full_file, os.path.relpath(root, args.zend_path))
 
 script_dir = os.path.dirname(__file__)
 all_dir = os.path.join(script_dir, '../test/zend/all')
 if not os.path.isdir(all_dir):
-    print "No test/zend/all. Maybe no tests were imported?"
+    if args.only:
+        print "No test/zend/all. Your --only arg didn't match any test that should be imported."
+    else:
+        print "No test/zend/all. Maybe no tests were imported?"
     sys.exit(0)
 else:
     print "Running all tests from zend/all"

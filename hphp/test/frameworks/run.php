@@ -1043,7 +1043,7 @@ abstract class Framework {
       verbose("Pulling code from ".$rep. " and branch/commit ".$gc."\n",
               Options::$verbose);
       if ($type === "pull") {
-        $git_command = "git pull --no-rebase --no-edit ".$rep." ".$gc;
+        $git_command = "git pull --no-rebase ".$rep." ".$gc;
       } else if ($type === "submodulemove") {
         $git_command = "git submodule add -b ".$gc." ".$rep;
         $move_from_dir = $pr["move_from_dir"];

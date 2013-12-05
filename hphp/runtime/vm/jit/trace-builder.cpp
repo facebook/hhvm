@@ -406,36 +406,41 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
 
   SSATmp* result = nullptr;
 
-  if (m_state.enableCse() && inst->canCSE()) {
-    result = m_state.cseLookup(inst, idoms);
+  if (m_enableSimplification) {
+    result = m_simplifier.simplify(inst);
     if (result) {
-      // Found a dominating instruction that can be used instead of inst
-      FTRACE(1, "  {}cse found: {}\n",
-             indent(), result->inst()->toString());
-
-      assert(!inst->consumesReferences());
+      inst = result->inst();
       if (inst->producesReference(0)) {
-        // Replace with an IncRef
-        FTRACE(1, "  {}cse of refcount-producing instruction\n", indent());
-        gen(IncRef, result);
-        return result;
-      } else {
+        // This effectively prevents CSE from kicking in below, which
+        // would replace the instruction with an IncRef.  That is
+        // correct if the simplifier morphed the instruction, but it's
+        // incorrect if the simplifier returned one of original
+        // instruction sources.  We currently have no way to
+        // distinguish the two cases, so we prevent CSE completely for
+        // now.
         return result;
       }
     }
   }
 
-  if (m_enableSimplification) {
-    result = m_simplifier.simplify(inst);
-    if (result) {
-      // Found a simpler instruction that can be used instead of inst
-      FTRACE(1, "  {}simplification returned: {}\n",
-             indent(), result->inst()->toString());
-      assert(inst->hasDst());
-      return result;
+  if (m_state.enableCse() && inst->canCSE()) {
+    SSATmp* cseResult = m_state.cseLookup(inst, idoms);
+    if (cseResult) {
+      // Found a dominating instruction that can be used instead of inst
+      FTRACE(1, "  {}cse found: {}\n",
+             indent(), cseResult->inst()->toString());
+
+      assert(!inst->consumesReferences());
+      if (inst->producesReference(0)) {
+        // Replace with an IncRef
+        FTRACE(1, "  {}cse of refcount-producing instruction\n", indent());
+        gen(IncRef, cseResult);
+      }
+      return cseResult;
     }
   }
-  return nullptr;
+
+  return result;
 }
 
 SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {

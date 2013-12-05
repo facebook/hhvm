@@ -201,7 +201,7 @@ again:
     return;
   }
 
-  cellCopy(numericConvHelper(c1), c1);
+  cellSet(numericConvHelper(c1), c1);
   assert(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
   goto again;
 }

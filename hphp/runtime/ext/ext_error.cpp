@@ -144,14 +144,7 @@ bool f_error_log(const String& message, int message_type /* = 0 */,
     std::string line(message.data(),
                      // Truncate to 512k
                      message.size() > (1<<19) ? (1<<19) : message.size());
-
     Logger::Error(line);
-
-    if (!RuntimeOption::ServerExecutionMode() &&
-        Logger::UseLogFile && Logger::Output) {
-      // otherwise errors will go to error log without displaying on screen
-      std::cerr << line;
-    }
     return true;
   }
   case 3:

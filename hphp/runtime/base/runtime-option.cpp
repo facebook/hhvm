@@ -647,6 +647,9 @@ void RuntimeOption::Load(Hdf &config,
     Logger::UseCronolog = logger["UseCronolog"].getBool(false);
     if (Logger::UseLogFile) {
       LogFile = logger["File"].getString();
+      if (!RuntimeOption::ServerExecutionMode()) {
+        LogFile.clear();
+      }
       if (LogFile[0] == '|') Logger::IsPipeOutput = true;
       LogFileSymLink = logger["SymLink"].getString();
     }

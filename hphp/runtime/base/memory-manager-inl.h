@@ -32,6 +32,21 @@ static_assert(
 
 inline MemoryManager& MM() { return *MemoryManager::TlsWrapper::getNoCheck(); }
 
+template<class T, class... Args> T* smart_new(Args&&... args) {
+  auto const mem = MM().smartMallocSize(sizeof(T));
+  try {
+    return new (mem) T(std::forward<Args>(args)...);
+  } catch (...) {
+    MM().smartFreeSize(mem, sizeof(T));
+    throw;
+  }
+}
+
+template<class T> void smart_delete(T* t) {
+  t->~T();
+  MM().smartFreeSize(t, sizeof *t);
+}
+
 template<class T> T* smart_new_array(size_t count) {
   T* ret = static_cast<T*>(smart_malloc(count * sizeof(T)));
   size_t i = 0;

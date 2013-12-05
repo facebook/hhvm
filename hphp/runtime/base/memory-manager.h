@@ -77,6 +77,16 @@ void* smart_realloc(void* ptr, size_t nbytes);
 void  smart_free(void* ptr);
 
 /*
+ * Smart (de)allocate for non-POD C++-style stuff.  (Runs constructors
+ * and destructors.)
+ *
+ * Unlike the normal operator delete, smart_delete requires ~T() must
+ * be nothrow and that p is not null.
+ */
+template<class T, class... Args> T* smart_new(Args&&...);
+template<class T> void smart_delete(T* p);
+
+/*
  * Allocate an array of objects.  Similar to smart_malloc, but with
  * support for constructors.
  *

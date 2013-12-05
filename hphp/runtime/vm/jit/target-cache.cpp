@@ -448,14 +448,15 @@ void pmethodCacheMissPath(MethodCache* mce,
   methodCacheSlowerPath<Fatal>(mce, ar, name, cls);
 
   // If we fail to get the write lease, just let it stay unsmashed for
-  // now.  (We don't actually *need* the write lease for this, but
-  // it's currently required in debug builds if you want to write to
-  // the TC.)
+  // now.  We are using the write lease + whether the code is already
+  // smashed to determine which thread should free the
+  // MethodCachePrimeData---after getting the lease, we need to
+  // re-check if someone else smashed it first.
   LeaseHolder writer(Translator::WriteLease());
   if (!writer) return;
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
-    always_assert(isSmashable(addr + 2, 8));
+    always_assert(isSmashable(addr, 10));
     assert(addr[0] == 0x49 && addr[1] == 0xba);
     auto const ptr = reinterpret_cast<uintptr_t*>(addr + 2);
     if (!(*ptr & 1)) {

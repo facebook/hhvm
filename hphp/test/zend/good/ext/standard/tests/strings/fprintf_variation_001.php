@@ -4,7 +4,7 @@ $float_variation = array( "%f","%-f", "%+f", "%7.2f", "%-7.2f", "%07.2f", "%-07.
 $float_numbers = array( 0, 1, -1, 0.32, -0.32, 3.4. -3.4, 2.54, -2.54 );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/dump.txt';
+$data_file = dirname(__FILE__) . '/fprintf_variation_001.phpt.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

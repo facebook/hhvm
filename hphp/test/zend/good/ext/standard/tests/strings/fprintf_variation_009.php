@@ -4,7 +4,7 @@ $string_variation = array( "%5s", "%-5s", "%05s", "%'#5s" );
 $strings = array( NULL, "abc", 'aaa' );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/dump.txt';
+$data_file = dirname(__FILE__) . '/fprintf_variation_009.phpt.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

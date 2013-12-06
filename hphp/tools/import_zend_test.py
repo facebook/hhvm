@@ -758,6 +758,8 @@ def walk(filename, source_dir):
         test = test.replace('temp3.txt.gz', 'gzseek_variation5.gz')
     if '/ext/standard/tests/strings/vfprintf_' in full_dest_filename:
         test = test.replace('dump.txt', dest_filename + '.txt')
+    if '/ext/standard/tests/strings/fprintf_' in full_dest_filename:
+        test = test.replace('dump.txt', dest_filename + '.txt')
     if '/ext/standard/tests/file/touch_basic.php' in full_dest_filename:
         test = test.replace('touch.dat', 'touch_basic.dat')
     if '/ext/standard/tests/file/touch_variation2.php' in full_dest_filename:

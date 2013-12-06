@@ -186,13 +186,11 @@ public:
   std::string m_username;
   std::string m_password;
   std::string m_database;
-  std::string m_socket;
   bool m_last_error_set;
   int m_last_errno;
   std::string m_last_error;
   int m_xaction_count;
   bool m_multi_query;
-  String m_async_query;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

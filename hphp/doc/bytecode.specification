@@ -1,5 +1,5 @@
 **********************************
-* HipHop Bytecode v1 revision 17 *
+* HipHop Bytecode v1 revision 18 *
 **********************************
 
 
@@ -19,12 +19,12 @@ HHBC was designed with several competing goals in mind:
 an efficient execution engine, whether it be an interpreter or a just-in-time
 compiler.
 
-2) PHP 5.4 compatibility. It should be possible to compile valid PHP 5.4 source
+2) PHP 5.5 compatibility. It should be possible to compile valid PHP 5.5 source
 code into HipHop bytecode in a way that preserves the semantic meaning of the
 source.
 
 3) Simplicity. The design of HHBC should avoid features that could be removed
-or simplified without compromising PHP 5.4 compatibility, run-time efficiency,
+or simplified without compromising PHP 5.5 compatibility, run-time efficiency,
 or design cleanliness.
 
 
@@ -156,14 +156,23 @@ used to reference the formally declared parameters. Formal parameters without
 default values are called "required parameters", while formal parameters with
 default values are called "optional parameters".
 
-The bytecode for each function consists of the instructions of the primary
-function body, optionally followed by the instructions for one or more fault
-funclets. The metadata for each function specifies one or more entry points for
-the primary function body, along with information about each fault funclet.
-Entry points and fault funclets are discussed in more detail in the next
-section. The total size of the bytecode for the primary function body and all
-the fault funclets must not exceed 2^31 - 1 bytes. The primary function body
-and each fault funclet must be a contiguous range of bytecode.
+The bytecode for each function is partitioned into a primary function body and
+0 or more fault funclets. The metadata for each function specifies how many
+fault funclets the function has. For the primary function body, the metadata
+specifies a set of non-overlapping ranges of bytecode that compose the primary
+function body, and it specifies the main entry point and 0 or more DV entry
+points (entry points are discussed in more detail in the "Entry points"
+section). For each fault funclet, the metadata specifies a set of non-
+overlapping ranges of bytecode that compose the fault funclet body, and it
+specifies an entry point for the fault funclet. The primary function body and
+the fault funclets may not overlap with each other, and the union of the
+primary function body and the fault funclets must cover all of the function's
+bytecode. Fault funclets are discussed in more detail in the "Exception handler
+(EH) table" and "Processing exceptions" sections.
+
+The total size of the bytecode for the primary function body and all the fault
+funclets must not exceed 2^31 - 1 bytes. The bytecode for a function must be
+one contiguous range of bytecode.
 
 Each function's metadata provides a "line number table" to allow mapping
 bytecode offsets back to source line numbers. Each row in the line number table
@@ -173,11 +182,11 @@ beginning of each instruction in the function must belong to exactly one of the
 ranges of bytecode in the line number table.
 
 
-Entry points and fault funclets
--------------------------------
+Entry points
+------------
 
-Entry points come in three varieties: the main entry point, DV entry points,
-and catch entry points.
+Entry points come in four varieties: the main entry point, DV entry points,
+fault entry points, and catch entry points.
 
 Every function has exactly one main entry point. When a function is called, the
 dispatcher will set the PC of the new frame to point to the main entry point if
@@ -197,70 +206,19 @@ table".  Each row in the entry point table consists of a number of arguments
 and the bytecode offset of the entry point that should be used by the
 dispatcher (either the main entry point or a DV entry point).
 
-Catch entry points are used to implement "catch" blocks in source code. When an
-exception is thrown and the unwinder identifies a matching catch, after it
-unwinds the stack it will transfer control to the catch entry point that
-corresponds to the matching catch. The caught exception object can be retrieved
-by the bytecode using the Catch instruction.
+Fault entry points are used by the unwinder to enter fault funclets as
+appropriate to perform necessary cleanup when a region of code exits abnormally
+through an exception. For a function with N fault funclets there are exactly N
+fault entry points (one fault entry point per fault funclet). The bytecode
+offset of a fault entry point must be inside its corresponding fault funclet.
 
-Fault funclets are used to perform necessary cleanup when a region of code
-exits abnormally through an exception. When an exception is thrown that exits a
-region protected by a fault funclet, the unwinder will transfer control to the
-fault funclet. When a fault funclet executes the Unwind instruction, it
-transfers control back to the unwinder. Fault funclets are referred to by the
-bytecode offset of their first instruction.
+Catch entry points are used by the unwinder to resume normal execution once a
+matching "catch" block has been found and all the necessary cleanup has been
+performed.
 
-Catch entry points and fault funclets are used by the unwinder when processing
-an exception. The exact details about how the unwinder uses catch entry points
-and fault funclets is covered in the next section.
-
-
-Exceptions
-----------
-
-The metadata for each function provides an "exception handler (EH) table".
-Each row in the EH table consists of a kind ("fault" or "catch"), a range
-of bytecode that constitutes the protected region, and an offset of a fault
-funclet or list of (classname, offset) pairs describing catch entry points.
-
-Each range of bytecode is given by a starting offset and an ending
-offset, where the starting offset is the bytecode offset at the beginning of
-the first instruction in the range and the ending offset is the bytecode offset
-after the last instruction in the range. For any pair of protected regions,
-one of the following must hold: (1) the regions are disjoint and do not
-overlap, or (2) one of the regions must be nested inside the other region.
-
-The offset for each catch target in a "catch" EH row must be within the
-primary function body.  The handler offsets listed in either type of EH
-row do not need to be unique; i.e. they may appear as a target in multiple
-rows.
-
-When an exception is thrown, control is transferred to the unwinder. The
-unwinder starts with the current frame and consults the EH table of the
-corresponding function. The unwinder visits each row in the EH table whose
-protected region protects the instruction pointed to by the current PC,
-starting with the row of the innermost protected region, then the row of the
-next innermost protected region, and so forth. If two rows have identical
-protected regions, the row occurring first in the EH table will be visited
-first.
-
-When the unwinder visits a "fault" kind protected region, it transfers control
-to the corresponding fault funclet. When the fault funclet ends, it transfers
-control back to the unwinder with the Unwind instruction.
-
-When the unwinder visits a "catch" kind protected region, it considers each
-catch target in the order they appear in the list. If the exception's type is
-compatible with type of exception handled by the catch block, the unwinder
-transfers control to the corresponding catch entry point, and normal execution
-resumes. Otherwise, the unwinder continues visiting protected regions
-searching for a matching catch.
-
-If the unwinder visits all of the relevant protected regions in the current
-frame's EH table and is unable to find a matching catch, the unwinder pops the
-current frame off of the call stack, and repeats the process with the previous
-frame on the call stack. If the unwinder is unable to find a matching catch and
-pops every frame off the call stack, it transfers control to the unhandled
-exception facility.
+More details about the unwinder, fault funclets, fault entry points, catch
+entry points can be found in the "Exception handler (EH) table" and "Processing
+exceptions" sections.
 
 
 Unit metadata
@@ -312,8 +270,8 @@ by reference.
 
 In addition to the evaluation stack, each frame also contains another stack
 called the FPI stack. Each entry on the FPI stack consists of a reference to an
-FPI structure and a bytecode address of a function. The entry on the top of the
-FPI stack is called the "current FPI".
+FPI structure and a bytecode address of entry point into the corresponding
+function. The entry on the top of the FPI stack is called the "current FPI".
 
 The FPush* instructions push a new entry onto the FPI stack, initializing the
 entry with a reference to the FPI structure for a given function and the
@@ -353,6 +311,127 @@ main entry point or a DV entry point) based on the number of parameters passed.
 When the callee executes the Ret* instruction, the dispatcher pushes the return
 value onto the caller's evaluation stack. Then the dispatcher destroys the
 callee's frame and transfers control back to the caller.
+
+
+Exception handler (EH) table
+----------------------------
+
+The metadata for each function provides an "exception handler (EH) table".
+Each row in the EH table (called an "EH entry") consists of a kind ("fault"
+or "catch"), a non-negative integer "region depth", a set of non-overlapping
+ranges of bytecode that compose the "protected region", and an offset of a
+fault funclet (if it's a "fault" EH entry) or a list of [class name, catch
+entry point] pairs (if it's a "catch" EH entry).
+
+Each range of bytecode is given by a starting offset and an ending offset,
+where the starting offset is the bytecode offset of the first byte of the first
+instruction in the range and the ending offset is the bytecode offset after the
+last byte of the last instruction in the range.
+
+Note that two or more EH entries may refer to the same fault funclet or the
+same catch entry points. Regardless of whether multiple EH entries share the
+same fault funclet or the same catch entry points, each EH entry in the EH
+table will be considered to declare a distinct "protected region".
+
+The EH entries in each EH table must honor the following rules:
+
+1) If an EH entry covers one or more bytes of the primary function body, then
+it may not cover any bytes in any fault funclets. If an EH entry covers one or
+more bytes of a fault funclet, then it may not cover any bytes in the primary
+function body or in other fault funclets.
+
+2) If a catch EH entry covers one or more bytes of the primary function body,
+then its catch entry points must point to instructions in the primary function
+body. If a catch EH entry covers one or more bytes of a fault funclet F, then
+its catch entry points must point to instructions in fault funclet F.
+
+3) For each EH entry with a region depth of D and a protected region P, for all
+other protected regions Q that overlap with P, one of the following must be
+true: (i) Q has a region depth that is greater than D and P is a superset of
+(or equal to) Q; or (ii) Q has a region depth that is less than D and P is a
+subset of (or equal to) Q.
+
+4) For each EH entry with a region depth of D and a protected region P, for
+each integer I where 0 <= I < D there must be exactly one protected region Q in
+the EH table where Q's region depth equals I and P overlaps with Q.
+
+
+Processing exceptions
+---------------------
+
+The unwinder maintains a stack of exception infos called the "exception stack".
+An "exception info" is a record that contains an exception object, a reference
+to a frame on the call stack, a program counter (PC), and a non-negative
+integer "region depth". When a thread of execution first begins, the exception
+stack is initially empty.
+
+HHBC allows programs to throw exceptions via the Throw instruction. When a
+Throw instruction executes, it pushes a new exception info to the top of the
+exception stack that contains the thrown exception object, a reference to the
+frame that threw the exception, the PC at the time the exception was thrown,
+and a region depth of D where D equals the number of protected regions in the
+current frame's EH table that cover PC. Then it transfers control to the
+unwinder which starts processing the exception info at the top of the exception
+stack by following the steps given at the end of this section starting with
+step 1 until control is transferred elsewhere.
+
+HHBC also provides an Unwind instruction to allow a fault funclet to return
+control back to the unwinder when it has finished its work. When the Unwind
+instruction executes, it transfers control to the unwinder and the unwinder
+resumes processing the exception info at the top of the exception stack by
+following the steps below starting at step 1 until control is transferred
+elsewhere.
+
+Here are the steps that the unwinder follows to process the exception info at
+the top of the stack (called the "current exception info"):
+
+Step 1) Consult the EH table of the current exception info's function. Check if
+        there are any EH entries that cover the current exception info's PC and
+        have a region depth that is less than the current exception info's
+        region depth. If one or more matching EH entries are found, choose the
+        EH entry with the greatest region depth and continue on to step 2. If
+        no matching EH entries are found go to step 5.
+
+Step 2) Let E be the EH entry found in step 1, and let D be the region depth
+        of E. Set the current exception info's region depth to D (overwriting
+        the previous value). Continue on to step 3.
+
+Step 3) If E is a fault EH entry, transfer control to E's fault funclet's entry
+        point; eventually control will be transferred back to the unwinder,
+        either via the Unwind instruction or via another exception being
+        thrown with the Throw instruction. Otherwise continue on to step 4.
+
+Step 4) E is a catch EH entry. Consult E's list of [class name, catch entry
+        point] pairs. Check if there are any pairs in the list where the
+        exception's type is compatible with the pair's class name. If one or
+        more matching pairs are found, choose the one that occurs first in E's
+        list and transfer control to that pair's catch entry point; the catch
+        entry point begins with a Catch instruction which will take care of
+        popping the current exception info off of the exception stack. If no
+        matching pair is found, go to step 1.
+
+Step 5) Check if the current exception info's PC is in a fault funclet. If
+        it's not, continue to step 6. If it is, read the exception X from the
+        current exception info and then pop the current exception info off of
+        the exception stack. Then, read the new current exception info's
+        exception Y, update exception X so that it's "previous" property chains
+        to exception Y, and then update the new current exception info to point
+        to exception X instead of exception Y. Then go to step 1.
+
+Step 6) The current exception info's PC is in the primary function body. Pop
+        the current frame off of the call stack and then check if the call
+        stack is empty. If the call stack is empty, read the current exception
+        info's exception X, clear the exception stack, and transfer control to
+        the unhandled exception facility passing along exception X. If the call
+        stack is not empty continue to step 7.
+
+Step 7) Update the current exception info to refer to the new current frame at
+        the top of the call stack, and set the current exception info's PC to
+        point to the FCall* instruction which immediately precedes the PC of
+        the current frame. Next, set the current exception info's region depth
+        to D, where D equals the number of protected regions in the current
+        frame's EH table that cover the current exception info's PC. Then go to
+        step 1.
 
 
 Property access
@@ -617,56 +696,62 @@ function body may not jump into the code for the funclets. Similarly, the code
 for a funclet may not jump into the code for the primary function body or
 another funclet.
 
-7) The primary function body and each fault funclet must end with one of the
-following instructions: Jmp, Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw,
-NativeImpl, or ContHandle. The primary function body may not contain the Unwind
-instruction. Also, fault funclets may not contain the Ret* instructions.
+7) Any bytecode instruction inside the primary function body or a fault funclet
+that is immediately followed by an instruction not inside the same primary
+function body or fault funclet must be one of the following instructions: Jmp,
+Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, NativeImpl, or ContHandle. 
 
-8) Each FPI region enumerated in the FPI region table must start with an FPush*
-instruction and it must end with an FCall* instruction. Each use of the FPush*
-instruction must be the first instruction in exactly one FPI region. Likewise,
-each use of the FCall* instruction must be the last instruction in exactly one
-FPI region. Finally, the FPass* instructions may not be used outside an FPI
-region.
+8) The primary function body may not contain the Unwind instruction, and fault
+funclets may not contain the Ret* instructions. Also, each catch entry point
+must point to a Catch instruction.
 
-9) Each FPI region may not contain backward jumps, nor may it contain
-forward jumps that jump outside the end of the FPI region.  Also, there may
-not be jumps anywhere in the function that transfer control from the outside
-of a given FPI region to the inside of that region.  An FPI region may not
-contain the Ret*, Unwind, Throw, or Fatal instructions.  Finally, an FPI
-region may not contain a catch, fault, or DV entry offset.
+9) Each FPI region enumerated in the FPI region table must start immediately
+after an FPush* instruction and it must end with an FCall* instruction. Each
+use of the FPush* instruction must be the instruction immediately before
+exactly one FPI region. Likewise, each use of the FCall* instruction must be
+the last instruction in exactly one FPI region. Finally, FPass* instructions
+may not be used outside an FPI region.
 
-10) The depth of the FPI stack at any given point in the bytecode must be the
+10) Each FPI region may not contain backward jumps, nor may it contain forward
+jumps that jump outside the end of the FPI region. Also, there may not be jumps
+anywhere in the function that transfer control from the outside of a given FPI
+region to the inside of that region. An FPI region may not contain the Ret*,
+Unwind, Throw, or Fatal instructions. Finally, an entry point may not point to
+an instruction inside an FPI region.
+
+11) The depth of the FPI stack at any given point in the bytecode must be the
 same for all possible control flow paths. Also, for any given FPI region that
 passes n parameters, all possible control flow paths from the beginning of the
 region to the end must pass through exactly n FPass* instructions associated
 with the region which pass the parameters in forward order.
 
-11) Given an evaluation stack of depth n after an FPush* instruction, the
+12) Given an evaluation stack of depth n after an FPush* instruction, the
 evaluation stack before the corresponding FCall* instruction must also have a
 depth of n. Likewise, the evaluation stack after corresponding FPass*
 instructions must have a depth of n as well. Finally, no instruction between an
 FPush* and its corresponding FCall* may consume any of the values from the
 evaluation stack that were pushed onto the stack before the FPush* instruction.
 
-12) The initialization state of each iterator variable must be known at
-every point in the code and must be the same for all control paths.  There
-are four possible states: (1) uninitialized, (2) "iter-initialized"
-(initialized via IterInit*), (3) "miter-initialized" (initialized via
-MIterInit*), and (4) "cuf-initialized" (initialized via DecodeCufIter).
-Every range of bytecode for which an iterator variable i is initialized must
-be protected by a fault funclet that unsets i by calling IterFree,
-MIterFree, or CIterFree, so that when the unwinder or dispatcher pops the
-current frame, each iterator variable is uninitialized.
+13) The initialization state of each iterator variable must be known at every
+point in the code and must be the same for all control paths. There are four
+possible states: (1) uninitialized, (2) "iter-initialized" (initialized via
+IterInit*), (3) "miter-initialized" (initialized via MIterInit*), and (4)
+"cuf-initialized" (initialized via DecodeCufIter). Every range of bytecode for
+which an iterator variable i is initialized must be protected by a fault
+funclet that unsets i by calling IterFree, MIterFree, or CIterFree.
 
-13) The iterator variable referenced by IterInit* or MIterInit* or
+14) The iterator variable referenced by IterInit* or MIterInit* or
 DecodeCufIter must be in the uninitialized state when the instruction
 executes. An iterator variable referenced by IterNext* and IterFree must be
 in the "iter-initialized" state, an iterator variable referenced by MIterNext*
 or MIterFree must be in the "miter-initialized" state, and an iterator variable
 referenced by FPushCufIter or CIterFree must be in the citer-initialized state.
-Note that IterInit* and MIterInit* conditionally initialize the iterator variable,
-and IterNext* and MIterNext* conditionally free the iterator variable.
+Note that IterInit* and MIterInit* conditionally initialize the iterator
+variable, and IterNext* and MIterNext* conditionally free the iterator
+variable.
+
+15) Each EH table must follow all of the rules specified in the "Exception
+handler (EH) table" section.
 
 
 Instruction set
@@ -3769,7 +3854,7 @@ AKExists    [C C] -> [C:Bool]
 
   Checks if array (object) in $1 contains key (property) in $2 and
   pushes the resulting boolean onto the stack.  If $2 is null, uses
-  the empty string as key.  Throws a fatal error if $1 is not an array
+  the empty string as key. Throws a fatal error if $1 is not an array
   or object, and raises a warning if $2 is not a string, integer, or
   null.
 
@@ -4043,7 +4128,9 @@ for the pseudo-main function.
 Not yet implemented
 -------------------
 
-HipHop bytecode v1 revision 16 does not implement the following:
+At the time of this writing, the HipHop bytecode specification is missing the
+following details:
+
 1) Description of traits
 2) Description of metadata for class statements, trait statements, and method
    statements
@@ -4052,7 +4139,8 @@ HipHop bytecode v1 revision 16 does not implement the following:
 5) Description of the resource type
 6) Definitions of operators (ex. +, -, !) and other helper functions (ex.
    is_null, get_class, strlen)
-7) Support for the PHP 5.3 namespace feature
+7) High level description of how namespaces are dealt with and any relevant
+   details
 
 
 Source code to HHBC examples

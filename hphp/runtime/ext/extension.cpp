@@ -155,9 +155,12 @@ void Extension::InitModules() {
   assert(s_registered_extensions);
   bool wasInited = SystemLib::s_inited;
   LitstrTable::get().setWriting();
+  auto const wasDB = RuntimeOption::EvalDumpBytecode;
+  RuntimeOption::EvalDumpBytecode &= ~1;
   SCOPE_EXIT {
     SystemLib::s_inited = wasInited;
     LitstrTable::get().setReading();
+    RuntimeOption::EvalDumpBytecode = wasDB;
   };
   SystemLib::s_inited = false;
   for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();

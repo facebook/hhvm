@@ -4444,7 +4444,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       TYPE_CHECK_INSTR(double, Dbl)
       TYPE_CHECK_INSTR(real, Dbl)
       TYPE_CHECK_INSTR(float, Dbl)
-      TYPE_CHECK_INSTR(scalar, Scalar)
+
 #undef TYPE_CHECK_INSTR
         // fall through
       }

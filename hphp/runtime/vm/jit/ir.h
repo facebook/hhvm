@@ -307,7 +307,6 @@ O(InstanceOfBitmask,           D(Bool), S(Cls) CStr,                       C) \
 O(NInstanceOfBitmask,          D(Bool), S(Cls) CStr,                       C) \
 O(IsType,                      D(Bool), S(Cell),                           C) \
 O(IsNType,                     D(Bool), S(Cell),                           C) \
-O(IsScalarType,                D(Bool), S(Cell),                           C) \
   /* there is a conditional branch for each of the above query ops */         \
 O(JmpGt,                       D(None), S(Gen) S(Gen),                     E) \
 O(JmpGte,                      D(None), S(Gen) S(Gen),                     E) \

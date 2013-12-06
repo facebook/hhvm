@@ -432,7 +432,6 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
   case UnboxPtr:      return simplifyUnboxPtr(inst);
   case IsType:
   case IsNType:       return simplifyIsType(inst);
-  case IsScalarType:  return simplifyIsScalarType(inst);
   case CheckInit:     return simplifyCheckInit(inst);
 
   case JmpZero:
@@ -1529,18 +1528,6 @@ SSATmp* Simplifier::simplifyIsType(IRInstruction* inst) {
   // At this point, either the tested type is a subtype of the src type, or they
   // are non-disjoint but neither is a subtype of the other. We can't simplify
   // this away.
-  return nullptr;
-}
-
-SSATmp* Simplifier::simplifyIsScalarType(IRInstruction* inst) {
-  SSATmp* src = inst->src(0);
-  if (src->type().isKnownDataType()) {
-    if (src->isA(Type::Int | Type::Dbl | Type::Str | Type::Bool)) {
-      return cns(true);
-    } else {
-      return cns(false);
-    }
-  }
   return nullptr;
 }
 

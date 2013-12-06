@@ -4711,14 +4711,13 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetL(IOP_ARGS) {
 
 OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
   switch (op) {
-  case IsTypeOp::Null:   return is_null(tvAsCVarRef(tv));
-  case IsTypeOp::Bool:   return is_bool(tvAsCVarRef(tv));
-  case IsTypeOp::Int:    return is_int(tvAsCVarRef(tv));
-  case IsTypeOp::Dbl:    return is_double(tvAsCVarRef(tv));
-  case IsTypeOp::Arr:    return is_array(tvAsCVarRef(tv));
-  case IsTypeOp::Obj:    return is_object(tvAsCVarRef(tv));
-  case IsTypeOp::Str:    return is_string(tvAsCVarRef(tv));
-  case IsTypeOp::Scalar: return f_is_scalar(tvAsCVarRef(tv));
+  case IsTypeOp::Null:  return is_null(tvAsCVarRef(tv));
+  case IsTypeOp::Bool:  return is_bool(tvAsCVarRef(tv));
+  case IsTypeOp::Int:   return is_int(tvAsCVarRef(tv));
+  case IsTypeOp::Dbl:   return is_double(tvAsCVarRef(tv));
+  case IsTypeOp::Arr:   return is_array(tvAsCVarRef(tv));
+  case IsTypeOp::Obj:   return is_object(tvAsCVarRef(tv));
+  case IsTypeOp::Str:   return is_string(tvAsCVarRef(tv));
   }
   not_reached();
 }

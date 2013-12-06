@@ -630,10 +630,6 @@ D:Bool = IsNTypeMem<T> S0:PtrToGen
   IsTypeMem (IsNTypeMem) sets D to true iff the value referenced by S0
   is (not) of type T.
 
-D:Bool = IsScalarType S0:Cell
-
-  Returns true if S0 is of type Int, Bool, Dbl or Str. Returns false otherwise.
-
 D:Bool = IsWaitHandle S0:Obj
 
   Sets D to true iff S0 is a subclass of WaitHandle.

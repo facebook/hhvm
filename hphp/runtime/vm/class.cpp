@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/enum-cache.h"
 #include "hphp/util/util.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/base/rds.h"
@@ -246,6 +247,8 @@ Class::~Class() {
     Func* meth = methods.popFront();
     if (meth) Func::destroy(meth);
   }
+  // clean enum cache
+  EnumCache::deleteValues(this);
 }
 
 void Class::releaseRefs() {

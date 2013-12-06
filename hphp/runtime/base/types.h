@@ -567,7 +567,7 @@ enum Attr {
   AttrPersistent    = (1 << 17), //    X                X    //
   AttrDeepInit      = (1 << 18), //            X             //
   AttrHot           = (1 << 19), //                     X    //
-  AttrBuiltin       = (1 << 20), //                     X    //
+  AttrBuiltin       = (1 << 20), //    X                X    //
   AttrAllowOverride = (1 << 21), //                     X    //
   AttrSkipFrame     = (1 << 22), //                     X    //
   AttrNative        = (1 << 23), //                     X    //

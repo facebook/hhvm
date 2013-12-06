@@ -70,6 +70,9 @@ void PreClassEmitter::init(int line1, int line2, Offset offset, Attr attrs,
   m_attrs = attrs;
   m_parent = parent;
   m_docComment = docComment;
+  if (!SystemLib::s_inited) {
+    m_attrs = m_attrs | AttrBuiltin;
+  }
 }
 
 PreClassEmitter::~PreClassEmitter() {

@@ -937,11 +937,8 @@ Array f_hphp_get_class_info(CVarRef name) {
 
   // attributes
   {
-    if (false) {
+    if (cls->attrs() & AttrBuiltin) {
       ret.set(s_internal,  true_varNR);
-    }
-    if (false && ClassInfo::HipHopSpecific) {
-      ret.set(s_hphp,      true_varNR);
     }
     if (cls->attrs() & AttrFinal) {
       ret.set(s_final,     true_varNR);

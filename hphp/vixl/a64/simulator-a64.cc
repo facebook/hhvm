@@ -2141,11 +2141,14 @@ void Simulator::DoHostCall(Instruction* instr) {
   }
 
   // Trash all caller-saved registers
-  auto callerSaved = CPURegList::GetCallerSaved();
-  while (!callerSaved.IsEmpty()) {
-    auto reg = callerSaved.PopLowestIndex();
-    set_xreg(reg.code(), 0xf00dbeef);
+  for (auto code = 1; code < kFirstCalleeSavedRegisterIndex; code++) {
+    // Add the code to the magic number to leave a clue as to where a bogus
+    // value may have come from
+    set_xreg(code, 0xf00dbeeff00dbeef + code);
   }
+
+  // The link register, also caller-saved
+  set_xreg(30, 0xf00dbeeff00dbeef + 30);
 
   set_xreg(0, result);
 

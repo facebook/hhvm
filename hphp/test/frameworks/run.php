@@ -1843,21 +1843,24 @@ class Runner {
       if ($status === null) {
         $status = Statuses::UNKNOWN;
         $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL;
-        $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
+        $this->fatal_information .= $this->getTestRunStr($test,
+                                                         "RUN TEST FILE: ").
                                     PHP_EOL.PHP_EOL;
         $this->stat_information = $this->name.PHP_EOL.$status.PHP_EOL;
         $continue_testing = false;
         break;
       } else if ($status === Statuses::TIMEOUT) {
         $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL;
-        $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
+        $this->fatal_information .= $this->getTestRunStr($test,
+                                                         "RUN TEST FILE: ").
                                     PHP_EOL.PHP_EOL;
         $this->stat_information = $this->name.PHP_EOL.$status.PHP_EOL;
         $continue_testing = false;
         break;
       } else if ($this->checkForFatals($status)) {
         $this->fatal_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL;
-        $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
+        $this->fatal_information .= $this->getTestRunStr($test,
+                                                         "RUN TEST FILE: ").
                                     PHP_EOL.PHP_EOL;
         $status = Statuses::FATAL;
         $this->stat_information = $this->name.PHP_EOL.$status.PHP_EOL;
@@ -1867,7 +1870,8 @@ class Runner {
         // Warnings are special. We may get one or more warnings, but then
         // a real test status will come afterwards.
         $this->error_information .= $test.PHP_EOL.$status.PHP_EOL.PHP_EOL;
-        $this->error_information .= $this->getTestRunStr("RUN TEST FILE: ").
+        $this->error_information .= $this->getTestRunStr($test,
+                                                         "RUN TEST FILE: ").
                                     PHP_EOL.PHP_EOL;
         continue;
       }
@@ -1925,7 +1929,8 @@ class Runner {
                 " and now is ".$status.PHP_EOL, !Options::$csv_only);
         $this->diff_information .= "----------------------".PHP_EOL;
         $this->diff_information .= $test.PHP_EOL.PHP_EOL;
-        $this->diff_information .= $this->getTestRunStr("RUN TEST FILE: ").
+        $this->diff_information .= $this->getTestRunStr($test,
+                                                        "RUN TEST FILE: ").
                                    PHP_EOL.PHP_EOL;
         $this->diff_information .= "EXPECTED: ".$this->framework->
                                    getCurrentTestStatuses()[$test].PHP_EOL;
@@ -1945,7 +1950,8 @@ class Runner {
         $this->diff_information .= "----------------------".PHP_EOL;
         $this->diff_information .= "Maybe haven't see this test before: ".
                                    $test.PHP_EOL.PHP_EOL;
-        $this->diff_information .= $this->getTestRunStr("RUN TEST FILE: ").
+        $this->diff_information .= $this->getTestRunStr($test,
+                                                        "RUN TEST FILE: ").
                                    PHP_EOL.PHP_EOL;
       } else {
         verbose(Colors::GRAY.Statuses::PASS.Colors::NONE, !Options::$csv_only);
@@ -1997,7 +2003,8 @@ class Runner {
         if (preg_match($this->framework->getTestNamePattern(), $line) === 1) {
           $print_blanks = true;
           $this->error_information .= PHP_EOL.
-                                      $this->getTestRunStr("RUN TEST FILE: ").
+                                      $this->getTestRunStr($line,
+                                                           "RUN TEST FILE: ").
                                       PHP_EOL.PHP_EOL;
         }
       }
@@ -2125,11 +2132,24 @@ class Runner {
     return false;
   }
 
-  private function getTestRunStr(string $prologue = "",
+  private function getTestRunStr(string $test = "", string $prologue = "",
                                  string $epilogue = ""): string {
     $test_run =  $prologue;
     $test_run .= " cd ".$this->framework->getTestPath()." && ";
-    $test_run .= $this->actual_test_command;
+    $test_run .= rtrim(str_replace("2>&1", "", $this->actual_test_command));
+    // If a framework is not being run in parallel (e.g., being run like normal
+    // phpunit for the entire framework), then the actual_test_command would
+    // not contain the individual test by default. So add it. Pear is a current
+    // example of this behavior. This way we have a more accurate command for
+    // users to run individual tests that have different statuses than
+    // expected.
+    if (!$this->framework->isParallel() && $test !== "") {
+      // Re-add __DIR__ if not there so we have a full test path to run
+      if (strpos($test, __DIR__) !== 0) {
+        $test = __DIR__."/".$test;
+      }
+      $test_run .= " ".$test;
+    }
     return $test_run;
   }
 }

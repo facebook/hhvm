@@ -491,7 +491,7 @@ std::string Process::GetCPUModel() {
   do_cpuid(0, regs);
 
   const int vendor_size = sizeof(regs[1])*3;
-
+  std::swap(regs[2], regs[3]);
   uint32_t cpu_exthigh = 0;
   if (memcmp(regs + 1, "GenuineIntel", vendor_size) == 0 ||
       memcmp(regs + 1, "AuthenticAMD", vendor_size) == 0) {

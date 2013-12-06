@@ -141,6 +141,10 @@ int PlainFile::getc() {
   return File::getc();
 }
 
+String PlainFile::read() {
+  return File::read();
+}
+
 String PlainFile::read(int64_t length) {
   if (length) m_eof = false;
   return File::read(length);

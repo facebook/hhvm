@@ -235,17 +235,12 @@ Variant f_stream_get_contents(CResRef handle, int maxlen /* = -1 */,
 
   String ret;
   if (maxlen != -1) {
-    ret = String(maxlen, ReserveString);
-    char *buf = ret.bufferSlice().ptr;
-    maxlen = file->readImpl(buf, maxlen);
     if (maxlen < 0) {
       return false;
     }
-    ret.setSize(maxlen);
+    ret = file->read(maxlen);
   } else {
-    StringBuffer sb;
-    sb.read(file);
-    ret = sb.detach();
+    ret = file->read();
   }
   return ret;
 }

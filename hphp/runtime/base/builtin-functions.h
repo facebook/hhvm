@@ -81,6 +81,9 @@ String concat4(const String& s1, const String& s2, const String& s3,
 inline void echo(const char *s) {
   g_context->write(s);
 }
+inline void echo(const char *s, int len) {
+  g_context->write(s, len);
+}
 inline void echo(const String& s) {
   g_context->write(s);
 }

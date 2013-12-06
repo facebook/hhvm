@@ -721,7 +721,7 @@ Variant f_printf(int _argc, const String& format, CArrRef _argv /* = null_array 
   int len = 0; char *output = string_printf(format.data(), format.size(),
                                             _argv, &len);
   if (output == NULL) return false;
-  echo(output); free(output);
+  echo(output, len); free(output);
   return len;
 }
 
@@ -729,7 +729,7 @@ Variant f_vprintf(const String& format, CArrRef args) {
   int len = 0; char *output = string_printf(format.data(), format.size(),
                                             args, &len);
   if (output == NULL) return false;
-  echo(output); free(output);
+  echo(output, len); free(output);
   return len;
 }
 

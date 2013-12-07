@@ -1471,7 +1471,7 @@ struct InterpStepper : boost::static_visitor<void> {
 
   void operator()(const bc::AsyncAwait& op) {
     popC();
-    push(TCell);
+    push(TInitCell);
     push(TBool);
   }
   void operator()(const bc::AsyncESuspend&) {

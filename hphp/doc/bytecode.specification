@@ -184,19 +184,18 @@ dispatcher will set the PC of the new frame to point to the main entry point if
 either (1) the function does not have any optional parameters or (2) the caller
 provides values for all of the optional parameters.
 
-DV entry points are used to handle initializing optional parameters that the
-caller did not provide. Each DV entry point enters into a corresponding basic
-block of instructions that operates directly on the appropriate local variable
-to set it to its default value. These basic blocks fall through directly into
-one another and the last basic block ends with a jump to the main entry point.
-The dispatcher selects the appropriate DV entry point based on the number of
-arguments passed into the function.
+DV entry points are normally used to handle initializing optional parameters
+that the caller did not provide.  Generally the DV entries contain blocks that
+initialize parameters, and then fall through directly into one another, with
+the last block ending with a jump to the main entry point.  This is not a
+requirement, however.  The dispatcher selects the appropriate DV entry point
+based on the number of arguments passed into the function.
 
 The main entry point and DV entry points are used by the dispatcher when
 handling a function call. Each function's metadata provides an "entry point
-table". Each row in the entry point table consists of a number of arguments and
-the bytecode offset of the entry point that should be used by the dispatcher
-(either the main entry point or a DV entry point).
+table".  Each row in the entry point table consists of a number of arguments
+and the bytecode offset of the entry point that should be used by the
+dispatcher (either the main entry point or a DV entry point).
 
 Catch entry points are used to implement "catch" blocks in source code. When an
 exception is thrown and the unwinder identifies a matching catch, after it

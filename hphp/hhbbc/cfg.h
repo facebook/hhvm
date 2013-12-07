@@ -140,9 +140,12 @@ void forEachNormalSuccessor(const php::Block& block, Fun f) {
 std::vector<borrowed_ptr<php::Block>> rpoSortFromMain(const php::Func&);
 
 /*
- * Obtain the blocks for a function in a reverse post order, starting
- * from the main entry point, and prepend each of the DV entry blocks
- * in parameter order.
+ * Obtain the blocks for a function in a reverse post order, taking
+ * into account all entry points.
+ *
+ * This can be thought of as an RPO on the CFG of Func starting from a
+ * virtual empty "entry" block, with edges to each DV entry point and
+ * an edge to the main entry point.
  */
 std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func&);
 

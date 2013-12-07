@@ -65,22 +65,31 @@ struct EmitUnitState {
  *   - Each funclet must have all of its blocks contiguous, with the
  *     entry block first.
  *
- *   - DV init entry points must fall through into each other, the
- *     final one makes a backward jump to the main entry point.
- *     TODO(#3116551): relax this rule
- *
  *   - Main entry point must be the first block.
+ *
+ * It is not a requirement, but we attempt to locate all the DV entry
+ * points after the rest of the primary function body.  The normal
+ * case for DV initializers is that each one falls through to the
+ * next, with the block jumping back to the main entry point.
  */
 std::vector<borrowed_ptr<php::Block>> order_blocks(const php::Func& f) {
   auto sorted = rpoSortFromMain(f);
 
-  // Add the DV initializers after the rpo from the main entry point.
-  for (auto& p : f.params) {
-    if (p.dvEntryPoint) sorted.push_back(p.dvEntryPoint);
-  }
+  // Get the DV blocks, without the rest of the primary function body,
+  // and then add them to the end of sorted.
+  auto const dvBlocks = [&] {
+    auto withDVs = rpoSortAddDVs(f);
+    withDVs.erase(
+      std::find(begin(withDVs), end(withDVs), sorted.front()),
+      end(withDVs)
+    );
+    return withDVs;
+  }();
+  sorted.insert(end(sorted), begin(dvBlocks), end(dvBlocks));
 
-  // The stable sort will keep the DV init entries after all other
-  // main code, and move fault funclets after all that.
+  // This stable sort will keep the blocks only reachable from DV
+  // entry points after all other main code, and move fault funclets
+  // after all that.
   std::stable_sort(
     begin(sorted), end(sorted),
     [&] (borrowed_ptr<php::Block> a, borrowed_ptr<php::Block> b) {
@@ -544,13 +553,15 @@ void exn_path(std::vector<const php::ExnNode*>& ret, const php::ExnNode* n) {
   ret.push_back(n);
 }
 
+// Return the count of shared elements in the front of two forward
+// ranges.
 template<class ForwardRange1, class ForwardRange2>
 size_t shared_prefix(ForwardRange1& r1, ForwardRange2& r2) {
   auto r1it = begin(r1);
   auto r2it = begin(r2);
   auto const r1end = end(r1);
   auto const r2end = end(r2);
-  size_t ret = 0;
+  auto ret = size_t{0};
   while (r1it != r1end && r2it != r2end && *r1it == *r2it) {
     ++ret; ++r1it; ++r2it;
   }

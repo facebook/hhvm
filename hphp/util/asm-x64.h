@@ -74,7 +74,7 @@ const uint8_t kOpsizePrefix = 0x66;
  * physical registers for different instructions (e.g. xmm0 and rax
  * are both 0).
  *
- * This type is mainly published for backward compatability with the
+ * This type is mainly published for backward compatibility with the
  * APIs that look like store_reg##_disp_reg##, which predate the
  * size-specific types.  (Some day it may become internal to this
  * module.)
@@ -84,7 +84,7 @@ enum class RegNumber : int {};
 struct Reg64 {
   explicit constexpr Reg64(int rn) : rn(rn) {}
 
-  // Implicit conversion for backward compatability only.  This is
+  // Implicit conversion for backward compatibility only.  This is
   // needed to keep the store_reg##_disp_reg## style apis working.
   constexpr /* implicit */ operator RegNumber() const { return RegNumber(rn); }
 
@@ -1909,7 +1909,7 @@ public:
 public:
   /*
    * The following functions are an older API to the assembler, which
-   * still partially exist here for backward compatability.
+   * still partially exist here for backward compatibility.
    *
    * Our ordering convention follows the gas standard of "destination
    * last": <op>_<src1>_<src2>_<dest>. Be warned that Intel manuals go the

@@ -251,18 +251,20 @@ struct StepFlags {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Propagate>
+template<class Propagate, class PropagateThrow>
 struct InterpStepper : boost::static_visitor<void> {
   explicit InterpStepper(const Index* index,
                          Context ctx,
                          State& st,
                          StepFlags& flags,
-                         Propagate propagate)
+                         Propagate propagate,
+                         PropagateThrow propagateThrow)
     : m_index(*index)
     , m_ctx(ctx)
     , m_state(st)
     , m_flags(flags)
     , m_propagate(propagate)
+    , m_propagateThrow(propagateThrow)
   {}
 
   void operator()(const bc::Nop&)  { nothrow(); }
@@ -1831,21 +1833,25 @@ private: // member instructions
   template<class Op>
   void miImpl(const Op& op, const MInstrInfo& info, const MVector& mvec) {
     auto state = MInstrState { &info, mvec };
+    // The state before miBase is propagated because wasPEI will be
+    // true.
     state.base = miBase(state, mvec);
+    miThrow();
     for (auto mInd = size_t{0}; mInd < mvec.mcodes.size() - 1; ++mInd) {
       miIntermediate(state, mvec.mcodes[mInd]);
+      // Note: this one might not be necessary: review whether member
+      // instructions can ever modify local types on itermediate dims.
+      miThrow();
     }
     miFinal(op, state, mvec.mcodes[mvec.mcodes.size() - 1]);
   }
 
+  // MInstrs can throw in between each op, so the states of locals
+  // need to be propagated across factored exit edges.
+  void miThrow() { m_propagateThrow(m_state); }
+
   template<class Op>
   void minstr(const Op& op) {
-    /*
-     * FIXME: we probably need to propagate states across the factored
-     * exit edges *mid instruction*.  (A member-instruction could
-     * throw in a intermediate dim after it's modified the type of a
-     * local.)
-     */
     miImpl(op, getMInstrInfo(Op::op), op.mvec);
   }
 
@@ -2143,6 +2149,7 @@ private:
   State& m_state;
   StepFlags& m_flags;
   Propagate m_propagate;
+  PropagateThrow m_propagateThrow;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2183,24 +2190,29 @@ struct Interpreter {
 
   template<class Propagate>
   StepFlags step(const Bytecode& op, Propagate propagate) {
-    auto flags = StepFlags{};
+    auto propagate_throw = [&] (const State& state) {
+      for (auto& factored : m_blk.factoredExits) {
+        propagate(*factored, without_stacks(state));
+      }
+    };
 
     // Make a copy of the state (except stacks) in case we need to
     // propagate across a factored exit.
     auto const stateBefore = without_stacks(m_state);
 
-    InterpStepper<Propagate> stepper(&m_index,
-                                     m_ctx,
-                                     m_state,
-                                     flags,
-                                     propagate);
+    auto flags = StepFlags{};
+    InterpStepper<Propagate,decltype(propagate_throw)> stepper(
+      &m_index,
+      m_ctx,
+      m_state,
+      flags,
+      propagate,
+      propagate_throw);
     visit(op, stepper);
 
     if (flags.wasPEI) {
       FTRACE(2, "   PEI.\n");
-      for (auto& factored : m_blk.factoredExits) {
-        propagate(*factored, stateBefore);
-      }
+      propagate_throw(stateBefore);
     }
 
     return flags;

@@ -1259,7 +1259,6 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void operator()(const bc::FCallBuiltin& op) {
-    // TODO(Builtin)
     for (auto i = uint32_t{0}; i < op.arg1; ++i) popT();
     specialFunctionEffects(op.str3);
     push(TInitGen);

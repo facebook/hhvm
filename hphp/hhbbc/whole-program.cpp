@@ -175,39 +175,6 @@ void optimize(Index& index, php::Program& program) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * TODO list:
- *
- *   - Builtin classes and functions; grep for TODO(Builtin).  They
- *     won't come through in this UnitEmitter set, but probably we
- *     should just assume systemlib is loaded and just use
- *     Unit::loadFunc and such to inspect them.
- *
- *   - support hhas files in this mode; (but we can't while it's
- *     relying on WholeProgram=true).
- *
- *   - Type operations on subtypes of TObj could use the Index and be
- *     a lot smarter.  Right now we're very conservative about it.
- *
- *   - We generate incorrect line numbers for classes that emitter.cpp
- *     decided not to emit DefCls opcodes for.
- *
- *   - Make the options runtime-configurable.
- *
- *   - Resolve functions for static class methods, ctors.
- *
- *   - Propagate global define() constants.
- *
- *   - Constant fold AddNewElem and NewPackedArray and stuff.
- *
- *   - Branching on the result of an isType operation could add
- *     information constraining the type of tested to the state on
- *     either side.
- *
- *   - Better implementations of MVec bytecodes
- *
- */
-
 std::vector<std::unique_ptr<UnitEmitter>>
 whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
               const Options& opts) {

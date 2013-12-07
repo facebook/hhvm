@@ -221,7 +221,7 @@ bool Type::couldBe(Type o) const {
    * object/class, because we currently don't look at the inheritance
    * chain.
    *
-   * TODO: use res::Class::couldBe
+   * TODO(#3343798): use res::Class::couldBe
    */
   if (Type(isect).subtypeOf(TObj)) return true;
   if (Type(isect).subtypeOf(TCls)) return true;
@@ -401,9 +401,9 @@ Type union_of(Type a, Type b) {
   X(TCStr)
   X(TSArr)
   X(TCArr)
-  // TODO_3: TObj/TCls unions can be smarter if they both have data,
-  // and if res::Class provides enough info (least common ancestor,
-  // etc).
+  // TODO(#3343798): TObj/TCls unions can be smarter if they both have
+  // data, and if res::Class provides enough info (least common
+  // ancestor, etc).
   X(TObj)
   X(TCls)
   X(TNull)

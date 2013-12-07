@@ -358,16 +358,18 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
    * Duplicate method names override parent methods, unless the parent
    * method is final, in which case it's a resolution error.
    */
-  if (!isIface) for (auto& m : rparent->cls->methods) {
-    if (m->attrs & AttrAbstract) continue;
-    auto& mptr = rleaf->methods[m->name];
-    if (mptr) {
-      if (mptr->attrs & AttrFinal) return false;
-      if (!(mptr->attrs & AttrPrivate)) {
-        assert(!(mptr->attrs & AttrNoOverride));
+  if (!isIface) {
+    for (auto& m : rparent->cls->methods) {
+      if (m->attrs & AttrAbstract) continue;
+      auto& mptr = rleaf->methods[m->name];
+      if (mptr) {
+        if (mptr->attrs & AttrFinal) return false;
+        if (!(mptr->attrs & AttrPrivate)) {
+          assert(!(mptr->attrs & AttrNoOverride));
+        }
       }
+      mptr = borrow(m);
     }
-    mptr = borrow(m);
   }
 
   return true;

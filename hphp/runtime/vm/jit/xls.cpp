@@ -20,7 +20,9 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/util/asm-x64.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/arch.h"
 
 #include <unordered_set>
 #include <algorithm>
@@ -40,7 +42,15 @@
 namespace HPHP { namespace JIT {
 namespace {
 using namespace Transl;
+using namespace reg;
 struct Interval;
+
+// machine-specific register conventions
+struct Abi {
+  static auto const NumRegs = kNumRegs;
+  RegSet gprs;
+  RegSet saved;
+};
 
 typedef StateVector<SSATmp, Interval> Intervals;
 typedef IdSet<SSATmp> LiveSet;
@@ -116,7 +126,7 @@ public:
 // data structures we use during the algorithm so we don't have
 // to pass them around everywhere.
 struct XLS {
-  XLS(IRUnit& unit, RegAllocInfo& regs);
+  XLS(IRUnit& unit, RegAllocInfo& regs, const Abi&);
   void allocate();
   // phases
   void prepareBlocks();
@@ -150,11 +160,12 @@ private:
   int m_numSplits { 0 };
   IRUnit& m_unit;
   RegAllocInfo& m_regs;
+  const Abi& m_abi;
   StateVector<IRInstruction, unsigned> m_posns;
   smart::vector<IRInstruction*> m_insts;
   BlockList m_blocks;
-  Interval m_scratch[kNumRegs];
-  Interval m_blocked[kNumRegs];
+  Interval m_scratch[Abi::NumRegs];
+  Interval m_blocked[Abi::NumRegs];
   StateVector<Block,LiveSet> m_liveIn;
   smart::vector<Interval*> m_pending;
   smart::vector<Interval*> m_active;
@@ -174,7 +185,7 @@ struct RegPositions {
   unsigned operator[](int r) const { return posns[r]; }
   void setPos(Interval*, unsigned pos);
 private:
-  unsigned posns[kNumRegs];
+  unsigned posns[Abi::NumRegs];
 };
 
 bool checkBlockOrder(IRUnit& unit, BlockList& blocks);
@@ -319,21 +330,21 @@ RegPair Interval::regs() const {
 
 //////////////////////////////////////////////////////////////////////////////
 
-XLS::XLS(IRUnit& unit, RegAllocInfo& regs)
+XLS::XLS(IRUnit& unit, RegAllocInfo& regs, const Abi& abi)
   : m_intervals(unit, Interval())
   , m_unit(unit)
   , m_regs(regs)
+  , m_abi(abi)
   , m_posns(unit, 0)
   , m_liveIn(unit, LiveSet())
   , m_between(unit, nullptr)
   , m_before(unit, nullptr)
   , m_after(unit, nullptr) {
-  auto const GPR = kAllRegs - kXMMRegs;
-  for (int r = 0; r < kNumRegs; ++r) {
+  for (int r = 0; r < Abi::NumRegs; ++r) {
     m_blocked[r].blocked = true;
     m_blocked[r].need = 1;
     m_blocked[r].info.setReg(PhysReg(r), 0);
-    if (!GPR.contains(PhysReg(r))) {
+    if (!m_abi.gprs.contains(PhysReg(r))) {
       // r is never available
       m_blocked[r].add(LiveRange(0, kMaximalPos));
     }
@@ -426,7 +437,8 @@ void XLS::buildIntervals() {
       stress = std::max(dst_need, stress);
       if (inst.isNative()) {
         if (RuntimeOption::EvalHHIREnableCalleeSavedOpt) {
-          kCallerSaved.forEach([&](PhysReg r) {
+          auto scratch = m_abi.gprs - m_abi.saved;
+          scratch.forEach([&](PhysReg r) {
             m_scratch[int(r)].add(LiveRange(spos, dpos));
           });
         }
@@ -454,7 +466,7 @@ void XLS::buildIntervals() {
     print(" after building intervals ");
   }
   stress += RuntimeOption::EvalHHIRNumFreeRegs;
-  for (int r = 0; r < kNumRegs; r++) {
+  for (int r = 0; r < Abi::NumRegs; r++) {
     if (m_blocked[r].start() > 0) {
       if (stress > 0) {
         stress--;
@@ -513,7 +525,7 @@ RegPositions::RegPositions() {
 std::pair<int,int> RegPositions::max2Reg() const {
   unsigned max1 = 0, max2 = 0;
   int r1 = 0, r2 = 0;
-  for (int r = 0; r < kNumRegs; ++r) {
+  for (int r = 0; r < Abi::NumRegs; ++r) {
     if (posns[r] > max2) {
       if (posns[r] > max1) {
         r2 = r1; max2 = max1;
@@ -1170,10 +1182,24 @@ bool checkBlockOrder(IRUnit& unit, BlockList& blocks) {
 }
 //////////////////////////////////////////////////////////////////////////////
 
+namespace {
+const Abi x64_abi {
+  kAllRegs - kXMMRegs,
+  kCalleeSaved
+};
+
+const Abi arm_abi {
+  // For now this is the same as x64, since we're pretending arm
+  // has the same register conventions as x64.
+  kAllRegs - kXMMRegs,
+  kCalleeSaved
+};
+}
+
 // This is the public entry-point
 RegAllocInfo allocateRegs(IRUnit& unit) {
   RegAllocInfo regs(unit);
-  XLS xls(unit, regs);
+  XLS xls(unit, regs, arch() == Arch::ARM ? arm_abi : x64_abi);
   xls.allocate();
   if (dumpIREnabled()) {
     dumpTrace(kRegAllocLevel, unit, " after extended alloc ", &regs,

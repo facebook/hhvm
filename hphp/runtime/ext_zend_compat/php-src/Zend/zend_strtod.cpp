@@ -177,7 +177,7 @@ typedef unsigned long int uint32_t;
 #define ULong   uint32_t
 
 #ifdef __cplusplus
-#include "malloc.h"
+#include "hphp/util/alloc.h"
 #include "memory.h"
 #else
 #ifndef KR_headers

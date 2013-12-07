@@ -17,6 +17,7 @@
 
 include(HPHPSetup)
 include(FollySetup)
+include(ExtZendCompat)
 
 # HHVM Build
 SET(USE_HHVM TRUE)

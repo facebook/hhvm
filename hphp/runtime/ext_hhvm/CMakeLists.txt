@@ -28,20 +28,32 @@ macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_OS EHHVM_ARCH)
 	                   COMMENT "Generating ext_hhvm wrapper for ${REL}")
 endmacro()
 
+macro(EXT_HHVM_DIR SOURCES HEADERS DIR)
+	string(LENGTH "${HPHP_HOME}/hphp/runtime/" HPHP_DIR_LEN)
+	auto_sources(files "*.cpp" "RECURSE" "${DIR}")
+	foreach (f ${files})
+		if (NOT ${f} MATCHES "(.ext_hhvm.cpp|/(old-)?tests?/)")
+			string(LENGTH ${f} f_LEN)
+			math(EXPR f_REL_LEN "${f_LEN} - ${HPHP_DIR_LEN}")
+			string(SUBSTRING ${f} ${HPHP_DIR_LEN} ${f_REL_LEN} f_REL)
+			EXT_HHVM_FILE(${SOURCES} ${HEADERS} ${f_REL} ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
+		endif()
+	endforeach()
+endmacro()
+
 # Generate ext_hhvm stubs for ext/*.cpp
-string(LENGTH "${HPHP_HOME}/hphp/runtime/" HPHP_DIR_LEN)
-auto_sources(files "*.cpp" "RECURSE" "${HPHP_HOME}/hphp/runtime/ext")
-foreach (f ${files})
-	if (NOT ${f} MATCHES ".ext_hhvm.cpp")
-		string(LENGTH ${f} f_LEN)
-		math(EXPR f_REL_LEN "${f_LEN} - ${HPHP_DIR_LEN}")
-		string(SUBSTRING ${f} ${HPHP_DIR_LEN} ${f_REL_LEN} f_REL)
-		EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS ${f_REL} ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
-	endif()
-endforeach()
+EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS "${HPHP_HOME}/hphp/runtime/ext")
+
 # ...and explicitly for builtin-functions.cpp
 EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS "base/builtin-functions.cpp" ${EXT_HHVM_OS} ${EXT_HHVM_ARCH})
 
+# Pick up relevant zend_ext_compat stubs
+if (ZEND_COMPAT_BUILD_DIRS)
+	foreach (dir ${ZEND_COMPAT_BUILD_DIRS})
+		EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS ${dir})
+	endforeach()
+	list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ext_zend_compat.cpp")
+endif()
 
 #
 ## ext_hhvm_infotabs
@@ -50,11 +62,8 @@ EXT_HHVM_FILE(CXX_SOURCES CXX_HEADERS "base/builtin-functions.cpp" ${EXT_HHVM_OS
 set(INFOTABS_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/ext_hhvm_infotabs.h")
 set(INFOTABS_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/ext_hhvm_infotabs.cpp")
 
-# Exclude ext_zend_compact stuff
 auto_sources(HPHP_IDLS "*.idl.json" "RECURSE" "${HPHP_HOME}/hphp/system/idl")
-foreach (zext calendar ftp gettext mongo oauth yaml)
-	list(REMOVE_ITEM HPHP_IDLS "${HPHP_HOME}/hphp/system/idl/${zext}.idl.json")
-endforeach ()
+ZEND_COMPAT_STRIP_IDLS(HPHP_IDLS ${ZEND_COMPAT_EXCLUDE_IDLS})
 
 # Generate ext_hhvm_infotabs.h based on ext_hhvm files being generated
 file(WRITE ${INFOTABS_HEADER} "")

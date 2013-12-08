@@ -448,7 +448,8 @@ std::string show(Type t) {
   }
 
   if (t.m_data) {
-    if (t.m_bits != BObj && t.m_bits != BCls) {
+    if (t.m_bits != BObj && t.m_bits != BCls &&
+        t.m_bits != BOptObj) {
       folly::toAppend("=", &ret);
     }
 

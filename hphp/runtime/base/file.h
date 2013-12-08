@@ -127,6 +127,8 @@ public:
 
   int64_t bufferedLen() { return m_writepos - m_readpos; }
 
+  int64_t getPosition() { return m_position; }
+
   std::string getMode() { return m_mode; }
 
   /**

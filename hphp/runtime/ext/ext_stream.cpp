@@ -233,6 +233,9 @@ Variant f_stream_get_contents(CResRef handle, int maxlen /* = -1 */,
     return false;
   }
 
+  if (offset == -1 && file->getPosition() > 0) {
+    offset = file->getPosition();
+  }
   if (offset >= 0 && !file->seek(offset, SEEK_SET) ) {
     raise_warning("Failed to seek to position %d in the stream", offset);
     return false;

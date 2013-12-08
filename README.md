@@ -1,6 +1,6 @@
 # HHVM [![Build Status](https://travis-ci.org/facebook/hhvm.png?branch=master)](https://travis-ci.org/facebook/hhvm)
 
-HHVM (aka the HipHop Virtual Machine) is a new open-source virtual machine designed for executing programs written in PHP. HHVM uses a just-in-time compilation approach to achieve superior performance while maintaining the flexibility that PHP developers are accustomed to. To date, HHVM (and its precedessor HPHPc before it) has realized over a 9x increase in web request throughput and over a 5x reduction in memory consumption for Facebook compared with the Zend PHP 5.2 engine + APC.
+HHVM (aka the HipHop Virtual Machine) is a new open-source virtual machine designed for executing programs written in PHP. HHVM uses a just-in-time compilation approach to achieve superior performance while maintaining the flexibility that PHP developers are accustomed to. To date, HHVM (and its predecessor HPHPc before it) has realized over a 9x increase in web request throughput and over a 5x reduction in memory consumption for Facebook compared with the Zend PHP 5.2 engine + APC.
 
 HHVM can be run as a standalone webserver (i.e. without the Apache webserver and the "modphp" extension). HHVM can also be used together with a FastCGI-based webserver, and work is in progress to make HHVM work smoothly with Apache.
 

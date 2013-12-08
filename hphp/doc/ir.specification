@@ -35,7 +35,7 @@ programs used for just in time compilation, with these goals:
 The unit of compilation is the Trace, which is a sequence of Blocks of
 Instructions that produce and consume Variables.  Blocks are single-entry,
 single-exit sequences of instructions (i.e. basic blocks).  Instructions may
-be annotated with Type which modifies the instruction's behavior.  Each
+be annotated with Type which modifies the instruction's behaviour.  Each
 Variable has a Type which describes the set of values it may hold at
 the point it is defined.  Instructions may have side effects, which occur
 in execution order.
@@ -88,7 +88,7 @@ Types
 Types in the IR are used in several contexts.  In all cases, a Type represents
 a set of runtime values, however, a Type's meaning depends on the context
 in which it appears.  A type which annotates an instruction (like IsType)
-modifies its behavior, extending its opcode.  The type of each source
+modifies its behaviour, extending its opcode.  The type of each source
 parameter restricts the type of any variable used by that parameter.
 A variable's type describes the set of values it may hold at the point it is
 defined.
@@ -175,7 +175,7 @@ can be on the stack.
   StackElem       {Gen|Cls}
 
 In the instruction descriptions below, we also use a "Const" prefix on
-several types loosly, which means the operand must be the requested
+several types loosely, which means the operand must be the requested
 type and must be a compile-time constant.  The optimizer relies on
 accessing the value of those operands.
 
@@ -195,7 +195,7 @@ is not this strict; during IR generation, we overload instruction type
 and types known at points *after* definition, due to guards.  e.g.  after
 a guard, we change src->instr->type to the refined type, then propagate this
 backwards through copies.  This effectively uses IRInstruction::m_type as
-a scratch variable, which is only valid at certian times during construction).
+a scratch variable, which is only valid at certain times during construction).
 This is probably unsound in later passes; after such a refinement,
 instructions using the variable before the guard see the refined type.
 
@@ -206,7 +206,7 @@ Instructions
 An instruction is an executable operation with zero or more inputs (sources),
 zero or one result (destination), and possible side effects such as accessing
 memory, doing I/O, and which may branch or throw an exception.  Some
-instructions have a Type parameter which modifies its behavior.
+instructions have a Type parameter which modifies its behaviour.
 
 Each instruction has a signature which describes its effect, parameter types,
 and return type, for example:
@@ -218,7 +218,7 @@ then the opcode name, and source parameters.  Types are to the right of the
 entities they modify, separated by : for results, sources, and variables,
 or delimited by <> for instruction modifiers.
 
-Instruction flags further describe their behavior:
+Instruction flags further describe their behaviour:
 
 HasDest
 NaryDest
@@ -250,7 +250,7 @@ MemEffects
   Indicates that the instruction has side effects on memory that
   cannot be rolled back.  If this bit isn't set, it means it is ok to
   redo whatever work the instruction did without changing observable
-  program behavior.
+  program behaviour.
 
   This flag is currently unused, but may be used later to share exit
   traces.
@@ -310,7 +310,7 @@ ModifiesStack
 HasStackVersion
 
   This instruction has a counterpart that returns a StkPtr in addition to any
-  primary destination. The behavior of the stack-modifying version is otherwise
+  primary destination. The behaviour of the stack-modifying version is otherwise
   identical.
 
 MInstrProp
@@ -497,7 +497,7 @@ D:Dbl            = OpCeil   S0:Dbl
   Integer/boolean arithmetic.  Performs the operation described by the
   opcode name on S0 and S1, and puts the result in D.
 
-  Undefined behavior occurs if OpMod is given a divisor of zero, or if
+  Undefined behaviour occurs if OpMod is given a divisor of zero, or if
   the divisor is -1 and the dividend is the minimum representable integer.
 
   AbsInt and AbsDbl compute the absolute value of an integer or double
@@ -666,7 +666,7 @@ D:None = JmpNZero S0:{Bool|Int} L:Label
 
 D:None JmpSwitchDest<JmpSwitchData> S0:Int
 
-  Jump to the target of a switch stamement using table metadata
+  Jump to the target of a switch statement using table metadata
   <JmpSwitchData> and index S0.
 
 CheckSurpriseFlags -> B
@@ -1811,7 +1811,7 @@ ContArIncKey S0:FramePtr
 
   Special-case key update for continuation, ActRec of which is S0,
   which increments the key of a continuation if that continuation's key
-  is an Int. This will cause undefined behavior if the continuation's key
+  is an Int. This will cause undefined behaviour if the continuation's key
   is not an Int.
 
 ContArUpdateIdx S0:FramePtr S1:Int

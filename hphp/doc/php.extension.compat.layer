@@ -42,7 +42,7 @@ One of the core issues that the PHP Extension Compatibility Layer must address
 is how to reconcile PHP's way and HHVM's way of representing program values and
 operating on program values. This includes the shape of the object graph in the
 heap (what points to what), how refcounting is done and how "reffiness" is
-handled, how copy-on-write semantics are honored, how values are stored into
+handled, how copy-on-write semantics are honoured, how values are stored into
 arrays, and so forth.
 
 One of the core ideas here is that HHVM supports "boxing" a program value via
@@ -154,7 +154,7 @@ value slots share an array "by value" under PHP vs. HHVM:
 Under PHP, a zval exclusively "owns" the array it points to, and the array
 itself does not have a refcount field. Instead of having multiple things point
 to the same array, sharing "by value" is achieved by having multiple things
-point to the zval that exclusivey owns the array (with the zval's is_ref flag
+point to the zval that exclusively owns the array (with the zval's is_ref flag
 set to 0). When the PHP runtime or a PHP extension wants to mutate an array,
 the SEPARATE_ZVAL_IF_NOT_REF() macro is used, which makes a copy of the zval
 and the array it points to iff the zval's refcount is 2 or greater and the

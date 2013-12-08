@@ -19,7 +19,7 @@ Default is false. When turned on, order-dependent function or class declaration
 vs. existence testing can work. When turned off, some function_exists(),
 class_exists(), get_defined_functions() or get_declared_classes() may return
 different results than PHP does. Most programs don't have dependencies on their
-behaviors, so this is recommended to leave as off.
+behaviours, so this is recommended to leave as off.
 
 = EnableEval
 

@@ -36,7 +36,7 @@ cluster: (default) The generated C++ code is divided up among a fixed number of 
 file: There is one C++ source file generated for each input PHP file. The paths to generated C++ files mirror the paths to the PHP files.
 sys: This is used to generate the C++ used for the system library.
 exe: This is the same as cluster but also compiles the generated C++ into an executable.
-lib: The same as cluster but compiles the generated C++ into a libraray.
+lib: The same as cluster but compiles the generated C++ into a library.
 
 If the target is <b>run</b>, FORMAT can be either cluster or file. These behave
 the same as the corresponding formats for cpp. However, with run the generated
@@ -163,7 +163,7 @@ the translated sources.
 = --no-min-include=BOOL (default: false)
 
 If BOOL is true, then minimum include analysis will not be performed for an
-analyze target.
+analyse target.
 
 = --no-meta-info=BOOL (default: false)
 

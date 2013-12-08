@@ -36,7 +36,7 @@ Each HipHop source file is compiled into a separate "compilation unit", or
 
 A unit's bytecode is an array of bytes encoding a sequence of HHBC
 instructions, where each instruction is encoded using one or more bytes. This
-specification defines an instruction set and defines the behavior of each HHBC
+specification defines an instruction set and defines the behaviour of each HHBC
 instruction, but the exact byte values used to encode HHBC instructions is
 currently unspecified.
 
@@ -74,7 +74,7 @@ instruction to execute. When the execution engine executes an instruction, the
 current PC is updated to point to the next instruction. By default, the current
 PC is updated to point to the byte that sequentially follows the last byte of
 the current instruction in the bytecode. Some instructions override the default
-behavior and explicitly update the current PC in a specific way.
+behaviour and explicitly update the current PC in a specific way.
 
 HHBC provides special instructions to allow for calling a function and
 returning from a function. When a function is called, a new frame is pushed
@@ -99,26 +99,26 @@ Values
 
 HHBC instructions may push and pop values on the current frame's evaluation
 stack and they may read and write values to the current frame's local
-variables. Values come in three flavors: cells, refs, and classrefs.
+variables. Values come in three flavours: cells, refs, and classrefs.
 
 A "cell" is a structure that contains a type identifier and either data (for
 non-refcounted types) or a pointer to data (for refcounted types). When a
 cell containing a pointer is duplicated, the new cell will point to the same
 data as the original cell. When a cell containing a pointer is duplicated or
-discarded, the execution engine is responsible for honoring the data's refcount
+discarded, the execution engine is responsible for honouring the data's refcount
 logic.
 
 A "ref" is a structure that contains a pointer to a cell container. When a
 ref is duplicated, the new ref will point to the same container as the
 original ref. When a ref is duplicated or destroyed, the execution engine is
-responsible for honoring the container's refcount logic.  When the container
+responsible for honouring the container's refcount logic.  When the container
 is destroyed, the cell it contains is also destroyed.
 
 A "classref" is a structure that contains a reference to a class. When a
 classref is pushed onto the stack or popped of the stack, no refcounting is
 required.
 
-Values on the evaluation stack may be any of the three flavors listed above.
+Values on the evaluation stack may be any of the three flavours listed above.
 Values stored in local variables may only be cells or refs.
 
 
@@ -360,7 +360,7 @@ Property access
 ---------------
 
 As object properties are accessed during execution, the execution engine is
-responsible for following certain rules to honor each property's accessibility
+responsible for following certain rules to honour each property's accessibility
 and visibility.
 
 The accessibility and visibility of a property in a given class is determined
@@ -423,7 +423,7 @@ named N. In cases where there are multiple distinct properties named N, the
 visibility rules are used to determine which property is retrieved. If there is
 a visible private property P named N, then property P is retrieved. Otherwise,
 if there is a visible non-private property Q named N, then property Q is
-retrieved. If there is no visible property named N, the behavior is determined
+retrieved. If there is no visible property named N, the behaviour is determined
 by the specific instruction. The semantic checks and the visibility rules
 ensure that for any context there cannot be more than one visible private
 property, and there cannot be more than one visible non-private property.
@@ -455,7 +455,7 @@ Static property access
 ----------------------
 
 As a class's static properties are accessed during execution, the execution
-engine is responsible for following certain rules to honor each static
+engine is responsible for following certain rules to honour each static
 property's accessibility and visibility.
 
 The accessibility and visibility of a static property in a given class is
@@ -537,25 +537,25 @@ Flavor descriptors
 ------------------
 
 Any given value on the stack must either be a cell, ref, or classref at run
-time. However, at bytecode generation time the specific flavor of a value on
-the stack is not always known. HipHop bytecode uses symbols called "flavor
+time. However, at bytecode generation time the specific flavour of a value on
+the stack is not always known. HipHop bytecode uses symbols called "flavour
 descriptors" to precisely describe what is known at bytecode generation about
 the state of the evaluation stack at each instruction boundary.
 
-Each instruction description specifies the flavor descriptor produced for each
-of its outputs. Each description also specifies the flavor descriptor consumed
+Each instruction description specifies the flavour descriptor produced for each
+of its outputs. Each description also specifies the flavour descriptor consumed
 for each of the instruction's inputs.
 
-Here is a description of each flavor descriptor:
+Here is a description of each flavour descriptor:
 
   C - cell; specifies that the value must be a cell at run time
   V - ref; specifies that the value must be a ref at run time
   A - classref; specifies that the value must be a classref at run time
   R - return value; specifies that the value may be a cell or a ref at run
-        time; this flavor descriptor is used for return values from function
+        time; this flavour descriptor is used for return values from function
         calls
   F - function argument; specifies that the value may be a cell or a ref at run
-        time; this flavor descriptor is used for parameter values that are
+        time; this flavour descriptor is used for parameter values that are
         about to be passed into a function
   U - uninit; specifies that the value must be an uninitialized null at run
         time; this is only used for FCallBuiltin
@@ -564,21 +564,21 @@ Here is a description of each flavor descriptor:
 Verifiability
 -------------
 
-Because instructions specify constraints on the flavor descriptor of each
+Because instructions specify constraints on the flavour descriptor of each
 input, it is important to be able to determine if a given HHBC program
 satisfies these constraints. A program that satisfies the constraints on the
-inputs to each instruction is said to be "flavor-safe".
+inputs to each instruction is said to be "flavour-safe".
 
 HHBC provides a set of verification rules that can be mechanically applied to
-verify that an HHBC program is flavor-safe. All valid HHBC programs must be
-verifiably flavor-safe, and the execution engine may refuse to execute HHBC
+verify that an HHBC program is flavour-safe. All valid HHBC programs must be
+verifiably flavour-safe, and the execution engine may refuse to execute HHBC
 programs that cannot be verified.
 
 At bytecode generation time, what is known about the state of the evaluation
-stack at a given instruction boundary can be precisely described using flavor
+stack at a given instruction boundary can be precisely described using flavour
 descriptors.
 
-In addition to being flavor-safe, there are other invariants that valid
+In addition to being flavour-safe, there are other invariants that valid
 HHBC programs must uphold with respect to metadata and how certain instructions
 are used.
 
@@ -587,14 +587,14 @@ executed does not come from a trusted source, it is the responsibility of the
 bytecode execution engine to verify that these invariants hold.
 
 1) The depth of the evaluation stack at any given point in the bytecode must
-the same for all possible control flow paths. The flavor descriptor of any
+the same for all possible control flow paths. The flavour descriptor of any
 given slot on the evaluation stack at any given point in the bytecode must the
 same for all possible control flow paths.
 
 2) No instruction may consume more values from the evaluation stack than are
-available at that given point in the bytecode. Likewise, the flavor descriptor
+available at that given point in the bytecode. Likewise, the flavour descriptor
 of each slot on the evaluation stack must be compatible with the instruction's
-inputs' flavor descriptors.
+inputs' flavour descriptors.
 
 3) The evaluation stack must be empty at any offset listed as a catch
 entry point.
@@ -605,9 +605,9 @@ ContHandle instruction, the evaluation stack before executing the given
 instruction must be empty.
 
 5) Before executing the RetC instruction, the evaluation stack must contain
-exactly one value and the flavor descriptor of the value must be cell.
+exactly one value and the flavour descriptor of the value must be cell.
 Likewise, before executing the RetV instruction, the evaluation stack must
-contain exactly one value and the flavor descriptor of the value must be the
+contain exactly one value and the flavour descriptor of the value must be the
 ref. Finally, before executing the Unwind instruction, the evaluation stack
 must be empty.
 
@@ -704,7 +704,7 @@ descriptions, "<T>" is used as shorthand to represent any one specific type.
 For example, a transition such as "[C:<T>] -> [C:<T>]" indicates that the type
 of value that the instruction pushes onto the stack will match the type of
 value that it consumed from the stack. Likewise, "<F>" is used as shorthand to
-represent any one specific flavor descriptor.
+represent any one specific flavour descriptor.
 
 $1 is used to refer to the value at the top of the evaluation stack, $2 is used
 to refer to the value directly below $1 on the evaluation stack, $3 is used to
@@ -1226,7 +1226,7 @@ Switch <offset vector> <base> <bounded>    [C]  ->  []
   Switch over integer case values. If bounded == 0, the implementation will
   assume that $1 is an integer in the range [0, length(vector)) and
   unconditionally transfer control to the location specified by
-  vector[$1]. Undefined behavior will result if $1 is not an integer inside
+  vector[$1]. Undefined behaviour will result if $1 is not an integer inside
   this range. If bounded != 0, the following rules take over:
 
   For a bounded Switch, the last two elements of the offset vector are special:
@@ -1297,7 +1297,7 @@ PushL <local variable id>    []  ->  [C]
 
   Teleport local value to eval stack. The local variable given by %1 must be
   defined and must not contain a reference. This instruction pushes the local's
-  value on the stack, then unsets it, equivalent to the behavior of UnsetL.
+  value on the stack, then unsets it, equivalent to the behaviour of UnsetL.
 
 CGetN    [C]  ->  [C]
 
@@ -1376,7 +1376,7 @@ AGetL <local variable id>    []  ->  [A]
   defined class. If y still does not match the name of a defined class this
   instruction throws a fatal error.
 
-  Next, this instruction pushs a classref that refers to the class named y.
+  Next, this instruction pushes a classref that refers to the class named y.
 
 
 6. Isset, Empty, and type querying instructions
@@ -1677,7 +1677,7 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   If x is an object, this instruction checks if the object has an __invoke
   method. If the object does not have an __invoke method, this instruction
   throws a fatal error. Otherwise this instruction pushes a new entry on the
-  FPI stack, intializing it with the number of parameters being passed (given
+  FPI stack, initialising it with the number of parameters being passed (given
   by %1) and a reference to the FPI structure for the __invoke method from
   object x.
 
@@ -1870,7 +1870,7 @@ FCall <num params>    [F..F]  ->  [R]
   from the stack to the callee as parameters, pops the current FPI off of the
   FPI stack, and then invokes the dispatcher to call the callee. When the
   callee returns, it will transfer the return value onto the caller's
-  evaluation stack using the R flavor.
+  evaluation stack using the R flavour.
 
 FCallArray    [F]  ->  [R]
 
@@ -1890,7 +1890,7 @@ FCallBuiltin  <total params> <passed params> <litstr id> [C|V|U..C|V|U]  -> [R]
   from the stack to the callee as parameters, and then invokes the dispatcher
   to call the callee. %2 denotes the number of non-default parameters pushed
   onto stack by user level code. When the callee returns, it will transfer
-  the return value onto the caller's evaluation stack using the R flavor.
+  the return value onto the caller's evaluation stack using the R flavour.
 
 
 9. Member operations
@@ -1911,9 +1911,9 @@ case, the base created contains a cell or a ref. In the latter case, the base
 created contains a reference to a memory location occupied by a cell or a ref.
 
 When a base that contains a cell is destroyed, if the cell points to data then
-the execution engine is responsible for honoring the data's refcount logic.
+the execution engine is responsible for honouring the data's refcount logic.
 Likewise when a base that contains a ref is destroyed, the execution engine is
-responsible for honoring the refcount logic of the cell container pointed to by
+responsible for honouring the refcount logic of the cell container pointed to by
 the ref. When a base that contains a reference to a memory location occupied
 by a cell or a ref is destroyed, no refcounting is required.
 
@@ -1921,11 +1921,11 @@ Some operations that take a base as input can modify that base as part of the
 work performed by the operation. Such operations are said to "set" the base to
 a new value. When a base that contains a cell or a reference to a memory
 location occupied by a cell is set to a new value, the new value overwrites the
-previous value contained in the cell (honoring the data refcount logic if the
+previous value contained in the cell (honouring the data refcount logic if the
 previous value was a refcounted type). When a base that contains a ref or a
 reference to a memory location occupied by a ref is set to the new value, the
 new value is written into the cell container referenced by the ref, overwriting
-the previous cell in that container (honoring the data refcount logic if the
+the previous cell in that container (honouring the data refcount logic if the
 previous cell was a refcounted type). Note that for bases that contain a
 reference to a memory location, "setting" the base does not change which memory
 location the base references.
@@ -2514,7 +2514,7 @@ SetElemC    [C C B]  ->  [C]
 
   If $1 is a non-empty string, this operation first computes x = (int)$3. If x
   is negative, this operation raises a warning and does nothing else. If x is
-  nonnegative, this operation appends spaces to the end of $1 as needed to
+  non-negative, this operation appends spaces to the end of $1 as needed to
   ensure that x is in bounds, then it computes y = substr((string)$2,0,1), and
   then it sets the character at index x in $1 equal to y (if y is not empty) or
   it sets the character at index x in $1 to "\0" (if y is empty). Then this
@@ -2539,7 +2539,7 @@ SetElemL <local variable id>    [C B]  ->  [C]
 
   If $1 is a non-empty string, this operation first computes x = (int)%1. If x
   is negative, this operation raises a warning and does nothing else. If x is
-  nonnegative, this operation appends spaces to the end of $1 as needed to
+  non-negative, this operation appends spaces to the end of $1 as needed to
   ensure that x is in bounds, then it computes y = substr((string)$2,0,1), and
   then it sets the character at index x in $1 equal to y (if y is not empty) or
   it sets the character at index x in $1 to "\0" (if y is empty). Then this
@@ -3394,11 +3394,11 @@ WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
   should receive the value (in %3) and key (in %4) for the iteration, in
   accordance with the type of iterator initialized in %1.
 
-  For the non-W* flavors of these instructions, the locals are stored to
-  with the same semantics as SetL (non-binding assignment).  The W* flavors
+  For the non-W* flavours of these instructions, the locals are stored to
+  with the same semantics as SetL (non-binding assignment).  The W* flavours
   of these instructions do a binding assignment to %3 if the rhs was a
   reference, or if not they unset the old value of the local and then do a
-  non-binding assignment.  The W* flavors still do a non-binding assignment
+  non-binding assignment.  The W* flavours still do a non-binding assignment
   to %4.
 
   The logical value is computed differently depending on the iterator type
@@ -3499,12 +3499,12 @@ WIterNextK <iterator id> <rel offset> <local id> <local id>   []  ->  []
   iterator initialized in %1.
 
   These locals are stored to with the same semantics as SetL (non-binding
-  assignment), except the W* flavors of these instructions do a "with
+  assignment), except the W* flavours of these instructions do a "with
   reference" assignment (i.e. the local gets a binding assignment if and only
   if the value to be assigned is already a reference).
 
   The semantics of how to determine what the key and value are depend on %1 in
-  an analagous way to {W,}IterInit{K,}.
+  an analogous way to {W,}IterInit{K,}.
 
 MIterNext  <iterator id> <rel offset> <local id>               []  ->  []
 MIterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
@@ -3726,7 +3726,7 @@ TraitExists        [C C]  ->  [C:Bool]
 VerifyParamType <parameter id>    []  ->  []
 
   Verify parameter type. Functions and methods can optionally specify the
-  types of arguments they will accept. These type constraints are memoized
+  types of arguments they will accept. These type constraints are memorised
   into each function's FPI structure.
 
   VerifyParamTypes checks the specified parameter against the enclosing
@@ -3799,7 +3799,7 @@ AssertTStk <stack offset> <op>   []  ->  []
   These opcodes may be used to communicate the results of ahead of
   time static analysis to the runtime.  They indicate that the value
   in the specified local or stack offset must be statically known to
-  have a particular type.  The sub opcodes shoud be used to indicate
+  have a particular type.  The sub opcodes should be used to indicate
   the type, in an unspecified way.
 
 AssertObjL    <local id>     <exact> <class name>   []  ->  []
@@ -3821,7 +3821,7 @@ PredictTL   <local id>     <op>   []  ->  []
 PredictTStk <stack offset> <op>   []  ->  []
 
   These opcodes may be used to provide hints about the types of values at
-  runtime. Runtime behavior is implementation defined, although incorrect
+  runtime. Runtime behaviour is implementation defined, although incorrect
   predictions should not affect program correctness.
 
 BreakTraceHint   []  ->  []
@@ -3937,7 +3937,7 @@ AsyncESuspend <label id> <number of iterators>   [C:Obj]  ->  [C:Obj]
   store a reference to the associated resumable async function and a label %1
   to be used to resume the execution once the WaitHandle object given by $1 is
   finished.  If the $1 is not a WaitHandle, or is a WaitHandle that is already
-  finished, the behavior is undefined.
+  finished, the behaviour is undefined.
 
 AsyncWrapResult   [C]  ->  [C:Obj]
 
@@ -3946,7 +3946,7 @@ AsyncWrapResult   [C]  ->  [C:Obj]
 AsyncWrapException   [C:Obj]  ->  [C:Obj]
 
   Wraps $1 into a StaticExceptionWaitHandle object.  If $1 is not an Exception,
-  the behavior is undefined.
+  the behaviour is undefined.
 
 Basic statement transformations
 -------------------------------

@@ -23,6 +23,7 @@
 #include "folly/ScopeGuard.h"
 #include "hphp/util/arena.h"
 #include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-trace.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/base/memory-manager.h"
 
@@ -168,12 +169,7 @@ class IRUnit {
   TRACE_SET_MOD(hhir);
 
 public:
-  IRUnit()
-    : m_nextBlockId(0)
-    , m_nextOpndId(0)
-    , m_nextInstId(0)
-    , m_main(nullptr)
-  {}
+  explicit IRUnit(Offset initialBcOffset);
 
   /*
    * Create an IRInstruction with lifetime equivalent to this IRUnit.
@@ -263,9 +259,8 @@ public:
   IRInstruction* mov(SSATmp* dst, SSATmp* src, BCMarker marker);
 
   /*
-   * Create a new trace
+   * Create a new exit trace.
    */
-  Block* makeMain(uint32_t bcOff);
   Block* addExit();
 
   Arena&   arena()               { return m_arena; }
@@ -273,7 +268,8 @@ public:
   uint32_t numBlocks() const     { return m_nextBlockId; }
   uint32_t numInsts() const      { return m_nextInstId; }
   CSEHash& constTable()          { return m_constTable; }
-  IRTrace* main() const          { return m_main; }
+  IRTrace* main()                { return m_main.get(); }
+  const IRTrace* main() const    { return m_main.get(); }
   uint32_t bcOff() const         { return m_bcOff; }
 
   // Overloads useful for StateVector and IdSet
@@ -281,8 +277,8 @@ public:
   uint32_t numIds(const Block*) const { return numBlocks(); }
   uint32_t numIds(const IRInstruction*) const { return numInsts(); }
 
-  typedef std::list<IRTrace*> ExitList;
-  ExitList& exits() { return m_exits; }
+  typedef smart::vector<smart::unique_ptr<IRTrace>> ExitList;
+  ExitList& exits()             { return m_exits; }
   const ExitList& exits() const { return m_exits; }
   Block* entry() const;
   std::string toString() const;
@@ -296,13 +292,13 @@ private:
   }
 
 private:
-  Arena m_arena; // contains IRTrace, Block, IRInstruction, and SSATmp objects
+  Arena m_arena; // contains Block, IRInstruction, and SSATmp objects
   CSEHash m_constTable; // DefConst's for each unique constant in this IR
   uint32_t m_nextBlockId;
   uint32_t m_nextOpndId;
   uint32_t m_nextInstId;
   uint32_t m_bcOff; // bytecode offset where this unit starts
-  IRTrace* m_main; // main entry point trace
+  smart::unique_ptr<IRTrace> m_main; // main entry point trace
   ExitList m_exits; // exit traces
 };
 

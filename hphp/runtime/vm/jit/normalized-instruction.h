@@ -184,7 +184,7 @@ class NormalizedInstruction {
   }
 
  private:
-  smart::vector<smart::unique_ptr<DynLocation>::type> m_dynLocs;
+  smart::vector<smart::unique_ptr<DynLocation>> m_dynLocs;
 };
 
 } } // HPHP::Transl

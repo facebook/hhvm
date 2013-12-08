@@ -35,7 +35,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   : m_unit(unit)
   , m_simplifier(*this)
   , m_state(unit, initialSpOffsetFromFp, func)
-  , m_curTrace(m_unit.makeMain(initialBcOffset)->trace())
+  , m_curTrace(m_unit.main())
   , m_curBlock(nullptr)
   , m_enableSimplification(false)
   , m_inReoptimize(false)

@@ -22,6 +22,15 @@ namespace HPHP {  namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
+IRUnit::IRUnit(Offset initialBcOffset)
+  : m_nextBlockId(0)
+  , m_nextOpndId(0)
+  , m_nextInstId(0)
+  , m_bcOff(initialBcOffset)
+  , m_main(smart::make_unique<IRTrace>(*this, defBlock()))
+{
+}
+
 IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
   IRInstruction inst(DefLabel, marker);
   IRInstruction* label = cloneInstruction(&inst);
@@ -58,18 +67,10 @@ SSATmp* IRUnit::findConst(ConstData& cdata, Type ctype) {
   return m_constTable.insert(cloneInstruction(&inst)->dst());
 }
 
-Block* IRUnit::makeMain(uint32_t bcOff) {
-  assert(!m_main);
-  auto entry = defBlock();
-  m_bcOff = bcOff;
-  m_main = new (m_arena) IRTrace(*this, entry);
-  return entry;
-}
-
 Block* IRUnit::addExit() {
   auto exit = defBlock();
   exit->setHint(Block::Hint::Unlikely);
-  m_exits.push_back(new (m_arena) IRTrace(*this, exit));
+  m_exits.push_back(smart::make_unique<IRTrace>(*this, exit));
   return exit;
 }
 

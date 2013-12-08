@@ -110,24 +110,18 @@ struct Allocator {
 };
 
 /*
- * Shorthand to create a std::unique_ptr to a smart-allocated object.
+ * Shorthand to create a smart::unique_ptr to a smart-allocated object.
  *
  * Usage:
  *
  *   auto ptr = smart::make_unique<Foo>(arg1, arg2);
- *
- * If you need to make a typedef to one, since we don't have type
- * aliases yet in our version of gcc you have to do:
- *
- *   typedef smart::unique_ptr<T>::type type;
  */
 
-template<class T> struct unique_ptr
-  : folly::AllocatorUniquePtr<T,Allocator<T>>
-{};
+template<class T>
+using unique_ptr = typename folly::AllocatorUniquePtr<T,Allocator<T>>::type;
 
 template<class T, class... Args>
-typename unique_ptr<T>::type make_unique(Args&&... args) {
+unique_ptr<T> make_unique(Args&&... args) {
   return folly::allocate_unique<T>(
     Allocator<T>(),
     std::forward<Args>(args)...
@@ -136,7 +130,7 @@ typename unique_ptr<T>::type make_unique(Args&&... args) {
 
 #ifndef __APPLE__ // XXX: this affects codegen quality but not correctness
 static_assert(
-  sizeof(unique_ptr<int>::type) == sizeof(std::unique_ptr<int>),
+  sizeof(unique_ptr<int>) == sizeof(std::unique_ptr<int>),
   "smart::unique_ptr pointer should not be larger than std::unique_ptr"
 );
 #endif

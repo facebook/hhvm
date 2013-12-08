@@ -431,13 +431,5 @@ void f_register_cleanup_function(int _argc, CVarRef function, CArrRef _argv /* =
                                       ExecutionContext::CleanUp);
 }
 
-bool f_register_tick_function(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
-  throw NotImplementedException(__func__);
-}
-
-void f_unregister_tick_function(CVarRef function_name) {
-  throw NotImplementedException(__func__);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

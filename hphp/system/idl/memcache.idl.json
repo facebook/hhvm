@@ -311,23 +311,6 @@
             ]
         },
         {
-            "name": "memcache_debug",
-            "desc": "memcache_debug() turns on debug output if parameter on_off is equal to TRUE and turns off if it's FALSE.\n\nmemcache_debug() is accessible only if PHP was built with --enable-debug option and always returns TRUE in this case. Otherwise, this function has no effect and always returns FALSE.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "Returns TRUE if PHP was built with --enable-debug option, otherwise returns FALSE."
-            },
-            "args": [
-                {
-                    "name": "onoff",
-                    "type": "Boolean",
-                    "desc": "Turns debug output on if equals to TRUE. Turns debug output off if equals to FALSE."
-                }
-            ]
-        },
-        {
             "name": "memcache_get_version",
             "flags": [
             ],

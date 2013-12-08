@@ -58,11 +58,6 @@ Variant f_stream_context_create(CArrRef options /* = null_array */,
   return Resource(NEWOBJ(StreamContext)(options, params));
 }
 
-Resource f_stream_context_get_default(CArrRef options /* = null_array */) {
-
-  throw NotImplementedException(__func__);
-}
-
 Variant f_stream_context_get_options(CResRef stream_or_context) {
   StreamContext* context = get_stream_context(stream_or_context);
   if (!context) {

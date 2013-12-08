@@ -771,11 +771,6 @@ Variant f_imap_alerts() {
   return ret;
 }
 
-bool f_imap_append(CResRef imap_stream, const String& mailbox,
-                   const String& message, const String& options /* = "" */) {
-  throw NotImplementedException(__func__);
-}
-
 Variant f_imap_base64(const String& text) {
   unsigned long newlength;
 
@@ -1115,28 +1110,6 @@ bool f_imap_gc(CResRef imap_stream, int64_t caches) {
   return true;
 }
 
-Variant f_imap_get_quota(CResRef imap_stream, const String& quota_root) {
-  throw NotImplementedException(__func__);
-}
-
-Variant f_imap_get_quotaroot(CResRef imap_stream, const String& quota_root) {
-  throw NotImplementedException(__func__);
-}
-
-Variant f_imap_getacl(CResRef imap_stream, const String& mailbox) {
-  throw NotImplementedException(__func__);
-}
-
-Variant f_imap_getmailboxes(CResRef imap_stream, const String& ref,
-                            const String& pattern) {
-  throw NotImplementedException(__func__);
-}
-
-Variant f_imap_getsubscribed(CResRef imap_stream, const String& ref,
-                             const String& pattern) {
-  throw NotImplementedException(__func__);
-}
-
 Variant f_imap_header(CResRef imap_stream, int64_t msg_number,
                       int64_t fromlength /* = 0 */,
                       int64_t subjectlength /* = 0 */,
@@ -1207,10 +1180,6 @@ Variant f_imap_headerinfo(CResRef imap_stream, int64_t msg_number,
   return ret;
 }
 
-Variant f_imap_headers(CResRef imap_stream) {
-  throw NotImplementedException(__func__);
-}
-
 Variant f_imap_last_error() {
   if (IMAPG(errorstack) == NIL) {
     return false;
@@ -1249,25 +1218,6 @@ Variant f_imap_list(CResRef imap_stream, const String& ref,
 Variant f_imap_listmailbox(CResRef imap_stream, const String& ref,
                            const String& pattern) {
   return f_imap_list(imap_stream, ref, pattern);
-}
-
-Variant f_imap_listscan(CResRef imap_stream, const String& ref,
-                        const String& pattern, const String& content) {
-  throw NotImplementedException(__func__);
-}
-
-Variant f_imap_listsubscribed(CResRef imap_stream, const String& ref,
-                              const String& pattern) {
-  throw NotImplementedException(__func__);
-}
-
-Variant f_imap_lsub(CResRef imap_stream, const String& ref,
-                    const String& pattern) {
-  throw NotImplementedException(__func__);
-}
-
-Variant f_imap_mail_compose(CArrRef envelope, CArrRef body) {
-  throw NotImplementedException(__func__);
 }
 
 bool f_imap_mail_copy(CResRef imap_stream, const String& msglist,
@@ -1379,10 +1329,6 @@ Variant f_imap_mailboxmsginfo(CResRef imap_stream) {
   return ret;
 }
 
-Variant f_imap_mime_header_decode(const String& text) {
-  throw NotImplementedException(__func__);
-}
-
 Variant f_imap_msgno(CResRef imap_stream, int64_t uid) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   return (int64_t)mail_msgno(obj->m_stream, uid);
@@ -1485,33 +1431,6 @@ bool f_imap_reopen(CResRef imap_stream, const String& mailbox,
   return true;
 }
 
-Variant f_imap_rfc822_parse_adrlist(const String& address,
-                                    const String& default_host) {
-  throw NotImplementedException(__func__);
-}
-
-Variant f_imap_rfc822_parse_headers(const String& headers,
-                                    const String& defaulthost /* = "" */) {
-  throw NotImplementedException(__func__);
-}
-
-Variant f_imap_rfc822_write_address(const String& mailbox, const String& host,
-                                    const String& personal) {
-  throw NotImplementedException(__func__);
-}
-
-bool f_imap_savebody(CResRef imap_stream, CVarRef file, int64_t msg_number,
-                     const String& part_number /* = "" */,
-                     int64_t options /* = 0 */) {
-  throw NotImplementedException(__func__);
-}
-
-Variant f_imap_scanmailbox(CResRef imap_stream, const String& ref,
-                           const String& pattern,
-                           const String& content) {
-  throw NotImplementedException(__func__);
-}
-
 Variant f_imap_search(CResRef imap_stream, const String& criteria,
                       int64_t options /* = 0 */,
                       const String& charset /* = "" */) {
@@ -1546,16 +1465,6 @@ Variant f_imap_search(CResRef imap_stream, const String& criteria,
   return ret;
 }
 
-bool f_imap_set_quota(CResRef imap_stream, const String& quota_root,
-                      int64_t quota_limit) {
-  throw NotImplementedException(__func__);
-}
-
-bool f_imap_setacl(CResRef imap_stream, const String& mailbox, const String& id,
-                   const String& rights) {
-  throw NotImplementedException(__func__);
-}
-
 bool f_imap_setflag_full(CResRef imap_stream, const String& sequence,
                          const String& flag,
                          int64_t options /* = 0 */) {
@@ -1563,13 +1472,6 @@ bool f_imap_setflag_full(CResRef imap_stream, const String& sequence,
   mail_setflag_full(obj->m_stream, (char*)sequence.data(), (char*)flag.data(),
                     (options ? options : NIL));
   return true;
-}
-
-Variant f_imap_sort(CResRef imap_stream, int64_t criteria, int64_t reverse,
-                    int64_t options /* = 0 */,
-                    const String& search_criteria /* = "" */,
-                    const String& charset /* = "" */) {
-  throw NotImplementedException(__func__);
 }
 
 Variant f_imap_status(CResRef imap_stream, const String& mailbox,
@@ -1608,10 +1510,6 @@ bool f_imap_subscribe(CResRef imap_stream, const String& mailbox) {
   } else {
     return false;
   }
-}
-
-Variant f_imap_thread(CResRef imap_stream, int64_t options /* = 0 */) {
-  throw NotImplementedException(__func__);
 }
 
 Variant f_imap_timeout(int64_t timeout_type, int64_t timeout /* = -1 */) {
@@ -1682,14 +1580,6 @@ bool f_imap_unsubscribe(CResRef imap_stream, const String& mailbox) {
   } else {
     return false;
   }
-}
-
-Variant f_imap_utf7_decode(const String& text) {
-  throw NotImplementedException(__func__);
-}
-
-Variant f_imap_utf7_encode(const String& data) {
-  throw NotImplementedException(__func__);
 }
 
 Variant f_imap_utf8(const String& mime_encoded_text) {

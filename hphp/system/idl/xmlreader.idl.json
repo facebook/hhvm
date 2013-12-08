@@ -271,16 +271,6 @@
                     ]
                 },
                 {
-                    "name": "expand",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": "Boolean"
-                    },
-                    "args": [
-                    ]
-                },
-                {
                     "name": "__get",
                     "flags": [
                     ],

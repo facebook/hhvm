@@ -35,7 +35,6 @@ bool f_memcache_delete(CObjRef memcache, const String& key, int expire = 0);
 int64_t f_memcache_increment(CObjRef memcache, const String& key, int offset = 1);
 int64_t f_memcache_decrement(CObjRef memcache, const String& key, int offset = 1);
 bool f_memcache_close(CObjRef memcache);
-bool f_memcache_debug(bool onoff);
 Variant f_memcache_get_version(CObjRef memcache);
 bool f_memcache_flush(CObjRef memcache, int timestamp = 0);
 bool f_memcache_setoptimeout(CObjRef memcache, int timeoutms);

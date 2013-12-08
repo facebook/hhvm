@@ -78,9 +78,6 @@ void f_register_shutdown_function(
   int _argc, CVarRef function, CArrRef _argv = null_array);
 void f_register_cleanup_function(
   int _argc, CVarRef function, CArrRef _argv = null_array);
-bool f_register_tick_function(
-  int _argc, CVarRef function, CArrRef _argv = null_array);
-void f_unregister_tick_function(CVarRef function_name);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

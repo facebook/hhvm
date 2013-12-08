@@ -618,10 +618,6 @@ bool f_memcache_close(CObjRef memcache) {
   return memcache_obj->t_close();
 }
 
-bool f_memcache_debug(bool onoff) {
-  throw NotImplementedException(__func__);
-}
-
 Variant f_memcache_get_version(CObjRef memcache) {
   c_Memcache *memcache_obj = memcache.getTyped<c_Memcache>();
   return memcache_obj->t_getversion();

@@ -249,10 +249,6 @@ int64_t f_get_magic_quotes_runtime() {
   return 0;
 }
 
-Array f_get_required_files() {
-  throw NotSupportedException(__func__, "requires PHP source code");
-}
-
 Variant f_getenv(const String& varname) {
   String ret = g_context->getenv(varname);
   if (!ret.isNull()) {
@@ -723,14 +719,6 @@ bool f_clock_settime(int clk_id, int64_t sec, int64_t nsec) {
 int64_t f_cpu_get_count() { return Process::GetCPUCount();}
 String f_cpu_get_model() { return Process::GetCPUModel();}
 
-String f_ini_alter(const String& varname, const String& newvalue) {
-  throw NotSupportedException(__func__, "not using ini");
-}
-
-Array f_ini_get_all(const String& extension /* = null_string */) {
-  throw NotSupportedException(__func__, "not using ini");
-}
-
 String f_ini_get(const String& varname) {
   String value = empty_string;
   IniSetting::Get(varname, value);
@@ -773,14 +761,6 @@ Variant f_php_ini_loaded_file() {
   return false;
 }
 
-String f_php_ini_scanned_files() {
-  throw NotSupportedException(__func__, "not using ini");
-}
-
-String f_php_logo_guid() {
-  throw NotSupportedException(__func__, "not PHP anymore");
-}
-
 String f_php_sapi_name() {
   return RuntimeOption::ExecutionMode;
 }
@@ -814,10 +794,6 @@ String f_php_uname(const String& mode /* = null_string */) {
     }
   }
   return ret;
-}
-
-bool f_phpcredits(int flag /* = 0 */) {
-  throw NotSupportedException(__func__, "not PHP anymore");
 }
 
 bool f_phpinfo(int what /* = 0 */) {
@@ -857,14 +833,6 @@ String f_sys_get_temp_dir() {
   char *env = getenv("TMPDIR");
   if (env && *env) return String(env, CopyString);
   return "/tmp";
-}
-
-String f_zend_logo_guid() {
-  throw NotSupportedException(__func__, "deprecated and removed");
-}
-
-int64_t f_zend_thread_id() {
-  throw NotSupportedException(__func__, "not zend anymore");
 }
 
 String f_zend_version() {

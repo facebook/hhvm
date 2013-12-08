@@ -22,7 +22,6 @@
 
 #include "hphp/runtime/ext/ext_apache.h"
 #include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/ext/ext_apd.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/ext_bcmath.h"
@@ -53,7 +52,6 @@
 #include "hphp/runtime/ext/ext_ipc.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_ldap.h"
-#include "hphp/runtime/ext/ext_magick.h"
 #include "hphp/runtime/ext/ext_mailparse.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_mb.h"

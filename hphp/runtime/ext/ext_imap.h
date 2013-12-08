@@ -25,9 +25,6 @@ namespace HPHP {
 
 Variant f_imap_8bit(const String& str);
 Variant f_imap_alerts();
-bool f_imap_append(
-  CResRef imap_stream, const String& mailbox, const String& message,
-  const String& options = "");
 Variant f_imap_base64(const String& text);
 Variant f_imap_binary(const String& str);
 Variant f_imap_body(
@@ -55,33 +52,17 @@ Variant f_imap_fetchheader(
 Variant f_imap_fetchstructure(
   CResRef imap_stream, int64_t msg_number, int64_t options = 0);
 bool f_imap_gc(CResRef imap_stream, int64_t caches);
-Variant f_imap_get_quota(CResRef imap_stream, const String& quota_root);
-Variant f_imap_get_quotaroot(CResRef imap_stream, const String& quota_root);
-Variant f_imap_getacl(CResRef imap_stream, const String& mailbox);
-Variant f_imap_getmailboxes(
-  CResRef imap_stream, const String& ref, const String& pattern);
-Variant f_imap_getsubscribed(
-  CResRef imap_stream, const String& ref, const String& pattern);
 Variant f_imap_header(
   CResRef imap_stream, int64_t msg_number, int64_t fromlength = 0,
   int64_t subjectlength = 0, const String& defaulthost = "");
 Variant f_imap_headerinfo(
   CResRef imap_stream, int64_t msg_number, int64_t fromlength = 0,
   int64_t subjectlength = 0, const String& defaulthost = "");
-Variant f_imap_headers(CResRef imap_stream);
 Variant f_imap_last_error();
 Variant f_imap_list(
   CResRef imap_stream, const String& ref, const String& pattern);
 Variant f_imap_listmailbox(
   CResRef imap_stream, const String& ref, const String& pattern);
-Variant f_imap_listscan(
-  CResRef imap_stream, const String& ref, const String& pattern,
-  const String& content);
-Variant f_imap_listsubscribed(
-  CResRef imap_stream, const String& ref, const String& pattern);
-Variant f_imap_lsub(
-  CResRef imap_stream, const String& ref, const String& pattern);
-Variant f_imap_mail_compose(CArrRef envelope, CArrRef body);
 bool f_imap_mail_copy(
   CResRef imap_stream, const String& msglist, const String& mailbox,
   int64_t options = 0);
@@ -93,7 +74,6 @@ bool f_imap_mail(
   const String& additional_headers = "", const String& cc = "",
   const String& bcc = "", const String& rpath = "");
 Variant f_imap_mailboxmsginfo(CResRef imap_stream);
-Variant f_imap_mime_header_decode(const String& text);
 Variant f_imap_msgno(CResRef imap_stream, int64_t uid);
 Variant f_imap_num_msg(CResRef imap_stream);
 Variant f_imap_num_recent(CResRef imap_stream);
@@ -107,43 +87,20 @@ bool f_imap_renamemailbox(
 bool f_imap_reopen(
   CResRef imap_stream, const String& mailbox, int64_t options = 0,
   int64_t retries = 0);
-Variant f_imap_rfc822_parse_adrlist(
-  const String& address, const String& default_host);
-Variant f_imap_rfc822_parse_headers(
-  const String& headers, const String& defaulthost = "");
-Variant f_imap_rfc822_write_address(
-  const String& mailbox, const String& host, const String& personal);
-bool f_imap_savebody(
-  CResRef imap_stream, CVarRef file, int64_t msg_number,
-  const String& part_number = "", int64_t options = 0);
-Variant f_imap_scanmailbox(
-  CResRef imap_stream, const String& ref, const String& pattern,
-  const String& content);
 Variant f_imap_search(
   CResRef imap_stream, const String& criteria, int64_t options = 0,
   const String& charset = "");
-bool f_imap_set_quota(
-  CResRef imap_stream, const String& quota_root, int64_t quota_limit);
-bool f_imap_setacl(
-  CResRef imap_stream, const String& mailbox, const String& id,
-  const String& rights);
 bool f_imap_setflag_full(
   CResRef imap_stream, const String& sequence, const String& flag,
   int64_t options = 0);
-Variant f_imap_sort(
-  CResRef imap_stream, int64_t criteria, int64_t reverse, int64_t options = 0,
-  const String& search_criteria = "", const String& charset = "");
 Variant f_imap_status(CResRef imap_stream, const String& mailbox,
                       int64_t options = 0);
 bool f_imap_subscribe(CResRef imap_stream, const String& mailbox);
-Variant f_imap_thread(CResRef imap_stream, int64_t options = 0);
 Variant f_imap_timeout(int64_t timeout_type, int64_t timeout = -1);
 Variant f_imap_uid(CResRef imap_stream, int64_t msg_number);
 bool f_imap_undelete(
   CResRef imap_stream, const String& msg_number, int64_t flags = 0);
 bool f_imap_unsubscribe(CResRef imap_stream, const String& mailbox);
-Variant f_imap_utf7_decode(const String& text);
-Variant f_imap_utf7_encode(const String& data);
 Variant f_imap_utf8(const String& mime_encoded_text);
 
 ///////////////////////////////////////////////////////////////////////////////

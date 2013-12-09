@@ -121,6 +121,8 @@ bool ObjectData::o_instanceof(const String& s) const {
 }
 
 bool ObjectData::o_toBooleanImpl() const noexcept {
+  // Note: if you add more cases here, hhbbc/class-util.cpp also needs
+  // to be changed.
   if (isCollection()) {
     if (m_cls == c_Vector::classof()) {
       return c_Vector::ToBool(this);

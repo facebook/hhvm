@@ -156,6 +156,15 @@ struct Type {
   bool strictSubtypeOf(Type o) const;
 
   /*
+   * Subtype of any of the list of types.
+   */
+  template<class... Types>
+  bool subtypeOfAny(Type t, Types... ts) const {
+    return subtypeOf(t) || subtypeOfAny(ts...);
+  }
+  bool subtypeOfAny() const { return false; }
+
+  /*
    * Returns whether there are any values of this type that are also
    * values of the type `o'.
    */
@@ -173,6 +182,7 @@ private:
   friend DObj dobj_of(Type);
   friend DCls dcls_of(Type);
   friend Type opt(Type);
+  friend Type unopt(Type);
   friend folly::Optional<Cell> tv(Type);
   friend std::string show(Type);
 
@@ -273,6 +283,13 @@ Type clsExact(res::Class);
 Type opt(Type t);
 
 /*
+ * Return the non-optional version of the Type t.
+ *
+ * Pre: t must be one of the predefined optional types.
+ */
+Type unopt(Type t);
+
+/*
  * Returns the best known TCls subtype for an object type.
  *
  * Pre: t.subtypeOf(TObj)
@@ -296,9 +313,10 @@ folly::Optional<Cell> tv(Type t);
 Type type_of_istype(IsTypeOp op);
 
 /*
- * Return the DObj structure for a strict subtype of TObj.
+ * Return the DObj structure for a strict subtype of TObj or TOptObj.
  *
- * Pre: t.strictSubtypeOf(TObj)
+ * Pre: t.strictSubtypeOf(TObj) ||
+ *        (t.subtypeOf(TOptObj) && unopt(t).strictSubtypeOf(TObj))
  */
 DObj dobj_of(Type t);
 

@@ -296,6 +296,13 @@ Type opt(Type t) {
   return ret;
 }
 
+Type unopt(Type t) {
+  auto const nonNullBits = static_cast<trep>(t.m_bits & ~BInitNull);
+  assert(canBeOptional(nonNullBits));
+  t.m_bits = nonNullBits;
+  return t;
+}
+
 Type objcls(Type t) {
   assert(t.subtypeOf(TObj));
   if (t.strictSubtypeOf(TObj)) {
@@ -351,7 +358,8 @@ Type type_of_istype(IsTypeOp op) {
 
 DObj dobj_of(Type t) {
   assert(t.checkInvariants());
-  assert(t.strictSubtypeOf(TObj));
+  assert(t.strictSubtypeOf(TObj) ||
+         (t.subtypeOf(TOptObj) && unopt(t).strictSubtypeOf(TOptObj)));
   assert(t.m_data);
   return t.m_data->dobj;
 }

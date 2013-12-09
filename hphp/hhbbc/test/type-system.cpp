@@ -28,12 +28,19 @@ auto primitives = {
   TUninit, TInitNull, TFalse, TTrue, TInt, TDbl, TSStr,
   TCStr, TSArr, TCArr, TObj, TRes, TCls, TRef
 };
+
+auto optionals = {
+  TOptTrue, TOptFalse, TOptBool, TOptInt, TOptDbl, TOptSStr,
+  TOptStr, TOptSArr, TOptArr, TOptObj, TOptRes
+};
+
 auto unions = {
   TOptTrue, TOptFalse, TOptBool, TOptInt, TOptDbl, TOptSStr,
-  TOptStr, TOptSArr, TOptArr, TOptObj, TOptRes, TInitCell,
-  TCell, TInitGen, TGen, TNull, TBool, TStr, TArr,
+  TOptStr, TOptSArr, TOptArr, TOptObj, TOptRes,
+  TInitCell, TCell, TInitGen, TGen, TNull, TBool, TStr, TArr,
   TInitUnc, TUnc, TTop
 };
+
 auto all = boost::join(primitives, unions);
 
 }
@@ -204,6 +211,12 @@ TEST(Type, SpecificExamples) {
   EXPECT_TRUE(TNull.couldBe(opt(ival(3))));
   EXPECT_TRUE(TInitNull.subtypeOf(opt(ival(3))));
   EXPECT_TRUE(!TNull.subtypeOf(opt(ival(3))));
+}
+
+TEST(Type, Unopt) {
+  for (auto& t : optionals) {
+    EXPECT_EQ(t, opt(unopt(t)));
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

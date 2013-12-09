@@ -1003,7 +1003,8 @@ class TraceProfiler : public Profiler {
       char buf[20];
       sprintf(buf, "%d", RuntimeOption::ProfilerMaxTraceBuffer);
       IniSetting::Bind("profiler.max_trace_buffer", buf,
-                       ini_on_update_long, &m_maxTraceBuffer);
+                       ini_on_update_long, ini_get_long,
+                       &m_maxTraceBuffer);
     }
   }
 

@@ -322,6 +322,7 @@ public:
   String getTimeZone() const { return m_timezone;}
   void setTimeZone(const String& timezone) { m_timezone = timezone;}
   String getDefaultTimeZone() const { return m_timezoneDefault;}
+  void setDefaultTimeZone(const String& s) { m_timezoneDefault = s;}
   String getArgSeparatorOutput() const {
     if (m_argSeparatorOutput.isNull()) return s_amp;
     return m_argSeparatorOutput;

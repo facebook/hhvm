@@ -28,18 +28,22 @@ static class DateExtension : public Extension {
     IniSetting::Bind(
       "date.timezone",
       g_context->getDefaultTimeZone().c_str(),
-      dateTimezoneIniCallback,
+      dateTimezoneIniUpdate, dateTimezoneIniGet,
       nullptr
     );
   }
 
  private:
-  static bool dateTimezoneIniCallback(const HPHP::String& value, void *p) {
+  static bool dateTimezoneIniUpdate(const HPHP::String& value, void *p) {
     assert(p == nullptr);
     if (value.empty()) {
       return false;
     }
     return f_date_default_timezone_set(value);
+  }
+
+  static String dateTimezoneIniGet(void* p) {
+    return f_date_default_timezone_get();
   }
 } s_date_extension;
 

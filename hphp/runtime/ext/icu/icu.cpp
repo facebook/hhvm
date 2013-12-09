@@ -30,11 +30,12 @@ IMPLEMENT_REQUEST_LOCAL(RequestData, s_intl_request);
 
 void IntlExtension::bindIniSettings() {
   IniSetting::Bind("intl.default_locale", "",
-                   icu_on_update_default_locale, nullptr);
+                   icu_on_update_default_locale, icu_get_default_locale,
+                   nullptr);
 }
 
 const String GetDefaultLocale() {
-  String locale(s_intl_request->defaultLocale());
+  String locale(s_intl_request->getDefaultLocale());
   if (locale.empty()) {
     locale = String(uloc_getDefault(), CopyString);
   }

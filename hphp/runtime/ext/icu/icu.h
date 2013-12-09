@@ -91,7 +91,7 @@ class RequestData : public RequestEventHandler {
     return m_utf8;
   }
 
-  const std::string& defaultLocale() const { return m_defaultLocale; }
+  const std::string& getDefaultLocale() const { return m_defaultLocale; }
   void setDefaultLocale(const std::string& loc) { m_defaultLocale = loc; }
 
  private:
@@ -132,6 +132,9 @@ class IntlExtension : public Extension {
   static bool icu_on_update_default_locale(const String& value, void *p) {
     s_intl_request->setDefaultLocale(value->data());
     return true;
+  }
+  static String icu_get_default_locale(void *p) {
+    return s_intl_request->getDefaultLocale();
   }
 
   void bindIniSettings();

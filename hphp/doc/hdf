@@ -1,7 +1,7 @@
 
 <h2>Hierarchical Data Format (HDF)</h2>
 
-Please use bin/hdf.el for syntax colouring that can help identify syntax errors.
+Please use bin/hdf.el for syntax coloring that can help identify syntax errors.
 
 1. Basic format
 

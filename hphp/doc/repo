@@ -53,7 +53,7 @@ always be writeable, but the 'local' repo can be read-only, or even completely
 missing. Before opening either the central or local repo, the first occurrence
 of '%{schema}' in the path will be replaced by the current schema id. There are
 several runtime configuration options (and related environment variables) that
-can be used to control repo behaviour:
+can be used to control repo behavior:
 
 * Repo.Local.Mode: rw, r-(*), or -- (overrides HHVM_REPO_LOCAL_MODE)
   rw: Use the local repo for reading and writing (if file permissions allow).

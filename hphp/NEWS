@@ -29,7 +29,7 @@ Next release
   - HNI (HipHop Native Interface) for calling C++ functions from PHP
   - Fix PropertyAccessorMap::isset
   - Expose more POSIX constants
-  - Fixed behaviour of stream_get_contents when default args are used.
+  - Fixed behavior of stream_get_contents when default args are used.
   - Implement str_getcsv, and fix some fgetcsv related issues.
   - [IPv6] Fix stream_socket_recvfrom & stream_socket_sendto.
   - [IPv6] Fix socket_sentto_recvfrom_ipv6_udp Zend compatibility.

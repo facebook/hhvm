@@ -424,7 +424,7 @@ These are experimental LFU settings.
 - CheckExistenceBeforeRewrite
 
 With this setting, rewrite rules will not be applied for files that exist in
-the original path. This is the default behaviour. Set this to false if one wants
+the original path. This is the default behavior. Set this to false if one wants
 to block access to certain files (ex. .htaccess.)
 
 = Administration Server
@@ -772,7 +772,7 @@ kill it to avoid extra server cost by turning on KillOnTimeout.
 - TypedResults
 
 Zend returns strings and NULL only for MySQL results, not integers or floats.
-HHVM return ints (and, sometimes, actual doubles). This behaviour can be
+HHVM return ints (and, sometimes, actual doubles). This behavior can be
 disabled by setting TypedResults to false.
 
 = HTTP Monitoring

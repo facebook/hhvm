@@ -163,7 +163,7 @@ the translated sources.
 = --no-min-include=BOOL (default: false)
 
 If BOOL is true, then minimum include analysis will not be performed for an
-analyse target.
+analyze target.
 
 = --no-meta-info=BOOL (default: false)
 

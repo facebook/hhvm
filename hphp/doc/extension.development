@@ -20,7 +20,7 @@ context for the function (e.g., for permissions check), etc.
 2. Update headers and implementation.
 
 Edit runtime/ext/ext_[name].h and runtime/ext/ext_[name].cpp to
-reflect the desired modifications in signature and behaviour.
+reflect the desired modifications in signature and behavior.
 
 3. Auto-generate files from IDL
 

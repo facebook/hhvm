@@ -36,11 +36,11 @@ array's internal cursor.
 
 (5) Foreach by reference
 
-Under Zend PHP, the behaviour of a foreach by reference loop can be
+Under Zend PHP, the behavior of a foreach by reference loop can be
 unpredictable if during iteration the next element of the array is unset, or if
 the array variable is assigned to directly or through a reference, or if
 copy-on-write causes the array to be copied. For such cases, HipHop VM's
-behaviour may differ from Zend PHP.
+behavior may differ from Zend PHP.
 
 
 2. Classes and objects
@@ -55,7 +55,7 @@ PHP outside of the __destruct method.
 Fatals thrown from destructors will log an error, and prevent further PHP code
 from executing as the fatal propagates. This includes other __destruct methods.
 
-(2) __destruct behaviour at end of request
+(2) __destruct behavior at end of request
 
 Under Zend PHP, if an object is still live at the end of a request, its
 __destruct method is invoked. By default, HipHop VM does not do this.

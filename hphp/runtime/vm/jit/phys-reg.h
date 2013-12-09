@@ -32,7 +32,7 @@ namespace HPHP { namespace Transl {
  * it as a 32 bit register call r32(physReg).
  *
  * The implicit conversion to RegNumber is historical: it exists
- * for backward-compatability with the old-style asm-x64.h api
+ * for backward-compatibility with the old-style asm-x64.h api
  * (e.g. store_reg##_disp_reg##).
  */
 struct PhysReg {

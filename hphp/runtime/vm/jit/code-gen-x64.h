@@ -173,14 +173,14 @@ private:
 
   // Main call helper:
   CallHelperInfo cgCallHelper(Asm& a,
-                              const CppCall& call,
+                              CppCall call,
                               const CallDest& dstInfo,
                               SyncOptions sync,
                               ArgGroup& args,
                               RegSet toSave);
   // Overload to make the toSave RegSet optional:
   CallHelperInfo cgCallHelper(Asm& a,
-                              const CppCall& call,
+                              CppCall call,
                               const CallDest& dstInfo,
                               SyncOptions sync,
                               ArgGroup& args);

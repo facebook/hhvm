@@ -708,7 +708,7 @@ X(JmpNSame);
  * shuffleArgs also handles adding lea-offsets for dest registers (dest = src +
  * lea-offset) and zero extending bools (dest = zeroExtend(src)).
  */
-static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
+static int64_t shuffleArgs(Asm& a, ArgGroup& args, CppCall& call) {
   // Compute the move/shuffle plan.
   PhysReg::Map<PhysReg> moves;
   PhysReg::Map<ArgDesc*> argDescs;
@@ -726,6 +726,12 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
       moves[dstReg] = srcReg;
       argDescs[dstReg] = &args[i];
     }
+    if (call.isIndirect() && dstReg == call.getReg()) {
+      // an indirect call uses an argumnet register for the func ptr.
+      // Use rax instead and update the CppCall
+      moves[reg::rax] = call.getReg();
+      call.updateCallIndirect(reg::rax);
+    }
   }
 
   auto const howTo = doRegMoves(moves, rCgGP);
@@ -737,23 +743,28 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
         emitMovRegReg(a, how.m_reg1, how.m_reg2);
       } else {
         ArgDesc* argDesc = argDescs[how.m_reg2];
-        ArgDesc::Kind kind = argDesc->kind();
-        if (kind == ArgDesc::Kind::Reg || kind == ArgDesc::Kind::TypeReg) {
-          if (argDesc->isZeroExtend()) {
+        if (argDesc == nullptr) {
+          // when no ArgDesc is available is a straight reg to reg swap
+          emitMovRegReg(a, how.m_reg1, how.m_reg2);
+        } else {
+          ArgDesc::Kind kind = argDesc->kind();
+          if (kind == ArgDesc::Kind::Reg || kind == ArgDesc::Kind::TypeReg) {
+            if (argDesc->isZeroExtend()) {
+              assert(how.m_reg1.isGP());
+              assert(how.m_reg2.isGP());
+              a. movzbl (rbyte(how.m_reg1), r32(how.m_reg2));
+            } else {
+              emitMovRegReg(a, how.m_reg1, how.m_reg2);
+            }
+          } else {
+            assert(kind == ArgDesc::Kind::Addr);
             assert(how.m_reg1.isGP());
             assert(how.m_reg2.isGP());
-            a.    movzbl (rbyte(how.m_reg1), r32(how.m_reg2));
-          } else {
-            emitMovRegReg(a, how.m_reg1, how.m_reg2);
+            a. lea (how.m_reg1[argDesc->imm().q()], how.m_reg2);
           }
-        } else {
-          assert(kind == ArgDesc::Kind::Addr);
-          assert(how.m_reg1.isGP());
-          assert(how.m_reg2.isGP());
-          a.    lea    (how.m_reg1[argDesc->imm().q()], how.m_reg2);
-        }
-        if (kind != ArgDesc::Kind::TypeReg) {
-          argDesc->markDone();
+          if (kind != ArgDesc::Kind::TypeReg) {
+            argDesc->markDone();
+          }
         }
       }
     } else {
@@ -877,7 +888,7 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
     }
   }
 
-  auto const call = [&]() -> CppCall {
+  auto call = [&]() -> CppCall {
     switch (info.func.type) {
     case FuncType::Call:
       return CppCall(info.func.call);
@@ -921,7 +932,7 @@ CallDest CodeGenerator::callDest2(SSATmp* ssa) const {
 }
 
 CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
-                                           const CppCall& call,
+                                           CppCall call,
                                            const CallDest& dstInfo,
                                            SyncOptions sync,
                                            ArgGroup& args) {
@@ -930,7 +941,7 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
 }
 
 CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
-                                           const CppCall& call,
+                                           CppCall call,
                                            const CallDest& dstInfo,
                                            SyncOptions sync,
                                            ArgGroup& args,
@@ -955,7 +966,7 @@ CallHelperInfo CodeGenerator::cgCallHelper(Asm& a,
   for (size_t i = 0; i < args.numRegArgs(); i++) {
     args[i].setDstReg(argNumToRegName[i]);
   }
-  regSaver.bytesPushed(shuffleArgs(a, args));
+  regSaver.bytesPushed(shuffleArgs(a, args, call));
 
   // do the call; may use a trampoline
   if (sync == SyncOptions::kSmashableAndSyncPoint) {
@@ -3472,14 +3483,15 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
       cgCheckStaticBitAndDecRef(
         Type::Cell, dataReg, nullptr,
         [&] (Asm& a) {
+          // load destructor fptr
+          loadDestructorFunc(a, typeReg, m_rScratch);
           // Emit call to release in m_astubs
           cgCallHelper(a,
-                       CppCall(tv_release_typed),
+                       CppCall(m_rScratch),
                        kVoidDest,
                        SyncOptions::kSyncPoint,
                        ArgGroup(curOpds())
-                       .reg(dataReg)
-                       .reg(typeReg));
+                       .reg(dataReg));
         });
   } else {
     patchStaticCheck =

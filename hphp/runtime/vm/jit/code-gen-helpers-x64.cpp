@@ -280,12 +280,16 @@ void emitCall(Asm& a, TCA dest) {
 void emitCall(Asm& a, CppCall call) {
   if (call.isDirect()) {
     return emitCall(a, (TCA)call.getAddress());
+  } else if (call.isVirtual()) {
+    // Virtual call.
+    // Load method's address from proper offset off of object in rdi,
+    // using rax as scratch.
+    a.  loadq  (*rdi, rax);
+    a.  call   (rax[call.getOffset()]);
+  } else {
+    assert(call.isIndirect());
+    a.  call   (call.getReg());
   }
-  // Virtual call.
-  // Load method's address from proper offset off of object in rdi,
-  // using rax as scratch.
-  a.  loadq  (*rdi, rax);
-  a.  call   (rax[call.getOffset()]);
 }
 
 void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {

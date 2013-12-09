@@ -195,7 +195,7 @@ inline IndexedMemoryRef lookupDestructor(X64Assembler& a,
 
   a.    shrl   (kShiftDataTypeToDestrIndex, r32(typeReg));
   a.    movq   (&g_destructors, scratch);
-  return scratch[typeReg*8];
+  return scratch[typeReg * 8];
 }
 
 inline void callDestructor(Asm& a, PhysReg typeReg, PhysReg scratch) {
@@ -205,6 +205,23 @@ inline void callDestructor(Asm& a, PhysReg typeReg, PhysReg scratch) {
 inline void jumpDestructor(Asm& a, PhysReg typeReg, PhysReg scratch) {
   a.    jmp    (lookupDestructor(a, typeReg, scratch));
 }
+
+inline void loadDestructorFunc(X64Assembler& a,
+                               PhysReg typeReg,
+                               PhysReg dstReg) {
+  static_assert((KindOfString        >> kShiftDataTypeToDestrIndex == 1) &&
+                (KindOfArray         >> kShiftDataTypeToDestrIndex == 2) &&
+                (KindOfObject        >> kShiftDataTypeToDestrIndex == 3) &&
+                (KindOfResource      >> kShiftDataTypeToDestrIndex == 4) &&
+                (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
+                "lookup of destructors depends on KindOf* values");
+
+  a.    movsbl (rbyte(typeReg), r32(typeReg));
+  a.    shrl   (kShiftDataTypeToDestrIndex, r32(typeReg));
+  a.    movq   (&g_destructors, dstReg);
+  a.    loadq  (dstReg[typeReg * 8], dstReg);
+}
+
 
 //////////////////////////////////////////////////////////////////////
 

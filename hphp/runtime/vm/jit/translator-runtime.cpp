@@ -485,14 +485,6 @@ void tv_release_generic(TypedValue* tv) {
   g_destructors[typeToDestrIndex(tv->m_type)](tv->m_data.pref);
 }
 
-void tv_release_typed(RefData* pv, DataType dt) {
-  assert(JIT::tx64->stateIsDirty());
-  assert(dt == KindOfString || dt == KindOfArray ||
-         dt == KindOfObject || dt == KindOfResource ||
-         dt == KindOfRef);
-  g_destructors[typeToDestrIndex(dt)](pv);
-}
-
 Cell lookupCnsHelper(const TypedValue* tv,
                      StringData* nm,
                      bool error) {

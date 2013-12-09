@@ -955,6 +955,8 @@ public:
                                                       m, rbyte(r)); }
   void movzbl(Reg8 src, Reg32 dest)         { emitRR32(instr_movzbx,
                                                        rn(src), rn(dest)); }
+  void movsbl(Reg8 src, Reg32 dest)         { emitRR(instr_movsbx,
+                                                       rn(src), rn(dest)); }
 
   void loadsbq(MemoryRef m, Reg64 r)        { instrMR(instr_movsbx,
                                                       m, r); }

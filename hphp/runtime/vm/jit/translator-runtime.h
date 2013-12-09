@@ -151,7 +151,6 @@ typedef FixedStringMap<TCA,true> SSwitchMap;
 TCA sswitchHelperFast(const StringData* val, const SSwitchMap* table, TCA* def);
 
 void tv_release_generic(TypedValue* tv);
-void tv_release_typed(RefData* pv, DataType dt);
 
 Cell lookupCnsHelper(const TypedValue* tv,
                      StringData* nm,

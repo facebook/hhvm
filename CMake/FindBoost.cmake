@@ -238,7 +238,7 @@ MACRO (_Boost_ADJUST_LIB_VARS basename)
     ENDIF(Boost_${basename}_LIBRARY)
 
   ENDIF (Boost_INCLUDE_DIR )
-  # Make variables changeble to the advanced user
+  # Make variables changeable to the advanced user
   MARK_AS_ADVANCED(
       Boost_${basename}_LIBRARY
       Boost_${basename}_LIBRARY_RELEASE

@@ -1377,7 +1377,7 @@ AGetL <local variable id>    []  ->  [A]
   defined class. If y still does not match the name of a defined class this
   instruction throws a fatal error.
 
-  Next, this instruction pushs a classref that refers to the class named y.
+  Next, this instruction pushes a classref that refers to the class named y.
 
 
 6. Isset, Empty, and type querying instructions
@@ -1678,7 +1678,7 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   If x is an object, this instruction checks if the object has an __invoke
   method. If the object does not have an __invoke method, this instruction
   throws a fatal error. Otherwise this instruction pushes a new entry on the
-  FPI stack, intializing it with the number of parameters being passed (given
+  FPI stack, initializing it with the number of parameters being passed (given
   by %1) and a reference to the FPI structure for the __invoke method from
   object x.
 
@@ -2515,7 +2515,7 @@ SetElemC    [C C B]  ->  [C]
 
   If $1 is a non-empty string, this operation first computes x = (int)$3. If x
   is negative, this operation raises a warning and does nothing else. If x is
-  nonnegative, this operation appends spaces to the end of $1 as needed to
+  non-negative, this operation appends spaces to the end of $1 as needed to
   ensure that x is in bounds, then it computes y = substr((string)$2,0,1), and
   then it sets the character at index x in $1 equal to y (if y is not empty) or
   it sets the character at index x in $1 to "\0" (if y is empty). Then this
@@ -2540,7 +2540,7 @@ SetElemL <local variable id>    [C B]  ->  [C]
 
   If $1 is a non-empty string, this operation first computes x = (int)%1. If x
   is negative, this operation raises a warning and does nothing else. If x is
-  nonnegative, this operation appends spaces to the end of $1 as needed to
+  non-negative, this operation appends spaces to the end of $1 as needed to
   ensure that x is in bounds, then it computes y = substr((string)$2,0,1), and
   then it sets the character at index x in $1 equal to y (if y is not empty) or
   it sets the character at index x in $1 to "\0" (if y is empty). Then this
@@ -3505,7 +3505,7 @@ WIterNextK <iterator id> <rel offset> <local id> <local id>   []  ->  []
   if the value to be assigned is already a reference).
 
   The semantics of how to determine what the key and value are depend on %1 in
-  an analagous way to {W,}IterInit{K,}.
+  an analogous way to {W,}IterInit{K,}.
 
 MIterNext  <iterator id> <rel offset> <local id>               []  ->  []
 MIterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
@@ -3800,7 +3800,7 @@ AssertTStk <stack offset> <op>   []  ->  []
   These opcodes may be used to communicate the results of ahead of
   time static analysis to the runtime.  They indicate that the value
   in the specified local or stack offset must be statically known to
-  have a particular type.  The sub opcodes shoud be used to indicate
+  have a particular type.  The sub opcodes should be used to indicate
   the type, in an unspecified way.
 
 AssertObjL    <local id>     <exact> <class name>   []  ->  []

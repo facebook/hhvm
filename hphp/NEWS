@@ -26,7 +26,7 @@ Next release
   - Support arbitrary expressions inside empty()
 
 "Bobotie" 16-Sep-2013
-  - HNI (HipHop Native Interface) for calling C++ functions from Php
+  - HNI (HipHop Native Interface) for calling C++ functions from PHP
   - Fix PropertyAccessorMap::isset
   - Expose more POSIX constants
   - Fixed behavior of stream_get_contents when default args are used.
@@ -40,14 +40,14 @@ Next release
   - Import ftp extension
 
 "Kimchi" 2-Sep-2013
-  - Fix order of custom attributes and visibility in  ctor arg promotion
+  - Fix order of custom attributes and visibility in ctor arg promotion
   - Implement CachingIterator
   - Implement RecursiveCachingIterator
   - Generalized heuristic for choosing when to inline in the jit
   - Introduced a Zend compatibility layer to compile extensions
   - Imported calendar extension
   - Use gcc-4.8.1 by default
-  - Improve hhvm commandline parsing logic
+  - Improve hhvm command line parsing logic
   - Fix register_shutdown in session_set_save_handler to match PHP 5.4
   - Add "native" functions for use in Systemlib
   - PHP extension source-compatitblility layer
@@ -105,7 +105,7 @@ Next release
 "Wasabi Peas" 08-Jul-2013
   - always_assert when we run out of TC space
   - Initial changes to get HHVM compiling on OSX
-  - Consolodate ObjectData and Instance
+  - Consolidate ObjectData and Instance
   - Prototype heap tracing framework & Heap profiler
   - Better JIT code generation for Mod and Div
   - Fixes to enable compilation with clang

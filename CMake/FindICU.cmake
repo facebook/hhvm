@@ -6,7 +6,7 @@
 #                       Note: always include ICU headers as, e.g.,
 #                       unicode/utypes.h
 #  ICU_LIBRARIES      - Libraries to link against for the common ICU
-#  ICU_I18N_LIBRARIES - Libraries to link against for ICU internationaliation
+#  ICU_I18N_LIBRARIES - Libraries to link against for ICU internationalisation
 #                       (note: in addition to ICU_LIBRARIES)
 
 # Look for the header file.

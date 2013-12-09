@@ -120,7 +120,7 @@ to repeat the same command many times.
     [d]own {num=1}       moves to inner frames (callees) on stacktrace
 
 
-Use this command to walk down on stacktrace to find out inner callees of
+Use this command to walk down on stacktrace to find out inner callee's of
 current frame. By default it moves down by one level. Specify a number
 to move down several levels a time.
 
@@ -224,7 +224,7 @@ Use this command to display declaration of a symbol.
 
 
 This will print names and values of all constants, if {text} is not
-speified. Otherwise, it will print names and values of all constants
+specified. Otherwise, it will print names and values of all constants
 that contain the text in their names or values. The search is
 case-insensitive and string-based.
 

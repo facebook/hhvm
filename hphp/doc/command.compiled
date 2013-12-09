@@ -34,7 +34,7 @@ Which port to start HTTP server on.
 = --admin-port
 
 Which port to start admin server that can take URL commands to perform
-adminstration, status queries, stats queries or debugging commands.
+administration, status queries, stats queries or debugging commands.
 
 = --debug-host
 

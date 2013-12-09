@@ -175,7 +175,7 @@ can be on the stack.
   StackElem       {Gen|Cls}
 
 In the instruction descriptions below, we also use a "Const" prefix on
-several types loosly, which means the operand must be the requested
+several types loosely, which means the operand must be the requested
 type and must be a compile-time constant.  The optimizer relies on
 accessing the value of those operands.
 
@@ -195,7 +195,7 @@ is not this strict; during IR generation, we overload instruction type
 and types known at points *after* definition, due to guards.  e.g.  after
 a guard, we change src->instr->type to the refined type, then propagate this
 backwards through copies.  This effectively uses IRInstruction::m_type as
-a scratch variable, which is only valid at certian times during construction).
+a scratch variable, which is only valid at certain times during construction).
 This is probably unsound in later passes; after such a refinement,
 instructions using the variable before the guard see the refined type.
 
@@ -666,7 +666,7 @@ D:None = JmpNZero S0:{Bool|Int} L:Label
 
 D:None JmpSwitchDest<JmpSwitchData> S0:Int
 
-  Jump to the target of a switch stamement using table metadata
+  Jump to the target of a switch statement using table metadata
   <JmpSwitchData> and index S0.
 
 CheckSurpriseFlags -> B

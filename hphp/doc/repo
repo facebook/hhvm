@@ -49,7 +49,7 @@ are stored:
   19452
 
 hhvm uses one or two repos, depending on configuration. The 'central' repo must
-always be writable, but the 'local' repo can be read-only, or even completely
+always be writeable, but the 'local' repo can be read-only, or even completely
 missing. Before opening either the central or local repo, the first occurrence
 of '%{schema}' in the path will be replaced by the current schema id. There are
 several runtime configuration options (and related environment variables) that
@@ -66,10 +66,10 @@ can be used to control repo behavior:
 * Repo.Central.Path (overrides HHVM_REPO_CENTRAL_PATH)
   There is always a central read-write repo. Non-eval units prefer to be written
   in the local repo, but are written in the central repo if the local repo isn't
-  writable. If unspecified, or unusable, will fall back first to
+  writeable. If unspecified, or unusable, will fall back first to
   $HHVM_REPO_CENTRAL_PATH, and then to ~user/.hhvm.hhbc
 * Repo.Eval.Mode: local, central, or readonly(*)
-  local: Write eval units to the local repo if it is writable; otherwise write
+  local: Write eval units to the local repo if it is writeable; otherwise write
          to the central repo.
   central: Write eval units to the central repo.
   readonly: Do not write eval units to a repo, but still search for them in

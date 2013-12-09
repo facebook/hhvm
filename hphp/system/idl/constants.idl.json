@@ -5032,10 +5032,6 @@
             "value": ":"
         },
         {
-            "name": "PCRE_VERSION",
-            "value": "7.3 2007-08-28"
-        },
-        {
             "name": "PEAR_EXTENSION_DIR",
             "value": ""
         },

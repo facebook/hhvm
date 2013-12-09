@@ -78,7 +78,7 @@ The communication protocol between the client and server is fairly
 simple. It is based on Thrift, and the bulk of the implementation is
 held in DebuggerCommand and its subclasses. All communication is based
 on sending a Command, and in most cases receiving a response of the
-same Command back, someitmes updated with more information. User
+same Command back, sometimes updated with more information. User
 actions like print, where, and breakpoint translate into CmdPrint,
 CmdWhere, and CmdBreak being sent to the server, and received back
 with data like the result of the print or where operation, or status
@@ -245,7 +245,7 @@ CmdSignal(stop) ----------------> |             |            |
    |                |      Set flag on each     |            |
    |                |      RTx thread to cause  |            |
    |                |      it to interrupt      |            |
-   |                |             |             |    Interupt flag seen.
+   |                |             |             |    Interrupt flag seen.
    | <----------------------------------------------- CmdInterrupt(BPR)
    |                |             |             |            |
    v                v             v             v            v
@@ -324,7 +324,7 @@ The debugger client has a top-level "event loop" which waits to
 receive commands from the proxy to which it is attached. It responds
 to CmdSignal, and when it receives a CmdInterrupt it enters a "console
 loop" which presents a prompt to the user and processes user
-commands. Each user command is recgonized and an instance of a
+commands. Each user command is recognized and an instance of a
 subclass of DebuggerCommand is created, then executed.
 
 The client will remain in the top-level event loop until an interrupt
@@ -334,7 +334,7 @@ executed (e.g. 'continue'), it sends the request to the server and
 then throws DebuggerConsoleExitException. This is the notification to
 exit the console loop and return to the event loop. The use of an
 exception for this is a bit odd, as it is typically simply the last
-thing done from the commands's onClientImpl() method, which is called
+thing done from the command's onClientImpl() method, which is called
 directly from the console loop. The use of an exception here is
 similar to the use of DebuggerClientExitException, discussed below,
 but is now a vestige that will likely be removed soon.
@@ -504,7 +504,7 @@ or a destructor called from a simple SETL the return offset stored in
 the VM's activation record is not what we would expect. A complex
 instruction may have multiple points at which execution could
 continue. ITERNEXT, for instance, will branch to the top of the loop
-if the iterator is not done, or fall thru if the iterator is
+if the iterator is not done, or fall through if the iterator is
 done. Thus the step out location could be multiple places.
 
 Also, functions with no source information are ignored for a step out

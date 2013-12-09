@@ -258,7 +258,6 @@ void ArrayIter::nextHelper() {
       return;
     }
     case Collection::MapType: {
-      assert(m_pos != 0);
       c_Map* mp = getMap();
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
@@ -267,7 +266,6 @@ void ArrayIter::nextHelper() {
       return;
     }
     case Collection::StableMapType: {
-      assert(m_pos != 0);
       c_StableMap* smp = getStableMap();
       if (UNLIKELY(m_version != smp->getVersion())) {
         throw_collection_modified();
@@ -276,7 +274,6 @@ void ArrayIter::nextHelper() {
       return;
     }
     case Collection::SetType: {
-      assert(m_pos != 0);
       c_Set* st = getSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
@@ -311,7 +308,6 @@ Variant ArrayIter::firstHelper() {
       return m_pos;
     }
     case Collection::MapType: {
-      assert(m_pos != 0);
       c_Map* mp = getMap();
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
@@ -319,7 +315,6 @@ Variant ArrayIter::firstHelper() {
       return mp->iter_key(m_pos);
     }
     case Collection::StableMapType: {
-      assert(m_pos != 0);
       c_StableMap* smp = getStableMap();
       if (UNLIKELY(m_version != smp->getVersion())) {
         throw_collection_modified();
@@ -531,7 +526,7 @@ bool ArrayIter::iterNext(VersionableSparse) {
     throw_collection_modified();
   }
   m_pos = coll->iter_next(m_pos);
-  return m_pos != 0;
+  return coll->iter_valid(m_pos);
 }
 
 template<class Tuplish>

@@ -121,9 +121,9 @@ array(2) {
 string(6) "Vector"
 array(2) {
   [0]=>
-  int(2)
-  [1]=>
   string(1) "a"
+  [1]=>
+  int(2)
 }
 array(2) {
   [0]=>

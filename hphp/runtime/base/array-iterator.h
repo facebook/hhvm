@@ -201,7 +201,8 @@ class ArrayIter {
    * an insertion or deletion is made to the collection while iterating.
    * Moreover the collection elements are accessed via an iterator.
    * Templatized VersionableSparse functions expect the collection to implement
-   * getVersion(), iter_begin(), iter_next(), iter_value() and iter_key().
+   * getVersion(), iter_begin(), iter_next(), iter_value(), iter_key(), and
+   * iter_valid().
    */
   enum class VersionableSparse {};
 

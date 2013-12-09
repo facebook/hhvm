@@ -12,14 +12,14 @@ object(Vector)#3 (4) {
 }
 ========
 object(Map)#6 (4) {
-  [33]=>
-  string(3) "foo"
   ["a"]=>
   int(1)
-  [44]=>
+  ["b"]=>
   object(stdClass)#7 (0) {
   }
-  ["b"]=>
+  [33]=>
+  string(3) "foo"
+  [44]=>
   object(stdClass)#7 (0) {
   }
 }

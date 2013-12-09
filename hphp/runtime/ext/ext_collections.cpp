@@ -238,7 +238,7 @@ Object c_Vector::t_clear() {
   for (int i = 0; i < sz; ++i) {
     tvRefcountedDecRef(&m_data[i]);
   }
-  smart_free(m_data);
+  if (m_data) smart_free(m_data);
   m_data = nullptr;
   m_size = 0;
   m_capacity = 0;
@@ -514,7 +514,8 @@ Object c_Vector::ti_fromarray(CVarRef arr) {
   }
   target->m_capacity = target->m_size = sz;
   TypedValue* data;
-  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
+  target->m_data = data =
+    (TypedValue*)smart_malloc(size_t(sz) * sizeof(TypedValue));
   ssize_t pos = ad->iter_begin();
   for (uint i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
     assert(pos != ArrayData::invalid_index);
@@ -856,40 +857,39 @@ c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const char emptyMapSlot[sizeof(c_Map::Bucket)] = { 0 };
+static int32_t empty_map_hash_slot = c_Map::Empty;
 
-c_Map::c_Map(Class* cb)
-  : ExtObjectDataFlags(cb)
-  , m_size(0)
-  , m_load(0)
-  , m_nLastSlot(0)
-  , m_version(0)
-{
-  m_data = (Bucket*)emptyMapSlot;
+c_Map::c_Map(Class* cb) :
+    ExtObjectDataFlags(cb) {
   o_subclassData.u16 = Collection::MapType;
+  uint32_t used = 0;
+  uint32_t cap = 0;
+  uint32_t tableMask = 0;
+  int32_t version = 0;
+  m_size = 0;
+  m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
+  m_maskAndVersion = (uint64_t(version) << 32) | uint64_t(tableMask);
+  m_data = nullptr;
+  m_hash = &empty_map_hash_slot;
 }
 
 c_Map::~c_Map() {
-  deleteBuckets();
+  deleteElms();
   freeData();
 }
 
 void c_Map::freeData() {
-  if (m_data != (Bucket*)emptyMapSlot) {
-    smart_free(m_data);
-  }
-  m_data = (Bucket*)emptyMapSlot;
+  if (m_data) smart_free(m_data);
 }
 
-void c_Map::deleteBuckets() {
-  if (!m_size) return;
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (p.validValue()) {
-      tvRefcountedDecRef(&p.data);
-      if (p.hasStrKey()) {
-        decRefStr(p.skey);
-      }
+void c_Map::deleteElms() {
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
+    tvRefcountedDecRef(&p->data);
+    if (p->hasStrKey()) {
+      decRefStr(p->skey);
     }
   }
 }
@@ -901,14 +901,14 @@ void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
 
 Array c_Map::toArrayImpl() const {
   ArrayInit ai(m_size);
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (p.validValue()) {
-      if (p.hasIntKey()) {
-        ai.set((int64_t)p.ikey, tvAsCVarRef(&p.data));
-      } else {
-        ai.set(*(const String*)(&p.skey), tvAsCVarRef(&p.data));
-      }
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
+    if (p->hasIntKey()) {
+      ai.set((int64_t)p->ikey, tvAsCVarRef(&p->data));
+    } else {
+      ai.set(*(const String*)(&p->skey), tvAsCVarRef(&p->data));
     }
   }
   return ai.create();
@@ -920,21 +920,29 @@ c_Map* c_Map::Clone(ObjectData* obj) {
 
   if (!thiz->m_size) return target;
 
-  assert(thiz->m_nLastSlot != 0);
+  assert(target->m_size == 0);
+  assert(thiz->m_used != 0);
+  target->m_capAndUsed = thiz->m_capAndUsed;
+  target->m_tableMask = thiz->m_tableMask;
   target->m_size = thiz->m_size;
-  target->m_load = thiz->m_load;
-  target->m_nLastSlot = thiz->m_nLastSlot;
-  target->m_data = (Bucket*)smart_malloc(thiz->numSlots() * sizeof(Bucket));
-  memcpy(target->m_data, thiz->m_data, thiz->numSlots() * sizeof(Bucket));
+  target->m_data =
+    (Elm*)smart_malloc(size_t(thiz->m_cap) * sizeof(Elm) +
+                       thiz->hashSize() * sizeof(int32_t));
+  target->m_hash = (int32_t*)(target->m_data + target->m_cap);
+  wordcpy(target->hashTab(), thiz->hashTab(), thiz->hashSize());
 
-  for (uint i = 0; i <= thiz->m_nLastSlot; ++i) {
-    Bucket& p = thiz->m_data[i];
-    if (p.validValue()) {
-      tvRefcountedIncRef(&p.data);
-      if (p.hasStrKey()) {
-        p.skey->incRefCount();
-      }
+  for (ssize_t i = 0; i < thiz->iterLimit(); ++i) {
+    Elm& e = thiz->data()[i];
+    Elm& te = target->data()[i];
+    if (thiz->isTombstone(e.data.m_type)) {
+      te.data.m_type = e.data.m_type;
+      continue;
     }
+    te.skey = e.skey;
+    te.data.hash() = e.data.hash();
+    if (te.hasStrKey()) te.skey->incRefCount();
+    cellDup(e.data, te.data);
+    assert(te.hash() == e.hash()); // ensure not clobbered.
   }
 
   return target;
@@ -980,12 +988,17 @@ Object c_Map::t_addall(CVarRef iterable) {
 }
 
 Object c_Map::t_clear() {
-  deleteBuckets();
+  deleteElms();
   freeData();
+  uint32_t used = 0;
+  uint32_t cap = 0;
+  uint32_t tableMask = 0;
+  int32_t version = m_version + 1;
   m_size = 0;
-  m_load = 0;
-  m_nLastSlot = 0;
-  m_data = (Bucket*)emptyMapSlot;
+  m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
+  m_maskAndVersion = (uint64_t(version) << 32) | uint64_t(tableMask);
+  m_data = nullptr;
+  m_hash = &empty_map_hash_slot;
   return this;
 }
 
@@ -1004,16 +1017,21 @@ Object c_Map::t_items() {
 Object c_Map::t_keys() {
   c_Vector* vec;
   Object obj = vec = NEWOBJ(c_Vector)();
+  if (!m_size) {
+    return obj;
+  }
   vec->reserve(m_size);
-  for (uint i = 0, j = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
-    if (p.hasIntKey()) {
-      vec->m_data[j].m_data.num = p.ikey;
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  ssize_t j = 0;
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
+    if (p->hasIntKey()) {
+      vec->m_data[j].m_data.num = p->ikey;
       vec->m_data[j].m_type = KindOfInt64;
     } else {
-      p.skey->incRefCount();
-      vec->m_data[j].m_data.pstr = p.skey;
+      p->skey->incRefCount();
+      vec->m_data[j].m_data.pstr = p->skey;
       vec->m_data[j].m_type = KindOfString;
     }
     ++vec->m_size;
@@ -1029,22 +1047,27 @@ Object c_Map::t_lazy() {
 Object c_Map::t_kvzip() {
   c_Vector* vec;
   Object obj = vec = NEWOBJ(c_Vector)();
+  if (!m_size) {
+    return obj;
+  }
   vec->reserve(m_size);
-  for (uint i = 0, j = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  ssize_t j = 0;
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
     c_Pair* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
-    if (p.hasIntKey()) {
-      pair->elm0.m_data.num = p.ikey;
+    if (p->hasIntKey()) {
+      pair->elm0.m_data.num = p->ikey;
       pair->elm0.m_type = KindOfInt64;
     } else {
-      p.skey->incRefCount();
-      pair->elm0.m_data.pstr = p.skey;
+      p->skey->incRefCount();
+      pair->elm0.m_data.pstr = p->skey;
       pair->elm0.m_type = KindOfString;
     }
     ++pair->m_size;
-    pair->initAdd(&p.data);
+    pair->initAdd(&p->data);
     vec->m_data[j].m_data.pobj = pair;
     vec->m_data[j].m_type = KindOfObject;
     ++vec->m_size;
@@ -1162,15 +1185,16 @@ Object c_Map::t_values() {
   if (!sz) {
     return ret;
   }
-  TypedValue* data;
-  target->m_capacity = target->m_size = m_size;
-  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
+  TypedValue* vecData;
+  target->m_capacity = target->m_size = sz;
+  target->m_data = vecData =
+    (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
 
   int64_t j = 0;
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
-    cellDup(p.data, data[j]);
+  for (ssize_t i = 0; i < iterLimit(); ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
+    cellDup(p.data, vecData[j]);
     ++j;
   }
   return ret;
@@ -1178,9 +1202,9 @@ Object c_Map::t_values() {
 
 Array c_Map::t_tokeysarray() {
   PackedArrayInit ai(m_size);
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
+  for (ssize_t i = 0; i < iterLimit(); ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
     if (p.hasIntKey()) {
       ai.append(int64_t{p.ikey});
     } else {
@@ -1192,9 +1216,9 @@ Array c_Map::t_tokeysarray() {
 
 Array c_Map::t_tovaluesarray() {
   PackedArrayInit ai(m_size);
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
+  for (ssize_t i = 0; i < iterLimit(); ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
     ai.append(tvAsCVarRef(&p.data));
   }
   return ai.toArray();
@@ -1211,9 +1235,9 @@ Object c_Map::t_differencebykey(CVarRef it) {
   auto ret = Object::attach(target);
   if (obj->getCollectionType() == Collection::MapType) {
     auto mp = static_cast<c_Map*>(obj);
-    for (uint i = 0; i <= mp->m_nLastSlot; ++i) {
-      c_Map::Bucket& p = mp->m_data[i];
-      if (!p.validValue()) continue;
+    for (uint i = 0; i < mp->iterLimit(); ++i) {
+      if (isTombstone(i)) continue;
+      c_Map::Elm& p = mp->data()[i];
       if (p.hasIntKey()) {
         target->remove((int64_t)p.ikey);
       } else {
@@ -1253,20 +1277,22 @@ Object c_Map::t_map(CVarRef callback) {
   c_Map* mp;
   Object obj = mp = NEWOBJ(c_Map)();
   if (!m_size) return obj;
-  assert(m_nLastSlot != 0);
+  assert(m_used != 0);
+  mp->deleteElms();
+  mp->freeData();
+  mp->m_cap = m_cap;
+  mp->m_tableMask = m_tableMask;
   mp->m_size = m_size;
-  mp->m_load = m_load;
-  mp->m_nLastSlot = 0;
-  mp->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
-  // We need to zero out the first slot in case an exception
-  // is thrown during the first iteration, because ~c_Map()
-  // will decRef all slots up to (and including) m_nLastSlot.
-  mp->m_data[0].data.m_type = (DataType)0;
-  uint nLastSlot = m_nLastSlot;
-  for (uint i = 0; i <= nLastSlot; mp->m_nLastSlot = i++) {
-    Bucket& p = m_data[i];
-    Bucket& np = mp->m_data[i];
-    if (!p.validValue()) {
+  mp->m_data = (Elm*)smart_malloc(size_t(mp->m_cap) * sizeof(Elm) +
+                                  mp->hashSize() * sizeof(int32_t));
+  mp->m_hash = (int32_t*)(mp->m_data + mp->m_cap);
+  wordcpy(mp->hashTab(), hashTab(), hashSize());
+  uint32_t used = iterLimit();
+  mp->m_used = 0;
+  for (uint32_t i = 0; i < used; mp->m_used = ++i) {
+    Elm& p = data()[i];
+    Elm& np = mp->data()[i];
+    if (isTombstone(i)) {
       np.data.m_type = p.data.m_type;
       continue;
     }
@@ -1297,20 +1323,22 @@ Object c_Map::t_mapwithkey(CVarRef callback) {
   c_Map* mp;
   Object obj = mp = NEWOBJ(c_Map)();
   if (!m_size) return obj;
-  assert(m_nLastSlot != 0);
+  assert(m_used != 0);
+  mp->deleteElms();
+  mp->freeData();
+  mp->m_cap = m_cap;
+  mp->m_tableMask = m_tableMask;
   mp->m_size = m_size;
-  mp->m_load = m_load;
-  mp->m_nLastSlot = 0;
-  mp->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
-  // We need to zero out the first slot in case an exception
-  // is thrown during the first iteration, because ~c_Map()
-  // will decRef all slots up to (and including) m_nLastSlot.
-  mp->m_data[0].data.m_type = (DataType)0;
-  uint nLastSlot = m_nLastSlot;
-  for (uint i = 0; i <= nLastSlot; mp->m_nLastSlot = i++) {
-    Bucket& p = m_data[i];
-    Bucket& np = mp->m_data[i];
-    if (!p.validValue()) {
+  mp->m_data = (Elm*)smart_malloc(size_t(mp->m_cap) * sizeof(Elm) +
+                                  mp->hashSize() * sizeof(int32_t));
+  mp->m_hash = (int32_t*)(mp->m_data + mp->m_cap);
+  wordcpy(mp->hashTab(), hashTab(), hashSize());
+  uint32_t used = iterLimit();
+  mp->m_used = 0;
+  for (uint32_t i = 0; i < used; mp->m_used = ++i) {
+    Elm& p = data()[i];
+    Elm& np = mp->data()[i];
+    if (isTombstone(i)) {
       np.data.m_type = p.data.m_type;
       continue;
     }
@@ -1346,10 +1374,10 @@ Object c_Map::t_filter(CVarRef callback) {
   c_Map* mp;
   Object obj = mp = NEWOBJ(c_Map)();
   if (!m_size) return obj;
-  uint nLastSlot = m_nLastSlot;
-  for (uint i = 0; i <= nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
+  uint32_t used = iterLimit();
+  for (uint i = 0; i < used; ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
     Variant ret;
     int32_t version = m_version;
     g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
@@ -1377,10 +1405,10 @@ Object c_Map::t_filterwithkey(CVarRef callback) {
   c_Map* mp;
   Object obj = mp = NEWOBJ(c_Map)();
   if (!m_size) return obj;
-  uint nLastSlot = m_nLastSlot;
-  for (uint i = 0; i <= nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
+  uint32_t used = iterLimit();
+  for (uint32_t i = 0; i < used; ++i) {
+    Elm& p = data()[i];
+    if (isTombstone(i)) continue;
     Variant ret;
     int32_t version = m_version;
     TypedValue args[2] = {
@@ -1407,11 +1435,14 @@ Object c_Map::t_zip(CVarRef iterable) {
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_Map* mp;
   Object obj = mp = NEWOBJ(c_Map)();
+  if (!m_size) {
+    return obj;
+  }
   mp->reserve(std::min(sz, size_t(m_size)));
-  uint nLastSlot = m_nLastSlot;
-  for (uint i = 0; i <= nLastSlot && iter; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
+  uint used = iterLimit();
+  for (uint i = 0; i < used && iter; ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
     Variant v = iter.second();
     c_Pair* pair;
     Object pairObj = pair = NEWOBJ(c_Pair)();
@@ -1487,12 +1518,85 @@ Object c_Map::ti_fromarray(CVarRef arr) {
   return ret;
 }
 
+NEVER_INLINE
 void c_Map::throwOOB(int64_t key) {
   throwIntOOB(key);
 }
 
+NEVER_INLINE
 void c_Map::throwOOB(StringData* key) {
   throwStrOOB(key);
+}
+
+NEVER_INLINE
+void c_Map::throwTooLarge() {
+  static const size_t reserveSize = 130;
+  String msg(reserveSize, ReserveString);
+  char* buf = msg.bufferSlice().ptr;
+  int sz = sprintf(buf,
+                   "Map object has reached its maximum capacity of "
+                   "%u element slots and does not have room to add a "
+                   "new element",
+                   c_Map::MaxSize);
+  assert(sz <= reserveSize);
+  msg.setSize(sz);
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
+  throw e;
+}
+
+NEVER_INLINE
+void c_Map::throwReserveTooLarge() {
+  static const size_t reserveSize = 80;
+  String msg(reserveSize, ReserveString);
+  char* buf = msg.bufferSlice().ptr;
+  int sz = sprintf(buf,
+                   "Map does not support reserving room for more than "
+                   "%u elements",
+                   c_Map::MaxSize / 2);
+  assert(sz <= reserveSize);
+  msg.setSize(sz);
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
+  throw e;
+}
+
+NEVER_INLINE
+int32_t* c_Map::warnUnbalanced(size_t n, int32_t* ei) {
+  if (n > size_t(RuntimeOption::MaxArrayChain)) {
+    raise_error("Map is too unbalanced (%lu)", n);
+  }
+  return ei;
+}
+
+TypedValue* c_Map::at(int64_t key) const {
+  auto p = find(key);
+  if (UNLIKELY(p == Empty)) {
+    throwOOB(key);
+  }
+  return &data()[p].data;
+}
+
+TypedValue* c_Map::at(StringData* key) const {
+  auto p = find(key, key->hash());
+  if (UNLIKELY(p == Empty)) {
+    throwOOB(key);
+  }
+  return &data()[p].data;
+}
+
+TypedValue* c_Map::get(int64_t key) const {
+  auto p = find(key);
+  if (p == Empty) {
+    return nullptr;
+  }
+  return &data()[p].data;
+}
+
+TypedValue* c_Map::get(StringData* key) const {
+  auto p = find(key, key->hash());
+  if (p == Empty) {
+    return nullptr;
+  }
+  return &data()[p].data;
 }
 
 void c_Map::add(TypedValue* val) {
@@ -1516,274 +1620,329 @@ void c_Map::add(TypedValue* val) {
   }
 }
 
-#define STRING_HASH(x)   (int32_t(x) | 0x80000000)
-
-ALWAYS_INLINE
-bool hitStringKey(const c_Map::Bucket* p, const char* k,
-                  int len, int32_t hash) {
-  assert(p->validValue());
-  if (p->hasIntKey()) return false;
-  const char* data = p->skey->data();
-  return data == k || (p->hash() == hash &&
-                       p->skey->size() == len &&
-                       memcmp(data, k, len) == 0);
-}
-
-ALWAYS_INLINE
-bool hitIntKey(const c_Map::Bucket* p, int64_t ki) {
-  assert(p->validValue());
-  return p->ikey == ki && p->hasIntKey();
-}
-
-#define FIND_BODY(h0, hit) \
-  size_t tableMask = m_nLastSlot; \
-  size_t probeIndex = size_t(h0) & tableMask; \
-  Bucket* p = fetchBucket(probeIndex); \
-  if (LIKELY(p->validValue() && (hit))) { \
-    return p; \
-  } \
-  if (LIKELY(p->empty())) { \
-    return nullptr; \
-  } \
-  for (size_t i = 1;; ++i) { \
-    assert(i <= tableMask); \
-    probeIndex = (probeIndex + i) & tableMask; \
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
-    p = fetchBucket(probeIndex); \
-    if (p->validValue() && (hit)) { \
-      return p; \
-    } \
-    if (p->empty()) { \
-      return nullptr; \
-    } \
+void c_Map::remove(int64_t key) {
+  ++m_version;
+  auto* p = findForInsert(key);
+  if (validPos(*p)) {
+    erase(p);
   }
+}
 
-#define FIND_FOR_INSERT_BODY(h0, hit) \
-  size_t tableMask = m_nLastSlot; \
-  size_t probeIndex = size_t(h0) & tableMask; \
-  Bucket* p = fetchBucket(h0 & tableMask); \
-  if (LIKELY((p->validValue() && (hit)) || \
-             p->empty())) { \
-    return p; \
-  } \
-  Bucket* ts = nullptr; \
-  for (size_t i = 1;; ++i) { \
-    if (UNLIKELY(p->tombstone() && !ts)) { \
-      ts = p; \
-    } \
-    assert(i <= tableMask); \
-    probeIndex = (probeIndex + i) & tableMask; \
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
-    p = fetchBucket(probeIndex); \
-    if (LIKELY(p->validValue() && (hit))) { \
-      return p; \
-    } \
-    if (LIKELY(p->empty())) { \
-      if (LIKELY(!ts)) { \
-        return p; \
-      } \
-      return ts; \
-    } \
+void c_Map::remove(StringData* key) {
+  ++m_version;
+  auto* p = findForInsert(key, key->hash());
+  if (validPos(*p)) {
+    erase(p);
   }
-
-c_Map::Bucket* c_Map::find(int64_t h) const {
-  FIND_BODY(h, hitIntKey(p, h));
 }
 
-c_Map::Bucket* c_Map::find(const char* k, int len, strhash_t prehash) const {
-  FIND_BODY(prehash, hitStringKey(p, k, len, STRING_HASH(prehash)));
+bool c_Map::contains(int64_t key) const {
+  return find(key) != Empty;
 }
 
-c_Map::Bucket* c_Map::findForInsert(int64_t h) const {
-  FIND_FOR_INSERT_BODY(h, hitIntKey(p, h));
+bool c_Map::contains(StringData* key) const {
+  return find(key, key->hash()) != Empty;
 }
 
-c_Map::Bucket* c_Map::findForInsert(const char* k, int len,
-                                    strhash_t prehash) const {
-  FIND_FOR_INSERT_BODY(prehash, hitStringKey(p, k, len, STRING_HASH(prehash)));
+static bool hitStringKey(const c_Map::Elm& e, const StringData* s,
+                         int32_t hash) {
+  // hitStringKey() should only be called on an Elm that is referenced by a
+  // hash table entry. c_Map guarantees that when it adds a hash table
+  // entry that it always sets it to refer to a valid element. Likewise when
+  // it removes an element it always removes the corresponding hash entry.
+  // Therefore the assertion below must hold.
+  assert(!c_Map::isTombstone(e.data.m_type));
+  return hash == e.hash() && (s == e.skey || s->same(e.skey));
+}
+
+static bool hitIntKey(const c_Map::Elm& e, int64_t ki) {
+  // hitIntKey() should only be called on an Elm that is referenced by a
+  // hash table entry. c_Map guarantees that when it adds a hash table
+  // entry that it always sets it to refer to a valid element. Likewise when
+  // it removes an element it always removes the corresponding hash entry.
+  // Therefore the assertion below must hold.
+  assert(!c_Map::isTombstone(e.data.m_type));
+  return e.ikey == ki && e.hasIntKey();
+}
+
+// Quadratic probe is:
+//
+//   h(k, i) = (k + c1*i + c2*(i^2)) % tableSize
+//
+// Use 1/2 for c1 and c2. In combination with a table size that is a power of
+// 2, this guarantees a probe sequence of length tableSize that probes all
+// table elements exactly once.
+
+template <class Hit>
+ALWAYS_INLINE
+ssize_t c_Map::findImpl(size_t h0, Hit hit) const {
+  size_t tableMask = m_tableMask;
+  auto* elms = data();
+  auto* hashtable = hashTab();
+  for (size_t probeIndex = h0, i = 1;; ++i) {
+    ssize_t pos = hashtable[probeIndex & tableMask];
+    if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
+      return pos;
+    }
+    probeIndex += i;
+    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
+  }
+}
+
+ssize_t c_Map::find(int64_t ki) const {
+  return findImpl(ki, [ki] (const Elm& e) {
+    return hitIntKey(e, ki);
+  });
+}
+
+ssize_t c_Map::find(const StringData* s, strhash_t prehash) const {
+  auto h = prehash | STRHASH_MSB;
+  return findImpl(prehash, [s, h] (const Elm& e) {
+    return hitStringKey(e, s, h);
+  });
+}
+
+template <class Hit>
+ALWAYS_INLINE
+int32_t* c_Map::findForInsertImpl(size_t h0, Hit hit) const {
+  // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
+  // regressed when they were 32-bit types via auto. Test carefully.
+  size_t tableMask = m_tableMask;
+  auto* elms = data();
+  auto* hashtable = hashTab();
+  int32_t* ret = nullptr;
+  for (size_t probeIndex = h0, i = 1;; ++i) {
+    auto ei = &hashtable[probeIndex & tableMask];
+    ssize_t pos = *ei;
+    if (validPos(pos)) {
+      if (hit(elms[pos])) {
+        return ei;
+      }
+    } else {
+      if (!ret) ret = ei;
+      if (pos == Empty) {
+        return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
+      }
+    }
+    probeIndex += i;
+    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
+  }
+}
+
+int32_t* c_Map::findForInsert(int64_t ki) const {
+  return findForInsertImpl(ki, [ki] (const Elm& e) {
+    return hitIntKey(e, ki);
+  });
+}
+
+int32_t* c_Map::findForInsert(const StringData* s, strhash_t prehash) const {
+  auto h = prehash | STRHASH_MSB;
+  return findForInsertImpl(prehash, [s, h] (const Elm& e) {
+    return hitStringKey(e, s, h);
+  });
 }
 
 // findForNewInsert() is only safe to use if you know for sure that the
 // key is not already present in the Map.
+ALWAYS_INLINE int32_t*
+c_Map::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
+  for (size_t i = 1, probe = h0;; ++i) {
+    auto ei = &table[probe & mask];
+    if (!validPos(*ei)) return ei;
+    probe += i;
+    assert(i <= mask && probe == h0 + ((i + i * i) / 2));
+  }
+}
+
 ALWAYS_INLINE
-c_Map::Bucket* c_Map::findForNewInsert(size_t h0) const {
-  size_t tableMask = m_nLastSlot;
-  size_t probeIndex = h0 & tableMask;
-  Bucket* p = fetchBucket(probeIndex);
-  if (LIKELY(p->empty())) {
-    return p;
-  }
-  for (size_t i = 1;; ++i) {
-    assert(i <= tableMask);
-    probeIndex = (probeIndex + i) & tableMask;
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex);
-    p = fetchBucket(probeIndex);
-    if (LIKELY(p->empty())) {
-      return p;
-    }
-  }
+int32_t* c_Map::findForNewInsert(size_t h0) const {
+  return findForNewInsert(hashTab(), m_tableMask, h0);
 }
 
-#undef STRING_HASH
-#undef FIND_BODY
-#undef FIND_FOR_INSERT_BODY
-
-bool c_Map::update(int64_t h, TypedValue* data) {
-  assert(data->m_type != KindOfRef);
-  Bucket* p = findForInsert(h);
+void c_Map::update(int64_t h, TypedValue* val) {
+  assert(val->m_type != KindOfRef);
+retry:
+  auto* p = findForInsert(h);
   assert(p);
-  if (p->validValue()) {
-    tvRefcountedIncRef(data);
-    tvRefcountedDecRef(&p->data);
-    tvCopy(*data, p->data);
-    return true;
-  }
-  ++m_version;
-  ++m_size;
-  if (!p->tombstone()) {
-    if (UNLIKELY(++m_load >= computeMaxLoad())) {
-      adjustCapacity();
-      p = findForInsert(h);
-      assert(p);
+  if (validPos(*p)) {
+    auto& e = data()[*p];
+    DataType oldType = e.data.m_type;
+    uint64_t oldDatum = e.data.m_data.num;
+    cellDup(*val, e.data);
+    if (IS_REFCOUNTED_TYPE(oldType)) {
+      tvDecRefHelper(oldType, oldDatum);
     }
+    return;
   }
-  cellDup(*data, p->data);
-  p->setIntKey(h);
-  return true;
+  if (UNLIKELY(isFull())) {
+    makeRoom();
+    goto retry;
+  }
+  auto& e = allocElm(p);
+  cellDup(*val, e.data);
+  e.setIntKey(h);
+  ++m_version;
 }
 
-bool c_Map::update(StringData *key, TypedValue* data) {
-  assert(data->m_type != KindOfRef);
+void c_Map::update(StringData* key, TypedValue* val) {
+  assert(val->m_type != KindOfRef);
   strhash_t h = key->hash();
-  Bucket* p = findForInsert(key->data(), key->size(), h);
+retry:
+  auto* p = findForInsert(key, h);
   assert(p);
-  if (p->validValue()) {
-    tvRefcountedIncRef(data);
-    tvRefcountedDecRef(&p->data);
-    tvCopy(*data, p->data);
-    return true;
-  }
-  ++m_version;
-  ++m_size;
-  if (!p->tombstone()) {
-    if (UNLIKELY(++m_load >= computeMaxLoad())) {
-      adjustCapacity();
-      p = findForInsert(key->data(), key->size(), h);
-      assert(p);
+  if (validPos(*p)) {
+    auto& e = data()[*p];
+    DataType oldType = e.data.m_type;
+    uint64_t oldDatum = e.data.m_data.num;
+    cellDup(*val, e.data);
+    if (IS_REFCOUNTED_TYPE(oldType)) {
+      tvDecRefHelper(oldType, oldDatum);
     }
-  }
-  cellDup(*data, p->data);
-  p->setStrKey(key, h);
-  return true;
-}
-
-void c_Map::erase(Bucket* p) {
-  if (!p) {
     return;
   }
-  if (p->validValue()) {
-    m_size--;
-    tvRefcountedDecRef(&p->data);
-    if (p->hasStrKey()) {
-      decRefStr(p->skey);
-    }
-    p->data.m_type = (DataType)KindOfTombstone;
-    if (m_size < computeMinElements() && m_size) {
-      adjustCapacity();
-    }
+  if (UNLIKELY(isFull())) {
+    makeRoom();
+    goto retry;
+  }
+  auto& e = allocElm(p);
+  cellDup(*val, e.data);
+  e.setStrKey(key, h);
+  ++m_version;
+}
+
+void c_Map::erase(int32_t* pos) {
+  assert(validPos(*pos) && !isTombstone(*pos));
+  assert(data());
+  Elm* elms = data();
+  auto& e = elms[*pos];
+  // Mark the hash slot as a tombstone.
+  *pos = Tombstone;
+  // Mark the Elm as a tombstone.
+  TypedValue* tv = &e.data;
+  DataType oldType = tv->m_type;
+  uint64_t oldDatum = tv->m_data.num;
+  tv->m_type = KindOfInvalid;
+  --m_size;
+  // Don't adjust m_used. This frees us from having to explicitly keep track
+  // of hash load, since we can instead rely on the isFull() condition to
+  // trigger a grow/compact before hash load gets too high.
+  assert(m_used <= m_cap);
+  // Finally, decref the old value
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+  if (m_size < m_used / 2) {
+    // Compact in order to keep elms from being overly sparse.
+    compact();
   }
 }
 
-void c_Map::adjustCapacityImpl(int64_t sz) {
-  ++m_version;
-  if (sz < 2) {
-    if (sz <= 0) return;
-    sz = 2;
-  }
-  if (m_nLastSlot == 0) {
-    assert(m_data == (Bucket*)emptyMapSlot);
-    m_nLastSlot = Util::roundUpToPowerOfTwo(sz << 1) - 1;
-    m_data = (Bucket*)smart_calloc(numSlots(), sizeof(Bucket));
+NEVER_INLINE void c_Map::makeRoom() {
+  assert(isFull());
+  if (m_size < m_used / 2) {
+    assert(m_size);
+    compact();
     return;
   }
-  size_t oldNumSlots = numSlots();
-  m_nLastSlot = Util::roundUpToPowerOfTwo(sz << 1) - 1;
-  m_load = m_size;
-  Bucket* oldBuckets = m_data;
-  m_data = (Bucket*)smart_calloc(numSlots(), sizeof(Bucket));
-  for (uint i = 0; i < oldNumSlots; ++i) {
-    Bucket* p = &oldBuckets[i];
-    if (p->validValue()) {
-      Bucket* np = findForNewInsert(p->hasIntKey() ? p->ikey : p->hash());
-      memcpy(np, p, sizeof(Bucket));
+  if (UNLIKELY(m_cap == MaxSize)) {
+    throwTooLarge();
+  }
+  uint32_t newCap = m_cap ? m_cap * 2 : SmallSize;
+  uint32_t newMask = m_cap ? m_tableMask * 2 + 1 : SmallMask;
+  grow(newCap, newMask);
+}
+
+NEVER_INLINE void c_Map::reserve(int64_t sz) {
+  assert(m_used <= m_cap);
+  uint32_t newCap, newMask;
+  // Map can only guarantee that it won't throw "cannot add element"
+  // exceptions if m_size <= MaxSize / 2. Therefore, the maximum
+  // reservation size that Map supports is MaxSize / 2.
+  if (UNLIKELY(sz > int64_t(MaxSize / 2))) {
+    throwReserveTooLarge();
+  }
+  if (sz > int64_t(m_cap)) {
+    auto lgSize = c_Map::SmallLgTableSize;
+    newCap = c_Map::SmallSize;
+    while (newCap < sz) {
+      ++lgSize;
+      newCap <<= 1;
     }
+    assert(lgSize <= 32);
+    newMask = (size_t(1U) << lgSize) - 1;
+    // fall through to the call to grow() below
+  } else if (m_size < m_used / 2) {
+    compact();
+    return;
+  } else if (m_used + (sz - m_size) <= m_cap) {
+    // Nothing to do
+    return;
+  } else {
+    assert(0 < m_cap && m_cap <= MaxSize / 2);
+    assert(m_tableMask != 0);
+    newCap = m_cap * 2;
+    newMask = m_tableMask * 2 + 1;
+    // fall through to the call to grow() below
   }
-  smart_free(oldBuckets);
+  grow(newCap, newMask);
 }
 
-ssize_t c_Map::iter_next(ssize_t pos) const {
-  if (pos == 0) {
-    return 0;
-  }
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  Bucket* pLast = fetchBucket(m_nLastSlot);
-  ++p;
-  while (p <= pLast) {
-    if (p->validValue()) {
-      return reinterpret_cast<ssize_t>(p);
+void c_Map::grow(uint32_t newCap, uint32_t newMask) {
+  assert(m_used <= m_cap);
+  size_t newHashSize = size_t(newMask) + 1;
+  assert(Util::isPowerOfTwo(newHashSize));
+  assert(computeMaxElms(newMask) == newCap);
+
+  auto* oldData = data();
+  auto* data = (Elm*)smart_malloc(size_t(newCap) * sizeof(Elm) +
+                                  newHashSize * sizeof(int32_t));
+  auto* table = (int32_t*)(data + size_t(newCap));
+  m_data = data;
+  m_hash = table;
+  m_tableMask = newMask;
+  initHash(table, newHashSize);
+  for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
+    while (isTombstone(oldData[frPos].data.m_type)) {
+      assert(frPos + 1 < m_used);
+      ++frPos;
     }
-    ++p;
+    auto& toE = data[toPos];
+    toE = oldData[frPos];
+    auto ie = findForNewInsert(table, newMask,
+                               toE.hasIntKey() ? toE.ikey : toE.hash());
+    *ie = toPos;
   }
-  return 0;
+  if (oldData) smart_free(oldData);
+  m_cap = newCap;
+  m_used = m_size;
 }
 
-ssize_t c_Map::iter_prev(ssize_t pos) const {
-  if (pos == 0) {
-    return 0;
-  }
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  Bucket* pStart = m_data;
-  --p;
-  while (p >= pStart) {
-    if (p->validValue()) {
-      return reinterpret_cast<ssize_t>(p);
+void c_Map::compact() {
+  assert(m_size);
+  auto* elms = data();
+  assert(elms);
+  auto mask = m_tableMask;
+  size_t tableSize = hashSize();
+  auto table = hashTab();
+  initHash(table, tableSize);
+  for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
+    while (isTombstone(elms[frPos].data.m_type)) {
+      assert(frPos + 1 < m_used);
+      ++frPos;
     }
-    --p;
+    auto& toE = elms[toPos];
+    if (toPos != frPos) {
+      toE = elms[frPos];
+    }
+    auto ie = findForNewInsert(table, mask,
+                               toE.hasIntKey() ? toE.ikey : toE.hash());
+    *ie = toPos;
   }
-  return 0;
-}
-
-Variant c_Map::iter_key(ssize_t pos) const {
-  assert(pos);
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  if (p->hasStrKey()) {
-    return p->skey;
-  }
-  return (int64_t)p->ikey;
-}
-
-TypedValue* c_Map::iter_value(ssize_t pos) const {
-  assert(pos);
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  return &p->data;
+  m_used = m_size;
 }
 
 void c_Map::throwBadKeyType() {
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(
     "Only integer keys and string keys may be used with Maps"));
   throw e;
-}
-
-void c_Map::Bucket::dump() {
-  if (!validValue()) {
-    printf("c_Map::Bucket: %s\n", (empty() ? "empty" : "tombstone"));
-    return;
-  }
-  printf("c_Map::Bucket: %" PRIx64 "\n", hashKey());
-  if (hasStrKey()) {
-    skey->dump();
-  }
-  tvAsCVarRef(&data).dump();
 }
 
 Array c_Map::ToArray(const ObjectData* obj) {
@@ -1884,19 +2043,18 @@ bool c_Map::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto mp1 = static_cast<const c_Map*>(obj1);
   auto mp2 = static_cast<const c_Map*>(obj2);
   if (mp1->m_size != mp2->m_size) return false;
-  for (uint i = 0; i <= mp1->m_nLastSlot; ++i) {
-    c_Map::Bucket& p = mp1->m_data[i];
-    if (p.validValue()) {
-      TypedValue* tv2;
-      if (p.hasIntKey()) {
-        tv2 = mp2->get(p.ikey);
-      } else {
-        assert(p.hasStrKey());
-        tv2 = mp2->get(p.skey);
-      }
-      if (!tv2) return false;
-      if (!equal(tvAsCVarRef(&p.data), tvAsCVarRef(tv2))) return false;
+  for (uint i = 0; i < mp1->iterLimit(); ++i) {
+    if (mp1->isTombstone(i)) continue;
+    c_Map::Elm& p = mp1->data()[i];
+    TypedValue* tv2;
+    if (p.hasIntKey()) {
+      tv2 = mp2->get(p.ikey);
+    } else {
+      assert(p.hasStrKey());
+      tv2 = mp2->get(p.skey);
     }
+    if (!tv2) return false;
+    if (!equal(tvAsCVarRef(&p.data), tvAsCVarRef(tv2))) return false;
   }
   return true;
 }
@@ -1914,26 +2072,27 @@ void c_Map::Unserialize(ObjectData* obj,
   for (int64_t i = 0; i < sz; ++i) {
     Variant k;
     k.unserialize(uns, Uns::Mode::ColKey);
-    Bucket* p;
+    int32_t* p;
+    Elm* e;
     if (k.isInteger()) {
       auto h = k.toInt64();
       p = mp->findForInsert(h);
-      if (UNLIKELY(p->validValue())) goto do_unserialize;
-      p->setIntKey(h);
+      if (UNLIKELY(validPos(*p))) goto do_unserialize;
+      e = &mp->allocElm(p);
+      e->setIntKey(h);
     } else if (k.isString()) {
       auto key = k.getStringData();
       auto h = key->hash();
-      p = mp->findForInsert(key->data(), key->size(), h);
-      if (UNLIKELY(p->validValue())) goto do_unserialize;
-      p->setStrKey(key, h);
+      p = mp->findForInsert(key, h);
+      if (UNLIKELY(validPos(*p))) goto do_unserialize;
+      e = &mp->allocElm(p);
+      e->setStrKey(key, h);
     } else {
       throw Exception("Invalid key");
     }
-    ++mp->m_size;
-    ++mp->m_load;
-    p->data.m_type = KindOfNull;
+    e->data.m_type = KindOfNull;
 do_unserialize:
-    tvAsVariant(&p->data).unserialize(uns, Uns::Mode::ColValue);
+    tvAsVariant(&e->data).unserialize(uns, Uns::Mode::ColValue);
   }
 }
 
@@ -1952,7 +2111,7 @@ Variant c_MapIterator::t_current() {
   if (UNLIKELY(m_version != mp->getVersion())) {
     throw_collection_modified();
   }
-  if (!m_pos) {
+  if (!mp->iter_valid(m_pos)) {
     throw_iterator_not_valid();
   }
   return tvAsCVarRef(mp->iter_value(m_pos));
@@ -1963,14 +2122,15 @@ Variant c_MapIterator::t_key() {
   if (UNLIKELY(m_version != mp->getVersion())) {
     throw_collection_modified();
   }
-  if (!m_pos) {
+  if (!mp->iter_valid(m_pos)) {
     throw_iterator_not_valid();
   }
   return mp->iter_key(m_pos);
 }
 
 bool c_MapIterator::t_valid() {
-  return m_pos != 0;
+  c_Map* mp = m_obj.get();
+  return mp->iter_valid(m_pos);
 }
 
 void c_MapIterator::t_next() {
@@ -4606,12 +4766,11 @@ ObjectData* collectionDeepCopyVector(c_Vector* vec) {
 ObjectData* collectionDeepCopyMap(c_Map* mp) {
   mp = c_Map::Clone(mp);
   Object o = Object::attach(mp);
-  uint lastSlot = mp->m_nLastSlot;
-  for (uint i = 0; i <= lastSlot; ++i) {
-    c_Map::Bucket* p = mp->fetchBucket(i);
-    if (p->validValue()) {
-      collectionDeepCopyTV(&p->data);
-    }
+  uint used = mp->iterLimit();
+  for (uint32_t i = 0; i < used; ++i) {
+    if (mp->isTombstone(i)) continue;
+    c_Map::Elm* p = &mp->data()[i];
+    collectionDeepCopyTV(&p->data);
   }
   return o.detach();
 }

@@ -65,7 +65,7 @@ Object c_GenMapWaitHandle::ti_create(CVarRef dependencies) {
   assert(dependencies.getObjectData()->instanceof(c_Map::classof()));
   p_Map deps = static_cast<c_Map*>(dependencies.getObjectData())->clone();
   for (ssize_t iter_pos = deps->iter_begin();
-       iter_pos;
+       deps->iter_valid(iter_pos);
        iter_pos = deps->iter_next(iter_pos)) {
 
     Cell* current = tvAssertCell(deps->iter_value(iter_pos));
@@ -78,7 +78,7 @@ Object c_GenMapWaitHandle::ti_create(CVarRef dependencies) {
 
   Object exception;
   for (ssize_t iter_pos = deps->iter_begin();
-       iter_pos;
+       deps->iter_valid(iter_pos);
        iter_pos = deps->iter_next(iter_pos)) {
 
     Cell* current = tvAssertCell(deps->iter_value(iter_pos));
@@ -134,7 +134,7 @@ void c_GenMapWaitHandle::initialize(CObjRef exception, c_Map* deps, ssize_t iter
 
 void c_GenMapWaitHandle::onUnblocked() {
   for (;
-       m_iterPos;
+       m_deps->iter_valid(m_iterPos);
        m_iterPos = m_deps->iter_next(m_iterPos)) {
 
     Cell* current = tvAssertCell(m_deps->iter_value(m_iterPos));
@@ -203,7 +203,7 @@ void c_GenMapWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
   // try to import other children
   try {
     for (ssize_t iter_pos = m_deps->iter_next(m_iterPos);
-         iter_pos;
+         m_deps->iter_valid(iter_pos);
          iter_pos = m_deps->iter_next(iter_pos)) {
 
       Cell* current = tvAssertCell(m_deps->iter_value(iter_pos));

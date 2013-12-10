@@ -1084,33 +1084,12 @@ struct SinkPointAnalyzer : private LocalStateHook {
     assert(valState.realCount >= 0);
     assert(valState.optCount() >= 0);
 
-    if (valState.realCount == 0) {
-      ITRACE(3, "no live references\n");
-      auto showFailure = [&]{
-        std::string ret;
-        ret += folly::format("{} wants to consume {} but it has no unconsumed "
-                             "references\n",
-                             *m_inst, *value).str();
-        ret += show(m_state);
-        ret += folly::format("{:-^80}\n{}{:-^80}\n",
-                             " trace ", m_unit.main()->toString(), "").str();
-        return ret;
-      };
-
-      // This is ok as long as the value came from a load. See the Value struct
-      // for why.
-      always_assert_log(valState.fromLoad && valState.optCount() == 0,
-                        showFailure);
-      return;
-    }
-
-    always_assert(valState.optCount() >= 1 &&
-                  "Consuming value with optCount < 1");
+    assertCanConsume(value);
 
     // Note that we're treating consumers and observers the same here, which is
     // necessary until we have better alias analysis.
     observeValue(value, valState, sinkPoint);
-    --valState.realCount;
+    if (valState.realCount) --valState.realCount;
 
     ITRACE(3, " after: {}\n", show(valState));
   }
@@ -1143,6 +1122,49 @@ struct SinkPointAnalyzer : private LocalStateHook {
     if (m_takenState && sp.id == m_ids.before(m_inst)) {
       ITRACE(3, "updating taken state for {}\n", *value);
       m_takenState->values[value].popRef();
+    }
+  }
+
+  void assertCanConsume(SSATmp* value) {
+    auto const& valState = m_state.values[value];
+    if (valState.realCount == 0) {
+      auto showFailure = [&]{
+        std::string ret;
+        ret += folly::format("{} wants to consume {} but it has no unconsumed "
+                             "references\n",
+                             *m_inst, *value).str();
+        ret += show(m_state);
+        ret += folly::format("{:-^80}\n{}{:-^80}\n",
+                             " trace ", m_unit.main()->toString(), "").str();
+        return ret;
+      };
+
+      // This is ok as long as the value came from a load (see the Value struct
+      // for why) or it's from a phi node where one or more of the incoming
+      // values has an uncounted type (when we process the DefLabel we take the
+      // pessimistic combination of all inputs and the uncounted value won't
+      // have any references).
+      auto uncountedPhiSource = [&]{
+        auto* inst = value->inst();
+        if (!inst->is(DefLabel)) return false;
+        for (uint32_t i = 0; i < inst->numDsts(); ++i) {
+          auto foundUncounted = false;
+          inst->block()->forEachSrc(i,
+            [&](const IRInstruction* inst, SSATmp* src) {
+              if (src->type().notCounted()) foundUncounted = true;
+            }
+          );
+          if (foundUncounted) return true;
+        }
+        return false;
+      };
+
+      always_assert_log((valState.fromLoad && valState.optCount() == 0) ||
+                        uncountedPhiSource(),
+                        showFailure);
+    } else {
+      always_assert(valState.optCount() >= 1 &&
+                    "Consuming value with optCount < 1");
     }
   }
 
@@ -1235,8 +1257,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
         // to the CheckType's taken branch, and erased completely from the path
         // falling through the CheckType.
         if (dst->type().notCounted() && src->type().maybeCounted()) {
-          auto& valState = m_state.values[canonical(dst)];
-          assert(valState.realCount >= 1 || valState.fromLoad);
+          auto* src = canonical(dst);
+          auto& valState = m_state.values[src];
+          assertCanConsume(src);
 
           ITRACE(3, "consuming reference to {}: {} and dropping "
                  "opt delta of {}\n",
@@ -1308,8 +1331,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
       assert(newVal->inst()->src(0) == oldVal);
       // Similar to what we do when processing the CheckType directly, we
       // "consume" the value on behalf of the CheckType.
-      auto& valState = m_state.values[canonical(oldVal)];
-      assert(valState.realCount >= 1 || valState.fromLoad);
+      oldVal = canonical(oldVal);
+      auto& valState = m_state.values[oldVal];
+      assertCanConsume(oldVal);
       if (valState.realCount) --valState.realCount;
     }
   }

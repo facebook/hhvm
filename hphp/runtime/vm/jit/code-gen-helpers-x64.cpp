@@ -359,8 +359,8 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
 
 void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
   assert(s0 != s1);
-  assert(!s0.isXMM() || s1 == InvalidReg); // never 2 XMMs
-  assert(!d0.isXMM() || d1 == InvalidReg); // never 2 XMMs
+  assert(!s0.isSIMD() || s1 == InvalidReg); // never 2 XMMs
+  assert(!d0.isSIMD() || d1 == InvalidReg); // never 2 XMMs
   if (d0 == s1 && d1 != InvalidReg) {
     assert(d0 != d1);
     if (d1 == s0) {
@@ -369,7 +369,7 @@ void shuffle2(Asm& as, PhysReg s0, PhysReg s1, PhysReg d0, PhysReg d1) {
       as.   movq (s1, d1); // save s1 first; d1 != s0
       as.   movq (s0, d0);
     }
-  } else if (d0.isXMM() && s0.isGP() && s1.isGP()) {
+  } else if (d0.isSIMD() && s0.isGP() && s1.isGP()) {
     // move 2 gpr to 1 xmm
     assert(d0 != rCgXMM0); // xmm0 is reserved for scratch
     as.   mov_reg64_xmm(s0, d0);

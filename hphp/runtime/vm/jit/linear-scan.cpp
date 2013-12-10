@@ -133,7 +133,7 @@ private:
   void collectInfo(BlockList::iterator it, IRTrace* trace);
   RegNumber getJmpPreColor(SSATmp* tmp, uint32_t regIndx, bool isReload);
   void computePreColoringHint();
-  void findFullXMMCandidates();
+  void findFullSIMDCandidates();
   IRInstruction* nextNative() const;
   uint32_t nextNativeId() const;
 
@@ -203,8 +203,8 @@ private:
   StateVector<SSATmp, PhysLoc> m_allocInfo;
 
   // SSATmps requiring 2 64-bit registers that are eligible for
-  // allocation to a single XMM register
-  boost::dynamic_bitset<> m_fullXMMCandidates;
+  // allocation to a single SIMD register
+  boost::dynamic_bitset<> m_fullSIMDCandidates;
 
   // reserved linear ids for each exit trace
   smart::flat_map<IRTrace*, uint32_t> m_exitIds;
@@ -289,7 +289,7 @@ LinearScan::LinearScan(IRUnit& unit)
   , m_uses(m_lifetime.uses)
   , m_jmps(unit, JmpList())
   , m_allocInfo(unit, PhysLoc())
-  , m_fullXMMCandidates(unit.numTmps())
+  , m_fullSIMDCandidates(unit.numTmps())
 {
   m_exitIds.reserve(unit.exits().size());
   for (int i = 0; i < kNumRegs; i++) {
@@ -326,11 +326,11 @@ PhysReg::Type LinearScan::getRegType(const SSATmp* tmp, int locIdx) const {
   if (!RuntimeOption::EvalHHIRAllocXMMRegs) return PhysReg::GP;
 
   // If we're selecting a register for the type, it means this SSATmp
-  // didn't get it's value allocated to a XMM register, which
+  // didn't get it's value allocated to a SIMD register, which
   // otherwise would store the type too.
   if (locIdx == 1) return PhysReg::GP;
 
-  if (tmp->isA(Type::Dbl)) return PhysReg::XMM;
+  if (tmp->isA(Type::Dbl)) return PhysReg::SIMD;
 
   if (packed_tv) return PhysReg::GP;
 
@@ -340,32 +340,32 @@ PhysReg::Type LinearScan::getRegType(const SSATmp* tmp, int locIdx) const {
 
   if (tmp->inst()->op() == Reload) {
     // We don't have an entry for reloaded SSATmps in
-    // m_fullXMMCandidates, since they're inserted after this set is
+    // m_fullSIMDCandidates, since they're inserted after this set is
     // computed.  So we approximate this property for the reloaded
     // SSATmp using the original SSATmp that was spilled.  In other
     // words, if the original SSATmp was a candidate to be allocated
-    // to a full XMM register, then so is the reloaded SSATmp.  This
+    // to a full SIMD register, then so is the reloaded SSATmp.  This
     // might be a bit conservative, but avoids recomputing the analysis.
     auto* reload = tmp->inst();
     auto* spill  = reload->src(0)->inst();
     tmpId = spill->src(0)->id();
   }
 
-  if (m_fullXMMCandidates[tmpId]) {
+  if (m_fullSIMDCandidates[tmpId]) {
     FTRACE(6,
-       "getRegType(SSATmp {} : {}): it's a candidate for full XMM register\n",
+       "getRegType(SSATmp {} : {}): it's a candidate for full SIMD register\n",
            tmpId, tmpType.toString());
     FTRACE(6,
        "getRegType(SSATmp {}): crossNative = {} ; # freeCalleeSaved[GP] = {}\n",
            tmpId, crossNativeCall(tmp), m_freeCalleeSaved[PhysReg::GP].size());
 
-    // Note that there are no callee-saved XMM registers in the x64
+    // Note that there are no callee-saved SIMD registers in the x64
     // ABI.  So, if tmp crosses native calls and there are 2 free GP
     // callee-saved registers, then allocate tmp to GP registers.
     if (crossNativeCall(tmp) && m_freeCalleeSaved[PhysReg::GP].size() >= 2) {
       return PhysReg::GP;
     }
-    return PhysReg::XMM;
+    return PhysReg::SIMD;
   }
   return PhysReg::GP;
 }
@@ -519,14 +519,14 @@ bool LinearScan::crossNativeCall(const SSATmp* tmp) const {
  * Allocates a register to ssaTmp's index component (0 for value, 1 for type).
  * Returns the number of 64-bit register-space allocated.  This is normally 1,
  * but it's 2 when both the type and value need registers and they're allocated
- * together to one 128-bit XMM register.
+ * together to one 128-bit SIMD register.
  */
 int LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
   bool preferCallerSaved = true;
   PhysReg::Type regType = getRegType(ssaTmp, index);
   FTRACE(6, "getRegType(SSATmp {}, {}) = {}\n", ssaTmp->id(),
          index, int(regType));
-  assert(regType == PhysReg::GP || index == 0); // no type-only in XMM regs
+  assert(regType == PhysReg::GP || index == 0); // no type-only in SIMD regs
 
   if (RuntimeOption::EvalHHIREnableCalleeSavedOpt) {
     preferCallerSaved = !crossNativeCall(ssaTmp);
@@ -596,8 +596,8 @@ int LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
 
   assignRegToTmp(reg, ssaTmp, index);
 
-  if (m_allocInfo[ssaTmp].isFullXMM()) {
-    // Type and value allocated together to a single XMM register
+  if (m_allocInfo[ssaTmp].isFullSIMD()) {
+    // Type and value allocated together to a single SIMD register
     return 2;
   }
   return 1;
@@ -606,9 +606,9 @@ int LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
 void LinearScan::assignRegToTmp(RegState* reg, SSATmp* ssaTmp, uint32_t index) {
   reg->m_ssaTmp = ssaTmp;
   // mark inst as using this register
-  if (ssaTmp->numWords() == 2 && reg->type() == PhysReg::XMM) {
+  if (ssaTmp->numWords() == 2 && reg->type() == PhysReg::SIMD) {
     assert(index == 0);
-    m_allocInfo[ssaTmp].setRegFullXMM(reg->m_reg);
+    m_allocInfo[ssaTmp].setRegFullSIMD(reg->m_reg);
   } else {
     m_allocInfo[ssaTmp].setReg(reg->m_reg, index);
   }
@@ -690,14 +690,14 @@ uint32_t LinearScan::assignSpillLoc() {
              ++locIndex) {
 
           // SSATmps with 2 regs are aligned to 16 bytes because they may be
-          // allocated to XMM registers, either before or after being reloaded
+          // allocated to SIMD registers, either before or after being reloaded
           if (src->numWords() == 2 && locIndex == 0) {
             spillLocManager.alignTo16Bytes();
           }
           auto spillLoc = spillLocManager.allocSpillLoc();
           m_allocInfo[dst].setSlot(locIndex, spillLoc);
 
-          if (m_allocInfo[src].isFullXMM()) {
+          if (m_allocInfo[src].isFullSIMD()) {
             // Allocate the next, consecutive spill slot for this SSATmp too
             spillLoc = spillLocManager.allocSpillLoc();
             m_allocInfo[dst].setSlot(1, spillLoc);
@@ -1035,23 +1035,23 @@ void LinearScan::genSpillStats(int numSpillLocs) {
 
 /*
  * Finds the set of SSATmps that should be considered for allocation
- * to a full XMM register.  These are the SSATmps that satisfy all the
+ * to a full SIMD register.  These are the SSATmps that satisfy all the
  * following conditions:
  *   a) it requires 2 64-bit registers
  *   b) it's defined in a load instruction
  *   c) all its uses are simple stores to memory
  *
- * The computed set of SSATmps is stored in m_fullXMMCandidates.
+ * The computed set of SSATmps is stored in m_fullSIMDCandidates.
  */
-void LinearScan::findFullXMMCandidates() {
+void LinearScan::findFullSIMDCandidates() {
   boost::dynamic_bitset<> notCandidates(m_unit.numTmps());
-  m_fullXMMCandidates.reset();
+  m_fullSIMDCandidates.reset();
   for (auto* block : m_blocks) {
     for (auto& inst : *block) {
       for (SSATmp& tmp : inst.dsts()) {
         if (tmp.numWords() == 2 && inst.isLoad() &&
             !inst.isControlFlow()) {
-          m_fullXMMCandidates[tmp.id()] = true;
+          m_fullSIMDCandidates[tmp.id()] = true;
         }
       }
       int idx = 0;
@@ -1063,7 +1063,7 @@ void LinearScan::findFullXMMCandidates() {
       }
     }
   }
-  m_fullXMMCandidates -= notCandidates;
+  m_fullSIMDCandidates -= notCandidates;
 }
 
 // Insert a Shuffle just before each Jmp, to copy the Jmp's src values
@@ -1101,7 +1101,7 @@ RegAllocInfo LinearScan::allocRegs() {
   m_idoms = findDominators(m_unit, m_blocks);
 
   if (!packed_tv) {
-    findFullXMMCandidates();
+    findFullSIMDCandidates();
   }
 
   allocRegsToTrace();

@@ -127,10 +127,10 @@ private:
 
 /*
  * Sometimes TypedValues need to be allocated with alignment that
- * allows use of xmm stores/loads.  This constant just helps
+ * allows use of 128-bit SIMD stores/loads.  This constant just helps
  * self-document that case.
  */
-constexpr size_t kTVXmmAlign = 0x10;
+constexpr size_t kTVSimdAlign = 0x10;
 
 /*
  * These may be used to provide a little more self-documentation about

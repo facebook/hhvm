@@ -326,7 +326,7 @@ bool checkShuffle(const IRInstruction& inst, const RegAllocInfo& regs) {
     //   general than the src type due to a control-flow join.
     assert(rs.numAllocated() <= rd.numAllocated());
     assert(!rs.spilled() || !rd.spilled());
-    assert(rs.isFullXMM() == rd.isFullXMM());
+    assert(rs.isFullSIMD() == rd.isFullSIMD());
     for (int j = 0; j < rd.numAllocated(); ++j) {
       if (rd.spilled()) {
         assert(!destSlots.test(rd.slot(j)));

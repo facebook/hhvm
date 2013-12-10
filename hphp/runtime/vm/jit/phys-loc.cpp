@@ -33,7 +33,7 @@ int PhysLoc::numAllocated() const {
 }
 
 int PhysLoc::numWords() const {
-  return isFullXMM() ? 2 : numAllocated();
+  return isFullSIMD() ? 2 : numAllocated();
 }
 
 RegSet PhysLoc::regs() const {

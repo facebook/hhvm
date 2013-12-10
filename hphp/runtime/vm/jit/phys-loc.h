@@ -47,7 +47,7 @@ using Transl::InvalidReg;
  * PhysLoc contains Register/spill locations for one SSATmp
  */
 class PhysLoc {
-  enum Kind { kRegister, kFullXMM, kSpill };
+  enum Kind { kRegister, kSIMD, kSpill };
 
 public:
   PhysLoc() : m_kind(kRegister) {
@@ -68,12 +68,12 @@ public:
   /*
    * The number of registers or spill slots actually allocated.  This might
    * end up fewer than SSATmp::numWords if the SSATmp isn't used, is
-   * a constant, or if we allocated a full XMM register to a 2-word tmp.
+   * a constant, or if we allocated a full SIMD register to a 2-word tmp.
    */
   int numAllocated() const;
 
   /*
-   * Number of words held by this PhysLoc.  If isFullXMM() is true this returns
+   * Number of words held by this PhysLoc.  If isFullSIMD() is true this returns
    * 2, otherwise it returns numAllocated().
    */
   int numWords() const;
@@ -100,12 +100,12 @@ public:
 
   /*
    * Used when the SSATmp needs two 64-bit registers and got assigned
-   * one 128-bit XMM register.
+   * one 128-bit SIMD register.
    */
-  void setRegFullXMM(PhysReg reg) {
-    assert(reg.isXMM() && m_kind != kSpill);
+  void setRegFullSIMD(PhysReg reg) {
+    assert(reg.isSIMD() && m_kind != kSpill);
     m_regs[0] = reg;
-    m_kind = kFullXMM;
+    m_kind = kSIMD;
   }
 
   bool spilled() const {
@@ -114,10 +114,10 @@ public:
 
   /*
    * Returns whether the SSATmp needed 2 regs and was allocated to a
-   * whole 128-bit XMM register.
+   * whole 128-bit SIMD register.
    */
-  bool isFullXMM() const {
-    return m_kind == kFullXMM;
+  bool isFullSIMD() const {
+    return m_kind == kSIMD;
   }
 
   /* Returns the set of registers in this PhysLoc */

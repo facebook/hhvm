@@ -39,11 +39,11 @@ struct MoveInfo {
 };
 
 template <int N>
-bool cycleHasXMMReg(const CycleInfo& cycle, const int (&moves)[N]) {
+bool cycleHasSIMDReg(const CycleInfo& cycle, const int (&moves)[N]) {
   int first = cycle.node;
   int node = first;
   do {
-    if (Transl::PhysReg(node).isXMM()) return true;
+    if (Transl::PhysReg(node).isSIMD()) return true;
     node = moves[node];
   } while (node != first);
   return false;
@@ -124,13 +124,13 @@ pathloop:
   }
   // Deal with any cycles we encountered
   for (int i = 0; i < numCycles; ++i) {
-    // can't use xchg if one of the registers is XMM
-    bool hasXMMReg = cycleHasXMMReg(cycles[i], moves);
-    if (cycles[i].length == 2 && !hasXMMReg) {
+    // can't use xchg if one of the registers is SIMD
+    bool hasSIMDReg = cycleHasSIMDReg(cycles[i], moves);
+    if (cycles[i].length == 2 && !hasSIMDReg) {
       int v = cycles[i].node;
       int w = moves[v];
       howTo.push_back(MoveInfo(MoveInfo::Kind::Xchg, w, v));
-    } else if (cycles[i].length == 3 && !hasXMMReg) {
+    } else if (cycles[i].length == 3 && !hasSIMDReg) {
       int v = cycles[i].node;
       int w = moves[v];
       howTo.push_back(MoveInfo(MoveInfo::Kind::Xchg, w, v));

@@ -24,8 +24,7 @@ namespace HPHP { namespace Transl {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * PhysReg represents a physical machine register.  (Currently it only
- * knows how to do GPRs.)
+ * PhysReg represents a physical machine register.
  *
  * To make it possible to use it with the assembler conveniently, it
  * can be implicitly converted to and from Reg64.  If you want to use
@@ -38,7 +37,7 @@ namespace HPHP { namespace Transl {
 struct PhysReg {
   enum Type {
     GP,
-    XMM,
+    SIMD,
     kNumTypes,  // keep last
   };
   explicit constexpr PhysReg(int n = -1) : n(n) {}
@@ -56,16 +55,16 @@ struct PhysReg {
     return n < kNumGPRegs ? RegNumber(n) : RegNumber(n - kNumGPRegs);
   }
   /* implicit */ operator RegXMM() const {
-    assert(isXMM() || n == -1);
+    assert(isSIMD() || n == -1);
     return RegXMM(n - kNumGPRegs);
   }
 
   Type type() const {
     assert(n >= 0 && n < kNumRegs);
-    return n < kNumGPRegs ? GP : XMM;
+    return n < kNumGPRegs ? GP : SIMD;
   }
   bool isGP () const { return n >= 0 && n < kNumGPRegs; }
-  bool isXMM() const { return n >= kNumGPRegs && n < kNumRegs; }
+  bool isSIMD() const { return n >= kNumGPRegs && n < kNumRegs; }
   explicit constexpr operator int() const { return n; }
   constexpr bool operator==(PhysReg r) const { return n == r.n; }
   constexpr bool operator!=(PhysReg r) const { return n != r.n; }

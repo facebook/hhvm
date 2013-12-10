@@ -19,11 +19,15 @@
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/ext_file.h"
+
+#include "hphp/runtime/base/directory.h"
+#include "hphp/runtime/base/glob-stream-wrapper.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
 
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(SPL);
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
@@ -35,7 +39,8 @@ const StaticString
   s_next("next"),
   s_current("current"),
   s_key("key"),
-  s_getIterator("getIterator");
+  s_getIterator("getIterator"),
+  s_directory_iterator("DirectoryIterator");
 
 const StaticString spl_classes[] = {
   StaticString("AppendIterator"),
@@ -45,7 +50,7 @@ const StaticString spl_classes[] = {
   StaticString("BadMethodCallException"),
   StaticString("CachingIterator"),
   StaticString("Countable"),
-  StaticString("DirectoryIterator"),
+  s_directory_iterator,
   StaticString("DomainException"),
   StaticString("EmptyIterator"),
   StaticString("FilesystemIterator"),
@@ -357,6 +362,42 @@ void f_spl_autoload(const String& class_name,
     throw_spl_exception("Class %s could not be loaded", class_name.c_str());
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <class T>
+static T* getDir(const Object& dir_iter) {
+  static_assert(std::is_base_of<Directory, T>::value,
+                "Only cast to directories");
+  auto dir = dir_iter->o_realProp("dir", 0, s_directory_iterator);
+  return dir->asCResRef().getTyped<T>();
+}
+
+static Variant HHVM_METHOD(DirectoryIterator, hh_readdir) {
+  auto dir = getDir<Directory>(this_);
+
+  if (auto array_dir = dynamic_cast<ArrayDirectory*>(dir)) {
+    auto prop = this_->o_realProp("dirName", 0, s_directory_iterator);
+    *prop = array_dir->path();
+  }
+
+  return f_readdir(Resource(dir));
+}
+
+static int64_t HHVM_METHOD(GlobIterator, count) {
+  return getDir<ArrayDirectory>(this_)->size();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+static class SPLExtension : public Extension {
+ public:
+  SPLExtension() : Extension("SPL") { }
+  virtual void moduleLoad(Hdf config) {
+    HHVM_ME(DirectoryIterator, hh_readdir);
+    HHVM_ME(GlobIterator, count);
+  }
+} s_SPL_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

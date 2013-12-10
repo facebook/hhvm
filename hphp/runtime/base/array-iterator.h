@@ -166,7 +166,7 @@ class ArrayIter {
    */
   RefData* zSecond();
 
-  bool hasArrayData() {
+  bool hasArrayData() const {
     return !((intptr_t)m_data & 1);
   }
   bool hasCollection() {
@@ -234,7 +234,7 @@ class ArrayIter {
   template<class Mappish>
   Variant iterKey(VersionableSparse);
 
-  const ArrayData* getArrayData() {
+  const ArrayData* getArrayData() const {
     assert(hasArrayData());
     return m_data;
   }

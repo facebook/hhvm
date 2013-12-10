@@ -21,6 +21,7 @@ hphp/system/php/spl/file_handling/SplFileInfo.php
 hphp/system/php/spl/interfaces/SeekableIterator.php
 hphp/system/php/spl/iterators/DirectoryIterator.php
 hphp/system/php/spl/iterators/FilesystemIterator.php
+hphp/system/php/spl/iterators/GlobIterator.php
 hphp/system/php/spl/iterators/RecursiveDirectoryIterator.php
 hphp/system/php/spl/file_handling/SplFileObject.php
 hphp/system/php/spl/file_handling/SplTempFileObject.php

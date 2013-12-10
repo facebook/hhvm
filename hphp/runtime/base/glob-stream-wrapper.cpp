@@ -53,20 +53,11 @@ Directory* GlobStreamWrapper::opendir(const String& path) {
   path_str += strlen(prefix);
   path_len -= strlen(prefix);
 
-  Variant v = f_glob(String(path_str, path_len, CopyString));
-
-  if (!v.isArray()) {
+  auto glob = f_glob(String(path_str, path_len, CopyString));
+  if (!glob.isArray()) {
     return nullptr;
   }
-
-  // need to strip off everything but the basename of each file
-  Array bases;
-  for (ArrayIter iter(v.toArray()); iter; ++iter) {
-    auto file = iter.secondRef().toString();
-    bases.append(Variant(f_basename(file)));
-  }
-
-  return NEWOBJ(ArrayDirectory)(bases);
+  return NEWOBJ(ArrayDirectory)(glob.toArray());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

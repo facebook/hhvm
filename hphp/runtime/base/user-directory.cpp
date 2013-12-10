@@ -40,7 +40,7 @@ bool UserDirectory::open(const String& path) {
   bool success = false;
   Variant ret = invoke(m_DirOpen, s_dir_opendir,
                        make_packed_array(path, 0), success);
-  if (success && (ret.toBoolean() == true)) {
+  if (success && ret.toBoolean()) {
     return true;
   }
   raise_warning("\"%s::dir_opendir\" call failed", m_cls->name()->data());
@@ -72,9 +72,7 @@ void UserDirectory::rewind() {
   if (!success) {
     raise_warning("%s::dir_rewinddir is not implemented",
                   m_cls->name()->data());
-    return;
   }
-  return;
 }
 
 }

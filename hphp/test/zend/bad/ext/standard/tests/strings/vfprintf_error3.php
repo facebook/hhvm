@@ -6,7 +6,7 @@
  */
 
 // Open handle
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_error3.phpt.txt';
 $fp = fopen( $file, "a+" );
 
 echo "\n-- Testing vfprintf() function with wrong variable types as argument --\n";
@@ -31,7 +31,7 @@ fclose( $fp );
 ===DONE===
 <?php
 
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_error3.phpt.txt';
 unlink( $file );
 
 ?>

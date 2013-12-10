@@ -8,7 +8,7 @@
 echo "*** Testing vfprintf() : variation functionality ***\n";
 
 // Open handle
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_variation1.phpt.txt';
 $fp = fopen( $file, 'a+' );
 
 $funset = fopen( __FILE__, 'r' );
@@ -51,7 +51,7 @@ fclose( $fp );
 ===DONE===
 <?php
 
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_variation1.phpt.txt';
 unlink( $file );
 
 ?>

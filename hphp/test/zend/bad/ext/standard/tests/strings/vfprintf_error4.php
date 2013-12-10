@@ -6,7 +6,7 @@
  */
 
 // Open handle
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_error4.phpt.txt';
 $fp = fopen( $file, "a+" );
 
 echo "\n-- Testing vfprintf() function with other strangeties  --\n";
@@ -20,7 +20,7 @@ fclose( $fp );
 ===DONE===
 <?php
 
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_error4.phpt.txt';
 unlink( $file );
 
 ?>

@@ -6,7 +6,7 @@
  */
 
 // Open handle
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_error1.phpt.txt';
 $fp = fopen( $file, "a+" );
 
 echo "\n-- Testing vfprintf() function with more than expected no. of arguments --\n";
@@ -23,7 +23,7 @@ fclose($fp);
 ===DONE===
 <?php
 
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_error1.phpt.txt';
 unlink( $file );
 
 ?>

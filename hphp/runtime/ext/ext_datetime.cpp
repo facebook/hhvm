@@ -43,7 +43,11 @@ static class DateExtension : public Extension {
   }
 
   static String dateTimezoneIniGet(void* p) {
-    return f_date_default_timezone_get();
+    auto ret = g_context->getTimeZone();
+    if (ret.isNull()) {
+      return empty_string;
+    }
+    return ret;
   }
 } s_date_extension;
 

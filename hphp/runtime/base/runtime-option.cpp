@@ -374,8 +374,20 @@ static inline std::string regionSelectorDefault() {
 #ifdef HHVM_REGION_SELECTOR_LEGACY
   return "legacy";
 #else
+#ifdef HHVM_REGION_SELECTOR_HOTTRACE
+  return "hottrace";
+#else
   return "";
 #endif
+#endif
+#endif
+}
+
+static inline bool pgoDefault() {
+#ifdef HHVM_REGION_SELECTOR_HOTTRACE
+  return true;
+#else
+  return false;
 #endif
 }
 

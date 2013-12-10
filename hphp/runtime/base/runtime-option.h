@@ -423,7 +423,7 @@ public:
   F(bool, HHIRAllocXMMRegs,            true)                            \
   /* Region compiler flags */                                           \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
-  F(bool,     JitPGO,                  false)                           \
+  F(bool,     JitPGO,                  pgoDefault())                    \
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
   F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
   F(bool,     JitPGOUsePostConditions, true)                            \

@@ -489,7 +489,7 @@ void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
   auto base = x2a(curOpd(inst->src(0)).reg());
   auto rCount = rAsm;
   m_as.  Ldr   (rCount.W(), base[FAST_REFCOUNT_OFFSET]);
-  m_as.  Tbnz  (rCount, RefCountStaticBitPos, &done);
+  m_as.  Tbnz  (rCount, UncountedBitPos, &done);
   m_as.  Cmp   (rCount, RefCountMaxRealistic);
   m_as.  B     (&done, vixl::ls);
   m_as.  Brk   (0);

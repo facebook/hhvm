@@ -33,8 +33,6 @@ using Transl::TCA;
 
 TRACE_SET_MOD(tx64);
 
-constexpr auto kJcc8Len = 3;
-
 //////////////////////////////////////////////////////////////////////
 
 namespace {

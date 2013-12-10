@@ -41,8 +41,13 @@ class DebugInfo {
 
   void debugSync();
   static DebugInfo* Get();
-
+  static void setPidMapOverlay(void* from, void* to) {
+    pidMapOverlayStart = from;
+    pidMapOverlayEnd = to;
+  }
  private:
+  void generatePidMapOverlay();
+
   /* maintain separate dwarf info for a and astubs, so that we
    * don't emit dwarf info for the two in the same ELF file.
    * gdb tends to get confused when it sees dwarf info for
@@ -56,6 +61,9 @@ class DebugInfo {
    */
   FILE* m_perfMap;
   char m_perfMapName[64];
+
+  static void* pidMapOverlayStart;
+  static void* pidMapOverlayEnd;
 };
 
 /*

@@ -1,8 +1,38 @@
 Next release
+  -
+
+"Tom Yum" 9-Dec-2013
   - support date.timezone in ini files
   - implement fileinfo
   - special comparisons for DateTime
   - delete unimplemented functions
+
+"Huarache" 26-Nov-2013
+  - Linker re-ordering of hot functions
+  - Huge pages for hot functions
+  - Implement ZipArchive
+  - preg_replace /e support
+  - get_mem_usage() no longer can be negative
+  - Userland file system support
+  - Implement fileinfo extension
+  - wordwrap() fixes
+  - PDO::sqlieCreateFunction()
+  - Implement NumberFormatter
+  - Implement Locale
+  - Implement DatePeriod
+  - Many reflection fixes
+  - Stub out PharData
+  - A ton of performance fixes 
+  - A ton of open source framework fixes 
+  - FastCGI Server Support
+
+"Garlic Alfredo" 11-Nov-2013
+  - teach implode() about collections
+  - fix ini parsing leak
+  - Make array not an instanceof Traversable
+
+"Burrito" 28-Oct-2013
+  - Log when a nullable (e.g. ?int) is incorrect
 
 "Sausage" 14-Oct-2013
   - Direct invocation of callable arrays: $f = [$cls_or_instance, 'method']; $f()

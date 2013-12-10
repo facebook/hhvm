@@ -770,7 +770,10 @@ public:
   ALWAYS_INLINE
   void pushStaticString(StringData* s) {
     assert(s->isStatic()); // No need to call s->incRefCount().
-    pushStringNoRc(s);
+    assert(m_top != m_elms);
+    m_top--;
+    m_top->m_data.pstr = s;
+    m_top->m_type = KindOfStaticString;
   }
 
   // This should only be called directly when the caller has

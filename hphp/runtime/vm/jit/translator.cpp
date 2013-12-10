@@ -2537,7 +2537,9 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
     } else {
       // TODO: Once the region translator supports guard relaxation
       //       (task #2598894), we can enable specialization for all modes.
-      const bool specialize = tx64->mode() == TransLive;
+      const bool specialize = (RuntimeOption::EvalHHBCRelaxGuards ||
+                               RuntimeOption::EvalHHIRRelaxGuards) &&
+                              tx64->mode() == TransLive;
       RuntimeType rtt = tx64->liveType(l, *liveUnit(), specialize);
       assert(rtt.isIter() || !rtt.isVagueValue());
       // Allocate a new DynLocation to represent this and store it in the

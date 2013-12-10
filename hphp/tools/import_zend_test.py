@@ -965,6 +965,11 @@ def walk(filename, source_dir):
         test = test.replace('afile.txt', 'file_get_contents_variation1.txt')
     if '/ext/standard/tests/file/readfile_variation6.php' in full_dest_filename:
         test = test.replace('afile.txt', 'readfile_variation6.txt')
+    if '/ext/standard/tests/file/rename_variation' in full_dest_filename:
+        test = test.replace('rename_variation_dir', dest_filename+'_dir')
+        test = test.replace('rename_variation.tmp', dest_filename+'.tmp')
+        test = test.replace('rename_variation2.tmp', dest_filename+'2.tmp')
+        test = test.replace('rename_variation_link.tmp', dest_filename+'_link.tmp')
 
     file(full_dest_filename, 'w').write(test)
 

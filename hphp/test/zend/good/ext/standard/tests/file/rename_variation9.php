@@ -9,8 +9,8 @@ $file_path = dirname(__FILE__);
 $context = stream_context_create();
 
 // on directory
-$dir_name = "$file_path/rename_variation_dir9";
-$new_dir_name = "$file_path/rename_variation_dir9_new";
+$dir_name = "$file_path/rename_variation9.phpt_dir9";
+$new_dir_name = "$file_path/rename_variation9.phpt_dir9_new";
 
 mkdir($dir_name);
 
@@ -35,5 +35,5 @@ echo "Done\n";
 ?>
 <?php
 unlink(dirname(__FILE__)."/rename_variation9_new.tmp");
-rmdir(dirname(__FILE__)."/rename_variation_dir9_new");
+rmdir(dirname(__FILE__)."/rename_variation9.phpt_dir9_new");
 ?>

@@ -2,7 +2,7 @@
 
 $file_path = dirname(__FILE__);
 
-$dest_dir = "$file_path/rename_variation_dir";
+$dest_dir = "$file_path/rename_variation3.phpt_dir";
 // create the $dest_dir
 mkdir($dest_dir);
 
@@ -35,5 +35,5 @@ echo "Done\n";
 <?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/rename_variation_hard_link1.tmp");
-rmdir($file_path."/rename_variation_dir");
+rmdir($file_path."/rename_variation3.phpt_dir");
 ?>

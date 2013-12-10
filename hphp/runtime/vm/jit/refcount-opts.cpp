@@ -520,16 +520,16 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
  private:
   struct IncomingBranch {
-    IncomingBranch(const Block* b, const Value& s)
+    IncomingBranch(const Block* b, const Value& v)
       : from(b)
-      , state(s)
+      , value(v)
     {}
 
     const Block* from;
-    Value state;
+    Value value;
   };
   struct IncomingValue {
-    Value state;
+    Value value;
     smart::vector<IncomingBranch> inBlocks;
   };
 
@@ -567,9 +567,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
         // If the value was already provided by another block, merge this
         // block's state in.
         if (existed) {
-          mergedState.state.merge(inPair.second);
+          mergedState.value.merge(inPair.second);
         } else {
-          mergedState.state = inPair.second;
+          mergedState.value = inPair.second;
         }
 
         // Register this block as an incoming provider of the value.
@@ -585,7 +585,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     // there is a difference in a value's state between incoming branches,
     // resolve it by inserting sink points on the appropriate incoming edges.
     for (auto& pair : mergedValues) {
-      auto mergedState = pair.second.state;
+      auto mergedState = pair.second.value;
 
       // If the value wasn't provided by every incoming branch, we have to
       // completely resolve it in all incoming branches.
@@ -596,7 +596,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       auto* incVal = mapGet(retState.canon, pair.first, pair.first);
       auto const mergedDelta = mergedState.optDelta();
       for (auto& inBlock : pair.second.inBlocks) {
-        auto& inState = inBlock.state;
+        auto& inState = inBlock.value;
         assert(inState.optDelta() >= mergedDelta);
 
         Point insertId = idForEdge(inBlock.from, m_block, m_ids);

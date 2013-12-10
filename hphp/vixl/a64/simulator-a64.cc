@@ -2074,8 +2074,7 @@ void Simulator::DoPrintf(Instruction* instr) {
     result = printf(format, x1(), x2(), x3(), x4(), x5(), x6(), x7());
   } else if (type == CPURegister::kFPRegister) {
     result = printf(format, d0(), d1(), d2(), d3(), d4(), d5(), d6(), d7());
-  } else {
-    assert(type == CPURegister::kNoRegister);
+  } else if (type == CPURegister::kInvalid) {
     result = printf("%s", format);
   }
   set_x0(result);

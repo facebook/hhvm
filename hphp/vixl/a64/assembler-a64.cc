@@ -67,9 +67,6 @@ bool CPURegList::IsValid() const {
       }
     }
     return is_valid;
-  } else if (type_ == CPURegister::kNoRegister) {
-    // We can't use IsEmpty here because that asserts IsValid().
-    return list_ == 0;
   } else {
     return false;
   }
@@ -81,10 +78,6 @@ void CPURegList::RemoveCalleeSaved() {
     Remove(GetCalleeSaved(RegisterSizeInBits()));
   } else if (type() == CPURegister::kFPRegister) {
     Remove(GetCalleeSavedFP(RegisterSizeInBits()));
-  } else {
-    assert(type() == CPURegister::kNoRegister);
-    assert(IsEmpty());
-    // The list must already be empty, so do nothing.
   }
 }
 

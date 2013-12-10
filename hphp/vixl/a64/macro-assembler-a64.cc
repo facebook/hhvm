@@ -657,15 +657,15 @@ void MacroAssembler::PushHelper(int count, int size,
   // Push(a, b) is equivalent to Push(a) followed by Push(b).
   switch (count) {
     case 1:
-      assert(src1.IsNone() && src2.IsNone() && src3.IsNone());
+      assert(!src1.IsValid() && !src2.IsValid() && !src3.IsValid());
       str(src0, MemOperand(StackPointer(), -1 * size, PreIndex));
       break;
     case 2:
-      assert(src2.IsNone() && src3.IsNone());
+      assert(!src2.IsValid() && !src3.IsValid());
       stp(src1, src0, MemOperand(StackPointer(), -2 * size, PreIndex));
       break;
     case 3:
-      assert(src3.IsNone());
+      assert(!src3.IsValid());
       stp(src2, src1, MemOperand(StackPointer(), -3 * size, PreIndex));
       str(src0, MemOperand(StackPointer(), 2 * size));
       break;
@@ -697,15 +697,15 @@ void MacroAssembler::PopHelper(int count, int size,
   // Pop(a, b) is equivalent to Pop(a) followed by Pop(b).
   switch (count) {
     case 1:
-      assert(dst1.IsNone() && dst2.IsNone() && dst3.IsNone());
+      assert(!dst1.IsValid() && !dst2.IsValid() && !dst3.IsValid());
       ldr(dst0, MemOperand(StackPointer(), 1 * size, PostIndex));
       break;
     case 2:
-      assert(dst2.IsNone() && dst3.IsNone());
+      assert(!dst2.IsValid() && !dst3.IsValid());
       ldp(dst0, dst1, MemOperand(StackPointer(), 2 * size, PostIndex));
       break;
     case 3:
-      assert(dst3.IsNone());
+      assert(!dst3.IsValid());
       ldr(dst2, MemOperand(StackPointer(), 2 * size));
       ldp(dst0, dst1, MemOperand(StackPointer(), 3 * size, PostIndex));
       break;
@@ -922,7 +922,7 @@ void MacroAssembler::PrintfNoPreserve(const char * format,
   assert((arg_count >= 0) && (arg_count <= kMaxArgCount));
   // Check that every remaining argument is NoCPUReg.
   for (int i = arg_count; i < kMaxArgCount; i++) {
-    assert(args[i].IsNone());
+    assert(!args[i].IsValid());
   }
   assert((arg_count == 0) || AreSameSizeAndType(args[0], args[1],
                                                 args[2], args[3],

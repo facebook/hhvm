@@ -19,6 +19,8 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
 
+#include "hphp/vixl/a64/assembler-a64.h"
+
 namespace HPHP { namespace Transl {
 
 //////////////////////////////////////////////////////////////////////
@@ -45,6 +47,8 @@ struct PhysReg {
   constexpr /* implicit */ PhysReg(RegXMM r) : n(int(r) + kNumGPRegs) {}
   explicit constexpr PhysReg(Reg32 r) : n(int(RegNumber(r))) {}
 
+  constexpr /* implicit */ PhysReg(vixl::Register r) : n(r.code()) {}
+
   explicit constexpr PhysReg(RegNumber r) : n(int(r)) {}
 
   /* implicit */ operator Reg64() const {
@@ -57,6 +61,15 @@ struct PhysReg {
   /* implicit */ operator RegXMM() const {
     assert(isSIMD() || n == -1);
     return RegXMM(n - kNumGPRegs);
+  }
+
+  /* implicit */ operator vixl::Register() const {
+    assert(isGP() || n == -1);
+    if (n == -1) {
+      return vixl::Register();
+    } else {
+      return vixl::Register(n, vixl::kXRegSize);
+    }
   }
 
   Type type() const {

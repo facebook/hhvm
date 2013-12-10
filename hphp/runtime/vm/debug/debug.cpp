@@ -16,8 +16,11 @@
 
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
+#include "hphp/runtime/vm/jit/translator-x64.h"
 
 #include "hphp/runtime/base/execution-context.h"
+
+#include "hphp/util/current-executable.h"
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -25,12 +28,15 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "hphp/runtime/vm/jit/translator-x64.h"
+#include <bfd.h>
 
 using namespace HPHP::Transl;
 
 namespace HPHP {
 namespace Debug {
+
+void* DebugInfo::pidMapOverlayStart;
+void* DebugInfo::pidMapOverlayEnd;
 
 DebugInfo* DebugInfo::Get() {
   return tx64->getDebugInfo();
@@ -41,6 +47,7 @@ DebugInfo::DebugInfo() {
            sizeof m_perfMapName,
            "/tmp/perf-%d.map", getpid());
   m_perfMap = fopen(m_perfMapName, "w");
+  generatePidMapOverlay();
 }
 
 DebugInfo::~DebugInfo() {
@@ -48,6 +55,74 @@ DebugInfo::~DebugInfo() {
   if (!RuntimeOption::EvalKeepPerfPidMap) {
     unlink(m_perfMapName);
   }
+}
+
+void DebugInfo::generatePidMapOverlay() {
+  if (!m_perfMap || !pidMapOverlayStart) return;
+
+  std::string self = current_executable_path();
+  bfd* abfd = bfd_openr(self.c_str(), nullptr);
+#ifdef BFD_DECOMPRESS
+  abfd->flags |= BFD_DECOMPRESS;
+#endif
+  char **match = nullptr;
+  if (!bfd_check_format(abfd, bfd_archive) &&
+      bfd_check_format_matches(abfd, bfd_object, &match)) {
+
+    std::vector<asymbol*> sorted;
+    long storage_needed = bfd_get_symtab_upper_bound (abfd);
+
+    if (storage_needed <= 0) return;
+
+    auto symbol_table = (asymbol**)malloc(storage_needed);
+
+    long number_of_symbols = bfd_canonicalize_symtab(abfd, symbol_table);
+
+    for (long i = 0; i < number_of_symbols; i++) {
+      auto sym = symbol_table[i];
+      if (!(sym->flags & (BSF_LOCAL|BSF_GLOBAL))) continue;
+      if (sym->flags &
+          (BSF_INDIRECT|BSF_SECTION_SYM|BSF_WEAK|BSF_FILE|BSF_OBJECT)) {
+        continue;
+      }
+      auto sec = sym->section;
+      if (!(sec->flags & (SEC_ALLOC|SEC_LOAD|SEC_CODE))) continue;
+      auto addr = sec->vma + sym->value;
+      if (addr < uintptr_t(pidMapOverlayStart) ||
+          addr >= uintptr_t(pidMapOverlayEnd)) {
+        continue;
+      }
+      sorted.push_back(sym);
+    }
+
+    std::sort(sorted.begin(), sorted.end(), [](asymbol* a, asymbol* b) {
+        auto addra = a->section->vma + a->value;
+        auto addrb = b->section->vma + b->value;
+        if (addra != addrb) return addra < addrb;
+        return strncmp("_ZN4HPHP", a->name, 8) &&
+          !strncmp("_ZN4HPHP", b->name, 8);
+      });
+
+    for (size_t i = 0; i < sorted.size(); i++) {
+      auto sym = sorted[i];
+      auto addr = sym->section->vma + sym->value;
+      unsigned size;
+      if (i + 1 < sorted.size()) {
+        auto s2 = sorted[i + 1];
+        size = s2->section->vma + s2->value - addr;
+      } else {
+        size = uintptr_t(pidMapOverlayEnd) - addr;
+      }
+      if (!size) continue;
+      fprintf(m_perfMap, "%lx %x %s\n",
+              long(addr), size, sym->name);
+    }
+
+    free(symbol_table);
+    free(match);
+  }
+  bfd_close(abfd);
+  return;
 }
 
 void DebugInfo::recordStub(TCRange range, const char* name) {

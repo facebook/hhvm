@@ -1125,18 +1125,21 @@ struct SinkPointAnalyzer : private LocalStateHook {
     }
   }
 
-  void assertCanConsume(SSATmp* value) {
+  void assertCanConsumeImpl(SSATmp* value, bool checkConsume) {
     auto const& valState = m_state.values[value];
+    auto showState = [&](const std::string& what) {
+      std::string ret;
+      ret += folly::format("'{}' wants to consume {} but {}\n",
+                           *m_inst, *value, what).str();
+      ret += show(m_state);
+      ret += folly::format("{:-^80}\n{}{:-^80}\n",
+                           " trace ", m_unit.main()->toString(), "").str();
+      return ret;
+    };
+
     if (valState.realCount == 0) {
-      auto showFailure = [&]{
-        std::string ret;
-        ret += folly::format("{} wants to consume {} but it has no unconsumed "
-                             "references\n",
-                             *m_inst, *value).str();
-        ret += show(m_state);
-        ret += folly::format("{:-^80}\n{}{:-^80}\n",
-                             " trace ", m_unit.main()->toString(), "").str();
-        return ret;
+      auto showFailure = [&] {
+        return showState("it has no unconsumed references");
       };
 
       // This is ok as long as the value came from a load (see the Value struct
@@ -1162,10 +1165,21 @@ struct SinkPointAnalyzer : private LocalStateHook {
       always_assert_log((valState.fromLoad && valState.optCount() == 0) ||
                         uncountedPhiSource(),
                         showFailure);
-    } else {
-      always_assert(valState.optCount() >= 1 &&
-                    "Consuming value with optCount < 1");
+    } else if (checkConsume) {
+      auto showFailure = [&] {
+        return showState(folly::format("it has an optCount of {}\n",
+                                       valState.optCount()).str());
+      };
+      always_assert_log(valState.optCount() >= 1, showFailure);
     }
+  }
+
+  void assertHasUnconsumedReference(SSATmp* value) {
+    assertCanConsumeImpl(value, false);
+  }
+
+  void assertCanConsume(SSATmp* value) {
+    assertCanConsumeImpl(value, true);
   }
 
   void observeLocalRefs() {
@@ -1259,7 +1273,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
         if (dst->type().notCounted() && src->type().maybeCounted()) {
           auto* src = canonical(dst);
           auto& valState = m_state.values[src];
-          assertCanConsume(src);
+          assertHasUnconsumedReference(src);
 
           ITRACE(3, "consuming reference to {}: {} and dropping "
                  "opt delta of {}\n",
@@ -1333,7 +1347,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // "consume" the value on behalf of the CheckType.
       oldVal = canonical(oldVal);
       auto& valState = m_state.values[oldVal];
-      assertCanConsume(oldVal);
+      assertHasUnconsumedReference(oldVal);
       if (valState.realCount) --valState.realCount;
     }
   }

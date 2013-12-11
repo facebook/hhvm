@@ -263,7 +263,7 @@ int instrLen(const Op* opcode) {
   return len;
 }
 
-Offset* instrJumpOffset(Op* instr) {
+Offset* instrJumpOffset(const Op* instr) {
   static const int8_t jumpMask[] = {
 #define NA 0
 #define MA 0
@@ -329,7 +329,7 @@ Offset* instrJumpOffset(Op* instr) {
 }
 
 Offset instrJumpTarget(const Op* instrs, Offset pos) {
-  Offset* offset = instrJumpOffset(const_cast<Op*>(instrs + pos));
+  Offset* offset = instrJumpOffset(instrs + pos);
 
   if (!offset) {
     return InvalidAbsoluteOffset;

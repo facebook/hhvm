@@ -881,7 +881,7 @@ const char* opcodeToName(Op op);
 // returns a pointer to the location within the bytecode containing the jump
 //   Offset, or NULL if the instruction cannot jump. Note that this offset is
 //   relative to the current instruction.
-Offset* instrJumpOffset(Op* instr);
+Offset* instrJumpOffset(const Op* instr);
 
 // returns absolute address of target, or InvalidAbsoluteOffset if instruction
 //   cannot jump

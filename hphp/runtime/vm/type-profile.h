@@ -47,6 +47,7 @@ void profileRequestEnd();
 void recordType(TypeProfileKey sk, DataType dt);
 std::pair<DataType, double> predictType(TypeProfileKey key);
 bool isProfileOpcode(const PC& pc);
+int64_t requestCount();
 
 extern __thread bool profileOn;
 inline bool shouldProfile() {

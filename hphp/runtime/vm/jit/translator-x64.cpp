@@ -201,6 +201,18 @@ bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
 
   if (profData()->optimized(sk.getFuncId())) return false;
 
+  // If we've hit EvalJitProfileRequests, then don't emit profiling
+  // translations for function entries (which trigger the optimizing
+  // retranslation).  This limits the duration of profiling.  For
+  // non-function-body SrcKeys, whose profiling translations only
+  // increment a counter, it's OK to emit them past the
+  // EvalJitProfileRequests threshold.  Notice that, because of the
+  // check above, if we got here, then the whole function hasn't been
+  // retranslated in optimizing mode yet.
+  if (sk.func()->base() == sk.offset() &&
+      requestCount() > RuntimeOption::EvalJitProfileRequests) {
+    return false;
+  }
   return true;
 }
 

@@ -159,6 +159,10 @@ profileInit() {
 bool __thread profileOn = false;
 static int64_t numRequests;
 
+int64_t requestCount() {
+  return numRequests;
+}
+
 static inline bool warmedUp() {
   return (numRequests >= RuntimeOption::EvalJitWarmupRequests) ||
     (RuntimeOption::ClientExecutionMode() &&

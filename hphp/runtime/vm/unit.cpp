@@ -445,8 +445,7 @@ Unit::~Unit() {
   }
 
   if (m_mergeInfo) {
-    // Delete all Func's.
-    range_foreach(mutableFuncs(), Func::destroy);
+    for (auto* func : mutableFuncs()) Func::destroy(func);
   }
 
   // ExecutionContext and the TC may retain references to Class'es, so

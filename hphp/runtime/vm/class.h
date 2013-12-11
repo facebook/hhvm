@@ -286,7 +286,7 @@ class PreClass : public AtomicCountable {
   size_t num##Fields()  const { return m_##fields.size(); }             \
   typedef IterRange<Type const*> TypeName##Range;                       \
   TypeName##Range all##Fields() const {                                 \
-    return TypeName##Range(fields(), fields() + m_##fields.size() - 1); \
+    return TypeName##Range(fields(), fields() + m_##fields.size());     \
   }
 
   DEF_ACCESSORS(Func*, Func, methods, Methods)

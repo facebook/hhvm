@@ -403,6 +403,17 @@
                     ]
                 },
                 {
+                    "name": "toFrozenSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a FrozenSet built from the values of this Vector.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "toKeysArray",
                     "flags": [
                     ],
@@ -1042,6 +1053,17 @@
                   ]
              },
              {
+                 "name": "toFrozenSet",
+                 "flags": [
+                 ],
+                  "desc": "Returns a FrozenSet built from the values of this FrozenVector.",
+                 "return": {
+                     "type": "Object"
+                 },
+                 "args": [
+                 ]
+             },
+             {
                  "name": "values",
                  "flags": [
                  ],
@@ -1556,6 +1578,17 @@
                     "flags": [
                     ],
                     "desc": "Returns a Set built from the values of this Map.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toFrozenSet",
+                    "flags": [
+                    ],
+                     "desc": "Returns a FrozenSet built from the values of this Map.",
                     "return": {
                         "type": "Object"
                     },
@@ -2226,6 +2259,17 @@
                     ]
                 },
                 {
+                    "name": "toFrozenSet",
+                    "flags": [
+                    ],
+                     "desc": "Returns a FrozenSet built from the values of this StableMap.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "values",
                     "flags": [
                     ],
@@ -2743,6 +2787,17 @@
                     ]
                 },
                 {
+                    "name": "toFrozenSet",
+                    "flags": [
+                    ],
+                     "desc": "Returns a FrozenSet built from the values of this Set.",
+                     "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
                     "name": "toKeysArray",
                     "flags": [
                     ],
@@ -3089,6 +3144,17 @@
                     "flags": [
                     ],
                     "desc": "Returns a Set built from the values of this FrozenSet.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "toFrozenSet",
+                    "flags": [
+                    ],
+                    "desc": "Returns a copy of this FrozenSet.",
                     "return": {
                         "type": "Object"
                     },
@@ -3515,6 +3581,17 @@
                     "flags": [
                     ],
                     "desc": "Returns a Set built from the values of this Pair.",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                   "name": "toFrozenSet",
+                   "flags": [
+                   ],
+                    "desc": "Returns a FrozenSet built from the values of this Pair.",
                     "return": {
                         "type": "Object"
                     },

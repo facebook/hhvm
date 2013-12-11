@@ -132,6 +132,8 @@ bool ObjectData::o_toBooleanImpl() const noexcept {
       return c_Set::ToBool(this);
     } else if (m_cls == c_FrozenVector::classof()) {
       return c_FrozenVector::ToBool(this);
+    } else if (m_cls == c_FrozenSet::classof()) {
+      return c_FrozenSet::ToBool(this);
     } else {
       always_assert(false);
     }
@@ -804,6 +806,8 @@ ObjectData* ObjectData::clone() {
         return c_Pair::Clone(this);
       } else if (m_cls == c_FrozenVector::classof()) {
         return c_FrozenVector::Clone(this);
+      } else if (m_cls == c_FrozenSet::classof()) {
+        return c_FrozenSet::Clone(this);
       }
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);

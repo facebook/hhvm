@@ -30,43 +30,16 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * Default implementations for iterable and keyed iterable materialization
- * methods.
+/**
+ * The "materialization" methods have the form "to[CollectionName]()" and
+ * allow us to get an instance of a collection type from another.
+ * This template provides a default implementation.
  */
-
-inline static Object toVectorDefaultImpl(ObjectData* obj) {
-  c_Vector* vec;
-  Object o = vec = NEWOBJ(c_Vector)();
-  vec->init(VarNR(obj));
-  return o;
-}
-
-inline static Object toSetDefaultImpl(ObjectData* obj) {
-  c_Set* st;
-  Object o = st = NEWOBJ(c_Set)();
-  st->init(VarNR(obj));
-  return o;
-}
-
-inline static Object toFrozenVectorDefaultImpl(ObjectData* obj) {
-  c_FrozenVector* fv;
-  Object o = fv = NEWOBJ(c_FrozenVector)();
-  fv->init(VarNR(obj));
-  return o;
-}
-
-inline static Object toMapDefaultImpl(ObjectData* obj) {
-  c_Map* mp;
-  Object o = mp = NEWOBJ(c_Map)();
-  mp->init(VarNR(obj));
-  return o;
-}
-
-inline static Object toStableMapDefaultImpl(ObjectData* obj) {
-  c_StableMap* smp;
-  Object o = smp = NEWOBJ(c_StableMap)();
-  smp->init(VarNR(obj));
+template<typename TCollection>
+inline static Object materializeDefaultImpl(ObjectData* obj) {
+  TCollection* col;
+  Object o = col = NEWOBJ(TCollection)();
+  col->init(VarNR(obj));
   return o;
 }
 
@@ -672,11 +645,11 @@ void c_Vector::initFvFields(c_FrozenVector* fv) {
 }
 
 Object c_Vector::t_tovector() {
-  return toVectorDefaultImpl(this);
+  return materializeDefaultImpl<c_Vector>(this);
 }
 
 Object c_Vector::t_toset() {
-  return toSetDefaultImpl(this);
+  return materializeDefaultImpl<c_Set>(this);
 }
 
 Object c_Vector::t_tofrozenvector() {
@@ -690,11 +663,15 @@ Object c_Vector::t_tofrozenvector() {
 }
 
 Object c_Vector::t_tomap() {
-  return toMapDefaultImpl(this);
+  return materializeDefaultImpl<c_Map>(this);
 }
 
 Object c_Vector::t_tostablemap() {
-  return toStableMapDefaultImpl(this);
+  return materializeDefaultImpl<c_StableMap>(this);
+}
+
+Object c_Vector::t_tofrozenset() {
+  return materializeDefaultImpl<c_FrozenSet>(this);
 }
 
 c_VectorIterator::c_VectorIterator(Class* cls
@@ -3949,7 +3926,16 @@ Object c_FrozenSet::ti_fromarrays(int _argc, CArrRef _argv) {
 }
 
 c_FrozenSet::c_FrozenSet(Class* cls) : BaseSet(cls) {
-  // TODO: set collection flags once this becomes a real collection.
+  const uint attrs = ObjectData::IsCollection|
+                     ObjectData::UseGet|
+                     ObjectData::UseSet|
+                     ObjectData::UseIsset|
+                     ObjectData::UseUnset|
+                     ObjectData::CallToImpl|
+                     ObjectData::HasCppClone;
+
+  ObjectData::setAttributes(attrs);
+  o_subclassData.u16 = Collection::FrozenSetType;
 }
 
 void c_FrozenSet::Unserialize(ObjectData* obj, VariableUnserializer* uns,
@@ -4457,16 +4443,22 @@ COLLECTION_MAGIC_METHODS(Pair)
     vec->init(VarNR(this)); \
     return o; \
   } \
+  Object c_##cls::t_tofrozenvector() { \
+    c_FrozenVector* fv; \
+    Object o = fv = NEWOBJ(c_FrozenVector)(); \
+    fv->init(VarNR(this)); \
+    return o; \
+  } \
   Object c_##cls::t_toset() { \
     c_Set* st; \
     Object o = st = NEWOBJ(c_Set)(); \
     st->init(VarNR(this)); \
     return o; \
   } \
-  Object c_##cls::t_tofrozenvector() { \
-    c_FrozenVector* fv; \
-    Object o = fv = NEWOBJ(c_FrozenVector)(); \
-    fv->init(VarNR(this)); \
+  Object c_##cls::t_tofrozenset() { \
+    c_FrozenSet* st; \
+    Object o = st = NEWOBJ(c_FrozenSet)(); \
+    st->init(VarNR(this)); \
     return o; \
   }
 
@@ -4495,12 +4487,18 @@ KEYEDITERABLE_MATERIALIZE_METHODS(FrozenVector)
 #undef ITERABLE_MATERIALIZE_METHODS
 #undef KEYEDITERABLE_MATERIALIZE_METHODS
 
+static inline bool isKeylessCollectionType(Collection::Type ctype) {
+  return ctype == Collection::SetType ||
+         ctype == Collection::FrozenSetType;
+}
+
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   assert(obj->isCollection());
   int64_t sz = obj->getCollectionSize();
   if (obj->getCollectionType() == Collection::VectorType ||
       obj->getCollectionType() == Collection::FrozenVectorType ||
       obj->getCollectionType() == Collection::SetType ||
+      obj->getCollectionType() == Collection::FrozenSetType ||
       obj->getCollectionType() == Collection::PairType) {
     serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
     serializer->writeArrayHeader(sz, true);
@@ -4517,10 +4515,10 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
       }
     } else {
       for (ArrayIter iter(obj); iter; ++iter) {
-        if (obj->getCollectionType() != Collection::SetType) {
-          serializer->writeCollectionKey(iter.first());
-        } else {
+        if (isKeylessCollectionType(obj->getCollectionType())) {
           serializer->writeCollectionKeylessPrefix();
+        } else {
+          serializer->writeCollectionKey(iter.first());
         }
         serializer->writeArrayValue(iter.second());
       }
@@ -4565,6 +4563,9 @@ void collectionDeepCopyTV(TypedValue* tv) {
           break;
         case Collection::PairType:
           obj = collectionDeepCopyPair(static_cast<c_Pair*>(obj));
+          break;
+        case Collection::FrozenSetType:
+          obj = collectionDeepCopyFrozenSet(static_cast<c_FrozenSet*>(obj));
           break;
         default:
           assert(false);
@@ -4628,6 +4629,10 @@ ObjectData* collectionDeepCopySet(c_Set* st) {
   return c_Set::Clone(st);
 }
 
+ObjectData* collectionDeepCopyFrozenSet(c_FrozenSet* st) {
+  return c_FrozenSet::Clone(st);
+}
+
 ObjectData* collectionDeepCopyPair(c_Pair* pair) {
   pair = c_Pair::Clone(pair);
   Object o = Object::attach(pair);
@@ -4651,6 +4656,8 @@ TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
       return c_Pair::OffsetGet(obj, key);
     case Collection::FrozenVectorType:
       return c_FrozenVector::OffsetGet(obj, key);
+    case Collection::FrozenSetType:
+      return c_FrozenSet::OffsetGet(obj, key);
     default:
       assert(false);
       return nullptr;
@@ -4676,6 +4683,8 @@ void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
       break;
     case Collection::PairType:
       c_Pair::OffsetSet(obj, key, val);
+    case Collection::FrozenSetType:
+      c_FrozenSet::OffsetSet(obj, key, val);
       break;
     default:
       assert(false);
@@ -4697,6 +4706,8 @@ bool collectionIsset(ObjectData* obj, TypedValue* key) {
       return c_Pair::OffsetIsset(obj, key);
     case Collection::FrozenVectorType:
       return c_FrozenVector::OffsetIsset(obj, key);
+    case Collection::FrozenSetType:
+      return c_FrozenSet::OffsetIsset(obj, key);
     default:
       assert(false);
       return false;
@@ -4718,6 +4729,8 @@ bool collectionEmpty(ObjectData* obj, TypedValue* key) {
       return c_Pair::OffsetEmpty(obj, key);
     case Collection::FrozenVectorType:
       return c_FrozenVector::OffsetEmpty(obj, key);
+    case Collection::FrozenSetType:
+      return c_FrozenSet::OffsetEmpty(obj, key);
     default:
       assert(false);
       return false;
@@ -4742,14 +4755,22 @@ void collectionUnset(ObjectData* obj, TypedValue* key) {
     case Collection::PairType:
       c_Pair::OffsetUnset(obj, key);
       break;
+    case Collection::FrozenSetType:
+      c_FrozenSet::OffsetUnset(obj, key);
+      break;
     default:
       assert(false);
   }
 }
 
 void collectionAppend(ObjectData* obj, TypedValue* val) {
+  auto fail = [](const char* clsName) {
+    return std::string("Cannot add an element to a ") + clsName;
+  };
+
   assert(val->m_type != KindOfRef);
   assert(val->m_type != KindOfUninit);
+
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
       static_cast<c_Vector*>(obj)->add(val);
@@ -4765,8 +4786,12 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
       break;
     case Collection::PairType: {
       assert(static_cast<c_Pair*>(obj)->isFullyConstructed());
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot add an element to a Pair"));
+      Object e(SystemLib::AllocRuntimeExceptionObject(fail("Pair")));
+      throw e;
+      break;
+    }
+    case Collection::FrozenSetType: {
+      Object e(SystemLib::AllocRuntimeExceptionObject(fail("FrozenSet")));
       throw e;
       break;
     }
@@ -4803,6 +4828,9 @@ void collectionInitAppend(ObjectData* obj, TypedValue* val) {
     case Collection::FrozenVectorType:
       static_cast<c_FrozenVector*>(obj)->add(val);
       break;
+    case Collection::FrozenSetType:
+      static_cast<c_FrozenSet*>(obj)->add(val);
+      break;
     default:
       assert(false);
   }
@@ -4820,6 +4848,9 @@ Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
       c_Set::throwNoIndexAccess();
     case Collection::PairType:
       return tvAsVariant(static_cast<c_Pair*>(obj)->at(offset));
+    case Collection::FrozenSetType:
+      c_FrozenSet::throwNoIndexAccess();
+      break;
     default:
       assert(false);
       return tvAsVariant(nullptr);
@@ -4840,11 +4871,15 @@ Variant& collectionOffsetGet(ObjectData* obj, const String& offset) {
       return tvAsVariant(static_cast<c_StableMap*>(obj)->at(key));
     case Collection::SetType:
       c_Set::throwNoIndexAccess();
+      break;
     case Collection::PairType: {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Only integer keys may be used with Pairs"));
       throw e;
     }
+    case Collection::FrozenSetType:
+      c_FrozenSet::throwNoIndexAccess();
+      break;
     default:
       assert(false);
       return tvAsVariant(nullptr);
@@ -4864,6 +4899,8 @@ Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
       return tvAsVariant(c_Set::OffsetGet(obj, key));
     case Collection::PairType:
       return tvAsVariant(c_Pair::OffsetGet(obj, key));
+    case Collection::FrozenSetType:
+      return tvAsVariant(c_FrozenSet::OffsetGet(obj, key));
     default:
       assert(false);
       return tvAsVariant(nullptr);
@@ -4892,6 +4929,9 @@ void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
         "Cannot assign to an element of a Pair"));
       throw e;
     }
+    case Collection::FrozenSetType:
+      c_FrozenSet::throwNoIndexAccess();
+      break;
     default:
       assert(false);
   }
@@ -4922,6 +4962,9 @@ void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
         "Cannot assign to an element of a Pair"));
       throw e;
     }
+    case Collection::FrozenSetType:
+      c_FrozenSet::throwNoIndexAccess();
+      break;
     default:
       assert(false);
   }
@@ -4949,6 +4992,9 @@ void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
     case Collection::PairType:
       c_Pair::OffsetSet(obj, key, tv);
       break;
+    case Collection::FrozenSetType:
+      c_FrozenSet::OffsetSet(obj, key, tv);
+      break;
     default:
       assert(false);
   }
@@ -4969,6 +5015,8 @@ bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
       return c_Pair::OffsetContains(obj, key);
     case Collection::FrozenVectorType:
       return c_FrozenVector::OffsetContains(obj, key);
+    case Collection::FrozenSetType:
+      return c_FrozenSet::OffsetContains(obj, key);
     default:
       assert(false);
       return false;
@@ -4994,6 +5042,9 @@ void collectionReserve(ObjectData* obj, int64_t sz) {
       break;
     case Collection::FrozenVectorType:
       static_cast<c_FrozenVector*>(obj)->reserve(sz);
+      break;
+    case Collection::FrozenSetType:
+      static_cast<c_FrozenSet*>(obj)->reserve(sz);
       break;
     default:
       assert(false);
@@ -5022,6 +5073,9 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
     case Collection::FrozenVectorType:
       c_FrozenVector::Unserialize(obj, uns, sz, type);
       break;
+    case Collection::FrozenSetType:
+      c_FrozenSet::Unserialize(obj, uns, sz, type);
+      break;
     default:
       assert(false);
   }
@@ -5043,6 +5097,8 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
       return c_Pair::Equals(obj1, obj2);
     case Collection::FrozenVectorType:
       return c_FrozenVector::Equals(obj1, obj2);
+    case Collection::FrozenSetType:
+      return c_FrozenSet::Equals(obj1, obj2);
     default:
       assert(false);
       return false;
@@ -5058,6 +5114,7 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
     case Collection::SetType: obj = NEWOBJ(c_Set)(); break;
     case Collection::PairType: obj = NEWOBJ(c_Pair)(); break;
     case Collection::FrozenVectorType: obj = NEWOBJ(c_FrozenVector)(); break;
+    case Collection::FrozenSetType: obj = NEWOBJ(c_FrozenSet)(); break;
     default:
       obj = nullptr;
       raise_error("NewCol: Invalid collection type");

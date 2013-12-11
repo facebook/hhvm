@@ -73,6 +73,7 @@ class c_Vector : public BaseVector {
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
+  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
   void t_reverse();
@@ -242,6 +243,7 @@ public:
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
+  Object t_tofrozenset();
 
 public:
 
@@ -298,6 +300,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
+  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
   Object t_values();
@@ -628,6 +631,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
+  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
   Object t_values();
@@ -1298,7 +1302,6 @@ private:
   uint m_nLastSlot;
   int32_t m_version;
 
-  friend ObjectData* collectionDeepCopySet(c_Set* st);
   friend class c_SetIterator;
   friend class c_Vector;
   friend class c_Map;
@@ -1340,6 +1343,7 @@ class c_Set : public BaseSet {
   Object t_tovector();
   Object t_tofrozenvector();
   Object t_toset();
+  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
   Object t_getiterator();
@@ -1397,6 +1401,7 @@ class c_FrozenSet : public BaseSet {
   Object t_tovector();
   Object t_tofrozenvector();
   Object t_toset();
+  Object t_tofrozenset();
 
   // Magic methods.
   String t___tostring();
@@ -1477,6 +1482,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
+  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
   Object t_getiterator();
@@ -1629,6 +1635,7 @@ ObjectData* collectionDeepCopyVector(c_Vector* vec);
 ObjectData* collectionDeepCopyMap(c_Map* mp);
 ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
 ObjectData* collectionDeepCopySet(c_Set* st);
+ObjectData* collectionDeepCopyFrozenSet(c_FrozenSet* st);
 ObjectData* collectionDeepCopyPair(c_Pair* pair);
 
 ObjectData* newCollectionHelper(uint32_t type, uint32_t size);

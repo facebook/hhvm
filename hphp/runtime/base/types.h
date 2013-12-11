@@ -144,7 +144,8 @@ enum Type {
   SetType = 4,
   PairType = 5,
   FrozenVectorType = 6,
-  MaxNumTypes = 7
+  FrozenSetType = 7,
+  MaxNumTypes = 8
 };
 inline Type stringToType(const char* str, size_t len) {
   switch (len) {
@@ -160,6 +161,7 @@ inline Type stringToType(const char* str, size_t len) {
       break;
     case 9:
       if (!strcasecmp(str, "stablemap")) return StableMapType;
+      if (!strcasecmp(str, "frozenset")) return FrozenSetType;
       break;
     case 12:
       if (!strcasecmp(str, "frozenvector")) return FrozenVectorType;

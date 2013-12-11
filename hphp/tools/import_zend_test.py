@@ -241,6 +241,9 @@ bad_tests = (
 
     # segfaults on contbuild in opt
     '/ext/standard/tests/strings/explode_bug.php',
+
+    # broken on travis
+    '/ext/soap/tests/bugs/bug36999.php',
 )
 
 # Tests that work but not in repo mode

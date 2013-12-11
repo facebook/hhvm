@@ -1565,15 +1565,22 @@ const StaticString
   s_amp("&"),
   s_ampsemi("&amp;");
 
-Array f_get_html_translation_table(int table /* = 0 */, int flags /* = k_ENT_COMPAT */) {
-  static entity_charset charset = determine_charset(nullptr); // get default one
+Array f_get_html_translation_table(int table /* = 0 */,
+                                   int flags /* = k_ENT_COMPAT */,
+                                   const String& encoding /* = "UTF-8" */) {
+  using namespace entity_charset_enum;
 
-  assert(charset != entity_charset_enum::cs_unknown);
+  auto charset = determine_charset(encoding.data());
+  if (charset == cs_unknown) {
+    charset = cs_utf_8;
+    if (!encoding.empty()) {
+      raise_warning("get_html_translation_table(): charset `%s' not supported"
+                    ", assuming utf-8", encoding.data());
+    }
+  }
 
   const int HTML_SPECIALCHARS = 0;
   const int HTML_ENTITIES = 1;
-
-  using namespace entity_charset_enum;
 
   Array ret;
   switch (table) {

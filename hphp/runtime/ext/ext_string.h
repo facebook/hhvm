@@ -103,7 +103,8 @@ Variant f_strtr(const String& str, CVarRef from, CVarRef to = null_variant);
 String f_convert_cyr_string(const String& str, const String& from, const String& to);
 
 Array f_get_html_translation_table(int table = 0,
-                                   int quote_style = k_ENT_COMPAT);
+                                   int quote_style = k_ENT_COMPAT,
+                                   const String& encoding = "UTF-8");
 
 String f_hebrev(const String& hebrew_text, int max_chars_per_line = 0);
 

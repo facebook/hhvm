@@ -194,8 +194,8 @@ class PreClass : public AtomicCountable {
     const StringData* getSelectedTraitName() const {
       return m_selectedTraitName;
     }
-    void getOtherTraitNames(TraitNameSet& nameSet) const {
-      nameSet = m_otherTraitNames;
+    TraitNameSet getOtherTraitNames() const {
+      return m_otherTraitNames;
     }
 
     template<class SerDe> void serde(SerDe& sd) {
@@ -273,11 +273,12 @@ class PreClass : public AtomicCountable {
   bool isPersistent() const { return m_attrs & AttrPersistent; }
 
   /*
-   *  Funcs, Consts, and Props all behave similarly. Define raw accessors
-   *  foo() and numFoos() for people munging by hand, and ranges.
-   *    methods(); numMethods(); FuncRange allMethods();
-   *    consts(); numConsts(); ConstRange allConsts();
-   *    properties; numProperties(); PropRange allProperties();
+   * Funcs, Consts, and Props all behave similarly. Define raw accessors
+   * foo() and numFoos() for people munging by hand, and ranges.
+   *
+   *   methods();   numMethods();    FuncRange allMethods();
+   *   constants(); numConstants();  ConstRange allConstants();
+   *   properties;  numProperties(); PropRange allProperties();
    */
 
 #define DEF_ACCESSORS(Type, TypeName, fields, Fields)                   \

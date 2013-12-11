@@ -140,6 +140,7 @@ function get_options($argv) {
     'log' => 'l',
     'failure-file:' => '',
     'arm' => '',
+    'hhas-round-trip' => '',
   );
   $options = array();
   $files = array();
@@ -165,6 +166,12 @@ function get_options($argv) {
       $files[] = $arg;
     }
   }
+
+  if (isset($options['repo']) && isset($options['hhas-round-trip'])) {
+    echo "repo and hhas-round-trip are mutually exclusive options\n";
+    exit(1);
+  }
+
   return array($options, $files);
 }
 
@@ -205,7 +212,7 @@ function find_tests($files, array $options = null) {
   }
   $files = implode(' ', $files);
   $tests = explode("\n", shell_exec(
-      "find $files -name '*.php' -o -name '*.hhas'"
+      "find $files -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
   ));
   if (!$tests) {
     error(usage());
@@ -489,8 +496,14 @@ function skip_test($options, $test) {
   return (bool)strlen($out);
 }
 
-function run_test($options, $test) {
+function dump_hhas_to_temp($hhvm_cmd, $test) {
+  $tmp_file = $test . '.round_trip.hhas';
+  system("$hhvm_cmd -vEval.DumpHhas=1 > $tmp_file", &$ret);
+  if ($ret) { echo "system failed\n"; exit(1); }
+  return $tmp_file;
+}
 
+function run_test($options, $test) {
   if (skip_test($options, $test)) {
     return 'skip';
   }
@@ -513,6 +526,11 @@ function run_test($options, $test) {
       $hhvm .= " -vRepo.Authoritative=true ".
                "-vRepo.Central.Path=$repodb";
     }
+  }
+
+  if (isset($options['hhas-round-trip'])) {
+    $hhas_temp = dump_hhas_to_temp($hhvm, $test);
+    list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
   }
 
   $descriptorspec = array(

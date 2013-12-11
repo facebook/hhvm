@@ -364,10 +364,10 @@ void populate_block(ParseUnitState& puState,
     return ret;
   };
 
-  auto decode_vsa = [&] {
-    auto n = decode<int32_t>(pc);
+  auto decode_stringvec = [&] {
+    auto const vecLen = decode<int32_t>(pc);
     std::vector<SString> keys;
-    for (size_t i = 0; i < n; ++i) {
+    for (auto i = size_t{0}; i < vecLen; ++i) {
       keys.push_back(ue.lookupLitstr(decode<int32_t>(pc)));
     }
     return keys;
@@ -447,7 +447,7 @@ void populate_block(ParseUnitState& puState,
                          opPC + decode<Offset>(pc) - ue.bc());
 #define IMM_OA_IMPL(n) decode<uint8_t>(pc);
 #define IMM_OA(type)   auto subop = (type)IMM_OA_IMPL
-#define IMM_VSA(n)     auto keys = decode_vsa();
+#define IMM_VSA(n)     auto keys = decode_stringvec();
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)

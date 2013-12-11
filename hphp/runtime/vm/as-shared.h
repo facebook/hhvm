@@ -13,24 +13,48 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef incl_HPHP_AS_SHARED_H_
+#define incl_HPHP_AS_SHARED_H_
 
-#ifndef incl_HPHP_HHVM_AS_H_
-#define incl_HPHP_HHVM_AS_H_
+#include <string>
+#include "folly/Optional.h"
+#include "hphp/runtime/base/types.h"
 
 namespace HPHP {
-
-struct UnitEmitter;
-struct MD5;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Assemble the contents of `filename' and return a UnitEmitter.
- *
- * Minimal documentation is available in as.cpp.
+ * This header contains routines shared between as.cpp and disas.cpp.
+ * It shouldn't be included by anything else.
  */
-UnitEmitter* assemble_string(const char* code, int codeLen,
-                             const char* filename, const MD5&);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Attribute bits mean different things depending on context.  This
+ * just enumerates the contexts the (dis)assembler cares about.
+ */
+enum class AttrContext {
+  Class         = 0x1,
+  Func          = 0x2,
+  Prop          = 0x4,
+  TraitImport   = 0x8,
+};
+
+/*
+ * Convert an attr to a string of space-separated attribute names, for
+ * a given context.
+ */
+std::string attrs_to_string(AttrContext, Attr);
+
+/*
+ * Convert a string containing a single attribute name into an Attr,
+ * for a given context.
+ *
+ * Returns folly::none if the string doesn't name a known attribute.
+ */
+folly::Optional<Attr> string_to_attr(AttrContext, const std::string&);
 
 //////////////////////////////////////////////////////////////////////
 

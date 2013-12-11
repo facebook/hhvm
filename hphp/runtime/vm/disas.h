@@ -13,24 +13,20 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef incl_HPHP_VM_DISAS_H_
+#define incl_HPHP_VM_DISAS_H_
 
-#ifndef incl_HPHP_HHVM_AS_H_
-#define incl_HPHP_HHVM_AS_H_
+#include <string>
 
 namespace HPHP {
 
-struct UnitEmitter;
-struct MD5;
+struct Unit;
+struct Func;
+struct Class;
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Assemble the contents of `filename' and return a UnitEmitter.
- *
- * Minimal documentation is available in as.cpp.
- */
-UnitEmitter* assemble_string(const char* code, int codeLen,
-                             const char* filename, const MD5&);
+std::string disassemble(const Unit*);
 
 //////////////////////////////////////////////////////////////////////
 

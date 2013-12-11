@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
@@ -2694,6 +2695,11 @@ Unit* UnitEmitter::create() {
   if (RuntimeOption::EvalDumpBytecode) {
     // Dump human-readable bytecode.
     Trace::traceRelease("%s", u->toString().c_str());
+  }
+  if (RuntimeOption::EvalDumpHhas && SystemLib::s_inited) {
+    std::printf("%s", disassemble(u).c_str());
+    std::fflush(stdout);
+    _Exit(0);
   }
 
   static const bool kVerify = debug || getenv("HHVM_VERIFY");

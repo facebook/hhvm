@@ -1044,8 +1044,7 @@ void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
                                MethodToTraitListMap& importMethToTraitMap) {
   const StringData* methName          = rule.getMethodName();
   const StringData* selectedTraitName = rule.getSelectedTraitName();
-  TraitNameSet      otherTraitNames;
-  rule.getOtherTraitNames(otherTraitNames);
+  auto otherTraitNames = rule.getOtherTraitNames();
 
   auto methIter = importMethToTraitMap.find(methName);
   if (methIter == importMethToTraitMap.end()) {

@@ -767,12 +767,6 @@
 #define HAVE_GD_IMAGESETTILE 1
 
 /* */
-#define HAVE_GD_JPG 1
-
-/* */
-#define HAVE_GD_PNG 1
-
-/* */
 #define HAVE_GD_STRINGFT 1
 
 /* */
@@ -1035,9 +1029,6 @@
 
 /* */
 #define HAVE_LIBEXPAT 1
-
-/* */
-#define HAVE_LIBFREETYPE 1
 
 /* */
 #define HAVE_LIBGD 1

@@ -99,7 +99,7 @@
             "flags": [
             ],
             "return": {
-                "type": "String",
+                "type": "Variant",
                 "desc": "Returns the contents of the output buffer and end output buffering. If output buffering isn't active then FALSE is returned."
             },
             "args": [
@@ -123,7 +123,7 @@
             "flags": [
             ],
             "return": {
-                "type": "String",
+                "type": "Variant",
                 "desc": "Returns the output buffer or FALSE if no buffering is active."
             },
             "args": [
@@ -167,25 +167,6 @@
                     "type": "Boolean",
                     "value": "false",
                     "desc": "TRUE to return all active output buffer levels. If FALSE or not set, only the top level output buffer is returned."
-                }
-            ]
-        },
-        {
-            "name": "ob_gzhandler",
-            "desc": "ob_gzhandler() is intended to be used as a callback function for ob_start() to help facilitate sending gz-encoded data to web browsers that support compressed web pages. Before ob_gzhandler() actually sends compressed data, it determines what type of content encoding the browser will accept (\"gzip\", \"deflate\" or none at all) and will return its output accordingly. All browsers are supported since it's up to the browser to send the correct header saying that it accepts compressed web pages. If a browser doesn't support compressed pages this function returns FALSE.",
-            "flags": [
-            ],
-            "return": {
-                "type": "String"
-            },
-            "args": [
-                {
-                    "name": "buffer",
-                    "type": "String"
-                },
-                {
-                    "name": "mode",
-                    "type": "Int32"
                 }
             ]
         },

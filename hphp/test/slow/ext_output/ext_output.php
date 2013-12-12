@@ -8,6 +8,8 @@ function mytolower($a) {
 // output buffer.
 function VS($x, $y) {
   if ($x !== $y) {
+    var_dump($x);
+    var_dump($y);
     throw new Exception("test failed: got $x, expected $y");
   }
 }
@@ -49,7 +51,7 @@ ob_start();
 echo "test";
 VS(ob_get_clean(), "test");
 VS(ob_get_clean(), "");
-VS(ob_get_clean(), "");
+VS(ob_get_clean(), false);
 
 ob_start();
 echo "test";
@@ -61,9 +63,9 @@ ob_start();
 ob_start();
 echo "test";
 VS(ob_get_flush(), "test");
-VS(ob_get_flush(), "");
-ob_end_clean();
 VS(ob_get_flush(), "test");
+ob_end_clean();
+VS(ob_get_flush(), false);
 ob_end_clean();
 
 ob_start();
@@ -80,10 +82,10 @@ VS(ob_get_level(), 0);
 ob_get_status();
 
 ob_start();
-ob_start("test");
+ob_start("mytolower");
 $handlers = ob_list_handlers();
 ob_end_clean();
 ob_end_clean();
-VS($handlers, array(null, "test"));
+VS($handlers, array("default output handler", "mytolower"));
 
 echo "\nok\n";

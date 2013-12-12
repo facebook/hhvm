@@ -283,9 +283,9 @@ bool BaseExecutionContext::obFlush() {
         prev->oss.absorb(last->oss);
       } else {
         try {
-          Variant tout =
-            vm_call_user_func(last->handler,
-                                   make_packed_array(last->oss.detach(), flag));
+          Variant tout = vm_call_user_func(
+            last->handler, make_packed_array(last->oss.detach(), flag)
+          );
           prev->oss.append(tout.toString());
           last->oss.clear();
         } catch (...) {
@@ -297,9 +297,9 @@ bool BaseExecutionContext::obFlush() {
 
     if (!last->handler.isNull()) {
       try {
-        Variant tout =
-          vm_call_user_func(last->handler,
-                                 make_packed_array(last->oss.detach(), flag));
+        Variant tout = vm_call_user_func(
+          last->handler, make_packed_array(last->oss.detach(), flag)
+        );
         String sout = tout.toString();
         writeStdout(sout.data(), sout.size());
         last->oss.clear();
@@ -378,9 +378,9 @@ void BaseExecutionContext::obSetImplicitFlush(bool on) {
 
 Array BaseExecutionContext::obGetHandlers() {
   Array ret;
-  for (std::list<OutputBuffer*>::const_iterator iter = m_buffers.begin();
-       iter != m_buffers.end(); ++iter) {
-    ret.append((*iter)->handler);
+  for (auto& ob : m_buffers) {
+    auto& handler = ob->handler;
+    ret.append(handler.isNull() ? s_default_output_handler : handler);
   }
   return ret;
 }

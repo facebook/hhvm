@@ -507,9 +507,6 @@ Variant f_array_pop(VRefParam array) {
 
 Variant f_array_product(CVarRef array) {
   getCheckedArray(array);
-  if (arr_array.empty()) {
-    return 0; // to be consistent with PHP
-  }
   int64_t i;
   double d;
   if (ArrayUtil::Product(arr_array, &i, &d) == KindOfInt64) {

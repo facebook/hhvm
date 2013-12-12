@@ -228,9 +228,14 @@ class Options {
   public static bool $allexcept = false;
   public static bool $test_by_single_test = false;
   public static string $results_root;
+  public static string $script_errors_file;
 
   public static function parse(OptionInfoMap $options, array $argv): Vector {
     self::$results_root = __DIR__."/results";
+    // Put any script error to a file when we are in a mode like --csv and
+    // want to control what gets printed to something like STDOUT.
+    self::$script_errors_file = self::$results_root."/_script.errors";
+    unlink(self::$script_errors_file);
 
     // Don't use $argv[0] which just contains the program to run
     $framework_names = Vector::fromArray(array_slice($argv, 1));
@@ -248,7 +253,7 @@ class Options {
 
     // Can't run all the framework tests and "all but" at the same time
     if ($options->containsKey('all') && $options->containsKey('allexcept')) {
-      error("Cannot use --all and --allexcept together");
+      error_and_exit("Cannot use --all and --allexcept together");
     } else if ($options->containsKey('all')) {
       self::$all = true;
       $framework_names->removeKey(0);
@@ -257,9 +262,9 @@ class Options {
       $framework_names->removeKey(0);
     }
 
-    // Can't be both summary and verbose. Summary trumps.
+    // Can't be both summary and verbose.
     if ($options->containsKey('csv') && $options->containsKey('verbose')) {
-      error("Cannot be --csv and --verbose together");
+      error_and_exit("Cannot be --csv and --verbose together");
     }
     else if ($options->containsKey('csv')) {
       self::$csv_only = true;
@@ -280,7 +285,7 @@ class Options {
     // Can't run framework tests both by file and single test
     if ($options->containsKey('by-file') &&
         $options->containsKey('by-single-test')) {
-      error("Cannot specify both by-file or by-single-test");
+      error_and_exit("Cannot specify both by-file or by-single-test");
     } else if ($options->contains('by-single-test')) {
       self::$test_by_single_test = true;
       $framework_names->removeKey(0);
@@ -703,10 +708,9 @@ abstract class Framework {
           // Tests: 678, Assertions: 678, Failures: 29, Skipped: 24.
         }
         else {
-          Options::$csv_only ? error()
-                             : error("The stats file for ".$this->name." is ".
-                                     "corrupt! It should only have test ".
-                                     "names and statuses in it.\n");
+          error_and_exit("The stats file for ".$this->name." is corrupt! It ".
+                         "should only have test names and statuses in it.\n",
+                         Options::$csv_only);
         }
       }
       // Count blacklisted tests as failures
@@ -864,9 +868,8 @@ abstract class Framework {
     // of a framework.
     $git_ret = run_install($git_command, __DIR__, ProxyInformation::$proxies);
     if ($git_ret !== 0) {
-      Options::$csv_only ? error()
-                         : error("Could not download framework ".
-                                 $this->name."!\n");
+      error_and_exit("Could not download framework ".$this->name."!\n",
+                     Options::$csv_only);
     }
     // Checkout out our baseline test code via SHA
     $git_command = "git checkout";
@@ -875,9 +878,8 @@ abstract class Framework {
                            ProxyInformation::$proxies);
     if ($git_ret !== 0) {
       remove_dir_recursive($this->install_root);
-      Options::$csv_only ? error()
-                         : error("Could not checkout baseline code for ".
-                                 $this->name."! Removing framework!\n");
+      error_and_exit("Could not checkout baseline code for ". $this->name.
+                     "! Removing framework!\n", Options::$csv_only);
     }
   }
 
@@ -933,13 +935,12 @@ abstract class Framework {
             pcntl_wexitstatus($child_status) !== 0) {
           unlink($this->tests_file);
           unlink($this->test_files_file);
-          Options::$csv_only ? error()
-                             : error("Could not get tests for ".$this->name);
+          error_and_exit("Could not get tests for ".$this->name,
+                         Options::$csv_only);
         }
       } else {
-        Options::$csv_only ? error()
-                           : error("Could not open process tp get tests for "
-                                   .$this->name);
+        error_and_exit("Could not open process tp get tests for ".$this->name,
+                       Options::$csv_only);
       }
     }
 
@@ -974,7 +975,7 @@ abstract class Framework {
       // Check if we are already disabled first
       if (!file_exists($t.$suffix)) {
         if (!rename($t, $t.$suffix)) {
-          error("Could not disable ".$t. " in ".$this->name."!");
+          error_and_exit("Could not disable ".$t. " in ".$this->name."!");
         }
       }
       $updated_tests->add($t.$suffix);
@@ -1012,17 +1013,15 @@ abstract class Framework {
           // did not get the dependencies.
           if (any_dir_empty_one_level($fw_vendor_dir)) {
             remove_dir_recursive($this->install_root);
-            Options::$csv_only ? error()
-                               : error("Couldn't download dependencies for ".
-                                       $this->name." Removing framework. ".
-                                       "You can try the --zend option.\n");
+            error_and_exit("Couldn't download dependencies for ".$this->name.
+                           ". Removing framework. You can try the --zend ".
+                           "option.\n", Options::$csv_only);
           }
         } else { // No vendor directory. Dependencies could not have been gotten
           remove_dir_recursive($this->install_root);
-          Options::$csv_only ? error()
-                             : error("Couldn't download dependencies for ".
-                                     $this->name." Removing framework. ".
-                                     "You can try the --zend option.\n");
+          error_and_exit("Couldn't download dependencies for ".$this->name.
+                         ". Removing framework. You can try the --zend ".
+                         "option.\n", Options::$csv_only);
         }
       }
     }
@@ -1054,10 +1053,8 @@ abstract class Framework {
                              ProxyInformation::$proxies);
       if ($git_ret !== 0) {
         remove_dir_recursive($this->install_root);
-        Options::$csv_only ? error()
-                           : error("Could not get pull request code for ".
-                                   $this->name."!".
-                                   " Removing framework!\n");
+        error_and_exit("Could not get pull request code for ".$this->name."!".
+                       " Removing framework!\n", Options::$csv_only);
       }
       if ($dir_to_move !== null) {
         $mv_command = "mv ".$dir_to_move." ".$dir;
@@ -1818,10 +1815,9 @@ class Runner {
       $ret_val = $this->finalize();
       $this->outputData();
     } else {
-      Options::$csv_only ? error()
-                         : error("Could not open process to run test ".
-                                 $this->name." for framework ".
-                                 $this->framework->getName());
+      error_and_exit("Could not open process to run test ".$this->name.
+                     " for framework ".$this->framework->getName(),
+                     Options::$csv_only);
     }
     chdir(__DIR__);
     return $ret_val;
@@ -2160,8 +2156,8 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
   if (Options::$all) {
     // At this point, $framework_names should be empty if we are in --all mode.
     if (!($passed_frameworks->isEmpty())) {
-      error("Do not specify both --all and individual frameworks to run at ".
-            "same time.\n");
+      error_and_exit("Do not specify both --all and individual frameworks to ".
+                     "run at same time.\n");
     }
     // Test all frameworks
     $passed_frameworks = $available_frameworks->toVector();
@@ -2171,7 +2167,7 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
                                               $available_frameworks->toVector(),
                                               $passed_frameworks));
   } else if (count($passed_frameworks) === 0) {
-    error(usage());
+    error_and_exit(usage());
   }
 
   // So it is easier to keep tabs on our progress when running ps or something.
@@ -2191,7 +2187,7 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
   }
 
   if (count($frameworks) === 0) {
-    error(usage());
+    error_and_exit(usage());
   }
 
   return $frameworks;
@@ -2212,7 +2208,7 @@ function fork_buckets(Traversable $data, Callable $callback): int {
   for ($i = 0; $i < $num_threads; $i++) {
     $pid = pcntl_fork();
     if ($pid === -1) {
-      error('Issues creating threads for data');
+      error_and_exit('Issues creating threads for data');
     } else if ($pid) {
       $children[] = $pid;
     } else {
@@ -2232,7 +2228,7 @@ function fork_buckets(Traversable $data, Callable $callback): int {
 
 function run_tests(Vector $frameworks): void {
   if (count($frameworks) === 0) {
-    error("No frameworks available on which to run tests");
+    error_and_exit("No frameworks available on which to run tests");
   }
 
   /***********************************
@@ -2290,7 +2286,7 @@ function run_tests(Vector $frameworks): void {
    ************************************/
   verbose("Beginning the unit tests.....\n", !Options::$csv_only);
   if (count($all_tests) === 0) {
-    error("No tests found to run");
+    error_and_exit("No tests found to run");
   }
 
   fork_buckets(
@@ -2394,7 +2390,7 @@ function get_unit_testing_infra_dependencies(): void {
     $ret = run_install($get_composer_command, __DIR__,
                        ProxyInformation::$proxies);
     if ($ret !== 0) {
-      error("Could not download composer. Script stopping\n");
+      error_and_exit("Could not download composer. Script stopping\n");
     }
   }
 
@@ -2427,7 +2423,7 @@ function get_unit_testing_infra_dependencies(): void {
     $ret = run_install($phpunit_install_command, __DIR__,
                        ProxyInformation::$proxies);
     if ($ret !== 0) {
-      error("Could not install PHPUnit. Script stopping\n");
+      error_and_exit("Could not install PHPUnit. Script stopping\n");
     }
   }
 
@@ -2688,7 +2684,8 @@ function get_runtime_build(bool $with_jit = true,
   // is already installed via a $PATH variable?
   if (Options::$zend_path !== null) {
     if (!file_exists(Options::$zend_path)) {
-      error("Zend build does not exists. Are you sure your path is right?");
+      error_and_exit("Zend build does not exists. Are you sure your path is ".
+                     "right?");
     }
     $build = Options::$zend_path;
   } else {
@@ -2717,7 +2714,7 @@ function get_runtime_build(bool $with_jit = true,
         $build .= "/php";
       }
     } else {
-      error("HHVM build doesn't exist. Did you build yet?");
+      error_and_exit("HHVM build doesn't exist. Did you build yet?");
     }
     if (!$use_php) {
       $repo_loc = tempnam('/tmp', 'framework-test');
@@ -2731,4 +2728,14 @@ function get_runtime_build(bool $with_jit = true,
     }
   }
   return $build;
+}
+
+function error_and_exit(string $message, bool $to_file = false): void {
+  if ($to_file) {
+    file_put_contents(Options::$script_errors_file, basename(__FILE__).": ".
+                      $message.PHP_EOL);
+  } else {
+    echo basename(__FILE__).": ".$message.PHP_EOL;
+  }
+  exit(1);
 }

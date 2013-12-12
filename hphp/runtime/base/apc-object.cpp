@@ -172,7 +172,7 @@ Object APCObject::createObject() const {
       ctx = klass;
     } else {
       if (auto const cls = prop->ctx.cls()) {
-        ctx = prop->ctx.cls();
+        ctx = cls;
       } else {
         ctx = Unit::lookupClass(prop->ctx.name());
         if (!ctx) continue;

@@ -579,6 +579,8 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
     ThreadInfo::s_threadInfo->m_reqInjectionData.setTimeout(
       RuntimeOption::RequestTimeoutSeconds);
   }
+
+  Extension::RequestInitModules();
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {

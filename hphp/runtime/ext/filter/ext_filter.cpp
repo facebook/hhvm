@@ -20,7 +20,7 @@
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(filter);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const int64_t k_INPUT_POST = 0;
@@ -77,6 +77,60 @@ const int64_t k_FILTER_FLAG_IPV4 = 1048576;
 const int64_t k_FILTER_FLAG_IPV6 = 2097152;
 const int64_t k_FILTER_FLAG_NO_RES_RANGE = 4194304;
 const int64_t k_FILTER_FLAG_NO_PRIV_RANGE = 8388608;
+
+const StaticString
+  s_GET("_GET"),
+  s_POST("_POST"),
+  s_COOKIE("_COOKIE"),
+  s_SERVER("_SERVER"),
+  s_ENV("_ENV");
+
+static class FilterExtension : public Extension {
+public:
+  FilterExtension() : Extension("filter") {}
+  virtual void moduleLoad(Hdf config) {
+    HHVM_FE(__SystemLib_filter_input_get_var);
+    HHVM_FE(_filter_snapshot_globals);
+  }
+
+  virtual void requestInit() {
+    GlobalVariables *g = get_global_variables();
+    // This doesn't copy them yet, but will do COW if they are modified
+    m_GET = g->get(s_GET).toArray();
+    m_POST = g->get(s_POST).toArray();
+    m_COOKIE = g->get(s_COOKIE).toArray();
+    m_SERVER = g->get(s_SERVER).toArray();
+    m_ENV = g->get(s_ENV).toArray();
+  }
+
+  virtual void requestShutdown() {
+    m_GET = nullptr;
+    m_POST = nullptr;
+    m_COOKIE = nullptr;
+    m_SERVER = nullptr;
+    m_ENV = nullptr;
+  }
+
+  Array getVar(int64_t type) {
+    switch (type) {
+      case k_INPUT_GET: return m_GET;
+      case k_INPUT_POST: return m_POST;
+      case k_INPUT_COOKIE: return m_COOKIE;
+      case k_INPUT_SERVER: return m_SERVER;
+      case k_INPUT_ENV: return m_ENV;
+    }
+    return empty_array;
+  }
+
+private:
+  Array m_GET;
+  Array m_POST;
+  Array m_COOKIE;
+  Array m_SERVER;
+  Array m_ENV;
+} s_filter_extension;
+
+///////////////////////////////////////////////////////////////////////////////
 
 typedef struct filter_list_entry {
   StaticString name;
@@ -311,6 +365,14 @@ Variant f_filter_var(CVarRef variable, int64_t filter /* = 516 */,
 }
 
 #undef FAIL_IF
+
+Array HHVM_FUNCTION(__SystemLib_filter_input_get_var, int64_t variable_name) {
+  return s_filter_extension.getVar(variable_name);
+}
+
+void HHVM_FUNCTION(_filter_snapshot_globals) {
+  s_filter_extension.requestInit();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

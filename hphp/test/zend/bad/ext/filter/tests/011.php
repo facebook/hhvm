@@ -1,9 +1,11 @@
 <?php
 parse_str("a=<b>test</b>&b=http://example.com", $_GET);
 $_REQUEST = array_merge($_REQUEST, $_GET);
+_filter_snapshot_globals();
 
 parse_str("c=<p>string</p>&d=12345.7", $_POST);
 $_REQUEST = array_merge($_REQUEST, $_POST);
+_filter_snapshot_globals();
 
 ini_set('html_errors', false);
 var_dump(filter_input(INPUT_GET, "a", FILTER_SANITIZE_STRIPPED));

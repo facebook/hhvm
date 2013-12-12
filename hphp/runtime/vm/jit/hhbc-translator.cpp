@@ -1900,8 +1900,7 @@ void HhbcTranslator::emitJmp(int32_t offset,
 SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
                                           bool negate,
                                           SSATmp* src) {
-  // Spill everything on main trace if all paths will exit.
-  if (m_lastBcOff) spillStack();
+  spillStack();
 
   auto const target  = makeExit(offset);
   auto const boolSrc = gen(ConvCellToBool, src);

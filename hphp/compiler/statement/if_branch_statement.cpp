@@ -97,7 +97,7 @@ void IfBranchStatement::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("trueBlock");
     cg.printAsBlock(m_stmt);
   }
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

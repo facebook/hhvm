@@ -73,7 +73,7 @@ void LabelStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("LabelStatement", 2);
   cg.printPropertyHeader("label");
   cg.printValue(m_label);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

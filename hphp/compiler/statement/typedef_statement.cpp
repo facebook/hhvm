@@ -62,7 +62,7 @@ void TypedefStatement::outputCodeModel(CodeGenerator& cg) {
   cg.printValue(name);
   cg.printPropertyHeader("typeAnnotation");
   annot->outputCodeModel(cg);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

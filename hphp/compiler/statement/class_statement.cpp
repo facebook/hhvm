@@ -256,7 +256,7 @@ void ClassStatement::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("block");
     cg.printAsBlock(m_stmt);
   }
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   if (!m_docComment.empty()) {
     cg.printPropertyHeader("comments");

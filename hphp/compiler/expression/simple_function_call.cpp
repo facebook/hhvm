@@ -1288,7 +1288,7 @@ void SimpleFunctionCall::outputCodeModel(CodeGenerator &cg) {
   m_nameExp->outputCodeModel(cg);
   cg.printPropertyHeader("arguments");
   cg.printExpressionVector(m_params);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(m_nameExp->getLocation());
   cg.printObjectFooter();
 }

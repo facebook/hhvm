@@ -79,7 +79,7 @@ void ThrowStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("ThrowStatement", 2);
   cg.printPropertyHeader("expression");
   m_exp->outputCodeModel(cg);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

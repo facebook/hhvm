@@ -87,7 +87,7 @@ void EchoStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("EchoStatement", 2);
   cg.printPropertyHeader("expression");
   m_exp->outputCodeModel(cg);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

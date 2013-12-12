@@ -166,7 +166,7 @@ void NewObjectExpression::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("arguments");
     cg.printExpressionVector(m_params);
   }
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

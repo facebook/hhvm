@@ -505,7 +505,7 @@ void CodeGenerator::printExpression(ExpressionPtr expression, bool isRef) {
     expression->outputCodeModel(*this);
     printPropertyHeader("operation");
     printValue(PHP_REFERENCE_OP);
-    printPropertyHeader("location");
+    printPropertyHeader("sourceLocation");
     printLocation(expression->getLocation());
     printObjectFooter();
   } else {
@@ -541,7 +541,7 @@ void CodeGenerator::printAsBlock(StatementPtr s) {
       s->outputCodeModel(*this);
       printf("}");
     }
-    printPropertyHeader("location");
+    printPropertyHeader("sourceLocation");
     printLocation(s->getLocation());
     printObjectFooter();
   }

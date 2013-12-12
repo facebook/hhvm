@@ -399,7 +399,7 @@ void ArrayElementExpression::outputCodeModel(CodeGenerator &cg) {
     cg.printObjectHeader("SimpleVariableExpression", 2);
     cg.printPropertyHeader("name");
     cg.printValue(m_globalName);
-    cg.printPropertyHeader("location");
+    cg.printPropertyHeader("sourceLocation");
     cg.printLocation(this->getLocation());
     cg.printObjectFooter();
   } else if (m_offset) {
@@ -410,7 +410,7 @@ void ArrayElementExpression::outputCodeModel(CodeGenerator &cg) {
     cg.printExpression(m_offset, false);
     cg.printPropertyHeader("operation");
     cg.printValue(PHP_ARRAY_ELEMENT);
-    cg.printPropertyHeader("location");
+    cg.printPropertyHeader("sourceLocation");
     cg.printLocation(this->getLocation());
     cg.printObjectFooter();
   } else {
@@ -419,7 +419,7 @@ void ArrayElementExpression::outputCodeModel(CodeGenerator &cg) {
     m_variable->outputCodeModel(cg);
     cg.printPropertyHeader("operation");
     cg.printValue(PHP_ARRAY_APPEND_POINT_OP);
-    cg.printPropertyHeader("location");
+    cg.printPropertyHeader("sourceLocation");
     cg.printLocation(this->getLocation());
     cg.printObjectFooter();
   }

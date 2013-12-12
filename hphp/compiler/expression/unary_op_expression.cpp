@@ -595,7 +595,7 @@ void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
       printf("V:6:\"Vector\":1:{");
       m_exp->outputCodeModel(cg);
       printf("}");
-      cg.printPropertyHeader("location");
+      cg.printPropertyHeader("sourceLocation");
       cg.printLocation(this->getLocation());
       cg.printObjectFooter();
       return;
@@ -637,7 +637,7 @@ void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
       assert(false);
   }
   cg.printValue(op);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

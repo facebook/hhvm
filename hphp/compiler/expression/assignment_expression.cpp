@@ -317,7 +317,7 @@ void AssignmentExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printExpression(m_value, m_ref);
   cg.printPropertyHeader("operation");
   cg.printValue(PHP_ASSIGNMENT);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

@@ -334,7 +334,7 @@ void ParameterExpression::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("expression");
     m_defaultValue->outputCodeModel(cg);
   }
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

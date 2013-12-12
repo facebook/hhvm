@@ -344,7 +344,7 @@ void ObjectPropertyExpression::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("propertyExpression");
   }
   m_property->outputCodeModel(cg);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

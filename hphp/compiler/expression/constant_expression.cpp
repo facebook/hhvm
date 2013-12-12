@@ -277,9 +277,9 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
 void ConstantExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("SimpleVariableExpression", 2);
-  cg.printPropertyHeader("name");
-  cg.printValue(getNonNSOriginalName());
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("variableName");
+  cg.printValue(m_origName);
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

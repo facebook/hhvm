@@ -922,7 +922,7 @@ void BinaryOpExpression::outputCodeModel(CodeGenerator &cg) {
     m_exp1->outputCodeModel(cg);
     cg.printPropertyHeader("arguments");
     cg.printExpressionVector(static_pointer_cast<ExpressionList>(m_exp2));
-    cg.printPropertyHeader("location");
+    cg.printPropertyHeader("sourceLocation");
     cg.printLocation(this->getLocation());
     cg.printObjectFooter();
     return;
@@ -978,7 +978,7 @@ void BinaryOpExpression::outputCodeModel(CodeGenerator &cg) {
   }
 
   cg.printValue(op);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

@@ -129,7 +129,7 @@ void EncapsListExpression::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("expressions");
     cg.printExpressionVector(m_exps);
   }
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

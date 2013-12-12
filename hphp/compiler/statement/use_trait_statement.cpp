@@ -115,7 +115,7 @@ void UseTraitStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printExpressionVector(m_exp);
   cg.printPropertyHeader("block");
   cg.printAsBlock(m_stmt);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

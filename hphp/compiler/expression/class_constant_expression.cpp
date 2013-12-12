@@ -229,7 +229,7 @@ void ClassConstantExpression::outputCodeModel(CodeGenerator &cg) {
   StaticClassName::outputCodeModel(cg);
   cg.printPropertyHeader("propertyName");
   cg.printValue(m_varName);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

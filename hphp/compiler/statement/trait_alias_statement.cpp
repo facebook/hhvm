@@ -120,7 +120,7 @@ void TraitAliasStatement::outputCodeModel(CodeGenerator &cg) {
   m_modifiers->outputCodeModel(cg);
   cg.printPropertyHeader("methodName2");
   m_newMethodName->outputCodeModel(cg);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

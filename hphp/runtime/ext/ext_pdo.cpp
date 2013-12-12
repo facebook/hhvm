@@ -555,14 +555,6 @@ static inline int64_t pdo_attr_lval(CArrRef options, PDOAttributeType name,
   return defval;
 }
 
-static inline String pdo_attr_strval(CArrRef options, PDOAttributeType name,
-                                     const String& defval) {
-  if (options.exists(name)) {
-    return options[name].toString();
-  }
-  return defval;
-}
-
 static Object pdo_stmt_instantiate(sp_PDOConnection dbh, const String& clsname,
                                    CVarRef ctor_args) {
   String name = clsname;

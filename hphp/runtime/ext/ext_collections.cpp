@@ -4727,6 +4727,10 @@ void collectionDeepCopyTV(TypedValue* tv) {
         case Collection::FrozenSetType:
           obj = collectionDeepCopyFrozenSet(static_cast<c_FrozenSet*>(obj));
           break;
+        case Collection::FrozenVectorType:
+          obj = collectionDeepCopyFrozenVector(
+                  static_cast<c_FrozenVector*>(obj));
+          break;
         default:
           assert(false);
           obj = nullptr;
@@ -4753,14 +4757,23 @@ ArrayData* collectionDeepCopyArray(ArrayData* arr) {
   return a.detach();
 }
 
-ObjectData* collectionDeepCopyVector(c_Vector* vec) {
-  vec = c_Vector::Clone(vec);
+template<typename TVector>
+static ObjectData* collectionDeepCopyBaseVector(TVector *vec) {
+  vec = TVector::Clone(vec);
   Object o = Object::attach(vec);
   size_t sz = vec->m_size;
   for (size_t i = 0; i < sz; ++i) {
     collectionDeepCopyTV(&vec->m_data[i]);
   }
   return o.detach();
+}
+
+ObjectData* collectionDeepCopyVector(c_Vector* vec) {
+  return collectionDeepCopyBaseVector<c_Vector>(vec);
+}
+
+ObjectData* collectionDeepCopyFrozenVector(c_FrozenVector* vec) {
+  return collectionDeepCopyBaseVector<c_FrozenVector>(vec);
 }
 
 ObjectData* collectionDeepCopyMap(c_Map* mp) {
@@ -4799,6 +4812,75 @@ ObjectData* collectionDeepCopyPair(c_Pair* pair) {
   collectionDeepCopyTV(&pair->elm1);
   return o.detach();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Many of the collectionXYZ functions need to throw exceptions with common
+// error messages (e.g. collectionSet() when called on an immutable collection).
+// So we provide them with shared error-signaling logic.
+
+/**
+ * The different types of error messages.
+ */
+enum class ErrMsgType {
+  CannotAssign,
+  CannotUnset,
+  CannotAdd,
+  OnlyIntKeys,
+};
+
+/**
+ * Construct the error message given its type and a collection name.
+ */
+static std::string getErrMsg(ErrMsgType errType, const std::string& colName) {
+  std::string msgBody;
+
+  switch (errType) {
+  case ErrMsgType::CannotAssign:
+    msgBody = "Cannot assign to an element of a";
+    break;
+  case ErrMsgType::CannotUnset:
+    msgBody = "Cannot unset an element of a";
+    break;
+  case ErrMsgType::CannotAdd:
+    msgBody = "Cannot add an element to a";
+    break;
+  case ErrMsgType::OnlyIntKeys:
+    msgBody = "Only integer keys may be used with";
+    break;
+  default:
+    assert(false);
+  }
+
+  return msgBody + " " + colName;
+}
+
+/**
+ * Throws an exception of the given type.
+ */
+static void collectionThrowHelper(ErrMsgType errType,
+    const std::string& colName) {
+
+  std::function<ObjectData*(std::string)> excAlloc = nullptr;
+
+  switch (errType) {
+  case ErrMsgType::CannotAssign:
+  case ErrMsgType::CannotUnset:
+  case ErrMsgType::CannotAdd:
+    excAlloc = SystemLib::AllocRuntimeExceptionObject;
+    break;
+  case ErrMsgType::OnlyIntKeys:
+    excAlloc = SystemLib::AllocInvalidArgumentExceptionObject;
+    break;
+  default:
+    assert(false);
+  }
+
+  Object exc = excAlloc(getErrMsg(errType, colName));
+  throw exc;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
@@ -4844,6 +4926,9 @@ void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
       c_Pair::OffsetSet(obj, key, val);
     case Collection::FrozenSetType:
       c_FrozenSet::OffsetSet(obj, key, val);
+      break;
+    case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
       break;
     default:
       assert(false);
@@ -4917,16 +5002,15 @@ void collectionUnset(ObjectData* obj, TypedValue* key) {
     case Collection::FrozenSetType:
       c_FrozenSet::OffsetUnset(obj, key);
       break;
+    case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::CannotUnset, "FrozenVector");
+      break;
     default:
       assert(false);
   }
 }
 
 void collectionAppend(ObjectData* obj, TypedValue* val) {
-  auto fail = [](const char* clsName) {
-    return std::string("Cannot add an element to a ") + clsName;
-  };
-
   assert(val->m_type != KindOfRef);
   assert(val->m_type != KindOfUninit);
 
@@ -4943,23 +5027,16 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
     case Collection::SetType:
       static_cast<c_Set*>(obj)->add(val);
       break;
-    case Collection::PairType: {
+    case Collection::PairType:
       assert(static_cast<c_Pair*>(obj)->isFullyConstructed());
-      Object e(SystemLib::AllocRuntimeExceptionObject(fail("Pair")));
-      throw e;
+      collectionThrowHelper(ErrMsgType::CannotAdd, "Pair");
       break;
-    }
-    case Collection::FrozenSetType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(fail("FrozenSet")));
-      throw e;
+    case Collection::FrozenSetType:
+      collectionThrowHelper(ErrMsgType::CannotAdd, "FrozenSet");
       break;
-    }
-    case Collection::FrozenVectorType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-          "Cannot add an element to a FrozenVector"));
-      throw e;
+    case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAdd, "FrozenVector");
       break;
-    }
     default:
       assert(false);
   }
@@ -5010,6 +5087,8 @@ Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
     case Collection::FrozenSetType:
       c_FrozenSet::throwNoIndexAccess();
       break;
+    case Collection::FrozenVectorType:
+      return tvAsVariant(static_cast<c_FrozenVector*>(obj)->at(offset));
     default:
       assert(false);
       return tvAsVariant(nullptr);
@@ -5019,11 +5098,9 @@ Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
 Variant& collectionOffsetGet(ObjectData* obj, const String& offset) {
   StringData* key = offset.get();
   switch (obj->getCollectionType()) {
-    case Collection::VectorType: {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Only integer keys may be used with Vectors"));
-      throw e;
-    }
+    case Collection::VectorType:
+      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Vectors");
+      break;
     case Collection::MapType:
       return tvAsVariant(static_cast<c_Map*>(obj)->at(key));
     case Collection::StableMapType:
@@ -5031,18 +5108,21 @@ Variant& collectionOffsetGet(ObjectData* obj, const String& offset) {
     case Collection::SetType:
       c_Set::throwNoIndexAccess();
       break;
-    case Collection::PairType: {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Only integer keys may be used with Pairs"));
-      throw e;
-    }
+    case Collection::PairType:
+      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Pairs");
+      break;
     case Collection::FrozenSetType:
       c_FrozenSet::throwNoIndexAccess();
       break;
+    case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "FrozenVectors");
+      break;
     default:
-      assert(false);
-      return tvAsVariant(nullptr);
+      // Do nothing: we fail below.
+      ;
   }
+  assert(false);
+  return tvAsVariant(nullptr);
 }
 
 Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
@@ -5060,6 +5140,8 @@ Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
       return tvAsVariant(c_Pair::OffsetGet(obj, key));
     case Collection::FrozenSetType:
       return tvAsVariant(c_FrozenSet::OffsetGet(obj, key));
+    case Collection::FrozenVectorType:
+      return tvAsVariant(c_FrozenVector::OffsetGet(obj, key));
     default:
       assert(false);
       return tvAsVariant(nullptr);
@@ -5083,13 +5165,15 @@ void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
       break;
     case Collection::SetType:
       c_Set::throwNoIndexAccess();
-    case Collection::PairType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot assign to an element of a Pair"));
-      throw e;
-    }
+      break;
+    case Collection::PairType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "Pair");
+      break;
     case Collection::FrozenSetType:
       c_FrozenSet::throwNoIndexAccess();
+      break;
+   case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
       break;
     default:
       assert(false);
@@ -5103,11 +5187,9 @@ void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
     tv = (TypedValue*)(&init_null_variant);
   }
   switch (obj->getCollectionType()) {
-    case Collection::VectorType: {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Only integer keys may be used with Vectors"));
-      throw e;
-    }
+    case Collection::VectorType:
+      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Vectors");
+      break;
     case Collection::MapType:
       static_cast<c_Map*>(obj)->set(key, tv);
       break;
@@ -5116,13 +5198,15 @@ void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
       break;
     case Collection::SetType:
       c_Set::throwNoIndexAccess();
-    case Collection::PairType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot assign to an element of a Pair"));
-      throw e;
-    }
+      break;
+    case Collection::PairType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "Pair");
+      break;
     case Collection::FrozenSetType:
       c_FrozenSet::throwNoIndexAccess();
+      break;
+   case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
       break;
     default:
       assert(false);
@@ -5153,6 +5237,9 @@ void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
       break;
     case Collection::FrozenSetType:
       c_FrozenSet::OffsetSet(obj, key, tv);
+      break;
+    case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
       break;
     default:
       assert(false);

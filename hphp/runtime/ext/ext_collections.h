@@ -143,7 +143,6 @@ class c_Vector : public BaseVector {
 
   // Friends
 
-  friend ObjectData* collectionDeepCopyVector(c_Vector* vec);
   friend void collectionAppend(ObjectData* obj, TypedValue* val);
   friend void triggerCow(c_Vector* vec);
 
@@ -1692,6 +1691,7 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2);
 void collectionDeepCopyTV(TypedValue* tv);
 ArrayData* collectionDeepCopyArray(ArrayData* arr);
 ObjectData* collectionDeepCopyVector(c_Vector* vec);
+ObjectData* collectionDeepCopyFrozenVector(c_FrozenVector* vec);
 ObjectData* collectionDeepCopyMap(c_Map* mp);
 ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
 ObjectData* collectionDeepCopySet(c_Set* st);

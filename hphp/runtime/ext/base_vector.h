@@ -273,6 +273,9 @@ private:
 
   friend class c_VectorIterator;
 
+  template<typename TVector>
+  friend ObjectData* collectionDeepCopyBaseVector(TVector* vec);
+
   friend void collectionReserve(ObjectData* obj, int64_t sz);
   friend void collectionInitAppend(ObjectData* obj, TypedValue* val);
 };

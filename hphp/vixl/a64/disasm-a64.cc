@@ -1673,7 +1673,7 @@ void Disassembler::AppendToOutput(const char* format, ...) {
 
 
 void PrintDisassembler::ProcessOutput(Instruction* instr) {
-  for (int i; i < indent_; i++) {
+  for (int i = 0; i < indent_; i++) {
     stream_ << ' ';
   }
   if (*color_) {

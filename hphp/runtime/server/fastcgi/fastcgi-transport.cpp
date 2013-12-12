@@ -257,8 +257,8 @@ void FastCGITransport::handleHeader(const std::string& key,
   } else if (compareKeys(key, k_remotePortKey)) {
     try {
       int remote_port = std::stoi(value);
-      if (remote_port < std::numeric_limits<typeof(m_remotePort)>::min() ||
-          remote_port > std::numeric_limits<typeof(m_remotePort)>::max()) {
+      if (remote_port < std::numeric_limits<decltype(m_remotePort)>::min() ||
+          remote_port > std::numeric_limits<decltype(m_remotePort)>::max()) {
         m_remotePort = 0;
       }
       m_remotePort = remote_port;

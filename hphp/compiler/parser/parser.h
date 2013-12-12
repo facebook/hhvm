@@ -341,7 +341,6 @@ private:
   std::vector<BlockScopePtrVec> m_scopes;
   std::vector<LabelScopePtrVec> m_labelScopes;
   std::vector<FunctionContext> m_funcContexts;
-  std::vector<std::vector<StatementPtr> > m_prependingStatements;
   std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
   std::string m_clsName; // for T_CLASS_C inside a closure
   std::string m_funcName;

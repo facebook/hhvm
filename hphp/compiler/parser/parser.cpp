@@ -168,8 +168,6 @@ Parser::Parser(Scanner &scanner, const char *fileName,
 
   Lock lock(m_ar->getMutex());
   m_ar->addFileScope(m_file);
-
-  m_prependingStatements.push_back(vector<StatementPtr>());
 }
 
 bool Parser::parse() {
@@ -803,7 +801,6 @@ void Parser::onFunctionStart(Token &name, bool doPushComment /* = true */) {
   }
   newScope();
   m_funcContexts.push_back(FunctionContext());
-  m_prependingStatements.push_back(vector<StatementPtr>());
   m_funcName = name.text();
   m_hasCallToGetArgs.push_back(false);
   m_staticVars.push_back(StringToExpressionPtrVecMap());
@@ -1006,7 +1003,6 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
     mth->getLocation()->char0 = loc->char0;
   }
 
-  m_prependingStatements.pop_back();
   return mth;
 }
 
@@ -1307,15 +1303,6 @@ void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
 }
 
 void Parser::addStatement(StatementPtr stmt, StatementPtr new_stmt) {
-  assert(!m_prependingStatements.empty());
-  vector<StatementPtr> &prepending = m_prependingStatements.back();
-  if (!prepending.empty()) {
-    assert(prepending.size() == 1);
-    for (unsigned i = 0; i < prepending.size(); i++) {
-      stmt->addElement(prepending[i]);
-    }
-    prepending.clear();
-  }
   if (new_stmt) {
     stmt->addElement(new_stmt);
   }

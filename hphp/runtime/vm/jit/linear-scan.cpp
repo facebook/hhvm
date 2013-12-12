@@ -105,7 +105,7 @@ private:
     void save(LinearScan* ls);
     void restore(LinearScan* ls);
    private:
-    RegState m_regs[NumRegs];
+    PhysReg::Map<RegState> m_regs;
   };
   typedef smart::map<Block*, StateSave> ExitTraceMap;
 
@@ -167,7 +167,7 @@ private:
 private:
   // Register allocation may generate Spill/Reload.
   IRUnit& m_unit;
-  RegState   m_regs[NumRegs];
+  PhysReg::Map<RegState> m_regs;
   // Lists of free caller and callee-saved registers, respectively.
   smart::list<RegState*> m_freeCallerSaved[PhysReg::kNumTypes];
   smart::list<RegState*> m_freeCalleeSaved[PhysReg::kNumTypes];
@@ -253,7 +253,9 @@ RegAllocInfo LinearScan::computeRegs() const {
 }
 
 void LinearScan::StateSave::save(LinearScan* ls) {
-  std::copy(ls->m_regs, ls->m_regs + NumRegs, m_regs);
+  for (auto r : ls->m_regs) {
+    m_regs[r] = ls->m_regs[r];
+  }
 }
 
 void LinearScan::StateSave::restore(LinearScan* ls) {
@@ -263,14 +265,14 @@ void LinearScan::StateSave::restore(LinearScan* ls) {
     ls->m_freeCallerSaved[i].clear();
   }
 
-  for (size_t i = 0; i < NumRegs; i++) {
+  for (auto i : m_regs) {
     ls->m_regs[i] = m_regs[i];
     RegState* reg = &ls->m_regs[i];
     if (reg->isReserved()) continue;
     if (reg->isAllocated()) {
       SSATmp* tmp = reg->m_ssaTmp;
       for (int r = 0; r < ls->m_allocInfo[tmp].numAllocated(); r++) {
-        if (ls->m_allocInfo[tmp].reg(r) == PhysReg(i)) {
+        if (ls->m_allocInfo[tmp].reg(r) == i) {
           ls->assignRegToTmp(reg, tmp, r);
         }
       }
@@ -292,29 +294,29 @@ LinearScan::LinearScan(IRUnit& unit)
   , m_fullSIMDCandidates(unit.numTmps())
 {
   m_exitIds.reserve(unit.exits().size());
-  for (int i = 0; i < kNumRegs; i++) {
-    m_regs[i].m_ssaTmp = nullptr;
-    m_regs[i].m_reg = PhysReg(i);
-    m_regs[i].m_pinned = false;
-    m_regs[i].m_reserved = false;
+  for (auto reg : m_regs) {
+    m_regs[reg].m_ssaTmp = nullptr;
+    m_regs[reg].m_reg = reg;
+    m_regs[reg].m_pinned = false;
+    m_regs[reg].m_reserved = false;
   }
 
   // Mark reserved regs.
-  m_regs[int(PhysReg(rVmSp))]  .m_reserved = true;
-  m_regs[int(PhysReg(rsp))]    .m_reserved = true;
-  m_regs[int(PhysReg(rVmFp))]  .m_reserved = true;
-  m_regs[int(PhysReg(rAsm))]   .m_reserved = true;
-  m_regs[int(PhysReg(rVmTl))]  .m_reserved = true;
-  m_regs[int(PhysReg(rCgGP))]  .m_reserved = true;
-  m_regs[int(PhysReg(rCgXMM0))].m_reserved = true;
-  m_regs[int(PhysReg(rCgXMM1))].m_reserved = true;
+  m_regs[rVmSp]  .m_reserved = true;
+  m_regs[rsp]    .m_reserved = true;
+  m_regs[rVmFp]  .m_reserved = true;
+  m_regs[rAsm]   .m_reserved = true;
+  m_regs[rVmTl]  .m_reserved = true;
+  m_regs[rCgGP]  .m_reserved = true;
+  m_regs[rCgXMM0].m_reserved = true;
+  m_regs[rCgXMM1].m_reserved = true;
 
   // Reserve extra regs for testing purpose.
   uint32_t numFreeRegs = RuntimeOption::EvalHHIRNumFreeRegs;
-  for (int i = kNumRegs - 1; i >= 0; i--) {
-    if (!m_regs[i].m_reserved) {
+  for (auto r : m_regs) {
+    if (!m_regs[r].m_reserved) {
       if (numFreeRegs == 0) {
-        m_regs[i].m_reserved = true;
+        m_regs[r].m_reserved = true;
       } else {
         --numFreeRegs;
       }
@@ -428,8 +430,8 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
 
   // Reload all source operands if necessary.
   // Mark registers as unpinned.
-  for (int regNo = 0; regNo < kNumRegs; ++regNo) {
-    m_regs[regNo].m_pinned = false;
+  for (auto r : m_regs) {
+    m_regs[r].m_pinned = false;
   }
   smart::vector<bool> needsReloading(inst->numSrcs(), true);
   for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
@@ -443,7 +445,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
     }
     if (!needsReloading[i]) {
       for (int i = 0, n = m_allocInfo[tmp].numAllocated(); i < n; ++i) {
-        m_regs[int(m_allocInfo[tmp].reg(i))].m_pinned = true;
+        m_regs[m_allocInfo[tmp].reg(i)].m_pinned = true;
       }
     }
   }
@@ -494,7 +496,7 @@ void LinearScan::allocRegToInstruction(InstructionList::iterator it) {
     for (int numAllocated = 0, n = dst.numWords(); numAllocated < n; ) {
       auto reg = forceAlloc(dst);
       if (reg != InvalidReg) {
-        assignRegToTmp(&m_regs[(int)reg], &dst, 0);
+        assignRegToTmp(&m_regs[reg], &dst, 0);
         numAllocated++;
         continue;
       }
@@ -560,7 +562,7 @@ int LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
       targetRegNo = m_allocInfo[ssaTmp->inst()->src(0)].reg(index);
     }
     if (targetRegNo != reg::noreg) {
-      reg = getReg(&m_regs[int(targetRegNo)]);
+      reg = getReg(&m_regs[PhysReg(targetRegNo)]);
     }
   }
   if (reg == nullptr &&
@@ -568,9 +570,9 @@ int LinearScan::allocRegToTmp(SSATmp* ssaTmp, uint32_t index) {
       ssaTmp->inst()->isNative()) {
     // Pre-colors ssaTmp if it's the return value of a native.
     if (index == 0) {
-      reg = getReg(&m_regs[int(rax)]);
+      reg = getReg(&m_regs[rax]);
     } else if (index == 1) {
-      reg = getReg(&m_regs[int(rdx)]);
+      reg = getReg(&m_regs[rdx]);
     } else {
       not_reached();
     }
@@ -945,9 +947,9 @@ RegNumber LinearScan::getJmpPreColor(SSATmp* tmp, uint32_t regIndex,
 // caller-saved regs depends on pre-coloring hints.
 void LinearScan::initFreeList() {
   // reserve extra regs for testing purpose.
-  for (int i = kNumRegs - 1; i >= 0; i--) {
-    if (!m_regs[i].m_reserved) {
-      pushFreeReg(&m_regs[i]);
+  for (auto r : m_regs) {
+    if (!m_regs[r].m_reserved) {
+      pushFreeReg(&m_regs[r]);
     }
   }
 }

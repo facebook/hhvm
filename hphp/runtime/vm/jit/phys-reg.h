@@ -42,7 +42,7 @@ struct PhysReg {
     SIMD,
     kNumTypes,  // keep last
   };
-  explicit constexpr PhysReg(int n = -1) : n(n) {}
+  explicit constexpr PhysReg() : n(-1) {}
   constexpr /* implicit */ PhysReg(Reg64 r) : n(int(r)) {}
   constexpr /* implicit */ PhysReg(RegXMM r) : n(int(r) + kNumGPRegs) {}
   explicit constexpr PhysReg(Reg32 r) : n(int(RegNumber(r))) {}
@@ -125,6 +125,11 @@ struct PhysReg {
       return m_elms[r.n];
     }
 
+    const T& operator[](const PhysReg& r) const {
+      assert(r.n != -1);
+      return m_elms[r.n];
+    }
+
     struct iterator {
       PhysReg operator*() const {
         return PhysReg{idx};
@@ -139,15 +144,15 @@ struct PhysReg {
         return *this;
       }
 
-      T* start;
+      const T* start;
       int idx;
     };
 
-    iterator begin() {
+    iterator begin() const {
       return { m_elms, 0 };
     }
 
-    iterator end() {
+    iterator end() const {
       return { m_elms, sizeof(m_elms) / sizeof(m_elms[0]) };
     }
 
@@ -156,6 +161,9 @@ struct PhysReg {
   };
 
 private:
+  friend struct RegSet;
+  explicit constexpr PhysReg(int n) : n(n) {}
+
   int n;
 };
 
@@ -172,7 +180,7 @@ constexpr PhysReg InvalidReg;
  */
 struct RegSet {
   explicit RegSet() : m_bits(0) {}
-  explicit RegSet(PhysReg pr) : m_bits(uint64_t(1) << int(pr)) {}
+  explicit RegSet(PhysReg pr) : m_bits(uint64_t(1) << pr.n) {}
 
   // Union
   RegSet operator|(const RegSet& rhs) const {
@@ -236,13 +244,13 @@ struct RegSet {
 
   RegSet& remove(PhysReg pr) {
     if (pr != InvalidReg) {
-      m_bits = m_bits & ~(1 << int(pr));
+      m_bits = m_bits & ~(1 << pr.n);
     }
     return *this;
   }
 
   bool contains(PhysReg pr) const {
-    return bool(m_bits & (1 << int(pr)));
+    return bool(m_bits & (1 << pr.n));
   }
 
   bool empty() const {

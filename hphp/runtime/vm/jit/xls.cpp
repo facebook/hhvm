@@ -59,7 +59,7 @@ struct Abi {
 
 typedef StateVector<SSATmp, Interval> Intervals;
 typedef IdSet<SSATmp> LiveSet;
-typedef std::pair<int,int> RegPair;
+typedef std::pair<PhysReg,PhysReg> RegPair;
 
 // A Use refers to the position where an interval is read or written.
 struct Use {
@@ -171,8 +171,8 @@ private:
   StateVector<IRInstruction, unsigned> m_posns;
   smart::vector<IRInstruction*> m_insts;
   BlockList m_blocks;
-  Interval m_scratch[Abi::NumRegs];
-  Interval m_blocked[Abi::NumRegs];
+  PhysReg::Map<Interval> m_scratch;
+  PhysReg::Map<Interval> m_blocked;
   StateVector<Block,LiveSet> m_liveIn;
   smart::vector<Interval*> m_pending;
   smart::vector<Interval*> m_active;
@@ -188,11 +188,11 @@ const uint32_t kMaximalPos = UINT32_MAX; // "infinity" use position
 // Initially all usable registers have kMaximalPos
 struct RegPositions {
   explicit RegPositions();
-  std::pair<int,int> max2Reg(RegSet regs) const;
-  unsigned operator[](int r) const { return posns[r]; }
+  RegPair max2Reg(RegSet regs) const;
+  unsigned operator[](PhysReg r) const { return posns[r]; }
   void setPos(Interval*, unsigned pos);
 private:
-  unsigned posns[Abi::NumRegs];
+  PhysReg::Map<unsigned> posns;
 };
 
 bool checkBlockOrder(IRUnit& unit, BlockList& blocks);
@@ -334,7 +334,7 @@ unsigned Interval::firstRegUse() const {
 
 // Return the register(s) assigned to this interval as a pair.
 RegPair Interval::regs() const {
-  return RegPair((int)info.reg(0), (int)info.reg(1));
+  return RegPair(info.reg(0), info.reg(1));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -350,17 +350,17 @@ XLS::XLS(IRUnit& unit, RegAllocInfo& regs, const Abi& abi)
   , m_before(unit, nullptr)
   , m_after(unit, nullptr) {
   auto all = abi.all();
-  for (int r = 0; r < Abi::NumRegs; ++r) {
+  for (auto r : m_blocked) {
     m_blocked[r].blocked = true;
     m_blocked[r].need = 1;
-    m_blocked[r].info.setReg(PhysReg(r), 0);
-    if (!all.contains(PhysReg(r))) {
+    m_blocked[r].info.setReg(r, 0);
+    if (!all.contains(r)) {
       // r is never available
       m_blocked[r].add(LiveRange(0, kMaximalPos));
     }
     m_scratch[r].scratch = true;
     m_scratch[r].need = 1;
-    m_scratch[r].info.setReg(PhysReg(r), 0);
+    m_scratch[r].info.setReg(r, 0);
   }
 }
 
@@ -490,7 +490,7 @@ void XLS::buildIntervals() {
         if (RuntimeOption::EvalHHIREnableCalleeSavedOpt) {
           auto scratch = m_abi.gp - m_abi.saved;
           scratch.forEach([&](PhysReg r) {
-            m_scratch[int(r)].add(LiveRange(spos, dpos));
+            m_scratch[r].add(LiveRange(spos, dpos));
           });
         }
       }
@@ -524,7 +524,7 @@ void XLS::buildIntervals() {
     print(" after building intervals ");
   }
   stress += RuntimeOption::EvalHHIRNumFreeRegs;
-  for (int r = 0; r < Abi::NumRegs; r++) {
+  for (auto r : m_blocked) {
     if (m_blocked[r].start() > 0) {
       if (stress > 0) {
         stress--;
@@ -586,16 +586,15 @@ void XLS::assign(Interval* ivl, RegPair r) {
 
 // initialize the positions array with maximal use positions.
 RegPositions::RegPositions() {
-  for (auto& p : posns) p = kMaximalPos;
+  for (auto r : posns) posns[r] = kMaximalPos;
 }
 
 // Find the two registers used furthest in the future, but only
 // consider registers in the given set
-std::pair<int,int> RegPositions::max2Reg(const RegSet regs) const {
+RegPair RegPositions::max2Reg(const RegSet regs) const {
   unsigned max1 = 0, max2 = 0;
-  int r1 = 0, r2 = 0;
-  regs.forEach([&](PhysReg reg) {
-    auto r = int(reg);
+  PhysReg r1 = *posns.begin(), r2 = *posns.begin();
+  regs.forEach([&](PhysReg r) {
     if (posns[r] > max2) {
       if (posns[r] > max1) {
         r2 = r1; max2 = max1;
@@ -613,10 +612,10 @@ std::pair<int,int> RegPositions::max2Reg(const RegSet regs) const {
 // to the minimum of pos and the existing position.
 void RegPositions::setPos(Interval* ivl, unsigned pos) {
   assert(ivl->info.numAllocated() >= 1);
-  auto r0 = (int)ivl->info.reg(0);
+  auto r0 = ivl->info.reg(0);
   posns[r0] = std::min(pos, posns[r0]);
   if (ivl->info.numAllocated() == 2) {
-    auto r1 = (int)ivl->info.reg(1);
+    auto r1 = ivl->info.reg(1);
     posns[r1] = std::min(pos, posns[r1]);
   }
 }
@@ -728,11 +727,11 @@ void XLS::allocBlocked(Interval* current) {
 
 // return true if r1 and r2 have any registers in common
 bool conflict(RegPair r1, RegPair r2) {
-  assert(r1.first != -1 && r2.first != -1);
+  assert(r1.first != InvalidReg && r2.first != InvalidReg);
   assert(r1.first != r1.second && r2.first != r2.second);
   return r1.first == r2.first ||
          r1.first == r2.second ||
-         (r1.second != (int)InvalidReg &&
+         (r1.second != InvalidReg &&
           (r1.second == r2.first || r1.second == r2.second));
 }
 
@@ -854,11 +853,11 @@ void XLS::walkIntervals() {
   for (auto& ivl : m_intervals) {
     if (!ivl.empty()) m_pending.push_back(&ivl);
   }
-  for (auto& ivl : m_scratch) {
-    if (!ivl.empty()) m_inactive.push_back(&ivl);
+  for (auto r : m_scratch) {
+    if (!m_scratch[r].empty()) m_inactive.push_back(&m_scratch[r]);
   }
-  for (auto& ivl : m_blocked) {
-    if (!ivl.empty()) m_inactive.push_back(&ivl);
+  for (auto r : m_blocked) {
+    if (!m_blocked[r].empty()) m_inactive.push_back(&m_blocked[r]);
   }
   std::make_heap(m_pending.begin(), m_pending.end(), compare);
   while (!m_pending.empty()) {

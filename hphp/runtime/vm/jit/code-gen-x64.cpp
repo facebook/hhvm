@@ -2731,7 +2731,7 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
     return;
   }
   checkFrame(fp, sp, /*checkLocals*/ false);
-  assert(sp <= (Cell*)fp || fp->m_func->isGenerator());
+  assert(sp <= (Cell*)fp || fp->inGenerator());
   // check return value if stack not empty
   if (sp < (Cell*)fp) assertTv(sp);
 }
@@ -3551,7 +3551,7 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
     });
   m_as.storeq  (m_rScratch, spReg[spOffset + int(AROFF(m_invName))]);
   m_as.storeq  (fpReg, spReg[spOffset + int(AROFF(m_savedRbp))]);
-  m_as.storel  (nArgs, spReg[spOffset + int(AROFF(m_numArgsAndCtorFlag))]);
+  m_as.storel  (nArgs, spReg[spOffset + int(AROFF(m_numArgsAndGenCtorFlags))]);
 
   emitAdjustSp(spReg, dstLoc(0).reg(), spOffset);
 }
@@ -3623,9 +3623,9 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
                               spOffset + int(AROFF(m_savedRbp)),
                               spReg);
 
-  // actRec->m_numArgsAndCtorFlag
+  // actRec->m_numArgsAndGenCtorFlags
   m_as.store_imm32_disp_reg(nArgs,
-                            spOffset + int(AROFF(m_numArgsAndCtorFlag)),
+                            spOffset + int(AROFF(m_numArgsAndGenCtorFlags)),
                             spReg);
 
   emitAdjustSp(spReg,

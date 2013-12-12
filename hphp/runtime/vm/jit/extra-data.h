@@ -292,9 +292,11 @@ struct ActRecInfo : IRExtraData {
   int32_t numArgs;
 
   std::string show() const {
-    auto numArgsAndCtorFlag = ActRec::decodeNumArgs(numArgs);
-    return folly::to<std::string>(numArgsAndCtorFlag.first,
-                                  numArgsAndCtorFlag.second ? ",ctor" : "",
+    ActRec ar;
+    ar.m_numArgsAndGenCtorFlags = numArgs;
+    return folly::to<std::string>(ar.numArgs(),
+                                  ar.isFromFPushCtor() ? ",ctor" : "",
+                                  ar.inGenerator() ? ",gen" : "",
                                   invName ? " M" : "");
   }
 };

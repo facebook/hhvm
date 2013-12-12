@@ -68,13 +68,14 @@ bool classIsUniqueInterface(const Class* cls) {
 
 HhbcTranslator::HhbcTranslator(Offset startOffset,
                                uint32_t initialSpOffsetFromFp,
+                               bool inGenerator,
                                const Func* func)
   : m_unit(startOffset)
   , m_irb(new IRBuilder(startOffset,
                         initialSpOffsetFromFp,
                         m_unit,
                         func))
-  , m_bcStateStack {BcState(startOffset, func)}
+  , m_bcStateStack {BcState(startOffset, inGenerator, func)}
   , m_startBcOff(startOffset)
   , m_lastBcOff(false)
   , m_hasExit(false)
@@ -354,7 +355,7 @@ void HhbcTranslator::beginInlining(unsigned numParams,
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.
-  m_bcStateStack.emplace_back(target->base(), target);
+  m_bcStateStack.emplace_back(target->base(), false, target);
   updateMarker();
 
   always_assert_log(
@@ -2398,7 +2399,7 @@ void HhbcTranslator::emitFPushActRec(SSATmp* func,
   auto actualStack = spillStack();
   auto returnSp = actualStack;
 
-  if (curFunc()->isGenerator()) {
+  if (inGenerator()) {
     gen(StashGeneratorSP, m_irb->fp(), m_irb->sp());
   }
 
@@ -2432,8 +2433,8 @@ void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
     fn = gen(LdClsCtor, makeCatch(), cls);
   }
   gen(IncRef, obj);
-  int32_t numArgsAndCtorFlag = ActRec::encodeNumArgs(numParams, true);
-  emitFPushActRec(fn, obj, numArgsAndCtorFlag, nullptr);
+  auto numArgsAndGenCtorFlags = ActRec::encodeNumArgs(numParams, false, true);
+  emitFPushActRec(fn, obj, numArgsAndGenCtorFlags, nullptr);
 }
 
 void HhbcTranslator::emitFPushCtor(int32_t numParams) {
@@ -3106,7 +3107,7 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
 
   updateMarker();
   // See the comment in beginInlining about generator frames.
-  if (curFunc()->isGenerator()) {
+  if (inGenerator()) {
     gen(ReDefGeneratorSP,
         ReDefGeneratorSPData(m_irb->inlinedFrameSpansCall()),
         m_irb->sp(), m_irb->fp());
@@ -5048,8 +5049,7 @@ std::string HhbcTranslator::showStack() const {
     out << folly::format("+{:-^82}+\n", str);
   };
 
-  const int32_t frameCells =
-    curFunc()->isGenerator() ? 0 : curFunc()->numSlotsInFrame();
+  const int32_t frameCells = inGenerator() ? 0 : curFunc()->numSlotsInFrame();
   const int32_t stackDepth =
     m_irb->spOffset() + m_irb->evalStack().size()
     - m_irb->stackDeficit() - frameCells;

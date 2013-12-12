@@ -328,14 +328,14 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   Asm a { mainCode };
   TCA start = mainCode.frontier();
   if (dvs.size() == 1) {
-    a.   cmp_imm32_disp_reg32(dvs[0].first,
-                              AROFF(m_numArgsAndCtorFlag), rVmFp);
+    a.  cmp_imm32_disp_reg32(dvs[0].first,
+                             AROFF(m_numArgsAndGenCtorFlags), rVmFp);
     emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[0].second));
     emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
   } else {
-    a.   load_reg64_disp_reg32(rVmFp, AROFF(m_numArgsAndCtorFlag), reg::rax);
+    a.  load_reg64_disp_reg32(rVmFp, AROFF(m_numArgsAndGenCtorFlags), reg::rax);
     for (unsigned i = 0; i < dvs.size(); i++) {
-      a.   cmp_imm32_reg32(dvs[i].first, reg::rax);
+      a.  cmp_imm32_reg32(dvs[i].first, reg::rax);
       emitBindJcc(mainCode, stubsCode, CC_LE, SrcKey(func, dvs[i].second));
     }
     emitBindJmp(mainCode, stubsCode, SrcKey(func, func->base()));
@@ -418,7 +418,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
     callFixup = a.frontier();
   }
   if (nPassed != 2) {
-    a.  storel (2, rStashedAR[AROFF(m_numArgsAndCtorFlag)]);
+    a.  storel (2, rStashedAR[AROFF(m_numArgsAndGenCtorFlags)]);
   }
   if (debug) { // "assertion": the emitPrologueWork path fixes up rVmSp.
     a.  movq   (0, rVmSp);

@@ -49,7 +49,7 @@ inline Class* liveClass() { return liveFunc()->cls(); }
 
 inline Offset liveSpOff() {
   Cell* fp = vmfp();
-  if (liveFunc()->isGenerator()) {
+  if (liveFrame()->inGenerator()) {
     fp = (Cell*)Stack::generatorStackBase((ActRec*)fp);
   }
   return fp - vmsp();
@@ -100,7 +100,7 @@ struct VMRegAnchor : private boost::noncopyable {
 
     auto prevAr = g_vmContext->getOuterVMFrame(ar);
     const Func* prevF = prevAr->m_func;
-    vmsp() = ar->m_func->isGenerator() ?
+    vmsp() = ar->inGenerator() ?
       Stack::generatorStackBase(ar) - 1 :
       (TypedValue*)ar - ar->numArgs();
     assert(g_vmContext->m_stack.isValidAddress((uintptr_t)vmsp()));

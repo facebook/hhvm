@@ -1422,7 +1422,7 @@ class MemoProfiler : public Profiler {
     // Lots of random cases to skip just to keep this simple for
     // now. There's no reason not to do more later.
     if (!g_vmContext->m_faults.empty()) return;
-    if (ar->m_func->isCPPBuiltin() || ar->m_func->isGenerator()) return;
+    if (ar->m_func->isCPPBuiltin() || ar->inGenerator()) return;
     auto ret_tv = g_vmContext->m_stack.topTV();
     auto ret = tvAsCVarRef(ret_tv);
     if (ret.isNull()) return;

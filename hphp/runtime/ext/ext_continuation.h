@@ -117,7 +117,7 @@ struct c_Continuation : ExtObjectDataFlags<ObjectData::HasClone> {
     // to it when we enter the generator body.
     auto ar = cont->actRec();
     ar->m_func = genFunc;
-    ar->initNumArgs(0);
+    ar->initNumArgsInGenerator(0);
     ar->setVarEnv(nullptr);
     return cont;
   }

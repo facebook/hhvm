@@ -651,11 +651,11 @@ void checkFrame(ActRec* fp, Cell* sp, bool checkLocals) {
   // TODO: validate this pointer from actrec
   int numLocals = func->numLocals();
   assert(sp <= (Cell*)fp - func->numSlotsInFrame()
-         || func->isGenerator());
+         || fp->inGenerator());
   if (checkLocals) {
     int numParams = func->numParams();
     for (int i=0; i < numLocals; i++) {
-      if (i >= numParams && func->isGenerator() && i < func->numNamedLocals()) {
+      if (i >= numParams && fp->inGenerator() && i < func->numNamedLocals()) {
         continue;
       }
       assert(tvIsPlausible(*frame_local(fp, i)));

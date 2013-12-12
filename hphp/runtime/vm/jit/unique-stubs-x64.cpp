@@ -242,8 +242,8 @@ void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
   // edx := num passed parameters
   // ecx := num declared parameters
   a.    loadq  (rStashedAR[AROFF(m_func)], rax);
-  a.    loadl  (rStashedAR[AROFF(m_numArgsAndCtorFlag)], edx);
-  a.    andl   (0x7fffffff, edx);
+  a.    loadl  (rStashedAR[AROFF(m_numArgsAndGenCtorFlags)], edx);
+  a.    andl   (0x3fffffff, edx);
   a.    loadl  (rax[Func::numParamsOff()], ecx);
 
   // If we passed more args than declared, jump to the numParamsCheck.

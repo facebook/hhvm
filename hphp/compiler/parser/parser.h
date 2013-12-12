@@ -414,20 +414,27 @@ private:
       std::string name;
     };
 
+    enum class AliasType {
+      AUTO,
+      USE,
+      CURRENT_NS
+    };
+
     AliasTable(const std::vector<AliasEntry>& autoAliases,
                std::function<bool ()> autoOracle);
 
     std::string getName(std::string alias);
     bool isAliased(std::string alias);
     bool isAutoImported(std::string alias);
-    void map(std::string alias, std::string name);
+    bool isUseType(std::string alias);
+    void map(std::string alias, std::string name, AliasType type);
     void clear();
 
   private:
 
     struct NameEntry {
       std::string name;
-      bool isAuto; // Is the name automatically-imported?
+      AliasType type;
     };
 
     hphp_string_imap<NameEntry> m_aliases;

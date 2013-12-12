@@ -39,12 +39,11 @@ struct RegState {
   RegState();
   SSATmp*& tmp(const PhysLoc&, int i);
   void merge(const RegState& other);
-  SSATmp* regs[kNumRegs];  // which tmp is in each register
+  PhysReg::Map<SSATmp*> regs;  // which tmp is in each register
   SSATmp* slots[NumPreAllocatedSpillLocs]; // which tmp is in each spill slot
 };
 
 RegState::RegState() {
-  memset(regs, 0, sizeof(regs));
   memset(slots, 0, sizeof(slots));
 }
 
@@ -54,13 +53,13 @@ SSATmp*& RegState::tmp(const PhysLoc& loc, int i) {
     return slots[loc.slot(i)];
   }
   auto r = loc.reg(i);
-  assert(r != Transl::InvalidReg && unsigned(int(r)) < kNumRegs);
-  return regs[int(r)];
+  assert(r != Transl::InvalidReg);
+  return regs[r];
 }
 
 void RegState::merge(const RegState& other) {
-  for (unsigned i = 0; i < kNumRegs; i++) {
-    if (regs[i] != other.regs[i]) regs[i] = nullptr;
+  for (auto r : regs) {
+    if (regs[r] != other.regs[r]) regs[r] = nullptr;
   }
   for (unsigned i = 0; i < NumPreAllocatedSpillLocs; i++) {
     if (slots[i] != other.slots[i]) slots[i] = nullptr;
@@ -406,4 +405,3 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
 }
 
 }}
-

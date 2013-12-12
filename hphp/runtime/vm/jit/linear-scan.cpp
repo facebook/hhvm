@@ -37,8 +37,6 @@ using namespace Transl::reg;
 TRACE_SET_MOD(hhir);
 
 struct LinearScan : private boost::noncopyable {
-  static const int NumRegs = kNumRegs;
-
   explicit LinearScan(IRUnit&);
   RegAllocInfo allocRegs();
 
@@ -91,12 +89,12 @@ private:
   public:
     PreColoringHint() { clear(); }
     bool preColorsTmp(RegState* reg) const;
-    RegNumber getPreColoringReg(SSATmp* tmp, uint32_t index) const;
+    PhysReg getPreColoringReg(SSATmp* tmp, uint32_t index) const;
     void clear();
     void add(SSATmp* tmp, uint32_t index, int argNum);
   private:
     // indexed by register number
-    std::pair<SSATmp*, uint32_t> m_preColoredTmps[LinearScan::NumRegs];
+    PhysReg::Map<std::pair<SSATmp*, uint32_t>> m_preColoredTmps;
   };
 
   class StateSave {
@@ -1431,28 +1429,28 @@ SSATmp* LinearScan::getOrigTmp(SSATmp* tmp) {
 
 bool LinearScan::PreColoringHint::preColorsTmp(RegState* reg) const {
   assert(reg->m_reg.isGP());
-  return m_preColoredTmps[int(reg->m_reg)].first != nullptr;
+  return m_preColoredTmps[reg->m_reg].first != nullptr;
 }
 
 // Get the pre-coloring register of (<tmp>, <index>).
 // A native call has at most six arguments, so the time complexity is
 // not a big problem.
-RegNumber LinearScan::PreColoringHint::getPreColoringReg(
+PhysReg LinearScan::PreColoringHint::getPreColoringReg(
     SSATmp* tmp, uint32_t index) const {
-  for (int regNo = 0; regNo < kNumRegs; ++regNo) {
-    if (m_preColoredTmps[regNo].first == tmp &&
-        m_preColoredTmps[regNo].second == index) {
-      assert(regNo < kNumGPRegs);
-      return (RegNumber)regNo;
+  for (auto reg : m_preColoredTmps) {
+    if (m_preColoredTmps[reg].first == tmp &&
+        m_preColoredTmps[reg].second == index) {
+      assert(reg.isGP());
+      return reg;
     }
   }
-  return reg::noreg;
+  return InvalidReg;
 }
 
 void LinearScan::PreColoringHint::clear() {
-  for (int i = 0; i < kNumRegs; ++i) {
-    m_preColoredTmps[i].first = nullptr;
-    m_preColoredTmps[i].second = 0;
+  for (auto reg : m_preColoredTmps) {
+    m_preColoredTmps[reg].first = nullptr;
+    m_preColoredTmps[reg].second = 0;
   }
 }
 
@@ -1460,8 +1458,8 @@ void LinearScan::PreColoringHint::clear() {
 // in next native.
 void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32_t index, int argNum) {
   assert(argNum < kNumRegisterArgs);
-  int reg = int(argNumToRegName[argNum]);
-  assert(reg >= 0 && reg < kNumGPRegs);
+  auto reg = argNumToRegName[argNum];
+  assert(reg != InvalidReg && reg.isGP());
   m_preColoredTmps[reg].first  = tmp;
   m_preColoredTmps[reg].second = index;
 }

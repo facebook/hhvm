@@ -78,7 +78,6 @@ struct PhysReg {
   }
   bool isGP () const { return n >= 0 && n < kNumGPRegs; }
   bool isSIMD() const { return n >= kNumGPRegs && n < kNumRegs; }
-  explicit constexpr operator int() const { return n; }
   constexpr bool operator==(PhysReg r) const { return n == r.n; }
   constexpr bool operator!=(PhysReg r) const { return n != r.n; }
   constexpr bool operator==(Reg64 r) const { return Reg64(n) == r; }
@@ -277,7 +276,7 @@ struct RegSet {
     uint64_t out;
     bool retval = ffs64(m_bits, out);
     reg = PhysReg(out);
-    assert(!retval || (int(reg) >= 0 && int(reg) < 64));
+    assert(!retval || (reg.n >= 0 && reg.n < 64));
     return retval;
   }
 
@@ -285,7 +284,7 @@ struct RegSet {
     uint64_t out;
     bool retval = fls64(m_bits, out);
     reg = PhysReg(out);
-    assert(!retval || (int(reg) >= 0 && int(reg) < 64));
+    assert(!retval || (reg.n >= 0 && reg.n < 64));
     return retval;
   }
 

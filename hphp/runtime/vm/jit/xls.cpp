@@ -48,7 +48,6 @@ struct RegPositions;
 
 // machine-specific register conventions
 struct Abi {
-  static auto const NumRegs = 8 * sizeof(RegSet);
   RegSet gp;      // general purpose 64-bit registers
   RegSet simd;    // floating point / simd 128-bit registers
   RegSet saved;   // callee-saved (gp and simd)

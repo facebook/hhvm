@@ -537,7 +537,7 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
     }
     if (src2->isConst()) {
       if (src1Type <= Type::Bool) {
-        m_as.    cmpb (src2->getValRawInt(), Reg8(int(srcReg1)));
+        m_as.    cmpb (src2->getValRawInt(), rbyte(srcReg1));
       } else {
         m_as.    cmp_imm64_reg64(src2->getValRawInt(), srcReg1);
       }
@@ -545,7 +545,7 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
       // Note the reverse syntax in the assembler.
       // This cmp will compute srcReg1 - srcReg2
       if (src1Type <= Type::Bool) {
-        m_as.    cmpb (Reg8(int(srcReg2)), Reg8(int(srcReg1)));
+        m_as.    cmpb (rbyte(srcReg2), rbyte(srcReg1));
       } else {
         m_as.    cmp_reg64_reg64(srcReg2, srcReg1);
       }
@@ -1686,9 +1686,9 @@ void CodeGenerator::cgCmpHelper(
   // simplifyCmp has converted all args to bool
   else if (type1 == Type::Bool && type2 == Type::Bool) {
     if (src2->isConst()) {
-      m_as.    cmpb (src2->getValBool(), Reg8(int(src1Reg)));
+      m_as.    cmpb (src2->getValBool(), rbyte(src1Reg));
     } else {
-      m_as.    cmpb (Reg8(int(src2Reg)), Reg8(int(src1Reg)));
+      m_as.    cmpb (rbyte(src2Reg), rbyte(src1Reg));
     }
     setFromFlags();
   }
@@ -2393,7 +2393,7 @@ void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
       m_as.mov_imm64_reg((uint64_t)makeStaticString("1"), dstReg);
     }
   } else {
-    m_as.testb(Reg8(int(srcReg)), Reg8(int(srcReg)));
+    m_as.testb(rbyte(srcReg), rbyte(srcReg));
     m_as.mov_imm64_reg((uint64_t)makeStaticString(""), dstReg);
     m_as.mov_imm64_reg((uint64_t)makeStaticString("1"), m_rScratch);
     m_as.cmov_reg64_reg64(CC_NZ, m_rScratch, dstReg);

@@ -129,7 +129,6 @@ public:
    * from RSP.
    */
   void setSlot(int idx, uint32_t slot) {
-    assert(int(slot) != int(InvalidReg));
     m_slots[idx] = slot;
     m_kind = kSpill;
   }

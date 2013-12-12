@@ -1,0 +1,3 @@
+<?php
+if (!gd_info()['XBM Support']) echo 'skip';
+if (!gd_info()['PNG Support']) echo 'skip';

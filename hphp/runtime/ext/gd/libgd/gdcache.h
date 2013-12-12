@@ -41,9 +41,7 @@
 /*********************************************************/
 
 #include <stdlib.h>
-#ifdef HAVE_MALLOC_H
- #include <malloc.h>
-#endif
+#include "hphp/util/alloc.h"
 #ifndef NULL
 #define NULL (void *)0
 #endif

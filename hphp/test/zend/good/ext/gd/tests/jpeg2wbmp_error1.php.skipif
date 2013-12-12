@@ -1,0 +1,3 @@
+<?php
+if (!gd_info()['JPEG Support']) echo 'skip';
+if (!gd_info()['WBMP Support']) echo 'skip';

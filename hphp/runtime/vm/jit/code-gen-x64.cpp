@@ -711,10 +711,9 @@ X(JmpNSame);
  */
 static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
   // Compute the move/shuffle plan.
-  int moves[kNumRegs];
-  ArgDesc* argDescs[kNumRegs];
-  memset(moves, -1, sizeof moves);
-  memset(argDescs, 0, sizeof argDescs);
+  PhysReg::Map<PhysReg> moves;
+  PhysReg::Map<ArgDesc*> argDescs;
+
   for (size_t i = 0; i < args.numRegArgs(); ++i) {
     auto kind = args[i].kind();
     if (!(kind == ArgDesc::Kind::Reg  ||
@@ -725,11 +724,12 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
     auto dstReg = args[i].dstReg();
     auto srcReg = args[i].srcReg();
     if (dstReg != srcReg) {
-      moves[int(dstReg)] = int(srcReg);
-      argDescs[int(dstReg)] = &args[i];
+      moves[dstReg] = srcReg;
+      argDescs[dstReg] = &args[i];
     }
   }
-  auto const howTo = doRegMoves(moves, int(rCgGP));
+
+  auto const howTo = doRegMoves(moves, rCgGP);
 
   // Execute the plan
   for (auto& how : howTo) {
@@ -737,7 +737,7 @@ static int64_t shuffleArgs(Asm& a, ArgGroup& args) {
       if (how.m_reg2 == rCgGP) {
         emitMovRegReg(a, how.m_reg1, how.m_reg2);
       } else {
-        ArgDesc* argDesc = argDescs[int(how.m_reg2)];
+        ArgDesc* argDesc = argDescs[how.m_reg2];
         ArgDesc::Kind kind = argDesc->kind();
         if (kind == ArgDesc::Kind::Reg || kind == ArgDesc::Kind::TypeReg) {
           if (argDesc->isZeroExtend()) {
@@ -2952,8 +2952,7 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
   // 1. reg->mem (stores)
   // 2. reg->reg (parallel copies)
   // 3. mem->reg (loads) & imm->reg (constants)
-  int moves[kNumRegs];    // moves[dst] = src
-  memset(moves, -1, sizeof moves);
+  PhysReg::Map<PhysReg> moves;    // moves[dst] = src
   for (uint32_t i = 0, n = inst->numSrcs(); i < n; ++i) {
     auto src = inst->src(i);
     auto& rs = curOpd(src);
@@ -2964,14 +2963,14 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     } else if (!rs.spilled()) {
       auto s0 = rs.reg(0);
       auto d0 = rd.reg(0);
-      if (s0 != InvalidReg) moves[int(d0)] = int(s0);
+      if (s0 != InvalidReg) moves[d0] = s0;
       auto s1 = rs.reg(1);
       auto d1 = rd.reg(1);
-      if (s1 != InvalidReg) moves[int(d1)] = int(s1);
+      if (s1 != InvalidReg) moves[d1] = s1;
     }
   }
   // Compute a serial order of moves and swaps
-  auto howTo = doRegMoves(moves, int(rCgGP));
+  auto howTo = doRegMoves(moves, rCgGP);
   for (auto& how : howTo) {
     if (how.m_kind == MoveInfo::Kind::Move) {
       emitMovRegReg(m_as, how.m_reg1, how.m_reg2);

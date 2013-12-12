@@ -107,6 +107,54 @@ struct PhysReg {
     return *(*this + ScaledIndex(dr.base, 0x1) + dr.disp);
   }
 
+  /*
+   * This struct can be used to efficiently represent a map from PhysReg to T.
+   * Note that the semantics are that all keys are present at all times. There
+   * is no such thing as adding to or removing from the map; all registers map
+   * to a value -- initially, a default-constructed T.
+   *
+   * The purpose is to allow the use of PhysReg's convenient internal encoding
+   * to be memory-efficient, without letting that abstraction leak.
+   */
+  template<typename T>
+  struct Map {
+    Map() : m_elms() {}
+
+    T& operator[](const PhysReg& r) {
+      assert(r.n != -1);
+      return m_elms[r.n];
+    }
+
+    struct iterator {
+      PhysReg operator*() const {
+        return PhysReg{idx};
+      }
+
+      bool operator!=(const iterator& other) {
+        return idx != other.idx;
+      }
+
+      iterator& operator++() {
+        idx++;
+        return *this;
+      }
+
+      T* start;
+      int idx;
+    };
+
+    iterator begin() {
+      return { m_elms, 0 };
+    }
+
+    iterator end() {
+      return { m_elms, sizeof(m_elms) / sizeof(m_elms[0]) };
+    }
+
+   private:
+    T m_elms[kNumRegs];
+  };
+
 private:
   int n;
 };

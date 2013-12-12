@@ -329,240 +329,130 @@ public:
   Label m_entry;
 };
 
-
-class FinallyRouter;
-
-DECLARE_BOOST_TYPES(FinallyRouterEntry);
+DECLARE_BOOST_TYPES(ControlTarget);
 /*
- * FinallyRouterEntry represents a single level of the unified stack
+ * The structure represents a code path that potentially requires
+ * running finally blocks. A code path has an assigned state ID that
+ * is used inside switch statements emitted at the end of finally
+ * blocks. It also has an optional label (the destination to jump
+ * to after all the required finally blocks are run).
+ */
+struct ControlTarget {
+  static const int k_unsetState;
+  explicit ControlTarget(EmitterVisitor* router);
+  ~ControlTarget();
+  // Manage state ID reuse.
+  bool isRegistered();
+  EmitterVisitor* m_visitor;
+  // The target to jump to once all the necessary finally blocks are run.
+  Label m_label;
+  // The state ID that identifies this control target inside finally
+  // epilogues. This ID assigned to the "state" unnamed local variable.
+  int m_state;
+};
+
+struct ControlTargetInfo {
+  ControlTargetInfo() : used(false) {}
+  ControlTargetInfo(ControlTargetPtr t, bool b) : target(t), used(b) {}
+  ControlTargetPtr target;
+  bool used;
+};
+
+DECLARE_BOOST_TYPES(Region);
+/*
+ * Region represents a single level of the unified stack
  * of constructs that are meaningful from the point of view of finally
  * implementation. The levels are used to keep track of the information
- * such as the actions that can be taken inside a block.
+ * such as the control targets that can be taken inside a block.
  */
-class FinallyRouterEntry {
+class Region {
 public:
-  enum EntryKind {
+  enum Kind {
     // Top-level (global) context.
-    GlobalEntry,
+    Global,
     // Function body / method body entry.
-    FuncBodyEntry,
+    FuncBody,
     // Entry for finally fault funclets emitted after the body of
     // a function
-    FuncFaultEntry,
-    // Try block entry (begins with try ends after catches).
-    TryFinallyEntry,
+    FaultFunclet,
+    // Region by a finally clause
+    TryFinally,
     // Finally block entry (begins after catches ends after finally)
-    FinallyEntry,
-    // Loop OR a break statement.
-    LoopEntry,
+    Finally,
+    // Loop or switch statement.
+    LoopOrSwitch,
   };
 
   typedef Emitter::IterPair IterPair;
   typedef std::vector<IterPair> IterVec;
 
-  DECLARE_BOOST_TYPES(Action);
-  /*
-   * The structure represents a code path that potentially requires
-   * running finally blocks. A code path has an assigned state ID that
-   * is used inside switch statements emitted at the end of finally
-   * blocks. It also has an optional label (the destination to jump
-   * to after all the required finally blocks are run).
-   */
-  struct Action {
-    static const int k_unsetState;
-
-    explicit Action(FinallyRouter* router);
-    ~Action();
-
-    // Manage state ID reuse.
-    bool isAllocated();
-    void allocate();
-    void release();
-
-    FinallyRouter* m_router;
-    // The target to jump to once all the necessary finally blocks
-    // are run.
-    Label m_label;
-    // The state ID that identifies this action inside finally switch
-    // statements. This is the id assigned to the "state" unnamed
-    // local variable.
-    int m_state;
-  };
-
-  FinallyRouterEntry(FinallyRouter* router,
-                     EntryKind kind,
-                     FinallyRouterEntryPtr parent);
-  ~FinallyRouterEntry();
-
-  // Helpers used for freeing iterators when appropriate actions
-  // require that.
-  void emitIterBreak(Emitter& e,
-                     IterVec& iters,
-                     Label& target);
-  void emitIterFree(Emitter& e, IterVec& iters);
-  void emitIterFree(Emitter& e);
-
-  // Emission of code snippets commencing actions. Method
-  // emitXYZ(e, ...) should be used instead of e.XYZ(...) in
-  // EmitterVisitor.
-  void emitReturn(Emitter& e, char sym);
-  void emitReturnImpl(Emitter& e,
-                      char sym,
-                      IterVec& iters);
-  void emitGoto(Emitter& e, StringData* name);
-  void emitGotoImpl(Emitter& e,
-                    StringData* name,
-                    IterVec& iters);
-  void emitBreak(Emitter& e, int depth);
-  void emitBreakImpl(Emitter& e,
-                     int depth,
-                     IterVec& iters);
-  void emitContinue(Emitter& e, int depth);
-  void emitContinueImpl(Emitter& e,
-                        int depth,
-                        IterVec& iters);
-
-  // Emit the switch statement in the finally epilogue. Optimizes
-  // cases where there is either just a fall-through case, or where
-  // there is a single case other than fall-through.
-  void emitFinallySwitch(Emitter& e);
-
-  // Helper for emitting beginning of single case from the finally
-  // epilogue.
-  void emitCase(Emitter& e, std::vector<Label*>& cases, ActionPtr action);
-  void emitReturnCase(Emitter& e, std::vector<Label*>& cases, char sym);
-  void emitReturnCaseImpl(Emitter& e, char sym, IterVec& iters);
-  void emitBreakCase(Emitter& e, std::vector<Label*>& cases, int depth);
-  void emitBreakCaseImpl(Emitter& e, int depth, IterVec& iters);
-  void emitContinueCase(Emitter& e, std::vector<Label*>& cases, int depth);
-  void emitContinueCaseImpl(Emitter& e, int depth, IterVec& iters);
+  Region(Region::Kind kind, RegionPtr parent);
 
   // Helper for establishing the maximal depth of break / continue
-  // actions that are allocated.
+  // control targets that are allocated.
   int getBreakContinueDepth();
 
   // Returns the maximal break / continue depth admissable (aka the
   // number of nested loops).
   int getMaxBreakContinueDepth();
 
-  // Methods used for emitting different cases for the finally
-  // epilogue switch.
-  void emitGotoCase(Emitter& e, std::vector<Label*>& cases, StringData* name);
-  void emitGotoCaseImpl(Emitter& e, StringData* name, IterVec& iters);
-  void emitReturnCases(Emitter& e, std::vector<Label*>& cases);
-  void emitGotoCases(Emitter& e, std::vector<Label*>& cases);
-  void emitBreakContinueCases(Emitter& e, std::vector<Label*>& cases);
-  void emitAllCases(Emitter& e, std::vector<Label*>& cases);
-
-  // Methods used for collecting labels corresponding to the cases
-  // from the finally epilogue. All the labels are accumulated
-  // inside the cases array. The array is eventually passed to
-  // e.Switch as the immediate argument.
-  void collectReturnCases(std::vector<Label*>& cases);
-  void collectGotoCases(std::vector<Label*>& cases);
-  void collectBreakContinueCases(std::vector<Label*>& cases);
-  void collectCase(std::vector<Label*>& cases,
-                   ActionPtr action);
-  void collectAllCases(std::vector<Label*>& cases);
+  int getMaxState();
 
   // The number of cases to be emitted. This is a helper used in
   // establishing whether one of the optimized cases can be used.
   int getCaseCount();
 
-  // Methods used for allocating new finally-aware code-paths.
-  // When alloc is set to false, the action is merely allocated in
-  // memory and shared among different entries. When alloc is set to
-  // true, the action is additionally assigned a state ID.
-  ActionPtr registerReturn(StatementPtr s, char sym);
-  ActionPtr registerGoto(StatementPtr s, StringData* name, bool alloc);
-  ActionPtr registerBreak(StatementPtr s, int depth, bool alloc);
-  ActionPtr registerContinue(StatementPtr s, int depth, bool alloc);
-  // Used to indicate that a particular label is present inside
-  // an entry. Labels don't have corresponding actions, however
-  // they need to be tracked in order to handle gotos appropriately.
-  void registerLabel(StatementPtr s, StringData* name);
-  // Yield / await is not supported inside a finally block for now.
-  // This method throws a parse time fatal whenever appropriate.
-  void registerYieldAwait(ExpressionPtr e);
+  bool isForeach() { return m_iterId != -1; }
+  bool isTryFinally() { return m_kind == Region::Kind::TryFinally; }
+  bool isFinally() { return m_kind == Region::Kind::Finally; }
 
-  FinallyRouter* m_router;
-  EntryKind m_kind;
+  bool isBreakUsed(int i) {
+    auto it = m_breakTargets.find(i);
+    if (it == m_breakTargets.end()) return false;
+    return it->second.used;
+  }
+
+  bool isContinueUsed(int i) {
+    auto it = m_continueTargets.find(i);
+    if (it == m_continueTargets.end()) return false;
+    return it->second.used;
+  }
+
+  Region::Kind m_kind;
   // Only used for loop / break kind of entries.
   Id m_iterId;
-  bool m_iterRef;
+  IterKind m_iterKind;
   // Because of a bug in code emission, functions sometimes have
-  // inconsistent return flavours. Therefore instead of a single
-  // return action, there need to be one return action per flavor
-  // used. Once the bug is removed, this code can be simplified.
-  std::map<char, ActionPtr> m_returnActions;
-  // A map of goto actions. Each goto action is identified by the
-  // name of the destination label.
-  std::map<StringData*, ActionPtr, string_data_lt> m_gotoActions;
-  // A map of goto labels occurrning inside the statement represented
+  // inconsistent return flavors. Therefore instead of a single
+  // return control target, there need to be one return control
+  // target per flavor used. Once the bug is removed, this code
+  // can be simplified.
+  std::map<char, ControlTargetInfo> m_returnTargets;
+  // Break and continue control targets identified by their depth.
+  std::map<int, ControlTargetInfo> m_breakTargets;
+  std::map<int, ControlTargetInfo> m_continueTargets;
+  // Goto control targets. Each goto control target is identified
+  // by the name of the destination label.
+  std::map<StringData*, ControlTargetInfo, string_data_lt> m_gotoTargets;
+  // A set of goto labels occurrning inside the statement represented
   // by this entry. This value is used for establishing whether
   // a finally block needs to be executed when performing gotos.
   std::set<StringData*, string_data_lt> m_gotoLabels;
-  // Continue actions identified by their depth.
-  std::map<int, ActionPtr> m_continueActions;
-  // Break actions identified by their depth.
-  std::map<int, ActionPtr> m_breakActions;
   // The label denoting the beginning of a finally block inside the
   // current try. Only used when the entry kind is a try statement.
   Label m_finallyLabel;
-  // The cases that need to be included in the switch statement. Only
-  // used when kind is set to try statement.
-  // These are the actions that are invoked inside the protected region
-  // protected by the try represented by this entry.
-  std::set<ActionPtr> m_finallyCases;
   // The parent entry.
-  FinallyRouterEntryPtr m_parent;
-};
-
-class FinallyRouter {
-public:
-  typedef FinallyRouterEntry::EntryKind EntryKind;
-
-  FinallyRouter();
-  ~FinallyRouter();
-
-  // The top entry on the unified stack.
-  FinallyRouterEntryPtr top();
-  // Create an entry corresponding to the passed in statement s.
-  // If the statement is insignificant (e.g. is an if statement),
-  // nullptr is returned.
-  FinallyRouterEntryPtr createForStatement(StatementPtr s);
-  // Create a global (top-level) entry.
-  FinallyRouterEntryPtr createGlobal(StatementPtr s);
-  // Create an entry for a functiob body.
-  FinallyRouterEntryPtr createFuncBody(StatementPtr s);
-  // Create an entry for a fault funclet inside a function body
-  FinallyRouterEntryPtr createFuncFault(StatementPtr s);
-  // Helper function for creating entries.
-  FinallyRouterEntryPtr create(StatementPtr s, EntryKind kind);
-  // Enter/leave the passed in entry. Note that entries sometimes need be
-  // to be constructed before they are entered, or need to be accessed
-  // after they are left. This especially applies to constructs such
-  // as loops and try blocks.
-  void enter(FinallyRouterEntryPtr);
-  void leave(FinallyRouterEntryPtr);
-
-  // Functions used for handling state IDs allocation.
-  // FIXME (#3275259): This should be moved into global / func
-  // body / fault funclet entries in order to optimize state
-  // allocation. See the task description for more details.
-  int allocateState();
-  void releaseState(int state);
-
-  // The stack of all the entered entries.
-  std::vector<FinallyRouterEntryPtr> m_entries;
-  // The state IDs currently allocated. See FIXME above.
-  std::set<int> m_states;
+  RegionPtr m_parent;
 };
 
 class EmitterVisitor {
   friend class UnsetUnnamedLocalThunklet;
   friend class FuncFinisher;
 public:
+  typedef std::vector<int> IndexChain;
+  typedef Emitter::IterPair IterPair;
+  typedef std::vector<IterPair> IterVec;
+
   explicit EmitterVisitor(UnitEmitter& ue);
   ~EmitterVisitor();
 
@@ -574,7 +464,7 @@ public:
   void assignFinallyVariableIds();
   void fixReturnType(Emitter& e, FunctionCallPtr fn,
                      Func* builtinFunc = nullptr);
-  typedef std::vector<int> IndexChain;
+
   void visitListAssignmentLHS(Emitter& e, ExpressionPtr exp,
                               IndexChain& indexChain,
                               std::vector<IndexChain*>& chainList);
@@ -611,7 +501,6 @@ public:
             || (instrFlags(getPrevOpcode()) & TF) == 0);
   }
   FuncEmitter* getFuncEmitter() { return m_curFunc; }
-  FinallyRouter& getFinallyRouter() { return m_finallyRouter; }
   Id getStateLocal() {
     assert(m_stateLocal >= 0);
     return m_stateLocal;
@@ -689,11 +578,11 @@ private:
     FuncEmitter* m_fe;
   };
 
-  class ExnHandlerRegion {
+  class CatchRegion {
   public:
-    ExnHandlerRegion(Offset start, Offset end) : m_start(start),
+    CatchRegion(Offset start, Offset end) : m_start(start),
       m_end(end) {}
-    ~ExnHandlerRegion() {
+    ~CatchRegion() {
       for (std::vector<std::pair<StringData*, Label*> >::const_iterator it =
              m_catchLabels.begin(); it != m_catchLabels.end(); it++) {
         delete it->second;
@@ -772,18 +661,25 @@ private:
   static EmittedClosures s_emittedClosures;
   std::deque<Funclet*> m_funclets;
   std::map<StatementPtr, Funclet*> m_memoizedFunclets;
-  std::deque<ExnHandlerRegion*> m_exnHandlers;
+  std::deque<CatchRegion*> m_catchRegions;
   std::deque<FaultRegion*> m_faultRegions;
   std::deque<FPIRegion*> m_fpiRegions;
   std::vector<Array> m_staticArrays;
   std::set<std::string,stdltistr> m_hoistables;
   LocationPtr m_tempLoc;
   std::vector<Label> m_yieldLabels;
-  FinallyRouter m_finallyRouter;
+
+  // The stack of all Regions that this EmitterVisitor is currently inside
+  std::vector<RegionPtr> m_regions;
+  // The state IDs currently allocated for the "finally router" logic.
+  // See FIXME above the registerControlTarget() method.
+  std::set<int> m_states;
+  // Unnamed local variables used by the "finally router" logic
   Id m_stateLocal;
   Id m_retLocal;
 
   MetaInfoBuilder m_metaInfo;
+
 public:
   bool checkIfStackEmpty(const char* forInstruction) const;
   void unexpectedStackSym(char sym, const char* where) const;
@@ -912,13 +808,43 @@ public:
   void emitForeachListAssignment(Emitter& e,
                                  ListAssignmentPtr la,
                                  int vLocalId);
-  void emitForeach(Emitter& e,
-                   ForEachStatementPtr fe,
-                   FinallyRouterEntryPtr entry);
+  void emitForeach(Emitter& e, ForEachStatementPtr fe);
   void emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc);
   void emitMakeUnitFatal(Emitter& e,
                          const char* msg,
                          FatalOp k = FatalOp::Runtime);
+
+  // Emits a Jmp or IterBreak instruction to the specified target, freeing
+  // the specified iterator variables. emitJump() cannot be used to leave a
+  // try region, except if it jumps to the m_finallyLabel of the try region.
+  void emitJump(Emitter& e, IterVec& iters, Label& target);
+
+  // These methods handle the return, break, continue, and goto operations.
+  // These methods are aware of try/finally blocks and foreach blocks and
+  // will free iterators and jump to finally epilogues as appropriate.
+  void emitReturn(Emitter& e, char sym, StatementPtr s);
+  void emitBreak(Emitter& e, int depth, StatementPtr s);
+  void emitContinue(Emitter& e, int depth, StatementPtr s);
+  void emitGoto(Emitter& e, StringData* name, StatementPtr s);
+
+  // Helper methods for emitting IterFree instructions
+  void emitIterFree(Emitter& e, IterVec& iters);
+  void emitIterFreeForReturn(Emitter& e);
+
+  // A "finally epilogue" is a blob of bytecode that comes after an inline
+  // copy of a "finally" clause body. Finally epilogues are used to ensure
+  // that that the bodies of finally clauses are executed whenever a return,
+  // break, continue, or goto operation jumps out of their corresponding
+  // "try" blocks.
+  void emitFinallyEpilogue(Emitter& e, Region* entry);
+  void emitReturnTrampoline(Emitter& e, Region* entry,
+                            std::vector<Label*>& cases, char sym);
+  void emitBreakTrampoline(Emitter& e, Region* entry,
+                           std::vector<Label*>& cases, int depth);
+  void emitContinueTrampoline(Emitter& e, Region* entry,
+                              std::vector<Label*>& cases, int depth);
+  void emitGotoTrampoline(Emitter& e, Region* entry,
+                          std::vector<Label*>& cases, StringData* name);
 
   Funclet* addFunclet(Thunklet* body);
   Funclet* addFunclet(StatementPtr stmt,
@@ -940,18 +866,20 @@ public:
                       Offset end,
                       Label* entry,
                       FaultIterInfo = FaultIterInfo { -1, KindOfIter });
-  void newFuncletAndRegion(Offset start,
+  void
+  newFaultRegionAndFunclet(Offset start,
                            Offset end,
                            Thunklet* t,
                            FaultIterInfo = FaultIterInfo { -1, KindOfIter });
-  void newFuncletAndRegion(StatementPtr stmt,
+  void
+  newFaultRegionAndFunclet(StatementPtr stmt,
                            Offset start,
                            Offset end,
                            Thunklet* t,
                            FaultIterInfo = FaultIterInfo { -1, KindOfIter });
 
   void newFPIRegion(Offset start, Offset end, Offset fpOff);
-  void copyOverExnHandlers(FuncEmitter* fe);
+  void copyOverCatchAndFaultRegions(FuncEmitter* fe);
   void copyOverFPIRegions(FuncEmitter* fe);
   void saveMaxStackCells(FuncEmitter* fe);
   void finishFunc(Emitter& e, FuncEmitter* fe);
@@ -963,6 +891,31 @@ public:
   void emitClassTraitAliasRule(PreClassEmitter* pce,
                                TraitAliasStatementPtr rule);
   void emitClassUseTrait(PreClassEmitter* pce, UseTraitStatementPtr useStmt);
+
+  // Helper function for creating entries.
+  RegionPtr createRegion(StatementPtr s, Region::Kind kind);
+  // Enter/leave the passed in entry. Note that entries sometimes need be
+  // to be constructed before they are entered, or need to be accessed
+  // after they are left. This especially applies to constructs such
+  // as loops and try blocks.
+  void enterRegion(RegionPtr);
+  void leaveRegion(RegionPtr);
+
+  // Functions used for handling state IDs allocation.
+  // FIXME (#3275259): This should be moved into global / func
+  // body / fault funclet entries in order to optimize state
+  // allocation. See the task description for more details.
+  void registerControlTarget(ControlTarget* t);
+  void unregisterControlTarget(ControlTarget* t);
+
+  void registerReturn(StatementPtr s, Region* entry, char sym);
+  void registerYieldAwait(ExpressionPtr e);
+  ControlTargetPtr registerBreak(StatementPtr s, Region* entry, int depth,
+                                 bool alloc);
+  ControlTargetPtr registerContinue(StatementPtr s, Region* entry, int depth,
+                                    bool alloc);
+  ControlTargetPtr registerGoto(StatementPtr s, Region* entry,
+                                StringData* name, bool alloc);
 };
 
 void emitAllHHBC(AnalysisResultPtr ar);

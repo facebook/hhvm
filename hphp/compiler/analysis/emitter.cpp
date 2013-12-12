@@ -1121,246 +1121,256 @@ private:
 };
 
 //=============================================================================
+// ControlTarget.
 
-const int FinallyRouterEntry::Action::k_unsetState = -1;
+const int ControlTarget::k_unsetState = -1;
 
-FinallyRouterEntry::Action::Action(FinallyRouter* router)
-  : m_router(router), m_label(), m_state(k_unsetState) {
-  assert(m_router != nullptr);
+ControlTarget::ControlTarget(EmitterVisitor* router)
+  : m_visitor(router), m_label(), m_state(k_unsetState) {
+  assert(m_visitor != nullptr);
 }
 
-FinallyRouterEntry::Action::~Action() {
+ControlTarget::~ControlTarget() {
   // The scope of states used in finally router is controled
   // using shared pointer refcounting. State numbers can be reused once
   // all the references are released.
-  if (isAllocated()) {
-    release();
+  if (isRegistered()) {
+    m_visitor->unregisterControlTarget(this);
+    m_state = k_unsetState;
   }
 }
 
-bool FinallyRouterEntry::Action::isAllocated() {
+bool ControlTarget::isRegistered() {
   return m_state != k_unsetState;
 }
 
-void FinallyRouterEntry::Action::allocate() {
-  assert(!isAllocated());
-  m_state = m_router->allocateState();
-}
-
-void FinallyRouterEntry::Action::release() {
-  assert(isAllocated());
-  m_router->releaseState(m_state);
-  m_state = k_unsetState;
-}
-
 //=============================================================================
+// Region.
 
-FinallyRouterEntry::FinallyRouterEntry(FinallyRouter* router,
-                                       EntryKind kind,
-                                       FinallyRouterEntryPtr parent)
-  : m_router(router),
-    m_kind(kind),
+Region::Region(Region::Kind kind, RegionPtr parent)
+  : m_kind(kind),
     m_iterId(-1),
-    m_iterRef(false),
+    m_iterKind(KindOfIter),
     m_parent(parent) {
-  assert(m_router != nullptr);
 }
 
-FinallyRouterEntry::~FinallyRouterEntry() {}
-
-FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerReturn(
-                                                    StatementPtr s,
-                                                    char sym) {
-  if (m_kind == EntryKind::FinallyEntry) {
-    throw EmitterVisitor::IncludeTimeFatalException(s,
-            "Return inside a finally block is not supported");
-  }
-  ActionPtr action;
-  if (m_returnActions.count(sym)) {
-    // We registered the action before. Just return the existing one.
-    action = m_returnActions[sym];
-  } else {
-    // Haven't registered the action in this entry yet.
-    if (m_parent == nullptr) {
-      // Top of the entry hierarchy - allocate a fresh action.
-      action = std::make_shared<Action>(m_router);
-    } else {
-      // Delegate to parent, since return actions need to be shared
-      // by all entries in a hierarchy.
-      action = m_parent->registerReturn(s, sym);
+void
+EmitterVisitor::registerReturn(StatementPtr s, Region* region, char sym) {
+  ControlTargetPtr t;
+  Region* r;
+  for (r = region; true; r = r->m_parent.get()) {
+    assert(r);
+    if (r->isFinally()) {
+      throw EmitterVisitor::IncludeTimeFatalException(s,
+              "Return inside a finally block is not supported");
     }
-    m_returnActions.insert(std::make_pair(sym, action));
-  }
-  assert(action != nullptr);
-  if (!action->isAllocated()) {
-    action->allocate();
-  }
-  if (m_kind == EntryKind::TryFinallyEntry) {
-    // If this is a try block, make sure the corresponding case is
-    // emitted in the finally epilogue.
-    m_finallyCases.insert(action);
-  }
-  assert(action->isAllocated());
-  return action;
-}
-
-FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerGoto(
-                                                    StatementPtr s,
-                                                    StringData* name,
-                                                    bool alloc) {
-  if (m_kind == EntryKind::FinallyEntry) {
-    throw EmitterVisitor::IncludeTimeFatalException(s,
-            "Goto jump is not allowed to leave a finally block");
-  }
-  ActionPtr action;
-  if (m_gotoActions.count(name)) {
-    action = m_gotoActions[name];
-  } else {
-    if (m_parent == nullptr) {
-      action = std::make_shared<Action>(m_router);
-    } else {
-      // Goto actions are global, delegate to the parent whenever
-      // possible.
-      action = m_parent->registerGoto(s, name, alloc);
+    if (r->m_returnTargets.count(sym)) {
+      // We registered the control target before. Just return the existing one.
+      t = r->m_returnTargets[sym].target;
+      break;
     }
-    m_gotoActions.insert(std::make_pair(name, action));
-  }
-  assert(action != nullptr);
-  if (alloc) {
-    if (!action->isAllocated()) {
-      action->allocate();
-    }
-    if (m_kind == EntryKind::TryFinallyEntry) {
-      m_finallyCases.insert(action);
+    // Haven't registered the control target with region r yet.
+    if (r->m_parent.get() == nullptr) {
+      // Top of the region hierarchy - allocate a fresh control target.
+      t = std::make_shared<ControlTarget>(this);
+      r = r->m_parent.get();
+      break;
     }
   }
-  assert(!alloc || action->isAllocated());
-  return action;
-}
-
-void FinallyRouterEntry::registerLabel(StatementPtr s,
-                                       StringData* name) {
-  if (!m_gotoLabels.count(name)) {
-    m_gotoLabels.insert(name);
+  assert(t != nullptr);
+  if (!t->isRegistered()) {
+    registerControlTarget(t.get());
+  }
+  // For all entries we visited that did not have this control target in
+  // m_returnTargets, add this control target to these entries' m_returnTargets
+  // fields as appropriate.
+  Region* end = r;
+  for (r = region; r != end; r = r->m_parent.get()) {
+    r->m_returnTargets[sym] = ControlTargetInfo(t, r->isTryFinally());
   }
 }
 
-void FinallyRouterEntry::registerYieldAwait(ExpressionPtr e) {
-  if (m_kind == EntryKind::FinallyEntry) {
-    throw EmitterVisitor::IncludeTimeFatalException(e,
-            "Yield expression inside a finally block is not supported");
-  }
-
-  if (m_parent != nullptr) {
-    m_parent->registerYieldAwait(e);
-  }
-}
-
-FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerBreak(
-                                                    StatementPtr s,
-                                                    int depth,
-                                                    bool alloc) {
-  if (m_kind == EntryKind::FinallyEntry) {
-    throw EmitterVisitor::IncludeTimeFatalException(s,
-            "Break jump is not allowed to leave a finally block");
-  }
-  // Should never descend to the bottom of the hierarchy since
-  // break is only allowed for loops.
-  assert(m_parent != nullptr);
-  ActionPtr action;
-  assert(depth >= 1);
-  if (m_breakActions.count(depth)) {
-    action = m_breakActions[depth];
-  } else {
-    if (m_kind == EntryKind::LoopEntry) {
-      if (depth == 1) {
-        // If this is a loop, and depth is one, just allocate a fresh
-        // action, since there are no more entries to delegate to.
-        action = std::make_shared<Action>(m_router);
-      } else {
-        // Otherwise, delegate to the parent. One break level has been
-        // taken care of by this entry.
-        action = m_parent->registerBreak(s, depth - 1, alloc);
+ControlTargetPtr
+EmitterVisitor::registerGoto(StatementPtr s, Region* region, StringData* name,
+                             bool alloc) {
+  ControlTargetPtr t;
+  Region* r;
+  for (r = region; true; r = r->m_parent.get()) {
+    assert(r);
+    if (r->isFinally()) {
+      throw EmitterVisitor::IncludeTimeFatalException(s,
+              "Goto inside a finally block is not supported");
+    }
+    if (r->m_gotoTargets.count(name)) {
+      // We registered the control target before. Just return the existing one.
+      t = r->m_gotoTargets[name].target;
+      if (alloc && r->isTryFinally()) {
+        r->m_gotoTargets[name].used = true;
       }
-    } else {
-      // Otherwise we don't take care of any break levels at this entry
-      // so just delegate to the parent.
-      action = m_parent->registerBreak(s, depth, alloc);
+      break;
     }
-    m_breakActions.insert(std::make_pair(depth, action));
-  }
-  assert(action != nullptr);
-  if (alloc) {
-    if (!action->isAllocated()) {
-      action->allocate();
-    }
-    if (m_kind == EntryKind::TryFinallyEntry) {
-      m_finallyCases.insert(action);
+    // Haven't registered the control target in this region yet.
+    if (r->m_parent.get() == nullptr) {
+      // Top of the region hierarchy - allocate a fresh control target.
+      t = std::make_shared<ControlTarget>(this);
+      r = r->m_parent.get();
+      break;
     }
   }
-  assert(!alloc || action->isAllocated());
-  return action;
+  assert(t != nullptr);
+  if (alloc && !t->isRegistered()) {
+    registerControlTarget(t.get());
+  }
+  // For all entries we visited that did not have this control target in
+  // m_gotoTargets, add this control target to these entries' m_gotoTargets
+  // fields as appropriate.
+  Region* end = r;
+  for (r = region; r != end; r = r->m_parent.get()) {
+    r->m_gotoTargets[name] = ControlTargetInfo(t, alloc && r->isTryFinally());
+  }
+  return t;
 }
 
-FinallyRouterEntry::ActionPtr FinallyRouterEntry::registerContinue(
-                                                    StatementPtr s,
-                                                    int depth,
-                                                    bool alloc) {
-  if (m_kind == EntryKind::FinallyEntry) {
-    throw EmitterVisitor::IncludeTimeFatalException(s,
-            "Continue jump is not allowed to leave a finally block");
+void EmitterVisitor::registerYieldAwait(ExpressionPtr e) {
+  Region* region = m_regions.back().get();
+  for (; region; region = region->m_parent.get()) {
+    if (region->isFinally()) {
+      throw EmitterVisitor::IncludeTimeFatalException(e,
+              "Yield expression inside a finally block is not supported");
+    }
   }
-  assert(m_parent != nullptr);
-  ActionPtr action;
+}
+
+ControlTargetPtr
+EmitterVisitor::registerBreak(StatementPtr s, Region* region, int depth,
+                              bool alloc) {
+  ControlTargetPtr t;
   assert(depth >= 1);
-  if (m_continueActions.count(depth)) {
-    action = m_continueActions[depth];
-  } else {
-    if (m_kind == EntryKind::LoopEntry) {
-      if (depth == 1) {
-        action = std::make_shared<Action>(m_router);
-      } else {
-        action = m_parent->registerContinue(s, depth - 1, alloc);
+  int d = depth;
+  Region* r;
+  for (r = region; true; r = r->m_parent.get()) {
+    assert(r);
+    if (r->isFinally()) {
+      throw EmitterVisitor::IncludeTimeFatalException(s,
+              "Break jump is not allowed to leave a finally block");
+    }
+    if (r->m_breakTargets.count(d)) {
+      // We registered the control target before. Just return the existing one.
+      t = r->m_breakTargets[d].target;
+      if (alloc && r->isTryFinally()) {
+        r->m_breakTargets[d].used = true;
       }
-    } else {
-      action = m_parent->registerContinue(s, depth, alloc);
+      break;
     }
-    m_continueActions.insert(std::make_pair(depth, action));
+    if (r->m_kind != Region::Kind::LoopOrSwitch) {
+      continue;
+    }
+    if (d == 1) {
+      // We should never reach this case if alloc == true, since the loop or
+      // switch should have registered its break target in advance
+      assert(!alloc);
+      // If this is a loop, and depth is one, just allocate a fresh
+      // control target, since there are no more entries to delegate to.
+      t = std::make_shared<ControlTarget>(this);
+      r = r->m_parent.get();
+      break;
+    }
+    // Otherwise, delegate to the parent. One break level has been
+    // taken care of by this region.
+    --d;
   }
-  assert(action != nullptr);
+  assert(t != nullptr);
   if (alloc) {
-    if (!action->isAllocated()) {
-      action->allocate();
-    }
-    if (m_kind == EntryKind::TryFinallyEntry) {
-      m_finallyCases.insert(action);
+    if (!t->isRegistered()) {
+      registerControlTarget(t.get());
     }
   }
-  assert(!alloc || action->isAllocated());
-  return action;
+  // For all of the entries that did not have this control target in
+  // m_breakTargets, add this control target to these entries' m_breakTargets
+  // fields as appropriate.
+  Region* end = r;
+  for (r = region; r != end; r = r->m_parent.get()) {
+    r->m_breakTargets[depth] =
+      ControlTargetInfo(t, alloc && r->isTryFinally());
+    if (r->m_kind == Region::Kind::LoopOrSwitch) {
+      --depth;
+    }
+  }
+  return t;
 }
 
-int FinallyRouterEntry::getCaseCount() {
+ControlTargetPtr
+EmitterVisitor::registerContinue(StatementPtr s, Region* region, int depth,
+                                 bool alloc) {
+  ControlTargetPtr t;
+  assert(depth >= 1);
+  int d = depth;
+  Region* r;
+  for (r = region; true; r = r->m_parent.get()) {
+    assert(r);
+    if (r->isFinally()) {
+      throw EmitterVisitor::IncludeTimeFatalException(s,
+              "Continue jump is not allowed to leave a finally block");
+    }
+    if (r->m_continueTargets.count(d)) {
+      // We registered the control target before. Just return the existing one.
+      t = r->m_continueTargets[d].target;
+      if (alloc && r->isTryFinally()) {
+        r->m_continueTargets[d].used = true;
+      }
+      break;
+    }
+    if (r->m_kind != Region::Kind::LoopOrSwitch) {
+      continue;
+    }
+    if (d == 1) {
+      // We should never reach this case if alloc == true, since the loop or
+      // switch should have registered its continue target in advance
+      assert(!alloc);
+      t = std::make_shared<ControlTarget>(this);
+      r = r->m_parent.get();
+      break;
+    }
+    // Otherwise, delegate to the parent. One continue level has been
+    // taken care of by this region.
+    --d;
+  }
+  assert(t != nullptr);
+  if (alloc && !t->isRegistered()) {
+    registerControlTarget(t.get());
+  }
+  // For all of the entries that did not have this control target in
+  // m_continueTargets, add this control target to these entries'
+  // m_continueTargets fields as appropriate.
+  Region* end = r;
+  for (r = region; r != end; r = r->m_parent.get()) {
+    r->m_continueTargets[depth] =
+      ControlTargetInfo(t, alloc && r->isTryFinally());
+    if (r->m_kind == Region::Kind::LoopOrSwitch) {
+      --depth;
+    }
+  }
+  return t;
+}
+
+int Region::getCaseCount() {
   int count = 1; // The fall-through case.
-  for (auto& action : m_continueActions) {
-    if (action.second->isAllocated()) ++count;
+  for (auto& t : m_returnTargets) {
+    if (t.second.target->isRegistered()) ++count;
   }
-  for (auto& action : m_continueActions) {
-    if (action.second->isAllocated()) ++count;
+  for (auto& t : m_breakTargets) {
+    if (t.second.target->isRegistered()) ++count;
   }
-  for (auto& action : m_breakActions) {
-    if (action.second->isAllocated()) ++count;
+  for (auto& t : m_continueTargets) {
+    if (t.second.target->isRegistered()) ++count;
   }
-  for (auto& action : m_returnActions) {
-    if (action.second->isAllocated()) ++count;
-  }
-  for (auto& action : m_gotoActions) {
-    if (action.second->isAllocated()) ++count;
+  for (auto& t : m_gotoTargets) {
+    if (t.second.target->isRegistered()) ++count;
   }
   return count;
 }
 
-void FinallyRouterEntry::emitIterFree(Emitter& e, IterVec& iters) {
+void EmitterVisitor::emitIterFree(Emitter& e, IterVec& iters) {
   for (auto& iter : iters) {
     assert(iter.id != -1);
     if (iter.kind == KindOfMIter) {
@@ -1372,22 +1382,19 @@ void FinallyRouterEntry::emitIterFree(Emitter& e, IterVec& iters) {
   }
 }
 
-void FinallyRouterEntry::emitIterFree(Emitter& e) {
-  FinallyRouterEntry* entry = this;
+void EmitterVisitor::emitIterFreeForReturn(Emitter& e) {
+  Region* region = m_regions.back().get();
   IterVec iters;
-  while (entry != nullptr) {
-    if (entry->m_kind == EntryKind::LoopEntry && entry->m_iterId != -1) {
-      iters.push_back(IterPair(entry->m_iterRef ? KindOfMIter : KindOfIter,
-                               entry->m_iterId));
+  while (region != nullptr) {
+    if (region->isForeach()) {
+      iters.push_back(IterPair(region->m_iterKind, region->m_iterId));
     }
-    entry = entry->m_parent.get();
+    region = region->m_parent.get();
   }
   emitIterFree(e, iters);
 }
 
-void FinallyRouterEntry::emitIterBreak(Emitter& e,
-                                       IterVec& iters,
-                                       Label& target) {
+void EmitterVisitor::emitJump(Emitter& e, IterVec& iters, Label& target) {
   if (!iters.empty()) {
     e.IterBreak(iters, target);
     iters.clear();
@@ -1396,662 +1403,508 @@ void FinallyRouterEntry::emitIterBreak(Emitter& e,
   }
 }
 
-void FinallyRouterEntry::emitReturn(Emitter& e, char sym) {
+void EmitterVisitor::emitReturn(Emitter& e, char sym, StatementPtr s) {
+  Region* region = m_regions.back().get();
+  registerReturn(s, region, sym);
+  assert(getEvalStack().size() == 1);
+  assert(region->m_returnTargets.count(sym));
   IterVec iters;
-  emitReturnImpl(e, sym, iters);
-}
-
-void FinallyRouterEntry::emitReturnImpl(Emitter& e,
-                                        char sym,
-                                        IterVec& iters) {
-  auto& visitor = e.getEmitterVisitor();
-  assert(visitor.getEvalStack().size() == 1);
-  assert(m_returnActions.count(sym));
-  auto& action = m_returnActions[sym];
-  if (m_parent == nullptr) {
-    // At the top of the hierarchy, no more finally blocks to run.
-    // Free the pending iterators and perform the actual return.
-    emitIterFree(e, iters);
-    if (sym == StackSym::C) {
-      e.RetC();
-    } else {
-      assert(sym == StackSym::V);
-      e.RetV();
+  for (Region* r = region; true; r = r->m_parent.get()) {
+    auto& t = r->m_returnTargets[sym].target;
+    if (r->m_parent == nullptr) {
+      // At the top of the hierarchy, no more finally blocks to run.
+      // Free the pending iterators and perform the actual return.
+      emitIterFree(e, iters);
+      if (sym == StackSym::C) {
+        e.RetC();
+      } else {
+        assert(sym == StackSym::V);
+        e.RetV();
+      }
+      return;
     }
-  } else if (m_kind == EntryKind::TryFinallyEntry) {
-    // We encountered a try block - a finally needs to be run
-    // before returning.
-    Id stateLocal = visitor.getStateLocal();
-    Id retLocal = visitor.getRetLocal();
-    // Set the unnamed "state" local to the appropriate identifier
-    visitor.emitVirtualLocal(retLocal);
-    assert(action->isAllocated());
-    e.Int(action->m_state);
-    e.SetL(stateLocal);
-    e.PopC();
-    // Emit code stashing the current return value in the "ret" unnamed
-    // local
-    if (sym == StackSym::C) {
-      // For legacy purposes, SetL expects its immediate argument to
-      // be present on the symbolic stack. In reality, retLocal is
-      // an immediate argument. The following pop and push instructions
-      // ensure that the arguments are place on the symbolic stack
-      // in a correct order. In reality the following three calls are
-      // a no-op.
-      visitor.popEvalStack(StackSym::C);
-      visitor.emitVirtualLocal(retLocal);
-      visitor.pushEvalStack(StackSym::C);
-      e.SetL(retLocal);
+    if (r->isTryFinally()) {
+      // We encountered a try block - a finally needs to be run
+      // before returning.
+      Id stateLocal = getStateLocal();
+      Id retLocal = getRetLocal();
+      // Set the unnamed "state" local to the appropriate identifier
+      emitVirtualLocal(retLocal);
+      assert(t->isRegistered());
+      e.Int(t->m_state);
+      e.SetL(stateLocal);
       e.PopC();
-    } else {
-      assert(sym == StackSym::V);
-      visitor.popEvalStack(StackSym::V);
-      visitor.emitVirtualLocal(retLocal);
-      visitor.pushEvalStack(StackSym::V);
-      e.BindL(retLocal);
-      e.PopV();
+      // Emit code stashing the current return value in the "ret" unnamed
+      // local
+      if (sym == StackSym::C) {
+        // For legacy purposes, SetL expects its immediate argument to
+        // be present on the symbolic stack. In reality, retLocal is
+        // an immediate argument. The following pop and push instructions
+        // ensure that the arguments are place on the symbolic stack
+        // in a correct order. In reality the following three calls are
+        // a no-op.
+        popEvalStack(StackSym::C);
+        emitVirtualLocal(retLocal);
+        pushEvalStack(StackSym::C);
+        e.SetL(retLocal);
+        e.PopC();
+      } else {
+        assert(sym == StackSym::V);
+        popEvalStack(StackSym::V);
+        emitVirtualLocal(retLocal);
+        pushEvalStack(StackSym::V);
+        e.BindL(retLocal);
+        e.PopV();
+      }
+      emitJump(e, iters, r->m_finallyLabel);
+      return;
     }
-    assert(m_finallyCases.count(action));
-    emitIterBreak(e, iters, m_finallyLabel);
-  } else {
-    if (m_kind == EntryKind::LoopEntry && m_iterId != -1) {
-      // Encountered a pending iterator, push it to the iters
-      // accumulator so that freeing code gets emitted.
-      iters.push_back(IterPair(m_iterRef ? KindOfMIter : KindOfIter,
-                               m_iterId));
+    if (r->isForeach()) {
+      iters.push_back(IterPair(r->m_iterKind, r->m_iterId));
     }
-    m_parent->emitReturnImpl(e, sym, iters);
   }
 }
 
-void FinallyRouterEntry::emitGoto(Emitter& e,
-                                  StringData* name) {
+void EmitterVisitor::emitGoto(Emitter& e, StringData* name, StatementPtr s) {
+  Region* region = m_regions.back().get();
+  registerGoto(s, region, name, true);
+  assert(!region->isFinally());
+  assert(region->m_gotoTargets.count(name));
   IterVec iters;
-  emitGotoImpl(e, name, iters);
-}
-
-void FinallyRouterEntry::emitGotoImpl(Emitter& e,
-                                      StringData* name,
-                                      IterVec& iters) {
-  assert(m_kind != EntryKind::FinallyEntry);
-  assert(m_gotoActions.count(name));
-  auto action = m_gotoActions[name];
-  if (m_gotoLabels.count(name)) {
-    // If only the destination label is within the statement
-    // associated with the current statement, just perform a
-    // direct jump. Free the pending iterators on the way.
-    emitIterBreak(e, iters, action->m_label);
-  } else if (m_kind == EntryKind::TryFinallyEntry) {
-    // We came across a try entry, need for run a finally block.
-    auto& visitor = e.getEmitterVisitor();
-    // Store appropriate value inside the state local.
-    Id stateLocal = visitor.getStateLocal();
-    visitor.emitVirtualLocal(stateLocal);
-    assert(action->isAllocated());
-    e.Int(action->m_state);
-    e.SetL(stateLocal);
-    e.PopC();
-    assert(m_finallyCases.count(action));
-    // Jump to the finally block and free any pending iterators on the
-    // way.
-    emitIterBreak(e, iters, m_finallyLabel);
-  } else {
-    if (m_kind == EntryKind::LoopEntry && m_iterId != -1) {
-      iters.push_back(IterPair(m_iterRef ? KindOfMIter : KindOfIter,
-                               m_iterId));
+  for (Region* r = region; true; r = r->m_parent.get()) {
+    auto t = r->m_gotoTargets[name].target;
+    if (r->m_gotoLabels.count(name)) {
+      // If only the destination label is within the statement
+      // associated with the current statement, just perform a
+      // direct jump. Free the pending iterators on the way.
+      emitJump(e, iters, t->m_label);
+      return;
     }
-    assert(m_parent != nullptr);
-    m_parent->emitGotoImpl(e, name, iters);
+    if (r->isTryFinally()) {
+      // We came across a try region, need for run a finally block.
+      // Store appropriate value inside the state local.
+      Id stateLocal = getStateLocal();
+      emitVirtualLocal(stateLocal);
+      assert(t->isRegistered());
+      e.Int(t->m_state);
+      e.SetL(stateLocal);
+      e.PopC();
+      // Jump to the finally block and free any pending iterators on the
+      // way.
+      emitJump(e, iters, r->m_finallyLabel);
+      return;
+    }
+    if (r->isForeach()) {
+      iters.push_back(IterPair(r->m_iterKind, r->m_iterId));
+    }
   }
 }
 
-void FinallyRouterEntry::emitBreak(Emitter& e,
-                                   int depth) {
-  IterVec iters;
-  emitBreakImpl(e, depth, iters);
-}
-
-void FinallyRouterEntry::emitBreakImpl(Emitter& e,
-                                       int depth,
-                                       IterVec& iters) {
+void EmitterVisitor::emitBreak(Emitter& e, int depth, StatementPtr s) {
+  Region* region = m_regions.back().get();
+  registerBreak(s, region, depth, true);
   assert(depth >= 1);
-  assert(m_kind != EntryKind::FinallyEntry);
-  assert(m_parent != nullptr);
-  assert(m_breakActions.count(depth));
-  auto action = m_breakActions[depth];
-  if (m_kind == EntryKind::LoopEntry) {
+  assert(!region->isFinally());
+  assert(region->m_parent != nullptr);
+  assert(region->m_breakTargets.count(depth));
+  IterVec iters;
+
+  for (Region* r = region; true; r = r->m_parent.get()) {
+    auto t = r->m_breakTargets[depth].target;
+    if (r->isTryFinally()) {
+      // Encountered a try block, need to run finally.
+      assert(r->m_breakTargets.count(depth));
+      assert(t->isRegistered());
+      Id stateLocal = getStateLocal();
+      emitVirtualLocal(stateLocal);
+      e.Int(t->m_state);
+      e.SetL(stateLocal);
+      e.PopC();
+      emitJump(e, iters, r->m_finallyLabel);
+      return;
+    }
+    if (r->m_kind != Region::Kind::LoopOrSwitch) {
+      continue;
+    }
     // Free iterator for the current loop whether or not
     // this is the last loop that we jump out of.
-    if (m_iterId != -1) {
-      iters.push_back(IterPair(m_iterRef ? KindOfMIter : KindOfIter,
-                               m_iterId));
+    if (r->isForeach()) {
+      iters.push_back(IterPair(r->m_iterKind, r->m_iterId));
     }
     if (depth == 1) {
       // Last loop to jumpt out of. Performa direct jump to the
       // break lable and free any pending iterators left.
-      emitIterBreak(e, iters, action->m_label);
-    } else {
-      // one level of jumping has been taken care of, delegate to the
-      // parent.
-      m_parent->emitBreakImpl(e, depth - 1, iters);
+      emitJump(e, iters, t->m_label);
+      return;
     }
-  } else if (m_kind == EntryKind::TryFinallyEntry) {
-    // Encountered a try block, need to run finally.
-    auto& visitor = e.getEmitterVisitor();
-    assert(m_breakActions.count(depth));
-    Id stateLocal = visitor.getStateLocal();
-    visitor.emitVirtualLocal(stateLocal);
-    assert(action->isAllocated());
-    e.Int(action->m_state);
-    e.SetL(stateLocal);
-    e.PopC();
-    emitIterBreak(e, iters, m_finallyLabel);
-  } else {
-    // We know current entry is not a loop.
-    m_parent->emitBreakImpl(e, depth, iters);
+    --depth;
   }
 }
 
-void FinallyRouterEntry::emitContinue(Emitter& e,
-                                      int depth) {
-  IterVec iters;
-  emitContinueImpl(e, depth, iters);
-}
-
-void FinallyRouterEntry::emitContinueImpl(Emitter& e,
-                                          int depth,
-                                          IterVec& iters) {
+void EmitterVisitor::emitContinue(Emitter& e, int depth, StatementPtr s) {
+  Region* region = m_regions.back().get();
+  registerContinue(s, region, depth, true);
   assert(depth >= 1);
-  assert(m_kind != EntryKind::FinallyEntry);
-  assert(m_parent != nullptr);
-  assert(m_continueActions.count(depth));
-  auto action = m_continueActions[depth];
-  if (m_kind == EntryKind::LoopEntry) {
+  assert(!region->isFinally());
+  assert(region->m_parent != nullptr);
+  assert(region->m_continueTargets.count(depth));
+  IterVec iters;
+
+  for (Region* r = region; true; r = r->m_parent.get()) {
+    auto t = r->m_continueTargets[depth].target;
+    if (r->isTryFinally()) {
+      // Encountered a try block, need to run finally.
+      assert(r->m_continueTargets.count(depth));
+      Id stateLocal = getStateLocal();
+      emitVirtualLocal(stateLocal);
+      assert(t->isRegistered());
+      e.Int(t->m_state);
+      e.SetL(stateLocal);
+      e.PopC();
+      emitJump(e, iters, r->m_finallyLabel);
+      return;
+    }
+    if (r->m_kind != Region::Kind::LoopOrSwitch) {
+      continue;
+    }
     if (depth == 1) {
       // Last level. Don't free the iterator for the current loop
       // however free any earlier pending iterators.
-      emitIterBreak(e, iters, action->m_label);
-    } else {
-      // Only free the iterator for the current loop if this is
-      // NOT the last level to continue out of.
-      if (m_iterId != -1) {
-        iters.push_back(IterPair(m_iterRef ? KindOfMIter : KindOfIter,
-                                 m_iterId));
-      }
-      m_parent->emitContinueImpl(e, depth - 1, iters);
+      emitJump(e, iters, t->m_label);
+      return;
     }
-  } else if (m_kind == EntryKind::TryFinallyEntry) {
-    // Encountered a try block, need to run finally.
-    auto& visitor = e.getEmitterVisitor();
-    assert(m_continueActions.count(depth));
-    Id stateLocal = visitor.getStateLocal();
-    visitor.emitVirtualLocal(stateLocal);
-    assert(action->isAllocated());
-    e.Int(action->m_state);
-    e.SetL(stateLocal);
-    e.PopC();
-    emitIterBreak(e, iters, m_finallyLabel);
-  } else {
-    // We know current entry is not a loop.
-    m_parent->emitContinueImpl(e, depth, iters);
+    // Only free the iterator for the current loop if this is
+    // NOT the last level to continue out of.
+    if (r->isForeach()) {
+      iters.push_back(IterPair(r->m_iterKind, r->m_iterId));
+    }
+    --depth;
   }
 }
 
-void FinallyRouterEntry::emitFinallySwitch(Emitter& e) {
-  assert(m_router != nullptr);
-  assert(m_kind == EntryKind::TryFinallyEntry);
-  assert(m_finallyLabel.isSet());
-  int count = getCaseCount();
+void EmitterVisitor::emitFinallyEpilogue(Emitter& e, Region* region) {
+  assert(region != nullptr);
+  assert(region->isTryFinally());
+  assert(region->m_finallyLabel.isSet());
+  int count = region->getCaseCount();
   assert(count >= 1);
   Label after;
   if (count == 1) {
-    // No-op
-  } else {
-    std::vector<Label*> cases;
-    collectAllCases(cases);
-    auto& visitor = e.getEmitterVisitor();
-    auto& evalStack = visitor.getEvalStack();
-    Id stateLocal = visitor.getStateLocal();
-    visitor.emitVirtualLocal(stateLocal);
-    e.IssetL(stateLocal);
-    e.JmpZ(after);
-    if (count == 2) {
-      // There is one remaining case, no switch needed.
-      emitAllCases(e, cases);
-    } else {
-      // A switch is needed since there are at least two remaining
-      // cases.
-      visitor.emitVirtualLocal(stateLocal);
-      evalStack.setKnownType(KindOfInt64);
-      e.CGetL(stateLocal);
-      e.Switch(cases, 0, 0);
-      emitAllCases(e, cases);
-    }
-    for (auto c : cases) {
-      delete c;
-    }
+    // If there is only one case (the fall-through case) then we're done
+    after.set(e);
+    return;
+  }
+  // Otherwise, we need to emit some conditional jumps/switches to handle
+  // the different cases. We start by builing up a vector of Label* that
+  // we'll use for the Switch instruction and/or for conditional branches.
+  int maxState = region->getMaxState();
+  std::vector<Label*> cases;
+  while (cases.size() <= maxState) {
+    cases.push_back(new Label());
+  }
+  // Now that we have our vector of Label*'s ready, we can emit a
+  // Switch instruction and/or conditional branches, and we can
+  // emit the body of each case.
+  auto& evalStack = getEvalStack();
+  Id stateLocal = getStateLocal();
+  emitVirtualLocal(stateLocal);
+  e.IssetL(stateLocal);
+  e.JmpZ(after);
+  if (count >= 3) {
+    // A switch is needed since there are more than two cases.
+    emitVirtualLocal(stateLocal);
+    evalStack.setKnownType(KindOfInt64);
+    e.CGetL(stateLocal);
+    e.Switch(cases, 0, 0);
+  }
+  for (auto& p : region->m_returnTargets) {
+    if (p.second.used) emitReturnTrampoline(e, region, cases, p.first);
+  }
+  assert(region->isTryFinally());
+  int max_depth = region->getBreakContinueDepth();
+  for (int i = 1; i <= max_depth; ++i) {
+    if (region->isBreakUsed(i)) emitBreakTrampoline(e, region, cases, i);
+    if (region->isContinueUsed(i)) emitContinueTrampoline(e, region, cases, i);
+  }
+  for (auto& p : region->m_gotoTargets) {
+    if (p.second.used) emitGotoTrampoline(e, region, cases, p.first);
+  }
+  for (auto c : cases) {
+    delete c;
   }
   after.set(e);
 }
 
-void FinallyRouterEntry::emitCase(Emitter& e,
-                                  std::vector<Label*>& cases,
-                                  ActionPtr action) {
-  assert(m_kind == EntryKind::TryFinallyEntry);
-  assert(action != nullptr);
-  assert(action->isAllocated());
-  assert(m_finallyCases.count(action));
-  assert(action->m_state < cases.size());
-  cases[action->m_state]->set(e);
-}
+void EmitterVisitor::emitReturnTrampoline(Emitter& e,
+                                          Region* region,
+                                          std::vector<Label*>& cases,
+                                          char sym) {
+  assert(region->isTryFinally());
+  assert(region->m_parent != nullptr);
+  assert(region->m_returnTargets.count(sym));
+  auto& t = region->m_returnTargets[sym].target;
+  cases[t->m_state]->set(e);
 
-void FinallyRouterEntry::emitReturnCase(Emitter& e,
-                                        std::vector<Label*>& cases,
-                                        char sym) {
-  assert(m_kind == EntryKind::TryFinallyEntry);
-  assert(m_parent != nullptr);
-  assert(m_returnActions.count(sym));
-  auto& action = m_returnActions[sym];
-  emitCase(e, cases, action);
   IterVec iters;
   // We are emitting a case in a finally epilogue, therefore skip
-  // the current try entry and start from its parent
-  m_parent->emitReturnCaseImpl(e, sym, iters);
-}
-
-void FinallyRouterEntry::emitReturnCaseImpl(Emitter& e,
-                                            char sym,
-                                            IterVec& iters) {
-  assert(m_returnActions.count(sym));
-  assert(m_returnActions[sym]->isAllocated());
-  // Add pending iterator if applicable
-  if (m_kind == EntryKind::LoopEntry && m_iterId != -1) {
-    iters.push_back(IterPair(m_iterRef ? KindOfMIter : KindOfIter,
-                             m_iterId));
-  }
-  if (m_parent == nullptr) {
-    // At the bottom of the hierarchy. Restore the return value
-    // and perform the actual return.
-    auto& visitor = e.getEmitterVisitor();
-    Id retLocal = visitor.getRetLocal();
-    visitor.emitVirtualLocal(retLocal);
-    if (sym == StackSym::C) {
-      e.CGetL(retLocal);
-      e.RetC();
-    } else {
-      assert(sym == StackSym::V);
-      e.VGetL(retLocal);
-      e.RetV();
+  // the current try region and start from its parent
+  for (region = region->m_parent.get(); true; region = region->m_parent.get()) {
+    assert(region->m_returnTargets.count(sym));
+    assert(region->m_returnTargets[sym].target->isRegistered());
+    // Add pending iterator if applicable
+    if (region->isForeach()) {
+      iters.push_back(IterPair(region->m_iterKind, region->m_iterId));
     }
-  } else if (m_kind == EntryKind::TryFinallyEntry) {
-    // Encountered another try block, jump to its finally and free
-    // iterators on the way.
-    emitIterBreak(e, iters, m_finallyLabel);
-  } else {
-    // Otherwise just delegate to the parent.
-    m_parent->emitReturnCaseImpl(e, sym, iters);
+    if (region->m_parent == nullptr) {
+      // At the bottom of the hierarchy. Restore the return value
+      // and perform the actual return.
+      Id retLocal = getRetLocal();
+      emitVirtualLocal(retLocal);
+      if (sym == StackSym::C) {
+        e.CGetL(retLocal);
+        e.RetC();
+      } else {
+        assert(sym == StackSym::V);
+        e.VGetL(retLocal);
+        e.RetV();
+      }
+      return;
+    }
+    if (region->isTryFinally()) {
+      // Encountered another try block, jump to its finally and free
+      // iterators on the way.
+      emitJump(e, iters, region->m_finallyLabel);
+      return;
+    }
   }
 }
 
-void FinallyRouterEntry::emitGotoCase(Emitter& e,
-                                      std::vector<Label*>& cases,
-                                      StringData* name) {
-  assert(m_gotoActions.count(name));
-  auto action = m_gotoActions[name];
-  emitCase(e, cases, action);
-  assert(m_parent != nullptr);
+void EmitterVisitor::emitGotoTrampoline(Emitter& e,
+                                        Region* region,
+                                        std::vector<Label*>& cases,
+                                        StringData* name) {
+  assert(region->m_gotoTargets.count(name));
+  auto t = region->m_gotoTargets[name].target;
+  cases[t->m_state]->set(e);
+  assert(region->m_parent != nullptr);
   IterVec iters;
-  m_parent->emitGotoCaseImpl(e, name, iters);
-}
-
-void FinallyRouterEntry::emitGotoCaseImpl(Emitter& e,
-                                          StringData* name,
-                                          IterVec& iters) {
-  assert(m_gotoActions.count(name));
-  auto action = m_gotoActions[name];
-  if (m_parent->m_gotoLabels.count(name)) {
-    // If only there is the appropriate label inside the current entry
-    // perform a jump.
-    auto& visitor = e.getEmitterVisitor();
-    Id stateLocal = visitor.getStateLocal();
-    visitor.emitVirtualLocal(stateLocal);
-    // We need to unset the state unnamed local in order to correctly
-    // fall through any future finally blocks.
-    e.UnsetL(stateLocal);
-    // Jump to the label and free any pending iterators.
-    emitIterBreak(e, iters, action->m_label);
-  } else if (m_kind == EntryKind::TryFinallyEntry) {
-    // Encountered a finally block, jump and free any pending iterators
-    emitIterBreak(e, iters, m_finallyLabel);
-  } else {
+  for (region = region->m_parent.get(); true; region = region->m_parent.get()) {
+    assert(region->m_gotoTargets.count(name));
+    auto t = region->m_gotoTargets[name].target;
+    if (region->m_parent->m_gotoLabels.count(name)) {
+      // If only there is the appropriate label inside the current region
+      // perform a jump.
+      Id stateLocal = getStateLocal();
+      emitVirtualLocal(stateLocal);
+      // We need to unset the state unnamed local in order to correctly
+      // fall through any future finally blocks.
+      e.UnsetL(stateLocal);
+      // Jump to the label and free any pending iterators.
+      emitJump(e, iters, t->m_label);
+      return;
+    }
+    if (region->isTryFinally()) {
+      // Encountered a finally block, jump and free any pending iterators
+      emitJump(e, iters, region->m_finallyLabel);
+      return;
+    }
     // Otherwise we will be jumping out of the current context,
     // therefore if we are in a loop, we need to free the iterator.
-    if (m_kind == EntryKind::LoopEntry && m_iterId != -1) {
-      iters.push_back(IterPair(m_iterRef ? KindOfMIter : KindOfIter,
-                               m_iterId));
+    if (region->isForeach()) {
+      iters.push_back(IterPair(region->m_iterKind, region->m_iterId));
     }
     // We should never break out of a function, therefore there
     // should always be a parent
-    assert(m_parent != nullptr);
-    m_parent->emitGotoCaseImpl(e, name, iters);
+    assert(region->m_parent != nullptr);
   }
 }
 
-void FinallyRouterEntry::emitBreakCase(Emitter& e,
-                                      std::vector<Label*>& cases,
-                                      int depth) {
+void EmitterVisitor::emitBreakTrampoline(Emitter& e, Region* region,
+                                         std::vector<Label*>& cases,
+                                         int depth) {
   assert(depth >= 1);
-  assert(m_kind == EntryKind::TryFinallyEntry);
-  assert(m_breakActions.count(depth));
-  auto action = m_breakActions[depth];
-  emitCase(e, cases, action);
-  assert(m_parent != nullptr);
+  assert(region->isTryFinally());
+  assert(region->m_breakTargets.count(depth));
+  auto t = region->m_breakTargets[depth].target;
+  cases[t->m_state]->set(e);
+  assert(region->m_parent != nullptr);
   IterVec iters;
-  m_parent->emitBreakCaseImpl(e, depth, iters);
-}
-
-void FinallyRouterEntry::emitBreakCaseImpl(Emitter& e,
-                                           int depth,
-                                           IterVec& iters) {
-  assert(depth >= 1);
-  assert(m_kind != EntryKind::FinallyEntry);
-  assert(m_parent != nullptr);
-  assert(m_breakActions.count(depth));
-  auto action = m_breakActions[depth];
-  if (m_kind == EntryKind::LoopEntry) {
+  for (region = region->m_parent.get(); true; region = region->m_parent.get()) {
+    assert(depth >= 1);
+    assert(!region->isFinally());
+    assert(region->m_parent != nullptr);
+    assert(region->m_breakTargets.count(depth));
+    auto t = region->m_breakTargets[depth].target;
+    if (region->isTryFinally()) {
+      // We encountered another try block, jump to the corresponding
+      // finally, freeing any iterators on the way.
+      emitJump(e, iters, region->m_finallyLabel);
+      return;
+    }
+    if (region->m_kind != Region::Kind::LoopOrSwitch) {
+      continue;
+    }
     // Whether or not this is the last loop to break out of, we
     // will be freeing the current iterator
-    if (m_iterId != -1) {
-      iters.push_back(IterPair(m_iterRef ? KindOfMIter : KindOfIter,
-                               m_iterId));
+    if (region->isForeach()) {
+      iters.push_back(IterPair(region->m_iterKind, region->m_iterId));
     }
     if (depth == 1) {
-      // This is the last loop to break out of.
-      auto& visitor = e.getEmitterVisitor();
-      // Unset the state local in order to correctly fall through
-      // any future finally blocks
-      Id stateLocal = visitor.getStateLocal();
-      visitor.emitVirtualLocal(stateLocal);
+      // This is the last loop to break out of. Unset the state local in
+      // order to correctly fall through any future finally blocks
+      Id stateLocal = getStateLocal();
+      emitVirtualLocal(stateLocal);
       e.UnsetL(stateLocal);
       // Jump to the break label and free any pending iterators on the
       // way.
-      emitIterBreak(e, iters, action->m_label);
-    } else {
-      // Otherwise just delegate to the parent. One loop level has been
-      // taken care of.
-      m_parent->emitBreakCaseImpl(e, depth - 1, iters);
+      emitJump(e, iters, t->m_label);
+      return;
     }
-  } else if (m_kind == EntryKind::TryFinallyEntry) {
-    // We encountered another try block, jump to the corresponding
-    // finally, freeing any iterators on the way.
-    emitIterBreak(e, iters, m_finallyLabel);
-  } else {
-    // We know this is not a loop, no iterators to free
-    m_parent->emitBreakCaseImpl(e, depth, iters);
+    // Otherwise just delegate to the parent. One loop level has been
+    // taken care of.
+    --depth;
   }
 }
 
-void FinallyRouterEntry::emitContinueCase(Emitter& e,
-                                          std::vector<Label*>& cases,
-                                          int depth) {
+void EmitterVisitor::emitContinueTrampoline(Emitter& e, Region* region,
+                                            std::vector<Label*>& cases,
+                                            int depth) {
   assert(depth >= 1);
-  assert(m_kind == EntryKind::TryFinallyEntry);
-  assert(m_continueActions.count(depth));
-  auto action = m_continueActions[depth];
-  emitCase(e, cases, action);
-  assert(m_parent != nullptr);
+  assert(region->isTryFinally());
+  assert(region->m_continueTargets.count(depth));
+  auto t = region->m_continueTargets[depth].target;
+  cases[t->m_state]->set(e);
+  assert(region->m_parent != nullptr);
   IterVec iters;
-  m_parent->emitContinueCaseImpl(e, depth, iters);
-}
-
-void FinallyRouterEntry::emitContinueCaseImpl(Emitter& e,
-                                              int depth,
-                                              IterVec& iters) {
-  assert(depth >= 1);
-  assert(m_parent != nullptr);
-  assert(m_kind != EntryKind::FinallyEntry);
-  auto action = m_continueActions[depth];
-  if (m_kind == EntryKind::LoopEntry) {
+  for (region = region->m_parent.get(); true; region = region->m_parent.get()) {
+    assert(depth >= 1);
+    assert(region->m_parent != nullptr);
+    assert(!region->isFinally());
+    auto t = region->m_continueTargets[depth].target;
+    if (region->isTryFinally()) {
+      emitJump(e, iters, region->m_finallyLabel);
+      return;
+    }
+    if (region->m_kind != Region::Kind::LoopOrSwitch) {
+      continue;
+    }
     if (depth == 1) {
       // This is the last loop level to continue out of. Don't free the
-      // iterator for the current loop.
-      auto& visitor = e.getEmitterVisitor();
-      // We need to free the state unnamed local in order to fall
-      // through any future finallies correctly
-      Id stateLocal = visitor.getStateLocal();
-      visitor.emitVirtualLocal(stateLocal);
+      // iterator for the current loop. We need to free the state unnamed
+      // local in order to fall through any future finallies correctly
+      Id stateLocal = getStateLocal();
+      emitVirtualLocal(stateLocal);
       e.UnsetL(stateLocal);
       // Jump to the continue label and free any pending iterators
-      emitIterBreak(e, iters, action->m_label);
-    } else {
-      // This is not the last loop level, therefore the current
-      // iterator should be freed.
-      if (m_iterId != -1) {
-        iters.push_back(IterPair(m_iterRef ? KindOfMIter : KindOfIter,
-                                 m_iterId));
-      }
-      // One loop level has been taken care of, delegate
-      m_parent->emitContinueCaseImpl(e, depth - 1, iters);
+      emitJump(e, iters, t->m_label);
+      return;
     }
-  } else if (m_kind == EntryKind::TryFinallyEntry) {
-    emitIterBreak(e, iters, m_finallyLabel);
-  } else {
-    m_parent->emitContinueCaseImpl(e, depth, iters);
+    // This is not the last loop level, therefore the current
+    // iterator should be freed.
+    if (region->isForeach()) {
+      iters.push_back(IterPair(region->m_iterKind, region->m_iterId));
+    }
+    --depth;
   }
 }
 
-int FinallyRouterEntry::getMaxBreakContinueDepth() {
-  if (m_parent == nullptr || m_kind == EntryKind::FinallyEntry) {
+int Region::getMaxBreakContinueDepth() {
+  if (m_parent == nullptr || isFinally()) {
     return 0;
-  } else if (m_kind == EntryKind::LoopEntry) {
+  } else if (m_kind == Region::Kind::LoopOrSwitch) {
     return m_parent->getMaxBreakContinueDepth() + 1;
   } else {
     return m_parent->getMaxBreakContinueDepth();
   }
 }
 
-int FinallyRouterEntry::getBreakContinueDepth() {
+int Region::getBreakContinueDepth() {
   int depth = 0;
-  for (auto& p : m_breakActions) {
+  for (auto& p : m_breakTargets) {
     depth = std::max(depth, p.first);
   }
-  for (auto& p : m_continueActions) {
+  for (auto& p : m_continueTargets) {
     depth = std::max(depth, p.first);
   }
   return depth;
 }
 
-void FinallyRouterEntry::emitBreakContinueCases(Emitter& e,
-                                                std::vector<Label*>& cases) {
-  assert(m_kind == EntryKind::TryFinallyEntry);
+int Region::getMaxState() {
+  int maxState = -1;
+  for (auto& p : m_returnTargets) {
+    if (p.second.used) {
+      maxState = std::max(maxState, p.second.target->m_state);
+    }
+  }
   int max_depth = getBreakContinueDepth();
   for (int i = 1; i <= max_depth; ++i) {
-    if (m_breakActions.count(i) &&
-        m_finallyCases.count(m_breakActions[i])) {
-      emitBreakCase(e, cases, i);
+    if (isBreakUsed(i)) {
+      maxState = std::max(maxState, m_breakTargets[i].target->m_state);
     }
-    if (m_continueActions.count(i) &&
-        m_finallyCases.count(m_continueActions[i])) {
-      emitContinueCase(e, cases, i);
+    if (isContinueUsed(i)) {
+      maxState = std::max(maxState, m_continueTargets[i].target->m_state);
     }
   }
-}
-
-void FinallyRouterEntry::emitReturnCases(Emitter& e,
-                                         std::vector<Label*>& cases) {
-  for (auto& p : m_returnActions) {
-    if (m_finallyCases.count(p.second)) {
-      emitReturnCase(e, cases, p.first);
+  for (auto& p : m_gotoTargets) {
+    if (p.second.used) {
+      maxState = std::max(maxState, p.second.target->m_state);
     }
   }
+  return maxState;
 }
 
-void FinallyRouterEntry::emitGotoCases(Emitter& e,
-                                       std::vector<Label*>& cases) {
-  for (auto& p : m_gotoActions) {
-    if (m_finallyCases.count(p.second)) {
-      emitGotoCase(e, cases, p.first);
-    }
+RegionPtr
+EmitterVisitor::createRegion(StatementPtr s, Region::Kind kind) {
+  RegionPtr parent = nullptr;
+  if (kind != Region::Kind::FuncBody && kind != Region::Kind::FaultFunclet &&
+      kind != Region::Kind::Global && !m_regions.empty()) {
+    parent = m_regions.back();
   }
-}
-
-void FinallyRouterEntry::emitAllCases(Emitter& e,
-                                      std::vector<Label*>& cases) {
-  assert(m_kind == EntryKind::TryFinallyEntry);
-  emitReturnCases(e, cases);
-  emitBreakContinueCases(e, cases);
-  emitGotoCases(e, cases);
-}
-
-void FinallyRouterEntry::collectReturnCases(std::vector<Label*>& cases) {
-  assert(m_kind == EntryKind::TryFinallyEntry);
-  for (auto& p : m_returnActions) {
-    if (m_finallyCases.count(p.second)) {
-      collectCase(cases, p.second);
-    }
-  }
-}
-
-void FinallyRouterEntry::collectGotoCases(std::vector<Label*>& cases) {
-  assert(m_kind == EntryKind::TryFinallyEntry);
-  for (auto& p : m_gotoActions) {
-    if (m_finallyCases.count(p.second)) {
-      collectCase(cases, p.second);
-    }
-  }
-}
-
-void FinallyRouterEntry::collectBreakContinueCases(
-                           std::vector<Label*>& cases) {
-  assert(m_kind == EntryKind::TryFinallyEntry);
-  int max_depth = getBreakContinueDepth();
-  for (int i = 1; i <= max_depth; ++i) {
-    if (m_breakActions.count(i) &&
-        m_finallyCases.count(m_breakActions[i])) {
-      collectCase(cases, m_breakActions[i]);
-    }
-    if (m_continueActions.count(i) &&
-        m_finallyCases.count(m_continueActions[i])) {
-      collectCase(cases, m_continueActions[i]);
-    }
-  }
-}
-
-void FinallyRouterEntry::collectCase(std::vector<Label*>& cases,
-                                     ActionPtr action) {
-  assert(m_kind == EntryKind::TryFinallyEntry);
-  assert(action != nullptr);
-  assert(action->isAllocated());
-  // NOTE: This is a completely arbitrary limitation that prevents
-  // running out of memory in case action->m_state contained trash as
-  // a result of e.g. memory corrupotion.
-  assert(action->m_state < 1024 && action->m_state >= 0);
-  assert(m_finallyCases.count(action));
-  while (cases.size() <= action->m_state) {
-    cases.push_back(new Label());
-  }
-  cases[action->m_state] = new Label();
-}
-
-void FinallyRouterEntry::collectAllCases(std::vector<Label*>& cases) {
-  assert(m_kind == EntryKind::TryFinallyEntry);
-  collectReturnCases(cases);
-  collectBreakContinueCases(cases);
-  collectGotoCases(cases);
-}
-
-//=============================================================================
-
-FinallyRouter::FinallyRouter() {}
-
-FinallyRouter::~FinallyRouter() {}
-
-FinallyRouterEntryPtr FinallyRouter::top() {
-  assert(m_entries.size() > 0);
-  return m_entries.back();
-}
-
-FinallyRouterEntryPtr FinallyRouter::createForStatement(StatementPtr s) {
-  switch (s->getKindOf()) {
-    case Statement::KindOfWhileStatement:
-    case Statement::KindOfDoStatement:
-    case Statement::KindOfForStatement:
-    case Statement::KindOfForEachStatement:
-    case Statement::KindOfSwitchStatement:
-      return create(s, EntryKind::LoopEntry); break;
-    case Statement::KindOfTryStatement:
-      return create(s, EntryKind::TryFinallyEntry); break;
-    case Statement::KindOfFinallyStatement:
-      return create(s, EntryKind::FinallyEntry); break;
-    default:
-      // Other kinds of statements are
-      return nullptr;
-  }
-}
-
-FinallyRouterEntryPtr FinallyRouter::createGlobal(StatementPtr s) {
-  return create(s, EntryKind::GlobalEntry);
-}
-
-FinallyRouterEntryPtr FinallyRouter::createFuncBody(StatementPtr s) {
-  return create(s, EntryKind::FuncBodyEntry);
-}
-
-FinallyRouterEntryPtr FinallyRouter::createFuncFault(StatementPtr s) {
-  return create(s, EntryKind::FuncFaultEntry);
-}
-
-FinallyRouterEntryPtr FinallyRouter::create(StatementPtr s,
-                                            EntryKind kind) {
-  FinallyRouterEntryPtr parent = nullptr;
-  if (kind != EntryKind::FuncBodyEntry &&
-      kind != EntryKind::FuncFaultEntry &&
-      kind != EntryKind::GlobalEntry &&
-      !m_entries.empty()) {
-    parent = m_entries.back();
-  }
-  auto entry = std::make_shared<FinallyRouterEntry>(this, kind, parent);
+  auto region = std::make_shared<Region>(kind, parent);
   // We preregister all the labels occurring in the provided statement
   // ahead of the time. Therefore at the time of emitting the actual
   // goto instructions we can reliably tell which finally blocks to
   // run.
   for (auto& label : s->getLabelScope()->getLabels()) {
     StringData* nName = makeStaticString(label.getName().c_str());
-    entry->registerLabel(label.getStatement(), nName);
+    if (!region->m_gotoLabels.count(nName)) {
+      region->m_gotoLabels.insert(nName);
+    }
   }
-  return entry;
+  return region;
 }
 
-void FinallyRouter::enter(FinallyRouterEntryPtr entry) {
-  assert(entry != nullptr);
-  assert(entry->m_router == this);
-  m_entries.push_back(entry);
+void EmitterVisitor::enterRegion(RegionPtr region) {
+  assert(region != nullptr);
+  m_regions.push_back(region);
 }
 
-void FinallyRouter::leave(FinallyRouterEntryPtr entry) {
-  assert(entry != nullptr);
-  assert(m_entries.size() > 0);
-  assert(m_entries.back() == entry);
-  assert(m_entries.back()->m_router == this);
-  m_entries.pop_back();
+void EmitterVisitor::leaveRegion(RegionPtr region) {
+  assert(region != nullptr);
+  assert(m_regions.size() > 0);
+  assert(m_regions.back() == region);
+  m_regions.pop_back();
 }
 
-int FinallyRouter::allocateState() {
+void EmitterVisitor::registerControlTarget(ControlTarget* t) {
+  assert(!t->isRegistered());
   int state = 0;
   while (m_states.count(state)) {
     ++state;
   }
   m_states.insert(state);
-  return state;
+  t->m_state = state;
 }
 
-void FinallyRouter::releaseState(int state) {
+void EmitterVisitor::unregisterControlTarget(ControlTarget* t) {
+  assert(t->isRegistered());
+  int state = t->m_state;
   assert(m_states.count(state));
   m_states.erase(state);
+  t->m_state = ControlTarget::k_unsetState;
 }
 
 //=============================================================================
-// EmitterVisitor.
 
 void MetaInfoBuilder::add(int pos, Unit::MetaInfo::Kind kind,
                           bool mVector, int arg, Id data) {
@@ -2135,12 +1988,15 @@ void MetaInfoBuilder::setForUnit(UnitEmitter& target) const {
   free(meta);
 }
 
+//=============================================================================
+// EmitterVisitor.
+
 EmitterVisitor::EmittedClosures EmitterVisitor::s_emittedClosures;
 
 EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
   : m_ue(ue), m_curFunc(ue.getMain()), m_evalStackIsUnknown(false),
-    m_actualStackHighWater(0), m_fdescHighWater(0),
-    m_finallyRouter(), m_stateLocal(-1), m_retLocal(-1) {
+    m_actualStackHighWater(0), m_fdescHighWater(0), m_stateLocal(-1),
+    m_retLocal(-1) {
   m_prevOpcode = OpLowInvalid;
   m_evalStack.m_actualStackHighWaterPtr = &m_actualStackHighWater;
   m_evalStack.m_fdescHighWaterPtr = &m_fdescHighWater;
@@ -2148,8 +2004,8 @@ EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
 
 EmitterVisitor::~EmitterVisitor() {
   // If a fatal occurs during emission, some extra cleanup is necessary.
-  for (std::deque<ExnHandlerRegion*>::const_iterator it = m_exnHandlers.begin();
-       it != m_exnHandlers.end(); ++it) {
+  for (std::deque<CatchRegion*>::const_iterator it = m_catchRegions.begin();
+       it != m_catchRegions.end(); ++it) {
     delete *it;
   }
 }
@@ -2395,8 +2251,7 @@ void EmitterVisitor::recordJumpTarget(Offset target,
     InvariantViolation(
       "Offset passed to EmitterVisitor::recordJumpTarget was invalid");
   }
-  hphp_hash_map<Offset, SymbolicStack>::iterator it =
-    m_jumpTargetEvalStacks.find(target);
+  auto it = m_jumpTargetEvalStacks.find(target);
   if (it == m_jumpTargetEvalStacks.end()) {
     m_jumpTargetEvalStacks[target] = evalStack;
     return;
@@ -2406,8 +2261,7 @@ void EmitterVisitor::recordJumpTarget(Offset target,
 
 void EmitterVisitor::restoreJumpTargetEvalStack() {
   m_evalStack.clear();
-  hphp_hash_map<Offset, SymbolicStack>::iterator it =
-    m_jumpTargetEvalStacks.find(m_ue.bcPos());
+  auto it = m_jumpTargetEvalStacks.find(m_ue.bcPos());
   if (it == m_jumpTargetEvalStacks.end()) {
     m_evalStackIsUnknown = true;
     return;
@@ -2424,8 +2278,7 @@ bool EmitterVisitor::isJumpTarget(Offset target) {
   //   1) We have seen an instruction that jumps to the specified offset
   //   2) We know of a Label that has been set to the specified offset
   //   3) We have seen a try region that ends at the specified offset
-  hphp_hash_map<Offset, SymbolicStack>::iterator it =
-    m_jumpTargetEvalStacks.find(target);
+  auto it = m_jumpTargetEvalStacks.find(target);
   return (it != m_jumpTargetEvalStacks.end());
 }
 
@@ -2478,13 +2331,13 @@ class FinallyThunklet : public Thunklet {
 public:
   explicit FinallyThunklet(FinallyStatementPtr finallyStatement,
                            int numLiveIters)
-    : m_finallyStatement(finallyStatement), m_numLiveIters(numLiveIters) {}
+      : m_finallyStatement(finallyStatement), m_numLiveIters(numLiveIters) {}
   virtual void emit(Emitter& e) {
     auto& visitor = e.getEmitterVisitor();
-    auto& router = visitor.getFinallyRouter();
-    auto entry = router.createFuncFault(m_finallyStatement);
-    router.enter(entry);
-    SCOPE_EXIT { router.leave(entry); };
+    auto region =
+      visitor.createRegion(m_finallyStatement, Region::Kind::FaultFunclet);
+    visitor.enterRegion(region);
+    SCOPE_EXIT { visitor.leaveRegion(region); };
     Id stateLocal = visitor.getStateLocal();
     visitor.emitVirtualLocal(stateLocal);
     e.UnsetL(stateLocal);
@@ -2677,9 +2530,9 @@ void EmitterVisitor::visit(FileScopePtr file) {
 
     if (Option::UseHHBBC && SystemLib::s_inited) notMergeOnly = true;
 
-    auto entry = m_finallyRouter.createGlobal(stmts);
-    m_finallyRouter.enter(entry);
-    SCOPE_EXIT { m_finallyRouter.leave(entry); };
+    auto region = createRegion(stmts, Region::Kind::Global);
+    enterRegion(region);
+    SCOPE_EXIT { leaveRegion(region); };
 
     for (i = 0; i < nk; i++) {
       StatementPtr s = (*stmts)[i];
@@ -3032,9 +2885,6 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
   Emitter e(node, m_ue, *this);
 
   if (StatementPtr s = dynamic_pointer_cast<Statement>(node)) {
-    auto entry = m_finallyRouter.top();
-    auto nextEntry = m_finallyRouter.createForStatement(s);
-
     switch (s->getKindOf()) {
       case Statement::KindOfBlockStatement:
       case Statement::KindOfStatementList:
@@ -3052,7 +2902,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         BreakStatementPtr bs(static_pointer_cast<BreakStatement>(s));
         uint64_t destLevel = bs->getDepth();
 
-        if (destLevel > entry->getMaxBreakContinueDepth()) {
+        if (destLevel > m_regions.back()->getMaxBreakContinueDepth()) {
           std::ostringstream msg;
           msg << "Cannot break/continue " << destLevel << " level";
           if (destLevel > 1) {
@@ -3063,25 +2913,26 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
 
         if (bs->is(Statement::KindOfBreakStatement)) {
-          entry->registerBreak(bs, destLevel, true);
-          entry->emitBreak(e, destLevel);
+          emitBreak(e, destLevel, bs);
         } else {
-          entry->registerContinue(bs, destLevel, true);
-          entry->emitContinue(e, destLevel);
+          emitContinue(e, destLevel, bs);
         }
 
         return false;
       }
 
       case Statement::KindOfDoStatement: {
+        auto region = createRegion(s, Region::Kind::LoopOrSwitch);
         DoStatementPtr ds(static_pointer_cast<DoStatement>(s));
 
         Label top(e);
-        Label& condition = nextEntry->registerContinue(ds, 1, false)->m_label;
-        Label& exit = nextEntry->registerBreak(ds, 1, false)->m_label;
+        Label& condition =
+          registerContinue(ds, region.get(), 1, false)->m_label;
+        Label& exit =
+          registerBreak(ds, region.get(), 1, false)->m_label;
         {
-          m_finallyRouter.enter(nextEntry);
-          SCOPE_EXIT { m_finallyRouter.leave(nextEntry); };
+          enterRegion(region);
+          SCOPE_EXIT { leaveRegion(region); };
           visit(ds->getBody());
         }
         condition.set(e);
@@ -3103,8 +2954,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Statement::KindOfCatchStatement: {
         // Store the current exception object in the appropriate local variable
         CatchStatementPtr cs(static_pointer_cast<CatchStatement>(node));
-        StringData* vName =
-          makeStaticString(cs->getVariable()->getName());
+        StringData* vName = makeStaticString(cs->getVariable()->getName());
         Id i = m_curFunc->lookupVarId(vName);
         emitVirtualLocal(i);
         e.Catch();
@@ -3136,14 +2986,15 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
 
       case Statement::KindOfForStatement: {
+        auto region = createRegion(s, Region::Kind::LoopOrSwitch);
         ForStatementPtr fs(static_pointer_cast<ForStatement>(s));
 
         if (visit(fs->getInitExp())) {
           emitPop(e);
         }
         Label preCond(e);
-        Label& preInc = nextEntry->registerContinue(fs, 1, false)->m_label;
-        Label& fail = nextEntry->registerBreak(fs, 1, false)->m_label;
+        Label& preInc = registerContinue(fs, region.get(), 1, false)->m_label;
+        Label& fail = registerBreak(fs, region.get(), 1, false)->m_label;
         if (ExpressionPtr condExp = fs->getCondExp()) {
           Label tru;
           Emitter condEmitter(condExp, m_ue, *this);
@@ -3151,8 +3002,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (tru.isUsed()) tru.set(e);
         }
         {
-          m_finallyRouter.enter(nextEntry);
-          SCOPE_EXIT { m_finallyRouter.leave(nextEntry); };
+          enterRegion(region);
+          SCOPE_EXIT { leaveRegion(region); };
           visit(fs->getBody());
         }
         preInc.set(e);
@@ -3166,8 +3017,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
       case Statement::KindOfForEachStatement: {
         ForEachStatementPtr fe(static_pointer_cast<ForEachStatement>(node));
-
-        emitForeach(e, fe, nextEntry);
+        emitForeach(e, fe);
         return false;
       }
 
@@ -3264,7 +3114,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         // continuations and resumed async functions
         if (m_curFunc->isGenerator()) {
           assert(retSym == StackSym::C);
-          entry->emitIterFree(e);
+          emitIterFreeForReturn(e);
           e.ContRetC();
           return false;
         }
@@ -3272,7 +3122,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         // eagerly executed async functions
         if (m_curFunc->isAsync()) {
           assert(retSym == StackSym::C);
-          entry->emitIterFree(e);
+          emitIterFreeForReturn(e);
           e.AsyncWrapResult();
           e.RetC();
           return false;
@@ -3289,8 +3139,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NonRefCounted,
                          false, 0, v);
         }*/
-        entry->registerReturn(r, retSym);
-        entry->emitReturn(e, retSym);
+        emitReturn(e, retSym, r);
         return false;
       }
 
@@ -3340,6 +3189,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
 
       case Statement::KindOfSwitchStatement: {
+        auto region = createRegion(s, Region::Kind::LoopOrSwitch);
         SwitchStatementPtr sw(static_pointer_cast<SwitchStatement>(node));
 
         StatementListPtr cases(sw->getCases());
@@ -3350,8 +3200,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
         uint ncase = cases->getCount();
         std::vector<Label> caseLabels(ncase);
-        Label& done = nextEntry->registerBreak(sw, 1, false)->m_label;
-
+        Label& brkTarget = registerBreak(sw, region.get(), 1, false)->m_label;
+        Label& contTarget =
+          registerContinue(sw, region.get(), 1, false)->m_label;
         // There are two different ways this can go.  If the subject is a simple
         // variable, then we have to evaluate it every time we compare against a
         // case condition.  Otherwise, we evaluate it once and store it in an
@@ -3386,10 +3237,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               visit(sw->getExp());
               emitPop(e);
             } else if (stype == KindOfInt64) {
-              emitIntegerSwitch(e, sw, caseLabels, done, state);
+              emitIntegerSwitch(e, sw, caseLabels, brkTarget, state);
             } else {
               assert(IS_STRING_TYPE(stype));
-              emitStringSwitch(e, sw, caseLabels, done, state);
+              emitStringSwitch(e, sw, caseLabels, brkTarget, state);
             }
             didSwitch = true;
           }
@@ -3435,25 +3286,24 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (defI != -1) {
             e.Jmp(caseLabels[defI]);
           } else {
-            e.Jmp(done);
+            e.Jmp(brkTarget);
           }
         }
         for (uint i = 0; i < ncase; i++) {
           caseLabels[i].set(e);
           CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
-          m_finallyRouter.enter(nextEntry);
-          SCOPE_EXIT { m_finallyRouter.leave(nextEntry); };
+          enterRegion(region);
+          SCOPE_EXIT { leaveRegion(region); };
           visit(c->getStatement());
         }
-        done.set(e);
-        // We need this since break == continue for switches.
-        nextEntry->registerContinue(s, 1, false)->m_label.set(e);
+        if (brkTarget.isUsed()) brkTarget.set(e);
+        if (contTarget.isUsed()) contTarget.set(e);
         if (!didSwitch && !simpleSubject) {
           // Null out temp local, to invoke any needed refcounting
           assert(tempLocal >= 0);
           assert(start != InvalidAbsoluteOffset);
-          newFuncletAndRegion(start, m_ue.bcPos(),
-                              new UnsetUnnamedLocalThunklet(tempLocal));
+          newFaultRegionAndFunclet(start, m_ue.bcPos(),
+                                   new UnsetUnnamedLocalThunklet(tempLocal));
           emitVirtualLocal(tempLocal);
           emitUnset(e);
           m_curFunc->freeUnnamedLocal(tempLocal);
@@ -3469,8 +3319,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
 
       case Statement::KindOfFinallyStatement: {
-        m_finallyRouter.enter(nextEntry);
-        SCOPE_EXIT { m_finallyRouter.leave(nextEntry); };
+        auto region = createRegion(s, Region::Kind::Finally);
+        enterRegion(region);
+        SCOPE_EXIT { leaveRegion(region); };
 
         FinallyStatementPtr fs = static_pointer_cast<FinallyStatement>(node);
         visit(fs->getBody());
@@ -3478,13 +3329,13 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
 
       case Statement::KindOfTryStatement: {
+        auto region = createRegion(s, Region::Kind::TryFinally);
         if (!m_evalStack.empty()) {
           InvariantViolation(
             "Emitter detected that the evaluation stack is not empty "
             "at the beginning of a try region: %d", m_ue.bcPos());
         }
 
-        Label after;
         TryStatementPtr ts = static_pointer_cast<TryStatement>(node);
 
         FinallyStatementPtr f(static_pointer_cast<FinallyStatement>
@@ -3492,37 +3343,37 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         Offset start = m_ue.bcPos();
         Offset end;
+        Label after;
 
         {
           if (f) {
-            m_finallyRouter.enter(nextEntry);
+            enterRegion(region);
           }
           SCOPE_EXIT {
             if (f) {
-              m_finallyRouter.leave(nextEntry);
+              leaveRegion(region);
             }
           };
 
           visit(ts->getBody());
-          // include the jump out of the try-catch block in the
-          // exception handler address range
-          // TODO (#3271373): This jump can be removed when no
-          // catch clauses are present.
-          e.Jmp(after);
-          end = m_ue.bcPos();
 
+          StatementListPtr catches = ts->getCatches();
+          int catch_count = catches->getCount();
+          if (catch_count > 0) {
+            // include the jump out of the try-catch block in the
+            // exception handler address range
+            e.Jmp(after);
+          }
+          end = m_ue.bcPos();
           if (!m_evalStack.empty()) {
             InvariantViolation("Emitter detected that the evaluation stack "
                                "is not empty at the end of a try region: %d",
                                end);
           }
 
-          StatementListPtr catches = ts->getCatches();
-          int catch_count = catches->getCount();
-
           if (catch_count > 0) {
-            ExnHandlerRegion* r = new ExnHandlerRegion(start, end);
-            m_exnHandlers.push_back(r);
+            CatchRegion* r = new CatchRegion(start, end);
+            m_catchRegions.push_back(r);
 
             bool firstHandler = true;
             for (int i = 0; i < catch_count; i++) {
@@ -3553,12 +3404,12 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
 
         Offset end_catches = m_ue.bcPos();
-        after.set(e);
+        if (after.isUsed()) after.set(e);
 
         if (f) {
-          nextEntry->m_finallyLabel.set(e);
+          region->m_finallyLabel.set(e);
           visit(f);
-          nextEntry->emitFinallySwitch(e);
+          emitFinallyEpilogue(e, region.get());
           auto func = getFunclet(f);
           if (func == nullptr) {
             auto thunklet =
@@ -3581,10 +3432,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       }
 
       case Statement::KindOfWhileStatement: {
+        auto region = createRegion(s, Region::Kind::LoopOrSwitch);
         WhileStatementPtr ws(static_pointer_cast<WhileStatement>(s));
-        Label& preCond = nextEntry->registerContinue(ws, 1, false)->m_label;
+        Label& preCond = registerContinue(ws, region.get(), 1, false)->m_label;
         preCond.set(e);
-        Label& fail = nextEntry->registerBreak(ws, 1, false)->m_label;
+        Label& fail = registerBreak(ws, region.get(), 1, false)->m_label;
         {
           Label tru;
           ExpressionPtr c(ws->getCondExp());
@@ -3593,8 +3445,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           if (tru.isUsed()) tru.set(e);
         }
         {
-          m_finallyRouter.enter(nextEntry);
-          SCOPE_EXIT { m_finallyRouter.leave(nextEntry); };
+          enterRegion(region);
+          SCOPE_EXIT { leaveRegion(region); };
           visit(ws->getBody());
         }
         e.Jmp(preCond);
@@ -3651,15 +3503,15 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Statement::KindOfGotoStatement: {
         GotoStatementPtr g(static_pointer_cast<GotoStatement>(node));
         StringData* nName = makeStaticString(g->label());
-        entry->registerGoto(g, nName, true);
-        entry->emitGoto(e, nName);
+        emitGoto(e, nName, g);
         return false;
       }
 
       case Statement::KindOfLabelStatement: {
         LabelStatementPtr l(static_pointer_cast<LabelStatement>(node));
         StringData* nName = makeStaticString(l->label());
-        entry->registerGoto(l, nName, false)->m_label.set(e);
+        registerGoto(l, m_regions.back().get(), nName, false)
+          ->m_label.set(e);
         return false;
       }
       case Statement::KindOfUseTraitStatement:
@@ -3847,7 +3699,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           case '@': {
             assert(oldErrorLevelLoc >= 0);
             assert(start != InvalidAbsoluteOffset);
-            newFuncletAndRegion(start, m_ue.bcPos(),
+            newFaultRegionAndFunclet(start, m_ue.bcPos(),
               new RestoreErrorReportingThunklet(oldErrorLevelLoc));
             emitRestoreErrorReporting(e, oldErrorLevelLoc);
             m_curFunc->freeUnnamedLocal(oldErrorLevelLoc);
@@ -4777,8 +4629,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               e.FCall(0);
               e.UnboxR();
             } else {
-              StringData* nValue =
-                makeStaticString(v.getStringData());
+              StringData* nValue = makeStaticString(v.getStringData());
               e.String(nValue);
             }
             break;
@@ -4804,8 +4655,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             }
             e.This();
           } else if (sv->getFunctionScope()->needsLocalThis()) {
-            static const StringData* thisStr =
-              makeStaticString("this");
+            static const StringData* thisStr = makeStaticString("this");
             Id thisId = m_curFunc->lookupVarId(thisStr);
             emitVirtualLocal(thisId);
           } else {
@@ -5005,8 +4855,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         e.CreateCl(useCount, ce->getClosureClassName());
 
         // From here on out, we're creating a new class to hold the closure.
-        const static StringData* parentName =
-          makeStaticString("Closure");
+        const static StringData* parentName = makeStaticString("Closure");
         const Location* sLoc = ce->getLocation().get();
         PreClassEmitter* pce = m_ue.newPreClassEmitter(
           ce->getClosureClassName(), PreClass::AlwaysHoistable);
@@ -5024,8 +4873,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 
         // The __invoke method. This is the body of the closure, preceded by
         // code that pulls the object's instance variables into locals.
-        static const StringData* invokeName =
-          makeStaticString("__invoke");
+        static const StringData* invokeName = makeStaticString("__invoke");
         FuncEmitter* invoke = m_ue.newMethodEmitter(invokeName, pce);
         invoke->setIsClosureBody(true);
         pce->addMethod(invoke);
@@ -5038,7 +4886,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Expression::KindOfYieldExpression: {
         YieldExpressionPtr y(static_pointer_cast<YieldExpression>(node));
 
-        m_finallyRouter.top()->registerYieldAwait(y);
+        registerYieldAwait(y);
         assert(m_evalStack.size() == 0);
 
         // evaluate key passed to yield, if applicable
@@ -5087,7 +4935,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
       case Expression::KindOfAwaitExpression: {
         AwaitExpressionPtr await(static_pointer_cast<AwaitExpression>(node));
 
-        m_finallyRouter.top()->registerYieldAwait(await);
+        registerYieldAwait(await);
 
         assert(m_evalStack.size() == 0);
 
@@ -5514,8 +5362,8 @@ void EmitterVisitor::emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal,
                                              Offset start) {
   assert(tempLocal >= 0);
   assert(start != InvalidAbsoluteOffset);
-  newFuncletAndRegion(start, m_ue.bcPos(),
-                      new UnsetUnnamedLocalThunklet(tempLocal));
+  newFaultRegionAndFunclet(start, m_ue.bcPos(),
+                           new UnsetUnnamedLocalThunklet(tempLocal));
   emitVirtualLocal(tempLocal);
   emitPushL(e);
   m_curFunc->freeUnnamedLocal(tempLocal);
@@ -5786,10 +5634,6 @@ void EmitterVisitor::emitEmpty(Emitter& e) {
       case StackSym::CG: e.EmptyG(); break;
       case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i));  // fall through
       case StackSym::CS: e.EmptyS(); break;
-      //XXX: Zend does not allow empty() on the result
-      // of a function call. We allow it here so that emitted
-      // code is valid. Once the parser handles this correctly,
-      // the R and C cases can go.
       case StackSym::R:  e.UnboxR(); // fall through
       case StackSym::C:  e.Not(); break;
       default: {
@@ -6088,9 +5932,9 @@ void EmitterVisitor::emitResolveClsBase(Emitter& e, int pos) {
     emitAGet(e);
     emitVirtualLocal(loc);
     emitUnset(e);
-    newFuncletAndRegion(m_evalStack.getUnnamedLocStart(pos),
-                        m_ue.bcPos(),
-                        new UnsetUnnamedLocalThunklet(loc));
+    newFaultRegionAndFunclet(m_evalStack.getUnnamedLocStart(pos),
+                             m_ue.bcPos(),
+                             new UnsetUnnamedLocalThunklet(loc));
     m_curFunc->freeUnnamedLocal(loc);
     break;
   }
@@ -6611,8 +6455,7 @@ void EmitterVisitor::emitPostponedMeths() {
           meth->getOriginalName().c_str());
       }
 
-      const StringData* methName =
-        makeStaticString(meth->getOriginalName());
+      const StringData* methName = makeStaticString(meth->getOriginalName());
       p.m_fe = fe = new FuncEmitter(m_ue, -1, -1, methName);
       top_fes.push_back(fe);
     }
@@ -6954,9 +6797,9 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
 }
 
 void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
-  auto entry = m_finallyRouter.createFuncBody(meth);
-  m_finallyRouter.enter(entry);
-  SCOPE_EXIT { m_finallyRouter.leave(entry); };
+  auto region = createRegion(meth, Region::Kind::FuncBody);
+  enterRegion(region);
+  SCOPE_EXIT { leaveRegion(region); };
 
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
@@ -6987,9 +6830,9 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
 }
 
 void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
-  auto entry = m_finallyRouter.createFuncBody(meth);
-  m_finallyRouter.enter(entry);
-  SCOPE_EXIT { m_finallyRouter.leave(entry); };
+  auto region = createRegion(meth, Region::Kind::FuncBody);
+  enterRegion(region);
+  SCOPE_EXIT { leaveRegion(region); };
 
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
@@ -7010,8 +6853,8 @@ void EmitterVisitor::emitAsyncMethod(MethodStatementPtr meth) {
 
   // wrap the whole body into a try-catch block
   Offset end = m_ue.bcPos();
-  ExnHandlerRegion* r = new ExnHandlerRegion(start, end);
-  m_exnHandlers.push_back(r);
+  CatchRegion* r = new CatchRegion(start, end);
+  m_catchRegions.push_back(r);
 
   Label* label = new Label(e);
   StringData* excLit = makeStaticString("Exception");
@@ -7074,9 +6917,9 @@ void EmitterVisitor::emitGeneratorCreate(MethodStatementPtr meth) {
 }
 
 void EmitterVisitor::emitGeneratorBody(MethodStatementPtr meth) {
-  auto entry = m_finallyRouter.createFuncBody(meth);
-  m_finallyRouter.enter(entry);
-  SCOPE_EXIT { m_finallyRouter.leave(entry); };
+  auto region = createRegion(meth, Region::Kind::FuncBody);
+  enterRegion(region);
+  SCOPE_EXIT { leaveRegion(region); };
 
   Emitter e(meth, m_ue, *this);
 
@@ -7647,8 +7490,7 @@ void EmitterVisitor::emitClassTraitAliasRule(PreClassEmitter* pce,
                                              TraitAliasStatementPtr stmt) {
   StringData* traitName    = makeStaticString(stmt->getTraitName());
   StringData* origMethName = makeStaticString(stmt->getMethodName());
-  StringData* newMethName  =
-    makeStaticString(stmt->getNewMethodName());
+  StringData* newMethName  = makeStaticString(stmt->getNewMethodName());
   // If there are no modifiers, buildAttrs() defaults to AttrPublic.
   // Here we don't want that. Instead, set AttrNone so that the modifiers of the
   // original method are preserved.
@@ -7717,8 +7559,7 @@ void EmitterVisitor::emitClass(Emitter& e,
   InterfaceStatementPtr is(
     static_pointer_cast<InterfaceStatement>(cNode->getStmt()));
   StringData* className = makeStaticString(cNode->getOriginalName());
-  StringData* parentName =
-    makeStaticString(cNode->getOriginalParent());
+  StringData* parentName = makeStaticString(cNode->getOriginalParent());
   StringData* classDoc = Option::GenerateDocComments ?
     makeStaticString(cNode->getDocComment()) : empty_string.get();
   Attr attr = cNode->isInterface() ? AttrInterface :
@@ -7806,8 +7647,7 @@ void EmitterVisitor::emitClass(Emitter& e,
     for (i = 0; i < n; i++) {
       if (MethodStatementPtr meth =
           dynamic_pointer_cast<MethodStatement>((*stmts)[i])) {
-        StringData* methName =
-          makeStaticString(meth->getOriginalName());
+        StringData* methName = makeStaticString(meth->getOriginalName());
         FuncEmitter* fe = m_ue.newMethodEmitter(methName, pce);
         bool added UNUSED = pce->addMethod(fe);
         assert(added);
@@ -8017,8 +7857,8 @@ void EmitterVisitor::emitForeachListAssignment(Emitter& e,
 }
 
 void EmitterVisitor::emitForeach(Emitter& e,
-                                 ForEachStatementPtr fe,
-                                 FinallyRouterEntryPtr entry) {
+                                 ForEachStatementPtr fe) {
+  auto region = createRegion(fe, Region::Kind::LoopOrSwitch);
   ExpressionPtr ae(fe->getArrayExp());
   ExpressionPtr val(fe->getValueExp());
   ExpressionPtr key(fe->getNameExp());
@@ -8026,8 +7866,8 @@ void EmitterVisitor::emitForeach(Emitter& e,
   int keyTempLocal;
   int valTempLocal;
   bool strong = fe->isStrong();
-  Label& exit = entry->registerBreak(fe, 1, false)->m_label;
-  Label& next = entry->registerContinue(fe, 1, false)->m_label;
+  Label& exit = registerBreak(fe, region.get(), 1, false)->m_label;
+  Label& next = registerContinue(fe, region.get(), 1, false)->m_label;
   Label start;
   Offset bIterStart;
   Id itId = m_curFunc->allocIterator();
@@ -8132,8 +7972,8 @@ void EmitterVisitor::emitForeach(Emitter& e,
     }
     emitVirtualLocal(valTempLocal);
     emitUnset(e);
-    newFuncletAndRegion(bIterStart, m_ue.bcPos(),
-                        new UnsetUnnamedLocalThunklet(valTempLocal));
+    newFaultRegionAndFunclet(bIterStart, m_ue.bcPos(),
+                             new UnsetUnnamedLocalThunklet(valTempLocal));
     if (key) {
       assert(keyTempLocal != -1);
       if (listKey) {
@@ -8150,16 +7990,16 @@ void EmitterVisitor::emitForeach(Emitter& e,
       }
       emitVirtualLocal(keyTempLocal);
       emitUnset(e);
-      newFuncletAndRegion(bIterStart, m_ue.bcPos(),
-                          new UnsetUnnamedLocalThunklet(keyTempLocal));
+      newFaultRegionAndFunclet(bIterStart, m_ue.bcPos(),
+                               new UnsetUnnamedLocalThunklet(keyTempLocal));
     }
   }
 
   {
-    entry->m_iterId = itId;
-    entry->m_iterRef = strong;
-    m_finallyRouter.enter(entry);
-    SCOPE_EXIT { m_finallyRouter.leave(entry); };
+    region->m_iterId = itId;
+    region->m_iterKind = strong ? KindOfMIter : KindOfIter;
+    enterRegion(region);
+    SCOPE_EXIT { leaveRegion(region); };
     if (body) visit(body);
   }
   if (next.isUsed()) {
@@ -8188,9 +8028,9 @@ void EmitterVisitor::emitForeach(Emitter& e,
       e.IterNext(itId, start, valTempLocal);
     }
   }
-  newFuncletAndRegion(bIterStart, m_ue.bcPos(),
-                      new IterFreeThunklet(itId, strong),
-                      { itId, strong ? KindOfMIter : KindOfIter });
+  newFaultRegionAndFunclet(bIterStart, m_ue.bcPos(),
+                           new IterFreeThunklet(itId, strong),
+                           { itId, strong ? KindOfMIter : KindOfIter });
   if (!simpleCase) {
     m_curFunc->freeUnnamedLocal(valTempLocal);
     if (key) {
@@ -8213,8 +8053,7 @@ void EmitterVisitor::emitForeach(Emitter& e,
  *     error_reporting(oldvalue)
  */
 void EmitterVisitor::emitRestoreErrorReporting(Emitter& e, Id oldLevelLoc) {
-  static const StringData* funcName =
-    makeStaticString("error_reporting");
+  static const StringData* funcName = makeStaticString("error_reporting");
   Label dontRollback;
   // Optimistically call with the old value.  If this returns nonzero, call it
   // again with that return value.
@@ -8256,8 +8095,7 @@ void EmitterVisitor::emitMakeUnitFatal(Emitter& e,
   e.Fatal(static_cast<uint8_t>(k));
 }
 
-Funclet* EmitterVisitor::addFunclet(StatementPtr stmt,
-                                    Thunklet* body) {
+Funclet* EmitterVisitor::addFunclet(StatementPtr stmt, Thunklet* body) {
   Funclet* f = addFunclet(body);
   m_memoizedFunclets.insert(std::make_pair(stmt, f));
   return f;
@@ -8298,19 +8136,19 @@ void EmitterVisitor::newFaultRegion(Offset start,
   m_faultRegions.push_back(r);
 }
 
-void EmitterVisitor::newFuncletAndRegion(Offset start,
-                                         Offset end,
-                                         Thunklet* t,
-                                         FaultIterInfo iter) {
+void EmitterVisitor::newFaultRegionAndFunclet(Offset start,
+                                              Offset end,
+                                              Thunklet* t,
+                                              FaultIterInfo iter) {
   Funclet* f = addFunclet(t);
   newFaultRegion(start, end, &f->m_entry, iter);
 }
 
-void EmitterVisitor::newFuncletAndRegion(StatementPtr stmt,
-                                         Offset start,
-                                         Offset end,
-                                         Thunklet* t,
-                                         FaultIterInfo iter) {
+void EmitterVisitor::newFaultRegionAndFunclet(StatementPtr stmt,
+                                              Offset start,
+                                              Offset end,
+                                              Thunklet* t,
+                                              FaultIterInfo iter) {
   Funclet* f = addFunclet(stmt, t);
   newFaultRegion(start, end, &f->m_entry, iter);
 }
@@ -8320,8 +8158,8 @@ void EmitterVisitor::newFPIRegion(Offset start, Offset end, Offset fpOff) {
   m_fpiRegions.push_back(r);
 }
 
-void EmitterVisitor::copyOverExnHandlers(FuncEmitter* fe) {
-  for (auto& eh : m_exnHandlers) {
+void EmitterVisitor::copyOverCatchAndFaultRegions(FuncEmitter* fe) {
+  for (auto& eh : m_catchRegions) {
     EHEnt& e = fe->addEHEnt();
     e.m_type = EHEnt::Type::Catch;
     e.m_base = eh->m_start;
@@ -8336,7 +8174,7 @@ void EmitterVisitor::copyOverExnHandlers(FuncEmitter* fe) {
     }
     delete eh;
   }
-  m_exnHandlers.clear();
+  m_catchRegions.clear();
   for (auto& fr : m_faultRegions) {
     EHEnt& e = fe->addEHEnt();
     e.m_type = EHEnt::Type::Fault;
@@ -8386,7 +8224,7 @@ void EmitterVisitor::saveMaxStackCells(FuncEmitter* fe) {
 void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe) {
   emitFunclets(e);
   saveMaxStackCells(fe);
-  copyOverExnHandlers(fe);
+  copyOverCatchAndFaultRegions(fe);
   copyOverFPIRegions(fe);
   m_yieldLabels.clear();
   Offset past = e.getUnitEmitter().bcPos();
@@ -8797,8 +8635,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
 
   for (unsigned int i = 0; i < classEntries.size(); ++i) {
     Entry& e = classEntries[i];
-    StringData* parentName =
-      makeStaticString(e.ci->getParentClass().get());
+    StringData* parentName = makeStaticString(e.ci->getParentClass().get());
     PreClassEmitter* pce = ue->newPreClassEmitter(e.name,
                                                   PreClass::AlwaysHoistable);
     pce->init(0, 0, ue->bcPos(), AttrUnique|AttrPersistent, parentName,
@@ -8822,8 +8659,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       const HhbcExtMethodInfo* methodInfo = &(e.info->m_methods[j]);
       static const StringData* continuationCls =
         makeStaticString("continuation");
-      StringData* methName =
-        makeStaticString(methodInfo->m_name);
+      StringData* methName = makeStaticString(methodInfo->m_name);
       ContinuationMethod cmeth;
 
       FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
@@ -8837,8 +8673,7 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         }
 
         // Build the function
-        BuiltinFunction bcf =
-          (BuiltinFunction)methodInfo->m_pGenericMethod;
+        BuiltinFunction bcf = (BuiltinFunction)methodInfo->m_pGenericMethod;
         const ClassInfo::MethodInfo* mi =
           e.ci->getMethodInfo(std::string(methodInfo->m_name));
         Offset base = ue->bcPos();

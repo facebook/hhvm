@@ -2048,7 +2048,7 @@ ArrayData* HphpArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
     ad->isPacked()        ? asPacked(ad)->packedToMixed() :
     asMixed(ad);
 
-  if (UNLIKELY(elems->m_kind != kMixedKind)) {
+  if (UNLIKELY(!elems->isMixed())) {
     return ArrayPlusEqGeneric(ad, ret, elems, neededSize);
   }
 
@@ -2105,7 +2105,7 @@ ArrayData* HphpArray::ArrayMergeGeneric(HphpArray* ret,
 ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems) {
   auto const ret = CopyReserve(asHphpArray(ad), ad->size() + elems->size());
 
-  if (elems->m_kind == kMixedKind) {
+  if (elems->isMixed()) {
     auto const rhs = asMixed(elems);
     auto srcElem = rhs->data();
     auto const srcStop = rhs->data() + rhs->m_used;
@@ -2123,7 +2123,7 @@ ArrayData* HphpArray::Merge(ArrayData* ad, const ArrayData* elems) {
     return ret;
   }
 
-  if (UNLIKELY(elems->m_kind != kPackedKind)) {
+  if (UNLIKELY(!elems->isPacked())) {
     return ArrayMergeGeneric(ret, elems);
   }
 

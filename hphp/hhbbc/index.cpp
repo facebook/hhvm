@@ -646,7 +646,7 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   switch (tc.metaType()) {
   case TypeConstraint::MetaType::Precise:
     {
-      auto const mainType = [&] {
+      auto const mainType = [&]() -> const Type {
         switch (tc.underlyingDataType()) {
         case KindOfString:        return TStr;
         case KindOfStaticString:  return TStr;

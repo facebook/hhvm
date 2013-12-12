@@ -20,7 +20,9 @@ namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-const struct {
+struct OptimizerOptions {
+  OptimizerOptions() {}
+
   /*
    * If true, completely remove jumps to blocks that are inferred to
    * be dead.  When false, dead blocks are replaced with Fatal
@@ -76,7 +78,8 @@ const struct {
    * constraint.
    */
   bool HardTypeHints = true;
-} options;
+};
+const OptimizerOptions options;
 
 //////////////////////////////////////////////////////////////////////
 

@@ -163,8 +163,6 @@ class Type {
     struct {
       bool m_arrayKindValid;
       ArrayData::ArrayKind m_arrayKind;
-      static_assert(sizeof(m_arrayKind) == 1,
-                    "Type expects ArrayKind to be one byte");
       char padding[6];
     };
   };

@@ -1368,7 +1368,7 @@ struct directory_data {
   }
 };
 IMPLEMENT_THREAD_LOCAL(directory_data, s_directory_data);
-InitFiniNode file_init([&] () {
+InitFiniNode file_init([]() {
   s_directory_data->defaultDirectory.detach();
 }, InitFiniNode::When::ThreadInit);
 

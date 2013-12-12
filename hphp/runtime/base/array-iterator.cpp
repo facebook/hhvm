@@ -1310,10 +1310,10 @@ int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 static NEVER_INLINE
 int64_t iter_next_free_arr(Iter* iter, HphpArray* arr) {
   assert(arr->getCount() == 1);
-  if (arr->m_kind == ArrayData::kPackedKind) {
+  if (arr->isPacked()) {
     HphpArray::ReleasePacked(arr);
   } else {
-    assert(arr->m_kind == ArrayData::kMixedKind);
+    assert(arr->isHphpArray());
     HphpArray::Release(arr);
   }
   if (debug) {

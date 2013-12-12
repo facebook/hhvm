@@ -400,6 +400,18 @@ struct CallData : IRExtraData {
   bool destroyLocals;
 };
 
+struct InGeneratorData : IRExtraData {
+  explicit InGeneratorData(bool inGenerator)
+    : inGenerator(inGenerator)
+  {}
+
+  std::string show() const {
+    return inGenerator ? "in generator" : "";
+  }
+
+  bool inGenerator;
+};
+
 /*
  * Name of a class constant.
  */
@@ -761,6 +773,8 @@ X(IncProfCounter,               TransIDData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallData);
 X(CallArray,                    CallArrayData);
+X(RetCtrl,                      InGeneratorData);
+X(FunctionExitSurpriseHook,     InGeneratorData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);
 X(LookupClsMethodCache,         ClsMethodData);

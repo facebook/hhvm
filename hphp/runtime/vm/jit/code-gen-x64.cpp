@@ -5730,7 +5730,7 @@ void CodeGenerator::cgFunctionExitSurpriseHook(IRInstruction* inst) {
   // To keep things simple in both the unwinder and the user profiler, we put
   // the return value onto the vm stack where it was coming into the RetC
   // instruction.
-  if (curFunc()->isGenerator()) {
+  if (inst->extra<InGeneratorData>()->inGenerator) {
     // sp points at the stack frame base, so there are no locals or iterators
     // to skip.
     cgStore(sp[-sizeof(TypedValue)], retVal, true);

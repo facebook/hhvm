@@ -898,7 +898,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(InlineReturn)) {
       FTRACE(3, "{}", show(m_state));
       m_state.frames.popInline(frameRoot(m_inst->src(0)->inst()));
-    } else if (m_inst->is(RetCtrl) && !m_frameState.func()->isGenerator()) {
+    } else if (m_inst->is(RetCtrl) &&
+               !m_inst->extra<InGeneratorData>()->inGenerator) {
       m_state.frames.pop();
     } else if (m_inst->is(Call, CallArray)) {
       resolveAllFrames();

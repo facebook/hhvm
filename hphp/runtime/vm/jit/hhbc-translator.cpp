@@ -1469,12 +1469,12 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
 
 void HhbcTranslator::emitContReturnControl() {
   auto const sp = spillStack();
-  emitRetSurpriseCheck(m_tb->genDefNull());
+  emitRetSurpriseCheck(m_tb->genDefNull(), true);
 
   auto const retAddr = gen(LdRetAddr, m_tb->fp());
   auto const fp = gen(FreeActRec, m_tb->fp());
 
-  gen(RetCtrl, sp, fp, retAddr);
+  gen(RetCtrl, InGeneratorData(true), sp, fp, retAddr);
   m_hasExit = true;
 }
 
@@ -2250,7 +2250,7 @@ void HhbcTranslator::emitNativeImpl() {
   SSATmp* sp = gen(RetAdjustStack, m_tb->fp());
   SSATmp* retAddr = gen(LdRetAddr, m_tb->fp());
   SSATmp* fp = gen(FreeActRec, m_tb->fp());
-  gen(RetCtrl, sp, fp, retAddr);
+  gen(RetCtrl, InGeneratorData(false), sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction so no ExitTrace is needed
   m_hasExit = true;
@@ -3057,12 +3057,12 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(StRetVal, m_tb->fp(), retVal);
   }
 
-  emitRetSurpriseCheck(retVal);
+  emitRetSurpriseCheck(retVal, false);
 
   // Free ActRec, and return control to caller.
   SSATmp* retAddr = gen(LdRetAddr, m_tb->fp());
   SSATmp* fp = gen(FreeActRec, m_tb->fp());
-  gen(RetCtrl, sp, fp, retAddr);
+  gen(RetCtrl, InGeneratorData(false), sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
   m_hasExit = true;
@@ -3080,7 +3080,7 @@ void HhbcTranslator::emitJmpSurpriseCheck() {
                });
 }
 
-void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal) {
+void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator) {
   emitRB(Trace::RBTypeFuncExit, curFunc()->fullName());
 
   m_tb->ifThen([&](Block* taken) {
@@ -3088,7 +3088,7 @@ void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal) {
                },
                [&] {
                  m_tb->hint(Block::Hint::Unlikely);
-                 gen(FunctionExitSurpriseHook,
+                 gen(FunctionExitSurpriseHook, InGeneratorData(inGenerator),
                      m_tb->fp(), m_tb->sp(), retVal);
                });
 

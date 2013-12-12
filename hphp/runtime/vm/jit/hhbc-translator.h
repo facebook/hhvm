@@ -743,7 +743,7 @@ private:
   SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
   void emitJmpSurpriseCheck();
-  void emitRetSurpriseCheck(SSATmp* retVal);
+  void emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator);
   void classExistsImpl(ClassKind);
 
   Type interpOutputType(const NormalizedInstruction&,

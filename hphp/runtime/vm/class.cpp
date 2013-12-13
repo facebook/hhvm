@@ -1084,7 +1084,8 @@ Class* Class::findSingleTraitWithMethod(const StringData* methName) {
   for (auto const& t : m_usedTraits) {
     if (t->m_methods.contains(methName)) {
       if (traitCls != nullptr) { // more than one trait contains method
-        return nullptr;
+        raise_error("more than one trait contains method '%s'",
+          methName->data());
       }
       traitCls = t.get();
     }

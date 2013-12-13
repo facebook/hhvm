@@ -592,7 +592,7 @@ void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
       cg.printPropertyHeader("functionName");
       cg.printValue(funcName);
       cg.printPropertyHeader("arguments");
-      printf("V:6:\"Vector\":1:{");
+      printf("V:9:\"HH\\Vector\":1:{");
       m_exp->outputCodeModel(cg);
       printf("}");
       cg.printPropertyHeader("sourceLocation");

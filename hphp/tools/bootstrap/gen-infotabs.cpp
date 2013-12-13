@@ -96,12 +96,12 @@ int main(int argc, const char* argv[]) {
 
   for (auto const& klass : classes) {
     if (!(klass.flags() & IsCppAbstract) && !(klass.flags() & ZendCompat)) {
-      cpp << "ObjectData* new_" << klass.name() << "_Instance(Class*);\n";
-      classesWithCtors.insert(klass.name());
+      cpp << "ObjectData* new_" << klass.getCppName() << "_Instance(Class*);\n";
+      classesWithCtors.insert(klass.getCppName());
     }
     for (auto const& func : klass.methods()) {
       if (func.flags() & ZendCompat) {
-        write_zend_func_stub(cpp, func, klass.name());
+        write_zend_func_stub(cpp, func, klass.getCppName());
       } else {
         cpp << "TypedValue* tg_" << func.getUniqueName()
             << "(ActRec* ar);\n";
@@ -141,10 +141,10 @@ int main(int argc, const char* argv[]) {
   cpp << "\n};\n\n";
 
   for (auto const& klass : classes) {
-    cpp << "static const long long hhbc_ext_method_count_" << klass.name()
+    cpp << "static const long long hhbc_ext_method_count_" << klass.getCppName()
         << " = " << klass.numMethods() << ";\n";
-    cpp << "static const HhbcExtMethodInfo hhbc_ext_methods_" << klass.name()
-        << "[] = {\n  ";
+    cpp << "static const HhbcExtMethodInfo hhbc_ext_methods_"
+        << klass.getCppName() << "[] = {\n  ";
     first = true;
     for (auto const& method : klass.methods()) {
       if (!first) {
@@ -154,7 +154,7 @@ int main(int argc, const char* argv[]) {
 
       auto name = method.getUniqueName();
       if (method.flags() & ZendCompat) {
-        name = klass.name() + "_" + method.name();
+        name = klass.getCppName() + "_" + method.name();
       }
       cpp << "{ \"" << method.name() << "\", tg_" << name << " }";
     }
@@ -168,7 +168,7 @@ int main(int argc, const char* argv[]) {
 
   for (auto& klass : classes) {
     cpp << "extern void "
-        << folly::to<std::string>("delete_", klass.name())
+        << folly::to<std::string>("delete_", klass.getCppName())
         << "(ObjectData*, const Class*);\n";
   }
 
@@ -180,14 +180,15 @@ int main(int argc, const char* argv[]) {
     }
     first = false;
 
-    auto ctor = classesWithCtors.count(klass.name()) > 0
-                 ? fbstring("new_") + klass.name() + "_Instance"
+    auto ctor = classesWithCtors.count(klass.getCppName()) > 0
+                 ? fbstring("new_") + klass.getCppName() + "_Instance"
                  : fbstring("nullptr");
-    auto dtor = classesWithCtors.count(klass.name()) > 0
-                 ? folly::to<std::string>("delete_", klass.name())
+
+    auto dtor = classesWithCtors.count(klass.getCppName()) > 0
+                 ? folly::to<std::string>("delete_", klass.getCppName())
                  : fbstring{"nullptr"};
 
-    auto cpp_name = klass.name();
+    auto cpp_name = klass.getCppName();
     if (klass.flags() & ZendCompat) {
       cpp_name = "ZendObjectData";
       ctor = "new_ZendObjectData_Instance";
@@ -195,15 +196,16 @@ int main(int argc, const char* argv[]) {
     }
 
     auto const c_cpp_name = "c_" + cpp_name;
-    cpp << "{ \"" << klass.name() << "\", " << ctor << "," << dtor
+    cpp << "{ \"" << escapeCpp(klass.getPhpName()) << "\", " << ctor
+        << "," << dtor
         << ", sizeof(" << c_cpp_name << ')'
         << ", intptr_t("
                "static_cast<ObjectData*>("
                  "reinterpret_cast<" << c_cpp_name << "*>(0x100)"
                ")"
              ") - 0x100"
-        << ", hhbc_ext_method_count_" << klass.name()
-        << ", hhbc_ext_methods_" << klass.name()
+        << ", hhbc_ext_method_count_" << klass.getCppName()
+        << ", hhbc_ext_methods_" << klass.getCppName()
         << ", &" << c_cpp_name << "::classof() }";
   }
   cpp << "\n};\n\n";

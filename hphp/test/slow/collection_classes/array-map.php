@@ -1,4 +1,4 @@
-<?php
+<?hh
 function plusOne($x) { return $x + 1; }
 function multiply($x, $y) {
   if (is_null($x)) $x = -1;

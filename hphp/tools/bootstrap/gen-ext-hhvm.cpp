@@ -524,15 +524,15 @@ void emitSlowPathHelper(const PhpFunc& func, const fbstring& prefix,
  * */
 static void emitClassCtorAndDtor(const PhpClass& klass, std::ostream& out) {
   if (!(klass.flags() & IsCppAbstract)) {
-    emitCtorHelper(klass.name(), out);
+    emitCtorHelper(klass.getCppName(), out);
     if (!(klass.flags() & CppCustomDelete)) {
-      emitDtorHelper(klass.name(), out);
+      emitDtorHelper(klass.getCppName(), out);
     }
   }
   if (klass.flags() & NoDefaultSweep) {
-    out << "IMPLEMENT_CLASS_NO_SWEEP(" << klass.name() << ");\n";
+    out << "IMPLEMENT_CLASS_NO_SWEEP(" << klass.getCppName() << ");\n";
   } else {
-    out << "IMPLEMENT_CLASS(" << klass.name() << ");\n";
+    out << "IMPLEMENT_CLASS(" << klass.getCppName() << ");\n";
   }
 }
 
@@ -743,7 +743,7 @@ int main(int argc, const char* argv[]) {
     g_mangleMap[func.getCppSig()] = &func;
   }
   for (auto const& klass : classes) {
-    g_classMap[klass.name()] = &klass;
+    g_classMap[klass.getCppName()] = &klass;
     for (auto const& func : klass.methods()) {
       g_mangleMap[func.getCppSig()] = &func;
     }

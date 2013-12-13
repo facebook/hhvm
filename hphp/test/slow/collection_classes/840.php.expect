@@ -1,4 +1,4 @@
-object(Vector)#6 (5) {
+object(HH\Vector)#6 (5) {
   [0]=>
   object(Map)#7 (1) {
     ["a"]=>

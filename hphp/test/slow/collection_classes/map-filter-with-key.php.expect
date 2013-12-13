@@ -3,7 +3,7 @@ callback(1, 2)
 callback(2, 3)
 callback(3, 4)
 ========
-Vector
+HH\Vector
 0 => 101
 1 => 102
 2 => 103
@@ -14,7 +14,7 @@ callback(1, 2)
 callback(2, 3)
 callback(3, 4)
 ========
-Vector
+HH\Vector
 0 => 1
 1 => 3
 ********
@@ -61,14 +61,14 @@ c => 3
 callback(0, 1)
 callback(1, 2)
 ========
-Vector
+HH\Vector
 0 => 101
 1 => 102
 ========
 callback(0, 1)
 callback(1, 2)
 ========
-Vector
+HH\Vector
 0 => 1
 
 

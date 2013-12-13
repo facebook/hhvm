@@ -232,7 +232,7 @@ void IfStatement::outputCodeModel(CodeGenerator &cg) {
     if (i > 0) {
       cg.printPropertyHeader("falseBlock");
       if (i < m_stmts->getCount() - 1) {
-        printf("V:6:\"Vector\":1:{");
+        printf("V:9:\"HH\\Vector\":1:{");
       }
     }
     if (condition != nullptr) {

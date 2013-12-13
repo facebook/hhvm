@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $mapFn = function ($t) {
  return Pair {

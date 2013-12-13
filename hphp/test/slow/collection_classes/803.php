@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 echo '=== Vector ===', "\n";
 $v = Vector {};

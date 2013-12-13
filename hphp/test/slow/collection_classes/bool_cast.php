@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   echo "=== Falsy ===\n";
@@ -20,7 +20,7 @@ function main() {
 
   echo "=== Reflection on Falsy ===\n";
   $rc_v  = new ReflectionClass($v);
-  var_dump($rc_v->getName() === 'Vector');
+  var_dump($rc_v->getName() === 'HH\Vector');
   $rc_m  = new ReflectionClass($m);
   var_dump($rc_m->getName() === 'Map');
   $rc_sm = new ReflectionClass($sm);

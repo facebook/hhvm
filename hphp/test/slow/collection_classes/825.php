@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $vec1 = Vector {
 11, 42, 73}

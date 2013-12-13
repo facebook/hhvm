@@ -1,4 +1,4 @@
-string(6) "Vector"
+string(9) "HH\Vector"
 array(2) {
   [0]=>
   string(1) "a"
@@ -38,7 +38,7 @@ array(2) {
   [2]=>
   int(2)
 }
-string(6) "Vector"
+string(9) "HH\Vector"
 array(2) {
   [0]=>
   string(1) "a"
@@ -78,7 +78,7 @@ array(2) {
   [2]=>
   int(2)
 }
-string(6) "Vector"
+string(9) "HH\Vector"
 array(2) {
   [0]=>
   string(1) "a"
@@ -118,7 +118,7 @@ array(2) {
   [2]=>
   int(2)
 }
-string(6) "Vector"
+string(9) "HH\Vector"
 array(2) {
   [0]=>
   string(1) "a"
@@ -170,7 +170,7 @@ array(2) {
   [1]=>
   string(1) "a"
 }
-string(6) "Vector"
+string(9) "HH\Vector"
 array(2) {
   [0]=>
   string(1) "a"

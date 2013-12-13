@@ -6,7 +6,7 @@
     ],
     "classes": [
         {
-            "name": "Vector",
+            "name": "HH_Vector",
             "ifaces": [
                 "MutableVector"
             ],

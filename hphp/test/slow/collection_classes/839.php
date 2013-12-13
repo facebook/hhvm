@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $obj = new stdclass();
 $x0 = Vector {

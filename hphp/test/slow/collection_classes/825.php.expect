@@ -7,7 +7,7 @@ int(2)
 string(1) "b"
 string(1) "z"
 int(9)
-object(Vector)#10 (3) {
+object(HH\Vector)#10 (3) {
   [0]=>
   object(Pair)#14 (2) {
     [0]=>
@@ -31,7 +31,7 @@ object(Vector)#10 (3) {
   }
 }
 ------------------------
-object(Vector)#19 (3) {
+object(HH\Vector)#19 (3) {
   [0]=>
   object(Pair)#20 (2) {
     [0]=>

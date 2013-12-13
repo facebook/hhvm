@@ -1,4 +1,4 @@
-<?php
+<?hh
 $x = Vector {'a'};
 var_dump($x->toValuesArray());
 var_dump($x->lazy()->toValuesArray());

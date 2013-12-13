@@ -1,4 +1,4 @@
-<?php
+<?hh
 function dump($x) {
   var_dump(get_class($x));
   var_dump((array)$x);

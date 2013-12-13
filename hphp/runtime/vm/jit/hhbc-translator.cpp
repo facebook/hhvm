@@ -974,7 +974,7 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
      */
     auto const val    = popC();
     auto const result = gen(ConcatCellCell, catchBlock, loc, val);
-    pushIncRef(stLocNRC(id, exitBlock, result));
+    pushIncRef(stLocNRC(id, nullptr, result));
     // ConcatCellCell does not DecRef its second argument,
     // so we need to do it here
     gen(DecRef, val);
@@ -988,7 +988,7 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
       loc->isA(Type::Bool) ? gen(ConvBoolToInt, loc) : loc,
       val->isA(Type::Bool) ? gen(ConvBoolToInt, val) : val
     );
-    pushStLoc(id, exitBlock, result);
+    pushStLoc(id, nullptr, result);
     return;
   }
 
@@ -5131,7 +5131,6 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
 
   // It's important that the IncRef happens after the LdRef, since the
   // LdRef is also a guard on the inner type and may side-exit.
-  assert(exit);
   auto const innerCell = gen(
     LdRef, oldLoc->type().innerType(), exit, oldLoc
   );

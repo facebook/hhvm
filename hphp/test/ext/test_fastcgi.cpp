@@ -388,7 +388,7 @@ bool TestFastCGIServer::VerifyExchange(const TestMessageExchange& mx,
             printf("Error while receiving payload\n");
             result = false;
           } else if (recv_len.toInt32() < len) {
-            printf("Too little date received\n");
+            printf("Too little data received\n");
             result = false;
           } else {
             CHECK(recv_len.toInt32() == len);

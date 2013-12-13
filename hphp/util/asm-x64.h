@@ -62,10 +62,6 @@ struct ScaledIndex;
 struct ScaledIndexDisp;
 struct DispReg;
 
-const int kNumGPRegs  = 16;
-const int kNumXMMRegs = 16;
-const int kNumRegs    = kNumGPRegs + kNumXMMRegs;
-
 const uint8_t kOpsizePrefix = 0x66;
 
 /*

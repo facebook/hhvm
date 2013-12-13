@@ -19,6 +19,9 @@
 
 namespace HPHP { namespace Transl {
 
+int PhysReg::kNumGP = 0;
+int PhysReg::kNumSIMD = 0;
+
 PhysRegSaverParity::PhysRegSaverParity(int parity, X64Assembler& as,
                                        RegSet regs)
     : m_as(as)

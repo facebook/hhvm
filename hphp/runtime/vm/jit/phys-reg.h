@@ -21,7 +21,21 @@
 
 #include "hphp/vixl/a64/assembler-a64.h"
 
+#include "hphp/runtime/vm/jit/arch.h"
+
 namespace HPHP { namespace Transl {
+
+namespace X64 {
+constexpr auto kNumGPRegs   = 16;
+constexpr auto kNumSIMDRegs = 16;
+constexpr auto kNumRegs     = kNumGPRegs + kNumSIMDRegs;
+}
+
+namespace ARM {
+constexpr auto kNumGPRegs   = 31;
+constexpr auto kNumSIMDRegs = 32;
+constexpr auto kNumRegs     = kNumGPRegs + kNumSIMDRegs;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -37,6 +51,22 @@ namespace HPHP { namespace Transl {
  * (e.g. store_reg##_disp_reg##).
  */
 struct PhysReg {
+ private:
+  static constexpr auto kMaxRegs = 64;
+  static constexpr auto kSIMDOffset = 32;
+  static_assert(kSIMDOffset >= X64::kNumGPRegs, "");
+  static_assert(kSIMDOffset >= ARM::kNumGPRegs, "");
+  static_assert(kMaxRegs - kSIMDOffset >= X64::kNumSIMDRegs, "");
+  static_assert(kMaxRegs - kSIMDOffset >= ARM::kNumSIMDRegs, "");
+  static_assert(kMaxRegs >= X64::kNumRegs, "");
+  static_assert(kMaxRegs >= ARM::kNumRegs, "");
+
+  // These are populated in Map's constructor, because they depend on a
+  // RuntimeOption.
+  static int kNumGP;
+  static int kNumSIMD;
+
+ public:
   enum Type {
     GP,
     SIMD,
@@ -44,7 +74,7 @@ struct PhysReg {
   };
   explicit constexpr PhysReg() : n(-1) {}
   constexpr /* implicit */ PhysReg(Reg64 r) : n(int(r)) {}
-  constexpr /* implicit */ PhysReg(RegXMM r) : n(int(r) + kNumGPRegs) {}
+  constexpr /* implicit */ PhysReg(RegXMM r) : n(int(r) + kSIMDOffset) {}
   explicit constexpr PhysReg(Reg32 r) : n(int(RegNumber(r))) {}
 
   constexpr /* implicit */ PhysReg(vixl::Register r) : n(r.code()) {}
@@ -56,11 +86,11 @@ struct PhysReg {
     return Reg64(n);
   }
   constexpr /* implicit */ operator RegNumber() const {
-    return n < kNumGPRegs ? RegNumber(n) : RegNumber(n - kNumGPRegs);
+    return n < kSIMDOffset ? RegNumber(n) : RegNumber(n - kSIMDOffset);
   }
   /* implicit */ operator RegXMM() const {
     assert(isSIMD() || n == -1);
-    return RegXMM(n - kNumGPRegs);
+    return RegXMM(n - kSIMDOffset);
   }
 
   /* implicit */ operator vixl::Register() const {
@@ -73,11 +103,11 @@ struct PhysReg {
   }
 
   Type type() const {
-    assert(n >= 0 && n < kNumRegs);
-    return n < kNumGPRegs ? GP : SIMD;
+    assert(n >= 0 && n < kMaxRegs);
+    return n < kSIMDOffset ? GP : SIMD;
   }
-  bool isGP () const { return n >= 0 && n < kNumGPRegs; }
-  bool isSIMD() const { return n >= kNumGPRegs && n < kNumRegs; }
+  bool isGP () const { return n >= 0 && n < kSIMDOffset; }
+  bool isSIMD() const { return n >= kSIMDOffset && n < kMaxRegs; }
   constexpr bool operator==(PhysReg r) const { return n == r.n; }
   constexpr bool operator!=(PhysReg r) const { return n != r.n; }
   constexpr bool operator==(Reg64 r) const { return Reg64(n) == r; }
@@ -117,7 +147,22 @@ struct PhysReg {
    */
   template<typename T>
   struct Map {
-    Map() : m_elms() {}
+    Map() : m_elms() {
+      // These are used in operator++ to determine how to iterate. They're
+      // initialized here because they depend on a RuntimeOption so they can't
+      // be inited at static init time.
+      if (kNumGP == 0 || kNumSIMD == 0) {
+        if (JIT::arch() == JIT::Arch::X64) {
+          kNumGP = X64::kNumGPRegs;
+          kNumSIMD = X64::kNumSIMDRegs;
+        } else if (JIT::arch() == JIT::Arch::ARM) {
+          kNumGP = ARM::kNumGPRegs;
+          kNumSIMD = ARM::kNumSIMDRegs;
+        } else {
+          not_implemented();
+        }
+      }
+    }
 
     T& operator[](const PhysReg& r) {
       assert(r.n != -1);
@@ -140,6 +185,11 @@ struct PhysReg {
 
       iterator& operator++() {
         idx++;
+        if (idx == kNumGP) {
+          idx = kSIMDOffset;
+        } else if (idx == kSIMDOffset + kNumSIMD) {
+          idx = kMaxRegs;
+        }
         return *this;
       }
 
@@ -156,7 +206,7 @@ struct PhysReg {
     }
 
    private:
-    T m_elms[kNumRegs];
+    T m_elms[kMaxRegs];
   };
 
 private:
@@ -243,13 +293,13 @@ struct RegSet {
 
   RegSet& remove(PhysReg pr) {
     if (pr != InvalidReg) {
-      m_bits = m_bits & ~(1 << pr.n);
+      m_bits = m_bits & ~(uint64_t(1) << pr.n);
     }
     return *this;
   }
 
   bool contains(PhysReg pr) const {
-    return bool(m_bits & (1 << pr.n));
+    return bool(m_bits & (uint64_t(1) << pr.n));
   }
 
   bool empty() const {

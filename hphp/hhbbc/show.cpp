@@ -302,20 +302,14 @@ std::string show(const Bytecode& bc) {
       break;
     case Op::IncDecL: case Op::IncDecN: case Op::IncDecG:
     case Op::IncDecS: case Op::IncDecM:
-#     define INCDEC_OP(x) case x: ret += #x; break;
-      switch (static_cast<IncDecOp>(subop)) {
-        INCDEC_OPS
-        case IncDec_invalid: break;
-      }
+#     define INCDEC_OP(x) case IncDecOp::x: ret += #x; break;
+      switch (static_cast<IncDecOp>(subop)) { INCDEC_OPS }
 #     undef INCDEC_OP
       break;
     case Op::SetOpL: case Op::SetOpN: case Op::SetOpG:
     case Op::SetOpS: case Op::SetOpM:
-#     define SETOP_OP(x, y) case SetOp##x: ret += #x; break;
-      switch (static_cast<SetOpOp>(subop)) {
-        SETOP_OPS
-        case SetOp_invalid: break;
-      }
+#     define SETOP_OP(x, y) case SetOpOp::x: ret += #x; break;
+      switch (static_cast<SetOpOp>(subop)) { SETOP_OPS }
 #     undef SETOP_OP
       break;
     case Op::BareThis:

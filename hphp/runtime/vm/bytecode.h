@@ -45,38 +45,37 @@ namespace HPHP {
 #define IOP_PASS(pc)    pc
 
 ALWAYS_INLINE
-void SETOP_BODY_CELL(Cell* lhs, unsigned char op, Cell* rhs) {
+void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
   assert(cellIsPlausible(*lhs));
   assert(cellIsPlausible(*rhs));
 
   switch (op) {
-  case SetOpPlusEqual:      cellAddEq(*lhs, *rhs); break;
-  case SetOpMinusEqual:     cellSubEq(*lhs, *rhs); break;
-  case SetOpMulEqual:       cellMulEq(*lhs, *rhs); break;
-  case SetOpDivEqual:       cellDivEq(*lhs, *rhs); break;
-  case SetOpModEqual:       cellModEq(*lhs, *rhs); break;
-  case SetOpConcatEqual:
+  case SetOpOp::PlusEqual:      cellAddEq(*lhs, *rhs); return;
+  case SetOpOp::MinusEqual:     cellSubEq(*lhs, *rhs); return;
+  case SetOpOp::MulEqual:       cellMulEq(*lhs, *rhs); return;
+  case SetOpOp::DivEqual:       cellDivEq(*lhs, *rhs); return;
+  case SetOpOp::ModEqual:       cellModEq(*lhs, *rhs); return;
+  case SetOpOp::ConcatEqual:
     concat_assign(tvAsVariant(lhs), cellAsCVarRef(*rhs).toString());
-    break;
-  case SetOpAndEqual:       cellBitAndEq(*lhs, *rhs); break;
-  case SetOpOrEqual:        cellBitOrEq(*lhs, *rhs);  break;
-  case SetOpXorEqual:       cellBitXorEq(*lhs, *rhs); break;
+    return;
+  case SetOpOp::AndEqual:       cellBitAndEq(*lhs, *rhs); return;
+  case SetOpOp::OrEqual:        cellBitOrEq(*lhs, *rhs);  return;
+  case SetOpOp::XorEqual:       cellBitXorEq(*lhs, *rhs); return;
 
-  case SetOpSlEqual:
+  case SetOpOp::SlEqual:
     cellCastToInt64InPlace(lhs);
     lhs->m_data.num <<= cellToInt(*rhs);
-    break;
-  case SetOpSrEqual:
+    return;
+  case SetOpOp::SrEqual:
     cellCastToInt64InPlace(lhs);
     lhs->m_data.num >>= cellToInt(*rhs);
-    break;
-  default:
-    not_reached();
+    return;
   }
+  not_reached();
 }
 
 ALWAYS_INLINE
-void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
+void SETOP_BODY(TypedValue* lhs, SetOpOp op, Cell* rhs) {
   SETOP_BODY_CELL(tvToCell(lhs), op, rhs);
 }
 

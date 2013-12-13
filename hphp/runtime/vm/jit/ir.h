@@ -1000,7 +1000,7 @@ namespace constToBits_detail {
 
   template<class T>
   typename std::enable_if<needs_promotion<T>::value,uint64_t>::type
-  promoteIfNeeded(T t) { return t; }
+  promoteIfNeeded(T t) { return static_cast<uint64_t>(t); }
 
   template<class T>
   typename std::enable_if<!needs_promotion<T>::value,T>::type

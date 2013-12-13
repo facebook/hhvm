@@ -3664,20 +3664,18 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         switch (op) {
           case T_INC:
           case T_DEC: {
-            int cop = IncDec_invalid;
-            if (op == T_INC) {
-              if (u->getFront()) {
-                cop = PreInc;
-              } else {
-                cop = PostInc;
+            auto const cop = [&] {
+              if (op == T_INC) {
+                if (u->getFront()) {
+                  return IncDecOp::PreInc;
+                }
+                return IncDecOp::PostInc;
               }
-            } else {
               if (u->getFront()) {
-                cop = PreDec;
-              } else {
-                cop = PostDec;
+                return IncDecOp::PreDec;
               }
-            }
+              return IncDecOp::PostDec;
+            }();
             emitIncDec(e, cop);
             break;
           }
@@ -5720,24 +5718,29 @@ void EmitterVisitor::emitSet(Emitter& e) {
   }
 }
 
-void EmitterVisitor::emitSetOp(Emitter& e, int op) {
+void EmitterVisitor::emitSetOp(Emitter& e, int tokenOp) {
   if (checkIfStackEmpty("SetOp*")) return;
 
-  unsigned char cop = SetOp_invalid;
-  switch (op) {
-  case T_PLUS_EQUAL: cop = SetOpPlusEqual; break;
-  case T_MINUS_EQUAL: cop = SetOpMinusEqual; break;
-  case T_MUL_EQUAL: cop = SetOpMulEqual; break;
-  case T_DIV_EQUAL: cop = SetOpDivEqual; break;
-  case T_CONCAT_EQUAL: cop = SetOpConcatEqual; break;
-  case T_MOD_EQUAL: cop = SetOpModEqual; break;
-  case T_AND_EQUAL: cop = SetOpAndEqual; break;
-  case T_OR_EQUAL: cop = SetOpOrEqual; break;
-  case T_XOR_EQUAL: cop = SetOpXorEqual; break;
-  case T_SL_EQUAL: cop = SetOpSlEqual; break;
-  case T_SR_EQUAL: cop = SetOpSrEqual; break;
-  default: assert(false);
-  }
+  auto const op = [&] {
+    switch (tokenOp) {
+    case T_PLUS_EQUAL:   return SetOpOp::PlusEqual;
+    case T_MINUS_EQUAL:  return SetOpOp::MinusEqual;
+    case T_MUL_EQUAL:    return SetOpOp::MulEqual;
+    case T_DIV_EQUAL:    return SetOpOp::DivEqual;
+    case T_CONCAT_EQUAL: return SetOpOp::ConcatEqual;
+    case T_MOD_EQUAL:    return SetOpOp::ModEqual;
+    case T_AND_EQUAL:    return SetOpOp::AndEqual;
+    case T_OR_EQUAL:     return SetOpOp::OrEqual;
+    case T_XOR_EQUAL:    return SetOpOp::XorEqual;
+    case T_SL_EQUAL:     return SetOpOp::SlEqual;
+    case T_SR_EQUAL:     return SetOpOp::SrEqual;
+    default:             break;
+    }
+    not_reached();
+  }();
+
+  auto const iop = static_cast<uint8_t>(op);
+
   int iLast = m_evalStack.size()-2;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
@@ -5745,13 +5748,13 @@ void EmitterVisitor::emitSetOp(Emitter& e, int op) {
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
-      case StackSym::L:  e.SetOpL(m_evalStack.getLoc(i), cop); break;
+      case StackSym::L:  e.SetOpL(m_evalStack.getLoc(i), iop); break;
       case StackSym::LN: emitCGetL2(e); // fall through
-      case StackSym::CN: e.SetOpN(cop); break;
+      case StackSym::CN: e.SetOpN(iop); break;
       case StackSym::LG: emitCGetL2(e); // fall through
-      case StackSym::CG: e.SetOpG(cop); break;
+      case StackSym::CG: e.SetOpG(iop); break;
       case StackSym::LS: emitCGetL3(e); // fall through
-      case StackSym::CS: e.SetOpS(cop); break;
+      case StackSym::CS: e.SetOpS(iop); break;
       default: {
         unexpectedStackSym(sym, "emitSetOp");
         break;
@@ -5760,7 +5763,7 @@ void EmitterVisitor::emitSetOp(Emitter& e, int op) {
   } else {
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, true, e);
-    e.SetOpM(cop, vectorImm);
+    e.SetOpM(iop, vectorImm);
   }
 }
 
@@ -5793,8 +5796,10 @@ void EmitterVisitor::emitBind(Emitter& e) {
   }
 }
 
-void EmitterVisitor::emitIncDec(Emitter& e, unsigned char cop) {
+void EmitterVisitor::emitIncDec(Emitter& e, IncDecOp op) {
   if (checkIfStackEmpty("IncDec*")) return;
+
+  auto const iop = static_cast<uint8_t>(op);
 
   emitClsIfSPropBase(e);
   int iLast = m_evalStack.size()-1;
@@ -5804,13 +5809,13 @@ void EmitterVisitor::emitIncDec(Emitter& e, unsigned char cop) {
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
-      case StackSym::L:  e.IncDecL(m_evalStack.getLoc(i), cop); break;
+      case StackSym::L: e.IncDecL(m_evalStack.getLoc(i), iop); break;
       case StackSym::LN: e.CGetL(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CN: e.IncDecN(cop); break;
+      case StackSym::CN: e.IncDecN(iop); break;
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CG: e.IncDecG(cop); break;
+      case StackSym::CG: e.IncDecG(iop); break;
       case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CS: e.IncDecS(cop); break;
+      case StackSym::CS: e.IncDecS(iop); break;
       default: {
         unexpectedStackSym(sym, "emitIncDec");
         break;
@@ -5819,7 +5824,7 @@ void EmitterVisitor::emitIncDec(Emitter& e, unsigned char cop) {
   } else {
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, true, e);
-    e.IncDecM(cop, vectorImm);
+    e.IncDecM(iop, vectorImm);
   }
 }
 

@@ -211,6 +211,7 @@ const StaticString s_include("include");
 #define DECODE_LA(var) DECODE_IVA(var)
 #define DECODE_IA(var) DECODE_IVA(var)
 #define DECODE_OA(var) DECODE(unsigned char, var)
+#define DECODE_OA_TYPED(var, type) DECODE(type, var)
 
 #define DECODE_ITER_LIST(typeList, idList, vecLen) \
   DECODE(int32_t, vecLen);                         \
@@ -5127,7 +5128,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetWithRefRM(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopSetOpL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
-  DECODE_OA(op);
+  DECODE_OA_TYPED(op, SetOpOp);
   Cell* fr = m_stack.topC();
   Cell* to = tvToCell(frame_local(m_fp, local));
   SETOP_BODY_CELL(to, op, fr);
@@ -5137,7 +5138,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpL(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpN(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA_TYPED(op, SetOpOp);
   StringData* name;
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
@@ -5155,7 +5156,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpN(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpG(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA_TYPED(op, SetOpOp);
   StringData* name;
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
@@ -5173,7 +5174,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpG(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpS(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA_TYPED(op, SetOpOp);
   Cell* fr = m_stack.topC();
   TypedValue* classref = m_stack.indTV(1);
   TypedValue* propn = m_stack.indTV(2);
@@ -5197,7 +5198,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpS(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpM(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA_TYPED(op, SetOpOp);
   DECLARE_SETHELPER_ARGS
   if (!setHelperPre<MoreWarnings, true, false, false, 1,
       VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS)) {
@@ -5238,7 +5239,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpM(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopIncDecL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
-  DECODE_OA(op);
+  DECODE_OA_TYPED(op, IncDecOp);
   TypedValue* to = m_stack.allocTV();
   tvWriteUninit(to);
   TypedValue* fr = frame_local(m_fp, local);
@@ -5247,11 +5248,10 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecL(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecN(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA_TYPED(op, IncDecOp);
   StringData* name;
   TypedValue* nameCell = m_stack.topTV();
   TypedValue* local = nullptr;
-  // XXX We're probably not getting warnings totally correct here
   lookupd_var(m_fp, name, nameCell, local);
   assert(local != nullptr);
   IncDecBody<true>(op, local, nameCell);
@@ -5260,11 +5260,10 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecN(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecG(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA_TYPED(op, IncDecOp);
   StringData* name;
   TypedValue* nameCell = m_stack.topTV();
   TypedValue* gbl = nullptr;
-  // XXX We're probably not getting warnings totally correct here
   lookupd_gbl(m_fp, name, nameCell, gbl);
   assert(gbl != nullptr);
   IncDecBody<true>(op, gbl, nameCell);
@@ -5281,14 +5280,14 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecS(IOP_ARGS) {
                 name->data());
   }
   tvRefcountedDecRefCell(nameCell);
-  IncDecBody<true>(op, val, output);
+  IncDecBody<true>(static_cast<IncDecOp>(op), val, output);
   m_stack.discard();
   SPROP_OP_POSTLUDE
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecM(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA_TYPED(op, IncDecOp);
   DECLARE_SETHELPER_ARGS
   TypedValue to;
   tvWriteUninit(&to);

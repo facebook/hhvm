@@ -1548,7 +1548,7 @@ HELPER_TABLE(INCDEC)
 #undef INCDEC
 
 void HhbcTranslator::MInstrTranslator::emitIncDecProp() {
-  IncDecOp op = IncDecOp(m_ni.imm[0].u_OA);
+  IncDecOp op = static_cast<IncDecOp>(m_ni.imm[0].u_OA);
   SSATmp* key = getKey();
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue,
                                MInstrState*, IncDecOp);
@@ -2499,11 +2499,11 @@ static inline TypedValue setOpElemImpl(TypedValue* base, TypedValue keyVal,
   return ret;
 }
 
-#define OPELEM_TABLE(m, nm, op)                 \
+#define OPELEM_TABLE(m, nm, pfx, op)            \
   /* name          op */                        \
-  m(nm##op##ElemC, op)
+  m(nm##op##ElemC, pfx op)
 
-#define HELPER_TABLE(m, op) OPELEM_TABLE(m, setOp, SetOp##op)
+#define HELPER_TABLE(m, op) OPELEM_TABLE(m, setOp, SetOpOp::, op)
 #define SETOP(nm, ...)                                                  \
 TypedValue nm(TypedValue* base, TypedValue key, Cell val,               \
                      MInstrState* mis) {                                \
@@ -2538,7 +2538,7 @@ static inline TypedValue incDecElemImpl(TypedValue* base, TypedValue keyVal,
   return result;
 }
 
-#define HELPER_TABLE(m, op) OPELEM_TABLE(m, incDec, op)
+#define HELPER_TABLE(m, op) OPELEM_TABLE(m, incDec, IncDecOp::, op)
 #define INCDEC(nm, ...)                                                 \
 TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) {     \
   return incDecElemImpl<__VA_ARGS__>(base, key, mis);                   \
@@ -2551,7 +2551,7 @@ INCDEC_OPS
 #undef INCDEC
 
 void HhbcTranslator::MInstrTranslator::emitIncDecElem() {
-  IncDecOp op = IncDecOp(m_ni.imm[0].u_OA);
+  IncDecOp op = static_cast<IncDecOp>(m_ni.imm[0].u_OA);
   SSATmp* key = getKey();
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
 # define INCDEC_OP(op) HELPER_TABLE(FILL_ROW, op)

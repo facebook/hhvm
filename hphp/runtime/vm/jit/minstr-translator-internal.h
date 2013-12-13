@@ -45,9 +45,9 @@ static const MInstrAttr WarnDefineReffy = MInstrAttr(Warn | Define | Reffy);
  * on a variable number of bool and enum arguments. */
 
 template<typename T> constexpr unsigned bitWidth() {
-  static_assert(IncDec_invalid == 4,
+  static_assert(kNumIncDecOps == 4,
                 "IncDecOp enum must fit in 2 bits");
-  static_assert(SetOp_invalid == 11,
+  static_assert(kNumSetOpOps == 11,
                 "SetOpOp enum must fit in 4 bits");
   return std::is_same<T, bool>::value ? 1
     : std::is_same<T, KeyType>::value ? 2

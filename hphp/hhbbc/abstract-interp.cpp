@@ -881,7 +881,7 @@ struct InterpStepper : boost::static_visitor<void> {
       auto resultTy = eval_cell([&] {
         Cell c = *locVal;
         Cell rhs = *v1;
-        SETOP_BODY_CELL(&c, op.subop, &rhs);
+        SETOP_BODY_CELL(&c, static_cast<SetOpOp>(op.subop), &rhs);
         return c;
       });
 
@@ -922,8 +922,8 @@ struct InterpStepper : boost::static_visitor<void> {
     if (!val) return push(TInitCell); // Only constants for now
 
     auto const subop = static_cast<IncDecOp>(op.subop);
-    auto const pre = subop == PreInc || subop == PreDec;
-    auto const inc = subop == PreInc || subop == PostInc;
+    auto const pre = subop == IncDecOp::PreInc || subop == IncDecOp::PreDec;
+    auto const inc = subop == IncDecOp::PreInc || subop == IncDecOp::PostInc;
 
     if (!pre) push(loc);
 

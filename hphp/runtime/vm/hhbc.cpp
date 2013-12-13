@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/base/zend-string.h"

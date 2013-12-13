@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/system/systemlib.h"
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/int.hpp>
@@ -422,10 +423,10 @@ class ObjectData {
 
   void setProp(Class* ctx, const StringData* key, TypedValue* val,
                bool bindingAssignment = false);
-  TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, unsigned char op,
+  TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
                         const StringData* key, Cell* val);
   template <bool setResult>
-  void incDecProp(TypedValue& tvRef, Class* ctx, unsigned char op,
+  void incDecProp(TypedValue& tvRef, Class* ctx, IncDecOp op,
                   const StringData* key, TypedValue& dest);
   void unsetProp(Class* ctx, const StringData* key);
 

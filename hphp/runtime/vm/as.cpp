@@ -65,8 +65,6 @@
  *     structures.  (It might make sense to do this via something like
  *     a .line directive at some point.)
  *
- *   - SetOpOp and IncDecOp op names are not implemented.
- *
  *   - You can't currently create non-top functions or non-hoistable
  *     classes.
  *
@@ -782,7 +780,7 @@ template<class Target> Target read_opcode_arg(AsmState& as) {
   }
 }
 
-uint8_t read_AssertT_arg(AsmState& as) {
+uint8_t read_AssertTOp(AsmState& as) {
   auto const str = read_opcode_arg<std::string>(as);
 #define ASSERTT_OP(x) if (str == #x) return static_cast<uint8_t>(AssertTOp::x);
   ASSERTT_OPS
@@ -791,7 +789,7 @@ uint8_t read_AssertT_arg(AsmState& as) {
   NOT_REACHED();
 }
 
-uint8_t read_Fatal_arg(AsmState& as) {
+uint8_t read_FatalOp(AsmState& as) {
   auto const str = read_opcode_arg<std::string>(as);
 #define FATAL_OP(x) if (str == #x) return static_cast<uint8_t>(FatalOp::x);
   FATAL_OPS
@@ -800,12 +798,30 @@ uint8_t read_Fatal_arg(AsmState& as) {
   NOT_REACHED();
 }
 
-uint8_t read_IsType_arg(AsmState& as) {
+uint8_t read_IsTypeOp(AsmState& as) {
   auto const str = read_opcode_arg<std::string>(as);
 #define IS_TYPE_OP(x) if (str == #x) return static_cast<uint8_t>(IsTypeOp::x);
   IS_TYPE_OPS
 #undef FATAL_OP
   as.error("unknown IsType operand");
+  NOT_REACHED();
+}
+
+uint8_t read_IncDecOp(AsmState& as) {
+  auto const str = read_opcode_arg<std::string>(as);
+#define INCDEC_OP(x) if (str == #x) return static_cast<uint8_t>(IncDecOp::x);
+  INCDEC_OPS
+#undef INCDEC_OP
+  as.error("unknown IncDec operand");
+  NOT_REACHED();
+}
+
+uint8_t read_SetOpOp(AsmState& as) {
+  auto const str = read_opcode_arg<std::string>(as);
+#define SETOP_OP(x, y) if (str == #x) return static_cast<uint8_t>(SetOpOp::x);
+  SETOP_OPS
+#undef SETOP_OP
+  as.error("unknown SetOp operand");
   NOT_REACHED();
 }
 
@@ -1050,16 +1066,31 @@ OpcodeParserMap opcode_parsers;
                    read_opcode_arg<std::string>(as)))
 #define IMM_IA   as.ue->emitIVA(as.getIterId( \
                    read_opcode_arg<int32_t>(as)))
+
 #define IMM_OA   as.ue->emitByte(                                       \
-                    (thisOpcode == Op::AssertTL ||                      \
-                     thisOpcode == Op::AssertTStk ||                    \
-                     thisOpcode == Op::PredictTL ||                     \
-                     thisOpcode == Op::PredictTStk) ? read_AssertT_arg(as) : \
-                    thisOpcode == Op::Fatal ? read_Fatal_arg(as) :      \
-                    (thisOpcode == Op::IsTypeL ||                       \
-                     thisOpcode == Op::IsTypeC) ? read_IsType_arg(as) : \
-                    uint8_t(read_opcode_arg<int32_t>(as)))
-                     // TODO more subop names
+                   [&]() -> uint8_t {                                   \
+                     switch (thisOpcode) {                              \
+                     case Op::AssertTL: case Op::AssertTStk:            \
+                     case Op::PredictTL: case Op::PredictTStk:          \
+                       return read_AssertTOp(as);                       \
+                     case Op::Fatal:                                    \
+                       return read_FatalOp(as);                         \
+                     case Op::IsTypeL: case Op::IsTypeC:                \
+                       return read_IsTypeOp(as);                        \
+                     case Op::IncDecL: case Op::IncDecN: case Op::IncDecG: \
+                     case Op::IncDecS: case Op::IncDecM:                \
+                       return read_IncDecOp(as);                        \
+                     case Op::SetOpL: case Op::SetOpN: case Op::SetOpG: \
+                     case Op::SetOpS: case Op::SetOpM:                  \
+                        return read_SetOpOp(as);                        \
+                     default:                                           \
+                       /* case for unsupported subop names */           \
+                       return static_cast<uint8_t>(                     \
+                         read_opcode_arg<int32_t>(as));                 \
+                     }                                                  \
+                   }()                                                  \
+                 );
+
 #define IMM_AA   as.ue->emitInt32(as.ue->mergeArray(read_litarray(as)))
 
 /*

@@ -853,32 +853,31 @@ IRTranslator::translateAKExists(const NormalizedInstruction& ni) {
 
 void
 IRTranslator::translateSetOpL(const NormalizedInstruction& i) {
-  Opcode opc;
-  switch (i.imm[1].u_OA) {
-    case SetOpPlusEqual:   opc = Add;    break;
-    case SetOpMinusEqual:  opc = Sub;    break;
-    case SetOpMulEqual:    opc = Mul;    break;
-    case SetOpDivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
-    case SetOpConcatEqual: opc = ConcatCellCell; break;
-    case SetOpModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
-    case SetOpAndEqual:    opc = BitAnd; break;
-    case SetOpOrEqual:     opc = BitOr;  break;
-    case SetOpXorEqual:    opc = BitXor; break;
-    case SetOpSlEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shl);
-    case SetOpSrEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shr);
-    default: not_reached();
-  }
+  auto const opc = [&] {
+    switch (static_cast<SetOpOp>(i.imm[1].u_OA)) {
+    case SetOpOp::PlusEqual:   return Add;
+    case SetOpOp::MinusEqual:  return Sub;
+    case SetOpOp::MulEqual:    return Mul;
+    case SetOpOp::DivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
+    case SetOpOp::ConcatEqual: return ConcatCellCell;
+    case SetOpOp::ModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
+    case SetOpOp::AndEqual:    return BitAnd;
+    case SetOpOp::OrEqual:     return BitOr;
+    case SetOpOp::XorEqual:    return BitXor;
+    case SetOpOp::SlEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shl);
+    case SetOpOp::SrEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shr);
+    }
+    not_reached();
+  }();
   HHIR_EMIT(SetOpL, opc, i.imm[0].u_LA);
 }
 
 void
 IRTranslator::translateIncDecL(const NormalizedInstruction& i) {
-  const IncDecOp oplet = IncDecOp(i.imm[1].u_OA);
-  assert(oplet == PreInc || oplet == PostInc || oplet == PreDec ||
-         oplet == PostDec);
-  bool post = (oplet == PostInc || oplet == PostDec);
+  const IncDecOp oplet = static_cast<IncDecOp>(i.imm[1].u_OA);
+  bool post = (oplet == IncDecOp::PostInc || oplet == IncDecOp::PostDec);
   bool pre  = !post;
-  bool inc  = (oplet == PostInc || oplet == PreInc);
+  bool inc  = (oplet == IncDecOp::PostInc || oplet == IncDecOp::PreInc);
 
   HHIR_EMIT(IncDecL, pre, inc, i.imm[0].u_LA);
 }

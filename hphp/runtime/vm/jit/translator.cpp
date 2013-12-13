@@ -679,31 +679,30 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
   assert(inputs.size() == 2);
   const int kValIdx = 0;
   const int kLocIdx = 1;
-  unsigned char op = ni->imm[1].u_OA;
+  auto const op = static_cast<SetOpOp>(ni->imm[1].u_OA);
   DynLocation locLocation(inputs[kLocIdx]->location,
                           inputs[kLocIdx]->rtt.unbox());
   assert(inputs[kLocIdx]->location.isLocal());
   switch (op) {
-    case SetOpPlusEqual:
-    case SetOpMinusEqual:
-    case SetOpMulEqual: {
-      // Same as OutArith, except we have to fiddle with inputs a bit.
-      vector<DynLocation*> arithInputs;
-      arithInputs.push_back(&locLocation);
-      arithInputs.push_back(inputs[kValIdx]);
-      return RuntimeType(inferType(ArithRules, arithInputs));
-    }
-    case SetOpConcatEqual: return RuntimeType(KindOfString);
-    case SetOpDivEqual:
-    case SetOpModEqual:    return RuntimeType(KindOfAny);
-    case SetOpAndEqual:
-    case SetOpOrEqual:
-    case SetOpXorEqual:    return bitOpType(&locLocation, inputs[kValIdx]);
-    case SetOpSlEqual:
-    case SetOpSrEqual:     return RuntimeType(KindOfInt64);
-    default:
-      not_reached();
+  case SetOpOp::PlusEqual:
+  case SetOpOp::MinusEqual:
+  case SetOpOp::MulEqual: {
+    // Same as OutArith, except we have to fiddle with inputs a bit.
+    vector<DynLocation*> arithInputs;
+    arithInputs.push_back(&locLocation);
+    arithInputs.push_back(inputs[kValIdx]);
+    return RuntimeType(inferType(ArithRules, arithInputs));
   }
+  case SetOpOp::ConcatEqual: return RuntimeType(KindOfString);
+  case SetOpOp::DivEqual:
+  case SetOpOp::ModEqual:    return RuntimeType(KindOfAny);
+  case SetOpOp::AndEqual:
+  case SetOpOp::OrEqual:
+  case SetOpOp::XorEqual:    return bitOpType(&locLocation, inputs[kValIdx]);
+  case SetOpOp::SlEqual:
+  case SetOpOp::SrEqual:     return RuntimeType(KindOfInt64);
+  }
+  not_reached();
 }
 
 static RuntimeType

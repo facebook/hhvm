@@ -1370,7 +1370,7 @@ void ObjectData::setProp(Class* ctx,
 }
 
 TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
-                                  unsigned char op, const StringData* key,
+                                  SetOpOp op, const StringData* key,
                                   Cell* val) {
   bool visible, accessible, unset;
   auto propVal = getProp(ctx, key, visible, accessible, unset);
@@ -1460,7 +1460,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
 template <bool setResult>
 void ObjectData::incDecProp(TypedValue& tvRef,
                             Class* ctx,
-                            unsigned char op,
+                            IncDecOp op,
                             const StringData* key,
                             TypedValue& dest) {
   bool visible, accessible, unset;
@@ -1535,12 +1535,12 @@ void ObjectData::incDecProp(TypedValue& tvRef,
 
 template void ObjectData::incDecProp<true>(TypedValue&,
                                            Class*,
-                                           unsigned char,
+                                           IncDecOp,
                                            const StringData*,
                                            TypedValue&);
 template void ObjectData::incDecProp<false>(TypedValue&,
                                             Class*,
-                                            unsigned char,
+                                            IncDecOp,
                                             const StringData*,
                                             TypedValue&);
 

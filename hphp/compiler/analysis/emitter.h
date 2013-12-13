@@ -708,7 +708,7 @@ public:
   void emitSet(Emitter& e);
   void emitSetOp(Emitter& e, int op);
   void emitBind(Emitter& e);
-  void emitIncDec(Emitter& e, unsigned char cop);
+  void emitIncDec(Emitter& e, IncDecOp cop);
   void emitPop(Emitter& e);
   void emitConvertToCell(Emitter& e);
   void emitConvertToCellIfVar(Emitter& e);

@@ -4439,19 +4439,17 @@ Type bitOpResult(Type t1, Type t2) {
 
 Type setOpResult(Type locType, Type valType, SetOpOp op) {
   switch (op) {
-    case SetOpPlusEqual:
-    case SetOpMinusEqual:
-    case SetOpMulEqual:    return arithOpResult(locType.unbox(), valType);
-    case SetOpConcatEqual: return Type::Str;
-    case SetOpDivEqual:
-    case SetOpModEqual:    return Type::Cell;
-    case SetOpAndEqual:
-    case SetOpOrEqual:
-    case SetOpXorEqual:    return bitOpResult(locType.unbox(), valType);
-    case SetOpSlEqual:
-    case SetOpSrEqual:     return Type::Int;
-
-    case SetOp_invalid:    not_reached();
+  case SetOpOp::PlusEqual:
+  case SetOpOp::MinusEqual:
+  case SetOpOp::MulEqual:    return arithOpResult(locType.unbox(), valType);
+  case SetOpOp::ConcatEqual: return Type::Str;
+  case SetOpOp::DivEqual:
+  case SetOpOp::ModEqual:    return Type::Cell;
+  case SetOpOp::AndEqual:
+  case SetOpOp::OrEqual:
+  case SetOpOp::XorEqual:    return bitOpResult(locType.unbox(), valType);
+  case SetOpOp::SlEqual:
+  case SetOpOp::SrEqual:     return Type::Int;
   }
   not_reached();
 }

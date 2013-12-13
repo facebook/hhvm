@@ -17,7 +17,8 @@
 #ifndef incl_HPHP_VM_HHBC_H_
 #define incl_HPHP_VM_HHBC_H_
 
-#include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/hphp-value.h"
 
 namespace HPHP {
 
@@ -298,7 +299,6 @@ inline MCodeImm memberCodeImmType(MemberCode mc) {
   not_reached();
 }
 
-
 inline int mcodeStackVals(MemberCode mc) {
   return !memberCodeHasImm(mc) && mc != MW ? 1 : 0;
 }
@@ -315,12 +315,12 @@ MemberCode parseMemberCode(const char*);
   INCDEC_OP(PostInc) \
   INCDEC_OP(PreDec) \
   INCDEC_OP(PostDec)
+constexpr int kNumIncDecOps = 4;
 
-enum IncDecOp {
+enum class IncDecOp : uint8_t {
 #define INCDEC_OP(incDecOp) incDecOp,
   INCDEC_OPS
 #undef INCDEC_OP
-  IncDec_invalid
 };
 
 #define IS_TYPE_OPS                             \
@@ -407,12 +407,12 @@ enum class FatalOp : uint8_t {
   SETOP_OP(XorEqual,    OpBitXor) \
   SETOP_OP(SlEqual,     OpShl) \
   SETOP_OP(SrEqual,     OpShr)
+constexpr int kNumSetOpOps = 11;
 
-enum SetOpOp {
-#define SETOP_OP(setOpOp, bcOp) SetOp##setOpOp,
+enum class SetOpOp : uint8_t {
+#define SETOP_OP(setOpOp, bcOp) setOpOp,
   SETOP_OPS
 #undef SETOP_OP
-  SetOp_invalid
 };
 
 //  name             immediates        inputs           outputs     flags

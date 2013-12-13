@@ -654,38 +654,6 @@ void ArrayData::serialize(VariableSerializer *serializer,
   }
 }
 
-bool ArrayData::hasInternalReference(PointerSet &vars,
-                                     bool ds /* = false */) const {
-  if (isSharedArray()) return false;
-  for (ArrayIter iter(this); iter; ++iter) {
-    CVarRef var = iter.secondRef();
-    if (var.isReferenced()) {
-      Variant *pvar = var.getRefData();
-      if (vars.find(pvar) != vars.end()) {
-        return true;
-      }
-      vars.insert(pvar);
-    }
-    if (var.isObject()) {
-      ObjectData *pobj = var.getObjectData();
-      if (vars.find(pobj) != vars.end()) {
-        return true;
-      }
-      vars.insert(pobj);
-      if (ds && pobj->instanceof(SystemLib::s_SerializableClass)) {
-        return true;
-      }
-      if (pobj->hasInternalReference(vars, ds)) {
-        return true;
-      }
-    } else if (var.isArray() &&
-               var.getArrayData()->hasInternalReference(vars, ds)) {
-      return true;
-    }
-  }
-  return false;
-}
-
 CVarRef ArrayData::get(CVarRef k, bool error) const {
   assert(IsValidKey(k));
   auto const cell = k.asCell();

@@ -30,9 +30,10 @@ APCHandle* APCArray::MakeShared(ArrayData* arr,
                                 bool inner,
                                 bool unserializeObj) {
   if (!inner) {
-    // only need to call hasInternalReference() on the toplevel array
-    PointerSet seen;
-    if (arr->hasInternalReference(seen)) {
+    // only need to call traverseData() on the toplevel array
+    DataWalker walker(DataWalker::LookupFeature::Default);
+    DataWalker::DataFeature features = walker.traverseData(arr);
+    if (features.isCircular() || features.hasCollection()) {
       String s = apc_serialize(arr);
       APCHandle* handle = APCString::MakeShared(KindOfArray, s.get());
       handle->setSerializedArray();

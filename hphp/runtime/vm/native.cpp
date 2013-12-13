@@ -134,7 +134,10 @@ bool coerceFCallArgs(TypedValue* args,
                      int32_t numArgs, int32_t numNonDefault,
                      const Func* func) {
   assert(numArgs == func->numParams());
-  bool zendParamMode = func->methInfo() &&
+
+  // funcs without a methInfo struct are HNI (with a struct are IDL)
+  // All HNI functions have ZPM enabled by default
+  bool zendParamMode = !func->methInfo() ||
                        func->methInfo()->attribute & ClassInfo::ZendParamMode;
 
   for (int32_t i = 0; (i < numNonDefault) && (i < numArgs); i++) {

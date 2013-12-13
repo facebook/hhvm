@@ -6767,7 +6767,6 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
   Emitter e(meth, m_ue, *this);
   Label topOfBody(e);
-  emitMethodPrologue(e, meth);
 
   Offset base = m_ue.bcPos();
   fe->setBuiltinFunc(bif, nif, attributes, base);

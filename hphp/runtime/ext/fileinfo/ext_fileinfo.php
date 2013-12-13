@@ -16,7 +16,7 @@ class finfo {
    *   empty string will be equivalent to the default value.
    */
   public function finfo(int $options = FILEINFO_NONE,
-                        string $magic_file = NULL): finfo {
+                        string $magic_file = ""): finfo {
     $this->resource = finfo_open($options, $magic_file);
   }
 
@@ -36,7 +36,7 @@ class finfo {
    */
   public function buffer(string $string = NULL,
                          int $options = FILEINFO_NONE,
-                         resource $context = NULL): string {
+                         ?resource $context = NULL): string {
     return finfo_buffer($this->resource, $string, $options, $context);
   }
 
@@ -52,7 +52,7 @@ class finfo {
    */
   public function file(string $file_name = NULL,
                        int $options = FILEINFO_NONE,
-                       resource $context = NULL): string {
+                       ?resource $context = NULL): string {
     return finfo_file($this->resource, $file_name, $options, $context);
   }
 
@@ -84,7 +84,7 @@ class finfo {
 function finfo_buffer(resource $finfo,
                       string $string = NULL,
                       int $options = FILEINFO_NONE,
-                      resource $context = NULL): string;
+                      ?resource $context = NULL): string;
 
 /**
  * Close fileinfo resource
@@ -108,10 +108,10 @@ function finfo_close(resource $finfo): bool;
  *   filename argument, or FALSE if an error occurred.
  */
 <<__Native>>
-function finfo_file(resouce $finfo,
+function finfo_file(resource $finfo,
                     string $file_name = NULL,
                     int $options = FILEINFO_NONE,
-                    resource $context = NULL): string;
+                    ?resource $context = NULL): string;
 
 /**
  * Create a new fileinfo resource

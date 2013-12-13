@@ -210,7 +210,8 @@ class PHPUnitPatterns {
 
   static string $hhvm_warning_pattern =
                                      "/^(HipHop|HHVM|hhvm) (Warning|Notice)/";
-  static string $hhvm_fatal_pattern = "/(^(HipHop|HHVM|hhvm) Fatal)|(^hhvm)/";
+  static string $hhvm_fatal_pattern =
+  "/(^(HipHop|HHVM|hhvm) Fatal)|(^hhvm:)|(^Core dumped: Segmentation fault)/";
 
   static string $test_method_name_pattern = "/public function test|\@test/";
 }
@@ -1979,6 +1980,20 @@ class Runner {
     // 1) Assetic\Test\Asset\HttpAssetTest::testGetLastModified <---- print
     // No tests executed! <----- print
     $print_blanks = false; // Only print blanks after the first test is found
+
+    // Sometimes when PHPUnit is done printing its post test information, hhvm
+    // fatals. This is not good, but it currently happens nonetheless. Here
+    // is an example:
+    //
+    // FAILURES!
+    // Tests: 3, Assertions: 15, Failures: 2.  <--- EXPECTED LAST LINE (STATS)
+    // Core dumped: Segmentation fault   <--- But, we can get this and below
+    // /home/joelm/bin/hhvm: line 1: 28417 Segmentation fault
+    //
+    // Let's separate this from the actual post test info where we are trying
+    // to get statistics.
+    $post_test_fatal = false;
+
     do
     {
       $line = $this->getLine();
@@ -1995,16 +2010,38 @@ class Runner {
           continue;
         }
         $line = remove_string_from_text($line, __DIR__, "");
-        $this->error_information .= $line.PHP_EOL;
-        if (preg_match($this->framework->getTestNamePattern(), $line) === 1) {
-          $print_blanks = true;
-          $this->error_information .= PHP_EOL.
-                                      $this->getTestRunStr($line,
-                                                           "RUN TEST FILE: ").
-                                      PHP_EOL.PHP_EOL;
+        if ($this->checkForFatals($line)) {
+          // Only print header the first time we arrive here
+          if (!$post_test_fatal) {
+            $this->fatal_information .= "POST-TEST FATAL FOR ".
+                                        $this->name.PHP_EOL;
+            $this->fatal_information .= PHP_EOL.
+                                        $this->getTestRunStr("",
+                                                             "RUN TEST FILE: ").
+                                        PHP_EOL;
+            $post_test_fatal = true;
+          }
+          $this->fatal_information .= $line.PHP_EOL;
+          continue;
+        }
+        if (!$post_test_fatal) {
+          $this->error_information .= $line.PHP_EOL;
+          if (preg_match($this->framework->getTestNamePattern(), $line) === 1) {
+            $print_blanks = true;
+            $this->error_information .= PHP_EOL.
+                                        $this->getTestRunStr($line,
+                                                             "RUN TEST FILE: ").
+                                        PHP_EOL.PHP_EOL;
+          }
         }
       }
     } while ($line !== null);
+
+    // Add a newline to the fatal file if we had a post-test fatal for better
+    // visual
+    if ($post_test_fatal) {
+      $this->fatal_information .= PHP_EOL;
+    }
 
     // The last non-null line in the error file would have been the real stat
     // information for pass percentage purposes. Take that out of the error

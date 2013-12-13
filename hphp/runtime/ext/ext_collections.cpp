@@ -1916,7 +1916,6 @@ void c_Map::grow(uint32_t newCap, uint32_t newMask) {
 }
 
 void c_Map::compact() {
-  assert(m_size);
   auto* elms = data();
   assert(elms);
   auto mask = m_tableMask;

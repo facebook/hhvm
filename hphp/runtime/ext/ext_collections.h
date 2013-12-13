@@ -542,8 +542,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection|
   void compact();
 
   c_Map::Elm& allocElm(int32_t* ei) {
-    assert(!validPos(*ei) && m_used < m_cap);
-    assert(m_size != 0 || m_used == 0);
+    assert(!validPos(*ei) && m_size <= m_used && m_used < m_cap);
     size_t i = m_used;
     (*ei) = i;
     m_used = i + 1;

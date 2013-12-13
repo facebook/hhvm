@@ -525,9 +525,9 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         ok = false;
         break;
       case Op::IsTypeC: case Op::IsTypeL:
-#define IS_TYPE_OP(x)  if (op == static_cast<uint8_t>(IsTypeOp::x)) break;
-        IS_TYPE_OPS
-#undef IS_TYPE_OP
+#define ISTYPE_OP(x)  if (op == static_cast<uint8_t>(IsTypeOp::x)) break;
+        ISTYPE_OPS
+#undef ISTYPE_OP
         error("invalid operation for IsType*: %d\n", op);
         ok = false;
         break;
@@ -551,7 +551,7 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         if (op > 1) ok = false;
         break;
       case OpFatal:
-#define FATAL_OP(x) if (FatalOp::x == static_cast<FatalOp>(op)) break;
+#define FATAL_OP(x)   if (op == static_cast<uint8_t>(FatalOp::x)) break;
         FATAL_OPS
 #undef FATAL_OP
         error("invalid error kind for Fatal: %d\n", op);

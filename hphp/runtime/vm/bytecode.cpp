@@ -210,8 +210,7 @@ const StaticString s_include("include");
 
 #define DECODE_LA(var) DECODE_IVA(var)
 #define DECODE_IA(var) DECODE_IVA(var)
-#define DECODE_OA(var) DECODE(unsigned char, var)
-#define DECODE_OA_TYPED(var, type) DECODE(type, var)
+#define DECODE_OA      DECODE
 
 #define DECODE_ITER_LIST(typeList, idList, vecLen) \
   DECODE(int32_t, vecLen);                         \
@@ -4057,7 +4056,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFatal(IOP_ARGS) {
   NEXT();
   TypedValue* top = m_stack.topTV();
   std::string msg;
-  DECODE_OA(kind_char);
+  DECODE_OA(FatalOp, kind_char);
   if (IS_STRING_TYPE(top->m_type)) {
     msg = top->m_data.pstr->data();
   } else {
@@ -4065,7 +4064,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFatal(IOP_ARGS) {
   }
   m_stack.popTV();
 
-  switch (static_cast<FatalOp>(kind_char)) {
+  switch (kind_char) {
   case FatalOp::RuntimeOmitFrame:
     raise_error_without_first_frame(msg);
     break;
@@ -4729,22 +4728,22 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
 OPTBLD_INLINE void VMExecutionContext::iopIsTypeL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
-  DECODE_OA(op);
+  DECODE_OA(IsTypeOp, op);
   TypedValue* tv = frame_local(m_fp, local);
   if (tv->m_type == KindOfUninit) {
     raise_undefined_local(m_fp, local);
   }
   TypedValue* topTv = m_stack.allocTV();
-  topTv->m_data.num = isTypeHelper(tv, static_cast<IsTypeOp>(op));
+  topTv->m_data.num = isTypeHelper(tv, op);
   topTv->m_type = KindOfBoolean;
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopIsTypeC(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA(IsTypeOp, op);
   TypedValue* topTv = m_stack.topTV();
   assert(topTv->m_type != KindOfRef);
-  bool ret = isTypeHelper(topTv, static_cast<IsTypeOp>(op));
+  bool ret = isTypeHelper(topTv, op);
   tvRefcountedDecRefCell(topTv);
   topTv->m_data.num = ret;
   topTv->m_type = KindOfBoolean;
@@ -4842,27 +4841,27 @@ OPTBLD_INLINE static void implAssertT(TypedValue* tv, AssertTOp op) {
 OPTBLD_INLINE void VMExecutionContext::iopAssertTL(IOP_ARGS) {
   NEXT();
   DECODE_LA(localId);
-  DECODE_OA(op);
-  implAssertT(frame_local(m_fp, localId), static_cast<AssertTOp>(op));
+  DECODE_OA(AssertTOp, op);
+  implAssertT(frame_local(m_fp, localId), op);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopAssertTStk(IOP_ARGS) {
   NEXT();
   DECODE_IVA(stkSlot);
-  DECODE_OA(op);
-  implAssertT(m_stack.indTV(stkSlot), static_cast<AssertTOp>(op));
+  DECODE_OA(AssertTOp, op);
+  implAssertT(m_stack.indTV(stkSlot), op);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopPredictTL(IOP_ARGS) {
   NEXT();
   DECODE_LA(localId);
-  DECODE_OA(op);
+  DECODE_OA(AssertTOp, op);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopPredictTStk(IOP_ARGS) {
   NEXT();
   DECODE_IVA(stkSlot);
-  DECODE_OA(op);
+  DECODE_OA(AssertTOp, op);
 }
 
 OPTBLD_INLINE static void implAssertObj(TypedValue* tv,
@@ -5128,7 +5127,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetWithRefRM(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopSetOpL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
-  DECODE_OA_TYPED(op, SetOpOp);
+  DECODE_OA(SetOpOp, op);
   Cell* fr = m_stack.topC();
   Cell* to = tvToCell(frame_local(m_fp, local));
   SETOP_BODY_CELL(to, op, fr);
@@ -5138,7 +5137,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpL(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpN(IOP_ARGS) {
   NEXT();
-  DECODE_OA_TYPED(op, SetOpOp);
+  DECODE_OA(SetOpOp, op);
   StringData* name;
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
@@ -5156,7 +5155,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpN(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpG(IOP_ARGS) {
   NEXT();
-  DECODE_OA_TYPED(op, SetOpOp);
+  DECODE_OA(SetOpOp, op);
   StringData* name;
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
@@ -5174,7 +5173,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpG(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpS(IOP_ARGS) {
   NEXT();
-  DECODE_OA_TYPED(op, SetOpOp);
+  DECODE_OA(SetOpOp, op);
   Cell* fr = m_stack.topC();
   TypedValue* classref = m_stack.indTV(1);
   TypedValue* propn = m_stack.indTV(2);
@@ -5198,7 +5197,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpS(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpM(IOP_ARGS) {
   NEXT();
-  DECODE_OA_TYPED(op, SetOpOp);
+  DECODE_OA(SetOpOp, op);
   DECLARE_SETHELPER_ARGS
   if (!setHelperPre<MoreWarnings, true, false, false, 1,
       VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS)) {
@@ -5239,7 +5238,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpM(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopIncDecL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
-  DECODE_OA_TYPED(op, IncDecOp);
+  DECODE_OA(IncDecOp, op);
   TypedValue* to = m_stack.allocTV();
   tvWriteUninit(to);
   TypedValue* fr = frame_local(m_fp, local);
@@ -5248,7 +5247,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecL(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecN(IOP_ARGS) {
   NEXT();
-  DECODE_OA_TYPED(op, IncDecOp);
+  DECODE_OA(IncDecOp, op);
   StringData* name;
   TypedValue* nameCell = m_stack.topTV();
   TypedValue* local = nullptr;
@@ -5260,7 +5259,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecN(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecG(IOP_ARGS) {
   NEXT();
-  DECODE_OA_TYPED(op, IncDecOp);
+  DECODE_OA(IncDecOp, op);
   StringData* name;
   TypedValue* nameCell = m_stack.topTV();
   TypedValue* gbl = nullptr;
@@ -5273,21 +5272,21 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecG(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopIncDecS(IOP_ARGS) {
   StringData* name;
   SPROP_OP_PRELUDE
-  DECODE_OA(op);
+  DECODE_OA(IncDecOp, op);
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 clsref->m_data.pcls->name()->data(),
                 name->data());
   }
   tvRefcountedDecRefCell(nameCell);
-  IncDecBody<true>(static_cast<IncDecOp>(op), val, output);
+  IncDecBody<true>(op, val, output);
   m_stack.discard();
   SPROP_OP_POSTLUDE
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecM(IOP_ARGS) {
   NEXT();
-  DECODE_OA_TYPED(op, IncDecOp);
+  DECODE_OA(IncDecOp, op);
   DECLARE_SETHELPER_ARGS
   TypedValue to;
   tvWriteUninit(&to);
@@ -6682,13 +6681,16 @@ OPTBLD_INLINE void VMExecutionContext::iopThis(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopBareThis(IOP_ARGS) {
   NEXT();
-  DECODE_OA(notice);
+  DECODE_OA(BareThisOp, bto);
   if (m_fp->hasThis()) {
     ObjectData* this_ = m_fp->getThis();
     m_stack.pushObject(this_);
   } else {
     m_stack.pushNull();
-    if (notice) raise_notice(Strings::WARN_NULL_THIS);
+    switch (bto) {
+    case BareThisOp::Notice:   raise_notice(Strings::WARN_NULL_THIS); break;
+    case BareThisOp::NoNotice: break;
+    }
   }
 }
 

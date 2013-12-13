@@ -293,56 +293,22 @@ std::string show(const Bytecode& bc) {
     ret += ">";
   };
 
-  auto append_subop = [&] (Op curOpcode, uint8_t subop) {
-    switch (curOpcode) {
-    case Op::AssertTL: case Op::AssertTStk:
-#     define ASSERTT_OP(x) case AssertTOp::x: ret += #x; break;
-      switch (static_cast<AssertTOp>(subop)) { ASSERTT_OPS }
-#     undef ASSERTT_OP
-      break;
-    case Op::IncDecL: case Op::IncDecN: case Op::IncDecG:
-    case Op::IncDecS: case Op::IncDecM:
-#     define INCDEC_OP(x) case IncDecOp::x: ret += #x; break;
-      switch (static_cast<IncDecOp>(subop)) { INCDEC_OPS }
-#     undef INCDEC_OP
-      break;
-    case Op::SetOpL: case Op::SetOpN: case Op::SetOpG:
-    case Op::SetOpS: case Op::SetOpM:
-#     define SETOP_OP(x, y) case SetOpOp::x: ret += #x; break;
-      switch (static_cast<SetOpOp>(subop)) { SETOP_OPS }
-#     undef SETOP_OP
-      break;
-    case Op::BareThis:
-      ret += folly::to<std::string>(uint32_t{subop});
-      break;
-    case Op::Fatal:
-#     define FATAL_OP(x) case FatalOp::x: ret += #x; break;
-      switch (static_cast<FatalOp>(subop)) { FATAL_OPS }
-#     undef FATAL_OP
-      break;
-    case Op::IsTypeL: case Op::IsTypeC:
-#     define IS_TYPE_OP(x) case IsTypeOp::x: ret += #x; break;
-      switch (static_cast<IsTypeOp>(subop)) { IS_TYPE_OPS }
-#     undef IS_TYPE_OP
-      break;
-    default: always_assert(0 && "unknown opcode with subop"); break;
-    }
-  };
-
-#define IMM_MA(n)     ret += " "; append_mvec(data.mvec);
-#define IMM_BLA(n)    ret += " "; append_switch(data.targets);
-#define IMM_SLA(n)    ret += " "; append_sswitch(data.targets);
-#define IMM_ILA(n)    ret += " "; append_itertab(data.iterTab);
-#define IMM_IVA(n)    folly::toAppend(" ", data.arg##n, &ret);
-#define IMM_I64A(n)   folly::toAppend(" ", data.arg##n, &ret);
-#define IMM_LA(n)     ret += " " + local_string(data.loc##n);
-#define IMM_IA(n)     folly::toAppend(" iter:", data.iter##n->id, &ret);
-#define IMM_DA(n)     folly::toAppend(" ", data.dbl##n, &ret);
-#define IMM_SA(n)     folly::toAppend(" ", escaped_string(data.str##n), &ret);
-#define IMM_AA(n)     ret += " " + array_string(data.arr##n);
-#define IMM_BA(n)     folly::toAppend(" <blk:", data.target->id, ">", &ret);
-#define IMM_OA(n)     ret += " "; append_subop(curOpcode, data.subop);
-#define IMM_VSA(n)    ret += " "; append_vsa(data.keys);
+#define IMM_MA(n)      ret += " "; append_mvec(data.mvec);
+#define IMM_BLA(n)     ret += " "; append_switch(data.targets);
+#define IMM_SLA(n)     ret += " "; append_sswitch(data.targets);
+#define IMM_ILA(n)     ret += " "; append_itertab(data.iterTab);
+#define IMM_IVA(n)     folly::toAppend(" ", data.arg##n, &ret);
+#define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
+#define IMM_LA(n)      ret += " " + local_string(data.loc##n);
+#define IMM_IA(n)      folly::toAppend(" iter:", data.iter##n->id, &ret);
+#define IMM_DA(n)      folly::toAppend(" ", data.dbl##n, &ret);
+#define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);
+#define IMM_AA(n)      ret += " " + array_string(data.arr##n);
+#define IMM_BA(n)      folly::toAppend(" <blk:", data.target->id, ">", &ret);
+#define IMM_OA_IMPL(n) /* empty */
+#define IMM_OA(type)   folly::toAppend(" ", subopToName(data.subop), &ret); \
+                       IMM_OA_IMPL
+#define IMM_VSA(n)     ret += " "; append_vsa(data.keys);
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -376,6 +342,7 @@ std::string show(const Bytecode& bc) {
 #undef IMM_SA
 #undef IMM_AA
 #undef IMM_BA
+#undef IMM_OA_IMPL
 #undef IMM_OA
 
 #undef IMM_NA

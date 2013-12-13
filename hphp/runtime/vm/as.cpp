@@ -780,48 +780,13 @@ template<class Target> Target read_opcode_arg(AsmState& as) {
   }
 }
 
-uint8_t read_AssertTOp(AsmState& as) {
+template<class SubOpType>
+uint8_t read_subop(AsmState& as) {
   auto const str = read_opcode_arg<std::string>(as);
-#define ASSERTT_OP(x) if (str == #x) return static_cast<uint8_t>(AssertTOp::x);
-  ASSERTT_OPS
-#undef ASSERTT_OP
-  as.error("unknown AssertT/PredictT operand");
-  NOT_REACHED();
-}
-
-uint8_t read_FatalOp(AsmState& as) {
-  auto const str = read_opcode_arg<std::string>(as);
-#define FATAL_OP(x) if (str == #x) return static_cast<uint8_t>(FatalOp::x);
-  FATAL_OPS
-#undef FATAL_OP
-  as.error("unknown Fatal operand");
-  NOT_REACHED();
-}
-
-uint8_t read_IsTypeOp(AsmState& as) {
-  auto const str = read_opcode_arg<std::string>(as);
-#define IS_TYPE_OP(x) if (str == #x) return static_cast<uint8_t>(IsTypeOp::x);
-  IS_TYPE_OPS
-#undef FATAL_OP
-  as.error("unknown IsType operand");
-  NOT_REACHED();
-}
-
-uint8_t read_IncDecOp(AsmState& as) {
-  auto const str = read_opcode_arg<std::string>(as);
-#define INCDEC_OP(x) if (str == #x) return static_cast<uint8_t>(IncDecOp::x);
-  INCDEC_OPS
-#undef INCDEC_OP
-  as.error("unknown IncDec operand");
-  NOT_REACHED();
-}
-
-uint8_t read_SetOpOp(AsmState& as) {
-  auto const str = read_opcode_arg<std::string>(as);
-#define SETOP_OP(x, y) if (str == #x) return static_cast<uint8_t>(SetOpOp::x);
-  SETOP_OPS
-#undef SETOP_OP
-  as.error("unknown SetOp operand");
+  if (auto const ty = nameToSubop<SubOpType>(str.c_str())) {
+    return static_cast<uint8_t>(*ty);
+  }
+  as.error("unknown subop name");
   NOT_REACHED();
 }
 
@@ -1053,45 +1018,21 @@ OpcodeParserMap opcode_parsers;
 
 #define IMM_VSA \
   std::vector<std::string> vecImm = read_strvector(as);                 \
-  auto vecImmStackValues = vecImm.size();                               \
-  as.ue->emitInt32(vecImmStackValues);                                    \
+  auto const vecImmStackValues = vecImm.size();                         \
+  as.ue->emitInt32(vecImmStackValues);                                  \
   for (size_t i = 0; i < vecImmStackValues; ++i) {                      \
     as.ue->emitInt32(as.ue->mergeLitstr(String(vecImm[i]).get()));      \
   }
 
-#define IMM_SA   as.ue->emitInt32(as.ue->mergeLitstr(read_litstr(as)))
-#define IMM_I64A as.ue->emitInt64(read_opcode_arg<int64_t>(as))
-#define IMM_DA   as.ue->emitDouble(read_opcode_arg<double>(as))
-#define IMM_LA   as.ue->emitIVA(as.getLocalId(  \
-                   read_opcode_arg<std::string>(as)))
-#define IMM_IA   as.ue->emitIVA(as.getIterId( \
-                   read_opcode_arg<int32_t>(as)))
-
-#define IMM_OA   as.ue->emitByte(                                       \
-                   [&]() -> uint8_t {                                   \
-                     switch (thisOpcode) {                              \
-                     case Op::AssertTL: case Op::AssertTStk:            \
-                     case Op::PredictTL: case Op::PredictTStk:          \
-                       return read_AssertTOp(as);                       \
-                     case Op::Fatal:                                    \
-                       return read_FatalOp(as);                         \
-                     case Op::IsTypeL: case Op::IsTypeC:                \
-                       return read_IsTypeOp(as);                        \
-                     case Op::IncDecL: case Op::IncDecN: case Op::IncDecG: \
-                     case Op::IncDecS: case Op::IncDecM:                \
-                       return read_IncDecOp(as);                        \
-                     case Op::SetOpL: case Op::SetOpN: case Op::SetOpG: \
-                     case Op::SetOpS: case Op::SetOpM:                  \
-                        return read_SetOpOp(as);                        \
-                     default:                                           \
-                       /* case for unsupported subop names */           \
-                       return static_cast<uint8_t>(                     \
-                         read_opcode_arg<int32_t>(as));                 \
-                     }                                                  \
-                   }()                                                  \
-                 );
-
-#define IMM_AA   as.ue->emitInt32(as.ue->mergeArray(read_litarray(as)))
+#define IMM_SA     as.ue->emitInt32(as.ue->mergeLitstr(read_litstr(as)))
+#define IMM_I64A   as.ue->emitInt64(read_opcode_arg<int64_t>(as))
+#define IMM_DA     as.ue->emitDouble(read_opcode_arg<double>(as))
+#define IMM_LA     as.ue->emitIVA(as.getLocalId(  \
+                     read_opcode_arg<std::string>(as)))
+#define IMM_IA     as.ue->emitIVA(as.getIterId( \
+                     read_opcode_arg<int32_t>(as)))
+#define IMM_OA(ty) as.ue->emitByte(read_subop<ty>(as));
+#define IMM_AA     as.ue->emitInt32(as.ue->mergeArray(read_litarray(as)))
 
 /*
  * There can currently be no more than one immvector per instruction,

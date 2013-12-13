@@ -328,7 +328,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define DEC_SA const StringData*
 #define DEC_AA ArrayData*
 #define DEC_BA Label&
-#define DEC_OA uchar
+#define DEC_OA(type) type
 #define DEC_VSA std::vector<std::string>&
 
 #define POP_NOV
@@ -401,7 +401,8 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define POP_LA_SA(i)
 #define POP_LA_AA(i)
 #define POP_LA_BA(i)
-#define POP_LA_OA(i)
+#define POP_LA_IMPL(x)
+#define POP_LA_OA(i) POP_LA_IMPL
 #define POP_LA_VSA(i)
 
 #define POP_LA_LA(i) \
@@ -577,11 +578,11 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #define IMPL3_BA IMPL_BA(a3)
 #define IMPL4_BA IMPL_BA(a4)
 
-#define IMPL_OA(var) getUnitEmitter().emitByte(var)
-#define IMPL1_OA IMPL_OA(a1)
-#define IMPL2_OA IMPL_OA(a2)
-#define IMPL3_OA IMPL_OA(a3)
-#define IMPL4_OA IMPL_OA(a4)
+#define IMPL_OA(var) getUnitEmitter().emitByte(static_cast<uint8_t>(var))
+#define IMPL1_OA(type) IMPL_OA(a1)
+#define IMPL2_OA(type) IMPL_OA(a2)
+#define IMPL3_OA(type) IMPL_OA(a3)
+#define IMPL4_OA(type) IMPL_OA(a4)
  OPCODES
 #undef O
 #undef ONE
@@ -633,6 +634,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef POP_LA_SA
 #undef POP_LA_AA
 #undef POP_LA_BA
+#undef POP_LA_IMPL
 #undef POP_LA_OA
 #undef POP_LA_LA
 #undef PUSH_NOV
@@ -4662,7 +4664,10 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
                              false, 0, 0);
               e.This();
             } else {
-              e.BareThis(!sv->hasContext(Expression::ExistContext));
+              auto const subop = sv->hasContext(Expression::ExistContext)
+                ? BareThisOp::NoNotice
+                : BareThisOp::Notice;
+              e.BareThis(subop);
             }
           }
         } else {
@@ -5580,7 +5585,7 @@ void EmitterVisitor::emitIsset(Emitter& e) {
       // the R and C cases can go.
       case StackSym::R:  e.UnboxR(); // fall through
       case StackSym::C:
-        e.IsTypeC(static_cast<uint8_t>(IsTypeOp::Null));
+        e.IsTypeC(IsTypeOp::Null);
         e.Not();
         break;
       default: {
@@ -5601,13 +5606,10 @@ void EmitterVisitor::emitIsType(Emitter& e, IsTypeOp op) {
   emitConvertToCellOrLoc(e);
   switch (char sym = m_evalStack.top()) {
   case StackSym::L:
-    e.IsTypeL(
-      m_evalStack.getLoc(m_evalStack.size() - 1),
-      static_cast<uint8_t>(op)
-    );
+    e.IsTypeL(m_evalStack.getLoc(m_evalStack.size() - 1), op);
     break;
   case StackSym::C:
-    e.IsTypeC(static_cast<uint8_t>(op));
+    e.IsTypeC(op);
     break;
   default:
     unexpectedStackSym(sym, "emitIsType");
@@ -5739,8 +5741,6 @@ void EmitterVisitor::emitSetOp(Emitter& e, int tokenOp) {
     not_reached();
   }();
 
-  auto const iop = static_cast<uint8_t>(op);
-
   int iLast = m_evalStack.size()-2;
   int i = scanStackForLocation(iLast);
   int sz = iLast - i;
@@ -5748,13 +5748,13 @@ void EmitterVisitor::emitSetOp(Emitter& e, int tokenOp) {
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
-      case StackSym::L:  e.SetOpL(m_evalStack.getLoc(i), iop); break;
+      case StackSym::L:  e.SetOpL(m_evalStack.getLoc(i), op); break;
       case StackSym::LN: emitCGetL2(e); // fall through
-      case StackSym::CN: e.SetOpN(iop); break;
+      case StackSym::CN: e.SetOpN(op); break;
       case StackSym::LG: emitCGetL2(e); // fall through
-      case StackSym::CG: e.SetOpG(iop); break;
+      case StackSym::CG: e.SetOpG(op); break;
       case StackSym::LS: emitCGetL3(e); // fall through
-      case StackSym::CS: e.SetOpS(iop); break;
+      case StackSym::CS: e.SetOpS(op); break;
       default: {
         unexpectedStackSym(sym, "emitSetOp");
         break;
@@ -5763,7 +5763,7 @@ void EmitterVisitor::emitSetOp(Emitter& e, int tokenOp) {
   } else {
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, true, e);
-    e.SetOpM(iop, vectorImm);
+    e.SetOpM(op, vectorImm);
   }
 }
 
@@ -5799,8 +5799,6 @@ void EmitterVisitor::emitBind(Emitter& e) {
 void EmitterVisitor::emitIncDec(Emitter& e, IncDecOp op) {
   if (checkIfStackEmpty("IncDec*")) return;
 
-  auto const iop = static_cast<uint8_t>(op);
-
   emitClsIfSPropBase(e);
   int iLast = m_evalStack.size()-1;
   int i = scanStackForLocation(iLast);
@@ -5809,13 +5807,13 @@ void EmitterVisitor::emitIncDec(Emitter& e, IncDecOp op) {
   char sym = m_evalStack.get(i);
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
-      case StackSym::L: e.IncDecL(m_evalStack.getLoc(i), iop); break;
+      case StackSym::L: e.IncDecL(m_evalStack.getLoc(i), op); break;
       case StackSym::LN: e.CGetL(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CN: e.IncDecN(iop); break;
+      case StackSym::CN: e.IncDecN(op); break;
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CG: e.IncDecG(iop); break;
+      case StackSym::CG: e.IncDecG(op); break;
       case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CS: e.IncDecS(iop); break;
+      case StackSym::CS: e.IncDecS(op); break;
       default: {
         unexpectedStackSym(sym, "emitIncDec");
         break;
@@ -5824,7 +5822,7 @@ void EmitterVisitor::emitIncDec(Emitter& e, IncDecOp op) {
   } else {
     std::vector<uchar> vectorImm;
     buildVectorImm(vectorImm, i, iLast, true, e);
-    e.IncDecM(iop, vectorImm);
+    e.IncDecM(op, vectorImm);
   }
 }
 
@@ -8097,7 +8095,7 @@ void EmitterVisitor::emitMakeUnitFatal(Emitter& e,
                                        FatalOp k) {
   const StringData* sd = makeStaticString(msg);
   e.String(sd);
-  e.Fatal(static_cast<uint8_t>(k));
+  e.Fatal(k);
 }
 
 Funclet* EmitterVisitor::addFunclet(StatementPtr stmt, Thunklet* body) {

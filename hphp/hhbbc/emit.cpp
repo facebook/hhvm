@@ -310,20 +310,21 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       euState.defClsMap[id] = startOffset;
     };
 
-#define IMM_MA(n)     emit_mvec(data.mvec);
-#define IMM_BLA(n)    emit_switch(data.targets);
-#define IMM_SLA(n)    emit_sswitch(data.targets);
-#define IMM_ILA(n)    emit_itertab(data.iterTab);
-#define IMM_IVA(n)    ue.emitIVA(data.arg##n);
-#define IMM_I64A(n)   ue.emitInt64(data.arg##n);
-#define IMM_LA(n)     ue.emitIVA(data.loc##n->id);
-#define IMM_IA(n)     ue.emitIVA(data.iter##n->id);
-#define IMM_DA(n)     ue.emitDouble(data.dbl##n);
-#define IMM_SA(n)     ue.emitInt32(ue.mergeLitstr(data.str##n));
-#define IMM_AA(n)     ue.emitInt32(ue.mergeArray(data.arr##n));
-#define IMM_OA(n)     ue.emitByte(data.subop);
-#define IMM_BA(n)     emit_branch(*data.target);
-#define IMM_VSA(n)    emit_vsa(data.keys);
+#define IMM_MA(n)      emit_mvec(data.mvec);
+#define IMM_BLA(n)     emit_switch(data.targets);
+#define IMM_SLA(n)     emit_sswitch(data.targets);
+#define IMM_ILA(n)     emit_itertab(data.iterTab);
+#define IMM_IVA(n)     ue.emitIVA(data.arg##n);
+#define IMM_I64A(n)    ue.emitInt64(data.arg##n);
+#define IMM_LA(n)      ue.emitIVA(data.loc##n->id);
+#define IMM_IA(n)      ue.emitIVA(data.iter##n->id);
+#define IMM_DA(n)      ue.emitDouble(data.dbl##n);
+#define IMM_SA(n)      ue.emitInt32(ue.mergeLitstr(data.str##n));
+#define IMM_AA(n)      ue.emitInt32(ue.mergeArray(data.arr##n));
+#define IMM_OA_IMPL(n) ue.emitByte(static_cast<uint8_t>(data.subop));
+#define IMM_OA(type)   IMM_OA_IMPL
+#define IMM_BA(n)      emit_branch(*data.target);
+#define IMM_VSA(n)     emit_vsa(data.keys);
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -385,6 +386,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_SA
 #undef IMM_AA
 #undef IMM_BA
+#undef IMM_OA_IMPL
 #undef IMM_OA
 #undef IMM_VSA
 

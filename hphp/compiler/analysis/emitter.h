@@ -122,7 +122,7 @@ public:
 #define SA const StringData*
 #define AA ArrayData*
 #define BA Label&
-#define OA unsigned char
+#define OA(type) type
 #define VSA std::vector<std::string>&
   OPCODES
 #undef O

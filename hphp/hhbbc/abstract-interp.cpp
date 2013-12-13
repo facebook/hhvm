@@ -1391,7 +1391,10 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::CheckThis&)    {}
 
   void operator()(const bc::BareThis& op) {
-    if (!op.subop) nothrow();
+    switch (op.subop) {
+    case BareThisOp::Notice:   break;
+    case BareThisOp::NoNotice: nothrow(); break;
+    }
     push(TOptObj);
   }
 
@@ -2238,9 +2241,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<uint8_t> assertTOpFor(Type t) {
+folly::Optional<AssertTOp> assertTOpFor(Type t) {
 #define ASSERTT_OP(y) \
-  if (t.subtypeOf(T##y)) return static_cast<uint8_t>(AssertTOp::y);
+  if (t.subtypeOf(T##y)) return AssertTOp::y;
   ASSERTT_OPS
 #undef ASSERTT_OP
   return folly::none;
@@ -2387,8 +2390,7 @@ void do_optimize(const Index& index, const FuncAnalysis& ainfo) {
       auto const srcLoc = blk->hhbcs.front().srcLoc;
       blk->hhbcs = {
         bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
-        bc_with_loc(srcLoc,
-                    bc::Fatal { static_cast<uint8_t>(FatalOp::Runtime) })
+        bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
       };
       blk->fallthrough = nullptr;
       continue;

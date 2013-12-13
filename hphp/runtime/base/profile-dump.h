@@ -110,6 +110,13 @@ private:
   int m_numDumps;
 };
 
+enum class ProfileType {
+  Default,    // use the value of RuntimeOption::HHProfAllocationProfile to
+              // determine which mode to use
+  Heap,       // only record allocations that are live at the end of a request
+  Allocation  // record all allocations
+};
+
 // Static controller for requesting and fetching profile dumps. The pprof
 // server will place requests for dumps, and the VM threads will give
 // their dumps to the controller if they satisfy the currently-active
@@ -117,9 +124,9 @@ private:
 // it needs to wait for a request to finish, it will.
 struct ProfileController {
   // request API
-  static bool requestNext();
-  static bool requestNextURL(const std::string &url);
-  static bool requestGlobal();
+  static bool requestNext(ProfileType type);
+  static bool requestNextURL(ProfileType type, const std::string &url);
+  static bool requestGlobal(ProfileType type);
   static void cancelRequest();
 
   // give API
@@ -127,6 +134,9 @@ struct ProfileController {
 
   // get API
   static ProfileDump waitForProfile();
+
+  // control API
+  static ProfileType profileType();
 };
 
 }

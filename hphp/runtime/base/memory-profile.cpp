@@ -53,7 +53,7 @@ void MemoryProfile::startProfilingImpl() {
   if (RuntimeOption::ClientExecutionMode() &&
       RuntimeOption::HHProfServerProfileClientMode) {
     HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
-    ProfileController::requestNext();
+    ProfileController::requestNext(ProfileType::Default);
   }
   m_livePointers.clear();
   m_dump.clear();
@@ -88,7 +88,10 @@ void MemoryProfile::logDeallocationImpl(void *ptr) {
   const auto &it = m_livePointers.find(ptr);
   if (it == m_livePointers.end()) return;
 
-  if (!RuntimeOption::HHProfServerAllocationProfile) {
+  auto profileType = ProfileController::profileType();
+  if (profileType == ProfileType::Heap ||
+      (profileType == ProfileType::Default &&
+      !RuntimeOption::HHProfServerAllocationProfile)) {
     const Allocation &alloc = it->second;
     m_dump.removeAlloc(alloc.m_size, alloc.m_trace);
   }

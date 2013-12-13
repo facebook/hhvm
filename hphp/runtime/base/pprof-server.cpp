@@ -120,18 +120,36 @@ bool HeapProfileRequestHandler::handleStartRequest(Transport *transport) {
   // this endpoint is used to start profiling. if there is no profile
   // in progess, we start profiling, otherwise we error out
   std::string requestType = transport->getParam("type");
+  std::string profileType = transport->getParam("profileType");
+  ProfileType pt;
+
+  if (profileType == "" || profileType == "default") {
+    pt = ProfileType::Default;
+  } else if (profileType == "heap") {
+    pt = ProfileType::Heap;
+  } else if (profileType == "allocation") {
+    pt = ProfileType::Allocation;
+  } else {
+    // what are they even trying to do???
+    Logger::Warning(folly::format(
+      "Bad request received at HHProf start endpoint, profile type was: {}",
+      profileType
+    ).str());
+    return false;
+  }
+
   if (requestType == "" || requestType == "next") {
     // profile the next request, which is also the default
     // if a url was supplied, use that
     std::string url = transport->getParam("url");
     if (url == "") {
-      return ProfileController::requestNext();
+      return ProfileController::requestNext(pt);
     } else {
-      return ProfileController::requestNextURL(url);
+      return ProfileController::requestNextURL(pt, url);
     }
   } else if (requestType == "global") {
     // profile all requests until pprof attacks
-    return ProfileController::requestGlobal();
+    return ProfileController::requestGlobal(pt);
   } else {
     // what are they even trying to do???
     Logger::Warning(folly::format(

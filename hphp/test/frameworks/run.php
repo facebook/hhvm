@@ -2010,10 +2010,10 @@ class Runner {
           continue;
         }
         $line = remove_string_from_text($line, __DIR__, "");
-        if ($this->checkForFatals($line)) {
+        if ($this->checkForFatals($line) || $this->checkForWarnings($line)) {
           // Only print header the first time we arrive here
           if (!$post_test_fatal) {
-            $this->fatal_information .= "POST-TEST FATAL FOR ".
+            $this->fatal_information .= "POST-TEST FATAL/WARNING FOR ".
                                         $this->name.PHP_EOL;
             $this->fatal_information .= PHP_EOL.
                                         $this->getTestRunStr("",

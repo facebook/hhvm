@@ -930,6 +930,7 @@ void c_PDO::sweep() {
   // PDOConnection is not sweepable, so clean it up manually.
   static_assert(!std::is_base_of<Sweepable, PDOConnection>::value,
                 "Remove the call to reset() below.");
+  m_dbh->closer();
   m_dbh.detach();
 }
 

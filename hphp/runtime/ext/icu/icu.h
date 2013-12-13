@@ -20,6 +20,8 @@
 #include "hphp/runtime/base/base-includes.h"
 #include <unicode/utypes.h>
 #include <unicode/ucnv.h>
+#include <unicode/ustring.h>
+#include <unicode/strenum.h>
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -103,6 +105,7 @@ DECLARE_EXTERN_REQUEST_LOCAL(RequestData, s_intl_request);
 
 const String GetDefaultLocale();
 bool SetDefaultLocale(const String& locale);
+Object iteratorFromEnumeration(icu::StringEnumeration *se);
 
 // Common encoding conversions UTF8<->UTF16
 String u16(const char *u8, int32_t u8_len, UErrorCode &error);
@@ -113,6 +116,13 @@ String u8(const UChar *u16, int32_t u16_len, UErrorCode &error);
 inline String u8(const String &u16, UErrorCode &error) {
   return u8((const UChar *)u16.c_str(), u16.size() / sizeof(UChar), error);
 }
+inline String u8(const icu::UnicodeString& u16, UErrorCode &error) {
+  return u8(u16.getBuffer(), u16.length(), error);
+}
+
+bool ustring_from_char(icu::UnicodeString& ret,
+                       const String& str,
+                       UErrorCode &error);
 
 class IntlExtension : public Extension {
  public:
@@ -126,6 +136,8 @@ class IntlExtension : public Extension {
     bindIniSettings();
     initLocale();
     initNumberFormatter();
+    initTimeZone();
+    initIterator();
   }
 
  private:
@@ -140,10 +152,13 @@ class IntlExtension : public Extension {
   void bindIniSettings();
   void initLocale();
   void initNumberFormatter();
+  void initTimeZone();
+  void initIterator();
 };
 
-
 } // namespace Intl
+
+extern Intl::IntlExtension s_intl_extension;
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

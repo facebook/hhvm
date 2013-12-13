@@ -4963,7 +4963,11 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
     return exit;
   }
 
-  if (bcOff() == m_startBcOff && targetBcOff == m_startBcOff) {
+  if (!isInlining() && bcOff() == m_startBcOff && targetBcOff == m_startBcOff) {
+    // Note that if we're inlining, then targetBcOff is in the inlined func,
+    // while m_startBcOff is in the outer func, so bindJmp will always work
+    // (and there's no guarantee that there is an anchor translation, so we
+    // must not use ReqRetranslate).
     gen(ReqRetranslate);
   } else {
     gen(ReqBindJmp, BCOffset(targetBcOff));

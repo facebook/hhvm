@@ -244,6 +244,9 @@ bad_tests = (
 
     # broken on travis
     '/ext/soap/tests/bugs/bug36999.php',
+
+    # flaky: t3390262
+    '/ext/standard/tests/file/readfile_variation6.php',
 )
 
 # Tests that work but not in repo mode

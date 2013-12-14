@@ -213,6 +213,8 @@ class PHPUnitPatterns {
   static string $hhvm_fatal_pattern =
   "/(^(HipHop|HHVM|hhvm) Fatal)|(^hhvm:)|(^Core dumped: Segmentation fault)/";
 
+  static string $phpunit_exception_with_hhvm_warning =
+    "/^PHPUnit_Framework_Exception: (HipHop|HHVM|hhvm) (Warning|Notice)/";
   static string $test_method_name_pattern = "/public function test|\@test/";
 }
 
@@ -2160,6 +2162,10 @@ class Runner {
 
   private function checkForWarnings(string $line): bool {
     if (preg_match(PHPUnitPatterns::$hhvm_warning_pattern, $line) === 1) {
+      return true;
+    }
+    if (preg_match(PHPUnitPatterns::$phpunit_exception_with_hhvm_warning,
+                   $line) === 1) {
       return true;
     }
     return false;

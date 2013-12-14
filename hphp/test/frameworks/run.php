@@ -157,7 +157,7 @@ class PHPUnitPatterns {
   // Four \\\\ needed to match one \
   // stackoverflow.com/questions/4025482/cant-escape-the-backslash-with-regex
   static string $test_name_pattern =
-  "/[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\"|#)[^\"|^\(|^\n]+(\")?)?/";
+  "/[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\".*?\"|#[0-9]+))?/";
 
   static string $pear_test_name_pattern =
  "/[\-_a-zA-Z0-9\.\/]*\.phpt/";
@@ -1765,7 +1765,8 @@ class Runner {
           if ($this->checkForWarnings($line)) {
             $this->error_information .= "PRETEST WARNING FOR ".
                                         $this->name.PHP_EOL.$line.PHP_EOL;
-            $this->error_information .= $this->getTestRunStr("RUN TEST FILE: ").
+            $this->error_information .= $this->getTestRunStr($this->name,
+                                                             "RUN TEST FILE: ").
                                         PHP_EOL;
           }
           continue;
@@ -1796,7 +1797,8 @@ class Runner {
             // HipHop Notice: Use of undefined constant DRIZZLE_CON_NONE
             $line = remove_string_from_text($line, __DIR__, "");
             $this->error_information .= PHP_EOL.$line.PHP_EOL;
-            $this->error_information .= $this->getTestRunStr("RUN TEST FILE: ").
+            $this->error_information .= $this->getTestRunStr($this->name,
+                                                             "RUN TEST FILE: ").
                                         PHP_EOL.PHP_EOL;
             continue;
           } else if ($this->checkForFatals($line)) {
@@ -1809,7 +1811,8 @@ class Runner {
             $line = remove_string_from_text($line, __DIR__, "");
             $this->fatal_information .= PHP_EOL.$this->name.
               PHP_EOL.$line.PHP_EOL.PHP_EOL;
-            $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
+            $this->fatal_information .= $this->getTestRunStr($this->name,
+                                                             "RUN TEST FILE: ").
                                         PHP_EOL.PHP_EOL;
             break;
           }
@@ -1996,6 +1999,8 @@ class Runner {
     // to get statistics.
     $post_test_fatal = false;
 
+    $matches = array();
+
     do
     {
       $line = $this->getLine();
@@ -2018,7 +2023,7 @@ class Runner {
             $this->fatal_information .= "POST-TEST FATAL/WARNING FOR ".
                                         $this->name.PHP_EOL;
             $this->fatal_information .= PHP_EOL.
-                                        $this->getTestRunStr("",
+                                        $this->getTestRunStr($this->name,
                                                              "RUN TEST FILE: ").
                                         PHP_EOL;
             $post_test_fatal = true;
@@ -2028,10 +2033,11 @@ class Runner {
         }
         if (!$post_test_fatal) {
           $this->error_information .= $line.PHP_EOL;
-          if (preg_match($this->framework->getTestNamePattern(), $line) === 1) {
+          if (preg_match($this->framework->getTestNamePattern(), $line,
+                         $matches) === 1) {
             $print_blanks = true;
             $this->error_information .= PHP_EOL.
-                                        $this->getTestRunStr($line,
+                                        $this->getTestRunStr($matches[0],
                                                              "RUN TEST FILE: ").
                                         PHP_EOL.PHP_EOL;
           }
@@ -2171,24 +2177,61 @@ class Runner {
     return false;
   }
 
-  private function getTestRunStr(string $test = "", string $prologue = "",
+  private function getTestRunStr(string $test, string $prologue = "",
                                  string $epilogue = ""): string {
-    $test_run =  $prologue;
+    $test_run = $prologue;
     $test_run .= " cd ".$this->framework->getTestPath()." && ";
-    $test_run .= rtrim(str_replace("2>&1", "", $this->actual_test_command));
-    // If a framework is not being run in parallel (e.g., being run like normal
-    // phpunit for the entire framework), then the actual_test_command would
-    // not contain the individual test by default. So add it. Pear is a current
-    // example of this behavior. This way we have a more accurate command for
-    // users to run individual tests that have different statuses than
-    // expected.
-    if (!$this->framework->isParallel() && $test !== "") {
-      // Re-add __DIR__ if not there so we have a full test path to run
-      if (strpos($test, __DIR__) !== 0) {
-        $test = __DIR__."/".$test;
+    // If the test that is coming in to this function is an individual test,
+    // as opposed to a file, then we can use the --filter option to make the
+    // run string have even more specificity.
+    if (preg_match($this->framework->getTestNamePattern(), $test)) {
+      // If we are running this framework with individual test mode
+      // (e.g., --by-test), then --filter already exists. We also don't want to
+      // add --filter to .phpt style tests (e.g. Pear).
+      if (strpos($this->actual_test_command, "--filter") === false &&
+          strpos($test, ".phpt") === false) {
+        // The string after the last space in actual_test_command is
+        // the file that is run in phpunit. Remove the file and replace
+        // with --filter <individual test>. This will also get rid of any
+        // 2>&1 that may exist as well, which we do not want.
+        //
+        // e.g.,
+        // hhvm -v Eval.Jit=true phpunit --debug 'ConverterTest.php'
+        // to
+        // hhvm -v Eval.Jit=true phpunit --debug 'ConverterTest::MyTest'
+        $t = rtrim(str_replace("2>&1", "", $this->actual_test_command));
+        $lastspace = strrpos($t, ' ');
+        $t = substr($this->actual_test_command, 0, $lastspace);
+        // For --filter, the namespaces need to be separated by \\
+        $test = str_replace("\\", "\\\\", $test);
+        $t .= " --filter '".$test."'";
+        $test_run .= $t;
+      } else if (!$this->framework->isParallel()) {
+      // If a framework is not being run in parallel (e.g., it is being run like
+      // normal phpunit for the entire framework), then the actual_test_command
+      // would not contain the individual test by default. It is being run like
+      // this, for example, from the test root directory:
+      //
+      // hhvm phpunit
+      //
+      // Pear is a current example of this behavior.
+        $test_run .= rtrim(str_replace("2>&1", "", $this->actual_test_command));
+        // Re-add __DIR__ if not there so we have a full test path to run
+        if (strpos($test, __DIR__) !== 0) {
+          $test_run .= " ".__DIR__."/".$test;
+        } else {
+          $test_run .= " ".$test;
+        }
+
+      } else {
+        $test_run .= rtrim(str_replace("2>&1", "", $this->actual_test_command));
       }
-      $test_run .= " ".$test;
+    } else {
+    // $test is not a XXX::YYY style test, but is instead a file that is already
+    // part of the actual_test_comand
+      $test_run .= rtrim(str_replace("2>&1", "", $this->actual_test_command));
     }
+    $test_run .= $epilogue;
     return $test_run;
   }
 }

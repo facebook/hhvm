@@ -30,7 +30,7 @@
 
 #include <bfd.h>
 
-using namespace HPHP::Transl;
+using namespace HPHP::JIT;
 
 namespace HPHP {
 namespace Debug {

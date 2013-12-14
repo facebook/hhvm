@@ -23,7 +23,7 @@
 #include "hphp/util/data-block.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 bool
 FixupMap::getFrameRegs(const ActRec* ar, const ActRec* prevAr,
@@ -216,6 +216,6 @@ FixupMap::eagerRecord(const Func* func) {
   return false;
 }
 
-} // HPHP::Transl
+} // HPHP::JIT
 
 } // HPHP

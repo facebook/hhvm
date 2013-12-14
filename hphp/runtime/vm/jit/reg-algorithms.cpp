@@ -18,9 +18,6 @@
 
 namespace HPHP { namespace JIT {
 
-using Transl::PhysReg;
-using Transl::InvalidReg;
-using Transl::RegSet;
 
 bool cycleHasSIMDReg(const CycleInfo& cycle,
                      PhysReg::Map<PhysReg>& moves) {

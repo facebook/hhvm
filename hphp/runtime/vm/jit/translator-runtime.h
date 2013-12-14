@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/bytecode.h"
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 struct MInstrState {
   // Room for this structure is allocated on the stack before we
@@ -121,7 +121,7 @@ void VerifyParamTypeCallable(TypedValue value, int param);
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,
                          int param,
-                         const TypeConstraint* expected);
+                         const HPHP::TypeConstraint* expected);
 
 void raise_error_sd(const StringData* sd);
 

@@ -44,7 +44,7 @@ bool isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
 void prepareForSmash(CodeBlock& cb, int nBytes, int offset /* = 0 */) {
   if (arch() == Arch::X64) {
     if (!isSmashable(cb.frontier(), nBytes, offset)) {
-      Transl::X64Assembler a { cb };
+      JIT::X64Assembler a { cb };
       int gapSize = (~(uintptr_t(a.frontier()) + offset) &
                      kX64CacheLineMask) + 1;
       a.emitNop(gapSize);
@@ -104,7 +104,7 @@ static void smashX64JmpOrCall(TCA addr, TCA dest, bool isCall) {
 
   auto& cb = tx64->codeBlockFor(addr);
   CodeCursor cursor { cb, addr };
-  Transl::X64Assembler a { cb };
+  JIT::X64Assembler a { cb };
   if (dest > addr && dest - addr <= X64::kJmpLen) {
     assert(!isCall);
     a.  emitNop(dest - addr);
@@ -187,10 +187,10 @@ void smashJcc(TCA jccAddr, TCA newDest) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitSmashableJump(CodeBlock& cb, Transl::TCA dest,
-                       Transl::ConditionCode cc) {
+void emitSmashableJump(CodeBlock& cb, JIT::TCA dest,
+                       JIT::ConditionCode cc) {
   if (arch() == Arch::X64) {
-    Transl::X64Assembler a { cb };
+    JIT::X64Assembler a { cb };
     if (cc == CC_None) {
       assert(isSmashable(cb.frontier(), X64::kJmpLen));
       a.  jmp(dest);
@@ -243,7 +243,7 @@ void emitSmashableJump(CodeBlock& cb, Transl::TCA dest,
 
 //////////////////////////////////////////////////////////////////////
 
-Transl::TCA jmpTarget(Transl::TCA jmp) {
+JIT::TCA jmpTarget(JIT::TCA jmp) {
   if (arch() == Arch::X64) {
     if (jmp[0] != 0xe9) return nullptr;
     return jmp + 5 + ((int32_t*)(jmp + 5))[-1];
@@ -268,7 +268,7 @@ Transl::TCA jmpTarget(Transl::TCA jmp) {
   }
 }
 
-Transl::TCA jccTarget(Transl::TCA jmp) {
+JIT::TCA jccTarget(JIT::TCA jmp) {
   if (arch() == Arch::X64) {
     if (jmp[0] != 0x0F || (jmp[1] & 0xF0) != 0x80) return nullptr;
     return jmp + 6 + ((int32_t*)(jmp + 6))[-1];
@@ -291,7 +291,7 @@ Transl::TCA jccTarget(Transl::TCA jmp) {
   }
 }
 
-Transl::TCA callTarget(Transl::TCA call) {
+JIT::TCA callTarget(JIT::TCA call) {
   if (arch() == Arch::X64) {
     if (call[0] != 0xE8) return nullptr;
     return call + 5 + ((int32_t*)(call + 5))[-1];

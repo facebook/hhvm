@@ -34,7 +34,6 @@ namespace JIT {
 struct SSATmp;
 namespace X64 {
 
-using namespace Transl; // XXX: this namespace should go away
 
 //////////////////////////////////////////////////////////////////////
 

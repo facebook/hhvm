@@ -23,7 +23,7 @@ namespace HPHP {
 StaticString s_call("__call");
 
 UserFSNode::UserFSNode(Class *cls, CVarRef context /*= null */) {
-  Transl::VMRegAnchor _;
+  JIT::VMRegAnchor _;
   const Func *ctor;
   m_cls = cls;
   if (MethodLookup::LookupResult::MethodFoundWithThis !=
@@ -42,7 +42,7 @@ UserFSNode::UserFSNode(Class *cls, CVarRef context /*= null */) {
 
 Variant UserFSNode::invoke(const Func *func, const String& name,
                            CArrRef args, bool &success) {
-  Transl::VMRegAnchor _;
+  JIT::VMRegAnchor _;
 
   // Assume failure
   success = false;
@@ -63,7 +63,7 @@ Variant UserFSNode::invoke(const Func *func, const String& name,
     return uninit_null();
   }
 
-  HPHP::Transl::CallerFrame cf;
+  HPHP::JIT::CallerFrame cf;
   Class* ctx = arGetContextClass(cf());
   switch(g_vmContext->lookupObjMethod(func, m_cls, name.get(), ctx)) {
     case MethodLookup::LookupResult::MethodFoundWithThis:

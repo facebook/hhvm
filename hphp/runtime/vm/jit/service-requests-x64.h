@@ -22,8 +22,7 @@
 
 namespace HPHP { namespace JIT { namespace X64 {
 
-typedef Transl::X64Assembler Asm;
-using Transl::TCA;
+typedef JIT::X64Assembler Asm;
 
 /*
  * emitServiceReqWork --
@@ -46,9 +45,9 @@ TCA emitServiceReqWork(Asm& as, TCA start, bool persist, SRFlags flags,
 /*
  * "cb" may be either the main section or stubs section.
  */
-void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
+void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
                       SrcKey dest);
-void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
+void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
                  SrcKey dest);
 void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest);
 

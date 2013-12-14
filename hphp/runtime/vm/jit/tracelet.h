@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/runtime-type.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 struct NormalizedInstruction;
 
@@ -193,5 +193,5 @@ struct Tracelet : private boost::noncopyable {
   const Func* func() const;
 };
 
-} } // HPHP::Transl
+} } // HPHP::JIT
 #endif

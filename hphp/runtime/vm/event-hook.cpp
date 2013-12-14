@@ -78,7 +78,7 @@ void EventHook::RunUserProfiler(const ActRec* ar, int mode) {
       Func::isSpecial(ar->m_func->name())) {
     return;
   }
-  Transl::VMRegAnchor _;
+  JIT::VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
   Array params;
@@ -139,7 +139,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
                                      &func->maybeIntercepted());
   if (!h) return true;
 
-  Transl::VMRegAnchor _;
+  JIT::VMRegAnchor _;
 
   PC savePc = g_vmContext->m_pc;
 
@@ -227,8 +227,8 @@ bool EventHook::onFunctionEnter(const ActRec* ar, int funcType) {
 }
 
 void EventHook::onFunctionExit(const ActRec* ar) {
-  auto const inlinedRip = Transl::tx64->uniqueStubs.retInlHelper;
-  if ((Transl::TCA)ar->m_savedRip == inlinedRip) {
+  auto const inlinedRip = JIT::tx64->uniqueStubs.retInlHelper;
+  if ((JIT::TCA)ar->m_savedRip == inlinedRip) {
     // Inlined calls normally skip the function enter and exit events. If we
     // side exit in an inlined callee, we want to make sure to skip the exit
     // event to avoid unbalancing the call stack.

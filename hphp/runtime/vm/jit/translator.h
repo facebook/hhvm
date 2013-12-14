@@ -52,12 +52,8 @@ class IRTranslator;
 namespace Debug {
 class DebugInfo;
 }
-namespace Transl {
+namespace JIT {
 
-using JIT::Type;
-using JIT::RegionDesc;
-using JIT::HhbcTranslator;
-using JIT::ProfData;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
@@ -198,11 +194,11 @@ class UnknownInputExc : public std::runtime_error {
 };
 
 #define punt() do { \
-  throw Transl::TranslationFailedExc(__FILE__, __LINE__); \
+  throw JIT::TranslationFailedExc(__FILE__, __LINE__); \
 } while(0)
 
 #define throwUnknownInput() do { \
-  throw Transl::UnknownInputExc(__FILE__, __LINE__); \
+  throw JIT::UnknownInputExc(__FILE__, __LINE__); \
 } while(0);
 
 class GuardType {
@@ -774,6 +770,6 @@ const InstrInfo& getInstrInfo(Op op);
 
 typedef const int COff; // Const offsets
 
-} } // HPHP::Transl
+} } // HPHP::JIT
 
 #endif

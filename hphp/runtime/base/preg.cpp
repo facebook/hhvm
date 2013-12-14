@@ -1049,7 +1049,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
           }
           *walkbuf = '\0';
           if (eval) {
-            Transl::VMRegAnchor _;
+            JIT::VMRegAnchor _;
             String prefixedCode = concat(concat(
                 "<?php return ", result + result_len), ";");
             Unit* unit = g_vmContext->compileEvalString(prefixedCode.get());

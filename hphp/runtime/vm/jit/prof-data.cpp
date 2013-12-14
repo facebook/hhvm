@@ -28,15 +28,6 @@ namespace JIT {
 
 static const Trace::Module TRACEMOD = Trace::pgo;
 
-using Transl::Tracelet;
-using Transl::TransLive;
-using Transl::TransAnchor;
-using Transl::TransInterp;
-using Transl::TransPrologue;
-using Transl::TransProflogue;
-using Transl::TransProfile;
-using Transl::TransOptimize;
-using Transl::InvalidID;
 
 ///////////   Counters   //////////
 

@@ -31,7 +31,7 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 

@@ -32,8 +32,7 @@ namespace HPHP { namespace JIT { namespace X64 {
 
 //////////////////////////////////////////////////////////////////////
 
-using namespace Transl; // XXX remove
-using namespace Transl::reg;
+using namespace JIT::reg;
 using boost::implicit_cast;
 
 TRACE_SET_MOD(ustubs);

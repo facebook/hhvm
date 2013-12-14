@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-using namespace HPHP::Transl;
+using namespace HPHP::JIT;
 
 namespace HPHP {
 namespace Debug {

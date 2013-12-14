@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-using namespace HPHP::Transl;
 
 namespace HPHP {  namespace JIT {
 

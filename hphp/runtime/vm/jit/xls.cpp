@@ -41,7 +41,6 @@
 
 namespace HPHP { namespace JIT {
 namespace {
-using namespace Transl;
 using namespace reg;
 struct Interval;
 struct RegPositions;

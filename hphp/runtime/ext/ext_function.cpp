@@ -31,8 +31,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-using HPHP::Transl::CallerFrame;
-using HPHP::Transl::EagerCallerFrame;
+using HPHP::JIT::CallerFrame;
+using HPHP::JIT::EagerCallerFrame;
 
 const StaticString
   s_internal("internal"),

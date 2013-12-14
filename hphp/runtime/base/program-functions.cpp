@@ -585,7 +585,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
 
   if (RuntimeOption::EvalDumpTC) {
-    HPHP::Transl::tc_dump();
+    HPHP::JIT::tc_dump();
   }
 
   if (xhprof) {

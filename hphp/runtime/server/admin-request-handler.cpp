@@ -606,7 +606,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     ServerPtr server = HttpServer::Server->getPageServer();
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
-    auto* tx = Transl::tx64;
+    auto* tx = JIT::tx64;
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
     appendStat("tc-hotsize", tx->getHotCodeSize());
     appendStat("tc-size", tx->getCodeSize());
@@ -896,7 +896,7 @@ typedef std::map<int, PCInfo> InfoMap;
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
-    transport->sendString(Transl::tx64->getUsage());
+    transport->sendString(JIT::tx64->getUsage());
     return true;
   }
   if (cmd == "vm-namedentities") {
@@ -906,7 +906,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "vm-dump-tc") {
-    if (HPHP::Transl::tc_dump()) {
+    if (HPHP::JIT::tc_dump()) {
       transport->sendString("Done");
     } else {
       transport->sendString("Error dumping the translation cache");

@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 NormalizedInstruction::NormalizedInstruction()
     : next(nullptr)
@@ -130,4 +130,4 @@ bool NormalizedInstruction::isAnyOutputUsed() const
           isOutputUsed(outLocal));
 }
 
-} } // HPHP::Transl
+} } // HPHP::JIT

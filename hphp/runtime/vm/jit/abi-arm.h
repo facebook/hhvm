@@ -26,8 +26,8 @@
 
 namespace std {
 template<>
-struct hash<HPHP::Transl::Reg64> {
-  size_t operator()(const HPHP::Transl::Reg64& r) const {
+struct hash<HPHP::JIT::Reg64> {
+  size_t operator()(const HPHP::JIT::Reg64& r) const {
     return std::hash<int>()(static_cast<int>(r));
   }
 };
@@ -35,39 +35,39 @@ struct hash<HPHP::Transl::Reg64> {
 
 namespace HPHP { namespace JIT { namespace ARM {
 
-inline vixl::Register x2a(const Transl::Reg64& x64reg) {
-  static const std::unordered_map<Transl::Reg64, vixl::Register> s_x2aRegMap = {
+inline vixl::Register x2a(const JIT::Reg64& x64reg) {
+  static const std::unordered_map<JIT::Reg64, vixl::Register> s_x2aRegMap = {
     // Special VM registers.
-    { Transl::reg::rbp, vixl::x29 },  // x29 is ARM's designated frame pointer.
-    { Transl::reg::rbx, vixl::x19 },  //
-    { Transl::reg::r12, vixl::x20 },  // General callee-saved.
-    { Transl::reg::r15, vixl::x21 },  //
-    { Transl::reg::r10, vixl::x9  },  // General caller-saved.
+    { JIT::reg::rbp, vixl::x29 },  // x29 is ARM's designated frame pointer.
+    { JIT::reg::rbx, vixl::x19 },  //
+    { JIT::reg::r12, vixl::x20 },  // General callee-saved.
+    { JIT::reg::r15, vixl::x21 },  //
+    { JIT::reg::r10, vixl::x9  },  // General caller-saved.
 
     // Argument registers.
-    { Transl::reg::rdi, vixl::x0 },
-    { Transl::reg::rsi, vixl::x1 },
-    { Transl::reg::rdx, vixl::x2 },
-    { Transl::reg::rcx, vixl::x3 },
-    { Transl::reg::r8,  vixl::x4 },
-    { Transl::reg::r9,  vixl::x5 },
+    { JIT::reg::rdi, vixl::x0 },
+    { JIT::reg::rsi, vixl::x1 },
+    { JIT::reg::rdx, vixl::x2 },
+    { JIT::reg::rcx, vixl::x3 },
+    { JIT::reg::r8,  vixl::x4 },
+    { JIT::reg::r9,  vixl::x5 },
 
     // General caller-saved.
-    { Transl::reg::r11, vixl::x10 },
+    { JIT::reg::r11, vixl::x10 },
 
     // General callee-saved.
-    { Transl::reg::r13, vixl::x22 },
-    { Transl::reg::r14, vixl::x23 },
+    { JIT::reg::r13, vixl::x22 },
+    { JIT::reg::r14, vixl::x23 },
 
     // VERY SKETCHY! On ARM, x0 is both the first arg register and the return
     // value register. Anywhere our x64 code implicitly assumes that these two
     // regs don't alias each other may break.
-    { Transl::reg::rax, vixl::x0 },
+    { JIT::reg::rax, vixl::x0 },
 
-    { Transl::reg::rsp, vixl::sp },
+    { JIT::reg::rsp, vixl::sp },
   };
 
-  if (Transl::reg::noreg == x64reg) {
+  if (JIT::reg::noreg == x64reg) {
     return vixl::Register();
   }
 
@@ -88,8 +88,8 @@ inline vixl::Register serviceReqArgReg(unsigned index) {
   return argReg(index + 1);
 }
 
-inline vixl::Condition convertCC(Transl::ConditionCode cc) {
-  if (cc == Transl::CC_P || cc == Transl::CC_NP) {
+inline vixl::Condition convertCC(JIT::ConditionCode cc) {
+  if (cc == JIT::CC_P || cc == JIT::CC_NP) {
     // ARM has no parity flag
     always_assert(false);
   }

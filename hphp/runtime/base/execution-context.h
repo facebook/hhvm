@@ -46,7 +46,7 @@ class PhpFile;
 }
 
 class EventHook;
-namespace Transl {
+namespace JIT {
 class Translator;
 }
 class PCFilter;

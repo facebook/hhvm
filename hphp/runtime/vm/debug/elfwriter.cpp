@@ -29,7 +29,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
-using namespace HPHP::Transl;
+using namespace HPHP::JIT;
 
 namespace HPHP {
 namespace Debug {

@@ -29,7 +29,7 @@ namespace HPHP {
 
 class ExecutionContext;
 
- namespace Transl {
+namespace JIT {
 
 /*
  * The Fixup map allows us to reconstruct the state of the VM
@@ -141,7 +141,7 @@ class FixupMap {
 
 public:
   struct VMRegs {
-    const Opcode* m_pc;
+    const HPHP::Opcode* m_pc;
     TypedValue* m_sp;
     const ActRec* m_fp;
   };
@@ -186,7 +186,8 @@ private:
     m_fixups.insert(tca, FixupEntry(indirect));
   }
 
-  const Opcode* pc(const ActRec* ar, const Func* f, const Fixup& fixup) const {
+  const HPHP::Opcode* pc(const ActRec* ar, const Func* f,
+                         const Fixup& fixup) const {
     assert(f);
     return f->getEntry() + fixup.m_pcOffset;
   }

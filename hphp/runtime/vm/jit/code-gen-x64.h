@@ -127,10 +127,10 @@ constexpr RegXMM rCgXMM0(reg::xmm0);
 constexpr RegXMM rCgXMM1(reg::xmm1);
 
 struct CodeGenerator {
-  typedef Transl::X64Assembler Asm;
+  typedef JIT::X64Assembler Asm;
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
-                Transl::TranslatorX64* tx64, CodegenState& state)
+                JIT::TranslatorX64* tx64, CodegenState& state)
     : m_unit(unit)
     , m_mainCode(mainCode)
     , m_stubsCode(stubsCode)

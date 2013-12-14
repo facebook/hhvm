@@ -96,8 +96,8 @@ void emitTestSurpriseFlags(vixl::MacroAssembler& a) {
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& stubsCode,
-                                 bool inTracelet, Transl::FixupMap& fixupMap,
-                                 Transl::Fixup fixup) {
+                                 bool inTracelet, JIT::FixupMap& fixupMap,
+                                 JIT::Fixup fixup) {
   vixl::MacroAssembler a { mainCode };
   vixl::MacroAssembler astubs { stubsCode };
 

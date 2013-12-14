@@ -19,7 +19,7 @@
 namespace HPHP {
 namespace JIT{
 
-using namespace Transl::reg;
+using namespace JIT::reg;
 
 TRACE_SET_MOD(hhir);
 

@@ -56,10 +56,10 @@ namespace HPHP {
 class StringData;
 namespace JIT {
 
-using HPHP::Transl::TCA;
-using HPHP::Transl::RegSet;
-using HPHP::Transl::PhysReg;
-using HPHP::Transl::ConditionCode;
+using HPHP::JIT::TCA;
+using HPHP::JIT::RegSet;
+using HPHP::JIT::PhysReg;
+using HPHP::JIT::ConditionCode;
 
 class IRUnit;
 struct IRInstruction;
@@ -1077,7 +1077,6 @@ class RawMemSlot {
     return m;
   }
   static RawMemSlot& GetMisCtx() {
-    using namespace HPHP::Transl;
     static RawMemSlot m(HHIR_MISOFF(ctx), sz::qword, Type::Cls);
     return m;
   }

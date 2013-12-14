@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 int PhysReg::kNumGP = 0;
 int PhysReg::kNumSIMD = 0;

@@ -913,7 +913,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(InterpOne, InterpOneCF)) {
       // InterpOne can push and pop ActRecs.
       auto const op = m_inst->extra<InterpOneData>()->opcode;
-      if (Transl::getInstrInfo(op).type == Transl::InstrFlags::OutFDesc) {
+      if (JIT::getInstrInfo(op).type == JIT::InstrFlags::OutFDesc) {
         m_state.frames.pushPreLive();
       } else if (isFCallStar(op)) {
         resolveAllFrames();

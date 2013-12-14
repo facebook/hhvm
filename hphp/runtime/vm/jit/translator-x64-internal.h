@@ -24,14 +24,13 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
-TRACE_SET_MOD(tx64);
 static const DataType BitwiseKindOfString = KindOfString;
 
 // Generate an if-then block into a.  thenBlock is executed if cc is true.
 template <class Then>
-void ifThen(Transl::X64Assembler& a, ConditionCode cc, Then thenBlock) {
+void ifThen(JIT::X64Assembler& a, ConditionCode cc, Then thenBlock) {
   Label done;
   a.jcc8(ccNegate(cc), done);
   thenBlock();

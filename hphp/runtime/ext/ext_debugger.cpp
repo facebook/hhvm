@@ -27,7 +27,7 @@ namespace HPHP {
 TRACE_SET_MOD(debugger);
 
 using namespace Eval;
-using HPHP::Transl::CallerFrame;
+using HPHP::JIT::CallerFrame;
 
 ///////////////////////////////////////////////////////////////////////////////
 

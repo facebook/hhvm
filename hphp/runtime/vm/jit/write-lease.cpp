@@ -21,7 +21,7 @@
 
 #include <sys/mman.h>
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 TRACE_SET_MOD(txlease);
 
 bool

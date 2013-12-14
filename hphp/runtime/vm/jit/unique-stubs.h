@@ -23,7 +23,6 @@ namespace HPHP { namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
-using Transl::TCA;
 
 constexpr int kNumFreeLocalsHelpers = 9;
 

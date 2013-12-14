@@ -20,7 +20,7 @@
 #include "hphp/util/base.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 /*
  * Core types.

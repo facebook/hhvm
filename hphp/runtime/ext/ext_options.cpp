@@ -131,7 +131,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
 Variant f_assert(CVarRef assertion) {
   if (!s_option_data->assertActive) return true;
 
-  Transl::CallerFrame cf;
+  JIT::CallerFrame cf;
   Offset callerOffset;
   auto const fp = cf(&callerOffset);
 

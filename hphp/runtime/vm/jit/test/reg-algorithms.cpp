@@ -21,9 +21,7 @@
 
 #include <gtest/gtest.h>
 
-namespace HPHP {
-
-using namespace Transl;
+namespace HPHP { namespace JIT {
 
 TEST(RegAlgorithms, twoCycle) {
   PhysReg::Map<PhysReg> moves;
@@ -112,4 +110,4 @@ TEST(RegAlgorithms, simdCycle) {
   EXPECT_EQ(howTo[2].m_reg2, xmm0);
 }
 
-}
+} }

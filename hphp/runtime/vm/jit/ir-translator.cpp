@@ -95,14 +95,13 @@ IRTranslator::IRTranslator(Offset bcOff, Offset spOff, const Func* curFunc)
 {
 }
 
-void IRTranslator::checkType(const Transl::Location& l,
-                             const Transl::RuntimeType& rtt,
+void IRTranslator::checkType(const JIT::Location& l,
+                             const JIT::RuntimeType& rtt,
                              bool outerOnly) {
   // We can get invalid inputs as a side effect of reading invalid
   // items out of BBs we truncate; they don't need guards.
   if (rtt.isVagueValue() || l.isThis()) return;
 
-  using Transl::Location;
   switch (l.space) {
     case Location::Stack: {
       uint32_t stackOffset = locPhysicalOffset(l);
@@ -127,11 +126,10 @@ void IRTranslator::checkType(const Transl::Location& l,
   }
 }
 
-void IRTranslator::assertType(const Transl::Location& l,
-                              const Transl::RuntimeType& rtt) {
+void IRTranslator::assertType(const JIT::Location& l,
+                              const JIT::RuntimeType& rtt) {
   if (rtt.isVagueValue()) return;
 
-  using Transl::Location;
   switch (l.space) {
     case Location::Stack: {
       // tx64LocPhysicalOffset returns positive offsets for stack values,
@@ -1035,7 +1033,7 @@ IRTranslator::translateFCallBuiltin(const NormalizedInstruction& i) {
   Id funcId = i.imm[2].u_SA;
 
   HHIR_EMIT(FCallBuiltin, numArgs, numNonDefault, funcId,
-            Transl::callDestroysLocals(i, m_hhbcTrans.curFunc()));
+            JIT::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
 bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
@@ -1140,7 +1138,7 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
       return refuse("inlining sizeable cold func into hot func");
     }
 
-    if (Transl::opcodeBreaksBB(op)) {
+    if (JIT::opcodeBreaksBB(op)) {
       return refuse("breaks tracelet");
     }
   }
@@ -1217,7 +1215,7 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
   }
 
   HHIR_EMIT(FCall, numArgs, returnBcOffset, i.funcd,
-            Transl::callDestroysLocals(i, m_hhbcTrans.curFunc()));
+            JIT::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
 void
@@ -1227,7 +1225,7 @@ IRTranslator::translateFCallArray(const NormalizedInstruction& i) {
   const Offset after = next.offset();
 
   HHIR_EMIT(FCallArray, pcOffset, after,
-            Transl::callDestroysLocals(i, m_hhbcTrans.curFunc()));
+            JIT::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
 void
@@ -1590,7 +1588,7 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   FTRACE(1, "\n{:-^60}\n", folly::format("translating {} with stack:\n{}",
                                          ni.toString(), ht.showStack()));
   // When profiling, we disable type predictions to avoid side exits
-  assert(Transl::tx64->mode() != TransProfile || !ni.outputPredicted);
+  assert(JIT::tx64->mode() != TransProfile || !ni.outputPredicted);
 
   if (ni.guardedThis) {
     // Task #2067635: This should really generate an AssertThis

@@ -27,7 +27,6 @@
 
 namespace HPHP { namespace JIT {
 
-using namespace Transl;
 
 static constexpr size_t dbgOff =
   offsetof(ThreadInfo, m_reqInjectionData) +

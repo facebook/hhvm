@@ -33,7 +33,7 @@ namespace HPHP { namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
-using HPHP::Transl::Location;
+using HPHP::JIT::Location;
 
 static bool wantPropSpecializedWarnings() {
   return !RuntimeOption::RepoAuthoritative ||

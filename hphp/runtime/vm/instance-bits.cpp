@@ -76,7 +76,7 @@ void profile(const StringData* name) {
 }
 
 void init() {
-  assert(Transl::Translator::WriteLease().amOwner());
+  assert(JIT::Translator::WriteLease().amOwner());
   if (initFlag.load(std::memory_order_acquire)) return;
 
   s_currentlyInitializing = true;

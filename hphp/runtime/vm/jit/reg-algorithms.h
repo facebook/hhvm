@@ -24,7 +24,6 @@
 
 namespace HPHP { namespace JIT {
 
-using Transl::PhysReg;
 
 struct CycleInfo {
   PhysReg node;

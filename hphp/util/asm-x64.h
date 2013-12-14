@@ -49,7 +49,7 @@
  */
 #define logical_const /* nothing */
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 #define TRACEMOD ::HPHP::Trace::asmx64
 
@@ -484,7 +484,7 @@ namespace reg {
 
 //////////////////////////////////////////////////////////////////////
 
-enum instrFlags {
+enum X64InstrFlags {
   IF_REVERSE    = 0x0001, // The operand encoding for some instructions are
                           // "backwards" in x64; these instructions are
                           // called "reverse" instructions. There are a few

@@ -30,7 +30,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/maphuge.h"
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 StoreImmPatcher::StoreImmPatcher(CodeBlock& cb, uint64_t initial,
                                  RegNumber reg,

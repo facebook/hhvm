@@ -30,10 +30,6 @@
 namespace HPHP {
 namespace JIT {
 
-using Transl::TransID;
-using Transl::TransKind;
-using Transl::Tracelet;
-using Transl::TCA;
 
 /**
  * A simple class of a growable number of profiling counters with

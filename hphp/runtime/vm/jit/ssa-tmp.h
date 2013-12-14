@@ -22,7 +22,6 @@
 
 namespace HPHP { namespace JIT {
 
-using Transl::TCA;
 class IRInstruction;
 class IRUnit;
 class TraceBuilder;

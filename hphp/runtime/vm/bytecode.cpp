@@ -110,9 +110,9 @@ bool RuntimeOption::RepoAuthoritative = false;
 
 using std::string;
 
-using Transl::VMRegAnchor;
-using Transl::EagerVMRegAnchor;
-using Transl::tx64;
+using JIT::VMRegAnchor;
+using JIT::EagerVMRegAnchor;
+using JIT::tx64;
 
 #if DEBUG
 #define OPTBLD_INLINE
@@ -1523,7 +1523,7 @@ void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
     int np = enterFnAr->m_func->numParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
-    Transl::TCA start = enterFnAr->m_func->getPrologue(na);
+    JIT::TCA start = enterFnAr->m_func->getPrologue(na);
     tx64->enterTCAtPrologue(enterFnAr, start);
   } else {
     if (prepareFuncEntry(enterFnAr, m_pc)) {
@@ -1533,7 +1533,7 @@ void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
 }
 
 void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
-  Transl::TCA start = nullptr;
+  JIT::TCA start = nullptr;
   if (enterFnAr) {
     if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
     checkStack(m_stack, enterFnAr->m_func);
@@ -1595,7 +1595,7 @@ resume:
     return;
 
   } catch (...) {
-    always_assert(Transl::tl_regState == Transl::VMRegState::CLEAN);
+    always_assert(JIT::tl_regState == JIT::VMRegState::CLEAN);
     auto const action = exception_handler();
     if (action == UnwindAction::ResumeVM) {
       goto resume;
@@ -2793,7 +2793,7 @@ void VMExecutionContext::exitDebuggerDummyEnv() {
 // Identifies the set of return helpers that we may set m_savedRip to in an
 // ActRec.
 bool VMExecutionContext::isReturnHelper(uintptr_t address) {
-  auto tcAddr = reinterpret_cast<Transl::TCA>(address);
+  auto tcAddr = reinterpret_cast<JIT::TCA>(address);
   auto& u = tx64->uniqueStubs;
   return tcAddr == u.retHelper ||
          tcAddr == u.genRetHelper ||
@@ -2811,7 +2811,7 @@ void VMExecutionContext::preventReturnsToTC() {
     ActRec *ar = getFP();
     while (ar) {
       if (!isReturnHelper(ar->m_savedRip) &&
-          (tx64->isValidCodeAddress((Transl::TCA)ar->m_savedRip))) {
+          (tx64->isValidCodeAddress((JIT::TCA)ar->m_savedRip))) {
         TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
                  "func %s\n", ar, ar->m_savedRip,
                  ar->m_func->fullName()->data());
@@ -7276,7 +7276,7 @@ VMExecutionContext::prettyStack(const string& prefix) const {
 }
 
 void VMExecutionContext::checkRegStateWork() const {
-  assert(Transl::tl_regState == Transl::VMRegState::CLEAN);
+  assert(JIT::tl_regState == JIT::VMRegState::CLEAN);
 }
 
 void VMExecutionContext::DumpStack() {

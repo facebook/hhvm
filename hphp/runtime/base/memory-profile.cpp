@@ -31,7 +31,7 @@ static ProfileStackTrace getStackTrace() {
   ProfileStackTrace trace;
 
   if (g_context.isNull()) return trace;
-  Transl::VMRegAnchor _;
+  JIT::VMRegAnchor _;
   ActRec *fp = g_vmContext->getFP();
   if (!fp) return trace;
   PC pc = g_vmContext->getPC();

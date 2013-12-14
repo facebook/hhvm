@@ -34,7 +34,6 @@
 namespace HPHP { namespace JIT {
 
 using namespace HPHP::MethodLookup;
-using namespace HPHP::Transl;
 
 TRACE_SET_MOD(targetcache);
 
@@ -89,7 +88,7 @@ const Func* FuncCache::lookup(RDS::Handle handle, StringData* sd) {
     // Miss. Does it actually exist?
     func = Unit::lookupFunc(sd);
     if (UNLIKELY(!func)) {
-      Transl::VMRegAnchor _;
+      JIT::VMRegAnchor _;
       func = Unit::loadFunc(sd);
       if (!func) {
         raise_error("Undefined function: %s", sd->data());

@@ -36,8 +36,7 @@ namespace HPHP { namespace JIT { namespace X64 {
 //////////////////////////////////////////////////////////////////////
 
 using namespace Util;
-using namespace Transl;
-using namespace Transl::reg;
+using namespace JIT::reg;
 
 TRACE_SET_MOD(hhir);
 
@@ -50,8 +49,6 @@ TRACE_SET_MOD(hhir);
  * just for some static_assertions relating to calls to helpers from
  * tx64 that hardcode these registers.)
  */
-using Transl::rVmFp;
-using Transl::rVmSp;
 
 /*
  * Satisfy an alignment constraint. Bridge the gap with int3's.
@@ -390,7 +387,6 @@ void zeroExtendIfBool(CodeGenerator::Asm& as, const SSATmp* src, PhysReg reg) {
 }
 
 ConditionCode opToConditionCode(Opcode opc) {
-  using namespace HPHP::Transl;
 
   switch (opc) {
   case JmpGt:                 return CC_G;

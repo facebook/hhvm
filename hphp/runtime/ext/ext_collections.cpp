@@ -611,7 +611,7 @@ bool c_Vector::usort(CVarRef cmp_function) {
   }
   ElmUCompare<VectorValAccessor> comp;
   CallCtx ctx;
-  Transl::CallerFrame cf;
+  JIT::CallerFrame cf;
   vm_decode_function(cmp_function, cf(), false, ctx);
   if (!ctx.func) {
     return false;
@@ -3144,7 +3144,7 @@ void c_StableMap::ksort(int sort_flags, bool ascending) {
       return true;                                                      \
     }                                                                   \
     CallCtx ctx;                                                        \
-    Transl::CallerFrame cf;                                             \
+    JIT::CallerFrame cf;                                             \
     vm_decode_function(cmp_function, cf(), false, ctx);                 \
     if (!ctx.func) {                                                    \
       return false;                                                     \

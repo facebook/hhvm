@@ -21,7 +21,7 @@
 #include "hphp/util/base.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 TRACE_SET_MOD(trans);
 

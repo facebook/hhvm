@@ -29,7 +29,6 @@ namespace HPHP { namespace JIT { namespace X64 {
 
 //////////////////////////////////////////////////////////////////////
 
-using Transl::TCA;
 
 TRACE_SET_MOD(tx64);
 
@@ -120,7 +119,6 @@ constexpr auto kLocalsToInitializeInline = 9;
 constexpr auto kMaxParamsInitUnroll = 5;
 
 SrcKey emitPrologueWork(Func* func, int nPassed) {
-  using Transl::Location;
   using namespace reg;
 
   int numParams = func->numParams();
@@ -148,10 +146,10 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     // Too many args; a weird case, so just callout. Stash ar
     // somewhere callee-saved.
     if (false) { // typecheck
-      Transl::trimExtraArgs((ActRec*)nullptr);
+      JIT::trimExtraArgs((ActRec*)nullptr);
     }
     a.    movq   (rStashedAR, argNumToRegName[0]);
-    emitCall(a, TCA(Transl::trimExtraArgs));
+    emitCall(a, TCA(JIT::trimExtraArgs));
     // We'll fix rVmSp below.
   } else if (nPassed < numParams) {
     // Figure out which, if any, default value initializer to go to

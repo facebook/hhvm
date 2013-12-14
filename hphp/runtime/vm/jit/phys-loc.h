@@ -21,9 +21,6 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 
 namespace HPHP { namespace JIT {
-using Transl::PhysReg;
-using Transl::RegSet;
-using Transl::InvalidReg;
 
 // Native stack layout:
 // |               |

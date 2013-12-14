@@ -59,7 +59,7 @@
 #define KindOfInvalid DontUseKindOfInvalidInThisFile
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 using namespace HPHP;
 using HPHP::JIT::Type;
@@ -4505,7 +4505,7 @@ std::string traceletShape(const Tracelet& trace) {
   return ret;
 }
 
-} // HPHP::Transl
+} // HPHP::JIT
 
 void invalidatePath(const std::string& path) {
   TRACE(1, "invalidatePath: abspath %s\n", path.c_str());

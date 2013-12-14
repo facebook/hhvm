@@ -61,20 +61,20 @@
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
 
-using HPHP::Transl::TCA;
+using HPHP::JIT::TCA;
 
 namespace HPHP {
 namespace JIT {
+
+TRACE_SET_MOD(hhir);
 
 namespace {
 
 //////////////////////////////////////////////////////////////////////
 
 using namespace Util;
-using namespace Transl::reg;
+using namespace JIT::reg;
 using namespace X64; // XXX: we need to split the x64-specific parts out
-
-TRACE_SET_MOD(hhir);
 
 /*
  * It's not normally ok to directly use tracelet abi registers in
@@ -83,8 +83,6 @@ TRACE_SET_MOD(hhir);
  * just for some static_assertions relating to calls to helpers from
  * tx64 that hardcode these registers.)
  */
-using Transl::rVmFp;
-using Transl::rVmSp;
 
 const size_t kTypeWordOffset = (offsetof(TypedValue, m_type) % 8);
 const size_t kTypeShiftBits = kTypeWordOffset * CHAR_BIT;
@@ -5429,7 +5427,7 @@ void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
   auto ch = cgLdClsCachedCommon(inst);
   unlikelyIfBlock(CC_E, [&] (Asm& a) {
     Class* (*const func)(Class**, const StringData*) =
-      Transl::lookupKnownClass;
+      JIT::lookupKnownClass;
     cgCallHelper(a,
                  CppCall(func),
                  callDest(inst->dst()),
@@ -5509,7 +5507,7 @@ void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
   auto const link  = RDS::bindClassConstant(extra->clsName, extra->cnsName);
   cgCallHelper(
     m_as,
-    CppCall(Transl::lookupClassConstantTv),
+    CppCall(JIT::lookupClassConstantTv),
     callDestTV(inst->dst()),
     SyncOptions::kSyncPoint,
     ArgGroup(curOpds())
@@ -6436,7 +6434,7 @@ void genCodeImpl(CodeBlock& mainCode,
                  CodeBlock& stubsCode,
                  IRUnit& unit,
                  vector<TransBCMapping>* bcMap,
-                 Transl::TranslatorX64* tx64,
+                 JIT::TranslatorX64* tx64,
                  const RegAllocInfo& regs,
                  AsmInfo* asmInfo) {
   LiveRegs live_regs = computeLiveRegs(unit, regs);
@@ -6525,7 +6523,7 @@ void genCodeImpl(CodeBlock& mainCode,
 
 void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
              vector<TransBCMapping>* bcMap,
-             Transl::TranslatorX64* tx64,
+             JIT::TranslatorX64* tx64,
              const RegAllocInfo& regs) {
   if (dumpIREnabled()) {
     AsmInfo ai(unit);

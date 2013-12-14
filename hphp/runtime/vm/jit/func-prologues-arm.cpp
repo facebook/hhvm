@@ -26,7 +26,6 @@
 
 namespace HPHP { namespace JIT { namespace ARM {
 
-using Transl::TCA;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -92,7 +91,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   // Resolve cases where the wrong number of args was passed.
   if (nPassed > numParams) {
-    void (*helper)(ActRec*) = Transl::trimExtraArgs;
+    void (*helper)(ActRec*) = JIT::trimExtraArgs;
     a.  Mov    (argReg(0), rStashedAR);
     emitCall(a, CppCall(helper));
     // We'll fix rVmSp below.
@@ -203,7 +202,6 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       a.  B     (&loopTop, vixl::ne);
     } else {
       for (auto k = numLocals; k < func->numLocals(); ++k) {
-        using Transl::Location;
         int disp =
           cellsToBytes(locPhysicalOffset(Location(Location::Local, k), func));
         a.Strb  (vixl::xzr, rVmFp[disp + TVOFF(m_type)]);
@@ -234,7 +232,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
         a.  Mov  (argReg(0), func->name()->data());
         a.  Mov  (argReg(1), numParams);
         a.  Mov  (argReg(2), i);
-        auto fixupAddr = emitCall(a, CppCall(Transl::raiseMissingArgument));
+        auto fixupAddr = emitCall(a, CppCall(JIT::raiseMissingArgument));
         tx64->fixupMap().recordFixup(fixupAddr, fixup);
         break;
       }

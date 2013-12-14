@@ -35,8 +35,6 @@ namespace HPHP { namespace JIT {
 
 TRACE_SET_MOD(region);
 
-using Transl::TransID;
-using Transl::TranslatorX64;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -265,7 +263,7 @@ void RegionDesc::Block::checkMetadata() const {
 //////////////////////////////////////////////////////////////////////
 
 RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
-                                   const Transl::Tracelet& tlet) {
+                                   const JIT::Tracelet& tlet) {
   typedef RegionDesc::Block Block;
 
   auto region = std::make_shared<RegionDesc>();
@@ -361,13 +359,13 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
     };
 
     switch (dep.first.space) {
-      case Transl::Location::Stack: {
+      case JIT::Location::Stack: {
         uint32_t offsetFromSp = uint32_t(-dep.first.offset - 1);
         uint32_t offsetFromFp = initSpOffset - offsetFromSp;
         addPred(R::Location::Stack{offsetFromSp, offsetFromFp});
         break;
       }
-      case Transl::Location::Local:
+      case JIT::Location::Local:
         addPred(R::Location::Local{uint32_t(dep.first.offset)});
         break;
 
@@ -389,7 +387,7 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
 }
 
 RegionDescPtr selectRegion(const RegionContext& context,
-                           const Transl::Tracelet* t) {
+                           const JIT::Tracelet* t) {
   auto const mode = regionMode();
 
   FTRACE(1,

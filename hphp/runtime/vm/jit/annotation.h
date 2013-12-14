@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 /*
  * The annotation module is opaque to most of the translator, and maintains

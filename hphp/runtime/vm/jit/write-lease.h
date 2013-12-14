@@ -21,7 +21,7 @@
 
 #include <pthread.h>
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 /*
  * The write Lease guards write access to the translation caches,
@@ -106,6 +106,6 @@ struct BlockingLeaseHolder : public LeaseHolderBase {
     : LeaseHolderBase(l, LeaseAcquire::BLOCKING) {}
 };
 
-}} // HPHP::Transl
+}} // HPHP::JIT
 
 #endif /* incl_HPHP_WRITELEASE_H_ */

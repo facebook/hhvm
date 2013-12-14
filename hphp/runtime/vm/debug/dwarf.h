@@ -24,7 +24,7 @@
 #include <dwarf.h>
 #include <vector>
 
-using namespace HPHP::Transl;
+using namespace HPHP::JIT;
 
 namespace HPHP {
 namespace Debug {
@@ -173,12 +173,12 @@ struct DwarfInfo {
 
   const char *lookupFile(const Unit *unit);
   void addLineEntries(TCRange range, const Unit *unit,
-		      const Opcode *instr, FunctionInfo* f);
+                      const Opcode *instr, FunctionInfo* f);
   void transferFuncs(DwarfChunk* from, DwarfChunk* to);
   void compactChunks();
   DwarfChunk* addTracelet(TCRange range, const char* name,
-			  const Func* func, const Opcode *instr,
-			  bool exit, bool inPrologue);
+                          const Func* func, const Opcode *instr,
+                          bool exit, bool inPrologue);
   void syncChunks();
 };
 

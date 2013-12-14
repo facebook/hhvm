@@ -272,7 +272,7 @@ static const char* describe_actual_type(const TypedValue* tv) {
 
 void TypeConstraint::verifyFail(const Func* func, int paramNum,
                                 const TypedValue* tv) const {
-  Transl::VMRegAnchor _;
+  JIT::VMRegAnchor _;
   std::ostringstream fname;
   fname << func->fullName()->data() << "()";
   const StringData* tn = typeName();

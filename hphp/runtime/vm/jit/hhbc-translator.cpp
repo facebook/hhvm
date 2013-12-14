@@ -40,7 +40,6 @@ namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
-using namespace HPHP::Transl;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -2536,7 +2535,7 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
   }
 
   bool magicCall = false;
-  const Func* func = HPHP::Transl::lookupImmutableMethod(baseClass,
+  const Func* func = HPHP::JIT::lookupImmutableMethod(baseClass,
                                                          methodName,
                                                          magicCall,
                                                          /* staticLookup: */
@@ -2665,7 +2664,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
   const StringData* className = np.first;
   const Class* baseClass = Unit::lookupUniqueClass(np.second);
   bool magicCall = false;
-  const Func* func = HPHP::Transl::lookupImmutableMethod(baseClass,
+  const Func* func = HPHP::JIT::lookupImmutableMethod(baseClass,
                                                              methodName,
                                                              magicCall,
                                                          /* staticLookup: */
@@ -4473,7 +4472,7 @@ uint32_t localInputId(const NormalizedInstruction& inst) {
 Type HhbcTranslator::interpOutputType(
     const NormalizedInstruction& inst,
     folly::Optional<Type>& checkTypeType) const {
-  using namespace Transl::InstrFlags;
+  using namespace JIT::InstrFlags;
   auto localType = [&]{
     auto locId = localInputId(inst);
     assert(locId >= 0 && locId < curFunc()->numLocals());
@@ -4564,7 +4563,7 @@ smart::vector<InterpOneData::LocalType>
 HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
                                    bool& smashesAllLocals,
                                    Type pushedType) {
-  using namespace Transl::InstrFlags;
+  using namespace JIT::InstrFlags;
   if (!(getInstrInfo(inst.op()).out & Local)) return {};
 
   smart::vector<InterpOneData::LocalType> locals;
@@ -4731,7 +4730,7 @@ void HhbcTranslator::emitInterpOne(Type outType, int popped, int pushed,
   auto op = unit->getOpcode(bcOff());
 
   auto& iInfo = getInstrInfo(op);
-  if (iInfo.type == Transl::InstrFlags::OutFDesc) {
+  if (iInfo.type == JIT::InstrFlags::OutFDesc) {
     m_fpiStack.emplace(sp, m_tb->spOffset());
   } else if (isFCallStar(op) && !m_fpiStack.empty()) {
     m_fpiStack.pop();

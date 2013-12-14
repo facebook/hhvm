@@ -23,7 +23,7 @@
 
 #include "hphp/runtime/vm/jit/arch.h"
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 namespace X64 {
 constexpr auto kNumGPRegs   = 16;

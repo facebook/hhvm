@@ -28,7 +28,7 @@ namespace HPHP { namespace JIT { namespace ARM {
 struct CodeGenerator {
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& stubsCode,
-                Transl::TranslatorX64* tx64, CodegenState& state)
+                JIT::TranslatorX64* tx64, CodegenState& state)
       : m_unit(unit)
       , m_mainCode(mainCode)
       , m_stubsCode(stubsCode)
@@ -72,7 +72,7 @@ struct CodeGenerator {
     return m_state.regs[m_curInst];
   }
 
-  void recordHostCallSyncPoint(vixl::MacroAssembler& as, Transl::TCA tca);
+  void recordHostCallSyncPoint(vixl::MacroAssembler& as, JIT::TCA tca);
   void cgInterpOneCommon(IRInstruction* inst);
 
 #define O(name, dsts, srcs, flags) void cg##name(IRInstruction* inst);

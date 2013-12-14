@@ -51,7 +51,7 @@ SSATmp*& RegState::tmp(const PhysLoc& loc, int i) {
     return slots[loc.slot(i)];
   }
   auto r = loc.reg(i);
-  assert(r != Transl::InvalidReg);
+  assert(r != JIT::InvalidReg);
   return regs[r];
 }
 
@@ -351,8 +351,8 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
       for (SSATmp* src : inst.srcs()) {
         auto const &rs = regs[inst][src];
         if (!rs.spilled() &&
-            (rs.reg(0) == Transl::rVmSp ||
-             rs.reg(0) == Transl::rVmFp)) {
+            (rs.reg(0) == JIT::rVmSp ||
+             rs.reg(0) == JIT::rVmFp)) {
           // hack - ignore rbx and rbp
           continue;
         }

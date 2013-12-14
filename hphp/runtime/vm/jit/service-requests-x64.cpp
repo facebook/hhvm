@@ -30,8 +30,6 @@
 
 namespace HPHP { namespace JIT { namespace X64 {
 
-using Transl::ConditionCode;
-using Transl::TCA;
 
 TRACE_SET_MOD(servicereq);
 
@@ -43,7 +41,7 @@ namespace {
 
 void emitBindJ(CodeBlock& cb, CodeBlock& stubs,
                ConditionCode cc, SrcKey dest, ServiceRequest req) {
-  prepareForSmash(cb, cc == Transl::CC_None ? kJmpLen : kJmpccLen);
+  prepareForSmash(cb, cc == JIT::CC_None ? kJmpLen : kJmpccLen);
   TCA toSmash = cb.frontier();
   if (cb.base() == stubs.base()) {
     Asm a { cb };
@@ -235,12 +233,12 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   }
   emitEagerVMRegSave(as, RegSaveFlags::SaveFP);
   if (persist) {
-    as.  emitImmReg(0, Transl::reg::rAsm);
+    as.  emitImmReg(0, JIT::reg::rAsm);
   } else {
-    as.  emitImmReg((uint64_t)start, Transl::reg::rAsm);
+    as.  emitImmReg((uint64_t)start, JIT::reg::rAsm);
   }
   TRACE(3, ")\n");
-  as.    emitImmReg(req, Transl::reg::rdi);
+  as.    emitImmReg(req, JIT::reg::rdi);
 
   /*
    * Weird hand-shaking with enterTC: reverse-call a service routine.
@@ -251,8 +249,8 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
    * SRJmpInsteadOfRet indicates to fake the return.
    */
   if (flags & SRFlags::JmpInsteadOfRet) {
-    as.  pop(Transl::reg::rax);
-    as.  jmp(Transl::reg::rax);
+    as.  pop(JIT::reg::rax);
+    as.  jmp(JIT::reg::rax);
   } else {
     as.  ret();
   }
@@ -276,18 +274,18 @@ emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
   return retval;
 }
 
-void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
+void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
                       SrcKey dest) {
   emitBindJ(cb, stubs, cc, dest, REQ_BIND_SIDE_EXIT);
 }
 
-void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
+void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
                  SrcKey dest) {
   emitBindJ(cb, stubs, cc, dest, REQ_BIND_JCC);
 }
 
 void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest) {
-  emitBindJ(cb, stubs, Transl::CC_None, dest, REQ_BIND_JMP);
+  emitBindJ(cb, stubs, JIT::CC_None, dest, REQ_BIND_JMP);
 }
 
 int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& stubsCode,

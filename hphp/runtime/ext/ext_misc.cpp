@@ -33,7 +33,7 @@
 
 namespace HPHP {
 
-using Transl::CallerFrame;
+using JIT::CallerFrame;
 
 // Make sure "tokenizer" gets added to the list of extensions
 IMPLEMENT_DEFAULT_EXTENSION(tokenizer);

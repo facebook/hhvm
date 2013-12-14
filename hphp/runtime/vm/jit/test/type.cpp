@@ -129,35 +129,35 @@ TEST(Type, RuntimeType) {
   auto sd = StringData::MakeMalloced("", 0);
   SCOPE_EXIT { sd->destruct(); };
 
-  HPHP::Transl::RuntimeType rt(sd);
+  HPHP::JIT::RuntimeType rt(sd);
   Type t = Type(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Str));
   EXPECT_FALSE(t.subtypeOf(Type::Int));
 
-  rt = HPHP::Transl::RuntimeType(HphpArray::GetStaticEmptyArray());
+  rt = HPHP::JIT::RuntimeType(HphpArray::GetStaticEmptyArray());
   t = Type(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Arr));
   EXPECT_FALSE(t.subtypeOf(Type::Str));
 
-  rt = HPHP::Transl::RuntimeType(true);
+  rt = HPHP::JIT::RuntimeType(true);
   t = Type(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Bool));
   EXPECT_FALSE(t.subtypeOf(Type::Obj));
 
-  rt = HPHP::Transl::RuntimeType((int64_t) 1);
+  rt = HPHP::JIT::RuntimeType((int64_t) 1);
   t = Type(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Int));
   EXPECT_FALSE(t.subtypeOf(Type::Dbl));
 
-  rt = HPHP::Transl::RuntimeType(DataType::KindOfObject,
+  rt = HPHP::JIT::RuntimeType(DataType::KindOfObject,
                                  DataType::KindOfInvalid);
   rt = rt.setKnownClass(SystemLib::s_TraversableClass);
   t = Type(rt);
   EXPECT_TRUE(t.subtypeOf(Type::Obj));
   EXPECT_FALSE(Type::Obj.subtypeOf(t));
   EXPECT_FALSE(Type::Int.subtypeOf(t));
-  HPHP::Transl::RuntimeType rt1 =
-    HPHP::Transl::RuntimeType(DataType::KindOfObject,
+  HPHP::JIT::RuntimeType rt1 =
+    HPHP::JIT::RuntimeType(DataType::KindOfObject,
                               DataType::KindOfInvalid);
   rt1 = rt1.setKnownClass(SystemLib::s_IteratorClass);
   Type t1 = Type(rt1);

@@ -124,7 +124,9 @@
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
+
+TRACE_SET_MOD(tx64);
 
 using namespace reg;
 using namespace Util;
@@ -389,7 +391,6 @@ static void populateLiveContext(JIT::RegionContext& ctx) {
     [&](const ActRec* ar) {
       // TODO(#2466980): when it's a Cls, we should pass the Class* in
       // the Type.
-      using JIT::Type;
       auto const objOrCls =
         ar->hasThis()  ? Type::Obj.specialize(ar->getThis()->getVMClass()) :
         ar->hasClass() ? Type::Cls
@@ -2072,7 +2073,6 @@ TranslatorX64::translateTracelet(Tracelet& t) {
 }
 
 void TranslatorX64::traceCodeGen() {
-  using namespace JIT;
 
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   auto& unit = ht.unit();
@@ -2695,6 +2695,6 @@ TranslatorX64::CodeBlockSelector::Args::getTranslator() const {
   return m_tx;
 }
 
-} // HPHP::Transl
+} // HPHP::JIT
 
 } // HPHP

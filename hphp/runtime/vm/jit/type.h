@@ -27,14 +27,12 @@
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 struct DynLocation;
 struct RuntimeType;
 }
 namespace JIT {
 
-using Transl::RuntimeType;
-using Transl::DynLocation;
 
 #define IRT_BOXES(name, bits)                                           \
   IRT(name,             (bits))                                         \

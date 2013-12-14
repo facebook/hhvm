@@ -31,7 +31,7 @@
 
 namespace HPHP {
 
-using Transl::VMRegAnchor;
+using JIT::VMRegAnchor;
 
 IMPLEMENT_DEFAULT_EXTENSION(Reflection);
 ///////////////////////////////////////////////////////////////////////////////

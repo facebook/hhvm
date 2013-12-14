@@ -621,7 +621,7 @@ class Assembler {
     return UpdateAndGetByteOffsetTo(label) >> kInstructionSizeLog2;
   }
 
-  HPHP::Transl::TCA frontier() const {
+  HPHP::JIT::TCA frontier() const {
     return cb_.frontier();
   }
 

@@ -26,7 +26,6 @@ namespace HPHP { namespace JIT {
 
 TRACE_SET_MOD(pgo);
 
-using Transl::TransID;
 
 typedef hphp_hash_map<TransID, RegionDescPtr>            TransIDToRegionMap;
 typedef hphp_hash_map<RegionDescPtr, TransIDVec,
@@ -206,7 +205,7 @@ static bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
  *           covered appropriately
  */
 void regionizeFunc(const Func*            func,
-                   Transl::TranslatorX64* tx64,
+                   JIT::TranslatorX64* tx64,
                    RegionVec&             regions) {
   assert(RuntimeOption::EvalJitPGO);
   FuncId funcId = func->getFuncId();

@@ -43,7 +43,7 @@ class TraceBuilder;
 class CodeGenerator;
 }}
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 struct TraceletCounters {
   uint64_t m_numEntered, m_numExecuted;

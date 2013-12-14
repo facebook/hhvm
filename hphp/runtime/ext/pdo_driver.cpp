@@ -72,6 +72,12 @@ PDOConnection::PDOConnection()
 PDOConnection::~PDOConnection() {
 }
 
+void PDOConnection::sweep() {
+  assert(!is_persistent);
+  def_stmt_ctor_args.asTypedValue()->m_type = KindOfNull;
+  delete this;
+}
+
 void PDOConnection::persistentSave() {
   String serialized = f_serialize(def_stmt_ctor_args);
   serialized_def_stmt_ctor_args = string(serialized.data(), serialized.size());

@@ -1537,7 +1537,7 @@ void c_Map::throwTooLarge() {
                    "Map object has reached its maximum capacity of "
                    "%u element slots and does not have room to add a "
                    "new element",
-                   c_Map::MaxSize);
+                   MaxSize);
   assert(sz <= reserveSize);
   msg.setSize(sz);
   Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
@@ -1552,7 +1552,7 @@ void c_Map::throwReserveTooLarge() {
   int sz = sprintf(buf,
                    "Map does not support reserving room for more than "
                    "%u elements",
-                   c_Map::MaxSize / 2);
+                   MaxReserveSize);
   assert(sz <= reserveSize);
   msg.setSize(sz);
   Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
@@ -1705,14 +1705,14 @@ ssize_t c_Map::find(const StringData* s, strhash_t prehash) const {
 template <class Hit>
 ALWAYS_INLINE
 int32_t* c_Map::findForInsertImpl(size_t h0, Hit hit) const {
-  // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
+  // mask, probe, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto. Test carefully.
-  size_t tableMask = m_tableMask;
+  size_t mask = m_tableMask;
   auto* elms = data();
   auto* hashtable = hashTab();
   int32_t* ret = nullptr;
-  for (size_t probeIndex = h0, i = 1;; ++i) {
-    auto ei = &hashtable[probeIndex & tableMask];
+  for (size_t probe = h0, i = 1;; ++i) {
+    auto ei = &hashtable[probe & mask];
     ssize_t pos = *ei;
     if (validPos(pos)) {
       if (hit(elms[pos])) {
@@ -1724,8 +1724,8 @@ int32_t* c_Map::findForInsertImpl(size_t h0, Hit hit) const {
         return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
       }
     }
-    probeIndex += i;
-    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
+    probe += i;
+    assert(i <= mask && probe == h0 + (i + i*i) / 2);
   }
 }
 
@@ -1750,7 +1750,7 @@ c_Map::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
     auto ei = &table[probe & mask];
     if (!validPos(*ei)) return ei;
     probe += i;
-    assert(i <= mask && probe == h0 + ((i + i * i) / 2));
+    assert(i <= mask && probe == h0 + (i + i*i) / 2);
   }
 }
 
@@ -1829,68 +1829,61 @@ void c_Map::erase(int32_t* pos) {
   assert(m_used <= m_cap);
   // Finally, decref the old value
   tvRefcountedDecRefHelper(oldType, oldDatum);
-  if (m_size < m_used / 2) {
-    // Compact in order to keep elms from being overly sparse.
+  // Compact in order to keep elms from being overly sparse. Other parts
+  // of Map's implementation rely on the fact that erase() does not allow
+  // the Elm density to drop below ~50%.
+  if (isDensityTooLow()) {
     compact();
   }
 }
 
 NEVER_INLINE void c_Map::makeRoom() {
   assert(isFull());
-  if (m_size < m_used / 2) {
-    assert(m_size);
-    compact();
-    return;
-  }
+  // erase() guarantees that element density will never drop below ~50%,
+  // so we always grow to make room here.
+  assert(!isDensityTooLow());
   if (UNLIKELY(m_cap == MaxSize)) {
     throwTooLarge();
   }
-  uint32_t newCap = m_cap ? m_cap * 2 : SmallSize;
-  uint32_t newMask = m_cap ? m_tableMask * 2 + 1 : SmallMask;
-  grow(newCap, newMask);
+  // Double the current capacity
+  grow(m_cap ? m_cap*2 : SmallSize, m_cap ? m_tableMask*2+1 : SmallMask);
 }
 
 NEVER_INLINE void c_Map::reserve(int64_t sz) {
-  assert(m_used <= m_cap);
+  assert(m_size <= m_used && m_used <= m_cap && !isDensityTooLow());
   uint32_t newCap, newMask;
-  // Map can only guarantee that it won't throw "cannot add element"
-  // exceptions if m_size <= MaxSize / 2. Therefore, the maximum
-  // reservation size that Map supports is MaxSize / 2.
-  if (UNLIKELY(sz > int64_t(MaxSize / 2))) {
+  if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
     throwReserveTooLarge();
   }
+  // Compute the new capacity and new hash mask if we need to grow or bail
+  // out if there is nothing to do.
   if (sz > int64_t(m_cap)) {
+    // The requested capacity is greater than the current capacity. Compute
+    // the smallest allowed capacity that is sufficient.
     auto lgSize = c_Map::SmallLgTableSize;
-    newCap = c_Map::SmallSize;
-    while (newCap < sz) {
-      ++lgSize;
-      newCap <<= 1;
-    }
-    assert(lgSize <= 32);
+    for (newCap = c_Map::SmallSize; newCap < sz; newCap <<= 1) ++lgSize;
     newMask = (size_t(1U) << lgSize) - 1;
-    // fall through to the call to grow() below
-  } else if (m_size < m_used / 2) {
-    compact();
-    return;
-  } else if (m_used + (sz - m_size) <= m_cap) {
-    // Nothing to do
-    return;
+    assert(lgSize <= MaxLgTableSize && newCap > m_cap);
   } else {
-    assert(0 < m_cap && m_cap <= MaxSize / 2);
-    assert(m_tableMask != 0);
+    // If sz <= m_size or if the Map can accommodate sz-m_size additional
+    // elements without growing or compacting, then there is nothing to do.
+    if (sz <= int64_t(m_size) ||
+        size_t(m_used) + size_t(sz - m_size) <= size_t(m_cap)) return;
+    // Otherwise prepare to double the current capacity
+    assert(0 < sz && sz <= int64_t(m_cap));
+    assert(m_cap < MaxSize && m_tableMask != 0);
     newCap = m_cap * 2;
     newMask = m_tableMask * 2 + 1;
-    // fall through to the call to grow() below
   }
+  // Perform the grow operation.
   grow(newCap, newMask);
 }
 
 void c_Map::grow(uint32_t newCap, uint32_t newMask) {
-  assert(m_used <= m_cap);
+  assert(m_size <= m_used && m_used <= m_cap);
   size_t newHashSize = size_t(newMask) + 1;
-  assert(Util::isPowerOfTwo(newHashSize));
-  assert(computeMaxElms(newMask) == newCap);
-
+  assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
+  assert(m_size <= newCap && newCap <= MaxSize);
   auto* oldData = data();
   auto* data = (Elm*)smart_malloc(size_t(newCap) * sizeof(Elm) +
                                   newHashSize * sizeof(int32_t));

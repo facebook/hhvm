@@ -406,6 +406,11 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection|
   static const uint32_t MaxMask = (size_t(1) << MaxLgTableSize) - 1;
   static const uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
 
+  // Map can only guarantee that it won't throw "cannot add element"
+  // exceptions if m_size <= MaxSize / 2. Therefore, we only allow
+  // reserve() to make room for up to MaxSize / 2 elements.
+  static const uint32_t MaxReserveSize = MaxSize / 2;
+
   void init(CVarRef t);
   void deleteElms();
   void freeData();
@@ -527,15 +532,14 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection|
   void erase(int32_t* pos);
 
   bool isFull() { return m_used == m_cap; }
+  bool isDensityTooLow() const { return (m_size < m_used / 2); }
 
   // This method will grow or compact as needed to make room to add
-  // a new element
+  // one new element.
   void makeRoom();
 
   // This method will grow or compact as needed in preparation for
-  // repeatedly adding new elements until m_size >= sz. When reserve()
-  // is called where sz < m_size, it may choose to perform a compaction
-  // if appropriate.
+  // repeatedly adding new elements until m_size >= sz.
   void reserve(int64_t sz);
 
   void grow(uint32_t newCap, uint32_t newMask);

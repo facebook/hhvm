@@ -610,6 +610,7 @@ public:
             || isJumpTarget(m_ue.bcPos())
             || (instrFlags(getPrevOpcode()) & TF) == 0);
   }
+  FuncEmitter* getFuncEmitter() { return m_curFunc; }
   FinallyRouter& getFinallyRouter() { return m_finallyRouter; }
   Id getStateLocal() {
     assert(m_stateLocal >= 0);

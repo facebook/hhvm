@@ -637,10 +637,12 @@ public:
     return m_retUserType;
   }
 
+  Id numIterators() const { return m_numIterators; }
+  void setNumIterators(Id numIterators);
   Id allocIterator();
   void freeIterator(Id id);
-  void setNumIterators(Id numIterators);
-  Id numIterators() const { return m_numIterators; }
+  Id numLiveIterators() { return m_nextFreeIterator; }
+  void setNumLiveIterators(Id id) { m_nextFreeIterator = id; }
 
   Id allocUnnamedLocal();
   void freeUnnamedLocal(Id id);

@@ -2476,8 +2476,9 @@ private:
 
 class FinallyThunklet : public Thunklet {
 public:
-  explicit FinallyThunklet(FinallyStatementPtr finallyStatement)
-    : m_finallyStatement(finallyStatement) {}
+  explicit FinallyThunklet(FinallyStatementPtr finallyStatement,
+                           int numLiveIters)
+    : m_finallyStatement(finallyStatement), m_numLiveIters(numLiveIters) {}
   virtual void emit(Emitter& e) {
     auto& visitor = e.getEmitterVisitor();
     auto& router = visitor.getFinallyRouter();
@@ -2490,11 +2491,16 @@ public:
     Id retLocal = visitor.getStateLocal();
     visitor.emitVirtualLocal(retLocal);
     e.UnsetL(retLocal);
+    auto* func = visitor.getFuncEmitter();
+    int oldNumLiveIters = func->numLiveIterators();
+    func->setNumLiveIterators(m_numLiveIters);
+    SCOPE_EXIT { func->setNumLiveIterators(oldNumLiveIters); };
     visitor.visit(m_finallyStatement);
     e.Unwind();
   }
 private:
   FinallyStatementPtr m_finallyStatement;
+  int m_numLiveIters;
 };
 
 /**
@@ -3555,7 +3561,8 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
           nextEntry->emitFinallySwitch(e);
           auto func = getFunclet(f);
           if (func == nullptr) {
-            auto thunklet = new FinallyThunklet(f);
+            auto thunklet =
+              new FinallyThunklet(f, m_curFunc->numLiveIterators());
             func = addFunclet(f, thunklet);
           }
           newFaultRegion(start, end_catches, &func->m_entry);

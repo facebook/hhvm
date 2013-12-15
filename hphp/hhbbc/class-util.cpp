@@ -57,7 +57,7 @@ bool could_have_magic_bool_conversion(Type t) {
   if (t.strictSubtypeOf(TObj)) {
     return has_magic_bool_conversion(dobj_of(t).cls);
   }
-  if (t.subtypeOf(TOptObj) && unopt(t).strictSubtypeOf(TObj)) {
+  if (is_opt(t) && unopt(t).strictSubtypeOf(TObj)) {
     return has_magic_bool_conversion(dobj_of(t).cls);
   }
   return true;

@@ -612,7 +612,6 @@ struct InterpStepper : boost::static_visitor<void> {
 
   template<class JmpOp>
   void jmpType(const bc::IsTypeL& istype, const JmpOp& jmp) {
-    auto const negate = jmp.op == Op::JmpNZ;
     auto const loc    = locAsCell(istype.loc1);
 
     if (static_cast<IsTypeOp>(istype.subop) == IsTypeOp::Scalar) {
@@ -623,14 +622,29 @@ struct InterpStepper : boost::static_visitor<void> {
       return impl(istype, jmp);
     }
 
-    // TODO(#3343812): we're not doing as well as the CGetL-fused case
-    // here with ?Obj type null checks.
-
     if (!locCouldBeUninit(istype.loc1)) nothrow();
 
-    setLoc(istype.loc1, negate ? testTy : loc);
+    auto const negate = jmp.op == Op::JmpNZ;
+    auto const was_true = [&] {
+      if (is_opt(loc)) {
+        if (testTy.subtypeOf(TNull)) return TInitNull;
+        auto const unopted = unopt(loc);
+        if (unopted.subtypeOf(testTy)) return unopted;
+      }
+      return testTy;
+    }();
+    auto const was_false = [&] {
+      if (is_opt(loc)) {
+        auto const unopted = unopt(loc);
+        if (testTy.subtypeOf(TNull))   return unopted;
+        if (unopted.subtypeOf(testTy)) return TInitNull;
+      }
+      return loc;
+    }();
+
+    setLoc(istype.loc1, negate ? was_true : was_false);
     m_propagate(*jmp.target, m_state);
-    setLoc(istype.loc1, negate ? loc : testTy);
+    setLoc(istype.loc1, negate ? was_false : was_true);
   }
 
   template<class JmpOp>
@@ -642,11 +656,7 @@ struct InterpStepper : boost::static_visitor<void> {
 
     auto const negate = jmp.op == Op::JmpNZ;
     auto const converted_true = [&] {
-      assert(!loc.subtypeOf(TInitNull)); // Handled above by impl().
-      if (loc.subtypeOfAny(TOptObj, TOptArr, TOptDbl,
-                           TOptInt, TOptBool, TOptRes)) {
-        return unopt(loc);
-      }
+      if (is_opt(loc)) return unopt(loc);
       if (loc.subtypeOf(TBool)) return TTrue;
       return loc;
     }();

@@ -21,7 +21,7 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 struct OptimizerOptions {
-  OptimizerOptions() {}
+  constexpr OptimizerOptions() {}
 
   /*
    * If true, completely remove jumps to blocks that are inferred to
@@ -78,8 +78,7 @@ struct OptimizerOptions {
    * constraint.
    */
   bool HardTypeHints = true;
-};
-const OptimizerOptions options;
+} options;
 
 //////////////////////////////////////////////////////////////////////
 

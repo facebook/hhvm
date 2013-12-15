@@ -33,9 +33,6 @@ namespace HPHP { namespace HHBBC {
 /*
  * Type system.
  *
- * Note: not sure if CStr and CArr will actually be useful; they may
- * go away later.
- *
  * Here's an unmaintainable ascii-art diagram:
  *
  *                      Top
@@ -46,22 +43,25 @@ namespace HPHP { namespace HHBBC {
  *                 |     |    |
  *                Cls  Cell  Ref
  *                 |     |
- *              Cls<=c   +--------+--------+-------+
- *                 |     |        |        |       |
- *              Cls=c   Unc       |        |      Obj
+ *              Cls<=c   +--------+--------+-------+-------+
+ *                 |     |        |        |       |       |
+ *              Cls=c   Unc       |        |      Obj     Res
  *                       |        |        |       |
  *                  +----+        |        |     Obj<=c
  *                 /     |        |        |       |
  *                /      |        |        |     Obj=c
  *             Null   InitUnc     |        |
- *             / |    /  | \ \   Arr      Str
- *            /  |   /   |  \ \  / \      / \
- *      Uninit  InitNull |   \ SArr CArr /  CStr
- *                       |    \     ____/
- *                       |     \   /
- *                       |      SStr
- *                       |       |
- *                       |     SStr=s
+ *             / |     / |\  \   Arr      Str
+ *            /  |    /  | \  \  / \      / \
+ *      Uninit  InitNull |  \  SArr CArr /  CStr
+ *                       |   \   |      /
+ *                       |    \ SArr=a /
+ *                       |     \      /
+ *                       |      \    /
+ *                       |       \  /
+ *                       |       SStr
+ *                       |        |
+ *                       |      SStr=s
  *                       |
  *                       +----------+-------+
  *                       |          |       |
@@ -103,8 +103,10 @@ enum trep : uint32_t {
   BOptInt      = BInitNull | BInt,       // may have value
   BOptDbl      = BInitNull | BDbl,       // may have value
   BOptSStr     = BInitNull | BSStr,      // may have value
+  BOptCStr     = BInitNull | BCStr,
   BOptStr      = BInitNull | BStr,
   BOptSArr     = BInitNull | BSArr,      // may have value
+  BOptCArr     = BInitNull | BCArr,
   BOptArr      = BInitNull | BArr,
   BOptObj      = BInitNull | BObj,       // may have data
   BOptRes      = BInitNull | BRes,
@@ -181,8 +183,10 @@ private:
   friend Type clsExact(res::Class);
   friend DObj dobj_of(Type);
   friend DCls dcls_of(Type);
+  friend Type union_of(Type, Type);
   friend Type opt(Type);
   friend Type unopt(Type);
+  friend bool is_opt(Type);
   friend folly::Optional<Cell> tv(Type);
   friend std::string show(Type);
 
@@ -241,8 +245,10 @@ X(OptBool)
 X(OptInt)
 X(OptDbl)
 X(OptSStr)
+X(OptCStr)
 X(OptStr)
 X(OptSArr)
+X(OptCArr)
 X(OptArr)
 X(OptObj)
 X(OptRes)
@@ -285,9 +291,16 @@ Type opt(Type t);
 /*
  * Return the non-optional version of the Type t.
  *
- * Pre: t must be one of the predefined optional types.
+ * Pre: is_opt(t)
  */
 Type unopt(Type t);
+
+/*
+ * Returns whether a given type is a subtype of one of the predefined
+ * optional types.  (Note that this does not include types like
+ * TInitUnc---it's only the TOpt* types.)
+ */
+bool is_opt(Type t);
 
 /*
  * Returns the best known TCls subtype for an object type.

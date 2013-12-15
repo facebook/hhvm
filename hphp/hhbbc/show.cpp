@@ -393,8 +393,10 @@ std::string show(Type t) {
   case BOptDbl:      ret = "?Dbl";     break;
   case BOptBool:     ret = "?Bool";    break;
   case BOptSStr:     ret = "?SStr";    break;
+  case BOptCStr:     ret = "?CStr";    break;
   case BOptStr:      ret = "?Str";     break;
   case BOptSArr:     ret = "?SArr";    break;
+  case BOptCArr:     ret = "?CArr";    break;
   case BOptArr:      ret = "?Arr";     break;
   case BOptObj:      ret = "?Obj";     break;
   case BOptRes:      ret = "?Res";     break;

@@ -1510,7 +1510,6 @@ void Translator::handleAssertionEffects(Tracelet& t,
     case AssertTOp::Int:      return RuntimeType{KindOfInt64};
     case AssertTOp::Dbl:      return RuntimeType{KindOfDouble};
     case AssertTOp::Res:      return RuntimeType{KindOfResource};
-    case AssertTOp::Null:     return folly::none;
     case AssertTOp::Bool:     return RuntimeType{KindOfBoolean};
     case AssertTOp::SStr:     return RuntimeType{KindOfString};
     case AssertTOp::Str:      return RuntimeType{KindOfString};
@@ -1530,6 +1529,7 @@ void Translator::handleAssertionEffects(Tracelet& t,
     case AssertTOp::OptSArr:
     case AssertTOp::OptArr:
     case AssertTOp::OptObj:
+    case AssertTOp::Null:    // could be KindOfUninit or KindOfNull
       return folly::none;
 
     case AssertTOp::Ref:

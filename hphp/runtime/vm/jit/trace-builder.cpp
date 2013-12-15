@@ -343,13 +343,29 @@ SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
 
   assert(inst->typeParam() == Type::None);
 
-  // There's no need to store the type if it's going to be the same
-  // KindOfFoo. We still have to store string types because we don't
-  // guard on KindOfStaticString vs. KindOfString.
+  /*
+   * There's no need to store the type if it's going to be the same
+   * KindOfFoo.  We'll still have to store string types because we
+   * aren't specific about storing KindOfStaticString
+   * vs. KindOfString, and a Type::Null might mean KindOfUninit or
+   * KindOfNull.
+   */
   auto const bothBoxed = curType.isBoxed() && newType.isBoxed();
-  auto const sameUnboxed =
-    curType.isSameKindOf(newType) && !curType.isString();
-  if (bothBoxed || sameUnboxed) {
+  auto const sameUnboxed = [&] {
+    auto avoidable = { Type::Uninit,
+                       Type::InitNull,
+                       Type::Int,
+                       Type::Dbl,
+                       // No strings.
+                       Type::Arr,
+                       Type::Obj,
+                       Type::Res };
+    for (auto& t : avoidable) {
+      if (curType.subtypeOf(t) && newType.subtypeOf(t)) return true;
+    }
+    return false;
+  };
+  if (bothBoxed || sameUnboxed()) {
     inst->setOpcode(StLocNT);
   }
 

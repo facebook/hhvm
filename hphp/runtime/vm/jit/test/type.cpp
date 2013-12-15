@@ -55,15 +55,27 @@ TEST(Type, Null) {
 
 TEST(Type, KnownDataType) {
   auto trueTypes = {
-    Type::Int, Type::BoxedCell, Type::StaticStr, Type::Str,
-    Type::Null, Type::Uninit, Type::InitNull
+    Type::Int, Type::BoxedCell, Type::StaticStr,
+    Type::Str, // TODO(#3390819): this should return false...
+    Type::Obj,
+    Type::Dbl,
+    Type::Arr,
+    Type::StaticArr,
+    Type::CountedArr,
+    Type::Res,
+    Type::Bool,
+    Type::Uninit,
+    Type::InitNull
   };
   for (auto t : trueTypes) {
     EXPECT_TRUE(t.isKnownDataType())
       << t.toString() << ".isKnownDataType()";
   }
   auto falseTypes = {
-    Type::Cell, Type::Gen, Type::Int | Type::Dbl
+    // Type::Null, // TODO(#3390819)
+    Type::Cell,
+    Type::Gen,
+    Type::Int | Type::Dbl
   };
   for (auto t : falseTypes) {
     EXPECT_FALSE(t.isKnownDataType())

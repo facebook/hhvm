@@ -6598,8 +6598,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
     Option::GenerateDocComments ? meth->getDocComment().c_str() : "");
   fe->setReturnType(meth->retTypeAnnotation()->dataType());
   fe->setMaxStackCells(kNumActRecCells + 1);
-  fe->setReturnTypeConstraint(
-      makeStaticString(meth->getReturnTypeConstraint()));
+  fe->setReturnUserType(makeStaticString(meth->getReturnTypeConstraint()));
 
   FunctionScopePtr funcScope = meth->getFunctionScope();
   const char *funcname  = funcScope->getName().c_str();

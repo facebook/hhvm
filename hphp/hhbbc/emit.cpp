@@ -723,7 +723,7 @@ void emit_finish_func(const php::Func& func,
   emit_ehent_tree(fe, func, info);
 
   fe.setUserAttributes(func.userAttributes);
-  fe.setReturnTypeConstraint(func.userRetTypeConstraint);
+  fe.setReturnUserType(func.returnUserType);
   fe.setOriginalFilename(func.originalFilename);
   fe.setIsClosureBody(func.isClosureBody);
   fe.setIsGenerator(func.isGeneratorBody);

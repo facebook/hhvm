@@ -619,17 +619,21 @@ public:
   bool hasVar(const StringData* name) const;
   Id numParams() const { return m_params.size(); }
 
-  void setReturnTypeConstraint(const StringData* retTypeConstraint) {
-    m_retTypeConstraint = TypeConstraint(
-      retTypeConstraint,
-      TypeConstraint::NoFlags);
-  }
+  /*
+   * Return type constraints will eventually be runtime-enforced
+   * return types, but for now are unused.
+   */
   void setReturnTypeConstraint(const TypeConstraint retTypeConstraint) {
     m_retTypeConstraint = retTypeConstraint;
   }
   const TypeConstraint& returnTypeConstraint() const {
     return m_retTypeConstraint;
   }
+
+  /*
+   * Return "user types" are string-format specifications of return
+   * types only used for reflection purposes.
+   */
   void setReturnUserType(const StringData* retUserType) {
     m_retUserType = retUserType;
   }

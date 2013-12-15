@@ -125,6 +125,12 @@
                     "name": "str",
                     "type": "String",
                     "desc": "The input string."
+                },
+                {
+                    "name": "is_xhtml",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether to use XHTML compatible line breaks or not."
                 }
             ]
         },

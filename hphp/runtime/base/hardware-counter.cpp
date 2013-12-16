@@ -375,7 +375,7 @@ bool HardwareCounter::setPerfEvents(const String& events) {
   while (s) {
     int len = strlen(s);
     char* event = url_decode(s, len);
-    bool isPseudoEvent = TranslatorX64::isPseudoEvent(event);
+    bool isPseudoEvent = JIT::TranslatorX64::isPseudoEvent(event);
     m_pseudoEvents = m_pseudoEvents || isPseudoEvent;
     if (!isPseudoEvent && !eventExists(event) && !addPerfEvent(event)) {
       return false;
@@ -415,7 +415,7 @@ void HardwareCounter::getPerfEvents(Array& ret) {
     ret.set(m_counters[i]->m_desc, m_counters[i]->read());
   }
   if (m_pseudoEvents) {
-    tx64->getPerfCounters(ret);
+    JIT::tx64->getPerfCounters(ret);
   }
 }
 

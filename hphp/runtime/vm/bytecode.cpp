@@ -113,6 +113,8 @@ using std::string;
 using JIT::VMRegAnchor;
 using JIT::EagerVMRegAnchor;
 using JIT::tx64;
+using JIT::tl_regState;
+using JIT::VMRegState;
 
 #if DEBUG
 #define OPTBLD_INLINE
@@ -4979,7 +4981,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIdx(IOP_ARGS) {
   TypedValue* key = m_stack.indTV(1);
   TypedValue* arr = m_stack.indTV(2);
 
-  TypedValue result = genericIdx(*arr, *key, *def);
+  TypedValue result = JIT::genericIdx(*arr, *key, *def);
   m_stack.popTV();
   m_stack.popTV();
   tvRefcountedDecRef(arr);

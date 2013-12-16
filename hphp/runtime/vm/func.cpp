@@ -41,6 +41,8 @@
 namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
+using JIT::tx64;
+
 const StringData* Func::s___call = makeStaticString("__call");
 const StringData* Func::s___callStatic =
   makeStaticString("__callStatic");

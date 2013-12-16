@@ -811,7 +811,7 @@ Class* Unit::loadClass(const NamedEntity* ne,
   if (LIKELY((cls = ne->getCachedClass()) != nullptr)) {
     return cls;
   }
-  VMRegAnchor _;
+  JIT::VMRegAnchor _;
   AutoloadHandler::s_instance->invokeHandler(
     StrNR(const_cast<StringData*>(name)));
   return Unit::lookupClass(ne);

@@ -96,8 +96,8 @@ void ProcessInit() {
   ClassInfo::SetHook(&vm_class_info_hook);
 
   // Create the global tx64 object
-  g_translator = tx64 = new TranslatorX64();
-  tx64->initUniqueStubs();
+  JIT::g_translator = JIT::tx64 = new JIT::TranslatorX64();
+  JIT::tx64->initUniqueStubs();
 
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the

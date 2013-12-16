@@ -58,14 +58,16 @@
 #define KindOfUnknown DontUseKindOfUnknownInThisFile
 #define KindOfInvalid DontUseKindOfInvalidInThisFile
 
+namespace {
+TRACE_SET_MOD(trans);
+}
+
 namespace HPHP {
 namespace JIT {
 
 using namespace HPHP;
 using HPHP::JIT::Type;
 using HPHP::JIT::HhbcTranslator;
-
-TRACE_SET_MOD(trans)
 
 static __thread BiasedCoin *dbgTranslateCoin;
 Translator* g_translator;
@@ -4509,7 +4511,7 @@ std::string traceletShape(const Tracelet& trace) {
 
 void invalidatePath(const std::string& path) {
   TRACE(1, "invalidatePath: abspath %s\n", path.c_str());
-  PendQ::defer(new DeferredPathInvalidate(path));
+  PendQ::defer(new JIT::DeferredPathInvalidate(path));
 }
 
 } // HPHP

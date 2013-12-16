@@ -24,10 +24,10 @@
 #include <dwarf.h>
 #include <vector>
 
-using namespace HPHP::JIT;
-
 namespace HPHP {
 namespace Debug {
+
+using JIT::TCA;
 
 typedef enum {
   RAX,
@@ -160,7 +160,7 @@ typedef std::map<TCA, FunctionInfo* > FuncDB;
 typedef vector<FunctionInfo* > FuncPtrDB;
 
 struct DwarfInfo {
-  typedef std::map<TCA, TransRec> TransDB;
+  typedef std::map<TCA, JIT::TransRec> TransDB;
 
   vector<DwarfChunk*> m_dwarfChunks;
   /* Array of chunks indexed by lg(#functions in chunk) + 1.

@@ -23,8 +23,6 @@
 #include <vector>
 #include <string>
 
-using namespace HPHP::JIT;
-
 namespace HPHP {
 namespace Debug {
 

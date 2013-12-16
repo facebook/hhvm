@@ -6,6 +6,7 @@ Next release
   - implement fileinfo
   - special comparisons for DateTime
   - delete unimplemented functions
+  - support for the finally clause in try blocks
 
 "Huarache" 26-Nov-2013
   - Linker re-ordering of hot functions
@@ -16,14 +17,14 @@ Next release
   - Userland file system support
   - Implement fileinfo extension
   - wordwrap() fixes
-  - PDO::sqlieCreateFunction()
+  - PDO::sqliteCreateFunction()
   - Implement NumberFormatter
   - Implement Locale
   - Implement DatePeriod
   - Many reflection fixes
   - Stub out PharData
-  - A ton of performance fixes 
-  - A ton of open source framework fixes 
+  - A ton of performance fixes
+  - A ton of open source framework fixes
   - FastCGI Server Support
 
 "Garlic Alfredo" 11-Nov-2013

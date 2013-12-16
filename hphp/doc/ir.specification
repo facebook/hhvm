@@ -245,16 +245,6 @@ Essential
   Currently this is just used to flag whether we are allowed to do
   dead code elimination on it.
 
-MemEffects
-
-  Indicates that the instruction has side effects on memory that
-  cannot be rolled back.  If this bit isn't set, it means it is ok to
-  redo whatever work the instruction did without changing observable
-  program behavior.
-
-  This flag is currently unused, but may be used later to share exit
-  traces.
-
 CallsNative
 
   Indicates that the instruction will call a native helper.
@@ -279,10 +269,6 @@ ProducesRC
   The instruction produces an incref'd value.
 
   This flag is currently unused.
-
-MayModifyRefs
-
-  The instruction may modify inner cells on KindOfRef values.
 
 MayRaiseError
 

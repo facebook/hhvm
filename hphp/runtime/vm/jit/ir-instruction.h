@@ -329,12 +329,10 @@ struct IRInstruction {
   bool canCSE() const;
   bool hasDst() const;
   bool naryDst() const;
-  bool hasMemEffects() const;
   bool isNative() const;
   bool consumesReferences() const;
   bool consumesReference(int srcNo) const;
   bool producesReference(int dstNo) const;
-  bool mayModifyRefs() const;
   bool mayRaiseError() const;
   bool isEssential() const;
   bool isTerminal() const;

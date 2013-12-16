@@ -66,10 +66,6 @@ bool IRInstruction::producesReference(int dstNo) const {
   return opcodeHasFlags(op(), ProducesRC);
 }
 
-bool IRInstruction::hasMemEffects() const {
-  return opcodeHasFlags(op(), MemEffects) || mayReenterHelper();
-}
-
 bool IRInstruction::canCSE() const {
   auto canCSE = opcodeHasFlags(op(), CanCSE);
   // Make sure that instructions that are CSE'able can't consume reference
@@ -150,25 +146,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
     default:
       return true;
   }
-}
-
-bool IRInstruction::mayModifyRefs() const {
-  Opcode opc = op();
-  // DecRefNZ does not have side effects other than decrementing the ref
-  // count. Therefore, its MayModifyRefs should be false.
-  if (opc == DecRef) {
-    auto type = src(0)->type();
-    if (isControlFlow()) {
-      // If the decref has a target label, then it exits if the destructor
-      // has to be called, so it does not have any side effects on the main
-      // trace.
-      return false;
-    }
-    if (!type.canRunDtor()) {
-      return false;
-    }
-  }
-  return opcodeHasFlags(opc, MayModifyRefs) || mayReenterHelper();
 }
 
 bool IRInstruction::mayRaiseError() const {

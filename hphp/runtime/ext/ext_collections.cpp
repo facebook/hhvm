@@ -64,6 +64,16 @@ void throwOOB(int64_t key) {
   throwIntOOB(key, true);
 }
 
+const int kCollectionObjectDataAttrs =
+  ObjectData::IsCppBuiltin |
+  ObjectData::IsCollection |
+  ObjectData::UseGet |
+  ObjectData::UseSet |
+  ObjectData::UseIsset |
+  ObjectData::UseUnset |
+  ObjectData::CallToImpl |
+  ObjectData::HasCppClone;
+
 static void throwStrOOB(StringData* key) ATTRIBUTE_NORETURN;
 
 void throwStrOOB(StringData* key) {
@@ -117,15 +127,7 @@ void triggerCow(c_Vector* vec) {
 
 c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
 
-  int flags = ObjectData::IsCollection |
-              ObjectData::UseGet |
-              ObjectData::UseSet |
-              ObjectData::UseIsset |
-              ObjectData::UseUnset |
-              ObjectData::CallToImpl |
-              ObjectData::HasCppClone;
-
-  ObjectData::setAttributes(flags);
+  ObjectData::setAttributes(kCollectionObjectDataAttrs);
   o_subclassData.u16 = Collection::VectorType;
 }
 
@@ -844,14 +846,7 @@ Object c_FrozenVector::t_values() {
 
 c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
 
-  int flags = ObjectData::IsCollection |
-              ObjectData::UseGet |
-              ObjectData::UseSet |
-              ObjectData::UseIsset |
-              ObjectData::UseUnset |
-              ObjectData::CallToImpl;
-
-  ObjectData::setAttributes(flags);
+  ObjectData::setAttributes(kCollectionObjectDataAttrs);
   o_subclassData.u16 = Collection::FrozenVectorType;
 }
 
@@ -3894,15 +3889,7 @@ void BaseSet::throwBadValueType() {
 
 c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
 
-  const uint attrs = ObjectData::IsCollection|
-                     ObjectData::UseGet|
-                     ObjectData::UseSet|
-                     ObjectData::UseIsset|
-                     ObjectData::UseUnset|
-                     ObjectData::CallToImpl|
-                     ObjectData::HasCppClone;
-
-  ObjectData::setAttributes(attrs);
+  ObjectData::setAttributes(kCollectionObjectDataAttrs);
   o_subclassData.u16 = Collection::SetType;
 }
 
@@ -4078,15 +4065,7 @@ Object c_FrozenSet::ti_fromarrays(int _argc, CArrRef _argv) {
 }
 
 c_FrozenSet::c_FrozenSet(Class* cls) : BaseSet(cls) {
-  const uint attrs = ObjectData::IsCollection|
-                     ObjectData::UseGet|
-                     ObjectData::UseSet|
-                     ObjectData::UseIsset|
-                     ObjectData::UseUnset|
-                     ObjectData::CallToImpl|
-                     ObjectData::HasCppClone;
-
-  ObjectData::setAttributes(attrs);
+  ObjectData::setAttributes(kCollectionObjectDataAttrs);
   o_subclassData.u16 = Collection::FrozenSetType;
 }
 

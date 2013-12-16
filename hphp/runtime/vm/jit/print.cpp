@@ -260,9 +260,20 @@ std::ostream& operator<<(std::ostream& os, const PhysLoc& loc) {
   for (int i = 0; i < sz; ++i) {
     if (!loc.spilled()) {
       PhysReg reg = loc.reg(i);
-      auto name = reg.type() == PhysReg::GP ? reg::regname(Reg64(reg)) :
-                  reg::regname(RegXMM(reg));
-      os << delim << name;
+      if (arch() == Arch::X64) {
+        auto name = reg.type() == PhysReg::GP ? reg::regname(Reg64(reg)) :
+          reg::regname(RegXMM(reg));
+        os << delim << name;
+      } else if (arch() == Arch::ARM) {
+        auto prefix =
+          reg.isGP() ? (vixl::Register(reg).size() == vixl::kXRegSize
+                        ? 'x' : 'w')
+          : (vixl::FPRegister(reg).size() == vixl::kSRegSize
+             ? 's' : 'd');
+        os << delim << prefix << int(RegNumber(reg));
+      } else {
+        not_implemented();
+      }
     } else {
       os << delim << "spill[" << loc.slot(i) << "]";
     }
@@ -556,4 +567,3 @@ void dumpTrace(int level, const IRUnit& unit, const char* caption,
 }
 
 }}
-

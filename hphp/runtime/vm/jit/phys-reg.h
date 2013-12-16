@@ -98,12 +98,17 @@ struct PhysReg {
     return RegXMM(n - kSIMDOffset);
   }
 
-  /* implicit */ operator vixl::Register() const {
-    assert(isGP() || n == -1);
+  /* implicit */ operator vixl::CPURegister() const {
     if (n == -1) {
-      return vixl::Register();
+      return vixl::NoCPUReg;
     } else {
-      return vixl::Register(n, vixl::kXRegSize);
+      if (isGP()) {
+        return vixl::CPURegister(n, vixl::kXRegSize,
+                                 vixl::CPURegister::kRegister);
+      } else {
+        return vixl::CPURegister(n - kSIMDOffset, vixl::kDRegSize,
+                                 vixl::CPURegister::kFPRegister);
+      }
     }
   }
 

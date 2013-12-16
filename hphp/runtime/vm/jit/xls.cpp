@@ -1280,9 +1280,9 @@ const Abi x64_abi {
 const Abi arm_abi {
   // For now this is the same as x64, since we're pretending arm
   // has the same register conventions as x64.
-  kAllRegs - kXMMRegs,
+  ARM::kCallerSaved | ARM::kCalleeSaved,
   RegSet(), // fp/simd
-  kCalleeSaved
+  ARM::kCalleeSaved
 };
 }
 

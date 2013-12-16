@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include <boost/noncopyable.hpp>
 
@@ -404,7 +405,7 @@ PhysReg forceAlloc(SSATmp& dst) {
            opc == CoerceStk ||
            opc == SideExitGuardStk  ||
            MInstrEffects::supported(opc));
-    return rVmSp;
+    return arch() == Arch::X64 ? rVmSp : ARM::rVmSp;
   }
 
   // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
@@ -412,12 +413,12 @@ PhysReg forceAlloc(SSATmp& dst) {
   bool abnormalFramePtr = opc == LdContActRec || opc == LdAFWHActRec;
 
   if (!abnormalFramePtr && dst.isA(Type::FramePtr)) {
-    return rVmFp;
+    return arch() == Arch::X64 ? rVmFp : ARM::rVmFp;
   }
 
   if (opc == DefMIStateBase) {
     assert(dst.isA(Type::PtrToCell));
-    return reg::rsp;
+    return arch() == Arch::X64 ? PhysReg(reg::rsp) : PhysReg(vixl::sp);
   }
   return InvalidReg;
 }

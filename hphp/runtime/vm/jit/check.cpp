@@ -18,6 +18,7 @@
 #include <boost/next_prior.hpp>
 #include <unordered_set>
 
+#include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
@@ -351,8 +352,10 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
       for (SSATmp* src : inst.srcs()) {
         auto const &rs = regs[inst][src];
         if (!rs.spilled() &&
-            (rs.reg(0) == JIT::rVmSp ||
-             rs.reg(0) == JIT::rVmFp)) {
+            ((arch() == Arch::X64 && (rs.reg(0) == JIT::rVmSp ||
+                                      rs.reg(0) == JIT::rVmFp)) ||
+             (arch() == Arch::ARM && (rs.reg(0) == ARM::rVmSp ||
+                                      rs.reg(0) == ARM::rVmFp)))) {
           // hack - ignore rbx and rbp
           continue;
         }

@@ -425,7 +425,7 @@ void zend_ini_callback(String *arg1, String *arg2, String *arg3,
   SCNG(callback)(arg1, arg2, arg3, callback_type, SCNG(arg));
 }
 
-void ini_error(char *msg) {
+void ini_error(const char *msg) {
   StringBuffer smsg;
   if (!SCNG(filename).empty()) {
     smsg.printf("%s in %s on line %d\n", msg, SCNG(filename).data(),

@@ -24,7 +24,7 @@
 // defined in zend-ini.ll
 
 int ini_parse();
-void ini_error(char *msg);
+void ini_error(const char *msg);
 int ini_lex(HPHP::String *ini_lval, void *loc);
 
 void zend_ini_scan(const HPHP::String& str,

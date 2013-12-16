@@ -2,8 +2,8 @@
 
 if [ -z "${INSTALL_DIR}" ]; then
   INFILE=${HPHP_HOME}/hphp/runtime/base/ini-parser/zend-ini.y
-  OUTFILE=${HPHP_HOME}/hphp/runtime/base/ini-parser/zend-ini.cpp
-  OUTHEADER=${HPHP_HOME}/hphp/runtime/base/ini-parser/zend-ini.hpp
+  OUTFILE=${HPHP_HOME}/hphp/runtime/base/ini-parser/zend-ini.tab.cpp
+  OUTHEADER=${HPHP_HOME}/hphp/runtime/base/ini-parser/zend-ini.tab.hpp
 
   BISON=`which bison`
   if [ ! -x "$BISON" ]; then

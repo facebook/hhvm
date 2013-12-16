@@ -4005,7 +4005,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   const Func* func = f->getValFunc();
   DataType funcReturnType = func->returnType();
-  int returnOffset = HHIR_MISOFF(tvBuiltinReturn);
+  int returnOffset = MISOFF(tvBuiltinReturn);
 
   if (FixupMap::eagerRecord(func)) {
     const uchar* pc = curUnit()->entry() + m_curInst->marker().bcOff;

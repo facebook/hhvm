@@ -1077,7 +1077,7 @@ class RawMemSlot {
     return m;
   }
   static RawMemSlot& GetMisCtx() {
-    static RawMemSlot m(HHIR_MISOFF(ctx), sz::qword, Type::Cls);
+    static RawMemSlot m(MISOFF(ctx), sz::qword, Type::Cls);
     return m;
   }
 

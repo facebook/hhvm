@@ -205,11 +205,10 @@ const RegSet kAllX64Regs = RegSet(kAllRegs).add(reg::r10)
 #define TVOFF(nm) offsetof(TypedValue, nm)
 #define AROFF(nm) offsetof(ActRec, nm)
 #define CONTOFF(nm) offsetof(c_Continuation, nm)
-#define MISOFF(nm) offsetof(JIT::MInstrState, nm)
 
-/* In hhir-translated tracelets, the MInstrState is stored right above
- * the reserved spill space so we add an extra offset.  */
-#define HHIR_MISOFF(nm)                                         \
+/* MInstrState is stored right above the reserved spill space on the C++
+ * stack. */
+#define MISOFF(nm)                                         \
   (offsetof(JIT::MInstrState, nm) + kReservedRSPSpillSpace)
 
 //////////////////////////////////////////////////////////////////////

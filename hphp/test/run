@@ -401,11 +401,11 @@ class Status {
     array_push(self::$results, array(
         'name' => $test,
         'status' => 'failed',
-        'details' => @file_get_contents("$test.diff")
+        'details' => (string)@file_get_contents("$test.diff")
     ));
     switch (self::$mode) {
       case self::MODE_NORMAL:
-        $diff = @file_get_contents($test.'.diff');
+        $diff = (string)@file_get_contents($test.'.diff');
         if (self::hasColor()) {
           print "\n\033[0;31m$test\033[0m\n$diff";
         } else {
@@ -429,7 +429,7 @@ class Status {
     $start = array('op' => 'start', 'test' => $test);
     $end = array('op' => 'test_done', 'test' => $test, 'status' => $status);
     if ($status == 'failed') {
-      $end['details'] = @file_get_contents("$test.diff");
+      $end['details'] = (string)@file_get_contents("$test.diff");
     }
     self::say($start, $end);
   }

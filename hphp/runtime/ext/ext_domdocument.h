@@ -141,7 +141,7 @@ FORWARD_DECLARE_CLASS(DOMNode);
 class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|
                                             ObjectData::UseSet|
                                             ObjectData::UseIsset|
-                                            ObjectData::HasCppClone> {
+                                            ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(DOMNode)
 

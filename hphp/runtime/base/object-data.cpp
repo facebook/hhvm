@@ -792,7 +792,7 @@ void ObjectData::dump() const {
 }
 
 ObjectData* ObjectData::clone() {
-  if (getAttribute(HasCppClone)) {
+  if (getAttribute(HasClone) && getAttribute(IsCppBuiltin)) {
     if (isCollection()) {
       if (m_cls == c_Vector::classof()) {
         return c_Vector::Clone(this);
@@ -808,6 +808,8 @@ ObjectData* ObjectData::clone() {
         return c_FrozenVector::Clone(this);
       } else if (m_cls == c_FrozenSet::classof()) {
         return c_FrozenSet::Clone(this);
+      } else {
+        always_assert(false);
       }
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);
@@ -1720,7 +1722,8 @@ void ObjectData::cloneSet(ObjectData* clone) {
 }
 
 ObjectData* ObjectData::cloneImpl() {
-  auto const hasCloneBit = getAttribute(HasClone);
+  auto const hasCloneBit = getAttribute(HasClone)
+    && !getAttribute(IsCppBuiltin);
 
   ObjectData* obj;
   Object o = obj = ObjectData::newInstance(m_cls);

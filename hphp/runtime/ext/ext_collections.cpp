@@ -72,7 +72,7 @@ const int kCollectionObjectDataAttrs =
   ObjectData::UseIsset |
   ObjectData::UseUnset |
   ObjectData::CallToImpl |
-  ObjectData::HasCppClone;
+  ObjectData::HasClone;
 
 static void throwStrOOB(StringData* key) ATTRIBUTE_NORETURN;
 

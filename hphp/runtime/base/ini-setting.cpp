@@ -24,15 +24,9 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/ini-parser/zend-ini.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/lock.h"
-
-///////////////////////////////////////////////////////////////////////////////
-// defined in zend/zend-ini.tab.cpp
-
-extern bool zend_parse_ini_string
-(const HPHP::String& str, const HPHP::String& filename, int scanner_mode,
- HPHP::IniSetting::PFN_PARSER_CALLBACK callback, void *arg);
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

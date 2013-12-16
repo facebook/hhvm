@@ -323,23 +323,8 @@ bool HttpProtocol::PrepareCookieVariable(Variant& cookie,
 }
 
 void HttpProtocol::CopyHeaderVariables(Variant& server,
-                                       const HeaderMap& headers,
-                                       bool normalize) {
+                                       const HeaderMap& headers) {
   static std::atomic<int> badRequests(-1);
-
-  if (!normalize) {
-    for (HeaderMap::const_iterator iter = headers.begin();
-         iter != headers.end();
-         ++iter) {
-      const vector<string> &values = iter->second;
-      for (unsigned int i = 0; i < values.size(); i++) {
-        String key = string_replace(f_strtoupper(iter->first), s_dash,
-                                    s_underscore);
-        server.set(key, String(values[i]));
-      }
-    }
-    return;
-  }
 
   std::vector<std::string> badHeaders;
   for (auto const& header : headers) {
@@ -590,14 +575,10 @@ void HttpProtocol::PrepareServerVariable(Variant& server,
   // "may" exclude them; this is not what APE does, but it's harmless.
   HeaderMap headers;
   transport->getHeaders(headers);
-  if (RuntimeOption::ServerType != "fastcgi") {
-    CopyHeaderVariables(server, headers, true);
-    CopyServerInfo(server, transport, vhost);
-    CopyRemoteInfo(server, transport);
-    CopyAuthInfo(server, transport);
-  } else {
-    CopyHeaderVariables(server, headers, false);
-  }
+  CopyHeaderVariables(server, headers);
+  CopyServerInfo(server, transport, vhost);
+  CopyRemoteInfo(server, transport);
+  CopyAuthInfo(server, transport);
 
   CopyPathInfo(server, transport, r, vhost);
 

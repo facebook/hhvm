@@ -281,7 +281,7 @@ struct RegSet {
   }
 
   int size() const {
-    return __builtin_popcount(m_bits);
+    return __builtin_popcountll(m_bits);
   }
 
   RegSet& add(PhysReg pr) {

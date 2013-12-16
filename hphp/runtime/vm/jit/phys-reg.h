@@ -32,8 +32,13 @@ constexpr auto kNumRegs     = kNumGPRegs + kNumSIMDRegs;
 }
 
 namespace ARM {
-constexpr auto kNumGPRegs   = 31;
-constexpr auto kNumSIMDRegs = 32;
+// ARM machines really only have 32 GP regs. However, vixl has 33 separate
+// register codes, because it treats the zero register and stack pointer (which
+// are really both register 31) separately. Rather than lose this distinction in
+// vixl (it's really helpful for avoiding stupid mistakes), we sacrifice the
+// ability to represent all 32 SIMD regs, and pretend that are 33 GP regs.
+constexpr auto kNumGPRegs   = 33;
+constexpr auto kNumSIMDRegs = 31;
 constexpr auto kNumRegs     = kNumGPRegs + kNumSIMDRegs;
 }
 
@@ -53,7 +58,7 @@ constexpr auto kNumRegs     = kNumGPRegs + kNumSIMDRegs;
 struct PhysReg {
  private:
   static constexpr auto kMaxRegs = 64;
-  static constexpr auto kSIMDOffset = 32;
+  static constexpr auto kSIMDOffset = 33;
   static_assert(kSIMDOffset >= X64::kNumGPRegs, "");
   static_assert(kSIMDOffset >= ARM::kNumGPRegs, "");
   static_assert(kMaxRegs - kSIMDOffset >= X64::kNumSIMDRegs, "");
@@ -365,6 +370,7 @@ struct RegSet {
 
 private:
   uint64_t m_bits;
+  static_assert(sizeof(m_bits) * 8 >= PhysReg::kMaxRegs, "");
 };
 
 static_assert(boost::has_trivial_destructor<RegSet>::value,

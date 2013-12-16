@@ -1318,12 +1318,20 @@ class Assembler {
   // disallow the zero register.
   static Instr RdSP(Register rd) {
     assert(!rd.IsZero());
-    return (rd.code() & kRegCodeMask) << Rd_offset;
+    if (rd.code() == kSPRegInternalCode) {
+      return kSPRegCode << Rd_offset;
+    } else {
+      return rd.code() << Rd_offset;
+    }
   }
 
   static Instr RnSP(Register rn) {
     assert(!rn.IsZero());
-    return (rn.code() & kRegCodeMask) << Rn_offset;
+    if (rn.code() == kSPRegInternalCode) {
+      return kSPRegCode << Rn_offset;
+    } else {
+      return rn.code() << Rn_offset;
+    }
   }
 
   // Flags encoding.

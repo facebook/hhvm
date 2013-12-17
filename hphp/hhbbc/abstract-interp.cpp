@@ -614,10 +614,10 @@ struct InterpStepper : boost::static_visitor<void> {
   void group(const bc::IsTypeL& istype, const JmpOp& jmp) {
     auto const loc = locAsCell(istype.loc1);
 
-    if (static_cast<IsTypeOp>(istype.subop) == IsTypeOp::Scalar) {
+    if (istype.subop == IsTypeOp::Scalar) {
       return impl(istype, jmp);
     }
-    auto const testTy = type_of_istype(static_cast<IsTypeOp>(istype.subop));
+    auto const testTy = type_of_istype(istype.subop);
     if (loc.subtypeOf(testTy) || !loc.couldBe(testTy)) {
       return impl(istype, jmp);
     }
@@ -871,20 +871,20 @@ struct InterpStepper : boost::static_visitor<void> {
   void isTypeLImpl(const Op& op) {
     if (!locCouldBeUninit(op.loc1)) { nothrow(); constprop(); }
     auto const loc = locAsCell(op.loc1);
-    if (static_cast<IsTypeOp>(op.subop) == IsTypeOp::Scalar) {
+    if (op.subop == IsTypeOp::Scalar) {
       return push(TBool);
     }
-    isTypeImpl(loc, type_of_istype(static_cast<IsTypeOp>(op.subop)));
+    isTypeImpl(loc, type_of_istype(op.subop));
   }
 
   template<class Op>
   void isTypeCImpl(const Op& op) {
     nothrow();
     auto const t1 = popC();
-    if (static_cast<IsTypeOp>(op.subop) == IsTypeOp::Scalar) {
+    if (op.subop == IsTypeOp::Scalar) {
       return push(TBool);
     }
-    isTypeImpl(t1, type_of_istype(static_cast<IsTypeOp>(op.subop)));
+    isTypeImpl(t1, type_of_istype(op.subop));
   }
 
   void operator()(const bc::IsTypeC& op) { isTypeCImpl(op); }
@@ -971,7 +971,7 @@ struct InterpStepper : boost::static_visitor<void> {
       auto resultTy = eval_cell([&] {
         Cell c = *locVal;
         Cell rhs = *v1;
-        SETOP_BODY_CELL(&c, static_cast<SetOpOp>(op.subop), &rhs);
+        SETOP_BODY_CELL(&c, op.subop, &rhs);
         return c;
       });
 
@@ -1011,7 +1011,7 @@ struct InterpStepper : boost::static_visitor<void> {
     auto const val = tv(loc);
     if (!val) return push(TInitCell); // Only constants for now
 
-    auto const subop = static_cast<IncDecOp>(op.subop);
+    auto const subop = op.subop;
     auto const pre = subop == IncDecOp::PreInc || subop == IncDecOp::PreDec;
     auto const inc = subop == IncDecOp::PreInc || subop == IncDecOp::PostInc;
 

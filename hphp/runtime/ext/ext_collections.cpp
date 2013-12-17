@@ -1231,7 +1231,7 @@ Object c_Map::t_differencebykey(CVarRef it) {
   if (obj->getCollectionType() == Collection::MapType) {
     auto mp = static_cast<c_Map*>(obj);
     for (uint i = 0; i < mp->iterLimit(); ++i) {
-      if (isTombstone(i)) continue;
+      if (mp->isTombstone(i)) continue;
       c_Map::Elm& p = mp->data()[i];
       if (p.hasIntKey()) {
         target->remove((int64_t)p.ikey);

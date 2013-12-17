@@ -505,7 +505,7 @@ template<class T> Bytecode bc_with_loc(php::SrcLoc loc, const T& t) {
 
 /*
  * Visit a bytecode using a StaticVisitor, similar to
- * boost::apply_visitor or match from misc.h
+ * boost::apply_visitor or match().
  *
  * The `v' argument should be a function object that accepts a call
  * operator for all the bc::Foo types, with a nested member typedef

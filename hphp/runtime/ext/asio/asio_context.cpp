@@ -59,7 +59,7 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx) == this);
   assert(!m_current);
 
-  exitContextVector<true>(ctx_idx, m_runnableQueue);
+  exitContextQueue(ctx_idx, m_runnableQueue);
 
   for (auto it : m_priorityQueueDefault) {
     exitContextQueue(ctx_idx, it.second);
@@ -73,7 +73,7 @@ void AsioContext::exit(context_idx_t ctx_idx) {
 }
 
 void AsioContext::schedule(c_AsyncFunctionWaitHandle* wait_handle) {
-  m_runnableQueue.push_back(wait_handle);
+  m_runnableQueue.push(wait_handle);
   wait_handle->incRefCount();
 }
 
@@ -119,8 +119,8 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 
     // Run queue of ready continuations once.
     if (!m_runnableQueue.empty()) {
-      auto current = m_runnableQueue.back();
-      m_runnableQueue.pop_back();
+      auto current = m_runnableQueue.front();
+      m_runnableQueue.pop();
       m_current = current;
       auto exit_guard = folly::makeGuard([&] {
         m_current = nullptr;

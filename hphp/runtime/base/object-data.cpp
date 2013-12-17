@@ -1722,17 +1722,22 @@ void ObjectData::cloneSet(ObjectData* clone) {
 }
 
 ObjectData* ObjectData::cloneImpl() {
-  auto const hasCloneBit = getAttribute(HasClone)
-    && !getAttribute(IsCppBuiltin);
-
   ObjectData* obj;
   Object o = obj = ObjectData::newInstance(m_cls);
   cloneSet(obj);
 
+  auto const hasCloneBit = getAttribute(HasClone);
+
   if (!hasCloneBit) return o.detach();
 
   auto const method = obj->m_cls->lookupMethod(s_clone.get());
+
+  // PHP classes that inherit from cpp builtins that have special clone
+  // functionality *may* also define a __clone method, but it's totally
+  // fine if a __clone doesn't exist.
+  if (!method && getAttribute(IsCppBuiltin)) return o.detach();
   assert(method);
+
   TypedValue tv;
   tvWriteNull(&tv);
   g_vmContext->invokeFuncFew(&tv, method, obj);

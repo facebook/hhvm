@@ -157,8 +157,10 @@ function verbose(string $msg, bool $verbose): void {
 }
 
 function remove_color_codes(string $line): string {
-  return preg_replace(PHPUnitPatterns::$color_escape_code_pattern,
-                      "", $line);
+  // Get rid of codes like ^[[31;31m that may get output to the results file.
+  // 0x1B is the hex code for the escape sequence ^[
+  $color_escape_code_pattern = "/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/";
+  return preg_replace($color_escape_code_pattern, "", $line);
 }
 
 /*

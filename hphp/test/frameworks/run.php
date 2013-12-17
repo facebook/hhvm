@@ -171,26 +171,21 @@ class PHPUnitPatterns {
   static string $status_code_pattern =
   "/^[\.SFEI]$|^[\.SFEI](HipHop)|^[\.SFEI][ \t]*[0-9]* \/ [0-9]* \([ 0-9]*%\)/";
 
-  // Get rid of codes like ^[[31;31m that may get output to the results file.
-  // 0x1B is the hex code for the escape sequence ^[
-  static string $color_escape_code_pattern =
-                "/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/";
-
   // Don't want to parse any more test names after the Time line in the
   // results. Any test names after that line are probably detailed error
   // information.
   static string $stop_parsing_pattern =
  "/^Time: \d+(\.\d+)? (second[s]?|ms|minute[s]?|hour[s]?), Memory: \d+(\.\d+)/";
 
-  static string $tests_ok_pattern = "/OK \(\d+ test[s]?, \d+ assertion[s]?\)/";
-  static string $tests_failure_pattern = "/Tests: \d+, Assertions: \d+.*[.]/";
+  static string $tests_ok_pattern = "/^OK \(\d+ test[s]?, \d+ assertion[s]?\)/";
+  static string $tests_failure_pattern = "/^Tests: \d+, Assertions: \d+.*[.]/";
 
   static string $header_pattern =
-                "/PHPUnit \d+.[0-9a-zA-Z\-\.]*( by Sebastian Bergmann.)?/";
+                "/^PHPUnit \d+.[0-9a-zA-Z\-\.]*( by Sebastian Bergmann.)?/";
 
-  static string $config_file_pattern = "/Configuration read from/";
+  static string $config_file_pattern = "/^Configuration read from/";
 
-  static string $xdebug_pattern = "/The Xdebug extension is not loaded./";
+  static string $xdebug_pattern = "/^The Xdebug extension is not loaded./";
 
   // Paris and Idiorm have tests with ending digits (e.g. Test53.php)
   static string $test_file_pattern =
@@ -200,13 +195,13 @@ class PHPUnitPatterns {
   static string $mediawiki_test_file_pattern = "/.*(\Test.*\.php)$/";
 
   static string $tests_ok_skipped_inc_pattern =
-               "/OK, but incomplete or skipped tests!/";
+               "/^OK, but incomplete or skipped tests!/";
   static string $num_errors_failures_pattern =
-               "/There (was|were) \d+ (failure|error)[s]?\:/";
+               "/^There (was|were) \d+ (failure|error)[s]?\:/";
   static string $num_skips_inc_pattern =
-               "/There (was|were) \d+ (skipped|incomplete) test[s]?\:/";
-  static string $failures_header_pattern = "/FAILURES!/";
-  static string $no_tests_executed_pattern = "/No tests executed!/";
+               "/^There (was|were) \d+ (skipped|incomplete) test[s]?\:/";
+  static string $failures_header_pattern = "/^FAILURES!/";
+  static string $no_tests_executed_pattern = "/^No tests executed!/";
 
   static string $hhvm_warning_pattern =
                                      "/^(HipHop|HHVM|hhvm) (Warning|Notice)/";
@@ -1968,110 +1963,143 @@ class Runner {
     if (!$this->checkReadStream()) {
       return Statuses::TIMEOUT;
     }
-
-    $line = fgets($this->pipes[1]);
-    if ($line === false) {return null;} // No more data
-    $line = rtrim($line, PHP_EOL);
+    $line = stream_get_line($this->pipes[1], 4096, PHP_EOL);
+    // No more data
+    if ($line === false || $line === null || strlen($line) === 4096) {
+      return null;
+    }
     $line = remove_color_codes($line);
     return $line;
   }
 
+  // Post test information are error/failure information and the final passing
+  // stats for the test
   private function printPostTestInfo(): void {
-    // Don't print out any of the PHPUnit Patterns to the errors file, except
-    // for lines with stat numbers (or no tests executed, in which case we skip
-    // the test). Just print out pertinent error information
-    //
-    // There was 1 failure:  <---- Don't print
-    // 1) Assetic\Test\Asset\HttpAssetTest::testGetLastModified <---- print
-    // No tests executed! <----- print
-    $print_blanks = false; // Only print blanks after the first test is found
-
-    // Sometimes when PHPUnit is done printing its post test information, hhvm
-    // fatals. This is not good, but it currently happens nonetheless. Here
-    // is an example:
-    //
-    // FAILURES!
-    // Tests: 3, Assertions: 15, Failures: 2.  <--- EXPECTED LAST LINE (STATS)
-    // Core dumped: Segmentation fault   <--- But, we can get this and below
-    // /home/joelm/bin/hhvm: line 1: 28417 Segmentation fault
-    //
-    // Let's separate this from the actual post test info where we are trying
-    // to get statistics.
-    $post_test_fatal = false;
-
+    $prev_line = null;
+    $final_stats = null;
     $matches = array();
+    $post_stat_fatal = false;
 
-    do
-    {
+    // Throw out any initial blank lines
+    do {
       $line = $this->getLine();
+    } while ($line === "" && $line !== null);
+
+    // Now that we have our first non-blank line, print out the test information
+    // until we have our final stats
+    while ($line !== null) {
+      // Don't print out any of the PHPUnit Patterns to the errors file.
+      // Just print out pertinent error information.
+      //
+      // There was 1 failure:  <---- Don't print
+      // <blank line>
+      // 1) Assetic\Test\Asset\HttpAssetTest::testGetLastModified <---- print
       if (preg_match(PHPUnitPatterns::$tests_ok_skipped_inc_pattern,
-                     $line) !== 1 &&
+                     $line) === 1 ||
           preg_match(PHPUnitPatterns::$num_errors_failures_pattern,
-                     $line) !== 1 &&
+                     $line) === 1 ||
           preg_match(PHPUnitPatterns::$failures_header_pattern,
-                     $line) !== 1 &&
+                     $line) === 1 ||
           preg_match(PHPUnitPatterns::$num_skips_inc_pattern,
-                     $line) !== 1 &&
-          $line !== null) {
-        if ($line === "" && !$print_blanks) {
-          continue;
-        }
-        $line = remove_string_from_text($line, __DIR__, "");
-        if ($this->checkForFatals($line) || $this->checkForWarnings($line)) {
-          // Only print header the first time we arrive here
-          if (!$post_test_fatal) {
-            $this->fatal_information .= "POST-TEST FATAL/WARNING FOR ".
-                                        $this->name.PHP_EOL;
-            $this->fatal_information .= PHP_EOL.
-                                        $this->getTestRunStr($this->name,
-                                                             "RUN TEST FILE: ").
-                                        PHP_EOL;
-            $post_test_fatal = true;
+                     $line) === 1) {
+        do {
+          // throw out any blank lines after these pattern
+          $line = $this->getLine();
+        } while ($line === "" && $line !== null);
+        continue;
+      }
+
+      // If we hit what we think is the final stats based on the pattern of the
+      // line, make sure this is the case. The final stats will generally be
+      // the last line before we hit null returned from line retrieval. The
+      // only cases where this would not be true is if, for some rare reason,
+      // stat information is part of the information provided for a
+      // given test error -- or -- we have hit a fatal at the very end of
+      // running PHPUnit. For that fatal case, we handle that a bit differently.
+      if (preg_match(PHPUnitPatterns::$tests_ok_pattern, $line) === 1 ||
+          preg_match(PHPUnitPatterns::$tests_failure_pattern, $line) === 1 ||
+          preg_match(PHPUnitPatterns::$no_tests_executed_pattern,
+                     $line) === 1) {
+        $prev_line = $line;
+        $line = $this->getLine();
+        if ($line === null) {
+          $final_stats = $prev_line;
+          break;
+        } else if ($line === "") {
+          // FIX ME: The above $line === null check is all I should need, but
+          // but getLine() is not cooperating. Not sure if getLine() problem or
+          // a PHPUnit output thing, but even when I am at the final stat line
+          // pattern, sometimes it takes me two getLine() calls to hit
+          // $line === null because I first get $line === "".
+          // So...save the current position. Read ahead. If null, we are done.
+          // Otherwise, print $prev_line, go back to where we were and the
+          // current blank line now stored in $line, will be printed down
+          // below
+          $curPos = ftell($this->pipes[1]);
+          if ($this->getLine() === null) {
+            $final_stats = $prev_line;
+            break;
+          } else {
+            $this->error_information .= $prev_line.PHP_EOL;
+            fseek($this->pipes[1], $curPos);
           }
-          $this->fatal_information .= $line.PHP_EOL;
-          continue;
-        }
-        if (!$post_test_fatal) {
-          $this->error_information .= $line.PHP_EOL;
-          if (preg_match($this->framework->getTestNamePattern(), $line,
-                         $matches) === 1) {
-            $print_blanks = true;
-            $this->error_information .= PHP_EOL.
-                                        $this->getTestRunStr($matches[0],
-                                                             "RUN TEST FILE: ").
-                                        PHP_EOL.PHP_EOL;
-          }
+        } else if ($this->checkForFatals($line) ||
+                   $this->checkForWarnings($line)) {
+        // Sometimes when PHPUnit is done printing its post test info, hhvm
+        // fatals. This is not good, but it currently happens nonetheless. Here
+        // is an example:
+        //
+        // FAILURES!
+        // Tests: 3, Assertions: 9, Failures: 2. <--- EXPECTED LAST LINE (STATS)
+        // Core dumped: Segmentation fault  <--- But, we can get this and below
+        // /home/joelm/bin/hhvm: line 1: 28417 Segmentation fault
+          $final_stats = $prev_line;
+          $post_stat_fatal = true;
+          break;
+        } else {
+          $this->error_information .= $prev_line.PHP_EOL;
         }
       }
-    } while ($line !== null);
 
-    // Add a newline to the fatal file if we had a post-test fatal for better
-    // visual
-    if ($post_test_fatal) {
+      $this->error_information .= $line.PHP_EOL;
+      if (preg_match($this->framework->getTestNamePattern(), $line,
+                     $matches) === 1) {
+        $print_blanks = true;
+        $this->error_information .= PHP_EOL.
+                                    $this->getTestRunStr($matches[0],
+                                                         "RUN TEST FILE: ").
+                                    PHP_EOL.PHP_EOL;
+      }
+      $line = $this->getLine();
+    }
+
+    if ($post_stat_fatal) {
+      $this->fatal_information .= "POST-TEST FATAL/WARNING FOR ".
+                                  $this->name.PHP_EOL;
+      $this->fatal_information .= PHP_EOL.
+                                  $this->getTestRunStr($this->name,
+                                                       "RUN TEST FILE: ").
+                                  PHP_EOL.PHP_EOL;
+      while ($line !== null) {
+        $this->fatal_information .= $line.PHP_EOL;
+        $line = $this->getLine();
+      }
+      // Add a newline to the fatal file if we had a post-test fatal for better
+      // visual
       $this->fatal_information .= PHP_EOL;
     }
 
-    // The last non-null line in the error file would have been the real stat
-    // information for pass percentage purposes. Take that out of the error
-    // string and put in the stat information string instead. Other stat like
-    // information may be in the error string as they are part of the test
-    // errors (PHPUnit does this).
-    $this->error_information = rtrim($this->error_information, PHP_EOL);
-    $pieces = explode(PHP_EOL, $this->error_information);
+    // If we have no final stats, assume some sort of fatal for this test.
+    // If we have "No tests executed", assume a skip
+    // Otherwise, print the final stats.
     $this->stat_information = $this->name.PHP_EOL;
-    $lastLine = array_pop($pieces);
-    // If no tests are executed, then mark as Statuses::SKIP
-    if (preg_match(PHPUnitPatterns::$no_tests_executed_pattern,
-                   $lastLine) === 1) {
+    if ($final_stats === null) {
+      $this->stat_information .= Statuses::FATAL.PHP_EOL;
+    } else if (preg_match(PHPUnitPatterns::$no_tests_executed_pattern,
+                          $final_stats) === 1) {
       $this->stat_information .= Statuses::SKIP.PHP_EOL;
     } else {
-      $this->stat_information .= $lastLine.PHP_EOL;
-    }
-    // There were no errors, just final stats if $pieces is now empty
-    if (count($pieces) > 0) {
-      $this->error_information = implode(PHP_EOL, $pieces).PHP_EOL;
-    } else {
-      $this->error_information = "";
+      $this->stat_information .= $final_stats.PHP_EOL;
     }
   }
 

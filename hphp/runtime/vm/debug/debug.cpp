@@ -80,9 +80,12 @@ void DebugInfo::generatePidMapOverlay() {
 
     for (long i = 0; i < number_of_symbols; i++) {
       auto sym = symbol_table[i];
-      if (!(sym->flags & (BSF_LOCAL|BSF_GLOBAL))) continue;
       if (sym->flags &
-          (BSF_INDIRECT|BSF_SECTION_SYM|BSF_WEAK|BSF_FILE|BSF_OBJECT)) {
+          (BSF_INDIRECT |
+           BSF_SECTION_SYM |
+           BSF_FILE |
+           BSF_DEBUGGING_RELOC |
+           BSF_OBJECT)) {
         continue;
       }
       auto sec = sym->section;

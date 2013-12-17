@@ -32,10 +32,22 @@ Next release
   - Make array not an instanceof Traversable
 
 "Burrito" 28-Oct-2013
+  - Initial support for using FastCGI
+  - Initial support for php.ini configuration files
   - Log when a nullable (e.g. ?int) is incorrect
+  - Add support for collections to array_diff, array_diff_key, array_intersect,
+    array_intersect_key
+  - tc-print improvements and fixes
+  - Several debugger fixes
+  - More improvements to the experimental PHP extension compat layer
+  - Fixed how parse errors are handled by eval()
+  - Support custom reason for status header
+  - Emit better error message when hhvm's systemlib doesn't load properly
+  - Fixes / clarifications added to the bytecode specification
+  - Lots of other bug fixes, clean up, PHP compat fixes, and JIT improvements
 
 "Sausage" 14-Oct-2013
-  - Direct invocation of callable arrays: $f = [$cls_or_instance, 'method']; $f()
+  - Direct invocation of callable arrays: $f = [$cls_or_obj, 'method']; $f()
   - ASAN clean
   - Support dynamically loadable extensions
   - Support loading mini-systemlibs from extensions

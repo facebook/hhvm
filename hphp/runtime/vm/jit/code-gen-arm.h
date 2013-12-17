@@ -60,6 +60,11 @@ struct CodeGenerator {
   template<class Loc, class JmpFn>
   void emitTypeTest(Type type, Loc typeSrc, Loc dataSrc, JmpFn doJcc);
 
+  void emitLoadTypedValue(SSATmp* dst, vixl::Register base, ptrdiff_t offset,
+                          Block* label);
+  void emitLoad(SSATmp* dst, vixl::Register base, ptrdiff_t offset,
+                Block* label = nullptr);
+
   Address cgInst(IRInstruction* inst);
 
   const PhysLoc curOpd(const SSATmp* t) const {

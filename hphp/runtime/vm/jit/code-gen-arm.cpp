@@ -215,7 +215,6 @@ PUNT_OPCODE(UnboxPtr)
 PUNT_OPCODE(BoxPtr)
 PUNT_OPCODE(LdVectorBase)
 PUNT_OPCODE(LdPairBase)
-PUNT_OPCODE(LdStack)
 PUNT_OPCODE(LdLoc)
 PUNT_OPCODE(LdLocAddr)
 PUNT_OPCODE(LdMem)
@@ -463,7 +462,6 @@ PUNT_OPCODE(IncTransCounter)
 PUNT_OPCODE(IncProfCounter)
 PUNT_OPCODE(ArrayIdx)
 PUNT_OPCODE(GenericIdx)
-PUNT_OPCODE(DbgAssertRefCount)
 PUNT_OPCODE(DbgAssertType)
 
 #undef PUNT_OPCODE
@@ -475,6 +473,20 @@ void CodeGenerator::recordHostCallSyncPoint(vixl::MacroAssembler& as,
   auto stackOff = m_curInst->marker().spOff;
   auto pcOff = m_curInst->marker().bcOff - m_curInst->marker().func->base();
   m_tx64->fixupMap().recordSyncPoint(tca, pcOff, stackOff);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
+  vixl::Label done;
+  auto base = x2a(curOpd(inst->src(0)).reg());
+  auto rCount = rAsm;
+  m_as.  Ldr   (rCount.W(), base[FAST_REFCOUNT_OFFSET]);
+  m_as.  Tbnz  (rCount, RefCountStaticBitPos, &done);
+  m_as.  Cmp   (rCount, RefCountMaxRealistic);
+  m_as.  B     (&done, vixl::ls);
+  m_as.  Brk   (0);
+  m_as.  bind  (&done);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -715,6 +727,60 @@ void CodeGenerator::cgEndCatch(IRInstruction* inst) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+void CodeGenerator::emitLoadTypedValue(SSATmp* dst,
+                                       vixl::Register base,
+                                       ptrdiff_t offset,
+                                       Block* label) {
+  auto valueDstReg = x2a(curOpd(dst).reg(0));
+  auto typeDstReg  = x2a(curOpd(dst).reg(1));
+
+  if (label) not_implemented();
+
+  if (valueDstReg.IsFPRegister()) {
+    not_implemented();
+  }
+
+  // Avoid clobbering the base reg if we'll need it later
+  if (base.Is(typeDstReg) && valueDstReg.IsValid()) {
+    m_as.  Mov  (rAsm, base);
+    base = rAsm;
+  }
+
+  if (typeDstReg.IsValid()) {
+    m_as.  Ldr  (typeDstReg.W(), base[offset + TVOFF(m_type)]);
+  }
+
+  if (valueDstReg.IsValid()) {
+    m_as.  Ldr  (valueDstReg, base[offset + TVOFF(m_data)]);
+  }
+}
+
+void CodeGenerator::emitLoad(SSATmp* dst,
+                             vixl::Register base,
+                             ptrdiff_t offset,
+                             Block* label /* = nullptr */) {
+  auto type = dst->type();
+  if (type.needsReg()) {
+    return emitLoadTypedValue(dst, base, offset, label);
+  }
+  if (label) {
+    not_implemented();
+  }
+  if (type.isNull()) return;
+
+  auto dstReg = x2a(curOpd(dst).reg());
+  if (!dstReg.IsValid()) return;
+
+  m_as.  Ldr  (dstReg, base[offset + TVOFF(m_data)]);
+}
+
+void CodeGenerator::cgLdStack(IRInstruction* inst) {
+  assert(inst->taken() == nullptr);
+  auto srcReg = x2a(curOpd(inst->src(0)).reg());
+  auto offset = cellsToBytes(inst->extra<LdStack>()->offset);
+  emitLoad(inst->dst(), srcReg, offset);
+}
 
 void CodeGenerator::cgLdConst(IRInstruction* inst) {
   auto const dstReg = x2a(curOpd(inst->dst()).reg());

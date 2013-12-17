@@ -232,6 +232,12 @@ Func* ProfData::transFunc(TransID id) const {
   return m_transRecs[id]->func();
 }
 
+const TransIDVec& ProfData::funcProfTransIDs(FuncId funcId) const {
+  auto it = m_funcProfTrans.find(funcId);
+  assert(it != m_funcProfTrans.end());
+  return it->second;
+}
+
 TransKind ProfData::transKind(TransID id) const {
   assert(id < m_numTrans);
   return m_transRecs[id]->kind();
@@ -324,6 +330,8 @@ TransID ProfData::addTransProfile(const Tracelet&       tracelet,
       m_dvFuncletDB.add(funcId, nParams, transId);
     }
   }
+
+  m_funcProfTrans[funcId].push_back(transId);
   return transId;
 }
 

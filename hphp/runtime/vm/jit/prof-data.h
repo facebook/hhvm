@@ -163,6 +163,7 @@ class ProfTransRec {
 };
 
 typedef std::unique_ptr<ProfTransRec> ProfTransRecPtr;
+typedef std::unordered_map<FuncId, TransIDVec> FuncProfTransMap;
 
 /**
  * ProfData encapsulates the profiling data kept by the JIT.
@@ -184,6 +185,7 @@ public:
   Offset                  transStopBcOff(TransID id)  const;
   FuncId                  transFuncId(TransID id)     const;
   Func*                   transFunc(TransID id)       const;
+  const TransIDVec&       funcProfTransIDs(FuncId funcId) const;
   RegionDescPtr           transRegion(TransID id)     const;
   TransKind               transKind(TransID id)       const;
   int64_t                 transCounter(TransID id)    const;
@@ -217,6 +219,7 @@ public:
 private:
   uint32_t                m_numTrans;
   vector<ProfTransRecPtr> m_transRecs;
+  FuncProfTransMap        m_funcProfTrans;
   ProfCounters<int64_t>   m_counters;
   SrcKeySet               m_optimizedSKs;   // set of SrcKeys already optimized
   FuncIdSet               m_optimizedFuncs; // set of funcs already optimized

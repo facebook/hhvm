@@ -223,11 +223,8 @@ bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
 void TranslatorX64::invalidateFuncProfSrcKeys(const Func* func) {
   assert(RuntimeOption::EvalJitPGO);
   FuncId funcId = func->getFuncId();
-  for (TransID tid = 0; tid < m_profData->numTrans(); tid++) {
-    if (m_profData->transFuncId(tid) == funcId &&
-        m_profData->transKind(tid) == TransProfile) {
-      invalidateSrcKey(m_profData->transSrcKey(tid));
-    }
+  for (auto tid : m_profData->funcProfTransIDs(funcId)) {
+    invalidateSrcKey(m_profData->transSrcKey(tid));
   }
 }
 

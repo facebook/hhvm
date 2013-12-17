@@ -369,6 +369,10 @@ static inline bool evalJitDefault() {
 }
 
 static inline std::string regionSelectorDefault() {
+  if (RuntimeOption::EvalJitPGO) {
+    return "hottrace";
+  }
+
 #ifdef HHVM_REGION_SELECTOR_TRACELET
   return "tracelet";
 #else

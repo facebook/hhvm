@@ -22,6 +22,8 @@ VS(bin2hex("ABC\n"), "4142430a");
 VS(hex2bin("4142430a"), "ABC\n");
 
 VS(nl2br("A\nB"), "A<br />\nB");
+VS(nl2br("A\nB", true), "A<br />\nB");
+VS(nl2br("A\nB", false), "A<br>\nB");
 
 VS(quotemeta(". \\ + * ? [ ^ ] ( $ )"),
    "\\. \\\\ \\+ \\* \\? \\[ \\^ \\] \\( \\$ \\)");

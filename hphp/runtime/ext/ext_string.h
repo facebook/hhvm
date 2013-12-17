@@ -36,7 +36,7 @@ String f_addslashes(const String& str);
 String f_stripslashes(const String& str);
 String f_bin2hex(const String& str);
 Variant f_hex2bin(const String& str);
-String f_nl2br(const String& str);
+String f_nl2br(const String& str, bool is_xhtml = true);
 String f_quotemeta(const String& str);
 String f_str_shuffle(const String& str);
 String f_strrev(const String& str);

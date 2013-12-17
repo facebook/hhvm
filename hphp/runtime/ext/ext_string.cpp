@@ -272,10 +272,15 @@ Variant f_hex2bin(const String& str) {
 
 const StaticString
   s_nl("\n"),
-  s_br("<br />\n");
+  s_br("<br />\n"),
+  s_non_xhtml_br("<br>\n");
 
-String f_nl2br(const String& str) {
-  return string_replace(str, s_nl, s_br);
+String f_nl2br(const String& str, bool is_xhtml /* = true */) {
+  if (is_xhtml) {
+    return string_replace(str, s_nl, s_br);
+  } else {
+    return string_replace(str, s_nl, s_non_xhtml_br);
+  }
 }
 
 String f_quotemeta(const String& str) {

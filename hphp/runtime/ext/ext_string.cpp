@@ -536,8 +536,10 @@ Variant f_strtok(const String& str, CVarRef token /* = null_variant */) {
 static
 Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
                     int &count, bool caseSensitive) {
+  count = 0;
   if (search.is(KindOfArray)) {
     String ret = subject;
+    int c = 0;
 
     Array searchArr = search.toArray();
     if (replace.is(KindOfArray)) {
@@ -547,20 +549,22 @@ Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
         if (replIter) {
           ret = string_replace(ret, iter.second().toString(),
                                replIter.second().toString(),
-                               count, caseSensitive);
+                               c, caseSensitive);
           ++replIter;
         } else {
           ret = string_replace(ret, iter.second().toString(),
-                               "", count, caseSensitive);
+                               "", c, caseSensitive);
         }
+        count +=c;
       }
       return ret;
     }
 
     String repl = replace.toString();
     for (ArrayIter iter(searchArr); iter; ++iter) {
-      ret = string_replace(ret, iter.second().toString(), repl, count,
+      ret = string_replace(ret, iter.second().toString(), repl, c,
                            caseSensitive);
+      count += c;
     }
     return ret;
   }
@@ -574,9 +578,11 @@ Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
 
 static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                            int &count, bool caseSensitive) {
+  count = 0;
   if (subject.is(KindOfArray)) {
     Array arr = subject.toArray();
     Array ret;
+    int c;
     for (ArrayIter iter(arr); iter; ++iter) {
       if (iter.second().is(KindOfArray) || iter.second().is(KindOfObject)) {
         ret.set(iter.first(), iter.second());
@@ -584,8 +590,9 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
       }
 
       String replaced = str_replace(search, replace, iter.second().toString(),
-                                    count, caseSensitive);
+                                    c, caseSensitive);
       ret.set(iter.first(), replaced);
+      count += c;
     }
     return ret;
   }

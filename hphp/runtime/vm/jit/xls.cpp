@@ -34,6 +34,7 @@
 //  - #3098661 generate spill stats so we can compare side/by/side
 //  - #3098678 EvalHHIREnablePreColoring
 //  - #3098685 EvalHHIREnableCoalescing, by using hints
+//  - #3409409 Enable use of SIMD at least for doubles, for packed_tv
 //  - #3098685 Optimize lifetime splitting
 //  - #3098712 reuse spill slots
 //  - #3098739 new features now possible with XLS
@@ -410,7 +411,7 @@ bool allocUnusedDest(IRInstruction&) {
 // Reduce the allow and prefer sets according to this particular use
 void srcConstraints(IRInstruction& inst, int i, SSATmp* src, Interval* ivl,
                     const Abi& abi) {
-  if (RuntimeOption::EvalHHIRAllocSIMDRegs) {
+  if (!packed_tv && RuntimeOption::EvalHHIRAllocSIMDRegs) {
     if (src->type() <= Type::Dbl) {
       ivl->prefer &= abi.simd;
       return;
@@ -427,7 +428,7 @@ void srcConstraints(IRInstruction& inst, int i, SSATmp* src, Interval* ivl,
 // Reduce the allow and prefer constraints based on this definition
 void dstConstraints(IRInstruction& inst, int i, SSATmp* dst, Interval* ivl,
                     const Abi& abi) {
-  if (RuntimeOption::EvalHHIRAllocSIMDRegs) {
+  if (!packed_tv && RuntimeOption::EvalHHIRAllocSIMDRegs) {
     if (dst->type() <= Type::Dbl) {
       ivl->prefer &= abi.simd;
       return;
@@ -532,9 +533,11 @@ void XLS::buildIntervals() {
   if (dumpIREnabled()) {
     print(" after building intervals ");
   }
+  // Implement stress mode by blocking more registers.
   stress += RuntimeOption::EvalHHIRNumFreeRegs;
   for (auto r : m_blocked) {
     if (m_blocked[r].start() > 0) {
+      // if r is not already blocked
       if (stress > 0) {
         stress--;
       } else {

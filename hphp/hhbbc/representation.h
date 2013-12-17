@@ -455,6 +455,7 @@ struct Class {
    * be flattened.
    */
   std::vector<SString> usedTraitNames;
+  std::vector<PreClass::TraitRequirement> traitRequirements;
   std::vector<PreClass::TraitPrecRule> traitPrecRules;
   std::vector<PreClass::TraitAliasRule> traitAliasRules;
 

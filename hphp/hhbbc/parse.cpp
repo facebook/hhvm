@@ -720,7 +720,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->unit           = unit;
   ret->parentName     = pce.parentName()->empty() ? nullptr : pce.parentName();
   ret->attrs          = pce.attrs();
-  ret->hoistability   = pce.hositability();
+  ret->hoistability   = pce.hoistability();
   ret->userAttributes = pce.userAttributes();
 
   for (auto& iface : pce.interfaces()) {
@@ -730,6 +730,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->usedTraitNames  = pce.usedTraits();
   ret->traitPrecRules  = pce.traitPrecRules();
   ret->traitAliasRules = pce.traitAliasRules();
+  ret->traitRequirements = pce.traitRequirements();
 
   for (auto& me : pce.methods()) {
     ret->methods.push_back(parse_func(puState, unit, borrow(ret), *me));
@@ -812,4 +813,3 @@ std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

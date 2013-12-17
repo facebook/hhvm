@@ -243,8 +243,52 @@ class PreClass : public AtomicCountable {
     Attr              m_modifiers;
   };
 
+  struct TraitRequirement {
+   public:
+    // Solely for SerDe
+    TraitRequirement(): m_word(0) {}
+
+    explicit TraitRequirement(const StringData* req, bool isExtends) {
+      m_word = pack(req, isExtends);
+    }
+
+    const StringData* name() {
+      return reinterpret_cast<const StringData*>(m_word & ~0x1);
+    }
+    bool is_extends() const { return m_word & 0x1; }
+    bool is_implements() const { return !is_extends(); }
+
+    // Deserialization version.
+    template<class SerDe>
+    typename boost::enable_if_c<SerDe::deserializing>::type
+    serde(SerDe& sd) {
+      const StringData* sd_name;
+      bool sd_is_extends;
+      sd(sd_name)(sd_is_extends);
+      m_word = pack(sd_name, sd_is_extends);
+    }
+
+    // Serialization version.
+    template<class SerDe>
+    typename boost::disable_if_c<SerDe::deserializing>::type
+    serde(SerDe& sd) {
+      const StringData* sd_name = name();
+      bool sd_is_extends = is_extends();
+      sd(sd_name)(sd_is_extends);
+    }
+
+   private:
+    static uintptr_t pack(const StringData* req, bool isExtends) {
+      auto req_ptr = reinterpret_cast<uintptr_t>(req);
+      return isExtends ? (req_ptr | 0x1) : req_ptr;
+    }
+
+    uintptr_t m_word;
+  };
+
   typedef FixedVector<const StringData*> InterfaceVec;
   typedef FixedVector<const StringData*> UsedTraitVec;
+  typedef FixedVector<TraitRequirement> TraitRequirementsVec;
   typedef FixedVector<TraitPrecRule> TraitPrecRuleVec;
   typedef FixedVector<TraitAliasRule> TraitAliasRuleVec;
 
@@ -268,6 +312,9 @@ class PreClass : public AtomicCountable {
   Id id() const { return m_id; }
   const InterfaceVec& interfaces() const { return m_interfaces; }
   const UsedTraitVec& usedTraits() const { return m_usedTraits; }
+  const TraitRequirementsVec& traitRequiredExtends() const {
+    return m_traitRequirements;
+  }
   const TraitPrecRuleVec& traitPrecRules() const { return m_traitPrecRules; }
   const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
   const UserAttributeMap& userAttributes() const { return m_userAttributes; }
@@ -363,6 +410,7 @@ private:
   BuiltinCtorFunction m_instanceCtor = nullptr;
   InterfaceVec m_interfaces;
   UsedTraitVec m_usedTraits;
+  TraitRequirementsVec m_traitRequirements;
   TraitPrecRuleVec m_traitPrecRules;
   TraitAliasRuleVec m_traitAliasRules;
   UserAttributeMap m_userAttributes;

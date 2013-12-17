@@ -7679,6 +7679,16 @@ void EmitterVisitor::emitClass(Emitter& e,
   for (size_t i = 0; i < usedTraits.size(); i++) {
     pce->addUsedTrait(makeStaticString(usedTraits[i]));
   }
+  if (cNode->isTrait()) {
+    for (auto& reqExtends : cNode->getTraitRequiredExtends()) {
+      pce->addTraitRequirement(
+        PreClass::TraitRequirement(makeStaticString(reqExtends), true));
+    }
+    for (auto& reqImplements : cNode->getTraitRequiredImplements()) {
+      pce->addTraitRequirement(
+        PreClass::TraitRequirement(makeStaticString(reqImplements), false));
+    }
+  }
   auto const& userAttrs = cNode->userAttributes();
   for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
     const StringData* uaName = makeStaticString(it->first);

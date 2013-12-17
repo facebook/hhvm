@@ -204,6 +204,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_builtinODOffset = m_builtinODOffset;
   pc->m_interfaces = m_interfaces;
   pc->m_usedTraits = m_usedTraits;
+  pc->m_traitRequirements = m_traitRequirements;
   pc->m_traitPrecRules = m_traitPrecRules;
   pc->m_traitAliasRules = m_traitAliasRules;
   pc->m_userAttributes = m_userAttributes;
@@ -265,6 +266,7 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
 
     (m_interfaces)
     (m_usedTraits)
+    (m_traitRequirements)
     (m_traitPrecRules)
     (m_traitAliasRules)
     (m_userAttributes)

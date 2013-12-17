@@ -302,11 +302,21 @@ public:
     }
   }
 
+  const boost::container::flat_set<std::string>& getTraitRequiredExtends()
+    const {
+    return m_traitRequiredExtends;
+  }
+
+  const boost::container::flat_set<std::string>& getTraitRequiredImplements()
+    const {
+    return m_traitRequiredImplements;
+  }
+
   const std::vector<std::string> &getUsedTraitNames() const {
     return m_usedTraitNames;
   }
 
-  const std::vector<std::pair<std::string, std::string> > &getTraitAliases()
+  const std::vector<std::pair<std::string, std::string>>& getTraitAliases()
     const {
     return m_traitAliases;
   }

@@ -132,7 +132,7 @@ class PreClassEmitter {
   Attr attrs() const { return m_attrs; }
   void setAttrs(Attr attrs) { m_attrs = attrs; }
   void setHoistable(PreClass::Hoistable h) { m_hoistable = h; }
-  PreClass::Hoistable hositability() const { return m_hoistable; }
+  PreClass::Hoistable hoistability() const { return m_hoistable; }
   void setOffset(Offset off) { m_offset = off; }
   Id id() const { return m_id; }
   const MethodVec& methods() const { return m_methods; }
@@ -156,10 +156,16 @@ class PreClassEmitter {
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode);
   void addUsedTrait(const StringData* traitName);
+  void addTraitRequirement(const PreClass::TraitRequirement req) {
+    m_traitRequirements.push_back(req);
+  }
   void addTraitPrecRule(const PreClass::TraitPrecRule &rule);
   void addTraitAliasRule(const PreClass::TraitAliasRule &rule);
   const std::vector<const StringData*>& usedTraits() const {
     return m_usedTraits;
+  }
+  const std::vector<PreClass::TraitRequirement>& traitRequirements() const {
+    return m_traitRequirements;
   }
   const std::vector<PreClass::TraitAliasRule>& traitAliasRules() const {
     return m_traitAliasRules;
@@ -210,6 +216,7 @@ class PreClassEmitter {
 
   std::vector<const StringData*> m_interfaces;
   std::vector<const StringData*> m_usedTraits;
+  std::vector<PreClass::TraitRequirement> m_traitRequirements;
   std::vector<PreClass::TraitPrecRule> m_traitPrecRules;
   std::vector<PreClass::TraitAliasRule> m_traitAliasRules;
   UserAttributeMap m_userAttributes;

@@ -753,6 +753,7 @@ public:
     m_top->m_data.field = arg;                                                \
     m_top->m_type = type;                                                     \
   }
+  PUSH_METHOD_ARG(Bool, KindOfBoolean, num, bool, b)
   PUSH_METHOD_ARG(Int, KindOfInt64, num, int64_t, i)
   PUSH_METHOD_ARG(Double, KindOfDouble, dbl, double, d)
 
@@ -854,6 +855,55 @@ public:
     assert(kNumIterCells * sizeof(Cell) == sizeof(Iter));
     assert((uintptr_t)&m_top[-kNumIterCells] >= (uintptr_t)m_elms);
     m_top -= kNumIterCells;
+  }
+
+  ALWAYS_INLINE
+  void replaceC(const Cell& c) {
+    assert(m_top != m_base);
+    assert(m_top->m_type != KindOfRef);
+    tvRefcountedDecRefCell(m_top);
+    *m_top = c;
+  }
+
+  template <DataType DT>
+  ALWAYS_INLINE
+  void replaceC() {
+    assert(m_top != m_base);
+    assert(m_top->m_type != KindOfRef);
+    tvRefcountedDecRefCell(m_top);
+    *m_top = make_tv<DT>();
+  }
+
+  template <DataType DT, typename T>
+  ALWAYS_INLINE
+  void replaceC(T value) {
+    assert(m_top != m_base);
+    assert(m_top->m_type != KindOfRef);
+    tvRefcountedDecRefCell(m_top);
+    *m_top = make_tv<DT>(value);
+  }
+
+  ALWAYS_INLINE
+  void replaceTV(const TypedValue& tv) {
+    assert(m_top != m_base);
+    tvRefcountedDecRef(m_top);
+    *m_top = tv;
+  }
+
+  template <DataType DT>
+  ALWAYS_INLINE
+  void replaceTV() {
+    assert(m_top != m_base);
+    tvRefcountedDecRef(m_top);
+    *m_top = make_tv<DT>();
+  }
+
+  template <DataType DT, typename T>
+  ALWAYS_INLINE
+  void replaceTV(T value) {
+    assert(m_top != m_base);
+    tvRefcountedDecRef(m_top);
+    *m_top = make_tv<DT>(value);
   }
 
   ALWAYS_INLINE

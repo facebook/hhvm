@@ -3683,8 +3683,8 @@ OPTBLD_INLINE void VMExecutionContext::iopCnsU(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopDefCns(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(s);
-  TypedValue* tv = m_stack.topTV();
-  tvAsVariant(tv) = Unit::defCns(s, tv);
+  bool result = Unit::defCns(s, m_stack.topTV());
+  m_stack.replaceTV<KindOfBoolean>(result);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopClsCns(IOP_ARGS) {
@@ -3735,7 +3735,6 @@ OPTBLD_INLINE void VMExecutionContext::iopNot(IOP_ARGS) {
   Cell* c1 = m_stack.topC();
   cellAsVariant(*c1) = !cellAsVariant(*c1).toBoolean();
 }
-
 
 OPTBLD_INLINE void VMExecutionContext::iopAbs(IOP_ARGS) {
   NEXT();
@@ -3995,9 +3994,7 @@ OPTBLD_INLINE void VMExecutionContext::iopInstanceOf(IOP_ARGS) {
     raise_error("Class name must be a valid object or a string");
   }
   m_stack.popC();
-  tvRefcountedDecRefCell(c2);
-  c2->m_data.num = r;
-  c2->m_type = KindOfBoolean;
+  m_stack.replaceC<KindOfBoolean>(r);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopInstanceOfD(IOP_ARGS) {
@@ -4009,18 +4006,14 @@ OPTBLD_INLINE void VMExecutionContext::iopInstanceOfD(IOP_ARGS) {
   const NamedEntity* ne = m_fp->m_func->unit()->lookupNamedEntityId(id);
   Cell* c1 = m_stack.topC();
   bool r = cellInstanceOf(c1, ne);
-  tvRefcountedDecRefCell(c1);
-  c1->m_data.num = r;
-  c1->m_type = KindOfBoolean;
+  m_stack.replaceC<KindOfBoolean>(r);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopPrint(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   echo(cellAsVariant(*c1).toString());
-  tvRefcountedDecRefCell(c1);
-  c1->m_type = KindOfInt64;
-  c1->m_data.num = 1;
+  m_stack.replaceC<KindOfInt64>(1);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopClone(IOP_ARGS) {
@@ -4627,9 +4620,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetN(IOP_ARGS) {
   } else {
     e = !cellIsNull(tvToCell(tv));
   }
-  tvRefcountedDecRefCell(tv1);
-  tv1->m_data.num = e;
-  tv1->m_type = KindOfBoolean;
+  m_stack.replaceC<KindOfBoolean>(e);
   decRefStr(name);
 }
 
@@ -4645,9 +4636,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetG(IOP_ARGS) {
   } else {
     e = !cellIsNull(tvToCell(tv));
   }
-  tvRefcountedDecRefCell(tv1);
-  tv1->m_data.num = e;
-  tv1->m_type = KindOfBoolean;
+  m_stack.replaceC<KindOfBoolean>(e);
   decRefStr(name);
 }
 
@@ -4904,9 +4893,7 @@ OPTBLD_INLINE void VMExecutionContext::iopEmptyL(IOP_ARGS) {
   DECODE_LA(local);
   TypedValue* loc = frame_local(m_fp, local);
   bool e = !cellToBool(*tvToCell(loc));
-  TypedValue* tv1 = m_stack.allocTV();
-  tv1->m_data.num = e;
-  tv1->m_type = KindOfBoolean;
+  m_stack.pushBool(e);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopEmptyN(IOP_ARGS) {
@@ -4921,9 +4908,7 @@ OPTBLD_INLINE void VMExecutionContext::iopEmptyN(IOP_ARGS) {
   } else {
     e = !cellToBool(*tvToCell(tv));
   }
-  tvRefcountedDecRefCell(tv1);
-  tv1->m_data.num = e;
-  tv1->m_type = KindOfBoolean;
+  m_stack.replaceC<KindOfBoolean>(e);
   decRefStr(name);
 }
 
@@ -4939,9 +4924,7 @@ OPTBLD_INLINE void VMExecutionContext::iopEmptyG(IOP_ARGS) {
   } else {
     e = !cellToBool(*tvToCell(tv));
   }
-  tvRefcountedDecRefCell(tv1);
-  tv1->m_data.num = e;
-  tv1->m_type = KindOfBoolean;
+  m_stack.replaceC<KindOfBoolean>(e);
   decRefStr(name);
 }
 
@@ -4970,9 +4953,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAKExists(IOP_ARGS) {
   TypedValue* key = arr + 1;
   bool result = f_array_key_exists(tvAsCVarRef(key), tvAsCVarRef(arr));
   m_stack.popTV();
-  tvRefcountedDecRef(key);
-  key->m_data.num = result;
-  key->m_type = KindOfBoolean;
+  m_stack.replaceTV<KindOfBoolean>(result);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopIdx(IOP_ARGS) {

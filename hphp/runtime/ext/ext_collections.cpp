@@ -3644,6 +3644,39 @@ BaseSet::~BaseSet() {
 
 // Private
 
+NEVER_INLINE
+void BaseSet::warnOnStrIntDup() const {
+  smart::hash_set<int64_t> seenVals;
+
+  for (uint32_t i = 0; i <= m_nLastSlot; i++) {
+    Bucket& p = m_data[i];
+    int64_t newVal = 0;
+
+    if (!p.validValue()) continue;
+
+    if (p.hasInt()) {
+      newVal = p.data.m_data.num;
+    } else {
+      assert(p.hasStr());
+      // isStriclyInteger() puts the int value in newVal as a side effect.
+      if (!p.data.m_data.pstr->isStrictlyInteger(newVal)) continue;
+    }
+
+    if (seenVals.find(newVal) != seenVals.end()) {
+      raise_warning(
+        "Set::toArray() for a set containing both int(%ld) and string('%ld')",
+        newVal,
+        newVal
+      );
+
+      return;
+    }
+
+    seenVals.insert(newVal);
+  }
+  // Do nothing if no 'duplicates' were found.
+}
+
 Array BaseSet::toArrayImpl() const {
   ArrayInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
@@ -3658,14 +3691,10 @@ Array BaseSet::toArrayImpl() const {
     }
   }
 
-  // If both '123' and 123 are present in the set, we better warn the user.
   Array arr = ai.create();
 
-  if (UNLIKELY(arr.length() < m_size)) {
-    // TODO (t2898471): walk the buckets again and report the offending item
-    raise_warning(
-      "Set::toArray() for a set containing both int(<n>) and string('<n>')");
-  }
+  // If both '123' and 123 are present in the set, we better warn the user.
+  if (UNLIKELY(arr.length() < m_size)) warnOnStrIntDup();
   return arr;
 }
 

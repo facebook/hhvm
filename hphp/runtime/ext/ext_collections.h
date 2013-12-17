@@ -1290,6 +1290,12 @@ protected:
 private:
   // Helpers
 
+  /**
+   * Raises a warning if the set contains an int and a string with the same
+   * numeric value: e.g. Set {'123', 123}. It's a no-op otherwise.
+   */
+  void warnOnStrIntDup() const;
+
   Array toArrayImpl() const;
   bool toBoolImpl() const { return (m_size != 0); }
   size_t numSlots() const { return m_nLastSlot + 1; }

@@ -17,7 +17,10 @@
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
+#include "hphp/runtime/vm/jit/native-calls.h"
+#include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
@@ -47,6 +50,13 @@ NOOP_OPCODE(TakeStack)
 NOOP_OPCODE(DbgAssertPtr);
 
 #undef NOOP_OPCODE
+
+//////////////////////////////////////////////////////////////////////
+
+#define CALL_OPCODE(name) \
+  void CodeGenerator::cg##name(IRInstruction* i) { cgCallNative(m_as, i); }
+
+CALL_OPCODE(ConvIntToStr)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -119,7 +129,6 @@ PUNT_OPCODE(ConvCellToInt)
 PUNT_OPCODE(ConvCellToObj)
 PUNT_OPCODE(ConvBoolToStr)
 PUNT_OPCODE(ConvDblToStr)
-PUNT_OPCODE(ConvIntToStr)
 PUNT_OPCODE(ConvObjToStr)
 PUNT_OPCODE(ConvResToStr)
 PUNT_OPCODE(ConvCellToStr)
@@ -494,6 +503,183 @@ void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
   m_as.  B     (&done, vixl::ls);
   m_as.  Brk   (0);
   m_as.  bind  (&done);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+static void shuffleArgs(vixl::MacroAssembler& a,
+                        ArgGroup& args,
+                        CppCall& call) {
+  assert_not_implemented(args.numStackArgs() == 0);
+
+  PhysReg::Map<PhysReg> moves;
+  PhysReg::Map<ArgDesc*> argDescs;
+
+  for (size_t i = 0; i < args.numRegArgs(); i++) {
+    auto kind = args[i].kind();
+    if (!(kind == ArgDesc::Kind::Reg  ||
+          kind == ArgDesc::Kind::Addr ||
+          kind == ArgDesc::Kind::TypeReg)) {
+      continue;
+    }
+    auto dstReg = args[i].dstReg();
+    auto srcReg = args[i].srcReg();
+    if (dstReg != srcReg) {
+      moves[dstReg] = srcReg;
+      argDescs[dstReg] = &args[i];
+    }
+    if (call.isIndirect() && dstReg == call.getReg()) {
+      // an indirect call uses an argument register for the func ptr.
+      // Use rAsm2 instead and update the CppCall
+      moves[rAsm2] = call.getReg();
+      call.updateCallIndirect(rAsm2);
+    }
+  }
+
+  auto const howTo = doRegMoves(moves, rAsm);
+
+  for (auto& how : howTo) {
+    auto srcReg = x2a(how.m_reg1);
+    auto dstReg = x2a(how.m_reg2);
+    if (how.m_kind == MoveInfo::Kind::Move) {
+      auto* argDesc = argDescs[how.m_reg2];
+      if (argDesc) {
+        auto kind = argDesc->kind();
+        if (kind == ArgDesc::Kind::Addr) {
+          emitRegGetsRegPlusImm(a, dstReg, srcReg, argDesc->imm().q());
+        } else {
+          if (argDesc->isZeroExtend()) {
+            // "Unsigned eXTend Byte"
+            a.Uxtb (dstReg, srcReg.W());
+          } else {
+            a.Mov  (dstReg, srcReg);
+          }
+        }
+        if (kind != ArgDesc::Kind::TypeReg) {
+          argDesc->markDone();
+        }
+      } else {
+        a.  Mov  (dstReg, srcReg);
+      }
+    } else {
+      emitXorSwap(a, dstReg, srcReg);
+    }
+  }
+
+  for (size_t i = 0; i < args.numRegArgs(); ++i) {
+    assert(args[i].done());
+  }
+}
+
+void CodeGenerator::cgCallNative(vixl::MacroAssembler& as,
+                                 IRInstruction* inst) {
+  using namespace NativeCalls;
+
+  Opcode opc = inst->op();
+  always_assert(CallMap::hasInfo(opc));
+
+  auto const& info = CallMap::info(opc);
+  ArgGroup argGroup = info.toArgGroup(curOpds(), inst);
+
+  auto call = [&]() -> CppCall {
+    switch (info.func.type) {
+    case FuncType::Call:
+      return CppCall(info.func.call);
+    case FuncType::SSA:
+      return CppCall(inst->src(info.func.srcIdx)->getValTCA());
+    }
+    not_reached();
+  }();
+
+  auto const dest = [&]() -> CallDest {
+    switch (info.dest) {
+      case DestType::None:  return kVoidDest;
+      case DestType::TV:    return callDestTV(inst->dst(0));
+      case DestType::SSA:   return callDest(inst->dst(0));
+      case DestType::SSA2:  return callDest2(inst->dst(0));
+    }
+    not_reached();
+  }();
+
+  cgCallHelper(as, call, dest, info.sync, argGroup,
+               m_state.liveRegs[m_curInst]);
+}
+
+void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
+                                 CppCall& call,
+                                 const CallDest& dstInfo,
+                                 SyncOptions sync,
+                                 ArgGroup& args,
+                                 RegSet toSave) {
+  assert(m_curInst->isNative());
+
+  auto dstReg0 = dstInfo.reg0;
+  auto dstReg1 = dstInfo.reg1;
+
+  if (debug) {
+    toSave.forEach([](PhysReg r) { assert(r.isGP()); });
+  }
+
+  toSave = toSave & kCallerSaved;
+  assert((toSave & RegSet().add(dstReg0).add(dstReg1)).empty());
+
+  // Use vixl's handy helper to push caller-save regs. It uses ldp/stp when
+  // possible.
+  CPURegList pushedRegs(vixl::CPURegister::kRegister, vixl::kXRegSize, 0);
+  toSave.forEach([&](PhysReg r) { pushedRegs.Combine(r); });
+  a.  PushCPURegList(pushedRegs);
+  SCOPE_EXIT { a.PopCPURegList(pushedRegs); };
+
+  for (size_t i = 0; i < args.numRegArgs(); i++) {
+    args[i].setDstReg(PhysReg{argReg(i)});
+  }
+  shuffleArgs(a, args, call);
+
+  auto syncPoint = emitCall(a, call);
+
+  if (RuntimeOption::HHProfServerEnabled || sync != SyncOptions::kNoSyncPoint) {
+    recordHostCallSyncPoint(a, syncPoint);
+  }
+
+  auto armDst0 = x2a(dstReg0);
+  DEBUG_ONLY auto armDst1 = x2a(dstReg1);
+
+  switch (dstInfo.type) {
+    case DestType::TV: not_implemented();
+    case DestType::SSA:
+      assert(!armDst1.IsValid());
+      if (armDst0.IsValid() && !armDst0.Is(vixl::x0)) a.Mov(armDst0, vixl::x0);
+      break;
+    case DestType::SSA2: not_implemented();
+    case DestType::None:
+      assert(!armDst0.IsValid() && !armDst1.IsValid());
+      break;
+  }
+}
+
+/*
+ * XXX copypasta but has to be in the class because of curOpd and changing that
+ * would make callsites real messy
+ */
+
+CallDest CodeGenerator::callDest(PhysReg reg0,
+                                 PhysReg reg1 /* = InvalidReg */) const {
+  return { DestType::SSA, reg0, reg1 };
+}
+
+CallDest CodeGenerator::callDest(SSATmp* ssa) const {
+  if (!ssa) return kVoidDest;
+  return { DestType::SSA, curOpd(ssa).reg(0), curOpd(ssa).reg(1) };
+}
+
+CallDest CodeGenerator::callDestTV(SSATmp* ssa) const {
+  if (!ssa) return kVoidDest;
+  return { DestType::TV, curOpd(ssa).reg(0), curOpd(ssa).reg(1) };
+}
+
+CallDest CodeGenerator::callDest2(SSATmp* ssa) const {
+  if (!ssa) return kVoidDest;
+  return { DestType::SSA2, curOpd(ssa).reg(0), curOpd(ssa).reg(1) };
 }
 
 //////////////////////////////////////////////////////////////////////

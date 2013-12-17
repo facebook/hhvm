@@ -89,6 +89,9 @@ struct CallInfo {
   DestType dest;
   SyncOptions sync;
   std::vector<Arg> args;
+
+  ArgGroup toArgGroup(const RegAllocInfo::RegMap& curOpds,
+                      IRInstruction* inst) const;
 };
 
 typedef std::initializer_list<CallInfo> CallInfoList;

@@ -60,6 +60,7 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
 
 using HPHP::JIT::TCA;
 
@@ -863,30 +864,8 @@ void CodeGenerator::cgCallNative(Asm& a, IRInstruction* inst) {
   Opcode opc = inst->op();
   always_assert(CallMap::hasInfo(opc));
 
-  const auto& info = CallMap::info(opc);
-  ArgGroup argGroup(curOpds());
-  for (auto const& arg : info.args) {
-    switch (arg.type) {
-    case ArgType::SSA:
-      argGroup.ssa(inst->src(arg.ival));
-      break;
-    case ArgType::TV:
-      argGroup.typedValue(inst->src(arg.ival));
-      break;
-    case ArgType::MemberKeyS:
-      argGroup.vectorKeyS(inst->src(arg.ival));
-      break;
-    case ArgType::MemberKeyIS:
-      argGroup.vectorKeyIS(inst->src(arg.ival));
-      break;
-    case ArgType::ExtraImm:
-      argGroup.imm(arg.extraFunc(inst));
-      break;
-    case ArgType::Imm:
-      argGroup.imm(arg.ival);
-      break;
-    }
-  }
+  auto const& info = CallMap::info(opc);
+  ArgGroup argGroup = info.toArgGroup(curOpds(), inst);
 
   auto call = [&]() -> CppCall {
     switch (info.func.type) {

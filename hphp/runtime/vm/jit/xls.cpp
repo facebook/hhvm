@@ -559,7 +559,7 @@ void XLS::buildIntervals() {
     std::reverse(ivl->uses.begin(), ivl->uses.end());
     std::reverse(ivl->ranges.begin(), ivl->ranges.end());
   }
-  if (dumpIREnabled()) {
+  if (dumpIREnabled(kRegAllocLevel)) {
     print(" after building intervals ");
   }
 }
@@ -894,7 +894,7 @@ void XLS::walkIntervals() {
     allocOne(current);
     assert(current->handled() && current->info.numWords() == current->need);
   }
-  if (dumpIREnabled()) {
+  if (dumpIREnabled(kRegAllocLevel)) {
     if (m_numSplits) dumpIntervals();
     print(" after walking intervals ");
   }
@@ -984,7 +984,7 @@ void XLS::insertSpill(Interval* ivl) {
 // Insert spills and copies that connect sub-intervals that were split between
 // instructions
 void XLS::resolveSplits() {
-  if (dumpIREnabled()) dumpIntervals();
+  if (dumpIREnabled(kRegAllocLevel)) dumpIntervals();
   for (auto i1 : m_intervals) {
     if (!i1) continue;
     if (i1->spill.spilled()) insertSpill(i1);
@@ -1046,7 +1046,7 @@ void XLS::resolveEdges() {
     });
   }
   assert(checkEdgeShuffles());
-  if (dumpIREnabled()) {
+  if (dumpIREnabled(kRegAllocLevel)) {
     print(" after resolving intervals ");
   }
 }

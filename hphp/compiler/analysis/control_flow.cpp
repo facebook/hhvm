@@ -245,6 +245,7 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
         Statement::KindOf stype = s->getKindOf();
         switch (stype) {
           case Statement::KindOfUseTraitStatement:
+          case Statement::KindOfTraitRequireStatement:
           case Statement::KindOfTraitPrecStatement:
           case Statement::KindOfTraitAliasStatement:
             not_reached();

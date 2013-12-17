@@ -271,6 +271,8 @@ enum NodeType {
   ONSELECTCLAUSE = 102,
   ONGROUPCLAUSE = 103,
   ONINTOCLAUSE = 104,
+  ONTRAITREQUIREEXTEND = 105,
+  ONTRAITREQUIREIMPLEMENT = 106,
 };
 
 struct Token : ScannerToken {
@@ -684,6 +686,11 @@ struct Parser : ParserBase {
 
   void onTraitUse(Token &out, Token &traits, Token &rules) {
     out.setNodeType(ONTRAITUSE).appendChild(&traits).appendChild(&rules);
+  }
+
+  void onTraitRequire(Token &out, Token &name, bool isExtends) {
+    out.setNodeType(isExtends ? ONTRAITREQUIREEXTEND : ONTRAITREQUIREIMPLEMENT)
+      .appendChild(&name);
   }
 
   void onTraitName(Token &out, Token *names, Token &name) {

@@ -32,6 +32,7 @@
 #include "hphp/compiler/statement/loop_statement.h"
 #include "hphp/compiler/statement/class_variable.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/trait_require_statement.h"
 #include "hphp/compiler/analysis/symbol_table.h"
 #include "hphp/compiler/package.h"
 #include "hphp/compiler/parser/parser.h"

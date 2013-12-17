@@ -202,6 +202,7 @@ public:
   void onInterface(Token &out, Token &name, Token &base, Token &stmt,
                    Token *attr);
   void onInterfaceName(Token &out, Token *names, Token &name);
+  void onTraitRequire(Token &out, Token &name, bool isClass);
   void onTraitUse(Token &out, Token &traits, Token &rules);
   void onTraitName(Token &out, Token *names, Token &name);
   void onTraitRule(Token &out, Token &stmtList, Token &newStmt);

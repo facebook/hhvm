@@ -72,6 +72,7 @@
 #include "hphp/compiler/statement/unset_statement.h"
 #include "hphp/compiler/statement/while_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/trait_require_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
@@ -3518,6 +3519,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         return false;
       }
       case Statement::KindOfUseTraitStatement:
+      case Statement::KindOfTraitRequireStatement:
       case Statement::KindOfTraitPrecStatement:
       case Statement::KindOfTraitAliasStatement: {
         not_implemented();

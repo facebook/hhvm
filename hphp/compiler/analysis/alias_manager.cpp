@@ -1927,6 +1927,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
 
   switch (stype) {
   case Statement::KindOfUseTraitStatement:
+  case Statement::KindOfTraitRequireStatement:
   case Statement::KindOfTraitPrecStatement:
   case Statement::KindOfTraitAliasStatement:
     return StatementPtr();
@@ -1968,7 +1969,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
   }
 
   case Statement::KindOfIfBranchStatement:
-    always_assert(0);
+    always_assert(false);
     break;
 
   case Statement::KindOfForStatement: {

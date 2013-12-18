@@ -460,7 +460,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
 
   if (RuntimeOption::HHProfServerEnabled && callFixup) {
     tx64->fixupMap().recordFixup(
-      a.frontier(),
+      callFixup,
       Fixup { skFuncBody.offset() - func->base(), func->numSlotsInFrame() }
     );
   }

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/profile-dump.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/crash-reporter.h"
 
 namespace HPHP {
 
@@ -47,12 +48,12 @@ struct MemoryProfile {
   }
   // Log allocation event
   static inline void logAllocation(void *ptr, size_t size) {
-    if (!RuntimeOption::HHProfServerEnabled) return;
+    if (!RuntimeOption::HHProfServerEnabled || IsCrashing) return;
     s_memory_profile->logAllocationImpl(ptr, size);
   }
   // Log deallocation event
   static inline void logDeallocation(void *ptr) {
-    if (!RuntimeOption::HHProfServerEnabled) return;
+    if (!RuntimeOption::HHProfServerEnabled || IsCrashing) return;
     s_memory_profile->logDeallocationImpl(ptr);
   }
 

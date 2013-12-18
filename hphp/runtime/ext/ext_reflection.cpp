@@ -96,7 +96,7 @@ const StaticString
   s_accessible("accessible"),
   s_closure_scope_class("closure_scope_class");
 
-static const Class* get_cls(CVarRef class_or_object) {
+static Class* get_cls(CVarRef class_or_object) {
   Class* cls = nullptr;
   if (class_or_object.is(KindOfObject)) {
     ObjectData* obj = class_or_object.toCObjRef().get();
@@ -714,21 +714,21 @@ static Array get_method_info(const ClassInfo *cls, CVarRef name) {
   return ret;
 }
 
-Array f_hphp_get_method_info(CVarRef cls, CVarRef name) {
-  const Class* c = get_cls(cls);
-  if (!c) return Array();
-  if (c->clsInfo()) {
+Array f_hphp_get_method_info(CVarRef class_or_object, CVarRef meth_name) {
+  auto const cls = get_cls(class_or_object);
+  if (!cls) return Array();
+  if (cls->clsInfo()) {
     /*
      * Default arguments for builtins arent setup correctly,
      * so use the ClassInfo instead.
      */
-    return get_method_info(c->clsInfo(), name);
+    return get_method_info(cls->clsInfo(), meth_name);
   }
-  const String& method_name = name.toString();
-  const Func* func = c->lookupMethod(method_name.get());
+  const String& method_name = meth_name.toString();
+  const Func* func = cls->lookupMethod(method_name.get());
   if (!func) {
-    if ((c->attrs() & AttrAbstract) || (c->attrs() & AttrInterface)) {
-      const Class::InterfaceMap& ifaces = c->allInterfaces();
+    if ((cls->attrs() & AttrAbstract) || (cls->attrs() & AttrInterface)) {
+      const Class::InterfaceMap& ifaces = cls->allInterfaces();
       for (int i = 0, size = ifaces.size(); i < size; i++) {
         func = ifaces[i]->lookupMethod(method_name.get());
         if (func) break;
@@ -898,7 +898,7 @@ static Array get_class_info(const ClassInfo *cls) {
 }
 
 Array f_hphp_get_class_info(CVarRef name) {
-  const Class* cls = get_cls(name);
+  auto cls = get_cls(name);
   if (!cls) return Array();
   if (cls->clsInfo()) {
     /*
@@ -925,8 +925,9 @@ Array f_hphp_get_class_info(CVarRef name) {
   // traits
   {
     Array arr = Array::Create();
-    for (auto const& trait : cls->usedTraits()) {
-      arr.set(trait->nameRef(), VarNR(1));
+    for (auto const& traitName : cls->preClass()->usedTraits()) {
+      auto& nameRef = *(String*)(&traitName);
+      arr.set(nameRef, VarNR(1));
     }
     ret.set(s_traits, VarNR(arr));
   }

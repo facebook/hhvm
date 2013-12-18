@@ -618,6 +618,7 @@ bool ClassScope::hasMethod(const string &methodName) const {
 ClassScopePtr
 ClassScope::findSingleTraitWithMethod(AnalysisResultPtr ar,
                                       const string &methodName) const {
+  assert(Option::WholeProgram);
   ClassScopePtr trait = ClassScopePtr();
 
   for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
@@ -635,6 +636,7 @@ ClassScope::findSingleTraitWithMethod(AnalysisResultPtr ar,
 }
 
 void ClassScope::addTraitAlias(TraitAliasStatementPtr aliasStmt) {
+  assert(Option::WholeProgram);
   const string &traitName = aliasStmt->getTraitName();
   const string &origMethName = aliasStmt->getMethodName();
   const string &newMethName = aliasStmt->getNewMethodName();
@@ -645,6 +647,7 @@ void ClassScope::addTraitAlias(TraitAliasStatementPtr aliasStmt) {
 
 void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
                                      TraitAliasStatementPtr stmt) {
+  assert(Option::WholeProgram);
   const string traitName = Util::toLower(stmt->getTraitName());
   const string origMethName = Util::toLower(stmt->getMethodName());
   const string newMethName = Util::toLower(stmt->getNewMethodName());
@@ -690,6 +693,7 @@ void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
 }
 
 void ClassScope::applyTraitRules(AnalysisResultPtr ar) {
+  assert(Option::WholeProgram);
   ClassStatementPtr classStmt = dynamic_pointer_cast<ClassStatement>(getStmt());
   assert(classStmt);
   StatementListPtr stmts = classStmt->getStmts();
@@ -722,6 +726,7 @@ void ClassScope::applyTraitRules(AnalysisResultPtr ar) {
 //   1) implemented by other traits
 //   2) duplicate
 void ClassScope::removeSpareTraitAbstractMethods(AnalysisResultPtr ar) {
+  assert(Option::WholeProgram);
   for (MethodToTraitListMap::iterator iter = m_importMethToTraitMap.begin();
        iter != m_importMethToTraitMap.end(); iter++) {
 
@@ -765,7 +770,11 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
 
   if (m_traitStatus == FLATTENED) return;
   if (m_traitStatus == BEING_FLATTENED) {
-    Compiler::Error(Compiler::CyclicDependentTraits, getStmt());
+    getStmt()->analysisTimeFatal(
+      Compiler::CyclicDependentTraits,
+      "Cyclic dependency between traits involving %s",
+      getOriginalName().c_str()
+    );
     return;
   }
   if (m_usedTraitNames.size() == 0) {
@@ -819,7 +828,7 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   }
 
   std::map<string, MethodStatementPtr> importedTraitMethods;
-  std::vector<std::pair<string,const TraitMethod*> > importedTraitsWithOrigName;
+  std::vector<std::pair<string,const TraitMethod*>> importedTraitsWithOrigName;
 
   // Actually import the methods
   for (MethodToTraitListMap::const_iterator

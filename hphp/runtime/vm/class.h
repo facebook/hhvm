@@ -643,10 +643,11 @@ struct Class : AtomicCountable {
   bool hasInitMethods() const { return m_hasInitMethods; }
   bool callsCustomInstanceInit() const { return m_callsCustomInstanceInit; }
   const InterfaceMap& allInterfaces() const { return m_interfaces; }
-  const std::vector<ClassPtr>& usedTraits() const {
+  // See comment for m_usedTraits
+  const std::vector<ClassPtr>& usedTraitClasses() const {
     return m_usedTraits;
   }
-  const TraitAliasVec& traitAliases() const { return m_traitAliases; }
+  const TraitAliasVec& traitAliases();
   const InitVec& pinitVec() const { return m_pinitVec; }
   const PropInitVec& declPropInit() const { return m_declPropInit; }
 
@@ -893,12 +894,16 @@ private:
   void addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const;
 
 private:
+
   PreClassPtr m_preClass;
   ClassPtr m_parent;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;
   size_t m_numDeclInterfaces;
   InterfaceMap m_interfaces;
 
+  // Note: In RepoAuthoritative mode, we rely on trait flattening in the
+  // compile phase to import the contents of traits. As a result,
+  // m_usedTraits is empty.
   std::vector<ClassPtr> m_usedTraits;
   TraitAliasVec m_traitAliases;
 

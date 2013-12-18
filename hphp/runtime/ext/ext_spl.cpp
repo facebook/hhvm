@@ -201,9 +201,9 @@ Variant f_class_uses(CVarRef obj, bool autoload /* = true */) {
     return false;
   }
   Array ret(Array::Create());
-  for (auto& elem : cls->usedTraits()) {
-    auto& traitName = elem->nameRef();
-    ret.set(traitName, traitName);
+  for (auto const& traitName : cls->preClass()->usedTraits()) {
+    const String& nameRef = *(String*)(&traitName);
+    ret.set(nameRef, nameRef);
   }
   return ret;
 }

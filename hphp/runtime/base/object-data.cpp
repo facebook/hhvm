@@ -399,8 +399,8 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
   const Class* cls = m_cls;
   do {
     getProps(cls, pubOnly, cls->preClass(), props, inserted);
-    for (auto const& trait : cls->usedTraits()) {
-      getProps(cls, pubOnly, trait->preClass(), props, inserted);
+    for (auto const& traitCls : cls->usedTraitClasses()) {
+      getProps(cls, pubOnly, traitCls->preClass(), props, inserted);
     }
     cls = cls->parent();
   } while (cls);

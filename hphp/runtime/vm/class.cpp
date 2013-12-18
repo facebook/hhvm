@@ -1119,6 +1119,23 @@ void Class::addTraitAlias(const StringData* traitName,
                            (newMethName, origName));
 }
 
+// not const due to memoization
+const Class::TraitAliasVec& Class::traitAliases() {
+
+  // We keep track of trait aliases in the class only to support
+  // ReflectionClass::getTraitAliases. So let's load this info from the
+  // preClass only on demand.
+  auto const& preClassRules = m_preClass->traitAliasRules();
+  if (m_traitAliases.size() != preClassRules.size()) {
+    for (auto const& rule : preClassRules) {
+      addTraitAlias(rule.getTraitName(),
+                    rule.getOrigMethodName(),
+                    rule.getNewMethodName());
+    }
+  }
+  return m_traitAliases;
+}
+
 void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
                                 MethodToTraitListMap& importMethToTraitMap) {
   const StringData* traitName    = rule.getTraitName();
@@ -1159,13 +1176,11 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
 }
 
 void Class::applyTraitRules(MethodToTraitListMap& importMethToTraitMap) {
-  for (size_t i = 0; i < m_preClass->traitPrecRules().size(); i++) {
-    applyTraitPrecRule(m_preClass->traitPrecRules()[i],
-                       importMethToTraitMap);
+  for (auto const& precRule : m_preClass->traitPrecRules()) {
+    applyTraitPrecRule(precRule, importMethToTraitMap);
   }
-  for (size_t i = 0; i < m_preClass->traitAliasRules().size(); i++) {
-    applyTraitAliasRule(m_preClass->traitAliasRules()[i],
-                        importMethToTraitMap);
+  for (auto const& aliasRule : m_preClass->traitAliasRules()) {
+    applyTraitAliasRule(aliasRule, importMethToTraitMap);
   }
 }
 
@@ -2090,18 +2105,28 @@ void Class::setInterfaces() {
 }
 
 void Class::setUsedTraits() {
-  for (PreClass::UsedTraitVec::const_iterator
-       it = m_preClass->usedTraits().begin();
-       it != m_preClass->usedTraits().end(); it++) {
-    Class* classPtr = Unit::loadClass(*it);
+  for (auto const& traitName : m_preClass->usedTraits()) {
+    Class* classPtr = Unit::loadClass(traitName);
     if (classPtr == nullptr) {
-      raise_error(Strings::TRAITS_UNKNOWN_TRAIT, (*it)->data());
+      raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
     }
     if (!(classPtr->attrs() & AttrTrait)) {
       raise_error("%s cannot use %s - it is not a trait",
                   m_preClass->name()->data(),
                   classPtr->name()->data());
     }
+
+
+    if (RuntimeOption::RepoAuthoritative) {
+      // In RepoAuthoritative mode (with the WholeProgram compiler
+      // optimizations), the contents of traits are flattened away into the
+      // preClasses of "use"r classes. Continuing here allows us to avoid
+      // unnecessarily attempting to re-import trait methods and
+      // properties, only to fail due to (surprise surprise!) the same
+      // method/property existing on m_preClass.
+      continue;
+    }
+
     m_usedTraits.push_back(ClassPtr(classPtr));
   }
 }
@@ -2145,7 +2170,7 @@ void Class::checkTraitConstraints() const {
     return;
   }
 
-  checkTraitConstraintsRec(usedTraits(), nullptr);
+  checkTraitConstraintsRec(usedTraitClasses(), nullptr);
 }
 
 void Class::checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
@@ -2194,7 +2219,7 @@ void Class::checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
   for (auto const& ut : usedTraits) {
     Class* usedTrait = ut.get();
     checkTraitConstraintsRec(
-      usedTrait->usedTraits(),
+      usedTrait->usedTraitClasses(),
       recName == nullptr ? usedTrait->preClass()->name() : recName
     );
   }
@@ -2294,10 +2319,12 @@ void Class::getClassInfo(ClassInfoVM* ci) {
   }
 
   // Used traits.
-  for (unsigned t = 0; t < m_usedTraits.size(); t++) {
-    const char* traitName = m_usedTraits[t]->name()->data();
-    ci->m_traitsVec.push_back(traitName);
-    ci->m_traits.insert(traitName);
+  for (auto const& traitName : m_preClass->usedTraits()) {
+    // Use the preclass list of trait names to avoid accounting for
+    // trait flattening.
+    const char* traitNameChars = traitName->data();
+    ci->m_traitsVec.push_back(traitNameChars);
+    ci->m_traits.insert(traitNameChars);
   }
 
   // Trait aliases.

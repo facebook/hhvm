@@ -235,7 +235,7 @@ class PDOStatement;
 typedef SmartResource<PDOStatement> sp_PDOStatement;
 
 /* represents a connection to a database */
-class PDOConnection : public ResourceData {
+class PDOConnection : public SweepableResourceData {
 public:
   static const char *PersistentKey;
 
@@ -259,6 +259,7 @@ public:
   PDOConnection();
   virtual ~PDOConnection();
   virtual bool create(CArrRef options) = 0;
+  virtual void sweep();
 
   CLASSNAME_IS("PDOConnection")
   // overriding ResourceData

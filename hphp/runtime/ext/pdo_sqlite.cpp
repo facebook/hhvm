@@ -114,6 +114,15 @@ bool PDOSqliteConnection::create(CArrRef options) {
   return true;
 }
 
+void PDOSqliteConnection::sweep() {
+  for (auto& udf : m_udfs) {
+    udf->func.asTypedValue()->m_type = KindOfNull;
+    udf->step.asTypedValue()->m_type = KindOfNull;
+    udf->fini.asTypedValue()->m_type = KindOfNull;
+  }
+  PDOConnection::sweep();
+}
+
 bool PDOSqliteConnection::support(SupportedMethod method) {
   return method != MethodCheckLiveness;
 }

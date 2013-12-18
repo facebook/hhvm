@@ -112,9 +112,9 @@ extern const int64_t q_PDO$$MYSQL_ATTR_IGNORE_SPACE;
 // class PDO
 
 FORWARD_DECLARE_CLASS(PDO);
-class c_PDO : public ExtObjectData, public Sweepable {
+class c_PDO : public ExtObjectData {
  public:
-  DECLARE_CLASS(PDO)
+  DECLARE_CLASS_NO_SWEEP(PDO)
 
   // need to implement
   public: c_PDO(Class* cls = c_PDO::classof());
@@ -152,9 +152,9 @@ class c_PDO : public ExtObjectData, public Sweepable {
 // class PDOStatement
 
 FORWARD_DECLARE_CLASS(PDOStatement);
-class c_PDOStatement : public ExtObjectData, public Sweepable {
+class c_PDOStatement : public ExtObjectData {
  public:
-  DECLARE_CLASS(PDOStatement)
+  DECLARE_CLASS_NO_SWEEP(PDOStatement)
 
   // need to implement
   public: c_PDOStatement(Class* cls = c_PDOStatement::classof());

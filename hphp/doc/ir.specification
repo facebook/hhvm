@@ -280,6 +280,12 @@ Terminal
   The instruction has no next instruction; it either jumps, returns,
   or throws.
 
+Branch
+
+  The instruction has a (sometimes optional) taken edge.  Instructions that
+  are conditional branches (i.e. a Branch that is not Terminal) will also
+  have a next edge.
+
 Passthrough
 
   The value of the instruction's dest is the same as one of its inputs; it
@@ -561,16 +567,25 @@ D:Cctx = ConvClsToCctx S0:Cls
 
 
 D:Bool = Gt    S0:Gen S1:Gen
+D:Bool = GtX   S0:Gen S1:Gen
 D:Bool = Gte   S0:Gen S1:Gen
+D:Bool = GteX  S0:Gen S1:Gen
 D:Bool = Lt    S0:Gen S1:Gen
+D:Bool = LtX   S0:Gen S1:Gen
 D:Bool = Lte   S0:Gen S1:Gen
+D:Bool = LteX  S0:Gen S1:Gen
 D:Bool = Eq    S0:Gen S1:Gen
+D:Bool = EqX   S0:Gen S1:Gen
 D:Bool = Neq   S0:Gen S1:Gen
+D:Bool = NeqX  S0:Gen S1:Gen
 D:Bool = Same  S0:Gen S1:Gen
 D:Bool = NSame S0:Gen S1:Gen
 
   Perform comparisons with PHP semantics on S0 and S1, and put the
-  result in D.
+  result in D.  The -X versions may re-enter the VM when comparing an
+  Object with a string, and therefore may throw exceptions.  The non-X
+  versions must not be passed (Object,String) pairs, and do not throw.
+  Note that Same and NSame never re-enter or throw, for any types.
 
 D:Bool = InstanceOf S0:Cls S1:{Cls|Nullptr}
 

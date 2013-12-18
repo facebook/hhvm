@@ -44,8 +44,10 @@ IRTrace::iterator IRTrace::erase(iterator it) {
   assert((*it)->preds().empty());
   Block* b = *it;
   b->setTrace(nullptr);
-  if (!b->empty()) b->back().setTaken(nullptr);
-  b->setNext(nullptr);
+  if (!b->empty()) {
+    b->back().setTaken(nullptr);
+    b->back().setNext(nullptr);
+  }
   return m_blocks.erase(it);
 }
 

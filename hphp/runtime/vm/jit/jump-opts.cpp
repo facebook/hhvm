@@ -107,14 +107,13 @@ void optimizeCondTraceExit(IRUnit& unit) {
     auto const& mainPreds = mainExit->preds();
     if (mainPreds.size() != 1) continue;
 
-    auto const jccBlock = mainPreds.front().from();
-    if (!jccCanBeDirectExit(jccBlock->back().op())) return;
+    auto const jccInst = mainPreds.front().inst();
+    if (!jccCanBeDirectExit(jccInst->op())) return;
     FTRACE(5, "previous block ends with jccCanBeDirectExit ({})\n",
-           opcodeName(jccBlock->back().op()));
+           opcodeName(jccInst->op()));
 
-    auto const jccInst = &jccBlock->back();
     auto jccExitBlock = jccInst->taken();
-    if (jccExitBlock == mainExit) jccExitBlock = jccBlock->next();
+    if (jccExitBlock == mainExit) jccExitBlock = jccInst->next();
     if (!isNormalExit(jccExitBlock)) continue;
     FTRACE(5, "exit trace is side-effect free\n");
 
@@ -123,7 +122,7 @@ void optimizeCondTraceExit(IRUnit& unit) {
     auto& syncAbi = *it;
     assert(syncAbi.op() == SyncABIRegs);
 
-    auto const newOpcode = jmpToReqBindJmp(jccBlock->back().op());
+    auto const newOpcode = jmpToReqBindJmp(jccInst->op());
     ReqBindJccData data;
     data.taken = jccExitBlock->back().extra<ReqBindJmp>()->offset;
     data.notTaken = reqBindJmp.extra<ReqBindJmp>()->offset;
@@ -138,7 +137,7 @@ void optimizeCondTraceExit(IRUnit& unit) {
 
     syncAbi.setMarker(jccInst->marker());
     reqBindJmp.setMarker(jccInst->marker());
-    jccInst->convertToNop();
+    jccInst->convertToJmp(mainExit);
   }
 }
 
@@ -177,6 +176,7 @@ void optimizeSideExitChecks(IRUnit& unit) {
     block->insert(block->iteratorTo(inst),
                   unit.cloneInstruction(syncABI));
 
+    auto next = inst->next();
     unit.replace(
       inst,
       isStack ? SideExitGuardStk : SideExitGuardLoc,
@@ -184,6 +184,7 @@ void optimizeSideExitChecks(IRUnit& unit) {
       data,
       isStack ? sp : fp
     );
+    block->push_back(unit.gen(Jmp, inst->marker(), next));
   });
 }
 
@@ -218,12 +219,14 @@ void optimizeSideExitJccs(IRUnit& unit) {
     block->insert(block->iteratorTo(inst),
                   unit.cloneInstruction(&syncABI));
 
+    auto next = inst->next();
     unit.replace(
       inst,
       newOpcode,
       data,
       std::make_pair(inst->numSrcs(), inst->srcs().begin())
     );
+    block->push_back(unit.gen(Jmp, inst->marker(), next));
   });
 }
 

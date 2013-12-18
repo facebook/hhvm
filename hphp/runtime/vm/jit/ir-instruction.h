@@ -79,6 +79,7 @@ struct IRInstruction {
    */
   explicit IRInstruction(Opcode op,
                          BCMarker marker,
+                         Edge* edges = nullptr,
                          uint32_t numSrcs = 0,
                          SSATmp** srcs = nullptr)
     : m_op(op)
@@ -88,6 +89,8 @@ struct IRInstruction {
     , m_id(kTransient)
     , m_srcs(srcs)
     , m_dst(nullptr)
+    , m_block(nullptr)
+    , m_edges(edges)
     , m_marker(marker)
     , m_extra(nullptr)
   {
@@ -189,6 +192,7 @@ struct IRInstruction {
    * is always taken.
    */
   void convertToJmp();
+  void convertToJmp(Block* target);
 
   /*
    * Replace an instruction in place with a Mov. Used when we have
@@ -223,7 +227,7 @@ struct IRInstruction {
   }
 
   Opcode     op()   const       { return m_op; }
-  void       setOpcode(Opcode newOpc)  { m_op = newOpc; }
+  void       setOpcode(Opcode newOpc);
   Type       typeParam() const         { return m_typeParam; }
   void       setTypeParam(Type t)      { m_typeParam = t; }
   uint32_t   numSrcs()  const          { return m_numSrcs; }
@@ -278,22 +282,27 @@ struct IRInstruction {
    * instruction, as well as where the taken edge is coming from, if there
    * is a taken edge.
    */
-  Block*     block() const { return m_taken.from(); }
-  void       setBlock(Block* b) { m_taken.setFrom(b); }
+  Block* block() const { return m_block; }
+  void setBlock(Block* b) { m_block = b; }
 
   /*
    * Optional control flow edge.  If present, this instruction must
    * be the last one in the block.
    */
-  Block*     taken() const { return m_taken.to(); }
-  Edge*      takenEdge()   { return m_taken.to() ? &m_taken : nullptr; }
-  void       setTaken(Block* b) {
-    if (isTransient()) m_taken.setTransientTo(b);
-    else m_taken.setTo(b);
-  }
+  Block* taken() const { return succ(1); }
+  Edge* takenEdge() { return succEdge(1); }
+  void setTaken(Block* b) { return setSucc(1, b); }
 
-  bool isControlFlow() const { return bool(m_taken.to()); }
-  bool isBlockEnd() const { return m_taken.to() || isTerminal(); }
+  /*
+   * Optional fall-through edge.  If present, this instruction must
+   * also have a taken edge.
+   */
+  Block* next() const { return succ(0); }
+  Edge* nextEdge() { return succEdge(0); }
+  void setNext(Block* b) { return setSucc(0, b); }
+
+  bool isControlFlow() const { return bool(taken()); }
+  bool isBlockEnd() const { return taken() || isTerminal(); }
   bool isLoad() const;
   /*
    * Returns true if the instruction stores its source operand srcIdx to
@@ -336,6 +345,7 @@ struct IRInstruction {
   bool mayRaiseError() const;
   bool isEssential() const;
   bool isTerminal() const;
+  bool hasEdges() const { return JIT::hasEdges(op()); }
   bool isPassthrough() const;
   SSATmp* getPassthroughValue() const;
   bool killsSources() const;
@@ -348,10 +358,28 @@ struct IRInstruction {
   // ModifiesStack set.
   bool hasMainDst() const;
 
-  friend const Edge* takenEdge(IRInstruction*); // only for validation
-
 private:
-  bool mayReenterHelper() const;
+  Block* succ(int i) const {
+    assert(!m_edges || hasEdges());
+    return m_edges ? m_edges[i].to() : nullptr;
+  }
+  Edge* succEdge(int i) {
+    assert(!m_edges || hasEdges());
+    return m_edges && m_edges[i].to() ? &m_edges[i] : nullptr;
+  }
+  void setSucc(int i, Block* b) {
+    if (hasEdges()) {
+      if (isTransient()) m_edges[i].setTransientTo(b);
+      else m_edges[i].setTo(b);
+    } else {
+      assert(!b && !m_edges);
+    }
+  }
+  void clearEdges() {
+    setSucc(0, nullptr);
+    setSucc(1, nullptr);
+    m_edges = nullptr;
+  }
 
 private:
   Opcode            m_op;
@@ -361,7 +389,8 @@ private:
   const Id          m_id;
   SSATmp**          m_srcs;
   SSATmp*           m_dst;     // if HasDest or NaryDest
-  Edge              m_taken;   // for branches, guards, and jmp
+  Block*            m_block;   // what block owns this instruction
+  Edge*             m_edges;   // outgoing edges, if this is a block-end.
   BCMarker          m_marker;
   IRExtraData*      m_extra;
 public:

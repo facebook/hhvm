@@ -91,7 +91,7 @@ void optimizePredictions(IRUnit& unit) {
 
     auto const mainBlock   = ldMem->block();
     auto const exit        = checkType->taken();
-    auto const specialized = checkType->block()->next();
+    auto const specialized = checkType->next();
 
     if (mainBlock != checkType->block()) return false;
     if (exit->numPreds() != 1) return false;
@@ -115,9 +115,10 @@ void optimizePredictions(IRUnit& unit) {
       CheckTypeMem,
       checkType->marker(),
       checkType->typeParam(),
-      checkType->taken(),
+      exit,
       ldMem->src(0)
     );
+    newCheckType->setNext(specialized);
     mainBlock->insert(mainBlock->iteratorTo(ldMem), newCheckType);
 
     // Clone the instructions to the exit before specializing.

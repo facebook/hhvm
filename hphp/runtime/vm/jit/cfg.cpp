@@ -53,17 +53,18 @@ Block* splitCriticalEdge(IRUnit& unit, Edge* edge) {
   if (!edge) return nullptr;
 
   auto* to = edge->to();
-  auto* from = edge->from();
+  auto* branch = edge->inst();
+  auto* from = branch->block();
   if (to->numPreds() <= 1 || from->numSuccs() <= 1) return nullptr;
 
   Block* middle = unit.defBlock();
   FTRACE(3, "splitting edge from B{} -> B{} using B{}\n",
          from->id(), to->id(), middle->id());
-  if (from->taken() == to) {
-    from->back().setTaken(middle);
+  if (branch->taken() == to) {
+    branch->setTaken(middle);
   } else {
-    assert(from->next() == to);
-    from->setNext(middle);
+    assert(branch->next() == to);
+    branch->setNext(middle);
   }
 
   auto& marker = to->front().marker();
@@ -163,11 +164,11 @@ IdomVector findDominators(const IRUnit& unit, const BlockList& blocks) {
       // p1 = any already-processed predecessor
       auto predIter = block->preds().begin();
       auto predEnd = block->preds().end();
-      auto p1 = predIter->from();
-      while (!idom[p1]) p1 = (++predIter)->from();
+      auto p1 = predIter->inst()->block();
+      while (!idom[p1]) p1 = (++predIter)->inst()->block();
       // for all other already-processed predecessors p2 of block
       for (++predIter; predIter != predEnd; ++predIter) {
-        auto p2 = predIter->from();
+        auto p2 = predIter->inst()->block();
         if (p2 == p1 || !idom[p2]) continue;
         // find earliest common predecessor of p1 and p2
         // (higher postIds are earlier in flow and in dom-tree).

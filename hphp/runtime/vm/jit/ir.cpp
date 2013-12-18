@@ -57,6 +57,7 @@ namespace {
 #define CRc    ConsumesRC
 #define Er     MayRaiseError
 #define T      Terminal
+#define B      Branch
 #define P      Passthrough
 #define K      KillsSources
 #define StkFlags(f) HasStackVersion|(f)
@@ -101,6 +102,7 @@ struct {
 #undef CRc
 #undef Er
 #undef T
+#undef B
 #undef P
 #undef K
 #undef StkFlags
@@ -134,6 +136,10 @@ const char* opcodeName(Opcode opcode) {
 
 bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
   return OpInfo[uint16_t(opcode)].flags & flags;
+}
+
+bool hasEdges(Opcode opcode) {
+  return opcodeHasFlags(opcode, Branch | MayRaiseError);
 }
 
 bool opHasExtraData(Opcode op) {
@@ -205,22 +211,6 @@ bool isQueryOp(Opcode opc) {
   case NInstanceOfBitmask:
   case IsType:
   case IsNType:
-    return true;
-  default:
-    return false;
-  }
-}
-
-bool isCmpOp(Opcode opc) {
-  switch (opc) {
-  case Gt:
-  case Gte:
-  case Lt:
-  case Lte:
-  case Eq:
-  case Neq:
-  case Same:
-  case NSame:
     return true;
   default:
     return false;
@@ -355,15 +345,6 @@ Opcode commuteQueryOp(Opcode opc) {
   case NSame: return NSame;
   default:      always_assert(0);
   }
-}
-
-// Objects compared with strings may involve calling a user-defined
-// __toString function.
-bool cmpOpTypesMayReenter(Opcode op, Type t0, Type t1) {
-  if (op == NSame || op == Same) return false;
-  assert(!t0.equals(Type::Gen) && !t1.equals(Type::Gen));
-  return (t0.maybe(Type::Obj) && t1.maybe(Type::Str)) ||
-         (t0.maybe(Type::Str) && t1.maybe(Type::Obj));
 }
 
 bool isRefCounted(SSATmp* tmp) {

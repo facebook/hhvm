@@ -6132,7 +6132,14 @@ OPTBLD_INLINE void VMExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func)) {
     Native::callFunc(func, nullptr, args, numArgs, ret);
   } else {
-    ret.m_type = KindOfNull;
+    bool zendParamMode = func->methInfo() &&
+                         func->methInfo()->attribute & ClassInfo::ZendParamMode;
+    if (zendParamMode) {
+      ret.m_type = KindOfNull;
+    } else {
+      ret.m_type = KindOfBoolean;
+      ret.m_data.num = 0;
+    }
   }
 
   frame_free_args(args, numNonDefault);

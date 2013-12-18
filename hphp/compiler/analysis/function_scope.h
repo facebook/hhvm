@@ -112,6 +112,7 @@ public:
   void setDirectInvoke() { m_directInvoke = true; }
   bool hasDirectInvoke() const { return m_directInvoke; }
   bool isZendParamMode() const;
+  bool isZendParamModeFalse() const;
   bool mayContainThis();
   bool isClosure() const;
   bool isGenerator() const { return m_generator; }

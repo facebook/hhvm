@@ -145,6 +145,7 @@ define('ContextSensitive',               1 << 26);
 define('NoDefaultSweep',                 1 << 27);
 define('IsSystem',                       1 << 28);
 define('IsTrait',                        1 << 29);
+define('ZendParamModeFalse',             1 << 30);
 define('NeedsActRec',                    1 << 31);
 
 // Mask for checking the flags related to variable arguments

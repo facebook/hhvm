@@ -187,7 +187,7 @@ static void outputConstants(const char *outputfn,
                         RefVariableArguments|MixedVariableArguments|\
                         NeedsActRec|FunctionIsFoldable|\
                         NoInjection|NoEffect|HasOptFunction|ZendParamMode|\
-                        ZendCompat)
+                        ZendParamModeFalse|ZendCompat)
 
 static void writeFunction(std::ostream& out, const PhpFunc& func) {
   auto flags = (func.flags() & FUNC_FLAG_MASK) | IsSystem | IsNothing;

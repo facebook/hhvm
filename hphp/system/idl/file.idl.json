@@ -1857,6 +1857,7 @@
             "name": "chdir",
             "desc": "Changes PHP's current directory to directory.",
             "flags": [
+                "ZendParamModeFalse"
             ],
             "return": {
                 "type": "Boolean",

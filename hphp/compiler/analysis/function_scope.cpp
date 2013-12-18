@@ -295,6 +295,10 @@ bool FunctionScope::isZendParamMode() const {
   return m_attributeClassInfo & ClassInfo::ZendParamMode;
 }
 
+bool FunctionScope::isZendParamModeFalse() const {
+  return m_attributeClassInfo & ClassInfo::ZendParamModeFalse;
+}
+
 bool FunctionScope::isPublic() const {
   return m_modifiers && m_modifiers->isPublic();
 }
@@ -670,8 +674,8 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
     /**
      * Duplicate the logic of getParamType(i), w/o the mutation
      */
-    TypePtr paramType(i < m_maxParam && !isZendParamMode() ?
-                      m_paramTypes[i] : TypePtr());
+    TypePtr paramType(i < m_maxParam && !isZendParamMode() &&
+                      !isZendParamModeFalse() ? m_paramTypes[i] : TypePtr());
     if (!paramType) paramType = Type::Some;
     if (valid && !canSetParamType && i < m_maxParam &&
         (!Option::HardTypeHints || !m_paramTypeSpecs[i])) {

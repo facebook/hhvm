@@ -78,6 +78,7 @@ public:
     IsSystem               = (1 << 28), //    x             x
 
     IsTrait                = (1 << 29), //    x
+    ZendParamModeFalse     = (1 << 30), //                  x      x
     NeedsActRec            = (1u << 31),//                  x      x
   };
 

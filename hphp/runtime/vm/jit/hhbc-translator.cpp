@@ -2871,7 +2871,9 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   //    would be overkill.
   spillStack();
 
-  bool zendParamMode = callee->methInfo()->attribute & ClassInfo::ZendParamMode;
+  bool zendParamMode =
+    callee->methInfo()->attribute &
+    (ClassInfo::ZendParamMode | ClassInfo::ZendParamModeFalse);
 
   // Convert types if needed.
   for (int i = 0; i < numNonDefault; i++) {

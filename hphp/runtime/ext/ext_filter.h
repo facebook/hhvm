@@ -27,8 +27,6 @@ Variant f_filter_list();
 Variant f_filter_id(const String& filtername);
 Variant f_filter_var(CVarRef variable, int64_t filter = 516,
                      CVarRef options = empty_array);
-Array HHVM_FUNCTION(__SystemLib_filter_input_get_var, int64_t variable_name);
-void HHVM_FUNCTION(_filter_snapshot_globals);
 
 extern const int64_t k_INPUT_POST;
 extern const int64_t k_INPUT_GET;

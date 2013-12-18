@@ -145,8 +145,9 @@ void Extension::LoadModules(Hdf hdf) {
 
   // Invoke Extension::moduleLoad() callbacks
   assert(s_registered_extensions);
-  for (auto& kv : *s_registered_extensions) {
-    kv.second->moduleLoad(hdf);
+  for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
+       iter != s_registered_extensions->end(); ++iter) {
+    iter->second->moduleLoad(hdf);
   }
 }
 
@@ -162,24 +163,11 @@ void Extension::InitModules() {
     RuntimeOption::EvalDumpBytecode = wasDB;
   };
   SystemLib::s_inited = false;
-  for (auto& kv : *s_registered_extensions) {
-    kv.second->moduleInit();
+  for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
+       iter != s_registered_extensions->end(); ++iter) {
+    iter->second->moduleInit();
   }
   s_modules_initialised = true;
-}
-
-void Extension::RequestInitModules() {
-  assert(s_registered_extensions);
-  for (auto& kv : *s_registered_extensions) {
-    kv.second->requestInit();
-  }
-}
-
-void Extension::RequestShutdownModules() {
-  assert(s_registered_extensions);
-  for (auto& kv : *s_registered_extensions) {
-    kv.second->requestShutdown();
-  }
 }
 
 bool Extension::ModulesInitialised() {
@@ -188,8 +176,9 @@ bool Extension::ModulesInitialised() {
 
 void Extension::ShutdownModules() {
   assert(s_registered_extensions);
-  for (auto& kv : *s_registered_extensions) {
-    kv.second->moduleShutdown();
+  for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
+       iter != s_registered_extensions->end(); ++iter) {
+    iter->second->moduleShutdown();
   }
   s_registered_extensions->clear();
 }
@@ -217,11 +206,12 @@ Extension *Extension::GetExtension(const String& name) {
 Array Extension::GetLoadedExtensions() {
   assert(s_registered_extensions);
   Array ret = Array::Create();
-  for (auto& kv : *s_registered_extensions) {
-    if (!apcExtension::Enable && kv.second->m_name == s_apc) {
+  for (ExtensionMap::const_iterator iter = s_registered_extensions->begin();
+       iter != s_registered_extensions->end(); ++iter) {
+    if (!apcExtension::Enable && iter->second->m_name == s_apc) {
       continue;
     }
-    ret.append(kv.second->m_name);
+    ret.append(iter->second->m_name);
   }
   return ret;
 }

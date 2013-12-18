@@ -7603,7 +7603,6 @@ void VMExecutionContext::requestExit() {
   profileRequestEnd();
   EventHook::Disable();
   EnvConstants::requestExit();
-  Extension::RequestShutdownModules();
 
   if (m_globalVarEnv) {
     VarEnv::destroy(m_globalVarEnv);

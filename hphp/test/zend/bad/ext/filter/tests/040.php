@@ -1,11 +1,9 @@
 <?php
 parse_str("a=1&b=2&c=0", $_GET);
 $_REQUEST = array_merge($_REQUEST, $_GET);
-_filter_snapshot_globals();
 
 parse_str("ap[]=1&bp=test&cp=", $_POST);
 $_REQUEST = array_merge($_REQUEST, $_POST);
-_filter_snapshot_globals();
 
 
 var_dump(filter_has_var());

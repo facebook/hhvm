@@ -1,7 +1,6 @@
 <?php
 parse_str("PHPSESSID=rfc1867-tests", $_GET);
 $_REQUEST = array_merge($_REQUEST, $_GET);
-_filter_snapshot_globals();
 
 session_start();
 var_dump(session_id());

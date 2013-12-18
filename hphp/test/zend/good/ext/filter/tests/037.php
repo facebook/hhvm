@@ -1,7 +1,6 @@
 <?php
 parse_str("a=1&b=2", $_GET);
 $_REQUEST = array_merge($_REQUEST, $_GET);
-_filter_snapshot_globals();
 
 function myfunc($val) {
 	return $val . '_callback';

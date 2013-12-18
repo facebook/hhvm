@@ -1,7 +1,6 @@
 <?php
 parse_str("dummy=1", $_GET);
 $_REQUEST = array_merge($_REQUEST, $_GET);
-_filter_snapshot_globals();
 
 header("Vary: Cookie");
 ob_start("ob_gzhandler");

@@ -22,10 +22,26 @@
    *                     the variable is not set and NULL if the filter
    *                     fails.
    */
-function filter_input(int $type, $variable_name, $filter = FILTER_DEFAULT,
+function filter_input($type, $variable_name, $filter = FILTER_DEFAULT,
                       $options = null) {
-  $var = __SystemLib_filter_input_get_var($type);
-
+  $var = null;
+  switch ($type) {
+    case INPUT_GET:
+      $var = $_GET;
+      break;
+    case INPUT_POST:
+      $var = $_POST;
+      break;
+    case INPUT_COOKIE:
+      $var = $_COOKIE;
+      break;
+    case INPUT_SERVER:
+      $var = $_SERVER;
+      break;
+    case INPUT_ENV:
+      $var = $_ENV;
+      break;
+  }
   if (!isset($var[$variable_name])) {
     if (is_array($options) && isset($options['options']) &&
         is_array($options['options']) &&
@@ -36,14 +52,3 @@ function filter_input(int $type, $variable_name, $filter = FILTER_DEFAULT,
   }
   return filter_var($var[$variable_name], $filter, $options);
 }
-
-<<__Native>>
-function __SystemLib_filter_input_get_var(int $variable_name) : array;
-
-/**
- * You almost never want this. It acts as though the request's globals
- * should be snapshotted now. Useful for unit tests that want to muck with
- * globals, and then lock them in.
- */
-<<__Native>>
-function _filter_snapshot_globals() : void;

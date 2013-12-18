@@ -7,7 +7,5 @@ int(6)
 bool(true)
 bool(false)
 bool(true)
-HipHop Notice: Array to string conversion in %s on line %d
 string(5) "Array"
-HipHop Notice: Array to string conversion in %s on line %d
 string(5) "Array"

@@ -2,16 +2,13 @@ bool(true)
 bool(true)
 bool(true)
 bool(false)
-HipHop Notice: Array to string conversion in %s on line %d
 Traversable Array 
 array(0) {
 }
-HipHop Notice: Array to string conversion in %s on line %d
 KeyedTraversable Array 
 array(0) {
 }
-HipHop Notice: Array to string conversion in %s on line %d
 Indexish Array 
 array(0) {
 }
-HipHop Fatal error: Argument 1 passed to ifoo() must be an instance of IFoo, array given in %s/test/slow/array_iterator/array-traversable.php on line 20
+HipHop Fatal error: Argument 1 passed to ifoo() must be an instance of IFoo, array given in %s/test/slow/array_iterator/array-traversable.php on line 23

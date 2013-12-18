@@ -26,8 +26,7 @@ array (
   '\\a' => '\\a',
 )falsearray (
   '' . "\0" . '' => '' . "\0" . '',
-)11truetrue111HipHop Notice: Array to string conversion in %s on line 25
-'Array''0x10''' . "\0" . ''array (
+)11truetrue111'Array''0x10''' . "\0" . ''array (
   '' . "\0" . '' => 1,
 )array (
   '' . "\0" . '' => '' . "\0" . '',

@@ -1,6 +1,5 @@
 v: 0
 v: 1
-HipHop Notice: Array to string conversion in %s
 v: Array
 v: 4
 array(4) {
@@ -15,7 +14,6 @@ array(4) {
 }
 k: 0, v: 0
 k: 1, v: 1
-HipHop Notice: Array to string conversion in %s
 k: 2, v: Array
 k: 3, v: 4
 array(4) {

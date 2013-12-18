@@ -70,43 +70,6 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   return ret;
 }
 
-TCA emitUnaryStub(CodeBlock& cb, CppCall c) {
-  Asm a { cb };
-
-  // These dtor stubs are meant to be called with the call
-  // instruction, unlike most translator code.
-  moveToAlign(cb);
-  TCA start = cb.frontier();
-  /*
-   * Preserve most caller-saved regs. The calling code has already
-   * preserved regs in `alreadySaved'; we push the rest of the caller
-   * saved regs and rbp.  It should take 9 qwords in total, and the
-   * incoming call instruction made it 10.  This is an even number of
-   * pushes, so we preserve the SSE-friendliness of our execution
-   * environment (without real intervention from PhysRegSaverParity).
-   *
-   * Note that we don't need to clean all registers because the only
-   * reason we could need those locations written back is if stack
-   * unwinding were to happen.  These stubs can re-enter due to user
-   * destructors, but exceptions are not allowed to propagate out of
-   * those, so it's not a problem.
-   */
-  a.    push (rbp); // {
-  a.    movq (rsp, rbp);
-  {
-    // We've made a call instruction, and pushed 1 arg onto the stack,
-    // so the stack is currently even.
-    constexpr auto parity = 0;
-    // The callNAryStub has already saved the first arg reg on a.
-    RegSet s = kGPCallerSaved - RegSet(argNumToRegName[0]);
-    PhysRegSaverParity rs(parity, a, s);
-    emitCall(a, c);
-  }
-  a.    pop  (rbp);  // }
-  a.    ret  ();
-  return start;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void emitCallToExit(UniqueStubs& uniqueStubs) {
@@ -190,31 +153,6 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   emitServiceReq(tx64->stubsCode, REQ_STACK_OVERFLOW);
 
   uniqueStubs.add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
-}
-
-void emitDtorStubs(UniqueStubs& uniqueStubs) {
-  auto const strDtor = uniqueStubs.add("dtorStr", emitUnaryStub(
-    tx64->mainCode, CppCall(getMethodPtr(&StringData::release))
-  ));
-  auto const arrDtor = uniqueStubs.add("dtorArr", emitUnaryStub(
-    tx64->mainCode, CppCall(getVTableOffset(&HphpArray::release))
-  ));
-  auto const objDtor = uniqueStubs.add("dtorObj", emitUnaryStub(
-    tx64->mainCode, CppCall(getMethodPtr(&ObjectData::release))
-  ));
-  auto const resDtor = uniqueStubs.add("dtorRes", emitUnaryStub(
-    tx64->mainCode, CppCall(getMethodPtr(&ResourceData::release))
-  ));
-  auto const refDtor = uniqueStubs.add("dtorRef", emitUnaryStub(
-    tx64->mainCode, CppCall(getMethodPtr(&RefData::release))
-  ));
-
-  uniqueStubs.dtorStubs[0] = nullptr;
-  uniqueStubs.dtorStubs[typeToDestrIndex(BitwiseKindOfString)] = strDtor;
-  uniqueStubs.dtorStubs[typeToDestrIndex(KindOfArray)]         = arrDtor;
-  uniqueStubs.dtorStubs[typeToDestrIndex(KindOfObject)]        = objDtor;
-  uniqueStubs.dtorStubs[typeToDestrIndex(KindOfResource)]      = resDtor;
-  uniqueStubs.dtorStubs[typeToDestrIndex(KindOfRef)]           = refDtor;
 }
 
 void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
@@ -539,7 +477,6 @@ UniqueStubs emitUniqueStubs() {
     emitResumeHelpers,
     emitStackOverflowHelper,
     emitDefClsHelper,
-    emitDtorStubs,
     emitFreeLocalsHelpers,
     emitFuncPrologueRedispatch,
     emitFCallArrayHelper,

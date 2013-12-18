@@ -94,9 +94,6 @@ void emitDefClsHelper(UniqueStubs& us) {
   us.add("defClsHelper", us.defClsHelper);
 }
 
-void emitDtorStubs(UniqueStubs& us) {
-}
-
 void emitFreeLocalsHelpers(UniqueStubs& us) {
   MacroAssembler a { tx64->mainCode };
 
@@ -220,7 +217,6 @@ UniqueStubs emitUniqueStubs() {
     emitResumeHelpers,
     emitStackOverflowHelper,
     emitDefClsHelper,
-    emitDtorStubs,
     emitFreeLocalsHelpers,
     emitFuncPrologueRedispatch,
     emitFCallArrayHelper,

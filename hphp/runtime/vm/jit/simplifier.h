@@ -149,6 +149,24 @@ private:
   SSATmp* simplifyStRef(IRInstruction*);
   SSATmp* simplifyAssertNonNull(IRInstruction*);
 
+
+  template <class Oper>
+  SSATmp* simplifyConst(SSATmp* src1, SSATmp* src2, Oper op);
+
+  template <class Oper>
+  SSATmp* simplifyCommutative(SSATmp* src1,
+                              SSATmp* src2,
+                              Opcode opcode,
+                              Oper op);
+
+  template <class OutOper, class InOper>
+  SSATmp* simplifyDistributive(SSATmp* src1,
+                               SSATmp* src2,
+                               Opcode outcode,
+                               Opcode incode,
+                               OutOper outop,
+                               InOper inop);
+
   template<class Oper>
   SSATmp* simplifyShift(SSATmp* src1, SSATmp* src2, Oper op);
   template<class Oper> SSATmp* simplifyRoundCommon(IRInstruction*, Oper);

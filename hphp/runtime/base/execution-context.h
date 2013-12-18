@@ -273,6 +273,7 @@ public:
   void registerRequestEventHandler(RequestEventHandler *handler);
   void registerShutdownFunction(CVarRef function, Array arguments,
                                 ShutdownType type);
+  Variant popShutdownFunction(ShutdownType type);
   void onRequestShutdown();
   void onShutdownPreSend();
   void onShutdownPostSend();

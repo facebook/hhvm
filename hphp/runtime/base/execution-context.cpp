@@ -424,6 +424,14 @@ void BaseExecutionContext::registerShutdownFunction(CVarRef function,
   funcs.append(callback);
 }
 
+Variant BaseExecutionContext::popShutdownFunction(ShutdownType type) {
+  Variant& funcs = m_shutdowns.lvalAt(type);
+  if (!funcs.isArray()) {
+    return uninit_null();
+  }
+  return funcs.pop();
+}
+
 Variant BaseExecutionContext::pushUserErrorHandler(CVarRef function,
                                                    int error_types) {
   Variant ret;

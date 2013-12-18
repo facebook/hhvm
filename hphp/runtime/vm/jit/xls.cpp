@@ -103,7 +103,7 @@ struct Interval {
   // mutators
   void add(LiveRange r);
   void setStart(unsigned start);
-  void addUse(unsigned pos) { uses.push_front(Use{pos}); }
+  void addUse(unsigned pos) { uses.push_back(Use{pos}); }
   Interval* split(unsigned pos);
   // register/spill assignment
   RegPair regs() const;
@@ -120,8 +120,8 @@ public:
   RegSet prefer;
   SSATmp* tmp { nullptr };
   Interval* parent { nullptr }; // if this is a split-off child
-  smart::list<LiveRange> ranges;
-  smart::list<Use> uses;
+  smart::vector<LiveRange> ranges;
+  smart::vector<Use> uses;
   smart::list<Interval> children; // if parent was split
   PhysLoc info;  // current location assigned to this interval
   PhysLoc spill; // spill location (parent only)
@@ -223,33 +223,35 @@ Interval::Interval(Interval* parent)
 
 // Add r to this interval, merging r with any existing overlapping ranges
 void Interval::add(LiveRange r) {
-  while (!ranges.empty() && r.contains(ranges.front())) {
-    ranges.pop_front();
+  while (!ranges.empty() && r.contains(ranges.back())) {
+    ranges.pop_back();
   }
   if (ranges.empty()) {
-    return ranges.push_front(r);
+    return ranges.push_back(r);
   }
-  auto& f = ranges.front();
-  if (f.contains(r)) return;
-  if (r.end >= f.start) {
-    f.start = r.start;
+  auto& first = ranges.back();
+  if (first.contains(r)) return;
+  if (r.end >= first.start) {
+    first.start = r.start;
   } else {
-    ranges.push_front(r);
+    ranges.push_back(r);
   }
-  assert(checkInvariants());
 }
 
-// Update the start-position of the frontmost range in this interval
+// Update the start-position of the earliest range in this interval,
+// which is ranges.back() during buildIntervals().
 void Interval::setStart(unsigned start) {
-  assert(!ranges.empty() && ranges.front().contains(start));
-  ranges.front().start = start;
+  assert(!ranges.empty() && ranges.back().contains(start));
+  ranges.back().start = start;
 }
 
 // Return true if one of the ranges in this interval includes pos
 bool Interval::covers(unsigned pos) const {
-  for (auto r : ranges) {
-    if (pos < r.start) return false;
-    if (pos < r.end) return true;
+  if (pos >= start() && pos < end()) {
+    for (auto r : ranges) {
+      if (pos < r.start) return false;
+      if (pos < r.end) return true;
+    }
   }
   return false;
 }
@@ -293,7 +295,6 @@ unsigned Interval::nextIntersect(Interval* ivl) const {
 // a location that ensures both shorter intervals are nonempty.
 // Pos must also be even, indicating a position between instructions.
 Interval* Interval::split(unsigned pos) {
-  assert(checkInvariants());
   assert(pos > start() && pos < end());
   auto leader = this->leader();
   auto iter = leader->children.begin();
@@ -302,20 +303,22 @@ Interval* Interval::split(unsigned pos) {
   }
   iter = leader->children.emplace(iter, leader);
   Interval* child = &(*iter);
-  // move r to the first range we want in child, splitting a range if needed.
-  auto r = ranges.begin();
-  while (pos >= r->end) r++;
-  if (pos > r->start) { // split r at pos
-    child->ranges.push_back(LiveRange(pos, r->end));
-    r->end = pos;
-    r++;
+  // advance r1 to the first range we want in child; maybe split a range.
+  auto r1 = ranges.begin(), r2 = ranges.end();
+  while (r1->end <= pos) r1++;
+  if (pos > r1->start) { // split r at pos
+    child->ranges.push_back(LiveRange(pos, r1->end));
+    r1->end = pos;
+    r1++;
   }
-  child->ranges.splice(child->ranges.end(), ranges, r, ranges.end());
-  // move u to the first use position in child
-  auto u = uses.begin(), uses_end = uses.end();
-  for (; u != uses_end && pos > u->pos; ++u) {}
-  child->uses.splice(child->uses.end(), uses, u, uses_end);
-  assert(child->checkInvariants());
+  child->ranges.insert(child->ranges.end(), r1, r2);
+  ranges.erase(r1, r2);
+  // advance u1 to the first use position in child, then copy u1..end to child.
+  auto u1 = uses.begin(), u2 = uses.end();
+  while (u1 != u2 && u1->pos < pos) u1++;
+  child->uses.insert(child->uses.end(), u1, u2);
+  uses.erase(u1, u2);
+  assert(leader->checkInvariants() && child->checkInvariants());
   return child;
 }
 
@@ -530,20 +533,34 @@ void XLS::buildIntervals() {
     }
     m_liveIn[block] = live;
   }
-  if (dumpIREnabled()) {
-    print(" after building intervals ");
-  }
   // Implement stress mode by blocking more registers.
   stress += RuntimeOption::EvalHHIRNumFreeRegs;
   for (auto r : m_blocked) {
-    if (m_blocked[r].start() > 0) {
-      // if r is not already blocked
-      if (stress > 0) {
-        stress--;
-      } else {
-        m_blocked[r].add(LiveRange(0, kMaximalPos));
-      }
+    auto& blocked = m_blocked[r];
+    if (blocked.empty() || blocked.start() == 0) continue;
+    // r is not already blocked
+    if (stress > 0) {
+      stress--;
+      std::reverse(blocked.ranges.begin(), blocked.ranges.end());
+    } else {
+      blocked.add(LiveRange(0, kMaximalPos));
+      assert(blocked.ranges.size() == 1);
     }
+  }
+  for (auto r : m_scratch) {
+    auto& scratch = m_scratch[r];
+    if (scratch.empty()) continue;
+    std::reverse(scratch.ranges.begin(), scratch.ranges.end());
+  }
+  // We built the use list of each interval by appending.  Now reverse those
+  // lists so they are in forwards order.
+  for (auto ivl : m_intervals) {
+    if (!ivl) continue;
+    std::reverse(ivl->uses.begin(), ivl->uses.end());
+    std::reverse(ivl->ranges.begin(), ivl->ranges.end());
+  }
+  if (dumpIREnabled()) {
+    print(" after building intervals ");
   }
 }
 

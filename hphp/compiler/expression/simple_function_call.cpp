@@ -545,7 +545,9 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
       if (!ok) {
-        Compiler::Error(Compiler::UnknownFunction, shared_from_this());
+        if (m_classScope || !Unit::lookupFunc(String(m_name).get())) {
+          Compiler::Error(Compiler::UnknownFunction, shared_from_this());
+        }
       }
     }
   }
@@ -1632,4 +1634,3 @@ ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
 }
 
 }
-

@@ -447,7 +447,11 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     if (b->fallthrough) {
       if (boost::next(blockIt) == endBlockIt || blockIt[1] != b->fallthrough) {
-        emit_inst(bc::Jmp { b->fallthrough });
+        if (b->fallthroughNS) {
+          emit_inst(bc::JmpNS { b->fallthrough });
+        } else {
+          emit_inst(bc::Jmp { b->fallthrough });
+        }
       }
     }
 

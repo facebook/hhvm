@@ -92,9 +92,10 @@ struct Block {
    * Edges coming out of blocks are repesented in three ways:
    *
    *  - fallthrough edges (the end of the block unconditionally jumps
-   *    to the named block
+   *    to the named block).  If fallthroughNS is true, this edge
+   *    represents a no-surprise jump.
    *
-   *  - taken edges (these are encoded in the last instruction in hhbcs)
+   *  - Taken edges (these are encoded in the last instruction in hhbcs).
    *
    *  - factoredExits (these represent edges traversed for exceptions
    *    mid-block)
@@ -104,6 +105,7 @@ struct Block {
    * Programs" (http://dl.acm.org/citation.cfm?id=316171).
    */
   borrowed_ptr<Block> fallthrough;
+  bool fallthroughNS = false;
   std::vector<borrowed_ptr<Block>> factoredExits;
 };
 

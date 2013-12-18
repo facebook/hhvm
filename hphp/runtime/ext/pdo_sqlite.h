@@ -43,6 +43,7 @@ public:
   PDOSqliteConnection();
   virtual ~PDOSqliteConnection();
   virtual bool create(CArrRef options);
+  virtual void sweep();
 
   int handleError(const char *file, int line, PDOStatement *stmt = nullptr);
 

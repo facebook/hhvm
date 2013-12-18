@@ -206,11 +206,20 @@ bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
   // This limits the duration of profiling.  For
   // non-retranslate-triggering SrcKeys, whose profiling translations
   // only increment a counter, it's OK to emit them past the
-  // EvalJitProfileRequests threshold as long as we haven't
+  // EvalJitProfileRequests threshold as long as we're already
+  // profiling this function (next check below) but haven't
   // retranslated this function yet (checked above).
   bool triggersRetrans = sk.func()->isEntry(sk.offset());
   if (triggersRetrans &&
       requestCount() > RuntimeOption::EvalJitProfileRequests) {
+    return false;
+  }
+
+  // For translations that don't trigger a retranslation, only emit
+  // them if we've already generated a retranslation-triggering
+  // translation for its function.
+  if (!triggersRetrans &&
+      !profData()->profiling(sk.getFuncId())) {
     return false;
   }
 
@@ -293,6 +302,7 @@ TCA TranslatorX64::retranslateOpt(TransID transId, bool align) {
 
   for (auto region : regions) {
     m_mode = TransOptimize;
+    always_assert(region->blocks.size() > 0);
     SrcKey regionSk = region->blocks[0]->start();
     auto translArgs = TranslArgs(regionSk, align).region(region);
     if (setFuncBody && regionSk.offset() == func->base()) {
@@ -632,19 +642,13 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   // Do a quick test before grabbing the write lease
   TCA prologue;
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
+
+  Offset entry = func->getEntryForNumArgs(nPassed);
+  SrcKey funcBody(func, entry);
+
   if (func->isClonedClosure()) {
     assert(ar);
-    const Func::ParamInfoVec& paramInfo = func->params();
-    Offset entry = func->base();
-    for (int i = nPassed; i < numParams; ++i) {
-      const Func::ParamInfo& pi = paramInfo[i];
-      if (pi.hasDefaultValue()) {
-        entry = pi.funcletOff();
-        break;
-      }
-    }
     interp_set_regs(ar, (Cell*)ar - func->numSlotsInFrame(), entry);
-    SrcKey funcBody(func, entry);
     TCA tca = getTranslation(TranslArgs(funcBody, false));
     tl_regState = VMRegState::DIRTY;
     if (tca) {
@@ -664,8 +668,7 @@ TranslatorX64::getFuncPrologue(Func* func, int nPassed, ActRec* ar) {
   // We're comming from a BIND_CALL service request, so enable
   // profiling if we haven't optimized the function entry yet.
   assert(m_mode == TransInvalid || m_mode == TransPrologue);
-  if (m_mode == TransInvalid && func->shouldPGO() &&
-      !profData()->optimized(func->getFuncId())) {
+  if (m_mode == TransInvalid && profileSrcKey(funcBody)) {
     m_mode = TransProflogue;
   } else {
     m_mode = TransPrologue;
@@ -1288,10 +1291,11 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
         // regenerated yet, then save toSmash as a caller to the
         // prologue, so that it can later be smashed to call a new
         // prologue when it's generated.
-        if (func->shouldPGO() && !profData()->optimized(func->getFuncId())) {
-          int calleeNumParams = func->numParams();
-          int calledPrologNumArgs = nArgs <= calleeNumParams ?
-            nArgs :  calleeNumParams + 1;
+        int calleeNumParams = func->numParams();
+        int calledPrologNumArgs = (nArgs <= calleeNumParams ?
+                                   nArgs :  calleeNumParams + 1);
+        SrcKey calleeSK = {func, func->getEntryForNumArgs(calledPrologNumArgs)};
+        if (profileSrcKey(calleeSK)) {
           if (isImmutable) {
             m_profData->addPrologueMainCaller(func, calledPrologNumArgs,
                                               toSmash);
@@ -1947,6 +1951,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
   const SrcKey &sk = t.m_sk;
   SrcRec& srcRec = *getSrcRec(sk);
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
+  bool profilingFunc = false;
 
   assert(srcRec.inProgressTailJumps().size() == 0);
   try {
@@ -1964,6 +1969,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       if (m_mode == TransProfile) {
         if (t.func()->isEntry(sk.offset())) {
           ht.emitCheckCold(m_profData->curTransID());
+          profilingFunc = true;
         } else {
           ht.emitIncProfCounter(m_profData->curTransID());
         }
@@ -2026,6 +2032,7 @@ TranslatorX64::translateTracelet(Tracelet& t) {
       traceCodeGen();
       TRACE(1, "HHIR: SUCCEEDED to generate code for Translation %d\n\n\n",
             getCurrentTransID());
+      if (profilingFunc) profData()->setProfiling(t.func()->getFuncId());
       return Success;
     } catch (JIT::FailedCodeGen& fcg) {
       // Code-gen failed. Search for the bytecode instruction that caused the

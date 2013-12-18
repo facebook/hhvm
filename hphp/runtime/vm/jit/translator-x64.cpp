@@ -1087,10 +1087,10 @@ struct DepthGuard { bool depthOne() const { return false; } };
  * enterTCHelper is a handwritten assembly function that transfers control in
  * and out of the TC.
  */
-static_assert(rVmSp == rbx &&
-              rVmFp == rbp &&
-              rVmTl == r12 &&
-              rStashedAR == r15,
+static_assert(X64::rVmSp == rbx &&
+              X64::rVmFp == rbp &&
+              X64::rVmTl == r12 &&
+              X64::rStashedAR == r15,
               "__enterTCHelper needs to be modified to use the correct ABI");
 static_assert(JIT::REQ_BIND_CALL == 0x1,
               "Update assembly test for REQ_BIND_CALL in __enterTCHelper");

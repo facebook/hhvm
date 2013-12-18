@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/reserved-stack.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace JIT { namespace X64 {
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -209,7 +209,7 @@ const RegSet kAllX64Regs = RegSet(kAllRegs).add(reg::r10)
 /* MInstrState is stored right above the reserved spill space on the C++
  * stack. */
 #define MISOFF(nm)                                         \
-  (offsetof(JIT::MInstrState, nm) + kReservedRSPSpillSpace)
+  (offsetof(JIT::MInstrState, nm) + X64::kReservedRSPSpillSpace)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -219,6 +219,6 @@ const size_t kReservedRSPTotalSpace       = RESERVED_STACK_TOTAL_SPACE;
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}}}
 
 #endif

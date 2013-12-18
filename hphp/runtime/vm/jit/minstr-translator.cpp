@@ -301,7 +301,7 @@ void HhbcTranslator::MInstrTranslator::emit() {
 // a null pointer if it's not needed.
 SSATmp* HhbcTranslator::MInstrTranslator::genMisPtr() {
   if (m_needMIS) {
-    return gen(LdAddr, m_misBase, cns(kReservedRSPSpillSpace));
+    return gen(LdAddr, m_misBase, cns(X64::kReservedRSPSpillSpace));
   } else {
     return gen(DefConst, Type::PtrToCell, ConstData(nullptr));
   }

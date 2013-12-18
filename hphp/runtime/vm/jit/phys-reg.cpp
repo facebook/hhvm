@@ -27,7 +27,7 @@ PhysRegSaverParity::PhysRegSaverParity(int parity, X64Assembler& as,
     : m_as(as)
     , m_regs(regs)
 {
-  auto xmm = regs & kXMMRegs;
+  auto xmm = regs & X64::kXMMRegs;
   auto gpr = regs - xmm;
   m_adjust = (parity & 0x1) == (gpr.size() & 0x1) ? 8 : 0;
   if (!xmm.empty()) {
@@ -56,7 +56,7 @@ PhysRegSaverParity::~PhysRegSaverParity() {
 }
 
 void PhysRegSaverParity::emitPops(X64Assembler& as, RegSet regs) {
-  auto xmm = regs & kXMMRegs;
+  auto xmm = regs & X64::kXMMRegs;
   auto gpr = regs - xmm;
   gpr.forEachR([&] (PhysReg pr) {
     as.    pop    (pr);

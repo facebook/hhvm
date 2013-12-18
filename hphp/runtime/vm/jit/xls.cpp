@@ -1272,9 +1272,9 @@ bool checkBlockOrder(IRUnit& unit, BlockList& blocks) {
 
 namespace {
 const Abi x64_abi {
-  kAllRegs - kXMMRegs, // general purpose
-  kAllRegs & kXMMRegs, // fp/simd
-  kCalleeSaved
+  X64::kAllRegs - X64::kXMMRegs, // general purpose
+  X64::kAllRegs & X64::kXMMRegs, // fp/simd
+  X64::kCalleeSaved
 };
 
 const Abi arm_abi {

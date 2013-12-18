@@ -352,8 +352,8 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
       for (SSATmp* src : inst.srcs()) {
         auto const &rs = regs[inst][src];
         if (!rs.spilled() &&
-            ((arch() == Arch::X64 && (rs.reg(0) == JIT::rVmSp ||
-                                      rs.reg(0) == JIT::rVmFp)) ||
+            ((arch() == Arch::X64 && (rs.reg(0) == X64::rVmSp ||
+                                      rs.reg(0) == X64::rVmFp)) ||
              (arch() == Arch::ARM && (rs.reg(0) == ARM::rVmSp ||
                                       rs.reg(0) == ARM::rVmFp)))) {
           // hack - ignore rbx and rbp

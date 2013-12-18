@@ -48,7 +48,7 @@ private:
   public:
     bool isReserved() const { return m_reserved; }
     bool isCallerSaved() const {
-      return kCallerSaved.contains(m_reg);
+      return X64::kCallerSaved.contains(m_reg);
     }
     bool isCalleeSaved() const { return !isCallerSaved(); }
     bool isAllocated() const { return m_ssaTmp != nullptr; }
@@ -209,7 +209,7 @@ private:
   smart::flat_map<IRTrace*, uint32_t> m_exitIds;
 };
 
-static_assert(kReservedRSPSpillSpace ==
+static_assert(X64::kReservedRSPSpillSpace ==
               NumPreAllocatedSpillLocs * sizeof(void*),
               "kReservedRSPSpillSpace changes require updates in "
               "LinearScan");
@@ -301,6 +301,7 @@ LinearScan::LinearScan(IRUnit& unit)
   }
 
   // Mark reserved regs.
+  using namespace X64;
   m_regs[rVmSp]  .m_reserved = true;
   m_regs[rsp]    .m_reserved = true;
   m_regs[rVmFp]  .m_reserved = true;
@@ -405,7 +406,7 @@ PhysReg forceAlloc(SSATmp& dst) {
            opc == CoerceStk ||
            opc == SideExitGuardStk  ||
            MInstrEffects::supported(opc));
-    return arch() == Arch::X64 ? rVmSp : ARM::rVmSp;
+    return arch() == Arch::X64 ? X64::rVmSp : ARM::rVmSp;
   }
 
   // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
@@ -413,7 +414,7 @@ PhysReg forceAlloc(SSATmp& dst) {
   bool abnormalFramePtr = opc == LdContActRec || opc == LdAFWHActRec;
 
   if (!abnormalFramePtr && dst.isA(Type::FramePtr)) {
-    return arch() == Arch::X64 ? rVmFp : ARM::rVmFp;
+    return arch() == Arch::X64 ? X64::rVmFp : ARM::rVmFp;
   }
 
   if (opc == DefMIStateBase) {
@@ -794,7 +795,7 @@ void LinearScan::computePreColoringHint() {
       }
       // Some opcodes (ex. SetM) can have more arguments than there are argument
       // registers. These will always spill so don't do any coloring for them.
-      if (reg >= kNumRegisterArgs) {
+      if (reg >= X64::kNumRegisterArgs) {
         break;
       }
     }
@@ -1458,8 +1459,8 @@ void LinearScan::PreColoringHint::clear() {
 // Provide a hint that (<tmp>, <index>) is used as the <argNum>-th arg
 // in next native.
 void LinearScan::PreColoringHint::add(SSATmp* tmp, uint32_t index, int argNum) {
-  assert(argNum < kNumRegisterArgs);
-  auto reg = argNumToRegName[argNum];
+  assert(argNum < X64::kNumRegisterArgs);
+  auto reg = X64::argNumToRegName[argNum];
   assert(reg != InvalidReg && reg.isGP());
   m_preColoredTmps[reg].first  = tmp;
   m_preColoredTmps[reg].second = index;

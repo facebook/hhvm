@@ -559,7 +559,7 @@ struct ArgGroup {
     // If there's exactly one register argument slot left, the whole TypedValue
     // goes on the stack instead of being split between a register and the
     // stack.
-    if (m_regArgs.size() == kNumRegisterArgs - 1) {
+    if (m_regArgs.size() == X64::kNumRegisterArgs - 1) {
       m_override = &m_stkArgs;
     }
     packed_tv ? type(tmp).ssa(tmp) : ssa(tmp).type(tmp);
@@ -581,7 +581,7 @@ private:
     // m_regArgs or m_stkArgs depending on how many args we've already pushed.
     ArgVec* args = m_override;
     if (!args) {
-      args = m_regArgs.size() < kNumRegisterArgs ? &m_regArgs : &m_stkArgs;
+      args = m_regArgs.size() < X64::kNumRegisterArgs ? &m_regArgs : &m_stkArgs;
     }
     args->push_back(arg);
   }

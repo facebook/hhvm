@@ -1053,6 +1053,9 @@ class Phar extends RecursiveDirectoryIterator
         if (strpos($filename, $prefix) === 0) {
           $entry = substr($filename, strlen($prefix) + 1);
           if (strlen($entry) > 0) {
+            if ($filename[strlen($prefix)] != '/') {
+              continue;
+            }
             $next_slash = strpos($entry, '/');
             if ($next_slash !== false) {
               $entry = substr($entry, 0, $next_slash);

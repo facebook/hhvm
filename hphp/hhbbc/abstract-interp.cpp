@@ -587,6 +587,10 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Exit&)  { popC(); push(TInitNull); }
   void operator()(const bc::Fatal&) { popC(); }
 
+  void operator()(const bc::JmpNS&) {
+    always_assert(0 && "blocks should not contain JmpNS instructions");
+  }
+
   void operator()(const bc::Jmp&) {
     always_assert(0 && "blocks should not contain Jmp instructions");
   }

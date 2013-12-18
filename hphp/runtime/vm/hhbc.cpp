@@ -360,7 +360,7 @@ int numSuccs(const Op* instr) {
     if (isSwitch(*instr)) {
       return *(int*)(instr + 1);
     }
-    if (*instr == OpJmp || *instr == OpIterBreak) return 1;
+    if (isUnconditionalJmp(*instr) || *instr == OpIterBreak) return 1;
     return 0;
   }
   if (instrJumpOffset(const_cast<Op*>(instr))) return 2;

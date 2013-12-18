@@ -4078,7 +4078,12 @@ OPTBLD_INLINE void VMExecutionContext::iopJmp(IOP_ARGS) {
   NEXT();
   DECODE_JMP(Offset, offset);
   jmpSurpriseCheck(offset);
+  pc += offset - 1;
+}
 
+OPTBLD_INLINE void VMExecutionContext::iopJmpNS(IOP_ARGS) {
+  NEXT();
+  DECODE_JMP(Offset, offset);
   pc += offset - 1;
 }
 
@@ -4141,9 +4146,6 @@ OPTBLD_INLINE void VMExecutionContext::iopIterBreak(IOP_ARGS) {
   NEXT();
   DECODE_ITER_LIST(iterTypeList, iterIdList, veclen);
   DECODE_JMP(Offset, offset);
-
-  jmpSurpriseCheck(offset); // we do this early so iterators are still dirty if
-                            // we have an exception
 
   FREE_ITER_LIST(iterTypeList, iterIdList, veclen);
   pc = savedPc + offset;

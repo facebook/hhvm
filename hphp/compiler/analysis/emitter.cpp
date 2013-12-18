@@ -7017,11 +7017,7 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
       m_curFunc->setParamFuncletOff(i, entryPoint.getAbsoluteOffset());
     }
   }
-  if (hasOptional) {
-    m_metaInfo.add(m_ue.bcPos(), Unit::MetaInfo::Kind::NoSurprise,
-                   false, 0, 0);
-    e.Jmp(topOfBody);
-  }
+  if (hasOptional) e.JmpNS(topOfBody);
 }
 
 void EmitterVisitor::emitPostponedCtors() {

@@ -1373,14 +1373,8 @@ void HhbcTranslator::emitCIterFree(uint32_t iterId) {
 }
 
 void HhbcTranslator::emitIterBreak(const ImmVector& iv,
-                                    uint32_t         offset,
-                                    bool             breakTracelet,
-                                    bool             noSurprise) {
-  bool backward = offset <= bcOff();
-  if (backward && !noSurprise) {
-    emitJmpSurpriseCheck();
-  }
-
+                                   uint32_t offset,
+                                   bool breakTracelet) {
   int iterIndex;
   for (iterIndex = 0; iterIndex < iv.size(); iterIndex += 2) {
     IterKind iterKind = (IterKind)iv.vec32()[iterIndex];
@@ -1897,10 +1891,10 @@ void HhbcTranslator::emitDup() {
 }
 
 void HhbcTranslator::emitJmp(int32_t offset,
-                             bool  breakTracelet,
-                             bool  noSurprise) {
+                             bool breakTracelet,
+                             bool noSurprise) {
   // If surprise flags are set, exit trace and handle surprise
-  bool backward = (uint32_t)offset <= bcOff();
+  bool backward = static_cast<uint32_t>(offset) <= bcOff();
   if (backward && !noSurprise) {
     emitJmpSurpriseCheck();
   }

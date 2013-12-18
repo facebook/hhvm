@@ -1295,6 +1295,12 @@ Jmp <rel offset>    []  ->  []
 
   Jump. Transfers control to the location specified by %1.
 
+JmpNS <rel offset>   []  ->  []
+
+  Jump, with no surprise flag checks.  This behaves identically to the Jmp
+  instruction, except that internal VM checks for things like OOM do not need
+  to be performed even if the offset is negative.
+
 JmpZ <rel offset>    [C]  ->  []
 
   Jump if zero. Conditionally transfers control to the location specified by %1

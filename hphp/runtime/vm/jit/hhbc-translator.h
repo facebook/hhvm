@@ -39,7 +39,6 @@ namespace HPHP {
 namespace JIT { struct PropInfo; }
 namespace JIT {
 
-
 //////////////////////////////////////////////////////////////////////
 
 struct EvalStack {
@@ -424,8 +423,7 @@ struct HhbcTranslator {
   void emitMIterFree(uint32_t iterId);
   void emitDecodeCufIter(uint32_t iterId, int targetOffset);
   void emitCIterFree(uint32_t iterId);
-  void emitIterBreak(const ImmVector& iv, uint32_t offset, bool breakTracelet,
-                      bool noSurprise);
+  void emitIterBreak(const ImmVector& iv, uint32_t offset, bool breakTracelet);
   void emitVerifyParamType(uint32_t paramId);
 
   // continuations

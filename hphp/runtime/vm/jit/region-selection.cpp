@@ -328,7 +328,7 @@ RegionDescPtr selectTraceletLegacy(Offset initSpOffset,
       curBlock->setParamByRef(sk, ni->preppedByRef);
     }
 
-    if (ni->next && ni->op() == OpJmp) {
+    if (ni->next && isUnconditionalJmp(ni->op())) {
       // A Jmp that isn't the final instruction in a Tracelet means we traced
       // through a forward jump in analyze. Update sk to point to the next NI
       // in the stream.

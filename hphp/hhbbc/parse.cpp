@@ -550,7 +550,7 @@ void populate_block(ParseUnitState& puState,
    * Just convert the opcode to a Nop, because this could create an
    * empty block and we have an invariant that no blocks are empty.
    */
-  if (blk.hhbcs.back().op == Op::Jmp) {
+  if (isUnconditionalJmp(blk.hhbcs.back().op)) {
     blk.fallthrough = blk.hhbcs.back().Jmp.target;
     blk.hhbcs.back() = bc_with_loc(blk.hhbcs.back().srcLoc, bc::Nop{});
   }

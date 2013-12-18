@@ -116,11 +116,6 @@ class NormalizedInstruction {
   bool guardedCls:1;
 
   /*
-   * dont check the surprise flag
-   */
-  bool noSurprise:1;
-
-  /*
    * instruction is statically known to have no effect, e.g. unboxing a Cell
    */
   bool noOp:1;

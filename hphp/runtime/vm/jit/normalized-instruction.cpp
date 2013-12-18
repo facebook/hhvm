@@ -37,7 +37,6 @@ NormalizedInstruction::NormalizedInstruction()
     , ignoreInnerType(false)
     , guardedThis(false)
     , guardedCls(false)
-    , noSurprise(false)
     , noOp(false)
     , interp(false)
     , inlineReturn(false) {

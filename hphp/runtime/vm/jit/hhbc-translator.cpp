@@ -3488,11 +3488,18 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   auto const& tc = func->params()[paramId].typeConstraint();
   auto locVal = ldLoc(paramId, DataTypeSpecific);
   Type locType = locVal->type().unbox();
-  always_assert_log(locType.isKnownDataType(),
-  [&] {
-    return folly::format("Bad type {} for local {}:\n\n{}\n",
-                         locType, paramId, m_tb->trace()->toString()).str();
-  });
+  if (!locType.isKnownDataType()) {
+    // This is supposed to be impossible, but it does happen in a rare case
+    // with the legacy region selector. Until it's figured out, punt in release
+    // builds. t3412704
+    assert_log(false,
+    [&] {
+      return folly::format("Bad type {} for local {}:\n\n{}\n",
+                           locType, paramId, m_tb->trace()->toString()).str();
+    });
+    emitInterpOne(Type::None, 0);
+    return;
+  }
 
   if (!RuntimeOption::EvalCheckExtendedTypeHints && tc.isExtended()) {
     return;

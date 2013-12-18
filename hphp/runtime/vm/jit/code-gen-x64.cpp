@@ -4332,8 +4332,8 @@ void CodeGenerator::cgStoreTypedValue(BaseRef dst, SSATmp* src) {
   auto srcReg0 = curOpd(src).reg(0);
   auto srcReg1 = curOpd(src).reg(1);
   if (srcReg0.isSIMD()) {
-    // Whole typed value is stored in single XMM reg srcReg0
-    assert(RuntimeOption::EvalHHIRAllocXMMRegs);
+    // Whole typed value is stored in single SIMD reg srcReg0
+    assert(RuntimeOption::EvalHHIRAllocSIMDRegs);
     assert(srcReg1 == InvalidReg);
     m_as.movdqa(srcReg0, loadTVData(dst));
     return;
@@ -4432,8 +4432,8 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst,
 
   if (valueDstReg.isSIMD()) {
     assert(!label);
-    // Whole typed value is stored in single XMM reg valueDstReg
-    assert(RuntimeOption::EvalHHIRAllocXMMRegs);
+    // Whole typed value is stored in single SIMD reg valueDstReg
+    assert(RuntimeOption::EvalHHIRAllocSIMDRegs);
     assert(typeDstReg == InvalidReg);
     m_as.movdqa(loadTVData(ref), valueDstReg);
     return;

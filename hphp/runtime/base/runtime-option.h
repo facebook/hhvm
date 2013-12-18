@@ -422,7 +422,7 @@ public:
   F(bool, HHIREnableCalleeSavedOpt,    true)                            \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
-  F(bool, HHIRAllocXMMRegs,            true)                            \
+  F(bool, HHIRAllocSIMDRegs,           true)                            \
   /* Region compiler flags */                                           \
   F(bool,     JitPGO,                  pgoDefault())                    \
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \

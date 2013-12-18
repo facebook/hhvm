@@ -324,7 +324,7 @@ LinearScan::LinearScan(IRUnit& unit)
 }
 
 PhysReg::Type LinearScan::getRegType(const SSATmp* tmp, int locIdx) const {
-  if (!RuntimeOption::EvalHHIRAllocXMMRegs) return PhysReg::GP;
+  if (!RuntimeOption::EvalHHIRAllocSIMDRegs) return PhysReg::GP;
 
   // If we're selecting a register for the type, it means this SSATmp
   // didn't get it's value allocated to a SIMD register, which

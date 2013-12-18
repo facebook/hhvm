@@ -401,7 +401,7 @@ bool allocUnusedDest(IRInstruction&) {
 // Reduce the allow and prefer sets according to this particular use
 void srcConstraints(IRInstruction& inst, int i, SSATmp* src, Interval* ivl,
                     const Abi& abi) {
-  if (RuntimeOption::EvalHHIRAllocXMMRegs) {
+  if (RuntimeOption::EvalHHIRAllocSIMDRegs) {
     if (src->type() <= Type::Dbl) {
       ivl->prefer &= abi.simd;
       return;
@@ -418,7 +418,7 @@ void srcConstraints(IRInstruction& inst, int i, SSATmp* src, Interval* ivl,
 // Reduce the allow and prefer constraints based on this definition
 void dstConstraints(IRInstruction& inst, int i, SSATmp* dst, Interval* ivl,
                     const Abi& abi) {
-  if (RuntimeOption::EvalHHIRAllocXMMRegs) {
+  if (RuntimeOption::EvalHHIRAllocSIMDRegs) {
     if (dst->type() <= Type::Dbl) {
       ivl->prefer &= abi.simd;
       return;

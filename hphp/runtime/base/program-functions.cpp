@@ -579,6 +579,8 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
     ThreadInfo::s_threadInfo->m_reqInjectionData.setTimeout(
       RuntimeOption::RequestTimeoutSeconds);
   }
+
+  Extension::RequestInitModules();
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
@@ -1673,6 +1675,9 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
   if (shutdown) {
     context->onRequestShutdown();
   }
+
+  // Extensions could have shutdown handlers
+  Extension::RequestShutdownModules();
 
   // Clean up a bunch of request state. No user code after this point.
   context->requestExit();

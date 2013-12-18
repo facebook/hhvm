@@ -789,18 +789,21 @@ def walk(filename, source_dir):
             '<?php',
             '<?php\nparse_str("' + sections['POST'] + '", $_POST);\n'
             '$_REQUEST = array_merge($_REQUEST, $_POST);\n'
+            '_filter_snapshot_globals();\n'
         )
     if sections.has_key('GET'):
         test = test.replace(
             '<?php',
             '<?php\nparse_str("' + sections['GET'] + '", $_GET);\n'
             '$_REQUEST = array_merge($_REQUEST, $_GET);\n'
+            '_filter_snapshot_globals();\n'
         )
     if sections.has_key('COOKIE'):
         test = test.replace(
             '<?php',
             '<?php\n$_COOKIE = http_parse_cookie("' +
                 sections['COOKIE'] + '");\n'
+            '_filter_snapshot_globals();\n'
         )
     if sections.has_key('ENV'):
         for line in sections['ENV'].split('\n'):
@@ -808,7 +811,9 @@ def walk(filename, source_dir):
             if len(boom) == 2 and boom[0] and boom[1]:
                 test = test.replace(
                     '<?php',
-                    '<?php\n$_ENV[%s] = %s;\n' % (boom[0], boom[1])
+                    '<?php\n$_ENV[%s] = %s;\n' 
+                    '_filter_snapshot_globals();\n'
+                    % (boom[0], boom[1])
                 )
 
     if sections.has_key('CLEAN'):

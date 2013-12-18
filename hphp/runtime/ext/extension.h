@@ -67,6 +67,8 @@ public:
   static void MergeSystemlib();
   static void ShutdownModules();
   static bool ModulesInitialised();
+  static void RequestInitModules();
+  static void RequestShutdownModules();
 
   // Look for "ext.{namehash}" in the binary and compile/merge it
   void loadSystemlib(const std::string& name = "");
@@ -86,6 +88,8 @@ public:
   virtual void moduleInfo(Array &info) { info.set(m_name, true);}
   virtual void moduleInit() {}
   virtual void moduleShutdown() {}
+  virtual void requestInit() {}
+  virtual void requestShutdown() {}
 
   void setDSOName(const std::string &name) {
     m_dsoName = name;

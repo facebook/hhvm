@@ -3488,7 +3488,11 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   auto const& tc = func->params()[paramId].typeConstraint();
   auto locVal = ldLoc(paramId, DataTypeSpecific);
   Type locType = locVal->type().unbox();
-  always_assert(locType.isKnownDataType());
+  always_assert_log(locType.isKnownDataType(),
+  [&] {
+    return folly::format("Bad type {} for local {}:\n\n{}\n",
+                         locType, paramId, m_tb->trace()->toString()).str();
+  });
 
   if (!RuntimeOption::EvalCheckExtendedTypeHints && tc.isExtended()) {
     return;

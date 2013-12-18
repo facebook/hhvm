@@ -627,15 +627,23 @@ public:
 
   bool openFile(const String& zfile, const String& zmode) {
     mode = DESC_FILE;
-    /* try a wrapper */
-    FILE *file = fopen(zfile.c_str(), zmode.c_str());
-    if (!file) {
+      /* try a wrapper */
+    Variant vfile = f_fopen(zfile.c_str(), zmode.c_str());
+    if (!vfile.isResource()) {
       raise_warning("Unable to open specified file: %s (mode %s)",
                       zfile.data(), zmode.data());
       return false;
+    } else {
+      File *file = vfile.toResource().getTyped<File>();
+      file->flush();
+      childend = dup(file->fd());
+      if (childend < 0) {
+        raise_warning("unable to dup File-Handle for descriptor %d - %s",
+                        index, folly::errnoStr(errno).c_str());
+        return false;
+      }
+      return true;
     }
-    childend = fileno(file);
-    return true;
   }
 
   void dupChild() {

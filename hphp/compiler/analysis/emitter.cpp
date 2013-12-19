@@ -5046,10 +5046,11 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
 }
 
 void EmitterVisitor::emitConstMethodCallNoParams(Emitter& e, string name) {
-  StringData* nameLit = makeStaticString(name);
+  auto const nameLit = makeStaticString(name);
+  auto const fpiStart = m_ue.bcPos();
+  e.FPushObjMethodD(0, nameLit);
   {
-    FPIRegionRecorder fpi(this, m_ue, m_evalStack, m_ue.bcPos());
-    e.FPushObjMethodD(0, nameLit);
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
   }
   e.FCall(0);
   emitConvertToCell(e);

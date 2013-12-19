@@ -220,6 +220,7 @@ std::string show(const Frame frame) {
   std::string ret;
   if (frame.mainThis) {
     folly::toAppend("main this: ", frame.mainThis->toString(), &ret);
+    if (frame.currentThis) ret += " ";
   }
   if (frame.currentThis) {
     folly::toAppend("current this: ", frame.currentThis->toString(), &ret);

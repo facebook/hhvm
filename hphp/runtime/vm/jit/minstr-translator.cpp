@@ -557,6 +557,10 @@ SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i,
       return cns(l.offset);
 
     case Location::This:
+      // If we don't have a current class context, this instruction will be
+      // unreachable.
+      if (!m_ht.curClass()) PUNT(Unreachable-LdThis);
+
       return gen(LdThis, m_tb.fp());
 
     default: not_reached();

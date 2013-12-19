@@ -154,8 +154,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
                             vhost->getName().c_str());
 
   // resolve source root
-  string host = transport->getHeader("Host");
-  SourceRootInfo sourceRootInfo(host.c_str());
+  SourceRootInfo sourceRootInfo(transport);
 
   if (sourceRootInfo.error()) {
     sourceRootInfo.handleError(transport);

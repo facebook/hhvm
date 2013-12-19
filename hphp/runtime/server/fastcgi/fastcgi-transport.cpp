@@ -50,6 +50,10 @@ const char *FastCGITransport::getUrl() {
   return m_requestURI.c_str();
 }
 
+const std::string FastCGITransport::getDocumentRoot() {
+  return m_documentRoot;
+}
+
 const char *FastCGITransport::getRemoteHost() {
   return m_remoteHost.c_str();
 }
@@ -274,6 +278,7 @@ const std::string FastCGITransport::k_remotePortKey = "REMOTE_PORT";
 const std::string FastCGITransport::k_methodKey = "REQUEST_METHOD";
 const std::string FastCGITransport::k_httpVersionKey = "HTTP_VERSION";
 const std::string FastCGITransport::k_contentLengthKey = "CONTENT_LENGTH";
+const std::string FastCGITransport::k_documentRoot = "DOCUMENT_ROOT";
 
 void FastCGITransport::onHeader(std::unique_ptr<folly::IOBuf> key_chain,
                                 std::unique_ptr<folly::IOBuf> value_chain) {
@@ -337,6 +342,8 @@ void FastCGITransport::handleHeader(const std::string& key,
     } catch (std::out_of_range&) {
       m_requestSize = 0;
     }
+  } else if (compareKeys(key, k_documentRoot)) {
+    m_documentRoot = value + "/";
   }
 }
 

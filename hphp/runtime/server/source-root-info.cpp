@@ -30,12 +30,22 @@ namespace HPHP {
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(string, SourceRootInfo::s_path);
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(string, SourceRootInfo::s_phproot);
 
-SourceRootInfo::SourceRootInfo(const char *host)
+SourceRootInfo::SourceRootInfo(Transport* transport)
     : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxCondition::On :
                                                  SandboxCondition::Off) {
   s_path.destroy();
   s_phproot.destroy();
+
+  auto documentRoot = transport->getDocumentRoot();
+  if (!documentRoot.empty()) {
+    // The transport take precedence over the config file
+    m_path = documentRoot;
+    *s_path.getCheck() = documentRoot;
+    return;
+  }
+
   if (!sandboxOn()) return;
+  auto host = transport->getHeader("Host");
   Variant matches;
   Variant r = preg_match(String(RuntimeOption::SandboxPattern.c_str(),
                                 RuntimeOption::SandboxPattern.size(),
@@ -242,8 +252,7 @@ string SourceRootInfo::parseSandboxServerVariable(const string &format) const {
 }
 
 string SourceRootInfo::path() const {
-  if (sandboxOn()) {
-    // Should return RuntimeOption::SourceRoot if m_data is empty?
+  if (sandboxOn() || !m_path.empty()) {
     return string(m_path.data(), m_path.size());
   } else {
     return RuntimeOption::SourceRoot;

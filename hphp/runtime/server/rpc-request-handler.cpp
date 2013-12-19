@@ -157,8 +157,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   };
 
   // resolve source root
-  string host = transport->getHeader("Host");
-  SourceRootInfo sourceRootInfo(host.c_str());
+  SourceRootInfo sourceRootInfo(transport);
 
   // set thread type
   switch (m_serverInfo->getType()) {

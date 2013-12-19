@@ -18,7 +18,7 @@ endif (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
 
 find_path (DWARF_INCLUDE_DIR
     NAMES
-      dwarf.h
+      libdwarf.h dwarf.h
     PATHS
       /usr/include
       /usr/include/libdwarf

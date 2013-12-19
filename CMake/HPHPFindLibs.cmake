@@ -326,15 +326,26 @@ if (NOT RECENT_CCLIENT)
 	message(FATAL_ERROR "Your version of c-client is too old, you need 2007")
 endif()
 
+
+if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
+	CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" auth_gss CCLIENT_HAS_GSS)
+elseif (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.h")
+    CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" auth_gss CCLIENT_HAS_GSS)
+endif()
+
 find_package(Libpam)
 if (PAM_INCLUDE_PATH)
 	include_directories(${PAM_INCLUDE_PATH})
-else()
+endif()
+
+if (NOT CCLIENT_HAS_GSS)
 	add_definitions(-DSKIP_IMAP_GSS=1)
 endif()
 
 if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
 	CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" ssl_onceonlyinit CCLIENT_HAS_SSL)
+elseif (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.h")
+	CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" ssl_onceonlyinit CCLIENT_HAS_SSL)
 endif()
 
 if (NOT CCLIENT_HAS_SSL)

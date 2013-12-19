@@ -636,8 +636,12 @@ PhpFunc::PhpFunc(const folly::dynamic& d,
 
   m_flags = parseFlags(m_func["flags"]);
 
-  ParamMode paramMode = (m_flags & (ZendParamMode | ZendParamModeFalse)) ?
-    ParamMode::Zend : ParamMode::CoerceAndCall;
+  ParamMode paramMode = ParamMode::CoerceAndCall;
+  if (m_flags & ZendParamMode) {
+    paramMode = ParamMode::Zend;
+  } else if (m_flags & ZendParamModeFalse) {
+    paramMode = ParamMode::ZendFalse;
+  }
 
   for (auto &p : args->second) {
     PhpParam param(p, magic, paramMode);

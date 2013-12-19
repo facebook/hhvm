@@ -130,7 +130,8 @@ fbstring phpSerialize(const folly::dynamic& d);
 
 enum class ParamMode {
   CoerceAndCall,
-  Zend
+  Zend,
+  ZendFalse
 };
 
 class PhpConst {

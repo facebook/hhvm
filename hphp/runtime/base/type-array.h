@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/hphp-value.h"
+#include "hphp/runtime/base/runtime-error.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -244,7 +245,12 @@ public:
   int    toInt32  () const { return (m_px && !m_px->empty()) ? 1 : 0;}
   int64_t  toInt64  () const { return (m_px && !m_px->empty()) ? 1 : 0;}
   double toDouble () const { return (m_px && !m_px->empty()) ? 1.0 : 0.0;}
-  String toString () const { return m_px ? "Array" : "";}
+  String toString () const {
+    if (m_px) {
+      raise_notice("Array to string conversion");
+    }
+    return m_px ? "Array" : "";
+  }
 
   /**
    * Comparisons

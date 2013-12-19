@@ -1,5 +1,8 @@
 <?php
 
+// disable array -> "Array" conversion notice
+error_reporting(error_reporting() & ~E_NOTICE);
+
 // originally came from ext/standard/tests/general_functions/include_path.phpt
 
 var_dump(get_include_path());

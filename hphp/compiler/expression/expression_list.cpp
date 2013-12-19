@@ -239,9 +239,11 @@ void ExpressionList::stripConcat() {
       BinaryOpExpressionPtr b
         (static_pointer_cast<BinaryOpExpression>(e));
       if (b->getOp() == '.') {
-        e = b->getExp1();
-        el.insertElement(b->getExp2(), i + 1);
-        continue;
+        if(!b->getExp1()->isArray() && !b->getExp2()->isArray()) {
+          e = b->getExp1();
+          el.insertElement(b->getExp2(), i + 1);
+          continue;
+        }
       }
     }
     i++;

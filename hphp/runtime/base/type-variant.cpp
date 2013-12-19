@@ -605,7 +605,8 @@ String Variant::toStringHelper() const {
   case KindOfString:
     assert(false); // Should be done in caller
     return m_data.pstr;
-  case KindOfArray:   return s_array;
+  case KindOfArray:   raise_notice("Array to string conversion");
+                      return s_array;
   case KindOfObject:  return m_data.pobj->invokeToString();
   case KindOfResource: return m_data.pres->o_toString();
   case KindOfRef: return m_data.pref->var()->toString();

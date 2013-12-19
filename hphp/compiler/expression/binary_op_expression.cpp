@@ -478,6 +478,9 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
               ExpressionPtr aExp = m_exp1;
               ExpressionPtr bExp = binOpExp->m_exp1;
               ExpressionPtr cExp = binOpExp->m_exp2;
+              if (aExp->isArray() || bExp->isArray() || cExp->isArray()) {
+                break;
+              }
               m_exp1 = binOpExp = Clone(binOpExp);
               m_exp2 = cExp;
               binOpExp->m_exp1 = aExp;
@@ -538,6 +541,9 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           *result.asCell() = cellBitXor(*v1.asCell(), *v2.asCell());
           break;
         case '.':
+          if (v1.isArray() || v2.isArray()) {
+            return ExpressionPtr();
+          }
           result = concat(v1.toString(), v2.toString());
           break;
         case T_IS_IDENTICAL:

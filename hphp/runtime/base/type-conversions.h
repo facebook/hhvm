@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/runtime-error.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -108,7 +109,12 @@ inline String toString(double  v) { return v;}
 inline String toString(litstr  v) = delete;
 inline String toString(StringData *v) { return v ? String(v) : String("");}
 inline String toString(const String& v) { return toString(v.get());}
-inline String toString(const ArrayData *v) { return v ? "Array" : "";}
+inline String toString(const ArrayData *v) {
+  if (v) {
+    raise_notice("Array to string conversion");
+  }
+  return v ? "Array" : "";
+}
 inline String toString(CArrRef v) { return toString(v.get());}
 inline String toString(ObjectData *v) {
   return v ? v->invokeToString() : String("");

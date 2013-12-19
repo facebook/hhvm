@@ -136,7 +136,7 @@ struct Func {
   static void destroy(Func* func);
 
   Func* clone(Class* cls) const;
-  const Func* cloneAndSetClass(Class* cls) const;
+  Func* cloneAndSetClass(Class* cls) const;
 
   void validate() const {
 #ifdef DEBUG
@@ -534,7 +534,7 @@ private:
   void allocVarId(const StringData* name);
   const SharedData* shared() const { return m_shared.get(); }
   SharedData* shared() { return m_shared.get(); }
-  const Func* findCachedClone(Class* cls) const;
+  Func* findCachedClone(Class* cls) const;
 
 private:
   Unit* m_unit;

@@ -749,14 +749,12 @@ Array f_hphp_get_closure_info(CVarRef closure) {
   mi.set(s_static_variables, static_vars);
 
   auto clos = asObj.getTyped<c_Closure>();
-  auto this_or_class = clos->getThisOrClass();
-  if (auto const cls = ActRec::decodeClass(this_or_class)) {
+  if (auto const cls = clos->getClass()) {
     mi.set(s_closure_scope_class, cls->nameRef());
-  } else if (auto const thiz = ActRec::decodeThis(this_or_class)) {
+  } else if (auto const thiz = clos->getThis()) {
     mi.set(s_closure_scope_class, thiz->o_getClassName());
   } else {
-    assert(this_or_class == nullptr);
-    mi.set(s_closure_scope_class, this_or_class);
+    mi.set(s_closure_scope_class, null_variant);
   }
 
   Array &params = mi.lvalAt(s_params).asArrRef();

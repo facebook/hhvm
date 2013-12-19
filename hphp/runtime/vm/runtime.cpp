@@ -200,8 +200,9 @@ void assertTv(const TypedValue* tv) {
 int init_closure(ActRec* ar, TypedValue* sp) {
   c_Closure* closure = static_cast<c_Closure*>(ar->getThis());
 
-  // Swap in the $this or late bound class
-  ar->setThis(closure->getThisOrClass());
+  // Swap in the $this or late bound class or null if it is ony from a plain
+  // function or psuedomain
+  ar->setThisOrClassAllowNull(closure->getThisOrClass());
 
   if (ar->hasThis()) {
     ar->getThis()->incRefCount();

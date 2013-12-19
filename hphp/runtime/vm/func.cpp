@@ -330,15 +330,15 @@ Func* Func::clone(Class* cls) const {
   return f;
 }
 
-const Func* Func::cloneAndSetClass(Class* cls) const {
-  if (const Func* ret = findCachedClone(cls)) {
+Func* Func::cloneAndSetClass(Class* cls) const {
+  if (Func* ret = findCachedClone(cls)) {
     return ret;
   }
 
   static Mutex s_clonedFuncListMutex;
   Lock l(s_clonedFuncListMutex);
   // Check again now that I'm the writer
-  if (const Func* ret = findCachedClone(cls)) {
+  if (Func* ret = findCachedClone(cls)) {
     return ret;
   }
 
@@ -355,8 +355,8 @@ const Func* Func::cloneAndSetClass(Class* cls) const {
   return clonedFunc;
 }
 
-const Func* Func::findCachedClone(Class* cls) const {
-  const Func* nextFunc = this;
+Func* Func::findCachedClone(Class* cls) const {
+  Func* nextFunc = const_cast<Func*>(this);
   while (nextFunc) {
     if (nextFunc->cls() == cls) {
       return nextFunc;

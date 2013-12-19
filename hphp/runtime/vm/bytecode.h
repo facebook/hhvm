@@ -325,8 +325,11 @@ struct ActRec {
   }
 
   void setThisOrClass(void* objOrCls) {
-    m_this = (ObjectData*)objOrCls;
+    setThisOrClassAllowNull(objOrCls);
     assert(hasThis() || hasClass());
+  }
+  void setThisOrClassAllowNull(void* objOrCls) {
+    m_this = (ObjectData*)objOrCls;
   }
 
   void* getThisOrClass() const {

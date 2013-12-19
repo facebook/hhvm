@@ -55,9 +55,7 @@ namespace {
 #define N      CallsNative
 #define PRc    ProducesRC
 #define CRc    ConsumesRC
-#define Refs   MayModifyRefs
 #define Er     MayRaiseError
-#define Mem    MemEffects
 #define T      Terminal
 #define P      Passthrough
 #define K      KillsSources
@@ -101,9 +99,7 @@ struct {
 #undef E
 #undef PRc
 #undef CRc
-#undef Refs
 #undef Er
-#undef Mem
 #undef T
 #undef P
 #undef K

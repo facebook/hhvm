@@ -920,11 +920,11 @@ enum OpcodeFlag : uint64_t {
   HasDest          = 1ULL <<  0,
   CanCSE           = 1ULL <<  1,
   Essential        = 1ULL <<  2,
-  MemEffects       = 1ULL <<  3,
+  // Unused
   CallsNative      = 1ULL <<  4,
   ConsumesRC       = 1ULL <<  5,
   ProducesRC       = 1ULL <<  6,
-  MayModifyRefs    = 1ULL <<  7,
+  // Unused
   // Unused
   MayRaiseError    = 1ULL <<  9,
   Terminal         = 1ULL << 10, // has no next instruction

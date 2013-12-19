@@ -55,7 +55,7 @@ struct Abi {
   RegSet all() const { return gp | simd; }
 };
 
-typedef StateVector<SSATmp, Interval> Intervals;
+typedef StateVector<SSATmp, Interval*> Intervals;
 typedef IdSet<SSATmp> LiveSet;
 typedef std::pair<PhysReg,PhysReg> RegPair;
 
@@ -131,6 +131,7 @@ public:
 // to pass them around everywhere.
 struct XLS {
   XLS(IRUnit& unit, RegAllocInfo& regs, const Abi&);
+  ~XLS();
   void allocate();
   // phases
   void prepareBlocks();
@@ -340,7 +341,7 @@ RegPair Interval::regs() const {
 //////////////////////////////////////////////////////////////////////////////
 
 XLS::XLS(IRUnit& unit, RegAllocInfo& regs, const Abi& abi)
-  : m_intervals(unit, Interval())
+  : m_intervals(unit, nullptr)
   , m_unit(unit)
   , m_regs(regs)
   , m_abi(abi)
@@ -361,6 +362,12 @@ XLS::XLS(IRUnit& unit, RegAllocInfo& regs, const Abi& abi)
     m_scratch[r].scratch = true;
     m_scratch[r].need = 1;
     m_scratch[r].info.setReg(r, 0);
+  }
+}
+
+XLS::~XLS() {
+  for (auto ivl : m_intervals) {
+    if (ivl) smart_delete(ivl);
   }
 }
 
@@ -455,7 +462,7 @@ void XLS::buildIntervals() {
     auto blockRange = closedRange(m_posns[block->front()],
                                   m_posns[block->back()] + 1);
     live.forEach([&](uint32_t id) {
-      m_intervals[id].add(blockRange);
+      m_intervals[id]->add(blockRange);
     });
     for (auto instIt = block->end(); instIt != block->begin();) {
       auto& inst = *--instIt;
@@ -464,13 +471,14 @@ void XLS::buildIntervals() {
       size_t dst_need = 0;
       for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
         auto d = inst.dst(i);
-        auto dest = &m_intervals[d];
+        auto dest = m_intervals[d];
         if (!live[d]) {
           // dest is not live; give it a register anyway.
-          assert(dest->empty());
+          assert(!dest);
           if (d->numWords() == 0) continue;
           if (force(inst, *d)) continue;
           if (!allocUnusedDest(inst)) continue;
+          m_intervals[d] = dest = smart_new<Interval>();
           dest->add(closedRange(dpos, dpos));
           dest->tmp = d;
           dest->need = d->numWords();
@@ -502,7 +510,8 @@ void XLS::buildIntervals() {
         auto need = s->numWords();
         if (need == 0) continue;
         if (force(inst, *s)) continue;
-        auto src = &m_intervals[s];
+        auto src = m_intervals[s];
+        if (!src) m_intervals[s] = src = smart_new<Interval>();
         src->add(closedRange(blockRange.start, spos));
         src->addUse(spos);
         if (!src->tmp) {
@@ -849,8 +858,8 @@ void XLS::update(unsigned pos) {
 // assign registers to intervals, split & spill where needed.
 void XLS::walkIntervals() {
   // fill the pending queue with nonempty intervals in order of start position
-  for (auto& ivl : m_intervals) {
-    if (!ivl.empty()) m_pending.push(&ivl);
+  for (auto ivl : m_intervals) {
+    if (ivl) m_pending.push(ivl);
   }
   for (auto r : m_scratch) {
     if (!m_scratch[r].empty()) m_inactive.push_back(&m_scratch[r]);
@@ -877,12 +886,12 @@ void XLS::assignLocations() {
     for (auto& inst : *b) {
       auto spos = m_posns[inst];
       for (auto s : inst.srcs()) {
-        if (m_intervals[s].empty()) continue;
-        m_regs[inst][s] = m_intervals[s].childAt(spos)->info;
+        if (!m_intervals[s]) continue;
+        m_regs[inst][s] = m_intervals[s]->childAt(spos)->info;
       }
       for (auto& d : inst.dsts()) {
-        if (m_intervals[d].empty()) continue;
-        m_regs[inst][d] = m_intervals[d].info;
+        if (!m_intervals[d]) continue;
+        m_regs[inst][d] = m_intervals[d]->info;
       }
     }
   }
@@ -956,10 +965,10 @@ void XLS::insertSpill(Interval* ivl) {
 // instructions
 void XLS::resolveSplits() {
   if (dumpIREnabled()) dumpIntervals();
-  for (auto& ivl : m_intervals) {
-    auto i1 = &ivl;
+  for (auto i1 : m_intervals) {
+    if (!i1) continue;
     if (i1->spill.spilled()) insertSpill(i1);
-    for (auto& i2 : ivl.children) {
+    for (auto& i2 : i1->children) {
       auto pos1 = i1->end();
       auto pos2 = i2.start();
       if (!i2.info.spilled() && pos1 == pos2 && i1->info != i2.info) {
@@ -978,6 +987,7 @@ void XLS::resolveSplits() {
 
 // Insert copies on control-flow edges, and turn Jmps into Shuffles
 void XLS::resolveEdges() {
+  const PhysLoc invalid_loc;
   for (auto succ : m_blocks) {
     auto& inst2 = *skipShuffle(succ);
     auto pos2 = m_posns[inst2]; // pos of first inst in succ.
@@ -989,17 +999,18 @@ void XLS::resolveEdges() {
       if (inst1.op() == Jmp) {
         // resolve Jmp->DefLabel copies
         for (unsigned i = 0, n = inst1.numSrcs(); i < n; ++i) {
-          auto i1 = &m_intervals[inst1.src(i)];
-          auto i2 = &m_intervals[inst2.dst(i)];
-          if (!i1->empty()) i1 = i1->childAt(pos1);
-          insertCopy(pred, it1, m_after[pred], inst1.src(i), i1->info,
-                     i2->info);
+          auto i1 = m_intervals[inst1.src(i)];
+          auto i2 = m_intervals[inst2.dst(i)];
+          if (i1) i1 = i1->childAt(pos1);
+          insertCopy(pred, it1, m_after[pred], inst1.src(i),
+                     i1 ? i1->info : invalid_loc,
+                     i2 ? i2->info : invalid_loc);
         }
       }
       m_liveIn[succ].forEach([&](uint32_t id) {
-        auto& ivl = m_intervals[id];
-        auto i1 = ivl.childAt(pos1 + 1);
-        auto i2 = ivl.childAt(pos2);
+        auto ivl = m_intervals[id];
+        auto i1 = ivl->childAt(pos1 + 1);
+        auto i2 = ivl->childAt(pos2);
         assert(i1 && i2);
         if (i2->info.spilled()) return; // we did spill store after def.
         if (pred->taken() && pred->next()) {
@@ -1089,12 +1100,12 @@ void XLS::allocate() {
 
 void XLS::dumpIntervals() {
   HPHP::Trace::traceRelease("Splits %d Spills %d\n", m_numSplits, m_nextSpill);
-  for (auto& ivl : m_intervals) {
-    if (!ivl.tmp) continue;
-    HPHP::Trace::traceRelease("i%-2d %s\n", ivl.tmp->id(),
-                              ivl.toString().c_str());
-    if (!ivl.children.empty()) {
-      for (auto& c : ivl.children) {
+  for (auto ivl : m_intervals) {
+    if (!ivl) continue;
+    HPHP::Trace::traceRelease("i%-2d %s\n", ivl->tmp->id(),
+                              ivl->toString().c_str());
+    if (!ivl->children.empty()) {
+      for (auto& c : ivl->children) {
         HPHP::Trace::traceRelease("    %s\n", c.toString().c_str());
       }
     }
@@ -1103,9 +1114,8 @@ void XLS::dumpIntervals() {
 
 template<class F>
 void forEachInterval(Intervals& intervals, F f) {
-  for (auto& ivl : intervals) {
-    if (ivl.empty()) continue;
-    f(&ivl);
+  for (auto ivl : intervals) {
+    if (ivl) f(ivl);
   }
 }
 

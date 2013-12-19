@@ -49,6 +49,7 @@ public:
   virtual const char *getUrl() override;
   virtual const char *getRemoteHost() override;
   virtual uint16_t getRemotePort() override;
+  virtual const std::string getDocumentRoot() override;
 
   virtual const void *getPostData(int &size) override;
   virtual bool hasMorePostData() override;
@@ -110,6 +111,7 @@ private:
   static const std::string k_methodKey;
   static const std::string k_httpVersionKey;
   static const std::string k_contentLengthKey;
+  static const std::string k_documentRoot;
 
   FastCGIConnection* m_connection;
   int m_id;
@@ -117,6 +119,7 @@ private:
   std::unique_ptr<folly::IOBuf> m_currBody;
   HeaderMap m_requestHeaders;
   std::string m_requestURI;
+  std::string m_documentRoot;
   std::string m_remoteHost;
   uint16_t m_remotePort;
   Method m_method;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $elts = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h');

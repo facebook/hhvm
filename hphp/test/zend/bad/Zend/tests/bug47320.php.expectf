@@ -1,0 +1,3 @@
+$php_errormsg in global: substr() expects at least 2 parameters, 1 given
+$php_errormsg in function: strpos() expects at least 2 parameters, 1 given
+$GLOBALS[php_errormsg] in function: substr() expects at least 2 parameters, 1 given

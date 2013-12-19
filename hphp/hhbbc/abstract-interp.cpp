@@ -38,6 +38,7 @@
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/class-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -77,7 +78,7 @@ std::string show(const ActRec& a) {
 
 std::string state_string(const php::Func& f, const State& st) {
   std::string ret;
-  if (!st.initialized) return "state uninitialized\n";
+  if (!st.initialized) return "state: uninitialized\n";
   ret = "state:\n";
   for (size_t i = 0; i < st.locals.size(); ++i) {
     ret += folly::format("${: <8} :: {}\n",
@@ -251,18 +252,20 @@ struct StepFlags {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Propagate>
+template<class Propagate, class PropagateThrow>
 struct InterpStepper : boost::static_visitor<void> {
   explicit InterpStepper(const Index* index,
                          Context ctx,
                          State& st,
                          StepFlags& flags,
-                         Propagate propagate)
+                         Propagate propagate,
+                         PropagateThrow propagateThrow)
     : m_index(*index)
     , m_ctx(ctx)
     , m_state(st)
     , m_flags(flags)
     , m_propagate(propagate)
+    , m_propagateThrow(propagateThrow)
   {}
 
   void operator()(const bc::Nop&)  { nothrow(); }
@@ -316,7 +319,7 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Int&    op) { nothrow(); push(ival(op.arg1)); }
   void operator()(const bc::Double& op) { nothrow(); push(dval(op.dbl1)); }
   void operator()(const bc::String& op) { nothrow(); push(sval(op.str1)); }
-  void operator()(const bc::Array& op)  { nothrow(); push(aval(op.arr1)); }
+  void operator()(const bc::Array&  op) { nothrow(); push(aval(op.arr1)); }
 
   void operator()(const bc::NewArray&)        { push(TArr); }
   void operator()(const bc::NewArrayReserve&) { push(TArr); }
@@ -540,8 +543,8 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   void castBoolImpl(bool negate) {
+    nothrow();
     auto const t = popC();
-    if (!t.couldBe(TObj) && !t.couldBe(TRes)) nothrow();
     auto const v = tv(t);
     if (v) {
       constprop();
@@ -590,6 +593,7 @@ struct InterpStepper : boost::static_visitor<void> {
 
   template<bool Negate, class Op>
   void jmpImpl(const Op& op) {
+    nothrow();
     auto const t1 = popC();
     auto const v1 = tv(t1);
     if (v1) {
@@ -600,12 +604,80 @@ struct InterpStepper : boost::static_visitor<void> {
       }
       return;
     }
-    if (!t1.couldBe(TObj) && !t1.couldBe(TRes)) nothrow();
     m_propagate(*op.target, m_state);
   }
 
   void operator()(const bc::JmpNZ& op) { jmpImpl<true>(op); }
   void operator()(const bc::JmpZ& op)  { jmpImpl<false>(op); }
+
+  template<class JmpOp>
+  void jmpType(const bc::IsTypeL& istype, const JmpOp& jmp) {
+    auto const loc    = locAsCell(istype.loc1);
+
+    if (static_cast<IsTypeOp>(istype.subop) == IsTypeOp::Scalar) {
+      return impl(istype, jmp);
+    }
+    auto const testTy = type_of_istype(static_cast<IsTypeOp>(istype.subop));
+    if (loc.subtypeOf(testTy) || !loc.couldBe(testTy)) {
+      return impl(istype, jmp);
+    }
+
+    if (!locCouldBeUninit(istype.loc1)) nothrow();
+
+    auto const negate = jmp.op == Op::JmpNZ;
+    auto const was_true = [&] {
+      if (is_opt(loc)) {
+        if (testTy.subtypeOf(TNull)) return TInitNull;
+        auto const unopted = unopt(loc);
+        if (unopted.subtypeOf(testTy)) return unopted;
+      }
+      return testTy;
+    }();
+    auto const was_false = [&] {
+      if (is_opt(loc)) {
+        auto const unopted = unopt(loc);
+        if (testTy.subtypeOf(TNull))   return unopted;
+        if (unopted.subtypeOf(testTy)) return TInitNull;
+      }
+      return loc;
+    }();
+
+    setLoc(istype.loc1, negate ? was_true : was_false);
+    m_propagate(*jmp.target, m_state);
+    setLoc(istype.loc1, negate ? was_false : was_true);
+  }
+
+  template<class JmpOp>
+  void jmpType(const bc::CGetL& cgetl, const JmpOp& jmp) {
+    auto const loc = locAsCell(cgetl.loc1);
+    if (tv(loc)) return impl(cgetl, jmp);
+
+    if (!locCouldBeUninit(cgetl.loc1)) nothrow();
+
+    auto const negate = jmp.op == Op::JmpNZ;
+    auto const converted_true = [&] {
+      if (is_opt(loc)) return unopt(loc);
+      if (loc.subtypeOf(TBool)) return TTrue;
+      return loc;
+    }();
+    auto const converted_false = [&] {
+      if (!could_have_magic_bool_conversion(loc) && loc.subtypeOf(TOptObj)) {
+        return TInitNull;
+      }
+      if (loc.subtypeOf(TInt))  return ival(0);
+      if (loc.subtypeOf(TBool)) return TFalse;
+      if (loc.subtypeOf(TDbl))  return dval(0);
+      // Can't tell if any of the other ?primitives are going to be
+      // null based on this, so leave those types alone.  E.g. a Str
+      // might contain "" and be falsey, or an array or collection
+      // could be empty.
+      return loc;
+    }();
+
+    setLoc(cgetl.loc1, negate ? converted_true : converted_false);
+    m_propagate(*jmp.target, m_state);
+    setLoc(cgetl.loc1, negate ? converted_false : converted_true);
+  }
 
   void operator()(const bc::Switch& op) {
     popC();
@@ -779,13 +851,20 @@ struct InterpStepper : boost::static_visitor<void> {
   void isTypeLImpl(const Op& op) {
     if (!locCouldBeUninit(op.loc1)) { nothrow(); constprop(); }
     auto const loc = locAsCell(op.loc1);
+    if (static_cast<IsTypeOp>(op.subop) == IsTypeOp::Scalar) {
+      return push(TBool);
+    }
     isTypeImpl(loc, type_of_istype(static_cast<IsTypeOp>(op.subop)));
   }
 
   template<class Op>
   void isTypeCImpl(const Op& op) {
     nothrow();
-    isTypeImpl(popC(), type_of_istype(static_cast<IsTypeOp>(op.subop)));
+    auto const t1 = popC();
+    if (static_cast<IsTypeOp>(op.subop) == IsTypeOp::Scalar) {
+      return push(TBool);
+    }
+    isTypeImpl(t1, type_of_istype(static_cast<IsTypeOp>(op.subop)));
   }
 
   void operator()(const bc::IsTypeC& op) { isTypeCImpl(op); }
@@ -872,7 +951,7 @@ struct InterpStepper : boost::static_visitor<void> {
       auto resultTy = eval_cell([&] {
         Cell c = *locVal;
         Cell rhs = *v1;
-        SETOP_BODY_CELL(&c, op.subop, &rhs);
+        SETOP_BODY_CELL(&c, static_cast<SetOpOp>(op.subop), &rhs);
         return c;
       });
 
@@ -913,8 +992,8 @@ struct InterpStepper : boost::static_visitor<void> {
     if (!val) return push(TInitCell); // Only constants for now
 
     auto const subop = static_cast<IncDecOp>(op.subop);
-    auto const pre = subop == PreInc || subop == PreDec;
-    auto const inc = subop == PreInc || subop == PostInc;
+    auto const pre = subop == IncDecOp::PreInc || subop == IncDecOp::PreDec;
+    auto const inc = subop == IncDecOp::PreInc || subop == IncDecOp::PostInc;
 
     if (!pre) push(loc);
 
@@ -1382,7 +1461,10 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::CheckThis&)    {}
 
   void operator()(const bc::BareThis& op) {
-    if (!op.subop) nothrow();
+    switch (op.subop) {
+    case BareThisOp::Notice:   break;
+    case BareThisOp::NoNotice: nothrow(); break;
+    }
     push(TOptObj);
   }
 
@@ -1831,21 +1913,25 @@ private: // member instructions
   template<class Op>
   void miImpl(const Op& op, const MInstrInfo& info, const MVector& mvec) {
     auto state = MInstrState { &info, mvec };
+    // The state before miBase is propagated because wasPEI will be
+    // true.
     state.base = miBase(state, mvec);
+    miThrow();
     for (auto mInd = size_t{0}; mInd < mvec.mcodes.size() - 1; ++mInd) {
       miIntermediate(state, mvec.mcodes[mInd]);
+      // Note: this one might not be necessary: review whether member
+      // instructions can ever modify local types on itermediate dims.
+      miThrow();
     }
     miFinal(op, state, mvec.mcodes[mvec.mcodes.size() - 1]);
   }
 
+  // MInstrs can throw in between each op, so the states of locals
+  // need to be propagated across factored exit edges.
+  void miThrow() { m_propagateThrow(m_state); }
+
   template<class Op>
   void minstr(const Op& op) {
-    /*
-     * FIXME: we probably need to propagate states across the factored
-     * exit edges *mid instruction*.  (A member-instruction could
-     * throw in a intermediate dim after it's modified the type of a
-     * local.)
-     */
     miImpl(op, getMInstrInfo(Op::op), op.mvec);
   }
 
@@ -2143,6 +2229,7 @@ private:
   State& m_state;
   StepFlags& m_flags;
   Propagate m_propagate;
+  PropagateThrow m_propagateThrow;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2158,11 +2245,20 @@ struct Interpreter {
     , m_state(state)
   {}
 
+  /*
+   * Run the interpreter on a whole block, propagating states using
+   * the propagate function.
+   */
   template<class Propagate, class MergeReturn>
   void run(Propagate propagate, MergeReturn mergeReturn) {
-    for (auto& bc : m_blk.hhbcs) {
-      FTRACE(2, "  {}\n", show(bc));
-      auto const flags = step(bc, propagate);
+    SCOPE_EXIT {
+      FTRACE(2, "out {}\n", state_string(*m_ctx.func, m_state));
+    };
+
+    auto const stop = end(m_blk.hhbcs);
+    auto iter       = begin(m_blk.hhbcs);
+    while (iter != stop) {
+      auto const flags = interpOps(iter, stop, propagate);
       if (flags.calledNoReturn) {
         FTRACE(2, "  <called function that never returns>\n");
         continue;
@@ -2176,38 +2272,106 @@ struct Interpreter {
         mergeReturn(*flags.returned);
       }
     }
+
     FTRACE(2, "  <end block>\n");
     if (m_blk.fallthrough) propagate(*m_blk.fallthrough, m_state);
-    FTRACE(2, "out {}\n", state_string(*m_ctx.func, m_state));
   }
 
-  template<class Propagate>
-  StepFlags step(const Bytecode& op, Propagate propagate) {
-    auto flags = StepFlags{};
+  /*
+   * Run a single opcode in the interpreter.  This entry point is used
+   * to propagate block entry states to mid-block positions after the
+   * global analysis has already finished.
+   */
+  StepFlags step(const Bytecode& op) {
+    auto propagate       = [&] (php::Block&, const State&) {};
+    auto propagate_throw = [&] (const State& state) {};
+    auto flags           = StepFlags{};
 
-    // Make a copy of the state (except stacks) in case we need to
-    // propagate across a factored exit.
-    auto const stateBefore = without_stacks(m_state);
-
-    InterpStepper<Propagate> stepper(&m_index,
-                                     m_ctx,
-                                     m_state,
-                                     flags,
-                                     propagate);
+    InterpStepper<decltype(propagate),decltype(propagate_throw)> stepper(
+      &m_index,
+      m_ctx,
+      m_state,
+      flags,
+      propagate,
+      propagate_throw
+    );
     visit(op, stepper);
-
-    if (flags.wasPEI) {
-      FTRACE(2, "   PEI.\n");
-      for (auto& factored : m_blk.factoredExits) {
-        propagate(*factored, stateBefore);
-      }
-    }
-
     return flags;
   }
 
-  StepFlags step(const Bytecode& bc) {
-    return step(bc, [&] (php::Block&, const State&) {});
+private:
+  template<class Stepper, class FirstOp>
+  void doJmpType(Stepper& stepper, const FirstOp& op, const Bytecode& jmp) {
+    switch (jmp.op) {
+    case Op::JmpZ:    return stepper.jmpType(op, jmp.JmpZ);
+    case Op::JmpNZ:   return stepper.jmpType(op, jmp.JmpNZ);
+    default:          not_reached();
+    }
+  }
+
+  template<class Stepper, class Iterator>
+  void interpStep(Stepper& stepper, Iterator& iter, Iterator stop) {
+    auto fusable = [&] (Op op) {
+      return op == Op::CGetL || op == Op::IsTypeL;
+    };
+    auto condjmp = [&] (Op op) {
+      return op == Op::JmpZ || op == Op::JmpNZ;
+    };
+
+    /*
+     * During the analysis phase, we analyze bytecode pairs involving
+     * conditional jumps together to be able to add additional
+     * information to the type environment depending on whether the
+     * branch is taken or not.
+     */
+    auto const iterNext = boost::next(iter);
+    if (iterNext != stop && condjmp(iterNext->op) && fusable(iter->op)) {
+      FTRACE(2, "  {}; {}\n", opcodeToName(iter->op),
+                              opcodeToName(iterNext->op));
+      switch (iter->op) {
+      case Op::CGetL:   doJmpType(stepper, iter->CGetL, *iterNext);   break;
+      case Op::IsTypeL: doJmpType(stepper, iter->IsTypeL, *iterNext); break;
+      default:
+        not_reached();
+      }
+      iter += 2;
+      return;
+    }
+
+    FTRACE(2, "  {}\n", show(*iter));
+    visit(*iter++, stepper);
+  }
+
+  template<class Iterator, class Propagate>
+  StepFlags interpOps(Iterator& iter, Iterator stop, Propagate propagate) {
+    auto propagate_throw = [&] (const State& state) {
+      for (auto& factored : m_blk.factoredExits) {
+        propagate(*factored, without_stacks(state));
+      }
+    };
+
+    auto flags = StepFlags{};
+    InterpStepper<Propagate,decltype(propagate_throw)> stepper(
+      &m_index,
+      m_ctx,
+      m_state,
+      flags,
+      propagate,
+      propagate_throw
+    );
+
+    // Make a copy of the state (except stacks) in case we need to
+    // propagate across factored exits (if it's a PEI).
+    auto const stateBefore = without_stacks(m_state);
+
+    interpStep(stepper, iter, stop);
+
+    if (flags.wasPEI) {
+      FTRACE(2, "   PEI.\n");
+      propagate_throw(stateBefore);
+    }
+
+    return flags;
   }
 
 private:
@@ -2219,9 +2383,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<uint8_t> assertTOpFor(Type t) {
+folly::Optional<AssertTOp> assertTOpFor(Type t) {
 #define ASSERTT_OP(y) \
-  if (t.subtypeOf(T##y)) return static_cast<uint8_t>(AssertTOp::y);
+  if (t.subtypeOf(T##y)) return AssertTOp::y;
   ASSERTT_OPS
 #undef ASSERTT_OP
   return folly::none;
@@ -2353,83 +2517,87 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
 
 //////////////////////////////////////////////////////////////////////
 
-void do_optimize(const Index& index, const FuncAnalysis& ainfo) {
-  auto const ctx = ainfo.ctx;
+std::vector<Bytecode> optimize_block(const Index& index,
+                                     const Context ctx,
+                                     php::Block* const blk,
+                                     State state) {
+  std::vector<Bytecode> newBCs;
+  newBCs.reserve(blk->hhbcs.size());
 
+  Interpreter interp { &index, ctx, blk, state };
+  for (auto& op : blk->hhbcs) {
+    FTRACE(2, "  == {}\n", show(op));
+
+    auto gen = [&] (const Bytecode& newb) {
+      newBCs.push_back(newb);
+      newBCs.back().srcLoc = op.srcLoc;
+      FTRACE(2, "   + {}\n", show(newBCs.back()));
+    };
+
+    auto const preState = state;
+    auto const flags    = interp.step(op);
+
+    if (flags.calledNoReturn) {
+      gen(op);
+      gen(bc::BreakTraceHint {}); // The rest of this code is going to
+                                  // be unreachable.
+      // It would be nice to put a fatal here, but we can't because it
+      // will mess up the bytecode invariant about blocks
+      // not-reachable via fallthrough if the stack depth is non-zero.
+      // It can also mess up FPI regions.
+      continue;
+    }
+
+    if (options.InsertAssertions) {
+      insert_assertions(*ctx.func, op, preState, flags.mayReadLocals, gen);
+    }
+
+    if (options.RemoveDeadBlocks && flags.tookBranch) {
+      switch (op.op) {
+      case Op::JmpNZ:  blk->fallthrough = op.JmpNZ.target; break;
+      case Op::JmpZ:   blk->fallthrough = op.JmpZ.target;  break;
+      default:
+        // No switch, etc support.
+        always_assert(0 && "unsupported tookBranch case");
+      }
+      continue;
+    }
+
+    if (options.ConstantProp && flags.canConstProp) {
+      if (propagate_constants(op, state, gen)) continue;
+    }
+
+    if (options.StrengthReduceBC && flags.strengthReduced) {
+      for (auto& hh : *flags.strengthReduced) gen(hh);
+      continue;
+    }
+
+    gen(op);
+  }
+
+  return newBCs;
+}
+
+void do_optimize(const Index& index, const FuncAnalysis& ainfo) {
   FTRACE(2, "{:-^70}\n", "Optimize Func");
 
   for (auto& blk : ainfo.rpoBlocks) {
     FTRACE(2, "block #{}\n", blk->id);
 
-    auto state = ainfo.bdata[blk->id].stateIn;
+    auto const& state = ainfo.bdata[blk->id].stateIn;
     if (!state.initialized) {
       FTRACE(2, "   unreachable\n");
       if (!options.InsertAssertions) continue;
       auto const srcLoc = blk->hhbcs.front().srcLoc;
       blk->hhbcs = {
         bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
-        bc_with_loc(srcLoc,
-                    bc::Fatal { static_cast<uint8_t>(FatalOp::Runtime) })
+        bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
       };
       blk->fallthrough = nullptr;
       continue;
     }
 
-    std::vector<Bytecode> newBCs;
-    newBCs.reserve(blk->hhbcs.size());
-
-    Interpreter interp { &index, ctx, blk, state };
-    for (auto& op : blk->hhbcs) {
-      FTRACE(2, "  == {}\n", show(op));
-
-      auto gen = [&] (const Bytecode& newb) {
-        newBCs.push_back(newb);
-        newBCs.back().srcLoc = op.srcLoc;
-        FTRACE(2, "   + {}\n", show(newBCs.back()));
-      };
-
-      auto const preState = state;
-
-      auto const flags = interp.step(op);
-      if (flags.calledNoReturn) {
-        gen(op);
-        gen(bc::BreakTraceHint {}); // The rest of this code is going
-                                    // to be unreachable.
-        // It would be nice to put a fatal here, but we can't because
-        // it will mess up the bytecode invariant about blocks
-        // not-reachable via fallthrough if the stack depth is
-        // non-zero.
-        continue;
-      }
-
-      if (options.InsertAssertions) {
-        insert_assertions(*ctx.func, op, preState, flags.mayReadLocals, gen);
-      }
-
-      if (options.RemoveDeadBlocks && flags.tookBranch) {
-        switch (op.op) {
-        case Op::JmpNZ:  blk->fallthrough = op.JmpNZ.target; break;
-        case Op::JmpZ:   blk->fallthrough = op.JmpZ.target;  break;
-        default:
-          // No switch, etc support.
-          always_assert(0 && "unsupported tookBranch case");
-        }
-        continue;
-      }
-
-      if (options.ConstantProp && flags.canConstProp) {
-        if (propagate_constants(op, state, gen)) continue;
-      }
-
-      if (options.StrengthReduceBC && flags.strengthReduced) {
-        for (auto& hh : *flags.strengthReduced) gen(hh);
-        continue;
-      }
-
-      gen(op);
-    }
-
-    blk->hhbcs = std::move(newBCs);
+    blk->hhbcs = optimize_block(index, ainfo.ctx, blk, state);
   }
 }
 

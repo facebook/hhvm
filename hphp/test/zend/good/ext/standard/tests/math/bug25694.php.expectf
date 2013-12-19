@@ -1,0 +1,17 @@
+round 0.045 = 0.05
+number format 0.045 = 0.05
+
+round 0.055 = 0.06
+number format 0.055 = 0.06
+
+round 5.045 = 5.05
+number format 5.045 = 5.05
+
+round 5.055 = 5.06
+number format 5.055 = 5.06
+
+round 3.025 = 3.03
+number format 3.025 = 3.03
+
+round 4.025 = 4.03
+number format 4.025 = 4.03

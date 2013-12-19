@@ -1,6 +1,6 @@
 string(30) "Integer key 2 is out of bounds"
 string(30) "Integer key 2 is out of bounds"
-object(Vector)#1 (2) {
+object(HH\Vector)#1 (2) {
   [0]=>
   string(4) "zero"
   [1]=>
@@ -8,7 +8,7 @@ object(Vector)#1 (2) {
 }
 string(31) "Integer key -2 is out of bounds"
 string(31) "Integer key -2 is out of bounds"
-object(Vector)#3 (2) {
+object(HH\Vector)#3 (2) {
   [0]=>
   string(4) "zero"
   [1]=>

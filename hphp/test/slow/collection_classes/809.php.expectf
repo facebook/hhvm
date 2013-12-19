@@ -6,9 +6,9 @@ i:1;
 }
 ]. stdClass is not a collection class. in %s/test/slow/collection_classes/809.php on line 10
 bool(false)
-HipHop Notice: Unable to unserialize: [O:6:"Vector":1:{
+HipHop Notice: Unable to unserialize: [O:9:"HH\Vector":1:{
 s:3:"foo";
 i:7;
 }
-]. Vector does not support the 'O' serialization format. in %s/test/slow/collection_classes/809.php on line 16
+]. HH\Vector does not support the 'O' serialization format. in %s/test/slow/collection_classes/809.php on line 16
 bool(false)

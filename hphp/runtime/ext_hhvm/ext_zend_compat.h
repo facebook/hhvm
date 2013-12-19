@@ -93,7 +93,7 @@ inline TypedValue* zend_wrap_func(
     ar->numArgs(),
     return_value->m_data.pref,
     return_value_ptr,
-    this_ptr->m_data.pref,
+    this_ptr_var.isNull() ? nullptr : this_ptr->m_data.pref,
     1
   );
   ZendExecutionStack::popHHVMStack();

@@ -1,0 +1,18 @@
+array(2) {
+  ["arg"]=>
+  array(2) {
+    [0]=>
+    string(5) "value"
+    [1]=>
+    string(5) "value"
+  }
+  ["a"]=>
+  array(3) {
+    [0]=>
+    string(5) "value"
+    [1]=>
+    string(5) "value"
+    [2]=>
+    string(5) "value"
+  }
+}

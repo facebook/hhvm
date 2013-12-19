@@ -1,0 +1,5 @@
+<?php
+// Gets a meaningless off-by-one error
+echo "skip";
+
+if (!gd_info()['FreeType Support']) echo 'skip';

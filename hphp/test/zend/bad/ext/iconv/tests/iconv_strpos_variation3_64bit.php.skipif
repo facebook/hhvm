@@ -1,0 +1,5 @@
+<?php
+extension_loaded('iconv') or die('skip');
+function_exists('iconv_strpos') or die("skip iconv_strpos() is not available in this build");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+?>

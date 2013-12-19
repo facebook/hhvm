@@ -110,9 +110,11 @@ bool RuntimeOption::RepoAuthoritative = false;
 
 using std::string;
 
-using Transl::VMRegAnchor;
-using Transl::EagerVMRegAnchor;
-using Transl::tx64;
+using JIT::VMRegAnchor;
+using JIT::EagerVMRegAnchor;
+using JIT::tx64;
+using JIT::tl_regState;
+using JIT::VMRegState;
 
 #if DEBUG
 #define OPTBLD_INLINE
@@ -208,7 +210,7 @@ const StaticString s_include("include");
 
 #define DECODE_LA(var) DECODE_IVA(var)
 #define DECODE_IA(var) DECODE_IVA(var)
-#define DECODE_OA(var) DECODE(unsigned char, var)
+#define DECODE_OA      DECODE
 
 #define DECODE_ITER_LIST(typeList, idList, vecLen) \
   DECODE(int32_t, vecLen);                         \
@@ -1523,7 +1525,7 @@ void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
     int np = enterFnAr->m_func->numParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
-    Transl::TCA start = enterFnAr->m_func->getPrologue(na);
+    JIT::TCA start = enterFnAr->m_func->getPrologue(na);
     tx64->enterTCAtPrologue(enterFnAr, start);
   } else {
     if (prepareFuncEntry(enterFnAr, m_pc)) {
@@ -1533,7 +1535,7 @@ void VMExecutionContext::enterVMPrologue(ActRec* enterFnAr) {
 }
 
 void VMExecutionContext::enterVMWork(ActRec* enterFnAr) {
-  Transl::TCA start = nullptr;
+  JIT::TCA start = nullptr;
   if (enterFnAr) {
     if (!EventHook::FunctionEnter(enterFnAr, EventHook::NormalFunc)) return;
     checkStack(m_stack, enterFnAr->m_func);
@@ -1595,7 +1597,7 @@ resume:
     return;
 
   } catch (...) {
-    always_assert(Transl::tl_regState == Transl::VMRegState::CLEAN);
+    always_assert(JIT::tl_regState == JIT::VMRegState::CLEAN);
     auto const action = exception_handler();
     if (action == UnwindAction::ResumeVM) {
       goto resume;
@@ -2793,7 +2795,7 @@ void VMExecutionContext::exitDebuggerDummyEnv() {
 // Identifies the set of return helpers that we may set m_savedRip to in an
 // ActRec.
 bool VMExecutionContext::isReturnHelper(uintptr_t address) {
-  auto tcAddr = reinterpret_cast<Transl::TCA>(address);
+  auto tcAddr = reinterpret_cast<JIT::TCA>(address);
   auto& u = tx64->uniqueStubs;
   return tcAddr == u.retHelper ||
          tcAddr == u.genRetHelper ||
@@ -2811,7 +2813,7 @@ void VMExecutionContext::preventReturnsToTC() {
     ActRec *ar = getFP();
     while (ar) {
       if (!isReturnHelper(ar->m_savedRip) &&
-          (tx64->isValidCodeAddress((Transl::TCA)ar->m_savedRip))) {
+          (tx64->isValidCodeAddress((JIT::TCA)ar->m_savedRip))) {
         TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
                  "func %s\n", ar, ar->m_savedRip,
                  ar->m_func->fullName()->data());
@@ -3681,8 +3683,8 @@ OPTBLD_INLINE void VMExecutionContext::iopCnsU(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopDefCns(IOP_ARGS) {
   NEXT();
   DECODE_LITSTR(s);
-  TypedValue* tv = m_stack.topTV();
-  tvAsVariant(tv) = Unit::defCns(s, tv);
+  bool result = Unit::defCns(s, m_stack.topTV());
+  m_stack.replaceTV<KindOfBoolean>(result);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopClsCns(IOP_ARGS) {
@@ -3733,7 +3735,6 @@ OPTBLD_INLINE void VMExecutionContext::iopNot(IOP_ARGS) {
   Cell* c1 = m_stack.topC();
   cellAsVariant(*c1) = !cellAsVariant(*c1).toBoolean();
 }
-
 
 OPTBLD_INLINE void VMExecutionContext::iopAbs(IOP_ARGS) {
   NEXT();
@@ -3993,9 +3994,7 @@ OPTBLD_INLINE void VMExecutionContext::iopInstanceOf(IOP_ARGS) {
     raise_error("Class name must be a valid object or a string");
   }
   m_stack.popC();
-  tvRefcountedDecRefCell(c2);
-  c2->m_data.num = r;
-  c2->m_type = KindOfBoolean;
+  m_stack.replaceC<KindOfBoolean>(r);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopInstanceOfD(IOP_ARGS) {
@@ -4007,18 +4006,14 @@ OPTBLD_INLINE void VMExecutionContext::iopInstanceOfD(IOP_ARGS) {
   const NamedEntity* ne = m_fp->m_func->unit()->lookupNamedEntityId(id);
   Cell* c1 = m_stack.topC();
   bool r = cellInstanceOf(c1, ne);
-  tvRefcountedDecRefCell(c1);
-  c1->m_data.num = r;
-  c1->m_type = KindOfBoolean;
+  m_stack.replaceC<KindOfBoolean>(r);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopPrint(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
   echo(cellAsVariant(*c1).toString());
-  tvRefcountedDecRefCell(c1);
-  c1->m_type = KindOfInt64;
-  c1->m_data.num = 1;
+  m_stack.replaceC<KindOfInt64>(1);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopClone(IOP_ARGS) {
@@ -4054,7 +4049,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFatal(IOP_ARGS) {
   NEXT();
   TypedValue* top = m_stack.topTV();
   std::string msg;
-  DECODE_OA(kind_char);
+  DECODE_OA(FatalOp, kind_char);
   if (IS_STRING_TYPE(top->m_type)) {
     msg = top->m_data.pstr->data();
   } else {
@@ -4062,7 +4057,7 @@ OPTBLD_INLINE void VMExecutionContext::iopFatal(IOP_ARGS) {
   }
   m_stack.popTV();
 
-  switch (static_cast<FatalOp>(kind_char)) {
+  switch (kind_char) {
   case FatalOp::RuntimeOmitFrame:
     raise_error_without_first_frame(msg);
     break;
@@ -4625,9 +4620,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetN(IOP_ARGS) {
   } else {
     e = !cellIsNull(tvToCell(tv));
   }
-  tvRefcountedDecRefCell(tv1);
-  tv1->m_data.num = e;
-  tv1->m_type = KindOfBoolean;
+  m_stack.replaceC<KindOfBoolean>(e);
   decRefStr(name);
 }
 
@@ -4643,9 +4636,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetG(IOP_ARGS) {
   } else {
     e = !cellIsNull(tvToCell(tv));
   }
-  tvRefcountedDecRefCell(tv1);
-  tv1->m_data.num = e;
-  tv1->m_type = KindOfBoolean;
+  m_stack.replaceC<KindOfBoolean>(e);
   decRefStr(name);
 }
 
@@ -4711,13 +4702,14 @@ OPTBLD_INLINE void VMExecutionContext::iopIssetL(IOP_ARGS) {
 
 OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
   switch (op) {
-  case IsTypeOp::Null:  return is_null(tvAsCVarRef(tv));
-  case IsTypeOp::Bool:  return is_bool(tvAsCVarRef(tv));
-  case IsTypeOp::Int:   return is_int(tvAsCVarRef(tv));
-  case IsTypeOp::Dbl:   return is_double(tvAsCVarRef(tv));
-  case IsTypeOp::Arr:   return is_array(tvAsCVarRef(tv));
-  case IsTypeOp::Obj:   return is_object(tvAsCVarRef(tv));
-  case IsTypeOp::Str:   return is_string(tvAsCVarRef(tv));
+  case IsTypeOp::Null:   return is_null(tvAsCVarRef(tv));
+  case IsTypeOp::Bool:   return is_bool(tvAsCVarRef(tv));
+  case IsTypeOp::Int:    return is_int(tvAsCVarRef(tv));
+  case IsTypeOp::Dbl:    return is_double(tvAsCVarRef(tv));
+  case IsTypeOp::Arr:    return is_array(tvAsCVarRef(tv));
+  case IsTypeOp::Obj:    return is_object(tvAsCVarRef(tv));
+  case IsTypeOp::Str:    return is_string(tvAsCVarRef(tv));
+  case IsTypeOp::Scalar: return f_is_scalar(tvAsCVarRef(tv));
   }
   not_reached();
 }
@@ -4725,22 +4717,22 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
 OPTBLD_INLINE void VMExecutionContext::iopIsTypeL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
-  DECODE_OA(op);
+  DECODE_OA(IsTypeOp, op);
   TypedValue* tv = frame_local(m_fp, local);
   if (tv->m_type == KindOfUninit) {
     raise_undefined_local(m_fp, local);
   }
   TypedValue* topTv = m_stack.allocTV();
-  topTv->m_data.num = isTypeHelper(tv, static_cast<IsTypeOp>(op));
+  topTv->m_data.num = isTypeHelper(tv, op);
   topTv->m_type = KindOfBoolean;
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopIsTypeC(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA(IsTypeOp, op);
   TypedValue* topTv = m_stack.topTV();
   assert(topTv->m_type != KindOfRef);
-  bool ret = isTypeHelper(topTv, static_cast<IsTypeOp>(op));
+  bool ret = isTypeHelper(topTv, op);
   tvRefcountedDecRefCell(topTv);
   topTv->m_data.num = ret;
   topTv->m_type = KindOfBoolean;
@@ -4838,27 +4830,27 @@ OPTBLD_INLINE static void implAssertT(TypedValue* tv, AssertTOp op) {
 OPTBLD_INLINE void VMExecutionContext::iopAssertTL(IOP_ARGS) {
   NEXT();
   DECODE_LA(localId);
-  DECODE_OA(op);
-  implAssertT(frame_local(m_fp, localId), static_cast<AssertTOp>(op));
+  DECODE_OA(AssertTOp, op);
+  implAssertT(frame_local(m_fp, localId), op);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopAssertTStk(IOP_ARGS) {
   NEXT();
   DECODE_IVA(stkSlot);
-  DECODE_OA(op);
-  implAssertT(m_stack.indTV(stkSlot), static_cast<AssertTOp>(op));
+  DECODE_OA(AssertTOp, op);
+  implAssertT(m_stack.indTV(stkSlot), op);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopPredictTL(IOP_ARGS) {
   NEXT();
   DECODE_LA(localId);
-  DECODE_OA(op);
+  DECODE_OA(AssertTOp, op);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopPredictTStk(IOP_ARGS) {
   NEXT();
   DECODE_IVA(stkSlot);
-  DECODE_OA(op);
+  DECODE_OA(AssertTOp, op);
 }
 
 OPTBLD_INLINE static void implAssertObj(TypedValue* tv,
@@ -4901,9 +4893,7 @@ OPTBLD_INLINE void VMExecutionContext::iopEmptyL(IOP_ARGS) {
   DECODE_LA(local);
   TypedValue* loc = frame_local(m_fp, local);
   bool e = !cellToBool(*tvToCell(loc));
-  TypedValue* tv1 = m_stack.allocTV();
-  tv1->m_data.num = e;
-  tv1->m_type = KindOfBoolean;
+  m_stack.pushBool(e);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopEmptyN(IOP_ARGS) {
@@ -4918,9 +4908,7 @@ OPTBLD_INLINE void VMExecutionContext::iopEmptyN(IOP_ARGS) {
   } else {
     e = !cellToBool(*tvToCell(tv));
   }
-  tvRefcountedDecRefCell(tv1);
-  tv1->m_data.num = e;
-  tv1->m_type = KindOfBoolean;
+  m_stack.replaceC<KindOfBoolean>(e);
   decRefStr(name);
 }
 
@@ -4936,9 +4924,7 @@ OPTBLD_INLINE void VMExecutionContext::iopEmptyG(IOP_ARGS) {
   } else {
     e = !cellToBool(*tvToCell(tv));
   }
-  tvRefcountedDecRefCell(tv1);
-  tv1->m_data.num = e;
-  tv1->m_type = KindOfBoolean;
+  m_stack.replaceC<KindOfBoolean>(e);
   decRefStr(name);
 }
 
@@ -4967,9 +4953,7 @@ OPTBLD_INLINE void VMExecutionContext::iopAKExists(IOP_ARGS) {
   TypedValue* key = arr + 1;
   bool result = f_array_key_exists(tvAsCVarRef(key), tvAsCVarRef(arr));
   m_stack.popTV();
-  tvRefcountedDecRef(key);
-  key->m_data.num = result;
-  key->m_type = KindOfBoolean;
+  m_stack.replaceTV<KindOfBoolean>(result);
 }
 
 OPTBLD_INLINE void VMExecutionContext::iopIdx(IOP_ARGS) {
@@ -4978,7 +4962,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIdx(IOP_ARGS) {
   TypedValue* key = m_stack.indTV(1);
   TypedValue* arr = m_stack.indTV(2);
 
-  TypedValue result = genericIdx(*arr, *key, *def);
+  TypedValue result = JIT::genericIdx(*arr, *key, *def);
   m_stack.popTV();
   m_stack.popTV();
   tvRefcountedDecRef(arr);
@@ -5124,7 +5108,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetWithRefRM(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopSetOpL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
-  DECODE_OA(op);
+  DECODE_OA(SetOpOp, op);
   Cell* fr = m_stack.topC();
   Cell* to = tvToCell(frame_local(m_fp, local));
   SETOP_BODY_CELL(to, op, fr);
@@ -5134,7 +5118,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpL(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpN(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA(SetOpOp, op);
   StringData* name;
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
@@ -5152,7 +5136,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpN(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpG(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA(SetOpOp, op);
   StringData* name;
   Cell* fr = m_stack.topC();
   TypedValue* tv2 = m_stack.indTV(1);
@@ -5170,7 +5154,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpG(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpS(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA(SetOpOp, op);
   Cell* fr = m_stack.topC();
   TypedValue* classref = m_stack.indTV(1);
   TypedValue* propn = m_stack.indTV(2);
@@ -5194,7 +5178,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpS(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopSetOpM(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA(SetOpOp, op);
   DECLARE_SETHELPER_ARGS
   if (!setHelperPre<MoreWarnings, true, false, false, 1,
       VectorLeaveCode::LeaveLast>(MEMBERHELPERPRE_ARGS)) {
@@ -5235,7 +5219,7 @@ OPTBLD_INLINE void VMExecutionContext::iopSetOpM(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopIncDecL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
-  DECODE_OA(op);
+  DECODE_OA(IncDecOp, op);
   TypedValue* to = m_stack.allocTV();
   tvWriteUninit(to);
   TypedValue* fr = frame_local(m_fp, local);
@@ -5244,11 +5228,10 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecL(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecN(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA(IncDecOp, op);
   StringData* name;
   TypedValue* nameCell = m_stack.topTV();
   TypedValue* local = nullptr;
-  // XXX We're probably not getting warnings totally correct here
   lookupd_var(m_fp, name, nameCell, local);
   assert(local != nullptr);
   IncDecBody<true>(op, local, nameCell);
@@ -5257,11 +5240,10 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecN(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecG(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA(IncDecOp, op);
   StringData* name;
   TypedValue* nameCell = m_stack.topTV();
   TypedValue* gbl = nullptr;
-  // XXX We're probably not getting warnings totally correct here
   lookupd_gbl(m_fp, name, nameCell, gbl);
   assert(gbl != nullptr);
   IncDecBody<true>(op, gbl, nameCell);
@@ -5271,7 +5253,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecG(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopIncDecS(IOP_ARGS) {
   StringData* name;
   SPROP_OP_PRELUDE
-  DECODE_OA(op);
+  DECODE_OA(IncDecOp, op);
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 clsref->m_data.pcls->name()->data(),
@@ -5285,7 +5267,7 @@ OPTBLD_INLINE void VMExecutionContext::iopIncDecS(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopIncDecM(IOP_ARGS) {
   NEXT();
-  DECODE_OA(op);
+  DECODE_OA(IncDecOp, op);
   DECLARE_SETHELPER_ARGS
   TypedValue to;
   tvWriteUninit(&to);
@@ -6680,13 +6662,16 @@ OPTBLD_INLINE void VMExecutionContext::iopThis(IOP_ARGS) {
 
 OPTBLD_INLINE void VMExecutionContext::iopBareThis(IOP_ARGS) {
   NEXT();
-  DECODE_OA(notice);
+  DECODE_OA(BareThisOp, bto);
   if (m_fp->hasThis()) {
     ObjectData* this_ = m_fp->getThis();
     m_stack.pushObject(this_);
   } else {
     m_stack.pushNull();
-    if (notice) raise_notice(Strings::WARN_NULL_THIS);
+    switch (bto) {
+    case BareThisOp::Notice:   raise_notice(Strings::WARN_NULL_THIS); break;
+    case BareThisOp::NoNotice: break;
+    }
   }
 }
 
@@ -7275,7 +7260,7 @@ VMExecutionContext::prettyStack(const string& prefix) const {
 }
 
 void VMExecutionContext::checkRegStateWork() const {
-  assert(Transl::tl_regState == Transl::VMRegState::CLEAN);
+  assert(JIT::tl_regState == JIT::VMRegState::CLEAN);
 }
 
 void VMExecutionContext::DumpStack() {

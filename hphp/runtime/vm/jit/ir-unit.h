@@ -168,12 +168,7 @@ class IRUnit {
   TRACE_SET_MOD(hhir);
 
 public:
-  IRUnit()
-    : m_nextBlockId(0)
-    , m_nextOpndId(0)
-    , m_nextInstId(0)
-    , m_main(nullptr)
-  {}
+  explicit IRUnit(Offset initialBcOffset);
 
   /*
    * Create an IRInstruction with lifetime equivalent to this IRUnit.
@@ -263,9 +258,8 @@ public:
   IRInstruction* mov(SSATmp* dst, SSATmp* src, BCMarker marker);
 
   /*
-   * Create a new trace
+   * Create a new exit trace.
    */
-  Block* makeMain(uint32_t bcOff);
   Block* addExit();
 
   Arena&   arena()               { return m_arena; }
@@ -273,7 +267,8 @@ public:
   uint32_t numBlocks() const     { return m_nextBlockId; }
   uint32_t numInsts() const      { return m_nextInstId; }
   CSEHash& constTable()          { return m_constTable; }
-  IRTrace* main() const          { return m_main; }
+  IRTrace* main()                { return m_main; }
+  const IRTrace* main() const    { return m_main; }
   uint32_t bcOff() const         { return m_bcOff; }
 
   // Overloads useful for StateVector and IdSet
@@ -281,8 +276,8 @@ public:
   uint32_t numIds(const Block*) const { return numBlocks(); }
   uint32_t numIds(const IRInstruction*) const { return numInsts(); }
 
-  typedef std::list<IRTrace*> ExitList;
-  ExitList& exits() { return m_exits; }
+  typedef smart::vector<IRTrace*> ExitList;
+  ExitList& exits()             { return m_exits; }
   const ExitList& exits() const { return m_exits; }
   Block* entry() const;
   std::string toString() const;

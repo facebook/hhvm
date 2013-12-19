@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $mapFn = function ($v) {
  return $v+1;

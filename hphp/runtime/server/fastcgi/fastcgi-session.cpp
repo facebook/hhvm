@@ -308,10 +308,10 @@ bool FastCGISession::parseRecordBegin(Cursor& cursor, size_t& available) {
     return false;
   }
   m_recordType = static_cast<RecordType>(cursor.readBE<uint8_t>());
-  m_requestId = cursor.readBE<typeof(m_requestId)>();
-  m_contentLength = cursor.readBE<typeof(m_contentLength)>();
+  m_requestId = cursor.readBE<decltype(m_requestId)>();
+  m_contentLength = cursor.readBE<decltype(m_contentLength)>();
   m_contentLeft = m_contentLength;
-  m_paddingLength = cursor.readBE<typeof(m_paddingLength)>();
+  m_paddingLength = cursor.readBE<decltype(m_paddingLength)>();
   cursor.skip(k_recordReservedLength);
   available -= k_recordBeginLength;
   return true;

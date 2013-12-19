@@ -17,7 +17,6 @@
   SetL $x
   PopC
 
-
   CGetL $x
   AsyncAwait  # should fatal
   PopC

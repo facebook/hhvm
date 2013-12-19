@@ -56,7 +56,7 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
   return val->m_data.pref;
 }
 
-namespace Transl {
+namespace JIT {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -115,15 +115,15 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
 }
 
 void setNewElem(TypedValue* base, Cell val) {
-  SetNewElem<false>(base, &val);
+  HPHP::SetNewElem<false>(base, &val);
 }
 
 void setNewElemArray(TypedValue* base, Cell val) {
-  SetNewElemArray(base, &val);
+  HPHP::SetNewElemArray(base, &val);
 }
 
 void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
-  base = NewElem(mis->tvScratch, mis->tvRef, base);
+  base = HPHP::NewElem(mis->tvScratch, mis->tvRef, base);
   if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
     tvBindRef(val, base);
   }
@@ -259,7 +259,7 @@ void VerifyParamTypeFail(int paramNum) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
-  const TypeConstraint& tc = func->params()[paramNum].typeConstraint();
+  auto const& tc = func->params()[paramNum].typeConstraint();
   TypedValue* tv = frame_local(ar, paramNum);
   assert(!tc.check(tv, func));
   tc.verifyFail(func, paramNum, tv);
@@ -274,7 +274,7 @@ void VerifyParamTypeCallable(TypedValue value, int param) {
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,
                          int param,
-                         const TypeConstraint* expected) {
+                         const HPHP::TypeConstraint* expected) {
   if (LIKELY(constraint && cls->classof(constraint))) {
     return;
   }
@@ -477,7 +477,7 @@ TCA sswitchHelperFast(const StringData* val,
 
 // TODO(#2031980): clear these out
 void tv_release_generic(TypedValue* tv) {
-  assert(Transl::tx64->stateIsDirty());
+  assert(JIT::tx64->stateIsDirty());
   assert(tv->m_type == KindOfString || tv->m_type == KindOfArray ||
          tv->m_type == KindOfObject || tv->m_type == KindOfResource ||
          tv->m_type == KindOfRef);
@@ -485,7 +485,7 @@ void tv_release_generic(TypedValue* tv) {
 }
 
 void tv_release_typed(RefData* pv, DataType dt) {
-  assert(Transl::tx64->stateIsDirty());
+  assert(JIT::tx64->stateIsDirty());
   assert(dt == KindOfString || dt == KindOfArray ||
          dt == KindOfObject || dt == KindOfResource ||
          dt == KindOfRef);
@@ -787,7 +787,7 @@ void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
 }
 
 const Func* lookupUnknownFunc(const StringData* name) {
-  Transl::VMRegAnchor _;
+  JIT::VMRegAnchor _;
   auto const func = Unit::loadFunc(name);
   if (UNLIKELY(!func)) {
     raise_error("Undefined function: %s", name->data());

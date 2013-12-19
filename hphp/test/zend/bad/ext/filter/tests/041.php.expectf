@@ -1,0 +1,14 @@
+array(3) {
+  ["abc"]=>
+  string(3) "dir"
+  ["def"]=>
+  string(4) "true"
+  ["xyz"]=>
+  string(17) "&#34;foo bar&#34;"
+}
+bool(true)
+string(3) "dir"
+string(4) "true"
+string(9) ""foo bar""
+bool(false)
+string(17) "&#34;foo bar&#34;"

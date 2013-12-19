@@ -56,8 +56,6 @@ private:
 Variant f_stream_context_create(CArrRef options = null_array,
                                  CArrRef params = null_array);
 
-Resource f_stream_context_get_default(CArrRef options = null_array);
-
 Variant f_stream_context_get_options(CResRef stream_or_context);
 
 bool f_stream_context_set_option(CResRef stream_or_context,

@@ -1,0 +1,91 @@
+*** Testing log1p() : usage variations ***
+
+-- Iteration 1 --
+float(0)
+
+-- Iteration 2 --
+float(0.69314718055995)
+
+-- Iteration 3 --
+float(9.4210874029538)
+
+-- Iteration 4 --
+float(NAN)
+
+-- Iteration 5 --
+float(21.487562597358)
+
+-- Iteration 6 --
+float(NAN)
+
+-- Iteration 7 --
+float(2.4423470353692)
+
+-- Iteration 8 --
+float(NAN)
+
+-- Iteration 9 --
+float(11.723654587153)
+
+-- Iteration 10 --
+float(0.0012338064377078)
+
+-- Iteration 11 --
+float(0.40546510810816)
+
+-- Iteration 12 --
+float(0)
+
+-- Iteration 13 --
+float(0)
+
+-- Iteration 14 --
+float(0.69314718055995)
+
+-- Iteration 15 --
+float(0)
+
+-- Iteration 16 --
+float(0.69314718055995)
+
+-- Iteration 17 --
+float(0)
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 22 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 23 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 24 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 25 --
+float(0)
+
+-- Iteration 26 --
+float(0)
+
+-- Iteration 27 --
+HipHop Warning: %s
+NULL
+===Done===

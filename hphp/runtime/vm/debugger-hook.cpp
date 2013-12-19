@@ -28,6 +28,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debuggerflow);
+using JIT::tx64;
 
 // Hook called from the bytecode interpreter before every opcode executed while
 // a debugger is attached. The debugger may choose to hold the thread below

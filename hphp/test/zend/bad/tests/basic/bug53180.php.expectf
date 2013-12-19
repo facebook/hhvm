@@ -1,0 +1,8 @@
+array(3) {
+  ["email"]=>
+  string(3) "foo"
+  ["password"]=>
+  string(3) "bar"
+  ["submit"]=>
+  string(6) "Log on"
+}

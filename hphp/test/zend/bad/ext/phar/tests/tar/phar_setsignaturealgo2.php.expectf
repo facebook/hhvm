@@ -1,0 +1,37 @@
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(5) "SHA-1"
+}
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(3) "MD5"
+}
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(5) "SHA-1"
+}
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(7) "SHA-256"
+}
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(7) "SHA-512"
+}
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(7) "OpenSSL"
+}
+===DONE===

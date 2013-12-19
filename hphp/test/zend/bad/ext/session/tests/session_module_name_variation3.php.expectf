@@ -1,0 +1,9 @@
+*** Testing session_module_name() : variation ***
+string(%d) "%s"
+string(4) "user"
+HipHop Fatal error: %s
+Stack trace:
+#0 [internal function]: open('', 'PHPSESSID')
+#1 %s(%d): session_start()
+#2 {main}
+  thrown in %s on line %d

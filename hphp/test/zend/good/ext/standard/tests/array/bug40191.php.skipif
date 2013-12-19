@@ -1,0 +1,1 @@
+<?php if (!extension_loaded('spl')) die("skip SPL is not available"); ?>

@@ -1,0 +1,9 @@
+*** Testing session_commit() : variation ***
+array(0) {
+}
+NULL
+array(0) {
+}
+bool(true)
+bool(true)
+Done

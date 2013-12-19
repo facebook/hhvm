@@ -525,31 +525,33 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
         ok = false;
         break;
       case Op::IsTypeC: case Op::IsTypeL:
-#define IS_TYPE_OP(x)  if (op == static_cast<uint8_t>(IsTypeOp::x)) break;
-        IS_TYPE_OPS
-#undef IS_TYPE_OP
+#define ISTYPE_OP(x)  if (op == static_cast<uint8_t>(IsTypeOp::x)) break;
+        ISTYPE_OPS
+#undef ISTYPE_OP
         error("invalid operation for IsType*: %d\n", op);
         ok = false;
         break;
       case OpIncDecL: case OpIncDecN: case OpIncDecG: case OpIncDecS:
       case OpIncDecM:
-        if (op >= IncDec_invalid) {
-          error("invalid operation for IncDec*: %d\n", op);
-          ok = false;
-        }
+#define INCDEC_OP(x)   if (op == static_cast<uint8_t>(IncDecOp::x)) break;
+        INCDEC_OPS
+#undef INCDEC_OP
+        error("invalid operation for IncDec*: %d\n", op);
+        ok = false;
         break;
       case OpSetOpL: case OpSetOpN: case OpSetOpG: case OpSetOpS:
       case OpSetOpM:
-        if (op >= SetOp_invalid) {
-          error("invalid operation for SetOp*: %d\n", op);
-          ok = false;
-        }
+#define SETOP_OP(x, y) if (op == static_cast<uint8_t>(SetOpOp::x)) break;
+        SETOP_OPS
+#undef SETOP_OP
+        error("invalid operation for SetOp*: %d\n", op);
+        ok = false;
         break;
       case OpBareThis:
         if (op > 1) ok = false;
         break;
       case OpFatal:
-#define FATAL_OP(x) if (FatalOp::x == static_cast<FatalOp>(op)) break;
+#define FATAL_OP(x)   if (op == static_cast<uint8_t>(FatalOp::x)) break;
         FATAL_OPS
 #undef FATAL_OP
         error("invalid error kind for Fatal: %d\n", op);

@@ -55,7 +55,7 @@ inline Offset liveSpOff() {
   return fp - vmsp();
 }
 
-namespace Transl {
+namespace JIT {
 
 inline uintptr_t tlsBase() {
   uintptr_t retval;
@@ -170,8 +170,8 @@ struct CallerFrame : public VMRegAnchor {
 };
 
 #define SYNC_VM_REGS_SCOPED() \
-  HPHP::Transl::VMRegAnchor _anchorUnused
+  HPHP::JIT::VMRegAnchor _anchorUnused
 
-} } // HPHP::Transl
+} } // HPHP::JIT
 
 #endif

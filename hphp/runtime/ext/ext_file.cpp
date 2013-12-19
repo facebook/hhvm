@@ -580,6 +580,11 @@ bool f_move_uploaded_file(const String& filename, const String& destination) {
 Variant f_parse_ini_file(const String& filename,
                          bool process_sections /* = false */,
                          int scanner_mode /* = k_INI_SCANNER_NORMAL */) {
+  if (filename.empty()) {
+    throw_invalid_argument("Filename cannot be empty!");
+    return false;
+  }
+
   String translated = File::TranslatePath(filename);
   if (translated.empty() || !f_file_exists(translated)) {
     if (filename[0] != '/') {
@@ -1368,7 +1373,7 @@ struct directory_data {
   }
 };
 IMPLEMENT_THREAD_LOCAL(directory_data, s_directory_data);
-InitFiniNode file_init([&] () {
+InitFiniNode file_init([]() {
   s_directory_data->defaultDirectory.detach();
 }, InitFiniNode::When::ThreadInit);
 

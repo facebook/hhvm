@@ -26,8 +26,8 @@
 
 namespace HPHP {
 
-using Transl::CallerFrame;
-using Transl::VMRegAnchor;
+using JIT::CallerFrame;
+using JIT::VMRegAnchor;
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers

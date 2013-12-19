@@ -15,11 +15,15 @@
 */
 
 #include "hphp/runtime/vm/hhbc.h"
+
+#include <type_traits>
+#include <sstream>
+
+#include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/stats.h"
-#include <sstream>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,9 +58,11 @@ ArgType immType(const Op opcode, int idx) {
 #define TWO(a, b) a,
 #define THREE(a, b, c) a,
 #define FOUR(a, b, c, d) a,
+#define OA(x) OA
 #define O(name, imm, unusedPop, unusedPush, unusedFlags) imm
     OPCODES
 // re-using definition of O below.
+#undef OA
 #undef NA
 #undef ONE
 #undef TWO
@@ -69,8 +75,10 @@ ArgType immType(const Op opcode, int idx) {
 #define TWO(a, b) b,
 #define THREE(a, b, c) b,
 #define FOUR(a, b, c, d) b,
+#define OA(x) OA
     OPCODES
 // re-using definition of O below.
+#undef OA
 #undef NA
 #undef ONE
 #undef TWO
@@ -83,7 +91,9 @@ ArgType immType(const Op opcode, int idx) {
 #define TWO(a, b) -1,
 #define THREE(a, b, c) c,
 #define FOUR(a, b, c, d) c,
+#define OA(x) OA
     OPCODES
+#undef OA
 #undef NA
 #undef ONE
 #undef TWO
@@ -96,7 +106,9 @@ ArgType immType(const Op opcode, int idx) {
 #define TWO(a, b) -1,
 #define THREE(a, b, c) -1,
 #define FOUR(a, b, c, d) d,
+#define OA(x) OA
     OPCODES
+#undef OA
 #undef O
 #undef NA
 #undef ONE
@@ -263,7 +275,7 @@ int instrLen(const Op* opcode) {
   return len;
 }
 
-Offset* instrJumpOffset(Op* instr) {
+Offset* instrJumpOffset(const Op* instr) {
   static const int8_t jumpMask[] = {
 #define NA 0
 #define MA 0
@@ -275,7 +287,7 @@ Offset* instrJumpOffset(Op* instr) {
 #define BA 1
 #define LA 0
 #define IA 0
-#define OA 0
+#define OA(x) 0
 #define VSA 0
 #define ONE(a) a
 #define TWO(a, b) (a + 2 * b)
@@ -329,7 +341,7 @@ Offset* instrJumpOffset(Op* instr) {
 }
 
 Offset instrJumpTarget(const Op* instrs, Offset pos) {
-  Offset* offset = instrJumpOffset(const_cast<Op*>(instrs + pos));
+  Offset* offset = instrJumpOffset(instrs + pos);
 
   if (!offset) {
     return InvalidAbsoluteOffset;
@@ -783,39 +795,6 @@ MemberCode parseMemberCode(const char* s) {
 }
 
 std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
-  // IncDec names
-  static const char* incdecNames[] = {
-    "PreInc", "PostInc", "PreDec", "PostDec"
-  };
-  static const int incdecNamesCount =
-    (int)(sizeof(incdecNames)/sizeof(const char*));
-  // IsType names
-  static const char* isTypeNames[] = {
-#define IS_TYPE_OP(x) #x,
-    IS_TYPE_OPS
-#undef IS_TYPE_OP
-  };
-  static auto const isTypeNamesCount =
-    sizeof(isTypeNames)/sizeof(const char*);
-  // SetOp names
-  static const char* setopNames[] = {
-#define SETOP_OP(setOpOp, bcOp) #bcOp,
-    SETOP_OPS
-#undef SETOP_OP
-  };
-  static const int setopNamesCount =
-    (int)(sizeof(setopNames)/sizeof(const char*));
-
-  auto assertTName = [&] (int immVal) {
-#   define ASSERTT_OP(x) case AssertTOp::x: return #x;
-    switch (static_cast<AssertTOp>(immVal)) {
-      ASSERTT_OPS
-    }
-#   undef ASSERTT_OP
-    assert(false);
-    return "<" "?" ">";
-  };
-
   std::stringstream out;
   const Op* iStart = it;
   Op op = *it;
@@ -846,33 +825,12 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   immIdx++;                                 \
 } while (false)
 
-#define READOA() do {                                             \
-  int immVal = (int)*((uchar*)&*it);                              \
-  it += sizeof(uchar);                                            \
-  out << " ";                                                     \
-  switch (op) {                                                   \
-  case OpIncDecL: case OpIncDecN: case OpIncDecG: case OpIncDecS: \
-  case OpIncDecM:                                                 \
-    out << ((immVal >= 0 && immVal < incdecNamesCount) ?          \
-            incdecNames[immVal] : "?");                           \
-    break;                                                        \
-  case OpSetOpL: case OpSetOpN: case OpSetOpG: case OpSetOpS:     \
-  case OpSetOpM:                                                  \
-    out << ((immVal >=0 && immVal < setopNamesCount) ?            \
-            setopNames[immVal] : "?");                            \
-    break;                                                        \
-  case Op::AssertTL: case Op::AssertTStk:                         \
-  case Op::PredictTL: case Op::PredictTStk:                       \
-    out << assertTName(immVal);                                   \
-    break;                                                        \
-  case Op::IsTypeL: case Op::IsTypeC:                             \
-    out << ((immVal >= 0 && immVal < isTypeNamesCount) ?          \
-             isTypeNames[immVal] : "?");                          \
-    break;                                                        \
-  default:                                                        \
-    out << immVal;                                                \
-    break;                                                        \
-  }                                                               \
+#define READOA(type) do {                       \
+  auto const immVal = static_cast<type>(        \
+    *reinterpret_cast<const uint8_t*>(it)       \
+  );                                            \
+  it += sizeof(uchar);                          \
+  out << " " << subopToName(immVal);            \
 } while (false)
 
 #define READVEC() do {                                                  \
@@ -986,7 +944,7 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
 #define H_IA READV()
 #define H_DA READ(double)
 #define H_BA READOFF()
-#define H_OA READOA()
+#define H_OA(type) READOA(type)
 #define H_SA READLITSTR(" ")
 #define H_AA                                                  \
   if (u) {                                                    \
@@ -1051,6 +1009,95 @@ const char* opcodeToName(Op op) {
   }
   return "Invalid";
 }
+
+//////////////////////////////////////////////////////////////////////
+
+static const char* IsTypeOp_names[] = {
+#define ISTYPE_OP(x) #x,
+  ISTYPE_OPS
+#undef ISTYPE_OP
+};
+
+static const char* AssertTOp_names[] = {
+#define ASSERTT_OP(op) #op,
+  ASSERTT_OPS
+#undef ASSERTT_OP
+};
+
+static const char* FatalOp_names[] = {
+#define FATAL_OP(op) #op,
+  FATAL_OPS
+#undef FATAL_OP
+};
+
+static const char* SetOpOp_names[] = {
+#define SETOP_OP(x, y) #x,
+  SETOP_OPS
+#undef SETOP_OP
+};
+
+static const char* IncDecOp_names[] = {
+#define INCDEC_OP(x) #x,
+  INCDEC_OPS
+#undef INCDEC_OP
+};
+
+static const char* BareThisOp_names[] = {
+#define BARETHIS_OP(x) #x,
+  BARETHIS_OPS
+#undef BARETHIS_OP
+};
+
+template<class T, size_t Sz>
+const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
+  static_assert(
+    std::is_same<typename std::underlying_type<T>::type,uint8_t>::value,
+    "Subops are all expected to be single-bytes"
+  );
+  auto const idx = static_cast<uint8_t>(opcode);
+  always_assert(idx < Sz);
+  return arr[idx];
+}
+
+template<class T, size_t Sz>
+folly::Optional<T> nameToSubopImpl(const char* (&arr)[Sz], const char* str) {
+  for (auto i = size_t{0}; i < Sz; ++i) {
+    if (!strcmp(str, arr[i])) return static_cast<T>(i);
+  }
+  return folly::none;
+}
+
+namespace {
+template<class T> struct NameToSubopHelper;
+}
+
+template<class T> folly::Optional<T> nameToSubop(const char* str) {
+  return NameToSubopHelper<T>::conv(str);
+}
+
+#define X(subop)                                            \
+  const char* subopToName(subop op) {                       \
+    return subopToNameImpl(subop##_names, op);              \
+  }                                                         \
+  namespace {                                               \
+  template<> struct NameToSubopHelper<subop> {              \
+    static folly::Optional<subop> conv(const char* str) {   \
+      return nameToSubopImpl<subop>(subop##_names, str);    \
+    }                                                       \
+  };                                                        \
+  }                                                         \
+  template folly::Optional<subop> nameToSubop(const char*);
+
+X(IsTypeOp)
+X(AssertTOp)
+X(FatalOp)
+X(SetOpOp)
+X(IncDecOp)
+X(BareThisOp)
+
+#undef X
+
+//////////////////////////////////////////////////////////////////////
 
 bool instrIsNonCallControlFlow(Op opcode) {
   if (!instrIsControlFlow(opcode) || isFCallStar(opcode)) return false;
@@ -1179,7 +1226,6 @@ bool ImmVector::decodeLastMember(const Unit* u,
   }
   return false;
 }
-
 
 int instrSpToArDelta(const Op* opcode) {
   // This function should only be called for instructions that read

@@ -16,7 +16,7 @@ $thisTestDir = "fileGetContentsVar1.dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
-$filename = "afile.txt";
+$filename = "file_get_contents_variation1.txt";
 $secondFile = $dir2."/".$filename;
 
 $newpath = create_include_path();

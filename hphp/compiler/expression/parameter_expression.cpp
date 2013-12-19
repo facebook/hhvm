@@ -315,7 +315,7 @@ void ParameterExpression::outputCodeModel(CodeGenerator &cg) {
   }
   if (m_modifier != 0) {
     cg.printPropertyHeader("modifiers");
-    printf("V:6:\"Vector\":1:{");
+    printf("V:9:\"HH\\Vector\":1:{");
     switch (m_modifier) {
       case T_PUBLIC: cg.printValue("public"); break;
       case T_PROTECTED: cg.printValue("protected"); break;
@@ -334,7 +334,7 @@ void ParameterExpression::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("expression");
     m_defaultValue->outputCodeModel(cg);
   }
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

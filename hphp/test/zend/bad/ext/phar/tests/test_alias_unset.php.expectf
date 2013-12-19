@@ -1,0 +1,4 @@
+Cannot open archive "%stest_alias_unset.2.phar.php", alias is already in use by existing archive
+string(5) "first"
+HipHop Warning: %s
+===DONE===

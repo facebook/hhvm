@@ -59,25 +59,25 @@ void prepareForSmash(CodeBlock&, int nBytes, int offset = 0);
  * Returns true if the given current frontier can have an nBytes-long
  * instruction written that will be smashable later.
  */
-bool isSmashable(Transl::TCA frontier, int nBytes, int offset = 0);
+bool isSmashable(JIT::TCA frontier, int nBytes, int offset = 0);
 
-void smashJmp(Transl::TCA jmpAddr, Transl::TCA newDest);
-void smashCall(Transl::TCA callAddr, Transl::TCA newDest);
-void smashJcc(Transl::TCA jccAddr, Transl::TCA newDest);
+void smashJmp(JIT::TCA jmpAddr, JIT::TCA newDest);
+void smashCall(JIT::TCA callAddr, JIT::TCA newDest);
+void smashJcc(JIT::TCA jccAddr, JIT::TCA newDest);
 
 /*
  * Emits a jump that satisfies the smash* routines above.
  */
-void emitSmashableJump(CodeBlock&, Transl::TCA dest, Transl::ConditionCode cc);
+void emitSmashableJump(CodeBlock&, JIT::TCA dest, JIT::ConditionCode cc);
 
 /*
  * Decodes jump instructions and returns their target. This includes handling
  * for ARM's multi-instruction "smashable jump" sequences. If the code does not
  * encode the right kind of jump, these functions return nullptr.
  */
-Transl::TCA jmpTarget(Transl::TCA addr);
-Transl::TCA jccTarget(Transl::TCA addr);
-Transl::TCA callTarget(Transl::TCA addr);
+JIT::TCA jmpTarget(JIT::TCA addr);
+JIT::TCA jccTarget(JIT::TCA addr);
+JIT::TCA callTarget(JIT::TCA addr);
 
 }}
 

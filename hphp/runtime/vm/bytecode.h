@@ -45,38 +45,37 @@ namespace HPHP {
 #define IOP_PASS(pc)    pc
 
 ALWAYS_INLINE
-void SETOP_BODY_CELL(Cell* lhs, unsigned char op, Cell* rhs) {
+void SETOP_BODY_CELL(Cell* lhs, SetOpOp op, Cell* rhs) {
   assert(cellIsPlausible(*lhs));
   assert(cellIsPlausible(*rhs));
 
   switch (op) {
-  case SetOpPlusEqual:      cellAddEq(*lhs, *rhs); break;
-  case SetOpMinusEqual:     cellSubEq(*lhs, *rhs); break;
-  case SetOpMulEqual:       cellMulEq(*lhs, *rhs); break;
-  case SetOpDivEqual:       cellDivEq(*lhs, *rhs); break;
-  case SetOpModEqual:       cellModEq(*lhs, *rhs); break;
-  case SetOpConcatEqual:
+  case SetOpOp::PlusEqual:      cellAddEq(*lhs, *rhs); return;
+  case SetOpOp::MinusEqual:     cellSubEq(*lhs, *rhs); return;
+  case SetOpOp::MulEqual:       cellMulEq(*lhs, *rhs); return;
+  case SetOpOp::DivEqual:       cellDivEq(*lhs, *rhs); return;
+  case SetOpOp::ModEqual:       cellModEq(*lhs, *rhs); return;
+  case SetOpOp::ConcatEqual:
     concat_assign(tvAsVariant(lhs), cellAsCVarRef(*rhs).toString());
-    break;
-  case SetOpAndEqual:       cellBitAndEq(*lhs, *rhs); break;
-  case SetOpOrEqual:        cellBitOrEq(*lhs, *rhs);  break;
-  case SetOpXorEqual:       cellBitXorEq(*lhs, *rhs); break;
+    return;
+  case SetOpOp::AndEqual:       cellBitAndEq(*lhs, *rhs); return;
+  case SetOpOp::OrEqual:        cellBitOrEq(*lhs, *rhs);  return;
+  case SetOpOp::XorEqual:       cellBitXorEq(*lhs, *rhs); return;
 
-  case SetOpSlEqual:
+  case SetOpOp::SlEqual:
     cellCastToInt64InPlace(lhs);
     lhs->m_data.num <<= cellToInt(*rhs);
-    break;
-  case SetOpSrEqual:
+    return;
+  case SetOpOp::SrEqual:
     cellCastToInt64InPlace(lhs);
     lhs->m_data.num >>= cellToInt(*rhs);
-    break;
-  default:
-    not_reached();
+    return;
   }
+  not_reached();
 }
 
 ALWAYS_INLINE
-void SETOP_BODY(TypedValue* lhs, unsigned char op, Cell* rhs) {
+void SETOP_BODY(TypedValue* lhs, SetOpOp op, Cell* rhs) {
   SETOP_BODY_CELL(tvToCell(lhs), op, rhs);
 }
 
@@ -754,6 +753,7 @@ public:
     m_top->m_data.field = arg;                                                \
     m_top->m_type = type;                                                     \
   }
+  PUSH_METHOD_ARG(Bool, KindOfBoolean, num, bool, b)
   PUSH_METHOD_ARG(Int, KindOfInt64, num, int64_t, i)
   PUSH_METHOD_ARG(Double, KindOfDouble, dbl, double, d)
 
@@ -770,7 +770,10 @@ public:
   ALWAYS_INLINE
   void pushStaticString(StringData* s) {
     assert(s->isStatic()); // No need to call s->incRefCount().
-    pushStringNoRc(s);
+    assert(m_top != m_elms);
+    m_top--;
+    m_top->m_data.pstr = s;
+    m_top->m_type = KindOfStaticString;
   }
 
   // This should only be called directly when the caller has
@@ -852,6 +855,55 @@ public:
     assert(kNumIterCells * sizeof(Cell) == sizeof(Iter));
     assert((uintptr_t)&m_top[-kNumIterCells] >= (uintptr_t)m_elms);
     m_top -= kNumIterCells;
+  }
+
+  ALWAYS_INLINE
+  void replaceC(const Cell& c) {
+    assert(m_top != m_base);
+    assert(m_top->m_type != KindOfRef);
+    tvRefcountedDecRefCell(m_top);
+    *m_top = c;
+  }
+
+  template <DataType DT>
+  ALWAYS_INLINE
+  void replaceC() {
+    assert(m_top != m_base);
+    assert(m_top->m_type != KindOfRef);
+    tvRefcountedDecRefCell(m_top);
+    *m_top = make_tv<DT>();
+  }
+
+  template <DataType DT, typename T>
+  ALWAYS_INLINE
+  void replaceC(T value) {
+    assert(m_top != m_base);
+    assert(m_top->m_type != KindOfRef);
+    tvRefcountedDecRefCell(m_top);
+    *m_top = make_tv<DT>(value);
+  }
+
+  ALWAYS_INLINE
+  void replaceTV(const TypedValue& tv) {
+    assert(m_top != m_base);
+    tvRefcountedDecRef(m_top);
+    *m_top = tv;
+  }
+
+  template <DataType DT>
+  ALWAYS_INLINE
+  void replaceTV() {
+    assert(m_top != m_base);
+    tvRefcountedDecRef(m_top);
+    *m_top = make_tv<DT>();
+  }
+
+  template <DataType DT, typename T>
+  ALWAYS_INLINE
+  void replaceTV(T value) {
+    assert(m_top != m_base);
+    tvRefcountedDecRef(m_top);
+    *m_top = make_tv<DT>(value);
   }
 
   ALWAYS_INLINE

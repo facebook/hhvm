@@ -1,0 +1,8 @@
+<?php
+$client = new SoapClient(dirname(__FILE__)."/round3_groupD_doclitparams.wsdl",array("trace"=>1,"exceptions"=>0));
+$client->echoString(array("param0"=>"Hello World"));
+echo $client->__getlastrequest();
+$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+include("round3_groupD_doclitparams.inc");
+echo "ok\n";
+?>

@@ -1,0 +1,5 @@
+Invalid alias "hi/" specified for phar "%sinvalid_alias.phar"
+Invalid alias "hi\l" specified for phar "%sinvalid_alias.phar"
+Invalid alias "hil;" specified for phar "%sinvalid_alias.phar"
+Invalid alias ":hil" specified for phar "%sinvalid_alias.phar"
+===DONE===

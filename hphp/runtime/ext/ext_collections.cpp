@@ -30,43 +30,16 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * Default implementations for iterable and keyed iterable materialization
- * methods.
+/**
+ * The "materialization" methods have the form "to[CollectionName]()" and
+ * allow us to get an instance of a collection type from another.
+ * This template provides a default implementation.
  */
-
-inline static Object toVectorDefaultImpl(ObjectData* obj) {
-  c_Vector* vec;
-  Object o = vec = NEWOBJ(c_Vector)();
-  vec->init(VarNR(obj));
-  return o;
-}
-
-inline static Object toSetDefaultImpl(ObjectData* obj) {
-  c_Set* st;
-  Object o = st = NEWOBJ(c_Set)();
-  st->init(VarNR(obj));
-  return o;
-}
-
-inline static Object toFrozenVectorDefaultImpl(ObjectData* obj) {
-  c_FrozenVector* fv;
-  Object o = fv = NEWOBJ(c_FrozenVector)();
-  fv->init(VarNR(obj));
-  return o;
-}
-
-inline static Object toMapDefaultImpl(ObjectData* obj) {
-  c_Map* mp;
-  Object o = mp = NEWOBJ(c_Map)();
-  mp->init(VarNR(obj));
-  return o;
-}
-
-inline static Object toStableMapDefaultImpl(ObjectData* obj) {
-  c_StableMap* smp;
-  Object o = smp = NEWOBJ(c_StableMap)();
-  smp->init(VarNR(obj));
+template<typename TCollection>
+inline static Object materializeDefaultImpl(ObjectData* obj) {
+  TCollection* col;
+  Object o = col = NEWOBJ(TCollection)();
+  col->init(VarNR(obj));
   return o;
 }
 
@@ -90,6 +63,16 @@ void throwIntOOB(int64_t key, bool isVector /* = false */) {
 void throwOOB(int64_t key) {
   throwIntOOB(key, true);
 }
+
+const int kCollectionObjectDataAttrs =
+  ObjectData::IsCppBuiltin |
+  ObjectData::IsCollection |
+  ObjectData::UseGet |
+  ObjectData::UseSet |
+  ObjectData::UseIsset |
+  ObjectData::UseUnset |
+  ObjectData::CallToImpl |
+  ObjectData::HasClone;
 
 static void throwStrOOB(StringData* key) ATTRIBUTE_NORETURN;
 
@@ -144,15 +127,7 @@ void triggerCow(c_Vector* vec) {
 
 c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
 
-  int flags = ObjectData::IsCollection |
-              ObjectData::UseGet |
-              ObjectData::UseSet |
-              ObjectData::UseIsset |
-              ObjectData::UseUnset |
-              ObjectData::CallToImpl |
-              ObjectData::HasCppClone;
-
-  ObjectData::setAttributes(flags);
+  ObjectData::setAttributes(kCollectionObjectDataAttrs);
   o_subclassData.u16 = Collection::VectorType;
 }
 
@@ -265,7 +240,7 @@ Object c_Vector::t_clear() {
   for (int i = 0; i < sz; ++i) {
     tvRefcountedDecRef(&m_data[i]);
   }
-  smart_free(m_data);
+  if (m_data) smart_free(m_data);
   m_data = nullptr;
   m_size = 0;
   m_capacity = 0;
@@ -541,7 +516,8 @@ Object c_Vector::ti_fromarray(CVarRef arr) {
   }
   target->m_capacity = target->m_size = sz;
   TypedValue* data;
-  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
+  target->m_data = data =
+    (TypedValue*)smart_malloc(size_t(sz) * sizeof(TypedValue));
   ssize_t pos = ad->iter_begin();
   for (uint i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
     assert(pos != ArrayData::invalid_index);
@@ -637,7 +613,7 @@ bool c_Vector::usort(CVarRef cmp_function) {
   }
   ElmUCompare<VectorValAccessor> comp;
   CallCtx ctx;
-  Transl::CallerFrame cf;
+  JIT::CallerFrame cf;
   vm_decode_function(cmp_function, cf(), false, ctx);
   if (!ctx.func) {
     return false;
@@ -672,11 +648,11 @@ void c_Vector::initFvFields(c_FrozenVector* fv) {
 }
 
 Object c_Vector::t_tovector() {
-  return toVectorDefaultImpl(this);
+  return materializeDefaultImpl<c_Vector>(this);
 }
 
 Object c_Vector::t_toset() {
-  return toSetDefaultImpl(this);
+  return materializeDefaultImpl<c_Set>(this);
 }
 
 Object c_Vector::t_tofrozenvector() {
@@ -690,11 +666,15 @@ Object c_Vector::t_tofrozenvector() {
 }
 
 Object c_Vector::t_tomap() {
-  return toMapDefaultImpl(this);
+  return materializeDefaultImpl<c_Map>(this);
 }
 
 Object c_Vector::t_tostablemap() {
-  return toStableMapDefaultImpl(this);
+  return materializeDefaultImpl<c_StableMap>(this);
+}
+
+Object c_Vector::t_tofrozenset() {
+  return materializeDefaultImpl<c_FrozenSet>(this);
 }
 
 c_VectorIterator::c_VectorIterator(Class* cls
@@ -866,53 +846,45 @@ Object c_FrozenVector::t_values() {
 
 c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
 
-  int flags = ObjectData::IsCollection |
-              ObjectData::UseGet |
-              ObjectData::UseSet |
-              ObjectData::UseIsset |
-              ObjectData::UseUnset |
-              ObjectData::CallToImpl;
-
-  ObjectData::setAttributes(flags);
+  ObjectData::setAttributes(kCollectionObjectDataAttrs);
   o_subclassData.u16 = Collection::FrozenVectorType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const char emptyMapSlot[sizeof(c_Map::Bucket)] = { 0 };
+static int32_t empty_map_hash_slot = c_Map::Empty;
 
-c_Map::c_Map(Class* cb)
-  : ExtObjectDataFlags(cb)
-  , m_size(0)
-  , m_load(0)
-  , m_nLastSlot(0)
-  , m_version(0)
-{
-  m_data = (Bucket*)emptyMapSlot;
+c_Map::c_Map(Class* cb) :
+    ExtObjectDataFlags(cb) {
   o_subclassData.u16 = Collection::MapType;
+  uint32_t used = 0;
+  uint32_t cap = 0;
+  uint32_t tableMask = 0;
+  int32_t version = 0;
+  m_size = 0;
+  m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
+  m_maskAndVersion = (uint64_t(version) << 32) | uint64_t(tableMask);
+  m_data = nullptr;
+  m_hash = &empty_map_hash_slot;
 }
 
 c_Map::~c_Map() {
-  deleteBuckets();
+  deleteElms();
   freeData();
 }
 
 void c_Map::freeData() {
-  if (m_data != (Bucket*)emptyMapSlot) {
-    smart_free(m_data);
-  }
-  m_data = (Bucket*)emptyMapSlot;
+  if (m_data) smart_free(m_data);
 }
 
-void c_Map::deleteBuckets() {
-  if (!m_size) return;
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (p.validValue()) {
-      tvRefcountedDecRef(&p.data);
-      if (p.hasStrKey()) {
-        decRefStr(p.skey);
-      }
+void c_Map::deleteElms() {
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
+    tvRefcountedDecRef(&p->data);
+    if (p->hasStrKey()) {
+      decRefStr(p->skey);
     }
   }
 }
@@ -924,14 +896,14 @@ void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
 
 Array c_Map::toArrayImpl() const {
   ArrayInit ai(m_size);
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (p.validValue()) {
-      if (p.hasIntKey()) {
-        ai.set((int64_t)p.ikey, tvAsCVarRef(&p.data));
-      } else {
-        ai.set(*(const String*)(&p.skey), tvAsCVarRef(&p.data));
-      }
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
+    if (p->hasIntKey()) {
+      ai.set((int64_t)p->ikey, tvAsCVarRef(&p->data));
+    } else {
+      ai.set(*(const String*)(&p->skey), tvAsCVarRef(&p->data));
     }
   }
   return ai.create();
@@ -943,21 +915,29 @@ c_Map* c_Map::Clone(ObjectData* obj) {
 
   if (!thiz->m_size) return target;
 
-  assert(thiz->m_nLastSlot != 0);
+  assert(target->m_size == 0);
+  assert(thiz->m_used != 0);
+  target->m_capAndUsed = thiz->m_capAndUsed;
+  target->m_tableMask = thiz->m_tableMask;
   target->m_size = thiz->m_size;
-  target->m_load = thiz->m_load;
-  target->m_nLastSlot = thiz->m_nLastSlot;
-  target->m_data = (Bucket*)smart_malloc(thiz->numSlots() * sizeof(Bucket));
-  memcpy(target->m_data, thiz->m_data, thiz->numSlots() * sizeof(Bucket));
+  target->m_data =
+    (Elm*)smart_malloc(size_t(thiz->m_cap) * sizeof(Elm) +
+                       thiz->hashSize() * sizeof(int32_t));
+  target->m_hash = (int32_t*)(target->m_data + target->m_cap);
+  wordcpy(target->hashTab(), thiz->hashTab(), thiz->hashSize());
 
-  for (uint i = 0; i <= thiz->m_nLastSlot; ++i) {
-    Bucket& p = thiz->m_data[i];
-    if (p.validValue()) {
-      tvRefcountedIncRef(&p.data);
-      if (p.hasStrKey()) {
-        p.skey->incRefCount();
-      }
+  for (ssize_t i = 0; i < thiz->iterLimit(); ++i) {
+    Elm& e = thiz->data()[i];
+    Elm& te = target->data()[i];
+    if (thiz->isTombstone(e.data.m_type)) {
+      te.data.m_type = e.data.m_type;
+      continue;
     }
+    te.skey = e.skey;
+    te.data.hash() = e.data.hash();
+    if (te.hasStrKey()) te.skey->incRefCount();
+    cellDup(e.data, te.data);
+    assert(te.hash() == e.hash()); // ensure not clobbered.
   }
 
   return target;
@@ -1003,12 +983,17 @@ Object c_Map::t_addall(CVarRef iterable) {
 }
 
 Object c_Map::t_clear() {
-  deleteBuckets();
+  deleteElms();
   freeData();
+  uint32_t used = 0;
+  uint32_t cap = 0;
+  uint32_t tableMask = 0;
+  int32_t version = m_version + 1;
   m_size = 0;
-  m_load = 0;
-  m_nLastSlot = 0;
-  m_data = (Bucket*)emptyMapSlot;
+  m_capAndUsed = (uint64_t(cap) << 32) | uint64_t(used);
+  m_maskAndVersion = (uint64_t(version) << 32) | uint64_t(tableMask);
+  m_data = nullptr;
+  m_hash = &empty_map_hash_slot;
   return this;
 }
 
@@ -1027,16 +1012,21 @@ Object c_Map::t_items() {
 Object c_Map::t_keys() {
   c_Vector* vec;
   Object obj = vec = NEWOBJ(c_Vector)();
+  if (!m_size) {
+    return obj;
+  }
   vec->reserve(m_size);
-  for (uint i = 0, j = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
-    if (p.hasIntKey()) {
-      vec->m_data[j].m_data.num = p.ikey;
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  ssize_t j = 0;
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
+    if (p->hasIntKey()) {
+      vec->m_data[j].m_data.num = p->ikey;
       vec->m_data[j].m_type = KindOfInt64;
     } else {
-      p.skey->incRefCount();
-      vec->m_data[j].m_data.pstr = p.skey;
+      p->skey->incRefCount();
+      vec->m_data[j].m_data.pstr = p->skey;
       vec->m_data[j].m_type = KindOfString;
     }
     ++vec->m_size;
@@ -1052,22 +1042,27 @@ Object c_Map::t_lazy() {
 Object c_Map::t_kvzip() {
   c_Vector* vec;
   Object obj = vec = NEWOBJ(c_Vector)();
+  if (!m_size) {
+    return obj;
+  }
   vec->reserve(m_size);
-  for (uint i = 0, j = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
+  Elm* p = data();
+  Elm* pLimit = p + iterLimit();
+  ssize_t j = 0;
+  for (; p != pLimit; ++p) {
+    if (isTombstone(p->data.m_type)) continue;
     c_Pair* pair = NEWOBJ(c_Pair)();
     pair->incRefCount();
-    if (p.hasIntKey()) {
-      pair->elm0.m_data.num = p.ikey;
+    if (p->hasIntKey()) {
+      pair->elm0.m_data.num = p->ikey;
       pair->elm0.m_type = KindOfInt64;
     } else {
-      p.skey->incRefCount();
-      pair->elm0.m_data.pstr = p.skey;
+      p->skey->incRefCount();
+      pair->elm0.m_data.pstr = p->skey;
       pair->elm0.m_type = KindOfString;
     }
     ++pair->m_size;
-    pair->initAdd(&p.data);
+    pair->initAdd(&p->data);
     vec->m_data[j].m_data.pobj = pair;
     vec->m_data[j].m_type = KindOfObject;
     ++vec->m_size;
@@ -1185,15 +1180,16 @@ Object c_Map::t_values() {
   if (!sz) {
     return ret;
   }
-  TypedValue* data;
-  target->m_capacity = target->m_size = m_size;
-  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
+  TypedValue* vecData;
+  target->m_capacity = target->m_size = sz;
+  target->m_data = vecData =
+    (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
 
   int64_t j = 0;
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
-    cellDup(p.data, data[j]);
+  for (ssize_t i = 0; i < iterLimit(); ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
+    cellDup(p.data, vecData[j]);
     ++j;
   }
   return ret;
@@ -1201,9 +1197,9 @@ Object c_Map::t_values() {
 
 Array c_Map::t_tokeysarray() {
   PackedArrayInit ai(m_size);
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
+  for (ssize_t i = 0; i < iterLimit(); ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
     if (p.hasIntKey()) {
       ai.append(int64_t{p.ikey});
     } else {
@@ -1215,9 +1211,9 @@ Array c_Map::t_tokeysarray() {
 
 Array c_Map::t_tovaluesarray() {
   PackedArrayInit ai(m_size);
-  for (uint i = 0; i <= m_nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
+  for (ssize_t i = 0; i < iterLimit(); ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
     ai.append(tvAsCVarRef(&p.data));
   }
   return ai.toArray();
@@ -1234,9 +1230,9 @@ Object c_Map::t_differencebykey(CVarRef it) {
   auto ret = Object::attach(target);
   if (obj->getCollectionType() == Collection::MapType) {
     auto mp = static_cast<c_Map*>(obj);
-    for (uint i = 0; i <= mp->m_nLastSlot; ++i) {
-      c_Map::Bucket& p = mp->m_data[i];
-      if (!p.validValue()) continue;
+    for (uint i = 0; i < mp->iterLimit(); ++i) {
+      if (mp->isTombstone(i)) continue;
+      c_Map::Elm& p = mp->data()[i];
       if (p.hasIntKey()) {
         target->remove((int64_t)p.ikey);
       } else {
@@ -1276,20 +1272,22 @@ Object c_Map::t_map(CVarRef callback) {
   c_Map* mp;
   Object obj = mp = NEWOBJ(c_Map)();
   if (!m_size) return obj;
-  assert(m_nLastSlot != 0);
+  assert(m_used != 0);
+  mp->deleteElms();
+  mp->freeData();
+  mp->m_cap = m_cap;
+  mp->m_tableMask = m_tableMask;
   mp->m_size = m_size;
-  mp->m_load = m_load;
-  mp->m_nLastSlot = 0;
-  mp->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
-  // We need to zero out the first slot in case an exception
-  // is thrown during the first iteration, because ~c_Map()
-  // will decRef all slots up to (and including) m_nLastSlot.
-  mp->m_data[0].data.m_type = (DataType)0;
-  uint nLastSlot = m_nLastSlot;
-  for (uint i = 0; i <= nLastSlot; mp->m_nLastSlot = i++) {
-    Bucket& p = m_data[i];
-    Bucket& np = mp->m_data[i];
-    if (!p.validValue()) {
+  mp->m_data = (Elm*)smart_malloc(size_t(mp->m_cap) * sizeof(Elm) +
+                                  mp->hashSize() * sizeof(int32_t));
+  mp->m_hash = (int32_t*)(mp->m_data + mp->m_cap);
+  wordcpy(mp->hashTab(), hashTab(), hashSize());
+  uint32_t used = iterLimit();
+  mp->m_used = 0;
+  for (uint32_t i = 0; i < used; mp->m_used = ++i) {
+    Elm& p = data()[i];
+    Elm& np = mp->data()[i];
+    if (isTombstone(i)) {
       np.data.m_type = p.data.m_type;
       continue;
     }
@@ -1320,20 +1318,22 @@ Object c_Map::t_mapwithkey(CVarRef callback) {
   c_Map* mp;
   Object obj = mp = NEWOBJ(c_Map)();
   if (!m_size) return obj;
-  assert(m_nLastSlot != 0);
+  assert(m_used != 0);
+  mp->deleteElms();
+  mp->freeData();
+  mp->m_cap = m_cap;
+  mp->m_tableMask = m_tableMask;
   mp->m_size = m_size;
-  mp->m_load = m_load;
-  mp->m_nLastSlot = 0;
-  mp->m_data = (Bucket*)smart_malloc(numSlots() * sizeof(Bucket));
-  // We need to zero out the first slot in case an exception
-  // is thrown during the first iteration, because ~c_Map()
-  // will decRef all slots up to (and including) m_nLastSlot.
-  mp->m_data[0].data.m_type = (DataType)0;
-  uint nLastSlot = m_nLastSlot;
-  for (uint i = 0; i <= nLastSlot; mp->m_nLastSlot = i++) {
-    Bucket& p = m_data[i];
-    Bucket& np = mp->m_data[i];
-    if (!p.validValue()) {
+  mp->m_data = (Elm*)smart_malloc(size_t(mp->m_cap) * sizeof(Elm) +
+                                  mp->hashSize() * sizeof(int32_t));
+  mp->m_hash = (int32_t*)(mp->m_data + mp->m_cap);
+  wordcpy(mp->hashTab(), hashTab(), hashSize());
+  uint32_t used = iterLimit();
+  mp->m_used = 0;
+  for (uint32_t i = 0; i < used; mp->m_used = ++i) {
+    Elm& p = data()[i];
+    Elm& np = mp->data()[i];
+    if (isTombstone(i)) {
       np.data.m_type = p.data.m_type;
       continue;
     }
@@ -1369,10 +1369,10 @@ Object c_Map::t_filter(CVarRef callback) {
   c_Map* mp;
   Object obj = mp = NEWOBJ(c_Map)();
   if (!m_size) return obj;
-  uint nLastSlot = m_nLastSlot;
-  for (uint i = 0; i <= nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
+  uint32_t used = iterLimit();
+  for (uint i = 0; i < used; ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
     Variant ret;
     int32_t version = m_version;
     g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p.data);
@@ -1400,10 +1400,10 @@ Object c_Map::t_filterwithkey(CVarRef callback) {
   c_Map* mp;
   Object obj = mp = NEWOBJ(c_Map)();
   if (!m_size) return obj;
-  uint nLastSlot = m_nLastSlot;
-  for (uint i = 0; i <= nLastSlot; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
+  uint32_t used = iterLimit();
+  for (uint32_t i = 0; i < used; ++i) {
+    Elm& p = data()[i];
+    if (isTombstone(i)) continue;
     Variant ret;
     int32_t version = m_version;
     TypedValue args[2] = {
@@ -1430,11 +1430,14 @@ Object c_Map::t_zip(CVarRef iterable) {
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   c_Map* mp;
   Object obj = mp = NEWOBJ(c_Map)();
+  if (!m_size) {
+    return obj;
+  }
   mp->reserve(std::min(sz, size_t(m_size)));
-  uint nLastSlot = m_nLastSlot;
-  for (uint i = 0; i <= nLastSlot && iter; ++i) {
-    Bucket& p = m_data[i];
-    if (!p.validValue()) continue;
+  uint used = iterLimit();
+  for (uint i = 0; i < used && iter; ++i) {
+    if (isTombstone(i)) continue;
+    Elm& p = data()[i];
     Variant v = iter.second();
     c_Pair* pair;
     Object pairObj = pair = NEWOBJ(c_Pair)();
@@ -1510,12 +1513,85 @@ Object c_Map::ti_fromarray(CVarRef arr) {
   return ret;
 }
 
+NEVER_INLINE
 void c_Map::throwOOB(int64_t key) {
   throwIntOOB(key);
 }
 
+NEVER_INLINE
 void c_Map::throwOOB(StringData* key) {
   throwStrOOB(key);
+}
+
+NEVER_INLINE
+void c_Map::throwTooLarge() {
+  static const size_t reserveSize = 130;
+  String msg(reserveSize, ReserveString);
+  char* buf = msg.bufferSlice().ptr;
+  int sz = sprintf(buf,
+                   "Map object has reached its maximum capacity of "
+                   "%u element slots and does not have room to add a "
+                   "new element",
+                   MaxSize);
+  assert(sz <= reserveSize);
+  msg.setSize(sz);
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
+  throw e;
+}
+
+NEVER_INLINE
+void c_Map::throwReserveTooLarge() {
+  static const size_t reserveSize = 80;
+  String msg(reserveSize, ReserveString);
+  char* buf = msg.bufferSlice().ptr;
+  int sz = sprintf(buf,
+                   "Map does not support reserving room for more than "
+                   "%u elements",
+                   MaxReserveSize);
+  assert(sz <= reserveSize);
+  msg.setSize(sz);
+  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
+  throw e;
+}
+
+NEVER_INLINE
+int32_t* c_Map::warnUnbalanced(size_t n, int32_t* ei) {
+  if (n > size_t(RuntimeOption::MaxArrayChain)) {
+    raise_error("Map is too unbalanced (%lu)", n);
+  }
+  return ei;
+}
+
+TypedValue* c_Map::at(int64_t key) const {
+  auto p = find(key);
+  if (UNLIKELY(p == Empty)) {
+    throwOOB(key);
+  }
+  return &data()[p].data;
+}
+
+TypedValue* c_Map::at(StringData* key) const {
+  auto p = find(key, key->hash());
+  if (UNLIKELY(p == Empty)) {
+    throwOOB(key);
+  }
+  return &data()[p].data;
+}
+
+TypedValue* c_Map::get(int64_t key) const {
+  auto p = find(key);
+  if (p == Empty) {
+    return nullptr;
+  }
+  return &data()[p].data;
+}
+
+TypedValue* c_Map::get(StringData* key) const {
+  auto p = find(key, key->hash());
+  if (p == Empty) {
+    return nullptr;
+  }
+  return &data()[p].data;
 }
 
 void c_Map::add(TypedValue* val) {
@@ -1539,274 +1615,321 @@ void c_Map::add(TypedValue* val) {
   }
 }
 
-#define STRING_HASH(x)   (int32_t(x) | 0x80000000)
-
-ALWAYS_INLINE
-bool hitStringKey(const c_Map::Bucket* p, const char* k,
-                  int len, int32_t hash) {
-  assert(p->validValue());
-  if (p->hasIntKey()) return false;
-  const char* data = p->skey->data();
-  return data == k || (p->hash() == hash &&
-                       p->skey->size() == len &&
-                       memcmp(data, k, len) == 0);
-}
-
-ALWAYS_INLINE
-bool hitIntKey(const c_Map::Bucket* p, int64_t ki) {
-  assert(p->validValue());
-  return p->ikey == ki && p->hasIntKey();
-}
-
-#define FIND_BODY(h0, hit) \
-  size_t tableMask = m_nLastSlot; \
-  size_t probeIndex = size_t(h0) & tableMask; \
-  Bucket* p = fetchBucket(probeIndex); \
-  if (LIKELY(p->validValue() && (hit))) { \
-    return p; \
-  } \
-  if (LIKELY(p->empty())) { \
-    return nullptr; \
-  } \
-  for (size_t i = 1;; ++i) { \
-    assert(i <= tableMask); \
-    probeIndex = (probeIndex + i) & tableMask; \
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
-    p = fetchBucket(probeIndex); \
-    if (p->validValue() && (hit)) { \
-      return p; \
-    } \
-    if (p->empty()) { \
-      return nullptr; \
-    } \
+void c_Map::remove(int64_t key) {
+  ++m_version;
+  auto* p = findForInsert(key);
+  if (validPos(*p)) {
+    erase(p);
   }
+}
 
-#define FIND_FOR_INSERT_BODY(h0, hit) \
-  size_t tableMask = m_nLastSlot; \
-  size_t probeIndex = size_t(h0) & tableMask; \
-  Bucket* p = fetchBucket(h0 & tableMask); \
-  if (LIKELY((p->validValue() && (hit)) || \
-             p->empty())) { \
-    return p; \
-  } \
-  Bucket* ts = nullptr; \
-  for (size_t i = 1;; ++i) { \
-    if (UNLIKELY(p->tombstone() && !ts)) { \
-      ts = p; \
-    } \
-    assert(i <= tableMask); \
-    probeIndex = (probeIndex + i) & tableMask; \
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex); \
-    p = fetchBucket(probeIndex); \
-    if (LIKELY(p->validValue() && (hit))) { \
-      return p; \
-    } \
-    if (LIKELY(p->empty())) { \
-      if (LIKELY(!ts)) { \
-        return p; \
-      } \
-      return ts; \
-    } \
+void c_Map::remove(StringData* key) {
+  ++m_version;
+  auto* p = findForInsert(key, key->hash());
+  if (validPos(*p)) {
+    erase(p);
   }
-
-c_Map::Bucket* c_Map::find(int64_t h) const {
-  FIND_BODY(h, hitIntKey(p, h));
 }
 
-c_Map::Bucket* c_Map::find(const char* k, int len, strhash_t prehash) const {
-  FIND_BODY(prehash, hitStringKey(p, k, len, STRING_HASH(prehash)));
+bool c_Map::contains(int64_t key) const {
+  return find(key) != Empty;
 }
 
-c_Map::Bucket* c_Map::findForInsert(int64_t h) const {
-  FIND_FOR_INSERT_BODY(h, hitIntKey(p, h));
+bool c_Map::contains(StringData* key) const {
+  return find(key, key->hash()) != Empty;
 }
 
-c_Map::Bucket* c_Map::findForInsert(const char* k, int len,
-                                    strhash_t prehash) const {
-  FIND_FOR_INSERT_BODY(prehash, hitStringKey(p, k, len, STRING_HASH(prehash)));
+static bool hitStringKey(const c_Map::Elm& e, const StringData* s,
+                         int32_t hash) {
+  // hitStringKey() should only be called on an Elm that is referenced by a
+  // hash table entry. c_Map guarantees that when it adds a hash table
+  // entry that it always sets it to refer to a valid element. Likewise when
+  // it removes an element it always removes the corresponding hash entry.
+  // Therefore the assertion below must hold.
+  assert(!c_Map::isTombstone(e.data.m_type));
+  return hash == e.hash() && (s == e.skey || s->same(e.skey));
+}
+
+static bool hitIntKey(const c_Map::Elm& e, int64_t ki) {
+  // hitIntKey() should only be called on an Elm that is referenced by a
+  // hash table entry. c_Map guarantees that when it adds a hash table
+  // entry that it always sets it to refer to a valid element. Likewise when
+  // it removes an element it always removes the corresponding hash entry.
+  // Therefore the assertion below must hold.
+  assert(!c_Map::isTombstone(e.data.m_type));
+  return e.ikey == ki && e.hasIntKey();
+}
+
+// Quadratic probe is:
+//
+//   h(k, i) = (k + c1*i + c2*(i^2)) % tableSize
+//
+// Use 1/2 for c1 and c2. In combination with a table size that is a power of
+// 2, this guarantees a probe sequence of length tableSize that probes all
+// table elements exactly once.
+
+template <class Hit>
+ALWAYS_INLINE
+ssize_t c_Map::findImpl(size_t h0, Hit hit) const {
+  size_t tableMask = m_tableMask;
+  auto* elms = data();
+  auto* hashtable = hashTab();
+  for (size_t probeIndex = h0, i = 1;; ++i) {
+    ssize_t pos = hashtable[probeIndex & tableMask];
+    if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
+      return pos;
+    }
+    probeIndex += i;
+    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
+  }
+}
+
+ssize_t c_Map::find(int64_t ki) const {
+  return findImpl(ki, [ki] (const Elm& e) {
+    return hitIntKey(e, ki);
+  });
+}
+
+ssize_t c_Map::find(const StringData* s, strhash_t prehash) const {
+  auto h = prehash | STRHASH_MSB;
+  return findImpl(prehash, [s, h] (const Elm& e) {
+    return hitStringKey(e, s, h);
+  });
+}
+
+template <class Hit>
+ALWAYS_INLINE
+int32_t* c_Map::findForInsertImpl(size_t h0, Hit hit) const {
+  // mask, probe, and pos are explicitly 64-bit, because performance
+  // regressed when they were 32-bit types via auto. Test carefully.
+  size_t mask = m_tableMask;
+  auto* elms = data();
+  auto* hashtable = hashTab();
+  int32_t* ret = nullptr;
+  for (size_t probe = h0, i = 1;; ++i) {
+    auto ei = &hashtable[probe & mask];
+    ssize_t pos = *ei;
+    if (validPos(pos)) {
+      if (hit(elms[pos])) {
+        return ei;
+      }
+    } else {
+      if (!ret) ret = ei;
+      if (pos == Empty) {
+        return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
+      }
+    }
+    probe += i;
+    assert(i <= mask && probe == h0 + (i + i*i) / 2);
+  }
+}
+
+int32_t* c_Map::findForInsert(int64_t ki) const {
+  return findForInsertImpl(ki, [ki] (const Elm& e) {
+    return hitIntKey(e, ki);
+  });
+}
+
+int32_t* c_Map::findForInsert(const StringData* s, strhash_t prehash) const {
+  auto h = prehash | STRHASH_MSB;
+  return findForInsertImpl(prehash, [s, h] (const Elm& e) {
+    return hitStringKey(e, s, h);
+  });
 }
 
 // findForNewInsert() is only safe to use if you know for sure that the
 // key is not already present in the Map.
+ALWAYS_INLINE int32_t*
+c_Map::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
+  for (size_t i = 1, probe = h0;; ++i) {
+    auto ei = &table[probe & mask];
+    if (!validPos(*ei)) return ei;
+    probe += i;
+    assert(i <= mask && probe == h0 + (i + i*i) / 2);
+  }
+}
+
 ALWAYS_INLINE
-c_Map::Bucket* c_Map::findForNewInsert(size_t h0) const {
-  size_t tableMask = m_nLastSlot;
-  size_t probeIndex = h0 & tableMask;
-  Bucket* p = fetchBucket(probeIndex);
-  if (LIKELY(p->empty())) {
-    return p;
-  }
-  for (size_t i = 1;; ++i) {
-    assert(i <= tableMask);
-    probeIndex = (probeIndex + i) & tableMask;
-    assert(((size_t(h0)+((i + i*i) >> 1)) & tableMask) == probeIndex);
-    p = fetchBucket(probeIndex);
-    if (LIKELY(p->empty())) {
-      return p;
-    }
-  }
+int32_t* c_Map::findForNewInsert(size_t h0) const {
+  return findForNewInsert(hashTab(), m_tableMask, h0);
 }
 
-#undef STRING_HASH
-#undef FIND_BODY
-#undef FIND_FOR_INSERT_BODY
-
-bool c_Map::update(int64_t h, TypedValue* data) {
-  assert(data->m_type != KindOfRef);
-  Bucket* p = findForInsert(h);
+void c_Map::update(int64_t h, TypedValue* val) {
+  assert(val->m_type != KindOfRef);
+retry:
+  auto* p = findForInsert(h);
   assert(p);
-  if (p->validValue()) {
-    tvRefcountedIncRef(data);
-    tvRefcountedDecRef(&p->data);
-    tvCopy(*data, p->data);
-    return true;
-  }
-  ++m_version;
-  ++m_size;
-  if (!p->tombstone()) {
-    if (UNLIKELY(++m_load >= computeMaxLoad())) {
-      adjustCapacity();
-      p = findForInsert(h);
-      assert(p);
+  if (validPos(*p)) {
+    auto& e = data()[*p];
+    DataType oldType = e.data.m_type;
+    uint64_t oldDatum = e.data.m_data.num;
+    cellDup(*val, e.data);
+    if (IS_REFCOUNTED_TYPE(oldType)) {
+      tvDecRefHelper(oldType, oldDatum);
     }
+    return;
   }
-  cellDup(*data, p->data);
-  p->setIntKey(h);
-  return true;
+  if (UNLIKELY(isFull())) {
+    makeRoom();
+    goto retry;
+  }
+  auto& e = allocElm(p);
+  cellDup(*val, e.data);
+  e.setIntKey(h);
+  ++m_version;
 }
 
-bool c_Map::update(StringData *key, TypedValue* data) {
-  assert(data->m_type != KindOfRef);
+void c_Map::update(StringData* key, TypedValue* val) {
+  assert(val->m_type != KindOfRef);
   strhash_t h = key->hash();
-  Bucket* p = findForInsert(key->data(), key->size(), h);
+retry:
+  auto* p = findForInsert(key, h);
   assert(p);
-  if (p->validValue()) {
-    tvRefcountedIncRef(data);
-    tvRefcountedDecRef(&p->data);
-    tvCopy(*data, p->data);
-    return true;
-  }
-  ++m_version;
-  ++m_size;
-  if (!p->tombstone()) {
-    if (UNLIKELY(++m_load >= computeMaxLoad())) {
-      adjustCapacity();
-      p = findForInsert(key->data(), key->size(), h);
-      assert(p);
+  if (validPos(*p)) {
+    auto& e = data()[*p];
+    DataType oldType = e.data.m_type;
+    uint64_t oldDatum = e.data.m_data.num;
+    cellDup(*val, e.data);
+    if (IS_REFCOUNTED_TYPE(oldType)) {
+      tvDecRefHelper(oldType, oldDatum);
     }
-  }
-  cellDup(*data, p->data);
-  p->setStrKey(key, h);
-  return true;
-}
-
-void c_Map::erase(Bucket* p) {
-  if (!p) {
     return;
   }
-  if (p->validValue()) {
-    m_size--;
-    tvRefcountedDecRef(&p->data);
-    if (p->hasStrKey()) {
-      decRefStr(p->skey);
-    }
-    p->data.m_type = (DataType)KindOfTombstone;
-    if (m_size < computeMinElements() && m_size) {
-      adjustCapacity();
-    }
+  if (UNLIKELY(isFull())) {
+    makeRoom();
+    goto retry;
   }
-}
-
-void c_Map::adjustCapacityImpl(int64_t sz) {
+  auto& e = allocElm(p);
+  cellDup(*val, e.data);
+  e.setStrKey(key, h);
   ++m_version;
-  if (sz < 2) {
-    if (sz <= 0) return;
-    sz = 2;
+}
+
+void c_Map::erase(int32_t* pos) {
+  assert(validPos(*pos) && !isTombstone(*pos));
+  assert(data());
+  Elm* elms = data();
+  auto& e = elms[*pos];
+  // Mark the hash slot as a tombstone.
+  *pos = Tombstone;
+  // Mark the Elm as a tombstone.
+  TypedValue* tv = &e.data;
+  DataType oldType = tv->m_type;
+  uint64_t oldDatum = tv->m_data.num;
+  tv->m_type = KindOfInvalid;
+  --m_size;
+  // Don't adjust m_used. This frees us from having to explicitly keep track
+  // of hash load, since we can instead rely on the isFull() condition to
+  // trigger a grow/compact before hash load gets too high.
+  assert(m_used <= m_cap);
+  // Finally, decref the old value
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+  // Compact in order to keep elms from being overly sparse. Other parts
+  // of Map's implementation rely on the fact that erase() does not allow
+  // the Elm density to drop below ~50%.
+  if (isDensityTooLow()) {
+    compact();
   }
-  if (m_nLastSlot == 0) {
-    assert(m_data == (Bucket*)emptyMapSlot);
-    m_nLastSlot = Util::roundUpToPowerOfTwo(sz << 1) - 1;
-    m_data = (Bucket*)smart_calloc(numSlots(), sizeof(Bucket));
-    return;
+}
+
+NEVER_INLINE void c_Map::makeRoom() {
+  assert(isFull());
+  // erase() guarantees that element density will never drop below ~50%,
+  // so we always grow to make room here.
+  assert(!isDensityTooLow());
+  if (UNLIKELY(m_cap == MaxSize)) {
+    throwTooLarge();
   }
-  size_t oldNumSlots = numSlots();
-  m_nLastSlot = Util::roundUpToPowerOfTwo(sz << 1) - 1;
-  m_load = m_size;
-  Bucket* oldBuckets = m_data;
-  m_data = (Bucket*)smart_calloc(numSlots(), sizeof(Bucket));
-  for (uint i = 0; i < oldNumSlots; ++i) {
-    Bucket* p = &oldBuckets[i];
-    if (p->validValue()) {
-      Bucket* np = findForNewInsert(p->hasIntKey() ? p->ikey : p->hash());
-      memcpy(np, p, sizeof(Bucket));
+  // Double the current capacity
+  grow(m_cap ? m_cap*2 : SmallSize, m_cap ? m_tableMask*2+1 : SmallMask);
+}
+
+NEVER_INLINE void c_Map::reserve(int64_t sz) {
+  assert(m_size <= m_used && m_used <= m_cap && !isDensityTooLow());
+  uint32_t newCap, newMask;
+  if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
+    throwReserveTooLarge();
+  }
+  // Compute the new capacity and new hash mask if we need to grow or bail
+  // out if there is nothing to do.
+  if (sz > int64_t(m_cap)) {
+    // The requested capacity is greater than the current capacity. Compute
+    // the smallest allowed capacity that is sufficient.
+    auto lgSize = c_Map::SmallLgTableSize;
+    for (newCap = c_Map::SmallSize; newCap < sz; newCap <<= 1) ++lgSize;
+    newMask = (size_t(1U) << lgSize) - 1;
+    assert(lgSize <= MaxLgTableSize && newCap > m_cap);
+  } else {
+    // If sz <= m_size or if the Map can accommodate sz-m_size additional
+    // elements without growing or compacting, then there is nothing to do.
+    if (sz <= int64_t(m_size) ||
+        size_t(m_used) + size_t(sz - m_size) <= size_t(m_cap)) return;
+    // Otherwise prepare to double the current capacity
+    assert(0 < sz && sz <= int64_t(m_cap));
+    assert(m_cap < MaxSize && m_tableMask != 0);
+    newCap = m_cap * 2;
+    newMask = m_tableMask * 2 + 1;
+  }
+  // Perform the grow operation.
+  grow(newCap, newMask);
+}
+
+void c_Map::grow(uint32_t newCap, uint32_t newMask) {
+  assert(m_size <= m_used && m_used <= m_cap);
+  size_t newHashSize = size_t(newMask) + 1;
+  assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
+  assert(m_size <= newCap && newCap <= MaxSize);
+  auto* oldData = data();
+  auto* data = (Elm*)smart_malloc(size_t(newCap) * sizeof(Elm) +
+                                  newHashSize * sizeof(int32_t));
+  auto* table = (int32_t*)(data + size_t(newCap));
+  m_data = data;
+  m_hash = table;
+  m_tableMask = newMask;
+  initHash(table, newHashSize);
+  for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
+    while (isTombstone(oldData[frPos].data.m_type)) {
+      assert(frPos + 1 < m_used);
+      ++frPos;
     }
+    auto& toE = data[toPos];
+    toE = oldData[frPos];
+    auto ie = findForNewInsert(table, newMask,
+                               toE.hasIntKey() ? toE.ikey : toE.hash());
+    *ie = toPos;
   }
-  smart_free(oldBuckets);
+  if (oldData) smart_free(oldData);
+  m_cap = newCap;
+  m_used = m_size;
 }
 
-ssize_t c_Map::iter_next(ssize_t pos) const {
-  if (pos == 0) {
-    return 0;
-  }
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  Bucket* pLast = fetchBucket(m_nLastSlot);
-  ++p;
-  while (p <= pLast) {
-    if (p->validValue()) {
-      return reinterpret_cast<ssize_t>(p);
+void c_Map::compact() {
+  auto* elms = data();
+  assert(elms);
+  auto mask = m_tableMask;
+  size_t tableSize = hashSize();
+  auto table = hashTab();
+  initHash(table, tableSize);
+  for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
+    while (isTombstone(elms[frPos].data.m_type)) {
+      assert(frPos + 1 < m_used);
+      ++frPos;
     }
-    ++p;
-  }
-  return 0;
-}
-
-ssize_t c_Map::iter_prev(ssize_t pos) const {
-  if (pos == 0) {
-    return 0;
-  }
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  Bucket* pStart = m_data;
-  --p;
-  while (p >= pStart) {
-    if (p->validValue()) {
-      return reinterpret_cast<ssize_t>(p);
+    auto& toE = elms[toPos];
+    if (toPos != frPos) {
+      toE = elms[frPos];
     }
-    --p;
+    auto ie = findForNewInsert(table, mask,
+                               toE.hasIntKey() ? toE.ikey : toE.hash());
+    *ie = toPos;
   }
-  return 0;
-}
-
-Variant c_Map::iter_key(ssize_t pos) const {
-  assert(pos);
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  if (p->hasStrKey()) {
-    return p->skey;
-  }
-  return (int64_t)p->ikey;
-}
-
-TypedValue* c_Map::iter_value(ssize_t pos) const {
-  assert(pos);
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  return &p->data;
+  m_used = m_size;
 }
 
 void c_Map::throwBadKeyType() {
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(
     "Only integer keys and string keys may be used with Maps"));
   throw e;
-}
-
-void c_Map::Bucket::dump() {
-  if (!validValue()) {
-    printf("c_Map::Bucket: %s\n", (empty() ? "empty" : "tombstone"));
-    return;
-  }
-  printf("c_Map::Bucket: %" PRIx64 "\n", hashKey());
-  if (hasStrKey()) {
-    skey->dump();
-  }
-  tvAsCVarRef(&data).dump();
 }
 
 Array c_Map::ToArray(const ObjectData* obj) {
@@ -1907,19 +2030,18 @@ bool c_Map::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto mp1 = static_cast<const c_Map*>(obj1);
   auto mp2 = static_cast<const c_Map*>(obj2);
   if (mp1->m_size != mp2->m_size) return false;
-  for (uint i = 0; i <= mp1->m_nLastSlot; ++i) {
-    c_Map::Bucket& p = mp1->m_data[i];
-    if (p.validValue()) {
-      TypedValue* tv2;
-      if (p.hasIntKey()) {
-        tv2 = mp2->get(p.ikey);
-      } else {
-        assert(p.hasStrKey());
-        tv2 = mp2->get(p.skey);
-      }
-      if (!tv2) return false;
-      if (!equal(tvAsCVarRef(&p.data), tvAsCVarRef(tv2))) return false;
+  for (uint i = 0; i < mp1->iterLimit(); ++i) {
+    if (mp1->isTombstone(i)) continue;
+    c_Map::Elm& p = mp1->data()[i];
+    TypedValue* tv2;
+    if (p.hasIntKey()) {
+      tv2 = mp2->get(p.ikey);
+    } else {
+      assert(p.hasStrKey());
+      tv2 = mp2->get(p.skey);
     }
+    if (!tv2) return false;
+    if (!equal(tvAsCVarRef(&p.data), tvAsCVarRef(tv2))) return false;
   }
   return true;
 }
@@ -1937,26 +2059,27 @@ void c_Map::Unserialize(ObjectData* obj,
   for (int64_t i = 0; i < sz; ++i) {
     Variant k;
     k.unserialize(uns, Uns::Mode::ColKey);
-    Bucket* p;
+    int32_t* p;
+    Elm* e;
     if (k.isInteger()) {
       auto h = k.toInt64();
       p = mp->findForInsert(h);
-      if (UNLIKELY(p->validValue())) goto do_unserialize;
-      p->setIntKey(h);
+      if (UNLIKELY(validPos(*p))) goto do_unserialize;
+      e = &mp->allocElm(p);
+      e->setIntKey(h);
     } else if (k.isString()) {
       auto key = k.getStringData();
       auto h = key->hash();
-      p = mp->findForInsert(key->data(), key->size(), h);
-      if (UNLIKELY(p->validValue())) goto do_unserialize;
-      p->setStrKey(key, h);
+      p = mp->findForInsert(key, h);
+      if (UNLIKELY(validPos(*p))) goto do_unserialize;
+      e = &mp->allocElm(p);
+      e->setStrKey(key, h);
     } else {
       throw Exception("Invalid key");
     }
-    ++mp->m_size;
-    ++mp->m_load;
-    p->data.m_type = KindOfNull;
+    e->data.m_type = KindOfNull;
 do_unserialize:
-    tvAsVariant(&p->data).unserialize(uns, Uns::Mode::ColValue);
+    tvAsVariant(&e->data).unserialize(uns, Uns::Mode::ColValue);
   }
 }
 
@@ -1975,7 +2098,7 @@ Variant c_MapIterator::t_current() {
   if (UNLIKELY(m_version != mp->getVersion())) {
     throw_collection_modified();
   }
-  if (!m_pos) {
+  if (!mp->iter_valid(m_pos)) {
     throw_iterator_not_valid();
   }
   return tvAsCVarRef(mp->iter_value(m_pos));
@@ -1986,14 +2109,15 @@ Variant c_MapIterator::t_key() {
   if (UNLIKELY(m_version != mp->getVersion())) {
     throw_collection_modified();
   }
-  if (!m_pos) {
+  if (!mp->iter_valid(m_pos)) {
     throw_iterator_not_valid();
   }
   return mp->iter_key(m_pos);
 }
 
 bool c_MapIterator::t_valid() {
-  return m_pos != 0;
+  c_Map* mp = m_obj.get();
+  return mp->iter_valid(m_pos);
 }
 
 void c_MapIterator::t_next() {
@@ -3015,7 +3139,7 @@ void c_StableMap::ksort(int sort_flags, bool ascending) {
       return true;                                                      \
     }                                                                   \
     CallCtx ctx;                                                        \
-    Transl::CallerFrame cf;                                             \
+    JIT::CallerFrame cf;                                             \
     vm_decode_function(cmp_function, cf(), false, ctx);                 \
     if (!ctx.func) {                                                    \
       return false;                                                     \
@@ -3520,6 +3644,39 @@ BaseSet::~BaseSet() {
 
 // Private
 
+NEVER_INLINE
+void BaseSet::warnOnStrIntDup() const {
+  smart::hash_set<int64_t> seenVals;
+
+  for (uint32_t i = 0; i <= m_nLastSlot; i++) {
+    Bucket& p = m_data[i];
+    int64_t newVal = 0;
+
+    if (!p.validValue()) continue;
+
+    if (p.hasInt()) {
+      newVal = p.data.m_data.num;
+    } else {
+      assert(p.hasStr());
+      // isStriclyInteger() puts the int value in newVal as a side effect.
+      if (!p.data.m_data.pstr->isStrictlyInteger(newVal)) continue;
+    }
+
+    if (seenVals.find(newVal) != seenVals.end()) {
+      raise_warning(
+        "Set::toArray() for a set containing both int(%ld) and string('%ld')",
+        newVal,
+        newVal
+      );
+
+      return;
+    }
+
+    seenVals.insert(newVal);
+  }
+  // Do nothing if no 'duplicates' were found.
+}
+
 Array BaseSet::toArrayImpl() const {
   ArrayInit ai(m_size);
   for (uint i = 0; i <= m_nLastSlot; ++i) {
@@ -3534,14 +3691,10 @@ Array BaseSet::toArrayImpl() const {
     }
   }
 
-  // If both '123' and 123 are present in the set, we better warn the user.
   Array arr = ai.create();
 
-  if (UNLIKELY(arr.length() < m_size)) {
-    // TODO (t2898471): walk the buckets again and report the offending item
-    raise_warning(
-      "Set::toArray() for a set containing both int(<n>) and string('<n>')");
-  }
+  // If both '123' and 123 are present in the set, we better warn the user.
+  if (UNLIKELY(arr.length() < m_size)) warnOnStrIntDup();
   return arr;
 }
 
@@ -3765,15 +3918,7 @@ void BaseSet::throwBadValueType() {
 
 c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
 
-  const uint attrs = ObjectData::IsCollection|
-                     ObjectData::UseGet|
-                     ObjectData::UseSet|
-                     ObjectData::UseIsset|
-                     ObjectData::UseUnset|
-                     ObjectData::CallToImpl|
-                     ObjectData::HasCppClone;
-
-  ObjectData::setAttributes(attrs);
+  ObjectData::setAttributes(kCollectionObjectDataAttrs);
   o_subclassData.u16 = Collection::SetType;
 }
 
@@ -3949,7 +4094,8 @@ Object c_FrozenSet::ti_fromarrays(int _argc, CArrRef _argv) {
 }
 
 c_FrozenSet::c_FrozenSet(Class* cls) : BaseSet(cls) {
-  // TODO: set collection flags once this becomes a real collection.
+  ObjectData::setAttributes(kCollectionObjectDataAttrs);
+  o_subclassData.u16 = Collection::FrozenSetType;
 }
 
 void c_FrozenSet::Unserialize(ObjectData* obj, VariableUnserializer* uns,
@@ -4457,16 +4603,22 @@ COLLECTION_MAGIC_METHODS(Pair)
     vec->init(VarNR(this)); \
     return o; \
   } \
+  Object c_##cls::t_tofrozenvector() { \
+    c_FrozenVector* fv; \
+    Object o = fv = NEWOBJ(c_FrozenVector)(); \
+    fv->init(VarNR(this)); \
+    return o; \
+  } \
   Object c_##cls::t_toset() { \
     c_Set* st; \
     Object o = st = NEWOBJ(c_Set)(); \
     st->init(VarNR(this)); \
     return o; \
   } \
-  Object c_##cls::t_tofrozenvector() { \
-    c_FrozenVector* fv; \
-    Object o = fv = NEWOBJ(c_FrozenVector)(); \
-    fv->init(VarNR(this)); \
+  Object c_##cls::t_tofrozenset() { \
+    c_FrozenSet* st; \
+    Object o = st = NEWOBJ(c_FrozenSet)(); \
+    st->init(VarNR(this)); \
     return o; \
   }
 
@@ -4495,12 +4647,18 @@ KEYEDITERABLE_MATERIALIZE_METHODS(FrozenVector)
 #undef ITERABLE_MATERIALIZE_METHODS
 #undef KEYEDITERABLE_MATERIALIZE_METHODS
 
+static inline bool isKeylessCollectionType(Collection::Type ctype) {
+  return ctype == Collection::SetType ||
+         ctype == Collection::FrozenSetType;
+}
+
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   assert(obj->isCollection());
   int64_t sz = obj->getCollectionSize();
   if (obj->getCollectionType() == Collection::VectorType ||
       obj->getCollectionType() == Collection::FrozenVectorType ||
       obj->getCollectionType() == Collection::SetType ||
+      obj->getCollectionType() == Collection::FrozenSetType ||
       obj->getCollectionType() == Collection::PairType) {
     serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
     serializer->writeArrayHeader(sz, true);
@@ -4517,10 +4675,10 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
       }
     } else {
       for (ArrayIter iter(obj); iter; ++iter) {
-        if (obj->getCollectionType() != Collection::SetType) {
-          serializer->writeCollectionKey(iter.first());
-        } else {
+        if (isKeylessCollectionType(obj->getCollectionType())) {
           serializer->writeCollectionKeylessPrefix();
+        } else {
+          serializer->writeCollectionKey(iter.first());
         }
         serializer->writeArrayValue(iter.second());
       }
@@ -4566,6 +4724,13 @@ void collectionDeepCopyTV(TypedValue* tv) {
         case Collection::PairType:
           obj = collectionDeepCopyPair(static_cast<c_Pair*>(obj));
           break;
+        case Collection::FrozenSetType:
+          obj = collectionDeepCopyFrozenSet(static_cast<c_FrozenSet*>(obj));
+          break;
+        case Collection::FrozenVectorType:
+          obj = collectionDeepCopyFrozenVector(
+                  static_cast<c_FrozenVector*>(obj));
+          break;
         default:
           assert(false);
           obj = nullptr;
@@ -4592,8 +4757,9 @@ ArrayData* collectionDeepCopyArray(ArrayData* arr) {
   return a.detach();
 }
 
-ObjectData* collectionDeepCopyVector(c_Vector* vec) {
-  vec = c_Vector::Clone(vec);
+template<typename TVector>
+static ObjectData* collectionDeepCopyBaseVector(TVector *vec) {
+  vec = TVector::Clone(vec);
   Object o = Object::attach(vec);
   size_t sz = vec->m_size;
   for (size_t i = 0; i < sz; ++i) {
@@ -4602,15 +4768,22 @@ ObjectData* collectionDeepCopyVector(c_Vector* vec) {
   return o.detach();
 }
 
+ObjectData* collectionDeepCopyVector(c_Vector* vec) {
+  return collectionDeepCopyBaseVector<c_Vector>(vec);
+}
+
+ObjectData* collectionDeepCopyFrozenVector(c_FrozenVector* vec) {
+  return collectionDeepCopyBaseVector<c_FrozenVector>(vec);
+}
+
 ObjectData* collectionDeepCopyMap(c_Map* mp) {
   mp = c_Map::Clone(mp);
   Object o = Object::attach(mp);
-  uint lastSlot = mp->m_nLastSlot;
-  for (uint i = 0; i <= lastSlot; ++i) {
-    c_Map::Bucket* p = mp->fetchBucket(i);
-    if (p->validValue()) {
-      collectionDeepCopyTV(&p->data);
-    }
+  uint used = mp->iterLimit();
+  for (uint32_t i = 0; i < used; ++i) {
+    if (mp->isTombstone(i)) continue;
+    c_Map::Elm* p = &mp->data()[i];
+    collectionDeepCopyTV(&p->data);
   }
   return o.detach();
 }
@@ -4628,6 +4801,10 @@ ObjectData* collectionDeepCopySet(c_Set* st) {
   return c_Set::Clone(st);
 }
 
+ObjectData* collectionDeepCopyFrozenSet(c_FrozenSet* st) {
+  return c_FrozenSet::Clone(st);
+}
+
 ObjectData* collectionDeepCopyPair(c_Pair* pair) {
   pair = c_Pair::Clone(pair);
   Object o = Object::attach(pair);
@@ -4635,6 +4812,75 @@ ObjectData* collectionDeepCopyPair(c_Pair* pair) {
   collectionDeepCopyTV(&pair->elm1);
   return o.detach();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Many of the collectionXYZ functions need to throw exceptions with common
+// error messages (e.g. collectionSet() when called on an immutable collection).
+// So we provide them with shared error-signaling logic.
+
+/**
+ * The different types of error messages.
+ */
+enum class ErrMsgType {
+  CannotAssign,
+  CannotUnset,
+  CannotAdd,
+  OnlyIntKeys,
+};
+
+/**
+ * Construct the error message given its type and a collection name.
+ */
+static std::string getErrMsg(ErrMsgType errType, const std::string& colName) {
+  std::string msgBody;
+
+  switch (errType) {
+  case ErrMsgType::CannotAssign:
+    msgBody = "Cannot assign to an element of a";
+    break;
+  case ErrMsgType::CannotUnset:
+    msgBody = "Cannot unset an element of a";
+    break;
+  case ErrMsgType::CannotAdd:
+    msgBody = "Cannot add an element to a";
+    break;
+  case ErrMsgType::OnlyIntKeys:
+    msgBody = "Only integer keys may be used with";
+    break;
+  default:
+    assert(false);
+  }
+
+  return msgBody + " " + colName;
+}
+
+/**
+ * Throws an exception of the given type.
+ */
+static void collectionThrowHelper(ErrMsgType errType,
+    const std::string& colName) {
+
+  std::function<ObjectData*(std::string)> excAlloc = nullptr;
+
+  switch (errType) {
+  case ErrMsgType::CannotAssign:
+  case ErrMsgType::CannotUnset:
+  case ErrMsgType::CannotAdd:
+    excAlloc = SystemLib::AllocRuntimeExceptionObject;
+    break;
+  case ErrMsgType::OnlyIntKeys:
+    excAlloc = SystemLib::AllocInvalidArgumentExceptionObject;
+    break;
+  default:
+    assert(false);
+  }
+
+  Object exc = excAlloc(getErrMsg(errType, colName));
+  throw exc;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
@@ -4651,6 +4897,8 @@ TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
       return c_Pair::OffsetGet(obj, key);
     case Collection::FrozenVectorType:
       return c_FrozenVector::OffsetGet(obj, key);
+    case Collection::FrozenSetType:
+      return c_FrozenSet::OffsetGet(obj, key);
     default:
       assert(false);
       return nullptr;
@@ -4676,6 +4924,11 @@ void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
       break;
     case Collection::PairType:
       c_Pair::OffsetSet(obj, key, val);
+    case Collection::FrozenSetType:
+      c_FrozenSet::OffsetSet(obj, key, val);
+      break;
+    case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
       break;
     default:
       assert(false);
@@ -4697,6 +4950,8 @@ bool collectionIsset(ObjectData* obj, TypedValue* key) {
       return c_Pair::OffsetIsset(obj, key);
     case Collection::FrozenVectorType:
       return c_FrozenVector::OffsetIsset(obj, key);
+    case Collection::FrozenSetType:
+      return c_FrozenSet::OffsetIsset(obj, key);
     default:
       assert(false);
       return false;
@@ -4718,6 +4973,8 @@ bool collectionEmpty(ObjectData* obj, TypedValue* key) {
       return c_Pair::OffsetEmpty(obj, key);
     case Collection::FrozenVectorType:
       return c_FrozenVector::OffsetEmpty(obj, key);
+    case Collection::FrozenSetType:
+      return c_FrozenSet::OffsetEmpty(obj, key);
     default:
       assert(false);
       return false;
@@ -4742,6 +4999,12 @@ void collectionUnset(ObjectData* obj, TypedValue* key) {
     case Collection::PairType:
       c_Pair::OffsetUnset(obj, key);
       break;
+    case Collection::FrozenSetType:
+      c_FrozenSet::OffsetUnset(obj, key);
+      break;
+    case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::CannotUnset, "FrozenVector");
+      break;
     default:
       assert(false);
   }
@@ -4750,6 +5013,7 @@ void collectionUnset(ObjectData* obj, TypedValue* key) {
 void collectionAppend(ObjectData* obj, TypedValue* val) {
   assert(val->m_type != KindOfRef);
   assert(val->m_type != KindOfUninit);
+
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
       static_cast<c_Vector*>(obj)->add(val);
@@ -4763,19 +5027,16 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
     case Collection::SetType:
       static_cast<c_Set*>(obj)->add(val);
       break;
-    case Collection::PairType: {
+    case Collection::PairType:
       assert(static_cast<c_Pair*>(obj)->isFullyConstructed());
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot add an element to a Pair"));
-      throw e;
+      collectionThrowHelper(ErrMsgType::CannotAdd, "Pair");
       break;
-    }
-    case Collection::FrozenVectorType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-          "Cannot add an element to a FrozenVector"));
-      throw e;
+    case Collection::FrozenSetType:
+      collectionThrowHelper(ErrMsgType::CannotAdd, "FrozenSet");
       break;
-    }
+    case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAdd, "FrozenVector");
+      break;
     default:
       assert(false);
   }
@@ -4803,6 +5064,9 @@ void collectionInitAppend(ObjectData* obj, TypedValue* val) {
     case Collection::FrozenVectorType:
       static_cast<c_FrozenVector*>(obj)->add(val);
       break;
+    case Collection::FrozenSetType:
+      static_cast<c_FrozenSet*>(obj)->add(val);
+      break;
     default:
       assert(false);
   }
@@ -4820,6 +5084,11 @@ Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
       c_Set::throwNoIndexAccess();
     case Collection::PairType:
       return tvAsVariant(static_cast<c_Pair*>(obj)->at(offset));
+    case Collection::FrozenSetType:
+      c_FrozenSet::throwNoIndexAccess();
+      break;
+    case Collection::FrozenVectorType:
+      return tvAsVariant(static_cast<c_FrozenVector*>(obj)->at(offset));
     default:
       assert(false);
       return tvAsVariant(nullptr);
@@ -4829,26 +5098,31 @@ Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
 Variant& collectionOffsetGet(ObjectData* obj, const String& offset) {
   StringData* key = offset.get();
   switch (obj->getCollectionType()) {
-    case Collection::VectorType: {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Only integer keys may be used with Vectors"));
-      throw e;
-    }
+    case Collection::VectorType:
+      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Vectors");
+      break;
     case Collection::MapType:
       return tvAsVariant(static_cast<c_Map*>(obj)->at(key));
     case Collection::StableMapType:
       return tvAsVariant(static_cast<c_StableMap*>(obj)->at(key));
     case Collection::SetType:
       c_Set::throwNoIndexAccess();
-    case Collection::PairType: {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Only integer keys may be used with Pairs"));
-      throw e;
-    }
+      break;
+    case Collection::PairType:
+      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Pairs");
+      break;
+    case Collection::FrozenSetType:
+      c_FrozenSet::throwNoIndexAccess();
+      break;
+    case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "FrozenVectors");
+      break;
     default:
-      assert(false);
-      return tvAsVariant(nullptr);
+      // Do nothing: we fail below.
+      ;
   }
+  assert(false);
+  return tvAsVariant(nullptr);
 }
 
 Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
@@ -4864,6 +5138,10 @@ Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
       return tvAsVariant(c_Set::OffsetGet(obj, key));
     case Collection::PairType:
       return tvAsVariant(c_Pair::OffsetGet(obj, key));
+    case Collection::FrozenSetType:
+      return tvAsVariant(c_FrozenSet::OffsetGet(obj, key));
+    case Collection::FrozenVectorType:
+      return tvAsVariant(c_FrozenVector::OffsetGet(obj, key));
     default:
       assert(false);
       return tvAsVariant(nullptr);
@@ -4887,11 +5165,16 @@ void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
       break;
     case Collection::SetType:
       c_Set::throwNoIndexAccess();
-    case Collection::PairType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot assign to an element of a Pair"));
-      throw e;
-    }
+      break;
+    case Collection::PairType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "Pair");
+      break;
+    case Collection::FrozenSetType:
+      c_FrozenSet::throwNoIndexAccess();
+      break;
+   case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
+      break;
     default:
       assert(false);
   }
@@ -4904,11 +5187,9 @@ void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
     tv = (TypedValue*)(&init_null_variant);
   }
   switch (obj->getCollectionType()) {
-    case Collection::VectorType: {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Only integer keys may be used with Vectors"));
-      throw e;
-    }
+    case Collection::VectorType:
+      collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Vectors");
+      break;
     case Collection::MapType:
       static_cast<c_Map*>(obj)->set(key, tv);
       break;
@@ -4917,11 +5198,16 @@ void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
       break;
     case Collection::SetType:
       c_Set::throwNoIndexAccess();
-    case Collection::PairType: {
-      Object e(SystemLib::AllocRuntimeExceptionObject(
-        "Cannot assign to an element of a Pair"));
-      throw e;
-    }
+      break;
+    case Collection::PairType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "Pair");
+      break;
+    case Collection::FrozenSetType:
+      c_FrozenSet::throwNoIndexAccess();
+      break;
+   case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
+      break;
     default:
       assert(false);
   }
@@ -4949,6 +5235,12 @@ void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
     case Collection::PairType:
       c_Pair::OffsetSet(obj, key, tv);
       break;
+    case Collection::FrozenSetType:
+      c_FrozenSet::OffsetSet(obj, key, tv);
+      break;
+    case Collection::FrozenVectorType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
+      break;
     default:
       assert(false);
   }
@@ -4969,6 +5261,8 @@ bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
       return c_Pair::OffsetContains(obj, key);
     case Collection::FrozenVectorType:
       return c_FrozenVector::OffsetContains(obj, key);
+    case Collection::FrozenSetType:
+      return c_FrozenSet::OffsetContains(obj, key);
     default:
       assert(false);
       return false;
@@ -4994,6 +5288,9 @@ void collectionReserve(ObjectData* obj, int64_t sz) {
       break;
     case Collection::FrozenVectorType:
       static_cast<c_FrozenVector*>(obj)->reserve(sz);
+      break;
+    case Collection::FrozenSetType:
+      static_cast<c_FrozenSet*>(obj)->reserve(sz);
       break;
     default:
       assert(false);
@@ -5022,6 +5319,9 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
     case Collection::FrozenVectorType:
       c_FrozenVector::Unserialize(obj, uns, sz, type);
       break;
+    case Collection::FrozenSetType:
+      c_FrozenSet::Unserialize(obj, uns, sz, type);
+      break;
     default:
       assert(false);
   }
@@ -5043,6 +5343,8 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
       return c_Pair::Equals(obj1, obj2);
     case Collection::FrozenVectorType:
       return c_FrozenVector::Equals(obj1, obj2);
+    case Collection::FrozenSetType:
+      return c_FrozenSet::Equals(obj1, obj2);
     default:
       assert(false);
       return false;
@@ -5058,6 +5360,7 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
     case Collection::SetType: obj = NEWOBJ(c_Set)(); break;
     case Collection::PairType: obj = NEWOBJ(c_Pair)(); break;
     case Collection::FrozenVectorType: obj = NEWOBJ(c_FrozenVector)(); break;
+    case Collection::FrozenSetType: obj = NEWOBJ(c_FrozenSet)(); break;
     default:
       obj = nullptr;
       raise_error("NewCol: Invalid collection type");

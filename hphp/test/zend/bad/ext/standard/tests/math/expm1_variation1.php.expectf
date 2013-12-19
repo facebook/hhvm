@@ -1,0 +1,93 @@
+*** Testing expm1() : usage variations ***
+
+-- Iteration 1 --
+float(0)
+
+-- Iteration 2 --
+float(1.718281828459)
+
+-- Iteration 3 --
+float(INF)
+
+-- Iteration 4 --
+float(-1)
+
+-- Iteration 5 --
+float(36314.502674247)
+
+-- Iteration 6 --
+float(-0.99997246355065)
+
+-- Iteration 7 --
+float(INF)
+
+-- Iteration 8 --
+float(0.0012353302826471)
+
+-- Iteration 9 --
+float(0.64872127070013)
+
+-- Iteration 10 --
+float(0)
+
+-- Iteration 11 --
+float(0)
+
+-- Iteration 12 --
+float(1.718281828459)
+
+-- Iteration 13 --
+float(0)
+
+-- Iteration 14 --
+float(1.718281828459)
+
+-- Iteration 15 --
+float(0)
+
+-- Iteration 16 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 22 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 23 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 24 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 25 --
+float(0)
+
+-- Iteration 26 --
+float(0)
+
+-- Iteration 27 --
+HipHop Warning: %s
+NULL
+===Done===

@@ -31,8 +31,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-using HPHP::Transl::CallerFrame;
-using HPHP::Transl::EagerCallerFrame;
+using HPHP::JIT::CallerFrame;
+using HPHP::JIT::EagerCallerFrame;
 
 const StaticString
   s_internal("internal"),
@@ -429,14 +429,6 @@ void f_register_shutdown_function(int _argc, CVarRef function, CArrRef _argv /* 
 void f_register_cleanup_function(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
   g_context->registerShutdownFunction(function, _argv,
                                       ExecutionContext::CleanUp);
-}
-
-bool f_register_tick_function(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
-  throw NotImplementedException(__func__);
-}
-
-void f_unregister_tick_function(CVarRef function_name) {
-  throw NotImplementedException(__func__);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

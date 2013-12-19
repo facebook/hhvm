@@ -1,0 +1,9 @@
+<?php 
+	if (!extension_loaded("gettext")) {
+		die("skip extension gettext not loaded\n");
+	}
+    if (!setlocale(LC_ALL, 'en_US.UTF-8')) {
+        die("skip en_US.UTF-8 locale not supported.");
+    }
+
+?>

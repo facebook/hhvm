@@ -31,8 +31,7 @@ using namespace vixl;
 namespace {
 
 void emitBindJ(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
-               Transl::ConditionCode cc, ServiceRequest req) {
-  using namespace Transl;
+               JIT::ConditionCode cc, ServiceRequest req) {
 
   TCA toSmash = cb.frontier();
   if (cb.base() == stubs.base()) {
@@ -124,16 +123,16 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, bool persist, SRFlags flags,
 }
 
 void emitBindJmp(CodeBlock& cb, CodeBlock& stubs, SrcKey dest) {
-  emitBindJ(cb, stubs, dest, Transl::CC_None, REQ_BIND_JMP);
+  emitBindJ(cb, stubs, dest, JIT::CC_None, REQ_BIND_JMP);
 }
 
-void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, Transl::ConditionCode cc,
+void emitBindJcc(CodeBlock& cb, CodeBlock& stubs, JIT::ConditionCode cc,
                  SrcKey dest) {
   emitBindJ(cb, stubs, dest, cc, REQ_BIND_JCC);
 }
 
 void emitBindSideExit(CodeBlock& cb, CodeBlock& stubs, SrcKey dest,
-                      Transl::ConditionCode cc) {
+                      JIT::ConditionCode cc) {
   emitBindJ(cb, stubs, dest, cc, REQ_BIND_SIDE_EXIT);
 }
 

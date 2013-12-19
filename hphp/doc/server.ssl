@@ -3,7 +3,7 @@
 1. Prepare Certificates
 
 Prepare two files: one certificate file and one key file. Make sure they are
-readble by the user account that runs web server.
+readable by the user account that runs web server.
 
 2. Configuration Change
 

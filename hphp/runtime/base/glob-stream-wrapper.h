@@ -25,11 +25,8 @@ namespace HPHP {
 
 class GlobStreamWrapper : public Stream::Wrapper {
  public:
-  GlobStreamWrapper() { }
-
   virtual File* open(const String& filename, const String& mode,
                      int options, CVarRef context);
-
   virtual Directory* opendir(const String& path);
 };
 

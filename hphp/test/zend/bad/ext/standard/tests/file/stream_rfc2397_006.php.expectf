@@ -1,0 +1,8 @@
+HipHop Warning: %s
+NULL
+HipHop Warning: %s
+NULL
+string(13) "foobar foobar"
+HipHop Warning: %s
+bool(false)
+===DONE===

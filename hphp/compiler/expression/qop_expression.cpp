@@ -180,7 +180,7 @@ void QOpExpression::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("valueIfFalse");
   }
   m_expNo->outputCodeModel(cg);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

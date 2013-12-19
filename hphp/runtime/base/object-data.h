@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/system/systemlib.h"
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/int.hpp>
@@ -52,9 +53,10 @@ class ObjectData {
     UseUnset      = 0x0020, // __unset()
     IsWaitHandle  = 0x0040, // This is a c_WaitHandle or derived
     HasCall       = 0x0080, // defines __call
-    HasClone      = 0x0100, // defines __clone as a php method
+    HasClone      = 0x0100, // if IsCppBuiltin, has custom clone logic
+                            // if not IsCppBuiltin, defines __clone PHP method
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
-    HasCppClone   = 0x0400, // has custom clone logic as a C++ builtin
+    // FreeFlag      = 0x0400, // ** a free flag **
     HasDynPropArr = 0x0800, // has a dynamic properties array
     IsCppBuiltin  = 0x1000, // has custom C++ subclass
     IsCollection  = 0x2000, // it's a collection (and the specific type is
@@ -421,10 +423,10 @@ class ObjectData {
 
   void setProp(Class* ctx, const StringData* key, TypedValue* val,
                bool bindingAssignment = false);
-  TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, unsigned char op,
+  TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
                         const StringData* key, Cell* val);
   template <bool setResult>
-  void incDecProp(TypedValue& tvRef, Class* ctx, unsigned char op,
+  void incDecProp(TypedValue& tvRef, Class* ctx, IncDecOp op,
                   const StringData* key, TypedValue& dest);
   void unsetProp(Class* ctx, const StringData* key);
 

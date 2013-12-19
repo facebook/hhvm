@@ -1,0 +1,4 @@
+EUC-JP
+
+Strict Standards: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s on line %d
+string(6) "¡¢¡£¡¤"

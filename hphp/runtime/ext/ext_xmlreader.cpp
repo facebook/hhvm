@@ -412,10 +412,6 @@ bool c_XMLReader::t_isvalid() {
   return bool_func_no_arg(xmlTextReaderIsValid);
 }
 
-bool c_XMLReader::t_expand() {
-  throw NotImplementedException(__func__);
-}
-
 bool c_XMLReader::t_getparserproperty(int64_t property) {
   int ret = 0;
   if (m_ptr) {

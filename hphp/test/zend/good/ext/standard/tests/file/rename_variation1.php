@@ -16,7 +16,7 @@ $src_dirs = array (
   "$file_path//rename_variation//",
 );
 
-$dest_dir = "$file_path/rename_variation_dir";
+$dest_dir = "$file_path/rename_variation1.phpt_dir";
 // create the $dest_dir
 mkdir($dest_dir);
 
@@ -42,5 +42,5 @@ echo "Done\n";
 ?>
 <?php
 $file_path = dirname(__FILE__);
-rmdir($file_path."/rename_variation_dir");
+rmdir($file_path."/rename_variation1.phpt_dir");
 ?>

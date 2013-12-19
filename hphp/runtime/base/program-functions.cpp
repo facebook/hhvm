@@ -56,6 +56,7 @@
 #include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/vm/debug/debug.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
@@ -584,7 +585,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
 
   if (RuntimeOption::EvalDumpTC) {
-    HPHP::Transl::tc_dump();
+    HPHP::JIT::tc_dump();
   }
 
   if (xhprof) {
@@ -634,6 +635,7 @@ hugifyText(char* from, char* to) {
   mprotect(from, sz, PROT_READ | PROT_EXEC);
   free(mem);
   mlock(from, to - from);
+  Debug::DebugInfo::setPidMapOverlay(from, to);
 #endif
 }
 

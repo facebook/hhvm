@@ -134,7 +134,7 @@ void ArrayPairExpression::outputCodeModel(CodeGenerator &cg) {
     cg.printExpression(m_value, m_ref);
     cg.printPropertyHeader("operation");
     cg.printValue(PHP_ARRAY_PAIR);
-    cg.printPropertyHeader("location");
+    cg.printPropertyHeader("sourceLocation");
     cg.printLocation(this->getLocation());
     cg.printObjectFooter();
   } else {

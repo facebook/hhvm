@@ -30,11 +30,12 @@ IMPLEMENT_REQUEST_LOCAL(RequestData, s_intl_request);
 
 void IntlExtension::bindIniSettings() {
   IniSetting::Bind("intl.default_locale", "",
-                   icu_on_update_default_locale, nullptr);
+                   icu_on_update_default_locale, icu_get_default_locale,
+                   nullptr);
 }
 
 const String GetDefaultLocale() {
-  String locale(s_intl_request->defaultLocale());
+  String locale(s_intl_request->getDefaultLocale());
   if (locale.empty()) {
     locale = String(uloc_getDefault(), CopyString);
   }
@@ -82,6 +83,25 @@ String u8(const UChar *u16, int32_t u16_len, UErrorCode &error) {
   }
   ret.setSize(outlen);
   return ret;
+}
+
+bool ustring_from_char(icu::UnicodeString& ret,
+                       const String& str,
+                       UErrorCode &error) {
+  int32_t capacity = str.size() + 1;
+  UChar *utf16 = ret.getBuffer(capacity);
+  int32_t utf16_len = 0;
+  error = U_ZERO_ERROR;
+  u_strFromUTF8WithSub(utf16, ret.getCapacity(), &utf16_len,
+                       str.c_str(), str.size(),
+                       U_SENTINEL /* no substitution */,
+                       nullptr, &error);
+  ret.releaseBuffer(utf16_len);
+  if (U_FAILURE(error)) {
+    ret.setToBogus();
+    return false;
+  }
+  return true;
 }
 
 } // namespace Intl

@@ -73,6 +73,7 @@ class c_Vector : public BaseVector {
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
+  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
   void t_reverse();
@@ -142,7 +143,6 @@ class c_Vector : public BaseVector {
 
   // Friends
 
-  friend ObjectData* collectionDeepCopyVector(c_Vector* vec);
   friend void collectionAppend(ObjectData* obj, TypedValue* val);
   friend void triggerCow(c_Vector* vec);
 
@@ -242,6 +242,7 @@ public:
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
+  Object t_tofrozenset();
 
 public:
 
@@ -259,20 +260,19 @@ public:
 // class Map
 
 FORWARD_DECLARE_CLASS(Map);
-class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection|
-                                        ObjectData::UseGet|
-                                        ObjectData::UseSet|
-                                        ObjectData::UseIsset|
-                                        ObjectData::UseUnset|
-                                        ObjectData::CallToImpl|
-                                        ObjectData::HasCppClone> {
+class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
+                                        ObjectData::UseGet |
+                                        ObjectData::UseSet |
+                                        ObjectData::UseIsset |
+                                        ObjectData::UseUnset |
+                                        ObjectData::CallToImpl |
+                                        ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(Map)
 
  public:
   explicit c_Map(Class* cls = c_Map::classof());
   ~c_Map();
-  void freeData();
   void t___construct(CVarRef iterable = null_variant);
   Object t_add(CVarRef val);
   Object t_addall(CVarRef val);
@@ -298,6 +298,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
+  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
   Object t_values();
@@ -316,33 +317,128 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection|
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
 
-  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
-  static void throwOOB(StringData* key) ATTRIBUTE_NORETURN;
+  struct Elm {
+    /* The key is either a string pointer or an int value, and the m_aux
+     * field in data is used to discriminate the key type. m_aux = 0 means
+     * int, nonzero values contain 32 bits of a string's hashcode.
+     * It is critical that when we return &data to clients, that they not
+     * read or write the m_aux field! */
+    union {
+      int64_t ikey;
+      StringData* skey;
+    };
+    // We store values here, but also some information local to this array:
+    // data.m_aux.u_hash contains either 0 (for an int key) or a string
+    // hashcode; the high bit is the int/string key descriminator.
+    // data.m_type == KindOfInvalid if this is an empty slot in the
+    // array (e.g. after a key is deleted).
+    TypedValueAux data;
+    bool hasStrKey() const {
+      return data.hash() != 0;
+    }
+    bool hasIntKey() const {
+      return data.hash() == 0;
+    }
+    int32_t hash() const {
+      return data.hash();
+    }
+    void setStaticKey(StringData* k, strhash_t h) {
+      assert(k->isStatic());
+      skey = k;
+      data.hash() = h | STRHASH_MSB;
+    }
+    void setStrKey(StringData* k, strhash_t h) {
+      skey = k;
+      data.hash() = h | STRHASH_MSB;
+      k->incRefCount();
+    }
+    void setIntKey(int64_t k) {
+      ikey = k;
+      data.hash() = 0;
+    }
+    static constexpr size_t dataOff() {
+      return offsetof(Elm, data);
+    }
+  };
+
+  uint32_t m_size;          // Number of values
+  union {
+    struct {
+      uint32_t m_used;      // Number of currently used Elm slots (values or
+                            // tombstones)
+      uint32_t m_cap;       // Maximum number of Elm slots we can use without
+                            // having to grow
+    };
+    uint64_t m_capAndUsed;
+  };
+  union {
+    struct {
+      uint32_t m_tableMask; // Bitmask used when indexing into the hash table
+      int32_t m_version;    // Version number; used to keep track if the
+                            // collection has been modified during iteration
+    };
+    uint64_t m_maskAndVersion;
+  };
+  Elm* m_data;              // Elm store.
+  int32_t* m_hash;          // Hash table.
+
+  static const int32_t Empty      = -1;
+  static const int32_t Tombstone  = -2;
+
+  // Load factor scaler. If C is the power-of-2 hashtable capacity and L is
+  // LoadScale, then we can accommodate up to C-C/L elements before needing
+  // to grow. So LoadScale=2 gives a maximum load factor of 0.5, LoadScale=4
+  // gives a maximum load factor of 0.75, and LoadScale=8 gives a maximum load
+  // factor of 0.875 load factor. We use powers of 2 so that we can use bit-
+  // shifting and bit-masking instructions instead of multiply and divide
+  // instructions.
+  static const uint LoadScale = 4;
+
+  // If a Map has a hash table allocated, the smallest hash table size we
+  // support is 4 (2^2). Note that the hash table size is always the hash
+  // mask plus 1.
+  static const uint32_t SmallLgTableSize = 2;
+  static const uint32_t SmallMask = (size_t(1) << SmallLgTableSize) - 1;
+  static const uint32_t SmallSize = SmallMask - SmallMask / LoadScale;
+
+  // The largest hash table size we support is 4294967296 (2^32).
+  static const uint32_t MaxLgTableSize = 32;
+  static const uint32_t MaxMask = (size_t(1) << MaxLgTableSize) - 1;
+  static const uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
+
+  // Map can only guarantee that it won't throw "cannot add element"
+  // exceptions if m_size <= MaxSize / 2. Therefore, we only allow
+  // reserve() to make room for up to MaxSize / 2 elements.
+  static const uint32_t MaxReserveSize = MaxSize / 2;
 
   void init(CVarRef t);
+  void deleteElms();
+  void freeData();
 
-  TypedValue* at(int64_t key) const {
-    Bucket* p = find(key);
-    if (LIKELY(p != NULL)) return &p->data;
-    throwOOB(key);
-    return NULL;
+  Elm* data() const { return (Elm*)m_data; }
+  int32_t* hashTab() const { return (int32_t*)m_hash; }
+  uint32_t iterLimit() const { return m_used; }
+
+  // We use this funny-looking helper to make g++ use lea and shl
+  // instructions instead of imul when indexing into m_data
+  Elm* fetchElm(Elm* data, intptr_t pos) const {
+    assert(sizeof(Elm) == 24);
+    assert(sizeof(int64_t) == 8);
+    intptr_t index = 3 * pos;
+    int64_t* ptr = (int64_t*)data;
+    return (Elm*)(&ptr[index]);
   }
-  TypedValue* get(int64_t key) const {
-    Bucket* p = find(key);
-    if (p) return &p->data;
-    return NULL;
-  }
-  TypedValue* at(StringData* key) const {
-    Bucket* p = find(key->data(), key->size(), key->hash());
-    if (LIKELY(p != NULL)) return &p->data;
-    throwOOB(key);
-    return NULL;
-  }
-  TypedValue* get(StringData* key) const {
-    Bucket* p = find(key->data(), key->size(), key->hash());
-    if (p) return &p->data;
-    return NULL;
-  }
+
+  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
+  static void throwOOB(StringData* key) ATTRIBUTE_NORETURN;
+  static void throwTooLarge() ATTRIBUTE_NORETURN;
+  static void throwReserveTooLarge() ATTRIBUTE_NORETURN;
+  static int32_t* warnUnbalanced(size_t n, int32_t* ei);
+
+  TypedValue* at(int64_t key) const;
+  TypedValue* at(StringData* key) const;
+  TypedValue* get(int64_t key) const;
+  TypedValue* get(StringData* key) const;
   void set(int64_t key, TypedValue* val) {
     assert(val->m_type != KindOfRef);
     update(key, val);
@@ -352,25 +448,10 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection|
     update(key, val);
   }
   void add(TypedValue* val);
-  void remove(int64_t key) {
-    ++m_version;
-    erase(find(key));
-  }
-  void remove(StringData* key) {
-    ++m_version;
-    erase(find(key->data(), key->size(), key->hash()));
-  }
-  bool contains(int64_t key) const {
-    return find(key);
-  }
-  bool contains(StringData* key) const {
-    return find(key->data(), key->size(), key->hash());
-  }
-  void reserve(int64_t sz) {
-    if (int64_t(m_load) + sz - int64_t(m_size) >= computeMaxLoad()) {
-      adjustCapacityImpl(sz);
-    }
-  }
+  void remove(int64_t key);
+  void remove(StringData* key);
+  bool contains(int64_t key) const;
+  bool contains(StringData* key) const;
   int getVersion() const {
     return m_version;
   }
@@ -395,153 +476,131 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection|
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
-  static uint sizeOffset() { return offsetof(c_Map, m_size); }
-
-  static const int32_t KindOfTombstone = -1;
-
-  struct Bucket {
-    /**
-     * Buckets are 24 bytes and we allocate Buckets continguously in memory
-     * without any padding, so some Buckets span multiple cache lines. We
-     * access data.m_aux, data.m_type, and ikey/skey during hash lookup, so we
-     * intentionally put the data field first so that the accessed fields are
-     * all next to each other, which means that they will be on the same cache
-     * line for 87.5% of the buckets.
-     *
-     * The key is either a string pointer or an int value, and the
-     * m_aux.u_hash field in data is used to discriminate the key type.
-     * u_hash = 0 means int, nonzero values contain 31 bits of a string's
-     * hashcode. It is critical that when we return &data to clients, that
-     * they not read or write the m_aux field.
-     */
-    TypedValueAux data;
-    union {
-      int64_t ikey;
-      StringData *skey;
-    };
-    inline bool hasStrKey() const { return data.hash() != 0; }
-    inline bool hasIntKey() const { return data.hash() == 0; }
-    inline void setStrKey(StringData* k, strhash_t h) {
-      skey = k;
-      skey->incRefCount();
-      data.hash() = int32_t(h) | 0x80000000;
-    }
-    inline void setIntKey(int64_t k) {
-      ikey = k;
-      data.hash() = 0;
-    }
-    inline int64_t hashKey() const {
-      return data.hash() == 0 ? ikey : data.hash();
-    }
-    inline int32_t hash() const {
-      return data.hash();
-    }
-    bool validValue() const {
-      return (intptr_t(data.m_type) > 0);
-    }
-    bool empty() const {
-      return data.m_type == KindOfUninit;
-    }
-    bool tombstone() const {
-      return data.m_type == KindOfTombstone;
-    }
-    void dump();
-  };
-
- private:
-  /**
-   * Map uses a power of two for the table size and quadratic probing to
-   * resolve hash collisions.
-   *
-   * When an element is removed from the table, a marker called a "tombstone"
-   * is left behind in the slot that the element used to occupy. The tombstone
-   * will remain in that slot until either (a) the table is resized, or (b) a
-   * new element is inserted into that slot.
-   *
-   * To ensure that hash lookups are efficient, Map keeps the load factor
-   * of the table below 75%. If adding a new element causes the load to
-   * increase to 75% or greater, we grow the table to lower the load. Note
-   * that tombstones count towards load.
-   *
-   * To ensure that iteration performance is efficient, Map keeps the ratio
-   * of # elements / # slots to be at least 18.75%. If removing an element
-   * causes the ratio to drop below 18.75%, we shrink the table to increase
-   * the ratio.
-   *
-   * When a Map has never had any removals performed, the load factor is
-   * guaranteed to be between 37.5% and 75% (as long as the Map has at least
-   * 2 elements).
-   */
-
-  uint m_size;
-  Bucket* m_data;
-  uint m_load;
-  uint m_nLastSlot;
-  int32_t m_version;
-
-  size_t numSlots() const {
-    return m_nLastSlot + 1;
+  static uint sizeOffset() {
+    return offsetof(c_Map, m_size);
   }
 
-  // The maximum load factor is 75%.
-  size_t computeMaxLoad() const {
-    size_t n = numSlots();
-    return (n - (n >> 2));
+  static bool validPos(ssize_t pos) {
+    return pos >= 0;
+    static_assert(ssize_t(Empty) == ssize_t(-1), "");
   }
 
-  // When the map is not empty, the minimum allowed ratio
-  // of # elements / # slots is 18.75%.
-  size_t computeMinElements() const {
-    size_t n = numSlots();
-    return ((n >> 3) + ((n+8) >> 4));
+  static bool validPos(int32_t pos) {
+    return pos >= 0;
+    static_assert(Empty == -1, "");
   }
 
-  // We use this funny-looking helper to make g++ use lea and shl
-  // instructions instead of imul when indexing into m_data
-  Bucket* fetchBucket(Bucket* data, intptr_t slot) const {
-    assert(sizeof(Bucket) == 24);
-    assert(sizeof(int64_t) == 8);
-    assert(slot >= 0 && slot <= m_nLastSlot);
-    intptr_t index = slot + (slot<<1);
-    int64_t* ptr = (int64_t*)data;
-    return (Bucket*)(&ptr[index]);
+  static bool isTombstone(DataType t) {
+    assert(IS_REAL_TYPE(t) || t == KindOfInvalid);
+    return t < KindOfUninit;
+    static_assert(KindOfUninit == 0 && KindOfInvalid < 0, "");
   }
 
-  Bucket* fetchBucket(intptr_t slot) const {
-    return fetchBucket(m_data, slot);
+  bool isTombstone(ssize_t pos) const {
+    assert(size_t(pos) <= m_used);
+    return isTombstone(data()[pos].data.m_type);
   }
 
-  Bucket* find(int64_t h) const;
-  Bucket* find(const char* k, int len, strhash_t prehash) const;
-  Bucket* findForInsert(int64_t h) const;
-  Bucket* findForInsert(const char* k, int len, strhash_t prehash) const;
-  Bucket* findForNewInsert(size_t h0) const;
-
-  bool update(int64_t h, TypedValue* data);
-  bool update(StringData* key, TypedValue* data);
-  void erase(Bucket* prev);
-
-  void adjustCapacityImpl(int64_t sz);
-  void adjustCapacity() {
-    adjustCapacityImpl(m_size);
+  size_t hashSize() const {
+    return size_t(m_tableMask) + 1;
   }
 
-  void deleteBuckets();
+  static uint32_t computeMaxElms(uint32_t tableMask) {
+    return tableMask - tableMask / LoadScale;
+  }
+
+  static void initHash(int32_t* table, size_t tableSize) {
+    wordfill(table, Empty, tableSize);
+  }
+
+  template <class Hit>
+  ssize_t findImpl(size_t h0, Hit) const;
+  ssize_t find(int64_t h) const;
+  ssize_t find(const StringData* s, strhash_t prehash) const;
+
+  template <class Hit>
+  int32_t* findForInsertImpl(size_t h0, Hit) const;
+  int32_t* findForInsert(int64_t h) const;
+  int32_t* findForInsert(const StringData* s, strhash_t prehash) const;
+
+  int32_t* findForNewInsert(size_t h0) const;
+  int32_t* findForNewInsert(int32_t* table, size_t mask, size_t h0) const;
+
+  void update(int64_t h, TypedValue* data);
+  void update(StringData* key, TypedValue* data);
+
+  void erase(int32_t* pos);
+
+  bool isFull() { return m_used == m_cap; }
+  bool isDensityTooLow() const { return (m_size < m_used / 2); }
+
+  // This method will grow or compact as needed to make room to add
+  // one new element.
+  void makeRoom();
+
+  // This method will grow or compact as needed in preparation for
+  // repeatedly adding new elements until m_size >= sz.
+  void reserve(int64_t sz);
+
+  void grow(uint32_t newCap, uint32_t newMask);
+  void compact();
+
+  c_Map::Elm& allocElm(int32_t* ei) {
+    assert(!validPos(*ei) && m_size <= m_used && m_used < m_cap);
+    size_t i = m_used;
+    (*ei) = i;
+    m_used = i + 1;
+    ++m_size;
+    return data()[i];
+  }
 
   ssize_t iter_begin() const {
-    if (!m_size) return 0;
-    for (uint i = 0; i <= m_nLastSlot; ++i) {
-      Bucket* p = fetchBucket(i);
-      if (p->validValue()) {
-        return reinterpret_cast<ssize_t>(p);
-      }
+    Elm* p = data();
+    auto* pLimit = fetchElm(data(), iterLimit());
+    for (; p != pLimit; ++p) {
+      if (LIKELY(!isTombstone(p->data.m_type))) return ssize_t(p);
     }
     return 0;
   }
-  ssize_t iter_next(ssize_t prev) const;
-  ssize_t iter_prev(ssize_t prev) const;
-  Variant iter_key(ssize_t pos) const;
-  TypedValue* iter_value(ssize_t pos) const;
+
+  ssize_t iter_next(ssize_t pos) const {
+    if (!iter_valid(pos)) return pos;
+    auto* p = (Elm*)pos;
+    auto* pLimit = fetchElm(data(), iterLimit());
+    for (++p; p != pLimit; ++p) {
+      if (LIKELY(!isTombstone(p->data.m_type))) return ssize_t(p);
+    }
+    return 0;
+  }
+
+  ssize_t iter_prev(ssize_t pos) const {
+    if (!iter_valid(pos)) return pos;
+    auto* p = (Elm*)pos;
+    auto* pLimit = fetchElm(data(), -1);
+    for (--p; p != pLimit; --p) {
+      if (LIKELY(!isTombstone(p->data.m_type))) return ssize_t(p);
+    }
+    return 0;
+  }
+
+  Variant iter_key(ssize_t pos) const {
+    assert(iter_valid(pos));
+    auto* p = (Elm*)pos;
+    if (p->hasStrKey()) {
+      return p->skey;
+    }
+    return (int64_t)p->ikey;
+  }
+
+  TypedValue* iter_value(ssize_t pos) const {
+    assert(iter_valid(pos));
+    auto* p = (Elm*)pos;
+    return &p->data;
+  }
+
+  bool iter_valid(ssize_t pos) const {
+    return pos != 0;
+  }
 
   static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
@@ -595,7 +654,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::IsCollection|
                                               ObjectData::UseIsset|
                                               ObjectData::UseUnset|
                                               ObjectData::CallToImpl|
-                                              ObjectData::HasCppClone> {
+                                              ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(StableMap)
 
@@ -628,6 +687,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
+  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
   Object t_values();
@@ -830,8 +890,11 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::IsCollection|
   }
   ssize_t iter_next(ssize_t prev) const;
   ssize_t iter_prev(ssize_t prev) const;
-  Variant iter_key(ssize_t pos) const;
   TypedValue* iter_value(ssize_t pos) const;
+  Variant iter_key(ssize_t pos) const;
+  bool iter_valid(ssize_t pos) const {
+    return pos != 0;
+  }
 
   static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
@@ -1227,6 +1290,12 @@ protected:
 private:
   // Helpers
 
+  /**
+   * Raises a warning if the set contains an int and a string with the same
+   * numeric value: e.g. Set {'123', 123}. It's a no-op otherwise.
+   */
+  void warnOnStrIntDup() const;
+
   Array toArrayImpl() const;
   bool toBoolImpl() const { return (m_size != 0); }
   size_t numSlots() const { return m_nLastSlot + 1; }
@@ -1286,6 +1355,9 @@ private:
   ssize_t iter_prev(ssize_t prev) const;
   const TypedValue* iter_value(ssize_t pos) const;
   Variant iter_key(ssize_t pos) const;
+  bool iter_valid(ssize_t pos) const {
+    return pos != 0;
+  }
 
   static void throwBadValueType() ATTRIBUTE_NORETURN;
 
@@ -1298,7 +1370,6 @@ private:
   uint m_nLastSlot;
   int32_t m_version;
 
-  friend ObjectData* collectionDeepCopySet(c_Set* st);
   friend class c_SetIterator;
   friend class c_Vector;
   friend class c_Map;
@@ -1340,6 +1411,7 @@ class c_Set : public BaseSet {
   Object t_tovector();
   Object t_tofrozenvector();
   Object t_toset();
+  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
   Object t_getiterator();
@@ -1397,6 +1469,7 @@ class c_FrozenSet : public BaseSet {
   Object t_tovector();
   Object t_tofrozenvector();
   Object t_toset();
+  Object t_tofrozenset();
 
   // Magic methods.
   String t___tostring();
@@ -1453,7 +1526,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
                                          ObjectData::UseSet|
                                          ObjectData::UseIsset|
                                          ObjectData::UseUnset|
-                                         ObjectData::HasCppClone> {
+                                         ObjectData::HasClone> {
  public:
   DECLARE_CLASS_NO_SWEEP(Pair)
 
@@ -1477,6 +1550,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_tomap();
   Object t_tostablemap();
   Object t_toset();
+  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
   Object t_getiterator();
@@ -1626,9 +1700,11 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2);
 void collectionDeepCopyTV(TypedValue* tv);
 ArrayData* collectionDeepCopyArray(ArrayData* arr);
 ObjectData* collectionDeepCopyVector(c_Vector* vec);
+ObjectData* collectionDeepCopyFrozenVector(c_FrozenVector* vec);
 ObjectData* collectionDeepCopyMap(c_Map* mp);
 ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
 ObjectData* collectionDeepCopySet(c_Set* st);
+ObjectData* collectionDeepCopyFrozenSet(c_FrozenSet* st);
 ObjectData* collectionDeepCopyPair(c_Pair* pair);
 
 ObjectData* newCollectionHelper(uint32_t type, uint32_t size);

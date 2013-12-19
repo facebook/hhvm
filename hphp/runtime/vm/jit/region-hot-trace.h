@@ -23,11 +23,11 @@
 
 namespace HPHP { namespace JIT {
 
-RegionDescPtr selectHotTrace(Transl::TransID triggerId,
+RegionDescPtr selectHotTrace(JIT::TransID triggerId,
                              const ProfData* profData,
                              TransCFG& cfg,
-                             Transl::TransIDSet& selectedSet,
-                             Transl::TransIDVec* selectedVec = nullptr);
+                             JIT::TransIDSet& selectedSet,
+                             JIT::TransIDVec* selectedVec = nullptr);
 
 } }
 

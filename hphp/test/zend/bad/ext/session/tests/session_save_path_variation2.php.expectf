@@ -1,0 +1,8 @@
+*** Testing session_save_path() : variation ***
+string(5) "/blah"
+HipHop Warning: %s
+bool(true)
+string(5) "/blah"
+bool(true)
+string(5) "/blah"
+Done

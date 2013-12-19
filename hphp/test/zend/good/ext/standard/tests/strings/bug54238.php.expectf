@@ -1,0 +1,13 @@
+array(1) {
+  [0]=>
+  string(9) "AArrayray"
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(1) "A"
+    [1]=>
+    string(1) "A"
+  }
+}

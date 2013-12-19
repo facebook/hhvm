@@ -1,0 +1,21 @@
+-- The following all result in INF --
+float(INF)
+float(INF)
+float(INF)
+
+
+-- The following all result in 0 --
+float(0)
+float(0)
+float(0)
+float(0)
+
+
+-- The following all result in -0 --
+float(%s)
+
+
+-- The following all result in -INF --
+float(-INF)
+float(-INF)
+===Done===

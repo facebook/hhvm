@@ -364,10 +364,10 @@ void populate_block(ParseUnitState& puState,
     return ret;
   };
 
-  auto decode_vsa = [&] {
-    auto n = decode<int32_t>(pc);
+  auto decode_stringvec = [&] {
+    auto const vecLen = decode<int32_t>(pc);
     std::vector<SString> keys;
-    for (size_t i = 0; i < n; ++i) {
+    for (auto i = size_t{0}; i < vecLen; ++i) {
       keys.push_back(ue.lookupLitstr(decode<int32_t>(pc)));
     }
     return keys;
@@ -423,30 +423,31 @@ void populate_block(ParseUnitState& puState,
     puState.defClsMap[b.NopDefCls.arg1] = &func;
   };
 
-#define IMM_MA(n)     auto mvec = decode_minstr();
-#define IMM_BLA(n)    auto targets = decode_switch(opPC);
-#define IMM_SLA(n)    auto targets = decode_sswitch(opPC);
-#define IMM_ILA(n)    auto iterTab = decode_itertab();
-#define IMM_IVA(n)    auto arg##n = decodeVariableSizeImm(&pc);
-#define IMM_I64A(n)   auto arg##n = decode<int64_t>(pc);
-#define IMM_LA(n)     auto loc##n = [&] {                       \
-                        auto id = decodeVariableSizeImm(&pc);   \
-                        always_assert(id < func.locals.size()); \
-                        return borrow(func.locals[id]);         \
-                      }();
-#define IMM_IA(n)     auto iter##n = [&] {                      \
-                        auto id = decodeVariableSizeImm(&pc);   \
-                        always_assert(id < func.iters.size());  \
-                        return borrow(func.iters[id]);          \
-                      }();
-#define IMM_DA(n)     auto dbl##n = decode<double>(pc);
-#define IMM_SA(n)     auto str##n = ue.lookupLitstr(decode<Id>(pc));
-#define IMM_AA(n)     auto arr##n = ue.lookupArray(decode<Id>(pc));
-#define IMM_BA(n)     assert(next == past); \
-                      auto target = findBlock(  \
-                        opPC + decode<Offset>(pc) - ue.bc());
-#define IMM_OA(n)     auto subop = decode<uint8_t>(pc);
-#define IMM_VSA(n)    auto keys = decode_vsa();
+#define IMM_MA(n)      auto mvec = decode_minstr();
+#define IMM_BLA(n)     auto targets = decode_switch(opPC);
+#define IMM_SLA(n)     auto targets = decode_sswitch(opPC);
+#define IMM_ILA(n)     auto iterTab = decode_itertab();
+#define IMM_IVA(n)     auto arg##n = decodeVariableSizeImm(&pc);
+#define IMM_I64A(n)    auto arg##n = decode<int64_t>(pc);
+#define IMM_LA(n)      auto loc##n = [&] {                       \
+                         auto id = decodeVariableSizeImm(&pc);   \
+                         always_assert(id < func.locals.size()); \
+                         return borrow(func.locals[id]);         \
+                       }();
+#define IMM_IA(n)      auto iter##n = [&] {                      \
+                         auto id = decodeVariableSizeImm(&pc);   \
+                         always_assert(id < func.iters.size());  \
+                         return borrow(func.iters[id]);          \
+                       }();
+#define IMM_DA(n)      auto dbl##n = decode<double>(pc);
+#define IMM_SA(n)      auto str##n = ue.lookupLitstr(decode<Id>(pc));
+#define IMM_AA(n)      auto arr##n = ue.lookupArray(decode<Id>(pc));
+#define IMM_BA(n)      assert(next == past); \
+                       auto target = findBlock(  \
+                         opPC + decode<Offset>(pc) - ue.bc());
+#define IMM_OA_IMPL(n) decode<uint8_t>(pc);
+#define IMM_OA(type)   auto subop = (type)IMM_OA_IMPL
+#define IMM_VSA(n)     auto keys = decode_stringvec();
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -525,6 +526,7 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_SA
 #undef IMM_AA
 #undef IMM_BA
+#undef IMM_OA_IMPL
 #undef IMM_OA
 #undef IMM_VSA
 
@@ -681,7 +683,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   // Note: probably need to clear AttrLeaf here eventually.
   ret->attrs                  = fe.attrs();
   ret->userAttributes         = fe.getUserAttributes();
-  ret->userRetTypeConstraint  = fe.returnTypeConstraint();
+  ret->returnUserType         = fe.returnUserType();
   ret->originalFilename       = fe.originalFilename();
 
   ret->top                    = fe.top();

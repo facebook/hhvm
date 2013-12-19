@@ -1,0 +1,3 @@
+<?php
+extension_loaded("xmlreader") or die("skip requires xmlreader");
+?>

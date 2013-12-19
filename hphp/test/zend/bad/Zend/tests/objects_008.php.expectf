@@ -1,0 +1,2 @@
+Strict Standards: Declaration of test3::foo() should be compatible with test::foo(Test $arg) in %s on line %d
+Done

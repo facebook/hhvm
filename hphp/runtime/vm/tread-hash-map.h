@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_VM_TREAD_HASH_MAP_H_
 #define incl_HPHP_VM_TREAD_HASH_MAP_H_
 
+#include <atomic>
 #include <boost/noncopyable.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/type_traits/is_convertible.hpp>
@@ -52,7 +53,7 @@ namespace Treadmill { void deferredFree(void*); }
  */
 template<class Key, class Val, class HashFunc>
 struct TreadHashMap : private boost::noncopyable {
-  typedef std::pair<Key,Val> value_type;
+  typedef std::pair<std::atomic<Key>,Val> value_type;
 
 private:
   struct Table {
@@ -117,7 +118,7 @@ public:
   private:
     void advancePastEmpty() {
       while (m_offset < m_table->capac &&
-          atomic_acquire_load(&m_table->entries[m_offset].first) == 0) {
+        m_table->entries[m_offset].first.load(std::memory_order_acquire) == 0) {
         ++m_offset;
       }
     }
@@ -131,11 +132,11 @@ public:
   typedef thm_iterator<const value_type> const_iterator;
 
   iterator begin() {
-    return iterator(atomic_acquire_load(&m_table), 0);
+    return iterator(m_table.load(std::memory_order_acquire), 0);
   }
 
   iterator end() {
-    Table* tab = atomic_acquire_load(&m_table);
+    auto tab = m_table.load(std::memory_order_acquire);
     return iterator(tab, tab->capac);
   }
 
@@ -154,12 +155,13 @@ public:
   Val* find(Key key) const {
     assert(key != 0);
 
-    Table* tab = atomic_acquire_load(&m_table); // memory_order_consume
+    auto tab = m_table.load(std::memory_order_consume);
     assert(tab->capac > tab->size);
-    size_t idx = project(tab, key);
+    auto idx = project(tab, key);
     for (;;) {
-      Key currentProbe = atomic_acquire_load(&tab->entries[idx].first);
-      if (currentProbe == key) return &tab->entries[idx].second;
+      auto& entry = tab->entries[idx];
+      Key currentProbe = entry.first.load(std::memory_order_acquire);
+      if (currentProbe == key) return &entry.second;
       if (currentProbe == 0) return 0;
       if (++idx == tab->capac) idx = 0;
     }
@@ -167,7 +169,7 @@ public:
 
 private:
   Val* insertImpl(Table* const tab, Key newKey, Val newValue) {
-    value_type* probe = &tab->entries[project(tab, newKey)];
+    auto probe = &tab->entries[project(tab, newKey)];
     assert(size_t(probe - tab->entries) < tab->capac);
 
     // Since we're the only thread allowed to write, we're allowed to
@@ -186,7 +188,7 @@ private:
     probe->second = newValue;
 
     // Make it visible.
-    atomic_release_store(&probe->first, newKey);
+    probe->first.store(newKey, std::memory_order_release);
 
     // size is only written to by the writer thread, relaxed memory
     // ordering is ok.
@@ -197,7 +199,7 @@ private:
 
   Table* acquireAndGrowIfNeeded() {
     // Relaxed load is ok---there's only one writer thread.
-    Table* old = m_table;
+    auto old = m_table.load(std::memory_order_relaxed);
 
     // 75% occupancy, avoiding the FPU.
     if (LIKELY((old->size) < (old->capac / 4 + old->capac / 2))) {
@@ -205,8 +207,8 @@ private:
     }
 
     // Rehash from old to new.
-    Table* newTable = allocTable(old->capac * 2);
-    for (size_t i = 0; i < old->capac; ++i) {
+    auto newTable = allocTable(old->capac * 2);
+    for (auto i = 0; i < old->capac; ++i) {
       value_type* ent = old->entries + i;
       if (ent->first) {
         insertImpl(newTable, ent->first, ent->second);
@@ -214,7 +216,7 @@ private:
     }
     assert(newTable->capac == old->capac * 2);
     assert(newTable->size == old->size); // only one writer thread
-    atomic_release_store(&m_table, newTable); // publish
+    m_table.store(newTable, std::memory_order_release);
     Treadmill::deferredFree(old);
     return newTable;
   }
@@ -225,7 +227,7 @@ private:
   }
 
   static Table* allocTable(size_t capacity) {
-    Table* ret = static_cast<Table*>(
+    auto ret = static_cast<Table*>(
       calloc(1, capacity * sizeof(value_type) + sizeof(Table)));
     ret->capac = capacity;
     ret->size = 0;
@@ -234,7 +236,7 @@ private:
 
 private:
   HashFunc m_hash;
-  Table* m_table;
+  std::atomic<Table*> m_table;
 };
 
 //////////////////////////////////////////////////////////////////////

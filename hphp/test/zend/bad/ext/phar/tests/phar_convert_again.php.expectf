@@ -1,0 +1,31 @@
+%sphar_convert_again.zip
+%sphar_convert_again.tar.gz
+%sphar_convert_again.tar.bz2
+Unable to add newly converted phar "%sphar_convert_again.phar" to the list of phars, a phar with that name already exists
+%sphar_convert_again2.phar
+%sphar_convert_again2.phar.zip
+hi
+%sphar_convert_again2.zip
+A Phar stub cannot be set in a plain zip archive
+A Phar stub cannot be set in a plain zip archive
+A Phar alias cannot be set in a plain zip archive
+%sphar_convert_again2.phar.tar
+%sphar_convert_again2.tar
+%sphar_convert_again2.phar.tar.gz
+Unknown file format specified, please pass one of Phar::PHAR, Phar::TAR or Phar::ZIP
+Cannot compress entire archive with gzip, zip archives do not support whole-archive compression
+Cannot compress entire archive with bz2, zip archives do not support whole-archive compression
+Cannot write out data phar archive, use Phar::TAR or Phar::ZIP
+Cannot write out data phar archive, use Phar::TAR or Phar::ZIP
+Unknown file format specified, please pass one of Phar::TAR or Phar::ZIP
+Cannot compress entire archive with gzip, zip archives do not support whole-archive compression
+Cannot compress entire archive with bz2, zip archives do not support whole-archive compression
+Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2
+Unknown compression specified, please pass one of Phar::GZ or Phar::BZ2
+A Phar stub cannot be set in a plain tar archive
+A Phar alias cannot be set in a plain tar archive
+A Phar stub cannot be set in a plain tar archive
+data phar "%sphar_convert_again2.phar.tgz.oops" has invalid extension phar.tgz.oops
+phar "%sphar_convert_again2.tgz.oops" has invalid extension tgz.oops
+data phar "%sphar_convert_again2.phar/.tgz.oops" has invalid extension phar/.tgz.oops
+===DONE===

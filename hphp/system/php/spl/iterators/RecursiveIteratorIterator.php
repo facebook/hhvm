@@ -382,6 +382,9 @@ class RecursiveIteratorIterator implements OuterIterator {
    * Undocumented behavior but Zend does it and frameworks rely on it, so..
    */
   public function __call($func, $params) {
-    return call_user_func_array(array($this->current(), $func), $params);
+    return call_user_func_array(
+      array($this->getInnerIterator(), $func),
+      $params
+    );
   }
 }

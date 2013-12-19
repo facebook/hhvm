@@ -1,0 +1,19 @@
+Unknown phar archive ""
+Unknown phar archive "%sphar_unlinkarchive.phar"
+Unknown phar archive "%sphar_unlinkarchive.phar.tar": internal corruption of phar "%sphar_unlinkarchive.phar.tar" (truncated entry)
+HipHop Warning: %s
+bool(false)
+string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
+phar archive "%sphar_unlinkarchive.phar" has open file handles or objects.  fclose() all file handles, and unset() all objects prior to calling unlinkArchive()
+bool(true)
+string(60) "<?php // zip-based phar archive stub file
+__HALT_COMPILER();"
+bool(true)
+string(60) "<?php // zip-based phar archive stub file
+__HALT_COMPILER();"
+bool(false)
+int(0)
+phar archive "%sphar_unlinkarchive.phar" cannot be unlinked from within itself
+string(%d) "%sphar_unlinkarchive.phar"
+hi
+===DONE===

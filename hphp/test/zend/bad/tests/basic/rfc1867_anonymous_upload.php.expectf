@@ -1,0 +1,30 @@
+array(2) {
+  [%d]=>
+  array(5) {
+    [%u|b%"name"]=>
+    %string|unicode%(9) "file1.txt"
+    [%u|b%"type"]=>
+    %string|unicode%(16) "text/plain-file1"
+    [%u|b%"tmp_name"]=>
+    %string|unicode%(%d) "%s"
+    [%u|b%"error"]=>
+    int(0)
+    [%u|b%"size"]=>
+    int(1)
+  }
+  [%d]=>
+  array(5) {
+    [%u|b%"name"]=>
+    %string|unicode%(9) "file2.txt"
+    [%u|b%"type"]=>
+    %string|unicode%(16) "text/plain-file2"
+    [%u|b%"tmp_name"]=>
+    %string|unicode%(%d) "%s"
+    [%u|b%"error"]=>
+    int(0)
+    [%u|b%"size"]=>
+    int(1)
+  }
+}
+array(0) {
+}

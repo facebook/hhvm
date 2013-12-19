@@ -18,6 +18,7 @@
 #include <boost/next_prior.hpp>
 #include <unordered_set>
 
+#include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/linear-scan.h"
@@ -26,8 +27,6 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 
 namespace HPHP {  namespace JIT {
-
-using Transl::kNumRegs;
 
 namespace {
 
@@ -39,12 +38,11 @@ struct RegState {
   RegState();
   SSATmp*& tmp(const PhysLoc&, int i);
   void merge(const RegState& other);
-  SSATmp* regs[kNumRegs];  // which tmp is in each register
+  PhysReg::Map<SSATmp*> regs;  // which tmp is in each register
   SSATmp* slots[NumPreAllocatedSpillLocs]; // which tmp is in each spill slot
 };
 
 RegState::RegState() {
-  memset(regs, 0, sizeof(regs));
   memset(slots, 0, sizeof(slots));
 }
 
@@ -54,13 +52,13 @@ SSATmp*& RegState::tmp(const PhysLoc& loc, int i) {
     return slots[loc.slot(i)];
   }
   auto r = loc.reg(i);
-  assert(r != Transl::InvalidReg && unsigned(int(r)) < kNumRegs);
-  return regs[int(r)];
+  assert(r != JIT::InvalidReg);
+  return regs[r];
 }
 
 void RegState::merge(const RegState& other) {
-  for (unsigned i = 0; i < kNumRegs; i++) {
-    if (regs[i] != other.regs[i]) regs[i] = nullptr;
+  for (auto r : regs) {
+    if (regs[r] != other.regs[r]) regs[r] = nullptr;
   }
   for (unsigned i = 0; i < NumPreAllocatedSpillLocs; i++) {
     if (slots[i] != other.slots[i]) slots[i] = nullptr;
@@ -141,7 +139,7 @@ bool checkBlock(Block* b) {
   // Invariant #6
   if (b->front().op() == DefLabel) {
     for (int i = 0; i < b->front().numDsts(); ++i) {
-      auto const traceBlocks = b->trace()->blocks();
+      DEBUG_ONLY auto const& traceBlocks = b->trace()->blocks();
       b->forEachSrc(i, [&](IRInstruction* inst, SSATmp*) {
         assert(std::find(traceBlocks.begin(), traceBlocks.end(),
                          inst->block()) != traceBlocks.end());
@@ -326,7 +324,7 @@ bool checkShuffle(const IRInstruction& inst, const RegAllocInfo& regs) {
     //   general than the src type due to a control-flow join.
     assert(rs.numAllocated() <= rd.numAllocated());
     assert(!rs.spilled() || !rd.spilled());
-    assert(rs.isFullXMM() == rd.isFullXMM());
+    assert(rs.isFullSIMD() == rd.isFullSIMD());
     for (int j = 0; j < rd.numAllocated(); ++j) {
       if (rd.spilled()) {
         assert(!destSlots.test(rd.slot(j)));
@@ -354,8 +352,10 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
       for (SSATmp* src : inst.srcs()) {
         auto const &rs = regs[inst][src];
         if (!rs.spilled() &&
-            (rs.reg(0) == Transl::rVmSp ||
-             rs.reg(0) == Transl::rVmFp)) {
+            ((arch() == Arch::X64 && (rs.reg(0) == JIT::rVmSp ||
+                                      rs.reg(0) == JIT::rVmFp)) ||
+             (arch() == Arch::ARM && (rs.reg(0) == ARM::rVmSp ||
+                                      rs.reg(0) == ARM::rVmFp)))) {
           // hack - ignore rbx and rbp
           continue;
         }
@@ -406,4 +406,3 @@ bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
 }
 
 }}
-

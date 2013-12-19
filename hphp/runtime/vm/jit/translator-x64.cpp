@@ -124,7 +124,9 @@
 #include "hphp/runtime/vm/jit/translator-x64-internal.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
+
+TRACE_SET_MOD(tx64);
 
 using namespace reg;
 using namespace Util;
@@ -199,6 +201,18 @@ bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
 
   if (profData()->optimized(sk.getFuncId())) return false;
 
+  // If we've hit EvalJitProfileRequests, then don't emit profiling
+  // translations for function entries (which trigger the optimizing
+  // retranslation).  This limits the duration of profiling.  For
+  // non-function-body SrcKeys, whose profiling translations only
+  // increment a counter, it's OK to emit them past the
+  // EvalJitProfileRequests threshold.  Notice that, because of the
+  // check above, if we got here, then the whole function hasn't been
+  // retranslated in optimizing mode yet.
+  if (sk.func()->base() == sk.offset() &&
+      requestCount() > RuntimeOption::EvalJitProfileRequests) {
+    return false;
+  }
   return true;
 }
 
@@ -209,11 +223,8 @@ bool TranslatorX64::profileSrcKey(const SrcKey& sk) const {
 void TranslatorX64::invalidateFuncProfSrcKeys(const Func* func) {
   assert(RuntimeOption::EvalJitPGO);
   FuncId funcId = func->getFuncId();
-  for (TransID tid = 0; tid < m_profData->numTrans(); tid++) {
-    if (m_profData->transFuncId(tid) == funcId &&
-        m_profData->transKind(tid) == TransProfile) {
-      invalidateSrcKey(m_profData->transSrcKey(tid));
-    }
+  for (auto tid : m_profData->funcProfTransIDs(funcId)) {
+    invalidateSrcKey(m_profData->transSrcKey(tid));
   }
 }
 
@@ -389,7 +400,6 @@ static void populateLiveContext(JIT::RegionContext& ctx) {
     [&](const ActRec* ar) {
       // TODO(#2466980): when it's a Cls, we should pass the Class* in
       // the Type.
-      using JIT::Type;
       auto const objOrCls =
         ar->hasThis()  ? Type::Obj.specialize(ar->getThis()->getVMClass()) :
         ar->hasClass() ? Type::Cls
@@ -2072,7 +2082,6 @@ TranslatorX64::translateTracelet(Tracelet& t) {
 }
 
 void TranslatorX64::traceCodeGen() {
-  using namespace JIT;
 
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   auto& unit = ht.unit();
@@ -2695,6 +2704,6 @@ TranslatorX64::CodeBlockSelector::Args::getTranslator() const {
   return m_tx;
 }
 
-} // HPHP::Transl
+} // HPHP::JIT
 
 } // HPHP

@@ -903,7 +903,7 @@ class Redis {
     if ($auto_reconnect AND
         $this->doConnect($this->host, $this->port,
                          $this->timeout_connect,
-                         null, $this->retry_internal,
+                         null, $this->retry_interval,
                          $this->persistent)) {
       if ($this->password) {
         $this->auth($this->password);

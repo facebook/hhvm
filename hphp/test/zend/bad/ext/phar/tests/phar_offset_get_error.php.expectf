@@ -1,0 +1,5 @@
+Entry /error/.. does not exist and cannot be created: phar error: invalid path "/error/.." contains upper directory reference
+foobar
+Cannot set any files or directories in magic ".phar" directory
+Entry .phar/stub.php does not exist
+===DONE===

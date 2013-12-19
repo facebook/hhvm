@@ -126,9 +126,8 @@ static fbstring genDocComment(const PhpFunc& func,
 }
 
 static fbstring genDocComment(const PhpClass& cls) {
-  return formatDocComment(
-           genDocCommentPreamble(cls.name(), cls.getDesc(), cls.flags(), "")
-         );
+  return formatDocComment(genDocCommentPreamble(cls.getPhpName(),
+        cls.getDesc(), cls.flags(), ""));
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -287,7 +286,7 @@ static void writeClass(std::ostream& out, const PhpClass& cls) {
   auto flags = (cls.flags() & CLASS_FLAG_MASK) | IsSystem | IsNothing;
 
   out << "  " << castLong(flags, true) << ", "
-      << "\"" << escapeCpp(cls.name()) << "\", "
+      << "\"" << escapeCpp(cls.getPhpName()) << "\", "
       << "\"" << escapeCpp(strtolower(cls.parent())) << "\", "
       << "\"\", "
       << castLong(0) << ", "

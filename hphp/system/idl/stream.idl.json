@@ -28,23 +28,6 @@
             ]
         },
         {
-            "name": "stream_context_get_default",
-            "flags": [
-            ],
-            "return": {
-                "type": "Resource",
-                "desc": "A stream context resource."
-            },
-            "args": [
-                {
-                    "name": "options",
-                    "type": "VariantMap",
-                    "value": "null_array",
-                    "desc": "options must be an associative array of associative arrays in the format $arr['wrapper']['option'] = $value.\n\nAs of PHP 5.3.0, the stream_context_set_default() function can be used to set the default context."
-                }
-            ]
-        },
-        {
             "name": "stream_context_get_options",
             "flags": [
             ],

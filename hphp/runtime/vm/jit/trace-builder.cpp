@@ -35,7 +35,7 @@ TraceBuilder::TraceBuilder(Offset initialBcOffset,
   : m_unit(unit)
   , m_simplifier(*this)
   , m_state(unit, initialSpOffsetFromFp, func)
-  , m_curTrace(m_unit.makeMain(initialBcOffset)->trace())
+  , m_curTrace(m_unit.main())
   , m_curBlock(nullptr)
   , m_enableSimplification(false)
   , m_inReoptimize(false)
@@ -343,13 +343,29 @@ SSATmp* TraceBuilder::preOptimizeStLoc(IRInstruction* inst) {
 
   assert(inst->typeParam() == Type::None);
 
-  // There's no need to store the type if it's going to be the same
-  // KindOfFoo. We still have to store string types because we don't
-  // guard on KindOfStaticString vs. KindOfString.
+  /*
+   * There's no need to store the type if it's going to be the same
+   * KindOfFoo.  We'll still have to store string types because we
+   * aren't specific about storing KindOfStaticString
+   * vs. KindOfString, and a Type::Null might mean KindOfUninit or
+   * KindOfNull.
+   */
   auto const bothBoxed = curType.isBoxed() && newType.isBoxed();
-  auto const sameUnboxed =
-    curType.isSameKindOf(newType) && !curType.isString();
-  if (bothBoxed || sameUnboxed) {
+  auto const sameUnboxed = [&] {
+    auto avoidable = { Type::Uninit,
+                       Type::InitNull,
+                       Type::Int,
+                       Type::Dbl,
+                       // No strings.
+                       Type::Arr,
+                       Type::Obj,
+                       Type::Res };
+    for (auto& t : avoidable) {
+      if (curType.subtypeOf(t) && newType.subtypeOf(t)) return true;
+    }
+    return false;
+  };
+  if (bothBoxed || sameUnboxed()) {
     inst->setOpcode(StLocNT);
   }
 
@@ -406,36 +422,41 @@ SSATmp* TraceBuilder::optimizeWork(IRInstruction* inst,
 
   SSATmp* result = nullptr;
 
-  if (m_state.enableCse() && inst->canCSE()) {
-    result = m_state.cseLookup(inst, idoms);
+  if (m_enableSimplification) {
+    result = m_simplifier.simplify(inst);
     if (result) {
-      // Found a dominating instruction that can be used instead of inst
-      FTRACE(1, "  {}cse found: {}\n",
-             indent(), result->inst()->toString());
-
-      assert(!inst->consumesReferences());
+      inst = result->inst();
       if (inst->producesReference(0)) {
-        // Replace with an IncRef
-        FTRACE(1, "  {}cse of refcount-producing instruction\n", indent());
-        gen(IncRef, result);
-        return result;
-      } else {
+        // This effectively prevents CSE from kicking in below, which
+        // would replace the instruction with an IncRef.  That is
+        // correct if the simplifier morphed the instruction, but it's
+        // incorrect if the simplifier returned one of original
+        // instruction sources.  We currently have no way to
+        // distinguish the two cases, so we prevent CSE completely for
+        // now.
         return result;
       }
     }
   }
 
-  if (m_enableSimplification) {
-    result = m_simplifier.simplify(inst);
-    if (result) {
-      // Found a simpler instruction that can be used instead of inst
-      FTRACE(1, "  {}simplification returned: {}\n",
-             indent(), result->inst()->toString());
-      assert(inst->hasDst());
-      return result;
+  if (m_state.enableCse() && inst->canCSE()) {
+    SSATmp* cseResult = m_state.cseLookup(inst, idoms);
+    if (cseResult) {
+      // Found a dominating instruction that can be used instead of inst
+      FTRACE(1, "  {}cse found: {}\n",
+             indent(), cseResult->inst()->toString());
+
+      assert(!inst->consumesReferences());
+      if (inst->producesReference(0)) {
+        // Replace with an IncRef
+        FTRACE(1, "  {}cse of refcount-producing instruction\n", indent());
+        gen(IncRef, cseResult);
+      }
+      return cseResult;
     }
   }
-  return nullptr;
+
+  return result;
 }
 
 SSATmp* TraceBuilder::optimizeInst(IRInstruction* inst, CloneFlag doClone) {
@@ -491,11 +512,10 @@ void TraceBuilder::reoptimize() {
   auto const idoms = findDominators(m_unit, sortedBlocks);
   m_state.clear();
 
-  auto blocks = std::move(m_curTrace->blocks());
-  assert(m_curTrace->blocks().empty());
-  while (!blocks.empty()) {
-    Block* block = blocks.front();
-    blocks.pop_front();
+  auto& traceBlocks = m_curTrace->blocks();
+  BlockList blocks(traceBlocks.begin(), traceBlocks.end());
+  traceBlocks.clear();
+  for (auto* block : blocks) {
     assert(block->trace() == m_curTrace);
     FTRACE(5, "Block: {}\n", block->id());
 
@@ -541,7 +561,7 @@ void TraceBuilder::reoptimize() {
     if (block->empty()) {
       // If all the instructions in the block were optimized away, remove it
       // from the trace.
-      auto it = m_curTrace->blocks().end();
+      auto it = traceBlocks.end();
       --it;
       assert(*it == block);
       m_curTrace->unlink(it);

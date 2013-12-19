@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_RUNTIME_RDS_H_
 #define incl_HPHP_RUNTIME_RDS_H_
 
+#include <atomic>
 #include <cstdlib>
 #include <cinttypes>
 #include <boost/variant.hpp>
@@ -130,7 +131,7 @@ struct Header {
    * points, the runtime will check whether this word is non-zero, and
    * if so go to a slow path to handle unusual conditions (e.g. OOM).
    */
-  ssize_t conditionFlags;
+  std::atomic<ssize_t> conditionFlags;
 };
 
 /*

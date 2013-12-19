@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $v = new Vector;
 $v[] = 'c';

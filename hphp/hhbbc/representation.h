@@ -350,7 +350,7 @@ struct Func {
    * User-visible return type specification as a string.  This is only
    * passed through to expose it to reflection.
    */
-  SString userRetTypeConstraint;
+  SString returnUserType;
 
   /*
    * If traits are being flattened by hphpc, we keep the original

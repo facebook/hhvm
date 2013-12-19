@@ -91,7 +91,7 @@ static bool HHVM_FUNCTION(finfo_set_flags, CResRef finfo, int64_t options) {
 
 static Variant php_finfo_get_type(
     const CResRef& object, const Variant& what,
-    int64_t options, CResRef context, int mode, int mimetype_emu)
+    int64_t options, CVarRef context, int mode, int mimetype_emu)
 {
   String ret_val;
   String buffer;
@@ -209,7 +209,7 @@ clean:
 
 static String HHVM_FUNCTION(finfo_buffer,
     CResRef finfo, const String& string,
-    int64_t options, CResRef context) {
+    int64_t options, CVarRef context) {
   return php_finfo_get_type(
       finfo, string, options, context,
       FILEINFO_MODE_BUFFER, 0);
@@ -217,14 +217,14 @@ static String HHVM_FUNCTION(finfo_buffer,
 
 static String HHVM_FUNCTION(finfo_file,
     CResRef finfo, const String& file_name,
-    int64_t options, CResRef context) {
+    int64_t options, CVarRef context) {
   return php_finfo_get_type(
       finfo, file_name, options, context,
       FILEINFO_MODE_FILE, 0);
 }
 
 static String HHVM_FUNCTION(mime_content_type, const Variant& filename) {
-  return php_finfo_get_type(nullptr, filename, 0, nullptr, -1, 1);
+  return php_finfo_get_type(nullptr, filename, 0, uninit_null(), -1, 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////

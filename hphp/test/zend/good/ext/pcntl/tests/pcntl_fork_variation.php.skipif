@@ -1,0 +1,4 @@
+<?php
+	if (!extension_loaded('pcntl')) die('skip pcntl extension not available');
+	elseif (!extension_loaded('posix')) die('skip posix extension not available');
+?>

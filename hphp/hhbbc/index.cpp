@@ -376,7 +376,7 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
 }
 
 borrowed_ptr<const php::Func> find_constructor(borrowed_ptr<ClassInfo> cinfo) {
-  if (cinfo->cls->attrs & (AttrInterface|AttrTrait|AttrAbstract)) {
+  if (cinfo->cls->attrs & (AttrInterface|AttrTrait)) {
     return nullptr;
   }
 
@@ -401,8 +401,9 @@ borrowed_ptr<const php::Func> find_constructor(borrowed_ptr<ClassInfo> cinfo) {
     return cinfo->parent->ctor;
   }
 
-  // Use the generated 86ctor.  This must exist at this point or the
-  // bytecode is ill-formed.
+  // Use the generated 86ctor.  Unless the class is abstract, this
+  // must exist at this point or the bytecode is ill-formed.
+  if (cinfo->cls->attrs & AttrAbstract) return nullptr;
   cit = cinfo->methods.find(s_86ctor.get());
   if (cit == end(cinfo->methods)) {
     always_assert(!"no 86ctor found on class");
@@ -646,7 +647,7 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   switch (tc.metaType()) {
   case TypeConstraint::MetaType::Precise:
     {
-      auto const mainType = [&] {
+      auto const mainType = [&]() -> const Type {
         switch (tc.underlyingDataType()) {
         case KindOfString:        return TStr;
         case KindOfStaticString:  return TStr;

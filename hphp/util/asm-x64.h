@@ -49,7 +49,7 @@
  */
 #define logical_const /* nothing */
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 #define TRACEMOD ::HPHP::Trace::asmx64
 
@@ -62,10 +62,6 @@ struct ScaledIndex;
 struct ScaledIndexDisp;
 struct DispReg;
 
-const int kNumGPRegs  = 16;
-const int kNumXMMRegs = 16;
-const int kNumRegs    = kNumGPRegs + kNumXMMRegs;
-
 const uint8_t kOpsizePrefix = 0x66;
 
 /*
@@ -74,7 +70,7 @@ const uint8_t kOpsizePrefix = 0x66;
  * physical registers for different instructions (e.g. xmm0 and rax
  * are both 0).
  *
- * This type is mainly published for backward compatability with the
+ * This type is mainly published for backward compatibility with the
  * APIs that look like store_reg##_disp_reg##, which predate the
  * size-specific types.  (Some day it may become internal to this
  * module.)
@@ -84,7 +80,7 @@ enum class RegNumber : int {};
 struct Reg64 {
   explicit constexpr Reg64(int rn) : rn(rn) {}
 
-  // Implicit conversion for backward compatability only.  This is
+  // Implicit conversion for backward compatibility only.  This is
   // needed to keep the store_reg##_disp_reg## style apis working.
   constexpr /* implicit */ operator RegNumber() const { return RegNumber(rn); }
 
@@ -488,7 +484,7 @@ namespace reg {
 
 //////////////////////////////////////////////////////////////////////
 
-enum instrFlags {
+enum X64InstrFlags {
   IF_REVERSE    = 0x0001, // The operand encoding for some instructions are
                           // "backwards" in x64; these instructions are
                           // called "reverse" instructions. There are a few
@@ -589,6 +585,7 @@ const X64Instr instr_testb =   { { 0x84,0x84,0xF6,0x00,0xA8,0xF1 }, 0x0810  };
 const X64Instr instr_cmp =     { { 0x39,0x3B,0x81,0x07,0x3D,0xF1 }, 0x0810  };
 const X64Instr instr_cmpb =    { { 0x38,0x3A,0x80,0x07,0x3C,0xF1 }, 0x0810  };
 const X64Instr instr_sbb =     { { 0x19,0x1B,0x81,0x03,0x1D,0xF1 }, 0x0810  };
+const X64Instr instr_sbbb =    { { 0x18,0x1A,0x80,0x03,0x1C,0xF1 }, 0x0810  };
 const X64Instr instr_adc =     { { 0x11,0x13,0x81,0x02,0x15,0xF1 }, 0x0810  };
 const X64Instr instr_lea =     { { 0xF1,0x8D,0xF1,0x00,0xF1,0xF1 }, 0x0000  };
 const X64Instr instr_xchgb =   { { 0x86,0x86,0xF1,0x00,0xF1,0xF1 }, 0x0000  };
@@ -935,6 +932,7 @@ public:
   FULL_OP(or,  instr_or)
   FULL_OP(test,instr_test)
   FULL_OP(cmp, instr_cmp)
+  FULL_OP(sbb, instr_sbb)
 
 #undef IMM64_OP
 #undef IMM64R_OP
@@ -1909,7 +1907,7 @@ public:
 public:
   /*
    * The following functions are an older API to the assembler, which
-   * still partially exist here for backward compatability.
+   * still partially exist here for backward compatibility.
    *
    * Our ordering convention follows the gas standard of "destination
    * last": <op>_<src1>_<src2>_<dest>. Be warned that Intel manuals go the

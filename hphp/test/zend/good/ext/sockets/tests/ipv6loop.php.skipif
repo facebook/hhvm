@@ -1,0 +1,6 @@
+<?php
+	if (!extension_loaded('sockets')) {
+		die('skip sockets extension not available.');
+	}
+	require 'ipv6_skipif.inc';
+?>

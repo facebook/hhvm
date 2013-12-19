@@ -33,7 +33,6 @@ Variant f_libxml_get_errors();
 Variant f_libxml_get_last_error();
 void f_libxml_clear_errors();
 bool f_libxml_use_internal_errors(CVarRef use_errors = null_variant);
-void f_libxml_set_streams_context(CResRef streams_context);
 bool f_libxml_disable_entity_loader(bool disable = true);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,7 +45,7 @@ class c_SimpleXMLElement :
                                 ObjectData::UseIsset|
                                 ObjectData::UseUnset|
                                 ObjectData::CallToImpl|
-                                ObjectData::HasCppClone>,
+                                ObjectData::HasClone>,
       public Sweepable {
  public:
   DECLARE_CLASS(SimpleXMLElement)

@@ -53,9 +53,6 @@
  *
  * Caveats:
  *
- *   - There's currently no support for inserting the Units this
- *     module makes into the Repo.
- *
  *   - It might be nice if you could refer to iterators by name
  *     instead of by index.
  *
@@ -64,8 +61,6 @@
  *   - Line number information can't be propagated to the various Unit
  *     structures.  (It might make sense to do this via something like
  *     a .line directive at some point.)
- *
- *   - SetOpOp and IncDecOp op names are not implemented.
  *
  *   - You can't currently create non-top functions or non-hoistable
  *     classes.
@@ -91,6 +86,8 @@
 
 #include "folly/String.h"
 
+#include "hphp/util/md5.h"
+#include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/preclass-emit.h"
@@ -186,21 +183,68 @@ struct Input {
     return true;
   }
 
-  // Mostly C-style character escapes, but not quite everything is
-  // implemented.
+  // C-style character escapes, no support for unicode escapes or
+  // whatnot.
   template<class OutCont>
-  void escapeChar(int src, OutCont& out) {
+  void escapeChar(OutCont& out) {
+    auto is_oct = [&] (int i) { return i >= '0' && i <= '7'; };
+    auto is_hex = [&] (int i) {
+      return (i >= '0' && i <= '9') ||
+             (i >= 'a' && i <= 'f') ||
+             (i >= 'A' && i <= 'F');
+    };
+    auto hex_val = [&] (int i) -> uint32_t {
+      assert(is_hex(i));
+      return i >= '0' && i <= '9' ? i - '0' :
+             i >= 'a' && i <= 'f' ? i - 'a' + 10 : i - 'A' + 10;
+    };
+
+    auto src = getc();
     switch (src) {
     case EOF:  error("EOF in string literal");
-    case 't':  out.push_back('\t'); break;
+    case 'a':  out.push_back('\a'); break;
+    case 'b':  out.push_back('\b'); break;
+    case 'f':  out.push_back('\f'); break;
     case 'n':  out.push_back('\n'); break;
+    case 'r':  out.push_back('\r'); break;
+    case 't':  out.push_back('\t'); break;
     case 'v':  out.push_back('\v'); break;
-    case '\\': out.push_back('\\'); break;
+    case '\'': out.push_back('\''); break;
     case '\"': out.push_back('\"'); break;
+    case '\?': out.push_back('\?'); break;
+    case '\\': out.push_back('\\'); break;
     case '\n': /* ignore */         break;
     default:
-      // If you hit this and want octal or hex escapes or something,
-      // please implement.
+      if (is_oct(src)) {
+        auto val = int64_t{src} - '0';
+        for (auto i = int{0}; i < 3; ++i) {
+          src = getc();
+          if (!is_oct(src)) { ungetc(src); break; }
+          val *= 8;
+          val += src - '0';
+        }
+        if (val > std::numeric_limits<uint8_t>::max()) {
+          error("octal escape sequence overflowed");
+        }
+        out.push_back(static_cast<uint8_t>(val));
+        return;
+      }
+
+      if (src == 'x' || src == 'X') {
+        auto val = uint64_t{0};
+        if (!is_hex(peek())) error("\\x used without no following hex digits");
+        do {
+          src = getc();
+          val *= 0x10;
+          val += hex_val(src);
+        } while (is_hex(peek()));
+        if (val > std::numeric_limits<uint8_t>::max()) {
+          error("hex escape sequence overflowed");
+        }
+        out.push_back(static_cast<uint8_t>(val));
+        return;
+      }
+
       error("unrecognized character escape");
     }
   }
@@ -219,8 +263,8 @@ struct Input {
     while ((c = getc()) != EOF) {
       switch (c) {
       case '\"': return true;
-      case '\\': escapeChar(getc(), str); break;
-      default:   str.push_back(c);        break;
+      case '\\': escapeChar(str);  break;
+      default:   str.push_back(c); break;
       }
     }
     error("EOF in string literal");
@@ -249,7 +293,7 @@ struct Input {
     int c;
     while ((c = getc()) != EOF) {
       if (c == '\\') {
-        escapeChar(getc(), buffer);
+        escapeChar(buffer);
         continue;
       }
       if (c == '"') {
@@ -782,30 +826,13 @@ template<class Target> Target read_opcode_arg(AsmState& as) {
   }
 }
 
-uint8_t read_AssertT_arg(AsmState& as) {
+template<class SubOpType>
+uint8_t read_subop(AsmState& as) {
   auto const str = read_opcode_arg<std::string>(as);
-#define ASSERTT_OP(x) if (str == #x) return static_cast<uint8_t>(AssertTOp::x);
-  ASSERTT_OPS
-#undef ASSERTT_OP
-  as.error("unknown AssertT/PredictT operand");
-  NOT_REACHED();
-}
-
-uint8_t read_Fatal_arg(AsmState& as) {
-  auto const str = read_opcode_arg<std::string>(as);
-#define FATAL_OP(x) if (str == #x) return static_cast<uint8_t>(FatalOp::x);
-  FATAL_OPS
-#undef FATAL_OP
-  as.error("unknown Fatal operand");
-  NOT_REACHED();
-}
-
-uint8_t read_IsType_arg(AsmState& as) {
-  auto const str = read_opcode_arg<std::string>(as);
-#define IS_TYPE_OP(x) if (str == #x) return static_cast<uint8_t>(IsTypeOp::x);
-  IS_TYPE_OPS
-#undef FATAL_OP
-  as.error("unknown IsType operand");
+  if (auto const ty = nameToSubop<SubOpType>(str.c_str())) {
+    return static_cast<uint8_t>(*ty);
+  }
+  as.error("unknown subop name");
   NOT_REACHED();
 }
 
@@ -1037,30 +1064,21 @@ OpcodeParserMap opcode_parsers;
 
 #define IMM_VSA \
   std::vector<std::string> vecImm = read_strvector(as);                 \
-  auto vecImmStackValues = vecImm.size();                               \
-  as.ue->emitInt32(vecImmStackValues);                                    \
+  auto const vecImmStackValues = vecImm.size();                         \
+  as.ue->emitInt32(vecImmStackValues);                                  \
   for (size_t i = 0; i < vecImmStackValues; ++i) {                      \
     as.ue->emitInt32(as.ue->mergeLitstr(String(vecImm[i]).get()));      \
   }
 
-#define IMM_SA   as.ue->emitInt32(as.ue->mergeLitstr(read_litstr(as)))
-#define IMM_I64A as.ue->emitInt64(read_opcode_arg<int64_t>(as))
-#define IMM_DA   as.ue->emitDouble(read_opcode_arg<double>(as))
-#define IMM_LA   as.ue->emitIVA(as.getLocalId(  \
-                   read_opcode_arg<std::string>(as)))
-#define IMM_IA   as.ue->emitIVA(as.getIterId( \
-                   read_opcode_arg<int32_t>(as)))
-#define IMM_OA   as.ue->emitByte(                                       \
-                    (thisOpcode == Op::AssertTL ||                      \
-                     thisOpcode == Op::AssertTStk ||                    \
-                     thisOpcode == Op::PredictTL ||                     \
-                     thisOpcode == Op::PredictTStk) ? read_AssertT_arg(as) : \
-                    thisOpcode == Op::Fatal ? read_Fatal_arg(as) :      \
-                    (thisOpcode == Op::IsTypeL ||                       \
-                     thisOpcode == Op::IsTypeC) ? read_IsType_arg(as) : \
-                    uint8_t(read_opcode_arg<int32_t>(as)))
-                     // TODO more subop names
-#define IMM_AA   as.ue->emitInt32(as.ue->mergeArray(read_litarray(as)))
+#define IMM_SA     as.ue->emitInt32(as.ue->mergeLitstr(read_litstr(as)))
+#define IMM_I64A   as.ue->emitInt64(read_opcode_arg<int64_t>(as))
+#define IMM_DA     as.ue->emitDouble(read_opcode_arg<double>(as))
+#define IMM_LA     as.ue->emitIVA(as.getLocalId(  \
+                     read_opcode_arg<std::string>(as)))
+#define IMM_IA     as.ue->emitIVA(as.getIterId( \
+                     read_opcode_arg<int32_t>(as)))
+#define IMM_OA(ty) as.ue->emitByte(read_subop<ty>(as));
+#define IMM_AA     as.ue->emitInt32(as.ue->mergeArray(read_litarray(as)))
 
 /*
  * There can currently be no more than one immvector per instruction,
@@ -1420,15 +1438,8 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
  *                | '[' attribute-name* ']'
  *                ;
  *
- * The `attribute-name' rule is context-sensitive; just look at the
- * code below.
+ * The `attribute-name' rule is context-sensitive; see as-shared.cpp.
  */
-enum class AttrContext {
-  Class,
-  Func,
-  Prop,
-  TraitImport
-};
 Attr parse_attribute_list(AsmState& as, AttrContext ctx) {
   as.in.skipWhitespace();
   int ret = AttrNone;
@@ -1446,29 +1457,10 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx) {
     if (as.in.peek() == ']') break;
     if (!as.in.readword(word)) break;
 
-    if (ctx == AttrContext::Func || ctx == AttrContext::Prop ||
-        ctx == AttrContext::TraitImport) {
-      if (word == "public")    { ret |= AttrPublic;    continue; }
-      if (word == "protected") { ret |= AttrProtected; continue; }
-      if (word == "private")   { ret |= AttrPrivate;   continue; }
-    }
-    if (ctx == AttrContext::Func || ctx == AttrContext::Prop) {
-      if (word == "static")    { ret |= AttrStatic;    continue; }
-    }
-    if (ctx == AttrContext::Class) {
-      if (word == "interface") { ret |= AttrInterface; continue; }
-      if (word == "no_expand_trait")
-                               { ret |= AttrNoExpandTrait; continue; }
-    }
-    if (ctx == AttrContext::Class || ctx == AttrContext::Func ||
-        ctx == AttrContext::TraitImport) {
-      if (word == "abstract")  { ret |= AttrAbstract;  continue; }
-      if (word == "final")     { ret |= AttrFinal;     continue; }
-      if (word == "no_override") { ret |= AttrNoOverride; continue; }
-    }
-    if (ctx == AttrContext::Class || ctx == AttrContext::Func) {
-      if (word == "trait")     { ret |= AttrTrait;     continue; }
-      if (word == "unique")    { ret |= AttrUnique;    continue; }
+    auto const abit = string_to_attr(ctx, word);
+    if (abit) {
+      ret |= *abit;
+      continue;
     }
 
     as.error("unrecognized attribute `" + word + "' in this context");
@@ -1541,6 +1533,7 @@ void parse_parameter_list(AsmState& as) {
       }
       as.addLabelDVInit(label, as.fe->numParams());
 
+      as.in.skipWhitespace();
       ch = as.in.getc();
       if (ch == '(') {
         String str = parse_long_string(as);
@@ -1560,6 +1553,7 @@ void parse_parameter_list(AsmState& as) {
           param.setDefaultValue(tv);
         }
         as.in.expectWs(')');
+        as.in.skipWhitespace();
         ch = as.in.getc();
       }
     } else {
@@ -1787,12 +1781,7 @@ void parse_use(AsmState& as) {
       }
     } else {
       identifier = traitName;
-      if (usedTraits.size() != 1) {
-        as.error("you must say which trait contains `" +
-                 identifier + "' since this .use block brings in "
-                 "multiple traits");
-      }
-      traitName = usedTraits.front();
+      traitName.clear();
     }
 
     if (as.in.tryConsume("as")) {
@@ -1813,6 +1802,10 @@ void parse_use(AsmState& as) {
         makeStaticString(alias),
         attrs));
     } else if (as.in.tryConsume("insteadof")) {
+      if (traitName.empty()) {
+        as.error("Must specify TraitName::name when using a trait insteadof");
+      }
+
       PreClass::TraitPrecRule precRule(
         makeStaticString(traitName),
         makeStaticString(identifier));
@@ -1856,10 +1849,10 @@ void parse_class_body(AsmState& as) {
 
   std::string directive;
   while (as.in.readword(directive)) {
-    if (directive == ".method")   { parse_method(as);   continue; }
-    if (directive == ".property") { parse_property(as); continue; }
-    if (directive == ".const")    { parse_constant(as); continue; }
-    if (directive == ".use")      { parse_use(as);      continue; }
+    if (directive == ".method")       { parse_method(as);       continue; }
+    if (directive == ".property")     { parse_property(as);     continue; }
+    if (directive == ".const")        { parse_constant(as);     continue; }
+    if (directive == ".use")          { parse_use(as);          continue; }
     if (directive == ".default_ctor") { parse_default_ctor(as); continue; }
 
     as.error("unrecognized directive `" + directive + "' in class");
@@ -1925,6 +1918,16 @@ void parse_class(AsmState& as) {
 }
 
 /*
+ * directive-filepath : quoted-string-literal ';'
+ *                    ;
+ */
+void parse_filepath(AsmState& as) {
+  auto const str = read_litstr(as);
+  as.ue->setFilepath(str);
+  as.in.expectWs(';');
+}
+
+/*
  * directive-main : '{' function-body
  *                ;
  */
@@ -1976,7 +1979,8 @@ void parse_adata(AsmState& as) {
  * asm-file : asm-tld* <EOF>
  *          ;
  *
- * asm-tld :    ".main"        directive-main
+ * asm-tld :    ".filepath"    directive-filepath
+ *         |    ".main"        directive-main
  *         |    ".function"    directive-function
  *         |    ".adata"       directive-adata
  *         |    ".class"       directive-class
@@ -1997,6 +2001,7 @@ void parse(AsmState& as) {
   }
 
   while (as.in.readword(directive)) {
+    if (directive == ".filepath")    { parse_filepath(as); continue; }
     if (directive == ".main")        { parse_main(as);     continue; }
     if (directive == ".function")    { parse_function(as); continue; }
     if (directive == ".adata")       { parse_adata(as);    continue; }
@@ -2021,7 +2026,7 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
   ue->setFilepath(sd);
 
   try {
-    std::istringstream instr(string(code, codeLen));
+    std::istringstream instr(std::string(code, codeLen));
     AsmState as(instr);
     as.ue = ue.get();
     parse(as);

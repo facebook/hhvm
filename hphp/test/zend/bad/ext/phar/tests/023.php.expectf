@@ -1,0 +1,4 @@
+string(28) "<?php echo "This is a\n"; ?>"
+string(28) "<?php echo "This is b\n"; ?>"
+string(30) "<?php echo "This is b/c\n"; ?>"
+===DONE===

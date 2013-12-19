@@ -1,0 +1,32 @@
+array(15) {
+  ["name1"]=>
+  string(8) "testname"
+  ["name2"]=>
+  string(8) "testname"
+  ["name3"]=>
+  string(8) "testname"
+  ["name\4"]=>
+  string(8) "testname"
+  ["name\5"]=>
+  string(8) "testname"
+  ["name\'6"]=>
+  string(8) "testname"
+  ["name\"7"]=>
+  string(8) "testname"
+  ["name\8"]=>
+  string(8) "testname"
+  ["name\9"]=>
+  string(8) "testname"
+  ["name'10"]=>
+  string(8) "testname"
+  ["name\"11"]=>
+  string(8) "testname"
+  ["name\12"]=>
+  string(8) "testname"
+  ["name\13"]=>
+  string(8) "testname"
+  ["name\'14"]=>
+  string(8) "testname"
+  ["name"15"]=>
+  string(8) "testname"
+}

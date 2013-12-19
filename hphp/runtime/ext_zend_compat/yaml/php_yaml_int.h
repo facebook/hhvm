@@ -119,7 +119,7 @@ zval *eval_scalar(yaml_event_t event, HashTable *callbacks TSRMLS_DC);
 zval *eval_scalar_with_callbacks(
     yaml_event_t event, HashTable *callbacks TSRMLS_DC);
 
-char *detect_scalar_type(
+const char *detect_scalar_type(
     const char *value, size_t length, const yaml_event_t *event);
 
 int scalar_is_null(

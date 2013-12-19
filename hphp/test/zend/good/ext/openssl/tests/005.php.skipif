@@ -1,0 +1,4 @@
+<?php 
+if (!extension_loaded("openssl")) die("skip"); 
+if (!function_exists("utf8_decode")) die("skip");
+?>

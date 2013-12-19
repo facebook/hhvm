@@ -84,6 +84,7 @@ bool RuntimeOption::AssertActive = false;
 bool RuntimeOption::AssertWarning = false;
 int RuntimeOption::NoticeFrequency = 1;
 int RuntimeOption::WarningFrequency = 1;
+int RuntimeOption::RaiseDebuggingFrequency = 1;
 int64_t RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
 int64_t RuntimeOption::StringOffsetLimit = 10 * 1024 * 1024; // 10MB
 
@@ -368,14 +369,30 @@ static inline bool evalJitDefault() {
 }
 
 static inline std::string regionSelectorDefault() {
+  if (RuntimeOption::EvalJitPGO) {
+    return "hottrace";
+  }
+
 #ifdef HHVM_REGION_SELECTOR_TRACELET
   return "tracelet";
 #else
 #ifdef HHVM_REGION_SELECTOR_LEGACY
   return "legacy";
 #else
+#ifdef HHVM_REGION_SELECTOR_HOTTRACE
+  return "hottrace";
+#else
   return "";
 #endif
+#endif
+#endif
+}
+
+static inline bool pgoDefault() {
+#ifdef HHVM_REGION_SELECTOR_HOTTRACE
+  return true;
+#else
+  return false;
 #endif
 }
 
@@ -395,6 +412,10 @@ static inline bool simulateARMDefault() {
 #endif
 }
 
+static inline bool xlsDefault() {
+  return RuntimeOption::EvalSimulateARM;
+}
+
 static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }
@@ -408,7 +429,8 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultWarmupRequests = debug ? 1 : 11;
-static const int kDefaultJitPGOThreshold = debug ? 2 : 100;
+static const int kDefaultJitPGOThreshold = debug ? 2 : 4;
+static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 500;
 static const size_t kJitGlobalDataDef = RuntimeOption::EvalJitASize >> 2;
 inline size_t maxUsageDef() {
   return RuntimeOption::EvalJitASize;

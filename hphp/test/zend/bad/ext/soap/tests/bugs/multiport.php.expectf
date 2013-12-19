@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://www.reuters.com/"><SOAP-ENV:Body><ns1:GetSessionId><ns1:userId>user</ns1:userId><ns1:password>password</ns1:password></ns1:GetSessionId></SOAP-ENV:Body></SOAP-ENV:Envelope>

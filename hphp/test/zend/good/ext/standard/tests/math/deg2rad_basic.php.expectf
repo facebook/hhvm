@@ -1,0 +1,8 @@
+deg2rad 0 = float(%f)
+Pass
+deg2rad 90 = float(%f)
+Pass
+deg2rad 180 = float(%f)
+Pass
+deg2rad 360 = float(%f)
+Pass

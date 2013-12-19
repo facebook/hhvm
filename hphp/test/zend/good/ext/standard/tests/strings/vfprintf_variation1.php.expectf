@@ -1,0 +1,20 @@
+*** Testing vfprintf() : variation functionality ***
+string(6) "format"
+int(6)
+string(17) "Foo is 30 and bar"
+int(17)
+string(14) "Foobar testing"
+int(14)
+string(11) "bar bar bar"
+int(11)
+string(2) "50"
+int(2)
+string(0) ""
+int(0)
+string(38) "Testing 1001 6 2.550200 30 foobar f 41"
+int(38)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+===DONE===

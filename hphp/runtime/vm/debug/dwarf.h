@@ -24,10 +24,10 @@
 #include <dwarf.h>
 #include <vector>
 
-using namespace HPHP::Transl;
-
 namespace HPHP {
 namespace Debug {
+
+using JIT::TCA;
 
 typedef enum {
   RAX,
@@ -160,7 +160,7 @@ typedef std::map<TCA, FunctionInfo* > FuncDB;
 typedef vector<FunctionInfo* > FuncPtrDB;
 
 struct DwarfInfo {
-  typedef std::map<TCA, TransRec> TransDB;
+  typedef std::map<TCA, JIT::TransRec> TransDB;
 
   vector<DwarfChunk*> m_dwarfChunks;
   /* Array of chunks indexed by lg(#functions in chunk) + 1.
@@ -173,12 +173,12 @@ struct DwarfInfo {
 
   const char *lookupFile(const Unit *unit);
   void addLineEntries(TCRange range, const Unit *unit,
-		      const Opcode *instr, FunctionInfo* f);
+                      const Opcode *instr, FunctionInfo* f);
   void transferFuncs(DwarfChunk* from, DwarfChunk* to);
   void compactChunks();
   DwarfChunk* addTracelet(TCRange range, const char* name,
-			  const Func* func, const Opcode *instr,
-			  bool exit, bool inPrologue);
+                          const Func* func, const Opcode *instr,
+                          bool exit, bool inPrologue);
   void syncChunks();
 };
 

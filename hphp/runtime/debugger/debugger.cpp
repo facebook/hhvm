@@ -515,7 +515,7 @@ void Debugger::removeProxy(DebuggerProxyPtr proxy) {
   m_proxyMap.erase(dummySid);
   // Clear the debugger blacklist PC upon last detach if JIT is used
   if (RuntimeOption::EvalJit && countConnectedProxy() == 0) {
-    Transl::tx64->clearDbgBL();
+    JIT::tx64->clearDbgBL();
   }
 }
 

@@ -96,6 +96,16 @@ struct TypeConstraint {
     init();
   }
 
+  template<class SerDe>
+  void serde(SerDe& sd) {
+    sd(m_typeName)
+      (m_flags)
+      ;
+    if (SerDe::deserializing) {
+      init();
+    }
+  }
+
   TypeConstraint(const TypeConstraint&) = default;
   TypeConstraint& operator=(const TypeConstraint&) = default;
 

@@ -1,0 +1,3 @@
+<?php
+if (!is_executable('/bin/cat')) echo 'skip cat not found';
+?>

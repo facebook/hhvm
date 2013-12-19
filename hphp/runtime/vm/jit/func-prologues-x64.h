@@ -38,7 +38,7 @@ constexpr auto kFuncGuardLen = 23;
 constexpr auto kFuncGuardShortLen = 14;
 
 template<typename T>
-T* funcPrologueToGuardImm(Transl::TCA prologue) {
+T* funcPrologueToGuardImm(JIT::TCA prologue) {
   assert(arch() == Arch::X64);
   assert(sizeof(T) == 4 || sizeof(T) == 8);
   T* retval = (T*)(prologue - (sizeof(T) == 8 ?
@@ -51,7 +51,7 @@ T* funcPrologueToGuardImm(Transl::TCA prologue) {
   return retval;
 }
 
-inline bool funcPrologueHasGuard(Transl::TCA prologue, const Func* func) {
+inline bool funcPrologueHasGuard(JIT::TCA prologue, const Func* func) {
   assert(arch() == Arch::X64);
   intptr_t iptr = uintptr_t(func);
   if (deltaFits(iptr, sz::dword)) {
@@ -71,7 +71,7 @@ inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
      kFuncGuardLen);
 }
 
-inline void funcPrologueSmashGuard(Transl::TCA prologue, const Func* func) {
+inline void funcPrologueSmashGuard(JIT::TCA prologue, const Func* func) {
   intptr_t iptr = uintptr_t(func);
   if (deltaFits(iptr, sz::dword)) {
     *funcPrologueToGuardImm<int32_t>(prologue) = 0;
@@ -82,7 +82,7 @@ inline void funcPrologueSmashGuard(Transl::TCA prologue, const Func* func) {
 
 //////////////////////////////////////////////////////////////////////
 
-Transl::TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs);
+JIT::TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs);
 SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start);
 SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start);
 

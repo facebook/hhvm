@@ -64,7 +64,7 @@ static double eval_sexagesimal_d(double dval, char *sg, char *eos);
 /* {{{ detect_scalar_type(const char *, size_t, yaml_event_t)
  * Guess what datatype the scalar encodes
  */
-char *detect_scalar_type(const char *value, size_t length,
+const char *detect_scalar_type(const char *value, size_t length,
     const yaml_event_t *event)
 {
   int flags = 0;

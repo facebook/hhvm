@@ -65,31 +65,6 @@ bool checkParams(const php::Func& f) {
     assert(f.params[i].dvEntryPoint == f.dvEntries[i]);
   }
 
-  /*
-   * Each dv init entry has a single successor, which is the next one,
-   * and the last one has a single successor which is the main entry.
-   *
-   * This also is effectively asserting that each dv initializer is a
-   * single basic block.  The bytecode specification implies this
-   * right now, but it's probably more restrictive than we really need.
-   */
-  using namespace folly::gen;
-  auto entries =
-    from(f.dvEntries)
-      | filter([&] (borrowed_ptr<php::Block> b) { return b != nullptr; })
-      | distinct
-      | as<std::vector>();
-  entries.push_back(f.mainEntry);
-  assert(!entries.empty());
-  for (auto it = begin(entries); boost::next(it) != end(entries); ++it) {
-    DEBUG_ONLY int count = 0;
-    forEachSuccessor(**it, [&] (const php::Block& b) {
-      ++count;
-      assert(&b == &**boost::next(it) && "dvinit entry chain is wrong");
-    });
-    assert(count == 1);
-  }
-
   return true;
 }
 

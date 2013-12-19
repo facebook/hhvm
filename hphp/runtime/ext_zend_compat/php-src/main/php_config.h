@@ -471,7 +471,11 @@
 /* #undef HAVE_BUILTIN_ATOMIC */
 
 /* */
+#ifdef HHVM
+#define HAVE_PCRE 1
+#else
 #define HAVE_BUNDLED_PCRE 1
+#endif
 
 /* */
 #define HAVE_BZ2 1

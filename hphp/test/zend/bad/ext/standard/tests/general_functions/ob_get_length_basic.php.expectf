@@ -1,0 +1,11 @@
+*** Testing ob_get_length() : basic functionality ***
+bool(false)
+int(26)
+int(8)
+int(1)
+int(15)
+int(0)
+int(0)
+HipHop Warning: %s
+NULL
+===DONE===

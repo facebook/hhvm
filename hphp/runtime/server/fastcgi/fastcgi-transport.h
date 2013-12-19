@@ -87,6 +87,15 @@ private:
   typedef std::map<std::string, std::vector<std::string>> ResponseHeaders;
 
   void handleHeader(const std::string& key, const std::string& value);
+  std::string getRawHeader(const std::string& name);
+  /*
+   * HTTP_IF_MODIFIED_SINCE -> If-Unmodified-Since
+   */
+  std::string unmangleHeader(const std::string& name);
+  /*
+   * If-Unmodified-Since -> HTTP_IF_MODIFIED_SINCE
+   */
+  std::string mangleHeader(const std::string& name);
 
   static bool compareKeys(const std::string& key,
                           const std::string& other_key);

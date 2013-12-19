@@ -24,14 +24,13 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator {
    * @path       mixed   The path of the directory to traverse.
    */
   public function __construct($path) {
-    if (!is_dir($path)) {
+    $this->dir = @opendir($path);
+    if ($this->dir === false) {
       throw new UnexpectedValueException(
         "DirectoryIterator::__construct($path): failed to open dir"
       );
     }
-
     $this->dirName = rtrim($path, DIRECTORY_SEPARATOR);
-    $this->dir = opendir($path);
     $this->index = 0;
     parent::__construct($this->readDir());
   }
@@ -143,12 +142,16 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator {
   }
 
   private function readDir() {
-    $file_name = readdir($this->dir);
+    // hh_readdir will set $this->dirName if necessary
+    $file_name = $this->hh_readdir();
     if ($file_name === false) {
       return false;
     } else {
       return $this->dirName.DIRECTORY_SEPARATOR.$file_name;
     }
   }
+
+  <<__Native>>
+  private function hh_readdir(): mixed;
 
 }

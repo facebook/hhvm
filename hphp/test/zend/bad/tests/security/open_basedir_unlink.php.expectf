@@ -1,0 +1,17 @@
+*** Testing open_basedir configuration [unlink] ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+*** Finished testing open_basedir configuration [unlink] ***

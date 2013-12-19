@@ -1,4 +1,4 @@
-<?php
+<?hh
 function bar($x) { return !$x; }
 function main() {
   $v0 = Vector {};

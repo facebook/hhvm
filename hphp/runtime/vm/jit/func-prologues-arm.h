@@ -32,12 +32,12 @@ struct Func;
 
 namespace JIT { namespace ARM {
 
-inline const Func** funcPrologueToGuardImmPtr(Transl::TCA prologue) {
+inline const Func** funcPrologueToGuardImmPtr(JIT::TCA prologue) {
   assert(arch() == Arch::ARM);
   return reinterpret_cast<const Func**>(prologue) - 1;
 }
 
-inline bool funcPrologueHasGuard(Transl::TCA prologue, const Func* func) {
+inline bool funcPrologueHasGuard(JIT::TCA prologue, const Func* func) {
   assert(arch() == Arch::ARM);
   return *funcPrologueToGuardImmPtr(prologue) == func;
 }
@@ -65,17 +65,17 @@ inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
   }
 }
 
-inline void funcPrologueSmashGuard(Transl::TCA prologue, const Func* func) {
+inline void funcPrologueSmashGuard(JIT::TCA prologue, const Func* func) {
   *funcPrologueToGuardImmPtr(prologue) = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-Transl::TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs);
+JIT::TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs);
 
 SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& stubsCode,
                         Func* func, bool funcIsMagic, int nPassed,
-                        Transl::TCA& start, Transl::TCA& aStart);
+                        JIT::TCA& start, JIT::TCA& aStart);
 
 }}}
 

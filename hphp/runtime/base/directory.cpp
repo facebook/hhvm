@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/ext/ext_file.h"
 #include <sys/types.h>
 
 namespace HPHP {
@@ -65,12 +66,23 @@ Variant ArrayDirectory::read() {
   }
 
   auto ret = m_it.second();
+  assert(ret.isString());
   ++m_it;
-  return ret;
+  return Variant(f_basename(ret.toString()));
 }
 
 void ArrayDirectory::rewind() {
   m_it.setPos(0);
+}
+
+String ArrayDirectory::path() {
+  if (!m_it) {
+    return empty_string;
+  }
+
+  auto entry = m_it.second();
+  assert(entry.isString());
+  return f_dirname(entry.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,1 @@
+<?php if (PHP_INT_SIZE != 8) { die('skip true 64 bit only'); } ?>

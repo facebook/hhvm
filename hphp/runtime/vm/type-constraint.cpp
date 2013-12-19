@@ -272,7 +272,7 @@ static const char* describe_actual_type(const TypedValue* tv) {
 
 void TypeConstraint::verifyFail(const Func* func, int paramNum,
                                 const TypedValue* tv) const {
-  Transl::VMRegAnchor _;
+  JIT::VMRegAnchor _;
   std::ostringstream fname;
   fname << func->fullName()->data() << "()";
   const StringData* tn = typeName();
@@ -291,7 +291,7 @@ void TypeConstraint::verifyFail(const Func* func, int paramNum,
     assert(
       (isSoft() || isNullable()) &&
       "Only nullable and soft extended type hints are currently implemented");
-    raise_warning(
+    raise_debugging(
       "Argument %d to %s must be of type %s, %s given",
       paramNum + 1, fname.str().c_str(), fullName().c_str(), givenType);
   } else {

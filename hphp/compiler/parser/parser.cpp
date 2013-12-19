@@ -168,8 +168,6 @@ Parser::Parser(Scanner &scanner, const char *fileName,
 
   Lock lock(m_ar->getMutex());
   m_ar->addFileScope(m_file);
-
-  m_prependingStatements.push_back(vector<StatementPtr>());
 }
 
 bool Parser::parse() {
@@ -803,7 +801,6 @@ void Parser::onFunctionStart(Token &name, bool doPushComment /* = true */) {
   }
   newScope();
   m_funcContexts.push_back(FunctionContext());
-  m_prependingStatements.push_back(vector<StatementPtr>());
   m_funcName = name.text();
   m_hasCallToGetArgs.push_back(false);
   m_staticVars.push_back(StringToExpressionPtrVecMap());
@@ -1006,7 +1003,6 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
     mth->getLocation()->char0 = loc->char0;
   }
 
-  m_prependingStatements.pop_back();
   return mth;
 }
 
@@ -1307,15 +1303,6 @@ void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
 }
 
 void Parser::addStatement(StatementPtr stmt, StatementPtr new_stmt) {
-  assert(!m_prependingStatements.empty());
-  vector<StatementPtr> &prepending = m_prependingStatements.back();
-  if (!prepending.empty()) {
-    assert(prepending.size() == 1);
-    for (unsigned i = 0; i < prepending.size(); i++) {
-      stmt->addElement(prepending[i]);
-    }
-    prepending.clear();
-  }
   if (new_stmt) {
     stmt->addElement(new_stmt);
   }
@@ -1851,7 +1838,7 @@ void Parser::AliasTable::addAutoImports() {
     m_alreadyImported = true;
 
     for (auto entry : m_autoAliases) {
-      m_aliases[entry.alias] = (NameEntry){entry.name, true};
+      m_aliases[entry.alias] = (NameEntry){entry.name, AliasType::AUTO};
     }
   }
 }
@@ -1870,14 +1857,20 @@ bool Parser::AliasTable::isAliased(std::string alias) {
 bool Parser::AliasTable::isAutoImported(std::string alias) {
   addAutoImports();
   auto it = m_aliases.find(alias);
-  return it != m_aliases.end() && it->second.isAuto;
+  return it != m_aliases.end() && (it->second.type == AliasType::AUTO);
 }
 
-void Parser::AliasTable::map(std::string alias, std::string name) {
+bool Parser::AliasTable::isUseType(std::string alias) {
+  auto it = m_aliases.find(alias);
+  return it != m_aliases.end() && (it->second.type == AliasType::USE);
+}
+
+void Parser::AliasTable::map(std::string alias,
+                             std::string name,
+                             AliasType type) {
   addAutoImports();
-  m_aliases[alias] = (NameEntry){name, false};
+  m_aliases[alias] = (NameEntry){name, type};
 }
-
 /*
  * To be called when we enter a fresh namespace.
  */
@@ -1897,11 +1890,15 @@ bool Parser::isAutoAliasOn() {
 }
 
 std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
-  std::vector<AliasTable::AliasEntry> aliases {
-    (AliasTable::AliasEntry){"Traversable", "HH\\Traversable"},
-    (AliasTable::AliasEntry){"Iterator", "HH\\Iterator"},
-    (AliasTable::AliasEntry){"Collection", "HH\\Collection"}
+  typedef AliasTable::AliasEntry AliasEntry;
+
+  std::vector<AliasEntry> aliases {
+    (AliasEntry){"Traversable", "HH\\Traversable"},
+    (AliasEntry){"Iterator", "HH\\Iterator"},
+    (AliasEntry){"Collection", "HH\\Collection"},
+    (AliasEntry){"Vector", "HH\\Vector"}
   };
+
   return aliases;
 }
 
@@ -1951,15 +1948,16 @@ void Parser::onUse(const std::string &ns, const std::string &as) {
   }
 
   // It's not an error if the alias already exists but is auto-imported.
-  // In that case, it gets replaced.
+  // In that case, it gets replaced. It prompts an error if it is not
+  // auto-imported and 'use' statement is trying to replace it.
   if (m_aliasTable.isAliased(key) && !m_aliasTable.isAutoImported(key) &&
-      m_aliasTable.getName(key) != ns) {
+      (m_aliasTable.isUseType(key) || m_aliasTable.getName(key) != ns)) {
     error("Cannot use %s as %s because the name is already in use: %s",
           ns.c_str(), key.c_str(), getMessage().c_str());
     return;
   }
 
-  m_aliasTable.map(key, ns);
+  m_aliasTable.map(key, ns, AliasTable::AliasType::USE);
 }
 
 std::string Parser::nsDecl(const std::string &name) {
@@ -2050,7 +2048,7 @@ void Parser::registerAlias(std::string name) {
   size_t pos = name.rfind(NAMESPACE_SEP);
   if (pos != string::npos) {
     string key = name.substr(pos + 1);
-    m_aliasTable.map(key, name);
+    m_aliasTable.map(key, name, AliasTable::AliasType::CURRENT_NS);
   }
 }
 

@@ -281,7 +281,7 @@ void ListAssignment::outputCodeModel(CodeGenerator &cg) {
   cg.printExpressionVector(m_variables);
   cg.printPropertyHeader("expression");
   m_array->outputCodeModel(cg);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

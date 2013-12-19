@@ -1,0 +1,28 @@
+array(4) {
+  ["v"]=>
+  array(4) {
+    [0]=>
+    bool(false)
+    [1]=>
+    bool(false)
+    [2]=>
+    bool(false)
+    [3]=>
+    bool(false)
+  }
+  ["a"]=>
+  string(5) "value"
+  [1]=>
+  array(4) {
+    [0]=>
+    bool(false)
+    [1]=>
+    bool(false)
+    [2]=>
+    bool(false)
+    [3]=>
+    bool(false)
+  }
+  [2]=>
+  bool(false)
+}

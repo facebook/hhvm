@@ -83,9 +83,12 @@ bool splitCriticalEdges(IRUnit& unit) {
   auto modified = removeUnreachable(unit);
   auto const startBlocks = unit.numBlocks();
 
-  for (auto* block : unit.main()->blocks()) {
-    splitCriticalEdge(unit, block->takenEdge());
-    splitCriticalEdge(unit, block->nextEdge());
+  // Splitting critical edges will add blocks to the main trace;
+  // iterate using a counter since elements can move.
+  auto& blocks = unit.main()->blocks();
+  for (size_t i = 0; i < blocks.size(); ++i) {
+    splitCriticalEdge(unit, blocks[i]->takenEdge());
+    splitCriticalEdge(unit, blocks[i]->nextEdge());
   }
 
   return modified || unit.numBlocks() != startBlocks;

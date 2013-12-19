@@ -405,39 +405,6 @@
                     "desc": "The callback to register."
                 }
             ]
-        },
-        {
-            "name": "register_tick_function",
-            "flags": [
-                "VariableArguments"
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "Returns TRUE on success or FALSE on failure."
-            },
-            "args": [
-                {
-                    "name": "function",
-                    "type": "Variant",
-                    "desc": "The function name as a string, or an array consisting of an object and a method."
-                }
-            ]
-        },
-        {
-            "name": "unregister_tick_function",
-            "flags": [
-            ],
-            "return": {
-                "type": null,
-                "desc": "No value is returned."
-            },
-            "args": [
-                {
-                    "name": "function_name",
-                    "type": "Variant",
-                    "desc": "The function name, as a string."
-                }
-            ]
         }
     ],
     "classes": [

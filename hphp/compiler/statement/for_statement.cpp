@@ -145,7 +145,7 @@ void ForStatement::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("block");
     cg.printAsBlock(m_stmt);
   }
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

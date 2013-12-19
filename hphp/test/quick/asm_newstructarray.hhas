@@ -1,0 +1,29 @@
+#
+# NewStructArray
+#
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  UnboxR
+  RetC
+}
+
+.function main() {
+  Int 1
+  String "two"
+  Double 3.1415
+  Int 4
+  NewStructArray <"one" "two" "three" "four">
+  SetL $arr
+  PopC
+
+  FPushFuncD 1 "var_dump"
+  FPassL 0 $arr
+  FCall 1
+  UnboxR
+  PopC
+
+  Int 1
+  RetC
+}

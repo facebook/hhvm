@@ -1,0 +1,88 @@
+*** Testing round() : usage variations ***
+
+-- Iteration 1 --
+float(123)
+
+-- Iteration 2 --
+float(123.4)
+
+-- Iteration 3 --
+float(123.4456789)
+
+-- Iteration 4 --
+float(0)
+
+-- Iteration 5 --
+float(123.4456789)
+
+-- Iteration 6 --
+float(123.4456789)
+
+-- Iteration 7 --
+float(0)
+
+-- Iteration 8 --
+float(123.4456789)
+
+-- Iteration 9 --
+float(123)
+
+-- Iteration 10 --
+float(123)
+
+-- Iteration 11 --
+float(123)
+
+-- Iteration 12 --
+float(123)
+
+-- Iteration 13 --
+float(123.4)
+
+-- Iteration 14 --
+float(123)
+
+-- Iteration 15 --
+float(123.4)
+
+-- Iteration 16 --
+float(123)
+
+-- Iteration 17 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 18 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 19 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 20 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 21 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 22 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 23 --
+HipHop Warning: %s
+NULL
+
+-- Iteration 24 --
+float(123)
+
+-- Iteration 25 --
+float(123)
+
+-- Iteration 26 --
+HipHop Warning: %s
+NULL
+===Done===

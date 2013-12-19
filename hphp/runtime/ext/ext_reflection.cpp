@@ -31,7 +31,7 @@
 
 namespace HPHP {
 
-using Transl::VMRegAnchor;
+using JIT::VMRegAnchor;
 
 IMPLEMENT_DEFAULT_EXTENSION(Reflection);
 ///////////////////////////////////////////////////////////////////////////////
@@ -435,7 +435,7 @@ static void set_function_info(Array &ret, const Func* func) {
       ret.set(s_hphp,     true_varNR);
     }
   }
-  set_return_type_constraint(ret, func->returnTypeConstraint());
+  set_return_type_constraint(ret, func->returnUserType());
 
   // doc comments
   set_doc_comment(ret, func->docComment());
@@ -937,11 +937,8 @@ Array f_hphp_get_class_info(CVarRef name) {
 
   // attributes
   {
-    if (false) {
+    if (cls->attrs() & AttrBuiltin) {
       ret.set(s_internal,  true_varNR);
-    }
-    if (false && ClassInfo::HipHopSpecific) {
-      ret.set(s_hphp,      true_varNR);
     }
     if (cls->attrs() & AttrFinal) {
       ret.set(s_final,     true_varNR);

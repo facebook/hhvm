@@ -520,16 +520,16 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
  private:
   struct IncomingBranch {
-    IncomingBranch(const Block* b, const Value& s)
+    IncomingBranch(const Block* b, const Value& v)
       : from(b)
-      , state(s)
+      , value(v)
     {}
 
     const Block* from;
-    Value state;
+    Value value;
   };
   struct IncomingValue {
-    Value state;
+    Value value;
     smart::vector<IncomingBranch> inBlocks;
   };
 
@@ -567,9 +567,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
         // If the value was already provided by another block, merge this
         // block's state in.
         if (existed) {
-          mergedState.state.merge(inPair.second);
+          mergedState.value.merge(inPair.second);
         } else {
-          mergedState.state = inPair.second;
+          mergedState.value = inPair.second;
         }
 
         // Register this block as an incoming provider of the value.
@@ -585,7 +585,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     // there is a difference in a value's state between incoming branches,
     // resolve it by inserting sink points on the appropriate incoming edges.
     for (auto& pair : mergedValues) {
-      auto mergedState = pair.second.state;
+      auto mergedState = pair.second.value;
 
       // If the value wasn't provided by every incoming branch, we have to
       // completely resolve it in all incoming branches.
@@ -596,7 +596,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       auto* incVal = mapGet(retState.canon, pair.first, pair.first);
       auto const mergedDelta = mergedState.optDelta();
       for (auto& inBlock : pair.second.inBlocks) {
-        auto& inState = inBlock.state;
+        auto& inState = inBlock.value;
         assert(inState.optDelta() >= mergedDelta);
 
         Point insertId = idForEdge(inBlock.from, m_block, m_ids);
@@ -898,7 +898,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(InlineReturn)) {
       FTRACE(3, "{}", show(m_state));
       m_state.frames.popInline(frameRoot(m_inst->src(0)->inst()));
-    } else if (m_inst->is(RetCtrl) && !m_frameState.func()->isGenerator()) {
+    } else if (m_inst->is(RetCtrl) &&
+               !m_inst->extra<InGeneratorData>()->inGenerator) {
       m_state.frames.pop();
     } else if (m_inst->is(Call, CallArray)) {
       resolveAllFrames();
@@ -912,7 +913,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(InterpOne, InterpOneCF)) {
       // InterpOne can push and pop ActRecs.
       auto const op = m_inst->extra<InterpOneData>()->opcode;
-      if (Transl::getInstrInfo(op).type == Transl::InstrFlags::OutFDesc) {
+      if (JIT::getInstrInfo(op).type == JIT::InstrFlags::OutFDesc) {
         m_state.frames.pushPreLive();
       } else if (isFCallStar(op)) {
         resolveAllFrames();
@@ -1084,33 +1085,12 @@ struct SinkPointAnalyzer : private LocalStateHook {
     assert(valState.realCount >= 0);
     assert(valState.optCount() >= 0);
 
-    if (valState.realCount == 0) {
-      ITRACE(3, "no live references\n");
-      auto showFailure = [&]{
-        std::string ret;
-        ret += folly::format("{} wants to consume {} but it has no unconsumed "
-                             "references\n",
-                             *m_inst, *value).str();
-        ret += show(m_state);
-        ret += folly::format("{:-^80}\n{}{:-^80}\n",
-                             " trace ", m_unit.main()->toString(), "").str();
-        return ret;
-      };
-
-      // This is ok as long as the value came from a load. See the Value struct
-      // for why.
-      always_assert_log(valState.fromLoad && valState.optCount() == 0,
-                        showFailure);
-      return;
-    }
-
-    always_assert(valState.optCount() >= 1 &&
-                  "Consuming value with optCount < 1");
+    assertCanConsume(value);
 
     // Note that we're treating consumers and observers the same here, which is
     // necessary until we have better alias analysis.
     observeValue(value, valState, sinkPoint);
-    --valState.realCount;
+    if (valState.realCount) --valState.realCount;
 
     ITRACE(3, " after: {}\n", show(valState));
   }
@@ -1144,6 +1124,63 @@ struct SinkPointAnalyzer : private LocalStateHook {
       ITRACE(3, "updating taken state for {}\n", *value);
       m_takenState->values[value].popRef();
     }
+  }
+
+  void assertCanConsumeImpl(SSATmp* value, bool checkConsume) {
+    auto const& valState = m_state.values[value];
+    auto showState = [&](const std::string& what) {
+      std::string ret;
+      ret += folly::format("'{}' wants to consume {} but {}\n",
+                           *m_inst, *value, what).str();
+      ret += show(m_state);
+      ret += folly::format("{:-^80}\n{}{:-^80}\n",
+                           " trace ", m_unit.main()->toString(), "").str();
+      return ret;
+    };
+
+    if (valState.realCount == 0) {
+      auto showFailure = [&] {
+        return showState("it has no unconsumed references");
+      };
+
+      // This is ok as long as the value came from a load (see the Value struct
+      // for why) or it's from a phi node where one or more of the incoming
+      // values has an uncounted type (when we process the DefLabel we take the
+      // pessimistic combination of all inputs and the uncounted value won't
+      // have any references).
+      auto uncountedPhiSource = [&]{
+        auto* inst = value->inst();
+        if (!inst->is(DefLabel)) return false;
+        for (uint32_t i = 0; i < inst->numDsts(); ++i) {
+          auto foundUncounted = false;
+          inst->block()->forEachSrc(i,
+            [&](const IRInstruction* inst, SSATmp* src) {
+              if (src->type().notCounted()) foundUncounted = true;
+            }
+          );
+          if (foundUncounted) return true;
+        }
+        return false;
+      };
+
+      always_assert_log((valState.fromLoad && valState.optCount() == 0) ||
+                        uncountedPhiSource(),
+                        showFailure);
+    } else if (checkConsume) {
+      auto showFailure = [&] {
+        return showState(folly::format("it has an optCount of {}\n",
+                                       valState.optCount()).str());
+      };
+      always_assert_log(valState.optCount() >= 1, showFailure);
+    }
+  }
+
+  void assertHasUnconsumedReference(SSATmp* value) {
+    assertCanConsumeImpl(value, false);
+  }
+
+  void assertCanConsume(SSATmp* value) {
+    assertCanConsumeImpl(value, true);
   }
 
   void observeLocalRefs() {
@@ -1235,8 +1272,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
         // to the CheckType's taken branch, and erased completely from the path
         // falling through the CheckType.
         if (dst->type().notCounted() && src->type().maybeCounted()) {
-          auto& valState = m_state.values[canonical(dst)];
-          assert(valState.realCount >= 1 || valState.fromLoad);
+          auto* src = canonical(dst);
+          auto& valState = m_state.values[src];
+          assertHasUnconsumedReference(src);
 
           ITRACE(3, "consuming reference to {}: {} and dropping "
                  "opt delta of {}\n",
@@ -1308,8 +1346,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
       assert(newVal->inst()->src(0) == oldVal);
       // Similar to what we do when processing the CheckType directly, we
       // "consume" the value on behalf of the CheckType.
-      auto& valState = m_state.values[canonical(oldVal)];
-      assert(valState.realCount >= 1 || valState.fromLoad);
+      oldVal = canonical(oldVal);
+      auto& valState = m_state.values[oldVal];
+      assertHasUnconsumedReference(oldVal);
       if (valState.realCount) --valState.realCount;
     }
   }

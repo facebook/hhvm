@@ -28,7 +28,7 @@ namespace HPHP {
 
 /**
  * Base class of extension modules. See ext_session.cpp for an example. It is
- * NOT required to have an extention class to derive from this base class,
+ * NOT required to have an extension class to derive from this base class,
  * unless one of these is needed:
  *
  *   - register an extension's name so extension_loaded() can work;

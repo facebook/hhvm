@@ -30,10 +30,8 @@ Array f_apache_response_headers();
 bool f_apache_setenv(
   const String& variable, const String& value, bool walk_to_top = false);
 Array f_getallheaders();
-bool f_virtual(const String& filename);
 Variant f_apache_get_config();
 Variant f_apache_get_scoreboard();
-Variant f_apache_get_rewrite_rules();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -7395,9 +7395,9 @@ TEST(Assembler, noreg) {
   assert(NoFPReg.Is(NoCPUReg));
   assert(NoCPUReg.Is(NoFPReg));
 
-  assert(NoReg.IsNone());
-  assert(NoFPReg.IsNone());
-  assert(NoCPUReg.IsNone());
+  assert(!NoReg.IsValid());
+  assert(!NoFPReg.IsValid());
+  assert(!NoCPUReg.IsValid());
 }
 
 

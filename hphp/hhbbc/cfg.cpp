@@ -54,16 +54,14 @@ std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func& func) {
   postorderWalk(ret, visited, *func.mainEntry);
 
   /*
-   * Note: depending what the caller is planning to do with this, it
-   * is easy to rely on the language in the bytecode spec which says
-   * that DV entry points must be basic blocks.
-   *
-   * E.g. if you use rpoSortAddDVs to see which blocks are reachable,
-   * you can leave out blocks within a given DV entry if we support
-   * multi-block DV entries.
+   * We've already marked the blocks reachable from the main entry
+   * point.  Do post order walks from each DV entry with the same
+   * visited set (so we'll stop if they chain to the main entry, which
+   * is the normal case).
    */
   for (auto rit = func.params.rbegin(); rit != func.params.rend(); ++rit) {
-    if (rit->dvEntryPoint) ret.push_back(rit->dvEntryPoint);
+    if (!rit->dvEntryPoint) continue;
+    postorderWalk(ret, visited, *rit->dvEntryPoint);
   }
   std::reverse(begin(ret), end(ret));
   return ret;

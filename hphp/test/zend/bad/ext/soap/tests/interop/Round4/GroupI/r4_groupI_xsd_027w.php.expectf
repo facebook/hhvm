@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/"><SOAP-ENV:Body><ns1:echoEnum><ns1:inputEnum>bitTwo</ns1:inputEnum></ns1:echoEnum></SOAP-ENV:Body></SOAP-ENV:Envelope>
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/"><SOAP-ENV:Body><ns1:echoEnumResponse><ns1:return>bitTwo</ns1:return></ns1:echoEnumResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
+ok

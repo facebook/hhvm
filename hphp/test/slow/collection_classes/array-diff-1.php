@@ -1,4 +1,4 @@
-<?php
+<?hh
 function main() {
   $a1 = array("1", 1, "2", 3, 4, "a", "7");
   $v1 = Vector {"1", 1, "2", 3, 4, "a", "7"};

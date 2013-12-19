@@ -1,6 +1,6 @@
-<?php
+<?hh
 function main() {
-  $ctypes = array('Vector', 'Map', 'StableMap');
+  $ctypes = array('HH\\Vector', 'Map', 'StableMap');
   foreach ($ctypes as $ctype) {
     echo "=== $ctype ===\n";
     $c = new $ctype();
@@ -19,7 +19,7 @@ function main() {
     } catch (Exception $e) {
       echo $e->getMessage() . "\n";
     }
-    if ($ctype === 'Vector') {
+    if ($ctype === 'HH\\Vector') {
       continue;
     }
     try {
@@ -58,5 +58,6 @@ function main() {
     }
   }
 }
+
 main();
 

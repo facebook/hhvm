@@ -58,14 +58,16 @@
 #define KindOfUnknown DontUseKindOfUnknownInThisFile
 #define KindOfInvalid DontUseKindOfInvalidInThisFile
 
+namespace {
+TRACE_SET_MOD(trans);
+}
+
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 using namespace HPHP;
 using HPHP::JIT::Type;
 using HPHP::JIT::HhbcTranslator;
-
-TRACE_SET_MOD(trans)
 
 static __thread BiasedCoin *dbgTranslateCoin;
 Translator* g_translator;
@@ -677,31 +679,30 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
   assert(inputs.size() == 2);
   const int kValIdx = 0;
   const int kLocIdx = 1;
-  unsigned char op = ni->imm[1].u_OA;
+  auto const op = static_cast<SetOpOp>(ni->imm[1].u_OA);
   DynLocation locLocation(inputs[kLocIdx]->location,
                           inputs[kLocIdx]->rtt.unbox());
   assert(inputs[kLocIdx]->location.isLocal());
   switch (op) {
-    case SetOpPlusEqual:
-    case SetOpMinusEqual:
-    case SetOpMulEqual: {
-      // Same as OutArith, except we have to fiddle with inputs a bit.
-      vector<DynLocation*> arithInputs;
-      arithInputs.push_back(&locLocation);
-      arithInputs.push_back(inputs[kValIdx]);
-      return RuntimeType(inferType(ArithRules, arithInputs));
-    }
-    case SetOpConcatEqual: return RuntimeType(KindOfString);
-    case SetOpDivEqual:
-    case SetOpModEqual:    return RuntimeType(KindOfAny);
-    case SetOpAndEqual:
-    case SetOpOrEqual:
-    case SetOpXorEqual:    return bitOpType(&locLocation, inputs[kValIdx]);
-    case SetOpSlEqual:
-    case SetOpSrEqual:     return RuntimeType(KindOfInt64);
-    default:
-      not_reached();
+  case SetOpOp::PlusEqual:
+  case SetOpOp::MinusEqual:
+  case SetOpOp::MulEqual: {
+    // Same as OutArith, except we have to fiddle with inputs a bit.
+    vector<DynLocation*> arithInputs;
+    arithInputs.push_back(&locLocation);
+    arithInputs.push_back(inputs[kValIdx]);
+    return RuntimeType(inferType(ArithRules, arithInputs));
   }
+  case SetOpOp::ConcatEqual: return RuntimeType(KindOfString);
+  case SetOpOp::DivEqual:
+  case SetOpOp::ModEqual:    return RuntimeType(KindOfAny);
+  case SetOpOp::AndEqual:
+  case SetOpOp::OrEqual:
+  case SetOpOp::XorEqual:    return bitOpType(&locLocation, inputs[kValIdx]);
+  case SetOpOp::SlEqual:
+  case SetOpOp::SrEqual:     return RuntimeType(KindOfInt64);
+  }
+  not_reached();
 }
 
 static RuntimeType
@@ -1069,7 +1070,8 @@ static const struct {
   { OpEmptyG,      {Stack1,           Stack1,       OutBoolean,        0 }},
   { OpEmptyS,      {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpEmptyM,      {MVector,          Stack1,       OutBoolean,        1 }},
-  { OpIsTypeC,     {Stack1,           Stack1,       OutBoolean,        0 }},
+  { OpIsTypeC,     {Stack1|
+                    DontGuardStack1,  Stack1,       OutBoolean,        0 }},
   { OpIsTypeL,     {Local,            Stack1,       OutBoolean,        1 }},
 
   /*** 7. Mutator instructions ***/
@@ -1508,7 +1510,6 @@ void Translator::handleAssertionEffects(Tracelet& t,
     case AssertTOp::Int:      return RuntimeType{KindOfInt64};
     case AssertTOp::Dbl:      return RuntimeType{KindOfDouble};
     case AssertTOp::Res:      return RuntimeType{KindOfResource};
-    case AssertTOp::Null:     return folly::none;
     case AssertTOp::Bool:     return RuntimeType{KindOfBoolean};
     case AssertTOp::SStr:     return RuntimeType{KindOfString};
     case AssertTOp::Str:      return RuntimeType{KindOfString};
@@ -1528,6 +1529,7 @@ void Translator::handleAssertionEffects(Tracelet& t,
     case AssertTOp::OptSArr:
     case AssertTOp::OptArr:
     case AssertTOp::OptObj:
+    case AssertTOp::Null:    // could be KindOfUninit or KindOfNull
       return folly::none;
 
     case AssertTOp::Ref:
@@ -2537,7 +2539,9 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
     } else {
       // TODO: Once the region translator supports guard relaxation
       //       (task #2598894), we can enable specialization for all modes.
-      const bool specialize = tx64->mode() == TransLive;
+      const bool specialize = (RuntimeOption::EvalHHBCRelaxGuards ||
+                               RuntimeOption::EvalHHIRRelaxGuards) &&
+                              tx64->mode() == TransLive;
       RuntimeType rtt = tx64->liveType(l, *liveUnit(), specialize);
       assert(rtt.isIter() || !rtt.isVagueValue());
       // Allocate a new DynLocation to represent this and store it in the
@@ -4502,11 +4506,11 @@ std::string traceletShape(const Tracelet& trace) {
   return ret;
 }
 
-} // HPHP::Transl
+} // HPHP::JIT
 
 void invalidatePath(const std::string& path) {
   TRACE(1, "invalidatePath: abspath %s\n", path.c_str());
-  PendQ::defer(new DeferredPathInvalidate(path));
+  PendQ::defer(new JIT::DeferredPathInvalidate(path));
 }
 
 } // HPHP

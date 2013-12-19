@@ -1,0 +1,26 @@
+*** Testing session_decode() : variation ***
+HipHop Warning: %s
+bool(false)
+HipHop Notice: %s
+NULL
+array(3) {
+  ["foo"]=>
+  int(1234567890)
+  ["bar"]=>
+  string(5) "Blah!"
+  ["guff"]=>
+  float(123.456)
+}
+HipHop Warning: %s
+bool(true)
+array(3) {
+  ["foo"]=>
+  int(1234567890)
+  ["bar"]=>
+  string(5) "Blah!"
+  ["guff"]=>
+  float(123.456)
+}
+HipHop Warning: %s
+bool(false)
+Done

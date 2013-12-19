@@ -26,9 +26,8 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
-using JIT::Type;
 
 struct DynLocation;
 struct Tracelet;
@@ -184,8 +183,8 @@ class NormalizedInstruction {
   }
 
  private:
-  smart::vector<smart::unique_ptr<DynLocation>::type> m_dynLocs;
+  smart::vector<smart::unique_ptr<DynLocation>> m_dynLocs;
 };
 
-} } // HPHP::Transl
+} } // HPHP::JIT
 #endif

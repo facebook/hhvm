@@ -1,6 +1,6 @@
 #########################################
 # 
-# Install all the dependancies for HipHop
+# Install all the dependencies for HipHop
 #
 #########################################
 
@@ -22,11 +22,11 @@ fi
 export CMAKE_PREFIX_PATH=`/bin/pwd`/..
 export HPHP_HOME=`/bin/pwd`
 
-# install python-software-properties  before trying to add a PPA
+# install python-software-properties before trying to add a PPA
 sudo apt-get -y update
 sudo apt-get install -y python-software-properties
 
-# install apt-fast to speedup later dependency installation
+# install apt-fast to speed up later dependency installation
 sudo add-apt-repository -y ppa:apt-fast/stable
 sudo apt-get -y update
 sudo apt-get -y install apt-fast

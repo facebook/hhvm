@@ -22,7 +22,7 @@
 #include "hphp/vixl/a64/simulator-a64.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 static void setupAfterPrologue(ActRec* fp, void* sp) {
   g_vmContext->m_fp = fp;
@@ -141,4 +141,4 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func) {
   return true;
 }
 
-} } // HPHP::Transl
+} } // HPHP::JIT

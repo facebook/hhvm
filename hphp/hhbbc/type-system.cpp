@@ -30,6 +30,7 @@ TRACE_SET_MOD(hhbbc);
 
 namespace {
 
+// Legal to call with !isPredefined(bits)
 bool mayHaveData(trep bits) {
   switch (bits) {
   case BSStr: case BSArr: case BObj: case BInt: case BDbl: case BCls:
@@ -41,6 +42,71 @@ bool mayHaveData(trep bits) {
   return false;
 }
 
+/*
+ * Note: currently we're limiting all represented types to predefined
+ * bit patterns (instead of arbitrary unions), so this function is
+ * around for assertions.
+ *
+ * This may be relaxed later if we think we can get more out of it,
+ * but for now the thought is that the likelihood of getting
+ * significantly better types from the inference algorithm might be
+ * counter-balanced by the increased chance of hard-to-track
+ * type-system bugs, so at least for now (at the time of this writing,
+ * before shipping hhbbc) we're ruling out a bunch of edge cases.
+ *
+ * Aside from types like Obj<= or things like TSStr, a lot of cases
+ * with arbitrary-unions may not lead to better code at JIT time
+ * (unless the inference turns them back into a predefined type),
+ * since we'll have to guard anyway to see which one it was.  We'll
+ * try it later.
+ */
+bool isPredefined(trep bits) {
+  switch (bits) {
+  case BBottom:
+  case BUninit:
+  case BInitNull:
+  case BFalse:
+  case BTrue:
+  case BInt:
+  case BDbl:
+  case BSStr:
+  case BCStr:
+  case BSArr:
+  case BCArr:
+  case BObj:
+  case BRes:
+  case BCls:
+  case BRef:
+  case BNull:
+  case BBool:
+  case BStr:
+  case BArr:
+  case BInitUnc:
+  case BUnc:
+  case BOptTrue:
+  case BOptFalse:
+  case BOptBool:
+  case BOptInt:
+  case BOptDbl:
+  case BOptSStr:
+  case BOptCStr:
+  case BOptStr:
+  case BOptSArr:
+  case BOptCArr:
+  case BOptArr:
+  case BOptObj:
+  case BOptRes:
+  case BInitCell:
+  case BCell:
+  case BInitGen:
+  case BGen:
+  case BTop:
+    return true;
+  }
+  return false;
+}
+
+// Pre: isPredefined(bits)
 bool canBeOptional(trep bits) {
   switch (bits) {
   case BBottom:
@@ -54,14 +120,12 @@ bool canBeOptional(trep bits) {
   case BInt:
   case BDbl:
   case BSStr:
+  case BCStr:
   case BSArr:
+  case BCArr:
   case BObj:
   case BRes:
     return true;
-
-  case BCStr:
-  case BCArr:
-    return false;
 
   case BNull:
   case BBool:
@@ -79,8 +143,10 @@ bool canBeOptional(trep bits) {
   case BOptInt:
   case BOptDbl:
   case BOptSStr:
+  case BOptCStr:
   case BOptStr:
   case BOptSArr:
+  case BOptCArr:
   case BOptArr:
   case BOptObj:
   case BOptRes:
@@ -213,23 +279,45 @@ bool Type::couldBe(Type o) const {
   if (!mayHaveData(isect)) return true;
 
   /*
-   * We have an intersection that may have data, and we already know
-   * that neither type contains the other.  For most of our types,
-   * where m_data represents an exact constant value, this just means
-   * we only can intersect if there is no data.  For objects or
-   * classes, we have to assume anything could be another
-   * object/class, because we currently don't look at the inheritance
-   * chain.
+   * From here we have an intersection that may have data, and we know
+   * that neither type completely contains the other.
+   *
+   * For most of our types, where m_data represents an exact constant
+   * value, this just means the types only overlap if there is no
+   * data.
+   *
+   * The exception to that are option types with data and
+   * objects/classes.
+   */
+
+  /*
+   * If the intersection allowed data, and either type was an option
+   * type, we can simplify the case to whether the unopt'd version of
+   * the option type couldBe the other type.  (The case where
+   * TInitNull was the overlapping part would already be handled
+   * above, because !mayHaveData(TInitNull).)
+   */
+  if (is_opt(*this)) return unopt(*this).couldBe(o);
+  if (is_opt(o))     return unopt(o).couldBe(*this);
+
+  /*
+   * For objects or classes, we have to assume any object or class
+   * could be another object/class, because we currently don't look at
+   * the inheritance chain.  (We already handled the trivial cases of
+   * Obj=Foo <: Obj<=Foo in the subtype check above.)
    *
    * TODO(#3343798): use res::Class::couldBe
    */
-  if (Type(isect).subtypeOf(TObj)) return true;
-  if (Type(isect).subtypeOf(TCls)) return true;
+  if (isPredefined(isect)) {
+    if (Type(isect).subtypeOf(TObj)) return true;
+    if (Type(isect).subtypeOf(TCls)) return true;
+  }
 
   return !m_data && !o.m_data;
 }
 
 bool Type::checkInvariants() const {
+  assert(isPredefined(m_bits));
   assert(!m_data || mayHaveData(m_bits));
   if (m_data) {
     if (m_bits == BSStr) assert(m_data->sval->isStatic());
@@ -296,6 +384,20 @@ Type opt(Type t) {
   return ret;
 }
 
+Type unopt(Type t) {
+  assert(is_opt(t));
+  t.m_bits = static_cast<trep>(t.m_bits & ~BInitNull);
+  assert(!is_opt(t));
+  return t;
+}
+
+bool is_opt(Type t) {
+  if (t.m_bits == BInitNull) return false;
+  if (!t.couldBe(TInitNull)) return false;
+  auto const nonNullBits = static_cast<trep>(t.m_bits & ~BInitNull);
+  return isPredefined(nonNullBits) && canBeOptional(nonNullBits);
+}
+
 Type objcls(Type t) {
   assert(t.subtypeOf(TObj));
   if (t.strictSubtypeOf(TObj)) {
@@ -317,6 +419,7 @@ folly::Optional<Cell> tv(Type t) {
   case BFalse:       return make_tv<KindOfBoolean>(false);
   default:
     if (!t.m_data)   break;
+    if (is_opt(t))   break;
     switch (t.m_bits) {
     case BInt:   return make_tv<KindOfInt64>(t.m_data->ival);
     case BDbl:   return make_tv<KindOfDouble>(t.m_data->dval);
@@ -325,7 +428,6 @@ folly::Optional<Cell> tv(Type t) {
                    const_cast<ArrayData*>(t.m_data->aval)
                  );
     case BObj:
-    case BOptObj:
       break;
     default:
       assert(0 && "invalid type with value");
@@ -336,23 +438,23 @@ folly::Optional<Cell> tv(Type t) {
 }
 
 Type type_of_istype(IsTypeOp op) {
-  // Note: this isn't done using a macro expansion because no type
-  // corresponding to IsScalar is in our type system yet.
   switch (op) {
-  case IsTypeOp::Null: return TNull;
-  case IsTypeOp::Bool: return TBool;
-  case IsTypeOp::Int:  return TInt;
-  case IsTypeOp::Dbl:  return TDbl;
-  case IsTypeOp::Str:  return TStr;
-  case IsTypeOp::Arr:  return TArr;
-  case IsTypeOp::Obj:  return TObj;
+  case IsTypeOp::Null:   return TNull;
+  case IsTypeOp::Bool:   return TBool;
+  case IsTypeOp::Int:    return TInt;
+  case IsTypeOp::Dbl:    return TDbl;
+  case IsTypeOp::Str:    return TStr;
+  case IsTypeOp::Arr:    return TArr;
+  case IsTypeOp::Obj:    return TObj;
+  case IsTypeOp::Scalar: always_assert(0);
   }
   not_reached();
 }
 
 DObj dobj_of(Type t) {
   assert(t.checkInvariants());
-  assert(t.strictSubtypeOf(TObj));
+  assert(t.strictSubtypeOf(TObj) ||
+         (t.subtypeOf(TOptObj) && unopt(t).strictSubtypeOf(TOptObj)));
   assert(t.m_data);
   return t.m_data->dobj;
 }
@@ -410,17 +512,22 @@ Type union_of(Type a, Type b) {
   X(TBool)
   X(TStr)
   X(TArr)
-  X(TOptTrue)
-  X(TOptFalse)
+
+  /*
+   * Merging option types tries to preserve subtype information where
+   * it's possible.  E.g. if you union InitNull and Obj<=Foo, we want
+   * OptObj<=Foo to be the result.
+   */
+  if (a == TInitNull && canBeOptional(b.m_bits)) return opt(b);
+  if (b == TInitNull && canBeOptional(a.m_bits)) return opt(a);
+
+  // A few optional unions still need to be checked despite the above
+  // (e.g. if we are merging TOptTrue and TOptFalse, we want TOptBool,
+  // but neither was TInitNull).
   X(TOptBool)
-  X(TOptInt)
-  X(TOptDbl)
-  X(TOptSStr)
   X(TOptStr)
-  X(TOptSArr)
   X(TOptArr)
-  X(TOptObj)
-  X(TOptRes)
+
   X(TInitUnc)
   X(TUnc)
   X(TInitCell)

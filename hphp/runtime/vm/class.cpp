@@ -1044,8 +1044,7 @@ void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
                                MethodToTraitListMap& importMethToTraitMap) {
   const StringData* methName          = rule.getMethodName();
   const StringData* selectedTraitName = rule.getSelectedTraitName();
-  TraitNameSet      otherTraitNames;
-  rule.getOtherTraitNames(otherTraitNames);
+  auto otherTraitNames = rule.getOtherTraitNames();
 
   auto methIter = importMethToTraitMap.find(methName);
   if (methIter == importMethToTraitMap.end()) {
@@ -1084,7 +1083,8 @@ Class* Class::findSingleTraitWithMethod(const StringData* methName) {
   for (auto const& t : m_usedTraits) {
     if (t->m_methods.contains(methName)) {
       if (traitCls != nullptr) { // more than one trait contains method
-        return nullptr;
+        raise_error("more than one trait contains method '%s'",
+          methName->data());
       }
       traitCls = t.get();
     }

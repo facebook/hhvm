@@ -1373,10 +1373,6 @@ bool f_libxml_use_internal_errors(CVarRef use_errors /* = null_variant */) {
   return ret;
 }
 
-void f_libxml_set_streams_context(CResRef streams_context) {
-  throw NotImplementedException(__func__);
-}
-
 static xmlParserInputBufferPtr
 hphp_libxml_input_buffer_noload(const char *URI, xmlCharEncoding enc) {
   return nullptr;

@@ -44,7 +44,6 @@
 
 namespace HPHP {  namespace JIT {
 
-using namespace HPHP::Transl;
 
 TRACE_SET_MOD(hhir);
 

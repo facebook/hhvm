@@ -23,7 +23,7 @@
 namespace HPHP {
 namespace Stats {
 
-using namespace HPHP::Transl;
+using namespace HPHP::JIT;
 
 TRACE_SET_MOD(stats);
 

@@ -1,0 +1,12 @@
+-- Test: leave default --
+string(63) "GET / HTTP/1.0
+From: teste@teste.pt
+Host: 127.0.0.1:12342
+
+"
+-- Test: after ini_set --
+string(62) "GET / HTTP/1.0
+From: junk@junk.com
+Host: 127.0.0.1:12342
+
+"

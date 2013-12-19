@@ -236,7 +236,7 @@ void raiseArrayIndexNotice(const int64_t index) {
 }
 
 void defClsHelper(PreClass* preClass) {
-  using namespace Transl;
+  using namespace JIT;
 
   assert(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;

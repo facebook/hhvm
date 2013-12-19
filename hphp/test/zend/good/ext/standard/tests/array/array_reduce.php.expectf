@@ -1,0 +1,39 @@
+*** Testing array_reduce() to integer ***
+int(61)
+int(42)
+
+*** Testing array_reduce() to float ***
+float(6.1)
+float(4.2)
+
+*** Testing array_reduce() to string ***
+string(23) "quuxfoofoobarquxquxquux"
+string(4) "quux"
+
+*** Testing array_reduce() to array ***
+array(4) {
+  ["foo"]=>
+  int(44)
+  ["bar"]=>
+  int(18)
+  ["qux"]=>
+  int(0)
+  ["quux"]=>
+  int(1)
+}
+array(4) {
+  ["foo"]=>
+  int(42)
+  ["bar"]=>
+  int(17)
+  ["qux"]=>
+  int(-2)
+  ["quux"]=>
+  int(0)
+}
+
+*** Testing array_reduce() to null ***
+string(19) "foofoobarquxquxquux"
+NULL
+
+Done

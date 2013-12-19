@@ -132,6 +132,9 @@ enum State {
   Complete
 } m_state;
 
+// Profile type (heap vs. allocation)
+ProfileType m_profileType = ProfileType::Default;
+
 // synchronization primitives
 std::condition_variable m_waitq;
 std::mutex m_mutex;
@@ -139,7 +142,7 @@ std::mutex m_mutex;
 };
 
 // static
-bool ProfileController::requestNext() {
+bool ProfileController::requestNext(ProfileType type) {
   std::unique_lock<std::mutex> lock(m_mutex);
 
   // don't clobber another request!
@@ -148,29 +151,33 @@ bool ProfileController::requestNext() {
   // place the request
   m_reqType = RequestType::Next;
   m_state = State::Pending;
+  m_profileType = type;
 
   return true;
 }
 
 // static
-bool ProfileController::requestNextURL(const std::string &url) {
+bool ProfileController::requestNextURL(ProfileType type,
+                                       const std::string &url) {
   std::unique_lock<std::mutex> lock(m_mutex);
 
   if (m_state != State::Waiting) return false;
   m_reqType = RequestType::NextURL;
   m_url = url;
   m_state = State::Pending;
+  m_profileType = type;
 
   return true;
 }
 
 // static
-bool ProfileController::requestGlobal() {
+bool ProfileController::requestGlobal(ProfileType type) {
   std::unique_lock<std::mutex> lock(m_mutex);
 
   if (m_state != State::Waiting) return false;
   m_reqType = RequestType::Global;
   m_state = State::Pending;
+  m_profileType = type;
 
   // clean up the dump since we are going to copy in data
   // from other dumps when they offer theirs
@@ -249,6 +256,10 @@ ProfileDump ProfileController::waitForProfile() {
   m_state = State::Waiting;
   m_reqType = RequestType::None;
   return m_dump;
+}
+
+ProfileType ProfileController::profileType() {
+  return m_profileType;
 }
 
 }

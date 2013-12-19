@@ -1,0 +1,9 @@
+bool(true)
+string(6) "foobar"
+bool(false)
+HipHop Warning: %s
+string(1) "f"
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+string(1) "f"

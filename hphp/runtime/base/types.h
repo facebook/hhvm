@@ -144,7 +144,8 @@ enum Type {
   SetType = 4,
   PairType = 5,
   FrozenVectorType = 6,
-  MaxNumTypes = 7
+  FrozenSetType = 7,
+  MaxNumTypes = 8
 };
 inline Type stringToType(const char* str, size_t len) {
   switch (len) {
@@ -155,11 +156,10 @@ inline Type stringToType(const char* str, size_t len) {
     case 4:
       if (!strcasecmp(str, "pair")) return PairType;
       break;
-    case 6:
-      if (!strcasecmp(str, "vector")) return VectorType;
-      break;
     case 9:
       if (!strcasecmp(str, "stablemap")) return StableMapType;
+      if (!strcasecmp(str, "frozenset")) return FrozenSetType;
+      if (!strcasecmp(str, "hh\\vector")) return VectorType;
       break;
     case 12:
       if (!strcasecmp(str, "frozenvector")) return FrozenVectorType;
@@ -249,13 +249,13 @@ public:
 
   ~RequestInjectionData();
 
-  inline volatile ssize_t* getConditionFlags() {
+  inline std::atomic<ssize_t>* getConditionFlags() {
     assert(cflagsPtr);
     return cflagsPtr;
   }
 
-  ssize_t* cflagsPtr;  // this points to the real condition flags,
-                       // somewhere in the thread's targetcache
+  std::atomic<ssize_t>* cflagsPtr;  // this points to the real condition flags,
+                                    // somewhere in the thread's targetcache
 
  private:
 #ifndef __APPLE__
@@ -567,7 +567,7 @@ enum Attr {
   AttrPersistent    = (1 << 17), //    X                X    //
   AttrDeepInit      = (1 << 18), //            X             //
   AttrHot           = (1 << 19), //                     X    //
-  AttrBuiltin       = (1 << 20), //                     X    //
+  AttrBuiltin       = (1 << 20), //    X                X    //
   AttrAllowOverride = (1 << 21), //                     X    //
   AttrSkipFrame     = (1 << 22), //                     X    //
   AttrNative        = (1 << 23), //                     X    //

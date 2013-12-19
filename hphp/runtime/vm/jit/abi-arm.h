@@ -23,57 +23,12 @@
 #include "hphp/vixl/a64/constants-a64.h"
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
-
-namespace std {
-template<>
-struct hash<HPHP::Transl::Reg64> {
-  size_t operator()(const HPHP::Transl::Reg64& r) const {
-    return std::hash<int>()(static_cast<int>(r));
-  }
-};
-}
+#include "hphp/runtime/vm/jit/phys-reg.h"
 
 namespace HPHP { namespace JIT { namespace ARM {
 
-inline vixl::Register x2a(const Transl::Reg64& x64reg) {
-  static const std::unordered_map<Transl::Reg64, vixl::Register> s_x2aRegMap = {
-    // Special VM registers.
-    { Transl::reg::rbp, vixl::x29 },  // x29 is ARM's designated frame pointer.
-    { Transl::reg::rbx, vixl::x19 },  //
-    { Transl::reg::r12, vixl::x20 },  // General callee-saved.
-    { Transl::reg::r15, vixl::x21 },  //
-    { Transl::reg::r10, vixl::x9  },  // General caller-saved.
-
-    // Argument registers.
-    { Transl::reg::rdi, vixl::x0 },
-    { Transl::reg::rsi, vixl::x1 },
-    { Transl::reg::rdx, vixl::x2 },
-    { Transl::reg::rcx, vixl::x3 },
-    { Transl::reg::r8,  vixl::x4 },
-    { Transl::reg::r9,  vixl::x5 },
-
-    // General caller-saved.
-    { Transl::reg::r11, vixl::x10 },
-
-    // General callee-saved.
-    { Transl::reg::r13, vixl::x22 },
-    { Transl::reg::r14, vixl::x23 },
-
-    // VERY SKETCHY! On ARM, x0 is both the first arg register and the return
-    // value register. Anywhere our x64 code implicitly assumes that these two
-    // regs don't alias each other may break.
-    { Transl::reg::rax, vixl::x0 },
-
-    { Transl::reg::rsp, vixl::sp },
-  };
-
-  if (Transl::reg::noreg == x64reg) {
-    return vixl::Register();
-  }
-
-  auto it = s_x2aRegMap.find(x64reg);
-  assert(it != s_x2aRegMap.end());
-  return it->second;
+inline vixl::Register x2a(PhysReg x64reg) {
+  return vixl::Register(vixl::CPURegister(x64reg));
 }
 
 inline constexpr unsigned maxArgReg() { return 7; }
@@ -88,8 +43,8 @@ inline vixl::Register serviceReqArgReg(unsigned index) {
   return argReg(index + 1);
 }
 
-inline vixl::Condition convertCC(Transl::ConditionCode cc) {
-  if (cc == Transl::CC_P || cc == Transl::CC_NP) {
+inline vixl::Condition convertCC(JIT::ConditionCode cc) {
+  if (cc == JIT::CC_P || cc == JIT::CC_NP) {
     // ARM has no parity flag
     always_assert(false);
   }
@@ -130,6 +85,40 @@ const vixl::Register rGContextReg(vixl::x24);
 const vixl::Register rLinkReg(vixl::x30);
 const vixl::Register rReturnReg(vixl::x0);
 const vixl::Register rHostCallReg(vixl::x16);
+
+const RegSet kCallerSaved = RegSet()
+  | RegSet(vixl::x0)
+  | RegSet(vixl::x1)
+  | RegSet(vixl::x2)
+  | RegSet(vixl::x3)
+  | RegSet(vixl::x4)
+  | RegSet(vixl::x6)
+  | RegSet(vixl::x7)
+  | RegSet(vixl::x8)
+  // x9  = rAsm
+  // x10 = rAsm2
+  | RegSet(vixl::x11)
+  | RegSet(vixl::x12)
+  | RegSet(vixl::x13)
+  | RegSet(vixl::x14)
+  | RegSet(vixl::x15)
+  // x16 = rHostCallReg
+  | RegSet(vixl::x17)
+  | RegSet(vixl::x18)
+  ;
+
+const RegSet kCalleeSaved = RegSet()
+  // x19 = rVmSp
+  // x20 = rVmTl
+  // x21 = rStashedAR
+  | RegSet(vixl::x22)
+  | RegSet(vixl::x23)
+  // x24 = rGContextReg
+  | RegSet(vixl::x25)
+  | RegSet(vixl::x26)
+  | RegSet(vixl::x27)
+  | RegSet(vixl::x28)
+  ;
 
 }}}
 

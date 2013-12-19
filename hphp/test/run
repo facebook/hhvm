@@ -140,6 +140,7 @@ function get_options($argv) {
     'log' => 'l',
     'failure-file:' => '',
     'arm' => '',
+    'hhas-round-trip' => '',
   );
   $options = array();
   $files = array();
@@ -165,6 +166,12 @@ function get_options($argv) {
       $files[] = $arg;
     }
   }
+
+  if (isset($options['repo']) && isset($options['hhas-round-trip'])) {
+    echo "repo and hhas-round-trip are mutually exclusive options\n";
+    exit(1);
+  }
+
   return array($options, $files);
 }
 
@@ -205,7 +212,7 @@ function find_tests($files, array $options = null) {
   }
   $files = implode(' ', $files);
   $tests = explode("\n", shell_exec(
-      "find $files -name '*.php' -o -name '*.hhas'"
+      "find $files -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
   ));
   if (!$tests) {
     error(usage());
@@ -313,6 +320,9 @@ function hhvm_cmd($options, $test, $test_run = null) {
     escapeshellarg($test_run),
     $use_automain ? escapeshellarg($test) : ''
   ));
+  if (file_exists($test.'.ini')) {
+    $cmd .= " -vServer.IniFile=$test.ini";
+  }
   $env = $_ENV;
   $in = find_test_ext($test, 'in');
   if ($in !== null) {
@@ -398,11 +408,11 @@ class Status {
     array_push(self::$results, array(
         'name' => $test,
         'status' => 'failed',
-        'details' => @file_get_contents("$test.diff")
+        'details' => (string)@file_get_contents("$test.diff")
     ));
     switch (self::$mode) {
       case self::MODE_NORMAL:
-        $diff = @file_get_contents($test.'.diff');
+        $diff = (string)@file_get_contents($test.'.diff');
         if (self::hasColor()) {
           print "\n\033[0;31m$test\033[0m\n$diff";
         } else {
@@ -426,7 +436,7 @@ class Status {
     $start = array('op' => 'start', 'test' => $test);
     $end = array('op' => 'test_done', 'test' => $test, 'status' => $status);
     if ($status == 'failed') {
-      $end['details'] = @file_get_contents("$test.diff");
+      $end['details'] = (string)@file_get_contents("$test.diff");
     }
     self::say($start, $end);
   }
@@ -486,8 +496,14 @@ function skip_test($options, $test) {
   return (bool)strlen($out);
 }
 
-function run_test($options, $test) {
+function dump_hhas_to_temp($hhvm_cmd, $test) {
+  $tmp_file = $test . '.round_trip.hhas';
+  system("$hhvm_cmd -vEval.DumpHhas=1 > $tmp_file", &$ret);
+  if ($ret) { echo "system failed\n"; exit(1); }
+  return $tmp_file;
+}
 
+function run_test($options, $test) {
   if (skip_test($options, $test)) {
     return 'skip';
   }
@@ -510,6 +526,11 @@ function run_test($options, $test) {
       $hhvm .= " -vRepo.Authoritative=true ".
                "-vRepo.Central.Path=$repodb";
     }
+  }
+
+  if (isset($options['hhas-round-trip'])) {
+    $hhas_temp = dump_hhas_to_temp($hhvm, $test);
+    list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
   }
 
   $descriptorspec = array(

@@ -1,0 +1,66 @@
+modify():
+orig:    2012-12-27 16:24:08 Europe/London
+copy:    2012-12-27 16:24:08 Europe/London
+changed: 2012-12-29 16:24:08 Europe/London
+orig:    2012-12-29 16:24:08 Europe/London
+copy:    2012-12-29 16:24:08 Europe/London
+changed: 2012-12-29 16:24:08 Europe/London
+
+add():
+orig:    2012-12-27 16:24:08 Europe/London
+copy:    2012-12-27 16:24:08 Europe/London
+changed: 2012-12-29 16:24:10 Europe/London
+orig:    2012-12-29 16:24:10 Europe/London
+copy:    2012-12-29 16:24:10 Europe/London
+changed: 2012-12-29 16:24:10 Europe/London
+
+sub():
+orig:    2012-12-27 16:24:08 Europe/London
+copy:    2012-12-27 16:24:08 Europe/London
+changed: 2012-12-25 16:24:06 Europe/London
+orig:    2012-12-25 16:24:06 Europe/London
+copy:    2012-12-25 16:24:06 Europe/London
+changed: 2012-12-25 16:24:06 Europe/London
+
+setTimezone():
+orig:    2012-12-27 16:24:08 Europe/London
+copy:    2012-12-27 16:24:08 Europe/London
+changed: 2012-12-28 01:24:08 Asia/Tokyo
+orig:    2012-12-28 01:24:08 Asia/Tokyo
+copy:    2012-12-28 01:24:08 Asia/Tokyo
+changed: 2012-12-28 01:24:08 Asia/Tokyo
+orig:    2012-12-27 16:24:08 Europe/London
+copy:    2012-12-27 16:24:08 Europe/London
+changed: 2012-12-28 01:24:08 Asia/Tokyo
+
+setTime():
+orig:    2012-12-27 16:24:08 Europe/London
+copy:    2012-12-27 16:24:08 Europe/London
+changed: 2012-12-27 05:07:19 Europe/London
+orig:    2012-12-27 05:07:19 Europe/London
+copy:    2012-12-27 05:07:19 Europe/London
+changed: 2012-12-27 05:07:19 Europe/London
+
+setDate():
+orig:    2012-12-27 16:24:08 Europe/London
+copy:    2012-12-27 16:24:08 Europe/London
+changed: 0005-07-19 16:24:08 Europe/London
+orig:    0005-07-19 16:24:08 Europe/London
+copy:    0005-07-19 16:24:08 Europe/London
+changed: 0005-07-19 16:24:08 Europe/London
+
+setIsoDate():
+orig:    2012-12-27 16:24:08 Europe/London
+copy:    2012-12-27 16:24:08 Europe/London
+changed: 2012-01-14 16:24:08 Europe/London
+orig:    2012-01-14 16:24:08 Europe/London
+copy:    2012-01-14 16:24:08 Europe/London
+changed: 2012-01-14 16:24:08 Europe/London
+
+setTimestamp():
+orig:    2012-12-27 16:24:08 Europe/London
+copy:    2012-12-27 16:24:08 Europe/London
+changed: 2033-10-06 18:57:02 Europe/London
+orig:    2033-10-06 18:57:02 Europe/London
+copy:    2033-10-06 18:57:02 Europe/London
+changed: 2033-10-06 18:57:02 Europe/London

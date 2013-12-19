@@ -1,0 +1,42 @@
+*** Testing is_callable() on defined functions ***
+-- Iteration  1 --
+bool(true)
+bool(true)
+bool(true)
+someFunction
+bool(true)
+bool(true)
+someFunction
+-- Iteration  2 --
+bool(true)
+bool(true)
+bool(true)
+x123
+bool(true)
+bool(true)
+x123
+-- Iteration  3 --
+bool(true)
+bool(true)
+bool(true)
+NULL
+bool(true)
+bool(true)
+NULL
+-- Iteration  4 --
+bool(true)
+bool(true)
+bool(true)
+false
+bool(true)
+bool(true)
+false
+-- Iteration  5 --
+bool(true)
+bool(true)
+bool(true)
+Hello_World
+bool(true)
+bool(true)
+Hello_World
+===DONE===

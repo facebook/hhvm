@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 TRACE_SET_MOD(trans)
 
@@ -200,4 +200,4 @@ void SrcRec::patch(IncomingBranch branch, TCA dest) {
   }
 }
 
-} } // HPHP::Transl
+} } // HPHP::JIT

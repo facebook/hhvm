@@ -177,7 +177,7 @@ function is_equal($obj1, $obj2) {
     report("Incorrect type", $type1, $type2);
     return false;
   }
-  if ($type1 !== "Vector" && $type1 !== "Map" && $type1 !== "StableMap") {
+  if ($type1 !== "HH\Vector" && $type1 !== "Map" && $type1 !== "StableMap") {
     return $obj1 === $obj2;
   }
   $n1 = count($obj1);
@@ -186,7 +186,7 @@ function is_equal($obj1, $obj2) {
     report("Incorrect size", $n1, $n2);
     return false;
   }
-  if ($type1 === "Vector") {
+  if ($type1 === "HH\Vector") {
     for ($i = 0; $i < $n1; ++$i) {
       if (!is_equal($obj1[$i], $obj2[$i])) {
         report("Incorrect value at [$i]", $obj1[$i], $obj2[$i]);

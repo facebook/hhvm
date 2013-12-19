@@ -1817,11 +1817,11 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "2.3.0-dev"
+            "value": "2.4.0-dev"
         },
         {
             "name": "HHVM_VERSION",
-            "value": "2.3.0-dev"
+            "value": "2.4.0-dev"
         },
         {
             "name": "HTML_ENTITIES",
@@ -5030,10 +5030,6 @@
         {
             "name": "PATH_SEPARATOR",
             "value": ":"
-        },
-        {
-            "name": "PCRE_VERSION",
-            "value": "7.3 2007-08-28"
         },
         {
             "name": "PEAR_EXTENSION_DIR",

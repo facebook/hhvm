@@ -31,7 +31,6 @@
 
 namespace HPHP {  namespace JIT { namespace NativeCalls {
 
-using namespace HPHP::Transl;
 
 namespace {
 

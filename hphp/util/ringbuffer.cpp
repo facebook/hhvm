@@ -34,7 +34,7 @@ namespace Trace {
 static const int kMaxRBBytes = 1 << 19; // 512KB
 __thread int  tl_rbPtr;
 __thread char tl_ring[kMaxRBBytes];
-__thread const char _unused[] = "\n----END OF RINGBUFFER---\n";
+UNUSED __thread const char _unused[] = "\n----END OF RINGBUFFER---\n";
 
 const char* ringbufferName(RingBufferType t) {
   switch (t) {

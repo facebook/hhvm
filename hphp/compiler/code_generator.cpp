@@ -483,7 +483,7 @@ void CodeGenerator::printValue(std::string value) {
 }
 
 void CodeGenerator::printModifierVector(std::string value) {
-  printf("V:6:\"Vector\":1:{");
+  printf("V:9:\"HH\\Vector\":1:{");
   printObjectHeader("Modifier", 1);
   printPropertyHeader("name");
   printValue(value);
@@ -505,7 +505,7 @@ void CodeGenerator::printExpression(ExpressionPtr expression, bool isRef) {
     expression->outputCodeModel(*this);
     printPropertyHeader("operation");
     printValue(PHP_REFERENCE_OP);
-    printPropertyHeader("location");
+    printPropertyHeader("sourceLocation");
     printLocation(expression->getLocation());
     printObjectFooter();
   } else {
@@ -514,7 +514,7 @@ void CodeGenerator::printExpression(ExpressionPtr expression, bool isRef) {
 }
 
 void CodeGenerator::printExpressionVector(ExpressionListPtr el) {
-  printf("V:6:\"Vector\":%d:{", el->getCount());
+  printf("V:9:\"HH\\Vector\":%d:{", el->getCount());
   if (el->getCount() > 0) {
     el->outputCodeModel(*this);
   }
@@ -522,7 +522,7 @@ void CodeGenerator::printExpressionVector(ExpressionListPtr el) {
 }
 
 void CodeGenerator::printExpressionVector(ExpressionPtr e) {
-  printf("V:6:\"Vector\":1:{");
+  printf("V:9:\"HH\\Vector\":1:{");
   e->outputCodeModel(*this);
   printf("}");
 }
@@ -537,18 +537,18 @@ void CodeGenerator::printAsBlock(StatementPtr s) {
       auto sl = static_pointer_cast<StatementList>(s);
       printStatementVector(sl);
     } else {
-      printf("V:6:\"Vector\":1:{");
+      printf("V:9:\"HH\\Vector\":1:{");
       s->outputCodeModel(*this);
       printf("}");
     }
-    printPropertyHeader("location");
+    printPropertyHeader("sourceLocation");
     printLocation(s->getLocation());
     printObjectFooter();
   }
 }
 
 void CodeGenerator::printStatementVector(StatementListPtr sl) {
-  printf("V:6:\"Vector\":%d:{", sl->getCount());
+  printf("V:9:\"HH\\Vector\":%d:{", sl->getCount());
   if (sl->getCount() > 0) {
     sl->outputCodeModel(*this);
   }

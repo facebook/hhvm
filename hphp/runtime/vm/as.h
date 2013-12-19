@@ -17,11 +17,10 @@
 #ifndef incl_HPHP_HHVM_AS_H_
 #define incl_HPHP_HHVM_AS_H_
 
-#include "hphp/util/md5.h"
-
 namespace HPHP {
 
-class UnitEmitter;
+struct UnitEmitter;
+struct MD5;
 
 //////////////////////////////////////////////////////////////////////
 

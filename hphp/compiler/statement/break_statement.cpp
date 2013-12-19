@@ -85,7 +85,7 @@ void BreakStatement::outputCodeModel(CodeGenerator &cg) {
   }
   cg.printPropertyHeader("depth");
   cg.printValue((int)m_depth);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

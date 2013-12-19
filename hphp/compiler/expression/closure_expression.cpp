@@ -282,12 +282,15 @@ bool ClosureExpression::hasStaticLocalsImpl(ConstructPtr root) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClosureExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ClosureExpression", 3);
+  auto numProps = m_vars != nullptr ? 3 : 2;
+  cg.printObjectHeader("ClosureExpression", numProps);
   cg.printPropertyHeader("function");
   m_func->outputCodeModel(cg);
-  cg.printPropertyHeader("capturedVariables");
-  cg.printExpressionVector(m_vars);
-  cg.printPropertyHeader("location");
+  if (m_vars != nullptr) {
+    cg.printPropertyHeader("capturedVariables");
+    cg.printExpressionVector(m_vars);
+  }
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

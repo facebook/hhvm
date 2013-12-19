@@ -244,16 +244,6 @@
             ]
         },
         {
-            "name": "get_required_files",
-            "flags": [
-            ],
-            "return": {
-                "type": "StringVec"
-            },
-            "args": [
-            ]
-        },
-        {
             "name": "getenv",
             "desc": null,
             "flags": [
@@ -486,42 +476,6 @@
             ]
         },
         {
-            "name": "ini_alter",
-            "flags": [
-            ],
-            "return": {
-                "type": "String"
-            },
-            "args": [
-                {
-                    "name": "varname",
-                    "type": "String"
-                },
-                {
-                    "name": "newvalue",
-                    "type": "String"
-                }
-            ]
-        },
-        {
-            "name": "ini_get_all",
-            "desc": "Returns all the registered configuration options.",
-            "flags": [
-            ],
-            "return": {
-                "type": "VariantMap",
-                "desc": "Returns an associative array with directive name as the array key.\n\nWhen details is TRUE (default) the array will contain global_value (set in php.ini), local_value (perhaps set with ini_set() or .htaccess), and access (the access level).\n\nWhen details is FALSE the value will be the current value of the option.\n\nSee the manual section for information on what access levels mean.\n\nIt's possible for a directive to have multiple access levels, which is why access shows the appropriate bitmask values."
-            },
-            "args": [
-                {
-                    "name": "extension",
-                    "type": "String",
-                    "value": "null_string",
-                    "desc": "An optional extension name. If set, the function return only options specific for that extension."
-                }
-            ]
-        },
-        {
             "name": "ini_get",
             "desc": "Returns the value of the configuration option on success.",
             "flags": [
@@ -639,30 +593,6 @@
             ]
         },
         {
-            "name": "php_ini_scanned_files",
-            "desc": "php_ini_scanned_files() returns a comma-separated list of configuration files parsed after php.ini. These files are found in a directory defined by the --with-config-file-scan-dir option which is set during compilation.\n\nThe returned configuration files also include the path as declared in the --with-config-file-scan-dir option.",
-            "flags": [
-            ],
-            "return": {
-                "type": "String",
-                "desc": "Returns a comma-separated string of .ini files on success. Each comma is followed by a newline. If the directive --with-config-file-scan-dir wasn't set, FALSE is returned. If it was set and the directory was empty, an empty string is returned. If a file is unrecognizable, the file will still make it into the returned string but a PHP error will also result. This PHP error will be seen both at compile time and while using php_ini_scanned_files()."
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "php_logo_guid",
-            "desc": "This function returns the ID which can be used to display the PHP logo using the built-in image. Logo is displayed only if expose_php is On.",
-            "flags": [
-            ],
-            "return": {
-                "type": "String",
-                "desc": "Returns PHPE9568F34-D428-11d2-A769-00AA001ACF42."
-            },
-            "args": [
-            ]
-        },
-        {
             "name": "php_sapi_name",
             "flags": [
             ],
@@ -688,24 +618,6 @@
                     "type": "String",
                     "value": "null_string",
                     "desc": "mode is a single character that defines what information is returned: 'a': This is the default. Contains all modes in the sequence \"s n r v m\". 's': Operating system name. eg. FreeBSD. 'n': Host name. eg. localhost.example.com. 'r': Release name. eg. 5.1.2-RELEASE. 'v': Version information. Varies a lot between operating systems. 'm': Machine type. eg. i386."
-                }
-            ]
-        },
-        {
-            "name": "phpcredits",
-            "desc": "This function prints out the credits listing the PHP developers, modules, etc. It generates the appropriate HTML codes to insert the information in a page.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "Returns TRUE on success or FALSE on failure."
-            },
-            "args": [
-                {
-                    "name": "flag",
-                    "type": "Int32",
-                    "value": "0",
-                    "desc": "To generate a custom credits page, you may want to use the flag parameter.\n\nPre-defined phpcredits() flags name description CREDITS_ALL All the credits, equivalent to using: CREDITS_DOCS + CREDITS_GENERAL + CREDITS_GROUP + CREDITS_MODULES + CREDITS_FULLPAGE. It generates a complete stand-alone HTML page with the appropriate tags. CREDITS_DOCS The credits for the documentation team CREDITS_FULLPAGE Usually used in combination with the other flags. Indicates that a complete stand-alone HTML page needs to be printed including the information indicated by the other flags. CREDITS_GENERAL General credits: Language design and concept, PHP authors and SAPI module. CREDITS_GROUP A list of the core developers CREDITS_MODULES A list of the extension modules for PHP, and their authors CREDITS_SAPI A list of the server API modules for PHP, and their authors"
                 }
             ]
         },
@@ -878,30 +790,6 @@
             "return": {
                 "type": "Int64",
                 "desc": "Returns number of collected cycles."
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "zend_logo_guid",
-            "desc": "This function returns the ID which can be used to display the Zend logo using the built-in image.",
-            "flags": [
-            ],
-            "return": {
-                "type": "String",
-                "desc": "Returns PHPE9568F35-D428-11d2-A769-00AA001ACF42."
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "zend_thread_id",
-            "desc": "This function returns a unique identifier for the current thread.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Int64",
-                "desc": "Returns the thread id as an integer."
             },
             "args": [
             ]

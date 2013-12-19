@@ -1,0 +1,27 @@
+*** Testing open_basedir configuration [tempnam] ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+bool(false)
+string(%d) "%s"
+bool(true)
+string(%d) "%s"
+bool(true)
+string(%d) "%s"
+bool(true)
+*** Finished testing open_basedir configuration [tempnam] ***

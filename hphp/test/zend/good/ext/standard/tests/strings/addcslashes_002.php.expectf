@@ -1,0 +1,6 @@
+*** Testing addcslashes() with ASCII code between 0 and 31 ***
+string(44) "goodyear12345NULL\000truefalse\a\v\f\b\n\r\t"
+
+*** Testing addcslashes() with objects ***
+string(7) "O\bject"
+Done

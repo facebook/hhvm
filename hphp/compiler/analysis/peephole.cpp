@@ -91,10 +91,10 @@ Peephole::Peephole(UnitEmitter &ue, MetaInfoBuilder& metaInfo)
           // fallthrough
 
         incDecOp:
-          if (imm->u_OA == PostInc) {
-            imm->u_OA = PreInc;
-          } else if (imm->u_OA == PostDec) {
-            imm->u_OA = PreDec;
+          if (static_cast<IncDecOp>(imm->u_OA) == IncDecOp::PostInc) {
+            imm->u_OA = static_cast<unsigned char>(IncDecOp::PreInc);
+          } else if (static_cast<IncDecOp>(imm->u_OA) == IncDecOp::PostDec) {
+            imm->u_OA = static_cast<unsigned char>(IncDecOp::PreDec);
           }
           break;
         default:

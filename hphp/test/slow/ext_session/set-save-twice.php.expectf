@@ -1,0 +1,23 @@
+string(4) "open"
+array(2) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  string(9) "PHPSESSID"
+}
+string(4) "read"
+array(1) {
+  [0]=>
+  string(64) "%s"
+}
+string(1) "a"
+string(5) "write"
+array(2) {
+  [0]=>
+  string(64) "%s"
+  [1]=>
+  string(10) "a|s:1:"a";"
+}
+string(5) "close"
+array(0) {
+}

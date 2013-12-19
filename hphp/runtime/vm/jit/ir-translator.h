@@ -20,14 +20,13 @@
 #include "hphp/runtime/vm/jit/translator-instrs.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 struct NormalizedInstruction;
 struct Tracelet;
 struct Location;
 struct RuntimeType;
 }
 namespace JIT {
-using Transl::NormalizedInstruction;
 
 /*
  * RegionIter is a temporary class used to traverse a region of hhbc
@@ -45,7 +44,7 @@ struct RegionIter {
 bool shouldIRInline(const Func* caller, const Func* callee,
                     RegionIter& iter);
 bool shouldIRInline(const Func* caller, const Func* callee,
-                    const Transl::Tracelet& tlet);
+                    const JIT::Tracelet& tlet);
 
 /*
  * IRTranslator is used to convert hhbc instructions to an IRTrace of hhir
@@ -56,9 +55,9 @@ struct IRTranslator {
   IRTranslator(Offset bcOff, Offset spOff, const Func* curFunc);
 
   void translateInstr(const NormalizedInstruction& i);
-  void checkType(const Transl::Location& l, const Transl::RuntimeType& rtt,
+  void checkType(const JIT::Location& l, const JIT::RuntimeType& rtt,
                  bool outerOnly);
-  void assertType(const Transl::Location&, const Transl::RuntimeType&);
+  void assertType(const JIT::Location&, const JIT::RuntimeType&);
   HhbcTranslator& hhbcTrans() { return m_hhbcTrans; }
 
  private:

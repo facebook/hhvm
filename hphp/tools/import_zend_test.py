@@ -215,7 +215,6 @@ bad_tests = (
     '/Zend/tests/lsb_021.php',
     '/Zend/tests/lsb_022.php',
 
-
     # flaky for various reasons
     '/ext/standard/tests/network/gethostbyname_error004.php',
     '/ext/standard/tests/network/getmxrr.php',
@@ -236,6 +235,24 @@ bad_tests = (
 
     # flaky: t3241496
     '/ext/standard/tests/file/copy_variation16.php',
+
+    # flakey
+    '/ext/session/tests/023.php',
+
+    # segfaults on contbuild in opt
+    '/ext/standard/tests/strings/explode_bug.php',
+
+    # broken on travis
+    '/ext/soap/tests/bugs/bug36999.php',
+
+    # flaky: t3390262
+    '/ext/standard/tests/file/readfile_variation6.php',
+
+    # flaky: t3396095
+    '/ext/standard/tests/file/file_exists_variation1.php',
+
+    # flaky: t3405896
+    '/ext/session/tests/013.php'
 )
 
 # Tests that work but not in repo mode
@@ -284,6 +301,7 @@ norepo_tests = (
     '/ext/pdo_sqlite/tests/bug33841.php',
     '/ext/pdo_sqlite/tests/bug46139.php',
     '/ext/pdo_sqlite/tests/bug52487.php',
+    '/ext/phar/tests/012.php',
     '/ext/sqlite3/tests/bug47159.php',
     '/ext/sqlite3/tests/sqlite3_01_open.php',
     '/ext/sqlite3/tests/sqlite3_02_create.php',
@@ -297,26 +315,47 @@ norepo_tests = (
     '/ext/sqlite3/tests/sqlite3_18_changes.php',
     '/ext/sqlite3/tests/sqlite3_19_columninfo.php',
     '/ext/sqlite3/tests/sqlite3_20_error.php',
+    '/ext/sqlite3/tests/sqlite3_22_loadextension.php',
     '/ext/sqlite3/tests/sqlite3_23_escape_string.php',
     '/ext/sqlite3/tests/sqlite3_24_last_insert_rowid.php',
     '/ext/sqlite3/tests/sqlite3stmt_paramCount_basic.php',
     '/ext/sqlite3/tests/sqlite3stmt_paramCount_error.php',
+    '/ext/standard/tests/array/001.php',
+    '/ext/standard/tests/array/003.php',
     '/ext/standard/tests/array/sizeof_variation4.php',
+    '/ext/standard/tests/assert/assert.php',
     '/ext/standard/tests/class_object/class_exists_basic_001.php',
     '/ext/standard/tests/class_object/get_declared_classes_variation1.php',
     '/ext/standard/tests/class_object/get_declared_interfaces_variation1.php',
     '/ext/standard/tests/class_object/get_declared_traits_variation1.php',
     '/ext/standard/tests/class_object/interface_exists_variation3.php',
     '/ext/standard/tests/class_object/interface_exists_variation4.php',
+    '/ext/standard/tests/class_object/is_a_variation_001.php',
     '/ext/standard/tests/file/file_get_contents_basic.php',
     '/ext/standard/tests/file/file_get_contents_file_put_contents_basic.php',
     '/ext/standard/tests/file/file_get_contents_file_put_contents_variation1.php',
     '/ext/standard/tests/file/file_get_contents_file_put_contents_variation2.php',
     '/ext/standard/tests/file/file_get_contents_variation1.php',
     '/ext/standard/tests/file/readfile_variation6.php',
+    '/ext/standard/tests/general_functions/is_callable_error.php',
     '/ext/standard/tests/general_functions/is_numeric.php',
     '/ext/standard/tests/math/abs.php',
+    '/ext/standard/tests/math/acos_basic.php',
+    '/ext/standard/tests/math/acosh_basic.php',
+    '/ext/standard/tests/math/asin_basic.php',
+    '/ext/standard/tests/math/asinh_basic.php',
+    '/ext/standard/tests/math/atan_basic.php',
+    '/ext/standard/tests/math/atanh_basic.php',
+    '/ext/standard/tests/math/cos_basic.php',
+    '/ext/standard/tests/math/cosh_basic.php',
+    '/ext/standard/tests/math/deg2rad_basic.php',
+    '/ext/standard/tests/math/log10_basic.php',
     '/ext/standard/tests/math/pow.php',
+    '/ext/standard/tests/math/rad2deg_basic.php',
+    '/ext/standard/tests/math/sin_basic.php',
+    '/ext/standard/tests/math/sinh_basic.php',
+    '/ext/standard/tests/math/tan_basic.php',
+    '/ext/standard/tests/math/tanh_basic.php',
     '/ext/standard/tests/serialize/bug30234.php',
     '/ext/standard/tests/streams/stream_resolve_include_path.php',
     '/ext/standard/tests/strings/trim.php',
@@ -358,6 +397,8 @@ norepo_tests = (
     '/tests/classes/autoload_018.php',
     '/tests/classes/constants_scope_001.php',
     '/tests/classes/unset_properties.php',
+    '/tests/lang/034.php',
+    '/tests/lang/bug32924.php',
     '/tests/lang/include_variation3.php',
     '/tests/lang/static_variation_001.php',
     '/tests/lang/static_variation_002.php',
@@ -413,16 +454,41 @@ other_files = (
     '/ext/date/tests/DateTime_data-spring-type3-type2.inc',
     '/ext/date/tests/DateTime_data-spring-type3-type3.inc',
     '/ext/date/tests/examine_diff.inc',
+    '/ext/exif/tests/bug34704.jpg',
     '/ext/exif/tests/bug48378.jpeg',
+    '/ext/exif/tests/bug60150.jpg',
+    '/ext/exif/tests/image007.jpg',
+    '/ext/exif/tests/image008.jpg',
+    '/ext/exif/tests/image009.jpg',
+    '/ext/exif/tests/image010.jpg',
+    '/ext/exif/tests/image011.jpg',
+    '/ext/exif/tests/image012.jpg',
+    '/ext/exif/tests/image013.jpg',
+    '/ext/exif/tests/image014.jpg',
+    '/ext/exif/tests/image015.jpg',
+    '/ext/exif/tests/image016.tiff',
+    '/ext/exif/tests/image017.tiff',
+    '/ext/exif/tests/image018.tiff',
+    '/ext/exif/tests/image020.tiff',
+    '/ext/exif/tests/image021.tiff',
+    '/ext/exif/tests/image022.tiff',
+    '/ext/exif/tests/image023.tiff',
+    '/ext/exif/tests/image024.jpg',
+    '/ext/exif/tests/image025.jpg',
+    '/ext/exif/tests/image026.tiff',
+    '/ext/exif/tests/image027.tiff',
+    '/ext/exif/tests/test1.jpg',
+    '/ext/exif/tests/test2.jpg',
+    '/ext/exif/tests/test5.jpg',
     '/ext/fileinfo/tests/magic',
-    '/ext/fileinfo/tests/resources/test.pdf',
-    '/ext/fileinfo/tests/resources/test.gif',
-    '/ext/fileinfo/tests/resources/test.awk',
-    '/ext/fileinfo/tests/resources/test.mp3',
     '/ext/fileinfo/tests/resources/dir.zip',
-    '/ext/fileinfo/tests/resources/test.png',
-    '/ext/fileinfo/tests/resources/test.jpg',
+    '/ext/fileinfo/tests/resources/test.awk',
     '/ext/fileinfo/tests/resources/test.bmp',
+    '/ext/fileinfo/tests/resources/test.gif',
+    '/ext/fileinfo/tests/resources/test.jpg',
+    '/ext/fileinfo/tests/resources/test.mp3',
+    '/ext/fileinfo/tests/resources/test.pdf',
+    '/ext/fileinfo/tests/resources/test.png',
     '/ext/ftp/tests/cert.pem',
     '/ext/ftp/tests/server.inc',
     '/ext/gd/tests/Tuffy.ttf',
@@ -475,13 +541,29 @@ other_files = (
     '/ext/pdo_mysql/tests/common.phpt',
     '/ext/pdo_mysql/tests/config.inc',
     '/ext/pdo_sqlite/tests/common.phpt',
+    '/ext/phar/tests/files/phar_test.inc',
     '/ext/session/tests/save_handler.inc',
     '/ext/simplexml/tests/book.xml',
     '/ext/simplexml/tests/bug24392.xml',
+    '/ext/soap/tests/bugs/bug27722.wsdl',
+    '/ext/soap/tests/bugs/bug28985.wsdl',
+    '/ext/soap/tests/bugs/bug29109.wsdl',
+    '/ext/soap/tests/bugs/bug29795.wsdl',
+    '/ext/soap/tests/bugs/bug30175.wsdl',
     '/ext/soap/tests/bugs/bug30928.wsdl',
+    '/ext/soap/tests/bugs/bug36614.wsdl',
+    '/ext/soap/tests/bugs/bug36999.wsdl',
+    '/ext/soap/tests/bugs/bug37083.wsdl',
+    '/ext/soap/tests/bugs/bug38004.wsdl',
+    '/ext/soap/tests/bugs/bug38055.wsdl',
+    '/ext/soap/tests/bugs/bug38067.wsdl',
+    '/ext/soap/tests/bugs/bug38536.wsdl',
     '/ext/soap/tests/bugs/bug41337.wsdl',
     '/ext/soap/tests/bugs/bug42692.wsdl',
+    '/ext/soap/tests/classmap.wsdl',
+    '/ext/soap/tests/interop/Round3/GroupF/round3_groupF_extreq.wsdl',
     '/ext/soap/tests/schema/test_schema.inc',
+    '/ext/soap/tests/server025.wsdl',
     '/ext/soap/tests/soap12/soap12-test.inc',
     '/ext/soap/tests/soap12/soap12-test.wsdl',
     '/ext/spl/tests/SplFileObject_testinput.csv',
@@ -490,6 +572,7 @@ other_files = (
     '/ext/spl/tests/testclass.class.inc',
     '/ext/sqlite3/tests/new_db.inc',
     '/ext/sqlite3/tests/stream_test.inc',
+    '/ext/standard/tests/array/data.inc',
     '/ext/standard/tests/array/compare_function.inc',
     '/ext/standard/tests/class_object/AutoInterface.inc',
     '/ext/standard/tests/class_object/AutoLoaded.inc',
@@ -497,6 +580,7 @@ other_files = (
     '/ext/standard/tests/file/bug40501.csv',
     '/ext/standard/tests/file/file.inc',
     '/ext/standard/tests/file/fopen_include_path.inc',
+    '/ext/standard/tests/file/stream_rfc2397_003.gif',
     '/ext/standard/tests/file/test.csv',
     '/ext/standard/tests/file/test2.csv',
     '/ext/standard/tests/file/test3.csv',
@@ -507,6 +591,7 @@ other_files = (
     '/ext/standard/tests/image/test13pix.swf',
     '/ext/standard/tests/image/test1pix.jpg',
     '/ext/standard/tests/image/testAPP.jpg',
+    '/ext/standard/tests/math/allowed_rounding_error.inc',
     '/ext/standard/tests/serialize/autoload_implements.p5c',
     '/ext/standard/tests/serialize/autoload_interface.p5c',
     '/ext/standard/tests/url/urls.inc',
@@ -533,6 +618,7 @@ other_files = (
     '/tests/classes/interface_optional_arg_003.inc',
     '/tests/lang/015.inc',
     '/tests/lang/016.inc',
+    '/tests/lang/023-1.inc',
     '/tests/lang/023-2.inc',
     '/tests/lang/inc.inc',
     '/tests/lang/inc_throw.inc',
@@ -625,7 +711,7 @@ def walk(filename, source_dir):
     for i in sections.keys():
         sections[i] = '\n'.join(sections[i])
 
-    unsupported_sections = ('INI', 'POST_RAW')
+    unsupported_sections = ('POST_RAW')
     for name in unsupported_sections:
         if sections.has_key(name):
             print "Unsupported test with section --%s--: " % name, filename
@@ -673,6 +759,10 @@ def walk(filename, source_dir):
         file(full_dest_filename+'.expectf', 'w').write(exp)
     elif sections.has_key('EXPECTREGEX'):
         exp = sections['EXPECTREGEX']
+
+        if '/ext/standard/tests/strings/004.php' in full_dest_filename:
+            exp = exp.replace(': 3', ': [3-4]')
+
         file(full_dest_filename+'.expectregex', 'w').write(exp)
     elif sections.has_key('EXPECTF'):
         exp = sections['EXPECTF']
@@ -684,6 +774,13 @@ def walk(filename, source_dir):
     else:
         print "Malformed test, no --EXPECT*--: ", filename
         return
+    
+    if sections.has_key('INI'):
+        exp = sections['INI']
+        file(full_dest_filename+'.ini', 'w').write(exp)
+
+    if sections.has_key('SKIPIF'):
+        file(full_dest_filename + '.skipif', 'w').write(sections['SKIPIF'])
 
     test = sections['FILE']
 
@@ -713,6 +810,7 @@ def walk(filename, source_dir):
                     '<?php',
                     '<?php\n$_ENV[%s] = %s;\n' % (boom[0], boom[1])
                 )
+
     if sections.has_key('CLEAN'):
         if not re.search(r'<\?php.*\?>', test, re.DOTALL):
             test += '?>\n'
@@ -762,6 +860,7 @@ def walk(filename, source_dir):
         test = test.replace('temp3.txt.gz', 'gzseek_variation5.gz')
     if '/ext/standard/tests/strings/vfprintf_' in full_dest_filename:
         test = test.replace('dump.txt', dest_filename + '.txt')
+        test = test.replace('vfprintf_test.txt', dest_filename + '.txt')
     if '/ext/standard/tests/strings/fprintf_' in full_dest_filename:
         test = test.replace('dump.txt', dest_filename + '.txt')
     if '/ext/standard/tests/file/touch_basic.php' in full_dest_filename:
@@ -877,6 +976,19 @@ def walk(filename, source_dir):
                             'function main() {\n' + pseudomain + '}\nmain();\n')
     if '/Zend/tests/bug55007.php' in full_dest_filename:
         test = test.replace('$a[]', '$a[];')
+    if '/ext/phar/tests/' in full_dest_filename:
+        test = test.replace('.clean', '')
+    if '/ext/phar/tests/' in full_dest_filename:
+        test = test.replace('.clean', '')
+    if '/ext/standard/tests/file/file_get_contents_variation1.php' in full_dest_filename:
+        test = test.replace('afile.txt', 'file_get_contents_variation1.txt')
+    if '/ext/standard/tests/file/readfile_variation6.php' in full_dest_filename:
+        test = test.replace('afile.txt', 'readfile_variation6.txt')
+    if '/ext/standard/tests/file/rename_variation' in full_dest_filename:
+        test = test.replace('rename_variation_dir', dest_filename+'_dir')
+        test = test.replace('rename_variation.tmp', dest_filename+'.tmp')
+        test = test.replace('rename_variation2.tmp', dest_filename+'2.tmp')
+        test = test.replace('rename_variation_link.tmp', dest_filename+'_link.tmp')
 
     file(full_dest_filename, 'w').write(test)
 
@@ -975,6 +1087,8 @@ for test in results:
         file(dest_file + '.norepo', 'w')
     if os.path.exists(filename + '.skipif'):
         shutil.copyfile(filename + '.skipif', dest_file + '.skipif')
+    if os.path.exists(filename + '.ini'):
+        shutil.copyfile(filename + '.ini', dest_file + '.ini')
     for f in glob.glob(delete_file + "*"):
         if os.path.isfile(f):
             os.unlink(f)

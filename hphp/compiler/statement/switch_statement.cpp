@@ -198,7 +198,7 @@ void SwitchStatement::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("caseStatements");
     cg.printStatementVector(m_cases);
   }
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

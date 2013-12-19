@@ -67,7 +67,7 @@ PHPAPI void  php_pcre_grep_impl(   pcre_cache_entry *pce, zval *input, zval *ret
   long flags TSRMLS_DC);
 
 ZEND_BEGIN_MODULE_GLOBALS(pcre)
-  HashTable pcre_cache;
+  std::map<std::string, pcre_cache_entry>  pcre_cache;
   long backtrack_limit;
   long recursion_limit;
   int  error_code;

@@ -125,6 +125,12 @@
                     "name": "str",
                     "type": "String",
                     "desc": "The input string."
+                },
+                {
+                    "name": "is_xhtml",
+                    "type": "Boolean",
+                    "value": "true",
+                    "desc": "Whether to use XHTML compatible line breaks or not."
                 }
             ]
         },
@@ -1111,6 +1117,12 @@
                     "type": "Int32",
                     "value": "k_ENT_COMPAT",
                     "desc": "Like the htmlspecialchars() and htmlentities() functions you can optionally specify the quote_style you are working with. See the description of these modes in htmlspecialchars()."
+                },
+                {
+                    "name": "encoding",
+                    "type": "String",
+                    "value": "\"UTF-8\"",
+                    "desc": "Encoding to use. If omitted, the default value for this argument is ISO-8859-1 in versions of PHP prior to 5.4.0, and UTF-8 from PHP 5.4.0 onwards."
                 }
             ]
         },

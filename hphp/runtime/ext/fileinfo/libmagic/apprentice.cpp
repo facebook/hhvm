@@ -958,7 +958,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
   memset(&me, 0, sizeof(me));
   /* read and parse this file */
   HPHP::String strline;
-  for (ms->line = 1; strline = stream->readLine(); ms->line++) {
+  for (ms->line = 1; (strline = stream->readLine()); ms->line++) {
     line = strline.data();
     len = strline.size();
     if (len == 0) /* null line, garbage, etc */
@@ -2778,7 +2778,7 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 
   assert(nm + sizeof(ar) < m);
 
-  if (stream->seek((off_t)sizeof(struct magic), SEEK_SET) != sizeof(struct magic)) {
+  if (!stream->seek((off_t)sizeof(struct magic), SEEK_SET)) {
     file_error(ms, errno, "error seeking `%s'", dbname);
     goto out;
   }

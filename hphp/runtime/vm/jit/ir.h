@@ -56,10 +56,10 @@ namespace HPHP {
 class StringData;
 namespace JIT {
 
-using HPHP::Transl::TCA;
-using HPHP::Transl::RegSet;
-using HPHP::Transl::PhysReg;
-using HPHP::Transl::ConditionCode;
+using HPHP::JIT::TCA;
+using HPHP::JIT::RegSet;
+using HPHP::JIT::PhysReg;
+using HPHP::JIT::ConditionCode;
 
 class IRUnit;
 struct IRInstruction;
@@ -307,6 +307,7 @@ O(InstanceOfBitmask,           D(Bool), S(Cls) CStr,                       C) \
 O(NInstanceOfBitmask,          D(Bool), S(Cls) CStr,                       C) \
 O(IsType,                      D(Bool), S(Cell),                           C) \
 O(IsNType,                     D(Bool), S(Cell),                           C) \
+O(IsScalarType,                D(Bool), S(Cell),                           C) \
   /* there is a conditional branch for each of the above query ops */         \
 O(JmpGt,                       D(None), S(Gen) S(Gen),                     E) \
 O(JmpGte,                      D(None), S(Gen) S(Gen),                     E) \
@@ -999,7 +1000,7 @@ namespace constToBits_detail {
 
   template<class T>
   typename std::enable_if<needs_promotion<T>::value,uint64_t>::type
-  promoteIfNeeded(T t) { return t; }
+  promoteIfNeeded(T t) { return static_cast<uint64_t>(t); }
 
   template<class T>
   typename std::enable_if<!needs_promotion<T>::value,T>::type
@@ -1076,8 +1077,7 @@ class RawMemSlot {
     return m;
   }
   static RawMemSlot& GetMisCtx() {
-    using namespace HPHP::Transl;
-    static RawMemSlot m(HHIR_MISOFF(ctx), sz::qword, Type::Cls);
+    static RawMemSlot m(MISOFF(ctx), sz::qword, Type::Cls);
     return m;
   }
 

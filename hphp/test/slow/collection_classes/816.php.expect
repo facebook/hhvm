@@ -1,4 +1,4 @@
-object(Vector)#1 (4) {
+object(HH\Vector)#1 (4) {
   [0]=>
   int(42)
   [1]=>

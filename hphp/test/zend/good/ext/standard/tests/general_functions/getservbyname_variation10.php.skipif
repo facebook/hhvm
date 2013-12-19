@@ -1,0 +1,5 @@
+<?php
+if(PHP_OS == 'Darwin') {
+  die("skip.. Mac OS X is fine with NULLs in getservbyname");
+}
+?>

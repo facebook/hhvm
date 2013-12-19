@@ -23,8 +23,6 @@
 #include <vector>
 #include <string>
 
-using namespace HPHP::Transl;
-
 namespace HPHP {
 namespace Debug {
 
@@ -38,7 +36,7 @@ struct ElfWriter {
   typedef std::map<const char *, Dwarf_Signed> FileDB;
   FileDB m_fileDB;
 
-  ElfWriter(DwarfChunk* d);
+  explicit ElfWriter(DwarfChunk* d);
   ~ElfWriter();
   int dwarfCallback(char *name, int size, Dwarf_Unsigned type,
     Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info);

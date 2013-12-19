@@ -1,0 +1,63 @@
+*** Testing open_basedir configuration [scandir] ***
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+HipHop Warning: %s
+HipHop Warning: %s
+HipHop Warning: %s
+bool(false)
+array(3) {
+  [0]=>
+  string(1) "."
+  [1]=>
+  string(2) ".."
+  [2]=>
+  string(6) "ok.txt"
+}
+array(3) {
+  [0]=>
+  string(1) "."
+  [1]=>
+  string(2) ".."
+  [2]=>
+  string(6) "ok.txt"
+}
+array(3) {
+  [0]=>
+  string(1) "."
+  [1]=>
+  string(2) ".."
+  [2]=>
+  string(6) "ok.txt"
+}
+*** Finished testing open_basedir configuration [scandir] ***

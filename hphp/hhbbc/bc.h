@@ -94,35 +94,36 @@ using SSwitchTab    = std::vector<SSwitchTabEnt>;
 
 namespace bc {
 
-#define IMM_TY_MA     MVector
-#define IMM_TY_BLA    SwitchTab
-#define IMM_TY_SLA    SSwitchTab
-#define IMM_TY_ILA    IterTab
-#define IMM_TY_IVA    int32_t
-#define IMM_TY_I64A   int64_t
-#define IMM_TY_LA     borrowed_ptr<php::Local>
-#define IMM_TY_IA     borrowed_ptr<php::Iter>
-#define IMM_TY_DA     double
-#define IMM_TY_SA     SString
-#define IMM_TY_AA     SArray
-#define IMM_TY_BA     borrowed_ptr<php::Block>
-#define IMM_TY_OA     uint8_t
-#define IMM_TY_VSA    std::vector<SString>
+#define IMM_TY_MA       MVector
+#define IMM_TY_BLA      SwitchTab
+#define IMM_TY_SLA      SSwitchTab
+#define IMM_TY_ILA      IterTab
+#define IMM_TY_IVA      int32_t
+#define IMM_TY_I64A     int64_t
+#define IMM_TY_LA       borrowed_ptr<php::Local>
+#define IMM_TY_IA       borrowed_ptr<php::Iter>
+#define IMM_TY_DA       double
+#define IMM_TY_SA       SString
+#define IMM_TY_AA       SArray
+#define IMM_TY_BA       borrowed_ptr<php::Block>
+#define IMM_TY_OA(type) type
+#define IMM_TY_VSA      std::vector<SString>
 
-#define IMM_NAME_MA(n)     mvec
-#define IMM_NAME_BLA(n)    targets
-#define IMM_NAME_SLA(n)    targets
-#define IMM_NAME_ILA(n)    iterTab
-#define IMM_NAME_IVA(n)    arg##n
-#define IMM_NAME_I64A(n)   arg##n
-#define IMM_NAME_LA(n)     loc##n
-#define IMM_NAME_IA(n)     iter##n
-#define IMM_NAME_DA(n)     dbl##n
-#define IMM_NAME_SA(n)     str##n
-#define IMM_NAME_AA(n)     arr##n
-#define IMM_NAME_BA(n)     target
-#define IMM_NAME_OA(n)     subop
-#define IMM_NAME_VSA(n)    keys
+#define IMM_NAME_MA(n)      mvec
+#define IMM_NAME_BLA(n)     targets
+#define IMM_NAME_SLA(n)     targets
+#define IMM_NAME_ILA(n)     iterTab
+#define IMM_NAME_IVA(n)     arg##n
+#define IMM_NAME_I64A(n)    arg##n
+#define IMM_NAME_LA(n)      loc##n
+#define IMM_NAME_IA(n)      iter##n
+#define IMM_NAME_DA(n)      dbl##n
+#define IMM_NAME_SA(n)      str##n
+#define IMM_NAME_AA(n)      arr##n
+#define IMM_NAME_BA(n)      target
+#define IMM_NAME_OA_IMPL(n) subop
+#define IMM_NAME_OA(type)   IMM_NAME_OA_IMPL
+#define IMM_NAME_VSA(n)     keys
 
 #define IMM_EXTRA_MA
 #define IMM_EXTRA_BLA
@@ -135,8 +136,8 @@ namespace bc {
 #define IMM_EXTRA_DA
 #define IMM_EXTRA_SA
 #define IMM_EXTRA_AA
-#define IMM_EXTRA_BA       typedef std::true_type has_target_flag;
-#define IMM_EXTRA_OA
+#define IMM_EXTRA_BA        using has_target_flag = std::true_type;
+#define IMM_EXTRA_OA(x)
 #define IMM_EXTRA_VSA
 
 #define IMM_MEM(which, n)          IMM_TY_##which IMM_NAME_##which(n)
@@ -343,6 +344,7 @@ OPCODES
 // #undef IMM_NAME_AA
 // #undef IMM_NAME_BA
 // #undef IMM_NAME_OA
+// #undef IMM_NAME_OA_IMPL
 
 #undef IMM_EXTRA_MA
 #undef IMM_EXTRA_BLA

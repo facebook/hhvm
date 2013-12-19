@@ -40,7 +40,6 @@ namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
-using namespace HPHP::Transl;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -69,7 +68,8 @@ bool classIsUniqueInterface(const Class* cls) {
 HhbcTranslator::HhbcTranslator(Offset startOffset,
                                uint32_t initialSpOffsetFromFp,
                                const Func* func)
-  : m_tb(new TraceBuilder(startOffset,
+  : m_unit(startOffset)
+  , m_tb(new TraceBuilder(startOffset,
                           initialSpOffsetFromFp,
                           m_unit,
                           func))
@@ -974,7 +974,7 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
      */
     auto const val    = popC();
     auto const result = gen(ConcatCellCell, catchBlock, loc, val);
-    pushIncRef(stLocNRC(id, exitBlock, result));
+    pushIncRef(stLocNRC(id, nullptr, result));
     // ConcatCellCell does not DecRef its second argument,
     // so we need to do it here
     gen(DecRef, val);
@@ -988,7 +988,7 @@ void HhbcTranslator::emitSetOpL(Opcode subOpc, uint32_t id) {
       loc->isA(Type::Bool) ? gen(ConvBoolToInt, loc) : loc,
       val->isA(Type::Bool) ? gen(ConvBoolToInt, val) : val
     );
-    pushStLoc(id, exitBlock, result);
+    pushStLoc(id, nullptr, result);
     return;
   }
 
@@ -1468,12 +1468,12 @@ void HhbcTranslator::emitContEnter(int32_t returnBcOffset) {
 
 void HhbcTranslator::emitContReturnControl() {
   auto const sp = spillStack();
-  emitRetSurpriseCheck(m_tb->genDefNull());
+  emitRetSurpriseCheck(m_tb->genDefNull(), true);
 
   auto const retAddr = gen(LdRetAddr, m_tb->fp());
   auto const fp = gen(FreeActRec, m_tb->fp());
 
-  gen(RetCtrl, sp, fp, retAddr);
+  gen(RetCtrl, InGeneratorData(true), sp, fp, retAddr);
   m_hasExit = true;
 }
 
@@ -1867,6 +1867,17 @@ void HhbcTranslator::emitIsTypeL(uint32_t id, DataType t) {
   push(gen(IsType, Type(t), ldLocInnerWarn(id, exit, DataTypeSpecific)));
 }
 
+void HhbcTranslator::emitIsScalarL(int id) {
+  SSATmp* src = ldLocInner(id, makeExit(), DataTypeSpecific);
+  push(gen(IsScalarType, src));
+}
+
+void HhbcTranslator::emitIsScalarC() {
+  SSATmp* src = popC();
+  push(gen(IsScalarType, src));
+  gen(DecRef, src);
+}
+
 void HhbcTranslator::emitPopA() { popA(); }
 
 void HhbcTranslator::emitPopC() {
@@ -1900,8 +1911,7 @@ void HhbcTranslator::emitJmp(int32_t offset,
 SSATmp* HhbcTranslator::emitJmpCondHelper(int32_t offset,
                                           bool negate,
                                           SSATmp* src) {
-  // Spill everything on main trace if all paths will exit.
-  if (m_lastBcOff) spillStack();
+  spillStack();
 
   auto const target  = makeExit(offset);
   auto const boolSrc = gen(ConvCellToBool, src);
@@ -2239,7 +2249,7 @@ void HhbcTranslator::emitNativeImpl() {
   SSATmp* sp = gen(RetAdjustStack, m_tb->fp());
   SSATmp* retAddr = gen(LdRetAddr, m_tb->fp());
   SSATmp* fp = gen(FreeActRec, m_tb->fp());
-  gen(RetCtrl, sp, fp, retAddr);
+  gen(RetCtrl, InGeneratorData(false), sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction so no ExitTrace is needed
   m_hasExit = true;
@@ -2525,7 +2535,7 @@ void HhbcTranslator::emitFPushObjMethodCommon(SSATmp* obj,
   }
 
   bool magicCall = false;
-  const Func* func = HPHP::Transl::lookupImmutableMethod(baseClass,
+  const Func* func = HPHP::JIT::lookupImmutableMethod(baseClass,
                                                          methodName,
                                                          magicCall,
                                                          /* staticLookup: */
@@ -2654,7 +2664,7 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
   const StringData* className = np.first;
   const Class* baseClass = Unit::lookupUniqueClass(np.second);
   bool magicCall = false;
-  const Func* func = HPHP::Transl::lookupImmutableMethod(baseClass,
+  const Func* func = HPHP::JIT::lookupImmutableMethod(baseClass,
                                                              methodName,
                                                              magicCall,
                                                          /* staticLookup: */
@@ -3046,12 +3056,12 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(StRetVal, m_tb->fp(), retVal);
   }
 
-  emitRetSurpriseCheck(retVal);
+  emitRetSurpriseCheck(retVal, false);
 
   // Free ActRec, and return control to caller.
   SSATmp* retAddr = gen(LdRetAddr, m_tb->fp());
   SSATmp* fp = gen(FreeActRec, m_tb->fp());
-  gen(RetCtrl, sp, fp, retAddr);
+  gen(RetCtrl, InGeneratorData(false), sp, fp, retAddr);
 
   // Flag that this trace has a Ret instruction, so that no ExitTrace is needed
   m_hasExit = true;
@@ -3069,7 +3079,7 @@ void HhbcTranslator::emitJmpSurpriseCheck() {
                });
 }
 
-void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal) {
+void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator) {
   emitRB(Trace::RBTypeFuncExit, curFunc()->fullName());
 
   m_tb->ifThen([&](Block* taken) {
@@ -3077,7 +3087,7 @@ void HhbcTranslator::emitRetSurpriseCheck(SSATmp* retVal) {
                },
                [&] {
                  m_tb->hint(Block::Hint::Unlikely);
-                 gen(FunctionExitSurpriseHook,
+                 gen(FunctionExitSurpriseHook, InGeneratorData(inGenerator),
                      m_tb->fp(), m_tb->sp(), retVal);
                });
 
@@ -4429,19 +4439,17 @@ Type bitOpResult(Type t1, Type t2) {
 
 Type setOpResult(Type locType, Type valType, SetOpOp op) {
   switch (op) {
-    case SetOpPlusEqual:
-    case SetOpMinusEqual:
-    case SetOpMulEqual:    return arithOpResult(locType.unbox(), valType);
-    case SetOpConcatEqual: return Type::Str;
-    case SetOpDivEqual:
-    case SetOpModEqual:    return Type::Cell;
-    case SetOpAndEqual:
-    case SetOpOrEqual:
-    case SetOpXorEqual:    return bitOpResult(locType.unbox(), valType);
-    case SetOpSlEqual:
-    case SetOpSrEqual:     return Type::Int;
-
-    case SetOp_invalid:    not_reached();
+  case SetOpOp::PlusEqual:
+  case SetOpOp::MinusEqual:
+  case SetOpOp::MulEqual:    return arithOpResult(locType.unbox(), valType);
+  case SetOpOp::ConcatEqual: return Type::Str;
+  case SetOpOp::DivEqual:
+  case SetOpOp::ModEqual:    return Type::Cell;
+  case SetOpOp::AndEqual:
+  case SetOpOp::OrEqual:
+  case SetOpOp::XorEqual:    return bitOpResult(locType.unbox(), valType);
+  case SetOpOp::SlEqual:
+  case SetOpOp::SrEqual:     return Type::Int;
   }
   not_reached();
 }
@@ -4462,7 +4470,7 @@ uint32_t localInputId(const NormalizedInstruction& inst) {
 Type HhbcTranslator::interpOutputType(
     const NormalizedInstruction& inst,
     folly::Optional<Type>& checkTypeType) const {
-  using namespace Transl::InstrFlags;
+  using namespace JIT::InstrFlags;
   auto localType = [&]{
     auto locId = localInputId(inst);
     assert(locId >= 0 && locId < curFunc()->numLocals());
@@ -4553,7 +4561,7 @@ smart::vector<InterpOneData::LocalType>
 HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
                                    bool& smashesAllLocals,
                                    Type pushedType) {
-  using namespace Transl::InstrFlags;
+  using namespace JIT::InstrFlags;
   if (!(getInstrInfo(inst.op()).out & Local)) return {};
 
   smart::vector<InterpOneData::LocalType> locals;
@@ -4720,7 +4728,7 @@ void HhbcTranslator::emitInterpOne(Type outType, int popped, int pushed,
   auto op = unit->getOpcode(bcOff());
 
   auto& iInfo = getInstrInfo(op);
-  if (iInfo.type == Transl::InstrFlags::OutFDesc) {
+  if (iInfo.type == JIT::InstrFlags::OutFDesc) {
     m_fpiStack.emplace(sp, m_tb->spOffset());
   } else if (isFCallStar(op) && !m_fpiStack.empty()) {
     m_fpiStack.pop();
@@ -4963,7 +4971,11 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
     return exit;
   }
 
-  if (bcOff() == m_startBcOff && targetBcOff == m_startBcOff) {
+  if (!isInlining() && bcOff() == m_startBcOff && targetBcOff == m_startBcOff) {
+    // Note that if we're inlining, then targetBcOff is in the inlined func,
+    // while m_startBcOff is in the outer func, so bindJmp will always work
+    // (and there's no guarantee that there is an anchor translation, so we
+    // must not use ReqRetranslate).
     gen(ReqRetranslate);
   } else {
     gen(ReqBindJmp, BCOffset(targetBcOff));
@@ -5119,7 +5131,6 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
 
   // It's important that the IncRef happens after the LdRef, since the
   // LdRef is also a guard on the inner type and may side-exit.
-  assert(exit);
   auto const innerCell = gen(
     LdRef, oldLoc->type().innerType(), exit, oldLoc
   );

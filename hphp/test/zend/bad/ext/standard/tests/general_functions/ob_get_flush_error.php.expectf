@@ -1,0 +1,6 @@
+*** Testing ob_get_flush() : error conditions ***
+HipHop Warning: %s
+NULL
+HipHop Notice: %s
+bool(false)
+===DONE===

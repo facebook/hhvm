@@ -179,9 +179,17 @@ void forPreorderDoms(Block* block, const DomChildren& children,
 }
 
 template <class Body>
+void forEachTrace(IRUnit& unit, Body body) {
+  body(unit.main());
+  for (auto* exit : unit.exits()) {
+    body(exit);
+  }
+}
+
+template <class Body>
 void forEachTrace(const IRUnit& unit, Body body) {
   body(unit.main());
-  for (auto exit : unit.exits()) {
+  for (auto* exit : unit.exits()) {
     body(exit);
   }
 }
@@ -191,7 +199,7 @@ void forEachTraceBlock(const IRUnit& unit, Body body) {
   for (auto block : unit.main()->blocks()) {
     body(block);
   }
-  for (auto exit : unit.exits()) {
+  for (auto* exit : unit.exits()) {
     for (auto block : exit->blocks()) {
       body(block);
     }
@@ -208,7 +216,7 @@ void forEachInst(const BlockList& blocks, Body body) {
 }
 
 template <class Body>
-void forEachTraceInst(const IRUnit& unit, Body body) {
+void forEachTraceInst(IRUnit& unit, Body body) {
   forEachTrace(unit, [=](IRTrace* t) {
     forEachInst(t->blocks(), body);
   });

@@ -1,0 +1,4 @@
+%s(1) "a"
+bool(false)
+%s(1) "c"
+bool(true)

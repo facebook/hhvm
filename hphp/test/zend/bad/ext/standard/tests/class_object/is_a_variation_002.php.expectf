@@ -1,0 +1,84 @@
+*** Testing is_a() : usage variations ***
+HipHop Notice: %s
+HipHop Notice: %s
+
+Arg value 0 
+bool(false)
+
+Arg value 1 
+bool(false)
+
+Arg value 12345 
+bool(false)
+
+Arg value -2345 
+bool(false)
+
+Arg value 10.5 
+bool(false)
+
+Arg value -10.5 
+bool(false)
+
+Arg value 101234567000 
+bool(false)
+
+Arg value 1.07654321E-9 
+bool(false)
+
+Arg value 0.5 
+bool(false)
+
+Arg value Array 
+HipHop Warning: %s
+NULL
+
+Arg value Array 
+HipHop Warning: %s
+NULL
+
+Arg value Array 
+HipHop Warning: %s
+NULL
+
+Arg value Array 
+HipHop Warning: %s
+NULL
+
+Arg value Array 
+HipHop Warning: %s
+NULL
+
+Arg value  
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value 1 
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value 1 
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value C Instance 
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value  
+bool(false)
+Done

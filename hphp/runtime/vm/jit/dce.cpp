@@ -438,9 +438,12 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
 
 void eliminateDeadCode(IRUnit& unit) {
   auto removeEmptyExitTraces = [&] {
-    unit.exits().remove_if([](IRTrace* exit) {
+    auto& exits = unit.exits();
+    auto isEmpty = [](IRTrace* exit) {
       return exit->blocks().empty();
-    });
+    };
+    exits.erase(std::remove_if(exits.begin(), exits.end(), isEmpty),
+                exits.end());
   };
 
   // kill unreachable code and remove any traces that are now empty

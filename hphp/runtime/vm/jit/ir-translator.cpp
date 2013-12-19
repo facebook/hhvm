@@ -95,14 +95,13 @@ IRTranslator::IRTranslator(Offset bcOff, Offset spOff, const Func* curFunc)
 {
 }
 
-void IRTranslator::checkType(const Transl::Location& l,
-                             const Transl::RuntimeType& rtt,
+void IRTranslator::checkType(const JIT::Location& l,
+                             const JIT::RuntimeType& rtt,
                              bool outerOnly) {
   // We can get invalid inputs as a side effect of reading invalid
   // items out of BBs we truncate; they don't need guards.
   if (rtt.isVagueValue() || l.isThis()) return;
 
-  using Transl::Location;
   switch (l.space) {
     case Location::Stack: {
       uint32_t stackOffset = locPhysicalOffset(l);
@@ -127,11 +126,10 @@ void IRTranslator::checkType(const Transl::Location& l,
   }
 }
 
-void IRTranslator::assertType(const Transl::Location& l,
-                              const Transl::RuntimeType& rtt) {
+void IRTranslator::assertType(const JIT::Location& l,
+                              const JIT::RuntimeType& rtt) {
   if (rtt.isVagueValue()) return;
 
-  using Transl::Location;
   switch (l.space) {
     case Location::Stack: {
       // tx64LocPhysicalOffset returns positive offsets for stack values,
@@ -820,6 +818,7 @@ static inline DataType typeOpToDataType(IsTypeOp op) {
   case IsTypeOp::Str:   return KindOfString;
   case IsTypeOp::Arr:   return KindOfArray;
   case IsTypeOp::Obj:   return KindOfObject;
+  case IsTypeOp::Scalar: not_reached();
   }
   not_reached();
 }
@@ -827,14 +826,24 @@ static inline DataType typeOpToDataType(IsTypeOp op) {
 void
 IRTranslator::translateCheckTypeLOp(const NormalizedInstruction& ni) {
   auto const locId = ni.imm[0].u_LA;
-  auto const op    = ni.imm[1].u_OA;
-  HHIR_EMIT(IsTypeL, locId, typeOpToDataType(static_cast<IsTypeOp>(op)));
+  auto const op    = static_cast<IsTypeOp>(ni.imm[1].u_OA);
+  if (op == IsTypeOp::Scalar) {
+    HHIR_EMIT(IsScalarL, locId);
+  } else {
+    DataType t = typeOpToDataType(op);
+    HHIR_EMIT(IsTypeL, locId, t);
+  }
 }
 
 void
 IRTranslator::translateCheckTypeCOp(const NormalizedInstruction& ni) {
-  auto const op = ni.imm[0].u_OA;
-  HHIR_EMIT(IsTypeC, typeOpToDataType(static_cast<IsTypeOp>(op)));
+  auto const op = static_cast<IsTypeOp>(ni.imm[0].u_OA);
+  if (op == IsTypeOp::Scalar) {
+    HHIR_EMIT(IsScalarC);
+  } else {
+    DataType t = typeOpToDataType(op);
+    HHIR_EMIT(IsTypeC, t);
+  }
 }
 
 void
@@ -844,32 +853,31 @@ IRTranslator::translateAKExists(const NormalizedInstruction& ni) {
 
 void
 IRTranslator::translateSetOpL(const NormalizedInstruction& i) {
-  Opcode opc;
-  switch (i.imm[1].u_OA) {
-    case SetOpPlusEqual:   opc = Add;    break;
-    case SetOpMinusEqual:  opc = Sub;    break;
-    case SetOpMulEqual:    opc = Mul;    break;
-    case SetOpDivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
-    case SetOpConcatEqual: opc = ConcatCellCell; break;
-    case SetOpModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
-    case SetOpAndEqual:    opc = BitAnd; break;
-    case SetOpOrEqual:     opc = BitOr;  break;
-    case SetOpXorEqual:    opc = BitXor; break;
-    case SetOpSlEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shl);
-    case SetOpSrEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shr);
-    default: not_reached();
-  }
+  auto const opc = [&] {
+    switch (static_cast<SetOpOp>(i.imm[1].u_OA)) {
+    case SetOpOp::PlusEqual:   return Add;
+    case SetOpOp::MinusEqual:  return Sub;
+    case SetOpOp::MulEqual:    return Mul;
+    case SetOpOp::DivEqual:    HHIR_UNIMPLEMENTED(SetOpL_Div);
+    case SetOpOp::ConcatEqual: return ConcatCellCell;
+    case SetOpOp::ModEqual:    HHIR_UNIMPLEMENTED(SetOpL_Mod);
+    case SetOpOp::AndEqual:    return BitAnd;
+    case SetOpOp::OrEqual:     return BitOr;
+    case SetOpOp::XorEqual:    return BitXor;
+    case SetOpOp::SlEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shl);
+    case SetOpOp::SrEqual:     HHIR_UNIMPLEMENTED(SetOpL_Shr);
+    }
+    not_reached();
+  }();
   HHIR_EMIT(SetOpL, opc, i.imm[0].u_LA);
 }
 
 void
 IRTranslator::translateIncDecL(const NormalizedInstruction& i) {
-  const IncDecOp oplet = IncDecOp(i.imm[1].u_OA);
-  assert(oplet == PreInc || oplet == PostInc || oplet == PreDec ||
-         oplet == PostDec);
-  bool post = (oplet == PostInc || oplet == PostDec);
+  const IncDecOp oplet = static_cast<IncDecOp>(i.imm[1].u_OA);
+  bool post = (oplet == IncDecOp::PostInc || oplet == IncDecOp::PostDec);
   bool pre  = !post;
-  bool inc  = (oplet == PostInc || oplet == PreInc);
+  bool inc  = (oplet == IncDecOp::PostInc || oplet == IncDecOp::PreInc);
 
   HHIR_EMIT(IncDecL, pre, inc, i.imm[0].u_LA);
 }
@@ -1024,7 +1032,7 @@ IRTranslator::translateFCallBuiltin(const NormalizedInstruction& i) {
   Id funcId = i.imm[2].u_SA;
 
   HHIR_EMIT(FCallBuiltin, numArgs, numNonDefault, funcId,
-            Transl::callDestroysLocals(i, m_hhbcTrans.curFunc()));
+            JIT::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
 bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
@@ -1129,7 +1137,7 @@ bool shouldIRInline(const Func* caller, const Func* callee, RegionIter& iter) {
       return refuse("inlining sizeable cold func into hot func");
     }
 
-    if (Transl::opcodeBreaksBB(op)) {
+    if (JIT::opcodeBreaksBB(op)) {
       return refuse("breaks tracelet");
     }
   }
@@ -1206,7 +1214,7 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
   }
 
   HHIR_EMIT(FCall, numArgs, returnBcOffset, i.funcd,
-            Transl::callDestroysLocals(i, m_hhbcTrans.curFunc()));
+            JIT::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
 void
@@ -1216,7 +1224,7 @@ IRTranslator::translateFCallArray(const NormalizedInstruction& i) {
   const Offset after = next.offset();
 
   HHIR_EMIT(FCallArray, pcOffset, after,
-            Transl::callDestroysLocals(i, m_hhbcTrans.curFunc()));
+            JIT::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
 void
@@ -1579,7 +1587,7 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   FTRACE(1, "\n{:-^60}\n", folly::format("translating {} with stack:\n{}",
                                          ni.toString(), ht.showStack()));
   // When profiling, we disable type predictions to avoid side exits
-  assert(Transl::tx64->mode() != TransProfile || !ni.outputPredicted);
+  assert(JIT::tx64->mode() != TransProfile || !ni.outputPredicted);
 
   if (ni.guardedThis) {
     // Task #2067635: This should really generate an AssertThis

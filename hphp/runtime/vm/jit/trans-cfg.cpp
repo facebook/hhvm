@@ -77,13 +77,11 @@ TransCFG::TransCFG(FuncId funcId,
   assert(profData);
 
   // add nodes
-  for (TransID tid = 0; tid < profData->numTrans(); tid++) {
-    if (profData->transKind(tid) == TransProfile &&
-        profData->transRegion(tid) != nullptr &&
-        profData->transFuncId(tid) == funcId &&
-        // This will skip DV Funclets if they were already
-        // retranslated w/ the prologues:
-        !profData->optimized(profData->transSrcKey(tid))) {
+  for (auto tid : profData->funcProfTransIDs(funcId)) {
+    assert(profData->transRegion(tid) != nullptr);
+    // This will skip DV Funclets if they were already
+    // retranslated w/ the prologues:
+    if (!profData->optimized(profData->transSrcKey(tid))) {
       int64_t counter = profData->transCounter(tid);
       int64_t weight  = RuntimeOption::EvalJitPGOThreshold - counter;
       addNode(tid, weight);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $v = Vector::fromArray(array('foo'));
 var_dump($v[0]);

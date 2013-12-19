@@ -91,23 +91,6 @@
             ]
         },
         {
-            "name": "virtual",
-            "desc": "virtual() is an Apache-specific function which is similar to <!--#include virtual...--> in mod_include. It performs an Apache sub-request. It is useful for including CGI scripts or .shtml files, or anything else that you would parse through Apache. Note that for a CGI script, the script must generate valid CGI headers. At the minimum that means it must generate a Content-Type header.\n\nTo run the sub-request, all buffers are terminated and flushed to the browser, pending headers are sent too. This function is only supported when PHP is installed as an Apache module.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "Performs the virtual command on success, or returns FALSE on failure."
-            },
-            "args": [
-                {
-                    "name": "filename",
-                    "type": "String",
-                    "desc": "The file that the virtual command will be performed on."
-                }
-            ]
-        },
-        {
             "name": "apache_get_config",
             "flags": [
             ],
@@ -119,16 +102,6 @@
         },
         {
             "name": "apache_get_scoreboard",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant"
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "apache_get_rewrite_rules",
             "flags": [
             ],
             "return": {

@@ -1,0 +1,21 @@
+array(1) {
+  ["foo"]=>
+  string(5) "hello"
+}
+*** Regenerated ***
+array(1) {
+  ["foo"]=>
+  string(5) "hello"
+}
+array(2) {
+  ["foo"]=>
+  string(5) "hello"
+  ["bar"]=>
+  string(5) "world"
+}
+array(2) {
+  ["foo"]=>
+  string(5) "hello"
+  ["bar"]=>
+  string(5) "world"
+}

@@ -394,7 +394,7 @@ static zval *handle_document(parser_state_t *state TSRMLS_DC)
 static zval *handle_mapping(parser_state_t *state TSRMLS_DC)
 {
   zval *retval = { 0 };
-  yaml_event_t src_event = { 0 }, key_event = { 0 };
+  yaml_event_t src_event = { YAML_NO_EVENT }, key_event = { YAML_NO_EVENT };
   zval *key = { 0 };
   char *key_str;
   zval *value = { 0 };
@@ -493,7 +493,7 @@ static zval *handle_mapping(parser_state_t *state TSRMLS_DC)
  */
 static zval *handle_sequence (parser_state_t *state TSRMLS_DC) {
   zval *retval = { 0 };
-  yaml_event_t src_event = { 0 };
+  yaml_event_t src_event = { YAML_NO_EVENT };
   zval *value = { 0 };
 
   /* save copy of sequence start event */
@@ -824,7 +824,7 @@ zval *eval_scalar(yaml_event_t event,
 zval *eval_scalar_with_callbacks(yaml_event_t event,
     HashTable *callbacks TSRMLS_DC)
 {
-  char *tag = (char *) event.data.scalar.tag;
+  const char *tag = (char *) event.data.scalar.tag;
   zval **callback = { 0 };
 
   if (YAML_PLAIN_SCALAR_STYLE == event.data.scalar.style && NULL == tag) {

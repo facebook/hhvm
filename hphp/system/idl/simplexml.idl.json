@@ -160,23 +160,6 @@
             ]
         },
         {
-            "name": "libxml_set_streams_context",
-            "desc": "Sets the streams context for the next libxml document load or write.",
-            "flags": [
-            ],
-            "return": {
-                "type": null,
-                "desc": "No value is returned."
-            },
-            "args": [
-                {
-                    "name": "streams_context",
-                    "type": "Resource",
-                    "desc": "The stream context resource (created with stream_context_create())"
-                }
-            ]
-        },
-        {
             "name": "libxml_disable_entity_loader",
             "desc": "Disable\/enable the ability to load external entities.",
             "flags": [

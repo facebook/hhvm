@@ -40,7 +40,7 @@ bool get_embedded_data(const char *section, embedded_data* desc,
 
 #ifndef __APPLE__
   GElf_Shdr shdr;
-  size_t shstrndx;
+  size_t shstrndx = -1;
   char *name;
   Elf_Scn *scn;
 
@@ -51,17 +51,22 @@ bool get_embedded_data(const char *section, embedded_data* desc,
   SCOPE_EXIT { close(fd); };
 
   Elf* e = elf_begin(fd, ELF_C_READ, nullptr);
-
-  if (!e ||
-      elf_kind(e) != ELF_K_ELF ||
-#ifdef HAVE_ELF_GETSHDRSTRNDX
-      elf_getshdrstrndx(e, &shstrndx)
-#else
-      !elf_getshstrndx(e, &shstrndx)
-#endif
-      ) {
+  if (e == nullptr || elf_kind(e) != ELF_K_ELF) {
     return false;
   }
+
+  auto get_shstrndx =
+#ifdef HAVE_ELF_GETSHDRSTRNDX
+    elf_getshdrstrndx;
+#else
+    elf_getshstrndx;
+#endif
+
+  int stat = get_shstrndx(e, &shstrndx);
+  if (stat < 0 || shstrndx == size_t(-1)) {
+    return false;
+  }
+
   scn = nullptr;
   while ((scn = elf_nextscn(e, scn)) != nullptr) {
     if (gelf_getshdr(scn, &shdr) != &shdr ||

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $mapFn = function ($x) {
  return $x*3+1;

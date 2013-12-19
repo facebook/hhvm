@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $v1 = Vector {
 5}

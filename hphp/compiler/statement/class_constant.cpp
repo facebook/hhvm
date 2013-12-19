@@ -136,7 +136,7 @@ void ClassConstant::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("ConstantStatement", 2);
   cg.printPropertyHeader("expressions");
   cg.printExpressionVector(m_exp);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

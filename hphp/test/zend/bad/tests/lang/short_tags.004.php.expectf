@@ -1,0 +1,10 @@
+<%= 'so should this' %>
+
+
+This gets echoed twice
+<%= $a%>
+
+<? $b=3; ?>
+
+HipHop Notice: %s
+HipHop Notice: %s

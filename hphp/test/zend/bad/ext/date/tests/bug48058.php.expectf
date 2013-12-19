@@ -1,0 +1,13 @@
+array(5) {
+  ["ts"]=>
+  int(-%d)
+  ["time"]=>
+  string(%d) "%s"
+  ["offset"]=>
+  int(3600)
+  ["isdst"]=>
+  bool(true)
+  ["abbr"]=>
+  string(3) "BST"
+}
+10000002008-02-28T12:00:00+0000

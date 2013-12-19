@@ -1,0 +1,18 @@
+string(1) "a"
+string(1) "b"
+string(1) "c"
+string(1) "d"
+int(42)
+NULL
+array(2) {
+  [0]=>
+  int(25)
+  [u"foo"]=>
+  unicode(3) "bar"
+}
+bool(true)
+string(1) "a"
+string(1) "b"
+string(1) "c"
+string(1) "d"
+===DONE===

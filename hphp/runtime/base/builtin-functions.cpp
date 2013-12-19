@@ -70,7 +70,7 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef smart::unique_ptr<CufIter>::type SmartCufIterPtr;
+typedef smart::unique_ptr<CufIter> SmartCufIterPtr;
 
 bool array_is_valid_callback(CArrRef arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
@@ -336,7 +336,7 @@ Variant vm_call_user_func(CVarRef function, CVarRef params,
                           bool forwarding /* = false */) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
-  HPHP::Transl::CallerFrame cf;
+  HPHP::JIT::CallerFrame cf;
   StringData* invName = nullptr;
   const HPHP::Func* f = vm_decode_function(function, cf(), forwarding,
                                            obj, cls, invName);
@@ -356,7 +356,7 @@ static bool vm_decode_function_cufiter(CVarRef function,
                                        SmartCufIterPtr& cufIter) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
-  HPHP::Transl::CallerFrame cf;
+  HPHP::JIT::CallerFrame cf;
   StringData* invName = nullptr;
   // Don't warn here, let the caller decide what to do if the func is nullptr.
   const HPHP::Func* func = vm_decode_function(function, cf(), false,
@@ -1116,7 +1116,7 @@ AutoloadHandler::Result AutoloadHandler::loadFromMap(const String& name,
         }
       }
       try {
-        Transl::VMRegAnchor _;
+        JIT::VMRegAnchor _;
         bool initial;
         VMExecutionContext* ec = g_vmContext;
         Unit* u = ec->evalInclude(fName.get(), nullptr, &initial);

@@ -1,0 +1,16 @@
+string(1) "a"
+bool(false)
+string(1) "b"
+bool(false)
+string(1) "c"
+bool(false)
+string(1) "a"
+bool(false)
+bool(true)
+string(1) "b"
+bool(false)
+bool(true)
+string(1) "c"
+bool(false)
+bool(true)
+===DONE===

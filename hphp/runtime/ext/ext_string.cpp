@@ -272,10 +272,15 @@ Variant f_hex2bin(const String& str) {
 
 const StaticString
   s_nl("\n"),
-  s_br("<br />\n");
+  s_br("<br />\n"),
+  s_non_xhtml_br("<br>\n");
 
-String f_nl2br(const String& str) {
-  return string_replace(str, s_nl, s_br);
+String f_nl2br(const String& str, bool is_xhtml /* = true */) {
+  if (is_xhtml) {
+    return string_replace(str, s_nl, s_br);
+  } else {
+    return string_replace(str, s_nl, s_non_xhtml_br);
+  }
 }
 
 String f_quotemeta(const String& str) {
@@ -728,7 +733,7 @@ Variant f_printf(int _argc, const String& format, CArrRef _argv /* = null_array 
   int len = 0; char *output = string_printf(format.data(), format.size(),
                                             _argv, &len);
   if (output == NULL) return false;
-  echo(output); free(output);
+  echo(output, len); free(output);
   return len;
 }
 
@@ -736,7 +741,7 @@ Variant f_vprintf(const String& format, CArrRef args) {
   int len = 0; char *output = string_printf(format.data(), format.size(),
                                             args, &len);
   if (output == NULL) return false;
-  echo(output); free(output);
+  echo(output, len); free(output);
   return len;
 }
 
@@ -1572,15 +1577,22 @@ const StaticString
   s_amp("&"),
   s_ampsemi("&amp;");
 
-Array f_get_html_translation_table(int table /* = 0 */, int flags /* = k_ENT_COMPAT */) {
-  static entity_charset charset = determine_charset(nullptr); // get default one
+Array f_get_html_translation_table(int table /* = 0 */,
+                                   int flags /* = k_ENT_COMPAT */,
+                                   const String& encoding /* = "UTF-8" */) {
+  using namespace entity_charset_enum;
 
-  assert(charset != entity_charset_enum::cs_unknown);
+  auto charset = determine_charset(encoding.data());
+  if (charset == cs_unknown) {
+    charset = cs_utf_8;
+    if (!encoding.empty()) {
+      raise_warning("get_html_translation_table(): charset `%s' not supported"
+                    ", assuming utf-8", encoding.data());
+    }
+  }
 
   const int HTML_SPECIALCHARS = 0;
   const int HTML_ENTITIES = 1;
-
-  using namespace entity_charset_enum;
 
   Array ret;
   switch (table) {

@@ -1,0 +1,4 @@
+<?php 
+	$OS = strtoupper(PHP_OS);
+	if ($OS == 'SUNOS' || $OS == 'SOLARIS') die("SKIP Solaris acos() returns wrong value");
+?>

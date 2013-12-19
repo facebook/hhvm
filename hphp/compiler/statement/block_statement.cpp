@@ -101,7 +101,7 @@ void BlockStatement::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("statements");
     m_stmts->outputCodeModel(cg);
   }
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

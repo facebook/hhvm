@@ -24,15 +24,9 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/ini-parser/zend-ini.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/lock.h"
-
-///////////////////////////////////////////////////////////////////////////////
-// defined in zend/zend-ini.tab.cpp
-
-extern bool zend_parse_ini_string
-(const HPHP::String& str, const HPHP::String& filename, int scanner_mode,
- HPHP::IniSetting::PFN_PARSER_CALLBACK callback, void *arg);
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -90,6 +84,22 @@ bool ini_on_update_string_non_empty(const String& value, void *p) {
     *((std::string*)p) = std::string(value.data(), value.size());
   }
   return true;
+}
+
+String ini_get_bool(void *p) {
+  return *(bool*) p;
+}
+
+String ini_get_long(void *p) {
+  return *((int64_t*)p);
+}
+
+String ini_get_real(void *p) {
+  return *((double*)p);
+}
+
+String ini_get_string(void *p) {
+  return *((std::string*)p);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -173,12 +183,13 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
   return false;
 }
 
-struct UpdateCallbackData {
-  IniSetting::PFN_UPDATE_CALLBACK callback;
+struct IniCallbackData {
+  IniSetting::UpdateCallback updateCallback;
+  IniSetting::GetCallback getCallback;
   void *p;
 };
 
-typedef std::map<std::string, UpdateCallbackData> CallbackMap;
+typedef std::map<std::string, IniCallbackData> CallbackMap;
 static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_callbacks);
 
 typedef std::map<std::string, std::string> DefaultMap;
@@ -193,14 +204,16 @@ void IniSetting::SetGlobalDefault(const char *name, const char *value) {
 }
 
 void IniSetting::Bind(const char *name, const char *value,
-                      PFN_UPDATE_CALLBACK callback, void *p /* = NULL */) {
+                      UpdateCallback updateCallback, GetCallback getCallback,
+                      void *p /* = NULL */) {
   assert(name && *name);
   assert(value);
 
-  UpdateCallbackData &data = (*s_callbacks)[name];
-  data.callback = callback;
+  auto &data = (*s_callbacks)[name];
+  data.updateCallback = updateCallback;
+  data.getCallback = getCallback;
   data.p = p;
-  (*callback)(value, p);
+  (*updateCallback)(value, p);
 }
 
 void IniSetting::Unbind(const char *name) {
@@ -312,14 +325,21 @@ bool IniSetting::Get(const String& name, String &value) {
     return true;
   }
 
+  CallbackMap::iterator cb_iter = s_callbacks->find(name.data());
+  if (cb_iter != s_callbacks->end()) {
+    value = (*cb_iter->second.getCallback)(cb_iter->second.p);
+    return true;
+  }
+
   return false;
 }
 
 bool IniSetting::Set(const String& name, const String& value) {
   CallbackMap::iterator iter = s_callbacks->find(name.data());
   if (iter != s_callbacks->end()) {
-    return (*iter->second.callback)(value, iter->second.p);
+    return (*iter->second.updateCallback)(value, iter->second.p);
   }
+
   if (name == s_error_reporting) {
     g_context->setErrorReportingLevel(value.toInt64());
     return true;

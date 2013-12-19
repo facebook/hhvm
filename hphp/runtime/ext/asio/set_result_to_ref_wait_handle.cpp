@@ -47,7 +47,7 @@ void c_SetResultToRefWaitHandle::ti_setoncreatecallback(CVarRef callback) {
 Object c_SetResultToRefWaitHandle::ti_create(CObjRef wait_handle, VRefParam ref) {
   TypedValue* var_or_cell = ref->asTypedValue();
   if (wait_handle.isNull()) {
-    tvSet(make_tv<KindOfNull>(), *var_or_cell);
+    tvSetNull(*var_or_cell);
     return wait_handle;
   }
 
@@ -67,7 +67,7 @@ Object c_SetResultToRefWaitHandle::ti_create(CObjRef wait_handle, VRefParam ref)
 
   // failed? reset ref and give back failed wait handle
   if (wh->isFailed()) {
-    tvSet(make_tv<KindOfNull>(), *var_or_cell);
+    tvSetNull(*var_or_cell);
     return wh;
   }
 

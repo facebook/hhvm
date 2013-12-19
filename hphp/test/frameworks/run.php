@@ -157,7 +157,7 @@ class PHPUnitPatterns {
   // Four \\\\ needed to match one \
   // stackoverflow.com/questions/4025482/cant-escape-the-backslash-with-regex
   static string $test_name_pattern =
-  "/[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\"|#)[^\"|^\(|^\n]+(\")?)?/";
+  "/[_a-zA-Z0-9\\\\]*::[_a-zA-Z0-9]*( with data set (\".*?\"|#[0-9]+))?/";
 
   static string $pear_test_name_pattern =
  "/[\-_a-zA-Z0-9\.\/]*\.phpt/";
@@ -171,26 +171,21 @@ class PHPUnitPatterns {
   static string $status_code_pattern =
   "/^[\.SFEI]$|^[\.SFEI](HipHop)|^[\.SFEI][ \t]*[0-9]* \/ [0-9]* \([ 0-9]*%\)/";
 
-  // Get rid of codes like ^[[31;31m that may get output to the results file.
-  // 0x1B is the hex code for the escape sequence ^[
-  static string $color_escape_code_pattern =
-                "/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]/";
-
   // Don't want to parse any more test names after the Time line in the
   // results. Any test names after that line are probably detailed error
   // information.
   static string $stop_parsing_pattern =
  "/^Time: \d+(\.\d+)? (second[s]?|ms|minute[s]?|hour[s]?), Memory: \d+(\.\d+)/";
 
-  static string $tests_ok_pattern = "/OK \(\d+ test[s]?, \d+ assertion[s]?\)/";
-  static string $tests_failure_pattern = "/Tests: \d+, Assertions: \d+.*[.]/";
+  static string $tests_ok_pattern = "/^OK \(\d+ test[s]?, \d+ assertion[s]?\)/";
+  static string $tests_failure_pattern = "/^Tests: \d+, Assertions: \d+.*[.]/";
 
   static string $header_pattern =
-                "/PHPUnit \d+.[0-9a-zA-Z\-\.]*( by Sebastian Bergmann.)?/";
+                "/^PHPUnit \d+.[0-9a-zA-Z\-\.]*( by Sebastian Bergmann.)?/";
 
-  static string $config_file_pattern = "/Configuration read from/";
+  static string $config_file_pattern = "/^Configuration read from/";
 
-  static string $xdebug_pattern = "/The Xdebug extension is not loaded./";
+  static string $xdebug_pattern = "/^The Xdebug extension is not loaded./";
 
   // Paris and Idiorm have tests with ending digits (e.g. Test53.php)
   static string $test_file_pattern =
@@ -200,18 +195,21 @@ class PHPUnitPatterns {
   static string $mediawiki_test_file_pattern = "/.*(\Test.*\.php)$/";
 
   static string $tests_ok_skipped_inc_pattern =
-               "/OK, but incomplete or skipped tests!/";
+               "/^OK, but incomplete or skipped tests!/";
   static string $num_errors_failures_pattern =
-               "/There (was|were) \d+ (failure|error)[s]?\:/";
+               "/^There (was|were) \d+ (failure|error)[s]?\:/";
   static string $num_skips_inc_pattern =
-               "/There (was|were) \d+ (skipped|incomplete) test[s]?\:/";
-  static string $failures_header_pattern = "/FAILURES!/";
-  static string $no_tests_executed_pattern = "/No tests executed!/";
+               "/^There (was|were) \d+ (skipped|incomplete) test[s]?\:/";
+  static string $failures_header_pattern = "/^FAILURES!/";
+  static string $no_tests_executed_pattern = "/^No tests executed!/";
 
   static string $hhvm_warning_pattern =
                                      "/^(HipHop|HHVM|hhvm) (Warning|Notice)/";
-  static string $hhvm_fatal_pattern = "/(^(HipHop|HHVM|hhvm) Fatal)|(^hhvm)/";
+  static string $hhvm_fatal_pattern =
+  "/(^(HipHop|HHVM|hhvm) Fatal)|(^hhvm:)|(^Core dumped: Segmentation fault)/";
 
+  static string $phpunit_exception_with_hhvm_warning =
+    "/^PHPUnit_Framework_Exception: (HipHop|HHVM|hhvm) (Warning|Notice)/";
   static string $test_method_name_pattern = "/public function test|\@test/";
 }
 
@@ -228,9 +226,14 @@ class Options {
   public static bool $allexcept = false;
   public static bool $test_by_single_test = false;
   public static string $results_root;
+  public static string $script_errors_file;
 
   public static function parse(OptionInfoMap $options, array $argv): Vector {
     self::$results_root = __DIR__."/results";
+    // Put any script error to a file when we are in a mode like --csv and
+    // want to control what gets printed to something like STDOUT.
+    self::$script_errors_file = self::$results_root."/_script.errors";
+    unlink(self::$script_errors_file);
 
     // Don't use $argv[0] which just contains the program to run
     $framework_names = Vector::fromArray(array_slice($argv, 1));
@@ -248,7 +251,7 @@ class Options {
 
     // Can't run all the framework tests and "all but" at the same time
     if ($options->containsKey('all') && $options->containsKey('allexcept')) {
-      error("Cannot use --all and --allexcept together");
+      error_and_exit("Cannot use --all and --allexcept together");
     } else if ($options->containsKey('all')) {
       self::$all = true;
       $framework_names->removeKey(0);
@@ -257,9 +260,9 @@ class Options {
       $framework_names->removeKey(0);
     }
 
-    // Can't be both summary and verbose. Summary trumps.
+    // Can't be both summary and verbose.
     if ($options->containsKey('csv') && $options->containsKey('verbose')) {
-      error("Cannot be --csv and --verbose together");
+      error_and_exit("Cannot be --csv and --verbose together");
     }
     else if ($options->containsKey('csv')) {
       self::$csv_only = true;
@@ -280,7 +283,7 @@ class Options {
     // Can't run framework tests both by file and single test
     if ($options->containsKey('by-file') &&
         $options->containsKey('by-single-test')) {
-      error("Cannot specify both by-file or by-single-test");
+      error_and_exit("Cannot specify both by-file or by-single-test");
     } else if ($options->contains('by-single-test')) {
       self::$test_by_single_test = true;
       $framework_names->removeKey(0);
@@ -703,10 +706,9 @@ abstract class Framework {
           // Tests: 678, Assertions: 678, Failures: 29, Skipped: 24.
         }
         else {
-          Options::$csv_only ? error()
-                             : error("The stats file for ".$this->name." is ".
-                                     "corrupt! It should only have test ".
-                                     "names and statuses in it.\n");
+          error_and_exit("The stats file for ".$this->name." is corrupt! It ".
+                         "should only have test names and statuses in it.\n",
+                         Options::$csv_only);
         }
       }
       // Count blacklisted tests as failures
@@ -864,9 +866,8 @@ abstract class Framework {
     // of a framework.
     $git_ret = run_install($git_command, __DIR__, ProxyInformation::$proxies);
     if ($git_ret !== 0) {
-      Options::$csv_only ? error()
-                         : error("Could not download framework ".
-                                 $this->name."!\n");
+      error_and_exit("Could not download framework ".$this->name."!\n",
+                     Options::$csv_only);
     }
     // Checkout out our baseline test code via SHA
     $git_command = "git checkout";
@@ -875,9 +876,8 @@ abstract class Framework {
                            ProxyInformation::$proxies);
     if ($git_ret !== 0) {
       remove_dir_recursive($this->install_root);
-      Options::$csv_only ? error()
-                         : error("Could not checkout baseline code for ".
-                                 $this->name."! Removing framework!\n");
+      error_and_exit("Could not checkout baseline code for ". $this->name.
+                     "! Removing framework!\n", Options::$csv_only);
     }
   }
 
@@ -933,13 +933,12 @@ abstract class Framework {
             pcntl_wexitstatus($child_status) !== 0) {
           unlink($this->tests_file);
           unlink($this->test_files_file);
-          Options::$csv_only ? error()
-                             : error("Could not get tests for ".$this->name);
+          error_and_exit("Could not get tests for ".$this->name,
+                         Options::$csv_only);
         }
       } else {
-        Options::$csv_only ? error()
-                           : error("Could not open process tp get tests for "
-                                   .$this->name);
+        error_and_exit("Could not open process tp get tests for ".$this->name,
+                       Options::$csv_only);
       }
     }
 
@@ -974,7 +973,7 @@ abstract class Framework {
       // Check if we are already disabled first
       if (!file_exists($t.$suffix)) {
         if (!rename($t, $t.$suffix)) {
-          error("Could not disable ".$t. " in ".$this->name."!");
+          error_and_exit("Could not disable ".$t. " in ".$this->name."!");
         }
       }
       $updated_tests->add($t.$suffix);
@@ -1012,17 +1011,15 @@ abstract class Framework {
           // did not get the dependencies.
           if (any_dir_empty_one_level($fw_vendor_dir)) {
             remove_dir_recursive($this->install_root);
-            Options::$csv_only ? error()
-                               : error("Couldn't download dependencies for ".
-                                       $this->name." Removing framework. ".
-                                       "You can try the --zend option.\n");
+            error_and_exit("Couldn't download dependencies for ".$this->name.
+                           ". Removing framework. You can try the --zend ".
+                           "option.\n", Options::$csv_only);
           }
         } else { // No vendor directory. Dependencies could not have been gotten
           remove_dir_recursive($this->install_root);
-          Options::$csv_only ? error()
-                             : error("Couldn't download dependencies for ".
-                                     $this->name." Removing framework. ".
-                                     "You can try the --zend option.\n");
+          error_and_exit("Couldn't download dependencies for ".$this->name.
+                         ". Removing framework. You can try the --zend ".
+                         "option.\n", Options::$csv_only);
         }
       }
     }
@@ -1054,10 +1051,8 @@ abstract class Framework {
                              ProxyInformation::$proxies);
       if ($git_ret !== 0) {
         remove_dir_recursive($this->install_root);
-        Options::$csv_only ? error()
-                           : error("Could not get pull request code for ".
-                                   $this->name."!".
-                                   " Removing framework!\n");
+        error_and_exit("Could not get pull request code for ".$this->name."!".
+                       " Removing framework!\n", Options::$csv_only);
       }
       if ($dir_to_move !== null) {
         $mv_command = "mv ".$dir_to_move." ".$dir;
@@ -1765,7 +1760,8 @@ class Runner {
           if ($this->checkForWarnings($line)) {
             $this->error_information .= "PRETEST WARNING FOR ".
                                         $this->name.PHP_EOL.$line.PHP_EOL;
-            $this->error_information .= $this->getTestRunStr("RUN TEST FILE: ").
+            $this->error_information .= $this->getTestRunStr($this->name,
+                                                             "RUN TEST FILE: ").
                                         PHP_EOL;
           }
           continue;
@@ -1796,7 +1792,8 @@ class Runner {
             // HipHop Notice: Use of undefined constant DRIZZLE_CON_NONE
             $line = remove_string_from_text($line, __DIR__, "");
             $this->error_information .= PHP_EOL.$line.PHP_EOL;
-            $this->error_information .= $this->getTestRunStr("RUN TEST FILE: ").
+            $this->error_information .= $this->getTestRunStr($this->name,
+                                                             "RUN TEST FILE: ").
                                         PHP_EOL.PHP_EOL;
             continue;
           } else if ($this->checkForFatals($line)) {
@@ -1809,7 +1806,8 @@ class Runner {
             $line = remove_string_from_text($line, __DIR__, "");
             $this->fatal_information .= PHP_EOL.$this->name.
               PHP_EOL.$line.PHP_EOL.PHP_EOL;
-            $this->fatal_information .= $this->getTestRunStr("RUN TEST FILE: ").
+            $this->fatal_information .= $this->getTestRunStr($this->name,
+                                                             "RUN TEST FILE: ").
                                         PHP_EOL.PHP_EOL;
             break;
           }
@@ -1818,10 +1816,9 @@ class Runner {
       $ret_val = $this->finalize();
       $this->outputData();
     } else {
-      Options::$csv_only ? error()
-                         : error("Could not open process to run test ".
-                                 $this->name." for framework ".
-                                 $this->framework->getName());
+      error_and_exit("Could not open process to run test ".$this->name.
+                     " for framework ".$this->framework->getName(),
+                     Options::$csv_only);
     }
     chdir(__DIR__);
     return $ret_val;
@@ -1966,71 +1963,143 @@ class Runner {
     if (!$this->checkReadStream()) {
       return Statuses::TIMEOUT;
     }
-
-    $line = fgets($this->pipes[1]);
-    if ($line === false) {return null;} // No more data
-    $line = rtrim($line, PHP_EOL);
+    $line = stream_get_line($this->pipes[1], 4096, PHP_EOL);
+    // No more data
+    if ($line === false || $line === null || strlen($line) === 4096) {
+      return null;
+    }
     $line = remove_color_codes($line);
     return $line;
   }
 
+  // Post test information are error/failure information and the final passing
+  // stats for the test
   private function printPostTestInfo(): void {
-    // Don't print out any of the PHPUnit Patterns to the errors file, except
-    // for lines with stat numbers (or no tests executed, in which case we skip
-    // the test). Just print out pertinent error information
-    //
-    // There was 1 failure:  <---- Don't print
-    // 1) Assetic\Test\Asset\HttpAssetTest::testGetLastModified <---- print
-    // No tests executed! <----- print
-    $print_blanks = false; // Only print blanks after the first test is found
-    do
-    {
+    $prev_line = null;
+    $final_stats = null;
+    $matches = array();
+    $post_stat_fatal = false;
+
+    // Throw out any initial blank lines
+    do {
       $line = $this->getLine();
+    } while ($line === "" && $line !== null);
+
+    // Now that we have our first non-blank line, print out the test information
+    // until we have our final stats
+    while ($line !== null) {
+      // Don't print out any of the PHPUnit Patterns to the errors file.
+      // Just print out pertinent error information.
+      //
+      // There was 1 failure:  <---- Don't print
+      // <blank line>
+      // 1) Assetic\Test\Asset\HttpAssetTest::testGetLastModified <---- print
       if (preg_match(PHPUnitPatterns::$tests_ok_skipped_inc_pattern,
-                     $line) !== 1 &&
+                     $line) === 1 ||
           preg_match(PHPUnitPatterns::$num_errors_failures_pattern,
-                     $line) !== 1 &&
+                     $line) === 1 ||
           preg_match(PHPUnitPatterns::$failures_header_pattern,
-                     $line) !== 1 &&
+                     $line) === 1 ||
           preg_match(PHPUnitPatterns::$num_skips_inc_pattern,
-                     $line) !== 1 &&
-          $line !== null) {
-        if ($line === "" && !$print_blanks) {
-          continue;
-        }
-        $line = remove_string_from_text($line, __DIR__, "");
-        $this->error_information .= $line.PHP_EOL;
-        if (preg_match($this->framework->getTestNamePattern(), $line) === 1) {
-          $print_blanks = true;
-          $this->error_information .= PHP_EOL.
-                                      $this->getTestRunStr($line,
-                                                           "RUN TEST FILE: ").
-                                      PHP_EOL.PHP_EOL;
+                     $line) === 1) {
+        do {
+          // throw out any blank lines after these pattern
+          $line = $this->getLine();
+        } while ($line === "" && $line !== null);
+        continue;
+      }
+
+      // If we hit what we think is the final stats based on the pattern of the
+      // line, make sure this is the case. The final stats will generally be
+      // the last line before we hit null returned from line retrieval. The
+      // only cases where this would not be true is if, for some rare reason,
+      // stat information is part of the information provided for a
+      // given test error -- or -- we have hit a fatal at the very end of
+      // running PHPUnit. For that fatal case, we handle that a bit differently.
+      if (preg_match(PHPUnitPatterns::$tests_ok_pattern, $line) === 1 ||
+          preg_match(PHPUnitPatterns::$tests_failure_pattern, $line) === 1 ||
+          preg_match(PHPUnitPatterns::$no_tests_executed_pattern,
+                     $line) === 1) {
+        $prev_line = $line;
+        $line = $this->getLine();
+        if ($line === null) {
+          $final_stats = $prev_line;
+          break;
+        } else if ($line === "") {
+          // FIX ME: The above $line === null check is all I should need, but
+          // but getLine() is not cooperating. Not sure if getLine() problem or
+          // a PHPUnit output thing, but even when I am at the final stat line
+          // pattern, sometimes it takes me two getLine() calls to hit
+          // $line === null because I first get $line === "".
+          // So...save the current position. Read ahead. If null, we are done.
+          // Otherwise, print $prev_line, go back to where we were and the
+          // current blank line now stored in $line, will be printed down
+          // below
+          $curPos = ftell($this->pipes[1]);
+          if ($this->getLine() === null) {
+            $final_stats = $prev_line;
+            break;
+          } else {
+            $this->error_information .= $prev_line.PHP_EOL;
+            fseek($this->pipes[1], $curPos);
+          }
+        } else if ($this->checkForFatals($line) ||
+                   $this->checkForWarnings($line)) {
+        // Sometimes when PHPUnit is done printing its post test info, hhvm
+        // fatals. This is not good, but it currently happens nonetheless. Here
+        // is an example:
+        //
+        // FAILURES!
+        // Tests: 3, Assertions: 9, Failures: 2. <--- EXPECTED LAST LINE (STATS)
+        // Core dumped: Segmentation fault  <--- But, we can get this and below
+        // /home/joelm/bin/hhvm: line 1: 28417 Segmentation fault
+          $final_stats = $prev_line;
+          $post_stat_fatal = true;
+          break;
+        } else {
+          $this->error_information .= $prev_line.PHP_EOL;
         }
       }
-    } while ($line !== null);
 
-    // The last non-null line in the error file would have been the real stat
-    // information for pass percentage purposes. Take that out of the error
-    // string and put in the stat information string instead. Other stat like
-    // information may be in the error string as they are part of the test
-    // errors (PHPUnit does this).
-    $this->error_information = rtrim($this->error_information, PHP_EOL);
-    $pieces = explode(PHP_EOL, $this->error_information);
+      $this->error_information .= $line.PHP_EOL;
+      if (preg_match($this->framework->getTestNamePattern(), $line,
+                     $matches) === 1) {
+        $print_blanks = true;
+        $this->error_information .= PHP_EOL.
+                                    $this->getTestRunStr($matches[0],
+                                                         "RUN TEST FILE: ").
+                                    PHP_EOL.PHP_EOL;
+      }
+      $line = $this->getLine();
+    }
+
+    if ($post_stat_fatal) {
+      $this->fatal_information .= "POST-TEST FATAL/WARNING FOR ".
+                                  $this->name.PHP_EOL;
+      $this->fatal_information .= PHP_EOL.
+                                  $this->getTestRunStr($this->name,
+                                                       "RUN TEST FILE: ").
+                                  PHP_EOL.PHP_EOL;
+      while ($line !== null) {
+        $this->fatal_information .= $line.PHP_EOL;
+        $line = $this->getLine();
+      }
+      // Add a newline to the fatal file if we had a post-test fatal for better
+      // visual
+      $this->fatal_information .= PHP_EOL;
+    }
+
+    // If we have no final stats, assume some sort of fatal for this test.
+    // If we have "No tests executed", assume a skip
+    // Otherwise, print the final stats.
     $this->stat_information = $this->name.PHP_EOL;
-    $lastLine = array_pop($pieces);
-    // If no tests are executed, then mark as Statuses::SKIP
-    if (preg_match(PHPUnitPatterns::$no_tests_executed_pattern,
-                   $lastLine) === 1) {
+    if ($final_stats === null) {
+      $this->stat_information .= Statuses::FATAL.PHP_EOL;
+    } else if (preg_match(PHPUnitPatterns::$no_tests_executed_pattern,
+                          $final_stats) === 1) {
       $this->stat_information .= Statuses::SKIP.PHP_EOL;
     } else {
-      $this->stat_information .= $lastLine.PHP_EOL;
-    }
-    // There were no errors, just final stats if $pieces is now empty
-    if (count($pieces) > 0) {
-      $this->error_information = implode(PHP_EOL, $pieces).PHP_EOL;
-    } else {
-      $this->error_information = "";
+      $this->stat_information .= $final_stats.PHP_EOL;
     }
   }
 
@@ -2129,27 +2198,68 @@ class Runner {
     if (preg_match(PHPUnitPatterns::$hhvm_warning_pattern, $line) === 1) {
       return true;
     }
+    if (preg_match(PHPUnitPatterns::$phpunit_exception_with_hhvm_warning,
+                   $line) === 1) {
+      return true;
+    }
     return false;
   }
 
-  private function getTestRunStr(string $test = "", string $prologue = "",
+  private function getTestRunStr(string $test, string $prologue = "",
                                  string $epilogue = ""): string {
-    $test_run =  $prologue;
+    $test_run = $prologue;
     $test_run .= " cd ".$this->framework->getTestPath()." && ";
-    $test_run .= rtrim(str_replace("2>&1", "", $this->actual_test_command));
-    // If a framework is not being run in parallel (e.g., being run like normal
-    // phpunit for the entire framework), then the actual_test_command would
-    // not contain the individual test by default. So add it. Pear is a current
-    // example of this behavior. This way we have a more accurate command for
-    // users to run individual tests that have different statuses than
-    // expected.
-    if (!$this->framework->isParallel() && $test !== "") {
-      // Re-add __DIR__ if not there so we have a full test path to run
-      if (strpos($test, __DIR__) !== 0) {
-        $test = __DIR__."/".$test;
+    // If the test that is coming in to this function is an individual test,
+    // as opposed to a file, then we can use the --filter option to make the
+    // run string have even more specificity.
+    if (preg_match($this->framework->getTestNamePattern(), $test)) {
+      // If we are running this framework with individual test mode
+      // (e.g., --by-test), then --filter already exists. We also don't want to
+      // add --filter to .phpt style tests (e.g. Pear).
+      if (strpos($this->actual_test_command, "--filter") === false &&
+          strpos($test, ".phpt") === false) {
+        // The string after the last space in actual_test_command is
+        // the file that is run in phpunit. Remove the file and replace
+        // with --filter <individual test>. This will also get rid of any
+        // 2>&1 that may exist as well, which we do not want.
+        //
+        // e.g.,
+        // hhvm -v Eval.Jit=true phpunit --debug 'ConverterTest.php'
+        // to
+        // hhvm -v Eval.Jit=true phpunit --debug 'ConverterTest::MyTest'
+        $t = rtrim(str_replace("2>&1", "", $this->actual_test_command));
+        $lastspace = strrpos($t, ' ');
+        $t = substr($this->actual_test_command, 0, $lastspace);
+        // For --filter, the namespaces need to be separated by \\
+        $test = str_replace("\\", "\\\\", $test);
+        $t .= " --filter '".$test."'";
+        $test_run .= $t;
+      } else if (!$this->framework->isParallel()) {
+      // If a framework is not being run in parallel (e.g., it is being run like
+      // normal phpunit for the entire framework), then the actual_test_command
+      // would not contain the individual test by default. It is being run like
+      // this, for example, from the test root directory:
+      //
+      // hhvm phpunit
+      //
+      // Pear is a current example of this behavior.
+        $test_run .= rtrim(str_replace("2>&1", "", $this->actual_test_command));
+        // Re-add __DIR__ if not there so we have a full test path to run
+        if (strpos($test, __DIR__) !== 0) {
+          $test_run .= " ".__DIR__."/".$test;
+        } else {
+          $test_run .= " ".$test;
+        }
+
+      } else {
+        $test_run .= rtrim(str_replace("2>&1", "", $this->actual_test_command));
       }
-      $test_run .= " ".$test;
+    } else {
+    // $test is not a XXX::YYY style test, but is instead a file that is already
+    // part of the actual_test_comand
+      $test_run .= rtrim(str_replace("2>&1", "", $this->actual_test_command));
     }
+    $test_run .= $epilogue;
     return $test_run;
   }
 }
@@ -2160,8 +2270,8 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
   if (Options::$all) {
     // At this point, $framework_names should be empty if we are in --all mode.
     if (!($passed_frameworks->isEmpty())) {
-      error("Do not specify both --all and individual frameworks to run at ".
-            "same time.\n");
+      error_and_exit("Do not specify both --all and individual frameworks to ".
+                     "run at same time.\n");
     }
     // Test all frameworks
     $passed_frameworks = $available_frameworks->toVector();
@@ -2171,7 +2281,7 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
                                               $available_frameworks->toVector(),
                                               $passed_frameworks));
   } else if (count($passed_frameworks) === 0) {
-    error(usage());
+    error_and_exit(usage());
   }
 
   // So it is easier to keep tabs on our progress when running ps or something.
@@ -2191,7 +2301,7 @@ function prepare(Set $available_frameworks, Vector $passed_frameworks): Vector {
   }
 
   if (count($frameworks) === 0) {
-    error(usage());
+    error_and_exit(usage());
   }
 
   return $frameworks;
@@ -2212,7 +2322,7 @@ function fork_buckets(Traversable $data, Callable $callback): int {
   for ($i = 0; $i < $num_threads; $i++) {
     $pid = pcntl_fork();
     if ($pid === -1) {
-      error('Issues creating threads for data');
+      error_and_exit('Issues creating threads for data');
     } else if ($pid) {
       $children[] = $pid;
     } else {
@@ -2232,7 +2342,7 @@ function fork_buckets(Traversable $data, Callable $callback): int {
 
 function run_tests(Vector $frameworks): void {
   if (count($frameworks) === 0) {
-    error("No frameworks available on which to run tests");
+    error_and_exit("No frameworks available on which to run tests");
   }
 
   /***********************************
@@ -2290,7 +2400,7 @@ function run_tests(Vector $frameworks): void {
    ************************************/
   verbose("Beginning the unit tests.....\n", !Options::$csv_only);
   if (count($all_tests) === 0) {
-    error("No tests found to run");
+    error_and_exit("No tests found to run");
   }
 
   fork_buckets(
@@ -2394,7 +2504,7 @@ function get_unit_testing_infra_dependencies(): void {
     $ret = run_install($get_composer_command, __DIR__,
                        ProxyInformation::$proxies);
     if ($ret !== 0) {
-      error("Could not download composer. Script stopping\n");
+      error_and_exit("Could not download composer. Script stopping\n");
     }
   }
 
@@ -2427,7 +2537,7 @@ function get_unit_testing_infra_dependencies(): void {
     $ret = run_install($phpunit_install_command, __DIR__,
                        ProxyInformation::$proxies);
     if ($ret !== 0) {
-      error("Could not install PHPUnit. Script stopping\n");
+      error_and_exit("Could not install PHPUnit. Script stopping\n");
     }
   }
 
@@ -2688,7 +2798,8 @@ function get_runtime_build(bool $with_jit = true,
   // is already installed via a $PATH variable?
   if (Options::$zend_path !== null) {
     if (!file_exists(Options::$zend_path)) {
-      error("Zend build does not exists. Are you sure your path is right?");
+      error_and_exit("Zend build does not exists. Are you sure your path is ".
+                     "right?");
     }
     $build = Options::$zend_path;
   } else {
@@ -2717,7 +2828,7 @@ function get_runtime_build(bool $with_jit = true,
         $build .= "/php";
       }
     } else {
-      error("HHVM build doesn't exist. Did you build yet?");
+      error_and_exit("HHVM build doesn't exist. Did you build yet?");
     }
     if (!$use_php) {
       $repo_loc = tempnam('/tmp', 'framework-test');
@@ -2731,4 +2842,14 @@ function get_runtime_build(bool $with_jit = true,
     }
   }
   return $build;
+}
+
+function error_and_exit(string $message, bool $to_file = false): void {
+  if ($to_file) {
+    file_put_contents(Options::$script_errors_file, basename(__FILE__).": ".
+                      $message.PHP_EOL, FILE_APPEND);
+  } else {
+    echo basename(__FILE__).": ".$message.PHP_EOL;
+  }
+  exit(1);
 }

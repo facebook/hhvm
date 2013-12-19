@@ -33,7 +33,7 @@ namespace HPHP { namespace JIT {
 
 TRACE_SET_MOD(hhir);
 
-using HPHP::Transl::Location;
+using HPHP::JIT::Location;
 
 static bool wantPropSpecializedWarnings() {
   return !RuntimeOption::RepoAuthoritative ||
@@ -396,8 +396,8 @@ void HhbcTranslator::MInstrTranslator::emitMPre() {
     SSATmp* uninit = m_tb.genDefUninit();
 
     if (nLogicalRatchets() > 0) {
-      gen(StMem, m_misBase, cns(HHIR_MISOFF(tvRef)), uninit);
-      gen(StMem, m_misBase, cns(HHIR_MISOFF(tvRef2)), uninit);
+      gen(StMem, m_misBase, cns(MISOFF(tvRef)), uninit);
+      gen(StMem, m_misBase, cns(MISOFF(tvRef2)), uninit);
     }
   }
 
@@ -1233,25 +1233,25 @@ void HhbcTranslator::MInstrTranslator::emitRatchetRefs() {
 
   m_base = m_tb.cond(
     [&] (Block* taken) {
-      gen(CheckInitMem, taken, m_misBase, cns(HHIR_MISOFF(tvRef)));
+      gen(CheckInitMem, taken, m_misBase, cns(MISOFF(tvRef)));
     },
     [&] { // Next: tvRef isn't Uninit. Ratchet the refs
       // Clean up tvRef2 before overwriting it.
       if (ratchetInd() > 0) {
-        gen(DecRefMem, Type::Gen, m_misBase, cns(HHIR_MISOFF(tvRef2)));
+        gen(DecRefMem, Type::Gen, m_misBase, cns(MISOFF(tvRef2)));
       }
       // Copy tvRef to tvRef2. Use mmx at some point
       SSATmp* tvRef = gen(
-        LdMem, Type::Gen, m_misBase, cns(HHIR_MISOFF(tvRef))
+        LdMem, Type::Gen, m_misBase, cns(MISOFF(tvRef))
       );
-      gen(StMem, m_misBase, cns(HHIR_MISOFF(tvRef2)), tvRef);
+      gen(StMem, m_misBase, cns(MISOFF(tvRef2)), tvRef);
 
       // Reset tvRef.
-      gen(StMem, m_misBase, cns(HHIR_MISOFF(tvRef)), m_tb.genDefUninit());
+      gen(StMem, m_misBase, cns(MISOFF(tvRef)), m_tb.genDefUninit());
 
       // Adjust base pointer.
       assert(m_base->type().isPtr());
-      return gen(LdAddr, m_misBase, cns(HHIR_MISOFF(tvRef2)));
+      return gen(LdAddr, m_misBase, cns(MISOFF(tvRef2)));
     },
     [&] { // Taken: tvRef is Uninit. Do nothing.
       return m_base;
@@ -1548,7 +1548,7 @@ HELPER_TABLE(INCDEC)
 #undef INCDEC
 
 void HhbcTranslator::MInstrTranslator::emitIncDecProp() {
-  IncDecOp op = IncDecOp(m_ni.imm[0].u_OA);
+  IncDecOp op = static_cast<IncDecOp>(m_ni.imm[0].u_OA);
   SSATmp* key = getKey();
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue,
                                MInstrState*, IncDecOp);
@@ -2499,11 +2499,11 @@ static inline TypedValue setOpElemImpl(TypedValue* base, TypedValue keyVal,
   return ret;
 }
 
-#define OPELEM_TABLE(m, nm, op)                 \
+#define OPELEM_TABLE(m, nm, pfx, op)            \
   /* name          op */                        \
-  m(nm##op##ElemC, op)
+  m(nm##op##ElemC, pfx op)
 
-#define HELPER_TABLE(m, op) OPELEM_TABLE(m, setOp, SetOp##op)
+#define HELPER_TABLE(m, op) OPELEM_TABLE(m, setOp, SetOpOp::, op)
 #define SETOP(nm, ...)                                                  \
 TypedValue nm(TypedValue* base, TypedValue key, Cell val,               \
                      MInstrState* mis) {                                \
@@ -2538,7 +2538,7 @@ static inline TypedValue incDecElemImpl(TypedValue* base, TypedValue keyVal,
   return result;
 }
 
-#define HELPER_TABLE(m, op) OPELEM_TABLE(m, incDec, op)
+#define HELPER_TABLE(m, op) OPELEM_TABLE(m, incDec, IncDecOp::, op)
 #define INCDEC(nm, ...)                                                 \
 TypedValue nm(TypedValue* base, TypedValue key, MInstrState* mis) {     \
   return incDecElemImpl<__VA_ARGS__>(base, key, mis);                   \
@@ -2551,7 +2551,7 @@ INCDEC_OPS
 #undef INCDEC
 
 void HhbcTranslator::MInstrTranslator::emitIncDecElem() {
-  IncDecOp op = IncDecOp(m_ni.imm[0].u_OA);
+  IncDecOp op = static_cast<IncDecOp>(m_ni.imm[0].u_OA);
   SSATmp* key = getKey();
   typedef TypedValue (*OpFunc)(TypedValue*, TypedValue, MInstrState*);
 # define INCDEC_OP(op) HELPER_TABLE(FILL_ROW, op)
@@ -2718,7 +2718,7 @@ void HhbcTranslator::MInstrTranslator::emitMPost() {
   // or two such scratch objects, in the case of a Set the first of which will
   // always be tvRef2, in all other cases if only one scratch value is present
   // it will be stored in tvRef.
-  static const size_t refOffs[] = { HHIR_MISOFF(tvRef), HHIR_MISOFF(tvRef2) };
+  static const size_t refOffs[] = { MISOFF(tvRef), MISOFF(tvRef2) };
   for (unsigned i = 0; i < std::min(nLogicalRatchets(), 2U); ++i) {
     IRInstruction* inst = m_irf.gen(DecRefMem, m_marker, Type::Gen, m_misBase,
                                     cns(refOffs[m_failedSetBlock ? 1 - i : i]));

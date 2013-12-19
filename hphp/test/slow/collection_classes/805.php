@@ -1,6 +1,6 @@
 <?php
 
-$classes = array('Vector','Map','StableMap');
+$classes = array('HH\Vector','Map','StableMap');
 $i = 0;
 try {
   foreach ($classes as $cls) {

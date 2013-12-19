@@ -1,0 +1,8 @@
+float(0.23)
+float(-42)
+float(42)
+float(0.4)
+float(-0.4)
+float(1000000000000)
+float(-1000000000000)
+float(2.324)

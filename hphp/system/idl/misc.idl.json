@@ -156,30 +156,6 @@
             ]
         },
         {
-            "name": "get_browser",
-            "desc": "Attempts to determine the capabilities of the user's browser, by looking up the browser's information in the browscap.ini file.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant",
-                "desc": "The information is returned in an object or an array which will contain various data elements representing, for instance, the browser's major and minor version numbers and ID string; TRUE\/FALSE values for features such as frames, JavaScript, and cookies; and so forth.\n\nThe cookies value simply means that the browser itself is capable of accepting cookies and does not mean the user has enabled the browser to accept cookies or not. The only way to test if cookies are accepted is to set one with setcookie(), reload, and check for the value."
-            },
-            "args": [
-                {
-                    "name": "user_agent",
-                    "type": "String",
-                    "value": "null_string",
-                    "desc": "The User Agent to be analyzed. By default, the value of HTTP User-Agent header is used; however, you can alter this (i.e., look up another browser's info) by passing this parameter.\n\nYou can bypass this parameter with a NULL value."
-                },
-                {
-                    "name": "return_array",
-                    "type": "Boolean",
-                    "value": "false",
-                    "desc": "If set to TRUE, this function will return an array instead of an object."
-                }
-            ]
-        },
-        {
             "name": "__halt_compiler",
             "flags": [
             ],
@@ -187,25 +163,6 @@
                 "type": null
             },
             "args": [
-            ]
-        },
-        {
-            "name": "show_source",
-            "flags": [
-            ],
-            "return": {
-                "type": "Variant"
-            },
-            "args": [
-                {
-                    "name": "filename",
-                    "type": "String"
-                },
-                {
-                    "name": "ret",
-                    "type": "Boolean",
-                    "value": "false"
-                }
             ]
         },
         {
@@ -241,30 +198,6 @@
                     "name": "format",
                     "type": "String",
                     "desc": "The format string consists of format codes followed by an optional repeater argument. The repeater argument can be either an integer value or * for repeating to the end of the input data. For a, A, h, H the repeat count specifies how many characters of one data argument are taken, for @ it is the absolute position where to put the next data, for everything else the repeat count specifies how many data arguments are consumed and packed into the resulting binary string.\n\nCurrently implemented formats are: pack() format characters Code Description a NUL-padded string A SPACE-padded string h Hex string, low nibble first H Hex string, high nibble first csigned char C unsigned char s signed short (always 16 bit, machine byte order) S unsigned short (always 16 bit, machine byte order) n unsigned short (always 16 bit, big endian byte order) v unsigned short (always 16 bit, little endian byte order) i signed integer (machine dependent size and byte order) I unsigned integer (machine dependent size and byte order) l signed long (always 32 bit, machine byte order) L unsigned long (always 32 bit, machine byte order) N unsigned long (always 32 bit, big endian byte order) V unsigned long (always 32 bit, little endian byte order) f float (machine dependent size and representation) d double (machine dependent size and representation) x NUL byte X Back up one byte @ NUL-fill to absolute position"
-                }
-            ]
-        },
-        {
-            "name": "php_check_syntax",
-            "desc": "Performs a syntax (lint) check on the specified filename testing for scripting errors.\n\nThis is similar to using php -l from the commandline except that this function will execute (but not output) the checked filename.\n\nFor example, if a function is defined in filename, this defined function will be available to the file that executed php_check_syntax(), but output from filename will be suppressed.\n\nFor technical reasons, this function is deprecated and removed from PHP. Instead, use php -l somefile.php from the commandline.",
-            "flags": [
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "Returns TRUE if the lint check passed, and FALSE if the link check failed or if filename cannot be opened."
-            },
-            "args": [
-                {
-                    "name": "filename",
-                    "type": "String",
-                    "desc": "The name of the file being checked."
-                },
-                {
-                    "name": "error_message",
-                    "type": "Variant",
-                    "value": "null",
-                    "desc": "If the error_message parameter is used, it will contain the error message generated by the syntax check. error_message is passed by reference.",
-                    "ref": true
                 }
             ]
         },

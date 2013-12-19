@@ -1,0 +1,6 @@
+Strict Standards: Accessing static property test::$foo as non static in %s on line %d
+object(test)#%d (1) {
+  ["foo"]=>
+  int(5)
+}
+Done

@@ -1,0 +1,1 @@
+<?php if (!function_exists('date_add')) echo "skip: date_add() function not found!"; ?>

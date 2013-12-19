@@ -19,6 +19,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <unordered_set>
+#include <algorithm>
 
 #include "folly/Format.h"
 #include "folly/json.h"
@@ -707,9 +708,30 @@ PhpProp::PhpProp(const folly::dynamic& d, fbstring cls) :
 /////////////////////////////////////////////////////////////////////////////
 // PhpClass
 
+static fbstring toPhpName(fbstring idlName) {
+  fbstring phpName = idlName;
+  std::replace(phpName.begin(), phpName.end(), '_', '\\');
+  return phpName;
+}
+
+/*
+ * Strip an idl name of any namespaces.
+ */
+static fbstring toCppName(fbstring idlName) {
+  fbstring cppName;
+
+  size_t endNs = idlName.find_last_of("_");
+  cppName = (string::npos == endNs) ? idlName : idlName.substr(endNs + 1);
+  assert(!cppName.empty());
+
+  return cppName;
+}
+
 PhpClass::PhpClass(const folly::dynamic &c) :
   m_class(c),
-  m_name(c["name"].asString()),
+  m_idlName(c["name"].asString()),
+  m_phpName(toPhpName(m_idlName)),
+  m_cppName(toCppName(m_idlName)),
   m_flags(parseFlags(m_class["flags"])),
   m_desc(getFollyDynamicDefaultString(c, "desc", "")) {
 
@@ -718,7 +740,8 @@ PhpClass::PhpClass(const folly::dynamic &c) :
     auto ifaces = ifacesIt->second;
     if (!ifaces.isArray()) {
       throw std::logic_error(
-        folly::format("Class {0}.ifaces field must be an array", m_name).str()
+        folly::format("Class {0}.ifaces field must be an array",
+          m_idlName).str()
       );
     }
     for (auto &interface : ifaces) {
@@ -727,20 +750,20 @@ PhpClass::PhpClass(const folly::dynamic &c) :
   }
 
   for (auto const& f : c["funcs"]) {
-    PhpFunc func(f, m_name);
+    PhpFunc func(f, getCppName());
     m_methods.push_back(func);
   }
 
   if (c.find("consts") != c.items().end()) {
     for (auto const& cns : c["consts"]) {
-      PhpConst cons(cns, m_name);
+      PhpConst cons(cns, getCppName());
       m_constants.push_back(cons);
     }
   }
 
   if (c.find("properties") != c.items().end()) {
     for (auto const& prp : c["properties"]) {
-      PhpProp prop(prp, m_name);
+      PhpProp prop(prp, getCppName());
       m_properties.push_back(prop);
     }
   }

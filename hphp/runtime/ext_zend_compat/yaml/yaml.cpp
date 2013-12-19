@@ -695,7 +695,7 @@ PHP_FUNCTION(yaml_emit)
   zval *zcallbacks = { 0 };
   HashTable *callbacks = { 0 };
 
-  yaml_emitter_t emitter = { 0 };
+  yaml_emitter_t emitter = { YAML_NO_ERROR };
   smart_str str = { 0 };
 
   if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "z/|lla/",
@@ -756,7 +756,7 @@ PHP_FUNCTION(yaml_emit_file)
   zval *zcallbacks = { 0 };
   HashTable *callbacks = { 0 };
 
-  yaml_emitter_t emitter = { 0 };
+  yaml_emitter_t emitter = { YAML_NO_ERROR };
 
 #ifdef IS_UNICODE
   if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&z/|ssa/",
@@ -792,12 +792,12 @@ PHP_FUNCTION(yaml_emit_file)
 
   yaml_emitter_initialize(&emitter);
   yaml_emitter_set_output_file(&emitter, fp);
-  yaml_emitter_set_encoding(&emitter, (yaml_encoding_t) (int) encoding);
-  yaml_emitter_set_break(&emitter, (yaml_break_t) (int) linebreak);
+  yaml_emitter_set_encoding(&emitter, (yaml_encoding_t) (size_t) encoding);
+  yaml_emitter_set_break(&emitter, (yaml_break_t) (size_t) linebreak);
   yaml_emitter_set_canonical(&emitter, YAML_G(output_canonical));
   yaml_emitter_set_indent(&emitter, YAML_G(output_indent));
   yaml_emitter_set_width(&emitter, YAML_G(output_width));
-  yaml_emitter_set_unicode(&emitter, YAML_ANY_ENCODING != (int) encoding);
+  yaml_emitter_set_unicode(&emitter, YAML_ANY_ENCODING != (size_t) encoding);
 
   RETVAL_BOOL((SUCCESS == php_yaml_write_impl(
       &emitter, data, YAML_ANY_ENCODING, callbacks TSRMLS_CC)));

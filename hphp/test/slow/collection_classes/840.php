@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $m = StableMap {
 'd' => 4}

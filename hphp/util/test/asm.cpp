@@ -31,7 +31,7 @@
 
 #include "hphp/util/disasm.h"
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 typedef X64Assembler Asm;
 using namespace reg;

@@ -1,6 +1,7 @@
 *.errors
 *.fatals
 *.out
+*.round_trip.hhas
 *.repo
 *.stats
 *.testfiles

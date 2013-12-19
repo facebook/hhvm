@@ -17,6 +17,7 @@
 #include "hphp/runtime/server/fastcgi/fastcgi-transport.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-server.h"
 #include "hphp/runtime/server/transport.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "folly/io/IOBuf.h"
 #include "folly/io/IOBufQueue.h"
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
@@ -26,6 +27,8 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
 #include "folly/MoveWrapper.h"
+
+#include <boost/algorithm/string/predicate.hpp>
 
 using folly::IOBuf;
 using folly::IOBufQueue;
@@ -127,7 +130,48 @@ const char *FastCGITransport::getServerObject() {
   return m_serverObject.c_str();
 }
 
+std::string FastCGITransport::unmangleHeader(const std::string& name) {
+  if (!boost::istarts_with(name, "HTTP_")) {
+    return "";
+  }
+
+  std::string ret;
+  bool is_upper = true;
+  for (auto& c : name.substr(5)) {
+    if (c == '_') {
+      ret += '-';
+      is_upper = true;
+    } else {
+      ret += is_upper ? toupper(c) : tolower(c);
+      is_upper = false;
+    }
+  }
+  return ret;
+}
+
+std::string FastCGITransport::mangleHeader(const std::string& name) {
+  std::string ret;
+  for (auto& c : name) {
+    if (c == '-') {
+      ret += '_';
+    } else {
+      ret += toupper(c);
+    }
+  }
+  return "HTTP_" + ret;
+}
+
+/**
+ * Passed an HTTP header like "Cookie" or "Cache-Control"
+ **/
 std::string FastCGITransport::getHeader(const char *name) {
+  return getRawHeader(mangleHeader(name));
+}
+
+/**
+ * Passed a FastCGI mangled header like "HTTP_COOKIE" or "HTTP_CACHE_CONTROL"
+ **/
+std::string FastCGITransport::getRawHeader(const std::string& name) {
   if (m_requestHeaders.count(name) && m_requestHeaders[name].size()) {
     return m_requestHeaders[name][0];
   } else {
@@ -136,7 +180,12 @@ std::string FastCGITransport::getHeader(const char *name) {
 }
 
 void FastCGITransport::getHeaders(HeaderMap &headers) {
-  headers = m_requestHeaders;
+  for (auto& pair : m_requestHeaders) {
+    auto key = unmangleHeader(pair.first);
+    if (!key.empty()) {
+      headers[key] = pair.second;
+    }
+  }
 }
 
 void FastCGITransport::addHeaderImpl(const char *name, const char *value) {
@@ -257,8 +306,8 @@ void FastCGITransport::handleHeader(const std::string& key,
   } else if (compareKeys(key, k_remotePortKey)) {
     try {
       int remote_port = std::stoi(value);
-      if (remote_port < std::numeric_limits<typeof(m_remotePort)>::min() ||
-          remote_port > std::numeric_limits<typeof(m_remotePort)>::max()) {
+      if (remote_port < std::numeric_limits<decltype(m_remotePort)>::min() ||
+          remote_port > std::numeric_limits<decltype(m_remotePort)>::max()) {
         m_remotePort = 0;
       }
       m_remotePort = remote_port;
@@ -292,8 +341,8 @@ void FastCGITransport::handleHeader(const std::string& key,
 }
 
 void FastCGITransport::onHeadersComplete() {
-  m_serverObject = getHeader("SCRIPT_NAME");
-  std::string queryString = getHeader("QUERY_STRING");
+  m_serverObject = getRawHeader("SCRIPT_NAME");
+  std::string queryString = getRawHeader("QUERY_STRING");
   if (!queryString.empty()) {
     m_serverObject += "?" + queryString;
   }

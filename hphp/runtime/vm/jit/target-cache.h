@@ -154,8 +154,8 @@ struct MethodCache {
  * pdataRaw to pmethodCacheMissPath.
  */
 struct MethodCachePrimeData {
-  Transl::TCA smashImmAddr;
-  Transl::TCA retAddr;
+  JIT::TCA smashImmAddr;
+  JIT::TCA retAddr;
 };
 
 template<bool fatal>

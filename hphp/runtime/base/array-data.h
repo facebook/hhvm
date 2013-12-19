@@ -192,6 +192,7 @@ public:
    * Specific derived class type querying operators.
    */
   bool isPacked() const { return m_kind == kPackedKind; }
+  bool isMixed() const { return m_kind == kMixedKind; }
   bool isHphpArray() const {
     return m_kind <= kMixedKind;
     static_assert(kPackedKind < kMixedKind, "");

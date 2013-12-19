@@ -36,18 +36,24 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int modu
 	const zend_ini_entry *p = ini_entry;
 
 	while (p->name) {
-    HPHP::IniSetting::PFN_UPDATE_CALLBACK callback =
-      [](const HPHP::String& value, void *p) -> bool {
-        zend_ini_entry *entry = static_cast<zend_ini_entry*>(p);
-        // TODO Who is supposed to free this?
-        char* data = estrndup(value.data(), value.size());
-        auto ret = entry->on_modify(
-          entry, data, value.size(),
-          entry->mh_arg1, entry->mh_arg2, entry->mh_arg3, ZEND_INI_STAGE_STARTUP
-        );
-        return ret;
-      };
-    HPHP::IniSetting::Bind(p->name, p->value, callback, const_cast<zend_ini_entry*>(p));
+    auto updateCallback = [](const HPHP::String& value, void *p) -> bool {
+      zend_ini_entry *entry = static_cast<zend_ini_entry*>(p);
+      // TODO Who is supposed to free this?
+      char* data = estrndup(value.data(), value.size());
+      auto ret = entry->on_modify(
+        entry, data, value.size(),
+        entry->mh_arg1, entry->mh_arg2, entry->mh_arg3, ZEND_INI_STAGE_STARTUP
+      );
+      return ret;
+    };
+    auto getCallback = [](void *p) {
+      zend_ini_entry *entry = static_cast<zend_ini_entry*>(p);
+      return HPHP::String(entry->value, entry->value_length, HPHP::CopyString);
+    };
+    HPHP::IniSetting::Bind(
+        p->name, p->value,
+        updateCallback, getCallback,
+        const_cast<zend_ini_entry*>(p));
 		p++;
 	}
 	return SUCCESS;

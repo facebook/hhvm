@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 namespace HPHP {
-namespace Transl {
+namespace JIT {
 
 // Location --
 //   A user-program-visible, and bytecode ISA addressable place for a PHP

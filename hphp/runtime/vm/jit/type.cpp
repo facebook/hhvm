@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-using namespace HPHP::Transl;
 
 namespace HPHP {  namespace JIT {
 
@@ -98,6 +97,8 @@ Type Type::fromString(const std::string& str) {
 }
 
 bool Type::checkValid() const {
+  static_assert(sizeof(m_arrayKind) == 1,
+                "Type expects ArrayKind to be one byte");
   if (m_extra) {
     assert((!(m_bits & kAnyObj) || !(m_bits & kAnyArr)) &&
            "Conflicting specialization");

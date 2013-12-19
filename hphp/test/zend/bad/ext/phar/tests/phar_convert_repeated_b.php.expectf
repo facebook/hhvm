@@ -1,0 +1,29 @@
+=================== new PharData() ==================
+bool(false)
+bool(false)
+bool(true)
+string(0) ""
+NULL
+================= convertToTar() =====================
+bool(false)
+bool(true)
+bool(false)
+string(0) ""
+NULL
+================= convertToZip() =====================
+bool(false)
+bool(false)
+bool(true)
+string(0) ""
+NULL
+================= convertToPhar() ====================
+Cannot write out executable phar archive, phar is read-only
+================ convertToTar(GZ) ====================
+bool(false)
+bool(true)
+bool(false)
+string(0) ""
+NULL
+================= convertToPhar() ====================
+Cannot write out executable phar archive, phar is read-only
+===DONE===

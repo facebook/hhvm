@@ -1,0 +1,8 @@
+<?php
+if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+    die("skip Test is not valid for Windows");
+}
+if (!setlocale(LC_TIME, "POSIX")) {
+    die("skip Locale POSIX is required to run this test");
+}
+?>

@@ -134,7 +134,7 @@ TypePtr ModifierExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 ///////////////////////////////////////////////////////////////////////////////
 
 void ModifierExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printf("V:6:\"Vector\":%d:{", (int)m_modifiers.size());
+  cg.printf("V:9:\"HH\\Vector\":%d:{", (int)m_modifiers.size());
   for (unsigned int i = 0; i < m_modifiers.size(); i++) {
     cg.printObjectHeader("Modifier", 1);
     cg.printPropertyHeader("name");

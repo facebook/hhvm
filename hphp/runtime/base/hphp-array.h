@@ -28,10 +28,10 @@ class ArrayInit;
 struct MemoryProfile;
 
 class HphpArray : public ArrayData {
-  // Load factor scaler.  If S is the # of elements, C is the
+  // Load factor scaler. If S is the # of elements, C is the
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
   // So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
-  // 0.125 load factor.  Use powers of 2 to enable shift-divide.
+  // 0.875 load factor. Use powers of 2 to enable shift-divide.
   static const uint LoadScale = 4;
 
 public:

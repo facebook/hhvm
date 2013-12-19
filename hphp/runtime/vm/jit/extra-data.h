@@ -323,22 +323,22 @@ struct BCOffset : IRExtraData {
  * Translation IDs.
  */
 struct TransIDData : IRExtraData {
-  explicit TransIDData(Transl::TransID transId) : transId(transId) {}
+  explicit TransIDData(JIT::TransID transId) : transId(transId) {}
   std::string show() const { return folly::to<std::string>(transId); }
-  Transl::TransID transId;
+  JIT::TransID transId;
 };
 
 /*
  * Information needed to generate a REQ_RETRANSLATE_OPT service request.
  */
 struct ReqRetransOptData : IRExtraData {
-  explicit ReqRetransOptData(Transl::TransID transId, Offset offset)
+  explicit ReqRetransOptData(JIT::TransID transId, Offset offset)
       : transId(transId)
       , offset(offset) {}
   std::string show() const {
     return folly::to<std::string>(transId, ", ", offset);
   }
-  Transl::TransID transId;
+  JIT::TransID transId;
   Offset offset;
 };
 
@@ -398,6 +398,18 @@ struct CallData : IRExtraData {
   }
 
   bool destroyLocals;
+};
+
+struct InGeneratorData : IRExtraData {
+  explicit InGeneratorData(bool inGenerator)
+    : inGenerator(inGenerator)
+  {}
+
+  std::string show() const {
+    return inGenerator ? "in generator" : "";
+  }
+
+  bool inGenerator;
 };
 
 /*
@@ -761,6 +773,8 @@ X(IncProfCounter,               TransIDData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallData);
 X(CallArray,                    CallArrayData);
+X(RetCtrl,                      InGeneratorData);
+X(FunctionExitSurpriseHook,     InGeneratorData);
 X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);
 X(LookupClsMethodCache,         ClsMethodData);

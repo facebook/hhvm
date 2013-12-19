@@ -349,7 +349,7 @@ void StaticMemberExpression::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("propertyExpression");
   }
   m_exp->outputCodeModel(cg);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

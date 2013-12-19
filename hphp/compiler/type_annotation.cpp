@@ -206,7 +206,7 @@ void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
   }
   if (numTypeArgs > 0) {
     cg.printPropertyHeader("typeArguments");
-    cg.printf("V:6:\"Vector\":%d:{", numTypeArgs);
+    cg.printf("V:9:\"HH\\Vector\":%d:{", numTypeArgs);
     while (typeArgsElem != nullptr) {
       typeArgsElem->outputCodeModel(cg);
       typeArgsElem = typeArgsElem->m_typeList;

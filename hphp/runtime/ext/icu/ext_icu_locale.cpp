@@ -565,7 +565,7 @@ static String HHVM_STATIC_METHOD(Locale, lookup, CArrRef langtag,
 }
 
 static Variant get_private_subtags(const String& locname) {
-  if (locname.empty()) return uninit_null;
+  if (locname.empty()) return uninit_null();
   String locale(locname);
   int pos;
   while ((pos = singleton_pos(locale)) >= 0) {

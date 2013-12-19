@@ -77,10 +77,6 @@ Array f_getallheaders() {
   return f_apache_request_headers();
 }
 
-bool f_virtual(const String& filename) {
-  throw NotSupportedException(__func__, "apache is not in use");
-}
-
 const StaticString
   s_restart_time("restart_time"),
   s_max_clients("max_clients"),
@@ -110,10 +106,6 @@ Variant f_apache_get_scoreboard() {
   ArrayInit ret(1);
   ret.set(s_child_status, child_status);
   return ret.create();
-}
-
-Variant f_apache_get_rewrite_rules() {
-  throw NotSupportedException(__func__, "apache is not in use");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

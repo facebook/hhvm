@@ -78,6 +78,7 @@ public:
   static bool AssertWarning;
   static int NoticeFrequency; // output 1 out of NoticeFrequency notices
   static int WarningFrequency;
+  static int RaiseDebuggingFrequency;
   static int64_t SerializationSizeLimit;
   static int64_t StringOffsetLimit;
 
@@ -357,6 +358,7 @@ public:
   F(uint32_t, VMInitialGlobalTableSize,                                 \
     kEvalVMInitialGlobalTableSizeDefault)                               \
   F(bool, Jit,                         evalJitDefault())                \
+  F(bool, SimulateARM,                 simulateARMDefault())            \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitAHotSize,             4 << 20)                         \
   F(uint64_t, JitASize,                60 << 20)                        \
@@ -387,6 +389,7 @@ public:
   F(bool, JitTypePrediction,           true)                            \
   F(int32_t, JitStressTypePredPercent, 0)                               \
   F(uint32_t, JitWarmupRequests,       kDefaultWarmupRequests)          \
+  F(uint32_t, JitProfileRequests,      kDefaultProfileRequests)         \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitStressLease,              false)                           \
@@ -415,23 +418,24 @@ public:
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
   /* Register allocation flags */                                       \
-  F(bool, HHIRXls,                     false)                           \
+  F(bool, HHIRXls,                     xlsDefault())                    \
   F(bool, HHIREnableCalleeSavedOpt,    true)                            \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
-  F(bool, HHIRAllocXMMRegs,            true)                            \
+  F(bool, HHIRAllocSIMDRegs,           true)                            \
   /* Region compiler flags */                                           \
-  F(string,   JitRegionSelector,       regionSelectorDefault())         \
-  F(bool,     JitPGO,                  false)                           \
+  F(bool,     JitPGO,                  pgoDefault())                    \
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
   F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
   F(bool,     JitPGOUsePostConditions, true)                            \
+  F(string,   JitRegionSelector,       regionSelectorDefault())         \
   F(uint32_t, HotFuncThreshold,        10)                              \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \
   F(bool, HHBCRelaxGuards,             hhbcRelaxGuardsDefault())        \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
+  F(bool, DumpHhas,                    false)                           \
   F(bool, DumpTC,                      false)                           \
   F(bool, DumpTCAnchors,               false)                           \
   F(bool, DumpAst,                     false)                           \
@@ -448,7 +452,6 @@ public:
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
-  F(bool, SimulateARM,                 simulateARMDefault())            \
   F(bool, DecRefUsePlainDecl,          true)                            \
   F(bool, DecRefUsePlainDeclWithDestroy,true)                           \
   F(bool, DecRefUseScratch,            false)                           \

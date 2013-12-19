@@ -1,0 +1,7 @@
+<?php
+echo mb_internal_encoding()."\n";
+
+$ngchars = array('Ç½','É½','»½','¥½');
+$str = '¸µÏ½ÍÜ»½Ðò¼Òº¾µ½É½¸½Ç½ÎÏÉ½¼¨±½ÌÈÄäË½ÎÏÅ½ÉÕ¹½Ê¸·½»ÒÍ½ÃÎñ½Æ¬¥½¥Õ¥¡¡¼';
+var_dump(strlen($str));
+var_dump(mb_strlen($str));

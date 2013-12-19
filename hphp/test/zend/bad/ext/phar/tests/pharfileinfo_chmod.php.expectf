@@ -1,0 +1,3 @@
+Phar entry "a" is a temporary directory (not an actual entry in the archive), cannot chmod
+HipHop Warning: %s
+===DONE===

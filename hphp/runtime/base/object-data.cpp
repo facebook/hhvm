@@ -121,6 +121,8 @@ bool ObjectData::o_instanceof(const String& s) const {
 }
 
 bool ObjectData::o_toBooleanImpl() const noexcept {
+  // Note: if you add more cases here, hhbbc/class-util.cpp also needs
+  // to be changed.
   if (isCollection()) {
     if (m_cls == c_Vector::classof()) {
       return c_Vector::ToBool(this);
@@ -132,6 +134,8 @@ bool ObjectData::o_toBooleanImpl() const noexcept {
       return c_Set::ToBool(this);
     } else if (m_cls == c_FrozenVector::classof()) {
       return c_FrozenVector::ToBool(this);
+    } else if (m_cls == c_FrozenSet::classof()) {
+      return c_FrozenSet::ToBool(this);
     } else {
       always_assert(false);
     }
@@ -790,7 +794,7 @@ void ObjectData::dump() const {
 }
 
 ObjectData* ObjectData::clone() {
-  if (getAttribute(HasCppClone)) {
+  if (getAttribute(HasClone) && getAttribute(IsCppBuiltin)) {
     if (isCollection()) {
       if (m_cls == c_Vector::classof()) {
         return c_Vector::Clone(this);
@@ -804,6 +808,10 @@ ObjectData* ObjectData::clone() {
         return c_Pair::Clone(this);
       } else if (m_cls == c_FrozenVector::classof()) {
         return c_FrozenVector::Clone(this);
+      } else if (m_cls == c_FrozenSet::classof()) {
+        return c_FrozenSet::Clone(this);
+      } else {
+        always_assert(false);
       }
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);
@@ -1364,7 +1372,7 @@ void ObjectData::setProp(Class* ctx,
 }
 
 TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
-                                  unsigned char op, const StringData* key,
+                                  SetOpOp op, const StringData* key,
                                   Cell* val) {
   bool visible, accessible, unset;
   auto propVal = getProp(ctx, key, visible, accessible, unset);
@@ -1454,7 +1462,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
 template <bool setResult>
 void ObjectData::incDecProp(TypedValue& tvRef,
                             Class* ctx,
-                            unsigned char op,
+                            IncDecOp op,
                             const StringData* key,
                             TypedValue& dest) {
   bool visible, accessible, unset;
@@ -1529,12 +1537,12 @@ void ObjectData::incDecProp(TypedValue& tvRef,
 
 template void ObjectData::incDecProp<true>(TypedValue&,
                                            Class*,
-                                           unsigned char,
+                                           IncDecOp,
                                            const StringData*,
                                            TypedValue&);
 template void ObjectData::incDecProp<false>(TypedValue&,
                                             Class*,
-                                            unsigned char,
+                                            IncDecOp,
                                             const StringData*,
                                             TypedValue&);
 
@@ -1716,16 +1724,22 @@ void ObjectData::cloneSet(ObjectData* clone) {
 }
 
 ObjectData* ObjectData::cloneImpl() {
-  auto const hasCloneBit = getAttribute(HasClone);
-
   ObjectData* obj;
   Object o = obj = ObjectData::newInstance(m_cls);
   cloneSet(obj);
 
+  auto const hasCloneBit = getAttribute(HasClone);
+
   if (!hasCloneBit) return o.detach();
 
   auto const method = obj->m_cls->lookupMethod(s_clone.get());
+
+  // PHP classes that inherit from cpp builtins that have special clone
+  // functionality *may* also define a __clone method, but it's totally
+  // fine if a __clone doesn't exist.
+  if (!method && getAttribute(IsCppBuiltin)) return o.detach();
   assert(method);
+
   TypedValue tv;
   tvWriteNull(&tv);
   g_vmContext->invokeFuncFew(&tv, method, obj);

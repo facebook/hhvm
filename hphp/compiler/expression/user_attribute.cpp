@@ -79,7 +79,7 @@ void UserAttribute::outputCodeModel(CodeGenerator &cg) {
       assert(false);
     }
   }
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

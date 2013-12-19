@@ -58,26 +58,18 @@ class CPURegister {
     kInvalid = 0,
     kRegister,
     kFPRegister,
-    kNoRegister
   };
 
-  CPURegister() : code_(0), size_(0), type_(kNoRegister) {
-    assert(!IsValid());
-    assert(IsNone());
-  }
+  constexpr CPURegister() : code_(0), size_(0), type_(kInvalid) {}
 
-  CPURegister(unsigned code, unsigned size, RegisterType type)
-      : code_(code), size_(size), type_(type) {
-    assert(IsValidOrNone());
-  }
+  constexpr CPURegister(unsigned code, unsigned size, RegisterType type)
+      : code_(code), size_(size), type_(type) {}
 
-  unsigned code() const {
-    assert(IsValid());
+  constexpr unsigned code() const {
     return code_;
   }
 
-  RegisterType type() const {
-    assert(IsValidOrNone());
+  constexpr RegisterType type() const {
     return type_;
   }
 
@@ -86,8 +78,7 @@ class CPURegister {
     return IsValid() ? (static_cast<RegList>(1) << code_) : 0;
   }
 
-  unsigned size() const {
-    assert(IsValid());
+  constexpr unsigned size() const {
     return size_;
   }
 
@@ -113,13 +104,7 @@ class CPURegister {
   }
 
   bool IsValid() const {
-    if (IsValidRegister() || IsValidFPRegister()) {
-      assert(!IsNone());
-      return true;
-    } else {
-      assert(IsNone());
-      return false;
-    }
+    return IsValidRegister() || IsValidFPRegister();
   }
 
   bool IsValidRegister() const {
@@ -134,16 +119,7 @@ class CPURegister {
            (code_ < kNumberOfFPRegisters);
   }
 
-  bool IsNone() const {
-    // kNoRegister types should always have size 0 and code 0.
-    assert((type_ != kNoRegister) || (code_ == 0));
-    assert((type_ != kNoRegister) || (size_ == 0));
-
-    return type_ == kNoRegister;
-  }
-
   bool Is(const CPURegister& other) const {
-    assert(IsValidOrNone() && other.IsValidOrNone());
     return (code_ == other.code_) && (size_ == other.size_) &&
            (type_ == other.type_);
   }
@@ -179,27 +155,20 @@ class CPURegister {
   unsigned code_;
   unsigned size_;
   RegisterType type_;
-
- private:
-  bool IsValidOrNone() const {
-    return IsValid() || IsNone();
-  }
 };
 
 
 class Register : public CPURegister {
  public:
-  explicit Register() : CPURegister() {}
-  inline explicit Register(const CPURegister& other)
+  constexpr explicit Register() : CPURegister() {}
+  constexpr explicit Register(const CPURegister& other)
       : CPURegister(other.code(), other.size(), other.type()) {
-    assert(IsValidRegister());
   }
-  explicit Register(unsigned code, unsigned size)
+  constexpr explicit Register(unsigned code, unsigned size)
       : CPURegister(code, size, kRegister) {}
 
   bool IsValid() const {
-    assert(IsRegister() || IsNone());
-    return IsValidRegister();
+    return CPURegister::IsValid() && IsRegister();
   }
 
   MemOperand operator[](const ptrdiff_t offset) const;
@@ -220,17 +189,15 @@ class Register : public CPURegister {
 
 class FPRegister : public CPURegister {
  public:
-  inline FPRegister() : CPURegister() {}
-  inline explicit FPRegister(const CPURegister& other)
+  constexpr FPRegister() : CPURegister() {}
+  constexpr explicit FPRegister(const CPURegister& other)
       : CPURegister(other.code(), other.size(), other.type()) {
-    assert(IsValidFPRegister());
   }
-  inline FPRegister(unsigned code, unsigned size)
+  constexpr FPRegister(unsigned code, unsigned size)
       : CPURegister(code, size, kFPRegister) {}
 
   bool IsValid() const {
-    assert(IsFPRegister() || IsNone());
-    return IsValidFPRegister();
+    return CPURegister::IsValid()  && IsFPRegister();
   }
 
   static const FPRegister& SRegFromCode(unsigned code);
@@ -654,7 +621,7 @@ class Assembler {
     return UpdateAndGetByteOffsetTo(label) >> kInstructionSizeLog2;
   }
 
-  HPHP::Transl::TCA frontier() const {
+  HPHP::JIT::TCA frontier() const {
     return cb_.frontier();
   }
 
@@ -1351,12 +1318,20 @@ class Assembler {
   // disallow the zero register.
   static Instr RdSP(Register rd) {
     assert(!rd.IsZero());
-    return (rd.code() & kRegCodeMask) << Rd_offset;
+    if (rd.code() == kSPRegInternalCode) {
+      return kSPRegCode << Rd_offset;
+    } else {
+      return rd.code() << Rd_offset;
+    }
   }
 
   static Instr RnSP(Register rn) {
     assert(!rn.IsZero());
-    return (rn.code() & kRegCodeMask) << Rn_offset;
+    if (rn.code() == kSPRegInternalCode) {
+      return kSPRegCode << Rn_offset;
+    } else {
+      return rn.code() << Rn_offset;
+    }
   }
 
   // Flags encoding.

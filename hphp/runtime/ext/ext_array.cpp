@@ -62,8 +62,8 @@ const int64_t k_UCOL_STRENGTH = UCOL_STRENGTH;
 const int64_t k_UCOL_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
 const int64_t k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
 
-using HPHP::Transl::CallerFrame;
-using HPHP::Transl::EagerCallerFrame;
+using HPHP::JIT::CallerFrame;
+using HPHP::JIT::EagerCallerFrame;
 
 #define getCheckedArrayRet(input, fail)                           \
   auto const cell_##input = static_cast<CVarRef>(input).asCell(); \
@@ -507,9 +507,6 @@ Variant f_array_pop(VRefParam array) {
 
 Variant f_array_product(CVarRef array) {
   getCheckedArray(array);
-  if (arr_array.empty()) {
-    return 0; // to be consistent with PHP
-  }
   int64_t i;
   double d;
   if (ArrayUtil::Product(arr_array, &i, &d) == KindOfInt64) {

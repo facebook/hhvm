@@ -6,7 +6,7 @@ object(__PHP_Unserializable_Class)#2 (1) {
   ["__PHP_Unserializable_Class_Name"]=>
   string(9) "XMLReader"
 }
-array(27) {
+array(26) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -46,20 +46,18 @@ array(27) {
   [18]=>
   string(7) "isValid"
   [19]=>
-  string(6) "expand"
-  [20]=>
   string(5) "__get"
-  [21]=>
+  [20]=>
   string(17) "getParserProperty"
-  [22]=>
+  [21]=>
   string(15) "lookupNamespace"
-  [23]=>
+  [22]=>
   string(9) "setSchema"
-  [24]=>
+  [23]=>
   string(17) "setParserProperty"
-  [25]=>
+  [24]=>
   string(16) "setRelaxNGSchema"
-  [26]=>
+  [25]=>
   string(22) "setRelaxNGSchemaSource"
 }
 ================
@@ -73,7 +71,7 @@ object(__PHP_Unserializable_Class)#4 (1) {
   ["__PHP_Unserializable_Class_Name"]=>
   string(11) "A_XMLReader"
 }
-array(27) {
+array(26) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -113,19 +111,17 @@ array(27) {
   [18]=>
   string(7) "isValid"
   [19]=>
-  string(6) "expand"
-  [20]=>
   string(5) "__get"
-  [21]=>
+  [20]=>
   string(17) "getParserProperty"
-  [22]=>
+  [21]=>
   string(15) "lookupNamespace"
-  [23]=>
+  [22]=>
   string(9) "setSchema"
-  [24]=>
+  [23]=>
   string(17) "setParserProperty"
-  [25]=>
+  [24]=>
   string(16) "setRelaxNGSchema"
-  [26]=>
+  [25]=>
   string(22) "setRelaxNGSchemaSource"
 }

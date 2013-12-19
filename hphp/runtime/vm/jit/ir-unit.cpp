@@ -15,12 +15,22 @@
 */
 
 #include "hphp/runtime/vm/jit/ir-unit.h"
+
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-trace.h"
 
 namespace HPHP {  namespace JIT {
 
 TRACE_SET_MOD(hhir);
+
+IRUnit::IRUnit(Offset initialBcOffset)
+  : m_nextBlockId(0)
+  , m_nextOpndId(0)
+  , m_nextInstId(0)
+  , m_bcOff(initialBcOffset)
+  , m_main(new (m_arena) IRTrace(*this, defBlock(), 8))
+{
+}
 
 IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
   IRInstruction inst(DefLabel, marker);
@@ -56,14 +66,6 @@ SSATmp* IRUnit::findConst(ConstData& cdata, Type ctype) {
     return tmp;
   }
   return m_constTable.insert(cloneInstruction(&inst)->dst());
-}
-
-Block* IRUnit::makeMain(uint32_t bcOff) {
-  assert(!m_main);
-  auto entry = defBlock();
-  m_bcOff = bcOff;
-  m_main = new (m_arena) IRTrace(*this, entry);
-  return entry;
 }
 
 Block* IRUnit::addExit() {

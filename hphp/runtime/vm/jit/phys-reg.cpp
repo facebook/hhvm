@@ -15,16 +15,30 @@
 */
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
+
+int PhysReg::kNumGP = 0;
+int PhysReg::kNumSIMD = 0;
 
 PhysRegSaverParity::PhysRegSaverParity(int parity, X64Assembler& as,
                                        RegSet regs)
     : m_as(as)
     , m_regs(regs)
-    , m_adjust((parity & 0x1) == (regs.size() & 0x1) ? 8 : 0)
 {
-  m_regs.forEach([&] (PhysReg pr) {
+  auto xmm = regs & kXMMRegs;
+  auto gpr = regs - xmm;
+  m_adjust = (parity & 0x1) == (gpr.size() & 0x1) ? 8 : 0;
+  if (!xmm.empty()) {
+    m_as.      subq   (16 * xmm.size(), reg::rsp);
+    int offset = 0;
+    xmm.forEach([&](PhysReg pr) {
+      m_as.    movdqu (pr, reg::rsp[offset]);
+      offset += 16;
+    });
+  }
+  gpr.forEach([&] (PhysReg pr) {
     m_as.    push   (pr);
   });
   if (m_adjust) {
@@ -42,9 +56,19 @@ PhysRegSaverParity::~PhysRegSaverParity() {
 }
 
 void PhysRegSaverParity::emitPops(X64Assembler& as, RegSet regs) {
-  regs.forEachR([&] (PhysReg pr) {
+  auto xmm = regs & kXMMRegs;
+  auto gpr = regs - xmm;
+  gpr.forEachR([&] (PhysReg pr) {
     as.    pop    (pr);
   });
+  if (!xmm.empty()) {
+    int offset = 0;
+    xmm.forEach([&](PhysReg pr) {
+      as.  movdqu (reg::rsp[offset], pr);
+      offset += 16;
+    });
+    as.    addq   (offset, reg::rsp);
+  }
 }
 
 int PhysRegSaverParity::rspAdjustment() const {

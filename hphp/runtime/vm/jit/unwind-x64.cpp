@@ -37,7 +37,7 @@ extern "C" void __deregister_frame(void*);
 
 TRACE_SET_MOD(unwind);
 
-namespace HPHP { namespace Transl {
+namespace HPHP { namespace JIT {
 
 RDS::Link<UnwindRDS> unwindRdsInfo(RDS::kInvalidHandle);
 

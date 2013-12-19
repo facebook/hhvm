@@ -1,0 +1,2 @@
+pdo.dsn.mysql cannot be accessed through ini_get_all()/ini_get()
+done!

@@ -1,0 +1,5 @@
+<?php
+	if (!function_exists('money_format')) {
+		die("SKIP money_format - not supported\n");
+	}
+?>

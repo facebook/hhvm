@@ -65,7 +65,7 @@ array(3) {
 }
 
 toVector...
-object(Vector)#6 (3) {
+object(HH\Vector)#6 (3) {
   [0]=>
   int(1)
   [1]=>

@@ -33,14 +33,12 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/srckey.h"
 
-using HPHP::Transl::NormalizedInstruction;
+using HPHP::JIT::NormalizedInstruction;
 
 namespace HPHP {
-namespace Transl { struct PropInfo; }
+namespace JIT { struct PropInfo; }
 namespace JIT {
 
-using Transl::Location;
-using Transl::RuntimeType;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -315,6 +313,8 @@ struct HhbcTranslator {
   void emitAKExists();
   void emitAGetC();
   void emitAGetL(int localId);
+  void emitIsScalarL(int id);
+  void emitIsScalarC();
   void emitVerifyParamType(int32_t paramId);
   void emitInstanceOfD(int classNameStrId);
   void emitInstanceOf();
@@ -453,8 +453,8 @@ struct HhbcTranslator {
   void emitStrlen();
   void emitIncStat(int32_t counter, int32_t value, bool force = false);
   void emitIncTransCounter();
-  void emitIncProfCounter(Transl::TransID transId);
-  void emitCheckCold(Transl::TransID transId);
+  void emitIncProfCounter(JIT::TransID transId);
+  void emitCheckCold(JIT::TransID transId);
   void emitRB(Trace::RingBufferType t, SrcKey sk);
   void emitRB(Trace::RingBufferType t, std::string msg) {
     emitRB(t, makeStaticString(msg));
@@ -497,7 +497,7 @@ private:
     void emitIntermediateOp();
     void emitProp();
     void emitPropGeneric();
-    void emitPropSpecialized(const MInstrAttr mia, Transl::PropInfo propInfo);
+    void emitPropSpecialized(const MInstrAttr mia, JIT::PropInfo propInfo);
     void emitElem();
     void emitElemArray(SSATmp* key, bool warn);
     void emitNewElem();
@@ -582,7 +582,7 @@ private:
     void    constrainBase(TypeConstraint tc, SSATmp* value = nullptr);
     SSATmp* checkInitProp(SSATmp* baseAsObj,
                           SSATmp* propAddr,
-                          Transl::PropInfo propOffset,
+                          JIT::PropInfo propOffset,
                           bool warn,
                           bool define);
     Class* contextClass() const;
@@ -741,7 +741,7 @@ private:
   SSATmp* emitMIterInitCommon(int offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
   void emitJmpSurpriseCheck();
-  void emitRetSurpriseCheck(SSATmp* retVal);
+  void emitRetSurpriseCheck(SSATmp* retVal, bool inGenerator);
   void classExistsImpl(ClassKind);
 
   Type interpOutputType(const NormalizedInstruction&,
@@ -779,7 +779,7 @@ private: // Exit trace creation routines.
    * only in slow paths.
    */
   Block* makeExitSlow();
-  Block* makeExitOpt(Transl::TransID transId);
+  Block* makeExitOpt(JIT::TransID transId);
 
   Block* makeCatch(std::vector<SSATmp*> extraSpill =
                    std::vector<SSATmp*>());

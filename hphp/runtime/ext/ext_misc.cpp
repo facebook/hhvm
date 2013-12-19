@@ -33,7 +33,7 @@
 
 namespace HPHP {
 
-using Transl::CallerFrame;
+using JIT::CallerFrame;
 
 // Make sure "tokenizer" gets added to the list of extensions
 IMPLEMENT_DEFAULT_EXTENSION(tokenizer);
@@ -167,17 +167,8 @@ Variant f_exit(CVarRef status /* = null_variant */) {
   throw ExitException(status.toInt32());
 }
 
-Variant f_get_browser(const String& user_agent /* = null_string */,
-                      bool return_array /* = false */) {
-  throw NotSupportedException(__func__, "bad idea");
-}
-
 void f___halt_compiler() {
   // do nothing
-}
-
-Variant f_show_source(const String& filename, bool ret /* = false */) {
-  throw NotSupportedException(__func__, "PHP specific");
 }
 
 int64_t f_ignore_user_abort(bool setting /* = false */) {
@@ -186,10 +177,6 @@ int64_t f_ignore_user_abort(bool setting /* = false */) {
 
 Variant f_pack(int _argc, const String& format, CArrRef _argv /* = null_array */) {
   return ZendPack().pack(format, _argv);
-}
-
-bool f_php_check_syntax(const String& filename, VRefParam error_message /* = null */) {
-  throw NotSupportedException(__func__, "PHP specific");
 }
 
 int64_t f_sleep(int seconds) {

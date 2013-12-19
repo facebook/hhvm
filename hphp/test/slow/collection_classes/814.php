@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function cmp($x, $y) {
   if ($x < $y) return 1;

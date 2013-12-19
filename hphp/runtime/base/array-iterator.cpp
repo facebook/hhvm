@@ -125,6 +125,11 @@ void ArrayIter::FrozenVectorInit(ArrayIter* iter, ObjectData* obj) {
   iter->m_version = vec->getVersion();
   iter->m_pos = 0;
 }
+void ArrayIter::FrozenSetInit(ArrayIter* iter, ObjectData* obj) {
+  auto st = static_cast<c_FrozenSet*>(obj);
+  iter->m_version = st->getVersion();
+  iter->m_pos = st->iter_begin();
+}
 void ArrayIter::IteratorObjInit(ArrayIter* iter, ObjectData* obj) {
   assert(obj->instanceof(SystemLib::s_IteratorClass));
   try {
@@ -144,7 +149,7 @@ void ArrayIter::IteratorObjInit(ArrayIter* iter, ObjectData* obj) {
   }
 }
 
-const ArrayIter::InitFuncPtr ArrayIter::initFuncTable[7] = {
+const ArrayIter::InitFuncPtr ArrayIter::initFuncTable[8] = {
   &ArrayIter::IteratorObjInit,
   &ArrayIter::VectorInit,
   &ArrayIter::MapInit,
@@ -152,6 +157,7 @@ const ArrayIter::InitFuncPtr ArrayIter::initFuncTable[7] = {
   &ArrayIter::SetInit,
   &ArrayIter::PairInit,
   &ArrayIter::FrozenVectorInit,
+  &ArrayIter::FrozenSetInit,
 };
 
 template <bool incRef>
@@ -235,6 +241,9 @@ bool ArrayIter::endHelper() {
     case Collection::FrozenVectorType: {
       return m_pos >= getFrozenVector()->size();
     }
+    case Collection::FrozenSetType: {
+      return m_pos == 0;
+    }
     default: {
       ObjectData* obj = getIteratorObj();
       return !obj->o_invoke_few_args(s_valid, 0).toBoolean();
@@ -249,7 +258,6 @@ void ArrayIter::nextHelper() {
       return;
     }
     case Collection::MapType: {
-      assert(m_pos != 0);
       c_Map* mp = getMap();
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
@@ -258,7 +266,6 @@ void ArrayIter::nextHelper() {
       return;
     }
     case Collection::StableMapType: {
-      assert(m_pos != 0);
       c_StableMap* smp = getStableMap();
       if (UNLIKELY(m_version != smp->getVersion())) {
         throw_collection_modified();
@@ -267,7 +274,6 @@ void ArrayIter::nextHelper() {
       return;
     }
     case Collection::SetType: {
-      assert(m_pos != 0);
       c_Set* st = getSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
@@ -283,6 +289,13 @@ void ArrayIter::nextHelper() {
       m_pos++;
       return;
     }
+    case Collection::FrozenSetType: {
+      assert(m_pos != 0);
+      c_FrozenSet* st = getFrozenSet();
+      assert(m_version == st->getVersion());
+      m_pos = st->iter_next(m_pos);
+      return;
+    }
     default:
       ObjectData* obj = getIteratorObj();
       obj->o_invoke_few_args(s_next, 0);
@@ -295,7 +308,6 @@ Variant ArrayIter::firstHelper() {
       return m_pos;
     }
     case Collection::MapType: {
-      assert(m_pos != 0);
       c_Map* mp = getMap();
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
@@ -303,7 +315,6 @@ Variant ArrayIter::firstHelper() {
       return mp->iter_key(m_pos);
     }
     case Collection::StableMapType: {
-      assert(m_pos != 0);
       c_StableMap* smp = getStableMap();
       if (UNLIKELY(m_version != smp->getVersion())) {
         throw_collection_modified();
@@ -322,6 +333,13 @@ Variant ArrayIter::firstHelper() {
     }
     case Collection::FrozenVectorType: {
       return m_pos;
+    }
+    case Collection::FrozenSetType: {
+      c_FrozenSet* st = getFrozenSet();
+      if (UNLIKELY(m_version != st->getVersion())) {
+        throw_collection_modified();
+      }
+      return st->iter_key(m_pos);
     }
     default: {
       ObjectData* obj = getIteratorObj();
@@ -375,6 +393,11 @@ Variant ArrayIter::second() {
         throw_collection_modified();
       }
       return tvAsCVarRef(fvec->at(m_pos));
+    }
+    case Collection::FrozenSetType: {
+      c_FrozenSet* st = getFrozenSet();
+      assert(m_version == st->getVersion());
+      return tvAsCVarRef(st->iter_value(m_pos));
     }
     default: {
       ObjectData* obj = getIteratorObj();
@@ -440,6 +463,11 @@ CVarRef ArrayIter::secondRefPlus() {
       }
       return tvAsCVarRef(fvec->at(m_pos));
     }
+    case Collection::FrozenSetType: {
+      c_FrozenSet* st = getFrozenSet();
+      assert(m_version == st->getVersion());
+      return tvAsCVarRef(st->iter_value(m_pos));
+    }
     default: {
       throw_param_is_not_container();
     }
@@ -498,7 +526,7 @@ bool ArrayIter::iterNext(VersionableSparse) {
     throw_collection_modified();
   }
   m_pos = coll->iter_next(m_pos);
-  return m_pos != 0;
+  return coll->iter_valid(m_pos);
 }
 
 template<class Tuplish>
@@ -1198,6 +1226,11 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
       return iterInit<c_FrozenVector, ArrayIter::Fixed>(
                                 dest, static_cast<c_FrozenVector*>(obj),
                                 valOut, keyOut);
+    case Collection::FrozenSetType:
+      return iterInit<c_FrozenSet, ArrayIter::VersionableSparse>(
+                                   dest,
+                                   static_cast<c_FrozenSet*>(obj),
+                                   valOut, keyOut);
     default:
       return new_iter_object_any(dest, obj, ctx, valOut, keyOut);
   }
@@ -1230,6 +1263,9 @@ static int64_t iter_next_collection(ArrayIter* ai,
                               ai, valOut, keyOut);
   case Collection::FrozenVectorType:
     return iterNext<c_FrozenVector, ArrayIter::Fixed>(
+                              ai, valOut, keyOut);
+  case Collection::FrozenSetType:
+    return iterNext<c_FrozenSet, ArrayIter::VersionableSparse>(
                               ai, valOut, keyOut);
   case Collection::InvalidType:
   case Collection::MaxNumTypes:
@@ -1274,10 +1310,10 @@ int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 static NEVER_INLINE
 int64_t iter_next_free_arr(Iter* iter, HphpArray* arr) {
   assert(arr->getCount() == 1);
-  if (arr->m_kind == ArrayData::kPackedKind) {
+  if (arr->isPacked()) {
     HphpArray::ReleasePacked(arr);
   } else {
-    assert(arr->m_kind == ArrayData::kMixedKind);
+    assert(arr->isHphpArray());
     HphpArray::Release(arr);
   }
   if (debug) {

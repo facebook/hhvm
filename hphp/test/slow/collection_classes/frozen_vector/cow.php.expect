@@ -1,5 +1,5 @@
 ------ ArraySet -------
-object(Vector)#3 (3) {
+object(HH\Vector)#3 (3) {
   [0]=>
   int(42)
   [1]=>
@@ -16,7 +16,7 @@ object(FrozenVector)#4 (3) {
   int(3)
 }
 ------ ArrayAppend -------
-object(Vector)#3 (4) {
+object(HH\Vector)#3 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -35,7 +35,7 @@ object(FrozenVector)#4 (3) {
   int(3)
 }
 ------ add -------
-object(Vector)#3 (4) {
+object(HH\Vector)#3 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -54,7 +54,7 @@ object(FrozenVector)#4 (3) {
   int(3)
 }
 ------ append -------
-object(Vector)#3 (4) {
+object(HH\Vector)#3 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -73,7 +73,7 @@ object(FrozenVector)#4 (3) {
   int(3)
 }
 ------ addAll -------
-object(Vector)#3 (4) {
+object(HH\Vector)#3 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -92,7 +92,7 @@ object(FrozenVector)#4 (3) {
   int(3)
 }
 ------ pop -------
-object(Vector)#3 (2) {
+object(HH\Vector)#3 (2) {
   [0]=>
   int(1)
   [1]=>
@@ -107,7 +107,7 @@ object(FrozenVector)#4 (3) {
   int(3)
 }
 ------ resize -------
-object(Vector)#3 (0) {
+object(HH\Vector)#3 (0) {
 }
 object(FrozenVector)#4 (3) {
   [0]=>
@@ -118,7 +118,7 @@ object(FrozenVector)#4 (3) {
   int(3)
 }
 ------ clear -------
-object(Vector)#3 (0) {
+object(HH\Vector)#3 (0) {
 }
 object(FrozenVector)#4 (3) {
   [0]=>
@@ -129,7 +129,7 @@ object(FrozenVector)#4 (3) {
   int(3)
 }
 ------ set -------
-object(Vector)#3 (3) {
+object(HH\Vector)#3 (3) {
   [0]=>
   int(42)
   [1]=>
@@ -146,7 +146,7 @@ object(FrozenVector)#4 (3) {
   int(3)
 }
 ------ setAll -------
-object(Vector)#3 (3) {
+object(HH\Vector)#3 (3) {
   [0]=>
   int(42)
   [1]=>
@@ -163,7 +163,7 @@ object(FrozenVector)#4 (3) {
   int(3)
 }
 ------ removeKey -------
-object(Vector)#3 (2) {
+object(HH\Vector)#3 (2) {
   [0]=>
   int(2)
   [1]=>
@@ -178,7 +178,7 @@ object(FrozenVector)#4 (3) {
   int(3)
 }
 ------ reverse -------
-object(Vector)#3 (3) {
+object(HH\Vector)#3 (3) {
   [0]=>
   int(3)
   [1]=>
@@ -195,7 +195,7 @@ object(FrozenVector)#4 (3) {
   int(3)
 }
 ------ splice -------
-object(Vector)#3 (2) {
+object(HH\Vector)#3 (2) {
   [0]=>
   int(2)
   [1]=>

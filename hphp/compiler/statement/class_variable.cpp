@@ -287,7 +287,7 @@ void ClassVariable::outputCodeModel(CodeGenerator &cg) {
   m_modifiers->outputCodeModel(cg);
   cg.printPropertyHeader("expressions");
   cg.printExpressionVector(m_declaration);
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

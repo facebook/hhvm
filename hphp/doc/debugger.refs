@@ -224,7 +224,7 @@ Use this command to display declaration of a symbol.
 
 
 This will print names and values of all constants, if {text} is not
-speified. Otherwise, it will print names and values of all constants
+specified. Otherwise, it will print names and values of all constants
 that contain the text in their names or values. The search is
 case-insensitive and string-based.
 

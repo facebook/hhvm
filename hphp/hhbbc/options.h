@@ -20,7 +20,9 @@ namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-const struct {
+struct OptimizerOptions {
+  constexpr OptimizerOptions() {}
+
   /*
    * If true, completely remove jumps to blocks that are inferred to
    * be dead.  When false, dead blocks are replaced with Fatal

@@ -1,0 +1,5 @@
+HipHop Warning: %s
+string(%d) "phar://%sphar_running.phar.php"
+string(%d) "%sphar_running.phar.php"
+string(0) ""
+===DONE===

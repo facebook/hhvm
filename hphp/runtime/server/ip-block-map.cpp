@@ -44,13 +44,18 @@ bool IpBlockMap::BinaryPrefixTrie::isAllowedImpl(
   const unsigned char *search_bytes = (const unsigned char *)search;
   BinaryPrefixTrie *child;
 
-  if (bit_offset > num_bits) {
-    // This should never happen because the trie should only ever contain
-    // prefixes of fixed-size network addresses, so the trie should never be
-    // any deeper than the network address size.
-    Logger::Error("trie depth exceeds search depth");
-    return false;
+  if (bit_offset == num_bits) {
+    if (m_children[0] != nullptr || m_children[1] != nullptr) {
+      // This should never happen because the trie should only ever contain
+      // prefixes of fixed-size network addresses, so the trie should never be
+      // any deeper than the network address size.
+      Logger::Error("trie depth exceeds search depth");
+      return false;
+    }
+    return m_allow;
   }
+
+  assert(bit_offset < num_bits);
 
   child = m_children[(*search_bytes >> (7 - bit_offset)) & 1];
   if (child) {

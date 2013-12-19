@@ -30,9 +30,7 @@ public:
   virtual void close() = 0;
   virtual Variant read() = 0;
   virtual void rewind() = 0;
-  void sweep() FOLLY_OVERRIDE {
-    close();
-  }
+  void sweep() FOLLY_OVERRIDE { close(); }
 
   CLASSNAME_IS("Directory")
   // overriding ResourceData
@@ -56,7 +54,7 @@ public:
   bool isValid() const;
 
 private:
-  DIR *m_dir;
+  DIR* m_dir;
 };
 
 class ArrayDirectory : public Directory {
@@ -74,9 +72,11 @@ public:
     Directory::sweep();
   }
 
+  size_t size() const { return m_it.getArrayData()->size(); }
+  String path();
+
 private:
   ArrayIter m_it;
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

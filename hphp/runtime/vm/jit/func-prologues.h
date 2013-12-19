@@ -23,7 +23,7 @@
 
 namespace HPHP { namespace JIT {
 
-inline bool funcPrologueHasGuard(Transl::TCA prologue, const Func* func) {
+inline bool funcPrologueHasGuard(JIT::TCA prologue, const Func* func) {
   if (arch() == Arch::X64) {
     return X64::funcPrologueHasGuard(prologue, func);
   } else if (arch() == Arch::ARM) {
@@ -32,7 +32,7 @@ inline bool funcPrologueHasGuard(Transl::TCA prologue, const Func* func) {
   not_implemented();
 }
 
-inline Transl::TCA funcPrologueToGuard(Transl::TCA prologue, const Func* func) {
+inline JIT::TCA funcPrologueToGuard(JIT::TCA prologue, const Func* func) {
   if (arch() == Arch::X64) {
     return X64::funcPrologueToGuard(prologue, func);
   } else if (arch() == Arch::ARM) {

@@ -1,0 +1,3 @@
+HipHop Fatal error: Uncaught exception 'RuntimeException' with message '[] operator not supported for accessing elements of Sets' in %s
+Stack trace:
+%a

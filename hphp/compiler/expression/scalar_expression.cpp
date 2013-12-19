@@ -416,7 +416,7 @@ void ScalarExpression::outputCodeModel(CodeGenerator &cg) {
     default:
       assert(false);
   }
-  cg.printPropertyHeader("location");
+  cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }

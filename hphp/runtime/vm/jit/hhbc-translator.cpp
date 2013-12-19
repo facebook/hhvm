@@ -4221,7 +4221,7 @@ void HhbcTranslator::emitDiv() {
   auto dividend = topC(1);
 
   // we can't codegen this but we may be able to special case it away
-  if (!(divisorType <= Type::Dbl) && !(dividendType <= Type::Dbl)) {
+  if (!divisor->isA(Type::Dbl) && !dividend->isA(Type::Dbl)) {
     // TODO(#2570625): support integer-integer division, move this to simlifier:
     if (divisor->isConst()) {
       int64_t divisorVal;
@@ -4235,7 +4235,7 @@ void HhbcTranslator::emitDiv() {
       if (divisorVal == 0) {
         popC();
         popC();
-        gen(RaiseWarning,
+        gen(RaiseWarning, makeCatch(),
             cns(makeStaticString(Strings::DIVISION_BY_ZERO)));
         push(cns(false));
         return;

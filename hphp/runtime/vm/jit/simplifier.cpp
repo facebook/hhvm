@@ -1098,9 +1098,10 @@ SSATmp* Simplifier::simplifyDivDbl(IRInstruction* inst) {
 
   // X / 0 -> bool(false)
   if (src2Val == 0.0) {
-    gen(RaiseWarning,
-        cns(makeStaticString(Strings::DIVISION_BY_ZERO)));
-    return cns(false);
+    // Ideally we'd generate a RaiseWarning and return false here, but we need
+    // a catch trace for that and we can't make a catch trace without
+    // HhbcTranslator.
+    return nullptr;
   }
 
   // statically compute X / Y

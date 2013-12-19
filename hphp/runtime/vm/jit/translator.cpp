@@ -100,7 +100,7 @@ struct TraceletContext {
   bool        m_varEnvTaint;
 
   RuntimeType currentType(const Location& l) const;
-  DynLocation* recordRead(const InputInfo& l, bool useHHIR,
+  DynLocation* recordRead(const InputInfo& l,
                           DataType staticType = KindOfAny);
   void recordWrite(DynLocation* dl);
   void recordDelete(const Location& l);
@@ -1658,7 +1658,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         SKTRACE(1, ni->source, "MetaInfo DataTypePredicted for input %d; "
                 "newType = %d\n", arg, DataType(info.m_data));
         InputInfo& ii = inputInfos[arg];
-        DynLocation* dl = tas.recordRead(ii, false, KindOfAny);
+        DynLocation* dl = tas.recordRead(ii, KindOfAny);
         NormalizedInstruction* src = findInputSrc(tas.m_t->m_instrStream.last,
                                                   dl);
         if (src) {
@@ -1683,7 +1683,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
                    "newType = %d\n", arg, DataType(info.m_data));
         InputInfo& ii = inputInfos[arg];
         ii.dontGuard = true;
-        DynLocation* dl = tas.recordRead(ii, true, (DataType)info.m_data);
+        DynLocation* dl = tas.recordRead(ii, (DataType)info.m_data);
         if (dl->rtt.outerType() != info.m_data &&
             (!dl->isString() || info.m_data != KindOfString)) {
           if (dl->rtt.outerType() != KindOfAny) {
@@ -1739,7 +1739,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
         assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
         ii.dontGuard = true;
-        DynLocation* dl = tas.recordRead(ii, true, KindOfString);
+        DynLocation* dl = tas.recordRead(ii, KindOfString);
         assert(!dl->rtt.isString() || !dl->rtt.valueString() ||
                dl->rtt.valueString() == sd);
         SKTRACE(1, ni->source, "MetaInfo on input %d; old type = %s\n",
@@ -1751,7 +1751,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       case Unit::MetaInfo::Kind::Class: {
         assert((unsigned)arg < inputInfos.size());
         InputInfo& ii = inputInfos[arg];
-        DynLocation* dl = tas.recordRead(ii, true);
+        DynLocation* dl = tas.recordRead(ii);
         if (dl->rtt.valueType() != KindOfObject) {
           continue;
         }
@@ -2518,7 +2518,6 @@ RuntimeType TraceletContext::currentType(const Location& l) const {
 }
 
 DynLocation* TraceletContext::recordRead(const InputInfo& ii,
-                                         bool useHHIR,
                                          DataType staticType) {
   if (staticType == KindOfNone) staticType = KindOfAny;
 
@@ -2531,9 +2530,9 @@ DynLocation* TraceletContext::recordRead(const InputInfo& ii,
     // be in m_changeSet either
     assert(!mapContains(m_changeSet, l));
     if (ii.dontGuard && !l.isLiteral()) {
-      assert(!useHHIR || staticType != KindOfRef);
+      assert(staticType != KindOfRef);
       dl = m_t->newDynLocation(l, RuntimeType(staticType));
-      if (useHHIR && staticType != KindOfAny) {
+      if (staticType != KindOfAny) {
         m_resolvedDeps[l] = dl;
       }
     } else {
@@ -3368,7 +3367,7 @@ void Translator::analyzeCallee(TraceletContext& tas,
    */
   restoreFrame();
   for (auto& loc : callerArgLocs) {
-    fcall->inputs.push_back(tas.recordRead(InputInfo(loc), true));
+    fcall->inputs.push_back(tas.recordRead(InputInfo(loc)));
   }
 
   FTRACE(1, "analyzeCallee: inline candidate\n");
@@ -3500,7 +3499,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
       for (unsigned int i = 0; i < inputInfos.size(); i++) {
         SKTRACE(2, sk, "typing input %d\n", i);
         const InputInfo& ii = inputInfos[i];
-        DynLocation* dl = tas.recordRead(ii, true);
+        DynLocation* dl = tas.recordRead(ii);
         const RuntimeType& rtt = dl->rtt;
         // Some instructions are able to handle an input with an unknown type
         if (!ii.dontBreak && !ii.dontGuard) {

@@ -160,6 +160,8 @@ struct XLS {
   void dumpIntervals();
   bool checkEdgeShuffles();
 private:
+  struct Compare { bool operator()(const Interval*, const Interval*); };
+private:
   Intervals m_intervals; // parent intervals indexed by ssatmp
   int m_nextSpill { 0 };
   int m_numSplits { 0 };
@@ -172,7 +174,7 @@ private:
   PhysReg::Map<Interval> m_scratch;
   PhysReg::Map<Interval> m_blocked;
   StateVector<Block,LiveSet> m_liveIn;
-  smart::vector<Interval*> m_pending;
+  smart::priority_queue<Interval*,Compare> m_pending;
   smart::vector<Interval*> m_active;
   smart::vector<Interval*> m_inactive;
   StateVector<IRInstruction,IRInstruction*> m_between;
@@ -533,18 +535,17 @@ void XLS::buildIntervals() {
   }
 }
 
-// comparison function for pending priority queue; std::make_heap
+// comparison function for pending priority queue. std::priority_queue
 // requies a less operation, but sorts the heap highest-first; we
-// need the opposite, so use greater-than.
-bool compare(const Interval* i1, const Interval* i2) {
+// need the opposite (lowest-first), so use greater-than.
+bool XLS::Compare::operator()(const Interval* i1, const Interval* i2) {
   return i1->start() > i2->start();
 }
 
 // insert interval into pending list in order of start position
 void XLS::enqueue(Interval* ivl) {
   assert(ivl->checkInvariants() && !ivl->handled());
-  m_pending.push_back(ivl);
-  std::push_heap(m_pending.begin(), m_pending.end(), compare);
+  m_pending.push(ivl);
 }
 
 // Assign the next available spill slot to interval
@@ -849,7 +850,7 @@ void XLS::update(unsigned pos) {
 void XLS::walkIntervals() {
   // fill the pending queue with nonempty intervals in order of start position
   for (auto& ivl : m_intervals) {
-    if (!ivl.empty()) m_pending.push_back(&ivl);
+    if (!ivl.empty()) m_pending.push(&ivl);
   }
   for (auto r : m_scratch) {
     if (!m_scratch[r].empty()) m_inactive.push_back(&m_scratch[r]);
@@ -857,11 +858,9 @@ void XLS::walkIntervals() {
   for (auto r : m_blocked) {
     if (!m_blocked[r].empty()) m_inactive.push_back(&m_blocked[r]);
   }
-  std::make_heap(m_pending.begin(), m_pending.end(), compare);
   while (!m_pending.empty()) {
-    Interval* current = m_pending.front();
-    std::pop_heap(m_pending.begin(), m_pending.end(), compare);
-    m_pending.pop_back();
+    Interval* current = m_pending.top();
+    m_pending.pop();
     update(current->start());
     allocOne(current);
     assert(current->handled() && current->info.numWords() == current->need);

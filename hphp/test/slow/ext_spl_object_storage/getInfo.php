@@ -19,4 +19,8 @@ while($s->valid()) {
     var_dump($data);
     $s->next();
 }
+
+// now mutate $o2 and ensure it sticks
+$s->attach($o2, "mutated");
+var_dump($s[$o2]);
 ?>

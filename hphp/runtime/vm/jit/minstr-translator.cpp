@@ -338,10 +338,10 @@ void HhbcTranslator::MInstrTranslator::checkMIState() {
 
   // SetM with only one element
   const bool singlePropSet = isSingle && isSetM &&
-    mcodeMaybePropName(m_ni.immVecM[0]);
+    mcodeIsProp(m_ni.immVecM[0]);
 
   // Array access with one element in the vector
-  const bool singleElem = isSingle && mcodeMaybeArrayOrMapKey(m_ni.immVecM[0]);
+  const bool singleElem = isSingle && mcodeIsElem(m_ni.immVecM[0]);
 
   // SetM with one vector array element
   const bool simpleArraySet = isSetM && singleElem;
@@ -434,9 +434,9 @@ void HhbcTranslator::MInstrTranslator::emitMTrace() {
     shape << separator;
     if (mcode == MW) {
       shape << "MW";
-    } else if (mcodeMaybeArrayOrMapKey(mcode)) {
+    } else if (mcodeIsElem(mcode)) {
       shape << "ME:" << rttStr(iInd);
-    } else if (mcodeMaybePropName(mcode)) {
+    } else if (mcodeIsProp(mcode)) {
       shape << "MP:" << rttStr(iInd);
     } else {
       not_reached();
@@ -605,7 +605,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
   // this instruction and once at the beginning of the retranslation.
   Block* failedRef = baseType.isBoxed() ? m_ht.makeExit() : nullptr;
   if ((baseType.subtypeOfAny(Type::Obj, Type::BoxedObj) &&
-       mcodeMaybePropName(m_ni.immVecM[0])) ||
+       mcodeIsProp(m_ni.immVecM[0])) ||
       simpleCollectionOp() != SimpleOp::None) {
     // In these cases we can pass the base by value, after unboxing if needed.
     m_base = gen(Unbox, failedRef, getBase(DataTypeSpecific));
@@ -670,7 +670,7 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
     if (baseType <= Type::Arr) {
       auto const isPacked = (baseType.hasArrayKind() &&
                             baseType.getArrayKind() == ArrayData::kPackedKind);
-      if (mcodeMaybeArrayOrMapKey(m_ni.immVecM[0])) {
+      if (mcodeIsElem(m_ni.immVecM[0])) {
         SSATmp* key = getInput(m_mii.valCount() + 1, DataTypeGeneric);
         if (key->isA(Type::Int) || key->isA(Type::Str)) {
           if (isPacked && readInst && key->isA(Type::Int)) {
@@ -707,7 +707,7 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
           }
         }
       } else if (isMap || isStableMap) {
-        if (mcodeMaybeArrayOrMapKey(m_ni.immVecM[0])) {
+        if (mcodeIsElem(m_ni.immVecM[0])) {
           SSATmp* key = getInput(m_mii.valCount() + 1, DataTypeGeneric);
           if (key->isA(Type::Int) || key->isA(Type::Str)) {
             return isMap ? SimpleOp::Map : SimpleOp::StableMap;

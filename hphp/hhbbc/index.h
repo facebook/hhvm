@@ -61,9 +61,9 @@ struct Program;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * A Context is a (unit, func, class) triple, where the class field is
- * optionally nullptr.  Most queries to the Index need a "context", to
- * allow recording dependencies.
+ * A Context is a (unit, func, class) triple, where cls and func
+ * fields may be null in some situations.  Most queries to the Index
+ * need a "context", to allow recording dependencies.
  */
 struct Context { borrowed_ptr<php::Unit> unit;
                  borrowed_ptr<php::Func> func;
@@ -77,6 +77,12 @@ inline bool operator<(Context a, Context b) {
   return std::make_tuple(a.unit, a.func, a.cls) <
          std::make_tuple(b.unit, b.func, b.cls);
 }
+
+/*
+ * State of properties on a class.  Map from property name to its
+ * Type.
+ */
+using PropState = std::map<SString,Type>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -285,6 +291,17 @@ struct Index {
   PrepKind lookup_param_prep(Context, res::Func, uint32_t paramId) const;
 
   /*
+   * Returns the control-flow insensitive inferred private property
+   * types for a Class.  The Class doesn't need to be fully resolved,
+   * because private properties don't depend on the inheritance
+   * hierarchy.
+   *
+   * The Index tracks the largest types for private properties that
+   * are guaranteed to hold at any program point.
+   */
+  PropState lookup_private_props(borrowed_ptr<const php::Class>) const;
+
+  /*
    * Refine the return type for a function, based on a round of
    * analysis.
    *
@@ -295,6 +312,16 @@ struct Index {
    * this php::Func.
    */
   std::vector<Context> refine_return_type(borrowed_ptr<const php::Func>, Type);
+
+  /*
+   * Refine the private property types for a class, based on a round
+   * of analysis.
+   *
+   * No threads should be reading from this Index when this function
+   * is called.
+   */
+  void refine_private_props(borrowed_ptr<const php::Class> cls,
+                            const PropState&);
 
 private:
   Index(const Index&) = delete;

@@ -98,8 +98,31 @@ struct Options {
    * Whether or not to assume that VerifyParamType instructions must
    * throw if the parameter does not match the associated type
    * constraint.
+   *
+   * This changes program behavior because parameter type hint
+   * validation is a recoverable fatal.  If the error handler doesn't
+   * throw at runtime, the parameter may not have the inferred type.
+   *
+   * Currently hhvm handles this by ignoring the problem and
+   * potentially segfaulting at runtime.  We want to change this to
+   * require the error handler to throw in this case.  TODO(#3038582).
    */
   bool HardTypeHints = true;
+
+  /*
+   * If true, we'll try to infer the types of declared private class
+   * properties.
+   *
+   * This is in the can-potentially-change-program-behavior section
+   * because if you unserialize specially-constructed strings you
+   * could create instances with private properties that don't follow
+   * the inferred types.
+   *
+   * Currently hhvm handles this by ignoring the problem and
+   * potentially segfaulting at runtime.  We want to change this to
+   * fatal at unserialize time.  TODO(#2516227).
+   */
+  bool HardPrivatePropInference = false;
 };
 extern Options options;
 

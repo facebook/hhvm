@@ -362,6 +362,24 @@ Type union_of(Type a, Type b);
  */
 Type stack_flav(Type a);
 
+/*
+ * Force any type that contains SStr and SArr to contain Arr and Str.
+ * This is needed for some operations that can change static arrays or
+ * strings into non-static ones.  Doesn't change the type if it can't
+ * contain SStr or SArr.
+ */
+Type loosen_statics(Type);
+
+/*
+ * Force any type that corresponds to a constant php value to contain
+ * all values of that php type.
+ *
+ * Precisely: strict subtypes of TInt, TDbl, TBool, TSStr, and TSArr
+ * become exactly that corresponding type.  Additionally, TOptTrue and
+ * TOptFalse become TOptBool.  All other types are unchanged.
+ */
+Type loosen_values(Type);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

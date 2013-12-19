@@ -1,0 +1,9 @@
+bool(true)
+bool(false)
+string(16) "this is a string"
+bool(true)
+object(Other)#2 (0) {
+}
+bool(true)
+float(42)
+int(3)

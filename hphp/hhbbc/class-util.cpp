@@ -16,6 +16,7 @@
 #include "hphp/hhbbc/class-util.h"
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/type-system.h"
 
@@ -32,7 +33,8 @@ const StaticString
   s_StableMap("StableMap"),
   s_Set("Set"),
   s_FrozenVector("FrozenVector"),
-  s_FrozenSet("FrozenSet");
+  s_FrozenSet("FrozenSet"),
+  s_86pinit("86pinit");
 
 bool has_magic_bool_conversion(res::Class cls) {
   return is_collection(cls) || cls.name()->isame(s_SimpleXMLElement.get());
@@ -61,6 +63,13 @@ bool could_have_magic_bool_conversion(Type t) {
     return has_magic_bool_conversion(dobj_of(t).cls);
   }
   return true;
+}
+
+bool has_86pinit(borrowed_ptr<const php::Class> cls) {
+  for (auto& m : cls->methods) {
+    if (m->name->isame(s_86pinit.get())) return true;
+  }
+  return false;
 }
 
 //////////////////////////////////////////////////////////////////////

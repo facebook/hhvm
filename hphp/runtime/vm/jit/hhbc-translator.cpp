@@ -4688,7 +4688,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
           auto const baseType = m_tb->localType(base.offset,
                                                 DataTypeSpecific).ptr();
           auto const isUnset = inst.op() == OpUnsetM;
-          auto const isProp = mcodeMaybePropName(inst.immVecM[0]);
+          auto const isProp = mcodeIsProp(inst.immVecM[0]);
 
           if (isUnset && isProp) break;
           auto op = isProp ? SetProp : isUnset ? UnsetElem : SetWithRefElem;

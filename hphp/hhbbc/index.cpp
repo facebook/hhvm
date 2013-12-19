@@ -117,6 +117,18 @@ bool has_dep(Dep m, Dep t) {
 
 //////////////////////////////////////////////////////////////////////
 
+PropState unknown_private_props(borrowed_ptr<const php::Class> cls) {
+  auto ret = PropState{};
+  for (auto& prop : cls->properties) {
+    if ((prop.attrs & AttrPrivate) && !(prop.attrs & AttrStatic)) {
+      ret[prop.name] = TGen;
+    }
+  }
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -272,7 +284,14 @@ struct IndexData {
   std::mutex funcInfoLock;
   std::unordered_map<borrowed_ptr<const php::Func>,FuncInfo> funcInfo;
 
-  // For now just functions..
+  // Private property types are stored separately from ClassInfo,
+  // because you don't need to resolve a class to get at them.
+  std::unordered_map<
+    borrowed_ptr<const php::Class>,
+    PropState
+  > privatePropInfo;
+
+  // For now we only need dependencies for function return types.
   std::mutex dependencyLock;
   std::unordered_map<
     borrowed_ptr<const php::Func>,
@@ -731,6 +750,15 @@ PrepKind Index::lookup_param_prep(Context ctx,
   return finfo->func->params[paramId].byRef ? PrepKind::Ref : PrepKind::Val;
 }
 
+PropState
+Index::lookup_private_props(borrowed_ptr<const php::Class> cls) const {
+  auto it = m_data->privatePropInfo.find(cls);
+  if (it != end(m_data->privatePropInfo)) return it->second;
+  return unknown_private_props(cls);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 std::vector<Context>
 Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
   auto const fdata = create_func_info(*m_data, func);
@@ -740,6 +768,20 @@ Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
     return find_deps(*m_data, func, Dep::ReturnTy);
   }
   return {};
+}
+
+void Index::refine_private_props(borrowed_ptr<const php::Class> cls,
+                                 const PropState& state) {
+  auto it = m_data->privatePropInfo.find(cls);
+  if (it == end(m_data->privatePropInfo)) {
+    m_data->privatePropInfo[cls] = state;
+    return;
+  }
+  for (auto& kv : state) {
+    auto& target = it->second[kv.first];
+    assert(kv.second.subtypeOf(target));
+    target = kv.second;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

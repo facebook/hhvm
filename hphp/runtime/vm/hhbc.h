@@ -1093,11 +1093,11 @@ inline bool mcodeIsLiteral(MemberCode mcode) {
   return mcode == MET || mcode == MEI || mcode == MPT;
 }
 
-inline bool mcodeMaybePropName(MemberCode mcode) {
+inline bool mcodeIsProp(MemberCode mcode) {
   return mcode == MPC || mcode == MPL || mcode == MPT;
 }
 
-inline bool mcodeMaybeArrayOrMapKey(MemberCode mcode) {
+inline bool mcodeIsElem(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MET || mcode == MEI;
 }
 

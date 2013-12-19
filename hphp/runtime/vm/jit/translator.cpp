@@ -370,7 +370,7 @@ isNormalPropertyAccess(const NormalizedInstruction& i,
   return
     i.immVecM.size() == 1 &&
     (lcode == LC || lcode == LL || lcode == LR || lcode == LH) &&
-    mcodeMaybePropName(i.immVecM[0]) &&
+    mcodeIsProp(i.immVecM[0]) &&
     i.inputs[propInput]->isString() &&
     i.inputs[objInput]->valueType() == KindOfObject;
 }
@@ -382,7 +382,7 @@ mInstrHasUnknownOffsets(const NormalizedInstruction& ni, Class* context) {
   unsigned ii = mii.valCount() + 1;
   for (; mi < ni.immVecM.size(); ++mi) {
     MemberCode mc = ni.immVecM[mi];
-    if (mcodeMaybePropName(mc)) {
+    if (mcodeIsProp(mc)) {
       const Class* cls = nullptr;
       if (getPropertyOffset(ni, context, cls, mii, mi, ii).offset == -1) {
         return true;
@@ -2314,7 +2314,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
               } else if (inLoc->rtt.valueType() == KindOfUninit ||
                          inLoc->rtt.valueType() == KindOfNull) {
                 RuntimeType newLhsRtt = inLoc->rtt.setValueType(
-                  mcodeMaybePropName(ni->immVecM[0]) ?
+                  mcodeIsProp(ni->immVecM[0]) ?
                   KindOfObject : KindOfArray);
                 SKTRACE(2, ni->source, "(%s, %" PRId64 ") <- type %d\n",
                         locLoc.spaceName(), locLoc.offset,

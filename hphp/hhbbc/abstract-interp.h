@@ -17,6 +17,7 @@
 #define incl_HHBBC_ABSTRACT_INTERP_H_
 
 #include <vector>
+#include <map>
 
 #include "folly/Optional.h"
 
@@ -51,10 +52,14 @@ struct State {
   std::vector<Type> locals;
   std::vector<Type> stack;
   std::vector<ActRec> fpiStack;
+
+  // Private property types on the current object.
+  PropState privateProperties;
 };
 
 /*
- * States are EqualityComparible.
+ * States are EqualityComparible (provided they are in-states for the
+ * same block).
  */
 bool operator==(const ActRec&, const ActRec&);
 bool operator!=(const ActRec&, const ActRec&);
@@ -97,6 +102,22 @@ struct FuncAnalysis {
   Type inferredReturn;
 };
 
+struct ClassAnalysis {
+  explicit ClassAnalysis(Context ctx) : ctx(ctx) {}
+
+  ClassAnalysis(ClassAnalysis&&) = default;
+  ClassAnalysis& operator=(ClassAnalysis&&) = default;
+
+  // The context that describes the class we did this analysis for.
+  Context ctx;
+
+  // FuncAnalysis results for each of the methods on the class.
+  std::vector<FuncAnalysis> methods;
+
+  // Inferred types for private properties.
+  PropState privateProperties;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -107,6 +128,14 @@ struct FuncAnalysis {
  * This routine makes no changes to the php::Func.
  */
 FuncAnalysis analyze_func(const Index&, Context);
+
+/*
+ * Perform an analysis for a whole php::Class at a time.
+ *
+ * This involves doing a analyze_func call on each of its functions,
+ * and inferring some whole-class information at the same time.
+ */
+ClassAnalysis analyze_class(const Index&, Context);
 
 /*
  * Use information from an analyze call to perform various

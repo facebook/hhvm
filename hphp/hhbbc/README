@@ -100,11 +100,21 @@ Whole Program Mode
 The algorithm in whole program mode works by continually running
 analysis passes to refine information stored in the Index.
 
-The basic idea behind the algorithm is this:
+The idea is that some types in the system are only allowed to grow,
+and some are only allowed to shrink.  Types that are only allowed to
+shrink are stored in the Index, while types that only grow must be
+analyzed in a context that can see everything that can affect that
+type (e.g. a function, or a whole class for private properties).
 
-  - Start with a list of all functions in the program.
+The basic idea behind the algorithm is to make several passes over
+these work units that infer only-growing types, and use them to refine
+the only-shrinking types in the Index until the Index stops shrinking.
+It looks somewhat like this:
 
-  - Run an analysis pass in parallel on each function in the list.
+  - Start with a list of all work units (functions or classes) in the
+    program.
+
+  - Run an analysis pass in parallel on each work unit in the list.
     Thread safety model here: none of the analysis is allowed to do
     anything except query the Index (internally thread safe) or read
     the php metadata/Bytecode (unchanging, safe to read concurrently)
@@ -113,10 +123,10 @@ The basic idea behind the algorithm is this:
   - Clear the list.
 
   - Single threaded: if we learned more useful information for any
-    function than was previously in the index, add that information to
-    the Index, and add any function that tried to ask for that
-    information back to the list.  Since only one thread is updating
-    the Index in this step we don't need to lock it.
+    function or class than was previously in the index, add that
+    information to the Index, and add any function that tried to ask
+    for that information back to the list.  Since only one thread is
+    updating the Index in this step we don't need to lock it.
 
   - Repeat starting from the second step if the list is non-empty.
 
@@ -131,11 +141,6 @@ allowed to be incorrect---it just might not be as useful as it could
 be.  This means that no analysis pass should ever deduce a new fact
 that is incorrect.  Each piece of information in the Index must also
 start conservative, and become more refined upon additional iterations.
-
-It bears repeating: this is a prototype.  Currently the only piece of
-data that refines is inferred function return types.  The algorithm
-will probably have to schedule classes-at-a-time instead of just
-functions as we add real information about classes to the Index.
 
 Type Inference
 --------------

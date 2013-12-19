@@ -548,6 +548,22 @@ Type stack_flav(Type a) {
   always_assert(0 && "stack_flav passed invalid type");
 }
 
+Type loosen_statics(Type a) {
+  if (a.couldBe(TSStr)) a = union_of(a, TStr);
+  if (a.couldBe(TSArr)) a = union_of(a, TArr);
+  return a;
+}
+
+Type loosen_values(Type a) {
+  return a.strictSubtypeOf(TInt) ? TInt :
+         a.strictSubtypeOf(TDbl) ? TDbl :
+         a.strictSubtypeOf(TBool) ? TBool :
+         a.strictSubtypeOf(TSStr) ? TSStr :
+         a.strictSubtypeOf(TSArr) ? TSArr :
+         a == TOptFalse || a == TOptTrue ? TOptBool :
+         a;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

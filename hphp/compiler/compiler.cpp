@@ -924,6 +924,7 @@ int runTarget(const CompilerOptions &po) {
     cmd += buf;
     cmd += " -vRepo.Authoritative=true";
     if (getenv("HPHP_DUMP_BYTECODE")) cmd += " -vEval.DumpBytecode=1";
+    if (getenv("HPHP_INTERP"))        cmd += " -vEval.Jit=0";
     cmd += " -vRepo.Local.Mode=r- -vRepo.Local.Path=";
   }
   cmd += po.outputDir + '/' + po.program;

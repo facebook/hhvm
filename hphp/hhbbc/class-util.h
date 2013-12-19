@@ -16,9 +16,12 @@
 #ifndef incl_HPHP_CLASS_UTIL_H_
 #define incl_HPHP_CLASS_UTIL_H_
 
+#include "hphp/hhbbc/misc.h"
+
 namespace HPHP { namespace HHBBC {
 
 namespace res { struct Class; }
+namespace php { struct Class; }
 struct Type;
 
 //////////////////////////////////////////////////////////////////////
@@ -33,6 +36,11 @@ bool is_collection(res::Class);
  * boolean conversion function.
  */
 bool could_have_magic_bool_conversion(Type);
+
+/*
+ * Returns whether a php::Class contains an 86pinit method.
+ */
+bool has_86pinit(borrowed_ptr<const php::Class>);
 
 //////////////////////////////////////////////////////////////////////
 

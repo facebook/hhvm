@@ -1,0 +1,10 @@
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+string(21) "/** @idx herp derp */"
+string(22) "/** I's doc comment */"
+string(23) "/** more doc comment */"
+string(22) "/** C's doc comment */"
+string(18) "/** doc comment */"
+bool(false)

@@ -37,6 +37,12 @@ public:
   virtual void hash_update(void *context, const unsigned char *buf,
                            unsigned int count) = 0;
   virtual void hash_final(unsigned char *digest, void *context) = 0;
+  virtual void hash_copy(void *new_context, void *old_context) {
+    assert(new_context != nullptr);
+    assert(old_context != nullptr);
+    assert(context_size >= 0);
+    memcpy(new_context, old_context, context_size);
+  }
 
   int digest_size;
   int block_size;

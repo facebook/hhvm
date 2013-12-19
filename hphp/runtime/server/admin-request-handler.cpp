@@ -591,8 +591,9 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     std::stringstream out;
     bool first = true;
     out << "{" << endl;
-    auto appendStat = [&](const char* name, int64_t value) {
-       out << (!first ? "," : "") << "  \"" << name << "\":" << value << endl;
+    auto appendStat = [&](const std::string& name, int64_t value) {
+       out << folly::format("{} \"{}\":{}\n",
+                            first ? "" : ",", name, value);
        first = false;
     };
     ServerPtr server = HttpServer::Server->getPageServer();
@@ -600,10 +601,12 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("queued", server->getQueuedJobs());
     auto* tx = JIT::tx64;
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
-    appendStat("tc-hotsize", tx->getHotCodeSize());
-    appendStat("tc-size", tx->getCodeSize());
-    appendStat("tc-profsize", tx->getProfCodeSize());
-    appendStat("tc-stubsize", tx->getStubSize());
+    tx->code.forEachBlock([&](const char* name, const CodeBlock& a) {
+      auto isMain = strncmp(name, "main", 4) == 0;
+      appendStat(folly::format("tc-{}size",
+                               isMain ? "" : name).str(),
+                 a.used());
+    });
     appendStat("targetcache", RDS::usedBytes());
     appendStat("rds", RDS::usedBytes()); // TODO(#2966387): temp double logging
     appendStat("units", Eval::FileRepository::getLoadedFiles());

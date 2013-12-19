@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/code-cache.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include <tbb/concurrent_hash_map.h>
 #include "hphp/util/ringbuffer.h"
@@ -100,56 +101,12 @@ class TranslatorX64 : public Translator
 
   typedef X64Assembler Asm;
 
-  enum class CodeBlockSelection {
-    Default,   // 'a'
-    Hot,       // 'ahot'
-    Profile,   // 'aprof' -- highest precedence
-  };
-
-  class CodeBlockSelector {
-   public:
-    class Args {
-     public:
-      explicit Args(TranslatorX64* tx);
-      Args&              hot(bool isHot);
-      Args&              profile(bool isProf);
-      CodeBlockSelection getSelection() const;
-      TranslatorX64*     getTranslator() const;
-
-     private:
-      TranslatorX64* m_tx;
-      CodeBlockSelection   m_select;
-    };
-
-    explicit CodeBlockSelector(const Args& args);
-    ~CodeBlockSelector();
-
-   private:
-    void           swap();
-
-    TranslatorX64* m_tx;
-    CodeBlockSelection   m_select;
-  };
-
-  TCA                    tcStart;
-  TCA                    aStart;
-
-public: // TODO: move these to some kind of CodeCache module
-
-  // Note that mainCode gets swapped with hotCode and profCode sometimes. It
-  // should be very uncommon to specifically refer to hotCode and profCode.
-  CodeBlock            mainCode; // used for hot code of non-AttrHot functions
-  CodeBlock            hotCode;  // used for hot code of AttrHot functions
-  CodeBlock            profCode; // used for hot code of profiling translations
-
-  CodeBlock            stubsCode; // used for cold code
-  CodeBlock            trampolinesCode;
+public:
+  CodeCache code;
 
 private:
   PointerMap           trampolineMap;
   int                  m_numNativeTrampolines;
-
-  DataBlock            m_globalData;
 
   TcaTransIDMap        m_jmpToTransID; // maps jump addresses to the ID
                                        // of translation containing them
@@ -224,29 +181,17 @@ private:
   void emitResolvedDeps(const ChangeMap& resolvedDeps);
   void checkRefs(SrcKey, const RefDeps&, SrcRec&);
 
-private:
   void drawCFG(std::ofstream& out) const;
-
-public:
-  CodeBlock& codeBlockFor(TCA addr) {
-    assert(mainCode.base() != hotCode.base()   &&
-           mainCode.base() != stubsCode.base() &&
-           hotCode.base()  != stubsCode.base());
-    return codeBlockChoose(addr, mainCode, hotCode, profCode, stubsCode,
-                           trampolinesCode);
-  }
-private:
 
   static JIT::CppCall getDtorCall(DataType type);
 
-private:
   void invalidateSrcKey(SrcKey sk);
   void invalidateFuncProfSrcKeys(const Func* func);
 
 public:
   FixupMap& fixupMap() { return m_fixupMap; }
 
-  DataBlock& globalData() { return m_globalData; }
+  DataBlock& globalData() { return code.data(); }
 
   bool freeRequestStub(TCA stub);
   TCA getFreeStub();
@@ -270,7 +215,7 @@ public:
   }
 
   inline bool isValidCodeAddress(TCA tca) const {
-    return tca >= tcStart && tca < stubsCode.base() + stubsCode.capacity();
+    return code.isValidCodeAddress(tca);
   }
 
   static bool isPseudoEvent(const char* event);
@@ -285,7 +230,7 @@ public:
 
   template<typename T, typename... Args>
   T* allocData(Args&&... args) {
-    return m_globalData.alloc<T>(std::forward<Args>(args)...);
+    return code.data().alloc<T>(std::forward<Args>(args)...);
   }
 
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
@@ -293,7 +238,7 @@ public:
 
 private:
   bool shouldTranslate() const {
-    return mainCode.used() < RuntimeOption::EvalJitAMaxUsage;
+    return code.main().used() < RuntimeOption::EvalJitAMaxUsage;
   }
   TCA getTranslation(const TranslArgs& args);
   TCA createTranslation(const TranslArgs& args);
@@ -354,10 +299,6 @@ public:
 
   // Returns a string with cache usage information
   std::string getUsage();
-  size_t getHotCodeSize() const;
-  size_t getCodeSize() const;
-  size_t getProfCodeSize() const;
-  size_t getStubSize() const;
 
   // true iff calling thread is sole writer.
   static bool canWrite() {
@@ -374,17 +315,11 @@ public:
   // Returns true on success
   bool dumpTCData();
 
-  // Debugging interfaces to prevent tampering with code.
-  void protectCode();
-  void unprotectCode();
-
   int numTranslations(SrcKey sk) const;
 
   bool addDbgGuards(const Unit* unit);
   bool addDbgGuard(const Func* func, Offset offset);
 };
-
-const size_t kTrampolinesBlockSize = 8 << 12;
 
 /*
  * Roughly expected length in bytes of each trampoline code sequence.

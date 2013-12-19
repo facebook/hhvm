@@ -37,7 +37,7 @@ static constexpr size_t dbgOff =
 namespace X64 {
 
 void addDbgGuardImpl(SrcKey sk) {
-  Asm a { tx64->mainCode };
+  Asm a { tx64->code.main() };
 
   // Emit the checks for debugger attach
   emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, reg::rAsm);
@@ -46,7 +46,7 @@ void addDbgGuardImpl(SrcKey sk) {
 
   // Branch to a special REQ_INTERPRET if attached
   TCA fallback =
-    emitServiceReq(tx64->stubsCode, REQ_INTERPRET, sk.offset(), 0);
+    emitServiceReq(tx64->code.stubs(), REQ_INTERPRET, sk.offset(), 0);
   a. jnz(fallback);
 }
 
@@ -57,7 +57,7 @@ void addDbgGuardImpl(SrcKey sk) {
 namespace ARM {
 
 void addDbgGuardImpl(SrcKey sk) {
-  vixl::MacroAssembler a { tx64->mainCode };
+  vixl::MacroAssembler a { tx64->code.main() };
 
   vixl::Label after;
   vixl::Label interpReqAddr;
@@ -79,7 +79,7 @@ void addDbgGuardImpl(SrcKey sk) {
   }
   a.   bind (&interpReqAddr);
   TCA interpReq =
-    emitServiceReq(tx64->stubsCode, REQ_INTERPRET, sk.offset(), 0);
+    emitServiceReq(tx64->code.stubs(), REQ_INTERPRET, sk.offset(), 0);
   a.   dc64 (interpReq);
   a.   bind (&after);
 }
@@ -94,12 +94,12 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec) {
     // no translations, nothing to do
     return;
   }
-  TCA dbgGuard = tx64->mainCode.frontier();
+  TCA dbgGuard = tx64->code.main().frontier();
 
   switch (arch()) {
     case Arch::X64:
       X64::addDbgGuardImpl(sk);
-      prepareForSmash(tx64->mainCode, X64::kJmpLen);
+      prepareForSmash(tx64->code.main(), X64::kJmpLen);
       break;
     case Arch::ARM:
       ARM::addDbgGuardImpl(sk);
@@ -109,8 +109,8 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec) {
   }
 
   // Emit a jump to the actual code
-  TCA dbgBranchGuardSrc = tx64->mainCode.frontier();
-  emitSmashableJump(tx64->mainCode, realCode, CC_None);
+  TCA dbgBranchGuardSrc = tx64->code.main().frontier();
+  emitSmashableJump(tx64->code.main(), realCode, CC_None);
 
   // Add it to srcRec
   srcRec->addDebuggerGuard(dbgGuard, dbgBranchGuardSrc);

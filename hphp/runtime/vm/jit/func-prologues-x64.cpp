@@ -128,7 +128,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   assert(IMPLIES(func->isGenerator(), nPassed == numParams));
 
-  Asm a { tx64->mainCode };
+  Asm a { tx64->code.main() };
 
   if (tx64->mode() == TransProflogue) {
     assert(func->shouldPGO());
@@ -302,7 +302,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(tx64->mainCode, tx64->stubsCode, false,
+  emitCheckSurpriseFlagsEnter(tx64->code.main(), tx64->code.stubs(), false,
                               tx64->fixupMap(), fixup);
 
   if (func->isClosureBody() && func->cls()) {
@@ -313,7 +313,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
                    rax);
     a.    jmp     (rax);
   } else {
-    emitBindJmp(tx64->mainCode, tx64->stubsCode, funcBody);
+    emitBindJmp(tx64->code.main(), tx64->code.stubs(), funcBody);
   }
   return funcBody;
 }
@@ -323,8 +323,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 //////////////////////////////////////////////////////////////////////
 
 TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
-  auto& mainCode = tx64->mainCode;
-  auto& stubsCode = tx64->stubsCode;
+  auto& mainCode = tx64->code.main();
+  auto& stubsCode = tx64->code.stubs();
   Asm a { mainCode };
   TCA start = mainCode.frontier();
   if (dvs.size() == 1) {
@@ -345,7 +345,7 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
 
 SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start) {
   assert(!func->isMagic());
-  Asm a { tx64->mainCode };
+  Asm a { tx64->code.main() };
 
   start = emitFuncGuard(a, func);
   if (RuntimeOption::EvalJitTransCounters) emitTransCounterInc(a);
@@ -360,7 +360,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   using namespace reg;
   using MkPacked = HphpArray* (*)(uint32_t, const TypedValue*);
 
-  Asm a { tx64->mainCode };
+  Asm a { tx64->code.main() };
   Label not_magic_call;
   auto const rInvName = r13;
   assert(!kSpecialCrossTraceRegs.contains(r13));

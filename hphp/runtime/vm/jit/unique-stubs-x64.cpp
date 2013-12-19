@@ -42,21 +42,21 @@ TRACE_SET_MOD(ustubs);
 namespace {
 
 TCA emitRetFromInterpretedFrame() {
-  Asm a { tx64->stubsCode };
-  moveToAlign(tx64->stubsCode);
+  Asm a { tx64->code.stubs() };
+  moveToAlign(tx64->code.stubs());
   auto const ret = a.frontier();
 
   auto const arBase = static_cast<int32_t>(sizeof(ActRec) - sizeof(Cell));
   a.   lea  (rVmSp[-arBase], serviceReqArgRegs[0]);
   a.   movq (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(tx64->stubsCode, SRFlags::JmpInsteadOfRet,
+  emitServiceReq(tx64->code.stubs(), SRFlags::JmpInsteadOfRet,
                  REQ_POST_INTERP_RET);
   return ret;
 }
 
 TCA emitRetFromInterpretedGeneratorFrame() {
-  Asm a { tx64->stubsCode };
-  moveToAlign(tx64->stubsCode);
+  Asm a { tx64->code.stubs() };
+  moveToAlign(tx64->code.stubs());
   auto const ret = a.frontier();
 
   // We have to get the Continuation object from the current AR's $this, then
@@ -65,7 +65,7 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   a.    loadq  (rVmFp[AROFF(m_this)], rContAR);
   a.    lea  (rContAR[c_Continuation::getArOffset()], rContAR);
   a.    movq   (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(tx64->stubsCode, SRFlags::JmpInsteadOfRet,
+  emitServiceReq(tx64->code.stubs(), SRFlags::JmpInsteadOfRet,
                  REQ_POST_INTERP_RET);
   return ret;
 }
@@ -73,14 +73,14 @@ TCA emitRetFromInterpretedGeneratorFrame() {
 //////////////////////////////////////////////////////////////////////
 
 void emitCallToExit(UniqueStubs& uniqueStubs) {
-  Asm a { tx64->mainCode };
+  Asm a { tx64->code.main() };
 
   // Emit a byte of padding. This is a kind of hacky way to avoid
   // hitting an assert in recordGdbStub when we call it with stub - 1
   // as the start address.
   a.emitNop(1);
   auto const stub = emitServiceReq(
-    tx64->mainCode,
+    tx64->code.main(),
     SRFlags::Align | SRFlags::JmpInsteadOfRet,
     REQ_EXIT
   );
@@ -101,8 +101,8 @@ void emitReturnHelpers(UniqueStubs& us) {
 }
 
 void emitResumeHelpers(UniqueStubs& uniqueStubs) {
-  Asm a { tx64->mainCode };
-  moveToAlign(tx64->mainCode);
+  Asm a { tx64->code.main() };
+  moveToAlign(tx64->code.main());
 
   auto const fpOff = offsetof(VMExecutionContext, m_fp);
   auto const spOff = offsetof(VMExecutionContext, m_stack) +
@@ -114,13 +114,13 @@ void emitResumeHelpers(UniqueStubs& uniqueStubs) {
   emitGetGContext(a, rax);
   a.   loadq  (rax[fpOff], rVmFp);
   a.   loadq  (rax[spOff], rVmSp);
-  emitServiceReq(tx64->mainCode, REQ_RESUME);
+  emitServiceReq(tx64->code.main(), REQ_RESUME);
 
   uniqueStubs.add("resumeHelpers", uniqueStubs.resumeHelper);
 }
 
 void emitDefClsHelper(UniqueStubs& uniqueStubs) {
-  Asm a { tx64->mainCode };
+  Asm a { tx64->code.main() };
   uniqueStubs.defClsHelper = a.frontier();
 
   void (*helper)(PreClass*) = defClsHelper;
@@ -137,9 +137,9 @@ void emitDefClsHelper(UniqueStubs& uniqueStubs) {
 }
 
 void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
-  Asm a { tx64->stubsCode };
+  Asm a { tx64->code.stubs() };
 
-  moveToAlign(tx64->stubsCode);
+  moveToAlign(tx64->code.stubs());
   uniqueStubs.stackOverflowHelper = a.frontier();
 
   // We are called from emitStackCheck, with the new stack frame in
@@ -150,7 +150,7 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   a.    loadl  (rax[Func::sharedBaseOffset()], eax);
   a.    addl   (eax, edi);
   emitEagerVMRegSave(a, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
-  emitServiceReq(tx64->stubsCode, REQ_STACK_OVERFLOW);
+  emitServiceReq(tx64->code.stubs(), REQ_STACK_OVERFLOW);
 
   uniqueStubs.add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
 }
@@ -173,8 +173,8 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   auto const rType     = esi;
   auto const rData     = rdi;
 
-  Asm a { tx64->mainCode };
-  moveToAlign(tx64->mainCode, kNonFallthroughAlign);
+  Asm a { tx64->code.main() };
+  moveToAlign(tx64->code.main(), kNonFallthroughAlign);
 
 asm_label(a, release);
   a.    loadq  (rIter[TVOFF(m_data)], rData);
@@ -187,7 +187,7 @@ asm_label(a, release);
 asm_label(a, doRelease);
   jumpDestructor(a, PhysReg(rType), rax);
 
-  moveToAlign(tx64->mainCode, kJmpTargetAlign);
+  moveToAlign(tx64->code.main(), kJmpTargetAlign);
   uniqueStubs.freeManyLocalsHelper = a.frontier();
   a.    lea    (rVmFp[-(JIT::kNumFreeLocalsHelpers * sizeof(Cell))],
                 rFinished);
@@ -226,9 +226,9 @@ asm_label(a, loopHead);
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
-  Asm a { tx64->mainCode };
+  Asm a { tx64->code.main() };
 
-  moveToAlign(tx64->mainCode);
+  moveToAlign(tx64->code.main());
   uniqueStubs.funcPrologueRedispatch = a.frontier();
 
   assert(kScratchCrossTraceRegs.contains(rax));
@@ -272,9 +272,9 @@ asm_label(a, numParamsCheck);
 }
 
 void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
-  Asm a { tx64->mainCode };
+  Asm a { tx64->code.main() };
 
-  moveToAlign(tx64->mainCode, kNonFallthroughAlign);
+  moveToAlign(tx64->code.main(), kNonFallthroughAlign);
   uniqueStubs.fcallArrayHelper = a.frontier();
 
   /*
@@ -352,9 +352,9 @@ asm_label(a, noCallee);
 
 void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
   TCA (*helper)(ActRec*, void*) = &fcallHelper;
-  Asm a { tx64->mainCode };
+  Asm a { tx64->code.main() };
 
-  moveToAlign(tx64->mainCode);
+  moveToAlign(tx64->code.main());
   uniqueStubs.fcallHelperThunk = a.frontier();
 
   Label popAndXchg, skip;
@@ -409,9 +409,9 @@ asm_label(a, skip);
 
 void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
   TCA (*helper)(ActRec*,void*) = &funcBodyHelper;
-  Asm a { tx64->mainCode };
+  Asm a { tx64->code.main() };
 
-  moveToAlign(tx64->mainCode);
+  moveToAlign(tx64->code.main());
   uniqueStubs.funcBodyHelperThunk = a.frontier();
 
   // This helper is called via a direct jump from the TC (from
@@ -427,9 +427,9 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
 
 void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
   bool (*helper)(const ActRec*, int) = &EventHook::onFunctionEnter;
-  Asm a { tx64->mainCode };
+  Asm a { tx64->code.main() };
 
-  moveToAlign(tx64->mainCode);
+  moveToAlign(tx64->code.main());
   uniqueStubs.functionEnterHelper = a.frontier();
 
   Label skip;

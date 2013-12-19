@@ -102,7 +102,7 @@ static void smashX64JmpOrCall(TCA addr, TCA dest, bool isCall) {
   // smashable jumps that way.
   assert(isSmashable(addr, X64::kJmpLen));
 
-  auto& cb = tx64->codeBlockFor(addr);
+  auto& cb = tx64->code.blockFor(addr);
   CodeCursor cursor { cb, addr };
   JIT::X64Assembler a { cb };
   if (dest > addr && dest - addr <= X64::kJmpLen) {

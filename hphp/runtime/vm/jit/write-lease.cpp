@@ -91,7 +91,7 @@ bool Lease::acquire(bool blocking /* = false */ ) {
       } else if (expire != 0 && m_owner == pthread_self()) {
         m_hintKept++;
       }
-      tx64->unprotectCode();
+      tx64->code.unprotect();
     }
 
     m_owner = pthread_self();
@@ -113,7 +113,7 @@ void Lease::drop(int64_t hintExpireDelay) {
         __builtin_return_address(1));
   if (debug) {
     popRank(RankWriteLease);
-    tx64->protectCode();
+    tx64->code.protect();
   }
   m_hintExpire = hintExpireDelay > 0 ?
     Timer::GetCurrentTimeMicros() + hintExpireDelay : 0;

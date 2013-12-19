@@ -556,13 +556,11 @@ void CodeGenerator::emitCompare(SSATmp* src1, SSATmp* src2) {
 void CodeGenerator::emitReqBindJcc(ConditionCode cc,
                                    const ReqBindJccData* extra) {
   auto& a = m_as;
-  assert(m_as.base() != m_astubs.base() &&
-         "ReqBindJcc only makes sense outside of astubs");
 
   prepareForTestAndSmash(m_mainCode, 0, TestAndSmashFlags::kAlignJccAndJmp);
   auto const patchAddr = a.frontier();
   auto const jccStub =
-    emitEphemeralServiceReq(tx64->stubsCode,
+    emitEphemeralServiceReq(tx64->code.stubs(),
                             tx64->getFreeStub(),
                             REQ_BIND_JMPCC_FIRST,
                             patchAddr,
@@ -2788,7 +2786,7 @@ void CodeGenerator::emitReqBindAddr(const Func* func,
                                     Offset offset) {
   tx64->setJmpTransID((TCA)&dest);
 
-  dest = emitServiceReq(tx64->stubsCode, REQ_BIND_ADDR,
+  dest = emitServiceReq(tx64->code.stubs(), REQ_BIND_ADDR,
                         &dest,
                         offset);
 }
@@ -2806,7 +2804,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       m_as.    cmpq(data->cases - 2, indexReg);
       prepareForSmash(m_mainCode, kJmpccLen);
       TCA def = emitEphemeralServiceReq(
-        tx64->stubsCode,
+        tx64->code.stubs(),
         tx64->getFreeStub(),
         REQ_BIND_JMPCC_SECOND,
         m_as.frontier(),
@@ -3156,8 +3154,8 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto extra = inst->extra<ReqRetranslateOpt>();
 
-  emitServiceReq(tx64->stubsCode, REQ_RETRANSLATE_OPT, curFunc()->getFuncId(),
-                 extra->offset, extra->transId);
+  emitServiceReq(tx64->code.stubs(), REQ_RETRANSLATE_OPT,
+                 curFunc()->getFuncId(), extra->offset, extra->transId);
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
@@ -3949,8 +3947,8 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   SrcKey srcKey = SrcKey(m_curInst->marker().func, m_curInst->marker().bcOff);
   bool isImmutable = (func->isConst() && !func->type().isNull());
   const Func* funcd = isImmutable ? func->getValFunc() : nullptr;
-  assert(m_as.base() == m_tx64->mainCode.base());
-  int32_t adjust = emitBindCall(m_tx64->mainCode, m_tx64->stubsCode,
+  assert(m_as.base() == m_tx64->code.main().base());
+  int32_t adjust = emitBindCall(m_tx64->code.main(), m_tx64->code.stubs(),
                                 srcKey, funcd, numArgs);
   if (adjust) {
     m_as.addq (adjust, rVmSp);

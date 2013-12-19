@@ -1296,7 +1296,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   m_as.   Ldr   (rVmSp, rReturnReg[offsetof(VMExecutionContext, m_stack) +
                                    Stack::topOfStackOffset()]);
 
-  emitServiceReq(tx64->mainCode, REQ_RESUME);
+  emitServiceReq(tx64->code.main(), REQ_RESUME);
 }
 
 //////////////////////////////////////////////////////////////////////

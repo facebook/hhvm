@@ -78,9 +78,9 @@ Pair Object
 )
 
 FrozenVector...
-FrozenVector Object
+HH\FrozenVector Object
 (
-    [0] => FrozenVector Object
+    [0] => HH\FrozenVector Object
         (
             [0] => 1
             [1] => 2
@@ -88,9 +88,9 @@ FrozenVector Object
 
     [1] => 3
 )
-FrozenVector Object
+HH\FrozenVector Object
 (
-    [0] => FrozenVector Object
+    [0] => HH\FrozenVector Object
         (
             [0] => 1
             [1] => 2

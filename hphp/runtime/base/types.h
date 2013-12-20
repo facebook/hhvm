@@ -163,8 +163,8 @@ inline Type stringToType(const char* str, size_t len) {
       if (!strcasecmp(str, "frozenset")) return FrozenSetType;
       if (!strcasecmp(str, "hh\\vector")) return VectorType;
       break;
-    case 12:
-      if (!strcasecmp(str, "frozenvector")) return FrozenVectorType;
+    case 15:
+      if (!strcasecmp(str, "hh\\frozenvector")) return FrozenVectorType;
       break;
     default:
       break;

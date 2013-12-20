@@ -715,7 +715,7 @@
             ]
         },
         {
-          "name": "FrozenVector",
+          "name": "HH_FrozenVector",
           "ifaces": [
             "ConstVector"
           ],

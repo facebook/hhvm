@@ -249,9 +249,7 @@ bool IniSetting::Get(const String& name, String &value) {
     return true;
   }
   if (name == s_memory_limit) {
-    int64_t v = g_context->getRequestMemoryMaxBytes();
-    if (v == std::numeric_limits<int64_t>::max()) v = -1;
-    value = String(v);
+    value = g_context->getRequestMemoryMaxBytes();
     return true;
   }
   if (name == s_max_execution_time || name == s_maximum_execution_time) {
@@ -345,16 +343,7 @@ bool IniSetting::Set(const String& name, const String& value) {
     return true;
   } else if (name == s_memory_limit) {
     if (!value.empty()) {
-      int64_t newInt = value.toInt64();
-      char lastChar = value.charAt(value.size() - 1);
-      if (lastChar == 'K' || lastChar == 'k') {
-        newInt <<= 10;
-      } else if (lastChar == 'M' || lastChar == 'm') {
-        newInt <<= 20;
-      } else if (lastChar == 'G' || lastChar == 'g') {
-        newInt <<= 30;
-      }
-      g_context->setRequestMemoryMaxBytes(newInt);
+      g_context->setRequestMemoryMaxBytes(value);
       return true;
     }
   } else if (name == s_max_execution_time || name == s_maximum_execution_time) {

@@ -550,8 +550,8 @@ static Variant php_mysql_do_connect(String server, String username,
 
   auto slash_pos = server.find('/');
   if (slash_pos != string::npos) {
-    socket = server.substr(slash_pos + 1);
-    server = server.substr(0, slash_pos);
+    socket = server.substr(slash_pos);
+    server = server.substr(0, slash_pos - 1);
   }
 
   Util::HostURL hosturl(std::string(server), MySQL::GetDefaultPort());

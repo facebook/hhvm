@@ -1092,6 +1092,29 @@ class Assetic extends Framework {
   }
 }
 
+class ReactPHP extends Framework {
+  public function __construct(string $name) { parent::__construct($name); }
+  protected function getInfo(): Map {
+    return Map {
+      "install_root" => __DIR__."/frameworks/reactphp",
+      "git_path" => "https://github.com/reactphp/react.git",
+      'git_commit' => "210c11a6041cfa2ce1701a4870b69475d9081265", # current stable - v0.3.3
+      "test_path" => __DIR__."/frameworks/reactphp",
+    };
+  }
+}
+
+class Ratchet extends Framework {
+  public function __construct(string $name) { parent::__construct($name); }
+  protected function getInfo(): Map {
+    return Map {
+      "install_root" => __DIR__."/frameworks/ratchet",
+      "git_path" => "https://github.com/cboden/Ratchet.git",
+      'git_commit' => "d756e0b507a5f3cdbf8c59dbb7baf68574dc7d58", # current stable - v0.3.0
+      "test_path" => __DIR__."/frameworks/ratchet",
+    };
+  }
+}
 
 class CodeIgniter extends Framework {
   public function __construct(string $name) { parent::__construct($name); }

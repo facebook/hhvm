@@ -1362,7 +1362,7 @@ static int64_t iter_next_apc_array(Iter* iter,
   APCLocalArray::NvGetKey(ad, &key, pos);
   auto const keyType  = keyOut->m_type;
   auto const keyDatum = keyOut->m_data.num;
-  cellDup(key, *keyOut);
+  cellCopy(key, *keyOut);
   tvRefcountedDecRefHelper(keyType, keyDatum);
 
   return 1;

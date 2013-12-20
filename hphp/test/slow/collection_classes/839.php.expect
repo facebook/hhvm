@@ -37,7 +37,7 @@ object(StableMap)#9 (4) {
   }
 }
 ========
-object(Set)#12 (2) {
+object(HH\Set)#12 (2) {
   int(1)
   string(3) "foo"
 }

@@ -85,7 +85,7 @@ object(FrozenVector)#6 (3) {
 }
 
 toSet...
-object(Set)#6 (3) {
+object(HH\Set)#6 (3) {
   int(1)
   int(2)
   int(3)

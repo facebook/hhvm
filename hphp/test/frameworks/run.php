@@ -1093,6 +1093,19 @@ class Assetic extends Framework {
 }
 
 
+class Monolog extends Framework {
+  public function __construct(string $name) { parent::__construct($name); }
+  protected function getInfo(): Map {
+    return Map {
+      "install_root" => __DIR__."/frameworks/monolog",
+      "git_path" => "https://github.com/Seldaek/monolog.git",
+      'git_commit' => "6225b22de9dcf36546be3a0b2fa8e3d986153f57", // stable 1.7
+      "test_path" => __DIR__."/frameworks/monolog",
+    };
+  }
+}
+
+
 class CodeIgniter extends Framework {
   public function __construct(string $name) { parent::__construct($name); }
   protected function getInfo(): Map {

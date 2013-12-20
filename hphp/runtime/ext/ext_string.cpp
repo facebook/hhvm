@@ -878,14 +878,6 @@ Variant f_substr_compare(const String& main_str, const String& str, int offset,
   return string_ncmp(s1 + offset, str.data(), cmp_len);
 }
 
-Variant f_strrchr(const String& haystack, CVarRef needle) {
-  Variant ret = f_strrpos(haystack, needle);
-  if (same(ret, false)) {
-    return false;
-  }
-  return haystack.substr(ret.toInt32());
-}
-
 Variant f_strstr(const String& haystack, CVarRef needle,
                  bool before_needle /* = false */) {
   Variant ret = f_strpos(haystack, needle);
@@ -973,6 +965,20 @@ static bool is_valid_strrpos_args(
     return false;
   }
   return true;
+}
+
+Variant f_strrchr(const String& haystack, CVarRef needle) {
+  if (!is_valid_strrpos_args(haystack, needle, 0)) {
+    return false;
+  }
+  int pos;
+  if (needle.isString()) {
+    pos = haystack.rfind(needle.toString().substr(0,1), false);
+  } else {
+    pos = haystack.rfind(needle.toByte(), false);
+  }
+  if (pos < 0) return false;
+  return haystack.substr(pos);
 }
 
 Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {

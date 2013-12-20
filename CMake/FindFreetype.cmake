@@ -7,7 +7,7 @@ find_path(FREETYPE_INCLUDE_DIRS NAMES freetype/freetype.h)
 if (NOT FREETYPE_INCLUDE_DIRS)
 	find_path(FREETYPE_INCLUDE_DIRS NAMES freetype2/freetype/freetype.h)
 	if (FREETYPE_INCLUDE_DIRS)
-		set(FREETYPE_INCLUDE_DIRS "${FREETYPE_INCLUDE_DIRS}/freetype2")
+		set(FREETYPE_INCLUDE_DIRS "${FREETYPE_INCLUDE_DIRS}/freetype2" CACHE PATH "Freetype include directory" FORCE)
 	endif()
 endif()
 

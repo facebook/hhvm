@@ -1287,11 +1287,11 @@ void SimpleFunctionCall::outputCodeModel(CodeGenerator &cg) {
     cg.printObjectHeader("SimpleFunctionCallExpression", 3);
     cg.printPropertyHeader("functionName");
   }
-  m_nameExp->outputCodeModel(cg);
+  cg.printValue(m_origName);
   cg.printPropertyHeader("arguments");
   cg.printExpressionVector(m_params);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(m_nameExp->getLocation());
+  cg.printLocation(this->getLocation());
   cg.printObjectFooter();
 }
 

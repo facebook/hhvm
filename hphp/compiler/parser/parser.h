@@ -267,6 +267,24 @@ public:
   void onTypeList(Token& type1, const Token& type2);
   void onTypeSpecialization(Token& type, char specialization);
 
+  // for language integrated query expressions
+  void onQuery(Token &out, Token &head, Token &body);
+  void onQueryBody(Token &out, Token *clauses, Token &select, Token *cont);
+  void onQueryBodyClause(Token &out, Token *clauses, Token &clause);
+  void onFromClause(Token &out, Token &var, Token &coll);
+  void onLetClause(Token &out, Token &var, Token &expr);
+  void onWhereClause(Token &out, Token &expr);
+  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
+    Token &right);
+  void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
+    Token &right, Token &group);
+  void onOrderbyClause(Token &out, Token &orderings);
+  void onOrdering(Token &out, Token *orderings, Token &ordering);
+  void onOrderingExpr(Token &out, Token &expr, Token *direction);
+  void onSelectClause(Token &out, Token &expr);
+  void onGroupClause(Token &out, Token &coll, Token &key);
+  void onIntoClause(Token &out, Token &var, Token &query);
+
   // for namespace support
   void onNamespaceStart(const std::string &ns, bool file_scope = false);
   void onNamespaceEnd();

@@ -34,6 +34,20 @@ $expected_exceptions = array(
   'T_AWAIT' => true,
   'T_ASYNC' => true,
   'T_TUPLE' => true,
+  'T_FROM' => true,
+  'T_WHERE' => true,
+  'T_JOIN' => true,
+  'T_IN' => true,
+  'T_ON' => true,
+  'T_EQUALS' => true,
+  'T_INTO' => true,
+  'T_LET' => true,
+  'T_ORDERBY' => true,
+  'T_ASCENDING' => true,
+  'T_DESCENDING' => true,
+  'T_SELECT' => true,
+  'T_GROUP' => true,
+  'T_BY' => true,
 );
 
 foreach ($token_range as $potential_token) {

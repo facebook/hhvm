@@ -45,6 +45,7 @@
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
 #include "hphp/compiler/expression/await_expression.h"
+#include "hphp/compiler/expression/query_expression.h"
 #include "hphp/compiler/statement/break_statement.h"
 #include "hphp/compiler/statement/case_statement.h"
 #include "hphp/compiler/statement/catch_statement.h"
@@ -5004,6 +5005,37 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
         }
         skipSuspend.set(e);
         return true;
+      }
+      case Expression::KindOfQueryExpression: {
+        QueryExpressionPtr query(static_pointer_cast<QueryExpression>(node));
+
+        visit(query->getCollection());
+        emitConvertToCell(e);
+        auto fpiStart = m_ue.bcPos();
+        StringData* executeQuery = makeStaticString("executeQuery");
+        e.FPushObjMethodD(2, executeQuery);
+        {
+          FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+          e.String(query->getQueryString());
+          emitFPass(e, 0, PassByRefKind::ErrorOnCell);
+          e.Null();
+          emitFPass(e, 1, PassByRefKind::ErrorOnCell);
+        }
+        e.FCall(2);
+        e.UnboxR();
+
+        return true;
+      }
+      case Expression::KindOfFromClause:
+      case Expression::KindOfLetClause:
+      case Expression::KindOfWhereClause:
+      case Expression::KindOfSelectClause:
+      case Expression::KindOfIntoClause:
+      case Expression::KindOfJoinClause:
+      case Expression::KindOfGroupClause:
+      case Expression::KindOfOrderbyClause:
+      case Expression::KindOfOrdering: {
+        not_reached();
       }
     }
   }

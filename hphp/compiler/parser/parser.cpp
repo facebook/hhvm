@@ -46,6 +46,11 @@
 #include "hphp/compiler/expression/yield_expression.h"
 #include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/expression/user_attribute.h"
+#include "hphp/compiler/expression/query_expression.h"
+#include "hphp/compiler/expression/simple_query_clause.h"
+#include "hphp/compiler/expression/join_clause.h"
+#include "hphp/compiler/expression/group_clause.h"
+#include "hphp/compiler/expression/ordering.h"
 
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/statement/class_statement.h"
@@ -1807,6 +1812,95 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
       break;
     }
   }
+}
+
+void Parser::onQuery(Token &out, Token &head, Token &body) {
+  out->exp = NEW_EXP(QueryExpression, head.exp, body.exp);
+}
+
+void appendList(ExpressionListPtr expList, Token *exps) {
+  if (exps != nullptr) {
+    assert(exps->exp->is(Expression::KindOfExpressionList));
+    ExpressionListPtr el(static_pointer_cast<ExpressionList>(exps->exp));
+    for (unsigned int i = 0; i < el->getCount(); i++) {
+      if ((*el)[i]) expList->addElement((*el)[i]);
+    }
+  }
+}
+
+void Parser::onQueryBody(
+  Token &out, Token *clauses, Token &select, Token *cont) {
+  ExpressionListPtr expList(NEW_EXP0(ExpressionList));
+  appendList(expList, clauses);
+  expList->addElement(select.exp);
+  if (cont != nullptr) expList->addElement(cont->exp);
+  out->exp = expList;
+}
+
+void Parser::onQueryBodyClause(Token &out, Token *clauses, Token &clause) {
+  ExpressionPtr expList;
+  if (clauses && clauses->exp) {
+    expList = clauses->exp;
+  } else {
+    expList = NEW_EXP0(ExpressionList);
+  }
+  expList->addElement(clause->exp);
+  out->exp = expList;
+}
+
+void Parser::onFromClause(Token &out, Token &var, Token &coll) {
+  out->exp = NEW_EXP(FromClause, var.text(), coll.exp);
+}
+
+void Parser::onLetClause(Token &out, Token &var, Token &expr) {
+  out->exp = NEW_EXP(LetClause, var.text(), expr.exp);
+}
+
+void Parser::onWhereClause(Token &out, Token &expr) {
+  out->exp = NEW_EXP(WhereClause, expr.exp);
+}
+
+void Parser::onJoinClause(Token &out, Token &var, Token &coll,
+  Token &left, Token &right) {
+  out->exp = NEW_EXP(JoinClause, var.text(), coll.exp,
+                     left.exp, right.exp, "");
+}
+
+void Parser::onJoinIntoClause(Token &out, Token &var, Token &coll,
+  Token &left, Token &right, Token &group) {
+  out->exp = NEW_EXP(JoinClause, var.text(), coll.exp,
+                     left.exp, right.exp, group.text());
+}
+
+void Parser::onOrderbyClause(Token &out, Token &orderings) {
+  out->exp = NEW_EXP(OrderbyClause, orderings.exp);
+}
+
+void Parser::onOrdering(Token &out, Token *orderings, Token &ordering) {
+  ExpressionPtr expList;
+  if (orderings && orderings->exp) {
+    expList = orderings->exp;
+  } else {
+    expList = NEW_EXP0(ExpressionList);
+  }
+  expList->addElement(ordering->exp);
+  out->exp = expList;
+}
+
+void Parser::onOrderingExpr(Token &out, Token &expr, Token *direction) {
+  out->exp = NEW_EXP(Ordering, expr.exp, (direction) ? direction->num() : 0);
+}
+
+void Parser::onSelectClause(Token &out, Token &expr) {
+  out->exp = NEW_EXP(SelectClause, expr.exp);
+}
+
+void Parser::onGroupClause(Token &out, Token &coll, Token &key) {
+  out->exp = NEW_EXP(GroupClause, coll.exp, key.exp);
+}
+
+void Parser::onIntoClause(Token &out, Token &var, Token &query) {
+  out->exp = NEW_EXP(IntoClause, var.text(), query.exp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

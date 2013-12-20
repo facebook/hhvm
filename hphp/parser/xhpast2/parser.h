@@ -257,6 +257,20 @@ enum NodeType {
   ONTYPESPECIALIZATION = 88,
   ONYIELDPAIR = 89,
   ONAWAIT = 90,
+  ONQUERY = 91,
+  ONQUERYBODY = 92,
+  ONQUERYBODYCLAUSE = 93,
+  ONFROMCLAUSE = 94,
+  ONLETCLAUSE = 95,
+  ONWHERECLAUSE = 96,
+  ONJOINCLAUSE = 97,
+  ONJOININTOCLAUSE = 98,
+  ONORDERBYCLAUSE = 99,
+  ONORDERING = 100,
+  ONORDERINGEXPR = 101,
+  ONSELECTCLAUSE = 102,
+  ONGROUPCLAUSE = 103,
+  ONINTOCLAUSE = 104,
 };
 
 struct Token : ScannerToken {
@@ -891,6 +905,55 @@ struct Parser : ParserBase {
     // TODO: no out?
 //    out.setNodeType(ONTYPESPECIALIZATION)
 //      .setExtra(new OnTypeSpecializationEI(specialization));
+  }
+
+  void onQuery(Token &out, Token &head, Token &body) {
+    out.setNodeType(ONQUERY).appendChild(&head).appendChild(&body);
+  }
+  void onQueryBody(Token &out, Token *clauses, Token &select, Token *cont) {
+    out.setNodeType(ONQUERYBODY).appendChild(clauses).appendChild(&select)
+      .appendChild(cont);
+  }
+  void onQueryBodyClause(Token &out, Token *clauses, Token &clause) {
+    out.setNodeType(ONQUERYBODYCLAUSE).appendChild(clauses)
+      .appendChild(&clause);
+  }
+  void onFromClause(Token &out, Token &var, Token &coll) {
+    out.setNodeType(ONFROMCLAUSE).appendChild(&var).appendChild(&coll);
+  }
+  void onLetClause(Token &out, Token &var, Token &expr) {
+    out.setNodeType(ONLETCLAUSE).appendChild(&var).appendChild(&expr);
+  }
+  void onWhereClause(Token &out, Token &expr) {
+    out.setNodeType(ONWHERECLAUSE).appendChild(&expr);
+  }
+  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
+      Token &right) {
+    out.setNodeType(ONJOINCLAUSE).appendChild(&var).appendChild(&coll)
+      .appendChild(&left).appendChild(&right);
+  }
+  void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
+      Token &right, Token &group) {
+    out.setNodeType(ONJOININTOCLAUSE).appendChild(&var).appendChild(&coll)
+      .appendChild(&left).appendChild(&right).appendChild(&group);
+  }
+  void onOrderbyClause(Token &out, Token &orderings) {
+    out.setNodeType(ONORDERBYCLAUSE).appendChild(&orderings);
+  }
+  void onOrdering(Token &out, Token *orderings, Token &ordering) {
+    out.setNodeType(ONORDERING).appendChild(orderings).appendChild(&ordering);
+  }
+  void onOrderingExpr(Token &out, Token &expr, Token *direction) {
+    out.setNodeType(ONORDERINGEXPR).appendChild(&expr).appendChild(direction);
+  }
+  void onSelectClause(Token &out, Token &expr) {
+    out.setNodeType(ONSELECTCLAUSE).appendChild(&expr);
+  }
+  void onGroupClause(Token &out, Token &coll, Token &key) {
+    out.setNodeType(ONGROUPCLAUSE).appendChild(&coll).appendChild(&key);
+  }
+  void onIntoClause(Token &out, Token &var, Token &query) {
+    out.setNodeType(ONINTOCLAUSE).appendChild(&var).appendChild(&query);
   }
 
   // for namespace support

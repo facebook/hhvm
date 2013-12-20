@@ -78,7 +78,17 @@ class Variant;
     x(ClosureExpression, None),                 \
     x(YieldExpression, None),                   \
     x(AwaitExpression, None),                   \
-    x(UserAttribute, None)
+    x(UserAttribute, None),                     \
+    x(QueryExpression, None),                   \
+    x(FromClause, None),                        \
+    x(LetClause, None),                         \
+    x(WhereClause, None),                       \
+    x(SelectClause, None),                      \
+    x(IntoClause, None),                        \
+    x(JoinClause, None),                        \
+    x(GroupClause, None),                       \
+    x(OrderbyClause, None),                     \
+    x(Ordering, None)
 
 class Expression : public Construct {
 public:

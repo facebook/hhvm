@@ -695,6 +695,21 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_ASYNC
 %token T_TUPLE
 
+%right T_FROM
+%token T_WHERE
+%token T_JOIN
+%token T_IN
+%token T_ON
+%token T_EQUALS
+%token T_INTO
+%token T_LET
+%token T_ORDERBY
+%token T_ASCENDING
+%token T_DESCENDING
+%token T_SELECT
+%token T_GROUP
+%token T_BY
+
 %%
 
 start:
@@ -739,6 +754,19 @@ ident:
   | T_XHP_REQUIRED                     { $$ = $1;}
   | T_XHP_ENUM                         { $$ = $1;}
   | T_TUPLE                            { $$ = $1;}
+  | T_WHERE                            { $$ = $1;}
+  | T_JOIN                             { $$ = $1;}
+  | T_ON                               { $$ = $1;}
+  | T_IN                               { $$ = $1;}
+  | T_EQUALS                           { $$ = $1;}
+  | T_INTO                             { $$ = $1;}
+  | T_LET                              { $$ = $1;}
+  | T_ORDERBY                          { $$ = $1;}
+  | T_ASCENDING                        { $$ = $1;}
+  | T_DESCENDING                       { $$ = $1;}
+  | T_SELECT                           { $$ = $1;}
+  | T_GROUP                            { $$ = $1;}
+  | T_BY                               { $$ = $1;}
 ;
 
 use_declarations:
@@ -887,6 +915,8 @@ statement:
   | await_assign_expr ';'              { _p->onExpStatement($$, $1);}
   | T_RETURN await_expr ';'            { _p->onReturn($$, &$2); }
   | await_list_assign_expr ';'         { _p->onExpStatement($$, $1);}
+  | query_assign_expr ';'              { _p->onExpStatement($$, $1);}
+  | T_RETURN query_expr ';'            { _p->onReturn($$, &$2); }
   | ident ':'                          { _p->onLabel($$, $1);
                                          _p->addLabel($1.text(),
                                                       _p->getLocation(),
@@ -1739,6 +1769,102 @@ dim_expr_base:
     array_literal                      { $$ = $1;}
   | class_constant                     { $$ = $1;}
   | '(' expr_no_variable ')'           { $$ = $2;}
+;
+
+query_expr:
+    query_head query_body            { _p->onQuery($$, $1, $2); }
+;
+
+query_assign_expr:
+    variable '=' query_expr          { _p->onAssign($$, $1, $3, 0, true);}
+;
+
+query_head:
+  T_FROM T_VARIABLE T_IN expr        { _p->onFromClause($$, $2, $4); }
+;
+
+query_body:
+    query_body_clauses select_or_group_clause
+                                     { _p->onQueryBody($$, &$1, $2, NULL); }
+  | query_body_clauses select_or_group_clause query_continuation
+                                     { _p->onQueryBody($$, &$1, $2, &$3); }
+  | select_or_group_clause
+                                     { _p->onQueryBody($$, NULL, $1, NULL); }
+  | select_or_group_clause query_continuation
+                                     { _p->onQueryBody($$, NULL, $1, &$2); }
+;
+
+query_body_clauses:
+    query_body_clause                { _p->onQueryBodyClause($$, NULL, $1); }
+  | query_body_clauses query_body_clause
+                                     { _p->onQueryBodyClause($$, &$1, $2); }
+;
+
+query_body_clause:
+    from_clause                      { $$ = $1;}
+  | let_clause                       { $$ = $1;}
+  | where_clause                     { $$ = $1;}
+  | join_clause                      { $$ = $1;}
+  | join_into_clause                 { $$ = $1;}
+  | orderby_clause                   { $$ = $1;}
+;
+
+from_clause:
+    T_FROM T_VARIABLE T_IN expr      { _p->onFromClause($$, $2, $4); }
+;
+
+let_clause:
+    T_LET T_VARIABLE '=' expr        { _p->onLetClause($$, $2, $4); }
+;
+
+where_clause:
+    T_WHERE expr                     { _p->onWhereClause($$, $2); }
+;
+
+join_clause:
+    T_JOIN T_VARIABLE T_IN expr T_ON expr T_EQUALS expr
+                                     { _p->onJoinClause($$, $2, $4, $6, $8); }
+;
+
+join_into_clause:
+    T_JOIN T_VARIABLE T_IN expr T_ON expr T_EQUALS expr T_INTO T_VARIABLE
+                              { _p->onJoinIntoClause($$, $2, $4, $6, $8, $10); }
+;
+
+orderby_clause:
+    T_ORDERBY orderings              { _p->onOrderbyClause($$, $2); }
+;
+
+orderings:
+    ordering                         { _p->onOrdering($$, NULL, $1); }
+  | orderings ',' ordering           { _p->onOrdering($$, &$1, $3); }
+;
+
+ordering:
+    expr                             { _p->onOrderingExpr($$, $1, NULL); }
+  | expr ordering_direction          { _p->onOrderingExpr($$, $1, &$2); }
+;
+
+ordering_direction:
+    T_ASCENDING                      { $$ = $1;}
+  | T_DESCENDING                     { $$ = $1;}
+;
+
+select_or_group_clause:
+    select_clause                    { $$ = $1;}
+  | group_clause                     { $$ = $1;}
+;
+
+select_clause:
+    T_SELECT expr                    { _p->onSelectClause($$, $2); }
+;
+
+group_clause:
+    T_GROUP expr T_BY expr           { _p->onGroupClause($$, $2, $4); }
+;
+
+query_continuation:
+    T_INTO T_VARIABLE query_body     { _p->onIntoClause($$, $2, $3); }
 ;
 
 lexical_vars:

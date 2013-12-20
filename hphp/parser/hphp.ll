@@ -147,6 +147,20 @@ static int getNextTokenType(int t) {
     case T_XHP_REQUIRED:
     case T_XHP_ENUM:
     case T_ARRAY:
+    case T_FROM:
+    case T_IN:
+    case T_WHERE:
+    case T_JOIN:
+    case T_ON:
+    case T_EQUALS:
+    case T_INTO:
+    case T_LET:
+    case T_ORDERBY:
+    case T_ASCENDING:
+    case T_DESCENDING:
+    case T_SELECT:
+    case T_GROUP:
+    case T_BY:
       return NextTokenType::TypeListMaybe;
     case T_XHP_ATTRIBUTE:
       return NextTokenType::XhpClassName |
@@ -406,6 +420,22 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 <ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_NEWTYPE); }
 <ST_IN_SCRIPTING>"await"              { HH_ONLY_KEYWORD(T_AWAIT);}
+<ST_IN_SCRIPTING>"from"/{WHITESPACE_AND_COMMENTS}\$[a-zA-Z0-9_\x7f-\xff] {
+  HH_ONLY_KEYWORD(T_FROM);
+}
+<ST_IN_SCRIPTING>"where"              { HH_ONLY_KEYWORD(T_WHERE); }
+<ST_IN_SCRIPTING>"join"               { HH_ONLY_KEYWORD(T_JOIN); }
+<ST_IN_SCRIPTING>"in"                 { HH_ONLY_KEYWORD(T_IN); }
+<ST_IN_SCRIPTING>"on"                 { HH_ONLY_KEYWORD(T_ON); }
+<ST_IN_SCRIPTING>"equals"             { HH_ONLY_KEYWORD(T_EQUALS); }
+<ST_IN_SCRIPTING>"into"               { HH_ONLY_KEYWORD(T_INTO); }
+<ST_IN_SCRIPTING>"let"                { HH_ONLY_KEYWORD(T_LET); }
+<ST_IN_SCRIPTING>"orderby"            { HH_ONLY_KEYWORD(T_ORDERBY); }
+<ST_IN_SCRIPTING>"ascending"          { HH_ONLY_KEYWORD(T_ASCENDING); }
+<ST_IN_SCRIPTING>"descending"         { HH_ONLY_KEYWORD(T_DESCENDING); }
+<ST_IN_SCRIPTING>"select"             { HH_ONLY_KEYWORD(T_SELECT); }
+<ST_IN_SCRIPTING>"group"              { HH_ONLY_KEYWORD(T_GROUP); }
+<ST_IN_SCRIPTING>"by"                 { HH_ONLY_KEYWORD(T_BY); }
 <ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff] {
   HH_ONLY_KEYWORD(T_ASYNC);
 }

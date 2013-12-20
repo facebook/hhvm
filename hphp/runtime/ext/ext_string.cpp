@@ -968,11 +968,12 @@ static bool is_valid_strrpos_args(
 }
 
 Variant f_strrchr(const String& haystack, CVarRef needle) {
-  if (!is_valid_strrpos_args(haystack, needle, 0)) {
+  if (haystack.size() == 0) {
     return false;
   }
+
   int pos;
-  if (needle.isString()) {
+  if (needle.isString() && needle.toString().size() > 0) {
     pos = haystack.rfind(needle.toString().substr(0,1), false);
   } else {
     pos = haystack.rfind(needle.toByte(), false);

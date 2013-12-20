@@ -1,0 +1,92 @@
+array(2) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  int(1)
+}
+array(2) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  int(1)
+}
+array(2) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  int(2)
+}
+array(2) {
+  [0]=>
+  string(2) "xx"
+  [1]=>
+  int(2)
+}
+array(2) {
+  [0]=>
+  string(2) "xx"
+  [1]=>
+  int(4)
+}
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(0) ""
+    [1]=>
+    string(0) ""
+  }
+  [1]=>
+  int(2)
+}
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(0) ""
+    [1]=>
+    string(1) "x"
+  }
+  [1]=>
+  int(1)
+}
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(1) "x"
+    [1]=>
+    string(0) ""
+  }
+  [1]=>
+  int(1)
+}
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "xxx"
+    [1]=>
+    string(3) "xxx"
+  }
+  [1]=>
+  int(4)
+}
+array(2) {
+  [0]=>
+  string(0) ""
+  [1]=>
+  int(1)
+}
+array(2) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  int(0)
+}
+array(2) {
+  [0]=>
+  string(3) "xxx"
+  [1]=>
+  int(2)
+}

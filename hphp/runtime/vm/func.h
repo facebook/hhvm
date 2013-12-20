@@ -250,6 +250,7 @@ struct Func {
   bool isEntry(Offset offset) const;
   bool isDVEntry(Offset offset) const;
   int  getDVEntryNumParams(Offset offset) const;
+  Offset getEntryForNumArgs(int numArgsPassed) const;
 
   Unit* unit() const { return m_unit; }
   PreClass* preClass() const { return shared()->m_preClass; }

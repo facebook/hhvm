@@ -789,6 +789,17 @@ int Func::getDVEntryNumParams(Offset offset) const {
   return -1;
 }
 
+Offset Func::getEntryForNumArgs(int numArgsPassed) const {
+  assert(numArgsPassed >= 0);
+  for (unsigned i = numArgsPassed; i < numParams(); i++) {
+    const Func::ParamInfo& pi = params()[i];
+    if (pi.hasDefaultValue()) {
+      return pi.funcletOff();
+    }
+  }
+  return base();
+}
+
 bool Func::shouldPGO() const {
   if (!RuntimeOption::EvalJitPGO) return false;
 

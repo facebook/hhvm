@@ -404,7 +404,7 @@ protected:
     Success
   };
   static const char* translateResultName(TranslateResult r);
-  void traceStart(Offset initBcOffset, Offset initSpOffset);
+  void traceStart(Offset initBcOffset, Offset initSpOffset, const Func* func);
   virtual void traceCodeGen() = 0;
   void traceEnd();
   void traceFree();

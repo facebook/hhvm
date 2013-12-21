@@ -574,7 +574,7 @@ public:
 
   Object m_o;
   dom_iterable *m_objmap;
-  ArrayIter *m_iter;
+  ArrayIter m_iter;
   int m_index;
   Object m_curobj;
 };

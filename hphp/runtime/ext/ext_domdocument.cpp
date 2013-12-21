@@ -5242,16 +5242,14 @@ Variant c_DOMXPath::t_registerphpfunctions(CVarRef funcs /* = null */) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_DOMNodeIterator::c_DOMNodeIterator(Class* cb) :
-    ExtObjectData(cb), m_objmap(NULL), m_iter(NULL), m_index(-1) {
+    ExtObjectData(cb), m_objmap(NULL), m_iter(), m_index(-1) {
 }
 
 c_DOMNodeIterator::~c_DOMNodeIterator() {
   sweep();
 }
 
-void c_DOMNodeIterator::sweep() {
-  delete m_iter;
-}
+void c_DOMNodeIterator::sweep() { }
 
 void c_DOMNodeIterator::reset_iterator() {
   assert(m_objmap);
@@ -5260,7 +5258,7 @@ void c_DOMNodeIterator::reset_iterator() {
   if (m_objmap->m_nodetype != XML_ENTITY_NODE &&
       m_objmap->m_nodetype != XML_NOTATION_NODE) {
     if (m_objmap->m_nodetype == DOM_NODESET) {
-      m_iter = new ArrayIter(m_objmap->m_baseobjptr);
+      m_iter = ArrayIter(m_objmap->m_baseobjptr);
     } else {
       xmlNodePtr nodep = m_objmap->m_baseobj.getTyped<c_DOMNode>()->m_node;
       if (!nodep) {
@@ -5317,14 +5315,14 @@ void c_DOMNodeIterator::t___construct() {
 
 Variant c_DOMNodeIterator::t_current() {
   if (m_iter) {
-    return m_iter->second();
+    return m_iter.second();
   }
   return m_curobj;
 }
 
 Variant c_DOMNodeIterator::t_key() {
   if (m_iter) {
-    return m_iter->first();
+    return m_iter.first();
   }
   xmlNodePtr curnode = m_curobj.getTyped<c_DOMNode>()->m_node;
   return String((const char *)curnode->name, CopyString);
@@ -5332,7 +5330,7 @@ Variant c_DOMNodeIterator::t_key() {
 
 Variant c_DOMNodeIterator::t_next() {
   if (m_iter) {
-    m_iter->next();
+    m_iter.next();
     return uninit_null();
   }
 
@@ -5382,8 +5380,7 @@ err:
 }
 
 Variant c_DOMNodeIterator::t_rewind() {
-  delete m_iter;
-  m_iter = NULL;
+  m_iter.reset();
   m_index = -1;
   reset_iterator();
   return uninit_null();
@@ -5391,7 +5388,7 @@ Variant c_DOMNodeIterator::t_rewind() {
 
 Variant c_DOMNodeIterator::t_valid() {
   if (m_iter) {
-    return !m_iter->end();
+    return !m_iter.end();
   }
   return !m_curobj.isNull();
 }

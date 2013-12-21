@@ -3304,6 +3304,12 @@ private:
 static bool isNewResult(ExpressionPtr e) {
   if (!e) return false;
   if (e->is(Expression::KindOfNewObjectExpression)) return true;
+  if (e->is(Expression::KindOfBinaryOpExpression)) {
+    auto b = spc(BinaryOpExpression, e);
+    if (b->getOp() == T_COLLECTION) {
+      return true;
+    }
+  }
   if (e->is(Expression::KindOfAssignmentExpression)) {
     return isNewResult(spc(AssignmentExpression, e)->getValue());
   }

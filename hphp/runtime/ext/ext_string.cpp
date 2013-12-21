@@ -1366,6 +1366,16 @@ Variant f_strtr(const String& str, CVarRef from, CVarRef to /* = null_variant */
   }
 
   if (!to.isNull()) {
+    if (to.is(KindOfArray)) {
+      throw_invalid_argument("3rd argument expected string; array given.");
+      return String();
+    } else if (to.is(KindOfResource)) {
+      throw_invalid_argument("3rd argument expected string; resource given.");
+      return String();
+    }
+    if (from.is(KindOfArray)) {
+      raise_notice("Array to string conversion");
+    }
     return StringUtil::Translate(str, from.toString(), to.toString());
   }
 

@@ -2344,6 +2344,26 @@ void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
   }
 }
 
+/*
+ * emit something equivalent to testl(val, mr),
+ * but with a shorter encoding (eg testb(val, mr))
+ * if possible.
+ */
+template <typename M>
+void testimm(Asm& as, uint32_t val, const M& mr) {
+  int off = 0;
+  auto v = val;
+  while (v > 0xff && !(v & 0xff)) {
+    off++;
+    v >>= 8;
+  }
+  if (v > 0xff) {
+    as.testl((int32_t)val, mr);
+  } else {
+    as.testb(v, *(mr.r + off));
+  }
+}
+
 void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
   const size_t sizeOff = FAST_COLLECTION_SIZE_OFFSET;
 
@@ -2353,14 +2373,13 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   auto srcReg = curOpd(src).reg();
 
-  m_as.testl   (ObjectData::CallToImpl, srcReg[ObjectData::attributeOff()]);
+  testimm(m_as, ObjectData::CallToImpl, srcReg[ObjectData::attributeOff()]);
   unlikelyIfThenElse(
     CC_NZ,
     [&] (Asm& a) {
-      a.testl(
-        ObjectData::IsCollection,
-        srcReg[ObjectData::attributeOff()]
-      );
+      testimm(a,
+              ObjectData::IsCollection,
+              srcReg[ObjectData::attributeOff()]);
       ifThenElse(
         a,
         CC_NZ,
@@ -3805,7 +3824,7 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
   if (cls->needInitialization()) {
     if (props) {
       cls->initPropHandle();
-      m_as.testq(-1, rVmTl[cls->propHandle()]);
+      m_as.cmpq(0, rVmTl[cls->propHandle()]);
       unlikelyIfBlock(CC_Z, [&] (Asm& a) {
           cgCallHelper(a,
                        CppCall(getMethodPtr(&Class::initProps)),
@@ -3816,7 +3835,7 @@ void CodeGenerator::cgAllocObjFast(IRInstruction* inst) {
     }
     if (sprops) {
       cls->initSPropHandle();
-      m_as.testq(-1, rVmTl[cls->sPropHandle()]);
+      m_as.cmpq(0, rVmTl[cls->sPropHandle()]);
       unlikelyIfBlock(CC_Z, [&] (Asm& a) {
           cgCallHelper(a,
                        CppCall(getMethodPtr(&Class::initSProps)),

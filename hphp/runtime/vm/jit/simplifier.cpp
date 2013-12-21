@@ -1798,7 +1798,17 @@ SSATmp* Simplifier::simplifyConvCellToBool(IRInstruction* inst) {
   if (srcType.isDbl())    return gen(ConvDblToBool, src);
   if (srcType.isInt())    return gen(ConvIntToBool, src);
   if (srcType.isString()) return gen(ConvStrToBool, src);
-  if (srcType.isObj())    return gen(ConvObjToBool, src);
+  if (srcType.isObj()) {
+    if (auto cls = srcType.getClass()) {
+      // t3429711 we should test cls->m_ODAttr
+      // here, but currently it doesnt have all
+      // the flags set.
+      if (!cls->instanceCtor()) {
+        return cns(true);
+      }
+    }
+    return gen(ConvObjToBool, src);
+  }
   if (srcType.isRes())    return nullptr; // No specialization yet
 
   return nullptr;

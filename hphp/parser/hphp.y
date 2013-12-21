@@ -103,6 +103,8 @@
 
 using namespace HPHP::HPHP_PARSER_NS;
 
+typedef HPHP::ClosureType ClosureType;
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
@@ -558,6 +560,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %parse-param {HPHP::HPHP_PARSER_NS::Parser *_p}
 
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
+%right T_LAMBDA_ARROW
 %left ','
 %left T_LOGICAL_OR
 %left T_LOGICAL_XOR
@@ -709,6 +712,10 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_SELECT
 %token T_GROUP
 %token T_BY
+
+%token T_LAMBDA_OP
+%token T_LAMBDA_CP
+%token T_UNRESOLVED_OP
 
 %%
 
@@ -958,7 +965,7 @@ is_reference:
 ;
 
 function_loc:
-    T_FUNCTION                         { _p->pushFuncLocation();}
+    T_FUNCTION                         { _p->pushFuncLocation(); }
 ;
 
 function_declaration_statement:
@@ -1676,36 +1683,92 @@ expr_no_variable:
   | shape_literal                      { $$ = $1; }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
-  | function_loc
-    is_reference '('                   { Token t;
-                                         _p->onNewLabelScope(true);
-                                         _p->onClosureStart(t);
-                                         _p->pushLabelInfo();}
-    parameter_list ')'
-    hh_opt_return_type lexical_vars
-    '{' inner_statement_list '}'       { Token u; u.reset();
-                                         _p->finishStatement($10, $10); $10 = 1;
-                                         _p->onClosure($$,0,u,$2,$5,$8,$10);
-                                         _p->popLabelInfo();
-                                         _p->onCompleteLabelScope(true);}
-  | non_empty_member_modifiers function_loc
-    is_reference '('                   { Token t;
-                                         _p->onNewLabelScope(true);
-                                         _p->onClosureStart(t);
-                                         _p->pushLabelInfo();}
-    parameter_list ')'
-    hh_opt_return_type lexical_vars
-    '{' inner_statement_list '}'       { Token u; u.reset();
-                                         _p->finishStatement($11, $11); $11 = 1;
-                                         _p->onClosure($$,&$1,u,$3,$6,$9,$11);
-                                         _p->popLabelInfo();
-                                         _p->onCompleteLabelScope(true);}
+  | closure_expression                 { $$ = $1;}
+  | lambda_expression                  { $$ = $1;}
   | dim_expr                           { $$ = $1;}
+;
+
+lambda_use_vars:
+    T_USE '('
+    lexical_var_list
+    hh_possible_comma
+    ')'                                { $$ = $3;}
+  |                                    { $$.reset();}
+;
+
+closure_expression:
+    function_loc
+    is_reference '('                   { Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo(); }
+    parameter_list ')'
+    hh_opt_return_type lambda_use_vars
+    '{' inner_statement_list '}'       { _p->finishStatement($10, $10); $10 = 1;
+                                         $$ = _p->onClosure(ClosureType::Long,
+                                                            nullptr,
+                                                            $2,$5,$8,$10);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
+  | non_empty_member_modifiers
+    function_loc
+    is_reference '('                   { Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo(); }
+    parameter_list ')'
+    hh_opt_return_type lambda_use_vars
+    '{' inner_statement_list '}'       { _p->finishStatement($10, $10); $10 = 1;
+                                         $$ = _p->onClosure(ClosureType::Long,
+                                                            &$1,
+                                                            $3,$6,$9,$11);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
+;
+
+lambda_expression:
+    T_VARIABLE                         { _p->pushFuncLocation();
+                                         Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo();
+                                         Token u;
+                                         _p->onParam($1,NULL,u,$1,0,
+                                                     NULL,NULL,NULL);}
+    lambda_body                        { Token v; Token w;
+                                         _p->finishStatement($3, $3); $3 = 1;
+                                         $$ = _p->onClosure(ClosureType::Short,
+                                                            nullptr,
+                                                            v,$1,w,$3);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
+  | T_LAMBDA_OP                        { _p->pushFuncLocation();
+                                         Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo();}
+    parameter_list
+    T_LAMBDA_CP
+    hh_opt_return_type
+    lambda_body                        { Token u; Token v;
+                                         _p->finishStatement($6, $6); $6 = 1;
+                                         $$ = _p->onClosure(ClosureType::Short,
+                                                            nullptr,
+                                                            u,$3,v,$6);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);}
+;
+
+lambda_body:
+    T_LAMBDA_ARROW expr               { $$ = _p->onExprForLambda($2);}
+  | T_LAMBDA_ARROW
+    '{' inner_statement_list '}'      { $$ = $3;}
 ;
 
 shape_keyname:
     T_CONSTANT_ENCAPSED_STRING        { validate_shape_keyname($1, _p);
                                         _p->onScalar($$, T_CONSTANT_ENCAPSED_STRING, $1); }
+;
 
 non_empty_shape_pair_list:
     non_empty_shape_pair_list ','

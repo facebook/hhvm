@@ -257,9 +257,15 @@ public:
   void onThrow(Token &out, Token &expr);
 
   void onClosureStart(Token &name);
-  void onClosure(Token &out, Token *modifiers, Token &ret, Token &ref,
-                 Token &params, Token &cparams, Token &stmts);
+  Token onClosure(ClosureType type,
+                  Token* modifiers,
+                  Token& ref,
+                  Token& params,
+                  Token& cparams,
+                  Token& stmts);
+  Token onExprForLambda(const Token& expr);
   void onClosureParam(Token &out, Token *params, Token &param, bool ref);
+
   void onLabel(Token &out, Token &label);
   void onGoto(Token &out, Token &label, bool limited);
   void onTypedef(Token& out, const Token& name, const Token& type);

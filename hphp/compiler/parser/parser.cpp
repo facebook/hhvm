@@ -1716,10 +1716,27 @@ void Parser::onClosureStart(Token &name) {
   onFunctionStart(name, true);
 }
 
-void Parser::onClosure(Token &out, Token* modifiers, Token &ret, Token &ref,
-                       Token &params, Token &cparams, Token &stmts) {
-  auto stmt = onFunctionHelper(FunctionType::Closure,
-                modifiers, ret, ref, nullptr, params, stmts, nullptr, true);
+Token Parser::onClosure(ClosureType type,
+                        Token* modifiers,
+                        Token& ref,
+                        Token& params,
+                        Token& cparams,
+                        Token& stmts) {
+  Token out;
+  Token name;
+
+  Token retIgnore;
+  auto stmt = onFunctionHelper(
+    FunctionType::Closure,
+    modifiers,
+    retIgnore,
+    ref,
+    nullptr,
+    params,
+    stmts,
+    nullptr,
+    true
+  );
 
   ExpressionListPtr vars = dynamic_pointer_cast<ExpressionList>(cparams->exp);
   if (vars) {
@@ -1734,11 +1751,22 @@ void Parser::onClosure(Token &out, Token* modifiers, Token &ret, Token &ref,
 
   ClosureExpressionPtr closure = NEW_EXP(
     ClosureExpression,
+    type,
     dynamic_pointer_cast<FunctionStatement>(stmt),
     vars
   );
   closure->getClosureFunction()->setContainingClosure(closure);
   out->exp = closure;
+
+  return out;
+}
+
+Token Parser::onExprForLambda(const Token& expr) {
+  auto stmt = NEW_STMT(ReturnStatement, expr.exp);
+  Token ret;
+  ret.stmt = NEW_STMT0(StatementList);
+  ret.stmt->addElement(stmt);
+  return ret;
 }
 
 void Parser::onClosureParam(Token &out, Token *params, Token &param,

@@ -19,6 +19,7 @@
 #include "folly/ScopeGuard.h"
 
 #include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/lambda_names.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/statement/statement_list.h"
@@ -38,7 +39,7 @@
 #include "hphp/compiler/expression/user_attribute.h"
 #include "hphp/runtime/base/complex-types.h"
 
-using namespace HPHP;
+namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -261,9 +262,10 @@ void FileScope::addConstantDependency(AnalysisResultPtr ar,
 }
 
 void FileScope::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_pseudoMain) {
-    m_pseudoMain->getStmt()->analyzeProgram(ar);
-  }
+  if (!m_pseudoMain) return;
+  m_pseudoMain->getStmt()->analyzeProgram(ar);
+
+  resolve_lambda_names(ar, shared_from_this());
 }
 
 ClassScopeRawPtr FileScope::resolveClass(ClassScopeRawPtr cls) {
@@ -508,3 +510,4 @@ void FileScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.done();
 }
 
+}

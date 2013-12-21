@@ -286,7 +286,7 @@ struct Token : ScannerToken {
     ScannerToken::m_num = num;
     return *this;
   }
-  Token& operator=(Token& other) {
+  Token& operator=(const Token& other) {
     ScannerToken::operator=(other);
     nodeType = other.nodeType;
     extra = other.extra;
@@ -316,10 +316,9 @@ struct Token : ScannerToken {
     }
     return *this;
   }
-  Token& appendChildren(Token *token) {
-    for (std::vector<Token *>::iterator i = token->children.begin();
-         i != token->children.end(); ++i) {
-      children.push_back(*i);
+  Token& appendChildren(const Token* token) {
+    for (auto& c : token->children) {
+      children.push_back(c);
     }
     return *this;
   }
@@ -879,17 +878,23 @@ struct Parser : ParserBase {
     out.setNodeType(ONTHROW).appendChild(&expr);
   }
 
-  void onClosure(Token &out, Token *modifiers, Token &ret, Token &ref,
-                 Token &params, Token &cparams, Token &stmts) {
-    out.setNodeType(ONCLOSURE).appendChild(modifiers).appendChild(&ret)
-      .appendChild(&ref).appendChild(&params).appendChild(&cparams)
-      .appendChild(&stmts);
+  Token onClosure(ClosureType type,
+                  Token* modifier,
+                  Token& ref,
+                  Token& params,
+                  Token& cparams,
+                  Token& stmts) {
+    // TODO
+    Token ret;
+    return ret;
   }
 
   void onClosureParam(Token &out, Token *params, Token &param, bool ref) {
     out.setNodeType(ONCLOSUREPARAM).appendChild(params).appendChild(&param)
       .setExtra(new OnClosureParamEI(ref));
   }
+
+  Token onExprForLambda(const Token&) { /* TODO */ Token ret; return ret; }
 
   void onLabel(Token &out, Token &label) {
     out.setNodeType(ONLABEL).appendChild(&label);

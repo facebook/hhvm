@@ -47,22 +47,26 @@
    (c) == '_' || (c) >= 0x7F)
 
 /**
- * "Next token" types tell us how to treat a token based on the previous
- * token for the purpose of recognizing XHP tags, XHP class names, XHP
- * category names, and type lists.
+ * "Next token types" tell us how to interpret the next characters in the
+ * input stream based on the previous token for the purpose of recognizing
+ * XHP tags, XHP class names, XHP category names, type lists, and lambda
+ * expressions.
  *   XhpTag:
- *     '<' will be treated as the start of an XHP tag
+ *     "<"[a-zA-Z_\x7f-\xff] will be treated as the start of an XHP tag
  *   XhpTagMaybe:
- *     '<' will be treated as possibly being the start of an XHP tag;
- *     we will scan ahead looking at subsequent characters to figure
- *     out if '<' is definitely the start of an XHP tag
+ *     "<"[a-zA-Z_\x7f-\xff] will be treated as possibly being the start of an
+ *     XHP tag; we will scan ahead looking at subsequent characters to figure
+ *     out if "<" is definitely the start of an XHP tag
  *   XhpClassName:
- *     ':' will be treated as the start of an XHP class name
+ *     ":"{XHPLABEL} will be treated as an XHP class name
  *   XhpCategoryName:
- *     '%' will be treated as the start of an XHP category name
+ *     "%"{XHPLABEL} will be treated as an XHP category name
  *   TypeListMaybe:
- *     '<' should be recognized as possibly being the start of a type list;
+ *     "<" should be recognized as possibly being the start of a type list;
  *     this will be resolved by inspecting subsequent tokens
+ *   LambdaMaybe:
+ *     "(" should be recognized as possibly being the start of a lambda
+ *     expression; this will be resolved by inspecting subsequent tokens
  */
 namespace NextTokenType {
   static const int Normal = 0x1;
@@ -71,6 +75,7 @@ namespace NextTokenType {
   static const int XhpClassName = 0x8;
   static const int XhpCategoryName = 0x10;
   static const int TypeListMaybe = 0x20;
+  static const int LambdaMaybe = 0x40;
 }
 
 static int getNextTokenType(int t) {
@@ -112,6 +117,7 @@ static int getNextTokenType(int t) {
     case T_NEW:
     case T_INSTANCEOF:
     case T_DOUBLE_ARROW:
+    case T_LAMBDA_ARROW:
     case T_NS_SEPARATOR:
     case T_INLINE_HTML:
     case T_INT_CAST:
@@ -124,14 +130,17 @@ static int getNextTokenType(int t) {
     case T_UNRESOLVED_LT:
     case T_AS:
       return NextTokenType::XhpTag |
-             NextTokenType::XhpClassName;
-    case ',': case '(': case '|':
+             NextTokenType::XhpClassName |
+             NextTokenType::LambdaMaybe;
+    case ',': case '(': case '|': case T_UNRESOLVED_OP:
       return NextTokenType::XhpTag |
              NextTokenType::XhpClassName |
-             NextTokenType::XhpCategoryName;
+             NextTokenType::XhpCategoryName |
+             NextTokenType::LambdaMaybe;
     case '}':
       return NextTokenType::XhpTagMaybe |
-             NextTokenType::XhpClassName;
+             NextTokenType::XhpClassName |
+             NextTokenType::LambdaMaybe;
     case T_INC:
     case T_DEC:
       return NextTokenType::XhpTagMaybe;
@@ -207,7 +216,7 @@ HNUM    "0x"[0-9a-fA-F]+
 LABEL   [a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
-TOKENS [;:,.\[\]()|^&+\-*/=%!~$<>?@]
+TOKENS [;:,.\[\])|^&+\-*/=%!~$<>?@]
 ANY_CHAR (.|[\n])
 NEWLINE ("\r"|"\n"|"\r\n")
 XHPLABEL {LABEL}([:-]{LABEL})*
@@ -387,6 +396,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"protected"          { RETTOKEN(T_PROTECTED);}
 <ST_IN_SCRIPTING>"public"             { RETTOKEN(T_PUBLIC);}
 <ST_IN_SCRIPTING>"unset"              { RETTOKEN(T_UNSET);}
+<ST_IN_SCRIPTING>"==>"                { RETTOKEN(T_LAMBDA_ARROW);}
 <ST_IN_SCRIPTING>"=>"                 { RETSTEP(T_DOUBLE_ARROW);}
 <ST_IN_SCRIPTING>"list"               { RETTOKEN(T_LIST);}
 <ST_IN_SCRIPTING>"array"              { RETTOKEN(T_ARRAY);}
@@ -555,6 +565,16 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   }
   yyless(1);
   RETSTEP('%');
+}
+
+<ST_IN_SCRIPTING>"("            {
+  if (_scanner->isHHSyntaxEnabled()) {
+    int ntt = getNextTokenType(_scanner->lastToken());
+    if (ntt & NextTokenType::LambdaMaybe) {
+      RETSTEP(T_UNRESOLVED_OP);
+    } 
+  }
+  RETSTEP(yytext[0]);
 }
 
 <ST_IN_SCRIPTING>{TOKENS}             {RETSTEP(yytext[0]);}
@@ -784,7 +804,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return ']';
 }
 
-<ST_VAR_OFFSET>{TOKENS}|[{}\"`] {
+<ST_VAR_OFFSET>{TOKENS}|[({}\"`] {
         /* Only '[' can be valid, but returning other tokens will allow
            a more explicit parse error */
         return yytext[0];

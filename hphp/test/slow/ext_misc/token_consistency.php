@@ -48,6 +48,10 @@ $expected_exceptions = array(
   'T_SELECT' => true,
   'T_GROUP' => true,
   'T_BY' => true,
+  'T_LAMBDA_ARROW' => true,
+  'T_LAMBDA_OP' => true,
+  'T_LAMBDA_CP' => true,
+  'T_UNRESOLVED_OP' => true,
 );
 
 foreach ($token_range as $potential_token) {

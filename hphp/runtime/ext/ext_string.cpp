@@ -974,7 +974,7 @@ Variant f_strrchr(const String& haystack, CVarRef needle) {
 
   int pos;
   if (needle.isString() && needle.toString().size() > 0) {
-    pos = haystack.rfind(needle.toString().data[0], false);
+    pos = haystack.rfind(needle.toString().data()[0], false);
   } else {
     pos = haystack.rfind(needle.toByte(), false);
   }

@@ -125,6 +125,9 @@ String StringUtil::Implode(CVarRef items, const String& delim) {
   int lenDelim = delim.size();
   int i = 0;
   for (ArrayIter iter(items); iter; ++iter) {
+    if (iter.second().is(KindOfArray)) {
+      raise_notice("Array to string conversion");
+    }
     new (&sitems[i]) String(iter.second().toString());
     len += sitems[i].size() + lenDelim;
     i++;

@@ -443,6 +443,9 @@ Variant f_explode(const String& delimiter, const String& str, int limit /* = 0x7
 String f_implode(CVarRef arg1, CVarRef arg2 /* = null_variant */) {
   Array items;
   String delim;
+  if (arg1.is(KindOfArray)) {
+    raise_notice("Array to string conversion");
+  }
   if (isContainer(arg1)) {
     items = arg1;
     delim = arg2.toString();

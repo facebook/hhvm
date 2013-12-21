@@ -228,7 +228,7 @@ Translator::liveType(const Cell* outer, const Location& l, bool specialize) {
     // Only infer the class/array kind if specialization requested
     if (valueType == KindOfObject) {
       klass = valCell->m_data.pobj->getVMClass();
-      if (klass != nullptr) {
+      if (klass != nullptr && (klass->attrs() & AttrFinal)) {
         retval = retval.setKnownClass(klass);
       }
     } else if (valueType == KindOfArray) {

@@ -1683,7 +1683,9 @@ Variant f_getimagesize(const String& filename,
 #define HAVE_GDIMAGECREATEFROMPNG 1
 
 #if HAVE_LIBTTF|HAVE_LIBFREETYPE
+#ifndef ENABLE_GD_TTF
 #define ENABLE_GD_TTF
+#endif
 #endif
 
 #define PHP_GDIMG_TYPE_GIF      1

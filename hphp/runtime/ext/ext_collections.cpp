@@ -3664,7 +3664,8 @@ void BaseSet::warnOnStrIntDup() const {
 
     if (seenVals.find(newVal) != seenVals.end()) {
       raise_warning(
-        "Set::toArray() for a set containing both int(%ld) and string('%ld')",
+        "Set::toArray() for a set containing both int(%" PRId64 ") "
+        "and string('%" PRId64 "')",
         newVal,
         newVal
       );

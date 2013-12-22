@@ -308,7 +308,7 @@ var_dump($rb->newInstance());
 print "\n";
 
 print "--- newInstanceArgs() ---\n";
-var_dump($rb->newInstanceArgs(array()));
+var_dump($rb->newInstanceArgs());
 print "\n";
 
 print "--- get_defined_functions() ---\n";

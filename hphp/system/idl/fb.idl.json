@@ -293,8 +293,8 @@
                 "HipHopSpecific"
             ],
             "return": {
-                "type": "Variant",
-                "desc": "Returns the portion of str specified by the start and length parameters.\n\nIf str is shorter than start characters long, FALSE will be returned."
+                "type": "String",
+                "desc": "Returns the portion of str specified by the start and length parameters.\n\nIf str is shorter than start characters long, the empty string will be returned."
             },
             "args": [
                 {

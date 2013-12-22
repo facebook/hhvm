@@ -37,7 +37,7 @@ bool f_fb_autoload_map(CVarRef map, const String& root);
 bool f_fb_utf8ize(VRefParam input);
 int64_t f_fb_utf8_strlen_deprecated(const String& input);
 int64_t f_fb_utf8_strlen(const String& input);
-Variant f_fb_utf8_substr(const String& str, int start, int length = INT_MAX);
+String f_fb_utf8_substr(const String& str, int start, int length = INT_MAX);
 Array f_fb_call_user_func_safe(int _argc, CVarRef function,
                                CArrRef _argv = null_array);
 Variant f_fb_call_user_func_safe_return(

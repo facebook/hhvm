@@ -1718,7 +1718,7 @@ closure_expression:
                                          _p->pushLabelInfo(); }
     parameter_list ')'
     hh_opt_return_type lambda_use_vars
-    '{' inner_statement_list '}'       { _p->finishStatement($10, $10); $10 = 1;
+    '{' inner_statement_list '}'       { _p->finishStatement($11, $11); $11 = 1;
                                          $$ = _p->onClosure(ClosureType::Long,
                                                             &$1,
                                                             $3,$6,$9,$11);
@@ -1932,12 +1932,6 @@ group_clause:
 
 query_continuation:
     T_INTO T_VARIABLE query_body     { _p->onIntoClause($$, $2, $3); }
-;
-
-lexical_vars:
-    T_USE '(' lexical_var_list
-    hh_possible_comma ')'              { $$ = $3;}
-  |                                    { $$.reset();}
 ;
 
 lexical_var_list:

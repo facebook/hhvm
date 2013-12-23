@@ -64,8 +64,8 @@ class SplQueue extends SplDoublyLinkedList
    * @return     mixed   No value is returned.
    */
   public function setIteratorMode($mode) {
-    if ($mode & self::IT_MODE_LIFO) {
-      throw new RuntimeException('SplQueue can only be used in FIFO mode.');
+    if (($mode & self::IT_MODE_FIFO) == 0) {
+      throw new RuntimeException('Iterators\' LIFO/FIFO modes for SplStack/SplQueue objects are frozen');
     }
     parent::setIteratorMode($mode);
   }

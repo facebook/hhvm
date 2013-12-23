@@ -698,7 +698,8 @@ void BaseExecutionContext::recordLastError(const Exception &e,
 }
 
 bool BaseExecutionContext::onFatalError(const Exception &e) {
-  recordLastError(e);
+  int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
+  recordLastError(e, errnum);
   String file = empty_string;
   int line = 0;
   bool silenced = false;
@@ -720,7 +721,6 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
-    int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {

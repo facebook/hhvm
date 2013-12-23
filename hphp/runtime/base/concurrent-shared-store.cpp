@@ -27,29 +27,6 @@ using std::set;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// helpers
-
-static void log_apc(const std::string& name) {
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableAPCStats) {
-    ServerStats::Log(name, 1);
-  }
-}
-
-static void stats_on_get(StringData* key, const APCHandle* svar) {
-  if (RuntimeOption::EnableAPCSizeStats &&
-      RuntimeOption::EnableAPCFetchStats) {
-    SharedStoreStats::onGet(key, svar);
-  }
-}
-static void stats_on_delete(StringData* key, const StoreValue* sval, bool exp) {
-  if (RuntimeOption::EnableAPCSizeStats) {
-    SharedStoreStats::removeDirect(key->size(), sval->size, exp);
-    if (RuntimeOption::EnableAPCSizeGroup ||
-        RuntimeOption::EnableAPCSizeDetail) {
-      SharedStoreStats::onDelete(key, sval->var, false, sval->expiry == 0);
-    }
-  }
-}
 static bool check_key_prefix(const std::vector<std::string>& list,
                              const char *key, size_t keyLen) {
   for (unsigned int i = 0; i < list.size(); ++i) {
@@ -61,43 +38,8 @@ static bool check_key_prefix(const std::vector<std::string>& list,
   }
   return false;
 }
-static bool check_skip(const char *key, size_t keyLen) {
-  return check_key_prefix(RuntimeOption::APCSizeSkipPrefix, key, keyLen);
-}
 static bool check_noTTL(const char *key, size_t keyLen) {
   return check_key_prefix(apcExtension::NoTTLPrefix, key, keyLen);
-}
-
-// stats_on_update should be called before updating sval with new value
-static void stats_on_update(const StringData* key, const StoreValue* sval,
-                            const APCHandle* svar, int64_t ttl) {
-  if (RuntimeOption::EnableAPCSizeStats &&
-      !check_skip(key->data(), key->size())) {
-    int32_t newSize = svar->getSpaceUsage();
-    SharedStoreStats::updateDirect(sval->size, newSize);
-    sval->size = newSize;
-  }
-  if (RuntimeOption::EnableAPCSizeStats &&
-      (RuntimeOption::EnableAPCSizeGroup ||
-       RuntimeOption::EnableAPCSizeDetail)) {
-    SharedStoreStats::onDelete(key, sval->var, true, sval->expiry == 0);
-    SharedStoreStats::onStore(key, svar, ttl, false);
-  }
-}
-// stats_on_add should be called after writing sval with the value
-static void stats_on_add(const StringData* key, const StoreValue* sval,
-                         int64_t ttl, bool prime, bool file) {
-  if (RuntimeOption::EnableAPCSizeStats &&
-      !check_skip(key->data(), key->size())) {
-    int32_t size = sval->var->getSpaceUsage();
-    SharedStoreStats::addDirect(key->size(), size, prime, file);
-    sval->size = size;
-  }
-  if (RuntimeOption::EnableAPCSizeStats &&
-      (RuntimeOption::EnableAPCSizeGroup ||
-       RuntimeOption::EnableAPCSizeDetail)) {
-    SharedStoreStats::onStore(key, sval->var, ttl, prime);
-  }
 }
 
 std::string ConcurrentTableSharedStore::GetSkeleton(const String& key) {
@@ -138,12 +80,7 @@ bool ConcurrentTableSharedStore::clear() {
 
 bool ConcurrentTableSharedStore::erase(const String& key,
                                        bool expired /* = false */) {
-  bool success = eraseImpl(key, expired);
-
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableAPCStats) {
-    ServerStats::Log(success ? "apc.erased" : "apc.erase", 1);
-  }
-  return success;
+  return eraseImpl(key, expired);
 }
 
 /**
@@ -163,7 +100,6 @@ bool ConcurrentTableSharedStore::eraseImpl(const String& key, bool expired) {
       return false;
     }
     if (acc->second.inMem()) {
-      stats_on_delete(key.get(), &acc->second, expired);
       acc->second.var->decRef();
     } else {
       assert(acc->second.inFile());
@@ -190,8 +126,6 @@ void ConcurrentTableSharedStore::purgeExpired() {
   }
   time_t now = time(nullptr);
   ExpirationPair tmp;
-  struct timespec tsBegin, tsEnd;
-  Timer::GetMonotonicTime(tsBegin);
   int i = 0;
   while (apcExtension::PurgeRate < 0 || i < apcExtension::PurgeRate) {
     if (!m_expQueue.try_pop(tmp)) {
@@ -214,11 +148,6 @@ void ConcurrentTableSharedStore::purgeExpired() {
     free((void *)tmp.first);
     ++i;
   }
-  Timer::GetMonotonicTime(tsEnd);
-  int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
-  SharedStoreStats::addPurgingTime(elapsed);
-  // Size could be inaccurate, but for stats reporting, it is good enough
-  SharedStoreStats::setExpireQueueSize(m_expQueue.size());
 }
 
 void ConcurrentTableSharedStore::addToExpirationQueue(const char* key,
@@ -257,8 +186,6 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
     // sv may not be same as svar here because some other thread may have
     // updated it already, check before updating
     if (sv == svar && !sv->getIsObj()) {
-      int64_t ttl = sval->expiry ? sval->expiry - time(nullptr) : 0;
-      stats_on_update(key.get(), sval, converted, ttl);
       sval->var = converted;
       sv->decRef();
       return true;
@@ -267,12 +194,6 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
   }
   return false;
 }
-
-static std::string std_apc_miss = "apc.miss";
-static std::string std_apc_hit = "apc.hit";
-static std::string std_apc_cas = "apc.cas";
-static std::string std_apc_update = "apc.update";
-static std::string std_apc_new = "apc.new";
 
 APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
                                                    const StoreValue* sval) {
@@ -286,7 +207,6 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
     Variant v;
     v.unserialize(&vu);
     sval->var = APCHandle::Create(v, sval->isSerializedObj());
-    stats_on_add(key.get(), sval, 0, true, true); // delayed prime
     return sval->var;
   } catch (Exception &e) {
     raise_notice("APC Primed fetch failed: key %s (%s).",
@@ -305,7 +225,6 @@ bool ConcurrentTableSharedStore::get(const String& key, Variant &value) {
   {
     Map::const_accessor acc;
     if (!m_vars.find(acc, tagStringData(key.get()))) {
-      log_apc(std_apc_miss);
       return false;
     } else {
       sval = &acc->second;
@@ -334,16 +253,13 @@ bool ConcurrentTableSharedStore::get(const String& key, Variant &value) {
           promoteObj = true;
         }
         value = svar->toLocal();
-        stats_on_get(key.get(), svar);
       }
     }
   }
   if (expired) {
-    log_apc(std_apc_miss);
     eraseImpl(key, true);
     return false;
   }
-  log_apc(std_apc_hit);
 
   if (promoteObj)  {
     handlePromoteObj(key, svar, value);
@@ -381,7 +297,6 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
         sval->var->decRef();
         sval->var = svar;
         found = true;
-        log_apc(std_apc_hit);
       }
     }
   }
@@ -403,7 +318,6 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
         sval->var->decRef();
         sval->var = var;
         success = true;
-        log_apc(std_apc_cas);
       }
     }
   }
@@ -418,7 +332,6 @@ bool ConcurrentTableSharedStore::exists(const String& key) {
   {
     Map::const_accessor acc;
     if (!m_vars.find(acc, tagStringData(key.get()))) {
-      log_apc(std_apc_miss);
       return false;
     } else {
       sval = &acc->second;
@@ -426,20 +339,13 @@ bool ConcurrentTableSharedStore::exists(const String& key) {
         // Because it only has a read lock on the data, deletion from
         // expiration has to happen after the lock is released
         expired = true;
-      } else {
-        // No need toLocal() here, avoiding the copy
-        if (sval->inMem()) {
-          stats_on_get(key.get(), sval->var);
-        }
       }
     }
   }
   if (expired) {
-    log_apc(std_apc_miss);
     eraseImpl(key, true);
     return false;
   }
-  log_apc(std_apc_hit);
   return true;
 }
 
@@ -468,17 +374,13 @@ bool ConcurrentTableSharedStore::store(const String& key, CVarRef value,
     Map::accessor acc;
     present = !m_vars.insert(acc, kcp);
     sval = &acc->second;
-    bool update = false;
     if (present) {
       free((void *)kcp);
       if (overwrite || sval->expired()) {
         // if ApcTTLLimit is set, then only primed keys can have expiry == 0
         overwritePrime = (sval->expiry == 0);
         if (sval->inMem()) {
-          stats_on_update(key.get(), sval, svar,
-                          adjust_ttl(ttl, overwritePrime || !limit_ttl));
           sval->var->decRef();
-          update = true;
         } else {
           // mark the inFile copy invalid since we are updating the key
           sval->sAddr = nullptr;
@@ -495,24 +397,12 @@ bool ConcurrentTableSharedStore::store(const String& key, CVarRef value,
     }
     sval->set(svar, adjustedTtl);
     expiry = sval->expiry;
-    if (!update) {
-      stats_on_add(key.get(), sval, adjustedTtl, false, false);
-    }
   }
   if (expiry) {
     addToExpirationQueue(key.data(), expiry);
   }
   if (apcExtension::ExpireOnSets) {
     purgeExpired();
-  }
-  if (present) {
-    log_apc(std_apc_update);
-  } else {
-    log_apc(std_apc_new);
-    if (RuntimeOption::EnableStats && RuntimeOption::EnableAPCKeyStats) {
-      std::string prefix = "apc.new." + GetSkeleton(key);
-      ServerStats::Log(prefix, 1);
-    }
   }
   return true;
 }
@@ -532,10 +422,6 @@ void ConcurrentTableSharedStore::prime(const std::vector<KeyValuePair> &vars) {
       acc->second.sAddr = item.sAddr;
       acc->second.sSize = item.sSize;
       continue;
-    }
-    if (RuntimeOption::APCSizeCountPrime) {
-      String str(copy, CopyString);
-      stats_on_add(str.get(), &acc->second, 0, true, false);
     }
   }
 }

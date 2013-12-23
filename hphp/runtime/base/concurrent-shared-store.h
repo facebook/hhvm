@@ -28,7 +28,6 @@
 #include "hphp/runtime/server/server-stats.h"
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_priority_queue.h>
-#include "hphp/runtime/base/shared-store-stats.h"
 
 namespace HPHP {
 

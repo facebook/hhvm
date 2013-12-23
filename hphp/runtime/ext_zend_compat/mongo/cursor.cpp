@@ -14,9 +14,6 @@
  *  limitations under the License.
  */
 
-#pragma GCC optimize "no-strict-aliasing"
-#pragma GCC diagnostic ignored "-Wstrict-aliasing"
-
 #include <php.h>
 #include <zend_interfaces.h>
 #include <zend_exceptions.h>

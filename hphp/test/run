@@ -448,13 +448,23 @@ class Status {
   /** Output is in the format expected by JsonTestRunner. */
   public static function say(/* ... */) {
     $data = array_map(function($row) {
-      return json_encode($row, JSON_UNESCAPED_SLASHES) . "\n";
+      return self::jsonEncode($row) . "\n";
     }, func_get_args());
     fwrite(STDERR, implode("", $data));
   }
 
   private static function hasColor() {
     return posix_isatty(STDOUT);
+  }
+
+  public static function jsonEncode($data) {
+    // JSON_UNESCAPED_SLASHES is zend54+, we aim for zend zend53 compatibility
+    if (defined("JSON_UNESCAPED_SLASHES")) {
+      return json_encode($row, JSON_UNESCAPED_SLASHES);
+    } 
+
+    $json = json_encode($row);
+    return str_replace('\\/', '/', $json);
   }
 }
 
@@ -498,7 +508,7 @@ function skip_test($options, $test) {
 
 function dump_hhas_to_temp($hhvm_cmd, $test) {
   $tmp_file = $test . '.round_trip.hhas';
-  system("$hhvm_cmd -vEval.DumpHhas=1 > $tmp_file", &$ret);
+  system("$hhvm_cmd -vEval.DumpHhas=1 > $tmp_file", $ret);
   if ($ret) { echo "system failed\n"; exit(1); }
   return $tmp_file;
 }

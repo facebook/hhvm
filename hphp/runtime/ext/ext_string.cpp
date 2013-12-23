@@ -213,7 +213,9 @@ String f_stripslashes(const String& str) {
         ret.append('\0');
         return;
       }
-      ret.append(*src);
+      if (src < end) {
+        ret.append(*src);
+      }
     });
 }
 

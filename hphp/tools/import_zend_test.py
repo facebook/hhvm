@@ -503,6 +503,7 @@ other_files = (
     '/ext/gd/tests/src.gd2',
     '/ext/gd/tests/src.wbmp',
     '/ext/gd/tests/test8859.ttf',
+    '/ext/gd/tests/test.png',
     '/ext/gettext/tests/locale/en/LC_CTYPE/dgettextTest.mo',
     '/ext/gettext/tests/locale/en/LC_CTYPE/dgettextTest.po',
     '/ext/gettext/tests/locale/en/LC_CTYPE/dgettextTest_switch.mo',
@@ -774,7 +775,7 @@ def walk(filename, source_dir):
     else:
         print "Malformed test, no --EXPECT*--: ", filename
         return
-    
+
     if sections.has_key('INI'):
         exp = sections['INI']
         file(full_dest_filename+'.ini', 'w').write(exp)
@@ -811,7 +812,7 @@ def walk(filename, source_dir):
             if len(boom) == 2 and boom[0] and boom[1]:
                 test = test.replace(
                     '<?php',
-                    '<?php\n$_ENV[%s] = %s;\n' 
+                    '<?php\n$_ENV[%s] = %s;\n'
                     '_filter_snapshot_globals();\n'
                     % (boom[0], boom[1])
                 )

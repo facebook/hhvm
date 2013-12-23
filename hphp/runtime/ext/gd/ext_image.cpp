@@ -2605,207 +2605,109 @@ static bool php_imagepolygon(CResRef image, CArrRef points, int num_points,
   return true;
 }
 
-static bool php_image_filter_negate(CResRef image,
+static bool php_image_filter_negate(gdImagePtr im,
                                     int arg1 /* = 0 */,
                                     int arg2 /* = 0 */,
                                     int arg3 /* = 0 */,
                                     int arg4 /* = 0 */) {
-  throw NotSupportedException(__func__, "gdImageNegate does not exists");
-/*
-  gdImagePtr im = image.getTyped<Image>()->get();
-  if (!im) return false;
-
-  if (gdImageNegate(im) == 1) {
-    return true;
-  }
-
-  return false;
-*/
+  return gdImageNegate(im) == 1;
 }
 
-static bool php_image_filter_grayscale(CResRef image,
+static bool php_image_filter_grayscale(gdImagePtr im,
                                        int arg1 /* = 0 */,
                                        int arg2 /* = 0 */,
                                        int arg3 /* = 0 */,
                                        int arg4 /* = 0 */) {
-  throw NotSupportedException(__func__, "gdImageGrayScale does not exists");
-/*
-  gdImagePtr im = image.getTyped<Image>()->get();
-  if (!im) return false;
-
-  if (gdImageGrayScale(im) == 1) {
-    return true;
-  }
-
-  return false;
-*/
+  return gdImageGrayScale(im) == 1;
 }
 
-static bool php_image_filter_brightness(CResRef image,
+static bool php_image_filter_brightness(gdImagePtr im,
                                         int arg1 /* = 0 */,
                                         int arg2 /* = 0 */,
                                         int arg3 /* = 0 */,
                                         int arg4 /* = 0 */) {
-  throw NotSupportedException(__func__, "gdImageBrightness does not exists");
-/*
-  gdImagePtr im = image.getTyped<Image>()->get();
-  if (!im) return false;
   int brightness = arg1;
-
-  if (gdImageBrightness(im, brightness) == 1) {
-    return true;
-  }
-  return false;
-*/
+  return gdImageBrightness(im, brightness) == 1;
 }
 
-static bool php_image_filter_contrast(CResRef image,
+static bool php_image_filter_contrast(gdImagePtr im,
                                       int arg1 /* = 0 */,
                                       int arg2 /* = 0 */,
                                       int arg3 /* = 0 */,
                                       int arg4 /* = 0 */) {
-  throw NotSupportedException(__func__, "gdImageContrast does not exists");
-/*
-  gdImagePtr im = image.getTyped<Image>()->get();
-  if (!im) return false;
   int contrast = arg1;
-
-  if (gdImageContrast(im, contrast) == 1) {
-    return true;
-  }
-  return false;
-*/
+  return gdImageContrast(im, contrast) == 1;
 }
 
-static bool php_image_filter_colorize(CResRef image,
+static bool php_image_filter_colorize(gdImagePtr im,
                                       int arg1 /* = 0 */,
                                       int arg2 /* = 0 */,
                                       int arg3 /* = 0 */,
                                       int arg4 /* = 0 */) {
-  throw NotSupportedException(__func__, "gdImageColor does not exists");
-/*
-  gdImagePtr im = image.getTyped<Image>()->get();
-  if (!im) return false;
   int r = arg1;
   int g = arg2;
   int b = arg3;
   int a = arg1;
-
-  if (gdImageColor(im, r, g, b, a) == 1) {
-    return true;
-  }
-  return false;
-*/
+  return gdImageColor(im, r, g, b, a) == 1;
 }
 
-static bool php_image_filter_edgedetect(CResRef image,
+static bool php_image_filter_edgedetect(gdImagePtr im,
                                         int arg1 /* = 0 */,
                                         int arg2 /* = 0 */,
                                         int arg3 /* = 0 */,
                                         int arg4 /* = 0 */) {
-  throw NotSupportedException(__func__,
-                              "gdImageEdgeDetectQuick does not exists");
-/*
-  gdImagePtr im = image.getTyped<Image>()->get();
-  if (!im) return false;
-
-  if (gdImageEdgeDetectQuick(im) == 1) {
-    return true;
-  }
-
-  return false;
-*/
+  return gdImageEdgeDetectQuick(im) == 1;
 }
 
-static bool php_image_filter_emboss(CResRef image,
+static bool php_image_filter_emboss(gdImagePtr im,
                                     int arg1 /* = 0 */,
                                     int arg2 /* = 0 */,
                                     int arg3 /* = 0 */,
                                     int arg4 /* = 0 */) {
-  throw NotSupportedException(__func__, "gdImageEmboss does not exists");
-/*
-  gdImagePtr im = image.getTyped<Image>()->get();
-  if (!im) return false;
-
-  if (gdImageEmboss(im) == 1) {
-    return true;
-  }
-
-  return false;
-*/
+  return gdImageEmboss(im) == 1;
 }
 
-static bool php_image_filter_gaussian_blur(CResRef image,
+static bool php_image_filter_gaussian_blur(gdImagePtr im,
                                            int arg1 /* = 0 */,
                                            int arg2 /* = 0 */,
                                            int arg3 /* = 0 */,
                                            int arg4 /* = 0 */) {
-  throw NotSupportedException(__func__, "gdImageGaussianBlur does not exists");
-/*
-  gdImagePtr im = image.getTyped<Image>()->get();
-  if (!im) return false;
-
-  if (gdImageGaussianBlur(im) == 1) {
-    return true;
-  }
-
-  return false;
-*/
+  return gdImageGaussianBlur(im) == 1;
 }
 
-static bool php_image_filter_selective_blur(CResRef image,
+static bool php_image_filter_selective_blur(gdImagePtr im,
                                             int arg1 /* = 0 */,
                                             int arg2 /* = 0 */,
                                             int arg3 /* = 0 */,
                                             int arg4 /* = 0 */) {
-  throw NotSupportedException(__func__, "gdImageSelectiveBlur does not exists");
-/*
-  gdImagePtr im = image.getTyped<Image>()->get();
-  if (!im) return false;
-
-  if (gdImageSelectiveBlur(im) == 1) {
-    return true;
-  }
-
-  return false;
-*/
+  return gdImageSelectiveBlur(im) == 1;
 }
 
-static bool php_image_filter_mean_removal(CResRef image,
+static bool php_image_filter_mean_removal(gdImagePtr im,
                                           int arg1 /* = 0 */,
                                           int arg2 /* = 0 */,
                                           int arg3 /* = 0 */,
                                           int arg4 /* = 0 */) {
-  throw NotSupportedException(__func__, "gdImageMeanRemoval does not exists");
-/*
-  gdImagePtr im = image.getTyped<Image>()->get();
-  if (!im) return false;
-
-  if (gdImageMeanRemoval(im) == 1) {
-    return true;
-  }
-
-  return false;
-*/
+  return gdImageMeanRemoval(im) == 1;
 }
 
-static bool php_image_filter_smooth(CResRef image,
+static bool php_image_filter_smooth(gdImagePtr im,
                                     int arg1 /* = 0 */,
                                     int arg2 /* = 0 */,
                                     int arg3 /* = 0 */,
                                     int arg4 /* = 0 */) {
-  throw NotSupportedException(__func__, "gdImageSmooth does not exists");
-/*
-  gdImagePtr im = image.getTyped<Image>()->get();
-  if (!im) return false;
   int weight = arg1;
+  return gdImageSmooth(im, weight) == 1;
+}
 
-  if (gdImageSmooth(im, weight) == 1) {
-    return true;
-  }
-
-  return false;
-*/
+static bool php_image_filter_pixelate(gdImagePtr im,
+                                      int arg1 /* = 0 */,
+                                      int arg2 /* = 0 */,
+                                      int arg3 /* = 0 */,
+                                      int arg4 /* = 0 */) {
+  int blocksize = arg1;
+  unsigned mode = arg2;
+  return gdImagePixelate(im, blocksize, mode) == 1;
 }
 
 /*
@@ -3182,8 +3084,6 @@ Variant f_imagetruecolortopalette(CResRef image, bool dither, int ncolors) {
 }
 
 Variant f_imagecolormatch(CResRef image1, CResRef image2) {
-  throw NotSupportedException(__func__, "gdImageColorMatch does not exist");
-/*
   gdImagePtr im1 = image1.getTyped<Image>()->get();
   if (!im1) return false;
   gdImagePtr im2 = image2.getTyped<Image>()->get();
@@ -3193,21 +3093,20 @@ Variant f_imagecolormatch(CResRef image1, CResRef image2) {
   result = gdImageColorMatch(im1, im2);
   switch (result) {
   case -1:
-    raise_warning("Image1 must be TrueColor" );
+    raise_warning("Image1 must be TrueColor");
     return false;
   case -2:
-    raise_warning("Image2 must be Palette" );
+    raise_warning("Image2 must be Palette");
     return false;
   case -3:
-    raise_warning("Image1 and Image2 must be the same size" );
+    raise_warning("Image1 and Image2 must be the same size");
     return false;
   case -4:
-    raise_warning("Image2 must have at least one color" );
+    raise_warning("Image2 must have at least one color");
     return false;
   }
 
   return true;
-*/
 }
 
 bool f_imagesetthickness(CResRef image, int thickness) {
@@ -4163,12 +4062,20 @@ bool f_png2wbmp(const String& pngname, const String& wbmpname, int dest_height,
                             threshold, PHP_GDIMG_TYPE_PNG);
 }
 
-bool f_imagefilter(CResRef image, int filtertype,
+bool f_imagefilter(const Resource& res, int filtertype,
                    int arg1 /* = 0 */, int arg2 /* = 0 */,
                    int arg3 /* = 0 */, int arg4 /* = 0 */) {
-  typedef bool (*image_filter)(CResRef, int, int, int, int);
+  auto im = res.getTyped<Image>(true /*nullOkay*/, true /*badTypeOkay*/);
+  if (im == nullptr || im->get() == nullptr) {
+    raise_warning(
+      "imagefilter(): supplied resource is not a valid Image resource"
+    );
+    return false;
+  }
+
+  using image_filter = bool (*)(gdImagePtr, int, int, int, int);
   image_filter filters[] = {
-    php_image_filter_negate ,
+    php_image_filter_negate,
     php_image_filter_grayscale,
     php_image_filter_brightness,
     php_image_filter_contrast,
@@ -4178,11 +4085,12 @@ bool f_imagefilter(CResRef image, int filtertype,
     php_image_filter_gaussian_blur,
     php_image_filter_selective_blur,
     php_image_filter_mean_removal,
-    php_image_filter_smooth
+    php_image_filter_smooth,
+    php_image_filter_pixelate,
   };
-  int num_filters = sizeof(filters)/sizeof(image_filter);
+  auto const num_filters = sizeof(filters) / sizeof(image_filter);
   if (filtertype >= 0 && filtertype < num_filters) {
-    return filters[filtertype](image, arg1, arg2, arg3, arg4);
+    return filters[filtertype](im->get(), arg1, arg2, arg3, arg4);
   }
   return false;
 }

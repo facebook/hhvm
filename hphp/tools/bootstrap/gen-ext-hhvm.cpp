@@ -166,6 +166,22 @@ void emitRemappedFuncDecl(const PhpFunc& func,
       << mangled << "\");\n\n";
 }
 
+static void emitZendParamPrefix(std::ostream& out,
+                                int32_t index,
+                                const PhpParam& param,
+                                const char* ind) {
+  out << ind << "if (!"
+        << "tvCoerceParamTo" << kindOfString(param.kindOf())
+        << "InPlace(args-" << index << ")) {\n"
+      << ind << "  raise_param_type_warning(__func__, " << index << " + 1, "
+        << "KindOf" << kindOfString(param.kindOf()) << ", "
+        << "(args-" << index << ")->m_type);\n";
+}
+
+static void emitZendParamSuffix(std::ostream& out, const char* ind) {
+  out << ind << "  return;\n"
+      << ind << "}\n";
+}
 
 void emitCast(const PhpParam& param, int32_t index, std::ostream& out,
               const char* ind, bool doCheck) {
@@ -182,16 +198,15 @@ void emitCast(const PhpParam& param, int32_t index, std::ostream& out,
   }
 
 
-  if (param.getParamMode() == ParamMode::Zend) {
-    out << ind << "if (!"
-          << "tvCoerceParamTo" << kindOfString(param.kindOf())
-          << "InPlace(args-" << index << ")) {\n"
-        << ind << "  raise_param_type_warning(__func__, " << index << " + 1, "
-          << "KindOf" << kindOfString(param.kindOf()) << ", "
-          << "(args-" << index << ")->m_type);\n"
-        << ind << "  rv->m_type = KindOfUninit;\n"
-        << ind << "  return;\n"
-        << ind << "}\n";
+  if (param.getParamMode() == ParamMode::ZendNull) {
+    emitZendParamPrefix(out, index, param, ind);
+    out << ind << "  rv->m_type = KindOfUninit;\n";
+    emitZendParamSuffix(out, ind);
+  } else if (param.getParamMode() == ParamMode::ZendFalse) {
+    emitZendParamPrefix(out, index, param, ind);
+    out << ind << "  rv->m_type = KindOfBoolean;\n"
+        << ind << "  rv->m_data.num = 0;\n";
+    emitZendParamSuffix(out, ind);
   } else if (param.kindOf() != KindOfAny) {
     out << ind << "tvCastTo" << kindOfString(param.kindOf())
         << "InPlace(args-" << index << ");\n";

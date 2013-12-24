@@ -85,7 +85,7 @@
             "name": "simplexml_import_dom",
             "desc": "This function takes a node of a DOM document and makes it into a SimpleXML node. This new object can then be used as a native SimpleXML element.",
             "flags": [
-                "ZendParamMode"
+                "ZendParamModeNull"
             ],
             "return": {
                 "type": "Variant",

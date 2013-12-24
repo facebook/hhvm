@@ -329,7 +329,7 @@
             "name": "get_object_vars",
             "desc": "Gets the accessible non-static properties of the given object according to scope.",
             "flags": [
-                "ZendParamMode"
+                "ZendParamModeNull"
             ],
             "return": {
                 "type": "Variant",

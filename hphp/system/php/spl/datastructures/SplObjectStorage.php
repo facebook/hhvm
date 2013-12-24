@@ -119,7 +119,7 @@ class SplObjectStorage
    * @return     mixed   No value is returned.
    */
   public function attach($obj, $data = null) {
-    if (is_object($obj) && !$this->contains($obj)) {
+    if (is_object($obj)) {
       $this->storage[$this->getHashAndValidate($obj)] = array(
         'obj' => $obj, 'inf' => $data
       );

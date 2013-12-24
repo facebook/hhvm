@@ -376,6 +376,7 @@ class SplDoublyLinkedList
         ++$this->count;
         $node->next = new _SplDoublyLinkedListNode;
         $node->next->prev = $node;
+        $this->tail = $node->next;
       }
       $node = $node->next;
     }

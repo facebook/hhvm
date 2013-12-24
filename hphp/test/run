@@ -460,10 +460,10 @@ class Status {
   public static function jsonEncode($data) {
     // JSON_UNESCAPED_SLASHES is Zend 5.4+
     if (defined("JSON_UNESCAPED_SLASHES")) {
-      return json_encode($row, JSON_UNESCAPED_SLASHES);
+      return json_encode($data, JSON_UNESCAPED_SLASHES);
     }
 
-    $json = json_encode($row);
+    $json = json_encode($data);
     return str_replace('\\/', '/', $json);
   }
 }

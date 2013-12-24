@@ -367,7 +367,22 @@ void FastCGITransport::handleHeader(const std::string& key,
 }
 
 void FastCGITransport::onHeadersComplete() {
-  m_serverObject = getRawHeader("SCRIPT_NAME");
+  m_pathTranslated = getRawHeader("PATH_TRANSLATED");
+  // use PATH_TRANSLATED instead of script_name and subtract document_root
+  // for mod_fastcgi support
+  if(!m_pathTranslated.empty()) {
+    if(m_pathTranslated.find(getRawHeader("DOCUMENT_ROOT")) != std::string::npos) {
+      // document_root found in path_translated. remove it!
+      size_t ptlen = strlen(getRawHeader("DOCUMENT_ROOT").c_str());
+      m_serverObject = m_pathTranslated.substr(ptlen, strlen(m_pathTranslated.c_str()));
+    } else {
+      // not sure if i should be settings this to path_translated or default it back to script_name.
+      // this will probaly never get executed.
+      m_serverObject = m_pathTranslated;
+    }
+  } else {
+    m_serverObject = getRawHeader("SCRIPT_NAME");
+  }
   std::string queryString = getRawHeader("QUERY_STRING");
   if (!queryString.empty()) {
     m_serverObject += "?" + queryString;

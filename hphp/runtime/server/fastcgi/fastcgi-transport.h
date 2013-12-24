@@ -131,6 +131,7 @@ private:
   Method m_method;
   std::string m_extendedMethod;
   std::string m_httpVersion;
+  std::string m_pathTranslated;
   std::string m_serverObject;
   size_t m_requestSize;
   ResponseHeaders m_responseHeaders;

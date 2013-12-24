@@ -1572,7 +1572,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   Returns a new instance of the class.
    */
-  public function newInstanceArgs($args) {
+  public function newInstanceArgs($args=array()) {
     if ($args && null === $this->getConstructor()) {
       // consistent with reference, but perhaps not particularly useful
       throw new ReflectionException(

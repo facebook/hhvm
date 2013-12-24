@@ -177,7 +177,7 @@ FastCGIServer::FastCGIServer(const std::string &address,
                  RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
                  RequestPriority::k_numPriorities) {
   TSocketAddress sock_addr;
-  if (sock_addr.empty()) {
+  if (address.empty()) {
     sock_addr.setFromLocalPort(port);
   } else {
     sock_addr.setFromHostPort(address, port);

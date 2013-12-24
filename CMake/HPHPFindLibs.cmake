@@ -96,6 +96,12 @@ if(HAVE_CUSTOM_LIBEVENT)
 endif()
 set(CMAKE_REQUIRED_LIBRARIES)
 
+find_package(LibUODBC)
+if (LIBUODBC_INCLUDE_DIRS)
+	include_directories(${LIBUODBC_INCLUDE_DIRS})
+	add_definitions("-DHAVE_UODBC")
+endif ()
+
 # GD checks
 add_definitions(-DPNG_SKIP_SETJMP_CHECK)
 find_package(LibVpx)
@@ -491,7 +497,9 @@ endif()
 if (LIBVPX_LIBRARIES)
 	target_link_libraries(${target} ${LIBVPX_LIBRARIES})
 endif()
-
+if (LIBUODBC_LIBRARIES)
+	target_link_libraries(${target} ${LIBUODBC_LIBRARIES})
+endif()
 	target_link_libraries(${target} ${LDAP_LIBRARIES})
 	target_link_libraries(${target} ${LBER_LIBRARIES})
 

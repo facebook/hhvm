@@ -15,6 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef HAVE_UODBC
+
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include <sql.h>
@@ -890,3 +892,5 @@ static class ODBCExtension : public Extension {
 } s_odbc_extension;
 
 }
+
+#endif // HAVE_UODBC

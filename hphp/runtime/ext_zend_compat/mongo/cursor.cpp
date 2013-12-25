@@ -92,6 +92,10 @@ static int handle_error(mongo_cursor *cursor TSRMLS_DC);
 
 zend_class_entry *mongo_ce_Cursor = NULL;
 
+#pragma GCC optimize "no-strict-aliasing"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+
 /*
  * Cursor related read/write functions
  */
@@ -164,6 +168,9 @@ static signed int get_cursor_header(mongo_connection *con, mongo_cursor *cursor,
 
 	return 0;
 }
+
+#pragma GCC optimize "strict-aliasing"
+#pragma GCC diagnostic pop
 
 /* Reads a cursors body
  * Returns -31 on failure, -80 on timeout, -32 on EOF, or an int indicating the number of bytes read */

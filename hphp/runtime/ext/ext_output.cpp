@@ -58,7 +58,10 @@ bool f_ob_end_flush() {
 void f_flush() {
   g_context->flush();
 }
-String f_ob_get_contents() {
+Variant f_ob_get_contents() {
+  if (f_ob_get_level() == 0) {
+    return false;
+  }
   return g_context->obCopyContents();
 }
 Variant f_ob_get_clean() {

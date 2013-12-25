@@ -31,7 +31,7 @@ void f_ob_flush();
 bool f_ob_end_clean();
 bool f_ob_end_flush();
 void f_flush();
-String f_ob_get_contents();
+Variant f_ob_get_contents();
 Variant f_ob_get_clean();
 Variant f_ob_get_flush();
 int64_t f_ob_get_length();

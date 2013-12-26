@@ -271,6 +271,8 @@ void FastCGISession::appendRecordBegin(AppenderT& cursor,
   cursor.template writeBE<uint16_t>(content_length);
   CHECK(padding_length <= std::template numeric_limits<uint8_t>::max());
   cursor.template writeBE<uint8_t>(padding_length);
+  cursor.ensure(k_recordReservedLength);
+  memset(cursor.writableData(), 0, k_recordReservedLength);
   cursor.append(k_recordReservedLength);
 }
 
@@ -278,6 +280,8 @@ template<typename AppenderT>
 void FastCGISession::appendRecordEnd(AppenderT& cursor,
                                      size_t padding_length) {
   CHECK(padding_length <= std::numeric_limits<uint8_t>::max());
+  cursor.ensure(padding_length);
+  memset(cursor.writableData(), 0, padding_length);
   cursor.append(padding_length);
 }
 

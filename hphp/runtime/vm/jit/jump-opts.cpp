@@ -230,35 +230,42 @@ void optimizeSideExitJccs(IRUnit& unit) {
   });
 }
 
+// Return true if this block ends with a trivial Jmp (a Jmp that does
+// not pass arguments, and whose target's only predecessor is b.
+bool isTrivialJmp(IRInstruction* branch, Block* taken) {
+  return branch->op() == Jmp && branch->numSrcs() == 0 &&
+         taken->numPreds() == 1;
 }
-
-//////////////////////////////////////////////////////////////////////
 
 // If main trace ends with an unconditional jump, and the target is not
 // reached by any other branch, then copy the target of the jump to the
 // end of the trace
-void eliminateUnconditionalJump(IRUnit& unit) {
-  auto* trace = unit.main();
-  Block* lastBlock = trace->back();
-  auto lastInst = lastBlock->backIter(); // iterator to last instruction
-  IRInstruction& jmp = *lastInst;
-  if (jmp.op() == Jmp && jmp.taken()->numPreds() == 1) {
-    Block* target = jmp.taken();
-    lastBlock->splice(lastInst, target, target->skipHeader(), target->end(),
-                      lastInst->marker());
-    jmp.convertToNop();         // unlink it from its Edge
-    lastBlock->erase(lastInst); // delete the jmp
-  }
+void eliminateJmp(Block* lastBlock, IRInstruction* jmp, Block* target) {
+  assert(isTrivialJmp(jmp, target));
+  auto lastInst = lastBlock->iteratorTo(jmp); // iterator to last instruction
+  lastBlock->splice(lastInst, target, target->skipHeader(), target->end());
+  jmp->setTaken(nullptr); // unlink edge
+  lastBlock->erase(lastInst); // delete the jmp
 }
 
-void optimizeJumps(IRUnit& unit) {
-  eliminateUnconditionalJump(unit);
+}
 
+//////////////////////////////////////////////////////////////////////
+
+void optimizeJumps(IRUnit& unit) {
   if (RuntimeOption::EvalHHIRDirectExit) {
     optimizeCondTraceExit(unit);
     optimizeSideExitChecks(unit);
     optimizeSideExitJccs(unit);
   }
+
+  postorderWalk(unit, [&](Block* b) {
+    auto branch = &b->back();
+    auto taken = branch->taken();
+    if (isTrivialJmp(branch, taken)) {
+      eliminateJmp(b, branch, taken);
+    }
+  });
 }
 
 }}

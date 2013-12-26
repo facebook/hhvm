@@ -134,8 +134,7 @@ struct Block : boost::noncopyable {
   iterator         erase(iterator pos);
   iterator         erase(IRInstruction* inst);
   iterator insert(iterator pos, IRInstruction* inst);
-  void splice(iterator pos, Block* from, iterator begin, iterator end,
-              BCMarker newMarker);
+  void splice(iterator pos, Block* from, iterator begin, iterator end);
   void push_back(IRInstruction* inst);
   template <class Predicate> void remove_if(Predicate p);
 
@@ -262,13 +261,9 @@ inline Block::iterator Block::insert(iterator pos, IRInstruction* inst) {
 }
 
 inline
-void Block::splice(iterator pos, Block* from, iterator begin, iterator end,
-                   BCMarker newMarker) {
+void Block::splice(iterator pos, Block* from, iterator begin, iterator end) {
   assert(from != this);
-  for (auto i = begin; i != end; ++i) {
-    i->setBlock(this);
-    i->setMarker(newMarker);
-  }
+  for (auto i = begin; i != end; ++i) i->setBlock(this);
   m_instrs.splice(pos, from->instrs(), begin, end);
 }
 

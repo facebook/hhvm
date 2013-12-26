@@ -32,7 +32,6 @@ class IRInstruction;
 void optimizeRefcounts(IRUnit&) noexcept;
 void optimizePredictions(IRUnit&);
 void optimizeJumps(IRUnit&);
-void eliminateUnconditionalJump(IRUnit&);
 void eliminateDeadCode(IRUnit&);
 
 /*

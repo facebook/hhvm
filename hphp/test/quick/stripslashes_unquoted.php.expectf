@@ -1,0 +1,20 @@
+*** Testing stripslashes() : basic functionality ***
+\:
+0
+ends with slash\:
+101
+110
+100
+115
+32
+119
+105
+116
+104
+32
+115
+108
+97
+115
+104
+Done

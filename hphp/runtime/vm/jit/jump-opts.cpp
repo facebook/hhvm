@@ -142,50 +142,53 @@ void optimizeCondTraceExit(IRUnit& unit) {
 }
 
 /*
- * Look for CheckStk/CheckLoc instructions in the main trace that
- * branch to "normal exits".  We can optimize these into the
- * SideExitGuard* instructions that can be patched in place.
+ * Return true if inst is a CheckStk/CheckLoc instruction that branches
+ * to a normal exit.
  */
-void optimizeSideExitChecks(IRUnit& unit) {
-  auto trace = unit.main();
+bool isSideExitCheck(IRInstruction* inst, Block* exit) {
+  return (inst->op() == CheckStk || inst->op() == CheckLoc) &&
+         isNormalExit(exit);
+}
+
+/*
+ * Convert a CheckStk/CheckLoc instruction into a corresponding SideExitGuard*
+ * instruction that can be patched in place.
+ */
+void optimizeSideExitCheck(IRUnit& unit, IRInstruction* inst,
+                           Block* exitBlock) {
+  assert(isSideExitCheck(inst, exitBlock));
   FTRACE(5, "SideExit:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "SideExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
-  forEachInst(trace->blocks(), [&] (IRInstruction* inst) {
-    if (inst->op() != CheckStk && inst->op() != CheckLoc) return;
-    auto const exitBlock = inst->taken();
-    if (!isNormalExit(exitBlock)) return;
+  auto const syncABI = &*boost::prior(exitBlock->backIter());
+  assert(syncABI->op() == SyncABIRegs);
 
-    auto const syncABI = &*boost::prior(exitBlock->backIter());
-    assert(syncABI->op() == SyncABIRegs);
+  FTRACE(5, "converting jump ({}) to side exit\n",
+         inst->id());
 
-    FTRACE(5, "converting jump ({}) to side exit\n",
-           inst->id());
+  auto const isStack = inst->op() == CheckStk;
+  auto const fp      = syncABI->src(0);
+  auto const sp      = syncABI->src(1);
 
-    auto const isStack = inst->op() == CheckStk;
-    auto const fp      = syncABI->src(0);
-    auto const sp      = syncABI->src(1);
+  SideExitGuardData data;
+  data.checkedSlot = isStack
+    ? inst->extra<CheckStk>()->offset
+    : inst->extra<CheckLoc>()->locId;
+  data.taken = exitBlock->back().extra<ReqBindJmp>()->offset;
 
-    SideExitGuardData data;
-    data.checkedSlot = isStack
-      ? inst->extra<CheckStk>()->offset
-      : inst->extra<CheckLoc>()->locId;
-    data.taken = exitBlock->back().extra<ReqBindJmp>()->offset;
+  auto const block = inst->block();
+  block->insert(block->iteratorTo(inst),
+                unit.cloneInstruction(syncABI));
 
-    auto const block = inst->block();
-    block->insert(block->iteratorTo(inst),
-                  unit.cloneInstruction(syncABI));
-
-    auto next = inst->next();
-    unit.replace(
-      inst,
-      isStack ? SideExitGuardStk : SideExitGuardLoc,
-      inst->typeParam(),
-      data,
-      isStack ? sp : fp
-    );
-    block->push_back(unit.gen(Jmp, inst->marker(), next));
-  });
+  auto next = inst->next();
+  unit.replace(
+    inst,
+    isStack ? SideExitGuardStk : SideExitGuardLoc,
+    inst->typeParam(),
+    data,
+    isStack ? sp : fp
+  );
+  block->push_back(unit.gen(Jmp, inst->marker(), next));
 }
 
 // Return true if branch is a conditional branch to a normal exit.
@@ -253,14 +256,15 @@ void eliminateJmp(Block* lastBlock, IRInstruction* jmp, Block* target) {
 void optimizeJumps(IRUnit& unit) {
   if (RuntimeOption::EvalHHIRDirectExit) {
     optimizeCondTraceExit(unit);
-    optimizeSideExitChecks(unit);
   }
 
   postorderWalk(unit, [&](Block* b) {
     if (RuntimeOption::EvalHHIRDirectExit) {
       auto branch = &b->back();
       auto taken = branch->taken();
-      if (isSideExitJcc(branch, taken)) {
+      if (isSideExitCheck(branch, taken)) {
+        optimizeSideExitCheck(unit, branch, taken);
+      } else if (isSideExitJcc(branch, taken)) {
         optimizeSideExitJcc(unit, branch, taken);
       }
     }

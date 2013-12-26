@@ -32,17 +32,6 @@ TRACE_SET_MOD(hhir);
 
 namespace {
 
-BlockList findMainExitBlocks(IRUnit& unit) {
-  BlockList blocks;
-
-  for (Block* b: unit.main()->blocks()) {
-    if (b->isExit()) {
-      blocks.push_back(b);
-    }
-  }
-  return blocks;
-}
-
 /*
  * Utility class for pattern matching the instructions in a Block,
  * ignoring markers and the label.
@@ -81,64 +70,69 @@ bool isNormalExit(Block* block) {
   return BlockMatcher(block).match(SyncABIRegs, ReqBindJmp);
 }
 
-// Returns whether `opc' is a within-tracelet conditional jump that
-// can be folded into a ReqBindJmpFoo instruction.
+/*
+ * Returns whether `opc' is a within-tracelet conditional jump that
+ * can be folded into a ReqBindJmpFoo instruction.
+ */
 bool jccCanBeDirectExit(Opcode opc) {
-  return isQueryJmpOp(opc) && (opc != JmpIsType) && (opc != JmpIsNType);
-    // TODO(#2404341)
+  return isQueryJmpOp(opc) && opc != JmpIsType && opc != JmpIsNType;
+  // TODO(#2404341)
 }
 
 /*
- * If main trace ends with a conditional jump with no side-effects on
- * exit, followed by the normal ReqBindJmp sequence, convert the whole
- * thing into a conditional ReqBindJmp.
- *
- * This leads to more efficient code because the service request stubs
- * will patch jumps in the main trace instead of off-trace.
+ * Return true if jccInst is a conditional jump with no side effects
+ * on exit, and both successors of the jcc are normal exits.
  */
-void optimizeCondTraceExit(IRUnit& unit) {
+bool isCondTraceExit(IRInstruction* jccInst, Block* jccExitBlock) {
+  auto mainExit = jccInst->next();
+  return jccCanBeDirectExit(jccInst->op()) &&
+         mainExit &&
+         mainExit->isExit() &&
+         isNormalExit(mainExit) &&
+         mainExit->numPreds() == 1 &&
+         isNormalExit(jccExitBlock);
+}
+
+/*
+ * Convert a conditional branch that leads to two normal exits to a single
+ * conditional ReqBindJmp instruction; then delete the unnecessary branch
+ * and exit block.
+ *
+ * This leads to more efficient code because the service request stubs will
+ * patch jumps in the main trace instead of off-trace.
+ */
+void optimizeCondTraceExit(IRUnit& unit, IRInstruction* jccInst,
+                           Block* jccExitBlock) {
+  assert(isCondTraceExit(jccInst, jccExitBlock));
   FTRACE(5, "CondExit:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "CondExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
-  auto const mainExitBlocks = findMainExitBlocks(unit);
-  for (Block* mainExit : mainExitBlocks) {
-    if (!isNormalExit(mainExit)) continue;
+  FTRACE(5, "block ends with jccCanBeDirectExit ({})\n",
+         opcodeName(jccInst->op()));
+  FTRACE(5, "exit trace is side-effect free\n");
 
-    auto const& mainPreds = mainExit->preds();
-    if (mainPreds.size() != 1) continue;
+  auto mainExit = jccInst->next();
+  auto it = mainExit->backIter();
+  auto& reqBindJmp = *(it--);
+  auto& syncAbi = *it;
+  assert(syncAbi.op() == SyncABIRegs);
 
-    auto const jccInst = mainPreds.front().inst();
-    if (!jccCanBeDirectExit(jccInst->op())) return;
-    FTRACE(5, "previous block ends with jccCanBeDirectExit ({})\n",
-           opcodeName(jccInst->op()));
+  auto const newOpcode = jmpToReqBindJmp(jccInst->op());
+  ReqBindJccData data;
+  data.taken = jccExitBlock->back().extra<ReqBindJmp>()->offset;
+  data.notTaken = reqBindJmp.extra<ReqBindJmp>()->offset;
 
-    auto jccExitBlock = jccInst->taken();
-    if (jccExitBlock == mainExit) jccExitBlock = jccInst->next();
-    if (!isNormalExit(jccExitBlock)) continue;
-    FTRACE(5, "exit trace is side-effect free\n");
+  FTRACE(5, "replacing {} with {}\n", jccInst->id(), opcodeName(newOpcode));
+  unit.replace(
+    &reqBindJmp,
+    newOpcode,
+    data,
+    std::make_pair(jccInst->numSrcs(), jccInst->srcs().begin())
+  );
 
-    auto it = mainExit->backIter();
-    auto& reqBindJmp = *(it--);
-    auto& syncAbi = *it;
-    assert(syncAbi.op() == SyncABIRegs);
-
-    auto const newOpcode = jmpToReqBindJmp(jccInst->op());
-    ReqBindJccData data;
-    data.taken = jccExitBlock->back().extra<ReqBindJmp>()->offset;
-    data.notTaken = reqBindJmp.extra<ReqBindJmp>()->offset;
-
-    FTRACE(5, "replacing {} with {}\n", jccInst->id(), opcodeName(newOpcode));
-    unit.replace(
-      &reqBindJmp,
-      newOpcode,
-      data,
-      std::make_pair(jccInst->numSrcs(), jccInst->srcs().begin())
-    );
-
-    syncAbi.setMarker(jccInst->marker());
-    reqBindJmp.setMarker(jccInst->marker());
-    jccInst->convertToJmp(mainExit);
-  }
+  syncAbi.setMarker(jccInst->marker());
+  reqBindJmp.setMarker(jccInst->marker());
+  jccInst->convertToJmp(mainExit);
 }
 
 /*
@@ -231,16 +225,16 @@ void optimizeSideExitJcc(IRUnit& unit, IRInstruction* inst, Block* exitBlock) {
   block->push_back(unit.gen(Jmp, inst->marker(), next));
 }
 
-// Return true if this block ends with a trivial Jmp (a Jmp that does
+// Return true if this block ends with a trivial Jmp: a Jmp that does
 // not pass arguments, and whose target's only predecessor is b.
 bool isTrivialJmp(IRInstruction* branch, Block* taken) {
   return branch->op() == Jmp && branch->numSrcs() == 0 &&
          taken->numPreds() == 1;
 }
 
-// If main trace ends with an unconditional jump, and the target is not
-// reached by any other branch, then copy the target of the jump to the
-// end of the trace
+// Coalesce two blocks joined by a trivial jump by moving the second block's
+// instructions to the first block and deleting the jump.  If the second block
+// starts with BeginCatch or DefLabel, they will also be deleted.
 void eliminateJmp(Block* lastBlock, IRInstruction* jmp, Block* target) {
   assert(isTrivialJmp(jmp, target));
   auto lastInst = lastBlock->iteratorTo(jmp); // iterator to last instruction
@@ -254,21 +248,18 @@ void eliminateJmp(Block* lastBlock, IRInstruction* jmp, Block* target) {
 //////////////////////////////////////////////////////////////////////
 
 void optimizeJumps(IRUnit& unit) {
-  if (RuntimeOption::EvalHHIRDirectExit) {
-    optimizeCondTraceExit(unit);
-  }
-
   postorderWalk(unit, [&](Block* b) {
     if (RuntimeOption::EvalHHIRDirectExit) {
       auto branch = &b->back();
       auto taken = branch->taken();
-      if (isSideExitCheck(branch, taken)) {
+      if (isCondTraceExit(branch, taken)) {
+        optimizeCondTraceExit(unit, branch, taken);
+      } else if (isSideExitCheck(branch, taken)) {
         optimizeSideExitCheck(unit, branch, taken);
       } else if (isSideExitJcc(branch, taken)) {
         optimizeSideExitJcc(unit, branch, taken);
       }
     }
-
     auto branch = &b->back();
     auto taken = branch->taken();
     if (isTrivialJmp(branch, taken)) {

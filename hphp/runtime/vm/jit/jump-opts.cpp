@@ -188,46 +188,44 @@ void optimizeSideExitChecks(IRUnit& unit) {
   });
 }
 
+// Return true if branch is a conditional branch to a normal exit.
+bool isSideExitJcc(IRInstruction* branch, Block* exit) {
+  return jccCanBeDirectExit(branch->op()) && isNormalExit(exit);
+}
+
 /*
- * Look for Jcc instructions in the main trace that
- * branch to "normal exits".  We can optimize these into the
- * SideExitJcc* instructions that can be patched in place.
+ * Branch is a conditional branch to a normal exit.  Convert it
+ * into a SideExitJcc instruction that can be patched in place.
  */
-void optimizeSideExitJccs(IRUnit& unit) {
-  auto trace = unit.main();
+void optimizeSideExitJcc(IRUnit& unit, IRInstruction* inst, Block* exitBlock) {
+  assert(isSideExitJcc(inst, exitBlock));
   FTRACE(5, "SideExitJcc:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "SideExitJcc:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
-  forEachInst(trace->blocks(), [&] (IRInstruction* inst) {
-    if (!jccCanBeDirectExit(inst->op())) return;
-    auto const exitBlock = inst->taken();
-    if (!isNormalExit(exitBlock)) return;
+  auto it = exitBlock->backIter();
+  auto& reqBindJmp = *(it--);
+  auto& syncABI = *it;
+  assert(syncABI.op() == SyncABIRegs);
 
-    auto it = exitBlock->backIter();
-    auto& reqBindJmp = *(it--);
-    auto& syncABI = *it;
-    assert(syncABI.op() == SyncABIRegs);
+  FTRACE(5, "converting jcc ({}) to side exit\n",
+         inst->id());
 
-    FTRACE(5, "converting jcc ({}) to side exit\n",
-           inst->id());
+  auto const newOpcode = jmpToSideExitJmp(inst->op());
+  SideExitJccData data;
+  data.taken = reqBindJmp.extra<ReqBindJmp>()->offset;
 
-    auto const newOpcode = jmpToSideExitJmp(inst->op());
-    SideExitJccData data;
-    data.taken = reqBindJmp.extra<ReqBindJmp>()->offset;
+  auto const block = inst->block();
+  block->insert(block->iteratorTo(inst),
+                unit.cloneInstruction(&syncABI));
 
-    auto const block = inst->block();
-    block->insert(block->iteratorTo(inst),
-                  unit.cloneInstruction(&syncABI));
-
-    auto next = inst->next();
-    unit.replace(
-      inst,
-      newOpcode,
-      data,
-      std::make_pair(inst->numSrcs(), inst->srcs().begin())
-    );
-    block->push_back(unit.gen(Jmp, inst->marker(), next));
-  });
+  auto next = inst->next();
+  unit.replace(
+    inst,
+    newOpcode,
+    data,
+    std::make_pair(inst->numSrcs(), inst->srcs().begin())
+  );
+  block->push_back(unit.gen(Jmp, inst->marker(), next));
 }
 
 // Return true if this block ends with a trivial Jmp (a Jmp that does
@@ -256,10 +254,17 @@ void optimizeJumps(IRUnit& unit) {
   if (RuntimeOption::EvalHHIRDirectExit) {
     optimizeCondTraceExit(unit);
     optimizeSideExitChecks(unit);
-    optimizeSideExitJccs(unit);
   }
 
   postorderWalk(unit, [&](Block* b) {
+    if (RuntimeOption::EvalHHIRDirectExit) {
+      auto branch = &b->back();
+      auto taken = branch->taken();
+      if (isSideExitJcc(branch, taken)) {
+        optimizeSideExitJcc(unit, branch, taken);
+      }
+    }
+
     auto branch = &b->back();
     auto taken = branch->taken();
     if (isTrivialJmp(branch, taken)) {

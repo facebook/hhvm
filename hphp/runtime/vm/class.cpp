@@ -2103,7 +2103,7 @@ void Class::setUsedTraits() {
   }
 }
 
-void Class::checkTraitConstraints() {
+void Class::checkTraitConstraints() const {
 
   if (attrs() & AttrInterface) {
     return; // nothing to do
@@ -2129,6 +2129,7 @@ void Class::checkTraitConstraints() {
                       reqName->data());
         }
       } else {
+        assert(req.is_implements());
         if (!(reqCls->attrs() & AttrInterface)) {
           raise_error("Trait '%s' requires implementations of '%s', but %s "
                       "is not an interface",
@@ -2141,23 +2142,35 @@ void Class::checkTraitConstraints() {
     return;
   }
 
-  for (auto const& ut : m_usedTraits) {
+  checkTraitConstraintsRec(usedTraits(), nullptr);
+}
+
+void Class::checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
+                                     const StringData* recName) const {
+
+  if (!usedTraits.size()) { return; }
+
+  for (auto const& ut : usedTraits) {
     auto const usedTrait = ut.get();
-    auto const ptrait = usedTrait->m_preClass.get();
+    auto const ptrait = usedTrait->preClass();
 
     for (auto const& req : ptrait->traitRequirements()) {
       auto const reqName = req.name();
       if (req.is_extends()) {
         auto reqExtCls = Unit::lookupClass(reqName);
+        // errors should've been raised for the following when the
+        // usedTrait was first loaded
+        assert(reqExtCls != nullptr);
         assert(!(reqExtCls->attrs() & (AttrTrait | AttrInterface)));
 
         if ((m_classVecLen < reqExtCls->m_classVecLen) ||
             (m_classVec[reqExtCls->m_classVecLen-1] != reqExtCls)) {
           raise_error("Class '%s' required to extend class '%s'"
-                      " by trait '%s'",
+                      " by trait '%s' (via %s)",
                       m_preClass->name()->data(),
                       reqName->data(),
-                      ptrait->name()->data());
+                      ptrait->name()->data(),
+                      ((recName == nullptr) ? "use" : recName->data()));
         }
         continue;
       }
@@ -2165,12 +2178,22 @@ void Class::checkTraitConstraints() {
       assert(req.is_implements());
       if (!ifaceofDirect(reqName)) {
         raise_error("Class '%s' required to implement interface '%s'"
-                    " by trait '%s'",
+                    " by trait '%s' (via %s)",
                     m_preClass->name()->data(),
                     reqName->data(),
-                    ptrait->name()->data());
+                    ptrait->name()->data(),
+                    ((recName == nullptr) ? "use" : recName->data()));
       }
     }
+  }
+
+  // separate loop for recursive checks
+  for (auto const& ut : usedTraits) {
+    Class* usedTrait = ut.get();
+    checkTraitConstraintsRec(
+      usedTrait->usedTraits(),
+      recName == nullptr ? usedTrait->preClass()->name() : recName
+    );
   }
 }
 

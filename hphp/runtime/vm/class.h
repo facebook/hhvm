@@ -886,7 +886,9 @@ private:
   void setInterfaces();
   void setClassVec();
   void setUsedTraits();
-  void checkTraitConstraints();
+  void checkTraitConstraints() const;
+  void checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
+                                const StringData* recName) const;
   template<bool setParents> void setInstanceBitsImpl();
   void addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const;
 

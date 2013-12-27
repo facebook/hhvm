@@ -252,7 +252,7 @@ class PreClass : public AtomicCountable {
       m_word = pack(req, isExtends);
     }
 
-    const StringData* name() {
+    const StringData* name() const {
       return reinterpret_cast<const StringData*>(m_word & ~0x1);
     }
     bool is_extends() const { return m_word & 0x1; }
@@ -312,7 +312,7 @@ class PreClass : public AtomicCountable {
   Id id() const { return m_id; }
   const InterfaceVec& interfaces() const { return m_interfaces; }
   const UsedTraitVec& usedTraits() const { return m_usedTraits; }
-  const TraitRequirementsVec& traitRequiredExtends() const {
+  const TraitRequirementsVec& traitRequirements() const {
     return m_traitRequirements;
   }
   const TraitPrecRuleVec& traitPrecRules() const { return m_traitPrecRules; }
@@ -886,6 +886,7 @@ private:
   void setInterfaces();
   void setClassVec();
   void setUsedTraits();
+  void checkTraitConstraints();
   template<bool setParents> void setInstanceBitsImpl();
   void addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const;
 

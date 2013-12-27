@@ -3009,7 +3009,7 @@
             ]
         },
         {
-            "name": "FrozenSet",
+            "name": "HH_FrozenSet",
             "ifaces": [
                 "ConstSet"
             ],

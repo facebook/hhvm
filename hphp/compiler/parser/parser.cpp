@@ -2025,7 +2025,8 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
     (AliasEntry){"Collection", "HH\\Collection"},
     (AliasEntry){"Vector", "HH\\Vector"},
     (AliasEntry){"Set", "HH\\Set"},
-    (AliasEntry){"FrozenVector", "HH\\FrozenVector"}
+    (AliasEntry){"FrozenVector", "HH\\FrozenVector"},
+    (AliasEntry){"FrozenSet", "HH\\FrozenSet"}
   };
 
   return aliases;

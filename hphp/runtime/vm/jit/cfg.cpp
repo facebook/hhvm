@@ -47,15 +47,17 @@ bool isRPOSorted(const BlockList& blocks) {
 }
 
 namespace {
-// If edge is critical, split it and return the new Block*. Otherwise, return
-// nullptr.
-Block* splitCriticalEdge(IRUnit& unit, Edge* edge) {
-  if (!edge) return nullptr;
+
+// If edge is critical, split it by inserting an intermediate block.
+// A critical edge is an edge from a block with multiple successors to
+// a block with multiple predecessors.
+void splitCriticalEdge(IRUnit& unit, Edge* edge) {
+  if (!edge) return;
 
   auto* to = edge->to();
   auto* branch = edge->inst();
   auto* from = branch->block();
-  if (to->numPreds() <= 1 || from->numSuccs() <= 1) return nullptr;
+  if (to->numPreds() <= 1 || from->numSuccs() <= 1) return;
 
   Block* middle = unit.defBlock();
   FTRACE(3, "splitting edge from B{} -> B{} using B{}\n",
@@ -74,8 +76,7 @@ Block* splitCriticalEdge(IRUnit& unit, Edge* edge) {
     middle->setHint(unlikely);
   }
 
-  unit.main()->push_back(middle);
-  return middle;
+  from->trace()->push_back(middle);
 }
 }
 
@@ -84,13 +85,12 @@ bool splitCriticalEdges(IRUnit& unit) {
   auto modified = removeUnreachable(unit);
   auto const startBlocks = unit.numBlocks();
 
-  // Splitting critical edges will add blocks to the main trace;
-  // iterate using a counter since elements can move.
-  auto& blocks = unit.main()->blocks();
-  for (size_t i = 0; i < blocks.size(); ++i) {
-    splitCriticalEdge(unit, blocks[i]->takenEdge());
-    splitCriticalEdge(unit, blocks[i]->nextEdge());
-  }
+  // Try to split outgoing edges of each reachable block.  This is safe in
+  // a postorder walk since we visit blocks after visiting successors.
+  postorderWalk(unit, [&](Block* b) {
+    splitCriticalEdge(unit, b->takenEdge());
+    splitCriticalEdge(unit, b->nextEdge());
+  });
 
   return modified || unit.numBlocks() != startBlocks;
 }

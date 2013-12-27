@@ -286,11 +286,14 @@ TypePtr ListAssignment::inferTypes(AnalysisResultPtr ar, TypePtr type,
 ///////////////////////////////////////////////////////////////////////////////
 
 void ListAssignment::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ListAssignmentExpression", 3);
+  auto numProps = m_array != nullptr ? 3 : 2;
+  cg.printObjectHeader("ListAssignmentExpression", numProps);
   cg.printPropertyHeader("variables");
   cg.printExpressionVector(m_variables);
-  cg.printPropertyHeader("expression");
-  m_array->outputCodeModel(cg);
+  if (m_array != nullptr) {
+    cg.printPropertyHeader("expression");
+    m_array->outputCodeModel(cg);
+  }
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

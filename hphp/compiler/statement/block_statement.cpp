@@ -99,7 +99,7 @@ void BlockStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printObjectHeader("BlockStatement", m_stmts != nullptr ? 2 : 1);
   if (m_stmts != nullptr) {
     cg.printPropertyHeader("statements");
-    m_stmts->outputCodeModel(cg);
+    cg.printStatementVector(m_stmts);
   }
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());

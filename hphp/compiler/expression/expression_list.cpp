@@ -469,7 +469,11 @@ bool ExpressionList::canonCompare(ExpressionPtr e) const {
 void ExpressionList::outputCodeModel(CodeGenerator &cg) {
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     ExpressionPtr exp = m_exps[i];
-    cg.printExpression(exp, exp?exp->hasContext(RefParameter):false);
+    if (exp) {
+      cg.printExpression(exp, exp->hasContext(RefParameter));
+    } else {
+      cg.printNull();
+    }
   }
 }
 

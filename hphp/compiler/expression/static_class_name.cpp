@@ -169,13 +169,13 @@ bool StaticClassName::checkPresent() {
 
 void StaticClassName::outputCodeModel(CodeGenerator &cg) {
   if (isSelf()) {
-    cg.printf("self");
+    cg.printValue("self");
   } else if (isParent()) {
-    cg.printf("parent");
+    cg.printValue("parent");
   } else if (isStatic()) {
-    cg.printf("static");
+    cg.printValue("static");
   } else {
-    cg.printf("%s", m_origClassName.c_str());
+    cg.printValue(m_origClassName);
   }
 }
 

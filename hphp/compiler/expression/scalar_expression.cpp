@@ -387,35 +387,38 @@ std::string ScalarExpression::getIdentifier() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ScalarExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ScalarExpression", 2);
-  cg.printPropertyHeader("value");
   switch (m_type) {
-    case T_CONSTANT_ENCAPSED_STRING:
-    case T_ENCAPSED_AND_WHITESPACE:
-    case T_STRING:
-    case T_NUM_STRING:
-      cg.printValue(m_value);
-      break;
-    case T_LNUMBER:
-    case T_COMPILER_HALT_OFFSET:
-      cg.printValue((int64_t)strtoll(m_value.c_str(), nullptr, 0));
-      break;
+    case T_NS_C:
     case T_LINE:
-      cg.printValue(String(m_translated).toInt64());
-      break;
     case T_TRAIT_C:
     case T_CLASS_C:
-    case T_NS_C:
     case T_METHOD_C:
-    case T_FUNC_C:
-      cg.printValue(m_translated);
-      break;
-    case T_DNUMBER:
-      cg.printValue(String(m_value).toDouble());
-      break;
+    case T_FUNC_C: {
+      cg.printObjectHeader("SimpleVariableExpression", 2);
+      std::string varName;
+      switch (m_type) {
+        case T_NS_C: varName = "__NAMESPACE__"; break;
+        case T_LINE: varName = "__LINE__"; break;
+        case T_TRAIT_C: varName = "__TRAIT__"; break;
+        case T_CLASS_C: varName = "__CLASS__"; break;
+        case T_METHOD_C: varName = "__METHOD__"; break;
+        case T_FUNC_C: varName = "__FUNCTION__"; break;
+        default: break;
+      }
+      cg.printPropertyHeader("variableName");
+      cg.printValue(varName);
+      cg.printPropertyHeader("sourceLocation");
+      cg.printLocation(this->getLocation());
+      cg.printObjectFooter();
+      return;
+    }
     default:
-      assert(false);
+      break;
   }
+
+  cg.printObjectHeader("ScalarExpression", 2);
+  cg.printPropertyHeader("value");
+  cg.printValue(m_originalValue);
   cg.printPropertyHeader("sourceLocation");
   cg.printLocation(this->getLocation());
   cg.printObjectFooter();

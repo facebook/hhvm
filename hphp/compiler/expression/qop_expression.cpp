@@ -172,7 +172,7 @@ void QOpExpression::outputCodeModel(CodeGenerator &cg) {
     m_condition->outputCodeModel(cg);
     cg.printPropertyHeader("valueIfNull");
   } else {
-    cg.printObjectHeader("ConditionalExpression(", 4);
+    cg.printObjectHeader("ConditionalExpression", 4);
     cg.printPropertyHeader("condition");
     m_condition->outputCodeModel(cg);
     cg.printPropertyHeader("valueIfTrue");

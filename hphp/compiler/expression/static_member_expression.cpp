@@ -340,7 +340,7 @@ bool StaticMemberExpression::canonCompare(ExpressionPtr e) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 void StaticMemberExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ClassPropertyExpression", 2);
+  cg.printObjectHeader("ClassPropertyExpression", 3);
   cg.printPropertyHeader("className");
   StaticClassName::outputCodeModel(cg);
   if (m_exp->is(Expression::KindOfScalarExpression)) {

@@ -571,6 +571,7 @@ ExpressionPtr UnaryOpExpression::unneededHelper() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
+  auto numProps = m_exp == nullptr ? 2 : 3;
   switch (m_op) {
     case T_UNSET:
     case T_EXIT:
@@ -578,7 +579,7 @@ void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
     case T_ISSET:
     case T_EMPTY:
     case T_EVAL: {
-      cg.printObjectHeader("SimpleFunctionCallExpression", 3);
+      cg.printObjectHeader("SimpleFunctionCallExpression", numProps);
       std::string funcName;
       switch (m_op) {
         case T_UNSET: funcName = "unset"; break;
@@ -591,10 +592,10 @@ void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
       }
       cg.printPropertyHeader("functionName");
       cg.printValue(funcName);
-      cg.printPropertyHeader("arguments");
-      printf("V:9:\"HH\\Vector\":1:{");
-      m_exp->outputCodeModel(cg);
-      printf("}");
+      if (m_exp != nullptr) {
+        cg.printPropertyHeader("arguments");
+        cg.printExpressionVector(m_exp);
+      }
       cg.printPropertyHeader("sourceLocation");
       cg.printLocation(this->getLocation());
       cg.printObjectFooter();
@@ -604,9 +605,38 @@ void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
       break;
   }
 
-  cg.printObjectHeader("UnaryOpExpression", 3);
-  cg.printPropertyHeader("expression");
-  m_exp->outputCodeModel(cg);
+  switch (m_op) {
+    case T_FILE:
+    case T_DIR:
+    case T_CLASS:
+    case T_FUNCTION: {
+      cg.printObjectHeader("SimpleVariableExpression", 2);
+      std::string varName;
+      switch (m_op) {
+        case T_FILE: varName = "__FILE__"; break;
+        case T_DIR: varName = "__DIR__"; break;
+        //case T_CLASS: varName = "class"; break;
+        //case T_FUNCTION: varName = "function"; break;
+        default:
+          assert(false); //fishing expedition. Are these cases dead?
+          break;
+      }
+      cg.printPropertyHeader("variableName");
+      cg.printValue(varName);
+      cg.printPropertyHeader("sourceLocation");
+      cg.printLocation(this->getLocation());
+      cg.printObjectFooter();
+      return;
+    }
+    default:
+      break;
+  }
+
+  cg.printObjectHeader("UnaryOpExpression", numProps);
+  if (m_exp != nullptr) {
+    cg.printPropertyHeader("expression");
+    m_exp->outputCodeModel(cg);
+  }
   cg.printPropertyHeader("operation");
   int op = 0;
   switch (m_op) {
@@ -629,6 +659,7 @@ void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
     case T_BOOL_CAST: op = PHP_BOOL_CAST_OP; break;
     case T_UNSET_CAST: op = PHP_UNSET_CAST_OP; break;
     case '@': op = PHP_ERROR_CONTROL_OP; break;
+    case T_PRINT: op = PHP_PRINT_OP; break;
     case T_INCLUDE: op = PHP_INCLUDE_OP; break;
     case T_INCLUDE_ONCE: op = PHP_INCLUDE_ONCE_OP; break;
     case T_REQUIRE: op = PHP_REQUIRE_OP; break;

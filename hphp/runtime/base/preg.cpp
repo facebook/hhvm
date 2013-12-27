@@ -583,7 +583,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
                     subpats_order > PREG_SET_ORDER)) ||
         (!global && subpats_order != 0)) {
       raise_warning("Invalid flags specified");
-      return false;
+      return null_variant;
     }
   }
 

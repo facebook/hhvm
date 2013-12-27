@@ -18,6 +18,7 @@
 #define incl_HPHP_CLOSURE_EXPRESSION_H_
 
 #include "hphp/compiler/expression/expression.h"
+#include "hphp/parser/parser.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,9 +30,19 @@ DECLARE_BOOST_TYPES(ExpressionList);
 class ClosureExpression : public Expression {
 public:
   ClosureExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                    FunctionStatementPtr func, ExpressionListPtr vars);
+                    ClosureType type,
+                    FunctionStatementPtr func,
+                    ExpressionListPtr vars);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
+
+  // Flag for whether we have already determined the capture list for
+  // this lambda.
+  enum class CaptureState {
+    Unknown,
+    Known,
+  };
+  CaptureState captureState() const { return m_captureState; }
 
   virtual ConstructPtr getNthKid(int n) const;
   virtual void setNthKid(int n, ConstructPtr cp);
@@ -43,17 +54,35 @@ public:
   StringData* getClosureClassName() { return m_closureClassName; }
   void setClosureClassName(StringData* value) { m_closureClassName = value; }
   bool hasStaticLocals();
+  ClosureType type() const { return m_type; }
+  std::set<std::string> collectParamNames() const;
 
+  /*
+   * Initialize the capture list for a closure that uses automatic
+   * captures.
+   *
+   * Pre: captureState() == CaptureState::Unknown.
+   */
+  void setCaptureList(AnalysisResultPtr ar,
+                      const std::set<std::string>&);
 
 private:
+  static TypePtr s_ClosureType;
+
+private:
+  void initializeFromUseList(ExpressionListPtr vars);
+  void initializeValuesFromVars();
+  void analyzeVars(AnalysisResultPtr);
+  bool hasStaticLocalsImpl(ConstructPtr root);
+
+private:
+  ClosureType m_type;
   FunctionStatementPtr m_func;
   ExpressionListPtr m_vars;
   ExpressionListPtr m_values;
   StringData* m_closureClassName;
-
-  static TypePtr s_ClosureType;
-
-  bool hasStaticLocalsImpl(ConstructPtr root);
+  std::set<std::string> m_unboundNames;
+  CaptureState m_captureState;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

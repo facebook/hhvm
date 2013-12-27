@@ -213,7 +213,9 @@ String f_stripslashes(const String& str) {
         ret.append('\0');
         return;
       }
-      ret.append(*src);
+      if (src < end) {
+        ret.append(*src);
+      }
     });
 }
 
@@ -541,8 +543,10 @@ Variant f_strtok(const String& str, CVarRef token /* = null_variant */) {
 static
 Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
                     int &count, bool caseSensitive) {
+  count = 0;
   if (search.is(KindOfArray)) {
     String ret = subject;
+    int c = 0;
 
     Array searchArr = search.toArray();
     if (replace.is(KindOfArray)) {
@@ -552,20 +556,22 @@ Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
         if (replIter) {
           ret = string_replace(ret, iter.second().toString(),
                                replIter.second().toString(),
-                               count, caseSensitive);
+                               c, caseSensitive);
           ++replIter;
         } else {
           ret = string_replace(ret, iter.second().toString(),
-                               "", count, caseSensitive);
+                               "", c, caseSensitive);
         }
+        count +=c;
       }
       return ret;
     }
 
     String repl = replace.toString();
     for (ArrayIter iter(searchArr); iter; ++iter) {
-      ret = string_replace(ret, iter.second().toString(), repl, count,
+      ret = string_replace(ret, iter.second().toString(), repl, c,
                            caseSensitive);
+      count += c;
     }
     return ret;
   }
@@ -579,9 +585,11 @@ Variant str_replace(CVarRef search, CVarRef replace, const String& subject,
 
 static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
                            int &count, bool caseSensitive) {
+  count = 0;
   if (subject.is(KindOfArray)) {
     Array arr = subject.toArray();
     Array ret;
+    int c;
     for (ArrayIter iter(arr); iter; ++iter) {
       if (iter.second().is(KindOfArray) || iter.second().is(KindOfObject)) {
         ret.set(iter.first(), iter.second());
@@ -589,8 +597,9 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
       }
 
       String replaced = str_replace(search, replace, iter.second().toString(),
-                                    count, caseSensitive);
+                                    c, caseSensitive);
       ret.set(iter.first(), replaced);
+      count += c;
     }
     return ret;
   }
@@ -883,14 +892,6 @@ Variant f_substr_compare(const String& main_str, const String& str, int offset,
   return string_ncmp(s1 + offset, str.data(), cmp_len);
 }
 
-Variant f_strrchr(const String& haystack, CVarRef needle) {
-  Variant ret = f_strrpos(haystack, needle);
-  if (same(ret, false)) {
-    return false;
-  }
-  return haystack.substr(ret.toInt32());
-}
-
 Variant f_strstr(const String& haystack, CVarRef needle,
                  bool before_needle /* = false */) {
   Variant ret = f_strpos(haystack, needle);
@@ -978,6 +979,21 @@ static bool is_valid_strrpos_args(
     return false;
   }
   return true;
+}
+
+Variant f_strrchr(const String& haystack, CVarRef needle) {
+  if (haystack.size() == 0) {
+    return false;
+  }
+
+  int pos;
+  if (needle.isString() && needle.toString().size() > 0) {
+    pos = haystack.rfind(needle.toString().data()[0], false);
+  } else {
+    pos = haystack.rfind(needle.toByte(), false);
+  }
+  if (pos < 0) return false;
+  return haystack.substr(pos);
 }
 
 Variant f_strrpos(const String& haystack, CVarRef needle, int offset /* = 0 */) {

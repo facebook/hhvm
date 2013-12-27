@@ -45,16 +45,21 @@ void FileinfoResource::sweep() {
 
 static Variant HHVM_FUNCTION(finfo_open,
     int64_t options,
-    const String& magic_file) {
+    CVarRef magic_file) {
   auto magic = magic_open(options);
   if (magic == nullptr) {
     raise_warning("Invalid mode '%" PRId64 "'.", options);
     return false;
   }
 
-  auto fn = magic_file.empty() ? nullptr : magic_file.data();
+  String mf;
+  if (!magic_file.isNull()) {
+    mf = magic_file.toString();
+  }
+
+  auto fn = mf.empty() ? nullptr : mf.data();
   if (magic_load(magic, fn) == -1) {
-    raise_warning("Failed to load magic database at '%s'.", magic_file.data());
+    raise_warning("Failed to load magic database at '%s'.", fn);
     magic_close(magic);
     return false;
   }
@@ -208,18 +213,28 @@ clean:
 }
 
 static String HHVM_FUNCTION(finfo_buffer,
-    CResRef finfo, const String& string,
+    CResRef finfo, CVarRef string,
     int64_t options, CVarRef context) {
+
+  String s;
+  if (!string.isNull()) {
+    s = string.toString();
+  }
   return php_finfo_get_type(
-      finfo, string, options, context,
+      finfo, s, options, context,
       FILEINFO_MODE_BUFFER, 0);
 }
 
 static String HHVM_FUNCTION(finfo_file,
-    CResRef finfo, const String& file_name,
+    CResRef finfo, CVarRef file_name,
     int64_t options, CVarRef context) {
+
+  String fn;
+  if (!file_name.isNull()) {
+    fn = file_name.toString();
+  }
   return php_finfo_get_type(
-      finfo, file_name, options, context,
+      finfo, fn, options, context,
       FILEINFO_MODE_FILE, 0);
 }
 

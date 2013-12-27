@@ -496,33 +496,12 @@ SSATmp* Simplifier::simplify(IRInstruction* inst) {
 SSATmp* Simplifier::simplifySpillStack(IRInstruction* inst) {
   auto const sp           = inst->src(0);
   auto const spDeficit    = inst->src(1)->getValInt();
-  auto       spillVals    = inst->srcs().subpiece(2);
-  auto const numSpillSrcs = spillVals.size();
-  auto const spillCells   = spillValueCells(inst);
-  int64_t    adjustment   = spDeficit - spillCells;
+  auto const numSpillSrcs = inst->srcs().subpiece(2).size();
 
   // If there's nothing to spill, and no stack adjustment, we don't
   // need the instruction; the old stack is still accurate.
   if (!numSpillSrcs && spDeficit == 0) return sp;
 
-  // Don't elide spills of LdStack values right away, since they're
-  // useful for getStackValue
-  if (!m_tb.inReoptimize()) return nullptr;
-
-  // If our value came from a LdStack on the same sp and offset,
-  // we don't need to spill it.
-  for (uint32_t i = 0, cellOff = 0; i < numSpillSrcs; i++) {
-    const int64_t offset = cellOff + adjustment;
-    auto* srcInst = spillVals[i]->inst();
-    if (srcInst->op() == LdStack && srcInst->src(0) == sp &&
-        srcInst->extra<LdStack>()->offset == offset) {
-      spillVals[i] = m_tb.genDefNone();
-    }
-    cellOff++;
-  }
-
-  // Note: although the instruction might have been modified above, we still
-  // need to return nullptr so that it gets cloned later if it's stack-allocated
   return nullptr;
 }
 
@@ -1098,9 +1077,10 @@ SSATmp* Simplifier::simplifyDivDbl(IRInstruction* inst) {
 
   // X / 0 -> bool(false)
   if (src2Val == 0.0) {
-    gen(RaiseWarning,
-        cns(makeStaticString(Strings::DIVISION_BY_ZERO)));
-    return cns(false);
+    // Ideally we'd generate a RaiseWarning and return false here, but we need
+    // a catch trace for that and we can't make a catch trace without
+    // HhbcTranslator.
+    return nullptr;
   }
 
   // statically compute X / Y

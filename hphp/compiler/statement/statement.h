@@ -84,6 +84,7 @@ DECLARE_BOOST_TYPES(LabelScope);
     x(GotoStatement),                           \
     x(LabelStatement),                          \
     x(UseTraitStatement),                       \
+    x(TraitRequireStatement),                   \
     x(TraitPrecStatement),                      \
     x(TraitAliasStatement),                     \
     x(TypedefStatement)

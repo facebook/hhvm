@@ -13,7 +13,7 @@ int(2)
 int(3)
 
 values...
-object(FrozenVector)#4 (3) {
+object(HH\FrozenVector)#4 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -21,7 +21,7 @@ object(FrozenVector)#4 (3) {
   [2]=>
   int(3)
 }
-object(FrozenVector)#4 (0) {
+object(HH\FrozenVector)#4 (0) {
 }
 
 lazy...
@@ -75,7 +75,7 @@ object(HH\Vector)#6 (3) {
 }
 
 toFrozenVector...
-object(FrozenVector)#6 (3) {
+object(HH\FrozenVector)#6 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -85,7 +85,7 @@ object(FrozenVector)#6 (3) {
 }
 
 toSet...
-object(Set)#6 (3) {
+object(HH\Set)#6 (3) {
   int(1)
   int(2)
   int(3)

@@ -211,7 +211,8 @@ void TransCFG::print(std::string fileName, FuncId funcId,
     const char* shape = selected && setContains(*selected, tid) ? "oval"
                                                                 : "box";
     fprintf(file,
-            "t%u [shape=%s,label=\"T: %u\\np: %" PRId64 "\\nbc: [0x%x-0x%x)\","
+            "t%u [shape=%s,label=\"T: %u\\np: %" PRId64 "\\n"
+            "bc: [%" PRIu32 "-%" PRIu32 ")\","
             "style=filled,fillcolor=\"#ff%02x%02x\"];\n", tid, shape, tid, w,
             bcStart, bcStop, coldness, coldness);
   }

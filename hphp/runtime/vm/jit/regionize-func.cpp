@@ -115,22 +115,28 @@ static void sortRegion(RegionVec&                  regions,
   RegionVec sorted;
   RegionSet selected;
 
-  // First, pick the region for the function body entry.  There may be
-  // multiple translations of the function body, so pick the one with
-  // largest profile weight.
+  if (regions.size() == 0) return;
+
+  // First, pick the region starting at the lowest bytecode offset.
+  // This will normally correspond to the main function entry (for
+  // normal, regular bytecode), but it may not be for irregular
+  // functions written in hhas (like array_map and array_filter).  If
+  // there multiple regions starting at the lowest bytecode offset,
+  // pick the one with the largest profile weight.
   RegionDescPtr entryRegion = nullptr;
   int64_t    maxEntryWeight = -1;
+  Offset     lowestOffset   = kInvalidOffset;
   for (const auto& pair : regionToTransIds) {
     auto  r    = pair.first;
     auto& tids = pair.second;
-    for (auto tid : tids) {
-      if (profData->transSrcKey(tid).offset() == func->base()) {
-        int64_t weight = cfg.weight(tid);
-        if (weight > maxEntryWeight) {
-          entryRegion    = r;
-          maxEntryWeight = weight;
-        }
-      }
+    TransID firstTid = tids[0];
+    Offset firstOffset = profData->transSrcKey(firstTid).offset();
+    int64_t weight = cfg.weight(firstTid);
+    if (lowestOffset == kInvalidOffset || firstOffset < lowestOffset ||
+        (firstOffset == lowestOffset && weight > maxEntryWeight)) {
+      entryRegion    = r;
+      maxEntryWeight = weight;
+      lowestOffset   = firstOffset;
     }
   }
 
@@ -204,9 +210,9 @@ static bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
  *      2.2) select a region starting at this node and mark nodes/arcs as
  *           covered appropriately
  */
-void regionizeFunc(const Func*            func,
+void regionizeFunc(const Func*         func,
                    JIT::TranslatorX64* tx64,
-                   RegionVec&             regions) {
+                   RegionVec&          regions) {
   assert(RuntimeOption::EvalJitPGO);
   FuncId funcId = func->getFuncId();
   ProfData* profData = tx64->profData();

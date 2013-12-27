@@ -1,6 +1,30 @@
 Next release
   -
 
+"Appleseed" 23-Dec-2013
+  - Fix issues with DOCUMENT_ROOT in fastcgi
+  - Better type inference for collections and builtins in repo mode
+  - Shorter syntax for lambda expressions w/ automatic captures
+  - Parser support for trait requires clauses
+  - Move FrozenVector and Set to the HH namespace
+  - Fix resource to array conversion
+  - Fix a request local memory leak in foreach of apc arrays
+  - Initial php_odbc API implementation
+  - Implement PHP's hash_copy() function
+  - Experimental tool: Memoization Opportunity Profiler
+  - Various small parity/behavior fixes (in phar, proc_open, filter_var)
+  - A Eval.DumpHhas=1 option to dump hhas for a php file
+  - Better warnings in Set::toArray
+  - Fix the behavior of foreach loops in finally blocks
+  - chmod -x runtime/vm/jit/*.{cpp,h}
+  - Changes to make hhvm build clean with clang-3.4
+  - Fix array_product to not be bug-compatible with PHP 5.2
+  - Change the Map datastructure---preserves order and does faster foreach
+  - FrozenSet collection
+  - Generate pid.map when we unmap text section, for the perf tool
+  - Implemented GlobIterator
+  - Implemented Reflection::export and Reflection::getModifierNames
+
 "Tom Yum" 9-Dec-2013
   - support date.timezone in ini files
   - implement fileinfo

@@ -4,3 +4,4 @@ string(2) "d1"
 object(stdClass)#3 (0) {
 }
 string(2) "d2"
+string(7) "mutated"

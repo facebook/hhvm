@@ -227,8 +227,8 @@ public:
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
   void setContentType(const String& mimetype, const String& charset);
-  int64_t getRequestMemoryMaxBytes() const { return m_maxMemory; }
-  void setRequestMemoryMaxBytes(int64_t max);
+  String getRequestMemoryMaxBytes() const { return m_maxMemory; }
+  void setRequestMemoryMaxBytes(const String& max);
   String getCwd() const { return m_cwd;}
   void setCwd(const String& cwd) { m_cwd = cwd;}
 
@@ -358,7 +358,7 @@ private:
   static const StaticString s_amp;
   // system settings
   Transport *m_transport;
-  int64_t m_maxMemory;
+  String m_maxMemory;
   String m_cwd;
 
   // output buffering
@@ -409,6 +409,7 @@ private:
   // helper functions
   void resetCurrentBuffer();
   void executeFunctions(CArrRef funcs);
+  int64_t convertBytesToInt(const String& value) const;
 
   DECLARE_DBG_SETTING
 };

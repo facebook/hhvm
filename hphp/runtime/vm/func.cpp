@@ -330,15 +330,15 @@ Func* Func::clone(Class* cls) const {
   return f;
 }
 
-const Func* Func::cloneAndSetClass(Class* cls) const {
-  if (const Func* ret = findCachedClone(cls)) {
+Func* Func::cloneAndSetClass(Class* cls) const {
+  if (Func* ret = findCachedClone(cls)) {
     return ret;
   }
 
   static Mutex s_clonedFuncListMutex;
   Lock l(s_clonedFuncListMutex);
   // Check again now that I'm the writer
-  if (const Func* ret = findCachedClone(cls)) {
+  if (Func* ret = findCachedClone(cls)) {
     return ret;
   }
 
@@ -355,8 +355,8 @@ const Func* Func::cloneAndSetClass(Class* cls) const {
   return clonedFunc;
 }
 
-const Func* Func::findCachedClone(Class* cls) const {
-  const Func* nextFunc = this;
+Func* Func::findCachedClone(Class* cls) const {
+  Func* nextFunc = const_cast<Func*>(this);
   while (nextFunc) {
     if (nextFunc->cls() == cls) {
       return nextFunc;
@@ -789,6 +789,17 @@ int Func::getDVEntryNumParams(Offset offset) const {
   return -1;
 }
 
+Offset Func::getEntryForNumArgs(int numArgsPassed) const {
+  assert(numArgsPassed >= 0);
+  for (unsigned i = numArgsPassed; i < numParams(); i++) {
+    const Func::ParamInfo& pi = params()[i];
+    if (pi.hasDefaultValue()) {
+      return pi.funcletOff();
+    }
+  }
+  return base();
+}
+
 bool Func::shouldPGO() const {
   if (!RuntimeOption::EvalJitPGO) return false;
 
@@ -882,9 +893,13 @@ void FuncEmitter::init(int line1, int line2, Offset base, Attr attrs, bool top,
   m_attrs = attrs;
   m_top = top;
   m_docComment = docComment;
-  if (!SystemLib::s_inited) {
-    m_attrs = m_attrs | AttrBuiltin;
-    if (!pce()) m_attrs = m_attrs | AttrSkipFrame;
+  if (!isPseudoMain()) {
+    if (!SystemLib::s_inited) {
+      assert(m_attrs & AttrBuiltin);
+    }
+    if ((m_attrs & AttrBuiltin) && !pce()) {
+      m_attrs = m_attrs | AttrSkipFrame;
+    }
   }
 }
 
@@ -1405,6 +1420,14 @@ void FuncRepoProxy::GetFuncsStmt
       assert(fe->sn() == funcSn);
       fe->setTop(top);
       fe->serdeMetaData(extraBlob);
+      if (!SystemLib::s_inited && !fe->isPseudoMain()) {
+        assert(fe->attrs() & AttrBuiltin);
+        if (preClassId < 0) {
+          assert(fe->attrs() & AttrPersistent);
+          assert(fe->attrs() & AttrUnique);
+          assert(fe->attrs() & AttrSkipFrame);
+        }
+      }
       fe->setEhTabIsSorted();
       fe->finish(fe->past(), true);
       ue.recordFunction(fe);

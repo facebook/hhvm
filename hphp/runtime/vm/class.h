@@ -115,7 +115,8 @@ class PreClass : public AtomicCountable {
     NotHoistable,
     Mergeable,
     MaybeHoistable,
-    AlwaysHoistable
+    AlwaysHoistable,
+    ClosureHoistable
   };
 
   struct Prop {

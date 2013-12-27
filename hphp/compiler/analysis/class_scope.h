@@ -173,6 +173,7 @@ public:
    * Get/set attributes.
    */
   void setSystem();
+  bool isSystem() const { return m_attribute & System; }
   void setAttribute(Attribute attr) { m_attribute |= attr;}
   void clearAttribute(Attribute attr) { m_attribute &= ~attr;}
   bool getAttribute(Attribute attr) const {
@@ -312,6 +313,8 @@ public:
 
   void addTraitAlias(TraitAliasStatementPtr aliasStmt);
 
+  void addTraitRequirement(const std::string &requiredName, bool isExtends);
+
   void importUsedTraits(AnalysisResultPtr ar);
 
   /**
@@ -378,6 +381,8 @@ private:
   UserAttributeMap m_userAttributes;
 
   std::vector<std::string> m_usedTraitNames;
+  boost::container::flat_set<std::string> m_traitRequiredExtends;
+  boost::container::flat_set<std::string> m_traitRequiredImplements;
   // m_traitAliases is used to support ReflectionClass::getTraitAliases
   std::vector<std::pair<std::string, std::string> > m_traitAliases;
 

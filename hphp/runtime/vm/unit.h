@@ -929,12 +929,12 @@ class UnitEmitter {
                         pointer_hash<FuncEmitter> > FMap;
   FMap m_fMap;
   typedef std::vector<PreClassEmitter*> PceVec;
-  typedef std::vector<Id> IdVec;
+  typedef std::list<Id> IdList;
   PceVec m_pceVec;
   typedef hphp_hash_set<const StringData*, string_data_hash,
                         string_data_isame> HoistedPreClassSet;
   HoistedPreClassSet m_hoistablePreClassSet;
-  IdVec m_hoistablePceIdVec;
+  IdList m_hoistablePceIdList;
   typedef std::vector<std::pair<UnitMergeKind, Id> > MergeableStmtVec;
   MergeableStmtVec m_mergeableStmts;
   std::vector<std::pair<Id,TypedValue> > m_mergeableValues;

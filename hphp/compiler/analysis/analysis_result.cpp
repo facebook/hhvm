@@ -32,6 +32,7 @@
 #include "hphp/compiler/statement/loop_statement.h"
 #include "hphp/compiler/statement/class_variable.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/trait_require_statement.h"
 #include "hphp/compiler/analysis/symbol_table.h"
 #include "hphp/compiler/package.h"
 #include "hphp/compiler/parser/parser.h"
@@ -488,8 +489,7 @@ void AnalysisResult::link(FileScopePtr user, FileScopePtr provider) {
 
 bool AnalysisResult::addClassDependency(FileScopePtr usingFile,
                                         const std::string &className) {
-  if (BuiltinSymbols::s_classes.find(className) !=
-      BuiltinSymbols::s_classes.end())
+  if (m_systemClasses.find(className) != m_systemClasses.end())
     return true;
 
   StringToClassScopePtrVecMap::const_iterator iter =
@@ -507,8 +507,7 @@ bool AnalysisResult::addClassDependency(FileScopePtr usingFile,
 
 bool AnalysisResult::addFunctionDependency(FileScopePtr usingFile,
                                            const std::string &functionName) {
-  if (BuiltinSymbols::s_functions.find(functionName) !=
-      BuiltinSymbols::s_functions.end())
+  if (m_functions.find(functionName) != m_functions.end())
     return true;
   StringToFunctionScopePtrMap::const_iterator iter =
     m_functionDecs.find(functionName);
@@ -570,12 +569,16 @@ bool AnalysisResult::isSystemConstant(const std::string &constName) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Program
 
-void AnalysisResult::loadBuiltins() {
-  AnalysisResultPtr ar = shared_from_this();
-  BuiltinSymbols::LoadFunctions(ar, m_functions);
-  BuiltinSymbols::LoadClasses(ar, m_systemClasses);
-  BuiltinSymbols::LoadVariables(ar, m_variables);
-  BuiltinSymbols::LoadConstants(ar, m_constants);
+void AnalysisResult::addSystemFunction(FunctionScopeRawPtr fs) {
+  FunctionScopePtr& entry = m_functions[fs->getName()];
+  assert(!entry);
+  entry = fs;
+}
+
+void AnalysisResult::addSystemClass(ClassScopeRawPtr cs) {
+  ClassScopePtr& entry = m_systemClasses[cs->getName()];
+  assert(!entry);
+  entry = cs;
 }
 
 void AnalysisResult::checkClassDerivations() {
@@ -605,22 +608,26 @@ void AnalysisResult::resolveNSFallbackFuncs() {
 }
 
 void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
-  const StringToFunctionScopePtrMap &funcs = fs->getFunctions();
-
-  for (StringToFunctionScopePtrMap::const_iterator iter = funcs.begin();
-       iter != funcs.end(); ++iter) {
-    FunctionScopePtr func = iter->second;
+  for (const auto& iter : fs->getFunctions()) {
+    FunctionScopePtr func = iter.second;
     if (!func->inPseudoMain()) {
-      FunctionScopePtr &funcDec = m_functionDecs[iter->first];
+      FunctionScopePtr &funcDec = m_functionDecs[iter.first];
       if (funcDec) {
-        FunctionScopePtrVec &funcVec = m_functionReDecs[iter->first];
-        int sz = funcVec.size();
-        if (!sz) {
-          funcDec->setRedeclaring(sz++);
-          funcVec.push_back(funcDec);
+        if (funcDec->isSystem()) {
+          assert(funcDec->allowOverride());
+          funcDec = func;
+        } else if (func->isSystem()) {
+          assert(func->allowOverride());
+        } else {
+          FunctionScopePtrVec &funcVec = m_functionReDecs[iter.first];
+          int sz = funcVec.size();
+          if (!sz) {
+            funcDec->setRedeclaring(sz++);
+            funcVec.push_back(funcDec);
+          }
+          func->setRedeclaring(sz++);
+          funcVec.push_back(func);
         }
-        func->setRedeclaring(sz++);
-        funcVec.push_back(func);
       } else {
         funcDec = func;
       }
@@ -628,13 +635,12 @@ void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
   }
 
   if (const StringToFunctionScopePtrVecMap *redec = fs->getRedecFunctions()) {
-    for (StringToFunctionScopePtrVecMap::const_iterator iter = redec->begin();
-         iter != redec->end(); ++iter) {
-      FunctionScopePtrVec::const_iterator i = iter->second.begin();
-      FunctionScopePtrVec::const_iterator e = iter->second.end();
-      FunctionScopePtr &funcDec = m_functionDecs[iter->first];
+    for (const auto &iter : *redec) {
+      FunctionScopePtrVec::const_iterator i = iter.second.begin();
+      FunctionScopePtrVec::const_iterator e = iter.second.end();
+      FunctionScopePtr &funcDec = m_functionDecs[iter.first];
       assert(funcDec); // because the first one was in funcs above
-      FunctionScopePtrVec &funcVec = m_functionReDecs[iter->first];
+      FunctionScopePtrVec &funcVec = m_functionReDecs[iter.first];
       int sz = funcVec.size();
       if (!sz) {
         funcDec->setRedeclaring(sz++);
@@ -647,11 +653,9 @@ void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
     }
   }
 
-  const StringToClassScopePtrVecMap &classes = fs->getClasses();
-  for (StringToClassScopePtrVecMap::const_iterator iter = classes.begin();
-       iter != classes.end(); ++iter) {
-    ClassScopePtrVec &clsVec = m_classDecs[iter->first];
-    clsVec.insert(clsVec.end(), iter->second.begin(), iter->second.end());
+  for (const auto& iter : fs->getClasses()) {
+    ClassScopePtrVec &clsVec = m_classDecs[iter.first];
+    clsVec.insert(clsVec.end(), iter.second.begin(), iter.second.end());
   }
 
   m_classAliases.insert(fs->getClassAliases().begin(),
@@ -1608,12 +1612,10 @@ void AnalysisResult::inferTypes() {
   BlockScopeRawPtrQueue scopes;
   getScopesSet(scopes);
 
-  for (BlockScopeRawPtrQueue::iterator
-       it = scopes.begin(), end = scopes.end();
-       it != end; ++it) {
-    (*it)->setInTypeInference(true);
-    (*it)->clearUpdated();
-    assert((*it)->getNumDepsToWaitFor() == 0);
+  for (auto scope : scopes) {
+    scope->setInTypeInference(true);
+    scope->clearUpdated();
+    assert(scope->getNumDepsToWaitFor() == 0);
   }
 
 #ifdef HPHP_INSTRUMENT_TYPE_INF
@@ -1624,13 +1626,11 @@ void AnalysisResult::inferTypes() {
 
   processScopesParallel<InferTypes>("InferTypes");
 
-  for (BlockScopeRawPtrQueue::iterator
-       it = scopes.begin(), end = scopes.end();
-       it != end; ++it) {
-    (*it)->setInTypeInference(false);
-    (*it)->clearUpdated();
-    assert((*it)->getMark() == BlockScope::MarkProcessed);
-    assert((*it)->getNumDepsToWaitFor() == 0);
+  for (auto scope : scopes) {
+    scope->setInTypeInference(false);
+    scope->clearUpdated();
+    assert(scope->getMark() == BlockScope::MarkProcessed);
+    assert(scope->getNumDepsToWaitFor() == 0);
   }
 }
 

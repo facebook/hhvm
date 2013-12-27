@@ -516,15 +516,13 @@ void HttpProtocol::CopyPathInfo(Variant& server,
     server.set(s_PHP_SELF, r.resolvedURL() + r.origPathInfo());
   }
 
-  String documentRoot;
-  if (RuntimeOption::ServerType != "fastcgi") {
+  String documentRoot = transport->getDocumentRoot();
+  if (documentRoot.empty()) {
+    // Right now this is just RuntimeOption::SourceRoot but mwilliams wants to
+    // fix it so it is settable, so I'll leave this for now
     documentRoot = vhost->getDocumentRoot();
-    server.set(s_DOCUMENT_ROOT, documentRoot);
-  } else if (server.asCArrRef().exists(s_DOCUMENT_ROOT)) {
-    CHECK(server[s_DOCUMENT_ROOT].isString());
-    documentRoot = server[s_DOCUMENT_ROOT].toCStrRef();
   }
-
+  server.set(s_DOCUMENT_ROOT, documentRoot);
   server.set(s_SCRIPT_FILENAME, r.absolutePath());
 
   if (r.pathInfo().empty()) {

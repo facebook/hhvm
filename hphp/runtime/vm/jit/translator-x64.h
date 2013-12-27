@@ -303,9 +303,8 @@ private:
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);
-  void regeneratePrologues(Func* func);
-  void regeneratePrologue(TransID prologueTransId);
-  bool prologuesWereRegenerated(const Func* func);
+  TCA regeneratePrologues(Func* func, SrcKey triggerSk);
+  TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk);
 
   void recordGdbTranslation(SrcKey sk, const Func* f,
                             const CodeBlock& cb,

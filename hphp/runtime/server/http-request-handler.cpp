@@ -154,8 +154,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
                             vhost->getName().c_str());
 
   // resolve source root
-  string host = transport->getHeader("Host");
-  SourceRootInfo sourceRootInfo(host.c_str());
+  SourceRootInfo sourceRootInfo(transport);
 
   if (sourceRootInfo.error()) {
     sourceRootInfo.handleError(transport);
@@ -328,6 +327,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   {
     ServerStatsHelper ssh("input");
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
+    Extension::RequestInitModules();
 
     if (RuntimeOption::EnableDebugger) {
       Eval::DSandboxInfo sInfo = sourceRootInfo.getSandboxInfo();

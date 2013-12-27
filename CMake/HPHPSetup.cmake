@@ -63,7 +63,6 @@ include(HPHPFunctions)
 include(HPHPFindLibs)
 
 add_definitions(-D_REENTRANT=1 -D_PTHREADS=1 -D__STDC_FORMAT_MACROS)
-add_definitions(-DHHVM_LIB_PATH_DEFAULT="${HPHP_HOME}/bin")
 
 if (LINUX)
 	add_definitions(-D_GNU_SOURCE)

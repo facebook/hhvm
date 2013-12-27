@@ -114,6 +114,10 @@ bool MethodStatement::isRef(int index /* = -1 */) const {
   return param->isRef();
 }
 
+bool MethodStatement::isSystem() const {
+  return getFunctionScope()->isSystem();
+}
+
 int MethodStatement::getRecursiveCount() const {
   return m_stmt ? m_stmt->getRecursiveCount() : 0;
 }

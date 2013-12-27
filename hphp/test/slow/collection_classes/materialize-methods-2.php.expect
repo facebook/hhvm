@@ -10,7 +10,7 @@ object(StableMap)#5 (1) {
   [123]=>
   string(3) "abc"
 }
-object(Set)#6 (1) {
+object(HH\Set)#6 (1) {
   string(3) "abc"
 }
 object(HH\Vector)#9 (1) {
@@ -25,6 +25,6 @@ object(StableMap)#17 (1) {
   [123]=>
   string(3) "abc"
 }
-object(Set)#21 (1) {
+object(HH\Set)#21 (1) {
   string(3) "abc"
 }

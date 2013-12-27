@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -190,7 +191,25 @@ Unit* compile_string(const char* s,
   if (u != nullptr) {
     return u;
   }
+  // NB: fname needs to be long-lived if generating a bytecode repo because it
+  // can be cached via a Location ultimately contained by ErrorInfo for printing
+  // code errors.
   return g_hphp_compiler_parse(s, sz, md5, fname);
+}
+
+Unit* compile_systemlib_string(const char* s, size_t sz,
+                               const char* fname) {
+  if (RuntimeOption::RepoAuthoritative) {
+    Eval::FileRepository::FileInfo fi;
+    String systemName = String("/:") + String(fname);
+    if (Eval::FileRepository::readRepoMd5(systemName.get(), fi)) {
+      MD5 md5(fi.m_unitMd5.c_str());
+      if (Unit* u = Repo::get().loadUnit(fname, md5)) {
+        return u;
+      }
+    }
+  }
+  return compile_string(s, sz, fname);
 }
 
 void assertTv(const TypedValue* tv) {
@@ -200,8 +219,9 @@ void assertTv(const TypedValue* tv) {
 int init_closure(ActRec* ar, TypedValue* sp) {
   c_Closure* closure = static_cast<c_Closure*>(ar->getThis());
 
-  // Swap in the $this or late bound class
-  ar->setThis(closure->getThisOrClass());
+  // Swap in the $this or late bound class or null if it is ony from a plain
+  // function or psuedomain
+  ar->setThisOrClassAllowNull(closure->getThisOrClass());
 
   if (ar->hasThis()) {
     ar->getThis()->incRefCount();

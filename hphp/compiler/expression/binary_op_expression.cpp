@@ -804,7 +804,7 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_COLLECTION:
     et1 = Type::Any;
     et2 = Type::Any;
-    rt = Type::Object;
+    rt = Type::CreateObjectType(m_exp1->getLiteralString());
     break;
   default:
     assert(false);
@@ -1063,4 +1063,3 @@ bool BinaryOpExpression::isOpEqual() {
   }
   return false;
 }
-

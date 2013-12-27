@@ -78,6 +78,7 @@ public:
 
   const std::string &getName() const { return m_fileName;}
   const MD5& getMd5() const { return m_md5; }
+  void setMd5(const MD5& md5) { m_md5 = md5; }
   StatementListPtr getStmt() const { return m_tree;}
   const StringToClassScopePtrVecMap &getClasses() const {
     return m_classes;
@@ -166,10 +167,8 @@ public:
     m_vertex = vertex;
   }
 
-  void setModule() { m_module = true; }
-  void setPrivateInclude() { m_privateInclude = true; }
-  bool isPrivateInclude() const { return m_privateInclude && !m_externInclude; }
-  void setExternInclude() { m_externInclude = true; }
+  void setSystem();
+  bool isSystem() const { return m_system; }
 
   void analyzeProgram(AnalysisResultPtr ar);
   void analyzeIncludes(AnalysisResultPtr ar);
@@ -199,10 +198,8 @@ public:
 private:
   int m_size;
   MD5 m_md5;
-  unsigned m_module : 1;
-  unsigned m_privateInclude : 1;
-  unsigned m_externInclude : 1;
   unsigned m_includeState : 2;
+  unsigned m_system : 1;
 
   std::vector<int> m_attributes;
   std::string m_fileName;

@@ -1,0 +1,11 @@
+<?php
+
+include 'config.inc';
+
+if (extension_loaded("odbc")) {
+  $link = odbc_connect($dsn, $user, $pass)
+      or die("Couldn't connect, must skip.");
+}
+else {
+  echo "skip";
+}

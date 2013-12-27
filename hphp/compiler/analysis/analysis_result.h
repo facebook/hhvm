@@ -150,7 +150,8 @@ public:
 
   void addNSFallbackFunc(ConstructPtr c, FileScopePtr fs);
 
-  void loadBuiltins();
+  void addSystemFunction(FunctionScopeRawPtr fs);
+  void addSystemClass(ClassScopeRawPtr cs);
   void analyzeProgram(bool system = false);
   void analyzeIncludes();
   void analyzeProgramFinal();

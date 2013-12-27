@@ -40,9 +40,30 @@
 #define NAMESPACE_SEP                  '\\'
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-typedef void * TStatementPtr;
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * HHVM supports multiple types of lambda expressions.
+ */
+enum class ClosureType {
+  /*
+   * Short = Lambda syntax. Automatically captures variables mentioned in the
+   * body.
+   */
+  Short,
+
+  /*
+   * Long = Traditional closure syntax. Only captures variables that are
+   * explicitly specified in the "use" list.
+   */
+  Long,
+};
+
+//////////////////////////////////////////////////////////////////////
+
+typedef void* TStatementPtr;
+
 class ParserBase {
 public:
   enum NameKind {

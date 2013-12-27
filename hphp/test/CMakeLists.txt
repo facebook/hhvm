@@ -1,4 +1,5 @@
 set(CXX_SOURCES)
+add_definitions("-DHHVM_PATH=\"${HPHP_HOME}/hphp/hhvm/hhvm\"")
 
 set(RECURSIVE_SOURCE_SUBDIRS ext)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})

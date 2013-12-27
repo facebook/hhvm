@@ -328,9 +328,9 @@ void tvCastToArrayInPlace(TypedValue* tv) {
     return;
   }
   case KindOfResource:  {
-    // For resources, we fall back on the Variant machinery
-    tvAsVariant(tv) = tv->m_data.pres->o_toArray();
-    return;
+    a = ArrayData::Create(tvAsVariant(tv));
+    tvDecRefRes(tv);
+    break;
   }
   default:            assert(false); a = ArrayData::Create(); break;
   }

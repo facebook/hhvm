@@ -109,6 +109,8 @@ public:
   virtual const char *getUrl() = 0;
   virtual const char *getRemoteHost() = 0;
   virtual uint16_t getRemotePort() = 0;
+  // The transport can override the virtualhosts' docroot
+  virtual const std::string getDocumentRoot() { return ""; }
 
   /**
    * POST request's data.

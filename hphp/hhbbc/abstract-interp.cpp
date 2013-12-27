@@ -611,13 +611,13 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::JmpZ& op)  { jmpImpl<false>(op); }
 
   template<class JmpOp>
-  void jmpType(const bc::IsTypeL& istype, const JmpOp& jmp) {
-    auto const loc    = locAsCell(istype.loc1);
+  void group(const bc::IsTypeL& istype, const JmpOp& jmp) {
+    auto const loc = locAsCell(istype.loc1);
 
-    if (static_cast<IsTypeOp>(istype.subop) == IsTypeOp::Scalar) {
+    if (istype.subop == IsTypeOp::Scalar) {
       return impl(istype, jmp);
     }
-    auto const testTy = type_of_istype(static_cast<IsTypeOp>(istype.subop));
+    auto const testTy = type_of_istype(istype.subop);
     if (loc.subtypeOf(testTy) || !loc.couldBe(testTy)) {
       return impl(istype, jmp);
     }
@@ -648,7 +648,7 @@ struct InterpStepper : boost::static_visitor<void> {
   }
 
   template<class JmpOp>
-  void jmpType(const bc::CGetL& cgetl, const JmpOp& jmp) {
+  void group(const bc::CGetL& cgetl, const JmpOp& jmp) {
     auto const loc = locAsCell(cgetl.loc1);
     if (tv(loc)) return impl(cgetl, jmp);
 
@@ -677,6 +677,26 @@ struct InterpStepper : boost::static_visitor<void> {
     setLoc(cgetl.loc1, negate ? converted_true : converted_false);
     m_propagate(*jmp.target, m_state);
     setLoc(cgetl.loc1, negate ? converted_false : converted_true);
+  }
+
+  template<class JmpOp>
+  void group(const bc::CGetL& cgetl,
+             const bc::InstanceOfD& inst,
+             const JmpOp& jmp) {
+    auto const rcls = m_index.resolve_class(m_ctx, inst.str1);
+    if (!rcls) return impl(cgetl, inst, jmp);
+    auto const instTy = subObj(*rcls);
+    auto const loc    = locAsCell(cgetl.loc1);
+    if (loc.subtypeOf(instTy) || !loc.couldBe(instTy)) {
+      return impl(cgetl, inst, jmp);
+    }
+
+    auto const negate    = jmp.op == Op::JmpNZ;
+    auto const was_true  = instTy;
+    auto const was_false = loc;
+    setLoc(cgetl.loc1, negate ? was_true : was_false);
+    m_propagate(*jmp.target, m_state);
+    setLoc(cgetl.loc1, negate ? was_false : was_true);
   }
 
   void operator()(const bc::Switch& op) {
@@ -851,20 +871,20 @@ struct InterpStepper : boost::static_visitor<void> {
   void isTypeLImpl(const Op& op) {
     if (!locCouldBeUninit(op.loc1)) { nothrow(); constprop(); }
     auto const loc = locAsCell(op.loc1);
-    if (static_cast<IsTypeOp>(op.subop) == IsTypeOp::Scalar) {
+    if (op.subop == IsTypeOp::Scalar) {
       return push(TBool);
     }
-    isTypeImpl(loc, type_of_istype(static_cast<IsTypeOp>(op.subop)));
+    isTypeImpl(loc, type_of_istype(op.subop));
   }
 
   template<class Op>
   void isTypeCImpl(const Op& op) {
     nothrow();
     auto const t1 = popC();
-    if (static_cast<IsTypeOp>(op.subop) == IsTypeOp::Scalar) {
+    if (op.subop == IsTypeOp::Scalar) {
       return push(TBool);
     }
-    isTypeImpl(t1, type_of_istype(static_cast<IsTypeOp>(op.subop)));
+    isTypeImpl(t1, type_of_istype(op.subop));
   }
 
   void operator()(const bc::IsTypeC& op) { isTypeCImpl(op); }
@@ -951,7 +971,7 @@ struct InterpStepper : boost::static_visitor<void> {
       auto resultTy = eval_cell([&] {
         Cell c = *locVal;
         Cell rhs = *v1;
-        SETOP_BODY_CELL(&c, static_cast<SetOpOp>(op.subop), &rhs);
+        SETOP_BODY_CELL(&c, op.subop, &rhs);
         return c;
       });
 
@@ -991,7 +1011,7 @@ struct InterpStepper : boost::static_visitor<void> {
     auto const val = tv(loc);
     if (!val) return push(TInitCell); // Only constants for now
 
-    auto const subop = static_cast<IncDecOp>(op.subop);
+    auto const subop = op.subop;
     auto const pre = subop == IncDecOp::PreInc || subop == IncDecOp::PreDec;
     auto const inc = subop == IncDecOp::PreInc || subop == IncDecOp::PostInc;
 
@@ -1983,7 +2003,8 @@ private:
   void impl(const T& t, Ts&&... ts) {
     impl(t);
 
-    assert(!m_flags.tookBranch && "you can't use impl with branching opcodes");
+    assert(!m_flags.tookBranch &&
+           "you can't use impl with branching opcodes before last position");
     assert(!m_flags.strengthReduced);
     auto const wasPEI = m_flags.wasPEI;
 
@@ -2303,43 +2324,67 @@ private:
   template<class Stepper, class FirstOp>
   void doJmpType(Stepper& stepper, const FirstOp& op, const Bytecode& jmp) {
     switch (jmp.op) {
-    case Op::JmpZ:    return stepper.jmpType(op, jmp.JmpZ);
-    case Op::JmpNZ:   return stepper.jmpType(op, jmp.JmpNZ);
+    case Op::JmpZ:    return stepper.group(op, jmp.JmpZ);
+    case Op::JmpNZ:   return stepper.group(op, jmp.JmpNZ);
     default:          not_reached();
     }
   }
 
-  template<class Stepper, class Iterator>
-  void interpStep(Stepper& stepper, Iterator& iter, Iterator stop) {
-    auto fusable = [&] (Op op) {
-      return op == Op::CGetL || op == Op::IsTypeL;
-    };
-    auto condjmp = [&] (Op op) {
-      return op == Op::JmpZ || op == Op::JmpNZ;
-    };
-
-    /*
-     * During the analysis phase, we analyze bytecode pairs involving
-     * conditional jumps together to be able to add additional
-     * information to the type environment depending on whether the
-     * branch is taken or not.
-     */
-    auto const iterNext = boost::next(iter);
-    if (iterNext != stop && condjmp(iterNext->op) && fusable(iter->op)) {
-      FTRACE(2, "  {}; {}\n", opcodeToName(iter->op),
-                              opcodeToName(iterNext->op));
-      switch (iter->op) {
-      case Op::CGetL:   doJmpType(stepper, iter->CGetL, *iterNext);   break;
-      case Op::IsTypeL: doJmpType(stepper, iter->IsTypeL, *iterNext); break;
-      default:
-        not_reached();
+  template<class Stepper, class Iterator, class... Args>
+  void group(Stepper& st, Iterator& it, Args&&... args) {
+    FTRACE(2, " {}\n", [&]() -> std::string {
+      auto ret = std::string{};
+      for (auto i = size_t{0}; i < sizeof...(Args); ++i) {
+        ret += " " + show(it[i]);
+        if (i != sizeof...(Args) - 1) ret += ';';
       }
-      iter += 2;
-      return;
+      return ret;
+    }());
+    it += sizeof...(Args);
+    return st.group(std::forward<Args>(args)...);
+  }
+
+  template<class Stepper, class Iterator>
+  void interpStep(Stepper& st, Iterator& it, Iterator stop) {
+    /*
+     * During the analysis phase, we analyze some common bytecode
+     * patterns involving conditional jumps as groups to be able to
+     * add additional information to the type environment depending on
+     * whether the branch is taken or not.
+     */
+    auto const o1 = it->op;
+    auto const o2 = it + 1 != stop ? it[1].op : Op::Nop;
+    auto const o3 = it + 1 != stop &&
+                    it + 2 != stop ? it[2].op : Op::Nop;
+
+    switch (o1) {
+    case Op::CGetL:
+      switch (o2) {
+      case Op::JmpZ:   return group(st, it, it[0].CGetL, it[1].JmpZ);
+      case Op::JmpNZ:  return group(st, it, it[0].CGetL, it[1].JmpNZ);
+      case Op::InstanceOfD:
+        switch (o3) {
+        case Op::JmpZ:
+          return group(st, it, it[0].CGetL, it[1].InstanceOfD, it[2].JmpZ);
+        case Op::JmpNZ:
+          return group(st, it, it[0].CGetL, it[1].InstanceOfD, it[2].JmpNZ);
+        default: break;
+        }
+      default: break;
+      }
+      break;
+    case Op::IsTypeL:
+      switch (o2) {
+      case Op::JmpZ:   return group(st, it, it[0].IsTypeL, it[1].JmpZ);
+      case Op::JmpNZ:  return group(st, it, it[0].IsTypeL, it[1].JmpNZ);
+      default: break;
+      }
+      break;
+    default: break;
     }
 
-    FTRACE(2, "  {}\n", show(*iter));
-    visit(*iter++, stepper);
+    FTRACE(2, "  {}\n", show(*it));
+    visit(*it++, st);
   }
 
   template<class Iterator, class Propagate>

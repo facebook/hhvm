@@ -11,7 +11,7 @@ not_array:
           InstanceOfD "KeyedTraversable"
           JmpNZ start_kt
           CGetL $arr
-          InstanceOfD "Set"
+          InstanceOfD "HH\\Set"
           JmpNZ start_kt
           CGetL $arr
           InstanceOfD "FrozenSet"

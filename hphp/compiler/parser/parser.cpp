@@ -46,6 +46,11 @@
 #include "hphp/compiler/expression/yield_expression.h"
 #include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/expression/user_attribute.h"
+#include "hphp/compiler/expression/query_expression.h"
+#include "hphp/compiler/expression/simple_query_clause.h"
+#include "hphp/compiler/expression/join_clause.h"
+#include "hphp/compiler/expression/group_clause.h"
+#include "hphp/compiler/expression/ordering.h"
 
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/statement/class_statement.h"
@@ -78,6 +83,7 @@
 #include "hphp/compiler/statement/goto_statement.h"
 #include "hphp/compiler/statement/label_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/trait_require_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
@@ -1146,6 +1152,10 @@ void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
   out->exp = expList;
 }
 
+void Parser::onTraitRequire(Token &out, Token &name, bool isExtends) {
+  out->stmt = NEW_STMT(TraitRequireStatement, name->text(), isExtends);
+}
+
 void Parser::onTraitUse(Token &out, Token &traits, Token &rules) {
   if (!rules->stmt) {
     rules->stmt = NEW_STMT0(StatementList);
@@ -1706,10 +1716,27 @@ void Parser::onClosureStart(Token &name) {
   onFunctionStart(name, true);
 }
 
-void Parser::onClosure(Token &out, Token* modifiers, Token &ret, Token &ref,
-                       Token &params, Token &cparams, Token &stmts) {
-  auto stmt = onFunctionHelper(FunctionType::Closure,
-                modifiers, ret, ref, nullptr, params, stmts, nullptr, true);
+Token Parser::onClosure(ClosureType type,
+                        Token* modifiers,
+                        Token& ref,
+                        Token& params,
+                        Token& cparams,
+                        Token& stmts) {
+  Token out;
+  Token name;
+
+  Token retIgnore;
+  auto stmt = onFunctionHelper(
+    FunctionType::Closure,
+    modifiers,
+    retIgnore,
+    ref,
+    nullptr,
+    params,
+    stmts,
+    nullptr,
+    true
+  );
 
   ExpressionListPtr vars = dynamic_pointer_cast<ExpressionList>(cparams->exp);
   if (vars) {
@@ -1724,11 +1751,22 @@ void Parser::onClosure(Token &out, Token* modifiers, Token &ret, Token &ref,
 
   ClosureExpressionPtr closure = NEW_EXP(
     ClosureExpression,
+    type,
     dynamic_pointer_cast<FunctionStatement>(stmt),
     vars
   );
   closure->getClosureFunction()->setContainingClosure(closure);
   out->exp = closure;
+
+  return out;
+}
+
+Token Parser::onExprForLambda(const Token& expr) {
+  auto stmt = NEW_STMT(ReturnStatement, expr.exp);
+  Token ret;
+  ret.stmt = NEW_STMT0(StatementList);
+  ret.stmt->addElement(stmt);
+  return ret;
 }
 
 void Parser::onClosureParam(Token &out, Token *params, Token &param,
@@ -1807,6 +1845,95 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
       break;
     }
   }
+}
+
+void Parser::onQuery(Token &out, Token &head, Token &body) {
+  out->exp = NEW_EXP(QueryExpression, head.exp, body.exp);
+}
+
+void appendList(ExpressionListPtr expList, Token *exps) {
+  if (exps != nullptr) {
+    assert(exps->exp->is(Expression::KindOfExpressionList));
+    ExpressionListPtr el(static_pointer_cast<ExpressionList>(exps->exp));
+    for (unsigned int i = 0; i < el->getCount(); i++) {
+      if ((*el)[i]) expList->addElement((*el)[i]);
+    }
+  }
+}
+
+void Parser::onQueryBody(
+  Token &out, Token *clauses, Token &select, Token *cont) {
+  ExpressionListPtr expList(NEW_EXP0(ExpressionList));
+  appendList(expList, clauses);
+  expList->addElement(select.exp);
+  if (cont != nullptr) expList->addElement(cont->exp);
+  out->exp = expList;
+}
+
+void Parser::onQueryBodyClause(Token &out, Token *clauses, Token &clause) {
+  ExpressionPtr expList;
+  if (clauses && clauses->exp) {
+    expList = clauses->exp;
+  } else {
+    expList = NEW_EXP0(ExpressionList);
+  }
+  expList->addElement(clause->exp);
+  out->exp = expList;
+}
+
+void Parser::onFromClause(Token &out, Token &var, Token &coll) {
+  out->exp = NEW_EXP(FromClause, var.text(), coll.exp);
+}
+
+void Parser::onLetClause(Token &out, Token &var, Token &expr) {
+  out->exp = NEW_EXP(LetClause, var.text(), expr.exp);
+}
+
+void Parser::onWhereClause(Token &out, Token &expr) {
+  out->exp = NEW_EXP(WhereClause, expr.exp);
+}
+
+void Parser::onJoinClause(Token &out, Token &var, Token &coll,
+  Token &left, Token &right) {
+  out->exp = NEW_EXP(JoinClause, var.text(), coll.exp,
+                     left.exp, right.exp, "");
+}
+
+void Parser::onJoinIntoClause(Token &out, Token &var, Token &coll,
+  Token &left, Token &right, Token &group) {
+  out->exp = NEW_EXP(JoinClause, var.text(), coll.exp,
+                     left.exp, right.exp, group.text());
+}
+
+void Parser::onOrderbyClause(Token &out, Token &orderings) {
+  out->exp = NEW_EXP(OrderbyClause, orderings.exp);
+}
+
+void Parser::onOrdering(Token &out, Token *orderings, Token &ordering) {
+  ExpressionPtr expList;
+  if (orderings && orderings->exp) {
+    expList = orderings->exp;
+  } else {
+    expList = NEW_EXP0(ExpressionList);
+  }
+  expList->addElement(ordering->exp);
+  out->exp = expList;
+}
+
+void Parser::onOrderingExpr(Token &out, Token &expr, Token *direction) {
+  out->exp = NEW_EXP(Ordering, expr.exp, (direction) ? direction->num() : 0);
+}
+
+void Parser::onSelectClause(Token &out, Token &expr) {
+  out->exp = NEW_EXP(SelectClause, expr.exp);
+}
+
+void Parser::onGroupClause(Token &out, Token &coll, Token &key) {
+  out->exp = NEW_EXP(GroupClause, coll.exp, key.exp);
+}
+
+void Parser::onIntoClause(Token &out, Token &var, Token &query) {
+  out->exp = NEW_EXP(IntoClause, var.text(), query.exp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1896,7 +2023,9 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
     (AliasEntry){"Traversable", "HH\\Traversable"},
     (AliasEntry){"Iterator", "HH\\Iterator"},
     (AliasEntry){"Collection", "HH\\Collection"},
-    (AliasEntry){"Vector", "HH\\Vector"}
+    (AliasEntry){"Vector", "HH\\Vector"},
+    (AliasEntry){"Set", "HH\\Set"},
+    (AliasEntry){"FrozenVector", "HH\\FrozenVector"}
   };
 
   return aliases;

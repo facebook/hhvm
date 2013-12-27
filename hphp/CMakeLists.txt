@@ -19,10 +19,7 @@ include(HPHPSetup)
 include(FollySetup)
 include(ExtZendCompat)
 
-# HHVM Build
-SET(USE_HHVM TRUE)
-SET(ENV{HHVM} 1)
-ADD_DEFINITIONS("-DHHVM -DHHVM_BINARY=1 -DHHVM_PATH=\\\"${HPHP_HOME}/hphp/hhvm/hhvm\\\"")
+add_definitions("-DHHVM")
 
 add_subdirectory(tools/bootstrap)
 

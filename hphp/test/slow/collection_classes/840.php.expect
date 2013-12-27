@@ -10,7 +10,7 @@ object(HH\Vector)#6 (5) {
     int(2)
   }
   [2]=>
-  object(Set)#9 (1) {
+  object(HH\Set)#9 (1) {
     string(1) "c"
   }
   [3]=>

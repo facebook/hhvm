@@ -111,7 +111,7 @@
             "flags": [
             ],
             "return": {
-                "type": "String",
+                "type": "Variant",
                 "desc": "This will return the contents of the output buffer or FALSE, if output buffering isn't active."
             },
             "args": [

@@ -151,18 +151,20 @@ inline Type stringToType(const char* str, size_t len) {
   switch (len) {
     case 3:
       if (!strcasecmp(str, "map")) return MapType;
-      if (!strcasecmp(str, "set")) return SetType;
       break;
     case 4:
       if (!strcasecmp(str, "pair")) return PairType;
+      break;
+    case 6:
+      if (!strcasecmp(str, "hh\\set")) return SetType;
       break;
     case 9:
       if (!strcasecmp(str, "stablemap")) return StableMapType;
       if (!strcasecmp(str, "frozenset")) return FrozenSetType;
       if (!strcasecmp(str, "hh\\vector")) return VectorType;
       break;
-    case 12:
-      if (!strcasecmp(str, "frozenvector")) return FrozenVectorType;
+    case 15:
+      if (!strcasecmp(str, "hh\\frozenvector")) return FrozenVectorType;
       break;
     default:
       break;

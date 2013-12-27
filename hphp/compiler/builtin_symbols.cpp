@@ -50,8 +50,7 @@ using namespace HPHP;
 
 bool BuiltinSymbols::Loaded = false;
 StringBag BuiltinSymbols::s_strings;
-
-StringToFunctionScopePtrMap BuiltinSymbols::s_functions;
+AnalysisResultPtr BuiltinSymbols::s_systemAr;
 
 const char *const BuiltinSymbols::GlobalNames[] = {
   "HTTP_RAW_POST_DATA",
@@ -86,12 +85,7 @@ const char *BuiltinSymbols::SystemClasses[] = {
   nullptr
 };
 
-StringToClassScopePtrMap BuiltinSymbols::s_classes;
-VariableTablePtr BuiltinSymbols::s_variables;
-ConstantTablePtr BuiltinSymbols::s_constants;
 StringToTypePtrMap BuiltinSymbols::s_superGlobals;
-AnalysisResultPtr BuiltinSymbols::s_systemAr;
-void *BuiltinSymbols::s_handle_main = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -218,7 +212,6 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
 }
 
 void BuiltinSymbols::ImportExtFunctions(AnalysisResultPtr ar,
-                                        StringToFunctionScopePtrMap &map,
                                         ClassInfo *cls) {
   const ClassInfo::MethodVec &methods = cls->getMethodsVec();
   for (auto it = methods.begin(); it != methods.end(); ++it) {
@@ -228,14 +221,13 @@ void BuiltinSymbols::ImportExtFunctions(AnalysisResultPtr ar,
     }
 
     FunctionScopePtr f = ImportFunctionScopePtr(ar, cls, *it);
-    assert(!map[f->getName()]);
-    map[f->getName()] = f;
+    ar->addSystemFunction(f);
   }
 }
 
-void BuiltinSymbols::ImportExtFunctions(AnalysisResultPtr ar,
-                                        FunctionScopePtrVec &vec,
-                                        ClassInfo *cls) {
+void BuiltinSymbols::ImportExtMethods(AnalysisResultPtr ar,
+                                      FunctionScopePtrVec &vec,
+                                      ClassInfo *cls) {
   const ClassInfo::MethodVec &methods = cls->getMethodsVec();
   for (auto it = methods.begin(); it != methods.end(); ++it) {
     FunctionScopePtr f = ImportFunctionScopePtr(ar, cls, *it);
@@ -287,7 +279,7 @@ void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
 ClassScopePtr BuiltinSymbols::ImportClassScopePtr(AnalysisResultPtr ar,
                                                   ClassInfo *cls) {
   FunctionScopePtrVec methods;
-  ImportExtFunctions(ar, methods, cls);
+  ImportExtMethods(ar, methods, cls);
 
   ClassInfo::InterfaceVec ifaces = cls->getInterfacesVec();
   String parent = cls->getParentClass();
@@ -325,8 +317,7 @@ void BuiltinSymbols::ImportExtClasses(AnalysisResultPtr ar) {
     }
 
     ClassScopePtr cl = ImportClassScopePtr(ar, it->second);
-    assert(!s_classes[cl->getName()]);
-    s_classes[cl->getName()] = cl;
+    ar->addSystemClass(cl);
   }
 }
 
@@ -338,13 +329,11 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
   ClassInfo::Load();
 
   // load extension functions first, so system/php may call them
-  ImportExtFunctions(ar, s_functions, ClassInfo::GetSystem());
-  AnalysisResultPtr ar2 = AnalysisResultPtr(new AnalysisResult());
-  s_variables = VariableTablePtr(new VariableTable(*ar2.get()));
-  s_constants = ConstantTablePtr(new ConstantTable(*ar2.get()));
+  ImportExtFunctions(ar, ClassInfo::GetSystem());
 
+  ConstantTablePtr cns = ar->getConstants();
   // load extension constants, classes and dynamics
-  ImportExtConstants(ar, s_constants, ClassInfo::GetSystem());
+  ImportExtConstants(ar, cns, ClassInfo::GetSystem());
   ImportExtClasses(ar);
 
   Array constants = ClassInfo::GetSystemConstants();
@@ -353,11 +342,11 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
     CVarRef key = it.first();
     if (!key.isString()) continue;
     std::string name = key.toCStrRef().data();
-    if (s_constants->getSymbol(name)) continue;
+    if (cns->getSymbol(name)) continue;
     if (name == "true" || name == "false" || name == "null") continue;
     CVarRef value = it.secondRef();
     if (!value.isInitialized() || value.isObject()) continue;
-    ExpressionPtr e = Expression::MakeScalarExpression(ar2, ar2, loc, value);
+    ExpressionPtr e = Expression::MakeScalarExpression(ar, ar, loc, value);
     TypePtr t =
       value.isNull()    ? Type::Null    :
       value.isBoolean() ? Type::Boolean :
@@ -365,120 +354,45 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
       value.isDouble()  ? Type::Double  :
       value.isArray()   ? Type::Array   : Type::Variant;
 
-    s_constants->add(key.toCStrRef().data(), t, e, ar2, e);
+    cns->add(key.toCStrRef().data(), t, e, ar, e);
   }
-  s_variables = ar2->getVariables();
   for (int i = 0, n = NumGlobalNames(); i < n; ++i) {
-    s_variables->add(GlobalNames[i], Type::Variant, false, ar,
-                     ConstructPtr(), ModifierExpressionPtr());
+    ar->getVariables()->add(GlobalNames[i], Type::Variant, false, ar,
+                            ConstructPtr(), ModifierExpressionPtr());
   }
 
-  s_constants->setDynamic(ar, "PHP_BINARY", true);
-  s_constants->setDynamic(ar, "PHP_BINDIR", true);
-  s_constants->setDynamic(ar, "PHP_OS", true);
-  s_constants->setDynamic(ar, "PHP_SAPI", true);
-  s_constants->setDynamic(ar, "SID", true);
+  cns->setDynamic(ar, "PHP_BINARY", true);
+  cns->setDynamic(ar, "PHP_BINDIR", true);
+  cns->setDynamic(ar, "PHP_OS", true);
+  cns->setDynamic(ar, "PHP_SAPI", true);
+  cns->setDynamic(ar, "SID", true);
 
-  // parse all PHP files under system/php
-  s_systemAr = ar = AnalysisResultPtr(new AnalysisResult());
-  ar->loadBuiltins();
-  string slib = get_systemlib();
+  // Systemlib files were all parsed by hphp_process_init
 
-  Scanner scanner(slib.c_str(), slib.size(),
-                  Option::GetScannerType(), "systemlib.php");
-  Compiler::Parser parser(scanner, "systemlib.php", ar);
-  if (!parser.parse()) {
-    Logger::Error("Unable to parse systemlib.php: %s",
-                  parser.getMessage().c_str());
-    assert(false);
-  }
-
-  ar->analyzeProgram(true);
-  ar->inferTypes();
   const StringToFileScopePtrMap &files = ar->getAllFiles();
-  for (StringToFileScopePtrMap::const_iterator iterFile = files.begin();
-       iterFile != files.end(); iterFile++) {
-    const StringToClassScopePtrVecMap &classes =
-      iterFile->second->getClasses();
-    for (StringToClassScopePtrVecMap::const_iterator iter = classes.begin();
-         iter != classes.end(); ++iter) {
-      assert(iter->second.size() == 1);
-      iter->second[0]->setSystem();
-      assert(!s_classes[iter->first]);
-      s_classes[iter->first] = iter->second[0];
+  for (const auto& file : files) {
+    file.second->setSystem();
+
+    const auto& classes = file.second->getClasses();
+    for (const auto& clsVec : classes) {
+      assert(clsVec.second.size() == 1);
+      auto cls = clsVec.second[0];
+      cls->setSystem();
+      ar->addSystemClass(cls);
+      for (const auto& func : cls->getFunctions()) {
+        FunctionScope::RecordFunctionInfo(func.first, func.second);
+      }
     }
 
-    const StringToFunctionScopePtrMap &functions =
-      iterFile->second->getFunctions();
-    for (StringToFunctionScopePtrMap::const_iterator iter = functions.begin();
-         iter != functions.end(); ++iter) {
-      iter->second->setSystem();
-      s_functions[iter->first] = iter->second;
+    const auto& functions = file.second->getFunctions();
+    for (const auto& func : functions) {
+      func.second->setSystem();
+      ar->addSystemFunction(func.second);
+      FunctionScope::RecordFunctionInfo(func.first, func.second);
     }
   }
 
   return true;
-}
-
-AnalysisResultPtr BuiltinSymbols::LoadGlobalSymbols(const char *fileName) {
-  AnalysisResultPtr ar(new AnalysisResult());
-  string phpBaseName = "/system/globals/";
-  phpBaseName += fileName;
-  string phpFileName = Option::GetSystemRoot() + phpBaseName;
-  const char *baseName = s_strings.add(phpBaseName.c_str());
-  fileName = s_strings.add(phpFileName.c_str());
-
-  try {
-    Scanner scanner(fileName, Option::GetScannerType());
-    Compiler::Parser parser(scanner, baseName, ar);
-    if (!parser.parse()) {
-      assert(false);
-      Logger::Error("Unable to parse file %s: %s", fileName,
-                    parser.getMessage().c_str());
-    }
-  } catch (FileOpenException &e) {
-    Logger::Error("%s", e.getMessage().c_str());
-  }
-  ar->analyzeProgram(true);
-  ar->inferTypes();
-  return ar;
-}
-
-void BuiltinSymbols::LoadFunctions(AnalysisResultPtr ar,
-                                   StringToFunctionScopePtrMap &functions) {
-  assert(Loaded);
-  functions.insert(s_functions.begin(), s_functions.end());
-}
-
-void BuiltinSymbols::LoadClasses(AnalysisResultPtr ar,
-                                 StringToClassScopePtrMap &classes) {
-  assert(Loaded);
-  classes.insert(s_classes.begin(), s_classes.end());
-}
-
-void BuiltinSymbols::LoadVariables(AnalysisResultPtr ar,
-                                   VariableTablePtr variables) {
-  assert(Loaded);
-  if (s_variables) {
-    variables->import(s_variables);
-  }
-}
-
-void BuiltinSymbols::LoadConstants(AnalysisResultPtr ar,
-                                   ConstantTablePtr constants) {
-  assert(Loaded);
-  if (s_constants) {
-    constants->import(s_constants);
-  }
-}
-
-ConstantTablePtr BuiltinSymbols::LoadSystemConstants() {
-  AnalysisResultPtr ar = LoadGlobalSymbols("constants.php");
-  const auto &fileScopes = ar->getAllFilesVector();
-  if (!fileScopes.empty()) {
-    return fileScopes[0]->getConstants();
-  }
-  throw std::runtime_error("LoadSystemConstants failed");
 }
 
 void BuiltinSymbols::LoadSuperGlobals() {

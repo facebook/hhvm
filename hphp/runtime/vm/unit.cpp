@@ -2347,7 +2347,17 @@ PreClassEmitter* UnitEmitter::newPreClassEmitter(const StringData* n,
 
   if (hoistable >= PreClass::MaybeHoistable) {
     m_hoistablePreClassSet.insert(n);
-    m_hoistablePceIdVec.push_back(pce->id());
+    if (hoistable == PreClass::ClosureHoistable) {
+      // Closures should appear at the VERY top of the file, so if any class in
+      // the same file tries to use them, they are already defined. We had a
+      // fun race where one thread was autoloading a file, finished parsing the
+      // class, then another thread came along and saw the class was already
+      // loaded and ran it before the first thread had time to parse the
+      // closure class.
+      m_hoistablePceIdList.push_front(pce->id());
+    } else {
+      m_hoistablePceIdList.push_back(pce->id());
+    }
   } else {
     m_allClassesHoistable = false;
   }
@@ -2587,7 +2597,7 @@ Unit* UnitEmitter::create() {
   }
   u->m_typeAliases = m_typeAliases;
 
-  size_t ix = m_fes.size() + m_hoistablePceIdVec.size();
+  size_t ix = m_fes.size() + m_hoistablePceIdList.size();
   if (m_mergeOnly && !m_allClassesHoistable) {
     size_t extra = 0;
     for (MergeableStmtVec::const_iterator it = m_mergeableStmts.begin();
@@ -2631,9 +2641,8 @@ Unit* UnitEmitter::create() {
   }
   mi->m_firstHoistablePreClass = ix;
   assert(m_fes.size());
-  for (IdVec::const_iterator it = m_hoistablePceIdVec.begin();
-       it != m_hoistablePceIdVec.end(); ++it) {
-    mi->mergeableObj(ix++) = u->m_preClasses[*it].get();
+  for (auto& id : m_hoistablePceIdList) {
+    mi->mergeableObj(ix++) = u->m_preClasses[id].get();
   }
   mi->m_firstMergeablePreClass = ix;
   if (u->m_mergeOnly && !m_allClassesHoistable) {

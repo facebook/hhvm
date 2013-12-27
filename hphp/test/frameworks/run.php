@@ -1093,6 +1093,44 @@ class Assetic extends Framework {
 }
 
 
+class Monolog extends Framework {
+  public function __construct(string $name) { parent::__construct($name); }
+  protected function getInfo(): Map {
+    return Map {
+      "install_root" => __DIR__."/frameworks/monolog",
+      "git_path" => "https://github.com/Seldaek/monolog.git",
+      'git_commit' => "6225b22de9dcf36546be3a0b2fa8e3d986153f57", // stable 1.7
+      "test_path" => __DIR__."/frameworks/monolog",
+    };
+  }
+}
+
+class ReactPHP extends Framework {
+  public function __construct(string $name) { parent::__construct($name); }
+  protected function getInfo(): Map {
+    return Map {
+      "install_root" => __DIR__."/frameworks/reactphp",
+      "git_path" => "https://github.com/reactphp/react.git",
+      # current stable - v0.3.3
+      'git_commit' => "210c11a6041cfa2ce1701a4870b69475d9081265",
+      "test_path" => __DIR__."/frameworks/reactphp",
+    };
+  }
+}
+
+class Ratchet extends Framework {
+  public function __construct(string $name) { parent::__construct($name); }
+  protected function getInfo(): Map {
+    return Map {
+      "install_root" => __DIR__."/frameworks/ratchet",
+      "git_path" => "https://github.com/cboden/Ratchet.git",
+      # current stable - v0.3.0
+      'git_commit' => "d756e0b507a5f3cdbf8c59dbb7baf68574dc7d58",
+      "test_path" => __DIR__."/frameworks/ratchet",
+    };
+  }
+}
+
 class CodeIgniter extends Framework {
   public function __construct(string $name) { parent::__construct($name); }
   protected function getInfo(): Map {
@@ -1560,6 +1598,77 @@ class PHPUnit extends Framework {
         __DIR__."/frameworks/phpunit/Tests/Util/ConfigurationTest.php",
       }
     };
+  }
+}
+
+class SilverStripe extends Framework {
+  public function __construct(string $name) { parent::__construct($name); }
+  protected function getInfo(): Map {
+    return Map {
+      'install_root' => __DIR__.'/frameworks/silverstripe',
+      'git_path' => 'https://github.com/silverstripe/'
+        . 'silverstripe-installer.git',
+      'git_commit' => 'c7fe54d08200e09094c7a6087572cc9d116c5774',
+      'test_path' => __DIR__.'/frameworks/silverstripe',
+    };
+  }
+
+  protected function install(): void {
+    parent::install();
+    verbose("Installing dependencies.\n", Options::$verbose);
+
+    $dependencies_install_cmd = get_runtime_build()." ".__DIR__.
+      "/composer.phar require silverstripe/sqlite3 dev-master";
+    $install_ret = run_install($dependencies_install_cmd,
+                               $this->getInstallRoot(),
+                               ProxyInformation::$proxies);
+
+    if ($install_ret !== 0) {
+      remove_dir_recursive($this->getInstallRoot());
+      error_and_exit("Couldn't download dependencies for ".$this->getName().
+                     ". Removing framework. \n", Options::$csv_only);
+    }
+
+    verbose(
+      "Creating a _ss_environment file for setting SQLite adapter.\n",
+      Options::$verbose
+    );
+
+    $contents = <<<'ENV_FILE'
+<?php
+define('SS_DATABASE_SERVER', 'localhost');
+define('SS_DATABASE_USERNAME', 'root');
+define('SS_DATABASE_PASSWORD', '');
+define('SS_DATABASE_NAME', 'tests');
+define('SS_ENVIRONMENT_TYPE', 'dev');
+define('SS_DATABASE_CLASS', 'SQLiteDatabase');
+define('SS_DATABASE_MEMORY', true);
+
+global $_FILE_TO_URL_MAPPING;
+$_FILE_TO_URL_MAPPING[__DIR__] = 'http://localhost';
+$_GET['flush'] = 1;
+ENV_FILE;
+
+    file_put_contents(
+      $this->getInstallRoot()."/_ss_environment.php", $contents
+    );
+  }
+
+   protected function isInstalled(): bool {
+    $extra_files = Set {
+      $this->getInstallRoot()."/sqlite3",
+      $this->getInstallRoot()."/_ss_environment.php",
+    };
+
+    if (file_exists($this->getInstallRoot())) {
+      foreach ($extra_files as $file) {
+        if (!file_exists($file)) {
+          remove_dir_recursive($this->getInstallRoot());
+          return false;
+        }
+      }
+    }
+    return parent::isInstalled();
   }
 }
 

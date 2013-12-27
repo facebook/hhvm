@@ -1,4 +1,4 @@
-<?php
+<?hh
 function f($x) {
   $arr = (array)$x;
   uasort($arr, function($a,$b) {

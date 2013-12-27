@@ -16,7 +16,7 @@ class finfo {
    *   empty string will be equivalent to the default value.
    */
   public function finfo(int $options = FILEINFO_NONE,
-                        string $magic_file = ""): finfo {
+                        ?string $magic_file = NULL): finfo {
     $this->resource = finfo_open($options, $magic_file);
   }
 
@@ -34,7 +34,7 @@ class finfo {
    * @return string - Returns a textual description of the string
    *   argument, or FALSE if an error occurred.
    */
-  public function buffer(string $string = NULL,
+  public function buffer(?string $string = NULL,
                          int $options = FILEINFO_NONE,
                          ?resource $context = NULL): string {
     return finfo_buffer($this->resource, $string, $options, $context);
@@ -50,7 +50,7 @@ class finfo {
    * @return string - Returns a textual description of the contents of
    *   the filename argument, or FALSE if an error occurred.
    */
-  public function file(string $file_name = NULL,
+  public function file(?string $file_name = NULL,
                        int $options = FILEINFO_NONE,
                        ?resource $context = NULL): string {
     return finfo_file($this->resource, $file_name, $options, $context);
@@ -82,7 +82,7 @@ class finfo {
  */
 <<__Native>>
 function finfo_buffer(resource $finfo,
-                      string $string = NULL,
+                      ?string $string = NULL,
                       int $options = FILEINFO_NONE,
                       ?resource $context = NULL): string;
 
@@ -109,7 +109,7 @@ function finfo_close(resource $finfo): bool;
  */
 <<__Native>>
 function finfo_file(resource $finfo,
-                    string $file_name = NULL,
+                    ?string $file_name = NULL,
                     int $options = FILEINFO_NONE,
                     ?resource $context = NULL): string;
 
@@ -128,7 +128,7 @@ function finfo_file(resource $finfo,
  */
 <<__Native>>
 function finfo_open(int $options = FILEINFO_NONE,
-                    string $magic_file = ""): mixed;
+                    ?string $magic_file = NULL): mixed;
 
 /**
  * Set libmagic configuration options

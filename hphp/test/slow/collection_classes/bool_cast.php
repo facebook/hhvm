@@ -26,7 +26,7 @@ function main() {
   $rc_sm = new ReflectionClass($sm);
   var_dump($rc_sm->getName() === 'StableMap');
   $rc_s  = new ReflectionClass($s);
-  var_dump($rc_s->getName() === 'Set');
+  var_dump($rc_s->getName() === 'HH\Set');
 
   $rm_v  = new ReflectionMethod($v, 'isEmpty');
   var_dump($rm_v->getName() === 'isEmpty');

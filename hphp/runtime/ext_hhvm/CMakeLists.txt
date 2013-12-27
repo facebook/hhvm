@@ -21,7 +21,8 @@ macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_OS EHHVM_ARCH)
 	list(APPEND ${HEADERS} "${f_SRC}.ext_hhvm.h")
 	add_custom_command(OUTPUT "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
 	                   DEPENDS ${f_SRC} gen-ext-hhvm
-	                   COMMAND "${HPHP_HOME}/hphp/tools/bootstrap/gen-ext-hhvm.sh"
+	                   COMMAND "HPHP_HOME=${HPHP_HOME}"
+	                           "${HPHP_HOME}/hphp/tools/bootstrap/gen-ext-hhvm.sh"
 	                   ARGS ${EHHVM_OS} ${EHHVM_ARCH} ${f_OBJ}
                                "${f_SRC}.ext_hhvm.cpp" "${f_SRC}.ext_hhvm.h"
 	                   WORKING_DIRECTORY "${HPHP_HOME}/hphp/tools/bootstrap"

@@ -540,6 +540,12 @@ int process(const CompilerOptions &po) {
 
   bool isPickledPHP = (po.target == "php" && po.format == "pickled");
   if (!isPickledPHP) {
+    bool wp = Option::WholeProgram;
+    Option::WholeProgram = false;
+    BuiltinSymbols::s_systemAr = ar;
+    hphp_process_init();
+    BuiltinSymbols::s_systemAr.reset();
+    Option::WholeProgram = wp;
     if (po.target == "hhbc" && !Option::WholeProgram) {
       // We're trying to produce the same bytecode as runtime parsing.
       // There's nothing to do.
@@ -547,9 +553,7 @@ int process(const CompilerOptions &po) {
       if (!BuiltinSymbols::Load(ar)) {
         return false;
       }
-      ar->loadBuiltins();
     }
-    hphp_process_init();
   }
 
   {
@@ -801,6 +805,7 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   if (po.format.find("exe") != string::npos) {
     RuntimeOption::RepoCentralPath += ".hhbc";
   }
+  unlink(RuntimeOption::RepoCentralPath.c_str());
   RuntimeOption::RepoLocalMode = "--";
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";

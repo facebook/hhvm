@@ -1927,6 +1927,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
 
   switch (stype) {
   case Statement::KindOfUseTraitStatement:
+  case Statement::KindOfTraitRequireStatement:
   case Statement::KindOfTraitPrecStatement:
   case Statement::KindOfTraitAliasStatement:
     return StatementPtr();
@@ -1968,7 +1969,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
   }
 
   case Statement::KindOfIfBranchStatement:
-    always_assert(0);
+    always_assert(false);
     break;
 
   case Statement::KindOfForStatement: {
@@ -3303,6 +3304,12 @@ private:
 static bool isNewResult(ExpressionPtr e) {
   if (!e) return false;
   if (e->is(Expression::KindOfNewObjectExpression)) return true;
+  if (e->is(Expression::KindOfBinaryOpExpression)) {
+    auto b = spc(BinaryOpExpression, e);
+    if (b->getOp() == T_COLLECTION) {
+      return true;
+    }
+  }
   if (e->is(Expression::KindOfAssignmentExpression)) {
     return isNewResult(spc(AssignmentExpression, e)->getValue());
   }

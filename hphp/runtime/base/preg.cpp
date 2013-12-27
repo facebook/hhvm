@@ -1172,7 +1172,9 @@ static Variant php_replace_in_subject(CVarRef regex, CVarRef replace,
         assert(!ret.toBoolean());
         return null_variant;
       }
-
+      if (!ret.isString()) {
+        return ret;
+      }
       subject = ret.asStrRef();
       if (subject.isNull()) {
         return subject;
@@ -1199,7 +1201,9 @@ static Variant php_replace_in_subject(CVarRef regex, CVarRef replace,
       assert(!ret.toBoolean());
       return null_variant;
     }
-
+    if (!ret.isString()) {
+      return ret;
+    }
     subject = ret.asStrRef();
     if (subject.isNull()) {
       return subject;

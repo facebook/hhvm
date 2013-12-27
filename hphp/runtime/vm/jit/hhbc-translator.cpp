@@ -2307,7 +2307,7 @@ void HhbcTranslator::emitFPushCtorCommon(SSATmp* cls,
 
 void HhbcTranslator::emitFPushCtor(int32_t numParams) {
   SSATmp* cls = popA();
-  SSATmp* obj = gen(AllocObj, cls);
+  SSATmp* obj = gen(AllocObj, makeCatch(), cls);
   gen(IncRef, obj);
   emitFPushCtorCommon(cls, obj, nullptr, numParams);
 }
@@ -2324,8 +2324,11 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   bool uniqueCls = classIsUnique(cls);
   bool persistentCls = classHasPersistentRDS(cls);
   bool canInstantiate = canInstantiateClass(cls);
-  bool fastAlloc = !RuntimeOption::EnableObjDestructCall &&
-    persistentCls && canInstantiate;
+  bool fastAlloc =
+    !RuntimeOption::EnableObjDestructCall &&
+    persistentCls &&
+    canInstantiate &&
+    !cls->callsCustomInstanceInit();
 
   const Func* func = uniqueCls ? cls->getCtor() : nullptr;
   if (func && !(func->attrs() & AttrPublic)) {
@@ -2345,7 +2348,7 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
                   : gen(LdClsCached, makeCatch(), cns(className));
   auto const obj =
     fastAlloc ? gen(AllocObjFast, ClassData(cls))
-              : gen(AllocObj, ssaCls);
+              : gen(AllocObj, makeCatch(), ssaCls);
   gen(IncRef, obj);
   emitFPushCtorCommon(ssaCls, obj, func, numParams);
 }
@@ -2871,7 +2874,9 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   //    would be overkill.
   spillStack();
 
-  bool zendParamMode = callee->methInfo()->attribute & ClassInfo::ZendParamMode;
+  bool zendParamMode =
+    callee->methInfo()->attribute &
+    (ClassInfo::ZendParamModeNull | ClassInfo::ZendParamModeFalse);
 
   // Convert types if needed.
   for (int i = 0; i < numNonDefault; i++) {
@@ -3488,7 +3493,18 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   auto const& tc = func->params()[paramId].typeConstraint();
   auto locVal = ldLoc(paramId, DataTypeSpecific);
   Type locType = locVal->type().unbox();
-  always_assert(locType.isKnownDataType());
+  if (!locType.isKnownDataType()) {
+    // This is supposed to be impossible, but it does happen in a rare case
+    // with the legacy region selector. Until it's figured out, punt in release
+    // builds. t3412704
+    assert_log(false,
+    [&] {
+      return folly::format("Bad type {} for local {}:\n\n{}\n",
+                           locType, paramId, m_tb->trace()->toString()).str();
+    });
+    emitInterpOne(Type::None, 0);
+    return;
+  }
 
   if (!RuntimeOption::EvalCheckExtendedTypeHints && tc.isExtended()) {
     return;
@@ -4210,7 +4226,7 @@ void HhbcTranslator::emitDiv() {
   auto dividend = topC(1);
 
   // we can't codegen this but we may be able to special case it away
-  if (!(divisorType <= Type::Dbl) && !(dividendType <= Type::Dbl)) {
+  if (!divisor->isA(Type::Dbl) && !dividend->isA(Type::Dbl)) {
     // TODO(#2570625): support integer-integer division, move this to simlifier:
     if (divisor->isConst()) {
       int64_t divisorVal;
@@ -4224,7 +4240,7 @@ void HhbcTranslator::emitDiv() {
       if (divisorVal == 0) {
         popC();
         popC();
-        gen(RaiseWarning,
+        gen(RaiseWarning, makeCatch(),
             cns(makeStaticString(Strings::DIVISION_BY_ZERO)));
         push(cns(false));
         return;

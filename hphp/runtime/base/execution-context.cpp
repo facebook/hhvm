@@ -65,7 +65,7 @@ BaseExecutionContext::BaseExecutionContext() :
     m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
     m_vhost(nullptr) {
 
-  setRequestMemoryMaxBytes(RuntimeOption::RequestMemoryMaxBytes);
+  setRequestMemoryMaxBytes(String(RuntimeOption::RequestMemoryMaxBytes));
   restoreIncludePath();
 }
 
@@ -177,12 +177,34 @@ void BaseExecutionContext::setContentType(const String& mimetype,
   }
 }
 
-void BaseExecutionContext::setRequestMemoryMaxBytes(int64_t max) {
-  if (max <= 0) {
-    max = INT64_MAX;
+int64_t BaseExecutionContext::convertBytesToInt(const String& value) const {
+  int64_t newInt = value.toInt64();
+  if (newInt <= 0) {
+    newInt = INT64_MAX;
+  } else {
+    char lastChar = value.charAt(value.size() - 1);
+    if (lastChar == 'K' || lastChar == 'k') {
+      newInt <<= 10;
+    } else if (lastChar == 'M' || lastChar == 'm') {
+      newInt <<= 20;
+    } else if (lastChar == 'G' || lastChar == 'g') {
+      newInt <<= 30;
+    }
   }
-  m_maxMemory = max;
-  MM().getStatsNoRefresh().maxBytes = m_maxMemory;
+  return newInt;
+}
+
+
+void BaseExecutionContext::setRequestMemoryMaxBytes(const String& max) {
+  int64_t newInt = max.toInt64();
+  if (newInt <= 0) {
+    newInt = INT64_MAX;
+    m_maxMemory = String(newInt);
+  } else {
+    m_maxMemory = max;
+    newInt = convertBytesToInt(max);
+  }
+  MM().getStatsNoRefresh().maxBytes = newInt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -698,7 +720,8 @@ void BaseExecutionContext::recordLastError(const Exception &e,
 }
 
 bool BaseExecutionContext::onFatalError(const Exception &e) {
-  recordLastError(e);
+  int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
+  recordLastError(e, errnum);
   String file = empty_string;
   int line = 0;
   bool silenced = false;
@@ -720,7 +743,6 @@ bool BaseExecutionContext::onFatalError(const Exception &e) {
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
-    int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {
@@ -787,10 +809,11 @@ void BaseExecutionContext::setErrorLog(const String& filename) {
 // IDebuggable
 
 void BaseExecutionContext::debuggerInfo(InfoVec &info) {
-  if (m_maxMemory <= 0) {
+  int64_t newInt = convertBytesToInt(m_maxMemory);
+  if (newInt == INT64_MAX) {
     Add(info, "Max Memory", "(unlimited)");
   } else {
-    Add(info, "Max Memory", FormatSize(m_maxMemory));
+    Add(info, "Max Memory", FormatSize(newInt));
   }
   Add(info, "Max Time", FormatTime(ThreadInfo::s_threadInfo.getNoCheck()->
                                    m_reqInjectionData.getTimeout() * 1000));

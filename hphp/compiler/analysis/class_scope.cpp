@@ -39,6 +39,7 @@
 #include "hphp/compiler/statement/class_variable.h"
 #include "hphp/compiler/statement/class_constant.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
+#include "hphp/compiler/statement/trait_require_statement.h"
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -471,6 +472,17 @@ void ClassScope::informClosuresAboutScopeClone(
 void ClassScope::addImportTraitMethod(const TraitMethod &traitMethod,
                                       const string &methName) {
   m_importMethToTraitMap[methName].push_back(traitMethod);
+}
+
+void ClassScope::addTraitRequirement(const string &requiredName,
+                                     bool isExtends) {
+  assert(isTrait());
+
+  if (isExtends) {
+    m_traitRequiredExtends.insert(requiredName);
+  } else {
+    m_traitRequiredImplements.insert(requiredName);
+  }
 }
 
 void

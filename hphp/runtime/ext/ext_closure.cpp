@@ -23,9 +23,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Closure::~c_Closure() {
-  // same as ar->hasThis()
-  if (m_thisOrClass && !(intptr_t(m_thisOrClass) & 1LL)) {
-    decRefObj(m_thisOrClass);
+  if (auto t = getThis()) {
+    decRefObj(t);
   }
 }
 
@@ -42,9 +41,7 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   if (ar->hasThis()) {
     if (invokeFunc->attrs() & AttrStatic) {
       // Only set the class for static closures.
-      m_thisOrClass = reinterpret_cast<ObjectData*>(
-        reinterpret_cast<intptr_t>(ar->getThis()->getVMClass()) | 1LL
-      );
+      setClass(ar->getThis()->getVMClass());
     } else {
       ar->getThis()->incRefCount();
     }

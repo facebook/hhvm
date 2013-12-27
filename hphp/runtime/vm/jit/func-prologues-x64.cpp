@@ -124,7 +124,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   int numParams = func->numParams();
   const Func::ParamInfoVec& paramInfo = func->params();
 
-  Offset dvInitializer = InvalidAbsoluteOffset;
+  Offset entryOffset = func->getEntryForNumArgs(nPassed);
 
   assert(IMPLIES(func->isGenerator(), nPassed == numParams));
 
@@ -152,14 +152,6 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     emitCall(a, TCA(JIT::trimExtraArgs));
     // We'll fix rVmSp below.
   } else if (nPassed < numParams) {
-    // Figure out which, if any, default value initializer to go to
-    for (int i = nPassed; i < numParams; ++i) {
-      const Func::ParamInfo& pi = paramInfo[i];
-      if (pi.hasDefaultValue()) {
-        dvInitializer = pi.funcletOff();
-        break;
-      }
-    }
     TRACE(1, "Only have %d of %d args; getting dvFunclet\n",
           nPassed, numParams);
     if (numParams - nPassed <= kMaxParamsInitUnroll) {
@@ -280,11 +272,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     }
   }
 
-  const HPHP::Opcode* destPC = func->unit()->entry() + func->base();
-  if (dvInitializer != InvalidAbsoluteOffset) {
-    // dispatch to funclet.
-    destPC = func->unit()->entry() + dvInitializer;
-  }
+  const HPHP::Opcode* destPC = func->unit()->entry() + entryOffset;
   SrcKey funcBody(func, destPC);
 
   // Move rVmSp to the right place: just past all locals

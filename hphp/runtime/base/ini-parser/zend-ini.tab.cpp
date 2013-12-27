@@ -74,7 +74,7 @@
 /* Copy the first part of user declarations.  */
 
 /* Line 268 of yacc.c  */
-#line 1 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 1 "zend-ini.y"
 
 /*
    +----------------------------------------------------------------------+
@@ -150,7 +150,7 @@ static void zend_ini_get_var(String &result, const String& name) {
 
 
 /* Line 268 of yacc.c  */
-#line 154 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.tab.cpp"
+#line 154 "zend-ini.tab.cpp"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -221,7 +221,7 @@ typedef struct YYLTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 225 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.tab.cpp"
+#line 225 "zend-ini.tab.cpp"
 
 #ifdef short
 # undef short
@@ -1545,7 +1545,7 @@ yyreduce:
         case 4:
 
 /* Line 1806 of yacc.c  */
-#line 108 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 108 "zend-ini.y"
     {
       zend_ini_callback(&(yyvsp[(2) - (3)]), NULL, NULL, IniSetting::ParserSection);
     }
@@ -1554,7 +1554,7 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 111 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 111 "zend-ini.y"
     {
       zend_ini_callback(&(yyvsp[(1) - (3)]), &(yyvsp[(3) - (3)]), NULL, IniSetting::ParserEntry);
     }
@@ -1563,7 +1563,7 @@ yyreduce:
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 114 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 114 "zend-ini.y"
     {
       zend_ini_callback(&(yyvsp[(1) - (5)]), &(yyvsp[(5) - (5)]), &(yyvsp[(2) - (5)]), IniSetting::ParserPopEntry);
     }
@@ -1572,7 +1572,7 @@ yyreduce:
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 117 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 117 "zend-ini.y"
     {
       zend_ini_callback(&(yyvsp[(1) - (1)]), NULL, NULL, IniSetting::ParserEntry);
     }
@@ -1581,217 +1581,217 @@ yyreduce:
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 124 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 124 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 125 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 125 "zend-ini.y"
     { (yyval) = empty_string;}
     break;
 
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 129 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 129 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 130 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 130 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 131 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 131 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 132 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 132 "zend-ini.y"
     { (yyval) = empty_string;}
     break;
 
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 136 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 136 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 137 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 137 "zend-ini.y"
     { (yyval).clear();}
     break;
 
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 141 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 141 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
     break;
 
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 142 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 142 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
     break;
 
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 143 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 143 "zend-ini.y"
     { (yyval) = empty_string;}
     break;
 
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 147 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 147 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 148 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 148 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 149 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 149 "zend-ini.y"
     { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 150 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 150 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
     break;
 
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 151 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 151 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (2)]) + (yyvsp[(2) - (2)]);}
     break;
 
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 152 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 152 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (4)]) + (yyvsp[(3) - (4)]);}
     break;
 
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 156 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 156 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 157 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 157 "zend-ini.y"
     { zend_ini_do_op('|', (yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 158 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 158 "zend-ini.y"
     { zend_ini_do_op('&', (yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 159 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 159 "zend-ini.y"
     { zend_ini_do_op('^', (yyval), (yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]));}
     break;
 
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 160 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 160 "zend-ini.y"
     { zend_ini_do_op('~', (yyval), (yyvsp[(2) - (2)])    );}
     break;
 
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 161 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 161 "zend-ini.y"
     { zend_ini_do_op('!', (yyval), (yyvsp[(2) - (2)])    );}
     break;
 
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 162 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 162 "zend-ini.y"
     { (yyval) = (yyvsp[(2) - (3)]);}
     break;
 
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 166 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 166 "zend-ini.y"
     { zend_ini_get_var((yyval), (yyvsp[(2) - (3)]));}
     break;
 
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 170 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 170 "zend-ini.y"
     { zend_ini_get_constant((yyval), (yyvsp[(1) - (1)]));}
     break;
 
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 171 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 171 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 172 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 172 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 37:
 
 /* Line 1806 of yacc.c  */
-#line 173 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 173 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
   case 38:
 
 /* Line 1806 of yacc.c  */
-#line 174 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 174 "zend-ini.y"
     { (yyval) = (yyvsp[(1) - (1)]);}
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 1795 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.tab.cpp"
+#line 1795 "zend-ini.tab.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2029,7 +2029,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 177 "/home/sgolemon/dev/hiphop-php//hphp/runtime/base/ini-parser/zend-ini.y"
+#line 177 "zend-ini.y"
 
 
 ///////////////////////////////////////////////////////////////////////////////

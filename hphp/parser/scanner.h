@@ -212,6 +212,8 @@ public:
   bool tryParseNSType(TokenStore::iterator& pos);
   bool tryParseTypeList(TokenStore::iterator& pos);
   bool tryParseFuncTypeList(TokenStore::iterator& pos);
+  bool tryParseNonEmptyLambdaParams(TokenStore::iterator& pos);
+  void parseApproxParamDefVal(TokenStore::iterator& pos);
 
   /**
    * Called by parser or tokenizer.

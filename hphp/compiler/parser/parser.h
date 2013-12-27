@@ -202,6 +202,7 @@ public:
   void onInterface(Token &out, Token &name, Token &base, Token &stmt,
                    Token *attr);
   void onInterfaceName(Token &out, Token *names, Token &name);
+  void onTraitRequire(Token &out, Token &name, bool isClass);
   void onTraitUse(Token &out, Token &traits, Token &rules);
   void onTraitName(Token &out, Token *names, Token &name);
   void onTraitRule(Token &out, Token &stmtList, Token &newStmt);
@@ -256,9 +257,15 @@ public:
   void onThrow(Token &out, Token &expr);
 
   void onClosureStart(Token &name);
-  void onClosure(Token &out, Token *modifiers, Token &ret, Token &ref,
-                 Token &params, Token &cparams, Token &stmts);
+  Token onClosure(ClosureType type,
+                  Token* modifiers,
+                  Token& ref,
+                  Token& params,
+                  Token& cparams,
+                  Token& stmts);
+  Token onExprForLambda(const Token& expr);
   void onClosureParam(Token &out, Token *params, Token &param, bool ref);
+
   void onLabel(Token &out, Token &label);
   void onGoto(Token &out, Token &label, bool limited);
   void onTypedef(Token& out, const Token& name, const Token& type);
@@ -266,6 +273,24 @@ public:
   void onTypeAnnotation(Token& out, const Token& name, const Token& typeArgs);
   void onTypeList(Token& type1, const Token& type2);
   void onTypeSpecialization(Token& type, char specialization);
+
+  // for language integrated query expressions
+  void onQuery(Token &out, Token &head, Token &body);
+  void onQueryBody(Token &out, Token *clauses, Token &select, Token *cont);
+  void onQueryBodyClause(Token &out, Token *clauses, Token &clause);
+  void onFromClause(Token &out, Token &var, Token &coll);
+  void onLetClause(Token &out, Token &var, Token &expr);
+  void onWhereClause(Token &out, Token &expr);
+  void onJoinClause(Token &out, Token &var, Token &coll, Token &left,
+    Token &right);
+  void onJoinIntoClause(Token &out, Token &var, Token &coll, Token &left,
+    Token &right, Token &group);
+  void onOrderbyClause(Token &out, Token &orderings);
+  void onOrdering(Token &out, Token *orderings, Token &ordering);
+  void onOrderingExpr(Token &out, Token &expr, Token *direction);
+  void onSelectClause(Token &out, Token &expr);
+  void onGroupClause(Token &out, Token &coll, Token &key);
+  void onIntoClause(Token &out, Token &var, Token &query);
 
   // for namespace support
   void onNamespaceStart(const std::string &ns, bool file_scope = false);

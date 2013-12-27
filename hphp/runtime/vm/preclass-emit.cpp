@@ -350,6 +350,10 @@ void PreClassRepoProxy::GetPreClassesStmt
       PreClassEmitter* pce = ue.newPreClassEmitter(
         name, (PreClass::Hoistable)hoistable);
       pce->serdeMetaData(extraBlob);
+      if (!SystemLib::s_inited) {
+        assert(pce->attrs() & AttrPersistent);
+        assert(pce->attrs() & AttrUnique);
+      }
       assert(pce->id() == preClassId);
     }
   } while (!query.done());

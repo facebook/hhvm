@@ -20,7 +20,6 @@ if [ "x${TRAVIS}" != "x" ]; then
 fi
 
 export CMAKE_PREFIX_PATH=`/bin/pwd`/..
-export HPHP_HOME=`/bin/pwd`
 
 # install python-software-properties before trying to add a PPA
 sudo apt-get -y update
@@ -124,4 +123,4 @@ cmake .
 
 echo "-------------------------------------------------------------------------"
 echo "Done. Now run:"
-echo "  CMAKE_PREFIX_PATH=\`pwd\`/.. HPHP_HOME=\`pwd\` make"
+echo "  CMAKE_PREFIX_PATH=\`pwd\`/.. make"

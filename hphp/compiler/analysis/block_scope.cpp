@@ -155,9 +155,7 @@ bool BlockScope::hasUser(BlockScopeRawPtr user, int useKinds) const {
 }
 
 void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
-  if (is(ClassScope) ? static_cast<HPHP::ClassScope*>(this)->isUserClass() :
-      is(FunctionScope) &&
-      static_cast<HPHP::FunctionScope*>(this)->isUserFunction()) {
+  if ((is(ClassScope) || is(FunctionScope)) && getStmt()) {
 
     if (user.get() == this) {
       m_selfUser |= useKinds;

@@ -31,7 +31,7 @@ namespace HPHP { namespace IDL {
 /////////////////////////////////////////////////////////////////////////////
 
 enum FuncFlags {
-  ZendParamMode                 = (1 <<  0),
+  ZendParamModeNull             = (1 <<  0),
   CppCustomDelete               = (1 <<  1),
   IsAbstract                    = (1 <<  4),
   IsFinal                       = (1 <<  5),
@@ -60,6 +60,7 @@ enum FuncFlags {
   NoDefaultSweep                = (1 << 27),
   IsSystem                      = (1 << 28),
   IsTrait                       = (1 << 29),
+  ZendParamModeFalse            = (1 << 30),
   NeedsActRec                   = (1 << 31),
 };
 
@@ -129,7 +130,8 @@ fbstring phpSerialize(const folly::dynamic& d);
 
 enum class ParamMode {
   CoerceAndCall,
-  Zend
+  ZendNull,
+  ZendFalse
 };
 
 class PhpConst {

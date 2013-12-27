@@ -11,7 +11,7 @@ endforeach()
 add_custom_command(
   OUTPUT "${HPHP_HOME}/hphp/hphp-repo-schema.h"
          "${HPHP_HOME}/hphp/hphp-build-info.cpp"
-  COMMAND "hphp/util/generate-buildinfo.sh"
+  COMMAND "HPHP_HOME=${HPHP_HOME}" "hphp/util/generate-buildinfo.sh"
   DEPENDS ${CXX_SOURCES}
   WORKING_DIRECTORY ${HPHP_HOME}
   COMMENT "Generating Repo Schema ID and Compiler ID"

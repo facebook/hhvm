@@ -19,6 +19,7 @@
 #include "folly/ScopeGuard.h"
 
 #include "hphp/compiler/analysis/code_error.h"
+#include "hphp/compiler/analysis/lambda_names.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/statement/statement_list.h"
@@ -38,15 +39,14 @@
 #include "hphp/compiler/expression/user_attribute.h"
 #include "hphp/runtime/base/complex-types.h"
 
-using namespace HPHP;
+namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 FileScope::FileScope(const string &fileName, int fileSize, const MD5 &md5)
   : BlockScope("", "", StatementPtr(), BlockScope::FileScope),
-    m_size(fileSize), m_md5(md5), m_module(false), m_privateInclude(false),
-    m_externInclude(false),
-    m_includeState(0), m_fileName(fileName), m_redeclaredFunctions(0) {
+    m_size(fileSize), m_md5(md5), m_includeState(0), m_system(false),
+    m_fileName(fileName), m_redeclaredFunctions(0) {
   pushAttribute(); // for global scope
 }
 
@@ -66,6 +66,11 @@ void FileScope::setFileLevel(StatementListPtr stmtList) {
       setFileLevel(dynamic_pointer_cast<StatementList>(stmt));
     }
   }
+}
+
+void FileScope::setSystem() {
+  m_fileName = "/:" + m_fileName;
+  m_system = true;
 }
 
 FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,
@@ -257,9 +262,10 @@ void FileScope::addConstantDependency(AnalysisResultPtr ar,
 }
 
 void FileScope::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_pseudoMain) {
-    m_pseudoMain->getStmt()->analyzeProgram(ar);
-  }
+  if (!m_pseudoMain) return;
+  m_pseudoMain->getStmt()->analyzeProgram(ar);
+
+  resolve_lambda_names(ar, shared_from_this());
 }
 
 ClassScopeRawPtr FileScope::resolveClass(ClassScopeRawPtr cls) {
@@ -373,11 +379,6 @@ void FileScope::analyzeIncludesHelper(AnalysisResultPtr ar) {
           static_pointer_cast<IncludeExpression>(exp)->getIncludedFile(ar));
         if (fs && fs->m_includeState != 1) {
           if (!fs->m_includeState) {
-            if (m_module && fs->m_privateInclude) {
-              BOOST_FOREACH(BlockScopeRawPtr bs, m_providedDefs) {
-                fs->m_providedDefs.insert(bs);
-              }
-            }
             fs->analyzeIncludesHelper(ar);
           }
           BOOST_FOREACH(BlockScopeRawPtr bs, fs->m_providedDefs) {
@@ -395,7 +396,7 @@ void FileScope::analyzeIncludesHelper(AnalysisResultPtr ar) {
 }
 
 void FileScope::analyzeIncludes(AnalysisResultPtr ar) {
-  if (!m_privateInclude && !m_includeState) {
+  if (!m_includeState) {
     analyzeIncludesHelper(ar);
   }
 }
@@ -457,24 +458,18 @@ string FileScope::outputFilebase() const {
 
 static void getFuncScopesSet(BlockScopeRawPtrQueue &v,
                              const StringToFunctionScopePtrMap &funcMap) {
-  for (StringToFunctionScopePtrMap::const_iterator
-         iter = funcMap.begin(), end = funcMap.end();
-       iter != end; ++iter) {
-    FunctionScopePtr f = iter->second;
-    if (f->isUserFunction()) {
+  for (const auto& iter : funcMap) {
+    FunctionScopePtr f = iter.second;
+    if (f->getStmt()) {
       v.push_back(f);
     }
   }
 }
 
 void FileScope::getScopesSet(BlockScopeRawPtrQueue &v) {
-  const StringToClassScopePtrVecMap &classes = getClasses();
-  for (StringToClassScopePtrVecMap::const_iterator iter = classes.begin(),
-         end = classes.end(); iter != end; ++iter) {
-    for (ClassScopePtrVec::const_iterator it = iter->second.begin(),
-           e = iter->second.end(); it != e; ++it) {
-      ClassScopePtr cls = *it;
-      if (cls->isUserClass()) {
+  for (const auto& clsVec : getClasses()) {
+    for (const auto cls : clsVec.second) {
+      if (cls->getStmt()) {
         v.push_back(cls);
         getFuncScopesSet(v, cls->getFunctions());
       }
@@ -482,20 +477,17 @@ void FileScope::getScopesSet(BlockScopeRawPtrQueue &v) {
   }
 
   getFuncScopesSet(v, getFunctions());
-  if (const StringToFunctionScopePtrVecMap *redec = m_redeclaredFunctions) {
-    for (StringToFunctionScopePtrVecMap::const_iterator iter = redec->begin(),
-           end = redec->end(); iter != end; ++iter) {
-      FunctionScopePtrVec::const_iterator i = iter->second.begin(),
-        e = iter->second.end();
+  if (const auto redec = m_redeclaredFunctions) {
+    for (const auto& funcVec : *redec) {
+      auto i = funcVec.second.begin(), e = funcVec.second.end();
       v.insert(v.end(), ++i, e);
     }
   }
 }
 
 void FileScope::getClassesFlattened(ClassScopePtrVec &classes) const {
-  for (StringToClassScopePtrVecMap::const_iterator it = m_classes.begin();
-       it != m_classes.end(); ++it) {
-    BOOST_FOREACH(ClassScopePtr cls, it->second) {
+  for (const auto& clsVec : m_classes) {
+    for (auto cls : clsVec.second) {
       classes.push_back(cls);
     }
   }
@@ -518,3 +510,4 @@ void FileScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.done();
 }
 
+}

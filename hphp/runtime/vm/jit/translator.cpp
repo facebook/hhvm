@@ -1393,6 +1393,8 @@ static NormalizedInstruction* findInputSrc(NormalizedInstruction* ni,
   return ni;
 }
 
+// Task #3449943: This returns true even if there's meta-data telling
+// that the value was inferred.
 bool outputIsPredicted(SrcKey startSk,
                        NormalizedInstruction& inst) {
   auto const& iInfo = getInstrInfo(inst.op());
@@ -4114,7 +4116,15 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Check for a type prediction. Put it in the NormalizedInstruction so
       // the emit* method can use it if needed.
-      auto const doPrediction = outputIsPredicted(startSk, inst);
+      // In PGO mode, we don't really need the values coming from the
+      // interpreter type profiler.  TransProfile translations end whenever
+      // there's a side-exit, and type predictions incur side-exits.  And when
+      // we stitch multiple TransProfile translations together to form a
+      // larger region (in TransOptimize mode), the guard for the top of the
+      // stack essentially does the role of type prediction.  And, if the value
+      // is also inferred, then the guard is omitted.
+      auto const doPrediction = mode() != TransOptimize &&
+                                outputIsPredicted(startSk, inst);
 
       // Emit IR for the body of the instruction.
       try {

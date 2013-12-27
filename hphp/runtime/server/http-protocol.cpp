@@ -346,8 +346,7 @@ void HttpProtocol::CopyHeaderVariables(Variant& server,
   for (auto const& header : headers) {
     auto const& key = header.first;
     auto const& values = header.second;
-    auto normalizedKey = s_HTTP_ +
-                         string_replace(f_strtoupper(key), s_dash,
+    auto normalizedKey = string_replace(f_strtoupper(key), s_dash,
                                         s_underscore);
 
     // Detect suspicious headers.  We are about to modify header names for

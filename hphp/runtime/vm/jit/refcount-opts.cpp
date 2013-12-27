@@ -1663,8 +1663,8 @@ void eliminateRefcounts(IRUnit& unit, const SinkPointsMap& info,
     }
 
     ITRACE(2, "erasing {} and {}\n", *incIt, *decIt);
-    decBlock->erase(incIt);
-    decBlock->erase(decIt);
+    incRef->convertToNop();
+    decRef->convertToNop();
   }
   ITRACE(2, "\n");
 }

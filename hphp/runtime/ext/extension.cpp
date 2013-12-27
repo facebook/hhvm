@@ -234,8 +234,12 @@ void Extension::MergeSystemlib() {
 
 void Extension::CompileSystemlib(const std::string &slib,
                                  const std::string &name) {
+  // TODO (t3443556) Bytecode repo compilation expects that any errors
+  // encountered during systemlib compilation have valid filename pointers
+  // which won't be the case for now unless these pointers are long-lived.
+  auto const moduleName = makeStaticString(name.c_str());
   Unit *unit = compile_systemlib_string(slib.c_str(), slib.size(),
-                                        name.c_str());
+                                        moduleName->data());
   assert(unit);
   unit->merge();
   s_systemlib_units.push_back(unit);

@@ -26,9 +26,3 @@ include(CheckFunctionExists)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hphp)
 
-if ("$ENV{USE_HHVM}" STREQUAL "1")
-	message("Building for HHVM")
-endif()
-if ("$ENV{USE_HPHPC}" STREQUAL "1")
-	message(FATAL_ERROR "Building HPHPc is no longer supported")
-endif()

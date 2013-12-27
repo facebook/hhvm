@@ -56,6 +56,7 @@ public:
 
   bool validForFunction() const;
   bool validForClosure() const;
+  bool validForTraitAliasRule() const;
 
   void setHasPrivacy(bool f) { m_hasPrivacy = f; }
 

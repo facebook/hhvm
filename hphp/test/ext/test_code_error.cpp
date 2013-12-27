@@ -656,21 +656,6 @@ bool TestCodeError::TestUnknownTraitMethod() {
   return true;
 }
 
-bool TestCodeError::TestInvalidAccessModifier() {
-  VE(InvalidAccessModifier,
-    "<?php\n"
-     "trait T1 {\n"
-     "  public function Func1() { }\n"
-     "}\n"
-     "class C {\n"
-     "  use T1 {\n"
-     "    T1::Func1 as static Func2;\n"
-     "  }\n"
-     "}\n");
-
-  return true;
-}
-
 bool TestCodeError::TestCyclicDependentTraits() {
   VE(CyclicDependentTraits,
      "<?php\n"

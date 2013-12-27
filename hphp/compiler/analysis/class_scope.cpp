@@ -819,13 +819,6 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
           continue;
         }
       }
-      if (traitMethIter->m_modifiers &&
-          traitMethIter->m_modifiers->isStatic()) {
-        Compiler::Error(Compiler::InvalidAccessModifier,
-                        traitMethIter->m_modifiers);
-        continue;
-      }
-
       string sourceName = traitMethIter->m_ruleStmt ?
         Util::toLower(((TraitAliasStatement*)traitMethIter->m_ruleStmt.get())->
                       getMethodName()) : iter->first;

@@ -191,6 +191,9 @@ Unit* compile_string(const char* s,
   if (u != nullptr) {
     return u;
   }
+  // NB: fname needs to be long-lived if generating a bytecode repo because it
+  // can be cached via a Location ultimately contained by ErrorInfo for printing
+  // code errors.
   return g_hphp_compiler_parse(s, sz, md5, fname);
 }
 

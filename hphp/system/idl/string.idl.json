@@ -455,7 +455,7 @@
             "name": "str_split",
             "desc": "Converts a string to an array.",
             "flags": [
-                "ZendParamMode"
+                "ZendParamModeNull"
             ],
             "return": {
                 "type": "Variant",

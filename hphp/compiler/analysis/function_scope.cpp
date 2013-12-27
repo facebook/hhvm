@@ -292,7 +292,8 @@ bool FunctionScope::hasUserAttr(const char *attr) const {
 }
 
 bool FunctionScope::isZendParamMode() const {
-  return m_attributeClassInfo & ClassInfo::ZendParamMode;
+  return m_attributeClassInfo &
+    (ClassInfo::ZendParamModeNull | ClassInfo::ZendParamModeFalse);
 }
 
 bool FunctionScope::isPublic() const {

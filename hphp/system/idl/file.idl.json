@@ -1698,7 +1698,7 @@
             "name": "pathinfo",
             "desc": "pathinfo() returns an associative array containing information about path.",
             "flags": [
-                "ZendParamMode"
+                "ZendParamModeNull"
             ],
             "return": {
                 "type": "Variant",
@@ -1857,6 +1857,7 @@
             "name": "chdir",
             "desc": "Changes PHP's current directory to directory.",
             "flags": [
+                "ZendParamModeFalse"
             ],
             "return": {
                 "type": "Boolean",

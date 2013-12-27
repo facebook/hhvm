@@ -1,108 +1,19 @@
-#include "hphp/runtime/base/base-includes.h"
-#include "hphp/runtime/ext/icu/icu.h"
+#include "hphp/runtime/ext/icu/ext_icu_timezone.h"
+#include "hphp/runtime/ext/icu/ext_icu_iterator.h"
 
-#include <unicode/timezone.h>
 #include <unicode/locid.h>
 
-namespace HPHP {
+namespace HPHP { namespace Intl {
+/////////////////////////////////////////////////////////////////////////////
+const StaticString s_IntlTimeZone("IntlTimeZone");
 
-const StaticString
-  s_IntlTimeZone("IntlTimeZone"),
-  s_resdata("__resdata");
+IntlTimeZone *IntlTimeZone::Get(Object obj) {
+  return GetResData<IntlTimeZone>(obj, s_IntlTimeZone.get());
+}
 
-//////////////////////////////////////////////////////////////////////////////
-// Internal resource data
-
-class IntlTimeZone : public SweepableResourceData {
- public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(IntlTimeZone);
-  CLASSNAME_IS("IntlTimeZone");
-  const String& o_getClassNameHook() const override { return classnameof(); }
-
-  explicit IntlTimeZone(icu::TimeZone *tz, bool owned = true):
-    m_timezone(tz), m_owned(owned) {}
-
-  void sweep() override {
-    if (m_timezone && m_owned) {
-      delete m_timezone;
-    }
-    m_timezone = nullptr;
-  }
-
-  bool isInvalid() const override {
-    return m_timezone == nullptr;
-  }
-
-  static IntlTimeZone *Get(Object obj) {
-    if (obj.isNull()) {
-      raise_error("NULL object passed");
-      return nullptr;
-    }
-    auto res = obj->o_get(s_resdata, false, s_IntlTimeZone.get());
-    if (!res.isResource()) {
-      return nullptr;
-    }
-    auto ret = res.toResource().getTyped<IntlTimeZone>(false, false);
-    if (!ret) {
-      return nullptr;
-    }
-    if (ret->isInvalid()) {
-      ret->setError(U_ILLEGAL_ARGUMENT_ERROR,
-                    "Found unconstructed IntlTimeZone");
-      return nullptr;
-    }
-    return ret;
-  }
-
-  Object wrap() {
-    auto cls = Unit::lookupClass(s_IntlTimeZone.get());
-    auto obj = ObjectData::newInstance(cls);
-    obj->o_set(s_resdata, Resource(this), s_IntlTimeZone.get());
-    return Object(obj);
-  }
-
-  void setError(UErrorCode code, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    s_intl_error->set(code, format, args);
-    va_end(args);
-    m_error = s_intl_error->m_error;
-  }
-
-  void setError(UErrorCode code) {
-    const char *errorMsg = u_errorName(code);
-    setError(code, "%s", errorMsg);
-  }
-
-  UErrorCode getErrorCode() const {
-    return m_error.code;
-  }
-
-  String getErrorMessage() const {
-    return m_error.custom_error_message;
-  }
-
-  static bool isValidStyle(int64_t style) {
-    return (style == icu::TimeZone::SHORT) ||
-           (style == icu::TimeZone::LONG) ||
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
-           (style == icu::TimeZone::SHORT_GENERIC) ||
-           (style == icu::TimeZone::LONG_GENERIC) ||
-           (style == icu::TimeZone::SHORT_GMT) ||
-           (style == icu::TimeZone::LONG_GMT) ||
-           (style == icu::TimeZone::SHORT_COMMONLY_USED) ||
-           (style == icu::TimeZone::GENERIC_LOCATION) ||
-#endif
-           false;
-  }
-
-  icu::TimeZone* timezone() const { return m_timezone; }
-
- private:
-  icu::TimeZone *m_timezone;
-  bool m_owned;
-  intl_error m_error;
-};
+Object IntlTimeZone::wrap() {
+  return WrapResData(s_IntlTimeZone.get());
+}
 
 #define TZ_GET(dest, src, def) \
   auto dest = IntlTimeZone::Get(src); \
@@ -125,7 +36,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, countEquivalentIDs,
                                   const String& zoneId) {
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString id;
-  if (!Intl::ustring_from_char(id, zoneId, error)) {
+  if (!ustring_from_char(id, zoneId, error)) {
     s_intl_error->set(error, "intltz_count_equivalent_ids: could not convert "
                              "time zone id to UTF-16");
     return false;
@@ -152,14 +63,14 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, createEnumeration,
                       "intltz_create_enumeration: invalid argument type");
     return false;
   }
-  return Intl::iteratorFromEnumeration(se);
+  return (NEWOBJ(IntlIterator)(se))->wrap();
 }
 
 static Object HHVM_STATIC_METHOD(IntlTimeZone, createTimeZone,
                                  const String& zoneId) {
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString id;
-  if (!Intl::ustring_from_char(id, zoneId, error)) {
+  if (!ustring_from_char(id, zoneId, error)) {
     s_intl_error->set(error, "intltz_count_equivalent_ids: could not convert "
                              "time zone id to UTF-16");
     return null_object;
@@ -172,7 +83,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getCanonicalID,
                                   VRefParam isSystemID) {
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString id;
-  if (!Intl::ustring_from_char(id, zoneId, error)) {
+  if (!ustring_from_char(id, zoneId, error)) {
     s_intl_error->set(error, "intltz_get_canonical_id: could not convert "
                              "time zone id to UTF-16");
     return false;
@@ -190,7 +101,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getCanonicalID,
 
   isSystemID = (bool)system;
   error = U_ZERO_ERROR;
-  String ret(Intl::u8(result, error));
+  String ret(u8(result, error));
   if (U_FAILURE(error)) {
     s_intl_error->set(error, "intltz_get_canonical_id: could not convert "
                              "time zone id to UTF-8");
@@ -215,7 +126,7 @@ static Variant HHVM_METHOD(IntlTimeZone, getDisplayName,
                                      ULOC_DEFAULT(locale).c_str()),
                                    result);
   UErrorCode error = U_ZERO_ERROR;
-  String ret(Intl::u8(result, error));
+  String ret(u8(result, error));
   TZ_CHECK(data, error, false);
   return ret;
 }
@@ -229,7 +140,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getEquivalentID,
                                   const String& zoneId, int64_t index) {
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString id;
-  if (!Intl::ustring_from_char(id, zoneId, error)) {
+  if (!ustring_from_char(id, zoneId, error)) {
     s_intl_error->set(error, "intltz_get_canonical_id: could not convert "
                              "time zone id to UTF-16");
     return false;
@@ -237,7 +148,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getEquivalentID,
 
   auto result = icu::TimeZone::getEquivalentID(id, (int32_t)index);
   error = U_ZERO_ERROR;
-  String ret(Intl::u8(result, error));
+  String ret(u8(result, error));
   if (U_FAILURE(error)) {
     s_intl_error->set(error, "intltz_get_equivalent_id: "
                              "could not convert resulting time zone id "
@@ -267,7 +178,7 @@ static Variant HHVM_METHOD(IntlTimeZone, getID) {
   icu::UnicodeString id;
   data->timezone()->getID(id);
   UErrorCode error = U_ZERO_ERROR;
-  String ret(Intl::u8(id, error));
+  String ret(u8(id, error));
   if (U_FAILURE(error)) {
     s_intl_error->set(error, "intltz_get_id: Could not convert id to UTF-8");
     return false;
@@ -350,14 +261,14 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, createTimeZoneIDEnumeration,
                              "Error obtaining time zone id enumeration");
     return false;
   }
-  return Intl::iteratorFromEnumeration(se);
+  return (NEWOBJ(IntlIterator)(se))->wrap();
 }
 
 static Variant HHVM_STATIC_METHOD(IntlTimeZone, getRegion,
                                   const String& str) {
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString id;
-  if (!Intl::ustring_from_char(id, str, error)) {
+  if (!ustring_from_char(id, str, error)) {
     s_intl_error->set(error, "intltz_get_region: could not convert "
                              "time zone id to UTF-16");
     return false;
@@ -394,7 +305,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getUnknown) {
                       s_IntlTimeZone.get(), makeStaticString(#v), \
                       UCAL_ZONE_ ## v)
 
-void Intl::IntlExtension::initTimeZone() {
+void IntlExtension::initTimeZone() {
   DISP_CONST(SHORT);
   DISP_CONST(LONG);
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
@@ -440,4 +351,4 @@ void Intl::IntlExtension::initTimeZone() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-} // namespace HPHP
+}} // namespace HPHP::Intl

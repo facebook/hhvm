@@ -346,8 +346,7 @@ void HttpProtocol::CopyHeaderVariables(Variant& server,
   for (auto const& header : headers) {
     auto const& key = header.first;
     auto const& values = header.second;
-    auto normalizedKey = s_HTTP_ +
-                         string_replace(f_strtoupper(key), s_dash,
+    auto normalizedKey = string_replace(f_strtoupper(key), s_dash,
                                         s_underscore);
 
     // Detect suspicious headers.  We are about to modify header names for
@@ -400,13 +399,22 @@ void HttpProtocol::CopyServerInfo(Variant& server,
   string hostHeader = transport->getHeader("Host");
   String hostName(vhost->serverName(hostHeader));
 
+  String serverNameHeader(transport->getServerName());
+  String serverAddrHeader(transport->getServerAddr());
+  String serverAddr(String(RuntimeOption::ServerPrimaryIP));
+  uint16_t serverPortHeader = transport->getServerPort();
+  uint16_t serverPort(RuntimeOption::ServerPort);
+
   if (hostHeader.empty()) {
     server.set(s_HTTP_HOST, hostName);
     StackTraceNoHeap::AddExtraLogging("Server", hostName.data());
   } else {
     StackTraceNoHeap::AddExtraLogging("Server", hostHeader.c_str());
   }
-  if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
+  // see if we have a server_name header from the transport. if not do what we did before.
+  if(!serverNameHeader.empty()) {
+	  hostName = serverNameHeader;
+  } else if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
     hostName = hostHeader;
     // _SERVER['SERVER_NAME'] shouldn't contain the port number
     int colonPos = hostName.find(':');
@@ -414,11 +422,16 @@ void HttpProtocol::CopyServerInfo(Variant& server,
       hostName = hostName.substr(0, colonPos);
     }
   }
-
+  if(!serverAddrHeader.empty()) {
+	  serverAddr = serverAddrHeader;
+  }
+  if(serverPortHeader != 0) {
+	 serverPort = serverPortHeader;
+  }
   server.set(s_GATEWAY_INTERFACE, s_CGI_1_1);
-  server.set(s_SERVER_ADDR, String(RuntimeOption::ServerPrimaryIP));
+  server.set(s_SERVER_ADDR, serverAddr);
   server.set(s_SERVER_NAME, hostName);
-  server.set(s_SERVER_PORT, RuntimeOption::ServerPort);
+  server.set(s_SERVER_PORT, serverPort);
   server.set(s_SERVER_SOFTWARE, s_HPHP);
   server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
   server.set(s_SERVER_ADMIN, empty_string);

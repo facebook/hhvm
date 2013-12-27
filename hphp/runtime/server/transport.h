@@ -113,6 +113,14 @@ public:
   virtual const std::string getDocumentRoot() { return ""; }
 
   /**
+   * Server Headers
+   */
+
+  virtual const char *getServerName() { return ""; };
+  virtual const char *getServerAddr() { return ""; };
+  virtual uint16_t getServerPort() { return 0; };
+
+  /**
    * POST request's data.
    */
   virtual const void *getPostData(int &size) = 0;

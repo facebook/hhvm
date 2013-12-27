@@ -42,7 +42,7 @@ namespace HPHP {
 FastCGITransport::FastCGITransport(FastCGIConnection* connection, int id)
   : m_connection(connection),
     m_id(id),
-    m_remotePort(0), m_method(Method::Unknown), m_requestSize(0),
+    m_remotePort(0), m_serverPort(0), m_method(Method::Unknown), m_requestSize(0),
     m_headersSent(false), m_readMore(false),
     m_waiting(0), m_readComplete(false) {}
 
@@ -60,6 +60,18 @@ const char *FastCGITransport::getRemoteHost() {
 
 uint16_t FastCGITransport::getRemotePort() {
   return m_remotePort;
+}
+
+const char *FastCGITransport::getServerName() {
+  return m_serverName.c_str();
+}
+
+const char *FastCGITransport::getServerAddr() {
+  return m_serverAddr.c_str();
+}
+
+uint16_t FastCGITransport::getServerPort() {
+  return m_serverPort;
 }
 
 const void *FastCGITransport::getPostData(int &size) {
@@ -194,7 +206,6 @@ void FastCGITransport::getHeaders(HeaderMap &headers) {
 
 void FastCGITransport::addHeaderImpl(const char *name, const char *value) {
   CHECK(!m_headersSent);
-
   if (!m_responseHeaders.count(name)) {
       m_responseHeaders.insert(std::make_pair(name,
                                 std::vector<std::string>()));
@@ -279,6 +290,9 @@ const std::string FastCGITransport::k_methodKey = "REQUEST_METHOD";
 const std::string FastCGITransport::k_httpVersionKey = "HTTP_VERSION";
 const std::string FastCGITransport::k_contentLengthKey = "CONTENT_LENGTH";
 const std::string FastCGITransport::k_documentRoot = "DOCUMENT_ROOT";
+const std::string FastCGITransport::k_serverNameKey = "SERVER_NAME";
+const std::string FastCGITransport::k_serverPortKey = "SERVER_PORT";
+const std::string FastCGITransport::k_serverAddrKey = "SERVER_ADDR";
 
 void FastCGITransport::onHeader(std::unique_ptr<folly::IOBuf> key_chain,
                                 std::unique_ptr<folly::IOBuf> value_chain) {
@@ -321,6 +335,18 @@ void FastCGITransport::handleHeader(const std::string& key,
     } catch (std::out_of_range&) {
       m_remotePort = 0;
     }
+  } else if (compareKeys(key, k_serverNameKey)) {
+    m_serverName = value;
+  } else if (compareKeys(key, k_serverAddrKey)) {
+    m_serverAddr = value;
+  } else if (compareKeys(key, k_serverPortKey)) {
+    try {
+      m_serverPort = std::stoi(value);
+    } catch (std::invalid_argument&) {
+      m_serverPort = 0;
+    } catch (std::out_of_range&) {
+      m_serverPort = 0;
+    }
   } else if (compareKeys(key, k_methodKey)) {
     m_extendedMethod = value;
     if (compareValues(value, "GET")) {
@@ -348,7 +374,22 @@ void FastCGITransport::handleHeader(const std::string& key,
 }
 
 void FastCGITransport::onHeadersComplete() {
-  m_serverObject = getRawHeader("SCRIPT_NAME");
+  m_pathTranslated = getRawHeader("PATH_TRANSLATED");
+  // use PATH_TRANSLATED instead of script_name and subtract document_root
+  // for mod_fastcgi support
+  if(!m_pathTranslated.empty()) {
+    if(m_pathTranslated.find(getRawHeader("DOCUMENT_ROOT")) != std::string::npos) {
+      // document_root found in path_translated. remove it!
+      size_t ptlen = strlen(getRawHeader("DOCUMENT_ROOT").c_str());
+      m_serverObject = m_pathTranslated.substr(ptlen, strlen(m_pathTranslated.c_str()));
+    } else {
+      // not sure if i should be settings this to path_translated or default it back to script_name.
+      // this will probaly never get executed.
+      m_serverObject = m_pathTranslated;
+    }
+  } else {
+    m_serverObject = getRawHeader("SCRIPT_NAME");
+  }
   std::string queryString = getRawHeader("QUERY_STRING");
   if (!queryString.empty()) {
     m_serverObject += "?" + queryString;

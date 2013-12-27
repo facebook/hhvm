@@ -218,10 +218,22 @@ void HttpServer::takeoverShutdown() {
 }
 
 HttpServer::~HttpServer() {
+  // XXX: why should we have to call stop here?  If we haven't already
+  // stopped (and joined all the threads), watchDog could still be
+  // running and leaving this destructor without a wait would be
+  // wrong...
   stop();
 }
 
-void HttpServer::run() {
+void HttpServer::startupFailure() {
+  Logger::Error("Shutting down due to failure(s) to bind in "
+                "HttpServer::run");
+  // Logger flushes itself---we don't need to run any atexit handlers
+  // (historically we've mostly just SEGV'd while trying) ...
+  _Exit(1);
+}
+
+void HttpServer::runOrExitProcess() {
   StartTime = time(0);
 
   m_watchDog.start();
@@ -236,7 +248,8 @@ void HttpServer::run() {
   if (RuntimeOption::ServerPort) {
     if (!startServer(true)) {
       Logger::Error("Unable to start page server");
-      return;
+      startupFailure();
+      not_reached();
     }
     Logger::Info("page server started");
   }
@@ -244,8 +257,8 @@ void HttpServer::run() {
   if (RuntimeOption::AdminServerPort) {
     if (!startServer(false)) {
       Logger::Error("Unable to start admin server");
-      abortServers();
-      return;
+      startupFailure();
+      not_reached();
     }
     Logger::Info("admin server started");
   }
@@ -258,15 +271,15 @@ void HttpServer::run() {
     } catch (Exception &e) {
       Logger::Error("Unable to start satellite server %s: %s",
                     name.c_str(), e.getMessage().c_str());
-      abortServers();
-      return;
+      startupFailure();
+      not_reached();
     }
   }
 
   if (!Eval::Debugger::StartServer()) {
     Logger::Error("Unable to start debugger server");
-    abortServers();
-    return;
+    startupFailure();
+    not_reached();
   } else if (RuntimeOption::EnableDebuggerServer) {
     Logger::Info("debugger server started");
   }

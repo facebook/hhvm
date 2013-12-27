@@ -794,7 +794,7 @@ static int start_server(const std::string &username) {
 
   }
 
-  HttpServer::Server->run();
+  HttpServer::Server->runOrExitProcess();
   return 0;
 }
 

@@ -145,9 +145,9 @@ void Logger::log(LogLevelType level, const std::string &msg,
     return;
   }
 
-  std::shared_ptr<StackTrace> deleter;
+  std::unique_ptr<StackTrace> deleter;
   if (LogNativeStackTrace && stackTrace == nullptr) {
-    deleter = std::shared_ptr<StackTrace>(new StackTrace());
+    deleter.reset(new StackTrace());
     stackTrace = deleter.get();
   }
 

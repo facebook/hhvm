@@ -36,7 +36,14 @@ public:
   explicit HttpServer();
   ~HttpServer();
 
-  void run();
+  /*
+   * Try to run the various servers that this class controls.
+   *
+   * If any of them can't bind their appropriate port (or otherwise
+   * fail their initialization steps), shut down the entire process
+   * without running any atexit handlers.
+   */
+  void runOrExitProcess();
 
   // Stop may be called from a signal handler.
   void stop(const char* reason = nullptr);
@@ -50,6 +57,9 @@ public:
 
   ServerPtr getPageServer() { return m_pageServer;}
   void getSatelliteStats(vector<std::pair<std::string, int>> *stats);
+
+private:
+  static void startupFailure();
 
 private:
   bool m_stopped;

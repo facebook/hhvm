@@ -70,6 +70,9 @@ fi
 if [ "$1" = "ini-parser" -o "$1" = "all" ]; then
   [ $VERBOSE -eq 1 ] && echo "Generating INI parser"
   $HPHP_HOME/hphp/runtime/base/ini-parser/make-zend-ini-parser.sh || exit 1
+  sed -i -e 's@^#line \([0-9]*\) ".*/\([^/]*\)"$@#line \1 "\2"@' \
+    $HPHP_HOME/hphp/runtime/base/ini-parser/zend-ini.tab.cpp \
+    $HPHP_HOME/hphp/runtime/base/ini-parser/zend-ini.tab.hpp
 fi
 
 if [ "$1" = "license" -o "$1" = "all" ]; then

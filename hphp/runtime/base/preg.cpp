@@ -642,10 +642,10 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
     }
 
     /* If something has matched */
-    if (count > 0) {
+    if (count > 0 && !subpats) {
       matched++;
-
-      if (!subpats) continue;
+    } else if (count > 0) {
+      matched++;
 
       // Try to get the list of substrings and display a warning if failed.
       if (pcre_get_substring_list(subject.data(), offsets, count,

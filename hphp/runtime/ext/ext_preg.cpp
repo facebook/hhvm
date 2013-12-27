@@ -57,8 +57,9 @@ Variant f_preg_match(const String& pattern, const String& subject,
   }
 }
 
-Variant f_preg_match_all(const String& pattern, const String& subject, VRefParam matches,
-                         int flags /* = 0 */, int offset /* = 0 */) {
+Variant f_preg_match_all(const String& pattern, const String& subject,
+                         VRefParam matches /* = null */, int flags /* = 0 */,
+                         int offset /* = 0 */) {
   if (matches.isReferenced()) {
     return preg_match_all(pattern, subject, matches, flags, offset);
   } else {

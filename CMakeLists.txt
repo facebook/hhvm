@@ -1,8 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
 PROJECT(hphp C CXX ASM)
 
-IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
-	message(FATAL_ERROR "32-bit support is currently unsupported, check back with a later version of HipHop")
+IF(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+	message(FATAL_ERROR "HHVM requires a 64bit OS")
 ENDIF()
 
 IF("$ENV{HPHP_HOME}" STREQUAL "")

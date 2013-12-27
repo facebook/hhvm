@@ -775,6 +775,9 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     tCls->importUsedTraits(ar);
 
     findTraitMethodsToImport(ar, tCls);
+
+    // Import any interfaces implemented
+    tCls->getInterfaces(ar, m_bases, false);
   }
 
   // Apply rules
@@ -1139,8 +1142,7 @@ void ClassScope::getInterfaces(AnalysisResultConstPtr ar,
       if (cls && cls->isRedeclaring()) {
         cls = self->findExactClass(cls);
       }
-      if (cls) names.push_back(cls->getDocName());
-      else     names.push_back(*it);
+      names.push_back(cls ? cls->getDocName() : *it);
       if (cls && recursive) {
         cls->getInterfaces(ar, names, true);
       }

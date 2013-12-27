@@ -8,7 +8,9 @@ check_err()
   fi
 }
 
-[ -z "$HPHP_HOME" ] && check_err 1 "HPHP_HOME environment variable not set"
+if [ -z "$HPHP_HOME" ]; then
+  HPHP_HOME="`dirname $0`/../../"
+fi
 
 VERBOSE=1
 

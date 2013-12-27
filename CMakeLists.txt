@@ -5,18 +5,14 @@ IF(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
 	message(FATAL_ERROR "HHVM requires a 64bit OS")
 ENDIF()
 
-IF("$ENV{HPHP_HOME}" STREQUAL "")
-	message(FATAL_ERROR "You should set the HPHP_HOME environmental")
-ENDIF()
+set(HPHP_HOME "$ENV{HPHP_HOME}")
+if (NOT HPHP_HOME)
+	set(HPHP_HOME "${CMAKE_CURRENT_SOURCE_DIR}")
+endif()
+message("Using HPHP_HOME == ${HPHP_HOME}")
 
-file(TO_CMAKE_PATH "$ENV{HPHP_HOME}" HPHP_HOME)
-
-IF(NOT IS_DIRECTORY ${HPHP_HOME})
-	message(FATAL_ERROR "The value of HPHP_HOME does not exist")
-ENDIF()
-
-IF(NOT EXISTS "${HPHP_HOME}/LICENSE.PHP")
-	message(FATAL_ERROR "The value of HPHP_HOME in incorrect")
+IF(NOT EXISTS "${HPHP_HOME}/CMake/HPHPSetup.cmake")
+	message(FATAL_ERROR "Invalid HPHP_HOME. Set it to the root of your hhvm tree, or run `cmake .` from there.")
 ENDIF()
 
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
@@ -24,5 +20,5 @@ SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
 include(CheckFunctionExists)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hphp)
+add_subdirectory(hphp)
 

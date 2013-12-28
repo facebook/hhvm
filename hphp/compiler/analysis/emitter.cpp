@@ -2551,6 +2551,9 @@ void EmitterVisitor::visit(FileScopePtr file) {
           // hoistable.
           ClassScopePtr cNode = s->getClassScope();
           emitClass(e, cNode, true);
+          if (cNode->getFatalMessage()) {
+            notMergeOnly = true;
+          }
           break;
         }
         case Statement::KindOfTypedefStatement:
@@ -7604,6 +7607,14 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
 void EmitterVisitor::emitClass(Emitter& e,
                                ClassScopePtr cNode,
                                bool toplevel) {
+
+  const StringData* fatal_msg = cNode->getFatalMessage();
+  if (fatal_msg != nullptr) {
+    e.String(fatal_msg);
+    e.Fatal(FatalOp::Runtime);
+    return;
+  }
+
   InterfaceStatementPtr is(
     static_pointer_cast<InterfaceStatement>(cNode->getStmt()));
   StringData* className = makeStaticString(cNode->getOriginalName());

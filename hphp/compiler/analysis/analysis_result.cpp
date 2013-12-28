@@ -590,7 +590,11 @@ void AnalysisResult::checkClassDerivations() {
       hphp_string_iset seen;
       cls->checkDerivation(ar, seen);
       if (Option::WholeProgram) {
-        cls->importUsedTraits(ar);
+        try {
+          cls->importUsedTraits(ar);
+        } catch (const AnalysisTimeFatalException& e) {
+          cls->setFatal(e);
+        }
       }
     }
   }

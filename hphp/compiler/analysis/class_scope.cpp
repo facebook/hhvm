@@ -545,6 +545,7 @@ ClassScope::findTraitMethod(AnalysisResultPtr ar,
 
 void ClassScope::findTraitMethodsToImport(AnalysisResultPtr ar,
                                           ClassScopePtr trait) {
+  assert(Option::WholeProgram);
   ClassStatementPtr tStmt =
     dynamic_pointer_cast<ClassStatement>(trait->getStmt());
   StatementListPtr tStmts = tStmt->getStmts();
@@ -562,6 +563,7 @@ void ClassScope::findTraitMethodsToImport(AnalysisResultPtr ar,
 }
 
 void ClassScope::applyTraitPrecRule(TraitPrecStatementPtr stmt) {
+  assert(Option::WholeProgram);
   const string methodName = Util::toLower(stmt->getMethodName());
   const string selectedTraitName = Util::toLower(stmt->getTraitName());
   std::set<string> otherTraitNames;
@@ -592,12 +594,20 @@ void ClassScope::applyTraitPrecRule(TraitPrecStatementPtr stmt) {
 
   // Report error if didn't find the selected trait
   if (!foundSelectedTrait) {
-    Compiler::Error(Compiler::UnknownTrait, stmt);
+    stmt->analysisTimeFatal(
+      Compiler::UnknownTrait,
+      Strings::TRAITS_UNKNOWN_TRAIT,
+      selectedTraitName.c_str()
+    );
   }
 
   // Sanity checking: otherTraitNames should be empty now
   if (otherTraitNames.size()) {
-    Compiler::Error(Compiler::UnknownTrait, stmt);
+    stmt->analysisTimeFatal(
+      Compiler::UnknownTrait,
+      Strings::TRAITS_UNKNOWN_TRAIT,
+      selectedTraitName.c_str()
+    );
   }
 }
 
@@ -647,8 +657,11 @@ void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
     traitCls = ar->findClass(traitName);
   }
   if (!traitCls || !(traitCls->isTrait())) {
-    Compiler::Error(Compiler::UnknownTrait, stmt);
-    return;
+    stmt->analysisTimeFatal(
+      Compiler::UnknownTrait,
+      Strings::TRAITS_UNKNOWN_TRAIT,
+      traitName.empty() ? origMethName.c_str() : traitName.c_str()
+    );
   }
 
   // Keep record of alias rule
@@ -659,8 +672,10 @@ void ClassScope::applyTraitAliasRule(AnalysisResultPtr ar,
   MethodStatementPtr methStmt = findTraitMethod(ar, traitCls, origMethName,
                                                 visitedTraits);
   if (!methStmt) {
-    Compiler::Error(Compiler::UnknownTraitMethod, stmt);
-    return;
+    stmt->analysisTimeFatal(
+      Compiler::UnknownTraitMethod,
+      Strings::TRAITS_UNKNOWN_TRAIT_METHOD, origMethName.c_str()
+    );
   }
 
   if (origMethName == newMethName) {
@@ -744,6 +759,10 @@ void ClassScope::removeSpareTraitAbstractMethods(AnalysisResultPtr ar) {
 }
 
 void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
+  // Trait flattening is supposed to happen only when we have awareness of
+  // the whole program.
+  assert(Option::WholeProgram);
+
   if (m_traitStatus == FLATTENED) return;
   if (m_traitStatus == BEING_FLATTENED) {
     Compiler::Error(Compiler::CyclicDependentTraits, getStmt());
@@ -767,9 +786,12 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
   for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
     ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);
     if (!tCls || !(tCls->isTrait())) {
-      setAttribute(UsesUnknownTrait);
-      Compiler::Error(Compiler::UnknownTrait, getStmt());
-      continue;
+      setAttribute(UsesUnknownTrait); // XXX: is this useful ... for anything?
+      getStmt()->analysisTimeFatal(
+        Compiler::UnknownTrait,
+        Strings::TRAITS_UNKNOWN_TRAIT,
+        m_usedTraitNames[i].c_str()
+      );
     }
     // First, make sure the used trait is flattened
     tCls->importUsedTraits(ar);
@@ -811,7 +833,11 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     }
     // Consistency checking: each name must only refer to one imported method
     if (iter->second.size() > 1) {
-      Compiler::Error(Compiler::MethodInMultipleTraits, getStmt());
+      getStmt()->analysisTimeFatal(
+        Compiler::MethodInMultipleTraits,
+        Strings::METHOD_IN_MULTIPLE_TRAITS,
+        iter->first.c_str()
+      );
     } else {
       TraitMethodList::const_iterator traitMethIter = iter->second.begin();
       if ((traitMethIter->m_modifiers ? traitMethIter->m_modifiers :

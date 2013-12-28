@@ -1071,10 +1071,11 @@ void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
 
   // Check error conditions
   if (!foundSelectedTrait) {
-    raise_error("unknown trait '%s'", selectedTraitName->data());
+    raise_error(Strings::TRAITS_UNKNOWN_TRAIT, selectedTraitName->data());
   }
   if (otherTraitNames.size()) {
-    raise_error("unknown trait '%s'", (*otherTraitNames.begin())->data());
+    raise_error(Strings::TRAITS_UNKNOWN_TRAIT,
+                (*otherTraitNames.begin())->data());
   }
 }
 
@@ -1132,7 +1133,7 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
   }
 
   if (!traitCls || (!(traitCls->attrs() & AttrTrait))) {
-    raise_error("unknown trait '%s'", traitName->data());
+    raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
   }
 
   // Save info to support ReflectionClass::getTraitAliases
@@ -1140,7 +1141,7 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
 
   Func* traitMeth = traitCls->lookupMethod(origMethName);
   if (!traitMeth) {
-    raise_error("unknown trait method '%s'", origMethName->data());
+    raise_error(Strings::TRAITS_UNKNOWN_TRAIT_METHOD, origMethName->data());
   }
 
   Attr ruleModifiers;
@@ -1307,7 +1308,7 @@ void Class::importTraitMethods(MethodMap::Builder& builder) {
       // OK if the class will override the method...
       if (m_preClass->hasMethod(iter->first)) continue;
 
-      raise_error("method '%s' declared in multiple traits",
+      raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS,
                   iter->first->data());
     }
 
@@ -2089,7 +2090,7 @@ void Class::setUsedTraits() {
        it != m_preClass->usedTraits().end(); it++) {
     Class* classPtr = Unit::loadClass(*it);
     if (classPtr == nullptr) {
-      raise_error("Trait '%s' not found", (*it)->data());
+      raise_error(Strings::TRAITS_UNKNOWN_TRAIT, (*it)->data());
     }
     if (!(classPtr->attrs() & AttrTrait)) {
       raise_error("%s cannot use %s - it is not a trait",

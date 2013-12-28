@@ -65,6 +65,12 @@ const char* const ASYNC_WITHOUT_BODY =
   " when it modifies a method body";
 const char* const PICK_ACCESS_MODIFIER =
   "Cannot declare more than one access modifier";
+const char* const TRAITS_UNKNOWN_TRAIT =
+  "Unknown trait '%s'";
+const char* const TRAITS_UNKNOWN_TRAIT_METHOD =
+  "Unknown trait method '%s'";
+const char* const METHOD_IN_MULTIPLE_TRAITS =
+  "Method '%s' declared in multiple traits";
 
 } // namespace Strings
 } // namespace HPHP

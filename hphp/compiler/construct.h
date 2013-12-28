@@ -180,6 +180,8 @@ public:
   void resetScope(BlockScopeRawPtr scope, bool resetOrigScope=false);
   void parseTimeFatal(Compiler::ErrorType error, const char *fmt, ...)
     ATTRIBUTE_PRINTF(3,4);
+  void analysisTimeFatal(Compiler::ErrorType error, const char *fmt, ...)
+    ATTRIBUTE_PRINTF(3,4);
   virtual int getLocalEffects() const { return UnknownEffect;}
   int getChildrenEffects() const;
   int getContainedEffects() const;

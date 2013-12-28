@@ -382,6 +382,16 @@ public:
   bool canSkipCreateMethod(AnalysisResultConstPtr ar) const;
   bool checkHasPropTable(AnalysisResultConstPtr ar);
 
+  const StringData* getFatalMessage() const {
+    return m_fatal_error_msg;
+  }
+
+  void setFatal(const AnalysisTimeFatalException& fatal) {
+    assert(m_fatal_error_msg == nullptr);
+    m_fatal_error_msg = makeStaticString(fatal.getMessage());
+    assert(m_fatal_error_msg != nullptr);
+  }
+
 private:
   // need to maintain declaration order for ClassInfo map
   FunctionScopePtrVec m_functionsVec;
@@ -441,6 +451,9 @@ private:
   // for classes with more than 31 bases, bit 31 is set iff
   // bases 32 through n are all known.
   unsigned m_knownBases;
+
+  // holds the fact that accessing this class declaration is a fatal error
+  const StringData* m_fatal_error_msg = nullptr;
 
   void addImportTraitMethod(const TraitMethod &traitMethod,
                             const std::string &methName);

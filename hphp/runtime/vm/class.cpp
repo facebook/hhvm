@@ -237,6 +237,7 @@ Class::Class(PreClass* preClass, Class* parent, unsigned classVecLen)
   setProperties();
   setInitializers();
   setClassVec();
+  checkTraitConstraints();
 }
 
 Class::~Class() {
@@ -2099,6 +2100,100 @@ void Class::setUsedTraits() {
                   classPtr->name()->data());
     }
     m_usedTraits.push_back(ClassPtr(classPtr));
+  }
+}
+
+void Class::checkTraitConstraints() const {
+
+  if (attrs() & AttrInterface) {
+    return; // nothing to do
+  }
+
+  if (attrs() & AttrTrait) {
+    for (auto const& req : m_preClass->traitRequirements()) {
+      auto const reqName = req.name();
+      auto const reqCls = Unit::loadClass(reqName);
+      if (!reqCls) {
+        raise_error("%s '%s' required by trait '%s' cannot be loaded",
+                    req.is_extends() ? "Class" : "Interface",
+                    reqName->data(),
+                    m_preClass->name()->data());
+      }
+
+      if (req.is_extends()) {
+        if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
+          raise_error("Trait '%s' requires extension of '%s', but %s "
+                      "is not an extendable class",
+                      m_preClass->name()->data(),
+                      reqName->data(),
+                      reqName->data());
+        }
+      } else {
+        assert(req.is_implements());
+        if (!(reqCls->attrs() & AttrInterface)) {
+          raise_error("Trait '%s' requires implementations of '%s', but %s "
+                      "is not an interface",
+                      m_preClass->name()->data(),
+                      reqName->data(),
+                      reqName->data());
+        }
+      }
+    }
+    return;
+  }
+
+  checkTraitConstraintsRec(usedTraits(), nullptr);
+}
+
+void Class::checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
+                                     const StringData* recName) const {
+
+  if (!usedTraits.size()) { return; }
+
+  for (auto const& ut : usedTraits) {
+    auto const usedTrait = ut.get();
+    auto const ptrait = usedTrait->preClass();
+
+    for (auto const& req : ptrait->traitRequirements()) {
+      auto const reqName = req.name();
+      if (req.is_extends()) {
+        auto reqExtCls = Unit::lookupClass(reqName);
+        // errors should've been raised for the following when the
+        // usedTrait was first loaded
+        assert(reqExtCls != nullptr);
+        assert(!(reqExtCls->attrs() & (AttrTrait | AttrInterface)));
+
+        if ((m_classVecLen < reqExtCls->m_classVecLen) ||
+            (m_classVec[reqExtCls->m_classVecLen-1] != reqExtCls)) {
+          raise_error("Class '%s' required to extend class '%s'"
+                      " by trait '%s' (via %s)",
+                      m_preClass->name()->data(),
+                      reqName->data(),
+                      ptrait->name()->data(),
+                      ((recName == nullptr) ? "use" : recName->data()));
+        }
+        continue;
+      }
+
+      assert(req.is_implements());
+      if (!ifaceofDirect(reqName)) {
+        raise_error("Class '%s' required to implement interface '%s'"
+                    " by trait '%s' (via %s)",
+                    m_preClass->name()->data(),
+                    reqName->data(),
+                    ptrait->name()->data(),
+                    ((recName == nullptr) ? "use" : recName->data()));
+      }
+    }
+  }
+
+  // separate loop for recursive checks
+  for (auto const& ut : usedTraits) {
+    Class* usedTrait = ut.get();
+    checkTraitConstraintsRec(
+      usedTrait->usedTraits(),
+      recName == nullptr ? usedTrait->preClass()->name() : recName
+    );
   }
 }
 

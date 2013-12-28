@@ -27,6 +27,7 @@ IMPLEMENT_REQUEST_LOCAL(IntlError, s_intl_error);
 namespace Intl {
 
 IMPLEMENT_REQUEST_LOCAL(RequestData, s_intl_request);
+const StaticString s_resdata("__resdata");
 
 void IntlExtension::bindIniSettings() {
   IniSetting::Bind("intl.default_locale", "",

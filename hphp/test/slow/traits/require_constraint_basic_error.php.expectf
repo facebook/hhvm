@@ -1,0 +1,1 @@
+HipHop Fatal error: Class 'C' required to extend class 'Super' by trait 'T1' (via use) in %s on line 24

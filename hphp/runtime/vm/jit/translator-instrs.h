@@ -69,6 +69,7 @@
   CASE(CastObject) \
   CASE(Print) \
   CASE(Jmp) \
+  CASE(JmpNS) \
   CASE(Switch) \
   CASE(SSwitch) \
   CASE(RetC) \

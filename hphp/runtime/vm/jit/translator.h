@@ -559,47 +559,48 @@ enum class ControlFlowInfo {
 static inline ControlFlowInfo
 opcodeControlFlowInfo(const Op instr) {
   switch (instr) {
-    case OpJmp:
-    case OpJmpZ:
-    case OpJmpNZ:
-    case OpSwitch:
-    case OpSSwitch:
-    case OpContSuspend:
-    case OpContSuspendK:
-    case OpContRetC:
-    case OpRetC:
-    case OpRetV:
-    case OpExit:
-    case OpFatal:
-    case OpIterNext:
-    case OpIterNextK:
-    case OpMIterNext:
-    case OpMIterNextK:
-    case OpWIterNext:
-    case OpWIterNextK:
-    case OpIterInit: // May branch to fail case.
-    case OpIterInitK: // Ditto
-    case OpMIterInit: // Ditto
-    case OpMIterInitK: // Ditto
-    case OpWIterInit: // Ditto
-    case OpWIterInitK: // Ditto
-    case OpDecodeCufIter: // Ditto
-    case OpIterBreak:
-    case OpThrow:
-    case OpUnwind:
-    case OpEval:
-    case OpNativeImpl:
-    case OpContHandle:
-    case OpBreakTraceHint:
+    case Op::Jmp:
+    case Op::JmpNS:
+    case Op::JmpZ:
+    case Op::JmpNZ:
+    case Op::Switch:
+    case Op::SSwitch:
+    case Op::ContSuspend:
+    case Op::ContSuspendK:
+    case Op::ContRetC:
+    case Op::RetC:
+    case Op::RetV:
+    case Op::Exit:
+    case Op::Fatal:
+    case Op::IterNext:
+    case Op::IterNextK:
+    case Op::MIterNext:
+    case Op::MIterNextK:
+    case Op::WIterNext:
+    case Op::WIterNextK:
+    case Op::IterInit: // May branch to fail case.
+    case Op::IterInitK: // Ditto
+    case Op::MIterInit: // Ditto
+    case Op::MIterInitK: // Ditto
+    case Op::WIterInit: // Ditto
+    case Op::WIterInitK: // Ditto
+    case Op::DecodeCufIter: // Ditto
+    case Op::IterBreak:
+    case Op::Throw:
+    case Op::Unwind:
+    case Op::Eval:
+    case Op::NativeImpl:
+    case Op::ContHandle:
+    case Op::BreakTraceHint:
       return ControlFlowInfo::BreaksBB;
-    case OpFCall:
-    case OpFCallArray:
-    case OpContEnter:
-    case OpIncl:
-    case OpInclOnce:
-    case OpReq:
-    case OpReqOnce:
-    case OpReqDoc:
+    case Op::FCall:
+    case Op::FCallArray:
+    case Op::ContEnter:
+    case Op::Incl:
+    case Op::InclOnce:
+    case Op::Req:
+    case Op::ReqOnce:
+    case Op::ReqDoc:
       return ControlFlowInfo::ChangesPC;
     default:
       return ControlFlowInfo::None;

@@ -1017,6 +1017,7 @@ static const struct {
   /*** 4. Control flow instructions ***/
 
   { OpJmp,         {None,             None,         OutNone,           0 }},
+  { OpJmpNS,       {None,             None,         OutNone,           0 }},
   { OpJmpZ,        {Stack1,           None,         OutNone,          -1 }},
   { OpJmpNZ,       {Stack1,           None,         OutNone,          -1 }},
   { OpSwitch,      {Stack1,           None,         OutNone,          -1 }},
@@ -1641,9 +1642,6 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
       base + (info.m_arg & ~Unit::MetaInfo::VectorArg) : info.m_arg;
 
     switch (info.m_kind) {
-      case Unit::MetaInfo::Kind::NoSurprise:
-        ni->noSurprise = true;
-        break;
       case Unit::MetaInfo::Kind::GuardedCls:
         ni->guardedCls = true;
         break;
@@ -3642,7 +3640,7 @@ std::unique_ptr<Tracelet> Translator::analyze(SrcKey sk,
     //
     // If we've gotten this far, it mostly boils down to control-flow
     // instructions. However, we'll trace through a few unconditional jmps.
-    if (ni->op() == OpJmp &&
+    if (isUnconditionalJmp(ni->op()) &&
         ni->imm[0].u_BA > 0 &&
         tas.m_numJmps < MaxJmpsTracedThrough) {
       // Continue tracing through jumps. To prevent pathologies, only trace
@@ -3843,9 +3841,6 @@ void readMetaData(Unit::MetaHandle& handle, NormalizedInstruction& inst,
     };
 
     switch (info.m_kind) {
-      case Unit::MetaInfo::Kind::NoSurprise:
-        inst.noSurprise = true;
-        break;
       case Unit::MetaInfo::Kind::GuardedCls:
         inst.guardedCls = true;
         break;

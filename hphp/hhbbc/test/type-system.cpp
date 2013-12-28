@@ -412,6 +412,8 @@ TEST(Type, SpecificExamples) {
 
   EXPECT_EQ(TStr, union_of(sval(s_test.get()), TCStr));
   EXPECT_EQ(TStr, union_of(TCStr, sval(s_test.get())));
+
+  EXPECT_EQ(TGen, union_of(TRef, TUninit));
 }
 
 TEST(Type, IndexBased) {

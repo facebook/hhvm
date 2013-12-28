@@ -550,9 +550,16 @@ void populate_block(ParseUnitState& puState,
    * Just convert the opcode to a Nop, because this could create an
    * empty block and we have an invariant that no blocks are empty.
    */
-  if (blk.hhbcs.back().op == Op::Jmp) {
+
+  auto make_fallthrough = [&] {
     blk.fallthrough = blk.hhbcs.back().Jmp.target;
     blk.hhbcs.back() = bc_with_loc(blk.hhbcs.back().srcLoc, bc::Nop{});
+  };
+
+  switch (blk.hhbcs.back().op) {
+  case Op::Jmp:   make_fallthrough();                           break;
+  case Op::JmpNS: make_fallthrough(); blk.fallthroughNS = true; break;
+  default:                                                      break;
   }
 }
 
@@ -713,7 +720,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->unit           = unit;
   ret->parentName     = pce.parentName()->empty() ? nullptr : pce.parentName();
   ret->attrs          = pce.attrs();
-  ret->hoistability   = pce.hositability();
+  ret->hoistability   = pce.hoistability();
   ret->userAttributes = pce.userAttributes();
 
   for (auto& iface : pce.interfaces()) {
@@ -723,6 +730,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->usedTraitNames  = pce.usedTraits();
   ret->traitPrecRules  = pce.traitPrecRules();
   ret->traitAliasRules = pce.traitAliasRules();
+  ret->traitRequirements = pce.traitRequirements();
 
   for (auto& me : pce.methods()) {
     ret->methods.push_back(parse_func(puState, unit, borrow(ret), *me));
@@ -805,4 +813,3 @@ std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

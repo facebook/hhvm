@@ -595,6 +595,8 @@ void FastCGISession::writeEndRequest(RequestId request_id,
                     padding_length);
   appender.writeBE<AppStatus>(app_status);
   appender.writeBE<uint8_t>(static_cast<uint8_t>(proto_status));
+  appender.ensure(k_endRequestReservedLength);
+  memset(appender.writableData(), 0, k_endRequestReservedLength);
   appender.append(k_endRequestReservedLength);
   appendRecordEnd(appender, padding_length);
   writeEgress(std::move(chain));
@@ -647,6 +649,8 @@ void FastCGISession::writeGetValueResult(const std::string& key,
                                          const std::string& value) {
   std::unique_ptr<IOBuf> chain(IOBuf::create(0));
   Appender cursor(chain.get(), k_writeGrowth);
+  cursor.ensure(k_recordBeginLength);
+  memset(cursor.writableData(), 0, k_recordBeginLength);
   cursor.append(k_recordBeginLength);
   if (key.size() & k_longLengthFlag) {
     cursor.writeBE<LongLength>(key.size() | (k_longLengthFlag << 24));
@@ -689,6 +693,8 @@ void FastCGISession::writeUnknownType(RecordType record_type) {
                     k_unknownTypeLength,
                     padding_length);
   cursor.writeBE<uint8_t>(static_cast<uint8_t>(record_type));
+  cursor.ensure(k_unknownTypeReservedLength);
+  memset(cursor.writableData(), 0, k_unknownTypeReservedLength);
   cursor.append(k_unknownTypeReservedLength);
   appendRecordEnd(cursor, padding_length);
   writeEgress(std::move(chain));

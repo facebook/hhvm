@@ -447,7 +447,11 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     if (b->fallthrough) {
       if (boost::next(blockIt) == endBlockIt || blockIt[1] != b->fallthrough) {
-        emit_inst(bc::Jmp { b->fallthrough });
+        if (b->fallthroughNS) {
+          emit_inst(bc::JmpNS { b->fallthrough });
+        } else {
+          emit_inst(bc::Jmp { b->fallthrough });
+        }
       }
     }
 
@@ -787,6 +791,7 @@ void emit_class(EmitUnitState& state,
 
   for (auto& i : cls.interfaceNames)   pce->addInterface(i);
   for (auto& ut : cls.usedTraitNames)  pce->addUsedTrait(ut);
+  for (auto& req : cls.traitRequirements) pce->addTraitRequirement(req);
   for (auto& tp : cls.traitPrecRules)  pce->addTraitPrecRule(tp);
   for (auto& ta : cls.traitAliasRules) pce->addTraitAliasRule(ta);
 
@@ -858,4 +863,3 @@ std::unique_ptr<UnitEmitter> emit_unit(const php::Unit& unit) {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

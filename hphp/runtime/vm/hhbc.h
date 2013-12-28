@@ -507,6 +507,7 @@ enum class BareThisOp : uint8_t {
   O(Exit,            NA,               ONE(CV),         ONE(CV),    NF) \
   O(Fatal,           ONE(OA(FatalOp)), ONE(CV),         NOV,        CF_TF) \
   O(Jmp,             ONE(BA),          NOV,             NOV,        CF_TF) \
+  O(JmpNS,           ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpZ,            ONE(BA),          ONE(CV),         NOV,        CF) \
   O(JmpNZ,           ONE(BA),          ONE(CV),         NOV,        CF) \
   O(Switch,          THREE(BLA,I64A,IVA),                               \
@@ -957,6 +958,10 @@ constexpr inline InstrFlags instrFlags(Op opcode) {
 
 constexpr inline bool instrIsControlFlow(Op opcode) {
   return (instrFlags(opcode) & CF) != 0;
+}
+
+constexpr inline bool isUnconditionalJmp(Op opcode) {
+  return opcode == Op::Jmp || opcode == Op::JmpNS;
 }
 
 inline bool isFPush(Op opcode) {

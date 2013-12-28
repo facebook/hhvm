@@ -82,9 +82,7 @@ void optimizePredictions(IRUnit& unit) {
    * type-specialized versions.
    */
   auto optLdMem = [&] (IRInstruction* checkType) -> bool {
-    auto const incRef = checkType->src(0)->inst();
-    if (incRef->op() != IncRef) return false;
-    auto const ldMem = incRef->src(0)->inst();
+    auto const ldMem = checkType->src(0)->inst();
     if (ldMem->op() != LdMem) return false;
     if (ldMem->src(1)->getValInt() != 0) return false;
     if (!ldMem->typeParam().equals(Type::Cell)) return false;
@@ -134,13 +132,13 @@ void optimizePredictions(IRUnit& unit) {
 
     /*
      * Replace the old CheckType with a Mov from the result of the
-     * IncRef so that any uses of its dest point to the correct new
+     * LdMem so that any uses of its dest point to the correct new
      * value.  We'll copyProp and get rid of this in a later pass.
      */
     unit.replace(
       checkType,
       Mov,
-      incRef->dst()
+      ldMem->dst()
     );
 
     // Move the fallthrough case to specialized.

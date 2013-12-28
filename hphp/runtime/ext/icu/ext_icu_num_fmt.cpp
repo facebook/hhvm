@@ -14,20 +14,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/icu/ext_icu_num_fmt.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/ext/icu/icu.h"
 #include "hphp/runtime/ext/ext_string.h"
 
-#include <unicode/unum.h>
-
-namespace HPHP {
+namespace HPHP { namespace Intl {
 //////////////////////////////////////////////////////////////////////////////
 // Internal resource data
 
-const StaticString
-  s_NumberFormatter("NumberFormatter"),
-  s_resdata("__resdata");
+const StaticString s_NumberFormatter("NumberFormatter");
 
 #define UNUM_DECL(cns, val) \
   const int64_t q_NumberFormatter_ ## cns = val; \
@@ -134,121 +129,55 @@ UNUM_DECL(TYPE_CURRENCY, 4);
 #undef UNUM_DECL
 #undef UNUM_ICU_DECL
 
-class NumberFormatter : public SweepableResourceData {
- public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(NumberFormatter);
-  CLASSNAME_IS("NumberFormatter");
-  const String& o_getClassNameHook() const override { return classnameof(); }
-
-  NumberFormatter(const String& locale,
-                  int64_t style,
-                  const String& pattern) {
-    String pat;
-    UErrorCode error = U_ZERO_ERROR;
-    if (!pattern.empty()) {
-      pat = Intl::u16(pattern, error);
-      if (U_FAILURE(error)) {
-        s_intl_error->set(error,
-            "numfmt_create: error converting pattern to UTF-16");
-        throwException("%s", s_intl_error->getErrorMessage().c_str());
-      }
-    }
-
-    const String loc = locale.empty() ? Intl::GetDefaultLocale() : locale;
-
-    error = U_ZERO_ERROR;
-    m_formatter = unum_open((UNumberFormatStyle)style,
-                            (UChar*)pat.c_str(), pat.size() / sizeof(UChar),
-                            locale.c_str(),
-                            nullptr, &error);
+NumberFormatter::NumberFormatter(const String& locale,
+                                 int64_t style,
+                                 const String& pattern) {
+  String pat;
+  UErrorCode error = U_ZERO_ERROR;
+  if (!pattern.empty()) {
+    pat = u16(pattern, error);
     if (U_FAILURE(error)) {
       s_intl_error->set(error,
-          "numfmt_create: number formatter creation failed");
-      throwException("%s", s_intl_error->getErrorMessage().c_str());
-    }
-  }
-  explicit NumberFormatter(const NumberFormatter *orig) {
-    if (!orig || !orig->formatter()) {
-      s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
-                        "Cannot clone unconstructed NumberFormatter");
-      throwException("%s", s_intl_error->getErrorMessage().c_str());
-    }
-    UErrorCode error = U_ZERO_ERROR;
-    m_formatter = unum_clone(orig->formatter(), &error);
-    if (U_FAILURE(error)) {
-      s_intl_error->set(error, "numfmt_clone: number formatter clone failed");
+          "numfmt_create: error converting pattern to UTF-16");
       throwException("%s", s_intl_error->getErrorMessage().c_str());
     }
   }
 
-  void sweep() override {
-    if (m_formatter) {
-      unum_close(m_formatter);
-      m_formatter = nullptr;
-    }
+  const String loc = locale.empty() ? GetDefaultLocale() : locale;
+
+  error = U_ZERO_ERROR;
+  m_formatter = unum_open((UNumberFormatStyle)style,
+                          (UChar*)pat.c_str(), pat.size() / sizeof(UChar),
+                          locale.c_str(),
+                          nullptr, &error);
+  if (U_FAILURE(error)) {
+    s_intl_error->set(error,
+        "numfmt_create: number formatter creation failed");
+    throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
+}
 
-  bool isInvalid() const override {
-    return m_formatter == nullptr;
+NumberFormatter::NumberFormatter(const NumberFormatter *orig) {
+  if (!orig || !orig->formatter()) {
+    s_intl_error->set(U_ILLEGAL_ARGUMENT_ERROR,
+                      "Cannot clone unconstructed NumberFormatter");
+    throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
-
-  static NumberFormatter *Get(Object obj) {
-    if (obj.isNull()) {
-      raise_error("NULL object passed");
-      return nullptr;
-    }
-    auto res = obj->o_get(s_resdata, false, s_NumberFormatter.get());
-    if (!res.isResource()) {
-      return nullptr;
-    }
-    auto ret = res.toResource().getTyped<NumberFormatter>(false, false);
-    if (!ret) {
-      return nullptr;
-    }
-    if (!ret->formatter()) {
-      ret->setError(U_ILLEGAL_ARGUMENT_ERROR,
-                    "Found unconstructed NumberFormatter");
-      return nullptr;
-    }
-    return ret;
+  UErrorCode error = U_ZERO_ERROR;
+  m_formatter = unum_clone(orig->formatter(), &error);
+  if (U_FAILURE(error)) {
+    s_intl_error->set(error, "numfmt_clone: number formatter clone failed");
+    throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
+}
 
-  void throwException(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    char buffer[1024];
-    vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args);
-    throw Object(SystemLib::AllocExceptionObject(buffer));
-  }
+NumberFormatter *NumberFormatter::Get(Object obj) {
+  return GetResData<NumberFormatter>(obj, s_NumberFormatter.get());
+}
 
-  void setError(UErrorCode code, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    s_intl_error->set(code, format, args);
-    va_end(args);
-    m_error = s_intl_error->m_error;
-  }
-
-  void setError(UErrorCode code) {
-    const char *errorMsg = u_errorName(code);
-    setError(code, "%s", errorMsg);
-  }
-
-  UErrorCode getErrorCode() const {
-    return m_error.code;
-  }
-
-  String getErrorMessage() const {
-    return m_error.custom_error_message;
-  }
-
-  UNumberFormat *formatter() const { return m_formatter; }
-
- private:
-  UNumberFormat *m_formatter = nullptr;
-  intl_error m_error;
-};
+Object NumberFormatter::wrap() {
+  return WrapResData(s_NumberFormatter.get());
+}
 
 #define NUMFMT_GET(dest, src, def) \
   auto dest = NumberFormatter::Get(src); \
@@ -283,7 +212,7 @@ static String HHVM_METHOD(NumberFormatter, formatCurrency,
                           const String& currency) {
   NUMFMT_GET(obj, this_, null_string);
   UErrorCode error = U_ZERO_ERROR;
-  String uCurrency = Intl::u16(currency, error);
+  String uCurrency = u16(currency, error);
   NUMFMT_CHECK(obj, error, null_string);
   uint32_t len = unum_formatDoubleCurrency(obj->formatter(), value,
                                            (UChar*)uCurrency.c_str(),
@@ -301,7 +230,7 @@ static String HHVM_METHOD(NumberFormatter, formatCurrency,
                                   nullptr, &error);
   NUMFMT_CHECK(obj, error, null_string);
   out.setSize(len * sizeof(UChar));
-  String ret(Intl::u8(out, error));
+  String ret(u8(out, error));
   NUMFMT_CHECK(obj, error, null_string);
   return ret;
 }
@@ -322,7 +251,7 @@ static Variant doFormat(NumberFormatter *obj, int64_t val) {
   NUMFMT_CHECK(obj, error, false);
   out.setSize(len * sizeof(UChar));
   error = U_ZERO_ERROR;
-  String ret(Intl::u8(out, error));
+  String ret(u8(out, error));
   NUMFMT_CHECK(obj, error, false);
   return ret;
 }
@@ -344,7 +273,7 @@ static Variant doFormat(NumberFormatter *obj, double val) {
   NUMFMT_CHECK(obj, error, false);
   out.setSize(len * sizeof(UChar));
   error = U_ZERO_ERROR;
-  String ret(Intl::u8(out, error));
+  String ret(u8(out, error));
   NUMFMT_CHECK(obj, error, false);
   return ret;
 }
@@ -464,7 +393,7 @@ static String HHVM_METHOD(NumberFormatter, getPattern) {
                        (UChar*)out->mutableData(), len + 1, &error);
   NUMFMT_CHECK(obj, error, null_string);
   out.setSize(len * sizeof(UChar));
-  String ret(Intl::u8(out, error));
+  String ret(u8(out, error));
   NUMFMT_CHECK(obj, error, null_string);
   return ret;
 }
@@ -486,7 +415,7 @@ static String HHVM_METHOD(NumberFormatter, getSymbol, int64_t attr) {
                        (UChar*)out->mutableData(), len + 1, &error);
   NUMFMT_CHECK(obj, error, null_string);
   out.setSize(len * sizeof(UChar));
-  String ret(Intl::u8(out, error));
+  String ret(u8(out, error));
   NUMFMT_CHECK(obj, error, null_string);
   return ret;
 }
@@ -508,7 +437,7 @@ static String HHVM_METHOD(NumberFormatter, getTextAttribute, int64_t attr) {
                               (UChar*)out->mutableData(), len + 1, &error);
   NUMFMT_CHECK(obj, error, null_string);
   out.setSize(len * sizeof(UChar));
-  String ret(Intl::u8(out, error));
+  String ret(u8(out, error));
   NUMFMT_CHECK(obj, error, null_string);
   return ret;
 }
@@ -518,7 +447,7 @@ static Variant HHVM_METHOD(NumberFormatter, parseCurrency,
                            VRefParam position) {
   NUMFMT_GET(obj, this_, false);
   UErrorCode error = U_ZERO_ERROR;
-  String val(Intl::u16(value, error));
+  String val(u16(value, error));
   NUMFMT_CHECK(obj, error, false);
   int32_t pos = position.toInt64();
   UChar cur[5] = {0};
@@ -529,7 +458,7 @@ static Variant HHVM_METHOD(NumberFormatter, parseCurrency,
   NUMFMT_CHECK(obj, error, false);
   position = (int64_t)pos;
   error = U_ZERO_ERROR;
-  currency = Intl::u8(cur, u_strlen(cur), error);
+  currency = u8(cur, u_strlen(cur), error);
   NUMFMT_CHECK(obj, error, false);
   return parsed;
 }
@@ -539,7 +468,7 @@ static Variant HHVM_METHOD(NumberFormatter, parse,
                            VRefParam position) {
   NUMFMT_GET(obj, this_, false);
   UErrorCode error = U_ZERO_ERROR;
-  String val(Intl::u16(value, error));
+  String val(u16(value, error));
   NUMFMT_CHECK(obj, error, false);
   Variant ret;
   int32_t pos = position.toInt64();
@@ -608,7 +537,7 @@ static bool HHVM_METHOD(NumberFormatter, setAttribute,
 static bool HHVM_METHOD(NumberFormatter, setPattern, const String& pattern) {
   NUMFMT_GET(obj, this_, false);
   UErrorCode error = U_ZERO_ERROR;
-  String pat(Intl::u16(pattern, error));
+  String pat(u16(pattern, error));
   NUMFMT_CHECK(obj, error, false);
   error = U_ZERO_ERROR;
   unum_applyPattern(obj->formatter(), 0,
@@ -627,7 +556,7 @@ static bool HHVM_METHOD(NumberFormatter, setSymbol,
     return false;
   }
   UErrorCode error = U_ZERO_ERROR;
-  String val(Intl::u16(value, error));
+  String val(u16(value, error));
   NUMFMT_CHECK(obj, error, false);
   error = U_ZERO_ERROR;
   unum_setSymbol(obj->formatter(), (UNumberFormatSymbol)attr,
@@ -640,7 +569,7 @@ static bool HHVM_METHOD(NumberFormatter, setTextAttribute,
                         int64_t attr, const String& value) {
   NUMFMT_GET(obj, this_, false);
   UErrorCode error = U_ZERO_ERROR;
-  String val(Intl::u16(value, error));
+  String val(u16(value, error));
   NUMFMT_CHECK(obj, error, false);
   unum_setTextAttribute(obj->formatter(), (UNumberFormatTextAttribute)attr,
                         (UChar*)val.c_str(), val.size() / sizeof(UChar),
@@ -651,7 +580,7 @@ static bool HHVM_METHOD(NumberFormatter, setTextAttribute,
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Intl::IntlExtension::initNumberFormatter() {
+void IntlExtension::initNumberFormatter() {
   HHVM_ME(NumberFormatter, __construct);
   HHVM_ME(NumberFormatter, __clone);
   HHVM_ME(NumberFormatter, formatCurrency);
@@ -754,4 +683,4 @@ void Intl::IntlExtension::initNumberFormatter() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-} // namespace HPHP
+}} // namespace HPHP::Intl

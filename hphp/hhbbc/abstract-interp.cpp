@@ -587,6 +587,10 @@ struct InterpStepper : boost::static_visitor<void> {
   void operator()(const bc::Exit&)  { popC(); push(TInitNull); }
   void operator()(const bc::Fatal&) { popC(); }
 
+  void operator()(const bc::JmpNS&) {
+    always_assert(0 && "blocks should not contain JmpNS instructions");
+  }
+
   void operator()(const bc::Jmp&) {
     always_assert(0 && "blocks should not contain Jmp instructions");
   }
@@ -612,11 +616,9 @@ struct InterpStepper : boost::static_visitor<void> {
 
   template<class JmpOp>
   void group(const bc::IsTypeL& istype, const JmpOp& jmp) {
-    auto const loc = locAsCell(istype.loc1);
+    if (istype.subop == IsTypeOp::Scalar) return impl(istype, jmp);
 
-    if (istype.subop == IsTypeOp::Scalar) {
-      return impl(istype, jmp);
-    }
+    auto const loc = derefLoc(istype.loc1);
     auto const testTy = type_of_istype(istype.subop);
     if (loc.subtypeOf(testTy) || !loc.couldBe(testTy)) {
       return impl(istype, jmp);
@@ -649,7 +651,7 @@ struct InterpStepper : boost::static_visitor<void> {
 
   template<class JmpOp>
   void group(const bc::CGetL& cgetl, const JmpOp& jmp) {
-    auto const loc = locAsCell(cgetl.loc1);
+    auto const loc = derefLoc(cgetl.loc1);
     if (tv(loc)) return impl(cgetl, jmp);
 
     if (!locCouldBeUninit(cgetl.loc1)) nothrow();
@@ -686,7 +688,7 @@ struct InterpStepper : boost::static_visitor<void> {
     auto const rcls = m_index.resolve_class(m_ctx, inst.str1);
     if (!rcls) return impl(cgetl, inst, jmp);
     auto const instTy = subObj(*rcls);
-    auto const loc    = locAsCell(cgetl.loc1);
+    auto const loc = derefLoc(cgetl.loc1);
     if (loc.subtypeOf(instTy) || !loc.couldBe(instTy)) {
       return impl(cgetl, inst, jmp);
     }
@@ -831,7 +833,7 @@ struct InterpStepper : boost::static_visitor<void> {
       return impl(bc::CGetL { op.loc1 },
                   bc::Not {});
     }
-    locAsCell(op.loc1);
+    locAsCell(op.loc1); // read the local
     push(TBool);
   }
 
@@ -2056,10 +2058,7 @@ private:
   void unsetUnknownLocal() {
     readUnknownLocals();
     FTRACE(2, "  unsetUnknownLocal\n");
-    for (auto& l : m_state.locals) {
-      if (l.subtypeOf(TUninit)) continue;
-      l = l.subtypeOf(TCell) ? TCell : TGen;
-    }
+    for (auto& l : m_state.locals) l = union_of(l, TUninit);
   }
 
   void specialFunctionEffects(SString name) {
@@ -2196,12 +2195,24 @@ private: // locals
     m_state.locals[l->id] = t;
   }
 
+  // Read a local type in the sense of CGetL.  (TUninits turn into
+  // TInitNull, and potentially reffy types return the "inner" type,
+  // which is always a subtype of InitCell.)
   Type locAsCell(borrowed_ptr<const php::Local> l) {
     readLocals();
     auto v = locRaw(l);
     if (v.subtypeOf(TInitCell)) return v;
     if (v.subtypeOf(TUninit))   return TInitNull;
     return TInitCell;
+  }
+
+  // Read a local type, dereferencing refs, but without converting
+  // potential TUninits to TInitNull.
+  Type derefLoc(borrowed_ptr<const php::Local> l) {
+    readLocals();
+    auto v = locRaw(l);
+    if (v.subtypeOf(TCell)) return v;
+    return v.couldBe(TUninit) ? TCell : TInitCell;
   }
 
   void ensureInit(borrowed_ptr<const php::Local> l) {
@@ -2222,7 +2233,8 @@ private: // locals
 
   /*
    * Set a local type in the sense of tvSet.  If the local is boxed or
-   * not known to be not boxed, we can't change the type.
+   * not known to be not boxed, we can't change the type.  May be used
+   * to set locals to types that include Uninit.
    */
   void setLoc(borrowed_ptr<const php::Local> l, Type t) {
     readLocals();

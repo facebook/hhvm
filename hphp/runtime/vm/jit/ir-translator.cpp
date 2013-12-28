@@ -569,9 +569,12 @@ IRTranslator::translatePrint(const NormalizedInstruction& i) {
   HHIR_EMIT(Print);
 }
 
-void
-IRTranslator::translateJmp(const NormalizedInstruction& i) {
-  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, i.breaksTracelet, i.noSurprise);
+void IRTranslator::translateJmp(const NormalizedInstruction& i) {
+  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, i.breaksTracelet, false);
+}
+
+void IRTranslator::translateJmpNS(const NormalizedInstruction& i) {
+  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, i.breaksTracelet, true);
 }
 
 void
@@ -1466,8 +1469,7 @@ void
 IRTranslator::translateIterBreak(const NormalizedInstruction& i) {
 
   assert(i.breaksTracelet);
-  HHIR_EMIT(IterBreak, i.immVec, i.offset() + i.imm[1].u_BA, i.breaksTracelet,
-            i.noSurprise);
+  HHIR_EMIT(IterBreak, i.immVec, i.offset() + i.imm[1].u_BA, i.breaksTracelet);
 }
 
 void

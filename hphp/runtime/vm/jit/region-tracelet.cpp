@@ -148,7 +148,7 @@ RegionDescPtr RegionFormer::go() {
     if (!prepareInstruction()) break;
 
     // Instead of translating a Jmp, go to its destination.
-    if (m_inst.op() == OpJmp && m_inst.imm[0].u_BA > 0 &&
+    if (isUnconditionalJmp(m_inst.op()) && m_inst.imm[0].u_BA > 0 &&
         numJmps < JIT::Translator::MaxJmpsTracedThrough) {
       // Include the Jmp in the region and continue to its destination.
       ++numJmps;

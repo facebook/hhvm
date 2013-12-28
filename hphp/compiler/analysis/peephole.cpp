@@ -24,7 +24,7 @@ namespace HPHP { namespace Compiler {
 static void collapseJmp(Offset* offsetPtr, Op* instr, Op* start) {
   if (offsetPtr) {
     Op* dest = instr + *offsetPtr;
-    while (*dest == OpJmp && dest != instr) {
+    while (isUnconditionalJmp(*dest) && dest != instr) {
       dest = start + instrJumpTarget(start, dest - start);
     }
     *offsetPtr = dest - instr;

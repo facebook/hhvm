@@ -21,7 +21,6 @@
 #include <unicode/utypes.h>
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
-#include <unicode/strenum.h>
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -73,6 +72,73 @@ DECLARE_EXTERN_REQUEST_LOCAL(IntlError, s_intl_error);
 
 namespace Intl {
 
+extern const StaticString s_resdata;
+class IntlResourceData : public SweepableResourceData {
+ public:
+  template<class T>
+  static T* GetResData(Object obj, const String& ctx) {
+    if (obj.isNull()) {
+      raise_error("NULL object passed");
+      return nullptr;
+    }
+    auto res = obj->o_get(s_resdata, false, ctx);
+    if (!res.isResource()) {
+      return nullptr;
+    }
+    auto ret = res.toResource().getTyped<T>(false, false);
+    if (!ret) {
+      return nullptr;
+    }
+    if (ret->isInvalid()) {
+      ret->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                    "Found unconstructed %s", ctx.c_str());
+      return nullptr;
+    }
+    return ret;
+  }
+
+  Object WrapResData(const String& ctx) {
+    auto cls = Unit::lookupClass(ctx.get());
+    auto obj = ObjectData::newInstance(cls);
+    Object ret(obj);
+    obj->o_set(s_resdata, Resource(this), ctx);
+    return ret;
+  }
+
+  void setError(UErrorCode code, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    s_intl_error->set(code, format, args);
+    va_end(args);
+    m_error = s_intl_error->m_error;
+  }
+
+  void setError(UErrorCode code) {
+    const char *errorMsg = u_errorName(code);
+    setError(code, "%s", errorMsg);
+  }
+
+  void throwException(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    char buffer[1024];
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    throw Object(SystemLib::AllocExceptionObject(buffer));
+  }
+
+  UErrorCode getErrorCode() const {
+    return m_error.code;
+  }
+
+  String getErrorMessage() const {
+    return m_error.custom_error_message;
+  }
+
+ private:
+  intl_error m_error;
+};
+
 class RequestData : public RequestEventHandler {
  public:
   void requestInit() override {}
@@ -105,7 +171,6 @@ DECLARE_EXTERN_REQUEST_LOCAL(RequestData, s_intl_request);
 
 const String GetDefaultLocale();
 bool SetDefaultLocale(const String& locale);
-Object iteratorFromEnumeration(icu::StringEnumeration *se);
 
 // Common encoding conversions UTF8<->UTF16
 String u16(const char *u8, int32_t u8_len, UErrorCode &error);

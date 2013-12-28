@@ -211,6 +211,7 @@ static int getNextTokenType(int t) {
 
 LNUM    [0-9]+
 DNUM    ([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)
+BNUM    "0b"[01]+
 EXPONENT_DNUM   (({LNUM}|{DNUM})[eE][+-]?{LNUM})
 HNUM    "0x"[0-9a-fA-F]+
 LABEL   [a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
@@ -657,6 +658,24 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         RETTOKEN(T_LNUMBER);
 }
 
+<ST_IN_SCRIPTING,ST_XHP_IN_TAG>{BNUM} {
+        /* replace leading "0b" with "  " for strtoull */
+        int len = strlen(yytext);
+        char str[len+1];
+        memcpy(str, yytext, len+1);
+        memset(str, ' ', 2);
+        
+        long ret = strtoull(str, NULL, 2);
+        if (errno == ERANGE || ret < 0) {
+                _scanner->error("Bin number is too big: %s", yytext);
+                if (_scanner->isHHFile()) {
+                        RETTOKEN(T_HH_ERROR);
+                }
+        }
+        RETTOKEN(T_LNUMBER);
+}
+
+
 <ST_VAR_OFFSET>0|([1-9][0-9]*) { /* Offset could be treated as a long */
         errno = 0;
         long ret = strtoll(yytext, NULL, 0);
@@ -669,7 +688,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         RETTOKEN(T_NUM_STRING);
 }
 
-<ST_VAR_OFFSET>{LNUM}|{HNUM} { /* Offset must be treated as a string */
+<ST_VAR_OFFSET>{LNUM}|{HNUM}|{BNUM} { /* Offset must be treated as a string */
         RETTOKEN(T_NUM_STRING);
 }
 

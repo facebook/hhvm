@@ -498,7 +498,9 @@ Variant ScalarExpression::getVariant() const {
       return String(m_value);
     case T_LNUMBER:
     case T_COMPILER_HALT_OFFSET:
-      return strtoll(m_value.c_str(), nullptr, 0);
+      int64_t i;
+      getInt(i);
+      return i;
     case T_LINE:
       return String(m_translated).toInt64();
     case T_TRAIT_C:
@@ -537,6 +539,13 @@ bool ScalarExpression::getString(const std::string *&s) const {
 
 bool ScalarExpression::getInt(int64_t &i) const {
   if (m_type == T_LNUMBER || m_type == T_COMPILER_HALT_OFFSET) {
+   
+    // binary number syntax "0b" is not supported by strtoll 
+    if (m_value.compare(0, 2, "0b") == 0) {
+        i = strtoll(m_value.substr(2).c_str(), nullptr, 2);
+        return true;
+    }
+
     i = strtoll(m_value.c_str(), nullptr, 0);
     return true;
   } else if (m_type == T_LINE) {

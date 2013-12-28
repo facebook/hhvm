@@ -498,7 +498,8 @@ const int UserTokenId_T_DOUBLE_COLON = 426;
 const int UserTokenId_T_LAMBDA_OP = 427;
 const int UserTokenId_T_LAMBDA_CP = 428;
 const int UserTokenId_T_UNRESOLVED_OP = 429;
-const int MaxUserTokenId = 430; // Marker, not a real user token ID
+const int UserTokenId_T_CALLABLE = 430;
+const int MaxUserTokenId = 431; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP

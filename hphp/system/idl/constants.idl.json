@@ -6590,6 +6590,10 @@
             "type": "Int64"
         },
         {
+            "name": "T_CALLABLE",
+            "type": "Int64"
+        },
+        {
             "name": "T_CASE",
             "type": "Int64"
         },

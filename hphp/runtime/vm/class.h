@@ -260,8 +260,7 @@ class PreClass : public AtomicCountable {
 
     // Deserialization version.
     template<class SerDe>
-    typename boost::enable_if_c<SerDe::deserializing>::type
-    serde(SerDe& sd) {
+    typename std::enable_if<SerDe::deserializing>::type serde(SerDe& sd) {
       const StringData* sd_name;
       bool sd_is_extends;
       sd(sd_name)(sd_is_extends);
@@ -270,8 +269,7 @@ class PreClass : public AtomicCountable {
 
     // Serialization version.
     template<class SerDe>
-    typename boost::disable_if_c<SerDe::deserializing>::type
-    serde(SerDe& sd) {
+    typename std::enable_if<!SerDe::deserializing>::type serde(SerDe& sd) {
       const StringData* sd_name = name();
       bool sd_is_extends = is_extends();
       sd(sd_name)(sd_is_extends);

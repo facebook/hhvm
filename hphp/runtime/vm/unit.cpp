@@ -861,7 +861,7 @@ static void mergeCns(TypedValue& tv, TypedValue *value,
     return;
   }
 
-  raise_warning(Strings::CONSTANT_ALREADY_DEFINED, name->data());
+  raise_notice(Strings::CONSTANT_ALREADY_DEFINED, name->data());
 }
 
 static SimpleMutex unitInitLock(false /* reentrant */, RankUnitInit);
@@ -1033,7 +1033,7 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
         tvAsCVarRef(value), true /* isKey */);
       return true;
     }
-    raise_warning(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
+    raise_notice(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
     return false;
   }
   return defCnsHelper(handle, value, cnsName);
@@ -1045,7 +1045,7 @@ uint64_t Unit::defCnsHelper(uint64_t ch,
   TypedValue* cns = &RDS::handleToRef<TypedValue>(ch);
   if (UNLIKELY(cns->m_type != KindOfUninit) ||
       UNLIKELY(cns->m_data.pref != nullptr)) {
-    raise_warning(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
+    raise_notice(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
   } else if (UNLIKELY(!tvAsCVarRef(value).isAllowedAsConstantValue())) {
     raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
   } else {

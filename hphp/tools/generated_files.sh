@@ -11,6 +11,7 @@ check_err()
 if [ -z "$HPHP_HOME" ]; then
   HPHP_HOME="`dirname $0`/../../"
 fi
+cd $HPHP_HOME
 
 VERBOSE=1
 
@@ -38,11 +39,12 @@ if [ "$1" = "help" ]; then
 fi
 
 if [ "$1" = "lexer" -o "$1" = "all" ]; then
-  cd $HPHP_HOME/hphp/parser
   [ $VERBOSE -eq 1 ] && echo "Generating lexer"
   FLEX=`which flex`
   if [ -x "$FLEX" ]; then
+    cd hphp/parser
     $FLEX -i -f -Phphp -R -8 --bison-locations -o lex.yy.cpp hphp.ll
+    cd ../..
     check_err $? "Failed generating lexer"
   else
     echo "No flex with which to generate lexer"
@@ -51,18 +53,20 @@ fi
 
 if [ "$1" = "parser" -o "$1" = "all" ]; then
   [ $VERBOSE -eq 1 ] && echo "Generating parser"
-  $HPHP_HOME/hphp/parser/make-parser.sh || exit 1
+
+  HPHP_HOME=. hphp/parser/make-parser.sh || exit 1
   sed -e 's@^#line \([0-9]*\) ".*/\([^/]*\)"$@#line \1 "\2"@' \
-    $HPHP_HOME/hphp/parser/hphp.tab.cpp > \
-    $HPHP_HOME/hphp/compiler/parser/hphp.tab.cpp
+    hphp/parser/hphp.tab.cpp > \
+    hphp/compiler/parser/hphp.tab.cpp
 fi
 
 if [ "$1" = "ini-lexer" -o "$1" = "all" ]; then
-  cd $HPHP_HOME/hphp/runtime/base/ini-parser/
   [ $VERBOSE -eq 1 ] && echo "Generating INI lexer"
   FLEX=`which flex`
   if [ -x "$FLEX" ]; then
+    cd hphp/runtime/base/ini-parser
     $FLEX -o zend-ini.yy.cpp zend-ini.ll
+    cd ../../../..
     check_err $? "Failed generating lexer"
   else
     echo "No flex with which to generate lexer"
@@ -71,14 +75,13 @@ fi
 
 if [ "$1" = "ini-parser" -o "$1" = "all" ]; then
   [ $VERBOSE -eq 1 ] && echo "Generating INI parser"
-  $HPHP_HOME/hphp/runtime/base/ini-parser/make-zend-ini-parser.sh || exit 1
+  HPHP_HOME=. hphp/runtime/base/ini-parser/make-zend-ini-parser.sh || exit 1
   sed -i -e 's@^#line \([0-9]*\) ".*/\([^/]*\)"$@#line \1 "\2"@' \
-    $HPHP_HOME/hphp/runtime/base/ini-parser/zend-ini.tab.cpp \
-    $HPHP_HOME/hphp/runtime/base/ini-parser/zend-ini.tab.hpp
+    hphp/runtime/base/ini-parser/zend-ini.tab.cpp \
+    hphp/runtime/base/ini-parser/zend-ini.tab.hpp
 fi
 
 if [ "$1" = "license" -o "$1" = "all" ]; then
-  cd $HPHP_HOME
   [ $VERBOSE -eq 1 ] && echo "Updating license headers"
   # TODO: At the moment, license.php fails on PCRE_ERROR_MATCHLIMIT
   # Fix that script then change this to detect errors properly

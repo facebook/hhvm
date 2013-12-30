@@ -97,9 +97,16 @@ Variant f_json_decode(const String& json, bool assoc /* = false */,
   }
 
   if (json.size() == 4) {
-    if (!strcasecmp(json.data(), "null")) return uninit_null();
-    if (!strcasecmp(json.data(), "true")) return true;
+    if (!strcasecmp(json.data(), "null")) {
+      json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
+      return uninit_null();
+    }
+    if (!strcasecmp(json.data(), "true")) {
+      json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
+      return true;
+    }
   } else if (json.size() == 5 && !strcasecmp(json.data(), "false")) {
+    json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     return false;
   }
 
@@ -107,18 +114,22 @@ Variant f_json_decode(const String& json, bool assoc /* = false */,
   double d;
   DataType type = json->isNumericWithVal(p, d, 0);
   if (type == KindOfInt64) {
+    json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     return p;
   } else if (type == KindOfDouble) {
+    json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     return d;
   }
 
   char ch0 = json.charAt(0);
   if (json.size() > 1 && ch0 == '"' && json.charAt(json.size() - 1) == '"') {
+    json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     return json.substr(1, json.size() - 2);
   }
 
   if ((json_options & k_JSON_FB_LOOSE) && json.size() > 1 &&
       ch0 == '\'' && json.charAt(json.size() - 1) == '\'') {
+    json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     return json.substr(1, json.size() - 2);
   }
 

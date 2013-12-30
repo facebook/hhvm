@@ -588,7 +588,7 @@ static Variant str_replace(CVarRef search, CVarRef replace, CVarRef subject,
   count = 0;
   if (subject.is(KindOfArray)) {
     Array arr = subject.toArray();
-    Array ret;
+    Array ret = Array::Create();
     int c;
     for (ArrayIter iter(arr); iter; ++iter) {
       if (iter.second().is(KindOfArray) || iter.second().is(KindOfObject)) {

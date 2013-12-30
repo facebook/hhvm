@@ -542,7 +542,7 @@ bool ScalarExpression::getInt(int64_t &i) const {
    
     // binary number syntax "0b" is not supported by strtoll 
     if (m_value.compare(0, 2, "0b") == 0) {
-        i = strtoll(m_value.substr(2).c_str(), nullptr, 2);
+        i = strtoll(m_value.c_str() + 2, nullptr, 2);
         return true;
     }
 

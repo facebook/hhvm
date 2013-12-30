@@ -659,13 +659,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{BNUM} {
-        /* replace leading "0b" with "  " for strtoull */
-        int len = strlen(yytext);
-        char str[len+1];
-        memcpy(str, yytext, len+1);
-        memset(str, ' ', 2);
-        
-        long ret = strtoull(str, NULL, 2);
+        long ret = strtoull(yytext + 2 /* skip over 0b */, NULL, 2);
         if (errno == ERANGE || ret < 0) {
                 _scanner->error("Bin number is too big: %s", yytext);
                 if (_scanner->isHHFile()) {

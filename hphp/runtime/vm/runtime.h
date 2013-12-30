@@ -41,6 +41,7 @@ void print_int(int64_t i);
 void print_boolean(bool val);
 
 void raiseWarning(const StringData* sd);
+void raiseNotice(const StringData* sd);
 void raiseArrayIndexNotice(int64_t index);
 
 inline Iter*

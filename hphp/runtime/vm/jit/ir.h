@@ -367,6 +367,7 @@ O(ExitOnVarEnv,                     ND, S(FramePtr),                     B|E) \
 O(ReleaseVVOrExit,                  ND, S(FramePtr),                   B|N|E) \
 O(RaiseError,                       ND, S(Str),                     E|N|T|Er) \
 O(RaiseWarning,                     ND, S(Str),                       E|N|Er) \
+O(RaiseNotice,                      ND, S(Str),                       E|N|Er) \
 O(RaiseArrayIndexNotice,            ND, S(Int),                          E|N) \
 O(CheckInit,                        ND, S(Gen),                         B|NF) \
 O(CheckInitMem,                     ND, S(PtrToGen) C(Int),             B|NF) \

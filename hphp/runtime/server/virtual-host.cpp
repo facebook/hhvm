@@ -159,7 +159,7 @@ void VirtualHost::init(Hdf vh) {
 
   if (prefix) m_prefix = prefix;
   if (pattern) {
-    m_pattern = Util::format_pattern(pattern, true);
+    m_pattern = Util::format_pattern(pattern, false);
     if (!m_pattern.empty()) {
       m_pattern += "i"; // case-insensitive
     }

@@ -49,20 +49,28 @@ static ProfileStackTrace getStackTrace() {
 }
 
 void MemoryProfile::startProfilingImpl() {
-  TRACE(1, "request started: initializing memory profile\n");
   if (RuntimeOption::ClientExecutionMode() &&
       RuntimeOption::HHProfServerProfileClientMode) {
     HeapProfileServer::Server = std::make_shared<HeapProfileServer>();
     ProfileController::requestNext(ProfileType::Default);
   }
+
+  if (!ProfileController::isProfiling()) {
+    return;
+  }
+
+  TRACE(1, "request started: initializing memory profile\n");
+  m_active = true;
   m_livePointers.clear();
   m_dump.clear();
 }
 
 void MemoryProfile::finishProfilingImpl() {
+  if (!m_active) { return; }
+
   TRACE(1, "request ended\n");
 
-  TRACE(2, "offerring dump to profile controller, "
+  TRACE(2, "offering dump to profile controller, "
            "request was for URL %s\n",
            g_context->getTransport()->getCommand().c_str());
 
@@ -74,6 +82,8 @@ void MemoryProfile::finishProfilingImpl() {
 }
 
 void MemoryProfile::logAllocationImpl(void *ptr, size_t size) {
+  if (!m_active) { return; }
+
   TRACE(3, "logging allocation at %p of %lu bytes\n", ptr, size);
   ProfileStackTrace trace = getStackTrace();
 
@@ -84,6 +94,8 @@ void MemoryProfile::logAllocationImpl(void *ptr, size_t size) {
 }
 
 void MemoryProfile::logDeallocationImpl(void *ptr) {
+  if (!m_active) { return; }
+
   TRACE(3, "logging deallocation at %p\n", ptr);
   const auto &it = m_livePointers.find(ptr);
   if (it == m_livePointers.end()) return;
@@ -132,6 +144,7 @@ size_t MemoryProfile::getSizeOfTV(TypedValue *tv) {
 // static
 size_t MemoryProfile::getSizeOfArray(ArrayData *arr) {
   size_t size = getSizeOfPtr(arr);
+  if (size == 0) { return 0; }
   if (arr->isHphpArray()) {
     // calculate extra size
     HphpArray *ha = static_cast<HphpArray *>(arr);
@@ -147,6 +160,7 @@ size_t MemoryProfile::getSizeOfArray(ArrayData *arr) {
 // static
 size_t MemoryProfile::getSizeOfObject(ObjectData *obj) {
   auto ret = getSizeOfPtr(obj);
+  if (ret == 0) { return 0; }
   if (UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr))) {
     auto& props = obj->dynPropArray();
     ret += getSizeOfArray(props.get());

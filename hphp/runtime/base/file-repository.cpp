@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/runtime/base/profile-dump.h"
 #include "hphp/runtime/server/source-root-info.h"
 
 #include "hphp/runtime/base/rds.h"
@@ -57,10 +58,19 @@ PhpFile::PhpFile(const string &fileName, const string &srcRoot,
 
 PhpFile::~PhpFile() {
   always_assert(getRef() == 0);
-  if (!RuntimeOption::HHProfServerEnabled && m_unit != nullptr) {
-    // Deleting a Unit can grab a low-ranked lock and we're probably
-    // at a high rank right now
-    PendQ::defer(new DeferredDeleter<Unit>(m_unit));
+  if (m_unit != nullptr) {
+    // If we have or in the process of a collecting an hhprof dump than we need
+    // to keep these units around as they might be needed for symbol resolution
+    // when that dump is collected by pprof. We will treadmill these later as
+    // part of post-collection cleanup.
+    if (memory_profiling && RuntimeOption::HHProfServerEnabled &&
+        ProfileController::isTracking()) {
+      FileRepository::enqueueOrphanedUnitForDeletion(m_unit);
+    } else {
+      // Deleting a Unit can grab a low-ranked lock and we're probably
+      // at a high rank right now
+      PendQ::defer(new DeferredDeleter<Unit>(m_unit));
+    }
     m_unit = nullptr;
   }
 }
@@ -103,6 +113,7 @@ ReadWriteMutex FileRepository::s_md5Lock(RankFileMd5);
 ParsedFilesMap FileRepository::s_files;
 Md5FileMap FileRepository::s_md5Files;
 UnitMd5Map FileRepository::s_unitMd5Map;
+UnitVec FileRepository::s_orphanedUnitsToDelete;
 
 static class FileDumpInitializer {
   public: FileDumpInitializer() {
@@ -462,6 +473,21 @@ PhpFile *FileRepository::parseFile(const std::string &name,
 
 bool FileRepository::fileStat(const string &name, struct stat *s) {
   return StatCache::stat(name, s) == 0;
+}
+
+void FileRepository::enqueueOrphanedUnitForDeletion(HPHP::Unit *u) {
+  assert(RuntimeOption::HHProfServerEnabled);
+  s_orphanedUnitsToDelete.push_back(u);
+}
+
+void FileRepository::deleteOrphanedUnits() {
+  assert(RuntimeOption::HHProfServerEnabled);
+  for (auto const& u : s_orphanedUnitsToDelete) {
+    // Deleting a Unit can grab a low-ranked lock and we're probably
+    // at a high rank right now
+    PendQ::defer(new DeferredDeleter<Unit>(u));
+  }
+  s_orphanedUnitsToDelete.clear();
 }
 
 struct ResolveIncludeContext {

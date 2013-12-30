@@ -48,8 +48,9 @@ void HeapProfileRequestHandler::handleRequest(Transport *transport) {
   } else if (!strcmp(url, "pprof/heap")) {
     // the next thing pprof does is hit this endpoint and get a profile
     // dump
-    ProfileDump dump = ProfileController::waitForProfile();
-    transport->sendString(dump.toPProfFormat(), 200);
+    ProfileController::waitForProfile([&](const ProfileDump& dump) {
+      transport->sendString(dump.toPProfFormat(), 200);
+    });
   } else if (!strcmp(url, "pprof/symbol")) {
     // lastly, pprof hits this endpoint three times. the first time, it
     // hits with a HEAD request, which gives it some knowledge as to the

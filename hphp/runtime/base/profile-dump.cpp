@@ -19,6 +19,7 @@
 #include "folly/Format.h"
 #include "folly/Conv.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/file-repository.h"
 
 namespace HPHP {
 
@@ -107,12 +108,12 @@ namespace {
 // Next: profile the next request
 // NextURL: profile the next request to m_url
 // Global: profile all requests until stopped
-enum RequestType {
+enum class RequestType {
   None,
   Next,
   NextURL,
   Global
-} m_reqType;
+} m_reqType = RequestType::None;
 
 // url to profile for NextURL type requests
 std::string m_url;
@@ -126,11 +127,11 @@ ProfileDump m_dump;
 //   been fulfilled
 // Complete: a request is active, and has been
 //   fulfilled
-enum State {
+enum class State {
   Waiting,
   Pending,
   Complete
-} m_state;
+} m_state = State::Waiting;
 
 // Profile type (heap vs. allocation)
 ProfileType m_profileType = ProfileType::Default;
@@ -193,7 +194,7 @@ void ProfileController::cancelRequest() {
   // changing the state is enough to cancel the currently
   // active request; no VM thread will put their dump here
   // if the state is waiting
-  m_state = State::Waiting;
+  cleanup(lock);
   m_waitq.notify_all();
 }
 
@@ -235,7 +236,7 @@ void ProfileController::offerProfile(const ProfileDump &dump) {
 }
 
 // static
-ProfileDump ProfileController::waitForProfile() {
+void ProfileController::waitForProfile(DumpFunc df) {
   std::unique_lock<std::mutex> lock(m_mutex);
 
   auto cond = [&] { return m_state != State::Pending; };
@@ -251,15 +252,48 @@ ProfileDump ProfileController::waitForProfile() {
   }
 
   // check to see if someone else grabbed the profile
-  if (m_state == State::Waiting) return ProfileDump();
-  // otherwise, the profile is ours. reset the state and return it
-  m_state = State::Waiting;
-  m_reqType = RequestType::None;
-  return m_dump;
+  if (m_state == State::Waiting) {
+    df(ProfileDump());
+    return;
+  }
+  // otherwise, the profile is ours. process it and reset the state
+  df(m_dump);
+  cleanup(lock);
 }
 
+// static
+bool ProfileController::isTracking() {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
+  // if the state is pending or complete than we have or are collecting
+  // a dump
+  return m_state != State::Waiting && m_reqType != RequestType::None;
+}
+
+// static
+bool ProfileController::isProfiling() {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
+  return m_state != State::Waiting &&
+         m_reqType != RequestType::None &&
+         (m_state != State::Complete || m_reqType == RequestType::Global);
+}
+
+// static
 ProfileType ProfileController::profileType() {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
   return m_profileType;
+}
+
+// static
+void ProfileController::cleanup(const std::unique_lock<std::mutex>& lock) {
+  assert(lock.owns_lock());
+  m_state = State::Waiting;
+  m_reqType = RequestType::None;
+  m_profileType = ProfileType::Default;
+  m_dump.clear();
+  HPHP::Eval::FileRepository::deleteOrphanedUnits();
 }
 
 }

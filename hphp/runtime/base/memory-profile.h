@@ -78,6 +78,8 @@ private:
   std::map<void *, Allocation> m_livePointers;
   // Profile dump of the current thread's request.
   ProfileDump m_dump;
+
+  bool m_active = false;
 };
 
 }

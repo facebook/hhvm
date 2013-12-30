@@ -30,12 +30,22 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   , m_id(id)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
   , m_dst(nullptr)
+  , m_block(nullptr)
   , m_marker(inst->m_marker)
   , m_extra(inst->m_extra ? cloneExtra(op(), inst->m_extra, arena)
                           : nullptr)
 {
+  assert(!isTransient());
   std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
-  setTaken(inst->taken());
+  if (hasEdges()) {
+    m_edges = new (arena) Edge[2];
+    m_edges[0].setInst(this);
+    m_edges[0].setTo(inst->next());
+    m_edges[1].setInst(this);
+    m_edges[1].setTo(inst->taken());
+  } else {
+    m_edges = nullptr;
+  }
 }
 
 IRTrace* IRInstruction::trace() const {
@@ -71,7 +81,7 @@ bool IRInstruction::canCSE() const {
   // Make sure that instructions that are CSE'able can't consume reference
   // counts.
   assert(!canCSE || !consumesReferences());
-  return canCSE && !mayReenterHelper();
+  return canCSE;
 }
 
 bool IRInstruction::consumesReferences() const {
@@ -157,13 +167,12 @@ bool IRInstruction::mayRaiseError() const {
     return false;
   }
 
-  return opcodeHasFlags(op(), MayRaiseError) || mayReenterHelper();
+  return opcodeHasFlags(op(), MayRaiseError);
 }
 
 bool IRInstruction::isEssential() const {
   return isControlFlow() ||
-         opcodeHasFlags(op(), Essential) ||
-         mayReenterHelper();
+         opcodeHasFlags(op(), Essential);
 }
 
 bool IRInstruction::isTerminal() const {
@@ -311,17 +320,6 @@ bool IRInstruction::hasMainDst() const {
   return opcodeHasFlags(op(), HasDest);
 }
 
-bool IRInstruction::mayReenterHelper() const {
-  if (isCmpOp(op())) {
-    return cmpOpTypesMayReenter(op(),
-                                src(0)->type(),
-                                src(1)->type());
-  }
-  // Not necessarily actually false; this is just a helper for other
-  // bits.
-  return false;
-}
-
 SSATmp* IRInstruction::dst(unsigned i) const {
   if (i == 0 && m_numDsts == 0) return nullptr;
   assert(i < m_numDsts);
@@ -338,15 +336,15 @@ Range<const SSATmp*> IRInstruction::dsts() const {
 }
 
 void IRInstruction::convertToNop() {
+  if (hasEdges()) clearEdges();
   IRInstruction nop(Nop, marker());
-  // copy all but m_id, m_taken, m_listNode
+  // copy all but m_id, m_edges, m_listNode
   m_op = nop.m_op;
   m_typeParam = nop.m_typeParam;
   m_numSrcs = nop.m_numSrcs;
   m_srcs = nop.m_srcs;
   m_numDsts = nop.m_numDsts;
   m_dst = nop.m_dst;
-  setTaken(nullptr);
   m_extra = nullptr;
 }
 
@@ -361,7 +359,12 @@ void IRInstruction::convertToJmp() {
   m_dst = nullptr;
   m_extra = nullptr;
   // Instructions in the simplifier don't have blocks yet.
-  if (block()) block()->setNext(nullptr);
+  setNext(nullptr);
+}
+
+void IRInstruction::convertToJmp(Block* target) {
+  convertToJmp();
+  setTaken(target);
 }
 
 void IRInstruction::convertToMov() {
@@ -378,15 +381,29 @@ void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
   assert(other->isTransient() || m_numDsts == other->m_numDsts);
   auto& arena = unit.arena();
 
-  // Copy all but m_id, m_taken.from, m_listNode, m_marker, and don't clone
+  // Copy all but m_id, m_edges[].from, m_listNode, m_marker, and don't clone
   // dests---the whole point of become() is things still point to us.
+  if (hasEdges() && !other->hasEdges()) {
+    clearEdges();
+  } else if (!hasEdges() && other->hasEdges()) {
+    m_edges = new (arena) Edge[2];
+    setNext(other->next());
+    setTaken(other->taken());
+  }
   m_op = other->m_op;
   m_typeParam = other->m_typeParam;
   m_numSrcs = other->m_numSrcs;
   m_extra = other->m_extra ? cloneExtra(m_op, other->m_extra, arena) : nullptr;
   m_srcs = new (arena) SSATmp*[m_numSrcs];
   std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
-  setTaken(other->taken());
+}
+
+void IRInstruction::setOpcode(Opcode newOpc) {
+  assert(hasEdges() || !JIT::hasEdges(newOpc)); // cannot allocate new edges
+  if (hasEdges() && !JIT::hasEdges(newOpc)) {
+    clearEdges();
+  }
+  m_op = newOpc;
 }
 
 void IRInstruction::addCopy(IRUnit& unit, SSATmp* src, const PhysLoc& dest) {
@@ -439,7 +456,7 @@ bool IRInstruction::cseEquals(IRInstruction* inst) const {
     return false;
   }
   /*
-   * Don't CSE on m_taken---it's ok to use the destination of some
+   * Don't CSE on the edges--it's ok to use the destination of some
    * earlier guarded load even though the instruction we may have
    * generated here would've exited to a different trace.
    *

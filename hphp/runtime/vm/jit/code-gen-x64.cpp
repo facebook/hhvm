@@ -1785,7 +1785,15 @@ void CodeGenerator::cgEq(IRInstruction* inst) {
   CG_OP_CMP(inst, sete, equal);
 }
 
+void CodeGenerator::cgEqX(IRInstruction* inst) {
+  CG_OP_CMP(inst, sete, equal);
+}
+
 void CodeGenerator::cgNeq(IRInstruction* inst) {
+  CG_OP_CMP(inst, setne, nequal);
+}
+
+void CodeGenerator::cgNeqX(IRInstruction* inst) {
   CG_OP_CMP(inst, setne, nequal);
 }
 
@@ -1801,7 +1809,15 @@ void CodeGenerator::cgLt(IRInstruction* inst) {
   CG_OP_CMP(inst, setl, less);
 }
 
+void CodeGenerator::cgLtX(IRInstruction* inst) {
+  CG_OP_CMP(inst, setl, less);
+}
+
 void CodeGenerator::cgGt(IRInstruction* inst) {
+  CG_OP_CMP(inst, setg, more);
+}
+
+void CodeGenerator::cgGtX(IRInstruction* inst) {
   CG_OP_CMP(inst, setg, more);
 }
 
@@ -1809,7 +1825,15 @@ void CodeGenerator::cgLte(IRInstruction* inst) {
   CG_OP_CMP(inst, setle, lte);
 }
 
+void CodeGenerator::cgLteX(IRInstruction* inst) {
+  CG_OP_CMP(inst, setle, lte);
+}
+
 void CodeGenerator::cgGte(IRInstruction* inst) {
+  CG_OP_CMP(inst, setge, gte);
+}
+
+void CodeGenerator::cgGteX(IRInstruction* inst) {
   CG_OP_CMP(inst, setge, gte);
 }
 

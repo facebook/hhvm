@@ -640,6 +640,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_DOUBLE_ARROW
 %token T_LIST
 %token T_ARRAY
+%token T_CALLABLE
 %token T_CLASS_C
 %token T_METHOD_C
 %token T_FUNC_C
@@ -2678,6 +2679,9 @@ hh_type:
   | class_namespace_string_typeargs    { $$ = $1; }
   | T_ARRAY                            { Token t; t.reset();
                                          $1.setText("array");
+                                         _p->onTypeAnnotation($$, $1, t); }
+  | T_CALLABLE                         { Token t; t.reset();
+                                         $1.setText("callable");
                                          _p->onTypeAnnotation($$, $1, t); }
   | hh_shape_type                      { $$ = $1; }
   | T_ARRAY T_TYPELIST_LT hh_type

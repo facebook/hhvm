@@ -85,11 +85,12 @@ namespace HPHP {
     PHP_POST_INCREMENT_OP = 18,
     PHP_PRE_DECREMENT_OP = 19,
     PHP_PRE_INCREMENT_OP = 20,
-    PHP_REFERENCE_OP = 21,
-    PHP_REQUIRE_OP = 22,
-    PHP_REQUIRE_ONCE_OP = 23,
-    PHP_STRING_CAST_OP = 24,
-    PHP_UNSET_CAST_OP = 25,
+    PHP_PRINT_OP = 21,
+    PHP_REFERENCE_OP = 22,
+    PHP_REQUIRE_OP = 23,
+    PHP_REQUIRE_ONCE_OP = 24,
+    PHP_STRING_CAST_OP = 25,
+    PHP_UNSET_CAST_OP = 26,
   };
 
   /** Enumerates the kinds of type declaration statements. */
@@ -97,6 +98,13 @@ namespace HPHP {
     PHP_CLASS = 1,
     PHP_INTERFACE = 2,
     PHP_TRAIT = 3,
+  };
+
+  /** The sort order to use when grouping query results */
+  enum CodeModelOrder {
+    PHP_NOT_SPECIFIED = 1,
+    PHP_ASCENDING = 2,
+    PHP_DESCENDING = 3,
   };
 
 }

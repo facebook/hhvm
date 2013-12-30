@@ -1155,9 +1155,6 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
       importMethToTraitMap[newMethName].push_back(traitMethod);
     }
   }
-  if (ruleModifiers & AttrStatic) {
-    raise_error("cannot use 'static' as access modifier");
-  }
 }
 
 void Class::applyTraitRules(MethodToTraitListMap& importMethToTraitMap) {

@@ -280,7 +280,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 
 void ObjectMethodExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ObjectMethodCallExpression(",
+  cg.printObjectHeader("ObjectMethodCallExpression",
       m_params == nullptr ? 3 : 4);
   cg.printPropertyHeader("object");
   m_object->outputCodeModel(cg);

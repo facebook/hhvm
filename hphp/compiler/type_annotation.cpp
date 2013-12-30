@@ -182,22 +182,16 @@ void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
   }
   typeArgsElem = m_typeArgs;
 
-  auto numProps = 1;
-  if (m_nullable) numProps++;
-  if (m_soft) numProps++;
+  auto numProps = 3;
   if (m_function) numProps++;
   if (numTypeArgs > 0) numProps++;
   cg.printObjectHeader("TypeExpression", numProps);
   cg.printPropertyHeader("name");
   cg.printValue(m_tuple ? "tuple" : m_name);
-  if (m_nullable) {
-    cg.printPropertyHeader("isNullable");
-    cg.printValue(true);
-  }
-  if (m_soft) {
-    cg.printPropertyHeader("isSoft");
-    cg.printValue(true);
-  }
+  cg.printPropertyHeader("isNullable");
+  cg.printBool((bool)m_nullable);
+  cg.printPropertyHeader("isSoft");
+  cg.printBool((bool)m_soft);
   if (m_function) {
     cg.printPropertyHeader("returnType");
     typeArgsElem->outputCodeModel(cg);
@@ -211,7 +205,7 @@ void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
       typeArgsElem->outputCodeModel(cg);
       typeArgsElem = typeArgsElem->m_typeList;
     }
-    printf("}");
+    cg.printf("}");
   }
   cg.printObjectFooter();
 }

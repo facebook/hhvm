@@ -219,36 +219,49 @@ void IfStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void IfStatement::outputCodeModel(CodeGenerator &cg) {
-  for (int i = 0; i < m_stmts->getCount(); i++) {
+  IfBranchStatementPtr elseBranch = nullptr;
+  auto count = m_stmts->getCount();
+  for (int i = 0; i < count; i++) {
     IfBranchStatementPtr branch =
       dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[i]);
     assert(branch != nullptr); // this cast always succeeds, by construction.
     auto condition = branch->getCondition();
+    if (condition == nullptr) {
+      elseBranch = branch;
+      count--;
+      break;
+    }
     auto statements = branch->getStmt();
-    auto numProps = 1;
-    if (condition != nullptr) numProps++;
-    if (statements != nullptr) numProps++;
-    if (i < m_stmts->getCount() - 1) numProps++;
     if (i > 0) {
+      // Not the first if in the if...else if...else if...else sequence
+      // so this is the false block of the preceding if
       cg.printPropertyHeader("falseBlock");
-      if (i < m_stmts->getCount() - 1) {
-        printf("V:9:\"HH\\Vector\":1:{");
-      }
+      cg.printObjectHeader("BlockStatement", 1);
+      cg.printPropertyHeader("statements");
+      printf("V:9:\"HH\\Vector\":1:{");
     }
-    if (condition != nullptr) {
-      cg.printObjectHeader("ConditionalStatement", 3);
-      cg.printPropertyHeader("condition");
-      condition->outputCodeModel(cg);
-      cg.printPropertyHeader("trueBlock");
-    }
-    if (statements != nullptr) {
-      cg.printAsBlock(statements);
-    }
+    cg.printObjectHeader("ConditionalStatement", 4);
+    cg.printPropertyHeader("condition");
+    condition->outputCodeModel(cg);
+    cg.printPropertyHeader("trueBlock");
+    cg.printAsBlock(statements);
+    cg.printPropertyHeader("sourceLocation");
+    cg.printLocation(this->getLocation());
+    // false block will be supplied by next iteration, or code following loop
   }
-  for (int i = 0; i < m_stmts->getCount() - 1; i++) {
-    cg.printf("}");
-    cg.printObjectFooter();
+  for (int i = 0; i < count-1; i++) {
+    cg.printObjectFooter(); //close the nested if
+    cg.printf("}"); //close the vector
   }
+  // supply the false block for the else
+  cg.printPropertyHeader("falseBlock");
+  if (elseBranch != nullptr) {
+    elseBranch->outputCodeModel(cg);
+  } else {
+    cg.printAsBlock(nullptr);
+  }
+  cg.printObjectFooter(); //close the outer if
+  // no vector to close
 }
 
 ///////////////////////////////////////////////////////////////////////////////

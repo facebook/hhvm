@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/ext_reflection.h"
 #include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_debugger.h"
 #include "hphp/runtime/ext/ext_misc.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/externals.h"
@@ -182,19 +183,27 @@ static bool set_source_info(Array &ret, const char *file, int line1,
   return file && *file;
 }
 
-static void set_doc_comment(Array &ret, const char *comment) {
-  if (comment) {
-    ret.set(s_doc, comment);
+static void set_empty_doc_comment(Array& ret) {
+  ret.set(s_doc, false_varNR);
+}
+
+static void set_doc_comment(Array& ret,
+                            const StringData* comment,
+                            bool isBuiltin) {
+  if (comment == nullptr || comment->empty()) {
+    set_empty_doc_comment(ret);
+  } else if (isBuiltin && !f_hphp_debugger_attached()) {
+    set_empty_doc_comment(ret);
   } else {
-    ret.set(s_doc, false_varNR);
+    ret.set(s_doc, VarNR(comment));
   }
 }
 
-static void set_doc_comment(Array &ret, const StringData* comment) {
-  if (comment && comment->size()) {
-    ret.set(s_doc, VarNR(comment));
+static void set_doc_comment(Array& ret, const char* comment) {
+  if (f_hphp_debugger_attached()) {
+    ret.set(s_doc, comment);
   } else {
-    ret.set(s_doc, false_varNR);
+    set_empty_doc_comment(ret);
   }
 }
 
@@ -214,7 +223,6 @@ static void set_property_info(Array &ret, ClassInfo::PropertyInfo *info,
   set_doc_comment(ret, info->docComment);
 }
 
-
 static void set_instance_prop_info(Array& ret,
                                    const Class::Prop* prop,
                                    const Variant& default_val) {
@@ -223,7 +231,8 @@ static void set_instance_prop_info(Array& ret,
   ret.set(s_defaultValue, default_val);
   set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
   ret.set(s_class, VarNR(prop->m_class->name()));
-  set_doc_comment(ret, prop->m_docComment);
+  set_doc_comment(ret, prop->m_docComment, prop->m_class->isBuiltin());
+
   if (prop->m_typeConstraint && prop->m_typeConstraint->size()) {
     ret.set(s_type, VarNR(prop->m_typeConstraint));
   } else {
@@ -238,7 +247,7 @@ static void set_dyn_prop_info(
   ret.set(s_name, name);
   set_attrs(ret, get_modifiers(AttrPublic, false) & ~0x66);
   ret.set(s_class, VarNR(className));
-  set_doc_comment(ret, empty_string.get());
+  set_empty_doc_comment(ret);
   ret.set(s_type, false_varNR);
 }
 
@@ -248,7 +257,7 @@ static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
   ret.set(s_defaultValue, tvAsCVarRef(&prop->m_val));
   set_attrs(ret, get_modifiers(prop->m_attrs, false) & ~0x66);
   ret.set(s_class, VarNR(prop->m_class->name()));
-  set_doc_comment(ret, prop->m_docComment);
+  set_doc_comment(ret, prop->m_docComment, prop->m_class->isBuiltin());
   if (prop->m_typeConstraint && prop->m_typeConstraint->size()) {
     ret.set(s_type, VarNR(prop->m_typeConstraint));
   } else {
@@ -438,7 +447,7 @@ static void set_function_info(Array &ret, const Func* func) {
   set_return_type_constraint(ret, func->returnUserType());
 
   // doc comments
-  set_doc_comment(ret, func->docComment());
+  set_doc_comment(ret, func->docComment(), func->isBuiltin());
 
   // parameters
   {
@@ -1069,7 +1078,7 @@ Array f_hphp_get_class_info(CVarRef name) {
     const PreClass* pcls = cls->preClass();
     set_source_info(ret, pcls->unit()->filepath()->data(),
                     pcls->line1(), pcls->line2());
-    set_doc_comment(ret, pcls->docComment());
+    set_doc_comment(ret, pcls->docComment(), pcls->isBuiltin());
   }
 
   // user attributes

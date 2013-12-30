@@ -409,7 +409,7 @@ class Redis {
     if ($withscores) {
       $args[] = 'WITHSCORES';
     }
-    $this->processCommand('ZRANGE', $args);
+    $this->processArrayCommand('ZRANGE', $args);
     if ($withscores) {
       return $this->processMapResponse(true, false);
     } else {
@@ -461,7 +461,7 @@ class Redis {
     if ($withscores) {
       $args[] = 'WITHSCORES';
     }
-    $this->processCommand('ZREVRANGE', $args);
+    $this->processArrayCommand('ZREVRANGE', $args);
     if ($withscores) {
       return $this->processMapResponse(true, false);
     } else {

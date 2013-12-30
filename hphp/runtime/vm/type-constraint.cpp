@@ -104,7 +104,8 @@ void TypeConstraint::init() {
   if (!mapGet(s_typeNamesToTypes, m_typeName, &dtype) ||
       !(isHHType() || dtype.dt == KindOfArray ||
         dtype.metatype == MetaType::Parent ||
-        dtype.metatype == MetaType::Self)) {
+        dtype.metatype == MetaType::Self ||
+        dtype.metatype == MetaType::Callable)) {
     TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
           this, m_typeName->data());
     m_type = { KindOfObject, MetaType::Precise };

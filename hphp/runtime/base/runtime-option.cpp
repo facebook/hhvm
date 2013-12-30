@@ -886,7 +886,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     IniFile = server["IniFile"].getString(IniFile);
     if (access(IniFile.c_str(), R_OK) == -1) {
       if (IniFile != "/etc/hhvm/php.ini") {
-        Logger::Error("INI file doens't exist: %s", IniFile.c_str());
+        Logger::Error("INI file doesn't exist: %s", IniFile.c_str());
       }
       IniFile.clear();
     }

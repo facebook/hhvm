@@ -181,15 +181,16 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& guards) {
         auto newType = std::min(constraint.knownType, previousGuardType(&inst));
         FTRACE(1, "relaxGuards changing {}'s type to {}, op to {}\n",
                inst, newType, newOp);
+        assert(!hasEdges(newOp));
+        if (inst.hasEdges()) {
+          block->push_back(unit.gen(Jmp, inst.marker(), inst.next()));
+        }
         inst.setTypeParam(newType);
         inst.setOpcode(newOp);
-        inst.setTaken(nullptr);
-
         changed = true;
       } else if (!oldType.equals(newType)) {
         FTRACE(1, "relaxGuards changing {}'s type to {}\n", inst, newType);
         inst.setTypeParam(newType);
-
         changed = true;
       }
     }

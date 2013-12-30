@@ -61,19 +61,25 @@ TypePtr UserAttribute::inferTypes(AnalysisResultPtr ar, TypePtr type,
 ///////////////////////////////////////////////////////////////////////////////
 
 void UserAttribute::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("CodeAttribute", m_exp != nullptr ? 3 : 2);
+  cg.printObjectHeader("Attribute", m_exp != nullptr ? 3 : 2);
   cg.printPropertyHeader("attributeName");
   cg.printValue(m_name);
   if (m_exp != nullptr && m_exp->is(Expression::KindOfUnaryOpExpression)) {
     UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(m_exp));
     if (u->getOp() == T_ARRAY) {
       ExpressionPtr ex = u->getExpression();
-      if (ex->is(Expression::KindOfExpressionList)) {
-        ExpressionListPtr el(static_pointer_cast<ExpressionList>(ex));
+      if (ex != nullptr) {
+        if (ex->is(Expression::KindOfExpressionList)) {
+          ExpressionListPtr el(static_pointer_cast<ExpressionList>(ex));
+          cg.printPropertyHeader("expressions");
+          cg.printExpressionVector(el);
+        } else {
+          assert(false);
+        }
+      } else {
+        ExpressionListPtr el;
         cg.printPropertyHeader("expressions");
         cg.printExpressionVector(el);
-      } else {
-        assert(false);
       }
     } else {
       assert(false);

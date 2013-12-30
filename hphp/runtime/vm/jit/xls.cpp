@@ -929,7 +929,7 @@ IRInstruction* skipShuffle(Block* b) {
 void XLS::insertSpill(Interval* ivl) {
   auto inst = ivl->tmp->inst();
   if (inst->isBlockEnd()) {
-    auto succ = inst->block()->next();
+    auto succ = inst->next();
     auto pos = succ->skipHeader();
     insertCopy(succ, pos, m_before[succ], ivl->tmp, ivl->info, ivl->spill);
   } else {
@@ -1226,7 +1226,7 @@ bool XLS::checkEdgeShuffles() {
     }
     if (m_before[b]) {
       assert(numPred == 1);
-      assert(!m_after[b->preds().front().from()]);
+      assert(!m_after[b->preds().front().inst()->block()]);
     }
     if (numSucc != 1) assert(!m_after[b]);
     if (numPred != 1) assert(!m_before[b]);

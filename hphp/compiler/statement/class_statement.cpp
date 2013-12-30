@@ -216,7 +216,7 @@ void ClassStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassStatement::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = 4;
+  auto numProps = 3;
   if (m_attrList != nullptr) numProps++;
   if (m_type == T_ABSTRACT || m_type == T_FINAL) numProps++;
   if (!m_parent.empty()) numProps++;

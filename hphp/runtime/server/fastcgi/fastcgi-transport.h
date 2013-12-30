@@ -74,7 +74,7 @@ public:
                         int size,
                         int code,
                         bool chunked) override;
-  void sendResponseHeaders(folly::IOBufQueue& queue);
+  void sendResponseHeaders(folly::IOBufQueue& queue, int code);
   virtual void onSendEndImpl() override;
 
   // Implementing ProtocolSessionHandler

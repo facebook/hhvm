@@ -365,11 +365,11 @@ bool ClosureExpression::hasStaticLocalsImpl(ConstructPtr root) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClosureExpression::outputCodeModel(CodeGenerator &cg) {
-  auto numProps = m_vars != nullptr ? 3 : 2;
+  auto numProps = m_vars != nullptr && m_vars->getCount() > 0 ? 3 : 2;
   cg.printObjectHeader("ClosureExpression", numProps);
-  cg.printPropertyHeader("function");
+  cg.printPropertyHeader("ffunction");
   m_func->outputCodeModel(cg);
-  if (m_vars != nullptr) {
+  if (m_vars != nullptr && m_vars->getCount() > 0) {
     cg.printPropertyHeader("capturedVariables");
     cg.printExpressionVector(m_vars);
   }

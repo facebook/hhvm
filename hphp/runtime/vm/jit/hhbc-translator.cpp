@@ -1923,10 +1923,35 @@ void HhbcTranslator::emitJmpNZ(Offset taken) {
   emitJmpCondHelper(taken, false, src);
 }
 
+// Objects compared with strings may involve calling a user-defined
+// __toString function.
+bool cmpOpTypesMayReenter(Type t0, Type t1) {
+  assert(!t0.equals(Type::Gen) && !t1.equals(Type::Gen));
+  return (t0.maybe(Type::Obj) && t1.maybe(Type::Str)) ||
+         (t0.maybe(Type::Str) && t1.maybe(Type::Obj));
+}
+
+Opcode matchReentrantCmp(Opcode opc) {
+  switch (opc) {
+  case Gt:  return GtX;
+  case Gte: return GteX;
+  case Lt:  return LtX;
+  case Lte: return LteX;
+  case Eq:  return EqX;
+  case Neq: return NeqX;
+  default:  return opc;
+  }
+}
+
 void HhbcTranslator::emitCmp(Opcode opc) {
   Block* catchBlock = nullptr;
-  if (cmpOpTypesMayReenter(opc, topC(0)->type(), topC(1)->type())) {
+  Opcode opc2 = matchReentrantCmp(opc);
+  // if the comparison operator could re-enter, convert it to the re-entrant
+  // form and add the required catch block.
+  // TODO #3446092 un-overload these opcodes.
+  if (cmpOpTypesMayReenter(topC(0)->type(), topC(1)->type()) && opc2 != opc) {
     catchBlock = makeCatch();
+    opc = opc2;
   }
   // src2 opc src1
   SSATmp* src1 = popC();
@@ -2368,7 +2393,7 @@ void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
   // side-effects, so we can't use AllocObjFast if
   // EnableObjDestructCall is on.
   auto const closure =
-    RuntimeOption::EnableObjDestructCall ? gen(AllocObj, cns(cls))
+    RuntimeOption::EnableObjDestructCall ? gen(AllocObj, makeCatch(), cns(cls))
                                          : gen(AllocObjFast, ClassData(cls));
   gen(IncRef, closure);
 

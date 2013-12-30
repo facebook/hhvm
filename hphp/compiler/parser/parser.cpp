@@ -1228,8 +1228,13 @@ void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
   }
 
   if (accessModifiers->exp) {
-    ruleStmt->setModifiers(dynamic_pointer_cast<ModifierExpression>
-                           (accessModifiers->exp));
+    auto modifiersExp =
+      dynamic_pointer_cast<ModifierExpression>(accessModifiers->exp);
+    if (!modifiersExp->validForTraitAliasRule()) {
+      PARSE_ERROR("Only access and visibility modifiers are allowed"
+                  " in trait alias rule");
+    }
+    ruleStmt->setModifiers(modifiersExp);
   }
 
   out->stmt = ruleStmt;
@@ -2025,7 +2030,8 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
     (AliasEntry){"Collection", "HH\\Collection"},
     (AliasEntry){"Vector", "HH\\Vector"},
     (AliasEntry){"Set", "HH\\Set"},
-    (AliasEntry){"FrozenVector", "HH\\FrozenVector"}
+    (AliasEntry){"FrozenVector", "HH\\FrozenVector"},
+    (AliasEntry){"FrozenSet", "HH\\FrozenSet"}
   };
 
   return aliases;

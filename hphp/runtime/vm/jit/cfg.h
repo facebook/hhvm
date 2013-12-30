@@ -111,11 +111,6 @@ void forPreorderDoms(Block* block, const DomChildren& children,
 template <class Body> void forEachTrace(const IRUnit&, Body body);
 
 /*
- * Visit the blocks in the main trace followed by exit trace blocks.
- */
-template <class Body> void forEachTraceBlock(const IRUnit&, Body body);
-
-/*
  * Visit the instructions in this blocklist, in block order.
  */
 template <class BlockList, class Body>
@@ -191,18 +186,6 @@ void forEachTrace(const IRUnit& unit, Body body) {
   body(unit.main());
   for (auto* exit : unit.exits()) {
     body(exit);
-  }
-}
-
-template <class Body>
-void forEachTraceBlock(const IRUnit& unit, Body body) {
-  for (auto block : unit.main()->blocks()) {
-    body(block);
-  }
-  for (auto* exit : unit.exits()) {
-    for (auto block : exit->blocks()) {
-      body(block);
-    }
   }
 }
 

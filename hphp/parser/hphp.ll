@@ -659,6 +659,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>{BNUM} {
+        errno = 0;
         long ret = strtoull(yytext + 2 /* skip over 0b */, NULL, 2);
         if (errno == ERANGE || ret < 0) {
                 _scanner->error("Bin number is too big: %s", yytext);

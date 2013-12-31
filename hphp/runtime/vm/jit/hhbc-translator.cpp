@@ -2233,15 +2233,19 @@ void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
                                 // below are implemented
   SSATmp* func = cns(callee);
   if (cls) {
+    auto const exitSlow = makeExitSlow();
+    if (!RDS::isPersistentHandle(cls->classHandle())) {
+      // The miss path is complicated and rare.  Punt for now.  This
+      // must be checked before we IncRef the context below, because
+      // the slow exit will want to do that same IncRef via InterpOne.
+      gen(LdClsCachedSafe, exitSlow, cns(cls->name()));
+    }
+
     if (forward) {
       ctx = gen(LdCtx, FuncData(curFunc()), m_tb->fp());
       ctx = gen(GetCtxFwdCall, ctx, cns(callee));
     } else {
       ctx = genClsMethodCtx(callee, cls);
-    }
-    if (!RDS::isPersistentHandle(cls->classHandle())) {
-      // The miss path is complicated and rare. Punt for now.
-      gen(LdClsCachedSafe, makeExitSlow(), cns(cls->name()));
     }
   } else {
     ctx = m_tb->genDefInitNull();

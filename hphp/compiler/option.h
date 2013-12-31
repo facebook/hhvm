@@ -28,10 +28,6 @@ DECLARE_BOOST_TYPES(FileScope);
 
 class Option {
 public:
-  /**
-   * Directory that has system HPHP files for loading builtin classes, etc.
-   */
-  static std::string GetSystemRoot();
 
   /**
    * Load options from different sources.
@@ -263,10 +259,6 @@ public:
 
   static bool (*PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr fs);
 private:
-  /**
-   * Directory that has system HPHP files for loading builtin classes, etc.
-   */
-  static std::string SystemRoot;
   static StringBag OptionStrings;
 
   static void LoadRootHdf(const Hdf &roots, std::map<std::string,

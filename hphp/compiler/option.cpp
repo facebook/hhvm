@@ -35,7 +35,6 @@ using std::map;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string Option::SystemRoot;
 std::string Option::RootDirectory;
 set<string> Option::PackageDirectories;
 set<string> Option::PackageFiles;
@@ -154,22 +153,6 @@ bool Option::GenerateDocComments = true;
 
 void (*Option::m_hookHandler)(Hdf &config);
 bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);
-
-///////////////////////////////////////////////////////////////////////////////
-// load from a PHP file
-
-std::string Option::GetSystemRoot() {
-  if (SystemRoot.empty()) {
-    const char *home = getenv("HPHP_HOME");
-    if (!home || !*home) {
-      throw Exception("Environment variable HPHP_HOME is not set, "
-                      "and neither is the SystemRoot option.");
-    }
-    SystemRoot = home;
-    SystemRoot += "/hphp";
-  }
-  return SystemRoot;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file

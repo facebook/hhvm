@@ -602,6 +602,19 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
     return pos != 0;
   }
 
+  enum SortFlavor { IntegerSort, StringSort, GenericSort };
+
+  private:
+  template <typename AccessorT>
+    SortFlavor preSort(const AccessorT& acc, bool checkTypes);
+  void postSort();
+
+  public:
+  void asort(int sort_flags, bool ascending);
+  void ksort(int sort_flags, bool ascending);
+  bool uasort(CVarRef cmp_function);
+  bool uksort(CVarRef cmp_function);
+
   static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
   friend ObjectData* collectionDeepCopyMap(c_Map* mp);

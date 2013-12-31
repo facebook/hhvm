@@ -29,3 +29,20 @@ uasort($s, 'cmp');
 foreach ($s as $key => $val) {
   echo $key . ' ' . $val . "\n";
 }
+
+echo "------------------------\n";
+$m = new Map;
+$m['w'] = 2;
+$m['v'] = 4;
+$m['y'] = 3;
+$m['x'] = 5;
+$m['z'] = 1;
+uksort($m, 'cmp');
+foreach ($m as $key => $val) {
+  echo $key . ' ' . $val . "\n";
+}
+echo "------------------------\n";
+uasort($m, 'cmp');
+foreach ($m as $key => $val) {
+  echo $key . ' ' . $val . "\n";
+}

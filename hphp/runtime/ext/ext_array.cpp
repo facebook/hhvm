@@ -1741,14 +1741,15 @@ class ArraySortTmp {
 };
 
 static bool
-php_sort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
-  if (array.isArray()) {
-    Array& arr_array = array.wrapped().toArrRef();
+php_sort(VRefParam container, int sort_flags,
+         bool ascending, bool use_collator) {
+  if (container.isArray()) {
+    Array& arr_array = container.wrapped().toArrRef();
     if (use_collator && sort_flags != SORT_LOCALE_STRING) {
       UCollator *coll = s_collator->getCollator();
       if (coll) {
         intl_error &errcode = s_collator->getErrorCodeRef();
-        return collator_sort(array, sort_flags, ascending,
+        return collator_sort(container, sort_flags, ascending,
                              coll, &errcode);
       }
     }
@@ -1756,8 +1757,8 @@ php_sort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
     ast->sort(sort_flags, ascending);
     return true;
   }
-  if (array.isObject()) {
-    ObjectData* obj = array.getObjectData();
+  if (container.isObject()) {
+    ObjectData* obj = container.getObjectData();
     if (obj->getCollectionType() == Collection::VectorType) {
       c_Vector* vec = static_cast<c_Vector*>(obj);
       vec->sort(sort_flags, ascending);
@@ -1769,14 +1770,15 @@ php_sort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
 }
 
 static bool
-php_asort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
-  if (array.isArray()) {
-    Array& arr_array = array.wrapped().toArrRef();
+php_asort(VRefParam container, int sort_flags,
+          bool ascending, bool use_collator) {
+  if (container.isArray()) {
+    Array& arr_array = container.wrapped().toArrRef();
     if (use_collator && sort_flags != SORT_LOCALE_STRING) {
       UCollator *coll = s_collator->getCollator();
       if (coll) {
         intl_error &errcode = s_collator->getErrorCodeRef();
-        return collator_asort(array, sort_flags, ascending,
+        return collator_asort(container, sort_flags, ascending,
                               coll, &errcode);
       }
     }
@@ -1784,10 +1786,15 @@ php_asort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
     ast->asort(sort_flags, ascending);
     return true;
   }
-  if (array.isObject()) {
-    ObjectData* obj = array.getObjectData();
+  if (container.isObject()) {
+    ObjectData* obj = container.getObjectData();
     if (obj->getCollectionType() == Collection::StableMapType) {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      smp->asort(sort_flags, ascending);
+      return true;
+    }
+    if (obj->getCollectionType() == Collection::MapType) {
+      c_Map* smp = static_cast<c_Map*>(obj);
       smp->asort(sort_flags, ascending);
       return true;
     }
@@ -1797,17 +1804,22 @@ php_asort(VRefParam array, int sort_flags, bool ascending, bool use_collator) {
 }
 
 static bool
-php_ksort(VRefParam array, int sort_flags, bool ascending) {
-  if (array.isArray()) {
-    Array& arr_array = array.wrapped().toArrRef();
+php_ksort(VRefParam container, int sort_flags, bool ascending) {
+  if (container.isArray()) {
+    Array& arr_array = container.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
     ast->ksort(sort_flags, ascending);
     return true;
   }
-  if (array.isObject()) {
-    ObjectData* obj = array.getObjectData();
+  if (container.isObject()) {
+    ObjectData* obj = container.getObjectData();
     if (obj->getCollectionType() == Collection::StableMapType) {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      smp->ksort(sort_flags, ascending);
+      return true;
+    }
+    if (obj->getCollectionType() == Collection::MapType) {
+      c_Map* smp = static_cast<c_Map*>(obj);
       smp->ksort(sort_flags, ascending);
       return true;
     }
@@ -1856,14 +1868,14 @@ Variant f_natcasesort(VRefParam array) {
   return php_asort(array, SORT_NATURAL_CASE, true, false);
 }
 
-bool f_usort(VRefParam array, CVarRef cmp_function) {
-  if (array.isArray()) {
-    Array& arr_array = array.wrapped().toArrRef();
+bool f_usort(VRefParam container, CVarRef cmp_function) {
+  if (container.isArray()) {
+    Array& arr_array = container.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
     return ast->usort(cmp_function);
   }
-  if (array.isObject()) {
-    ObjectData* obj = array.getObjectData();
+  if (container.isObject()) {
+    ObjectData* obj = container.getObjectData();
     if (obj->getCollectionType() == Collection::VectorType) {
       c_Vector* vec = static_cast<c_Vector*>(obj);
       return vec->usort(cmp_function);
@@ -1873,16 +1885,20 @@ bool f_usort(VRefParam array, CVarRef cmp_function) {
   return false;
 }
 
-bool f_uasort(VRefParam array, CVarRef cmp_function) {
-  if (array.isArray()) {
-    Array& arr_array = array.wrapped().toArrRef();
+bool f_uasort(VRefParam container, CVarRef cmp_function) {
+  if (container.isArray()) {
+    Array& arr_array = container.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
     return ast->uasort(cmp_function);
   }
-  if (array.isObject()) {
-    ObjectData* obj = array.getObjectData();
+  if (container.isObject()) {
+    ObjectData* obj = container.getObjectData();
     if (obj->getCollectionType() == Collection::StableMapType) {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      return smp->uasort(cmp_function);
+    }
+    if (obj->getCollectionType() == Collection::MapType) {
+      c_Map* smp = static_cast<c_Map*>(obj);
       return smp->uasort(cmp_function);
     }
   }
@@ -1890,16 +1906,20 @@ bool f_uasort(VRefParam array, CVarRef cmp_function) {
   return false;
 }
 
-bool f_uksort(VRefParam array, CVarRef cmp_function) {
-  if (array.isArray()) {
-    Array& arr_array = array.wrapped().toArrRef();
+bool f_uksort(VRefParam container, CVarRef cmp_function) {
+  if (container.isArray()) {
+    Array& arr_array = container.wrapped().toArrRef();
     ArraySortTmp ast(arr_array);
     return ast->uksort(cmp_function);
   }
-  if (array.isObject()) {
-    ObjectData* obj = array.getObjectData();
+  if (container.isObject()) {
+    ObjectData* obj = container.getObjectData();
     if (obj->getCollectionType() == Collection::StableMapType) {
       c_StableMap* smp = static_cast<c_StableMap*>(obj);
+      return smp->uksort(cmp_function);
+    }
+    if (obj->getCollectionType() == Collection::MapType) {
+      c_Map* smp = static_cast<c_Map*>(obj);
       return smp->uksort(cmp_function);
     }
   }

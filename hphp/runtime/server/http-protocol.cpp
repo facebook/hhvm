@@ -408,26 +408,28 @@ void HttpProtocol::CopyServerInfo(Variant& server,
 
   if (hostHeader.empty()) {
     server.set(s_HTTP_HOST, hostName);
-    StackTraceNoHeap::AddExtraLogging("Server", hostName.data());
-  } else {
-    StackTraceNoHeap::AddExtraLogging("Server", hostHeader.c_str());
+    StackTraceNoHeap::AddExtraLogging("Server_HTTP_HOST", hostName.data());
   }
   // see if we have a server_name header from the transport. if not do what we did before.
   if(!serverNameHeader.empty()) {
-	  hostName = serverNameHeader;
+    hostName = serverNameHeader;
+    StackTraceNoHeap::AddExtraLogging("Server", serverNameHeader.data());
   } else if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
     hostName = hostHeader;
-    // _SERVER['SERVER_NAME'] shouldn't contain the port number
+    StackTraceNoHeap::AddExtraLogging("Server", hostHeader.c_str());
+  }
+  // _SERVER['SERVER_NAME'] shouldn't contain the port number
+  if(!hostName.empty()) {
     int colonPos = hostName.find(':');
     if (colonPos != String::npos) {
       hostName = hostName.substr(0, colonPos);
     }
   }
   if(!serverAddrHeader.empty()) {
-	  serverAddr = serverAddrHeader;
+    serverAddr = serverAddrHeader;
   }
   if(serverPortHeader != 0) {
-	 serverPort = serverPortHeader;
+    serverPort = serverPortHeader;
   }
   server.set(s_GATEWAY_INTERFACE, s_CGI_1_1);
   server.set(s_SERVER_ADDR, serverAddr);

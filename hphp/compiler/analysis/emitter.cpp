@@ -46,6 +46,7 @@
 #include "hphp/compiler/expression/yield_expression.h"
 #include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/expression/query_expression.h"
+#include "hphp/compiler/statement/block_statement.h"
 #include "hphp/compiler/statement/break_statement.h"
 #include "hphp/compiler/statement/case_statement.h"
 #include "hphp/compiler/statement/catch_statement.h"
@@ -9039,10 +9040,16 @@ String hphp_compiler_serialize_code_model_for(String code, String prefix) {
   AnalysisResultPtr ar(new AnalysisResult());
   auto statements = Parser::ParseString(code, ar, nullptr, false);
   if (statements != nullptr) {
+    LabelScopePtr labelScope(new LabelScope());
+    auto block = BlockStatementPtr(
+      new BlockStatement(
+        BlockScopePtr(), labelScope, statements->getLocation(), statements
+      )
+    );
     std::ostringstream serialized;
     CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel);
     cg.setAstClassPrefix(prefix->data());
-    statements->outputCodeModel(cg);
+    block->outputCodeModel(cg);
     std::string r(serialized.str().c_str(), serialized.str().length());
     return r;
   } else {

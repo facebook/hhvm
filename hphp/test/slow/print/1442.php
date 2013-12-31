@@ -1,5 +1,8 @@
 <?php
 
+// disable array -> "Array" conversion notice
+error_reporting(error_reporting() & ~E_NOTICE);
+
 echo(array("\0" => 1));
 echo(array("\0" => "\0"));
 echo(array("\0" => "\\"));

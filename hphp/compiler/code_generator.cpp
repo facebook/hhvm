@@ -451,6 +451,14 @@ void CodeGenerator::printPropertyHeader(const std::string propertyName) {
   printf("%s\";", propertyName.c_str());
 }
 
+void CodeGenerator::printNull() {
+  printf("N;");
+}
+
+void CodeGenerator::printBool(bool value) {
+  printf("b:%d;", value ? 1 : 0);
+}
+
 void CodeGenerator::printValue(double v) {
   *m_out << "d:";
   if (std::isnan(v)) {
@@ -500,7 +508,7 @@ void CodeGenerator::printTypeExpression(std::string value) {
 
 void CodeGenerator::printExpression(ExpressionPtr expression, bool isRef) {
   if (isRef) {
-    printObjectHeader("UnaryOpExpression", 4);
+    printObjectHeader("UnaryOpExpression", 3);
     printPropertyHeader("expression");
     expression->outputCodeModel(*this);
     printPropertyHeader("operation");
@@ -514,35 +522,37 @@ void CodeGenerator::printExpression(ExpressionPtr expression, bool isRef) {
 }
 
 void CodeGenerator::printExpressionVector(ExpressionListPtr el) {
-  printf("V:9:\"HH\\Vector\":%d:{", el->getCount());
-  if (el->getCount() > 0) {
+  auto count = el == nullptr ? 0 : el->getCount();
+  printf("V:9:\"HH\\Vector\":%d:{", count);
+  if (count > 0) {
     el->outputCodeModel(*this);
   }
   printf("}");
 }
 
 void CodeGenerator::printExpressionVector(ExpressionPtr e) {
-  printf("V:9:\"HH\\Vector\":1:{");
-  e->outputCodeModel(*this);
-  printf("}");
+  if (e->is(Expression::KindOfExpressionList)) {
+    auto sl = static_pointer_cast<ExpressionList>(e);
+    printExpressionVector(sl);
+  } else {
+    printf("V:9:\"HH\\Vector\":1:{");
+    e->outputCodeModel(*this);
+    printf("}");
+  }
 }
 
 void CodeGenerator::printAsBlock(StatementPtr s) {
-  if (s->is(Statement::KindOfBlockStatement)) {
+  if (s != nullptr && s->is(Statement::KindOfBlockStatement)) {
     s->outputCodeModel(*this);
   } else {
-    printObjectHeader("BlockStatement", 2);
+    auto numProps = s == nullptr ? 1 : 2;
+    printObjectHeader("BlockStatement", numProps);
     printPropertyHeader("statements");
-    if (s->is(Statement::KindOfStatementList)) {
-      auto sl = static_pointer_cast<StatementList>(s);
-      printStatementVector(sl);
-    } else {
-      printf("V:9:\"HH\\Vector\":1:{");
-      s->outputCodeModel(*this);
-      printf("}");
+    printStatementVector(s);
+    if (s != nullptr) {
+      printPropertyHeader("sourceLocation");
+      printLocation(s->getLocation());
     }
-    printPropertyHeader("sourceLocation");
-    printLocation(s->getLocation());
     printObjectFooter();
   }
 }
@@ -553,6 +563,19 @@ void CodeGenerator::printStatementVector(StatementListPtr sl) {
     sl->outputCodeModel(*this);
   }
   printf("}");
+}
+
+void CodeGenerator::printStatementVector(StatementPtr s) {
+  if (s == nullptr) {
+    printf("V:9:\"HH\\Vector\":0:{}");
+  } else if (s->is(Statement::KindOfStatementList)) {
+    auto sl = static_pointer_cast<StatementList>(s);
+    printStatementVector(sl);
+  } else {
+    printf("V:9:\"HH\\Vector\":1:{");
+    s->outputCodeModel(*this);
+    printf("}");
+  }
 }
 
 void CodeGenerator::printLocation(LocationPtr location) {

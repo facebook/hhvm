@@ -414,7 +414,7 @@ void ArrayElementExpression::outputCodeModel(CodeGenerator &cg) {
     cg.printLocation(this->getLocation());
     cg.printObjectFooter();
   } else {
-    cg.printObjectHeader("UnaryOpExpression", 4);
+    cg.printObjectHeader("UnaryOpExpression", 3);
     cg.printPropertyHeader("expression");
     m_variable->outputCodeModel(cg);
     cg.printPropertyHeader("operation");

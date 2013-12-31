@@ -134,11 +134,17 @@ PUNT_OPCODE(InterfaceSupportsDbl)
 PUNT_OPCODE(IsTypeMem)
 PUNT_OPCODE(IsNTypeMem)
 PUNT_OPCODE(Gt)
+PUNT_OPCODE(GtX)
 PUNT_OPCODE(Gte)
+PUNT_OPCODE(GteX)
 PUNT_OPCODE(Lt)
+PUNT_OPCODE(LtX)
 PUNT_OPCODE(Lte)
+PUNT_OPCODE(LteX)
 PUNT_OPCODE(Eq)
+PUNT_OPCODE(EqX)
 PUNT_OPCODE(Neq)
+PUNT_OPCODE(NeqX)
 PUNT_OPCODE(Same)
 PUNT_OPCODE(NSame)
 PUNT_OPCODE(Floor)
@@ -196,6 +202,7 @@ PUNT_OPCODE(ExitOnVarEnv)
 PUNT_OPCODE(ReleaseVVOrExit)
 PUNT_OPCODE(RaiseError)
 PUNT_OPCODE(RaiseWarning)
+PUNT_OPCODE(RaiseNotice)
 PUNT_OPCODE(RaiseArrayIndexNotice)
 PUNT_OPCODE(CheckInit)
 PUNT_OPCODE(CheckInitMem)
@@ -482,7 +489,7 @@ void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
   auto base = x2a(curOpd(inst->src(0)).reg());
   auto rCount = rAsm;
   m_as.  Ldr   (rCount.W(), base[FAST_REFCOUNT_OFFSET]);
-  m_as.  Tbnz  (rCount, RefCountStaticBitPos, &done);
+  m_as.  Tbnz  (rCount, UncountedBitPos, &done);
   m_as.  Cmp   (rCount, RefCountMaxRealistic);
   m_as.  B     (&done, vixl::ls);
   m_as.  Brk   (0);

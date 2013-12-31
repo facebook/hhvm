@@ -248,11 +248,19 @@ struct TraceBuilder {
     Block* done_block = m_unit.defBlock();
     DisableCseGuard guard(*this);
     branch(taken_block);
-    assert(!m_curTrace->back()->next());
-    m_curTrace->back()->setNext(done_block);
+    Block* last = m_curTrace->back();
+    assert(!last->next());
+    last->back().setNext(done_block);
     appendBlock(taken_block);
     taken();
-    taken_block->setNext(done_block);
+    // patch the last block added by the Taken lambda to jump to
+    // the done block.  Note that last might not be taken_block.
+    last = m_curTrace->back();
+    if (last->empty() || !last->back().isBlockEnd()) {
+      gen(Jmp, done_block);
+    } else {
+      last->back().setNext(done_block);
+    }
     appendBlock(done_block);
   }
 
@@ -268,7 +276,14 @@ struct TraceBuilder {
     DisableCseGuard guard(*this);
     branch(done_block);
     next();
-    m_curTrace->back()->setNext(done_block);
+    // patch the last block added by the Next lambda to jump to
+    // the done block.
+    auto last = m_curTrace->back();
+    if (last->empty() || !last->back().isBlockEnd()) {
+      gen(Jmp, done_block);
+    } else {
+      last->back().setNext(done_block);
+    }
     appendBlock(done_block);
   }
 

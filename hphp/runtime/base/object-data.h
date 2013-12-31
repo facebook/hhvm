@@ -298,7 +298,6 @@ class ObjectData {
 
   void serialize(VariableSerializer* serializer) const;
   void serializeImpl(VariableSerializer* serializer) const;
-  bool hasInternalReference(PointerSet& vars, bool ds = false) const;
   void dump() const;
   ObjectData* clone();
 

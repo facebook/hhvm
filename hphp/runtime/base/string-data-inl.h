@@ -94,7 +94,11 @@ inline void StringData::destruct() {
 
 inline void StringData::setRefCount(RefCount n) { m_count = n; }
 inline bool StringData::isStatic() const {
-  return !isRefCounted();
+  return m_count == StaticValue;
+}
+
+inline bool StringData::isUncounted() const {
+  return m_count == UncountedValue;
 }
 
 inline StringSlice StringData::slice() const {
@@ -202,7 +206,7 @@ inline StringData::SharedPayload* StringData::sharedPayload() {
 inline bool StringData::isShared() const { return !m_cap; }
 inline bool StringData::isFlat() const { return m_data == voidPayload(); }
 inline bool StringData::isImmutable() const {
-  return isStatic() || isShared();
+  return isStatic() || isShared() ||  isUncounted();
 }
 
 //////////////////////////////////////////////////////////////////////

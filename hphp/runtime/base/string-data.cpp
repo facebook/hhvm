@@ -477,7 +477,12 @@ void StringData::preCompute() const {
 }
 
 void StringData::setStatic() const {
-  m_count = RefCountStaticValue;
+  m_count = StaticValue;
+  preCompute();
+}
+
+void StringData::setUncounted() const {
+  m_count = UncountedValue;
   preCompute();
 }
 

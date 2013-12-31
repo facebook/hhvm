@@ -79,8 +79,9 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  *    where specified in #1.
  * 3. If the optional BeginCatch is present, the block must belong to an exit
  *    trace and must be the first block in its Trace's block list.
- * 4. If any instruction is isBlockEnd(), it must be last.
- * 5. If the last instruction isTerminal(), block->next must be null.
+ * 4. The last instruction must be isBlockEnd() and the middle instructions
+ *    must not be isBlockEnd().  Therefore, blocks cannot be empty.
+ * 5. If the last instruction isTerminal(), block->next() must be null.
  * 6. If the DefLabel produces a value, all of its incoming edges must be from
  *    blocks listed in the block list for this block's Trace.
  * 7. Any path from this block to a Block that expects values must be
@@ -94,7 +95,7 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
 bool checkBlock(Block* b) {
   auto it = b->begin();
   auto end = b->end();
-  if (it == end) return true;
+  assert(!b->empty());
 
   // Invariant #1
   if (it->op() == DefLabel) ++it;
@@ -107,8 +108,8 @@ bool checkBlock(Block* b) {
   }
 
   // Invariants #2, #4
-  if (it == end) return true;
-  if (b->back().isBlockEnd()) --end;
+  assert(it != end && b->back().isBlockEnd());
+  --end;
   for (DEBUG_ONLY IRInstruction& inst : folly::makeRange(it, end)) {
     assert(inst.op() != DefLabel);
     assert(inst.op() != BeginCatch);
@@ -158,18 +159,6 @@ bool checkBlock(Block* b) {
 }
 }
 
-const Edge* takenEdge(IRInstruction* inst) {
-  return inst->m_taken.to() ? &inst->m_taken : nullptr;
-}
-
-const Edge* takenEdge(Block* b) {
-  return takenEdge(&b->back());
-}
-
-const Edge* nextEdge(Block* b) {
-  return b->m_next.to() ? &b->m_next : nullptr;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -183,24 +172,23 @@ const Edge* nextEdge(Block* b) {
  *    blocks must not have out-edges to reachable blocks).
  */
 bool checkCfg(const IRUnit& unit) {
-  forEachTraceBlock(unit, checkBlock);
-
   // Check valid successor/predecessor edges.
   auto const blocks = rpoSortCfg(unit);
   std::unordered_set<const Edge*> edges;
   for (Block* b : blocks) {
     auto checkEdge = [&] (const Edge* e) {
-      assert(e->from() == b);
+      assert(e->inst()->block() == b);
       edges.insert(e);
       for (auto& p : e->to()->preds()) if (&p == e) return;
       assert(false); // did not find edge.
     };
-    if (auto *e = nextEdge(b))  checkEdge(e);
-    if (auto *e = takenEdge(b)) checkEdge(e);
+    checkBlock(b);
+    if (auto *e = b->nextEdge())  checkEdge(e);
+    if (auto *e = b->takenEdge()) checkEdge(e);
   }
   for (Block* b : blocks) {
     for (DEBUG_ONLY auto const &e : b->preds()) {
-      assert(&e == takenEdge(e.from()) || &e == nextEdge(e.from()));
+      assert(&e == e.inst()->takenEdge() || &e == e.inst()->nextEdge());
       assert(e.to() == b);
     }
   }

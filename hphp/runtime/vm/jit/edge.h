@@ -23,6 +23,7 @@
 namespace HPHP { namespace JIT {
 
 struct Block;
+struct IRInstruction;
 
 /*
  * An Edge represents a control-flow edge as an encapsulated pointer to a
@@ -30,17 +31,17 @@ struct Block;
  * The predecessor list is updated by calling setTo().
  */
 struct Edge : private boost::noncopyable {
-  Edge() : m_to(nullptr), m_from(nullptr) {}
-  Edge(const Edge& other) : m_to(nullptr), m_from(nullptr) {
+  Edge() : m_to(nullptr), m_inst(nullptr) {}
+  Edge(const Edge& other) : m_to(nullptr), m_inst(nullptr) {
     setTo(other.m_to);
   }
-  explicit Edge(Block* from, Block* to) : m_to(nullptr), m_from(from) {
+  explicit Edge(IRInstruction* inst, Block* to) : m_to(nullptr), m_inst(inst) {
     setTo(to);
   }
 
-  // The block this edge comes from.
-  Block* from() const { return m_from; }
-  void setFrom(Block* from) { m_from = from; }
+  // The instruction that owns this edge
+  IRInstruction* inst() const { return m_inst; }
+  void setInst(IRInstruction* inst) { m_inst = inst; };
 
   // The block this edge takes us to.  Changing this property updates
   // the affected Block's preds property.
@@ -58,7 +59,7 @@ struct Edge : private boost::noncopyable {
 
  private:
   Block* m_to;
-  Block* m_from;
+  IRInstruction* m_inst;
  public:
   boost::intrusive::list_member_hook<> m_node; // for Block::m_preds
 };

@@ -293,6 +293,14 @@ void ProfData::setOptimized(FuncId funcId) {
   m_optimizedFuncs.insert(funcId);
 }
 
+bool ProfData::profiling(FuncId funcId) const {
+  return mapContains(m_profilingFuncs, funcId);
+}
+
+void ProfData::setProfiling(FuncId funcId) {
+  m_profilingFuncs.insert(funcId);
+}
+
 RegionDescPtr ProfData::transRegion(TransID id) const {
   assert(id < m_transRecs.size());
   const ProfTransRec& pTransRec = *m_transRecs[id];

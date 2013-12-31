@@ -57,13 +57,12 @@ struct InstructionBuilder {
    */
   template<class... Args>
   Ret go(Opcode op, BCMarker marker, Args&&... args) {
-    std::aligned_storage<
-      sizeof(IRInstruction)
-    >::type buffer;
+    std::aligned_storage<sizeof(IRInstruction)>::type buffer;
     void* const vpBuffer = &buffer;
     SCOPE_EXIT { if (debug) memset(&buffer, 0xc0, sizeof buffer); };
+    Edge edges[2];
 
-    new (vpBuffer) IRInstruction(op, marker);
+    new (vpBuffer) IRInstruction(op, marker, hasEdges(op) ? edges : nullptr);
     auto const inst = static_cast<IRInstruction*>(vpBuffer);
 
     SCOPE_EXIT { inst->clearExtra(); };

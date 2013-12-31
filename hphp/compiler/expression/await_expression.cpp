@@ -86,7 +86,7 @@ TypePtr AwaitExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 ///////////////////////////////////////////////////////////////////////////////
 
 void AwaitExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("UnaryOpExpression", 2);
+  cg.printObjectHeader("UnaryOpExpression", 3);
   cg.printPropertyHeader("expression");
   m_exp->outputCodeModel(cg);
   cg.printPropertyHeader("operation");

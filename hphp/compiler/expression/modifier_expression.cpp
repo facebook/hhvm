@@ -118,6 +118,20 @@ bool ModifierExpression::validForClosure() const {
   return true;
 }
 
+/**
+ * In the context of a trait alias rule, only method access and visibility
+ * modifiers are allowed
+ */
+bool ModifierExpression::validForTraitAliasRule() const {
+  for (auto const& mod: m_modifiers) {
+    if (mod != T_PUBLIC && mod != T_PRIVATE && mod != T_PROTECTED
+        && mod != T_FINAL) {
+      return false;
+    }
+  }
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 

@@ -124,12 +124,11 @@ APCHandle* APCObject::MakeAPCObject(APCHandle* obj, CVarRef value) {
   }
   obj->setObjAttempted();
   ObjectData *o = value.getObjectData();
-  if (o->instanceof(SystemLib::s_SerializableClass)) {
-    // should also check the object itself
-    return nullptr;
-  }
-  PointerSet seen;
-  if (o->hasInternalReference(seen, true)) {
+  DataWalker walker(DataWalker::LookupFeature::DetectSerializable);
+  DataWalker::DataFeature features = walker.traverseData(o);
+  if (features.isCircular() ||
+      features.hasCollection() ||
+      features.hasSerializableReference()) {
     return nullptr;
   }
   APCHandle* tmp = APCHandle::Create(value, false, true, true);

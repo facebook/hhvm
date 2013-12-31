@@ -335,7 +335,7 @@ ObjectPropertyExpression::postOptimize(AnalysisResultConstPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ObjectPropertyExpression::outputCodeModel(CodeGenerator &cg) {
-  cg.printObjectHeader("ObjectPropertyExpression(", 3);
+  cg.printObjectHeader("ObjectPropertyExpression", 3);
   cg.printPropertyHeader("object");
   m_object->outputCodeModel(cg);
   if (m_property->is(Expression::KindOfScalarExpression)) {

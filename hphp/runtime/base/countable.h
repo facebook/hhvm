@@ -36,13 +36,20 @@ typedef int32_t RefCount;
  * object lives across requests and may be accessed by multiple
  * threads.
  */
-constexpr size_t RefCountStaticBitPos = 31;
-const int32_t RefCountStaticValue = INT_MIN;
-const int8_t RefCountStaticValueHighByte = RefCountStaticValue / (1 << 24);
+// use values that generate a shorter cmp instruction and are far enough from 0
+#define UNCOUNTED   -128
+#define STATIC      UNCOUNTED + 1
+
+// UNCOUNT and STATIC imply negative values so this bit check is valid
+constexpr size_t UncountedBitPos = 31;
+const int32_t UncountedValue = UNCOUNTED;
+const int32_t StaticValue = STATIC; // implies UncountedValue
 const int32_t RefCountMaxRealistic = (1 << 30) - 1;
 
-static_assert((uint32_t)RefCountStaticValue == (1uL << RefCountStaticBitPos),
-              "Check RefCountStaticValue and RefCountStaticBitPos");
+static_assert((uint32_t)UncountedValue & (1uL << UncountedBitPos),
+              "Check UncountedValue and UncountedBitPos");
+static_assert((uint32_t)StaticValue & (1uL << UncountedBitPos),
+              "Check StaticValue and UncountedBitPos");
 
 /*
  * Real count values should always be less than or equal to
@@ -51,7 +58,7 @@ static_assert((uint32_t)RefCountStaticValue == (1uL << RefCountStaticBitPos),
  * allocator's 0x6a6a6a6a).
  */
 inline void assert_refcount_realistic(int32_t count) {
-  assert(count == RefCountStaticValue ||
+  assert(count <= StaticValue ||
          (uint32_t)count <= (uint32_t)RefCountMaxRealistic);
 }
 
@@ -59,7 +66,7 @@ inline void assert_refcount_realistic(int32_t count) {
  * As above, but additionally check for non-zero
  */
 inline void assert_refcount_realistic_nz(int32_t count) {
-  assert(count == RefCountStaticValue ||
+  assert(count <= StaticValue ||
          (uint32_t)count - 1 < (uint32_t)RefCountMaxRealistic);
 }
 
@@ -99,7 +106,7 @@ inline void assert_refcount_realistic_ns_nz(int32_t count) {
                                                                         \
   bool isRefCounted() const {                                           \
     assert_refcount_realistic(m_count);                                 \
-    return !((uint32_t)m_count & (uint32_t)RefCountStaticValue);        \
+    return m_count >= 0;                                                \
   }                                                                     \
                                                                         \
   bool hasMultipleRefs() const {                                        \
@@ -126,10 +133,17 @@ inline void assert_refcount_realistic_ns_nz(int32_t count) {
 #define IMPLEMENT_COUNTABLE_METHODS             \
   void setStatic() const {                      \
     assert_refcount_realistic(m_count);         \
-    m_count = RefCountStaticValue;              \
+    m_count = StaticValue;                      \
   }                                             \
   bool isStatic() const {                       \
-    return !isRefCounted();                     \
+    return m_count == StaticValue;              \
+  }                                             \
+  void setUncounted() const {                   \
+    assert_refcount_realistic(m_count);         \
+    m_count = UncountedValue;                   \
+  }                                             \
+  bool isUncounted() const {                   \
+    return m_count == UncountedValue;           \
   }                                             \
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 

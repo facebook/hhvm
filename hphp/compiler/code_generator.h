@@ -277,6 +277,8 @@ public:
   void printObjectHeader(const std::string className, int numProperties);
   void printPropertyHeader(const std::string propertyName);
   void printObjectFooter();
+  void printNull();
+  void printBool(bool value);
   void printValue(double value);
   void printValue(int32_t value);
   void printValue(int64_t value);
@@ -288,6 +290,7 @@ public:
   void printExpressionVector(ExpressionPtr e);
   void printAsBlock(StatementPtr s);
   void printStatementVector(StatementListPtr sl);
+  void printStatementVector(StatementPtr s);
   void printLocation(LocationPtr location);
   void setAstClassPrefix(const std::string &prefix) { m_astPrefix = prefix; }
 private:

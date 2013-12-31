@@ -215,6 +215,8 @@ public:
   bool                    optimized(FuncId funcId) const;
   void                    setOptimized(const SrcKey& sk);
   void                    setOptimized(FuncId funcId);
+  bool                    profiling(FuncId funcId) const;
+  void                    setProfiling(FuncId funcId);
 
 private:
   uint32_t                m_numTrans;
@@ -223,6 +225,7 @@ private:
   ProfCounters<int64_t>   m_counters;
   SrcKeySet               m_optimizedSKs;   // set of SrcKeys already optimized
   FuncIdSet               m_optimizedFuncs; // set of funcs already optimized
+  FuncIdSet               m_profilingFuncs; // set of funcs being profiled
   PrologueToTransMap      m_prologueDB;  // maps (Func,nArgs) => prolog TransID
   PrologueToTransMap      m_dvFuncletDB; // maps (Func,nArgs) => DV funclet
                                          //                      TransID

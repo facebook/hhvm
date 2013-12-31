@@ -239,9 +239,11 @@ void ExpressionList::stripConcat() {
       BinaryOpExpressionPtr b
         (static_pointer_cast<BinaryOpExpression>(e));
       if (b->getOp() == '.') {
-        e = b->getExp1();
-        el.insertElement(b->getExp2(), i + 1);
-        continue;
+        if(!b->getExp1()->isArray() && !b->getExp2()->isArray()) {
+          e = b->getExp1();
+          el.insertElement(b->getExp2(), i + 1);
+          continue;
+        }
       }
     }
     i++;
@@ -469,7 +471,11 @@ bool ExpressionList::canonCompare(ExpressionPtr e) const {
 void ExpressionList::outputCodeModel(CodeGenerator &cg) {
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     ExpressionPtr exp = m_exps[i];
-    cg.printExpression(exp, exp?exp->hasContext(RefParameter):false);
+    if (exp) {
+      cg.printExpression(exp, exp->hasContext(RefParameter));
+    } else {
+      cg.printNull();
+    }
   }
 }
 

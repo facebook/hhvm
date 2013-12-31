@@ -378,6 +378,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   RETSTEP('(');
 }
 
+<ST_IN_SCRIPTING>"callable"           { RETTOKEN(T_CALLABLE);}
 <ST_IN_SCRIPTING>"eval"               { RETTOKEN(T_EVAL);}
 <ST_IN_SCRIPTING>"include"            { RETTOKEN(T_INCLUDE);}
 <ST_IN_SCRIPTING>"include_once"       { RETTOKEN(T_INCLUDE_ONCE);}
@@ -573,7 +574,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
     int ntt = getNextTokenType(_scanner->lastToken());
     if (ntt & NextTokenType::LambdaMaybe) {
       RETSTEP(T_UNRESOLVED_OP);
-    } 
+    }
   }
   RETSTEP(yytext[0]);
 }

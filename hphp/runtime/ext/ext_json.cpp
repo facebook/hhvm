@@ -90,16 +90,23 @@ Variant f_json_decode(const String& json, bool assoc /* = false */,
 
   const int64_t supported_options =
     k_JSON_FB_LOOSE | k_JSON_FB_COLLECTIONS | k_JSON_FB_STABLE_MAPS;
+  int64_t parser_options = json_options & supported_options;
   Variant z;
-  if (JSON_parser(z, json.data(), json.size(), assoc,
-                  (json_options & supported_options))) {
+  if (JSON_parser(z, json.data(), json.size(), assoc, parser_options)) {
     return z;
   }
 
   if (json.size() == 4) {
-    if (!strcasecmp(json.data(), "null")) return uninit_null();
-    if (!strcasecmp(json.data(), "true")) return true;
+    if (!strcasecmp(json.data(), "null")) {
+      json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
+      return uninit_null();
+    }
+    if (!strcasecmp(json.data(), "true")) {
+      json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
+      return true;
+    }
   } else if (json.size() == 5 && !strcasecmp(json.data(), "false")) {
+    json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     return false;
   }
 
@@ -107,18 +114,38 @@ Variant f_json_decode(const String& json, bool assoc /* = false */,
   double d;
   DataType type = json->isNumericWithVal(p, d, 0);
   if (type == KindOfInt64) {
+    json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     return p;
   } else if (type == KindOfDouble) {
+    json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     return d;
   }
 
   char ch0 = json.charAt(0);
   if (json.size() > 1 && ch0 == '"' && json.charAt(json.size() - 1) == '"') {
-    return json.substr(1, json.size() - 2);
+    json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
+
+    // Wrap the string in an array to allow the JSON_parser to handle
+    // things like unicode escape sequences, then unwrap to get result
+    String wrapped("[");
+    wrapped += json + "]";
+    // Stick to a normal hhvm array for the wrapper
+    const int64_t mask = ~(k_JSON_FB_COLLECTIONS | k_JSON_FB_STABLE_MAPS);
+    if (JSON_parser(z, wrapped.data(), wrapped.size(), false,
+                    parser_options & mask) && z.isArray()) {
+      Array arr = z.toArray();
+      if ((arr.size() == 1) && arr.exists(0)) {
+        return arr[0];
+      }
+      // The input string could be something like: "foo","bar"
+      // Which will parse inside the [] wrapper, but be invalid
+      json_set_last_error_code(json_error_codes::JSON_ERROR_SYNTAX);
+    }
   }
 
   if ((json_options & k_JSON_FB_LOOSE) && json.size() > 1 &&
       ch0 == '\'' && json.charAt(json.size() - 1) == '\'') {
+    json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
     return json.substr(1, json.size() - 2);
   }
 

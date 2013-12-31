@@ -87,10 +87,11 @@ void IfBranchStatement::inferTypes(AnalysisResultPtr ar) {
 
 void IfBranchStatement::outputCodeModel(CodeGenerator &cg) {
   if (m_condition == nullptr) {
-    if (m_stmt != nullptr) m_stmt->outputCodeModel(cg);
+    cg.printAsBlock(m_stmt);
     return;
   }
-  cg.printObjectHeader("ConditionalStatement", 3);
+  auto numProps = m_stmt != nullptr ? 3 : 2;
+  cg.printObjectHeader("ConditionalStatement", numProps);
   cg.printPropertyHeader("condition");
   m_condition->outputCodeModel(cg);
   if (m_stmt != nullptr) {

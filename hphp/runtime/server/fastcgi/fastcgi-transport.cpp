@@ -208,9 +208,15 @@ void FastCGITransport::removeHeaderImpl(const char *name) {
   m_responseHeaders.erase(name);
 }
 
-void FastCGITransport::sendResponseHeaders(IOBufQueue& queue) {
+void FastCGITransport::sendResponseHeaders(IOBufQueue& queue, int code) {
   CHECK(!m_headersSent);
   m_headersSent = true;
+
+  if (code != 200) {
+    queue.append("Status: ");
+    queue.append(std::to_string(code));
+    queue.append("\r\n");
+  }
 
   for (auto header : m_responseHeaders) {
     for (auto value : header.second) {
@@ -227,7 +233,7 @@ void FastCGITransport::sendImpl(const void *data, int size, int code,
                                 bool chunked) {
   IOBufQueue queue;
   if (!m_headersSent) {
-    sendResponseHeaders(queue);
+    sendResponseHeaders(queue, code);
   }
   queue.append(IOBuf::copyBuffer(data, size));
   folly::MoveWrapper<std::unique_ptr<IOBuf>>

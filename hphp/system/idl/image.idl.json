@@ -1667,6 +1667,7 @@
             "name": "imagefilter",
             "desc": "imagefilter() applies the given filter filtertype on the image.",
             "flags": [
+              "ZendParamModeFalse"
             ],
             "return": {
                 "type": "Boolean",

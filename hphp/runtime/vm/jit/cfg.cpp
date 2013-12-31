@@ -47,23 +47,26 @@ bool isRPOSorted(const BlockList& blocks) {
 }
 
 namespace {
-// If edge is critical, split it and return the new Block*. Otherwise, return
-// nullptr.
-Block* splitCriticalEdge(IRUnit& unit, Edge* edge) {
-  if (!edge) return nullptr;
+
+// If edge is critical, split it by inserting an intermediate block.
+// A critical edge is an edge from a block with multiple successors to
+// a block with multiple predecessors.
+void splitCriticalEdge(IRUnit& unit, Edge* edge) {
+  if (!edge) return;
 
   auto* to = edge->to();
-  auto* from = edge->from();
-  if (to->numPreds() <= 1 || from->numSuccs() <= 1) return nullptr;
+  auto* branch = edge->inst();
+  auto* from = branch->block();
+  if (to->numPreds() <= 1 || from->numSuccs() <= 1) return;
 
   Block* middle = unit.defBlock();
   FTRACE(3, "splitting edge from B{} -> B{} using B{}\n",
          from->id(), to->id(), middle->id());
-  if (from->taken() == to) {
-    from->back().setTaken(middle);
+  if (branch->taken() == to) {
+    branch->setTaken(middle);
   } else {
-    assert(from->next() == to);
-    from->setNext(middle);
+    assert(branch->next() == to);
+    branch->setNext(middle);
   }
 
   auto& marker = to->front().marker();
@@ -73,8 +76,7 @@ Block* splitCriticalEdge(IRUnit& unit, Edge* edge) {
     middle->setHint(unlikely);
   }
 
-  unit.main()->push_back(middle);
-  return middle;
+  from->trace()->push_back(middle);
 }
 }
 
@@ -83,13 +85,12 @@ bool splitCriticalEdges(IRUnit& unit) {
   auto modified = removeUnreachable(unit);
   auto const startBlocks = unit.numBlocks();
 
-  // Splitting critical edges will add blocks to the main trace;
-  // iterate using a counter since elements can move.
-  auto& blocks = unit.main()->blocks();
-  for (size_t i = 0; i < blocks.size(); ++i) {
-    splitCriticalEdge(unit, blocks[i]->takenEdge());
-    splitCriticalEdge(unit, blocks[i]->nextEdge());
-  }
+  // Try to split outgoing edges of each reachable block.  This is safe in
+  // a postorder walk since we visit blocks after visiting successors.
+  postorderWalk(unit, [&](Block* b) {
+    splitCriticalEdge(unit, b->takenEdge());
+    splitCriticalEdge(unit, b->nextEdge());
+  });
 
   return modified || unit.numBlocks() != startBlocks;
 }
@@ -163,11 +164,11 @@ IdomVector findDominators(const IRUnit& unit, const BlockList& blocks) {
       // p1 = any already-processed predecessor
       auto predIter = block->preds().begin();
       auto predEnd = block->preds().end();
-      auto p1 = predIter->from();
-      while (!idom[p1]) p1 = (++predIter)->from();
+      auto p1 = predIter->inst()->block();
+      while (!idom[p1]) p1 = (++predIter)->inst()->block();
       // for all other already-processed predecessors p2 of block
       for (++predIter; predIter != predEnd; ++predIter) {
-        auto p2 = predIter->from();
+        auto p2 = predIter->inst()->block();
         if (p2 == p1 || !idom[p2]) continue;
         // find earliest common predecessor of p1 and p2
         // (higher postIds are earlier in flow and in dom-tree).

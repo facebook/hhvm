@@ -319,6 +319,7 @@ class PreClass : public AtomicCountable {
   const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
   const UserAttributeMap& userAttributes() const { return m_userAttributes; }
   bool isPersistent() const { return m_attrs & AttrPersistent; }
+  bool isBuiltin() const { return attrs() & AttrBuiltin; }
 
   /*
    * Funcs, Consts, and Props all behave similarly. Define raw accessors
@@ -690,6 +691,7 @@ struct Class : AtomicCountable {
   }
 
   bool isPersistent() const { return m_attrCopy & AttrPersistent; }
+  bool isBuiltin() const { return attrs() & AttrBuiltin; }
 
   // Finds the base class defining the given method (NULL if none).
   // Note: for methods imported via traits, the base class is the one that

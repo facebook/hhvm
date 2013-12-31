@@ -1,5 +1,8 @@
 <?
 
+// disable array -> "Array" conversion notice
+error_reporting(error_reporting() & ~E_NOTICE);
+
 trait T {
   public function binary($la, $ra) {
     // Stick this in a trait, so we get different copies for different

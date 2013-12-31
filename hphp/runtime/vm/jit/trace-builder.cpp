@@ -129,7 +129,7 @@ void TraceBuilder::appendInstruction(IRInstruction* inst) {
       m_curTrace->push_back(next);
       if (!prev->isTerminal()) {
         // new block is reachable from old block so link it.
-        block->setNext(next);
+        prev->setNext(next);
         next->setHint(block->hint());
       }
       block = next;
@@ -554,8 +554,13 @@ void TraceBuilder::reoptimize() {
         appendInstruction(mov, block);
         m_state.update(mov);
       }
-      // Not re-adding inst; remove the inst->taken edge
-      if (inst->taken()) inst->setTaken(nullptr);
+      if (inst->isBlockEnd()) {
+        // Not re-adding inst; replace it with a jump to the next block.
+        auto next = inst->next();
+        appendInstruction(m_unit.gen(Jmp, inst->marker(), next));
+        inst->setTaken(nullptr);
+        inst->setNext(nullptr);
+      }
     }
 
     if (block->empty()) {
@@ -566,10 +571,6 @@ void TraceBuilder::reoptimize() {
       assert(*it == block);
       m_curTrace->unlink(it);
     } else {
-      if (block->back().isTerminal()) {
-        // Could have converted a conditional branch to Jmp; clear next.
-        block->setNext(nullptr);
-      }
       m_state.finishBlock(block);
     }
   }

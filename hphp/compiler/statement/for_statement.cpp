@@ -130,16 +130,16 @@ void ForStatement::outputCodeModel(CodeGenerator &cg) {
   if (m_stmt != nullptr) numProps++;
   cg.printObjectHeader("ForStatement", numProps);
   if (m_exp1 != nullptr) {
-    cg.printPropertyHeader("expression1");
-    m_exp1->outputCodeModel(cg);
+    cg.printPropertyHeader("initializers");
+    cg.printExpressionVector(m_exp1);
   }
   if (m_exp2 != nullptr) {
-    cg.printPropertyHeader("expression2");
-    m_exp2->outputCodeModel(cg);
+    cg.printPropertyHeader("conditions");
+    cg.printExpressionVector(m_exp2);
   }
   if (m_exp3 != nullptr) {
-    cg.printPropertyHeader("expression3");
-    m_exp3->outputCodeModel(cg);
+    cg.printPropertyHeader("increments");
+    cg.printExpressionVector(m_exp3);
   }
   if (m_stmt != nullptr) {
     cg.printPropertyHeader("block");

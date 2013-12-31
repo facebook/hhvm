@@ -319,6 +319,7 @@ CALL_OPCODE(ThrowNonObjProp)
 CALL_OPCODE(RaiseUndefProp)
 CALL_OPCODE(RaiseError)
 CALL_OPCODE(RaiseWarning)
+CALL_OPCODE(RaiseNotice)
 CALL_OPCODE(RaiseArrayIndexNotice)
 CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(ClosureStaticLocInit)
@@ -1785,7 +1786,15 @@ void CodeGenerator::cgEq(IRInstruction* inst) {
   CG_OP_CMP(inst, sete, equal);
 }
 
+void CodeGenerator::cgEqX(IRInstruction* inst) {
+  CG_OP_CMP(inst, sete, equal);
+}
+
 void CodeGenerator::cgNeq(IRInstruction* inst) {
+  CG_OP_CMP(inst, setne, nequal);
+}
+
+void CodeGenerator::cgNeqX(IRInstruction* inst) {
   CG_OP_CMP(inst, setne, nequal);
 }
 
@@ -1801,7 +1810,15 @@ void CodeGenerator::cgLt(IRInstruction* inst) {
   CG_OP_CMP(inst, setl, less);
 }
 
+void CodeGenerator::cgLtX(IRInstruction* inst) {
+  CG_OP_CMP(inst, setl, less);
+}
+
 void CodeGenerator::cgGt(IRInstruction* inst) {
+  CG_OP_CMP(inst, setg, more);
+}
+
+void CodeGenerator::cgGtX(IRInstruction* inst) {
   CG_OP_CMP(inst, setg, more);
 }
 
@@ -1809,7 +1826,15 @@ void CodeGenerator::cgLte(IRInstruction* inst) {
   CG_OP_CMP(inst, setle, lte);
 }
 
+void CodeGenerator::cgLteX(IRInstruction* inst) {
+  CG_OP_CMP(inst, setle, lte);
+}
+
 void CodeGenerator::cgGte(IRInstruction* inst) {
+  CG_OP_CMP(inst, setge, gte);
+}
+
+void CodeGenerator::cgGteX(IRInstruction* inst) {
   CG_OP_CMP(inst, setge, gte);
 }
 
@@ -3140,7 +3165,7 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src) {
       emitIncRef(m_as, base);
     } else {
       m_as.cmpl(0, base[FAST_REFCOUNT_OFFSET]);
-      static_assert(RefCountStaticValue < 0, "RefCountStaticValue must be -ve");
+      static_assert(UncountedValue < 0 && StaticValue < 0, "");
       ifThen(m_as, CC_NS, [&] { emitIncRef(m_as, base); });
     }
   };
@@ -3298,8 +3323,8 @@ Address CodeGenerator::cgCheckStaticBitAndDecRef(Type type,
 
   Address addrToPatch = nullptr;
   auto static_check_and_decl = [&](Asm& as) {
-    static_assert(RefCountStaticValue == INT_MIN,
-                  "RefCountStaticValue must be INT_MIN");
+    static_assert(UncountedValue == UNCOUNTED, "");
+    static_assert(StaticValue == STATIC, "");
 
     if (type.needsStaticBitCheck()) {
       addrToPatch = as.frontier();
@@ -3385,9 +3410,9 @@ void CodeGenerator::cgDecRefStaticType(Type type,
 
   if (type.notCounted()) return;
 
-  // Check for RefCountStaticValue if needed, do the actual DecRef,
-  // and leave flags set based on the subtract result, which is
-  // tested below
+  // Check for UncountedValue or StaticValue if needed,
+  // do the actual DecRef, and leave flags set based on the subtract result,
+  // which is tested below
   Address patchStaticCheck = nullptr;
   if (genZeroCheck && !exit) {
     patchStaticCheck = cgCheckStaticBitAndDecRef(
@@ -3421,7 +3446,7 @@ void CodeGenerator::cgDecRefDynamicType(PhysReg typeReg,
   // Emit check for ref-counted type
   Address patchTypeCheck = cgCheckRefCountedType(typeReg);
 
-  // Emit check for RefCountStaticValue and the actual DecRef
+  // Emit check for UncountedValue or StaticValue and the actual DecRef
   Address patchStaticCheck;
   if (genZeroCheck && exit == nullptr) {
     patchStaticCheck =
@@ -3466,7 +3491,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(PhysReg baseReg,
 
   m_as.loadq(baseReg[offset + TVOFF(m_data)], scratchReg);
 
-  // Emit check for RefCountStaticValue and the actual DecRef
+  // Emit check for UncountedValue or StaticValue and the actual DecRef
   Address patchStaticCheck;
   if (exit) {
     patchStaticCheck = cgCheckStaticBitAndDecRef(Type::Cell, scratchReg, exit);
@@ -3573,7 +3598,7 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   m_as.testq    (m_rScratch, m_rScratch);
   ifThen(m_as, CC_NZ, [this] {
       m_as.cmpl(0, m_rScratch[FAST_REFCOUNT_OFFSET]);
-      static_assert(RefCountStaticValue < 0, "RefCountStaticValue must be -ve");
+      static_assert(UncountedValue < 0 && StaticValue < 0, "");
       ifThen(m_as, CC_NS, [&] { emitIncRef(m_as, m_rScratch); });
       m_as.orq (ActRec::kInvNameBit, m_rScratch);
     });

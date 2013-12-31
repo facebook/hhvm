@@ -655,7 +655,7 @@ public:
       {
         int data_size = size * nmemb;
         Variant ret = ch->do_callback(
-          t->callback, make_packed_array(Resource(ch), t->fp->fd(), data_size));
+          t->callback, make_packed_array(Resource(ch), t->fp, data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();

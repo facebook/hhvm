@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/sweepable.h"
+#include <typeinfo>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,6 +101,9 @@ public:
     static_assert(std::is_base_of<ResourceData, T>::value, "");
 
     ResourceData *cur = m_px;
+
+    std::string str=typeid(cur).name();
+
     if (!cur) {
       if (!nullOkay) {
         throw_null_pointer_exception();

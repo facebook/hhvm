@@ -429,7 +429,7 @@ TEST(Type, IndexBased) {
   EXPECT_TRUE(func != nullptr);
 
   auto const ctx = Context { unit, func };
-  Index idx{borrow(program), Options{}};
+  Index idx{borrow(program)};
   auto const cls = idx.resolve_class(ctx, s_TestClass.get());
   if (!cls) EXPECT_TRUE(false);
 

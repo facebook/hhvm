@@ -484,6 +484,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Option::ParseTimeOpts = false;
   }
 
+  initialize_hhbbc_options();
+
   return 0;
 }
 

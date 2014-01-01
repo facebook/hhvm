@@ -24,10 +24,11 @@
 #include "hphp/util/db-query.h"
 #include "hphp/util/util.h"
 #include "hphp/util/process.h"
+#include "hphp/hhbbc/hhbbc.h"
 #include <boost/algorithm/string/trim.hpp>
 #include "hphp/runtime/base/preg.h"
 
-using namespace HPHP;
+namespace HPHP {
 
 using std::set;
 using std::map;
@@ -378,3 +379,13 @@ void Option::FilterFiles(std::vector<std::string> &files,
   }
 }
 
+//////////////////////////////////////////////////////////////////////
+
+void initialize_hhbbc_options() {
+  if (!Option::UseHHBBC) return;
+  HHBBC::options.InterceptableFunctions = Option::DynamicInvokeFunctions;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}

@@ -176,8 +176,7 @@ void optimize(Index& index, php::Program& program) {
 //////////////////////////////////////////////////////////////////////
 
 std::vector<std::unique_ptr<UnitEmitter>>
-whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
-              const Options& opts) {
+whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   trace_time tracer("whole program");
 
   LitstrTable::get().setReading();
@@ -201,7 +200,7 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
 
   state_after("parse", *program);
 
-  Index index{borrow(program), opts};
+  Index index{borrow(program)};
   optimize(index, *program);
 
   if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 1)) {

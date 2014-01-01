@@ -423,9 +423,7 @@ bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
 
 //////////////////////////////////////////////////////////////////////
 
-static void add_unit_to_index(IndexData& index,
-                              const php::Unit& unit,
-                              const Options& opts) {
+static void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   for (auto& c : unit.classes) {
     index.classes.insert({c->name, borrow(c)});
     for (auto& m : c->methods) {
@@ -433,7 +431,7 @@ static void add_unit_to_index(IndexData& index,
     }
   }
   for (auto& f : unit.funcs) {
-    if (opts.InterceptableFunctions.count(std::string{f->name->data()})) {
+    if (options.InterceptableFunctions.count(std::string{f->name->data()})) {
       f->attrs = f->attrs | AttrDynamicInvoke;
     }
     index.funcs.insert({f->name, borrow(f)});
@@ -443,18 +441,18 @@ static void add_unit_to_index(IndexData& index,
   }
 }
 
-Index::Index(borrowed_ptr<php::Program> program, const Options& opts)
+Index::Index(borrowed_ptr<php::Program> program)
   : m_data(folly::make_unique<IndexData>())
 {
   trace_time tracer("create index");
-  for (auto& u : program->units) add_unit_to_index(*m_data, *u, opts);
+  for (auto& u : program->units) add_unit_to_index(*m_data, *u);
   m_data->isComprehensive = true;
 }
 
 Index::Index(borrowed_ptr<php::Unit> unit)
   : m_data(folly::make_unique<IndexData>())
 {
-  add_unit_to_index(*m_data, *unit, Options{});
+  add_unit_to_index(*m_data, *unit);
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr

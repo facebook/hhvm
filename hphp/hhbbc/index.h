@@ -199,7 +199,7 @@ struct Index {
   /*
    * Create a comprehensive, whole-program-aware index.
    */
-  explicit Index(borrowed_ptr<php::Program>, const Options&);
+  explicit Index(borrowed_ptr<php::Program>);
 
   /*
    * Create a non-comprehensive index for a single php::Unit.

@@ -9023,12 +9023,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
 
   assert(Option::UseHHBBC || ues.empty());
   if (Option::UseHHBBC) {
-    // TODO: drop all the AST structures to free up their memory?
-    // RuntimeOption::EvalJitEnableRenameFunction =
-    //   Option::JitEnableRenameFunction;
-    HHBBC::Options opts;
-    opts.InterceptableFunctions = Option::DynamicInvokeFunctions;
-    ues = HHBBC::whole_program(std::move(ues), opts);
+    ues = HHBBC::whole_program(std::move(ues));
     batchCommit(std::move(ues));
     commitLitstrs();
   }

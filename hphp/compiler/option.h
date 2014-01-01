@@ -273,6 +273,17 @@ private:
   static void (*m_hookHandler)(Hdf &config);
 };
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Hook called after Option is set up to propagate various options to
+ * HHBBC's option structure.
+ *
+ * This exists this way because we don't want to have libhhbbc depend
+ * on all of libhphp_analysis---the dependency goes the other way.
+ */
+void initialize_hhbbc_options();
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 #endif // incl_HPHP_OPTION_H_

@@ -35,7 +35,6 @@
 #include "hphp/runtime/ext/ext_math.h" // f_abs
 
 #include "hphp/hhbbc/cfg.h"
-#include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/class-util.h"

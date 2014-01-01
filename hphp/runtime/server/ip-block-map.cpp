@@ -193,8 +193,7 @@ bool IpBlockMap::isBlocking(const std::string &command,
   struct in6_addr address;
   int bits;
 
-  for (StringToAclPtrMap::const_iterator iter = m_acls.begin();
-       iter != m_acls.end(); ++iter) {
+  for (auto iter = m_acls.begin(); iter != m_acls.end(); ++iter) {
     const string &path = iter->first;
     if (command.size() >= path.size() &&
         strncmp(command.c_str(), path.c_str(), path.size()) == 0) {

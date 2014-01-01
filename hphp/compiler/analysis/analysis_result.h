@@ -24,6 +24,7 @@
 #include "hphp/compiler/analysis/symbol_table.h"
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/package.h"
+#include "hphp/compiler/hphp.h"
 
 #include "hphp/util/string-bag.h"
 #include "hphp/util/thread-local.h"
@@ -36,7 +37,7 @@ namespace HPHP {
 
 
 DECLARE_BOOST_TYPES(ClassScope);
-DECLARE_BOOST_TYPES(FileScope);
+DECLARE_EXTENDED_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(Location);
 DECLARE_BOOST_TYPES(AnalysisResult);

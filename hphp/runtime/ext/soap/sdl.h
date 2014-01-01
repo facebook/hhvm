@@ -19,6 +19,7 @@
 #define PHP_SDL_H
 
 #include "hphp/runtime/ext/soap/encoding.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/runtime/base/http-client.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,10 +76,13 @@ DECLARE_BOOST_TYPES(sdlRestrictions);
 DECLARE_BOOST_TYPES(sdlRestrictionChar);
 DECLARE_BOOST_TYPES(sdlRestrictionInt);
 
-typedef StringTosdlTypePtrMap sdlTypeMap;
+typedef hphp_string_hash_map<std::shared_ptr<sdlType>,sdlType> sdlTypeMap;
 typedef sdlTypePtrVec sdlTypeVec;
-typedef StringTosdlAttributePtrMap sdlAttributeMap;
-typedef StringTosdlExtraAttributePtrMap sdlExtraAttributeMap;
+typedef hphp_string_hash_map<std::shared_ptr<sdlAttribute>,sdlAttribute>
+        sdlAttributeMap;
+typedef hphp_string_hash_map<std::shared_ptr<sdlExtraAttribute>,
+                             sdlExtraAttribute>
+        sdlExtraAttributeMap;
 
 struct sdlRestrictionInt {
   int value;
@@ -196,12 +200,16 @@ DECLARE_BOOST_TYPES(sdlFault);
 DECLARE_BOOST_TYPES(sdlFunction);
 
 typedef sdlTypePtrVec sdlTypeVec;
-typedef StringTosdlBindingPtrMap sdlBindingMap;
-typedef StringTosdlSoapBindingFunctionHeaderPtrMap \
+typedef hphp_string_hash_map<std::shared_ptr<sdlBinding>,sdlBinding>
+        sdlBindingMap;
+typedef hphp_string_hash_map<std::shared_ptr<sdlSoapBindingFunctionHeader>,
+                             sdlSoapBindingFunctionHeader>
   sdlSoapBindingFunctionHeaderMap;
 typedef sdlParamPtrVec sdlParamVec;
-typedef StringTosdlFaultPtrMap sdlFaultMap;
-typedef StringTosdlFunctionPtrMap sdlFunctionMap;
+typedef hphp_string_hash_map<std::shared_ptr<sdlFault>,sdlFault>
+        sdlFaultMap;
+typedef hphp_string_hash_map<std::shared_ptr<sdlFunction>,sdlFunction>
+        sdlFunctionMap;
 
 struct sdlSoapBinding {
   sdlEncodingStyle  style;

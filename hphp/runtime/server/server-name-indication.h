@@ -17,9 +17,11 @@
 #ifndef incl_HPHP_SERVER_NAME_INDICATION_H_
 #define incl_HPHP_SERVER_NAME_INDICATION_H_
 
-#include "hphp/util/base.h"
 #include <evhttp.h>
 #include <openssl/ssl.h>
+
+#include "hphp/util/base.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 

@@ -18,6 +18,7 @@
 #define incl_HPHP_TRANSL_TYPES_H_
 
 #include "hphp/util/base.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 namespace JIT {

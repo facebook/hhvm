@@ -20,6 +20,7 @@
 #include "hphp/util/base.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/rank.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

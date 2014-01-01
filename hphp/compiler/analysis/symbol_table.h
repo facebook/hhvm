@@ -21,6 +21,7 @@
 #include "hphp/util/json.h"
 #include "hphp/util/util.h"
 #include "hphp/util/lock.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +30,7 @@ class BlockScope;
 class CodeGenerator;
 class Variant;
 DECLARE_BOOST_TYPES(Construct);
-DECLARE_BOOST_TYPES(Type);
+DECLARE_EXTENDED_BOOST_TYPES(Type);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(SymbolTable);
 DECLARE_BOOST_TYPES(FunctionScope);

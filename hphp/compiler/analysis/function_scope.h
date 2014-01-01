@@ -21,6 +21,7 @@
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/option.h"
 
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/json.h"
 #include "hphp/parser/parser.h"
 
@@ -388,7 +389,7 @@ public:
 
   ReadWriteMutex &getInlineMutex() { return m_inlineMutex; }
 
-  DECLARE_BOOST_TYPES(FunctionInfo);
+  DECLARE_EXTENDED_BOOST_TYPES(FunctionInfo);
 
   static void RecordFunctionInfo(std::string fname, FunctionScopePtr func);
 

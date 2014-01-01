@@ -197,7 +197,7 @@ using flat_multiset = boost::container::flat_multiset<K, Pref, Allocator<K>>;
 
 template <class T,
           class U,
-          class V = hphp_hash<T>,
+          class V = std::hash<T>,
           class W = std::equal_to<T>>
 struct hash_map : std::unordered_map<
   T, U, V, W,
@@ -213,7 +213,7 @@ struct hash_map : std::unordered_map<
 
 template <class T,
           class U,
-          class V = hphp_hash<T>,
+          class V = std::hash<T>,
           class W = std::equal_to<T>>
 struct hash_multimap : std::unordered_multimap<
   T, U, V, W,
@@ -228,7 +228,7 @@ struct hash_multimap : std::unordered_multimap<
 };
 
 template <class T,
-          class V = hphp_hash<T>,
+          class V = std::hash<T>,
           class W = std::equal_to<T>>
 struct hash_set : std::unordered_set<T,V,W,Allocator<T> > {
   hash_set()

@@ -71,46 +71,6 @@
 #define va_copy __builtin_va_copy
 #endif
 
-#if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 4)) || \
-  __INTEL_COMPILER || defined(__clang__)
-
-#include <unordered_map>
-#include <unordered_set>
-
-#define hphp_hash     std::hash
-
-namespace HPHP {
-
-struct cstr_hash {
-  size_t operator()(const char* s) const {
-    return hash_string_cs(s, strlen(s));
-  }
-};
-
-template <class _T,class _U,
-          class _V = hphp_hash<_T>,class _W = std::equal_to<_T> >
-struct hphp_hash_map : std::unordered_map<_T,_U,_V,_W> {
-  hphp_hash_map() : std::unordered_map<_T,_U,_V,_W>(0) {}
-};
-
-template <class _T,
-          class _V = hphp_hash<_T>,class _W = std::equal_to<_T> >
-struct hphp_hash_set : std::unordered_set<_T,_V,_W> {
-  hphp_hash_set() : std::unordered_set<_T,_V,_W>(0) {}
-};
-}
-
-#else
-
-#include <ext/hash_map>
-#include <ext/hash_set>
-
-#define hphp_hash_map __gnu_cxx::hash_map
-#define hphp_hash_set __gnu_cxx::hash_set
-#define hphp_hash     __gnu_cxx::hash
-
-#endif
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging
@@ -160,6 +120,12 @@ typedef unsigned char uchar;
 ///////////////////////////////////////////////////////////////////////////////
 // stl classes
 
+struct cstr_hash {
+  size_t operator()(const char* s) const {
+    return hash_string_cs(s, strlen(s));
+  }
+};
+
 struct ltstr {
   bool operator()(const char *s1, const char *s2) const {
     return strcmp(s1, s2) < 0;
@@ -200,10 +166,6 @@ struct stringHashCompare {
   size_t hash(const std::string &s) const {
     return hash_string(s.c_str(), s.size());
   }
-};
-
-template<class type, class T> struct hphp_string_hash_map :
-  public hphp_hash_map<std::string, type, string_hash> {
 };
 
 struct int64_hash {
@@ -303,20 +265,6 @@ private:
 IMPLEMENT_PTR_OPERATORS(hphp_raw_ptr, hphp_raw_ptr);
 IMPLEMENT_PTR_OPERATORS(hphp_raw_ptr, std::shared_ptr);
 IMPLEMENT_PTR_OPERATORS(std::shared_ptr, hphp_raw_ptr);
-
-template<class T> using hphp_const_char_map =
-  hphp_hash_map<const char*,T,cstr_hash,eqstr>;
-
-template<typename T>
-class hphp_string_map :
-    public hphp_hash_map<std::string, T, string_hash> {
-};
-
-typedef hphp_hash_set<std::string, string_hash> hphp_string_set;
-
-typedef hphp_hash_map<void*, void*, pointer_hash<void> > PointerMap;
-typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;
-typedef hphp_hash_set<void*, pointer_hash<void> > PointerSet;
 
 typedef std::vector<std::string> StringVec;
 typedef std::shared_ptr<std::vector<std::string> > StringVecPtr;
@@ -437,19 +385,13 @@ destroyMapValues(Container& c) {
 
 #define DECLARE_BOOST_TYPES(classname)                                  \
   class classname;                                                      \
-  typedef std::shared_ptr<classname> classname ## Ptr;                \
+  typedef std::shared_ptr<classname> classname ## Ptr;                  \
   typedef hphp_raw_ptr<classname> classname ## RawPtr;                  \
-  typedef std::weak_ptr<classname> classname ## WeakPtr;              \
-  typedef std::shared_ptr<const classname> classname ## ConstPtr;     \
+  typedef std::weak_ptr<classname> classname ## WeakPtr;                \
+  typedef std::shared_ptr<const classname> classname ## ConstPtr;       \
   typedef std::vector<classname ## Ptr> classname ## PtrVec;            \
   typedef std::set<classname ## Ptr> classname ## PtrSet;               \
-  typedef std::list<classname ## Ptr> classname ## PtrList;             \
-  typedef hphp_string_hash_map<classname ## Ptr, classname>             \
-      StringTo ## classname ## PtrMap;                                  \
-  typedef hphp_string_hash_map<classname ## PtrVec, classname>          \
-      StringTo ## classname ## PtrVecMap;                               \
-  typedef hphp_string_hash_map<classname ## PtrSet, classname>          \
-      StringTo ## classname ## PtrSetMap;                               \
+  typedef std::list<classname ## Ptr> classname ## PtrList;
 
 typedef std::shared_ptr<FILE> FilePtr;
 

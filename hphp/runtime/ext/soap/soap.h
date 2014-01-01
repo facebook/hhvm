@@ -82,7 +82,8 @@ private:
     sdlPtr sdl;
     time_t time;
   };
-  typedef StringTosdlCacheBucketPtrMap sdlCache;
+  typedef hphp_string_hash_map<std::shared_ptr<sdlCacheBucket>,sdlCacheBucket>
+          sdlCache;
 
 public:
   int64_t m_cache;

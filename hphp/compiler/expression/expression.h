@@ -20,6 +20,7 @@
 #include "hphp/compiler/construct.h"
 #include "hphp/compiler/analysis/type.h"
 #include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 #define EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS                          \
   BlockScopePtr scope, LocationPtr loc, Expression::KindOf kindOf
@@ -48,7 +49,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(Statement);
-DECLARE_BOOST_TYPES(Expression);
+DECLARE_EXTENDED_BOOST_TYPES(Expression);
 class Variant;
 
 #define DECLARE_EXPRESSION_TYPES(x)             \

@@ -55,24 +55,6 @@ struct string_lessi {
   }
 };
 
-template<typename T>
-class hphp_const_char_imap :
-      public hphp_hash_map<const char *, T, hashi, eqstri> {
-};
-
-class hphp_const_char_iset :
-      public hphp_hash_set<const char *, hashi, eqstri> {
-};
-
-template<typename T>
-class hphp_string_imap :
-      public hphp_hash_map<std::string, T, string_hashi, string_eqstri> {
-};
-
-class hphp_string_iset :
-      public hphp_hash_set<std::string, string_hashi, string_eqstri> {
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

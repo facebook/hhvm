@@ -84,7 +84,7 @@ private:
 
     BinaryPrefixTrie m_networks; // prefix => true: allow; false: deny
   };
-  StringToAclPtrMap m_acls; // location => acl
+  hphp_string_hash_map<std::shared_ptr<Acl>,Acl> m_acls; // location => acl
 
   static void LoadIpList(AclPtr acl, Hdf hdf, bool allow);
 };

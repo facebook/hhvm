@@ -24,6 +24,7 @@
 #include "hphp/util/case-insensitive.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 #include <boost/intrusive_ptr.hpp>
 

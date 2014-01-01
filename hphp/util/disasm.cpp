@@ -25,6 +25,7 @@
 
 #include "hphp/util/base.h"
 #include "hphp/util/text-color.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 

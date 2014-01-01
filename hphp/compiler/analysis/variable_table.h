@@ -20,6 +20,7 @@
 #include "hphp/compiler/analysis/symbol_table.h"
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -296,7 +297,7 @@ public:
    * GlobalVariables class to make ThreadLocal<GlobalVaribles> work.
    * This data structure is only needed by global scope.
    */
-  DECLARE_BOOST_TYPES(StaticGlobalInfo);
+  DECLARE_EXTENDED_BOOST_TYPES(StaticGlobalInfo);
   struct StaticGlobalInfo {
     Symbol *sym;
     VariableTable *variables; // where this variable was from

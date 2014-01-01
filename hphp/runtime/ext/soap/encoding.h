@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/ext/soap/xml.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines
@@ -200,7 +201,7 @@ public:
 typedef encodeType* encodeTypePtr;
 
 DECLARE_BOOST_TYPES(encode);
-typedef StringToencodePtrMap encodeMap;
+typedef hphp_string_hash_map<std::shared_ptr<encode>,encode> encodeMap;
 typedef std::shared_ptr<encodeMap> encodeMapPtr;
 struct encode {
   encodeType details;

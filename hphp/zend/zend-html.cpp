@@ -373,9 +373,7 @@ static int utf32_to_utf8(unsigned char *buf, int k) {
   return retval;
 }
 
-typedef hphp_hash_map
-<const char *, std::string, hphp_hash<const char *>, eqstr>
-HtmlEntityMap;
+using HtmlEntityMap = hphp_hash_map<const char*,std::string,cstr_hash,eqstr>;
 
 static volatile bool EntityMapInited = false;
 static Mutex EntityMapMutex;

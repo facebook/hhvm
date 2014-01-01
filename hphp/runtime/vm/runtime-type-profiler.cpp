@@ -52,7 +52,8 @@ struct ProfileCounter {
 };
 }
 
-typedef folly::AtomicHashMap<const char*, ProfileCounter> TypeCounter;
+typedef folly::AtomicHashMap<const char*,ProfileCounter,cstr_hash,eqstr>
+        TypeCounter;
 typedef AtomicVector<TypeCounter*> FuncTypeCounter;
 typedef AtomicVector<FuncTypeCounter*> RuntimeProfileInfo;
 

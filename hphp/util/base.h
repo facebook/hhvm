@@ -78,16 +78,15 @@
 #include <unordered_set>
 
 #define hphp_hash     std::hash
-namespace std {
-template<>
-struct hash<const char*> {
-  size_t operator()(const char *s) const {
-    return HPHP::hash_string_cs(s, strlen(s));
-  }
-};
-}
 
 namespace HPHP {
+
+struct cstr_hash {
+  size_t operator()(const char* s) const {
+    return hash_string_cs(s, strlen(s));
+  }
+};
+
 template <class _T,class _U,
           class _V = hphp_hash<_T>,class _W = std::equal_to<_T> >
 struct hphp_hash_map : std::unordered_map<_T,_U,_V,_W> {
@@ -305,10 +304,8 @@ IMPLEMENT_PTR_OPERATORS(hphp_raw_ptr, hphp_raw_ptr);
 IMPLEMENT_PTR_OPERATORS(hphp_raw_ptr, std::shared_ptr);
 IMPLEMENT_PTR_OPERATORS(std::shared_ptr, hphp_raw_ptr);
 
-template<typename T>
-class hphp_const_char_map :
-    public hphp_hash_map<const char *, T, hphp_hash<const char *>, eqstr> {
-};
+template<class T> using hphp_const_char_map =
+  hphp_hash_map<const char*,T,cstr_hash,eqstr>;
 
 template<typename T>
 class hphp_string_map :
@@ -316,8 +313,6 @@ class hphp_string_map :
 };
 
 typedef hphp_hash_set<std::string, string_hash> hphp_string_set;
-typedef hphp_hash_set<const char *, hphp_hash<const char *>,
-                      eqstr> hphp_const_char_set;
 
 typedef hphp_hash_map<void*, void*, pointer_hash<void> > PointerMap;
 typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;

@@ -611,6 +611,12 @@ void __attribute__((weak)) __hot_end();
 }
 #endif
 
+#if FACEBOOK
+# define AT_END_OF_TEXT       __attribute__((__section__(".stub")))
+#else
+# define AT_END_OF_TEXT
+#endif
+
 static void NEVER_INLINE AT_END_OF_TEXT __attribute__((optimize("2")))
 hugifyText(char* from, char* to) {
 #if FACEBOOK && !defined FOLLY_SANITIZE_ADDRESS && defined MADV_HUGEPAGE

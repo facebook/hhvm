@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <algorithm>
+#include <string>
 
 #include "folly/Format.h"
 #include "folly/json.h"
@@ -726,7 +727,7 @@ static fbstring toCppName(fbstring idlName) {
   fbstring cppName;
 
   size_t endNs = idlName.find_last_of("_");
-  cppName = (string::npos == endNs) ? idlName : idlName.substr(endNs + 1);
+  cppName = (std::string::npos == endNs) ? idlName : idlName.substr(endNs + 1);
   assert(!cppName.empty());
 
   return cppName;

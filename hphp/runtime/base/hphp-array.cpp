@@ -1361,7 +1361,7 @@ inline ArrayData* HphpArray::addVal(StringData* key, CVarRef data) {
   return initVal(e.data, data);
 }
 
-template <class K> INLINE_SINGLE_CALLER
+template <class K> ALWAYS_INLINE
 ArrayData* HphpArray::update(K k, CVarRef data) {
   assert(!isPacked());
   assert(!isFull());
@@ -1383,7 +1383,7 @@ ArrayData* HphpArray::updateRef(K k, CVarRef data) {
   return initRef(p.tv, data);
 }
 
-template <class K> INLINE_SINGLE_CALLER
+template <class K> ALWAYS_INLINE
 ArrayData* HphpArray::zSetImpl(K k, RefData* data) {
   auto p = insert(k);
   if (p.found) {
@@ -1392,7 +1392,7 @@ ArrayData* HphpArray::zSetImpl(K k, RefData* data) {
   return zInitVal(p.tv, data);
 }
 
-INLINE_SINGLE_CALLER
+ALWAYS_INLINE
 ArrayData* HphpArray::zAppendImpl(RefData* data) {
   if (UNLIKELY(m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "

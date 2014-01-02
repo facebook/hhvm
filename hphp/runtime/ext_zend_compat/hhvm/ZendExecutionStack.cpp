@@ -38,10 +38,10 @@ zval* ZendExecutionStack::getArg(int i) {
 
     case ZendStackMode::SIDE_STACK: {
       // Zend puts the number of args as the last thing on the stack
-      DEBUG_ONLY int numargs = uintptr_t(entry.value);
+      int numargs = uintptr_t(entry.value);
       assert(numargs < 4096);
       assert(i < numargs);
-      zval* zv = (zval*) stack[stack.size() - 2 - i].value;
+      zval* zv = (zval*) stack[stack.size() - 1 - numargs + i].value;
       zv->assertValid();
       return zv;
     }

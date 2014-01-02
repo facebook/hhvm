@@ -99,9 +99,9 @@ zend_module_entry mongo_module_entry = {
 };
 /* }}} */
 
-#ifdef COMPILE_DL_MONGO
+// #ifdef COMPILE_DL_MONGO
 ZEND_GET_MODULE(mongo)
-#endif
+// #endif
 
 static PHP_INI_MH(OnUpdatePingInterval)
 {

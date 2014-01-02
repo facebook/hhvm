@@ -59,6 +59,26 @@ int UserStreamWrapper::stat(const String& path, struct stat* buf) {
   Resource wrapper(file);
   return file->stat(path, buf);
 }
+int UserStreamWrapper::unlink(const String& path) {
+  auto file = NEWOBJ(UserFile)(m_cls);
+  Resource wrapper(file);
+  return file->unlink(path) ? 0 : -1;
+}
+int UserStreamWrapper::rename(const String& oldname, const String& newname) {
+  auto file = NEWOBJ(UserFile)(m_cls);
+  Resource wrapper(file);
+  return file->rename(oldname, newname) ? 0 : -1;
+}
+int UserStreamWrapper::mkdir(const String& path, int mode, int options) {
+  auto file = NEWOBJ(UserFile)(m_cls);
+  Resource wrapper(file);
+  return file->mkdir(path, mode, options) ? 0 : -1;
+}
+int UserStreamWrapper::rmdir(const String& path, int options) {
+  auto file = NEWOBJ(UserFile)(m_cls);
+  Resource wrapper(file);
+  return file->rmdir(path, options) ? 0 : -1;
+}
 
 Directory* UserStreamWrapper::opendir(const String& path) {
   auto dir = NEWOBJ(UserDirectory)(m_cls);

@@ -63,6 +63,10 @@ public:
   int access(const String& path, int mode);
   int lstat(const String& path, struct stat* buf);
   int stat(const String& path, struct stat* buf);
+  bool unlink(const String& path);
+  bool rename(const String& oldname, const String& newname);
+  bool mkdir(const String& path, int mode, int options);
+  bool rmdir(const String& path, int options);
 
 private:
   int statImpl(const String& path, struct stat* stat_sb, int flags = 0);
@@ -79,6 +83,10 @@ protected:
   const Func* m_StreamTruncate;
   const Func* m_StreamLock;
   const Func* m_UrlStat;
+  const Func* m_Unlink;
+  const Func* m_Rename;
+  const Func* m_Mkdir;
+  const Func* m_Rmdir;
 
   bool m_opened;
 };

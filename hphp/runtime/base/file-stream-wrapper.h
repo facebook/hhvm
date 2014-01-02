@@ -41,7 +41,19 @@ class FileStreamWrapper : public Stream::Wrapper {
   virtual int lstat(const String& path, struct stat* buf) {
     return ::lstat(File::TranslatePath(path).data(), buf);
   }
+  virtual int unlink(const String& path) {
+    return ::unlink(File::TranslatePath(path).data());
+  }
+  virtual int rename(const String& oldname, const String& newname);
+  virtual int mkdir(const String& path, int mode, int options);
+  virtual int rmdir(const String& path, int options) {
+   return ::rmdir(File::TranslatePath(path).data());
+  }
+
   virtual Directory* opendir(const String& path);
+
+ private:
+  int mkdir_recursive(const String& path, int mode);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

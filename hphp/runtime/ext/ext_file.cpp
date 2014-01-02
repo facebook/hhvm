@@ -1128,14 +1128,13 @@ bool f_copy(const String& source, const String& dest,
 
 bool f_rename(const String& oldname, const String& newname,
               CVarRef context /* = null */) {
-  int ret =
-    RuntimeOption::UseDirectCopy ?
-      Util::directRename(File::TranslatePath(oldname).data(),
-                         File::TranslatePath(newname).data())
-                                 :
-      Util::rename(File::TranslatePath(oldname).data(),
-                   File::TranslatePath(newname).data());
-  return (ret == 0);
+  Stream::Wrapper* w = Stream::getWrapperFromURI(oldname);
+  if (w != Stream::getWrapperFromURI(newname)) {
+    raise_warning("Can't rename a file on different streams");
+    return false;
+  }
+  CHECK_SYSTEM(w->rename(oldname, newname));
+  return true;
 }
 
 int64_t f_umask(CVarRef mask /* = null_variant */) {
@@ -1149,7 +1148,8 @@ int64_t f_umask(CVarRef mask /* = null_variant */) {
 }
 
 bool f_unlink(const String& filename, CVarRef context /* = null */) {
-  CHECK_SYSTEM(unlink(File::TranslatePath(filename).data()));
+  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
+  CHECK_SYSTEM(w->unlink(filename));
   return true;
 }
 
@@ -1319,20 +1319,16 @@ Variant f_tmpfile() {
 
 bool f_mkdir(const String& pathname, int64_t mode /* = 0777 */,
              bool recursive /* = false */, CVarRef context /* = null */) {
-  if (recursive) {
-    String path = File::TranslatePath(pathname);
-    if (path.empty()) return false;
-    if (path.charAt(path.size() - 1) != '/') {
-      path += "/";
-    }
-    return Util::mkdir(path.data(), mode);
-  }
-  CHECK_SYSTEM(mkdir(File::TranslatePath(pathname).data(), mode));
+  Stream::Wrapper* w = Stream::getWrapperFromURI(pathname);
+  int options = recursive ? k_STREAM_MKDIR_RECURSIVE : 0;
+  CHECK_SYSTEM(w->mkdir(pathname, mode, options));
   return true;
 }
 
 bool f_rmdir(const String& dirname, CVarRef context /* = null */) {
-  CHECK_SYSTEM(rmdir(File::TranslatePath(dirname).data()));
+  Stream::Wrapper* w = Stream::getWrapperFromURI(dirname);
+  int options = 0;
+  CHECK_SYSTEM(w->rmdir(dirname, options));
   return true;
 }
 

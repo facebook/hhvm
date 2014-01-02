@@ -611,8 +611,8 @@ void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
     // Very large operator=() invocation.
     *mi = *methInfo();
     // Deep copy the vectors of mi-owned pointers.
-    cloneMembers(mi->parameters);
-    cloneMembers(mi->staticVariables);
+    for (auto& p : mi->parameters)      p = new ClassInfo::ParameterInfo(*p);
+    for (auto& p : mi->staticVariables) p = new ClassInfo::ConstantInfo(*p);
   } else {
     // hphpc sets the ClassInfo::VariableArguments attribute if the method
     // contains a call to func_get_arg, func_get_args, or func_num_args. We

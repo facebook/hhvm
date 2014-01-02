@@ -2216,8 +2216,8 @@ MethodInfoVM::~MethodInfoVM() {
 
 ClassInfoVM::~ClassInfoVM() {
   for (auto& m : m_methodsVec) delete m;
-  destroyMapValues(m_properties);
-  destroyMapValues(m_constants);
+  for (auto& p : m_properties) delete p.second;
+  for (auto& c : m_constants)  delete c.second;
 }
 
 Array VMExecutionContext::getUserFunctionsInfo() {

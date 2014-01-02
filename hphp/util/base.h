@@ -74,15 +74,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#if __WORDSIZE == 64
-#define WORDSIZE_IS_64
-#endif
-
 typedef unsigned char uchar;
-
-#ifndef ULLONG_MAX
-#define ULLONG_MAX 0xffffffffffffffffULL
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // stl classes
@@ -253,55 +245,9 @@ mapInsertUnique(Map& m,
   mapInsert(m, k, d);
 }
 
-// Deep-copy a container of dynamically allocated pointers. Assumes copy
-// constructors do the right thing.
-template<typename Container>
-void
-cloneMembers(Container& c) {
-  for (typename Container::iterator i = c.begin();
-       i != c.end(); ++i) {
-    typedef typename Container::value_type Pointer;
-    typedef typename boost::remove_pointer<Pointer>::type Inner;
-    *i = new Inner(**i);
-  }
-}
-
-template<typename Container>
-void
-destroyMapValues(Container& c) {
-  for (typename Container::iterator i = c.begin();
-       i != c.end(); ++i) {
-    delete i->second;
-  }
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 
-struct null_deleter {
-  void operator()(void const *) const {
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-template<class T, size_t Sz>
-size_t array_size(T (&t)[Sz]) {
-  return Sz;
-}
-
-template<typename Out, typename In>
-Out& readData(In*& it) {
-  Out& r = *(Out*)it;
-  (char*&)it += sizeof(Out);
-  return r;
-}
 } // namespace HPHP
-
-inline bool ptr_is_low_mem(void* ptr) {
-  static_assert(sizeof(void*) == 8, "Unexpected pointer size");
-  return !((uint64_t)ptr & 0xffffffff00000000ull);
-}
 
 namespace HPHP {
   using std::string;

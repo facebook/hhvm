@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <array>
+
 #include <boost/range/adaptors.hpp>
 
 #include "hphp/util/trace.h"
@@ -62,13 +64,14 @@ struct DceFlags {
   }
 
   std::string toString() const {
-    static const char* const names[] = {
+    std::array<const char*,2> const names = {{
       "DEAD",
       "LIVE",
-    };
+    }};
     return folly::format(
       "{}",
-      m_state > array_size(names) ? "<invalid>" : names[m_state]).str();
+      m_state < names.size() ? names[m_state] : "<invalid>"
+    ).str();
   }
 
 private:

@@ -1673,7 +1673,7 @@ static sdlTypePtr model_array_element(sdlContentModelPtr model) {
   switch (model->kind) {
   case XSD_CONTENT_ELEMENT: {
     if (model->max_occurs == -1 || model->max_occurs > 1) {
-      return sdlTypePtr(model->u_element, null_deleter());
+      return sdlTypePtr(model->u_element, [] (const void*) {});
     } else {
       return sdlTypePtr();
     }

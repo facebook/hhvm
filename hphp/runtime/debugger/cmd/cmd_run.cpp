@@ -63,7 +63,7 @@ void CmdRun::onClient(DebuggerClient &client) {
   if (DebuggerCommand::displayedHelp(client)) return;
 
   m_args = std::shared_ptr<std::vector<std::string>>(client.args(),
-    null_deleter());
+    [] (const void*) {});
   client.sendToServer(this);
   client.clearCachedLocal();
   client.setFrame(0);

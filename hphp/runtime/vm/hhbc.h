@@ -1053,6 +1053,14 @@ inline bool isSwitch(Opcode op) {
   return isSwitch(toOp(op));
 }
 
+template<typename Out, typename In>
+Out& readData(In*& it) {
+  Out& r = *(Out*)it;
+  // XXX: illegal wrt strict-aliasing?
+  (char*&)it += sizeof(Out);
+  return r;
+}
+
 template<typename L>
 void foreachSwitchTarget(const Op* op, L func) {
   assert(isSwitch(*op));

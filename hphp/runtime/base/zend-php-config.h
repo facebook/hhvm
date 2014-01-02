@@ -2167,6 +2167,8 @@
 /* The size of a `intmax_t', as computed by sizeof. */
 #define SIZEOF_INTMAX_T 8
 
+#define WORDSIZE_IS_64
+
 /* The size of a `long', as computed by sizeof. */
 #ifdef WORDSIZE_IS_64
 #define SIZEOF_LONG 8

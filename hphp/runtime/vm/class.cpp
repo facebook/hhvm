@@ -1358,6 +1358,11 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
                 m_preClass->name()->data());
   }
 
+  // This used to be a global bool that guarded all bug-for-bug
+  // compatibility with hphpi, but it's moved here because this is the
+  // last use site.  (We need to evaluate if we can remove this one.)
+  const bool hphpiCompat = true;
+
   Func* baseMethod = parentMethod->baseCls()->lookupMethod(method->name());
   if (!(method->attrs() & AttrAbstract) &&
       (baseMethod->attrs() & AttrAbstract) &&

@@ -220,6 +220,28 @@ bool IRInstruction::isLoad() const {
   }
 }
 
+/*
+ * Returns true if the instruction does nothing but load a PHP value from
+ * memory, possibly with some straightforward computation beforehand to decide
+ * where the load should come from. This specifically excludes opcodes such as
+ * CGetProp and ArrayGet that incref their return value.
+ */
+bool IRInstruction::isRawLoad() const {
+  switch (m_op) {
+    case LdMem:
+    case LdRef:
+    case LdStack:
+    case LdElem:
+    case LdProp:
+    case LdPackedArrayElem:
+    case Unbox:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
 bool IRInstruction::storesCell(uint32_t srcIdx) const {
   switch (m_op) {
     case StRetVal:

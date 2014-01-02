@@ -2107,9 +2107,15 @@ SSATmp* Simplifier::simplifyLdStack(IRInstruction* inst) {
   // We don't want to extend live ranges of tmps across calls, so we
   // don't get the value if spansCall is true; however, we can use
   // any type information known.
-  if (info.value && (!info.spansCall ||
-                      info.value->inst()->op() == DefConst)) {
-    if (info.value->type().maybeCounted() || m_tb.typeMightRelax(info.value)) {
+  auto* value = info.value;
+  if (value && (!info.spansCall || info.value->inst()->is(DefConst))) {
+    // The refcount optimizations depend on reliably tracking refcount
+    // producers and consumers. LdStack and other raw loads are special cased
+    // during the analysis, so if we're going to replace this LdStack with a
+    // value that isn't from another raw load, we need to leave something in
+    // its place to preserve that information.
+    if (!value->inst()->isRawLoad() &&
+        (value->type().maybeCounted() || m_tb.typeMightRelax(info.value))) {
       gen(TakeStack, info.value);
     }
     return info.value;

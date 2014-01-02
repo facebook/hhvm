@@ -6423,13 +6423,9 @@ LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs) {
       if (Block* next = block->next()) live |= liveMap[next];
       for (auto it = block->end(); it != block->begin(); ) {
         IRInstruction& inst = *--it;
-        for (const SSATmp& dst : inst.dsts()) {
-          live -= regs[inst][dst].regs();
-        }
+        live -= regs.dstRegs(inst);
         live_regs[inst] = live;
-        for (SSATmp* src : inst.srcs()) {
-          live |= regs[inst][src].regs();
-        }
+        live |= regs.srcRegs(inst);
       }
     });
   return live_regs;

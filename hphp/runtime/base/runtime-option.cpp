@@ -418,10 +418,6 @@ static inline bool simulateARMDefault() {
 #endif
 }
 
-static inline bool xlsDefault() {
-  return RuntimeOption::EvalSimulateARM;
-}
-
 static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }

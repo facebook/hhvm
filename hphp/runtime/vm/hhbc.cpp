@@ -259,7 +259,7 @@ size_t encodeVariableSizeImm(int32_t n, unsigned char* buf) {
   return 4;
 }
 
-void encodeIvaToVector(std::vector<uchar>& out, int32_t val) {
+void encodeIvaToVector(std::vector<unsigned char>& out, int32_t val) {
   size_t currentLen = out.size();
   out.resize(currentLen + 4);
   out.resize(currentLen + encodeVariableSizeImm(val, &out[currentLen]));
@@ -829,7 +829,7 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   auto const immVal = static_cast<type>(        \
     *reinterpret_cast<const uint8_t*>(it)       \
   );                                            \
-  it += sizeof(uchar);                          \
+  it += sizeof(unsigned char);                  \
   out << " " << subopToName(immVal);            \
 } while (false)
 
@@ -839,19 +839,19 @@ std::string instrToString(const Op* it, const Unit* u /* = NULL */) {
   const uint8_t* const start = (uint8_t*)it;                             \
   out << " <";                                                          \
   if (sz > 0) {                                                         \
-    int immVal = (int)*((uchar*)&*it);                                  \
+    int immVal = (int)*((unsigned char*)&*it);                          \
     out << ((immVal >= 0 && size_t(immVal) < locationNamesCount) ?      \
             locationCodeString(LocationCode(immVal)) : "?");            \
-    it += sizeof(uchar);                                                \
+    it += sizeof(unsigned char);                                        \
     int numLocImms = numLocationCodeImms(LocationCode(immVal));         \
     for (int i = 0; i < numLocImms; ++i) {                              \
       out << ':' << decodeVariableSizeImm((const uint8_t**)&it);        \
     }                                                                   \
     while (reinterpret_cast<const uint8_t*>(it) - start < sz) {         \
-      immVal = (int)*((uchar*)&*it);                                    \
+      immVal = (int)*((unsigned char*)&*it);                            \
       out << " " << ((immVal >=0 && size_t(immVal) < memberNamesCount) ? \
                      memberCodeString(MemberCode(immVal)) : "?");       \
-      it += sizeof(uchar);                                              \
+      it += sizeof(unsigned char);                                      \
       if (memberCodeHasImm(MemberCode(immVal))) {                       \
         int64_t imm = decodeMemberCodeImm((const uint8_t**)&it,         \
                                           MemberCode(immVal));          \

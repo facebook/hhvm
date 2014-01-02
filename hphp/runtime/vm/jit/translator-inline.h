@@ -39,7 +39,7 @@ namespace HPHP   {
  */
 inline Cell*&  vmsp() { return (Cell*&)g_vmContext->m_stack.top(); }
 inline Cell*&  vmfp() { return (Cell*&)g_vmContext->m_fp; }
-inline const uchar*& vmpc() { return g_vmContext->m_pc; }
+inline const unsigned char*& vmpc() { return g_vmContext->m_pc; }
 inline ActRec*& vmFirstAR() { return g_vmContext->m_firstAR; }
 
 inline ActRec* liveFrame()    { return (ActRec*)vmfp(); }
@@ -114,7 +114,7 @@ struct EagerVMRegAnchor {
     if (debug) {
       DEBUG_ONLY const Cell* fp = vmfp();
       DEBUG_ONLY const Cell* sp = vmsp();
-      DEBUG_ONLY const uchar* pc = vmpc();
+      DEBUG_ONLY const auto* pc = vmpc();
       VMRegAnchor _;
       assert(vmfp() == fp && vmsp() == sp && vmpc() == pc);
     }

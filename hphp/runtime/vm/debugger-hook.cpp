@@ -34,7 +34,7 @@ using JIT::tx64;
 // a debugger is attached. The debugger may choose to hold the thread below
 // here and execute any number of commands from the client. Return from here
 // lets the opcode execute.
-void phpDebuggerOpcodeHook(const uchar* pc) {
+void phpDebuggerOpcodeHook(const unsigned char* pc) {
   TRACE(5, "in phpDebuggerOpcodeHook() with pc %p\n", pc);
   // Short-circuit when we're doing things like evaling PHP for print command,
   // or conditional breakpoints.

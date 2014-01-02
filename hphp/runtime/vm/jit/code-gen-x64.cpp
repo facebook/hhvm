@@ -4064,7 +4064,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   int returnOffset = MISOFF(tvBuiltinReturn);
 
   if (FixupMap::eagerRecord(func)) {
-    const uchar* pc = curUnit()->entry() + m_curInst->marker().bcOff;
+    const auto* pc = curUnit()->entry() + m_curInst->marker().bcOff;
     // we have spilled all args to stack, so spDiff is 0
     emitEagerSyncPoint(m_as, pc, 0);
   }

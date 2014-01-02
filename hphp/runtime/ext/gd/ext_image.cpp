@@ -5339,7 +5339,7 @@ static char *exif_get_sectionlist(int sectionlist) {
 typedef struct {
   int type;
   size_t size;
-  uchar *data;
+  unsigned char *data;
 } file_section;
 
 typedef struct {
@@ -5442,7 +5442,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
  size is allocated
 */
 static int exif_file_sections_add(image_info_type *ImageInfo, int type,
-                                  size_t size, uchar *data) {
+                                  size_t size, unsigned char *data) {
   file_section *tmp;
   int count = ImageInfo->file.count;
   size_t realloc_size = (count+1) * sizeof(file_section);
@@ -5456,7 +5456,7 @@ static int exif_file_sections_add(image_info_type *ImageInfo, int type,
   if (!size) {
     data = NULL;
   } else if (data == NULL) {
-    data = (uchar *)IM_MALLOC(size);
+    data = (unsigned char *)IM_MALLOC(size);
     if (data == NULL) IM_FREE(tmp);
     CHECK_ALLOC_R(data, size, -1);
   }
@@ -5634,7 +5634,7 @@ static double exif_convert_any_format(void *value, int format,
     case TAG_FMT_SBYTE:
       return *(signed char *)value;
     case TAG_FMT_BYTE:
-      return *(uchar *)value;
+      return *(unsigned char *)value;
 
     case TAG_FMT_USHORT:
       return php_ifd_get16u(value, motorola_intel);
@@ -5681,7 +5681,7 @@ static size_t exif_convert_any_to_int(void *value, int format,
     case TAG_FMT_SBYTE:
       return *(signed char *)value;
     case TAG_FMT_BYTE:
-      return *(uchar *)value;
+      return *(unsigned char *)value;
 
     case TAG_FMT_USHORT:
       return php_ifd_get16u(value, motorola_intel);
@@ -5720,7 +5720,7 @@ static size_t exif_convert_any_to_int(void *value, int format,
 
 /* Get 16 bits motorola order (always) for jpeg header stuff. */
 static int php_jpg_get16(void *value) {
-  return (((uchar *)value)[0] << 8) | ((uchar *)value)[1];
+  return (((unsigned char *)value)[0] << 8) | ((unsigned char *)value)[1];
 }
 
 /* Write 16 bit unsigned value to data */
@@ -6676,7 +6676,7 @@ static void exif_process_APP1(image_info_type *ImageInfo, char *CharBuf,
                               size_t length, size_t displacement) {
   /* Check the APP1 for Exif Identifier Code */
   char *end = CharBuf + length;
-  static const uchar ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
+  static const unsigned char ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
   CHECK_BUFFER(CharBuf+2, end, 6);
   if (length <= 8 || memcmp(CharBuf+2, ExifHeader, 6)) {
     raise_warning("Incorrect APP1 Exif Identifier Code");
@@ -6702,7 +6702,7 @@ static void exif_process_APP12(image_info_type *ImageInfo,
 }
 
 /* Process a SOFn marker.  This is useful for the image dimensions */
-static void exif_process_SOFn (uchar *Data, int marker,
+static void exif_process_SOFn (unsigned char *Data, int marker,
                                jpeg_sof_info *result) {
   result->bits_per_sample = Data[2];
   result->height          = php_jpg_get16(Data+3);
@@ -6715,7 +6715,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo) {
   int section, sn;
   int marker = 0, last_marker = M_PSEUDO, comment_correction=1;
   int ll, lh;
-  uchar *Data;
+  unsigned char *Data;
   size_t fpos, size, got, itemlen;
   jpeg_sof_info  sof_info;
 
@@ -6780,8 +6780,8 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo) {
     Data = ImageInfo->file.list[sn].data;
 
     /* Store first two pre-read bytes. */
-    Data[0] = (uchar)lh;
-    Data[1] = (uchar)ll;
+    Data[0] = (unsigned char)lh;
+    Data[1] = (unsigned char)ll;
 
     String str = ImageInfo->infile->read(itemlen-2);
     got = str.length();
@@ -6881,7 +6881,7 @@ static int exif_file_sections_realloc(image_info_type *ImageInfo,
   }
   tmp = IM_REALLOC(ImageInfo->file.list[section_index].data, size);
   CHECK_ALLOC_R(tmp, size, -1);
-  ImageInfo->file.list[section_index].data = (uchar *)tmp;
+  ImageInfo->file.list[section_index].data = (unsigned char *)tmp;
   ImageInfo->file.list[section_index].size = size;
   return 0;
 }
@@ -7467,7 +7467,7 @@ static void exif_iif_add_buffer(image_info_type *image_info,
 
 /* scan JPEG in thumbnail (memory) */
 static int exif_scan_thumbnail(image_info_type *ImageInfo) {
-  uchar c, *data = (uchar*)ImageInfo->Thumbnail.data;
+  unsigned char c, *data = (unsigned char*)ImageInfo->Thumbnail.data;
   int n, marker;
   size_t length=2, pos=0;
   jpeg_sof_info sof_info;

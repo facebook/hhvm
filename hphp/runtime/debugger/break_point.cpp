@@ -93,7 +93,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, CVarRef error)
     // so we need to construct the site on the caller
     fp = context->getPrevVMState(fp, &m_offset);
   } else {
-    const uchar *pc = context->getPC();
+    const auto *pc = context->getPC();
     bail_on(!fp->m_func);
     m_unit = fp->m_func->unit();
     bail_on(!m_unit);

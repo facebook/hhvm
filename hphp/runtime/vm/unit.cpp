@@ -1413,8 +1413,8 @@ void Unit::mergeImpl(void* tcbase, UnitMergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_require);
           Unit *unit = (Unit*)((char*)obj - (int)k);
-          uchar& unitLoadedFlags =
-            getDataRef<uchar>(tcbase, unit->m_cacheOffset);
+          unsigned char& unitLoadedFlags =
+            getDataRef<unsigned char>(tcbase, unit->m_cacheOffset);
           if (!(unitLoadedFlags & unit->m_cacheMask)) {
             unitLoadedFlags |= unit->m_cacheMask;
             unit->mergeImpl<debugger>(tcbase, unit->m_mergeInfo);
@@ -1636,10 +1636,9 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
     }
   }
 
-  std::map<Offset,const Func*>::const_iterator funcIt =
-    funcMap.lower_bound(startOffset);
+  auto funcIt = funcMap.lower_bound(startOffset);
 
-  const uchar* it = &m_bc[startOffset];
+  const auto* it = &m_bc[startOffset];
   int prevLineNum = -1;
   MetaHandle metaHand;
   while (it < &m_bc[stopOffset]) {
@@ -1852,8 +1851,8 @@ Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
 
 void UnitRepoProxy::InsertUnitStmt
                   ::insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5,
-                           const uchar* bc, size_t bclen,
-                           const uchar* bc_meta, size_t bc_meta_len,
+                           const unsigned char* bc, size_t bclen,
+                           const unsigned char* bc_meta, size_t bc_meta_len,
                            const TypedValue* mainReturn, bool mergeOnly,
                            const LineTable& lines,
                            const std::vector<TypeAlias>& typeAliases) {
@@ -1910,8 +1909,8 @@ bool UnitRepoProxy::GetUnitStmt
     BlobDecoder typeAliasesBlob =            /**/ query.getBlob(6);
     ue.setRepoId(m_repoId);
     ue.setSn(unitSn);
-    ue.setBc((const uchar*)bc, bclen);
-    ue.setBcMeta((const uchar*)bc_meta, bc_meta_len);
+    ue.setBc((const unsigned char*)bc, bclen);
+    ue.setBcMeta((const unsigned char*)bc_meta, bc_meta_len);
     ue.setMainReturn(&value);
     ue.setMergeOnly(mergeable);
 
@@ -2152,7 +2151,7 @@ bool UnitRepoProxy::GetSourceLocTabStmt
 // UnitEmitter.
 
 UnitEmitter::UnitEmitter(const MD5& md5)
-  : m_repoId(-1), m_sn(-1), m_bcmax(BCMaxInit), m_bc((uchar*)malloc(BCMaxInit)),
+  : m_repoId(-1), m_sn(-1), m_bcmax(BCMaxInit), m_bc((unsigned char*)malloc(BCMaxInit)),
     m_bclen(0), m_bc_meta(nullptr), m_bc_meta_len(0), m_filepath(nullptr),
     m_md5(md5), m_nextFuncSn(0), m_mergeOnly(false),
     m_allClassesHoistable(true), m_returnSeen(false) {
@@ -2192,20 +2191,20 @@ void UnitEmitter::addTrivialPseudoMain() {
   setMergeOnly(true);
 }
 
-void UnitEmitter::setBc(const uchar* bc, size_t bclen) {
+void UnitEmitter::setBc(const unsigned char* bc, size_t bclen) {
   if (m_bc) {
     free(m_bc);
   }
-  m_bc = (uchar*)malloc(bclen);
+  m_bc = (unsigned char*)malloc(bclen);
   m_bcmax = bclen;
   memcpy(m_bc, bc, bclen);
   m_bclen = bclen;
 }
 
-void UnitEmitter::setBcMeta(const uchar* bc_meta, size_t bc_meta_len) {
+void UnitEmitter::setBcMeta(const unsigned char* bc_meta, size_t bc_meta_len) {
   assert(m_bc_meta == nullptr);
   if (bc_meta_len) {
-    m_bc_meta = (uchar*)malloc(bc_meta_len);
+    m_bc_meta = (unsigned char*)malloc(bc_meta_len);
     memcpy(m_bc_meta, bc_meta, bc_meta_len);
   }
   m_bc_meta_len = bc_meta_len;

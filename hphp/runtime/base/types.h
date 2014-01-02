@@ -467,7 +467,7 @@ typedef uint8_t Opcode;
  * during a given instruction it is incremented while decoding
  * immediates and may point to arbitrary bytes.
  */
-typedef const uchar* PC;
+typedef const unsigned char* PC;
 
 /*
  * Id type for various components of a unit that have to have unique

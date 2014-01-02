@@ -875,7 +875,7 @@ ArrayData* read_litarray(AsmState& as) {
   return it->second;
 }
 
-void read_immvector_immediate(AsmState& as, std::vector<uchar>& ret,
+void read_immvector_immediate(AsmState& as, std::vector<unsigned char>& ret,
                               MemberCode mcode = InvalidMemberCode) {
   if (memberCodeImmIsLoc(mcode) || mcode == InvalidMemberCode) {
     if (as.in.getc() != '$') {
@@ -897,8 +897,8 @@ void read_immvector_immediate(AsmState& as, std::vector<uchar>& ret,
   }
 }
 
-std::vector<uchar> read_immvector(AsmState& as, int& stackCount) {
-  std::vector<uchar> ret;
+std::vector<unsigned char> read_immvector(AsmState& as, int& stackCount) {
+  std::vector<unsigned char> ret;
 
   as.in.skipSpaceTab();
   as.in.expect('<');
@@ -1088,7 +1088,7 @@ OpcodeParserMap opcode_parsers;
  */
 #define IMM_MA                                                        \
   int vecImmStackValues = 0;                                          \
-  std::vector<uchar> vecImm = read_immvector(as, vecImmStackValues);  \
+  auto vecImm = read_immvector(as, vecImmStackValues);                \
   as.ue->emitInt32(vecImm.size());                                    \
   as.ue->emitInt32(vecImmStackValues);                                \
   for (size_t i = 0; i < vecImm.size(); ++i) {                        \

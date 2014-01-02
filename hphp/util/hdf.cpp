@@ -289,7 +289,7 @@ uint64_t Hdf::getUInt(uint64_t defValue, const char *type, uint64_t mask) const 
   return n;
 }
 
-uchar Hdf::getUByte(uchar defValue /* = 0 */) const {
+unsigned char Hdf::getUByte(unsigned char defValue /* = 0 */) const {
   return getUInt(defValue, "unsigned byte", ~0xFFUL);
 }
 
@@ -379,8 +379,8 @@ int Hdf::compare(char v2) const {
   return v1 > v2 ? 1 : -1;
 }
 
-int Hdf::compare(uchar v2) const {
-  uchar v1 = getUByte();
+int Hdf::compare(unsigned char v2) const {
+  unsigned char v1 = getUByte();
   if (v1 == v2) return 0;
   return v1 > v2 ? 1 : -1;
 }

@@ -120,6 +120,8 @@ namespace Compiler {
 
 TRACE_SET_MOD(emitter)
 
+using uchar = unsigned char;
+
 namespace {
   const StringData* s_continuationVarArgsLocal
     = makeStaticString("0ContinuationVarArgsLocal");

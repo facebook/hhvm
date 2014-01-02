@@ -888,10 +888,10 @@ int64_t decodeMemberCodeImm(const unsigned char** immPtr, MemberCode mcode);
 size_t encodeVariableSizeImm(int32_t val, unsigned char* buf);
 
 // Encodes a variable sized immediate to the end of vec.
-void encodeIvaToVector(std::vector<uchar>& vec, int32_t val);
+void encodeIvaToVector(std::vector<unsigned char>& vec, int32_t val);
 
 template<typename T>
-void encodeToVector(std::vector<uchar>& vec, T val) {
+void encodeToVector(std::vector<unsigned char>& vec, T val) {
   size_t currentLen = vec.size();
   vec.resize(currentLen + sizeof(T));
   memcpy(&vec[currentLen], &val, sizeof(T));

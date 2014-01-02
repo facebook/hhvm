@@ -111,7 +111,7 @@ public:
   typ1 a1, typ2 a2, typ3 a3
 #define FOUR(typ1, typ2, typ3, typ4) \
   typ1 a1, typ2 a2, typ3 a3, typ4 a4
-#define MA std::vector<uchar>
+#define MA std::vector<unsigned char>
 #define BLA std::vector<Label*>&
 #define SLA std::vector<StrOff>&
 #define ILA std::vector<IterPair>&
@@ -686,7 +686,7 @@ public:
   void unexpectedStackSym(char sym, const char* where) const;
 
   int scanStackForLocation(int iLast);
-  void buildVectorImm(std::vector<uchar>& vectorImm,
+  void buildVectorImm(std::vector<unsigned char>& vectorImm,
                       int iFirst, int iLast, bool allowW,
                       Emitter& e);
   enum class PassByRefKind {

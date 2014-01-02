@@ -747,9 +747,9 @@ private:
   // pseudoMain's return value, or KindOfUninit if its not known.
   TypedValue m_mainReturn;
   int64_t m_sn;
-  uchar const* m_bc;
+  unsigned char const* m_bc;
   size_t m_bclen;
-  uchar const* m_bc_meta;
+  unsigned char const* m_bc_meta;
   size_t m_bc_meta_len;
   const StringData* m_filepath;
   const StringData* m_dirpath;
@@ -789,10 +789,10 @@ class UnitEmitter {
   void setRepoId(int repoId) { m_repoId = repoId; }
   int64_t sn() const { return m_sn; }
   void setSn(int64_t sn) { m_sn = sn; }
-  const uchar* bc() const { return m_bc; }
+  const unsigned char* bc() const { return m_bc; }
   Offset bcPos() const { return (Offset)m_bclen; }
-  void setBc(const uchar* bc, size_t bclen);
-  void setBcMeta(const uchar* bc_meta, size_t bc_meta_len);
+  void setBc(const unsigned char* bc, size_t bclen);
+  void setBcMeta(const unsigned char* bc_meta, size_t bc_meta_len);
   const StringData* getFilepath() const { return m_filepath; }
   void setFilepath(const StringData* filepath) { m_filepath = filepath; }
   void setMainReturn(const TypedValue* v) { m_mainReturn = *v; }
@@ -844,11 +844,11 @@ class UnitEmitter {
  private:
   template<class T>
   void emitImpl(T n, int64_t pos) {
-    uchar *c = (uchar*)&n;
+    auto *c = (unsigned char*)&n;
     if (pos == -1) {
       // Make sure m_bc is large enough.
       while (m_bclen + sizeof(T) > m_bcmax) {
-        m_bc = (uchar*)realloc(m_bc, m_bcmax << 1);
+        m_bc = (unsigned char*)realloc(m_bc, m_bcmax << 1);
         m_bcmax <<= 1;
       }
       memcpy(&m_bc[m_bclen], c, sizeof(T));
@@ -862,9 +862,9 @@ class UnitEmitter {
   }
  public:
   void emitOp(Op op, int64_t pos = -1) {
-    emitByte((uchar)op, pos);
+    emitByte((unsigned char)op, pos);
   }
-  void emitByte(uchar n, int64_t pos = -1) { emitImpl(n, pos); }
+  void emitByte(unsigned char n, int64_t pos = -1) { emitImpl(n, pos); }
   void emitInt32(int n, int64_t pos = -1) { emitImpl(n, pos); }
   template<typename T> void emitIVA(T n) {
     if (LIKELY((n & 0x7f) == n)) {
@@ -901,9 +901,9 @@ class UnitEmitter {
   int64_t m_sn;
   static const size_t BCMaxInit = 4096; // Initial bytecode size.
   size_t m_bcmax;
-  uchar* m_bc;
+  unsigned char* m_bc;
   size_t m_bclen;
-  uchar* m_bc_meta;
+  unsigned char* m_bc_meta;
   size_t m_bc_meta_len;
   TypedValue m_mainReturn;
   const StringData* m_filepath;
@@ -1021,8 +1021,10 @@ class UnitRepoProxy : public RepoProxy {
   class InsertUnitStmt : public RepoProxy::Stmt {
    public:
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5, const uchar* bc,
-                size_t bclen, const uchar* bc_meta, size_t bc_meta_len,
+    void insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5,
+                const unsigned char* bc,
+                size_t bclen, const unsigned char* bc_meta,
+                size_t bc_meta_len,
                 const TypedValue* mainReturn, bool mergeOnly,
                 const LineTable& lines,
                 const std::vector<TypeAlias>&);

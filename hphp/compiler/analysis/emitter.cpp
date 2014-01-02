@@ -80,6 +80,7 @@
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/hhbbc/hhbbc.h"
 
+#include "hphp/util/safe-cast.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
 #include "hphp/util/job-queue.h"

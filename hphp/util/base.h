@@ -62,8 +62,8 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/type_traits.hpp>
-#include <boost/numeric/conversion/cast.hpp>
 
+#include "hphp/util/compilation-flags.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/assertions.h"
 
@@ -73,31 +73,6 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// debugging
-
-const bool debug =
-#ifdef DEBUG
-  true
-#else
-  false
-#endif
-  ;
-
-const bool packed_tv =
-#ifdef PACKED_TV
-  true
-#else
-  false
-#endif
-  ;
-
-const bool memory_profiling =
-#ifdef MEMORY_PROFILING
-  true
-#else
-  false
-#endif
-  ;
 
 /**
  * Guard bug-for-bug hphpi compatibility code with this predicate.
@@ -317,26 +292,6 @@ struct null_deleter {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * DEBUG-only wrapper around boost::numeric_cast that converts any
- * thrown exceptions to a failed assertion.
- */
-template <typename To, typename From>
-To safe_cast(From val) {
-  if (debug) {
-    try {
-      return boost::numeric_cast<To>(val);
-    } catch (std::bad_cast& bce) {
-      std::cerr << "conversion of " << val << " failed in "
-                << __PRETTY_FUNCTION__ << " : "
-                << bce.what() << std::endl;
-      not_reached();
-    }
-  } else {
-    return static_cast<To>(val);
-  }
-}
 
 template<class T, size_t Sz>
 size_t array_size(T (&t)[Sz]) {

@@ -23,6 +23,7 @@
 #include "hphp/util/data-block.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/trace.h"
+#include "hphp/util/safe-cast.h"
 
 /*
  * An experimental macro assembler for x64, that strives for low coupling to

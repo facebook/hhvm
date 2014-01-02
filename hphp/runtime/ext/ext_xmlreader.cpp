@@ -17,6 +17,9 @@
 
 #include "hphp/runtime/ext/ext_xmlreader.h"
 
+
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {

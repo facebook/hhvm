@@ -20,7 +20,7 @@
 #include <functional>
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/util/case-insensitive.h"
+#include "hphp/util/functional.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/type-profile.h"
 

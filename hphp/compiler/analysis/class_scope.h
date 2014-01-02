@@ -25,7 +25,8 @@
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/expression/user_attribute.h"
 #include "hphp/util/json.h"
-#include "hphp/util/case-insensitive.h"
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/compiler/option.h"
 
 namespace HPHP {

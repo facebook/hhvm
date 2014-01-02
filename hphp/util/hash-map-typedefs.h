@@ -22,7 +22,7 @@
 #include <string>
 
 #include "hphp/util/base.h"
-#include "hphp/util/case-insensitive.h"
+#include "hphp/util/functional.h"
 
 namespace HPHP {
 

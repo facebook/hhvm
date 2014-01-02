@@ -25,6 +25,8 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/system/systemlib.h"
 
 #define DOM_XMLNS_NAMESPACE                             \

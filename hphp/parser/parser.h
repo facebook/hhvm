@@ -19,7 +19,8 @@
 
 #include "hphp/parser/scanner.h"
 #include "hphp/util/lock.h"
-#include "hphp/util/case-insensitive.h"
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 #define IMPLEMENT_XHP_ATTRIBUTES                \
   Token m_xhpAttributes;                        \

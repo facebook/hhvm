@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/case-insensitive.h"
+#include "hphp/util/functional.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/hash-map-typedefs.h"

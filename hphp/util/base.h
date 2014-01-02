@@ -14,6 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
+/*
+ * TODO(#3468751): delete this header.
+ */
+
 #ifndef incl_HPHP_BASE_H_
 #define incl_HPHP_BASE_H_
 
@@ -24,7 +28,7 @@
 
 #include <errno.h>
 #include <string.h>
-#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/strings.h" // XXX
 #include <unistd.h>
 #include <poll.h>
 #include <netinet/in.h>
@@ -66,105 +70,11 @@
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/functional.h"
 
 #ifdef __INTEL_COMPILER
 #define va_copy __builtin_va_copy
 #endif
-
-namespace HPHP {
-
-///////////////////////////////////////////////////////////////////////////////
-
-struct cstr_hash {
-  size_t operator()(const char* s) const {
-    return hash_string_cs(s, strlen(s));
-  }
-};
-
-struct ltstr {
-  bool operator()(const char *s1, const char *s2) const {
-    return strcmp(s1, s2) < 0;
-  }
-};
-
-struct eqstr {
-  bool operator()(const char* s1, const char* s2) const {
-    return strcmp(s1, s2) == 0;
-  }
-};
-
-struct stdltstr {
-  bool operator()(const std::string &s1, const std::string &s2) const {
-    return strcmp(s1.c_str(), s2.c_str()) < 0;
-  }
-};
-
-struct stdltistr {
-  bool operator()(const std::string &s1, const std::string &s2) const {
-    return strcasecmp(s1.c_str(), s2.c_str()) < 0;
-  }
-};
-
-struct string_hash {
-  size_t operator()(const std::string &s) const {
-    return hash_string_cs(s.c_str(), s.size());
-  }
-  size_t hash(const std::string &s) const {
-    return operator()(s);
-  }
-};
-
-struct stringHashCompare {
-  bool equal(const std::string &s1, const std::string &s2) const {
-    return s1 == s2;
-  }
-  size_t hash(const std::string &s) const {
-    return hash_string(s.c_str(), s.size());
-  }
-};
-
-struct int64_hash {
-  size_t operator() (const int64_t v) const {
-    return (size_t)hash_int64(v);
-  }
-  size_t hash(const int64_t v) const {
-    return operator()(v);
-  }
-  bool equal(const int64_t lhs, const int64_t rhs) const {
-    return lhs == rhs;
-  }
-};
-
-template<typename T>
-struct pointer_hash {
-  size_t operator() (const T *const p) const {
-    return (size_t)hash_int64(intptr_t(p));
-  }
-  size_t hash(const T *const p) const {
-    return operator()(p);
-  }
-  bool equal(const T *const lhs,
-             const T *const rhs) const {
-    return lhs == rhs;
-  }
-};
-
-template<typename T>
-struct smart_pointer_hash {
-  size_t operator() (const T &p) const {
-    return (size_t)hash_int64(intptr_t(p.get()));
-  }
-  size_t hash (const T &p) const {
-    return operator()(p);
-  }
-  bool equal(const T &lhs, const T &rhs) const {
-    return lhs.get() == rhs.get();
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-} // namespace HPHP
 
 namespace HPHP {
   using std::string;

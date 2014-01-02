@@ -95,6 +95,7 @@
                 {
                     "name": "matches",
                     "type": "Variant",
+                    "value": "null",
                     "desc": "Array of all matches in multi-dimensional array ordered according to flags.",
                     "ref": true
                 },

@@ -193,6 +193,7 @@ struct StringData {
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
   void setRefCount(RefCount n);
   bool isStatic() const;
+  bool isUncounted() const;
 
   /*
    * Get the wrapped APCHandle, or return null if this string is
@@ -448,6 +449,7 @@ private:
   bool checkSane() const;
   void preCompute() const;
   void setStatic() const;
+  void setUncounted() const;
 
 private:
   char* m_data;

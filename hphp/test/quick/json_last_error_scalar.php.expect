@@ -1,0 +1,27 @@
+JSON: null
+NULL
+Error: 0
+JSON: false
+bool(false)
+Error: 0
+JSON: true
+bool(true)
+Error: 0
+JSON: "abc"
+string(3) "abc"
+Error: 0
+JSON: "ab\"c"
+string(4) "ab"c"
+Error: 0
+JSON: 0
+int(0)
+Error: 0
+JSON: 0.45
+float(0.45)
+Error: 0
+JSON: -0.5
+float(-0.5)
+Error: 0
+JSON: invalid
+NULL
+Error: 4

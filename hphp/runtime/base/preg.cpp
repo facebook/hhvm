@@ -645,48 +645,68 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
     if (count > 0) {
       matched++;
 
-      if (!subpats) continue;
+      if (subpats) {
+        // Try to get the list of substrings and display a warning if failed.
+        if (pcre_get_substring_list(subject.data(), offsets, count,
+                                    &stringlist) < 0) {
+          raise_warning("Get subpatterns list failed");
+          return false;
+        }
 
-      // Try to get the list of substrings and display a warning if failed.
-      if (pcre_get_substring_list(subject.data(), offsets, count,
-                                  &stringlist) < 0) {
-        raise_warning("Get subpatterns list failed");
-        return false;
-      }
+        if (global) {  /* global pattern matching */
+          if (subpats_order == PREG_PATTERN_ORDER) {
+            /* For each subpattern, insert it into the appropriate array. */
+            for (i = 0; i < count; i++) {
+              if (offset_capture) {
+                add_offset_pair(match_sets.lvalAt(i),
+                                String(stringlist[i],
+                                       offsets[(i<<1)+1] - offsets[i<<1],
+                                       CopyString),
+                                offsets[i<<1], nullptr);
+              } else {
+                match_sets.lvalAt(i).append
+                  (String(stringlist[i],
+                          offsets[(i<<1)+1] - offsets[i<<1], CopyString));
+              }
+            }
+            /*
+             * If the number of captured subpatterns on this run is
+             * less than the total possible number, pad the result
+             * arrays with empty strings.
+             */
+            if (count < num_subpats) {
+              for (; i < num_subpats; i++) {
+                match_sets.lvalAt(i).append("");
+              }
+            }
+          } else {
+            result_set = Array::Create();
 
-      if (global) {  /* global pattern matching */
-        if (subpats_order == PREG_PATTERN_ORDER) {
-          /* For each subpattern, insert it into the appropriate array. */
+            /* Add all the subpatterns to it */
+            for (i = 0; i < count; i++) {
+              if (offset_capture) {
+                add_offset_pair(result_set,
+                                String(stringlist[i],
+                                       offsets[(i<<1)+1] - offsets[i<<1],
+                                       CopyString),
+                                offsets[i<<1], subpat_names[i]);
+              } else {
+                String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
+                             CopyString);
+                if (subpat_names[i]) {
+                  result_set.set(String(subpat_names[i]), value);
+                }
+                result_set.append(value);
+              }
+            }
+            /* And add it to the output array */
+            subpats->append(result_set);
+          }
+        } else {      /* single pattern matching */
+          /* For each subpattern, insert it into the subpatterns array. */
           for (i = 0; i < count; i++) {
             if (offset_capture) {
-              add_offset_pair(match_sets.lvalAt(i),
-                              String(stringlist[i],
-                                     offsets[(i<<1)+1] - offsets[i<<1],
-                                     CopyString),
-                              offsets[i<<1], nullptr);
-            } else {
-              match_sets.lvalAt(i).append
-                (String(stringlist[i],
-                        offsets[(i<<1)+1] - offsets[i<<1], CopyString));
-            }
-          }
-          /*
-           * If the number of captured subpatterns on this run is
-           * less than the total possible number, pad the result
-           * arrays with empty strings.
-           */
-          if (count < num_subpats) {
-            for (; i < num_subpats; i++) {
-              match_sets.lvalAt(i).append("");
-            }
-          }
-        } else {
-          result_set = Array::Create();
-
-          /* Add all the subpatterns to it */
-          for (i = 0; i < count; i++) {
-            if (offset_capture) {
-              add_offset_pair(result_set,
+              add_offset_pair(*subpats,
                               String(stringlist[i],
                                      offsets[(i<<1)+1] - offsets[i<<1],
                                      CopyString),
@@ -695,35 +715,14 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
               String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                            CopyString);
               if (subpat_names[i]) {
-                result_set.set(String(subpat_names[i]), value);
+                subpats->set(String(subpat_names[i]), value);
               }
-              result_set.append(value);
+              subpats->append(value);
             }
           }
-          /* And add it to the output array */
-          subpats->append(result_set);
         }
-      } else {      /* single pattern matching */
-        /* For each subpattern, insert it into the subpatterns array. */
-        for (i = 0; i < count; i++) {
-          if (offset_capture) {
-            add_offset_pair(*subpats,
-                            String(stringlist[i],
-                                   offsets[(i<<1)+1] - offsets[i<<1],
-                                   CopyString),
-                            offsets[i<<1], subpat_names[i]);
-          } else {
-            String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
-                         CopyString);
-            if (subpat_names[i]) {
-              subpats->set(String(subpat_names[i]), value);
-            }
-            subpats->append(value);
-          }
-        }
+        pcre_free((void *) stringlist);
       }
-
-      pcre_free((void *) stringlist);
     } else if (count == PCRE_ERROR_NOMATCH) {
       /* If we previously set PCRE_NOTEMPTY after a null match,
          this is not necessarily the end. We need to advance

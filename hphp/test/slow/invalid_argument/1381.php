@@ -1,5 +1,8 @@
 <?php
 
+// disable array -> "Array" conversion notice
+error_reporting(error_reporting() & ~E_NOTICE);
+
 $ch = curl_init();
 var_dump(curl_setopt($ch, -1, 'http://www.example.com/'));
 curl_close($ch);

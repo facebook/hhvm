@@ -2,81 +2,81 @@
 HipHop Notice: %s
 HipHop Notice: %s
 
-Arg value 0 
+Arg value 0
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value 12345 
+Arg value 12345
 bool(false)
 
-Arg value -2345 
+Arg value -2345
 bool(false)
 
-Arg value 10.5 
+Arg value 10.5
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 bool(false)
 
-Arg value 101234567000 
+Arg value 101234567000
 bool(false)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 bool(false)
 
-Arg value 0.5 
+Arg value 0.5
 bool(false)
 
-Arg value Array 
+Arg value Array
 bool(false)
 
-Arg value Array 
+Arg value Array
 bool(false)
 
-Arg value Array 
+Arg value Array
 bool(false)
 
-Arg value Array 
+Arg value Array
 bool(false)
 
-Arg value Array 
+Arg value Array
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value string 
+Arg value string
 bool(false)
 
-Arg value String 
+Arg value String
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 Done

@@ -1,5 +1,8 @@
 <?php
 
+// disable array -> "Array" conversion notice
+error_reporting(error_reporting() & ~E_NOTICE);
+
 serialize(array("\0" => 1));
 serialize(array("\0" => "\0"));
 serialize(array("\0" => "\\"));

@@ -18,6 +18,8 @@
 
 #include <boost/range/adaptors.hpp>
 
+#include "folly/MapUtil.h"
+
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -248,7 +250,7 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
       case InlineReturn: {
         auto* frameInst = frameRoot(inst->src(0)->inst());
         assert(frameInst->is(DefInlineFP));
-        auto frameUses = mapGet(uses, frameInst->dst(), 0);
+        auto frameUses = folly::get_default(uses, frameInst->dst(), 0);
         auto* spillInst = findSpillFrame(frameInst->src(0));
 
         auto weakUses = state[frameInst].weakUseCount();
@@ -317,7 +319,8 @@ void optimizeActRecs(BlockList& blocks, DceState& state, IRUnit& unit,
           assert(spillInst);
           curDepth += depth(spillInst->marker().func);
           ITRACE(4, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
-                 inst, state[inst].weakUseCount(), mapGet(uses, inst.dst(), 0));
+                 inst, state[inst].weakUseCount(),
+                 folly::get_default(uses, inst.dst(), 0));
           break;
         }
 

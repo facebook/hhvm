@@ -16,6 +16,7 @@
 
 #include "folly/Conv.h"
 #include "folly/Format.h"
+#include "folly/MapUtil.h"
 #include "folly/experimental/Gen.h"
 
 #include "hphp/util/trace.h"
@@ -93,7 +94,7 @@ Type Type::fromString(const std::string& str) {
 #   undef IRT
     init = true;
   }
-  return mapGet(types, str, Type::None);
+  return folly::get_default(types, str, Type::None);
 }
 
 bool Type::checkValid() const {

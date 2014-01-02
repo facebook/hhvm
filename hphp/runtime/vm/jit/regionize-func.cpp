@@ -48,7 +48,7 @@ static void markCovered(const TransCFG& cfg, const TransIDVec selectedVec,
   // Mark all incoming arcs into newHead from covered nodes as covered.
   for (auto arc : cfg.inArcs(newHead)) {
     TransID src = arc->src();
-    if (setContains(coveredNodes, src)) {
+    if (coveredNodes.count(src)) {
       coveredArcs.insert(arc);
     }
   }
@@ -70,7 +70,7 @@ static void markCovered(const TransCFG& cfg, const TransIDVec selectedVec,
   // Mark all outgoing arcs from the region to a head node as covered.
   for (auto node : selectedVec) {
     for (auto arc : cfg.outArcs(node)) {
-      if (setContains(heads, arc->dst())) {
+      if (heads.count(arc->dst())) {
         coveredArcs.insert(arc);
       }
     }
@@ -153,7 +153,7 @@ static void sortRegion(RegionVec&                  regions,
     RegionDescPtr bestNext = nullptr;
     auto    regionTransIds = getRegionTransIDVec(regionToTransIds, region);
     for (auto next : regions) {
-      if (setContains(selected, next)) continue;
+      if (selected.count(next)) continue;
       auto nextTransIds = getRegionTransIDVec(regionToTransIds, next);
       int64_t weight = interRegionWeight(regionTransIds, nextTransIds[0], cfg);
       int64_t headWeight = cfg.weight(nextTransIds[0]);
@@ -186,7 +186,7 @@ static void sortRegion(RegionVec&                  regions,
 static bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
                            const TransCFG::ArcPtrSet& coveredArcs) {
   for (auto arc : arcs) {
-    if (!setContains(coveredArcs, arc)) {
+    if (!coveredArcs.count(arc)) {
       return false;
     }
   }
@@ -246,7 +246,7 @@ void regionizeFunc(const Func*         func,
   regions.clear();
 
   for (auto node : nodes) {
-    if (!setContains(coveredNodes, node) ||
+    if (!coveredNodes.count(node) ||
         !allArcsCovered(cfg.inArcs(node),  coveredArcs)) {
       TransID newHead = node;
       FTRACE(6, "regionizeFunc: selecting trace to cover node {}\n", newHead);

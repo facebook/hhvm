@@ -510,11 +510,11 @@ SSATmp* HhbcTranslator::MInstrTranslator::getValAddr() {
   const DynLocation& dl = *m_ni.inputs[0];
   const Location& l = dl.location;
   if (l.space == Location::Local) {
-    assert(!mapContains(m_stackInputs, 0));
+    assert(!m_stackInputs.count(0));
     return m_ht.ldLocAddr(l.offset, DataTypeGeneric); // teleported to container
   } else {
     assert(l.space == Location::Stack);
-    assert(mapContains(m_stackInputs, 0));
+    assert(m_stackInputs.count(0));
     m_ht.spillStack();
     return m_ht.ldStackAddr(m_stackInputs[0],
                             DataTypeGeneric); // teleported to container
@@ -542,7 +542,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i,
   const DynLocation& dl = *m_ni.inputs[i];
   const Location& l = dl.location;
 
-  assert(mapContains(m_stackInputs, i) == (l.space == Location::Stack));
+  assert(!!m_stackInputs.count(i) == (l.space == Location::Stack));
   switch (l.space) {
     case Location::Stack:
       return m_ht.top(Type::StackElem, m_stackInputs[i], tc);

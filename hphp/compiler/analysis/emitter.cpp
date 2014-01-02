@@ -15,6 +15,8 @@
 */
 #include "hphp/compiler/analysis/emitter.h"
 
+#include "folly/MapUtil.h"
+
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
@@ -6090,7 +6092,7 @@ DataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
         n = m_ue.mergeLitstr(cval.asStrRef().get());
         isNonZero = false; // not used for string switches
       }
-      if (!mapContains(caseMap, n)) {
+      if (!caseMap.count(n)) {
         // If 'case n:' appears multiple times, only the first will
         // ever match
         caseMap[n] = i;
@@ -6141,9 +6143,8 @@ void EmitterVisitor::emitIntegerSwitch(Emitter& e, SwitchStatementPtr sw,
   Label* defLabel = state.defI == -1 ? &done : &caseLabels[state.defI];
   std::vector<Label*> labels(nTargets + 2);
   for (int i = 0; i < nTargets; ++i) {
-    int caseIdx;
-    if (mapGet(caseMap, base + i, &caseIdx)) {
-      labels[i] = &caseLabels[caseIdx];
+    if (auto const caseIdx = folly::get_ptr(caseMap, base + i)) {
+      labels[i] = &caseLabels[*caseIdx];
     } else {
       labels[i] = defLabel;
     }
@@ -8734,13 +8735,14 @@ static Unit* emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       static const StringData* continuationCls =
         makeStaticString("continuation");
       StringData* methName = makeStaticString(methodInfo->m_name);
-      ContinuationMethod cmeth;
+      ContinuationMethod* cmeth;
 
       FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
       pce->addMethod(fe);
       if (e.name->isame(continuationCls) &&
-          mapGet(contMethods, methName, &cmeth)) {
-        emitContinuationMethod(*ue, fe, cmeth);
+          (cmeth = folly::get_ptr(contMethods, methName))) {
+        auto methCpy = *cmeth;
+        emitContinuationMethod(*ue, fe, methCpy);
       } else {
         if (e.name->isame(s_construct.get())) {
           hasCtor = true;

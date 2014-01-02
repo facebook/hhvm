@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/type-constraint.h"
 
+#include "folly/MapUtil.h"
+
 #include "hphp/util/base.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_function.h"
@@ -101,7 +103,9 @@ void TypeConstraint::init() {
   Type dtype;
   TRACE(5, "TypeConstraint: this %p type %s, nullable %d\n",
         this, m_typeName->data(), isNullable());
-  if (!mapGet(s_typeNamesToTypes, m_typeName, &dtype) ||
+  auto const mptr = folly::get_ptr(s_typeNamesToTypes, m_typeName);
+  if (mptr) dtype = *mptr;
+  if (!mptr ||
       !(isHHType() || dtype.dt == KindOfArray ||
         dtype.metatype == MetaType::Parent ||
         dtype.metatype == MetaType::Self ||

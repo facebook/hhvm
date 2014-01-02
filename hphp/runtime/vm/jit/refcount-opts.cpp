@@ -18,6 +18,7 @@
 
 #include "folly/Lazy.h"
 #include "folly/Optional.h"
+#include "folly/MapUtil.h"
 
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/util/trace.h"
@@ -594,7 +595,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
         mergedState.pessimize();
       }
 
-      auto* incVal = mapGet(retState.canon, pair.first, pair.first);
+      auto* incVal = folly::get_default(retState.canon, pair.first,
+        pair.first);
       auto const mergedDelta = mergedState.optDelta();
       for (auto& inBlock : pair.second.inBlocks) {
         auto& inState = inBlock.value;

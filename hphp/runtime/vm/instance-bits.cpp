@@ -20,6 +20,7 @@
 #include <tbb/concurrent_hash_map.h>
 
 #include "folly/ScopeGuard.h"
+#include "folly/MapUtil.h"
 
 #include "hphp/util/base.h"
 #include "hphp/util/trace.h"
@@ -159,10 +160,11 @@ void init() {
 unsigned lookup(const StringData* name) {
   assert(s_currentlyInitializing || initFlag.load(std::memory_order_acquire));
 
-  unsigned bit;
-  if (!mapGet(s_instanceBitsMap, name, &bit)) return 0;
-  assert(bit >= 1 && bit < kNumInstanceBits);
-  return bit;
+  if (auto const ptr = folly::get_ptr(s_instanceBitsMap, name)) {
+    assert(*ptr >= 1 && *ptr < kNumInstanceBits);
+    return *ptr;
+  }
+  return 0;
 }
 
 bool getMask(const StringData* name, int& offset, uint8_t& mask) {

@@ -20,6 +20,8 @@
 
 #include <stdint.h>
 
+#include "folly/MapUtil.h"
+
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/text-color.h"
@@ -92,7 +94,9 @@ VMExecutionContext::VMExecutionContext() :
   {
     Lock lock(s_threadIdxLock);
     pid_t tid = Process::GetThreadPid();
-    if (!mapGet(s_threadIdxMap, tid, &m_currentThreadIdx)) {
+    if (auto const idx = folly::get_ptr(s_threadIdxMap, tid)) {
+      m_currentThreadIdx = *idx;
+    } else {
       m_currentThreadIdx = s_threadIdxCounter++;
       s_threadIdxMap[tid] = m_currentThreadIdx;
     }

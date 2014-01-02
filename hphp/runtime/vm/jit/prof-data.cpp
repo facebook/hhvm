@@ -17,6 +17,9 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 
 #include <vector>
+
+#include "folly/MapUtil.h"
+
 #include "hphp/util/base.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/tracelet.h"
@@ -87,7 +90,7 @@ void PrologueToTransMap::add(FuncId funcId, int numArgs, TransID transId) {
 
 TransID PrologueToTransMap::get(FuncId funcId, int numArgs) const {
   auto pid = PrologueID(funcId, numArgs);
-  return mapGet(m_prologueIdToTransId, pid, InvalidID);
+  return folly::get_default(m_prologueIdToTransId, pid, InvalidID);
 }
 
 
@@ -278,11 +281,11 @@ int ProfData::prologueArgs(TransID id) const {
 }
 
 bool ProfData::optimized(const SrcKey& sk) const {
-  return mapContains(m_optimizedSKs, sk);
+  return m_optimizedSKs.count(sk);
 }
 
 bool ProfData::optimized(FuncId funcId) const {
-  return mapContains(m_optimizedFuncs, funcId);
+  return m_optimizedFuncs.count(funcId);
 }
 
 void ProfData::setOptimized(const SrcKey& sk) {
@@ -294,7 +297,7 @@ void ProfData::setOptimized(FuncId funcId) {
 }
 
 bool ProfData::profiling(FuncId funcId) const {
-  return mapContains(m_profilingFuncs, funcId);
+  return m_profilingFuncs.count(funcId);
 }
 
 void ProfData::setProfiling(FuncId funcId) {

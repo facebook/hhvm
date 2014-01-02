@@ -27,6 +27,7 @@
 #include <string>
 
 #include "folly/Conv.h"
+#include "folly/MapUtil.h"
 
 #include "hphp/util/trace.h"
 #include "hphp/util/biased-coin.h"
@@ -1693,7 +1694,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
             // and there's an earlier bytecode in the tracelet
             // thats going to fatal
             NormalizedInstruction *src = nullptr;
-            if (mapContains(tas.m_changeSet, dl->location)) {
+            if (tas.m_changeSet.count(dl->location)) {
               src = findInputSrc(tas.m_t->m_instrStream.last, dl);
               if (src && src->outputPredicted) {
                 src->outputPredicted = false;
@@ -1722,7 +1723,7 @@ bool Translator::applyInputMetaData(Unit::MetaHandle& metaHand,
            * profiler we want to clear outputPredicted to
            * avoid unneeded guards
            */
-          if (mapContains(tas.m_changeSet, dl->location)) {
+          if (tas.m_changeSet.count(dl->location)) {
             NormalizedInstruction *src =
               findInputSrc(tas.m_t->m_instrStream.last, dl);
             if (src->outputPredicted) {
@@ -1946,7 +1947,7 @@ void getInputsImpl(SrcKey startSk,
   const SrcKey& sk = ni->source;
 #endif
   assert(inputs.empty());
-  if (debug && !mapContains(instrInfo, ni->op())) {
+  if (debug && !instrInfo.count(ni->op())) {
     fprintf(stderr, "Translator does not understand "
       "instruction %s\n", opcodeToName(ni->op()));
     assert(false);
@@ -2508,27 +2509,27 @@ bool DynLocation::canBeAliased() const {
 
 // Test the type of a location without recording it as a read yet.
 RuntimeType TraceletContext::currentType(const Location& l) const {
-  DynLocation* dl;
-  if (!mapGet(m_currentMap, l, &dl)) {
-    assert(!mapContains(m_deletedSet, l));
-    assert(!mapContains(m_changeSet, l));
+  auto const dl = folly::get_ptr(m_currentMap, l);
+  if (!dl) {
+    assert(!m_deletedSet.count(l));
+    assert(!m_changeSet.count(l));
     return tx64->liveType(l, *liveUnit());
   }
-  return dl->rtt;
+  return (*dl)->rtt;
 }
 
 DynLocation* TraceletContext::recordRead(const InputInfo& ii,
                                          DataType staticType) {
   if (staticType == KindOfNone) staticType = KindOfAny;
 
-  DynLocation* dl;
   const Location& l = ii.loc;
-  if (!mapGet(m_currentMap, l, &dl)) {
+  auto dl = folly::get_default(m_currentMap, l, nullptr);
+  if (!dl) {
     // We should never try to read a location that has been deleted
-    assert(!mapContains(m_deletedSet, l));
+    assert(!m_deletedSet.count(l));
     // If the given location was not in m_currentMap, then it shouldn't
     // be in m_changeSet either
-    assert(!mapContains(m_changeSet, l));
+    assert(!m_changeSet.count(l));
     if (ii.dontGuard && !l.isLiteral()) {
       assert(staticType != KindOfRef);
       dl = m_t->newDynLocation(l, RuntimeType(staticType));

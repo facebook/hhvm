@@ -379,7 +379,7 @@ CallMap::CallMap(CallInfoList infos) {
 }
 
 bool CallMap::hasInfo(Opcode op) {
-  return mapContains(s_callMap.m_map, op);
+  return s_callMap.m_map.count(op) != 0;
 }
 
 const CallInfo& CallMap::info(Opcode op) {

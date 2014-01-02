@@ -15,6 +15,8 @@
 */
 #include "hphp/runtime/vm/jit/translator-x64.h"
 
+#include "folly/MapUtil.h"
+
 #include <cinttypes>
 #include <stdint.h>
 #include <assert.h>
@@ -1633,7 +1635,7 @@ TranslatorX64::getNativeTrampoline(TCA helperAddr) {
   if (!RuntimeOption::EvalJitTrampolines && !Stats::enabled()) {
     return helperAddr;
   }
-  TCA trampAddr = (TCA)mapGet<PointerMap>(trampolineMap, helperAddr);
+  auto const trampAddr = (TCA)folly::get_default(trampolineMap, helperAddr);
   if (trampAddr) {
     return trampAddr;
   }

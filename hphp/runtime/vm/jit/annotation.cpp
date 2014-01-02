@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/vm/jit/annotation.h"
+
+#include "folly/MapUtil.h"
+
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -183,13 +186,12 @@ void annotate(NormalizedInstruction* i) {
     } break;
     case OpFCall:
     case OpFCallArray: {
-      CallRecord callRec;
-      if (mapGet(s_callDB, i->source, &callRec)) {
-        if (callRec.m_type == CallRecordType::Function) {
-          i->funcd = callRec.m_func;
+      if (auto const callRec = folly::get_ptr(s_callDB, i->source)) {
+        if (callRec->m_type == CallRecordType::Function) {
+          i->funcd = callRec->m_func;
         } else {
-          assert(callRec.m_type == CallRecordType::EncodedNameAndArgs);
-          i->funcName = callRec.m_encodedName;
+          assert(callRec->m_type == CallRecordType::EncodedNameAndArgs);
+          i->funcName = callRec->m_encodedName;
         }
       } else {
         i->funcName = nullptr;
@@ -201,14 +203,13 @@ void annotate(NormalizedInstruction* i) {
 
 const StringData*
 fcallToFuncName(const NormalizedInstruction* i) {
-  CallRecord callRec;
-  if (mapGet(s_callDB, i->source, &callRec)) {
-    if (callRec.m_type == CallRecordType::Function) {
-      return callRec.m_func->name();
+  if (auto const callRec = folly::get_ptr(s_callDB, i->source)) {
+    if (callRec->m_type == CallRecordType::Function) {
+      return callRec->m_func->name();
     }
     string name;
     int numArgs;
-    decodeNameAndArgs(callRec.m_encodedName, name, numArgs);
+    decodeNameAndArgs(callRec->m_encodedName, name, numArgs);
     return makeStaticString(name.c_str());
   }
   return nullptr;

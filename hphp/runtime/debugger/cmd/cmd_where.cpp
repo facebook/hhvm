@@ -79,7 +79,7 @@ Array CmdWhere::fetchStackTrace(DebuggerClient &client) {
   bool isAsync = m_type == KindOfWhereAsync;
   if (st.isNull() || (isAsync != client.isStackTraceAsync())) {
     m_stackArgs = client.getDebuggerClientStackArgs();
-    CmdWherePtr cmd = client.xend<CmdWhere>(this);
+    auto cmd = client.xend<CmdWhere>(this);
     st = cmd->m_stacktrace;
     client.setStackTrace(st, isAsync);
   }

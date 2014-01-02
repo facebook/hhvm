@@ -131,8 +131,8 @@ bool FastCGIConnection::hasReadDataAvailable() {
   return ((chain != nullptr) && (chain->length() != 0));
 }
 
-ProtocolSessionHandlerPtr FastCGIConnection::newSessionHandler(
-                                               int transport_id) {
+std::shared_ptr<ProtocolSessionHandler>
+FastCGIConnection::newSessionHandler(int transport_id) {
   auto transport = std::make_shared<FastCGITransport>(this, transport_id);
   m_transports[transport_id] = transport;
   return transport;
@@ -287,7 +287,8 @@ int FastCGIServer::getLibEventConnectionCount() {
   return conns;
 }
 
-void FastCGIServer::handleRequest(FastCGITransportPtr transport) {
+void FastCGIServer::handleRequest(
+    std::shared_ptr<FastCGITransport> transport) {
   auto job = std::make_shared<FastCGIJob>(transport);
   m_dispatcher.enqueue(job);
 }

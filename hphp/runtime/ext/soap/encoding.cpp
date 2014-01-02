@@ -2043,9 +2043,10 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
   }
 }
 
-static sdlExtraAttributePtr get_extra_attributes(sdlType *sdl_type,
-                                                 const char *type,
-                                                 const char *wsdl_type) {
+static std::shared_ptr<sdlExtraAttribute>
+get_extra_attributes(sdlType *sdl_type,
+                     const char *type,
+                     const char *wsdl_type) {
   if (sdl_type) {
     sdlAttributeMap::const_iterator iterAttributes =
       sdl_type->attributes.find(type);
@@ -2058,7 +2059,7 @@ static sdlExtraAttributePtr get_extra_attributes(sdlType *sdl_type,
       }
     }
   }
-  return sdlExtraAttributePtr();
+  return std::shared_ptr<sdlExtraAttribute>();
 }
 
 static xmlNodePtr to_xml_array(encodeTypePtr type, CVarRef data_, int style,
@@ -2109,7 +2110,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, CVarRef data_, int style,
   }
 
   if (data.isArray()) {
-    sdlExtraAttributePtr ext;
+    std::shared_ptr<sdlExtraAttribute> ext;
     sdlTypeMap::const_iterator iterElements;
     sdlAttributeMap::const_iterator iterAttributes;
     sdlExtraAttributeMap::const_iterator iterExtraAttributes;
@@ -2172,7 +2173,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, CVarRef data_, int style,
              iterAttributes->second->extraAttributes.find
              (WSDL_NAMESPACE":arraySize")) !=
             iterAttributes->second->extraAttributes.end()) {
-          sdlExtraAttributePtr ext = iterExtraAttributes->second;
+          auto ext = iterExtraAttributes->second;
           dimension = calc_dimension_12(ext->val.c_str());
           dims = get_position_12(dimension, ext->val.c_str());
           if (dims[0] == 0) {dims[0] = i;}
@@ -2293,7 +2294,7 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
   xmlAttrPtr attr;
   sdl *sdl;
   sdlAttributePtr arrayType;
-  sdlExtraAttributePtr ext;
+  std::shared_ptr<sdlExtraAttribute> ext;
   sdlTypePtr elementType;
 
   FIND_XML_NULL(data, ret);

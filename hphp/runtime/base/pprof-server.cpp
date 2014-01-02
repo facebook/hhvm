@@ -161,6 +161,6 @@ bool HeapProfileRequestHandler::handleStartRequest(Transport *transport) {
   }
 }
 
-HeapProfileServerPtr HeapProfileServer::Server;
+std::shared_ptr<HeapProfileServer> HeapProfileServer::Server;
 
 }

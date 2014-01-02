@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_COMMAND_H_
 #define incl_HPHP_EVAL_DEBUGGER_COMMAND_H_
 
+#include <memory>
+
 #include "hphp/util/base.h"
 #include "hphp/runtime/debugger/debugger_thrift_buffer.h"
 #include "hphp/runtime/debugger/debugger_client.h"
@@ -32,7 +34,8 @@ namespace HPHP { namespace Eval {
 // is in the onServer* methods.
 //
 
-DECLARE_BOOST_TYPES(DebuggerCommand);
+struct DebuggerCommand;
+using DebuggerCommandPtr = std::shared_ptr<DebuggerCommand>;
 class DebuggerCommand {
 public:
   /**

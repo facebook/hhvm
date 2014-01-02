@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_EXPRESSION_H_
 #define incl_HPHP_EXPRESSION_H_
 
+#include "hphp/util/deprecated/declare-boost-types.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/compiler/construct.h"
 #include "hphp/compiler/analysis/type.h"
 #include "hphp/compiler/analysis/analysis_result.h"

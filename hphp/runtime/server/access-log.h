@@ -87,7 +87,7 @@ private:
                FILE *outFile, const char *format);
 
   std::vector<LogFileData> m_output;
-  std::vector<CronologPtr> m_cronOutput;
+  std::vector<std::shared_ptr<Cronolog>> m_cronOutput;
   bool m_initialized;
   GetThreadDataFunc m_fGetThreadData;
   std::string m_defaultFormat;

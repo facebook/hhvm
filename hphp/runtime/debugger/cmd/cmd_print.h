@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdPrint);
 class CmdPrint : public DebuggerCommand {
 public:
   static const char *Formats[];

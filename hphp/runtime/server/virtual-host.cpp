@@ -222,7 +222,7 @@ void VirtualHost::init(Hdf vh) {
 
   if (vh["IpBlockMap"].firstChild().exists()) {
     Hdf ipblocks = vh["IpBlockMap"];
-    m_ipBlocks = IpBlockMapPtr(new IpBlockMap(ipblocks));
+    m_ipBlocks = std::make_shared<IpBlockMap>(ipblocks);
   }
 
   Hdf logFilters = vh["LogFilters"];

@@ -29,6 +29,7 @@
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/server/request-uri.h"
 #include "hphp/runtime/server/http-protocol.h"
+#include "hphp/runtime/server/files-match.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/alloc.h"

@@ -59,7 +59,7 @@ void CmdConstant::onClient(DebuggerClient &client) {
     return;
   }
 
-  CmdConstantPtr cmd = client.xend<CmdConstant>(this);
+  auto cmd = client.xend<CmdConstant>(this);
   if (cmd->m_constants.empty()) {
     client.info("(no constant was defined)");
   } else {

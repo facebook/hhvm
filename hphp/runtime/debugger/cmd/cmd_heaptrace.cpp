@@ -209,7 +209,7 @@ void CmdHeaptrace::onClient(DebuggerClient &client) {
     return;
   }
 
-  CmdHeaptracePtr cmd = client.xend<CmdHeaptrace>(this);
+  auto cmd = client.xend<CmdHeaptrace>(this);
 
   if (file.empty()) {
     cmd->printHeap(client);

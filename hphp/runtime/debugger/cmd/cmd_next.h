@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdNext);
 class CmdNext : public CmdFlowControl {
 public:
   CmdNext() :

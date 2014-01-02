@@ -186,7 +186,7 @@ void StackTraceNoHeap::printStackTrace(int fd) const {
   // ~bfds[i].bc here (unlike the heap case)
 }
 
-void StackTrace::get(FramePtrVec &frames) const {
+void StackTrace::get(std::vector<std::shared_ptr<Frame>> &frames) const {
   frames.clear();
   for (vector<void*>::const_iterator btpi = m_bt_pointers.begin();
        btpi != m_bt_pointers.end(); ++btpi) {
@@ -296,12 +296,12 @@ bool StackTraceBase::Translate(void *frame, StackTraceBase::Frame * f,
   return true;
 }
 
-StackTrace::FramePtr StackTrace::Translate(void *frame) {
+std::shared_ptr<StackTrace::Frame> StackTrace::Translate(void *frame) {
   Dl_info dlInfo;
   addr2line_data adata;
 
   Frame * f1 = new Frame(frame);
-  FramePtr f(f1);
+  std::shared_ptr<Frame> f(f1);
   if (!StackTraceBase::Translate(frame, f1, dlInfo, &adata)) {
     // Lookup using dladdr() failed, so this is probably a PHP symbol.
     // Let's check the perf map.

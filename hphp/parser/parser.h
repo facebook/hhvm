@@ -162,7 +162,7 @@ protected:
   const char *m_fileName;
 
   Location m_loc;
-  LocationPtrVec m_funcLocs;
+  std::vector<std::shared_ptr<Location>> m_funcLocs;
   std::vector<bool> m_classes; // used to determine if we are currently
                                // inside a regular class or an XHP class
 

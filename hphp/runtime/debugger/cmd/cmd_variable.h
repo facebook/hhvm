@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdVariable);
 class CmdVariable : public DebuggerCommand {
 public:
   static Array GetGlobalVariables();

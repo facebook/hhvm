@@ -17,12 +17,14 @@
 #ifndef incl_HPHP_FILES_MATCH_H_
 #define incl_HPHP_FILES_MATCH_H_
 
+#include <string>
+#include <vector>
+
 #include "hphp/util/hdf.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(FilesMatch);
 class FilesMatch {
 public:
   explicit FilesMatch(Hdf vh);

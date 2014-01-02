@@ -25,7 +25,6 @@ namespace HPHP {
 class VirtualHost;
 class Transport;
 
-DECLARE_BOOST_TYPES(RequestURI);
 class RequestURI {
 public:
   RequestURI(const VirtualHost *vhost, Transport *transport,

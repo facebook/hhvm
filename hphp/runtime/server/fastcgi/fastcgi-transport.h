@@ -37,7 +37,6 @@ class FastCGITransport;
 
 class FastCGIConnection;
 
-DECLARE_BOOST_TYPES(FastCGITransport);
 class FastCGITransport
   : public Transport,
     public ProtocolSessionHandler {

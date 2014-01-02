@@ -40,10 +40,11 @@ std::string ServerData::DefaultPassword = "";
 
 class DBConnQueryJob {
  public:
-  DBConnQueryJob(ServerDataPtr server, const std::string sql, int index,
-           Mutex &mutex, DBDataSet &dsResult, bool retryQueryOnFail,
-           unsigned int readTimeout, unsigned int connectTimeout,
-           int maxRetryOpenOnFail, int maxRetryQueryOnFail)
+  DBConnQueryJob(std::shared_ptr<ServerData> server, const std::string sql,
+                 int index,
+                 Mutex &mutex, DBDataSet &dsResult, bool retryQueryOnFail,
+                 unsigned int readTimeout, unsigned int connectTimeout,
+                 int maxRetryOpenOnFail, int maxRetryQueryOnFail)
       : m_server(server), m_sql(sql), m_index(index),
         m_affected(0), m_dsMutex(&mutex), m_dsResult(&dsResult),
         m_retryQueryOnFail(retryQueryOnFail), m_connectTimeout(connectTimeout),
@@ -51,7 +52,7 @@ class DBConnQueryJob {
         m_maxRetryOpenOnFail(maxRetryOpenOnFail),
         m_maxRetryQueryOnFail(maxRetryQueryOnFail) {}
 
-  ServerDataPtr m_server;
+  std::shared_ptr<ServerData> m_server;
   std::string m_sql;
   int m_index;
   int m_affected;
@@ -68,7 +69,7 @@ class DBConnQueryJob {
 class DBConnQueryWorker {
  public:
   void onThreadEnter() {}
-  void doJob(DBConnQueryJobPtr job);
+  void doJob(std::shared_ptr<DBConnQueryJob> job);
   void onThreadExit() { mysql_thread_end();}
 };
 
@@ -85,8 +86,8 @@ static void parseColonPair(std::string &s, size_t pos,
   }
 }
 
-ServerDataPtr ServerData::Create(const std::string &connection) {
-  ServerDataPtr server(new ServerData());
+std::shared_ptr<ServerData> ServerData::Create(const std::string &connection) {
+  auto server = std::make_shared<ServerData>();
   string s = connection;
 
   size_t pos = s.find('@');
@@ -151,8 +152,8 @@ void DBConn::AddLocalDB(int dbId, const char *ip, const char *db,
                         const SessionVariableVec &sessionVariables) {
   Lock lock(s_mutex);
   s_localDatabases[dbId] =
-    ServerDataPtr(new ServerData(ip, db, port, username, password,
-                                 sessionVariables));
+    std::make_shared<ServerData>(ip, db, port, username, password,
+                                 sessionVariables);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -167,7 +168,8 @@ DBConn::~DBConn() {
   close();
 }
 
-void DBConn::open(ServerDataPtr server, int connectTimeout /* = -1 */,
+void DBConn::open(std::shared_ptr<ServerData> server,
+                  int connectTimeout /* = -1 */,
                   int readTimeout /* = -1 */) {
   if (isOpened()) {
     close();
@@ -313,19 +315,19 @@ int DBConn::parallelExecute(const char *sql, DBDataSet &ds,
     return -1;
   }
 
-  DBConnQueryJobPtrVec jobs;
+  std::vector<std::shared_ptr<DBConnQueryJob>> jobs;
   Mutex mutex;
   jobs.reserve(s_localDatabases.size());
   string ssql = sql; // so we have copy-on-write in the loop
   for (DatabaseMap::const_iterator iter = s_localDatabases.begin();
        iter != s_localDatabases.end(); ++iter) {
-    jobs.push_back(DBConnQueryJobPtr(
-                     new DBConnQueryJob(iter->second, ssql, iter->first,
+    jobs.push_back(std::make_shared<DBConnQueryJob>(
+                                        iter->second, ssql, iter->first,
                                         mutex, ds,
                                         retryQueryOnFail, connectTimeout,
                                         readTimeout,
                                         maxRetryOpenOnFail,
-                                        maxRetryQueryOnFail)));
+                                        maxRetryQueryOnFail));
   }
   return parallelExecute(jobs, errors, maxThread);
 }
@@ -340,23 +342,24 @@ int DBConn::parallelExecute(const ServerQueryVec &sqls, DBDataSet &ds,
     return 0;
   }
 
-  DBConnQueryJobPtrVec jobs;
+  std::vector<std::shared_ptr<DBConnQueryJob>> jobs;
   Mutex mutex;
   jobs.reserve(sqls.size());
   for (unsigned int i = 0; i < sqls.size(); i++) {
     const ServerQuery &query = sqls[i];
 
-    DBConnQueryJobPtr job(
-      new DBConnQueryJob(query.first, query.second, i, mutex, ds,
+    auto job = std::make_shared<DBConnQueryJob>(
+                         query.first, query.second, i, mutex, ds,
                          retryQueryOnFail, connectTimeout,
                          readTimeout,
-                         maxRetryOpenOnFail, maxRetryQueryOnFail));
+                         maxRetryOpenOnFail, maxRetryQueryOnFail);
     jobs.push_back(job);
   }
   return parallelExecute(jobs, errors, maxThread);
 }
 
-int DBConn::parallelExecute(const ServerQueryVec &sqls, DBDataSetPtrVec &dss,
+int DBConn::parallelExecute(const ServerQueryVec &sqls,
+                            std::vector<std::shared_ptr<DBDataSet>> &dss,
                             ErrorInfoMap &errors, int maxThread,
                             bool retryQueryOnFail, int connectTimeout,
                             int readTimeout,
@@ -368,30 +371,31 @@ int DBConn::parallelExecute(const ServerQueryVec &sqls, DBDataSetPtrVec &dss,
     return 0;
   }
 
-  DBConnQueryJobPtrVec jobs;
+  std::vector<std::shared_ptr<DBConnQueryJob>> jobs;
   Mutex mutex;
   jobs.reserve(sqls.size());
   for (unsigned int i = 0; i < sqls.size(); i++) {
     const ServerQuery &query = sqls[i];
 
-    DBConnQueryJobPtr job(
-      new DBConnQueryJob(query.first, query.second, i, mutex,
+    auto job = std::make_shared<DBConnQueryJob>(
+                         query.first, query.second, i, mutex,
                          *dss[i], retryQueryOnFail, connectTimeout,
                          readTimeout,
-                         maxRetryOpenOnFail, maxRetryQueryOnFail));
+                         maxRetryOpenOnFail, maxRetryQueryOnFail);
     jobs.push_back(job);
   }
   return parallelExecute(jobs, errors, maxThread);
 }
 
-int DBConn::parallelExecute(DBConnQueryJobPtrVec &jobs, ErrorInfoMap &errors,
+int DBConn::parallelExecute(std::vector<std::shared_ptr<DBConnQueryJob>> &jobs,
+                            ErrorInfoMap &errors,
                             int maxThread) {
   if (maxThread <= 0) maxThread = DefaultWorkerCount;
   JobDispatcher<DBConnQueryJob, DBConnQueryWorker>(jobs, maxThread).run();
 
   int affected = 0;
   for (unsigned int i = 0; i < jobs.size(); i++) {
-    DBConnQueryJobPtr job = jobs[i];
+    auto job = jobs[i];
 
     int count = job->m_affected;
     if (count >= 0) {
@@ -403,7 +407,7 @@ int DBConn::parallelExecute(DBConnQueryJobPtrVec &jobs, ErrorInfoMap &errors,
   return affected;
 }
 
-void DBConnQueryWorker::doJob(DBConnQueryJobPtr job) {
+void DBConnQueryWorker::doJob(std::shared_ptr<DBConnQueryJob> job) {
   string &sql = job->m_sql;
   Util::replaceAll(sql, "INDEX", lexical_cast<string>(job->m_index).c_str());
 

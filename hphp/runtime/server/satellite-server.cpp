@@ -86,7 +86,7 @@ bool SatelliteServerInfo::checkMainURL(const std::string& path) {
 
 class InternalPageServer : public SatelliteServer {
 public:
-  explicit InternalPageServer(SatelliteServerInfoPtr info)
+  explicit InternalPageServer(std::shared_ptr<SatelliteServerInfo> info)
     : m_allowedURLs(info->getURLs()) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
@@ -133,7 +133,7 @@ private:
 
 class DanglingPageServer : public SatelliteServer {
 public:
-  explicit DanglingPageServer(SatelliteServerInfoPtr info) {
+  explicit DanglingPageServer(std::shared_ptr<SatelliteServerInfo> info) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
        info->getThreadCount());
@@ -163,7 +163,7 @@ private:
 
 class RPCServer : public SatelliteServer {
 public:
-  explicit RPCServer(SatelliteServerInfoPtr info) {
+  explicit RPCServer(std::shared_ptr<SatelliteServerInfo> info) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
        info->getThreadCount());
@@ -195,9 +195,11 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // SatelliteServer
 
-SatelliteServerPtr SatelliteServer::Create(SatelliteServerInfoPtr info) {
-  SatelliteServerPtr satellite;
+std::shared_ptr<SatelliteServer>
+SatelliteServer::Create(std::shared_ptr<SatelliteServerInfo> info) {
+  std::shared_ptr<SatelliteServer> satellite;
   if (info->getPort()) {
+    using SatelliteServerPtr = std::shared_ptr<SatelliteServer>;
     switch (info->getType()) {
     case Type::KindOfInternalPageServer:
       satellite = SatelliteServerPtr(new InternalPageServer(info));

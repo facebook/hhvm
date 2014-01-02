@@ -66,11 +66,10 @@ public:
   static std::string ReportStats();
 
 private:
-  DECLARE_BOOST_TYPES(Stats);
   struct Stats {
     int actions[VERB_COUNT];
   };
-  typedef hphp_string_map<StatsPtr> StatsMap;
+  typedef hphp_string_map<std::shared_ptr<Stats>> StatsMap;
 
   static bool s_inited;
   static hphp_string_map<Verb> s_verbs;

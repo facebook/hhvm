@@ -87,7 +87,7 @@ sdlPtr SoapData::get_sdl_impl(const char *uri, long cache_wsdl,
   if (cache_wsdl & WSDL_CACHE_MEMORY) {
     sdlCache::iterator iter = m_mem_cache.find(uri);
     if (iter != m_mem_cache.end()) {
-      sdlCacheBucketPtr p = iter->second;
+      auto p = iter->second;
       if (p->time >= time(0) - m_cache_ttl) {
         return p->sdl;
       }
@@ -102,7 +102,7 @@ sdlPtr SoapData::get_sdl_impl(const char *uri, long cache_wsdl,
   m_error_code = old;
 
   if (sdl && (cache_wsdl & WSDL_CACHE_MEMORY)) {
-    sdlCacheBucketPtr p(new sdlCacheBucket());
+    auto p = std::make_shared<sdlCacheBucket>();
     p->sdl = sdl;
     p->time = time(0);
     m_mem_cache[uri] = p;

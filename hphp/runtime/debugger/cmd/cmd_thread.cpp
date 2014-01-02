@@ -84,7 +84,7 @@ void CmdThread::help(DebuggerClient &client) {
 
 void CmdThread::processList(DebuggerClient &client, bool output /* = true */) {
   m_body = "list";
-  CmdThreadPtr res = client.xend<CmdThread>(this);
+  auto res = client.xend<CmdThread>(this);
   client.updateThreads(res->m_threads);
   if (!output) return;
 
@@ -109,7 +109,7 @@ void CmdThread::onClient(DebuggerClient &client) {
 
   if (client.argCount() == 0) {
     m_body = "info";
-    CmdThreadPtr res = client.xend<CmdThread>(this);
+    auto res = client.xend<CmdThread>(this);
     client.print(res->m_out);
   } else if (client.arg(1, "list")) {
     processList(client);

@@ -34,8 +34,11 @@ namespace Eval {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(DebuggerCommand);
-DECLARE_BOOST_TYPES(CmdInterrupt);
+struct DebuggerCommand;
+struct CmdInterrupt;
+
+using DebuggerCommandPtr = std::shared_ptr<DebuggerCommand>;
+
 class DebuggerClient {
 public:
   static int LineWidth;
@@ -212,7 +215,7 @@ public:
   /**
    * Sandbox functions.
    */
-  void updateSandboxes(DSandboxInfoPtrVec &sandboxes) {
+  void updateSandboxes(std::vector<DSandboxInfoPtr> &sandboxes) {
     m_sandboxes = sandboxes;
   }
   DSandboxInfoPtr getSandbox(int index) const;
@@ -222,7 +225,7 @@ public:
   /**
    * Thread functions.
    */
-  void updateThreads(DThreadInfoPtrVec threads);
+  void updateThreads(std::vector<DThreadInfoPtr> threads);
   DThreadInfoPtr getThread(int index) const;
   int64_t getCurrentThreadId() const { return m_threadId;}
 
@@ -230,10 +233,10 @@ public:
    * Current source location and breakpoints.
    */
   BreakPointInfoPtr getCurrentLocation() const { return m_breakpoint;}
-  BreakPointInfoPtrVec *getBreakPoints() { return &m_breakpoints;}
-  void setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints);
+  std::vector<BreakPointInfoPtr> *getBreakPoints() { return &m_breakpoints;}
+  void setMatchedBreakPoints(std::vector<BreakPointInfoPtr> breakpoints);
   void setCurrentLocation(int64_t threadId, BreakPointInfoPtr breakpoint);
-  BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
+  std::vector<BreakPointInfoPtr> *getMatchedBreakPoints() { return &m_matched;}
 
   // Retrieves a source location that is the current focus of the
   // debugger. The current focus is initially determined by the
@@ -288,7 +291,9 @@ public:
   void startMacro(std::string name);
   void endMacro();
   bool playMacro(std::string name);
-  const MacroPtrVec &getMacros() const { return m_macros;}
+  const std::vector<std::shared_ptr<Macro>> &getMacros() const {
+    return m_macros;
+  }
   bool deleteMacro(int index);
 
   DECLARE_DBG_CLIENT_SETTING_ACCESSORS
@@ -360,22 +365,23 @@ private:
   std::vector<int> m_argIdx;
   std::string m_code;
 
-  MacroPtrVec m_macros;
-  MacroPtr m_macroRecording;
-  MacroPtr m_macroPlaying;
+  std::vector<std::shared_ptr<Macro>> m_macros;
+  std::shared_ptr<Macro> m_macroRecording;
+  std::shared_ptr<Macro> m_macroPlaying;
 
-  DMachineInfoPtrVec m_machines; // All connected machines. 0th is local.
-  DMachineInfoPtr m_machine;     // Current machine
-  std::string m_rpcHost;         // Current RPC host
+  std::vector<std::shared_ptr<DMachineInfo>>
+    m_machines; // All connected machines. 0th is local.
+  std::shared_ptr<DMachineInfo> m_machine; // Current machine
+  std::string m_rpcHost; // Current RPC host
 
-  DSandboxInfoPtrVec m_sandboxes;
-  DThreadInfoPtrVec m_threads;
+  std::vector<DSandboxInfoPtr> m_sandboxes;
+  std::vector<DThreadInfoPtr> m_threads;
   int64_t m_threadId;
   std::map<int64_t, int> m_threadIdMap; // maps threadId to index
 
-  BreakPointInfoPtrVec m_breakpoints;
+  std::vector<BreakPointInfoPtr> m_breakpoints;
   BreakPointInfoPtr m_breakpoint;
-  BreakPointInfoPtrVec m_matched;
+  std::vector<BreakPointInfoPtr> m_matched;
 
   // list command's current location, which may be different from m_breakpoint
 
@@ -425,7 +431,7 @@ private:
 
   // connections
   void closeAllConnections();
-  void switchMachine(DMachineInfoPtr machine);
+  void switchMachine(std::shared_ptr<DMachineInfo> machine);
   SmartPtr<Socket> connectLocal();
   bool connectRemote(const std::string &host, int port);
   bool tryConnect(const std::string &host, int port, bool clearmachines);

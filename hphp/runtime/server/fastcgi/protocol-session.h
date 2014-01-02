@@ -30,7 +30,8 @@ public:
   public:
     virtual ~Callback() {}
 
-    virtual ProtocolSessionHandlerPtr newSessionHandler(int handler_id) = 0;
+    virtual std::shared_ptr<ProtocolSessionHandler>
+      newSessionHandler(int handler_id) = 0;
     virtual void onSessionEgress(std::unique_ptr<folly::IOBuf> chain) = 0;
     virtual void onSessionError() = 0;
     virtual void onSessionClose() = 0;

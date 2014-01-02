@@ -51,7 +51,7 @@ void WarmupRequestHandlerFactory::bumpReqCount() {
   if (!num) {
     return;
   }
-  ServerPtr server = m_server.lock();
+  auto const server = m_server.lock();
   if (!server) {
     return;
   }

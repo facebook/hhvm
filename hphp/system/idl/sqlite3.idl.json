@@ -55,7 +55,7 @@
             "flags": [
                 "NoDefaultSweep"
             ],
-            "footer": "\n  public: void validate() const;\n  public: sqlite3 *m_raw_db;\n    DECLARE_BOOST_TYPES(UserDefinedFunc);\n    struct UserDefinedFunc {\n      int argc;\n      Variant func;\n      Variant step;\n      Variant fini;\n    };\n  public: UserDefinedFuncPtrVec m_udfs;",
+            "footer": "",
             "funcs": [
                 {
                     "name": "__construct",
@@ -411,7 +411,7 @@
             "flags": [
                 "NoDefaultSweep"
             ],
-            "footer": "\n  public: void validate() const;\n  public: p_SQLite3 m_db;\n  public: sqlite3_stmt *m_raw_stmt;\n    DECLARE_BOOST_TYPES(BoundParam);\n    struct BoundParam {\n      int type;\n      int index;\n      Variant value;\n    };\n  public: BoundParamPtrVec m_bound_params;",
+            "footer": "",
             "funcs": [
                 {
                     "name": "__construct",

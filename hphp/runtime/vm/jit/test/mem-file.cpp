@@ -66,7 +66,7 @@ TEST(TestMemFile, DataConstructor) {
 }
 
 TEST(TestMemFile, BadReadFromCache) {
-  StaticContentCache::TheFileCache = FileCachePtr(new FileCache());
+  StaticContentCache::TheFileCache = std::make_shared<FileCache>();
 
   MemFile mf;
   ASSERT_FALSE(mf.open("/some/random/file", "r"));
@@ -80,7 +80,7 @@ TEST(TestMemFile, BadOpenModes) {
 }
 
 TEST(TestMemFile, EmptyFileInCache) {
-  StaticContentCache::TheFileCache = FileCachePtr(new FileCache());
+  StaticContentCache::TheFileCache = std::make_shared<FileCache>();
   StaticContentCache::TheFileCache->write("/no/content/entry");
 
   MemFile mf;
@@ -93,7 +93,7 @@ TEST(TestMemFile, EmptyFileInCache) {
 }
 
 TEST(TestMemFile, NotInCache) {
-  StaticContentCache::TheFileCache = FileCachePtr(new FileCache());
+  StaticContentCache::TheFileCache = std::make_shared<FileCache>();
 
   MemFile mf;
   ASSERT_FALSE(mf.open("/not/even/there", "r"));
@@ -103,7 +103,7 @@ TEST(TestMemFile, RealFileInCache) {
   string temp_fn;
   ASSERT_TRUE(makeTempFile("123abc", &temp_fn));
 
-  StaticContentCache::TheFileCache = FileCachePtr(new FileCache());
+  StaticContentCache::TheFileCache = std::make_shared<FileCache>();
   StaticContentCache::TheFileCache->write("/content", temp_fn.c_str());
 
   MemFile mf;

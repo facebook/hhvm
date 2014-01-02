@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdFrame);
 class CmdFrame : public DebuggerCommand {
 public:
   CmdFrame() : DebuggerCommand(KindOfFrame) {}

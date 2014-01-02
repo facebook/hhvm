@@ -90,17 +90,6 @@ class hphp_string_iset :
 
 //////////////////////////////////////////////////////////////////////
 
-#define DECLARE_EXTENDED_BOOST_TYPES(classname)                 \
-  DECLARE_BOOST_TYPES(classname)                                \
-  typedef hphp_string_hash_map<classname ## Ptr, classname>     \
-    StringTo ## classname ## PtrMap;                            \
-  typedef hphp_string_hash_map<classname ## PtrVec, classname>  \
-    StringTo ## classname ## PtrVecMap;                         \
-  typedef hphp_string_hash_map<classname ## PtrSet, classname>  \
-    StringTo ## classname ## PtrSetMap;
-
-//////////////////////////////////////////////////////////////////////
-
 }
 
 #endif

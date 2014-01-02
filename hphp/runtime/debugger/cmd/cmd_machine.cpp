@@ -108,7 +108,7 @@ void CmdMachine::help(DebuggerClient &client) {
 bool CmdMachine::processList(DebuggerClient &client,
                              bool output /* = true */) {
   m_body = "list";
-  CmdMachinePtr res = client.xend<CmdMachine>(this);
+  auto res = client.xend<CmdMachine>(this);
   client.updateSandboxes(res->m_sandboxes);
   if (!output) return true;
 
@@ -164,7 +164,7 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
 
   client.info("Attaching to %s and pre-loading, please wait...",
                sandbox->desc().c_str());
-  CmdMachinePtr cmdMachine = client.xend<CmdMachine>(&cmd);
+  auto cmdMachine = client.xend<CmdMachine>(&cmd);
   if (cmdMachine->m_succeed) {
     client.setSandbox(sandbox);
     client.playMacro("startup");

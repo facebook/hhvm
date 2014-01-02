@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdQuit);
 class CmdQuit : public DebuggerCommand {
 public:
   CmdQuit() : DebuggerCommand(KindOfQuit) {}

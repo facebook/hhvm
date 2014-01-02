@@ -29,7 +29,6 @@ namespace HPHP { namespace Eval {
  * request.
  */
 class DebuggerProxy;
-DECLARE_BOOST_TYPES(DummySandbox);
 class DummySandbox : public Synchronizable {
 public:
   DummySandbox(DebuggerProxy *proxy, const std::string &defaultPath,

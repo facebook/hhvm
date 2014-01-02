@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdMachine);
 class CmdMachine : public DebuggerCommand {
 public:
   static bool AttachSandbox(DebuggerClient &client, const char *user = nullptr,
@@ -49,7 +48,7 @@ private:
                             DSandboxInfoPtr sandbox,
                             bool force = false);
 
-  DSandboxInfoPtrVec m_sandboxes;
+  std::vector<DSandboxInfoPtr> m_sandboxes;
   Array m_rpcConfig;
   bool m_force;
   bool m_succeed;

@@ -143,7 +143,7 @@ bool CmdList::listFileRange(DebuggerClient &client,
     m_line2 = tmp;
   }
 
-  CmdListPtr res = client.xend<CmdList>(this);
+  auto res = client.xend<CmdList>(this);
   if (res->m_code.isString()) {
     if (!client.code(res->m_code.toString(), m_line1, m_line2,
                      lineFocus0, charFocus0, lineFocus1, charFocus1)) {
@@ -170,11 +170,11 @@ const StaticString
 // needed for this command.
 bool CmdList::listFunctionOrClass(DebuggerClient &client) {
   assert(client.argCount() == 1);
-  CmdInfoPtr cmdInfo(new CmdInfo());
+  auto cmdInfo = std::make_shared<CmdInfo>();
   DebuggerCommandPtr deleter(cmdInfo);
   string subsymbol;
   cmdInfo->parseOneArg(client, subsymbol);
-  CmdInfoPtr cmd = client.xend<CmdInfo>(cmdInfo.get());
+  auto cmd = client.xend<CmdInfo>(cmdInfo.get());
   Array info = cmd->getInfo();
   if (info.empty()) return false;
   always_assert(info.size() == 1);
@@ -364,7 +364,7 @@ Variant CmdList::GetSourceFile(DebuggerClient &client,
                                const std::string &file) {
   CmdList cmd;
   cmd.m_file = file;
-  CmdListPtr res = client.xend<CmdList>(&cmd);
+  auto res = client.xend<CmdList>(&cmd);
   return res->m_code;
 }
 

@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdConfig);
 class CmdConfig : public DebuggerCommand {
 public:
   CmdConfig() : DebuggerCommand(KindOfConfig) {}

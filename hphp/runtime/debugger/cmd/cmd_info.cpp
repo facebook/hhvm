@@ -172,7 +172,7 @@ void CmdInfo::onClient(DebuggerClient &client) {
     return;
   }
 
-  CmdInfoPtr cmd = client.xend<CmdInfo>(this);
+  auto cmd = client.xend<CmdInfo>(this);
   Array info = cmd->m_info;
   if (info.empty()) {
     client.info("(specified symbol cannot be found)");
@@ -188,7 +188,7 @@ void CmdInfo::onClient(DebuggerClient &client) {
 void CmdInfo::UpdateLiveLists(DebuggerClient &client) {
   CmdInfo cmd;
   cmd.m_type = KindOfLiveLists;
-  CmdInfoPtr res = client.xend<CmdInfo>(&cmd);
+  auto res = client.xend<CmdInfo>(&cmd);
   client.setLiveLists(res->m_acLiveLists);
 }
 
@@ -201,7 +201,7 @@ String CmdInfo::GetProtoType(DebuggerClient &client, const std::string &cls,
   } else {
     cmd.m_symbol = String(cls) + "::" + String(func);
   }
-  CmdInfoPtr res = client.xend<CmdInfo>(&cmd);
+  auto res = client.xend<CmdInfo>(&cmd);
   Array info = res->m_info;
   if (!info.empty()) {
     info = info[0];

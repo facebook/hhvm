@@ -28,7 +28,7 @@ namespace HPHP {
 class StaticContentCache {
 public:
   static StaticContentCache TheCache;
-  static FileCachePtr TheFileCache;
+  static std::shared_ptr<FileCache> TheFileCache;
 
 public:
   StaticContentCache();

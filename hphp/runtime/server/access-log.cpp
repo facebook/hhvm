@@ -82,7 +82,7 @@ void AccessLog::openFiles(const string &username) {
     assert(!file.empty());
     FILE *fp = nullptr;
     if (Logger::UseCronolog) {
-      CronologPtr cl(new Cronolog);
+      auto cl = std::make_shared<Cronolog>();
       if (strchr(file.c_str(), '%')) {
         cl->m_template = file;
         cl->setPeriodicity();

@@ -32,9 +32,10 @@ void FastCGIJob::getRequestStart(struct timespec *outReqStart) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-FastCGITransportTraits::FastCGITransportTraits(FastCGIJobPtr job,
-                                               void* context,
-                                               int id)
+FastCGITransportTraits::FastCGITransportTraits(
+    std::shared_ptr<FastCGIJob> job,
+    void* context,
+    int id)
   : m_server((FastCGIServer*) context),
     m_transport(job->m_transport) {}
 

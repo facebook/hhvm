@@ -17,21 +17,29 @@
 #ifndef incl_HPHP_LIBEVENT_HTTP_CLIENT_H_
 #define incl_HPHP_LIBEVENT_HTTP_CLIENT_H_
 
+#include <map>
+#include <memory>
+#include <vector>
+#include <string>
+
+#include <evhttp.h>
+
 #include "hphp/util/base.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/lock.h"
-#include <evhttp.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
+struct LibEventHttpClient;
+using LibEventHttpClientPtr = std::shared_ptr<LibEventHttpClient>;
+
+/*
  * Use evhttp as our HTTP client. This isn't the same as HttpClient that's CURL
  * based. HttpClient supports SSL and follows redirections, whereas this class
  * doesn't. But this class allows keep-alive connections to be pooled for
  * repetitively HTTP requests.
  */
-DECLARE_BOOST_TYPES(LibEventHttpClient);
 class LibEventHttpClient {
 public:
   /**
@@ -47,7 +55,8 @@ public:
 
 private:
   static ReadWriteMutex ConnectionPoolMutex;
-  static std::map<std::string, LibEventHttpClientPtrVec> ConnectionPool;
+  static std::map<std::string,std::vector<LibEventHttpClientPtr>>
+    ConnectionPool;
 
   /**
    * address:port => max connection to pool

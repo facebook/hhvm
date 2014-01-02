@@ -387,7 +387,7 @@ bool c_SQLite3::t_createfunction(const String& name, CVarRef callback,
     return false;
   }
 
-  UserDefinedFuncPtr udf(new UserDefinedFunc());
+  auto udf = std::make_shared<UserDefinedFunc>();
   if (sqlite3_create_function(m_raw_db, name.data(), argcount, SQLITE_UTF8,
                               udf.get(), php_sqlite3_callback_func,
                               NULL, NULL) == SQLITE_OK) {
@@ -416,7 +416,7 @@ bool c_SQLite3::t_createaggregate(const String& name, CVarRef step, CVarRef fina
     return false;
   }
 
-  UserDefinedFuncPtr udf(new UserDefinedFunc());
+  auto udf = std::make_shared<UserDefinedFunc>();
   if (sqlite3_create_function(m_raw_db, name.data(), argcount, SQLITE_UTF8,
                               udf.get(), NULL,
                               php_sqlite3_callback_step,
@@ -504,7 +504,7 @@ bool c_SQLite3Stmt::t_clear() {
 
 bool c_SQLite3Stmt::t_bindparam(CVarRef name, VRefParam parameter,
                                 int64_t type /* = k_SQLITE3_TEXT */) {
-  BoundParamPtr param(new BoundParam());
+  auto param = std::make_shared<BoundParam>();
   param->type = type;
   param->value.assignRef(parameter);
 

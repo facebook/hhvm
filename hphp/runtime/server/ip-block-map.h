@@ -27,7 +27,6 @@ namespace HPHP {
 // configuration, then is used to test candidate addresses to see if they
 // fall into one of the forbidden networks for a particular request type.
 
-DECLARE_BOOST_TYPES(IpBlockMap);
 class IpBlockMap {
 public:
   // Reads a textual IPv4 or IPv6 address, possibly including a bit count,
@@ -77,16 +76,13 @@ public:
   };
 
 private:
-  DECLARE_BOOST_TYPES(Acl);
-  class Acl {
-  public:
+  struct Acl {
     Acl();
-
     BinaryPrefixTrie m_networks; // prefix => true: allow; false: deny
   };
   hphp_string_hash_map<std::shared_ptr<Acl>,Acl> m_acls; // location => acl
 
-  static void LoadIpList(AclPtr acl, Hdf hdf, bool allow);
+  static void LoadIpList(std::shared_ptr<Acl> acl, Hdf hdf, bool allow);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

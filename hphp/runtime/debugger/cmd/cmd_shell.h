@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdShell);
 class CmdShell : public DebuggerCommand {
 public:
   CmdShell() : DebuggerCommand(KindOfShell) {}

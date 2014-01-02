@@ -78,7 +78,8 @@ void DBQuery::filterBy(const char *fmt, unsigned int value,
   filterBy(fmt, (int)value, op);
 }
 
-void DBQuery::filterBy(const char *fmt, DBQueryFilterPtr filter,
+void DBQuery::filterBy(const char *fmt,
+                       std::shared_ptr<DBQueryFilter> filter,
                        Op op /* = And */) {
   assert(!filter->isEmpty());
   assert(!m_filter);

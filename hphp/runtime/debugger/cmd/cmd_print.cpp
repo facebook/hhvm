@@ -277,7 +277,7 @@ Variant CmdPrint::processWatch(DebuggerClient &client, const char *format,
   m_body = php;
   m_frame = client.getFrame();
   m_noBreak = true;
-  CmdPrintPtr res = client.xend<CmdPrint>(this);
+  auto res = client.xend<CmdPrint>(this);
   if (!res->m_output.empty()) {
     client.output(res->m_output);
   }
@@ -333,7 +333,7 @@ void CmdPrint::onClient(DebuggerClient &client) {
   m_printLevel = client.getDebuggerClientPrintLevel();
   assert(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
   m_frame = client.getFrame();
-  CmdPrintPtr res = client.xendWithNestedExecution<CmdPrint>(this);
+  auto res = client.xendWithNestedExecution<CmdPrint>(this);
   m_output = res->m_output;
   m_ret = res->m_ret;
   if (!m_output.empty()) {

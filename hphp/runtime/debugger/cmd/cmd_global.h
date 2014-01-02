@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdGlobal);
 class CmdGlobal : public DebuggerCommand {
 public:
   CmdGlobal() : DebuggerCommand(KindOfGlobal) {

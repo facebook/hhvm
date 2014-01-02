@@ -237,11 +237,11 @@ void CmdBreak::processStatusChange(DebuggerClient &client) {
   }
 
   if (client.argCount() == 1) {
-    BreakPointInfoPtrVec *matched = client.getMatchedBreakPoints();
-    BreakPointInfoPtrVec *bps = client.getBreakPoints();
+    auto *matched = client.getMatchedBreakPoints();
+    auto *bps = client.getBreakPoints();
     bool found = false;
     for (unsigned int i = 0; i < matched->size(); i++) {
-      BreakPointInfoPtr bpm = (*matched)[i];
+      auto bpm = (*matched)[i];
       BreakPointInfoPtr bp;
       int index = 0;
       for (; index < (int)bps->size(); index++) {

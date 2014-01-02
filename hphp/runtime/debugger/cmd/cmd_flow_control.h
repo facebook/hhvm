@@ -54,7 +54,6 @@ namespace HPHP { namespace Eval {
 // and remember enough state to determine if they should really transition their
 // state or not.
 
-DECLARE_BOOST_TYPES(CmdFlowControl);
 class CmdFlowControl : public DebuggerCommand {
 public:
   explicit CmdFlowControl(Type type)

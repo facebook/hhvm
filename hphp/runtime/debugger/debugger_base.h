@@ -17,6 +17,9 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_BASE_H_
 #define incl_HPHP_EVAL_DEBUGGER_BASE_H_
 
+#include <memory>
+#include <string>
+
 #include "hphp/runtime/debugger/break_point.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -127,8 +130,11 @@ extern const char *PHP_KEYWORDS[];
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(DSandboxInfo);
-DECLARE_BOOST_TYPES(DMachineInfo);
+struct DSandboxInfo;
+struct DMachineInfo;
+
+using DSandboxInfoPtr = std::shared_ptr<DSandboxInfo>;
+
 class DMachineInfo {
 public:
   DMachineInfo()
@@ -175,7 +181,6 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(DThreadInfo);
 class DThreadInfo {
 public:
   int64_t m_id;
@@ -189,10 +194,11 @@ public:
   void recvImpl(ThriftBuffer &thrift);
 };
 
+using DThreadInfoPtr = std::shared_ptr<DThreadInfo>;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class BreakPointInfo;
-DECLARE_BOOST_TYPES(DFunctionInfo);
 class DFunctionInfo {
 public:
   std::string m_namespace;
@@ -209,7 +215,6 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(Macro);
 class Macro {
 public:
   std::string m_name;

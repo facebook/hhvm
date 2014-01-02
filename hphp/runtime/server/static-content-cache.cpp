@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticContentCache StaticContentCache::TheCache;
-FileCachePtr StaticContentCache::TheFileCache;
+std::shared_ptr<FileCache> StaticContentCache::TheFileCache;
 
 StaticContentCache::StaticContentCache() : m_totalSize(0) {
 }
@@ -35,7 +35,7 @@ void StaticContentCache::load() {
   Timer timer(Timer::WallTime, "loading static content");
 
   if (!RuntimeOption::FileCache.empty()) {
-    TheFileCache = FileCachePtr(new FileCache());
+    TheFileCache = std::make_shared<FileCache>();
     TheFileCache->loadMmap(RuntimeOption::FileCache.c_str());
 
     Logger::Info("loaded file cache from %s",

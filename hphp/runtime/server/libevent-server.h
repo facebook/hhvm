@@ -33,7 +33,6 @@ namespace HPHP {
  * Wrapping evhttp_request to keep track of queuing time: from onRequest() to
  * doJob().
  */
-DECLARE_BOOST_TYPES(LibEventJob);
 class LibEventJob : public ServerJob {
 public:
   explicit LibEventJob(evhttp_request *req) : request(req) {}
@@ -44,7 +43,8 @@ public:
 };
 
 class LibEventTransportTraits;
-typedef ServerWorker<LibEventJobPtr, LibEventTransportTraits> LibEventWorker;
+typedef ServerWorker<std::shared_ptr<LibEventJob>,
+                     LibEventTransportTraits> LibEventWorker;
 
 /**
  * Helper class for queuing up response sending back to event loop.
@@ -63,7 +63,6 @@ public:
   void close();
 
 private:
-  DECLARE_BOOST_TYPES(Response);
   class Response {
   public:
     Response();
@@ -78,19 +77,18 @@ private:
     evbuffer *chunk;
   };
 
-  DECLARE_BOOST_TYPES(ResponseQueue);
   class ResponseQueue {
   public:
     Mutex m_mutex;
-    std::deque<ResponsePtr> m_responses;
+    std::deque<std::shared_ptr<Response>> m_responses;
   };
 
   // signal between worker thread and response processing thread
   event m_event;
   CPipe m_ready;
-  ResponseQueuePtrVec m_responseQueues;
+  std::vector<std::shared_ptr<ResponseQueue>> m_responseQueues;
 
-  void enqueue(int worker, ResponsePtr response);
+  void enqueue(int worker, std::shared_ptr<Response> response);
 };
 
 /**
@@ -201,7 +199,8 @@ private:
 class LibEventTransportTraits {
  public:
 
-  LibEventTransportTraits(LibEventJobPtr job, void *opaque, int id);
+  LibEventTransportTraits(
+    std::shared_ptr<LibEventJob> job, void *opaque, int id);
 
   Server *getServer() {
     return server_;

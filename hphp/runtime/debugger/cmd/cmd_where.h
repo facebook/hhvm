@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdWhere);
 class CmdWhere : public DebuggerCommand {
 public:
   CmdWhere() : DebuggerCommand(KindOfWhere), m_stackArgs(true) {}

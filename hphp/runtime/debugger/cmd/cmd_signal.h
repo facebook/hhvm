@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdSignal);
 class CmdSignal : public DebuggerCommand {
 public:
   enum Signal {

@@ -17,22 +17,36 @@
 #ifndef incl_HPHP_RUNTIME_OPTION_H_
 #define incl_HPHP_RUNTIME_OPTION_H_
 
+#include <unordered_map>
+#include <vector>
+#include <string>
+#include <map>
+#include <set>
+
 #include <boost/container/flat_set.hpp>
-#include "hphp/runtime/server/files-match.h"
-#include "hphp/runtime/server/satellite-server.h"
-#include "hphp/runtime/server/virtual-host.h"
+
+#include "hphp/util/base.h"
+#include "hphp/util/case-insensitive.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class AccessLogFileData;
+struct VirtualHost;
+struct IpBlockMap;
+struct SatelliteServerInfo;
+struct FilesMatch;
+struct Hdf;
+
 /**
  * Configurable options set from command line or configurable file at startup
  * time.
  */
 class RuntimeOption {
 public:
-  static void Load(Hdf &config, StringVec *overwrites = nullptr,
+  static void Load(Hdf& config,
+                   std::vector<std::string>* overwrites = nullptr,
                    bool empty = false);
 
   static bool Loaded;
@@ -160,9 +174,10 @@ public:
   static std::string DefaultCharsetName;
   static bool ForceServerNameToHeader;
   static bool EnableCufAsync;
-  static VirtualHostPtrVec VirtualHosts;
-  static IpBlockMapPtr IpBlocks;
-  static SatelliteServerInfoPtrVec SatelliteServerInfos;
+  static std::vector<std::shared_ptr<VirtualHost>> VirtualHosts;
+  static std::shared_ptr<IpBlockMap> IpBlocks;
+  static std::vector<std::shared_ptr<SatelliteServerInfo>>
+         SatelliteServerInfos;
 
   // If a request has a body over this limit, switch to on-demand reading.
   // -1 for no limit.
@@ -223,7 +238,7 @@ public:
   static hphp_string_imap<std::string> PhpFileExtensions;
   static std::set<std::string> ForbiddenFileExtensions;
   static std::set<std::string> StaticFileGenerators;
-  static FilesMatchPtrVec FilesMatches;
+  static std::vector<std::shared_ptr<FilesMatch>> FilesMatches;
 
   static bool WhitelistExec;
   static bool WhitelistExecWarningOnly;

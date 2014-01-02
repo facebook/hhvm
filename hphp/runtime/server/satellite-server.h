@@ -24,8 +24,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(SatelliteServerInfo);
-DECLARE_BOOST_TYPES(SatelliteServer);
+struct SatelliteServerInfo;
+
 class SatelliteServer {
 public:
   enum class Type {
@@ -41,7 +41,8 @@ public:
   const std::string &getName() const { return m_name;}
 
 public:
-  static SatelliteServerPtr Create(SatelliteServerInfoPtr info);
+  static std::shared_ptr<SatelliteServer>
+    Create(std::shared_ptr<SatelliteServerInfo> info);
 
   virtual ~SatelliteServer() {}
 

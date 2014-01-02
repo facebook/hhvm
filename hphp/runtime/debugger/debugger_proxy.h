@@ -17,6 +17,10 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_PROXY_H_
 #define incl_HPHP_EVAL_DEBUGGER_PROXY_H_
 
+#include <string>
+#include <memory>
+#include <vector>
+
 #include "hphp/util/base.h"
 #include "hphp/util/synchronizable.h"
 #include "hphp/util/async-func.h"
@@ -43,9 +47,12 @@ namespace HPHP { namespace Eval {
 //
 
 class CmdInterrupt;
-DECLARE_BOOST_TYPES(DebuggerProxy);
-DECLARE_BOOST_TYPES(DebuggerCommand);
-DECLARE_BOOST_TYPES(CmdFlowControl);
+struct DebuggerProxy;
+struct DebuggerCommand;
+struct CmdFlowControl;
+
+using DebuggerProxyPtr = std::shared_ptr<DebuggerProxy>;
+using DebuggerCommandPtr = std::shared_ptr<DebuggerCommand>;
 
 class DebuggerProxy : public Synchronizable,
                       public std::enable_shared_from_this<DebuggerProxy> {
@@ -69,7 +76,7 @@ public:
   std::string getSandboxId();
   const DSandboxInfo& getDummyInfo() const { return m_dummyInfo; }
 
-  void getThreads(DThreadInfoPtrVec &threads);
+  void getThreads(std::vector<DThreadInfoPtr> &threads);
   bool switchSandbox(const std::string &newId, bool force);
   void updateSandbox(DSandboxInfoPtr sandbox);
   bool switchThread(DThreadInfoPtr thread);
@@ -78,8 +85,8 @@ public:
   void startDummySandbox();
   void notifyDummySandbox();
 
-  void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
-  void getBreakPoints(BreakPointInfoPtrVec &breakpoints);
+  void setBreakPoints(std::vector<BreakPointInfoPtr> &breakpoints);
+  void getBreakPoints(std::vector<BreakPointInfoPtr> &breakpoints);
 
   void setBreakableForBreakpointsNotMatching(CmdInterrupt& cmd);
   void unsetBreakableForBreakpointsMatching(CmdInterrupt& cmd);
@@ -131,7 +138,7 @@ private:
 
   ReadWriteMutex m_breakMutex;
   bool m_hasBreakPoints;
-  BreakPointInfoPtrVec m_breakpoints;
+  std::vector<BreakPointInfoPtr> m_breakpoints;
   DSandboxInfo m_sandbox;
   DSandboxInfo m_dummyInfo;
 
@@ -140,7 +147,8 @@ private:
   DThreadInfoPtr m_newThread; // Used by CmdThread to switch threads
   std::map<int64_t, DThreadInfoPtr> m_threads; // Threads in blockUntilOwn
 
-  CmdFlowControlPtr m_flow; // c, s, n, o commands that can skip breakpoints
+  // c, s, n, o commands that can skip breakpoints
+  std::shared_ptr<CmdFlowControl> m_flow;
 
   AsyncFunc<DebuggerProxy> m_signalThread; // polling signals from client
 

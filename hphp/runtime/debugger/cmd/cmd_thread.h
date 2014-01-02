@@ -23,7 +23,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdThread);
 class CmdThread : public DebuggerCommand, public IDebuggable {
 public:
   CmdThread() : DebuggerCommand(KindOfThread) {}
@@ -43,7 +42,7 @@ private:
   virtual void debuggerInfo(InfoVec &info);
 
   String m_out;
-  DThreadInfoPtrVec m_threads;
+  std::vector<DThreadInfoPtr> m_threads;
 
   void processList(DebuggerClient &client, bool output = true);
 };

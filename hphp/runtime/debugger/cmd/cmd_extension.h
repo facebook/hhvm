@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdExtension);
 class CmdExtension : public CmdExtended {
 public:
   virtual void list(DebuggerClient &client);

@@ -20,6 +20,7 @@
 #include "hphp/util/base.h"
 #include "hphp/util/case-insensitive.h"
 #include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/deprecated/declare-boost-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

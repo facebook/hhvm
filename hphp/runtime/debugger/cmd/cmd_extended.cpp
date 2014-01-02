@@ -186,10 +186,10 @@ const ExtendedCommandMap &CmdExtended::GetExtendedCommandMap() {
 }
 
 #define ELSE_IF_CMD(name) \
-  } else if (cls == "Cmd" #name) { ret = CmdExtendedPtr(new Cmd ## name());
+  } else if (cls == "Cmd" #name) { ret = std::make_shared<Cmd##name>()
 
 DebuggerCommandPtr CmdExtended::CreateExtendedCommand(const std::string &cls) {
-  CmdExtendedPtr ret;
+  std::shared_ptr<CmdExtended> ret;
   if (cls.empty()) {
 
     // add one line for each command

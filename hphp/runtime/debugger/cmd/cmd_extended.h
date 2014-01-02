@@ -25,7 +25,6 @@ namespace HPHP { namespace Eval {
 // we want to use std::map for sorted commands
 typedef std::map<std::string, std::string> ExtendedCommandMap;
 
-DECLARE_BOOST_TYPES(CmdExtended);
 class CmdExtended : public DebuggerCommand {
 public:
   static const ExtendedCommandMap &GetExtendedCommandMap();

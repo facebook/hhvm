@@ -89,7 +89,7 @@ void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
                   ? KindOfVariableAsync : KindOfVariable);
   auto charCount = client.getDebuggerClientShortPrintCharCount();
   cmd.m_frame = client.getFrame();
-  CmdVariablePtr rcmd = client.xend<CmdVariable>(&cmd);
+  auto rcmd = client.xend<CmdVariable>(&cmd);
   if (rcmd->m_version == 2) {
     // Using the new protocol. rcmd contains a list of variables only.
     // Fetch value of varName only, so that we can recover nicely when its
@@ -233,7 +233,7 @@ void CmdVariable::onClient(DebuggerClient &client) {
 
   m_frame = client.getFrame();
 
-  CmdVariablePtr cmd = client.xend<CmdVariable>(this);
+  auto cmd = client.xend<CmdVariable>(this);
   if (cmd->m_variables.empty()) {
     client.info("(no variable was defined)");
   } else {

@@ -790,7 +790,7 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
     }
     // Now we have a namespace, class and func name.
     // The namespace only or the namespace and class might be empty.
-    DFunctionInfoPtr pfunc(new DFunctionInfo());
+    auto pfunc = std::make_shared<DFunctionInfo>();
     if (m_class.empty()) {
       if (!isValidIdentifier(name)) goto returnInvalid;
       if (m_namespace.empty()) {
@@ -1088,7 +1088,8 @@ bool BreakPointInfo::checkClause(DebuggerProxy &proxy) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void BreakPointInfo::SendImpl(int version, const BreakPointInfoPtrVec &bps,
+void BreakPointInfo::SendImpl(int version,
+                              const std::vector<BreakPointInfoPtr> &bps,
                               DebuggerThriftBuffer &thrift) {
   TRACE(2, "BreakPointInfo::SendImpl\n");
   int16_t size = bps.size();
@@ -1098,7 +1099,8 @@ void BreakPointInfo::SendImpl(int version, const BreakPointInfoPtrVec &bps,
   }
 }
 
-void BreakPointInfo::RecvImpl(int version, BreakPointInfoPtrVec &bps,
+void BreakPointInfo::RecvImpl(int version,
+                              std::vector<BreakPointInfoPtr> &bps,
                               DebuggerThriftBuffer &thrift) {
   TRACE(2, "BreakPointInfo::RecvImpl\n");
   int16_t size;

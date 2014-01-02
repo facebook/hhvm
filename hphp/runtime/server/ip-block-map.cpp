@@ -147,7 +147,7 @@ bool IpBlockMap::ReadIPv6Address(const char *text,
   return true;
 }
 
-void IpBlockMap::LoadIpList(AclPtr acl, Hdf hdf, bool allow) {
+void IpBlockMap::LoadIpList(std::shared_ptr<Acl> acl, Hdf hdf, bool allow) {
   for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
     string ip = child.getString();
 
@@ -164,7 +164,7 @@ void IpBlockMap::LoadIpList(AclPtr acl, Hdf hdf, bool allow) {
 
 IpBlockMap::IpBlockMap(Hdf config) {
   for (Hdf hdf = config.firstChild(); hdf.exists(); hdf = hdf.next()) {
-    AclPtr acl(new Acl());
+    auto acl = std::make_shared<Acl>();
     // sgrimm note: not sure AllowFirst is relevant with my implementation
     // since we always search for the narrowest matching rule -- it really
     // just sets whether we deny or allow by default, I think.

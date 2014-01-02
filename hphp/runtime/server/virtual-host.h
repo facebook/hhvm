@@ -24,7 +24,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(VirtualHost);
 class VirtualHost {
 public:
   static VirtualHost &GetDefault();
@@ -117,7 +116,7 @@ private:
   std::string m_documentRoot;
 
   std::vector<RewriteRule> m_rewriteRules;
-  IpBlockMapPtr m_ipBlocks;
+  std::shared_ptr<IpBlockMap> m_ipBlocks;
   std::vector<QueryStringFilter> m_queryStringFilters;
 
   VhostRuntimeOption m_runtimeOption;

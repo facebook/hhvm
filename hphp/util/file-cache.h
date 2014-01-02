@@ -28,7 +28,6 @@ namespace HPHP {
  * Stores file contents in memory. Used by web server for faster static
  * content serving.
  */
-DECLARE_BOOST_TYPES(FileCache);
 
 class CacheManager;
 

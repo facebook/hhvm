@@ -16,34 +16,35 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
-// Get SIZE_MAX definition.  Do this before including any more files, to make
-// sure that this is the first place that stdint.h is included.
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS
-#endif
-#define __STDC_LIMIT_MACROS
-#include <stdint.h>
+#include <cstdint>
 #include <limits>
 
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/shared-store-base.h"
-#include "hphp/runtime/server/access-log.h"
-#include "hphp/runtime/base/extended-logger.h"
-#include "hphp/runtime/base/simple-counter.h"
-#include "hphp/runtime/base/memory-manager.h"
+#include "folly/String.h"
+
+#include "hphp/util/hdf.h"
 #include "hphp/util/util.h"
 #include "hphp/util/network.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
 #include "hphp/util/file-cache.h"
+
+#include "hphp/parser/scanner.h"
+
+#include "hphp/runtime/server/satellite-server.h"
+#include "hphp/runtime/server/virtual-host.h"
+#include "hphp/runtime/server/files-match.h"
+#include "hphp/runtime/server/access-log.h"
+
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/shared-store-base.h"
+#include "hphp/runtime/base/extended-logger.h"
+#include "hphp/runtime/base/simple-counter.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/parser/scanner.h"
-#include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/base/crash-reporter.h"
-#include "folly/String.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -182,9 +183,10 @@ std::string RuntimeOption::SSLCertificateDir;
 bool RuntimeOption::TLSDisableTLS1_2;
 std::string RuntimeOption::TLSClientCipherSpec;
 
-VirtualHostPtrVec RuntimeOption::VirtualHosts;
-IpBlockMapPtr RuntimeOption::IpBlocks;
-SatelliteServerInfoPtrVec RuntimeOption::SatelliteServerInfos;
+std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
+std::shared_ptr<IpBlockMap> RuntimeOption::IpBlocks;
+std::vector<std::shared_ptr<SatelliteServerInfo>>
+  RuntimeOption::SatelliteServerInfos;
 
 int RuntimeOption::XboxServerThreadCount = 10;
 int RuntimeOption::XboxServerMaxQueueLength = INT_MAX;
@@ -232,7 +234,7 @@ hphp_string_imap<std::string> RuntimeOption::StaticFileExtensions;
 hphp_string_imap<std::string> RuntimeOption::PhpFileExtensions;
 std::set<std::string> RuntimeOption::ForbiddenFileExtensions;
 std::set<std::string> RuntimeOption::StaticFileGenerators;
-FilesMatchPtrVec RuntimeOption::FilesMatches;
+std::vector<std::shared_ptr<FilesMatch>> RuntimeOption::FilesMatches;
 
 bool RuntimeOption::WhitelistExec = false;
 bool RuntimeOption::WhitelistExecWarningOnly = false;
@@ -940,7 +942,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
           VirtualHost::GetDefault().init(hdf);
           VirtualHost::GetDefault().addAllowedDirectories(AllowedDirectories);
         } else {
-          VirtualHostPtr host(new VirtualHost(hdf));
+          auto host = std::make_shared<VirtualHost>(hdf);
           host->addAllowedDirectories(AllowedDirectories);
           VirtualHosts.push_back(host);
         }
@@ -955,13 +957,13 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
   }
   {
     Hdf ipblocks = config["IpBlockMap"];
-    IpBlocks = IpBlockMapPtr(new IpBlockMap(ipblocks));
+    IpBlocks = std::make_shared<IpBlockMap>(ipblocks);
   }
   {
     Hdf satellites = config["Satellites"];
     if (satellites.exists()) {
       for (Hdf hdf = satellites.firstChild(); hdf.exists(); hdf = hdf.next()) {
-        SatelliteServerInfoPtr satellite(new SatelliteServerInfo(hdf));
+        auto satellite = std::make_shared<SatelliteServerInfo>(hdf);
         SatelliteServerInfos.push_back(satellite);
         if (satellite->getType() == SatelliteServer::Type::KindOfRPCServer) {
           XboxPassword = satellite->getPassword();
@@ -1011,7 +1013,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
     Hdf matches = content["FilesMatch"];
     if (matches.exists()) {
       for (Hdf hdf = matches.firstChild(); hdf.exists(); hdf = hdf.next()) {
-        FilesMatches.push_back(FilesMatchPtr(new FilesMatch(hdf)));
+        FilesMatches.push_back(std::make_shared<FilesMatch>(hdf));
       }
     }
   }

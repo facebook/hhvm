@@ -72,7 +72,6 @@ private:
     SmartResource<File> fp;
   };
 
-  DECLARE_BOOST_TYPES(ToFree);
   class ToFree {
   public:
     vector<char*>          str;
@@ -104,7 +103,7 @@ public:
 
     memset(m_error_str, 0, sizeof(m_error_str));
     m_error_no = CURLE_OK;
-    m_to_free = ToFreePtr(new ToFree());
+    m_to_free = std::make_shared<ToFree>();
 
     m_write.method = PHP_CURL_STDOUT;
     m_write.type   = PHP_CURL_ASCII;
@@ -752,7 +751,7 @@ private:
   char m_error_str[CURL_ERROR_SIZE + 1];
   CURLcode m_error_no;
 
-  ToFreePtr m_to_free;
+  std::shared_ptr<ToFree> m_to_free;
 
   String m_url;
   String m_header;

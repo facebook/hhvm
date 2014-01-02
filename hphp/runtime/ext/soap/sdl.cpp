@@ -299,7 +299,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, bool include,
   }
 }
 
-static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header
+static std::shared_ptr<sdlSoapBindingFunctionHeader> wsdl_soap_binding_header
 (sdlCtx* ctx, xmlNodePtr header, char* wsdl_soap_namespace, bool fault) {
   xmlAttrPtr tmp = get_attribute(header->properties, "message");
   if (!tmp) {
@@ -331,7 +331,7 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header
                         tmp->children->content);
   }
 
-  sdlSoapBindingFunctionHeaderPtr h(new sdlSoapBindingFunctionHeader());
+  auto h = std::make_shared<sdlSoapBindingFunctionHeader>();
   h->name = (char*)tmp->children->content;
 
   tmp = get_attribute(header->properties, "use");
@@ -388,8 +388,7 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header
     xmlNodePtr trav = header->children;
     while (trav) {
       if (node_is_equal_ex(trav, "headerfault", wsdl_soap_namespace)) {
-        sdlSoapBindingFunctionHeaderPtr hf =
-          wsdl_soap_binding_header(ctx, trav, wsdl_soap_namespace, true);
+        auto hf = wsdl_soap_binding_header(ctx, trav, wsdl_soap_namespace, true);
         string key;
         if (!hf->ns.empty()) {
           key += hf->ns;
@@ -483,8 +482,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node,
         }
       }
     } else if (node_is_equal_ex(trav, "header", wsdl_soap_namespace)) {
-      sdlSoapBindingFunctionHeaderPtr h =
-        wsdl_soap_binding_header(ctx, trav, wsdl_soap_namespace, false);
+      auto h = wsdl_soap_binding_header(ctx, trav, wsdl_soap_namespace, false);
       string key;
       if (!h->ns.empty()) {
         key += h->ns;
@@ -766,7 +764,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
         xmlNodePtr input, output, fault;
         xmlAttrPtr paramOrder;
 
-        sdlFunctionPtr function(new sdlFunction());
+        auto function = std::make_shared<sdlFunction>();
         function->functionName = (char*)op_name->children->content;
 
         if (tmpbinding->bindingType == BINDING_SOAP) {
@@ -888,7 +886,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
                                   "of '%s'", op_name->children->content);
             }
 
-            sdlFaultPtr f(new sdlFault());
+            auto f = std::make_shared<sdlFault>();
             f->name = (char*)name->children->content;
             wsdl_message(&ctx, f->details, message->children->content);
             if (f->details.size() != 1) {

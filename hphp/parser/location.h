@@ -17,12 +17,14 @@
 #ifndef incl_HPHP_PARSER_LOCATION_H_
 #define incl_HPHP_PARSER_LOCATION_H_
 
+#include <cstring>
+#include <memory>
+
 #include "hphp/util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(Location);
 class Location {
 public:
   Location() : file(""), line0(1), char0(1), line1(1), char1(1), cursor(0) {}
@@ -60,6 +62,7 @@ public:
     return strcmp(file, loc->file);
   }
 };
+using LocationPtr = std::shared_ptr<Location>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

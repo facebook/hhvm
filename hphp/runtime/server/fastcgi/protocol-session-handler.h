@@ -25,7 +25,6 @@ namespace HPHP {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(ProtocolSessionHandler);
 class ProtocolSessionHandler {
 public:
   class Callback {

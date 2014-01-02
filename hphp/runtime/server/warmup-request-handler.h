@@ -17,13 +17,15 @@
 #ifndef incl_HPHP_WARMUP_REQUEST_HANDLER_H_
 #define incl_HPHP_WARMUP_REQUEST_HANDLER_H_
 
+#include <memory>
+
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/http-request-handler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(WarmupRequestHandlerFactory);
+struct WarmupRequestHandlerFactory;
 
 /**
  * WarmupRequestHandler is a small shim on top of HttpRequestHandler.
@@ -32,15 +34,16 @@ DECLARE_BOOST_TYPES(WarmupRequestHandlerFactory);
  */
 class WarmupRequestHandler : public RequestHandler {
 public:
-  explicit WarmupRequestHandler(int timeout,
-                                const WarmupRequestHandlerFactoryPtr& factory)
+  explicit WarmupRequestHandler(
+      int timeout,
+      const std::shared_ptr<WarmupRequestHandlerFactory>& factory)
     : RequestHandler(timeout), m_factory(factory), m_reqHandler(timeout) {}
 
   virtual void handleRequest(Transport *transport);
   virtual void abortRequest(Transport *transport);
 
 private:
-  WarmupRequestHandlerFactoryPtr m_factory;
+  std::shared_ptr<WarmupRequestHandlerFactory> m_factory;
   HttpRequestHandler m_reqHandler;
 };
 
@@ -68,7 +71,7 @@ private:
   int m_timeout;
   // The server has a shared pointer to us, so use a weak pointer to the
   // server to avoid a circular reference.
-  ServerWeakPtr m_server;
+  std::weak_ptr<Server> m_server;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

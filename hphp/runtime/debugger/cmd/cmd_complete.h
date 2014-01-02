@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdComplete);
 class CmdComplete : public DebuggerCommand {
 public:
   CmdComplete() : DebuggerCommand(KindOfComplete) {}

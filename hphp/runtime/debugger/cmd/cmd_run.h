@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdRun);
 class CmdRun : public DebuggerCommand {
 public:
   CmdRun() : DebuggerCommand(KindOfRun) {}

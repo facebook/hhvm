@@ -21,7 +21,7 @@
 #include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
-  DECLARE_BOOST_TYPES(AnalysisResult);
+  struct AnalysisResult; // XXX
 namespace JSON {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -77,7 +77,7 @@ template <typename Type>
 class _OutputStream {
 public:
   _OutputStream(std::ostream &out,
-                AnalysisResultPtr ar) : m_out(out), m_ar(ar) {}
+                std::shared_ptr<AnalysisResult> ar) : m_out(out), m_ar(ar) {}
 
   _OutputStream &operator<< (unsigned int v) { m_out << v; return *this; }
 
@@ -180,11 +180,11 @@ public:
     return *this;
   }
 
-  AnalysisResultPtr analysisResult() const { return m_ar; }
+  std::shared_ptr<AnalysisResult> analysisResult() const { return m_ar; }
 
 private:
   std::ostream      &m_out;
-  AnalysisResultPtr  m_ar;
+  std::shared_ptr<AnalysisResult>  m_ar;
 
   std::ostream &raw() { return m_out;}
 

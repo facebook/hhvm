@@ -46,7 +46,7 @@ extern InitFiniNode *extra_server_init, *extra_server_exit;
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-HttpServerPtr HttpServer::Server;
+std::shared_ptr<HttpServer> HttpServer::Server;
 time_t HttpServer::StartTime;
 
 const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
@@ -106,8 +106,8 @@ HttpServer::HttpServer()
 
   for (unsigned int i = 0; i < RuntimeOption::SatelliteServerInfos.size();
        i++) {
-    SatelliteServerInfoPtr info = RuntimeOption::SatelliteServerInfos[i];
-    SatelliteServerPtr satellite = SatelliteServer::Create(info);
+    auto info = RuntimeOption::SatelliteServerInfos[i];
+    auto satellite = SatelliteServer::Create(info);
     if (satellite) {
       if (info->getType() == SatelliteServer::Type::KindOfDanglingPageServer) {
         m_danglings.push_back(satellite);
@@ -118,8 +118,8 @@ HttpServer::HttpServer()
   }
 
   if (RuntimeOption::XboxServerPort != 0) {
-    SatelliteServerInfoPtr xboxInfo(new XboxServerInfo());
-    SatelliteServerPtr satellite = SatelliteServer::Create(xboxInfo);
+    std::shared_ptr<SatelliteServerInfo> xboxInfo(new XboxServerInfo());
+    auto satellite = SatelliteServer::Create(xboxInfo);
     if (satellite) {
       m_satellites.push_back(satellite);
     }
@@ -158,15 +158,14 @@ HttpServer::HttpServer()
   }
 
   for (unsigned int i = 0; i < RuntimeOption::ThreadDocuments.size(); i++) {
-    ServiceThreadPtr thread
-      (new ServiceThread(RuntimeOption::ThreadDocuments[i]));
-    m_serviceThreads.push_back(thread);
+    m_serviceThreads.push_back(
+      std::make_shared<ServiceThread>(RuntimeOption::ThreadDocuments[i]));
   }
 
   for (unsigned int i = 0; i < RuntimeOption::ThreadLoopDocuments.size(); i++) {
-    ServiceThreadPtr thread
-      (new ServiceThread(RuntimeOption::ThreadLoopDocuments[i], true));
-    m_serviceThreads.push_back(thread);
+    m_serviceThreads.push_back(
+      std::make_shared<ServiceThread>(
+        RuntimeOption::ThreadLoopDocuments[i], true));
   }
 }
 

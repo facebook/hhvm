@@ -1631,7 +1631,7 @@ static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
       xmlNsPtr nsPtr = attr_find_ns(attr);
       if (strncmp((char*)nsPtr->href, SCHEMA_NAMESPACE,
                   sizeof(SCHEMA_NAMESPACE))) {
-        sdlExtraAttributePtr ext(new sdlExtraAttribute());
+        auto ext = std::make_shared<sdlExtraAttribute>();
         string value, ns;
         parse_namespace(attr->children->content, value, ns);
         xmlNsPtr nsptr = xmlSearchNs(attr->doc, attr->parent, NS_STRING(ns));
@@ -1801,7 +1801,7 @@ static void copy_extra_attributes(sdlAttributePtr dest, sdlAttributePtr src) {
   for (sdlExtraAttributeMap::const_iterator iter =
          src->extraAttributes.begin(); iter != src->extraAttributes.end();
        ++iter) {
-    sdlExtraAttributePtr eattr(new sdlExtraAttribute());
+    auto eattr = std::make_shared<sdlExtraAttribute>();
     eattr->ns = iter->second->ns;
     eattr->val = iter->second->val;
     dest->extraAttributes[iter->first] = eattr;

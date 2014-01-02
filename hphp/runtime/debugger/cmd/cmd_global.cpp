@@ -60,7 +60,7 @@ void CmdGlobal::onClient(DebuggerClient &client) {
     return;
   }
 
-  CmdGlobalPtr cmd = client.xend<CmdGlobal>(this);
+  auto cmd = client.xend<CmdGlobal>(this);
   if (cmd->m_globals.empty()) {
     client.info("(no global variable was found)");
   } else {

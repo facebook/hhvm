@@ -761,17 +761,17 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
             svIter.second().toString().data()));
         }
       }
-      ServerDataPtr server
-        (new ServerData(data[s_ip].toString().data(),
+      auto server = std::make_shared<ServerData>(
+                        data[s_ip].toString().data(),
                         data[s_db].toString().data(),
                         data[s_port].toInt32(),
                         data[s_username].toString().data(),
                         data[s_password].toString().data(),
-                        sessionVariables));
+                        sessionVariables);
       queries.push_back(ServerQuery(server, data[s_sql].toString().data()));
     } else {
       // so we can report errors according to array index
-      queries.push_back(ServerQuery(ServerDataPtr(), ""));
+      queries.push_back(ServerQuery(std::shared_ptr<ServerData>(), ""));
     }
   }
 
@@ -786,9 +786,9 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
                      mysqlExtension::MaxRetryQueryOnFail);
     output_dataset(ret, affected, ds, errors);
   } else {
-    DBDataSetPtrVec dss(queries.size());
+    std::vector<std::shared_ptr<DBDataSet>> dss(queries.size());
     for (unsigned int i = 0; i < dss.size(); i++) {
-      dss[i] = DBDataSetPtr(new DBDataSet());
+      dss[i] = std::make_shared<DBDataSet>();
     }
 
     DBConn::ErrorInfoMap errors;

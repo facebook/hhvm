@@ -475,7 +475,7 @@ bool DebuggerClient::connect(const std::string &host, int port) {
 bool DebuggerClient::connectRPC(const std::string &host, int port) {
   TRACE(2, "DebuggerClient::connectRPC\n");
   assert(!m_machines.empty());
-  DMachineInfoPtr local = m_machines[0];
+  auto local = m_machines[0];
   assert(local->m_name == LocalPrompt);
   local->m_rpcHost = host;
   local->m_rpcPort = port;
@@ -488,7 +488,7 @@ bool DebuggerClient::connectRPC(const std::string &host, int port) {
 bool DebuggerClient::disconnect() {
   TRACE(2, "DebuggerClient::disconnect\n");
   assert(!m_machines.empty());
-  DMachineInfoPtr local = m_machines[0];
+  auto local = m_machines[0];
   assert(local->m_name == LocalPrompt);
   local->m_rpcHost.clear();
   local->m_rpcPort = 0;
@@ -496,7 +496,7 @@ bool DebuggerClient::disconnect() {
   return !local->m_interrupting;
 }
 
-void DebuggerClient::switchMachine(DMachineInfoPtr machine) {
+void DebuggerClient::switchMachine(std::shared_ptr<DMachineInfo> machine) {
   TRACE(2, "DebuggerClient::switchMachine\n");
   m_rpcHost.clear();
   machine->m_initialized = false; // even if m_machine == machine
@@ -527,7 +527,7 @@ SmartPtr<Socket> DebuggerClient::connectLocal() {
 
   socket1->unregister();
   socket2->unregister();
-  DMachineInfoPtr machine(new DMachineInfo());
+  auto machine = std::make_shared<DMachineInfo>();
   machine->m_sandboxAttached = true;
   machine->m_name = LocalPrompt;
   machine->m_thrift.create(socket1);
@@ -606,7 +606,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
           }
         }
       }
-      DMachineInfoPtr machine(new DMachineInfo());
+      auto machine = std::make_shared<DMachineInfo>();
       machine->m_name = host;
       machine->m_port = port;
       machine->m_thrift.create(SmartPtr<Socket>(sock));
@@ -697,7 +697,7 @@ void DebuggerClient::run() {
   playMacro("startup");
 
   if (!m_options.cmds.empty()) {
-    m_macroPlaying = MacroPtr(new Macro());
+    m_macroPlaying = std::make_shared<Macro>();
     m_macroPlaying->m_cmds = m_options.cmds;
     m_macroPlaying->m_cmds.push_back("q");
     m_macroPlaying->m_index = 0;
@@ -1077,7 +1077,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
         throw DebuggerProtocolException();
       }
       m_sigCount = 0;
-      CmdInterruptPtr intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
+      auto intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
       Debugger::UsageLogInterrupt("terminal", getSandboxId(), *intr.get());
       cmd->onClient(*this);
 
@@ -1925,7 +1925,7 @@ std::string DebuggerClient::getSandboxId() {
   return "None";
 }
 
-void DebuggerClient::updateThreads(DThreadInfoPtrVec threads) {
+void DebuggerClient::updateThreads(std::vector<DThreadInfoPtr> threads) {
   TRACE(2, "DebuggerClient::updateThreads\n");
   m_threads = threads;
   for (unsigned int i = 0; i < m_threads.size(); i++) {
@@ -2008,9 +2008,10 @@ void DebuggerClient::setSourceRoot(const std::string &sourceRoot) {
   setListLocation(m_listFile, m_listLine, true);
 }
 
-void DebuggerClient::setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints) {
+void DebuggerClient::setMatchedBreakPoints(
+    std::vector<BreakPointInfoPtr> breakpoints) {
   TRACE(2, "DebuggerClient::setMatchedBreakPoints\n");
-  m_matched = breakpoints;
+  m_matched = std::move(breakpoints);
 }
 
 void DebuggerClient::setCurrentLocation(int64_t threadId,
@@ -2169,7 +2170,7 @@ void DebuggerClient::startMacro(std::string name) {
       break;
     }
   }
-  m_macroRecording = MacroPtr(new Macro());
+  m_macroRecording = std::make_shared<Macro>();
   m_macroRecording->m_name = name;
 }
 
@@ -2309,7 +2310,7 @@ void DebuggerClient::loadConfig() {
 
   for (Hdf node = m_config["Macros"].firstChild(); node.exists();
        node = node.next()) {
-    MacroPtr macro(new Macro());
+    auto macro = std::make_shared<Macro>();
     macro->load(node);
     m_macros.push_back(macro);
   }

@@ -66,7 +66,7 @@ const VirtualHost *HttpProtocol::GetVirtualHost(Transport *transport) {
   if (!RuntimeOption::VirtualHosts.empty()) {
     string host = transport->getHeader("Host");
     for (unsigned int i = 0; i < RuntimeOption::VirtualHosts.size(); i++) {
-      VirtualHostPtr vhost = RuntimeOption::VirtualHosts[i];
+      auto vhost = RuntimeOption::VirtualHosts[i];
       if (vhost->match(host)) {
         VirtualHost::SetCurrent(vhost.get());
         return vhost.get();

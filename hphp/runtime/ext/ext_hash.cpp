@@ -60,6 +60,7 @@ static class HashExtension : public Extension {
 // hash engines
 
 static HashEngineMap HashEngines;
+using HashEnginePtr = std::shared_ptr<HashEngine>;
 
 class HashEngineMapInitializer {
 public:

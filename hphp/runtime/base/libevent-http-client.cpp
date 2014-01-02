@@ -58,7 +58,7 @@ static std::string get_hash(const std::string &address, int port) {
 
 ReadWriteMutex LibEventHttpClient::ConnectionPoolMutex;
 std::map<std::string, int> LibEventHttpClient::ConnectionPoolConfig;
-std::map<std::string, LibEventHttpClientPtrVec>
+std::map<std::string,std::vector<LibEventHttpClientPtr>>
   LibEventHttpClient::ConnectionPool;
 
 void LibEventHttpClient::SetCache(const std::string &address, int port,
@@ -92,9 +92,9 @@ LibEventHttpClientPtr LibEventHttpClient::Get(const std::string &address,
   }
 
   WriteLock lock(ConnectionPoolMutex);
-  LibEventHttpClientPtrVec &pool = ConnectionPool[hash];
+  auto& pool = ConnectionPool[hash];
   for (unsigned int i = 0; i < pool.size(); i++) {
-    LibEventHttpClientPtr client = pool[i];
+    auto client = pool[i];
     if (!client->m_busy) {
       client->m_busy = true;
       ServerStats::Log("evhttp.hit", 1);

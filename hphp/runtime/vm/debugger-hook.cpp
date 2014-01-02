@@ -157,7 +157,7 @@ static void addBreakPointInUnit(Eval::BreakPointInfoPtr bp, Unit* unit) {
 
 static void addBreakPointsInFile(Eval::DebuggerProxy* proxy,
                                  Eval::PhpFile* efile) {
-  Eval::BreakPointInfoPtrVec bps;
+  std::vector<Eval::BreakPointInfoPtr> bps;
   proxy->getBreakPoints(bps);
   for (unsigned int i = 0; i < bps.size(); i++) {
     Eval::BreakPointInfoPtr bp = bps[i];
@@ -206,7 +206,7 @@ static bool matchFunctionName(string name, const Func* f) {
 // function, arrange for the VM to stop execution and notify the debugger
 // whenever execution enters the given function.
 static void addBreakPointFuncEntry(Eval::DebuggerProxy* proxy, const Func* f) {
-  Eval::BreakPointInfoPtrVec bps;
+  std::vector<Eval::BreakPointInfoPtr> bps;
   proxy->getBreakPoints(bps);
   for (unsigned int i = 0; i < bps.size(); i++) {
     Eval::BreakPointInfoPtr bp = bps[i];
@@ -228,7 +228,7 @@ static void addBreakPointsClass(Eval::DebuggerProxy* proxy, const Class* cls) {
   if (numFuncs == 0) return;
   auto clsName = cls->name();
   auto funcs = cls->methods();
-  Eval::BreakPointInfoPtrVec bps;
+  std::vector<Eval::BreakPointInfoPtr> bps;
   proxy->getBreakPoints(bps);
   for (unsigned int i = 0; i < bps.size(); i++) {
     Eval::BreakPointInfoPtr bp = bps[i];
@@ -308,7 +308,7 @@ void phpDebuggerDefFuncHook(const Func* func) {
 // Since this intended to be called when user input is received, it is not
 // performance critical. Also, in typical scenarios, the list is short.
 void phpSetBreakPoints(Eval::DebuggerProxy* proxy) {
-  Eval::BreakPointInfoPtrVec bps;
+  std::vector<Eval::BreakPointInfoPtr> bps;
   proxy->getBreakPoints(bps);
   for (unsigned int i = 0; i < bps.size(); i++) {
     Eval::BreakPointInfoPtr bp = bps[i];

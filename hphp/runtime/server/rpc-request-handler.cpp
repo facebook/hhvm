@@ -26,6 +26,7 @@
 #include "hphp/runtime/server/request-uri.h"
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/util/process.h"
+#include "hphp/runtime/server/satellite-server.h"
 
 #include "folly/ScopeGuard.h"
 

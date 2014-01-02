@@ -99,7 +99,8 @@ bool Debugger::SwitchSandbox(DebuggerProxyPtr proxy,
   return s_debugger.switchSandbox(proxy, newId, force);
 }
 
-void Debugger::GetRegisteredSandboxes(DSandboxInfoPtrVec &sandboxes) {
+void Debugger::GetRegisteredSandboxes(
+    std::vector<DSandboxInfoPtr> &sandboxes) {
   TRACE(2, "Debugger::GetRegisteredSandboxes\n");
   s_debugger.getSandboxes(sandboxes);
 }
@@ -352,7 +353,7 @@ void Debugger::addOrUpdateSandbox(const DSandboxInfo &sandbox) {
   }
 }
 
-void Debugger::getSandboxes(DSandboxInfoPtrVec &sandboxes) {
+void Debugger::getSandboxes(std::vector<DSandboxInfoPtr> &sandboxes) {
   TRACE(2, "Debugger::getSandboxes\n");
   sandboxes.reserve(m_sandboxMap.size());
   for (SandboxMap::const_iterator iter =

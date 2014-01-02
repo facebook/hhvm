@@ -36,7 +36,7 @@ public:
 
   FastCGITransaction(FastCGISession* session,
                      RequestId request_id,
-                     ProtocolSessionHandlerPtr handler);
+                     std::shared_ptr<ProtocolSessionHandler> handler);
   virtual ~FastCGITransaction();
 
   void onStdIn(std::unique_ptr<folly::IOBuf> chain);
@@ -86,7 +86,7 @@ private:
   folly::IOBufQueue m_valueBuf;
   FastCGISession* m_session;
   RequestId m_requestId;
-  ProtocolSessionHandlerPtr m_handler;
+  std::shared_ptr<ProtocolSessionHandler> m_handler;
 };
 
 

@@ -757,7 +757,7 @@ static int start_server(const std::string &username) {
 
   // Create the HttpServer before any warmup requests to properly
   // initialize the process
-  HttpServer::Server = HttpServerPtr(new HttpServer());
+  HttpServer::Server = std::make_shared<HttpServer>();
 
   if (RuntimeOption::HHProfServerEnabled) {
     Logger::Info("Starting up profiling server");
@@ -810,12 +810,12 @@ string translate_stack(const char *hexencoded, bool with_frame_numbers) {
   }
 
   StackTrace st(hexencoded);
-  StackTrace::FramePtrVec frames;
+  std::vector<std::shared_ptr<StackTrace::Frame>> frames;
   st.get(frames);
 
   std::ostringstream out;
   for (unsigned int i = 0; i < frames.size(); i++) {
-    StackTrace::FramePtr f = frames[i];
+    auto f = frames[i];
     if (with_frame_numbers) {
       out << "# " << (i < 10 ? " " : "") << i << ' ';
     }

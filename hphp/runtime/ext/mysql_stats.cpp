@@ -112,9 +112,9 @@ void MySqlStats::Record(const std::string &verb,
   string ltable = Util::toLower(table);
 
   Lock lock(s_mutex);
-  StatsMap::iterator iter = s_stats.find(ltable);
+  auto iter = s_stats.find(ltable);
   if (iter == s_stats.end()) {
-    StatsPtr stats(new Stats());
+    auto stats = std::make_shared<Stats>();
     memset(stats.get(), 0, sizeof(Stats));
     stats->actions[v] = 1;
     s_stats[ltable] = stats;

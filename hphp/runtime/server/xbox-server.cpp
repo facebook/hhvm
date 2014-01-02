@@ -96,7 +96,8 @@ String XboxTransport::getResults(int &code, int timeout_ms /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static IMPLEMENT_THREAD_LOCAL(XboxServerInfoPtr, s_xbox_server_info);
+static IMPLEMENT_THREAD_LOCAL(std::shared_ptr<XboxServerInfo>,
+  s_xbox_server_info);
 static IMPLEMENT_THREAD_LOCAL(string, s_xbox_prev_req_init_doc);
 
 class XboxRequestHandler: public RPCRequestHandler {
@@ -133,7 +134,7 @@ struct XboxWorker
 private:
   RequestHandler *createRequestHandler() {
     if (!*s_xbox_server_info) {
-      *s_xbox_server_info = XboxServerInfoPtr(new XboxServerInfo());
+      *s_xbox_server_info = std::make_shared<XboxServerInfo>();
     }
     if (RuntimeOption::XboxServerLogInfo) XboxRequestHandler::Info = true;
     s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
@@ -408,7 +409,7 @@ int XboxServer::TaskResult(XboxTransport *job, int timeout_ms, Variant &ret) {
   return code;
 }
 
-XboxServerInfoPtr XboxServer::GetServerInfo() {
+std::shared_ptr<XboxServerInfo> XboxServer::GetServerInfo() {
   return *s_xbox_server_info;
 }
 

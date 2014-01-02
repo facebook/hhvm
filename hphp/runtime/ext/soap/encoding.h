@@ -181,13 +181,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(soapMapping);
 struct soapMapping {
   Variant to_xml;
   Variant to_zval;
 };
 
-class sdlType;
+struct sdlType;
+
 class encodeType {
 public:
   encodeType() : type(0), sdl_type(NULL) {}
@@ -195,20 +195,20 @@ public:
   int type;
   std::string type_str;
   std::string ns;
-  sdlType *sdl_type; // weak pointer
-  soapMappingPtr map;
+  sdlType* sdl_type; // weak pointer
+  std::shared_ptr<soapMapping> map;
 };
 typedef encodeType* encodeTypePtr;
 
-DECLARE_BOOST_TYPES(encode);
-typedef hphp_string_hash_map<std::shared_ptr<encode>,encode> encodeMap;
-typedef std::shared_ptr<encodeMap> encodeMapPtr;
 struct encode {
   encodeType details;
   Variant (*to_zval)(encodeTypePtr type, xmlNodePtr data);
   xmlNodePtr (*to_xml)(encodeTypePtr type, CVarRef data, int style,
                        xmlNodePtr parent);
 };
+using encodePtr = std::shared_ptr<encode>;
+typedef hphp_string_hash_map<std::shared_ptr<encode>,encode> encodeMap;
+typedef std::shared_ptr<encodeMap> encodeMapPtr;
 
 struct encodeStatic {
   int type;

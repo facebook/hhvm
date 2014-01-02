@@ -294,7 +294,7 @@ bool PDOSqliteConnection::createFunction(const String& name,
     return false;
   }
 
-  c_SQLite3::UserDefinedFuncPtr udf(new c_SQLite3::UserDefinedFunc());
+  auto udf = std::make_shared<c_SQLite3::UserDefinedFunc>();
   auto stat = sqlite3_create_function(m_db, name.data(), argcount, SQLITE_UTF8,
                                       udf.get(), php_sqlite3_callback_func,
                                       nullptr, nullptr);

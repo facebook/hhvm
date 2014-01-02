@@ -70,7 +70,7 @@ public:
 private:
   sqlite3 *m_db;
   PDOSqliteError m_einfo;
-  c_SQLite3::UserDefinedFuncPtrVec m_udfs;
+  std::vector<std::shared_ptr<c_SQLite3::UserDefinedFunc>> m_udfs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

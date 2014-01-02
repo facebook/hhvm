@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdDown);
 class CmdDown : public DebuggerCommand {
 public:
   CmdDown() : DebuggerCommand(KindOfDown) {}

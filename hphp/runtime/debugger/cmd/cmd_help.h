@@ -22,7 +22,6 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(CmdHelp);
 class CmdHelp : public DebuggerCommand {
 public:
   static void HelpAll(DebuggerClient &client);

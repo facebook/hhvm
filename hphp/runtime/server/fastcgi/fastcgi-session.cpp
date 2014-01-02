@@ -34,7 +34,8 @@ using folly::io::RWPrivateCursor;
 
 FastCGITransaction::FastCGITransaction(FastCGISession* session,
                                        RequestId request_id,
-                                       ProtocolSessionHandlerPtr handler)
+                                       std::shared_ptr<ProtocolSessionHandler>
+                                         handler)
   : m_phase(Phase::READ_KEY_LENGTH),
     m_readBuf(IOBufQueue::cacheChainLength()),
     m_keyBuf(IOBufQueue::cacheChainLength()),

@@ -61,9 +61,10 @@ void LibEventJob::getRequestStart(struct timespec *reqStart) {
 ///////////////////////////////////////////////////////////////////////////////
 // LibEventTransportTraits
 
-LibEventTransportTraits::LibEventTransportTraits(LibEventJobPtr job,
-                                                 void *opaque,
-                                                 int id) :
+LibEventTransportTraits::LibEventTransportTraits(
+  std::shared_ptr<LibEventJob> job,
+  void *opaque,
+  int id) :
     server_((LibEventServer*)opaque),
     request_(job->request),
     transport_(server_, request_, id) {
@@ -480,7 +481,7 @@ void LibEventServer::onRequest(struct evhttp_request *request) {
   }
   if (getStatus() == RunStatus::RUNNING) {
     RequestPriority priority = getRequestPriority(request);
-    m_dispatcher.enqueue(LibEventJobPtr(new LibEventJob(request)), priority);
+    m_dispatcher.enqueue(std::make_shared<LibEventJob>(request), priority);
   } else {
     Logger::Error("throwing away one new request while shutting down");
   }
@@ -548,7 +549,7 @@ LibEventServer::RequestPriority LibEventServer::getRequestPriority(
 PendingResponseQueue::PendingResponseQueue() {
   assert(RuntimeOption::ResponseQueueCount > 0);
   for (int i = 0; i < RuntimeOption::ResponseQueueCount; i++) {
-    m_responseQueues.push_back(ResponseQueuePtr(new ResponseQueue()));
+    m_responseQueues.push_back(std::make_shared<ResponseQueue>());
   }
 }
 
@@ -574,7 +575,8 @@ void PendingResponseQueue::close() {
   event_del(&m_event);
 }
 
-void PendingResponseQueue::enqueue(int worker, ResponsePtr response) {
+void PendingResponseQueue::enqueue(int worker,
+                                   std::shared_ptr<Response> response) {
   {
     int i = worker % RuntimeOption::ResponseQueueCount;
     ResponseQueue &q = *m_responseQueues[i];
@@ -590,7 +592,7 @@ void PendingResponseQueue::enqueue(int worker, ResponsePtr response) {
 
 void PendingResponseQueue::enqueue(int worker, evhttp_request *request,
                                    int code, int nwritten) {
-  ResponsePtr res(new Response());
+  auto res = std::make_shared<Response>();
   res->request = request;
   res->code = code;
   res->nwritten = nwritten;
@@ -600,7 +602,7 @@ void PendingResponseQueue::enqueue(int worker, evhttp_request *request,
 void PendingResponseQueue::enqueue(int worker, evhttp_request *request,
                                    int code, evbuffer *chunk,
                                    bool firstChunk) {
-  ResponsePtr res(new Response());
+  auto res = std::make_shared<Response>();
   res->request = request;
   res->code = code;
   res->chunked = true;
@@ -610,7 +612,7 @@ void PendingResponseQueue::enqueue(int worker, evhttp_request *request,
 }
 
 void PendingResponseQueue::enqueue(int worker, evhttp_request *request) {
-  ResponsePtr res(new Response());
+  auto res = std::make_shared<Response>();
   res->request = request;
   res->chunked = true;
   enqueue(worker, res);
@@ -624,7 +626,7 @@ void PendingResponseQueue::process() {
   }
 
   // making a copy so we don't hold up the mutex very long
-  ResponsePtrVec responses;
+  std::vector<std::shared_ptr<Response>> responses;
   for (int i = 0; i < RuntimeOption::ResponseQueueCount; i++) {
     ResponseQueue &q = *m_responseQueues[i];
     Lock lock(q.m_mutex);

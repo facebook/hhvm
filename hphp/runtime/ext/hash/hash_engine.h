@@ -18,6 +18,9 @@
 #ifndef incl_HPHP_EXT_HASH_ENGINE_H_
 #define incl_HPHP_EXT_HASH_ENGINE_H_
 
+#include <map>
+#include <memory>
+
 #include "hphp/util/base.h"
 
 namespace HPHP {
@@ -25,7 +28,6 @@ namespace HPHP {
 
 #define L64(x) (x ## ULL)
 
-DECLARE_BOOST_TYPES(HashEngine);
 class HashEngine {
 public:
   HashEngine(int digest_size_, int block_size_, int context_size_)
@@ -49,7 +51,7 @@ public:
   int context_size;
 };
 
-typedef std::map<std::string, HashEnginePtr> HashEngineMap;
+typedef std::map<std::string,std::shared_ptr<HashEngine>> HashEngineMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

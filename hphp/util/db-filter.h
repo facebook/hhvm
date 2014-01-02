@@ -23,10 +23,6 @@ namespace HPHP {
 
 class DBConn;
 
-DECLARE_BOOST_TYPES(DBQueryFilter);
-DECLARE_BOOST_TYPES(DBInNumberFilter);
-DECLARE_BOOST_TYPES(DBInStringFilter);
-DECLARE_BOOST_TYPES(DBOrStringFilter);
 ///////////////////////////////////////////////////////////////////////////////
 
 /**

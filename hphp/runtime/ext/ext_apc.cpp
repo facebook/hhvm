@@ -400,7 +400,6 @@ static PFUNC_APC_LOAD apc_load_func(void *handle, const char *name) {
   return p;
 }
 
-DECLARE_BOOST_TYPES(ApcLoadJob);
 class ApcLoadJob {
 public:
   ApcLoadJob(void *handle, int index) : m_handle(handle), m_index(index) {}
@@ -410,7 +409,7 @@ public:
 class ApcLoadWorker {
 public:
   void onThreadEnter() {}
-  void doJob(ApcLoadJobPtr job) {
+  void doJob(std::shared_ptr<ApcLoadJob> job) {
     char func_name[128];
     snprintf(func_name, sizeof(func_name), "_apc_load_%d", job->m_index);
     apc_load_func(job->m_handle, func_name)();
@@ -466,10 +465,10 @@ void apc_load(int thread) {
   } else {
     int count = ((int(*)())apc_load_func(handle, "_apc_load_count"))();
 
-    ApcLoadJobPtrVec jobs;
+    std::vector<std::shared_ptr<ApcLoadJob>> jobs;
     jobs.reserve(count);
     for (int i = 0; i < count; i++) {
-      jobs.push_back(ApcLoadJobPtr(new ApcLoadJob(handle, i)));
+      jobs.push_back(std::make_shared<ApcLoadJob>(handle, i));
     }
     JobDispatcher<ApcLoadJob, ApcLoadWorker>(jobs, thread).run();
   }

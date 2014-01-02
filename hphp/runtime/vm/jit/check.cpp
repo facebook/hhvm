@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/id-set.h"
 
 namespace HPHP {  namespace JIT {
 
@@ -227,58 +228,56 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
   // CallBuiltin is ok because it is not a php-level call.  (It will
   // call a C++ helper and we can push/pop around it normally.)
   auto isCall = [&] (Opcode op) {
-    return op == Call || op == CallArray;
+    return op == Call || op == CallArray || op == ContEnter;
   };
 
-  typedef StateVector<SSATmp,bool> State;
+  auto ignoreSrc = [&](IRInstruction& inst, SSATmp* src) {
+    /*
+     * ReDefSP, ReDefGeneratorSP, and TakeStack, and FramePtr/StKptr-typed
+     * tmps are used only for stack analysis in the simplifier and therefore
+     * may live across calls.  In particular, ReDef[Generator]SP are used to
+     * bridge the logical stack of the caller when a callee is inlined so that
+     * analysis does not scan into the callee stack when searching for a type
+     * of value in the caller.
+     *
+     * Tmps defined by DefConst are always available and not assigned to
+     * registers.  However, results of LdConst may not span calls.
+     */
+    return (inst.is(ReDefSP) && src->isA(Type::StkPtr)) ||
+           (inst.is(ReDefGeneratorSP) && src->isA(Type::StkPtr)) ||
+           inst.is(TakeStack) ||
+           src->isA(Type::StkPtr) ||
+           src->inst()->is(DefConst) ||
+           src->isA(Type::FramePtr);
+  };
 
+  StateVector<Block,IdSet<SSATmp>> livein(unit, IdSet<SSATmp>());
   bool isValid = true;
-  forPreorderDoms(
-    blocks.front(), children, State(unit, false),
-    [&] (Block* b, State& state) {
-      for (auto& inst : *b) {
-        for (auto& src : inst.srcs()) {
-          /*
-           * These SSATmp's are used only for stack analysis in the
-           * simplifier and therefore may live across calls.  In particular
-           * these instructions are used to bridge the logical stack of the
-           * caller when a callee is inlined so that analysis does not scan
-           * into the callee stack when searching for a type of value in the
-           * caller.
-           */
-          if (inst.op() == ReDefSP && src->isA(Type::StkPtr)) continue;
-          if (inst.op() == ReDefGeneratorSP && src->isA(Type::StkPtr)) {
-            continue;
-          }
-
-          if (src->isA(Type::FramePtr)) continue;
-          if (src->isConst()) continue;
-          if (!state[src]) {
-            auto msg = folly::format("checkTmpsSpanningCalls failed\n"
-                                     "  instruction: {}\n"
-                                     "  src:         {}\n",
-                                     inst.toString(),
-                                     src->toString()).str();
-            std::cerr << msg;
-            FTRACE(1, "{}", msg);
-            isValid = false;
-          }
-        }
-
-        /*
-         * Php calls kill all live temporaries.  We can't keep them
-         * alive across the call because we currently have no
-         * callee-saved registers in our abi, and all translations
-         * share the same spill slots.
-         */
-        if (isCall(inst.op())) state.reset();
-
-        for (auto& d : inst.dsts()) {
-          state[d] = true;
-        }
+  postorderWalk(unit, [&](Block* block) {
+    auto& live = livein[block];
+    if (auto taken = block->taken()) live = livein[taken];
+    if (auto next  = block->next()) live |= livein[next];
+    for (auto it = block->end(); it != block->begin();) {
+      auto& inst = *--it;
+      for (auto& dst : inst.dsts()) {
+        live.erase(dst);
+      }
+      if (isCall(inst.op())) {
+        live.forEach([&](uint32_t tmp) {
+          auto msg = folly::format("checkTmpsSpanningCalls failed\n"
+                                   "  instruction: {}\n"
+                                   "  src:         t{}\n",
+                                   inst.toString(), tmp).str();
+          std::cerr << msg;
+          FTRACE(1, "{}", msg);
+          isValid = false;
+        });
+      }
+      for (auto* src : inst.srcs()) {
+        if (!ignoreSrc(inst, src)) live.add(src);
       }
     }
-  );
+  });
 
   return isValid;
 }

@@ -27,7 +27,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
-
+#include <cxxabi.h>
 #include <bfd.h>
 
 using namespace HPHP::JIT;
@@ -109,6 +109,10 @@ void DebugInfo::generatePidMapOverlay() {
     for (size_t i = 0; i < sorted.size(); i++) {
       auto sym = sorted[i];
       auto addr = sym->section->vma + sym->value;
+      int status;
+      char* demangled =
+        abi::__cxa_demangle(sym->name, nullptr, nullptr, &status);
+      if (status != 0) demangled = const_cast<char*>(sym->name);
       unsigned size;
       if (i + 1 < sorted.size()) {
         auto s2 = sorted[i + 1];
@@ -118,7 +122,8 @@ void DebugInfo::generatePidMapOverlay() {
       }
       if (!size) continue;
       fprintf(m_perfMap, "%lx %x %s\n",
-              long(addr), size, sym->name);
+              long(addr), size, demangled);
+      if (status == 0) free(demangled);
     }
 
     free(symbol_table);

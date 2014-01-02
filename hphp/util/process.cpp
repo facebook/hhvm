@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "folly/ScopeGuard.h"
+
 #include "hphp/util/process.h"
 #include "hphp/util/base.h"
 #include "util.h"
@@ -38,24 +40,14 @@ static void swap_fd(const string &filename, FILE *fdesc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FileReader {
-public:
-  FileReader(FilePtr f, string &out) : m_f(f), m_out(out) {}
-  void read() { readString(m_f.get(), m_out); }
-
-  static void readString(FILE *f, string &out) {
-    size_t nread = 0;
-    const unsigned int BUFFER_SIZE = 1024;
-    char buf[BUFFER_SIZE];
-    while ((nread = fread(buf, 1, BUFFER_SIZE, f)) != 0) {
-      out.append(buf, nread);
-    }
+static void readString(FILE *f, string &out) {
+  size_t nread = 0;
+  const unsigned int BUFFER_SIZE = 1024;
+  char buf[BUFFER_SIZE];
+  while ((nread = fread(buf, 1, BUFFER_SIZE, f)) != 0) {
+    out.append(buf, nread);
   }
-
-private:
-  FilePtr m_f;
-  string &m_out;
-};
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -77,10 +69,11 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
   if (pid == 0) return false;
 
   {
-    FilePtr sin(fdopen(fdin, "w"), file_closer());
+    FILE* sin = fdopen(fdin, "w");
     if (!sin) return false;
+    SCOPE_EXIT { fclose(sin); };
     if (in && *in) {
-      fwrite(in, 1, strlen(in), sin.get());
+      fwrite(in, 1, strlen(in), sin);
     }
   }
 
@@ -341,7 +334,7 @@ void Process::GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
     FILE * f = fopen(filename.c_str(), "r");
     if (f) {
       string cmdline;
-      FileReader::readString(f, cmdline);
+      readString(f, cmdline);
       fclose(f);
       string converted;
       if (matchAll) {
@@ -377,7 +370,7 @@ std::string Process::GetCommandLine(pid_t pid) {
   string cmdline;
   FILE * f = fopen(name.c_str(), "r");
   if (f) {
-    FileReader::readString(f, cmdline);
+    readString(f, cmdline);
     fclose(f);
   }
 
@@ -410,7 +403,7 @@ int Process::GetProcessRSS(pid_t pid) {
   string status;
   FILE * f = fopen(name.c_str(), "r");
   if (f) {
-    FileReader::readString(f, status);
+    readString(f, status);
     fclose(f);
   }
 
@@ -453,7 +446,7 @@ size_t Process::GetCodeFootprint(pid_t pid) {
   string statm;
   FILE * f = fopen(name.c_str(), "r");
   if (f) {
-    FileReader::readString(f, statm);
+    readString(f, statm);
     fclose(f);
   }
 

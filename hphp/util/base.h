@@ -317,16 +317,8 @@ destroyMapValues(Container& c) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef std::shared_ptr<FILE> FilePtr;
-
 struct null_deleter {
   void operator()(void const *) const {
-  }
-};
-
-struct file_closer {
-  void operator()(FILE *f) const {
-    if (f) fclose(f);
   }
 };
 

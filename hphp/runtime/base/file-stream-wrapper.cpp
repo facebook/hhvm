@@ -104,6 +104,12 @@ int FileStreamWrapper::mkdir_recursive(const String& path, int mode) {
     return -1;
   }
 
+  // Check first if the whole path exists
+  if (access(fullpath.data(), F_OK) >= 0) {
+    errno = EEXIST;
+    return -1;
+  }
+ 
   char dir[PATH_MAX+1];
   char *p;
   strncpy(dir, fullpath.data(), sizeof(dir));

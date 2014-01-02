@@ -1669,6 +1669,18 @@ void eliminateRefcounts(IRUnit& unit, const SinkPointsMap& info,
   ITRACE(2, "\n");
 }
 
+/* After this pass completes, we don't need the TakeStack instructions anymore.
+ * this pass converts them to Nop, and dce removes them. */
+void eliminateTakeStacks(const BlockList& blocks) {
+  for (auto b : blocks) {
+    for (auto& inst : *b) {
+      if (inst.op() == TakeStack) {
+        inst.convertToNop();
+      }
+    }
+  }
+}
+
 }
 
 /* optimizeRefcounts attempts to remove IncRef/DecRef pairs when we can prove
@@ -1724,6 +1736,7 @@ void optimizeRefcounts(IRUnit& unit) noexcept {
 
   sinkIncRefs(unit, sinkPoints, ids);
   eliminateRefcounts(unit, sinkPoints, ids);
+  eliminateTakeStacks(blocks);
 
   if (RuntimeOption::EvalHHIRValidateRefCount) {
     BlockMap after;

@@ -1068,6 +1068,7 @@ public:
 
   // May smash rAsm.
   void jmp(CodeAddress dest) {
+    always_assert(dest);
     if (!jmpDeltaFits(dest)) {
       movq (dest, reg::rAsm);
       jmp  (reg::rAsm);
@@ -1078,6 +1079,7 @@ public:
 
   // May smash rAsm.
   void call(CodeAddress dest) {
+    always_assert(dest);
     if (!jmpDeltaFits(dest)) {
       movq (dest, reg::rAsm);
       call (reg::rAsm);

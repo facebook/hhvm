@@ -89,6 +89,11 @@ void addDbgGuardImpl(SrcKey sk) {
 //////////////////////////////////////////////////////////////////////
 
 void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec) {
+  TCA realCode = srcRec->getTopTranslation();
+  if (!realCode) {
+    // no translations, nothing to do
+    return;
+  }
   TCA dbgGuard = tx64->mainCode.frontier();
 
   switch (arch()) {
@@ -104,7 +109,6 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec) {
   }
 
   // Emit a jump to the actual code
-  TCA realCode = srcRec->getTopTranslation();
   TCA dbgBranchGuardSrc = tx64->mainCode.frontier();
   emitSmashableJump(tx64->mainCode, realCode, CC_None);
 

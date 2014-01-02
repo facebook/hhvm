@@ -101,7 +101,8 @@ void (*g_vmProcessInit)();
 struct ProgramOptions {
   string     mode;
   string     config;
-  StringVec  confStrings;
+  std::vector<std::string>
+             confStrings;
   int        port;
   int        portfd;
   int        sslportfd;
@@ -112,7 +113,8 @@ struct ProgramOptions {
   bool       isTempFile;
   int        count;
   bool       noSafeAccessCheck;
-  StringVec  args;
+  std::vector<std::string>
+             args;
   string     buildId;
   string     instanceId;
   int        xhprofFlags;
@@ -827,7 +829,9 @@ string translate_stack(const char *hexencoded, bool with_frame_numbers) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void prepare_args(int &argc, char **&argv, const StringVec &args,
+static void prepare_args(int &argc,
+                         char **&argv,
+                         const std::vector<std::string> &args,
                          const char *file) {
   argv = (char **)malloc((args.size() + 2) * sizeof(char*));
   argc = 0;
@@ -991,7 +995,7 @@ static int execute_program_impl(int argc, char** argv) {
      "run | debug (d) | server (s) | daemon | replay | translate (t)")
     ("config,c", value<string>(&po.config),
      "load specified config file")
-    ("config-value,v", value<StringVec >(&po.confStrings)->composing(),
+    ("config-value,v", value<std::vector<std::string>>(&po.confStrings)->composing(),
      "individual configuration string in a format of name=value, where "
      "name can be any valid configuration for a config file")
     ("port,p", value<int>(&po.port)->default_value(-1),
@@ -1011,7 +1015,8 @@ static int execute_program_impl(int argc, char** argv) {
      "connect to debugger server at specified port")
     ("debug-extension", value<string>(&po.debugger_options.extension),
      "PHP file that extends y command")
-    ("debug-cmd", value<StringVec>(&po.debugger_options.cmds)->composing(),
+    ("debug-cmd", value<std::vector<std::string>>(
+      &po.debugger_options.cmds)->composing(),
      "executes this debugger command and returns its output in stdout")
     ("debug-sandbox",
      value<string>(&po.debugger_options.sandbox)->default_value("default"),
@@ -1033,7 +1038,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("no-safe-access-check",
       value<bool>(&po.noSafeAccessCheck)->default_value(false),
      "whether to ignore safe file access check")
-    ("arg", value<StringVec >(&po.args)->composing(),
+    ("arg", value<std::vector<std::string>>(&po.args)->composing(),
      "arguments")
     ("extra-header", value<string>(&Logger::ExtraHeader),
      "extra-header to add to log lines")
@@ -1323,7 +1328,7 @@ static int execute_program_impl(int argc, char** argv) {
         return 1;
       }
       Eval::Debugger::RegisterSandbox(localProxy->getDummyInfo());
-      StringVecPtr client_args;
+      std::shared_ptr<std::vector<std::string>> client_args;
       bool restart = false;
       ret = 0;
       while (true) {

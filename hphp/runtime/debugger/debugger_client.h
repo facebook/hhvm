@@ -180,7 +180,7 @@ public:
   std::string argValue(int index);
   // The entire line after that argument, un-escaped.
   std::string lineRest(int index);
-  StringVec *args() { return &m_args;}
+  std::vector<std::string> *args() { return &m_args;}
 
   /**
    * Send the commmand to server's DebuggerProxy and expect same type of command
@@ -360,7 +360,7 @@ private:
   std::string m_command;
   std::string m_commandCanonical;
   std::string m_prevCmd;
-  StringVec m_args;
+  std::vector<std::string> m_args;
   // m_args[i]'s last character is m_line[m_argIdx[i]]
   std::vector<int> m_argIdx;
   std::string m_code;

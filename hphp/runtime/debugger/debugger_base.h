@@ -18,6 +18,7 @@
 #define incl_HPHP_EVAL_DEBUGGER_BASE_H_
 
 #include <memory>
+#include <vector>
 #include <string>
 
 #include "hphp/runtime/debugger/break_point.h"
@@ -33,7 +34,7 @@ struct DebuggerClientOptions {
   std::string host;
   int port;
   std::string extension;
-  StringVec cmds;
+  std::vector<std::string> cmds;
   std::string sandbox;
   std::string user;
   std::string configFName;
@@ -87,7 +88,8 @@ class DebuggerClientExitException  : public DebuggerException {
 
 class DebuggerRestartException     : public DebuggerException {
 public:
-  explicit DebuggerRestartException(StringVecPtr args) : m_args(args) {}
+  explicit DebuggerRestartException(
+    std::shared_ptr<std::vector<std::string>> args) : m_args(args) {}
   ~DebuggerRestartException() throw() {}
 
   virtual const char *what() const throw() {
@@ -95,7 +97,7 @@ public:
   }
   EXCEPTION_COMMON_IMPL(DebuggerRestartException);
 
-  StringVecPtr m_args;
+  std::shared_ptr<std::vector<std::string>> m_args;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -218,7 +220,7 @@ public:
 class Macro {
 public:
   std::string m_name;
-  StringVec m_cmds;
+  std::vector<std::string> m_cmds;
 
   unsigned int m_index; // currently playing position
 

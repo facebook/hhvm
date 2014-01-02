@@ -555,7 +555,8 @@ static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
   return true;
 }
 
-void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */,
+void RuntimeOption::Load(Hdf &config,
+                         std::vector<std::string> *overwrites /* = NULL */,
                          bool empty /* = false */) {
   // Machine metrics
   string hostname, tier, cpu;

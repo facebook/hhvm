@@ -421,8 +421,8 @@ static int find_boundary(multipart_buffer *self, char *boundary) {
 static int multipart_buffer_headers(multipart_buffer *self,
                                     header_list &header) {
   char *line;
-  StringPair prev_entry;
-  StringPair entry;
+  std::pair<std::string, std::string> prev_entry;
+  std::pair<std::string, std::string> entry;
 
   /* didn't find boundary, abort */
   if (!find_boundary(self, self->boundary)) {
@@ -446,10 +446,10 @@ static int multipart_buffer_headers(multipart_buffer *self,
     if (value) {
       *value = 0;
       do { value++; } while(isspace(*value));
-      entry = StringPair(key, value);
+      entry = std::make_pair(key, value);
     } else if (!header.empty()) {
       /* If no ':' on the line, add to previous line */
-      entry = StringPair(prev_entry.first, prev_entry.second + line);
+      entry = std::make_pair(prev_entry.first, prev_entry.second + line);
       header.pop_back();
     } else {
       continue;

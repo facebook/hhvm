@@ -74,7 +74,8 @@ public:
   /**
    * Execute a debugger action.
    */
-  virtual String debuggerVerb(const std::string &verb, const StringVec &args) {
+  virtual String debuggerVerb(const std::string &verb,
+                              const std::vector<std::string> &args) {
     return String();
   }
 };

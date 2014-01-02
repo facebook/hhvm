@@ -149,7 +149,7 @@ bool CmdExtension::onServer(DebuggerProxy &proxy) {
     } else {
       if (ext->debuggerSupport() & IDebuggable::SupportVerb) {
         string verb = m_args[2];
-        StringVec args;
+        std::vector<std::string> args;
         if (m_args.size() > 3) {
           args.insert(args.end(), m_args.begin() + 3, m_args.end());
         }

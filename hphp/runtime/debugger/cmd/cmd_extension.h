@@ -35,7 +35,7 @@ protected:
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
 private:
-  StringVec m_args;
+  std::vector<std::string> m_args;
   String m_out;
   String m_err;
 

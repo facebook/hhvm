@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_APC_ARRAY_H_
 #define incl_HPHP_APC_ARRAY_H_
 
-#include "hphp/runtime/base/apc-handle.h"
+#include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/lock.h"
@@ -99,8 +99,6 @@ struct APCArray {
     return indexOf(key);
   }
 
-  void incRef() { m_handle.incRef(); }
-  void decRef() { m_handle.decRef(); }
   bool isPacked() const { return m_handle.isPacked(); }
 
 private:

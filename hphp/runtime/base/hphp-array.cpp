@@ -447,6 +447,7 @@ HphpArray* HphpArray::copyMixedAndResizeIfNeededSlow() const {
 
 NEVER_INLINE
 void HphpArray::ReleasePacked(ArrayData* in) {
+  assert(in->m_count >= 0);
   auto const ad = asPacked(in);
 
   if (!ad->isZombie()) {
@@ -471,6 +472,7 @@ void HphpArray::ReleasePacked(ArrayData* in) {
 
 NEVER_INLINE
 void HphpArray::Release(ArrayData* in) {
+  assert(in->m_count >= 0);
   auto const ad = asMixed(in);
 
   if (!ad->isZombie()) {
@@ -493,6 +495,50 @@ void HphpArray::Release(ArrayData* in) {
   auto const cap  = ad->m_cap;
   auto const mask = ad->m_tableMask;
   MM().objFreeLogged(ad, computeAllocBytes(cap, mask));
+}
+
+NEVER_INLINE
+void HphpArray::ReleaseUncounted(ArrayData* in) {
+  auto const ad = asHphpArray(in);
+  assert(ad->m_count == UncountedValue);
+
+  if (!ad->isZombie()) {
+    auto const data = ad->data();
+    auto const stop = data + ad->m_used;
+
+    for (auto ptr = data; ptr != stop; ++ptr) {
+      if (!ad->isPacked()) {
+        if (isTombstone(ptr->data.m_type)) continue;
+        if (ptr->hasStrKey()) {
+          assert(ptr->key->m_count < 0);
+          if (!ptr->key->isStatic()) {
+            ptr->key->destructStatic();
+          }
+        }
+      }
+      if (ptr->data.m_type == KindOfString) {
+        assert(ptr->data.m_data.pstr->m_count < 0);
+        if (!ptr->data.m_data.pstr->isStatic()) {
+          ptr->data.m_data.pstr->destructStatic();
+        }
+      } else if (ptr->data.m_type == KindOfArray) {
+        assert(ptr->data.m_data.pstr->m_count < 0);
+        if (!ptr->data.m_data.parr->isStatic()) {
+          ReleaseUncounted(ptr->data.m_data.parr);
+        }
+      } else {
+        assert(!IS_REFCOUNTED_TYPE(ptr->data.m_type));
+      }
+    }
+
+    auto fullPos = ad->m_strongIterators;
+    while (UNLIKELY(fullPos != nullptr)) {
+      fullPos->setContainer(nullptr);
+      fullPos = fullPos->getNext();
+    }
+  }
+
+  std::free(ad);
 }
 
 //=============================================================================

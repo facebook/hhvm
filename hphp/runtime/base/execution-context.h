@@ -432,8 +432,12 @@ public:
   static void fillContinuationVars(
     ActRec* origFp, const Func* origFunc, ActRec* genFp, const Func* genFunc);
   void pushLocalsAndIterators(const HPHP::Func* f, int nparams = 0);
+  void enqueueAPCHandle(APCHandle* handle);
 
 private:
+  std::vector<APCHandle*> m_apcHandles;
+  void manageAPCHandle();
+
   enum class VectorLeaveCode {
     ConsumeAll,
     LeaveLast

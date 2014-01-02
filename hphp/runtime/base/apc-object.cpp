@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/apc-handle.h"
+#include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -99,7 +100,7 @@ APCHandle* APCObject::Construct(ObjectData* objectData) {
 ALWAYS_INLINE
 APCObject::~APCObject() {
   for (auto i = uint32_t{0}; i < m_propCount; ++i) {
-    if (props()[i].val) props()[i].val->decRef();
+    if (props()[i].val) props()[i].val->unreference();
     assert(props()[i].name->isStatic());
   }
 }
@@ -184,35 +185,6 @@ Object APCObject::createObject() const {
 
   obj->invokeWakeup();
   return obj;
-}
-
-//
-// Stats API
-//
-
-void APCObject::getSizeStats(APCHandleStats* stats) const {
-  stats->initStats();
-  stats->dataTotalSize += sizeof(APCObject) + sizeof(Prop) * m_propCount;
-
-  for (auto i = uint32_t{0}; i < m_propCount; ++i) {
-    assert(props()[i].name->isStatic());
-    if (props()[i].val) {
-      APCHandleStats childStats;
-      props()[i].val->getStats(&childStats);
-      stats->addChildStats(&childStats);
-    }
-  }
-}
-
-int32_t APCObject::getSpaceUsage() const {
-  int32_t size = sizeof(APCObject) + sizeof(Prop) * m_propCount;
-
-  for (auto i = uint32_t{0}; i < m_propCount; ++i) {
-    if (props()[i].val) {
-      size += props()[i].val->getSpaceUsage();
-    }
-  }
-  return size;
 }
 
 //////////////////////////////////////////////////////////////////////

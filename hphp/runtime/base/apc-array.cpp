@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-handle.h"
+#include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/apc-local-array.h"
@@ -31,7 +32,7 @@ APCHandle* APCArray::MakeShared(ArrayData* arr,
                                 bool unserializeObj) {
   if (!inner) {
     // only need to call traverseData() on the toplevel array
-    DataWalker walker(DataWalker::LookupFeature::Default);
+    DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
     DataWalker::DataFeature features = walker.traverseData(arr);
     if (features.isCircular() || features.hasCollection()) {
       String s = apc_serialize(arr);
@@ -39,6 +40,9 @@ APCHandle* APCArray::MakeShared(ArrayData* arr,
       handle->setSerializedArray();
       handle->mustCache();
       return handle;
+    } else if (apcExtension::UseUncounted &&
+               !features.hasObjectOrResource()) {
+      return APCTypedValue::MakeSharedArray(arr);
     }
   }
 
@@ -113,7 +117,9 @@ APCHandle* APCArray::MakePackedShared(ArrayData* arr,
 }
 
 Variant APCArray::MakeArray(APCHandle* handle) {
-  if (handle->getSerializedArray()) {
+  if (handle->getUncounted()) {
+    return APCTypedValue::fromHandle(handle)->getArrayData();
+  } else if (handle->getSerializedArray()) {
     StringData* serArr = APCString::fromHandle(handle)->getStringData();
     return apc_unserialize(serArr->data(), serArr->size());
   }
@@ -129,13 +135,13 @@ APCArray::~APCArray() {
   if (isPacked()) {
      APCHandle** v = vals();
      for (size_t i = 0, n = m_size; i < n; i++) {
-       v[i]->decRef();
+       v[i]->unreference();
      }
   } else {
     Bucket* bks = buckets();
     for (int i = 0; i < m.m_num; i++) {
-      bks[i].key->decRef();
-      bks[i].val->decRef();
+      bks[i].key->unreference();
+      bks[i].val->unreference();
     }
   }
 }

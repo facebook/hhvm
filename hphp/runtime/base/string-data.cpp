@@ -79,8 +79,12 @@ void freeForSize(void* vp, uint32_t size) {
 
 //////////////////////////////////////////////////////////////////////
 
-StringData* StringData::MakeStatic(StringSlice sl) {
-  if (UNLIKELY(sl.len > MaxSize)) {
+// create either a static or an uncounted string.
+// Diffrence between static and uncounted is in the lifetime
+// of the string. Static are alive for the lifetime of the process.
+// Uncounted are not ref counted but will be deleted at some point.
+StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
+  if (UNLIKELY(sl.len > StringData::MaxSize)) {
     throw_string_too_large(sl.len);
   }
 
@@ -100,13 +104,25 @@ StringData* StringData::MakeStatic(StringSlice sl) {
 
   assert(ret->m_hash == 0);
   assert(ret->m_count == 0);
-  ret->setStatic();
+  if (trueStatic) {
+    ret->setStatic();
+  } else {
+    ret->setUncounted();
+  }
 
   assert(ret == sd);
   assert(ret->isFlat());
-  assert(ret->isStatic());
+  assert(trueStatic ? ret->isStatic() : ret->isUncounted());
   assert(ret->checkSane());
   return ret;
+}
+
+StringData* StringData::MakeStatic(StringSlice sl) {
+  return MakeShared(sl, true);
+}
+
+StringData* StringData::MakeUncounted(StringSlice sl) {
+  return MakeShared(sl, false);
 }
 
 void StringData::destructStatic() {
@@ -139,7 +155,7 @@ void StringData::sweepAll() {
                    - sizeof(StringData)
     );
     assert(s->isShared());
-    s->sharedPayload()->shared->decRef();
+    s->sharedPayload()->shared->getHandle()->unreference();
   }
   head.next = head.prev = &head;
 }
@@ -234,7 +250,7 @@ void StringData::releaseDataSlowPath() {
   assert(isShared());
   assert(checkSane());
 
-  sharedPayload()->shared->decRef();
+  sharedPayload()->shared->getHandle()->unreference();
   delist();
   freeForSize(this, sizeof(StringData) + sizeof(SharedPayload));
 }

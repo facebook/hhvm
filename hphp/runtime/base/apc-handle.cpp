@@ -47,8 +47,8 @@ APCHandle* APCHandle::Create(CVarRef source,
   // getAPCHandle() is responsible to check the conditions under which
   // a wrapped object can be returned
   auto wrapped = source.getAPCHandle();
-  if (UNLIKELY(wrapped && !unserializeObj)) {
-    wrapped->incRef();
+  if (UNLIKELY(wrapped && !unserializeObj && !wrapped->getUncounted())) {
+    wrapped->reference();
     return wrapped;
   }
   return CreateSharedType(source, serialized, inner, unserializeObj);
@@ -101,6 +101,11 @@ StringCase:
       }
 
       assert(!s->isStatic()); // would've been handled above
+      if (!inner && apcExtension::UseUncounted) {
+        StringData* st = StringData::MakeUncounted(s->slice());
+        APCTypedValue* value = new APCTypedValue(st);
+        return value->getHandle();
+      }
       return APCString::MakeShared(type, s);
     }
 
@@ -154,6 +159,7 @@ Variant APCHandle::toLocal() {
 }
 
 void APCHandle::deleteShared() {
+  assert(!getUncounted());
   switch (m_type) {
     case KindOfBoolean:
     case KindOfInt64:
@@ -181,113 +187,69 @@ void APCHandle::deleteShared() {
   }
 }
 
-//
-// Stats API
-//
-void APCHandle::getStats(APCHandleStats *stats) const {
-  stats->initStats();
-  stats->variantCount = 1;
-  switch (m_type) {
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+ArrayData* CreateUncountedArray(ArrayData* array);
+
+Variant CreateVarForUncountedArray(CVarRef source) {
+  assert(apcExtension::UseUncounted);
+  auto type = source.getType(); // this gets rid of the ref, if it was one
+  switch (type) {
+    case KindOfBoolean:
+      return source.getBoolean();
+    case KindOfInt64:
+      return source.getInt64();
+    case KindOfDouble:
+      return source.getDouble();
     case KindOfUninit:
     case KindOfNull:
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble:
+      return null_variant;
     case KindOfStaticString:
-      stats->dataSize = sizeof(double);
-      stats->dataTotalSize = sizeof(APCTypedValue);
-      break;
-    case KindOfObject:
-      if (getIsObj()) {
-        APCHandleStats childStats;
-        APCObject::fromHandle(const_cast<APCHandle*>(this))->
-                                                getSizeStats(&childStats);
-        stats->addChildStats(&childStats);
-        break;
-      }
-    // fall through
-    case KindOfString:
-      stats->dataSize =
-          APCString::fromHandle(const_cast<APCHandle*>(this))->
-                                                getStringData()->size();
-      stats->dataTotalSize = sizeof(APCString) + stats->dataSize;
-      break;
+      return source.getStringData();
+
+    case KindOfString: {
+      auto const st = lookupStaticString(source.getStringData());
+      if (st != nullptr) return st;
+      return StringData::MakeUncounted(source.getStringData()->slice());
+    }
+
+    case KindOfArray:
+      return CreateUncountedArray(source.getArrayData());
+
     default:
-      assert(is(KindOfArray));
-      if (getSerializedArray()) {
-        stats->dataSize =
-            APCString::fromHandle(const_cast<APCHandle*>(this))->
-                                                getStringData()->size();
-        stats->dataTotalSize = sizeof(APCArray) + stats->dataSize;
-        break;
-      }
-      APCArray* arr = APCArray::fromHandle(const_cast<APCHandle*>(this));
-      stats->dataTotalSize = sizeof(APCArray);
-      if (isPacked()) {
-        auto size = arr->size();
-        stats->dataTotalSize += sizeof(APCHandle*) * size;
-        for (size_t i = 0; i < size; i++) {
-          APCHandle *v = arr->vals()[i];
-          APCHandleStats childStats;
-          v->getStats(&childStats);
-          stats->addChildStats(&childStats);
-        }
-      } else {
-        stats->dataTotalSize += sizeof(APCArray::Bucket) * arr->size() +
-                                sizeof(int) * (arr->capacity() + 1);
-        for (size_t i = 0, n = arr->size(); i < n; i++) {
-          APCHandleStats childStats;
-          arr->buckets()[i].key->getStats(&childStats);
-          stats->addChildStats(&childStats);
-          arr->buckets()[i].val->getStats(&childStats);
-          stats->addChildStats(&childStats);
-        }
-      }
-      break;
+      assert(false); // type not allowed
   }
+  return null_variant;
 }
 
-int32_t APCHandle::getSpaceUsage() const {
-  uint32_t size = sizeof(APCHandle);
-  if (!IS_REFCOUNTED_TYPE(m_type)) return size;
-  switch (m_type) {
-    case KindOfObject:
-      if (getIsObj()) {
-        return size +
-          APCObject::fromHandle(const_cast<APCHandle*>(this))->getSpaceUsage();
-      }
-    // fall through
-    case KindOfString:
-      size += sizeof(StringData) +
-          APCString::fromHandle(const_cast<APCHandle*>(this))->
-                                              getStringData()->size();
-      break;
-    default:
-      assert(is(KindOfArray));
-      if (getSerializedArray()) {
-        size += sizeof(StringData) +
-            APCString::fromHandle(const_cast<APCHandle*>(this))->
-                                              getStringData()->size();
-        break;
-      }
-      APCArray* arr = APCArray::fromHandle(const_cast<APCHandle*>(this));
-      if (isPacked()) {
-        auto size = arr->size();
-        size += sizeof(APCArray) + size * sizeof(APCHandle*);
-        for (size_t i = 0, n = arr->size(); i < n; i++) {
-          size += arr->vals()[i]->getSpaceUsage();
-        }
-      } else {
-        size += sizeof(APCArray::Bucket) * arr->size() +
-                sizeof(int) * (arr->capacity() + 1);
-        for (size_t i = 0, n = arr->size(); i < n; i++) {
-          size += arr->buckets()[i].key->getSpaceUsage();
-          size += arr->buckets()[i].val->getSpaceUsage();
-        }
-      }
-      break;
+ArrayData* CreateUncountedArray(ArrayData* array) {
+  assert(apcExtension::UseUncounted);
+  Array temp = Array::Create();
+  for (ArrayIter it(array); !it.end(); it.next()) {
+    auto key = CreateVarForUncountedArray(it.first());
+    auto val = CreateVarForUncountedArray(it.secondRef());
+    temp.set(key, val);
   }
-  return size;
+  return ArrayData::GetUncountedArray(temp.get());
+}
+}
+
+APCHandle* APCTypedValue::MakeSharedArray(ArrayData* array) {
+  auto value = new APCTypedValue(CreateUncountedArray(array));
+  return value->getHandle();
+}
+
+void APCTypedValue::deleteUncounted() {
+  assert(m_handle.getUncounted());
+  DataType type = m_handle.getType();
+  assert(type == KindOfString || type == KindOfArray);
+  if (type == KindOfString) {
+    m_data.str->destructStatic();
+  } else if (type == KindOfArray) {
+    HphpArray::ReleaseUncounted(m_data.arr);
+  }
+  delete this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

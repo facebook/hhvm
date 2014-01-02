@@ -38,7 +38,7 @@ class APCLocalArray : public ArrayData, Sweepable {
     , m_arr(source)
     , m_localCache(nullptr) {
     m_size = m_arr->size();
-    source->incRef();
+    source->getHandle()->reference();
   }
 
   ~APCLocalArray();
@@ -133,7 +133,7 @@ public:
   static ArrayData* EscalateForSort(ArrayData*);
 
   // implements Sweepable.sweep()
-  void sweep() FOLLY_OVERRIDE { m_arr->decRef(); }
+  void sweep() FOLLY_OVERRIDE { m_arr->getHandle()->unreference(); }
 
 private:
   ssize_t getIndex(int64_t k) const;

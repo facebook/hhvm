@@ -57,6 +57,7 @@ class apcExtension : public Extension {
   static bool ConcurrentTableLockFree;
   static bool FileStorageKeepFileLinked;
   static std::vector<std::string> NoTTLPrefix;
+  static bool UseUncounted;
 
   virtual void moduleLoad(Hdf config);
   virtual void moduleInit();

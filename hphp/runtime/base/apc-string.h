@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/apc-handle.h"
+#include "hphp/runtime/base/apc-typed-value.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,6 +36,9 @@ struct APCString {
   // Return the PHP string from the APC one
   static Variant MakeString(APCHandle* handle) {
     assert(handle->getType() == KindOfString);
+    if (handle->getUncounted()) {
+      return APCTypedValue::fromHandle(handle)->getStringData();
+    }
     return StringData::Make(APCString::fromHandle(handle));
   }
 
@@ -49,18 +53,6 @@ struct APCString {
 
   StringData* getStringData() {
     return &m_data;
-  }
-
-  //
-  // APCHandle forward API
-  //
-
-  void incRef() {
-    m_handle.incRef();
-  }
-
-  void decRef() {
-    m_handle.decRef();
   }
 
 private:

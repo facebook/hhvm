@@ -41,6 +41,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/util/util.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/debug.h"
@@ -52,6 +53,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -64,6 +66,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_result_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_exception_wait_handle.h"
@@ -2564,6 +2567,33 @@ VMExecutionContext::pushLocalsAndIterators(const Func* func,
   // Push iterators.
   for (int i = 0; i < func->numIterators(); i++) {
     m_stack.allocI();
+  }
+}
+
+void VMExecutionContext::enqueueAPCHandle(APCHandle* handle) {
+  assert(handle->getUncounted());
+  assert(handle->getType() == KindOfString ||
+         handle->getType() == KindOfArray);
+  m_apcHandles.push_back(handle);
+}
+
+// Treadmill solution for the SharedVariant memory management
+class FreedAPCHandle : public Treadmill::WorkItem {
+  std::vector<APCHandle*> m_apcHandles;
+public:
+  explicit FreedAPCHandle(std::vector<APCHandle*>&& shandles)
+      : m_apcHandles(std::move(shandles)) {}
+  virtual void operator()() {
+    for (auto handle: m_apcHandles) {
+      APCTypedValue::fromHandle(handle)->deleteUncounted();
+    }
+  }
+};
+
+void VMExecutionContext::manageAPCHandle() {
+  assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
+  if (apcExtension::UseUncounted) {
+    Treadmill::WorkItem::enqueue(new FreedAPCHandle(std::move(m_apcHandles)));
   }
 }
 
@@ -7624,6 +7654,7 @@ void VMExecutionContext::requestInit() {
 void VMExecutionContext::requestExit() {
   MemoryProfile::finishProfiling();
 
+  manageAPCHandle();
   syncGdbState();
   tx64->requestExit();
   m_stack.requestExit();

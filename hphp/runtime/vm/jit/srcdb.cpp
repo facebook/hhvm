@@ -19,7 +19,6 @@
 #include <stdarg.h>
 #include <string>
 
-#include "hphp/util/base.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/jump-smash.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"

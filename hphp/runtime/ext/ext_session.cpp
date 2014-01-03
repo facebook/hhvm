@@ -14,33 +14,41 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_session.h"
-#include "hphp/runtime/ext/ext_options.h"
-#include "hphp/runtime/ext/ext_hash.h"
-#include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/zend-math.h"
-#include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/datetime.h"
-#include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/compatibility.h"
-#include "folly/String.h"
+
+#include <string>
+
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
 
+#include "folly/String.h"
+
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/compatibility.h"
+
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/datetime.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/base/zend-math.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_hash.h"
+#include "hphp/runtime/ext/ext_options.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
+
+using std::string;
 
 static bool ini_on_update_save_handler(const String& value, void *p);
 static String ini_get_save_handler(void *p);
@@ -744,8 +752,8 @@ public:
 
 private:
   int m_fd;
-  string m_lastkey;
-  string m_basedir;
+  std::string m_lastkey;
+  std::string m_basedir;
   size_t m_dirdepth;
   size_t m_st_size;
   int m_filemode;

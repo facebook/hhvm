@@ -138,7 +138,7 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
                                const char *user /* = NULL */,
                                const char *name /* = NULL */,
                                bool force /* = false */) {
-  string login;
+  std::string login;
   if (user == nullptr) {
     user = client.getCurrentUser().c_str();
   }
@@ -217,10 +217,10 @@ void CmdMachine::onClient(DebuggerClient &client) {
       help(client);
       return;
     }
-    string host = client.argValue(2);
+    std::string host = client.argValue(2);
     int port = 0;
     size_t pos = host.find(":");
-    if (pos != string::npos) {
+    if (pos != std::string::npos) {
       if (!DebuggerClient::IsValidNumber(host.substr(pos + 1))) {
         client.error("Port needs to be a number");
         help(client);
@@ -263,7 +263,7 @@ void CmdMachine::onClient(DebuggerClient &client) {
   if (client.arg(1, "attach")) {
     DSandboxInfoPtr sandbox;
 
-    string snum = client.argValue(2);
+    std::string snum = client.argValue(2);
     if (DebuggerClient::IsValidNumber(snum)) {
       int num = atoi(snum.c_str());
       sandbox = client.getSandbox(num);

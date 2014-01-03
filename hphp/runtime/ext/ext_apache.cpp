@@ -42,9 +42,8 @@ Array f_apache_request_headers() {
     HeaderMap headers;
     transport->getHeaders(headers);
     Array ret;
-    for (HeaderMap::const_iterator iter = headers.begin();
-         iter != headers.end(); ++iter) {
-      const vector<string> &values = iter->second;
+    for (auto iter = headers.begin(); iter != headers.end(); ++iter) {
+      const auto& values = iter->second;
       ret.set(String(iter->first), String(values.back()));
     }
     return ret;
@@ -58,9 +57,8 @@ Array f_apache_response_headers() {
     HeaderMap headers;
     transport->getResponseHeaders(headers);
     Array ret;
-    for (HeaderMap::const_iterator iter = headers.begin();
-         iter != headers.end(); ++iter) {
-      const vector<string> &values = iter->second;
+    for (auto iter = headers.begin(); iter != headers.end(); ++iter) {
+      const auto& values = iter->second;
       ret.set(String(iter->first), String(values.back()));
     }
     return ret;

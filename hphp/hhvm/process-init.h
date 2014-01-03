@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_HHVM_PROCESS_INIT_H_
 #define incl_HPHP_HHVM_PROCESS_INIT_H_
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/compiler/analysis/emitter.h"

@@ -23,6 +23,8 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+using std::string;
+
 TRACE_SET_MOD(debugger);
 
 const std::string &DSandboxInfo::id() const {
@@ -35,7 +37,7 @@ const std::string &DSandboxInfo::id() const {
 
 const std::string DSandboxInfo::desc() const {
   TRACE(2, "DSandboxInfo::desc\n");
-  string ret = m_user + "'s " + m_name + " sandbox";
+  std::string ret = m_user + "'s " + m_name + " sandbox";
   if (!m_path.empty()) {
     ret += " at " + m_path;
   }
@@ -56,7 +58,7 @@ void DSandboxInfo::set(const std::string &id) {
   m_name.clear();
   m_path.clear();
   if (!id.empty()) {
-    vector<string> tokens;
+    std::vector<std::string> tokens;
     Util::split('\t', id.c_str(), tokens);
     if (tokens.size() == 2) {
       m_user = tokens[0];
@@ -131,7 +133,7 @@ std::string DFunctionInfo::getName() const {
 
 std::string DFunctionInfo::site(std::string &preposition) const {
   TRACE(2, "DFunctionInfo::site\n");
-  string ret;
+  std::string ret;
   preposition = "at ";
   if (!m_class.empty()) {
     if (!m_namespace.empty()) {
@@ -160,7 +162,7 @@ std::string DFunctionInfo::site(std::string &preposition) const {
 
 std::string DFunctionInfo::desc(const BreakPointInfo *bpi) const {
   TRACE(2, "DFunctionInfo::desc\n");
-  string ret;
+  std::string ret;
   if (!m_class.empty()) {
     string cls;
     if (!m_namespace.empty()) {
@@ -189,7 +191,7 @@ std::string DFunctionInfo::desc(const BreakPointInfo *bpi) const {
 
 std::string Macro::desc(const char *indent) {
   TRACE(2, "Macro::desc\n");
-  string ret;
+  std::string ret;
   for (unsigned int i = 0; i < m_cmds.size(); i++) {
     if (indent) ret += indent;
     ret += m_cmds[i];
@@ -491,7 +493,7 @@ String highlight_php(const String& source, int line /* = 0 */,
   Scanner scanner(source.data(), source.size(),
                   Scanner::AllowShortTags | Scanner::ReturnAllTokens);
   ScannerToken tok1, tok2;
-  std::vector<std::pair<int, string> > ahead_tokens;
+  std::vector<std::pair<int, std::string> > ahead_tokens;
   Location loc1, loc2;
 
   const char *colorComment = nullptr, *endComment = nullptr;

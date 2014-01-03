@@ -14,13 +14,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_socket.h"
-#include "hphp/runtime/base/socket.h"
-#include "hphp/runtime/base/ssl-socket.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/util/logger.h"
-#include "folly/String.h"
+
+#include <boost/lexical_cast.hpp>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -35,8 +31,15 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/uio.h>
-#include "hphp/util/network.h"
 #include <poll.h>
+
+#include "folly/String.h"
+
+#include "hphp/util/network.h"
+#include "hphp/runtime/base/socket.h"
+#include "hphp/runtime/base/ssl-socket.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/util/logger.h"
 
 #define PHP_NORMAL_READ 0x0001
 #define PHP_BINARY_READ 0x0002
@@ -1040,7 +1043,7 @@ void f_socket_clear_error(CResRef socket /* = null_object */) {
 Variant sockopen_impl(const Util::HostURL &hosturl, VRefParam errnum,
                       VRefParam errstr, double timeout, bool persistent) {
 
-  string key;
+  std::string key;
   if (persistent) {
     key = hosturl.getHostURL();
     Socket *sock =

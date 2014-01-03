@@ -46,10 +46,10 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
   hdf["Passwords"].get(m_passwords);
   m_alwaysReset = hdf["AlwaysReset"].getBool(false);
 
-  string type = hdf["Type"].getString();
+  std::string type = hdf["Type"].getString();
   if (type == "InternalPageServer") {
     m_type = SatelliteServer::Type::KindOfInternalPageServer;
-    vector<string> urls;
+    std::vector<std::string> urls;
     hdf["URLs"].get(urls);
     for (unsigned int i = 0; i < urls.size(); i++) {
       m_urls.insert(Util::format_pattern(urls[i], true));
@@ -69,8 +69,7 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
 
 bool SatelliteServerInfo::checkMainURL(const std::string& path) {
   String url(path.c_str(), path.size(), CopyString);
-  for (std::set<string>::const_iterator iter =
-         SatelliteServerInfo::InternalURLs.begin();
+  for (auto iter = SatelliteServerInfo::InternalURLs.begin();
        iter != SatelliteServerInfo::InternalURLs.end(); ++iter) {
     Variant ret = preg_match
       (String(iter->c_str(), iter->size(), CopyString), url);

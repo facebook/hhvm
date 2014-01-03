@@ -24,7 +24,6 @@
 
 #include <evhttp.h>
 
-#include "hphp/util/base.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/lock.h"
 

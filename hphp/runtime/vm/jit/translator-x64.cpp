@@ -1746,7 +1746,7 @@ void dumpTranslationInfo(const Tracelet& t, TCA postGuards) {
     // to vary across the optimized/debug builds.
     PC oldPC = vmpc();
     vmpc() = unit->at(sk.offset());
-    TRACE(3, g_vmContext->prettyStack(string(" tx64 ")));
+    TRACE(3, g_vmContext->prettyStack(std::string(" tx64 ")));
     vmpc() = oldPC;
     TRACE(3, "----------------------------------------------\n");
   }
@@ -2506,10 +2506,10 @@ bool TranslatorX64::addDbgGuard(const Func* func, Offset offset) {
 }
 
 bool TranslatorX64::dumpTCCode(const char* filename) {
-#define OPEN_FILE(F, SUFFIX)                            \
-  string F ## name = string(filename).append(SUFFIX);   \
-  FILE* F = fopen(F ## name .c_str(),"wb");             \
-  if (F == nullptr) return false;                       \
+#define OPEN_FILE(F, SUFFIX)                                    \
+  std::string F ## name = std::string(filename).append(SUFFIX); \
+  FILE* F = fopen(F ## name .c_str(),"wb");                     \
+  if (F == nullptr) return false;                               \
   SCOPE_EXIT{ fclose(F); };
 
   OPEN_FILE(aFile,          "_a");

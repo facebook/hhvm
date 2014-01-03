@@ -13,8 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/server/admin-request-handler.h"
+
+#include <string>
+#include <sstream>
+#include <iomanip>
+
+#include <boost/lexical_cast.hpp>
+
+#ifdef GOOGLE_CPU_PROFILER
+#include <google/profiler.h>
+#endif
+
 #include "hphp/runtime/base/file-repository.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
@@ -41,16 +51,12 @@
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/ext_apc.h"
 
-#include <sstream>
-#include <iomanip>
-
-#ifdef GOOGLE_CPU_PROFILER
-#include <google/profiler.h>
-#endif
+namespace HPHP {
 
 using std::endl;
+using boost::lexical_cast;
+using std::string;
 
-namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_THREAD_LOCAL(AccessLog::ThreadData,
@@ -112,7 +118,7 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
 void AdminRequestHandler::handleRequest(Transport *transport) {
   GetAccessLog().onNewRequest();
   transport->addHeader("Content-Type", "text/plain");
-  string cmd = transport->getCommand();
+  std::string cmd = transport->getCommand();
 
   do {
     if (cmd == "" || cmd == "help") {
@@ -551,13 +557,13 @@ static bool send_report(Transport *transport, ServerStats::Format format,
                         const char *mime) {
   int64_t  from   = transport->getInt64Param ("from");
   int64_t  to     = transport->getInt64Param ("to");
-  string agg    = transport->getParam      ("agg");
-  string keys   = transport->getParam      ("keys");
-  string url    = transport->getParam      ("url");
+  std::string agg    = transport->getParam      ("agg");
+  std::string keys   = transport->getParam      ("keys");
+  std::string url    = transport->getParam      ("url");
   int    code   = transport->getIntParam   ("code");
-  string prefix = transport->getParam      ("prefix");
+  std::string prefix = transport->getParam      ("prefix");
 
-  string out;
+  std::string out;
   ServerStats::Report(out, format, from, to, agg, keys, url, code, prefix);
 
   transport->addHeader("Content-Type", mime);
@@ -581,7 +587,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                              Transport *transport) {
   if (cmd == "check-load") {
     int count = HttpServer::Server->getPageServer()->getActiveWorker();
-    transport->sendString(lexical_cast<string>(count));
+    transport->sendString(boost::lexical_cast<std::string>(count));
     return true;
   }
   if (cmd == "check-ev") {
@@ -631,7 +637,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "check-sat") {
-    vector<std::pair<std::string, int>> stats;
+    std::vector<std::pair<std::string, int>> stats;
     HttpServer::Server->getSatelliteStats(&stats);
     std::stringstream out;
     bool first = true;

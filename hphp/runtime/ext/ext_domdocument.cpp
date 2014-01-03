@@ -64,7 +64,7 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
 static void php_libxml_internal_error_handler(int error_type, void *ctx,
                                               const char *fmt,
                                               va_list ap) {
-  string msg;
+  std::string msg;
   Util::string_vsnprintf(msg, fmt, ap);
 
   /* remove any trailing \n */
@@ -237,7 +237,7 @@ static void php_dom_throw_error(dom_exception_code error_code,
     Object e(SystemLib::AllocDOMExceptionObject(error_message, 0));
     throw e;
   }
-  raise_warning(string(error_message));
+  raise_warning(std::string(error_message));
 }
 
 static bool dom_has_feature(const char *feature, const char *version) {

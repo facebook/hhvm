@@ -13,6 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#include <atomic>
+
+#include <sys/time.h>
+#include <sys/mman.h>
+#include <sys/resource.h>
+#include <signal.h>
+
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/code-coverage.h"
@@ -20,9 +28,6 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include "folly/String.h"
-
-#include <atomic>
-#include <sys/mman.h>
 
 using std::map;
 

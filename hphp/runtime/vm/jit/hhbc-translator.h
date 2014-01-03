@@ -134,8 +134,8 @@ struct HhbcTranslator {
   void guardTypeLocation(const RegionDesc::Location& loc, Type type,
                          bool outerOnly);
   void guardRefs(int64_t entryArDelta,
-                 const vector<bool>& mask,
-                 const vector<bool>& vals);
+                 const std::vector<bool>& mask,
+                 const std::vector<bool>& vals);
 
   // Interface to irtranslator for predicted and inferred types.
   void assertTypeLocal(uint32_t localIndex, Type type);

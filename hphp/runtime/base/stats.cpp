@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/stats.h"
 
-#include "hphp/util/base.h"
 #include "hphp/util/data-block.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
 

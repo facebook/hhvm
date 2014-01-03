@@ -17,8 +17,14 @@
 #ifndef incl_HPHP_COUNTABLE_H_
 #define incl_HPHP_COUNTABLE_H_
 
-#include "hphp/util/base.h"
+#include <cstdlib>
+#include <cstdint>
+#include <cassert>
+#include <atomic>
+
 #include "hphp/util/util.h"
+#include "hphp/util/compilation-flags.h"
+#include "hphp/util/compatibility.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/atomic.h"
 

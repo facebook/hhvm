@@ -308,7 +308,7 @@ void CmdBreak::processStatusChange(DebuggerClient &client) {
     return processList(client);
   }
 
-  string snum = client.argValue(2);
+  std::string snum = client.argValue(2);
   if (!DebuggerClient::IsValidNumber(snum)) {
     client.error("'[b]reak [c]lear|[t]oggle' needs an {index} argument.");
     client.tutorial(
@@ -499,7 +499,7 @@ void CmdBreak::onClient(DebuggerClient &client) {
     return;
   }
 
-  string currentFile;
+  std::string currentFile;
   int currentLine = 0;
   BreakPointInfoPtr loc = client.getCurrentLocation();
   if (loc) {
@@ -533,7 +533,7 @@ void CmdBreak::onClient(DebuggerClient &client) {
   }
 
   if (interrupt >= 0) {
-    string url;
+    std::string url;
     if (!client.arg(index + 1, "if") && !client.arg(index + 1, "&&")) {
       url = client.argValue(++index);
     }

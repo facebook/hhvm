@@ -14,8 +14,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/soap/sdl.h"
+
+#include <string>
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/ext/soap/soap.h"
 
 namespace HPHP {
@@ -23,7 +27,7 @@ namespace HPHP {
 
 encodePtr get_encoder_from_prefix(sdl *sdl, xmlNodePtr node,
                                   const xmlChar *type) {
-  string ns, cptype;
+  std::string ns, cptype;
   parse_namespace(type, cptype, ns);
   xmlNsPtr nsptr = xmlSearchNs(node->doc, node, NS_STRING(ns));
   encodePtr enc;
@@ -41,11 +45,11 @@ encodePtr get_encoder_from_prefix(sdl *sdl, xmlNodePtr node,
 static sdlTypePtr get_element(sdl *sdl, xmlNodePtr node, const xmlChar *type) {
   sdlTypePtr ret;
   if (!sdl->elements.empty()) {
-    string ns, cptype;
+    std::string ns, cptype;
     parse_namespace(type, cptype, ns);
     xmlNsPtr nsptr = xmlSearchNs(node->doc, node, NS_STRING(ns));
     if (nsptr) {
-      string nscat = (char*)nsptr->href;
+      std::string nscat = (char*)nsptr->href;
       nscat += ':';
       nscat += cptype;
       sdlTypeMap::iterator iter = sdl->elements.find(nscat);
@@ -68,7 +72,7 @@ static sdlTypePtr get_element(sdl *sdl, xmlNodePtr node, const xmlChar *type) {
 }
 
 encodePtr get_encoder(sdl *sdl, const char *ns, const char *type) {
-  string nscat = ns;
+  std::string nscat = ns;
   nscat += ':';
   nscat += type;
   encodePtr enc = get_encoder_ex(sdl, nscat);
@@ -76,7 +80,7 @@ encodePtr get_encoder(sdl *sdl, const char *ns, const char *type) {
   if (!enc &&
       (strcmp(ns, SOAP_1_1_ENC_NAMESPACE) == 0 ||
        strcmp(ns, SOAP_1_2_ENC_NAMESPACE) == 0)) {
-    string enc_nscat = XSD_NAMESPACE;
+    std::string enc_nscat = XSD_NAMESPACE;
     enc_nscat += ':';
     enc_nscat += type;
     enc = get_encoder_ex(NULL, enc_nscat);
@@ -118,7 +122,7 @@ sdlBindingPtr get_binding_from_type(sdl *sdl, int type) {
 }
 
 sdlBindingPtr get_binding_from_name(sdl *sdl, char *name, char *ns) {
-  string key = ns;
+  std::string key = ns;
   key += ':';
   key += name;
   sdlBindingMap::iterator iter = sdl->bindings.find(key);
@@ -389,7 +393,7 @@ static std::shared_ptr<sdlSoapBindingFunctionHeader> wsdl_soap_binding_header
     while (trav) {
       if (node_is_equal_ex(trav, "headerfault", wsdl_soap_namespace)) {
         auto hf = wsdl_soap_binding_header(ctx, trav, wsdl_soap_namespace, true);
-        string key;
+        std::string key;
         if (!hf->ns.empty()) {
           key += hf->ns;
           key += ':';
@@ -483,7 +487,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node,
       }
     } else if (node_is_equal_ex(trav, "header", wsdl_soap_namespace)) {
       auto h = wsdl_soap_binding_header(ctx, trav, wsdl_soap_namespace, false);
-      string key;
+      std::string key;
       if (!h->ns.empty()) {
         key += h->ns;
         key += ':';
@@ -965,10 +969,10 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
         function->binding = tmpbinding;
 
         {
-          string tmp = Util::toLower(function->functionName);
+          std::string tmp = Util::toLower(function->functionName);
           sdlFunctionMap::iterator iter = ctx.sdl->functions.find(tmp);
           if (iter != ctx.sdl->functions.end()) {
-            ctx.sdl->functions[boost::lexical_cast<string>
+            ctx.sdl->functions[boost::lexical_cast<std::string>
                                (ctx.sdl->functions.size())] = function;
           } else {
             ctx.sdl->functions[tmp] = function;

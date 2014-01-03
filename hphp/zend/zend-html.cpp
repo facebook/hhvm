@@ -14,11 +14,12 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/zend/zend-html.h"
-#include "hphp/util/lock.h"
+
 #include <unicode/uchar.h>
 #include <unicode/utf8.h>
+
+#include "hphp/util/lock.h"
 
 namespace HPHP {
 

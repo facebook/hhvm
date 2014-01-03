@@ -26,8 +26,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
+#include <cmath>
 #include <float.h>
+#include <iostream>
 #include <gtest/gtest.h>
 
 #include "hphp/vixl/test/test-utils-a64.h"
@@ -103,7 +104,7 @@ namespace vixl {
   cb.init(buf, buf_size);                                                      \
   Decoder decoder;                                                             \
   Simulator* simulator = nullptr;                                              \
-  simulator = new Simulator(&decoder);                                         \
+  simulator = new Simulator(&decoder, std::cout);                              \
   RegisterDump core;                                                           \
   { /* masm needs to be destroyed before buf is deleted */                     \
     MacroAssembler masm(cb)                                                    \

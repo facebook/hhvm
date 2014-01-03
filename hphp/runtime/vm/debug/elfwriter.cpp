@@ -37,7 +37,7 @@ namespace Debug {
 TRACE_SET_MOD(debuginfo);
 static const uint8_t CFA_OFFSET = 16;
 
-void ElfWriter::logError(const string& msg) {
+void ElfWriter::logError(const std::string& msg) {
   perror("");
   std::cerr << msg << '\n';
 }
@@ -81,7 +81,7 @@ bool ElfWriter::initElfHeader() {
   return true;
 }
 
-int ElfWriter::addSectionString(const string& name) {
+int ElfWriter::addSectionString(const std::string& name) {
   int off = m_strtab.size();
   for (unsigned int i = 0; i < name.size(); i++) {
     m_strtab.push_back(name[i]);
@@ -551,7 +551,7 @@ ElfWriter::ElfWriter(DwarfChunk* d):
   off_t elf_size;
   char *symfile;
 
-  m_filename = string("/tmp/vm_dwarf.XXXXXX");
+  m_filename = std::string("/tmp/vm_dwarf.XXXXXX");
   m_fd = mkstemp((char *)m_filename.c_str());
   if (m_fd < 0) {
     logError("Unable to open file for writing.");

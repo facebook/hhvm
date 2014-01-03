@@ -130,7 +130,7 @@ void CmdThread::onClient(DebuggerClient &client) {
     client.info("Thread is running in exclusive mode now. All other threads "
                  "will not break, even when they hit breakpoints.");
   } else {
-    string snum = client.argValue(1);
+    std::string snum = client.argValue(1);
     if (!DebuggerClient::IsValidNumber(snum)) {
       client.error("'[t]hread {index}' needs a numeric argument.");
       client.tutorial(

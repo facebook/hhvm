@@ -3462,7 +3462,7 @@ RuntimeType HhbcTranslator::rttFromLocation(const Location& loc) {
   return t.toRuntimeType();
 }
 
-static uint64_t packBitVec(const vector<bool>& bits, unsigned i) {
+static uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
   uint64_t retval = 0;
   assert(i % 64 == 0);
   assert(i < bits.size());
@@ -3476,8 +3476,8 @@ static uint64_t packBitVec(const vector<bool>& bits, unsigned i) {
 }
 
 void HhbcTranslator::guardRefs(int64_t entryArDelta,
-                               const vector<bool>& mask,
-                               const vector<bool>& vals) {
+                               const std::vector<bool>& mask,
+                               const std::vector<bool>& vals) {
   int32_t actRecOff = cellsToBytes(entryArDelta);
   SSATmp* funcPtr = gen(LdARFuncPtr, m_tb->sp(), cns(actRecOff));
   SSATmp* nParams = nullptr;

@@ -16,6 +16,8 @@
 
 #include "parser.h"
 #include "hphp/util/hash.h"
+
+#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace HPHP {
@@ -58,7 +60,7 @@ ParserBase::~ParserBase() {
 }
 
 std::string ParserBase::getMessage(bool filename /* = false */) const {
-  string ret = m_scanner.getError();
+  std::string ret = m_scanner.getError();
   if (!ret.empty()) {
     ret += " ";
   }
@@ -70,12 +72,12 @@ std::string ParserBase::getMessage(Location *loc,
                                    bool filename /* = false */) const {
   int line = loc->line1;
   int column = loc->char1;
-  string ret = "(";
+  std::string ret = "(";
   if (filename) {
-    ret += string("File: ") + file() + ", ";
+    ret += std::string("File: ") + file() + ", ";
   }
-  ret += string("Line: ") + boost::lexical_cast<string>(line);
-  ret += ", Char: " + boost::lexical_cast<string>(column) + ")";
+  ret += std::string("Line: ") + boost::lexical_cast<std::string>(line);
+  ret += ", Char: " + boost::lexical_cast<std::string>(column) + ")";
   return ret;
 }
 

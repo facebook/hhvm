@@ -20,7 +20,6 @@
 #include <cstdarg>
 #include <string>
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/base/datatype.h"
 
 namespace HPHP {

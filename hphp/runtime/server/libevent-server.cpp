@@ -535,7 +535,7 @@ void LibEventServer::onChunkedResponseEnd(int worker,
 
 LibEventServer::RequestPriority LibEventServer::getRequestPriority(
   struct evhttp_request* request) {
-  string command = URL::getCommand(URL::getServerObject(request->uri));
+  std::string command = URL::getCommand(URL::getServerObject(request->uri));
   if (RuntimeOption::ServerHighPriorityEndPoints.find(command) ==
       RuntimeOption::ServerHighPriorityEndPoints.end()) {
     return PRIORITY_NORMAL;

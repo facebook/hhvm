@@ -23,6 +23,8 @@
 
 #include <boost/noncopyable.hpp>
 
+struct stat;
+
 namespace HPHP {
 
 class Directory;

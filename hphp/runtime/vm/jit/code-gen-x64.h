@@ -143,7 +143,7 @@ struct CodeGenerator {
   {
   }
 
-  void cgBlock(Block* block, vector<TransBCMapping>* bcMap);
+  void cgBlock(Block* block, std::vector<TransBCMapping>* bcMap);
 
 private:
   Address cgInst(IRInstruction* inst);
@@ -619,7 +619,7 @@ ObjectData* createClHelper(Class*, int, ActRec*, TypedValue*);
 void genCode(CodeBlock&              mainCode,
              CodeBlock&              stubsCode,
              IRUnit&                 unit,
-             vector<TransBCMapping>* bcMap,
+             std::vector<TransBCMapping>* bcMap,
              TranslatorX64*          tx64,
              const RegAllocInfo&     regs);
 

@@ -13,8 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/debugger/debugger_client.h"
+
+#include <boost/lexical_cast.hpp>
+#include <signal.h>
+
 #include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/runtime/debugger/cmd/all.h"
 #include "hphp/runtime/base/complex-types.h"
@@ -51,6 +54,8 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
+
+using std::string;
 
 static boost::scoped_ptr<DebuggerClient> debugger_client;
 
@@ -392,7 +397,7 @@ String DebuggerClient::FormatInfoVec(const IDebuggable::InfoVec &info,
   StringBuffer sb;
   for (unsigned int i = 0; i < info.size(); i++) {
     if (ItemNameColor) sb.append(ItemNameColor);
-    string name = info[i].first;
+    std::string name = info[i].first;
     name += ":                                                        ";
     sb.append(name.substr(0, maxlen + 4));
     if (ItemNameColor) sb.append(ANSI_COLOR_END);
@@ -1077,7 +1082,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
         throw DebuggerProtocolException();
       }
       m_sigCount = 0;
-      auto intr = dynamic_pointer_cast<CmdInterrupt>(cmd);
+      auto intr = std::dynamic_pointer_cast<CmdInterrupt>(cmd);
       Debugger::UsageLogInterrupt("terminal", getSandboxId(), *intr.get());
       cmd->onClient(*this);
 
@@ -2351,7 +2356,7 @@ void DebuggerClient::saveConfig() {
 
 void DebuggerClient::defineColors() {
   TRACE(2, "DebuggerClient::defineColors\n");
-  vector<string> names;
+  std::vector<std::string> names;
   get_supported_colors(names);
   Hdf support = m_config["Color"]["SupportedNames"];
   for (unsigned int i = 0; i < names.size(); i++) {

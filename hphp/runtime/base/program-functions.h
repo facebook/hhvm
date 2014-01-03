@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_PROGRAM_FUNCTIONS_H_
 #define incl_HPHP_PROGRAM_FUNCTIONS_H_
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/base/types.h"
 
 // Needed for compatibility with oniguruma-5.9.4+

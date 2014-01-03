@@ -82,7 +82,7 @@ void CmdMacro::onClient(DebuggerClient &client) {
   } else if (client.arg(1, "list")) {
     processList(client);
   } else if (client.arg(1, "clear")) {
-    string snum = client.argValue(2);
+    std::string snum = client.argValue(2);
     if (!DebuggerClient::IsValidNumber(snum)) {
       client.error("'& [c]lear' needs an {index} argument.");
       client.tutorial(

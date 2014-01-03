@@ -32,7 +32,7 @@ namespace HPHP {
   }
 
 bool SystemLib::s_inited = false;
-string SystemLib::s_source = "";
+std::string SystemLib::s_source = "";
 HPHP::Unit* SystemLib::s_unit = nullptr;
 HPHP::Unit* SystemLib::s_hhas_unit = nullptr;
 HPHP::Unit* SystemLib::s_nativeFuncUnit = nullptr;

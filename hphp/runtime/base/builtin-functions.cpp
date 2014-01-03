@@ -48,6 +48,9 @@
 using namespace HPHP::MethodLookup;
 
 namespace HPHP {
+
+using std::string;
+
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
 

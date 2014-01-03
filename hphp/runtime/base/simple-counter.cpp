@@ -34,7 +34,8 @@ void SimpleCounter::requestInit() {
   m_stacks.clear();
 }
 
-bool SimpleCounter::Comparer::operator()(const string &s1, const string &s2) {
+bool SimpleCounter::Comparer::operator()(const std::string &s1,
+                                         const std::string &s2) {
   return m_map[s1] > m_map[s2];
 }
 
@@ -48,15 +49,15 @@ void SimpleCounter::requestShutdown() {
     fprintf(stderr, "%s : %d\n", it->first.c_str(), it->second);
     if (SampleStackCount > 0) {
       CounterMap cm;
-      vector<string> &stackVec = m_stacks[it->first];
+      std::vector<std::string> &stackVec = m_stacks[it->first];
       for (size_t i = 0; i < stackVec.size(); i++) {
         cm[stackVec[i]]++;
       }
-      vector<string> unique;
+      std::vector<std::string> unique;
       for (CounterMap::const_iterator jt = cm.begin(); jt != cm.end(); ++jt) {
         unique.push_back(jt->first);
       }
-      sort(unique.begin(), unique.end(), Comparer(cm));
+      std::sort(unique.begin(), unique.end(), Comparer(cm));
       for (size_t i = 0; i < unique.size(); i++) {
         fprintf(stderr, "Stack #%d: %d/%d\n",
                 (int)(i + 1), cm[unique[i]], (int)stackVec.size());
@@ -67,12 +68,12 @@ void SimpleCounter::requestShutdown() {
   }
 }
 
-void SimpleCounter::Count(const string &name) {
+void SimpleCounter::Count(const std::string &name) {
   if (Enabled) {
     int count = ++s_counter->m_counters[name];
     if (SampleStackCount > 0) {
       assert(StackTrace::Enabled);
-      vector<string> &stackVec = s_counter->m_stacks[name];
+      std::vector<std::string> &stackVec = s_counter->m_stacks[name];
       if ((int)stackVec.size() < SampleStackCount ||
           f_rand(0, count - 1) < SampleStackCount) {
         StackTrace st;

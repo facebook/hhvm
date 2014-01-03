@@ -14,23 +14,33 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_process.h"
-#include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/thread-init-fini.h"
-#include "folly/String.h"
+
+#include <cstdlib>
+#include <vector>
+#include <string>
+#include <iostream>
+
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
-#include "hphp/util/lock.h"
-#include "hphp/runtime/base/plain-file.h"
+
+#include "folly/String.h"
+
 #include "hphp/util/light-process.h"
+#include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/vm/repo.h"
 
 #if !defined(_NSIG) && defined(NSIG)
@@ -684,7 +694,7 @@ const StaticString s_pipe("pipe");
 const StaticString s_file("file");
 
 static bool pre_proc_open(CArrRef descriptorspec,
-                          vector<DescriptorItem> &items) {
+                          std::vector<DescriptorItem> &items) {
   /* walk the descriptor spec and set up files/pipes */
   items.resize(descriptorspec.size());
   int i = 0;
@@ -745,7 +755,7 @@ static bool pre_proc_open(CArrRef descriptorspec,
 }
 
 static Variant post_proc_open(const String& cmd, Variant &pipes,
-                              CVarRef env, vector<DescriptorItem> &items,
+                              CVarRef env, std::vector<DescriptorItem> &items,
                               pid_t child) {
   if (child < 0) {
     /* failed to fork() */
@@ -786,7 +796,7 @@ Variant f_proc_open(const String& cmd, CArrRef descriptorspec, VRefParam pipes,
 
   std::vector<DescriptorItem> items;
 
-  string scwd = "";
+  std::string scwd = "";
   if (!cwd.empty()) {
     scwd = cwd.c_str();
   } else if (!g_context->getCwd().empty()) {
@@ -801,8 +811,7 @@ Variant f_proc_open(const String& cmd, CArrRef descriptorspec, VRefParam pipes,
     // for each name.
 
     // Env vars defined in the hdf file go in first
-    for (std::map<string, string>::const_iterator iter =
-        RuntimeOption::EnvVariables.begin();
+    for (auto iter = RuntimeOption::EnvVariables.begin();
         iter != RuntimeOption::EnvVariables.end(); ++iter) {
       enva.set(String(iter->first), String(iter->second));
     }
@@ -845,8 +854,8 @@ Variant f_proc_open(const String& cmd, CArrRef descriptorspec, VRefParam pipes,
       nvpair.append(iter.first().toString());
       nvpair.append('=');
       nvpair.append(iter.second().toString());
-      string tmp = nvpair.detach().c_str();
-      if (tmp.find('\n') == string::npos) {
+      std::string tmp = nvpair.detach().c_str();
+      if (tmp.find('\n') == std::string::npos) {
         envs.push_back(tmp);
       }
     }
@@ -878,7 +887,7 @@ Variant f_proc_open(const String& cmd, CArrRef descriptorspec, VRefParam pipes,
   if (scwd.length() > 0 && chdir(scwd.c_str())) {
     // chdir failed, the working directory remains unchanged
   }
-  vector<String> senvs; // holding those char *
+  std::vector<String> senvs; // holding those char *
   char **envp = build_envp(enva, senvs);
   execle("/bin/sh", "sh", "-c", cmd.data(), NULL, envp);
   free(envp);

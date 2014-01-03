@@ -13,8 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/user-file.h"
+
+#include <cstdio>
+#include <cassert>
+
+#include <sys/types.h>
+#include <sys/file.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/runtime-error.h"

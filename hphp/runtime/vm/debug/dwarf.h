@@ -94,7 +94,7 @@ class TCRange {
 };
 
 struct DwarfBuf {
-  vector<uint8_t> m_buf;
+  std::vector<uint8_t> m_buf;
 
   void byte(uint8_t c);
   void byte(int off, uint8_t c);
@@ -147,7 +147,7 @@ struct FunctionInfo {
 
 struct DwarfChunk {
   DwarfBuf m_buf;
-  vector<FunctionInfo *> m_functions;
+  std::vector<FunctionInfo *> m_functions;
   char *m_symfile;
   bool m_synced;
   DwarfChunk() : m_symfile(nullptr), m_synced(false) {}
@@ -157,12 +157,12 @@ struct DwarfChunk {
 };
 
 typedef std::map<TCA, FunctionInfo* > FuncDB;
-typedef vector<FunctionInfo* > FuncPtrDB;
+typedef std::vector<FunctionInfo* > FuncPtrDB;
 
 struct DwarfInfo {
   typedef std::map<TCA, JIT::TransRec> TransDB;
 
-  vector<DwarfChunk*> m_dwarfChunks;
+  std::vector<DwarfChunk*> m_dwarfChunks;
   /* Array of chunks indexed by lg(#functions in chunk) + 1.
    * i.e. m_dwarfChunk[i] = pointer to chunk with
    * 2^(i-1) * RuntimeOption::EvalGdbSyncChunks functions, or NULL if

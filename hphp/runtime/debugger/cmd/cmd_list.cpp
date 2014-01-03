@@ -13,8 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/debugger/cmd/cmd_list.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/ext_file.h"
@@ -120,7 +124,7 @@ void CmdList::getListLocation(DebuggerClient &client, int &lineFocus0,
 void CmdList::listEvalCode(DebuggerClient &client) {
   assert(m_file.empty());
 
-  string evalCode = client.getCode();
+  std::string evalCode = client.getCode();
   if (evalCode.empty()) {
     client.error("There is no current source file.");
   } else {
@@ -172,7 +176,7 @@ bool CmdList::listFunctionOrClass(DebuggerClient &client) {
   assert(client.argCount() == 1);
   auto cmdInfo = std::make_shared<CmdInfo>();
   DebuggerCommandPtr deleter(cmdInfo);
-  string subsymbol;
+  std::string subsymbol;
   cmdInfo->parseOneArg(client, subsymbol);
   auto cmd = client.xend<CmdInfo>(cmdInfo.get());
   Array info = cmd->getInfo();
@@ -219,7 +223,7 @@ void CmdList::onClient(DebuggerClient &client) {
   int line = 0;
   m_line1 = m_line2 = 0;
   if (client.argCount() == 1) {
-    string arg = client.argValue(1);
+    std::string arg = client.argValue(1);
     if (DebuggerClient::IsValidNumber(arg)) {
       line = atoi(arg.c_str());
       if (line <= 0) {
@@ -229,14 +233,14 @@ void CmdList::onClient(DebuggerClient &client) {
       }
       m_line1 = line - DebuggerClient::CodeBlockSize/2;
       m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
-    } else if (arg.find("::") != string::npos) {
+    } else if (arg.find("::") != std::string::npos) {
       if (!listFunctionOrClass(client)) {
         client.error("Unable to read specified method.");
       }
       return;
     } else {
       size_t pos = arg.find(':');
-      if (pos != string::npos) {
+      if (pos != std::string::npos) {
         m_file = arg.substr(0, pos);
         if (m_file.empty()) {
           client.error("File name cannot be empty.");
@@ -246,9 +250,9 @@ void CmdList::onClient(DebuggerClient &client) {
         arg = arg.substr(pos + 1);
       }
       pos = arg.find('-');
-      if (pos != string::npos) {
-        string line1 = arg.substr(0, pos);
-        string line2 = arg.substr(pos + 1);
+      if (pos != std::string::npos) {
+        std::string line1 = arg.substr(0, pos);
+        std::string line2 = arg.substr(pos + 1);
         if (!DebuggerClient::IsValidNumber(line1) ||
             !DebuggerClient::IsValidNumber(line2)) {
           if (m_file.empty()) {

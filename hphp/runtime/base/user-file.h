@@ -20,6 +20,8 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/user-fs-node.h"
 
+struct stat;
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

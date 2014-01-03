@@ -239,7 +239,7 @@ bool SSLSocket::onAccept() {
 
 bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
   char esbuf[512];
-  string ebuf;
+  std::string ebuf;
   unsigned long ecode;
 
   bool retry = true;

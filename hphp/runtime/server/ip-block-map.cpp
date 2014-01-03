@@ -149,7 +149,7 @@ bool IpBlockMap::ReadIPv6Address(const char *text,
 
 void IpBlockMap::LoadIpList(std::shared_ptr<Acl> acl, Hdf hdf, bool allow) {
   for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
-    string ip = child.getString();
+    std::string ip = child.getString();
 
     int bits;
     struct in6_addr address;
@@ -179,7 +179,7 @@ IpBlockMap::IpBlockMap(Hdf config) {
       LoadIpList(acl, hdf["Ip.Deny"], false);
     }
 
-    string location = hdf["Location"].getString();
+    std::string location = hdf["Location"].getString();
     if (!location.empty() && location[0] == '/') {
       location = location.substr(1);
     }
@@ -194,7 +194,7 @@ bool IpBlockMap::isBlocking(const std::string &command,
   int bits;
 
   for (auto iter = m_acls.begin(); iter != m_acls.end(); ++iter) {
-    const string &path = iter->first;
+    const std::string &path = iter->first;
     if (command.size() >= path.size() &&
         strncmp(command.c_str(), path.c_str(), path.size()) == 0) {
 

@@ -17,8 +17,11 @@
 #ifndef incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 #define incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 
-#include "hphp/util/base.h"
+#include <map>
+#include <string>
+
 #include "hphp/util/compression.h"
+#include "hphp/util/functional.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/debuggable.h"

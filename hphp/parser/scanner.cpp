@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/parser/scanner.h"
+
+#include <fstream>
+
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 #include "hphp/zend/zend-string.h"
@@ -44,7 +46,7 @@ bool ScannerToken::htmlTrim() {
     return false;
   }
   while (isspace(*p1) && p1 > p0) --p1;
-  string text;
+  std::string text;
   text.reserve(m_text.length());
   if (p0 != p00) {
     text = " ";
@@ -76,7 +78,7 @@ void ScannerToken::xhpDecode() {
   // Pretty sure it is universally available!
   // (Do assertion anyway.)
   assert(ret);
-  m_text = string(ret, len);
+  m_text = std::string(ret, len);
   free(ret);
 }
 
@@ -119,7 +121,7 @@ Scanner::Scanner(const char *source, int len, int type,
   assert(m_source);
   m_streamOwner = false;
   if (md5) {
-    m_stream = new std::istringstream(string(source, len));
+    m_stream = new std::istringstream(std::string(source, len));
     m_streamOwner = true;
     computeMd5();
   }
@@ -623,7 +625,7 @@ void Scanner::error(const char* fmt, ...) {
 void Scanner::warn(const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  string msg;
+  std::string msg;
   Util::string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
@@ -669,8 +671,8 @@ void Scanner::incLoc(const char *rawText, int rawLeng, int type) {
   }
 }
 
-string Scanner::escape(const char *str, int len, char quote_type) const {
-  string output;
+std::string Scanner::escape(const char *str, int len, char quote_type) const {
+  std::string output;
   output.reserve(len);
 
   if (quote_type == '\'') {
@@ -717,7 +719,7 @@ string Scanner::escape(const char *str, int len, char quote_type) const {
             case 'x':
             case 'X': {
               if (isxdigit(str[i+1])) {
-                string shex;
+                std::string shex;
                 shex += str[++i]; // 0th hex digit
                 if (isxdigit(str[i+1])) {
                   shex += str[++i]; // 1st hex digit
@@ -732,7 +734,7 @@ string Scanner::escape(const char *str, int len, char quote_type) const {
             default: {
               // check for an octal
               if ('0' <= str[i] && str[i] <= '7') {
-                string soct;
+                std::string soct;
                 soct += str[i]; // 0th octal digit
                 if ('0' <= str[i+1] && str[i+1] <= '7') {
                   soct += str[++i];   // 1st octal digit

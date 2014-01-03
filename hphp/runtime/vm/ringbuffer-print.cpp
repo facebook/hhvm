@@ -13,8 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/ringbuffer-print.h"
+
+#include <iostream>
 
 #include "folly/Format.h"
 

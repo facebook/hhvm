@@ -5392,8 +5392,8 @@ void CodeGenerator::cgLdClsPropAddrCached(IRInstruction* inst) {
   const StringData* propNameString = propName->getValStr();
   const StringData* clsNameString  = clsName->getValStr();
 
-  string sds(Util::toLower(clsNameString->data()) + ":" +
-             string(propNameString->data(), propNameString->size()));
+  std::string sds(Util::toLower(clsNameString->data()) + ":" +
+                  std::string(propNameString->data(), propNameString->size()));
   String sd(sds);
   auto const ch = SPropCache::alloc(makeStaticString(sd));
 
@@ -6437,7 +6437,7 @@ static void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) {
   }
 }
 
-void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
+void CodeGenerator::cgBlock(Block* block, std::vector<TransBCMapping>* bcMap) {
   FTRACE(6, "cgBlock: {}\n", block->id());
 
   BCMarker prevMarker;
@@ -6489,7 +6489,7 @@ LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs) {
 void genCodeImpl(CodeBlock& mainCode,
                  CodeBlock& stubsCode,
                  IRUnit& unit,
-                 vector<TransBCMapping>* bcMap,
+                 std::vector<TransBCMapping>* bcMap,
                  JIT::TranslatorX64* tx64,
                  const RegAllocInfo& regs,
                  AsmInfo* asmInfo) {
@@ -6578,7 +6578,7 @@ void genCodeImpl(CodeBlock& mainCode,
 }
 
 void genCode(CodeBlock& main, CodeBlock& stubs, IRUnit& unit,
-             vector<TransBCMapping>* bcMap,
+             std::vector<TransBCMapping>* bcMap,
              JIT::TranslatorX64* tx64,
              const RegAllocInfo& regs) {
   if (dumpIREnabled()) {

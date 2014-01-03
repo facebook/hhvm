@@ -15,6 +15,11 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/gd/ext_image.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"

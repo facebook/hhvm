@@ -16,28 +16,34 @@
 */
 #include "hphp/runtime/ext/ext_mysql.h"
 
-#include "folly/ScopeGuard.h"
+#include <boost/lexical_cast.hpp>
 
-#include "hphp/runtime/ext/ext_preg.h"
-#include "hphp/runtime/ext/ext_network.h"
-#include "hphp/runtime/ext/mysql_stats.h"
-#include "hphp/runtime/base/socket.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/extended-logger.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
+#include <netinet/in.h>
+#include <netdb.h>
+#include <poll.h>
+
+#include "folly/ScopeGuard.h"
+#include "folly/String.h"
+
 #include "hphp/util/network.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/db-mysql.h"
-#include "folly/String.h"
-#include <netinet/in.h>
-#include <netdb.h>
 
+#include "hphp/runtime/base/extended-logger.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/socket.h"
+#include "hphp/runtime/ext/ext_network.h"
+#include "hphp/runtime/ext/ext_preg.h"
+#include "hphp/runtime/ext/mysql_stats.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+using std::string;
 
 bool mysqlExtension::ReadOnly = false;
 #ifdef FACEBOOK
@@ -549,7 +555,7 @@ static Variant php_mysql_do_connect(String server, String username,
   int port;
 
   auto slash_pos = server.find('/');
-  if (slash_pos != string::npos) {
+  if (slash_pos != std::string::npos) {
     socket = server.substr(slash_pos);
     server = server.substr(0, slash_pos - 1);
   }

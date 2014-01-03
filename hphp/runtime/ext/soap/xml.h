@@ -18,7 +18,9 @@
 #ifndef PHP_SOAP_XML_H
 #define PHP_SOAP_XML_H
 
-#include "hphp/util/base.h"
+#include <map>
+#include <string>
+
 #include "hphp/runtime/ext/ext_simplexml_include.h"
 
 namespace HPHP {

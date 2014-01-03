@@ -19,6 +19,9 @@
 #include <cstdint>
 #include <limits>
 
+#include <sys/time.h>
+#include <sys/resource.h>
+
 #include "folly/String.h"
 
 #include "hphp/util/hdf.h"
@@ -437,6 +440,7 @@ static const size_t kJitGlobalDataDef = RuntimeOption::EvalJitASize >> 2;
 inline size_t maxUsageDef() {
   return RuntimeOption::EvalJitASize;
 }
+using std::string;
 #define F(type, name, def) \
   type RuntimeOption::Eval ## name = type(def);
 EVALFLAGS();

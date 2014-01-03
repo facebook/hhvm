@@ -84,7 +84,7 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
   } else if (limit < 0) {
     int pos = input.find(delimiter);
     if (pos >= 0) {
-      vector<int> positions;
+      std::vector<int> positions;
       int len = delimiter.size();
       int pos0 = 0;
       int found = 0;

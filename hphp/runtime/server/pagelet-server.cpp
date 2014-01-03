@@ -37,7 +37,7 @@ namespace HPHP {
 
 PageletTransport::PageletTransport(
     const String& url, CArrRef headers, const String& postData,
-    const String& remoteHost, const set<string> &rfc1867UploadedFiles,
+    const String& remoteHost, const set<std::string> &rfc1867UploadedFiles,
     CArrRef files, int timeoutSeconds)
     : m_refCount(0),
       m_timeoutSeconds(timeoutSeconds),
@@ -59,8 +59,8 @@ PageletTransport::PageletTransport(
     } else {
       int pos = header.find(": ");
       if (pos >= 0) {
-        string name = header.substr(0, pos).data();
-        string value = header.substr(pos + 2).data();
+        std::string name = header.substr(0, pos).data();
+        std::string value = header.substr(pos + 2).data();
         m_requestHeaders[name].push_back(value);
       } else {
         Logger::Error("throwing away bad header: %s", header.data());
@@ -156,7 +156,7 @@ bool PageletTransport::moveUploadedFile(const String& filename,
   return moveUploadedFileHelper(filename, destination);
 }
 
-bool PageletTransport::getFiles(string &files) {
+bool PageletTransport::getFiles(std::string &files) {
   files = m_files;
   return true;
 }
@@ -165,7 +165,7 @@ bool PageletTransport::isDone() {
   return m_done;
 }
 
-void PageletTransport::addToPipeline(const string &s) {
+void PageletTransport::addToPipeline(const std::string &s) {
   Lock lock(this);
   m_pipeline.push_back(s);
   if (m_event) {
@@ -188,7 +188,7 @@ bool PageletTransport::getResults(
     Lock lock(this);
     assert(m_done || !m_pipeline.empty());
     while (!m_pipeline.empty()) {
-      string &str = m_pipeline.front();
+      std::string &str = m_pipeline.front();
       String response(str.c_str(), str.size(), CopyString);
       results.append(response);
       m_pipeline.pop_front();
@@ -227,7 +227,7 @@ String PageletTransport::getResults(
 
     if (!m_pipeline.empty()) {
       // intermediate results do not have headers and code
-      string ret = m_pipeline.front();
+      std::string ret = m_pipeline.front();
       m_pipeline.pop_front();
       code = 0;
       return ret;
@@ -435,7 +435,7 @@ String PageletServer::TaskResult(CResRef task, Array &headers, int &code,
   return ptask->getJob()->getResults(headers, code, timeout_ms);
 }
 
-void PageletServer::AddToPipeline(const string &s) {
+void PageletServer::AddToPipeline(const std::string &s) {
   assert(!s.empty());
   PageletTransport *job =
     dynamic_cast<PageletTransport *>(g_context->getTransport());

@@ -27,6 +27,8 @@
 #ifndef VIXL_A64_SIMULATOR_A64_H_
 #define VIXL_A64_SIMULATOR_A64_H_
 
+#include <iosfwd>
+
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/utils.h"
 #include "hphp/vixl/a64/instructions-a64.h"
@@ -118,7 +120,7 @@ class SimSystemRegister {
 
 class Simulator : public DecoderVisitor {
  public:
-  explicit Simulator(Decoder* decoder, std::ostream& stream = std::cout);
+  explicit Simulator(Decoder* decoder, std::ostream& stream);
   ~Simulator();
 
   void ResetState();

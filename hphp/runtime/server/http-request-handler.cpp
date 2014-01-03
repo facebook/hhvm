@@ -13,8 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/server/http-request-handler.h"
+
+#include <string>
+#include <vector>
+
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -36,6 +39,10 @@
 #include "hphp/util/service-data.h"
 
 namespace HPHP {
+
+using std::string;
+using std::vector;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_THREAD_LOCAL(AccessLog::ThreadData,
@@ -57,11 +64,10 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
                                            const std::string &cmd,
                                            const char *ext) {
   assert(ext);
-  assert(cmd.rfind('.') != string::npos);
+  assert(cmd.rfind('.') != std::string::npos);
   assert(strcmp(ext, cmd.c_str() + cmd.rfind('.') + 1) == 0);
 
-  hphp_string_imap<string>::const_iterator iter =
-    RuntimeOption::StaticFileExtensions.find(ext);
+  auto iter = RuntimeOption::StaticFileExtensions.find(ext);
   if (iter != RuntimeOption::StaticFileExtensions.end()) {
     string val = iter->second;
     const char *valp = val.c_str();

@@ -13,8 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/server/request-uri.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -62,8 +66,8 @@ RequestURI::RequestURI(const std::string & rpcFunc)
 }
 
 bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
-                         const string &sourceRoot,
-                         const string &pathTranslation, const char *url) {
+                         const std::string &sourceRoot,
+                         const std::string &pathTranslation, const char *url) {
   splitURL(url, m_originalURL, m_queryString);
   m_originalURL = StringUtil::UrlDecode(m_originalURL, false);
   m_rewritten = false;
@@ -125,11 +129,11 @@ const StaticString s_https("https://");
  *  m_rewrittenURL is set and m_queryString is updated if needed
  */
 bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
-                            const string &pathTranslation,
-                            const string &sourceRoot) {
+                            const std::string &pathTranslation,
+                            const std::string &sourceRoot) {
   bool qsa = false;
   int redirect = 0;
-  string host = transport->getHeader("host");
+  std::string host = transport->getHeader("host");
   m_rewrittenURL = m_originalURL;
   if (vhost->rewriteURL(host, m_rewrittenURL, qsa, redirect)) {
     m_rewritten = true;
@@ -188,8 +192,8 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
  *   output is false and no file was found
  */
 bool RequestURI::resolveURL(const VirtualHost *vhost,
-                            const string &pathTranslation,
-                            const string &sourceRoot) {
+                            const std::string &pathTranslation,
+                            const std::string &sourceRoot) {
 
   String startURL;
   if (m_rewritten) {
@@ -231,8 +235,8 @@ bool RequestURI::resolveURL(const VirtualHost *vhost,
 }
 
 bool RequestURI::virtualFileExists(const VirtualHost *vhost,
-                                   const string &sourceRoot,
-                                   const string &pathTranslation,
+                                   const std::string &sourceRoot,
+                                   const std::string &pathTranslation,
                                    const String& filename) {
   if (filename.empty() || filename.charAt(filename.length() - 1) == '/') {
     return false;
@@ -240,7 +244,7 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
   String canon(Util::canonicalize(filename.c_str(), filename.size()),
                AttachString);
   if (!vhost->getDocumentRoot().empty()) {
-    string fullname = canon.data();
+    std::string fullname = canon.data();
     int i = 0;
     while (i < fullname.size() && fullname[i] == '/') ++i;
     if (i) {
@@ -271,11 +275,11 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
 }
 
 bool RequestURI::virtualFolderExists(const VirtualHost *vhost,
-                                     const string &sourceRoot,
-                                     const string &pathTranslation,
+                                     const std::string &sourceRoot,
+                                     const std::string &pathTranslation,
                                      const String& foldername) {
   if (!vhost->getDocumentRoot().empty()) {
-    string fullname = foldername.data();
+    std::string fullname = foldername.data();
     // If there is a trailing slash, remove it
     if (fullname.size() > 0 && fullname[fullname.size()-1] == '/') {
       fullname = fullname.substr(fullname.size()-1);
@@ -294,7 +298,7 @@ bool RequestURI::virtualFolderExists(const VirtualHost *vhost,
       return true;
     }
 
-    const vector<string> &allowedDirectories =
+    const std::vector<std::string> &allowedDirectories =
       VirtualHost::GetAllowedDirectories();
     if (find(allowedDirectories.begin(),
              allowedDirectories.end(),

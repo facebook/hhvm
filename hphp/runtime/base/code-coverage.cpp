@@ -13,8 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/code-coverage.h"
+
+#include <fstream>
+#include <vector>
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/util/logger.h"
@@ -87,13 +90,13 @@ void CodeCoverage::Record(const char *filename, int line0, int line1) {
 
   CodeCoverageMap::iterator iter = m_hits.find(filename);
   if (iter == m_hits.end()) {
-    vector<int> &lines = m_hits[filename];
+    std::vector<int> &lines = m_hits[filename];
     lines.resize(line1 + 1);
     for (int i = line0; i <= line0 /* should be line1 one day */; i++) {
       lines[i] = 1;
     }
   } else {
-    vector<int> &lines = iter->second;
+    std::vector<int> &lines = iter->second;
     if ((int)lines.size() < line1 + 1) {
       lines.resize(line1 + 1);
     }
@@ -107,7 +110,7 @@ Array CodeCoverage::Report() {
   Array ret = Array::Create();
   for (CodeCoverageMap::const_iterator iter = m_hits.begin();
        iter != m_hits.end(); ++iter) {
-    const vector<int> &lines = iter->second;
+    const std::vector<int> &lines = iter->second;
     Array tmp = Array::Create();
     for (int i = 1; i < (int)lines.size(); i++) {
       if (lines[i]) {
@@ -130,7 +133,7 @@ void CodeCoverage::Report(const std::string &filename) {
   f << "{\n";
   for (CodeCoverageMap::const_iterator iter = m_hits.begin();
        iter != m_hits.end();) {
-    const vector<int> &lines = iter->second;
+    const std::vector<int> &lines = iter->second;
     f << "\"" << iter->first << "\": [";
     int count = lines.size();
     for (int i = 0 /* not 1 */; i < count; i++) {

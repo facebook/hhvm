@@ -34,9 +34,9 @@ SoapData::SoapData() : m_cache(WSDL_CACHE_MEMORY), m_cache_ttl(86400) {
 
     const encodeType &details = enc->details;
     if (!details.type_str.empty()) {
-      string name = details.type_str;
+      std::string name = details.type_str;
       if (!details.ns.empty()) {
-        name = string(details.ns) + ':' + name;
+        name = std::string(details.ns) + ':' + name;
       }
       m_defEnc[name] = enc;
     }

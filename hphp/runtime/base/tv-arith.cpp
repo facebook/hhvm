@@ -21,6 +21,7 @@
 
 #include "folly/ScopeGuard.h"
 
+#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-conversions.h"
 

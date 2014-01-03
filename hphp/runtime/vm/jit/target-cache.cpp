@@ -20,6 +20,7 @@
 #include <vector>
 #include <mutex>
 
+#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/runtime-option.h"

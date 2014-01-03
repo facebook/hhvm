@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/hphp-array.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/util/base.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
 #include <setjmp.h>

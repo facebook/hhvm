@@ -14,9 +14,18 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/server/access-log.h"
+
+#include <sstream>
+#include <string>
+#include <cstdio>
+#include <cstdlib>
+
+#include <signal.h>
+#include <time.h>
+#include <stdio.h>
+
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/timestamp.h"
-#include <time.h>
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/server-stats.h"
@@ -47,9 +56,9 @@ AccessLog::~AccessLog() {
   }
 }
 
-void AccessLog::init(const string &defaultFormat,
-                     vector<AccessLogFileData> &files,
-                     const string &username) {
+void AccessLog::init(const std::string &defaultFormat,
+                     std::vector<AccessLogFileData> &files,
+                     const std::string &username) {
   Lock l(m_lock);
   if (m_initialized) return;
   m_initialized = true;
@@ -58,10 +67,10 @@ void AccessLog::init(const string &defaultFormat,
   openFiles(username);
 }
 
-void AccessLog::init(const string &format,
-                     const string &symLink,
-                     const string &file,
-                     const string &username) {
+void AccessLog::init(const std::string &format,
+                     const std::string &symLink,
+                     const std::string &file,
+                     const std::string &username) {
   Lock l(m_lock);
   if (m_initialized) return;
   m_initialized = true;
@@ -72,13 +81,12 @@ void AccessLog::init(const string &format,
   openFiles(username);
 }
 
-void AccessLog::openFiles(const string &username) {
+void AccessLog::openFiles(const std::string &username) {
   assert(m_output.empty() && m_cronOutput.empty());
   if (m_files.empty()) return;
-  for (vector<AccessLogFileData>::const_iterator it = m_files.begin();
-       it != m_files.end(); ++it) {
-    const string &file = it->file;
-    const string &symLink = it->symLink;
+  for (auto it = m_files.begin(); it != m_files.end(); ++it) {
+    const std::string &file = it->file;
+    const std::string &symLink = it->symLink;
     assert(!file.empty());
     FILE *fp = nullptr;
     if (Logger::UseCronolog) {
@@ -94,7 +102,7 @@ void AccessLog::openFiles(const string &username) {
       m_cronOutput.push_back(cl);
     } else {
       if (file[0] == '|') {
-        string plog = file.substr(1);
+        std::string plog = file.substr(1);
         fp = popen(plog.c_str(), "w");
       } else {
         fp = fopen(file.c_str(), "a");
@@ -151,7 +159,7 @@ int AccessLog::writeLog(Transport *transport, const VirtualHost *vhost,
      }
 
      if (parseConditions(format, transport->getResponseCode())) {
-       string arg = parseArgument(format);
+       std::string arg = parseArgument(format);
        if (!genField(out, format, transport, vhost, arg)) {
          out << "-";
        }
@@ -161,7 +169,7 @@ int AccessLog::writeLog(Transport *transport, const VirtualHost *vhost,
      }
    }
    out << endl;
-   string output = out.str();
+   std::string output = out.str();
    int nbytes = fprintf(outFile, "%s", output.c_str());
    fflush(outFile);
    return nbytes;
@@ -197,12 +205,12 @@ bool AccessLog::parseConditions(const char* &format, int code) {
   return wantMatch == matched;
 }
 
-string AccessLog::parseArgument(const char* &format) {
-  if (*format != '{') return string();
+std::string AccessLog::parseArgument(const char* &format) {
+  if (*format != '{') return std::string();
   format++;
   const char *start = format;
   while (*format != '}') { format++; }
-  string res(start, format - start);
+  std::string res(start, format - start);
   format++;
   return res;
 }
@@ -246,7 +254,7 @@ static void escape_data(std::ostringstream &out, const char *s, int len)
 
 bool AccessLog::genField(std::ostringstream &out, const char* &format,
                          Transport *transport, const VirtualHost *vhost,
-                         const string &arg) {
+                         const std::string &arg) {
   int responseSize = transport->getResponseSize();
   int code = transport->getResponseCode();
 
@@ -265,7 +273,7 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
     if (arg.empty()) {
       return false;
     } else {
-      string cookie = transport->getCookie(arg);
+      std::string cookie = transport->getCookie(arg);
       if (cookie.empty()) return false;
       escape_data(out, cookie.c_str(), cookie.size());
     }
@@ -294,7 +302,7 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
   case 'i':
     if (arg.empty()) return false;
     {
-      string header = transport->getHeader(arg.c_str());
+      std::string header = transport->getHeader(arg.c_str());
       if (header.empty()) return false;
 
       if (vhost && vhost->hasLogFilter() &&
@@ -335,7 +343,7 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
         out << url;
       }
 
-      string httpVersion = transport->getHTTPVersion();
+      std::string httpVersion = transport->getHTTPVersion();
       out << " HTTP/" << httpVersion;
     }
     break;
@@ -379,8 +387,8 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
     break;
   case 'v':
     {
-      string host = transport->getHeader("Host");
-      const string &sname = VirtualHost::GetCurrent()->serverName(host);
+      std::string host = transport->getHeader("Host");
+      const std::string &sname = VirtualHost::GetCurrent()->serverName(host);
       if (sname.empty() || RuntimeOption::ForceServerNameToHeader) {
         out << host;
       } else {

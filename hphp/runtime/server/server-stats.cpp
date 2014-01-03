@@ -15,6 +15,15 @@
 */
 #include "hphp/runtime/server/server-stats.h"
 
+#include <set>
+#include <string>
+#include <map>
+#include <vector>
+#include <list>
+#include <iostream>
+
+#include <boost/lexical_cast.hpp>
+
 #include "folly/json.h"
 #include "folly/Range.h"
 #include "folly/String.h"
@@ -32,12 +41,17 @@
 #include "hphp/util/timer.h"
 #include "hphp/runtime/base/hardware-counter.h"
 
+namespace HPHP {
+
+//////////////////////////////////////////////////////////////////////
+
 using std::list;
 using std::set;
 using std::map;
 using std::ostream;
+using std::string;
+using boost::lexical_cast;
 
-namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
@@ -109,10 +123,9 @@ void ServerStats::Merge(list<TimeSlot*> &dest, const list<TimeSlot*> &src) {
   }
 }
 
-void ServerStats::GetAllKeys(set<string> &allKeys,
-                             const list<TimeSlot*> &slots) {
-  for (list<TimeSlot*>::const_iterator iter = slots.begin();
-       iter != slots.end(); ++iter) {
+void ServerStats::GetAllKeys(std::set<std::string> &allKeys,
+                             const std::list<TimeSlot*> &slots) {
+  for (auto iter = slots.begin(); iter != slots.end(); ++iter) {
     TimeSlot *s = *iter;
     for (PageStatsMap::const_iterator piter = s->m_pages.begin();
          piter != s->m_pages.end(); ++piter) {
@@ -133,19 +146,19 @@ void ServerStats::GetAllKeys(set<string> &allKeys,
 
 void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
                          const std::string &url, int code,
-                         map<string, int> &wantedKeys) {
+                         std::map<std::string, int> &wantedKeys) {
   if (!keys.empty()) {
-    vector<string> rules0;
+    std::vector<std::string> rules0;
     Util::split(',', keys.c_str(), rules0, true);
     if (!rules0.empty()) {
 
       // prepare rules
-      map<string, int> rules;
+      std::map<std::string, int> rules;
       for (unsigned int i = 0; i < rules0.size(); i++) {
-        string &rule = rules0[i];
+        std::string &rule = rules0[i];
         assert(!rule.empty());
         int len = rule.length();
-        string suffix;
+        std::string suffix;
         if (len > 4) {
           len -= 4;
           suffix = rule.substr(len);
@@ -160,12 +173,11 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
       }
 
       // prepare all keys
-      set<string> allKeys;
+      std::set<std::string> allKeys;
       GetAllKeys(allKeys, slots);
 
       // prepare wantedKeys
-      for (set<string>::const_iterator iter = allKeys.begin();
-           iter != allKeys.end(); ++iter) {
+      for (auto iter = allKeys.begin(); iter != allKeys.end(); ++iter) {
         const string &key = *iter;
         for (map<string, int>::const_iterator riter = rules.begin();
              riter != rules.end(); ++riter) {
@@ -613,7 +625,7 @@ private:
 // static
 
 Mutex ServerStats::s_lock;
-vector<ServerStats*> ServerStats::s_loggers;
+std::vector<ServerStats*> ServerStats::s_loggers;
 bool ServerStats::s_profile_network = false;
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ServerStats, ServerStats::s_logger);
 

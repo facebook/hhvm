@@ -1360,8 +1360,8 @@ Variant f_imap_open(const String& mailbox, const String& username,
     mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) retries);
   }
 
-  IMAPG(user)     = string(username.data(), username.size());
-  IMAPG(password) = string(password.data(), password.size());
+  IMAPG(user)     = std::string(username.data(), username.size());
+  IMAPG(password) = std::string(password.data(), password.size());
 
   MAILSTREAM *stream = mail_open(NIL, (char*)filename.data(), options);
   if (stream == NIL) {

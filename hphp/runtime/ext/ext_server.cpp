@@ -14,8 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_server.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-server.h"
@@ -48,8 +50,8 @@ bool f_dangling_server_proxy_old_request() {
     return false;
   }
 
-  string url = "http://localhost:" +
-    lexical_cast<string>(SatelliteServerInfo::DanglingServerPort) +
+  std::string url = "http://localhost:" +
+    boost::lexical_cast<std::string>(SatelliteServerInfo::DanglingServerPort) +
     transport->getServerObject();
 
   int code = 0;
@@ -82,8 +84,8 @@ bool f_dangling_server_proxy_new_request(const String& host) {
     return false;
   }
 
-  string url = string("http://") + host.data() + ":" +
-    lexical_cast<string>(RuntimeOption::ServerPort) +
+  std::string url = std::string("http://") + host.data() + ":" +
+    boost::lexical_cast<std::string>(RuntimeOption::ServerPort) +
     transport->getServerObject();
 
   int code = 0;
@@ -157,7 +159,7 @@ void f_pagelet_server_flush() {
     // this method is only meaningful in a pagelet thread
     context->obFlushAll();
     String content = context->obDetachContents();
-    string s(content.data(), content.size());
+    std::string s(content.data(), content.size());
     if (!s.empty()) {
       PageletServer::AddToPipeline(s);
     }

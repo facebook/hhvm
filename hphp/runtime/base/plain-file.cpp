@@ -13,11 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/plain-file.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/request-local.h"
-#include <unistd.h>
 
 namespace HPHP {
 

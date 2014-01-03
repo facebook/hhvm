@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/intercept.h"
+
+#include <vector>
+
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -77,13 +80,13 @@ static Mutex s_mutex;
  * The vector contains a list of maybeIntercepted flags for functions
  * with this name.
  */
-typedef StringIMap<std::pair<bool,vector<char*>>> RegisteredFlagsMap;
+typedef StringIMap<std::pair<bool,std::vector<char*>>> RegisteredFlagsMap;
 
 static RegisteredFlagsMap s_registered_flags;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void flag_maybe_intercepted(vector<char*> &flags) {
+static void flag_maybe_intercepted(std::vector<char*> &flags) {
   for (auto flag : flags) {
     *flag = 1;
   }
@@ -175,7 +178,7 @@ void unregister_intercept_flag(const String& name, char *flag) {
   RegisteredFlagsMap::iterator iter =
     s_registered_flags.find(name);
   if (iter != s_registered_flags.end()) {
-    vector<char*> &flags = iter->second.second;
+    std::vector<char*> &flags = iter->second.second;
     for (int i = flags.size(); i--; ) {
       if (flag == flags[i]) {
         flags.erase(flags.begin() + i);

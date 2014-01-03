@@ -17,9 +17,10 @@
 #ifndef incl_HPHP_RUNTIME_SERVER_FASTCGI_SESSION_HANDLER_H_
 #define incl_HPHP_RUNTIME_SERVER_FASTCGI_SESSION_HANDLER_H_
 
-#include "hphp/util/base.h"
-#include "folly/io/IOBuf.h"
+#include <memory>
 #include <map>
+
+#include "folly/io/IOBuf.h"
 
 namespace HPHP {
 

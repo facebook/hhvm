@@ -14,27 +14,32 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_fb.h"
+
+#include <fstream>
+
+#include <netinet/in.h>
+
+#include <unicode/uchar.h>
+#include <unicode/utf8.h>
+
+#include "folly/String.h"
+
+#include "hphp/util/db-conn.h"
+#include "hphp/util/logger.h"
+#include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/file-repository.h"
+#include "hphp/runtime/base/intercept.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stat-cache.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_mysql.h"
 #include "hphp/runtime/ext/FBSerialize.h"
 #include "hphp/runtime/ext/VariantController.h"
-#include "hphp/util/db-conn.h"
-#include "hphp/util/logger.h"
-#include "hphp/runtime/base/stat-cache.h"
-#include "folly/String.h"
-#include <netinet/in.h>
-#include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/code-coverage.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/vm/unwind.h"
-#include <unicode/uchar.h>
-#include <unicode/utf8.h>
-#include "hphp/runtime/base/file-repository.h"
 
 #include "hphp/parser/parser.h"
 
@@ -752,11 +757,11 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
   for (ArrayIter iter(sql_map); iter; ++iter) {
     Array data = iter.second().toArray();
     if (!data.empty()) {
-      std::vector< std::pair<string, string> > sessionVariables;
+      std::vector< std::pair<std::string, std::string> > sessionVariables;
       if (data.exists(s_session_variable)) {
         Array sv = data[s_session_variable].toArray();
         for (ArrayIter svIter(sv); svIter; ++svIter) {
-          sessionVariables.push_back(std::pair<string, string>(
+          sessionVariables.push_back(std::pair<std::string,std::string>(
             svIter.first().toString().data(),
             svIter.second().toString().data()));
         }

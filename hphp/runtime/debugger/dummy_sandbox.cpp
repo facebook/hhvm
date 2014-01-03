@@ -81,7 +81,7 @@ void DummySandbox::run() {
       CLISession hphpSession;
 
       DSandboxInfo sandbox = m_proxy->getSandbox();
-      string msg;
+      std::string msg;
       if (sandbox.valid()) {
         GlobalVariables *g = get_global_variables();
         SourceRootInfo sri(sandbox.m_user, sandbox.m_name);
@@ -103,7 +103,7 @@ void DummySandbox::run() {
           getcwd(cwd, sizeof(cwd));
           Logger::Info("Start loading startup doc '%s', pwd = '%s'",
                        doc.c_str(), cwd);
-          bool error; string errorMsg;
+          bool error; std::string errorMsg;
           bool ret = hphp_invoke(g_context.getNoCheck(), doc, false, null_array,
                                  uninit_null(), "", "", error, errorMsg, true,
                                  false, true);
@@ -158,7 +158,7 @@ void DummySandbox::notifySignal(int signum) {
 
 std::string DummySandbox::getStartupDoc(const DSandboxInfo &sandbox) {
   TRACE(2, "DummySandbox::getStartupDoc\n");
-  string path;
+  std::string path;
   if (!m_startupFile.empty()) {
     // if relative path, prepend directory
     if (m_startupFile[0] != '/' && m_startupFile[0] != '~') {
@@ -174,9 +174,9 @@ std::string DummySandbox::getStartupDoc(const DSandboxInfo &sandbox) {
 
     // resolving home directory
     if (path[0] == '~') {
-      string user, home;
+      std::string user, home;
       size_t pos = path.find('/');
-      if (pos == string::npos) pos = path.size();
+      if (pos == std::string::npos) pos = path.size();
       if (pos > 1) {
         user = path.substr(1, pos - 1);
       }

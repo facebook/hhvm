@@ -14,8 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_function.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/ext/ext_json.h"
 #include "hphp/runtime/ext/ext_class.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -33,6 +35,7 @@ namespace HPHP {
 
 using HPHP::JIT::CallerFrame;
 using HPHP::JIT::EagerCallerFrame;
+using std::string;
 
 const StaticString
   s_internal("internal"),
@@ -179,7 +182,7 @@ Variant f_call_user_func_rpc(int _argc, const String& host, int port,
                              const String& auth,
                              int timeout, CVarRef function,
                              CArrRef _argv /* = null_array */) {
-  string shost = host.data();
+  std::string shost = host.data();
   if (!RuntimeOption::DebuggerRpcHostDomain.empty()) {
     unsigned int pos = shost.find(RuntimeOption::DebuggerRpcHostDomain);
     if (pos != shost.length() - RuntimeOption::DebuggerRpcHostDomain.size()) {
@@ -187,17 +190,17 @@ Variant f_call_user_func_rpc(int _argc, const String& host, int port,
     }
   }
 
-  string url = "http://";
+  std::string url = "http://";
   url += shost;
   url += ":";
-  url += lexical_cast<string>(port);
+  url += boost::lexical_cast<std::string>(port);
   url += "/call_user_func_serialized?auth=";
   url += auth.data();
 
   Array blob = make_map_array(s_func, function, s_args, _argv);
   String message = f_serialize(blob);
 
-  vector<string> headers;
+  std::vector<string> headers;
   LibEventHttpClientPtr http = LibEventHttpClient::Get(shost, port);
   if (!http->send(url, headers, timeout < 0 ? 0 : timeout, false,
                   message.data(), message.size())) {

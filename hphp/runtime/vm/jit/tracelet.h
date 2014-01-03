@@ -18,7 +18,6 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/vm/jit/runtime-type.h"
 
 namespace HPHP {
@@ -47,8 +46,8 @@ struct InstrStream {
 
 struct RefDeps {
   struct Record {
-    vector<bool> m_mask;
-    vector<bool> m_vals;
+    std::vector<bool> m_mask;
+    std::vector<bool> m_vals;
 
     std::string pretty() const {
       std::ostringstream out;

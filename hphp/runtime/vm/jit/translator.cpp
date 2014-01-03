@@ -280,7 +280,7 @@ struct InferenceRule {
 };
 
 static DataType inferType(const InferenceRule* rules,
-                          const vector<DynLocation*>& inputs) {
+                          const std::vector<DynLocation*>& inputs) {
   int inputMask = 0;
   // We generate the inputMask by ORing together the mask for each input's
   // type.
@@ -343,7 +343,7 @@ static const InferenceRule BitOpRules[] = {
 };
 
 static RuntimeType bitOpType(DynLocation* a, DynLocation* b) {
-  vector<DynLocation*> ins;
+  std::vector<DynLocation*> ins;
   ins.push_back(a);
   if (b) ins.push_back(b);
   return RuntimeType(inferType(BitOpRules, ins));
@@ -676,7 +676,7 @@ predictOutputs(SrcKey startSk,
  * Returns the type of the value a SetOpL will store into the local.
  */
 static RuntimeType setOpOutputType(NormalizedInstruction* ni,
-                                   const vector<DynLocation*>& inputs) {
+                                   const std::vector<DynLocation*>& inputs) {
   assert(inputs.size() == 2);
   const int kValIdx = 0;
   const int kLocIdx = 1;
@@ -689,7 +689,7 @@ static RuntimeType setOpOutputType(NormalizedInstruction* ni,
   case SetOpOp::MinusEqual:
   case SetOpOp::MulEqual: {
     // Same as OutArith, except we have to fiddle with inputs a bit.
-    vector<DynLocation*> arithInputs;
+    std::vector<DynLocation*> arithInputs;
     arithInputs.push_back(&locLocation);
     arithInputs.push_back(inputs[kValIdx]);
     return RuntimeType(inferType(ArithRules, arithInputs));
@@ -2143,7 +2143,7 @@ void Translator::getOutputs(/*inout*/ Tracelet& t,
                             /*out*/   bool& varEnvTaint) {
   varEnvTaint = false;
 
-  const vector<DynLocation*>& inputs = ni->inputs;
+  const std::vector<DynLocation*>& inputs = ni->inputs;
   const Op op = ni->op();
 
   initInstrInfo();
@@ -4267,7 +4267,7 @@ TransRec::TransRec(SrcKey                   s,
                    uint32_t                 _aLen,
                    TCA                      _astubsStart,
                    uint32_t                 _astubsLen,
-                   vector<TransBCMapping>   _bcMapping)
+                   std::vector<TransBCMapping>   _bcMapping)
     : id(0)
     , kind(_kind)
     , src(s)
@@ -4286,7 +4286,7 @@ TransRec::TransRec(SrcKey                   s,
 }
 
 
-string
+std::string
 TransRec::print(uint64_t profCount) const {
   std::string ret;
 

@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <fstream>
 #include <string.h>
 
 #include "folly/String.h"

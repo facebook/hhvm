@@ -25,7 +25,6 @@
 
 #include <boost/container/flat_set.hpp>
 
-#include "hphp/util/base.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/functional.h"
 
@@ -395,12 +394,12 @@ public:
   F(bool, ProfileBC,                   false)                           \
   F(bool, ProfileHeapAcrossRequests,   false)                           \
   F(bool, ProfileHWEnable,             true)                            \
-  F(string, ProfileHWEvents,           string(""))                      \
+  F(string, ProfileHWEvents,      std::string(""))                      \
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(uint32_t, JitMaxTranslations,      12)                              \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(bool, JitTrampolines,              true)                            \
-  F(string, JitProfilePath,            string(""))                      \
+  F(string, JitProfilePath,       std::string(""))                      \
   F(bool, JitTypePrediction,           true)                            \
   F(int32_t, JitStressTypePredPercent, 0)                               \
   F(uint32_t, JitWarmupRequests,       kDefaultWarmupRequests)          \
@@ -472,6 +471,9 @@ public:
   F(bool, DecRefUseScratch,            false)                           \
   /* */
 
+private:
+  using string = std::string;
+public:
 #define F(type, name, unused) \
   static type Eval ## name;
   EVALFLAGS()

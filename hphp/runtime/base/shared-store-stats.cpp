@@ -16,6 +16,9 @@
 
 #include <pcre.h>
 
+#include <sstream>
+#include <fstream>
+
 #include "hphp/runtime/base/shared-store-stats.h"
 #include "hphp/runtime/base/runtime-option.h"
 
@@ -120,8 +123,8 @@ static void normalizeKey(const char *key, char *normalizedKey, size_t outlen) {
   // normalizedKey, with no longer than outlen, may not null terminated
   // if outlen is too small
 
-  vector<std::string> &specialPrefix = RuntimeOption::APCSizeSpecialPrefix;
-  vector<std::string> &prefixReplace = RuntimeOption::APCSizePrefixReplace;
+  std::vector<std::string> &specialPrefix = RuntimeOption::APCSizeSpecialPrefix;
+  std::vector<std::string> &prefixReplace = RuntimeOption::APCSizePrefixReplace;
   for (unsigned int i = 0; i < specialPrefix.size(); i++) {
     const char *prefix = specialPrefix[i].c_str();
     if (strncmp(key, prefix, specialPrefix[i].length()) == 0) {
@@ -129,8 +132,8 @@ static void normalizeKey(const char *key, char *normalizedKey, size_t outlen) {
       return;
     }
   }
-  vector<std::string> &specialMiddle = RuntimeOption::APCSizeSpecialMiddle;
-  vector<std::string> &middleReplace = RuntimeOption::APCSizeMiddleReplace;
+  std::vector<std::string> &specialMiddle = RuntimeOption::APCSizeSpecialMiddle;
+  std::vector<std::string> &middleReplace = RuntimeOption::APCSizeMiddleReplace;
   for (unsigned int i = 0; i < specialMiddle.size(); i++) {
     const char *middle = specialMiddle[i].c_str();
     if (strstr(key, middle) != nullptr) {
@@ -257,8 +260,8 @@ SharedStoreStats::StatsMap SharedStoreStats::s_statsMap,
 //////////////////////////////////////////////////////////////////////////////
 // Helpers for reporting and global aggregation
 
-string SharedStoreStats::report_basic() {
-  ostringstream out;
+std::string SharedStoreStats::report_basic() {
+  std::ostringstream out;
   out << "{\n";
   writeEntryInt(out, "Key_Count", s_keyCount, false, 1, true);
   writeEntryInt(out, "Size_Total", s_keySize + s_dataTotalSize, false, 1, true);
@@ -276,8 +279,8 @@ string SharedStoreStats::report_basic() {
   return out.str();
 }
 
-string SharedStoreStats::report_basic_flat() {
-  ostringstream out;
+std::string SharedStoreStats::report_basic_flat() {
+  std::ostringstream out;
   out << "{ " << "\"hphp.apc.size_total\":" << s_keySize + s_dataTotalSize
       << ", " << "\"hphp.apc.key_count\":" << s_keyCount
       << ", " << "\"hphp.apc.size_key\":" << s_keySize
@@ -294,8 +297,8 @@ string SharedStoreStats::report_basic_flat() {
   return out.str();
 }
 
-string SharedStoreStats::report_keys() {
-  ostringstream out;
+std::string SharedStoreStats::report_keys() {
+  std::ostringstream out;
   ReadLock l(s_rwlock);
   StatsMap::iterator iter;
   for (iter = s_statsMap.begin(); iter != s_statsMap.end(); ++iter) {

@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/array-util.h"
+
+#include <vector>
+
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -592,10 +594,10 @@ Variant ArrayUtil::RegularSortUnique(CArrRef input) {
   if (input.size() <= 1) return input;
 
   Array::SortData opaque;
-  vector<int> indices;
+  std::vector<int> indices;
   Array::SortImpl(indices, input, opaque, Array::SortRegularAscending, false);
 
-  vector<bool> duplicates(indices.size(), false);
+  std::vector<bool> duplicates(indices.size(), false);
   int lastIdx = indices[0];
   Variant last = input->getValue(opaque.positions[lastIdx]);
   for (unsigned int i = 1; i < indices.size(); ++i) {

@@ -58,7 +58,7 @@ class NormalizedInstruction {
   DynLocation* outStack2; // Used for CGetL2
   DynLocation* outStack3; // Used for CGetL3
   Type         outPred;
-  vector<Location> deadLocs; // locations that die at the end of this
+  std::vector<Location> deadLocs; // locations that die at the end of this
                              // instruction
   ArgUnion imm[4];
   ImmVector immVec; // vector immediate; will have !isValid() if the

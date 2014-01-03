@@ -31,6 +31,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
+using std::string;
+
 bool ClassInfo::s_loaded = false;
 ClassInfo *ClassInfo::s_systemFuncs = nullptr;
 ClassInfo::ClassMap ClassInfo::s_class_like;
@@ -235,7 +237,7 @@ Variant ClassInfo::ConstantInfo::getValue() const {
 void ClassInfo::ConstantInfo::setValue(CVarRef value) {
   VariableSerializer vs(VariableSerializer::Type::Serialize);
   String s = vs.serialize(value, true);
-  svalue = string(s.data(), s.size());
+  svalue = std::string(s.data(), s.size());
   deferred = false;
 }
 
@@ -775,16 +777,14 @@ ClassInfo::ParameterInfo::~ParameterInfo() {
 
 ClassInfo::MethodInfo::~MethodInfo() {
   if (attribute & ClassInfo::IsRedeclared) {
-    for (vector<const ParameterInfo *>::iterator it = parameters.begin();
-         it != parameters.end(); ++it) {
+    for (auto it = parameters.begin(); it != parameters.end(); ++it) {
       delete (MethodInfo*)(void*)*it;
     }
   } else {
-    for (vector<const ParameterInfo *>::iterator it = parameters.begin();
-         it != parameters.end(); ++it) {
+    for (auto it = parameters.begin(); it != parameters.end(); ++it) {
       delete *it;
     }
-    for (vector<const ConstantInfo *>::iterator it = staticVariables.begin();
+    for (auto it = staticVariables.begin();
          it != staticVariables.end(); ++it) {
       delete *it;
     }

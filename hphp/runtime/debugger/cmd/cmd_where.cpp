@@ -131,7 +131,7 @@ void CmdWhere::onClient(DebuggerClient &client) {
       }
     }
   } else {
-    string snum = client.argValue(argBase);
+    std::string snum = client.argValue(argBase);
     int num = atoi(snum.c_str());
     if (snum[0] == '-') {
       snum = snum.substr(1);

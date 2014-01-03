@@ -27,8 +27,8 @@ using std::map;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(string, SourceRootInfo::s_path);
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(string, SourceRootInfo::s_phproot);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(std::string, SourceRootInfo::s_path);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(std::string, SourceRootInfo::s_phproot);
 
 SourceRootInfo::SourceRootInfo(Transport* transport)
     : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxCondition::On :
@@ -87,7 +87,7 @@ SourceRootInfo::SourceRootInfo(const std::string &user,
 
 void SourceRootInfo::createFromCommonRoot(const String &sandboxName) {
   m_user = "";
-  m_sandbox = string(sandboxName);
+  m_sandbox = std::string(sandboxName);
   String sandboxesRoot = String(RuntimeOption::SandboxDirectoriesRoot);
   String logsRoot = String(RuntimeOption::SandboxLogsRoot);
   m_path = sandboxesRoot + "/" + sandboxName;
@@ -123,7 +123,7 @@ void SourceRootInfo::createFromUserConfig() {
     }
   }
 
-  string confpath = string(homePath.c_str()) +
+  std::string confpath = std::string(homePath.c_str()) +
     RuntimeOption::SandboxConfFile;
   Hdf config, serverVars;
   String sp, lp, alp, userOverride;
@@ -201,9 +201,9 @@ void SourceRootInfo::handleError(Transport *t) {
 
 void SourceRootInfo::setServerVariables(Variant &server) const {
   if (!sandboxOn()) return;
-  for (map<string, string>::const_iterator it =
-         RuntimeOption::SandboxServerVariables.begin();
-       it != RuntimeOption::SandboxServerVariables.end(); ++it) {
+  for (auto it = RuntimeOption::SandboxServerVariables.begin();
+       it != RuntimeOption::SandboxServerVariables.end();
+       ++it) {
     server.set(String(it->first),
                String(parseSandboxServerVariable(it->second)));
   }
@@ -221,7 +221,8 @@ Eval::DSandboxInfo SourceRootInfo::getSandboxInfo() const {
   return sandbox;
 }
 
-string SourceRootInfo::parseSandboxServerVariable(const string &format) const {
+std::string
+SourceRootInfo::parseSandboxServerVariable(const std::string &format) const {
   std::ostringstream res;
   bool control = false;
   for (uint i = 0; i < format.size(); i++) {
@@ -251,9 +252,9 @@ string SourceRootInfo::parseSandboxServerVariable(const string &format) const {
   return res.str();
 }
 
-string SourceRootInfo::path() const {
+std::string SourceRootInfo::path() const {
   if (sandboxOn() || !m_path.empty()) {
-    return string(m_path.data(), m_path.size());
+    return std::string(m_path.data(), m_path.size());
   } else {
     return RuntimeOption::SourceRoot;
   }
@@ -263,12 +264,12 @@ const StaticString
   s_SERVER("_SERVER"),
   s_PHP_ROOT("PHP_ROOT");
 
-string& SourceRootInfo::initPhpRoot() {
+std::string& SourceRootInfo::initPhpRoot() {
   GlobalVariables *g = get_global_variables();
   CVarRef server = g->get(s_SERVER);
   CVarRef v = server.rvalAt(s_PHP_ROOT);
   if (v.isString()) {
-    *s_phproot.getCheck() = string(v.asCStrRef().data()) + string("/");
+    *s_phproot.getCheck() = std::string(v.asCStrRef().data()) + "/";
   } else {
     // Our best guess at the source root.
     *s_phproot.getCheck() = GetCurrentSourceRoot();

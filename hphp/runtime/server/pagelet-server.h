@@ -17,6 +17,11 @@
 #ifndef incl_HPHP_PAGELET_SERVER_H_
 #define incl_HPHP_PAGELET_SERVER_H_
 
+#include <string>
+#include <atomic>
+#include <set>
+#include <deque>
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/server-task-event.h"
@@ -77,7 +82,8 @@ class PageletTransport : public Transport, public Synchronizable {
 public:
   PageletTransport(
     const String& url, CArrRef headers, const String& postData,
-    const String& remoteHost, const std::set<string> &rfc1867UploadedFiles,
+    const String& remoteHost,
+    const std::set<std::string> &rfc1867UploadedFiles,
     CArrRef files, int timeoutSeconds);
 
   /**
@@ -98,12 +104,12 @@ public:
   virtual bool isUploadedFile(const String& filename);
   virtual bool moveUploadedFile(const String& filename,
     const String& destination);
-  virtual bool getFiles(string &files);
+  virtual bool getFiles(std::string &files);
 
   // task interface
   bool isDone();
 
-  void addToPipeline(const string &s);
+  void addToPipeline(const std::string &s);
 
   bool isPipelineEmpty();
 
@@ -131,20 +137,20 @@ private:
   std::atomic<int> m_refCount;
   int m_timeoutSeconds;
 
-  string m_url;
+  std::string m_url;
   HeaderMap m_requestHeaders;
   bool m_get;
-  string m_postData;
-  string m_remoteHost;
+  std::string m_postData;
+  std::string m_remoteHost;
 
   bool m_done;
   HeaderMap m_responseHeaders;
-  string m_response;
+  std::string m_response;
   int m_code;
 
-  std::deque<string> m_pipeline; // the intermediate pagelet results
-  std::set<string> m_rfc1867UploadedFiles;
-  string m_files; // serialized to use as $_FILES
+  std::deque<std::string> m_pipeline; // the intermediate pagelet results
+  std::set<std::string> m_rfc1867UploadedFiles;
+  std::string m_files; // serialized to use as $_FILES
 
   PageletServerTaskEvent *m_event;
 };

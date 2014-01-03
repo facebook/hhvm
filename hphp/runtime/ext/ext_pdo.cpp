@@ -14,8 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_pdo.h"
+
+#include <string>
+
 #include "hphp/runtime/ext/pdo_driver.h"
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/pdo_sqlite.h"
@@ -44,6 +46,7 @@
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(PDO);
+using std::string;
 ///////////////////////////////////////////////////////////////////////////////
 // PDO constants
 

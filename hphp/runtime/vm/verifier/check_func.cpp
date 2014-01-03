@@ -18,6 +18,7 @@
 #include <list>
 #include <cstdio>
 #include <limits>
+#include <iostream>
 
 #include "hphp/runtime/vm/verifier/check.h"
 #include "hphp/runtime/vm/verifier/cfg.h"

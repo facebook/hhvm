@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_ZEND_HTML_H_
 #define incl_HPHP_ZEND_HTML_H_
 
-#include "hphp/util/base.h"
+#include <cstdint>
 
 // Avoid dragging in the icu namespace.
 #ifndef U_USING_ICU_NAMESPACE

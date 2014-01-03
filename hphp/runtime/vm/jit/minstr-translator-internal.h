@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_RUNTIME_VM_TRANSLATOR_HOPT_VECTOR_TRANSLATOR_HELPERS_H_
 #define incl_HPHP_RUNTIME_VM_TRANSLATOR_HOPT_VECTOR_TRANSLATOR_HELPERS_H_
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/translator.h"

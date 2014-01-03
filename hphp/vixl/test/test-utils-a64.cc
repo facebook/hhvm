@@ -26,7 +26,7 @@
 
 #include "test-utils-a64.h"
 
-#include <math.h>   // Needed for isnan().
+#include <cmath>   // Needed for isnan().
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 #include "hphp/vixl/a64/simulator-a64.h"

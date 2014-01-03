@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_EMULATE_ZEND_H_
 #define incl_HPHP_EMULATE_ZEND_H_
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP {

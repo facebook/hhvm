@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/server/http-server.h"
 
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/http-client.h"
@@ -42,6 +44,10 @@
 
 namespace HPHP {
 extern InitFiniNode *extra_server_init, *extra_server_exit;
+
+using boost::lexical_cast;
+using std::string;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics
@@ -185,7 +191,7 @@ void HttpServer::onServerShutdown() {
   // When a new instance of HPHP has taken over our page server socket,
   // stop our admin server and satellites so it can acquire those ports.
   for (unsigned int i = 0; i < m_satellites.size(); i++) {
-    string name = m_satellites[i]->getName();
+    std::string name = m_satellites[i]->getName();
     m_satellites[i]->stop();
     Logger::Info("satellite server %s stopped", name.c_str());
   }
@@ -197,7 +203,7 @@ void HttpServer::onServerShutdown() {
 
   // start dangling servers, so they can serve old version of pages
   for (unsigned int i = 0; i < m_danglings.size(); i++) {
-    string name = m_danglings[i]->getName();
+    std::string name = m_danglings[i]->getName();
     try {
       m_danglings[i]->start();
       Logger::Info("dangling server %s started", name.c_str());
@@ -263,7 +269,7 @@ void HttpServer::runOrExitProcess() {
   }
 
   for (unsigned int i = 0; i < m_satellites.size(); i++) {
-    string name = m_satellites[i]->getName();
+    std::string name = m_satellites[i]->getName();
     try {
       m_satellites[i]->start();
       Logger::Info("satellite server %s started", name.c_str());
@@ -457,7 +463,8 @@ void HttpServer::checkMemory() {
   }
 }
 
-void HttpServer::getSatelliteStats(vector<std::pair<std::string, int>> *stats) {
+void HttpServer::getSatelliteStats(
+    std::vector<std::pair<std::string, int>> *stats) {
   for (auto i : m_satellites) {
     std::pair<std::string, int> active("satellite." + i->getName() + ".load",
                                        i->getActiveWorker());
@@ -495,10 +502,10 @@ bool HttpServer::startServer(bool pageServer) {
       }
 
       HttpClient http;
-      string url = "http://";
+      std::string url = "http://";
       url += RuntimeOption::ServerIP;
       url += ":";
-      url += lexical_cast<string>(RuntimeOption::AdminServerPort);
+      url += boost::lexical_cast<std::string>(RuntimeOption::AdminServerPort);
       url += "/stop";
       StringBuffer response;
       http.get(url.c_str(), response);
@@ -542,8 +549,8 @@ bool HttpServer::startServer(bool pageServer) {
           Logger::Info("killing anything listening on port %d", port);
         }
 
-        string cmd = "lsof -t -i :";
-        cmd += lexical_cast<string>(port);
+        std::string cmd = "lsof -t -i :";
+        cmd += lexical_cast<std::string>(port);
         cmd += " | xargs kill -9";
         Util::ssystem(cmd.c_str());
 

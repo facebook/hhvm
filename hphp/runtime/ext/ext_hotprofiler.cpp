@@ -29,6 +29,9 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/ext_function.h"
 
+#include <sys/time.h>
+#include <sys/resource.h>
+
 #ifdef __FreeBSD__
 #include <sys/resource.h>
 #include <sys/param.h>
@@ -72,6 +75,10 @@ namespace HPHP {
 
 IMPLEMENT_DEFAULT_EXTENSION(hotprofiler);
 IMPLEMENT_DEFAULT_EXTENSION(xhprof);
+
+using std::vector;
+using std::string;
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 

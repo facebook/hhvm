@@ -342,9 +342,9 @@ Variant c_Memcached::t_fetchall() {
 
 bool c_Memcached::getMultiImpl(const String& server_key, CArrRef keys,
                                bool enableCas, Array *returnValue) {
-  vector<const char*> keysCopy;
+  std::vector<const char*> keysCopy;
   keysCopy.reserve(keys.size());
-  vector<size_t> keysLengthCopy;
+  std::vector<size_t> keysLengthCopy;
   keysLengthCopy.reserve(keys.size());
   for (ArrayIter iter(keys); iter; ++iter) {
     Variant vKey = iter.second();
@@ -480,7 +480,7 @@ bool c_Memcached::setOperationImpl(SetOperation op, const String& server_key,
     return false;
   }
 
-  vector<char> payload; uint32_t flags;
+  std::vector<char> payload; uint32_t flags;
   toPayload(value, payload, flags);
 
   const String& myServerKey = server_key.empty() ? key : server_key;
@@ -502,7 +502,7 @@ bool c_Memcached::t_casbykey(double cas_token, const String& server_key, const S
     return false;
   }
 
-  vector<char> payload; uint32_t flags;
+  std::vector<char> payload; uint32_t flags;
   toPayload(value, payload, flags);
 
   const String& myServerKey = server_key.empty() ? key : server_key;
@@ -917,7 +917,7 @@ bool c_Memcached::handleError(memcached_return status) {
   }
 }
 
-void c_Memcached::toPayload(CVarRef value, vector<char> &payload,
+void c_Memcached::toPayload(CVarRef value, std::vector<char> &payload,
                             uint32_t &flags) {
   String encoded;
   if (value.isString() || value.isNumeric()) {
@@ -965,7 +965,7 @@ bool c_Memcached::toObject(Variant& value, const memcached_result_st &result) {
   String decompPayload;
   if (flags & MEMC_VAL_COMPRESSED) {
     bool done = false;
-    vector<char> buffer;
+    std::vector<char> buffer;
     unsigned long bufferSize;
     for (int factor = 1; !done && factor <= 16; ++factor) {
       bufferSize = payloadLength * (1 << factor) + 1;
@@ -1022,7 +1022,7 @@ memcached_return c_Memcached::doCacheCallback(CVarRef callback, const String& ke
     return MEMCACHED_NOTFOUND;
   }
 
-  vector<char> payload; uint32_t flags;
+  std::vector<char> payload; uint32_t flags;
   toPayload(value, payload, flags);
   return memcached_set(&m_impl->memcached, key.c_str(), key.length(),
                        payload.data(), payload.size(), 0, flags);

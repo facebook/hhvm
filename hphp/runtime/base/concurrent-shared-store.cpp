@@ -29,7 +29,7 @@ namespace HPHP {
 
 // helpers
 
-static void log_apc(const string& name) {
+static void log_apc(const std::string& name) {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableAPCStats) {
     ServerStats::Log(name, 1);
   }
@@ -268,11 +268,11 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
   return false;
 }
 
-static string std_apc_miss = "apc.miss";
-static string std_apc_hit = "apc.hit";
-static string std_apc_cas = "apc.cas";
-static string std_apc_update = "apc.update";
-static string std_apc_new = "apc.new";
+static std::string std_apc_miss = "apc.miss";
+static std::string std_apc_hit = "apc.hit";
+static std::string std_apc_cas = "apc.cas";
+static std::string std_apc_update = "apc.update";
+static std::string std_apc_new = "apc.new";
 
 APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
                                                    const StoreValue* sval) {
@@ -510,7 +510,7 @@ bool ConcurrentTableSharedStore::store(const String& key, CVarRef value,
   } else {
     log_apc(std_apc_new);
     if (RuntimeOption::EnableStats && RuntimeOption::EnableAPCKeyStats) {
-      string prefix = "apc.new." + GetSkeleton(key);
+      std::string prefix = "apc.new." + GetSkeleton(key);
       ServerStats::Log(prefix, 1);
     }
   }
@@ -596,8 +596,7 @@ void ConcurrentTableSharedStore::primeDone() {
                          apcExtension::FileStorageAdviseOutPeriod);
   }
 
-  for (set<string>::const_iterator iter =
-         apcExtension::CompletionKeys.begin();
+  for (auto iter = apcExtension::CompletionKeys.begin();
        iter != apcExtension::CompletionKeys.end(); ++iter) {
     Map::accessor acc;
     const char *copy = strdup(iter->c_str());

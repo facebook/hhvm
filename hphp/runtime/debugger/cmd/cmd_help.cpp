@@ -297,7 +297,7 @@ void CmdHelp::onClient(DebuggerClient &client) {
 }
 
 bool CmdHelp::processTutorial(DebuggerClient &client) {
-  string mode = client.argValue(2);
+  std::string mode = client.argValue(2);
   if (mode == "off") {
     client.setTutorial(-1);
   } else if (mode == "on") {

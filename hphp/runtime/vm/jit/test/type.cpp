@@ -18,7 +18,6 @@
 
 #include "folly/ScopeGuard.h"
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/vm/jit/ir.h"
 // for specialized object tests to get some real VM::Class
 #include "hphp/system/systemlib.h"

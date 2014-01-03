@@ -54,15 +54,14 @@ String File::TranslatePathKeepRelative(const String& filename) {
     ),
     AttachString);
   if (RuntimeOption::SafeFileAccess) {
-    const vector<string> &allowedDirectories =
-      VirtualHost::GetAllowedDirectories();
+    auto const& allowedDirectories = VirtualHost::GetAllowedDirectories();
     auto it = std::upper_bound(allowedDirectories.begin(),
                                allowedDirectories.end(), canonicalized,
-                               [](const String& val, const string& dir) {
+                               [](const String& val, const std::string& dir) {
                                  return strcmp(val.c_str(), dir.c_str()) < 0;
                                });
     if (it != allowedDirectories.begin()) {
-      const string& dir = *--it;
+      const std::string& dir = *--it;
       if (dir.size() <= canonicalized.size() &&
           !strncmp(dir.c_str(), canonicalized.c_str(), dir.size())) {
         return canonicalized;
@@ -166,6 +165,7 @@ void File::sweep() {
   // resources it might have allocated.
   assert(!valid());
   free(m_buffer);
+  using std::string;
   m_name.~string();
   m_mode.~string();
 }

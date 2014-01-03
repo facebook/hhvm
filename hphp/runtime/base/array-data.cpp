@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/base/array-data.h"
 
+#include <boost/lexical_cast.hpp>
 #include <tbb/concurrent_hash_map.h>
 
 #include "hphp/util/exception.h"
@@ -713,16 +714,16 @@ const char* ArrayData::kindToString(ArrayKind kind) {
 }
 
 void ArrayData::dump() {
-  string out; dump(out); fwrite(out.c_str(), out.size(), 1, stdout);
+  std::string out; dump(out); fwrite(out.c_str(), out.size(), 1, stdout);
 }
 
 void ArrayData::dump(std::string &out) {
   VariableSerializer vs(VariableSerializer::Type::VarDump);
   String ret(vs.serialize(Array(this), true));
   out += "ArrayData(";
-  out += boost::lexical_cast<string>(m_count);
+  out += boost::lexical_cast<std::string>(m_count);
   out += "): ";
-  out += string(ret.data(), ret.size());
+  out += std::string(ret.data(), ret.size());
 }
 
 void ArrayData::dump(std::ostream &out) {

@@ -492,7 +492,7 @@ static void add_assoc_name_entry(Array &ret, const char *key,
 }
 
 static const char *read_string(CArrRef args, const String& key, const char *def,
-                               vector<String> &strings) {
+                               std::vector<String> &strings) {
   if (args.exists(key)) {
     String value = args[key].toString();
     strings.push_back(value);
@@ -562,7 +562,8 @@ const StaticString
   s_encrypt_key("encrypt_key");
 
 static bool php_openssl_parse_config(struct php_x509_request *req,
-                                     CArrRef args, vector<String> &strings) {
+                                     CArrRef args,
+                                     std::vector<String> &strings) {
   req->config_filename =
     read_string(args, s_config, default_ssl_conf_filename, strings);
   req->section_name =
@@ -972,7 +973,7 @@ Variant f_openssl_csr_new(CArrRef dn, VRefParam privkey,
 
   Resource okey;
   X509_REQ *csr = NULL;
-  vector<String> strings;
+  std::vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings)) {
     /* Generate or use a private key */
     if (!privkey.isNull()) {
@@ -1057,7 +1058,7 @@ Variant f_openssl_csr_sign(CVarRef csr, CVarRef cacert, CVarRef priv_key,
   struct php_x509_request req;
   memset(&req, 0, sizeof(req));
   Variant ret = false;
-  vector<String> strings;
+  std::vector<String> strings;
   if (!php_openssl_parse_config(&req, configargs.toArray(), strings)) {
     goto cleanup;
   }
@@ -1626,7 +1627,7 @@ static bool openssl_pkey_export_impl(CVarRef key, BIO *bio_out,
 
   struct php_x509_request req;
   memset(&req, 0, sizeof(req));
-  vector<String> strings;
+  std::vector<String> strings;
   bool ret = false;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings)) {
     const EVP_CIPHER *cipher;
@@ -1812,7 +1813,7 @@ Resource f_openssl_pkey_new(CVarRef configargs /* = null_variant */) {
   memset(&req, 0, sizeof(req));
 
   Resource ret;
-  vector<String> strings;
+  std::vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings) &&
       req.generatePrivateKey()) {
     ret = Resource(new Key(req.priv_key));
@@ -1990,7 +1991,7 @@ Variant f_openssl_seal(const String& data, VRefParam sealed_data, VRefParam env_
   int *eksl = (int*)malloc(nkeys * sizeof(*eksl));
   unsigned char **eks = (unsigned char **)malloc(nkeys * sizeof(*eks));
   memset(eks, 0, sizeof(*eks) * nkeys);
-  vector<Resource> holder;
+  std::vector<Resource> holder;
 
   /* get the public keys we are using to seal this data */
   bool ret = true;

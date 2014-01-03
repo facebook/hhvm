@@ -18,7 +18,6 @@
 
 #include "folly/Format.h"
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/vm/jit/ir.h"
 
 namespace HPHP {  namespace JIT {

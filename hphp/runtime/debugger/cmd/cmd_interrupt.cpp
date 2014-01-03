@@ -13,8 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/debugger/cmd/cmd_break.h"
 #include "hphp/runtime/debugger/cmd/cmd_print.h"
 #include "hphp/runtime/base/array-init.h"
@@ -298,12 +300,12 @@ bool CmdInterrupt::shouldBreak(DebuggerProxy &proxy,
 }
 
 std::string CmdInterrupt::getFileLine() const {
-  string ret;
+  std::string ret;
   if (m_site) {
     if (m_site->getFile()) {
       ret = m_site->getFile();
     }
-    ret += ":" + lexical_cast<string>(m_site->getLine0());
+    ret += ":" + boost::lexical_cast<std::string>(m_site->getLine0());
   }
   return ret;
 }

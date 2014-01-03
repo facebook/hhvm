@@ -32,17 +32,17 @@ const char *CmdPrint::Formats[] = {
 std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
   if (format == nullptr) {
     String sret = DebuggerClient::FormatVariable(ret, -1);
-    return string(sret.data(), sret.size());
+    return std::string(sret.data(), sret.size());
   }
 
   if (strcmp(format, "r") == 0) {
     String sret = DebuggerClient::FormatVariable(ret, -1, 'r');
-    return string(sret.data(), sret.size());
+    return std::string(sret.data(), sret.size());
   }
 
   if (strcmp(format, "v") == 0) {
     String sret = DebuggerClient::FormatVariable(ret, -1, 'v');
-    return string(sret.data(), sret.size());
+    return std::string(sret.data(), sret.size());
   }
 
   if (strcmp(format, "dec") == 0 ||
@@ -251,7 +251,7 @@ void CmdPrint::processClear(DebuggerClient &client) {
     return;
   }
 
-  string snum = client.argValue(2);
+  std::string snum = client.argValue(2);
   if (!DebuggerClient::IsValidNumber(snum)) {
     client.error("'[p]rint [c]lear' needs an {index} argument.");
     client.tutorial(

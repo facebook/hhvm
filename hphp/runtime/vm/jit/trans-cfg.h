@@ -19,7 +19,6 @@
 
 #include <vector>
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-x64.h"
@@ -86,7 +85,7 @@ class TransCFG {
            const SrcDB& srcDB,
            const TcaTransIDMap& jmpToTransID);
 
-  const vector<TransID>& nodes() const { return m_transIds; }
+  const std::vector<TransID>& nodes() const { return m_transIds; }
   ArcPtrVec              arcs()  const;
   int64_t                weight(TransID id) const;
   void                   setNodeWeight(TransID id, int64_t weight);
@@ -101,8 +100,8 @@ class TransCFG {
                                const TransIDSet* selected = nullptr) const;
 
  private:
-  vector<TransID>                m_transIds;  // vector of TransIDs in the graph
-  vector<Node>                   m_nodeInfo;  // info about each node
+  std::vector<TransID>                m_transIds;  // vector of TransIDs in the graph
+  std::vector<Node>                   m_nodeInfo;  // info about each node
   hphp_hash_map<TransID, size_t> m_idToIdx;   // map from TransIDs to indices
                                               // in m_nodeInfo
 };

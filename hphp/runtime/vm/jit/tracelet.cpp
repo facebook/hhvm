@@ -15,6 +15,8 @@
 */
 #include "hphp/runtime/vm/jit/tracelet.h"
 
+#include <iostream>
+
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 

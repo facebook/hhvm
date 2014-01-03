@@ -14,8 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/soap/encoding.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/ext_soap.h"
 #include "hphp/runtime/ext/ext_string.h"
@@ -23,6 +25,9 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+using std::string;
+using boost::lexical_cast;
 
 bool php_libxml_xmlCheckUTF8(const unsigned char *s) {
   int i;
@@ -391,7 +396,7 @@ static string get_full_typename(const char *ns, const char *type) {
 
 static encodePtr get_typemap_type(const char *ns, const char *type) {
   USE_SOAP_GLOBAL;
-  string nscat = get_full_typename(ns, type);
+  std::string nscat = get_full_typename(ns, type);
   if (SOAP_GLOBAL(typemap)) {
     encodeMap::const_iterator iter = SOAP_GLOBAL(typemap)->find(nscat);
     if (iter != SOAP_GLOBAL(typemap)->end()) {
@@ -463,7 +468,7 @@ static bool soap_check_zval_ref(CVarRef data, xmlNodePtr node) {
       xmlSetNs(node, node_ptr->ns);
       xmlAttrPtr attr = node_ptr->properties;
       const char *id;
-      string prefix;
+      std::string prefix;
       if (SOAP_GLOBAL(soap_version) == SOAP_1_1) {
         while (1) {
           attr = get_attribute(attr, "id");
@@ -627,7 +632,7 @@ static Variant master_to_zval_int(encodePtr encode, xmlNodePtr data) {
       xmlAttrPtr type_attr = get_attribute_ex(data->properties, "type",
                                               XSI_NAMESPACE);
       if (type_attr) {
-        string ns, cptype;
+        std::string ns, cptype;
         parse_namespace(type_attr->children->content, cptype, ns);
         xmlNsPtr nsptr = xmlSearchNs(data->doc, data, NS_STRING(ns));
         string nscat;
@@ -943,7 +948,7 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, CVarRef data, int style,
       err[i++] = '.';
       err[i++] = 0;
     }
-    string serr = err;
+    std::string serr = err;
     free(err);
     throw SoapException("Encoding: string '%s' is not a valid utf-8 string",
                         serr.c_str());
@@ -2067,7 +2072,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, CVarRef data_, int style,
   USE_SOAP_GLOBAL;
   sdlType *sdl_type = type->sdl_type;
   sdlTypePtr element_type;
-  string array_type, array_size;
+  std::string array_type, array_size;
   int i;
   xmlNodePtr xmlParam;
   encodePtr enc;

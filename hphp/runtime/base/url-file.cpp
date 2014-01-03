@@ -63,7 +63,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   if (!m_headers.empty()) {
     pHeaders = &requestHeaders;
     for (ArrayIter iter(m_headers); iter; ++iter) {
-      requestHeaders[string(iter.first().toString().data())].
+      requestHeaders[std::string(iter.first().toString().data())].
         push_back(iter.second().toString().data());
     }
   }
@@ -81,7 +81,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   }
 
   int code;
-  vector<String> responseHeaders;
+  std::vector<String> responseHeaders;
   if (m_get) {
     code = http.get(url.c_str(), m_response, pHeaders, &responseHeaders);
   } else {
@@ -110,13 +110,13 @@ bool UrlFile::open(const String& input_url, const String& mode) {
 
 int64_t UrlFile::writeImpl(const char *buffer, int64_t length) {
   assert(m_len != -1);
-  throw FatalErrorException((string("cannot write a url stream: ") +
+  throw FatalErrorException((std::string("cannot write a url stream: ") +
                              m_name).c_str());
 }
 
 bool UrlFile::flush() {
   assert(m_len != -1);
-  throw FatalErrorException((string("cannot flush a url stream: ") +
+  throw FatalErrorException((std::string("cannot flush a url stream: ") +
                              m_name).c_str());
 }
 

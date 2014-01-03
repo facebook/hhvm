@@ -16,6 +16,11 @@
 */
 #include "hphp/runtime/ext/ext_options.h"
 
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sys/utsname.h>
+#include <pwd.h>
+
 #include "folly/ScopeGuard.h"
 
 #include "hphp/runtime/ext/ext_misc.h"
@@ -31,8 +36,6 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/process.h"
-#include <sys/utsname.h>
-#include <pwd.h>
 
 #include "hphp/runtime/vm/request-arena.h"
 
@@ -541,7 +544,7 @@ Array f_getopt(const String& options, CVarRef longopts /* = null_variant */) {
   Array vargv = g->get(s_argv).toArray();
   int argc = vargv.size();
   char **argv = (char **)malloc((argc+1) * sizeof(char*));
-  vector<String> holders;
+  std::vector<String> holders;
   int index = 0;
   for (ArrayIter iter(vargv); iter; ++iter) {
     String arg = iter.second().toString();

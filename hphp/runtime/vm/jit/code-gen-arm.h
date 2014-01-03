@@ -40,7 +40,7 @@ struct CodeGenerator {
     {
     }
 
-  void cgBlock(Block* block, vector<TransBCMapping>* bcMap);
+  void cgBlock(Block* block, std::vector<TransBCMapping>* bcMap);
 
  private:
   template<class Then, class Else>

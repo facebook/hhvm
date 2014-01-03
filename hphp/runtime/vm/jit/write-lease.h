@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_WRITELEASE_H_
 #define incl_HPHP_WRITELEASE_H_
 
-#include "hphp/util/base.h"
+#include "hphp/util/compilation-flags.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include <pthread.h>

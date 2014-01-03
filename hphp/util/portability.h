@@ -41,6 +41,16 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+#ifdef ATTRIBUTE_UNUSED
+# undef ATTRIBUTE_UNUSED
+#endif
+#ifdef ATTRIBUTE_NORETURN
+# undef ATTRIBUTE_NORETURN
+#endif
+#ifdef ATTRIBUTE_PRINTF
+# undef ATTRIBUTE_PRINTF
+#endif
+
 #define ATTRIBUTE_UNUSED   __attribute__((__unused__))
 #define ATTRIBUTE_NORETURN __attribute__((__noreturn__))
 

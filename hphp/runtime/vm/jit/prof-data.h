@@ -19,7 +19,6 @@
 
 #include <vector>
 
-#include "hphp/util/base.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -58,7 +57,7 @@ class ProfCounters {
   static const uint32_t kCountersPerChunk = 2 * 1024 * 1024 / sizeof(T);
 
   T                     m_initVal;
-  vector<T*>            m_chunks;
+  std::vector<T*>       m_chunks;
 };
 
 typedef std::vector<TCA> PrologueCallersVec;
@@ -220,7 +219,8 @@ public:
 
 private:
   uint32_t                m_numTrans;
-  vector<ProfTransRecPtr> m_transRecs;
+  std::vector<ProfTransRecPtr>
+                          m_transRecs;
   FuncProfTransMap        m_funcProfTrans;
   ProfCounters<int64_t>   m_counters;
   SrcKeySet               m_optimizedSKs;   // set of SrcKeys already optimized

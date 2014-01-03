@@ -31,6 +31,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+using std::string;
+
 XboxTransport::XboxTransport(const String& message, const String& reqInitDoc /* = "" */)
     : m_refCount(0), m_done(false), m_code(0), m_event(nullptr) {
   Timer::GetMonotonicTime(m_queueTime);
@@ -98,7 +100,7 @@ String XboxTransport::getResults(int &code, int timeout_ms /* = 0 */) {
 
 static IMPLEMENT_THREAD_LOCAL(std::shared_ptr<XboxServerInfo>,
   s_xbox_server_info);
-static IMPLEMENT_THREAD_LOCAL(string, s_xbox_prev_req_init_doc);
+static IMPLEMENT_THREAD_LOCAL(std::string, s_xbox_prev_req_init_doc);
 
 class XboxRequestHandler: public RPCRequestHandler {
 public:
@@ -252,7 +254,7 @@ bool XboxServer::SendMessage(const String& message, Variant &ret, int timeout_ms
     }
 
     string hostStr(host.data());
-    vector<string> headers;
+    std::vector<std::string> headers;
     LibEventHttpClientPtr http =
       LibEventHttpClient::Get(hostStr, RuntimeOption::XboxServerPort);
     if (http->send(url, headers, timeoutSeconds, false,
@@ -299,8 +301,8 @@ bool XboxServer::PostMessage(const String& message,
     url += host.data();
     url += "/xbox_post_message";
 
-    vector<string> headers;
-    string hostStr(host.data());
+    std::vector<std::string> headers;
+    std::string hostStr(host.data());
     LibEventHttpClientPtr http =
       LibEventHttpClient::Get(hostStr, RuntimeOption::XboxServerPort);
     if (http->send(url, headers, 0, false, message.data(), message.size())) {

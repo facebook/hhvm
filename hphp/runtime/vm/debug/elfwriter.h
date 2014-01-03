@@ -31,7 +31,7 @@ struct ElfWriter {
   Elf *m_elf;
   std::string m_filename;
   Elf64_Ehdr *m_ehdr;
-  vector<unsigned char> m_strtab;
+  std::vector<unsigned char> m_strtab;
   Dwarf_P_Debug m_dwarfProducer;
   typedef std::map<const char *, Dwarf_Signed> FileDB;
   FileDB m_fileDB;

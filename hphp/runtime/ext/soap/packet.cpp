@@ -399,7 +399,7 @@ bool parse_packet_soap(c_SoapClient *obj, const char *buffer,
       if (trav->type == XML_ELEMENT_NODE) {
         encodePtr enc;
         if (hdrs && !hdrs->empty()) {
-          string key;
+          std::string key;
           if (trav->ns) {
             key += (char*)trav->ns->href;
             key += ':';

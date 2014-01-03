@@ -47,7 +47,7 @@ void CmdExtension::list(DebuggerClient &client) {
   } else {
     // This is cheating, assuming server has same list of extensions.
     Array exts = Extension::GetLoadedExtensions();
-    vector<std::string> items;
+    std::vector<std::string> items;
     for (ArrayIter iter(exts); iter; ++iter) {
       items.push_back(iter.second().toString()->toCPPString());
     }
@@ -98,7 +98,7 @@ bool CmdExtension::processList(DebuggerProxy &proxy) {
     assert(ext);
     if (ext) {
       int support = ext->debuggerSupport();
-      string line;
+      std::string line;
       line += (support & IDebuggable::SupportInfo) ? "Yes     " : "        ";
       line += (support & IDebuggable::SupportDump) ? "Yes     " : "        ";
       line += (support & IDebuggable::SupportVerb) ? "Yes     " : "        ";
@@ -128,7 +128,7 @@ bool CmdExtension::onServer(DebuggerProxy &proxy) {
     return processList(proxy);
   }
 
-  string name = m_args[1];
+  std::string name = m_args[1];
   Extension *ext = Extension::GetExtension(name);
   if (ext) {
     if (m_args.size() == 2) {
@@ -148,7 +148,7 @@ bool CmdExtension::onServer(DebuggerProxy &proxy) {
       }
     } else {
       if (ext->debuggerSupport() & IDebuggable::SupportVerb) {
-        string verb = m_args[2];
+        std::string verb = m_args[2];
         std::vector<std::string> args;
         if (m_args.size() > 3) {
           args.insert(args.end(), m_args.begin() + 3, m_args.end());

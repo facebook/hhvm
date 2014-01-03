@@ -966,7 +966,7 @@ Address CodeGenerator::cgInst(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgBlock(Block* block, vector<TransBCMapping>* bcMap) {
+void CodeGenerator::cgBlock(Block* block, std::vector<TransBCMapping>* bcMap) {
   FTRACE(6, "cgBlock: {}\n", block->id());
 
   BCMarker prevMarker;

@@ -14,14 +14,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/ext_apc.h"
+
+#include <fstream>
+
+#include <dlfcn.h>
+#include <sys/time.h> // gettimeofday
+
 #include "hphp/runtime/ext/ext_variable.h"
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/async-job.h"
 #include "hphp/util/timer.h"
-#include <dlfcn.h>
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -47,7 +51,7 @@ void apcExtension::moduleLoad(Hdf config) {
   PrimeLibrary = apc["PrimeLibrary"].getString();
   LoadThread = apc["LoadThread"].getInt16(2);
   apc["CompletionKeys"].get(CompletionKeys);
-  string tblType = apc["TableType"].getString("concurrent");
+  std::string tblType = apc["TableType"].getString("concurrent");
   if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
     TableType = TableTypes::ConcurrentTable;
   } else {
@@ -591,7 +595,7 @@ void const_load_impl(struct cache_info *info,
   {
     int count = count_items(thrifts, 4);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **p = thrifts;
       for (int i = 0; i < count; i++, p += 4) {
         String key(*p, (int)(int64_t)*(p+1), CopyString);
@@ -635,7 +639,7 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(int_keys, 2);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **k = int_keys;
       long long*v = int_values;
       for (int i = 0; i < count; i++, k += 2) {
@@ -650,7 +654,7 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(char_keys, 2);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **k = char_keys;
       char *v = char_values;
       for (int i = 0; i < count; i++, k += 2) {
@@ -671,7 +675,7 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(strings, 4);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **p = strings;
       for (int i = 0; i < count; i++, p += 4) {
         auto& item = vars[i];
@@ -687,7 +691,7 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(objects, 4);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **p = objects;
       for (int i = 0; i < count; i++, p += 4) {
         auto& item = vars[i];
@@ -702,7 +706,7 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(thrifts, 4);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **p = thrifts;
       for (int i = 0; i < count; i++, p += 4) {
         auto& item = vars[i];
@@ -722,7 +726,7 @@ void apc_load_impl(struct cache_info *info,
   {
     int count = count_items(others, 4);
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       const char **p = others;
       for (int i = 0; i < count; i++, p += 4) {
         auto& item = vars[i];
@@ -901,7 +905,7 @@ void apc_load_impl_compressed
     int count = int_lens[0];
     int len = int_lens[1];
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       char *keys = gzdecode(int_keys, len);
       if (keys == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(keys);
@@ -922,7 +926,7 @@ void apc_load_impl_compressed
     int count = char_lens[0];
     int len = char_lens[1];
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       char *keys = gzdecode(char_keys, len);
       if (keys == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(keys);
@@ -949,7 +953,7 @@ void apc_load_impl_compressed
     int count = string_lens[0] / 2;
     int len = string_lens[1];
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(strings, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
@@ -973,7 +977,7 @@ void apc_load_impl_compressed
     int count = object_lens[0] / 2;
     int len = object_lens[1];
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(objects, len);
       if (decoded == NULL) throw Exception("bad compressed APC archive.");
       ScopedMem holder(decoded);
@@ -995,7 +999,7 @@ void apc_load_impl_compressed
     int count = thrift_lens[0] / 2;
     int len = thrift_lens[1];
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(thrifts, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
@@ -1022,7 +1026,7 @@ void apc_load_impl_compressed
     int count = other_lens[0] / 2;
     int len = other_lens[1];
     if (count) {
-      vector<KeyValuePair> vars(count);
+      std::vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(others, len);
       if (decoded == NULL) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
@@ -1111,13 +1115,13 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
         len = RFC1867_TRACKING_KEY_MAXLEN;
       }
       rfc1867ApcData->tracking_key =
-        string(RuntimeOption::Rfc1867Prefix.c_str(), len);
+        std::string(RuntimeOption::Rfc1867Prefix.c_str(), len);
       len = strlen(*data->value);
       int rem = RFC1867_TRACKING_KEY_MAXLEN -
                 rfc1867ApcData->tracking_key.size();
       if (len > rem) len = rem;
       rfc1867ApcData->tracking_key +=
-        string(*data->value, len);
+        std::string(*data->value, len);
       rfc1867ApcData->bytes_processed = data->post_bytes_processed;
     }
     /* Facebook: Temporary fix for a bug in PHP's rfc1867 code,
@@ -1136,11 +1140,11 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       rfc1867ApcData->bytes_processed = data->post_bytes_processed;
       int len = strlen(*data->filename);
       if (len > RFC1867_FILENAME_MAXLEN) len = RFC1867_FILENAME_MAXLEN;
-      rfc1867ApcData->filename = string(*data->filename, len);
+      rfc1867ApcData->filename = std::string(*data->filename, len);
       rfc1867ApcData->temp_filename = NULL;
       len = strlen(data->name);
       if (len > RFC1867_NAME_MAXLEN) len = RFC1867_NAME_MAXLEN;
-      rfc1867ApcData->name = string(data->name, len);
+      rfc1867ApcData->name = std::string(data->name, len);
       ArrayInit track(6);
       track.set(s_total, rfc1867ApcData->content_length);
       track.set(s_current, rfc1867ApcData->bytes_processed);

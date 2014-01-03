@@ -13,8 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/file-repository.h"
+
+#include <fstream>
+#include <sstream>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include "folly/ScopeGuard.h"
+
+#include "hphp/util/assertions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/process.h"
@@ -33,8 +43,6 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 
-#include "folly/ScopeGuard.h"
-
 using std::endl;
 
 namespace HPHP {
@@ -45,13 +53,15 @@ extern bool (*file_dump)(const char *filename);
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-std::set<string> FileRepository::s_names;
+std::set<std::string> FileRepository::s_names;
 
-PhpFile::PhpFile(const string &fileName, const string &srcRoot,
-                 const string &relPath, const string &md5,
+PhpFile::PhpFile(const std::string &fileName,
+                 const std::string &srcRoot,
+                 const std::string &relPath,
+                 const std::string &md5,
                  HPHP::Unit* unit)
     : m_refCount(0), m_id(0),
-      m_profName(string("run_init::") + string(fileName)),
+      m_profName(std::string("run_init::") + std::string(fileName)),
       m_fileName(fileName), m_srcRoot(srcRoot), m_relPath(relPath), m_md5(md5),
       m_unit(unit) {
 }
@@ -306,10 +316,10 @@ bool FileRepository::findFile(const StringData *path, struct stat *s) {
 String FileRepository::translateFileName(StringData *file) {
   ParsedFilesMap::const_accessor acc;
   if (!s_files.find(acc, file)) return file;
-  string srcRoot(SourceRootInfo::GetCurrentSourceRoot());
+  std::string srcRoot(SourceRootInfo::GetCurrentSourceRoot());
   if (srcRoot.empty()) return file;
   PhpFile *f = acc->second->getPhpFile();
-  const string &parsedSrcRoot = f->getSrcRoot();
+  const std::string &parsedSrcRoot = f->getSrcRoot();
   if (srcRoot == parsedSrcRoot) return file;
   int len = parsedSrcRoot.size();
   if (len > 0 && file->size() > len &&
@@ -319,10 +329,10 @@ String FileRepository::translateFileName(StringData *file) {
   return file;
 }
 
-string FileRepository::unitMd5(const string& fileMd5) {
+std::string FileRepository::unitMd5(const std::string& fileMd5) {
   // Incorporate relevant options into the unit md5 (there will be more)
   std::ostringstream opts;
-  string t = fileMd5 + '\0'
+  std::string t = fileMd5 + '\0'
     + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
     + (RuntimeOption::EnableEmitSwitch ? '1' : '0')
     + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
@@ -331,14 +341,14 @@ string FileRepository::unitMd5(const string& fileMd5) {
 }
 
 void FileRepository::setFileInfo(const StringData *name,
-                                 const string& md5,
+                                 const std::string& md5,
                                  FileInfo &fileInfo,
                                  bool fromRepo) {
   // Incorporate the path into the md5 that is used as the key for file
   // repository lookups.  This assures that even if two PHP files have
   // identical content, separate units exist for them (so that
   // Unit::filepath() and Unit::dirpath() work correctly).
-  string s = md5 + '\0' + name->data();
+  std::string s = md5 + '\0' + name->data();
   fileInfo.m_md5 = string_md5(s.c_str(), s.size());
 
   if (fromRepo) {
@@ -351,12 +361,12 @@ void FileRepository::setFileInfo(const StringData *name,
   int srcRootLen = fileInfo.m_srcRoot.size();
   if (srcRootLen) {
     if (!strncmp(name->data(), fileInfo.m_srcRoot.c_str(), srcRootLen)) {
-      fileInfo.m_relPath = string(name->data() + srcRootLen);
+      fileInfo.m_relPath = std::string(name->data() + srcRootLen);
     }
   }
 
   ReadLock lock(s_md5Lock);
-  Md5FileMap::iterator it = s_md5Files.find(fileInfo.m_md5);
+  auto it = s_md5Files.find(fileInfo.m_md5);
   if (it != s_md5Files.end()) {
     PhpFile *f = it->second;
     if (!fileInfo.m_relPath.empty() &&
@@ -392,7 +402,7 @@ bool FileRepository::readActualFile(const StringData *name,
 void FileRepository::computeMd5(const StringData *name, FileInfo& fileInfo) {
   if (md5Enabled()) {
     auto& input = fileInfo.m_inputString;
-    string md5 = string_md5(input.data(), input.size());
+    std::string md5 = string_md5(input.data(), input.size());
     setFileInfo(name, md5, fileInfo, false);
   }
 }
@@ -471,7 +481,7 @@ PhpFile *FileRepository::parseFile(const std::string &name,
   return p;
 }
 
-bool FileRepository::fileStat(const string &name, struct stat *s) {
+bool FileRepository::fileStat(const std::string &name, struct stat *s) {
   return StatCache::stat(name, s) == 0;
 }
 
@@ -532,9 +542,9 @@ static bool findFileWrapper(const String& file, void* ctx) {
       return true;
     }
   }
-  string server_root(SourceRootInfo::GetCurrentSourceRoot());
+  std::string server_root(SourceRootInfo::GetCurrentSourceRoot());
   if (server_root.empty()) {
-    server_root = string(g_vmContext->getCwd()->data());
+    server_root = std::string(g_vmContext->getCwd()->data());
     if (server_root.empty() || server_root[server_root.size() - 1] != '/') {
       server_root += "/";
     }

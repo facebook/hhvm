@@ -30,6 +30,7 @@
 #include "hphp/util/md5.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/timer.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -264,12 +265,14 @@ struct TransRec {
   SrcKey                 src;
   MD5                    md5;
   Offset                 bcStopOffset;
-  vector<DynLocation>    dependencies;
+  std::vector<DynLocation>
+                         dependencies;
   TCA                    aStart;
   uint32_t               aLen;
   TCA                    astubsStart;
   uint32_t               astubsLen;
-  vector<TransBCMapping> bcMapping;
+  std::vector<TransBCMapping>
+                         bcMapping;
 
   TransRec() {}
 
@@ -293,10 +296,11 @@ struct TransRec {
            uint32_t                 _aLen = 0,
            TCA                      _astubsStart = 0,
            uint32_t                 _astubsLen = 0,
-           vector<TransBCMapping>  _bcMapping = vector<TransBCMapping>());
+           std::vector<TransBCMapping>  _bcMapping =
+             std::vector<TransBCMapping>());
 
   void setID(TransID newID) { id = newID; }
-  string print(uint64_t profCount) const;
+  std::string print(uint64_t profCount) const;
 };
 
 struct TranslArgs {
@@ -420,9 +424,9 @@ protected:
                                   RegionBlacklist& interp);
 
   typedef std::map<TCA, TransID> TransDB;
-  TransDB            m_transDB;
-  vector<TransRec>   m_translations;
-  vector<uint64_t*>  m_transCounters;
+  TransDB                 m_transDB;
+  std::vector<TransRec>   m_translations;
+  std::vector<uint64_t*>  m_transCounters;
 
   int64_t              m_createdTime;
 

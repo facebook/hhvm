@@ -49,18 +49,18 @@ void StaticContentCache::load() {
   // get a list of all files, one for each extension
   Logger::Info("searching all files under source root...");
   int count = 0;
-  std::map<string, vector<string> > ext2files;
+  std::map<std::string, std::vector<std::string> > ext2files;
   {
     const char *argv[] = {"", (char*)RuntimeOption::SourceRoot.c_str(),
                           "-type", "f", nullptr};
-    string files;
-    vector<string> out;
+    std::string files;
+    std::vector<std::string> out;
     Process::Exec("find", argv, nullptr, files);
     Util::split('\n', files.c_str(), out, true);
     for (unsigned int i = 0; i < out.size(); i++) {
-      const string &name = out[i];
+      const std::string &name = out[i];
       size_t pos = name.rfind('.');
-      if (pos != string::npos) {
+      if (pos != std::string::npos) {
         ext2files[name.substr(pos+1)].push_back(name);
         ++count;
       }
@@ -68,13 +68,12 @@ void StaticContentCache::load() {
   }
 
   Logger::Info("analyzing %d files under source root...", count);
-  for (hphp_string_imap<string>::const_iterator iter =
-         RuntimeOption::StaticFileExtensions.begin();
+  for (auto iter = RuntimeOption::StaticFileExtensions.begin();
        iter != RuntimeOption::StaticFileExtensions.end(); ++iter) {
     if (ext2files.find(iter->first) == ext2files.end()) {
       continue;
     }
-    const vector<string> &out = ext2files[iter->first];
+    const std::vector<std::string> &out = ext2files[iter->first];
 
     int total = 0;
     for (unsigned int i = 0; i < out.size(); i++) {
@@ -82,7 +81,7 @@ void StaticContentCache::load() {
 
       auto const sb = std::make_shared<CstrBuffer>(out[i].c_str());
       if (sb->valid() && sb->size() > 0) {
-        string url = out[i].substr(rootSize + 1);
+        std::string url = out[i].substr(rootSize + 1);
         f->file = sb;
         m_files[url] = f;
 

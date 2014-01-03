@@ -177,7 +177,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
     key_cmp_function = SortRegularAscending;
   }
 
-  vector<int> perm1;
+  std::vector<int> perm1;
   SortData opaque1;
   int bottom = 0;
   int top = array.size();
@@ -824,7 +824,7 @@ static int multi_compare_func(const void *n1, const void *n2, const void *op) {
   return 0;
 }
 
-void Array::SortImpl(vector<int> &indices, CArrRef source,
+void Array::SortImpl(std::vector<int> &indices, CArrRef source,
                      Array::SortData &opaque, Array::PFUNC_CMP cmp_func,
                      bool by_key, const void *data /* = NULL */) {
   assert(cmp_func);
@@ -854,7 +854,7 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
                  const void *data /* = NULL */) {
   Array sorted = Array::Create();
   SortData opaque;
-  vector<int> indices;
+  std::vector<int> indices;
   SortImpl(indices, *this, opaque, cmp_func, by_key, data);
   int count = size();
   for (int i = 0; i < count; i++) {

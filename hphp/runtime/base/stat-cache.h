@@ -21,9 +21,12 @@
 #include <sys/inotify.h>
 #endif
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include <tbb/concurrent_hash_map.h>
 
-#include "hphp/util/base.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/smart-ptr.h"
 

@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/util/base.h"
 
 namespace HPHP {
 namespace JIT {
@@ -56,7 +55,9 @@ encodeCallAndArgs(const StringData* name, int numArgs) {
 }
 
 static void
-decodeNameAndArgs(const StringData* enc, string& outName, int& outNumArgs) {
+decodeNameAndArgs(const StringData* enc,
+                  std::string& outName,
+                  int& outNumArgs) {
   const char* numArgs = strchr(enc->data(), '@');
   assert(numArgs && *numArgs =='@');
   numArgs++;
@@ -207,7 +208,7 @@ fcallToFuncName(const NormalizedInstruction* i) {
     if (callRec->m_type == CallRecordType::Function) {
       return callRec->m_func->name();
     }
-    string name;
+    std::string name;
     int numArgs;
     decodeNameAndArgs(callRec->m_encodedName, name, numArgs);
     return makeStaticString(name.c_str());

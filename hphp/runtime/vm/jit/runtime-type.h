@@ -182,7 +182,7 @@ class InputInfos : public std::vector<InputInfo> {
     for (size_t i = 0; i < size(); i++) {
       retval += (*this)[i].pretty();
       if (i != size() - 1) {
-        retval += string(" ");
+        retval += std::string(" ");
       }
     }
     return retval;

@@ -448,9 +448,9 @@ static void pcre_log_error(const char *func, int line, int pcre_code,
   const char *escapedPattern;
   const char *escapedSubject;
   const char *escapedRepl;
-  string p(pattern, pattern_size);
-  string s(subject, subject_size);
-  string r(repl, repl_size);
+  std::string p(pattern, pattern_size);
+  std::string s(subject, subject_size);
+  std::string r(repl, repl_size);
   escapedPattern = Logger::EscapeString(p);
   escapedSubject = Logger::EscapeString(s);
   escapedRepl = Logger::EscapeString(r);

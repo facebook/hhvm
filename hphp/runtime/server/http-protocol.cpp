@@ -13,31 +13,39 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/server/http-protocol.h"
-#include "hphp/runtime/base/hphp-system.h"
-#include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/server/source-root-info.h"
-#include "hphp/runtime/server/request-uri.h"
-#include "hphp/runtime/server/transport.h"
+
+#include <sys/time.h>
+
+#include <map>
+#include <string>
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/util/logger.h"
 #include "hphp/util/util.h"
-#include "hphp/runtime/server/upload.h"
-#include "hphp/runtime/server/replay-transport.h"
-#include "hphp/runtime/server/virtual-host.h"
+
+#include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/server/replay-transport.h"
+#include "hphp/runtime/server/request-uri.h"
+#include "hphp/runtime/server/source-root-info.h"
+#include "hphp/runtime/server/transport.h"
+#include "hphp/runtime/server/upload.h"
+#include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/vm/jit/arch.h"
-#include <boost/lexical_cast.hpp>
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
 using std::map;
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
+using std::string;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,7 +72,7 @@ static bool read_all_post_data(Transport *transport,
 
 const VirtualHost *HttpProtocol::GetVirtualHost(Transport *transport) {
   if (!RuntimeOption::VirtualHosts.empty()) {
-    string host = transport->getHeader("Host");
+    std::string host = transport->getHeader("Host");
     for (unsigned int i = 0; i < RuntimeOption::VirtualHosts.size(); i++) {
       auto vhost = RuntimeOption::VirtualHosts[i];
       if (vhost->match(host)) {
@@ -254,17 +262,17 @@ void HttpProtocol::PreparePostVariables(Variant& post,
                                         Variant& files,
                                         Transport *transport) {
 
-  string contentType = transport->getHeader("Content-Type");
-  string contentLength = transport->getHeader("Content-Length");
+  std::string contentType = transport->getHeader("Content-Type");
+  std::string contentLength = transport->getHeader("Content-Length");
 
   bool needDelete = false;
   int size = 0;
   const void *data = transport->getPostData(size);
   if (data && size) {
-    string boundary;
+    std::string boundary;
     int content_length = atoi(contentLength.c_str());
     bool rfc1867Post = IsRfc1867(contentType, boundary);
-    string files_str;
+    std::string files_str;
     if (rfc1867Post) {
       if (content_length > VirtualHost::GetMaxPostSize()) {
         // $_POST and $_FILES are empty
@@ -864,7 +872,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
   if (extraHeaders) {
     for (HeaderMap::const_iterator iter = extraHeaders->begin();
          iter != extraHeaders->end(); ++iter) {
-      vector<string> &values = requestHeaders[iter->first];
+      std::vector<std::string> &values = requestHeaders[iter->first];
       values.insert(values.end(), iter->second.begin(), iter->second.end());
     }
   }
@@ -876,7 +884,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
   }
 
   code = 0; // HTTP status of curl or 0 for "no server response code"
-  vector<String> responseHeaders;
+  std::vector<String> responseHeaders;
   HttpClient http;
   if (data && size) {
     code = http.post(url.c_str(), data, size, response, &requestHeaders,

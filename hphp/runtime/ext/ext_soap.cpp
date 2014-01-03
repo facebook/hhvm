@@ -40,6 +40,8 @@ IMPLEMENT_DEFAULT_EXTENSION(soap);
 ///////////////////////////////////////////////////////////////////////////////
 // helper classes for setting/resetting globals within a method call
 
+using std::string;
+
 class SoapScope {
 public:
   SoapScope() {
@@ -376,7 +378,7 @@ static xmlDocPtr serialize_function_call
       encodePtr enc;
 
       if (hdrs) {
-        string key = header->m_namespace.data();
+        std::string key = header->m_namespace.data();
         key += ':';
         key += header->m_name.data();
         sdlSoapBindingFunctionHeaderMap::iterator iter = hdrs->find(key);

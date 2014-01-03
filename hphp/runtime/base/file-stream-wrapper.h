@@ -17,6 +17,10 @@
 #ifndef HPHP_FILE_STREAM_WRAPPER_H
 #define HPHP_FILE_STREAM_WRAPPER_H
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mem-file.h"

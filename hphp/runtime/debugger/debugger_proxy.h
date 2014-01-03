@@ -21,7 +21,6 @@
 #include <memory>
 #include <vector>
 
-#include "hphp/util/base.h"
 #include "hphp/util/synchronizable.h"
 #include "hphp/util/async-func.h"
 #include "hphp/runtime/base/socket.h"

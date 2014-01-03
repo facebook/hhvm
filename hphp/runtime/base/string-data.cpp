@@ -357,7 +357,7 @@ void StringData::dump() const {
   for (uint32_t i = 0; i < s.len; i++) {
     char ch = s.ptr[i];
     if (isprint(ch)) {
-      std::cout << ch;
+      printf("%c", ch);
     } else {
       printf("\\x%02x", ch);
     }

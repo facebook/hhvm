@@ -455,8 +455,8 @@ RegionDescPtr selectHotRegion(TransID transId,
   }
 
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
-    std::string dotFileName = string("/tmp/trans-cfg-") +
-                              lexical_cast<std::string>(transId) + ".dot";
+    std::string dotFileName = std::string("/tmp/trans-cfg-") +
+                              folly::to<std::string>(transId) + ".dot";
 
     cfg.print(dotFileName, funcId, profData, &selectedTIDs);
     FTRACE(5, "selectHotRegion: New Translation {} (file: {}) {}\n",

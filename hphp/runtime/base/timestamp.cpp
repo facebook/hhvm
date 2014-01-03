@@ -13,12 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/timestamp.h"
+
+#include <sys/time.h>
+extern "C" {
+#include <timelib.h>
+}
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/array-init.h"
-#include <timelib.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

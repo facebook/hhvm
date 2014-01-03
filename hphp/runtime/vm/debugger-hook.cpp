@@ -190,15 +190,16 @@ static void addBreakPointFuncEntry(const Func* f) {
 // general codegen strategy as generators, the original function still
 // starts the work, so we treat generators from async functions
 // normally.
-static bool matchFunctionName(string name, const Func* f) {
+static bool matchFunctionName(std::string name, const Func* f) {
   if (f->hasGeneratorAsBody() && !f->isAsync()) return false; // Original func
   auto funcName = f->name()->data();
   if (!f->isGenerator() || f->isAsync()) {
     return name == funcName;
   } else {
-    DEBUG_ONLY string s(funcName);
-    assert(s.compare(s.length() - 13, string::npos, "$continuation") == 0);
-    return name.compare(0, string::npos, funcName, strlen(funcName) - 13) == 0;
+    DEBUG_ONLY std::string s(funcName);
+    assert(s.compare(s.length() - 13, std::string::npos, "$continuation") == 0);
+    return name.compare(0, std::string::npos, funcName,
+      strlen(funcName) - 13) == 0;
   }
 }
 

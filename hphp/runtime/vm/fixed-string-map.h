@@ -17,7 +17,8 @@
 #ifndef incl_HPHP_FIXED_STRING_MAP_H_
 #define incl_HPHP_FIXED_STRING_MAP_H_
 
-#include "hphp/util/base.h"
+#include <cstdint>
+
 #include "hphp/runtime/base/string-data.h"
 
 namespace HPHP {

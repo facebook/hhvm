@@ -40,6 +40,9 @@
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(curl);
 
+using std::string;
+using std::vector;
+
 const StaticString
   s_exception("exception"),
   s_previous("previous");
@@ -74,9 +77,9 @@ private:
 
   class ToFree {
   public:
-    vector<char*>          str;
-    vector<curl_httppost*> post;
-    vector<curl_slist*>    slist;
+    std::vector<char*>          str;
+    std::vector<curl_httppost*> post;
+    std::vector<curl_slist*>    slist;
 
     ~ToFree() {
       for (unsigned int i = 0; i < str.size(); i++) {
@@ -1400,7 +1403,7 @@ IMPLEMENT_OBJECT_ALLOCATION(LibEventHttpHandle)
 static LibEventHttpClientPtr prepare_client
 (const String& url, const String& data, CArrRef headers, int timeout,
  bool async, bool post) {
-  string sUrl = url.data();
+  std::string sUrl = url.data();
   if (sUrl.size() < 7 || sUrl.substr(0, 7) != "http://") {
     raise_warning("Invalid URL: %s", sUrl.c_str());
     return LibEventHttpClientPtr();
@@ -1409,7 +1412,7 @@ static LibEventHttpClientPtr prepare_client
   // parsing server address
   size_t pos = sUrl.find('/', 7);
   string path;
-  if (pos == string::npos) {
+  if (pos == std::string::npos) {
     pos = sUrl.length();
     path = "/";
   } else if (pos == 7) {
@@ -1436,7 +1439,7 @@ static LibEventHttpClientPtr prepare_client
     return client;
   }
 
-  vector<string> sheaders;
+  std::vector<std::string> sheaders;
   for (ArrayIter iter(headers); iter; ++iter) {
     sheaders.push_back(iter.second().toString().data());
   }

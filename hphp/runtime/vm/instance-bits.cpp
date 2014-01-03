@@ -17,12 +17,12 @@
 
 #include <vector>
 #include <algorithm>
+#include <atomic>
 #include <tbb/concurrent_hash_map.h>
 
 #include "folly/ScopeGuard.h"
 #include "folly/MapUtil.h"
 
-#include "hphp/util/base.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/vm/class.h"

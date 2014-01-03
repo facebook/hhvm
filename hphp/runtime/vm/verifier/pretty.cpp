@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <stdio.h>
 
 #include "folly/Format.h"
@@ -84,7 +85,7 @@ void printBlocks(const Func* func, const Graph* g) {
 }
 
 void printGml(const Unit* unit) {
-  string filename = unit->md5().toString() + ".gml";
+  std::string filename = unit->md5().toString() + ".gml";
   FILE* file = fopen(filename.c_str(), "w");
   if (!file) {
     std::cerr << "Couldn't open GML output file " << filename << std::endl;

@@ -18,7 +18,11 @@
 #ifndef incl_HPHP_ZEND_MATH_H_
 #define incl_HPHP_ZEND_MATH_H_
 
-#include "hphp/util/base.h"
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+#include <cmath>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,7 +65,7 @@ inline double php_math_round(double value, int places,
   }
 
   int precision_places = 14 - floor(log10(fabs(value)));
-  float f1 = pow(10.0, (double)abs(places));
+  float f1 = pow(10.0, (double)std::abs(places));
 
   /* If the decimal precision guaranteed by FP arithmetic is higher than
    * the requested places BUT is small enough to make sure a non-zero value

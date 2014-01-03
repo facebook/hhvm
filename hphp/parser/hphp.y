@@ -4,6 +4,7 @@
 #else
 #include "hphp/compiler/parser/parser.h"
 #endif
+#include <boost/lexical_cast.hpp>
 #include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 

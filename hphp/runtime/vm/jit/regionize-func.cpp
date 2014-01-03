@@ -219,14 +219,15 @@ void regionizeFunc(const Func*         func,
   TransCFG cfg(funcId, profData, tx64->getSrcDB(), tx64->getJmpToTransIDMap());
 
   if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
-    string dotFileName = folly::to<string>("/tmp/func-cfg-", funcId, ".dot");
+    auto dotFileName = folly::to<std::string>(
+      "/tmp/func-cfg-", funcId, ".dot");
     cfg.print(dotFileName, funcId, profData, nullptr);
     FTRACE(5, "regionizeFunc: initial CFG for func {} saved to file {}\n",
            funcId, dotFileName);
   }
 
   TransCFG::ArcPtrVec arcs = cfg.arcs();
-  vector<TransID>    nodes = cfg.nodes();
+  std::vector<TransID>    nodes = cfg.nodes();
 
   std::sort(nodes.begin(), nodes.end(),
             [&](TransID tid1, TransID tid2) -> bool {

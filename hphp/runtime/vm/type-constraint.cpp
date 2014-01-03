@@ -18,7 +18,6 @@
 
 #include "folly/MapUtil.h"
 
-#include "hphp/util/base.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/vm/hhbc.h"

@@ -164,7 +164,7 @@ bool Repo::GetFileHashStmt::get(const char *path, MD5& md5) {
   return false;
 }
 
-bool Repo::findFile(const char *path, const string &root, MD5& md5) {
+bool Repo::findFile(const char *path, const std::string &root, MD5& md5) {
   if (m_dbc == nullptr) {
     return false;
   }

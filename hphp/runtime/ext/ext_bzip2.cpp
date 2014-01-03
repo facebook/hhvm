@@ -74,7 +74,8 @@ Variant f_bzopen(CVarRef filename, const String& mode) {
     int stream_mode_len = stream_mode.length();
 
     if (stream_mode_len != 1 &&
-        !(stream_mode_len == 2 && stream_mode.find('b') != string::npos)) {
+        !(stream_mode_len == 2 &&
+          stream_mode.find('b') != std::string::npos)) {
       raise_warning("cannot use stream opened in mode '%s'", stream_mode.c_str());
       return false;
     } else if (stream_mode_len == 1 &&

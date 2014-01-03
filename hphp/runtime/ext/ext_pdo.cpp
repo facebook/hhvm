@@ -2548,7 +2548,7 @@ rewrite:
       newbuffer += t;
     }
     *newbuffer = '\0';
-    out = out.substr(0, newbuffer - out.data());
+    out.setSize(newbuffer - out.data());
 
     ret = 1;
     goto clean_up;
@@ -2609,6 +2609,7 @@ clean_up:
   while (placeholders) {
     plc = placeholders;
     placeholders = plc->next;
+    plc->quoted.reset();
     free(plc);
   }
 

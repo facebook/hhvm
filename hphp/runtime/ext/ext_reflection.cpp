@@ -328,9 +328,6 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
   if (info->attribute & ClassInfo::IsClosure) {
     ret.set(s_is_closure, true_varNR);
   }
-  if (info->attribute & ClassInfo::HasGeneratorAsBody) {
-    ret.set(s_is_generator, true_varNR);
-  }
 
   // doc comments
   set_doc_comment(ret, info->docComment);

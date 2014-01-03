@@ -59,7 +59,6 @@ public:
 
     ZendCompat             = (1 << 14), //                  x      x
 
-    HasGeneratorAsBody     = (1 << 15), //                  x      x
     IsCppSerializable      = (1 << 15), //    x
     HipHopSpecific         = (1 << 16), //    x             x
 

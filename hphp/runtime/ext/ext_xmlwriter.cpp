@@ -65,7 +65,7 @@ bool f_xmlwriter_start_element(CObjRef xmlwriter, const String& name) {
     t_startelement(name);
 }
 
-bool f_xmlwriter_start_element_ns(CObjRef xmlwriter, const String& prefix,
+bool f_xmlwriter_start_element_ns(CObjRef xmlwriter, const CVarRef prefix,
                                   const String& name, const String& uri) {
   return xmlwriter.getTyped<c_XMLWriter>()->
     t_startelementns(prefix, name, uri);
@@ -366,14 +366,20 @@ bool c_XMLWriter::t_startelement(const String& name) {
   return ret != -1;
 }
 
-bool c_XMLWriter::t_startelementns(const String& prefix, const String& name, const String& uri) {
+bool c_XMLWriter::t_startelementns(const CVarRef prefix, const String& name,
+                                   const String& uri) {
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
     return false;
   }
   int ret = -1;
   if (m_ptr) {
-    ret = xmlTextWriterStartElementNS(m_ptr, (xmlChar*)prefix.data(),
+    // To be consistent with Zend PHP, we need to make a distinction between
+    // null strings and empty strings for the prefix. We use CVarRef above
+    // because null strings are coerced to empty strings automatically.
+    xmlChar * prefixData = prefix.isNull()
+      ? nullptr : (xmlChar *)prefix.toString().data();
+    ret = xmlTextWriterStartElementNS(m_ptr, prefixData,
                                       (xmlChar*)name.data(),
                                       (xmlChar*)uri.data());
   }

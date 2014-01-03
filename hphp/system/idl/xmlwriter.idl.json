@@ -150,7 +150,7 @@
                 },
                 {
                     "name": "prefix",
-                    "type": "String",
+                    "type": "Variant",
                     "desc": "The namespace prefix."
                 },
                 {
@@ -1121,7 +1121,7 @@
                     "args": [
                         {
                             "name": "prefix",
-                            "type": "String"
+                            "type": "Variant"
                         },
                         {
                             "name": "name",

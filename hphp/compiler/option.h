@@ -19,7 +19,7 @@
 
 #include "hphp/util/hdf.h"
 #include "hphp/util/string-bag.h"
-#include "hphp/util/base.h"
+#include "hphp/util/deprecated/base.h"
 #include "hphp/util/deprecated/declare-boost-types.h"
 
 namespace HPHP {

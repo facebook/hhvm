@@ -18,7 +18,7 @@
 #define incl_HPHP_LABEL_SCOPE_H_
 
 #include "hphp/compiler/hphp.h"
-#include "hphp/util/base.h"
+#include "hphp/util/deprecated/base.h"
 
 #include <vector>
 #include <string>

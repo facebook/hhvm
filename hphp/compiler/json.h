@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_JSON_H_
 #define incl_HPHP_JSON_H_
 
-#include "hphp/util/base.h"
+#include "hphp/util/deprecated/base.h"
 #include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {

@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_TYPEANNOTATION_H_
 #define incl_HPHP_TYPEANNOTATION_H_
 
-#include "hphp/util/base.h"
+#include "hphp/util/deprecated/base.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/compiler/code_generator.h"
 

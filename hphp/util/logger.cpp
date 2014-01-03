@@ -13,13 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/logger.h"
-#include "hphp/util/base.h"
+
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/process.h"
 #include "hphp/util/exception.h"
-#include "util.h"
+#include "hphp/util/util.h"
 #include "hphp/util/text-color.h"
 #include <syslog.h>
 
@@ -66,7 +65,7 @@ Logger *Logger::s_logger = new Logger();
 void Logger::Log(LogLevelType level, const char *fmt, va_list ap) {
   if (!IsEnabled()) return;
 
-  string msg;
+  std::string msg;
   Util::string_vsnprintf(msg, fmt, ap);
   Log(level, msg, nullptr);
 }
@@ -74,7 +73,7 @@ void Logger::Log(LogLevelType level, const char *fmt, va_list ap) {
 void Logger::LogEscapeMore(LogLevelType level, const char *fmt, va_list ap) {
   if (!IsEnabled()) return;
 
-  string msg;
+  std::string msg;
   Util::string_vsnprintf(msg, fmt, ap);
   Log(level, msg, nullptr, true, true);
 }
@@ -163,7 +162,7 @@ void Logger::log(LogLevelType level, const std::string &msg,
     } else {
       f = Output ? Output : stdf;
     }
-    string header, sheader;
+    std::string header, sheader;
     if (LogHeader) {
       header = GetHeader();
       if (LogNativeStackTrace) {

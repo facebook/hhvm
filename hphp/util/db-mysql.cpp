@@ -13,9 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/db-mysql.h"
-#include "mysql.h"
+
+#include <cassert>
 
 namespace HPHP {
 

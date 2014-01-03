@@ -17,8 +17,13 @@
 #ifndef incl_HPHP_STACKTRACE_H_
 #define incl_HPHP_STACKTRACE_H_
 
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "hphp/util/portability.h"
+
 #include <dlfcn.h>
-#include "hphp/util/base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

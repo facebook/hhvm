@@ -13,14 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/util/util.h"
 
-#include "util.h"
-#include "hphp/util/base.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/exception.h"
-#include "hphp/util/network.h"
-#include "folly/String.h"
+#include <vector>
+#include <fstream>
+
+#include <boost/filesystem.hpp>
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -28,8 +26,19 @@
 #include <fcntl.h>
 #include <libgen.h>
 
+#include "folly/String.h"
+
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/network.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+using std::string;
+using std::vector;
+namespace fs = boost::filesystem;
 
 static Mutex s_file_mutex;
 
@@ -230,7 +239,7 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
     for (std::set<string>::const_iterator iter = todelete.begin();
          iter != todelete.end(); ++iter) {
       Logger::Info("sync: deleting %s", iter->c_str());
-      boost::filesystem::remove_all(*iter);
+      fs::remove_all(*iter);
     }
   }
 

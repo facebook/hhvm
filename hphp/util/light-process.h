@@ -17,10 +17,16 @@
 #ifndef incl_HPHP_LIGHT_PROCESS_H_
 #define incl_HPHP_LIGHT_PROCESS_H_
 
-#include "hphp/util/process.h"
-#include "hphp/util/lock.h"
 #include <string>
 #include <vector>
+#include <cstdio>
+#include <cstdlib>
+
+#include <signal.h>
+#include <unistd.h>
+
+#include "hphp/util/process.h"
+#include "hphp/util/lock.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,7 +19,6 @@
 #include <type_traits>
 
 #include "hphp/util/util.h"
-#include "hphp/util/base.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/trace.h"

@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_POOL_H_
 #define incl_HPHP_POOL_H_
 
-#include "hphp/util/base.h"
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

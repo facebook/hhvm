@@ -17,8 +17,12 @@
 #ifndef incl_HPHP_DB_QUERY_H_
 #define incl_HPHP_DB_QUERY_H_
 
+#include <memory>
+#include <string>
 #include <stdarg.h>
+
 #include "hphp/util/db-filter.h"
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 

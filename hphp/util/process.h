@@ -17,8 +17,13 @@
 #ifndef incl_HPHP_PROCESS_H_
 #define incl_HPHP_PROCESS_H_
 
-#include "hphp/util/base.h"
+#include <string>
+#include <vector>
+#include <cstdio>
+
+#include <sys/types.h>
 #include <sys/syscall.h>
+#include <unistd.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -13,11 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/db-query.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/util/db-conn.h"
 #include "hphp/util/db-dataset.h"
-#include "util.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,7 +53,7 @@ void DBQuery::filterBy(const char *fmt, Op op /* = And */) {
 void DBQuery::filterBy(const char *fmt, const char *value, Op op /* = And */) {
   assert(m_conn);
 
-  string escaped;
+  std::string escaped;
   m_conn->escapeString(value, escaped);
   char *where = (char*)malloc(strlen(fmt) + escaped.size() - 1);
   sprintf(where, fmt, escaped.c_str());
@@ -99,9 +101,9 @@ void DBQuery::orderBy(const char *field, bool ascending /* = true */) {
 void DBQuery::limit(int count, int offset /* = 0 */) {
   m_limit = " LIMIT ";
   if (offset) {
-    m_limit += boost::lexical_cast<string>(offset) + ", ";
+    m_limit += boost::lexical_cast<std::string>(offset) + ", ";
   }
-  m_limit += boost::lexical_cast<string>(count);
+  m_limit += boost::lexical_cast<std::string>(count);
 }
 
 void DBQuery::insert(const char *fmt, ...) {
@@ -132,7 +134,7 @@ void DBQuery::setField(const char *fmt, const std::string &value) {
 void DBQuery::setField(const char *fmt, const char *binary, int len) {
   assert(m_conn);
 
-  string escaped;
+  std::string escaped;
   m_conn->escapeString(binary, len, escaped);
 
   char *buffer = (char*)malloc(strlen(fmt) + escaped.size());
@@ -145,7 +147,7 @@ void DBQuery::setField(const char *fmt, const char *binary, int len) {
 }
 
 void DBQuery::setField(const char *fmt, int value) {
-  setField(fmt, boost::lexical_cast<string>(value).c_str());
+  setField(fmt, boost::lexical_cast<std::string>(value).c_str());
 }
 
 void DBQuery::setField(const char *fmt, unsigned int value) {
@@ -259,15 +261,15 @@ const char *DBQuery::format(const char *fmt, ...) {
 const char *DBQuery::format(const char *fmt, va_list ap) {
   m_format = fmt;
 
-  for (string::size_type pos = m_format.find('%');
-       pos != string::npos && pos < m_format.length() - 1;
+  for (std::string::size_type pos = m_format.find('%');
+       pos != std::string::npos && pos < m_format.length() - 1;
        pos = m_format.find('%', pos + 1)) {
     switch (m_format[pos+1]) {
     case 's':
       {
         assert(m_conn);
         const char *value = va_arg(ap, const char *);
-        string escaped;
+        std::string escaped;
         m_conn->escapeString(value, escaped);
         m_format.replace(pos, 2, escaped);
         pos += escaped.size();
@@ -306,7 +308,7 @@ const char *DBQuery::format(const char *fmt, va_list ap) {
 
 std::string DBQuery::escapeFieldName(const char *fieldNameList) {
   assert(fieldNameList);
-  string ret = "`";
+  std::string ret = "`";
   ret += fieldNameList;
   ret += "`";
   Util::replaceAll(ret, ",", "`,`");

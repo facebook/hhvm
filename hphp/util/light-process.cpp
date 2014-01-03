@@ -13,23 +13,27 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/light-process.h"
-#include "hphp/util/process.h"
-#include "util.h"
-#include "hphp/util/logger.h"
-#include "folly/String.h"
 
-#include <afdt.h>
 #include <string>
+
+#include <boost/scoped_array.hpp>
+
 #include <vector>
+#include <sys/wait.h>
+#include <afdt.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/wait.h>
 #include <poll.h>
 #include <pwd.h>
 #include <signal.h>
-#include <boost/scoped_array.hpp>
+#include <unistd.h>
+
+#include "folly/String.h"
+
+#include "hphp/util/process.h"
+#include "hphp/util/util.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 
@@ -75,7 +79,7 @@ static int recv_fd(int afdt_fd) {
   return fd;
 }
 
-static char **build_envp(const vector<string> &env) {
+static char **build_envp(const std::vector<std::string> &env) {
   char **envp = nullptr;
   int size = env.size();
   if (size) {
@@ -89,7 +93,7 @@ static char **build_envp(const vector<string> &env) {
   return envp;
 }
 
-static void close_fds(const vector<int> &fds) {
+static void close_fds(const std::vector<int> &fds) {
   for (unsigned int i = 0; i < fds.size(); i++) {
     ::close(fds[i]);
   }
@@ -107,7 +111,7 @@ static void do_popen(FILE *fin, FILE *fout, int afdt_fd) {
 
   read_buf(fin, buf);
 
-  string old_cwd = Process::GetCurrentDirectory();
+  std::string old_cwd = Process::GetCurrentDirectory();
   read_buf(fin, cwd);
   if (old_cwd != cwd) {
     if (chdir(cwd)) {
@@ -166,7 +170,7 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
 
   char buf[BUFFER_SIZE];
   int env_size = 0;
-  vector<string> env;
+  std::vector<std::string> env;
   read_buf(fin, buf);
   sscanf(buf, "%d", &env_size);
   for (int i = 0; i < env_size; i++) {
@@ -177,7 +181,7 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
   int pipe_size = 0;
   read_buf(fin, buf);
   sscanf(buf, "%d", &pipe_size);
-  vector<int> pvals;
+  std::vector<int> pvals;
   for (int i = 0; i < pipe_size; i++) {
     int fd_value;
     read_buf(fin, buf);
@@ -185,7 +189,7 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
     pvals.push_back(fd_value);
   }
 
-  vector<int> pkeys;
+  std::vector<int> pkeys;
   for (int i = 0; i < pipe_size; i++) {
     int fd = recv_fd(afdt_fd);
     if (fd < 0) {
@@ -310,7 +314,7 @@ void LightProcess::SigChldHandler(int sig, siginfo_t* info, void* ctx) {
 }
 
 void LightProcess::Initialize(const std::string &prefix, int count,
-                              const vector<int> &inherited_fds) {
+                              const std::vector<int> &inherited_fds) {
   if (prefix.empty() || count <= 0) {
     return;
   }
@@ -348,7 +352,7 @@ void LightProcess::Initialize(const std::string &prefix, int count,
 }
 
 bool LightProcess::initShadow(const std::string &prefix, int id,
-                              const vector<int> &inherited_fds) {
+                              const std::vector<int> &inherited_fds) {
   Lock lock(m_procMutex);
 
   std::ostringstream os;
@@ -539,7 +543,7 @@ FILE *LightProcess::popen(const char *cmd, const char *type,
 FILE *LightProcess::HeavyPopenImpl(const char *cmd, const char *type,
                                    const char *cwd) {
   if (cwd && *cwd) {
-    string old_cwd = Process::GetCurrentDirectory();
+    auto old_cwd = Process::GetCurrentDirectory();
     if (old_cwd != cwd) {
       Lock lock(s_mutex);
       if (chdir(cwd)) {
@@ -619,9 +623,10 @@ int LightProcess::pclose(FILE *f) {
   return ret;
 }
 
-pid_t LightProcess::proc_open(const char *cmd, const vector<int> &created,
-                              const vector<int> &desired,
-                              const char *cwd, const vector<string> &env) {
+pid_t LightProcess::proc_open(const char *cmd, const std::vector<int> &created,
+                              const std::vector<int> &desired,
+                              const char *cwd,
+                              const std::vector<std::string> &env) {
   int id = GetId();
   Lock lock(g_procs[id].m_procMutex);
   always_assert(Available());
@@ -715,7 +720,7 @@ pid_t LightProcess::pcntl_waitpid(pid_t pid, int *stat_loc, int options) {
   return p;
 }
 
-void LightProcess::ChangeUser(const string &username) {
+void LightProcess::ChangeUser(const std::string &username) {
   if (username.empty()) return;
   for (int i = 0; i < g_procsCount; i++) {
     Lock lock(g_procs[i].m_procMutex);

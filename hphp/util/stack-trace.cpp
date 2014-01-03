@@ -13,13 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/stack-trace.h"
-#include "hphp/util/process.h"
-#include "hphp/util/base.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/logger.h"
-#include "util.h"
 
 #include <execinfo.h>
 #include <bfd.h>
@@ -27,22 +21,30 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+#include "folly/ScopeGuard.h"
+#include "folly/Conv.h"
+
+#include "hphp/util/process.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/util.h"
+
 #include "hphp/util/light-process.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/hash.h"
-#include "folly/ScopeGuard.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 std::string StackTrace::Frame::toString() const {
-  string out;
+  std::string out;
   out = funcname.empty() ? "??" : funcname;
   out += " at ";
   out += filename.empty() ? "??" : filename;
   out += ":";
-  out += lexical_cast<string>(lineno);
+  out += folly::to<std::string>(lineno);
   return out;
 }
 
@@ -103,7 +105,7 @@ StackTraceNoHeap::StackTraceNoHeap(bool trace) {
 }
 
 void StackTrace::initFromHex(const char *hexEncoded) {
-  vector<string> frames;
+  std::vector<std::string> frames;
   Util::split(':', hexEncoded, frames);
   for (unsigned int i = 0; i < frames.size(); i++) {
     m_bt_pointers.push_back((void*)strtoll(frames[i].c_str(), nullptr, 16));
@@ -149,15 +151,15 @@ const std::string &StackTrace::toString(int skip, int limit) const {
   if (skip != 0 || limit != -1) m_bt.clear();
   if (m_bt.empty()) {
     size_t frame = 0;
-    for (vector<void*>::const_iterator btpi = m_bt_pointers.begin();
+    for (auto btpi = m_bt_pointers.begin();
          btpi != m_bt_pointers.end(); ++btpi) {
-      string framename = Translate(*btpi)->toString();
-      if (framename.find("StackTrace::") != string::npos) {
+      std::string framename = Translate(*btpi)->toString();
+      if (framename.find("StackTrace::") != std::string::npos) {
         continue; // ignore frames in the StackTrace class
       }
       if (skip-- > 0) continue;
       m_bt += "# ";
-      m_bt += lexical_cast<string>(frame);
+      m_bt += folly::to<std::string>(frame);
       if (frame < 10) m_bt += " ";
 
       m_bt += " ";
@@ -188,7 +190,7 @@ void StackTraceNoHeap::printStackTrace(int fd) const {
 
 void StackTrace::get(std::vector<std::shared_ptr<Frame>> &frames) const {
   frames.clear();
-  for (vector<void*>::const_iterator btpi = m_bt_pointers.begin();
+  for (auto btpi = m_bt_pointers.begin();
        btpi != m_bt_pointers.end(); ++btpi) {
     frames.push_back(Translate(*btpi));
   }
@@ -196,7 +198,7 @@ void StackTrace::get(std::vector<std::shared_ptr<Frame>> &frames) const {
 
 std::string StackTrace::hexEncode(int minLevel /* = 0 */,
                                   int maxLevel /* = 999 */) const {
-  string bts;
+  std::string bts;
   for (int i = minLevel; i < (int)m_bt_pointers.size() && i < maxLevel; i++) {
     if (i > minLevel) bts += ':';
     char buf[20];
@@ -566,7 +568,7 @@ std::string StackTrace::Demangle(const char *mangled) {
   char *result = cplus_demangle(mangled + skip_first, DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE);
   if (result == nullptr) return mangled;
 
-  string ret;
+  std::string ret;
   if (mangled[0] == '.') ret += '.';
   ret += result;
   free (result);

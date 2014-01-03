@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_COMPRESSION_H_
 #define incl_HPHP_COMPRESSION_H_
 
-#include "hphp/util/base.h"
 #include <zlib.h>
 
 // encoding_mode

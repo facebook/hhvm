@@ -23,7 +23,6 @@
 #include "folly/Format.h"
 #include "folly/ScopeGuard.h"
 
-#include "hphp/util/base.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/hash-map-typedefs.h"
 

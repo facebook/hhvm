@@ -21,7 +21,6 @@
 #include <functional>
 #include <string>
 
-#include "hphp/util/base.h"
 #include "hphp/util/functional.h"
 
 namespace HPHP {

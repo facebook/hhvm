@@ -13,9 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/text-color.h"
-#include "util.h"
+
+#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,7 +24,7 @@ const char *s_stdout_color = nullptr;
 const char *s_stderr_color = nullptr;
 
 const char *get_color_by_name(const char *name) {
-  string upper = Util::toUpper(name);
+  auto upper = Util::toUpper(name);
   if (upper == "BLACK"         ) return  ANSI_COLOR_BLACK;
   if (upper == "RED"           ) return  ANSI_COLOR_RED;
   if (upper == "GREEN"         ) return  ANSI_COLOR_GREEN;
@@ -45,7 +45,7 @@ const char *get_color_by_name(const char *name) {
 }
 
 const char *get_bgcolor_by_name(const char *name) {
-  string upper = Util::toUpper(name);
+  auto upper = Util::toUpper(name);
   if (upper == "BLACK"         ) return  ANSI_BGCOLOR_BLACK;
   if (upper == "RED"           ) return  ANSI_BGCOLOR_RED;
   if (upper == "GREEN"         ) return  ANSI_BGCOLOR_GREEN;
@@ -80,7 +80,7 @@ std::string add_bgcolor(const char *color, const char *bgcolor) {
   assert(color && *color && color[strlen(color) - 1] == 'm');
   assert(bgcolor && *bgcolor);
 
-  string ret = color;
+  std::string ret = color;
   return ret.substr(0, ret.length() - 1) + bgcolor;
 }
 

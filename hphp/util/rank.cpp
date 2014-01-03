@@ -13,10 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/util/rank.h"
 
+#include <cstdio>
+#include <cstdint>
 #include <stack>
+#include <cinttypes>
 
-#include "hphp/util/base.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
 

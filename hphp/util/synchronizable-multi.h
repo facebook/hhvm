@@ -17,10 +17,13 @@
 #ifndef incl_HPHP_SYNCHRONIZABLE_MULTI_H_
 #define incl_HPHP_SYNCHRONIZABLE_MULTI_H_
 
-#include "hphp/util/base.h"
+#include <vector>
+#include <list>
+
 #include "hphp/util/mutex.h"
 #include "hphp/util/rank.h"
 #include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/functional.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

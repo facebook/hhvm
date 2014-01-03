@@ -20,8 +20,6 @@
 #include <memory>
 #include <string>
 
-#include "hphp/util/base.h"
-
 namespace HPHP {
 
 /**

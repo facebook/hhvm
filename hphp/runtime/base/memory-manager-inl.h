@@ -19,6 +19,8 @@
 
 #include <limits>
 
+#include "hphp/util/compilation-flags.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////

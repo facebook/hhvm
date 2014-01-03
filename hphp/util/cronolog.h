@@ -19,6 +19,8 @@
 
 #include <atomic>
 #include <string>
+#include <cstdio>
+
 #include "hphp/util/cronoutils.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/util.h"

@@ -13,7 +13,6 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/file-cache.h"
 
 #include <gtest/gtest.h>
@@ -28,7 +27,7 @@ class TestFileCache : public testing::Test {
     FileCache::UseNewCache = true;
   }
 
-  bool makeTempDir(string* dir) {
+  bool makeTempDir(std::string* dir) {
     char dir_tmpl[] = "/tmp/hhvm_unit_test.XXXXXX";
     const char* temp = mkdtemp(dir_tmpl);
 
@@ -81,10 +80,10 @@ TEST_F(TestFileCache, WriteAndReadBack) {
   fc.write("_unit_test_two_");
   fc.write("/__invalid__/path/with/directories");
 
-  string temp_dir;
+  std::string temp_dir;
   ASSERT_TRUE(makeTempDir(&temp_dir));
 
-  string cache_fn(temp_dir);
+  std::string cache_fn(temp_dir);
   cache_fn.append("/cache.dump");
 
   // Flush to disk.
@@ -136,8 +135,8 @@ TEST_F(TestFileCache, HighlyCompressibleData) {
   FILE* f = fdopen(data_fd, "w");
   ASSERT_TRUE(f != nullptr);
 
-  string test_path = "/path/to/data";
-  string test_data;
+  std::string test_path = "/path/to/data";
+  std::string test_data;
 
   for (int i = 0; i < 10; ++i) {
     test_data.append("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
@@ -151,10 +150,10 @@ TEST_F(TestFileCache, HighlyCompressibleData) {
 
   // Flush to disk.
 
-  string temp_dir;
+  std::string temp_dir;
   ASSERT_TRUE(makeTempDir(&temp_dir));
 
-  string cache_fn(temp_dir);
+  std::string cache_fn(temp_dir);
   cache_fn.append("/cache.dump");
 
   fc.save(cache_fn.c_str());

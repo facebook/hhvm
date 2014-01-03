@@ -13,13 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/exception.h"
 
-#include <string>
-
-#include "util.h"
-#include "hphp/util/base.h"
+#include "hphp/util/util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

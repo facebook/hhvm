@@ -13,8 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/string-bag.h"
+
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

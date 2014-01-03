@@ -13,15 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/memory-manager.h"
-
-// Get SIZE_MAX definition.  Do this before including any other files, to make
-// sure that this is the first place that stdint.h is included.
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS
-#endif
-#define __STDC_LIMIT_MACROS
 
 #include <algorithm>
 #include <cstdint>

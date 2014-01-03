@@ -13,11 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #ifndef incl_HPHP_COMPATIBILITY_H_
 #define incl_HPHP_COMPATIBILITY_H_
 
-#include "hphp/util/base.h"
+#include <cstdint>
+#include <time.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

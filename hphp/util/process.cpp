@@ -13,22 +13,29 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/util/process.h"
+
+#include <boost/lexical_cast.hpp>
+
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <pwd.h>
+#include <poll.h>
+#include <unistd.h>
 
 #include "folly/ScopeGuard.h"
+#include "folly/String.h"
 
-#include "hphp/util/process.h"
-#include "hphp/util/base.h"
-#include "util.h"
+#include "hphp/util/util.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/text-color.h"
-#include "folly/String.h"
-
-#include <pwd.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
+
+using std::string;
 
 static void swap_fd(const string &filename, FILE *fdesc) {
   FILE *f = fopen(filename.c_str(), "a");
@@ -171,7 +178,7 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
 
 int Process::Exec(const std::string &cmd, const std::string &outf,
                   const std::string &errf) {
-  vector<string> argvs;
+  std::vector<std::string> argvs;
   Util::split(' ', cmd.c_str(), argvs);
   if (argvs.empty()) {
     return -1;
@@ -311,7 +318,7 @@ void Process::GetProcessId(const std::string &cmd, std::vector<pid_t> &pids,
   string out;
   Exec("find", argv, nullptr, out);
 
-  vector<string> files;
+  std::vector<std::string> files;
   Util::split('\n', out.c_str(), files, true);
 
   string ccmd = cmd;
@@ -407,7 +414,7 @@ int Process::GetProcessRSS(pid_t pid) {
     fclose(f);
   }
 
-  vector<string> lines;
+  std::vector<std::string> lines;
   Util::split('\n', status.c_str(), lines, true);
   for (unsigned int i = 0; i < lines.size(); i++) {
     string &line = lines[i];

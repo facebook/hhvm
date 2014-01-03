@@ -13,9 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #ifndef incl_HPHP_DB_DATASET_H_
 #define incl_HPHP_DB_DATASET_H_
+
+#include <list>
 
 #include "hphp/util/dataset.h"
 

@@ -22,6 +22,9 @@
 #include <stdarg.h>
 
 #include "folly/Format.h"
+
+#include "hphp/util/assertions.h"
+#include "hphp/util/portability.h"
 #include "hphp/util/text-color.h"
 
 /*

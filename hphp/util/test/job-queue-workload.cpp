@@ -20,6 +20,7 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <vector>
 
 #include "folly/Random.h"
 
@@ -177,7 +178,7 @@ class TickRequestFactory {
 
   template <class Getter>
   Stats getStats(Getter getter) {
-    vector<int> metrics;
+    std::vector<int> metrics;
     metrics.reserve(m_requests.size());
     for(auto r : m_requests) {
       metrics.push_back(getter(r));
@@ -341,7 +342,7 @@ TEST_F(JobQueueTest, WorkloadTest) {
     return;
   }
 
-  vector<int> latencies;
+  std::vector<int> latencies;
   loadRequestFromFile(&latencies);
   int rps = 150;
   m_dispatcher->start();

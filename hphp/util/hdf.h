@@ -17,9 +17,10 @@
 #ifndef incl_HPHP_CONFIG_HDF_H_
 #define incl_HPHP_CONFIG_HDF_H_
 
-#include "hphp/util/base.h"
-#include <boost/container/flat_set.hpp>
 #include <string>
+
+#include <boost/container/flat_set.hpp>
+
 #include "hphp/util/exception.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/functional.h"

@@ -13,16 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/util/db-conn.h"
+
+#include <cstdlib>
+
+#include <boost/lexical_cast.hpp>
+
 #include "hphp/util/db-query.h"
 #include "hphp/util/db-mysql.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/async-job.h"
-#include "util.h"
+#include "hphp/util/util.h"
 #include "hphp/util/alloc.h"
-#include <boost/lexical_cast.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,10 +78,10 @@ class DBConnQueryWorker {
 
 static void parseColonPair(std::string &s, size_t pos,
                            std::string &part1, std::string &part2) {
-  string tmp = s.substr(0, pos);
+  std::string tmp = s.substr(0, pos);
   s = s.substr(pos + 1);
   pos = tmp.find(':');
-  if (pos == string::npos) {
+  if (pos == std::string::npos) {
     part1 = tmp;
   } else {
     part1 = tmp.substr(0, pos);
@@ -88,18 +91,18 @@ static void parseColonPair(std::string &s, size_t pos,
 
 std::shared_ptr<ServerData> ServerData::Create(const std::string &connection) {
   auto server = std::make_shared<ServerData>();
-  string s = connection;
+  std::string s = connection;
 
   size_t pos = s.find('@');
-  if (pos != string::npos) {
+  if (pos != std::string::npos) {
     parseColonPair(s, pos, server->m_username, server->m_password);
   }
 
   pos = s.find('/');
-  if (pos != string::npos) {
-    string port;
+  if (pos != std::string::npos) {
+    std::string port;
     parseColonPair(s, pos, server->m_ip, port);
-    if (!port.empty()) server->m_port = atoi(port.c_str());
+    if (!port.empty()) server->m_port = std::atoi(port.c_str());
   }
 
   server->m_database = s;
@@ -190,7 +193,7 @@ void DBConn::open(std::shared_ptr<ServerData> server,
   if (!ret) {
     int code = mysql_errno(m_conn);
     const char *msg = mysql_error(m_conn);
-    string smsg = msg ? msg : "";
+    std::string smsg = msg ? msg : "";
     mysql_close(m_conn);
     m_conn = nullptr;
     throw DBConnectionException(code, server->getIP().c_str(),
@@ -200,14 +203,14 @@ void DBConn::open(std::shared_ptr<ServerData> server,
 
   // Setting session variables
   if (server->getSessionVariables().size()) {
-    string sessionCmd = string("SET ");
-    for (SessionVariableVec::const_iterator iter =
-         server->getSessionVariables().begin(); iter !=
-         server->getSessionVariables().end(); iter++) {
+    auto sessionCmd = std::string("SET ");
+    for (auto iter = server->getSessionVariables().begin();
+        iter != server->getSessionVariables().end();
+        iter++) {
       if (iter != server->getSessionVariables().begin()) {
         sessionCmd += ", ";
       }
-      sessionCmd += string("SESSION ") + iter->first + string("=") +
+      sessionCmd += std::string("SESSION ") + iter->first + std::string("=") +
                     iter->second;
     }
 
@@ -318,7 +321,7 @@ int DBConn::parallelExecute(const char *sql, DBDataSet &ds,
   std::vector<std::shared_ptr<DBConnQueryJob>> jobs;
   Mutex mutex;
   jobs.reserve(s_localDatabases.size());
-  string ssql = sql; // so we have copy-on-write in the loop
+  std::string ssql = sql; // so we have copy-on-write in the loop
   for (DatabaseMap::const_iterator iter = s_localDatabases.begin();
        iter != s_localDatabases.end(); ++iter) {
     jobs.push_back(std::make_shared<DBConnQueryJob>(
@@ -408,8 +411,9 @@ int DBConn::parallelExecute(std::vector<std::shared_ptr<DBConnQueryJob>> &jobs,
 }
 
 void DBConnQueryWorker::doJob(std::shared_ptr<DBConnQueryJob> job) {
-  string &sql = job->m_sql;
-  Util::replaceAll(sql, "INDEX", lexical_cast<string>(job->m_index).c_str());
+  std::string &sql = job->m_sql;
+  Util::replaceAll(sql, "INDEX",
+    boost::lexical_cast<std::string>(job->m_index).c_str());
 
   if (!job->m_server) {
     job->m_affected = -1;

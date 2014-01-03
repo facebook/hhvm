@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_UTIL_VDSO_H
 #define incl_HPHP_UTIL_VDSO_H
 
-#include "hphp/util/base.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/util.h"
 

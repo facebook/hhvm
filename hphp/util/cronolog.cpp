@@ -13,9 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/util/cronolog.h"
 
 #include <pwd.h>
-#include "hphp/util/cronolog.h"
+
 #include "hphp/util/util.h"
 
 /* Default permissions for files and directories that are created */
@@ -27,6 +28,8 @@
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
+
+using std::string;
 
 /* Open a new log file: determine the start of the current
  * period, generate the log file name from the fileTemplate,

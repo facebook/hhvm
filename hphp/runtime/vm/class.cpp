@@ -2150,8 +2150,7 @@ void Class::checkTraitConstraints() const {
 
       if (req.is_extends()) {
         if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
-          raise_error("Trait '%s' requires extension of '%s', but %s "
-                      "is not an extendable class",
+          raise_error(Strings::TRAIT_BAD_REQ_EXTENDS,
                       m_preClass->name()->data(),
                       reqName->data(),
                       reqName->data());
@@ -2159,8 +2158,7 @@ void Class::checkTraitConstraints() const {
       } else {
         assert(req.is_implements());
         if (!(reqCls->attrs() & AttrInterface)) {
-          raise_error("Trait '%s' requires implementations of '%s', but %s "
-                      "is not an interface",
+          raise_error(Strings::TRAIT_BAD_REQ_IMPLEMENTS,
                       m_preClass->name()->data(),
                       reqName->data(),
                       reqName->data());
@@ -2193,8 +2191,7 @@ void Class::checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
 
         if ((m_classVecLen < reqExtCls->m_classVecLen) ||
             (m_classVec[reqExtCls->m_classVecLen-1] != reqExtCls)) {
-          raise_error("Class '%s' required to extend class '%s'"
-                      " by trait '%s' (via %s)",
+          raise_error(Strings::TRAIT_REQ_EXTENDS,
                       m_preClass->name()->data(),
                       reqName->data(),
                       ptrait->name()->data(),
@@ -2205,8 +2202,7 @@ void Class::checkTraitConstraintsRec(const std::vector<ClassPtr>& usedTraits,
 
       assert(req.is_implements());
       if (!ifaceofDirect(reqName)) {
-        raise_error("Class '%s' required to implement interface '%s'"
-                    " by trait '%s' (via %s)",
+        raise_error(Strings::TRAIT_REQ_IMPLEMENTS,
                     m_preClass->name()->data(),
                     reqName->data(),
                     ptrait->name()->data(),

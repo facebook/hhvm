@@ -28,7 +28,7 @@ trait T3 {
 }
 
 class C extends Super {
-  use T3;
+  use T3; // fails the requirements of T1
 }
 
 function main() {

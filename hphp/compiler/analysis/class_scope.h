@@ -476,6 +476,8 @@ private:
 
   void findTraitMethodsToImport(AnalysisResultPtr ar, ClassScopePtr trait);
 
+  void importTraitRequirements(AnalysisResultPtr ar, ClassScopePtr trait);
+
   MethodStatementPtr findTraitMethod(AnalysisResultPtr ar,
                                      ClassScopePtr trait,
                                      const std::string &methodName,

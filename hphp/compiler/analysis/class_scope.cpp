@@ -562,6 +562,43 @@ void ClassScope::findTraitMethodsToImport(AnalysisResultPtr ar,
   }
 }
 
+void ClassScope::importTraitRequirements(AnalysisResultPtr ar,
+                                         ClassScopePtr trait) {
+  if (isTrait()) {
+    for (auto const& req : trait->getTraitRequiredExtends()) {
+      addTraitRequirement(req, true);
+    }
+    for (auto const& req : trait->getTraitRequiredImplements()) {
+      addTraitRequirement(req, false);
+    }
+  } else {
+    for (auto const& req : trait->getTraitRequiredExtends()) {
+      if (!derivesFrom(ar, req, true, false)) {
+        getStmt()->analysisTimeFatal(
+          Compiler::InvalidDerivation,
+          Strings::TRAIT_REQ_EXTENDS,
+          m_originalName.c_str(),
+          req.c_str(),
+          trait->getOriginalName().c_str(),
+          "use"
+        );
+      }
+    }
+    for (auto const& req : trait->getTraitRequiredImplements()) {
+      if (!derivesFrom(ar, req, true, false)) {
+        getStmt()->analysisTimeFatal(
+          Compiler::InvalidDerivation,
+          Strings::TRAIT_REQ_IMPLEMENTS,
+          m_originalName.c_str(),
+          req.c_str(),
+          trait->getOriginalName().c_str(),
+          "use"
+        );
+      }
+    }
+  }
+}
+
 void ClassScope::applyTraitPrecRule(TraitPrecStatementPtr stmt) {
   assert(Option::WholeProgram);
   const string methodName = Util::toLower(stmt->getMethodName());
@@ -791,6 +828,33 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     }
   }
 
+  if (isTrait()) {
+    for (auto const& req : getTraitRequiredExtends()) {
+      ClassScopePtr rCls = ar->findClass(req);
+      if (!rCls || rCls->isFinal() || rCls->isInterface()) {
+        getStmt()->analysisTimeFatal(
+          Compiler::InvalidDerivation,
+          Strings::TRAIT_BAD_REQ_EXTENDS,
+          m_originalName.c_str(),
+          req.c_str(),
+          req.c_str()
+        );
+      }
+    }
+    for (auto const& req : getTraitRequiredImplements()) {
+      ClassScopePtr rCls = ar->findClass(req);
+      if (!rCls || !(rCls->isInterface())) {
+        getStmt()->analysisTimeFatal(
+          Compiler::InvalidDerivation,
+          Strings::TRAIT_BAD_REQ_IMPLEMENTS,
+          m_originalName.c_str(),
+          req.c_str(),
+          req.c_str()
+        );
+      }
+    }
+  }
+
   // Find trait methods to be imported
   for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
     ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);
@@ -809,6 +873,8 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
 
     // Import any interfaces implemented
     tCls->getInterfaces(ar, m_bases, false);
+
+    importTraitRequirements(ar, tCls);
   }
 
   // Apply rules

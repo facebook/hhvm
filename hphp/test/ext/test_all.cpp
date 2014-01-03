@@ -43,7 +43,8 @@ void Test::RunTestsImpl(bool &allPassed, std::string &suite,
 #ifdef ENABLE_FASTCGI
   if (set == "TestFastCGI") {
     Option::EnableEval = Option::FullEval;
-    RUN_TESTSUITE(TestFastCGIServer);
+    // flaky, see t3064325
+    // RUN_TESTSUITE(TestFastCGIServer);
     RUN_TESTSUITE(TestFastCGIProtocol);
     return;
   }

@@ -50,6 +50,9 @@ public:
   virtual const char *getRemoteHost() override;
   virtual uint16_t getRemotePort() override;
   virtual const std::string getDocumentRoot() override;
+  virtual const char *getServerName() override;
+  virtual const char *getServerAddr() override;
+  virtual uint16_t getServerPort() override;
 
   virtual const void *getPostData(int &size) override;
   virtual bool hasMorePostData() override;
@@ -113,6 +116,9 @@ private:
   static const std::string k_httpVersionKey;
   static const std::string k_contentLengthKey;
   static const std::string k_documentRoot;
+  static const std::string k_serverNameKey;
+  static const std::string k_serverPortKey;
+  static const std::string k_serverAddrKey;
 
   FastCGIConnection* m_connection;
   int m_id;
@@ -123,6 +129,9 @@ private:
   std::string m_documentRoot;
   std::string m_remoteHost;
   uint16_t m_remotePort;
+  std::string m_serverName;
+  std::string m_serverAddr;
+  uint16_t m_serverPort;
   Method m_method;
   std::string m_extendedMethod;
   std::string m_httpVersion;

@@ -84,10 +84,10 @@ public:
   virtual ~Transport();
 
   void onRequestStart(const timespec &queueTime);
-  const timespec &getQueueTime() const { return m_queueTime;}
-  const timespec &getWallTime() const { return m_wallTime;}
-  const timespec &getCpuTime() const { return m_cpuTime;}
-  const int64_t &getInstructions() const { return m_instructions;}
+  const timespec &getQueueTime() const { return m_queueTime; }
+  const timespec &getWallTime() const { return m_wallTime; }
+  const timespec &getCpuTime() const { return m_cpuTime; }
+  const int64_t &getInstructions() const { return m_instructions; }
   const int64_t &getSleepTime() const { return m_sleepTime; }
   void incSleepTime(unsigned int seconds) { m_sleepTime += seconds; }
   const int64_t &getuSleepTime() const { return m_usleepTime; }
@@ -111,6 +111,19 @@ public:
   virtual uint16_t getRemotePort() = 0;
   // The transport can override the virtualhosts' docroot
   virtual const std::string getDocumentRoot() { return ""; }
+
+  /**
+   * Server Headers
+   */
+  virtual const char *getServerName() {
+    return "";
+  };
+  virtual const char *getServerAddr() {
+    return RuntimeOption::ServerPrimaryIP.c_str();
+  };
+  virtual uint16_t getServerPort() {
+    return RuntimeOption::ServerPort;
+  };
 
   /**
    * POST request's data.

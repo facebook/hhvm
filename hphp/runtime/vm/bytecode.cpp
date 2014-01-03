@@ -6597,6 +6597,13 @@ OPTBLD_INLINE void VMExecutionContext::iopReqDoc(IOP_ARGS) {
 OPTBLD_INLINE void VMExecutionContext::iopEval(IOP_ARGS) {
   NEXT();
   Cell* c1 = m_stack.topC();
+
+  if (UNLIKELY(RuntimeOption::RepoAuthoritative)) {
+    // Ahead of time whole program optimizations need to assume it can
+    // see all the code, or it really can't do much.
+    raise_error("You can't use eval in RepoAuthoritative mode");
+  }
+
   String code(prepareKey(c1));
   String prefixedCode = concat("<?php ", code);
 

@@ -305,6 +305,7 @@ Variant f_apc_inc(const String& key, int64_t step /* = 1 */,
   bool found = false;
   int64_t newValue = s_apc_store[cache_id].inc(key, step, found);
   success = found;
+  if (!found) return false;
   return newValue;
 }
 
@@ -319,6 +320,7 @@ Variant f_apc_dec(const String& key, int64_t step /* = 1 */,
   bool found = false;
   int64_t newValue = s_apc_store[cache_id].inc(key, -step, found);
   success = found;
+  if (!found) return false;
   return newValue;
 }
 

@@ -14,11 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include <pcre.h>
+
 #include "hphp/runtime/base/shared-store-stats.h"
 #include "hphp/runtime/base/runtime-option.h"
-
-#include "hphp/util/json.h"
-#include <pcre.h>
 
 using std::ostream;
 using std::ostringstream;
@@ -35,11 +34,12 @@ static void writeEntryInt(ostream& out, const char *name, int64_t value,
   for (int i = 0; i < indent ; i++) {
     out << "  ";
   }
-  if (last) {
-    out << "\"" << JSON::Escape(name) << "\":" << value;
-  } else {
-    out << "\"" << JSON::Escape(name) << "\":" << value << ", ";
-  }
+  // This code is about to be removed in D1110559
+  // if (last) {
+  //   out << "\"" << JSON::Escape(name) << "\":" << value;
+  // } else {
+  //   out << "\"" << JSON::Escape(name) << "\":" << value << ", ";
+  // }
   if (newline) {
     out << "\n";
   }
@@ -51,11 +51,12 @@ static void writeEntryStr(ostream& out, const char *name, const char* value,
   for (int i = 0; i < indent ; i++) {
     out << "  ";
   }
-  if (last) {
-    out << "\"" << JSON::Escape(name) << "\":\"" << value << "\"";
-  } else {
-    out << "\"" << JSON::Escape(name) << "\":\"" << value << "\", ";
-  }
+  // This code is about to be removed in D1110559
+  // if (last) {
+  //   out << "\"" << JSON::Escape(name) << "\":\"" << value << "\"";
+  // } else {
+  //   out << "\"" << JSON::Escape(name) << "\":\"" << value << "\", ";
+  // }
   if (newline) {
     out << "\n";
   }

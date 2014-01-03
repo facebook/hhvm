@@ -18,7 +18,7 @@
 #define incl_HPHP_SYMBOL_TABLE_H_
 
 #include "hphp/compiler/hphp.h"
-#include "hphp/util/json.h"
+#include "hphp/compiler/json.h"
 #include "hphp/util/util.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/hash-map-typedefs.h"

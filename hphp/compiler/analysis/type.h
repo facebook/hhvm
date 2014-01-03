@@ -18,7 +18,7 @@
 #define incl_HPHP_TYPE_H_
 
 #include "hphp/compiler/hphp.h"
-#include "hphp/util/json.h"
+#include "hphp/compiler/json.h"
 #include "hphp/util/functional.h"
 #include "hphp/runtime/base/types.h"
 

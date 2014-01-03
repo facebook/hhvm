@@ -25,7 +25,7 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/builtin_symbols.h"
-#include "hphp/util/json.h"
+#include "hphp/compiler/json.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/db-conn.h"
 #include "hphp/util/exception.h"

@@ -20,9 +20,9 @@
 #include "hphp/compiler/expression/user_attribute.h"
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/option.h"
+#include "hphp/compiler/json.h"
 
 #include "hphp/util/hash-map-typedefs.h"
-#include "hphp/util/json.h"
 #include "hphp/parser/parser.h"
 
 namespace HPHP {

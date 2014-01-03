@@ -21,7 +21,7 @@
 #include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP {
-  struct AnalysisResult; // XXX
+struct AnalysisResult;
 namespace JSON {
 ///////////////////////////////////////////////////////////////////////////////
 

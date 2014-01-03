@@ -13,8 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/server/server-stats.h"
+
+#include "folly/json.h"
+#include "folly/Range.h"
+#include "folly/String.h"
+
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -23,7 +27,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/util/json.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
@@ -37,6 +40,15 @@ using std::ostream;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
+
+static folly::fbstring escape_for_json(const char* s) {
+  auto ret = folly::fbstring{};
+  auto opts = folly::json::serialization_opts{};
+  opts.skip_invalid_utf8 = true;
+  opts.encode_non_ascii = true;
+  folly::json::escapeString(folly::StringPiece{s}, ret, opts);
+  return ret;
+}
 
 void ServerStats::GetLogger() {
   s_logger.getCheck();
@@ -479,7 +491,7 @@ protected:
       m_out << ", ";
     }
     if (m_namelessContextStack.size() != 0 && !m_namelessContextStack.top()) {
-      m_out << '"' << JSON::Escape(name) << "\": ";
+      m_out << '"' << escape_for_json(name) << "\": ";
     }
     m_justIndented = false;
   }
@@ -523,7 +535,7 @@ public:
     beginEntity(name);
 
     // Now write the actual value
-    m_out << "\"" << JSON::Escape(value.c_str()) << "\"\n";
+    m_out << "\"" << escape_for_json(value.c_str()) << "\"\n";
   }
 
   virtual void writeEntry(const char *name, int64_t value) {
@@ -743,7 +755,8 @@ void ServerStats::Report(string &output, Format format,
           } else {
             out << ", ";
           }
-          out << '"' << JSON::Escape((key + viter->first->getString()).c_str())
+          out << '"'
+              << escape_for_json((key + viter->first->getString()).c_str())
               << "\": " << viter->second;
         }
       }

@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
+#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/class-info.h"

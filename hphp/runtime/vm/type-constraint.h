@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/util/functional.h"
-#include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/type-profile.h"
 
 namespace HPHP { struct Func; }

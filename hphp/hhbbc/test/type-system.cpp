@@ -24,6 +24,7 @@
 #include "hphp/hhbbc/parse.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace HHBBC {
 

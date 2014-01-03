@@ -29,6 +29,7 @@
 #include "hphp/hhbbc/debug.h"
 #include "hphp/hhbbc/abstract-interp.h"
 #include "hphp/hhbbc/type-system.h"
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace HHBBC {
 

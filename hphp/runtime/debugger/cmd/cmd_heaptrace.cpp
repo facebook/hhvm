@@ -17,7 +17,6 @@
 #include "hphp/runtime/debugger/cmd/cmd_heaptrace.h"
 
 #include "hphp/runtime/base/memory-profile.h"
-#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////

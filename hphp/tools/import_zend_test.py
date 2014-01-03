@@ -364,6 +364,32 @@ norepo_tests = (
     '/tests/lang/include_variation3.php',
     '/tests/lang/static_variation_001.php',
     '/tests/lang/static_variation_002.php',
+
+    # These tests use eval(), which is banned in repo mode.
+    '/Zend/tests/bug31102.php',
+    '/Zend/tests/bug33116.php',
+    '/Zend/tests/bug36513.php',
+    '/Zend/tests/bug43128.php',
+    '/Zend/tests/bug54624.php',
+    '/Zend/tests/bug60444.php',
+    '/Zend/tests/bug62907.php',
+    '/Zend/tests/bug63305.php',
+    '/Zend/tests/bug65254.php',
+    '/Zend/tests/constants/dir-constant-eval.php',
+    '/Zend/tests/is_a.php',
+    '/Zend/tests/method_static_var.php',
+    '/ext/session/tests/bug53141.php',
+    '/ext/spl/tests/spl_autoload_014.php',
+    '/ext/spl/tests/spl_autoload_bug48541.php',
+    '/ext/standard/tests/class_object/is_a.php',
+    '/ext/standard/tests/general_functions/bug35229.php',
+    '/ext/standard/tests/serialize/bug62836_1.php',
+    '/tests/classes/constants_basic_006.php',
+    '/tests/lang/013.php',
+    '/tests/lang/014.php',
+    '/tests/lang/018.php',
+    '/tests/lang/bug21961.php',
+    '/tests/lang/foreachLoop.012.php',
 )
 
 # Random other files that zend wants

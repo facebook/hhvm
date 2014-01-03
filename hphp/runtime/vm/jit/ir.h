@@ -1175,8 +1175,6 @@ typedef smart::flat_map<const IRInstruction*, TypeConstraint> GuardConstraints;
  */
 int32_t spillValueCells(const IRInstruction* spillStack);
 
-bool isConvIntOrPtrToBool(IRInstruction* instr);
-
 } // namespace JIT
 } // namespace HPHP
 

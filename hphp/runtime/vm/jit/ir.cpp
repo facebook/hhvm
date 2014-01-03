@@ -357,17 +357,5 @@ int32_t spillValueCells(const IRInstruction* spillStack) {
   return numSrcs - 2;
 }
 
-bool isConvIntOrPtrToBool(IRInstruction* instr) {
-  switch (instr->op()) {
-    case ConvIntToBool:
-      return true;
-    case ConvCellToBool:
-      return instr->src(0)->type().subtypeOfAny(
-        Type::Func, Type::Cls, Type::FuncCls, Type::VarEnv, Type::TCA);
-    default:
-      return false;
-  }
-}
-
 }}
 

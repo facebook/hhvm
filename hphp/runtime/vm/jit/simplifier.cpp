@@ -2026,6 +2026,17 @@ SSATmp* Simplifier::simplifyCondJmp(IRInstruction* inst) {
 
   // If the source is conversion of an int or pointer to boolean, we
   // can test the int/ptr value directly.
+  auto isConvIntOrPtrToBool = [&](IRInstruction* instr) {
+    switch (instr->op()) {
+    case ConvIntToBool:
+      return true;
+    case ConvCellToBool:
+      return instr->src(0)->type().subtypeOfAny(
+        Type::Func, Type::Cls, Type::FuncCls, Type::VarEnv, Type::TCA);
+    default:
+      return false;
+    }
+  };
   if (isConvIntOrPtrToBool(srcInst)) {
     return gen(inst->op(), inst->taken(), srcInst->src(0));
   }

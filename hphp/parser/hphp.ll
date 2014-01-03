@@ -687,14 +687,14 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"__DIR__"              { RETTOKEN(T_DIR); }
 <ST_IN_SCRIPTING>"__NAMESPACE__"        { RETTOKEN(T_NS_C); }
 
-<INITIAL>"#"[^\n]*"\n" {
+<INITIAL>"#!"[^\n]*"\n" {
         _scanner->setHashBang(yytext, yyleng, T_INLINE_HTML);
         BEGIN(ST_IN_SCRIPTING);
         yy_push_state(ST_AFTER_HASHBANG, yyscanner);
         return T_INLINE_HTML;
 }
 
-<INITIAL>(([^<#]|"<"[^?%s<]){1,400})|"<s"|"<" {
+<INITIAL>(([^<#]|"<"[^?%s<]|"#"[^!]){1,400})|"<s"|"<" {
         SETTOKEN(T_INLINE_HTML);
         BEGIN(ST_IN_SCRIPTING);
         yy_push_state(ST_IN_HTML, yyscanner);

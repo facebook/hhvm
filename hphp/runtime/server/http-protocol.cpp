@@ -399,6 +399,7 @@ void HttpProtocol::CopyServerInfo(Variant& server,
 
   string hostHeader = transport->getHeader("Host");
   String hostName(vhost->serverName(hostHeader));
+  String serverNameHeader(transport->getServerName());
 
   if (hostHeader.empty()) {
     server.set(s_HTTP_HOST, hostName);
@@ -406,19 +407,26 @@ void HttpProtocol::CopyServerInfo(Variant& server,
   } else {
     StackTraceNoHeap::AddExtraLogging("Server", hostHeader.c_str());
   }
-  if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
+
+  // Use the header from the transport if it is available
+  if (!serverNameHeader.empty()) {
+    hostName = serverNameHeader;
+  } else if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
     hostName = hostHeader;
-    // _SERVER['SERVER_NAME'] shouldn't contain the port number
-    int colonPos = hostName.find(':');
-    if (colonPos != String::npos) {
-      hostName = hostName.substr(0, colonPos);
-    }
   }
 
+  // _SERVER['SERVER_NAME'] shouldn't contain the port number
+  int colonPos = hostName.find(':');
+  if (colonPos != String::npos) {
+    hostName = hostName.substr(0, colonPos);
+  }
+
+  StackTraceNoHeap::AddExtraLogging("Server_SERVER_NAME", hostName.data());
+
   server.set(s_GATEWAY_INTERFACE, s_CGI_1_1);
-  server.set(s_SERVER_ADDR, String(RuntimeOption::ServerPrimaryIP));
+  server.set(s_SERVER_ADDR, transport->getServerAddr());
   server.set(s_SERVER_NAME, hostName);
-  server.set(s_SERVER_PORT, RuntimeOption::ServerPort);
+  server.set(s_SERVER_PORT, transport->getServerPort());
   server.set(s_SERVER_SOFTWARE, s_HPHP);
   server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
   server.set(s_SERVER_ADMIN, empty_string);

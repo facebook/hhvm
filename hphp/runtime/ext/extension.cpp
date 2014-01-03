@@ -195,10 +195,13 @@ void Extension::ShutdownModules() {
 }
 
 const StaticString s_apc("apc");
+const StaticString s_redis("redis");
 
 bool Extension::IsLoaded(const String& name) {
   if (name == s_apc) {
     return apcExtension::Enable;
+  } else if (name == s_redis) {
+    return Unit::getClass(s_redis.get(), false);   
   }
   assert(s_registered_extensions);
   return s_registered_extensions->find(name.data()) !=

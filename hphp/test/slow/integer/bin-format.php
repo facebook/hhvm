@@ -50,3 +50,16 @@ var_dump($ofBin === $ofHex);
 var_dump($ufBin === $ufInt);
 var_dump($ufBin === $ufHex);
 
+echo "array-index\n";
+$array = [0, 1, 2, 3];
+var_dump($array[0b11]);
+
+
+// Zend PHP does not have "real" runtime support as of 5.5.7
+// So the expected behaviour is not what you would expect "logically"
+echo "runtime support\n";
+$i = (int)    "0b100";	
+$f = (float)  "0b100";
+var_dump($i);			// int(0)
+var_dump($f);			// float(0)
+var_dump(is_numeric("0b100"));	// false

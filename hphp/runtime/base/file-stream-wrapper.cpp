@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/server/static-content-cache.h"
+#include "hphp/system/constants.h"
 #include <memory>
 
 namespace HPHP {
@@ -77,6 +78,61 @@ Directory* FileStreamWrapper::opendir(const String& path) {
     return nullptr;
   }
   return dir.release();
+}
+
+int FileStreamWrapper::rename(const String& oldname, const String& newname) {
+  int ret =
+    RuntimeOption::UseDirectCopy ?
+      Util::directRename(File::TranslatePath(oldname).data(),
+                         File::TranslatePath(newname).data())
+                                 :
+      Util::rename(File::TranslatePath(oldname).data(),
+                   File::TranslatePath(newname).data());
+  return ret;
+}
+
+int FileStreamWrapper::mkdir(const String& path, int mode, int options) {
+  if (options & k_STREAM_MKDIR_RECURSIVE)
+    return mkdir_recursive(path, mode);
+  return ::mkdir(File::TranslatePath(path).data(), mode);
+}
+
+int FileStreamWrapper::mkdir_recursive(const String& path, int mode) {
+  String fullpath = File::TranslatePath(path);
+  if (fullpath.size() > PATH_MAX) {
+    errno = ENAMETOOLONG;
+    return -1;
+  }
+
+  // Check first if the whole path exists
+  if (access(fullpath.data(), F_OK) >= 0) {
+    errno = EEXIST;
+    return -1;
+  }
+
+  char dir[PATH_MAX+1];
+  char *p;
+  strncpy(dir, fullpath.data(), sizeof(dir));
+
+  for (p = dir + 1; *p; p++) {
+    if (*p == '/') {
+      *p = '\0';
+      if (::access(dir, F_OK) < 0) {
+        if (::mkdir(dir, mode) < 0) {
+          return -1;
+        }
+      }
+      *p = '/';
+    }
+  }
+
+  if (::access(dir, F_OK) < 0) {
+    if (::mkdir(dir, mode) < 0) {
+      return -1;
+    }
+  }
+
+  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

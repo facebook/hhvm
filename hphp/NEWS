@@ -1,5 +1,5 @@
 Next release
-  -
+  - StreamWrappers now support rmdir, mkdir, rename and unlink
 
 "Appleseed" 23-Dec-2013
   - Fix issues with DOCUMENT_ROOT in fastcgi

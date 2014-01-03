@@ -35,6 +35,10 @@ StaticString s_stream_flush("stream_flush");
 StaticString s_stream_truncate("stream_truncate");
 StaticString s_stream_lock("stream_lock");
 StaticString s_url_stat("url_stat");
+StaticString s_unlink("unlink");
+StaticString s_rename("rename");
+StaticString s_mkdir("mkdir");
+StaticString s_rmdir("rmdir");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -51,6 +55,10 @@ UserFile::UserFile(Class *cls, CVarRef context /*= null */) :
   m_StreamTruncate = lookupMethod(s_stream_truncate.get());
   m_StreamLock  = lookupMethod(s_stream_lock.get());
   m_UrlStat     = lookupMethod(s_url_stat.get());
+  m_Unlink      = lookupMethod(s_unlink.get());
+  m_Rename      = lookupMethod(s_rename.get());
+  m_Mkdir       = lookupMethod(s_mkdir.get());
+  m_Rmdir       = lookupMethod(s_rmdir.get());
   m_isLocal = true;
 }
 
@@ -318,6 +326,86 @@ int UserFile::lstat(const String& path, struct stat* buf) {
 
 int UserFile::stat(const String& path, struct stat* buf) {
   return statImpl(path, buf);
+}
+
+bool UserFile::unlink(const String& filename) {
+  // bool unlink($path)
+  bool success = false;
+  Variant ret = invoke(
+    m_Unlink,
+    s_unlink,
+    PackedArrayInit(1)
+      .append(filename)
+      .toArray(),
+    success
+  );
+  if (success && (ret.toBoolean() == true)) {
+    return true;
+  }
+
+  raise_warning("\"%s::unlink\" call failed", m_cls->name()->data());
+  return false;
+}
+
+bool UserFile::rename(const String& oldname, const String& newname) {
+  // bool rename($oldname, $newname);
+  bool success = false;
+  Variant ret = invoke(
+    m_Rename,
+    s_rename,
+    PackedArrayInit(2)
+      .append(oldname)
+      .append(newname)
+      .toArray(),
+    success
+  );
+  if (success && (ret.toBoolean() == true)) {
+    return true;
+  }
+
+  raise_warning("\"%s::rename\" call failed", m_cls->name()->data());
+  return false;
+}
+
+bool UserFile::mkdir(const String& filename, int mode, int options) {
+  // bool mkdir($path, $mode, $options)
+  bool success = false;
+  Variant ret = invoke(
+    m_Mkdir,
+    s_mkdir,
+    PackedArrayInit(3)
+      .append(filename)
+      .append(mode)
+      .append(options)
+      .toArray(),
+    success
+  );
+  if (success && (ret.toBoolean() == true)) {
+    return true;
+  }
+
+  raise_warning("\"%s::mkdir\" call failed", m_cls->name()->data());
+  return false;
+}
+
+bool UserFile::rmdir(const String& filename, int options) {
+  // bool rmdir($path, $options)
+  bool success = false;
+  Variant ret = invoke(
+    m_Rmdir,
+    s_rmdir,
+    PackedArrayInit(2)
+      .append(filename)
+      .append(options)
+      .toArray(),
+    success
+  );
+  if (success && (ret.toBoolean() == true)) {
+    return true;
+  }
+
+  raise_warning("\"%s::rmdir\" call failed", m_cls->name()->data());
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -33,6 +33,10 @@ class UserStreamWrapper : public Stream::Wrapper {
   virtual int access(const String& path, int mode);
   virtual int lstat(const String& path, struct stat* buf);
   virtual int stat(const String& path, struct stat* buf);
+  virtual int unlink(const String& path);
+  virtual int rename(const String& oldname, const String& newname);
+  virtual int mkdir(const String& path, int mode, int options);
+  virtual int rmdir(const String& path, int options);
   virtual Directory* opendir(const String& path);
  private:
   String m_name;

@@ -45,10 +45,12 @@ static inline const String& ctxClassName() {
 }
 
 static const Class* get_cls(CVarRef class_or_object) {
-  Class* cls = NULL;
+  Class* cls = nullptr;
   if (class_or_object.is(KindOfObject)) {
     ObjectData* obj = class_or_object.toCObjRef().get();
     cls = obj->getVMClass();
+  } else if (class_or_object.is(KindOfArray)) {
+    // do nothing but avoid the toString conversion notice
   } else {
     cls = Unit::loadClass(class_or_object.toString().get());
   }

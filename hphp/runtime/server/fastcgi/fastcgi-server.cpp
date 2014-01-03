@@ -62,7 +62,8 @@ void FastCGIAcceptor::onNewConnection(
     localAddress = s_unknownSocketAddress;
   }
 
-  FastCGIConnection* conn = new FastCGIConnection(
+  // Will delete itself when it gets a closing callback
+  auto conn = new FastCGIConnection(
       m_server,
       std::move(sock),
       localAddress,
@@ -117,10 +118,12 @@ void FastCGIConnection::readDataAvailable(size_t len) noexcept {
 
 void FastCGIConnection::readEOF() noexcept {
   shutdownTransport();
+  delete this;
 }
 
 void FastCGIConnection::readError(const TTransportException& ex) noexcept {
   shutdownTransport();
+  delete this;
 }
 
 bool FastCGIConnection::hasReadDataAvailable() {

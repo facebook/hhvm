@@ -141,6 +141,13 @@ int PlainFile::getc() {
   return File::getc();
 }
 
+// This definition is needed to avoid triggering a gcc compiler error about
+// an overloaded virtual when only overriding the one parameter version from
+// File.
+String PlainFile::read() {
+  return File::read();
+}
+
 String PlainFile::read(int64_t length) {
   if (length) m_eof = false;
   return File::read(length);

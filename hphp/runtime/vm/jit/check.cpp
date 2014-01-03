@@ -222,9 +222,6 @@ bool checkCfg(const IRUnit& unit) {
 }
 
 bool checkTmpsSpanningCalls(const IRUnit& unit) {
-  auto const blocks = rpoSortCfg(unit);
-  auto const children = findDomChildren(unit, blocks);
-
   // CallBuiltin is ok because it is not a php-level call.  (It will
   // call a C++ helper and we can push/pop around it normally.)
   auto isCall = [&] (Opcode op) {

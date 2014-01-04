@@ -453,8 +453,8 @@ static void init_entity_table() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char *string_html_encode(const char *input, int &len, bool encode_double_quote,
-                         bool encode_single_quote, bool utf8, bool nbsp) {
+char *string_html_encode(const char *input, int &len,
+                         const int64_t qsBitmask, bool utf8, bool nbsp) {
   assert(input);
   /**
    * Though seems to be wasting memory a lot, we have to realize most of the
@@ -479,14 +479,14 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
     unsigned char c = *p;
     switch (c) {
     case '"':
-      if (encode_double_quote) {
+      if (qsBitmask & static_cast<int64_t>(EntBitmask::ENT_BM_DOUBLE)) {
         *q++ = '&'; *q++ = 'q'; *q++ = 'u'; *q++ = 'o'; *q++ = 't'; *q++ = ';';
       } else {
         *q++ = c;
       }
       break;
     case '\'':
-      if (encode_single_quote) {
+      if (qsBitmask & static_cast<int64_t>(EntBitmask::ENT_BM_SINGLE)) {
         *q++ = '&'; *q++ = '#'; *q++ = '0'; *q++ = '3'; *q++ = '9'; *q++ = ';';
       } else {
         *q++ = c;
@@ -511,6 +511,9 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
     default: {
       if (LIKELY(c < 0x80)) {
         *q++ = c;
+        break;
+      }
+      if (qsBitmask & static_cast<int64_t>(EntBitmask::ENT_BM_IGNORE)) {
         break;
       }
 

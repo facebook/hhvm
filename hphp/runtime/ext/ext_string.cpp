@@ -1313,7 +1313,7 @@ String f_htmlentities(const String& str, int flags /* = k_ENT_COMPAT */,
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
-  return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyle(flags),
+  return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyleBitmask(flags),
                                 scharset, true);
 }
 
@@ -1329,7 +1329,7 @@ String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "UTF-8";
-  return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyle(flags),
+  return StringUtil::HtmlEncode(str, StringUtil::toQuoteStyleBitmask(flags),
                                 scharset, false);
 }
 

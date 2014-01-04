@@ -43,6 +43,7 @@ public:
     QS(FBUtf8, 32768)     \
     /* Order of the fields matters here if we're
      * matching on what flags are set */  \
+    QS(Ignore, 4) /* k_ENT_IGNORE:   silently discard invalid chars */ \
     QS(Both, 3)   /* k_ENT_QUOTES:   escape both double and single quotes */  \
     QS(Double, 2) /* k_ENT_COMPAT:   escape double quotes only */   \
     QS(No, 0)     /* k_ENT_NOQUOTES: leave all quotes alone */  \
@@ -53,19 +54,33 @@ public:
   };
   #undef QS
 
-  static QuoteStyle toQuoteStyle(int64_t flags) {
-    auto is_set = [&](QuoteStyle qs) {
-      auto as_int = static_cast<int64_t>(qs);
-      return (as_int & flags) == as_int;
-    };
+  static bool is_set(int64_t flags, QuoteStyle qs) {
+    auto as_int = static_cast<int64_t>(qs);
+    return (as_int & flags) == as_int;
+  }
 
+  static QuoteStyle toQuoteStyle(int64_t flags) {
     #define QS(STYLE, VAL)  \
-      if (is_set(QuoteStyle::STYLE)) { return QuoteStyle::STYLE; }
+      if (is_set(flags, QuoteStyle::STYLE)) { return QuoteStyle::STYLE; }
 
     QUOTE_STYLES
 
     #undef QS
+    not_reached();
+  }
 
+  static int64_t toQuoteStyleBitmask(int64_t flags) {
+    int64_t bitmask = 0L;
+
+    #define QS(STYLE, VAL)  \
+      if (is_set(flags, QuoteStyle::STYLE)) { \
+        bitmask |= static_cast<int64_t>(QuoteStyle::STYLE); \
+      }
+
+    QUOTE_STYLES
+
+    return bitmask;
+    #undef QS
     not_reached();
   }
 
@@ -95,6 +110,8 @@ public:
    * Encoding/decoding.
    */
   static String HtmlEncode(const String& input, QuoteStyle quoteStyle,
+                           const char *charset, bool nbsp);
+  static String HtmlEncode(const String& input, const int64_t qsBitmask,
                            const char *charset, bool nbsp);
   static String HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
                                 const char *charset, bool nbsp, Array extra);

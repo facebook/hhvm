@@ -199,6 +199,12 @@ Variant StringUtil::ChunkSplit(const String& body, int chunklen /* = 76 */,
 
 String StringUtil::HtmlEncode(const String& input, QuoteStyle quoteStyle,
                               const char *charset, bool nbsp) {
+  return HtmlEncode(input, static_cast<int64_t>(quoteStyle),
+                    charset, nbsp);
+}
+
+String StringUtil::HtmlEncode(const String& input, const int64_t qsBitmask,
+                              const char *charset, bool nbsp) {
   if (input.empty()) return input;
 
   assert(charset);
@@ -211,9 +217,7 @@ String StringUtil::HtmlEncode(const String& input, QuoteStyle quoteStyle,
 
   int len = input.size();
   char *ret = string_html_encode(input.data(), len,
-                                 quoteStyle != QuoteStyle::No,
-                                 quoteStyle == QuoteStyle::Both,
-                                 utf8, nbsp);
+                                 qsBitmask, utf8, nbsp);
   if (!ret) {
     return empty_string;
   }

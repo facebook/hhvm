@@ -7,6 +7,9 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x != false, true); }
 
+// Php doesn't support \u escapes.
+function u($x) { return json_decode("\"" . $x . "\""); }
+
 //////////////////////////////////////////////////////////////////////
 
 VS(addcslashes("ABCDEFGH\n", "A..D\n"), "\\A\\B\\C\\DEFGH\\n");
@@ -266,6 +269,24 @@ VS(htmlentities($str, ENT_QUOTES),
 VS(htmlentities("\xA0", ENT_COMPAT), "");
 VS(htmlentities("\xc2\xA0", ENT_COMPAT, ""), "&nbsp;");
 VS(htmlentities("\xc2\xA0", ENT_COMPAT, "UTF-8"), "&nbsp;");
+
+$ic = u('\ufff0');
+$str_invalid = "<'{$ic} This includes invalid chars{$ic}\"zzz\"{$ic}'>";
+$str_valid = "<'This does not include invalid chars \"zzz\"'>";
+
+VS(htmlspecialchars($str_invalid, ENT_QUOTES | ENT_IGNORE),
+  "&lt;&#039; This includes invalid chars&quot;zzz&quot;&#039;&gt;");
+VS(htmlspecialchars($str_invalid, ENT_NOQUOTES | ENT_IGNORE),
+  "&lt;' This includes invalid chars\"zzz\"'&gt;");
+VS(htmlspecialchars($str_valid, ENT_COMPAT | ENT_IGNORE),
+  "&lt;'This does not include invalid chars &quot;zzz&quot;'&gt;");
+
+VS(htmlentities($str_invalid, ENT_COMPAT | ENT_IGNORE),
+  "&lt;' This includes invalid chars&quot;zzz&quot;'&gt;");
+VS(htmlentities($str_invalid, ENT_NOQUOTES | ENT_IGNORE),
+  "&lt;' This includes invalid chars\"zzz\"'&gt;");
+VS(htmlentities($str_valid, ENT_QUOTES | ENT_IGNORE),
+  "&lt;&#039;This does not include invalid chars &quot;zzz&quot;&#039;&gt;");
 
 VS(quoted_printable_encode("egfe \015\t"), "egfe=20=0D=09");
 

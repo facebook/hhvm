@@ -23,28 +23,8 @@ no_import = (
     '/ext/standard/tests/general_functions/usleep_error.phpt',
     '/ext/zlib/tests/gzgetc_basic.phpt',
     '/ext/zlib/tests/gzgets_basic.phpt',
-
-    # segfaults
-    '/Zend/tests/heredoc_005.phpt',
-    '/Zend/tests/jump13.phpt',
-    '/ext/bz2/tests/004.phpt',
-    '/ext/date/tests/bug50055.phpt',
-    '/ext/gd/tests/crafted_gd2.phpt',
-    '/ext/pcntl/tests/pcntl_exec.phpt',
-    '/ext/pcntl/tests/pcntl_exec_2.phpt',
-    '/ext/pcntl/tests/pcntl_exec_3.phpt',
-    '/ext/session/tests/bug61728.phpt',
-    '/ext/session/tests/session_module_name_variation2.phpt',
-    '/tests/func/010.phpt',
-    '/tests/lang/bug21820.phpt',
-    '/Zend/tests/bug64660.phpt',
-
-    # intermittent segfaults
-    '/Zend/tests/001.phpt',
-    '/Zend/tests/002.phpt',
-    '/Zend/tests/003.phpt',
-
-    # regular expression is too large at offset 231351
+    
+    # too large input
     '/tests/lang/024.phpt',
 
     # cause of failure uninvestigated:

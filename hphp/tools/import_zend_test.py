@@ -101,25 +101,6 @@ bad_tests = (
     # "ls" sometimes prints on stderr
     '/ext/standard/tests/streams/bug64770.php',
 
-    # broken in contbuild
-    '/ext/standard/tests/strings/bug51059.php',
-    '/ext/standard/tests/strings/setlocale_variation1.php',
-    '/ext/standard/tests/strings/setlocale_basic1.php',
-    '/ext/standard/tests/strings/setlocale_basic2.php',
-    '/ext/standard/tests/strings/setlocale_basic3.php',
-    '/ext/standard/tests/file/filetype_variation2.php',
-    '/ext/standard/tests/file/filetype_variation3.php',
-    '/ext/sockets/tests/ipv4loop.php',
-    '/ext/posix/tests/posix_kill_basic.php',
-    '/ext/standard/tests/file/005_variation-win32.php',
-    '/ext/json/tests/fail001.php',
-    '/ext/standard/network/tests/getmxrr.php',
-    '/ext/standard/network/tests/gethostbyname_error004.php',
-    '/ext/standard/tests/file/fgets_socket_variation1.php',
-    '/ext/pcntl/tests/pcntl_wait.php',
-    '/tests/classes/unset_properties.php',
-    '/ext/spl/tests/RecursiveDirectoryIterator_getSubPath_basic.php',
-
     # our build machines have no members in group 0...
     '/ext/posix/tests/posix_getgrgid.php',
     '/ext/posix/tests/posix_getgroups_basic.php',
@@ -162,6 +143,13 @@ bad_tests = (
     '/tests/lang/045.php',
     '/Zend/tests/lsb_021.php',
     '/Zend/tests/lsb_022.php',
+
+    # broken in contbuild for unknown reasons
+    '/ext/standard/tests/strings/bug51059.php',
+    '/ext/posix/tests/posix_kill_basic.php',
+    '/ext/spl/tests/RecursiveDirectoryIterator_getSubPath_basic.php',
+    '/tests/classes/unset_properties.php',
+    '/ext/pcntl/tests/pcntl_wait.php',
 
     # flaky for various reasons
     '/ext/standard/tests/network/gethostbyname_error004.php',

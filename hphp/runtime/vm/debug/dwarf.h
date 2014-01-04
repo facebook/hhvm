@@ -52,9 +52,15 @@ typedef enum {
 const int DWARF_CODE_ALIGN = 1;
 const int DWARF_DATA_ALIGN = 8;
 
+#ifdef HAVE_NEW_LIBDWARF
+extern int g_dwarfCallback(const char *name, int size, Dwarf_Unsigned type,
+  Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info,
+  Dwarf_Unsigned *sect_name_index, Dwarf_Ptr handle, int *error);
+#else
 extern int g_dwarfCallback(char *name, int size, Dwarf_Unsigned type,
   Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info,
   Dwarf_Unsigned *sect_name_index, Dwarf_Ptr handle, int *error);
+#endif
 
 class TCRange {
   TCA m_start, m_end;

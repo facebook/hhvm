@@ -176,7 +176,6 @@ bad_tests = (
     '/ext/posix/tests/posix_getgroups_basic.php',
 
     # concurrency issues
-    '/ext/ftp/tests/ftp_chmod_basic.php',
     '/ext/mysql/tests/001.php',
     '/ext/mysql/tests/bug47438.php',
     '/ext/mysql/tests/mysql_client_encoding.php',
@@ -1011,6 +1010,9 @@ for root, dirs, files in os.walk(args.zend_path):
         def matches(patterns):
             if not patterns:
                 return True
+            for other_file in other_files:
+                if not other_file.endswith('.phpt') and other_file in full_file:
+                    return True
             for pattern in patterns:
                 if pattern in full_file:
                     return True

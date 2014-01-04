@@ -384,7 +384,7 @@ class PhpClass {
 
  private:
   folly::dynamic m_class;
-  // The name in the IDL file. Use '_' for namespaces.
+  // The name in the IDL file. Use '\\' for namespaces.
   fbstring m_idlName;
   // The name in PHP land.
   fbstring m_phpName;

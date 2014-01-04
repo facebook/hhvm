@@ -716,7 +716,6 @@ PhpProp::PhpProp(const folly::dynamic& d, fbstring cls) :
 
 static fbstring toPhpName(fbstring idlName) {
   fbstring phpName = idlName;
-  std::replace(phpName.begin(), phpName.end(), '_', '\\');
   return phpName;
 }
 
@@ -726,7 +725,7 @@ static fbstring toPhpName(fbstring idlName) {
 static fbstring toCppName(fbstring idlName) {
   fbstring cppName;
 
-  size_t endNs = idlName.find_last_of("_");
+  size_t endNs = idlName.find_last_of("\\");
   cppName = (std::string::npos == endNs) ? idlName : idlName.substr(endNs + 1);
   assert(!cppName.empty());
 

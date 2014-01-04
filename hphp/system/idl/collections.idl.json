@@ -6,7 +6,7 @@
     ],
     "classes": [
         {
-            "name": "HH_Vector",
+            "name": "HH\\Vector",
             "ifaces": [
                 "MutableVector"
             ],
@@ -715,7 +715,7 @@
             ]
         },
         {
-          "name": "HH_FrozenVector",
+          "name": "HH\\FrozenVector",
           "ifaces": [
             "ConstVector"
           ],
@@ -2509,7 +2509,7 @@
             ]
         },
         {
-            "name": "HH_Set",
+            "name": "HH\\Set",
             "ifaces": [
                 "MutableSet"
             ],
@@ -2929,7 +2929,7 @@
             ]
         },
         {
-            "name": "HH_FrozenSet",
+            "name": "HH\\FrozenSet",
             "ifaces": [
                 "ConstSet"
             ],

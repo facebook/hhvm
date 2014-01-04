@@ -22,6 +22,24 @@
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/system/systemlib.h"
 
+#define DECLARE_COLLECTION_MAGIC_METHODS()           \
+  String t___tostring();                             \
+  Variant t___get(Variant name);                     \
+  Variant t___set(Variant name, Variant value);      \
+  bool t___isset(Variant name);                      \
+  Variant t___unset(Variant name)
+
+#define DECLARE_ITERABLE_MATERIALIZE_METHODS()       \
+  Object t_tovector();                               \
+  Object t_tofrozenvector();                         \
+  Object t_toset();                                  \
+  Object t_tofrozenset()
+
+#define DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS()  \
+  DECLARE_ITERABLE_MATERIALIZE_METHODS();            \
+  Object t_tomap();                                  \
+  Object t_tostablemap()
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -68,12 +86,7 @@ class c_Vector : public BaseVector {
   bool t_containskey(CVarRef key);
   Object t_removekey(CVarRef key);
   Array t_toarray();
-  Object t_tovector();
-  Object t_tofrozenvector();
-  Object t_tomap();
-  Object t_tostablemap();
-  Object t_toset();
-  Object t_tofrozenset();
+  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
   Array t_tokeysarray();
   Array t_tovaluesarray();
   void t_reverse();
@@ -87,11 +100,7 @@ class c_Vector : public BaseVector {
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
-  String t___tostring();
-  Variant t___get(Variant name);
-  Variant t___set(Variant name, Variant value);
-  bool t___isset(Variant name);
-  Variant t___unset(Variant name);
+  DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
   static Object ti_slice(CVarRef vec, CVarRef offset,
@@ -229,20 +238,9 @@ public:
     return BaseVector::Clone<c_FrozenVector>(obj);
   }
 
-  // Magic methods
-  String t___tostring();
-  Variant t___get(Variant name);
-  Variant t___set(Variant name, Variant value);
-  bool t___isset(Variant name);
-  Variant t___unset(Variant name);
+  DECLARE_COLLECTION_MAGIC_METHODS();
 
-  // Materialization methods
-  Object t_tovector();
-  Object t_tofrozenvector();
-  Object t_tomap();
-  Object t_tostablemap();
-  Object t_toset();
-  Object t_tofrozenset();
+  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
 
 public:
 
@@ -293,14 +291,9 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
   Object t_remove(CVarRef key);
   Object t_removekey(CVarRef key);
   Array t_toarray();
-  Object t_tovector();
-  Object t_tofrozenvector();
-  Object t_tomap();
-  Object t_tostablemap();
-  Object t_toset();
-  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
+  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
   Object t_values();
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
@@ -309,11 +302,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
-  String t___tostring();
-  Variant t___get(Variant name);
-  Variant t___set(Variant name, Variant value);
-  bool t___isset(Variant name);
-  Variant t___unset(Variant name);
+  DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
 
@@ -695,14 +684,9 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_remove(CVarRef key);
   Object t_removekey(CVarRef key);
   Array t_toarray();
-  Object t_tovector();
-  Object t_tofrozenvector();
-  Object t_tomap();
-  Object t_tostablemap();
-  Object t_toset();
-  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
+  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
   Object t_values();
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
@@ -711,11 +695,7 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
-  String t___tostring();
-  Variant t___get(Variant name);
-  Variant t___set(Variant name, Variant value);
-  bool t___isset(Variant name);
-  Variant t___unset(Variant name);
+  DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
 
@@ -1081,7 +1061,6 @@ public:
   }
 
   // Static methods
-
   static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
   static void throwOOB(StringData* key) ATTRIBUTE_NORETURN;
   static void throwNoIndexAccess() ATTRIBUTE_NORETURN;
@@ -1421,22 +1400,15 @@ class c_Set : public BaseSet {
   bool t_contains(CVarRef key);
   Object t_remove(CVarRef key);
   Array t_toarray();
-  Object t_tovector();
-  Object t_tofrozenvector();
-  Object t_toset();
-  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
+  DECLARE_ITERABLE_MATERIALIZE_METHODS();
   Object t_getiterator();
   Object t_map(CVarRef callback);
   Object t_filter(CVarRef callback);
   Object t_zip(CVarRef iterable);
   Object t_difference(CVarRef iterable);
-  String t___tostring();
-  Variant t___get(Variant name);
-  Variant t___set(Variant name, Variant value);
-  bool t___isset(Variant name);
-  Variant t___unset(Variant name);
+  DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
   static Object ti_fromarrays(int _argc, CArrRef _argv = null_array);
@@ -1479,17 +1451,10 @@ class c_FrozenSet : public BaseSet {
   Array t_toarray();
   Array t_tokeysarray();
   Array t_tovaluesarray();
-  Object t_tovector();
-  Object t_tofrozenvector();
-  Object t_toset();
-  Object t_tofrozenset();
 
-  // Magic methods.
-  String t___tostring();
-  Variant t___get(Variant name);
-  Variant t___set(Variant name, Variant value);
-  bool t___isset(Variant name);
-  Variant t___unset(Variant name);
+  DECLARE_ITERABLE_MATERIALIZE_METHODS();
+
+  DECLARE_COLLECTION_MAGIC_METHODS();
 
   // Static methods.
   static Object ti_fromitems(CVarRef iterable);
@@ -1558,25 +1523,16 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Variant t_get(CVarRef key);
   bool t_containskey(CVarRef key);
   Array t_toarray();
-  Object t_tovector();
-  Object t_tofrozenvector();
-  Object t_tomap();
-  Object t_tostablemap();
-  Object t_toset();
-  Object t_tofrozenset();
   Array t_tokeysarray();
   Array t_tovaluesarray();
+  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
   Object t_getiterator();
   Object t_map(CVarRef callback);
   Object t_mapwithkey(CVarRef callback);
   Object t_filter(CVarRef callback);
   Object t_filterwithkey(CVarRef callback);
   Object t_zip(CVarRef iterable);
-  String t___tostring();
-  Variant t___get(Variant name);
-  Variant t___set(Variant name, Variant value);
-  bool t___isset(Variant name);
-  Variant t___unset(Variant name);
+  DECLARE_COLLECTION_MAGIC_METHODS();
 
   static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 
@@ -1764,5 +1720,9 @@ void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 ///////////////////////////////////////////////////////////////////////////////
 
 }
+
+#undef DECLARE_COLLECTION_MAGIC_METHODS
+#undef DECLARE_ITERABLE_MATERIALIZE_METHODS
+#undef DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS
 
 #endif // incl_HPHP_EXT_COLLECTION_H_

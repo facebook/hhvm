@@ -443,9 +443,9 @@ static void set_function_info(Array &ret, const Func* func) {
   }
   if (func->isBuiltin()) {
     ret.set(s_internal, true_varNR);
-    ClassInfo::MethodInfo mi;
-    func->getFuncInfo(&mi);
-    if (mi.attribute & ClassInfo::HipHopSpecific) {
+    if ((func->methInfo() &&
+         func->methInfo()->attribute & ClassInfo::HipHopSpecific) ||
+         (!func->methInfo() && func->attrs() & AttrHPHPSpecific)) {
       ret.set(s_hphp,     true_varNR);
     }
   }

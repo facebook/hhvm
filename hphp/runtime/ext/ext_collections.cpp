@@ -656,13 +656,13 @@ Object c_Vector::t_toset() {
 }
 
 Object c_Vector::t_tofrozenvector() {
-    if (m_frozenCopy.isNull()) {
-      c_FrozenVector* fv = NEWOBJ(c_FrozenVector)();
-      initFvFields(fv);
-      m_frozenCopy = fv;
-    }
+  if (m_frozenCopy.isNull()) {
+    c_FrozenVector* fv = NEWOBJ(c_FrozenVector)();
+    initFvFields(fv);
+    m_frozenCopy = fv;
+  }
 
-    return m_frozenCopy;
+  return m_frozenCopy;
 }
 
 Object c_Vector::t_tomap() {
@@ -852,11 +852,16 @@ c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static int32_t empty_map_hash_slot = c_Map::Empty;
+static int32_t empty_map_hash_slot = BaseMap::Empty;
 
-c_Map::c_Map(Class* cb) :
-    ExtObjectDataFlags(cb) {
+c_Map::c_Map(Class* cls) : BaseMap(cls) {
   o_subclassData.u16 = Collection::MapType;
+}
+
+// Protected (Internal)
+
+BaseMap::BaseMap(Class* cls) : ExtObjectData(cls) {
+  ObjectData::setAttributes(kCollectionObjectDataAttrs);
   uint32_t used = 0;
   uint32_t cap = 0;
   uint32_t tableMask = 0;
@@ -868,16 +873,16 @@ c_Map::c_Map(Class* cb) :
   m_hash = &empty_map_hash_slot;
 }
 
-c_Map::~c_Map() {
+BaseMap::~BaseMap() {
   deleteElms();
   freeData();
 }
 
-void c_Map::freeData() {
+void BaseMap::freeData() {
   if (m_data) smart_free(m_data);
 }
 
-void c_Map::deleteElms() {
+void BaseMap::deleteElms() {
   Elm* p = data();
   Elm* pLimit = p + iterLimit();
   for (; p != pLimit; ++p) {
@@ -889,12 +894,16 @@ void c_Map::deleteElms() {
   }
 }
 
-void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
+void BaseMap::php_construct(CVarRef iterable /* = null_variant */) {
   if (iterable.isNull()) return;
   init(iterable);
 }
 
-Array c_Map::toArrayImpl() const {
+void c_Map::t___construct(CVarRef iterable /* = null_variant */) {
+  return php_construct(iterable);
+}
+
+Array BaseMap::php_toArray() const {
   ArrayInit ai(m_size);
   Elm* p = data();
   Elm* pLimit = p + iterLimit();
@@ -909,9 +918,12 @@ Array c_Map::toArrayImpl() const {
   return ai.create();
 }
 
-c_Map* c_Map::Clone(ObjectData* obj) {
-  auto thiz = static_cast<c_Map*>(obj);
-  auto target = static_cast<c_Map*>(obj->cloneImpl());
+template<typename TMap>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, TMap*>::type
+BaseMap::Clone(ObjectData* obj) {
+  auto thiz = static_cast<TMap*>(obj);
+  auto target = static_cast<TMap*>(obj->cloneImpl());
 
   if (!thiz->m_size) return target;
 
@@ -943,7 +955,11 @@ c_Map* c_Map::Clone(ObjectData* obj) {
   return target;
 }
 
-void c_Map::init(CVarRef t) {
+c_Map* c_Map::Clone(ObjectData* obj) {
+  return BaseMap::Clone<c_Map>(obj);
+}
+
+void BaseMap::init(CVarRef t) {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(t, sz);
   if (sz) {
@@ -963,13 +979,17 @@ void c_Map::init(CVarRef t) {
   }
 }
 
-Object c_Map::t_add(CVarRef val) {
+Object BaseMap::php_add(CVarRef val) {
   TypedValue* tv = cvarToCell(&val);
   add(tv);
   return this;
 }
 
-Object c_Map::t_addall(CVarRef iterable) {
+Object c_Map::t_add(CVarRef val) { return php_add(val); }
+
+Object c_StableMap::t_add(CVarRef val) { return php_add(val); }
+
+Object BaseMap::php_addAll(CVarRef iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -982,7 +1002,11 @@ Object c_Map::t_addall(CVarRef iterable) {
   return this;
 }
 
-Object c_Map::t_clear() {
+Object c_Map::t_addall(CVarRef val) { return php_addAll(val); }
+
+Object c_StableMap::t_addall(CVarRef val) { return php_addAll(val); }
+
+Object BaseMap::php_clear() {
   deleteElms();
   freeData();
   uint32_t used = 0;
@@ -997,19 +1021,23 @@ Object c_Map::t_clear() {
   return this;
 }
 
-bool c_Map::t_isempty() {
-  return !toBoolImpl();
-}
+Object c_Map::t_clear() { return php_clear(); }
 
-int64_t c_Map::t_count() {
-  return m_size;
-}
+Object c_StableMap::t_clear() { return php_clear(); }
 
-Object c_Map::t_items() {
-  return SystemLib::AllocLazyKVZipIterableObject(this);
-}
+bool c_Map::t_isempty() { return php_isEmpty();  }
 
-Object c_Map::t_keys() {
+bool c_StableMap::t_isempty() { return php_isEmpty(); }
+
+int64_t c_Map::t_count() { return size(); }
+
+int64_t c_StableMap::t_count() { return size(); }
+
+Object c_Map::t_items() { return php_items(); }
+
+Object c_StableMap::t_items() { return php_items(); }
+
+Object BaseMap::php_keys() const {
   c_Vector* vec;
   Object obj = vec = NEWOBJ(c_Vector)();
   if (!m_size) {
@@ -1035,11 +1063,15 @@ Object c_Map::t_keys() {
   return obj;
 }
 
-Object c_Map::t_lazy() {
-  return SystemLib::AllocLazyKeyedIterableViewObject(this);
-}
+Object c_Map::t_keys() { return php_keys(); }
 
-Object c_Map::t_kvzip() {
+Object c_StableMap::t_keys() { return php_keys(); }
+
+Object c_Map::t_lazy() { return php_lazy(); }
+
+Object c_StableMap::t_lazy() { return php_lazy(); }
+
+Object BaseMap::php_kvzip() const {
   c_Vector* vec;
   Object obj = vec = NEWOBJ(c_Vector)();
   if (!m_size) {
@@ -1071,7 +1103,11 @@ Object c_Map::t_kvzip() {
   return obj;
 }
 
-Variant c_Map::t_at(CVarRef key) {
+Object c_Map::t_kvzip() { return php_kvzip(); }
+
+Object c_StableMap::t_kvzip() { return php_kvzip(); }
+
+Variant BaseMap::php_at(CVarRef key) const {
   if (key.isInteger()) {
     return tvAsCVarRef(at(key.toInt64()));
   } else if (key.isString()) {
@@ -1081,7 +1117,11 @@ Variant c_Map::t_at(CVarRef key) {
   return uninit_null();
 }
 
-Variant c_Map::t_get(CVarRef key) {
+Variant c_Map::t_at(CVarRef key) { return php_at(key); }
+
+Variant c_StableMap::t_at(CVarRef key) { return php_at(key); }
+
+Variant BaseMap::php_get(CVarRef key) const {
   if (key.isInteger()) {
     TypedValue* tv = get(key.toInt64());
     if (tv) {
@@ -1101,7 +1141,11 @@ Variant c_Map::t_get(CVarRef key) {
   return uninit_null();
 }
 
-Object c_Map::t_set(CVarRef key, CVarRef value) {
+Variant c_Map::t_get(CVarRef key) { return php_get(key); }
+
+Variant c_StableMap::t_get(CVarRef key) { return php_get(key); }
+
+Object BaseMap::php_set(CVarRef key, CVarRef value) {
   TypedValue* val = cvarToCell(&value);
   if (key.isInteger()) {
     update(key.toInt64(), val);
@@ -1113,7 +1157,14 @@ Object c_Map::t_set(CVarRef key, CVarRef value) {
   return this;
 }
 
-Object c_Map::t_setall(CVarRef iterable) {
+Object c_Map::t_set(CVarRef key, CVarRef value) {
+  return php_set(key, value);
+}
+Object c_StableMap::t_set(CVarRef key, CVarRef value) {
+  return php_set(key, value);
+}
+
+Object BaseMap::php_setAll(CVarRef iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
@@ -1133,11 +1184,21 @@ Object c_Map::t_setall(CVarRef iterable) {
   return this;
 }
 
+NEVER_INLINE
+Object c_Map::t_setall(CVarRef iterable) { return php_setAll(iterable); }
+
+NEVER_INLINE
+Object c_StableMap::t_setall(CVarRef iterable) { return php_setAll(iterable); }
+
 Object c_Map::t_put(CVarRef key, CVarRef value) {
   return t_set(key, value);
 }
 
-bool c_Map::t_contains(CVarRef key) {
+Object c_StableMap::t_put(CVarRef key, CVarRef value) {
+  return t_set(key, value);
+}
+
+bool BaseMap::php_contains(CVarRef key) const {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     return contains(key.toInt64());
@@ -1149,11 +1210,15 @@ bool c_Map::t_contains(CVarRef key) {
   return false;
 }
 
-bool c_Map::t_containskey(CVarRef key) {
-  return t_contains(key);
-}
+bool c_Map::t_contains(CVarRef key) { return php_contains(key); }
 
-Object c_Map::t_remove(CVarRef key) {
+bool c_StableMap::t_contains(CVarRef key) { return php_contains(key); }
+
+bool c_Map::t_containskey(CVarRef key) { return php_contains(key); }
+
+bool c_StableMap::t_containskey(CVarRef key) { return php_contains(key); }
+
+Object BaseMap::php_remove(CVarRef key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     remove(key.toInt64());
@@ -1165,15 +1230,19 @@ Object c_Map::t_remove(CVarRef key) {
   return this;
 }
 
-Object c_Map::t_removekey(CVarRef key) {
-  return t_remove(key);
-}
+Object c_Map::t_remove(CVarRef key) { return php_remove(key); }
 
-Array c_Map::t_toarray() {
-  return toArrayImpl();
-}
+Object c_Map::t_removekey(CVarRef key) { return php_remove(key); }
 
-Object c_Map::t_values() {
+Object c_StableMap::t_remove(CVarRef key) { return php_remove(key); }
+
+Object c_StableMap::t_removekey(CVarRef key) { return php_remove(key); }
+
+Array c_Map::t_toarray() { return php_toArray(); }
+
+Array c_StableMap::t_toarray() { return php_toArray(); }
+
+Object BaseMap::php_values() const {
   c_Vector* target;
   Object ret = target = NEWOBJ(c_Vector)();
   int64_t sz = m_size;
@@ -1195,7 +1264,11 @@ Object c_Map::t_values() {
   return ret;
 }
 
-Array c_Map::t_tokeysarray() {
+Object c_Map::t_values() { return php_values(); }
+
+Object c_StableMap::t_values() { return php_values(); }
+
+Array BaseMap::php_toKeysArray() const {
   PackedArrayInit ai(m_size);
   for (ssize_t i = 0; i < iterLimit(); ++i) {
     if (isTombstone(i)) continue;
@@ -1209,7 +1282,11 @@ Array c_Map::t_tokeysarray() {
   return ai.toArray();
 }
 
-Array c_Map::t_tovaluesarray() {
+Array c_Map::t_tokeysarray() { return php_toKeysArray(); }
+
+Array c_StableMap::t_tokeysarray() { return php_toKeysArray(); }
+
+Array BaseMap::php_toValuesArray() const {
   PackedArrayInit ai(m_size);
   for (ssize_t i = 0; i < iterLimit(); ++i) {
     if (isTombstone(i)) continue;
@@ -1219,20 +1296,27 @@ Array c_Map::t_tovaluesarray() {
   return ai.toArray();
 }
 
-Object c_Map::t_differencebykey(CVarRef it) {
+Array c_Map::t_tovaluesarray() { return php_toValuesArray(); }
+
+Array c_StableMap::t_tovaluesarray() { return php_toValuesArray(); }
+
+template<typename TMap>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_differenceByKey(CVarRef it) {
   if (!it.isObject()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter it must be an instance of Iterable"));
+               "Parameter it must be an instance of Iterable"));
     throw e;
   }
   ObjectData* obj = it.getObjectData();
-  c_Map* target = c_Map::Clone(this);
+  TMap* target = BaseMap::Clone<TMap>(this);
   auto ret = Object::attach(target);
   if (obj->getCollectionType() == Collection::MapType) {
     auto mp = static_cast<c_Map*>(obj);
     for (uint i = 0; i < mp->iterLimit(); ++i) {
       if (mp->isTombstone(i)) continue;
-      c_Map::Elm& p = mp->data()[i];
+      BaseMap::Elm& p = mp->data()[i];
       if (p.hasIntKey()) {
         target->remove((int64_t)p.ikey);
       } else {
@@ -1253,7 +1337,15 @@ Object c_Map::t_differencebykey(CVarRef it) {
   return ret;
 }
 
-Object c_Map::t_getiterator() {
+Object c_Map::t_differencebykey(CVarRef it) {
+  return php_differenceByKey<c_Map>(it);
+}
+
+Object c_StableMap::t_differencebykey(CVarRef it) {
+  return php_differenceByKey<c_StableMap>(it);
+}
+
+Object BaseMap::php_getIterator() {
   c_MapIterator* it = NEWOBJ(c_MapIterator)();
   it->m_obj = this;
   it->m_pos = iter_begin();
@@ -1261,16 +1353,23 @@ Object c_Map::t_getiterator() {
   return it;
 }
 
-Object c_Map::t_map(CVarRef callback) {
+Object c_Map::t_getiterator() { return php_getIterator(); }
+
+Object c_StableMap::t_getiterator() { return php_getIterator(); }
+
+template<typename TMap>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_map(CVarRef callback) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
+               "Parameter must be a valid callback"));
     throw e;
   }
-  c_Map* mp;
-  Object obj = mp = NEWOBJ(c_Map)();
+  TMap* mp;
+  Object obj = mp = NEWOBJ(TMap)();
   if (!m_size) return obj;
   assert(m_used != 0);
   mp->deleteElms();
@@ -1307,16 +1406,27 @@ Object c_Map::t_map(CVarRef callback) {
   return obj;
 }
 
-Object c_Map::t_mapwithkey(CVarRef callback) {
+Object c_Map::t_map(CVarRef callback) {
+  return php_map<c_Map>(callback);
+}
+
+Object c_StableMap::t_map(CVarRef callback) {
+  return php_map<c_StableMap>(callback);
+}
+
+template<typename TMap>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_mapWithKey(CVarRef callback) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
+               "Parameter must be a valid callback"));
     throw e;
   }
-  c_Map* mp;
-  Object obj = mp = NEWOBJ(c_Map)();
+  TMap* mp;
+  Object obj = mp = NEWOBJ(TMap)();
   if (!m_size) return obj;
   assert(m_used != 0);
   mp->deleteElms();
@@ -1341,7 +1451,7 @@ Object c_Map::t_mapwithkey(CVarRef callback) {
     int32_t version = m_version;
     TypedValue args[2] = {
       (p.hasIntKey() ? make_tv<KindOfInt64>(p.ikey)
-                     : make_tv<KindOfString>(p.skey)),
+       : make_tv<KindOfString>(p.skey)),
       p.data
     };
     g_vmContext->invokeFuncFew(tv, ctx, 2, args);
@@ -1358,17 +1468,29 @@ Object c_Map::t_mapwithkey(CVarRef callback) {
   return obj;
 }
 
-Object c_Map::t_filter(CVarRef callback) {
+Object c_Map::t_mapwithkey(CVarRef callback) {
+  return php_mapWithKey<c_Map>(callback);
+}
+
+Object c_StableMap::t_mapwithkey(CVarRef callback) {
+  return php_mapWithKey<c_StableMap>(callback);
+}
+
+template<typename TMap>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_filter(CVarRef callback) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
+               "Parameter must be a valid callback"));
     throw e;
   }
-  c_Map* mp;
-  Object obj = mp = NEWOBJ(c_Map)();
+  TMap* mp;
+  Object obj = mp = NEWOBJ(TMap)();
   if (!m_size) return obj;
+
   uint32_t used = iterLimit();
   for (uint i = 0; i < used; ++i) {
     if (isTombstone(i)) continue;
@@ -1389,16 +1511,27 @@ Object c_Map::t_filter(CVarRef callback) {
   return obj;
 }
 
-Object c_Map::t_filterwithkey(CVarRef callback) {
+Object c_Map::t_filter(CVarRef callback) {
+  return php_filter<c_Map>(callback);
+}
+
+Object c_StableMap::t_filter(CVarRef callback) {
+  return php_filter<c_StableMap>(callback);
+}
+
+template<typename TMap>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_filterWithKey(CVarRef callback) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
+               "Parameter must be a valid callback"));
     throw e;
   }
-  c_Map* mp;
-  Object obj = mp = NEWOBJ(c_Map)();
+  TMap* mp;
+  Object obj = mp = NEWOBJ(TMap)();
   if (!m_size) return obj;
   uint32_t used = iterLimit();
   for (uint32_t i = 0; i < used; ++i) {
@@ -1408,7 +1541,7 @@ Object c_Map::t_filterwithkey(CVarRef callback) {
     int32_t version = m_version;
     TypedValue args[2] = {
       (p.hasIntKey() ? make_tv<KindOfInt64>(p.ikey)
-                     : make_tv<KindOfString>(p.skey)),
+       : make_tv<KindOfString>(p.skey)),
       p.data
     };
     g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
@@ -1425,11 +1558,22 @@ Object c_Map::t_filterwithkey(CVarRef callback) {
   return obj;
 }
 
-Object c_Map::t_zip(CVarRef iterable) {
+Object c_Map::t_filterwithkey(CVarRef callback) {
+  return php_filterWithKey<c_Map>(callback);
+}
+
+Object c_StableMap::t_filterwithkey(CVarRef callback) {
+  return php_filterWithKey<c_StableMap>(callback);
+}
+
+template<typename TMap>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_zip(CVarRef iterable) const {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  c_Map* mp;
-  Object obj = mp = NEWOBJ(c_Map)();
+  TMap* mp;
+  Object obj = mp = NEWOBJ(TMap)();
   if (!m_size) {
     return obj;
   }
@@ -1456,12 +1600,23 @@ Object c_Map::t_zip(CVarRef iterable) {
   return obj;
 }
 
-Object c_Map::ti_fromitems(CVarRef iterable) {
-  if (iterable.isNull()) return NEWOBJ(c_Map)();
+Object c_Map::t_zip(CVarRef iterable) {
+  return php_zip<c_Map>(iterable);
+}
+
+Object c_StableMap::t_zip(CVarRef iterable) {
+  return php_zip<c_StableMap>(iterable);
+}
+
+template<typename TMap>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_mapFromIterable(CVarRef iterable) {
+  if (iterable.isNull()) return NEWOBJ(TMap)();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  c_Map* target;
-  Object ret = target = NEWOBJ(c_Map)();
+  TMap* target;
+  Object ret = target = NEWOBJ(TMap)();
   if (sz) {
     target->reserve(sz);
   }
@@ -1471,7 +1626,7 @@ Object c_Map::ti_fromitems(CVarRef iterable) {
     if (UNLIKELY(tv->m_type != KindOfObject ||
                  tv->m_data.pobj->getVMClass() != c_Pair::classof())) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Parameter must be an instance of Iterable<Pair>"));
+                 "Parameter must be an instance of Iterable<Pair>"));
       throw e;
     }
     auto pair = static_cast<c_Pair*>(tv->m_data.pobj);
@@ -1484,20 +1639,31 @@ Object c_Map::ti_fromitems(CVarRef iterable) {
     } else if (IS_STRING_TYPE(tvKey->m_type)) {
       target->update(tvKey->m_data.pstr, tvValue);
     } else {
-      throwBadKeyType();
+      TMap::throwBadKeyType();
     }
   }
   return ret;
 }
 
-Object c_Map::ti_fromarray(CVarRef arr) {
+Object c_Map::ti_fromitems(CVarRef iterable) {
+  return php_mapFromIterable<c_Map>(iterable);
+}
+
+Object c_StableMap::ti_fromitems(CVarRef iterable) {
+  return php_mapFromIterable<c_StableMap>(iterable);
+}
+
+template<typename TMap>
+typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, Object>::type
+BaseMap::php_mapFromArray(CVarRef arr) {
   if (!arr.isArray()) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Parameter arr must be an array"));
     throw e;
   }
-  c_Map* mp;
-  Object ret = mp = NEWOBJ(c_Map)();
+  TMap* mp;
+  Object ret = mp = NEWOBJ(TMap)();
   ArrayData* ad = arr.getArrayData();
   for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
        pos = ad->iter_advance(pos)) {
@@ -1513,18 +1679,27 @@ Object c_Map::ti_fromarray(CVarRef arr) {
   return ret;
 }
 
+Object c_Map::ti_fromarray(CVarRef arr) {
+  return php_mapFromArray<c_Map>(arr);
+}
+
 NEVER_INLINE
-void c_Map::throwOOB(int64_t key) {
+Object c_StableMap::ti_fromarray(CVarRef arr) {
+  return php_mapFromArray<c_StableMap>(arr);
+}
+
+NEVER_INLINE
+void BaseMap::throwOOB(int64_t key) {
   throwIntOOB(key);
 }
 
 NEVER_INLINE
-void c_Map::throwOOB(StringData* key) {
+void BaseMap::throwOOB(StringData* key) {
   throwStrOOB(key);
 }
 
 NEVER_INLINE
-void c_Map::throwTooLarge() {
+void BaseMap::throwTooLarge() {
   static const size_t reserveSize = 130;
   String msg(reserveSize, ReserveString);
   char* buf = msg.bufferSlice().ptr;
@@ -1540,7 +1715,7 @@ void c_Map::throwTooLarge() {
 }
 
 NEVER_INLINE
-void c_Map::throwReserveTooLarge() {
+void BaseMap::throwReserveTooLarge() {
   static const size_t reserveSize = 80;
   String msg(reserveSize, ReserveString);
   char* buf = msg.bufferSlice().ptr;
@@ -1555,14 +1730,14 @@ void c_Map::throwReserveTooLarge() {
 }
 
 NEVER_INLINE
-int32_t* c_Map::warnUnbalanced(size_t n, int32_t* ei) {
+int32_t* BaseMap::warnUnbalanced(size_t n, int32_t* ei) {
   if (n > size_t(RuntimeOption::MaxArrayChain)) {
     raise_error("Map is too unbalanced (%lu)", n);
   }
   return ei;
 }
 
-TypedValue* c_Map::at(int64_t key) const {
+TypedValue* BaseMap::at(int64_t key) const {
   auto p = find(key);
   if (UNLIKELY(p == Empty)) {
     throwOOB(key);
@@ -1570,7 +1745,7 @@ TypedValue* c_Map::at(int64_t key) const {
   return &data()[p].data;
 }
 
-TypedValue* c_Map::at(StringData* key) const {
+TypedValue* BaseMap::at(StringData* key) const {
   auto p = find(key, key->hash());
   if (UNLIKELY(p == Empty)) {
     throwOOB(key);
@@ -1578,7 +1753,7 @@ TypedValue* c_Map::at(StringData* key) const {
   return &data()[p].data;
 }
 
-TypedValue* c_Map::get(int64_t key) const {
+TypedValue* BaseMap::get(int64_t key) const {
   auto p = find(key);
   if (p == Empty) {
     return nullptr;
@@ -1586,7 +1761,7 @@ TypedValue* c_Map::get(int64_t key) const {
   return &data()[p].data;
 }
 
-TypedValue* c_Map::get(StringData* key) const {
+TypedValue* BaseMap::get(StringData* key) const {
   auto p = find(key, key->hash());
   if (p == Empty) {
     return nullptr;
@@ -1594,7 +1769,7 @@ TypedValue* c_Map::get(StringData* key) const {
   return &data()[p].data;
 }
 
-void c_Map::add(TypedValue* val) {
+void BaseMap::add(TypedValue* val) {
   if (UNLIKELY(val->m_type != KindOfObject ||
                val->m_data.pobj->getVMClass() != c_Pair::classof())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
@@ -1615,7 +1790,7 @@ void c_Map::add(TypedValue* val) {
   }
 }
 
-void c_Map::remove(int64_t key) {
+void BaseMap::remove(int64_t key) {
   ++m_version;
   auto* p = findForInsert(key);
   if (validPos(*p)) {
@@ -1623,7 +1798,7 @@ void c_Map::remove(int64_t key) {
   }
 }
 
-void c_Map::remove(StringData* key) {
+void BaseMap::remove(StringData* key) {
   ++m_version;
   auto* p = findForInsert(key, key->hash());
   if (validPos(*p)) {
@@ -1631,32 +1806,32 @@ void c_Map::remove(StringData* key) {
   }
 }
 
-bool c_Map::contains(int64_t key) const {
+bool BaseMap::contains(int64_t key) const {
   return find(key) != Empty;
 }
 
-bool c_Map::contains(StringData* key) const {
+bool BaseMap::contains(StringData* key) const {
   return find(key, key->hash()) != Empty;
 }
 
-static bool hitStringKey(const c_Map::Elm& e, const StringData* s,
+static bool hitStringKey(const BaseMap::Elm& e, const StringData* s,
                          int32_t hash) {
   // hitStringKey() should only be called on an Elm that is referenced by a
   // hash table entry. c_Map guarantees that when it adds a hash table
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(!c_Map::isTombstone(e.data.m_type));
+  assert(!BaseMap::isTombstone(e.data.m_type));
   return hash == e.hash() && (s == e.skey || s->same(e.skey));
 }
 
-static bool hitIntKey(const c_Map::Elm& e, int64_t ki) {
+static bool hitIntKey(const BaseMap::Elm& e, int64_t ki) {
   // hitIntKey() should only be called on an Elm that is referenced by a
   // hash table entry. c_Map guarantees that when it adds a hash table
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(!c_Map::isTombstone(e.data.m_type));
+  assert(!BaseMap::isTombstone(e.data.m_type));
   return e.ikey == ki && e.hasIntKey();
 }
 
@@ -1670,7 +1845,7 @@ static bool hitIntKey(const c_Map::Elm& e, int64_t ki) {
 
 template <class Hit>
 ALWAYS_INLINE
-ssize_t c_Map::findImpl(size_t h0, Hit hit) const {
+ssize_t BaseMap::findImpl(size_t h0, Hit hit) const {
   size_t tableMask = m_tableMask;
   auto* elms = data();
   auto* hashtable = hashTab();
@@ -1684,13 +1859,13 @@ ssize_t c_Map::findImpl(size_t h0, Hit hit) const {
   }
 }
 
-ssize_t c_Map::find(int64_t ki) const {
+ssize_t BaseMap::find(int64_t ki) const {
   return findImpl(ki, [ki] (const Elm& e) {
     return hitIntKey(e, ki);
   });
 }
 
-ssize_t c_Map::find(const StringData* s, strhash_t prehash) const {
+ssize_t BaseMap::find(const StringData* s, strhash_t prehash) const {
   auto h = prehash | STRHASH_MSB;
   return findImpl(prehash, [s, h] (const Elm& e) {
     return hitStringKey(e, s, h);
@@ -1699,7 +1874,7 @@ ssize_t c_Map::find(const StringData* s, strhash_t prehash) const {
 
 template <class Hit>
 ALWAYS_INLINE
-int32_t* c_Map::findForInsertImpl(size_t h0, Hit hit) const {
+int32_t* BaseMap::findForInsertImpl(size_t h0, Hit hit) const {
   // mask, probe, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto. Test carefully.
   size_t mask = m_tableMask;
@@ -1724,13 +1899,13 @@ int32_t* c_Map::findForInsertImpl(size_t h0, Hit hit) const {
   }
 }
 
-int32_t* c_Map::findForInsert(int64_t ki) const {
+int32_t* BaseMap::findForInsert(int64_t ki) const {
   return findForInsertImpl(ki, [ki] (const Elm& e) {
     return hitIntKey(e, ki);
   });
 }
 
-int32_t* c_Map::findForInsert(const StringData* s, strhash_t prehash) const {
+int32_t* BaseMap::findForInsert(const StringData* s, strhash_t prehash) const {
   auto h = prehash | STRHASH_MSB;
   return findForInsertImpl(prehash, [s, h] (const Elm& e) {
     return hitStringKey(e, s, h);
@@ -1740,7 +1915,7 @@ int32_t* c_Map::findForInsert(const StringData* s, strhash_t prehash) const {
 // findForNewInsert() is only safe to use if you know for sure that the
 // key is not already present in the Map.
 ALWAYS_INLINE int32_t*
-c_Map::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
+BaseMap::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
   for (size_t i = 1, probe = h0;; ++i) {
     auto ei = &table[probe & mask];
     if (!validPos(*ei)) return ei;
@@ -1750,11 +1925,11 @@ c_Map::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
 }
 
 ALWAYS_INLINE
-int32_t* c_Map::findForNewInsert(size_t h0) const {
+int32_t* BaseMap::findForNewInsert(size_t h0) const {
   return findForNewInsert(hashTab(), m_tableMask, h0);
 }
 
-void c_Map::update(int64_t h, TypedValue* val) {
+void BaseMap::update(int64_t h, TypedValue* val) {
   assert(val->m_type != KindOfRef);
 retry:
   auto* p = findForInsert(h);
@@ -1779,7 +1954,7 @@ retry:
   ++m_version;
 }
 
-void c_Map::update(StringData* key, TypedValue* val) {
+void BaseMap::update(StringData* key, TypedValue* val) {
   assert(val->m_type != KindOfRef);
   strhash_t h = key->hash();
 retry:
@@ -1805,7 +1980,7 @@ retry:
   ++m_version;
 }
 
-void c_Map::erase(int32_t* pos) {
+void BaseMap::erase(int32_t* pos) {
   assert(validPos(*pos) && !isTombstone(*pos));
   assert(data());
   Elm* elms = data();
@@ -1832,7 +2007,7 @@ void c_Map::erase(int32_t* pos) {
   }
 }
 
-NEVER_INLINE void c_Map::makeRoom() {
+NEVER_INLINE void BaseMap::makeRoom() {
   assert(isFull());
   // erase() guarantees that element density will never drop below ~50%,
   // so we always grow to make room here.
@@ -1844,7 +2019,7 @@ NEVER_INLINE void c_Map::makeRoom() {
   grow(m_cap ? m_cap*2 : SmallSize, m_cap ? m_tableMask*2+1 : SmallMask);
 }
 
-NEVER_INLINE void c_Map::reserve(int64_t sz) {
+NEVER_INLINE void BaseMap::reserve(int64_t sz) {
   assert(m_size <= m_used && m_used <= m_cap && !isDensityTooLow());
   uint32_t newCap, newMask;
   if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
@@ -1855,8 +2030,8 @@ NEVER_INLINE void c_Map::reserve(int64_t sz) {
   if (sz > int64_t(m_cap)) {
     // The requested capacity is greater than the current capacity. Compute
     // the smallest allowed capacity that is sufficient.
-    auto lgSize = c_Map::SmallLgTableSize;
-    for (newCap = c_Map::SmallSize; newCap < sz; newCap <<= 1) ++lgSize;
+    auto lgSize = BaseMap::SmallLgTableSize;
+    for (newCap = BaseMap::SmallSize; newCap < sz; newCap <<= 1) ++lgSize;
     newMask = (size_t(1U) << lgSize) - 1;
     assert(lgSize <= MaxLgTableSize && newCap > m_cap);
   } else {
@@ -1874,7 +2049,7 @@ NEVER_INLINE void c_Map::reserve(int64_t sz) {
   grow(newCap, newMask);
 }
 
-void c_Map::grow(uint32_t newCap, uint32_t newMask) {
+void BaseMap::grow(uint32_t newCap, uint32_t newMask) {
   assert(m_size <= m_used && m_used <= m_cap);
   size_t newHashSize = size_t(newMask) + 1;
   assert(Util::isPowerOfTwo(newHashSize) && computeMaxElms(newMask) == newCap);
@@ -1903,7 +2078,7 @@ void c_Map::grow(uint32_t newCap, uint32_t newMask) {
   m_used = m_size;
 }
 
-void c_Map::compact() {
+void BaseMap::compact() {
   auto* elms = data();
   assert(elms);
   auto mask = m_tableMask;
@@ -1926,165 +2101,24 @@ void c_Map::compact() {
   m_used = m_size;
 }
 
-void c_Map::throwBadKeyType() {
+void BaseMap::throwBadKeyType() {
   Object e(SystemLib::AllocInvalidArgumentExceptionObject(
     "Only integer keys and string keys may be used with Maps"));
   throw e;
 }
 
-Array c_Map::ToArray(const ObjectData* obj) {
+Array BaseMap::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
-  return static_cast<const c_Map*>(obj)->toArrayImpl();
+  return static_cast<const BaseMap*>(obj)->php_toArray();
 }
 
-bool c_Map::ToBool(const ObjectData* obj) {
-  return static_cast<const c_Map*>(obj)->toBoolImpl();
+bool BaseMap::ToBool(const ObjectData* obj) {
+  return static_cast<const BaseMap*>(obj)->toBoolImpl();
 }
 
-TypedValue* c_Map::OffsetGet(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  auto mp = static_cast<c_Map*>(obj);
-  if (key->m_type == KindOfInt64) {
-    return mp->at(key->m_data.num);
-  }
-  if (IS_STRING_TYPE(key->m_type)) {
-    return mp->at(key->m_data.pstr);
-  }
-  throwBadKeyType();
-  return nullptr;
-}
-
-void c_Map::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
-  assert(key->m_type != KindOfRef);
-  assert(val->m_type != KindOfRef);
-  auto mp = static_cast<c_Map*>(obj);
-  if (key->m_type == KindOfInt64) {
-    mp->set(key->m_data.num, val);
-    return;
-  }
-  if (IS_STRING_TYPE(key->m_type)) {
-    mp->set(key->m_data.pstr, val);
-    return;
-  }
-  throwBadKeyType();
-}
-
-bool c_Map::OffsetIsset(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  auto mp = static_cast<c_Map*>(obj);
-  TypedValue* result;
-  if (key->m_type == KindOfInt64) {
-    result = mp->get(key->m_data.num);
-  } else if (IS_STRING_TYPE(key->m_type)) {
-    result = mp->get(key->m_data.pstr);
-  } else {
-    throwBadKeyType();
-    result = nullptr;
-  }
-  return result ? !cellIsNull(result) : false;
-}
-
-bool c_Map::OffsetEmpty(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  auto mp = static_cast<c_Map*>(obj);
-  TypedValue* result;
-  if (key->m_type == KindOfInt64) {
-    result = mp->get(key->m_data.num);
-  } else if (IS_STRING_TYPE(key->m_type)) {
-    result = mp->get(key->m_data.pstr);
-  } else {
-    throwBadKeyType();
-    result = nullptr;
-  }
-  return result ? !cellToBool(*result) : true;
-}
-
-bool c_Map::OffsetContains(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  auto mp = static_cast<c_Map*>(obj);
-  if (key->m_type == KindOfInt64) {
-    return mp->contains(key->m_data.num);
-  } else if (IS_STRING_TYPE(key->m_type)) {
-    return mp->contains(key->m_data.pstr);
-  } else {
-    throwBadKeyType();
-    return false;
-  }
-}
-
-void c_Map::OffsetUnset(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  auto mp = static_cast<c_Map*>(obj);
-  if (key->m_type == KindOfInt64) {
-    mp->remove(key->m_data.num);
-    return;
-  }
-  if (IS_STRING_TYPE(key->m_type)) {
-    mp->remove(key->m_data.pstr);
-    return;
-  }
-  throwBadKeyType();
-}
-
-bool c_Map::Equals(const ObjectData* obj1, const ObjectData* obj2) {
-  auto mp1 = static_cast<const c_Map*>(obj1);
-  auto mp2 = static_cast<const c_Map*>(obj2);
-  if (mp1->m_size != mp2->m_size) return false;
-  for (uint i = 0; i < mp1->iterLimit(); ++i) {
-    if (mp1->isTombstone(i)) continue;
-    c_Map::Elm& p = mp1->data()[i];
-    TypedValue* tv2;
-    if (p.hasIntKey()) {
-      tv2 = mp2->get(p.ikey);
-    } else {
-      assert(p.hasStrKey());
-      tv2 = mp2->get(p.skey);
-    }
-    if (!tv2) return false;
-    if (!equal(tvAsCVarRef(&p.data), tvAsCVarRef(tv2))) return false;
-  }
-  return true;
-}
-
-void c_Map::Unserialize(ObjectData* obj,
-                        VariableUnserializer* uns,
-                        int64_t sz,
-                        char type) {
-  if (type != 'K') {
-    throw Exception("Map does not support the '%c' serialization "
-                    "format", type);
-  }
-  auto mp = static_cast<c_Map*>(obj);
-  mp->reserve(sz);
-  for (int64_t i = 0; i < sz; ++i) {
-    Variant k;
-    k.unserialize(uns, Uns::Mode::ColKey);
-    int32_t* p;
-    Elm* e;
-    if (k.isInteger()) {
-      auto h = k.toInt64();
-      p = mp->findForInsert(h);
-      if (UNLIKELY(validPos(*p))) goto do_unserialize;
-      e = &mp->allocElm(p);
-      e->setIntKey(h);
-    } else if (k.isString()) {
-      auto key = k.getStringData();
-      auto h = key->hash();
-      p = mp->findForInsert(key, h);
-      if (UNLIKELY(validPos(*p))) goto do_unserialize;
-      e = &mp->allocElm(p);
-      e->setStrKey(key, h);
-    } else {
-      throw Exception("Invalid key");
-    }
-    e->data.m_type = KindOfNull;
-do_unserialize:
-    tvAsVariant(&e->data).unserialize(uns, Uns::Mode::ColValue);
-  }
-}
 
 struct MapKeyAccessor {
-  typedef const c_Map::Elm& ElmT;
+  typedef const BaseMap::Elm& ElmT;
   bool isInt(ElmT elm) const { return elm.hasIntKey(); }
   bool isStr(ElmT elm) const { return elm.hasStrKey(); }
   int64_t getInt(ElmT elm) const { return elm.ikey; }
@@ -2099,7 +2133,7 @@ struct MapKeyAccessor {
 };
 
 struct MapValAccessor {
-  typedef const c_Map::Elm& ElmT;
+  typedef const BaseMap::Elm& ElmT;
   bool isInt(ElmT elm) const { return elm.data.m_type == KindOfInt64; }
   bool isStr(ElmT elm) const { return IS_STRING_TYPE(elm.data.m_type); }
   int64_t getInt(ElmT elm) const { return elm.data.m_data.num; }
@@ -2115,7 +2149,7 @@ struct MapValAccessor {
  * comparator and avoid performing type checks during the actual sort.
  */
 template <typename AccessorT>
-c_Map::SortFlavor c_Map::preSort(const AccessorT& acc, bool checkTypes) {
+BaseMap::SortFlavor BaseMap::preSort(const AccessorT& acc, bool checkTypes) {
   assert(m_size > 0);
   if (!checkTypes && m_size == m_used) {
     // No need to loop over the elements, we're done
@@ -2169,7 +2203,7 @@ c_Map::SortFlavor c_Map::preSort(const AccessorT& acc, bool checkTypes) {
  * postSort() runs after the sort has been performed. For c_Map,
  * postSort() handles rebuilding the hash.
  */
-void c_Map::postSort() {
+void BaseMap::postSort() {
   assert(m_size > 0);
   auto const table = hashTab();
   initHash(table, hashSize());
@@ -2214,27 +2248,27 @@ void c_Map::postSort() {
       } else {                                  \
     SORT_CASE_BLOCK(Elm, acc_type)              \
       }
-#define SORT_BODY(acc_type)                                             \
-  do {                                                                  \
-    if (!m_size) {                                                      \
-      return;                                                           \
-    }                                                                   \
-    SortFlavor flav = preSort<acc_type>(acc_type(), true);              \
-    try {                                                               \
-      CALL_SORT(acc_type);                                              \
-    } catch (...) {                                                     \
-      /* make sure the map is left in a consistent state */             \
-      postSort();                                                       \
-      throw;                                                            \
-    }                                                                   \
-    postSort();                                                         \
+#define SORT_BODY(acc_type)                                     \
+  do {                                                          \
+    if (!m_size) {                                              \
+      return;                                                   \
+    }                                                           \
+    SortFlavor flav = preSort<acc_type>(acc_type(), true);      \
+    try {                                                       \
+      CALL_SORT(acc_type);                                      \
+    } catch (...) {                                             \
+      /* make sure the map is left in a consistent state */     \
+      postSort();                                               \
+      throw;                                                    \
+    }                                                           \
+    postSort();                                                 \
   } while(0)
 
-void c_Map::asort(int sort_flags, bool ascending) {
+void BaseMap::asort(int sort_flags, bool ascending) {
   SORT_BODY(MapValAccessor);
 }
 
-void c_Map::ksort(int sort_flags, bool ascending) {
+void BaseMap::ksort(int sort_flags, bool ascending) {
   SORT_BODY(MapKeyAccessor);
 }
 
@@ -2243,41 +2277,185 @@ void c_Map::ksort(int sort_flags, bool ascending) {
 #undef CALL_SORT
 #undef SORT_BODY
 
-#define USER_SORT_BODY(acc_type)                                        \
-  do {                                                                  \
-    if (!m_size) {                                                      \
-      return true;                                                      \
-    }                                                                   \
-    CallCtx ctx;                                                        \
-    JIT::CallerFrame cf;                                                \
-    vm_decode_function(cmp_function, cf(), false, ctx);                 \
-    if (!ctx.func) {                                                    \
-      return false;                                                     \
-    }                                                                   \
-    preSort<acc_type>(acc_type(), false);                               \
-    SCOPE_EXIT {                                                        \
-      /* make sure the map is left in a consistent state */             \
-      postSort();                                                       \
-    };                                                                  \
-    ElmUCompare<acc_type> comp;                                         \
-    comp.ctx = &ctx;                                                    \
-    HPHP::Sort::sort(data(), data() + m_size, comp);                    \
-    return true;                                                        \
+#define USER_SORT_BODY(acc_type)                                \
+  do {                                                          \
+    if (!m_size) {                                              \
+      return true;                                              \
+    }                                                           \
+    CallCtx ctx;                                                \
+    JIT::CallerFrame cf;                                        \
+    vm_decode_function(cmp_function, cf(), false, ctx);         \
+    if (!ctx.func) {                                            \
+      return false;                                             \
+    }                                                           \
+    preSort<acc_type>(acc_type(), false);                       \
+    SCOPE_EXIT {                                                \
+      /* make sure the map is left in a consistent state */     \
+      postSort();                                               \
+    };                                                          \
+    ElmUCompare<acc_type> comp;                                 \
+    comp.ctx = &ctx;                                            \
+    HPHP::Sort::sort(data(), data() + m_size, comp);            \
+    return true;                                                \
   } while (0)
 
-bool c_Map::uasort(CVarRef cmp_function) {
+bool BaseMap::uasort(CVarRef cmp_function) {
   USER_SORT_BODY(MapValAccessor);
 }
 
-bool c_Map::uksort(CVarRef cmp_function) {
+bool BaseMap::uksort(CVarRef cmp_function) {
   USER_SORT_BODY(MapKeyAccessor);
 }
 
 #undef USER_SORT_BODY
 
-c_MapIterator::c_MapIterator(Class* cb) :
-    ExtObjectData(cb) {
+TypedValue* BaseMap::OffsetGet(ObjectData* obj, TypedValue* key) {
+  assert(key->m_type != KindOfRef);
+  auto mp = static_cast<BaseMap*>(obj);
+  if (key->m_type == KindOfInt64) {
+    return mp->at(key->m_data.num);
+  }
+  if (IS_STRING_TYPE(key->m_type)) {
+    return mp->at(key->m_data.pstr);
+  }
+  throwBadKeyType();
+  return nullptr;
 }
+
+void BaseMap::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
+  assert(key->m_type != KindOfRef);
+  assert(val->m_type != KindOfRef);
+  auto mp = static_cast<BaseMap*>(obj);
+  if (key->m_type == KindOfInt64) {
+    mp->set(key->m_data.num, val);
+    return;
+  }
+  if (IS_STRING_TYPE(key->m_type)) {
+    mp->set(key->m_data.pstr, val);
+    return;
+  }
+  throwBadKeyType();
+}
+
+bool BaseMap::OffsetIsset(ObjectData* obj, TypedValue* key) {
+  assert(key->m_type != KindOfRef);
+  auto mp = static_cast<BaseMap*>(obj);
+  TypedValue* result;
+  if (key->m_type == KindOfInt64) {
+    result = mp->get(key->m_data.num);
+  } else if (IS_STRING_TYPE(key->m_type)) {
+    result = mp->get(key->m_data.pstr);
+  } else {
+    throwBadKeyType();
+    result = nullptr;
+  }
+  return result ? !cellIsNull(result) : false;
+}
+
+bool BaseMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
+  assert(key->m_type != KindOfRef);
+  auto mp = static_cast<BaseMap*>(obj);
+  TypedValue* result;
+  if (key->m_type == KindOfInt64) {
+    result = mp->get(key->m_data.num);
+  } else if (IS_STRING_TYPE(key->m_type)) {
+    result = mp->get(key->m_data.pstr);
+  } else {
+    throwBadKeyType();
+    result = nullptr;
+  }
+  return result ? !cellToBool(*result) : true;
+}
+
+bool BaseMap::OffsetContains(ObjectData* obj, TypedValue* key) {
+  assert(key->m_type != KindOfRef);
+  auto mp = static_cast<BaseMap*>(obj);
+  if (key->m_type == KindOfInt64) {
+    return mp->contains(key->m_data.num);
+  } else if (IS_STRING_TYPE(key->m_type)) {
+    return mp->contains(key->m_data.pstr);
+  } else {
+    throwBadKeyType();
+    return false;
+  }
+}
+
+void BaseMap::OffsetUnset(ObjectData* obj, TypedValue* key) {
+  assert(key->m_type != KindOfRef);
+  auto mp = static_cast<BaseMap*>(obj);
+  if (key->m_type == KindOfInt64) {
+    mp->remove(key->m_data.num);
+    return;
+  }
+  if (IS_STRING_TYPE(key->m_type)) {
+    mp->remove(key->m_data.pstr);
+    return;
+  }
+  throwBadKeyType();
+}
+
+// FIXME: for legacy reasons, map equality is done independent of the order
+// of elements
+bool c_Map::Equals(const ObjectData* obj1, const ObjectData* obj2) {
+  auto mp1 = static_cast<const c_Map*>(obj1);
+  auto mp2 = static_cast<const c_Map*>(obj2);
+  if (mp1->m_size != mp2->m_size) return false;
+  for (uint i = 0; i < mp1->iterLimit(); ++i) {
+    if (mp1->isTombstone(i)) continue;
+    BaseMap::Elm& p = mp1->data()[i];
+    TypedValue* tv2;
+    if (p.hasIntKey()) {
+      tv2 = mp2->get(p.ikey);
+    } else {
+      assert(p.hasStrKey());
+      tv2 = mp2->get(p.skey);
+    }
+    if (!tv2) return false;
+    if (!equal(tvAsCVarRef(&p.data), tvAsCVarRef(tv2))) return false;
+  }
+  return true;
+}
+
+void BaseMap::Unserialize(ObjectData* obj,
+                          VariableUnserializer* uns,
+                          int64_t sz,
+                          char type) {
+  if (type != 'K') {
+    throw Exception("Map does not support the '%c' serialization "
+                    "format", type);
+  }
+  auto mp = static_cast<BaseMap*>(obj);
+  mp->reserve(sz);
+  for (int64_t i = 0; i < sz; ++i) {
+    Variant k;
+    k.unserialize(uns, Uns::Mode::ColKey);
+    int32_t* p;
+    Elm* e;
+    if (k.isInteger()) {
+      auto h = k.toInt64();
+      p = mp->findForInsert(h);
+      if (UNLIKELY(validPos(*p))) goto do_unserialize;
+      e = &mp->allocElm(p);
+      e->setIntKey(h);
+    } else if (k.isString()) {
+      auto key = k.getStringData();
+      auto h = key->hash();
+      p = mp->findForInsert(key, h);
+      if (UNLIKELY(validPos(*p))) goto do_unserialize;
+      e = &mp->allocElm(p);
+      e->setStrKey(key, h);
+    } else {
+      throw Exception("Invalid key");
+    }
+    e->data.m_type = KindOfNull;
+do_unserialize:
+    tvAsVariant(&e->data).unserialize(uns, Uns::Mode::ColValue);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+c_MapIterator::c_MapIterator(Class* cb) : ExtObjectData(cb) {}
 
 c_MapIterator::~c_MapIterator() {
 }
@@ -2286,7 +2464,7 @@ void c_MapIterator::t___construct() {
 }
 
 Variant c_MapIterator::t_current() {
-  c_Map* mp = m_obj.get();
+  auto const mp = m_obj.get();
   if (UNLIKELY(m_version != mp->getVersion())) {
     throw_collection_modified();
   }
@@ -2297,7 +2475,7 @@ Variant c_MapIterator::t_current() {
 }
 
 Variant c_MapIterator::t_key() {
-  c_Map* mp = m_obj.get();
+  auto const mp = m_obj.get();
   if (UNLIKELY(m_version != mp->getVersion())) {
     throw_collection_modified();
   }
@@ -2308,12 +2486,12 @@ Variant c_MapIterator::t_key() {
 }
 
 bool c_MapIterator::t_valid() {
-  c_Map* mp = m_obj.get();
+  auto const mp = m_obj.get();
   return mp->iter_valid(m_pos);
 }
 
 void c_MapIterator::t_next() {
-  c_Map* mp = m_obj.get();
+  auto const mp = m_obj.get();
   if (UNLIKELY(m_version != mp->getVersion())) {
     throw_collection_modified();
   }
@@ -2321,7 +2499,7 @@ void c_MapIterator::t_next() {
 }
 
 void c_MapIterator::t_rewind() {
-  c_Map* mp = m_obj.get();
+  auto const mp = m_obj.get();
   if (UNLIKELY(m_version != mp->getVersion())) {
     throw_collection_modified();
   }
@@ -2330,1275 +2508,63 @@ void c_MapIterator::t_rewind() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define CONNECT_TO_GLOBAL_DLLIST(mapobj, element)                       \
-do {                                                                    \
-  (element)->pListLast = (mapobj)->m_pListTail;                         \
-  (mapobj)->m_pListTail = (element);                                    \
-  (element)->pListNext = nullptr;                                       \
-  if ((element)->pListLast != nullptr) {                                \
-    (element)->pListLast->pListNext = (element);                        \
-  }                                                                     \
-  if (!(mapobj)->m_pListHead) {                                         \
-    (mapobj)->m_pListHead = (element);                                  \
-  }                                                                     \
-} while (false)
-
-static const char emptyStableMapSlot[sizeof(c_StableMap::Bucket*)] = { 0 };
-
-c_StableMap::c_StableMap(Class* cb)
-  : ExtObjectDataFlags(cb)
-  , m_version(0)
-  , m_pListHead(nullptr)
-  , m_pListTail(nullptr)
-{
-  m_size = 0;
-  m_nTableSize = 0;
-  m_nTableMask = 0;
-  m_arBuckets = (Bucket**)emptyStableMapSlot;
-
+c_StableMap::c_StableMap(Class* cb) : BaseMap(cb) {
   o_subclassData.u16 = Collection::StableMapType;
 }
 
-c_StableMap::~c_StableMap() {
-  deleteBuckets();
-  freeData();
-}
-
-void c_StableMap::freeData() {
-  if (m_arBuckets != (Bucket**)emptyStableMapSlot) {
-    smart_free(m_arBuckets);
-  }
-  m_arBuckets = (Bucket**)emptyStableMapSlot;
-}
-
-void c_StableMap::deleteBuckets() {
-  Bucket* p = m_pListHead;
-  while (p) {
-    Bucket* q = p;
-    p = p->pListNext;
-    q->release();
-  }
-}
-
 void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
-  if (iterable.isNull()) return;
-  init(iterable);
-}
-
-Array c_StableMap::toArrayImpl() const {
-  ArrayInit ai(m_size);
-  Bucket* p = m_pListHead;
-  while (p) {
-    if (p->hasIntKey()) {
-      ai.set((int64_t)p->ikey, tvAsCVarRef(&p->data));
-    } else {
-      ai.set(*(const String*)(&p->skey), tvAsCVarRef(&p->data));
-    }
-    p = p->pListNext;
-  }
-  return ai.create();
+  php_construct(iterable);
 }
 
 c_StableMap* c_StableMap::Clone(ObjectData* obj) {
-  auto thiz = static_cast<c_StableMap*>(obj);
-  auto target = static_cast<c_StableMap*>(obj->cloneImpl());
-
-  if (!thiz->m_size) return target;
-
-  target->m_size = thiz->m_size;
-  target->m_nTableSize = thiz->m_nTableSize;
-  target->m_nTableMask = thiz->m_nTableMask;
-  target->m_arBuckets =
-    (Bucket**)smart_calloc(thiz->m_nTableSize, sizeof(Bucket*));
-
-  Bucket *last = nullptr;
-  for (Bucket* p = thiz->m_pListHead; p; p = p->pListNext) {
-    Bucket *np = Bucket::Make();
-    cellDup(p->data, np->data);
-    uint nIndex;
-    if (p->hasIntKey()) {
-      np->setIntKey(p->ikey);
-      nIndex = p->ikey & target->m_nTableMask;
-    } else {
-      np->setStrKey(p->skey, p->hash());
-      nIndex = p->hash() & target->m_nTableMask;
-    }
-
-    np->pNext = target->m_arBuckets[nIndex];
-    target->m_arBuckets[nIndex] = np;
-
-    if (last) {
-      last->pListNext = np;
-      np->pListLast = last;
-    } else {
-      target->m_pListHead = np;
-    }
-    last = np;
-  }
-  target->m_pListTail = last;
-
-  return target;
-}
-
-void c_StableMap::init(CVarRef t) {
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(t, sz);
-  if (sz) {
-    reserve(sz);
-  }
-  for (; iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    if (k.isInteger()) {
-      update(k.toInt64(), tv);
-    } else if (k.isString()) {
-      update(k.getStringData(), tv);
-    } else {
-      throwBadKeyType();
-    }
-  }
-}
-
-Object c_StableMap::t_add(CVarRef val) {
-  TypedValue* tv = cvarToCell(&val);
-  add(tv);
-  return this;
-}
-
-Object c_StableMap::t_addall(CVarRef iterable) {
-  if (iterable.isNull()) return this;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  reserve(std::max(sz, size_t(m_size)));
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    add(tv);
-  }
-  return this;
-}
-
-Object c_StableMap::t_clear() {
-  deleteBuckets();
-  freeData();
-  m_pListHead = nullptr;
-  m_pListTail = nullptr;
-  m_size = 0;
-  m_nTableSize = 0;
-  m_nTableMask = 0;
-  m_arBuckets = (Bucket**)emptyStableMapSlot;
-  return this;
-}
-
-bool c_StableMap::t_isempty() {
-  return !toBoolImpl();
-}
-
-int64_t c_StableMap::t_count() {
-  return m_size;
-}
-
-Object c_StableMap::t_items() {
-  return SystemLib::AllocLazyKVZipIterableObject(this);
-}
-
-Object c_StableMap::t_keys() {
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
-  vec->reserve(m_size);
-  uint64_t j = 0;
-  for (Bucket* p = m_pListHead; p; p = p->pListNext) {
-    if (p->hasIntKey()) {
-      vec->m_data[j].m_data.num = p->ikey;
-      vec->m_data[j].m_type = KindOfInt64;
-    } else {
-      p->skey->incRefCount();
-      vec->m_data[j].m_data.pstr = p->skey;
-      vec->m_data[j].m_type = KindOfString;
-    }
-    ++vec->m_size;
-    ++j;
-  }
-  return obj;
-}
-
-Object c_StableMap::t_lazy() {
-  return SystemLib::AllocLazyKeyedIterableViewObject(this);
-}
-
-Object c_StableMap::t_kvzip() {
-  c_Vector* vec;
-  Object obj = vec = NEWOBJ(c_Vector)();
-  vec->reserve(m_size);
-  uint64_t j = 0;
-  for (Bucket* p = m_pListHead; p; p = p->pListNext) {
-    c_Pair* pair = NEWOBJ(c_Pair)();
-    pair->incRefCount();
-    if (p->hasIntKey()) {
-      pair->elm0.m_data.num = p->ikey;
-      pair->elm0.m_type = KindOfInt64;
-    } else {
-      p->skey->incRefCount();
-      pair->elm0.m_data.pstr = p->skey;
-      pair->elm0.m_type = KindOfString;
-    }
-    ++pair->m_size;
-    pair->initAdd(&p->data);
-    vec->m_data[j].m_data.pobj = pair;
-    vec->m_data[j].m_type = KindOfObject;
-    ++vec->m_size;
-    ++j;
-  }
-  return obj;
-}
-
-Variant c_StableMap::t_at(CVarRef key) {
-  if (key.isInteger()) {
-    return tvAsCVarRef(at(key.toInt64()));
-  } else if (key.isString()) {
-    return tvAsCVarRef(at(key.getStringData()));
-  }
-  throwBadKeyType();
-  return uninit_null();
-}
-
-Variant c_StableMap::t_get(CVarRef key) {
-  if (key.isInteger()) {
-    TypedValue* tv = get(key.toInt64());
-    if (tv) {
-      return tvAsCVarRef(tv);
-    } else {
-      return uninit_null();
-    }
-  } else if (key.isString()) {
-    TypedValue* tv = get(key.getStringData());
-    if (tv) {
-      return tvAsCVarRef(tv);
-    } else {
-      return uninit_null();
-    }
-  }
-  throwBadKeyType();
-  return uninit_null();
-}
-
-Object c_StableMap::t_set(CVarRef key, CVarRef value) {
-  TypedValue* val = cvarToCell(&value);
-  if (key.isInteger()) {
-    update(key.toInt64(), val);
-  } else if (key.isString()) {
-    update(key.getStringData(), val);
-  } else {
-    throwBadKeyType();
-  }
-  return this;
-}
-
-Object c_StableMap::t_setall(CVarRef iterable) {
-  if (iterable.isNull()) return this;
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  for (; iter; ++iter) {
-    Variant k = iter.first();
-    Variant v = iter.second();
-    TypedValue* tvKey = cvarToCell(&k);
-    TypedValue* tvVal = cvarToCell(&v);
-    if (tvKey->m_type == KindOfInt64) {
-      set(tvKey->m_data.num, tvVal);
-    } else if (IS_STRING_TYPE(tvKey->m_type)) {
-      set(tvKey->m_data.pstr, tvVal);
-    } else {
-      throwBadKeyType();
-    }
-  }
-  return this;
-}
-
-Object c_StableMap::t_put(CVarRef key, CVarRef value) {
-  return t_set(key, value);
-}
-
-bool c_StableMap::t_contains(CVarRef key) {
-  DataType t = key.getType();
-  if (t == KindOfInt64) {
-    return contains(key.toInt64());
-  }
-  if (IS_STRING_TYPE(t)) {
-    return contains(key.getStringData());
-  }
-  throwBadKeyType();
-  return false;
-}
-
-bool c_StableMap::t_containskey(CVarRef key) {
-  return t_contains(key);
-}
-
-Object c_StableMap::t_remove(CVarRef key) {
-  DataType t = key.getType();
-  if (t == KindOfInt64) {
-    remove(key.toInt64());
-  } else if (IS_STRING_TYPE(t)) {
-    remove(key.getStringData());
-  } else {
-    throwBadKeyType();
-  }
-  return this;
-}
-
-Object c_StableMap::t_removekey(CVarRef key) {
-  return t_remove(key);
-}
-
-Array c_StableMap::t_toarray() {
-  return toArrayImpl();
-}
-
-Object c_StableMap::t_values() {
-  c_Vector* target;
-  Object ret = target = NEWOBJ(c_Vector)();
-  int64_t sz = m_size;
-  if (!sz) {
-    return ret;
-  }
-  TypedValue* data;
-  target->m_capacity = target->m_size = m_size;
-  target->m_data = data = (TypedValue*)smart_malloc(sz * sizeof(TypedValue));
-  Bucket* p = m_pListHead;
-  for (int64_t i = 0; i < sz; ++i) {
-    assert(p);
-    cellDup(p->data, data[i]);
-    p = p->pListNext;
-  }
-  return ret;
-}
-
-Array c_StableMap::t_tokeysarray() {
-  PackedArrayInit ai(m_size);
-  Bucket* p = m_pListHead;
-  while (p) {
-    if (p->hasIntKey()) {
-      ai.append(int64_t{p->ikey});
-    } else {
-      ai.append(*(const String*)(&p->skey));
-    }
-    p = p->pListNext;
-  }
-  return ai.toArray();
-}
-
-Array c_StableMap::t_tovaluesarray() {
-  PackedArrayInit ai(m_size);
-  Bucket* p = m_pListHead;
-  while (p) {
-    ai.append(tvAsCVarRef(&p->data));
-    p = p->pListNext;
-  }
-  return ai.toArray();
-}
-
-Object c_StableMap::t_differencebykey(CVarRef it) {
-  if (!it.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter it must be an instance of Iterable"));
-    throw e;
-  }
-  ObjectData* obj = it.getObjectData();
-  c_StableMap* target = c_StableMap::Clone(this);
-  auto ret = Object::attach(target);
-  if (obj->getCollectionType() == Collection::StableMapType) {
-    auto smp = static_cast<c_StableMap*>(obj);
-    c_StableMap::Bucket* p = smp->m_pListHead;
-    while (p) {
-      if (p->hasIntKey()) {
-        target->remove((int64_t)p->ikey);
-      } else {
-        target->remove(p->skey);
-      }
-      p = p->pListNext;
-    }
-  }
-  for (ArrayIter iter = obj->begin(); iter; ++iter) {
-    Variant k = iter.first();
-    if (k.isInteger()) {
-      target->remove(k.toInt64());
-    } else {
-      assert(k.isString());
-      target->remove(k.getStringData());
-    }
-  }
-  return ret;
-}
-
-Object c_StableMap::t_getiterator() {
-  c_StableMapIterator* it = NEWOBJ(c_StableMapIterator)();
-  it->m_obj = this;
-  it->m_pos = iter_begin();
-  it->m_version = getVersion();
-  return it;
-}
-
-Object c_StableMap::t_map(CVarRef callback) {
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
-    throw e;
-  }
-  c_StableMap* smp;
-  Object obj = smp = NEWOBJ(c_StableMap)();
-  if (!m_size) return obj;
-  smp->m_size = m_size;
-  smp->m_nTableSize = m_nTableSize;
-  smp->m_nTableMask = m_nTableMask;
-  smp->m_arBuckets = (Bucket**)smart_calloc(m_nTableSize, sizeof(Bucket*));
-  Bucket *last = nullptr;
-  for (Bucket* p = m_pListHead; p; p = p->pListNext) {
-    Variant ret;
-    int32_t version = m_version;
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p->data);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
-    Bucket *np = Bucket::Make(ret.asCell());
-    uint nIndex;
-    if (p->hasIntKey()) {
-      np->setIntKey(p->ikey);
-      nIndex = p->ikey & smp->m_nTableMask;
-    } else {
-      np->setStrKey(p->skey, p->hash());
-      nIndex = p->hash() & smp->m_nTableMask;
-    }
-    np->pNext = smp->m_arBuckets[nIndex];
-    smp->m_arBuckets[nIndex] = np;
-    if (last) {
-      last->pListNext = np;
-      np->pListLast = last;
-    } else {
-      smp->m_pListHead = np;
-    }
-    last = np;
-  }
-  smp->m_pListTail = last;
-  return obj;
-}
-
-Object c_StableMap::t_mapwithkey(CVarRef callback) {
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
-    throw e;
-  }
-  c_StableMap* smp;
-  Object obj = smp = NEWOBJ(c_StableMap)();
-  if (!m_size) return obj;
-  smp->m_size = m_size;
-  smp->m_nTableSize = m_nTableSize;
-  smp->m_nTableMask = m_nTableMask;
-  smp->m_arBuckets = (Bucket**)smart_calloc(m_nTableSize, sizeof(Bucket*));
-  Bucket *last = nullptr;
-  for (Bucket* p = m_pListHead; p; p = p->pListNext) {
-    Variant ret;
-    int32_t version = m_version;
-    TypedValue args[2] = {
-      (p->hasIntKey() ? make_tv<KindOfInt64>(p->ikey)
-                      : make_tv<KindOfString>(p->skey)),
-      p->data
-    };
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
-    Bucket *np = Bucket::Make(ret.asTypedValue());
-    uint nIndex;
-    if (p->hasIntKey()) {
-      np->setIntKey(p->ikey);
-      nIndex = p->ikey & smp->m_nTableMask;
-    } else {
-      np->setStrKey(p->skey, p->hash());
-      nIndex = p->hash() & smp->m_nTableMask;
-    }
-    np->pNext = smp->m_arBuckets[nIndex];
-    smp->m_arBuckets[nIndex] = np;
-    if (last) {
-      last->pListNext = np;
-      np->pListLast = last;
-    } else {
-      smp->m_pListHead = np;
-    }
-    last = np;
-  }
-  smp->m_pListTail = last;
-  return obj;
-}
-
-Object c_StableMap::t_filter(CVarRef callback) {
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
-    throw e;
-  }
-  c_StableMap* smp;
-  Object obj = smp = NEWOBJ(c_StableMap)();
-  if (!m_size) return obj;
-  for (Bucket* p = m_pListHead; p; p = p->pListNext) {
-    Variant ret;
-    int32_t version = m_version;
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 1, &p->data);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
-    if (!ret.toBoolean()) continue;
-    if (p->hasIntKey()) {
-      smp->update(p->ikey, &p->data);
-    } else {
-      smp->update(p->skey, &p->data);
-    }
-  }
-  return obj;
-}
-
-Object c_StableMap::t_filterwithkey(CVarRef callback) {
-  CallCtx ctx;
-  vm_decode_function(callback, nullptr, false, ctx);
-  if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
-    throw e;
-  }
-  c_StableMap* smp;
-  Object obj = smp = NEWOBJ(c_StableMap)();
-  if (!m_size) return obj;
-  for (Bucket* p = m_pListHead; p; p = p->pListNext) {
-    Variant ret;
-    int32_t version = m_version;
-    TypedValue args[2] = {
-      (p->hasIntKey() ? make_tv<KindOfInt64>(p->ikey)
-                      : make_tv<KindOfString>(p->skey)),
-      p->data
-    };
-    g_vmContext->invokeFuncFew(ret.asTypedValue(), ctx, 2, args);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
-    if (!ret.toBoolean()) continue;
-    if (p->hasIntKey()) {
-      smp->update(p->ikey, &p->data);
-    } else {
-      smp->update(p->skey, &p->data);
-    }
-  }
-  return obj;
-}
-
-Object c_StableMap::t_zip(CVarRef iterable) {
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  c_StableMap* smp;
-  Object obj = smp = NEWOBJ(c_StableMap)();
-  smp->reserve(std::min(sz, size_t(m_size)));
-  for (Bucket* p = m_pListHead; p && iter; p = p->pListNext, ++iter) {
-    Variant v = iter.second();
-    c_Pair* pair;
-    Object pairObj = pair = NEWOBJ(c_Pair)();
-    pair->initAdd(&p->data);
-    pair->initAdd(cvarToCell(&v));
-    TypedValue tv;
-    tv.m_data.pobj = pair;
-    tv.m_type = KindOfObject;
-    if (p->hasIntKey()) {
-      smp->update(p->ikey, &tv);
-    } else {
-      smp->update(p->skey, &tv);
-    }
-  }
-  return obj;
-}
-
-Object c_StableMap::ti_fromitems(CVarRef iterable) {
-  if (iterable.isNull()) return NEWOBJ(c_StableMap)();
-  size_t sz;
-  ArrayIter iter = getArrayIterHelper(iterable, sz);
-  c_StableMap* target;
-  Object ret = target = NEWOBJ(c_StableMap)();
-  if (sz) {
-    target->reserve(sz);
-  }
-  for (; iter; ++iter) {
-    Variant v = iter.second();
-    TypedValue* tv = cvarToCell(&v);
-    if (UNLIKELY(tv->m_type != KindOfObject ||
-                 tv->m_data.pobj->getVMClass() != c_Pair::classof())) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Parameter must be an instance of Iterable<Pair>"));
-      throw e;
-    }
-    auto pair = static_cast<c_Pair*>(tv->m_data.pobj);
-    TypedValue* tvKey = &pair->elm0;
-    TypedValue* tvValue = &pair->elm1;
-    assert(tvKey->m_type != KindOfRef);
-    assert(tvValue->m_type != KindOfRef);
-    if (tvKey->m_type == KindOfInt64) {
-      target->update(tvKey->m_data.num, tvValue);
-    } else if (IS_STRING_TYPE(tvKey->m_type)) {
-      target->update(tvKey->m_data.pstr, tvValue);
-    } else {
-      throwBadKeyType();
-    }
-  }
-  return ret;
-}
-
-Object c_StableMap::ti_fromarray(CVarRef arr) {
-  if (!arr.isArray()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter arr must be an array"));
-    throw e;
-  }
-  c_StableMap* smp;
-  Object ret = smp = NEWOBJ(c_StableMap)();
-  ArrayData* ad = arr.getArrayData();
-  for (ssize_t pos = ad->iter_begin(); pos != ArrayData::invalid_index;
-       pos = ad->iter_advance(pos)) {
-    Variant k = ad->getKey(pos);
-    Variant v = ad->getValue(pos);
-    TypedValue* tv = cvarToCell(&v);
-    if (k.isInteger()) {
-      smp->update(k.toInt64(), tv);
-    } else {
-      assert(k.isString());
-      smp->update(k.getStringData(), tv);
-    }
-  }
-  return ret;
-}
-
-void c_StableMap::throwOOB(int64_t key) {
-  throwIntOOB(key);
-}
-
-void c_StableMap::throwOOB(StringData* key) {
-  throwStrOOB(key);
-}
-
-void c_StableMap::add(TypedValue* val) {
-  if (UNLIKELY(val->m_type != KindOfObject ||
-               val->m_data.pobj->getVMClass() != c_Pair::classof())) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be an instance of Pair"));
-    throw e;
-  }
-  auto pair = static_cast<c_Pair*>(val->m_data.pobj);
-  TypedValue* tvKey = &pair->elm0;
-  TypedValue* tvValue = &pair->elm1;
-  assert(tvKey->m_type != KindOfRef);
-  assert(tvValue->m_type != KindOfRef);
-  if (tvKey->m_type == KindOfInt64) {
-    update(tvKey->m_data.num, tvValue);
-  } else if (IS_STRING_TYPE(tvKey->m_type)) {
-    update(tvKey->m_data.pstr, tvValue);
-  } else {
-    throwBadKeyType();
-  }
-}
-
-ALWAYS_INLINE
-bool sm_hit_string_key(const c_StableMap::Bucket* p, const char* k,
-                       int len, int32_t hash) {
-  if (p->hasIntKey()) return false;
-  const char* data = p->skey->data();
-  return data == k || (p->hash() == hash &&
-                       p->skey->size() == len &&
-                       memcmp(data, k, len) == 0);
-}
-
-c_StableMap::Bucket* c_StableMap::find(int64_t h) const {
-  for (Bucket* p = m_arBuckets[h & m_nTableMask]; p; p = p->pNext) {
-    if (p->hasIntKey() && p->ikey == h) {
-      return p;
-    }
-  }
-  return nullptr;
-}
-
-c_StableMap::Bucket* c_StableMap::find(const char* k, int len,
-                                       strhash_t prehash) const {
-  int32_t hash = c_StableMap::Bucket::encodeHash(prehash);
-  for (Bucket* p = m_arBuckets[prehash & m_nTableMask]; p; p = p->pNext) {
-    if (sm_hit_string_key(p, k, len, hash)) return p;
-  }
-  return nullptr;
-}
-
-c_StableMap::Bucket** c_StableMap::findForErase(int64_t h) const {
-  Bucket** ret = &(m_arBuckets[h & m_nTableMask]);
-  Bucket* p = *ret;
-  while (p) {
-    if (p->hasIntKey() && p->ikey == h) {
-      return ret;
-    }
-    ret = &(p->pNext);
-    p = *ret;
-  }
-  return nullptr;
-}
-
-c_StableMap::Bucket** c_StableMap::findForErase(const char* k, int len,
-                                                strhash_t prehash) const {
-  Bucket** ret = &(m_arBuckets[prehash & m_nTableMask]);
-  Bucket* p = *ret;
-  int32_t hash = c_StableMap::Bucket::encodeHash(prehash);
-  while (p) {
-    if (sm_hit_string_key(p, k, len, hash)) return ret;
-    ret = &(p->pNext);
-    p = *ret;
-  }
-  return nullptr;
-}
-
-bool c_StableMap::update(int64_t h, TypedValue* data) {
-  assert(data->m_type != KindOfRef);
-  Bucket* p = find(h);
-  if (p) {
-    tvRefcountedIncRef(data);
-    tvRefcountedDecRef(&p->data);
-    tvCopy(*data, p->data);
-    return true;
-  }
-  ++m_version;
-  if (++m_size > m_nTableSize) {
-    adjustCapacity();
-  }
-  p = Bucket::Make(data);
-  p->setIntKey(h);
-  uint nIndex = (h & m_nTableMask);
-  p->pNext = m_arBuckets[nIndex];
-  m_arBuckets[nIndex] = p;
-  CONNECT_TO_GLOBAL_DLLIST(this, p);
-  return true;
-}
-
-bool c_StableMap::update(StringData *key, TypedValue* data) {
-  assert(data->m_type != KindOfRef);
-  strhash_t h = key->hash();
-  Bucket* p = find(key->data(), key->size(), h);
-  if (p) {
-    tvRefcountedIncRef(data);
-    tvRefcountedDecRef(&p->data);
-    tvCopy(*data, p->data);
-    return true;
-  }
-  ++m_version;
-  if (++m_size > m_nTableSize) {
-    adjustCapacity();
-  }
-  p = Bucket::Make(data);
-  p->setStrKey(key, h);
-  uint nIndex = (h & m_nTableMask);
-  p->pNext = m_arBuckets[nIndex];
-  m_arBuckets[nIndex] = p;
-  CONNECT_TO_GLOBAL_DLLIST(this, p);
-  return true;
-}
-
-void c_StableMap::erase(Bucket** prev) {
-  if (!prev) {
-    return;
-  }
-  Bucket* p = *prev;
-  if (p) {
-    *prev = p->pNext;
-    if (p->pListLast) {
-      p->pListLast->pListNext = p->pListNext;
-    } else {
-      /* Deleting the head of the list */
-      assert(m_pListHead == p);
-      m_pListHead = p->pListNext;
-    }
-    if (p->pListNext) {
-      p->pListNext->pListLast = p->pListLast;
-    } else {
-      assert(m_pListTail == p);
-      m_pListTail = p->pListLast;
-    }
-    m_size--;
-    p->release();
-  }
-}
-
-void c_StableMap::adjustCapacityImpl(int64_t sz) {
-  ++m_version;
-  if (sz < 4) {
-    if (sz <= 0) return;
-    sz = 4;
-  } else {
-    sz = Util::roundUpToPowerOfTwo(sz);
-  }
-  if (m_nTableSize == 0) {
-    m_nTableSize = sz;
-    m_nTableMask = m_nTableSize - 1;
-    m_arBuckets = (Bucket**)smart_calloc(m_nTableSize, sizeof(Bucket*));
-    return;
-  }
-  m_nTableSize = sz;
-  m_nTableMask = m_nTableSize - 1;
-  smart_free(m_arBuckets);
-  m_arBuckets = (Bucket**)smart_calloc(m_nTableSize, sizeof(Bucket*));
-  for (Bucket* p = m_pListHead; p; p = p->pListNext) {
-    uint nIndex = (p->hashKey() & m_nTableMask);
-    p->pNext = m_arBuckets[nIndex];
-    m_arBuckets[nIndex] = p;
-  }
-}
-
-ssize_t c_StableMap::iter_next(ssize_t pos) const {
-  if (pos == 0) {
-    return 0;
-  }
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  p = p->pListNext;
-  return reinterpret_cast<ssize_t>(p);
-}
-
-ssize_t c_StableMap::iter_prev(ssize_t pos) const {
-  if (pos == 0) {
-    return 0;
-  }
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  p = p->pListLast;
-  return reinterpret_cast<ssize_t>(p);
-}
-
-Variant c_StableMap::iter_key(ssize_t pos) const {
-  assert(pos);
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  if (p->hasStrKey()) {
-    return p->skey;
-  }
-  return (int64_t)p->ikey;
-}
-
-TypedValue* c_StableMap::iter_value(ssize_t pos) const {
-  assert(pos);
-  Bucket* p = reinterpret_cast<Bucket*>(pos);
-  return &p->data;
-}
-
-struct StableMapKeyAccessor {
-  typedef const c_StableMap::Bucket* ElmT;
-  bool isInt(ElmT elm) const { return elm->hasIntKey(); }
-  bool isStr(ElmT elm) const { return elm->hasStrKey(); }
-  int64_t getInt(ElmT elm) const { return elm->ikey; }
-  StringData* getStr(ElmT elm) const { return elm->skey; }
-  Variant getValue(ElmT elm) const {
-    if (isInt(elm)) {
-      return getInt(elm);
-    }
-    assert(isStr(elm));
-    return getStr(elm);
-  }
-};
-
-struct StableMapValAccessor {
-  typedef const c_StableMap::Bucket* ElmT;
-  bool isInt(ElmT elm) const { return elm->data.m_type == KindOfInt64; }
-  bool isStr(ElmT elm) const { return IS_STRING_TYPE(elm->data.m_type); }
-  int64_t getInt(ElmT elm) const { return elm->data.m_data.num; }
-  StringData* getStr(ElmT elm) const { return elm->data.m_data.pstr; }
-  Variant getValue(ElmT elm) const { return tvAsCVarRef(&elm->data); }
-};
-
-/**
- * preSort() does an initial pass over the array to do some preparatory work
- * before the sort algorithm runs. For sorts that use builtin comparators, the
- * types of values are also observed during this first pass. By observing the
- * types during this initial pass, we can often use a specialized comparator
- * and avoid performing type checks during the actual sort.
- */
-template <typename AccessorT>
-c_StableMap::SortFlavor c_StableMap::preSort(Bucket** buffer,
-                                             const AccessorT& acc,
-                                             bool checkTypes) {
-  assert(m_size > 0);
-  bool allInts UNUSED = true;
-  bool allStrs UNUSED = true;
-  uint i = 0;
-  // Build up an auxillary array of Bucket pointers. We will
-  // sort this auxillary array, and then we will rebuild the
-  // linked list based on the result.
-  if (checkTypes) {
-    for (Bucket* p = m_pListHead; p; ++i, p = p->pListNext) {
-      allInts = (allInts && acc.isInt(p));
-      allStrs = (allStrs && acc.isStr(p));
-      buffer[i] = p;
-    }
-    return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
-  } else {
-    for (Bucket* p = m_pListHead; p; ++i, p = p->pListNext) {
-      buffer[i] = p;
-    }
-    return GenericSort;
-  }
-}
-
-/**
- * postSort() runs after sorting has been performed. For StableMap, postSort()
- * handles rewiring the linked list according to the results of the sort.
- */
-void c_StableMap::postSort(Bucket** buffer) {
-  uint last = m_size-1;
-  Bucket* b = m_pListHead = buffer[0];
-  b->pListLast = nullptr;
-  for (uint i = 0; i < last; ++i) {
-    Bucket* bNext = buffer[i+1];
-    b->pListNext = bNext;
-    bNext->pListLast = b;
-    b = bNext;
-  }
-  m_pListTail = b;
-  b->pListNext = nullptr;
-}
-
-#define SORT_CASE(flag, cmp_type, acc_type) \
-  case flag: { \
-    if (ascending) { \
-      cmp_type##Compare<acc_type, flag, true> comp; \
-      HPHP::Sort::sort(buffer, buffer + m_size, comp); \
-    } else { \
-      cmp_type##Compare<acc_type, flag, false> comp; \
-      HPHP::Sort::sort(buffer, buffer + m_size, comp); \
-    } \
-    break; \
-  }
-#define SORT_CASE_BLOCK(cmp_type, acc_type) \
-  switch (sort_flags) { \
-    default: /* fall through to SORT_REGULAR case */ \
-    SORT_CASE(SORT_REGULAR, cmp_type, acc_type) \
-    SORT_CASE(SORT_NUMERIC, cmp_type, acc_type) \
-    SORT_CASE(SORT_STRING, cmp_type, acc_type) \
-    SORT_CASE(SORT_LOCALE_STRING, cmp_type, acc_type) \
-    SORT_CASE(SORT_NATURAL, cmp_type, acc_type) \
-    SORT_CASE(SORT_NATURAL_CASE, cmp_type, acc_type) \
-  }
-#define CALL_SORT(acc_type) \
-  if (flav == StringSort) { \
-    SORT_CASE_BLOCK(StrElm, acc_type) \
-  } else if (flav == IntegerSort) { \
-    SORT_CASE_BLOCK(IntElm, acc_type) \
-  } else { \
-    SORT_CASE_BLOCK(Elm, acc_type) \
-  }
-#define SORT_BODY(acc_type) \
-  do { \
-    if (!m_size) { \
-      return; \
-    } \
-    Bucket** buffer = (Bucket**)smart_malloc(m_size * sizeof(Bucket*)); \
-    SortFlavor flav = preSort<acc_type>(buffer, acc_type(), true); \
-    try { \
-      CALL_SORT(acc_type); \
-    } catch (...) { \
-      postSort(buffer); \
-      smart_free(buffer); \
-      throw; \
-    } \
-    postSort(buffer); \
-    smart_free(buffer); \
-  } while(0)
-
-void c_StableMap::asort(int sort_flags, bool ascending) {
-  SORT_BODY(StableMapValAccessor);
-}
-
-void c_StableMap::ksort(int sort_flags, bool ascending) {
-  SORT_BODY(StableMapKeyAccessor);
-}
-
-#undef SORT_CASE
-#undef SORT_CASE_BLOCK
-#undef CALL_SORT
-#undef SORT_BODY
-
-#define USER_SORT_BODY(acc_type)                                        \
-  do {                                                                  \
-    if (!m_size) {                                                      \
-      return true;                                                      \
-    }                                                                   \
-    CallCtx ctx;                                                        \
-    JIT::CallerFrame cf;                                             \
-    vm_decode_function(cmp_function, cf(), false, ctx);                 \
-    if (!ctx.func) {                                                    \
-      return false;                                                     \
-    }                                                                   \
-    Bucket** buffer = (Bucket**)smart_malloc(m_size * sizeof(Bucket*)); \
-    preSort<acc_type>(buffer, acc_type(), false);                       \
-    SCOPE_EXIT {                                                        \
-      postSort(buffer);                                                 \
-      smart_free(buffer);                                               \
-    };                                                                  \
-    ElmUCompare<acc_type> comp;                                         \
-    comp.ctx = &ctx;                                                    \
-    HPHP::Sort::sort(buffer, buffer + m_size, comp);                    \
-    return true;                                                        \
-  } while (0)
-
-bool c_StableMap::uasort(CVarRef cmp_function) {
-  USER_SORT_BODY(StableMapValAccessor);
-}
-
-bool c_StableMap::uksort(CVarRef cmp_function) {
-  USER_SORT_BODY(StableMapKeyAccessor);
-}
-
-#undef USER_SORT_BODY
-
-void c_StableMap::throwBadKeyType() {
-  Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-    "Only integer keys and string keys may be used with StableMaps"));
-  throw e;
-}
-
-c_StableMap::Bucket::~Bucket() {
-  if (hasStrKey()) {
-    decRefStr(skey);
-  }
-  tvRefcountedDecRef(&data);
-}
-
-void c_StableMap::Bucket::release() {
-  this->~Bucket();
-  MM().smartFreeSizeLogged(this, sizeof(Bucket));
-}
-
-void c_StableMap::Bucket::dump() {
-  printf("c_StableMap::Bucket: %" PRIx64 ", %p, %p, %p\n",
-         hashKey(), pListNext, pListLast, pNext);
-  if (hasStrKey()) {
-    skey->dump();
-  }
-  tvAsCVarRef(&data).dump();
-}
-
-Array c_StableMap::ToArray(const ObjectData* obj) {
-  check_collection_cast_to_array();
-  return static_cast<const c_StableMap*>(obj)->toArrayImpl();
-}
-
-bool c_StableMap::ToBool(const ObjectData* obj) {
-  return static_cast<const c_StableMap*>(obj)->toBoolImpl();
-}
-
-TypedValue* c_StableMap::OffsetGet(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  auto smp = static_cast<c_StableMap*>(obj);
-  if (key->m_type == KindOfInt64) {
-    return smp->at(key->m_data.num);
-  }
-  if (IS_STRING_TYPE(key->m_type)) {
-    return smp->at(key->m_data.pstr);
-  }
-  throwBadKeyType();
-  return nullptr;
-}
-
-void c_StableMap::OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
-  assert(key->m_type != KindOfRef);
-  assert(val->m_type != KindOfRef);
-  auto smp = static_cast<c_StableMap*>(obj);
-  if (key->m_type == KindOfInt64) {
-    smp->set(key->m_data.num, val);
-    return;
-  }
-  if (IS_STRING_TYPE(key->m_type)) {
-    smp->set(key->m_data.pstr, val);
-    return;
-  }
-  throwBadKeyType();
-}
-
-bool c_StableMap::OffsetIsset(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  auto smp = static_cast<c_StableMap*>(obj);
-  TypedValue* result;
-  if (key->m_type == KindOfInt64) {
-    result = smp->get(key->m_data.num);
-  } else if (IS_STRING_TYPE(key->m_type)) {
-    result = smp->get(key->m_data.pstr);
-  } else {
-    throwBadKeyType();
-    result = nullptr;
-  }
-  return result ? !cellIsNull(result) : false;
-}
-
-bool c_StableMap::OffsetEmpty(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  auto smp = static_cast<c_StableMap*>(obj);
-  TypedValue* result;
-  if (key->m_type == KindOfInt64) {
-    result = smp->get(key->m_data.num);
-  } else if (IS_STRING_TYPE(key->m_type)) {
-    result = smp->get(key->m_data.pstr);
-  } else {
-    throwBadKeyType();
-    result = nullptr;
-  }
-  return result ? !cellToBool(*result) : true;
-}
-
-bool c_StableMap::OffsetContains(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  auto smp = static_cast<c_StableMap*>(obj);
-  if (key->m_type == KindOfInt64) {
-    return smp->contains(key->m_data.num);
-  } else if (IS_STRING_TYPE(key->m_type)) {
-    return smp->contains(key->m_data.pstr);
-  } else {
-    throwBadKeyType();
-    return false;
-  }
-}
-
-void c_StableMap::OffsetUnset(ObjectData* obj, TypedValue* key) {
-  assert(key->m_type != KindOfRef);
-  auto smp = static_cast<c_StableMap*>(obj);
-  if (key->m_type == KindOfInt64) {
-    smp->remove(key->m_data.num);
-    return;
-  }
-  if (IS_STRING_TYPE(key->m_type)) {
-    smp->remove(key->m_data.pstr);
-    return;
-  }
-  throwBadKeyType();
+  return BaseMap::Clone<c_StableMap>(obj);
 }
 
+// For StableMap equality, order of keys-data pairs matters as much as
+// their presence
 bool c_StableMap::Equals(const ObjectData* obj1, const ObjectData* obj2) {
-  auto smp1 = static_cast<const c_StableMap*>(obj1);
-  auto smp2 = static_cast<const c_StableMap*>(obj2);
-  if (smp1->m_size != smp2->m_size) return false;
-  auto p1 = smp1->m_pListHead;
-  auto p2 = smp2->m_pListHead;
-  for (; p1; p1 = p1->pListNext, p2 = p2->pListNext) {
-    assert(p2);
-    // Check if the keys are identical (===)
-    if (p1->hasIntKey()) {
-      if (!p2->hasIntKey()) return false;
-      if (p1->ikey != p2->ikey) return false;
-    } else {
-      assert(p1->hasStrKey());
-      if (!p2->hasStrKey()) return false;
-      if (!p1->skey->same(p2->skey)) return false;
+  auto mp1 = static_cast<const c_Map*>(obj1);
+  auto mp2 = static_cast<const c_Map*>(obj2);
+  auto size = mp1->size();
+
+  if (size != mp2->size()) { return false; }
+  if (size == 0) { return true; }
+
+  uint compared = 0;
+  for (uint ix1 = 0, ix2 = 0;
+       ix1 < mp1->iterLimit() && ix2 < mp2->iterLimit() ; ) {
+
+    auto tomb1 = mp1->isTombstone(ix1);
+    auto tomb2 = mp2->isTombstone(ix2);
+
+    if (tomb1 || tomb2) {
+      if (tomb1) { ++ix1; }
+      if (tomb2) { ++ix2; }
+      continue;
     }
-    // Compare the values using equals (==)
-    if (!equal(tvAsCVarRef(&p1->data), tvAsCVarRef(&p2->data))) {
+
+    BaseMap::Elm& p1 = mp1->data()[ix1];
+    BaseMap::Elm& p2 = mp2->data()[ix2];
+
+    if (p1.hasIntKey()) {
+      if (!p2.hasIntKey() ||
+          p1.ikey != p2.ikey) {
+        return false;
+      }
+    } else {
+      assert(p1.hasStrKey());
+      if (!p2.hasStrKey() || !equal(p1.skey, p2.skey)) {
+        return false;
+      }
+    }
+    if (!equal(tvAsCVarRef(&p1.data), tvAsCVarRef(&p2.data))) {
       return false;
     }
+
+    ++ix1; ++ix2; ++compared;
   }
-  return true;
-}
 
-void c_StableMap::Unserialize(ObjectData* obj,
-                              VariableUnserializer* uns,
-                              int64_t sz,
-                              char type) {
-  if (type != 'K') {
-    throw Exception("StableMap does not support the '%c' serialization "
-                    "format", type);
-  }
-  auto smp = static_cast<c_StableMap*>(obj);
-  smp->reserve(sz);
-  for (int64_t i = 0; i < sz; ++i) {
-    Variant k;
-    k.unserialize(uns, Uns::Mode::ColKey);
-    Bucket* p;
-    uint nIndex;
-    if (k.isInteger()) {
-      auto h = k.toInt64();
-      p = smp->find(h);
-      if (UNLIKELY(p != nullptr)) goto do_unserialize;
-      p = Bucket::Make();
-      p->setIntKey(h);
-      nIndex = (h & smp->m_nTableMask);
-    } else if (k.isString()) {
-      auto key = k.getStringData();
-      auto h = key->hash();
-      p = smp->find(key->data(), key->size(), h);
-      if (UNLIKELY(p != nullptr)) goto do_unserialize;
-      p = Bucket::Make();
-      p->setStrKey(key, h);
-      nIndex = (h & smp->m_nTableMask);
-    } else {
-      throw Exception("Invalid key");
-    }
-    ++smp->m_size;
-    p->data.m_type = KindOfNull;
-    p->pNext = smp->m_arBuckets[nIndex];
-    smp->m_arBuckets[nIndex] = p;
-    CONNECT_TO_GLOBAL_DLLIST(smp, p);
-do_unserialize:
-    tvAsVariant(&p->data).unserialize(uns, Uns::Mode::ColValue);
-  }
-}
-
-#undef CONNECT_TO_GLOBAL_DLLIST
-
-c_StableMapIterator::c_StableMapIterator(Class* cb) :
-    ExtObjectData(cb) {
-}
-
-c_StableMapIterator::~c_StableMapIterator() {
-}
-
-void c_StableMapIterator::t___construct() {
-}
-
-Variant c_StableMapIterator::t_current() {
-  c_StableMap* smp = m_obj.get();
-  if (UNLIKELY(m_version != smp->getVersion())) {
-    throw_collection_modified();
-  }
-  if (!m_pos) {
-    throw_iterator_not_valid();
-  }
-  return tvAsCVarRef(smp->iter_value(m_pos));
-}
-
-Variant c_StableMapIterator::t_key() {
-  c_StableMap* smp = m_obj.get();
-  if (UNLIKELY(m_version != smp->getVersion())) {
-    throw_collection_modified();
-  }
-  if (!m_pos) {
-    throw_iterator_not_valid();
-  }
-  return smp->iter_key(m_pos);
-}
-
-bool c_StableMapIterator::t_valid() {
-  return m_pos != 0;
-}
-
-void c_StableMapIterator::t_next() {
-  c_StableMap* smp = m_obj.get();
-  if (UNLIKELY(m_version != smp->getVersion())) {
-    throw_collection_modified();
-  }
-  m_pos = smp->iter_next(m_pos);
-}
-
-void c_StableMapIterator::t_rewind() {
-  c_StableMap* smp = m_obj.get();
-  if (UNLIKELY(m_version != smp->getVersion())) {
-    throw_collection_modified();
-  }
-  m_pos = smp->iter_begin();
+  return (compared == size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4970,21 +3936,24 @@ ObjectData* collectionDeepCopyFrozenVector(c_FrozenVector* vec) {
 }
 
 ObjectData* collectionDeepCopyMap(c_Map* mp) {
-  mp = c_Map::Clone(mp);
+  mp = BaseMap::Clone<c_Map>(mp);
   Object o = Object::attach(mp);
   uint used = mp->iterLimit();
   for (uint32_t i = 0; i < used; ++i) {
     if (mp->isTombstone(i)) continue;
-    c_Map::Elm* p = &mp->data()[i];
+    BaseMap::Elm* p = &mp->data()[i];
     collectionDeepCopyTV(&p->data);
   }
   return o.detach();
 }
 
 ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
-  smp = c_StableMap::Clone(smp);
+  smp = BaseMap::Clone<c_StableMap>(smp);
   Object o = Object::attach(smp);
-  for (c_StableMap::Bucket* p = smp->m_pListHead; p; p = p->pListNext) {
+  uint used = smp->iterLimit();
+  for (uint32_t i = 0; i < used; ++i) {
+    if (smp->isTombstone(i)) continue;
+    BaseMap::Elm* p = &smp->data()[i];
     collectionDeepCopyTV(&p->data);
   }
   return o.detach();
@@ -5081,9 +4050,8 @@ TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
     case Collection::VectorType:
       return c_Vector::OffsetGet(obj, key);
     case Collection::MapType:
-      return c_Map::OffsetGet(obj, key);
     case Collection::StableMapType:
-      return c_StableMap::OffsetGet(obj, key);
+      return BaseMap::OffsetGet(obj, key);
     case Collection::SetType:
       return c_Set::OffsetGet(obj, key);
     case Collection::PairType:
@@ -5107,10 +4075,8 @@ void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
       c_Vector::OffsetSet(obj, key, val);
       break;
     case Collection::MapType:
-      c_Map::OffsetSet(obj, key, val);
-      break;
     case Collection::StableMapType:
-      c_StableMap::OffsetSet(obj, key, val);
+      BaseMap::OffsetSet(obj, key, val);
       break;
     case Collection::SetType:
       c_Set::OffsetSet(obj, key, val);
@@ -5134,9 +4100,8 @@ bool collectionIsset(ObjectData* obj, TypedValue* key) {
     case Collection::VectorType:
       return c_Vector::OffsetIsset(obj, key);
     case Collection::MapType:
-      return c_Map::OffsetIsset(obj, key);
     case Collection::StableMapType:
-      return c_StableMap::OffsetIsset(obj, key);
+      return BaseMap::OffsetIsset(obj, key);
     case Collection::SetType:
       return c_Set::OffsetIsset(obj, key);
     case Collection::PairType:
@@ -5157,9 +4122,8 @@ bool collectionEmpty(ObjectData* obj, TypedValue* key) {
     case Collection::VectorType:
       return c_Vector::OffsetEmpty(obj, key);
     case Collection::MapType:
-      return c_Map::OffsetEmpty(obj, key);
     case Collection::StableMapType:
-      return c_StableMap::OffsetEmpty(obj, key);
+      return BaseMap::OffsetEmpty(obj, key);
     case Collection::SetType:
       return c_Set::OffsetEmpty(obj, key);
     case Collection::PairType:
@@ -5181,10 +4145,8 @@ void collectionUnset(ObjectData* obj, TypedValue* key) {
       c_Vector::OffsetUnset(obj, key);
       break;
     case Collection::MapType:
-      c_Map::OffsetUnset(obj, key);
-      break;
     case Collection::StableMapType:
-      c_StableMap::OffsetUnset(obj, key);
+      BaseMap::OffsetUnset(obj, key);
       break;
     case Collection::SetType:
       c_Set::OffsetUnset(obj, key);
@@ -5324,9 +4286,8 @@ Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
     case Collection::VectorType:
       return tvAsVariant(c_Vector::OffsetGet(obj, key));
     case Collection::MapType:
-      return tvAsVariant(c_Map::OffsetGet(obj, key));
     case Collection::StableMapType:
-      return tvAsVariant(c_StableMap::OffsetGet(obj, key));
+      return tvAsVariant(BaseMap::OffsetGet(obj, key));
     case Collection::SetType:
       return tvAsVariant(c_Set::OffsetGet(obj, key));
     case Collection::PairType:
@@ -5417,10 +4378,8 @@ void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
       c_Vector::OffsetSet(obj, key, tv);
       break;
     case Collection::MapType:
-      c_Map::OffsetSet(obj, key, tv);
-      break;
     case Collection::StableMapType:
-      c_StableMap::OffsetSet(obj, key, tv);
+      BaseMap::OffsetSet(obj, key, tv);
       break;
     case Collection::SetType:
       c_Set::OffsetSet(obj, key, tv);
@@ -5445,9 +4404,8 @@ bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
     case Collection::VectorType:
       return c_Vector::OffsetContains(obj, key);
     case Collection::MapType:
-      return c_Map::OffsetContains(obj, key);
     case Collection::StableMapType:
-      return c_StableMap::OffsetContains(obj, key);
+      return BaseMap::OffsetContains(obj, key);
     case Collection::SetType:
       return c_Set::OffsetContains(obj, key);
     case Collection::PairType:
@@ -5468,10 +4426,8 @@ void collectionReserve(ObjectData* obj, int64_t sz) {
       static_cast<c_Vector*>(obj)->reserve(sz);
       break;
     case Collection::MapType:
-      static_cast<c_Map*>(obj)->reserve(sz);
-      break;
     case Collection::StableMapType:
-      static_cast<c_StableMap*>(obj)->reserve(sz);
+      static_cast<BaseMap*>(obj)->reserve(sz);
       break;
     case Collection::SetType:
       static_cast<c_Set*>(obj)->reserve(sz);

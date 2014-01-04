@@ -155,7 +155,7 @@ class c_Vector : public BaseVector {
   friend void collectionAppend(ObjectData* obj, TypedValue* val);
   friend void triggerCow(c_Vector* vec);
 
-  friend class c_Map;
+  friend class BaseMap;
   friend class c_StableMap;
   friend class c_Pair;
   friend class ArrayIter;
@@ -230,7 +230,6 @@ public:
   int64_t t_linearsearch(CVarRef search_value);
   Object t_values();
 
-
   static Object ti_slice(CVarRef vec, CVarRef offset,
                          CVarRef len = uninit_null());
 
@@ -255,57 +254,16 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class Map
+// class BaseMap
 
-FORWARD_DECLARE_CLASS(Map);
-class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
-                                        ObjectData::UseGet |
-                                        ObjectData::UseSet |
-                                        ObjectData::UseIsset |
-                                        ObjectData::UseUnset |
-                                        ObjectData::CallToImpl |
-                                        ObjectData::HasClone> {
- public:
-  DECLARE_CLASS_NO_SWEEP(Map)
+/**
+ * BaseMap is a hash-table implementation with int and string keys only.
+ * It doesn't represent any PHP-land class; that job is delegated to its
+ * c_-prefixed child classes.
+ */
+class BaseMap : public ExtObjectData {
 
  public:
-  explicit c_Map(Class* cls = c_Map::classof());
-  ~c_Map();
-  void t___construct(CVarRef iterable = null_variant);
-  Object t_add(CVarRef val);
-  Object t_addall(CVarRef val);
-  Object t_clear();
-  bool t_isempty();
-  int64_t t_count();
-  Object t_items();
-  Object t_keys();
-  Object t_lazy();
-  Object t_kvzip();
-  Variant t_at(CVarRef key);
-  Variant t_get(CVarRef key);
-  Object t_set(CVarRef key, CVarRef value);
-  Object t_setall(CVarRef iterable);
-  Object t_put(CVarRef key, CVarRef value); // deprecated
-  bool t_contains(CVarRef key);
-  bool t_containskey(CVarRef key);
-  Object t_remove(CVarRef key);
-  Object t_removekey(CVarRef key);
-  Array t_toarray();
-  Array t_tokeysarray();
-  Array t_tovaluesarray();
-  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
-  Object t_values();
-  Object t_differencebykey(CVarRef it);
-  Object t_getiterator();
-  Object t_map(CVarRef callback);
-  Object t_mapwithkey(CVarRef callback);
-  Object t_filter(CVarRef callback);
-  Object t_filterwithkey(CVarRef callback);
-  Object t_zip(CVarRef iterable);
-  DECLARE_COLLECTION_MAGIC_METHODS();
-  static Object ti_fromitems(CVarRef iterable);
-  static Object ti_fromarray(CVarRef arr); // deprecated
-
   struct Elm {
     /* The key is either a string pointer or an int value, and the m_aux
      * field in data is used to discriminate the key type. m_aux = 0 means
@@ -350,6 +308,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
     }
   };
 
+ protected:
   uint32_t m_size;          // Number of values
   union {
     struct {
@@ -370,6 +329,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
   };
   Elm* m_data;              // Elm store.
   int32_t* m_hash;          // Hash table.
+
+ public:
 
   static const int32_t Empty      = -1;
   static const int32_t Tombstone  = -2;
@@ -400,10 +361,11 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
   // reserve() to make room for up to MaxSize / 2 elements.
   static const uint32_t MaxReserveSize = MaxSize / 2;
 
-  void init(CVarRef t);
+ private:
   void deleteElms();
   void freeData();
 
+ protected:
   Elm* data() const { return (Elm*)m_data; }
   int32_t* hashTab() const { return (int32_t*)m_hash; }
   uint32_t iterLimit() const { return m_used; }
@@ -423,6 +385,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
   static void throwTooLarge() ATTRIBUTE_NORETURN;
   static void throwReserveTooLarge() ATTRIBUTE_NORETURN;
   static int32_t* warnUnbalanced(size_t n, int32_t* ei);
+
+ public:
 
   TypedValue* at(int64_t key) const;
   TypedValue* at(StringData* key) const;
@@ -447,12 +411,15 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
   int64_t size() const {
     return m_size;
   }
-  Array toArrayImpl() const;
   bool toBoolImpl() const {
     return (m_size != 0);
   }
 
-  static c_Map* Clone(ObjectData* obj);
+  template<typename TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, TMap*>::type
+  static Clone(ObjectData* obj);
+
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
@@ -461,12 +428,11 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
-  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
   static uint sizeOffset() {
-    return offsetof(c_Map, m_size);
+    return offsetof(BaseMap, m_size);
   }
 
   static bool validPos(ssize_t pos) {
@@ -502,6 +468,8 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
     wordfill(table, Empty, tableSize);
   }
 
+  void init(CVarRef t);
+
   template <class Hit>
   ssize_t findImpl(size_t h0, Hit) const;
   ssize_t find(int64_t h) const;
@@ -534,7 +502,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
   void grow(uint32_t newCap, uint32_t newMask);
   void compact();
 
-  c_Map::Elm& allocElm(int32_t* ei) {
+  BaseMap::Elm& allocElm(int32_t* ei) {
     assert(!validPos(*ei) && m_size <= m_used && m_used < m_cap);
     size_t i = m_used;
     (*ei) = i;
@@ -543,6 +511,7 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
     return data()[i];
   }
 
+ public:
   ssize_t iter_begin() const {
     Elm* p = data();
     auto* pLimit = fetchElm(data(), iterLimit());
@@ -593,12 +562,16 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
 
   enum SortFlavor { IntegerSort, StringSort, GenericSort };
 
-  private:
+ protected: // BaseMap is an abstract class
+  explicit BaseMap(Class* cls);
+  ~BaseMap();
+
+ private:
   template <typename AccessorT>
-    SortFlavor preSort(const AccessorT& acc, bool checkTypes);
+  SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort();
 
-  public:
+ public:
   void asort(int sort_flags, bool ascending);
   void ksort(int sort_flags, bool ascending);
   bool uasort(CVarRef cmp_function);
@@ -606,7 +579,10 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
 
   static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
+ private:
+
   friend ObjectData* collectionDeepCopyMap(c_Map* mp);
+  friend ObjectData* collectionDeepCopyStableMap(c_StableMap* mp);
   friend class c_MapIterator;
   friend class c_Vector;
   friend class c_StableMap;
@@ -616,8 +592,130 @@ class c_Map : public ExtObjectDataFlags<ObjectData::IsCollection |
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field
     // at the same offset.
-    static_assert(offsetof(c_Map, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
+    static_assert(offsetof(BaseMap, m_size)
+                  == FAST_COLLECTION_SIZE_OFFSET, "");
   }
+
+ protected: // implementations of the API accessible from user PHP code
+
+  void php_construct(CVarRef iterable = null_variant);
+  Object php_add(CVarRef val);
+  Object php_addAll(CVarRef val);
+  Object php_clear();
+  bool php_isEmpty() const { return !toBoolImpl(); }
+  Object php_items() {
+    return SystemLib::AllocLazyKVZipIterableObject(this);
+  }
+  Object php_keys() const;
+  Object php_lazy() {
+    return SystemLib::AllocLazyKeyedIterableViewObject(this);
+  }
+  Object php_kvzip() const;
+  Variant php_at(CVarRef key) const;
+  Variant php_get(CVarRef key) const;
+  Object php_set(CVarRef key, CVarRef value);
+  Object php_setAll(CVarRef iterable);
+  Object php_put(CVarRef key, CVarRef value); // deprecated
+  bool php_contains(CVarRef key) const;
+  Object php_remove(CVarRef key);
+  Array php_toArray() const;
+  Array php_toKeysArray() const;
+  Array php_toValuesArray() const;
+  Object php_values() const;
+
+  template<typename TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
+  php_differenceByKey(CVarRef it);
+
+  Object php_getIterator();
+
+  template<typename TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
+  php_map(CVarRef callback) const;
+
+  template<typename TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
+  php_mapWithKey(CVarRef callback) const;
+
+  template<typename TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
+  php_filter(CVarRef callback) const;
+
+  template<typename TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
+  php_filterWithKey(CVarRef callback) const;
+
+  template<typename TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
+  php_zip(CVarRef iterable) const;
+
+  template<typename TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
+  static php_mapFromIterable(CVarRef iterable);
+
+  template<typename TMap>
+  typename std::enable_if<
+    std::is_base_of<BaseMap, TMap>::value, Object>::type
+  static php_mapFromArray(CVarRef arr);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class Map
+
+FORWARD_DECLARE_CLASS(Map);
+class c_Map : public BaseMap {
+
+ public:
+  DECLARE_CLASS_NO_SWEEP(Map)
+
+ public:
+  explicit c_Map(Class* cls = c_Map::classof());
+
+  static c_Map* Clone(ObjectData* obj);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
+
+ public: // PHP API - No inlines (required by .idl.json linking)
+  void t___construct(CVarRef iterable = null_variant);
+  Object t_add(CVarRef val);
+  Object t_addall(CVarRef val);
+  Object t_clear();
+  bool t_isempty();
+  int64_t t_count();
+  Object t_items();
+  Object t_keys();
+  Object t_lazy();
+  Object t_kvzip(); // const
+  Variant t_at(CVarRef key); // const
+  Variant t_get(CVarRef key); // const
+  Object t_set(CVarRef key, CVarRef value);
+  Object t_setall(CVarRef iterable);
+  Object t_put(CVarRef key, CVarRef value); // deprecated
+  bool t_contains(CVarRef key); // const
+  bool t_containskey(CVarRef key); // const
+  Object t_remove(CVarRef key);
+  Object t_removekey(CVarRef key);
+  Array t_toarray();
+  Array t_tokeysarray();
+  Array t_tovaluesarray();
+  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
+  Object t_values();
+  Object t_differencebykey(CVarRef it);
+  Object t_getiterator();
+  Object t_map(CVarRef callback);
+  Object t_mapwithkey(CVarRef callback);
+  Object t_filter(CVarRef callback);
+  Object t_filterwithkey(CVarRef callback);
+  Object t_zip(CVarRef iterable);
+  DECLARE_COLLECTION_MAGIC_METHODS();
+  static Object ti_fromitems(CVarRef iterable);
+  static Object ti_fromarray(CVarRef arr); // deprecated
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -639,31 +737,29 @@ class c_MapIterator : public ExtObjectData {
   void t_rewind();
 
  private:
-  SmartPtr<c_Map> m_obj;
+  SmartPtr<BaseMap> m_obj;
   ssize_t m_pos;
   int32_t m_version;
 
-  friend class c_Map;
+  friend class BaseMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // class StableMap
 
 FORWARD_DECLARE_CLASS(StableMap);
-class c_StableMap : public ExtObjectDataFlags<ObjectData::IsCollection|
-                                              ObjectData::UseGet|
-                                              ObjectData::UseSet|
-                                              ObjectData::UseIsset|
-                                              ObjectData::UseUnset|
-                                              ObjectData::CallToImpl|
-                                              ObjectData::HasClone> {
+class c_StableMap : public BaseMap {
+
  public:
   DECLARE_CLASS_NO_SWEEP(StableMap)
 
  public:
   explicit c_StableMap(Class* cls = c_StableMap::classof());
-  ~c_StableMap();
-  void freeData();
+
+  static c_StableMap* Clone(ObjectData* obj);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
+
+ public: // PHP API - No inlines (required by .idl.json linking)
   void t___construct(CVarRef iterable = null_variant);
   Object t_add(CVarRef val);
   Object t_addall(CVarRef val);
@@ -673,262 +769,31 @@ class c_StableMap : public ExtObjectDataFlags<ObjectData::IsCollection|
   Object t_items();
   Object t_keys();
   Object t_lazy();
-  Object t_kvzip();
-  Variant t_at(CVarRef key);
-  Variant t_get(CVarRef key);
+  Object t_kvzip(); // const
+  Variant t_at(CVarRef key); // const
+  Variant t_get(CVarRef key); // const
   Object t_set(CVarRef key, CVarRef value);
   Object t_setall(CVarRef iterable);
   Object t_put(CVarRef key, CVarRef value); // deprecated
-  bool t_contains(CVarRef key);
-  bool t_containskey(CVarRef key);
+  bool t_contains(CVarRef key); // const
+  bool t_containskey(CVarRef key); // const
   Object t_remove(CVarRef key);
   Object t_removekey(CVarRef key);
-  Array t_toarray();
-  Array t_tokeysarray();
-  Array t_tovaluesarray();
+  Array t_toarray(); // const
+  Array t_tokeysarray(); // const
+  Array t_tovaluesarray(); // const
   DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
   Object t_values();
   Object t_differencebykey(CVarRef it);
   Object t_getiterator();
-  Object t_map(CVarRef callback);
-  Object t_mapwithkey(CVarRef callback);
-  Object t_filter(CVarRef callback);
-  Object t_filterwithkey(CVarRef callback);
-  Object t_zip(CVarRef iterable);
+  Object t_map(CVarRef callback); // const
+  Object t_mapwithkey(CVarRef callback); // const
+  Object t_filter(CVarRef callback); // const
+  Object t_filterwithkey(CVarRef callback); // const
+  Object t_zip(CVarRef iterable); // const
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
-
-  static void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
-  static void throwOOB(StringData* key) ATTRIBUTE_NORETURN;
-
-  void init(CVarRef t);
-
-  TypedValue* at(int64_t key) {
-    Bucket* p = find(key);
-    if (LIKELY(p != NULL)) return &p->data;
-    throwOOB(key);
-    return NULL;
-  }
-  TypedValue* at(StringData* key) {
-    Bucket* p = find(key->data(), key->size(), key->hash());
-    if (LIKELY(p != NULL)) return &p->data;
-    throwOOB(key);
-    return NULL;
-  }
-  TypedValue* get(int64_t key) {
-    Bucket* p = find(key);
-    if (p != NULL) return &p->data;
-    return NULL;
-  }
-  TypedValue* get(StringData* key) {
-    Bucket* p = find(key->data(), key->size(), key->hash());
-    if (p != NULL) return &p->data;
-    return NULL;
-  }
-  void set(int64_t key, TypedValue* val) {
-    update(key, val);
-  }
-  void set(StringData* key, TypedValue* val) {
-    update(key, val);
-  }
-  void add(TypedValue* val);
-  void remove(int64_t key) {
-    ++m_version;
-    erase(findForErase(key));
-  }
-  void remove(StringData* key) {
-    ++m_version;
-    erase(findForErase(key->data(), key->size(), key->hash()));
-  }
-  bool contains(int64_t key) {
-    return find(key);
-  }
-  bool contains(StringData* key) {
-    return find(key->data(), key->size(), key->hash());
-  }
-  void reserve(int64_t sz) {
-    if (sz > int64_t(m_nTableSize)) {
-      adjustCapacityImpl(sz);
-    }
-  }
-  int getVersion() const {
-    return m_version;
-  }
-  int64_t size() const {
-    return m_size;
-  }
-  Array toArrayImpl() const;
-  bool toBoolImpl() const {
-    return (m_size != 0);
-  }
-
-  static c_StableMap* Clone(ObjectData* obj);
-  static Array ToArray(const ObjectData* obj);
-  static bool ToBool(const ObjectData* obj);
-  static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
-  static void OffsetSet(ObjectData* obj, TypedValue* key, TypedValue* val);
-  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
-  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
-  static bool OffsetContains(ObjectData* obj, TypedValue* key);
-  static void OffsetUnset(ObjectData* obj, TypedValue* key);
-  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
-  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
-                          int64_t sz, char type);
-
-  static uint sizeOffset() { return offsetof(c_StableMap, m_size); }
-
-  struct Bucket {
-    Bucket() : ikey(0), pListNext(nullptr), pListLast(nullptr), pNext(nullptr) {
-      data.hash() = 0;
-    }
-    explicit Bucket(TypedValue* tv) : ikey(0), pListNext(nullptr),
-        pListLast(nullptr), pNext(nullptr) {
-      assert(tv->m_type != KindOfRef);
-      cellDup(*tv, data);
-      data.hash() = 0;
-    }
-    ~Bucket();
-
-    template<class... Args>
-    static Bucket* Make(Args&&... args) {
-      return new (MM().smartMallocSizeLogged(sizeof(Bucket)))
-        Bucket(std::forward<Args>(args)...);
-    }
-    void release();
-
-    // set the top bit for string hashes to make sure the hash
-    // value is never zero. hash value 0 corresponds to integer key.
-    static inline int32_t encodeHash(strhash_t h) {
-      return int32_t(h) | 0x80000000;
-    }
-
-    /* The key is either a string pointer or an int value, and the m_aux.u_hash
-     * field in data is used to discriminate the key type. u_hash = 0 means
-     * int, nonzero values contain 31 bits of a string's hashcode.
-     * It is critical that when we return &data to clients, that they not
-     * read or write the m_aux field! */
-    TypedValueAux data;
-    union {
-      int64_t ikey;
-      StringData* skey;
-    };
-    Bucket* pListNext;
-    Bucket* pListLast;
-    Bucket* pNext;
-
-    inline bool hasStrKey() const { return data.hash() != 0; }
-    inline bool hasIntKey() const { return data.hash() == 0; }
-    inline void setStrKey(StringData* k, strhash_t h) {
-      skey = k;
-      skey->incRefCount();
-      data.hash() = encodeHash(h);
-    }
-    inline void setIntKey(int64_t k) {
-      ikey = k;
-      data.hash() = 0;
-    }
-    inline int64_t hashKey() const {
-      return data.hash() == 0 ? ikey : data.hash();
-    }
-    inline int32_t hash() const {
-      return data.hash();
-    }
-
-    void dump();
-  };
-
-  enum SortFlavor { IntegerSort, StringSort, GenericSort };
-
- private:
-  template <typename AccessorT>
-  SortFlavor preSort(Bucket** buffer, const AccessorT& acc, bool checkTypes);
-
-  void postSort(Bucket** buffer);
-
- public:
-  void asort(int sort_flags, bool ascending);
-  void ksort(int sort_flags, bool ascending);
-  bool uasort(CVarRef cmp_function);
-  bool uksort(CVarRef cmp_function);
-
- private:
-  uint m_size;
-  uint m_nTableSize;
-  uint m_nTableMask;
-  int32_t m_version;
-  Bucket* m_pListHead;
-  Bucket* m_pListTail;
-  Bucket** m_arBuckets;
-
-  Bucket* find(int64_t h) const;
-  Bucket* find(const char* k, int len, strhash_t prehash) const;
-  Bucket** findForErase(int64_t h) const;
-  Bucket** findForErase(const char* k, int len, strhash_t prehash) const;
-
-  bool update(int64_t h, TypedValue* data);
-  bool update(StringData* key, TypedValue* data);
-  void erase(Bucket** prev);
-
-  void adjustCapacityImpl(int64_t sz);
-  void adjustCapacity() {
-    adjustCapacityImpl(m_size);
-  }
-
-  void deleteBuckets();
-
-  ssize_t iter_begin() const {
-    Bucket* p = m_pListHead;
-    return reinterpret_cast<ssize_t>(p);
-  }
-  ssize_t iter_next(ssize_t prev) const;
-  ssize_t iter_prev(ssize_t prev) const;
-  TypedValue* iter_value(ssize_t pos) const;
-  Variant iter_key(ssize_t pos) const;
-  bool iter_valid(ssize_t pos) const {
-    return pos != 0;
-  }
-
-  static void throwBadKeyType() ATTRIBUTE_NORETURN;
-
-  friend ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
-  friend class c_StableMapIterator;
-  friend class c_Vector;
-  friend class c_Map;
-  friend class ArrayIter;
-
-  static void compileTimeAssertions() {
-    // For performance, all native collection classes have their m_size field
-    // at the same offset.
-    static_assert(
-      offsetof(c_StableMap, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class StableMapIterator
-
-FORWARD_DECLARE_CLASS(StableMapIterator);
-class c_StableMapIterator : public ExtObjectData {
- public:
-  DECLARE_CLASS_NO_SWEEP(StableMapIterator)
-
- public:
-  explicit c_StableMapIterator(Class* cls = c_StableMapIterator::classof());
-  ~c_StableMapIterator();
-  void t___construct();
-  Variant t_current();
-  Variant t_key();
-  bool t_valid();
-  void t_next();
-  void t_rewind();
-
- private:
-  SmartPtr<c_StableMap> m_obj;
-  ssize_t m_pos;
-  int32_t m_version;
-
-  friend class c_StableMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1610,8 +1475,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   friend class c_PairIterator;
   friend class c_Vector;
   friend class BaseVector;
-  friend class c_Map;
-  friend class c_StableMap;
+  friend class BaseMap;
   friend class ArrayIter;
 
   static void compileTimeAssertions() {

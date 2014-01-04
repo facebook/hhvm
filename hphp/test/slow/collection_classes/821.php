@@ -6,14 +6,14 @@ $s1 = StableMap {
 $s2 = StableMap {
 'b' => 2, 'a' => 1}
 ;
-var_dump($s1 == $s2);
+var_dump($s1 == $s2); // false
 $s2->remove('b');
 $s2['b'] = 2;
-var_dump($s1 == $s2);
+var_dump($s1 == $s2); // true
 $s1['b'] = "2";
-var_dump($s1 == $s2);
+var_dump($s1 == $s2); // true
 $s1['b'] = 3;
-var_dump($s1 == $s2);
+var_dump($s1 == $s2); // false
 echo "------------------------\n";
 $m = StableMap {
 }

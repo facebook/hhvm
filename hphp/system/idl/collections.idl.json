@@ -1245,7 +1245,7 @@
             "ifaces": [
                 "MutableMap"
             ],
-            "desc": "An unordered dictionary-style collection.",
+            "desc": "An ordered dictionary-style collection.",
             "flags": [
                 "IsFinal",
                 "IsCppSerializable",
@@ -1839,7 +1839,7 @@
             "ifaces": [
                 "KeyedIterator"
             ],
-            "desc": "An iterator implementation for iterating over a Map.",
+            "desc": "An iterator implementation for iterating over a Map/StableMap.",
             "flags": [
                 "IsFinal",
                 "NoDefaultSweep"
@@ -1919,7 +1919,7 @@
             "ifaces": [
                 "MutableMap"
             ],
-            "desc": "An ordered dictionary-style collection.",
+            "desc": "An ordered dictionary-style collection. Since Map is also ordered, it should be preferred.",
             "flags": [
                 "IsFinal",
                 "IsCppSerializable",
@@ -2502,86 +2502,6 @@
                             "name": "mp",
                             "type": "Variant"
                         }
-                    ]
-                }
-            ],
-            "consts": [
-            ]
-        },
-        {
-            "name": "StableMapIterator",
-            "ifaces": [
-                "KeyedIterator"
-            ],
-            "desc": "An iterator implementation for iterating over a StableMap.",
-            "flags": [
-                "IsFinal",
-                "NoDefaultSweep"
-            ],
-            "funcs": [
-                {
-                    "name": "__construct",
-                    "return": {
-                        "type": null
-                    },
-                    "flags": [
-                    ],
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "current",
-                    "desc": "Returns the current value that the iterator points to.",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": "Variant"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "key",
-                    "desc": "Returns the current key that the iterator points to.",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": "Variant"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "valid",
-                    "desc": "Returns true if the iterator points to a valid value, returns false otherwise.",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": "Boolean"
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "next",
-                    "desc": "Advance this iterator forward one position.",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
-                    ]
-                },
-                {
-                    "name": "rewind",
-                    "desc": "Move this iterator back to the first position.",
-                    "flags": [
-                    ],
-                    "return": {
-                        "type": null
-                    },
-                    "args": [
                     ]
                 }
             ],

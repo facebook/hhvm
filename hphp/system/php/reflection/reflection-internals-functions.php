@@ -99,7 +99,7 @@ function hphp_invoke_method(?object $obj, string $cls, string $name,
  * @return object - The newly created object
  */
 <<__Native("NoInjection"), __HipHopSpecific>>
-function hphp_create_object(string $name, array $params): object;
+function hphp_create_object(string $name, ?array $params): object;
 
 /**
  * hphp_create_object_without_constructor() - Used by ReflectionClass to create 

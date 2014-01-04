@@ -428,6 +428,12 @@ class BaseMap : public ExtObjectData {
   static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
   static bool OffsetContains(ObjectData* obj, TypedValue* key);
   static void OffsetUnset(ObjectData* obj, TypedValue* key);
+
+  enum EqualityFlavor { OrderMatters, OrderIrrelevant };
+
+  static bool Equals(EqualityFlavor eq,
+                     const ObjectData* obj1, const ObjectData* obj2);
+
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
@@ -679,7 +685,6 @@ class c_Map : public BaseMap {
   explicit c_Map(Class* cls = c_Map::classof());
 
   static c_Map* Clone(ObjectData* obj);
-  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
  public: // PHP API - No inlines (required by .idl.json linking)
   void t___construct(CVarRef iterable = null_variant);
@@ -757,7 +762,6 @@ class c_StableMap : public BaseMap {
   explicit c_StableMap(Class* cls = c_StableMap::classof());
 
   static c_StableMap* Clone(ObjectData* obj);
-  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
  public: // PHP API - No inlines (required by .idl.json linking)
   void t___construct(CVarRef iterable = null_variant);

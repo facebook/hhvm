@@ -2394,26 +2394,78 @@ void BaseMap::OffsetUnset(ObjectData* obj, TypedValue* key) {
   throwBadKeyType();
 }
 
-// FIXME: for legacy reasons, map equality is done independent of the order
-// of elements
-bool c_Map::Equals(const ObjectData* obj1, const ObjectData* obj2) {
-  auto mp1 = static_cast<const c_Map*>(obj1);
-  auto mp2 = static_cast<const c_Map*>(obj2);
-  if (mp1->m_size != mp2->m_size) return false;
-  for (uint i = 0; i < mp1->iterLimit(); ++i) {
-    if (mp1->isTombstone(i)) continue;
-    BaseMap::Elm& p = mp1->data()[i];
-    TypedValue* tv2;
-    if (p.hasIntKey()) {
-      tv2 = mp2->get(p.ikey);
-    } else {
-      assert(p.hasStrKey());
-      tv2 = mp2->get(p.skey);
+bool BaseMap::Equals(EqualityFlavor eq,
+                     const ObjectData* obj1, const ObjectData* obj2) {
+
+  auto mp1 = static_cast<const BaseMap*>(obj1);
+  auto mp2 = static_cast<const BaseMap*>(obj2);
+  auto size = mp1->size();
+
+  if (size != mp2->size()) { return false; }
+  if (size == 0) { return true; }
+
+  switch (eq) {
+    case EqualityFlavor::OrderIrrelevant: {
+      // obj1 and obj2 must have the exact same set of keys, and the values
+      // for each key must compare equal (==). This equality behavior
+      // matches that of == on two PHP (associative) arrays.
+      for (uint i = 0; i < mp1->iterLimit(); ++i) {
+        if (mp1->isTombstone(i)) continue;
+        BaseMap::Elm& p = mp1->data()[i];
+        TypedValue* tv2;
+        if (p.hasIntKey()) {
+          tv2 = mp2->get(p.ikey);
+        } else {
+          assert(p.hasStrKey());
+          tv2 = mp2->get(p.skey);
+        }
+        if (!tv2) return false;
+        if (!equal(tvAsCVarRef(&p.data), tvAsCVarRef(tv2))) return false;
+      }
+      return true;
     }
-    if (!tv2) return false;
-    if (!equal(tvAsCVarRef(&p.data), tvAsCVarRef(tv2))) return false;
+    case EqualityFlavor::OrderMatters: {
+      // obj1 and obj2 must compare equal according to OrderIrrelevant;
+      // additionally, the (identical) keys of obj1 and obj2 must be in the
+      // same iteration order.
+      uint compared = 0;
+      for (uint ix1 = 0, ix2 = 0;
+           ix1 < mp1->iterLimit() && ix2 < mp2->iterLimit() ; ) {
+
+        auto tomb1 = mp1->isTombstone(ix1);
+        auto tomb2 = mp2->isTombstone(ix2);
+
+        if (tomb1 || tomb2) {
+          if (tomb1) { ++ix1; }
+          if (tomb2) { ++ix2; }
+          continue;
+        }
+
+        BaseMap::Elm& p1 = mp1->data()[ix1];
+        BaseMap::Elm& p2 = mp2->data()[ix2];
+
+        if (p1.hasIntKey()) {
+          if (!p2.hasIntKey() ||
+              p1.ikey != p2.ikey) {
+            return false;
+          }
+        } else {
+          assert(p1.hasStrKey());
+          if (!p2.hasStrKey() || !equal(p1.skey, p2.skey)) {
+            return false;
+          }
+        }
+        if (!equal(tvAsCVarRef(&p1.data), tvAsCVarRef(&p2.data))) {
+          return false;
+        }
+
+        ++ix1; ++ix2; ++compared;
+      }
+
+      return (compared == size);
+    }
   }
-  return true;
+  not_reached();
 }
 
 void BaseMap::Unserialize(ObjectData* obj,
@@ -2518,53 +2570,6 @@ void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
 
 c_StableMap* c_StableMap::Clone(ObjectData* obj) {
   return BaseMap::Clone<c_StableMap>(obj);
-}
-
-// For StableMap equality, order of keys-data pairs matters as much as
-// their presence
-bool c_StableMap::Equals(const ObjectData* obj1, const ObjectData* obj2) {
-  auto mp1 = static_cast<const c_Map*>(obj1);
-  auto mp2 = static_cast<const c_Map*>(obj2);
-  auto size = mp1->size();
-
-  if (size != mp2->size()) { return false; }
-  if (size == 0) { return true; }
-
-  uint compared = 0;
-  for (uint ix1 = 0, ix2 = 0;
-       ix1 < mp1->iterLimit() && ix2 < mp2->iterLimit() ; ) {
-
-    auto tomb1 = mp1->isTombstone(ix1);
-    auto tomb2 = mp2->isTombstone(ix2);
-
-    if (tomb1 || tomb2) {
-      if (tomb1) { ++ix1; }
-      if (tomb2) { ++ix2; }
-      continue;
-    }
-
-    BaseMap::Elm& p1 = mp1->data()[ix1];
-    BaseMap::Elm& p2 = mp2->data()[ix2];
-
-    if (p1.hasIntKey()) {
-      if (!p2.hasIntKey() ||
-          p1.ikey != p2.ikey) {
-        return false;
-      }
-    } else {
-      assert(p1.hasStrKey());
-      if (!p2.hasStrKey() || !equal(p1.skey, p2.skey)) {
-        return false;
-      }
-    }
-    if (!equal(tvAsCVarRef(&p1.data), tvAsCVarRef(&p2.data))) {
-      return false;
-    }
-
-    ++ix1; ++ix2; ++compared;
-  }
-
-  return (compared == size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4483,9 +4488,11 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
     case Collection::VectorType:
       return c_Vector::Equals(obj1, obj2);
     case Collection::MapType:
-      return c_Map::Equals(obj1, obj2);
+      return BaseMap::Equals(
+        BaseMap::EqualityFlavor::OrderIrrelevant, obj1, obj2);
     case Collection::StableMapType:
-      return c_StableMap::Equals(obj1, obj2);
+      return BaseMap::Equals(
+        BaseMap::EqualityFlavor::OrderMatters, obj1, obj2);
     case Collection::SetType:
       return c_Set::Equals(obj1, obj2);
     case Collection::PairType:

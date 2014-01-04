@@ -1,0 +1,1 @@
+<?php if (!extension_loaded('simplexml') || !extension_loaded('dom') || defined('PHP_WINDOWS_VERSION_MAJOR')) die('skip'); ?>

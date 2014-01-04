@@ -1244,6 +1244,9 @@ void c_LibXMLError::t___construct() {
 ///////////////////////////////////////////////////////////////////////////////
 // libxml
 
+static xmlParserInputBufferPtr
+hphp_libxml_input_buffer(const char *URI, xmlCharEncoding enc);
+
 class xmlErrorVec : public std::vector<xmlError> {
 public:
   ~xmlErrorVec() {
@@ -1263,13 +1266,15 @@ public:
   virtual void requestInit() {
     m_use_error = false;
     m_errors.reset();
-    xmlParserInputBufferCreateFilenameDefault(nullptr);
+    m_entity_loader_disabled = false;
+    xmlParserInputBufferCreateFilenameDefault(hphp_libxml_input_buffer);
   }
   virtual void requestShutdown() {
     m_use_error = false;
     m_errors.reset();
   }
 
+  bool m_entity_loader_disabled;
   bool m_use_error;
   xmlErrorVec m_errors;
 };
@@ -1376,19 +1381,19 @@ void f_libxml_set_streams_context(CResRef streams_context) {
 }
 
 static xmlParserInputBufferPtr
-hphp_libxml_input_buffer_noload(const char *URI, xmlCharEncoding enc) {
-  return nullptr;
+hphp_libxml_input_buffer(const char *URI, xmlCharEncoding enc) {
+  if (s_libxml_errors->m_entity_loader_disabled) {
+    return nullptr;
+  }
+  return __xmlParserInputBufferCreateFilename(URI, enc);
 }
 
 bool f_libxml_disable_entity_loader(bool disable /* = true */) {
-  xmlParserInputBufferCreateFilenameFunc old;
+  bool old = s_libxml_errors->m_entity_loader_disabled;
 
-  if (disable) {
-    old = xmlParserInputBufferCreateFilenameDefault(hphp_libxml_input_buffer_noload);
-  } else {
-    old = xmlParserInputBufferCreateFilenameDefault(nullptr);
-  }
-  return (old == hphp_libxml_input_buffer_noload);
+  s_libxml_errors->m_entity_loader_disabled = disable;
+
+  return old;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

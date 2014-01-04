@@ -32,14 +32,7 @@ no_import = (
     'ext/spl/tests/SplFileObject_setCsvControl_variation001.php',
 
     # spews files until they work
-    '/ext/standard/tests/file/fopen_variation14-win32.phpt',
-    '/ext/standard/tests/file/fopen_variation15-win32.phpt',
-    '/ext/standard/tests/file/mkdir_variation5-win32.phpt',
-    '/ext/standard/tests/file/mkdir_variation5-win32.phpt',
     '/ext/standard/tests/file/readfile_variation4.phpt',
-    '/ext/standard/tests/file/windows_links/bug48746.phpt',
-    '/ext/standard/tests/file/windows_links/bug48746_1.phpt',
-    '/ext/standard/tests/file/windows_links/bug48746_2.phpt',
     '/ext/xmlwriter/tests/001.phpt',
     '/ext/xmlwriter/tests/004.phpt',
     '/ext/xmlwriter/tests/005.phpt',

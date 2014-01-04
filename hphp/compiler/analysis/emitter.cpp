@@ -6658,7 +6658,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
   if (!nif) {
     bif = Native::unimplementedWrapper;
-  } else if (fe->parseNativeAttributes(attributes) & Native::AttrActRec) {
+  } else if (fe->parseUserAttributes(attributes) & Native::AttrActRec) {
     // Call this native function with a raw ActRec*
     // rather than pulling out args for normal func calling
     bif = nif;

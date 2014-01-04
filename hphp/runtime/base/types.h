@@ -602,6 +602,7 @@ enum Attr {
   AttrSkipFrame     = (1 << 22), //                     X    //
   AttrNative        = (1 << 23), //                     X    //
   AttrVMEntry       = (1 << 24), //                     X    //
+  AttrHPHPSpecific  = (1 << 25), //                     X    //
 };
 
 inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }

@@ -723,7 +723,9 @@ public:
   const UserAttributeMap& getUserAttributes() const {
     return m_userAttributes;
   }
+  int parseUserAttributes(Attr &attrs) const;
   int parseNativeAttributes(Attr &attrs) const;
+  int parseHipHopAttributes(Attr &attrs) const;
 
   void commit(RepoTxn& txn) const;
   Func* create(Unit& unit, PreClass* preClass = nullptr) const;

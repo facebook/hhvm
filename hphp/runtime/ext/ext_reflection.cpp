@@ -34,28 +34,6 @@ namespace HPHP {
 
 using JIT::VMRegAnchor;
 
-static class ReflectionExtension : public Extension {
- public:
-  ReflectionExtension() : Extension("reflection") { }
-  virtual void moduleLoad(Hdf config) {
-    HHVM_FE(hphp_create_object);
-    HHVM_FE(hphp_create_object_without_constructor);
-    HHVM_FE(hphp_get_class_constant);
-    HHVM_FE(hphp_get_class_info);
-    HHVM_FE(hphp_get_closure_info);
-    HHVM_FE(hphp_get_extension_info);
-    HHVM_FE(hphp_get_function_info);
-    HHVM_FE(hphp_get_method_info);
-    HHVM_FE(hphp_get_original_class_name);
-    HHVM_FE(hphp_get_property);
-    HHVM_FE(hphp_get_static_property);
-    HHVM_FE(hphp_invoke);
-    HHVM_FE(hphp_invoke_method);
-    HHVM_FE(hphp_scalar_typehints_enabled);
-    HHVM_FE(hphp_set_property);
-    HHVM_FE(hphp_set_static_property);
-  }
-} s_reflection_extension;
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
@@ -1236,6 +1214,33 @@ String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
 bool HHVM_FUNCTION(hphp_scalar_typehints_enabled) {
   return RuntimeOption::EnableHipHopSyntax;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+class reflectionExtension : public Extension {
+ public:
+  reflectionExtension() : Extension("reflection") { }
+  virtual void moduleInit() {
+    HHVM_FE(hphp_create_object);
+    HHVM_FE(hphp_create_object_without_constructor);
+    HHVM_FE(hphp_get_class_constant);
+    HHVM_FE(hphp_get_class_info);
+    HHVM_FE(hphp_get_closure_info);
+    HHVM_FE(hphp_get_extension_info);
+    HHVM_FE(hphp_get_function_info);
+    HHVM_FE(hphp_get_method_info);
+    HHVM_FE(hphp_get_original_class_name);
+    HHVM_FE(hphp_get_property);
+    HHVM_FE(hphp_get_static_property);
+    HHVM_FE(hphp_invoke);
+    HHVM_FE(hphp_invoke_method);
+    HHVM_FE(hphp_scalar_typehints_enabled);
+    HHVM_FE(hphp_set_property);
+    HHVM_FE(hphp_set_static_property);
+
+    loadSystemlib();
+  }
+} s_reflection_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

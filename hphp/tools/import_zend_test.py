@@ -92,28 +92,14 @@ no_import = (
 
 # For marking tests as always failing. Used to keep flaky tests in bad/.
 bad_tests = (
-    # SESSION is bused on husdon
-    '/Zend/tests/unset_cv05.php',
-    '/Zend/tests/unset_cv06.php',
-
-    # works in interp but not others
-    '/tests/lang/bug25922.php',
-    '/Zend/tests/bug34064.php',
-    '/Zend/tests/objects_029.php',
-    '/Zend/tests/objects_030.php',
-    '/ext/standard/tests/strings/bug44242.php',
-    '/ext/standard/tests/streams/bug64770.php',
-
     # line number is inconsistent on stack overflow
     '/Zend/tests/bug41633_3.php',
 
     # doubles aren't serialized properly in the repo
     '/ext/filter/tests/049.php',
 
-    # broken in Jenkins
-    '/ext/standard/array/tests/array_diff_assoc_variation6.php',
-    '/Zend/tests/bug35239.php',
-    '/Zend/tests/bug54265.php',
+    # "ls" sometimes prints on stderr
+    '/ext/standard/tests/streams/bug64770.php',
 
     # broken in contbuild
     '/ext/standard/tests/strings/bug51059.php',
@@ -226,6 +212,7 @@ norepo_tests = (
     '/Zend/tests/bug28444.php',
     '/Zend/tests/bug30519.php',
     '/Zend/tests/bug30922.php',
+    '/Zend/tests/bug34064.php',
     '/Zend/tests/bug36006.php',
     '/Zend/tests/bug36759.php',
     '/Zend/tests/bug39542.php',
@@ -251,6 +238,8 @@ norepo_tests = (
     '/Zend/tests/jump14.php',
     '/Zend/tests/lsb_013.php',
     '/Zend/tests/ns_041.php',
+    '/Zend/tests/objects_029.php',
+    '/Zend/tests/objects_030.php',
     '/Zend/tests/traits/bug60369.php',
     '/Zend/tests/traits/bug60809.php',
     '/Zend/tests/traits/bugs/overridding-conflicting-property-initializer.php',
@@ -319,7 +308,9 @@ norepo_tests = (
     '/ext/standard/tests/math/tan_basic.php',
     '/ext/standard/tests/math/tanh_basic.php',
     '/ext/standard/tests/serialize/bug30234.php',
+    '/ext/standard/tests/streams/bug64770.php',
     '/ext/standard/tests/streams/stream_resolve_include_path.php',
+    '/ext/standard/tests/strings/bug44242.php',
     '/ext/standard/tests/strings/trim.php',
     '/ext/standard/tests/strings/wordwrap.php',
     '/ext/standard/tests/url/parse_url_basic_001.php',
@@ -360,6 +351,7 @@ norepo_tests = (
     '/tests/classes/constants_scope_001.php',
     '/tests/classes/unset_properties.php',
     '/tests/lang/034.php',
+    '/tests/lang/bug25922.php',
     '/tests/lang/bug32924.php',
     '/tests/lang/include_variation3.php',
     '/tests/lang/static_variation_001.php',

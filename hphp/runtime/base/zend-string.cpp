@@ -2448,7 +2448,7 @@ static char Lookahead(unsigned char *word, int how_far) {
     phoned_word[p_idx++] = c;                                           \
   }
 /* Slap a null character on the end of the phoned word */
-#define End_Phoned_Word  {phoned_word[p_idx] = '\0';}
+#define End_Phoned_Word  { Phonize('\0'); }
 /* How long is the phoned word? */
 #define Phone_Len  (p_idx)
 

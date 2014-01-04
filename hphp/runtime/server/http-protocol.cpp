@@ -400,25 +400,41 @@ void HttpProtocol::CopyServerInfo(Variant& server,
   string hostHeader = transport->getHeader("Host");
   String hostName(vhost->serverName(hostHeader));
 
+  String serverNameHeader(transport->getServerName());
+  String serverAddrHeader(transport->getServerAddr());
+  String serverAddr(String(RuntimeOption::ServerPrimaryIP));
+  uint16_t serverPortHeader = transport->getServerPort();
+  uint16_t serverPort(RuntimeOption::ServerPort);
+
   if (hostHeader.empty()) {
     server.set(s_HTTP_HOST, hostName);
-    StackTraceNoHeap::AddExtraLogging("Server", hostName.data());
-  } else {
+    StackTraceNoHeap::AddExtraLogging("Server_HTTP_HOST", hostName.data());
+  }
+  // see if we have a server_name header from the transport. if not do what we did before.
+  if(!serverNameHeader.empty()) {
+    hostName = serverNameHeader;
+    StackTraceNoHeap::AddExtraLogging("Server", serverNameHeader.data());
+  } else if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
+    hostName = hostHeader;
     StackTraceNoHeap::AddExtraLogging("Server", hostHeader.c_str());
   }
-  if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
-    hostName = hostHeader;
-    // _SERVER['SERVER_NAME'] shouldn't contain the port number
+  // _SERVER['SERVER_NAME'] shouldn't contain the port number
+  if(!hostName.empty()) {
     int colonPos = hostName.find(':');
     if (colonPos != String::npos) {
       hostName = hostName.substr(0, colonPos);
     }
   }
-
+  if(!serverAddrHeader.empty()) {
+    serverAddr = serverAddrHeader;
+  }
+  if(serverPortHeader != 0) {
+    serverPort = serverPortHeader;
+  }
   server.set(s_GATEWAY_INTERFACE, s_CGI_1_1);
-  server.set(s_SERVER_ADDR, String(RuntimeOption::ServerPrimaryIP));
+  server.set(s_SERVER_ADDR, serverAddr);
   server.set(s_SERVER_NAME, hostName);
-  server.set(s_SERVER_PORT, RuntimeOption::ServerPort);
+  server.set(s_SERVER_PORT, serverPort);
   server.set(s_SERVER_SOFTWARE, s_HPHP);
   server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
   server.set(s_SERVER_ADMIN, empty_string);

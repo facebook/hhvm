@@ -18,21 +18,11 @@ import sys
 # We want runnig the bad tests to still complete.
 no_import = (
     # these hang forever
-    '/ext/sockets/tests/socket_select-wrongparams-1.phpt',
-    '/ext/spl/tests/array_012.phpt',
-    '/ext/spl/tests/observer_003.phpt',
-    '/ext/spl/tests/observer_004.phpt',
-    '/ext/spl/tests/observer_005.phpt',
-    '/ext/spl/tests/observer_006.phpt',
-    '/ext/spl/tests/observer_009.phpt',
     '/ext/standard/tests/array/array_pad_variation2.phpt',
-    '/ext/standard/tests/file/bug27508.phpt',
     '/ext/standard/tests/general_functions/sleep_error.phpt',
     '/ext/standard/tests/general_functions/usleep_error.phpt',
     '/ext/zlib/tests/gzgetc_basic.phpt',
     '/ext/zlib/tests/gzgets_basic.phpt',
-    '/tests/func/005a.phpt',
-    '/tests/run-test/test010.phpt',
 
     # segfaults
     '/Zend/tests/heredoc_005.phpt',
@@ -54,7 +44,7 @@ no_import = (
     '/Zend/tests/002.phpt',
     '/Zend/tests/003.phpt',
 
-    # too large input
+    # regular expression is too large at offset 231351
     '/tests/lang/024.phpt',
 
     # cause of failure uninvestigated:

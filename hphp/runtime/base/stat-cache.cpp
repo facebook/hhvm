@@ -33,20 +33,6 @@ namespace HPHP {
 
 TRACE_SET_MOD(stat);
 
-namespace {
-
-// Insert into a map and assert that the key isn't already present.
-template<typename Map>
-void
-mapInsertUnique(Map& m,
-                const typename Map::key_type& k,
-                const typename Map::mapped_type& d) {
-  assert(m.find(k) == end(m));
-  m.insert(std::make_pair(k, d));
-}
-
-}
-
 UNUSED static std::string statToString(const struct stat* buf) {
   std::ostringstream os;
   os << "struct stat {";
@@ -403,7 +389,10 @@ std::string StatCache::Node::readlink(const std::string& path,
 
 void StatCache::Node::insertChild(const std::string& childName,
                                   StatCache::NodePtr child, bool follow) {
-  mapInsertUnique(follow ? m_children : m_lChildren, childName, child);
+  auto& map = follow ? m_children : m_lChildren;
+  if (!map.insert(std::make_pair(childName, child)).second) {
+    assert(0); // should not already exist in the map here.
+  }
 }
 
 void StatCache::Node::removeChild(const std::string& childName) {
@@ -496,7 +485,9 @@ StatCache::NodePtr StatCache::getNode(const std::string& path, bool follow) {
     node = folly::get_default(m_watch2Node, wd);
     if (!node.get()) {
       node = new Node(*this, wd);
-      mapInsertUnique(m_watch2Node, wd, node);
+      if (!m_watch2Node.insert(std::make_pair(wd, node)).second) {
+        assert(0); // should not already exist in the map
+      }
       TRACE(2, "StatCache: getNode('%s', follow=%s) --> %p (wd=%d)\n",
                path.c_str(), follow ? "true" : "false", node.get(), wd);
     } else {

@@ -83,6 +83,7 @@ hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
 hphp/system/php/redis/RedisSessionModule.php
 hphp/system/php/reflection/reflection-classes.php
+hphp/system/php/reflection/reflection-internals-functions.php
 hphp/system/php/reflection/Reflection.php
 hphp/system/php/sessions/session_register_shutdown.php
 hphp/system/php/soap/SoapFault.php

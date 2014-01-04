@@ -268,7 +268,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
 
   if (m_type == KindOfUnknown || m_type == KindOfClass) {
     try {
-      Array ret = f_hphp_get_class_info(m_symbol);
+      Array ret = HHVM_FN(hphp_get_class_info)(m_symbol);
       if (!ret.empty()) {
         m_info.append(ret);
       }
@@ -276,7 +276,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
   }
   if (m_type == KindOfUnknown || m_type == KindOfFunction) {
     try {
-      Array ret = f_hphp_get_function_info(m_symbol);
+      Array ret = HHVM_FN(hphp_get_function_info)(m_symbol);
       if (!ret.empty()) {
         m_info.append(ret);
       }

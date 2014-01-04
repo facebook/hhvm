@@ -1143,12 +1143,12 @@ Variant HHVM_FUNCTION(hphp_invoke, const String& name, CVarRef params) {
   return invoke(name.data(), params);
 }
 
-Variant HHVM_FUNCTION(hphp_invoke_method, CObjRef obj, const String& cls,
+Variant HHVM_FUNCTION(hphp_invoke_method, CVarRef obj, const String& cls,
                                           const String& name, CVarRef params) {
   if (obj.isNull()) {
     return invoke_static_method(cls, name, params);
   }
-  ObjectData *o = obj.get();
+  ObjectData *o = obj.toObject().get();
   return o->o_invoke(name, params);
 }
 

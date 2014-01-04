@@ -31,7 +31,7 @@ Array HHVM_FUNCTION(hphp_get_closure_info, CObjRef closure);
 Array HHVM_FUNCTION(hphp_get_class_info, CVarRef name);
 Array HHVM_FUNCTION(hphp_get_function_info, const String& name);
 Variant HHVM_FUNCTION(hphp_invoke, const String& name, CVarRef params);
-Variant HHVM_FUNCTION(hphp_invoke_method, CObjRef obj, const String& cls,
+Variant HHVM_FUNCTION(hphp_invoke_method, CVarRef obj, const String& cls,
                                           const String& name, CVarRef params);
 Object HHVM_FUNCTION(hphp_create_object, const String& name, CVarRef params);
 Object HHVM_FUNCTION(hphp_create_object_without_constructor,

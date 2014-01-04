@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
+#include "hphp/util/slice.h"
 
 namespace HPHP { namespace JIT {
 
@@ -32,73 +33,66 @@ bool cycleHasSIMDReg(const CycleInfo& cycle,
 
 smart::vector<MoveInfo> doRegMoves(PhysReg::Map<PhysReg>& moves,
                                    PhysReg rTmp) {
+  auto constexpr N = X64::kNumRegs > ARM::kNumRegs ? X64::kNumRegs :
+                     ARM::kNumRegs;
   smart::vector<MoveInfo> howTo;
-  smart::vector<CycleInfo> cycles;
+  CycleInfo cycle_mem[N];
+  List<CycleInfo> cycles(cycle_mem, 0, N);
   PhysReg::Map<int> outDegree;
-  RegSet inCycle;
+  PhysReg::Map<int> index;
 
+  assert(moves[rTmp] == InvalidReg);
   for (auto reg : moves) {
-    if (reg == moves[reg]) {
-      // Get rid of 1-cycles.
-      moves[reg] = InvalidReg;
-    }
-    if (reg == rTmp && moves[reg] != InvalidReg) {
-      // ERROR: rTmp cannot be referenced in moves[].
-      assert(false);
-    }
+    // Ignore moves from a register to itself
+    if (reg == moves[reg]) moves[reg] = InvalidReg;
+    index[reg] = -1;
   }
 
   // Iterate over the nodes filling in outDegree[] and cycles[] as we go
+  int nextIndex = 0;
   for (auto reg : moves) {
-    if (moves[reg] != InvalidReg) {
-      ++outDegree[moves[reg]];
-    }
+    // skip registers we've visited already.
+    if (index[reg] >= 0) continue;
 
-    if (inCycle.contains(reg)) {
-      // We've already found this node in a cycle.
-      continue;
-    }
-
-    auto node = reg;
-    smart::vector<PhysReg> path;
-
-    // Follow the path from this node. If it's in a cycle, we will eventually
-    // find this node again.
-    do {
-      path.push_back(node);
-      node = moves[node];
-    } while (node != InvalidReg && node != reg);
-
-    if (node != InvalidReg) {
-      // Found a cycle.
-      for (auto const& r : path) {
-        inCycle.add(r);
+    // Begin walking a path from reg.
+    for (auto node = reg;;) {
+      assert(nextIndex < N);
+      index[node] = nextIndex++;
+      auto next = moves[node];
+      if (next != InvalidReg) {
+        ++outDegree[next];
+        if (index[next] < 0) {
+          // There is an edge from node to next, and next has not been
+          // visited.  Extend current path to include next, then loop.
+          node = next;
+          continue;
+        }
+        // next already visited; check if next is on current path.
+        if (index[next] >= index[reg]) {
+          // found a cycle.
+          cycles.push_back({ next, nextIndex - index[next] });
+        }
       }
-      cycles.push_back({node, (int)path.size()});
+      break;
     }
   }
 
   // Handle all moves that aren't part of a cycle. Only nodes with outdegree
   // zero are put into the queue, which is how nodes in a cycle get excluded.
   {
-    smart::deque<PhysReg> q;
+    PhysReg q[N];
+    int qBack = 0;
+    auto enque = [&](PhysReg r) { assert(qBack < N); q[qBack++] = r; };
     for (auto node : outDegree) {
-      if (outDegree[node] == 0) {
-        q.push_back(node);
-      }
+      if (outDegree[node] == 0) enque(node);
     }
-    while (!q.empty()) {
-      auto node = q.front();
-      q.pop_front();
-
-      if (moves[node] != InvalidReg) {
-        auto nextNode = moves[node];
-        howTo.emplace_back(MoveInfo::Kind::Move, nextNode, node);
-        --outDegree[nextNode];
-        if (outDegree[nextNode] == 0) {
-          q.push_back(nextNode);
-        }
-      }
+    for (int i = 0; i < qBack; ++i) {
+      auto node = q[i];
+      if (moves[node] == InvalidReg) continue;
+      auto nextNode = moves[node];
+      howTo.emplace_back(MoveInfo::Kind::Move, nextNode, node);
+      --outDegree[nextNode];
+      if (outDegree[nextNode] == 0) enque(nextNode);
     }
   }
 

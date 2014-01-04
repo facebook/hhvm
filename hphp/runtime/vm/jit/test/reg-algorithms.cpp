@@ -52,6 +52,14 @@ TEST(RegAlgorithms, threeCycle) {
               (howTo[0].m_reg1 == rdx && howTo[0].m_reg2 == rax));
   EXPECT_TRUE((howTo[1].m_reg1 == rdx && howTo[1].m_reg2 == rcx) ||
               (howTo[1].m_reg1 == rcx && howTo[1].m_reg2 == rdx));
+
+  // another test involving a 3-cycle plus one leaf.  pass as long as
+  // it doesn't blow up.
+  moves[rax] = rbx;
+  moves[rcx] = rax;
+  moves[rdx] = rcx; // leaf
+  moves[rbx] = rcx;
+  auto howTo2 = doRegMoves(moves, r10);
 }
 
 TEST(RegAlgorithms, noCycle) {

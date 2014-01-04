@@ -189,7 +189,7 @@ struct PhysReg {
         return PhysReg{idx};
       }
 
-      bool operator!=(const iterator& other) {
+      bool operator!=(const iterator& other) const {
         return idx != other.idx;
       }
 

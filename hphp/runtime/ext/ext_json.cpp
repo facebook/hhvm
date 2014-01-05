@@ -23,6 +23,7 @@
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(json);
 ///////////////////////////////////////////////////////////////////////////////
+// json_encode() options
 const int64_t k_JSON_HEX_TAG           = 1<<0;
 const int64_t k_JSON_HEX_AMP           = 1<<1;
 const int64_t k_JSON_HEX_APOS          = 1<<2;
@@ -32,6 +33,11 @@ const int64_t k_JSON_NUMERIC_CHECK     = 1<<5;
 const int64_t k_JSON_UNESCAPED_SLASHES = 1<<6;
 const int64_t k_JSON_PRETTY_PRINT      = 1<<7;
 const int64_t k_JSON_UNESCAPED_UNICODE = 1<<8;
+
+// json_decode() options
+const int64_t k_JSON_BIGINT_AS_STRING  = 1<<0;
+
+// FB json_decode() options
 // intentionally higher so when PHP adds more options we're fine
 const int64_t k_JSON_FB_LOOSE          = 1<<20;
 const int64_t k_JSON_FB_UNLIMITED      = 1<<21;
@@ -89,7 +95,7 @@ Variant f_json_decode(const String& json, bool assoc /* = false */,
   }
 
   const int64_t supported_options =
-    k_JSON_FB_LOOSE | k_JSON_FB_COLLECTIONS | k_JSON_FB_STABLE_MAPS;
+    k_JSON_FB_LOOSE | k_JSON_FB_COLLECTIONS | k_JSON_FB_STABLE_MAPS | k_JSON_BIGINT_AS_STRING;
   int64_t parser_options = json_options & supported_options;
   Variant z;
   if (JSON_parser(z, json.data(), json.size(), assoc, depth, parser_options)) {

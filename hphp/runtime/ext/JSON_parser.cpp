@@ -401,10 +401,12 @@ static int dehexchar(char c) {
   return -1;
 }
 
-static void json_create_zval(Variant &z, StringBuffer &buf, int type) {
+static void json_create_zval(Variant &z, StringBuffer &buf, int type,
+                             int64_t options) {
   switch (type) {
   case KindOfInt64:
     {
+      bool bigint = false;
       const char *p = buf.data();
       assert(p);
       if (p == NULL) {
@@ -420,15 +422,22 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type) {
         if (len == MAX_LENGTH_OF_LONG - 1) {
           int cmp = strcmp(p + (neg ? 1 : 0), long_min_digits);
           if (!(cmp < 0 || (cmp == 0 && neg))) {
-            z = strtod(p, NULL);
-            return;
+            bigint = true;
           }
         } else {
-          z = strtod(p, NULL);
-          return;
+          bigint = true;
         }
       }
-      z = int64_t(strtoll(buf.data(), NULL, 10));
+
+      if (bigint) {
+        if (options & k_JSON_BIGINT_AS_STRING) {
+          z = buf.detach();
+        } else {
+          z = strtod(p, NULL);
+        }
+      } else {
+        z = int64_t(strtoll(buf.data(), NULL, 10));
+      }
     }
     break;
   case KindOfDouble:
@@ -679,7 +688,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
         if (type != -1 &&
             JSON(the_stack)[JSON(the_top)] == MODE_OBJECT) {
           Variant mval;
-          json_create_zval(mval, *buf, type);
+          json_create_zval(mval, *buf, type, options);
           Variant &top = JSON(the_zstack)[JSON(the_top)];
           object_set(top, key->detach(), mval, assoc);
           buf->clear();
@@ -730,7 +739,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
           if (type != -1 &&
                JSON(the_stack)[JSON(the_top)] == MODE_ARRAY) {
             Variant mval;
-            json_create_zval(mval, *buf, type);
+            json_create_zval(mval, *buf, type, options);
             JSON(the_zstack)[JSON(the_top)].append(mval);
             buf->clear();
             JSON_RESET_TYPE();
@@ -780,7 +789,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
           if (type != -1 &&
               (JSON(the_stack)[JSON(the_top)] == MODE_OBJECT ||
                JSON(the_stack)[JSON(the_top)] == MODE_ARRAY)) {
-            json_create_zval(mval, *buf, type);
+            json_create_zval(mval, *buf, type, options);
           }
 
           switch (JSON(the_stack)[JSON(the_top)]) {

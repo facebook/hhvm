@@ -45,6 +45,7 @@ extern const int64_t k_JSON_FB_EXTRA_ESCAPES;
 extern const int64_t k_JSON_FB_UNLIMITED;
 extern const int64_t k_JSON_FB_COLLECTIONS;
 extern const int64_t k_JSON_FB_STABLE_MAPS;
+extern const int64_t k_JSON_BIGINT_AS_STRING;
 
 // For json.idl.json registartion to use in PHP-land.
 // Duplicating values in the JSON_parser.h enum.

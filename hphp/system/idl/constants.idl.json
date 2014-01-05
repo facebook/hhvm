@@ -100,18 +100,6 @@
             "value": 131094
         },
         {
-            "name": "AF_INET",
-            "value": 2
-        },
-        {
-            "name": "AF_INET6",
-            "value": 10
-        },
-        {
-            "name": "AF_UNIX",
-            "value": 1
-        },
-        {
             "name": "ALT_DIGITS",
             "value": 131119
         },
@@ -2872,24 +2860,12 @@
             "value": 131106
         },
         {
-            "name": "MSG_DONTROUTE",
-            "value": 4
-        },
-        {
             "name": "MSG_EAGAIN",
             "value": 11
         },
         {
             "name": "MSG_ENOMSG",
             "value": 42
-        },
-        {
-            "name": "MSG_EOF",
-            "value": 512
-        },
-        {
-            "name": "MSG_EOR",
-            "value": 128
         },
         {
             "name": "MSG_EXCEPT",
@@ -2902,18 +2878,6 @@
         {
             "name": "MSG_NOERROR",
             "value": 2
-        },
-        {
-            "name": "MSG_OOB",
-            "value": 1
-        },
-        {
-            "name": "MSG_PEEK",
-            "value": 2
-        },
-        {
-            "name": "MSG_WAITALL",
-            "value": 256
         },
         {
             "name": "MW_AbsoluteIntent",
@@ -5052,10 +5016,6 @@
             "desc": "Dynamic constant - current_executable_path()"
         },
         {
-            "name": "PHP_BINARY_READ",
-            "value": 2
-        },
-        {
             "name": "PHP_BINDIR",
             "type": "String",
             "desc": "Dynamic constant - current_executable_directory()"
@@ -5095,10 +5055,6 @@
         {
             "name": "PHP_LOCALSTATEDIR",
             "value": ""
-        },
-        {
-            "name": "PHP_NORMAL_READ",
-            "value": 1
         },
         {
             "name": "PHP_OS",
@@ -6002,42 +5958,6 @@
             "value": 54
         },
         {
-            "name": "SOCK_DGRAM",
-            "value": 2
-        },
-        {
-            "name": "SOCK_RAW",
-            "value": 3
-        },
-        {
-            "name": "SOCK_RDM",
-            "value": 4
-        },
-        {
-            "name": "SOCK_SEQPACKET",
-            "value": 5
-        },
-        {
-            "name": "SOCK_STREAM",
-            "value": 1
-        },
-        {
-            "name": "SOL_SOCKET",
-            "value": 1
-        },
-        {
-            "name": "SOL_TCP",
-            "value": 6
-        },
-        {
-            "name": "SOL_UDP",
-            "value": 17
-        },
-        {
-            "name": "SOMAXCONN",
-            "value": 128
-        },
-        {
             "name": "SORTARRIVAL",
             "value": 1
         },
@@ -6098,72 +6018,12 @@
             "value": 2
         },
         {
-            "name": "SO_BROADCAST",
-            "value": 6
-        },
-        {
-            "name": "SO_DEBUG",
-            "value": 1
-        },
-        {
-            "name": "SO_DONTROUTE",
-            "value": 5
-        },
-        {
-            "name": "SO_ERROR",
-            "value": 4
-        },
-        {
             "name": "SO_FREE",
             "value": 8
         },
         {
-            "name": "SO_KEEPALIVE",
-            "value": 9
-        },
-        {
-            "name": "SO_LINGER",
-            "value": 13
-        },
-        {
             "name": "SO_NOSERVER",
             "value": 16
-        },
-        {
-            "name": "SO_OOBINLINE",
-            "value": 10
-        },
-        {
-            "name": "SO_RCVBUF",
-            "value": 8
-        },
-        {
-            "name": "SO_RCVLOWAT",
-            "value": 18
-        },
-        {
-            "name": "SO_RCVTIMEO",
-            "value": 20
-        },
-        {
-            "name": "SO_REUSEADDR",
-            "value": 2
-        },
-        {
-            "name": "SO_SNDBUF",
-            "value": 7
-        },
-        {
-            "name": "SO_SNDLOWAT",
-            "value": 19
-        },
-        {
-            "name": "SO_SNDTIMEO",
-            "value": 21
-        },
-        {
-            "name": "SO_TYPE",
-            "value": 3
         },
         {
             "name": "SQLT_AFC",

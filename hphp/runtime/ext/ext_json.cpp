@@ -155,10 +155,6 @@ Variant f_json_decode(const String& json, bool assoc /* = false */,
     return json.substr(1, json.size() - 2);
   }
 
-  if (ch0 == '{' || ch0 == '[') { /* invalid JSON string */
-    //json_set_last_error_code(json_error_codes::JSON_ERROR_SYNTAX);
-  }
-
   assert(json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE);
   return uninit_null();
 }

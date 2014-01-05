@@ -369,19 +369,19 @@ O(RaiseError,                       ND, S(Str),                     E|N|T|Er) \
 O(RaiseWarning,                     ND, S(Str),                       E|N|Er) \
 O(RaiseNotice,                      ND, S(Str),                       E|N|Er) \
 O(RaiseArrayIndexNotice,            ND, S(Int),                          E|N) \
-O(CheckInit,                        ND, S(Gen),                         B|NF) \
-O(CheckInitMem,                     ND, S(PtrToGen) C(Int),             B|NF) \
+O(CheckInit,                        ND, S(Gen),                            B) \
+O(CheckInitMem,                     ND, S(PtrToGen) C(Int),                B) \
 O(CheckCold,                        ND, NA,                              B|E) \
 O(CheckNullptr,                     ND, S(CountedStr,Nullptr),       B|E|CRc) \
-O(CheckNonNull,  DSubtract(0, Nullptr), S(Nullptr,Func),                B|NF) \
+O(CheckNonNull,  DSubtract(0, Nullptr), S(Nullptr,Func),                   B) \
 O(CheckBounds,                      ND, S(Int) S(Int),                E|N|Er) \
 O(LdVectorSize,                 D(Int), S(Obj),                            E) \
 O(CheckPackedArrayBounds,           ND, S(Arr) S(Int),                   B|E) \
 O(CheckPackedArrayElemNull,    D(Bool), S(Arr) S(Int),                     E) \
-O(VectorHasFrozenCopy,              ND, S(Obj),                         B|NF) \
+O(VectorHasFrozenCopy,              ND, S(Obj),                            B) \
 O(VectorDoCow,                      ND, S(Obj),                          N|E) \
 O(AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func),        P) \
-O(Unbox,                     DUnbox(0), S(Gen),                         B|NF) \
+O(Unbox,                     DUnbox(0), S(Gen),                            B) \
 O(Box,                         DBox(0), S(Init),                 E|N|CRc|PRc) \
 O(UnboxPtr,               D(PtrToCell), S(PtrToGen),                      NF) \
 O(BoxPtr,            D(PtrToBoxedCell), S(PtrToGen),                       N) \
@@ -391,11 +391,11 @@ O(LdStack,                      DParam, S(StkPtr),                        NF) \
 O(LdLoc,                        DParam, S(FramePtr),                      NF) \
 O(LdStackAddr,                  DParam, S(StkPtr),                         C) \
 O(LdLocAddr,                    DParam, S(FramePtr),                       C) \
-O(LdMem,                        DParam, S(PtrToGen) C(Int),             B|NF) \
-O(LdProp,                       DParam, S(Obj) C(Int),                  B|NF) \
+O(LdMem,                        DParam, S(PtrToGen) C(Int),                B) \
+O(LdProp,                       DParam, S(Obj) C(Int),                     B) \
 O(LdElem,                      D(Cell), S(PtrToCell) S(Int),               E) \
 O(LdPackedArrayElem,            D(Gen), S(Arr) S(Int),                     E) \
-O(LdRef,                        DLdRef, S(BoxedCell),                   B|NF) \
+O(LdRef,                        DLdRef, S(BoxedCell),                      B) \
 O(LdThis,                        DThis, S(FramePtr),                     B|C) \
 O(LdRetAddr,                D(RetAddr), S(FramePtr),                      NF) \
 O(LdConst,                      DParam, NA,                                C) \
@@ -405,10 +405,10 @@ O(LdCtx,                        D(Ctx), S(FramePtr),                       C) \
 O(LdCctx,                      D(Cctx), S(FramePtr),                       C) \
 O(LdCls,                        D(Cls), S(Str) C(Cls),              C|E|N|Er) \
 O(LdClsCached,                  D(Cls), CStr,                       C|E|N|Er) \
-O(LdClsCachedSafe,              D(Cls), CStr,                           B|NF) \
+O(LdClsCachedSafe,              D(Cls), CStr,                              B) \
 O(LdClsCtx,                     D(Cls), S(Ctx),                            C) \
 O(LdClsCctx,                    D(Cls), S(Cctx),                           C) \
-O(LdClsCns,                     DParam, NA,                             B|NF) \
+O(LdClsCns,                     DParam, NA,                                B) \
 O(LookupClsRDSHandle,     D(RDSHandle), S(Str),                          C|N) \
 O(DerefClsRDSHandle,            D(Cls), S(RDSHandle),                     NF) \
 O(LookupClsCns,           D(Uncounted), NA,                           E|Er|N) \
@@ -436,7 +436,7 @@ O(LdPropAddr,              D(PtrToGen), S(Obj) C(Int),                     C) \
 O(LdClsPropAddr,           D(PtrToGen), S(Cls) S(Str) C(Cls),     B|C|E|N|Er) \
 O(LdClsPropAddrCached,     D(PtrToGen), S(Cls) CStr CStr C(Cls),  B|C|E|N|Er) \
 O(LdObjMethod,                      ND, S(Cls) CStr S(StkPtr),        E|N|Er) \
-O(LdObjInvoke,                 D(Func), S(Cls),                         B|NF) \
+O(LdObjInvoke,                 D(Func), S(Cls),                            B) \
 O(LdGblAddrDef,            D(PtrToGen), S(Str),                          E|N) \
 O(LdGblAddr,               D(PtrToGen), S(Str),                          B|N) \
 O(LdObjClass,                   D(Cls), S(Obj),                            C) \
@@ -452,7 +452,7 @@ O(LdStrFPushCuf,                    ND, S(Str)                                \
 O(LdFunc,                      D(Func), S(Str),                   E|N|CRc|Er) \
 O(LdFuncCached,                D(Func), NA,                           N|E|Er) \
 O(LdFuncCachedU,               D(Func), NA,                           N|E|Er) \
-O(LdFuncCachedSafe,            D(Func), NA,                             B|NF) \
+O(LdFuncCachedSafe,            D(Func), NA,                                B) \
 O(LdARFuncPtr,                 D(Func), S(StkPtr,FramePtr) C(Int),         C) \
 O(LdSSwitchDestFast,            D(TCA), S(Gen),                            N) \
 O(LdSSwitchDestSlow,            D(TCA), S(Gen),                       E|N|Er) \
@@ -501,7 +501,7 @@ O(StElem,                           ND, S(PtrToCell)                          \
 O(IterCopy,                         ND, S(FramePtr) S(Int)                    \
                                         S(PtrToGen) S(Int),                E) \
 O(LdStaticLocCached,      D(BoxedCell), NA,                               NF) \
-O(CheckStaticLocInit,               ND, S(BoxedCell),                   B|NF) \
+O(CheckStaticLocInit,               ND, S(BoxedCell),                      B) \
 O(ClosureStaticLocInit,   D(BoxedCell), CStr                                  \
                                           S(FramePtr)                         \
                                           S(Cell),                       E|N) \

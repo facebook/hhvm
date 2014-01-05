@@ -50,11 +50,11 @@
             "type": "Int64"
         },
         {
-            "name": "JSON_FB_COLLECTIONS",
+            "name": "JSON_BIGINT_AS_STRING",
             "type": "Int64"
         },
         {
-            "name": "JSON_BIGINT_AS_STRING",
+            "name": "JSON_FB_COLLECTIONS",
             "type": "Int64"
         },
         {

@@ -320,10 +320,10 @@ struct Eq {
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
     if (od1 == od2) return true;
-    if (od1->getVMClass() != od2->getVMClass()) return false;
     if (od1->isCollection()) {
       return collectionEquals(od1, od2);
     }
+    if (od1->getVMClass() != od2->getVMClass()) return false;
     if (UNLIKELY(od1->instanceof(SystemLib::s_ArrayObjectClass))) {
       // Compare the whole object, not just the array representation
       Array ar1(ArrayData::Create());
@@ -618,4 +618,3 @@ bool cellGreaterOrEqual(Cell c1, Cell c2) {
 //////////////////////////////////////////////////////////////////////
 
 }
-

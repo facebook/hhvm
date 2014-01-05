@@ -4483,16 +4483,22 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
 
 bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
   int ct = obj1->getCollectionType();
-  assert(ct == obj2->getCollectionType());
+  assert(ct != Collection::InvalidType);
+  int ct2 = obj2->getCollectionType();
+  if (ct2 == Collection::InvalidType) { return false; }
+
+  if ((ct == Collection::MapType || ct == Collection::StableMapType)
+      && (ct2 == Collection::MapType || ct2 == Collection::StableMapType)) {
+    // For migration purposes, distinct Map types should compare equal
+    return BaseMap::Equals(
+      BaseMap::EqualityFlavor::OrderIrrelevant, obj1, obj2);
+  }
+
+  if (ct != ct2) { return false; }
+
   switch (ct) {
     case Collection::VectorType:
       return c_Vector::Equals(obj1, obj2);
-    case Collection::MapType:
-      return BaseMap::Equals(
-        BaseMap::EqualityFlavor::OrderIrrelevant, obj1, obj2);
-    case Collection::StableMapType:
-      return BaseMap::Equals(
-        BaseMap::EqualityFlavor::OrderMatters, obj1, obj2);
     case Collection::SetType:
       return c_Set::Equals(obj1, obj2);
     case Collection::PairType:
@@ -4501,6 +4507,8 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
       return c_FrozenVector::Equals(obj1, obj2);
     case Collection::FrozenSetType:
       return c_FrozenSet::Equals(obj1, obj2);
+    case Collection::MapType:
+    case Collection::StableMapType:
     default:
       assert(false);
       return false;

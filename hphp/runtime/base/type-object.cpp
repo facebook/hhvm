@@ -67,11 +67,11 @@ bool Object::equal(CObjRef v2) const {
   if (!m_px || !v2.get()) {
     return false;
   }
-  if (v2.get()->getVMClass() != m_px->getVMClass()) {
-    return false;
-  }
   if (m_px->isCollection()) {
     return collectionEquals(m_px, v2.get());
+  }
+  if (v2.get()->getVMClass() != m_px->getVMClass()) {
+    return false;
   }
   if (UNLIKELY(m_px->instanceof(SystemLib::s_ArrayObjectClass))) {
     // Compare the whole object, not just the array representation

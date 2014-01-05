@@ -669,7 +669,7 @@ D:None = JmpNZero S0:{Bool|Int} L:Label
 
   Conditionally jump to L based on S0.
 
-D:None JmpSwitchDest<JmpSwitchData> S0:Int
+JmpSwitchDest<JmpSwitchData> S0:Int
 
   Jump to the target of a switch statement using table metadata
   <JmpSwitchData> and index S0.

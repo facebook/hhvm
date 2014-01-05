@@ -74,8 +74,8 @@ String f_json_encode(CVarRef value, CVarRef options /* = 0 */) {
   return vs.serializeValue(value, !(json_options & k_JSON_FB_UNLIMITED));
 }
 
-Variant f_json_decode(const String& json, bool assoc /* = false */,
-                      CVarRef options /* = 0 */) {
+Variant f_json_decode(const String& json, bool assoc /* = false */, 
+                      int depth /* = 512 */, CVarRef options /* = 0 */){
 
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
 
@@ -92,7 +92,7 @@ Variant f_json_decode(const String& json, bool assoc /* = false */,
     k_JSON_FB_LOOSE | k_JSON_FB_COLLECTIONS | k_JSON_FB_STABLE_MAPS;
   int64_t parser_options = json_options & supported_options;
   Variant z;
-  if (JSON_parser(z, json.data(), json.size(), assoc, parser_options)) {
+  if (JSON_parser(z, json.data(), json.size(), assoc, depth, parser_options)) {
     return z;
   }
 
@@ -131,7 +131,7 @@ Variant f_json_decode(const String& json, bool assoc /* = false */,
     wrapped += json + "]";
     // Stick to a normal hhvm array for the wrapper
     const int64_t mask = ~(k_JSON_FB_COLLECTIONS | k_JSON_FB_STABLE_MAPS);
-    if (JSON_parser(z, wrapped.data(), wrapped.size(), false,
+    if (JSON_parser(z, wrapped.data(), wrapped.size(), false, depth,
                     parser_options & mask) && z.isArray()) {
       Array arr = z.toArray();
       if ((arr.size() == 1) && arr.exists(0)) {
@@ -150,7 +150,7 @@ Variant f_json_decode(const String& json, bool assoc /* = false */,
   }
 
   if (ch0 == '{' || ch0 == '[') { /* invalid JSON string */
-    json_set_last_error_code(json_error_codes::JSON_ERROR_SYNTAX);
+    //json_set_last_error_code(json_error_codes::JSON_ERROR_SYNTAX);
   }
 
   assert(json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE);

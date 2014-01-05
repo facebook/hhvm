@@ -286,18 +286,22 @@ static const int loose_state_transition_table[31][31] = {
 /*</fb>*/
 
 
-#define JSON_PARSER_MAX_DEPTH 512
+#define JSON_PARSER_DEFAULT_DEPTH 512
 
 /**
  * A stack maintains the states of nested structures.
  */
 struct json_parser {
-  int the_stack[JSON_PARSER_MAX_DEPTH];
-  Variant the_zstack[JSON_PARSER_MAX_DEPTH];
-  String the_kstack[JSON_PARSER_MAX_DEPTH];
+  std::vector<int> the_stack;
+  std::vector<Variant> the_zstack;
+  std::vector<String> the_kstack;
   int the_top;
   int the_mark; // the watermark
+  int depth;
   json_error_codes error_code;
+  json_parser() : the_stack(JSON_PARSER_DEFAULT_DEPTH), 
+                  the_zstack(JSON_PARSER_DEFAULT_DEPTH), 
+                  the_kstack(JSON_PARSER_DEFAULT_DEPTH) {};
 };
 
 
@@ -365,7 +369,7 @@ private:
  * Push a mode onto the stack. Return false if there is overflow.
  */
 static int push(json_parser *json, int mode) {
-  if (json->the_top + 1 >= JSON_PARSER_MAX_DEPTH) {
+  if (json->the_top + 1 >= json->depth) {
     return false;
   }
   json->the_top += 1;
@@ -520,8 +524,8 @@ static void attach_zval(json_parser *json, const String& key,
  * It is implemented as a Pushdown Automaton; that means it is a finite state
  * machine with a stack.
  */
-bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
-                 int64_t options/*</fb>*/) {
+bool JSON_parser(Variant &z, const char *p, int length, bool assoc,
+                 int depth, int64_t options) {
   int b;  /* the next character */
   int c;  /* the next character class */
   int s;  /* the next state */
@@ -549,6 +553,13 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
   int type = -1;
   unsigned short utf16 = 0;
 
+  JSON(depth) = depth;
+  if (depth >= JSON_PARSER_DEFAULT_DEPTH) {
+    JSON(the_stack).resize(depth);
+    JSON(the_zstack).resize(depth);
+    JSON(the_kstack).resize(depth);
+  }
+
   JSON(the_mark) = JSON(the_top) = -1;
   push(the_json, MODE_DONE);
 
@@ -567,7 +578,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
       c = byte_class[b];
       /*</fb>*/
       if (c <= S_ERR) {
-       s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
+        s_json_parser->error_code = JSON_ERROR_CTRL_CHAR;
         return false;
       }
     } else {
@@ -614,6 +625,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
         */
       case -8:
         if (!push(the_json, MODE_KEY)) {
+          s_json_parser->error_code = JSON_ERROR_DEPTH;
           return false;
         }
 
@@ -677,6 +689,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
         attach_zval(the_json, JSON(the_kstack)[JSON(the_top)], assoc);
 
         if (!pop(the_json, MODE_OBJECT)) {
+          s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
           return false;
         }
         the_state = 9;
@@ -686,6 +699,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
         */
       case -6:
         if (!push(the_json, MODE_ARRAY)) {
+          s_json_parser->error_code = JSON_ERROR_DEPTH;
           return false;
         }
         the_state = 2;
@@ -725,6 +739,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
           attach_zval(the_json, JSON(the_kstack[JSON(the_top)]), assoc);
 
           if (!pop(the_json, MODE_ARRAY)) {
+            s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
             return false;
           }
           the_state = 9;

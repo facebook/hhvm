@@ -148,6 +148,12 @@
                     "desc": "When TRUE, returned objects will be converted into associative arrays."
                 },
                 {
+                    "name": "depth",
+                    "type": "Int32",
+                    "value": "512",
+                    "desc": "User specified recursion depth."
+                },
+                {
                     "name": "options",
                     "type": "Variant",
                     "value": "0",

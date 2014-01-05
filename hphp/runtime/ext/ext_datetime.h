@@ -54,7 +54,7 @@ class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
   public: Object t_add(CObjRef interval);
   public: void t___construct(const String& time = "now",
                              CObjRef timezone = null_object);
-  public: static Object ti_createfromformat(
+  public: static Variant ti_createfromformat(
     const String& format, const String& time, CObjRef timezone = null_object);
   public: Object t_diff(CObjRef datetime2, bool absolute = false);
   public: String t_format(const String& format);
@@ -249,7 +249,7 @@ String f_timezone_version_get();
 
 bool f_checkdate(int month, int day, int year);
 Object f_date_add(CObjRef datetime, CObjRef interval);
-Object f_date_create_from_format(const String& format,
+Variant f_date_create_from_format(const String& format,
                                  const String& time,
                                  CObjRef timezone = null_object);
 Variant f_date_create(const String& time = null_string,

@@ -101,12 +101,15 @@ void c_DateTime::t___construct(const String& time /*= "now"*/,
   }
 }
 
-Object c_DateTime::ti_createfromformat(const String& format, const String& time,
+Variant c_DateTime::ti_createfromformat(const String& format, const String& time,
                                        CObjRef timezone /*= null_object */) {
   c_DateTime *datetime = NEWOBJ(c_DateTime);
   datetime->m_dt = NEWOBJ(DateTime);
-  datetime->m_dt->fromString(time, c_DateTimeZone::unwrap(timezone),
-                             format.data(), false);
+  if(!datetime->m_dt->fromString(time, c_DateTimeZone::unwrap(timezone),
+                             format.data(), false)) {
+    return false;
+  }
+
   return datetime;
 }
 
@@ -541,7 +544,7 @@ Object f_date_add(CObjRef datetime, CObjRef interval) {
     t_add(interval.getTyped<c_DateInterval>());
 }
 
-Object f_date_create_from_format(const String& format,
+Variant f_date_create_from_format(const String& format,
                                  const String& time,
                                  CObjRef timezone /* = null_object */) {
   return c_DateTime::ti_createfromformat(format, time, timezone);

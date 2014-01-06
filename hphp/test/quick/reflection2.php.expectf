@@ -8,7 +8,7 @@ array(6) {
     ["originalClass"]=>
     string(8) "my_child"
     ["info"]=>
-    array(15) {
+    array(16) {
       ["name"]=>
       string(17) "my_other_override"
       ["access"]=>
@@ -32,6 +32,8 @@ array(6) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_async"]=>
+      bool(false)
       ["is_closure"]=>
       bool(false)
       ["is_generator"]=>
@@ -53,7 +55,7 @@ array(6) {
     ["originalClass"]=>
     string(8) "my_child"
     ["info"]=>
-    array(15) {
+    array(16) {
       ["name"]=>
       string(15) "my_child_method"
       ["access"]=>
@@ -77,6 +79,8 @@ array(6) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_async"]=>
+      bool(false)
       ["is_closure"]=>
       bool(false)
       ["is_generator"]=>
@@ -98,7 +102,7 @@ array(6) {
     ["originalClass"]=>
     string(8) "my_child"
     ["info"]=>
-    array(15) {
+    array(16) {
       ["name"]=>
       string(9) "my_method"
       ["access"]=>
@@ -122,6 +126,8 @@ array(6) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_async"]=>
+      bool(false)
       ["is_closure"]=>
       bool(false)
       ["is_generator"]=>
@@ -143,7 +149,7 @@ array(6) {
     ["originalClass"]=>
     string(8) "my_child"
     ["info"]=>
-    array(15) {
+    array(16) {
       ["name"]=>
       string(18) "my_override_method"
       ["access"]=>
@@ -167,6 +173,8 @@ array(6) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_async"]=>
+      bool(false)
       ["is_closure"]=>
       bool(false)
       ["is_generator"]=>
@@ -188,7 +196,7 @@ array(6) {
     ["originalClass"]=>
     string(8) "my_child"
     ["info"]=>
-    array(15) {
+    array(16) {
       ["name"]=>
       string(15) "my_trait_method"
       ["access"]=>
@@ -212,6 +220,8 @@ array(6) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_async"]=>
+      bool(false)
       ["is_closure"]=>
       bool(false)
       ["is_generator"]=>
@@ -233,7 +243,7 @@ array(6) {
     ["originalClass"]=>
     string(8) "my_child"
     ["info"]=>
-    array(15) {
+    array(16) {
       ["name"]=>
       string(14) "my_base_method"
       ["access"]=>
@@ -257,6 +267,8 @@ array(6) {
       ["attributes"]=>
       array(0) {
       }
+      ["is_async"]=>
+      bool(false)
       ["is_closure"]=>
       bool(false)
       ["is_generator"]=>

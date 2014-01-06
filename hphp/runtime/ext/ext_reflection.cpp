@@ -70,6 +70,7 @@ const StaticString
   s_abstract("abstract"),
   s_instantiable("instantiable"),
   s_internal("internal"),
+  s_is_async("is_async"),
   s_is_closure("is_closure"),
   s_is_generator("is_generator"),
   s_hphp("hphp"),
@@ -544,6 +545,8 @@ static void set_function_info(Array &ret, const Func* func) {
     }
     ret.set(s_attributes, VarNR(arr));
   }
+
+  ret.set(s_is_async, func->isAsync());
 
   // closure info
   ret.set(s_is_closure, func->isClosureBody());

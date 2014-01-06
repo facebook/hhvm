@@ -322,7 +322,7 @@ class Redis {
 
   public function hMGet($key, array $members) {
     $members = array_values($members);
-    $args = [$this->prefix($key)] + $members;
+    $args = array_merge([$this->prefix($key)], $members);
     $this->processArrayCommand('HMGET', $args);
     return $this->processAssocResponse($members);
   }

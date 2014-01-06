@@ -143,7 +143,8 @@ class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
 
   // Helper for c_DateTimeZone -> TimeZone conversion
   public: static SmartResource<TimeZone> unwrap(CObjRef timezone) {
-    SmartObject<c_DateTimeZone> ctz = timezone.getTyped<c_DateTimeZone>(true);
+    SmartObject<c_DateTimeZone> ctz =
+      timezone.getTyped<c_DateTimeZone>(true, true);
     if (ctz.get() == NULL)
       return SmartResource<TimeZone>();
     return ctz->m_tz;

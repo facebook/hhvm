@@ -3,11 +3,12 @@ language: cpp
 compiler:
   - gcc
 
-before_script: 
+before_script:
   - TRAVIS=1 ./configure_ubuntu_12.04.sh
-# for some tests  
+# for some tests
   - sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
   - HPHP_HOME=`pwd` make -j 6
+  - cd hphp/test/zend/good/ext/curl/tests/responder && ../../../../../../../hhvm/hhvm -m server -p 8444 &
 
 # Test suites take longer to run in RepoAuthoritative mode (-r) than normal so
 # split out the -r from normal runs and further split the -r runs by suite to
@@ -26,7 +27,7 @@ env:
   - TEST_RUN_MODE="-m interp -r slow"
   - TEST_RUN_MODE="-m interp -r zend"
 
-script: hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
+script: PHP_CURL_HTTP_REMOTE_SERVER="http://localhost:8444" hphp/hhvm/hhvm hphp/test/run $TEST_RUN_MODE
 
 notifications:
   email: false

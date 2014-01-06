@@ -439,6 +439,7 @@ other_files = (
     '/Zend/tests/ns_069.inc',
     '/Zend/tests/unset.inc',
     '/ext/calendar/tests/skipif.inc',
+    '/ext/curl/tests/responder/get.php',
     '/ext/curl/tests/curl_testdata1.txt',
     '/ext/curl/tests/curl_testdata2.txt',
     '/ext/date/tests/DateTime_data-absolute.inc',

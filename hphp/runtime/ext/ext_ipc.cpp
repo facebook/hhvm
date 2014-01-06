@@ -46,9 +46,11 @@
 using HPHP::Util::ScopedMem;
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(sysvmsg);
-IMPLEMENT_DEFAULT_EXTENSION(sysvsem);
-IMPLEMENT_DEFAULT_EXTENSION(sysvshm);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(sysvmsg, NO_VERSION_YET);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(sysvsem, NO_VERSION_YET);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(sysvshm, NO_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 int64_t f_ftok(const String& pathname, const String& proj) {

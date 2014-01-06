@@ -20,7 +20,9 @@
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(xmlwriter);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(xmlwriter, "0.1");
+
 ///////////////////////////////////////////////////////////////////////////////
 // functions are just wrappers of object methods
 

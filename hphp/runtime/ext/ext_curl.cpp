@@ -38,7 +38,8 @@
 
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(curl);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(curl, NO_VERSION_YET);
 
 const StaticString
   s_exception("exception"),

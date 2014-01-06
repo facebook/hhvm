@@ -36,7 +36,9 @@
 #endif
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(iconv);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(iconv, NO_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static char _generic_superset_name[] = "UCS-4LE";

@@ -21,7 +21,9 @@
 #include "hphp/runtime/base/variable-serializer.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(json);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(json, "1.2.1");
+
 ///////////////////////////////////////////////////////////////////////////////
 const int64_t k_JSON_HEX_TAG           = 1<<0;
 const int64_t k_JSON_HEX_AMP           = 1<<1;

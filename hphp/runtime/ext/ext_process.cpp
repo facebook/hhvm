@@ -107,7 +107,7 @@ static bool check_cmd(const char *cmd) {
 ///////////////////////////////////////////////////////////////////////////////
 // pcntl
 
-IMPLEMENT_DEFAULT_EXTENSION(pcntl);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(pcntl, NO_VERSION_YET);
 
 int64_t f_pcntl_alarm(int seconds) {
   return alarm(seconds);

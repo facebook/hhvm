@@ -155,7 +155,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(ImapRequestData, s_imap_data);
 
 static class imapExtension : public Extension {
 public:
-  imapExtension() : Extension("imap") {}
+  imapExtension() : Extension("imap", NO_VERSION_YET) {}
 
   virtual void moduleInit() {
     mail_link(&unixdriver);   /* link in the unix driver */

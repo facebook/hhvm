@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/bcmath/bcmath.h"
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(bcmath);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(bcmath, NO_VERSION_YET);
 ///////////////////////////////////////////////////////////////////////////////
 
 class bcmath_data {

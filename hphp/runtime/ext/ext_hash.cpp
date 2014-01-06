@@ -42,7 +42,7 @@ namespace HPHP {
 
 static class HashExtension : public Extension {
  public:
-  HashExtension() : Extension("hash") { }
+  HashExtension() : Extension("hash", "1.0") { }
   virtual void moduleLoad(Hdf config) {
     HHVM_FE(hash);
     HHVM_FE(hash_algos);

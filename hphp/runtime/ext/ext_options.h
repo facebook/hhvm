@@ -63,7 +63,7 @@ Variant f_php_ini_loaded_file();
 String f_php_sapi_name();
 String f_php_uname(const String& mode = null_string);
 bool f_phpinfo(int what = 0);
-String f_phpversion(const String& extension = null_string);
+Variant f_phpversion(const String& extension = null_string);
 bool f_putenv(const String& setting);
 bool f_set_magic_quotes_runtime(bool new_setting);
 void f_set_time_limit(int seconds);

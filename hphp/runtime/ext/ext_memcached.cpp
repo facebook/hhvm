@@ -27,7 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_DEFAULT_EXTENSION(memcached);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(memcached, "2.2.0b1");
 IMPLEMENT_THREAD_LOCAL(c_Memcached::ImplMap, c_Memcached::s_persistentMap);
 
 // Payload value flags

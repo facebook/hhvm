@@ -36,7 +36,7 @@ namespace HPHP {
 using JIT::CallerFrame;
 
 // Make sure "tokenizer" gets added to the list of extensions
-IMPLEMENT_DEFAULT_EXTENSION(tokenizer);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(tokenizer, "0.1");
 
 const double k_INF = std::numeric_limits<double>::infinity();
 const double k_NAN = std::numeric_limits<double>::quiet_NaN();

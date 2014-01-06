@@ -36,14 +36,11 @@ namespace HPHP {
  *   - implement moduleInit() and moduleShutdown() logics that static
  *     initialization is too early.
  *
- * If only "name" is needed to register, use IMPLEMENT_DEFAULT_EXTENSION.
+ * If only "name" is needed to register, use 
+ * IMPLEMENT_DEFAULT_EXTENSION(name, NO_VERSION_YET).
  */
 
-#define IMPLEMENT_DEFAULT_EXTENSION(name)               \
-  static class name ## Extension : public Extension {   \
-  public:                                               \
-    name ## Extension() : Extension(#name) {}           \
-  } s_ ## name ## _extension
+#define NO_VERSION_YET ''
 
 #define IMPLEMENT_DEFAULT_EXTENSION_VERSION(name, v)    \
   static class name ## Extension : public Extension {   \

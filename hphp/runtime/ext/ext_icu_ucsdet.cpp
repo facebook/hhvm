@@ -22,7 +22,7 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-IMPLEMENT_DEFAULT_EXTENSION(icu_ucsdet);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(icu_ucsdet, NO_VERSION_YET);
 
 c_EncodingDetector::c_EncodingDetector(Class* cb) :
     ExtObjectData(cb) {

@@ -36,7 +36,9 @@
 #endif
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(idn);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(idn, NO_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 int64_t f_intl_get_error_code() {

@@ -28,7 +28,9 @@
 #define PHP_LD_FULL_ADD 0xff
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(ldap);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(ldap, NO_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class LdapRequestData {

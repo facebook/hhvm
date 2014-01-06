@@ -154,7 +154,7 @@ void c_AsyncFunctionWaitHandle::initialize(c_Continuation* continuation,
 
   // needs to be called with non-zero refcnt
   if (UNLIKELY(session->hasOnAsyncFunctionCreateCallback())) {
-    session->onAsyncFunctionCreate(this);
+    session->onAsyncFunctionCreate(this, child);
   }
 }
 

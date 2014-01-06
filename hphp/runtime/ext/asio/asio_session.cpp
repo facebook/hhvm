@@ -81,12 +81,12 @@ void AsioSession::initAbruptInterruptException() {
     "The request was abruptly interrupted.");
 }
 
-void AsioSession::onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont) {
+void AsioSession::onAsyncFunctionCreate(c_AsyncFunctionWaitHandle* cont, c_WaitableWaitHandle* child) {
   assert(m_onAsyncFunctionCreateCallback.get());
   try {
     vm_call_user_func(
       m_onAsyncFunctionCreateCallback,
-      Array::Create(cont));
+     make_packed_array(cont, child));
   } catch (const Object& callback_exception) {
     raise_warning("[asio] Ignoring exception thrown by AsyncFunctionWaitHandle::onCreate callback");
   }

@@ -1223,7 +1223,6 @@ class reflectionExtension : public Extension {
   virtual void moduleInit() {
     HHVM_FE(hphp_create_object);
     HHVM_FE(hphp_create_object_without_constructor);
-    HHVM_FE(hphp_get_class_constant);
     HHVM_FE(hphp_get_class_info);
     HHVM_FE(hphp_get_closure_info);
     HHVM_FE(hphp_get_extension_info);

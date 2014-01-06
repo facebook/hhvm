@@ -127,7 +127,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(FilterRequestData, s_filter_request_data);
 
 static class FilterExtension : public Extension {
 public:
-  FilterExtension() : Extension("filter") {}
+  FilterExtension() : Extension("filter", "0.11.0") {}
   virtual void moduleLoad(Hdf config) {
     HHVM_FE(__SystemLib_filter_input_get_var);
     HHVM_FE(_filter_snapshot_globals);

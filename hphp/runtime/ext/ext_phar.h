@@ -25,7 +25,7 @@ namespace HPHP {
 
 class pharExtension : public Extension {
  public:
-  pharExtension() : Extension("phar") {}
+  pharExtension() : Extension("phar", "2.0.2") {}
   virtual void moduleInit();
 };
 extern pharExtension s_phar_extension;

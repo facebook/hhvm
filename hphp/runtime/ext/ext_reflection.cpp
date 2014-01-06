@@ -34,7 +34,8 @@ namespace HPHP {
 
 using JIT::VMRegAnchor;
 
-IMPLEMENT_DEFAULT_EXTENSION(Reflection);
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(Reflection, "$Id$");
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString

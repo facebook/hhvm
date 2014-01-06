@@ -47,8 +47,8 @@ StaticString PHPTransport::s_etype("etype");
 StaticString PHPTransport::s_format("format");
 StaticString PHPTransport::s_collection("collection");
 
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(thrift_protocol, NO_VERSION_YET);
 
-IMPLEMENT_DEFAULT_EXTENSION(thrift_protocol);
 ///////////////////////////////////////////////////////////////////////////////
 
 const int32_t VERSION_MASK = 0xffff0000;

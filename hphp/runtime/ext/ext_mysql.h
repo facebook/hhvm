@@ -36,7 +36,7 @@ namespace HPHP {
 
 class mysqlExtension : public Extension {
 public:
-  mysqlExtension() : Extension("mysql") {}
+  mysqlExtension() : Extension("mysql", "1.0") {}
 
   // implementing IDebuggable
   virtual int  debuggerSupport() {

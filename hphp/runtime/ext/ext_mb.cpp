@@ -50,7 +50,7 @@ namespace HPHP {
 
 static class mbstringExtension : public Extension {
  public:
-  mbstringExtension() : Extension("mbstring") {}
+  mbstringExtension() : Extension("mbstring", NO_VERSION_YET) {}
 
   virtual void moduleInit() {
     IniSetting::SetGlobalDefault("mbstring.http_input", "pass");

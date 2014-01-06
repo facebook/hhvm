@@ -23,7 +23,9 @@
 #include <sqlite3.h>
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(pdo_sqlite);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_sqlite, "1.0.1");
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class PDOSqliteStatement : public PDOStatement {

@@ -29,7 +29,9 @@
 #include <memory>
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(posix);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(posix, NO_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const int64_t k_POSIX_S_IFMT = S_IFMT;

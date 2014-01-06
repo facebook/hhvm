@@ -26,7 +26,9 @@
 #include <mcrypt.h>
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(mcrypt);
+
+IMPLEMENT_DEFAULT_EXTENSION_VERSION(mcrypt, NO_VERSION_YET);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class MCrypt : public SweepableResourceData {

@@ -28,6 +28,7 @@
 namespace HPHP { namespace JIT { namespace ARM {
 
 inline vixl::Register x2a(PhysReg x64reg) {
+  always_assert(!x64reg.isSIMD());
   return vixl::Register(vixl::CPURegister(x64reg));
 }
 

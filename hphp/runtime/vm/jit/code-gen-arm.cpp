@@ -763,6 +763,16 @@ void CodeGenerator::emitLoadTypedValue(SSATmp* dst,
   }
 }
 
+void CodeGenerator::emitStoreTypedValue(vixl::Register base,
+                                        ptrdiff_t offset,
+                                        SSATmp* src) {
+  assert(src->type().needsReg());
+  auto reg0 = x2a(curOpd(src).reg(0));
+  auto reg1 = x2a(curOpd(src).reg(1));
+  m_as.  Str  (reg0, base[offset + TVOFF(m_data)]);
+  m_as.  Strb (reg1.W(), base[offset + TVOFF(m_type)]);
+}
+
 void CodeGenerator::emitLoad(SSATmp* dst,
                              vixl::Register base,
                              ptrdiff_t offset,
@@ -780,6 +790,42 @@ void CodeGenerator::emitLoad(SSATmp* dst,
   if (!dstReg.IsValid()) return;
 
   m_as.  Ldr  (dstReg, base[offset + TVOFF(m_data)]);
+}
+
+void CodeGenerator::emitStore(vixl::Register base,
+                              ptrdiff_t offset,
+                              SSATmp* src,
+                              bool genStoreType /* = true */) {
+  Type type = src->type();
+  if (type.needsReg()) {
+    return emitStoreTypedValue(base, offset, src);
+  }
+  if (genStoreType) {
+    auto dt = type.toDataType();
+    if (dt == KindOfUninit) {
+      static_assert(KindOfUninit == 0, "zero register hack");
+      m_as.  Strb  (vixl::wzr, base[offset + TVOFF(m_type)]);
+    } else {
+      m_as.  Mov   (rAsm, dt);
+      m_as.  Strb  (rAsm.W(), base[offset + TVOFF(m_type)]);
+    }
+  }
+  if (type.isNull()) {
+    return;
+  }
+  if (src->isConst()) {
+    int64_t val = 0;
+    if (type <= (Type::Bool | Type::Int | Type::Dbl |
+                 Type::Arr | Type::StaticStr | Type::Cls)) {
+      val = src->getValBits();
+    } else {
+      not_reached();
+    }
+    m_as.    Mov  (rAsm, val);
+    m_as.    Str  (rAsm, base[offset + TVOFF(m_data)]);
+  } else {
+    m_as.    Str  (x2a(curOpd(src).reg()), base[offset + TVOFF(m_data)]);
+  }
 }
 
 void CodeGenerator::cgLdStack(IRInstruction* inst) {
@@ -883,16 +929,7 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
       // The simplifier detected that this store was redundnant.
       continue;
     }
-    // XXX this is a cut-down version of cgStore.
-    if (val->isConst()) {
-      m_as. Mov (rAsm, val->getValBits());
-      m_as. Str (rAsm, spReg[offset]);
-    } else {
-      auto reg = x2a(curOpd(val).reg());
-      m_as. Str   (reg, spReg[offset]);
-    }
-    m_as. Mov   (rAsm, val->type().toDataType());
-    m_as. Strb  (rAsm.W(), spReg[offset + TVOFF(m_type)]);
+    emitStore(spReg, offset, val);
   }
   emitRegGetsRegPlusImm(m_as, dstReg, spReg, adjustment);
 }

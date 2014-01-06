@@ -62,8 +62,13 @@ struct CodeGenerator {
 
   void emitLoadTypedValue(SSATmp* dst, vixl::Register base, ptrdiff_t offset,
                           Block* label);
+  void emitStoreTypedValue(vixl::Register base, ptrdiff_t offset, SSATmp* src);
   void emitLoad(SSATmp* dst, vixl::Register base, ptrdiff_t offset,
                 Block* label = nullptr);
+  void emitStore(vixl::Register base,
+                 ptrdiff_t offset,
+                 SSATmp* src,
+                 bool genStoreType = true);
 
   Address cgInst(IRInstruction* inst);
 

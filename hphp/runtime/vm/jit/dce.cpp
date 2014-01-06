@@ -130,7 +130,7 @@ BlockList prepareBlocks(IRUnit& unit) {
   // 1. simplify unguarded loads to remove unnecssary branches, and
   //    perform copy propagation on every instruction. Targets that become
   //    unreachable from this pass will be eliminated in step 2 below.
-  forEachTraceInst(unit, [](IRInstruction* inst) {
+  forEachTraceInst(unit, [&](IRInstruction* inst) {
     copyProp(inst);
     // if this is a load that does not generate a guard, then get rid
     // of its label so that its not an essential control-flow
@@ -143,6 +143,12 @@ BlockList prepareBlocks(IRUnit& unit) {
       ITRACE(4, "removing taken branch of unguarded load {}\n",
              *inst);
       inst->setTaken(nullptr);
+
+      if (inst->next()) {
+        auto block = inst->block();
+        block->push_back(unit.gen(Jmp, inst->marker(), inst->next()));
+        inst->setNext(nullptr);
+      }
     }
   });
 

@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <cstdlib>
+#include <cstring>
 
 #include "hphp/util/tiny-vector.h"
 #include "hphp/util/pointer-list.h"

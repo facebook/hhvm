@@ -18,6 +18,8 @@
 #define incl_HPHP_POINTERLIST_H_
 
 #include <stdlib.h>
+#include <cstring>
+
 #include "hphp/util/assertions.h"
 
 namespace HPHP {

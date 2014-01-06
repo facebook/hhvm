@@ -15,6 +15,9 @@
 */
 #include "hphp/util/db-dataset.h"
 
+#include <cassert>
+#include <cstring>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

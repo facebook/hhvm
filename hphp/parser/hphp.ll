@@ -1,5 +1,6 @@
 %{ /* -*- mode: c++ -*- */
 #include "hphp/parser/scanner.h"
+#include <cassert>
 
 // macros for flex
 #define YYSTYPE HPHP::ScannerToken

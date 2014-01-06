@@ -40,7 +40,7 @@ namespace HPHP {
  * IMPLEMENT_DEFAULT_EXTENSION(name, NO_VERSION_YET).
  */
 
-#define NO_VERSION_YET ''
+#define NO_VERSION_YET "\0"
 
 #define IMPLEMENT_DEFAULT_EXTENSION_VERSION(name, v)    \
   static class name ## Extension : public Extension {   \

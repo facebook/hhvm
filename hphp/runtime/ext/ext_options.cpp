@@ -808,7 +808,7 @@ Variant f_phpversion(const String& extension /* = null_string */) {
     return k_PHP_VERSION;
   }
 
-  if ((ext = Extension::GetExtension(extension)) != NULL && strcmp(ext->getVersion(), "") != 0) {
+  if ((ext = Extension::GetExtension(extension)) != NULL && strcmp(ext->getVersion(), NO_VERSION_YET) != 0) {
     return ext->getVersion();
   }
 

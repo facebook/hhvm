@@ -32,10 +32,10 @@ using namespace HPHP::JIT;
 namespace HPHP {
 namespace Debug {
 
-
-int g_dwarfCallback(char *name, int size, Dwarf_Unsigned type,
-            Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info,
-            Dwarf_Unsigned *sect_name_index, Dwarf_Ptr handle, int *error) {
+int g_dwarfCallback(
+  LIBDWARF_CALLBACK_NAME_TYPE name, int size, Dwarf_Unsigned type,
+  Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info,
+  Dwarf_Unsigned *sect_name_index, Dwarf_Ptr handle, int *error) {
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
   ElfWriter *e = reinterpret_cast<ElfWriter *>(handle);
   return e->dwarfCallback(name, size, type, flags, link, info);

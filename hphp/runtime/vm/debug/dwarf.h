@@ -52,7 +52,14 @@ typedef enum {
 const int DWARF_CODE_ALIGN = 1;
 const int DWARF_DATA_ALIGN = 8;
 
-extern int g_dwarfCallback(char *name, int size, Dwarf_Unsigned type,
+#ifdef HAVE_LIBDWARF_20130729
+#define LIBDWARF_CALLBACK_NAME_TYPE const char*
+#else
+#define LIBDWARF_CALLBACK_NAME_TYPE char*
+#endif
+
+extern int g_dwarfCallback(
+  LIBDWARF_CALLBACK_NAME_TYPE name, int size, Dwarf_Unsigned type,
   Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info,
   Dwarf_Unsigned *sect_name_index, Dwarf_Ptr handle, int *error);
 

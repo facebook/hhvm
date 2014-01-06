@@ -53,7 +53,8 @@
             "flags": [
             ],
             "return": {
-                "type": "Object"
+                "type": "Variant",
+                "desc": "Returns a new DateTime instance or FALSE on failure."
             },
             "args": [
                 {
@@ -1075,8 +1076,8 @@
                         "IsStatic"
                     ],
                     "return": {
-                        "type": "Object",
-                        "desc": "Returns a new DateTime object"
+                        "type": "Variant",
+                        "desc": "Returns a new DateTime instance or FALSE on failure."
                     },
                     "args": [
                         {

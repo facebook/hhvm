@@ -342,9 +342,6 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
       param.set(s_name, p->name);
       param.set(s_type, p->type);
       param.set(s_function, info->name);
-      if (info->attribute & ClassInfo::IsSystem) {
-        param.set(s_internal, true_varNR);
-      }
 
       if (classname) {
         param.set(s_class, VarNR(*classname));
@@ -445,9 +442,6 @@ static void set_function_info(Array &ret, const Func* func) {
       param.set(s_index, VarNR((int)i));
       VarNR name(func->localNames()[i]);
       param.set(s_name, name);
-      if (func->isBuiltin()) {
-        param.set(s_internal, true_varNR);
-      }
 
       auto const nonExtendedConstraint =
         fpi.typeConstraint().hasConstraint() &&

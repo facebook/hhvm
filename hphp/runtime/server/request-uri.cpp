@@ -54,7 +54,7 @@ RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
         return;
       }
     }
-    transport->sendString("Not Found", 404);
+    transport->sendString(getDefault404(), 404);
     transport->onSendEnd();
     m_done = true;
   }
@@ -256,6 +256,9 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
     m_path = fullname;
     m_absolutePath = String(sourceRoot) + m_path;
     processExt();
+    if (RuntimeOption::PathDebug) {
+      m_triedURLs.push_back(m_absolutePath.toCppString());
+    }
 
     if (StaticContentCache::TheFileCache && !fullname.empty() &&
         StaticContentCache::TheFileCache->fileExists(fullname.c_str())) {
@@ -368,6 +371,18 @@ void RequestURI::clear() {
   m_origPathInfo.reset();
   m_absolutePath.reset();
   m_path.reset();
+}
+
+const std::string RequestURI::getDefault404() {
+  std::string ret = "404 File Not Found";
+  if (RuntimeOption::PathDebug) {
+    ret += "<br/>Paths examined:<ul>";
+    for (auto& url : m_triedURLs) {
+      ret += "<li>" + url + "</li>";
+    }
+    ret += "</ul>";
+  }
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

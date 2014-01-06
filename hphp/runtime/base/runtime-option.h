@@ -173,6 +173,7 @@ public:
   static std::string DefaultCharsetName;
   static bool ForceServerNameToHeader;
   static bool EnableCufAsync;
+  static bool PathDebug;
   static std::vector<std::shared_ptr<VirtualHost>> VirtualHosts;
   static std::shared_ptr<IpBlockMap> IpBlocks;
   static std::vector<std::shared_ptr<SatelliteServerInfo>>

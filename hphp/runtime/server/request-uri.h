@@ -88,6 +88,9 @@ private:
                            const String& foldername);
   void processExt();
 
+  std::vector<std::string> m_triedURLs;
+  const std::string getDefault404();
+
   static const char *parseExt(const String& s);
   static void PrependSlash(String &s);
 

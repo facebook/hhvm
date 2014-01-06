@@ -174,6 +174,7 @@ int RuntimeOption::ExpiresDefault = 2592000;
 std::string RuntimeOption::DefaultCharsetName = "utf-8";
 bool RuntimeOption::ForceServerNameToHeader = false;
 bool RuntimeOption::EnableCufAsync = false;
+bool RuntimeOption::PathDebug = false;
 
 int RuntimeOption::RequestBodyReadLimit = -1;
 
@@ -926,6 +927,7 @@ void RuntimeOption::Load(Hdf &config,
     ForceServerNameToHeader = server["ForceServerNameToHeader"].getBool();
 
     EnableCufAsync = server["EnableCufAsync"].getBool(false);
+    PathDebug = server["PathDebug"].getBool(false);
 
     ServerUser = server["User"].getString("");
   }

@@ -158,6 +158,9 @@ flood error logs.
 
     # Forcing $_SERVER['SERVER_NAME'] to come from request header
     ForceServerNameToHeader = false
+    
+    # Print file paths traversed onto the 404 page
+    PathDebug = false
 
     # startup options
     TakeoverFilename = filename   # for port takeover between server instances

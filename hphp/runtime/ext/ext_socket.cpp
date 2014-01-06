@@ -42,9 +42,6 @@
 #define PHP_BINARY_READ 0x0002
 
 namespace HPHP {
-
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(sockets, NO_VERSION_YET);
-
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
@@ -1274,7 +1271,7 @@ const StaticString
 
 class SocketsExtension : public Extension {
  public:
-  SocketsExtension() : Extension("sockets") {}
+  SocketsExtension() : Extension("sockets", NO_VERSION_YET) {}
 
   void moduleInit() override {
     SOCK_CONST(AF_UNIX);

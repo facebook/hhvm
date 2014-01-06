@@ -393,14 +393,6 @@ static inline std::string regionSelectorDefault() {
 #endif
 }
 
-static inline bool pgoDefault() {
-#ifdef HHVM_REGION_SELECTOR_HOTTRACE
-  return true;
-#else
-  return false;
-#endif
-}
-
 static inline bool hhirRelaxGuardsDefault() {
   return RuntimeOption::EvalJitRegionSelector == "tracelet";
 }

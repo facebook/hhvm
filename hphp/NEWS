@@ -1,4 +1,5 @@
 Next release
+  - Support lex-time binary constants (eg. 0b10111)
   - StreamWrappers now support rmdir, mkdir, rename and unlink
 
 "Appleseed" 23-Dec-2013

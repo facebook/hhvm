@@ -1,0 +1,38 @@
+simple
+int(0)
+int(1)
+int(15)
+int(0)
+int(8)
+int(1)
+negative simple
+int(0)
+int(-1)
+int(-15)
+simple operations
+int(4)
+int(1)
+int(4)
+float(1.5)
+large
+int(4294967295)
+int(4294967296)
+int(9223372036854775807)
+int(-4294967295)
+int(-4294967296)
+int(-9223372036854775807)
+int(-9223372036854775808)
+overflows
+int(-9223372036854775808)
+int(9223372036854775807)
+overflow consistency
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+array-index
+int(3)
+runtime support
+int(0)
+float(0)
+bool(false)

@@ -87,6 +87,8 @@ private:
   std::string m_translated;
   bool m_quoted;
   std::string m_comment; // for inlined constant name
+
+  int64_t getIntValue() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

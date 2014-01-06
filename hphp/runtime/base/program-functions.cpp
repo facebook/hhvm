@@ -1136,7 +1136,7 @@ static int execute_program_impl(int argc, char** argv) {
 #include "../../version" // nolint
 
     cout << "HipHop VM";
-    cout << " v" << version << " (" << (debug ? "dbg" : "rel") << ")\n";
+    cout << " " << version << " (" << (debug ? "dbg" : "rel") << ")\n";
     cout << "Compiler: " << kCompilerId << "\n";
     cout << "Repo schema: " << kRepoSchemaId << "\n";
     return 0;

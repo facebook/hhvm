@@ -25,9 +25,7 @@
 
 #ifdef HHVM
 #include "zend_objects_API.h"
-END_EXTERN_C()
 #include "hphp/runtime/base/externals.h"
-BEGIN_EXTERN_C()
 #endif
 
 typedef struct _php_core_globals php_core_globals;
@@ -187,8 +185,10 @@ struct _php_core_globals {
 };
 
 #ifdef HHVM
+BEGIN_EXTERN_C()
 zval** PG_http_globals();
 _arg_separators PG_arg_separator();
+END_EXTERN_C()
 #endif
 
 #endif /* PHP_GLOBALS_H */

@@ -62,7 +62,6 @@ cpp_library(
     "-Ihphp/runtime/ext_zend_compat/php-src/Zend/",
     "-Ihphp/runtime/ext_zend_compat/php-src/TSRM/",
     "-Ihphp/runtime/ext_zend_compat/php-src/",
-    "-DCOMPILE_DL_$capital_name",
   ],
 )
 END

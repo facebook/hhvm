@@ -1,10 +1,12 @@
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend.h"
-BEGIN_EXTERN_C()
+// Zend has a very specific include order, so I can't do this class' header
+// before zend.h sadly
 #include "hphp/runtime/ext_zend_compat/php-src/main/php_globals.h"
-END_EXTERN_C()
 #include "hphp/runtime/ext_hhvm/ext_zend_compat.h"
 
 static IMPLEMENT_THREAD_LOCAL(_php_core_globals, s_php_core_globals);
+
+BEGIN_EXTERN_C()
 zval** PG_http_globals() {
   auto* globals = HPHP::get_global_variables();
   auto* tl_globals = s_php_core_globals.get()->http_globals;
@@ -32,3 +34,4 @@ _arg_separators PG_arg_separator() {
   seps.output = "&";
   return seps;
 }
+END_EXTERN_C()

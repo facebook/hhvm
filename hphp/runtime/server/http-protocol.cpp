@@ -393,13 +393,11 @@ void HttpProtocol::CopyHeaderVariables(Variant& server,
   }
 }
 
-void HttpProtocol::CopyServerParams(Variant& server,
+void HttpProtocol::CopyTransportParams(Variant& server,
                                     Transport *transport) {
   HeaderMap serverParams;
   // Get additional server params from the transport if it has any. eg fast_cgi_params
   // This is basically a full header list being sent from apache/nginx.
-  // Be careful here to not overwrite any _SERVER variable 
-  // that has already been set elsewhere
   transport->getServerParams(serverParams);
   for (auto const& header : serverParams) {
     auto const& key = header.first;
@@ -407,7 +405,8 @@ void HttpProtocol::CopyServerParams(Variant& server,
     auto normalizedKey = string_replace(f_strtoupper(key), s_dash,
                                         s_underscore);
 
-    // add server vriable if it doesnt already exist and it has a value.
+    // Be careful here to not overwrite any _SERVER variable 
+    // that has already been set elsewhere and make sure it has a value.
     if (!values.empty() && !server.asArrRef().exists(normalizedKey)) {
       // When a header has multiple values, we always take the last one.
       server.set(normalizedKey, String(values.back()));
@@ -641,7 +640,7 @@ void HttpProtocol::PrepareServerVariable(Variant& server,
     server.set(String(iter->first), String(iter->second));
   }
   // Do this last as to not overwrite any existing server variables.
-  CopyServerParams(server, transport);
+  CopyTransportParams(server, transport);
   sri.setServerVariables(server);
 
   const char *threadType = transport->getThreadTypeName();

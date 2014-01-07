@@ -192,7 +192,7 @@ void FastCGITransport::getHeaders(HeaderMap &headers) {
   }
 }
 
-void FastCGITransport::getServerParams(HeaderMap &serverParams) {
+void FastCGITransport::getTransportParams(HeaderMap &serverParams) {
   for (auto& pair : m_requestHeaders) {
     serverParams[pair.first] = pair.second;
   }

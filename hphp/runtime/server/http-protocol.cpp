@@ -395,11 +395,11 @@ void HttpProtocol::CopyHeaderVariables(Variant& server,
 
 void HttpProtocol::CopyTransportParams(Variant& server,
                                     Transport *transport) {
-  HeaderMap serverParams;
+  HeaderMap transportParams;
   // Get additional server params from the transport if it has any. eg fast_cgi_params
   // This is basically a full header list being sent from apache/nginx.
-  transport->getServerParams(serverParams);
-  for (auto const& header : serverParams) {
+  transport->getTransportParams(transportParams);
+  for (auto const& header : transportParams) {
     auto const& key = header.first;
     auto const& values = header.second;
     auto normalizedKey = string_replace(f_strtoupper(key), s_dash,

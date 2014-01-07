@@ -141,7 +141,7 @@ public:
    */
   virtual std::string getHeader(const char *name) = 0;
   virtual void getHeaders(HeaderMap &headers) = 0;
-  virtual void getServerParams(HeaderMap &serverParams) {};
+  virtual void getTransportParams(HeaderMap &serverParams) {};
 
 
   /**

@@ -23,12 +23,13 @@ foreach($objects as $name => $object){
   }
 
   if (substr($name, -2, 2) == '.h') {
-    $dest_dir = $dest_root.'/'.$object->getSubpath();
+    $dest_dir = $dest_root.'/'.substr($object->getPath(),
+                                      strlen($source_root) + 1);
     mkdir($dest_dir);
     copy($name, $dest_dir.'/'.$object->getFilename());
 
   } elseif (substr($name, -2, 2) == '.c') {
-    $sub_path = $object->getSubpath();
+    $sub_path = substr($object->getPath(), strlen($source_root) + 1);
     mkdir($dest_root.'/'.$sub_path);
     $dest_file = ($sub_path ? $sub_path.'/' : '').$object->getFilename().'pp';
     copy($name, $dest_root.'/'.$dest_file);

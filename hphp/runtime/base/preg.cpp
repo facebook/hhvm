@@ -445,6 +445,9 @@ static void pcre_log_error(const char *func, int line, int pcre_code,
                            const char *repl, int repl_size,
                            int arg1 = 0, int arg2 = 0,
                            int arg3 = 0, int arg4 = 0) {
+  if (!RuntimeOption::EnableHipHopSyntax) {
+    return;
+  }
   const char *escapedPattern;
   const char *escapedSubject;
   const char *escapedRepl;

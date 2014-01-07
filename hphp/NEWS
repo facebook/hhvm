@@ -1,6 +1,25 @@
 Next release
+
+"Beastie Boys" 6-Jan-2014
   - Support lex-time binary constants (eg. 0b10111)
   - StreamWrappers now support rmdir, mkdir, rename and unlink
+  - Miscellaneous Zend PHP compatibility fixes
+  - Default StatCache to off
+  - Miscellaneous FastCGI fixes
+  - Miscellaneous region compiler fixes
+  - Move more collections to the HH namespace
+  - hhprof performance improvements
+  - Add array to string conversion notice
+  - Add RaiseNotice IR opcode
+  - Fix VirtualHost.<name>.Pattern matching
+  - Fix various memory leaks (pdo_parse_params, Gen*WaitHandle)
+  - Import a lot more Zend tests that used to crash or hang
+  - Clean up base.h
+  - XLS register allocation cleanup
+  - Enable region compiler by default for JIT functions in ahot
+  - Fatal on eval() in RepoAuthoritative mode
+  - Enable LTO for HHVM
+  - Fix a few SPL compatibility issues
 
 "Appleseed" 23-Dec-2013
   - Fix issues with DOCUMENT_ROOT in fastcgi

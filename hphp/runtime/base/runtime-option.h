@@ -439,7 +439,7 @@ public:
   F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIRAllocSIMDRegs,           true)                            \
   /* Region compiler flags */                                           \
-  F(bool,     JitPGO,                  true)                            \
+  F(bool,     JitPGO,                  pgoDefault())                    \
   F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
   F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
   F(bool,     JitPGOUsePostConditions, true)                            \

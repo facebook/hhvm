@@ -847,6 +847,13 @@ TranslatorX64::bindJmp(TCA toSmash, SrcKey destSk,
   LeaseHolder writer(s_writeLease);
   if (!writer) return tDest;
   SrcRec* sr = getSrcRec(destSk);
+  // The top translation may have changed while we waited for the
+  // write lease, so read it again.  If it was replaced with a new
+  // translation, then bind to the new one.  If it was invalidated,
+  // then don't bind the jump.
+  tDest = sr->getTopTranslation();
+  if (tDest == nullptr) return nullptr;
+
   if (req == JIT::REQ_BIND_ADDR) {
     auto addr = reinterpret_cast<TCA*>(toSmash);
     if (*addr == tDest) {

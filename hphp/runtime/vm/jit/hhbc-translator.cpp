@@ -4650,7 +4650,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
       auto locType = m_tb->localType(localInputId(inst), DataTypeSpecific);
       auto stackType = topType(0);
       // SetL preserves reffiness of a local.
-      setImmLocType(0, locType.isBoxed() ? stackType.box() : stackType);
+      setImmLocType(0, locType.isBoxed() ? boxType(stackType) : stackType);
       break;
     }
     case OpVGetL:

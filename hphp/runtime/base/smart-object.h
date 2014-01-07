@@ -80,6 +80,12 @@ public:
     return static_cast<T*>(Object::get());
   }
 
+  static SmartObject attach(T* object) {
+    SmartObject o;
+    o.m_px = object;
+    return o;
+  }
+
   template<class Y>
   operator SmartObject<Y>() {
     /*

@@ -63,7 +63,7 @@ Object c_GenMapWaitHandle::ti_create(CVarRef dependencies) {
     throw e;
   }
   assert(dependencies.getObjectData()->instanceof(c_Map::classof()));
-  p_Map deps = static_cast<c_Map*>(dependencies.getObjectData())->clone();
+  auto deps = p_Map::attach(c_Map::Clone(dependencies.getObjectData()));
   for (ssize_t iter_pos = deps->iter_begin();
        deps->iter_valid(iter_pos);
        iter_pos = deps->iter_next(iter_pos)) {

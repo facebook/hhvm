@@ -63,7 +63,7 @@ Object c_GenVectorWaitHandle::ti_create(CVarRef dependencies) {
     throw e;
   }
   assert(dependencies.getObjectData()->instanceof(c_Vector::classof()));
-  p_Vector deps = static_cast<c_Vector*>(dependencies.getObjectData())->clone();
+  auto deps = p_Vector::attach(c_Vector::Clone(dependencies.getObjectData()));
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {
     Cell* current = deps->at(iter_pos);
 

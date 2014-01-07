@@ -127,11 +127,17 @@ BlockList prepareBlocks(IRUnit& unit) {
   FTRACE(5, "RemoveUnreachable:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "RemoveUnreachable:^^^^^^^^^^^^^^^^^^^^\n"); };
 
+  BlockList blocks = rpoSortCfg(unit);
+  bool needsResort = false;
+
   // 1. simplify unguarded loads to remove unnecssary branches, and
   //    perform copy propagation on every instruction. Targets that become
   //    unreachable from this pass will be eliminated in step 2 below.
-  forEachTraceInst(unit, [&](IRInstruction* inst) {
-    copyProp(inst);
+  for (auto block : blocks) {
+    for (auto& inst : *block) {
+      copyProp(&inst);
+    }
+    auto inst = &block->back();
     // if this is a load that does not generate a guard, then get rid
     // of its label so that its not an essential control-flow
     // instruction
@@ -143,14 +149,13 @@ BlockList prepareBlocks(IRUnit& unit) {
       ITRACE(4, "removing taken branch of unguarded load {}\n",
              *inst);
       inst->setTaken(nullptr);
-
+      needsResort = true;
       if (inst->next()) {
-        auto block = inst->block();
         block->push_back(unit.gen(Jmp, inst->marker(), inst->next()));
         inst->setNext(nullptr);
       }
     }
-  });
+  }
 
   // 2. erase unreachable blocks and get an rpo sorted list of what remains.
   bool needsReflow = removeUnreachable(unit);
@@ -160,7 +165,8 @@ BlockList prepareBlocks(IRUnit& unit) {
   //    instructions.
   if (needsReflow) reflowTypes(unit);
 
-  return rpoSortCfg(unit);
+  if (needsResort) blocks = rpoSortCfg(unit);
+  return blocks;
 }
 
 WorkList

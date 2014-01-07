@@ -955,16 +955,18 @@ void LinearScan::initFreeList() {
 }
 
 void LinearScan::coalesce() {
-  forEachTraceInst(m_unit, [](IRInstruction* inst) {
-    for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
-      SSATmp* src = inst->src(i);
-      SSATmp* origSrc = canonicalize(src);
-      if (origSrc != src) {
-        // Replace every operand with its canonicalized version.
-        inst->setSrc(i, origSrc);
+  for (auto block : m_blocks) {
+    for (auto& inst : *block) {
+      for (uint32_t i = 0; i < inst.numSrcs(); ++i) {
+        auto src = inst.src(i);
+        auto origSrc = canonicalize(src);
+        if (origSrc != src) {
+          // Replace every operand with its canonicalized version.
+          inst.setSrc(i, origSrc);
+        }
       }
     }
-  });
+  }
 }
 
 // Assign ids to each instruction in linear order.
@@ -1096,13 +1098,13 @@ RegAllocInfo LinearScan::allocRegs() {
   // Pre: Ensure there are no existing Shuffle instructions
   assert(checkNoShuffles(m_unit));
 
+  m_blocks = rpoSortCfg(m_unit);
+  m_idoms = findDominators(m_unit, m_blocks);
+
   if (RuntimeOption::EvalHHIREnableCoalescing) {
     // <coalesce> doesn't need instruction numbering.
     coalesce();
   }
-
-  m_blocks = rpoSortCfg(m_unit);
-  m_idoms = findDominators(m_unit, m_blocks);
 
   if (!packed_tv) {
     findFullSIMDCandidates();

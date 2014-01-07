@@ -116,11 +116,6 @@ template <class Body> void forEachTrace(const IRUnit&, Body body);
 template <class BlockList, class Body>
 void forEachInst(const BlockList& blocks, Body body);
 
-/*
- * Visit each instruction in the main trace, then the exit traces
- */
-template <class Body> void forEachTraceInst(const IRUnit&, Body body);
-
 namespace detail {
    // PostorderSort encapsulates a depth-first postorder walk
   template <class Visitor>
@@ -196,13 +191,6 @@ void forEachInst(const BlockList& blocks, Body body) {
       body(&inst);
     }
   }
-}
-
-template <class Body>
-void forEachTraceInst(IRUnit& unit, Body body) {
-  forEachTrace(unit, [=](IRTrace* t) {
-    forEachInst(t->blocks(), body);
-  });
 }
 
 }}

@@ -169,46 +169,6 @@ Variant f_stream_copy_to_stream(CResRef source, CResRef dest,
   return cbytes;
 }
 
-bool f_stream_encoding(CResRef stream, const String& encoding /* = null_string */) {
-  throw NotSupportedException(__func__, "stream filter is not supported");
-}
-
-void f_stream_bucket_append(CResRef brigade, CResRef bucket) {
-  throw NotSupportedException(__func__, "stream bucket is not supported");
-}
-
-void f_stream_bucket_prepend(CResRef brigade, CResRef bucket) {
-  throw NotSupportedException(__func__, "stream bucket is not supported");
-}
-
-Resource f_stream_bucket_make_writeable(CResRef brigade) {
-  throw NotSupportedException(__func__, "stream bucket is not supported");
-}
-
-Resource f_stream_bucket_new(CResRef stream, const String& buffer) {
-  throw NotSupportedException(__func__, "stream bucket is not supported");
-}
-
-bool f_stream_filter_register(const String& filtername, const String& classname) {
-  throw NotSupportedException(__func__, "stream filter is not supported");
-}
-
-bool f_stream_filter_remove(CResRef stream_filter) {
-  throw NotSupportedException(__func__, "stream filter is not supported");
-}
-
-Resource f_stream_filter_append(CResRef stream, const String& filtername,
-                              int read_write /* = 0 */,
-                              CVarRef params /* = null_variant */) {
-  throw NotSupportedException(__func__, "stream filter is not supported");
-}
-
-Resource f_stream_filter_prepend(CResRef stream, const String& filtername,
-                               int read_write /* = 0 */,
-                               CVarRef params /* = null_variant */) {
-  throw NotSupportedException(__func__, "stream filter is not supported");
-}
-
 Variant f_stream_get_contents(CResRef handle, int maxlen /* = -1 */,
                               int offset /* = -1 */) {
   if (maxlen < -1) {
@@ -243,10 +203,6 @@ Variant f_stream_get_contents(CResRef handle, int maxlen /* = -1 */,
     ret = file->read();
   }
   return ret;
-}
-
-Array f_stream_get_filters() {
-  throw NotSupportedException(__func__, "stream filter is not supported");
 }
 
 Variant f_stream_get_line(CResRef handle, int length /* = 0 */,
@@ -499,12 +455,6 @@ Variant f_stream_socket_client(const String& remote_socket,
                                CResRef context /* = null_object */) {
   Util::HostURL hosturl(static_cast<const std::string>(remote_socket));
   return sockopen_impl(hosturl, errnum, errstr, timeout, false);
-}
-
-Variant f_stream_socket_enable_crypto(CResRef stream, bool enable,
-                                      int crypto_type /* = 0 */,
-                                      CResRef session_stream /* = null_object */) {
-  throw NotSupportedException(__func__, "no crypto support on sockets");
 }
 
 Variant f_stream_socket_get_name(CResRef handle, bool want_peer) {

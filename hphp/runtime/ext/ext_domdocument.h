@@ -52,7 +52,7 @@ Variant f_dom_document_savexml(
   CVarRef obj, CObjRef node = null_object, int64_t options = 0);
 Variant f_dom_document_validate(CVarRef obj);
 Variant f_dom_document_xinclude(CVarRef obj, int64_t options = 0);
-Variant f_dom_document_save_html(CVarRef obj);
+Variant f_dom_document_save_html(CVarRef obj, CObjRef node = null_object);
 Variant f_dom_document_save_html_file(CVarRef obj, const String& file);
 Variant f_dom_document_schema_validate_file(
   CVarRef obj, const String& filename);
@@ -344,7 +344,7 @@ class c_DOMDocument : public c_DOMNode, public Sweepable {
   public: bool t_relaxngvalidate(const String& filename);
   public: bool t_relaxngvalidatesource(const String& source);
   public: Variant t_save(const String& file, int64_t options = 0);
-  public: Variant t_savehtml();
+  public: Variant t_savehtml(CObjRef node = null_object);
   public: Variant t_savehtmlfile(const String& file);
   public: Variant t_savexml(CObjRef node = null_object, int64_t options = 0);
   public: bool t_schemavalidate(const String& filename);
@@ -369,6 +369,9 @@ public:
   Array m_classmap;
   std::auto_ptr<XmlNodeSet> m_orphans;
   bool m_owner;
+
+private:
+  Variant save_html_or_xml(bool as_xml, CObjRef node = null_object);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

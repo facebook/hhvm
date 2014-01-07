@@ -3474,20 +3474,6 @@ Variant c_DOMDocument::t_save(const String& file, int64_t options /* = 0 */) {
   return bytes;
 }
 
-Variant c_DOMDocument::t_savehtml() {
-  xmlDocPtr docp = (xmlDocPtr)m_node;
-  xmlChar *mem;
-  int size;
-  htmlDocDumpMemory(docp, &mem, &size);
-  if (!size) {
-    if (mem) xmlFree(mem);
-    return false;
-  }
-  String ret = String((char*)mem, size, CopyString);
-  xmlFree(mem);
-  return ret;
-}
-
 Variant c_DOMDocument::t_savehtmlfile(const String& file) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0;
@@ -3508,13 +3494,32 @@ Variant c_DOMDocument::t_savehtmlfile(const String& file) {
 
 Variant c_DOMDocument::t_savexml(CObjRef node /* = null_object */,
                                  int64_t options /* = 0 */) {
+  int saveempty = 0;
+
+  if (options & LIBXML_SAVE_NOEMPTYTAG) {
+    saveempty = xmlSaveNoEmptyTags;
+    xmlSaveNoEmptyTags = 1;
+  }
+
+  Variant ret = save_html_or_xml(/* as_xml = */ true, node);
+
+  if (options & LIBXML_SAVE_NOEMPTYTAG) {
+    xmlSaveNoEmptyTags = saveempty;
+  }
+
+  return ret;
+}
+
+Variant c_DOMDocument::t_savehtml(CObjRef node /* = null_object */) {
+  return save_html_or_xml(/* as_xml = */ false, node);
+}
+
+Variant c_DOMDocument::save_html_or_xml(bool as_xml,
+                                          CObjRef node /* = null_object */) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlBufferPtr buf;
   xmlChar *mem;
-  int size, format = 0, saveempty = 0;
-
-  format = m_formatoutput;
-
+  int size;
   if (!node.isNull()) {
     c_DOMNode *domnode = node.getTyped<c_DOMNode>();
     xmlNodePtr node = domnode->m_node;
@@ -3528,13 +3533,10 @@ Variant c_DOMDocument::t_savexml(CObjRef node /* = null_object */,
       raise_warning("Could not fetch buffer");
       return false;
     }
-    if (options & LIBXML_SAVE_NOEMPTYTAG) {
-      saveempty = xmlSaveNoEmptyTags;
-      xmlSaveNoEmptyTags = 1;
-    }
-    xmlNodeDump(buf, docp, node, 0, format);
-    if (options & LIBXML_SAVE_NOEMPTYTAG) {
-      xmlSaveNoEmptyTags = saveempty;
+    if (as_xml) {
+      xmlNodeDump(buf, docp, node, 0, m_formatoutput);
+    } else {
+      htmlNodeDump(buf, docp, node);
     }
     mem = (xmlChar*)xmlBufferContent(buf);
     if (!mem) {
@@ -3544,23 +3546,25 @@ Variant c_DOMDocument::t_savexml(CObjRef node /* = null_object */,
     String ret = String((char*)mem, CopyString);
     xmlBufferFree(buf);
     return ret;
-  } else {
-    if (options & LIBXML_SAVE_NOEMPTYTAG) {
-      saveempty = xmlSaveNoEmptyTags;
-      xmlSaveNoEmptyTags = 1;
-    }
-    // Encoding is handled from the encoding property set on the document
-    xmlDocDumpFormatMemory(docp, &mem, &size, format);
-    if (options & LIBXML_SAVE_NOEMPTYTAG) {
-      xmlSaveNoEmptyTags = saveempty;
-    }
-    if (!size) {
-      return false;
-    }
-    String ret = String((char*)mem, size, CopyString);
-    xmlFree(mem);
-    return ret;
   }
+
+  if (as_xml) {
+    xmlDocDumpFormatMemory(docp, &mem, &size, m_formatoutput);
+  } else {
+#if LIBXML_VERSION >= 20623
+    htmlDocDumpMemoryFormat(docp, &mem, &size, m_formatoutput);
+#else
+    htmlDocDumpMemory(docp, &mem, &size);
+#endif
+  }
+
+  if (!size) {
+    if (mem) xmlFree(mem);
+    return false;
+  }
+  String ret = String((char*)mem, size, CopyString);
+  xmlFree(mem);
+  return ret;
 }
 
 bool c_DOMDocument::t_schemavalidate(const String& filename) {
@@ -5517,9 +5521,10 @@ Variant f_dom_document_xinclude(CVarRef obj, int64_t options /* = 0 */) {
   return pobj->t_xinclude(options);
 }
 
-Variant f_dom_document_save_html(CVarRef obj) {
+Variant f_dom_document_save_html(CVarRef obj,
+                                 CObjRef node /* = null_object */) {
   DOM_GET_OBJ(Document);
-  return pobj->t_savehtml();
+  return pobj->t_savehtml(node);
 }
 
 Variant f_dom_document_save_html_file(CVarRef obj, const String& file) {

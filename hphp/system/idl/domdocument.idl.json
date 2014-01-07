@@ -401,6 +401,12 @@
                 {
                     "name": "obj",
                     "type": "Variant"
+                },
+                {
+                    "name": "node",
+                    "type": "Object",
+                    "value": "null_object",
+                    "desc": "Optional parameter to output a subset of the document."
                 }
             ]
         },
@@ -2740,6 +2746,12 @@
                         "desc": "Returns the HTML, or FALSE if an error occurred."
                     },
                     "args": [
+                        {
+                            "name": "node",
+                            "type": "Object",
+                            "value": "null_object",
+                            "desc": "Optional parameter to output a subset of the document."
+                        }
                     ]
                 },
                 {

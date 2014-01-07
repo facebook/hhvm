@@ -60,6 +60,8 @@ public:
                                     const VirtualHost *vhost);
   static void CopyHeaderVariables(Variant& server,
                                   const HeaderMap& headers);
+  static void CopyServerParams(Variant& server,
+                               Transport *transport);
   static void CopyServerInfo(Variant& server,
                              Transport *transport,
                              const VirtualHost *vhost);

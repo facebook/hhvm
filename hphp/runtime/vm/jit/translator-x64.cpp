@@ -2417,6 +2417,10 @@ std::string TranslatorX64::getUsage() {
   auto const persistentPct = 400 * persistentUsage /
     RuntimeOption::EvalJitTargetCacheSize;
 
+  auto percentUsed = [&](const CodeBlock& cb) {
+    return cb.capacity() == 0 ? 0 : 100 * cb.used() / cb.capacity();
+  };
+
   Util::string_printf(
     usage,
     "tx64: %9zd bytes (%zd%%) in ahot.code\n"
@@ -2428,12 +2432,11 @@ std::string TranslatorX64::getUsage() {
     "tx64: %9zd bytes (%zd%%) in persistentCache\n"
     "tx64: %9zd bytes (%zd%%) in RDS\n"
     "tx64: %9zd bytes (%zd%%) in persistentRDS\n",
-    aHotUsage,  100 * aHotUsage / hotCode.capacity(),
-    aUsage,     100 * aUsage / mainCode.capacity(),
-    aProfUsage, (profCode.capacity() != 0
-                 ? 100 * aProfUsage / profCode.capacity() : 0),
-    stubsUsage, 100 * stubsUsage / stubsCode.capacity(),
-    dataUsage,  100 * dataUsage / m_globalData.capacity(),
+    aHotUsage,  percentUsed(hotCode),
+    aUsage,     percentUsed(mainCode),
+    aProfUsage, percentUsed(profCode),
+    stubsUsage, percentUsed(stubsCode),
+    dataUsage,  percentUsed(m_globalData),
     rdsUsage, rdsPct,
     persistentUsage, persistentPct,
     // TODO(#2966387): temporarily double logging targetcache under new names

@@ -634,16 +634,16 @@ static const StringData* mangleSmcName(const StringData* cls,
 }
 
 RDS::Handle StaticMethodCache::alloc(const StringData* clsName,
-                                const StringData* methName,
-                                const char* ctxName) {
+                                     const StringData* methName,
+                                     const char* ctxName) {
   return RDS::bind<StaticMethodCache>(
     RDS::StaticMethod { mangleSmcName(clsName, methName, ctxName) }
   ).handle();
 }
 
 RDS::Handle StaticMethodFCache::alloc(const StringData* clsName,
-                                 const StringData* methName,
-                                 const char* ctxName) {
+                                      const StringData* methName,
+                                      const char* ctxName) {
   return RDS::bind<StaticMethodFCache>(
     RDS::StaticMethodF { mangleSmcName(clsName, methName, ctxName) }
   ).handle();

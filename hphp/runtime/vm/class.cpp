@@ -36,6 +36,16 @@ static StringData* sd86ctor = makeStaticString("86ctor");
 static StringData* sd86pinit = makeStaticString("86pinit");
 static StringData* sd86sinit = makeStaticString("86sinit");
 
+/*
+ * We clone methods with static locals into derived classes,
+ * but the clone still points to the class the method was defined
+ * in (because it needs to have the right context class). For data
+ * profiling, we need to find the actual class that a Func belongs to
+ * so we put such Func's into this map.
+ */
+typedef tbb::concurrent_hash_map<uint64_t, const Class*> FuncIdToClassMap;
+static FuncIdToClassMap* s_funcIdToClassMap;
+
 hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
               string_data_hash, string_data_isame> Class::s_extClassHash;
 
@@ -64,6 +74,20 @@ const StringData* PreClass::manglePropName(const StringData* className,
   }
   default: not_reached();
   }
+}
+
+const Class* getOwningClassForFunc(const Func* f) {
+  // currently we only populate s_funcIdToClassMap
+  // when EvalPerfDataMap is true.
+  assert(RuntimeOption::EvalPerfDataMap);
+
+  if (s_funcIdToClassMap) {
+    FuncIdToClassMap::const_accessor acc;
+    if (s_funcIdToClassMap->find(acc, f->getFuncId())) {
+      return acc->second;
+    }
+  }
+  return f->cls();
 }
 
 //=============================================================================
@@ -1368,6 +1392,21 @@ void Class::setMethods() {
       // class.
       f = f->clone(f->attrs() & AttrClone ? this : f->cls());
       f->setNewFuncId();
+      if (RuntimeOption::EvalPerfDataMap) {
+        if (!s_funcIdToClassMap) {
+          Lock l(Unit::s_classesMutex);
+          if (!s_funcIdToClassMap) {
+            s_funcIdToClassMap = new FuncIdToClassMap;
+          }
+        }
+        FuncIdToClassMap::accessor acc;
+        if (!s_funcIdToClassMap->insert(
+              acc, FuncIdToClassMap::value_type(f->getFuncId(), this))) {
+          // we only just allocated this id, which is supposedly
+          // process unique
+          assert(false);
+        }
+      }
     }
   }
 
@@ -2500,7 +2539,13 @@ TypedValue* Class::getSPropData() const {
 }
 
 void Class::initSPropHandle() const {
-  m_propSDataCache.bind();
+  if (!m_propSDataCache.bound()) {
+    m_propSDataCache.bind();
+    RDS::recordRds(m_propSDataCache.handle(),
+                   sizeof(TypedValue*),
+                   "PropSDataCache",
+                   name()->data());
+  }
 }
 
 TypedValue* Class::initSProps() const {

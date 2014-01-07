@@ -1039,6 +1039,16 @@ inline bool classHasPersistentRDS(const Class* cls) {
           RDS::isPersistentHandle(cls->classHandle()));
 }
 
+/*
+ * Returns that class that "owns" f. This will normally be
+ * f->cls(), but for Funcs with static locals, f may have
+ * been cloned into a derived class.
+ *
+ * May only be called when RuntimeOption::EvalPerfDataMap
+ * is true.
+ */
+const Class* getOwningClassForFunc(const Func* f);
+
 } // HPHP
 
 #endif

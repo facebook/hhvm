@@ -169,8 +169,8 @@ void NamedEntity::setCachedTypeAlias(const TypeAliasReq& td) {
 
 const TypeAliasReq* NamedEntity::getCachedTypeAlias() const {
   // TODO(#2103214): support persistent typeAliases
-  m_cachedTypeAlias.bind();
-  return m_cachedTypeAlias->name ? m_cachedTypeAlias.get() : nullptr;
+  return m_cachedTypeAlias.bound() && m_cachedTypeAlias->name ?
+    m_cachedTypeAlias.get() : nullptr;
 }
 
 void NamedEntity::pushClass(Class* cls) {
@@ -678,6 +678,15 @@ Class* Unit::defClass(const PreClass* preClass,
       }
       nameList->pushClass(newClass.get());
     }
+    if (RuntimeOption::EvalPerfDataMap) {
+      Debug::DebugInfo::recordDataMap(
+        newClass.get(), newClass.get() + 1,
+        folly::format("Class-{}", preClass->name()->data()).str());
+      Debug::DebugInfo::recordDataMap(
+        (char*)(intptr_t)nameList->m_cachedClass.handle(),
+        (char*)(intptr_t)nameList->m_cachedClass.handle() + sizeof(void*),
+        folly::format("rds+Class-{}", preClass->name()->data()).str());
+    }
     /*
      * call setCached after adding to the class list, otherwise the
      * target-cache short circuit at the top could return a class
@@ -730,8 +739,12 @@ void Unit::defTypeAlias(Id id) {
   }
 
   // TODO(#2103214): persistent type alias support
-  nameList->m_cachedTypeAlias.bind();
-
+  if (!nameList->m_cachedTypeAlias.bound()) {
+    nameList->m_cachedTypeAlias.bind();
+    RDS::recordRds(nameList->m_cachedTypeAlias.handle(),
+                   sizeof(TypeAliasReq),
+                   "TypeAlias", typeName->data());
+  }
   /*
    * If this type alias is a KindOfObject and the name on the right
    * hand side was another type alias, we will bind the name to the
@@ -841,6 +854,12 @@ void Unit::loadFunc(const Func *func) {
                  : RDS::Mode::Normal
   );
   const_cast<Func*>(func)->setFuncHandle(ne->m_cachedFunc);
+  if (RuntimeOption::EvalPerfDataMap) {
+    Debug::DebugInfo::recordDataMap(
+      (char*)(intptr_t)ne->m_cachedFunc.handle(),
+      (char*)(intptr_t)ne->m_cachedFunc.handle() + sizeof(void*),
+      folly::format("rds+Func-{}", func->name()->data()).str());
+  }
 }
 
 static void mergeCns(TypedValue& tv, TypedValue *value,
@@ -858,6 +877,10 @@ static SimpleMutex unitInitLock(false /* reentrant */, RankUnitInit);
 void Unit::initialMerge() {
   unitInitLock.assertOwnedBySelf();
   if (LIKELY(m_mergeState == UnitMergeStateUnmerged)) {
+    if (RuntimeOption::EvalPerfDataMap) {
+      Debug::DebugInfo::recordDataMap(
+        this, this + 1, folly::format("Unit-{}", m_filepath->data()).str());
+    }
     int state = 0;
     bool needsCompact = false;
     m_mergeState = UnitMergeStateMerging;

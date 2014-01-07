@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/debug/debug.h"
 
 #include "folly/AtomicHashMap.h"
 
@@ -236,8 +237,13 @@ RDS::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
   }
   auto const it = s_stringDataMap->find(make_intern_key(cnsName));
   assert(it != s_stringDataMap->end());
-  it->second.bind<kTVSimdAlign>(persistent ? RDS::Mode::Persistent
-                                           : RDS::Mode::Normal);
+  if (!it->second.bound()) {
+    it->second.bind<kTVSimdAlign>(persistent ? RDS::Mode::Persistent
+                                             : RDS::Mode::Normal);
+
+    RDS::recordRds(it->second.handle(), sizeof(TypedValue),
+                   "Cns", cnsName->data());
+  }
   return it->second.handle();
 }
 

@@ -42,18 +42,35 @@ DebugInfo* DebugInfo::Get() {
   return mcg->getDebugInfo();
 }
 
-DebugInfo::DebugInfo() {
+DebugInfo::DebugInfo() : m_perfMap(0), m_dataMap(0) {
   snprintf(m_perfMapName,
            sizeof m_perfMapName,
            "/tmp/perf-%d.map", getpid());
-  m_perfMap = fopen(m_perfMapName, "w");
+  if (RuntimeOption::EvalPerfPidMap) {
+    m_perfMap = fopen(m_perfMapName, "w");
+  }
+  snprintf(m_dataMapName,
+           sizeof m_dataMapName,
+           "/tmp/perf-data-%d.map", getpid());
+  if (RuntimeOption::EvalPerfDataMap) {
+    m_dataMap = fopen(m_dataMapName, "w");
+  }
   generatePidMapOverlay();
 }
 
 DebugInfo::~DebugInfo() {
-  if (m_perfMap) fclose(m_perfMap);
-  if (!RuntimeOption::EvalKeepPerfPidMap) {
-    unlink(m_perfMapName);
+  if (m_perfMap) {
+    fclose(m_perfMap);
+    if (!RuntimeOption::EvalKeepPerfPidMap) {
+      unlink(m_perfMapName);
+    }
+  }
+
+  if (m_dataMap) {
+    fclose(m_dataMap);
+    if (!RuntimeOption::EvalKeepPerfPidMap) {
+      unlink(m_dataMapName);
+    }
   }
 }
 
@@ -196,9 +213,26 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
 void DebugInfo::recordTracelet(TCRange range, const Func* func,
     const Op* instr, bool exit, bool inPrologue) {
   if (range.isAstubs()) {
-    m_astubsDwarfInfo.addTracelet(range, nullptr, func, instr, exit, inPrologue);
+    m_astubsDwarfInfo.addTracelet(range, nullptr, func,
+                                  instr, exit, inPrologue);
   } else {
     m_aDwarfInfo.addTracelet(range, nullptr, func, instr, exit, inPrologue);
+  }
+}
+
+void DebugInfo::recordDataMap(void* from, void* to, const std::string& desc) {
+  if (!mcg) return;
+  return Get()->recordDataMapImpl(from, to, desc);
+}
+
+void DebugInfo::recordDataMapImpl(void* from, void* to,
+                                  const std::string& desc) {
+  if (m_dataMap) {
+    fprintf(m_dataMap, "%" PRIxPTR " %" PRIx64 " %s\n",
+            uintptr_t(from),
+            uint64_t((char*)to - (char*)from),
+            desc.c_str());
+    fflush(m_dataMap);
   }
 }
 

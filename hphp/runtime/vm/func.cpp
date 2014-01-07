@@ -134,6 +134,17 @@ void Func::setFullName() {
     m_fullName = m_name;
     m_namedEntity = Unit::GetNamedEntity(m_name);
   }
+  if (RuntimeOption::EvalPerfDataMap) {
+    int numPre = isClosureBody() ? 1 : 0;
+    char* from = (char*)this - numPre * sizeof(Func);
+
+    int maxNumPrologues = Func::getMaxNumPrologues(m_numParams);
+    int numPrologues = maxNumPrologues > kNumFixedPrologues ?
+      maxNumPrologues : kNumFixedPrologues;
+    char* to = (char*)(m_prologueTable + numPrologues);
+    Debug::DebugInfo::recordDataMap(
+      from, to, folly::format("Func-{}-{}", numPre, m_fullName->data()).str());
+  }
   if (RuntimeOption::DynamicInvokeFunctions.size()) {
     if (RuntimeOption::DynamicInvokeFunctions.find(m_fullName->data()) !=
         RuntimeOption::DynamicInvokeFunctions.end()) {

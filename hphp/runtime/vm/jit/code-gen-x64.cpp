@@ -2437,6 +2437,9 @@ void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
 
 void CodeGenerator::cgLdFunc(IRInstruction* inst) {
   auto const ch = FuncCache::alloc();
+  RDS::recordRds(ch, sizeof(FuncCache),
+                 "FuncCache", curFunc()->fullName()->data());
+
   // raises an error if function not found
   cgCallHelper(m_as,
                CppCall(FuncCache::lookup),
@@ -2457,6 +2460,12 @@ void CodeGenerator::cgLdObjMethod(IRInstruction *inst) {
   auto& a = m_as;
 
   auto const handle = RDS::alloc<MethodCache,sizeof(MethodCache)>().handle();
+  if (RuntimeOption::EvalPerfDataMap) {
+    Debug::DebugInfo::recordDataMap(
+      (char*)(intptr_t)handle,
+      (char*)(intptr_t)handle + sizeof(TypedValue),
+      folly::format("rds+MethodCache-{}", curFunc()->fullName()->data()).str());
+  }
   auto pdata = static_cast<MethodCachePrimeData*>(
     std::malloc(sizeof(MethodCachePrimeData))
   );
@@ -5122,6 +5131,9 @@ void CodeGenerator::cgThingExists(IRInstruction* inst) {
 
 void CodeGenerator::cgLdCls(IRInstruction* inst) {
   auto const ch = ClassCache::alloc();
+  RDS::recordRds(ch, sizeof(ClassCache),
+                 "ClassCache", curFunc()->fullName()->data());
+
   cgCallHelper(m_as,
                CppCall(ClassCache::lookup),
                callDest(inst),

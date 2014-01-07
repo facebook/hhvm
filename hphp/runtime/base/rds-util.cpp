@@ -23,21 +23,22 @@ namespace HPHP { namespace RDS {
 //////////////////////////////////////////////////////////////////////
 
 Link<RefData> bindStaticLocal(const Func* func, const StringData* name) {
-  return bind<RefData>(
+  auto ret = bind<RefData>(
     StaticLocal { func->getFuncId(), name },
     Mode::Normal
   );
+  return ret;
 }
 
 Link<TypedValue> bindClassConstant(const StringData* clsName,
                                    const StringData* cnsName) {
-  return bind<TypedValue,kTVSimdAlign>(
+  auto ret = bind<TypedValue,kTVSimdAlign>(
     ClsConstant { clsName, cnsName },
     Mode::Normal
   );
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 }}
-

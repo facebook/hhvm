@@ -389,6 +389,7 @@ public:
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
   F(bool, PerfPidMap,                  true)                            \
+  F(bool, PerfDataMap,                 false)                           \
   F(bool, KeepPerfPidMap,              false)                           \
   F(bool, RuntimeTypeProfile,          false)                           \
   F(int32_t, RuntimeTypeProfileLoggingFreq,  0)                         \

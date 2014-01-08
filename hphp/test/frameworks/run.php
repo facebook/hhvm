@@ -1289,6 +1289,20 @@ class Joomla extends Framework {
   }
 }
 
+class Klein extends Framework {
+  public function __construct(string $name) { parent::__construct($name); }
+  protected function getInfo(): Map {
+    return Map {
+      "install_root" => __DIR__."/frameworks/klein",
+      "git_path" => "https://github.com/chriso/klein.php.git",
+      # Most recent stable with 100% code coverage
+      # @link: http://reports.dev.metroserve.me/klein-a4e9c21-code-coverage/
+      "git_commit" => "a4e9c2110933c600b3498b5b42ac9804f9f05a62",
+      "test_path" => __DIR__."/frameworks/klein",
+    };
+  }
+}
+
 class Laravel extends Framework {
   public function __construct(string $name) { parent::__construct($name); }
   protected function getInfo(): Map {

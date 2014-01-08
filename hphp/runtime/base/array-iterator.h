@@ -28,8 +28,7 @@ namespace HPHP {
 
 struct TypedValue;
 class c_Vector;
-class c_Map;
-class c_StableMap;
+class BaseMap;
 class c_Set;
 class c_Pair;
 class c_FrozenVector;
@@ -269,6 +268,7 @@ class ArrayIter {
   static void VectorInit(ArrayIter* iter, ObjectData* obj);
   static void MapInit(ArrayIter* iter, ObjectData* obj);
   static void StableMapInit(ArrayIter* iter, ObjectData* obj);
+  static void FrozenMapInit(ArrayIter* iter, ObjectData* obj);
   static void SetInit(ArrayIter* iter, ObjectData* obj);
   static void PairInit(ArrayIter* iter, ObjectData* obj);
   static void FrozenVectorInit(ArrayIter* iter, ObjectData* obj);
@@ -276,7 +276,7 @@ class ArrayIter {
   static void IteratorObjInit(ArrayIter* iter, ObjectData* obj);
 
   typedef void(*InitFuncPtr)(ArrayIter*,ObjectData*);
-  static const InitFuncPtr initFuncTable[8];
+  static const InitFuncPtr initFuncTable[Collection::MaxNumTypes];
 
   void destruct();
 
@@ -284,13 +284,10 @@ class ArrayIter {
     assert(hasCollection() && getCollectionType() == Collection::VectorType);
     return (c_Vector*)((intptr_t)m_obj & ~1);
   }
-  c_Map* getMap() {
-    assert(hasCollection() && getCollectionType() == Collection::MapType);
-    return (c_Map*)((intptr_t)m_obj & ~1);
-  }
-  c_StableMap* getStableMap() {
-    assert(hasCollection() && getCollectionType() == Collection::StableMapType);
-    return (c_StableMap*)((intptr_t)m_obj & ~1);
+  BaseMap* getMappish() {
+    assert(hasCollection());
+    assert(Collection::isMapType(getCollectionType()));
+    return (BaseMap*)((intptr_t)m_obj & ~1);
   }
   c_Set* getSet() {
     assert(hasCollection() && getCollectionType() == Collection::SetType);

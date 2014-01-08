@@ -30,6 +30,9 @@ ObjectData* newVectorHelper(int nElms);
 ObjectData* newMapHelper(int nElms);
 ObjectData* newStableMapHelper(int nElms);
 ObjectData* newSetHelper(int nElms);
+ObjectData* newFrozenVectorHelper(int nElms);
+ObjectData* newFrozenMapHelper(int nElms);
+ObjectData* newFrozenSetHelper(int nElms);
 ObjectData* newPairHelper();
 
 StringData* concat_is(int64_t v1, StringData* v2);

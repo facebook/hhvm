@@ -73,7 +73,7 @@ public:
   void markParam(int p, bool noRefWrapper);
   void markParams(bool noRefWrapper);
 
-  void setCollectionType(int cType);
+  void setCollectionType(Collection::Type cType);
 
   virtual bool canonCompare(ExpressionPtr e) const;
 

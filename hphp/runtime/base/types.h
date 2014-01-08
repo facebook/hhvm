@@ -147,7 +147,8 @@ enum Type {
   PairType = 5,
   FrozenVectorType = 6,
   FrozenSetType = 7,
-  MaxNumTypes = 8
+  FrozenMapType = 8,
+  MaxNumTypes = 9
 };
 inline Type stringToType(const char* str, size_t len) {
   switch (len) {
@@ -165,6 +166,7 @@ inline Type stringToType(const char* str, size_t len) {
       if (!strcasecmp(str, "hh\\vector")) return VectorType;
       break;
     case 12:
+      if (!strcasecmp(str, "hh\\frozenmap")) return FrozenMapType;
       if (!strcasecmp(str, "hh\\frozenset")) return FrozenSetType;
       break;
     case 15:
@@ -178,6 +180,27 @@ inline Type stringToType(const char* str, size_t len) {
 inline Type stringToType(const std::string& s) {
   return stringToType(s.c_str(), s.size());
 }
+inline bool isVectorType(Collection::Type ctype) {
+  return (ctype == Collection::VectorType ||
+          ctype == Collection::FrozenVectorType);
+}
+
+inline bool isMapType(Collection::Type ctype) {
+  return (ctype == Collection::MapType ||
+          ctype == Collection::StableMapType ||
+          ctype == Collection::FrozenMapType);
+}
+
+inline bool isSetType(Collection::Type ctype) {
+  return (ctype == Collection::SetType ||
+          ctype == Collection::FrozenSetType);
+}
+
+inline bool isInvalidType(Collection::Type ctype) {
+  return (ctype == Collection::MaxNumTypes ||
+          ctype == Collection::InvalidType);
+}
+
 }
 
 /**

@@ -3868,8 +3868,9 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
             throw IncludeTimeFatalException(b,
               "Cannot use collection initialization for non-collection class");
           }
-          bool kvPairs = (cType == Collection::MapType ||
-                          cType == Collection::StableMapType);
+          bool kvPairs = cType == Collection::FrozenMapType
+            || cType == Collection::MapType
+            || cType == Collection::StableMapType;
           e.NewCol(cType, nElms);
           if (kvPairs) {
             for (int i = 0; i < nElms; i++) {
@@ -3878,8 +3879,7 @@ bool EmitterVisitor::visitImpl(ConstructPtr node) {
               ExpressionPtr key = ap->getName();
               if (!key) {
                 throw IncludeTimeFatalException(ap,
-                  "Keys must be specified for Map and StableMap "
-                  "initialization");
+                  "Keys must be specified for Map initialization");
               }
               visit(key);
               emitConvertToCell(e);

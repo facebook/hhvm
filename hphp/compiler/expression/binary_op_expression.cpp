@@ -67,7 +67,7 @@ BinaryOpExpression::BinaryOpExpression
     break;
   case T_COLLECTION: {
     std::string s = m_exp1->getLiteralString();
-    int cType = 0;
+    Collection::Type cType = Collection::InvalidType;
     if (strcasecmp(s.c_str(), "vector") == 0) {
       cType = Collection::VectorType;
     } else if (strcasecmp(s.c_str(), "map") == 0) {
@@ -78,6 +78,12 @@ BinaryOpExpression::BinaryOpExpression
       cType = Collection::SetType;
     } else if (strcasecmp(s.c_str(), "pair") == 0) {
       cType = Collection::PairType;
+    } else if (strcasecmp(s.c_str(), "frozenvector") == 0) {
+      cType = Collection::FrozenVectorType;
+    } else if (strcasecmp(s.c_str(), "frozenmap") == 0) {
+      cType = Collection::FrozenMapType;
+    } else if (strcasecmp(s.c_str(), "frozenset") == 0) {
+      cType = Collection::FrozenSetType;
     }
     ExpressionListPtr el = static_pointer_cast<ExpressionList>(m_exp2);
     el->setCollectionType(cType);

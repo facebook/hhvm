@@ -833,7 +833,7 @@ ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
 ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
                               TypedValue value) {
   if (coll->isCollection()) {
-    collectionSet(coll, &key, &value);
+    collectionInitSet(coll, &key, &value);
     // consume the input value. the collection setter either threw or created a
     // reference to value, so we can use a cheaper decref.
     tvRefcountedDecRefNZ(value);

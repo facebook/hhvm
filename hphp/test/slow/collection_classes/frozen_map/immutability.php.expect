@@ -1,0 +1,8 @@
+RuntimeException: Cannot assign to an element of a FrozenMap
+RuntimeException: Cannot add an element to a FrozenMap
+RuntimeException: Cannot unset an element of a FrozenMap
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)

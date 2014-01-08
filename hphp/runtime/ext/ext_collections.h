@@ -420,6 +420,11 @@ class BaseMap : public ExtObjectData {
     std::is_base_of<BaseMap, TMap>::value, TMap*>::type
   static Clone(ObjectData* obj);
 
+  // template<typename TMap>
+  // typename std::enable_if<
+  //   std::is_base_of<BaseMap, TMap>::value, TMap*>::type
+  // static DeepCopy(TMap* mp);
+
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
   static TypedValue* OffsetGet(ObjectData* obj, TypedValue* key);
@@ -587,11 +592,15 @@ class BaseMap : public ExtObjectData {
 
  private:
 
-  friend ObjectData* collectionDeepCopyMap(c_Map* mp);
-  friend ObjectData* collectionDeepCopyStableMap(c_StableMap* mp);
+  template<typename TMap>
+  typename std::enable_if<
+   std::is_base_of<BaseMap, TMap>::value, ObjectData*>::type
+  friend collectionDeepCopyBaseMap(TMap* vec);
+
   friend class c_MapIterator;
   friend class c_Vector;
   friend class c_StableMap;
+  friend class c_FrozenMap;
   friend class ArrayIter;
   friend class c_GenMapWaitHandle;
 
@@ -721,6 +730,48 @@ class c_Map : public BaseMap {
   DECLARE_COLLECTION_MAGIC_METHODS();
   static Object ti_fromitems(CVarRef iterable);
   static Object ti_fromarray(CVarRef arr); // deprecated
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class FrozenMap
+
+FORWARD_DECLARE_CLASS(FrozenMap);
+class c_FrozenMap : public BaseMap {
+
+ public:
+  DECLARE_CLASS_NO_SWEEP(FrozenMap)
+
+  public:
+  explicit c_FrozenMap(Class* cls = c_FrozenMap::classof());
+
+  static c_FrozenMap* Clone(ObjectData* obj);
+
+ public: // PHP API - No inlines (required by .idl.json linking)
+  void t___construct(CVarRef iterable = null_variant);
+  bool t_isempty();
+  int64_t t_count();
+  Object t_items();
+  Object t_keys();
+  Object t_lazy();
+  Object t_kvzip();
+  Variant t_at(CVarRef key);
+  Variant t_get(CVarRef key);
+  bool t_contains(CVarRef key);
+  bool t_containskey(CVarRef key);
+  Array t_toarray();
+  Array t_tokeysarray();
+  Array t_tovaluesarray();
+  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
+  Object t_values();
+  Object t_differencebykey(CVarRef it);
+  Object t_getiterator();
+  Object t_map(CVarRef callback);
+  Object t_mapwithkey(CVarRef callback);
+  Object t_filter(CVarRef callback);
+  Object t_filterwithkey(CVarRef callback);
+  Object t_zip(CVarRef iterable);
+  DECLARE_COLLECTION_MAGIC_METHODS();
+  static Object ti_fromitems(CVarRef iterable);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1517,11 +1568,14 @@ class c_PairIterator : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 
 TypedValue* collectionGet(ObjectData* obj, TypedValue* key);
+// used for collection literal syntax only
+void collectionInitSet(ObjectData* obj, TypedValue* key, TypedValue* val);
 void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val);
 bool collectionIsset(ObjectData* obj, TypedValue* key);
 bool collectionEmpty(ObjectData* obj, TypedValue* key);
 void collectionUnset(ObjectData* obj, TypedValue* key);
 void collectionAppend(ObjectData* obj, TypedValue* val);
+// used for collection literal syntax only
 void collectionInitAppend(ObjectData* obj, TypedValue* val);
 Variant& collectionOffsetGet(ObjectData* obj, int64_t offset);
 Variant& collectionOffsetGet(ObjectData* obj, const String& offset);
@@ -1539,8 +1593,9 @@ ArrayData* collectionDeepCopyArray(ArrayData* arr);
 ObjectData* collectionDeepCopyVector(c_Vector* vec);
 ObjectData* collectionDeepCopyFrozenVector(c_FrozenVector* vec);
 ObjectData* collectionDeepCopyMap(c_Map* mp);
-ObjectData* collectionDeepCopyStableMap(c_StableMap* smp);
-ObjectData* collectionDeepCopySet(c_Set* st);
+ObjectData* collectionDeepCopyStableMap(c_StableMap* mp);
+ObjectData* collectionDeepCopyFrozenMap(c_FrozenMap* mp);
+ObjectData* collectionDeepCopySet(c_Set* mp);
 ObjectData* collectionDeepCopyFrozenSet(c_FrozenSet* st);
 ObjectData* collectionDeepCopyPair(c_Pair* pair);
 

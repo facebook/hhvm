@@ -3627,7 +3627,7 @@ OPTBLD_INLINE void VMExecutionContext::iopColAddElemC(IOP_ARGS) {
   Cell* c2 = m_stack.indC(1);
   Cell* c3 = m_stack.indC(2);
   if (c3->m_type == KindOfObject && c3->m_data.pobj->isCollection()) {
-    collectionSet(c3->m_data.pobj, c2, c1);
+    collectionInitSet(c3->m_data.pobj, c2, c1);
   } else {
     raise_error("ColAddElemC: $3 must be a collection");
   }

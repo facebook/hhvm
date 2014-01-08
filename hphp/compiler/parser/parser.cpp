@@ -2031,7 +2031,8 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
     (AliasEntry){"Vector", "HH\\Vector"},
     (AliasEntry){"Set", "HH\\Set"},
     (AliasEntry){"FrozenVector", "HH\\FrozenVector"},
-    (AliasEntry){"FrozenSet", "HH\\FrozenSet"}
+    (AliasEntry){"FrozenSet", "HH\\FrozenSet"},
+    (AliasEntry){"FrozenMap", "HH\\FrozenMap"},
   };
 
   return aliases;

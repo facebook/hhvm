@@ -79,6 +79,9 @@ NEW_COLLECTION_HELPER(Vector)
 NEW_COLLECTION_HELPER(Map)
 NEW_COLLECTION_HELPER(StableMap)
 NEW_COLLECTION_HELPER(Set)
+NEW_COLLECTION_HELPER(FrozenMap)
+NEW_COLLECTION_HELPER(FrozenVector)
+NEW_COLLECTION_HELPER(FrozenSet)
 
 ObjectData* newPairHelper() {
   ObjectData *obj = NEWOBJ(c_Pair)();
@@ -328,4 +331,3 @@ bool interface_supports_double(const std::string& n) {
 //////////////////////////////////////////////////////////////////////
 
 }
-

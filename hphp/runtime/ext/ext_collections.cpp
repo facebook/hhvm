@@ -1025,13 +1025,19 @@ Object c_Map::t_clear() { return php_clear(); }
 
 Object c_StableMap::t_clear() { return php_clear(); }
 
+bool c_FrozenMap::t_isempty() { return php_isEmpty(); }
+
 bool c_Map::t_isempty() { return php_isEmpty();  }
 
 bool c_StableMap::t_isempty() { return php_isEmpty(); }
 
+int64_t c_FrozenMap::t_count() { return size(); }
+
 int64_t c_Map::t_count() { return size(); }
 
 int64_t c_StableMap::t_count() { return size(); }
+
+Object c_FrozenMap::t_items() { return php_items(); }
 
 Object c_Map::t_items() { return php_items(); }
 
@@ -1063,9 +1069,13 @@ Object BaseMap::php_keys() const {
   return obj;
 }
 
+Object c_FrozenMap::t_keys() { return php_keys(); }
+
 Object c_Map::t_keys() { return php_keys(); }
 
 Object c_StableMap::t_keys() { return php_keys(); }
+
+Object c_FrozenMap::t_lazy() { return php_lazy(); }
 
 Object c_Map::t_lazy() { return php_lazy(); }
 
@@ -1103,6 +1113,8 @@ Object BaseMap::php_kvzip() const {
   return obj;
 }
 
+Object c_FrozenMap::t_kvzip() { return php_kvzip(); }
+
 Object c_Map::t_kvzip() { return php_kvzip(); }
 
 Object c_StableMap::t_kvzip() { return php_kvzip(); }
@@ -1116,6 +1128,8 @@ Variant BaseMap::php_at(CVarRef key) const {
   throwBadKeyType();
   return uninit_null();
 }
+
+Variant c_FrozenMap::t_at(CVarRef key) { return php_at(key); }
 
 Variant c_Map::t_at(CVarRef key) { return php_at(key); }
 
@@ -1141,6 +1155,8 @@ Variant BaseMap::php_get(CVarRef key) const {
   return uninit_null();
 }
 
+Variant c_FrozenMap::t_get(CVarRef key) { return php_get(key); }
+
 Variant c_Map::t_get(CVarRef key) { return php_get(key); }
 
 Variant c_StableMap::t_get(CVarRef key) { return php_get(key); }
@@ -1160,6 +1176,7 @@ Object BaseMap::php_set(CVarRef key, CVarRef value) {
 Object c_Map::t_set(CVarRef key, CVarRef value) {
   return php_set(key, value);
 }
+
 Object c_StableMap::t_set(CVarRef key, CVarRef value) {
   return php_set(key, value);
 }
@@ -1184,10 +1201,8 @@ Object BaseMap::php_setAll(CVarRef iterable) {
   return this;
 }
 
-NEVER_INLINE
 Object c_Map::t_setall(CVarRef iterable) { return php_setAll(iterable); }
 
-NEVER_INLINE
 Object c_StableMap::t_setall(CVarRef iterable) { return php_setAll(iterable); }
 
 Object c_Map::t_put(CVarRef key, CVarRef value) {
@@ -1210,9 +1225,13 @@ bool BaseMap::php_contains(CVarRef key) const {
   return false;
 }
 
+bool c_FrozenMap::t_contains(CVarRef key) { return php_contains(key); }
+
 bool c_Map::t_contains(CVarRef key) { return php_contains(key); }
 
 bool c_StableMap::t_contains(CVarRef key) { return php_contains(key); }
+
+bool c_FrozenMap::t_containskey(CVarRef key) { return php_contains(key); }
 
 bool c_Map::t_containskey(CVarRef key) { return php_contains(key); }
 
@@ -1232,11 +1251,13 @@ Object BaseMap::php_remove(CVarRef key) {
 
 Object c_Map::t_remove(CVarRef key) { return php_remove(key); }
 
-Object c_Map::t_removekey(CVarRef key) { return php_remove(key); }
-
 Object c_StableMap::t_remove(CVarRef key) { return php_remove(key); }
 
+Object c_Map::t_removekey(CVarRef key) { return php_remove(key); }
+
 Object c_StableMap::t_removekey(CVarRef key) { return php_remove(key); }
+
+Array c_FrozenMap::t_toarray() { return php_toArray(); }
 
 Array c_Map::t_toarray() { return php_toArray(); }
 
@@ -1264,6 +1285,8 @@ Object BaseMap::php_values() const {
   return ret;
 }
 
+Object c_FrozenMap::t_values() { return php_values(); }
+
 Object c_Map::t_values() { return php_values(); }
 
 Object c_StableMap::t_values() { return php_values(); }
@@ -1282,6 +1305,8 @@ Array BaseMap::php_toKeysArray() const {
   return ai.toArray();
 }
 
+Array c_FrozenMap::t_tokeysarray() { return php_toKeysArray(); }
+
 Array c_Map::t_tokeysarray() { return php_toKeysArray(); }
 
 Array c_StableMap::t_tokeysarray() { return php_toKeysArray(); }
@@ -1295,6 +1320,8 @@ Array BaseMap::php_toValuesArray() const {
   }
   return ai.toArray();
 }
+
+Array c_FrozenMap::t_tovaluesarray() { return php_toValuesArray(); }
 
 Array c_Map::t_tovaluesarray() { return php_toValuesArray(); }
 
@@ -1312,8 +1339,8 @@ BaseMap::php_differenceByKey(CVarRef it) {
   ObjectData* obj = it.getObjectData();
   TMap* target = BaseMap::Clone<TMap>(this);
   auto ret = Object::attach(target);
-  if (obj->getCollectionType() == Collection::MapType) {
-    auto mp = static_cast<c_Map*>(obj);
+  if (Collection::isMapType(obj->getCollectionType())) {
+    auto mp = static_cast<BaseMap*>(obj);
     for (uint i = 0; i < mp->iterLimit(); ++i) {
       if (mp->isTombstone(i)) continue;
       BaseMap::Elm& p = mp->data()[i];
@@ -1337,6 +1364,10 @@ BaseMap::php_differenceByKey(CVarRef it) {
   return ret;
 }
 
+Object c_FrozenMap::t_differencebykey(CVarRef it) {
+  return php_differenceByKey<c_FrozenMap>(it);
+}
+
 Object c_Map::t_differencebykey(CVarRef it) {
   return php_differenceByKey<c_Map>(it);
 }
@@ -1352,6 +1383,8 @@ Object BaseMap::php_getIterator() {
   it->m_version = getVersion();
   return it;
 }
+
+Object c_FrozenMap::t_getiterator() { return php_getIterator(); }
 
 Object c_Map::t_getiterator() { return php_getIterator(); }
 
@@ -1404,6 +1437,10 @@ BaseMap::php_map(CVarRef callback) const {
     np.data.hash() = p.data.hash();
   }
   return obj;
+}
+
+Object c_FrozenMap::t_map(CVarRef callback) {
+  return php_map<c_FrozenMap>(callback);
 }
 
 Object c_Map::t_map(CVarRef callback) {
@@ -1468,6 +1505,10 @@ BaseMap::php_mapWithKey(CVarRef callback) const {
   return obj;
 }
 
+Object c_FrozenMap::t_mapwithkey(CVarRef callback) {
+  return php_mapWithKey<c_FrozenMap>(callback);
+}
+
 Object c_Map::t_mapwithkey(CVarRef callback) {
   return php_mapWithKey<c_Map>(callback);
 }
@@ -1509,6 +1550,10 @@ BaseMap::php_filter(CVarRef callback) const {
     }
   }
   return obj;
+}
+
+Object c_FrozenMap::t_filter(CVarRef callback) {
+  return php_filter<c_FrozenMap>(callback);
 }
 
 Object c_Map::t_filter(CVarRef callback) {
@@ -1558,6 +1603,10 @@ BaseMap::php_filterWithKey(CVarRef callback) const {
   return obj;
 }
 
+Object c_FrozenMap::t_filterwithkey(CVarRef callback) {
+  return php_filterWithKey<c_FrozenMap>(callback);
+}
+
 Object c_Map::t_filterwithkey(CVarRef callback) {
   return php_filterWithKey<c_Map>(callback);
 }
@@ -1598,6 +1647,10 @@ BaseMap::php_zip(CVarRef iterable) const {
     ++iter;
   }
   return obj;
+}
+
+Object c_FrozenMap::t_zip(CVarRef iterable) {
+  return php_zip<c_FrozenMap>(iterable);
 }
 
 Object c_Map::t_zip(CVarRef iterable) {
@@ -1645,6 +1698,10 @@ BaseMap::php_mapFromIterable(CVarRef iterable) {
   return ret;
 }
 
+Object c_FrozenMap::ti_fromitems(CVarRef iterable) {
+  return php_mapFromIterable<c_FrozenMap>(iterable);
+}
+
 Object c_Map::ti_fromitems(CVarRef iterable) {
   return php_mapFromIterable<c_Map>(iterable);
 }
@@ -1683,9 +1740,35 @@ Object c_Map::ti_fromarray(CVarRef arr) {
   return php_mapFromArray<c_Map>(arr);
 }
 
-NEVER_INLINE
 Object c_StableMap::ti_fromarray(CVarRef arr) {
   return php_mapFromArray<c_StableMap>(arr);
+}
+
+template<typename TMap>
+  typename std::enable_if<
+  std::is_base_of<BaseMap, TMap>::value, ObjectData*>::type
+static collectionDeepCopyBaseMap(TMap* mp) {
+  mp = TMap::Clone(mp);
+  Object o = Object::attach(mp);
+  uint used = mp->iterLimit();
+  for (uint32_t i = 0; i < used; ++i) {
+    if (mp->isTombstone(i)) continue;
+    BaseMap::Elm* p = &mp->data()[i];
+    collectionDeepCopyTV(&p->data);
+  }
+  return o.detach();
+}
+
+ObjectData* collectionDeepCopyFrozenMap(c_FrozenMap* map) {
+  return collectionDeepCopyBaseMap<c_FrozenMap>(map);
+}
+
+ObjectData* collectionDeepCopyMap(c_Map* map) {
+  return collectionDeepCopyBaseMap<c_Map>(map);
+}
+
+ObjectData* collectionDeepCopyStableMap(c_StableMap* map) {
+  return collectionDeepCopyBaseMap<c_StableMap>(map);
 }
 
 NEVER_INLINE
@@ -2570,6 +2653,20 @@ void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
 
 c_StableMap* c_StableMap::Clone(ObjectData* obj) {
   return BaseMap::Clone<c_StableMap>(obj);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+c_FrozenMap::c_FrozenMap(Class* cb) : BaseMap(cb) {
+  o_subclassData.u16 = Collection::FrozenMapType;
+}
+
+void c_FrozenMap::t___construct(CVarRef iterable /* = null_variant */) {
+  php_construct(iterable);
+}
+
+c_FrozenMap* c_FrozenMap::Clone(ObjectData* obj) {
+  return BaseMap::Clone<c_FrozenMap>(obj);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3754,6 +3851,7 @@ COLLECTION_MAGIC_METHODS(Vector)
 COLLECTION_MAGIC_METHODS(FrozenVector)
 COLLECTION_MAGIC_METHODS(Map)
 COLLECTION_MAGIC_METHODS(StableMap)
+COLLECTION_MAGIC_METHODS(FrozenMap)
 COLLECTION_MAGIC_METHODS(Set)
 COLLECTION_MAGIC_METHODS(FrozenSet)
 COLLECTION_MAGIC_METHODS(Pair)
@@ -3803,6 +3901,7 @@ COLLECTION_MAGIC_METHODS(Pair)
 
 KEYEDITERABLE_MATERIALIZE_METHODS(Map)
 KEYEDITERABLE_MATERIALIZE_METHODS(StableMap)
+KEYEDITERABLE_MATERIALIZE_METHODS(FrozenMap)
 ITERABLE_MATERIALIZE_METHODS(Set)
 ITERABLE_MATERIALIZE_METHODS(FrozenSet)
 KEYEDITERABLE_MATERIALIZE_METHODS(Pair)
@@ -3812,17 +3911,14 @@ KEYEDITERABLE_MATERIALIZE_METHODS(FrozenVector)
 #undef KEYEDITERABLE_MATERIALIZE_METHODS
 
 static inline bool isKeylessCollectionType(Collection::Type ctype) {
-  return ctype == Collection::SetType ||
-         ctype == Collection::FrozenSetType;
+  return Collection::isSetType(ctype);
 }
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   assert(obj->isCollection());
   int64_t sz = obj->getCollectionSize();
-  if (obj->getCollectionType() == Collection::VectorType ||
-      obj->getCollectionType() == Collection::FrozenVectorType ||
-      obj->getCollectionType() == Collection::SetType ||
-      obj->getCollectionType() == Collection::FrozenSetType ||
+  if (Collection::isVectorType(obj->getCollectionType()) ||
+      Collection::isSetType(obj->getCollectionType()) ||
       obj->getCollectionType() == Collection::PairType) {
     serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
     serializer->writeArrayHeader(sz, true);
@@ -3849,8 +3945,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
     }
     serializer->writeArrayFooter();
   } else {
-    assert(obj->getCollectionType() == Collection::MapType ||
-           obj->getCollectionType() == Collection::StableMapType);
+    assert(Collection::isMapType(obj->getCollectionType()));
     serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'K');
     serializer->writeArrayHeader(sz, false);
     for (ArrayIter iter(obj); iter; ++iter) {
@@ -3878,6 +3973,9 @@ void collectionDeepCopyTV(TypedValue* tv) {
           break;
         case Collection::MapType:
           obj = collectionDeepCopyMap(static_cast<c_Map*>(obj));
+          break;
+        case Collection::FrozenMapType:
+          obj = collectionDeepCopyFrozenMap(static_cast<c_FrozenMap*>(obj));
           break;
         case Collection::StableMapType:
           obj = collectionDeepCopyStableMap(static_cast<c_StableMap*>(obj));
@@ -3940,30 +4038,6 @@ ObjectData* collectionDeepCopyFrozenVector(c_FrozenVector* vec) {
   return collectionDeepCopyBaseVector<c_FrozenVector>(vec);
 }
 
-ObjectData* collectionDeepCopyMap(c_Map* mp) {
-  mp = BaseMap::Clone<c_Map>(mp);
-  Object o = Object::attach(mp);
-  uint used = mp->iterLimit();
-  for (uint32_t i = 0; i < used; ++i) {
-    if (mp->isTombstone(i)) continue;
-    BaseMap::Elm* p = &mp->data()[i];
-    collectionDeepCopyTV(&p->data);
-  }
-  return o.detach();
-}
-
-ObjectData* collectionDeepCopyStableMap(c_StableMap* smp) {
-  smp = BaseMap::Clone<c_StableMap>(smp);
-  Object o = Object::attach(smp);
-  uint used = smp->iterLimit();
-  for (uint32_t i = 0; i < used; ++i) {
-    if (smp->isTombstone(i)) continue;
-    BaseMap::Elm* p = &smp->data()[i];
-    collectionDeepCopyTV(&p->data);
-  }
-  return o.detach();
-}
-
 ObjectData* collectionDeepCopySet(c_Set* st) {
   return c_Set::Clone(st);
 }
@@ -3982,7 +4056,7 @@ ObjectData* collectionDeepCopyPair(c_Pair* pair) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Many of the collectionXYZ functions need to throw exceptions with common
-// error messages (e.g. collectionSet() when called on an immutable collection).
+// error messages (e.g. collectionInitSet() when called on an immutable collection).
 // So we provide them with shared error-signaling logic.
 
 /**
@@ -4056,6 +4130,7 @@ TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
       return c_Vector::OffsetGet(obj, key);
     case Collection::MapType:
     case Collection::StableMapType:
+    case Collection::FrozenMapType:
       return BaseMap::OffsetGet(obj, key);
     case Collection::SetType:
       return c_Set::OffsetGet(obj, key);
@@ -4071,10 +4146,20 @@ TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
   }
 }
 
+void collectionInitSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
+  assert(key->m_type != KindOfRef);
+  assert(val->m_type != KindOfRef);
+  assert(val->m_type != KindOfUninit);
+
+  assert(Collection::isMapType(obj->getCollectionType()));
+  BaseMap::OffsetSet(obj, key, val);
+}
+
 void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   assert(key->m_type != KindOfRef);
   assert(val->m_type != KindOfRef);
   assert(val->m_type != KindOfUninit);
+
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
       c_Vector::OffsetSet(obj, key, val);
@@ -4084,20 +4169,23 @@ void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
       BaseMap::OffsetSet(obj, key, val);
       break;
     case Collection::SetType:
-      c_Set::OffsetSet(obj, key, val);
+    case Collection::FrozenSetType:
+      BaseSet::OffsetSet(obj, key, val);
       break;
     case Collection::PairType:
       c_Pair::OffsetSet(obj, key, val);
-    case Collection::FrozenSetType:
-      c_FrozenSet::OffsetSet(obj, key, val);
       break;
     case Collection::FrozenVectorType:
       collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
+      break;
+    case Collection::FrozenMapType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenMap");
       break;
     default:
       assert(false);
   }
 }
+
 
 bool collectionIsset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
@@ -4106,6 +4194,7 @@ bool collectionIsset(ObjectData* obj, TypedValue* key) {
       return c_Vector::OffsetIsset(obj, key);
     case Collection::MapType:
     case Collection::StableMapType:
+    case Collection::FrozenMapType:
       return BaseMap::OffsetIsset(obj, key);
     case Collection::SetType:
       return c_Set::OffsetIsset(obj, key);
@@ -4128,6 +4217,7 @@ bool collectionEmpty(ObjectData* obj, TypedValue* key) {
       return c_Vector::OffsetEmpty(obj, key);
     case Collection::MapType:
     case Collection::StableMapType:
+    case Collection::FrozenMapType:
       return BaseMap::OffsetEmpty(obj, key);
     case Collection::SetType:
       return c_Set::OffsetEmpty(obj, key);
@@ -4159,11 +4249,14 @@ void collectionUnset(ObjectData* obj, TypedValue* key) {
     case Collection::PairType:
       c_Pair::OffsetUnset(obj, key);
       break;
-    case Collection::FrozenSetType:
-      c_FrozenSet::OffsetUnset(obj, key);
-      break;
     case Collection::FrozenVectorType:
       collectionThrowHelper(ErrMsgType::CannotUnset, "FrozenVector");
+      break;
+    case Collection::FrozenMapType:
+      collectionThrowHelper(ErrMsgType::CannotUnset, "FrozenMap");
+      break;
+    case Collection::FrozenSetType:
+      collectionThrowHelper(ErrMsgType::CannotUnset, "FrozenSet");
       break;
     default:
       assert(false);
@@ -4179,10 +4272,8 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
       static_cast<c_Vector*>(obj)->add(val);
       break;
     case Collection::MapType:
-      static_cast<c_Map*>(obj)->add(val);
-      break;
     case Collection::StableMapType:
-      static_cast<c_StableMap*>(obj)->add(val);
+      static_cast<BaseMap*>(obj)->add(val);
       break;
     case Collection::SetType:
       static_cast<c_Set*>(obj)->add(val);
@@ -4197,6 +4288,9 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
     case Collection::FrozenVectorType:
       collectionThrowHelper(ErrMsgType::CannotAdd, "FrozenVector");
       break;
+    case Collection::FrozenMapType:
+      collectionThrowHelper(ErrMsgType::CannotAdd, "FrozenMap");
+      break;
     default:
       assert(false);
   }
@@ -4205,15 +4299,10 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
 void collectionInitAppend(ObjectData* obj, TypedValue* val) {
   assert(val->m_type != KindOfRef);
   assert(val->m_type != KindOfUninit);
+  assert(!Collection::isMapType(obj->getCollectionType()));
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
       static_cast<c_Vector*>(obj)->add(val);
-      break;
-    case Collection::MapType:
-      static_cast<c_Map*>(obj)->add(val);
-      break;
-    case Collection::StableMapType:
-      static_cast<c_StableMap*>(obj)->add(val);
       break;
     case Collection::SetType:
       static_cast<c_Set*>(obj)->add(val);
@@ -4237,16 +4326,14 @@ Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
     case Collection::VectorType:
       return tvAsVariant(static_cast<c_Vector*>(obj)->at(offset));
     case Collection::MapType:
-      return tvAsVariant(static_cast<c_Map*>(obj)->at(offset));
     case Collection::StableMapType:
-      return tvAsVariant(static_cast<c_StableMap*>(obj)->at(offset));
+    case Collection::FrozenMapType:
+      return tvAsVariant(static_cast<BaseMap*>(obj)->at(offset));
     case Collection::SetType:
-      c_Set::throwNoIndexAccess();
+    case Collection::FrozenSetType:
+      BaseSet::throwNoIndexAccess();
     case Collection::PairType:
       return tvAsVariant(static_cast<c_Pair*>(obj)->at(offset));
-    case Collection::FrozenSetType:
-      c_FrozenSet::throwNoIndexAccess();
-      break;
     case Collection::FrozenVectorType:
       return tvAsVariant(static_cast<c_FrozenVector*>(obj)->at(offset));
     default:
@@ -4262,17 +4349,15 @@ Variant& collectionOffsetGet(ObjectData* obj, const String& offset) {
       collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Vectors");
       break;
     case Collection::MapType:
-      return tvAsVariant(static_cast<c_Map*>(obj)->at(key));
     case Collection::StableMapType:
-      return tvAsVariant(static_cast<c_StableMap*>(obj)->at(key));
+    case Collection::FrozenMapType:
+      return tvAsVariant(static_cast<BaseMap*>(obj)->at(key));
     case Collection::SetType:
-      c_Set::throwNoIndexAccess();
+    case Collection::FrozenSetType:
+      BaseSet::throwNoIndexAccess();
       break;
     case Collection::PairType:
       collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Pairs");
-      break;
-    case Collection::FrozenSetType:
-      c_FrozenSet::throwNoIndexAccess();
       break;
     case Collection::FrozenVectorType:
       collectionThrowHelper(ErrMsgType::OnlyIntKeys, "FrozenVectors");
@@ -4292,6 +4377,7 @@ Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
       return tvAsVariant(c_Vector::OffsetGet(obj, key));
     case Collection::MapType:
     case Collection::StableMapType:
+    case Collection::FrozenMapType:
       return tvAsVariant(BaseMap::OffsetGet(obj, key));
     case Collection::SetType:
       return tvAsVariant(c_Set::OffsetGet(obj, key));
@@ -4317,10 +4403,8 @@ void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
       static_cast<c_Vector*>(obj)->set(offset, tv);
       break;
     case Collection::MapType:
-      static_cast<c_Map*>(obj)->set(offset, tv);
-      break;
     case Collection::StableMapType:
-      static_cast<c_StableMap*>(obj)->set(offset, tv);
+      static_cast<BaseMap*>(obj)->set(offset, tv);
       break;
     case Collection::SetType:
       c_Set::throwNoIndexAccess();
@@ -4331,7 +4415,10 @@ void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
     case Collection::FrozenSetType:
       c_FrozenSet::throwNoIndexAccess();
       break;
-   case Collection::FrozenVectorType:
+    case Collection::FrozenMapType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenMap");
+      break;
+    case Collection::FrozenVectorType:
       collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
       break;
     default:
@@ -4350,21 +4437,20 @@ void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
       collectionThrowHelper(ErrMsgType::OnlyIntKeys, "Vectors");
       break;
     case Collection::MapType:
-      static_cast<c_Map*>(obj)->set(key, tv);
-      break;
     case Collection::StableMapType:
-      static_cast<c_StableMap*>(obj)->set(key, tv);
+      static_cast<BaseMap*>(obj)->set(key, tv);
       break;
     case Collection::SetType:
-      c_Set::throwNoIndexAccess();
+    case Collection::FrozenSetType:
+      BaseSet::throwNoIndexAccess();
       break;
     case Collection::PairType:
       collectionThrowHelper(ErrMsgType::CannotAssign, "Pair");
       break;
-    case Collection::FrozenSetType:
-      c_FrozenSet::throwNoIndexAccess();
+    case Collection::FrozenMapType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenMap");
       break;
-   case Collection::FrozenVectorType:
+    case Collection::FrozenVectorType:
       collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
       break;
     default:
@@ -4395,6 +4481,9 @@ void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
     case Collection::FrozenSetType:
       c_FrozenSet::OffsetSet(obj, key, tv);
       break;
+    case Collection::FrozenMapType:
+      collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenMap");
+      break;
     case Collection::FrozenVectorType:
       collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
       break;
@@ -4410,6 +4499,7 @@ bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
       return c_Vector::OffsetContains(obj, key);
     case Collection::MapType:
     case Collection::StableMapType:
+    case Collection::FrozenMapType:
       return BaseMap::OffsetContains(obj, key);
     case Collection::SetType:
       return c_Set::OffsetContains(obj, key);
@@ -4432,6 +4522,7 @@ void collectionReserve(ObjectData* obj, int64_t sz) {
       break;
     case Collection::MapType:
     case Collection::StableMapType:
+    case Collection::FrozenMapType:
       static_cast<BaseMap*>(obj)->reserve(sz);
       break;
     case Collection::SetType:
@@ -4459,10 +4550,9 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
       c_Vector::Unserialize(obj, uns, sz, type);
       break;
     case Collection::MapType:
-      c_Map::Unserialize(obj, uns, sz, type);
-      break;
     case Collection::StableMapType:
-      c_StableMap::Unserialize(obj, uns, sz, type);
+    case Collection::FrozenMapType:
+      BaseMap::Unserialize(obj, uns, sz, type);
       break;
     case Collection::SetType:
       c_Set::Unserialize(obj, uns, sz, type);
@@ -4482,13 +4572,11 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
 }
 
 bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
-  int ct = obj1->getCollectionType();
-  assert(ct != Collection::InvalidType);
-  int ct2 = obj2->getCollectionType();
-  if (ct2 == Collection::InvalidType) { return false; }
+  Collection::Type ct = obj1->getCollectionType();
+  assert(!Collection::isInvalidType(ct));
+  Collection::Type ct2 = obj2->getCollectionType();
 
-  if ((ct == Collection::MapType || ct == Collection::StableMapType)
-      && (ct2 == Collection::MapType || ct2 == Collection::StableMapType)) {
+  if (Collection::isMapType(ct) && Collection::isMapType(ct2)) {
     // For migration purposes, distinct Map types should compare equal
     return BaseMap::Equals(
       BaseMap::EqualityFlavor::OrderIrrelevant, obj1, obj2);
@@ -4509,6 +4597,7 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
       return c_FrozenSet::Equals(obj1, obj2);
     case Collection::MapType:
     case Collection::StableMapType:
+    case Collection::FrozenMapType:
     default:
       assert(false);
       return false;
@@ -4520,6 +4609,7 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
   switch (type) {
     case Collection::VectorType: obj = NEWOBJ(c_Vector)(); break;
     case Collection::MapType: obj = NEWOBJ(c_Map)(); break;
+    case Collection::FrozenMapType: obj = NEWOBJ(c_FrozenMap)(); break;
     case Collection::StableMapType: obj = NEWOBJ(c_StableMap)(); break;
     case Collection::SetType: obj = NEWOBJ(c_Set)(); break;
     case Collection::PairType: obj = NEWOBJ(c_Pair)(); break;

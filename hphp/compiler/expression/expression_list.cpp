@@ -274,7 +274,7 @@ void ExpressionList::markParams(bool noRefWrapper) {
   }
 }
 
-void ExpressionList::setCollectionType(int cType) {
+void ExpressionList::setCollectionType(Collection::Type cType) {
   m_arrayElements = true;
   m_collectionType = cType;
 }
@@ -514,4 +514,3 @@ unsigned int ExpressionList::checkLitstrKeys() const {
   }
   return keys.size();
 }
-

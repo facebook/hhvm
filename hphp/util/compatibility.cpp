@@ -17,6 +17,15 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/vdso.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -19,6 +19,8 @@
 #include <cstdint>
 #include <time.h>
 
+#include "hphp/util/portability.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

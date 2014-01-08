@@ -1112,6 +1112,9 @@ Variant f_mysql_query(const String& query, CVarRef link_identifier /* = null */)
 
 Variant f_mysql_multi_query(const String& query, CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (conn == nullptr) {
+    return false;
+  }
   MySQL *mySQL = MySQL::Get(link_identifier);
   if (!mySQL->m_multi_query && !mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_ON)) {
     mySQL->m_multi_query = true;
@@ -1133,6 +1136,9 @@ Variant f_mysql_multi_query(const String& query, CVarRef link_identifier /* = nu
 
 int f_mysql_next_result(CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (conn == nullptr) {
+    return 2006 /* CR_SERVER_GONE_ERROR */;
+  }
   if (!mysql_more_results(conn)) {
     raise_strict_warning("There is no next result set. "
       "Please, call mysql_more_results() to check "
@@ -1143,11 +1149,17 @@ int f_mysql_next_result(CVarRef link_identifier /* = null */) {
 
 bool f_mysql_more_results(CVarRef link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
+  if (conn == nullptr) {
+    return 2006 /* CR_SERVER_GONE_ERROR */;
+  }
   return mysql_more_results(conn);
 }
 
 Variant f_mysql_fetch_result(CVarRef link_identifier /* = null */) {
     MYSQL *conn = MySQL::GetConn(link_identifier);
+    if (conn == nullptr) {
+      return false;
+    }
     MYSQL_RES *mysql_result;
 
     mysql_result = mysql_store_result(conn);

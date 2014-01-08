@@ -1,0 +1,4 @@
+HipHop Warning: supplied argument is not a valid MySQL-Link resource in %s/test/slow/ext_mysql/bogus_connection.php on line 4
+HipHop Warning: supplied argument is not a valid MySQL-Link resource in %s/test/slow/ext_mysql/bogus_connection.php on line 5
+HipHop Warning: supplied argument is not a valid MySQL-Link resource in %s/test/slow/ext_mysql/bogus_connection.php on line 6
+HipHop Warning: supplied argument is not a valid MySQL-Link resource in %s/test/slow/ext_mysql/bogus_connection.php on line 7

@@ -761,9 +761,21 @@ Array f_hphp_get_closure_info(CVarRef closure) {
   Array static_vars = Array::Create();
   for (Slot i = 0; i < cls->numDeclProperties(); ++i) {
     auto const& prop = cls->declProperties()[i];
-    auto val = asObj.o_get(StrNR(prop.m_name), true /* error */,
+    auto val = asObj.o_get(StrNR(prop.m_name), false /* error */,
                            cls->nameRef());
-    static_vars.set(VarNR(prop.m_name), val);
+
+    // Closure static locals are represented as special instance
+    // properties with a mangled name.
+    if (prop.m_name->data()[0] == '8') {
+      static const char prefix[] = "86static_";
+      assert(!strncmp(prop.m_name->data(), prefix, sizeof prefix - 1));
+      String strippedName(prop.m_name->data() + sizeof prefix - 1,
+                          prop.m_name->size() - sizeof prefix + 1,
+                          CopyString);
+      static_vars.set(VarNR(strippedName), val);
+    } else {
+      static_vars.set(VarNR(prop.m_name), val);
+    }
   }
   mi.set(s_static_variables, static_vars);
 

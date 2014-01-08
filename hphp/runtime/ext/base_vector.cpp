@@ -378,9 +378,10 @@ void BaseVector::reserve(int64_t sz) {
   }
 }
 
-BaseVector::BaseVector(Class* cls) : ExtObjectData(cls),
-    m_size(0), m_data(nullptr), m_capacity(0),
-    m_version(0), m_frozenCopy(nullptr) {
+BaseVector::BaseVector(Class* cls)
+    : ExtCollectionObjectData(cls)
+    , m_size(0), m_data(nullptr), m_capacity(0)
+    , m_version(0), m_frozenCopy(nullptr) {
 }
 
 /**

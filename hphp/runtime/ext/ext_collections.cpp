@@ -64,16 +64,6 @@ void throwOOB(int64_t key) {
   throwIntOOB(key, true);
 }
 
-const int kCollectionObjectDataAttrs =
-  ObjectData::IsCppBuiltin |
-  ObjectData::IsCollection |
-  ObjectData::UseGet |
-  ObjectData::UseSet |
-  ObjectData::UseIsset |
-  ObjectData::UseUnset |
-  ObjectData::CallToImpl |
-  ObjectData::HasClone;
-
 static void throwStrOOB(StringData* key) ATTRIBUTE_NORETURN;
 
 void throwStrOOB(StringData* key) {
@@ -126,8 +116,6 @@ void triggerCow(c_Vector* vec) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
-
-  ObjectData::setAttributes(kCollectionObjectDataAttrs);
   o_subclassData.u16 = Collection::VectorType;
 }
 
@@ -845,8 +833,6 @@ Object c_FrozenVector::t_values() {
 // Non PHP methods.
 
 c_FrozenVector::c_FrozenVector(Class* cls) : BaseVector(cls) {
-
-  ObjectData::setAttributes(kCollectionObjectDataAttrs);
   o_subclassData.u16 = Collection::FrozenVectorType;
 }
 
@@ -860,8 +846,7 @@ c_Map::c_Map(Class* cls) : BaseMap(cls) {
 
 // Protected (Internal)
 
-BaseMap::BaseMap(Class* cls) : ExtObjectData(cls) {
-  ObjectData::setAttributes(kCollectionObjectDataAttrs);
+BaseMap::BaseMap(Class* cls) : ExtCollectionObjectData(cls) {
   uint32_t used = 0;
   uint32_t cap = 0;
   uint32_t tableMask = 0;
@@ -2893,8 +2878,10 @@ const char BaseSet::emptySetSlot[sizeof(BaseSet::Bucket)] = {0};
 
 // Protected (Internal)
 
-BaseSet::BaseSet(Class* cls) : ExtObjectData(cls), m_size(0),
-    m_data((Bucket*)emptySetSlot), m_load(0), m_nLastSlot(0), m_version(0) {
+BaseSet::BaseSet(Class* cls)
+    : ExtCollectionObjectData(cls)
+    , m_size(0), m_data((Bucket*)emptySetSlot), m_load(0), m_nLastSlot(0)
+    , m_version(0) {
 }
 
 BaseSet::~BaseSet() {
@@ -3178,8 +3165,6 @@ void BaseSet::throwBadValueType() {
 // Set
 
 c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
-
-  ObjectData::setAttributes(kCollectionObjectDataAttrs);
   o_subclassData.u16 = Collection::SetType;
 }
 
@@ -3355,7 +3340,6 @@ Object c_FrozenSet::ti_fromarrays(int _argc, CArrRef _argv) {
 }
 
 c_FrozenSet::c_FrozenSet(Class* cls) : BaseSet(cls) {
-  ObjectData::setAttributes(kCollectionObjectDataAttrs);
   o_subclassData.u16 = Collection::FrozenSetType;
 }
 
@@ -3371,8 +3355,7 @@ c_FrozenSet* c_FrozenSet::Clone(ObjectData* obj) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SetIterator::c_SetIterator(Class* cb) :
-    ExtObjectData(cb) {
+c_SetIterator::c_SetIterator(Class* cb) : ExtObjectData(cb) {
 }
 
 c_SetIterator::~c_SetIterator() {

@@ -31,7 +31,7 @@ void throwOOB(int64_t key);
 // BaseVector encapsulates functionality that is common to both c_Vector and
 // c_FrozenVector. It doesn't map to any PHP-land class.
 
-class BaseVector : public ExtObjectData {
+class BaseVector : public ExtCollectionObjectData {
 
 protected:
 

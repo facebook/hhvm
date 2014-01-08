@@ -261,7 +261,7 @@ public:
  * It doesn't represent any PHP-land class; that job is delegated to its
  * c_-prefixed child classes.
  */
-class BaseMap : public ExtObjectData {
+class BaseMap : public ExtCollectionObjectData {
 
  public:
   struct Elm {
@@ -862,7 +862,7 @@ class c_StableMap : public BaseMap {
  * in the Map class for more details on how the hash table works and how
  * we decide when to grow or shrink the table.
  */
-class BaseSet : public ExtObjectData {
+class BaseSet : public ExtCollectionObjectData {
 
 public:
   // Inner types and constants.

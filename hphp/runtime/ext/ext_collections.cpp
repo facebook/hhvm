@@ -471,10 +471,6 @@ Object c_Vector::t_setall(CVarRef iterable) {
   return this;
 }
 
-Object c_Vector::t_put(CVarRef key, CVarRef value) {
-  return t_set(key, value);
-}
-
 Object c_Vector::ti_fromitems(CVarRef iterable) {
   if (iterable.isNull()) return NEWOBJ(c_Vector)();
   size_t sz;
@@ -1189,14 +1185,6 @@ Object BaseMap::php_setAll(CVarRef iterable) {
 Object c_Map::t_setall(CVarRef iterable) { return php_setAll(iterable); }
 
 Object c_StableMap::t_setall(CVarRef iterable) { return php_setAll(iterable); }
-
-Object c_Map::t_put(CVarRef key, CVarRef value) {
-  return t_set(key, value);
-}
-
-Object c_StableMap::t_put(CVarRef key, CVarRef value) {
-  return t_set(key, value);
-}
 
 bool BaseMap::php_contains(CVarRef key) const {
   DataType t = key.getType();

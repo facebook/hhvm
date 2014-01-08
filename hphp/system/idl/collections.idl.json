@@ -176,25 +176,6 @@
                     ]
                 },
                 {
-                    "name": "put",
-                    "flags": [
-                    ],
-                    "desc": "Stores a value into the Vector with the specified key, overwriting any previous value that was associated with the key. If the key is outside the bounds of the Vector, an exception is thrown.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "key",
-                            "type": "Variant"
-                        },
-                        {
-                            "name": "value",
-                            "type": "Variant"
-                        }
-                    ]
-                },
-                {
                     "name": "clear",
                     "flags": [
                     ],
@@ -1399,25 +1380,6 @@
                     ]
                 },
                 {
-                    "name": "put",
-                    "flags": [
-                    ],
-                    "desc": "Stores a value into the Map with the specified key, overwriting any previous value that was associated with the key.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "key",
-                            "type": "Variant"
-                        },
-                        {
-                            "name": "value",
-                            "type": "Variant"
-                        }
-                    ]
-                },
-                {
                     "name": "clear",
                     "flags": [
                     ],
@@ -2522,25 +2484,6 @@
                     "args": [
                         {
                             "name": "iterable",
-                            "type": "Variant"
-                        }
-                    ]
-                },
-                {
-                    "name": "put",
-                    "flags": [
-                    ],
-                    "desc": "Stores a value into the StableMap with the specified key, overwriting any previous value that was associated with the key.",
-                    "return": {
-                        "type": "Object"
-                    },
-                    "args": [
-                        {
-                            "name": "key",
-                            "type": "Variant"
-                        },
-                        {
-                            "name": "value",
                             "type": "Variant"
                         }
                     ]

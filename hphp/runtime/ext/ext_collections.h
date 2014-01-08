@@ -81,7 +81,6 @@ class c_Vector : public BaseVector {
   Variant t_get(CVarRef key);
   Object t_set(CVarRef key, CVarRef value);
   Object t_setall(CVarRef iterable);
-  Object t_put(CVarRef key, CVarRef value); // deprecated
   bool t_contains(CVarRef key); // deprecated
   bool t_containskey(CVarRef key);
   Object t_removekey(CVarRef key);
@@ -710,7 +709,6 @@ class c_Map : public BaseMap {
   Variant t_get(CVarRef key); // const
   Object t_set(CVarRef key, CVarRef value);
   Object t_setall(CVarRef iterable);
-  Object t_put(CVarRef key, CVarRef value); // deprecated
   bool t_contains(CVarRef key); // const
   bool t_containskey(CVarRef key); // const
   Object t_remove(CVarRef key);
@@ -829,7 +827,6 @@ class c_StableMap : public BaseMap {
   Variant t_get(CVarRef key); // const
   Object t_set(CVarRef key, CVarRef value);
   Object t_setall(CVarRef iterable);
-  Object t_put(CVarRef key, CVarRef value); // deprecated
   bool t_contains(CVarRef key); // const
   bool t_containskey(CVarRef key); // const
   Object t_remove(CVarRef key);

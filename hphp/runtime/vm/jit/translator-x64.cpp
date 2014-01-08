@@ -1292,25 +1292,34 @@ bool TranslatorX64::handleServiceRequest(TReqInfo& info,
     }
     if (dest) {
       LeaseHolder writer(s_writeLease);
-      if (writer && JIT::callTarget(toSmash) != dest) {
-        TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
-        JIT::smashCall(toSmash, dest);
-        smashed = true;
-        // For functions to be PGO'ed, if their prologues haven't been
-        // regenerated yet, then save toSmash as a caller to the
-        // prologue, so that it can later be smashed to call a new
-        // prologue when it's generated.
-        int calleeNumParams = func->numParams();
-        int calledPrologNumArgs = (nArgs <= calleeNumParams ?
-                                   nArgs :  calleeNumParams + 1);
-        SrcKey calleeSK = {func, func->getEntryForNumArgs(calledPrologNumArgs)};
-        if (profileSrcKey(calleeSK)) {
-          if (isImmutable) {
-            m_profData->addPrologueMainCaller(func, calledPrologNumArgs,
-                                              toSmash);
-          } else {
-            m_profData->addPrologueGuardCaller(func, calledPrologNumArgs,
-                                               toSmash);
+      if (writer) {
+        // Someone else may have changed the func prologue while we
+        // waited for the write lease, so read it again.
+        dest = getFuncPrologue(func, nArgs);
+        assert(dest);
+        if (!isImmutable) dest = JIT::funcPrologueToGuard(dest, func);
+
+        if (JIT::callTarget(toSmash) != dest) {
+          TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
+          JIT::smashCall(toSmash, dest);
+          smashed = true;
+          // For functions to be PGO'ed, if their prologues haven't been
+          // regenerated yet, then save toSmash as a caller to the
+          // prologue, so that it can later be smashed to call a new
+          // prologue when it's generated.
+          int calleeNumParams = func->numParams();
+          int calledPrologNumArgs = (nArgs <= calleeNumParams ?
+                                     nArgs :  calleeNumParams + 1);
+          SrcKey calleeSK = {func,
+                             func->getEntryForNumArgs(calledPrologNumArgs)};
+          if (profileSrcKey(calleeSK)) {
+            if (isImmutable) {
+              m_profData->addPrologueMainCaller(func, calledPrologNumArgs,
+                                                toSmash);
+            } else {
+              m_profData->addPrologueGuardCaller(func, calledPrologNumArgs,
+                                                 toSmash);
+            }
           }
         }
       }

@@ -17,7 +17,9 @@
 #ifndef incl_HPHP_FILE_SCOPE_H_
 #define incl_HPHP_FILE_SCOPE_H_
 
+#include <string>
 #include <map>
+#include <boost/algorithm/string.hpp>
 
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/function_container.h"
@@ -143,8 +145,12 @@ public:
                              const std::string &decname);
 
   void addClassAlias(const std::string& target, const std::string& alias) {
-    m_classAliasMap.insert(std::make_pair(Util::toLower(target),
-                                          Util::toLower(alias)));
+    m_classAliasMap.insert(
+      std::make_pair(
+        boost::to_lower_copy(target),
+        boost::to_lower_copy(alias)
+      )
+    );
   }
 
   std::multimap<std::string,std::string> const& getClassAliases() const {
@@ -152,7 +158,7 @@ public:
   }
 
   void addTypeAliasName(const std::string& name) {
-    m_typeAliasNames.insert(Util::toLower(name));
+    m_typeAliasNames.insert(boost::to_lower_copy(name));
   }
 
   std::set<std::string> const& getTypeAliasNames() const {

@@ -21,6 +21,7 @@
 #include <vector>
 #include <cstdio>
 #include <cstdlib>
+#include <map>
 
 #include <signal.h>
 #include <unistd.h>

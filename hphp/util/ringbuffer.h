@@ -19,8 +19,9 @@
 #include <cstdlib>
 #include <cstdarg>
 #include <cinttypes>
+#include <atomic>
 
-#include "hphp/util/util.h"
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 namespace Trace {

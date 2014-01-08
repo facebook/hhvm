@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_DB_CONN_H_
 #define incl_HPHP_DB_CONN_H_
 
+#include <map>
+
 #include "hphp/util/db-dataset.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/mutex.h"

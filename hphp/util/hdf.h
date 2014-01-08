@@ -18,6 +18,9 @@
 #define incl_HPHP_CONFIG_HDF_H_
 
 #include <string>
+#include <map>
+#include <set>
+#include <vector>
 
 #include <boost/container/flat_set.hpp>
 

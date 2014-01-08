@@ -17,6 +17,11 @@
 #ifndef incl_HPHP_PARSER_PARSER_H_
 #define incl_HPHP_PARSER_PARSER_H_
 
+#include <map>
+#include <set>
+#include <vector>
+#include <string>
+
 #include "hphp/parser/scanner.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/functional.h"

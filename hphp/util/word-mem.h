@@ -18,7 +18,6 @@
 
 #include <limits>
 #include "folly/Portability.h"
-#include "hphp/util/util.h"
 
 namespace HPHP {
 

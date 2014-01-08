@@ -138,7 +138,7 @@ enum class Mode {
 }
 
 namespace Collection {
-enum Type {
+enum Type : uint16_t { // stored in ObjectData::o_subclassData
   InvalidType = 0,
   VectorType = 1,
   MapType = 2,
@@ -147,9 +147,10 @@ enum Type {
   PairType = 5,
   FrozenVectorType = 6,
   FrozenSetType = 7,
-  FrozenMapType = 8,
-  MaxNumTypes = 9
+  FrozenMapType = 8
 };
+const int MaxNumTypes = 9;
+
 inline Type stringToType(const char* str, size_t len) {
   switch (len) {
     case 3:

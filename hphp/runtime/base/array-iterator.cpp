@@ -248,11 +248,12 @@ bool ArrayIter::endHelper() {
     case Collection::FrozenVectorType: {
       return m_pos >= getFrozenVector()->size();
     }
-    default: {
+    case Collection::InvalidType: {
       ObjectData* obj = getIteratorObj();
       return !obj->o_invoke_few_args(s_valid, 0).toBoolean();
     }
   }
+  not_reached();
 }
 
 void ArrayIter::nextHelper() {
@@ -294,9 +295,10 @@ void ArrayIter::nextHelper() {
       m_pos = st->iter_next(m_pos);
       return;
     }
-    default:
+    case Collection::InvalidType: {
       ObjectData* obj = getIteratorObj();
       obj->o_invoke_few_args(s_next, 0);
+    }
   }
 }
 
@@ -334,11 +336,11 @@ Variant ArrayIter::firstHelper() {
       }
       return st->iter_key(m_pos);
     }
-    default: {
-      ObjectData* obj = getIteratorObj();
-      return obj->o_invoke_few_args(s_key, 0);
-    }
+    case Collection::InvalidType:
+      break;
   }
+  ObjectData* obj = getIteratorObj();
+  return obj->o_invoke_few_args(s_key, 0);
 }
 
 Variant ArrayIter::second() {
@@ -387,11 +389,12 @@ Variant ArrayIter::second() {
       assert(m_version == st->getVersion());
       return tvAsCVarRef(st->iter_value(m_pos));
     }
-    default: {
-      ObjectData* obj = getIteratorObj();
-      return obj->o_invoke_few_args(s_current, 0);
-    }
+    case Collection::InvalidType:
+      break;
   }
+
+  ObjectData* obj = getIteratorObj();
+  return obj->o_invoke_few_args(s_current, 0);
 }
 
 CVarRef ArrayIter::secondRef() {
@@ -451,10 +454,11 @@ CVarRef ArrayIter::secondRefPlus() {
       assert(m_version == st->getVersion());
       return tvAsCVarRef(st->iter_value(m_pos));
     }
-    default: {
+    case Collection::InvalidType: {
       throw_param_is_not_container();
     }
   }
+  not_reached();
 }
 
 //
@@ -1211,9 +1215,10 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                                    dest,
                                    static_cast<c_FrozenSet*>(obj),
                                    valOut, keyOut);
-    default:
+    case Collection::InvalidType:
       return new_iter_object_any(dest, obj, ctx, valOut, keyOut);
   }
+  not_reached();
 }
 
 template <bool withRef>
@@ -1247,8 +1252,7 @@ static int64_t iter_next_collection(ArrayIter* ai,
       return iterNext<c_FrozenSet, ArrayIter::VersionableSparse>(
         ai, valOut, keyOut);
     case Collection::InvalidType:
-    case Collection::MaxNumTypes:
-      not_reached();
+      break;
   }
   not_reached();
 }

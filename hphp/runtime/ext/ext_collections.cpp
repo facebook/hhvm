@@ -3964,7 +3964,7 @@ void collectionDeepCopyTV(TypedValue* tv) {
           obj = collectionDeepCopyFrozenVector(
                   static_cast<c_FrozenVector*>(obj));
           break;
-        default:
+        case Collection::InvalidType:
           assert(false);
           obj = nullptr;
           break;
@@ -4111,10 +4111,11 @@ TypedValue* collectionGet(ObjectData* obj, TypedValue* key) {
       return c_FrozenVector::OffsetGet(obj, key);
     case Collection::FrozenSetType:
       return c_FrozenSet::OffsetGet(obj, key);
-    default:
-      assert(false);
-      return nullptr;
+    case Collection::InvalidType:
+      break;
   }
+  assert(false);
+  return nullptr;
 }
 
 void collectionInitSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
@@ -4152,7 +4153,7 @@ void collectionSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
     case Collection::FrozenMapType:
       collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenMap");
       break;
-    default:
+    case Collection::InvalidType:
       assert(false);
   }
 }
@@ -4175,10 +4176,11 @@ bool collectionIsset(ObjectData* obj, TypedValue* key) {
       return c_FrozenVector::OffsetIsset(obj, key);
     case Collection::FrozenSetType:
       return c_FrozenSet::OffsetIsset(obj, key);
-    default:
+    case Collection::InvalidType:
       assert(false);
       return false;
   }
+  not_reached();
 }
 
 bool collectionEmpty(ObjectData* obj, TypedValue* key) {
@@ -4198,10 +4200,11 @@ bool collectionEmpty(ObjectData* obj, TypedValue* key) {
       return c_FrozenVector::OffsetEmpty(obj, key);
     case Collection::FrozenSetType:
       return c_FrozenSet::OffsetEmpty(obj, key);
-    default:
+    case Collection::InvalidType:
       assert(false);
       return false;
   }
+  not_reached();
 }
 
 void collectionUnset(ObjectData* obj, TypedValue* key) {
@@ -4229,8 +4232,9 @@ void collectionUnset(ObjectData* obj, TypedValue* key) {
     case Collection::FrozenSetType:
       collectionThrowHelper(ErrMsgType::CannotUnset, "FrozenSet");
       break;
-    default:
+    case Collection::InvalidType:
       assert(false);
+      break;
   }
 }
 
@@ -4262,15 +4266,15 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
     case Collection::FrozenMapType:
       collectionThrowHelper(ErrMsgType::CannotAdd, "FrozenMap");
       break;
-    default:
+    case Collection::InvalidType:
       assert(false);
+      break;
   }
 }
 
 void collectionInitAppend(ObjectData* obj, TypedValue* val) {
   assert(val->m_type != KindOfRef);
   assert(val->m_type != KindOfUninit);
-  assert(!Collection::isMapType(obj->getCollectionType()));
   switch (obj->getCollectionType()) {
     case Collection::VectorType:
       static_cast<c_Vector*>(obj)->add(val);
@@ -4287,8 +4291,12 @@ void collectionInitAppend(ObjectData* obj, TypedValue* val) {
     case Collection::FrozenSetType:
       static_cast<c_FrozenSet*>(obj)->add(val);
       break;
-    default:
+    case Collection::MapType:
+    case Collection::StableMapType:
+    case Collection::FrozenMapType:
+    case Collection::InvalidType:
       assert(false);
+      break;
   }
 }
 
@@ -4307,10 +4315,11 @@ Variant& collectionOffsetGet(ObjectData* obj, int64_t offset) {
       return tvAsVariant(static_cast<c_Pair*>(obj)->at(offset));
     case Collection::FrozenVectorType:
       return tvAsVariant(static_cast<c_FrozenVector*>(obj)->at(offset));
-    default:
+    case Collection::InvalidType:
       assert(false);
       return tvAsVariant(nullptr);
   }
+  not_reached();
 }
 
 Variant& collectionOffsetGet(ObjectData* obj, const String& offset) {
@@ -4333,9 +4342,9 @@ Variant& collectionOffsetGet(ObjectData* obj, const String& offset) {
     case Collection::FrozenVectorType:
       collectionThrowHelper(ErrMsgType::OnlyIntKeys, "FrozenVectors");
       break;
-    default:
+    case Collection::InvalidType:
       // Do nothing: we fail below.
-      ;
+      break;
   }
   assert(false);
   return tvAsVariant(nullptr);
@@ -4358,10 +4367,11 @@ Variant& collectionOffsetGet(ObjectData* obj, CVarRef offset) {
       return tvAsVariant(c_FrozenSet::OffsetGet(obj, key));
     case Collection::FrozenVectorType:
       return tvAsVariant(c_FrozenVector::OffsetGet(obj, key));
-    default:
+    case Collection::InvalidType:
       assert(false);
       return tvAsVariant(nullptr);
   }
+  not_reached();
 }
 
 void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
@@ -4392,8 +4402,9 @@ void collectionOffsetSet(ObjectData* obj, int64_t offset, CVarRef val) {
     case Collection::FrozenVectorType:
       collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
       break;
-    default:
+    case Collection::InvalidType:
       assert(false);
+      break;
   }
 }
 
@@ -4424,8 +4435,9 @@ void collectionOffsetSet(ObjectData* obj, const String& offset, CVarRef val) {
     case Collection::FrozenVectorType:
       collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
       break;
-    default:
+    case Collection::InvalidType:
       assert(false);
+      break;
   }
 }
 
@@ -4458,8 +4470,9 @@ void collectionOffsetSet(ObjectData* obj, CVarRef offset, CVarRef val) {
     case Collection::FrozenVectorType:
       collectionThrowHelper(ErrMsgType::CannotAssign, "FrozenVector");
       break;
-    default:
+    case Collection::InvalidType:
       assert(false);
+      break;
   }
 }
 
@@ -4480,10 +4493,11 @@ bool collectionOffsetContains(ObjectData* obj, CVarRef offset) {
       return c_FrozenVector::OffsetContains(obj, key);
     case Collection::FrozenSetType:
       return c_FrozenSet::OffsetContains(obj, key);
-    default:
+    case Collection::InvalidType:
       assert(false);
       return false;
   }
+  not_reached();
 }
 
 void collectionReserve(ObjectData* obj, int64_t sz) {
@@ -4508,8 +4522,9 @@ void collectionReserve(ObjectData* obj, int64_t sz) {
     case Collection::FrozenSetType:
       static_cast<c_FrozenSet*>(obj)->reserve(sz);
       break;
-    default:
+    case Collection::InvalidType:
       assert(false);
+      break;
   }
 }
 
@@ -4537,8 +4552,9 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
     case Collection::FrozenSetType:
       c_FrozenSet::Unserialize(obj, uns, sz, type);
       break;
-    default:
+    case Collection::InvalidType:
       assert(false);
+      break;
   }
 }
 
@@ -4577,7 +4593,7 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
     case Collection::PairType: obj = NEWOBJ(c_Pair)(); break;
     case Collection::FrozenVectorType: obj = NEWOBJ(c_FrozenVector)(); break;
     case Collection::FrozenSetType: obj = NEWOBJ(c_FrozenSet)(); break;
-    default:
+    case Collection::InvalidType:
       obj = nullptr;
       raise_error("NewCol: Invalid collection type");
       break;

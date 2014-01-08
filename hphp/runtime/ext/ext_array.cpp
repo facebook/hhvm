@@ -1764,6 +1764,10 @@ php_sort(VRefParam container, int sort_flags,
       vec->sort(sort_flags, ascending);
       return true;
     }
+    // other collections are not supported:
+    //  - mapping types require associative sort
+    //  - frozen types are not to be modified
+    //  - set types are not ordered
   }
   throw_expected_array_or_collection_exception();
   return false;
@@ -1872,6 +1876,10 @@ bool f_usort(VRefParam container, CVarRef cmp_function) {
       c_Vector* vec = static_cast<c_Vector*>(obj);
       return vec->usort(cmp_function);
     }
+    // other collections are not supported:
+    //  - mapping types require associative sort
+    //  - frozen types are not to be modified
+    //  - set types are not ordered
   }
   throw_expected_array_or_collection_exception();
   return false;

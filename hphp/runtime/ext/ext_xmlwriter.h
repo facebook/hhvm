@@ -80,7 +80,6 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
  public:
   DECLARE_CLASS(XMLWriter)
 
-  // need to implement
   public: c_XMLWriter(Class* cls = c_XMLWriter::classof());
   public: ~c_XMLWriter();
   public: void t___construct();
@@ -134,7 +133,6 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
  private:
   xmlTextWriterPtr   m_ptr;
   xmlBufferPtr       m_output;
-  xmlOutputBufferPtr m_uri_output;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

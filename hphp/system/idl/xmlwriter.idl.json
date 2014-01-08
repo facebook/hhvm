@@ -1007,6 +1007,7 @@
             ],
             "desc": "",
             "flags": [
+                "NoDefaultSweep"
             ],
             "footer": "\n public:\n  SmartObject<File>  m_uri;\n private:\n  xmlTextWriterPtr   m_ptr;\n  xmlBufferPtr       m_output;\n  xmlOutputBufferPtr m_uri_output;",
             "funcs": [

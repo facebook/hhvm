@@ -269,7 +269,7 @@ String f_xmlwriter_output_memory(CObjRef xmlwriter, bool flush /* = true */) {
 // helpers
 
 static int write_file(void *context, const char *buffer, int len) {
-  return ((c_XMLWriter*)context)->m_uri->writeImpl(buffer, len);
+  return len > 0 ? ((c_XMLWriter*)context)->m_uri->writeImpl(buffer, len) : 0;
 }
 
 static int close_file(void *context) {
@@ -283,19 +283,28 @@ static xmlChar *xmls(const String& s) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_XMLWriter::c_XMLWriter(Class* cb) :
-    ExtObjectData(cb), m_ptr(NULL), m_output(NULL), m_uri_output(NULL) {
+    ExtObjectData(cb), m_ptr(nullptr), m_output(nullptr) {
+}
+
+void c_XMLWriter::sweep() {
+  if (m_ptr) {
+    assert(m_ptr != xmlTextWriterPtr(-1));
+    xmlFreeTextWriter(m_ptr);
+    if (debug) {
+      m_ptr = xmlTextWriterPtr(-1);
+    }
+  }
+  if (m_output) {
+    assert(m_output != xmlBufferPtr(-1));
+    xmlBufferFree(m_output);
+    if (debug) {
+      m_output = xmlBufferPtr(-1);
+    }
+  }
 }
 
 c_XMLWriter::~c_XMLWriter() {
-  if (m_ptr) {
-    xmlFreeTextWriter(m_ptr);
-  }
-  if (m_output) {
-    xmlBufferFree(m_output);
-  }
-  if (m_uri_output) {
-    xmlOutputBufferClose(m_uri_output);
-  }
+  sweep();
 }
 
 void c_XMLWriter::t___construct() {
@@ -317,12 +326,13 @@ bool c_XMLWriter::t_openuri(const String& uri) {
   }
   m_uri = file.toResource().getTyped<File>();
 
-  m_uri_output = xmlOutputBufferCreateIO(write_file, close_file, this, NULL);
-  if (m_uri_output == NULL) {
+  xmlOutputBufferPtr uri_output = xmlOutputBufferCreateIO(
+    write_file, close_file, this, nullptr);
+  if (uri_output == nullptr) {
     raise_warning("Unable to create output buffer");
     return false;
   }
-  m_ptr = xmlNewTextWriter(m_uri_output);
+  m_ptr = xmlNewTextWriter(uri_output);
   return true;
 }
 

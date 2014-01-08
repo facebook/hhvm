@@ -2,11 +2,11 @@ object(HH\Vector)#3 (1) {
   [0]=>
   string(3) "abc"
 }
-object(Map)#4 (1) {
+object(HH\Map)#4 (1) {
   [123]=>
   string(3) "abc"
 }
-object(StableMap)#5 (1) {
+object(HH\Map)#5 (1) {
   [123]=>
   string(3) "abc"
 }
@@ -17,11 +17,11 @@ object(HH\Vector)#9 (1) {
   [0]=>
   string(3) "abc"
 }
-object(Map)#13 (1) {
+object(HH\Map)#13 (1) {
   [123]=>
   string(3) "abc"
 }
-object(StableMap)#17 (1) {
+object(HH\Map)#17 (1) {
   [123]=>
   string(3) "abc"
 }

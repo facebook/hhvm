@@ -2057,6 +2057,8 @@ std::vector<Parser::AliasTable::AliasEntry> Parser::getAutoAliasedClasses() {
     (AliasEntry){"Set", "HH\\Set"},
     (AliasEntry){"FrozenVector", "HH\\FrozenVector"},
     (AliasEntry){"FrozenSet", "HH\\FrozenSet"},
+    (AliasEntry){"Map", "HH\\Map"},
+    (AliasEntry){"StableMap", "HH\\Map"}, // Merging with Map
     (AliasEntry){"FrozenMap", "HH\\FrozenMap"},
   };
 

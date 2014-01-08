@@ -33,9 +33,9 @@ Map...
 bool(false)
 
 StableMap...
-StableMap Object
+HH\Map Object
 (
-    [0] => StableMap Object
+    [0] => HH\Map Object
         (
             [0] => 1
         )
@@ -44,9 +44,9 @@ StableMap Object
     [2] => 3
     [3] => 4
 )
-StableMap Object
+HH\Map Object
 (
-    [0] => StableMap Object
+    [0] => HH\Map Object
         (
             [0] => 1
         )

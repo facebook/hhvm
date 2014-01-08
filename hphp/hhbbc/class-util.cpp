@@ -29,8 +29,7 @@ namespace {
 const StaticString
   s_SimpleXMLElement("SimpleXMLElement"),
   s_Vector("HH\\Vector"),
-  s_Map("Map"),
-  s_StableMap("StableMap"),
+  s_Map("HH\\Map"),
   s_Set("HH\\Set"),
   s_Pair("Pair"),
   s_FrozenVector("HH\\FrozenVector"),
@@ -49,11 +48,11 @@ bool has_magic_bool_conversion(res::Class cls) {
 bool is_collection(res::Class cls) {
   auto const name = cls.name();
   return name->isame(s_Vector.get()) ||
-         name->isame(s_Map.get()) ||
-         name->isame(s_StableMap.get()) ||
-         name->isame(s_Set.get()) ||
-         name->isame(s_FrozenVector.get()) ||
-         name->isame(s_FrozenSet.get());
+    name->isame(s_Map.get()) ||
+    name->isame(s_Set.get()) ||
+    name->isame(s_FrozenVector.get()) ||
+    name->isame(s_FrozenSet.get()) ||
+    name->isame(s_FrozenMap.get());
 }
 
 bool could_have_magic_bool_conversion(Type t) {
@@ -79,9 +78,8 @@ SString collectionTypeToString(uint32_t ctype) {
   case Collection::VectorType:
     return s_Vector.get();
   case Collection::MapType:
-    return s_Map.get();
   case Collection::StableMapType:
-    return s_StableMap.get();
+    return s_Map.get();
   case Collection::SetType:
     return s_Set.get();
   case Collection::PairType:
@@ -100,4 +98,3 @@ SString collectionTypeToString(uint32_t ctype) {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

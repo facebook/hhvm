@@ -54,7 +54,7 @@ object(HH\Vector)#19 (3) {
     int(9)
   }
 }
-object(StableMap)#26 (3) {
+object(HH\Map)#26 (3) {
   ["a"]=>
   int(1)
   [2]=>
@@ -63,7 +63,7 @@ object(StableMap)#26 (3) {
   int(9)
 }
 ------------------------
-object(StableMap)#31 (3) {
+object(HH\Map)#31 (3) {
   ["a"]=>
   int(1)
   [2]=>

@@ -427,7 +427,6 @@ class c_Vector : public BaseVector {
   friend void triggerCow(c_Vector* vec);
 
   friend class BaseMap;
-  friend class c_StableMap;
   friend class c_Pair;
   friend class ArrayIter;
 };
@@ -871,7 +870,6 @@ class BaseMap : public ExtCollectionObjectData {
 
   friend class c_MapIterator;
   friend class c_Vector;
-  friend class c_StableMap;
   friend class c_FrozenMap;
   friend class ArrayIter;
   friend class c_GenMapWaitHandle;
@@ -1066,57 +1064,7 @@ class c_MapIterator : public ExtObjectData {
   friend class BaseMap;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// class StableMap
-
-FORWARD_DECLARE_CLASS(StableMap);
-class c_StableMap : public BaseMap {
-
- public:
-  DECLARE_CLASS_NO_SWEEP(StableMap)
-
- public:
-  explicit c_StableMap(Class* cls = c_StableMap::classof());
-
-  static c_StableMap* Clone(ObjectData* obj);
-
- public: // PHP API - No inlines (required by .idl.json linking)
-  void t___construct(CVarRef iterable = null_variant);
-  Object t_add(CVarRef val);
-  Object t_addall(CVarRef val);
-  Object t_clear();
-  bool t_isempty();
-  int64_t t_count();
-  Object t_items();
-  Object t_keys();
-  Object t_lazy();
-  Object t_kvzip(); // const
-  Variant t_at(CVarRef key); // const
-  Variant t_get(CVarRef key); // const
-  Object t_set(CVarRef key, CVarRef value);
-  Object t_setall(CVarRef iterable);
-  bool t_contains(CVarRef key); // const
-  bool t_containskey(CVarRef key); // const
-  Object t_remove(CVarRef key);
-  Object t_removekey(CVarRef key);
-  Array t_toarray(); // const
-  Array t_tokeysarray(); // const
-  Array t_tovaluesarray(); // const
-  DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
-  Object t_values();
-  Object t_differencebykey(CVarRef it);
-  Object t_getiterator();
-  Object t_map(CVarRef callback); // const
-  Object t_mapwithkey(CVarRef callback); // const
-  Object t_filter(CVarRef callback); // const
-  Object t_filterwithkey(CVarRef callback); // const
-  Object t_retain(CVarRef callback);
-  Object t_retainwithkey(CVarRef callback);
-  Object t_zip(CVarRef iterable); // const
-  DECLARE_COLLECTION_MAGIC_METHODS();
-  static Object ti_fromitems(CVarRef iterable);
-  static Object ti_fromarray(CVarRef arr); // deprecated
-};
+typedef class c_Map c_StableMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1490,6 +1438,7 @@ private:
   friend class c_SetIterator;
   friend class c_Vector;
   friend class c_Set;
+  friend class c_Map;
   friend class ArrayIter;
 
   static void compileTimeAssertions() {
@@ -1798,7 +1747,6 @@ ArrayData* collectionDeepCopyArray(ArrayData* arr);
 ObjectData* collectionDeepCopyVector(c_Vector* vec);
 ObjectData* collectionDeepCopyFrozenVector(c_FrozenVector* vec);
 ObjectData* collectionDeepCopyMap(c_Map* mp);
-ObjectData* collectionDeepCopyStableMap(c_StableMap* mp);
 ObjectData* collectionDeepCopyFrozenMap(c_FrozenMap* mp);
 ObjectData* collectionDeepCopySet(c_Set* mp);
 ObjectData* collectionDeepCopyFrozenSet(c_FrozenSet* st);

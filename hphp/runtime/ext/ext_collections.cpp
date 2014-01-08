@@ -1333,8 +1333,6 @@ Object BaseMap::php_add(CVarRef val) {
 
 Object c_Map::t_add(CVarRef val) { return php_add(val); }
 
-Object c_StableMap::t_add(CVarRef val) { return php_add(val); }
-
 Object BaseMap::php_addAll(CVarRef iterable) {
   if (iterable.isNull()) return this;
   size_t sz;
@@ -1349,8 +1347,6 @@ Object BaseMap::php_addAll(CVarRef iterable) {
 }
 
 Object c_Map::t_addall(CVarRef val) { return php_addAll(val); }
-
-Object c_StableMap::t_addall(CVarRef val) { return php_addAll(val); }
 
 Object BaseMap::php_clear() {
   deleteElms();
@@ -1369,25 +1365,17 @@ Object BaseMap::php_clear() {
 
 Object c_Map::t_clear() { return php_clear(); }
 
-Object c_StableMap::t_clear() { return php_clear(); }
-
 bool c_FrozenMap::t_isempty() { return php_isEmpty(); }
 
 bool c_Map::t_isempty() { return php_isEmpty();  }
-
-bool c_StableMap::t_isempty() { return php_isEmpty(); }
 
 int64_t c_FrozenMap::t_count() { return size(); }
 
 int64_t c_Map::t_count() { return size(); }
 
-int64_t c_StableMap::t_count() { return size(); }
-
 Object c_FrozenMap::t_items() { return php_items(); }
 
 Object c_Map::t_items() { return php_items(); }
-
-Object c_StableMap::t_items() { return php_items(); }
 
 Object BaseMap::php_keys() const {
   c_Vector* vec;
@@ -1419,13 +1407,9 @@ Object c_FrozenMap::t_keys() { return php_keys(); }
 
 Object c_Map::t_keys() { return php_keys(); }
 
-Object c_StableMap::t_keys() { return php_keys(); }
-
 Object c_FrozenMap::t_lazy() { return php_lazy(); }
 
 Object c_Map::t_lazy() { return php_lazy(); }
-
-Object c_StableMap::t_lazy() { return php_lazy(); }
 
 Object BaseMap::php_kvzip() const {
   c_Vector* vec;
@@ -1463,8 +1447,6 @@ Object c_FrozenMap::t_kvzip() { return php_kvzip(); }
 
 Object c_Map::t_kvzip() { return php_kvzip(); }
 
-Object c_StableMap::t_kvzip() { return php_kvzip(); }
-
 Variant BaseMap::php_at(CVarRef key) const {
   if (key.isInteger()) {
     return tvAsCVarRef(at(key.toInt64()));
@@ -1478,8 +1460,6 @@ Variant BaseMap::php_at(CVarRef key) const {
 Variant c_FrozenMap::t_at(CVarRef key) { return php_at(key); }
 
 Variant c_Map::t_at(CVarRef key) { return php_at(key); }
-
-Variant c_StableMap::t_at(CVarRef key) { return php_at(key); }
 
 Variant BaseMap::php_get(CVarRef key) const {
   if (key.isInteger()) {
@@ -1505,8 +1485,6 @@ Variant c_FrozenMap::t_get(CVarRef key) { return php_get(key); }
 
 Variant c_Map::t_get(CVarRef key) { return php_get(key); }
 
-Variant c_StableMap::t_get(CVarRef key) { return php_get(key); }
-
 Object BaseMap::php_set(CVarRef key, CVarRef value) {
   TypedValue* val = cvarToCell(&value);
   if (key.isInteger()) {
@@ -1520,10 +1498,6 @@ Object BaseMap::php_set(CVarRef key, CVarRef value) {
 }
 
 Object c_Map::t_set(CVarRef key, CVarRef value) {
-  return php_set(key, value);
-}
-
-Object c_StableMap::t_set(CVarRef key, CVarRef value) {
   return php_set(key, value);
 }
 
@@ -1549,8 +1523,6 @@ Object BaseMap::php_setAll(CVarRef iterable) {
 
 Object c_Map::t_setall(CVarRef iterable) { return php_setAll(iterable); }
 
-Object c_StableMap::t_setall(CVarRef iterable) { return php_setAll(iterable); }
-
 bool BaseMap::php_contains(CVarRef key) const {
   DataType t = key.getType();
   if (t == KindOfInt64) {
@@ -1567,13 +1539,9 @@ bool c_FrozenMap::t_contains(CVarRef key) { return php_contains(key); }
 
 bool c_Map::t_contains(CVarRef key) { return php_contains(key); }
 
-bool c_StableMap::t_contains(CVarRef key) { return php_contains(key); }
-
 bool c_FrozenMap::t_containskey(CVarRef key) { return php_contains(key); }
 
 bool c_Map::t_containskey(CVarRef key) { return php_contains(key); }
-
-bool c_StableMap::t_containskey(CVarRef key) { return php_contains(key); }
 
 Object BaseMap::php_remove(CVarRef key) {
   DataType t = key.getType();
@@ -1589,17 +1557,11 @@ Object BaseMap::php_remove(CVarRef key) {
 
 Object c_Map::t_remove(CVarRef key) { return php_remove(key); }
 
-Object c_StableMap::t_remove(CVarRef key) { return php_remove(key); }
-
 Object c_Map::t_removekey(CVarRef key) { return php_remove(key); }
-
-Object c_StableMap::t_removekey(CVarRef key) { return php_remove(key); }
 
 Array c_FrozenMap::t_toarray() { return php_toArray(); }
 
 Array c_Map::t_toarray() { return php_toArray(); }
-
-Array c_StableMap::t_toarray() { return php_toArray(); }
 
 Object BaseMap::php_values() const {
   c_Vector* target;
@@ -1627,8 +1589,6 @@ Object c_FrozenMap::t_values() { return php_values(); }
 
 Object c_Map::t_values() { return php_values(); }
 
-Object c_StableMap::t_values() { return php_values(); }
-
 Array BaseMap::php_toKeysArray() const {
   PackedArrayInit ai(m_size);
   for (ssize_t i = 0; i < iterLimit(); ++i) {
@@ -1647,8 +1607,6 @@ Array c_FrozenMap::t_tokeysarray() { return php_toKeysArray(); }
 
 Array c_Map::t_tokeysarray() { return php_toKeysArray(); }
 
-Array c_StableMap::t_tokeysarray() { return php_toKeysArray(); }
-
 Array BaseMap::php_toValuesArray() const {
   PackedArrayInit ai(m_size);
   for (ssize_t i = 0; i < iterLimit(); ++i) {
@@ -1662,8 +1620,6 @@ Array BaseMap::php_toValuesArray() const {
 Array c_FrozenMap::t_tovaluesarray() { return php_toValuesArray(); }
 
 Array c_Map::t_tovaluesarray() { return php_toValuesArray(); }
-
-Array c_StableMap::t_tovaluesarray() { return php_toValuesArray(); }
 
 template<typename TMap>
 typename std::enable_if<
@@ -1710,10 +1666,6 @@ Object c_Map::t_differencebykey(CVarRef it) {
   return php_differenceByKey<c_Map>(it);
 }
 
-Object c_StableMap::t_differencebykey(CVarRef it) {
-  return php_differenceByKey<c_StableMap>(it);
-}
-
 Object BaseMap::php_getIterator() {
   c_MapIterator* it = NEWOBJ(c_MapIterator)();
   it->m_obj = this;
@@ -1725,8 +1677,6 @@ Object BaseMap::php_getIterator() {
 Object c_FrozenMap::t_getiterator() { return php_getIterator(); }
 
 Object c_Map::t_getiterator() { return php_getIterator(); }
-
-Object c_StableMap::t_getiterator() { return php_getIterator(); }
 
 ALWAYS_INLINE
 static std::array<TypedValue, 2> makeArgsFromMapKeyAndValue(
@@ -1804,20 +1754,12 @@ Object c_Map::t_map(CVarRef callback) {
   return php_map<c_Map>(callback, &makeArgsFromMapValue);
 }
 
-Object c_StableMap::t_map(CVarRef callback) {
-  return php_map<c_StableMap>(callback, &makeArgsFromMapValue);
-}
-
 Object c_FrozenMap::t_mapwithkey(CVarRef callback) {
   return php_map<c_FrozenMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 Object c_Map::t_mapwithkey(CVarRef callback) {
   return php_map<c_Map>(callback, &makeArgsFromMapKeyAndValue);
-}
-
-Object c_StableMap::t_mapwithkey(CVarRef callback) {
-  return php_map<c_StableMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 template<typename TMap, class MakeArgs>
@@ -1865,20 +1807,12 @@ Object c_Map::t_filter(CVarRef callback) {
   return php_filter<c_Map>(callback, &makeArgsFromMapValue);
 }
 
-Object c_StableMap::t_filter(CVarRef callback) {
-  return php_filter<c_StableMap>(callback, &makeArgsFromMapValue);
-}
-
 Object c_FrozenMap::t_filterwithkey(CVarRef callback) {
   return php_filter<c_FrozenMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 Object c_Map::t_filterwithkey(CVarRef callback) {
   return php_filter<c_Map>(callback, &makeArgsFromMapKeyAndValue);
-}
-
-Object c_StableMap::t_filterwithkey(CVarRef callback) {
-  return php_filter<c_StableMap>(callback, &makeArgsFromMapKeyAndValue);
 }
 
 template<class MakeArgs>
@@ -1925,15 +1859,7 @@ Object c_Map::t_retain(CVarRef callback) {
   return php_retain(callback, &makeArgsFromMapValue);
 }
 
-Object c_StableMap::t_retain(CVarRef callback) {
-  return php_retain(callback, &makeArgsFromMapValue);
-}
-
 Object c_Map::t_retainwithkey(CVarRef callback) {
-  return php_retain(callback, &makeArgsFromMapKeyAndValue);
-}
-
-Object c_StableMap::t_retainwithkey(CVarRef callback) {
   return php_retain(callback, &makeArgsFromMapKeyAndValue);
 }
 
@@ -1977,10 +1903,6 @@ Object c_FrozenMap::t_zip(CVarRef iterable) {
 
 Object c_Map::t_zip(CVarRef iterable) {
   return php_zip<c_Map>(iterable);
-}
-
-Object c_StableMap::t_zip(CVarRef iterable) {
-  return php_zip<c_StableMap>(iterable);
 }
 
 template<typename TMap>
@@ -2028,10 +1950,6 @@ Object c_Map::ti_fromitems(CVarRef iterable) {
   return php_mapFromIterable<c_Map>(iterable);
 }
 
-Object c_StableMap::ti_fromitems(CVarRef iterable) {
-  return php_mapFromIterable<c_StableMap>(iterable);
-}
-
 template<typename TMap>
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
@@ -2062,10 +1980,6 @@ Object c_Map::ti_fromarray(CVarRef arr) {
   return php_mapFromArray<c_Map>(arr);
 }
 
-Object c_StableMap::ti_fromarray(CVarRef arr) {
-  return php_mapFromArray<c_StableMap>(arr);
-}
-
 template<typename TMap>
   typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, ObjectData*>::type
@@ -2087,10 +2001,6 @@ ObjectData* collectionDeepCopyFrozenMap(c_FrozenMap* map) {
 
 ObjectData* collectionDeepCopyMap(c_Map* map) {
   return collectionDeepCopyBaseMap<c_Map>(map);
-}
-
-ObjectData* collectionDeepCopyStableMap(c_StableMap* map) {
-  return collectionDeepCopyBaseMap<c_StableMap>(map);
 }
 
 NEVER_INLINE
@@ -2969,20 +2879,6 @@ void c_MapIterator::t_rewind() {
     throw_collection_modified();
   }
   m_pos = mp->iter_begin();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-c_StableMap::c_StableMap(Class* cb) : BaseMap(cb) {
-  o_subclassData.u16 = Collection::StableMapType;
-}
-
-void c_StableMap::t___construct(CVarRef iterable /* = null_variant */) {
-  php_construct(iterable);
-}
-
-c_StableMap* c_StableMap::Clone(ObjectData* obj) {
-  return BaseMap::Clone<c_StableMap>(obj);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4484,7 +4380,6 @@ void c_PairIterator::t_rewind() {
 COLLECTION_MAGIC_METHODS(Vector)
 COLLECTION_MAGIC_METHODS(FrozenVector)
 COLLECTION_MAGIC_METHODS(Map)
-COLLECTION_MAGIC_METHODS(StableMap)
 COLLECTION_MAGIC_METHODS(FrozenMap)
 COLLECTION_MAGIC_METHODS(Set)
 COLLECTION_MAGIC_METHODS(FrozenSet)
@@ -4534,7 +4429,6 @@ COLLECTION_MAGIC_METHODS(Pair)
   }
 
 KEYEDITERABLE_MATERIALIZE_METHODS(Map)
-KEYEDITERABLE_MATERIALIZE_METHODS(StableMap)
 KEYEDITERABLE_MATERIALIZE_METHODS(FrozenMap)
 ITERABLE_MATERIALIZE_METHODS(Set)
 ITERABLE_MATERIALIZE_METHODS(FrozenSet)
@@ -4606,13 +4500,11 @@ void collectionDeepCopyTV(TypedValue* tv) {
           obj = collectionDeepCopyVector(static_cast<c_Vector*>(obj));
           break;
         case Collection::MapType:
+        case Collection::StableMapType:
           obj = collectionDeepCopyMap(static_cast<c_Map*>(obj));
           break;
         case Collection::FrozenMapType:
           obj = collectionDeepCopyFrozenMap(static_cast<c_FrozenMap*>(obj));
-          break;
-        case Collection::StableMapType:
-          obj = collectionDeepCopyStableMap(static_cast<c_StableMap*>(obj));
           break;
         case Collection::SetType:
           obj = collectionDeepCopySet(static_cast<c_Set*>(obj));

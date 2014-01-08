@@ -131,7 +131,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(Map)#1 (3) {
+input: object(HH\Map)#1 (3) {
   ["a"]=>
   string(3) "foo"
   ["b"]=>
@@ -158,7 +158,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: object(Map)#1 (3) {
+input: object(HH\Map)#1 (3) {
   [10]=>
   string(3) "foo"
   [20]=>

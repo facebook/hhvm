@@ -503,16 +503,6 @@ protected:
 
 using ExtObjectData = ExtObjectDataFlags<ObjectData::IsCppBuiltin>;
 
-using ExtCollectionObjectData = ExtObjectDataFlags<
-  ObjectData::IsCppBuiltin |
-  ObjectData::IsCollection |
-  ObjectData::UseGet |
-  ObjectData::UseSet |
-  ObjectData::UseIsset |
-  ObjectData::UseUnset |
-  ObjectData::CallToImpl |
-  ObjectData::HasClone>; // might make more sense in ext_collection.h
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }

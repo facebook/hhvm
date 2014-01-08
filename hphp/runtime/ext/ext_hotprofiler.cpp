@@ -166,14 +166,18 @@ static int64_t get_cpu_frequency() {
     return 0.0;
   }
   uint64_t tsc_start = cpuCycles();
-  // Sleep for 5 miliseconds. Comparaing with gettimeofday's  few microseconds
-  // execution time, this should be enough.
-  usleep(5000);
-  if (gettimeofday(&end, 0)) {
-    perror("gettimeofday");
-    return 0.0;
-  }
-  uint64_t tsc_end = cpuCycles();
+  uint64_t tsc_end;
+  volatile int i;
+  /* Busy loop for 5 miliseconds. */
+  do {
+    for (i = 0; i < 1000000; i++);
+    if (gettimeofday(&end, 0)) {
+      perror("gettimeofday");
+      return 0.0;
+    }
+    tsc_end = cpuCycles();
+  } while (get_us_interval(&start, &end) < 5000);
+
   return nearbyint((tsc_end - tsc_start) * 1.0
                                    / (get_us_interval(&start, &end)));
 }

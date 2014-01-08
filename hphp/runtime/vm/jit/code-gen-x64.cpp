@@ -4840,8 +4840,7 @@ void CodeGenerator::cgLdAddr(IRInstruction* inst) {
 
 void CodeGenerator::cgLdLoc(IRInstruction* inst) {
   cgLoad(inst->dst(),
-         curOpd(inst->src(0)).reg()[localOffset(inst->extra<LdLoc>()->locId)],
-         inst->taken());
+         curOpd(inst->src(0)).reg()[localOffset(inst->extra<LdLoc>()->locId)]);
 }
 
 void CodeGenerator::cgLdLocAddr(IRInstruction* inst) {

@@ -43,6 +43,14 @@ struct CodeGenerator {
   void cgBlock(Block* block, std::vector<TransBCMapping>* bcMap);
 
  private:
+  template<class Then>
+  void ifThen(vixl::MacroAssembler& a, vixl::Condition cc, Then thenBlock) {
+    vixl::Label done;
+    a.  B   (&done, InvertCondition(cc));
+    thenBlock();
+    a.  bind(&done);
+  }
+
   template<class Then, class Else>
   void ifThenElse(vixl::MacroAssembler& a, vixl::Condition cc, Then thenBlock,
                   Else elseBlock) {
